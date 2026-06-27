@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Destiny Matrix — Niko</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05040f;--bg2:#0d0b1e;--bg3:#15112a;--bg4:#1e1838;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.12);
+  --text:#e8e5f0;--muted:rgba(232,229,240,0.45);--muted2:rgba(232,229,240,0.25);
+  --gold:#c9a84c;--gold-dim:rgba(201,168,76,0.10);--gold-glow:rgba(201,168,76,0.45);
+  --violet:#8b5cf6;--violet-dim:rgba(139,92,246,0.10);--violet-glow:rgba(139,92,246,0.4);
+  --teal:#06b6d4;--teal-dim:rgba(6,182,212,0.08);
+  --rose:#e879b2;--rose-dim:rgba(232,121,178,0.08);
+  --sidebar-w:260px;
+}
+html,body{height:100%;font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden}
+body::before{content:'';position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:radial-gradient(ellipse 60% 50% at 20% 0%,rgba(139,92,246,0.07) 0%,transparent 70%),
+    radial-gradient(ellipse 40% 40% at 80% 100%,rgba(201,168,76,0.05) 0%,transparent 70%);}
+.shell{display:flex;min-height:100vh;position:relative;z-index:1}
+.sidebar{width:var(--sidebar-w);flex-shrink:0;background:rgba(13,11,30,0.97);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow:hidden;
+  backdrop-filter:blur(20px);transition:transform .3s cubic-bezier(.4,0,.2,1);z-index:50;}
+.sidebar-logo{padding:22px 20px 16px;border-bottom:1px solid var(--border);flex-shrink:0}
+.logo-name{font-size:17px;font-weight:900;letter-spacing:0.04em;color:var(--gold);text-shadow:0 0 20px var(--gold-glow)}
+.logo-sub{font-size:9px;color:var(--muted);letter-spacing:0.15em;text-transform:uppercase;margin-top:2px}
+.logo-dob{font-size:10px;color:var(--muted);margin-top:6px;font-weight:500}
+.sidebar-nav{flex:1;overflow-y:auto;padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+.sidebar-nav::-webkit-scrollbar{width:2px}
+.sidebar-nav::-webkit-scrollbar-thumb{background:rgba(255,255,255,0.05)}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;
+  text-decoration:none;color:var(--muted);font-size:11px;font-weight:500;
+  border:1px solid transparent;transition:all .15s;cursor:pointer;}
+.nav-item:hover{background:rgba(255,255,255,0.04);color:var(--text);border-color:var(--border)}
+.nav-item.active{background:var(--gold-dim);color:var(--gold);border-color:rgba(201,168,76,0.22);font-weight:600}
+.nav-num{font-size:9px;font-weight:700;color:var(--muted2);min-width:16px}
+.nav-item.active .nav-num{color:var(--gold)}
+.sidebar-footer{padding:12px 14px;border-top:1px solid var(--border);flex-shrink:0}
+.birth-chip{padding:9px 11px;border-radius:9px;background:var(--violet-dim);border:1px solid rgba(139,92,246,0.18)}
+.birth-chip-label{font-size:8px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--violet)}
+.birth-chip-val{font-size:11px;font-weight:600;color:var(--text);margin-top:2px}
+.sidebar-toggle{display:none;position:fixed;bottom:22px;right:22px;z-index:200;
+  width:46px;height:46px;border-radius:50%;background:var(--violet);border:none;color:#fff;
+  font-size:18px;cursor:pointer;box-shadow:0 0 20px var(--violet-glow);align-items:center;justify-content:center;}
+.sidebar-overlay{display:none;position:fixed;inset:0;z-index:40;background:rgba(0,0,0,0.55);backdrop-filter:blur(3px)}
+.main{flex:1;overflow-y:auto;min-width:0}
+.hero{padding:44px 52px 36px;border-bottom:1px solid var(--border);
+  background:linear-gradient(180deg,rgba(139,92,246,0.05) 0%,transparent 100%);
+  display:flex;flex-direction:column;align-items:center;gap:28px;}
+.hero-text{text-align:center}
+.hero-eyebrow{font-size:9px;font-weight:700;letter-spacing:0.22em;text-transform:uppercase;color:var(--violet);margin-bottom:10px}
+.hero-name{font-size:38px;font-weight:900;letter-spacing:-0.02em}
+.hero-name span{color:var(--gold);text-shadow:0 0 28px var(--gold-glow)}
+.hero-meta{display:flex;align-items:center;gap:12px;margin-top:10px;flex-wrap:wrap;justify-content:center}
+.hero-meta-item{font-size:11px;color:var(--muted)}
+.hero-meta-dot{width:3px;height:3px;border-radius:50%;background:var(--muted2)}
+.matrix-wrap{width:100%;max-width:440px;padding:20px;background:rgba(255,255,255,0.02);
+  border:1px solid var(--border);border-radius:18px;backdrop-filter:blur(10px);
+  box-shadow:0 0 50px rgba(139,92,246,0.07);}
+.matrix-title{font-size:9px;font-weight:700;letter-spacing:0.15em;text-transform:uppercase;
+  color:var(--muted);text-align:center;margin-bottom:14px}
+.hero-keys{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}
+.key-card{display:flex;flex-direction:column;align-items:center;gap:2px;padding:8px 12px;
+  border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid var(--border);min-width:68px}
+.key-num{font-size:19px;font-weight:900;letter-spacing:-0.02em}
+.key-label{font-size:8px;font-weight:600;letter-spacing:0.07em;text-transform:uppercase;color:var(--muted)}
+.key-pos{font-size:7px;color:var(--muted2);margin-top:1px}
+.key-card.k-gold{border-color:rgba(201,168,76,0.28);background:var(--gold-dim)}.key-card.k-gold .key-num{color:var(--gold);text-shadow:0 0 12px var(--gold-glow)}
+.key-card.k-violet{border-color:rgba(139,92,246,0.28);background:var(--violet-dim)}.key-card.k-violet .key-num{color:var(--violet)}
+.key-card.k-teal{border-color:rgba(6,182,212,0.25);background:var(--teal-dim)}.key-card.k-teal .key-num{color:var(--teal)}
+.key-card.k-rose{border-color:rgba(232,121,178,0.25);background:var(--rose-dim)}.key-card.k-rose .key-num{color:var(--rose)}
+.content{padding:36px 52px 80px;display:flex;flex-direction:column;gap:32px}
+.report-section{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:16px;overflow:hidden;transition:border-color .2s}
+.report-section:hover{border-color:var(--border2)}
+.section-header{padding:20px 26px 16px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;gap:14px;background:rgba(255,255,255,0.015)}
+.section-number{font-size:10px;font-weight:700;letter-spacing:0.1em;color:var(--muted2);min-width:22px;padding-top:3px}
+.section-title-wrap{flex:1}
+.section-title{font-size:16px;font-weight:800;letter-spacing:-0.01em}
+.section-subtitle{font-size:11px;color:var(--muted);margin-top:2px}
+.section-badges{display:flex;flex-wrap:wrap;gap:5px;margin-top:9px}
+.arcana-badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;letter-spacing:0.03em;border:1px solid;white-space:nowrap}
+.ab-gold{color:var(--gold);border-color:rgba(201,168,76,0.32);background:var(--gold-dim)}
+.ab-violet{color:var(--violet);border-color:rgba(139,92,246,0.32);background:var(--violet-dim)}
+.ab-teal{color:var(--teal);border-color:rgba(6,182,212,0.28);background:var(--teal-dim)}
+.ab-rose{color:var(--rose);border-color:rgba(232,121,178,0.28);background:var(--rose-dim)}
+.ab-muted{color:var(--muted);border-color:var(--border);background:rgba(255,255,255,0.02)}
+.section-body{padding:24px 26px}
+.prose p{font-size:14px;line-height:1.82;color:var(--text);margin-bottom:16px}
+.prose p:last-child{margin-bottom:0}
+.prose strong{color:var(--text);font-weight:700}
+.prose em{color:rgba(232,229,240,0.7);font-style:italic}
+.sub-section{margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
+.sub-section:first-child{margin-top:0;padding-top:0;border-top:none}
+.sub-title{font-size:11px;font-weight:800;letter-spacing:0.1em;text-transform:uppercase;margin-bottom:13px;display:flex;align-items:center;gap:8px}
+.sub-title-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.callout{padding:14px 18px;border-radius:11px;background:var(--violet-dim);border:1px solid rgba(139,92,246,0.18);font-size:13px;line-height:1.72;color:var(--text);margin:18px 0}
+.callout.gold{background:var(--gold-dim);border-color:rgba(201,168,76,0.22)}
+.callout.teal{background:var(--teal-dim);border-color:rgba(6,182,212,0.18)}
+.callout.rose{background:var(--rose-dim);border-color:rgba(232,121,178,0.18)}
+.triplet{display:flex;align-items:center;gap:4px;margin:18px 0;flex-wrap:wrap}
+.triplet-num{width:58px;height:58px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid;flex-shrink:0}
+.t-gold{border-color:rgba(201,168,76,0.5);background:var(--gold-dim)}.t-gold .tn{color:var(--gold);text-shadow:0 0 10px var(--gold-glow)}
+.t-violet{border-color:rgba(139,92,246,0.5);background:var(--violet-dim)}.t-violet .tn{color:var(--violet)}
+.t-teal{border-color:rgba(6,182,212,0.4);background:var(--teal-dim)}.t-teal .tn{color:var(--teal)}
+.t-rose{border-color:rgba(232,121,178,0.4);background:var(--rose-dim)}.t-rose .tn{color:var(--rose)}
+.tn{font-size:20px;font-weight:900;line-height:1}
+.tn-name{font-size:7px;font-weight:600;letter-spacing:0.05em;text-align:center;color:var(--muted);margin-top:1px;line-height:1.1;max-width:52px}
+.triplet-arrow{font-size:14px;color:var(--muted2);padding:0 4px}
+.program-card{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:14px}
+.program-card:last-child{margin-bottom:0}
+.program-card-header{display:flex;align-items:center;gap:10px;margin-bottom:14px;padding-bottom:12px;border-bottom:1px solid var(--border)}
+.program-name{font-size:13px;font-weight:800}
+.program-triplet-pills{display:flex;gap:5px;margin-left:auto;align-items:center}
+.program-pill{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900;border:2px solid;flex-shrink:0}
+.pp-gold{border-color:rgba(201,168,76,0.5);background:var(--gold-dim);color:var(--gold)}
+.pp-violet{border-color:rgba(139,92,246,0.5);background:var(--violet-dim);color:var(--violet)}
+.pp-teal{border-color:rgba(6,182,212,0.4);background:var(--teal-dim);color:var(--teal)}
+.pp-rose{border-color:rgba(232,121,178,0.4);background:var(--rose-dim);color:var(--rose)}
+.pp-muted{border-color:var(--border2);background:rgba(255,255,255,0.04);color:var(--muted)}
+.pp-dash{font-size:10px;color:var(--muted2);padding:0 1px}
+.program-rows{display:flex;flex-direction:column;gap:12px}
+.program-row-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;margin-bottom:5px}
+.lbl-green{color:#4ade80}.lbl-red{color:#f87171}.lbl-violet{color:var(--violet)}
+.program-row-text{font-size:13px;line-height:1.72;color:var(--text)}
+.talent-grid{display:flex;flex-direction:column;gap:12px}
+.talent-row{display:flex;align-items:flex-start;gap:14px;padding:14px;border-radius:11px;background:rgba(255,255,255,0.015);border:1px solid var(--border)}
+.talent-num{width:46px;height:46px;border-radius:50%;flex-shrink:0;display:flex;flex-direction:column;align-items:center;justify-content:center;border:2px solid rgba(201,168,76,0.45);background:var(--gold-dim)}
+.talent-num .tn{font-size:17px;color:var(--gold);text-shadow:0 0 10px var(--gold-glow)}
+.talent-num .tn-name{font-size:6px;max-width:42px}
+.talent-label{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:5px}
+.talent-text{font-size:13px;line-height:1.72;color:var(--text)}
+.destiny-grid{display:flex;gap:12px;flex-wrap:wrap}
+.destiny-card{flex:1;min-width:170px;padding:18px;border-radius:12px;background:rgba(255,255,255,0.015);border:1px solid var(--border);display:flex;flex-direction:column;gap:8px}
+.destiny-card.dc-personal{border-color:rgba(201,168,76,0.22);background:var(--gold-dim)}
+.destiny-card.dc-social{border-color:rgba(139,92,246,0.22);background:var(--violet-dim)}
+.destiny-card.dc-spiritual{border-color:rgba(6,182,212,0.22);background:var(--teal-dim)}
+.dc-phase{font-size:8px;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:var(--muted)}
+.dc-arcana-row{display:flex;align-items:baseline;gap:7px}
+.dc-num{font-size:30px;font-weight:900;letter-spacing:-0.03em;line-height:1}
+.dc-personal .dc-num{color:var(--gold);text-shadow:0 0 14px var(--gold-glow)}
+.dc-social .dc-num{color:var(--violet);text-shadow:0 0 14px var(--violet-glow)}
+.dc-spiritual .dc-num{color:var(--teal)}
+.dc-arcana-name{font-size:11px;font-weight:700}
+.dc-age{font-size:9px;color:var(--muted)}
+.dc-text{font-size:12px;line-height:1.7;color:var(--text)}
+.money-channel{display:flex;align-items:center;justify-content:center;gap:0;margin:18px 0;padding:18px;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.18);border-radius:12px;flex-wrap:wrap}
+.mc-node{display:flex;flex-direction:column;align-items:center;gap:5px;padding:0 14px}
+.mc-circle{width:52px;height:52px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:900;border:2px solid rgba(201,168,76,0.5);background:rgba(201,168,76,0.08);color:var(--gold);text-shadow:0 0 12px var(--gold-glow)}
+.mc-label{font-size:8px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--muted);text-align:center}
+.mc-arcana{font-size:9px;font-weight:600;color:var(--gold)}
+.mc-arrow{font-size:18px;color:rgba(201,168,76,0.4);flex-shrink:0}
+.chakra-table{display:flex;flex-direction:column;border-radius:12px;overflow:hidden;border:1px solid var(--border)}
+.chakra-header-row{display:grid;grid-template-columns:120px 1fr 1fr 1fr;background:rgba(255,255,255,0.03);border-bottom:1px solid var(--border)}
+.chakra-row{display:grid;grid-template-columns:120px 1fr 1fr 1fr;border-bottom:1px solid var(--border)}
+.chakra-row:last-child{border-bottom:none}
+.ch-cell{padding:12px 11px;border-right:1px solid var(--border);font-size:12px;line-height:1.6}
+.ch-cell:last-child{border-right:none}
+.ch-header-cell{padding:8px 11px;border-right:1px solid var(--border);font-size:8px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted)}
+.ch-header-cell:last-child{border-right:none}
+.ch-name-cell{display:flex;flex-direction:column;gap:1px;padding:12px 11px;border-right:1px solid var(--border)}
+.ch-chakra-name{font-size:11px;font-weight:800}
+.ch-chakra-sub{font-size:8px;color:var(--muted);font-weight:600}
+.ch-num{font-size:17px;font-weight:900;margin-top:2px;line-height:1}
+.cr-7 .ch-chakra-name,.cr-7 .ch-num{color:#a78bfa}
+.cr-6 .ch-chakra-name,.cr-6 .ch-num{color:#38bdf8}
+.cr-5 .ch-chakra-name,.cr-5 .ch-num{color:var(--gold)}
+.cr-4 .ch-chakra-name,.cr-4 .ch-num{color:#4ade80}
+.cr-3 .ch-chakra-name,.cr-3 .ch-num{color:#fb923c}
+.cr-2 .ch-chakra-name,.cr-2 .ch-num{color:#f43f5e}
+.cr-1 .ch-chakra-name,.cr-1 .ch-num{color:#c084fc}
+.guidance-list{display:flex;flex-direction:column;gap:10px}
+.guidance-item{display:flex;align-items:flex-start;gap:12px;padding:13px 14px;border-radius:10px;background:rgba(255,255,255,0.015);border:1px solid var(--border);transition:border-color .15s}
+.guidance-item:hover{border-color:var(--border2)}
+.guidance-num{width:26px;height:26px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.3);color:var(--gold);margin-top:1px}
+.guidance-text{font-size:13px;line-height:1.72;color:var(--text);flex:1}
+.guidance-text strong{color:var(--gold);font-weight:700}
+.parent-grid{display:flex;gap:14px;flex-wrap:wrap}
+.parent-card{flex:1;min-width:220px;padding:18px;border-radius:12px;background:rgba(255,255,255,0.015);border:1px solid var(--border)}
+.parent-card.pc-mother{border-color:rgba(232,121,178,0.18);background:var(--rose-dim)}
+.parent-card.pc-father{border-color:rgba(139,92,246,0.18);background:var(--violet-dim)}
+.pc-header{display:flex;align-items:center;gap:8px;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.pc-icon{font-size:18px}
+.pc-title{font-size:12px;font-weight:800}
+.pc-sub{font-size:9px;color:var(--muted)}
+.pc-text{font-size:13px;line-height:1.72;color:var(--text)}
+.forecast-period{padding:18px;border-radius:12px;background:linear-gradient(135deg,rgba(201,168,76,0.07),rgba(139,92,246,0.07));border:1px solid rgba(201,168,76,0.25);margin-bottom:18px}
+.fp-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.fp-badge{padding:3px 12px;border-radius:20px;font-size:9px;font-weight:800;letter-spacing:0.08em;text-transform:uppercase;background:var(--gold-dim);border:1px solid rgba(201,168,76,0.38);color:var(--gold)}
+.fp-current{font-size:9px;font-weight:700;letter-spacing:0.1em;text-transform:uppercase;color:#4ade80}
+.fp-title{font-size:15px;font-weight:800;margin-bottom:3px}
+.fp-arcana{font-size:11px;color:var(--gold);font-weight:600}
+.fp-text{font-size:13px;line-height:1.72;color:var(--text);margin-top:8px}
+.age-timeline{display:flex;overflow-x:auto;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin:18px 0}
+.age-period{flex:1;min-width:72px;padding:9px 6px;text-align:center;border-right:1px solid var(--border);background:rgba(255,255,255,0.015)}
+.age-period:last-child{border-right:none}
+.age-period.ap-current{background:var(--gold-dim)}
+.ap-range{font-size:7px;font-weight:700;letter-spacing:0.05em;color:var(--muted)}
+.ap-num{font-size:15px;font-weight:900;margin:3px 0;color:var(--text)}
+.age-period.ap-current .ap-num{color:var(--gold);text-shadow:0 0 8px var(--gold-glow)}
+.ap-name{font-size:7px;color:var(--muted);line-height:1.2}
+.brand-grid{display:flex;gap:12px;flex-wrap:wrap;margin:16px 0}
+.brand-card{flex:1;min-width:150px;padding:15px;border-radius:11px;background:rgba(255,255,255,0.015);border:1px solid var(--border)}
+.bc-icon{font-size:20px;margin-bottom:7px}
+.bc-title{font-size:11px;font-weight:800;margin-bottom:5px}
+.bc-text{font-size:12px;line-height:1.65;color:var(--muted)}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:16px 0}
+.two-col-card{padding:16px;border-radius:11px;background:rgba(255,255,255,0.015);border:1px solid var(--border)}
+.tc-label{font-size:9px;font-weight:700;letter-spacing:0.12em;text-transform:uppercase;color:var(--muted);margin-bottom:8px}
+.tc-text{font-size:13px;line-height:1.72;color:var(--text)}
+.section-divider{height:1px;background:linear-gradient(to right,transparent,var(--border2),transparent);margin:20px 0}
+@media(max-width:920px){.hero{padding:30px 22px 24px}.content{padding:22px 18px 60px}.two-col{grid-template-columns:1fr}.chakra-header-row,.chakra-row{grid-template-columns:100px 1fr 1fr 1fr}}
+@media(max-width:700px){.shell{flex-direction:column}.sidebar{position:fixed;left:0;top:0;height:100vh;transform:translateX(-100%);box-shadow:4px 0 40px rgba(0,0,0,0.5)}.sidebar.open{transform:translateX(0)}.sidebar-toggle{display:flex}.sidebar-overlay.visible{display:block}.money-channel{flex-direction:column}.mc-arrow{transform:rotate(90deg)}.chakra-header-row,.chakra-row{grid-template-columns:1fr;display:block}.ch-cell,.ch-header-cell,.ch-name-cell{border-right:none;display:block}.destiny-grid{flex-direction:column}.parent-grid{flex-direction:column}.hero-name{font-size:26px}.triplet{justify-content:center}}
+</style>
+</head>
+<body>
+<button class="sidebar-toggle" id="menuToggle">☰</button>
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+<div class="shell">
+<aside class="sidebar" id="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-name">NIKO</div>
+    <div class="logo-sub">Destiny Matrix Reading</div>
+    <div class="logo-dob">08 · 05 · 2002</div>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="#s1"  class="nav-item"><span class="nav-num">01</span>Personal Qualities</a>
+    <a href="#s2"  class="nav-item"><span class="nav-num">02</span>Previous Life</a>
+    <a href="#s3"  class="nav-item"><span class="nav-num">03</span>Scenario of Life</a>
+    <a href="#s4"  class="nav-item"><span class="nav-num">04</span>Talents</a>
+    <a href="#s5"  class="nav-item"><span class="nav-num">05</span>Destiny</a>
+    <a href="#s6"  class="nav-item"><span class="nav-num">06</span>Money</a>
+    <a href="#s7"  class="nav-item"><span class="nav-num">07</span>Programs</a>
+    <a href="#s8"  class="nav-item"><span class="nav-num">08</span>Sexiness</a>
+    <a href="#s9"  class="nav-item"><span class="nav-num">09</span>Parents</a>
+    <a href="#s10" class="nav-item"><span class="nav-num">10</span>Kids</a>
+    <a href="#s11" class="nav-item"><span class="nav-num">11</span>Relationship</a>
+    <a href="#s12" class="nav-item"><span class="nav-num">12</span>Life Guidance</a>
+    <a href="#s13" class="nav-item"><span class="nav-num">13</span>Year's Forecast</a>
+    <a href="#s14" class="nav-item"><span class="nav-num">14</span>Personal Brand</a>
+    <a href="#s15" class="nav-item"><span class="nav-num">15</span>Health &amp; Chakras</a>
+  </nav>
+  <div class="sidebar-footer">
+    <div class="birth-chip">
+      <div class="birth-chip-label">Location</div>
+      <div class="birth-chip-val">New Zealand</div>
+    </div>
+  </div>
+</aside>
+
+<main class="main" id="mainScroll">
+<div class="hero">
+  <div class="hero-text">
+    <div class="hero-eyebrow">Personal Destiny Matrix Reading</div>
+    <div class="hero-name"><span>NIKO</span></div>
+    <div class="hero-meta">
+      <span class="hero-meta-item">08 May 2002</span>
+      <span class="hero-meta-dot"></span>
+      <span class="hero-meta-item">New Zealand</span>
+    </div>
+  </div>
+
+  <div class="matrix-wrap">
+    <div class="matrix-title">Destiny Matrix · Major Arcana Map</div>
+    <svg viewBox="0 0 440 390" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block">
+      <defs>
+        <filter id="glow"><feGaussianBlur stdDeviation="2.5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+        <radialGradient id="rg1" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#c9a84c" stop-opacity="0.25"/><stop offset="100%" stop-color="#c9a84c" stop-opacity="0"/></radialGradient>
+        <radialGradient id="rg2" cx="50%" cy="50%" r="50%"><stop offset="0%" stop-color="#8b5cf6" stop-opacity="0.25"/><stop offset="100%" stop-color="#8b5cf6" stop-opacity="0"/></radialGradient>
+      </defs>
+      <circle cx="220" cy="195" r="50" fill="url(#rg2)"/>
+      <circle cx="220" cy="32"  r="30" fill="url(#rg1)"/>
+      <polygon points="220,32 408,195 220,358 32,195" fill="none" stroke="rgba(139,92,246,0.15)" stroke-width="1.5"/>
+      <polygon points="314,113 314,277 126,277 126,113" fill="none" stroke="rgba(201,168,76,0.1)" stroke-width="1"/>
+      <line x1="220" y1="32"  x2="220" y2="358" stroke="rgba(201,168,76,0.18)" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <line x1="32"  y1="195" x2="408" y2="195" stroke="rgba(139,92,246,0.18)" stroke-width="1.5" stroke-dasharray="4,4"/>
+      <line x1="220" y1="195" x2="314" y2="113" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="220" y1="195" x2="314" y2="277" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="220" y1="195" x2="126" y2="277" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <line x1="220" y1="195" x2="126" y2="113" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+      <!-- A: Top Sky = 8 Strength -->
+      <g filter="url(#glow)">
+        <circle cx="220" cy="32" r="25" fill="#09071a" stroke="#c9a84c" stroke-width="2"/>
+        <text x="220" y="27" text-anchor="middle" fill="#c9a84c" font-size="15" font-weight="900" font-family="Inter,sans-serif">8</text>
+        <text x="220" y="37" text-anchor="middle" fill="rgba(201,168,76,0.65)" font-size="6.5" font-family="Inter,sans-serif">Strength</text>
+        <text x="220" y="6"  text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="6.5" font-family="Inter,sans-serif">SKY · PURPOSE</text>
+      </g>
+      <!-- B: Right Social = 5 Hierophant -->
+      <g filter="url(#glow)">
+        <circle cx="408" cy="195" r="25" fill="#09071a" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="408" y="190" text-anchor="middle" fill="#8b5cf6" font-size="15" font-weight="900" font-family="Inter,sans-serif">5</text>
+        <text x="408" y="200" text-anchor="middle" fill="rgba(139,92,246,0.65)" font-size="6.5" font-family="Inter,sans-serif">Hierophant</text>
+        <text x="437" y="195" text-anchor="start" fill="rgba(255,255,255,0.3)" font-size="6.5" font-family="Inter,sans-serif">SOCIAL</text>
+      </g>
+      <!-- C: Bottom Karma = 4 Emperor -->
+      <g filter="url(#glow)">
+        <circle cx="220" cy="358" r="25" fill="#09071a" stroke="#06b6d4" stroke-width="2"/>
+        <text x="220" y="353" text-anchor="middle" fill="#06b6d4" font-size="15" font-weight="900" font-family="Inter,sans-serif">4</text>
+        <text x="220" y="363" text-anchor="middle" fill="rgba(6,182,212,0.65)" font-size="6.5" font-family="Inter,sans-serif">Emperor</text>
+        <text x="220" y="384" text-anchor="middle" fill="rgba(255,255,255,0.3)" font-size="6.5" font-family="Inter,sans-serif">EARTH · KARMA</text>
+      </g>
+      <!-- D: Left Personal = 17 The Star -->
+      <g filter="url(#glow)">
+        <circle cx="32" cy="195" r="25" fill="#09071a" stroke="#c9a84c" stroke-width="2"/>
+        <text x="32" y="190" text-anchor="middle" fill="#c9a84c" font-size="13" font-weight="900" font-family="Inter,sans-serif">17</text>
+        <text x="32" y="200" text-anchor="middle" fill="rgba(201,168,76,0.65)" font-size="6.5" font-family="Inter,sans-serif">The Star</text>
+        <text x="3" y="195" text-anchor="end" fill="rgba(255,255,255,0.3)" font-size="6.5" font-family="Inter,sans-serif">PERSONAL</text>
+      </g>
+      <!-- F: Top-Right inner = 13 Death -->
+      <circle cx="314" cy="113" r="18" fill="#09071a" stroke="rgba(232,121,178,0.45)" stroke-width="1.5"/>
+      <text x="314" y="109" text-anchor="middle" fill="#e879b2" font-size="12" font-weight="900" font-family="Inter,sans-serif">13</text>
+      <text x="314" y="119" text-anchor="middle" fill="rgba(232,121,178,0.55)" font-size="6" font-family="Inter,sans-serif">Death</text>
+      <!-- G: Right-Bottom inner = 9 Hermit -->
+      <circle cx="314" cy="277" r="18" fill="#09071a" stroke="rgba(6,182,212,0.45)" stroke-width="1.5"/>
+      <text x="314" y="273" text-anchor="middle" fill="#06b6d4" font-size="12" font-weight="900" font-family="Inter,sans-serif">9</text>
+      <text x="314" y="283" text-anchor="middle" fill="rgba(6,182,212,0.55)" font-size="6" font-family="Inter,sans-serif">Hermit</text>
+      <!-- H: Bottom-Left inner = 21 World -->
+      <circle cx="126" cy="277" r="18" fill="#09071a" stroke="rgba(201,168,76,0.45)" stroke-width="1.5"/>
+      <text x="126" y="273" text-anchor="middle" fill="#c9a84c" font-size="12" font-weight="900" font-family="Inter,sans-serif">21</text>
+      <text x="126" y="283" text-anchor="middle" fill="rgba(201,168,76,0.55)" font-size="6" font-family="Inter,sans-serif">World</text>
+      <!-- I: Left-Top inner = 7 Chariot -->
+      <circle cx="126" cy="113" r="18" fill="#09071a" stroke="rgba(139,92,246,0.45)" stroke-width="1.5"/>
+      <text x="126" y="109" text-anchor="middle" fill="#8b5cf6" font-size="12" font-weight="900" font-family="Inter,sans-serif">7</text>
+      <text x="126" y="119" text-anchor="middle" fill="rgba(139,92,246,0.55)" font-size="6" font-family="Inter,sans-serif">Chariot</text>
+      <!-- E: Center = 7 Chariot -->
+      <g filter="url(#glow)">
+        <circle cx="220" cy="195" r="27" fill="#09071a" stroke="#8b5cf6" stroke-width="2.5"/>
+        <circle cx="220" cy="195" r="20" fill="rgba(139,92,246,0.07)" stroke="rgba(139,92,246,0.2)" stroke-width="1"/>
+        <text x="220" y="190" text-anchor="middle" fill="#8b5cf6" font-size="17" font-weight="900" font-family="Inter,sans-serif">7</text>
+        <text x="220" y="201" text-anchor="middle" fill="rgba(139,92,246,0.65)" font-size="6.5" font-family="Inter,sans-serif">CENTER</text>
+      </g>
+    </svg>
+  </div>
+
+  <div class="hero-keys">
+    <div class="key-card k-gold"><div class="key-num">8</div><div class="key-label">Strength</div><div class="key-pos">Sky · Birth Day</div></div>
+    <div class="key-card k-gold"><div class="key-num">17</div><div class="key-label">The Star</div><div class="key-pos">Personal Energy</div></div>
+    <div class="key-card k-violet"><div class="key-num">7</div><div class="key-label">The Chariot</div><div class="key-pos">Center · Inner</div></div>
+    <div class="key-card k-teal"><div class="key-num">4</div><div class="key-label">Emperor</div><div class="key-pos">Karma · Earth</div></div>
+    <div class="key-card k-violet"><div class="key-num">5</div><div class="key-label">Hierophant</div><div class="key-pos">Social · Right</div></div>
+    <div class="key-card k-rose"><div class="key-num">13</div><div class="key-label">Death</div><div class="key-pos">Top-Right Inner</div></div>
+    <div class="key-card k-gold"><div class="key-num">21</div><div class="key-label">The World</div><div class="key-pos">Bottom-Left Inner</div></div>
+  </div>
+</div>
+
+<div class="content">
+
+<section class="report-section" id="s1">
+  <div class="section-header">
+    <span class="section-number">01</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Personal Qualities</h2>
+      <div class="section-subtitle">Core character, birth energy, and central archetype</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">8 · Strength</span>
+        <span class="arcana-badge ab-gold">17 · The Star</span>
+        <span class="arcana-badge ab-violet">7 · The Chariot</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>You were born under <strong>Arcana 8 — Strength</strong>. Not strength in the brute-force sense — the kind that shouts and dominates. This is the Strength of the figure who tames the lion with open hands, with composure, with a quality of presence so steady that even wild energy surrenders to it. You carry this as your birth frequency. There is something about you that reads as capable even before you speak. People sense you can handle things. In a moment of crisis, you are the one they trust. This is not a performance. It is in the architecture of who you are.</p>
+    <p>Your personal energy — the way you actually move through the world day to day — is <strong>Arcana 17: The Star</strong>. The Star is the card that appears after The Tower falls — it is the light in the dark sky that says: there is still reason to hope. Star people carry this in their presence. They have a rare combination of openness and depth that makes others feel seen and safe. You are someone people come to when their own light has dimmed. Not because you take on their pain, but because something in your presence reminds them they still have access to their own.</p>
+    <p>At your very center — the integrating force of your entire chart — sits <strong>Arcana 7: The Chariot</strong>. The Chariot is the energy of focused will. Of direction chosen and maintained. At your core, you are driven and purposeful. Even in your most scattered moments, there is a part of you that knows what it wants and is already moving toward it.</p>
+    <div class="callout">The synthesis: you arrived with the power to hold what others cannot (8), you carry a healing light that others orient toward instinctively (17), and at your core you are always moving with intention (7). The work of your life is not discovering your gifts — it is choosing to deploy them fully, without apology and without waiting for perfect conditions.</div>
+    <p>You are likely someone who appears more composed than you feel inside. Your outer register is calm and quietly authoritative — a direct expression of Arcana 8. Internally, The Star's openness means you feel everything more than most people would guess. Learning to close this gap — to let your outer self show more of what your inner self contains — is one of the most important personal development tasks your chart is pointing you toward.</p>
+  </div>
+</section>
+
+<section class="report-section" id="s2">
+  <div class="section-header">
+    <span class="section-number">02</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Previous Life · Karmic Debt</h2>
+      <div class="section-subtitle">What the soul carried in — and how it shows up today</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-rose">Karmic Code · 9 – 4 – 21</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="triplet">
+      <div class="triplet-num t-teal"><div class="tn">9</div><div class="tn-name">Hermit</div></div>
+      <span class="triplet-arrow">·</span>
+      <div class="triplet-num t-teal"><div class="tn">4</div><div class="tn-name">Emperor</div></div>
+      <span class="triplet-arrow">·</span>
+      <div class="triplet-num t-gold"><div class="tn">21</div><div class="tn-name">The World</div></div>
+    </div>
+    <div class="sub-section prose">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--rose)"></span>The Past Life Story</h4>
+      <p>Your karmic tail is the triplet <strong>9 · 4 · 21</strong>: The Hermit, The Emperor, and The World. In a previous existence you occupied a position of significant authority and near-complete mastery (21 at the end of the karmic line marks someone who, in that lifetime, achieved something close to total worldly completion). The Emperor (4) tells us the domain was structural — you built systems, established order, created legacy. The Hermit (9) suggests this was done largely in isolation — the philosopher-king, the sage in the tower, wisdom valued but kept at arm's length.</p>
+      <p>The karma is not in what you achieved but in how it was maintained. The Emperor without warmth creates order that serves the system rather than the people within it. The Hermit's isolation, in its shadow form, means wisdom was hoarded — kept private, made exclusive, used as a form of separation rather than a bridge. The gift was real but the transmission was incomplete.</p>
+    </div>
+    <div class="sub-section prose">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--gold)"></span>How It Manifests in This Life</h4>
+      <p>This karmic code shows up as a tension between your natural wisdom and your willingness to share it. The pull to retreat, to process alone, to keep your inner world private — this is the Hermit karma asking to be examined. You may also create very structured environments (Emperor, 4) that feel ordered and safe to you but that others experience as rigid or controlling. Perfectionism — waiting until the structure is exactly right before moving — is another direct expression of this triplet in present life.</p>
+    </div>
+    <div class="sub-section prose">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--teal)"></span>Lesson &amp; Recommendations</h4>
+      <p><strong>Arcana 9 (The Hermit):</strong> Solitude is a tool, not a home. Use it to fill up, then come back out and share what you found. The light the Hermit carries is meant to be held up for others, not kept burning alone in the dark.</p>
+      <p><strong>Arcana 4 (The Emperor):</strong> Build structures that serve the people within them. Every system you create should pass this test: does this give people more freedom, or less?</p>
+      <p><strong>Arcana 21 (The World):</strong> Your inherited completion energy is a resource. Trust what you know — and then give it away generously.</p>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s3">
+  <div class="section-header">
+    <span class="section-number">03</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Scenario of Life</h2>
+      <div class="section-subtitle">Overarching narrative and recurring life patterns</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">8 · Strength</span>
+        <span class="arcana-badge ab-gold">17 · The Star</span>
+        <span class="arcana-badge ab-rose">13 · Transformation</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>The overarching pattern of your life is one of <strong>tested strength becoming luminous wisdom</strong>. The combination of Strength (8) at your sky and The Star (17) as your personal energy means your life is structured as a series of initiations — moments where you are brought to the edge of what you can hold, and discover you can hold more than you knew. Each of these moments deposits something permanent: a quality of light, of presence, of quiet authority that cannot be taken away.</p>
+    <p>The recurring theme across the arc of your life: difficulty arrives, you discover an inner resource you didn't know was there, and you emerge with something permanent. The Star (17) is specifically associated with healing after collapse — with the clarity that comes after the storm. Your deepest gifts will often emerge in direct proportion to the hardships you navigate. Not despite them. <em>Through</em> them.</p>
+    <p>The Emperor (4) at your karma position means that building is the central metaphor of your life. You build relationships that last. You build skills to a high level. You build systems and structures. When you commit, you commit to something real.</p>
+    <div class="callout gold"><strong>The shadow scenario:</strong> Strength (8) without tenderness becomes rigidity. The Emperor (4) without warmth becomes control. The Star (17) without action becomes beautiful but passive — a light that shines but never leads anywhere. The awakened version of your life is one where you are strong AND open, structured AND warm, luminous AND directional. In your chart, those pairings are not in conflict. They are the exact combination your soul came here to demonstrate is possible.</div>
+    <p>Arcana 13 (Death/Transformation) runs through your spiritual leadership program, meaning transformation is not optional — it is built into the architecture. You will be asked, periodically, to let something die that felt central to your identity. Every time this happens successfully, a new and more accurate version of yourself becomes available.</p>
+  </div>
+</section>
+
+<section class="report-section" id="s4">
+  <div class="section-header">
+    <span class="section-number">04</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Talents</h2>
+      <div class="section-subtitle">Gifts from the Universe, from the maternal line, from the paternal line</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">Vertical Axis · 8–7–4</span>
+        <span class="arcana-badge ab-gold">Female Line · 21 · 7</span>
+        <span class="arcana-badge ab-violet">Male Line · 9 · 13</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="sub-section">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--gold)"></span>Talents from God · The Universe</h4>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:13px">Vertical axis: 8 – 7 – 4. Capacities so natural you often don't recognise them as exceptional.</p>
+      <div class="talent-grid">
+        <div class="talent-row">
+          <div class="talent-num"><div class="tn">8</div><div class="tn-name">Strength</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Composure Under Pressure · Inner Fortitude</div>
+            <div class="talent-text">A natural capacity to remain functional — even clear — in circumstances that overwhelm most people. This is not about suppressing feeling. It's about having a structural integrity that holds even under significant load. Others gravitate toward you in crisis because your nervous system communicates stability. This is a gift most people spend decades trying to develop. You were born with it.</div>
+          </div>
+        </div>
+        <div class="talent-row">
+          <div class="talent-num"><div class="tn">7</div><div class="tn-name">Chariot</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Directed Will · Focus</div>
+            <div class="talent-text">The ability to choose a direction and sustain movement toward it — not just in bursts of motivation but as a consistent, disciplined practice. The Chariot at your center means your will is genuinely available to you as a resource. When you decide something is happening, it happens. This directional quality is rare and enormously useful across every domain of life.</div>
+          </div>
+        </div>
+        <div class="talent-row">
+          <div class="talent-num"><div class="tn">4</div><div class="tn-name">Emperor</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Foundation Building · Material Mastery</div>
+            <div class="talent-text">A natural ability to create lasting structures — whether that's a business, a practice, a body of work, or a relationship. The Emperor gift is the understanding that real things are built slowly, on solid ground. You have an instinct for what will last. This is the gift that turns vision into reality.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--rose)"></span>Talents from Mother · Maternal Line</h4>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:13px">Female line: 4 – 21 – 17 – 7 – 8. Key inherited energies: Arcana 21 (The World) and Arcana 7 (The Chariot).</p>
+      <div class="talent-grid">
+        <div class="talent-row">
+          <div class="talent-num" style="border-color:rgba(232,121,178,0.5);background:var(--rose-dim)"><div class="tn" style="color:var(--rose)">21</div><div class="tn-name">The World</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Completion Energy · Wholeness</div>
+            <div class="talent-text">The women of your maternal line carried the frequency of completion — the ability to bring things to their fullest expression. You have a built-in capacity for finishing what you start, for reaching synthesis, for not stopping short of the full realisation of something. Most people abandon things at 80%. The maternal gift in your chart pushes you toward 100%.</div>
+          </div>
+        </div>
+        <div class="talent-row">
+          <div class="talent-num" style="border-color:rgba(232,121,178,0.5);background:var(--rose-dim)"><div class="tn" style="color:var(--rose)">7</div><div class="tn-name">Chariot</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Drive · Self-Determination</div>
+            <div class="talent-text">The maternal line carries Chariot energy — a fierce refusal to be defined by circumstance, a will that chooses its own direction regardless of what the environment is doing. Women in your lineage built things through sheer determination. You inherited their backbone. When you decide to move, nothing external can stop you.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="sub-section">
+      <h4 class="sub-title"><span class="sub-title-dot" style="background:var(--violet)"></span>Talents from Father · Paternal Line</h4>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:13px">Male line: 4 – 9 – 5 – 13 – 8. Key inherited energies: Arcana 9 (The Hermit) and Arcana 13 (Transformation).</p>
+      <div class="talent-grid">
+        <div class="talent-row">
+          <div class="talent-num" style="border-color:rgba(139,92,246,0.5);background:var(--violet-dim)"><div class="tn" style="color:var(--violet)">9</div><div class="tn-name">Hermit</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Inner Wisdom · Deep Knowing</div>
+            <div class="talent-text">The men of your paternal lineage carried the gift of the Hermit — wisdom earned through solitude, through deep inner work, through the kind of reflection that produces genuine insight rather than borrowed opinion. You inherited this capacity for inner knowing. When you slow down enough to listen to yourself, what you find there is usually right.</div>
+          </div>
+        </div>
+        <div class="talent-row">
+          <div class="talent-num" style="border-color:rgba(139,92,246,0.5);background:var(--violet-dim)"><div class="tn" style="color:var(--violet)">13</div><div class="tn-name">Death</div></div>
+          <div class="talent-content">
+            <div class="talent-label">Courage to Transform · Resilience Through Change</div>
+            <div class="talent-text">Arcana 13 in the paternal line means the men in your lineage went through profound, sometimes radical transformation — and survived it. The gift passed to you is a bone-deep understanding that endings are not failures. That what looks like destruction is often preparation. You have an inherited willingness to let things die when they need to.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s5">
+  <div class="section-header">
+    <span class="section-number">05</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Destiny</h2>
+      <div class="section-subtitle">Personal · Social · Spiritual — the three-level purpose</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">17 · Personal</span>
+        <span class="arcana-badge ab-violet">5 · Social</span>
+        <span class="arcana-badge ab-teal">8 · Spiritual</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="destiny-grid">
+      <div class="destiny-card dc-personal">
+        <div class="dc-phase">Personal Destiny</div>
+        <div class="dc-arcana-row"><div class="dc-num">17</div><div class="dc-arcana-name">The Star</div></div>
+        <div class="dc-age">Birth to ~40 years</div>
+        <div class="dc-text">Become authentically yourself. Heal the wound that is also your gift. Let your particular quality of light develop through lived experience — not in spite of your hardships but because of them. The Star demands authentic self-expression above all else. Can you stop hiding yourself behind capability, and let your full self be seen?</div>
+      </div>
+      <div class="destiny-card dc-social">
+        <div class="dc-phase">Social Destiny</div>
+        <div class="dc-arcana-row"><div class="dc-num">5</div><div class="dc-arcana-name">The Hierophant</div></div>
+        <div class="dc-age">~40 – 60 years</div>
+        <div class="dc-text">Become the teacher, guide, and wisdom transmitter your soul is built to be. By this phase, your lived experience will have given you something genuinely worth sharing. The Hierophant asks you to formalise your knowing — to step into the role of guide with intention and authority, not apology.</div>
+      </div>
+      <div class="destiny-card dc-spiritual">
+        <div class="dc-phase">Spiritual Destiny</div>
+        <div class="dc-arcana-row"><div class="dc-num">8</div><div class="dc-arcana-name">Strength</div></div>
+        <div class="dc-age">The overarching call</div>
+        <div class="dc-text">Embody true inner power — not force, not dominance, but the composure of someone who has tamed the wild energies within and walks forward with full command of themselves. Become someone whose strength is in their presence, not their position.</div>
+      </div>
+    </div>
+    <div class="sub-section prose">
+      <p>The purpose triplet — <strong>17 → 5 → 8</strong> — reads as a complete sentence: <em>"Through becoming authentically yourself and transmitting your healing light (17), you step into the role of wise guide and teacher (5), and through that transmission, you embody the truest form of inner power (8)."</em></p>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s6">
+  <div class="section-header">
+    <span class="section-number">06</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Money</h2>
+      <div class="section-subtitle">Financial channel, wealth potential, and ideal professional fields</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">Channel · 17 – 7 – 5</span>
+        <span class="arcana-badge ab-teal">Block · 9 The Hermit</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="money-channel">
+      <div class="mc-node"><div class="mc-circle">17</div><div class="mc-label">Entrance</div><div class="mc-arcana">The Star</div></div>
+      <span class="mc-arrow">→</span>
+      <div class="mc-node"><div class="mc-circle">7</div><div class="mc-label">Flow</div><div class="mc-arcana">Chariot</div></div>
+      <span class="mc-arrow">→</span>
+      <div class="mc-node"><div class="mc-circle">5</div><div class="mc-label">Expression</div><div class="mc-arcana">Hierophant</div></div>
+    </div>
+    <div class="prose">
+      <p><strong>How money enters your life:</strong> Money comes through authenticity — through being uniquely, visibly yourself. Arcana 17 (The Star) at the entrance of your money channel means your wealth-building activates when you stop trying to be what others expect and start showing up as exactly who you are. Your particular perspective, your particular way of seeing and communicating, is the asset. There is no one else with your specific combination of Strength (8), Star (17), and Chariot (7). That distinctness is your competitive advantage.</p>
+      <p><strong>How money flows:</strong> Once activated through authentic self-expression (17), energy moves through The Chariot (7) — directed effort and disciplined action that keeps the channel open. The channel does not stay open without motion. Keep showing up even when results aren't immediately visible.</p>
+      <p><strong>Where money expresses:</strong> The channel lands at Arcana 5 (The Hierophant) — meaning your financial expression is ultimately in the domain of teaching, guidance, and wisdom transmission. The more you formalise and share what you know, the more the channel opens. You are built to sell perspective and insight, not time.</p>
+      <p><strong>What blocks this channel:</strong> Arcana 9 (The Hermit) in your social zone creates a pattern of keeping wisdom private. Withdrawing from visibility right when the channel wants to open. Staying in research mode — always learning, always preparing — rather than putting what you know in front of people who need it. The Hermit's isolation is the primary financial blocker in your chart.</p>
+    </div>
+    <div class="callout gold"><strong>Ideal professional fields:</strong> Coaching and mentoring, healing arts, psychology and therapy, content creation, writing, speaking and education, spiritual guidance, creative direction — any field where your authentic perspective is the product and where you are visible as a person, not hidden behind a system.</div>
+  </div>
+</section>
+
+<section class="report-section" id="s7">
+  <div class="section-header">
+    <span class="section-number">07</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Programs</h2>
+      <div class="section-subtitle">The four quadrant life programs — strengths, shadows, and recommendations</div>
+      <div class="section-badges"><span class="arcana-badge ab-muted">4 Active Programs</span></div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="program-card">
+      <div class="program-card-header">
+        <div><div class="program-name">Personal Evolution Program</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Top-Left Quadrant · D–I–A</div></div>
+        <div class="program-triplet-pills">
+          <div class="program-pill pp-gold">17</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-violet">7</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-gold">8</div>
+        </div>
+      </div>
+      <div class="program-rows">
+        <div><div class="program-row-label lbl-green">✦ Strengths</div><div class="program-row-text">The Star (17), The Chariot (7), and Strength (8) forming your personal evolution triplet creates a powerful self-development configuration. You have authentic vision (17) directed by disciplined will (7) and backed by extraordinary inner endurance (8). This program produces someone who transforms their own life with dedicated precision — not in dramatic leaps, but in sustained, intelligent movement toward a clearly held inner vision of who they are becoming.</div></div>
+        <div><div class="program-row-label lbl-red">✦ Potential Issues</div><div class="program-row-text">The shadow is the Star's tendency toward passive hope — waiting for the healing to happen rather than directing will (7) toward it. The gap between your vision of yourself (17) and your current expression can sometimes feel paralysing rather than motivating. Strength (8) here can also create a pattern of white-knuckling through growth rather than allowing genuine transformation — muscling through change rather than moving with it.</div></div>
+        <div><div class="program-row-label lbl-violet">✦ Recommendations</div><div class="program-row-text">Marry your vision with consistent action. The Star sees far — but it is The Chariot that gets you there. Establish small, non-negotiable daily practices that move you toward who you're becoming. Let Strength (8) be the steady container for the process rather than the force that pushes through when rest is what the moment actually requires.</div></div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-card-header">
+        <div><div class="program-name">Spiritual Leadership Program</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Top-Right Quadrant · A–F–B</div></div>
+        <div class="program-triplet-pills">
+          <div class="program-pill pp-gold">8</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-rose">13</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-violet">5</div>
+        </div>
+      </div>
+      <div class="program-rows">
+        <div><div class="program-row-label lbl-green">✦ Strengths</div><div class="program-row-text">Strength (8), Death/Transformation (13), and The Hierophant (5) is one of the most powerful leadership triplets possible. This gives you the capacity to lead people through genuine transformation — the deep kind. Arcana 13 in your spiritual leadership quadrant means you are comfortable in the territory most people find terrifying: real endings, real change, real rebirth. You can hold space for others' transformation because you have made the journey yourself.</div></div>
+        <div><div class="program-row-label lbl-red">✦ Potential Issues</div><div class="program-row-text">Arcana 13 in this quadrant can create a pattern of unconsciously catalysing transformation in others before they are ready — or without their full consent. In a leadership role, this needs conscious attention: not all transformation is appropriate in all contexts, and not every person in front of you is ready for the depth you naturally operate at.</div></div>
+        <div><div class="program-row-label lbl-violet">✦ Recommendations</div><div class="program-row-text">Develop the practice of reading readiness in others before you go deep. Your ability to reach the transformative edges is extraordinary — deploy it when the person or situation calls for it, not as a default. Let Strength (8) provide the grounded, steady container; let The Hierophant (5) provide the structure; and let Arcana 13 do its work in its own timing.</div></div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-card-header">
+        <div><div class="program-name">Social Transformation Program</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Bottom-Right Quadrant · B–G–C</div></div>
+        <div class="program-triplet-pills">
+          <div class="program-pill pp-violet">5</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-teal">9</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-teal">4</div>
+        </div>
+      </div>
+      <div class="program-rows">
+        <div><div class="program-row-label lbl-green">✦ Strengths</div><div class="program-row-text">The Hierophant (5), The Hermit (9), and The Emperor (4) creates a program of quiet but profound influence. You change social environments not by making noise but by the quality of what you offer — deep insight (9), structured wisdom (5), a capacity for building something real and lasting (4). In groups, you tend to say the thing that reframes the entire conversation — and then the group moves in a new direction.</div></div>
+        <div><div class="program-row-label lbl-red">✦ Potential Issues</div><div class="program-row-text">The Hermit (9) in your social program creates a recurring tension between your desire to engage and your genuine need for withdrawal. You may cycle between over-extending and over-withdrawing — disappearing from social environments at the exact moment your presence would have the most impact. The Emperor (4) can create rigidity in group settings — a subtle conviction that your way of seeing things is the right way, which becomes a barrier to genuine collaboration.</div></div>
+        <div><div class="program-row-label lbl-violet">✦ Recommendations</div><div class="program-row-text">Create intentional social rhythms: periods of genuine engagement and periods of genuine withdrawal, by design rather than by depletion. When you offer wisdom in group settings, hold it lightly — the Emperor's gift is structure, but the structure should serve the group's evolution, not demonstrate your authority.</div></div>
+      </div>
+    </div>
+
+    <div class="program-card">
+      <div class="program-card-header">
+        <div><div class="program-name">Material Liberation Program</div><div style="font-size:10px;color:var(--muted);margin-top:1px">Bottom-Left Quadrant · C–H–D</div></div>
+        <div class="program-triplet-pills">
+          <div class="program-pill pp-teal">4</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-gold">21</div><span class="pp-dash">–</span>
+          <div class="program-pill pp-gold">17</div>
+        </div>
+      </div>
+      <div class="program-rows">
+        <div><div class="program-row-label lbl-green">✦ Strengths</div><div class="program-row-text">The Emperor (4), The World (21), and The Star (17) is a remarkable configuration for building real, lasting, meaningful things. The Emperor builds with precision and patience; The World completes and synthesises; The Star ensures that what gets built carries authentic meaning rather than empty form. When this program runs well, you create things that last — that carry your specific imprint, that mean something to people beyond their functional value.</div></div>
+        <div><div class="program-row-label lbl-red">✦ Potential Issues</div><div class="program-row-text">The World (21) in the center of this program can create a pattern of waiting for everything to be complete before you release it — perfectionism in the literal sense. The Emperor (4) reinforces this: the structure must be right before it can be shown. Meanwhile, The Star (17) is reminding you that imperfect authenticity is worth more than perfect presentation. The tension between these three can create significant creative paralysis.</div></div>
+        <div><div class="program-row-label lbl-violet">✦ Recommendations</div><div class="program-row-text">Set a deliberate release schedule for your creative and material work — a structure (Emperor) within which you share things that are complete enough, not perfect. Let The Star lead in this domain: authenticity over polish. What you make when you let yourself be seen imperfectly will have more impact than what you polish endlessly in private.</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s8">
+  <div class="section-header">
+    <span class="section-number">08</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Sexiness</h2>
+      <div class="section-subtitle">Sexual energy, inner magnetism, and what makes you irresistible</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">8 · Strength</span>
+        <span class="arcana-badge ab-gold">17 · The Star</span>
+        <span class="arcana-badge ab-violet">7 · The Chariot</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>Your magnetism is of the rare kind — it doesn't announce itself and doesn't need to. <strong>Arcana 8 (Strength)</strong> as your birth energy gives you a leonine quality: a settled, composed presence that carries natural authority without aggression. You don't take up a room by being loud. You take up a room simply by being in it. People sense your stability before they can explain why. And stability, in a world of chronic anxiety, is one of the most attractive qualities a person can carry.</p>
+    <p><strong>The Star (17)</strong> as your personal energy adds something rarer: genuine openness. You have a quality of receptivity — of being present to who the person in front of you actually is — that makes people feel seen in a way they are not accustomed to. You don't need to perform interest, because your interest is real. And real attention is irresistible.</p>
+    <p><strong>The Chariot (7)</strong> at your center adds directional desire. When you want something — or someone — there is a quality of focused clarity that the other person will feel. You are not someone who waits passively to be chosen. You know what you want and, when the decision is made, you move toward it with quiet certainty. That certainty is its own form of charisma.</p>
+    <div class="callout rose">The deepest layer of your magnetism lives in the gap between your composed exterior and your rich, intense inner world. The people who get past the capable, steady surface and discover the Star underneath — the one who feels everything, who sees everything — they are the lucky ones. Getting to know the full you is a privilege. And somehow people sense that even before they've experienced it.</div>
+    <p>You are most attractive not when you are trying to attract, but when you are completely absorbed in something that genuinely matters to you. When your inner Star is lit up — by an idea, a work, a conversation that actually goes somewhere — your energy is magnetic in a way that cannot be manufactured. Be in your element. That is the move.</p>
+  </div>
+</section>
+
+<section class="report-section" id="s9">
+  <div class="section-header">
+    <span class="section-number">09</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Parents</h2>
+      <div class="section-subtitle">Karmic relationships with parents and generational patterns to integrate</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-rose">Mother · 4–21–17–7–8</span>
+        <span class="arcana-badge ab-violet">Father · 4–9–5–13–8</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="parent-grid">
+      <div class="parent-card pc-mother">
+        <div class="pc-header">
+          <div class="pc-icon">🌙</div>
+          <div><div class="pc-title">Your Mother</div><div class="pc-sub">Maternal line: 4 – 21 – 17 – 7 – 8</div></div>
+        </div>
+        <div class="pc-text">The maternal line opens with Arcana 4 (The Emperor) — your mother and the women before her carried a strong theme of structure, order, and expectation. These were women who knew how things should be done and maintained that knowing with considerable force. There may have been a quality of high standards in the home — standards applied to achievement, behaviour, the way things looked to the outside world.<br><br>The World (21) in the maternal line tells us the women of your lineage carried the gift of completion — they finished things, they endured to the end, they did not quit. The Star (17) further along the line means there was also a healing current in the maternal lineage — possibly suppressed, possibly expressed through art or care or quiet wisdom, but present.<br><br>The developmental task with your mother: receive the gifts — the structure, the completion energy, the endurance — while recognising where the Emperor's rules stopped serving your authentic Star (17) energy. The highest point of your maternal line is Arcana 8 (Strength) — the same energy as your own birth. The maternal gift was always pointing you back to yourself.</div>
+      </div>
+      <div class="parent-card pc-father">
+        <div class="pc-header">
+          <div class="pc-icon">☀️</div>
+          <div><div class="pc-title">Your Father</div><div class="pc-sub">Paternal line: 4 – 9 – 5 – 13 – 8</div></div>
+        </div>
+        <div class="pc-text">Your father's line carries the energy of Arcana 9 (The Hermit) as its central current — a father who was inwardly focused, who found answers through reflection and solitude rather than open emotional expression. Hermit fathers are often perceived as emotionally distant, not because they don't care, but because their primary mode of being is internal. There may have been wisdom available in the relationship, but it required effort to access.<br><br>Arcana 13 (Death/Transformation) running through the paternal line suggests the men in your lineage went through significant upheaval — losses, reinventions, breaks from the previous path. The gift passed to you through this energy is a bone-deep comfort with change at its most radical. You can handle endings in a way others cannot, because this capacity runs in your blood.<br><br>The Hierophant (5) in the paternal line means that despite any distance or complexity in the paternal relationship, there was a transmission of wisdom — however indirect. The highest point of your paternal line is also Arcana 8 (Strength) — the same as yours. Your father, and his fathers before him, were moving toward the same frequency you carry at birth. You are the culmination of something this lineage has been building toward.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s10">
+  <div class="section-header">
+    <span class="section-number">10</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Kids</h2>
+      <div class="section-subtitle">Relationship with children — present or future — and the lessons they bring</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-violet">7 · Center Energy</span>
+        <span class="arcana-badge ab-gold">21 · Inner Zone</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>The energy governing your relationship with children is The Chariot (7) at your center and The World (21) in the bottom-left inner position. This is a remarkable combination.</p>
+    <p>The Chariot (7) at your center means you naturally offer children direction and purpose — a sense of where they're going and the confidence they can get there. You are not the parent or guide who floats without structure. You offer clear values, clear direction, a sense of forward motion that children find stabilising. You lead by example in the truest sense: your discipline and your drive are visible, and children in your life absorb this without being told to.</p>
+    <p>The World (21) in the inner zone is one of the most beautiful placements for a parenting reading. It suggests that children who come into your life will be, in some sense, old souls — seekers who carry a quality of accumulated wisdom even as young people. They will challenge you to grow in ways you didn't expect. And they will bring a quality of wholeness to your life — a sense that this relationship is, in some deep way, completing something.</p>
+    <div class="callout">The shadow to watch: The Chariot's direction can become over-direction in a parenting context. The discipline you apply to yourself may not be the right medicine for every child in your life. The developmental task is to give them your strength and direction as a resource rather than a requirement. Show them what it looks like to be focused, capable, and free.</div>
+  </div>
+</section>
+
+<section class="report-section" id="s11">
+  <div class="section-header">
+    <span class="section-number">11</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Relationship</h2>
+      <div class="section-subtitle">Love channel, ideal partner qualities, and what blocks deep connection</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">Love Channel · 17–7–5</span>
+        <span class="arcana-badge ab-teal">Block · 9 Hermit</span>
+        <span class="arcana-badge ab-rose">Transformation · 13</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>Your relationship channel runs along the horizontal axis: <strong>The Star (17) → The Chariot (7) → The Hierophant (5)</strong>.</p>
+    <p><strong>What you bring to love:</strong> You bring authenticity (17) — a genuine, unperformed way of showing up that is rare and disarming in intimate relationships. You also bring The Chariot's sense of direction (7): when you invest, you invest fully. When the movement stops, you feel it as a kind of death. And you bring The Hierophant's depth (5): your love relationships are built on shared meaning, shared values, shared intellectual or spiritual world. Without that foundation, nothing else quite works.</p>
+    <div class="two-col">
+      <div class="two-col-card">
+        <div class="tc-label">What you need in a partner</div>
+        <div class="tc-text">Someone who matches your authenticity — who is genuinely themselves, not performing a version of themselves for the relationship. Someone who has a sense of direction in their own life. And someone with genuine depth — intellectual, emotional, or spiritual — who can meet you in the places where you actually live. A partner who treats wisdom as something to be earned and shared is your natural match.</div>
+      </div>
+      <div class="two-col-card">
+        <div class="tc-label">What blocks love</div>
+        <div class="tc-text">Arcana 9 (The Hermit) creates a pattern of withdrawal at exactly the moment intimacy wants to deepen — retreating into your own world right when the relationship needs you present. Arcana 13 (Death/Transformation) means relationships will transform profoundly over time, and the fear of this transformation can create avoidance of the depth that would make it worthwhile. Learn to distinguish "this needs space" from "I am afraid of how real this is getting."</div>
+      </div>
+    </div>
+    <p><strong>Keys to harmony:</strong> Choose depth over initial chemistry. Distinguish between attraction that opens you and attraction that distracts you. Find someone who respects your need for solitude without interpreting it as rejection. And commit to returning from your inner world rather than disappearing into it.</p>
+  </div>
+</section>
+
+<section class="report-section" id="s12">
+  <div class="section-header">
+    <span class="section-number">12</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Life Guidance</h2>
+      <div class="section-subtitle">Ten practical rules for living in alignment with your matrix</div>
+      <div class="section-badges"><span class="arcana-badge ab-muted">10 Core Rules</span></div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="guidance-list">
+      <div class="guidance-item"><div class="guidance-num">1</div><div class="guidance-text"><strong>Stop hiding your light.</strong> The Star (17) is your personal energy and it is being asked to be seen. Every time you keep your perspective, your insight, your authentic self out of the visible world, the money channel closes, the purpose dims, and the restlessness builds. Visibility is not vanity in your chart. It is the activation of your primary frequency.</div></div>
+      <div class="guidance-item"><div class="guidance-num">2</div><div class="guidance-text"><strong>Build every day.</strong> The Emperor (4) at your karma position means foundation-building is not optional — it is the medium through which your soul learns in this lifetime. Consistent, non-spectacular daily effort accumulates into something real. The grand gesture is far less powerful in your chart than the small, repeated act.</div></div>
+      <div class="guidance-item"><div class="guidance-num">3</div><div class="guidance-text"><strong>Choose direction and hold it.</strong> The Chariot (7) at your center requires a clear direction to function. Without a chosen direction, the Chariot's energy has nowhere to go and becomes either restlessness or stagnation. Name what you're building. Commit to it. Adjust the route as needed but keep the destination clear.</div></div>
+      <div class="guidance-item"><div class="guidance-num">4</div><div class="guidance-text"><strong>Your wound is your gift.</strong> Arcana 17 (The Star) carries the archetype of the wounded healer whose own experience of difficulty becomes the precise gift they offer others. Whatever you have struggled with most is not separate from your purpose. It is your purpose, in its rawest form.</div></div>
+      <div class="guidance-item"><div class="guidance-num">5</div><div class="guidance-text"><strong>Let transformation complete.</strong> Arcana 13 runs through your spiritual program. When something is ending — a chapter, a relationship, a version of yourself — do not rescue it past its natural completion. Premature rescues extend the transition and delay the arrival of what comes next. Trust endings.</div></div>
+      <div class="guidance-item"><div class="guidance-num">6</div><div class="guidance-text"><strong>Strength through softness.</strong> Arcana 8 (Strength) is not about force. The image is a figure opening a lion's mouth with bare hands — no weapons, just a quality of presence that makes aggression unnecessary. Your strength works the same way. It is most powerful when most composed, most open, least defensive.</div></div>
+      <div class="guidance-item"><div class="guidance-num">7</div><div class="guidance-text"><strong>Share what you know, now.</strong> Arcana 9 (The Hermit) creates a pattern of holding wisdom privately — forever preparing but never transmitting. The Hermit's light is meant to be held up for others. What you know right now is already enough to illuminate the path for someone behind you on the road.</div></div>
+      <div class="guidance-item"><div class="guidance-num">8</div><div class="guidance-text"><strong>Solitude is a tool, not a refuge.</strong> Your need for withdrawal is genuine and important — honour it. But distinguish between solitude that fills you up so you can return and contribute, and isolation that is a response to fear or overwhelm. The Hermit goes into the mountain and comes back down. The coming back down is equally part of the practice.</div></div>
+      <div class="guidance-item"><div class="guidance-num">9</div><div class="guidance-text"><strong>Build structures that liberate.</strong> The Emperor (4) in your karma means you will create systems and frameworks throughout your life. Each one should pass this test: does this give the people within it more freedom and more capacity, or does it constrain them? Build things that expand possibility.</div></div>
+      <div class="guidance-item"><div class="guidance-num">10</div><div class="guidance-text"><strong>You are already enough to begin.</strong> The World (21) in your inner chart is the reminder that your soul came in with significant accumulated wisdom. You are not starting from scratch. You don't need more time, more preparation, or more credentials. You need to begin.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s13">
+  <div class="section-header">
+    <span class="section-number">13</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Year's Forecast</h2>
+      <div class="section-subtitle">Current age period analysis and what 2026 is asking of you</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">Age 21–28 · The Chariot · Arcana 7</span>
+        <span class="arcana-badge ab-muted">Current Period · Active Now</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <div class="age-timeline">
+      <div class="age-period"><div class="ap-range">0–7</div><div class="ap-num">4</div><div class="ap-name">Emperor</div></div>
+      <div class="age-period"><div class="ap-range">7–14</div><div class="ap-num">21</div><div class="ap-name">The World</div></div>
+      <div class="age-period"><div class="ap-range">14–21</div><div class="ap-num">17</div><div class="ap-name">The Star</div></div>
+      <div class="age-period ap-current"><div class="ap-range">21–28 ★</div><div class="ap-num">7</div><div class="ap-name">Chariot</div></div>
+      <div class="age-period"><div class="ap-range">28–35</div><div class="ap-num">8</div><div class="ap-name">Strength</div></div>
+      <div class="age-period"><div class="ap-range">35–42</div><div class="ap-num">13</div><div class="ap-name">Death</div></div>
+      <div class="age-period"><div class="ap-range">42–49</div><div class="ap-num">5</div><div class="ap-name">Hierophant</div></div>
+      <div class="age-period"><div class="ap-range">49–56</div><div class="ap-num">9</div><div class="ap-name">Hermit</div></div>
+    </div>
+
+    <div class="forecast-period">
+      <div class="fp-header">
+        <span class="fp-badge">Ages 21–28</span>
+        <span class="fp-current">● You are here · 2026 · Age 24</span>
+      </div>
+      <div class="fp-title">The Chariot Period · Arcana 7</div>
+      <div class="fp-arcana">The decade of direction, discipline, and decisive self-authorship</div>
+      <div class="fp-text">You are 3 years into the most formative directional period of your early life. The Chariot period (ages 21–28) is when the energy of your chart asks you to get behind the wheel — to stop drifting in the direction life is pushing you and to consciously choose your direction and hold it. At 24, you are in the heart of this phase. What you build now — the habits, the skills, the relationships, the direction — will be the infrastructure of everything that follows.</div>
+    </div>
+
+    <div class="prose">
+      <p><strong>What just ended:</strong> The Star period (14–21) was a phase of self-discovery — finding out who you actually are, what your specific light looks like, what matters to you. That phase has done its work. The Chariot says: now do something with it.</p>
+      <p><strong>Theme 1: Direction over drift.</strong> The primary question of this period is: are you moving by design or by default? The Chariot does not reward passive movement. Choose the direction. Commit to it. Measure yourself against your own chosen standard, not against where circumstances have carried you.</p>
+      <p><strong>Theme 2: Discipline as identity.</strong> In this period, what you do consistently becomes who you are. The practices, the standards, the routines you build in the Chariot years become the infrastructure of everything that follows. Build them now — not when it feels good, but as a non-negotiable expression of who you're choosing to become.</p>
+      <p><strong>Theme 3: Momentum is everything.</strong> The Chariot wins through sustained motion, not through a single great effort. Small, consistent movement toward your chosen direction in 2026 will have compounding effects through the rest of this period and into the Strength years (28–35) that follow.</p>
+      <div class="callout gold"><strong>2026 specifically:</strong> You are midway through the Chariot phase at age 24. This is the year to pick the lane — if you haven't fully committed to a direction yet, the pressure to do so will be felt most acutely now. The approaching Strength period (28–35) will ask for the full embodiment of your power, but it builds on what The Chariot establishes now. What you commit to in 2026 is what you will embody in your 30s.</div>
+      <p><strong>What's coming:</strong> The Strength period (28–35) will ask you to fully embody the power you were born with. The preparation begins now. Every act of discipline, every moment of choosing what is right over what is easy, every time you show up for yourself in The Chariot years — all of that is readying the vessel for Arcana 8 in full expression.</p>
+    </div>
+  </div>
+</section>
+
+<section class="report-section" id="s14">
+  <div class="section-header">
+    <span class="section-number">14</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Personal Brand</h2>
+      <div class="section-subtitle">How the world perceives you, your natural charisma, and how to project authentically</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-gold">Archetype · Warrior-Healer</span>
+        <span class="arcana-badge ab-gold">8 · Birth</span>
+        <span class="arcana-badge ab-gold">17 · Personal</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body prose">
+    <p>Your personal brand archetype is the <strong>Warrior-Healer</strong> — a rare and powerful combination carrying two qualities not often found together: the quiet strength and composure of someone who can handle anything (8), and the open, luminous healing presence of someone who makes others feel that everything is going to be okay (17). Your brand does not have to choose between power and warmth. It embodies both, simultaneously.</p>
+    <p><strong>How the world perceives you:</strong> Before you say a word, you register as capable. There is a groundedness to your presence — a physical and energetic solidity — that people perceive as reliability and authority. At the same time, your Star energy (17) creates an unusual openness in your manner that makes people feel you are genuinely interested in them. The combination is rare: power and approachability in a single person. Command and warmth.</p>
+
+    <div class="brand-grid">
+      <div class="brand-card">
+        <div class="bc-icon">✦</div>
+        <div class="bc-title">Your Natural Charisma</div>
+        <div class="bc-text">Quiet authority combined with genuine warmth. You don't fill silence — you make silence comfortable. Your charisma is most activated when you speak with precision about something you know from lived experience. Personal testimony is your most powerful brand voice.</div>
+      </div>
+      <div class="brand-card">
+        <div class="bc-icon">⭐</div>
+        <div class="bc-title">Your Brand Differentiator</div>
+        <div class="bc-text">Authentic depth. In a world of curated personas and borrowed wisdom, you offer the genuine article. Your specific experience, your specific perspective — these cannot be replicated. Authenticity is not just a brand value for you. It is your primary market advantage.</div>
+      </div>
+      <div class="brand-card">
+        <div class="bc-icon">⚡</div>
+        <div class="bc-title">Your Voice in the World</div>
+        <div class="bc-text">Direct, warm, and grounded. You speak from lived experience rather than theory. Your voice is most powerful when you say the thing others are thinking but don't have the composure or courage to say out loud.</div>
+      </div>
+      <div class="brand-card">
+        <div class="bc-icon">🎯</div>
+        <div class="bc-title">The Chariot in Your Brand</div>
+        <div class="bc-text">Everything you put into the world should have direction — a clear sense of what it's building toward. Your brand is a movement, not a mood board. It has a destination and a forward momentum that people can feel and want to follow.</div>
+      </div>
+    </div>
+
+    <div class="section-divider"></div>
+    <p><strong>1. Lead with lived experience.</strong> The Star (17) brand is personal testimony — your specific journey, your specific turning points, your hard-won knowing. Use your real story as a bridge to someone else's understanding.</p>
+    <p><strong>2. Embody what you teach.</strong> Strength (8) teaches this without negotiation. The brand that lasts is the one where there is no gap between what is communicated and how you actually live. Close that gap in every domain.</p>
+    <p><strong>3. Be seen moving.</strong> The Chariot (7) at your center means your brand has an inherently dynamic quality — always building toward something. Let people see you in motion. The journey is as compelling as the destination.</p>
+  </div>
+</section>
+
+<section class="report-section" id="s15">
+  <div class="section-header">
+    <span class="section-number">15</span>
+    <div class="section-title-wrap">
+      <h2 class="section-title">Health &amp; Chakras</h2>
+      <div class="section-subtitle">Sahasrara through Muladhara — physical, energetic, and emotional body</div>
+      <div class="section-badges">
+        <span class="arcana-badge ab-muted">7 Chakra Centres</span>
+        <span class="arcana-badge ab-violet">Physics · Energy · Emotions</span>
+      </div>
+    </div>
+  </div>
+  <div class="section-body">
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Each energy centre maps to a specific arcana position in your chart. The three columns reflect the physical body, the energetic body, and the emotional body respectively.</p>
+    <div class="chakra-table">
+      <div class="chakra-header-row">
+        <div class="ch-header-cell">Chakra</div>
+        <div class="ch-header-cell">Physical Body</div>
+        <div class="ch-header-cell">Energy Body</div>
+        <div class="ch-header-cell">Emotional Body</div>
+      </div>
+      <div class="chakra-row cr-7">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Sahasrara</div><div class="ch-chakra-sub">Crown · Arcana 8</div><div class="ch-num">8</div></div>
+        <div class="ch-cell">Nervous system, brain, immune function. Strength (8) at the crown means a naturally robust physical constitution. Risk: pushing past genuine limits without noticing because your threshold for discomfort is high. Rest before breaking, not after.</div>
+        <div class="ch-cell">Strong, stable crown energy that does not require external validation to maintain connection to higher knowing. You access clarity through composure, not stimulation. Quiet activates this chakra; noise closes it.</div>
+        <div class="ch-cell">When balanced: a deep sense of inner rightness — the conviction that you can handle whatever comes. When depleted: a quiet but pervasive sense of carrying more than is sustainable. The signal to rest often comes as exhaustion rather than earlier, subtler signs of overextension.</div>
+      </div>
+      <div class="chakra-row cr-6">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Ajna</div><div class="ch-chakra-sub">Third Eye · Arcana 7</div><div class="ch-num">7</div></div>
+        <div class="ch-cell">Eyes, brain, pituitary, sleep patterns. The Chariot at the third eye means your visionary capacity is directional — you don't just perceive, you perceive in terms of movement and goal. Eyes and headaches respond quickly to misalignment between your direction and your actions.</div>
+        <div class="ch-cell">Exceptional clarity of vision when aligned with your chosen direction. The third eye literally works better when The Chariot's direction is clear. When you are drifting, perception becomes cloudy — difficulty making decisions, difficulty seeing what is in front of you.</div>
+        <div class="ch-cell">The emotional signature of an open third eye in your chart is the feeling of knowing where you're going — the calm confidence of the directed warrior. When it's closed: a frustrating sense of not being able to see clearly, of options looking equal, of paralysis in decision-making.</div>
+      </div>
+      <div class="chakra-row cr-5">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Vishuddha</div><div class="ch-chakra-sub">Throat · Arcana 17 &amp; 13</div><div class="ch-num">17</div></div>
+        <div class="ch-cell">Throat, vocal cords, thyroid, neck and shoulders. The Star (17) and Death (13) at the throat means your voice carries significant transformative power — and the physical cost of suppressing it shows up as chronic tension in neck and shoulders. Speaking your truth is literally good for your body.</div>
+        <div class="ch-cell">Your voice is a healing instrument when it is authentic. The Star energy at the throat means that when you speak from genuine experience and genuine feeling, the effect on others is disproportionate to the effort. Death (13) means what you say, when said fully, has the power to transform — to end old stories and begin new ones.</div>
+        <div class="ch-cell">A pull between the authentic expression the Star demands and the controlled, composed presentation that Strength (8) has trained you in. When these two conflict — when you hold back what you actually feel to maintain composure — the throat chakra registers it immediately.</div>
+      </div>
+      <div class="chakra-row cr-4">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Anahata</div><div class="ch-chakra-sub">Heart · Arcana 7</div><div class="ch-num">7</div></div>
+        <div class="ch-cell">Heart, lungs, circulation, upper back, arms. The Chariot at the heart means your heart opens through shared direction and shared purpose. You are most openhearted in relationships and situations that are going somewhere meaningful. Your heart health — physical and emotional — is directly tied to having a sense of direction and movement.</div>
+        <div class="ch-cell">The heart chakra in your chart operates like a compass — most open when pointing toward something true. When you are in purposeful motion, energy flows freely through this centre. When you are stagnant, the heart literally contracts. Movement is medicine for your heart.</div>
+        <div class="ch-cell">You love deeply but not indiscriminately. The Chariot at the heart means your love is directional — you love people who are building something, going somewhere, committed to something real. Stagnant or purposeless love environments trigger a slow withdrawal of emotional energy that you may not notice happening until the distance is significant.</div>
+      </div>
+      <div class="chakra-row cr-3">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Manipura</div><div class="ch-chakra-sub">Solar Plexus · Arcana 9</div><div class="ch-num">9</div></div>
+        <div class="ch-cell">Stomach, liver, digestion, adrenal response. The Hermit at the solar plexus means your personal power is sourced from within — from reflection, from solitude, from inner knowing. Periods of intense social demand without corresponding solitude create digestive and adrenal depletion. Withdrawal is physiological maintenance, not optional.</div>
+        <div class="ch-cell">Your power centre charges in quiet. Unlike many people who energise in social contexts, your solar plexus powers down in overstimulating environments and powers up in stillness. Understanding this is not a personality quirk — it is a fundamental aspect of your energy management system.</div>
+        <div class="ch-cell">Your sense of personal power is intrinsic, not relational. You don't need external validation to feel capable. But when cut off from your inner world by busyness or noise, your sense of personal agency diminishes dramatically and quickly. Protect your quiet time fiercely.</div>
+      </div>
+      <div class="chakra-row cr-2">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Svadhisthana</div><div class="ch-chakra-sub">Sacral · Arcana 21</div><div class="ch-num">21</div></div>
+        <div class="ch-cell">Reproductive system, hips, lower abdomen, lower back, creative organs. The World (21) at the sacral is one of the most powerful placements for creative and life-force energy in the entire chart. Your creative and sexual energy carries the frequency of completion and wholeness. When this centre is open, your creative output has a quality of fullness — nothing half-formed, nothing tentative.</div>
+        <div class="ch-cell">The World energy in the sacral centre means your creative life force has an inherent drive toward synthesis and integration. Your creative process tends to involve incubation periods followed by relatively rapid completion. Trust the incubation. The World is composting the material for the next creation.</div>
+        <div class="ch-cell">When the sacral is open: an extraordinary sense of creative and life-force aliveness — the feeling of fully participating in your own life. When it is blocked: a flat quality to existence, going through the motions without vitality. Movement, creativity, and genuine pleasure are the medicines.</div>
+      </div>
+      <div class="chakra-row cr-1">
+        <div class="ch-name-cell"><div class="ch-chakra-name">Muladhara</div><div class="ch-chakra-sub">Root · Arcana 4</div><div class="ch-num">4</div></div>
+        <div class="ch-cell">Spine, legs, bones, adrenal glands, immune system. The Emperor (4) at the root means you are built for grounding — for establishing stable, ordered foundations from which everything else can grow. Your physical body responds best to regular rhythms: consistent sleep, consistent exercise, consistent food. Structure literally stabilises your root.</div>
+        <div class="ch-cell">The Emperor provides exceptional structural stability — you are not easily destabilised at the foundational level. However, the Emperor's rigidity can mean that when the root is under threat — when basic security feels uncertain — the response is disproportionate and can lock down the entire energetic system. Safety, order, and reliable structure are not luxuries for you. They are the foundation.</div>
+        <div class="ch-cell">Your sense of safety is built on structure, order, and control of your environment. When these are in place, you feel genuinely secure. When they are disrupted — sudden change, chaos, uncertainty about basic foundations — your emotional response can be more intense than the external situation warrants. Build structures that are flexible, not brittle. Security through adaptable order, not rigid control.</div>
+      </div>
+    </div>
+    <div class="callout teal" style="margin-top:20px">
+      <strong>Priority health focus:</strong> The Throat chakra (Arcana 17 &amp; 13) and the Solar Plexus (Arcana 9) are your two most important areas of intentional care. The Throat needs authentic expression — suppressing your voice has direct physical consequences. The Solar Plexus needs protected solitude — your power charges in quiet, and without it, everything downstream is running on empty. Speak your truth and protect your stillness. These two practices do more for your health than almost anything else in your matrix.
+    </div>
+  </div>
+</section>
+
+</div>
+</main>
+</div>
+
+<script>
+const sections = document.querySelectorAll('.report-section');
+const navItems = document.querySelectorAll('.nav-item');
+const io = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      navItems.forEach(n => n.classList.remove('active'));
+      const link = document.querySelector(`.nav-item[href="#${e.target.id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-15% 0px -75% 0px' });
+sections.forEach(s => io.observe(s));
+navItems.forEach(item => {
+  item.addEventListener('click', e => {
+    e.preventDefault();
+    const id = item.getAttribute('href').slice(1);
+    document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (window.innerWidth < 700) closeSidebar();
+  });
+});
+const sidebar = document.getElementById('sidebar');
+const overlay = document.getElementById('sidebarOverlay');
+const toggle  = document.getElementById('menuToggle');
+function openSidebar()  { sidebar.classList.add('open');  overlay.classList.add('visible'); }
+function closeSidebar() { sidebar.classList.remove('open'); overlay.classList.remove('visible'); }
+toggle.addEventListener('click',  () => sidebar.classList.contains('open') ? closeSidebar() : openSidebar());
+overlay.addEventListener('click', closeSidebar);
+</script>
+</body>
+</html>
