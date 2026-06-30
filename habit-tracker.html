@@ -1,0 +1,749 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Niko — Habits</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #050505;
+  --surface:   #080808;
+  --border:    #1c1c1c;
+  --border-md: #282828;
+
+  --t0: #2a2a2a;   /* dimmest text */
+  --t1: #4a4a4a;   /* muted */
+  --t2: #777;      /* default */
+  --t3: #aaa;      /* normal */
+  --t4: #d0d0d0;   /* bright */
+
+  --green:     #00c96e;
+  --green-b:   rgba(0,201,110,0.55);
+  --green-g1:  rgba(0,201,110,0.2);
+  --green-g2:  rgba(0,201,110,0.08);
+  --green-bg:  rgba(0,201,110,0.055);
+
+  --red:       #b31b2b;
+  --red-b:     rgba(179,27,43,0.5);
+  --red-g1:    rgba(179,27,43,0.18);
+  --red-g2:    rgba(179,27,43,0.07);
+  --red-bg:    rgba(179,27,43,0.055);
+
+  --radius-pill: 9999px;
+  --radius-box:  18px;
+}
+
+html, body {
+  min-height: 100%;
+  background: var(--bg);
+  color: var(--t2);
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+::-webkit-scrollbar       { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+/* ── SHELL ────────────────────────────────────────────────────────── */
+.app {
+  max-width: 568px;
+  margin: 0 auto;
+  padding: 52px 20px 96px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+/* ── HEADER ─────────────────────────────────────────────────────── */
+.hdr {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.hdr-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  color: var(--t4);
+  letter-spacing: 0.01em;
+}
+.hdr-date {
+  font-size: 10px;
+  color: var(--t0);
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+/* ── SECTION ─────────────────────────────────────────────────────── */
+.section { display: flex; flex-direction: column; gap: 14px; }
+
+.sec-label {
+  font-size: 8px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--t0);
+}
+
+/* ── HABIT LIST ──────────────────────────────────────────────────── */
+.habit-list { display: flex; flex-direction: column; gap: 8px; }
+
+.habit-wrap { display: flex; flex-direction: column; }
+
+/* Main pill row */
+.habit-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 13px 12px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: border-color 0.28s ease, box-shadow 0.28s ease;
+}
+.habit-pill.is-green {
+  border-color: var(--green-b);
+  box-shadow:
+    0 0 14px var(--green-g1),
+    0 0 36px var(--green-g2),
+    inset 0 0 18px rgba(0,201,110,0.015);
+}
+.habit-pill.is-red {
+  border-color: var(--red-b);
+  box-shadow:
+    0 0 14px var(--red-g1),
+    0 0 36px var(--red-g2),
+    inset 0 0 18px rgba(179,27,43,0.015);
+}
+
+/* Left: name + streak */
+.habit-left { display: flex; align-items: center; gap: 10px; }
+
+.habit-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t2);
+  letter-spacing: -0.01em;
+  transition: color 0.22s;
+}
+.habit-pill.is-green .habit-name,
+.habit-pill.is-red   .habit-name { color: var(--t3); }
+
+.streak-n {
+  font-size: 9px;
+  font-weight: 700;
+  min-width: 12px;
+  transition: color 0.25s, text-shadow 0.25s;
+  line-height: 1;
+}
+.streak-n.sg { color: var(--green); text-shadow: 0 0 9px var(--green-g1); }
+.streak-n.sr { color: var(--red);   text-shadow: 0 0 9px var(--red-g1); }
+
+/* Right: toggle pair */
+.tog-pair { display: flex; gap: 5px; }
+
+.tog {
+  padding: 5px 17px;
+  border: 1px solid var(--border-md);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--t0);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  font-family: inherit;
+  user-select: none;
+  white-space: nowrap;
+}
+.tog:hover { color: var(--t1); border-color: #353535; }
+
+/* Positive habit toggle states */
+.tog.yes.a {
+  background: var(--green-bg);
+  border-color: var(--green-b);
+  color: var(--green);
+  box-shadow: 0 0 10px var(--green-g1), 0 0 22px var(--green-g2);
+}
+.tog.no.a {
+  background: var(--red-bg);
+  border-color: var(--red-b);
+  color: var(--red);
+  box-shadow: 0 0 10px var(--red-g1), 0 0 22px var(--red-g2);
+}
+
+/* Negative habit: flip colors */
+.habit-pill.neg .tog.yes.a {
+  background: var(--red-bg);
+  border-color: var(--red-b);
+  color: var(--red);
+  box-shadow: 0 0 10px var(--red-g1), 0 0 22px var(--red-g2);
+}
+.habit-pill.neg .tog.no.a {
+  background: var(--green-bg);
+  border-color: var(--green-b);
+  color: var(--green);
+  box-shadow: 0 0 10px var(--green-g1), 0 0 22px var(--green-g2);
+}
+
+/* ── MICRO NOTE ──────────────────────────────────────────────────── */
+.note-wrap {
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  margin-top: 0;
+  transition:
+    max-height 0.3s cubic-bezier(0.4,0,0.2,1),
+    opacity    0.24s ease,
+    margin-top 0.3s cubic-bezier(0.4,0,0.2,1);
+}
+.note-wrap.open {
+  max-height: 34px;
+  opacity: 1;
+  margin-top: 7px;
+}
+.note-in {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--border);
+  padding: 0 24px 6px;
+  color: var(--t1);
+  font-size: 10px;
+  font-family: 'JetBrains Mono', 'Courier New', monospace;
+  font-style: italic;
+  letter-spacing: 0.015em;
+  outline: none;
+  transition: border-color 0.2s, color 0.2s;
+}
+.note-in::placeholder { color: var(--t0); }
+.note-in:focus { border-bottom-color: var(--border-md); color: var(--t2); }
+
+/* ── CALORIE MODULE ──────────────────────────────────────────────── */
+.cal-wrap { display: flex; flex-direction: column; }
+
+.cal-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 13px 12px 22px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  background: transparent;
+  transition: border-color 0.28s ease, box-shadow 0.28s ease;
+}
+.cal-pill.is-green {
+  border-color: var(--green-b);
+  box-shadow: 0 0 14px var(--green-g1), 0 0 36px var(--green-g2);
+}
+.cal-pill.is-red {
+  border-color: var(--red-b);
+  box-shadow: 0 0 14px var(--red-g1), 0 0 36px var(--red-g2);
+}
+
+.cal-left { display: flex; align-items: center; gap: 10px; }
+.cal-name {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--t2);
+  letter-spacing: -0.01em;
+  transition: color 0.22s;
+}
+.cal-pill.is-green .cal-name,
+.cal-pill.is-red   .cal-name { color: var(--t3); }
+
+.cal-right { display: flex; align-items: center; gap: 8px; }
+
+.cal-in {
+  width: 76px;
+  text-align: right;
+  background: transparent;
+  border: none;
+  color: var(--t2);
+  font-size: 15px;
+  font-weight: 700;
+  font-family: inherit;
+  letter-spacing: -0.025em;
+  outline: none;
+  transition: color 0.22s;
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+.cal-in::-webkit-inner-spin-button,
+.cal-in::-webkit-outer-spin-button { -webkit-appearance: none; }
+.cal-in::placeholder { color: var(--t0); }
+.cal-pill.is-green .cal-in { color: var(--green); }
+.cal-pill.is-red   .cal-in { color: var(--red); }
+
+.cal-goal {
+  font-size: 9px;
+  color: var(--t0);
+  font-weight: 500;
+  white-space: nowrap;
+  letter-spacing: 0.03em;
+}
+
+/* ── WEEKLY MATRIX ───────────────────────────────────────────────── */
+.week-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-box);
+  padding: 18px 14px 16px;
+  background: rgba(255,255,255,0.008);
+  transition: border-color 0.55s ease, box-shadow 0.55s ease;
+}
+.week-box.wg {
+  border-color: rgba(0,201,110,0.2);
+  box-shadow:
+    0 0 0 1px rgba(0,201,110,0.05),
+    0 0 44px rgba(0,201,110,0.065),
+    0 0 80px rgba(0,201,110,0.03);
+}
+.week-box.wr {
+  border-color: rgba(179,27,43,0.18);
+  box-shadow:
+    0 0 0 1px rgba(179,27,43,0.045),
+    0 0 44px rgba(179,27,43,0.06),
+    0 0 80px rgba(179,27,43,0.03);
+}
+
+.wk-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 5px;
+}
+
+/* Day column */
+.day-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+.d-name {
+  font-size: 7px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--t0);
+  transition: color 0.2s;
+  margin-bottom: 1px;
+}
+.d-num {
+  font-size: 8.5px;
+  font-weight: 600;
+  color: var(--t0);
+  letter-spacing: -0.01em;
+  transition: color 0.2s;
+  margin-bottom: 3px;
+}
+.day-col.today .d-name { color: var(--t2); }
+.day-col.today .d-num  { color: var(--t3); }
+
+/* Micro pills */
+.mpills { display: flex; flex-direction: column; gap: 3px; width: 100%; }
+
+.mp {
+  width: 100%;
+  height: 13px;
+  border-radius: var(--radius-pill);
+  border: 1px solid #161616;
+  background: #0c0c0c;
+  position: relative;
+  transition: all 0.22s;
+}
+.mp.g {
+  background: rgba(0,201,110,0.09);
+  border-color: rgba(0,201,110,0.28);
+  box-shadow: 0 0 5px rgba(0,201,110,0.14);
+}
+.mp.r {
+  background: rgba(179,27,43,0.08);
+  border-color: rgba(179,27,43,0.26);
+  box-shadow: 0 0 5px rgba(179,27,43,0.13);
+  cursor: help;
+}
+
+/* Day column ambient glow */
+.day-col.dg .mpills { filter: drop-shadow(0 0 5px rgba(0,201,110,0.11)); }
+.day-col.dr .mpills { filter: drop-shadow(0 0 5px rgba(179,27,43,0.11)); }
+
+/* Today column ring */
+.day-col.today .mpills {
+  outline: 1px solid rgba(255,255,255,0.04);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+
+/* ── TOOLTIP ─────────────────────────────────────────────────────── */
+.tt {
+  position: fixed;
+  z-index: 9000;
+  background: #111;
+  border: 1px solid var(--border-md);
+  border-radius: 8px;
+  padding: 4px 10px;
+  font-size: 9.5px;
+  color: var(--t2);
+  font-family: 'JetBrains Mono', monospace;
+  font-style: italic;
+  letter-spacing: 0.01em;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.13s;
+  white-space: nowrap;
+  max-width: 220px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.tt.on { opacity: 1; }
+
+/* ── NAV BACK ───────────────────────────────────────────────────── */
+.nav-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 14px 5px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--t1);
+  text-decoration: none;
+  letter-spacing: 0.03em;
+  transition: border-color 0.18s, color 0.18s;
+  align-self: flex-start;
+}
+.nav-back:hover { border-color: var(--border-md); color: var(--t2); }
+.nav-back svg { flex-shrink: 0; }
+</style>
+</head>
+
+<body>
+<div class="app" id="app">
+
+  <!-- Back nav -->
+  <a class="nav-back" href="index.html">
+    <svg width="10" height="10" viewBox="0 0 10 10" fill="none">
+      <path d="M6.5 2L3.5 5L6.5 8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+    Dashboard
+  </a>
+
+  <!-- Header -->
+  <div class="hdr">
+    <span class="hdr-title">Daily Habits</span>
+    <span class="hdr-date" id="hdrDate"></span>
+  </div>
+
+  <!-- Habit Matrix -->
+  <div class="section">
+    <div class="sec-label">Non-Negotiables</div>
+    <div class="habit-list" id="habitList"></div>
+  </div>
+
+  <!-- Calorie Module -->
+  <div class="section">
+    <div class="sec-label">Nutrition</div>
+    <div class="cal-wrap">
+      <div class="cal-pill" id="calPill">
+        <div class="cal-left">
+          <span class="cal-name">Calories</span>
+          <span class="streak-n" id="calStreak"></span>
+        </div>
+        <div class="cal-right">
+          <input type="number" class="cal-in" id="calIn" placeholder="—" min="0" max="9999" />
+          <span class="cal-goal">/ 2,600 kcal</span>
+        </div>
+      </div>
+      <div class="note-wrap" id="calNoteWrap">
+        <input type="text" class="note-in" id="calNoteIn" placeholder="// Context..." />
+      </div>
+    </div>
+  </div>
+
+  <!-- Weekly Matrix -->
+  <div class="section">
+    <div class="sec-label">7-Day Horizon</div>
+    <div class="week-box" id="weekBox">
+      <div class="wk-grid" id="wkGrid"></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Floating tooltip -->
+<div class="tt" id="tt"></div>
+
+<script>
+'use strict';
+
+/* ─── CONFIG ───────────────────────────────────────────────────────────── */
+const HABITS = [
+  { id: 'gym',    label: 'Gym',               neg: false },
+  { id: 'steps',  label: '20k Steps',         neg: false },
+  { id: 'water',  label: '3L Water',          neg: false },
+  { id: 'screen', label: 'Screen Time Focus', neg: true  },
+];
+
+const CAL_TARGET = 2600;
+const DAYS = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+const KEY  = 'ht_v3';
+
+/* ─── DB ─────────────────────────────────────────────────────────────── */
+let db = {};
+
+function load() {
+  try { db = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch { db = {}; }
+}
+function save() { localStorage.setItem(KEY, JSON.stringify(db)); }
+
+function dayOf(k) {
+  const d = db[k];
+  return d
+    ? d
+    : { gym:null, steps:null, water:null, screen:null, calories:null, notes:{}, calNote:'' };
+}
+function putDay(k, v) { db[k] = v; save(); }
+
+/* ─── DATE UTILS ─────────────────────────────────────────────────────── */
+function fmt(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+const TODAY = fmt(new Date());
+
+function weekDays() {
+  const t   = new Date();
+  const dow = t.getDay();
+  const mon = new Date(t);
+  mon.setDate(t.getDate() - ((dow + 6) % 7));
+  return Array.from({length:7}, (_,i) => {
+    const d = new Date(mon);
+    d.setDate(mon.getDate() + i);
+    return { key: fmt(d), n: d.getDate() };
+  });
+}
+
+/* ─── STREAK ─────────────────────────────────────────────────────────── */
+function streak(id, neg) {
+  let st = null, cnt = 0;
+  for (let i = 0; i < 90; i++) {
+    const d  = new Date(); d.setDate(d.getDate() - i);
+    const v  = dayOf(fmt(d))[id];
+    if (v === null || v === undefined) { if (i === 0) continue; break; }
+    const ok = neg ? v === 'no' : v === 'yes';
+    const cur = ok ? 'g' : 'r';
+    if (st === null) st = cur; else if (cur !== st) break;
+    cnt++;
+  }
+  return { st, cnt };
+}
+
+function calStreak() {
+  let good = null, cnt = 0;
+  for (let i = 0; i < 90; i++) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const c = dayOf(fmt(d)).calories;
+    if (c === null || c === undefined || c === '') { if (i === 0) continue; break; }
+    const ok = Number(c) <= CAL_TARGET;
+    if (good === null) good = ok; else if (ok !== good) break;
+    cnt++;
+  }
+  return { st: good === null ? null : (good ? 'g' : 'r'), cnt };
+}
+
+/* ─── PILL STATE ─────────────────────────────────────────────────────── */
+function pillCls(val, neg) {
+  if (val === null || val === undefined) return '';
+  return (neg ? val === 'no' : val === 'yes') ? 'g' : 'r';
+}
+function calPillCls(c) {
+  if (c === null || c === undefined || c === '') return '';
+  return Number(c) <= CAL_TARGET ? 'g' : 'r';
+}
+
+/* ─── RENDER HABITS ──────────────────────────────────────────────────── */
+function renderHabits() {
+  const day  = dayOf(TODAY);
+  const list = document.getElementById('habitList');
+  list.innerHTML = '';
+
+  HABITS.forEach(h => {
+    const val  = day[h.id];
+    const note = (day.notes && day.notes[h.id]) || '';
+    const s    = streak(h.id, h.neg);
+    const bad  = h.neg ? val === 'yes' : val === 'no';
+    const good = h.neg ? val === 'no'  : val === 'yes';
+    const pst  = good ? 'is-green' : bad ? 'is-red' : '';
+
+    const wrap = el('div', 'habit-wrap');
+
+    const pill = el('div', `habit-pill ${pst} ${h.neg ? 'neg' : ''}`);
+
+    const left = el('div', 'habit-left');
+    const nm   = el('span', 'habit-name'); nm.textContent = h.label;
+    const sn   = el('span', `streak-n${s.cnt > 0 ? (s.st==='g' ? ' sg' : ' sr') : ''}`);
+    sn.textContent = s.cnt > 0 ? s.cnt : '';
+    left.append(nm, sn);
+
+    const pair = el('div', 'tog-pair');
+    ['yes','no'].forEach(v => {
+      const btn = el('button', `tog ${v}${val === v ? ' a' : ''}`);
+      btn.textContent = v === 'yes' ? 'Yes' : 'No';
+      btn.addEventListener('click', () => {
+        const d = dayOf(TODAY);
+        d[h.id] = d[h.id] === v ? null : v;
+        const nowBad = h.neg ? d[h.id] === 'yes' : d[h.id] === 'no';
+        if (!nowBad && d.notes) d.notes[h.id] = '';
+        putDay(TODAY, d);
+        renderAll();
+      });
+      pair.appendChild(btn);
+    });
+
+    pill.append(left, pair);
+
+    const nw = el('div', `note-wrap${bad ? ' open' : ''}`);
+    const ni = el('input'); ni.type='text'; ni.className='note-in'; ni.placeholder='// Context...'; ni.value=note;
+    ni.addEventListener('input', () => {
+      const d = dayOf(TODAY);
+      if (!d.notes) d.notes = {};
+      d.notes[h.id] = ni.value;
+      putDay(TODAY, d);
+    });
+    nw.appendChild(ni);
+
+    wrap.append(pill, nw);
+    list.appendChild(wrap);
+  });
+}
+
+/* ─── RENDER CALORIES ────────────────────────────────────────────────── */
+function renderCal() {
+  const day    = dayOf(TODAY);
+  const c      = day.calories;
+  const note   = day.calNote || '';
+  const s      = calStreak();
+  const hasVal = c !== null && c !== undefined && c !== '';
+  const over   = hasVal && Number(c) > CAL_TARGET;
+  const under  = hasVal && Number(c) <= CAL_TARGET;
+  const inp    = document.getElementById('calIn');
+
+  document.getElementById('calPill').className = `cal-pill${under ? ' is-green' : over ? ' is-red' : ''}`;
+
+  if (document.activeElement !== inp) inp.value = hasVal ? c : '';
+
+  document.getElementById('calNoteWrap').className = `note-wrap${over ? ' open' : ''}`;
+  const ni = document.getElementById('calNoteIn');
+  if (document.activeElement !== ni) ni.value = note;
+
+  const sEl = document.getElementById('calStreak');
+  sEl.textContent = s.cnt > 0 ? s.cnt : '';
+  sEl.className = `streak-n${s.cnt > 0 ? (s.st==='g' ? ' sg' : ' sr') : ''}`;
+}
+
+/* ─── RENDER WEEKLY ──────────────────────────────────────────────────── */
+function renderWeek() {
+  const wk   = weekDays();
+  const grid = document.getElementById('wkGrid');
+  const box  = document.getElementById('weekBox');
+  grid.innerHTML = '';
+
+  let gDays = 0, rDays = 0;
+
+  wk.forEach(({key, n}, i) => {
+    const data    = dayOf(key);
+    const isToday = key === TODAY;
+    const isFuture = key > TODAY;
+
+    const col = el('div', `day-col${isToday ? ' today' : ''}`);
+
+    const dn = el('div', 'd-name'); dn.textContent = DAYS[i];
+    const dd = el('div', 'd-num');  dd.textContent = n;
+
+    const pills = el('div', 'mpills');
+    let dg = 0, dr = 0;
+
+    HABITS.forEach(h => {
+      const v  = data[h.id];
+      const pc = pillCls(v, h.neg);
+      if (pc === 'g') dg++; else if (pc === 'r') dr++;
+      const p = el('div', `mp${pc ? ' '+pc : ''}`);
+      if (pc === 'r') {
+        const txt = data.notes && data.notes[h.id];
+        if (txt) { p.dataset.tip = `${h.label}: ${txt}`; tip(p); }
+      }
+      pills.appendChild(p);
+    });
+
+    const cal = data.calories;
+    const cp  = calPillCls(cal);
+    if (cp === 'g') dg++; else if (cp === 'r') dr++;
+    const cpEl = el('div', `mp${cp ? ' '+cp : ''}`);
+    if (cp === 'r' && data.calNote) { cpEl.dataset.tip = `Calories: ${data.calNote}`; tip(cpEl); }
+    pills.appendChild(cpEl);
+
+    if (!isFuture && (dg + dr > 0)) {
+      if (dg > dr)      { col.classList.add('dg'); gDays++; }
+      else if (dr > dg) { col.classList.add('dr'); rDays++; }
+    }
+
+    col.append(dn, dd, pills);
+    grid.appendChild(col);
+  });
+
+  box.className = gDays > rDays ? 'week-box wg' : rDays > gDays ? 'week-box wr' : 'week-box';
+}
+
+/* ─── TOOLTIP ────────────────────────────────────────────────────────── */
+const ttEl = document.getElementById('tt');
+function tip(el) {
+  el.addEventListener('mouseenter', e => { ttEl.textContent = el.dataset.tip; ttEl.classList.add('on'); mv(e); });
+  el.addEventListener('mousemove', mv);
+  el.addEventListener('mouseleave', () => ttEl.classList.remove('on'));
+}
+function mv(e) { ttEl.style.left = (e.clientX+13)+'px'; ttEl.style.top = (e.clientY-30)+'px'; }
+
+/* ─── CALORIE EVENTS ─────────────────────────────────────────────────── */
+function bindCal() {
+  document.getElementById('calIn').addEventListener('input', function() {
+    const d = dayOf(TODAY);
+    const v = this.value === '' ? null : parseInt(this.value, 10);
+    d.calories = isNaN(v) ? null : v;
+    putDay(TODAY, d);
+    renderCal();
+    renderWeek();
+  });
+  document.getElementById('calNoteIn').addEventListener('input', function() {
+    const d = dayOf(TODAY); d.calNote = this.value; putDay(TODAY, d);
+  });
+  document.getElementById('calNoteIn').addEventListener('change', () => renderWeek());
+}
+
+/* ─── HEADER ─────────────────────────────────────────────────────────── */
+function renderHeader() {
+  document.getElementById('hdrDate').textContent =
+    new Date().toLocaleDateString('en-US', {weekday:'long',month:'short',day:'numeric'});
+}
+
+/* ─── UTIL ───────────────────────────────────────────────────────────── */
+function el(tag, cls) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  return e;
+}
+
+/* ─── INIT ───────────────────────────────────────────────────────────── */
+function renderAll() { renderHabits(); renderCal(); renderWeek(); }
+
+load();
+renderHeader();
+renderAll();
+bindCal();
+</script>
+</body>
+</html>
