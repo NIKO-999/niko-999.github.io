@@ -420,6 +420,40 @@ html, body {
 }
 .nav-back:hover { border-color: var(--border-md); color: var(--t2); }
 .nav-back svg { flex-shrink: 0; }
+
+/* ── MOBILE ─────────────────────────────────────────────────────── */
+@media (max-width: 480px) {
+  .app { padding: 36px 14px 72px; gap: 32px; }
+
+  .habit-pill,
+  .cal-pill {
+    padding: 13px 11px 13px 17px;
+  }
+
+  .habit-name,
+  .cal-name { font-size: 12.5px; }
+
+  /* Larger touch targets on mobile */
+  .tog {
+    padding: 8px 15px;
+    font-size: 11px;
+    min-height: 36px;
+  }
+
+  /* Prevent iOS zoom on input focus — must be ≥16px */
+  .note-in  { font-size: 16px; }
+  .cal-in   { font-size: 16px; }
+
+  .week-box { padding: 14px 10px 12px; }
+  .wk-grid  { gap: 3px; }
+
+  .d-name   { font-size: 7px; letter-spacing: 0.08em; }
+  .d-num    { font-size: 8px; }
+
+  .mp { height: 12px; }
+
+  .hdr-date { display: none; }
+}
 </style>
 </head>
 
