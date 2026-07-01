@@ -1557,7 +1557,12 @@ function animate() {
 }
 
 // ── RESIZE ────────────────────────────────────────────────────────────────
+// Mobile fix: opening the on-screen keyboard for the DOB edit input shrinks
+// window.innerHeight, which used to fire this same handler and re-fit the
+// camera/renderer to the shrunken viewport — visually "zooming"/distorting
+// the whole scene. Skip the refit entirely while that input is focused.
 window.addEventListener('resize', () => {
+  if (document.activeElement && document.activeElement.classList.contains('dob-edit')) return;
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -2792,8 +2797,24 @@ appendHint();
 
 })();
 
+// ── SHAREABLE DOB LINK ────────────────────────────────────────────────────
+// ?dob=YYYY-MM-DD (or any format js/calculator.js's parseDate accepts) loads
+// straight into that date's reading. After any successful date change — via
+// this param or the existing tap-to-edit flow — the URL is kept in sync so
+// copying the address bar always shares the exact reading on screen.
+;(function () {
+  const _prevShare = applyNewDate;
+  applyNewDate = function(dateStr) {
+    const ok = _prevShare(dateStr);
+    if (!ok) return false;
+    const iso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+    history.replaceState(null, '', `${location.pathname}?dob=${iso}`);
+    return true;
+  };
 
-
+  const paramDob = new URLSearchParams(location.search).get('dob');
+  if (paramDob) applyNewDate(paramDob); // silently falls back to the default on invalid input
+})();
 
 })();
 </script>
