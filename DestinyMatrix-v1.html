@@ -438,6 +438,44 @@
     }
     @keyframes lf { to { width: 100%; } }
 
+    /* Gate: shown instead of the progress bar when no ?dob= link was used —
+       blocks the reveal until a visitor enters their own date, so a bare
+       shared link never shows the page owner's own chart. */
+    #loader .l-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+    #loader .l-gate-hint {
+      font-size: 7px;
+      font-weight: 400;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(180,210,255,0.28);
+    }
+    #loader .l-gate-input {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(180,210,255,0.28);
+      color: rgba(255,255,255,0.75);
+      font-family: 'DM Mono', monospace;
+      font-size: 11px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-align: center;
+      width: 120px;
+      outline: none;
+      padding: 0 2px 4px;
+    }
+    #loader .l-gate-input::placeholder { color: rgba(255,255,255,0.18); }
+    #loader .l-gate-error {
+      font-size: 7px;
+      letter-spacing: 1.5px;
+      color: rgba(255,120,120,0.55);
+      height: 9px;
+    }
+
     /* ── Nebula veil ─────────────────────────────────── */
     #veil {
       position: fixed;
@@ -453,7 +491,12 @@
 <!-- Loader -->
 <div id="loader">
   <div class="l-word">Destiny Matrix</div>
-  <div class="l-track"><div class="l-fill"></div></div>
+  <div class="l-track" id="l-track"><div class="l-fill"></div></div>
+  <div class="l-gate" id="l-gate" style="display:none">
+    <input type="text" class="l-gate-input" id="l-gate-input" placeholder="DD/MM/YYYY" inputmode="numeric">
+    <div class="l-gate-hint">Enter your date of birth to reveal your matrix</div>
+    <div class="l-gate-error" id="l-gate-error"></div>
+  </div>
 </div>
 
 <!-- WebGL canvas -->
@@ -1562,7 +1605,8 @@ function animate() {
 // camera/renderer to the shrunken viewport — visually "zooming"/distorting
 // the whole scene. Skip the refit entirely while that input is focused.
 window.addEventListener('resize', () => {
-  if (document.activeElement && document.activeElement.classList.contains('dob-edit')) return;
+  const ae = document.activeElement;
+  if (ae && (ae.classList.contains('dob-edit') || ae.id === 'l-gate-input')) return;
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
@@ -1574,7 +1618,7 @@ gsap.set('#hud-back', { opacity: 0 });
 
 animate(); // start loop immediately (renders while loader is covering)
 
-setTimeout(() => {
+function revealScene() {
   gsap.to(loader, {
     opacity: 0, duration: 1.2,
     onComplete: () => { loader.style.display = 'none'; },
@@ -1583,7 +1627,53 @@ setTimeout(() => {
   tagEls.forEach((el, i) => {
     gsap.from(el, { opacity: 0, duration: 1.6, delay: 0.5 + i * 0.1 });
   });
-}, 1900);
+}
+
+// A link with ?dob= already carries a specific reading (the owner's own,
+// or one they generated for someone else) — boot normally; that date is
+// applied synchronously at the bottom of this script, well before the
+// timer below fires, so the reveal never shows the hardcoded default.
+// A bare link carries no date, and the hardcoded default IS the page
+// owner's real birthday — so it must never be revealed to visitors.
+// Swap the progress bar for a mandatory date-of-birth prompt instead,
+// and only reveal once someone submits their own valid date.
+const _bootParamDob = new URLSearchParams(location.search).get('dob');
+if (_bootParamDob) {
+  setTimeout(revealScene, 1900);
+} else {
+  document.getElementById('l-track').style.display = 'none';
+  const gate      = document.getElementById('l-gate');
+  const gateInput = document.getElementById('l-gate-input');
+  const gateError = document.getElementById('l-gate-error');
+  gate.style.display = 'flex';
+  gateInput.focus();
+
+  function submitGate() {
+    // js/calculator.js's parseDate doesn't range-check day/month (e.g.
+    // "99/99/9999" parses "successfully") — catch that here before it
+    // ever reaches applyNewDate.
+    const [d, m, y] = gateInput.value.trim().split('/').map(Number);
+    const valid = d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100;
+
+    if (valid && applyNewDate(gateInput.value.trim())) {
+      revealScene();
+    } else {
+      gateError.textContent = 'Please enter a valid date';
+      gsap.fromTo(gateInput, { x: -6 }, { x: 0, duration: 0.4, ease: 'elastic.out(1, 0.3)' });
+    }
+  }
+
+  gateInput.addEventListener('input', () => {
+    const digits = gateInput.value.replace(/\D/g, '').slice(0, 8);
+    let out = digits;
+    if (digits.length > 4)      out = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+    else if (digits.length > 2) out = digits.slice(0, 2) + '/' + digits.slice(2);
+    gateInput.value = out;
+    gateError.textContent = '';
+    if (digits.length === 8) submitGate(); // full DD/MM/YYYY typed — submit automatically
+  });
+  gateInput.addEventListener('keydown', e => { if (e.key === 'Enter') submitGate(); });
+}
 
 // ── DOB INPUT ─────────────────────────────────────────────────────────────
 const hudDate = document.getElementById('hud-date');
