@@ -1,0 +1,2801 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Destiny Matrix · 08.05.2002</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      overflow: hidden;
+      background: #01030d;
+      font-family: 'Inter', sans-serif;
+      cursor: none;
+    }
+
+    canvas#scene {
+      display: block;
+      position: fixed;
+      inset: 0;
+      touch-action: none;
+    }
+
+    /* ── Custom cursor ───────────────────────────────── */
+    #cursor {
+      position: fixed;
+      width: 5px; height: 5px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.88);
+      pointer-events: none;
+      z-index: 1000;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+      transition: width .18s, height .18s, background .18s, border .18s;
+    }
+    #cursor.on-star {
+      width: 32px; height: 32px;
+      background: transparent;
+      border: 1px solid rgba(255,255,255,0.36);
+    }
+
+    /* ── Node overlays ───────────────────────────────── */
+    #overlay {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+    .node-tag {
+      position: absolute;
+      text-align: center;
+      transform: translate(-50%, 0);
+      pointer-events: all;
+      cursor: none;
+    }
+    .node-tag .t-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 13px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.88);
+      letter-spacing: 1px;
+      line-height: 1;
+      text-shadow: 0 0 14px rgba(180,220,255,0.7);
+      transition: opacity .5s;
+    }
+    .node-tag .t-label {
+      font-size: 7.5px;
+      font-weight: 400;
+      letter-spacing: 2.8px;
+      text-transform: uppercase;
+      color: rgba(180,210,255,0.42);
+      margin-top: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    .node-tag.lit .t-label { opacity: 1; }
+
+    /* ── Minimal HUD ─────────────────────────────────── */
+    #hud {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 20;
+    }
+    #hud-label {
+      position: absolute;
+      top: 30px; left: 50%;
+      transform: translateX(-50%);
+      font-size: 8px;
+      font-weight: 500;
+      letter-spacing: 7px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      white-space: nowrap;
+    }
+    #hud-credit {
+      position: absolute;
+      bottom: 30px; left: 32px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.14);
+      white-space: nowrap;
+    }
+    #hud-date {
+      position: absolute;
+      bottom: 30px; right: 32px;
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.14);
+      pointer-events: all;
+      cursor: none;
+      transition: color .25s;
+    }
+    #hud-date:hover { color: rgba(255,255,255,0.38); }
+
+    /* DOB inline edit input */
+    #hud-date input.dob-edit {
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid rgba(180,210,255,0.28);
+      color: rgba(255,255,255,0.65);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-align: center;
+      width: 108px;
+      outline: none;
+      padding: 0 2px 3px;
+      cursor: text;
+    }
+    #hud-date input.dob-edit::placeholder { color: rgba(255,255,255,0.18); }
+    #hud-date .dob-hint {
+      display: block;
+      font-size: 7px;
+      letter-spacing: 2px;
+      color: rgba(180,210,255,0.22);
+      margin-top: 5px;
+      text-align: center;
+    }
+    .ic-view-toggle {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 18px;
+    }
+    .ic-view-btn {
+      font-family: 'DM Mono', monospace;
+      font-size: 7.5px;
+      font-weight: 300;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: rgba(180,210,255,0.32);
+      background: rgba(180,210,255,0.04);
+      border: 1px solid rgba(180,210,255,0.12);
+      border-radius: 2px;
+      padding: 5px 12px;
+      cursor: pointer;
+      pointer-events: all;
+      transition: color .2s, background .2s, border-color .2s;
+    }
+    .ic-view-btn:hover {
+      color: rgba(210,225,255,0.6);
+      border-color: rgba(180,210,255,0.22);
+    }
+    .ic-view-btn.active {
+      color: rgba(255,255,255,0.85);
+      background: rgba(180,210,255,0.14);
+      border-color: rgba(180,210,255,0.4);
+    }
+    .ic-correlation {
+      font-size: 11px;
+      font-weight: 300;
+      line-height: 1.75;
+      color: rgba(180,210,240,0.62);
+      letter-spacing: 0.1px;
+      padding: 12px 14px;
+      margin-bottom: 18px;
+      background: rgba(180,210,255,0.05);
+      border-left: 2px solid rgba(180,210,255,0.28);
+      border-radius: 0 2px 2px 0;
+    }
+    #hud-back {
+      position: absolute;
+      bottom: 30px; left: 32px;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      cursor: none;
+      pointer-events: all;
+      opacity: 0;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 2px;
+      transition: color .2s;
+    }
+    #hud-back:hover { color: rgba(255,255,255,0.55); }
+
+    /* ── Info card ───────────────────────────────────── */
+    #info-card {
+      position: fixed;
+      bottom: 60px;
+      left: 50%;
+      width: min(480px, 92vw);
+      max-height: 72vh;
+      overflow-y: auto;
+      background: rgba(4, 7, 22, 0.88);
+      border: 1px solid rgba(180,210,255,0.11);
+      border-radius: 2px;
+      padding: 22px 26px 24px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      z-index: 30;
+      pointer-events: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,210,255,0.12) transparent;
+    }
+    #info-card::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 28px; right: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(180,210,255,0.35), transparent);
+    }
+    .ic-arcana {
+      font-family: 'DM Mono', monospace;
+      font-size: 7.5px;
+      font-weight: 300;
+      letter-spacing: 3.5px;
+      text-transform: uppercase;
+      color: rgba(160,200,255,0.55);
+      margin-bottom: 9px;
+    }
+    .ic-name {
+      font-size: 19px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.92);
+      letter-spacing: 0.3px;
+      margin-bottom: 18px;
+    }
+    .ic-rule {
+      width: 22px;
+      height: 1px;
+      background: rgba(180,210,255,0.18);
+      margin-bottom: 16px;
+    }
+    .ic-desc {
+      font-size: 11.5px;
+      font-weight: 300;
+      line-height: 1.88;
+      color: rgba(180,210,240,0.5);
+      letter-spacing: 0.1px;
+    }
+    .ic-heading {
+      font-size: 13px;
+      font-weight: 400;
+      color: rgba(255,255,255,0.72);
+      letter-spacing: 0.2px;
+      margin-bottom: 18px;
+      line-height: 1.5;
+    }
+    .ic-sections { display: flex; flex-direction: column; gap: 0; }
+    .ic-section { margin-bottom: 16px; }
+    .ic-section:last-child { margin-bottom: 0; }
+    .ic-section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 6.5px;
+      font-weight: 300;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(160,200,255,0.38);
+      margin-bottom: 7px;
+    }
+    .ic-section-state { padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
+    .ic-state-label-positive { color: rgba(130,220,170,0.55); }
+    .ic-state-label-negative { color: rgba(230,130,130,0.55); }
+    .ic-section-body {
+      font-size: 11px;
+      font-weight: 300;
+      line-height: 1.95;
+      color: rgba(180,210,240,0.48);
+      letter-spacing: 0.1px;
+    }
+
+    /* ── Program banner ─────────────────────────────── */
+    #prog-banner {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%) translateY(105%);
+      width: min(720px, 96vw);
+      max-height: 54vh;
+      background: rgba(3, 5, 18, 0.93);
+      border: 1px solid rgba(180,210,255,0.1);
+      border-bottom: none;
+      border-radius: 16px 16px 0 0;
+      padding: 30px 38px 40px;
+      backdrop-filter: blur(26px);
+      -webkit-backdrop-filter: blur(26px);
+      overflow-y: auto;
+      z-index: 50;
+      pointer-events: none;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,210,255,0.15) transparent;
+    }
+    #prog-banner.open { pointer-events: all; }
+    .pb-full-section { margin-bottom: 28px; }
+    .pb-full-section:last-child { margin-bottom: 0; }
+    .pb-full-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px;
+      letter-spacing: 3px;
+      margin-bottom: 10px;
+      opacity: 0.75;
+    }
+    .pb-full-text {
+      font-size: 12px;
+      font-weight: 300;
+      line-height: 1.9;
+      color: rgba(190,215,245,0.60);
+      letter-spacing: 0.1px;
+    }
+    #prog-banner::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 36px; right: 36px; height: 1px;
+      background: linear-gradient(90deg, transparent, rgba(180,210,255,0.28), transparent);
+    }
+    .pb-close {
+      position: absolute;
+      top: 20px; right: 28px;
+      font-family: 'DM Mono', monospace;
+      font-size: 7px; letter-spacing: 2.5px;
+      color: rgba(255,255,255,0.22);
+      cursor: pointer;
+      transition: color .2s;
+      text-transform: uppercase;
+    }
+    .pb-close:hover { color: rgba(255,255,255,0.65); }
+    .pb-prog-name {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
+      color: rgba(180,210,255,0.32); margin-bottom: 16px;
+    }
+    .pb-section-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px; letter-spacing: 3.5px; text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .pb-heading {
+      font-size: 17px; font-weight: 300;
+      color: rgba(255,255,255,0.88);
+      letter-spacing: 0.2px; line-height: 1.5;
+      margin-bottom: 22px;
+    }
+    .pb-body {
+      font-size: 11.5px; font-weight: 300;
+      line-height: 2.05; color: rgba(180,210,240,0.5);
+      letter-spacing: 0.1px;
+    }
+    /* orbiting star labels */
+    .orbit-tag { pointer-events: none; }
+    .orbit-inner {
+      transform: scale(0.45);
+      transform-origin: center top;
+      opacity: 0;
+      transition: transform .3s cubic-bezier(.34,1.56,.64,1), opacity .25s ease;
+      will-change: transform, opacity;
+      text-align: center;
+    }
+    .orbit-tag.lit .orbit-inner { transform: scale(1); opacity: 1; }
+    .orbit-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 6.5px; letter-spacing: 2.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      text-shadow: 0 0 10px rgba(200,220,255,0.5);
+      white-space: nowrap;
+    }
+    /* planet name tags */
+    .planet-tag { pointer-events: none; }
+    .planet-inner {
+      transform: scale(0.5);
+      transform-origin: center top;
+      opacity: 0;
+      transition: transform .4s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
+      text-align: center;
+    }
+    .planet-tag.lit .planet-inner { transform: scale(1); opacity: 1; }
+    .planet-name {
+      font-size: 9px; font-family: 'DM Mono', monospace; font-weight: 300;
+      letter-spacing: 2.5px; text-transform: uppercase;
+      color: rgba(255,255,255,0.78);
+      text-shadow: 0 0 14px rgba(200,220,255,0.6);
+      white-space: nowrap;
+    }
+    .planet-nums {
+      font-size: 6.5px; font-family: 'DM Mono', monospace;
+      color: rgba(255,255,255,0.3); letter-spacing: 1.5px; margin-top: 4px;
+    }
+
+    /* ── Loader ──────────────────────────────────────── */
+    #loader {
+      position: fixed;
+      inset: 0;
+      background: #01030d;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 18px;
+      z-index: 200;
+    }
+    #loader .l-word {
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: rgba(180,210,255,0.38);
+    }
+    #loader .l-track {
+      width: 72px;
+      height: 1px;
+      background: rgba(180,210,255,0.1);
+      overflow: hidden;
+    }
+    #loader .l-fill {
+      height: 100%;
+      background: rgba(180,210,255,0.55);
+      animation: lf 1.6s cubic-bezier(.4,0,.2,1) forwards;
+      width: 0;
+    }
+    @keyframes lf { to { width: 100%; } }
+
+    /* ── Nebula veil ─────────────────────────────────── */
+    #veil {
+      position: fixed;
+      inset: 0;
+      z-index: 15;
+      pointer-events: none;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body>
+
+<!-- Loader -->
+<div id="loader">
+  <div class="l-word">Destiny Matrix</div>
+  <div class="l-track"><div class="l-fill"></div></div>
+</div>
+
+<!-- WebGL canvas -->
+<canvas id="scene"></canvas>
+
+<!-- Custom cursor -->
+<div id="cursor"></div>
+
+<!-- Node overlays (positioned via JS each frame) -->
+<div id="overlay"></div>
+
+<!-- HUD -->
+<div id="hud">
+  <div id="hud-label">Destiny Matrix</div>
+  <div id="hud-credit">CREATED BY NIKO</div>
+  <div id="hud-date">08 · 05 · 2002</div>
+  <div id="hud-back" id="hud-back">← Return</div>
+</div>
+
+<!-- Nebula veil — covers screen when flying into a star -->
+<div id="veil"></div>
+
+<!-- Program section banner (slides up from bottom when orbiting star clicked) -->
+<div id="prog-banner">
+  <div class="pb-close" id="pb-close">CLOSE ✕</div>
+  <div class="pb-prog-name" id="pb-prog-name"></div>
+  <div class="pb-section-label" id="pb-section-label"></div>
+  <div class="pb-heading" id="pb-heading"></div>
+  <div class="pb-body" id="pb-body"></div>
+</div>
+
+<!-- Info card -->
+<div id="info-card">
+  <div class="ic-arcana"  id="ic-arcana"></div>
+  <div class="ic-name"    id="ic-name"></div>
+  <div class="ic-rule"></div>
+  <div class="ic-view-toggle" id="ic-view-toggle">
+    <div class="ic-view-btn" id="ic-view-standard">Standard</div>
+    <div class="ic-view-btn" id="ic-view-law">Law</div>
+  </div>
+  <div class="ic-correlation" id="ic-correlation" style="display:none"></div>
+  <div class="ic-heading" id="ic-heading"></div>
+  <div class="ic-sections" id="ic-sections">
+    <div class="ic-section" id="ic-sec-why">
+      <div class="ic-section-label">The Why</div>
+      <div class="ic-section-body" id="ic-why"></div>
+    </div>
+    <div class="ic-section" id="ic-sec-shadow">
+      <div class="ic-section-label">The Shadow</div>
+      <div class="ic-section-body" id="ic-shadow"></div>
+    </div>
+    <div class="ic-section" id="ic-sec-path">
+      <div class="ic-section-label">The Path</div>
+      <div class="ic-section-body" id="ic-path"></div>
+    </div>
+    <div class="ic-section ic-section-state" id="ic-sec-positive">
+      <div class="ic-section-label ic-state-label-positive">Positive State</div>
+      <div class="ic-section-body" id="ic-positive"></div>
+    </div>
+    <div class="ic-section ic-section-state" id="ic-sec-negative">
+      <div class="ic-section-label ic-state-label-negative">Negative State</div>
+      <div class="ic-section-body" id="ic-negative"></div>
+    </div>
+  </div>
+  <div class="ic-desc" id="ic-desc" style="display:none"></div>
+</div>
+
+<script src="js/calculator.js"></script>
+<script src="js/arcana.js"></script>
+<script src="js/programs.js"></script>
+<script src="js/micro-content.js"></script>
+<script src="js/matrix-engine.js"></script>
+<script src="js/talent-content.js"></script>
+<script src="js/universal-law-content.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script>
+(function () {
+'use strict';
+
+// ── NODE DATA ──────────────────────────────────────────────────────────────
+const NODES = [
+  {
+    key: 'A', num: 8, arcana: 'VIII',
+    label: 'Core Character',
+    desc: 'Your Day of Birth — the psychological portrait you were born wearing. Arcana VIII, Justice: a persona built on truth, balance and the knowledge that every cause carries its effect.',
+    pos: new THREE.Vector3( -3.7,  0,   0 ),
+    twk: { spd: 1.1, off: 0.0 },
+    color: 0xFFCC44,   // warm gold — strength, karma, discipline
+    soul: false,
+  },
+  {
+    key: 'B', num: 5, arcana: 'V',
+    label: 'Sky Line',
+    desc: 'Your spiritual potential and divine talents — the channel that reaches upward. Arcana V, the Hierophant: sacred law, inherited wisdom and the gift of turning higher order into teaching.',
+    pos: new THREE.Vector3(  0,  3.7,   0 ),
+    twk: { spd: 0.9, off: 1.4 },
+    color: 0x44AAFF,   // electric blue — will, direction, clarity
+    soul: false,
+  },
+  {
+    key: 'C', num: 4, arcana: 'IV',
+    label: 'Earth Line',
+    desc: 'Your Year of Birth — material and financial potential. Arcana IV, the Emperor: structure, sovereignty and the power to build lasting wealth and protect what you create.',
+    pos: new THREE.Vector3(  3.7,  0,   0 ),
+    twk: { spd: 1.3, off: 2.8 },
+    color: 0x44FFAA,   // emerald — earth, roots, ancestral ground
+    soul: false,
+  },
+  {
+    key: 'D', num: 17, arcana: 'XVII',
+    label: 'Karmic Tail',
+    desc: 'Your karmic tail — the past-life lesson carried into this incarnation. Arcana XVII, the Star: talent once hidden or dimmed; the soul\'s task is to reclaim its visibility and let the light be seen.',
+    pos: new THREE.Vector3(  0, -3.7,   0 ),
+    twk: { spd: 1.0, off: 4.2 },
+    color: 0xCC66FF,   // soft violet — the Star, celestial vision, renewal
+    soul: false,
+  },
+  {
+    key: 'E', num: 7, arcana: 'VII',
+    label: 'Soul Center',
+    desc: 'Your comfort zone and soul center — the foundation everything else is built upon. Arcana VII, the Chariot: inner will and direction, the star you were born steering toward.',
+    pos: new THREE.Vector3(  0,    0,   0 ),
+    twk: { spd: 0.7, off: 3.5 },
+    color: 0xDDEEFF,   // cool white-blue — pure soul light
+    soul: true,
+  },
+];
+
+const EDGES = [
+  [0,1],[1,2],[2,3],[3,0],   // outer diamond
+  [0,2],[1,3],               // cross diagonals
+  [0,4],[1,4],[2,4],[3,4],   // spokes to center
+];
+
+// ── RENDERER ───────────────────────────────────────────────────────────────
+const canvas   = document.getElementById('scene');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: window.devicePixelRatio < 2 });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setClearColor(0x01030d, 1);
+
+const scene  = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.set(0, 0, 12);
+
+// ── TEXTURE BUILDERS ───────────────────────────────────────────────────────
+
+// Star sprite: glow + two diffraction spikes + hard core
+function makeNodeTex(size = 256) {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = size;
+  const cx = cv.getContext('2d');
+  const h = size / 2;
+
+  // Wide diffuse halo
+  const g1 = cx.createRadialGradient(h,h,0, h,h,h);
+  g1.addColorStop(0,   'rgba(210,228,255,0.22)');
+  g1.addColorStop(0.35,'rgba(190,215,255,0.07)');
+  g1.addColorStop(1,   'rgba(0,0,0,0)');
+  cx.fillStyle = g1; cx.fillRect(0,0,size,size);
+
+  // Inner glow
+  const g2 = cx.createRadialGradient(h,h,0, h,h,h*0.28);
+  g2.addColorStop(0,   'rgba(240,248,255,0.72)');
+  g2.addColorStop(0.6, 'rgba(200,225,255,0.18)');
+  g2.addColorStop(1,   'rgba(0,0,0,0)');
+  cx.fillStyle = g2; cx.fillRect(0,0,size,size);
+
+  // Horizontal diffraction spike
+  const sh = cx.createLinearGradient(0,h,size,h);
+  sh.addColorStop(0,    'rgba(255,255,255,0)');
+  sh.addColorStop(0.22, 'rgba(200,225,255,0.16)');
+  sh.addColorStop(0.5,  'rgba(255,255,255,0.88)');
+  sh.addColorStop(0.78, 'rgba(200,225,255,0.16)');
+  sh.addColorStop(1,    'rgba(255,255,255,0)');
+  cx.save();
+  cx.strokeStyle = sh; cx.lineWidth = 1.8;
+  cx.beginPath(); cx.moveTo(0,h); cx.lineTo(size,h); cx.stroke();
+  cx.restore();
+
+  // Vertical diffraction spike
+  const sv = cx.createLinearGradient(h,0,h,size);
+  sv.addColorStop(0,    'rgba(255,255,255,0)');
+  sv.addColorStop(0.22, 'rgba(200,225,255,0.16)');
+  sv.addColorStop(0.5,  'rgba(255,255,255,0.88)');
+  sv.addColorStop(0.78, 'rgba(200,225,255,0.16)');
+  sv.addColorStop(1,    'rgba(255,255,255,0)');
+  cx.save();
+  cx.strokeStyle = sv; cx.lineWidth = 1.8;
+  cx.beginPath(); cx.moveTo(h,0); cx.lineTo(h,size); cx.stroke();
+  cx.restore();
+
+  // Pinpoint core
+  const gc = cx.createRadialGradient(h,h,0, h,h, h*0.065);
+  gc.addColorStop(0, 'rgba(255,255,255,1)');
+  gc.addColorStop(1, 'rgba(255,255,255,0)');
+  cx.fillStyle = gc; cx.fillRect(0,0,size,size);
+
+  return new THREE.CanvasTexture(cv);
+}
+
+// Tiny background star sprite
+function makeBgTex() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 16;
+  const cx = cv.getContext('2d');
+  const g = cx.createRadialGradient(8,8,0, 8,8,6);
+  g.addColorStop(0,   'rgba(255,255,255,1)');
+  g.addColorStop(0.45,'rgba(215,232,255,0.5)');
+  g.addColorStop(1,   'rgba(0,0,0,0)');
+  cx.fillStyle = g; cx.fillRect(0,0,16,16);
+  return new THREE.CanvasTexture(cv);
+}
+
+// Nebula dust cloud sprite
+function makeDustTex() {
+  const cv = document.createElement('canvas');
+  cv.width = cv.height = 256;
+  const cx = cv.getContext('2d');
+  const g = cx.createRadialGradient(128,128,0, 128,128,128);
+  g.addColorStop(0,   'rgba(100,130,200,0.10)');
+  g.addColorStop(0.45,'rgba(60, 90,170,0.04)');
+  g.addColorStop(1,   'rgba(0,0,0,0)');
+  cx.fillStyle = g; cx.fillRect(0,0,256,256);
+  return new THREE.CanvasTexture(cv);
+}
+
+const nodeTex  = makeNodeTex(256);
+const bgTex    = makeBgTex();
+const dustTex  = makeDustTex();
+
+// ── STAR FIELD (background, inside a rotating group) ─────────────────────
+const starGroup = new THREE.Group();
+scene.add(starGroup);
+
+(function buildStars() {
+  const N = 6500;
+  const pos  = new Float32Array(N * 3);
+  const col  = new Float32Array(N * 3);
+  const size = new Float32Array(N);
+
+  for (let i = 0; i < N; i++) {
+    const r   = 65 + Math.random() * 45;
+    const th  = Math.random() * Math.PI * 2;
+    const ph  = Math.acos(2 * Math.random() - 1);
+    pos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+    pos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+    pos[i*3+2] = r * Math.cos(ph);
+
+    // Colour distribution: blue-white majority, rare warm
+    const t = Math.random();
+    if (t < 0.65) {                         // blue-white
+      col[i*3] = 0.82 + Math.random()*0.18;
+      col[i*3+1] = 0.88 + Math.random()*0.12;
+      col[i*3+2] = 1.0;
+    } else if (t < 0.88) {                  // pure white
+      const v = 0.90 + Math.random()*0.10;
+      col[i*3] = col[i*3+1] = col[i*3+2] = v;
+    } else {                                 // rare warm yellow
+      col[i*3] = 1.0;
+      col[i*3+1] = 0.90 + Math.random()*0.08;
+      col[i*3+2] = 0.70 + Math.random()*0.12;
+    }
+
+    // Most stars sub-pixel; a few slightly larger
+    size[i] = Math.random() < 0.03 ? 2.0
+            : Math.random() < 0.14 ? 1.2
+            : 0.55 + Math.random() * 0.35;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('aSize',    new THREE.BufferAttribute(size, 1));
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTex: { value: bgTex } },
+    vertexShader: `
+      attribute float aSize;
+      attribute vec3 color;
+      varying vec3 vColor;
+      void main() {
+        vColor = color;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uTex;
+      varying vec3 vColor;
+      void main() {
+        vec4 t = texture2D(uTex, gl_PointCoord);
+        gl_FragColor = vec4(vColor, t.a) * t.r;
+        if (gl_FragColor.a < 0.02) discard;
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: THREE.AdditiveBlending,
+  });
+
+  starGroup.add(new THREE.Points(geo, mat));
+})();
+
+// ── DUST CLOUDS ───────────────────────────────────────────────────────────
+(function buildDust() {
+  const configs = [
+    { p: [-32, 18, -55], s: 72, o: 0.45 },
+    { p: [ 42,-14, -62], s: 80, o: 0.35 },
+    { p: [-15,-28, -58], s: 90, o: 0.30 },
+    { p: [ 20, 32, -48], s: 68, o: 0.40 },
+    { p: [  5,-18, -70], s: 85, o: 0.28 },
+  ];
+  configs.forEach(c => {
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: dustTex, transparent: true,
+      blending: THREE.AdditiveBlending, depthWrite: false,
+      opacity: c.o,
+    }));
+    sp.position.set(...c.p);
+    sp.scale.set(c.s, c.s, 1);
+    starGroup.add(sp);
+  });
+})();
+
+// ── AMBIENT EFFECTS ───────────────────────────────────────────────────────
+;(function buildAmbient() {
+
+  // ── 1. ELECTRON ORBITS ─────────────────────────────────────────────────
+  const ORBS = [
+    { color: 0xFFCC44, tilt: new THREE.Euler(1.20,  0,  0.40), speed: 0.28 },
+    { color: 0x44AAFF, tilt: new THREE.Euler(0.55,  0, -1.10), speed: 0.21 },
+    { color: 0xCC66FF, tilt: new THREE.Euler(0.00, 1.05, 0.60), speed: 0.17 },
+  ];
+  const ORBIT_R = 5.5;
+  const _electronData = [];
+
+  ORBS.forEach(orb => {
+    const tiltMtx  = new THREE.Matrix4().makeRotationFromEuler(orb.tilt);
+
+    // Faint orbit path line — thin gray
+    const pts = [];
+    for (let i = 0; i <= 64; i++) {
+      const a = (i / 64) * Math.PI * 2;
+      const v = new THREE.Vector3(Math.cos(a) * ORBIT_R, Math.sin(a) * ORBIT_R, 0);
+      v.applyMatrix4(tiltMtx);
+      pts.push(v);
+    }
+    const lineGeoOrb = new THREE.BufferGeometry().setFromPoints(pts);
+    const lineMtl    = new THREE.LineBasicMaterial({
+      color: 0x888888, transparent: true, opacity: 0.18, depthWrite: false,
+    });
+    const orbitLine = new THREE.Line(lineGeoOrb, lineMtl);
+    orbitLine.frustumCulled = false;
+    scene.add(orbitLine);
+
+    // 5 electrons per ring — tiny, black with white core using qTex-style texture
+    const electrons = [];
+    for (let k = 0; k < 5; k++) {
+      const phase = (k / 5) * Math.PI * 2;
+
+      const dot = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: nodeTex, color: 0xffffff,
+        transparent: true, blending: THREE.NormalBlending,
+        depthWrite: false, opacity: 0.9,
+      }));
+      dot.scale.set(0.18, 0.18, 1);
+      dot.frustumCulled = false;
+      scene.add(dot);
+
+      electrons.push({ dot, halo: null, phase });
+    }
+    _electronData.push({ tiltMtx, speed: orb.speed, electrons });
+  });
+
+  // ── 2. QUANTUM PARTICLE FIELD ──────────────────────────────────────────
+  // Texture: dark ring with bright white core
+  const qCv = document.createElement('canvas');
+  qCv.width = qCv.height = 64;
+  const qCtx = qCv.getContext('2d');
+  const qH = 32;
+  // Dark halo ring
+  const qRing = qCtx.createRadialGradient(qH,qH, qH*0.18, qH,qH, qH*0.9);
+  qRing.addColorStop(0,   'rgba(0,0,0,0)');
+  qRing.addColorStop(0.25,'rgba(0,0,0,0.92)');
+  qRing.addColorStop(0.65,'rgba(0,0,0,0.75)');
+  qRing.addColorStop(1,   'rgba(0,0,0,0)');
+  qCtx.fillStyle = qRing; qCtx.fillRect(0,0,64,64);
+  // White core
+  const qCore = qCtx.createRadialGradient(qH,qH, 0, qH,qH, qH*0.22);
+  qCore.addColorStop(0,   'rgba(255,255,255,1)');
+  qCore.addColorStop(0.55,'rgba(220,235,255,0.85)');
+  qCore.addColorStop(1,   'rgba(180,210,255,0)');
+  qCtx.fillStyle = qCore; qCtx.fillRect(0,0,64,64);
+  const qTex = new THREE.CanvasTexture(qCv);
+
+  const QN    = 300;
+  const qPos  = new Float32Array(QN * 3);
+  const qVel  = new Float32Array(QN * 3);
+  const qSize = new Float32Array(QN);
+
+  for (let i = 0; i < QN; i++) {
+    const r  = 4 + Math.random() * 10;
+    const th = Math.random() * Math.PI * 2;
+    const ph = Math.acos(2 * Math.random() - 1);
+    qPos[i*3]   = r * Math.sin(ph) * Math.cos(th);
+    qPos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
+    qPos[i*3+2] = r * Math.cos(ph);
+
+    const vr  = 0.004 + Math.random() * 0.006;
+    const vth = Math.random() * Math.PI * 2;
+    const vph = Math.acos(2 * Math.random() - 1);
+    qVel[i*3]   = vr * Math.sin(vph) * Math.cos(vth);
+    qVel[i*3+1] = vr * Math.sin(vph) * Math.sin(vth);
+    qVel[i*3+2] = vr * Math.cos(vph);
+
+    qSize[i] = 3.0 + Math.random() * 2.5;  // small but visible
+  }
+
+  const qGeo = new THREE.BufferGeometry();
+  qGeo.setAttribute('position', new THREE.BufferAttribute(qPos, 3));
+  qGeo.setAttribute('aSize',    new THREE.BufferAttribute(qSize, 1));
+
+  const qMat = new THREE.ShaderMaterial({
+    uniforms: { uTex: { value: qTex } },
+    vertexShader: `
+      attribute float aSize;
+      void main() {
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uTex;
+      void main() {
+        vec4 t = texture2D(uTex, gl_PointCoord);
+        if (t.a < 0.01) discard;
+        gl_FragColor = t;
+      }
+    `,
+    transparent: true, depthWrite: false,
+    blending: THREE.NormalBlending,
+  });
+  const qPoints = new THREE.Points(qGeo, qMat);
+  scene.add(qPoints);
+
+  // ── 3. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
+  const pulsePts = [];
+  for (let i = 0; i <= 64; i++) {
+    const a = (i / 64) * Math.PI * 2;
+    pulsePts.push(new THREE.Vector3(Math.cos(a), Math.sin(a), 0));
+  }
+  const pulseGeo = new THREE.BufferGeometry().setFromPoints(pulsePts);
+  const pulseMat = new THREE.LineBasicMaterial({
+    color: 0xaaaaaa, transparent: true, opacity: 0, depthWrite: false,
+  });
+  const pulseLine = new THREE.Line(pulseGeo, pulseMat);
+  pulseLine.scale.set(0.5, 0.5, 1);
+  scene.add(pulseLine);
+
+  function firePulse() {
+    gsap.set(pulseLine.scale, { x:0.5, y:0.5, z:1 });
+    gsap.set(pulseMat, { opacity:0 });
+    gsap.to(pulseLine.scale, { x:7, y:7, z:1, duration:2.8, ease:'power1.out' });
+    gsap.to(pulseMat,        { opacity:0.80, duration:0.25,
+      onComplete() { gsap.to(pulseMat, { opacity:0, duration:2.5 }); }
+    });
+    gsap.delayedCall(4.2, firePulse);
+  }
+  gsap.delayedCall(1.5, firePulse);
+
+  // ── 4. SHOOTING STARS ─────────────────────────────────────────────────
+  const shootGeo = new THREE.BufferGeometry();
+  const shootPts = new Float32Array(6); // 2 points × 3
+  shootGeo.setAttribute('position', new THREE.BufferAttribute(shootPts, 3));
+  const shootMat = new THREE.LineBasicMaterial({
+    color: 0xddeeff, transparent: true, opacity: 0, depthWrite: false,
+  });
+  const shootLine = new THREE.Line(shootGeo, shootMat);
+  scene.add(shootLine);
+
+  function fireShoot() {
+    // Random point on a sphere shell at radius 40, biased toward visible area
+    const th = (Math.random() - 0.5) * Math.PI * 0.9;
+    const ph = (Math.random() - 0.5) * Math.PI * 0.5;
+    const r  = 40;
+    const sx = r * Math.cos(ph) * Math.cos(th);
+    const sy = r * Math.sin(ph);
+    const sz = r * Math.cos(ph) * Math.sin(th) - 20;
+    // Direction: across the field of view
+    const dx = (Math.random() - 0.5) * 14;
+    const dy = (Math.random() - 0.5) * 10;
+    const dz = -3;
+
+    const pos = shootGeo.attributes.position.array;
+    pos[0]=sx;   pos[1]=sy;   pos[2]=sz;
+    pos[3]=sx;   pos[4]=sy;   pos[5]=sz;
+    shootGeo.attributes.position.needsUpdate = true;
+
+    gsap.set(shootMat, { opacity:0 });
+    // Animate head
+    const head = { x:sx, y:sy, z:sz };
+    const tail = { x:sx, y:sy, z:sz };
+    gsap.to(head, { x:sx+dx, y:sy+dy, z:sz+dz, duration:0.35, ease:'power1.in',
+      onUpdate() {
+        pos[3]=head.x; pos[4]=head.y; pos[5]=head.z;
+        shootGeo.attributes.position.needsUpdate = true;
+      },
+    });
+    gsap.to(tail, { x:sx+dx*0.7, y:sy+dy*0.7, z:sz+dz*0.7, duration:0.35, delay:0.08, ease:'power1.in',
+      onUpdate() {
+        pos[0]=tail.x; pos[1]=tail.y; pos[2]=tail.z;
+        shootGeo.attributes.position.needsUpdate = true;
+      },
+    });
+    gsap.to(shootMat, { opacity:0.85, duration:0.08,
+      onComplete() { gsap.to(shootMat, { opacity:0, duration:0.28, delay:0.08 }); }
+    });
+
+    // Schedule next
+    gsap.delayedCall(12 + Math.random() * 10, fireShoot);
+  }
+  gsap.delayedCall(8 + Math.random() * 6, fireShoot);
+
+  // ── Expose update hook for animate() ──────────────────────────────────
+  window._ambientUpdate = function(t) {
+    // Electrons
+    _electronData.forEach(orb => {
+      orb.electrons.forEach(e => {
+        const a   = t * orb.speed + e.phase;
+        const loc = new THREE.Vector3(Math.cos(a)*ORBIT_R, Math.sin(a)*ORBIT_R, 0);
+        loc.applyMatrix4(orb.tiltMtx);
+        e.dot.position.copy(loc);
+        if (e.halo) e.halo.position.copy(loc);
+      });
+    });
+
+    // Quantum particles
+    const pa = qGeo.attributes.position.array;
+    for (let i = 0; i < QN; i++) {
+      pa[i*3]   += qVel[i*3];
+      pa[i*3+1] += qVel[i*3+1];
+      pa[i*3+2] += qVel[i*3+2];
+      // Wrap if too far
+      const dx = pa[i*3], dy = pa[i*3+1], dz = pa[i*3+2];
+      if (dx*dx + dy*dy + dz*dz > 18*18) {
+        const rr = 4 + Math.random() * 3;
+        const th2 = Math.random() * Math.PI * 2;
+        const ph2 = Math.acos(2 * Math.random() - 1);
+        pa[i*3]   = rr * Math.sin(ph2) * Math.cos(th2);
+        pa[i*3+1] = rr * Math.sin(ph2) * Math.sin(th2);
+        pa[i*3+2] = rr * Math.cos(ph2);
+      }
+    }
+    qGeo.attributes.position.needsUpdate = true;
+  };
+
+})();
+
+// ── CONSTELLATION LINES ───────────────────────────────────────────────────
+const lineVerts = [];
+EDGES.forEach(([a, b]) => {
+  const pa = NODES[a].pos, pb = NODES[b].pos;
+  lineVerts.push(pa.x, pa.y, pa.z, pb.x, pb.y, pb.z);
+});
+const lineGeo = new THREE.BufferGeometry();
+lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts), 3));
+const lineMat = new THREE.LineBasicMaterial({
+  color: 0xb0c8f0,
+  opacity: 0.11,
+  transparent: true,
+});
+const constellLines = new THREE.LineSegments(lineGeo, lineMat);
+scene.add(constellLines);
+
+// Subtle concentric rings around the soul node (E) in the Z plane
+[1.4, 2.9, 4.8].forEach((r, i) => {
+  const pts = [];
+  for (let a = 0; a <= 128; a++) {
+    const ang = (a / 128) * Math.PI * 2;
+    pts.push(new THREE.Vector3(Math.cos(ang)*r, Math.sin(ang)*r, 0));
+  }
+  const rGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const rMat = new THREE.LineBasicMaterial({
+    color: 0x6070a0,
+    opacity: [0.055, 0.040, 0.025][i],
+    transparent: true,
+  });
+  scene.add(new THREE.Line(rGeo, rMat));
+});
+
+// ── NODE SPRITES + HIT SPHERES ────────────────────────────────────────────
+const nodeSprites  = [];
+const hitMeshes    = [];
+
+NODES.forEach((data, i) => {
+  const sz = data.soul ? 0.70 : 0.48;
+
+  const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: nodeTex,
+    color: new THREE.Color(data.color),
+    transparent: true,
+    blending: THREE.AdditiveBlending,
+    depthWrite: false,
+  }));
+  sp.position.copy(data.pos);
+  sp.scale.set(sz, sz, 1);
+  scene.add(sp);
+  nodeSprites.push(sp);
+  data.sprite   = sp;
+  data.baseScale = sz;
+
+  // Invisible sphere for raycasting
+  const hit = new THREE.Mesh(
+    new THREE.SphereGeometry(0.55, 8, 8),
+    new THREE.MeshBasicMaterial({ visible: false }),
+  );
+  hit.position.copy(data.pos);
+  hit.userData.nodeIndex = i;
+  scene.add(hit);
+  hitMeshes.push(hit);
+});
+
+// ── NODE LABEL OVERLAYS (HTML) ────────────────────────────────────────────
+const overlayEl = document.getElementById('overlay');
+const tagEls    = NODES.map((data, i) => {
+  const d = document.createElement('div');
+  d.className   = 'node-tag';
+  d.dataset.idx = i;
+  d.innerHTML   = `<div class="t-num">${data.num}</div><div class="t-label">${data.label}</div>`;
+  overlayEl.appendChild(d);
+  return d;
+});
+
+// ── CAMERA STATE ──────────────────────────────────────────────────────────
+const baseCamZ  = 12;
+let   baseCamX  = 0;
+let   baseCamY  = 0;
+let   offX = 0, offY = 0;
+let   tgtX = 0, tgtY = 0;
+
+// Touch-only drag-to-pan (index.html mobile fix) — lets narrow/portrait
+// viewports reveal content clipped by the fixed-FOV frustum without
+// shrinking the diagram. Persists until returnToMap() recenters it.
+let   panX = 0, panY = 0;
+const PAN_CLAMP = 4.5; // world units; keeps the diagram from dragging fully off-screen
+let   wasDragging = false;
+
+// Touch-only pinch-to-zoom — dollies the camera along Z between fingers.
+let   camZoom = baseCamZ;
+const ZOOM_MIN = 6, ZOOM_MAX = 22;
+
+let isFlying  = false;
+let activeIdx = -1;
+let hoveredIdx = -1;
+
+// ── UNIVERSAL LAW DATA MATRIX (Part 14/15) ──────────────────────────────
+// Each arcana has exactly one curated law match (DUniversalLawContent.getMatch),
+// surfaced via a simple Standard/Law toggle in the info-card — no picker.
+const LAW_LABELS = {
+  mentalism: 'Mentalism', correspondence: 'Correspondence', vibration: 'Vibration',
+  causeEffect: 'Cause & Effect', polarity: 'Polarity', attraction: 'Attraction',
+  divineOneness: 'Divine Oneness', action: 'Action', compensation: 'Compensation',
+  perpetualTransmutation: 'Transmutation',
+};
+let currentMatrixView = 'STANDARD'; // 'STANDARD' | 'LAW'
+
+function renderViewToggle() {
+  document.getElementById('ic-view-standard').classList.toggle('active', currentMatrixView === 'STANDARD');
+  document.getElementById('ic-view-law').classList.toggle('active', currentMatrixView === 'LAW');
+}
+document.getElementById('ic-view-standard').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentMatrixView = 'STANDARD';
+  if (activeIdx !== -1) showCard(activeIdx);
+});
+document.getElementById('ic-view-law').addEventListener('click', (e) => {
+  e.stopPropagation();
+  currentMatrixView = 'LAW';
+  if (activeIdx !== -1) showCard(activeIdx);
+});
+
+// Shared cross-tier zoom guard. The core arcana, program-star, and talent-star
+// click handlers each live in their own IIFE with a private "which one of mine
+// is zoomed" flag (_activeProgStar / _activeTalentStar) — none of them know
+// about the others. Without this, a click meant to close one tier's zoom can
+// hit another tier's invisible raycast target mid-transition and kick off a
+// second, competing camera fly-in. Every flyTo*/return function must set this
+// on entry to a zoom and clear it on return; every raycast-and-fly branch must
+// bail if this is already set.
+let activeExtraStar = null; // { tier: 'prog' | 'talent', key }
+
+// ── RAYCASTER ─────────────────────────────────────────────────────────────
+const raycaster = new THREE.Raycaster();
+const mouse2D   = new THREE.Vector2(-999, -999);
+const cursor    = document.getElementById('cursor');
+
+// Unified pointer input — mouse hover keeps the existing parallax feel;
+// touch drag pans the camera, and a second touch pinches to zoom (mobile
+// fix: fixed-FOV frustum clips side content on narrow/portrait viewports,
+// so touch users can drag/pinch to reveal or scale it rather than the
+// diagram being shrunk to fit).
+const activeTouches = new Map(); // pointerId → {x, y}
+let _dragStartX = 0, _dragStartY = 0;
+let _dragStartPanX = 0, _dragStartPanY = 0;
+let _dragDistance = 0;
+
+let _pinchStartDist = 0;
+let _pinchStartZoom = baseCamZ;
+
+function _pxToWorld() {
+  // World-units-per-pixel is identical on both axes for a standard
+  // (non-anamorphic) perspective camera — see PAN_CLAMP comment above.
+  const halfH = camZoom * Math.tan(THREE.MathUtils.degToRad(25));
+  return (2 * halfH) / window.innerHeight;
+}
+
+function _touchDist() {
+  const pts = [...activeTouches.values()];
+  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+}
+
+document.addEventListener('pointermove', e => {
+  cursor.style.left = e.clientX + 'px';
+  cursor.style.top  = e.clientY  + 'px';
+
+  // Update raycaster mouse (needed for both mouse hover and touch tap hit-testing)
+  mouse2D.set(
+    (e.clientX / window.innerWidth)  * 2 - 1,
+   -(e.clientY / window.innerHeight) * 2 + 1,
+  );
+
+  if (e.pointerType === 'touch') {
+    if (!activeTouches.has(e.pointerId)) return;
+    activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activeTouches.size >= 2) {
+      // Pinch-zoom: pan is frozen while two fingers are down.
+      const dist  = _touchDist();
+      const scale = dist / _pinchStartDist;
+      camZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, _pinchStartZoom / scale));
+      wasDragging = true;
+      return;
+    }
+
+    // Single finger: existing pan behavior.
+    const dxPx = e.clientX - _dragStartX;
+    const dyPx = e.clientY - _dragStartY;
+    _dragDistance = Math.hypot(dxPx, dyPx);
+    if (_dragDistance > 6) wasDragging = true;
+
+    const pxToWorld = _pxToWorld();
+    panX = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanX - dxPx * pxToWorld));
+    panY = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanY + dyPx * pxToWorld));
+    return;
+  }
+
+  // Mouse (non-touch): existing hover-parallax target, untouched.
+  tgtX = (e.clientX / window.innerWidth  - 0.5) *  2.0;
+  tgtY = (e.clientY / window.innerHeight - 0.5) * -1.3;
+});
+
+document.addEventListener('pointerdown', e => {
+  if (e.pointerType !== 'touch') return;
+
+  // A tap with zero movement never fires pointermove, so mouse2D must be
+  // set here too — otherwise the raycaster hit-tests against wherever the
+  // last drag happened to end instead of this tap's actual position.
+  mouse2D.set(
+    (e.clientX / window.innerWidth)  * 2 - 1,
+   -(e.clientY / window.innerHeight) * 2 + 1,
+  );
+
+  wasDragging = false; // each new gesture starts clean — don't let a stale drag eat this tap
+  if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+
+  activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activeTouches.size === 2) {
+    _pinchStartDist = _touchDist();
+    _pinchStartZoom = camZoom;
+  } else if (activeTouches.size === 1) {
+    _dragStartX     = e.clientX;
+    _dragStartY     = e.clientY;
+    _dragStartPanX  = panX;
+    _dragStartPanY  = panY;
+    _dragDistance   = 0;
+  }
+});
+
+document.addEventListener('pointerup', e => {
+  activeTouches.delete(e.pointerId);
+  if (activeTouches.size === 1) {
+    // Dropped from a pinch (or a stray second touch) back to one finger —
+    // resume panning from here instead of jumping to the old baseline.
+    const [remaining] = activeTouches.values();
+    _dragStartX    = remaining.x;
+    _dragStartY    = remaining.y;
+    _dragStartPanX = panX;
+    _dragStartPanY = panY;
+    _dragDistance  = 0;
+  }
+});
+
+// ── CLICK ─────────────────────────────────────────────────────────────────
+canvas.addEventListener('click', () => {
+  if (wasDragging) { wasDragging = false; return; } // pan gesture, not a tap
+
+  if (isFlying) return;
+
+  if (activeIdx !== -1) {
+    // Any click while zoomed into an arcana → return to map
+    returnToMap();
+    return;
+  }
+
+  // A program or talent star is mid-transition or zoomed — that tier's own
+  // click handler owns this click; don't start a competing arcana fly-in.
+  if (activeExtraStar !== null) return;
+
+  raycaster.setFromCamera(mouse2D, camera);
+  const hits = raycaster.intersectObjects(hitMeshes);
+  const clickedIdx = hits.length > 0 ? hits[0].object.userData.nodeIndex : -1;
+  if (clickedIdx !== -1) flyTo(clickedIdx);
+});
+
+document.getElementById('hud-back').addEventListener('click', returnToMap);
+
+// ── FLY TO NODE ───────────────────────────────────────────────────────────
+const veil = document.getElementById('veil');
+
+function flyTo(idx) {
+  if (isFlying) return;
+  isFlying  = true;
+  activeIdx = idx;
+  const data = NODES[idx];
+  const tp   = data.pos;
+
+  // Fade all tags + lines out
+  tagEls.forEach(el => gsap.to(el, { opacity: 0, duration: 0.5 }));
+  gsap.to(lineMat, { opacity: 0, duration: 0.7 });
+
+  // Camera flies DIRECTLY at the node then blasts 12 units past it
+  const overshoot = 12;
+  const dir = tp.clone().normalize();
+  const destX = tp.x + dir.x * overshoot;
+  const destY = tp.y + dir.y * overshoot;
+  const destZ = tp.z - overshoot; // always travel inward on Z too
+
+  // Phase 1 (0 → 1.9s): approach, camera accelerates toward the star
+  gsap.to(camera.position, {
+    x: tp.x, y: tp.y, z: tp.z,
+    duration: 1.9,
+    ease: 'power2.in',
+    onUpdate() { camera.lookAt(tp.x, tp.y, tp.z); },
+    onComplete() {
+      // Phase 2 (1.9 → 2.6s): blast through into the nebula
+      gsap.to(camera.position, {
+        x: destX, y: destY, z: destZ,
+        duration: 0.7,
+        ease: 'power3.out',
+        onUpdate() { camera.lookAt(tp.x, tp.y, tp.z); },
+        onComplete() {
+          isFlying = false;
+          showCard(idx);
+          gsap.to('#hud-back', { opacity: 1, duration: 0.6 });
+        },
+      });
+    },
+  });
+
+  baseCamX = destX;
+  baseCamY = destY;
+
+  // Star blooms huge as camera closes in, hides after pass-through
+  gsap.to(data.sprite.scale, {
+    x: data.baseScale * 22,
+    y: data.baseScale * 22,
+    duration: 1.9,
+    ease: 'power2.in',
+  });
+  gsap.to(data.sprite.material, {
+    opacity: 0,
+    duration: 0.25,
+    delay: 1.75,
+    onComplete() { data.sprite.visible = false; },
+  });
+
+  // Veil: flash brilliant white at the moment of entry, then settle to node colour
+  const hex = '#' + new THREE.Color(data.color).getHexString();
+  veil.style.background = [
+    `radial-gradient(ellipse at center,`,
+    `  #ffffff 0%,`,
+    `  ${hex}cc 18%,`,
+    `  ${hex}55 50%,`,
+    `  transparent 80%)`,
+  ].join('');
+  gsap.to(veil, { opacity: 1, duration: 0.18, delay: 1.82,
+    onComplete() {
+      // Dim to a soft ambient nebula glow
+      veil.style.background = [
+        `radial-gradient(ellipse at center,`,
+        `  ${hex}22 0%,`,
+        `  ${hex}10 45%,`,
+        `  transparent 75%)`,
+      ].join('');
+      gsap.to(veil, { opacity: 1, duration: 0.6 });
+    },
+  });
+}
+
+function returnToMap(onDone) {
+  if (isFlying) return;
+  isFlying = true;
+  hideCard();
+  currentMatrixView = 'STANDARD'; // always reopen fresh cards on Standard, never sticky
+  panX = 0; panY = 0; camZoom = baseCamZ; // recenter pan/zoom on every return to the map
+  gsap.to('#hud-back', { opacity: 0, duration: 0.25 });
+  // Clear any hover highlight immediately
+  if (hoveredIdx !== -1) {
+    tagEls[hoveredIdx].classList.remove('lit');
+    hoveredIdx = -1;
+  }
+
+  const prevIdx = activeIdx;
+  activeIdx = -1;
+
+  // Fade veil out
+  gsap.to(veil, { opacity: 0, duration: 1.0 });
+
+  // Restore previous star before flying back
+  if (prevIdx !== -1) {
+    const d = NODES[prevIdx];
+    d.sprite.visible = true;
+    d.sprite.material.opacity = 0;
+    gsap.to(d.sprite.scale, { x: d.baseScale, y: d.baseScale, duration: 0 });
+    gsap.to(d.sprite.material, { opacity: 0.78, duration: 1.0, delay: 0.3 });
+  }
+
+  gsap.to(camera.position, {
+    x: 0, y: 0, z: baseCamZ,
+    duration: 2.0, ease: 'power2.inOut',
+    onUpdate() { camera.lookAt(0, 0, 0); },
+    onComplete() {
+      isFlying = false;
+      baseCamX = 0;
+      baseCamY = 0;
+      tagEls.forEach(el => gsap.to(el, { opacity: 1, duration: 0.5 }));
+      gsap.to(lineMat, { opacity: 0.11, duration: 1.0 });
+      if (onDone) onDone();
+    },
+  });
+}
+
+// ── INFO CARD ─────────────────────────────────────────────────────────────
+const infoCard = document.getElementById('info-card');
+gsap.set(infoCard, { xPercent: -50, y: 24, opacity: 0, pointerEvents: 'none' });
+
+function showCard(idx) {
+  const d   = NODES[idx];
+
+  renderViewToggle();
+
+  if (currentMatrixView === 'LAW') {
+    const match = window.DUniversalLawContent && DUniversalLawContent.getMatch(d.num);
+    if (match) {
+      document.getElementById('ic-arcana').textContent = `Law · ${LAW_LABELS[match.lawKey]}`;
+      document.getElementById('ic-name').textContent   = d.label;
+      document.getElementById('ic-correlation').textContent = match.correlation;
+      document.getElementById('ic-correlation').style.display = '';
+      document.getElementById('ic-heading').textContent  = match.heading;
+      document.getElementById('ic-why').textContent      = match.why;
+      document.getElementById('ic-shadow').textContent   = match.shadow;
+      document.getElementById('ic-path').textContent     = match.path;
+      document.getElementById('ic-sec-positive').style.display = 'none';
+      document.getElementById('ic-sec-negative').style.display = 'none';
+      document.getElementById('ic-heading').style.display  = '';
+      document.getElementById('ic-sections').style.display = '';
+      document.getElementById('ic-desc').style.display     = 'none';
+      gsap.to(infoCard, { y: 0, opacity: 1, duration: 0.75, ease: 'power2.out', pointerEvents: 'all' });
+      return;
+    }
+  }
+
+  document.getElementById('ic-correlation').style.display = 'none';
+
+  const mc  = window.DMicroContent && DMicroContent.get(d.num, d.key);
+
+  document.getElementById('ic-arcana').textContent = `Arcana · ${d.arcana}`;
+  document.getElementById('ic-name').textContent   = d.label;
+
+  if (mc) {
+    document.getElementById('ic-heading').textContent  = mc.heading;
+    document.getElementById('ic-why').textContent      = mc.why;
+    document.getElementById('ic-shadow').textContent   = mc.shadow;
+    document.getElementById('ic-path').textContent     = mc.path;
+    document.getElementById('ic-positive').textContent = mc.positive || '';
+    document.getElementById('ic-negative').textContent = mc.negative || '';
+    document.getElementById('ic-sec-positive').style.display = mc.positive ? '' : 'none';
+    document.getElementById('ic-sec-negative').style.display = mc.negative ? '' : 'none';
+    document.getElementById('ic-heading').style.display  = '';
+    document.getElementById('ic-sections').style.display = '';
+    document.getElementById('ic-desc').style.display     = 'none';
+  } else {
+    document.getElementById('ic-heading').style.display  = 'none';
+    document.getElementById('ic-sections').style.display = 'none';
+    document.getElementById('ic-desc').style.display     = '';
+    document.getElementById('ic-desc').textContent       = d.desc;
+  }
+
+  gsap.to(infoCard, { y: 0, opacity: 1, duration: 0.75, ease: 'power2.out', pointerEvents: 'all' });
+}
+function hideCard() {
+  gsap.to(infoCard, { y: 24, opacity: 0, duration: 0.4, pointerEvents: 'none' });
+}
+
+// ── PROJECTION ────────────────────────────────────────────────────────────
+const _pv = new THREE.Vector3();
+function toScreen(v3) {
+  _pv.copy(v3).project(camera);
+  return {
+    x: (_pv.x  + 1) * 0.5 * window.innerWidth,
+    y: (-_pv.y + 1) * 0.5 * window.innerHeight,
+  };
+}
+
+// ── LINE OPACITY BREATHE ──────────────────────────────────────────────────
+gsap.to(lineMat, { opacity: 0.17, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+
+// ── ANIMATION LOOP ────────────────────────────────────────────────────────
+const clock = new THREE.Clock();
+
+function animate() {
+  requestAnimationFrame(animate);
+  const t = clock.getElapsedTime();
+
+  // ─ Parallax damping
+  offX += (tgtX - offX) * 0.042;
+  offY += (tgtY - offY) * 0.042;
+
+  if (!isFlying && activeIdx === -1) {
+    camera.position.x = baseCamX + offX + panX;
+    camera.position.y = baseCamY + offY + panY;
+    camera.position.z = camZoom;
+    camera.lookAt(offX * 0.12 + panX, offY * 0.12 + panY, 0);
+  }
+
+  // ─ Background star rotation (independent of nodes)
+  starGroup.rotation.y = t * 0.00045;
+  starGroup.rotation.x = Math.sin(t * 0.00028) * 0.018;
+
+  // ─ Hover detection
+  raycaster.setFromCamera(mouse2D, camera);
+  const hits = raycaster.intersectObjects(hitMeshes);
+  const newHover = hits.length > 0 ? hits[0].object.userData.nodeIndex : -1;
+
+  if (newHover !== hoveredIdx) {
+    if (hoveredIdx !== -1 && hoveredIdx !== activeIdx) {
+      tagEls[hoveredIdx].classList.remove('lit');
+      cursor.classList.remove('on-star');
+      if (activeIdx === -1) {
+        const d = NODES[hoveredIdx];
+        gsap.to(d.sprite.scale, { x: d.baseScale, y: d.baseScale, duration: 0.5 });
+      }
+    }
+    hoveredIdx = newHover;
+    if (hoveredIdx !== -1) {
+      tagEls[hoveredIdx].classList.add('lit');
+      cursor.classList.add('on-star');
+      if (activeIdx === -1) {
+        const d = NODES[hoveredIdx];
+        gsap.to(d.sprite.scale, {
+          x: d.baseScale * 1.6, y: d.baseScale * 1.6, duration: 0.4,
+        });
+      }
+    } else {
+      cursor.classList.remove('on-star');
+    }
+  }
+
+  // ─ Twinkle + update label positions
+  NODES.forEach((data, i) => {
+    const tw = Math.sin(t * data.twk.spd + data.twk.off);
+    // Don't overwrite opacity while GSAP is fading the star during fly-in
+    if (data.sprite.visible && !(isFlying && i === activeIdx)) {
+      data.sprite.material.opacity = 0.78 + tw * 0.22;
+    }
+
+    // Update HTML tag position (below the star)
+    const sc = toScreen(data.pos);
+    const tag = tagEls[i];
+    tag.style.left = sc.x + 'px';
+    tag.style.top  = (sc.y + 38) + 'px';
+  });
+
+  // ─ Ambient effects (electrons + quantum particles)
+  if (window._ambientUpdate) window._ambientUpdate(t);
+
+  renderer.render(scene, camera);
+}
+
+// ── RESIZE ────────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth / window.innerHeight;
+  camera.updateProjectionMatrix();
+});
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+const loader = document.getElementById('loader');
+gsap.set('#hud-back', { opacity: 0 });
+
+animate(); // start loop immediately (renders while loader is covering)
+
+setTimeout(() => {
+  gsap.to(loader, {
+    opacity: 0, duration: 1.2,
+    onComplete: () => { loader.style.display = 'none'; },
+  });
+  gsap.from('#hud',  { opacity: 0, duration: 2.2, delay: 0.4 });
+  tagEls.forEach((el, i) => {
+    gsap.from(el, { opacity: 0, duration: 1.6, delay: 0.5 + i * 0.1 });
+  });
+}, 1900);
+
+// ── DOB INPUT ─────────────────────────────────────────────────────────────
+const hudDate = document.getElementById('hud-date');
+
+// Track current parsed date so we can restore on invalid input
+let _dob = { day: 8, month: 5, yearFull: 2002 };
+
+function toRoman(n) {
+  return ['I','II','III','IV','V','VI','VII','VIII','IX','X',
+          'XI','XII','XIII','XIV','XV','XVI','XVII','XVIII','XIX','XX',
+          'XXI','XXII'][n - 1] || String(n);
+}
+
+function fmtDate(d, m, y) {
+  return `${String(d).padStart(2,'0')} · ${String(m).padStart(2,'0')} · ${y}`;
+}
+
+function applyNewDate(dateStr) {
+  if (!window.DMCalc) return false;
+  try {
+    const matrix = window.DMCalc.matrixFromDate(dateStr);
+    const p = matrix.positions;
+
+    // NODES order: [0]=top(A=day), [1]=right(B=month), [2]=bottom(C=year),
+    //              [3]=left(D=karmic tail), [4]=center(G=soul)
+    [p.A, p.B, p.C, p.D, p.G].forEach((pos, i) => {
+      const val = pos.value;
+      NODES[i].num    = val;
+      NODES[i].arcana = toRoman(val);
+
+      // Swap arcana reading into label/desc if arcana.js is loaded
+      if (window.DMArcana) {
+        try {
+          const a = window.DMArcana.getArcana(val);
+          NODES[i].desc = a.identity.split('. ')[0] + '.';
+        } catch (_) {}
+      }
+
+      // Fade number out → update → fade in
+      const numEl = tagEls[i].querySelector('.t-num');
+      gsap.to(numEl, {
+        opacity: 0, duration: 0.22,
+        onComplete() {
+          numEl.textContent = val;
+          gsap.to(numEl, { opacity: 1, duration: 0.35 });
+        },
+      });
+    });
+
+    _dob = matrix.input;
+    hudDate.textContent = fmtDate(_dob.day, _dob.month, _dob.yearFull);
+    appendHint();
+    return true;
+  } catch (e) {
+    return false;
+  }
+}
+
+function appendHint() {
+  // Small "tap to change" label beneath the date — only visible on hover via CSS
+  const existing = hudDate.querySelector('.dob-hint');
+  if (!existing) {
+    const hint = document.createElement('span');
+    hint.className = 'dob-hint';
+    hint.textContent = 'tap to change';
+    hudDate.appendChild(hint);
+  }
+}
+
+function openDateEdit() {
+  if (hudDate.querySelector('input')) return; // already open
+
+  const saved = fmtDate(_dob.day, _dob.month, _dob.yearFull);
+  const editVal = `${String(_dob.day).padStart(2,'0')}/${String(_dob.month).padStart(2,'0')}/${_dob.yearFull}`;
+
+  hudDate.textContent = '';
+  const inp = document.createElement('input');
+  inp.type        = 'text';
+  inp.className   = 'dob-edit';
+  inp.value       = editVal;
+  inp.placeholder = 'DD/MM/YYYY';
+  hudDate.appendChild(inp);
+  inp.focus();
+  inp.select();
+
+  function commit() {
+    const raw = inp.value.trim();
+    if (!applyNewDate(raw)) {
+      // Invalid — restore original display
+      hudDate.textContent = saved;
+      appendHint();
+    }
+  }
+
+  inp.addEventListener('input', () => {
+    const digits = inp.value.replace(/\D/g, '').slice(0, 8);
+    let out = digits;
+    if (digits.length > 4) {
+      out = digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4);
+    } else if (digits.length > 2) {
+      out = digits.slice(0, 2) + '/' + digits.slice(2);
+    }
+    inp.value = out;
+    if (digits.length === 8) inp.blur(); // full DD/MM/YYYY typed — commit automatically
+  });
+
+  inp.addEventListener('keydown', e => {
+    if (e.key === 'Enter')  { inp.blur(); }
+    if (e.key === 'Escape') { hudDate.textContent = saved; appendHint(); }
+  });
+  inp.addEventListener('blur', commit);
+}
+
+hudDate.addEventListener('click', openDateEdit);
+appendHint();
+
+// ── MICRO-NODES: LOVER, MONEY + 8 PERIMETER AGE STARS ────────────────────
+// ── ANCESTRAL LINES: Father's (↘) and Mother's (↗) diagonals ─────────────
+// Appended as a self-contained block. Zero changes to existing code above.
+;(function() {
+
+  // Inject only the styles needed for micro overlays
+  const _mStyle = document.createElement('style');
+  _mStyle.textContent = `
+    .micro-tag { pointer-events:none; }
+    .micro-inner {
+      transform: scale(0.6);
+      transform-origin: center top;
+      opacity: 0.2;
+      transition: transform .35s cubic-bezier(.34,1.56,.64,1), opacity .3s ease;
+      will-change: transform, opacity;
+    }
+    .micro-tag.lit .micro-inner { transform: scale(1); opacity: 1; }
+    .micro-tag .t-num {
+      font-size:13px; font-family:'DM Mono',monospace; font-weight:300;
+      color:rgba(255,255,255,0.88); letter-spacing:1px;
+      text-shadow:0 0 12px rgba(200,220,255,0.7);
+    }
+    .micro-tag .t-label {
+      font-size:7px; letter-spacing:2.5px; text-transform:uppercase;
+      color:rgba(180,210,255,0.42); margin-top:5px; white-space:nowrap;
+      opacity:0; transition:opacity .3s;
+    }
+    .micro-tag.lit .t-label { opacity:1; }
+    .micro-icon {
+      font-size:9px; opacity:0.45; margin-left:3px;
+      vertical-align:middle; pointer-events:none;
+    }
+    .micro-tag .t-archetype {
+      font-size:5.5px; letter-spacing:1.6px; text-transform:uppercase;
+      color:rgba(180,210,255,0.28); margin-top:2px; white-space:nowrap;
+      opacity:0; transition:opacity .3s;
+    }
+    .micro-tag.lit .t-archetype { opacity:1; }
+
+    /* Talent Star Line tags — sit between .node-tag and .micro-tag in weight */
+    .talent-tag { pointer-events:none; }
+    .talent-tag .t-num {
+      font-size:12px; font-family:'DM Mono',monospace; font-weight:300;
+      letter-spacing:1px; text-shadow:0 0 12px currentColor;
+      opacity:0.9;
+    }
+    .talent-tag .t-label {
+      font-size:6.5px; letter-spacing:2.2px; text-transform:uppercase;
+      color:rgba(190,215,245,0.5); margin-top:4px; white-space:nowrap;
+      opacity:0; transition:opacity .3s;
+    }
+    .talent-tag.lit .t-label { opacity:1; }
+  `;
+  document.head.appendChild(_mStyle);
+
+  // ── Lerp helper ─────────────────────────────────────────────────────────
+  function _lv(a, b, t) {
+    return new THREE.Vector3(
+      a.x + (b.x - a.x) * t,
+      a.y + (b.y - a.y) * t,
+      a.z + (b.z - a.z) * t,
+    );
+  }
+
+  // ── Reduce helper (mirrors DMCalc.reduce) ────────────────────────────────
+  function _rd(n) {
+    if (window.DMCalc) return window.DMCalc.reduce(n);
+    if (n <= 22) return n;
+    return _rd(String(Math.abs(n)).split('').reduce((a,d) => a + Number(d), 0));
+  }
+
+  // ── Source positions from existing NODES ─────────────────────────────────
+  const pA = NODES[0].pos, pB = NODES[1].pos,
+        pC = NODES[2].pos, pD = NODES[3].pos, pG = NODES[4].pos;
+
+  // ── Natalia Ladini coordinate system ────────────────────────────────────
+  // Personal Square  : A=Left(-R,0)  B=Top(0,R)  C=Right(R,0)  D=Bottom(0,-R)
+  // Ancestral Square : 45° rotation, corners at R distance from origin
+  //   F=Paternal Spiritual (Top-Left)    G=Maternal Spiritual (Top-Right)
+  //   H=Paternal Material  (Bottom-Right) I=Maternal Material  (Bottom-Left)
+  // Father's Lineage (\): F → H    Mother's Lineage (/): G → I
+  // Love/Money channel   : Inner Bottom → Inner Right  (bottom-right quadrant)
+
+  const _R  = Math.abs(pA.x);   // derives R from A=[-R,0,0]
+
+  // Ancestral square corners at midpoints of the diamond edges (factor 0.5)
+  // This places F, G, H, I exactly on the existing diamond edge lines
+  const _ptF = new THREE.Vector3(-_R * 0.5,  _R * 0.5, 0);  // F: Paternal Spiritual (Top-Left)
+  const _ptG = new THREE.Vector3( _R * 0.5,  _R * 0.5, 0);  // G: Maternal Spiritual (Top-Right)
+  const _ptH = new THREE.Vector3( _R * 0.5, -_R * 0.5, 0);  // H: Paternal Material  (Bottom-Right)
+  const _ptI = new THREE.Vector3(-_R * 0.5, -_R * 0.5, 0);  // I: Maternal Material  (Bottom-Left)
+
+  // Inner spoke-midpoint nodes used for Love/Money channel
+  const _pDG = new THREE.Vector3(0,       -_R / 2, 0);   // Inner Bottom (D → E midpoint)
+  const _pCG = new THREE.Vector3(_R / 2,   0,      0);   // Inner Right  (C → E midpoint)
+
+  // Ancestral lineage diagonals removed — rendered via existing EDGES geometry
+
+  // ── Compute values from current NODES ────────────────────────────────────
+  // Rule 1: Base-22 reduction (digits summed until ≤ 22; 22 stays 22).
+  // Rule 2: Sky = B+D (vertical), Earth = A+C (horizontal).
+  // Rule 3: Father's lineage = reduce(F+H), Mother's = reduce(G+I).
+  function _calcVals() {
+    const A = NODES[0].num, B = NODES[1].num,
+          C = NODES[2].num, D = NODES[3].num, E = NODES[4].num;
+
+    // Ancestral square corner values
+    const Fv = _rd(A + B);   // F: Paternal Spiritual  (between A-Left and B-Top)
+    const Gv = _rd(B + C);   // G: Maternal Spiritual  (between B-Top  and C-Right)
+    const Hv = _rd(C + D);   // H: Paternal Material   (between C-Right and D-Bottom)
+    const Iv = _rd(D + A);   // I: Maternal Material   (between D-Bottom and A-Left)
+
+    // Inner spoke midpoint values (spoke centre = reduce of corner + center)
+    const DGv = _rd(D + E);  // Inner Bottom value
+    const CGv = _rd(C + E);  // Inner Right value
+
+    // Love & Money: bridge channel from Inner Bottom → Inner Right
+    const monV  = _rd(DGv + CGv);      // midpoint of channel
+    const loveV = _rd(DGv + monV);     // 1/3 point (closer to Inner Bottom)
+
+    return { love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv };
+  }
+
+  let _vals = _calcVals();
+
+  // ── 6 micro-nodes ────────────────────────────────────────────────────────
+  const MICRO = [
+    // Love & Money: explicit positions along Inner Bottom → Inner Right vector
+    { key:'LOVE', num:_vals.love, label:'Relationship', icon:'♥',
+      pos: new THREE.Vector3((_R/2)*0.333, -(_R/2)*0.666, 0),
+      color:0xFF88AA, twk:{spd:0.8,off:1.2} },
+    { key:'MON',  num:_vals.mon,  label:'Money',        icon:'$',
+      pos: new THREE.Vector3((_R/2)*0.666, -(_R/2)*0.333, 0),
+      color:0xFFBB44, twk:{spd:1.0,off:3.1} },
+
+    // Ancestral square corners — endpoints of the lineage diagonals.
+    // F=TL and G=TR double as the Talent Star Line's Ancestral Inherited
+    // Talents (paternal/maternal); their archetype string is folded into
+    // the same tag as a second line rather than spawning duplicate stars.
+    { key:'F', num:_vals.atF, label:'Paternal Spiritual',
+      archetype: window.DMEngine ? window.DMEngine.getArchetype(_vals.atF) : null,
+      pos:_ptF.clone(), color:0xCCDDFF, twk:{spd:1.1,off:0.5} },
+    { key:'G', num:_vals.atG, label:'Maternal Spiritual',
+      archetype: window.DMEngine ? window.DMEngine.getArchetype(_vals.atG) : null,
+      pos:_ptG.clone(), color:0xCCDDFF, twk:{spd:0.9,off:2.1} },
+    { key:'H', num:_vals.atH, label:'Paternal Material',  pos:_ptH.clone(), color:0xCCDDFF, twk:{spd:1.2,off:3.7} },
+    { key:'I', num:_vals.atI, label:'Maternal Material',  pos:_ptI.clone(), color:0xCCDDFF, twk:{spd:0.8,off:5.3} },
+  ];
+
+  // ── Three.js sprites ────────────────────────────────────────────────────
+  const _microHits = [];
+  let _hovM = -1;
+  let _activeMicroStar = -1;
+
+  MICRO.forEach((data, i) => {
+    const sz = i < 2 ? 0.20 : 0.22;   // corners slightly larger than channel nodes
+
+    const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: nodeTex,
+      color: new THREE.Color(data.color),
+      transparent: true,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+      opacity: 0.28,
+    }));
+    sp.position.copy(data.pos);
+    sp.scale.set(sz, sz, 1);
+    scene.add(sp);
+    data.sprite    = sp;
+    data.baseScale = sz;
+
+    // Invisible hit sphere — 0.45 radius ≈ 24–32 px touch target at camera Z≈12
+    const hit = new THREE.Mesh(
+      new THREE.SphereGeometry(0.45, 8, 8),
+      new THREE.MeshBasicMaterial({ visible: false }),
+    );
+    hit.position.copy(data.pos);
+    hit.userData.mIdx = i;
+    scene.add(hit);
+    _microHits.push(hit);
+  });
+
+  // ── HTML overlays ────────────────────────────────────────────────────────
+  const _microTags = MICRO.map(data => {
+    const el = document.createElement('div');
+    el.className = 'node-tag micro-tag';
+    const icon = data.icon ? `<span class="micro-icon">${data.icon}</span>` : '';
+    const lbl  = data.label ? `<div class="t-label">${data.label}</div>` : '';
+    const arch = data.archetype ? `<div class="t-archetype">${data.archetype}</div>` : '';
+    el.innerHTML = `<div class="micro-inner"><div class="t-num">${data.num}${icon}</div>${lbl}${arch}</div>`;
+    overlayEl.appendChild(el);
+    return el;
+  });
+
+  // ── Animation loop ───────────────────────────────────────────────────────
+  ;(function _mLoop() {
+    requestAnimationFrame(_mLoop);
+    const t = performance.now() * 0.001;
+
+    MICRO.forEach((data, i) => {
+      const sc = toScreen(data.pos);
+      _microTags[i].style.left = sc.x + 'px';
+      _microTags[i].style.top  = (sc.y + 22) + 'px';
+
+      // Color-tinted twinkle — wider range so color shines through
+      if (_hovM !== i) {
+        const tw = Math.sin(t * data.twk.spd + data.twk.off) * 0.5 + 0.5;
+        data.sprite.material.opacity = 0.18 + tw * 0.26;
+      }
+    });
+
+    if (!isFlying && activeIdx === -1 && _activeMicroStar === -1) {
+      raycaster.setFromCamera(mouse2D, camera);
+      const hits = raycaster.intersectObjects(_microHits);
+      const next = hits.length ? hits[0].object.userData.mIdx : -1;
+
+      if (next !== _hovM) {
+        if (_hovM !== -1) {
+          _microTags[_hovM].classList.remove('lit');
+          gsap.to(MICRO[_hovM].sprite.material, { opacity: 0.24, duration: 0.35 });
+          gsap.to(MICRO[_hovM].sprite.scale, {
+            x: MICRO[_hovM].baseScale, y: MICRO[_hovM].baseScale, duration: 0.3 });
+        }
+        _hovM = next;
+        if (_hovM !== -1) {
+          _microTags[_hovM].classList.add('lit');
+          gsap.to(MICRO[_hovM].sprite.material, { opacity: 0.95, duration: 0.28 });
+          gsap.to(MICRO[_hovM].sprite.scale, {
+            x: MICRO[_hovM].baseScale * 2.4, y: MICRO[_hovM].baseScale * 2.4, duration: 0.28 });
+          if (hoveredIdx === -1) cursor.classList.add('on-star');
+        } else {
+          if (hoveredIdx === -1) cursor.classList.remove('on-star');
+        }
+      }
+    }
+  })();
+
+  // ── Fly-to + card + return for micro-nodes (4th "extra tier") ───────────
+  // Mirrors flyToProgStar/flyToTalent exactly, reusing the same shared
+  // #prog-banner and participating in the shared activeExtraStar guard.
+  const _mBanner    = document.getElementById('prog-banner');
+  const _mPbClose   = document.getElementById('pb-close');
+  let   _bannerOpenMi = false;
+
+  function openMicroCard(idx) {
+    const data = MICRO[idx];
+    const hex  = '#' + new THREE.Color(data.color).getHexString();
+    const mc   = window.DMicroContent && DMicroContent.get(data.num, data.key);
+    const sectionLabel = (data.key === 'LOVE' || data.key === 'MON')
+      ? 'Love & Money Channel'
+      : 'Ancestral Square';
+
+    document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-section-label').textContent = sectionLabel;
+    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-heading').textContent = (mc && mc.heading) || data.label;
+    document.getElementById('pb-body').innerHTML = mc ?
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+         <div class="pb-full-text">${mc.why || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-text">${mc.shadow || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE PATH</div>
+         <div class="pb-full-text">${mc.path || ''}</div>
+       </div>
+       ${mc.positive ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-text">${mc.positive}</div>
+       </div>` : ''}
+       ${mc.negative ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-text">${mc.negative}</div>
+       </div>` : ''}` : '';
+
+    _mBanner.classList.add('open');
+    _mBanner.scrollTop = 0;
+    gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+    _bannerOpenMi = true;
+  }
+
+  function closeMicroBanner() {
+    if (!_bannerOpenMi) return;
+    gsap.to(_mBanner, { y:'105%', duration:0.4, ease:'power2.in',
+      onComplete() { _mBanner.classList.remove('open'); }
+    });
+    _bannerOpenMi = false;
+  }
+  _mPbClose.addEventListener('click', closeMicroBanner);
+
+  function restoreMicroStar(idx) {
+    const d = MICRO[idx];
+    d.sprite.visible = true;
+    d.sprite.material.opacity = 0;
+    gsap.to(d.sprite.scale, { x: d.baseScale, y: d.baseScale, duration: 0 });
+    gsap.to(d.sprite.material, { opacity: 0.6, duration: 1.0 });
+    MICRO.forEach((other, i) => {
+      if (i !== idx) gsap.to(other.sprite.material, { opacity: 0.3, duration: 0.9 });
+    });
+  }
+
+  function flyToMicro(idx) {
+    if (isFlying) return;
+    isFlying = true;
+    _activeMicroStar = idx;
+    activeExtraStar = { tier: 'micro', key: idx };
+
+    const data = MICRO[idx];
+    const tp   = data.pos;
+
+    tagEls.forEach(el => gsap.to(el, { opacity: 0, duration: 0.5 }));
+    gsap.to(lineMat, { opacity: 0, duration: 0.7 });
+    MICRO.forEach((other, i) => {
+      if (i !== idx) gsap.to(other.sprite.material, { opacity: 0, duration: 0.5 });
+    });
+
+    const overshoot = 12;
+    const dir   = tp.clone().normalize();
+    const destX = tp.x + dir.x * overshoot;
+    const destY = tp.y + dir.y * overshoot;
+    const destZ = tp.z - overshoot;
+
+    gsap.to(camera.position, {
+      x: tp.x, y: tp.y, z: tp.z,
+      duration: 1.9, ease: 'power2.in',
+      onUpdate() { camera.lookAt(tp.x, tp.y, tp.z); },
+      onComplete() {
+        gsap.to(camera.position, {
+          x: destX, y: destY, z: destZ,
+          duration: 0.7, ease: 'power3.out',
+          onUpdate() { camera.lookAt(tp.x, tp.y, tp.z); },
+          onComplete() {
+            isFlying = false;
+            openMicroCard(idx);
+            gsap.to('#hud-back', { opacity: 1, duration: 0.6 });
+          },
+        });
+      },
+    });
+
+    baseCamX = destX;
+    baseCamY = destY;
+
+    gsap.to(data.sprite.scale, { x: data.baseScale * 22, y: data.baseScale * 22, duration: 1.9, ease: 'power2.in' });
+    gsap.to(data.sprite.material, { opacity: 0, duration: 0.25, delay: 1.75,
+      onComplete() { data.sprite.visible = false; },
+    });
+
+    const hex = '#' + new THREE.Color(data.color).getHexString();
+    veil.style.background = [
+      `radial-gradient(ellipse at center,`,
+      `  #ffffff 0%,`,
+      `  ${hex}cc 18%,`,
+      `  ${hex}55 50%,`,
+      `  transparent 80%)`,
+    ].join('');
+    gsap.to(veil, { opacity: 1, duration: 0.18, delay: 1.82,
+      onComplete() {
+        veil.style.background = [
+          `radial-gradient(ellipse at center,`,
+          `  ${hex}22 0%,`,
+          `  ${hex}10 45%,`,
+          `  transparent 75%)`,
+        ].join('');
+        gsap.to(veil, { opacity: 1, duration: 0.6 });
+      },
+    });
+  }
+
+  document.getElementById('hud-back').addEventListener('click', () => {
+    if (_activeMicroStar === -1) return;
+    const idx = _activeMicroStar;
+    _activeMicroStar = -1;
+    activeExtraStar = null;
+    closeMicroBanner();
+    gsap.delayedCall(0.5, () => restoreMicroStar(idx));
+  });
+
+  // ── Click handler ─────────────────────────────────────────────────────────
+  canvas.addEventListener('click', () => {
+    if (wasDragging) { wasDragging = false; return; } // pan gesture, not a tap
+    if (isFlying || activeIdx !== -1) return;
+
+    // Any click while zoomed into a micro-node → return to map
+    if (_activeMicroStar !== -1) {
+      const idx = _activeMicroStar;
+      _activeMicroStar = -1;
+      activeExtraStar = null;
+      closeMicroBanner();
+      gsap.delayedCall(0.5, () => restoreMicroStar(idx));
+      returnToMap();
+      return;
+    }
+
+    // Another tier is mid-transition or zoomed — that tier's own click
+    // handler owns this click; don't start a competing fly-in.
+    if (activeExtraStar !== null) return;
+
+    raycaster.setFromCamera(mouse2D, camera);
+    const hits = raycaster.intersectObjects(_microHits);
+    if (hits.length) flyToMicro(hits[0].object.userData.mIdx);
+  });
+
+  // ── DOB update hook ──────────────────────────────────────────────────────
+  const _prevApply = applyNewDate;
+  applyNewDate = function(dateStr) {
+    const ok = _prevApply(dateStr);
+    if (!ok) return false;
+    _vals = _calcVals();
+
+    // Nodes 0-1: Love & Money (have icon span — update text node only)
+    _microTags[0].querySelector('.t-num').firstChild.nodeValue = String(_vals.love);
+    _microTags[1].querySelector('.t-num').firstChild.nodeValue = String(_vals.mon);
+    MICRO[0].num = _vals.love;
+    MICRO[1].num = _vals.mon;
+
+    // Nodes 2-5: the four corners (no icon — replace full textContent)
+    [_vals.atF, _vals.atG, _vals.atH, _vals.atI].forEach((v, i) => {
+      _microTags[i + 2].querySelector('.t-num').textContent = String(v);
+      MICRO[i + 2].num = v;
+    });
+    return true;
+  };
+
+})();
+
+
+
+// ── PROGRAM STARS ─────────────────────────────────────────────────────────────
+;(function () {
+  if (!window.DMPrograms) return;
+
+  function _rd(n) {
+    if (window.DMCalc) return window.DMCalc.reduce(n);
+    if (n <= 22) return n;
+    return _rd(String(Math.abs(n)).split('').reduce((s,d)=>s+Number(d),0));
+  }
+  function _matrixSet() {
+    const A=NODES[0].num,B=NODES[1].num,C=NODES[2].num,D=NODES[3].num,E=NODES[4].num;
+    const iD=_rd(D+E),iC=_rd(C+E),mon=_rd(iD+iC),love=_rd(iD+mon);
+    return new Set([A,B,C,D,E,_rd(A+B),_rd(B+C),_rd(C+D),_rd(D+A),iD,iC,mon,love]);
+  }
+
+  let present = _matrixSet();
+  let active = DMPrograms.all().filter(p => p.numbers.every(n => present.has(n)));
+
+  const CAT_COLORS = {
+    'Social Status & Self-Worth':       { hex:'#E8A020', num:0xE8A020 },
+    'Intellectual & Mindset Alignment': { hex:'#20B8FF', num:0x20B8FF },
+    'Abundance & Financial Flow':       { hex:'#18EEA8', num:0x18EEA8 },
+    'Relationship & Love':              { hex:'#FF3388', num:0xFF3388 },
+    'Health & Vitality':                { hex:'#FF5518', num:0xFF5518 },
+    'Purpose & Mission':                { hex:'#9944FF', num:0x9944FF },
+  };
+
+  // Scattered background positions — behind the diamond (negative z)
+  const BG_POS = [
+    new THREE.Vector3(-6.5,  3.2, -5),
+    new THREE.Vector3( 7.0, -2.5, -6),
+    new THREE.Vector3(-2.5, -5.5, -4),
+    new THREE.Vector3( 5.5,  4.2, -7),
+    new THREE.Vector3( 0.5, -7.0, -5),
+    new THREE.Vector3(-7.5,  0.5, -6),
+  ];
+
+  // ── Banner setup ────────────────────────────────────────────────────────
+  const banner   = document.getElementById('prog-banner');
+  const pbClose  = document.getElementById('pb-close');
+  let _bannerOpen  = false;
+  let _activeStar  = -1;
+
+  gsap.set(banner, { y:'105%' });
+
+  function openProgram(pi) {
+    const prog = active[pi];
+    const cd   = CAT_COLORS[prog.category] || { hex:'#AABBFF', num:0xAABBFF };
+    // Build full multi-section content inside banner body
+    document.getElementById('pb-prog-name').textContent = prog.name + '  ·  ' + prog.numbers.join(' · ');
+    document.getElementById('pb-prog-name').style.color = cd.hex;
+    document.getElementById('pb-section-label').textContent = prog.category;
+    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-heading').textContent = prog.heading || prog.name;
+    document.getElementById('pb-body').innerHTML =
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">THE WHY</div>
+         <div class="pb-full-text">${prog.why || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">THE SHADOW</div>
+         <div class="pb-full-text">${prog.shadow || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">THE PATH</div>
+         <div class="pb-full-text">${prog.path || ''}</div>
+       </div>
+       ${prog.positive ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-text">${prog.positive}</div>
+       </div>` : ''}
+       ${prog.negative ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-text">${prog.negative}</div>
+       </div>` : ''}`;
+    banner.classList.add('open');
+    banner.scrollTop = 0;
+    gsap.to(banner, { y:'0%', duration:0.55, ease:'power3.out' });
+    _bannerOpen = true;
+    _activeStar = pi;
+  }
+
+  function closeBanner() {
+    if (!_bannerOpen) return;
+    gsap.to(banner, { y:'105%', duration:0.4, ease:'power2.in',
+      onComplete() { banner.classList.remove('open'); }
+    });
+    _bannerOpen = false;
+    _activeStar = -1;
+  }
+  pbClose.addEventListener('click', closeBanner);
+
+  // ── Build star sprites ──────────────────────────────────────────────────
+  let _stars     = [];
+  let _hitMeshes = [];
+
+  function _disposeStars() {
+    _stars.forEach(s => {
+      scene.remove(s.coreSp, s.haloSp);
+      s.coreSp.material.map = null; s.coreSp.material.dispose();
+      s.haloSp.material.map = null; s.haloSp.material.dispose();
+      s.lbl.remove();
+    });
+    _hitMeshes.forEach(hit => {
+      scene.remove(hit);
+      hit.geometry.dispose(); hit.material.dispose();
+    });
+    _stars    = [];
+    _hitMeshes = [];
+  }
+
+  function buildStars() {
+    _disposeStars();
+
+    active.forEach((prog, pi) => {
+      const pos  = BG_POS[pi % BG_POS.length];
+      const cd   = CAT_COLORS[prog.category] || { hex:'#AABBFF', num:0xAABBFF };
+      const col  = new THREE.Color(cd.num);
+
+      // Core star sprite
+      const coreSp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: nodeTex, color: col,
+        transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false, opacity: 0.95,
+      }));
+      coreSp.scale.set(1.1, 1.1, 1);
+      coreSp.position.copy(pos);
+      coreSp.frustumCulled = false;
+      scene.add(coreSp);
+
+      // Outer halo
+      const haloSp = new THREE.Sprite(new THREE.SpriteMaterial({
+        map: nodeTex, color: col,
+        transparent: true, blending: THREE.AdditiveBlending,
+        depthWrite: false, opacity: 0.22,
+      }));
+      haloSp.scale.set(3.5, 3.5, 1);
+      haloSp.position.copy(pos);
+      haloSp.frustumCulled = false;
+      scene.add(haloSp);
+
+      // Invisible hit sphere for raycasting
+      const hit = new THREE.Mesh(
+        new THREE.SphereGeometry(0.55, 8, 8),
+        new THREE.MeshBasicMaterial({ visible: false })
+      );
+      hit.position.copy(pos);
+      hit.userData.pIdx = pi;
+      hit.frustumCulled = false;
+      scene.add(hit);
+      _hitMeshes.push(hit);
+
+      // HTML label
+      const lbl = document.createElement('div');
+      lbl.className = 'node-tag planet-tag';
+      lbl.innerHTML = '<div class="planet-inner">'
+        + '<div class="planet-name" style="color:' + cd.hex + ';text-shadow:0 0 14px ' + cd.hex + 'aa">' + prog.name + '</div>'
+        + '<div class="planet-nums">' + prog.numbers.join(' \xb7 ') + '</div>'
+        + '</div>';
+      overlayEl.appendChild(lbl);
+
+      _stars.push({
+        prog, pos: pos.clone(), cd, col,
+        coreSp, haloSp, lbl,
+        baseY: pos.y,
+        driftSpeed: 0.18 + pi * 0.07,
+        driftAmp:   0.18 + pi * 0.04,
+        driftPhase: pi * 1.3,
+        visible: true,
+      });
+    });
+  }
+
+  buildStars();
+
+  // ── Fly-to + return for program stars ───────────────────────────────────
+  let _activeProgStar = -1;
+
+  function flyToProgStar(pi) {
+    if (isFlying) return;
+    isFlying = true;
+    _activeProgStar = pi;
+    activeExtraStar = { tier: 'prog', key: pi };
+
+    const s   = _stars[pi];
+    const pos = s.coreSp.position.clone(); // snapshot current drifted position
+
+    tagEls.forEach(el => gsap.to(el, { opacity:0, duration:0.5 }));
+    gsap.to(lineMat, { opacity:0, duration:0.7 });
+    _stars.forEach((st, i) => {
+      if (i !== pi) { gsap.to(st.coreSp.material, { opacity:0, duration:0.5 }); gsap.to(st.haloSp.material, { opacity:0, duration:0.4 }); }
+    });
+
+    const dir   = pos.clone().normalize();
+    const destX = pos.x + dir.x * 12;
+    const destY = pos.y + dir.y * 12;
+    const destZ = pos.z - 12;
+
+    gsap.to(camera.position, {
+      x: pos.x, y: pos.y, z: pos.z,
+      duration: 1.9, ease: 'power2.in',
+      onUpdate()   { camera.lookAt(pos.x, pos.y, pos.z); },
+      onComplete() {
+        gsap.to(camera.position, {
+          x: destX, y: destY, z: destZ,
+          duration: 0.7, ease: 'power3.out',
+          onUpdate()   { camera.lookAt(pos.x, pos.y, pos.z); },
+          onComplete() {
+            isFlying = false;
+            openProgram(pi);
+            gsap.to('#hud-back', { opacity:1, duration:0.6 });
+          },
+        });
+      },
+    });
+
+    baseCamX = destX;
+    baseCamY = destY;
+
+    gsap.to(s.coreSp.scale, { x:1.1*22, y:1.1*22, duration:1.9, ease:'power2.in' });
+    gsap.to(s.coreSp.material, { opacity:0, duration:0.25, delay:1.75,
+      onComplete() { s.coreSp.visible = false; }
+    });
+
+    veil.style.background = `radial-gradient(ellipse at center,#fff 0%,${s.cd.hex}cc 18%,${s.cd.hex}55 50%,transparent 80%)`;
+    gsap.to(veil, { opacity:1, duration:0.18, delay:1.82,
+      onComplete() {
+        veil.style.background = `radial-gradient(ellipse at center,${s.cd.hex}22 0%,${s.cd.hex}10 45%,transparent 75%)`;
+        gsap.to(veil, { opacity:1, duration:0.6 });
+      },
+    });
+  }
+
+  document.getElementById('hud-back').addEventListener('click', () => {
+    if (_activeProgStar === -1) return;
+    const pi = _activeProgStar;
+    _activeProgStar = -1;
+    activeExtraStar = null;
+    closeBanner();
+    // Restore this star after camera starts returning
+    gsap.delayedCall(0.5, () => {
+      const s = _stars[pi];
+      s.coreSp.visible = true;
+      s.coreSp.material.opacity = 0;
+      gsap.to(s.coreSp.scale, { x:1.1, y:1.1, duration:0 });
+      gsap.to(s.coreSp.material, { opacity:0.95, duration:1.0 });
+      _stars.forEach((st, i) => {
+        if (i !== pi) { gsap.to(st.coreSp.material, { opacity:0.95, duration:0.9 }); gsap.to(st.haloSp.material, { opacity:0.22, duration:0.9 }); }
+      });
+    });
+  });
+
+  // ── Click handler ───────────────────────────────────────────────────────
+  canvas.addEventListener('click', () => {
+    if (wasDragging) { wasDragging = false; return; } // pan gesture, not a tap
+    if (isFlying || activeIdx !== -1) return;
+
+    // Any click while zoomed into a prog star → return to map
+    if (_activeProgStar !== -1) {
+      const pi = _activeProgStar;
+      _activeProgStar = -1;
+      activeExtraStar = null;
+      closeBanner();
+      gsap.delayedCall(0.5, () => {
+        const s = _stars[pi];
+        s.coreSp.visible = true;
+        s.coreSp.material.opacity = 0;
+        gsap.to(s.coreSp.scale, { x:1.1, y:1.1, duration:0 });
+        gsap.to(s.coreSp.material, { opacity:0.95, duration:1.0 });
+        _stars.forEach((st, i) => {
+          if (i !== pi) {
+            gsap.to(st.coreSp.material, { opacity:0.95, duration:0.9 });
+            gsap.to(st.haloSp.material, { opacity:0.22, duration:0.9 });
+          }
+        });
+      });
+      returnToMap();
+      return;
+    }
+
+    // Another tier (talent star) is mid-transition or zoomed — don't start a
+    // second, competing fly-in. That tier's own click handler owns this click.
+    if (activeExtraStar !== null) return;
+
+    raycaster.setFromCamera(mouse2D, camera);
+    const hits = raycaster.intersectObjects(_hitMeshes);
+    if (hits.length) {
+      flyToProgStar(hits[0].object.userData.pIdx);
+    }
+  });
+
+  // ── Animation loop ───────────────────────────────────────────────────────
+  let _hovStar = -1;
+  ;(function _sLoop() {
+    requestAnimationFrame(_sLoop);
+    const t = performance.now() * 0.001;
+
+    _stars.forEach((s, pi) => {
+      if (!s.visible) return;
+
+      // Gentle vertical drift (pause when active)
+      if (_activeProgStar !== pi) {
+        const drift = Math.sin(t * s.driftSpeed + s.driftPhase) * s.driftAmp;
+        s.coreSp.position.y = s.baseY + drift;
+        s.haloSp.position.y = s.baseY + drift;
+        _hitMeshes[pi].position.y = s.baseY + drift;
+      }
+
+      // Pulse opacity
+      const pulse = Math.sin(t * 0.9 + pi * 1.8) * 0.5 + 0.5;
+      if (_activeProgStar !== pi) {
+        s.coreSp.material.opacity = 0.75 + pulse * 0.22;
+        s.haloSp.material.opacity = 0.10 + pulse * 0.14;
+        const sc = 1.0 + pulse * 0.18;
+        s.coreSp.scale.set(1.1 * sc, 1.1 * sc, 1);
+      }
+
+      // HTML label
+      const wp  = s.coreSp.position;
+      const sc2 = toScreen(wp);
+      s.lbl.style.left = sc2.x + 'px';
+      s.lbl.style.top  = (sc2.y + 22) + 'px';
+    });
+
+    // Hover detection (map view only)
+    if (!isFlying && activeIdx === -1 && _activeProgStar === -1) {
+      raycaster.setFromCamera(mouse2D, camera);
+      const hits = raycaster.intersectObjects(_hitMeshes);
+      const next = hits.length ? hits[0].object.userData.pIdx : -1;
+      if (next !== _hovStar) {
+        if (_hovStar !== -1) {
+          _stars[_hovStar].lbl.classList.remove('lit');
+          gsap.to(_stars[_hovStar].haloSp.scale, { x:3.5, y:3.5, duration:0.4 });
+          if (hoveredIdx === -1) cursor.classList.remove('on-star');
+        }
+        _hovStar = next;
+        if (_hovStar !== -1) {
+          _stars[_hovStar].lbl.classList.add('lit');
+          gsap.to(_stars[_hovStar].haloSp.scale, { x:5.5, y:5.5, duration:0.35, ease:'back.out(1.4)' });
+          cursor.classList.add('on-star');
+        }
+      }
+    }
+  })();
+
+  // ── DOB hook ─────────────────────────────────────────────────────────────
+  const _prev = applyNewDate;
+  applyNewDate = function(dateStr) {
+    const ok = _prev(dateStr);
+    if (!ok) return false;
+
+    // Rebuild the star field from scratch — the set of active programs
+    // (not just which existing stars stay lit) can change with a new date.
+    if (_activeProgStar !== -1) { _activeProgStar = -1; activeExtraStar = null; closeBanner(); }
+    _hovStar = -1;
+
+    present = _matrixSet();
+    active  = DMPrograms.all().filter(p => p.numbers.every(n => present.has(n)));
+    buildStars();
+    return true;
+  };
+
+})();
+
+// ── TALENT STAR LINE ─────────────────────────────────────────────────────────
+;(function () {
+  if (!window.DMEngine || !window.DTalentContent) return;
+
+  // Crown = B (Top node) exactly — already rendered as the Sky Line arcana star.
+  // Only throat (Vishuddha) and thirdEye (Ajna) are genuinely new positions,
+  // placed 2/3 and 1/3 down the B→E segment (matches the LOVE/MON fractional
+  // placement pattern already used for the inner channel micro-nodes).
+  const ICON_COLOR_MAP = {
+    LEADER_ACTION:        0xFFAA33,
+    INTUITION_WISDOM:      0xB088FF,
+    CREATIVITY_ART:        0xFF6FA8,
+    TEACHER_FREEDOM:       0x5FC9FF,
+    TRANSFORMATION_POWER:  0xFF6644,
+  };
+
+  function dobToISO() {
+    return `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+  }
+
+  let _talents = window.DMEngine.calculateDestinyMatrix(dobToISO()).talents;
+
+  const TALENT_POS = {
+    throat:   new THREE.Vector3(0, 2.47, 0),
+    thirdEye: new THREE.Vector3(0, 1.23, 0),
+  };
+  const TALENT_LABEL = { throat: 'Vishuddha · Throat', thirdEye: 'Ajna · Third Eye' };
+  const KEYS = ['throat', 'thirdEye'];
+
+  // ── Banner (shared with program stars — only one is ever open at a time) ──
+  const banner  = document.getElementById('prog-banner');
+  const pbClose = document.getElementById('pb-close');
+
+  function openTalent(key) {
+    const num  = _talents[key];
+    const icon = window.DMEngine.getIconType(num);
+    const hex  = '#' + (ICON_COLOR_MAP[icon] || 0xAABBFF).toString(16).padStart(6, '0');
+    const content = window.DTalentContent.get(icon);
+    if (!content) return;
+
+    document.getElementById('pb-prog-name').textContent = TALENT_LABEL[key] + '  ·  ' + num;
+    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-section-label').textContent = 'Talent Star Line';
+    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-heading').textContent = content.heading;
+    document.getElementById('pb-body').innerHTML =
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+         <div class="pb-full-text">${content.why || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-text">${content.shadow || ''}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE PATH</div>
+         <div class="pb-full-text">${content.path || ''}</div>
+       </div>
+       ${content.positive ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-text">${content.positive}</div>
+       </div>` : ''}
+       ${content.negative ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-text">${content.negative}</div>
+       </div>` : ''}`;
+    banner.classList.add('open');
+    banner.scrollTop = 0;
+    gsap.to(banner, { y:'0%', duration:0.55, ease:'power3.out' });
+    _bannerOpenT = true;
+  }
+
+  let _bannerOpenT = false;
+  function closeTalentBanner() {
+    if (!_bannerOpenT) return;
+    gsap.to(banner, { y:'105%', duration:0.4, ease:'power2.in',
+      onComplete() { banner.classList.remove('open'); }
+    });
+    _bannerOpenT = false;
+  }
+  pbClose.addEventListener('click', closeTalentBanner);
+
+  // ── Build star sprites ──────────────────────────────────────────────────
+  const _tStars     = {};
+  const _tHitMeshes = [];
+
+  KEYS.forEach(key => {
+    const pos  = TALENT_POS[key];
+    const num  = _talents[key];
+    const icon = window.DMEngine.getIconType(num);
+    const col  = new THREE.Color(ICON_COLOR_MAP[icon] || 0xAABBFF);
+
+    const coreSp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: nodeTex, color: col,
+      transparent: true, blending: THREE.AdditiveBlending,
+      depthWrite: false, opacity: 0.85,
+    }));
+    coreSp.scale.set(0.55, 0.55, 1);
+    coreSp.position.copy(pos);
+    coreSp.frustumCulled = false;
+    scene.add(coreSp);
+
+    const haloSp = new THREE.Sprite(new THREE.SpriteMaterial({
+      map: nodeTex, color: col,
+      transparent: true, blending: THREE.AdditiveBlending,
+      depthWrite: false, opacity: 0.20,
+    }));
+    haloSp.scale.set(1.9, 1.9, 1);
+    haloSp.position.copy(pos);
+    haloSp.frustumCulled = false;
+    scene.add(haloSp);
+
+    const hit = new THREE.Mesh(
+      new THREE.SphereGeometry(0.42, 8, 8),
+      new THREE.MeshBasicMaterial({ visible: false })
+    );
+    hit.position.copy(pos);
+    hit.userData.tKey = key;
+    hit.frustumCulled = false;
+    scene.add(hit);
+    _tHitMeshes.push(hit);
+
+    const lbl = document.createElement('div');
+    lbl.className = 'node-tag talent-tag';
+    lbl.innerHTML = `<div class="t-num" style="color:#${col.getHexString()}">${num}</div>`
+      + `<div class="t-label">${TALENT_LABEL[key]}</div>`;
+    overlayEl.appendChild(lbl);
+
+    _tStars[key] = { key, num, icon, col, pos: pos.clone(), coreSp, haloSp, lbl, active: false };
+  });
+
+  // ── Fly-to + return ───────────────────────────────────────────────────────
+  let _activeTalentStar = null;
+
+  function flyToTalent(key) {
+    if (isFlying) return;
+    isFlying = true;
+    _activeTalentStar = key;
+    activeExtraStar = { tier: 'talent', key };
+
+    const s   = _tStars[key];
+    const pos = s.coreSp.position.clone();
+
+    tagEls.forEach(el => gsap.to(el, { opacity:0, duration:0.5 }));
+    gsap.to(lineMat, { opacity:0, duration:0.7 });
+    KEYS.forEach(k => {
+      if (k !== key) {
+        gsap.to(_tStars[k].coreSp.material, { opacity:0, duration:0.5 });
+        gsap.to(_tStars[k].haloSp.material, { opacity:0, duration:0.4 });
+      }
+    });
+
+    const dir   = pos.clone().normalize();
+    const destX = pos.x + dir.x * 12;
+    const destY = pos.y + dir.y * 12;
+    const destZ = pos.z - 12;
+
+    gsap.to(camera.position, {
+      x: pos.x, y: pos.y, z: pos.z,
+      duration: 1.9, ease: 'power2.in',
+      onUpdate()   { camera.lookAt(pos.x, pos.y, pos.z); },
+      onComplete() {
+        gsap.to(camera.position, {
+          x: destX, y: destY, z: destZ,
+          duration: 0.7, ease: 'power3.out',
+          onUpdate()   { camera.lookAt(pos.x, pos.y, pos.z); },
+          onComplete() {
+            isFlying = false;
+            openTalent(key);
+            gsap.to('#hud-back', { opacity:1, duration:0.6 });
+          },
+        });
+      },
+    });
+
+    baseCamX = destX;
+    baseCamY = destY;
+
+    gsap.to(s.coreSp.scale, { x:0.55*22, y:0.55*22, duration:1.9, ease:'power2.in' });
+    gsap.to(s.coreSp.material, { opacity:0, duration:0.25, delay:1.75,
+      onComplete() { s.coreSp.visible = false; }
+    });
+
+    const hex = '#' + s.col.getHexString();
+    veil.style.background = `radial-gradient(ellipse at center,#fff 0%,${hex}cc 18%,${hex}55 50%,transparent 80%)`;
+    gsap.to(veil, { opacity:1, duration:0.18, delay:1.82,
+      onComplete() {
+        veil.style.background = `radial-gradient(ellipse at center,${hex}22 0%,${hex}10 45%,transparent 75%)`;
+        gsap.to(veil, { opacity:1, duration:0.6 });
+      },
+    });
+  }
+
+  function restoreTalentStar(key) {
+    const s = _tStars[key];
+    s.coreSp.visible = true;
+    s.coreSp.material.opacity = 0;
+    gsap.to(s.coreSp.scale, { x:0.55, y:0.55, duration:0 });
+    gsap.to(s.coreSp.material, { opacity:0.85, duration:1.0 });
+    KEYS.forEach(k => {
+      if (k !== key) {
+        gsap.to(_tStars[k].coreSp.material, { opacity:0.85, duration:0.9 });
+        gsap.to(_tStars[k].haloSp.material, { opacity:0.20, duration:0.9 });
+      }
+    });
+  }
+
+  document.getElementById('hud-back').addEventListener('click', () => {
+    if (_activeTalentStar === null) return;
+    const key = _activeTalentStar;
+    _activeTalentStar = null;
+    activeExtraStar = null;
+    closeTalentBanner();
+    gsap.delayedCall(0.5, () => restoreTalentStar(key));
+  });
+
+  // ── Click handler ───────────────────────────────────────────────────────
+  canvas.addEventListener('click', () => {
+    if (wasDragging) { wasDragging = false; return; } // pan gesture, not a tap
+    if (isFlying || activeIdx !== -1) return;
+
+    if (_activeTalentStar !== null) {
+      const key = _activeTalentStar;
+      _activeTalentStar = null;
+      activeExtraStar = null;
+      closeTalentBanner();
+      gsap.delayedCall(0.5, () => restoreTalentStar(key));
+      returnToMap();
+      return;
+    }
+
+    // Another tier (program star) is mid-transition or zoomed — don't start
+    // a second, competing fly-in. That tier's own click handler owns this click.
+    if (activeExtraStar !== null) return;
+
+    raycaster.setFromCamera(mouse2D, camera);
+    const hits = raycaster.intersectObjects(_tHitMeshes);
+    if (hits.length) flyToTalent(hits[0].object.userData.tKey);
+  });
+
+  // ── Animation loop ───────────────────────────────────────────────────────
+  let _hovTalent = null;
+  ;(function _tLoop() {
+    requestAnimationFrame(_tLoop);
+    const t = performance.now() * 0.001;
+
+    KEYS.forEach((key, i) => {
+      const s = _tStars[key];
+      if (_activeTalentStar !== key) {
+        const pulse = Math.sin(t * 0.85 + i * 2.1) * 0.5 + 0.5;
+        s.coreSp.material.opacity = 0.65 + pulse * 0.2;
+        s.haloSp.material.opacity = 0.10 + pulse * 0.12;
+        const sc = 1.0 + pulse * 0.15;
+        s.coreSp.scale.set(0.55 * sc, 0.55 * sc, 1);
+      }
+      const sc2 = toScreen(s.coreSp.position);
+      s.lbl.style.left = sc2.x + 'px';
+      s.lbl.style.top  = (sc2.y + 18) + 'px';
+    });
+
+    if (!isFlying && activeIdx === -1 && _activeTalentStar === null) {
+      raycaster.setFromCamera(mouse2D, camera);
+      const hits = raycaster.intersectObjects(_tHitMeshes);
+      const next = hits.length ? hits[0].object.userData.tKey : null;
+      if (next !== _hovTalent) {
+        if (_hovTalent !== null) {
+          _tStars[_hovTalent].lbl.classList.remove('lit');
+          gsap.to(_tStars[_hovTalent].haloSp.scale, { x:1.9, y:1.9, duration:0.4 });
+          if (hoveredIdx === -1) cursor.classList.remove('on-star');
+        }
+        _hovTalent = next;
+        if (_hovTalent !== null) {
+          _tStars[_hovTalent].lbl.classList.add('lit');
+          gsap.to(_tStars[_hovTalent].haloSp.scale, { x:3.0, y:3.0, duration:0.35, ease:'back.out(1.4)' });
+          cursor.classList.add('on-star');
+        }
+      }
+    }
+  })();
+
+  // ── DOB hook — recompute talents + recolor stars on date change ──────────
+  const _prevT = applyNewDate;
+  applyNewDate = function(dateStr) {
+    const ok = _prevT(dateStr);
+    if (!ok) return false;
+    _talents = window.DMEngine.calculateDestinyMatrix(dobToISO()).talents;
+    KEYS.forEach(key => {
+      const s = _tStars[key];
+      s.num  = _talents[key];
+      s.icon = window.DMEngine.getIconType(s.num);
+      s.col  = new THREE.Color(ICON_COLOR_MAP[s.icon] || 0xAABBFF);
+      s.coreSp.material.color.copy(s.col);
+      s.haloSp.material.color.copy(s.col);
+      s.lbl.querySelector('.t-num').textContent = s.num;
+      s.lbl.querySelector('.t-num').style.color = '#' + s.col.getHexString();
+    });
+    return true;
+  };
+
+})();
+
+
+
+
+})();
+</script>
+</body>
+</html>
