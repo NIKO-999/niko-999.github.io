@@ -2263,6 +2263,18 @@ appendHint();
       _microTags[i + 2].querySelector('.t-num').textContent = String(v);
       MICRO[i + 2].num = v;
     });
+
+    // F/G also carry a derived archetype subtitle (Talent Star Line's
+    // ancestral-inherited-talent line) — must be recomputed alongside the
+    // number, same as the talent-line hook already does for its own icon.
+    if (window.DMEngine) {
+      MICRO[2].archetype = window.DMEngine.getArchetype(_vals.atF);
+      MICRO[3].archetype = window.DMEngine.getArchetype(_vals.atG);
+      const archF = _microTags[2].querySelector('.t-archetype');
+      const archG = _microTags[3].querySelector('.t-archetype');
+      if (archF) archF.textContent = MICRO[2].archetype;
+      if (archG) archG.textContent = MICRO[3].archetype;
+    }
     return true;
   };
 
