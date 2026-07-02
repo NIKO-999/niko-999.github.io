@@ -192,24 +192,6 @@
       transition: color .2s;
     }
     #hud-back:hover { color: rgba(255,255,255,0.55); }
-    #hud-reset {
-      position: absolute;
-      /* Bottom-left, same row as the date-of-birth control (bottom-right);
-         stacked slightly above #hud-back's spot so the two don't overlap
-         when "← Return" fades in while zoomed into a core arcana star. */
-      bottom: 46px; left: 32px;
-      font-size: 8px;
-      font-weight: 400;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      cursor: none;
-      pointer-events: all;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
-      padding-bottom: 2px;
-      transition: color .2s;
-    }
-    #hud-reset:hover { color: rgba(255,255,255,0.55); }
 
     /* ── Info card ───────────────────────────────────── */
     #info-card {
@@ -521,7 +503,6 @@
   <div id="hud-label">Destiny Matrix</div>
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
-  <div id="hud-reset">Reset</div>
 </div>
 
 <!-- Nebula veil — covers screen when flying into a star -->
@@ -1479,44 +1460,6 @@ function returnToMap(onDone) {
   });
 }
 
-// ── HARD RESET ────────────────────────────────────────────────────────────
-// Always-visible mobile safety net (bottom-middle "Reset" button). Unlike
-// returnToMap(), which bails if isFlying is already true and only unwinds
-// whichever single tier called it, this force-clears every piece of shared
-// state directly — core arcana zoom, the cross-tier activeExtraStar guard,
-// and the program/talent banner's shared DOM — regardless of which tier
-// (or accidental flyTo, e.g. from the DOB-gate keyboard-dismiss bug) got
-// the camera stuck.
-function hardReset() {
-  gsap.killTweensOf(camera.position);
-
-  isFlying        = false;
-  activeIdx       = -1;
-  activeExtraStar = null;
-  hideCard();
-
-  const banner = document.getElementById('prog-banner');
-  gsap.killTweensOf(banner);
-  gsap.set(banner, { y: '105%' });
-  banner.classList.remove('open');
-  gsap.to('#hud-back', { opacity: 0, duration: 0.25 });
-
-  panX = 0; panY = 0;
-  baseCamZ = computeFitCamZ();
-  camZoom  = baseCamZ;
-  baseCamX = 0; baseCamY = 0;
-
-  gsap.to(camera.position, {
-    x: 0, y: 0, z: baseCamZ,
-    duration: 0.8, ease: 'power2.inOut',
-    onUpdate() { camera.lookAt(0, 0, 0); },
-  });
-
-  tagEls.forEach(el => gsap.to(el, { opacity: 1, duration: 0.5 }));
-  gsap.to(lineMat, { opacity: 0.11, duration: 1.0 });
-}
-document.getElementById('hud-reset').addEventListener('click', hardReset);
-
 // ── INFO CARD ─────────────────────────────────────────────────────────────
 const infoCard = document.getElementById('info-card');
 gsap.set(infoCard, { xPercent: -50, y: 24, opacity: 0, pointerEvents: 'none' });
@@ -1693,21 +1636,22 @@ gsap.set('#hud-back', { opacity: 0 });
 
 animate(); // start loop immediately (renders while loader is covering)
 
-// Swallows the very first tap right after the scene reveals — covers a
-// stray tap made to dismiss the mobile keyboard after DOB-gate entry (see
-// submitGate()) landing on the canvas and accidentally raycast-hitting a
-// star. Capture phase + stopImmediatePropagation so it runs before (and
-// blocks) all four of this file's separate canvas click listeners,
-// regardless of their registration order.
-let _justRevealed = false;
+// Swallows any tap for a short window after a date of birth is entered or
+// changed — via the initial gate, the "tap to change" HUD control, or a
+// ?dob= link. Covers a stray tap made to dismiss the mobile on-screen
+// keyboard landing on the canvas and accidentally raycast-hitting a star,
+// which was flying the camera into a random arcana with no way back.
+// The flag itself is set inside applyNewDate() (further down) so every
+// entry point is covered uniformly, not just the gate. Capture phase +
+// stopImmediatePropagation so it runs before (and blocks) all four of
+// this file's separate canvas click listeners, regardless of registration
+// order.
+let _dobJustChanged = false;
 canvas.addEventListener('click', e => {
-  if (_justRevealed) e.stopImmediatePropagation();
+  if (_dobJustChanged) e.stopImmediatePropagation();
 }, true);
 
 function revealScene() {
-  _justRevealed = true;
-  setTimeout(() => { _justRevealed = false; }, 600);
-
   gsap.to(loader, {
     opacity: 0, duration: 1.2,
     onComplete: () => { loader.style.display = 'none'; },
@@ -1816,6 +1760,12 @@ function applyNewDate(dateStr) {
     _dob = matrix.input;
     hudDate.textContent = fmtDate(_dob.day, _dob.month, _dob.yearFull);
     appendHint();
+
+    // Ignore stray taps for a moment — covers the mobile-keyboard-dismiss-tap
+    // hitting the canvas right after any date change (see _dobJustChanged above).
+    _dobJustChanged = true;
+    setTimeout(() => { _dobJustChanged = false; }, 1000);
+
     return true;
   } catch (e) {
     return false;
