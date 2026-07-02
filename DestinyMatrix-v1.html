@@ -1129,9 +1129,7 @@ const ZOOM_MIN = 6, ZOOM_MAX = 30;
 
 // Auto-fit: derive the camera distance from the viewport's aspect ratio so
 // the whole diamond (nodes sit at ±3.7 on each axis) fits on screen without
-// requiring pan/pinch just to see it — mobile fix, replaces relying on the
-// gesture below for basic visibility. Reuses the same half-FOV (25°) math
-// as _pxToWorld() further down.
+// requiring any gesture just to see it.
 const FIT_HALF_EXTENT = 5.5; // world units — the ±3.7 diamond plus label/orbit breathing room
 function computeFitCamZ() {
   const fovRad  = THREE.MathUtils.degToRad(25);
@@ -1147,15 +1145,14 @@ let   baseCamY  = 0;
 let   offX = 0, offY = 0;
 let   tgtX = 0, tgtY = 0;
 
-// Touch-only drag-to-pan (index.html mobile fix) — lets narrow/portrait
-// viewports reveal content clipped by the fixed-FOV frustum without
-// shrinking the diagram. Persists until returnToMap() recenters it.
+// Pan/pinch removed — the diagram auto-fits the viewport (computeFitCamZ)
+// so everything is already reachable without a gesture, and manual
+// pan/pinch was the other half of the mobile "camera gets stuck" bug
+// class. panX/panY/camZoom stay declared (still read by animate() and
+// returnToMap()) but are never mutated by touch input anymore, so the
+// camera simply stays at the fitted default at all times.
 let   panX = 0, panY = 0;
-const PAN_CLAMP = 4.5; // world units; keeps the diagram from dragging fully off-screen
 let   wasDragging = false;
-
-// Touch-only pinch-to-zoom — dollies the camera along Z between fingers.
-// Kept as a bonus on top of the auto-fit base distance, not required for it.
 let   camZoom = baseCamZ;
 
 let isFlying  = false;
@@ -1203,31 +1200,11 @@ const raycaster = new THREE.Raycaster();
 const mouse2D   = new THREE.Vector2(-999, -999);
 const cursor    = document.getElementById('cursor');
 
-// Unified pointer input — mouse hover keeps the existing parallax feel;
-// touch drag pans the camera, and a second touch pinches to zoom (mobile
-// fix: fixed-FOV frustum clips side content on narrow/portrait viewports,
-// so touch users can drag/pinch to reveal or scale it rather than the
-// diagram being shrunk to fit).
-const activeTouches = new Map(); // pointerId → {x, y}
-let _dragStartX = 0, _dragStartY = 0;
-let _dragStartPanX = 0, _dragStartPanY = 0;
-let _dragDistance = 0;
-
-let _pinchStartDist = 0;
-let _pinchStartZoom = baseCamZ;
-
-function _pxToWorld() {
-  // World-units-per-pixel is identical on both axes for a standard
-  // (non-anamorphic) perspective camera — see PAN_CLAMP comment above.
-  const halfH = camZoom * Math.tan(THREE.MathUtils.degToRad(25));
-  return (2 * halfH) / window.innerHeight;
-}
-
-function _touchDist() {
-  const pts = [...activeTouches.values()];
-  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
-}
-
+// Unified pointer input — mouse hover keeps the existing parallax feel.
+// Touch drag-to-pan and pinch-to-zoom were removed (mobile bug fix): the
+// diagram auto-fits the viewport instead (computeFitCamZ), so nothing is
+// clipped and there's no gesture needed to reach it. Touch taps still work
+// exactly as before — only the drag/pinch camera-movement is gone.
 document.addEventListener('pointermove', e => {
   cursor.style.left = e.clientX + 'px';
   cursor.style.top  = e.clientY  + 'px';
@@ -1238,30 +1215,7 @@ document.addEventListener('pointermove', e => {
    -(e.clientY / window.innerHeight) * 2 + 1,
   );
 
-  if (e.pointerType === 'touch') {
-    if (!activeTouches.has(e.pointerId)) return;
-    activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-    if (activeTouches.size >= 2) {
-      // Pinch-zoom: pan is frozen while two fingers are down.
-      const dist  = _touchDist();
-      const scale = dist / _pinchStartDist;
-      camZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, _pinchStartZoom / scale));
-      wasDragging = true;
-      return;
-    }
-
-    // Single finger: existing pan behavior.
-    const dxPx = e.clientX - _dragStartX;
-    const dyPx = e.clientY - _dragStartY;
-    _dragDistance = Math.hypot(dxPx, dyPx);
-    if (_dragDistance > 6) wasDragging = true;
-
-    const pxToWorld = _pxToWorld();
-    panX = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanX - dxPx * pxToWorld));
-    panY = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanY + dyPx * pxToWorld));
-    return;
-  }
+  if (e.pointerType === 'touch') return;
 
   // Mouse (non-touch): existing hover-parallax target, untouched.
   tgtX = (e.clientX / window.innerWidth  - 0.5) *  2.0;
@@ -1273,41 +1227,12 @@ document.addEventListener('pointerdown', e => {
 
   // A tap with zero movement never fires pointermove, so mouse2D must be
   // set here too — otherwise the raycaster hit-tests against wherever the
-  // last drag happened to end instead of this tap's actual position.
+  // last pointer event happened to leave it instead of this tap's actual
+  // position.
   mouse2D.set(
     (e.clientX / window.innerWidth)  * 2 - 1,
    -(e.clientY / window.innerHeight) * 2 + 1,
   );
-
-  wasDragging = false; // each new gesture starts clean — don't let a stale drag eat this tap
-  if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
-
-  activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
-
-  if (activeTouches.size === 2) {
-    _pinchStartDist = _touchDist();
-    _pinchStartZoom = camZoom;
-  } else if (activeTouches.size === 1) {
-    _dragStartX     = e.clientX;
-    _dragStartY     = e.clientY;
-    _dragStartPanX  = panX;
-    _dragStartPanY  = panY;
-    _dragDistance   = 0;
-  }
-});
-
-document.addEventListener('pointerup', e => {
-  activeTouches.delete(e.pointerId);
-  if (activeTouches.size === 1) {
-    // Dropped from a pinch (or a stray second touch) back to one finger —
-    // resume panning from here instead of jumping to the old baseline.
-    const [remaining] = activeTouches.values();
-    _dragStartX    = remaining.x;
-    _dragStartY    = remaining.y;
-    _dragStartPanX = panX;
-    _dragStartPanY = panY;
-    _dragDistance  = 0;
-  }
 });
 
 // ── CLICK ─────────────────────────────────────────────────────────────────
@@ -1338,7 +1263,7 @@ document.getElementById('hud-back').addEventListener('click', returnToMap);
 const veil = document.getElementById('veil');
 
 function flyTo(idx) {
-  if (isFlying) return;
+  if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
   isFlying  = true;
   activeIdx = idx;
   const data = NODES[idx];
@@ -1422,7 +1347,6 @@ function returnToMap(onDone) {
   isFlying = true;
   hideCard();
   currentMatrixView = 'STANDARD'; // always reopen fresh cards on Standard, never sticky
-  panX = 0; panY = 0; camZoom = baseCamZ; // recenter pan/zoom on every return to the map
   gsap.to('#hud-back', { opacity: 0, duration: 0.25 });
   // Clear any hover highlight immediately
   if (hoveredIdx !== -1) {
@@ -1432,6 +1356,7 @@ function returnToMap(onDone) {
 
   const prevIdx = activeIdx;
   activeIdx = -1;
+  panX = 0; panY = 0; camZoom = baseCamZ; // recenter pan/zoom on every return to the map
 
   // Fade veil out
   gsap.to(veil, { opacity: 0, duration: 1.0 });
@@ -2136,7 +2061,7 @@ appendHint();
   }
 
   function flyToMicro(idx) {
-    if (isFlying) return;
+    if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
     isFlying = true;
     _activeMicroStar = idx;
     activeExtraStar = { tier: 'micro', key: idx };
@@ -2441,7 +2366,7 @@ appendHint();
   let _activeProgStar = -1;
 
   function flyToProgStar(pi) {
-    if (isFlying) return;
+    if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
     isFlying = true;
     _activeProgStar = pi;
     activeExtraStar = { tier: 'prog', key: pi };
@@ -2495,23 +2420,24 @@ appendHint();
     });
   }
 
+  function restoreProgStar(pi) {
+    const s = _stars[pi];
+    s.coreSp.visible = true;
+    s.coreSp.material.opacity = 0;
+    gsap.to(s.coreSp.scale, { x:1.1, y:1.1, duration:0 });
+    gsap.to(s.coreSp.material, { opacity:0.95, duration:1.0 });
+    _stars.forEach((st, i) => {
+      if (i !== pi) { gsap.to(st.coreSp.material, { opacity:0.95, duration:0.9 }); gsap.to(st.haloSp.material, { opacity:0.22, duration:0.9 }); }
+    });
+  }
+
   document.getElementById('hud-back').addEventListener('click', () => {
     if (_activeProgStar === -1) return;
     const pi = _activeProgStar;
     _activeProgStar = -1;
     activeExtraStar = null;
     closeBanner();
-    // Restore this star after camera starts returning
-    gsap.delayedCall(0.5, () => {
-      const s = _stars[pi];
-      s.coreSp.visible = true;
-      s.coreSp.material.opacity = 0;
-      gsap.to(s.coreSp.scale, { x:1.1, y:1.1, duration:0 });
-      gsap.to(s.coreSp.material, { opacity:0.95, duration:1.0 });
-      _stars.forEach((st, i) => {
-        if (i !== pi) { gsap.to(st.coreSp.material, { opacity:0.95, duration:0.9 }); gsap.to(st.haloSp.material, { opacity:0.22, duration:0.9 }); }
-      });
-    });
+    gsap.delayedCall(0.5, () => restoreProgStar(pi));
   });
 
   // ── Click handler ───────────────────────────────────────────────────────
@@ -2525,19 +2451,7 @@ appendHint();
       _activeProgStar = -1;
       activeExtraStar = null;
       closeBanner();
-      gsap.delayedCall(0.5, () => {
-        const s = _stars[pi];
-        s.coreSp.visible = true;
-        s.coreSp.material.opacity = 0;
-        gsap.to(s.coreSp.scale, { x:1.1, y:1.1, duration:0 });
-        gsap.to(s.coreSp.material, { opacity:0.95, duration:1.0 });
-        _stars.forEach((st, i) => {
-          if (i !== pi) {
-            gsap.to(st.coreSp.material, { opacity:0.95, duration:0.9 });
-            gsap.to(st.haloSp.material, { opacity:0.22, duration:0.9 });
-          }
-        });
-      });
+      gsap.delayedCall(0.5, () => restoreProgStar(pi));
       returnToMap();
       return;
     }
@@ -2761,7 +2675,7 @@ appendHint();
   let _activeTalentStar = null;
 
   function flyToTalent(key) {
-    if (isFlying) return;
+    if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
     isFlying = true;
     _activeTalentStar = key;
     activeExtraStar = { tier: 'talent', key };
