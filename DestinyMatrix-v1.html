@@ -96,16 +96,6 @@
       color: rgba(255,255,255,0.22);
       white-space: nowrap;
     }
-    #hud-credit {
-      position: absolute;
-      bottom: 30px; left: 32px;
-      font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      font-weight: 300;
-      letter-spacing: 3px;
-      color: rgba(255,255,255,0.14);
-      white-space: nowrap;
-    }
     #hud-date {
       position: absolute;
       bottom: 30px; right: 32px;
@@ -202,6 +192,24 @@
       transition: color .2s;
     }
     #hud-back:hover { color: rgba(255,255,255,0.55); }
+    #hud-reset {
+      position: absolute;
+      /* Bottom-left, same row as the date-of-birth control (bottom-right);
+         stacked slightly above #hud-back's spot so the two don't overlap
+         when "← Return" fades in while zoomed into a core arcana star. */
+      bottom: 46px; left: 32px;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      cursor: none;
+      pointer-events: all;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 2px;
+      transition: color .2s;
+    }
+    #hud-reset:hover { color: rgba(255,255,255,0.55); }
 
     /* ── Info card ───────────────────────────────────── */
     #info-card {
@@ -511,9 +519,9 @@
 <!-- HUD -->
 <div id="hud">
   <div id="hud-label">Destiny Matrix</div>
-  <div id="hud-credit">CREATED BY NIKO</div>
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
+  <div id="hud-reset">Reset</div>
 </div>
 
 <!-- Nebula veil — covers screen when flying into a star -->
@@ -1133,7 +1141,26 @@ const tagEls    = NODES.map((data, i) => {
 });
 
 // ── CAMERA STATE ──────────────────────────────────────────────────────────
-const baseCamZ  = 12;
+// ZOOM_MAX raised from 22 to 30 — narrow portrait phones (e.g. 375×812, aspect
+// ~0.46) need a fit distance of ~25.5 to show the whole diamond; the old cap
+// clamped that shorter, pushing nodes off-screen instead of shrinking to fit.
+const ZOOM_MIN = 6, ZOOM_MAX = 30;
+
+// Auto-fit: derive the camera distance from the viewport's aspect ratio so
+// the whole diamond (nodes sit at ±3.7 on each axis) fits on screen without
+// requiring pan/pinch just to see it — mobile fix, replaces relying on the
+// gesture below for basic visibility. Reuses the same half-FOV (25°) math
+// as _pxToWorld() further down.
+const FIT_HALF_EXTENT = 5.5; // world units — the ±3.7 diamond plus label/orbit breathing room
+function computeFitCamZ() {
+  const fovRad  = THREE.MathUtils.degToRad(25);
+  const aspect  = window.innerWidth / window.innerHeight;
+  const d = FIT_HALF_EXTENT / (Math.tan(fovRad) * Math.min(1, aspect));
+  return Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, d));
+}
+
+let   baseCamZ  = computeFitCamZ();
+camera.position.z = baseCamZ; // override the placeholder set at camera creation
 let   baseCamX  = 0;
 let   baseCamY  = 0;
 let   offX = 0, offY = 0;
@@ -1147,8 +1174,8 @@ const PAN_CLAMP = 4.5; // world units; keeps the diagram from dragging fully off
 let   wasDragging = false;
 
 // Touch-only pinch-to-zoom — dollies the camera along Z between fingers.
+// Kept as a bonus on top of the auto-fit base distance, not required for it.
 let   camZoom = baseCamZ;
-const ZOOM_MIN = 6, ZOOM_MAX = 22;
 
 let isFlying  = false;
 let activeIdx = -1;
@@ -1452,6 +1479,44 @@ function returnToMap(onDone) {
   });
 }
 
+// ── HARD RESET ────────────────────────────────────────────────────────────
+// Always-visible mobile safety net (bottom-middle "Reset" button). Unlike
+// returnToMap(), which bails if isFlying is already true and only unwinds
+// whichever single tier called it, this force-clears every piece of shared
+// state directly — core arcana zoom, the cross-tier activeExtraStar guard,
+// and the program/talent banner's shared DOM — regardless of which tier
+// (or accidental flyTo, e.g. from the DOB-gate keyboard-dismiss bug) got
+// the camera stuck.
+function hardReset() {
+  gsap.killTweensOf(camera.position);
+
+  isFlying        = false;
+  activeIdx       = -1;
+  activeExtraStar = null;
+  hideCard();
+
+  const banner = document.getElementById('prog-banner');
+  gsap.killTweensOf(banner);
+  gsap.set(banner, { y: '105%' });
+  banner.classList.remove('open');
+  gsap.to('#hud-back', { opacity: 0, duration: 0.25 });
+
+  panX = 0; panY = 0;
+  baseCamZ = computeFitCamZ();
+  camZoom  = baseCamZ;
+  baseCamX = 0; baseCamY = 0;
+
+  gsap.to(camera.position, {
+    x: 0, y: 0, z: baseCamZ,
+    duration: 0.8, ease: 'power2.inOut',
+    onUpdate() { camera.lookAt(0, 0, 0); },
+  });
+
+  tagEls.forEach(el => gsap.to(el, { opacity: 1, duration: 0.5 }));
+  gsap.to(lineMat, { opacity: 0.11, duration: 1.0 });
+}
+document.getElementById('hud-reset').addEventListener('click', hardReset);
+
 // ── INFO CARD ─────────────────────────────────────────────────────────────
 const infoCard = document.getElementById('info-card');
 gsap.set(infoCard, { xPercent: -50, y: 24, opacity: 0, pointerEvents: 'none' });
@@ -1610,6 +1675,16 @@ window.addEventListener('resize', () => {
   renderer.setSize(window.innerWidth, window.innerHeight);
   camera.aspect = window.innerWidth / window.innerHeight;
   camera.updateProjectionMatrix();
+
+  // Re-fit the base camera distance to the new viewport (e.g. orientation
+  // change), but only while the map view is idle — avoids yanking the
+  // camera mid-fly or while zoomed into a card, mirroring the animate-loop
+  // guard that gates camera.position writes on !isFlying && activeIdx===-1.
+  if (!isFlying && activeIdx === -1) {
+    const wasAtBase = camZoom === baseCamZ;
+    baseCamZ = computeFitCamZ();
+    if (wasAtBase) camZoom = baseCamZ; // stay fitted unless manually pinched away from it
+  }
 });
 
 // ── BOOT ──────────────────────────────────────────────────────────────────
@@ -1618,7 +1693,21 @@ gsap.set('#hud-back', { opacity: 0 });
 
 animate(); // start loop immediately (renders while loader is covering)
 
+// Swallows the very first tap right after the scene reveals — covers a
+// stray tap made to dismiss the mobile keyboard after DOB-gate entry (see
+// submitGate()) landing on the canvas and accidentally raycast-hitting a
+// star. Capture phase + stopImmediatePropagation so it runs before (and
+// blocks) all four of this file's separate canvas click listeners,
+// regardless of their registration order.
+let _justRevealed = false;
+canvas.addEventListener('click', e => {
+  if (_justRevealed) e.stopImmediatePropagation();
+}, true);
+
 function revealScene() {
+  _justRevealed = true;
+  setTimeout(() => { _justRevealed = false; }, 600);
+
   gsap.to(loader, {
     opacity: 0, duration: 1.2,
     onComplete: () => { loader.style.display = 'none'; },
@@ -1656,6 +1745,7 @@ if (_bootParamDob) {
     const valid = d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100;
 
     if (valid && applyNewDate(gateInput.value.trim())) {
+      gateInput.blur(); // dismiss the mobile keyboard proactively, before revealScene()
       revealScene();
     } else {
       gateError.textContent = 'Please enter a valid date';
