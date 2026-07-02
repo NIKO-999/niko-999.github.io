@@ -324,6 +324,13 @@
       color: rgba(190,215,245,0.60);
       letter-spacing: 0.1px;
     }
+    .pb-expr-list {
+      margin: 0;
+      padding-left: 0;
+      list-style: none;
+    }
+    .pb-expr-list li { margin-bottom: 10px; }
+    .pb-expr-list li:last-child { margin-bottom: 0; }
     #prog-banner::before {
       content: '';
       position: absolute;
@@ -568,6 +575,7 @@
 <script src="js/matrix-engine.js"></script>
 <script src="js/talent-content.js"></script>
 <script src="js/universal-law-content.js"></script>
+<script src="js/karmic-debt-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -1958,7 +1966,10 @@ appendHint();
     const monV  = _rd(DGv + CGv);      // midpoint of channel
     const loveV = _rd(DGv + monV);     // 1/3 point (closer to Inner Bottom)
 
-    return { love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv };
+    // Karmic Debt: the Inner Bottom value itself (reduce(D+E)) — already
+    // computed above for the Love/Money chain, also matches matrix-engine.js's
+    // karmic-tail-triplet middle value [D, reduce(D+E), E].
+    return { love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv };
   }
 
   let _vals = _calcVals();
@@ -1985,6 +1996,12 @@ appendHint();
       pos:_ptG.clone(), color:0xCCDDFF, twk:{spd:0.9,off:2.1} },
     { key:'H', num:_vals.atH, label:'Paternal Material',  pos:_ptH.clone(), color:0xCCDDFF, twk:{spd:1.2,off:3.7} },
     { key:'I', num:_vals.atI, label:'Maternal Material',  pos:_ptI.clone(), color:0xCCDDFF, twk:{spd:0.8,off:5.3} },
+
+    // Karmic Debt — sits at the Inner Bottom point, the literal midpoint
+    // between the Karmic Tail star (D) and Soul Center star (E). Past-life
+    // debt / health reading, keyed to matrix-engine.js's karmic-tail triplet.
+    { key:'KARMA', num:_vals.atK, label:'Karmic Debt',
+      pos: new THREE.Vector3(-_R * 0.18, -_R * 0.5, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2085,6 +2102,62 @@ appendHint();
   function openMicroCard(idx) {
     const data = MICRO[idx];
     const hex  = '#' + new THREE.Color(data.color).getHexString();
+
+    // Karmic Debt gets its own richer 5-section template + named-seed
+    // override, instead of the standard why/shadow/path micro-node card.
+    if (data.key === 'KARMA') {
+      let kc = null, isNamedSeed = false;
+      if (window.DMEngine && window.DKarmicDebtContent) {
+        const D = NODES[3].num, E = NODES[4].num;
+        const code = window.DMEngine.matchKarmicTailCode([D, data.num, E]);
+        if (code) { kc = window.DKarmicDebtContent.getCode(code); isNamedSeed = !!kc; }
+        if (!kc) kc = window.DKarmicDebtContent.get(data.num);
+      }
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = isNamedSeed ? 'Named Karmic Seed' : 'Karmic Debt';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (kc && kc.heading) || data.label;
+      document.getElementById('pb-body').innerHTML = kc ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">PAST-LIFE EXPRESSIONS</div>
+           <ul class="pb-full-text pb-expr-list">
+             ${(kc.expressions || []).map(e => `<li>${e}</li>`).join('')}
+           </ul>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">WHAT WAS LEFT UNFINISHED</div>
+           <div class="pb-full-text">${kc.unfinished || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">WHY YOUR SOUL CHOSE THIS LIFE</div>
+           <div class="pb-full-text">${kc.soulChose || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">HOW THIS MAY SHOW UP TODAY</div>
+           <div class="pb-full-text">${kc.showsUpToday || ''}</div>
+         </div>
+         ${kc.health ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">HEALTH</div>
+           <div class="pb-full-text">${kc.health}</div>
+         </div>` : ''}
+         ${kc.positive ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+           <div class="pb-full-text">${kc.positive}</div>
+         </div>` : ''}
+         ${kc.negative ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+           <div class="pb-full-text">${kc.negative}</div>
+         </div>` : ''}` : '';
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
     const mc   = window.DMicroContent && DMicroContent.get(data.num, data.key);
     const sectionLabel = (data.key === 'LOVE' || data.key === 'MON')
       ? 'Love & Money Channel'
@@ -2275,6 +2348,11 @@ appendHint();
       if (archF) archF.textContent = MICRO[2].archetype;
       if (archG) archG.textContent = MICRO[3].archetype;
     }
+
+    // Node 6: Karmic Debt (no icon — replace full textContent, same as corners)
+    _microTags[6].querySelector('.t-num').textContent = String(_vals.atK);
+    MICRO[6].num = _vals.atK;
+
     return true;
   };
 
