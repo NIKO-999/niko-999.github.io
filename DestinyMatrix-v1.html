@@ -1153,14 +1153,15 @@ let   baseCamY  = 0;
 let   offX = 0, offY = 0;
 let   tgtX = 0, tgtY = 0;
 
-// Pan/pinch removed — the diagram auto-fits the viewport (computeFitCamZ)
-// so everything is already reachable without a gesture, and manual
-// pan/pinch was the other half of the mobile "camera gets stuck" bug
-// class. panX/panY/camZoom stay declared (still read by animate() and
-// returnToMap()) but are never mutated by touch input anymore, so the
-// camera simply stays at the fitted default at all times.
+// Touch-only drag-to-pan (index.html mobile fix) — lets narrow/portrait
+// viewports reveal content clipped by the fixed-FOV frustum without
+// shrinking the diagram. Persists until returnToMap() recenters it.
 let   panX = 0, panY = 0;
+const PAN_CLAMP = 4.5; // world units; keeps the diagram from dragging fully off-screen
 let   wasDragging = false;
+
+// Touch-only pinch-to-zoom — dollies the camera along Z between fingers.
+// Kept as a bonus on top of the auto-fit base distance, not required for it.
 let   camZoom = baseCamZ;
 
 let isFlying  = false;
@@ -1208,11 +1209,31 @@ const raycaster = new THREE.Raycaster();
 const mouse2D   = new THREE.Vector2(-999, -999);
 const cursor    = document.getElementById('cursor');
 
-// Unified pointer input — mouse hover keeps the existing parallax feel.
-// Touch drag-to-pan and pinch-to-zoom were removed (mobile bug fix): the
-// diagram auto-fits the viewport instead (computeFitCamZ), so nothing is
-// clipped and there's no gesture needed to reach it. Touch taps still work
-// exactly as before — only the drag/pinch camera-movement is gone.
+// Unified pointer input — mouse hover keeps the existing parallax feel;
+// touch drag pans the camera, and a second touch pinches to zoom (mobile
+// fix: fixed-FOV frustum clips side content on narrow/portrait viewports,
+// so touch users can drag/pinch to reveal or scale it rather than the
+// diagram being shrunk to fit).
+const activeTouches = new Map(); // pointerId → {x, y}
+let _dragStartX = 0, _dragStartY = 0;
+let _dragStartPanX = 0, _dragStartPanY = 0;
+let _dragDistance = 0;
+
+let _pinchStartDist = 0;
+let _pinchStartZoom = baseCamZ;
+
+function _pxToWorld() {
+  // World-units-per-pixel is identical on both axes for a standard
+  // (non-anamorphic) perspective camera — see PAN_CLAMP comment above.
+  const halfH = camZoom * Math.tan(THREE.MathUtils.degToRad(25));
+  return (2 * halfH) / window.innerHeight;
+}
+
+function _touchDist() {
+  const pts = [...activeTouches.values()];
+  return Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+}
+
 document.addEventListener('pointermove', e => {
   cursor.style.left = e.clientX + 'px';
   cursor.style.top  = e.clientY  + 'px';
@@ -1223,7 +1244,30 @@ document.addEventListener('pointermove', e => {
    -(e.clientY / window.innerHeight) * 2 + 1,
   );
 
-  if (e.pointerType === 'touch') return;
+  if (e.pointerType === 'touch') {
+    if (!activeTouches.has(e.pointerId)) return;
+    activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+    if (activeTouches.size >= 2) {
+      // Pinch-zoom: pan is frozen while two fingers are down.
+      const dist  = _touchDist();
+      const scale = dist / _pinchStartDist;
+      camZoom = Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, _pinchStartZoom / scale));
+      wasDragging = true;
+      return;
+    }
+
+    // Single finger: existing pan behavior.
+    const dxPx = e.clientX - _dragStartX;
+    const dyPx = e.clientY - _dragStartY;
+    _dragDistance = Math.hypot(dxPx, dyPx);
+    if (_dragDistance > 6) wasDragging = true;
+
+    const pxToWorld = _pxToWorld();
+    panX = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanX - dxPx * pxToWorld));
+    panY = Math.max(-PAN_CLAMP, Math.min(PAN_CLAMP, _dragStartPanY + dyPx * pxToWorld));
+    return;
+  }
 
   // Mouse (non-touch): existing hover-parallax target, untouched.
   tgtX = (e.clientX / window.innerWidth  - 0.5) *  2.0;
@@ -1235,12 +1279,41 @@ document.addEventListener('pointerdown', e => {
 
   // A tap with zero movement never fires pointermove, so mouse2D must be
   // set here too — otherwise the raycaster hit-tests against wherever the
-  // last pointer event happened to leave it instead of this tap's actual
-  // position.
+  // last drag happened to end instead of this tap's actual position.
   mouse2D.set(
     (e.clientX / window.innerWidth)  * 2 - 1,
    -(e.clientY / window.innerHeight) * 2 + 1,
   );
+
+  wasDragging = false; // each new gesture starts clean — don't let a stale drag eat this tap
+  if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+
+  activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
+
+  if (activeTouches.size === 2) {
+    _pinchStartDist = _touchDist();
+    _pinchStartZoom = camZoom;
+  } else if (activeTouches.size === 1) {
+    _dragStartX     = e.clientX;
+    _dragStartY     = e.clientY;
+    _dragStartPanX  = panX;
+    _dragStartPanY  = panY;
+    _dragDistance   = 0;
+  }
+});
+
+document.addEventListener('pointerup', e => {
+  activeTouches.delete(e.pointerId);
+  if (activeTouches.size === 1) {
+    // Dropped from a pinch (or a stray second touch) back to one finger —
+    // resume panning from here instead of jumping to the old baseline.
+    const [remaining] = activeTouches.values();
+    _dragStartX    = remaining.x;
+    _dragStartY    = remaining.y;
+    _dragStartPanX = panX;
+    _dragStartPanY = panY;
+    _dragDistance  = 0;
+  }
 });
 
 // ── CLICK ─────────────────────────────────────────────────────────────────
@@ -1614,11 +1687,12 @@ if (_bootParamDob) {
   gate.style.display = 'flex';
   gateInput.max = new Date().toISOString().slice(0, 10); // no future birthdates
 
-  if (gateInput.showPicker) {
-    try { gateInput.showPicker(); } catch (_) { gateInput.focus(); }
-  } else {
-    gateInput.focus();
-  }
+  // No auto-focus/showPicker() here: showPicker() throws (NotAllowedError)
+  // without a preceding real user gesture, which a page-load call never
+  // has — that silent failure was why this looked broken on desktop
+  // (fell back to .focus(), which doesn't visibly open anything). The
+  // input is already visible; a normal click/tap opens its picker exactly
+  // like any other date field, no JS needed.
 
   function submitGate() {
     // gateInput.value is always YYYY-MM-DD from a native date input, and a
@@ -1629,15 +1703,22 @@ if (_bootParamDob) {
     const valid = d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100;
 
     if (valid && applyNewDate(gateInput.value)) {
-      gateInput.blur(); // dismiss any mobile picker UI proactively, before revealScene()
       revealScene();
-    } else {
+    } else if (gateInput.value) {
+      // Only show an error once something was actually entered — an empty
+      // value just means they haven't picked a date yet, not a mistake.
       gateError.textContent = 'Please enter a valid date';
       gsap.fromTo(gateInput, { x: -6 }, { x: 0, duration: 0.4, ease: 'elastic.out(1, 0.3)' });
     }
   }
 
-  gateInput.addEventListener('change', submitGate);
+  // Commit on blur, not 'change': on some mobile date pickers 'change'
+  // fires the moment a single segment (e.g. just the year) updates, well
+  // before the person has finished picking day/month/year — submitting
+  // then reads an incomplete date and wrongly reports it as invalid.
+  // Waiting for blur means we only read the value once they've actually
+  // closed the picker or tapped away.
+  gateInput.addEventListener('blur', submitGate);
 }
 
 // ── DOB INPUT ─────────────────────────────────────────────────────────────
@@ -1737,26 +1818,20 @@ function openDateEdit() {
     inp.focus();
   }
 
-  let committed = false;
-  function commit() {
-    committed = true;
+  // Commit on blur, not 'change': on some mobile date pickers 'change'
+  // fires the moment a single segment (e.g. just the year) updates, well
+  // before day/month are picked — committing then reads an incomplete
+  // date. Waiting for blur means we only read the value once the picker
+  // has actually closed or focus has moved away, covering both a real
+  // pick and a cancel (no value change) in one place.
+  inp.addEventListener('blur', () => {
     if (!inp.value || !applyNewDate(inp.value)) {
-      // Invalid or blank — restore original display
+      // Invalid, blank, or cancelled — restore original display
       hudDate.textContent = saved;
       appendHint();
     }
     // On success, applyNewDate() already replaced hudDate's content,
     // which removes this input from the DOM.
-  }
-
-  inp.addEventListener('change', commit);
-  inp.addEventListener('blur', () => {
-    // Cancelled without picking a value — only restore if commit() (via
-    // 'change') hasn't already handled it and removed this input.
-    if (!committed && hudDate.contains(inp)) {
-      hudDate.textContent = saved;
-      appendHint();
-    }
   });
 }
 
