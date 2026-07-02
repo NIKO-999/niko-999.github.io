@@ -247,12 +247,30 @@ function calculateDestinyMatrix(birthdateString) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 3b · FLEXIBLE-FORMAT ENTRY POINT
+ *    Accepts DD/MM/YYYY · DD.MM.YYYY · DD-MM-YYYY · YYYY-MM-DD (mirrors the
+ *    legacy calculator.js parseDate() flexibility) and normalizes to the
+ *    strict ISO string calculateDestinyMatrix() requires.
+ * ─────────────────────────────────────────────────────────────────────────── */
+function matrixFromDate(dateStr) {
+  const parts = String(dateStr).trim().split(/[\/\-\.]/).map(Number);
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    throw new Error(`Invalid date "${dateStr}". Use DD/MM/YYYY or YYYY-MM-DD.`);
+  }
+  const [a, b, c] = parts;
+  const iso = a > 1900
+    ? `${a}-${String(b).padStart(2, '0')}-${String(c).padStart(2, '0')}`   // YYYY-MM-DD
+    : `${c}-${String(b).padStart(2, '0')}-${String(a).padStart(2, '0')}`;  // DD/MM/YYYY
+  return calculateDestinyMatrix(iso);
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix };
+  module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
 } else {
-  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix };
+  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

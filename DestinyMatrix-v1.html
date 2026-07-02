@@ -324,13 +324,6 @@
       color: rgba(190,215,245,0.60);
       letter-spacing: 0.1px;
     }
-    .pb-expr-list {
-      margin: 0;
-      padding-left: 0;
-      list-style: none;
-    }
-    .pb-expr-list li { margin-bottom: 10px; }
-    .pb-expr-list li:last-child { margin-bottom: 0; }
     #prog-banner::before {
       content: '';
       position: absolute;
@@ -568,7 +561,6 @@
   <div class="ic-desc" id="ic-desc" style="display:none"></div>
 </div>
 
-<script src="js/calculator.js"></script>
 <script src="js/arcana.js"></script>
 <script src="js/programs.js"></script>
 <script src="js/micro-content.js"></script>
@@ -576,6 +568,7 @@
 <script src="js/talent-content.js"></script>
 <script src="js/universal-law-content.js"></script>
 <script src="js/karmic-debt-content.js"></script>
+<script src="js/past-life-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -1706,7 +1699,7 @@ if (_bootParamDob) {
     // gateInput.value is always YYYY-MM-DD from a native date input, and a
     // native input reports an empty value if what's typed isn't a real,
     // in-range date — but keep an explicit check as defense-in-depth since
-    // js/calculator.js's parseDate() itself doesn't range-check day/month.
+    // js/matrix-engine.js's matrixFromDate() itself doesn't range-check day/month.
     const [y, m, d] = (gateInput.value || '').split('-').map(Number);
     const valid = d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100;
 
@@ -1746,14 +1739,14 @@ function fmtDate(d, m, y) {
 }
 
 function applyNewDate(dateStr) {
-  if (!window.DMCalc) return false;
+  if (!window.DMEngine) return false;
   try {
-    const matrix = window.DMCalc.matrixFromDate(dateStr);
-    const p = matrix.positions;
+    const matrix = window.DMEngine.matrixFromDate(dateStr);
+    const p = matrix.core;
 
     // NODES order: [0]=top(A=day), [1]=right(B=month), [2]=bottom(C=year),
-    //              [3]=left(D=karmic tail), [4]=center(G=soul)
-    [p.A, p.B, p.C, p.D, p.G].forEach((pos, i) => {
+    //              [3]=left(D=karmic tail), [4]=center(E=soul)
+    [p.A, p.B, p.C, p.D, p.E].forEach((pos, i) => {
       const val = pos.value;
       NODES[i].num    = val;
       NODES[i].arcana = toRoman(val);
@@ -1777,7 +1770,7 @@ function applyNewDate(dateStr) {
       });
     });
 
-    _dob = matrix.input;
+    _dob = { day: matrix.input.day, month: matrix.input.month, yearFull: matrix.input.year };
     hudDate.textContent = fmtDate(_dob.day, _dob.month, _dob.yearFull);
     appendHint();
 
@@ -1910,9 +1903,9 @@ appendHint();
     );
   }
 
-  // ── Reduce helper (mirrors DMCalc.reduce) ────────────────────────────────
+  // ── Reduce helper (mirrors DMEngine.reduceArcana) ────────────────────────
   function _rd(n) {
-    if (window.DMCalc) return window.DMCalc.reduce(n);
+    if (window.DMEngine) return window.DMEngine.reduceArcana(n);
     if (n <= 22) return n;
     return _rd(String(Math.abs(n)).split('').reduce((a,d) => a + Number(d), 0));
   }
@@ -2002,6 +1995,13 @@ appendHint();
     // debt / health reading, keyed to matrix-engine.js's karmic-tail triplet.
     { key:'KARMA', num:_vals.atK, label:'Karmic Debt',
       pos: new THREE.Vector3(-_R * 0.18, -_R * 0.5, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
+
+    // Past Life Star — sits beyond the Karmic Tail star (D) on the same
+    // vertical axis, outside the diamond. Reuses D's own value directly:
+    // D is already canonically "past-life lessons" (see CLAUDE.md), so this
+    // is a deep-dive expansion of that same number, not a competing one.
+    { key:'PASTLIFE', num:NODES[3].num, label:'Past Life Star',
+      pos: new THREE.Vector3(0, -_R * 1.35, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2103,8 +2103,9 @@ appendHint();
     const data = MICRO[idx];
     const hex  = '#' + new THREE.Color(data.color).getHexString();
 
-    // Karmic Debt gets its own richer 5-section template + named-seed
-    // override, instead of the standard why/shadow/path micro-node card.
+    // Karmic Debt — present-life tension only (own 3-section template +
+    // named-seed override). Past Life Star has its own separate branch
+    // below; the two systems never share language or cross-reference.
     if (data.key === 'KARMA') {
       let kc = null, isNamedSeed = false;
       if (window.DMEngine && window.DKarmicDebtContent) {
@@ -2121,35 +2122,53 @@ appendHint();
       document.getElementById('pb-heading').textContent = (kc && kc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = kc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">PAST-LIFE EXPRESSIONS</div>
-           <ul class="pb-full-text pb-expr-list">
-             ${(kc.expressions || []).map(e => `<li>${e}</li>`).join('')}
-           </ul>
+           <div class="pb-full-label" style="color:${hex}">THE PATTERN</div>
+           <div class="pb-full-text">${kc.pattern || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">WHAT WAS LEFT UNFINISHED</div>
-           <div class="pb-full-text">${kc.unfinished || ''}</div>
+           <div class="pb-full-label" style="color:${hex}">THE CORE LESSON</div>
+           <div class="pb-full-text">${kc.lesson || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">WHY YOUR SOUL CHOSE THIS LIFE</div>
-           <div class="pb-full-text">${kc.soulChose || ''}</div>
+           <div class="pb-full-label" style="color:${hex}">THE PATH FORWARD</div>
+           <div class="pb-full-text">${kc.path || ''}</div>
+         </div>` : '';
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Past Life Star — origin-imprint layer only. Never references present-
+    // life behavior, lessons, or growth paths; that belongs entirely to the
+    // Karmic Debt branch above.
+    if (data.key === 'PASTLIFE') {
+      const pl = window.DPastLifeContent ? window.DPastLifeContent.get(data.num) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Past Life Star';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (pl && pl.heading) || data.label;
+      document.getElementById('pb-body').innerHTML = pl ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">POSSIBLE ORIGIN EXPRESSIONS</div>
+           <div class="pb-full-text">${pl.expressions || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">HOW THIS MAY SHOW UP TODAY</div>
-           <div class="pb-full-text">${kc.showsUpToday || ''}</div>
+           <div class="pb-full-label" style="color:${hex}">THE SHARED THEME</div>
+           <div class="pb-full-text">${pl.theme || ''}</div>
          </div>
-         ${kc.health ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">HEALTH</div>
-           <div class="pb-full-text">${kc.health}</div>
-         </div>` : ''}
-         ${kc.positive ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
-           <div class="pb-full-text">${kc.positive}</div>
-         </div>` : ''}
-         ${kc.negative ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
-           <div class="pb-full-text">${kc.negative}</div>
-         </div>` : ''}` : '';
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE EMOTIONAL IMPRINT</div>
+           <div class="pb-full-text">${pl.imprint || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">HOW THIS MAY FEEL FAMILIAR TODAY</div>
+           <div class="pb-full-text">${pl.today || ''}</div>
+         </div>` : '';
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
@@ -2353,6 +2372,10 @@ appendHint();
     _microTags[6].querySelector('.t-num').textContent = String(_vals.atK);
     MICRO[6].num = _vals.atK;
 
+    // Node 7: Past Life Star — always mirrors the live Karmic Tail (D) value
+    _microTags[7].querySelector('.t-num').textContent = String(NODES[3].num);
+    MICRO[7].num = NODES[3].num;
+
     return true;
   };
 
@@ -2365,7 +2388,7 @@ appendHint();
   if (!window.DMPrograms) return;
 
   function _rd(n) {
-    if (window.DMCalc) return window.DMCalc.reduce(n);
+    if (window.DMEngine) return window.DMEngine.reduceArcana(n);
     if (n <= 22) return n;
     return _rd(String(Math.abs(n)).split('').reduce((s,d)=>s+Number(d),0));
   }
@@ -3015,7 +3038,7 @@ appendHint();
 })();
 
 // ── SHAREABLE DOB LINK ────────────────────────────────────────────────────
-// ?dob=YYYY-MM-DD (or any format js/calculator.js's parseDate accepts) loads
+// ?dob=YYYY-MM-DD (or any format js/matrix-engine.js's matrixFromDate accepts) loads
 // straight into that date's reading. After any successful date change — via
 // this param or the existing tap-to-edit flow — the URL is kept in sync so
 // copying the address bar always shares the exact reading on screen.
