@@ -2046,7 +2046,11 @@ appendHint();
     { key:'RWM', num:_vals.atCG, label:'Relationship with Money',
       pos: _pCG.clone(), color:0xFFBB44, twk:{spd:1.05,off:0.8} },
     { key:'MEP', num:_vals.atH, label:'Money Entry Point',
-      pos: new THREE.Vector3(_R * 0.65, -_R * 0.65, 0), color:0xFFBB44, twk:{spd:0.85,off:4.9} },
+      // Pushed further out along the same diagonal than its original
+      // (0.65,-0.65) spot — that position was only ~0.1*_R from the later-
+      // added Paternal Feminine Line star (H1, Ancestral Tasks), causing
+      // near-total label/hit-sphere overlap on live (reported by user).
+      pos: new THREE.Vector3(_R * 0.95, -_R * 0.95, 0), color:0xFFBB44, twk:{spd:0.85,off:4.9} },
 
     // ── Ancestral Tasks (4 of 4 named source positions; the "talents"
     // family — F2/G2/H2/I2 — is computed in _calcVals() but deferred, not
