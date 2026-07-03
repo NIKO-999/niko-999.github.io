@@ -569,6 +569,7 @@
 <script src="js/universal-law-content.js"></script>
 <script src="js/karmic-debt-content.js"></script>
 <script src="js/past-life-content.js"></script>
+<script src="js/sexual-line-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -1959,10 +1960,29 @@ appendHint();
     const monV  = _rd(DGv + CGv);      // midpoint of channel
     const loveV = _rd(DGv + monV);     // 1/3 point (closer to Inner Bottom)
 
+    // Lineage Square (research/01-Foundation/Destiny-Matrix-Calculation-
+    // Guide.extracted.md, "Page 10"): L2 = sum of all 4 ancestral corners;
+    // the "2" family (F2/G2/H2/I2) is each corner + L2 — the guide's own
+    // text calls these "talents inherited from the lineage"; the "1" family
+    // (F1/G1/H1/I1) is each corner + its own "2" value — per
+    // research/11-Research-Updates/13, these are the 4 named "Ancestral
+    // Tasks" (Paternal/Maternal × Masculine/Feminine). Only the "1" family
+    // is built as stars for now; "2" is computed and kept for later.
+    const L2v = _rd(Fv + Gv + Hv + Iv);
+    const F2v = _rd(Fv + L2v), G2v = _rd(Gv + L2v), H2v = _rd(Hv + L2v), I2v = _rd(Iv + L2v);
+    const F1v = _rd(Fv + F2v), G1v = _rd(Gv + G2v), H1v = _rd(Hv + H2v), I1v = _rd(Iv + I2v);
+
     // Karmic Debt: the Inner Bottom value itself (reduce(D+E)) — already
     // computed above for the Love/Money chain, also matches matrix-engine.js's
     // karmic-tail-triplet middle value [D, reduce(D+E), E].
-    return { love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv };
+    // atCG (Inner Right, reduce(C+E)) is the same value already computed
+    // above to build the Money/Love chain — exposed here as its own display
+    // value for the "Relationship with Money" Money Channel sub-position.
+    return {
+      love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
+      atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
+      atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v, // computed, not yet shown as stars
+    };
   }
 
   let _vals = _calcVals();
@@ -1996,12 +2016,56 @@ appendHint();
     { key:'KARMA', num:_vals.atK, label:'Karmic Debt',
       pos: new THREE.Vector3(-_R * 0.18, -_R * 0.5, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
 
+    // Sexual Line — mirrors Karmic Debt's position across the vertical axis.
+    // A separate 26-combination naming system over the same (D, E) pair as
+    // the Karmic Tail (see js/sexual-line-content.js); reuses the same
+    // derived value for display, but its own named-seed lookup is keyed by
+    // (D, E) directly via DMEngine.matchSexualLineCode, not sorted or shared
+    // with the Karmic Tail/Karmic Debt lookup.
+    { key:'SEXLINE', num:_vals.atK, label:'Sexual Line',
+      pos: new THREE.Vector3(_R * 0.18, -_R * 0.5, 0), color:0xE84393, twk:{spd:0.75,off:2.6} },
+
     // Past Life Star — sits beyond the Karmic Tail star (D) on the same
     // vertical axis, outside the diamond. Reuses D's own value directly:
     // D is already canonically "past-life lessons" (see CLAUDE.md), so this
     // is a deep-dive expansion of that same number, not a competing one.
     { key:'PASTLIFE', num:NODES[3].num, label:'Past Life Star',
       pos: new THREE.Vector3(0, -_R * 1.35, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
+
+    // ── Money Channel sub-positions (3 of 5 named source positions; the
+    // other 2 — Under the Dollar Sign, Guardian Angel — have no confirmed
+    // node mapping yet, per research/11-Research-Updates/07). Appended at
+    // the END of MICRO (not inserted mid-array) deliberately — an earlier
+    // insertion mid-array this session shifted Past Life Star's index and
+    // broke its date-change refresh logic; appending avoids repeating that.
+    // Each reuses an already-computed matrix value under a new position
+    // identity, per NON_NEGOTIABLE_RULES.md's Absolute System Isolation:
+    // shared numeric source is fine, each still gets its own dedicated star.
+    { key:'MK', num:NODES[2].num, label:'Material Karma',
+      pos: new THREE.Vector3(_R * 1.15, _R * 0.15, 0), color:0x44FFAA, twk:{spd:0.9,off:3.4} },
+    { key:'RWM', num:_vals.atCG, label:'Relationship with Money',
+      pos: _pCG.clone(), color:0xFFBB44, twk:{spd:1.05,off:0.8} },
+    { key:'MEP', num:_vals.atH, label:'Money Entry Point',
+      pos: new THREE.Vector3(_R * 0.65, -_R * 0.65, 0), color:0xFFBB44, twk:{spd:0.85,off:4.9} },
+
+    // ── Ancestral Tasks (4 of 4 named source positions; the "talents"
+    // family — F2/G2/H2/I2 — is computed in _calcVals() but deferred, not
+    // built as stars yet). Each sits near its corresponding ancestral
+    // corner (F/G/H/I) without overlapping it. Per
+    // research/11-Research-Updates/13: F1=Paternal Masculine Line,
+    // G1=Maternal Masculine Line, H1=Paternal Feminine Line, I1=Maternal
+    // Feminine Line — this does NOT rename or reinterpret the existing
+    // F/G/H/I (Paternal/Maternal Spiritual/Material) stars; it's a
+    // separate, additive layer per NON_NEGOTIABLE_RULES.md's Absolute
+    // System Isolation.
+    { key:'F1', num:_vals.atF1, label:'Paternal Masculine Line',
+      pos: new THREE.Vector3(-_R * 0.65, _R * 0.75, 0), color:0xCCDDFF, twk:{spd:1.15,off:2.0} },
+    { key:'G1', num:_vals.atG1, label:'Maternal Masculine Line',
+      pos: new THREE.Vector3(_R * 0.75, _R * 0.65, 0), color:0xCCDDFF, twk:{spd:0.95,off:3.6} },
+    { key:'H1', num:_vals.atH1, label:'Paternal Feminine Line',
+      pos: new THREE.Vector3(_R * 0.75, -_R * 0.65, 0), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
+    { key:'I1', num:_vals.atI1, label:'Maternal Feminine Line',
+      pos: new THREE.Vector3(-_R * 0.75, -_R * 0.65, 0), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2141,6 +2205,49 @@ appendHint();
       return;
     }
 
+    // Sexual Line — separate 26-combination system over the same (D, E)
+    // pair as Karmic Tail/Karmic Debt, but its own named-seed lookup and
+    // its own content file; never shares or cross-references Karmic Debt's
+    // language. No per-arcana fallback exists for this system (none was in
+    // the source), so an unmatched (D, E) pair shows an honest "no named
+    // configuration" note rather than fabricated content.
+    if (data.key === 'SEXLINE') {
+      let sc = null;
+      const D = NODES[3].num, E = NODES[4].num;
+      if (window.DMEngine && window.DSexualLineContent) {
+        const code = window.DMEngine.matchSexualLineCode(D, E);
+        if (code) sc = window.DSexualLineContent.getCode(code);
+      }
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Sexual Line';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (sc && sc.heading) || data.label;
+      document.getElementById('pb-body').innerHTML = sc ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE PATTERN</div>
+           <div class="pb-full-text">${sc.pattern || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE CORE LESSON</div>
+           <div class="pb-full-text">${sc.lesson || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE PATH FORWARD</div>
+           <div class="pb-full-text">${sc.path || ''}</div>
+         </div>` :
+        `<div class="pb-full-section">
+           <div class="pb-full-text">This particular pairing doesn't correspond to one of the 26 named Sexual Line configurations in the source material.</div>
+         </div>`;
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
     // Past Life Star — origin-imprint layer only. Never references present-
     // life behavior, lessons, or growth paths; that belongs entirely to the
     // Karmic Debt branch above.
@@ -2180,6 +2287,10 @@ appendHint();
     const mc   = window.DMicroContent && DMicroContent.get(data.num, data.key);
     const sectionLabel = (data.key === 'LOVE' || data.key === 'MON')
       ? 'Love & Money Channel'
+      : (data.key === 'MK' || data.key === 'RWM' || data.key === 'MEP')
+      ? 'Money Channel'
+      : (data.key === 'F1' || data.key === 'G1' || data.key === 'H1' || data.key === 'I1')
+      ? 'Ancestral Tasks'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -2372,9 +2483,38 @@ appendHint();
     _microTags[6].querySelector('.t-num').textContent = String(_vals.atK);
     MICRO[6].num = _vals.atK;
 
-    // Node 7: Past Life Star — always mirrors the live Karmic Tail (D) value
-    _microTags[7].querySelector('.t-num').textContent = String(NODES[3].num);
-    MICRO[7].num = NODES[3].num;
+    // Node 7: Sexual Line — same derived value as Karmic Debt, display only
+    // (its own named-seed lookup uses D/E directly, not this displayed num)
+    _microTags[7].querySelector('.t-num').textContent = String(_vals.atK);
+    MICRO[7].num = _vals.atK;
+
+    // Node 8: Past Life Star — always mirrors the live Karmic Tail (D) value
+    _microTags[8].querySelector('.t-num').textContent = String(NODES[3].num);
+    MICRO[8].num = NODES[3].num;
+
+    // Node 9: Material Karma — mirrors the live Earth Line (C) value
+    _microTags[9].querySelector('.t-num').textContent = String(NODES[2].num);
+    MICRO[9].num = NODES[2].num;
+
+    // Node 10: Relationship with Money — reduce(C+E), Inner Right value
+    _microTags[10].querySelector('.t-num').textContent = String(_vals.atCG);
+    MICRO[10].num = _vals.atCG;
+
+    // Node 11: Money Entry Point — mirrors the live Paternal Material (H/BR) value
+    _microTags[11].querySelector('.t-num').textContent = String(_vals.atH);
+    MICRO[11].num = _vals.atH;
+
+    // Nodes 12-15: Ancestral Tasks (F1/G1/H1/I1) — recomputed from the
+    // current ancestral corners each date change, same as the corners
+    // themselves.
+    _microTags[12].querySelector('.t-num').textContent = String(_vals.atF1);
+    MICRO[12].num = _vals.atF1;
+    _microTags[13].querySelector('.t-num').textContent = String(_vals.atG1);
+    MICRO[13].num = _vals.atG1;
+    _microTags[14].querySelector('.t-num').textContent = String(_vals.atH1);
+    MICRO[14].num = _vals.atH1;
+    _microTags[15].querySelector('.t-num').textContent = String(_vals.atI1);
+    MICRO[15].num = _vals.atI1;
 
     return true;
   };
@@ -2759,11 +2899,11 @@ appendHint();
   let _talents = window.DMEngine.calculateDestinyMatrix(dobToISO()).talents;
 
   const TALENT_POS = {
-    throat:   new THREE.Vector3(0, 2.47, 0),
-    thirdEye: new THREE.Vector3(0, 1.23, 0),
+    thirdEye: new THREE.Vector3(0, 2.47, 0),
+    throat:   new THREE.Vector3(0, 1.23, 0),
   };
-  const TALENT_LABEL = { throat: 'Vishuddha · Throat', thirdEye: 'Ajna · Third Eye' };
-  const KEYS = ['throat', 'thirdEye'];
+  const TALENT_LABEL = { thirdEye: 'Ajna · Third Eye', throat: 'Vishuddha · Throat' };
+  const KEYS = ['thirdEye', 'throat'];
 
   // ── Banner (shared with program stars — only one is ever open at a time) ──
   const banner  = document.getElementById('prog-banner');

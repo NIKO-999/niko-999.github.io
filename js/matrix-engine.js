@@ -96,23 +96,101 @@ function matchTalentProgram(triplet) {
 
 /* ───────────────────────────────────────────────────────────────────────────
  * 2 · KARMIC TAIL CODE LIBRARY
- *    The tail triplet is (D, F, E). Its middle (F) always equals
- *    reduce(D + E), so codes match as an ORDER-INDEPENDENT multiset —
- *    which is why "18-9-9" and "9-9-18" are the same seed.
- *    Keys are the triplet sorted ascending. null ⇒ read each arcana
- *    individually through the Plus/Minus library (no named seed).
+ *    The tail triplet is (D, F, E), where F = reduce(D + E) is DERIVED, not
+ *    freely chosen — so "order" here isn't an arbitrary permutation, it's
+ *    simply which value is D (root) vs E (soul center). Two different (D, E)
+ *    pairs can produce the same three digits in different arrangements, and
+ *    the source material treats those as genuinely different people — most
+ *    visibly the "Magical Trinity" (18-9-9 / 9-18-9 / 9-9-18), three distinct
+ *    named tails sharing the digits 9, 9, 18.
+ *    Keys are the triplet's TRUE achievable order (verified against
+ *    reduce(D+E) = F for every entry below) — never sorted. A sorted key
+ *    can be mathematically unachievable and would silently never match.
  * ─────────────────────────────────────────────────────────────────────────── */
 const KARMIC_TAIL_CODES = {
-  '9-9-18':  'The Wizard / Secret Knowledge',
-  '6-11-17': 'Wasted Talent',
-  '3-7-22':  'The Prisoner',
-  '6-9-15':  'World of Passions / Temptation',
-  '5-8-15':  'Betrayal of Family / Pride',
+  '18-9-9':   'Sorcerer, Hermit, Rejection of Knowledge',
+  '9-18-9':   'Magical Sacrifice',
+  '9-9-18':   'The Wizard / Secret Knowledge',
+  '6-17-11':  'Wasted Talent',
+  '3-7-22':   'The Prisoner',
+  '9-15-6':   'World of Passions / Temptation',
+  '15-5-8':   'Family Betrayal',
+  '18-6-6':   'Love Magic',
+  '15-20-5':  'Rebel',
+  '18-3-12':  'Physical Suffering',
+  '12-19-7':  'Warrior',
+  '9-12-3':   'The Solitary Woman',
+  '3-22-19':  'The Unborn Child',
+  '21-4-10':  'The Oppressed Soul',
+  '12-16-4':  'The Emperor',
+  '21-10-16': 'The Spiritual Priest',
+  '6-8-20':   'Disappointment of the Lineage',
+  '9-3-21':   'The Overseer',
+  '6-5-17':   'Pride',
+  '21-7-13':  'Destruction and Death',
+  '15-8-11':  'Physical Aggression',
+  '18-6-15':  'The Dark Magician',
+  '6-20-14':  'The Sacrificed Soul',
+  '21-10-7':  'The Warrior of Faith',
+  '3-13-10':  'Self-Destruction',
+  '6-14-8':   'The Dictator',
 };
 
 function matchKarmicTailCode(triplet) {
-  const key = [...triplet].sort((a, b) => a - b).join('-');
+  const key = [...triplet].join('-');
   return KARMIC_TAIL_CODES[key] || null;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * 2b · SEXUAL LINE CODE LIBRARY
+ *    A separate 26-combination naming system over the SAME (D, E) pair as
+ *    the Karmic Tail, sourced from a different section of the same source
+ *    material. Critically, its printed order is NOT (D, F, E) like the
+ *    Karmic Tail — it's (D, E, F), derived value LAST rather than in the
+ *    middle. Verified computationally against reduce(D+E) = F for all 26
+ *    entries before trusting the printed order (same rigor as the Karmic
+ *    Tail order-dependency fix — a by-hand assumption already produced one
+ *    wrong answer once this session).
+ *    Like the Karmic Tail, some (D, E) pairs collide in digit-set with a
+ *    different name per swapped order (e.g. 3-6-9 vs 6-3-9) — both are
+ *    kept as distinct entries, not merged.
+ *    One source-internal inconsistency: 8-16-6 is given two different names
+ *    in the source with no way to disambiguate (identical D/E pair, not a
+ *    swapped-order case) — resolved by keeping one name ("Awakening Through
+ *    Crisis"), noted here rather than silently dropped.
+ * ─────────────────────────────────────────────────────────────────────────── */
+const SEXUAL_LINE_CODES = {
+  '7-5-12':   'Gentle Lovers',
+  '12-6-18':  'Seekers of Perfection',
+  '11-4-15':  'Vengeful Dominators',
+  '6-12-18':  'Disillusioned Cynics',
+  '10-11-21': 'Rebellious Servants',
+  '5-10-15':  'Forbidden Dreamers',
+  '4-8-12':   'Possessive Punishers',
+  '11-13-6':  'Detached Lovers',
+  '7-14-21':  'Versatile Lovers',
+  '8-7-15':   'Vulnerable Rebels',
+  '10-20-3':  'Aimless Lover',
+  '8-16-6':   'Awakening Through Crisis', // source also gives "Passion Through Crisis" for this same pair — kept to one name
+  '6-21-9':   'Pioneer of Desire',
+  '3-6-9':    'Masked Provocateurs',
+  '6-3-9':    'Magnetic Seducers',
+  '9-9-18':   'Nostalgics of the Past',
+  '9-18-9':   'Nostalgic Visionaries',
+  '22-8-3':   'Changeable Explorers',
+  '14-10-6':  'Unsatisfied Romantics',
+  '16-5-21':  'Devoted Servants',
+  '13-8-21':  'Lovers of Contrasts',
+  '20-4-6':   'Extreme Lovers',
+  '11-22-6':  'Idealistic Revolutionaries',
+  '18-9-9':   'Cycle of the Past',
+  '12-15-9':  'Disillusioned Hunter',
+};
+
+function matchSexualLineCode(D, E) {
+  const F = reduceArcana(D + E);
+  const key = `${D}-${E}-${F}`;
+  return SEXUAL_LINE_CODES[key] || null;
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
@@ -169,12 +247,15 @@ function calculateDestinyMatrix(birthdateString) {
 
   const thirdPurpose  = reduceArcana(firstPurpose + secondPurpose);      // 60+
 
-  // ── TALENT STAR LINE · Crown → Throat → Third-Eye (top-down per spec) ────
+  // ── TALENT STAR LINE · Crown → Third-Eye → Throat (top-down per spec) ────
   // Two midpoints are undefined upstream; built the same way every other
   // midpoint in this engine is: sequential reduce(prev + E) walking to center.
+  // Standard chakra order top-down is 7=Crown, 6=Third Eye/Ajna, 5=Throat/
+  // Vishuddha — confirmed against the source's own "6th chakra" (Ajna) named
+  // before "5th chakra" (Vishuddha) on the walk from crown toward center.
   const crown    = B;                                // Sahasrara — Top Node
-  const throat   = reduceArcana(crown + E);           // Vishuddha — 1st midpoint
-  const thirdEye = reduceArcana(throat + E);           // Ajna      — 2nd midpoint
+  const thirdEye = reduceArcana(crown + E);           // Ajna      — 1st midpoint
+  const throat   = reduceArcana(thirdEye + E);        // Vishuddha — 2nd midpoint
 
   const spiritualDominant = dominantOf([crown, thirdEye, throat]);
   const spiritualArchetype = ARCHETYPE_MAP[spiritualDominant] || null;
@@ -190,10 +271,10 @@ function calculateDestinyMatrix(birthdateString) {
   const ancestralDominant = dominantOf([TL, TR]);
 
   const talents = {
-    crown, throat, thirdEye,
-    iconType: ICON_TYPE_MAP[dominantOf([crown, throat, thirdEye])] || null,
+    crown, thirdEye, throat,
+    iconType: ICON_TYPE_MAP[dominantOf([crown, thirdEye, throat])] || null,
 
-    spiritual: { crown, throat, thirdEye, dominant: spiritualDominant, archetype: spiritualArchetype },
+    spiritual: { crown, thirdEye, throat, dominant: spiritualDominant, archetype: spiritualArchetype },
     earthly:   { left: A, midpoint: earthlyMid, dominant: earthlyDominant, archetype: earthlyArchetype },
     ancestral: {
       paternal: { value: TL, archetype: paternalArchetype },
@@ -270,7 +351,7 @@ function matrixFromDate(dateStr) {
 if (typeof module !== 'undefined' && module.exports) {
   module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
 } else {
-  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
+  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

@@ -81,10 +81,10 @@ window.DKarmicDebtContent = (function () {
     },
 
     8: {
-      heading: 'Strength — The Tension of Holding Everything Alone',
-      pattern: `This placement may activate under real pressure or difficulty, where the automatic response is to grip tighter and manage the situation single-handedly rather than to let anyone else share the weight of it. This may repeat as a pattern of being reliably strong for other people while rarely, if ever, being the one who receives that same support in return — not because support isn't offered, but because accepting it doesn't come as naturally as providing it.`,
-      lesson: `The core lesson being integrated may be learning that asking for help is not a departure from strength but an extension of it — that genuine resilience includes knowing when to let something be carried by more than one person.`,
-      path: `This may shift through small, deliberate practice in naming a real need to someone else this week, rather than a preference, and allowing the request to stand without immediately managing or minimizing it.`,
+      heading: 'Justice — The Tension of a Standard Applied Unevenly',
+      pattern: `This placement may activate around situations involving fairness, where the automatic response is a sharp, almost immediate read of what's imbalanced — paired with a much quieter, harder-to-access awareness of where a similar imbalance might exist in your own conduct. This may repeat as recurring encounters with unfairness that can feel oddly personal, as though the same lesson keeps finding new circumstances to arrive in.`,
+      lesson: `The core lesson being integrated may be learning to apply the same honest, careful standard to yourself that gets applied so readily to others — closing the gap between the fairness demanded of the world and the fairness practiced internally.`,
+      path: `This may shift by choosing one specific situation and asking, deliberately, whether you're holding yourself to the same standard you're applying to someone else, and adjusting accordingly.`,
     },
 
     9: {
@@ -102,10 +102,10 @@ window.DKarmicDebtContent = (function () {
     },
 
     11: {
-      heading: 'Justice — The Tension of a Standard Applied Unevenly',
-      pattern: `This placement may activate around situations involving fairness, where the automatic response is a sharp, almost immediate read of what's imbalanced — paired with a much quieter, harder-to-access awareness of where a similar imbalance might exist in your own conduct. This may repeat as recurring encounters with unfairness that can feel oddly personal, as though the same lesson keeps finding new circumstances to arrive in.`,
-      lesson: `The core lesson being integrated may be learning to apply the same honest, careful standard to yourself that gets applied so readily to others — closing the gap between the fairness demanded of the world and the fairness practiced internally.`,
-      path: `This may shift by choosing one specific situation and asking, deliberately, whether you're holding yourself to the same standard you're applying to someone else, and adjusting accordingly.`,
+      heading: 'Strength — The Tension of Holding Everything Alone',
+      pattern: `This placement may activate under real pressure or difficulty, where the automatic response is to grip tighter and manage the situation single-handedly rather than to let anyone else share the weight of it. This may repeat as a pattern of being reliably strong for other people while rarely, if ever, being the one who receives that same support in return — not because support isn't offered, but because accepting it doesn't come as naturally as providing it.`,
+      lesson: `The core lesson being integrated may be learning that asking for help is not a departure from strength but an extension of it — that genuine resilience includes knowing when to let something be carried by more than one person.`,
+      path: `This may shift through small, deliberate practice in naming a real need to someone else this week, rather than a preference, and allowing the request to stand without immediately managing or minimizing it.`,
     },
 
     12: {
@@ -223,11 +223,158 @@ window.DKarmicDebtContent = (function () {
       path: `This may shift by building in one deliberate pause between the pull toward something intense and the decision to act on it, long enough to weigh the actual cost.`,
     },
 
-    'Betrayal of Family / Pride': {
+    'Family Betrayal': {
       heading: 'Betrayal of Family — The Tension of Pride Over Loyalty',
       pattern: `This placement may activate specifically within family or origin-based relationships, where the automatic response under pressure is to protect pride or position rather than to stay loyal to the people with a legitimate claim on your care. This may repeat as a pattern of distance or friction in family contexts specifically, even when the same difficulty is handled easily elsewhere.`,
       lesson: `The core lesson being integrated may be learning that loyalty and personal advancement don't have to compete — and that humility toward family, specifically, doesn't cost what pride may be insisting it will.`,
       path: `This may shift by choosing one specific family relationship and practicing an act of humility there directly — an acknowledgment, an apology, a genuine ask for repair — rather than letting pride continue to hold the distance in place.`,
+    },
+
+    'Sorcerer, Hermit, Rejection of Knowledge': {
+      heading: 'The Guarded Hermit — The Tension of Trusting No One With What You Carry',
+      pattern: `This placement may activate whenever trust is on the table — sharing something real with another person, being vulnerable about what you actually know or sense. The automatic response under pressure can be caution first, warmth second: a guardedness that keeps real intimacy one careful step removed, even in relationships that have otherwise earned it. This may repeat as a pattern of being the one others confide in while remaining, by comparison, genuinely hard to reach — trusted with everything except your own inner world.`,
+      lesson: `The core lesson being integrated may be learning that trust extended first, before it feels fully earned or safe, is what actually builds the closeness you might otherwise be protecting yourself out of.`,
+      path: `This may shift through one small, deliberate act of unguarded honesty with someone already safe — sharing something real before it feels fully ready to be shared, and noticing that the closeness which follows outweighs the old risk.`,
+    },
+
+    'Magical Sacrifice': {
+      heading: 'The Watchful Influence — The Tension of Power That Still Needs Checking',
+      pattern: `This placement may activate around any situation where personal influence could shape an outcome — a negotiation, guidance someone is relying on, a relationship where one person's read of things quietly carries more weight. The automatic response under pressure can swing between two extremes: reaching for more influence than the moment actually calls for, or overcorrecting into refusing to use it at all, even when it would genuinely help. This may repeat as a pull toward spiritual or esoteric interests alongside a real wariness of them — an uncertainty about whether your own motives are fully clean.`,
+      lesson: `The core lesson being integrated may be learning that personal influence isn't inherently dangerous — only unexamined influence is, and the real safeguard is bringing intention into full view rather than avoiding the influence altogether.`,
+      path: `This may shift through a small, regular practice of naming your actual motive to yourself before acting on any real influence you hold, and letting that one honest pause be enough to keep the use of it clean.`,
+    },
+
+    'Love Magic': {
+      heading: 'Love Magic — The Tension of Earning Love Through Self-Sacrifice',
+      pattern: `This placement may activate anywhere love or approval feels uncertain, where the automatic response is to give more — more accommodation, more self-erasure, more compensating — rather than to simply ask whether the connection is actually mutual. This may repeat as relationships that require increasingly excessive giving to sustain, alongside a persistent inner emptiness that more giving never quite fills.`,
+      lesson: `The core lesson being integrated may be learning that love earned through self-sacrifice isn't the same as love freely given and received — and that the emptiness underneath isn't solved by trying harder at the same strategy.`,
+      path: `This may shift by naming one specific need directly to someone this week, instead of trying to earn its fulfillment through further accommodation, and noticing what happens when the need is simply stated.`,
+    },
+
+    'Rebel': {
+      heading: 'The Rebel — The Tension of Opposing on Reflex',
+      pattern: `This placement may activate specifically around family or authority, where the automatic response is opposition itself — pushing back, distancing, rejecting the expectation — regardless of whether the actual expectation was reasonable. This may repeat as a pattern of feeling like an outsider even in close relationships, with real connection kept at a careful, self-protective distance.`,
+      lesson: `The core lesson being integrated may be learning to distinguish genuine autonomy from automatic opposition — recognizing that some closeness can be chosen without it costing your independence.`,
+      path: `This may shift by choosing one relationship currently held at a distance and offering one small, direct gesture of reconnection, without waiting for the other person to prove they deserve it first.`,
+    },
+
+    'Physical Suffering': {
+      heading: 'The Guarded Body — The Tension of Bracing Against Pain That Hasn’t Arrived',
+      pattern: `This placement may activate around anything involving the body — your own health, or the health of someone vulnerable and close to you — where the automatic response under pressure is either hypervigilance or complete avoidance, rarely anything calmer in between. This may repeat as a low tolerance for ordinary discomfort, physical or emotional, and outsized alarm at minor health scares involving people you love.`,
+      lesson: `The core lesson being integrated may be learning that the body can be trusted and cared for without either constant monitoring or total avoidance — that steady, ordinary attention is enough.`,
+      path: `This may shift by choosing one consistent, moderate act of physical self-care this week, and practicing staying with it calmly rather than swinging toward vigilance or neglect.`,
+    },
+
+    'Warrior': {
+      heading: 'The Warrior — The Tension of Meeting Every Challenge as Combat',
+      pattern: `This placement may activate in any situation involving disagreement or competition, where the automatic response is to treat it as something to win rather than something to navigate. This may repeat as relationships and collaborations that become unnecessarily adversarial, alongside a genuine leadership capacity that struggles to find a constructive outlet.`,
+      lesson: `The core lesson being integrated may be learning that real strength includes the choice not to fight — that leadership built on trust and collaboration holds up better than leadership built on winning.`,
+      path: `This may shift by entering one upcoming disagreement with the explicit intention of finding a shared solution rather than a winner, and noticing whether the old urge to dominate the outcome softens.`,
+    },
+
+    'The Solitary Woman': {
+      heading: 'The Solitary Woman — The Tension of Staying Just Out of Reach',
+      pattern: `This placement may activate as a relationship starts to deepen, where the automatic response is to keep it at a survivable distance — pleasant, steady, but not fully open — rather than risk the kind of closeness that could actually be lost. This may repeat as relationships that look stable from the outside while remaining quietly guarded underneath.`,
+      lesson: `The core lesson being integrated may be learning that closeness withheld to avoid future loss is still a loss, just a slower and less visible one — and that openness now doesn't require certainty about forever.`,
+      path: `This may shift by allowing one relationship currently kept at a comfortable distance to move one step closer than feels entirely safe, and noticing what actually happens.`,
+    },
+
+    'The Unborn Child': {
+      heading: 'The Unborn Child — The Tension of Withholding Warmth From Fear of Loss',
+      pattern: `This placement may activate around children, family continuity, or a lingering coolness toward a parent, where the automatic response is quiet guardedness rather than open affection — as though warmth given fully might somehow be taken away. This may repeat as overprotectiveness toward the people you love most, or a persistent difficulty feeling fully at ease around family.`,
+      lesson: `The core lesson being integrated may be learning that generosity toward the people you love, and toward yourself, doesn't need to be rationed against some anticipated future loss.`,
+      path: `This may shift by offering one deliberate, unguarded act of warmth this week — toward a child, a parent, or yourself — without the usual instinct to hold part of it back.`,
+    },
+
+    'The Oppressed Soul': {
+      heading: 'The Oppressed Soul — The Tension of Waiting for Permission',
+      pattern: `This placement may activate at any real decision point, where the automatic response is to defer — to wait for someone else's approval or direction rather than trusting your own judgment. This may repeat as a pattern of living inside expectations set by other people, with your own preferences and ambitions quietly kept in the background.`,
+      lesson: `The core lesson being integrated may be learning that your own judgment is trustworthy enough to act on directly, without first requiring someone else's sign-off.`,
+      path: `This may shift by making one real decision this week entirely on your own terms, and letting it stand without seeking outside confirmation afterward.`,
+    },
+
+    'The Emperor': {
+      heading: 'The Emperor — The Tension of Authority Without Balance',
+      pattern: `This placement may activate around authority itself — your own, or a father figure's — where the automatic response swings between over-controlling everyone nearby and checking out of responsibility entirely, rarely landing in between. This may repeat as recurring friction in relationships with paternal figures, and a similar instability in how you hold power in your own life.`,
+      lesson: `The core lesson being integrated may be learning that authority can be held steadily, without needing to dominate or abdicate it — and that forgiveness toward an imperfect father figure frees up energy currently spent managing that old friction.`,
+      path: `This may shift by choosing one area where you currently either over-control or avoid responsibility, and consciously practicing the steadier middle version instead, just once, to see how it feels.`,
+    },
+
+    'The Spiritual Priest': {
+      heading: 'The Spiritual Priest — The Tension of Doubting a Knowing That Runs Deep',
+      pattern: `This placement may activate whenever your own spiritual or intuitive insight asks to be trusted publicly — teaching, guiding, or simply naming what you sense is true. The automatic response under pressure can be retreat: quietly discounting your own perception before anyone else gets the chance to, and letting the moment pass to someone with less to lose. This may repeat as private clarity that rarely becomes public voice.`,
+      lesson: `The core lesson being integrated may be that your insight doesn't need to be fully resolved or provably "right" before it's allowed to be spoken — withholding it doesn't make it safer, only invisible.`,
+      path: `This may shift by naming one thing you already sense is true, out loud, to one person, before it feels fully ready to be said.`,
+    },
+
+    'Disappointment of the Lineage': {
+      heading: 'Disappointment of the Lineage — The Tension of Working Without Credit',
+      pattern: `This placement may activate specifically around recognition, where genuine effort keeps meeting delay, being overlooked, or landing as someone else's success. The automatic response under pressure can be quiet resentment toward family, paired with a persistent hunger for praise that doesn't quite ease even when it arrives. This may repeat as obstacles that feel disproportionate to the actual effort involved.`,
+      lesson: `The core lesson being integrated may be learning that genuine vocation, pursued for its own sake, restores a sense of worth that waiting for outside recognition never fully can.`,
+      path: `This may shift by committing to one activity that genuinely inspires you, independent of whether it's noticed or credited by anyone else, and continuing it regardless.`,
+    },
+
+    'The Overseer': {
+      heading: 'The Overseer — The Tension of Managing What Isn’t Yours to Manage',
+      pattern: `This placement may activate whenever someone nearby is struggling, where the automatic response is to step in and manage the situation — offering direction, oversight, or unsolicited help — rather than waiting to be asked. This may repeat as strained relationships where people feel supervised rather than supported, even when the intention behind it was genuinely caring.`,
+      lesson: `The core lesson being integrated may be learning that real help waits to be invited, and that stepping back from someone else's situation is not the same as abandoning them.`,
+      path: `This may shift by identifying one relationship where you habitually manage or oversee, and consciously waiting to be asked before offering input, just this once.`,
+    },
+
+    'Pride': {
+      heading: 'Pride — The Tension of Charm Curdling Into Superiority',
+      pattern: `This placement may activate whenever charm, attractiveness, or influence over a room comes easily, where the automatic response is a quiet sense of being above the people who don't have it — a superiority that can slide into contempt without quite meaning to. This may repeat as relationships that cool once admiration stops being offered, and a discomfort with any environment where you're not the most noticed person in it.`,
+      lesson: `The core lesson being integrated may be learning that a person's worth was never actually a competition, and that real value doesn't require anyone else's to be smaller by comparison.`,
+      path: `This may shift by spending real time with someone you'd normally dismiss as unimpressive, and practicing genuine curiosity about them instead of quiet evaluation.`,
+    },
+
+    'Destruction and Death': {
+      heading: 'The Reckoning — The Tension of Disregarding the Human Cost',
+      pattern: `This placement may activate around any pursuit of power, control, or a goal, where the automatic response under pressure is to discount the cost to the people affected by it, treating outcomes as separate from the harm required to reach them. This may repeat as a pull toward high-stakes or high-consequence situations, paired with real discomfort when the human cost becomes impossible to ignore.`,
+      lesson: `The core lesson being integrated may be learning that a goal and the wellbeing of the people it passes through are never actually separate — and that a life oriented toward protecting or improving others tends to resolve this tension more than winning does.`,
+      path: `This may shift by choosing one current pursuit and naming, honestly, what or who its cost has been so far — then adjusting the approach accordingly.`,
+    },
+
+    'Physical Aggression': {
+      heading: 'The Coiled Response — The Tension of Meeting Stress With Force',
+      pattern: `This placement may activate under stress or provocation, where the automatic response is a surge toward aggression — an outburst, an intimidating edge, a struggle to stay level — before any calmer option gets a chance to register. This may repeat as strained relationships around conflict, and a body that carries old tension in ways that surface later as physical strain.`,
+      lesson: `The core lesson being integrated may be learning that the aggression is usually protecting an older, unacknowledged pain — and that examining what's underneath it tends to soften the reflex more than sheer self-control does.`,
+      path: `This may shift by noticing, in the moment stress first spikes, the physical warning signs that usually precede the reaction, and using one grounding practice deliberately before responding.`,
+    },
+
+    'The Dark Magician': {
+      heading: 'The Dark Magician — The Tension of Influence Without Consent',
+      pattern: `This placement may activate whenever personal charisma or insight could sway a situation in your favor, where the automatic response is to use it regardless of whether the other person actually invited the influence. This may repeat as relationships that feel unbalanced in hindsight — charged and compelling in the moment, but built on persuasion rather than mutual choice.`,
+      lesson: `The core lesson being integrated may be learning that real influence only holds value when it's offered with consent, not exercised on someone who hasn't actually asked for it.`,
+      path: `This may shift by waiting to be asked before offering guidance or persuasion in one relationship this week, even when you're confident you're right.`,
+    },
+
+    'The Sacrificed Soul': {
+      heading: 'The Sacrificed Soul — The Tension of Asking Without Words',
+      pattern: `This placement may activate whenever a real need for care or attention arises, where the automatic response is to signal it indirectly — through withdrawal, minor crises, or quiet self-neglect — rather than naming the need outright. This may repeat as people around you responding generously to the indirect signal while the actual need underneath goes unspoken and only partly met.`,
+      lesson: `The core lesson being integrated may be learning that asking directly for what you need is a sign of maturity, not a burden on the people who care about you.`,
+      path: `This may shift by naming one specific need in plain words to someone close, instead of waiting for it to be noticed.`,
+    },
+
+    'The Warrior of Faith': {
+      heading: 'The Warrior of Faith — The Tension of Certainty That Leaves No Room',
+      pattern: `This placement may activate whenever your own convictions meet a differing view, where the automatic response is to press the point rather than genuinely consider the other perspective. This may repeat as relationships strained by an insistence on being right, and a social circle that quietly narrows toward people who already agree.`,
+      lesson: `The core lesson being integrated may be learning that another person's differing path doesn't threaten the validity of your own, and that real influence comes through example rather than insistence.`,
+      path: `This may shift by listening fully to one differing view this week without arguing back, simply to understand it rather than to respond to it.`,
+    },
+
+    'Self-Destruction': {
+      heading: 'The Quiet Surrender — The Tension of Giving Up Before Trying the Next Step',
+      pattern: `This placement may activate under real hardship, where the automatic response is to treat the difficulty as confirmation that things are hopeless, rather than as one obstacle among others that might still be worked through. This may repeat as a pattern of neglecting basic self-care exactly when it matters most, and a persistent difficulty recognizing your own worth independent of how things are currently going.`,
+      lesson: `The core lesson being integrated may be learning that a hard chapter is not a final verdict, and that caring for yourself through it is not optional — it's what makes reaching the other side of it possible.`,
+      path: `This may shift by choosing one small, concrete act of self-care today, and by naming the difficulty out loud to one trusted person rather than carrying it alone.`,
+    },
+
+    'The Dictator': {
+      heading: 'The Dictator — The Tension of a Confident Mask Over Real Doubt',
+      pattern: `This placement may activate whenever real self-doubt surfaces, where the automatic response is to cover it with an outward show of confidence and control rather than let anyone see the uncertainty underneath. This may repeat as a pattern of swinging between over-functioning for others and quietly resenting the imbalance, with the genuine doubt underneath rarely getting spoken aloud.`,
+      lesson: `The core lesson being integrated may be learning that real strength includes the parts that are still unsure — and that showing the uncertainty tends to build more trust than the polished mask does.`,
+      path: `This may shift by sharing one genuine doubt with someone trustworthy this week, rather than resolving it privately behind a confident front.`,
     },
 
   };

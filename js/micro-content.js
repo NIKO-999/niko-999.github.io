@@ -2444,6 +2444,1546 @@ window.DMicroContent = (function () {
       negative: `Taking material risks reactively, out of inherited urgency rather than genuine current choice, repeats an old pattern of forced leaps rather than deliberate ones.`,
     },
 
+    // ── 1 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '1_MK': {
+      heading: `You Keep Starting Over With Money Instead of Building on What's There`,
+      why: `Something in your relationship to material security carries an old, unresolved pattern of initiation without follow-through — a new plan, a fresh financial start, a different approach, each one arriving with real energy. The Magician sits in your Material Karma, meaning your unresolved material task centers specifically on origination: you're genuinely gifted at starting something from nothing, but the security that comes from letting one thing compound over time hasn't yet been claimed.`,
+      shadow: `The risk is mistaking the next fresh start for progress, when what's actually needed is staying with the one already in motion. If your financial position keeps resetting to zero right before it would have compounded into something real, that's this pattern still unresolved.`,
+      path: `This may shift by choosing the material plan already underway and deliberately not starting a new one until this one has had real time to mature.`,
+      positive: `You let one material plan run its full course, and the security that comes from genuine compounding finally becomes available to you.`,
+      negative: `An old pull toward starting over keeps resetting your material position right before it would have compounded into real, lasting security.`,
+    },
+
+    // ── 2 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '2_MK': {
+      heading: `Your Actual Financial Picture Stays Quietly Hidden, Even From You`,
+      why: `Something in your relationship to material security carries an old pattern of concealment — a preference for not looking too closely, not saying the real numbers out loud, keeping your actual financial state private even from people close to you. The High Priestess sits in your Material Karma, meaning your unresolved material task centers on bringing hidden financial reality into the light rather than continuing to sense it privately.`,
+      shadow: `The risk is that what stays unexamined stays unmanaged — material security built on a foundation you've never actually looked at directly. If you can sense your financial position more than you can state it plainly, that avoidance may be the pattern still active.`,
+      path: `This may shift by writing down your actual financial numbers once, in full, and letting them be seen — by yourself first, and then by one trusted other person.`,
+      positive: `You've brought your actual financial picture into full view, and the security that comes from truly knowing your position replaces the old comfort of not looking.`,
+      negative: `Keeping your real financial numbers private, even from yourself, leaves material security built on a foundation that's never actually been examined.`,
+    },
+
+    // ── 3 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '3_MK': {
+      heading: `Generosity Comes Easily, But Your Own Material Cushion Rarely Grows`,
+      why: `Something in your relationship to material security carries an old pattern of giving that outpaces keeping — real warmth expressed through material generosity, resources shared freely, comfort extended to others before it's secured for yourself. The Empress sits in your Material Karma, meaning your unresolved material task centers on letting your own reserve grow alongside what you give.`,
+      shadow: `The risk is that generosity, unchecked, becomes its own form of depletion — a pattern of material abundance flowing outward while your own foundation stays thin. If you're generous with others while quietly under-resourced yourself, that imbalance is the unresolved piece.`,
+      path: `This may shift by setting aside a portion of any material gain for your own security first, before it gets extended to anyone else.`,
+      positive: `Your generosity continues, but now alongside a genuinely growing personal reserve — abundance that includes you, not just what flows outward from you.`,
+      negative: `Generosity that consistently outpaces your own material security keeps your foundation thin, no matter how much abundance passes through your hands.`,
+    },
+
+    // ── 4 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '4_MK': {
+      heading: `You Hold Tight Control Over Money, As If Loosening It Means Losing It`,
+      why: `Something in your relationship to material security carries an old pattern of control — structure, oversight, and a firm hand over every financial detail, as though security depends entirely on your direct management of it. The Emperor sits in your Material Karma, meaning your unresolved material task centers on finding out whether real security can exist without total personal control over every part of it.`,
+      shadow: `The risk is that the control itself becomes exhausting to maintain, and delegating or trusting a system you didn't build yourself feels like real danger rather than a reasonable option. If you can't imagine your material security holding without your constant oversight, that's the pattern still active.`,
+      path: `This may shift by handing one specific piece of financial management to a trusted system or person, and observing whether the structure holds without your constant hand on it.`,
+      positive: `You've tested whether your material security holds without total personal control, and found real structures you can actually trust beyond your own oversight.`,
+      negative: `A need for total control over every financial detail keeps security feeling fragile, entirely dependent on your constant, exhausting oversight.`,
+    },
+
+    // ── 5 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '5_MK': {
+      heading: `Old Rules About How Money "Should" Work Still Quietly Run the Show`,
+      why: `Something in your relationship to material security carries an old pattern of deference to inherited financial rules — beliefs about money passed down from family, tradition, or authority, followed carefully even when they no longer fit your actual circumstances. The Hierophant sits in your Material Karma, meaning your unresolved material task centers on testing those inherited rules against your own direct experience.`,
+      shadow: `The risk is following an outdated financial rule simply because it's familiar, even when it's quietly working against your actual security. If a "should" about money keeps overriding what your own numbers are telling you, that's the pattern still unresolved.`,
+      path: `This may shift by naming one inherited belief about money directly and testing it against your current, actual circumstances rather than assuming it still applies.`,
+      positive: `You've tested an inherited financial rule against your real circumstances, and now follow only the guidance that actually serves your present security.`,
+      negative: `An old, unexamined rule about how money "should" work can quietly override what your actual financial reality is telling you.`,
+    },
+
+    // ── 6 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '6_MK': {
+      heading: `A Real Financial Choice Keeps Getting Deferred in Favor of Keeping the Peace`,
+      why: `Something in your relationship to material security carries an old pattern of indecision at real financial forks — a choice that would actually serve your security, deferred in favor of whatever keeps things comfortable in the moment. The Lovers sits in your Material Karma, meaning your unresolved material task centers on making the financial choice that reflects genuine preference, even when it isn't the easiest one.`,
+      shadow: `The risk is that deferred financial choices don't actually disappear — they just accumulate, leaving your material security shaped more by avoidance than by decision. If you're still weighing the same financial choice long after enough information has arrived, that's the pattern still active.`,
+      path: `This may shift by making one specific, deferred financial decision this week, even without full certainty, and letting the choice actually stand.`,
+      positive: `You make real financial choices from genuine preference rather than deferring them, and your material security reflects decisions actually made.`,
+      negative: `A financial choice kept perpetually open, never quite decided, leaves material security shaped by avoidance rather than by an actual decision.`,
+    },
+
+    // ── 7 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '7_MK': {
+      heading: `You're Always Pushing Toward More Security, Never Quite Arriving`,
+      why: `Something in your relationship to material security carries an old pattern of forward motion without arrival — real drive toward financial goals, one after another, with the sense of "enough" always sitting just past the next milestone. The Chariot sits in your Material Karma, meaning your unresolved material task centers on recognizing security you've actually already reached, rather than continuously pushing past it.`,
+      shadow: `The risk is that genuine financial progress never registers as progress, because the goalpost keeps moving the moment it's reached. If you can't name a point at which you'd actually feel secure, that restlessness is the pattern still unresolved.`,
+      path: `This may shift by naming one specific, concrete financial milestone as "enough," and pausing there deliberately once it's reached, rather than immediately setting the next one.`,
+      positive: `You recognize and rest in real financial milestones once they're reached, letting genuine progress actually register as security.`,
+      negative: `A goalpost that keeps moving the instant it's reached means real financial progress never gets to feel like the security it actually is.`,
+    },
+
+    // ── 8 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '8_MK': {
+      heading: `An Old Sense of Financial Unfairness Still Shapes How You Handle Money`,
+      why: `Something in your relationship to material security carries an old imbalance around fairness — a sense, not always articulated, that you were once shorted, overlooked, or unfairly treated in material terms, now shaping present-day vigilance around every financial exchange. The Justice sits in your Material Karma, meaning your unresolved material task centers on settling that old imbalance rather than continuing to guard against its repeat.`,
+      shadow: `The risk is treating every current financial exchange as a potential repeat of the old unfairness, creating friction in transactions that have nothing to do with what actually happened before. If you feel disproportionately alert to being shortchanged, that history may still be running underneath it.`,
+      path: `This may shift by naming, specifically, what the original financial unfairness was, and separating it consciously from whatever current exchange is actually in front of you.`,
+      positive: `You've named the old financial unfairness directly, and current exchanges get evaluated on their own terms instead of through that old lens.`,
+      negative: `An unresolved sense of past financial unfairness can make present, unrelated transactions feel like a repeat of something that already happened once.`,
+    },
+
+    // ── 9 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
+    '9_MK': {
+      heading: `You'd Rather Not Deal With Money Matters Directly If You Can Help It`,
+      why: `Something in your relationship to material security carries an old pattern of withdrawal from financial engagement — a preference for not looking too closely at bills, statements, or planning, retreating into other matters rather than confronting material reality head-on. The Hermit sits in your Material Karma, meaning your unresolved material task centers on engaging directly with money matters rather than continuing to avoid them.`,
+      shadow: `The risk is that unexamined finances tend to drift, and the avoidance that once felt like peace becomes its own source of quiet financial stress. If you can't say clearly what your current financial state actually is, that avoidance may be costing you more than the discomfort of looking would.`,
+      path: `This may shift by setting aside one specific, limited block of time to look directly at your actual financial state, without retreating from it partway through.`,
+      positive: `You engage directly with your financial reality instead of retreating from it, and the clarity that follows replaces the old, quiet stress of not knowing.`,
+      negative: `Avoiding direct engagement with money matters lets unexamined finances drift, turning old avoidance into a steady, quiet source of stress.`,
+    },
+
+    // ── 10 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '10_MK': {
+      heading: `Money Seems to Arrive and Vanish in Cycles You Can't Quite Predict`,
+      why: `Something in your relationship to material security carries an old pattern of instability — real upswings and real downturns, financial fortune that seems to move in cycles rather than settling into something steady. The Wheel of Fortune sits in your Material Karma, meaning your unresolved material task centers on building consistency underneath the cycle, rather than simply riding it up and down.`,
+      shadow: `The risk is treating every upswing as permanent and every downturn as catastrophic, making decisions from whichever extreme you happen to be in rather than from a steadier, longer view. If your financial choices swing as widely as your circumstances do, the cycle may be running the decisions instead of the other way around.`,
+      path: `This may shift by building one small, consistent financial habit that holds steady regardless of which phase of the cycle you're currently in.`,
+      positive: `You've built consistent habits that hold steady through both ups and downs, so the natural cycle no longer dictates your financial decisions.`,
+      negative: `Letting whichever phase of the cycle you're in — flush or lean — drive your financial decisions keeps real stability just out of reach.`,
+    },
+
+    // ── 11 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '11_MK': {
+      heading: `You Carry Financial Strain Alone Rather Than Naming It Out Loud`,
+      why: `Something in your relationship to material security carries an old pattern of silent endurance — real financial hardship or pressure, held quietly and managed alone, without it ever being said plainly to anyone who might help. The Strength sits in your Material Karma, meaning your unresolved material task centers on naming financial strain directly rather than continuing to carry it in silence.`,
+      shadow: `The risk is that silently-carried financial strain never gets the chance to be actually addressed, since no one close to you knows the real extent of it. If people would be surprised to learn how much financial pressure you're actually under, that silence is the pattern still active.`,
+      path: `This may shift by naming your actual financial strain out loud to one trusted person this week, rather than continuing to manage it alone.`,
+      positive: `You've named real financial strain out loud, and the support that becomes available once it's spoken replaces the old weight of carrying it silently.`,
+      negative: `Financial strain carried silently, never spoken aloud to anyone, stays unaddressed no matter how capably you manage it alone.`,
+    },
+
+    // ── 12 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '12_MK': {
+      heading: `A Real Financial Decision Has Been Left Suspended for a Long Time`,
+      why: `Something in your relationship to material security carries an old pattern of self-imposed limbo — a financial decision or change left unmade, material comfort quietly sacrificed while waiting for a clarity that hasn't fully arrived. The Hanged Man sits in your Material Karma, meaning your unresolved material task centers on actually making the suspended decision rather than continuing to wait inside it.`,
+      shadow: `The risk is mistaking the wait itself for necessary patience, when it may have quietly become its own form of avoidance. If the same financial decision has stayed unmade well past the point where the underlying uncertainty was resolved, the suspension may no longer be serving you.`,
+      path: `This may shift by naming the specific financial decision that's been left suspended, and setting a real point by which it gets made, ready or not.`,
+      positive: `You've made the financial decision that had been left suspended, and material comfort no longer has to wait on a clarity that wasn't actually going to arrive.`,
+      negative: `A financial decision left suspended indefinitely quietly costs material comfort, mistaking avoidance for patience the longer it goes unmade.`,
+    },
+
+    // ── 13 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '13_MK': {
+      heading: `Necessary Financial Change Gets Resisted Longer Than It Needs To`,
+      why: `Something in your relationship to material security carries an old fear of material loss — a resistance to endings, even financial ones that are clearly due, because letting go of a current arrangement feels like losing the security itself. The Death sits in your Material Karma, meaning your unresolved material task centers on recognizing that some financial endings are what actually make room for real security, not a threat to it.`,
+      shadow: `The risk is holding onto a financial arrangement well past its useful life simply because ending it feels dangerous, even when the arrangement itself has stopped serving your actual security. If you're maintaining something financial mainly out of fear of what ending it might mean, that fear is the pattern still unresolved.`,
+      path: `This may shift by identifying one financial arrangement that's clearly run its course, and letting it end deliberately rather than continuing to resist the ending.`,
+      positive: `You let a financial arrangement that had run its course actually end, and real room opens up for security that fits your current life.`,
+      negative: `Resisting a financial ending that's clearly due, out of fear rather than genuine need, blocks the room a real ending would otherwise create.`,
+    },
+
+    // ── 14 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '14_MK': {
+      heading: `Your Spending Swings Between Full Restriction and Full Release`,
+      why: `Something in your relationship to material security carries an old pattern of extremes — strict financial discipline followed by periods of full release, each framed as the necessary correction for the one before it. The Temperance sits in your Material Karma, meaning your unresolved material task centers on finding a sustainable middle, rather than continuing to alternate between opposite poles.`,
+      shadow: `The risk is that neither extreme, held alone, ever actually produces lasting security — restriction that eventually breaks, followed by release that undoes the restriction's progress. If your financial habits look more like a pendulum than a steady practice, that swing is the pattern still active.`,
+      path: `This may shift by choosing one small, moderate financial habit and holding it consistently, resisting the pull toward either extreme.`,
+      positive: `You've replaced the swing between financial extremes with one sustainable, moderate habit, and real security compounds instead of resetting.`,
+      negative: `Alternating between full financial restriction and full release keeps undoing whatever progress the other extreme managed to build.`,
+    },
+
+    // ── 15 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '15_MK': {
+      heading: `Money Sometimes Feels Like Something You're Trapped By, Not Something You Hold`,
+      why: `Something in your relationship to material security carries an old pattern of compulsive attachment — a felt sense of being bound to financial obligations, possessions, or a particular lifestyle rather than genuinely choosing them. The Devil sits in your Material Karma, meaning your unresolved material task centers on examining that felt bondage directly, rather than continuing to experience it as simply how things are.`,
+      shadow: `The risk is mistaking a compulsive material attachment for a fixed reality, when it may actually be a pattern that hasn't yet been questioned. If you feel trapped by a financial obligation without having genuinely examined whether it's still required, that unexamined bind is the pattern still unresolved.`,
+      path: `This may shift by naming, honestly, one specific material attachment that feels like a trap, and asking directly what it would actually take to loosen it.`,
+      positive: `You've examined a felt material bind directly and found it more loosenable than it seemed, replacing compulsion with genuine, examined choice.`,
+      negative: `A financial obligation felt as inescapable, but never actually examined, keeps functioning as a trap it may not need to be.`,
+    },
+
+    // ── 16 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '16_MK': {
+      heading: `Financial Warning Signs Tend to Get Missed Until They Can't Be`,
+      why: `Something in your relationship to material security carries an old pattern of denial toward early financial strain — signs of instability quietly maintained as "fine" until a sudden, more disruptive reckoning forces the issue. The Tower sits in your Material Karma, meaning your unresolved material task centers on taking early financial warning signs seriously, rather than waiting for a forced, sudden correction.`,
+      shadow: `The risk is that maintaining the appearance of financial stability, rather than addressing what's actually straining underneath it, sets up exactly the sudden collapse the denial was meant to avoid. If financial reversals in your life tend to feel sudden despite visible signals beforehand, that pattern of delayed reckoning may be active.`,
+      path: `This may shift by identifying, specifically, one financial strain currently being minimized, and addressing it directly before it forces a more disruptive correction.`,
+      positive: `You address financial strain at its early signs, and a gradual, chosen correction replaces the sudden reckoning denial would otherwise have forced.`,
+      negative: `Denying early financial warning signs to maintain an appearance of stability tends to produce exactly the sudden collapse the denial was trying to avoid.`,
+    },
+
+    // ── 17 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '17_MK': {
+      heading: `You Keep Hoping Your Finances Will Improve Without Yet Acting on That Hope`,
+      why: `Something in your relationship to material security carries an old pattern of passive hope — a genuine, sustaining belief that things will get better financially, held without yet converting into the concrete action that hope was meant to inspire. The Star sits in your Material Karma, meaning your unresolved material task centers on pairing real hope with real, specific action toward material improvement.`,
+      shadow: `The risk is that hope alone, however genuine, doesn't move a financial position on its own — and waiting for improvement to simply arrive can substitute for the action that would actually produce it. If your financial hope hasn't yet translated into a concrete step, that gap is the pattern still unresolved.`,
+      path: `This may shift by naming one small, concrete action your financial hope is actually pointing toward, and taking it this week.`,
+      positive: `You've paired genuine financial hope with real action, and material improvement starts arriving because of what you did, not just what you believed.`,
+      negative: `Hope for financial improvement, held without any concrete action behind it, doesn't move a material position on its own.`,
+    },
+
+    // ── 18 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '18_MK': {
+      heading: `The Full Picture of Your Finances Feels Hazier Than It Probably Needs To Be`,
+      why: `Something in your relationship to material security carries an old pattern of anxious avoidance — a preference for a vague, felt sense of your financial position over a clear, examined one, because clarity itself feels like it might confirm something feared. The Moon sits in your Material Karma, meaning your unresolved material task centers on replacing that anxious haze with an actual, examined look at where things stand.`,
+      shadow: `The risk is that the anxiety persists precisely because it's never actually checked against real numbers — a vague fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual numbers would justify, that gap between feeling and fact is the pattern still active.`,
+      path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess.`,
+      positive: `You've replaced anxious financial guesswork with an actual, examined look at your numbers, and the haze clears into something workable.`,
+      negative: `An anxious, unexamined sense of your finances tends to persist and grow precisely because it's never actually checked against the real numbers.`,
+    },
+
+    // ── 19 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '19_MK': {
+      heading: `You Project Financial Confidence Even in Moments You're Privately Unsure`,
+      why: `Something in your relationship to material security carries an old pattern of performed ease — an outward financial confidence maintained consistently, even in stretches where the underlying picture feels genuinely uncertain. The Sun sits in your Material Karma, meaning your unresolved material task centers on letting real uncertainty be visible sometimes, rather than maintaining brightness regardless of what's actually happening underneath.`,
+      shadow: `The risk is that the performed confidence prevents anyone, including you, from actually addressing the uncertainty underneath it — a bright surface that keeps real financial concerns from getting real attention. If you'd never let anyone see you worried about money, that consistent brightness may be costing you the support that naming it would bring.`,
+      path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual confidence.`,
+      positive: `You let real financial uncertainty be visible sometimes, and the support that follows replaces the effort of maintaining constant, performed confidence.`,
+      negative: `Performing financial confidence regardless of what's actually happening underneath keeps real concerns from ever getting the attention they need.`,
+    },
+
+    // ── 20 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '20_MK': {
+      heading: `A Real Financial Reckoning Keeps Getting Pushed a Little Further Out`,
+      why: `Something in your relationship to material security carries an old pattern of delay at the point of reckoning — a financial truth that's already become clear, met with more preparation, more waiting, one more condition before it's actually faced. The Judgement sits in your Material Karma, meaning your unresolved material task centers on acting on financial clarity that has, in most cases, already arrived.`,
+      shadow: `The risk is that further preparation, past a certain point, functions as delay rather than genuine diligence — a reckoning kept perpetually one step away. If you already know what the financial situation actually calls for and still haven't acted, that delay is the pattern still unresolved.`,
+      path: `This may shift by naming the specific action the financial clarity is already calling for, and taking a first concrete step this week rather than gathering more certainty first.`,
+      positive: `You've acted on financial clarity that had already arrived, closing a reckoning that delay had kept perpetually just out of reach.`,
+      negative: `Financial clarity that's already arrived, but keeps being met with more preparation instead of action, turns necessary diligence into indefinite delay.`,
+    },
+
+    // ── 21 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '21_MK': {
+      heading: `A Financial Goal Rarely Gets to Feel Fully Finished`,
+      why: `Something in your relationship to material security carries an old pattern of extending completion — a financial goal reached in practical terms, but immediately relativized, expanded, or set alongside a new condition before it's allowed to actually count as done. The World sits in your Material Karma, meaning your unresolved material task centers on letting a genuinely reached financial goal be named complete.`,
+      shadow: `The risk is that material security never gets to be felt, because the finish line keeps moving the moment it's actually crossed. If you can't recall the last time a financial goal felt fully, simply done, that pattern of continuous extension is still active.`,
+      path: `This may shift by identifying one financial goal that is, in practical terms, already reached, and deliberately naming it complete rather than adding one more condition first.`,
+      positive: `You let a genuinely reached financial goal be named complete, and the security it represents finally gets to be actually felt.`,
+      negative: `A financial goal that's reached but never allowed to count as finished means material security never quite gets the chance to be felt.`,
+    },
+
+    // ── 22 in MATERIAL KARMA (Money Channel) ────────────────────────────────
+    '22_MK': {
+      heading: `Financial Risks Tend to Get Taken Before a Safety Net Is Actually in Place`,
+      why: `Something in your relationship to material security carries an old pattern of leaping first — genuine openness to material risk, acted on with real courage, but often before the groundwork that would make the risk sustainable has actually been laid. The Fool sits in your Material Karma, meaning your unresolved material task centers on pairing that real courage with enough preparation to let the leap actually land.`,
+      shadow: `The risk is that the leap itself becomes the whole story, with the landing left to chance — material risks taken freely, but rarely with a safety net considered in advance. If your financial risks tend to work out through luck rather than preparation, that gap is the pattern still unresolved.`,
+      path: `This may shift by building one small piece of safety net before the next financial leap, rather than trusting the landing entirely to courage alone.`,
+      positive: `You pair real financial courage with genuine preparation, so the leap lands on something solid instead of depending on luck.`,
+      negative: `Taking financial risks freely, without ever building the safety net first, leaves the landing dependent on luck rather than preparation.`,
+    },
+
+    // ── 1 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '1_RWM': {
+      heading: `You Trust Money You Actively Made More Than Money That Just Arrived`,
+      why: `Your subconscious relationship to money runs through active generation — earning feels legitimate, deserved, real, while money that arrives without your direct effort (a gift, a windfall, unearned interest) can feel oddly uncomfortable to simply receive. The Magician governs your Relationship with Money, meaning your instinct is to keep initiating income rather than letting it also just come to you.`,
+      shadow: `The risk is turning down or minimizing genuinely available resources — support, gifts, easier income — because only self-generated money feels legitimate to hold onto. If you find yourself working harder for money you could have simply accepted, that discomfort with receiving may be the pattern still running.`,
+      path: `This may shift by accepting one piece of unearned financial ease this week — a gift, an easier path, help offered — without converting it into something you have to justify through extra effort.`,
+      positive: `You receive both earned and unearned resources with equal ease, and your financial flow widens because you're no longer filtering out help that didn't require active generation.`,
+      negative: `Discomfort with unearned money keeps you working harder than necessary, turning down real ease because only self-generated income feels legitimate to hold.`,
+    },
+
+    // ── 2 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '2_RWM': {
+      heading: `You Sense Financial Opportunity Before You Can Explain It, But Rarely Name Your Price`,
+      why: `Your subconscious relationship to money runs through quiet intuition — a real sense for when a financial opportunity is right, paired with real discomfort stating plainly what your work or time is actually worth. The High Priestess governs your Relationship with Money, meaning your financial insight tends to stay private, felt rather than spoken aloud in the transactional terms money actually requires.`,
+      shadow: `The risk is that unclaimed insight goes uncompensated — you sense the right move, make it quietly, and let the value of that instinct go unnamed and underpaid. If your income doesn't reflect what you actually know, the silence around your own worth may be the pattern still active.`,
+      path: `This may shift by stating one specific price or value out loud this week, rather than letting your financial instinct stay an unspoken, unpaid asset.`,
+      positive: `You name your financial worth out loud, and your income finally reflects the real value of the instinct you've always quietly had.`,
+      negative: `Financial insight that stays private and unspoken keeps going uncompensated, no matter how consistently accurate that quiet instinct actually is.`,
+    },
+
+    // ── 3 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '3_RWM': {
+      heading: `Spending on Comfort and Beauty Comes Naturally; Saving for Yourself Does Not`,
+      why: `Your subconscious relationship to money runs through generous, sensory expression — real ease spending on comfort, beauty, and care, for yourself and especially for others, with less natural pull toward accumulation or reserve. The Empress governs your Relationship with Money, meaning your financial flow is generative and warm, but not automatically protective of its own future.`,
+      shadow: `The risk is that generosity, unchecked, leaves nothing set aside — real abundance moving freely outward while your own reserve stays thin. If you're comfortable and generous now but anxious about later, that imbalance may be the pattern still unresolved.`,
+      path: `This may shift by setting aside a specific portion of any income for your own future before spending on comfort or generosity extends further.`,
+      positive: `Your natural generosity continues, now paired with a genuine reserve set aside first, so warmth outward no longer comes at the cost of your own future.`,
+      negative: `Spending easily on comfort and care for others, without setting anything aside first, keeps your own reserve thin no matter how much flows through your hands.`,
+    },
+
+    // ── 4 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '4_RWM': {
+      heading: `Money Feels Safest When You're the One Managing Every Detail of It`,
+      why: `Your subconscious relationship to money runs through control — structure, oversight, a firm hand on every account and decision, as though financial security depends entirely on your personal management of it. The Emperor governs your Relationship with Money, meaning your instinct is to build and defend systems rather than trust ones you didn't personally construct.`,
+      shadow: `The risk is that the management itself becomes the source of stress, and delegating any part of your finances — even to a trustworthy system — feels like a genuine risk rather than a reasonable option. If you can't imagine your money being fine without your constant oversight, that's the pattern still active.`,
+      path: `This may shift by handing one small piece of financial management to a system or person you trust, and observing whether it actually holds without you.`,
+      positive: `You've tested whether your finances hold without total personal control, and found real systems worth trusting beyond your own constant oversight.`,
+      negative: `A need to personally manage every financial detail keeps money feeling safe only under your direct control, which is exhausting to sustain indefinitely.`,
+    },
+
+    // ── 5 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '5_RWM': {
+      heading: `You Feel Guilty About Money Earned or Spent Outside the "Right" Way`,
+      why: `Your subconscious relationship to money runs through inherited rules about correctness — a real sense that there's a proper, sanctioned way to earn and spend, and quiet discomfort whenever money arrives or leaves outside that framework. The Hierophant governs your Relationship with Money, meaning your instinct is to check financial choices against tradition or authority before trusting them.`,
+      shadow: `The risk is passing up genuinely good financial opportunities simply because they don't match an inherited idea of the "proper" way to earn or spend. If you feel guilty about money that came easily or unconventionally, even when nothing about it was actually wrong, that inherited rule may be the pattern still active.`,
+      path: `This may shift by naming one inherited money rule directly and testing whether it actually reflects your own values, or just an old, unexamined authority.`,
+      positive: `You've tested an inherited money rule against your own actual values, and now earn and spend according to what genuinely fits you, not just old convention.`,
+      negative: `An unexamined rule about the "proper" way to handle money can quietly disqualify genuinely good opportunities that simply don't match the old convention.`,
+    },
+
+    // ── 6 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '6_RWM': {
+      heading: `Financial Choices Get Weighed Against What Someone Else Wants, Not Just What You Do`,
+      why: `Your subconscious relationship to money runs through relational weighing — earning and spending decisions filtered through what a partner or loved one would think, want, or need, sometimes before your own actual preference gets consulted. The Lovers governs your Relationship with Money, meaning your financial choices are genuinely relational, for better and for worse.`,
+      shadow: `The risk is that your own financial preference gets perpetually deferred to someone else's, leaving you unsure what you'd actually choose if the decision were only yours. If you can't say clearly what you want financially, independent of what someone else wants, that deference may be the pattern still unresolved.`,
+      path: `This may shift by making one financial decision based purely on your own preference this week, and letting it stand without checking it against anyone else's wants first.`,
+      positive: `You make real financial choices from your own genuine preference, and relational money decisions become a true collaboration instead of a one-sided deference.`,
+      negative: `Financial choices perpetually filtered through someone else's preference first leave your own actual financial wants quietly unexamined.`,
+    },
+
+    // ── 7 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '7_RWM': {
+      heading: `You Chase the Next Income Goal Before Actually Enjoying the Last One`,
+      why: `Your subconscious relationship to money runs through forward drive — real ambition and momentum toward the next financial target, arriving so quickly after the last one that there's rarely a pause to actually register what's already been earned. The Chariot governs your Relationship with Money, meaning your financial motion is genuinely strong, but rest and enjoyment haven't kept pace with it.`,
+      shadow: `The risk is that money earned never actually gets to feel earned — spent, saved, or invested toward the next goal before its arrival is even acknowledged. If you can't recall the last time you paused to genuinely enjoy an income milestone, that restlessness may be the pattern still active.`,
+      path: `This may shift by deliberately pausing after the next financial milestone, before setting the next target, long enough to actually register what's been reached.`,
+      positive: `You pause to genuinely register each financial milestone before pushing toward the next, and the momentum starts to feel like progress instead of a treadmill.`,
+      negative: `Chasing the next income goal before acknowledging the last one keeps real financial progress from ever actually registering as such.`,
+    },
+
+    // ── 8 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '8_RWM': {
+      heading: `You Keep a Precise Mental Ledger of What's Fair in Every Financial Exchange`,
+      why: `Your subconscious relationship to money runs through fairness and precision — a sharp internal accounting of who owes what, whether compensation matches effort, whether an exchange was actually equal. The Justice governs your Relationship with Money, meaning your financial instinct is deeply oriented toward balance, sometimes at the cost of ease.`,
+      shadow: `The risk is that the mental ledger never fully closes — small financial imbalances tracked and remembered long after they'd naturally resolve on their own, creating tension in relationships or transactions that could otherwise be simple. If you're still tallying a financial unfairness long after it stopped mattering to anyone else, that ledger may be the pattern still running.`,
+      path: `This may shift by consciously closing one old financial account you're still mentally tracking, and letting the balance rest rather than continuing to tally it.`,
+      positive: `You let old, settled financial imbalances actually close, and your sharp sense of fairness applies to what's current instead of what's long past.`,
+      negative: `A mental ledger that never closes keeps old, minor financial imbalances alive long after they'd naturally have stopped mattering to anyone else.`,
+    },
+
+    // ── 9 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
+    '9_RWM': {
+      heading: `You'd Rather Earn Less Alone Than Ask for Financial Help or Partnership`,
+      why: `Your subconscious relationship to money runs through self-sufficiency — a strong preference for earning and managing money independently, even when collaboration or support would genuinely increase what's available to you. The Hermit governs your Relationship with Money, meaning your financial instinct favors solitude over asking, even at a real cost.`,
+      shadow: `The risk is undercharging or under-earning specifically to avoid the discomfort of financial interdependence — a self-sufficiency so strong it quietly limits your own income. If you'd rather make less alone than ask for help that could genuinely grow what you earn, that avoidance may be the pattern still active.`,
+      path: `This may shift by asking for one specific piece of financial help or partnership this week, and noticing what actually becomes possible once you do.`,
+      positive: `You ask for financial help or partnership when it would genuinely help, and your income grows because self-sufficiency is no longer the only option you'll consider.`,
+      negative: `Preferring to earn less entirely alone rather than ask for help quietly caps your income well below what real collaboration could unlock.`,
+    },
+
+    // ── 10 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '10_RWM': {
+      heading: `Income Arrives in Waves, and Steady, Predictable Money Feels Almost Suspicious`,
+      why: `Your subconscious relationship to money runs through cycles — real feast-and-famine patterns, income that surges and recedes, an instinct that treats sudden financial luck as more familiar than slow, steady accumulation. The Wheel of Fortune governs your Relationship with Money, meaning your financial rhythm is genuinely cyclical, for better and worse.`,
+      shadow: `The risk is that steady income gets unconsciously undermined — quietly sabotaged or simply not trusted — because the wave pattern feels more like "how money actually works" than something reliable ever could. If consistent income opportunities keep slipping away just as they start to stabilize, that instinct may be the pattern still active.`,
+      path: `This may shift by deliberately protecting one steady income source through a full cycle, resisting the urge to disrupt it just because it feels unfamiliar.`,
+      positive: `You let one steady income source hold through a full cycle without disrupting it, and real stability becomes as trustworthy as the old, familiar waves.`,
+      negative: `An instinct that only trusts feast-and-famine cycles can quietly undermine the steady income that would actually smooth them out.`,
+    },
+
+    // ── 11 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '11_RWM': {
+      heading: `You Provide Financially for Others Long Before You'd Ask to Be Provided For`,
+      why: `Your subconscious relationship to money runs through quiet endurance — real capacity to earn, support, and carry financial responsibility for others, paired with a much weaker instinct to ask the same in return. The Strength governs your Relationship with Money, meaning your financial resilience is genuine, but one-directional by default.`,
+      shadow: `The risk is that the giving becomes depleting precisely because it's never balanced by receiving — real financial strength quietly costing you the support you'd need to actually sustain it. If you can provide for everyone but struggle to ask anyone to provide for you, that imbalance may be the pattern still unresolved.`,
+      path: `This may shift by naming one specific financial need out loud to someone capable of helping, rather than continuing to carry it alone by default.`,
+      positive: `You name real financial needs out loud instead of only ever meeting others', and the support that follows makes your strength sustainable instead of depleting.`,
+      negative: `Providing financially for others while rarely asking to be provided for keeps real strength one-directional, and eventually, quietly depleting.`,
+    },
+
+    // ── 12 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '12_RWM': {
+      heading: `Spending on Yourself Specifically Tends to Get Delayed or Denied`,
+      why: `Your subconscious relationship to money runs through self-denial — a real instinct to withhold financial comfort from yourself specifically, even while resources exist, as though waiting or sacrificing has its own quiet virtue. The Hanged Man governs your Relationship with Money, meaning your financial instinct suspends your own comfort more readily than it suspends anyone else's.`,
+      shadow: `The risk is that the denial outlives whatever it was originally protecting — money available for your own comfort, held back indefinitely, well past the point where the sacrifice actually serves anything. If you consistently postpone spending on yourself specifically, that suspension may be the pattern still active.`,
+      path: `This may shift by spending, deliberately and without justification, on one thing for your own comfort this week — not as a reward, just as a choice.`,
+      positive: `You spend on your own comfort without needing to justify or earn it first, and the old, indefinite self-denial finally has a real end point.`,
+      negative: `Indefinitely postponing spending on your own comfort, even when resources exist, keeps a form of self-denial running well past any actual necessity.`,
+    },
+
+    // ── 13 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '13_RWM': {
+      heading: `Your Finances Tend to Change Through Total Overhaul, Not Gradual Adjustment`,
+      why: `Your subconscious relationship to money runs through transformation — real financial shifts that arrive as complete overhauls, a job left entirely, a whole system rebuilt from scratch, rather than gradual, incremental change. The Death governs your Relationship with Money, meaning your financial instinct favors the clean break over the slow adjustment.`,
+      shadow: `The risk is that smaller, earlier course-corrections get skipped in favor of waiting for the big, dramatic reset — financial problems left unaddressed until they force a total overhaul that a gradual adjustment could have prevented. If your financial life keeps needing complete rebuilds rather than small tune-ups, that pattern may be the piece still unresolved.`,
+      path: `This may shift by making one small, incremental financial adjustment now, rather than waiting for the situation to force a complete overhaul later.`,
+      positive: `You make small financial adjustments as they're needed, and real transformation becomes something you choose deliberately, not something forced by neglect.`,
+      negative: `Skipping small financial course-corrections in favor of waiting for a dramatic reset tends to make the eventual overhaul more disruptive than it needed to be.`,
+    },
+
+    // ── 14 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '14_RWM': {
+      heading: `Under Stress, Your Spending Swings Hard Toward One Extreme or the Other`,
+      why: `Your subconscious relationship to money runs through balance — genuinely steady and moderate when centered, but prone to swinging into strict restriction or full indulgence the moment real stress enters the picture. The Temperance governs your Relationship with Money, meaning your natural equilibrium is real, but conditional on your overall state.`,
+      shadow: `The risk is that stress-driven financial swings undo the very balance that's otherwise your real strength — a period of discipline followed by a release that erases its progress, or the reverse. If your spending habits seem to track your stress level more than your actual financial plan, that swing may be the pattern still active.`,
+      path: `This may shift by noticing the moment stress starts pulling your spending toward an extreme, and consciously choosing the smaller, steadier version of the response instead.`,
+      positive: `You notice stress-driven financial swings as they start and choose the steadier response instead, letting your natural balance hold even under pressure.`,
+      negative: `Financial habits that track your stress level more than your actual plan keep undoing, under pressure, the very balance that's otherwise your real strength.`,
+    },
+
+    // ── 15 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '15_RWM': {
+      heading: `A Specific Spending or Earning Habit Feels More Compulsive Than Chosen`,
+      why: `Your subconscious relationship to money runs through compulsion — a specific financial habit, whether spending, earning, or a particular relationship to a job or lifestyle, that feels less like an active choice and more like something you're bound to. The Devil governs your Relationship with Money, meaning at least one part of your financial life runs on autopilot rather than genuine decision.`,
+      shadow: `The risk is mistaking the compulsive habit for simply how things are, never actually examining whether it's still necessary or just familiar. If a specific money habit feels like it's running you rather than the other way around, that unexamined grip may be the pattern still unresolved.`,
+      path: `This may shift by naming the specific compulsive financial habit honestly, and asking directly what would actually happen if you loosened it.`,
+      positive: `You've examined a compulsive money habit directly and found it more changeable than it seemed, replacing autopilot with genuine, examined choice.`,
+      negative: `A financial habit that runs on autopilot, never actually questioned, keeps functioning as a compulsion rather than a choice you're still making.`,
+    },
+
+    // ── 16 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '16_RWM': {
+      heading: `Financial Change Tends to Arrive Suddenly, Even When Signs Were There`,
+      why: `Your subconscious relationship to money runs through sudden disruption — real financial shifts that seem to hit abruptly, even in situations where warning signs were quietly present beforehand. The Tower governs your Relationship with Money, meaning your instinct is to maintain the current picture until it can no longer be maintained, rather than adjusting early.`,
+      shadow: `The risk is that maintaining the appearance of financial stability, instead of addressing the strain underneath it, sets up exactly the sudden reversal the denial was meant to avoid. If financial surprises in your life tend to have visible signals in hindsight, that pattern of delayed reckoning may be active.`,
+      path: `This may shift by identifying one financial strain currently being minimized, and addressing it directly before it forces a more disruptive, sudden correction.`,
+      positive: `You address financial strain at its early signs now, and gradual, chosen adjustment replaces the sudden reversals that used to catch you off guard.`,
+      negative: `Maintaining an appearance of financial stability while ignoring early strain tends to produce exactly the sudden disruption the denial was trying to avoid.`,
+    },
+
+    // ── 17 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '17_RWM': {
+      heading: `You Naturally Monetize What Inspires You, But Wait Passively for the Rest to Improve`,
+      why: `Your subconscious relationship to money runs through hope and natural talent — real ease turning creative or inspired work into income, paired with a more passive hope that other financial areas will simply improve on their own over time. The Star governs your Relationship with Money, meaning your gift for monetizing inspiration is real, but it hasn't yet extended to areas that need direct action instead.`,
+      shadow: `The risk is that hope substitutes for action in exactly the financial areas that need a concrete step, while your genuine talent for monetizing passion continues unaffected. If parts of your financial life have stayed the same for years despite hoping they'd improve, that passivity may be the pattern still active.`,
+      path: `This may shift by naming one financial area you've been hoping will improve, and taking one concrete action toward it this week instead of continuing to wait.`,
+      positive: `You pair your natural gift for monetizing inspiration with real action in the areas that needed it, and hope finally has something concrete behind it.`,
+      negative: `Hoping a financial area will improve, without pairing that hope with any concrete action, tends to leave it exactly where it's always been.`,
+    },
+
+    // ── 18 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '18_RWM': {
+      heading: `Your Actual Financial Numbers Feel Hazier Than the Anxiety About Them`,
+      why: `Your subconscious relationship to money runs through anxious uncertainty — a real, felt worry about your financial state that's often more intense and less examined than the actual numbers would justify. The Moon governs your Relationship with Money, meaning your financial fear tends to run ahead of your financial facts.`,
+      shadow: `The risk is that the anxiety perpetuates itself precisely because it's never actually checked against reality — a vague, unexamined fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual situation warrants, that gap between feeling and fact may be the pattern still active.`,
+      path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess.`,
+      positive: `You've replaced anxious financial guesswork with an actual, examined look at your numbers, and the fear settles into something workable.`,
+      negative: `An anxious, unexamined sense of your finances tends to grow precisely because it's never actually checked against the real, specific numbers.`,
+    },
+
+    // ── 19 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '19_RWM': {
+      heading: `You Project Financial Ease Even in Stretches You're Privately Worried`,
+      why: `Your subconscious relationship to money runs through performed confidence — a natural, radiant ease around money maintained outwardly, even during periods where the underlying picture feels genuinely uncertain. The Sun governs your Relationship with Money, meaning your real gift for financial optimism sometimes covers concerns that could use real attention instead.`,
+      shadow: `The risk is that the consistent brightness prevents anyone, including you, from actually addressing what's uncertain underneath it — genuine financial concerns that never get real attention because the surface always looks fine. If you'd rarely let anyone see you actually worried about money, that consistent performance may be costing you real support.`,
+      path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual ease.`,
+      positive: `You let real financial uncertainty be visible sometimes, and the support that follows replaces the effort of maintaining constant, performed ease.`,
+      negative: `Performing financial confidence regardless of what's actually happening underneath keeps real concerns from ever getting the attention they need.`,
+    },
+
+    // ── 20 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '20_RWM': {
+      heading: `A Financial Wake-Up Call Tends to Arrive Later Than the Signs Did`,
+      why: `Your subconscious relationship to money runs through delayed reckoning — a pattern of eventually facing financial truths fully and honestly, but usually well after the signs pointing toward them first appeared. The Judgement governs your Relationship with Money, meaning your eventual clarity is genuine, but the timing tends to lag behind the actual evidence.`,
+      shadow: `The risk is that the delay itself has a cost — financial issues left unaddressed longer than necessary, simply because the eventual reckoning always seems to arrive, so there's less urgency to act on early signs. If you tend to face financial truths only once they can no longer be avoided, that lag may be the pattern still active.`,
+      path: `This may shift by acting on a current financial sign now, before it becomes the kind of situation that eventually forces a full reckoning.`,
+      positive: `You act on financial signs as they appear, and the eventual, delayed reckoning gets replaced by earlier, less costly course-corrections.`,
+      negative: `Waiting for financial truths to become undeniable before facing them fully tends to make the eventual reckoning more costly than it needed to be.`,
+    },
+
+    // ── 21 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '21_RWM': {
+      heading: `Financial Success Rarely Feels Complete Until It Matches a Bigger, Ideal Picture`,
+      why: `Your subconscious relationship to money runs through a large-scale, big-picture standard — real financial progress measured against an ideal, comprehensive version of success, rather than felt as complete on its own more modest terms. The World governs your Relationship with Money, meaning genuine financial wins can feel unfinished simply because the full picture hasn't yet arrived.`,
+      shadow: `The risk is that real, current financial success never gets to be felt as success, because it's constantly measured against a bigger picture that hasn't materialized yet. If you can't recall the last time a financial win felt genuinely complete, that big-picture standard may be the pattern still active.`,
+      path: `This may shift by naming one financial win that's genuinely real right now, and letting it count as complete on its own terms, without measuring it against the larger picture.`,
+      positive: `You let real, current financial wins count as complete on their own terms, and success finally gets to be felt instead of endlessly deferred to a bigger picture.`,
+      negative: `Measuring every financial win against an ideal, bigger picture keeps real, current success from ever quite registering as success.`,
+    },
+
+    // ── 22 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
+    '22_RWM': {
+      heading: `You Trust That Money Will Work Out More Than You Plan for It To`,
+      why: `Your subconscious relationship to money runs through spontaneous trust — real openness to financial risk and change, paired with a genuine belief that things will work out, more than a habit of building the structure that would make that outcome more certain. The Fool governs your Relationship with Money, meaning your financial optimism is real, but often unaccompanied by preparation.`,
+      shadow: `The risk is that the trust alone gets asked to do the work that planning was meant to do — financial risks taken freely, with the landing left mostly to chance. If your financial life tends to work out through luck more than through preparation, that gap may be the pattern still unresolved.`,
+      path: `This may shift by pairing your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism.`,
+      positive: `You pair genuine financial optimism with real preparation, so the trust that things will work out is backed by something solid instead of chance alone.`,
+      negative: `Trusting that money will simply work out, without building any structure to support that outcome, leaves real financial risk dependent on luck.`,
+    },
+
+    // ── 1 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '1_MEP': {
+      heading: `You Carry Real, Inherited Competence at Launching Things From Nothing`,
+      why: `Your money entry point reflects a genuine, carried-over competence at starting ventures from scratch — earning through initiation, launching, building something new where nothing existed before. The Magician sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating the same old pattern alongside the competence — initiating a promising professional venture and then moving to the next before this one has actually paid off. If your career shows a string of strong starts without matching follow-through, that carried-over pattern may be worth addressing directly.`,
+      path: `This may shift by choosing one current professional venture and deliberately staying with it well past the exciting starting phase.`,
+      positive: `You bring genuine, practiced skill to starting new ventures, and because you now stay through the follow-through phase too, that competence finally compounds into real career growth.`,
+      negative: `Real, inherited skill at starting things loses its financial value if the same old pattern of moving on too soon keeps repeating alongside it.`,
+    },
+
+    // ── 2 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '2_MEP': {
+      heading: `You Carry Real, Inherited Competence at Reading What Others Miss`,
+      why: `Your money entry point reflects a genuine, carried-over competence in intuitive, discerning, or advisory work — earning through insight, counsel, or a quiet read on situations others find opaque. The High Priestess sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of holding that insight back rather than offering it plainly, letting a genuinely marketable skill stay private and uncompensated. If your professional insight is often right but rarely credited or paid for directly, that old caution may be worth addressing.`,
+      path: `This may shift by offering your intuitive read directly and explicitly in one professional context this week, rather than letting it stay implied.`,
+      positive: `You offer your genuine intuitive insight directly instead of holding it back, and your career finally reflects the real value of a competence you've always quietly had.`,
+      negative: `Real, inherited insight stays financially undervalued if an old caution keeps it private instead of offered plainly in professional contexts.`,
+    },
+
+    // ── 3 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '3_MEP': {
+      heading: `You Carry Real, Inherited Competence in Creative, Nurturing, or Abundant Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in creative, hospitable, or nurturing professions — earning through generativity, care, beauty, or cultivation, work that produces real comfort and abundance for others. The Empress sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of under-pricing that generosity, giving so freely in professional contexts that the actual market value of the work goes uncollected. If your creative or nurturing work is appreciated but underpaid, that old pattern may be the piece still active.`,
+      path: `This may shift by naming a fair, specific price for your creative or nurturing work this week, and holding to it without discounting out of habit.`,
+      positive: `You price your creative and nurturing work fairly, and real abundance flows back to match the genuine value you've always brought to it.`,
+      negative: `A pattern of underpricing genuinely valuable creative or nurturing work keeps real professional abundance from actually reaching you.`,
+    },
+
+    // ── 4 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '4_MEP': {
+      heading: `You Carry Real, Inherited Competence in Leadership and Building Structure`,
+      why: `Your money entry point reflects a genuine, carried-over competence in organizational or leadership work — earning through building systems, directing effort, and creating the structure that lets an enterprise actually function. The Emperor sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of over-control, building structures so tightly held that they depend entirely on you, limiting how far your professional competence can actually scale. If your career growth keeps hitting a ceiling shaped by how much you can personally oversee, that old pattern may be worth addressing.`,
+      path: `This may shift by building one system at work that runs correctly without your constant direct oversight, and trusting it to hold.`,
+      positive: `You build structures that hold without requiring your constant oversight, and your real leadership competence finally scales past what you alone can manage.`,
+      negative: `Real, inherited leadership skill hits a ceiling if an old need for total control keeps every structure dependent on your constant personal oversight.`,
+    },
+
+    // ── 5 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '5_MEP': {
+      heading: `You Carry Real, Inherited Competence in Teaching and Passing Down Knowledge`,
+      why: `Your money entry point reflects a genuine, carried-over competence in teaching, mentorship, or institutional work — earning through transmitting knowledge, upholding standards, and guiding others through established frameworks. The Hierophant sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of clinging to outdated methods simply because they're familiar, letting genuinely valuable teaching competence calcify instead of adapting to what's actually needed now. If your professional approach hasn't updated in a while despite the field around it changing, that old rigidity may be worth addressing.`,
+      path: `This may shift by updating one specific teaching or mentoring method you rely on, testing it against what's actually needed today rather than what's simply familiar.`,
+      positive: `You update your teaching and mentoring methods to match what's actually needed now, and your real competence stays relevant instead of calcifying.`,
+      negative: `Real, inherited teaching skill loses relevance if an old attachment to familiar methods keeps it from adapting to what the field actually needs now.`,
+    },
+
+    // ── 6 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '6_MEP': {
+      heading: `You Carry Real, Inherited Competence in Collaborative and Relational Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in partnership-based or relational professions — earning through discernment, matching, negotiating, or collaborative craft that depends on reading a relationship correctly. The Lovers sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of indecision at key professional forks, letting a genuinely valuable relational instinct stall out at the exact moments a clear choice was needed. If important collaborative decisions tend to sit unresolved longer than they should, that old hesitation may be worth addressing.`,
+      path: `This may shift by making one pending collaborative or partnership decision this week, using your genuine relational instinct rather than continuing to defer it.`,
+      positive: `You act decisively on your genuine relational instincts, and collaborative work finally moves forward instead of stalling at key decision points.`,
+      negative: `Real, inherited relational skill stalls out if an old pattern of indecision keeps key collaborative choices perpetually unresolved.`,
+    },
+
+    // ── 7 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '7_MEP': {
+      heading: `You Carry Real, Inherited Competence in Driven, High-Achievement Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in competitive or high-momentum professions — earning through drive, decisive action, and a real capacity to push toward a goal and win it. The Chariot sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of relentless pushing without pacing, letting genuinely valuable drive burn out the very career it's meant to build. If your professional momentum tends to end in exhaustion rather than sustainable success, that old pattern may be worth addressing.`,
+      path: `This may shift by building one deliberate pause into your current professional push, treating rest as part of the strategy rather than a departure from it.`,
+      positive: `You pair your genuine drive with real pacing, and sustainable career momentum replaces the old cycle of pushing hard and then burning out.`,
+      negative: `Real, inherited drive burns out its own career gains if an old pattern of relentless pushing never builds in genuine pacing.`,
+    },
+
+    // ── 8 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '8_MEP': {
+      heading: `You Carry Real, Inherited Competence in Fairness-Based and Judgment-Based Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in law, mediation, or standards-based professions — earning through a sharp, reliable sense of what's fair, balanced, and accountable. The Justice sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of applying that standard too rigidly or harshly, letting genuinely valuable judgment curdle into inflexibility that costs you professional goodwill. If your fairness sometimes reads as coldness to the people you work with, that old rigidity may be worth addressing.`,
+      path: `This may shift by pairing one judgment call this week with visible compassion for the person on the other side of it, not just the correct standard.`,
+      positive: `You apply your genuine sense of fairness with real compassion alongside it, and your professional judgment earns trust instead of just correctness.`,
+      negative: `Real, inherited fairness curdles into costly rigidity if an old pattern of harsh application never softens into genuine compassion.`,
+    },
+
+    // ── 9 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
+    '9_MEP': {
+      heading: `You Carry Real, Inherited Competence in Deep, Solitary Expertise`,
+      why: `Your money entry point reflects a genuine, carried-over competence in independent, research-driven, or expert work — earning through depth, focus, and knowledge built alone over real time. The Hermit sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of isolating that expertise so completely it never reaches the audience or collaborators who'd actually pay for it. If your deep knowledge rarely gets shared in ways that translate into professional recognition or income, that old withdrawal may be worth addressing.`,
+      path: `This may shift by sharing one piece of your expert knowledge publicly or professionally this week, rather than continuing to develop it in isolation.`,
+      positive: `You share your genuine expertise more openly, and real professional recognition finally reaches knowledge that used to stay developed in isolation.`,
+      negative: `Real, inherited expertise stays professionally invisible if an old pattern of isolation keeps it from ever reaching the people who'd value it.`,
+    },
+
+    // ── 10 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '10_MEP': {
+      heading: `You Carry Real, Inherited Competence in Adaptable, Cyclical Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in professions shaped by change, timing, or cycles — earning through adaptability, reading shifting conditions, and moving fluidly as circumstances turn. The Wheel of Fortune sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of relying on favorable timing instead of building consistency underneath it, letting real adaptability substitute for a steadier professional foundation. If your career success seems to depend heavily on lucky timing rather than built structure, that old pattern may be worth addressing.`,
+      path: `This may shift by building one consistent professional practice that holds steady regardless of which phase of the cycle you're currently in.`,
+      positive: `You pair your genuine adaptability with real consistency underneath it, and career success stops depending so heavily on lucky timing.`,
+      negative: `Real, inherited adaptability stays fragile if an old reliance on favorable timing never gets paired with a steadier professional foundation.`,
+    },
+
+    // ── 11 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '11_MEP': {
+      heading: `You Carry Real, Inherited Competence in Steady, Resilient, Caretaking Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in caretaking or endurance-based professions — earning through reliability, quiet strength, and a real capacity to hold difficult work steady over time. The Strength sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of carrying professional burdens entirely alone, letting genuinely valuable resilience turn into isolation rather than sustainable strength. If you're relied on professionally but rarely supported in return, that old pattern may be worth addressing.`,
+      path: `This may shift by naming one specific professional burden out loud to a colleague or collaborator this week, rather than continuing to carry it silently.`,
+      positive: `You name real professional burdens instead of carrying them silently, and your genuine resilience becomes sustainable instead of isolating.`,
+      negative: `Real, inherited resilience becomes isolating if an old pattern of carrying every professional burden alone never gets named or shared.`,
+    },
+
+    // ── 12 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '12_MEP': {
+      heading: `You Carry Real, Inherited Competence in Patient, Perspective-Shifting Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in service-oriented or reframing professions — earning through patience, a willingness to see situations from an unconventional angle, and a capacity to hold difficulty without rushing it. The Hanged Man sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of self-sacrifice past the point of usefulness, letting genuinely valuable patience curdle into professional self-neglect. If you consistently put your own professional needs last, that old pattern may be worth addressing.`,
+      path: `This may shift by naming one professional need of your own this week and prioritizing it, rather than automatically deferring it again.`,
+      positive: `You prioritize your own professional needs alongside your genuine patience for others, and the old self-sacrifice no longer costs you what you actually need.`,
+      negative: `Real, inherited patience turns into costly self-neglect if an old pattern of self-sacrifice keeps overriding your own professional needs.`,
+    },
+
+    // ── 13 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '13_MEP': {
+      heading: `You Carry Real, Inherited Competence in Transformative, Threshold-Crossing Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in change-oriented professions — earning through guiding transitions, endings, and rebirths, work that requires real comfort with what other people find frightening. The Death sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of forcing dramatic professional overhauls instead of allowing gradual evolution, letting genuinely valuable transformative skill skip over smaller, necessary adjustments. If your career keeps needing complete resets rather than incremental growth, that old pattern may be worth addressing.`,
+      path: `This may shift by making one small, incremental professional change now, rather than waiting for circumstances to force a complete overhaul.`,
+      positive: `You make small professional adjustments as they're needed, and your genuine transformative skill gets applied by choice, not just by crisis.`,
+      negative: `Real, inherited transformative skill keeps getting used only in crisis if an old pattern of forcing dramatic resets skips over smaller, timely adjustments.`,
+    },
+
+    // ── 14 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '14_MEP': {
+      heading: `You Carry Real, Inherited Competence in Integrative, Balance-Oriented Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in blending or integrative professions — earning through combining disparate elements into something coherent, work that requires real patience and a steady hand. The Temperance sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of losing that careful balance exactly when professional pressure rises, letting genuinely valuable moderation give way to extremes right when steadiness matters most. If your usual measured approach tends to break down under real deadline or client pressure, that old pattern may be worth addressing.`,
+      path: `This may shift by identifying your specific pressure point at work and deliberately practicing the moderate response there, rather than the extreme one.`,
+      positive: `You maintain your genuine integrative balance even under real professional pressure, and that steadiness becomes reliable rather than conditional.`,
+      negative: `Real, inherited integrative skill breaks down under pressure if an old pattern of losing balance keeps surfacing exactly when steadiness matters most.`,
+    },
+
+    // ── 15 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '15_MEP': {
+      heading: `You Carry Real, Inherited Competence in Persuasion and Influence-Based Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in professions built on influence — earning through persuasion, negotiation, and a real, magnetic capacity to move other people toward a decision. The Devil sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of using that influence manipulatively, letting genuinely valuable persuasive skill curdle into something that damages trust rather than building it. If your professional relationships tend to cool once the deal is closed, that old pattern may be worth addressing.`,
+      path: `This may shift by using your persuasive skill in one upcoming situation with full transparency about your actual interest, rather than obscuring it.`,
+      positive: `You use your genuine persuasive gift with real transparency, and professional trust deepens instead of eroding once the deal is done.`,
+      negative: `Real, inherited persuasive skill damages professional trust if an old pattern of obscured motive keeps surfacing once the influence has done its work.`,
+    },
+
+    // ── 16 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '16_MEP': {
+      heading: `You Carry Real, Inherited Competence in Crisis and Rebuilding Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in disruption-adjacent professions — earning through steadiness during upheaval and a real capacity to help rebuild what's collapsed. The Tower sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of ignoring early professional warning signs until a full collapse forces the issue, letting genuinely valuable crisis competence get used reactively instead of preventively. If disruptions in your career tend to feel sudden despite visible signals beforehand, that old pattern may be worth addressing.`,
+      path: `This may shift by addressing one current professional warning sign directly now, rather than waiting for it to force a bigger disruption later.`,
+      positive: `You address professional warning signs early, and your genuine crisis competence gets used preventively instead of only after things collapse.`,
+      negative: `Real, inherited crisis skill only gets used reactively if an old pattern of ignoring early signs keeps letting situations collapse before you act.`,
+    },
+
+    // ── 17 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '17_MEP': {
+      heading: `You Carry Real, Inherited Competence in Inspirational and Creative Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in inspired or visionary professions — earning through creative vision, natural encouragement of others, and a real gift for making hope feel tangible. The Star sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of waiting passively for recognition rather than actively offering your work, letting genuinely valuable inspiration stay underexposed. If your creative or inspirational work rarely reaches the audience that would actually value it, that old passivity may be worth addressing.`,
+      path: `This may shift by actively sharing one piece of your inspired work this week, rather than waiting for it to be discovered on its own.`,
+      positive: `You actively share your genuine creative gift instead of waiting to be discovered, and real recognition finally reaches work that's always deserved it.`,
+      negative: `Real, inherited creative inspiration stays underexposed if an old pattern of passive waiting keeps it from actively reaching the people who'd value it.`,
+    },
+
+    // ── 18 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '18_MEP': {
+      heading: `You Carry Real, Inherited Competence in Deep, Intuitive, Psychological Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in intuitive or psychologically deep professions — earning through perceiving what's beneath the surface, work that requires real comfort with ambiguity and the subconscious. The Moon sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of losing clarity in that depth, letting genuinely valuable intuitive skill blur into confusion that undermines professional confidence in your own read. If your deep insight sometimes gets clouded by anxious uncertainty rather than trusted, that old pattern may be worth addressing.`,
+      path: `This may shift by grounding one intuitive professional read this week against concrete, checkable evidence before acting on it fully.`,
+      positive: `You ground your genuine intuitive insight in concrete evidence, and deep perceptive skill becomes a trusted professional asset instead of a source of confusion.`,
+      negative: `Real, inherited intuitive skill loses professional trust if an old pattern of unclear, anxious uncertainty keeps clouding an otherwise accurate read.`,
+    },
+
+    // ── 19 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '19_MEP': {
+      heading: `You Carry Real, Inherited Competence in Joyful, Life-Affirming, Public Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in visible, celebratory, or life-affirming professions — earning through radiance, natural warmth, and a real gift for making people feel genuinely good. The Sun sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of performing that joy even when the underlying professional picture feels uncertain, letting genuine warmth cover concerns that need real attention. If you'd rarely let colleagues see you actually struggling professionally, that old performance may be worth addressing.`,
+      path: `This may shift by letting one real professional difficulty be visible to a trusted colleague this week, instead of managing it entirely behind your usual brightness.`,
+      positive: `You let real professional difficulty be visible sometimes, and the support that follows makes your genuine warmth sustainable instead of a constant performance.`,
+      negative: `Real, inherited warmth becomes an exhausting performance if an old pattern of hiding professional struggle behind it never gets addressed directly.`,
+    },
+
+    // ── 20 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '20_MEP': {
+      heading: `You Carry Real, Inherited Competence in Awakening and Advocacy Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in calling-oriented professions — earning through advocacy, spiritual guidance, or work that helps other people recognize something they'd been avoiding. The Judgement sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of delaying your own necessary professional calls to action, applying your gift for waking others up while leaving your own overdue changes untouched. If you can see clearly what a colleague or client needs to face but avoid facing your own equivalent, that old delay may be worth addressing.`,
+      path: `This may shift by acting on one piece of professional clarity you've already reached about your own path, rather than continuing to delay it.`,
+      positive: `You act on your own overdue professional clarity as readily as you help others act on theirs, and your genuine gift for advocacy finally includes yourself.`,
+      negative: `Real, inherited skill at awakening others to what they're avoiding loses its full value if an old pattern of self-delay keeps your own equivalent untouched.`,
+    },
+
+    // ── 21 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '21_MEP': {
+      heading: `You Carry Real, Inherited Competence in Large-Scale, Integrative Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in big-picture or synthesizing professions — earning through pulling disparate pieces into a coherent whole, work with real scope and reach. The World sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of never letting a project feel finished, relativizing genuine professional completions in favor of an ever-larger picture. If you can't recall the last time a big project felt fully, simply done, that old extension may be worth addressing.`,
+      path: `This may shift by naming one large project that is, in practical terms, already complete, and letting it count as finished rather than extending it further.`,
+      positive: `You let genuinely complete large-scale work actually count as finished, and your real integrative skill gets to be felt as the accomplishment it is.`,
+      negative: `Real, inherited skill at large-scale synthesis rarely gets to feel complete if an old pattern of extension keeps relativizing every finish line.`,
+    },
+
+    // ── 22 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
+    '22_MEP': {
+      heading: `You Carry Real, Inherited Competence in Unconventional, Freedom-Based Work`,
+      why: `Your money entry point reflects a genuine, carried-over competence in pioneering or independent professions — earning through courage, adaptability, and a real willingness to build a path that doesn't already exist. The Fool sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
+      shadow: `The risk is repeating an old pattern of leaping professionally without building the groundwork that would let the leap actually land, letting genuine courage substitute for preparation. If your unconventional career moves tend to work out through luck rather than groundwork, that old pattern may be worth addressing.`,
+      path: `This may shift by pairing your next unconventional professional move with one concrete piece of preparation, rather than trusting the landing to courage alone.`,
+      positive: `You pair your genuine pioneering courage with real preparation, and unconventional career moves land on solid ground instead of depending on luck.`,
+      negative: `Real, inherited courage for unconventional paths depends too heavily on luck if an old pattern of leaping without groundwork never gets addressed.`,
+    },
+
+    // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '1_F1': {
+      heading: `A Venture Your Father's Male Line Never Got to Fully Launch Is Now Yours to Start`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Paternal Masculine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
+      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
+      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea.`,
+      positive: `You launch what your paternal line only ever wanted to, turning an inherited unfinished dream into something real and actually built.`,
+      negative: `An inherited pull to start something, never followed through, keeps repeating an old incompleteness instead of finally resolving it.`,
+    },
+
+    // ── 2 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '2_F1': {
+      heading: `Trusting Your Own Instinct Where a Male Ancestor Couldn't Is Now Yours to Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real inner knowing that circumstance, expectation, or a demand for constant rationality never allowed to be trusted or acted on. The High Priestess sits in your Paternal Masculine Line, meaning this generation's task may be to trust intuition the way that line never got permission to.`,
+      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
+      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it.`,
+      positive: `You trust and act on your own instinct freely, completing a permission the men in your line never got to give themselves.`,
+      negative: `Consistently overriding real instinct in favor of what's provable repeats the same silencing this inherited task exists to finally resolve.`,
+    },
+
+    // ── 3 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '3_F1': {
+      heading: `A Softer, More Creative Side of Yourself Was Denied Further Back and Is Now Yours to Live`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for creativity, nurture, or open warmth that rigid expectations of masculinity never allowed to be expressed. The Empress sits in your Paternal Masculine Line, meaning this generation's task may be to live openly what that line had to keep hidden.`,
+      shadow: `The risk is inheriting the same suppression in a new form — real creative or nurturing capacity present in you, but kept private or minimized out of an old, unexamined caution. If your gentler, more generative side rarely gets to show fully, that inherited caution may still be running.`,
+      path: `This may shift by expressing your creativity or warmth openly in one specific setting this week, without softening or hiding it as you might by habit.`,
+      positive: `You express real creativity and warmth openly, completing a permission the men in your line were never given to show that side of themselves.`,
+      negative: `Keeping genuine creative or nurturing capacity minimized or hidden repeats the same old suppression this inherited task exists to finally resolve.`,
+    },
+
+    // ── 4 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '4_F1': {
+      heading: `A Kind of Authority That Was Never Claimed, or Was Claimed Too Harshly, Is Now Yours to Balance`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — real leadership potential either never claimed at all, or claimed in a way that curdled into harshness rather than genuine authority. The Emperor sits in your Paternal Masculine Line, meaning this generation's task may be to hold authority in a way that line never managed to.`,
+      shadow: `The risk is repeating whichever half of the imbalance was more prominent — either avoiding authority entirely out of fear of becoming harsh, or gripping control too tightly the way an ancestor once did. If your relationship to leadership swings toward one of these extremes, that old imbalance may still be running.`,
+      path: `This may shift by taking on one piece of real responsibility this week, leading it with firmness and genuine care held together, not one at the expense of the other.`,
+      positive: `You hold real authority with both firmness and care, completing a balance the men in your line never quite managed to find.`,
+      negative: `Swinging toward either avoiding authority entirely or gripping it too tightly repeats an old imbalance this inherited task exists to finally resolve.`,
+    },
+
+    // ── 5 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '5_F1': {
+      heading: `A Calling to Teach or Guide Others Was Set Aside and Is Now Yours to Answer`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected path. The Hierophant sits in your Paternal Masculine Line, meaning this generation's task may be to actually answer a calling that line had to set down.`,
+      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
+      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such.`,
+      positive: `You claim your calling to teach or guide fully, completing something the men in your line had to set aside for a more conventional path.`,
+      negative: `Offering guidance informally without ever fully claiming the calling repeats the same setting-aside this inherited task exists to finally resolve.`,
+    },
+
+    // ── 6 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '6_F1': {
+      heading: `A Love Chosen for Duty Instead of the Heart Is Now Yours to Choose Freely`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Paternal Masculine Line, meaning this generation's task may be to choose love from genuine preference where that line couldn't.`,
+      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
+      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice.`,
+      positive: `You choose partnership from genuine desire rather than duty, completing a freedom the men in your line never got to exercise for themselves.`,
+      negative: `Choosing relationships primarily out of duty or expectation repeats the same sacrifice this inherited task exists to finally resolve.`,
+    },
+
+    // ── 7 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '7_F1': {
+      heading: `A Goal Interrupted Partway Through Is Now Yours to Actually Finish`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Paternal Masculine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
+      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
+      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted.`,
+      positive: `You carry a stalled ambition all the way to completion, resolving an interruption the men in your line never got the chance to finish.`,
+      negative: `Ambitions that keep stalling just short of completion repeat an old interruption instead of finally carrying it through.`,
+    },
+
+    // ── 8 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '8_F1': {
+      heading: `An Old Unresolved Unfairness in Your Father's Line Is Now Yours to Actually Settle`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Paternal Masculine Line, meaning this generation's task may be to bring genuine resolution to something that line had to leave unsettled.`,
+      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
+      path: `This may shift by naming, as specifically as you can, what the original unfairness in your paternal line actually was, and consciously choosing to resolve rather than continue carrying it.`,
+      positive: `You bring genuine resolution to an old, unresolved unfairness, settling something the men in your line had to leave standing.`,
+      negative: `An unexamined, inherited sensitivity to unfairness keeps reacting to the present with an intensity that actually belongs to something older, unresolved.`,
+    },
+
+    // ── 9 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '9_F1': {
+      heading: `A Need for Real Solitude, Never Once Permitted, Is Now Yours to Finally Claim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Paternal Masculine Line, meaning this generation's task may be to claim the solitude that line was never allowed to take.`,
+      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
+      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first.`,
+      positive: `You claim real solitude without guilt, completing a permission the men in your line were never able to give themselves.`,
+      negative: `Filling every space with obligation, unable to justify solitude even when it's genuinely needed, repeats a pattern this inherited task exists to resolve.`,
+    },
+
+    // ── 10 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '10_F1': {
+      heading: `A Plan Derailed by Circumstance Beyond Anyone's Control Is Now Yours to Make Peace With`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Paternal Masculine Line, meaning this generation's task may be to find peace with life's turns where that line couldn't.`,
+      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
+      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it.`,
+      positive: `You meet life's unpredictable turns with genuine acceptance, resolving a resistance the men in your line were never able to release.`,
+      negative: `Treating every uncontrollable turn as personal injustice repeats an old resistance this inherited task exists to finally settle.`,
+    },
+
+    // ── 11 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '11_F1': {
+      heading: `A Strength That Includes Gentleness, Not Just Toughness, Is Now Yours to Embody`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for compassionate strength, overridden by a demand to appear tough, unaffected, or hardened instead. The Strength sits in your Paternal Masculine Line, meaning this generation's task may be to lead with a strength that line was only allowed to show as harshness.`,
+      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as toughness, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
+      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it.`,
+      positive: `You lead with strength that includes real gentleness, completing a fuller version of resilience the men in your line were only allowed to harden.`,
+      negative: `Expressing strength only as toughness, without its gentler counterpart, repeats an old hardening this inherited task exists to soften.`,
+    },
+
+    // ── 12 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '12_F1': {
+      heading: `A Life Given Entirely to Others' Needs, Never His Own, Is Now Yours to Rebalance`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Paternal Masculine Line, meaning this generation's task may be to reclaim active choice for yourself where that line only ever gave it away.`,
+      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
+      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's.`,
+      positive: `You prioritize your own needs alongside your care for others, completing a balance the men in your line never got the chance to claim.`,
+      negative: `A life shaped entirely around others' needs, with your own perpetually unconsidered, repeats an imbalance this inherited task exists to resolve.`,
+    },
+
+    // ── 13 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '13_F1': {
+      heading: `A Change Resisted Until the End Is Now Yours to Complete Instead of Avoid`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Paternal Masculine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way that line did.`,
+      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
+      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it.`,
+      positive: `You meet necessary endings directly instead of resisting them, completing a transformation the men in your line were never able to face.`,
+      negative: `Holding onto what's already finished simply because letting go feels dangerous repeats an old resistance this inherited task exists to resolve.`,
+    },
+
+    // ── 14 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '14_F1': {
+      heading: `A Life Lost to Extremes Instead of Balance Is Now Yours to Steady`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, excess, or rigid self-denial. The Temperance sits in your Paternal Masculine Line, meaning this generation's task may be to find the steadiness that line's life never actually held.`,
+      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or excess, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
+      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme.`,
+      positive: `You hold a genuinely steady, moderate rhythm, completing a balance the men in your line's lives were never actually able to find.`,
+      negative: `Swinging between overexertion and collapse repeats an old imbalance this inherited task exists to finally settle.`,
+    },
+
+    // ── 15 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '15_F1': {
+      heading: `A Bind That Felt Impossible to Break Is Now Yours to Actually Release`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real entrapment, whether addiction, compulsion, or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Paternal Masculine Line, meaning this generation's task may be to release a bind that line was never able to escape.`,
+      shadow: `The risk is inheriting a compulsive attachment of your own — to a substance, a pattern, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
+      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed.`,
+      positive: `You actually release a bind that felt permanent, completing a freedom the men in your line were never able to reach.`,
+      negative: `Accepting a compulsive bind as simply how things are, without ever questioning it, repeats an entrapment this inherited task exists to release.`,
+    },
+
+    // ── 16 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '16_F1': {
+      heading: `A Sudden Collapse That Was Never Fully Rebuilt Is Now Yours to Finish Rebuilding`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Paternal Masculine Line, meaning this generation's task may be to complete a reconstruction that line started but didn't finish.`,
+      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
+      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse.`,
+      positive: `You fully rebuild and invest in real stability, completing a reconstruction the men in your line were never able to finish.`,
+      negative: `Holding back from real stability, bracing for a collapse that already happened once, repeats an incomplete rebuilding this task exists to finish.`,
+    },
+
+    // ── 17 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '17_F1': {
+      heading: `A Hope Abandoned After Disappointment Is Now Yours to Restore`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Paternal Masculine Line, meaning this generation's task may be to restore a hope that line felt forced to give up.`,
+      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
+      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it.`,
+      positive: `You restore genuine hope and act on it, completing something the men in your line felt they had to abandon after real disappointment.`,
+      negative: `Guarding against hope as protection from disappointment repeats an old abandonment this inherited task exists to restore.`,
+    },
+
+    // ── 18 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '18_F1': {
+      heading: `A Fear Never Faced Directly Is Now Yours to Finally See Clearly`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Paternal Masculine Line, meaning this generation's task may be to see clearly what that line could never quite look at directly.`,
+      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
+      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it.`,
+      positive: `You see a long-unexamined fear clearly and directly, completing a clarity the men in your line were never able to reach.`,
+      negative: `An unnamed anxiety shaping decisions from the background, never faced directly, repeats an old obscurity this inherited task exists to clear.`,
+    },
+
+    // ── 19 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '19_F1': {
+      heading: `A Joy Kept Hidden Behind Stoicism Is Now Yours to Let Be Seen`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for open joy and warmth, kept behind a wall of stoicism or emotional reserve considered proper or necessary. The Sun sits in your Paternal Masculine Line, meaning this generation's task may be to let visible joy exist where that line only ever allowed restraint.`,
+      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a controlled surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
+      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure.`,
+      positive: `You let real joy be openly visible, completing a warmth the men in your line felt but were never permitted to show.`,
+      negative: `Keeping genuine happiness behind a controlled, stoic surface repeats an old restraint this inherited task exists to finally release.`,
+    },
+
+    // ── 20 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '20_F1': {
+      heading: `A Calling Never Answered Is Now Yours to Finally Take Up`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Paternal Masculine Line, meaning this generation's task may be to answer a call that line heard but couldn't take up.`,
+      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
+      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it.`,
+      positive: `You answer a calling directly, completing an awakening the men in your line sensed but were never able to fully take up.`,
+      negative: `Sensing a real calling and continuing to delay acting on it repeats an old unanswered call this inherited task exists to finally take up.`,
+    },
+
+    // ── 21 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '21_F1': {
+      heading: `Something Left Permanently Unfinished Is Now Yours to Actually Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Paternal Masculine Line, meaning this generation's task may be to reach a completion that line never got to feel.`,
+      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
+      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further.`,
+      positive: `You complete something fully and let it be finished, resolving an incompletion the men in your line were never able to reach the end of.`,
+      negative: `Real progress that never quite gets to feel finished repeats an old incompletion this inherited task exists to actually close out.`,
+    },
+
+    // ── 22 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '22_F1': {
+      heading: `A Freedom Traded Away for Security Is Now Yours to Reclaim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Paternal Masculine Line, meaning this generation's task may be to reclaim the freedom that line gave up.`,
+      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
+      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety.`,
+      positive: `You reclaim real freedom in your own choices, completing something the men in your line traded away for security.`,
+      negative: `Reflexively choosing safety over genuine freedom repeats an old trade this inherited task exists to finally reclaim.`,
+    },
+
+    // ── 1 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '1_G1': {
+      heading: `A Venture Your Mother's Father Never Got to Fully Launch Is Now Yours to Start`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Maternal Masculine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
+      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
+      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea.`,
+      positive: `You launch what your maternal grandfather only ever wanted to, turning an inherited unfinished dream into something real and actually built.`,
+      negative: `An inherited pull to start something, never followed through, keeps repeating an old incompleteness instead of finally resolving it.`,
+    },
+
+    // ── 2 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '2_G1': {
+      heading: `Trusting Your Own Instinct Where Your Mother's Father Couldn't Is Now Yours to Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real inner knowing that circumstance, expectation, or a demand for constant rationality never allowed to be trusted or acted on. The High Priestess sits in your Maternal Masculine Line, meaning this generation's task may be to trust intuition the way he never got permission to.`,
+      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
+      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it.`,
+      positive: `You trust and act on your own instinct freely, completing a permission your mother's father never got to give himself.`,
+      negative: `Consistently overriding real instinct in favor of what's provable repeats the same silencing this inherited task exists to finally resolve.`,
+    },
+
+    // ── 3 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '3_G1': {
+      heading: `A Softer, More Creative Side of Your Mother's Father Was Denied and Is Now Yours to Live`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for creativity, nurture, or open warmth that rigid expectations of masculinity never allowed him to express. The Empress sits in your Maternal Masculine Line, meaning this generation's task may be to live openly what he had to keep hidden.`,
+      shadow: `The risk is inheriting the same suppression in a new form — real creative or nurturing capacity present in you, but kept private or minimized out of an old, unexamined caution. If your gentler, more generative side rarely gets to show fully, that inherited caution may still be running.`,
+      path: `This may shift by expressing your creativity or warmth openly in one specific setting this week, without softening or hiding it as you might by habit.`,
+      positive: `You express real creativity and warmth openly, completing a permission your mother's father was never given to show that side of himself.`,
+      negative: `Keeping genuine creative or nurturing capacity minimized or hidden repeats the same old suppression this inherited task exists to finally resolve.`,
+    },
+
+    // ── 4 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '4_G1': {
+      heading: `A Kind of Authority Your Mother's Father Never Balanced Is Now Yours to Hold Well`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — real leadership potential either never claimed at all, or claimed in a way that curdled into harshness rather than genuine authority. The Emperor sits in your Maternal Masculine Line, meaning this generation's task may be to hold authority in a way he never managed to.`,
+      shadow: `The risk is repeating whichever half of the imbalance was more prominent — either avoiding authority entirely out of fear of becoming harsh, or gripping control too tightly the way he once did. If your relationship to leadership swings toward one of these extremes, that old imbalance may still be running.`,
+      path: `This may shift by taking on one piece of real responsibility this week, leading it with firmness and genuine care held together, not one at the expense of the other.`,
+      positive: `You hold real authority with both firmness and care, completing a balance your mother's father never quite managed to find.`,
+      negative: `Swinging toward either avoiding authority entirely or gripping it too tightly repeats an old imbalance this inherited task exists to finally resolve.`,
+    },
+
+    // ── 5 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '5_G1': {
+      heading: `A Calling to Teach or Guide Others Was Set Aside by Your Mother's Father and Is Now Yours to Answer`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected path. The Hierophant sits in your Maternal Masculine Line, meaning this generation's task may be to actually answer a calling he had to set down.`,
+      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
+      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such.`,
+      positive: `You claim your calling to teach or guide fully, completing something your mother's father had to set aside for a more conventional path.`,
+      negative: `Offering guidance informally without ever fully claiming the calling repeats the same setting-aside this inherited task exists to finally resolve.`,
+    },
+
+    // ── 6 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '6_G1': {
+      heading: `A Love Your Mother's Father Chose for Duty Instead of the Heart Is Now Yours to Choose Freely`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Maternal Masculine Line, meaning this generation's task may be to choose love from genuine preference where he couldn't.`,
+      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
+      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice.`,
+      positive: `You choose partnership from genuine desire rather than duty, completing a freedom your mother's father never got to exercise for himself.`,
+      negative: `Choosing relationships primarily out of duty or expectation repeats the same sacrifice this inherited task exists to finally resolve.`,
+    },
+
+    // ── 7 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '7_G1': {
+      heading: `A Goal Your Mother's Father Left Interrupted Is Now Yours to Actually Finish`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Maternal Masculine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
+      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
+      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted.`,
+      positive: `You carry a stalled ambition all the way to completion, resolving an interruption your mother's father never got the chance to finish.`,
+      negative: `Ambitions that keep stalling just short of completion repeat an old interruption instead of finally carrying it through.`,
+    },
+
+    // ── 8 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '8_G1': {
+      heading: `An Old Unresolved Unfairness in Your Mother's Father's Life Is Now Yours to Actually Settle`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Maternal Masculine Line, meaning this generation's task may be to bring genuine resolution to something he had to leave unsettled.`,
+      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
+      path: `This may shift by naming, as specifically as you can, what the original unfairness was, and consciously choosing to resolve rather than continue carrying it.`,
+      positive: `You bring genuine resolution to an old, unresolved unfairness, settling something your mother's father had to leave standing.`,
+      negative: `An unexamined, inherited sensitivity to unfairness keeps reacting to the present with an intensity that actually belongs to something older, unresolved.`,
+    },
+
+    // ── 9 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
+    '9_G1': {
+      heading: `A Need for Real Solitude Your Mother's Father Never Got Is Now Yours to Finally Claim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Maternal Masculine Line, meaning this generation's task may be to claim the solitude he was never allowed to take.`,
+      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
+      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first.`,
+      positive: `You claim real solitude without guilt, completing a permission your mother's father was never able to give himself.`,
+      negative: `Filling every space with obligation, unable to justify solitude even when it's genuinely needed, repeats a pattern this inherited task exists to resolve.`,
+    },
+
+    // ── 10 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '10_G1': {
+      heading: `A Plan Your Mother's Father Saw Derailed Is Now Yours to Make Peace With`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Maternal Masculine Line, meaning this generation's task may be to find peace with life's turns where he couldn't.`,
+      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
+      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it.`,
+      positive: `You meet life's unpredictable turns with genuine acceptance, resolving a resistance your mother's father was never able to release.`,
+      negative: `Treating every uncontrollable turn as personal injustice repeats an old resistance this inherited task exists to finally settle.`,
+    },
+
+    // ── 11 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '11_G1': {
+      heading: `A Strength That Includes Gentleness Is Now Yours to Embody Where Your Mother's Father Only Showed Toughness`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for compassionate strength, overridden by a demand to appear tough, unaffected, or hardened instead. The Strength sits in your Maternal Masculine Line, meaning this generation's task may be to lead with a strength he was only allowed to show as harshness.`,
+      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as toughness, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
+      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it.`,
+      positive: `You lead with strength that includes real gentleness, completing a fuller version of resilience your mother's father was only allowed to harden.`,
+      negative: `Expressing strength only as toughness, without its gentler counterpart, repeats an old hardening this inherited task exists to soften.`,
+    },
+
+    // ── 12 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '12_G1': {
+      heading: `A Life Your Mother's Father Gave Entirely to Others Is Now Yours to Rebalance`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Maternal Masculine Line, meaning this generation's task may be to reclaim active choice for yourself where he only ever gave it away.`,
+      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
+      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's.`,
+      positive: `You prioritize your own needs alongside your care for others, completing a balance your mother's father never got the chance to claim.`,
+      negative: `A life shaped entirely around others' needs, with your own perpetually unconsidered, repeats an imbalance this inherited task exists to resolve.`,
+    },
+
+    // ── 13 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '13_G1': {
+      heading: `A Change Your Mother's Father Resisted Until the End Is Now Yours to Complete Instead of Avoid`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Maternal Masculine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way he did.`,
+      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
+      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it.`,
+      positive: `You meet necessary endings directly instead of resisting them, completing a transformation your mother's father was never able to face.`,
+      negative: `Holding onto what's already finished simply because letting go feels dangerous repeats an old resistance this inherited task exists to resolve.`,
+    },
+
+    // ── 14 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '14_G1': {
+      heading: `A Life Your Mother's Father Lost to Extremes Is Now Yours to Steady`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, excess, or rigid self-denial. The Temperance sits in your Maternal Masculine Line, meaning this generation's task may be to find the steadiness his life never actually held.`,
+      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or excess, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
+      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme.`,
+      positive: `You hold a genuinely steady, moderate rhythm, completing a balance your mother's father's life was never actually able to find.`,
+      negative: `Swinging between overexertion and collapse repeats an old imbalance this inherited task exists to finally settle.`,
+    },
+
+    // ── 15 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '15_G1': {
+      heading: `A Bind Your Mother's Father Never Broke Is Now Yours to Actually Release`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real entrapment, whether addiction, compulsion, or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Maternal Masculine Line, meaning this generation's task may be to release a bind he was never able to escape.`,
+      shadow: `The risk is inheriting a compulsive attachment of your own — to a substance, a pattern, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
+      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed.`,
+      positive: `You actually release a bind that felt permanent, completing a freedom your mother's father was never able to reach.`,
+      negative: `Accepting a compulsive bind as simply how things are, without ever questioning it, repeats an entrapment this inherited task exists to release.`,
+    },
+
+    // ── 16 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '16_G1': {
+      heading: `A Collapse Your Mother's Father Never Fully Rebuilt From Is Now Yours to Finish Rebuilding`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Maternal Masculine Line, meaning this generation's task may be to complete a reconstruction he started but didn't finish.`,
+      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
+      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse.`,
+      positive: `You fully rebuild and invest in real stability, completing a reconstruction your mother's father was never able to finish.`,
+      negative: `Holding back from real stability, bracing for a collapse that already happened once, repeats an incomplete rebuilding this task exists to finish.`,
+    },
+
+    // ── 17 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '17_G1': {
+      heading: `A Hope Your Mother's Father Abandoned Is Now Yours to Restore`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Maternal Masculine Line, meaning this generation's task may be to restore a hope he felt forced to give up.`,
+      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
+      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it.`,
+      positive: `You restore genuine hope and act on it, completing something your mother's father felt he had to abandon after real disappointment.`,
+      negative: `Guarding against hope as protection from disappointment repeats an old abandonment this inherited task exists to restore.`,
+    },
+
+    // ── 18 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '18_G1': {
+      heading: `A Fear Your Mother's Father Never Faced Is Now Yours to Finally See Clearly`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Maternal Masculine Line, meaning this generation's task may be to see clearly what he could never quite look at directly.`,
+      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
+      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it.`,
+      positive: `You see a long-unexamined fear clearly and directly, completing a clarity your mother's father was never able to reach.`,
+      negative: `An unnamed anxiety shaping decisions from the background, never faced directly, repeats an old obscurity this inherited task exists to clear.`,
+    },
+
+    // ── 19 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '19_G1': {
+      heading: `A Joy Your Mother's Father Kept Hidden Behind Stoicism Is Now Yours to Let Be Seen`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for open joy and warmth, kept behind a wall of stoicism or emotional reserve considered proper or necessary. The Sun sits in your Maternal Masculine Line, meaning this generation's task may be to let visible joy exist where he only ever allowed restraint.`,
+      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a controlled surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
+      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure.`,
+      positive: `You let real joy be openly visible, completing a warmth your mother's father felt but was never permitted to show.`,
+      negative: `Keeping genuine happiness behind a controlled, stoic surface repeats an old restraint this inherited task exists to finally release.`,
+    },
+
+    // ── 20 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '20_G1': {
+      heading: `A Calling Your Mother's Father Never Answered Is Now Yours to Finally Take Up`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Maternal Masculine Line, meaning this generation's task may be to answer a call he heard but couldn't take up.`,
+      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
+      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it.`,
+      positive: `You answer a calling directly, completing an awakening your mother's father sensed but was never able to fully take up.`,
+      negative: `Sensing a real calling and continuing to delay acting on it repeats an old unanswered call this inherited task exists to finally take up.`,
+    },
+
+    // ── 21 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '21_G1': {
+      heading: `Something Your Mother's Father Left Permanently Unfinished Is Now Yours to Actually Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Maternal Masculine Line, meaning this generation's task may be to reach a completion he never got to feel.`,
+      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
+      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further.`,
+      positive: `You complete something fully and let it be finished, resolving an incompletion your mother's father was never able to reach the end of.`,
+      negative: `Real progress that never quite gets to feel finished repeats an old incompletion this inherited task exists to actually close out.`,
+    },
+
+    // ── 22 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
+    '22_G1': {
+      heading: `A Freedom Your Mother's Father Traded Away Is Now Yours to Reclaim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Maternal Masculine Line, meaning this generation's task may be to reclaim the freedom he gave up.`,
+      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
+      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety.`,
+      positive: `You reclaim real freedom in your own choices, completing something your mother's father traded away for security.`,
+      negative: `Reflexively choosing safety over genuine freedom repeats an old trade this inherited task exists to finally reclaim.`,
+    },
+
+    // ── 1 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '1_H1': {
+      heading: `A Venture Your Father's Mother Never Got to Fully Launch Is Now Yours to Start`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Paternal Feminine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
+      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
+      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea.`,
+      positive: `You launch what your paternal grandmother only ever wanted to, turning an inherited unfinished dream into something real and actually built.`,
+      negative: `An inherited pull to start something, never followed through, keeps repeating an old incompleteness instead of finally resolving it.`,
+    },
+
+    // ── 2 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '2_H1': {
+      heading: `Trusting Your Own Instinct Where Your Father's Mother Couldn't Is Now Yours to Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real inner knowing that circumstance, expectation, or a demand for constant practicality never allowed to be trusted or acted on. The High Priestess sits in your Paternal Feminine Line, meaning this generation's task may be to trust intuition the way she never got permission to.`,
+      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
+      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it.`,
+      positive: `You trust and act on your own instinct freely, completing a permission your father's mother never got to give herself.`,
+      negative: `Consistently overriding real instinct in favor of what's provable repeats the same silencing this inherited task exists to finally resolve.`,
+    },
+
+    // ── 3 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '3_H1': {
+      heading: `A Creative Ambition of Your Father's Mother Was Set Aside and Is Now Yours to Live`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real capacity for creativity, nurture, or generative abundance that circumstance or expectation never allowed her to fully express beyond the domestic sphere. The Empress sits in your Paternal Feminine Line, meaning this generation's task may be to live openly what she had to keep contained.`,
+      shadow: `The risk is inheriting the same containment — real creative or nurturing capacity present in you, but kept small or minimized out of an old, unexamined caution. If your gifts rarely get to expand beyond what feels safely modest, that inherited caution may still be running.`,
+      path: `This may shift by expressing your creativity or generosity at full scale in one specific setting this week, without shrinking it as you might by habit.`,
+      positive: `You express real creativity and abundance at full scale, completing a permission your father's mother was never given to expand into.`,
+      negative: `Keeping genuine creative or nurturing capacity contained and small repeats the same old suppression this inherited task exists to finally resolve.`,
+    },
+
+    // ── 4 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '4_H1': {
+      heading: `An Authority Your Father's Mother Never Got to Claim Is Now Yours to Hold Well`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — real leadership potential either never claimed at all, or exercised quietly behind the scenes rather than openly. The Emperor sits in your Paternal Feminine Line, meaning this generation's task may be to hold visible authority in a way she never got to.`,
+      shadow: `The risk is repeating the same pattern of influence without visibility — real capability exercised behind the scenes, never claimed openly as leadership in its own right. If you tend to manage things quietly rather than lead them visibly, that old pattern may still be running.`,
+      path: `This may shift by taking on one piece of real, visible responsibility this week, leading it openly rather than managing it from behind the scenes.`,
+      positive: `You hold visible authority openly, completing a claim to leadership your father's mother was never able to make for herself.`,
+      negative: `Managing real capability quietly from behind the scenes, rather than claiming visible leadership, repeats an old pattern this task exists to resolve.`,
+    },
+
+    // ── 5 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '5_H1': {
+      heading: `A Calling to Teach or Guide Others Was Set Aside by Your Father's Mother and Is Now Yours to Answer`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected role. The Hierophant sits in your Paternal Feminine Line, meaning this generation's task may be to actually answer a calling she had to set down.`,
+      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
+      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such.`,
+      positive: `You claim your calling to teach or guide fully, completing something your father's mother had to set aside for a more conventional role.`,
+      negative: `Offering guidance informally without ever fully claiming the calling repeats the same setting-aside this inherited task exists to finally resolve.`,
+    },
+
+    // ── 6 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '6_H1': {
+      heading: `A Love Your Father's Mother Chose for Duty Instead of the Heart Is Now Yours to Choose Freely`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Paternal Feminine Line, meaning this generation's task may be to choose love from genuine preference where she couldn't.`,
+      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
+      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice.`,
+      positive: `You choose partnership from genuine desire rather than duty, completing a freedom your father's mother never got to exercise for herself.`,
+      negative: `Choosing relationships primarily out of duty or expectation repeats the same sacrifice this inherited task exists to finally resolve.`,
+    },
+
+    // ── 7 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '7_H1': {
+      heading: `A Goal Your Father's Mother Left Interrupted Is Now Yours to Actually Finish`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Paternal Feminine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
+      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
+      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted.`,
+      positive: `You carry a stalled ambition all the way to completion, resolving an interruption your father's mother never got the chance to finish.`,
+      negative: `Ambitions that keep stalling just short of completion repeat an old interruption instead of finally carrying it through.`,
+    },
+
+    // ── 8 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '8_H1': {
+      heading: `An Old Unresolved Unfairness in Your Father's Mother's Life Is Now Yours to Actually Settle`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Paternal Feminine Line, meaning this generation's task may be to bring genuine resolution to something she had to leave unsettled.`,
+      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
+      path: `This may shift by naming, as specifically as you can, what the original unfairness was, and consciously choosing to resolve rather than continue carrying it.`,
+      positive: `You bring genuine resolution to an old, unresolved unfairness, settling something your father's mother had to leave standing.`,
+      negative: `An unexamined, inherited sensitivity to unfairness keeps reacting to the present with an intensity that actually belongs to something older, unresolved.`,
+    },
+
+    // ── 9 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '9_H1': {
+      heading: `A Need for Real Solitude Your Father's Mother Never Got Is Now Yours to Finally Claim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Paternal Feminine Line, meaning this generation's task may be to claim the solitude she was never allowed to take.`,
+      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
+      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first.`,
+      positive: `You claim real solitude without guilt, completing a permission your father's mother was never able to give herself.`,
+      negative: `Filling every space with obligation, unable to justify solitude even when it's genuinely needed, repeats a pattern this inherited task exists to resolve.`,
+    },
+
+    // ── 10 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '10_H1': {
+      heading: `A Plan Your Father's Mother Saw Derailed Is Now Yours to Make Peace With`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Paternal Feminine Line, meaning this generation's task may be to find peace with life's turns where she couldn't.`,
+      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
+      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it.`,
+      positive: `You meet life's unpredictable turns with genuine acceptance, resolving a resistance your father's mother was never able to release.`,
+      negative: `Treating every uncontrollable turn as personal injustice repeats an old resistance this inherited task exists to finally settle.`,
+    },
+
+    // ── 11 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '11_H1': {
+      heading: `A Strength That Includes Gentleness Is Now Yours to Embody Where Your Father's Mother Only Showed Toughness`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real capacity for compassionate strength, overridden by a demand to appear unshaken, endlessly capable, or hardened instead. The Strength sits in your Paternal Feminine Line, meaning this generation's task may be to lead with a strength she was only allowed to show as endurance.`,
+      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as endurance, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
+      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it.`,
+      positive: `You lead with strength that includes real gentleness, completing a fuller version of resilience your father's mother was only allowed to harden.`,
+      negative: `Expressing strength only as endurance, without its gentler counterpart, repeats an old hardening this inherited task exists to soften.`,
+    },
+
+    // ── 12 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '12_H1': {
+      heading: `A Life Your Father's Mother Gave Entirely to Others Is Now Yours to Rebalance`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Paternal Feminine Line, meaning this generation's task may be to reclaim active choice for yourself where she only ever gave it away.`,
+      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
+      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's.`,
+      positive: `You prioritize your own needs alongside your care for others, completing a balance your father's mother never got the chance to claim.`,
+      negative: `A life shaped entirely around others' needs, with your own perpetually unconsidered, repeats an imbalance this inherited task exists to resolve.`,
+    },
+
+    // ── 13 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '13_H1': {
+      heading: `A Change Your Father's Mother Resisted Until the End Is Now Yours to Complete Instead of Avoid`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Paternal Feminine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way she did.`,
+      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
+      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it.`,
+      positive: `You meet necessary endings directly instead of resisting them, completing a transformation your father's mother was never able to face.`,
+      negative: `Holding onto what's already finished simply because letting go feels dangerous repeats an old resistance this inherited task exists to resolve.`,
+    },
+
+    // ── 14 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '14_H1': {
+      heading: `A Life Your Father's Mother Lost to Extremes Is Now Yours to Steady`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, self-denial, or relentless caretaking. The Temperance sits in your Paternal Feminine Line, meaning this generation's task may be to find the steadiness her life never actually held.`,
+      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or depletion, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
+      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme.`,
+      positive: `You hold a genuinely steady, moderate rhythm, completing a balance your father's mother's life was never actually able to find.`,
+      negative: `Swinging between overexertion and collapse repeats an old imbalance this inherited task exists to finally settle.`,
+    },
+
+    // ── 15 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '15_H1': {
+      heading: `A Bind Your Father's Mother Never Broke Is Now Yours to Actually Release`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real entrapment, whether a compulsion or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Paternal Feminine Line, meaning this generation's task may be to release a bind she was never able to escape.`,
+      shadow: `The risk is inheriting a compulsive attachment of your own — to a pattern, a role, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
+      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed.`,
+      positive: `You actually release a bind that felt permanent, completing a freedom your father's mother was never able to reach.`,
+      negative: `Accepting a compulsive bind as simply how things are, without ever questioning it, repeats an entrapment this inherited task exists to release.`,
+    },
+
+    // ── 16 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '16_H1': {
+      heading: `A Collapse Your Father's Mother Never Fully Rebuilt From Is Now Yours to Finish Rebuilding`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Paternal Feminine Line, meaning this generation's task may be to complete a reconstruction she started but didn't finish.`,
+      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
+      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse.`,
+      positive: `You fully rebuild and invest in real stability, completing a reconstruction your father's mother was never able to finish.`,
+      negative: `Holding back from real stability, bracing for a collapse that already happened once, repeats an incomplete rebuilding this task exists to finish.`,
+    },
+
+    // ── 17 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '17_H1': {
+      heading: `A Hope Your Father's Mother Abandoned Is Now Yours to Restore`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Paternal Feminine Line, meaning this generation's task may be to restore a hope she felt forced to give up.`,
+      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
+      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it.`,
+      positive: `You restore genuine hope and act on it, completing something your father's mother felt she had to abandon after real disappointment.`,
+      negative: `Guarding against hope as protection from disappointment repeats an old abandonment this inherited task exists to restore.`,
+    },
+
+    // ── 18 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '18_H1': {
+      heading: `A Fear Your Father's Mother Never Faced Is Now Yours to Finally See Clearly`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Paternal Feminine Line, meaning this generation's task may be to see clearly what she could never quite look at directly.`,
+      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
+      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it.`,
+      positive: `You see a long-unexamined fear clearly and directly, completing a clarity your father's mother was never able to reach.`,
+      negative: `An unnamed anxiety shaping decisions from the background, never faced directly, repeats an old obscurity this inherited task exists to clear.`,
+    },
+
+    // ── 19 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '19_H1': {
+      heading: `A Joy Your Father's Mother Kept Hidden Is Now Yours to Let Be Seen`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real capacity for open joy and warmth, kept behind quiet composure considered proper or necessary. The Sun sits in your Paternal Feminine Line, meaning this generation's task may be to let visible joy exist where she only ever allowed restraint.`,
+      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a composed surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
+      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure.`,
+      positive: `You let real joy be openly visible, completing a warmth your father's mother felt but was never permitted to show.`,
+      negative: `Keeping genuine happiness behind a controlled, composed surface repeats an old restraint this inherited task exists to finally release.`,
+    },
+
+    // ── 20 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '20_H1': {
+      heading: `A Calling Your Father's Mother Never Answered Is Now Yours to Finally Take Up`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Paternal Feminine Line, meaning this generation's task may be to answer a call she heard but couldn't take up.`,
+      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
+      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it.`,
+      positive: `You answer a calling directly, completing an awakening your father's mother sensed but was never able to fully take up.`,
+      negative: `Sensing a real calling and continuing to delay acting on it repeats an old unanswered call this inherited task exists to finally take up.`,
+    },
+
+    // ── 21 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '21_H1': {
+      heading: `Something Your Father's Mother Left Permanently Unfinished Is Now Yours to Actually Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Paternal Feminine Line, meaning this generation's task may be to reach a completion she never got to feel.`,
+      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
+      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further.`,
+      positive: `You complete something fully and let it be finished, resolving an incompletion your father's mother was never able to reach the end of.`,
+      negative: `Real progress that never quite gets to feel finished repeats an old incompletion this inherited task exists to actually close out.`,
+    },
+
+    // ── 22 in PATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '22_H1': {
+      heading: `A Freedom Your Father's Mother Traded Away Is Now Yours to Reclaim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your father's mother — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Paternal Feminine Line, meaning this generation's task may be to reclaim the freedom she gave up.`,
+      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
+      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety.`,
+      positive: `You reclaim real freedom in your own choices, completing something your father's mother traded away for security.`,
+      negative: `Reflexively choosing safety over genuine freedom repeats an old trade this inherited task exists to finally reclaim.`,
+    },
+
+    // ── 1 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '1_I1': {
+      heading: `A Venture Your Mother's Mother Never Got to Fully Launch Is Now Yours to Start`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Maternal Feminine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
+      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
+      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea.`,
+      positive: `You launch what your maternal grandmother only ever wanted to, turning an inherited unfinished dream into something real and actually built.`,
+      negative: `An inherited pull to start something, never followed through, keeps repeating an old incompleteness instead of finally resolving it.`,
+    },
+
+    // ── 2 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '2_I1': {
+      heading: `Trusting Your Own Instinct Where Your Mother's Mother Couldn't Is Now Yours to Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real inner knowing that circumstance, expectation, or a demand for constant practicality never allowed to be trusted or acted on. The High Priestess sits in your Maternal Feminine Line, meaning this generation's task may be to trust intuition the way she never got permission to.`,
+      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
+      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it.`,
+      positive: `You trust and act on your own instinct freely, completing a permission your mother's mother never got to give herself.`,
+      negative: `Consistently overriding real instinct in favor of what's provable repeats the same silencing this inherited task exists to finally resolve.`,
+    },
+
+    // ── 3 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '3_I1': {
+      heading: `A Creative Ambition of Your Mother's Mother Was Set Aside and Is Now Yours to Live`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for creativity, nurture, or generative abundance that circumstance or expectation never allowed her to fully express beyond the domestic sphere. The Empress sits in your Maternal Feminine Line, meaning this generation's task may be to live openly what she had to keep contained.`,
+      shadow: `The risk is inheriting the same containment — real creative or nurturing capacity present in you, but kept small or minimized out of an old, unexamined caution. If your gifts rarely get to expand beyond what feels safely modest, that inherited caution may still be running.`,
+      path: `This may shift by expressing your creativity or generosity at full scale in one specific setting this week, without shrinking it as you might by habit.`,
+      positive: `You express real creativity and abundance at full scale, completing a permission your mother's mother was never given to expand into.`,
+      negative: `Keeping genuine creative or nurturing capacity contained and small repeats the same old suppression this inherited task exists to finally resolve.`,
+    },
+
+    // ── 4 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '4_I1': {
+      heading: `An Authority Your Mother's Mother Never Got to Claim Is Now Yours to Hold Well`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — real leadership potential either never claimed at all, or exercised quietly behind the scenes rather than openly. The Emperor sits in your Maternal Feminine Line, meaning this generation's task may be to hold visible authority in a way she never got to.`,
+      shadow: `The risk is repeating the same pattern of influence without visibility — real capability exercised behind the scenes, never claimed openly as leadership in its own right. If you tend to manage things quietly rather than lead them visibly, that old pattern may still be running.`,
+      path: `This may shift by taking on one piece of real, visible responsibility this week, leading it openly rather than managing it from behind the scenes.`,
+      positive: `You hold visible authority openly, completing a claim to leadership your mother's mother was never able to make for herself.`,
+      negative: `Managing real capability quietly from behind the scenes, rather than claiming visible leadership, repeats an old pattern this task exists to resolve.`,
+    },
+
+    // ── 5 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '5_I1': {
+      heading: `A Calling to Teach or Guide Others Was Set Aside by Your Mother's Mother and Is Now Yours to Answer`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected role. The Hierophant sits in your Maternal Feminine Line, meaning this generation's task may be to actually answer a calling she had to set down.`,
+      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
+      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such.`,
+      positive: `You claim your calling to teach or guide fully, completing something your mother's mother had to set aside for a more conventional role.`,
+      negative: `Offering guidance informally without ever fully claiming the calling repeats the same setting-aside this inherited task exists to finally resolve.`,
+    },
+
+    // ── 6 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '6_I1': {
+      heading: `A Love Your Mother's Mother Chose for Duty Instead of the Heart Is Now Yours to Choose Freely`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Maternal Feminine Line, meaning this generation's task may be to choose love from genuine preference where she couldn't.`,
+      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
+      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice.`,
+      positive: `You choose partnership from genuine desire rather than duty, completing a freedom your mother's mother never got to exercise for herself.`,
+      negative: `Choosing relationships primarily out of duty or expectation repeats the same sacrifice this inherited task exists to finally resolve.`,
+    },
+
+    // ── 7 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '7_I1': {
+      heading: `A Goal Your Mother's Mother Left Interrupted Is Now Yours to Actually Finish`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Maternal Feminine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
+      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
+      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted.`,
+      positive: `You carry a stalled ambition all the way to completion, resolving an interruption your mother's mother never got the chance to finish.`,
+      negative: `Ambitions that keep stalling just short of completion repeat an old interruption instead of finally carrying it through.`,
+    },
+
+    // ── 8 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '8_I1': {
+      heading: `An Old Unresolved Unfairness in Your Mother's Mother's Life Is Now Yours to Actually Settle`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Maternal Feminine Line, meaning this generation's task may be to bring genuine resolution to something she had to leave unsettled.`,
+      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
+      path: `This may shift by naming, as specifically as you can, what the original unfairness was, and consciously choosing to resolve rather than continue carrying it.`,
+      positive: `You bring genuine resolution to an old, unresolved unfairness, settling something your mother's mother had to leave standing.`,
+      negative: `An unexamined, inherited sensitivity to unfairness keeps reacting to the present with an intensity that actually belongs to something older, unresolved.`,
+    },
+
+    // ── 9 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
+    '9_I1': {
+      heading: `A Need for Real Solitude Your Mother's Mother Never Got Is Now Yours to Finally Claim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Maternal Feminine Line, meaning this generation's task may be to claim the solitude she was never allowed to take.`,
+      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
+      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first.`,
+      positive: `You claim real solitude without guilt, completing a permission your mother's mother was never able to give herself.`,
+      negative: `Filling every space with obligation, unable to justify solitude even when it's genuinely needed, repeats a pattern this inherited task exists to resolve.`,
+    },
+
+    // ── 10 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '10_I1': {
+      heading: `A Plan Your Mother's Mother Saw Derailed Is Now Yours to Make Peace With`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Maternal Feminine Line, meaning this generation's task may be to find peace with life's turns where she couldn't.`,
+      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
+      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it.`,
+      positive: `You meet life's unpredictable turns with genuine acceptance, resolving a resistance your mother's mother was never able to release.`,
+      negative: `Treating every uncontrollable turn as personal injustice repeats an old resistance this inherited task exists to finally settle.`,
+    },
+
+    // ── 11 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '11_I1': {
+      heading: `A Strength That Includes Gentleness Is Now Yours to Embody Where Your Mother's Mother Only Showed Toughness`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for compassionate strength, overridden by a demand to appear unshaken, endlessly capable, or hardened instead. The Strength sits in your Maternal Feminine Line, meaning this generation's task may be to lead with a strength she was only allowed to show as endurance.`,
+      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as endurance, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
+      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it.`,
+      positive: `You lead with strength that includes real gentleness, completing a fuller version of resilience your mother's mother was only allowed to harden.`,
+      negative: `Expressing strength only as endurance, without its gentler counterpart, repeats an old hardening this inherited task exists to soften.`,
+    },
+
+    // ── 12 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '12_I1': {
+      heading: `A Life Your Mother's Mother Gave Entirely to Others Is Now Yours to Rebalance`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Maternal Feminine Line, meaning this generation's task may be to reclaim active choice for yourself where she only ever gave it away.`,
+      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
+      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's.`,
+      positive: `You prioritize your own needs alongside your care for others, completing a balance your mother's mother never got the chance to claim.`,
+      negative: `A life shaped entirely around others' needs, with your own perpetually unconsidered, repeats an imbalance this inherited task exists to resolve.`,
+    },
+
+    // ── 13 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '13_I1': {
+      heading: `A Change Your Mother's Mother Resisted Until the End Is Now Yours to Complete Instead of Avoid`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Maternal Feminine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way she did.`,
+      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
+      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it.`,
+      positive: `You meet necessary endings directly instead of resisting them, completing a transformation your mother's mother was never able to face.`,
+      negative: `Holding onto what's already finished simply because letting go feels dangerous repeats an old resistance this inherited task exists to resolve.`,
+    },
+
+    // ── 14 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '14_I1': {
+      heading: `A Life Your Mother's Mother Lost to Extremes Is Now Yours to Steady`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, self-denial, or relentless caretaking. The Temperance sits in your Maternal Feminine Line, meaning this generation's task may be to find the steadiness her life never actually held.`,
+      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or depletion, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
+      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme.`,
+      positive: `You hold a genuinely steady, moderate rhythm, completing a balance your mother's mother's life was never actually able to find.`,
+      negative: `Swinging between overexertion and collapse repeats an old imbalance this inherited task exists to finally settle.`,
+    },
+
+    // ── 15 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '15_I1': {
+      heading: `A Bind Your Mother's Mother Never Broke Is Now Yours to Actually Release`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real entrapment, whether a compulsion or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Maternal Feminine Line, meaning this generation's task may be to release a bind she was never able to escape.`,
+      shadow: `The risk is inheriting a compulsive attachment of your own — to a pattern, a role, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
+      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed.`,
+      positive: `You actually release a bind that felt permanent, completing a freedom your mother's mother was never able to reach.`,
+      negative: `Accepting a compulsive bind as simply how things are, without ever questioning it, repeats an entrapment this inherited task exists to release.`,
+    },
+
+    // ── 16 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '16_I1': {
+      heading: `A Collapse Your Mother's Mother Never Fully Rebuilt From Is Now Yours to Finish Rebuilding`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Maternal Feminine Line, meaning this generation's task may be to complete a reconstruction she started but didn't finish.`,
+      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
+      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse.`,
+      positive: `You fully rebuild and invest in real stability, completing a reconstruction your mother's mother was never able to finish.`,
+      negative: `Holding back from real stability, bracing for a collapse that already happened once, repeats an incomplete rebuilding this task exists to finish.`,
+    },
+
+    // ── 17 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '17_I1': {
+      heading: `A Hope Your Mother's Mother Abandoned Is Now Yours to Restore`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Maternal Feminine Line, meaning this generation's task may be to restore a hope she felt forced to give up.`,
+      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
+      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it.`,
+      positive: `You restore genuine hope and act on it, completing something your mother's mother felt she had to abandon after real disappointment.`,
+      negative: `Guarding against hope as protection from disappointment repeats an old abandonment this inherited task exists to restore.`,
+    },
+
+    // ── 18 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '18_I1': {
+      heading: `A Fear Your Mother's Mother Never Faced Is Now Yours to Finally See Clearly`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Maternal Feminine Line, meaning this generation's task may be to see clearly what she could never quite look at directly.`,
+      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
+      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it.`,
+      positive: `You see a long-unexamined fear clearly and directly, completing a clarity your mother's mother was never able to reach.`,
+      negative: `An unnamed anxiety shaping decisions from the background, never faced directly, repeats an old obscurity this inherited task exists to clear.`,
+    },
+
+    // ── 19 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '19_I1': {
+      heading: `A Joy Your Mother's Mother Kept Hidden Is Now Yours to Let Be Seen`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for open joy and warmth, kept behind quiet composure considered proper or necessary. The Sun sits in your Maternal Feminine Line, meaning this generation's task may be to let visible joy exist where she only ever allowed restraint.`,
+      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a composed surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
+      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure.`,
+      positive: `You let real joy be openly visible, completing a warmth your mother's mother felt but was never permitted to show.`,
+      negative: `Keeping genuine happiness behind a controlled, composed surface repeats an old restraint this inherited task exists to finally release.`,
+    },
+
+    // ── 20 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '20_I1': {
+      heading: `A Calling Your Mother's Mother Never Answered Is Now Yours to Finally Take Up`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Maternal Feminine Line, meaning this generation's task may be to answer a call she heard but couldn't take up.`,
+      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
+      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it.`,
+      positive: `You answer a calling directly, completing an awakening your mother's mother sensed but was never able to fully take up.`,
+      negative: `Sensing a real calling and continuing to delay acting on it repeats an old unanswered call this inherited task exists to finally take up.`,
+    },
+
+    // ── 21 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '21_I1': {
+      heading: `Something Your Mother's Mother Left Permanently Unfinished Is Now Yours to Actually Complete`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Maternal Feminine Line, meaning this generation's task may be to reach a completion she never got to feel.`,
+      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
+      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further.`,
+      positive: `You complete something fully and let it be finished, resolving an incompletion your mother's mother was never able to reach the end of.`,
+      negative: `Real progress that never quite gets to feel finished repeats an old incompletion this inherited task exists to actually close out.`,
+    },
+
+    // ── 22 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
+    '22_I1': {
+      heading: `A Freedom Your Mother's Mother Traded Away Is Now Yours to Reclaim`,
+      why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Maternal Feminine Line, meaning this generation's task may be to reclaim the freedom she gave up.`,
+      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
+      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety.`,
+      positive: `You reclaim real freedom in your own choices, completing something your mother's mother traded away for security.`,
+      negative: `Reflexively choosing safety over genuine freedom repeats an old trade this inherited task exists to finally reclaim.`,
+    },
+
   }; // end nodes
 
 
