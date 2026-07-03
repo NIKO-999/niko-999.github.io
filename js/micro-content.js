@@ -624,6 +624,16 @@ window.DMicroContent = (function () {
       negative: `Treating every crack as a reason for immediate collapse creates recurring financial upheaval where patient reinforcement would have actually held.`,
     },
 
+    // ── 17 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
+    '17_C': {
+      heading: `Your Financial Renewal Comes After You've Actually Rebuilt`,
+      why: `The Star on your Earth Line means genuine financial renewal is available to you, but specifically the kind that arrives after real material rebuilding — not luck falling from the sky, but hope translated into the patient reconstruction of your resources after a setback. You carry a real capacity to restore your material life even from genuine loss, generating fresh security the way the Star pours water onto both the parched earth and the flowing stream: replenishing what's dry and sustaining what's already moving.`,
+      shadow: `The risk is waiting passively for financial renewal to simply arrive, treating hope as a strategy instead of a starting point — a belief that things will "work out" materially without the corresponding rebuilding effort. It can also show up as chronic financial restarting, where each setback becomes an identity rather than a stage to move through. If your material life keeps needing "renewal" without ever consolidating into real stability, hope may be substituting for the rebuilding work it was meant to inspire.`,
+      path: `Try pairing your genuine capacity for hope with concrete rebuilding steps — a real plan, not just faith that things will improve. The renewal is real, but it needs your hands in it to actually take material form.`,
+      positive: `You pair genuine hope with real rebuilding effort, so financial renewal actually consolidates into lasting stability instead of just another hopeful restart.`,
+      negative: `Waiting for financial renewal to simply arrive, without the rebuilding effort behind it, keeps you cycling through hopeful restarts that never quite consolidate.`,
+    },
+
     // ── 18 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '18_C': {
       heading: `You Sense Financial Trouble Before There's Any Proof of It`,
@@ -802,6 +812,16 @@ window.DMicroContent = (function () {
       path: `This position asks for one specific redemption: choose to release something voluntarily, before you're forced to, and mean it rather than perform it. Every time you do, you pay the debt down and prove that surrender doesn't have to arrive as loss.`,
       positive: `You've learned to release things voluntarily and genuinely, rather than under duress or as performance, and that real surrender repays an old debt of resisted letting go.`,
       negative: `A pattern of gripping until forced to release, or performing sacrifice without meaning it, keeps repeating an old debt that surrender never actually resolved.`,
+    },
+
+    // ── 13 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
+    '13_D': {
+      heading: `The Ending You're Here to Finally Let Finish`,
+      why: `Something in you carries an old, wordless resistance to letting things fully end — a sense that in whatever came before this life, a necessary release was interrupted, avoided, or only partially completed. Transformation sits at the base of your matrix, in your Karmic Tail — the deepest inherited work of the soul — and the debt it marks is unfinished ending: something that should have been allowed to fully die, but instead lingered, half-released, carried forward instead of completed.`,
+      shadow: `You might notice a pattern of endings that never quite land — relationships, jobs, or identities that you leave without fully leaving, keeping one foot in a door you've already decided to walk through. It's worth naming plainly: if the same situation keeps almost-ending without ever actually closing, that's not just circumstance — it's an old, unfinished release still looking for its completion.`,
+      path: `This position is built for redemption through completion — letting one ending in your current life actually finish, fully, without keeping a thread attached. Every time you let something genuinely die instead of half-releasing it, you pay the debt down and free the space for what's actually next.`,
+      positive: `You've learned to let endings actually finish, fully, and each complete release repays an old debt of endings that were once only half-completed.`,
+      negative: `A pattern of endings that never quite land — one foot still in a door already meant to be closed — keeps repeating an old, unfinished release that's still waiting for its completion.`,
     },
 
     // ── 14 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
@@ -1044,6 +1064,16 @@ window.DMicroContent = (function () {
       negative: `Needing collapse itself to feel purposeful confuses intensity with clarity, keeping your life reorganizing in crisis when gentler insight would have worked as well.`,
     },
 
+    // ── 17 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
+    '17_E': {
+      heading: `Your Soul's Purpose Is Generating Hope Even Without Proof It's Warranted`,
+      why: `The Star at the center of your matrix means your foundation of purpose is genuine, structural hope — you're here to keep generating real renewal and light, for yourself and others, even in circumstances that don't yet confirm the hope is justified. At your core, you feel most like yourself when you're actively replenishing something — a person, a project, your own depleted reserves — trusting the process before there's outside evidence it's working.`,
+      shadow: `The trap is needing external proof before you'll let yourself hope, which cuts you off from your own deepest source of purpose. It can also show up as pouring hope outward so consistently that your own reserves run dry, offering renewal to everyone except yourself. If your purpose feels like it's always about lifting others and never about being lifted, the wellspring needs its own source too.`,
+      path: `Let your hope be genuinely reciprocal — replenished as much as it replenishes. Purpose here isn't an inexhaustible personal resource; it's a real exchange that has to include you receiving, not just generating.`,
+      positive: `You generate real hope and let it be reciprocal, replenished as much as it replenishes, so purpose stays sustainable instead of quietly draining you.`,
+      negative: `Pouring hope outward without ever letting your own reserves be replenished turns a real gift for renewal into something that quietly runs you dry.`,
+    },
+
     // ── 18 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '18_E': {
       heading: `Your Soul's Purpose Lives Beneath What You Can Explain`,
@@ -1252,6 +1282,16 @@ window.DMicroContent = (function () {
       path: `Let your clarity inform a deliberate conversation before it becomes a sudden exit. Not every relationship in trouble needs demolition — some genuinely can be rebuilt if you bring the truth to the table instead of just acting on it alone.`,
       positive: `You see relationship truths clearly and bring them into honest conversation, so necessary endings or real repairs happen deliberately instead of through sudden upheaval.`,
       negative: `Acting on relationship clarity alone, without bringing it into conversation first, turns endings into sudden upheaval that a direct conversation might have avoided or softened.`,
+    },
+
+    // ── 17 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
+    '17_LOVE': {
+      heading: `You Fall in Love With People You Can Genuinely Hope For`,
+      why: `The Star governing your relationship channel means love for you is deeply tied to genuine hope — you're drawn to partners you can believe in, and you offer a rare, real gift in return: unwavering faith in who they're capable of becoming, offered without needing proof upfront. Your relationships often function as a source of renewal for both people, a place where discouragement gets met with real, structural hope rather than empty reassurance.`,
+      shadow: `The risk is loving someone's potential more than who they actually, currently are — staying in relationships that keep disappointing the present moment because your hope is pointed at who they could be instead of who they're actually showing up as. If your relationships keep feeling like an act of faith rather than a present-tense connection, the hope may be substituting for honest assessment.`,
+      path: `Try letting your hope meet a partner exactly where they currently are, not just where you believe they're headed. Real love here offers renewal to what's actually present, not just to potential.`,
+      positive: `You offer genuine hope and renewal to who a partner actually is right now, not just their potential, so your relationships feel met rather than perpetually aspirational.`,
+      negative: `Loving a partner's potential more than their present reality keeps relationships feeling like an act of faith, perpetually disappointed by who they actually, currently are.`,
     },
 
     // ── 18 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
