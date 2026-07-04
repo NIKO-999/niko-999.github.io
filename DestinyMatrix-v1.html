@@ -200,6 +200,114 @@
     }
     #hud-back:hover { color: rgba(255,255,255,0.55); }
 
+    /* ── Star Index (collapsible quick-nav) ──────────── */
+    #star-index {
+      position: absolute;
+      top: 26px; left: 28px;
+      pointer-events: all;
+      z-index: 25;
+      width: 216px;
+      max-width: calc(100vw - 56px);
+    }
+    #si-toggle {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      user-select: none;
+      transition: color .2s;
+    }
+    #si-toggle:hover { color: rgba(255,255,255,0.55); }
+    #si-toggle .si-chevron {
+      display: inline-block;
+      font-size: 8px;
+      transition: transform .3s ease;
+      transform: rotate(-90deg);
+    }
+    #star-index.open #si-toggle .si-chevron { transform: rotate(0deg); }
+    #si-panel {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height .35s ease, opacity .25s ease;
+      margin-top: 10px;
+      background: rgba(4, 7, 22, 0.88);
+      border: 1px solid rgba(180,210,255,0.11);
+      border-radius: 2px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    #star-index.open #si-panel {
+      max-height: min(70vh, 520px);
+      opacity: 1;
+    }
+    #si-search {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(180,210,255,0.05);
+      border: none;
+      border-bottom: 1px solid rgba(180,210,255,0.12);
+      color: rgba(255,255,255,0.75);
+      font-family: 'DM Mono', monospace;
+      font-size: 10.5px;
+      letter-spacing: 0.5px;
+      padding: 10px 12px;
+      outline: none;
+    }
+    #si-search::placeholder { color: rgba(180,210,255,0.28); }
+    #si-list {
+      max-height: min(60vh, 440px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,210,255,0.14) transparent;
+      padding: 4px 0 8px;
+    }
+    .si-group-label {
+      font-family: 'DM Mono', monospace;
+      font-size: 6.5px;
+      font-weight: 300;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(160,200,255,0.35);
+      padding: 10px 12px 4px;
+    }
+    .si-row {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 6px 12px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .si-row:hover { background: rgba(180,210,255,0.08); }
+    .si-num {
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      font-weight: 400;
+      flex-shrink: 0;
+      width: 20px;
+    }
+    .si-label {
+      font-size: 10.5px;
+      font-weight: 300;
+      letter-spacing: 0.2px;
+      color: rgba(210,225,255,0.68);
+      line-height: 1.3;
+    }
+    .si-empty {
+      padding: 14px 12px;
+      font-size: 10px;
+      color: rgba(180,210,255,0.3);
+      font-style: italic;
+    }
+
     /* ── Info card ───────────────────────────────────── */
     #info-card {
       position: fixed;
@@ -511,6 +619,14 @@
   <div id="hud-label">Destiny Matrix</div>
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
+
+  <div id="star-index">
+    <div id="si-toggle"><span class="si-chevron">▾</span><span>Star Index</span></div>
+    <div id="si-panel">
+      <input id="si-search" type="text" placeholder="Search stars…" autocomplete="off" />
+      <div id="si-list"></div>
+    </div>
+  </div>
 </div>
 
 <!-- Nebula veil — covers screen when flying into a star -->
@@ -1205,6 +1321,16 @@ document.getElementById('ic-view-law').addEventListener('click', (e) => {
 // on entry to a zoom and clear it on return; every raycast-and-fly branch must
 // bail if this is already set.
 let activeExtraStar = null; // { tier: 'prog' | 'talent', key }
+
+// Shared lookup so the Star Index panel (built after every tier below has
+// initialized) can list and jump to any star without reaching into each
+// tier's own private closure state. Each tier IIFE (micro/prog/talent)
+// registers a { list(), fly(key) } provider at the end of its own setup;
+// list() always reads that tier's live arrays directly (not a snapshot),
+// so entries stay correct across date changes with no extra wiring needed.
+// Core (A–E) needs no provider — NODES and flyTo() are already reachable
+// directly from here since neither is nested in a tier IIFE.
+const _tierProviders = {};
 
 // ── RAYCASTER ─────────────────────────────────────────────────────────────
 const raycaster = new THREE.Raycaster();
@@ -1989,12 +2115,18 @@ appendHint();
 
   // ── 6 micro-nodes ────────────────────────────────────────────────────────
   const MICRO = [
-    // Love & Money: explicit positions along Inner Bottom → Inner Right vector
+    // Love & Money: positioned in the lower-right quadrant between Soul
+    // Center and the Inner Right/Bottom anchors, matching Core-Methodology-
+    // and-Concepts.md's diagram description ("a green $ icon sits just
+    // right of center... a red heart icon sits just below-right of
+    // center"). Re-spaced (2026-07-04 placement audit) off the literal
+    // Inner Bottom/Inner Right points — those coordinates collided with
+    // KARMA/SEXLINE and RWM, which sit exactly on those anchors themselves.
     { key:'LOVE', num:_vals.love, label:'Relationship', icon:'♥',
-      pos: new THREE.Vector3((_R/2)*0.333, -(_R/2)*0.666, 0),
+      pos: new THREE.Vector3(_R * 0.02, -_R * 0.44, 0),
       color:0xFF88AA, twk:{spd:0.8,off:1.2} },
     { key:'MON',  num:_vals.mon,  label:'Money',        icon:'$',
-      pos: new THREE.Vector3((_R/2)*0.666, -(_R/2)*0.333, 0),
+      pos: new THREE.Vector3(_R * 0.28, -_R * 0.36, 0),
       color:0xFFBB44, twk:{spd:1.0,off:3.1} },
 
     // Ancestral square corners — endpoints of the lineage diagonals.
@@ -2010,11 +2142,14 @@ appendHint();
     { key:'H', num:_vals.atH, label:'Paternal Material',  pos:_ptH.clone(), color:0xCCDDFF, twk:{spd:1.2,off:3.7} },
     { key:'I', num:_vals.atI, label:'Maternal Material',  pos:_ptI.clone(), color:0xCCDDFF, twk:{spd:0.8,off:5.3} },
 
-    // Karmic Debt — sits at the Inner Bottom point, the literal midpoint
-    // between the Karmic Tail star (D) and Soul Center star (E). Past-life
-    // debt / health reading, keyed to matrix-engine.js's karmic-tail triplet.
+    // Karmic Debt — sits near the Inner Bottom point, the conceptual
+    // midpoint between the Karmic Tail star (D) and Soul Center star (E).
+    // Past-life debt / health reading, keyed to matrix-engine.js's
+    // karmic-tail triplet. Pushed slightly further from center than the
+    // literal midpoint (2026-07-04 placement audit) for clearance from I
+    // and from LOVE, which sit close by.
     { key:'KARMA', num:_vals.atK, label:'Karmic Debt',
-      pos: new THREE.Vector3(-_R * 0.18, -_R * 0.5, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
+      pos: new THREE.Vector3(-_R * 0.24, -_R * 0.70, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
 
     // Sexual Line — mirrors Karmic Debt's position across the vertical axis.
     // A separate 26-combination naming system over the same (D, E) pair as
@@ -2023,14 +2158,15 @@ appendHint();
     // (D, E) directly via DMEngine.matchSexualLineCode, not sorted or shared
     // with the Karmic Tail/Karmic Debt lookup.
     { key:'SEXLINE', num:_vals.atK, label:'Sexual Line',
-      pos: new THREE.Vector3(_R * 0.18, -_R * 0.5, 0), color:0xE84393, twk:{spd:0.75,off:2.6} },
+      pos: new THREE.Vector3(_R * 0.24, -_R * 0.70, 0), color:0xE84393, twk:{spd:0.75,off:2.6} },
 
     // Past Life Star — sits beyond the Karmic Tail star (D) on the same
     // vertical axis, outside the diamond. Reuses D's own value directly:
     // D is already canonically "past-life lessons" (see CLAUDE.md), so this
     // is a deep-dive expansion of that same number, not a competing one.
+    // Pushed slightly further out (2026-07-04) for clearance from D itself.
     { key:'PASTLIFE', num:NODES[3].num, label:'Past Life Star',
-      pos: new THREE.Vector3(0, -_R * 1.35, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
+      pos: new THREE.Vector3(0, -_R * 1.40, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
 
     // ── Money Channel sub-positions (3 of 5 named source positions; the
     // other 2 — Under the Dollar Sign, Guardian Angel — have no confirmed
@@ -2042,34 +2178,49 @@ appendHint();
     // identity, per NON_NEGOTIABLE_RULES.md's Absolute System Isolation:
     // shared numeric source is fine, each still gets its own dedicated star.
     { key:'MK', num:NODES[2].num, label:'Material Karma',
-      pos: new THREE.Vector3(_R * 1.15, _R * 0.15, 0), color:0x44FFAA, twk:{spd:0.9,off:3.4} },
+      // Sits straight out beyond the Earth Line star (C) — its original
+      // (1.15, 0.15) spot landed almost exactly on top of C itself
+      // (confirmed by direct hit-sphere distance check, 2026-07-04 placement
+      // audit). Pushed further along C's own axis so the "material karma"
+      // theming stays visually adjacent to Earth Line without overlapping it.
+      pos: new THREE.Vector3(_R * 1.45, 0, 0), color:0x44FFAA, twk:{spd:0.9,off:3.4} },
     { key:'RWM', num:_vals.atCG, label:'Relationship with Money',
       pos: _pCG.clone(), color:0xFFBB44, twk:{spd:1.05,off:0.8} },
     { key:'MEP', num:_vals.atH, label:'Money Entry Point',
-      // Pushed further out along the same diagonal than its original
-      // (0.65,-0.65) spot — that position was only ~0.1*_R from the later-
-      // added Paternal Feminine Line star (H1, Ancestral Tasks), causing
-      // near-total label/hit-sphere overlap on live (reported by user).
-      pos: new THREE.Vector3(_R * 0.95, -_R * 0.95, 0), color:0xFFBB44, twk:{spd:0.85,off:4.9} },
+      // Sits further out along a diagonal a few degrees off H1's own ray
+      // (2026-07-04 placement audit, superseding the (0.95,-0.95) fix from
+      // earlier this session) — H1 itself moved further out in this same
+      // pass (see Ancestral Tasks below), which reopened a clearance issue
+      // between the two; nudging MEP's angle instead of just its radius
+      // keeps it clear of H1 without drifting into MK's or PASTLIFE's zones.
+      pos: new THREE.Vector3(_R * 1.55 * Math.cos(-50 * Math.PI / 180), _R * 1.55 * Math.sin(-50 * Math.PI / 180), 0),
+      color:0xFFBB44, twk:{spd:0.85,off:4.9} },
 
     // ── Ancestral Tasks (4 of 4 named source positions; the "talents"
     // family — F2/G2/H2/I2 — is computed in _calcVals() but deferred, not
-    // built as stars yet). Each sits near its corresponding ancestral
-    // corner (F/G/H/I) without overlapping it. Per
-    // research/11-Research-Updates/13: F1=Paternal Masculine Line,
-    // G1=Maternal Masculine Line, H1=Paternal Feminine Line, I1=Maternal
-    // Feminine Line — this does NOT rename or reinterpret the existing
-    // F/G/H/I (Paternal/Maternal Spiritual/Material) stars; it's a
-    // separate, additive layer per NON_NEGOTIABLE_RULES.md's Absolute
-    // System Isolation.
+    // built as stars yet). Per research/11-Research-Updates/13:
+    // F1=Paternal Masculine Line, G1=Maternal Masculine Line,
+    // H1=Paternal Feminine Line, I1=Maternal Feminine Line — this does NOT
+    // rename or reinterpret the existing F/G/H/I (Paternal/Maternal
+    // Spiritual/Material) stars; it's a separate, additive layer per
+    // NON_NEGOTIABLE_RULES.md's Absolute System Isolation.
+    //
+    // Placement (2026-07-04 audit, replacing the earlier "near the corner,
+    // nudged to avoid overlap" spots): research/11-Research-Updates/12's
+    // rendered-diagram finding describes F1 as "a smaller circle nested
+    // directly off F, connected via a labeled 'male generation line' arrow"
+    // — i.e. it continues outward along the same center→F diagonal, not an
+    // arbitrary nearby point. Built here as each corner's own position
+    // vector, normalized and re-scaled to a larger radius, so F1/G1/H1/I1
+    // sit exactly on the F/G/H/I diagonals themselves, further from center.
     { key:'F1', num:_vals.atF1, label:'Paternal Masculine Line',
-      pos: new THREE.Vector3(-_R * 0.65, _R * 0.75, 0), color:0xCCDDFF, twk:{spd:1.15,off:2.0} },
+      pos: _ptF.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:1.15,off:2.0} },
     { key:'G1', num:_vals.atG1, label:'Maternal Masculine Line',
-      pos: new THREE.Vector3(_R * 0.75, _R * 0.65, 0), color:0xCCDDFF, twk:{spd:0.95,off:3.6} },
+      pos: _ptG.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:0.95,off:3.6} },
     { key:'H1', num:_vals.atH1, label:'Paternal Feminine Line',
-      pos: new THREE.Vector3(_R * 0.75, -_R * 0.65, 0), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
+      pos: _ptH.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
     { key:'I1', num:_vals.atI1, label:'Maternal Feminine Line',
-      pos: new THREE.Vector3(-_R * 0.75, -_R * 0.65, 0), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
+      pos: _ptI.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2523,6 +2674,15 @@ appendHint();
     return true;
   };
 
+  // ── Star Index provider ──────────────────────────────────────────────────
+  _tierProviders.micro = {
+    list: () => MICRO.map((d, i) => ({
+      idx: i, label: d.label, num: d.num,
+      color: '#' + new THREE.Color(d.color).getHexString(),
+    })),
+    fly: (idx) => flyToMicro(idx),
+  };
+
 })();
 
 
@@ -2878,6 +3038,15 @@ appendHint();
     return true;
   };
 
+  // ── Star Index provider ──────────────────────────────────────────────────
+  _tierProviders.prog = {
+    list: () => active.map((p, i) => ({
+      idx: i, label: p.name, num: p.numbers.join('·'),
+      color: (CAT_COLORS[p.category] || { hex: '#AABBFF' }).hex,
+    })),
+    fly: (idx) => flyToProgStar(idx),
+  };
+
 })();
 
 // ── TALENT STAR LINE ─────────────────────────────────────────────────────────
@@ -3179,6 +3348,15 @@ appendHint();
     return true;
   };
 
+  // ── Star Index provider ──────────────────────────────────────────────────
+  _tierProviders.talent = {
+    list: () => KEYS.map(key => ({
+      key, label: TALENT_LABEL[key], num: _talents[key],
+      color: '#' + (ICON_COLOR_MAP[window.DMEngine.getIconType(_talents[key])] || 0xAABBFF).toString(16).padStart(6, '0'),
+    })),
+    fly: (key) => flyToTalent(key),
+  };
+
 })();
 
 // ── SHAREABLE DOB LINK ────────────────────────────────────────────────────
@@ -3198,6 +3376,104 @@ appendHint();
 
   const paramDob = new URLSearchParams(location.search).get('dob');
   if (paramDob) applyNewDate(paramDob); // silently falls back to the default on invalid input
+})();
+
+// ── STAR INDEX PANEL ──────────────────────────────────────────────────────
+// Collapsible top-left quick-nav: every star in the chart, in writing form,
+// grouped by tier — click a row to fly straight to that star, same as
+// clicking it in the scene. Built last, after every tier IIFE above has
+// registered its provider on _tierProviders, so this never has to know any
+// tier's internals beyond the shared { list(), fly(key) } shape.
+;(function () {
+  const root   = document.getElementById('star-index');
+  const toggle = document.getElementById('si-toggle');
+  const search = document.getElementById('si-search');
+  const listEl = document.getElementById('si-list');
+
+  function coreRows() {
+    return NODES.map((d, i) => ({
+      label: d.label, num: d.num,
+      color: '#' + new THREE.Color(d.color).getHexString(),
+      fly: () => flyTo(i),
+    }));
+  }
+
+  function buildGroups() {
+    const groups = [{ title: 'Core Cross', rows: coreRows() }];
+    if (_tierProviders.micro) {
+      groups.push({
+        title: 'Ancestral & Channels',
+        rows: _tierProviders.micro.list().map(r => ({ ...r, fly: () => _tierProviders.micro.fly(r.idx) })),
+      });
+    }
+    if (_tierProviders.talent) {
+      groups.push({
+        title: 'Talent Star Line',
+        rows: _tierProviders.talent.list().map(r => ({ ...r, fly: () => _tierProviders.talent.fly(r.key) })),
+      });
+    }
+    if (_tierProviders.prog) {
+      const rows = _tierProviders.prog.list().map(r => ({ ...r, fly: () => _tierProviders.prog.fly(r.idx) }));
+      if (rows.length) groups.push({ title: 'Karmic Programs', rows });
+    }
+    return groups;
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    listEl.innerHTML = '';
+    let anyShown = false;
+
+    buildGroups().forEach(g => {
+      const rows = q ? g.rows.filter(r => (r.label + ' ' + r.num).toLowerCase().includes(q)) : g.rows;
+      if (!rows.length) return;
+      anyShown = true;
+
+      const groupLabel = document.createElement('div');
+      groupLabel.className = 'si-group-label';
+      groupLabel.textContent = g.title;
+      listEl.appendChild(groupLabel);
+
+      rows.forEach(r => {
+        const row = document.createElement('div');
+        row.className = 'si-row';
+        row.innerHTML = `<span class="si-num" style="color:${r.color}">${r.num}</span><span class="si-label">${r.label}</span>`;
+        row.addEventListener('click', () => {
+          // Every fly*() function already self-guards on isFlying/activeIdx/
+          // activeExtraStar — checking here too just avoids the pointless
+          // close-then-no-op if a click lands mid-transition.
+          if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+          root.classList.remove('open');
+          search.value = '';
+          r.fly();
+        });
+        listEl.appendChild(row);
+      });
+    });
+
+    if (!anyShown) {
+      const empty = document.createElement('div');
+      empty.className = 'si-empty';
+      empty.textContent = 'No stars match your search.';
+      listEl.appendChild(empty);
+    }
+  }
+
+  toggle.addEventListener('click', () => {
+    const opening = !root.classList.contains('open');
+    root.classList.toggle('open');
+    if (opening) render();
+  });
+
+  search.addEventListener('input', render);
+
+  document.addEventListener('click', (e) => {
+    if (root.classList.contains('open') && !root.contains(e.target)) {
+      root.classList.remove('open');
+    }
+  });
+
+  render(); // pre-render once so the very first open has content immediately
 })();
 
 })();
