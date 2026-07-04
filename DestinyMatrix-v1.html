@@ -2113,6 +2113,15 @@ appendHint();
 
   let _vals = _calcVals();
 
+  // Sexual Line has no per-arcana fallback (see the comment on its MICRO
+  // entry below) — recomputed on every date change so the star can be shown
+  // or hidden entirely depending on whether this birthdate's (D, E) pair
+  // actually names one of the 25 combinations.
+  function _sexLineMatch() {
+    return window.DMEngine ? window.DMEngine.matchSexualLineCode(NODES[3].num, NODES[4].num) : null;
+  }
+  let _sexLineActive = !!_sexLineMatch();
+
   // ── 6 micro-nodes ────────────────────────────────────────────────────────
   const MICRO = [
     // Love & Money: positioned in the lower-right quadrant between Soul
@@ -2145,28 +2154,27 @@ appendHint();
     // Karmic Debt — sits near the Inner Bottom point, the conceptual
     // midpoint between the Karmic Tail star (D) and Soul Center star (E).
     // Past-life debt / health reading, keyed to matrix-engine.js's
-    // karmic-tail triplet. Pushed slightly further from center than the
-    // literal midpoint (2026-07-04 placement audit) for clearance from I
-    // and from LOVE, which sit close by.
+    // karmic-tail triplet.
     { key:'KARMA', num:_vals.atK, label:'Karmic Debt',
-      pos: new THREE.Vector3(-_R * 0.24, -_R * 0.70, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
+      pos: new THREE.Vector3(-_R * 0.2498, -_R * 0.4184, 0), color:0xB08FFF, twk:{spd:0.7,off:4.4} },
 
-    // Sexual Line — mirrors Karmic Debt's position across the vertical axis.
-    // A separate 26-combination naming system over the same (D, E) pair as
-    // the Karmic Tail (see js/sexual-line-content.js); reuses the same
-    // derived value for display, but its own named-seed lookup is keyed by
-    // (D, E) directly via DMEngine.matchSexualLineCode, not sorted or shared
-    // with the Karmic Tail/Karmic Debt lookup.
+    // Sexual Line — a separate 26-combination naming system over the same
+    // (D, E) pair as the Karmic Tail (see js/sexual-line-content.js); reuses
+    // the same derived value for display, but its own named-seed lookup is
+    // keyed by (D, E) directly via DMEngine.matchSexualLineCode, not sorted
+    // or shared with the Karmic Tail/Karmic Debt lookup. Unlike every other
+    // micro-node, this system has no per-arcana fallback — only 25 of the
+    // many possible (D, E) pairs have a named entry — so this star is only
+    // ever rendered when the current birthdate actually resolves to one of
+    // them (see the visibility toggle below); no placeholder "no match" star.
     { key:'SEXLINE', num:_vals.atK, label:'Sexual Line',
-      pos: new THREE.Vector3(_R * 0.24, -_R * 0.70, 0), color:0xE84393, twk:{spd:0.75,off:2.6} },
+      pos: new THREE.Vector3(_R * 0.2145, -_R * 0.6625, 0), color:0xE84393, twk:{spd:0.75,off:2.6} },
 
-    // Past Life Star — sits beyond the Karmic Tail star (D) on the same
-    // vertical axis, outside the diamond. Reuses D's own value directly:
-    // D is already canonically "past-life lessons" (see CLAUDE.md), so this
-    // is a deep-dive expansion of that same number, not a competing one.
-    // Pushed slightly further out (2026-07-04) for clearance from D itself.
+    // Past Life Star — reuses D's own value directly: D is already
+    // canonically "past-life lessons" (see CLAUDE.md), so this is a
+    // deep-dive expansion of that same number, not a competing one.
     { key:'PASTLIFE', num:NODES[3].num, label:'Past Life Star',
-      pos: new THREE.Vector3(0, -_R * 1.40, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
+      pos: new THREE.Vector3(-_R * 0.1441, -_R * 0.7172, 0), color:0x8FD9FF, twk:{spd:0.6,off:1.9} },
 
     // ── Money Channel sub-positions (3 of 5 named source positions; the
     // other 2 — Under the Dollar Sign, Guardian Angel — have no confirmed
@@ -2178,23 +2186,11 @@ appendHint();
     // identity, per NON_NEGOTIABLE_RULES.md's Absolute System Isolation:
     // shared numeric source is fine, each still gets its own dedicated star.
     { key:'MK', num:NODES[2].num, label:'Material Karma',
-      // Sits straight out beyond the Earth Line star (C) — its original
-      // (1.15, 0.15) spot landed almost exactly on top of C itself
-      // (confirmed by direct hit-sphere distance check, 2026-07-04 placement
-      // audit). Pushed further along C's own axis so the "material karma"
-      // theming stays visually adjacent to Earth Line without overlapping it.
-      pos: new THREE.Vector3(_R * 1.45, 0, 0), color:0x44FFAA, twk:{spd:0.9,off:3.4} },
+      pos: new THREE.Vector3(_R * 0.7320, _R * 0.1268, 0), color:0x44FFAA, twk:{spd:0.9,off:3.4} },
     { key:'RWM', num:_vals.atCG, label:'Relationship with Money',
       pos: _pCG.clone(), color:0xFFBB44, twk:{spd:1.05,off:0.8} },
     { key:'MEP', num:_vals.atH, label:'Money Entry Point',
-      // Sits further out along a diagonal a few degrees off H1's own ray
-      // (2026-07-04 placement audit, superseding the (0.95,-0.95) fix from
-      // earlier this session) — H1 itself moved further out in this same
-      // pass (see Ancestral Tasks below), which reopened a clearance issue
-      // between the two; nudging MEP's angle instead of just its radius
-      // keeps it clear of H1 without drifting into MK's or PASTLIFE's zones.
-      pos: new THREE.Vector3(_R * 1.55 * Math.cos(-50 * Math.PI / 180), _R * 1.55 * Math.sin(-50 * Math.PI / 180), 0),
-      color:0xFFBB44, twk:{spd:0.85,off:4.9} },
+      pos: new THREE.Vector3(_R * 0.2121, _R * 0.4590, 0), color:0xFFBB44, twk:{spd:0.85,off:4.9} },
 
     // ── Ancestral Tasks (4 of 4 named source positions; the "talents"
     // family — F2/G2/H2/I2 — is computed in _calcVals() but deferred, not
@@ -2205,31 +2201,39 @@ appendHint();
     // Spiritual/Material) stars; it's a separate, additive layer per
     // NON_NEGOTIABLE_RULES.md's Absolute System Isolation.
     //
-    // Placement (2026-07-04 audit, replacing the earlier "near the corner,
-    // nudged to avoid overlap" spots): research/11-Research-Updates/12's
-    // rendered-diagram finding describes F1 as "a smaller circle nested
-    // directly off F, connected via a labeled 'male generation line' arrow"
-    // — i.e. it continues outward along the same center→F diagonal, not an
-    // arbitrary nearby point. Built here as each corner's own position
-    // vector, normalized and re-scaled to a larger radius, so F1/G1/H1/I1
-    // sit exactly on the F/G/H/I diagonals themselves, further from center.
+    // Placement (2026-07-05 audit, superseding the earlier "beyond the
+    // corner, further from center" version from the previous pass):
+    // research/11-Research-Updates/12's rendered-diagram finding describes
+    // F1 as "a smaller circle nested directly off F, connected via a
+    // labeled 'male generation line' arrow," which is why each of these
+    // still sits along its own corner's center-diagonal — but pushing them
+    // further OUTWARD than F/G/H/I put them outside the diamond entirely,
+    // which conflicts with the harder requirement that every micro-star
+    // stay on the diagram (only program stars are allowed off it). F1/G1
+    // sit inward along their diagonal, at a smaller radius than F/G
+    // themselves; H1/I1 had to give up the exact diagonal angle too — that
+    // whole quadrant is shared with the Money/Love channel cluster, and a
+    // solved, verified-by-direct-distance-check layout (zero overlaps,
+    // everything inside the diamond) took priority over angular symmetry.
     { key:'F1', num:_vals.atF1, label:'Paternal Masculine Line',
-      pos: _ptF.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:1.15,off:2.0} },
+      pos: new THREE.Vector3(-_R * 0.3142, _R * 0.3122, 0), color:0xCCDDFF, twk:{spd:1.15,off:2.0} },
     { key:'G1', num:_vals.atG1, label:'Maternal Masculine Line',
-      pos: _ptG.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:0.95,off:3.6} },
+      pos: new THREE.Vector3(_R * 0.3902, _R * 0.2587, 0), color:0xCCDDFF, twk:{spd:0.95,off:3.6} },
     { key:'H1', num:_vals.atH1, label:'Paternal Feminine Line',
-      pos: _ptH.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
+      pos: new THREE.Vector3(_R * 0.5974, -_R * 0.2479, 0), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
     { key:'I1', num:_vals.atI1, label:'Maternal Feminine Line',
-      pos: _ptI.clone().normalize().multiplyScalar(_R * 1.2), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
+      pos: new THREE.Vector3(-_R * 0.4487, -_R * 0.2418, 0), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
   const _microHits = [];
   let _hovM = -1;
   let _activeMicroStar = -1;
+  let _sexLineHit = null; // kept out of _microHits (not raycastable) whenever inactive
 
   MICRO.forEach((data, i) => {
     const sz = i < 2 ? 0.20 : 0.22;   // corners slightly larger than channel nodes
+    const isSexLine = data.key === 'SEXLINE';
 
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: nodeTex,
@@ -2241,6 +2245,7 @@ appendHint();
     }));
     sp.position.copy(data.pos);
     sp.scale.set(sz, sz, 1);
+    if (isSexLine) sp.visible = _sexLineActive;
     scene.add(sp);
     data.sprite    = sp;
     data.baseScale = sz;
@@ -2253,7 +2258,14 @@ appendHint();
     hit.position.copy(data.pos);
     hit.userData.mIdx = i;
     scene.add(hit);
-    _microHits.push(hit);
+    if (isSexLine) {
+      _sexLineHit = hit;
+      if (_sexLineActive) _microHits.push(hit);
+      // else: exists in the scene (harmless, invisible, never raycast against)
+      // but deliberately left out of _microHits so it can never be clicked.
+    } else {
+      _microHits.push(hit);
+    }
   });
 
   // ── HTML overlays ────────────────────────────────────────────────────────
@@ -2264,6 +2276,7 @@ appendHint();
     const lbl  = data.label ? `<div class="t-label">${data.label}</div>` : '';
     const arch = data.archetype ? `<div class="t-archetype">${data.archetype}</div>` : '';
     el.innerHTML = `<div class="micro-inner"><div class="t-num">${data.num}${icon}</div>${lbl}${arch}</div>`;
+    if (data.key === 'SEXLINE' && !_sexLineActive) el.style.display = 'none';
     overlayEl.appendChild(el);
     return el;
   });
@@ -2639,9 +2652,33 @@ appendHint();
     MICRO[6].num = _vals.atK;
 
     // Node 7: Sexual Line — same derived value as Karmic Debt, display only
-    // (its own named-seed lookup uses D/E directly, not this displayed num)
+    // (its own named-seed lookup uses D/E directly, not this displayed num).
+    // Re-checked every date change: this star only exists on the diagram
+    // when the new (D, E) pair actually names one of the 25 combinations.
     _microTags[7].querySelector('.t-num').textContent = String(_vals.atK);
     MICRO[7].num = _vals.atK;
+    {
+      const wasActive = _sexLineActive;
+      _sexLineActive = !!_sexLineMatch();
+      if (_sexLineActive !== wasActive) {
+        MICRO[7].sprite.visible = _sexLineActive;
+        _microTags[7].style.display = _sexLineActive ? '' : 'none';
+        if (_sexLineActive) {
+          if (_sexLineHit && !_microHits.includes(_sexLineHit)) _microHits.push(_sexLineHit);
+        } else {
+          const hi = _microHits.indexOf(_sexLineHit);
+          if (hi !== -1) _microHits.splice(hi, 1);
+          // If the star was open/zoomed when the date changed out from under
+          // it, back out of that zoom cleanly rather than leaving the banner
+          // open on a star that no longer exists.
+          if (_activeMicroStar === 7) {
+            _activeMicroStar = -1;
+            activeExtraStar = null;
+            closeMicroBanner();
+          }
+        }
+      }
+    }
 
     // Node 8: Past Life Star — always mirrors the live Karmic Tail (D) value
     _microTags[8].querySelector('.t-num').textContent = String(NODES[3].num);
@@ -2676,10 +2713,9 @@ appendHint();
 
   // ── Star Index provider ──────────────────────────────────────────────────
   _tierProviders.micro = {
-    list: () => MICRO.map((d, i) => ({
-      idx: i, label: d.label, num: d.num,
-      color: '#' + new THREE.Color(d.color).getHexString(),
-    })),
+    list: () => MICRO
+      .map((d, i) => ({ idx: i, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
+      .filter((r) => r.idx !== 7 || _sexLineActive), // Sexual Line: only list it when it's actually on the diagram
     fly: (idx) => flyToMicro(idx),
   };
 
