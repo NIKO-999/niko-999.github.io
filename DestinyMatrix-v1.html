@@ -203,20 +203,20 @@
     /* ── Star Index (collapsible quick-nav) ──────────── */
     #star-index {
       position: absolute;
-      top: 26px; left: 28px;
+      top: 22px; left: 24px;
       pointer-events: all;
       z-index: 25;
-      width: 216px;
-      max-width: calc(100vw - 56px);
+      width: 168px;
+      max-width: calc(100vw - 48px);
     }
     #si-toggle {
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
       font-family: 'DM Mono', monospace;
-      font-size: 8px;
+      font-size: 7px;
       font-weight: 400;
-      letter-spacing: 3px;
+      letter-spacing: 2.5px;
       text-transform: uppercase;
       color: rgba(255,255,255,0.3);
       cursor: pointer;
@@ -226,7 +226,7 @@
     #si-toggle:hover { color: rgba(255,255,255,0.55); }
     #si-toggle .si-chevron {
       display: inline-block;
-      font-size: 8px;
+      font-size: 7px;
       transition: transform .3s ease;
       transform: rotate(-90deg);
     }
@@ -236,7 +236,7 @@
       max-height: 0;
       opacity: 0;
       transition: max-height .35s ease, opacity .25s ease;
-      margin-top: 10px;
+      margin-top: 7px;
       background: rgba(4, 7, 22, 0.88);
       border: 1px solid rgba(180,210,255,0.11);
       border-radius: 2px;
@@ -244,7 +244,7 @@
       -webkit-backdrop-filter: blur(18px);
     }
     #star-index.open #si-panel {
-      max-height: min(70vh, 520px);
+      max-height: min(55vh, 380px);
       opacity: 1;
     }
     #si-search {
@@ -256,54 +256,54 @@
       border-bottom: 1px solid rgba(180,210,255,0.12);
       color: rgba(255,255,255,0.75);
       font-family: 'DM Mono', monospace;
-      font-size: 10.5px;
-      letter-spacing: 0.5px;
-      padding: 10px 12px;
+      font-size: 9px;
+      letter-spacing: 0.4px;
+      padding: 7px 9px;
       outline: none;
     }
     #si-search::placeholder { color: rgba(180,210,255,0.28); }
     #si-list {
-      max-height: min(60vh, 440px);
+      max-height: min(45vh, 300px);
       overflow-y: auto;
       scrollbar-width: thin;
       scrollbar-color: rgba(180,210,255,0.14) transparent;
-      padding: 4px 0 8px;
+      padding: 3px 0 6px;
     }
     .si-group-label {
       font-family: 'DM Mono', monospace;
-      font-size: 6.5px;
+      font-size: 5.5px;
       font-weight: 300;
-      letter-spacing: 2.5px;
+      letter-spacing: 2px;
       text-transform: uppercase;
       color: rgba(160,200,255,0.35);
-      padding: 10px 12px 4px;
+      padding: 7px 9px 3px;
     }
     .si-row {
       display: flex;
       align-items: baseline;
-      gap: 8px;
-      padding: 6px 12px;
+      gap: 6px;
+      padding: 4px 9px;
       cursor: pointer;
       transition: background .15s;
     }
     .si-row:hover { background: rgba(180,210,255,0.08); }
     .si-num {
       font-family: 'DM Mono', monospace;
-      font-size: 9px;
+      font-size: 7.5px;
       font-weight: 400;
       flex-shrink: 0;
-      width: 20px;
+      width: 15px;
     }
     .si-label {
-      font-size: 10.5px;
+      font-size: 9px;
       font-weight: 300;
-      letter-spacing: 0.2px;
+      letter-spacing: 0.15px;
       color: rgba(210,225,255,0.68);
-      line-height: 1.3;
+      line-height: 1.25;
     }
     .si-empty {
-      padding: 14px 12px;
-      font-size: 10px;
+      padding: 10px 9px;
+      font-size: 8.5px;
       color: rgba(180,210,255,0.3);
       font-style: italic;
     }
