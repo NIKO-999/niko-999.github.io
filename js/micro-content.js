@@ -5190,6 +5190,408 @@ window.DMicroContent = (function () {
       negative: `Staying inside a rigid system out of practicality while calling adventure a 'someday' keeps the heart's material desire for real freedom unmet.`,
     },
 
+
+    // ── Chakra Map: Muladhara, Root Chakra (MUL) ────────────────────────────
+
+    '1_MUL': {
+      heading: `Your Ground Is Built By Starting, Not By Arriving`,
+      why: `Your sense of safety comes from motion — from knowing you can generate what you need out of nothing if you have to. The Magician grounds you through capability itself: as long as you can start something, you feel like you'll survive.`,
+      shadow: `The risk is never actually letting the ground settle, staying in perpetual-start mode because stillness feels like the one thing your safety wasn't built to survive.`,
+      path: `Try trusting that you're allowed to stop generating and just be held by what you've already built. You are allowed to feel safe without constantly proving you can begin again. What would it feel like to be grounded without needing to start something new to prove it?`,
+      positive: `You feel safe in stillness, not just in motion, and that settled ground is what actually lets your capability rest between efforts.`,
+      negative: `Safety that only exists in motion never gets to actually land — the ground stays theoretical, always one stop away from feeling unstable.`,
+    },
+
+    '2_MUL': {
+      heading: `Your Ground Is Built By Knowing Before You're Told`,
+      why: `Your sense of safety comes from your own internal read of a situation — sensing what's true before anyone confirms it. The High Priestess grounds you through trusted inner knowing, a felt security that doesn't need outside verification.`,
+      shadow: `The risk is that the security stays entirely private, so ungrounded to anyone else that it can be mistaken for absence rather than depth.`,
+      path: `Try letting your grounded knowing show occasionally, so it can actually be recognized as the stability it is. You are allowed to let your quiet certainty be visible. What would it look like to let someone see how grounded you actually are?`,
+      positive: `You let your inner certainty be visible sometimes, and that visibility is what lets others actually recognize the safety you carry.`,
+      negative: `A groundedness kept entirely invisible reads as absence to everyone else, even while it's real and solid underneath.`,
+    },
+
+    '3_MUL': {
+      heading: `Your Ground Is Built By Abundance and Belonging`,
+      why: `Your sense of safety comes from resources, warmth, a home that actually holds you — material comfort as a real form of security, not excess for its own sake. The Empress grounds you through genuine, felt provision.`,
+      shadow: `The risk is measuring your safety only by how much you're providing for others, letting your own basic needs go quietly unattended while you tend everyone else's.`,
+      path: `Try including your own needs in the abundance you create. You are allowed to be as provided-for as you provide. What basic need of your own have you been quietly deferring while meeting everyone else's?`,
+      positive: `You provide for yourself with the same generosity you offer others, and that inclusion is what makes your groundedness genuinely whole.`,
+      negative: `Providing abundantly for everyone except yourself leaves your own foundation quietly unattended, however secure everyone around you feels.`,
+    },
+
+    '4_MUL': {
+      heading: `Your Ground Is Built By Structure You Can Actually Rely On`,
+      why: `Your sense of safety comes from order — systems, routines, a structure sturdy enough that you don't have to constantly monitor it. The Emperor grounds you through built, dependable stability.`,
+      shadow: `The risk is that maintaining the structure becomes a full-time job in itself, so exhausting to uphold that the security it was supposed to provide gets spent on defending it instead.`,
+      path: `Try building one piece of structure durable enough that it holds itself, without your constant oversight. You are allowed to trust a system you built. What structure of yours could actually run without your constant management?`,
+      positive: `You build structures sturdy enough to trust without constant oversight, and that trust is what finally lets the security feel restful instead of effortful.`,
+      negative: `A structure that requires constant vigilance to hold isn't actually secure — it just relocates the anxiety from chaos to maintenance.`,
+    },
+
+    '5_MUL': {
+      heading: `Your Ground Is Built By Belonging to Something Larger`,
+      why: `Your sense of safety comes from tradition, community, a shared framework of meaning bigger than any one day's uncertainty. The Hierophant grounds you through belonging.`,
+      shadow: `The risk is that the belonging becomes the whole foundation, so that questioning any part of the tradition feels like losing the ground itself.`,
+      path: `Try separating your security from any single belief so the ground survives even when one part of it gets questioned. You are allowed to feel safe even while doubting a piece of what you were taught. What would still hold you up if you let one inherited belief be wrong?`,
+      positive: `You separate your security from any single belief, and that separation is what lets genuine doubt coexist with real, lasting groundedness.`,
+      negative: `Ground built entirely on an unquestioned tradition collapses the moment any part of it is honestly examined, because nothing was actually load-bearing on its own.`,
+    },
+
+    '6_MUL': {
+      heading: `Your Ground Is Built By Being Genuinely Chosen`,
+      why: `Your sense of safety comes from connection — knowing you're wanted, not just tolerated, by the people closest to you. The Lovers grounds you through felt, mutual belonging.`,
+      shadow: `The risk is chasing that feeling of being chosen so hard you accept relationships that don't actually offer it, mistaking any attention for the real thing.`,
+      path: `Try noticing where you already are genuinely chosen and let that be enough ground for now. You are allowed to feel secure in love without constantly re-auditioning for it. Where are you already wanted exactly as you are, if you actually looked?`,
+      positive: `You recognize the places you're already genuinely chosen, and that recognition is real ground instead of a feeling you have to keep re-earning.`,
+      negative: `Chasing the feeling of being chosen through relationships that don't actually offer it leaves the ground perpetually unstable, no matter how much attention arrives.`,
+    },
+
+    '7_MUL': {
+      heading: `Your Ground Is Built By Forward Motion Itself`,
+      why: `Your sense of safety comes from momentum — as long as you're moving toward something, the ground under you feels solid. The Chariot grounds you through purposeful direction.`,
+      shadow: `The risk is that stillness starts to feel like danger, so any pause reads as the ground itself giving way rather than a normal part of any journey.`,
+      path: `Try resting for one real stretch and noticing that the ground is actually still there. You are allowed to feel safe while standing still. What would it take to trust that stopping doesn't undo your progress?`,
+      positive: `You rest without the ground feeling like it's disappearing, and that trust is what lets momentum become sustainable instead of compulsive.`,
+      negative: `Ground that only exists in motion means every pause feels like collapse, even when nothing has actually been lost.`,
+    },
+
+    '8_MUL': {
+      heading: `Your Ground Is Built By Things Being Fair`,
+      why: `Your sense of safety comes from balance — knowing the scales are even, that what's owed gets paid and what's earned gets received. Justice grounds you through a world that behaves the way it's supposed to.`,
+      shadow: `The risk is that any unfairness, even small, can feel like the whole ground shifting, because your security is tied to a world staying perfectly calibrated.`,
+      path: `Try letting your ground rest in your own integrity rather than the world's fairness, since only one of those is actually within your control. You are allowed to feel secure even when the world is unfair. What would let your footing hold steady even through one unresolved injustice?`,
+      positive: `You root your security in your own integrity rather than the world's cooperation, and that shift is what makes your ground finally steady regardless of outside conditions.`,
+      negative: `Ground that depends on the world staying perfectly fair will shake with every ordinary injustice, because that condition was never actually guaranteed.`,
+    },
+
+    '9_MUL': {
+      heading: `Your Ground Is Built in Solitude`,
+      why: `Your sense of safety comes from withdrawal — time alone to actually settle, away from the noise of other people's needs and opinions. The Hermit grounds you through chosen retreat.`,
+      shadow: `The risk is that the retreat becomes permanent, security purchased at the price of connection you actually still need.`,
+      path: `Try returning from your solitude with the ground intact and letting relationship not threaten it. You are allowed to be grounded in solitude and still stay connected. What would it look like to bring your settled self back into company without losing it?`,
+      positive: `You return from solitude still grounded, and that return proves the security was never actually dependent on staying alone.`,
+      negative: `Retreat that never ends purchases stability at a cost of connection that was never actually required to give up.`,
+    },
+
+    '10_MUL': {
+      heading: `Your Ground Is Built By Trusting the Turning`,
+      why: `Your sense of safety comes from accepting that things cycle — the ability to trust a low point will actually turn, rather than needing certainty about outcomes. The Wheel of Fortune grounds you through faith in timing.`,
+      shadow: `The risk is that every downturn still feels like proof the ground has given way, even when you know, intellectually, that it's just a phase.`,
+      path: `Try meeting the next low point with the trust you already have in theory. You are allowed to feel grounded through a downturn, not just after it ends. What would it look like to feel secure while still mid-cycle, before the turn arrives?`,
+      positive: `You feel grounded through the downturn itself, not just after it resolves, and that mid-cycle trust is real, durable security.`,
+      negative: `Waiting for the turn to complete before feeling safe again means the ground never actually holds during the exact moments it's needed most.`,
+    },
+
+    '11_MUL': {
+      heading: `Your Ground Is Built By Enduring Without Needing to Prove It`,
+      why: `Your sense of safety comes from your own capacity to withstand — real, quiet endurance that doesn't need an audience. Strength grounds you through inner resilience.`,
+      shadow: `The risk is turning that endurance into a performance, needing witnesses to confirm the resilience is real, which quietly undermines the very quality it's meant to prove.`,
+      path: `Try letting your endurance be private again, unwitnessed, and trust it's still real. You are allowed to feel grounded without anyone seeing how strong you are. What would it feel like to be resilient with no one watching?`,
+      positive: `You let your resilience be private and unwitnessed, and that privacy is what confirms it was never actually dependent on an audience.`,
+      negative: `Endurance that needs to be seen to feel real stops actually being grounded — it becomes contingent on the witness instead of standing on its own.`,
+    },
+
+    '12_MUL': {
+      heading: `Your Ground Is Built By Letting Go of Control`,
+      why: `Your sense of safety comes, paradoxically, from surrender — trusting the situation enough to stop gripping it. The Hanged Man grounds you through release rather than control.`,
+      shadow: `The risk is that the surrender turns into passivity, a permanent suspension mistaken for the release that was actually needed.`,
+      path: `Try releasing your grip on one specific thing today and noticing the ground holds anyway. You are allowed to feel secure without controlling the outcome. What would you have to let go of to find out the ground was there the whole time?`,
+      positive: `You release control of something specific and find the ground holds anyway, and that discovery is what makes surrender genuinely grounding instead of merely passive.`,
+      negative: `Gripping control indefinitely, mistaking it for the only path to safety, keeps you from ever discovering the ground was already there.`,
+    },
+
+    '13_MUL': {
+      heading: `Your Ground Is Built By Letting Old Versions of Yourself Die`,
+      why: `Your sense of safety comes from your own capacity to actually end things and be renewed — real transformation as a source of stability, not a threat to it. Transformation grounds you through willingness to change.`,
+      shadow: `The risk is ending things prematurely, mistaking any discomfort for a signal that the current chapter must be over, when it might just be difficult.`,
+      path: `Try letting an ending complete at its actual pace rather than rushing it for the relief. You are allowed to feel grounded through change, not just after it's finished. What ending in your life deserves its full timeline instead of a rushed one?`,
+      positive: `You let real endings complete at their own pace, and that patience is what makes transformation a genuine source of ground rather than a scramble for relief.`,
+      negative: `Rushing every ending to escape discomfort skips the actual transformation, leaving the ground unsettled underneath the appearance of change.`,
+    },
+
+    '14_MUL': {
+      heading: `Your Ground Is Built By Actual Balance, Not Managed Extremes`,
+      why: `Your sense of safety comes from genuine integration — body, mind, and circumstance actually working together, not just alternating in turns. Temperance grounds you through real, felt equilibrium.`,
+      shadow: `The risk is mistaking the alternation between extremes for balance itself, when true equilibrium was actually being asked for the whole time.`,
+      path: `Try finding one small, actually blended version of two things you've been alternating between. You are allowed to want real balance, not managed extremes. What two things in your life are ready to work together instead of taking turns?`,
+      positive: `You find genuine integration instead of alternating extremes, and that blend is what finally provides the felt equilibrium your ground was asking for.`,
+      negative: `Alternating between extremes and calling it balance never actually produces the settled ground that real integration would.`,
+    },
+
+    '15_MUL': {
+      heading: `Your Ground Is Built By Facing What You'd Rather Deny`,
+      why: `Your sense of safety comes from honest reckoning with your own compulsions and desires — real security through self-knowledge, not through pretending the shadow isn't there. The Devil grounds you through confrontation, not denial.`,
+      shadow: `The risk is performing a cleaner version of yourself while an unexamined pull runs quietly underneath, undermining the very ground the performance was meant to protect.`,
+      path: `Try naming one real compulsion honestly, without judgment, today. You are allowed to feel grounded by facing your shadow instead of hiding it. What part of yourself have you been protecting the ground from instead of actually grounding it in?`,
+      positive: `You face a real compulsion honestly instead of denying it, and that honesty becomes the actual ground your safety was built to need.`,
+      negative: `A performed, cleaner self with an unexamined pull running underneath leaves the real ground unaddressed no matter how convincing the performance is.`,
+    },
+
+    '16_MUL': {
+      heading: `Your Ground Is Built By Surviving What Collapses`,
+      why: `Your sense of safety comes from having already survived structural collapse — proof, hard-won, that you can rebuild. The Tower grounds you through resilience tested by real crisis.`,
+      shadow: `The risk is bracing permanently for the next collapse, so vigilant against instability that you can never actually rest in the ground you've already rebuilt.`,
+      path: `Try trusting the current structure without constantly checking it for cracks. You are allowed to feel grounded without waiting for the next collapse. What would it feel like to trust what you've already rebuilt?`,
+      positive: `You trust the structure you've already rebuilt instead of constantly checking it for cracks, and that trust is what lets the ground finally feel settled.`,
+      negative: `Permanent vigilance against the next collapse means you never actually get to rest in the ground you've already proven you can rebuild.`,
+    },
+
+    '17_MUL': {
+      heading: `Your Ground Is Built By Hope That Doesn't Need Proof`,
+      why: `Your sense of safety comes from faith in a better outcome — hope itself as a stabilizing force, not dependent on evidence it will pan out. The Star grounds you through trust in the future.`,
+      shadow: `The risk is keeping that hope so modest and private it barely functions as ground at all, too small to actually hold your weight.`,
+      path: `Try letting your hope be as large and visible as it actually is. You are allowed to feel grounded in a hope you haven't shrunk down. What would your hope look like at its actual, unshrunken size?`,
+      positive: `You let your hope be large and visible, and that full size is what finally lets it function as real, load-bearing ground.`,
+      negative: `Hope kept deliberately small and private is too thin to actually hold any weight, even though the capacity for real ground was always there.`,
+    },
+
+    '18_MUL': {
+      heading: `Your Ground Is Built By Trusting the Undercurrent`,
+      why: `Your sense of safety comes from a felt sense beneath the surface — intuition about atmosphere and undercurrent that turns out, again and again, to be accurate. The Moon grounds you through trust in the unseen.`,
+      shadow: `The risk is that the felt sense curdles into anxious story, mistaking every strong feeling for confirmed danger rather than genuine signal.`,
+      path: `Try checking one strong feeling against real evidence before treating it as settled fact. You are allowed to trust your intuition while still verifying it. What feeling have you been treating as certain that's actually still just a feeling?`,
+      positive: `You check your intuition against real evidence, and that verification is what turns a felt sense into genuinely trustworthy ground.`,
+      negative: `Treating every anxious feeling as confirmed fact keeps the ground shaky, mistaking noise for the real signal underneath it.`,
+    },
+
+    '19_MUL': {
+      heading: `Your Ground Is Built By Being Genuinely Warm`,
+      why: `Your sense of safety comes from vitality and open warmth — a felt sense that things are fundamentally good, not performed positivity but actual, lived brightness. The Sun grounds you through real joy.`,
+      shadow: `The risk is that the warmth becomes a performance for other people's comfort, leaving your own harder feelings with nowhere safe to land.`,
+      path: `Try letting one difficult feeling be visible alongside the warmth today. You are allowed to feel grounded even when you're not being bright. What would it feel like to be warmly received on a day you're not performing brightness at all?`,
+      positive: `You let difficult feelings be visible alongside your warmth, and that fuller honesty is what makes the ground genuinely stable instead of performed.`,
+      negative: `Warmth performed for others' comfort while your own hard feelings go unwitnessed leaves the real ground unaddressed underneath the glow.`,
+    },
+
+    '20_MUL': {
+      heading: `Your Ground Is Built By Answering What You Already Know`,
+      why: `Your sense of safety comes from clarity acted on — knowing exactly what needs to change and actually rising to do it, rather than staying in ambiguous preparation. Judgement grounds you through decisive alignment.`,
+      shadow: `The risk is that the clarity arrives and gets endlessly deferred, prepared-for instead of acted on, leaving the ground perpetually pending.`,
+      path: `Try taking one concrete action toward the calling you've already heard clearly. You are allowed to feel grounded by acting on what you know, not just by knowing it. What is the smallest real step the clarity you already have is asking for?`,
+      positive: `You act on the clarity you've already received instead of endlessly preparing, and that action is what finally makes the ground solid rather than pending.`,
+      negative: `Clarity that's heard but perpetually deferred for more preparation leaves the ground permanently unsettled, no matter how well-understood the situation is.`,
+    },
+
+    '21_MUL': {
+      heading: `Your Ground Is Built By Letting Things Actually Finish`,
+      why: `Your sense of safety comes from completion — real, acknowledged arrival, not another goal appended before the current one gets to count. The World grounds you through genuine closure.`,
+      shadow: `The risk is reaching real completion and immediately relativizing it, adding one more condition before it's allowed to actually count as done.`,
+      path: `Try letting one already-finished thing in your life actually be named as complete today. You are allowed to feel grounded in genuine arrival. What have you already finished that deserves to be acknowledged as done, not almost?`,
+      positive: `You let a genuine achievement actually be named as complete, and that acknowledgment is what finally gives the ground somewhere solid to rest.`,
+      negative: `Relativizing every completion by adding one more condition keeps the ground permanently unfinished, no matter how much has actually been accomplished.`,
+    },
+
+    '22_MUL': {
+      heading: `Your Ground Is Built By Trusting the Leap Itself`,
+      why: `Your sense of safety comes, unusually, from openness to the unknown — trusting the flow of life enough that not having a net doesn't feel like danger. The Fool grounds you through faith in your own adaptability.`,
+      shadow: `The risk is that the openness becomes recklessness, leaping without any real discernment because the trust in adaptability has slipped into avoiding all preparation.`,
+      path: `Try taking one real leap this season while still keeping your eyes open. You are allowed to feel grounded in trust rather than certainty. What would you leap toward if trusting your own adaptability were enough of a plan?`,
+      positive: `You leap with open eyes, trusting your own adaptability rather than needing a guaranteed outcome, and that trust becomes genuine, lived ground.`,
+      negative: `Leaping without any discernment at all mistakes recklessness for faith, and the ground that trust was supposed to provide never actually forms.`,
+    },
+
+
+    // ── Chakra Map: Swadhisthana, Sacral Chakra (SWA) ───────────────────────
+
+    '1_SWA': {
+      heading: `Your Pleasure Comes From Making Something New`,
+      why: `Your creative and sensual energy flows most freely at the start of things — the charge of a fresh idea, a new attraction, an unbuilt possibility. The Magician moves your sacral energy through initiation.`,
+      shadow: `The risk is that the pleasure fades exactly when things stop being new, so your emotional flow depends entirely on novelty rather than depth.`,
+      path: `Try staying with one pleasure past its newness and noticing what's still there. You are allowed to find delight in something familiar. What familiar pleasure of yours might still have more in it if you actually stayed?`,
+      positive: `You find real pleasure in things that have stopped being new, and that capacity is what lets your creative flow deepen instead of just restarting.`,
+      negative: `Pleasure that only exists at the start of things keeps your emotional flow shallow, always moving to the next new charge instead of into anything deeper.`,
+    },
+
+    '2_SWA': {
+      heading: `Your Pleasure Comes From What Stays Unspoken`,
+      why: `Your creative and sensual energy flows through mystery — attraction and creativity that thrive on what's suggested rather than stated outright. The High Priestess moves your sacral energy through withheld intimacy.`,
+      shadow: `The risk is that everything stays so veiled that pleasure never quite gets to fully arrive, mystery becoming distance instead of allure.`,
+      path: `Try letting one desire be spoken plainly instead of only implied. You are allowed to enjoy pleasure you've actually named out loud. What longing have you been hinting at that deserves to just be said?`,
+      positive: `You name a real desire plainly instead of only implying it, and that directness is what finally lets the pleasure fully arrive.`,
+      negative: `Pleasure kept perpetually veiled and unspoken stays perpetually withheld too, mystery curdling into distance instead of staying alluring.`,
+    },
+
+    '3_SWA': {
+      heading: `Your Pleasure Comes From Beauty and Genuine Abundance`,
+      why: `Your creative and sensual energy flows through richness — nurturing, aesthetics, a body and life that feel genuinely fed. The Empress moves your sacral energy through embodied abundance.`,
+      shadow: `The risk is that the abundance flows outward only, so you're generous with everyone's pleasure but your own, quietly, goes unattended.`,
+      path: `Try including your own senses in the abundance you create for others. You are allowed to receive pleasure, not only produce it for other people. What sensory pleasure have you been offering everyone except yourself?`,
+      positive: `You include your own senses in the richness you create, and that inclusion is what makes your sacral flow genuinely abundant instead of one-directional.`,
+      negative: `Generosity that only flows outward leaves your own pleasure quietly unattended, however richly everyone around you gets to feast.`,
+    },
+
+    '4_SWA': {
+      heading: `Your Pleasure Comes From Control You Can Actually Trust`,
+      why: `Your creative and sensual energy flows through structure — knowing the container is sturdy enough to actually relax inside of. The Emperor moves your sacral energy through contained safety.`,
+      shadow: `The risk is that the control itself becomes the point, so tightly managed that spontaneous pleasure never gets room to actually happen.`,
+      path: `Try loosening your grip on one small pleasure and letting it be unplanned. You are allowed to enjoy something you didn't structure in advance. What would an unplanned pleasure feel like if you actually let it happen?`,
+      positive: `You loosen your grip on one small pleasure and let it be unplanned, and that release is what finally lets spontaneous joy actually arrive.`,
+      negative: `Control so tight it manages every pleasure in advance leaves no room for the spontaneous joy the structure was originally meant to protect.`,
+    },
+
+    '5_SWA': {
+      heading: `Your Pleasure Comes From Shared Meaning`,
+      why: `Your creative and sensual energy flows through belonging to something with real values — creative expression that feels connected to purpose, not indulgence for its own sake. The Hierophant moves your sacral energy through meaningful creation.`,
+      shadow: `The risk is that pleasure gets policed so hard by what's 'appropriate' that spontaneous enjoyment rarely survives the filter.`,
+      path: `Try letting one pleasure be enjoyed simply because it feels good, without needing to justify its meaning. You are allowed to enjoy something just because it's pleasurable. What delight have you been requiring a justification for?`,
+      positive: `You let a pleasure be enjoyed for its own sake without requiring justification, and that permission is what finally lets spontaneous joy through the filter.`,
+      negative: `Requiring every pleasure to justify its meaning filters out most spontaneous joy before it even has a chance to be felt.`,
+    },
+
+    '6_SWA': {
+      heading: `Your Pleasure Comes From Real, Chosen Connection`,
+      why: `Your creative and sensual energy flows through intimacy — genuine attraction and deep bonds, not performance of romance. The Lovers moves your sacral energy through chosen closeness.`,
+      shadow: `The risk is confusing intensity with intimacy, chasing the charge of a connection rather than the depth actually available in it.`,
+      path: `Try choosing depth over intensity in one connection this week and noticing what that actually feels like. You are allowed to want quiet intimacy more than exciting intensity. Which connection of yours might have more real depth than drama?`,
+      positive: `You choose depth over mere intensity, and that choice is what lets real intimacy — not just charge — actually flow.`,
+      negative: `Chasing intensity as if it were intimacy leaves the actual connection thin, however exciting the charge feels in the moment.`,
+    },
+
+    '7_SWA': {
+      heading: `Your Pleasure Comes From Winning and Moving Forward`,
+      why: `Your creative and sensual energy flows through achievement and motion — pleasure tied to victory, progress, actually getting somewhere. The Chariot moves your sacral energy through forward drive.`,
+      shadow: `The risk is that pleasure only registers when you're winning, so ordinary, undramatic enjoyment barely counts as real to you.`,
+      path: `Try enjoying one small, undramatic pleasure today without it needing to be a victory. You are allowed to feel good about something that isn't a win. What quiet, ordinary pleasure have you been dismissing as too small to count?`,
+      positive: `You enjoy small, undramatic pleasures without requiring them to be victories, and that shift lets ordinary joy actually register as real.`,
+      negative: `Pleasure that only counts when it's a win leaves most of ordinary life feeling flat, however much genuine enjoyment is actually available in it.`,
+    },
+
+    '8_SWA': {
+      heading: `Your Pleasure Comes From Things Being Fair`,
+      why: `Your creative and sensual energy flows through balance — pleasure that feels earned and evenly distributed, not taken at someone else's expense. Justice moves your sacral energy through equitable exchange.`,
+      shadow: `The risk is that you monitor fairness so closely you can't actually relax into pleasure without auditing whether you deserve it.`,
+      path: `Try enjoying one pleasure today without checking whether it's been earned first. You are allowed to enjoy something simply because it feels good, not because you've calculated you deserve it. What pleasure have you been withholding pending an audit that isn't actually required?`,
+      positive: `You enjoy a pleasure without first auditing whether you've earned it, and that release is what finally lets sacral joy flow freely.`,
+      negative: `Auditing every pleasure for whether it's deserved before allowing it keeps genuine enjoyment perpetually on hold.`,
+    },
+
+    '9_SWA': {
+      heading: `Your Pleasure Comes From Depth Found Alone`,
+      why: `Your creative and sensual energy flows through solitude — real satisfaction found in your own inner world, not dependent on company. The Hermit moves your sacral energy through private depth.`,
+      shadow: `The risk is that the solitude becomes so complete that shared pleasure, the kind that actually requires another person, gets avoided entirely.`,
+      path: `Try letting one pleasure be shared rather than solitary this week. You are allowed to enjoy connection, not only depth found alone. What pleasure have you been keeping solitary that could actually be shared?`,
+      positive: `You let a real pleasure be shared rather than kept solitary, and that sharing is what lets your sacral energy include connection alongside depth.`,
+      negative: `Solitude so complete it avoids shared pleasure entirely leaves half of what sacral energy is actually for permanently untapped.`,
+    },
+
+    '10_SWA': {
+      heading: `Your Pleasure Comes and Goes in Waves You Can Trust`,
+      why: `Your creative and sensual energy flows in cycles — periods of real abundance and enjoyment, followed by quieter stretches that are just as legitimate. The Wheel of Fortune moves your sacral energy through rhythm.`,
+      shadow: `The risk is fighting the quiet stretches as though they were failures of pleasure, rather than trusting the rhythm to bring the fuller stretch back around.`,
+      path: `Try meeting your current quiet stretch with patience instead of alarm. You are allowed to feel low pleasure sometimes without it being a crisis. What would it feel like to trust that this quiet season is simply a phase, not a verdict?`,
+      positive: `You meet a quiet stretch with patience rather than alarm, and that trust is what lets the natural rhythm of pleasure keep flowing instead of getting fought.`,
+      negative: `Fighting every quiet stretch as a crisis exhausts the very flow that would otherwise simply cycle back around on its own.`,
+    },
+
+    '11_SWA': {
+      heading: `Your Pleasure Comes From Endurance That Doesn't Need Applause`,
+      why: `Your creative and sensual energy flows through quiet resilience — a body and spirit that can hold real intensity without needing anyone to witness it. Strength moves your sacral energy through unshowy staying power.`,
+      shadow: `The risk is performing that endurance for an audience, turning private resilience into something that needs external confirmation to feel real.`,
+      path: `Try letting your resilience be unwitnessed today and trusting it's still real. You are allowed to feel good about your own staying power with no one watching. What would it feel like to be resilient with absolutely no audience?`,
+      positive: `You let your resilience go unwitnessed and trust it anyway, and that private confidence is what makes the pleasure of your own endurance genuinely yours.`,
+      negative: `Endurance performed for an audience makes the pleasure of it contingent on being seen, instead of standing on its own as it was meant to.`,
+    },
+
+    '12_SWA': {
+      heading: `Your Pleasure Comes From Surrendering the Need to Control It`,
+      why: `Your creative and sensual energy flows best when you stop directing it — pleasure that arrives through release rather than management. The Hanged Man moves your sacral energy through letting go.`,
+      shadow: `The risk is that the surrender turns into passivity, waiting indefinitely for pleasure to arrive rather than actually meeting it halfway.`,
+      path: `Try releasing your grip on one specific outcome today and noticing what pleasure actually shows up. You are allowed to enjoy what arrives without controlling its shape. What might you feel if you stopped directing exactly how the pleasure has to go?`,
+      positive: `You release control over the shape of a pleasure and let it arrive on its own terms, and that release is what finally lets it actually land.`,
+      negative: `Waiting passively for pleasure instead of meeting it at all leaves the release incomplete — surrender without engagement isn't actually flow.`,
+    },
+
+    '13_SWA': {
+      heading: `Your Pleasure Comes From Letting Old Versions of Desire Die`,
+      why: `Your creative and sensual energy flows through real transformation — letting an old want or old identity actually end so a truer one can take its place. Transformation moves your sacral energy through renewal.`,
+      shadow: `The risk is clinging to an old source of pleasure well past its natural life, because ending it feels like losing access to joy altogether.`,
+      path: `Try letting one outdated pleasure or desire actually complete its ending. You are allowed to let an old joy go so a truer one can arrive. What pleasure from an earlier chapter is your heart quietly finished with?`,
+      positive: `You let an outdated pleasure complete its ending, and that release makes room for a truer, more current joy to actually take its place.`,
+      negative: `Clinging to an old source of pleasure past its natural life blocks the truer joy that renewal was actually trying to bring in.`,
+    },
+
+    '14_SWA': {
+      heading: `Your Pleasure Comes From Genuine Blending, Not Alternating Extremes`,
+      why: `Your creative and sensual energy flows through actual integration — indulgence and discipline working together, not taking turns. Temperance moves your sacral energy through real balance.`,
+      shadow: `The risk is swinging hard between full indulgence and total restriction, mistaking the alternation for the balance that was actually being asked for.`,
+      path: `Try finding one small, genuinely blended pleasure today instead of choosing an extreme. You are allowed to want moderate, sustainable enjoyment, not just intense swings. What would a blended, sustainable pleasure actually look like this week?`,
+      positive: `You find a genuinely blended pleasure instead of swinging between extremes, and that integration is what finally produces sustainable enjoyment.`,
+      negative: `Alternating between full indulgence and total restriction and calling it balance never actually produces the sustainable pleasure real integration would.`,
+    },
+
+    '15_SWA': {
+      heading: `Your Pleasure Comes From Looking Directly at What You Want`,
+      why: `Your creative and sensual energy flows through honest confrontation with desire — real pleasure available once the craving is actually examined instead of denied. The Devil moves your sacral energy through reckoning.`,
+      shadow: `The risk is either denying the desire entirely or chasing it so unconsciously that pleasure curdles into compulsion.`,
+      path: `Try naming one real desire honestly, without judgment, and choosing consciously whether to pursue it. You are allowed to want pleasure and examine it at the same time. What craving have you been either denying or chasing on autopilot?`,
+      positive: `You name a real desire honestly and choose consciously how to meet it, and that awareness is what turns compulsion back into genuine pleasure.`,
+      negative: `Denying a desire or chasing it unconsciously leaves pleasure either starved or compulsive — neither actually satisfies the sacral energy underneath.`,
+    },
+
+    '16_SWA': {
+      heading: `Your Pleasure Comes From Rebuilding After Real Collapse`,
+      why: `Your creative and sensual energy flows through renewal after upheaval — real pleasure rediscovered once an old structure has actually fallen and been rebuilt. The Tower moves your sacral energy through disruption and rebirth.`,
+      shadow: `The risk is fearing pleasure itself after a collapse, treating enjoyment as risky because the last collapse arrived unannounced.`,
+      path: `Try letting yourself enjoy one small thing today without waiting for proof it's safe. You are allowed to feel pleasure again after upheaval, without needing a guarantee first. What small joy have you been withholding until you feel fully safe again?`,
+      positive: `You let yourself feel pleasure again without waiting for a guarantee, and that willingness is what lets real enjoyment return after the rebuilding.`,
+      negative: `Withholding all pleasure until safety is guaranteed keeps joy indefinitely postponed, long after the actual rebuilding has already happened.`,
+    },
+
+    '17_SWA': {
+      heading: `Your Pleasure Comes From Hope and Creative Inspiration`,
+      why: `Your creative and sensual energy flows through inspired hope — real joy found in making, dreaming, and believing in a better version of things. The Star moves your sacral energy through creative faith.`,
+      shadow: `The risk is keeping that creative joy modest and private, as if letting it be seen fully would be too much or too naive.`,
+      path: `Try letting one piece of your creative joy be visible today, at full size. You are allowed to enjoy your own inspiration in front of other people. What creative pleasure have you been keeping smaller than it actually is?`,
+      positive: `You let your creative joy be visible at its actual size, and that visibility is what finally lets the pleasure of inspiration be fully shared.`,
+      negative: `Creative joy kept modest and private denies the sacral energy the full, shared expression it was actually built for.`,
+    },
+
+    '18_SWA': {
+      heading: `Your Pleasure Comes From What You Can't Fully Explain`,
+      why: `Your creative and sensual energy flows through the mysterious and the felt — pleasure connected to dreams, intuition, art that touches something beneath the surface. The Moon moves your sacral energy through enchantment.`,
+      shadow: `The risk is that the mystery curdles into anxious uncertainty, so pleasure gets tangled up with unease instead of staying genuinely enchanting.`,
+      path: `Try letting one mysterious pleasure just be enjoyed, without needing to fully explain or resolve it. You are allowed to enjoy something you can't fully articulate. What pleasure have you been over-analyzing instead of simply feeling?`,
+      positive: `You let a mysterious pleasure simply be felt without over-analyzing it, and that trust is what keeps enchantment from curdling into anxiety.`,
+      negative: `Over-analyzing every mysterious pleasure until it's fully explained strips it of the enchantment that was actually the point.`,
+    },
+
+    '19_SWA': {
+      heading: `Your Pleasure Comes From Open, Visible Joy`,
+      why: `Your creative and sensual energy flows through unguarded happiness — pleasure expressed fully and openly, not managed for anyone else's comfort. The Sun moves your sacral energy through radiant, shared delight.`,
+      shadow: `The risk is performing lightness while your deeper pleasure stays private and unexpressed, as if full joy would be too much for the room.`,
+      path: `Try letting one piece of real joy show at full volume today. You are allowed to enjoy something without dimming it for anyone else's comfort. What happiness have you been quietly managing down to something more acceptable?`,
+      positive: `You let real joy show at full volume without managing it down, and that openness is what finally lets your pleasure be genuinely shared.`,
+      negative: `Dimming joy for other people's comfort keeps the sacral energy's real pleasure private, however bright the performed version looks from outside.`,
+    },
+
+    '20_SWA': {
+      heading: `Your Pleasure Comes From Answering What You Already Feel Called To`,
+      why: `Your creative and sensual energy flows through aligned action — real pleasure found in finally doing the thing you've sensed you should do for a while. Judgement moves your sacral energy through responsive alignment.`,
+      shadow: `The risk is sensing the call clearly and still finding reasons to delay acting on it, leaving the pleasure of alignment permanently just out of reach.`,
+      path: `Try taking one concrete step toward what you already feel called to enjoy or create. You are allowed to feel pleasure in finally answering a call you've been sensing. What creative or sensual calling have you been delaying acting on?`,
+      positive: `You act on a calling you've already sensed instead of delaying it further, and that action is exactly the pleasure of alignment your sacral energy was asking for.`,
+      negative: `Sensing a call clearly but endlessly deferring it for more readiness leaves the pleasure of alignment permanently unfelt.`,
+    },
+
+    '21_SWA': {
+      heading: `Your Pleasure Comes From Feeling Genuinely Complete`,
+      why: `Your creative and sensual energy flows through real integration and arrival — pleasure that comes from a felt sense of wholeness, not another unmet want appended to the list. The World moves your sacral energy through fulfillment.`,
+      shadow: `The risk is reaching a genuinely fulfilling moment and immediately looking for the next thing, never quite letting the completion register as pleasure in itself.`,
+      path: `Try letting one already-fulfilling moment today actually be felt as enough. You are allowed to feel pleasure in completion, not only in pursuit. What moment of genuine fulfillment have you rushed past without actually feeling it?`,
+      positive: `You let a genuinely fulfilling moment actually register as enough, and that felt completion is exactly the pleasure your sacral energy was asking for.`,
+      negative: `Rushing past fulfillment toward the next want keeps the pleasure of genuine completion permanently unfelt, however much is actually accomplished.`,
+    },
+
+    '22_SWA': {
+      heading: `Your Pleasure Comes From Trusting Life Without a Net`,
+      why: `Your creative and sensual energy flows through openness to the unknown — real joy found in spontaneity, new experience, and trusting the flow without needing certainty first. The Fool moves your sacral energy through faithful adventure.`,
+      shadow: `The risk is that the openness turns into recklessness, chasing every new sensation without any real discernment about what actually nourishes you.`,
+      path: `Try taking one real, spontaneous pleasure this month, chosen with open eyes rather than pure impulse. You are allowed to enjoy adventure and still exercise real discernment. What spontaneous joy would you choose if you trusted your own judgment enough to pick it consciously?`,
+      positive: `You choose spontaneous pleasure with open eyes and real discernment, and that combination is what makes the adventure genuinely nourishing rather than merely reckless.`,
+      negative: `Chasing every new sensation without discernment mistakes recklessness for openness, and the nourishing joy that real adventure offers never actually arrives.`,
+    },
+
   }; // end nodes
 
 

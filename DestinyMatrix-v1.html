@@ -2122,11 +2122,30 @@ appendHint();
     const hzVv = _rd(B + D);  // vertical line / spiritual desire
     const hzHv = _rd(A + C);  // horizontal line / material desire
 
+    // Chakra Map (research/01-Foundation/Destiny-Matrix-Calculation-
+    // Guide.extracted.md, Page 14): "chakras are calculated using diagonal
+    // lines" — 7 named formulas given, but only 2 of the 7 have every
+    // letter independently confirmed elsewhere in the research (the other
+    // 5 reference K/O/P/S/J, none of which have a sourced definition
+    // anywhere — J's only candidate is matrix-engine.js's already-rejected
+    // dead `channels` object — so those 5 are deliberately NOT built here):
+    //   Muladhara (Root)      = C + D            — C, D already known.
+    //   Swadhisthana (Sacral) = L + M             — L=atCG (Inner Right),
+    //     M=atK (Inner Bottom), both already computed above for Money/Love.
+    //     Note: this makes Swadhisthana numerically identical to the
+    //     existing Money star (same reduce(atCG+atK) as monV) — expected
+    //     and fine, same as any other reused-value position (e.g. Material
+    //     Karma reusing C); Gold Standard content is written fresh per
+    //     position regardless of numeric overlap.
+    const mulV = _rd(C + D);
+    const swaV = monV; // = reduce(atCG + atK), per the Swadhisthana formula above
+
     return {
       love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
       atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
       atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v,
       atHZV: hzVv, atHZH: hzHv,
+      atMUL: mulV, atSWA: swaV,
     };
   }
 
@@ -2284,6 +2303,19 @@ appendHint();
       pos: new THREE.Vector3(-_R * 0.6338, _R * 0.0891, 0), color:0x66E8A0, twk:{spd:0.95,off:1.6} },
     { key:'HZH', num:_vals.atHZH, label:'Heart Zone · Material Desire',
       pos: new THREE.Vector3(-_R * 0.8159, -_R * 0.3297, 0), color:0x66E8A0, twk:{spd:1.00,off:3.9} },
+
+    // ── Chakra Map, the 2 formula-confirmed chakras (see _calcVals()
+    // comment for why only these 2 of 7 are built). No diagram position is
+    // given for this formula-based system (distinct from the separate,
+    // still-unbuilt age-ring Chakra-Correspondence diagram) — placed via
+    // direct-distance check only, flanking the Sky Line/Top star (min
+    // separation ≈0.40R, clear of every existing star). Colors follow the
+    // traditional chakra palette confirmed in Chakra-Correspondence-and-
+    // Meanings.md (red=Root, orange=Sacral).
+    { key:'MUL', num:_vals.atMUL, label:'Muladhara · Root Chakra',
+      pos: new THREE.Vector3(_R * 0.3986, _R * 0.8953, 0), color:0xE84C3D, twk:{spd:0.75,off:2.3} },
+    { key:'SWA', num:_vals.atSWA, label:'Swadhisthana · Sacral Chakra',
+      pos: new THREE.Vector3(-_R * 0.3986, _R * 0.8953, 0), color:0xE89A3D, twk:{spd:0.80,off:5.2} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2524,6 +2556,8 @@ appendHint();
       ? 'Lineage Square Talents'
       : (data.key === 'HZV' || data.key === 'HZH')
       ? 'Heart Zone'
+      : (data.key === 'MUL' || data.key === 'SWA')
+      ? 'Chakra Map'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -2798,6 +2832,12 @@ appendHint();
     MICRO[20].num = _vals.atHZV;
     _microTags[21].querySelector('.t-num').textContent = String(_vals.atHZH);
     MICRO[21].num = _vals.atHZH;
+
+    // Nodes 22-23: Chakra Map (MUL/SWA) — recomputed each date change.
+    _microTags[22].querySelector('.t-num').textContent = String(_vals.atMUL);
+    MICRO[22].num = _vals.atMUL;
+    _microTags[23].querySelector('.t-num').textContent = String(_vals.atSWA);
+    MICRO[23].num = _vals.atSWA;
 
     return true;
   };
