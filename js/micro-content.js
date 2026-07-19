@@ -3984,6 +3984,810 @@ window.DMicroContent = (function () {
       negative: `Reflexively choosing safety over genuine freedom repeats an old trade this inherited task exists to finally reclaim.`,
     },
 
+
+    // ── Lineage Square Talents: Paternal Spiritual Talent (F2) ─────────────
+
+    '1_F2': {
+      heading: `A Spark Your Father's Line Passed Down Half-Lit`,
+      why: `Somewhere in your father's spiritual line, someone carried the raw ability to begin — to spark a conviction, a practice, a way of seeing, from nothing. The Magician sits in your Paternal Spiritual Talent, meaning the gift you inherited here is a genuine capacity to originate belief rather than simply receive it.`,
+      shadow: `The risk is treating the spark as something to perform rather than tend. You may light new spiritual interests easily and let each one go cold the moment the initial charge fades, mistaking novelty for depth.`,
+      path: `This talent asks you to finish one spiritual thread instead of starting ten. You are allowed to let a single practice mature past its exciting beginning. What belief, sparked long ago, is ready for you to actually build something on?`,
+      positive: `You carry forward a real gift for spiritual initiation, and staying with one practice long enough lets it become something durable rather than another bright, brief start.`,
+      negative: `A spark treated as disposable repeats an old pattern of beginning without staying — the inherited gift stays raw instead of becoming a real foundation.`,
+    },
+
+    '2_F2': {
+      heading: `A Knowing Your Father's Line Never Explained, Just Trusted`,
+      why: `Somewhere back along your father's line, someone trusted an inner knowing they couldn't fully explain — and that trust, not the explanation, is what reached you. The High Priestess in your Paternal Spiritual Talent means your inheritance is intuitive certainty itself.`,
+      shadow: `The risk is keeping the knowing so private it never gets tested or used, treating unexplainable as a reason to stay silent rather than simply undemonstrated.`,
+      path: `This talent asks you to act on the knowing before you can defend it in words. You are allowed to trust what you sense before you can explain it. What is that inherited knowing telling you right now?`,
+      positive: `You trust an inner certainty passed down wordlessly, and acting on it before it's provable is what lets its accuracy finally show.`,
+      negative: `A knowing kept too private to test never gets to prove itself — the gift stays theoretical instead of becoming trusted, lived guidance.`,
+    },
+
+    '3_F2': {
+      heading: `An Abundance Your Father's Line Carried Quietly`,
+      why: `Somewhere in your father's spiritual line, someone held a real generosity of spirit — warmth, fertility of ideas, a hospitable inner life — that didn't need to announce itself to be real. The Empress in your Paternal Spiritual Talent means this abundance is yours to draw from.`,
+      shadow: `The risk is keeping that abundance internal, tending your own rich inner world without ever letting it nourish anyone else, mistaking privacy for humility.`,
+      path: `This talent asks you to let the abundance move outward. You are allowed to let your spiritual richness feed someone besides yourself. Who nearby is hungry for exactly the warmth you already carry?`,
+      positive: `You let an inherited spiritual abundance flow outward, and its impact grows precisely because it's no longer contained to your own inner life.`,
+      negative: `Abundance kept entirely private never gets to nourish anyone — the inherited gift stays a personal comfort instead of becoming a shared one.`,
+    },
+
+    '4_F2': {
+      heading: `A Structure Your Father's Line Built to Last`,
+      why: `Somewhere back along your father's spiritual line, someone built a framework of belief sturdy enough to hold real weight — not a rigid cage, but scaffolding that let faith stand upright through hard seasons. The Emperor in your Paternal Spiritual Talent means structural steadiness is your inheritance.`,
+      shadow: `The risk is mistaking the structure for the point, defending the framework itself rather than what it was built to hold, until the scaffolding starts to matter more than the faith inside it.`,
+      path: `This talent asks you to keep the structure in service of the life, not the reverse. You are allowed to hold your convictions firmly without needing them unquestioned. Which spiritual structure of yours could flex without actually falling?`,
+      positive: `You hold a steady spiritual framework that flexes without collapsing, and that steadiness is what lets your faith outlast hard seasons instead of cracking under them.`,
+      negative: `A structure defended for its own sake calcifies — the inherited steadiness becomes rigidity, and what was built to hold faith starts to strangle it instead.`,
+    },
+
+    '5_F2': {
+      heading: `A Doctrine Your Father's Line Handed Down Whole`,
+      why: `Somewhere in your father's spiritual line, someone received and carried forward an actual body of teaching — not a vague sense of tradition, but real, specific doctrine passed hand to hand. The Hierophant in your Paternal Spiritual Talent means you inherited the whole transmission, not just its outline.`,
+      shadow: `The risk is carrying the doctrine unexamined, teaching what you were taught without ever testing it against your own lived encounter with the sacred.`,
+      path: `This talent asks you to keep what still serves and release what doesn't, on your own authority. You are allowed to inherit the teaching and still make it yours. Which part of what you were handed has actually proven true in your own life?`,
+      positive: `You carry a real inherited body of teaching, tested and renewed by your own experience, so what you pass on next is alive rather than merely repeated.`,
+      negative: `Doctrine carried without ever being tested against lived experience calcifies into something recited rather than believed — the inheritance stops actually transmitting anything real.`,
+    },
+
+    '6_F2': {
+      heading: `A Devotion Your Father's Line Chose Freely`,
+      why: `Somewhere back along your father's spiritual line, someone chose their faith rather than merely inheriting it — a real, examined devotion, arrived at rather than assumed. The Lovers in your Paternal Spiritual Talent means the gift you carry is the capacity to choose your beliefs on purpose.`,
+      shadow: `The risk is going through the motions of choice while actually just accepting whatever was easiest or expected, mistaking inherited comfort for genuine conviction.`,
+      path: `This talent asks you to actually examine what you believe and choose it again, deliberately. You are allowed to keep only the parts of your inherited faith that you would choose fresh today. What would you choose if no one before you had already chosen it?`,
+      positive: `You hold a devotion that's genuinely chosen rather than merely inherited, and that ownership is what makes your faith durable under real pressure.`,
+      negative: `Faith carried by default rather than choice thins out the moment it's tested — an inheritance never actually claimed as your own rarely holds.`,
+    },
+
+    '7_F2': {
+      heading: `A Drive Your Father's Line Aimed at Something Higher`,
+      why: `Somewhere in your father's spiritual line, someone pointed real determination at a spiritual destination rather than letting it dissipate into mere busyness. The Chariot in your Paternal Spiritual Talent means directed spiritual will is your inheritance.`,
+      shadow: `The risk is applying the drive without ever pausing to check the direction, moving hard toward a spiritual goal that was set for you rather than one you've actually examined.`,
+      path: `This talent asks you to aim the inherited drive at a destination you've chosen yourself. You are allowed to slow down long enough to steer. What spiritual direction are you moving toward that you've actually chosen, not just inherited momentum toward?`,
+      positive: `You aim real spiritual drive at a destination you've deliberately chosen, and that alignment is what makes the momentum actually take you somewhere worth arriving.`,
+      negative: `Drive aimed at an inherited destination never actually examined burns real energy without ever quite arriving anywhere that's genuinely yours.`,
+    },
+
+    '8_F2': {
+      heading: `A Fairness Your Father's Line Practiced Quietly`,
+      why: `Somewhere back along your father's spiritual line, someone held a real, careful sense of moral balance — not loud judgment, but a quiet insistence on doing right by people. Justice in your Paternal Spiritual Talent means integrity itself is your inheritance.`,
+      shadow: `The risk is turning that fairness outward only, auditing everyone else's conduct while your own goes unexamined, mistaking vigilance for virtue.`,
+      path: `This talent asks you to apply the inherited standard to yourself first. You are allowed to receive the same fairness you extend to others. Where would your own verdict soften if you judged yourself as gently as you judge fairly?`,
+      positive: `You hold a real integrity applied evenly, inward and outward alike, and that evenness is what makes your fairness trusted rather than merely feared.`,
+      negative: `Fairness applied only outward while the self goes unexamined curdles into quiet self-exemption — the inherited integrity stops being whole.`,
+    },
+
+    '9_F2': {
+      heading: `A Wisdom Your Father's Line Found Alone`,
+      why: `Somewhere in your father's spiritual line, someone found real understanding through solitude — withdrawal that produced depth rather than isolation. The Hermit in your Paternal Spiritual Talent means contemplative wisdom is your inheritance.`,
+      shadow: `The risk is staying in the solitude past its purpose, gathering wisdom that never gets carried back out to anyone who could actually use it.`,
+      path: `This talent asks you to return from the quiet with something to offer. You are allowed to bring the solitary understanding into shared light. Who nearby could use what your withdrawal has already shown you?`,
+      positive: `You gather real depth in solitude and bring it back into relationship, and that return is what turns private wisdom into a genuine gift.`,
+      negative: `Wisdom gathered alone and never brought back stays a private comfort — the inherited depth never reaches anyone it could actually help.`,
+    },
+
+    '10_F2': {
+      heading: `A Trust in Timing Your Father's Line Learned the Hard Way`,
+      why: `Somewhere back along your father's spiritual line, someone learned to read the turning of a spiritual season rather than fighting every downturn as a catastrophe. The Wheel of Fortune in your Paternal Spiritual Talent means faith through cycles is your inheritance.`,
+      shadow: `The risk is forgetting the lesson under real pressure, treating every low spiritual season as proof that everything is failing rather than simply turning.`,
+      path: `This talent asks you to trust the turning even when you're currently on the downswing. You are allowed to meet a hard season with curiosity instead of panic. What might this current spiritual low actually be clearing space for?`,
+      positive: `You meet spiritual downturns with earned patience rather than panic, and that patience is what lets the turning actually complete instead of being fought the whole way through.`,
+      negative: `Forgetting the inherited trust in cycles under pressure turns an ordinary low season into a full crisis — the wisdom is there but goes unused exactly when it's needed most.`,
+    },
+
+    '11_F2': {
+      heading: `A Strength Your Father's Line Never Had to Prove`,
+      why: `Somewhere in your father's spiritual line, someone carried real inner steadiness that didn't need an audience to be true. Strength in your Paternal Spiritual Talent means quiet, unforced resilience is your inheritance.`,
+      shadow: `The risk is performing the strength for others rather than simply holding it, turning an inward steadiness into something you feel you must constantly demonstrate.`,
+      path: `This talent asks you to let the strength be private when it wants to be. You are allowed to be resilient without an audience or a test. Where in your spiritual life could you stop demonstrating and simply be steady?`,
+      positive: `You hold real steadiness without needing it witnessed, and that quiet resilience is what makes it durable rather than performance-dependent.`,
+      negative: `Strength performed for others rather than simply held starts to depend on the audience — remove the witnesses and the inherited steadiness wavers.`,
+    },
+
+    '12_F2': {
+      heading: `A Patience Your Father's Line Learned Upside Down`,
+      why: `Somewhere back along your father's spiritual line, someone learned real patience through a season of genuine suspension — waiting that taught something standing still never could. The Hanged Man in your Paternal Spiritual Talent means patient perspective is your inheritance.`,
+      shadow: `The risk is mistaking every pause for that same kind of productive suspension, staying in stuck situations indefinitely because waiting once paid off.`,
+      path: `This talent asks you to tell the difference between a pause still doing work and one that's become avoidance. You are allowed to hang upside down a while longer only if the view is still teaching you. What is your current waiting actually showing you?`,
+      positive: `You can tell a generative pause from mere stalling, and that discernment is what lets the inherited patience keep producing real insight instead of just delay.`,
+      negative: `A pause mistaken for permanent wisdom becomes simple avoidance — the inherited patience stops teaching anything once it outlives its purpose.`,
+    },
+
+    '13_F2': {
+      heading: `A Willingness to End Things Your Father's Line Modeled`,
+      why: `Somewhere in your father's spiritual line, someone let a belief, a version of faith, or an old identity actually die when its time came, rather than propping it up past its natural end. Transformation in your Paternal Spiritual Talent means the capacity for real spiritual endings is your inheritance.`,
+      shadow: `The risk is applying that willingness too readily, ending things prematurely just to avoid sitting with something difficult a little longer.`,
+      path: `This talent asks you to let real endings complete without rushing them. You are allowed to let an old belief finish dying so something truer can be born. What version of your faith is quietly ready to be released?`,
+      positive: `You let outdated beliefs actually complete their ending, and that willingness is what makes room for a truer, more current faith to take their place.`,
+      negative: `Endings rushed just to avoid discomfort skip the actual completion — the inherited willingness to let go gets used as an exit instead of genuine release.`,
+    },
+
+    '14_F2': {
+      heading: `A Blend Your Father's Line Achieved Without a Formula`,
+      why: `Somewhere back along your father's spiritual line, someone found a genuine, working balance between devotion and daily life, discipline and ease, without needing a rulebook to get there. Temperance in your Paternal Spiritual Talent means integrated moderation is your inheritance.`,
+      shadow: `The risk is treating the blend as fixed rather than living, applying an old formula for balance to a life that has since changed shape.`,
+      path: `This talent asks you to keep re-blending rather than settling on one static mix. You are allowed to combine your spiritual practices slowly and call it mastery. What two parts of your faith are ready for a new blend?`,
+      positive: `You keep actively re-blending devotion and daily life as both evolve, and that living balance is what keeps the inherited integration genuinely working.`,
+      negative: `A once-working blend applied rigidly to a changed life stops actually balancing anything — the inherited integration calcifies into an old formula.`,
+    },
+
+    '15_F2': {
+      heading: `A Pull Your Father's Line Wrestled With Honestly`,
+      why: `Somewhere in your father's spiritual line, someone faced a real compulsion — toward power, control, or an old attachment — honestly enough to loosen its grip rather than pretend it wasn't there. The Devil in your Paternal Spiritual Talent means honest reckoning with spiritual shadow is your inheritance.`,
+      shadow: `The risk is inheriting the pull itself without inheriting the honesty that faced it, repeating the compulsion while skipping the reckoning that actually worked.`,
+      path: `This talent asks you to look at your own pull as directly as your line once did. You are allowed to examine the compulsion without shame. What is the pull actually protecting you from feeling?`,
+      positive: `You face an inherited compulsion honestly rather than denying it, and that honesty is what actually loosens its grip the way it once loosened for your line.`,
+      negative: `A pull inherited without the honesty that once faced it just repeats itself unexamined — the compulsion returns because the reckoning never happened.`,
+    },
+
+    '16_F2': {
+      heading: `A Collapse Your Father's Line Rebuilt Something Truer From`,
+      why: `Somewhere back along your father's spiritual line, a belief structure fell suddenly, and someone rebuilt afterward on more honest ground rather than reconstructing the same flawed shape. The Tower in your Paternal Spiritual Talent means resilience through spiritual collapse is your inheritance.`,
+      shadow: `The risk is fearing collapse so much you avoid ever testing a belief that quietly needs it, propping up something you already suspect isn't sound.`,
+      path: `This talent asks you to let a shaky structure fall on its own terms rather than defending it indefinitely. You are allowed to watch it fall without catching it this time. What belief of yours is already cracked and asking to be rebuilt honestly?`,
+      positive: `You let genuinely unstable beliefs fall and rebuild on truer ground, and that willingness is what keeps your faith actually sound instead of quietly propped up.`,
+      negative: `Defending a structure you already suspect is unsound just delays an inevitable, harder collapse — the inherited resilience never gets the chance to do its real work.`,
+    },
+
+    '17_F2': {
+      heading: `A Hope Your Father's Line Kept Alive Without Proof`,
+      why: `Somewhere in your father's spiritual line, someone kept faith burning through genuinely hard seasons, without needing evidence it would work out. The Star in your Paternal Spiritual Talent means unproven, durable hope is your inheritance.`,
+      shadow: `The risk is keeping that hope modest and private, as if believing too openly or too largely would be tempting fate.`,
+      path: `This talent asks you to let the hope be as large as it actually is. You are allowed to hope at full size. What immodest hope have you been quietly shrinking before anyone could hear it?`,
+      positive: `You keep a real, unproven hope burning openly rather than modestly, and that visible faith is what actually sustains people around you too.`,
+      negative: `Hope kept deliberately small and private stops doing the work it was built for — the inherited faith shrinks to fit a caution it never actually needed.`,
+    },
+
+    '18_F2': {
+      heading: `A Sense Your Father's Line Trusted Before It Could Be Explained`,
+      why: `Somewhere back along your father's spiritual line, someone trusted a felt spiritual undercurrent — a sensed presence, a hunch about meaning — before it could be proven or fully articulated. The Moon in your Paternal Spiritual Talent means trust in the unexplainable is your inheritance.`,
+      shadow: `The risk is letting that trust curdle into anxious, unverified story, mistaking every strong feeling for confirmed spiritual truth.`,
+      path: `This talent asks you to hold the sense as real without needing it verified. You are allowed to trust what you sense before you can explain it. What is that feeling actually pointing toward right now?`,
+      positive: `You trust real spiritual undercurrents without needing constant proof, and that trust is what lets genuine intuition guide you instead of anxiety impersonating it.`,
+      negative: `An unverified feeling treated as certain fact rather than a genuine hunch quietly curdles into anxiety wearing intuition's clothing.`,
+    },
+
+    '19_F2': {
+      heading: `A Joy Your Father's Line Let Be Part of Faith`,
+      why: `Somewhere in your father's spiritual line, someone let genuine delight sit inside devotion rather than treating seriousness as the only proof of sincerity. The Sun in your Paternal Spiritual Talent means joyful faith is your inheritance.`,
+      shadow: `The risk is hiding that joy behind a more solemn presentation, performing gravity because it feels like the more respectable way to be spiritual.`,
+      path: `This talent asks you to let the joy be visible, not just felt. You are allowed to keep a joyful faith — reverence and laughter were never enemies. What delight might be the most serious spiritual practice available to you right now?`,
+      positive: `You let real joy be visible inside your devotion, and that visibility is what makes your faith contagious rather than merely respectable.`,
+      negative: `Joy hidden behind solemn performance drains the faith of exactly the warmth that made it inheritable in the first place.`,
+    },
+
+    '20_F2': {
+      heading: `A Calling Your Father's Line Heard and Passed Along`,
+      why: `Somewhere back along your father's spiritual line, someone heard an unmistakable spiritual summons — and whether or not they fully answered it, they passed the hearing of it down to you. Judgement in your Paternal Spiritual Talent means the capacity to recognize a real calling is your inheritance.`,
+      shadow: `The risk is hearing the summons clearly and still finding sophisticated reasons to keep preparing instead of rising to meet it.`,
+      path: `This talent asks you to answer before you feel fully ready. You are allowed to rise before you feel prepared. What is the calling asking of you this month, specifically?`,
+      positive: `You recognize and answer a real calling without waiting for total readiness, and that responsiveness is what your line was hoping would finally happen.`,
+      negative: `A calling heard clearly but endlessly deferred for more preparation never actually gets answered — the inherited capacity to hear it goes unused.`,
+    },
+
+    '21_F2': {
+      heading: `A Completion Your Father's Line Never Quite Let Land`,
+      why: `Somewhere back along your father's spiritual line, someone came close to real spiritual arrival — an integration, a sense of having actually gotten there — and, for reasons lost to time, never quite let it be acknowledged as complete. The World in your Paternal Spiritual Talent means the capacity for genuine spiritual completion is your inheritance, waiting to actually be claimed.`,
+      shadow: `The risk is repeating the same near-arrival, reaching real integration and still finding a reason it doesn't quite count as finished.`,
+      path: `This talent asks you to let a spiritual arrival actually be called complete. You are allowed to call it finished and mean it. What spiritual milestone have you already reached that deserves to be named as arrived, not almost?`,
+      positive: `You let a genuine spiritual arrival be acknowledged as complete, finishing what your line came close to but never quite claimed.`,
+      negative: `A spiritual completion that's reached but never acknowledged repeats the old near-arrival — the inherited capacity for genuine landing stays just out of reach.`,
+    },
+
+    '22_F2': {
+      heading: `A Freedom Your Father's Line Believed in Before It Was Safe`,
+      why: `Somewhere in your father's spiritual line, someone believed in spiritual freedom and possibility before circumstances made it safe to act on — faith as an act of daring, not just comfort. The Fool in your Paternal Spiritual Talent means the capacity for that kind of leap is your inheritance.`,
+      shadow: `The risk is inheriting the belief in freedom without ever actually taking the leap it was pointing toward, keeping the possibility purely theoretical.`,
+      path: `This talent asks you to actually take one leap this season. You are allowed to leap with open eyes and still call it faith. What would you begin if wisdom and boldness finally worked together instead of the boldness always waiting for permission?`,
+      positive: `You take a real spiritual leap rather than only believing one is possible, and that action is what turns inherited faith into inherited courage.`,
+      negative: `Belief in freedom that never becomes an actual leap stays a comforting idea rather than a lived inheritance — the courage waits indefinitely for permission that was never required.`,
+    },
+
+
+    // ── Lineage Square Talents: Maternal Spiritual Talent (G2) ─────────────
+
+    '1_G2': {
+      heading: `A Spark Your Mother's Line Passed Down Half-Lit`,
+      why: `Somewhere in your mother's spiritual line, someone carried the raw ability to begin a belief, a practice, a way of seeing — and that initiating spark reached you intact. The Magician in your Maternal Spiritual Talent means origination itself is your inheritance.`,
+      shadow: `The risk is treating the spark as entertainment, lighting new spiritual interests easily and letting each cool before it ever deepens into anything lasting.`,
+      path: `This talent asks you to stay with one spiritual thread past its exciting opening. You are allowed to let a single practice mature past its beginning. What belief, sparked long ago in your line, is ready for you to actually build on?`,
+      positive: `You carry forward a genuine gift for spiritual initiation, and staying with one practice long enough turns a spark into something durable.`,
+      negative: `A spark treated as disposable keeps repeating a pattern of beginning without staying — the inherited gift stays raw instead of becoming foundation.`,
+    },
+
+    '2_G2': {
+      heading: `A Knowing Your Mother's Line Trusted Wordlessly`,
+      why: `Somewhere back along your mother's spiritual line, someone trusted an inner sense they couldn't fully explain, and passed down the trust itself rather than an explanation. The High Priestess in your Maternal Spiritual Talent means intuitive certainty is your inheritance.`,
+      shadow: `The risk is keeping that knowing so guarded it never gets tested, treating the unexplainable as a reason to stay silent instead of simply unspoken.`,
+      path: `This talent asks you to act on the knowing before it's provable. You are allowed to trust what you sense before you can explain it. What is the inherited knowing telling you right now?`,
+      positive: `You trust an inner certainty passed down wordlessly, and acting on it before it's provable is what finally lets its accuracy show.`,
+      negative: `A knowing kept too guarded to test never proves itself — the gift stays theoretical instead of becoming lived, trusted guidance.`,
+    },
+
+    '3_G2': {
+      heading: `An Abundance Your Mother's Line Carried Quietly`,
+      why: `Somewhere in your mother's spiritual line, someone held real warmth and generative richness that didn't need to be announced to be true. The Empress in your Maternal Spiritual Talent means abundance of spirit is your inheritance.`,
+      shadow: `The risk is keeping that abundance entirely internal, tending a rich inner world without ever letting it feed anyone beyond yourself.`,
+      path: `This talent asks you to let the abundance move outward. You are allowed to let your spiritual richness nourish someone besides yourself. Who nearby is hungry for exactly the warmth you already carry?`,
+      positive: `You let an inherited spiritual abundance flow outward, and its reach grows precisely because it stops being contained to your own inner life.`,
+      negative: `Abundance kept entirely private never nourishes anyone else — the inherited gift stays a personal comfort instead of a shared one.`,
+    },
+
+    '4_G2': {
+      heading: `A Structure Your Mother's Line Built to Last`,
+      why: `Somewhere back along your mother's spiritual line, someone built a framework of belief sturdy enough to hold real weight through hard seasons. The Emperor in your Maternal Spiritual Talent means structural steadiness is your inheritance.`,
+      shadow: `The risk is mistaking the structure for the point, defending the framework rather than what it was built to hold, until the scaffolding matters more than the faith inside it.`,
+      path: `This talent asks you to keep the structure in service of the life. You are allowed to hold your convictions firmly without needing them unquestioned. Which spiritual structure of yours could flex without actually falling?`,
+      positive: `You hold a steady spiritual framework that flexes without collapsing, and that steadiness lets your faith outlast hard seasons instead of cracking.`,
+      negative: `A structure defended for its own sake calcifies into rigidity — the inherited steadiness starts strangling the very faith it was built to hold.`,
+    },
+
+    '5_G2': {
+      heading: `A Teaching Your Mother's Line Handed Down Whole`,
+      why: `Somewhere in your mother's spiritual line, someone received and carried forward real, specific teaching — not a vague tradition, but actual doctrine passed hand to hand. The Hierophant in your Maternal Spiritual Talent means the full transmission is your inheritance.`,
+      shadow: `The risk is carrying the teaching unexamined, repeating what you were taught without testing it against your own lived encounter with the sacred.`,
+      path: `This talent asks you to keep what still serves and release the rest, on your own authority. You are allowed to inherit the teaching and still make it yours. Which part of what you were handed has actually proven true in your own life?`,
+      positive: `You carry a real inherited teaching, tested and renewed by your own experience, so what you pass forward stays alive rather than merely recited.`,
+      negative: `Teaching carried without ever being tested against lived experience calcifies into recitation — the inheritance stops actually transmitting anything real.`,
+    },
+
+    '6_G2': {
+      heading: `A Devotion Your Mother's Line Chose Freely`,
+      why: `Somewhere back along your mother's spiritual line, someone chose their faith rather than simply inheriting it — a real, examined devotion, arrived at rather than assumed. The Lovers in your Maternal Spiritual Talent means the capacity to choose belief on purpose is your inheritance.`,
+      shadow: `The risk is going through the motions of choice while actually just accepting whatever was easiest or expected, mistaking comfort for conviction.`,
+      path: `This talent asks you to actually examine and reclaim what you believe. You are allowed to keep only the parts of your inherited faith you would choose fresh today. What would you choose if no one before you had already chosen it?`,
+      positive: `You hold a devotion that's genuinely chosen rather than merely inherited, and that ownership makes your faith durable under real pressure.`,
+      negative: `Faith carried by default rather than choice thins out the moment it's tested — an inheritance never actually claimed rarely holds.`,
+    },
+
+    '7_G2': {
+      heading: `A Drive Your Mother's Line Aimed at Something Higher`,
+      why: `Somewhere in your mother's spiritual line, someone pointed real determination at a spiritual destination rather than letting it dissipate into busyness. The Chariot in your Maternal Spiritual Talent means directed spiritual will is your inheritance.`,
+      shadow: `The risk is applying the drive without checking the direction, moving hard toward a spiritual goal set for you rather than one you've actually examined.`,
+      path: `This talent asks you to aim the inherited drive at a destination you've chosen yourself. You are allowed to slow down long enough to steer. What spiritual direction have you actually chosen, not just inherited momentum toward?`,
+      positive: `You aim real spiritual drive at a destination you've deliberately chosen, and that alignment lets the momentum actually arrive somewhere that's yours.`,
+      negative: `Drive aimed at an inherited destination never examined burns real energy without arriving anywhere that's genuinely your own.`,
+    },
+
+    '8_G2': {
+      heading: `A Fairness Your Mother's Line Practiced Quietly`,
+      why: `Somewhere back along your mother's spiritual line, someone held a real, careful sense of moral balance — quiet insistence on doing right rather than loud judgment. Justice in your Maternal Spiritual Talent means integrity itself is your inheritance.`,
+      shadow: `The risk is turning that fairness outward only, auditing everyone else's conduct while your own goes unexamined.`,
+      path: `This talent asks you to apply the standard to yourself first. You are allowed to receive the same fairness you extend to others. Where would your own verdict soften if you judged yourself as gently as you judge fairly?`,
+      positive: `You hold a real integrity applied evenly, inward and outward, and that evenness makes your fairness trusted rather than merely feared.`,
+      negative: `Fairness applied only outward while the self stays unexamined curdles into quiet self-exemption — the inherited integrity stops being whole.`,
+    },
+
+    '9_G2': {
+      heading: `A Wisdom Your Mother's Line Found Alone`,
+      why: `Somewhere in your mother's spiritual line, someone found real understanding through solitude — withdrawal that produced depth, not isolation. The Hermit in your Maternal Spiritual Talent means contemplative wisdom is your inheritance.`,
+      shadow: `The risk is staying in the solitude past its purpose, gathering wisdom that never gets carried back out to anyone who could use it.`,
+      path: `This talent asks you to return from the quiet with something to offer. You are allowed to bring the solitary understanding into shared light. Who nearby could use what your withdrawal has already shown you?`,
+      positive: `You gather real depth in solitude and bring it back into relationship, and that return turns private wisdom into an actual gift.`,
+      negative: `Wisdom gathered alone and never brought back stays a private comfort — the inherited depth never reaches anyone it could help.`,
+    },
+
+    '10_G2': {
+      heading: `A Trust in Timing Your Mother's Line Learned the Hard Way`,
+      why: `Somewhere back along your mother's spiritual line, someone learned to read a spiritual season's turning rather than fighting every downturn as catastrophe. The Wheel of Fortune in your Maternal Spiritual Talent means faith through cycles is your inheritance.`,
+      shadow: `The risk is forgetting the lesson under real pressure, treating a low spiritual season as proof everything is failing rather than simply turning.`,
+      path: `This talent asks you to trust the turning even mid-downswing. You are allowed to meet a hard season with curiosity instead of panic. What might this current spiritual low actually be clearing space for?`,
+      positive: `You meet spiritual downturns with earned patience, and that patience lets the turning actually complete instead of being fought the whole way through.`,
+      negative: `Forgetting the inherited trust in cycles under pressure turns an ordinary low season into a full crisis — the wisdom exists but goes unused.`,
+    },
+
+    '11_G2': {
+      heading: `A Strength Your Mother's Line Never Had to Prove`,
+      why: `Somewhere in your mother's spiritual line, someone carried real inner steadiness that didn't need an audience to be true. Strength in your Maternal Spiritual Talent means quiet, unforced resilience is your inheritance.`,
+      shadow: `The risk is performing that strength for others rather than simply holding it, turning inward steadiness into something you feel must be constantly demonstrated.`,
+      path: `This talent asks you to let the strength be private when it wants to be. You are allowed to be resilient without an audience or a test. Where in your spiritual life could you stop demonstrating and simply be steady?`,
+      positive: `You hold real steadiness without needing it witnessed, and that quiet resilience makes it durable rather than performance-dependent.`,
+      negative: `Strength performed for others starts depending on the audience — remove the witnesses and the inherited steadiness wavers.`,
+    },
+
+    '12_G2': {
+      heading: `A Patience Your Mother's Line Learned Upside Down`,
+      why: `Somewhere back along your mother's spiritual line, someone learned real patience through a genuine season of suspension — waiting that taught something standing still never could. The Hanged Man in your Maternal Spiritual Talent means patient perspective is your inheritance.`,
+      shadow: `The risk is mistaking every pause for that same productive suspension, staying in stuck situations indefinitely because waiting once paid off.`,
+      path: `This talent asks you to tell a generative pause from mere stalling. You are allowed to hang upside down a while longer only if the view is still teaching you. What is your current waiting actually showing you?`,
+      positive: `You can distinguish a generative pause from stalling, and that discernment lets the inherited patience keep producing insight instead of delay.`,
+      negative: `A pause mistaken for permanent wisdom becomes simple avoidance — the inherited patience stops teaching once it outlives its purpose.`,
+    },
+
+    '13_G2': {
+      heading: `A Willingness to End Things Your Mother's Line Modeled`,
+      why: `Somewhere in your mother's spiritual line, someone let a belief or old identity actually die when its time came, rather than propping it up past its natural end. Transformation in your Maternal Spiritual Talent means the capacity for real spiritual endings is your inheritance.`,
+      shadow: `The risk is applying that willingness too readily, ending things prematurely just to avoid sitting with something difficult a little longer.`,
+      path: `This talent asks you to let real endings complete without rushing them. You are allowed to let an old belief finish dying so something truer can be born. What version of your faith is quietly ready to be released?`,
+      positive: `You let outdated beliefs actually complete their ending, making room for a truer, more current faith to take their place.`,
+      negative: `Endings rushed just to avoid discomfort skip the actual completion — the willingness to let go gets used as an exit instead of genuine release.`,
+    },
+
+    '14_G2': {
+      heading: `A Blend Your Mother's Line Achieved Without a Formula`,
+      why: `Somewhere back along your mother's spiritual line, someone found a genuine, working balance between devotion and daily life without needing a rulebook. Temperance in your Maternal Spiritual Talent means integrated moderation is your inheritance.`,
+      shadow: `The risk is treating that blend as fixed, applying an old formula for balance to a life that has since changed shape.`,
+      path: `This talent asks you to keep re-blending rather than settling on one static mix. You are allowed to combine your spiritual practices slowly and call it mastery. What two parts of your faith are ready for a new blend?`,
+      positive: `You keep actively re-blending devotion and daily life as both evolve, and that living balance keeps the inherited integration genuinely working.`,
+      negative: `A once-working blend applied rigidly to a changed life stops actually balancing anything — the integration calcifies into an old formula.`,
+    },
+
+    '15_G2': {
+      heading: `A Pull Your Mother's Line Wrestled With Honestly`,
+      why: `Somewhere in your mother's spiritual line, someone faced a real compulsion — toward control, comfort, or an old attachment — honestly enough to loosen its grip. The Devil in your Maternal Spiritual Talent means honest reckoning with spiritual shadow is your inheritance.`,
+      shadow: `The risk is inheriting the pull without inheriting the honesty that once faced it, repeating the compulsion while skipping the reckoning that actually worked.`,
+      path: `This talent asks you to look at your own pull as directly as your line once did. You are allowed to examine the compulsion without shame. What is the pull actually protecting you from feeling?`,
+      positive: `You face an inherited compulsion honestly rather than denying it, and that honesty actually loosens its grip the way it once did for your line.`,
+      negative: `A pull inherited without the honesty that once faced it just repeats itself unexamined — the compulsion returns because the reckoning never happened.`,
+    },
+
+    '16_G2': {
+      heading: `A Collapse Your Mother's Line Rebuilt Something Truer From`,
+      why: `Somewhere back along your mother's spiritual line, a belief structure fell suddenly, and someone rebuilt afterward on more honest ground rather than reconstructing the same flawed shape. The Tower in your Maternal Spiritual Talent means resilience through spiritual collapse is your inheritance.`,
+      shadow: `The risk is fearing collapse so much you avoid testing a belief that quietly needs it, propping up something you already suspect isn't sound.`,
+      path: `This talent asks you to let a shaky structure fall on its own terms. You are allowed to watch it fall without catching it this time. What belief of yours is already cracked and asking to be rebuilt honestly?`,
+      positive: `You let genuinely unstable beliefs fall and rebuild on truer ground, keeping your faith actually sound instead of quietly propped up.`,
+      negative: `Defending a structure you already suspect is unsound just delays a harder collapse — the inherited resilience never gets to do its real work.`,
+    },
+
+    '17_G2': {
+      heading: `A Hope Your Mother's Line Kept Alive Without Proof`,
+      why: `Somewhere in your mother's spiritual line, someone kept faith burning through genuinely hard seasons without needing evidence it would work out. The Star in your Maternal Spiritual Talent means unproven, durable hope is your inheritance.`,
+      shadow: `The risk is keeping that hope modest and private, as if believing too openly would be tempting fate.`,
+      path: `This talent asks you to let the hope be as large as it actually is. You are allowed to hope at full size. What immodest hope have you been quietly shrinking before anyone could hear it?`,
+      positive: `You keep a real, unproven hope burning openly rather than modestly, and that visible faith sustains people around you too.`,
+      negative: `Hope kept deliberately small and private stops doing the work it was built for — the inherited faith shrinks to fit an unnecessary caution.`,
+    },
+
+    '18_G2': {
+      heading: `A Sense Your Mother's Line Trusted Before It Could Be Explained`,
+      why: `Somewhere back along your mother's spiritual line, someone trusted a felt spiritual undercurrent before it could be proven or fully articulated. The Moon in your Maternal Spiritual Talent means trust in the unexplainable is your inheritance.`,
+      shadow: `The risk is letting that trust curdle into anxious, unverified story, mistaking every strong feeling for confirmed spiritual truth.`,
+      path: `This talent asks you to hold the sense as real without needing it verified. You are allowed to trust what you sense before you can explain it. What is that feeling actually pointing toward right now?`,
+      positive: `You trust real spiritual undercurrents without needing constant proof, and that trust lets genuine intuition guide you instead of anxiety impersonating it.`,
+      negative: `An unverified feeling treated as certain fact quietly curdles into anxiety wearing intuition's clothing.`,
+    },
+
+    '19_G2': {
+      heading: `A Joy Your Mother's Line Let Be Part of Faith`,
+      why: `Somewhere in your mother's spiritual line, someone let genuine delight sit inside devotion rather than treating seriousness as the only proof of sincerity. The Sun in your Maternal Spiritual Talent means joyful faith is your inheritance.`,
+      shadow: `The risk is hiding that joy behind a more solemn presentation, performing gravity because it feels like the more respectable way to be spiritual.`,
+      path: `This talent asks you to let the joy be visible, not just felt. You are allowed to keep a joyful faith — reverence and laughter were never enemies. What delight might be the most serious spiritual practice available to you right now?`,
+      positive: `You let real joy be visible inside your devotion, and that visibility makes your faith contagious rather than merely respectable.`,
+      negative: `Joy hidden behind solemn performance drains the faith of exactly the warmth that made it inheritable in the first place.`,
+    },
+
+    '20_G2': {
+      heading: `A Calling Your Mother's Line Heard and Passed Along`,
+      why: `Somewhere back along your mother's spiritual line, someone heard an unmistakable spiritual summons and passed the hearing of it down to you, whether or not they fully answered it. Judgement in your Maternal Spiritual Talent means recognizing a real calling is your inheritance.`,
+      shadow: `The risk is hearing the summons clearly and still finding sophisticated reasons to keep preparing instead of rising to meet it.`,
+      path: `This talent asks you to answer before you feel fully ready. You are allowed to rise before you feel prepared. What is the calling asking of you this month, specifically?`,
+      positive: `You recognize and answer a real calling without waiting for total readiness, and that responsiveness is what your line was hoping would finally happen.`,
+      negative: `A calling heard clearly but endlessly deferred for more preparation never actually gets answered — the inherited capacity to hear it goes unused.`,
+    },
+
+    '21_G2': {
+      heading: `A Completion Your Mother's Line Never Quite Let Land`,
+      why: `Somewhere in your mother's spiritual line, someone came close to real spiritual arrival and, for reasons lost to time, never quite let it be acknowledged as complete. The World in your Maternal Spiritual Talent means the capacity for genuine completion is your inheritance, waiting to be claimed.`,
+      shadow: `The risk is repeating the same near-arrival, reaching real integration and still finding a reason it doesn't quite count as finished.`,
+      path: `This talent asks you to let a spiritual arrival actually be called complete. You are allowed to call it finished and mean it. What spiritual milestone have you already reached that deserves to be named as arrived, not almost?`,
+      positive: `You let a genuine spiritual arrival be acknowledged as complete, finishing what your line came close to but never quite claimed.`,
+      negative: `A spiritual completion that's reached but never acknowledged repeats the old near-arrival — the inherited capacity for genuine landing stays out of reach.`,
+    },
+
+    '22_G2': {
+      heading: `A Freedom Your Mother's Line Believed in Before It Was Safe`,
+      why: `Somewhere back along your mother's spiritual line, someone believed in spiritual freedom and possibility before circumstances made it safe to act on. The Fool in your Maternal Spiritual Talent means the capacity for that kind of leap is your inheritance.`,
+      shadow: `The risk is inheriting the belief in freedom without ever actually taking the leap it was pointing toward, keeping the possibility purely theoretical.`,
+      path: `This talent asks you to actually take one leap this season. You are allowed to leap with open eyes and still call it faith. What would you begin if wisdom and boldness finally worked together?`,
+      positive: `You take a real spiritual leap rather than only believing one is possible, turning inherited faith into inherited courage.`,
+      negative: `Belief in freedom that never becomes an actual leap stays a comforting idea rather than a lived inheritance.`,
+    },
+
+
+    // ── Lineage Square Talents: Paternal Material Talent (H2) ───────────────
+
+    '1_H2': {
+      heading: `A Knack for Making Something From Nothing, Passed Down`,
+      why: `Somewhere in your father's material line, someone could start a venture, a trade, an income from bare circumstances — real, practical originating ability. The Magician in your Paternal Material Talent means launching from scratch is your inheritance.`,
+      shadow: `The risk is starting many things and finishing few, spending the inherited spark on the exciting opening and losing interest once the harder building begins.`,
+      path: `This talent asks you to carry one material venture past its beginning. You are allowed to finish something ordinary and let that count. What would you build if starting were the qualification, not finishing?`,
+      positive: `You carry a genuine gift for material initiation, and staying with one venture past its start turns raw spark into something that actually lasts.`,
+      negative: `A spark spent only on beginnings repeats a pattern of starting without staying — the inherited talent stays a series of openings instead of a real build.`,
+    },
+
+    '2_H2': {
+      heading: `A Practical Instinct Passed Down Ahead of the Numbers`,
+      why: `Somewhere back along your father's material line, someone read a financial or practical situation correctly before the facts could confirm it — instinct that outran the spreadsheet and was usually right. The High Priestess in your Paternal Material Talent means that instinct is your inheritance.`,
+      shadow: `The risk is trusting the instinct so privately it never gets acted on, letting a correct read go unused because it can't yet be justified on paper.`,
+      path: `This talent asks you to act on the instinct and let the numbers catch up. You are allowed to trust the practical read before you can explain it. Where has that inherited gut-sense already been right, quietly, without credit?`,
+      positive: `You trust a real practical instinct and act on it before it's fully provable, and that trust is what makes the gift actually useful instead of merely accurate in hindsight.`,
+      negative: `An instinct trusted only in private, after the fact, never gets to actually change an outcome — the inherited read stays a quiet 'I knew it' instead of a decision.`,
+    },
+
+    '3_H2': {
+      heading: `A Gift for Making Sure Everyone's Provided For`,
+      why: `Somewhere in your father's material line, someone made certain the people around them were fed, housed, and materially cared for — practical generosity as instinct, not effort. The Empress in your Paternal Material Talent means that provision is your inheritance.`,
+      shadow: `The risk is providing for everyone except yourself, extending the generosity outward so consistently that your own material comfort quietly goes unattended.`,
+      path: `This talent asks you to include yourself in the providing. You are allowed to be fed and held too, not just to make sure of it for others. Who checks whether you've eaten, rested, been materially cared for lately?`,
+      positive: `You provide for others and let yourself be provided for in turn, and that reciprocity is what keeps the inherited generosity sustainable instead of depleting.`,
+      negative: `Provision extended only outward eventually runs the well dry — the inherited generosity stops being sustainable once it excludes its own source.`,
+    },
+
+    '4_H2': {
+      heading: `A Structure Built to Actually Hold Weight`,
+      why: `Somewhere back along your father's material line, someone built systems — a business, a household economy, a way of organizing resources — sturdy enough to actually last. The Emperor in your Paternal Material Talent means structural competence is your inheritance.`,
+      shadow: `The risk is building structures so rigid they become a burden to maintain, mistaking control for stability until the system exists mainly to be defended.`,
+      path: `This talent asks you to let the structure serve rather than dominate. You are allowed to hold power in your material life gently. Where could steadiness replace either the grip or the absence?`,
+      positive: `You build material structures that hold real weight without becoming a burden, and that ease is what makes the inherited competence actually livable.`,
+      negative: `A structure built to be controlled rather than lived inside becomes its own weight — the inherited competence turns into a system that must constantly be managed.`,
+    },
+
+    '5_H2': {
+      heading: `A Skill Passed Down That Nobody Formally Taught`,
+      why: `Somewhere in your father's material line, someone carried real practical know-how — a trade, a craft, a way of handling money or materials — learned by doing rather than by certificate. The Hierophant in your Paternal Material Talent means that untaught expertise is your inheritance.`,
+      shadow: `The risk is undervaluing the skill precisely because it wasn't formally credentialed, treating something genuinely expert as merely ordinary.`,
+      path: `This talent asks you to name the skill as real expertise. You are allowed to own the abilities nobody certified. What untaught competence of yours deserves to be named as expertise rather than a knack?`,
+      positive: `You claim an inherited, uncertified skill as genuine expertise, and that claiming is what finally lets it be valued at its actual worth.`,
+      negative: `A real skill dismissed as merely a knack goes underpriced and underused — the inherited expertise stays invisible for lack of a name.`,
+    },
+
+    '6_H2': {
+      heading: `A Sense of What Matters When Resources Are Tight`,
+      why: `Somewhere back along your father's material line, someone kept clear values intact even when money or resources were genuinely scarce — clarity about what mattered that didn't bend under pressure. The Lovers in your Paternal Material Talent means that clarity is your inheritance.`,
+      shadow: `The risk is letting that clarity fade the moment resources become comfortable, forgetting under abundance the values that were so sharp under scarcity.`,
+      path: `This talent asks you to keep the clarity active even when it isn't required. You are allowed to keep the essential things essential, scarce or not. What does your inheritance help you see that abundance tends to blur?`,
+      positive: `You keep the same material clarity whether resources are tight or plentiful, and that consistency is what makes the inherited values durable rather than situational.`,
+      negative: `Clarity about what matters that only shows up under scarcity isn't values, it's survival mode — the inherited gift stays dormant once things get easy.`,
+    },
+
+    '7_H2': {
+      heading: `A Determination That Never Needed a Co-Pilot`,
+      why: `Somewhere in your father's material line, someone drove a material goal forward alone, without waiting for permission or partnership to move. The Chariot in your Paternal Material Talent means self-directed material drive is your inheritance.`,
+      shadow: `The risk is refusing help even when it's genuinely offered, treating solo determination as the only legitimate way to reach a material goal.`,
+      path: `This talent asks you to keep the drive and add a hand. You are allowed to ask for help and keep the wheel. What are you steering alone right now that was never designed for one driver?`,
+      positive: `You keep real self-directed determination while letting help in when it's offered, and that combination is what actually accelerates the inherited drive.`,
+      negative: `Determination that refuses all help caps its own ceiling — the inherited drive stays solo-sized instead of reaching what partnership could build.`,
+    },
+
+    '8_H2': {
+      heading: `A Careful Sense of What's Fair, Materially`,
+      why: `Somewhere back along your father's material line, someone divided resources, credit, and reward with real, careful fairness — not performative generosity, but actual balance. Justice in your Paternal Material Talent means that fairness is your inheritance.`,
+      shadow: `The risk is applying that fairness to everyone except yourself, dividing carefully for others while leaving your own share consistently smallest.`,
+      path: `This talent asks you to include yourself in the fair division. You are allowed to be part of your own fair share. When the careful dividing is done, what portion have you been leaving off your own plate?`,
+      positive: `You divide resources fairly, yourself included, and that inclusion is what makes the inherited fairness actually whole instead of self-sacrificing.`,
+      negative: `Fairness that always excludes the self isn't balance, it's quiet self-shortchanging — the inherited integrity stays incomplete.`,
+    },
+
+    '9_H2': {
+      heading: `A Competence for Handling Material Life Alone`,
+      why: `Somewhere in your father's material line, someone managed real material responsibility in solitude and did it capably, without needing company to get it right. The Hermit in your Paternal Material Talent means solitary material competence is your inheritance.`,
+      shadow: `The risk is staying solitary in it even when company would genuinely help, treating solo capability as the only trustworthy way to handle things.`,
+      path: `This talent asks you to let a task be witnessed or shared sometimes. You are allowed to be competent and accompanied. What material task could you let someone witness, or even share, this week?`,
+      positive: `You handle material responsibility capably and let it be shared when sharing would actually help, and that openness deepens rather than threatens the inherited competence.`,
+      negative: `Competence that refuses company even when company would help isolates its own gift — the inherited skill stays solitary by habit, not by necessity.`,
+    },
+
+    '10_H2': {
+      heading: `An Endurance for Material Life's Ups and Downs`,
+      why: `Somewhere back along your father's material line, someone weathered real financial or material cycles — booms and busts — without being wrecked by either extreme. The Wheel of Fortune in your Paternal Material Talent means that endurance is your inheritance.`,
+      shadow: `The risk is bracing so hard against the next downturn that you can't actually receive or enjoy the current upswing.`,
+      path: `This talent asks you to let the good stretch actually land as good. You are allowed to expect good stretches, not just endure hard ones. What upswing might you be bracing against instead of receiving?`,
+      positive: `You meet material cycles with earned steadiness in both directions, and that evenness lets you actually receive the good seasons instead of just surviving the hard ones.`,
+      negative: `Bracing permanently against the next downturn means never fully receiving the current upswing — the inherited endurance becomes vigilance instead of resilience.`,
+    },
+
+    '11_H2': {
+      heading: `A Softness That Never Actually Broke Under Strain`,
+      why: `Somewhere in your father's material line, someone stayed gentle through real material hardship — softness that endured rather than hardened. Strength in your Paternal Material Talent means that gentleness-under-pressure is your inheritance.`,
+      shadow: `The risk is mistaking the gentleness for weakness under your own current strain, hardening reflexively instead of trusting the softness to hold.`,
+      path: `This talent asks you to trust that the softness already proved itself. You are allowed to stay soft — the strain already proved it doesn't break you. Where is your gentleness quietly outlasting circumstances that were supposed to harden you?`,
+      positive: `You stay gentle under real material pressure, and that endurance is proof the softness was never actually fragile.`,
+      negative: `Hardening reflexively under strain abandons a gift that had already proven itself — the inherited gentleness gets replaced by armor it never needed.`,
+    },
+
+    '12_H2': {
+      heading: `A Patience for Material Circumstances That Take Their Time`,
+      why: `Somewhere back along your father's material line, someone waited out a slow material circumstance without forcing it, and it eventually resolved on its own timing. The Hanged Man in your Paternal Material Talent means that patience is your inheritance.`,
+      shadow: `The risk is applying that patience to situations that actually need a push, mistaking every slow circumstance for one that just needs more waiting.`,
+      path: `This talent asks you to nudge, sometimes, instead of only waiting. You are allowed to nudge the slow circumstances instead of only waiting them out. What patient situation of yours might respond to one small push?`,
+      positive: `You can tell a circumstance that needs time from one that needs a nudge, and that discernment is what makes the inherited patience actually productive.`,
+      negative: `Patience applied indiscriminately to every slow situation becomes passivity — the inherited gift stops distinguishing waiting from stalling.`,
+    },
+
+    '13_H2': {
+      heading: `A Real Capacity to Rebuild From Almost Nothing`,
+      why: `Somewhere in your father's material line, someone lost real material ground and rebuilt from close to nothing, more than once if needed. Transformation in your Paternal Material Talent means that rebuilding capacity is your inheritance.`,
+      shadow: `The risk is waiting for an actual collapse to use the gift, letting things get much worse than necessary before finally rebuilding.`,
+      path: `This talent asks you to rebuild before ruin forces it. You are allowed to rebuild without waiting for the ruin. What could you renovate now, while things still stand?`,
+      positive: `You use your rebuilding capacity proactively rather than only in crisis, and that timing is what makes the inherited resilience actually protective instead of reactive.`,
+      negative: `A rebuilding gift used only after total collapse lets damage go further than it needed to — the inherited capacity waits for an emergency it doesn't require.`,
+    },
+
+    '14_H2': {
+      heading: `A Real Skill for Making Limited Resources Stretch`,
+      why: `Somewhere back along your father's material line, someone made scarce resources genuinely go further — not through deprivation, but through real practical skill. Temperance in your Paternal Material Talent means that stretching ability is your inheritance.`,
+      shadow: `The risk is stretching resources even when stretching is no longer necessary, staying in scarcity-mode long after actual scarcity has passed.`,
+      path: `This talent asks you to let margin be margin sometimes. You are allowed to have enough that nothing needs stretching. What would you do with real, unstretched margin?`,
+      positive: `You stretch resources skillfully when needed and let margin simply be margin when it's genuinely available, and that flexibility is the inherited skill at its fullest.`,
+      negative: `Stretching resources out of habit rather than necessity turns a skill into a limitation — the inherited talent keeps manufacturing scarcity that isn't actually there.`,
+    },
+
+    '15_H2': {
+      heading: `A Complicated Relationship to Holding Material Power`,
+      why: `Somewhere in your father's material line, someone wrestled honestly with material power — who should hold it, how it should be used — rather than pretending the question was simple. The Devil in your Paternal Material Talent means that honest wrestling is your inheritance.`,
+      shadow: `The risk is inheriting the discomfort around power without inheriting the honest examination that once accompanied it, avoiding material authority altogether instead of examining it.`,
+      path: `This talent asks you to hold power and examine it, rather than avoiding it. You are allowed to hold material power without fearing your own hands. What motive, named honestly, would make your next use of influence feel clean?`,
+      positive: `You hold material power and examine your own motives honestly, and that honesty is what lets the inherited authority actually be used cleanly.`,
+      negative: `Avoiding material power altogether just because it's uncomfortable leaves the inherited authority unclaimed — the discomfort passed down without the honest reckoning that should accompany it.`,
+    },
+
+    '16_H2': {
+      heading: `A Material Collapse That Was Rebuilt From, Never Fully Discussed`,
+      why: `Somewhere back along your father's material line, a real financial or material collapse happened and was survived — but never fully talked through afterward. The Tower in your Paternal Material Talent means resilience through material collapse is your inheritance, alongside an unfinished conversation.`,
+      shadow: `The risk is repeating a version of the same collapse because the original one was never actually processed, only survived.`,
+      path: `This talent asks you to speak about the collapse that was never talked through. You are allowed to talk about the collapse that was never talked through. What might your money worries lose their grip on once the old story is finally told?`,
+      positive: `You name and process an old material collapse rather than only having survived it, and that processing is what finally lets the pattern stop repeating.`,
+      negative: `A collapse only survived and never discussed keeps its grip through silence — the inherited resilience is real, but the unfinished story keeps recreating the fear.`,
+    },
+
+    '17_H2': {
+      heading: `A Quiet, Modest Hope That Things Would Get Better`,
+      why: `Somewhere in your father's material line, someone held onto real hope for better material circumstances, sized modestly enough to feel safe. The Star in your Paternal Material Talent means that hope is your inheritance.`,
+      shadow: `The risk is keeping the hope permanently modest even once circumstances could support something larger, out of an old habit of not expecting too much.`,
+      path: `This talent asks you to let the hope grow to match what's actually possible now. You are allowed to hope for more than the line permitted itself. What material dream have you been pre-shrinking before it can even be spoken?`,
+      positive: `You let material hope grow to actually match your present possibility, and that growth honors the inherited hope by finally giving it enough room.`,
+      negative: `Hope kept permanently modest regardless of actual circumstances shrinks a real capacity for more into a habit of expecting less.`,
+    },
+
+    '18_H2': {
+      heading: `A Financial Worry Felt More Than It Was Ever Explained`,
+      why: `Somewhere back along your father's material line, someone carried a real financial fear that was never given words, only felt and passed along as atmosphere. The Moon in your Paternal Material Talent means that unnamed worry is your inheritance, waiting to finally be named.`,
+      shadow: `The risk is letting the felt worry run your decisions without ever checking it against your own actual, current circumstances.`,
+      path: `This talent asks you to translate the felt worry into words and test it. You are allowed to name the fear so it stops steering. If the unnamed financial dread had a sentence — what would it say, and is it still true for you?`,
+      positive: `You name the inherited financial fear plainly and check it against your real circumstances, and that clarity is what finally lets it stop steering decisions from the shadows.`,
+      negative: `A felt worry never translated into words keeps steering decisions invisibly — the inherited fear runs the show precisely because it was never named.`,
+    },
+
+    '19_H2': {
+      heading: `A Warmth That Held Through Real Material Hardship`,
+      why: `Somewhere in your father's material line, someone stayed genuinely warm — generous, present, unguarded — even during real material hardship. The Sun in your Paternal Material Talent means that intact warmth is your inheritance.`,
+      shadow: `The risk is assuming the warmth should be reserved until things are materially easier, holding back generosity as if it were conditional on comfort.`,
+      path: `This talent asks you to let the warmth show now, regardless of current material conditions. You are allowed to trust that your warmth survives hardship — it already has, for generations. Who needs that intact warmth from you right now?`,
+      positive: `You let genuine warmth show regardless of material circumstance, proving the inherited gift was never actually conditional on comfort.`,
+      negative: `Warmth withheld until things feel materially easier repeats a needless bargain — the inherited generosity was never actually conditional, only treated as if it were.`,
+    },
+
+    '20_H2': {
+      heading: `A Material Potential Never Fully Claimed`,
+      why: `Somewhere back along your father's material line, someone sensed a bigger material possibility than circumstances ever let them pursue. Judgement in your Paternal Material Talent means that unclaimed potential is now yours to actually take up.`,
+      shadow: `The risk is sensing the same larger possibility in your own life and, out of old habit, still finding reasons to wait for better conditions.`,
+      path: `This talent asks you to answer the material calling with what you actually have available now. You are allowed to claim the potential they never got to. What material ambition would honor your line precisely by exceeding it?`,
+      positive: `You claim a material potential your line never got the chance to pursue, and that claiming honors them by finally living what they only sensed.`,
+      negative: `A sensed potential endlessly waiting for better conditions repeats an old deferral — the inherited possibility stays unclaimed exactly like it did before.`,
+    },
+
+    '21_H2': {
+      heading: `A Completion the Line Was Waiting to See`,
+      why: `Somewhere in your father's material line, a material goal came close to being reached and was never quite allowed to be called finished. The World in your Paternal Material Talent means genuine material completion is your inheritance, waiting to actually be claimed.`,
+      shadow: `The risk is repeating the same near-completion, reaching real material success and still finding a reason it doesn't count as done.`,
+      path: `This talent asks you to let a material goal actually be finished. You are allowed to be the one who finishes. What almost-done thing in your material life is asking you to break the family pattern and complete it?`,
+      positive: `You let a genuine material achievement be called complete, finishing what your line came close to but never quite claimed.`,
+      negative: `A material success that's reached but never acknowledged as finished repeats the old near-completion — the inherited capacity for genuine arrival stays just out of reach.`,
+    },
+
+    '22_H2': {
+      heading: `A Willingness to Risk Passed Down at the Right Moments`,
+      why: `Somewhere back along your father's material line, someone took a real, well-placed material risk when it mattered, rather than playing every situation safe. The Fool in your Paternal Material Talent means that calculated boldness is your inheritance.`,
+      shadow: `The risk is inheriting caution instead of the boldness, letting an old fear of loss override a genuinely good opportunity in front of you now.`,
+      path: `This talent asks you to size the risk with your own eyes, not old caution. You are allowed to take the practical risk when it matters — it's a family skill. What is the mattering moment in front of you right now?`,
+      positive: `You take a well-placed material risk when the moment actually calls for it, honoring an inherited boldness instead of an inherited fear.`,
+      negative: `Caution inherited in place of the actual boldness lets good opportunities pass unclaimed — the family skill for calculated risk goes unused out of old fear.`,
+    },
+
+
+    // ── Lineage Square Talents: Maternal Material Talent (I2) ───────────────
+
+    '1_I2': {
+      heading: `A Knack for Making Something From Very Little`,
+      why: `Somewhere in your mother's material line, someone could start a venture, a household economy, an income from bare circumstances — real, practical originating ability. The Magician in your Maternal Material Talent means launching from scratch is your inheritance.`,
+      shadow: `The risk is starting many things and finishing few, spending the inherited spark on the exciting opening and losing interest once the harder building begins.`,
+      path: `This talent asks you to carry one material venture past its beginning. You are allowed to make from abundance too, not only from scraps. What could your resourcefulness build if it finally had full materials?`,
+      positive: `You carry a genuine gift for material initiation, and staying with one venture past its start turns raw spark into something that actually lasts.`,
+      negative: `A spark spent only on beginnings repeats a pattern of starting without staying — the inherited talent stays a series of openings instead of a real build.`,
+    },
+
+    '2_I2': {
+      heading: `A Practical Instinct That Runs Ahead of the Numbers`,
+      why: `Somewhere back along your mother's material line, someone read a financial or practical situation correctly before the facts could confirm it. The High Priestess in your Maternal Material Talent means that instinct is your inheritance.`,
+      shadow: `The risk is trusting the instinct so privately it never gets acted on, letting a correct read go unused because it can't yet be justified on paper.`,
+      path: `This talent asks you to act on the instinct and let the numbers catch up. You are allowed to trust the practical instinct and let the numbers catch up. Where has that inherited gut-sense already saved you recently?`,
+      positive: `You trust a real practical instinct and act on it before it's fully provable, and that trust makes the gift actually useful instead of merely accurate in hindsight.`,
+      negative: `An instinct trusted only in private, after the fact, never gets to actually change an outcome.`,
+    },
+
+    '3_I2': {
+      heading: `A Belief That Making Sure Everyone's Fed and Held Is Simply What You Do`,
+      why: `Somewhere in your mother's material line, someone made certain the people around them were fed, housed, and materially cared for, as instinct rather than effort. The Empress in your Maternal Material Talent means that provision is your inheritance.`,
+      shadow: `The risk is providing for everyone except yourself, extending the care outward so consistently that your own material comfort quietly goes unattended.`,
+      path: `This talent asks you to include yourself in the providing. You are allowed to be fed and held too, not just to make sure of it for others. Who checks whether you've eaten, rested, been carried lately?`,
+      positive: `You provide for others and let yourself be provided for in turn, and that reciprocity keeps the inherited generosity sustainable instead of depleting.`,
+      negative: `Provision extended only outward eventually runs the well dry — the inherited generosity stops being sustainable once it excludes its own source.`,
+    },
+
+    '4_I2': {
+      heading: `The Job of Keeping Things Materially Organized, Without Ever Being Asked`,
+      why: `Somewhere back along your mother's material line, someone quietly organized the household economy, the logistics, the practical structure everyone else relied on without ever formally being asked to. The Emperor in your Maternal Material Talent means that organizing competence is your inheritance.`,
+      shadow: `The risk is holding the job forever without ever being relieved of it, keeping the organizing entirely on your own shoulders because no one else was ever asked to share it.`,
+      path: `This talent asks you to let the job be shared sometimes. You are allowed to resign from the unasked-for job sometimes. What would happen if the organizing waited for you to be actually willing?`,
+      positive: `You organize material life skillfully and let others share the load when it's genuinely offered, and that sharing makes the inherited competence sustainable rather than solitary.`,
+      negative: `An unasked-for job held indefinitely and alone becomes its own quiet burden — the inherited organizing gift never gets relieved because it was never questioned.`,
+    },
+
+    '5_I2': {
+      heading: `Practical Skills Nobody Ever Formally Taught You`,
+      why: `Somewhere in your mother's material line, someone carried real practical know-how learned by doing rather than by certificate. The Hierophant in your Maternal Material Talent means that untaught expertise is your inheritance.`,
+      shadow: `The risk is undervaluing the skill precisely because it wasn't formally credentialed.`,
+      path: `This talent asks you to name the skill as real expertise. You are allowed to own the skills nobody formally certified. What untaught competence of yours deserves to be named as expertise?`,
+      positive: `You claim an inherited, uncertified skill as genuine expertise, and that claiming is what finally lets it be valued at its actual worth.`,
+      negative: `A real skill dismissed as merely a knack goes underpriced and underused — the inherited expertise stays invisible for lack of a name.`,
+    },
+
+    '6_I2': {
+      heading: `A Sense of What Actually Matters When Resources Are Limited`,
+      why: `Somewhere back along your mother's material line, someone kept clear values intact even when money or resources were genuinely scarce. The Lovers in your Maternal Material Talent means that clarity is your inheritance.`,
+      shadow: `The risk is letting that clarity fade the moment resources become comfortable, forgetting under abundance the values that were so sharp under scarcity.`,
+      path: `This talent asks you to keep the clarity active even when it isn't required. You are allowed to keep the clarity even when resources aren't limited. What essential thing does your inheritance help you see that abundance tends to blur?`,
+      positive: `You keep the same material clarity whether resources are tight or plentiful, and that consistency makes the inherited values durable rather than situational.`,
+      negative: `Clarity about what matters that only shows up under scarcity isn't values, it's survival mode — the inherited gift stays dormant once things get easy.`,
+    },
+
+    '7_I2': {
+      heading: `Learning to Steer, Never to Ask for a Hand`,
+      why: `Somewhere in your mother's material line, someone drove a material goal forward alone, without waiting for permission or partnership to move. The Chariot in your Maternal Material Talent means self-directed material drive is your inheritance.`,
+      shadow: `The risk is refusing help even when it's genuinely offered, treating solo determination as the only legitimate way to reach a material goal.`,
+      path: `This talent asks you to keep the drive and add a hand. You are allowed to ask for a hand and keep the wheel. What are you steering alone right now that was never designed for one driver?`,
+      positive: `You keep real self-directed determination while letting help in when it's offered, and that combination actually accelerates the inherited drive.`,
+      negative: `Determination that refuses all help caps its own ceiling — the inherited drive stays solo-sized instead of reaching what partnership could build.`,
+    },
+
+    '8_I2': {
+      heading: `A Careful Sense of Fairness About Who Gets What`,
+      why: `Somewhere back along your mother's material line, someone divided resources, credit, and reward with real, careful fairness. Justice in your Maternal Material Talent means that fairness is your inheritance.`,
+      shadow: `The risk is applying that fairness to everyone except yourself, dividing carefully for others while leaving your own share consistently smallest.`,
+      path: `This talent asks you to include yourself in the fair division. You are allowed to include yourself in the fair share. When the careful dividing is done, what portion have you been leaving off your own plate?`,
+      positive: `You divide resources fairly, yourself included, and that inclusion makes the inherited fairness actually whole instead of self-sacrificing.`,
+      negative: `Fairness that always excludes the self isn't balance, it's quiet self-shortchanging — the inherited integrity stays incomplete.`,
+    },
+
+    '9_I2': {
+      heading: `A Quiet Competence for Handling Material Life Alone`,
+      why: `Somewhere in your mother's material line, someone managed real material responsibility in solitude and did it capably. The Hermit in your Maternal Material Talent means solitary material competence is your inheritance.`,
+      shadow: `The risk is staying solitary in it even when company would genuinely help.`,
+      path: `This talent asks you to let a task be witnessed or shared sometimes. You are allowed to be competent and accompanied. What material task could you let someone witness, or even share, this week?`,
+      positive: `You handle material responsibility capably and let it be shared when sharing would actually help, and that openness deepens rather than threatens the inherited competence.`,
+      negative: `Competence that refuses company even when company would help isolates its own gift — the inherited skill stays solitary by habit, not by necessity.`,
+    },
+
+    '10_I2': {
+      heading: `A Quiet Endurance for Material Life's Ups and Downs`,
+      why: `Somewhere back along your mother's material line, someone weathered real financial cycles without being wrecked by either extreme. The Wheel of Fortune in your Maternal Material Talent means that endurance is your inheritance.`,
+      shadow: `The risk is bracing so hard against the next downturn that you can't actually receive or enjoy the current upswing.`,
+      path: `This talent asks you to let the good stretch actually land as good. You are allowed to expect good stretches, not just endure hard ones. What upswing might you be bracing against instead of receiving?`,
+      positive: `You meet material cycles with earned steadiness in both directions, and that evenness lets you actually receive the good seasons instead of just surviving the hard ones.`,
+      negative: `Bracing permanently against the next downturn means never fully receiving the current upswing — the inherited endurance becomes vigilance instead of resilience.`,
+    },
+
+    '11_I2': {
+      heading: `A Softness That Somehow Never Actually Broke Under Material Strain`,
+      why: `Somewhere in your mother's material line, someone stayed gentle through real material hardship — softness that endured rather than hardened. Strength in your Maternal Material Talent means that gentleness-under-pressure is your inheritance.`,
+      shadow: `The risk is mistaking the gentleness for weakness under your own current strain, hardening reflexively instead of trusting the softness to hold.`,
+      path: `This talent asks you to trust that the softness already proved itself. You are allowed to stay soft — the strain already proved it doesn't break you. Where is your gentleness quietly outlasting circumstances that were supposed to harden you?`,
+      positive: `You stay gentle under real material pressure, and that endurance is proof the softness was never actually fragile.`,
+      negative: `Hardening reflexively under strain abandons a gift that had already proven itself — the inherited gentleness gets replaced by armor it never needed.`,
+    },
+
+    '12_I2': {
+      heading: `A Patience for Material Circumstances That Take Their Time to Change`,
+      why: `Somewhere back along your mother's material line, someone waited out a slow material circumstance without forcing it, and it eventually resolved on its own timing. The Hanged Man in your Maternal Material Talent means that patience is your inheritance.`,
+      shadow: `The risk is applying that patience to situations that actually need a push.`,
+      path: `This talent asks you to nudge, sometimes, instead of only waiting. You are allowed to nudge the slow circumstances instead of only waiting them out. What patient situation of yours might respond to one small push?`,
+      positive: `You can tell a circumstance that needs time from one that needs a nudge, and that discernment makes the inherited patience actually productive.`,
+      negative: `Patience applied indiscriminately to every slow situation becomes passivity — the inherited gift stops distinguishing waiting from stalling.`,
+    },
+
+    '13_I2': {
+      heading: `A Real Capacity to Rebuild Materially From Almost Nothing`,
+      why: `Somewhere in your mother's material line, someone lost real material ground and rebuilt from close to nothing, more than once if needed. Transformation in your Maternal Material Talent means that rebuilding capacity is your inheritance.`,
+      shadow: `The risk is waiting for an actual collapse to use the gift, letting things get much worse than necessary before finally rebuilding.`,
+      path: `This talent asks you to rebuild before ruin forces it. You are allowed to rebuild without waiting for the ruin. What could you renovate now, while things still stand?`,
+      positive: `You use your rebuilding capacity proactively rather than only in crisis, and that timing makes the inherited resilience actually protective instead of reactive.`,
+      negative: `A rebuilding gift used only after total collapse lets damage go further than it needed to — the inherited capacity waits for an emergency it doesn't require.`,
+    },
+
+    '14_I2': {
+      heading: `A Real Skill for Making Limited Resources Actually Stretch`,
+      why: `Somewhere back along your mother's material line, someone made scarce resources genuinely go further through real practical skill, not deprivation. Temperance in your Maternal Material Talent means that stretching ability is your inheritance.`,
+      shadow: `The risk is stretching resources even when stretching is no longer necessary, staying in scarcity-mode long after actual scarcity has passed.`,
+      path: `This talent asks you to let margin be margin sometimes. You are allowed to have enough that nothing needs stretching. What would you do with real, unstretched margin?`,
+      positive: `You stretch resources skillfully when needed and let margin simply be margin when it's genuinely available, and that flexibility is the inherited skill at its fullest.`,
+      negative: `Stretching resources out of habit rather than necessity turns a skill into a limitation — the inherited talent keeps manufacturing scarcity that isn't actually there.`,
+    },
+
+    '15_I2': {
+      heading: `A Complicated Relationship to Material Dependence`,
+      why: `Somewhere in your mother's material line, someone wrestled honestly with material dependence — needing help, receiving support — rather than pretending independence was always possible or always required. The Devil in your Maternal Material Talent means that honest wrestling is your inheritance.`,
+      shadow: `The risk is inheriting the discomfort around dependence without inheriting the honest examination that once accompanied it, refusing support altogether rather than examining the discomfort.`,
+      path: `This talent asks you to depend and examine it honestly, rather than avoiding it outright. You are allowed to depend and remain whole. What support could you accept this season without it costing your self-respect?`,
+      positive: `You accept material support when it's genuinely useful and examine the discomfort honestly rather than refusing it outright, and that honesty lets dependence become collaboration instead of shame.`,
+      negative: `Refusing all material dependence just because it's uncomfortable leaves real help unclaimed — the discomfort passed down without the honest reckoning that should accompany it.`,
+    },
+
+    '16_I2': {
+      heading: `A Material Loss That Was Survived but Never Fully Discussed`,
+      why: `Somewhere back along your mother's material line, a real financial loss happened and was survived — but never fully talked through afterward. The Tower in your Maternal Material Talent means resilience through material loss is your inheritance, alongside an unfinished conversation.`,
+      shadow: `The risk is repeating a version of the same loss because the original one was never actually processed, only survived.`,
+      path: `This talent asks you to speak about the loss that was only survived. You are allowed to speak about the loss that was only survived. What might your money worries lose their grip on once the old story is finally told?`,
+      positive: `You name and process an old material loss rather than only having survived it, and that processing finally lets the pattern stop repeating.`,
+      negative: `A loss only survived and never discussed keeps its grip through silence — the inherited resilience is real, but the unfinished story keeps recreating the fear.`,
+    },
+
+    '17_I2': {
+      heading: `A Quiet, Modest Hope That Things Would Materially Get Better`,
+      why: `Somewhere in your mother's material line, someone held onto real hope for better material circumstances, sized modestly enough to feel safe. The Star in your Maternal Material Talent means that hope is your inheritance.`,
+      shadow: `The risk is keeping the hope permanently modest even once circumstances could support something larger.`,
+      path: `This talent asks you to let the hope grow to match what's actually possible now. You are allowed to hope at a size she couldn't afford. What better-than-modest future would you name out loud if hope were free?`,
+      positive: `You let material hope grow to actually match your present possibility, and that growth honors the inherited hope by finally giving it enough room.`,
+      negative: `Hope kept permanently modest regardless of actual circumstances shrinks a real capacity for more into a habit of expecting less.`,
+    },
+
+    '18_I2': {
+      heading: `A Material Worry That Was Felt More Than It Was Ever Explained`,
+      why: `Somewhere back along your mother's material line, someone carried a real financial fear that was never given words, only felt and passed along as atmosphere. The Moon in your Maternal Material Talent means that unnamed worry is your inheritance, waiting to finally be named.`,
+      shadow: `The risk is letting the felt worry run your decisions without ever checking it against your own actual, current circumstances.`,
+      path: `This talent asks you to translate the felt worry into words and test it. You are allowed to translate the felt worry into words and check it. What is the inherited unease actually about — and does your present life still match it?`,
+      positive: `You name the inherited financial fear plainly and check it against your real circumstances, and that clarity finally lets it stop steering decisions from the shadows.`,
+      negative: `A felt worry never translated into words keeps steering decisions invisibly — the inherited fear runs the show precisely because it was never named.`,
+    },
+
+    '19_I2': {
+      heading: `A Warmth That Stayed Intact Even During Real Material Hardship`,
+      why: `Somewhere in your mother's material line, someone stayed genuinely warm even during real material hardship. The Sun in your Maternal Material Talent means that intact warmth is your inheritance.`,
+      shadow: `The risk is assuming the warmth should be reserved until things are materially easier, holding back generosity as if it were conditional on comfort.`,
+      path: `This talent asks you to let the warmth show now, regardless of current material conditions. You are allowed to trust that your warmth survives hardship — it already has for generations. Who needs that intact warmth from you right now?`,
+      positive: `You let genuine warmth show regardless of material circumstance, proving the inherited gift was never actually conditional on comfort.`,
+      negative: `Warmth withheld until things feel materially easier repeats a needless bargain — the inherited generosity was never actually conditional, only treated as if it were.`,
+    },
+
+    '20_I2': {
+      heading: `A Sense of Material Potential That Circumstances Never Let Her Pursue`,
+      why: `Somewhere back along your mother's material line, someone sensed a bigger material possibility than circumstances ever let them pursue. Judgement in your Maternal Material Talent means that unclaimed potential is now yours to actually take up.`,
+      shadow: `The risk is sensing the same larger possibility in your own life and, out of old habit, still finding reasons to wait for better conditions.`,
+      path: `This talent asks you to answer the material calling with what you actually have available now. You are allowed to pursue what her circumstances forbade. What material possibility would live twice if you lived it — once for you, once for her?`,
+      positive: `You claim a material potential your line never got the chance to pursue, and that claiming honors them by finally living what they only sensed.`,
+      negative: `A sensed potential endlessly waiting for better conditions repeats an old deferral — the inherited possibility stays unclaimed exactly like it did before.`,
+    },
+
+    '21_I2': {
+      heading: `A Quiet Sense That What You Have Can Actually Be Enough`,
+      why: `Somewhere in your mother's material line, a material goal came close to being reached and was never quite allowed to be called finished, or enough. The World in your Maternal Material Talent means genuine material sufficiency is your inheritance, waiting to actually be claimed.`,
+      shadow: `The risk is repeating the same near-completion, reaching real material stability and still finding a reason it doesn't count as enough.`,
+      path: `This talent asks you to let what you have actually be counted as enough. You are allowed to feel the enoughness now, not after the next milestone. What do you already have that, honestly counted, is enough?`,
+      positive: `You let a genuine material sufficiency be acknowledged as enough, finishing what your line came close to but never quite claimed.`,
+      negative: `A material stability that's reached but never acknowledged as enough repeats the old near-completion — the inherited capacity for genuine arrival stays just out of reach.`,
+    },
+
+    '22_I2': {
+      heading: `A Willingness to Take a Real Practical Risk When It Mattered`,
+      why: `Somewhere back along your mother's material line, someone took a real, well-placed material risk when it mattered, rather than playing every situation safe. The Fool in your Maternal Material Talent means that calculated boldness is your inheritance.`,
+      shadow: `The risk is inheriting caution instead of the boldness, letting an old fear of loss override a genuinely good opportunity in front of you now.`,
+      path: `This talent asks you to size the risk with your own eyes, not old caution. You are allowed to take the practical risk when it matters — it's a family skill. What is the mattering moment in front of you right now?`,
+      positive: `You take a well-placed material risk when the moment actually calls for it, honoring an inherited boldness instead of an inherited fear.`,
+      negative: `Caution inherited in place of the actual boldness lets good opportunities pass unclaimed — the family skill for calculated risk goes unused out of old fear.`,
+    },
+
   }; // end nodes
 
 

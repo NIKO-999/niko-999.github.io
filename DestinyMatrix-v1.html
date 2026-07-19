@@ -2228,6 +2228,32 @@ appendHint();
       pos: new THREE.Vector3(_R * 0.5974, -_R * 0.2479, 0), color:0xCCDDFF, twk:{spd:1.25,off:5.1} },
     { key:'I1', num:_vals.atI1, label:'Maternal Feminine Line',
       pos: new THREE.Vector3(-_R * 0.4487, -_R * 0.2418, 0), color:0xCCDDFF, twk:{spd:0.80,off:1.4} },
+
+    // ── Lineage Square Talents (F2/G2/H2/I2) — per research/11-Research-
+    // Updates/13 & the Calculation Guide's own Page 6 language ("F2 =
+    // paternal-line talent, G2 = maternal-line talent"): each corner's
+    // "2" value, previously computed in _calcVals() but deferred, is the
+    // inherited-talent counterpart to its Ancestral Square identity — F2 is
+    // F's (Paternal Spiritual) talent, G2 is G's (Maternal Spiritual), H2
+    // is H's (Paternal Material), I2 is I's (Maternal Material). This is
+    // additive, not a rename: F/G/H/I and F1/G1/H1/I1 keep their existing
+    // identity and content untouched, per NON_NEGOTIABLE_RULES.md's
+    // Absolute System Isolation.
+    //
+    // Placement: pulled inward along each corner's own diagonal (135°/45°/
+    // -45°/-135°) at a smaller radius than F1-I1, since no diagram position
+    // is specified for this family beyond "nested off" its parent corner.
+    // Verified by direct-distance check against every existing micro-node,
+    // core star, and F1-I1 (min separation ≈0.22-0.25R, in line with the
+    // ≈0.26R baseline spacing already used elsewhere on this diagram).
+    { key:'F2', num:_vals.atF2, label:'Paternal Spiritual Talent',
+      pos: new THREE.Vector3(-_R * 0.1556, _R * 0.1556, 0), color:0xCCDDFF, twk:{spd:1.05,off:0.9} },
+    { key:'G2', num:_vals.atG2, label:'Maternal Spiritual Talent',
+      pos: new THREE.Vector3(_R * 0.1697, _R * 0.1697, 0), color:0xCCDDFF, twk:{spd:0.90,off:4.4} },
+    { key:'H2', num:_vals.atH2, label:'Paternal Material Talent',
+      pos: new THREE.Vector3(_R * 0.1626, -_R * 0.1626, 0), color:0xCCDDFF, twk:{spd:1.10,off:2.7} },
+    { key:'I2', num:_vals.atI2, label:'Maternal Material Talent',
+      pos: new THREE.Vector3(-_R * 0.1768, -_R * 0.1768, 0), color:0xCCDDFF, twk:{spd:0.85,off:5.6} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2464,6 +2490,8 @@ appendHint();
       ? 'Money Channel'
       : (data.key === 'F1' || data.key === 'G1' || data.key === 'H1' || data.key === 'I1')
       ? 'Ancestral Tasks'
+      : (data.key === 'F2' || data.key === 'G2' || data.key === 'H2' || data.key === 'I2')
+      ? 'Lineage Square Talents'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -2712,6 +2740,17 @@ appendHint();
     MICRO[14].num = _vals.atH1;
     _microTags[15].querySelector('.t-num').textContent = String(_vals.atI1);
     MICRO[15].num = _vals.atI1;
+
+    // Nodes 16-19: Lineage Square Talents (F2/G2/H2/I2) — recomputed from
+    // the current ancestral corners each date change, same as F1-I1.
+    _microTags[16].querySelector('.t-num').textContent = String(_vals.atF2);
+    MICRO[16].num = _vals.atF2;
+    _microTags[17].querySelector('.t-num').textContent = String(_vals.atG2);
+    MICRO[17].num = _vals.atG2;
+    _microTags[18].querySelector('.t-num').textContent = String(_vals.atH2);
+    MICRO[18].num = _vals.atH2;
+    _microTags[19].querySelector('.t-num').textContent = String(_vals.atI2);
+    MICRO[19].num = _vals.atI2;
 
     return true;
   };
