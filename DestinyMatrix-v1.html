@@ -689,6 +689,7 @@
 <script src="js/karmic-debt-content.js"></script>
 <script src="js/past-life-content.js"></script>
 <script src="js/sexual-line-content.js"></script>
+<script src="js/career-paths-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2519,7 +2520,15 @@ appendHint();
        ${mc.negative ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
          <div class="pb-full-text">${mc.negative}</div>
-       </div>` : ''}` : '';
+       </div>` : ''}
+       ${data.key === 'MEP' && window.DCareerPathsContent ? (() => {
+         const cp = DCareerPathsContent.get(data.num);
+         return cp ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">CAREER PATHS</div>
+           <div class="pb-full-text"><em>${cp.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${cp.text}</div>
+         </div>` : '';
+       })() : ''}` : '';
 
     _mBanner.classList.add('open');
     _mBanner.scrollTop = 0;
