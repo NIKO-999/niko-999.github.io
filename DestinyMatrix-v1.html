@@ -2110,10 +2110,23 @@ appendHint();
     // atCG (Inner Right, reduce(C+E)) is the same value already computed
     // above to build the Money/Love chain — exposed here as its own display
     // value for the "Relationship with Money" Money Channel sub-position.
+
+    // Heart Zone (research/05-Psychological-Interpretations/Heart-Zone.md):
+    // "the Arcanum that sits along the Earth and Sky lines, next to the
+    // Character Zone... In the body, this is the Anahata chakra." Two
+    // values, sky-line (vertical/spiritual desire) and earth-line
+    // (horizontal/material desire) — these are exactly js/matrix-engine.js's
+    // existing skyLineSum=reduce(B+D) and earthLineSum=reduce(A+C)
+    // intermediates (feeding its "Three Life Destinies" calc), never before
+    // exposed as their own display values. No new formula invented.
+    const hzVv = _rd(B + D);  // vertical line / spiritual desire
+    const hzHv = _rd(A + C);  // horizontal line / material desire
+
     return {
       love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
       atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
-      atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v, // computed, not yet shown as stars
+      atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v,
+      atHZV: hzVv, atHZH: hzHv,
     };
   }
 
@@ -2255,6 +2268,22 @@ appendHint();
       pos: new THREE.Vector3(_R * 0.1626, -_R * 0.1626, 0), color:0xCCDDFF, twk:{spd:1.10,off:2.7} },
     { key:'I2', num:_vals.atI2, label:'Maternal Material Talent',
       pos: new THREE.Vector3(-_R * 0.1768, -_R * 0.1768, 0), color:0xCCDDFF, twk:{spd:0.85,off:5.6} },
+
+    // ── Heart Zone (Anahata/Heart Chakra) — research/05-Psychological-
+    // Interpretations/Heart-Zone.md: "the Arcanum that sits along the Earth
+    // and Sky lines, next to the Character Zone... In the body, this is
+    // the Anahata chakra." Two values — vertical (spiritual desire) and
+    // horizontal (material desire) — reusing js/matrix-engine.js's existing
+    // skyLineSum=reduce(B+D) / earthLineSum=reduce(A+C) intermediates
+    // (never before displayed on their own). Positioned near Core Character
+    // (A), per the source's own description and the separate Chakra-
+    // Correspondence diagram's "green circle... near the Core Character
+    // arm"; verified by direct-distance check (min separation ≈0.32-0.36R,
+    // clear of every existing star).
+    { key:'HZV', num:_vals.atHZV, label:'Heart Zone · Spiritual Desire',
+      pos: new THREE.Vector3(-_R * 0.6338, _R * 0.0891, 0), color:0x66E8A0, twk:{spd:0.95,off:1.6} },
+    { key:'HZH', num:_vals.atHZH, label:'Heart Zone · Material Desire',
+      pos: new THREE.Vector3(-_R * 0.8159, -_R * 0.3297, 0), color:0x66E8A0, twk:{spd:1.00,off:3.9} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2493,6 +2522,8 @@ appendHint();
       ? 'Ancestral Tasks'
       : (data.key === 'F2' || data.key === 'G2' || data.key === 'H2' || data.key === 'I2')
       ? 'Lineage Square Talents'
+      : (data.key === 'HZV' || data.key === 'HZH')
+      ? 'Heart Zone'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -2760,6 +2791,13 @@ appendHint();
     MICRO[18].num = _vals.atH2;
     _microTags[19].querySelector('.t-num').textContent = String(_vals.atI2);
     MICRO[19].num = _vals.atI2;
+
+    // Nodes 20-21: Heart Zone (HZV/HZH) — recomputed from the live Sky/Earth
+    // line values each date change.
+    _microTags[20].querySelector('.t-num').textContent = String(_vals.atHZV);
+    MICRO[20].num = _vals.atHZV;
+    _microTags[21].querySelector('.t-num').textContent = String(_vals.atHZH);
+    MICRO[21].num = _vals.atHZH;
 
     return true;
   };

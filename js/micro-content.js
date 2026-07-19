@@ -4788,6 +4788,408 @@ window.DMicroContent = (function () {
       negative: `Caution inherited in place of the actual boldness lets good opportunities pass unclaimed — the family skill for calculated risk goes unused out of old fear.`,
     },
 
+
+    // ── Heart Zone: Spiritual Desire, vertical line (HZV) ──────────────────
+
+    '1_HZV': {
+      heading: `Your Heart Wants to Create Its Own Reality`,
+      why: `Underneath everything else, your heart wants to discover its own spiritual power and build a destiny that's actually authored by you — not one you're quietly living out on someone else's terms. The Magician here names a heart that wants mastery over its own becoming, guided by intuition rather than instruction.`,
+      shadow: `When this desire gets blocked, you do what looks right instead of what feels true, and the gap between the two starts to feel like static — a low hum of not-quite-here-ness that no amount of external success actually quiets.`,
+      path: `The way back is small: one choice this week made from your own intuitive pull rather than the expected script. You are allowed to want to author your own life. What would you create today if you trusted you were already spiritually equipped to?`,
+      positive: `You create from your own intuitive authority, and life stops feeling like a script you're reading from someone else's hand.`,
+      negative: `A life built on what looks right instead of what feels true keeps generating a quiet static that success alone never resolves.`,
+    },
+
+    '2_HZV': {
+      heading: `Your Heart Wants Harmony With Its Own Inner Knowing`,
+      why: `Your heart's deepest wish is simple and rarely spoken: to trust its own intuition enough to actually live by it. The High Priestess here names a desire for inner wisdom to be believed, not just noticed in passing.`,
+      shadow: `Blocked, this shows up as a persistent second-guessing — sensing something clearly and still waiting for outside confirmation before it counts as real.`,
+      path: `The path is trusting one inner knowing today without asking anyone to confirm it first. You are allowed to believe your own intuition on its own authority. What do you already know that you're still waiting for permission to trust?`,
+      positive: `You trust your own inner knowing without needing it confirmed, and your spiritual awareness deepens simply because you finally believe it.`,
+      negative: `Waiting endlessly for outside confirmation of an inner knowing keeps your own wisdom permanently on probation.`,
+    },
+
+    '3_HZV': {
+      heading: `Your Heart Wants a Life of Beauty and Belonging`,
+      why: `Your heart wants harmony with nature, with the people around it, with a creative force larger than any single achievement — a nurturing, productive life filled with love and beauty. The Empress here names desire for a rich, connected existence, not just a comfortable one.`,
+      shadow: `Blocked, you can end up productive and surrounded by very little beauty at all — busy in a way that quietly starves the part of you that actually wanted connection and loveliness.`,
+      path: `The path is letting one ordinary moment today be beautiful on purpose. You are allowed to want a life that's lovely, not just functional. Where has your life gotten productive at the cost of getting lovely?`,
+      positive: `You let beauty and connection back into your ordinary days, and productivity stops being the only thing your life is measured by.`,
+      negative: `A life optimized purely for output quietly starves the desire for beauty it was supposed to be in service of.`,
+    },
+
+    '4_HZV': {
+      heading: `Your Heart Wants a Foundation Sturdy Enough to Trust`,
+      why: `Your heart wants a structured, solid spiritual foundation — to feel genuinely secure, managing life through conscious choice rather than reactive scrambling. The Emperor here names a desire for real, felt stability, not just the appearance of control.`,
+      shadow: `Blocked, this can turn into controlling everything in sight because nothing underneath ever feels sturdy enough to relax into.`,
+      path: `The path is building one small, real piece of structure rather than gripping the whole picture at once. You are allowed to want to feel secure without controlling everything. What structure, built rather than gripped, would let you actually rest?`,
+      positive: `You build real spiritual security through conscious choice, and control finally loosens because the foundation underneath is genuinely sturdy.`,
+      negative: `Gripping everything because nothing feels sturdy enough just proves, again, that nothing was ever actually secured — only held.`,
+    },
+
+    '5_HZV': {
+      heading: `Your Heart Wants Wisdom Worth Passing On`,
+      why: `Your heart wants to learn spiritual teachings, spread real wisdom, and receive guidance — fulfillment through being in harmony with tradition and shared meaning. The Hierophant here names a desire to belong to something larger and to hand something forward.`,
+      shadow: `Blocked, this can turn into collecting teachings without ever letting any of them actually change you, wisdom accumulated like credentials rather than lived.`,
+      path: `The path is choosing one teaching you've already collected and actually living by it this week. You are allowed to want guidance and belonging both. Which piece of wisdom have you learned but not yet lived?`,
+      positive: `You live the wisdom you've gathered rather than only collecting it, and that embodiment is what finally lets it feel like belonging instead of accumulation.`,
+      negative: `Wisdom gathered but never lived stays inert — the desire for genuine belonging goes unmet no matter how much is learned.`,
+    },
+
+    '6_HZV': {
+      heading: `Your Heart Wants Love in Its Highest Form`,
+      why: `Your heart wants to find real, deep spiritual connection — a soulmate bond, love felt at its fullest rather than its most convenient. The Lovers here names a desire for genuine, chosen intimacy, not merely companionship.`,
+      shadow: `Blocked, this can turn into settling for adequate connection while quietly starving for the deep kind, afraid that wanting more makes you ungrateful for what you have.`,
+      path: `The path is naming, honestly, what depth of connection you actually want. You are allowed to want real spiritual intimacy, not just company. What would you ask for in love if wanting more didn't feel greedy?`,
+      positive: `You name and pursue the depth of connection you actually want, and that honesty is what finally lets real intimacy become possible.`,
+      negative: `Settling for adequate connection out of guilt keeps the heart quietly starved for the depth it was actually built to want.`,
+    },
+
+    '7_HZV': {
+      heading: `Your Heart Wants to Know Nothing Can Stop It`,
+      why: `Your heart wants to discover its own inner strength and will — real spiritual progress, a path it's charting itself, and the felt certainty that no obstacle is actually final. The Chariot here names a desire for unstoppable, self-directed momentum.`,
+      shadow: `Blocked, this can turn into constant motion that never actually proves the point, since proving requires stopping long enough to notice you've already arrived somewhere.`,
+      path: `The path is letting one recent obstacle count as evidence you're already unstoppable. You are allowed to want proof of your own resilience. What difficulty have you already moved through that deserves to count as proof?`,
+      positive: `You let real, already-lived evidence of your resilience actually register, and the certainty you were chasing turns out to already be earned.`,
+      negative: `Constant motion that never pauses to notice what's already been overcome keeps the proof you're seeking permanently just out of reach.`,
+    },
+
+    '8_HZV': {
+      heading: `Your Heart Wants a Life Guided by Fairness`,
+      why: `Your heart wants harmony with truth and justice — to understand karma, and to guide its own life by real, felt fairness rather than convenient rules. Justice here names a desire for integrity as a way of living, not just a standard applied to others.`,
+      shadow: `Blocked, this can turn into a private tally of everyone else's unfairness while your own conduct goes quietly unexamined.`,
+      path: `The path is applying today's fairness standard to yourself first. You are allowed to want a genuinely fair life, starting with your own conduct. Where would your own verdict change if you judged yourself as carefully as you judge fairness in the world?`,
+      positive: `You guide your own life by a fairness applied evenly, inward and outward, and that evenness is what your heart was actually asking for.`,
+      negative: `A fairness tracked only outward while the self stays exempt never actually satisfies the heart's real desire for integrity.`,
+    },
+
+    '9_HZV': {
+      heading: `Your Heart Wants to Go Inward and Actually Find Itself`,
+      why: `Your heart wants a real inner journey — solitude deep enough to reach genuine spiritual understanding, not just a break from noise. The Hermit here names a desire for depth reached alone, on purpose.`,
+      shadow: `Blocked, this can turn into staying busy specifically to avoid the solitude that would actually deliver what you're craving.`,
+      path: `The path is one real hour of solitude, chosen rather than accidental. You are allowed to want to be alone with yourself on purpose. What would you find if you actually let yourself sit still long enough to look?`,
+      positive: `You take the solitude your heart has been asking for, and what you find there is exactly the understanding you were craving.`,
+      negative: `Staying busy to avoid solitude keeps the heart's actual desire — depth, found alone — permanently deferred.`,
+    },
+
+    '10_HZV': {
+      heading: `Your Heart Wants to Trust the Turning of Its Own Cycles`,
+      why: `Your heart wants harmony with universal timing — to accept change as it arrives and stay in the flow rather than fighting every shift. The Wheel of Fortune here names a desire for trust in cycles, not certainty about outcomes.`,
+      shadow: `Blocked, this can turn into treating every downturn as a verdict, white-knuckling each low point instead of trusting it will actually turn.`,
+      path: `The path is meeting today's specific change with curiosity instead of resistance. You are allowed to want to trust the timing instead of controlling it. What current shift might go easier if you actually trusted its timing?`,
+      positive: `You meet change with trust in its timing rather than resistance to its arrival, and the flow your heart wanted becomes available.`,
+      negative: `Fighting every shift as if it were a verdict keeps the heart from ever actually settling into the trust it was asking for.`,
+    },
+
+    '11_HZV': {
+      heading: `Your Heart Wants to Transform Its Fear Through Love`,
+      why: `Your heart wants to discover its inner power, face its fears directly, and let real transformation happen through love rather than force. Strength here names a desire for patient, gentle courage, not aggressive conquest.`,
+      shadow: `Blocked, this can turn into gripping harder at exactly the moments gentleness was actually being asked for.`,
+      path: `The path is meeting one current fear with softness instead of force. You are allowed to want to be gentle with your own fear. What would change if you met your fear the way you'd meet someone you loved who was afraid?`,
+      positive: `You meet your own fear with patience and love rather than force, and that gentleness is what actually transforms it.`,
+      negative: `Gripping harder at a fear that was asking for gentleness only reinforces it — the heart's real desire for patient courage goes unmet.`,
+    },
+
+    '12_HZV': {
+      heading: `Your Heart Wants to Surrender and See Differently`,
+      why: `Your heart wants to trust the flow completely and view its own life from a genuinely different angle — surrender, not as defeat, but as a change of vantage point. The Hanged Man here names a desire for perspective gained through letting go.`,
+      shadow: `Blocked, this can turn into gripping the old vantage point precisely because surrendering it feels like losing control entirely.`,
+      path: `The path is letting one current situation be seen from an angle you haven't tried yet. You are allowed to want a new perspective more than you want to be right. What might this situation look like from underneath instead of straight on?`,
+      positive: `You let surrender actually change your vantage point, and the new view is exactly the perspective your heart was asking for.`,
+      negative: `Gripping the familiar angle because surrender feels risky keeps the heart's desire for a genuinely new perspective out of reach.`,
+    },
+
+    '13_HZV': {
+      heading: `Your Heart Wants to Leave the Old Self Behind`,
+      why: `Your heart wants to release old identities, attachments, and emotional weight, and be genuinely reborn — spiritual transformation as an active, wanted thing, not a crisis to survive. Transformation here names a desire for real, willing endings.`,
+      shadow: `Blocked, this can turn into holding an identity long past its natural life simply because letting it go feels like losing yourself entirely.`,
+      path: `The path is naming one identity that's actually ready to end. You are allowed to want to become someone new. What version of yourself is your heart already finished being?`,
+      positive: `You let an outdated identity actually end, and the rebirth your heart wanted has real room to begin.`,
+      negative: `Holding an identity past its natural life keeps the heart's real desire for rebirth waiting on a permission that was never actually required.`,
+    },
+
+    '14_HZV': {
+      heading: `Your Heart Wants Everything in Harmony at Once`,
+      why: `Your heart wants inner peace and spiritual balance — a life where the different parts of you are actually working together rather than taking turns. Temperance here names a desire for integration, not just truce between opposites.`,
+      shadow: `Blocked, this can turn into oscillating hard between extremes and calling the alternation 'balance,' when balance was actually being asked for the whole time.`,
+      path: `The path is finding one small blend today instead of choosing one extreme. You are allowed to want genuine harmony, not just alternating extremes. What two parts of your life are ready to actually work together instead of taking turns?`,
+      positive: `You find a genuine blend rather than alternating extremes, and that integration is exactly the harmony your heart was asking for.`,
+      negative: `Swinging hard between extremes and calling it balance keeps the heart's real desire for integration permanently unmet.`,
+    },
+
+    '15_HZV': {
+      heading: `Your Heart Wants to Look Directly at Its Own Darkness`,
+      why: `Your heart wants to explore its desires, its shadow, even its compulsions — to face its own darkness honestly rather than pretend it isn't there. The Devil here names a desire for real self-confrontation, not denial dressed as virtue.`,
+      shadow: `Blocked, this can turn into performing a cleaner version of yourself while the actual desire or compulsion runs quietly, unexamined, underneath.`,
+      path: `The path is naming one real desire or compulsion honestly, without judgment. You are allowed to want to know your own shadow. What part of yourself have you been performing past instead of actually looking at?`,
+      positive: `You look at your own shadow honestly instead of performing past it, and that honesty is exactly the self-confrontation your heart wanted.`,
+      negative: `Performing a cleaner self while the real desire runs underneath keeps the heart's wish for honest self-knowledge unmet.`,
+    },
+
+    '16_HZV': {
+      heading: `Your Heart Wants a Complete Spiritual Rebirth`,
+      why: `Your heart wants significant transformation — freedom from old patterns and an actual spiritual rebirth, not a minor adjustment. The Tower here names a desire for real, structural change, even if it's disruptive.`,
+      shadow: `Blocked, this can turn into making small, cosmetic changes that leave the old pattern's foundation completely intact.`,
+      path: `The path is letting one old pattern actually fall rather than patching it again. You are allowed to want real change, not just the appearance of it. What pattern is your heart ready to let collapse for good?`,
+      positive: `You let an old pattern actually fall rather than patching it, and the real rebirth your heart wanted finally has room to happen.`,
+      negative: `Cosmetic changes to a pattern whose foundation stays intact keep the heart's desire for genuine rebirth permanently postponed.`,
+    },
+
+    '17_HZV': {
+      heading: `Your Heart Wants to Live an Inspiring Life`,
+      why: `Your heart wants divine guidance and to remain filled with hope — to shine spiritually and actually live in a way that inspires the people around it. The Star here names a desire for visible, generous hope, not private optimism kept to yourself.`,
+      shadow: `Blocked, this can turn into hoping quietly and privately, as if letting hope be seen would somehow be presumptuous or naive.`,
+      path: `The path is letting one piece of your hope be visible today. You are allowed to want to inspire, not just privately hope. What hope of yours would actually help someone if you let them see it?`,
+      positive: `You let your hope be visible rather than private, and that visibility is exactly the inspiring life your heart was asking for.`,
+      negative: `Hope kept strictly private denies the heart the inspiring, generous life it was actually built to want.`,
+    },
+
+    '18_HZV': {
+      heading: `Your Heart Wants to Unravel Its Own Mysteries`,
+      why: `Your heart wants to explore the subconscious, strengthen its intuition, and actually understand its own spiritual mysteries rather than leave them unexamined. The Moon here names a desire for depth pursued deliberately, not just felt vaguely.`,
+      shadow: `Blocked, this can turn into staying at the surface of a feeling because going deeper feels like it might reveal something you're not ready to see.`,
+      path: `The path is following one recurring feeling all the way to its actual source. You are allowed to want to understand your own depths, not just feel them. What feeling keeps recurring that you haven't yet followed to where it actually comes from?`,
+      positive: `You follow a recurring feeling to its real source, and that pursuit is exactly the self-understanding your heart was asking for.`,
+      negative: `Staying at the surface of a feeling out of fear of what's underneath keeps the heart's desire for real depth unmet.`,
+    },
+
+    '19_HZV': {
+      heading: `Your Heart Wants Pure, Unhidden Joy`,
+      why: `Your heart wants real happiness and spiritual enlightenment — a life full of love where it gets to express itself completely, without editing. The Sun here names a desire for joy that's whole, not managed or rationed.`,
+      shadow: `Blocked, this can turn into performing lightness while the real joy stays muted, as if full expression would be somehow too much for the room.`,
+      path: `The path is letting one piece of real joy show today, unmanaged. You are allowed to want joy at full volume. What happiness have you been quietly editing down to something more acceptable?`,
+      positive: `You let your joy show at its actual size, and that full expression is exactly what your heart was asking for.`,
+      negative: `Editing joy down to something more acceptable keeps the heart's real desire for full, unhidden happiness unmet.`,
+    },
+
+    '20_HZV': {
+      heading: `Your Heart Wants to Break Free From the Past for Good`,
+      why: `Your heart wants to release the burdens of the past and reach a genuinely new level of consciousness — real spiritual awakening, not a partial, managed improvement. Judgement here names a desire for full release, not incremental relief.`,
+      shadow: `Blocked, this can turn into carrying the same old weight while telling yourself you've already mostly dealt with it.`,
+      path: `The path is naming one piece of the past that's actually still being carried. You are allowed to want full release, not partial relief. What burden are you still carrying that you've told yourself is already handled?`,
+      positive: `You name and release what's actually still being carried, and the full awakening your heart wanted has real room to arrive.`,
+      negative: `Believing an old burden is already handled while still carrying its weight keeps full release just out of reach.`,
+    },
+
+    '21_HZV': {
+      heading: `Your Heart Wants to Feel Genuinely Complete`,
+      why: `Your heart wants integration, spiritual fulfillment, and the actual feeling of completion — merging with something larger, not just checking off another achievement. The World here names a desire for wholeness, felt, not just accomplished.`,
+      shadow: `Blocked, this can turn into reaching real milestones and still feeling like something essential hasn't quite landed.`,
+      path: `The path is letting one genuine accomplishment actually be felt as complete, today. You are allowed to want to feel done, not just be done. What milestone have you reached that you haven't yet let yourself feel complete?`,
+      positive: `You let a genuine accomplishment actually be felt as complete, and that felt wholeness is exactly what your heart was asking for.`,
+      negative: `Reaching milestones without ever letting the completion be felt keeps the heart's desire for genuine wholeness unmet.`,
+    },
+
+    '22_HZV': {
+      heading: `Your Heart Wants to Take a Fearless Leap Into Life`,
+      why: `Your heart wants to be completely free — to leap without a net, trust the flow, stay open to new experience, and keep its inner child's sense of wonder alive. The Fool here names a desire for genuine, faithful openness, not caution disguised as wisdom.`,
+      shadow: `Blocked, this can turn into calling caution wisdom, closing off the very openness your heart was actually asking to keep alive.`,
+      path: `The path is one small, real leap today, taken with open eyes. You are allowed to want freedom more than certainty. What would you leap toward this month if trust in the unknown were enough of a reason?`,
+      positive: `You take a real leap in faith rather than settling for caution disguised as wisdom, and the freedom your heart wanted becomes lived, not just longed for.`,
+      negative: `Calling caution wisdom keeps the heart's real desire for open, faithful freedom permanently deferred.`,
+    },
+
+
+    // ── Heart Zone: Material Desire, horizontal line (HZH) ─────────────────
+
+    '1_HZH': {
+      heading: `Your Heart Wants a Solid Place in the Material World`,
+      why: `Underneath the day-to-day, your heart wants tangible achievement — a real place in the world built through your own talent, wealth and status that are actually earned, not borrowed. The Magician here names a material desire for visible, self-made ground.`,
+      shadow: `Blocked, this can turn into generating idea after idea while none of them ever becomes the actual solid place you were building toward.`,
+      path: `The path is carrying one material venture past its beginning, all the way to something you can stand on. You are allowed to want a solid, self-made place in the world. What would 'solid ground' actually look like for you if you built it start to finish?`,
+      positive: `You carry a material venture through to something real and standing, and that completion is exactly the solid ground your heart wanted.`,
+      negative: `Endless new ideas that never become a finished place to stand leave the heart's material desire permanently under construction.`,
+    },
+
+    '2_HZH': {
+      heading: `Your Heart Wants a Presence People Remember`,
+      why: `Your heart wants to leave a real impression — a mysterious, intriguing presence in the physical world, knowledge held and shared carefully, real impact made even from behind the scenes. The High Priestess here names a material desire for quiet but unmistakable influence.`,
+      shadow: `Blocked, this can turn into staying so guarded that the impression never actually lands, influence withheld until it stops being influence at all.`,
+      path: `The path is sharing one piece of what you know with someone who's actually earned it. You are allowed to want to be remembered, not just mysterious. What impression are you capable of leaving that you've been withholding out of habit?`,
+      positive: `You share your knowledge selectively but actually, and the memorable presence your heart wanted finally gets to land.`,
+      negative: `Guarding influence so completely it never lands anywhere keeps the heart's desire for a real, remembered presence unmet.`,
+    },
+
+    '3_HZH': {
+      heading: `Your Heart Wants a Beautiful, Abundant Home Life`,
+      why: `Your heart wants family, home, and a peaceful, abundant physical life — comfort, luxury, and real beauty around it, not just enough to get by. The Empress here names a material desire for genuine domestic richness.`,
+      shadow: `Blocked, this can turn into a home that runs efficiently but has nothing lovely in it, function standing in for the abundance that was actually wanted.`,
+      path: `The path is adding one real piece of beauty to your home or daily life this week. You are allowed to want luxury and comfort, not just sufficiency. Where has your home gotten efficient at the cost of getting beautiful?`,
+      positive: `You let real beauty and comfort back into your home life, and that richness is exactly the abundance your heart was asking for.`,
+      negative: `A home optimized only for efficiency quietly starves the desire for beauty and comfort it was actually meant to hold.`,
+    },
+
+    '4_HZH': {
+      heading: `Your Heart Wants Real Authority and Financial Security`,
+      why: `Your heart wants power, authority, and financial security — a prestigious, controlled position in business and life, genuinely earned. The Emperor here names a material desire for durable, respected standing.`,
+      shadow: `Blocked, this can turn into chasing the appearance of authority — the title, the office — while the actual financial security underneath stays thin.`,
+      path: `The path is building one piece of real financial ground today, not just its appearance. You are allowed to want genuine security, not just its look. What would actual financial security require that mere status hasn't given you?`,
+      positive: `You build real financial ground rather than its appearance, and the security your heart wanted becomes actual instead of merely visible.`,
+      negative: `Chasing the look of authority while security stays thin leaves the heart's material desire unmet no matter how prestigious the title.`,
+    },
+
+    '5_HZH': {
+      heading: `Your Heart Wants Respected Standing Rooted in Tradition`,
+      why: `Your heart wants academic or spiritual leadership, real respect in society, and a strong position rooted in traditional values. The Hierophant here names a material desire for earned, structural credibility.`,
+      shadow: `Blocked, this can turn into collecting credentials that look respectable without ever building the actual standing they were supposed to represent.`,
+      path: `The path is using one credential you already have to actually do something respected, not just held. You are allowed to want real, earned standing. What credibility have you already earned that you haven't yet put to actual use?`,
+      positive: `You put your earned credibility to real use, and the respected standing your heart wanted becomes lived instead of merely certified.`,
+      negative: `Credentials collected but never used leave the heart's desire for genuine, structural respect permanently on paper only.`,
+    },
+
+    '6_HZH': {
+      heading: `Your Heart Wants a Passionate, Deeply Bonded Life`,
+      why: `Your heart wants a passionate relationship, real romance, deep bonds actually lived in the physical world. The Lovers here names a material desire for love that's felt, not just described.`,
+      shadow: `Blocked, this can turn into a relationship that looks passionate from the outside while the actual bond underneath stays thin and untested.`,
+      path: `The path is deepening one real bond today rather than performing its appearance. You are allowed to want a love that's actually deep, not just visibly passionate. Where is a bond of yours performing depth it hasn't actually built yet?`,
+      positive: `You deepen a real bond rather than performing its appearance, and the passionate life your heart wanted becomes genuinely lived.`,
+      negative: `A relationship that performs passion without building real depth leaves the heart's material desire for a truly bonded life unmet.`,
+    },
+
+    '7_HZH': {
+      heading: `Your Heart Wants Victory and Constant Forward Motion`,
+      why: `Your heart wants success, travel, adventure — real victories won through motion, not a life spent standing still. The Chariot here names a material desire for visible, earned achievement in constant pursuit.`,
+      shadow: `Blocked, this can turn into motion without any actual victories, momentum mistaken for the achievement it was supposed to produce.`,
+      path: `The path is naming one concrete victory you're actually driving toward right now. You are allowed to want real wins, not just constant motion. What specific victory is your current momentum actually aimed at?`,
+      positive: `You aim your momentum at a real, named victory, and the achievement your heart wanted finally has a destination.`,
+      negative: `Motion without a named destination produces exhaustion instead of the victories the heart was actually asking for.`,
+    },
+
+    '8_HZH': {
+      heading: `Your Heart Wants to Make the World Fairer`,
+      why: `Your heart wants a strong position in the world of law and rights — real fairness enacted, not just believed in privately. Justice here names a material desire for fairness that actually changes conditions.`,
+      shadow: `Blocked, this can turn into holding strong opinions about fairness while never actually using your position to change anything.`,
+      path: `The path is using whatever standing you have to correct one real unfairness this month. You are allowed to want to actually change something unfair, not just notice it. What position do you already hold that could make one situation more fair?`,
+      positive: `You use your actual standing to correct a real unfairness, and that action is exactly what your heart's desire for justice was asking for.`,
+      negative: `Noticing unfairness without using your position to change it leaves the heart's material desire for real fairness unmet.`,
+    },
+
+    '9_HZH': {
+      heading: `Your Heart Wants Retreat and Genuine Self-Discovery`,
+      why: `Your heart wants a life away from the noise, in harmony with nature — real retreat into your own inner world, individual discovery actually pursued. The Hermit here names a material desire for solitude with a purpose.`,
+      shadow: `Blocked, this can turn into staying constantly busy in the city of your own responsibilities, retreat postponed indefinitely as impractical.`,
+      path: `The path is taking one real day of retreat, however small, this month. You are allowed to want actual solitude, not just a break from noise. What would a real retreat look like for you, sized to what's actually possible right now?`,
+      positive: `You take a genuine retreat sized to what's actually possible, and the self-discovery your heart wanted has real room to happen.`,
+      negative: `Postponing retreat indefinitely as impractical keeps the heart's material desire for solitude and discovery permanently deferred.`,
+    },
+
+    '10_HZH': {
+      heading: `Your Heart Wants Genuine Material Fortune`,
+      why: `Your heart wants fortunate events and real material abundance — the sense of actually making the most of life's opportunities as they arrive. The Wheel of Fortune here names a material desire for good fortune met and used well.`,
+      shadow: `Blocked, this can turn into good opportunities arriving and going unused because you're too busy bracing for the next downturn to actually receive them.`,
+      path: `The path is receiving one current piece of good fortune fully, without immediately bracing for its opposite. You are allowed to want to actually enjoy good fortune when it arrives. What current good thing haven't you let yourself fully receive yet?`,
+      positive: `You receive good fortune fully instead of bracing against it, and the abundance your heart wanted finally gets to land.`,
+      negative: `Bracing for the next downturn instead of receiving the current upswing leaves fortune's material desire chronically unmet.`,
+    },
+
+    '11_HZH': {
+      heading: `Your Heart Wants a Strong, Charismatic Physical Presence`,
+      why: `Your heart wants real physical endurance, a healthy body, a presence strong enough to withstand life's challenges and inspire other people. Strength here names a material desire for embodied, magnetic resilience.`,
+      shadow: `Blocked, this can turn into performing strength outwardly while your actual physical vitality goes quietly neglected underneath the performance.`,
+      path: `The path is one real act of physical care today, not performance of strength but actual tending to it. You are allowed to want genuine vitality, not just the appearance of resilience. Where has physical performance replaced actual physical care?`,
+      positive: `You tend to your actual physical vitality rather than only performing strength, and the resilient presence your heart wanted becomes real instead of staged.`,
+      negative: `Performing strength while neglecting actual vitality leaves the heart's material desire for genuine, embodied resilience unmet.`,
+    },
+
+    '12_HZH': {
+      heading: `Your Heart Wants a Real Pause to Actually Transform`,
+      why: `Your heart wants a genuine period of pause in the physical world — deep inner transformation, real freedom from old patterns, not a rushed-through interruption. The Hanged Man here names a material desire for suspension that's actually allowed to do its work.`,
+      shadow: `Blocked, this can turn into rushing through the pause to get back to normal, skipping the transformation the suspension was actually there to produce.`,
+      path: `The path is letting one current pause last exactly as long as it needs to. You are allowed to want the pause to actually finish its work. What transformation is this current pause trying to complete that rushing would cut short?`,
+      positive: `You let a real pause finish its work rather than rushing past it, and the transformation your heart wanted actually completes.`,
+      negative: `Rushing through a pause to return to normal skips the transformation it existed to produce, leaving the material desire unmet.`,
+    },
+
+    '13_HZH': {
+      heading: `Your Heart Wants to Tear Down the Old and Build the New`,
+      why: `Your heart wants a major transformation in the material world — a completely renewed lifestyle, the old genuinely torn down to make room for something new. Transformation here names a material desire for real, structural change.`,
+      shadow: `Blocked, this can turn into renovating the surface of your material life while the actual old structure underneath stays fully intact.`,
+      path: `The path is tearing down one real piece of the old structure, not just its surface. You are allowed to want a genuinely rebuilt material life. What old structure is your heart actually ready to demolish, not just redecorate?`,
+      positive: `You tear down the actual old structure rather than redecorating its surface, and the renewed material life your heart wanted gets real room to be built.`,
+      negative: `Redecorating the surface while the old structure stays intact leaves the heart's desire for genuine material renewal unmet.`,
+    },
+
+    '14_HZH': {
+      heading: `Your Heart Wants Perfect Balance Between Body, Mind, and Spirit`,
+      why: `Your heart wants a genuinely healthy life — real, felt balance across body, mind, and spirit, not just adequate function in each separately. Temperance here names a material desire for lived, integrated wellbeing.`,
+      shadow: `Blocked, this can turn into managing each area separately and reasonably well while the actual felt integration between them never quite arrives.`,
+      path: `The path is finding one place today where body, mind, and spirit could work together instead of being managed separately. You are allowed to want them integrated, not just each individually maintained. Where could one small act serve all three at once?`,
+      positive: `You find one act that serves body, mind, and spirit together, and that integration is exactly the balance your heart was asking for.`,
+      negative: `Managing each area separately, however competently, leaves the heart's desire for genuinely felt integration unmet.`,
+    },
+
+    '15_HZH': {
+      heading: `Your Heart Wants Pleasure, Power, and Material Wealth Honestly Held`,
+      why: `Your heart wants real passion, pleasure, and material wealth — sometimes a life that pushes boundaries, held honestly rather than apologetically. The Devil here names a material desire for power and pleasure examined rather than denied.`,
+      shadow: `Blocked, this can turn into either denying the desire for wealth and pleasure outright, or pursuing it so unconsciously it curdles into compulsion.`,
+      path: `The path is naming your actual desire for power or pleasure honestly, then choosing consciously whether and how to pursue it. You are allowed to want wealth and pleasure without shame. What material desire have you been either denying or chasing unconsciously?`,
+      positive: `You name your desire for wealth and pleasure honestly and pursue it consciously, and that honesty is exactly what your heart's material desire was asking for.`,
+      negative: `Denying or unconsciously chasing a real desire for power and pleasure leaves it either starved or compulsive — neither satisfies the heart.`,
+    },
+
+    '16_HZH': {
+      heading: `Your Heart Wants a Completely New Material Beginning`,
+      why: `Your heart craves significant material change — the destruction of old structures and the chance for a genuinely new beginning, not incremental adjustment. The Tower here names a material desire for real, clean-slate renewal.`,
+      shadow: `Blocked, this can turn into bracing against necessary collapse so hard that the new beginning never actually gets to arrive.`,
+      path: `The path is letting one structure that's already failing actually finish falling. You are allowed to want a real new beginning, not a patched old one. What is already collapsing that you could stop propping up?`,
+      positive: `You let a failing structure actually finish falling, and the clean, new beginning your heart wanted has real room to start.`,
+      negative: `Propping up a structure that's already failing keeps the heart's desire for genuine new beginning permanently postponed.`,
+    },
+
+    '17_HZH': {
+      heading: `Your Heart Wants to Be an Inspiring Creative Presence`,
+      why: `Your heart wants art, creativity, a life lived close to nature — and to actually be an inspiring presence to the people around it, not just a private creative practice. The Star here names a material desire for creative work that's shared and seen.`,
+      shadow: `Blocked, this can turn into making beautiful things privately while the inspiring, shared version of that creativity never actually gets offered.`,
+      path: `The path is sharing one piece of your creative work with someone this week. You are allowed to want to inspire others, not just create privately. What creative work of yours is ready to stop being private?`,
+      positive: `You share your creative work rather than keeping it private, and the inspiring presence your heart wanted finally reaches someone.`,
+      negative: `Creativity kept entirely private denies the heart's material desire to actually be an inspiring presence to anyone.`,
+    },
+
+    '18_HZH': {
+      heading: `Your Heart Wants a Life Intertwined With Mystery`,
+      why: `Your heart wants dreams, artistic expression, mystical experience — a material life genuinely woven through with the supernatural and the strange, not scrubbed clean of it. The Moon here names a material desire for enchantment actually lived, not merely appreciated from a distance.`,
+      shadow: `Blocked, this can turn into admiring mystery and art from a safe, tidy distance while never actually letting your own life be shaped by them.`,
+      path: `The path is letting one real dream or mystical hunch actually influence a decision this week. You are allowed to want a life genuinely touched by mystery. What dream or hunch have you been admiring instead of actually following?`,
+      positive: `You let a real dream or hunch actually shape a decision, and the enchanted, art-touched life your heart wanted becomes lived rather than merely admired.`,
+      negative: `Admiring mystery from a safe distance without ever being shaped by it leaves the heart's material desire for enchantment unmet.`,
+    },
+
+    '19_HZH': {
+      heading: `Your Heart Wants Success, Health, and Love All at Once`,
+      why: `Your heart wants happiness, success, health, and love-filled relationships in the physical world — the whole picture, not one piece traded for another. The Sun here names a material desire for wholeness across every domain at once.`,
+      shadow: `Blocked, this can turn into succeeding in one domain while quietly sacrificing another, treating the trade as inevitable rather than examined.`,
+      path: `The path is naming one domain you've quietly sacrificed for another and giving it real attention this week. You are allowed to want all of it, not just one piece at a time. Which part of your wholeness have you been trading away as if it were required?`,
+      positive: `You give real attention to the domain you'd been quietly sacrificing, and the full, undivided success your heart wanted becomes actually possible.`,
+      negative: `Trading one domain for another as if it were required leaves the heart's material desire for genuine wholeness permanently partial.`,
+    },
+
+    '20_HZH': {
+      heading: `Your Heart Wants a Completely Fresh Material Start`,
+      why: `Your heart yearns for radical transformation — a completely fresh start and the release of every past material burden, not a lightened version of the old life. Judgement here names a material desire for total, not partial, renewal.`,
+      shadow: `Blocked, this can turn into making moderate improvements while calling them a fresh start, when something more total was actually being asked for.`,
+      path: `The path is naming what a truly fresh start would require, even if you only take one real step toward it now. You are allowed to want total renewal, not a moderate upgrade. What would an actually fresh material start require of you?`,
+      positive: `You name and move toward what genuine renewal actually requires, and the fresh start your heart wanted stops being a moderate substitute.`,
+      negative: `Calling a moderate improvement a fresh start leaves the heart's desire for total material renewal quietly unmet.`,
+    },
+
+    '21_HZH': {
+      heading: `Your Heart Wants to Travel the World and Actually Live It`,
+      why: `Your heart wants to travel, experience different cultures, and build a genuinely successful, fulfilling material life — not just imagine one. The World here names a material desire for lived breadth, not deferred plans.`,
+      shadow: `Blocked, this can turn into planning a bigger life indefinitely while the actual, lived version keeps getting pushed to some more convenient year.`,
+      path: `The path is booking, planning, or starting one real piece of the bigger life this month. You are allowed to want to actually live the fuller life, not just plan it. What piece of the life you keep planning could you actually start now?`,
+      positive: `You start one real piece of the fuller life rather than only planning it, and the lived breadth your heart wanted finally begins.`,
+      negative: `Planning a bigger life indefinitely without ever starting it leaves the heart's material desire for lived breadth permanently deferred.`,
+    },
+
+    '22_HZH': {
+      heading: `Your Heart Wants an Adventurous Life Free of Rigid Systems`,
+      why: `Your heart seeks constant new places, new people, living fully in the moment — an adventurous material life free from stereotypes and rigid systems, explored rather than merely imagined. The Fool here names a material desire for genuine freedom, lived.`,
+      shadow: `Blocked, this can turn into staying inside a rigid system out of practicality while telling yourself the adventurous life is simply for later.`,
+      path: `The path is one real, unplanned adventure this month, however small. You are allowed to want a genuinely free, unstructured life. What adventurous thing have you been postponing as impractical that's actually just overdue?`,
+      positive: `You take a real, unplanned adventure rather than deferring it, and the free, exploratory life your heart wanted becomes lived now instead of later.`,
+      negative: `Staying inside a rigid system out of practicality while calling adventure a 'someday' keeps the heart's material desire for real freedom unmet.`,
+    },
+
   }; // end nodes
 
 
