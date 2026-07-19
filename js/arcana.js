@@ -31,7 +31,7 @@ const ARCANA = [
 
     money_power: `You can generate money fast — and sometimes lose it just as fast, because your nervous system is built for initiation, not stewardship. There may be a quiet fear underneath that having real power makes you visible, and visible means accountable, so you sabotage yourself right at the threshold of actually arriving. Watch for a cycle of almost-making-it followed by a sudden reversal.`,
 
-    integration: `Try letting go of performing competence and start choosing depth instead. Commit to one thing long enough to see what it becomes once the novelty wears off. The belief worth shifting: "I must always be capable" into "I'm allowed to not know." The behavior that anchors it: finishing what you start, even after the excitement is gone.`,
+    integration: `Try letting go of performing competence and start choosing depth instead. Commit to one thing long enough to see what it becomes once the novelty wears off. The belief worth shifting: "I must always be capable" into "I'm allowed to not know." The behavior that anchors it: finishing what you start, even after the excitement is gone. You are allowed to be ordinary in the middle of something and still finish it. What half-built thing of yours deserves to find out what it could become?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -52,7 +52,7 @@ const ARCANA = [
 
     money_power: `Your financial behavior tends to be inconsistent and intuition-driven in ways that don't always translate into strategy. You might know exactly what you want but struggle to build the structured systems that hold wealth. There's often an unconscious belief lurking that money is somehow incompatible with depth or spirituality — a piece of conditioning worth identifying and consciously letting go of.`,
 
-    integration: `Try letting go of making people earn access to your real self as a kind of worthiness test. That strategy protects you, but it also guarantees loneliness. The belief worth shifting: "My depth is too much for most people" into "The right people have been waiting for me to stop hiding." The behavior: say the first truthful thing, directly, before you have time to qualify it into nothing.`,
+    integration: `Try letting go of making people earn access to your real self as a kind of worthiness test. That strategy protects you, but it also guarantees loneliness. The belief worth shifting: "My depth is too much for most people" into "The right people have been waiting for me to stop hiding." The behavior: say the first truthful thing, directly, before you have time to qualify it into nothing. You are allowed to be found without a search party. What truth would you say tomorrow if it didn't have to be perfect first?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -73,7 +73,7 @@ const ARCANA = [
 
     money_power: `Your relationship with money can get complicated — either highly abundant and generous to the point of financial instability, or subtly blocked because somewhere underneath there's a belief that wanting more is selfish. The core wound worth examining: a fear that financial abundance might change how people see you, or make you somehow less connected to others. It won't — but that belief can run deep.`,
 
-    integration: `Try letting go of taking responsibility for other people's emotional states. That's not generosity — it's control wearing the costume of love. The belief worth shifting: "My worth is what I provide" into "I am enough when I provide nothing." The behavior: practice receiving a compliment, a gift, or help without immediately deflecting or reciprocating. Let yourself actually be given to.`,
+    integration: `Try letting go of taking responsibility for other people's emotional states. That's not generosity — it's control wearing the costume of love. The belief worth shifting: "My worth is what I provide" into "I am enough when I provide nothing." The behavior: practice receiving a compliment, a gift, or help without immediately deflecting or reciprocating. Let yourself actually be given to. You are allowed to be nourished, not just nourishing. When something is offered to you — what would it take to simply say thank you and keep it?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -94,7 +94,7 @@ const ARCANA = [
 
     money_power: `You typically have strong financial capacity, but money often gets tangled up with identity and status in a way that creates anxiety. The fear of losing financial stability can drive overwork and rigidity. You may struggle to spend on pleasure or anything without a measurable return, because part of you has never fully learned that enjoyment isn't irresponsibility.`,
 
-    integration: `Try treating your emotional world as something other than a management problem. Feelings aren't inefficiencies. The belief worth shifting: "If I'm not in control, everything collapses" into "Others are capable, and I'm allowed to rest." The behavior: delegate something genuinely important and resist the urge to check on it. Let someone else carry something. See what actually happens.`,
+    integration: `Try treating your emotional world as something other than a management problem. Feelings aren't inefficiencies. The belief worth shifting: "If I'm not in control, everything collapses" into "Others are capable, and I'm allowed to rest." The behavior: delegate something genuinely important and resist the urge to check on it. Let someone else carry something. See what actually happens. You are allowed to rest inside a structure you didn't personally hold up. What might loosen in you if the world proved it could stand for one day without your hands on it?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -115,7 +115,7 @@ const ARCANA = [
 
     money_power: `Money and ethics tend to be closely entangled for you. There's often an unconscious belief that financial success achieved outside tradition or expectation is somehow wrong or destabilizing. That can produce either rigid financial conservatism or a complicated, morally ambiguous relationship with wealth. The work is separating your financial capacity from inherited moral frameworks about what counts as "acceptable" success.`,
 
-    integration: `Try no longer outsourcing your authority to systems, traditions, or other people's approval. What you were given isn't the whole truth — it's a starting point. The belief worth shifting: "If I question the framework, I lose my people" into "My real people are the ones who can handle my honest questioning." The behavior: form one opinion publicly that contradicts something you've previously defended.`,
+    integration: `Try no longer outsourcing your authority to systems, traditions, or other people's approval. What you were given isn't the whole truth — it's a starting point. The belief worth shifting: "If I question the framework, I lose my people" into "My real people are the ones who can handle my honest questioning." The behavior: form one opinion publicly that contradicts something you've previously defended. You are allowed to outgrow what raised you and still honor it. Which inherited certainty is quietly asking for your own honest verdict?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -136,7 +136,7 @@ const ARCANA = [
 
     money_power: `Your financial decisions are strongly shaped by relational dynamics — spending for love, avoiding success for fear it disrupts a connection, making choices based on what keeps the peace rather than what serves your real goals. Worth examining: where are you limiting your financial growth just to stay inside a relational comfort zone?`,
 
-    integration: `Try treating your own preferences as non-negotiable. Every time you compromise a real preference for the sake of connection, you're training yourself and the other person that your preferences don't matter. The belief worth shifting: "Having my own needs will drive people away" into "The right people are drawn to the clarity of who I actually am." The behavior: state a real preference and let the other person respond to it without adjusting your answer based on their reaction.`,
+    integration: `Try treating your own preferences as non-negotiable. Every time you compromise a real preference for the sake of connection, you're training yourself and the other person that your preferences don't matter. The belief worth shifting: "Having my own needs will drive people away" into "The right people are drawn to the clarity of who I actually am." The behavior: state a real preference and let the other person respond to it without adjusting your answer based on their reaction. You are allowed to be chosen as you actually are. What preference have you been trading away for a harmony that was never really at risk?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -157,7 +157,7 @@ const ARCANA = [
 
     money_power: `You likely have strong earning capacity, but your relationship with money mirrors your relationship with everything else: it has to be controlled. There may be a pattern of over-accumulating without ever enjoying it, or an inability to stop and actually inhabit the success you've built. Worth asking: is the financial driving in service of a life, or a substitute for one?`,
 
-    integration: `Try treating pause as something other than failure. The thing you're most afraid to do — stop, not know, not be moving — is exactly what the next stage requires. The belief worth shifting: "I am what I achieve" into "I exist completely even when I'm achieving nothing." The behavior: take one full day with no goals, no productivity, and resist the urge to manufacture urgency. Notice what comes up.`,
+    integration: `Try treating pause as something other than failure. The thing you're most afraid to do — stop, not know, not be moving — is exactly what the next stage requires. The belief worth shifting: "I am what I achieve" into "I exist completely even when I'm achieving nothing." The behavior: take one full day with no goals, no productivity, and resist the urge to manufacture urgency. Notice what comes up. You are allowed to exist unmoving and still be going somewhere. If the race paused — what would the stillness get to say?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -178,7 +178,7 @@ const ARCANA = [
 
     money_power: `You're typically capable financially but often underearn relative to what you actually produce, because asking for what you're worth requires the same vulnerability as asking for anything else. There's often a pattern of doing more than expected and then resenting the lack of recognition or compensation — when the real issue was never asking clearly for what you needed.`,
 
-    integration: `Try letting go of performing unbreakability. It's keeping people from actually knowing you, and it's slowly wearing you down. The belief worth shifting: "Needing is weakness" into "Being genuinely known, needs included, is what creates real connection." The behavior: tell one person something you actually need this week. Not a preference — a real need. See if the world ends.`,
+    integration: `Try letting go of performing unbreakability. It's keeping people from actually knowing you, and it's slowly wearing you down. The belief worth shifting: "Needing is weakness" into "Being genuinely known, needs included, is what creates real connection." The behavior: tell one person something you actually need this week. Not a preference — a real need. See if the world ends. You are allowed to be carried sometimes. What need have you been strong enough to hide and are now strong enough to speak?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -199,7 +199,7 @@ const ARCANA = [
 
     money_power: `Your relationship with material success can get complicated, often because success requires engaging with the external world in ways that feel draining or compromising. There's sometimes a belief that financial ambition is incompatible with depth or integrity. Worth asking: is your relationship with money genuinely values-aligned, or is disengaging from financial pursuit just another form of avoidance?`,
 
-    integration: `Your wisdom isn't complete until you risk offering it. The belief worth shifting: "No one can really understand what I carry" into "I haven't yet found the right way to offer it." The behavior: share the thing you know most deeply with one person who hasn't asked for it, without waiting to refine it to perfection. Let it be imperfect. Let them respond.`,
+    integration: `Your wisdom isn't complete until you risk offering it. The belief worth shifting: "No one can really understand what I carry" into "I haven't yet found the right way to offer it." The behavior: share the thing you know most deeply with one person who hasn't asked for it, without waiting to refine it to perfection. Let it be imperfect. Let them respond. You are allowed to come down from the mountain mid-thought. Who is waiting for a light you've been perfecting alone?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -220,7 +220,7 @@ const ARCANA = [
 
     money_power: `Your financial life often mirrors the wheel itself — dramatic highs followed by significant lows, with a recurring theme of almost-arriving. Watch for the unconscious repetition: each cycle of loss is often preceded by the same choices, the same signals being ignored. The work is becoming conscious of the moment right before the wheel turns downward, and asking: what am I not looking at right now?`,
 
-    integration: `Try no longer treating every difficult phase as a sign something's gone wrong. The belief worth shifting: "When things are good, something bad is coming" into "I'm building the capacity to hold more, not just waiting for the fall." The behavior: notice the next time you're in an upswing, and consciously reinforce it instead of bracing against its end.`,
+    integration: `Try no longer treating every difficult phase as a sign something's gone wrong. The belief worth shifting: "When things are good, something bad is coming" into "I'm building the capacity to hold more, not just waiting for the fall." The behavior: notice the next time you're in an upswing, and consciously reinforce it instead of bracing against its end. You are allowed to enjoy the rise without rehearsing the fall. What good thing is happening right now that you haven't fully let land?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -241,7 +241,7 @@ const ARCANA = [
 
     money_power: `You often have a complicated relationship with money, rooted in a belief that wealth is somehow inherently unequal or unfair, and therefore something to avoid, minimize, or give away. There may also be a pattern of working far harder than you're compensated for, driven by an unconscious belief that claiming your financial worth is somehow unjust, or "not fair to others." That's the Justice wound turned on yourself.`,
 
-    integration: `Try no longer holding yourself to a standard you'd instantly recognize as cruel if you applied it to anyone else. The belief worth shifting: "I must be entirely accountable before I can ask for anything" into "Asking for what I need isn't the opposite of fairness — it's part of it." The behavior: identify one place where you're applying a different standard to yourself than to others. Correct it.`,
+    integration: `Try no longer holding yourself to a standard you'd instantly recognize as cruel if you applied it to anyone else. The belief worth shifting: "I must be entirely accountable before I can ask for anything" into "Asking for what I need isn't the opposite of fairness — it's part of it." The behavior: identify one place where you're applying a different standard to yourself than to others. Correct it. You are allowed to receive the same mercy you extend so precisely to everyone else. Where would your own verdict soften if you were someone you loved?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -262,7 +262,7 @@ const ARCANA = [
 
     money_power: `You often experience involuntary financial suspension — periods of waiting, of resources not flowing, of effort not producing results — that feel like failure but actually function as reorientation. Worth examining: what does the suspension keep trying to show you about the direction you were heading? Your financial life becomes coherent once the suspension gets followed instead of fought.`,
 
-    integration: `Try no longer treating every period of stillness as something to escape. The belief worth shifting: "Nothing is happening, therefore I'm failing" into "Something is being given to me that I can only receive if I stop trying to produce it." The behavior: identify the one thing you keep rushing past. Sit with it for a full hour without doing anything about it. Notice what it tells you.`,
+    integration: `Try no longer treating every period of stillness as something to escape. The belief worth shifting: "Nothing is happening, therefore I'm failing" into "Something is being given to me that I can only receive if I stop trying to produce it." The behavior: identify the one thing you keep rushing past. Sit with it for a full hour without doing anything about it. Notice what it tells you. You are allowed to receive what only stillness can deliver. What keeps arriving in your quiet moments that you haven't yet stayed long enough to hear?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -283,7 +283,7 @@ const ARCANA = [
 
     money_power: `Your financial patterns often involve holding onto situations, jobs, or income streams that have already ended in terms of alignment or growth, because the ending feels like loss rather than transition. Or the opposite: dramatic financial endings as a way of forcing change your self couldn't choose consciously. Worth asking: what financial structure are you maintaining just because you can't bear to let it end, even though you already know it's over?`,
 
-    integration: `Identify what ended that you still haven't mourned. Not the thing you say you're over — the thing you haven't let yourself feel was actually lost. The belief worth shifting: "Letting go means it didn't matter" into "Fully releasing what has ended is the deepest respect I can pay to what it was." The behavior: consciously complete one ending that's still incomplete. Say goodbye to it. Out loud.`,
+    integration: `Identify what ended that you still haven't mourned. Not the thing you say you're over — the thing you haven't let yourself feel was actually lost. The belief worth shifting: "Letting go means it didn't matter" into "Fully releasing what has ended is the deepest respect I can pay to what it was." The behavior: consciously complete one ending that's still incomplete. Say goodbye to it. Out loud. You are allowed to grieve fully and still move forward. What loss is waiting for you to finally honor it as real?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -304,7 +304,7 @@ const ARCANA = [
 
     money_power: `You often have complex spending or saving patterns that swing between excess and restriction, both driven by the same underlying anxiety about what the "right amount" even is. What you need is a genuinely relaxed relationship with financial flow — neither hoarding nor burning through, but letting money move through a life that's itself in motion.`,
 
-    integration: `Try no longer waiting to get it perfectly balanced before engaging with it fully. The belief worth shifting: "I need to find the middle before I can commit" into "The middle is something I build by committing, not something I find beforehand." The behavior: fully commit to one position — in a relationship, a project, a belief — for thirty days without hedging or adjusting based on the response.`,
+    integration: `Try no longer waiting to get it perfectly balanced before engaging with it fully. The belief worth shifting: "I need to find the middle before I can commit" into "The middle is something I build by committing, not something I find beforehand." The behavior: fully commit to one position — in a relationship, a project, a belief — for thirty days without hedging or adjusting based on the response. You are allowed to commit before the balance is perfect. What would you pour yourself into if hedging were off the table?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -325,7 +325,7 @@ const ARCANA = [
 
     money_power: `You often have complex relationships with money tied to shame, secrecy, or compulsion. Your financial patterns may include hidden spending, compulsive acquisition, or self-sabotage driven by an unconscious belief that you don't deserve real stability. Or the reverse: using financial power as a form of control in relationships, which is its own shadow expression. The work is separating financial behavior from shame.`,
 
-    integration: `The specific shadow you're least willing to admit to yourself is usually the one with the most power over you. Naming it — to yourself, and to at least one other person who can hold it with you — isn't weakness. It's the beginning of actual freedom. The belief worth shifting: "If people knew this about me, they'd leave" into "The people who matter can hold this, and I can hold myself knowing it." The behavior: say the thing you've never said out loud.`,
+    integration: `The specific shadow you're least willing to admit to yourself is usually the one with the most power over you. Naming it — to yourself, and to at least one other person who can hold it with you — isn't weakness. It's the beginning of actual freedom. The belief worth shifting: "If people knew this about me, they'd leave" into "The people who matter can hold this, and I can hold myself knowing it." The behavior: say the thing you've never said out loud. You are allowed to be fully known and still be loved. What is the one sentence you've been certain would end everything — and who has actually earned the chance to hear it?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -346,7 +346,7 @@ const ARCANA = [
 
     money_power: `You've likely had financial Tower experiences — sudden losses, unexpected collapses, situations that seemed stable turning dramatically. Worth examining: what was already unstable before the collapse? What weren't you looking at, or willing to address, that got exposed? The financial rebuild after a Tower experience only holds once the honest audit is actually done.`,
 
-    integration: `Try no longer waiting for something external to force the change you already know needs to happen. You've had enough experience by now to recognize when you're building on a foundation that can't hold. The belief worth shifting: "Maybe if I reinforce it enough, it will hold" into "The honest collapse I choose is less costly than the one I avoid until it chooses me." The behavior: identify the structure in your life that's already quietly failing. Make the conscious choice.`,
+    integration: `Try no longer waiting for something external to force the change you already know needs to happen. You've had enough experience by now to recognize when you're building on a foundation that can't hold. The belief worth shifting: "Maybe if I reinforce it enough, it will hold" into "The honest collapse I choose is less costly than the one I avoid until it chooses me." The behavior: identify the structure in your life that's already quietly failing. Make the conscious choice. You are allowed to choose the ending instead of waiting for it. What would a deliberate, dignified collapse free you to build next?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -367,7 +367,7 @@ const ARCANA = [
 
     money_power: `You often have a complicated relationship with material success — either deeply generous to the point of financial instability, or avoiding financial ambition because it feels incompatible with your luminous self-image. What you need to learn is that grounding your gifts in structures that generate real financial capacity isn't a betrayal of your nature. It's how the light actually reaches people.`,
 
-    integration: `Your vision isn't complete until it has a specific, timed, committed action attached to it. The belief worth shifting: "The vision is enough" into "The vision is only the beginning. The embodiment is the work." The behavior: take your most held, longest-running vision and attach a specific, concrete first action to it. Do it before the end of this week.`,
+    integration: `Your vision isn't complete until it has a specific, timed, committed action attached to it. The belief worth shifting: "The vision is enough" into "The vision is only the beginning. The embodiment is the work." The behavior: take your most held, longest-running vision and attach a specific, concrete first action to it. Do it before the end of this week. You are allowed to want your vision in this lifetime, not the next. What is the smallest real step your brightest hope has been waiting on?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -388,7 +388,7 @@ const ARCANA = [
 
     money_power: `Your financial life often mirrors your unconscious cycles — inexplicable fluctuations, decisions driven by fear or emotional undercurrent rather than rational assessment. You're particularly susceptible to financial decisions made from anxiety instead of clarity. The discipline worth building: is this decision coming from what I know, or from what I fear?`,
 
-    integration: `Try learning to distinguish between what you feel and what's true. Not all emotional intelligence is accurate intelligence. The belief worth shifting: "What I feel is what is real" into "What I feel is important data that still requires honest examination." The behavior: the next time you're certain of something based on feeling, pause and ask what evidence exists independently of your emotional state. Update your position accordingly.`,
+    integration: `Try learning to distinguish between what you feel and what's true. Not all emotional intelligence is accurate intelligence. The belief worth shifting: "What I feel is what is real" into "What I feel is important data that still requires honest examination." The behavior: the next time you're certain of something based on feeling, pause and ask what evidence exists independently of your emotional state. Update your position accordingly. You are allowed to question a feeling without betraying it. Which certainty of yours might be a tide rather than a truth?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -409,7 +409,7 @@ const ARCANA = [
 
     money_power: `You often have genuine capacity for financial success, but it can get complicated by the gap between your performing self and your real self. If success was built on the performed version, there's often an underlying fear that the real person couldn't sustain it. Or the opposite: giving away resources to maintain the "generous, luminous" identity at the expense of actual financial stability. You need to earn and hold wealth as your whole person, not just the bright one.`,
 
-    integration: `Let people see you when you're not shining. Not as vulnerability-performance — as a genuine sharing of what your actual experience is. The belief worth shifting: "If I show the difficult parts, I lose what makes me valuable" into "The people who matter want access to all of me, not just the easy part." The behavior: share something genuinely difficult with someone who only knows your bright side. See what it does.`,
+    integration: `Let people see you when you're not shining. Not as vulnerability-performance — as a genuine sharing of what your actual experience is. The belief worth shifting: "If I show the difficult parts, I lose what makes me valuable" into "The people who matter want access to all of me, not just the easy part." The behavior: share something genuinely difficult with someone who only knows your bright side. See what it does. You are allowed to be loved at half-light. Who might love you more, not less, for seeing the unlit rooms?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -430,7 +430,7 @@ const ARCANA = [
 
     money_power: `You often have a strong financial conscience but a complicated relationship with financial success. You may experience cycles of financial reckoning — periods where old decisions come due. Worth watching: unconsciously limiting your financial growth as a form of ongoing self-punishment for past mistakes. Worth sitting with: have you financially "paid" for the mistake long enough? Is the limitation still serving atonement, or has it become habit?`,
 
-    integration: `You're allowed to be finished with it. The belief worth shifting: "If I release the judgment of myself, I'll repeat the pattern" into "I can be fully accountable and also fully forgiven — these aren't opposites." The behavior: identify one past decision you're still actively penalizing yourself for. Write down what you actually learned from it. Then close the file.`,
+    integration: `You're allowed to be finished with it. The belief worth shifting: "If I release the judgment of myself, I'll repeat the pattern" into "I can be fully accountable and also fully forgiven — these aren't opposites." The behavior: identify one past decision you're still actively penalizing yourself for. Write down what you actually learned from it. Then close the file. You are allowed to be finished serving that sentence. If the case were truly closed — what would you rise toward first?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -451,7 +451,7 @@ const ARCANA = [
 
     money_power: `You often have strong capacity to build to a point, followed by a pattern of moving the success threshold just before you reach it. You may have experienced near-arrival financially multiple times — almost at the number, almost at the stability — followed by circumstances or choices that reset the process. Worth examining: what happens right before that threshold? What are you doing in that moment, or not doing?`,
 
-    integration: `Declare one thing complete. Not perfect — complete. The belief worth shifting: "I am not there yet" into "There is a version of 'there' I can reach, and it's enough to honor." The behavior: identify something in your life that's genuinely finished but that you haven't acknowledged as finished. Acknowledge it. Celebrate it in whatever way feels real. Then let it be done.`,
+    integration: `Declare one thing complete. Not perfect — complete. The belief worth shifting: "I am not there yet" into "There is a version of 'there' I can reach, and it's enough to honor." The behavior: identify something in your life that's genuinely finished but that you haven't acknowledged as finished. Acknowledge it. Celebrate it in whatever way feels real. Then let it be done. You are allowed to arrive and let arrival count. What completed thing in your life has been waiting for you to say the word done?`,
   },
 
   // ─────────────────────────────────────────────────────────────────────────
@@ -472,7 +472,7 @@ const ARCANA = [
 
     money_power: `Your financial life often mirrors the leap-and-not-land pattern — strong income potential in new projects, followed by a loss of interest before the project becomes financially productive. There may be a history of excellent starts and inconsistent follow-through. Your financial discipline isn't about controlling the leap — it's deciding in advance what "staying" looks like, and committing to it before the excitement fades.`,
 
-    integration: `The commitment is the leap. Not the start — the staying. The belief worth shifting: "Real freedom is always having the option to leave" into "Real freedom is being fully present in the thing I chose." The behavior: identify the thing you've already begun that most deserves your continued presence. Give it three months of consistent engagement without evaluating whether it's still working. Be there.`,
+    integration: `The commitment is the leap. Not the start — the staying. The belief worth shifting: "Real freedom is always having the option to leave" into "Real freedom is being fully present in the thing I chose." The behavior: identify the thing you've already begun that most deserves your continued presence. Give it three months of consistent engagement without evaluating whether it's still working. Be there. You are allowed to stay and still be free. What might the leap of remaining reveal that the leap of leaving never has?`,
   },
 ];
 
