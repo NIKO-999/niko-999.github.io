@@ -3047,6 +3047,18 @@ appendHint();
          <div class="pb-full-label" style="color:${cd.hex}">THE PATH</div>
          <div class="pb-full-text">${prog.path || ''}</div>
        </div>
+       ${Array.isArray(prog.indicators) && prog.indicators.length ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">INDICATORS</div>
+         <div class="pb-full-text">${prog.indicators.join(' &nbsp;·&nbsp; ')}</div>
+       </div>` : ''}
+       ${prog.newStrategy ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">NEW STRATEGY</div>
+         <div class="pb-full-text">${prog.newStrategy}</div>
+       </div>` : ''}
+       ${Array.isArray(prog.stepsToTake) && prog.stepsToTake.length ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${cd.hex}">STEPS TO TAKE</div>
+         <div class="pb-full-text">${prog.stepsToTake.map((s,i) => (i+1) + '. ' + s).join('<br>')}</div>
+       </div>` : ''}
        ${prog.positive ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${prog.positive}</div>
@@ -3400,6 +3412,10 @@ appendHint();
          <div class="pb-full-label" style="color:${hex}">THE PATH</div>
          <div class="pb-full-text">${content.path || ''}</div>
        </div>
+       ${content.blocks ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">WHAT CAN BLOCK THIS TALENT</div>
+         <div class="pb-full-text">${content.blocks}</div>
+       </div>` : ''}
        ${content.positive ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${content.positive}</div>
