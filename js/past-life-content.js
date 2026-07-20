@@ -80,7 +80,7 @@ window.DPastLifeContent = (function () {
       today: `This may show up today as a restlessness that persists even amid genuine accomplishment, or a familiar instinct to fill any pause with the next goal before the current one has been fully metabolized. It could also surface as real difficulty answering, honestly, what a given pursuit is actually for. You are allowed to arrive somewhere and stay a while. If the motion stopped tomorrow — what would you discover you'd actually been running toward?`,
     },
 
-    8: {
+    11: {
       heading: 'Strength — An Origin Imprint of Endurance Mistaken for Ease',
       expressions: `This placement may indicate an origin pattern organized around sustained force or control — a past identity that could have held real power, physical or otherwise, and used it more to dominate or suppress than to genuinely integrate. In one expression, this might reflect a life where being feared and being respected were not clearly distinguished from each other. In another, it could suggest a pattern of suppressing instinct so consistently that it eventually surfaced in ways that were harder to direct.`,
       theme: `What may run through these expressions is force used in place of integration — real capacity for endurance that could have outpaced the gentler, more patient work of actually meeting instinct rather than overriding it.`,
@@ -104,7 +104,7 @@ window.DPastLifeContent = (function () {
       today: `In the present, this may show up as a felt familiarity with cycles — financial, relational, or otherwise — that seem to repeat with a certain rhythm, alongside a subtler discomfort with the steady, undramatic middle ground that doesn't offer either a clear win or a clear loss. You are allowed to let the steady middle be enough. What could ordinary consistency build for you that the highs and lows never have?`,
     },
 
-    11: {
+    8: {
       heading: 'Justice — An Origin Imprint of Judgment Turned Outward',
       expressions: `This placement may suggest an origin pattern built around discernment applied more consistently to others than to the self — a past identity that could have held real clarity about fairness and imbalance, while remaining somewhat exempt, in its own eyes, from that same standard. In one expression, this might reflect a life spent assessing or ruling on others' conduct without an equally rigorous look at its own. In another, it could point to a pattern of demanding consistency from the world that wasn't always matched internally.`,
       theme: `Across these possibilities, the shared thread may be a double measure — genuine clarity about fairness that could have been applied unevenly, sharper when turned outward than when turned toward the self.`,
