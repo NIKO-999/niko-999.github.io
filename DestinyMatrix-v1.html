@@ -690,6 +690,7 @@
 <script src="js/past-life-content.js"></script>
 <script src="js/sexual-line-content.js"></script>
 <script src="js/career-paths-content.js"></script>
+<script src="js/health-map-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2345,6 +2346,20 @@ appendHint();
     // used to calculate yearly energies" — min separation ≈0.40R).
     { key:'YE', num:_vals.atYE, label:'Yearly Energy',
       pos: new THREE.Vector3(-_R * 0.8953, _R * 0.3986, 0), color:0xFFD966, twk:{spd:0.70,off:0.3} },
+
+    // ── Health Map — a "folder" star: clicking it opens a list of the 5
+    // chakra/body-system zones whose numbers cleanly matched already-
+    // verified positions in this app (see js/health-map-content.js header
+    // for the full verification trail); tapping a zone swaps in that
+    // zone's own content within the same banner, with a back arrow to
+    // return to the list. The other 2 chakra zones (Throat, Sacral) plus
+    // a "General/Immune" zone are deliberately left out — their numbers
+    // didn't match any already-computed value for the verification
+    // subject, the same honest treatment as the still-blocked formula
+    // chakras. `num` here is just the zone count, not an arcana reading —
+    // this position has no single per-arcana value of its own.
+    { key:'HEALTH', num:5, label:'Health Map',
+      pos: new THREE.Vector3(-_R * 0.1032, _R * 0.6519, 0), color:0x7FE0D6, twk:{spd:0.65,off:2.2} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2453,9 +2468,79 @@ appendHint();
   const _mPbClose   = document.getElementById('pb-close');
   let   _bannerOpenMi = false;
 
+  // ── Health Map "folder" — a list of zones inside the banner; tapping a
+  // zone swaps in its content via a data-zone-keyed click delegate, with
+  // a back row to return to the list. Reuses the existing #prog-banner
+  // shape rather than adding new 3D geometry.
+  function _healthListHtml(hex) {
+    if (!window.DHealthMapContent) return '';
+    return window.DHealthMapContent.zones.map((z) => `
+      <div class="pb-full-section health-zone-row" data-zone="${z.key}" style="cursor:pointer;">
+        <div class="pb-full-label" style="color:${hex}">${z.label.toUpperCase()}</div>
+        <div class="pb-full-text">${z.bodySystems}</div>
+      </div>`).join('');
+  }
+  function _healthZoneHtml(zoneKey, hex) {
+    const z = window.DHealthMapContent && window.DHealthMapContent.get(zoneKey);
+    if (!z) return _healthListHtml(hex);
+    return `
+      <div class="pb-full-section health-zone-back" data-zone-back="1" style="cursor:pointer;">
+        <div class="pb-full-label" style="color:rgba(255,255,255,0.4)">← ALL ZONES</div>
+      </div>
+      <div class="pb-full-section">
+        <div class="pb-full-label" style="color:${hex}">BODY SYSTEMS</div>
+        <div class="pb-full-text">${z.bodySystems}</div>
+      </div>
+      <div class="pb-full-section">
+        <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+        <div class="pb-full-text">${z.why}</div>
+      </div>
+      <div class="pb-full-section">
+        <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+        <div class="pb-full-text">${z.shadow}</div>
+      </div>
+      <div class="pb-full-section">
+        <div class="pb-full-label" style="color:${hex}">THE PATH</div>
+        <div class="pb-full-text">${z.path}</div>
+      </div>`;
+  }
+  // Single delegated listener — #pb-body is shared/repopulated across
+  // every tier's banner content, so this only needs wiring once.
+  document.getElementById('pb-body').addEventListener('click', (e) => {
+    const zoneRow = e.target.closest('[data-zone]');
+    const backRow = e.target.closest('[data-zone-back]');
+    if (zoneRow) {
+      const hex = document.getElementById('pb-prog-name').style.color || '#7FE0D6';
+      document.getElementById('pb-body').innerHTML = _healthZoneHtml(zoneRow.dataset.zone, hex);
+      _mBanner.scrollTop = 0;
+    } else if (backRow) {
+      const hex = document.getElementById('pb-prog-name').style.color || '#7FE0D6';
+      document.getElementById('pb-body').innerHTML = _healthListHtml(hex);
+      _mBanner.scrollTop = 0;
+    }
+  });
+
   function openMicroCard(idx) {
     const data = MICRO[idx];
     const hex  = '#' + new THREE.Color(data.color).getHexString();
+
+    // Health Map — folder/subfolder: opens to the zone list; tapping a
+    // zone swaps in its own content within the same banner (see the
+    // delegated click listener above).
+    if (data.key === 'HEALTH') {
+      document.getElementById('pb-prog-name').textContent = data.label;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Health Map';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = 'Tap a Zone to Open It';
+      document.getElementById('pb-body').innerHTML = _healthListHtml(hex);
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
 
     // Karmic Debt — present-life tension only (own 3-section template +
     // named-seed override). Past Life Star has its own separate branch
