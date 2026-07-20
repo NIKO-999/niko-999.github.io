@@ -5592,6 +5592,207 @@ window.DMicroContent = (function () {
       negative: `Chasing every new sensation without discernment mistakes recklessness for openness, and the nourishing joy that real adventure offers never actually arrives.`,
     },
 
+
+    // ── Yearly Energy Forecast (YE) — the one time-varying position ─────────
+
+    '1_YE': {
+      heading: `Right Now, Life Is Asking You to Begin Something`,
+      why: `This stretch of your life is carrying Magician energy — a season built for starting things, not for finishing what's already comfortable. Whatever's been sitting half-formed in your mind may be more ready than you've been treating it as.`,
+      shadow: `The risk this season is starting five things and staying with none of them, mistaking the charge of a new idea for evidence it's actually the right one.`,
+      path: `Try picking one beginning and actually following it past its first exciting week. You are allowed to begin before you feel fully ready. What has this season been quietly nudging you to finally start?`,
+      positive: `You begin something real during this season and stay with it, and that follow-through is what this chapter was actually asking of you.`,
+      negative: `Starting several things and finishing none turns a season built for beginning into one that produces nothing lasting.`,
+    },
+
+    '2_YE': {
+      heading: `Right Now, Life Is Asking You to Trust What You Sense`,
+      why: `This stretch of your life is carrying High Priestess energy — a season for listening inward rather than gathering more outside opinions. Whatever quiet certainty you've been sitting on may be more trustworthy right now than it usually gets credit for.`,
+      shadow: `The risk this season is staying so private with your knowing that it never actually gets tested or acted on.`,
+      path: `Try acting on one inner certainty this month before you can fully justify it to anyone else. You are allowed to trust what you sense before you can explain it. What has your intuition been quietly telling you during this stretch?`,
+      positive: `You act on an inner knowing during this season instead of only holding it privately, and that action is what the chapter was asking for.`,
+      negative: `A knowing kept entirely private through this whole season never gets to prove itself one way or the other.`,
+    },
+
+    '3_YE': {
+      heading: `Right Now, Life Is Asking You to Let Something Grow`,
+      why: `This stretch of your life is carrying Empress energy — a season built for nurturing, abundance, and letting something take its natural time to develop. Whatever you've been tending may be closer to bearing fruit than it looks.`,
+      shadow: `The risk this season is rushing the growth, or pouring so much outward that your own reserves quietly run thin.`,
+      path: `Try tending one thing patiently this season without forcing its pace, and make sure you're included in what gets nurtured. You are allowed to grow slowly and still be growing. What has been quietly developing during this stretch that deserves more patience?`,
+      positive: `You let something grow at its own pace and include yourself in the nurturing, and that patience is exactly what this season rewards.`,
+      negative: `Rushing a natural growth period, or pouring outward until you're depleted, wastes exactly the abundance this season was offering.`,
+    },
+
+    '4_YE': {
+      heading: `Right Now, Life Is Asking You to Build Something Sturdy`,
+      why: `This stretch of your life is carrying Emperor energy — a season for establishing real structure, not just holding things together improvised. Whatever system or foundation you've been meaning to formalize may finally have the conditions to actually hold.`,
+      shadow: `The risk this season is gripping control so tightly that the structure becomes a burden rather than support.`,
+      path: `Try building one piece of real, durable structure this season and then letting it hold without your constant oversight. You are allowed to build steadiness without needing to control everything within it. What foundation is this season asking you to finally make solid?`,
+      positive: `You build a structure sturdy enough to trust without constant oversight, and that steadiness is exactly what this chapter was making possible.`,
+      negative: `Gripping control instead of trusting the structure turns a season built for stability into one spent managing anxiety instead.`,
+    },
+
+    '5_YE': {
+      heading: `Right Now, Life Is Asking You to Learn or Teach Something Real`,
+      why: `This stretch of your life is carrying Hierophant energy — a season for engaging seriously with tradition, mentorship, or a body of real knowledge, in whichever direction it moves for you. Whatever teaching or learning has been calling may be especially available right now.`,
+      shadow: `The risk this season is treating the knowledge as something to collect rather than something to actually apply and pass on.`,
+      path: `Try either learning one thing deeply or teaching one thing you already know, fully, this season. You are allowed to take guidance seriously without losing your own authority. What real knowledge is this stretch of life asking you to either receive or pass forward?`,
+      positive: `You engage seriously with real teaching or learning during this season, and that engagement is exactly what the chapter makes possible.`,
+      negative: `Collecting knowledge without ever applying or passing it on wastes a season specifically built for meaningful transmission.`,
+    },
+
+    '6_YE': {
+      heading: `Right Now, Life Is Asking You to Choose, Not Just Feel`,
+      why: `This stretch of your life is carrying Lovers energy — a season for making a real, examined choice about a relationship or a value, rather than drifting along an existing arrangement. Whatever connection has been asking for a decision may finally have the clarity to make one.`,
+      shadow: `The risk this season is going through the motions of a choice you've actually already made by default, without ever consciously reclaiming it.`,
+      path: `Try naming, out loud, one choice you've been making silently by default. You are allowed to choose deliberately what you've been accepting by habit. What relationship or value is this season asking you to actually choose rather than just continue?`,
+      positive: `You make a real, deliberate choice this season instead of continuing by default, and that ownership is exactly what the chapter was asking for.`,
+      negative: `Continuing an arrangement by pure default, without ever consciously choosing it, wastes a season specifically built for clarity.`,
+    },
+
+    '7_YE': {
+      heading: `Right Now, Life Is Asking You to Move Toward Something`,
+      why: `This stretch of your life is carrying Chariot energy — a season for directed momentum, not just staying busy. Whatever goal you've been circling may finally have real traction available if you actually aim at it.`,
+      shadow: `The risk this season is moving hard without checking the direction, mistaking speed itself for progress.`,
+      path: `Try naming one specific destination this season and aiming your current momentum at it deliberately. You are allowed to slow down just long enough to steer. What direction is this stretch of life actually asking your drive to move toward?`,
+      positive: `You aim your momentum at a destination you've deliberately chosen, and that direction is exactly what lets this season's drive actually arrive somewhere.`,
+      negative: `Moving hard without ever checking the direction burns a season's worth of real momentum without arriving anywhere in particular.`,
+    },
+
+    '8_YE': {
+      heading: `Right Now, Life Is Asking You to Set Something Right`,
+      why: `This stretch of your life is carrying Justice energy — a season for addressing an imbalance honestly, including one closer to home than you'd usually look. Whatever fairness question has been sitting unresolved may finally have the conditions to actually be settled.`,
+      shadow: `The risk this season is applying that clarity outward only, auditing everyone else while your own conduct goes unexamined.`,
+      path: `Try applying the same fair standard to yourself that you'd apply to anyone else, once, this season. You are allowed to receive the same fairness you extend to others. What imbalance is this stretch of life actually asking you to set right?`,
+      positive: `You apply real fairness inward as well as outward, and that evenness is exactly what this season was asking you to finally settle.`,
+      negative: `Auditing everyone else's fairness while your own goes unexamined leaves this season's real invitation toward integrity untouched.`,
+    },
+
+    '9_YE': {
+      heading: `Right Now, Life Is Asking You to Go Inward for a While`,
+      why: `This stretch of your life is carrying Hermit energy — a season for withdrawal and depth, not constant availability to everyone else. Whatever understanding you've been circling may finally have room to actually settle if you give it real solitude.`,
+      shadow: `The risk this season is staying in the withdrawal past its purpose, gathering depth that never gets carried back out.`,
+      path: `Try taking real, chosen solitude this season, and then bringing back one thing you learn there to share. You are allowed to withdraw for a while and still plan to return. What understanding is this stretch of life asking you to sit with alone before you offer it to anyone?`,
+      positive: `You take genuine solitude and return with something real to offer, and that return is exactly what this season's depth was for.`,
+      negative: `Withdrawal that never returns anything to anyone wastes a season's worth of hard-won understanding on isolation alone.`,
+    },
+
+    '10_YE': {
+      heading: `Right Now, Life Is Turning, Whether You Push or Not`,
+      why: `This stretch of your life is carrying Wheel of Fortune energy — a season of genuine turning, where trusting the timing matters more than forcing an outcome. Whatever's currently shifting may be exactly on schedule, even if it doesn't feel that way.`,
+      shadow: `The risk this season is treating a normal turn as a crisis, either bracing hard against a downturn or refusing to trust an upswing.`,
+      path: `Try meeting whatever's currently turning — up or down — with curiosity instead of alarm. You are allowed to trust the timing even mid-turn. What is this season's turning actually clearing space for?`,
+      positive: `You meet this season's turning with earned trust instead of alarm, and that trust is what lets the cycle actually complete on its own timing.`,
+      negative: `Fighting an ordinary turn as though it were a crisis exhausts energy this season would rather have spent adapting.`,
+    },
+
+    '11_YE': {
+      heading: `Right Now, Life Is Asking for Quiet Endurance`,
+      why: `This stretch of your life is carrying Strength energy — a season for holding steady through real pressure, gently rather than by force. Whatever's currently demanding your resilience may be exactly the kind of test this quieter strength is built for.`,
+      shadow: `The risk this season is performing unbreakability for an audience rather than simply, privately, holding steady.`,
+      path: `Try letting your endurance be private this season and trusting it doesn't need to be witnessed to be real. You are allowed to be resilient without anyone seeing it. What is this stretch of life quietly asking you to hold with gentleness instead of force?`,
+      positive: `You hold steady through real pressure without needing it witnessed, and that quiet endurance is exactly what this season calls for.`,
+      negative: `Performing strength for an audience instead of simply holding it makes this season's real resilience depend on being seen.`,
+    },
+
+    '12_YE': {
+      heading: `Right Now, Life Is Asking You to Pause on Purpose`,
+      why: `This stretch of your life is carrying Hanged Man energy — a season for suspension that's actually doing work, not stalling. Whatever's currently on hold may be gathering exactly the perspective it needs before it can move again.`,
+      shadow: `The risk this season is mistaking every pause for permission to avoid a decision indefinitely.`,
+      path: `Try checking whether your current pause is still teaching you something or has quietly become avoidance. You are allowed to stay in the pause a while longer if the view is still changing. What is this season's suspension actually showing you that standing still never could?`,
+      positive: `You recognize a generative pause and let it finish its real work, and that patience is exactly what this season was offering.`,
+      negative: `A pause mistaken for permanent avoidance stops teaching anything, wasting a season built for a very specific kind of patience.`,
+    },
+
+    '13_YE': {
+      heading: `Right Now, Life Is Asking Something in You to End`,
+      why: `This stretch of your life is carrying Transformation energy — a season for a real ending, not a patched-over version of the same old thing. Whatever identity or arrangement has quietly run its course may finally have the conditions to actually complete.`,
+      shadow: `The risk this season is rushing the ending to avoid discomfort, or refusing to let it happen at all.`,
+      path: `Try naming one thing that's actually ready to end and letting it complete at its own pace. You are allowed to let something die so something truer can begin. What is this stretch of life asking you to finally let go of?`,
+      positive: `You let a real ending complete fully, and that completion is exactly what makes room for this season's renewal to actually begin.`,
+      negative: `Refusing an ending that's already run its course, or rushing it just to avoid discomfort, blocks the renewal this season was making possible.`,
+    },
+
+    '14_YE': {
+      heading: `Right Now, Life Is Asking for Real Balance, Not Managed Extremes`,
+      why: `This stretch of your life is carrying Temperance energy — a season for genuine integration between two things you've been treating as opposites. Whatever you've been alternating between may actually be ready to work together.`,
+      shadow: `The risk this season is swinging hard between extremes and calling the alternation balance.`,
+      path: `Try finding one small, actually blended version of two things you've been keeping separate. You are allowed to combine things slowly instead of choosing one extreme. What two parts of your life is this season asking you to finally integrate?`,
+      positive: `You find genuine integration instead of alternating extremes, and that blend is exactly what this season's balance was asking for.`,
+      negative: `Swinging between extremes and calling it balance leaves this season's real invitation toward integration unanswered.`,
+    },
+
+    '15_YE': {
+      heading: `Right Now, Life Is Asking You to Look at a Pull Honestly`,
+      why: `This stretch of your life is carrying Devil energy — a season for facing a compulsion or attachment honestly, rather than pretending it isn't there. Whatever pull has been quietly running things may finally be visible enough to actually examine.`,
+      shadow: `The risk this season is denying the pull entirely, which only tightens its grip.`,
+      path: `Try naming one real compulsion or attachment honestly, without shame, this season. You are allowed to examine the pull without judging yourself for having it. What is this stretch of life asking you to finally look at directly?`,
+      positive: `You face a real pull honestly instead of denying it, and that honesty is exactly what loosens its grip this season.`,
+      negative: `Denying a pull that's been quietly running things all season just tightens its hold instead of loosening it.`,
+    },
+
+    '16_YE': {
+      heading: `Right Now, Life Is Rebuilding Something That Had to Fall`,
+      why: `This stretch of your life is carrying Tower energy — a season of real collapse followed by real rebuilding, on more honest ground. Whatever's currently falling apart may have needed to, in order to make room for something sturdier.`,
+      shadow: `The risk this season is defending a structure you already suspect isn't sound, just to avoid the collapse.`,
+      path: `Try letting one shaky structure fall on its own terms instead of propping it up further. You are allowed to rebuild on more honest ground. What is this season asking you to stop defending so it can actually be rebuilt properly?`,
+      positive: `You let an unstable structure fall and rebuild on truer ground, and that willingness is exactly what this season's disruption was for.`,
+      negative: `Propping up a structure you already suspect is unsound just delays a harder collapse this season was trying to complete now.`,
+    },
+
+    '17_YE': {
+      heading: `Right Now, Life Is Asking You to Hope at Full Size`,
+      why: `This stretch of your life is carrying Star energy — a season for real, visible hope, not a modest, private version of it. Whatever faith you've been keeping small may be ready to actually take up its full space.`,
+      shadow: `The risk this season is keeping that hope quiet and shrunken, as if believing too openly would be tempting fate.`,
+      path: `Try letting one hope be as large and visible as it actually is this season. You are allowed to hope at full size. What hope has this stretch of life been asking you to stop shrinking?`,
+      positive: `You let a real hope be large and visible instead of modest and private, and that full size is exactly what this season was making room for.`,
+      negative: `Keeping hope deliberately small during a season built for it wastes exactly the faith this stretch of life was offering room for.`,
+    },
+
+    '18_YE': {
+      heading: `Right Now, Life Is Asking You to Trust What You Can't Yet Explain`,
+      why: `This stretch of your life is carrying Moon energy — a season for trusting an undercurrent before it's fully provable. Whatever feeling has been running beneath the surface may be worth taking seriously right now, even unverified.`,
+      shadow: `The risk this season is letting that feeling curdle into anxious story instead of staying a genuine, worth-checking signal.`,
+      path: `Try holding one strong feeling as real information this season, and checking it gently against what's actually happening. You are allowed to trust what you sense before you can explain it. What undercurrent is this stretch of life asking you to take seriously?`,
+      positive: `You trust a real undercurrent and check it against your actual circumstances, and that trust is exactly what this season's intuition was for.`,
+      negative: `Letting an unverified feeling run unchecked all season curdles genuine intuition into anxiety wearing its clothing.`,
+    },
+
+    '19_YE': {
+      heading: `Right Now, Life Is Asking You to Let Joy Be Visible`,
+      why: `This stretch of your life is carrying Sun energy — a season for real, open happiness, not a managed or modest version of it. Whatever delight has been available may be more ready to be lived out loud than you've been letting it.`,
+      shadow: `The risk this season is dimming the joy for other people's comfort, keeping it smaller than it actually is.`,
+      path: `Try letting one real joy show at its full size this season, without managing it down. You are allowed to be openly happy without apologizing for it. What delight has this season been offering that you've been quietly dimming?`,
+      positive: `You let real joy show at full size instead of managed down, and that openness is exactly what this season's brightness was for.`,
+      negative: `Dimming joy for other people's comfort during a season built for it wastes exactly the happiness this stretch of life was offering.`,
+    },
+
+    '20_YE': {
+      heading: `Right Now, Life Is Asking You to Answer a Calling`,
+      why: `This stretch of your life is carrying Judgement energy — a season for actually rising to something you've already heard clearly, rather than continuing to prepare for it indefinitely. Whatever summons has been sitting with you may finally have the conditions to be answered.`,
+      shadow: `The risk this season is hearing the calling clearly and still finding sophisticated reasons to keep waiting.`,
+      path: `Try taking one concrete step toward the calling you've already heard, this season, without waiting to feel fully ready. You are allowed to rise before you feel prepared. What is this stretch of life asking you to finally answer?`,
+      positive: `You answer a calling you've already heard instead of continuing to prepare for it indefinitely, and that responsiveness is exactly what this season was for.`,
+      negative: `Hearing a calling clearly but endlessly deferring it for more readiness leaves this season's real invitation unanswered.`,
+    },
+
+    '21_YE': {
+      heading: `Right Now, Life Is Asking You to Call Something Finished`,
+      why: `This stretch of your life is carrying World energy — a season for genuine completion, not another condition appended before something is allowed to count as done. Whatever you've already achieved may deserve to actually be named as arrived.`,
+      shadow: `The risk this season is reaching real completion and immediately relativizing it, finding a reason it doesn't quite count yet.`,
+      path: `Try letting one already-finished thing in your life actually be called complete this season. You are allowed to call it finished and mean it. What have you already accomplished that deserves to be named as done, not almost?`,
+      positive: `You let a genuine achievement actually be acknowledged as complete, and that acknowledgment is exactly what this season's arrival was for.`,
+      negative: `Relativizing every completion by adding one more condition leaves this season's real invitation toward genuine arrival unanswered.`,
+    },
+
+    '22_YE': {
+      heading: `Right Now, Life Is Asking You to Take One Real Leap`,
+      why: `This stretch of your life is carrying Fool energy — a season for beginning something with open eyes, trusting the unknown rather than waiting for full certainty. Whatever leap has been waiting for permission may have exactly the conditions it needs right now.`,
+      shadow: `The risk this season is inheriting caution instead of the boldness, letting an old fear override a genuinely good opportunity in front of you.`,
+      path: `Try taking one real leap this season, with your eyes open, rather than waiting for a guarantee that isn't coming. You are allowed to leap with open eyes and still call it wisdom. What would you begin this season if trust in the unknown were reason enough?`,
+      positive: `You take a real leap with open eyes rather than waiting for certainty, and that courage is exactly what this season was making possible.`,
+      negative: `Waiting for a guarantee that was never going to arrive lets this season's real opportunity for a leap pass by unclaimed.`,
+    },
+
   }; // end nodes
 
 

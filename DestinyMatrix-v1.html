@@ -2140,14 +2140,35 @@ appendHint();
     const mulV = _rd(C + D);
     const swaV = monV; // = reduce(atCG + atK), per the Swadhisthana formula above
 
+    // Yearly Energy Forecast (research/01-Foundation/Destiny-Matrix-
+    // Calculation-Guide.extracted.md, Pages 12-13): the life span divided
+    // into 8 age-decade sectors walking A(0)-F(10)-B(20)-G(30)-C(40)-
+    // H(50)-D(60)-I(70), each split into 7 mini-periods via the guide's
+    // own worked formula. Fully implemented in js/matrix-engine.js's new
+    // getYearlyEnergy() — verified bit-exact against the guide's own
+    // worked example and against 3 independent real data points from a
+    // worked personal report; see that function's header comment for the
+    // full verification trail. This is the live, "as of today" value —
+    // it changes with the calendar, not just with the birthdate.
+    let yeV = E, yeMeta = null;
+    if (window.DMEngine) {
+      const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+      yeMeta = DMEngine.getYearlyEnergy(dobIso);
+      yeV = yeMeta.value;
+    }
+    _yeMeta = yeMeta;
+
     return {
       love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
       atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
       atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v,
       atHZV: hzVv, atHZH: hzHv,
       atMUL: mulV, atSWA: swaV,
+      atYE: yeV,
     };
   }
+
+  let _yeMeta = null; // set by _calcVals(); read by the YE card's section body
 
   let _vals = _calcVals();
 
@@ -2316,6 +2337,14 @@ appendHint();
       pos: new THREE.Vector3(_R * 0.3986, _R * 0.8953, 0), color:0xE84C3D, twk:{spd:0.75,off:2.3} },
     { key:'SWA', num:_vals.atSWA, label:'Swadhisthana · Sacral Chakra',
       pos: new THREE.Vector3(-_R * 0.3986, _R * 0.8953, 0), color:0xE89A3D, twk:{spd:0.80,off:5.2} },
+
+    // ── Yearly Energy Forecast — the one time-varying star on the diagram;
+    // see _calcVals()'s comment above for the full formula/verification
+    // trail. Placed via direct-distance check only (no diagram position
+    // given in the source beyond "the area around the main diagram is
+    // used to calculate yearly energies" — min separation ≈0.40R).
+    { key:'YE', num:_vals.atYE, label:'Yearly Energy',
+      pos: new THREE.Vector3(-_R * 0.8953, _R * 0.3986, 0), color:0xFFD966, twk:{spd:0.70,off:0.3} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2558,6 +2587,8 @@ appendHint();
       ? 'Heart Zone'
       : (data.key === 'MUL' || data.key === 'SWA')
       ? 'Chakra Map'
+      : (data.key === 'YE')
+      ? 'Yearly Energy Forecast'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -2593,7 +2624,11 @@ appendHint();
            <div class="pb-full-text"><em>${cp.heading}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${cp.text}</div>
          </div>` : '';
-       })() : ''}` : '';
+       })() : ''}
+       ${data.key === 'YE' && _yeMeta ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">CURRENTLY ACTIVE</div>
+         <div class="pb-full-text">Ages ${_yeMeta.slotStartAge.toFixed(1)}–${_yeMeta.slotEndAge.toFixed(1)}, within the ${_yeMeta.decadeStart}–${_yeMeta.decadeEnd} life decade.</div>
+       </div>` : ''}` : '';
 
     _mBanner.classList.add('open');
     _mBanner.scrollTop = 0;
@@ -2838,6 +2873,12 @@ appendHint();
     MICRO[22].num = _vals.atMUL;
     _microTags[23].querySelector('.t-num').textContent = String(_vals.atSWA);
     MICRO[23].num = _vals.atSWA;
+
+    // Node 24: Yearly Energy — recomputed each date change (also reflects
+    // today's real date, so its value can change between sessions even if
+    // the birthdate doesn't).
+    _microTags[24].querySelector('.t-num').textContent = String(_vals.atYE);
+    MICRO[24].num = _vals.atYE;
 
     return true;
   };

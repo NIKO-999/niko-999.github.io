@@ -346,12 +346,81 @@ function matrixFromDate(dateStr) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 3c · YEARLY ENERGY FORECAST
+ *    Source: research/01-Foundation/Destiny-Matrix-Calculation-Guide.
+ *    extracted.md, Pages 12-13. "The life span is divided into 8 age
+ *    sectors [decades]... 0 years=Energy A, 10 years=Energy F, 20 years=
+ *    Energy B (...and so on)" — continuing that rotation around the
+ *    octagon (already-confirmed age anchors: TL/F=10, TR/G=30, BR/H=50,
+ *    BL/I=70) gives the full 8-anchor sequence: A(0)-F(10)-B(20)-G(30)-
+ *    C(40)-H(50)-D(60)-I(70), cycling back to A at 80 ("The 80th birthday
+ *    corresponds to 0"). Each decade is split into 7 mini-periods (a-g),
+ *    computed from the decade's start/end anchor values (P/N) via the
+ *    Guide's own fully-worked example (Page 13): d=P+N, b=P+d, a=P+b,
+ *    c=b+d, f=d+N, e=d+f, g=f+N (=f+N matches the stated "g = f + B").
+ *    Verified bit-exact against the Guide's own worked example (P=14,
+ *    N=9 -> d=5,b=19,a=6,c=6,f=14,e=19,g=5) and against 3 independent
+ *    real data points from a worked personal report (age ~22.5-25,
+ *    decade 20-30, P=B, N=G): all 3 observed values landed in the
+ *    predicted set at the correct evenly-divided (10/7-year) sub-period.
+ *    No formula invented — this is the Guide's own stated method.
+ * ─────────────────────────────────────────────────────────────────────────── */
+function getYearlyEnergy(birthdateString, asOfDateString) {
+  const chart = calculateDestinyMatrix(birthdateString);
+  const bm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdateString).trim());
+  const birth = new Date(Date.UTC(Number(bm[1]), Number(bm[2]) - 1, Number(bm[3])));
+  const asOf  = asOfDateString ? new Date(asOfDateString) : new Date();
+
+  const MS_PER_YEAR = 365.2425 * 24 * 3600 * 1000;
+  const rawAge = (asOf.getTime() - birth.getTime()) / MS_PER_YEAR;
+  const age = ((rawAge % 80) + 80) % 80; // "the 80th birthday corresponds to 0"
+
+  // Anchor sequence around the octagon, ages 0/10/20/30/40/50/60/70.
+  const anchors = [
+    chart.core.A.value, chart.ancestralSquare.TL.value,
+    chart.core.B.value, chart.ancestralSquare.TR.value,
+    chart.core.C.value, chart.ancestralSquare.BR.value,
+    chart.core.D.value, chart.ancestralSquare.BL.value,
+  ];
+
+  const decadeIndex = Math.floor(age / 10); // 0-7
+  const decadeStart = decadeIndex * 10;
+  const P = anchors[decadeIndex];
+  const N = anchors[(decadeIndex + 1) % 8];
+
+  const d = reduceArcana(P + N);
+  const b = reduceArcana(P + d);
+  const a = reduceArcana(P + b);
+  const c = reduceArcana(b + d);
+  const f = reduceArcana(d + N);
+  const e = reduceArcana(d + f);
+  const g = reduceArcana(f + N);
+  const slots = { a, b, c, d, e, f, g };
+
+  const order = ['a', 'b', 'c', 'd', 'e', 'f', 'g'];
+  const slotWidth = 10 / 7;
+  const posInDecade = age - decadeStart;
+  const slotIndex = Math.min(6, Math.floor(posInDecade / slotWidth));
+  const slotLetter = order[slotIndex];
+
+  return {
+    ageYears: age,
+    decadeStart, decadeEnd: decadeStart + 10,
+    decadeStartValue: P, decadeEndValue: N,
+    slots, slotLetter, slotIndex,
+    value: slots[slotLetter],
+    slotStartAge: decadeStart + slotIndex * slotWidth,
+    slotEndAge: decadeStart + (slotIndex + 1) * slotWidth,
+  };
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
+  module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate };
+  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
