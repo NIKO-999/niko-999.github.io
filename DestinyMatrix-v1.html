@@ -1621,6 +1621,7 @@ function showCard(idx) {
       document.getElementById('ic-why').textContent      = match.why;
       document.getElementById('ic-shadow').textContent   = match.shadow;
       document.getElementById('ic-path').textContent     = match.path;
+      document.getElementById('ic-sec-path').style.display = 'none';
       document.getElementById('ic-sec-positive').style.display = 'none';
       document.getElementById('ic-sec-negative').style.display = 'none';
       document.getElementById('ic-heading').style.display  = '';
@@ -1645,6 +1646,7 @@ function showCard(idx) {
     document.getElementById('ic-path').textContent     = mc.path;
     document.getElementById('ic-positive').textContent = mc.positive || '';
     document.getElementById('ic-negative').textContent = mc.negative || '';
+    document.getElementById('ic-sec-path').style.display = 'none';
     document.getElementById('ic-sec-positive').style.display = mc.positive ? '' : 'none';
     document.getElementById('ic-sec-negative').style.display = mc.negative ? '' : 'none';
     document.getElementById('ic-heading').style.display  = '';
@@ -2690,10 +2692,6 @@ appendHint();
          <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
        </div>
-       <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE PATH</div>
-         <div class="pb-full-text">${mc.path || ''}</div>
-       </div>
        ${mc.positive ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${mc.positive}</div>
@@ -3042,10 +3040,6 @@ appendHint();
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${cd.hex}">THE SHADOW</div>
          <div class="pb-full-text">${prog.shadow || ''}</div>
-       </div>
-       <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">THE PATH</div>
-         <div class="pb-full-text">${prog.path || ''}</div>
        </div>
        ${Array.isArray(prog.indicators) && prog.indicators.length ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${cd.hex}">INDICATORS</div>
@@ -3407,10 +3401,6 @@ appendHint();
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
          <div class="pb-full-text">${content.shadow || ''}</div>
-       </div>
-       <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE PATH</div>
-         <div class="pb-full-text">${content.path || ''}</div>
        </div>
        ${content.blocks ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">WHAT CAN BLOCK THIS TALENT</div>
