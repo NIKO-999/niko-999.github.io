@@ -691,6 +691,7 @@
 <script src="js/sexual-line-content.js"></script>
 <script src="js/career-paths-content.js"></script>
 <script src="js/health-map-content.js"></script>
+<script src="js/purpose-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2161,6 +2162,29 @@ appendHint();
     }
     _yeMeta = yeMeta;
 
+    // Three Life Purposes (research/01-Foundation/Destiny-Matrix-Calculation-
+    // Guide.extracted.md, Page 11 — "Life Purpose: Personal, Social, and
+    // Spiritual", one of the source's own top-level categories). These are
+    // exactly js/matrix-engine.js's existing destinies.first/second/third,
+    // which have always been computed and never displayed anywhere in the
+    // app. Built here from the locals already computed above rather than by
+    // calling the engine separately, so there is only one source of truth
+    // per value:
+    //   Personal  = reduce(EarthLine + SkyLine)   — reuses hzHv / hzVv
+    //   Social    = reduce(reduce(F+H) + reduce(G+I))  — paternal + maternal
+    //   Spiritual = reduce(Personal + Social)     — the "General Destiny Purpose"
+    // Page 11's printed "the diagonal A + D represents the Earth Line" is a
+    // confirmed extraction error for A + C — see research/11-Research-Updates/
+    // 22-three-life-purposes-formula-verification.md for the full trail (the
+    // same guide elsewhere says "numbers found horizontally (the earth line)",
+    // and Core-Methodology-and-Concepts.md calls Earth Line the "Right
+    // cardinal arm"). Earth/Sky are cardinal axes, never diagonals.
+    const patV = _rd(Fv + Hv);   // paternal diagonal  (F + H)
+    const matV = _rd(Gv + Iv);   // maternal diagonal  (G + I)
+    const ppV  = _rd(hzHv + hzVv);
+    const sopV = _rd(patV + matV);
+    const sppV = _rd(ppV + sopV);
+
     return {
       love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
       atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
@@ -2168,6 +2192,9 @@ appendHint();
       atHZV: hzVv, atHZH: hzHv,
       atMUL: mulV, atSWA: swaV,
       atYE: yeV,
+      atPP: ppV, atSOP: sopV, atSPP: sppV,
+      // Contributing intermediates — read by the Purpose cards' synthesis line.
+      pSky: hzVv, pEarth: hzHv, pPat: patV, pMat: matV,
     };
   }
 
@@ -2362,6 +2389,35 @@ appendHint();
     // this position has no single per-arcana value of its own.
     { key:'HEALTH', num:5, label:'Health Map',
       pos: new THREE.Vector3(-_R * 0.1032, _R * 0.6519, 0), color:0x7FE0D6, twk:{spd:0.65,off:2.2} },
+
+    // ── Three Life Purposes (research/01-Foundation/Destiny-Matrix-
+    // Calculation-Guide.extracted.md, Page 11 — "Life Purpose: Personal,
+    // Social, and Spiritual", one of the source's own top-level categories).
+    // Values come from _calcVals()'s atPP/atSOP/atSPP, which are exactly
+    // js/matrix-engine.js's long-computed-but-never-displayed
+    // destinies.first/second/third. Formula verification (including the
+    // Earth Line A+C vs the source's garbled "A+D") is recorded in
+    // research/11-Research-Updates/22-three-life-purposes-formula-
+    // verification.md.
+    //
+    // No diagram coordinates are given in the source for these, so placement
+    // is by direct-distance check only, same as HZV/HZH, MUL/SWA and YE:
+    // an evenly-spaced 45° arc on the r=1.20R ring at θ=294°/339°/24°,
+    // measured min separation 0.4466R from every one of the 31 existing
+    // stars (better-separated than HZV/HZH ≈0.32R or MUL/SWA ≈0.40R). The
+    // arc ascends bottom-right → right → top-right, matching the purposes'
+    // own age progression (→40, 40–60, 60+); the colour grades gold → white
+    // along that same ascent so the three read as one tier.
+    //
+    // Appended at the END of MICRO, never inserted mid-array — see the
+    // Material Karma comment above for why (index-shift broke Past Life
+    // Star's refresh logic once already).
+    { key:'PP', num:_vals.atPP, label:'Personal Purpose',
+      pos: new THREE.Vector3(_R * 0.4881, -_R * 1.0963, 0), color:0xFFE08A, twk:{spd:0.72,off:0.15} },
+    { key:'SOP', num:_vals.atSOP, label:'Social Purpose',
+      pos: new THREE.Vector3(_R * 1.1203, -_R * 0.4300, 0), color:0xFFF1C1, twk:{spd:0.88,off:2.95} },
+    { key:'SPP', num:_vals.atSPP, label:'Spiritual Purpose',
+      pos: new THREE.Vector3(_R * 1.0963, _R * 0.4881, 0), color:0xFFFFFF, twk:{spd:1.02,off:4.65} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2529,6 +2585,79 @@ appendHint();
     // Health Map — folder/subfolder: opens to the zone list; tapping a
     // zone swaps in its own content within the same banner (see the
     // delegated click listener above).
+    // Three Life Purposes — own content file (js/purpose-content.js) with an
+    // extra `synthesis` field the other systems don't have. Each purpose is a
+    // SUM of positions the reader can open elsewhere, so the card opens with a
+    // generated line naming their own contributing values before the written
+    // synthesis prose. No general[] fallback exists by design: an unwritten
+    // entry renders an honest note rather than a fabricated reading (same
+    // treatment as the Sexual Line's unmatched-pair case). `path` is written
+    // in the data but deliberately not rendered, as on every other card.
+    if (data.key === 'PP' || data.key === 'SOP' || data.key === 'SPP') {
+      const pc = window.DPurposeContent
+        ? DPurposeContent.get(data.key, data.num) : null;
+
+      const SECTION_LABEL = {
+        PP:  'Life Purpose · Personal (to age 40)',
+        SOP: 'Life Purpose · Social (40–60)',
+        SPP: 'Life Purpose · Spiritual (60+)',
+      };
+
+      // Contributing-values line, built live from the current chart.
+      const nm = (n) => {
+        if (!window.DMArcana) return String(n);
+        try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
+      };
+      const feed = data.key === 'PP'
+        ? [['Sky Line', _vals.pSky], ['Earth Line', _vals.pEarth]]
+        : data.key === 'SOP'
+          ? [['Paternal Line', _vals.pPat], ['Maternal Line', _vals.pMat]]
+          : [['Personal Purpose', _vals.atPP], ['Social Purpose', _vals.atSOP]];
+      const feedHtml =
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
+           <div class="pb-full-text">${feed[0][0]} ${nm(feed[0][1])}
+             &nbsp;+&nbsp; ${feed[1][0]} ${nm(feed[1][1])}
+             &nbsp;→&nbsp; ${data.label} ${nm(data.num)}</div>
+         </div>`;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = SECTION_LABEL[data.key];
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (pc && pc.heading) || data.label;
+      document.getElementById('pb-body').innerHTML = feedHtml + (pc ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE SYNTHESIS</div>
+           <div class="pb-full-text">${pc.synthesis || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">WHY</div>
+           <div class="pb-full-text">${pc.why || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+           <div class="pb-full-text">${pc.shadow || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">POSITIVE STATE</div>
+           <div class="pb-full-text">${pc.positive || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">NEGATIVE STATE</div>
+           <div class="pb-full-text">${pc.negative || ''}</div>
+         </div>` :
+        `<div class="pb-full-section">
+           <div class="pb-full-text">This combination hasn't been written yet.</div>
+         </div>`);
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
     if (data.key === 'HEALTH') {
       document.getElementById('pb-prog-name').textContent = data.label;
       document.getElementById('pb-prog-name').style.color = hex;
@@ -2962,6 +3091,18 @@ appendHint();
     // the birthdate doesn't).
     _microTags[24].querySelector('.t-num').textContent = String(_vals.atYE);
     MICRO[24].num = _vals.atYE;
+
+    // Node 25 is the Health Map folder star — its `num` is a static zone
+    // count, not an arcana value, so it deliberately has no refresh line.
+
+    // Nodes 26-28: Three Life Purposes (PP/SOP/SPP) — recomputed from the
+    // live Sky/Earth lines and ancestral corners each date change.
+    _microTags[26].querySelector('.t-num').textContent = String(_vals.atPP);
+    MICRO[26].num = _vals.atPP;
+    _microTags[27].querySelector('.t-num').textContent = String(_vals.atSOP);
+    MICRO[27].num = _vals.atSOP;
+    _microTags[28].querySelector('.t-num').textContent = String(_vals.atSPP);
+    MICRO[28].num = _vals.atSPP;
 
     return true;
   };
