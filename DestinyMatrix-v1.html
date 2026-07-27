@@ -308,6 +308,113 @@
       font-style: italic;
     }
 
+    /* ── CHAKRA RAIL ────────────────────────────────────────────────────────
+       Mirrors the Star Index's visual language (same mono toggle, blur panel,
+       border and radius) but runs the full height of the right edge, because
+       the chakras are an ordered vertical stack mapped to the body — crown at
+       top, root at bottom. Collapsed it is a spine of 7 colour dots, always
+       glanceable; expanded it slides a panel out to its left. */
+    #chakra-rail {
+      position: absolute;
+      top: 0; right: 0; height: 100%;
+      display: flex; align-items: center; justify-content: flex-end;
+      pointer-events: none;
+      z-index: 25;
+    }
+    #cr-inner { display: flex; align-items: stretch; pointer-events: all; }
+    #cr-panel {
+      overflow: hidden;
+      width: 0; opacity: 0;
+      transition: width .35s ease, opacity .25s ease;
+      background: rgba(4, 7, 22, 0.88);
+      border: 1px solid rgba(180,210,255,0.11);
+      border-right: none;
+      border-radius: 2px 0 0 2px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      align-self: center;
+    }
+    #chakra-rail.open #cr-panel { width: 212px; opacity: 1; }
+    #cr-head {
+      font-family: 'DM Mono', monospace;
+      font-size: 5.5px; font-weight: 300;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(160,200,255,0.35);
+      padding: 9px 11px 5px;
+      white-space: nowrap;
+    }
+    .cr-row {
+      display: flex; align-items: center; gap: 7px;
+      padding: 4px 11px; cursor: pointer;
+      transition: background .15s;
+      white-space: nowrap;
+    }
+    .cr-row:hover { background: rgba(180,210,255,0.08); }
+    .cr-name {
+      font-size: 8.5px; font-weight: 300;
+      color: rgba(210,225,255,0.68);
+      flex: 1; letter-spacing: .15px;
+    }
+    .cr-name small {
+      display: block;
+      font-size: 6px; letter-spacing: 1.4px; text-transform: uppercase;
+      color: rgba(180,210,255,0.3);
+    }
+    .cr-vals {
+      font-family: 'DM Mono', monospace;
+      font-size: 7.5px; font-weight: 400;
+      color: rgba(210,225,255,0.5);
+      letter-spacing: .5px; flex-shrink: 0;
+    }
+    #cr-totals {
+      border-top: 1px solid rgba(180,210,255,0.09);
+      margin-top: 4px; padding: 6px 11px 9px;
+      font-family: 'DM Mono', monospace;
+      font-size: 6.5px; letter-spacing: 1px;
+      color: rgba(180,210,255,0.34);
+      display: flex; justify-content: space-between; white-space: nowrap;
+    }
+    /* the spine — always visible */
+    #cr-spine {
+      width: 30px; flex-shrink: 0;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      gap: 9px; padding: 10px 0;
+      background: rgba(4, 7, 22, 0.72);
+      border-left: 1px solid rgba(180,210,255,0.09);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      align-self: center;
+      border-radius: 2px 0 0 2px;
+    }
+    #cr-toggle {
+      font-family: 'DM Mono', monospace;
+      font-size: 7px; color: rgba(255,255,255,0.3);
+      cursor: pointer; user-select: none;
+      transition: color .2s, transform .3s ease;
+      margin-bottom: 3px;
+    }
+    #cr-toggle:hover { color: rgba(255,255,255,0.6); }
+    #chakra-rail.open #cr-toggle { transform: rotate(180deg); }
+    #cr-dots {
+      display: flex; flex-direction: column;
+      align-items: center; gap: 9px;
+    }
+    .cr-dot {
+      width: 13px; height: 13px; border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'DM Mono', monospace;
+      font-size: 5.5px; font-weight: 500;
+      color: rgba(255,255,255,0.82);
+      cursor: pointer;
+      opacity: 0.62;
+      transition: opacity .2s, transform .2s;
+    }
+    .cr-dot:hover, .cr-dot.lit { opacity: 1; transform: scale(1.25); }
+    @media (max-width: 720px) {
+      #chakra-rail.open #cr-panel { width: 176px; }
+    }
+
     /* ── Info card ───────────────────────────────────── */
     #info-card {
       position: fixed;
@@ -628,6 +735,22 @@
       <div id="si-list"></div>
     </div>
   </div>
+
+  <!-- Chakra rail — full-height right edge. Spine of 7 colour dots is always
+       visible (crown at top, root at bottom); the panel slides out to its left. -->
+  <div id="chakra-rail">
+    <div id="cr-inner">
+      <div id="cr-panel">
+        <div id="cr-head">Chakra Map · phys / engy / emo</div>
+        <div id="cr-rows"></div>
+        <div id="cr-totals"></div>
+      </div>
+      <div id="cr-spine">
+        <div id="cr-toggle" title="Chakra Map">‹</div>
+        <div id="cr-dots"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
 </div>
@@ -692,6 +815,7 @@
 <script src="js/career-paths-content.js"></script>
 <script src="js/health-map-content.js"></script>
 <script src="js/purpose-content.js"></script>
+<script src="js/chakra-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -3961,6 +4085,139 @@ let _scanVals = null;
 
   const paramDob = new URLSearchParams(location.search).get('dob');
   if (paramDob) applyNewDate(paramDob); // silently falls back to the default on invalid input
+})();
+
+// ── CHAKRA RAIL ───────────────────────────────────────────────────────────
+// The Chakra Map is deliberately NOT a star tier. The seven centres are an
+// ordered vertical stack mapped to the body, so they get a full-height rail on
+// the right edge — crown at top, root at bottom — rather than being scattered
+// across the diagram as seven more stars. Formula derivation and the talent-
+// line correction that came out of it: research/11-Research-Updates/24-*.md.
+//
+// Values come from DMEngine's `chakras` output (7 rows of physical / energy /
+// emotional plus column totals). Clicking a chakra opens the shared
+// #prog-banner, and the rail participates in the same activeExtraStar guard as
+// every other tier so it can't fight a star mid-transition.
+;(function () {
+  if (!window.DMEngine || !window.DChakraContent) return;
+
+  const rail   = document.getElementById('chakra-rail');
+  const toggle = document.getElementById('cr-toggle');
+  const dotsEl = document.getElementById('cr-dots');
+  const rowsEl = document.getElementById('cr-rows');
+  const totEl  = document.getElementById('cr-totals');
+  if (!rail) return;
+
+  const banner  = document.getElementById('prog-banner');
+  const pbClose = document.getElementById('pb-close');
+  let _open = false;          // banner open
+  let _activeKey = null;
+
+  function dobToISO() {
+    return `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+  }
+
+  let _chakras = DMEngine.calculateDestinyMatrix(dobToISO()).chakras;
+
+  function closeChakraCard() {
+    if (!_open) return;
+    gsap.to(banner, { y:'105%', duration:0.4, ease:'power2.in',
+      onComplete() { banner.classList.remove('open'); } });
+    _open = false;
+    _activeKey = null;
+    activeExtraStar = null;
+    [...dotsEl.children].forEach(d => d.classList.remove('lit'));
+  }
+  pbClose.addEventListener('click', () => { if (_open) closeChakraCard(); });
+
+  function openChakra(key) {
+    // Respect the shared guard — never open over a flying/active star.
+    if (isFlying || activeIdx !== -1 || (activeExtraStar !== null && !_open)) return;
+    const row = _chakras.list.find(r => r.key === key);
+    const c   = DChakraContent.get(key);
+    if (!row || !c) return;
+
+    _activeKey = key;
+    activeExtraStar = { tier: 'chakra', key };
+    [...dotsEl.children].forEach(d => d.classList.toggle('lit', d.dataset.key === key));
+
+    const hex = row.colour;
+    document.getElementById('pb-prog-name').textContent =
+      `${row.name}  ·  ${row.common}`;
+    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-section-label').textContent = 'Chakra Map';
+    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-heading').textContent = c.governs;
+
+    const aspect = (label, val, text) =>
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">${label} · ${val}</div>
+         <div class="pb-full-text">${text}</div>
+       </div>`;
+
+    document.getElementById('pb-body').innerHTML =
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">WHERE IT SITS</div>
+         <div class="pb-full-text">${c.where}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">IN BALANCE</div>
+         <div class="pb-full-text">${c.balanced}</div>
+       </div>` +
+      aspect('PHYSICAL', row.physical, c.physical) +
+      aspect('ENERGY',   row.energy,   c.energy) +
+      aspect('EMOTIONAL', row.emotional, c.emotional);
+
+    banner.classList.add('open');
+    banner.scrollTop = 0;
+    gsap.to(banner, { y:'0%', duration:0.55, ease:'power3.out' });
+    _open = true;
+  }
+
+  function render() {
+    dotsEl.innerHTML = '';
+    rowsEl.innerHTML = '';
+    _chakras.list.forEach((r) => {
+      const dot = document.createElement('div');
+      dot.className = 'cr-dot';
+      dot.dataset.key = r.key;
+      dot.style.background = r.colour;
+      dot.title = `${r.name} · ${r.common}`;
+      dot.textContent = r.emotional;
+      dot.addEventListener('click', (e) => { e.stopPropagation(); openChakra(r.key); });
+      dotsEl.appendChild(dot);
+
+      const row = document.createElement('div');
+      row.className = 'cr-row';
+      row.innerHTML =
+        `<span class="cr-dot" style="background:${r.colour};opacity:.85;cursor:default"></span>` +
+        `<span class="cr-name">${r.name}<small>${r.common}</small></span>` +
+        `<span class="cr-vals">${r.physical} / ${r.energy} / ${r.emotional}</span>`;
+      row.addEventListener('click', () => openChakra(r.key));
+      rowsEl.appendChild(row);
+    });
+    const t = _chakras.totals;
+    totEl.innerHTML =
+      `<span>TOTALS</span><span>${t.physical.value} / ${t.energy.value} / ${t.emotional.value}</span>`;
+  }
+
+  toggle.addEventListener('click', (e) => {
+    e.stopPropagation();
+    rail.classList.toggle('open');
+  });
+
+  render();
+
+  // ── DOB hook ─────────────────────────────────────────────────────────────
+  const _prev = applyNewDate;
+  applyNewDate = function (dateStr) {
+    const ok = _prev(dateStr);
+    if (!ok) return false;
+    if (_open) closeChakraCard();
+    _chakras = DMEngine.calculateDestinyMatrix(dobToISO()).chakras;
+    render();
+    return true;
+  };
 })();
 
 // ── STAR INDEX PANEL ──────────────────────────────────────────────────────
