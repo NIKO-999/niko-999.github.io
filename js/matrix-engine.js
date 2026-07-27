@@ -247,17 +247,44 @@ function calculateDestinyMatrix(birthdateString) {
 
   const thirdPurpose  = reduceArcana(firstPurpose + secondPurpose);      // 60+
 
-  // ── TALENT STAR LINE · Crown → Third-Eye → Throat (top-down per spec) ────
-  // Two midpoints are undefined upstream; built the same way every other
-  // midpoint in this engine is: sequential reduce(prev + E) walking to center.
-  // Standard chakra order top-down is 7=Crown, 6=Third Eye/Ajna, 5=Throat/
-  // Vishuddha — confirmed against the source's own "6th chakra" (Ajna) named
-  // before "5th chakra" (Vishuddha) on the walk from crown toward center.
-  const crown    = B;                                // Sahasrara — Top Node
-  const thirdEye = reduceArcana(crown + E);           // Ajna      — 1st midpoint
-  const throat   = reduceArcana(thirdEye + E);        // Vishuddha — 2nd midpoint
+  // ── LETTERED ARM POINTS (shared by the Talent line and the Chakra Map) ────
+  // The vertical (sky) arm runs B -> P -> K -> T -> E and the horizontal
+  // (earth) arm runs A -> O -> J -> S -> E, each by successive
+  // midpoint-toward-centre. Derivation and verification: see the CHAKRA MAP
+  // comment below — these are the guide's own letters, solved against its
+  // Page 15 worked example, not invented here.
+  const chK = reduceArcana(B + E), chP = reduceArcana(B + chK), chT = reduceArcana(chK + E);
+  const chJ = reduceArcana(A + E), chO = reduceArcana(A + chJ), chS = reduceArcana(chJ + E);
+  const chL = reduceArcana(C + E), chM = reduceArcana(D + E);
 
-  const spiritualDominant = dominantOf([crown, thirdEye, throat]);
+  // ── TALENT STAR LINE ──────────────────────────────────────────────────────
+  // CORRECTED 2026-07-28. This previously walked B -> reduce(B+E) ->
+  // reduce(B+E+E) and labelled those two points "Ajna/Third Eye" and
+  // "Vishuddha/Throat". That was off by one position: the guide's own chakra
+  // table shows THREE points between B and centre (P, K, T), so the app's
+  // first point was really K (Vishuddha) and its second was T (Anahata) — a
+  // heart-chakra value being shown as a throat talent. See
+  // research/11-Research-Updates/24-*.md.
+  //
+  // The talent positions and their sourced names:
+  //   crown    = B   Sahasrara  — "God-given talents (birth month)"
+  //                              cheat sheet: "Your Core Talent & Source of
+  //                              Inspiration". Already drawn as the Sky Line star.
+  //   pastLife = P   Ajna       — Talent-Zone.md: "cognitive abilities and
+  //                              talents carried over from previous lives";
+  //                              cheat sheet: "Hidden Past-Life Talent, Past
+  //                              Life Skill".
+  //   personal = K   Vishuddha  — Talent-Zone.md: "talent for self-expression";
+  //                              guide Page 6: "K represents your personal
+  //                              (individual) talent"; cheat sheet:
+  //                              "Self-Presentation, Social Interaction,
+  //                              Self-Expression in This Lifetime".
+  // T (Anahata) is NOT a talent position and now belongs to the Chakra Map.
+  const crown    = B;
+  const pastLife = chP;
+  const personal = chK;
+
+  const spiritualDominant = dominantOf([crown, pastLife, personal]);
   const spiritualArchetype = ARCHETYPE_MAP[spiritualDominant] || null;
 
   // Earthly & Social Talents — Left Node (A) chain toward Center (E).
@@ -271,10 +298,10 @@ function calculateDestinyMatrix(birthdateString) {
   const ancestralDominant = dominantOf([TL, TR]);
 
   const talents = {
-    crown, thirdEye, throat,
-    iconType: ICON_TYPE_MAP[dominantOf([crown, thirdEye, throat])] || null,
+    crown, pastLife, personal,
+    iconType: ICON_TYPE_MAP[dominantOf([crown, pastLife, personal])] || null,
 
-    spiritual: { crown, thirdEye, throat, dominant: spiritualDominant, archetype: spiritualArchetype },
+    spiritual: { crown, pastLife, personal, dominant: spiritualDominant, archetype: spiritualArchetype },
     earthly:   { left: A, midpoint: earthlyMid, dominant: earthlyDominant, archetype: earthlyArchetype },
     ancestral: {
       paternal: { value: TL, archetype: paternalArchetype },
@@ -282,6 +309,70 @@ function calculateDestinyMatrix(birthdateString) {
     },
 
     activeProgram: matchTalentProgram([spiritualDominant, earthlyDominant, ancestralDominant]),
+  };
+
+  /* ── CHAKRA MAP · 7 chakras x 3 aspects ────────────────────────────────────
+   * Source: research/01-Foundation/Destiny-Matrix-Calculation-Guide.extracted.md
+   * Pages 14-15. The guide gives seven "diagonal" formulas:
+   *
+   *   Sahasrara = A + B    Ajna     = O + P    Vishuddha = J + K
+   *   Anahata   = S + T    Manipura = E + E    Swadhisthana = L + M
+   *   Muladhara = C + D
+   *
+   * Earlier passes recorded O/P/J/K/S/T/L/M as having "no sourced definition"
+   * and left 5 of the 7 unbuilt. They are in fact fully determined: Page 15
+   * prints a worked example whose two letter columns are
+   *   Physical (horizontal / earth line): A, O, J, S, E, L, C
+   *   Energy   (vertical  / sky line)   : B, P, K, T, E, M, D
+   * with values 22,4,9,14,5,13,8 and 4,13,9,14,5,12,7. That example's A-E are
+   * this engine's own A-E (D = reduce(A+B+C) = 7, E = reduce(A+B+C+D) = 5 both
+   * check out), and every remaining letter falls out as the same successive
+   * midpoint-toward-centre construction used everywhere else in this engine:
+   *
+   *   horizontal arm   A -> O -> J -> S -> E      vertical arm   B -> P -> K -> T -> E
+   *     J = reduce(A + E)                           K = reduce(B + E)
+   *     O = reduce(A + J)                           P = reduce(B + K)
+   *     S = reduce(J + E)                           T = reduce(K + E)
+   *     L = reduce(C + E)                           M = reduce(D + E)
+   *
+   * All eight reproduce the worked example exactly, and the full 7x3 table
+   * plus all three column totals match it bit-for-bit (75->12, 64->10,
+   * 85->13). Independently confirmed a second time against the rendered
+   * Sky Line arm in DestinyMatrix-Sheet.extracted.md Page 1, where the circle
+   * COLOURS also line up with the traditional chakra palette
+   * (purple=Sahasrara at B, blue=Ajna at P, light blue=Vishuddha at K,
+   * green=Anahata at T). See research/11-Research-Updates/24-*.md.
+   *
+   * "Manipura = E + E" is therefore genuine, not the OCR misread the original
+   * extraction flagged — it resolves correctly in the worked example.
+   *
+   * Aspect model (Page 14, "Classical Calculation" + Page 6): the horizontal
+   * value is Physical, the vertical value is Energetic, and Emotional is the
+   * sum of the two. Column totals are the reduced sum down each column.
+   * ───────────────────────────────────────────────────────────────────────── */
+  const CHAKRA_ROWS = [
+    { key: 'sahasrara',    name: 'Sahasrara',    common: 'Crown',        colour: '#A855F7', physical: A,   energy: B   },
+    { key: 'ajna',         name: 'Ajna',         common: 'Third Eye',    colour: '#4F63D2', physical: chO, energy: chP },
+    { key: 'vishuddha',    name: 'Vishuddha',    common: 'Throat',       colour: '#3FC5E8', physical: chJ, energy: chK },
+    { key: 'anahata',      name: 'Anahata',      common: 'Heart',        colour: '#4ADE80', physical: chS, energy: chT },
+    { key: 'manipura',     name: 'Manipura',     common: 'Solar Plexus', colour: '#FACC15', physical: E,   energy: E   },
+    { key: 'swadhisthana', name: 'Swadhisthana', common: 'Sacral',       colour: '#FB923C', physical: chL, energy: chM },
+    { key: 'muladhara',    name: 'Muladhara',    common: 'Root',         colour: '#EF4444', physical: C,   energy: D   },
+  ];
+
+  const chakraList = CHAKRA_ROWS.map((r) => ({
+    ...r, emotional: reduceArcana(r.physical + r.energy),
+  }));
+  const _sum = (f) => chakraList.reduce((s, r) => s + r[f], 0);
+  const chakras = {
+    list: chakraList,
+    totals: {
+      physical:  { raw: _sum('physical'),  value: reduceArcana(_sum('physical'))  },
+      energy:    { raw: _sum('energy'),    value: reduceArcana(_sum('energy'))    },
+      emotional: { raw: _sum('emotional'), value: reduceArcana(_sum('emotional')) },
+    },
+    // The lettered arm points, exposed so the UI layer never re-derives them.
+    letters: { O: chO, J: chJ, S: chS, L: chL, P: chP, K: chK, T: chT, M: chM },
   };
 
   // ── STRUCTURED RETURN ─────────────────────────────────────────────────────
@@ -324,6 +415,7 @@ function calculateDestinyMatrix(birthdateString) {
     },
 
     talents,
+    chakras,
   };
 }
 
@@ -458,8 +550,8 @@ if (typeof require !== 'undefined' && require.main === module) {
     `3rd=${chart.destinies.third.value}`);
   console.log('Talent Line   :',
     `crown=${chart.talents.crown}`,
-    `throat=${chart.talents.throat}`,
-    `thirdEye=${chart.talents.thirdEye}`,
+    `pastLife=${chart.talents.pastLife}`,
+    `personal=${chart.talents.personal}`,
     `iconType=${chart.talents.iconType}`);
   console.log('Talent Cats   :',
     `spiritual=${chart.talents.spiritual.dominant}/${chart.talents.spiritual.archetype}`,

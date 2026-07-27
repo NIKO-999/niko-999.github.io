@@ -2165,18 +2165,16 @@ let _scanVals = null;
     // full verification trail. This is the live, "as of today" value —
     // it changes with the calendar, not just with the birthdate.
     let yeV = E, yeMeta = null;
-    // Talent Star Line values (Ajna / Vishuddha). Taken from the engine here
-    // rather than read off the Talent Star Line IIFE, because that IIFE opens
-    // AFTER the program-star IIFE that consumes these — see the _scanVals note
-    // at the top of this block. Engine stays the single source of truth.
-    let teV = null, tvV = null;
+    // Lettered arm points (P/K/T on the sky arm, O/J/S/L/M on the earth arm),
+    // taken from the engine rather than re-derived here. Read by the program
+    // scanner, which sits in an IIFE that opens after this one — see the
+    // _scanVals note above. Engine stays the single source of truth.
+    let chLetters = null;
     if (window.DMEngine) {
       const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
       yeMeta = DMEngine.getYearlyEnergy(dobIso);
       yeV = yeMeta.value;
-      const _t = DMEngine.calculateDestinyMatrix(dobIso).talents;
-      teV = _t.thirdEye;
-      tvV = _t.throat;
+      chLetters = DMEngine.calculateDestinyMatrix(dobIso).chakras.letters;
     }
     _yeMeta = yeMeta;
 
@@ -2211,8 +2209,13 @@ let _scanVals = null;
       atMUL: mulV, atSWA: swaV,
       atYE: yeV,
       atPP: ppV, atSOP: sopV, atSPP: sppV,
-      // Talent Star Line — consumed by the program scanner (see above).
-      atThirdEye: teV, atThroat: tvV,
+      // Lettered arm points — consumed by the program scanner (see above).
+      // atP/atK are the two Talent Star Line positions (Ajna / Vishuddha
+      // values); atT is Anahata, which belongs to the Chakra Map.
+      atP: chLetters ? chLetters.P : null,
+      atK: chLetters ? chLetters.K : null,
+      atT: chLetters ? chLetters.T : null,
+      chLetters,
       // Core cross, carried through so the program scanner has one complete
       // picture without re-reading NODES[] itself.
       atA: A, atB: B, atC: C, atD: D, atE: E,
@@ -3195,7 +3198,7 @@ let _scanVals = null;
       v.atHZV, v.atHZH,                        // Heart Zone
       v.atMUL,                                 // Muladhara (Root)
       v.atPP, v.atSOP, v.atSPP,                // Three Life Purposes
-      v.atThirdEye, v.atThroat,                // Talent Star Line
+      v.atP, v.atK, v.atT,                     // sky-arm points (talents + Anahata)
     ].filter(n => typeof n === 'number')));
   }
 
@@ -3616,10 +3619,26 @@ let _scanVals = null;
 ;(function () {
   if (!window.DMEngine || !window.DTalentContent) return;
 
-  // Crown = B (Top node) exactly — already rendered as the Sky Line arcana star.
-  // Only throat (Vishuddha) and thirdEye (Ajna) are genuinely new positions,
-  // placed 2/3 and 1/3 down the B→E segment (matches the LOVE/MON fractional
-  // placement pattern already used for the inner channel micro-nodes).
+  // CORRECTED 2026-07-28 — the two stars here were previously labelled
+  // "Ajna · Third Eye" and "Vishuddha · Throat" and placed at 2/3 and 1/3 down
+  // the B→E segment. Both the names and the placement were off by one position.
+  //
+  // The guide's own chakra table (Calculation Guide pages 14-15) shows the sky
+  // arm running B → P → K → T → E — THREE intermediate points, not two — and
+  // the rendered diagram in DestinyMatrix-Sheet page 1 confirms it, with circle
+  // colours matching the chakra palette (purple B = Sahasrara, blue P = Ajna,
+  // light-blue K = Vishuddha, green T = Anahata). So the old first star was
+  // really K (Vishuddha) wearing Ajna's name, and the old second star was T —
+  // a heart-chakra value being shown as a throat talent.
+  //
+  // The talent line is now its correct two points (crown B is already drawn as
+  // the Sky Line arcana star), under the names the source actually gives them:
+  //   P → "Hidden Past-Life Talent, Past Life Skill"   (cheat sheet)
+  //   K → "Self-Expression & Social Interaction"       (cheat sheet: "Self-
+  //        Presentation, Social Interaction, Self-Expression in This Lifetime";
+  //        guide page 6: "K represents your personal (individual) talent")
+  // T (Anahata) has moved out of this tier and belongs to the Chakra Map.
+  // Quarter spacing on the B→E segment (B=3.7, E=0): P=2.775, K=1.85.
   const ICON_COLOR_MAP = {
     LEADER_ACTION:        0xFFAA33,
     INTUITION_WISDOM:      0xB088FF,
@@ -3635,11 +3654,14 @@ let _scanVals = null;
   let _talents = window.DMEngine.calculateDestinyMatrix(dobToISO()).talents;
 
   const TALENT_POS = {
-    thirdEye: new THREE.Vector3(0, 2.47, 0),
-    throat:   new THREE.Vector3(0, 1.23, 0),
+    pastLife: new THREE.Vector3(0, 2.775, 0),
+    personal: new THREE.Vector3(0, 1.85,  0),
   };
-  const TALENT_LABEL = { thirdEye: 'Ajna · Third Eye', throat: 'Vishuddha · Throat' };
-  const KEYS = ['thirdEye', 'throat'];
+  const TALENT_LABEL = {
+    pastLife: 'Hidden Past-Life Talent',
+    personal: 'Self-Expression & Social Interaction',
+  };
+  const KEYS = ['pastLife', 'personal'];
 
   // ── Banner (shared with program stars — only one is ever open at a time) ──
   const banner  = document.getElementById('prog-banner');
