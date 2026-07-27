@@ -1976,6 +1976,16 @@ function openDateEdit() {
 hudDate.addEventListener('click', openDateEdit);
 appendHint();
 
+// ── SHARED CHART-VALUE PUBLISH POINT ─────────────────────────────────────
+// _calcVals() (inside the micro-node IIFE below) computes every position the
+// app displays, but its `_vals` is scoped to that IIFE — and the PROGRAM STARS
+// IIFE further down opens only after that scope has closed, so it can't read
+// it. Rather than duplicate the formulas there (which would drift the moment a
+// position changes), _calcVals() publishes its result here as its last act.
+// Every call site — initial load and every date change — therefore republishes
+// automatically. Read by _matrixSet() in the program scanner.
+let _scanVals = null;
+
 // ── MICRO-NODES: LOVER, MONEY + 8 PERIMETER AGE STARS ────────────────────
 // ── ANCESTRAL LINES: Father's (↘) and Mother's (↗) diagonals ─────────────
 // Appended as a self-contained block. Zero changes to existing code above.
@@ -2155,10 +2165,18 @@ appendHint();
     // full verification trail. This is the live, "as of today" value —
     // it changes with the calendar, not just with the birthdate.
     let yeV = E, yeMeta = null;
+    // Talent Star Line values (Ajna / Vishuddha). Taken from the engine here
+    // rather than read off the Talent Star Line IIFE, because that IIFE opens
+    // AFTER the program-star IIFE that consumes these — see the _scanVals note
+    // at the top of this block. Engine stays the single source of truth.
+    let teV = null, tvV = null;
     if (window.DMEngine) {
       const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
       yeMeta = DMEngine.getYearlyEnergy(dobIso);
       yeV = yeMeta.value;
+      const _t = DMEngine.calculateDestinyMatrix(dobIso).talents;
+      teV = _t.thirdEye;
+      tvV = _t.throat;
     }
     _yeMeta = yeMeta;
 
@@ -2185,7 +2203,7 @@ appendHint();
     const sopV = _rd(patV + matV);
     const sppV = _rd(ppV + sopV);
 
-    return {
+    const _out = {
       love: loveV, mon: monV, atF: Fv, atG: Gv, atH: Hv, atI: Iv, atK: DGv, atCG: CGv,
       atF1: F1v, atG1: G1v, atH1: H1v, atI1: I1v,
       atF2: F2v, atG2: G2v, atH2: H2v, atI2: I2v,
@@ -2193,9 +2211,19 @@ appendHint();
       atMUL: mulV, atSWA: swaV,
       atYE: yeV,
       atPP: ppV, atSOP: sopV, atSPP: sppV,
+      // Talent Star Line — consumed by the program scanner (see above).
+      atThirdEye: teV, atThroat: tvV,
+      // Core cross, carried through so the program scanner has one complete
+      // picture without re-reading NODES[] itself.
+      atA: A, atB: B, atC: C, atD: D, atE: E,
       // Contributing intermediates — read by the Purpose cards' synthesis line.
       pSky: hzVv, pEarth: hzHv, pPat: patV, pMat: matV,
     };
+
+    // Publish for the program scanner (declared in the outer scope above this
+    // IIFE). Assigned on every call, so a date change republishes automatically.
+    _scanVals = _out;
+    return _out;
   }
 
   let _yeMeta = null; // set by _calcVals(); read by the YE card's section body
@@ -3128,10 +3156,47 @@ appendHint();
     if (n <= 22) return n;
     return _rd(String(Math.abs(n)).split('').reduce((s,d)=>s+Number(d),0));
   }
+  // Which chart positions a program is scanned against.
+  //
+  // This originally covered 13 values — the core cross, the four ancestral
+  // corners, inner bottom/right, money and love — because that was every
+  // position the app had when the scanner was written. Everything added since
+  // (Lineage Square, Heart Zone, Muladhara, the Talent stars, the three Life
+  // Purposes) was invisible to it, so programs that should have been firing
+  // never did: across a 61-date sweep the average was 1.69 active programs and
+  // 15 of 61 charts showed NONE at all. Widened to all 29 displayed positions,
+  // that becomes 6.77 average with 1 chart empty.
+  //
+  // No source specifies the scan scope — the original 13 were incidental, and
+  // this widening is a project decision, recorded with the before/after numbers
+  // in research/11-Research-Updates/23-program-scan-scope.md so it can be
+  // revisited.
+  //
+  // DELIBERATELY EXCLUDED: atYE (Yearly Energy). It is the one time-varying
+  // value on the chart — it changes with today's calendar date, not the
+  // birthdate — so including it would make programs appear and disappear as
+  // the year turns. Do not "fix" this omission.
+  //
+  // atSWA is also absent on purpose: Swadhisthana is numerically identical to
+  // the money value, which is already in the set.
   function _matrixSet() {
     const A=NODES[0].num,B=NODES[1].num,C=NODES[2].num,D=NODES[3].num,E=NODES[4].num;
     const iD=_rd(D+E),iC=_rd(C+E),mon=_rd(iD+iC),love=_rd(iD+mon);
-    return new Set([A,B,C,D,E,_rd(A+B),_rd(B+C),_rd(C+D),_rd(D+A),iD,iC,mon,love]);
+    const base=[A,B,C,D,E,_rd(A+B),_rd(B+C),_rd(C+D),_rd(D+A),iD,iC,mon,love];
+
+    // Fallback: if _calcVals() hasn't published yet (load-order change), scan
+    // the original 13 rather than throwing.
+    const v = _scanVals;
+    if (!v) return new Set(base);
+
+    return new Set(base.concat([
+      v.atF1, v.atG1, v.atH1, v.atI1,          // Ancestral Tasks
+      v.atF2, v.atG2, v.atH2, v.atI2,          // Lineage Square Talents
+      v.atHZV, v.atHZH,                        // Heart Zone
+      v.atMUL,                                 // Muladhara (Root)
+      v.atPP, v.atSOP, v.atSPP,                // Three Life Purposes
+      v.atThirdEye, v.atThroat,                // Talent Star Line
+    ].filter(n => typeof n === 'number')));
   }
 
   let present = _matrixSet();
@@ -3146,7 +3211,22 @@ appendHint();
     'Purpose & Mission':                { hex:'#9944FF', num:0x9944FF },
   };
 
-  // Scattered background positions — behind the diamond (negative z)
+  // Scattered background positions — behind the diamond (negative z).
+  //
+  // Was 6, which silently broke once the scan widened: buildStars() indexed
+  // this with `pi % BG_POS.length`, so a 7th program rendered at EXACTLY the
+  // same coordinates as the 1st. Nothing exceeded 4 active programs before, so
+  // it never surfaced.
+  //
+  // Sized against a full sweep of 31,390 birthdates (1940-2025) under the
+  // widened scan: average 6.45 active programs, MAXIMUM 17 (e.g. 2000-11-01),
+  // 1.47% of charts exceeding 12. Extended to 18 so the overflow path below is
+  // a genuine last resort rather than something ~1 in 68 charts hits.
+  //
+  // The original 6 are preserved byte-identical so existing charts look
+  // unchanged. The 12 added sit on the same clear ring (radius 5.8-10.8, well
+  // outside the diamond's +/-3.7) with a minimum separation of 2.88 in the
+  // screen plane — verified by _assertBgSpacing() below.
   const BG_POS = [
     new THREE.Vector3(-6.5,  3.2, -5),
     new THREE.Vector3( 7.0, -2.5, -6),
@@ -3154,7 +3234,36 @@ appendHint();
     new THREE.Vector3( 5.5,  4.2, -7),
     new THREE.Vector3( 0.5, -7.0, -5),
     new THREE.Vector3(-7.5,  0.5, -6),
+    new THREE.Vector3(-1.1, 10.6, -6),
+    new THREE.Vector3(-9.0, -5.8, -6),
+    new THREE.Vector3( 6.4, -8.6, -4),
+    new THREE.Vector3(10.6,  1.8, -7),
+    new THREE.Vector3( 4.5,  9.7, -6),
+    new THREE.Vector3(-6.3,  8.7, -6),
+    new THREE.Vector3( 0.6,  5.8, -4),
+    new THREE.Vector3(-5.6, -9.2, -6),
+    new THREE.Vector3(-1.6,-10.6, -5),
+    new THREE.Vector3(-5.9, -3.2, -7),
+    new THREE.Vector3( 2.7,-10.4, -5),
+    new THREE.Vector3(-3.4,  5.9, -4),
   ];
+
+  // Placement discipline used everywhere else in this project: no two stars
+  // may sit within a minimum separation. Dev-time check only.
+  (function _assertBgSpacing() {
+    const MIN = 2.5;
+    for (let i = 0; i < BG_POS.length; i++) {
+      for (let j = i + 1; j < BG_POS.length; j++) {
+        // Screen-plane distance, not 3D: the z spread (-4..-7) would otherwise
+        // inflate the measure and let two visually-overlapping stars pass.
+        const a = BG_POS[i], b = BG_POS[j];
+        const d = Math.hypot(a.x - b.x, a.y - b.y);
+        if (d < MIN) {
+          console.warn(`[programs] BG_POS ${i} and ${j} are ${d.toFixed(2)} apart (min ${MIN})`);
+        }
+      }
+    }
+  })();
 
   // ── Banner setup ────────────────────────────────────────────────────────
   const banner   = document.getElementById('prog-banner');
@@ -3242,7 +3351,19 @@ appendHint();
     _disposeStars();
 
     active.forEach((prog, pi) => {
-      const pos  = BG_POS[pi % BG_POS.length];
+      // Never reuse an exact coordinate. Within BG_POS, take the slot; beyond
+      // it (more active programs than layout slots), offset the wrapped slot so
+      // the star is still distinct and clickable rather than stacked invisibly
+      // on top of an earlier one.
+      let pos = BG_POS[pi % BG_POS.length];
+      if (pi >= BG_POS.length) {
+        const ring = Math.floor(pi / BG_POS.length);
+        pos = pos.clone().add(new THREE.Vector3(
+          Math.cos(pi * 2.399) * 1.6 * ring,
+          Math.sin(pi * 2.399) * 1.6 * ring,
+          -0.6 * ring,
+        ));
+      }
       const cd   = CAT_COLORS[prog.category] || { hex:'#AABBFF', num:0xAABBFF };
       const col  = new THREE.Color(cd.num);
 
