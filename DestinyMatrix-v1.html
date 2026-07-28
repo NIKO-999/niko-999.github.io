@@ -2110,6 +2110,37 @@ appendHint();
 // automatically. Read by _matrixSet() in the program scanner.
 let _scanVals = null;
 
+// ── ARCANA ESSENCE ────────────────────────────────────────────────────────
+// One-phrase descriptor per arcana, used to make generated "contributing
+// values" lines (Purposes, Chakra Map) actually describe what a value IS,
+// not just name it. Compact and reusable — outer scope so every tier can
+// read it. Phrasing matches the established meaning of each arcana already
+// used throughout micro-content.js / purpose-content.js / chakra-content.js.
+const ARCANA_ESSENCE = {
+  1: 'decisive, quick to start, turns will into motion',
+  2: 'perceptive, private, trusts an unproven knowing',
+  3: 'generous, nurturing, wants things to grow',
+  4: 'structured, protective, needs real order to feel safe',
+  5: 'principled, loyal to a framework, teaches what it has tested',
+  6: 'relational, chooses deliberately, needs genuine connection',
+  7: 'driven, forward-moving, steers hard toward a goal',
+  8: 'exacting, fair-minded, needs things to balance',
+  9: 'solitary, self-sufficient, finds clarity alone',
+  10: 'cyclical, adaptable, reads the turning of things',
+  11: 'gentle but unbreakable, endures without hardening',
+  12: 'suspended, reflective, finds insight through pause',
+  13: 'ending-and-rebuilding, at ease with real change',
+  14: 'calibrating, blending extremes into something sustainable',
+  15: 'intense, appetite-driven, wrestling with what it actually wants',
+  16: 'rupture-tested, survives sudden collapse, rebuilds after',
+  17: 'hopeful, quietly trusting, aimed at renewal',
+  18: 'intuitive but foggy, senses more than it can yet prove',
+  19: 'warm, vital, open-hearted almost by default',
+  20: 'summoned, aware of an unanswered call',
+  21: 'integrative, wants the whole picture to cohere',
+  22: 'open, trusting, willing to leap without guarantees',
+};
+
 // ── MICRO-NODES: LOVER, MONEY + 8 PERIMETER AGE STARS ────────────────────
 // ── ANCESTRAL LINES: Father's (↘) and Mother's (↗) diagonals ─────────────
 // Appended as a self-contained block. Zero changes to existing code above.
@@ -2758,11 +2789,19 @@ let _scanVals = null;
         SPP: 'Life Purpose · Spiritual (60+)',
       };
 
-      // Contributing-values line, built live from the current chart.
+      // Contributing-values line, built live from the current chart. Names
+      // AND describes each contributing arcana (via ARCANA_ESSENCE) rather
+      // than just stating numbers — otherwise two readers with the same
+      // resulting purpose but completely different inputs would see identical
+      // copy here, which is the same genericness problem the Chakra Map had
+      // before its per-arcana pass. The written `synthesis` field stays fixed
+      // per resulting arcana (that's the position's own psychology); this line
+      // is what actually varies per reader.
       const nm = (n) => {
         if (!window.DMArcana) return String(n);
         try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
       };
+      const essence = (n) => ARCANA_ESSENCE[n] ? ` — ${ARCANA_ESSENCE[n]}` : '';
       const feed = data.key === 'PP'
         ? [['Sky Line', _vals.pSky], ['Earth Line', _vals.pEarth]]
         : data.key === 'SOP'
@@ -2771,9 +2810,9 @@ let _scanVals = null;
       const feedHtml =
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
-           <div class="pb-full-text">${feed[0][0]} ${nm(feed[0][1])}
-             &nbsp;+&nbsp; ${feed[1][0]} ${nm(feed[1][1])}
-             &nbsp;→&nbsp; ${data.label} ${nm(data.num)}</div>
+           <div class="pb-full-text">${feed[0][0]} is ${nm(feed[0][1])}${essence(feed[0][1])}.
+             ${feed[1][0]} is ${nm(feed[1][1])}${essence(feed[1][1])}.
+             Together those two shape your ${data.label}: ${nm(data.num)}${essence(data.num)}.</div>
          </div>`;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -4140,6 +4179,9 @@ let _scanVals = null;
     if (!window.DMArcana) return String(n);
     try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
   }
+  function _arcEssence(n) {
+    return ARCANA_ESSENCE[n] ? ` — ${ARCANA_ESSENCE[n]}` : '';
+  }
 
   function openChakra(key) {
     // Respect the shared guard — never open over a flying/active star.
@@ -4165,9 +4207,9 @@ let _scanVals = null;
     const feedHtml =
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
-         <div class="pb-full-text">Physical ${_arcName(row.physical)}
-           &nbsp;+&nbsp; Energy ${_arcName(row.energy)}
-           &nbsp;→&nbsp; ${row.name} ${_arcName(row.emotional)}</div>
+         <div class="pb-full-text">Physical is ${_arcName(row.physical)}${_arcEssence(row.physical)}.
+           Energy is ${_arcName(row.energy)}${_arcEssence(row.energy)}.
+           Together those two shape your ${row.name}: ${_arcName(row.emotional)}${_arcEssence(row.emotional)}.</div>
        </div>`;
     const whereHtml =
       `<div class="pb-full-section">
