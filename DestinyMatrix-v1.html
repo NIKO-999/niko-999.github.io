@@ -813,7 +813,6 @@
 <script src="js/past-life-content.js"></script>
 <script src="js/sexual-line-content.js"></script>
 <script src="js/career-paths-content.js"></script>
-<script src="js/health-map-content.js"></script>
 <script src="js/purpose-content.js"></script>
 <script src="js/chakra-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -2562,19 +2561,11 @@ const ARCANA_ESSENCE = {
     { key:'YE', num:_vals.atYE, label:'Yearly Energy',
       pos: new THREE.Vector3(-_R * 0.8953, _R * 0.3986, 0), color:0xFFD966, twk:{spd:0.70,off:0.3} },
 
-    // ── Health Map — a "folder" star: clicking it opens a list of the 5
-    // chakra/body-system zones whose numbers cleanly matched already-
-    // verified positions in this app (see js/health-map-content.js header
-    // for the full verification trail); tapping a zone swaps in that
-    // zone's own content within the same banner, with a back arrow to
-    // return to the list. The other 2 chakra zones (Throat, Sacral) plus
-    // a "General/Immune" zone are deliberately left out — their numbers
-    // didn't match any already-computed value for the verification
-    // subject, the same honest treatment as the still-blocked formula
-    // chakras. `num` here is just the zone count, not an arcana reading —
-    // this position has no single per-arcana value of its own.
-    { key:'HEALTH', num:5, label:'Health Map',
-      pos: new THREE.Vector3(-_R * 0.1032, _R * 0.6519, 0), color:0x7FE0D6, twk:{spd:0.65,off:2.2} },
+    // Health Map REMOVED 2026-07-28: it covered the same 7 chakras as the
+    // Chakra Map rail, at only 5 of 7 zones and with zero per-arcana
+    // personalization (a single fixed write-up per zone for every reader) —
+    // fully subsumed and superseded once the rail shipped with all 7 chakras
+    // fully personalized. See research/11-Research-Updates/25-*.md.
 
     // ── Three Life Purposes (research/01-Foundation/Destiny-Matrix-
     // Calculation-Guide.extracted.md, Page 11 — "Life Purpose: Personal,
@@ -2712,65 +2703,15 @@ const ARCANA_ESSENCE = {
   const _mPbClose   = document.getElementById('pb-close');
   let   _bannerOpenMi = false;
 
-  // ── Health Map "folder" — a list of zones inside the banner; tapping a
-  // zone swaps in its content via a data-zone-keyed click delegate, with
-  // a back row to return to the list. Reuses the existing #prog-banner
-  // shape rather than adding new 3D geometry.
-  function _healthListHtml(hex) {
-    if (!window.DHealthMapContent) return '';
-    return window.DHealthMapContent.zones.map((z) => `
-      <div class="pb-full-section health-zone-row" data-zone="${z.key}" style="cursor:pointer;">
-        <div class="pb-full-label" style="color:${hex}">${z.label.toUpperCase()}</div>
-        <div class="pb-full-text">${z.bodySystems}</div>
-      </div>`).join('');
-  }
-  function _healthZoneHtml(zoneKey, hex) {
-    const z = window.DHealthMapContent && window.DHealthMapContent.get(zoneKey);
-    if (!z) return _healthListHtml(hex);
-    return `
-      <div class="pb-full-section health-zone-back" data-zone-back="1" style="cursor:pointer;">
-        <div class="pb-full-label" style="color:rgba(255,255,255,0.4)">← ALL ZONES</div>
-      </div>
-      <div class="pb-full-section">
-        <div class="pb-full-label" style="color:${hex}">BODY SYSTEMS</div>
-        <div class="pb-full-text">${z.bodySystems}</div>
-      </div>
-      <div class="pb-full-section">
-        <div class="pb-full-label" style="color:${hex}">THE WHY</div>
-        <div class="pb-full-text">${z.why}</div>
-      </div>
-      <div class="pb-full-section">
-        <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
-        <div class="pb-full-text">${z.shadow}</div>
-      </div>
-      <div class="pb-full-section">
-        <div class="pb-full-label" style="color:${hex}">THE PATH</div>
-        <div class="pb-full-text">${z.path}</div>
-      </div>`;
-  }
-  // Single delegated listener — #pb-body is shared/repopulated across
-  // every tier's banner content, so this only needs wiring once.
-  document.getElementById('pb-body').addEventListener('click', (e) => {
-    const zoneRow = e.target.closest('[data-zone]');
-    const backRow = e.target.closest('[data-zone-back]');
-    if (zoneRow) {
-      const hex = document.getElementById('pb-prog-name').style.color || '#7FE0D6';
-      document.getElementById('pb-body').innerHTML = _healthZoneHtml(zoneRow.dataset.zone, hex);
-      _mBanner.scrollTop = 0;
-    } else if (backRow) {
-      const hex = document.getElementById('pb-prog-name').style.color || '#7FE0D6';
-      document.getElementById('pb-body').innerHTML = _healthListHtml(hex);
-      _mBanner.scrollTop = 0;
-    }
-  });
+  // Health Map's "folder" list/zone renderers and their delegated #pb-body
+  // click listener were removed 2026-07-28 along with the star itself —
+  // superseded by the Chakra Map rail. See
+  // research/11-Research-Updates/25-*.md.
 
   function openMicroCard(idx) {
     const data = MICRO[idx];
     const hex  = '#' + new THREE.Color(data.color).getHexString();
 
-    // Health Map — folder/subfolder: opens to the zone list; tapping a
-    // zone swaps in its own content within the same banner (see the
-    // delegated click listener above).
     // Three Life Purposes — own content file (js/purpose-content.js) with an
     // extra `synthesis` field the other systems don't have. Each purpose is a
     // SUM of positions the reader can open elsewhere, so the card opens with a
@@ -2844,21 +2785,6 @@ const ARCANA_ESSENCE = {
         `<div class="pb-full-section">
            <div class="pb-full-text">This combination hasn't been written yet.</div>
          </div>`);
-
-      _mBanner.classList.add('open');
-      _mBanner.scrollTop = 0;
-      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
-      _bannerOpenMi = true;
-      return;
-    }
-
-    if (data.key === 'HEALTH') {
-      document.getElementById('pb-prog-name').textContent = data.label;
-      document.getElementById('pb-prog-name').style.color = hex;
-      document.getElementById('pb-section-label').textContent = 'Health Map';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
-      document.getElementById('pb-heading').textContent = 'Tap a Zone to Open It';
-      document.getElementById('pb-body').innerHTML = _healthListHtml(hex);
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
@@ -3286,17 +3212,17 @@ const ARCANA_ESSENCE = {
     _microTags[24].querySelector('.t-num').textContent = String(_vals.atYE);
     MICRO[24].num = _vals.atYE;
 
-    // Node 25 is the Health Map folder star — its `num` is a static zone
-    // count, not an arcana value, so it deliberately has no refresh line.
+    // Node 25 was the Health Map folder star — removed 2026-07-28 (superseded
+    // by the Chakra Map rail); indices below shifted down by one accordingly.
 
-    // Nodes 26-28: Three Life Purposes (PP/SOP/SPP) — recomputed from the
+    // Nodes 25-27: Three Life Purposes (PP/SOP/SPP) — recomputed from the
     // live Sky/Earth lines and ancestral corners each date change.
-    _microTags[26].querySelector('.t-num').textContent = String(_vals.atPP);
-    MICRO[26].num = _vals.atPP;
-    _microTags[27].querySelector('.t-num').textContent = String(_vals.atSOP);
-    MICRO[27].num = _vals.atSOP;
-    _microTags[28].querySelector('.t-num').textContent = String(_vals.atSPP);
-    MICRO[28].num = _vals.atSPP;
+    _microTags[25].querySelector('.t-num').textContent = String(_vals.atPP);
+    MICRO[25].num = _vals.atPP;
+    _microTags[26].querySelector('.t-num').textContent = String(_vals.atSOP);
+    MICRO[26].num = _vals.atSOP;
+    _microTags[27].querySelector('.t-num').textContent = String(_vals.atSPP);
+    MICRO[27].num = _vals.atSPP;
 
     return true;
   };
