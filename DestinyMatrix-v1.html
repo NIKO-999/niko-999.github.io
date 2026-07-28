@@ -2621,6 +2621,36 @@ const ARCANA_ESSENCE = {
     // matching Node 28 block.
     { key:'CAREER', num:_vals.mon, label:'Career Paths',
       pos: new THREE.Vector3(-_R * 0.4300, -_R * 1.1203, 0), color:0xFFBB44, twk:{spd:0.94,off:1.05} },
+
+    // ── Guardian Angel (Month of Birth / B) — "Destiny Matrix: The 22
+    // Ultimate Life-Changing Codes" (Natalia Ladini's own full source book,
+    // not a fragment extract), pages 128-129, stated three separate times
+    // with a worked calculation example: "The upper spot of the diagonal
+    // square... is an energy of your personal guardian angel given to you
+    // at birth... The spot of your guardian angel... stands for the month
+    // of your birthday." That is exactly B — the Sky Line/birth-month
+    // value, already live as its own star. This is a confirmed *additional
+    // meaning* layer on B (same pattern as MON also representing "Balance
+    // between Money and Relationships"), not a new formula — reuses
+    // NODES[1].num under its own dedicated star identity, same technique as
+    // Career Paths reusing _vals.mon.
+    //
+    // Deliberately NOT claimed to resolve the separate "Guardian Angel (SOS
+    // Point)" label on DestinyMatrix-Sheet.pdf's Money Channel diagram
+    // (page 11) — that position was hand-traced to a low circle inside the
+    // money cluster, not the top vertex, so it may be a distinct,
+    // still-unsourced position that happens to share the name. Left
+    // unbuilt; see research/11-Research-Updates/26.
+    //
+    // Placement: r=1.20R ring, θ=204°, continuing the same ring as PP/SOP/
+    // SPP/CAREER. Verified by direct-distance check: nearest neighbor is
+    // Heart Zone · Material Desire at ≈0.32R separation, clear of the
+    // ≈0.22-0.26R baseline used elsewhere.
+    //
+    // Appended at the END of MICRO — index 29; matching Node 29 block in
+    // applyNewDate() below.
+    { key:'GA', num:NODES[1].num, label:'Guardian Angel',
+      pos: new THREE.Vector3(-_R * 1.0963, -_R * 0.4881, 0), color:0xE0C2FF, twk:{spd:0.68,off:3.35} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3253,6 +3283,10 @@ const ARCANA_ESSENCE = {
     // Node 28: Career Paths — mirrors the live Money/Wealth Potential (MON) value
     _microTags[28].querySelector('.t-num').textContent = String(_vals.mon);
     MICRO[28].num = _vals.mon;
+
+    // Node 29: Guardian Angel — mirrors the live Sky Line (B / month-of-birth) value
+    _microTags[29].querySelector('.t-num').textContent = String(NODES[1].num);
+    MICRO[29].num = NODES[1].num;
 
     return true;
   };

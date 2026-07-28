@@ -3303,6 +3303,210 @@ window.DMicroContent = (function () {
       negative: `Your originality is completely real, and it keeps getting forced into a fixed, conventional role that punishes it. That forcing isn't discipline. It's a fit still restless, still waiting for a template-free shape it's actually allowed to take.`,
     },
 
+    // ── Guardian Angel (Month of Birth / B) — Destiny Matrix: The 22
+    // Ultimate Life-Changing Codes, pages 128-129: "The upper spot of the
+    // diagonal square... is an energy of your personal guardian angel given
+    // to you at birth... The spot of your guardian angel... stands for the
+    // month of your birthday." Reuses B (Sky Line/birth-month) under its
+    // own star identity, same technique as Career Paths reusing MON. ──
+    '1_GA': {
+      heading: `Your Guardian Angel Speaks Through the Urge to Begin`,
+      why: `Your connection to guidance was given to you at birth through this energy of origination — the sudden, confident impulse to start something is often your guardian angel's nudge arriving as certainty rather than as a sign you have to interpret.`,
+      shadow: `The risk is drowning that nudge in second-guessing, waiting for more proof before acting, until the opening the impulse pointed toward has already closed.`,
+      path: `Try acting on one confident impulse this week without demanding proof first. You are allowed to trust a sudden certainty as real guidance. What clear urge to begin have you been quietly overriding?`,
+      positive: `Your guidance through confident impulse hasn't changed — that certainty was always real protection. What's different is that you now act on one confident impulse without demanding proof first. That trust is what finally lets the guidance land in time.`,
+      negative: `Your guardian-angel impulse is completely real, and it keeps getting drowned in second-guessing until the opening it pointed toward closes. That waiting isn't caution. It's a guidance still overridden, still waiting to be trusted at the moment it actually arrives.`,
+    },
+
+    '2_GA': {
+      heading: `Your Guardian Angel Speaks Through What You Already Sense`,
+      why: `Your connection to guidance arrives as quiet, wordless knowing — a felt certainty about a person or situation that turns out to be right before you can explain why.`,
+      shadow: `The risk is dismissing that quiet knowing because it can't be justified out loud, so the guidance goes unacted on.`,
+      path: `Try trusting one quiet certainty this week enough to act on it, even without a tidy explanation. You are allowed to follow guidance you can't fully justify. What have you sensed clearly that you've been waiting to be able to prove?`,
+      positive: `Your guidance through quiet knowing hasn't changed — that felt certainty was always real. What's different is that you now act on one quiet certainty without needing a tidy explanation first. That trust is what finally lets the knowing be used.`,
+      negative: `Your quiet knowing is completely real, and it keeps getting dismissed because it can't be justified out loud. That dismissing isn't rigor. It's a guidance still unacted on, still waiting for you to trust it without needing to prove it first.`,
+    },
+
+    '3_GA': {
+      heading: `Your Guardian Angel Speaks Through What Actually Nourishes You`,
+      why: `Your connection to guidance arrives through a felt sense of abundance or depletion — what genuinely feeds you versus what only looks like it should.`,
+      shadow: `The risk is overriding that felt sense to keep giving, missing the guidance embedded in your own exhaustion.`,
+      path: `Try letting one signal of depletion this week actually change what you do, instead of pushing through it. You are allowed to treat your own exhaustion as real information. What has your body already been telling you that you've been overriding?`,
+      positive: `Your guidance through felt abundance and depletion hasn't changed — that sense was always real information. What's different is that you now let one signal of depletion actually change what you do. That listening is what lets the guidance be used instead of overridden.`,
+      negative: `Your felt sense of what nourishes you is completely real, and it keeps getting overridden so you can keep giving. That overriding isn't generosity. It's a guidance still ignored, still waiting for your own exhaustion to be treated as real information.`,
+    },
+
+    '4_GA': {
+      heading: `Your Guardian Angel Speaks Through a Clear Sense of When to Act`,
+      why: `Your connection to guidance arrives as a clear, structural sense of right timing — knowing when to hold and when to move, protection built into your own instinct for order.`,
+      shadow: `The risk is overriding that timing sense to force control before the moment is actually ready.`,
+      path: `Try waiting for the moment your own instinct says is actually ready, rather than forcing action early. You are allowed to trust your sense of timing as real guidance. Where have you been forcing a moment that hasn't actually arrived yet?`,
+      positive: `Your guidance through a sense of timing hasn't changed — that instinct for the right moment was always real. What's different is that you now wait for the moment your instinct says is ready, instead of forcing it early. That waiting is what lets the guidance actually work.`,
+      negative: `Your sense of timing is completely real, and it keeps getting overridden by a need to force control early. That forcing isn't decisiveness. It's a guidance still ignored, still waiting for the moment it already knows is right.`,
+    },
+
+    '5_GA': {
+      heading: `Your Guardian Angel Speaks Through What Actually Rings True`,
+      why: `Your connection to guidance arrives through recognition — a teaching, a person, a piece of knowledge that resonates as genuinely true the moment you encounter it, ahead of any argument for it.`,
+      shadow: `The risk is following an outside authority's word over your own recognition, deferring guidance you actually already received.`,
+      path: `Try trusting one thing that rang true to you this week over an outside authority's opposing opinion. You are allowed to recognize truth without external permission. What have you recognized as true that you've been waiting for someone else to confirm?`,
+      positive: `Your guidance through recognition hasn't changed — that instant sense of truth was always real. What's different is that you now trust what rang true to you over an outside authority's opposing opinion. That trust is what lets the guidance stand on its own.`,
+      negative: `Your recognition of what's true is completely real, and it keeps deferring to outside authority instead of trusting itself. That deferring isn't humility. It's a guidance still unconfirmed, still waiting for your own recognition to be enough.`,
+    },
+
+    '6_GA': {
+      heading: `Your Guardian Angel Speaks Through Who and What You're Pulled Toward`,
+      why: `Your connection to guidance arrives as a genuine pull — toward a person, a choice, a path — distinct from what merely looks convenient or expected.`,
+      shadow: `The risk is choosing what looks correct on paper over the actual pull, muting the guidance to avoid disruption.`,
+      path: `Try naming the pull you've been overriding for something more convenient, and giving it real weight this week. You are allowed to let a genuine pull outweigh a convenient option. What choice keeps quietly pulling at you despite the practical case against it?`,
+      positive: `Your guidance through genuine pull hasn't changed — that draw was always real. What's different is that you now give the pull real weight instead of choosing what merely looks convenient. That weight is what lets the guidance actually be followed.`,
+      negative: `Your genuine pull is completely real, and it keeps getting muted in favor of what looks correct on paper. That muting isn't practicality. It's a guidance still overridden, still waiting to outweigh the convenient option.`,
+    },
+
+    '7_GA': {
+      heading: `Your Guardian Angel Speaks Through Momentum That Feels Aligned`,
+      why: `Your connection to guidance arrives through motion itself — the difference between drive that feels aligned and effortless versus pushing that feels forced is often the signal.`,
+      shadow: `The risk is confusing sheer forward motion with guidance, forcing a direction the momentum was never actually behind.`,
+      path: `Try noticing this week where your drive feels aligned versus forced, and following the aligned direction even if it's slower. You are allowed to let ease be a sign, not just proof of laziness. Where has forcing it been covering for a direction that isn't actually right?`,
+      positive: `Your guidance through aligned momentum hasn't changed — that distinction was always real. What's different is that you now follow the direction that feels aligned, even if it's slower than the forced one. That following is what lets the guidance actually lead somewhere.`,
+      negative: `Your momentum is completely real, and it keeps getting aimed by force instead of alignment. That forcing isn't drive working correctly. It's a guidance still overridden, still waiting for ease to be trusted as a real signal.`,
+    },
+
+    '8_GA': {
+      heading: `Your Guardian Angel Speaks Through a Clear Sense of What's Right`,
+      why: `Your connection to guidance arrives as clarity about fairness — a clean, uncomplicated read on what's actually right in a situation, before the justifications and arguments arrive.`,
+      shadow: `The risk is talking yourself out of that clean read with elaborate justification, muddying guidance that was actually simple.`,
+      path: `Try trusting your first clear read on one fairness question this week before you argue yourself out of it. You are allowed to trust the simple version. Where has an elaborate justification been overriding a clear, simple read you already had?`,
+      positive: `Your guidance through a clean read on fairness hasn't changed — that clarity was always real. What's different is that you now trust the first clear read before arguing yourself out of it. That trust is what keeps the guidance simple instead of muddied.`,
+      negative: `Your clean read on what's fair is completely real, and it keeps getting muddied by elaborate justification. That justifying isn't rigor. It's a guidance still overridden, still waiting for the simple version to be trusted.`,
+    },
+
+    '9_GA': {
+      heading: `Your Guardian Angel Speaks Through What Arrives in Solitude`,
+      why: `Your connection to guidance arrives specifically in quiet, alone time — insight that doesn't come in a crowded room, only after you've actually withdrawn long enough to hear it.`,
+      shadow: `The risk is staying so busy or social that the solitude this guidance depends on never actually arrives.`,
+      path: `Try spending one real stretch of solitude this week with no agenda, and noticing what surfaces. You are allowed to need to be alone to actually hear your own guidance. What has been waiting for quiet you haven't given it yet?`,
+      positive: `Your guidance through solitude hasn't changed — that insight was always real, arriving specifically in quiet. What's different is that you now spend one real stretch of solitude with no agenda and let it surface. That quiet is what finally lets the guidance be heard.`,
+      negative: `Your capacity for insight in solitude is completely real, and it keeps being crowded out by constant busyness or company. That crowding isn't productivity. It's a guidance still unheard, still waiting for the quiet it actually needs.`,
+    },
+
+    '10_GA': {
+      heading: `Your Guardian Angel Speaks Through the Doors That Open Easily`,
+      why: `This is the code named directly in the source material as guarded by fortune — lucky doors opening, the right people and information arriving right on time once you've actually made a decision and moved.`,
+      shadow: `The risk is doubting the ease itself, assuming a door that opened easily can't be the real one, and passing it by looking for a harder path to prove yourself on.`,
+      path: `Try walking through one door that opened easily this week instead of waiting for a harder one to prove it's real. You are allowed to trust luck as real guidance, not something to be suspicious of. What easy opening have you been distrusting simply because it wasn't hard-won?`,
+      positive: `Your guidance through easy openings hasn't changed — that flow of fortune was always real. What's different is that you now walk through a door that opened easily instead of waiting for a harder one to feel earned. That trust is what finally lets the luck be used.`,
+      negative: `Your flow of fortune is completely real, and it keeps getting distrusted simply for arriving easily. That suspicion isn't discernment. It's a guidance still declined, still waiting for ease to be trusted instead of second-guessed.`,
+    },
+
+    '11_GA': {
+      heading: `Your Guardian Angel Speaks Through Quiet, Private Resolve`,
+      why: `Your connection to guidance arrives as an inner steadiness that doesn't need anyone else to witness it — a private certainty that you can hold something difficult, felt rather than proven.`,
+      shadow: `The risk is needing that resolve confirmed by an audience before trusting it's real, delaying action until someone else validates the guidance.`,
+      path: `Try acting on one private certainty this week without needing anyone else to confirm it first. You are allowed to trust your own resolve without a witness. What have you been waiting for someone else to validate that you already privately know?`,
+      positive: `Your guidance through private resolve hasn't changed — that inner steadiness was always real. What's different is that you now act on a private certainty without needing it confirmed first. That trust is what finally lets the resolve be used.`,
+      negative: `Your private resolve is completely real, and it keeps waiting for outside confirmation before it's trusted. That waiting isn't humility. It's a guidance still delayed, still waiting to be acted on without a witness.`,
+    },
+
+    '12_GA': {
+      heading: `Your Guardian Angel Speaks Through the New Angle You're Given`,
+      why: `This is one of the codes whose own affirmation names the guardian angels directly — guidance arrives here as a new perspective on a situation you'd stopped being able to see clearly, arriving right as you release your grip on the old view.`,
+      shadow: `The risk is clinging to the old angle out of self-sacrifice, refusing the new view because it feels like giving something up.`,
+      path: `Try deliberately releasing your current view of one stuck situation this week, and letting a new angle arrive. You are allowed to receive a new perspective without it costing you anything. Where have you been gripping an old view even though a new one is trying to arrive?`,
+      positive: `Your guidance through a new angle hasn't changed — that perspective shift was always real and available. What's different is that you now deliberately release your grip on the old view of one stuck situation. That release is what finally lets the new angle arrive.`,
+      negative: `Your access to a new perspective is completely real, and it keeps being blocked by clinging to the old angle out of self-sacrifice. That clinging isn't loyalty. It's a guidance still unreceived, still waiting for the old grip to loosen.`,
+    },
+
+    '13_GA': {
+      heading: `Your Guardian Angel Speaks Through What an Ending Clears`,
+      why: `Your connection to guidance arrives inside endings themselves — what becomes visible only once something old has actually been let go, protection built into the release itself, not despite it.`,
+      shadow: `The risk is resisting the ending so hard that the clarity waiting on the other side of it never actually arrives.`,
+      path: `Try letting one ending complete fully this week instead of prolonging it, and noticing what becomes visible. You are allowed to trust that what an ending clears is guidance, not just loss. What ending have you been resisting that might actually be trying to clear your view?`,
+      positive: `Your guidance through what an ending clears hasn't changed — that clarity was always waiting on the other side of release. What's different is that you now let one ending complete fully instead of prolonging it. That completion is what finally lets the clarity arrive.`,
+      negative: `Your capacity to find clarity through endings is completely real, and it keeps being blocked by resisting the ending itself. That resisting isn't protection. It's a guidance still hidden, still waiting for the release it needs to actually complete.`,
+    },
+
+    '14_GA': {
+      heading: `Your Guardian Angel Speaks Through Intuition You Were Simply Born With`,
+      why: `This is one of the codes the source names as having a well-established, born-in connection to guidance — strong intuition and extrasensory perception that doesn't need to be built, only trusted and used.`,
+      shadow: `The risk is doubting a sense this reliable simply because it arrived without effort, treating an inborn gift as if it needed to be earned before it counts.`,
+      path: `Try trusting one intuitive read this week exactly because it came easily, not despite that. You are allowed to trust a gift you didn't have to work for. What have you been dismissing as too easy to be real guidance?`,
+      positive: `Your inborn intuitive connection hasn't changed — that gift was always real, given at birth. What's different is that you now trust one intuitive read exactly because it came easily. That trust is what finally lets the gift be used instead of doubted.`,
+      negative: `Your inborn intuition is completely real, and it keeps being doubted simply for arriving without effort. That doubting isn't discernment. It's a guidance still dismissed, still waiting to be trusted as the gift it actually is.`,
+    },
+
+    '15_GA': {
+      heading: `Your Guardian Angel Speaks Through the Moment You Notice the Pull`,
+      why: `Your connection to guidance arrives as the moment of noticing itself — the instant you catch a compulsion or temptation actually pulling at you is itself the protection, the awareness that lets you choose instead of just reacting.`,
+      shadow: `The risk is ignoring that moment of noticing, letting the pull run unexamined because acknowledging it feels like admitting weakness.`,
+      path: `Try naming one pull the moment you notice it this week, instead of letting it run silently. You are allowed to notice temptation without it meaning you've already failed. What pull have you been noticing and then pretending not to?`,
+      positive: `Your guidance through noticing the pull hasn't changed — that awareness was always the real protection. What's different is that you now name the pull the moment you notice it, instead of letting it run silently. That naming is what lets the guidance actually work.`,
+      negative: `Your capacity to notice the pull is completely real, and it keeps being ignored to avoid admitting weakness. That ignoring isn't strength. It's a guidance still unused, still waiting for the noticing to be named instead of silenced.`,
+    },
+
+    '16_GA': {
+      heading: `Your Guardian Angel Speaks Through the Warning Before the Fall`,
+      why: `Your connection to guidance arrives as an early signal — a felt sense that something is about to give way, arriving well before the actual collapse, protection built into your own capacity to sense structural strain.`,
+      shadow: `The risk is dismissing that early signal to maintain the appearance of stability, letting the warning go unheeded until the collapse forces the issue.`,
+      path: `Try naming one early warning sign you've been minimizing this week, and addressing it directly. You are allowed to trust a warning before it's proven true. What signal have you already sensed that you've been calling paranoia?`,
+      positive: `Your guidance through early warning hasn't changed — that capacity to sense strain was always real. What's different is that you now name one early warning sign and address it directly, instead of minimizing it. That naming is what lets the guidance prevent the collapse.`,
+      negative: `Your capacity to sense an early warning is completely real, and it keeps getting dismissed to maintain the appearance of stability. That dismissing isn't calm. It's a guidance still unheeded, still waiting to be trusted before the collapse forces the issue.`,
+    },
+
+    '17_GA': {
+      heading: `Your Guardian Angel Speaks Through Hope That Won't Quite Leave`,
+      why: `Your connection to guidance arrives as a hope that persists even when the circumstances don't obviously justify it — a quiet, stubborn faith that something is still possible, which is itself the signal worth trusting.`,
+      shadow: `The risk is dismissing that persistent hope as naive, talking yourself out of the one thing that was actually guidance.`,
+      path: `Try letting one stubborn hope be real information this week instead of naivety to be managed. You are allowed to trust hope that has no obvious reason. What hope have you kept quietly alive that deserves to be trusted as guidance, not naivety?`,
+      positive: `Your guidance through persistent hope hasn't changed — that stubborn faith was always real information. What's different is that you now let one stubborn hope be trusted instead of managed as naivety. That trust is what finally lets the guidance be followed.`,
+      negative: `Your persistent hope is completely real, and it keeps being dismissed as naive. That dismissing isn't realism. It's a guidance still talked out of, still waiting to be trusted as the signal it actually is.`,
+    },
+
+    '18_GA': {
+      heading: `Your Guardian Angel Speaks Through What Surfaces in Dreams and Quiet Moments`,
+      why: `Your connection to guidance arrives through the felt and the dreamed — an image, a mood, an undercurrent that carries real information even though it can't be immediately explained.`,
+      shadow: `The risk is letting fear masquerade as guidance, since this same sensitive channel can manifest what it fears as easily as what it hopes.`,
+      path: `Try writing down one dream or felt undercurrent this week and checking whether it's guidance or fear before acting on it. You are allowed to trust the felt sense once you've checked which one it is. What has surfaced lately that you haven't yet sorted into fear versus guidance?`,
+      positive: `Your guidance through dreams and felt undercurrents hasn't changed — that sensitive channel was always real. What's different is that you now check one felt sense against reality before acting, sorting fear from guidance. That checking is what makes the channel trustworthy.`,
+      negative: `Your sensitive, dreaming channel is completely real, and it keeps letting fear masquerade as guidance unchecked. That confusion isn't the channel failing. It's a guidance still unsorted, still waiting to be checked before it's trusted.`,
+    },
+
+    '19_GA': {
+      heading: `Your Guardian Angel Speaks Through What Genuinely Lights You Up`,
+      why: `Your connection to guidance arrives as unmistakable joy — the thing that makes your eyes actually sparkle is rarely random, it's usually protection pointing you toward exactly where your energy is meant to go.`,
+      shadow: `The risk is dismissing joy as frivolous, requiring a more serious-sounding reason before trusting the guidance embedded in what actually delights you.`,
+      path: `Try following one thing that genuinely lights you up this week without needing a serious justification for it. You are allowed to trust joy as real guidance, not just a nice feeling. What have you been delaying simply because it sounded too fun to be the real priority?`,
+      positive: `Your guidance through genuine joy hasn't changed — that spark was always real direction. What's different is that you now follow what lights you up without needing a serious justification. That following is what lets the guidance be used instead of delayed.`,
+      negative: `Your capacity for genuine joy is completely real, and it keeps being dismissed as frivolous until it earns a serious-sounding reason. That dismissing isn't maturity. It's a guidance still delayed, still waiting to be trusted as real direction.`,
+    },
+
+    '20_GA': {
+      heading: `Your Guardian Angel Speaks Through the Call You Keep Hearing`,
+      why: `Your connection to guidance arrives as a summons that keeps returning no matter how long you set it aside — the same call, in different forms, until it's finally answered.`,
+      shadow: `The risk is treating the repetition as noise to manage rather than guidance insisting on being heard.`,
+      path: `Try naming the call that keeps returning to you this week, and taking one real step toward answering it. You are allowed to trust a repeated summons as real guidance, not nagging. What keeps calling you back no matter how many times you've set it down?`,
+      positive: `Your guidance through a repeated call hasn't changed — that summons was always real. What's different is that you now name the call and take one real step toward answering it, instead of managing it as noise. That step is what finally lets the guidance be heard.`,
+      negative: `Your repeated call is completely real, and it keeps being managed as noise instead of heard as guidance. That managing isn't peace. It's a summons still unanswered, still waiting for one real step toward it.`,
+    },
+
+    '21_GA': {
+      heading: `Your Guardian Angel Speaks Through the Feeling of Genuine Completion`,
+      why: `Your connection to guidance arrives as a felt sense of arrival — knowing something is actually finished, not by external checklist but by an internal, protective sense of rightness.`,
+      shadow: `The risk is overriding that felt completion with an external standard, refusing to let something count as done because it doesn't look finished enough.`,
+      path: `Try trusting one felt sense of completion this week over an external checklist that says otherwise. You are allowed to know something is done because it feels done. What have you refused to call finished even though it genuinely feels complete?`,
+      positive: `Your guidance through felt completion hasn't changed — that internal sense of rightness was always real. What's different is that you now trust one felt sense of completion over an external checklist. That trust is what finally lets the guidance be honored.`,
+      negative: `Your felt sense of completion is completely real, and it keeps being overridden by an external standard of what counts as finished. That overriding isn't rigor. It's a guidance still dismissed, still waiting to be trusted on its own terms.`,
+    },
+
+    '22_GA': {
+      heading: `Your Guardian Angel Speaks Through the Leap That Feels Right`,
+      why: `Your connection to guidance arrives as trust itself — a leap that feels right despite having no proof attached, protection built into the willingness to begin without a guarantee.`,
+      shadow: `The risk is demanding the guarantee anyway, refusing to move until certainty arrives, which this particular guidance was never going to offer.`,
+      path: `Try taking one leap this week that feels right despite lacking proof, and trusting the protection that comes with actually moving. You are allowed to leap without the guarantee. What leap have you been delaying, waiting for a certainty that guidance like this doesn't actually give?`,
+      positive: `Your guidance through the felt-right leap hasn't changed — that trust was always real protection. What's different is that you now take one leap that feels right despite lacking proof. That leap is what finally lets the guidance be lived instead of waited on.`,
+      negative: `Your capacity to trust a leap without proof is completely real, and it keeps waiting for a guarantee this guidance was never going to give. That waiting isn't caution. It's a protection still untested, still waiting for the leap it was actually built for.`,
+    },
+
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_F1': {
       heading: `A Venture Your Father's Male Line Never Got to Fully Launch Is Now Yours to Start`,
