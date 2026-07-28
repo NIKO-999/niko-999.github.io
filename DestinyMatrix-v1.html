@@ -308,6 +308,80 @@
       font-style: italic;
     }
 
+    /* ── Numerology Index (collapsible quick-nav, mirrors Star Index) ──
+       Same structure/behaviour as #star-index, flipped to the top-right.
+       Row/list/search styling is shared via the .si-* classes above —
+       only the container position differs. */
+    #numerology-index {
+      position: absolute;
+      top: 22px; right: 24px;
+      pointer-events: all;
+      z-index: 25;
+      width: 168px;
+      max-width: calc(100vw - 48px);
+    }
+    #ni-toggle {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-family: 'DM Mono', monospace;
+      font-size: 7px;
+      font-weight: 400;
+      letter-spacing: 2.5px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      user-select: none;
+      transition: color .2s;
+      justify-content: flex-end;
+    }
+    #ni-toggle:hover { color: rgba(255,255,255,0.55); }
+    #ni-toggle .ni-chevron {
+      display: inline-block;
+      font-size: 7px;
+      transition: transform .3s ease;
+      transform: rotate(-90deg);
+    }
+    #numerology-index.open #ni-toggle .ni-chevron { transform: rotate(0deg); }
+    #ni-panel {
+      overflow: hidden;
+      max-height: 0;
+      opacity: 0;
+      transition: max-height .35s ease, opacity .25s ease;
+      margin-top: 7px;
+      background: rgba(4, 7, 22, 0.88);
+      border: 1px solid rgba(180,210,255,0.11);
+      border-radius: 2px;
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+    }
+    #numerology-index.open #ni-panel {
+      max-height: min(55vh, 380px);
+      opacity: 1;
+    }
+    #ni-search {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(180,210,255,0.05);
+      border: none;
+      border-bottom: 1px solid rgba(180,210,255,0.12);
+      color: rgba(255,255,255,0.75);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.4px;
+      padding: 7px 9px;
+      outline: none;
+    }
+    #ni-search::placeholder { color: rgba(180,210,255,0.28); }
+    #ni-list {
+      max-height: min(45vh, 300px);
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(180,210,255,0.14) transparent;
+      padding: 3px 0 6px;
+    }
+
     /* ── CHAKRA RAIL ────────────────────────────────────────────────────────
        Mirrors the Star Index's visual language (same mono toggle, blur panel,
        border and radius) but runs the full height of the right edge, because
@@ -733,6 +807,18 @@
     <div id="si-panel">
       <input id="si-search" type="text" placeholder="Search stars…" autocomplete="off" />
       <div id="si-list"></div>
+    </div>
+  </div>
+
+  <!-- Numerology Index — mirrors Star Index, flipped to the top-right. A
+       small curated shortcut list (not aggregated from _tierProviders like
+       Star Index is), covering Life Path, Career Paths, Guardian Angel, and
+       a jump straight into the Numerology view of the Soul Center star. -->
+  <div id="numerology-index">
+    <div id="ni-toggle"><span class="ni-chevron">▾</span><span>Numerology</span></div>
+    <div id="ni-panel">
+      <input id="ni-search" type="text" placeholder="Search numerology…" autocomplete="off" />
+      <div id="ni-list"></div>
     </div>
   </div>
 
@@ -2325,11 +2411,19 @@ const ARCANA_ESSENCE = {
     // scanner, which sits in an IIFE that opens after this one — see the
     // _scanVals note above. Engine stays the single source of truth.
     let chLetters = null;
+    // Life Path — full birthdate digit sum, this app's own base-22 reduction
+    // (never the classical 1-9/11/22/33 Western cap). Pulled from the engine
+    // rather than re-derived here since it needs the raw day/month/year
+    // digits, not the already-reduced A/B/C locals above. See
+    // research/11-Research-Updates/31.
+    let lifePathV = E;
     if (window.DMEngine) {
       const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
       yeMeta = DMEngine.getYearlyEnergy(dobIso);
       yeV = yeMeta.value;
-      chLetters = DMEngine.calculateDestinyMatrix(dobIso).chakras.letters;
+      const _fullChart = DMEngine.calculateDestinyMatrix(dobIso);
+      chLetters = _fullChart.chakras.letters;
+      lifePathV = _fullChart.lifePath.value;
     }
     _yeMeta = yeMeta;
 
@@ -2363,6 +2457,7 @@ const ARCANA_ESSENCE = {
       atHZV: hzVv, atHZH: hzHv,
       atMUL: mulV, atSWA: swaV,
       atYE: yeV,
+      lifePath: lifePathV,
       atPP: ppV, atSOP: sopV, atSPP: sppV,
       // Lettered arm points — consumed by the program scanner (see above).
       // atP/atK are the two Talent Star Line positions (Ajna / Vishuddha
@@ -2652,6 +2747,21 @@ const ARCANA_ESSENCE = {
     // applyNewDate() below.
     { key:'GA', num:NODES[1].num, label:'Guardian Angel',
       pos: new THREE.Vector3(-_R * 1.0963, -_R * 0.4881, 0), color:0xE0C2FF, twk:{spd:0.68,off:3.35} },
+
+    // ── Life Path — full birthdate digit sum, reduced with this app's own
+    // base-22 rule (never the classical Western 1-9/11/22/33 cap). Distinct
+    // from every other position: it digit-sums the raw day/month/year
+    // directly rather than combining already-reduced A/B/C. See
+    // js/matrix-engine.js's `lifePath` and research/11-Research-Updates/31.
+    //
+    // Placement: r=1.20R ring, θ=90° (straight up). Verified by
+    // direct-distance check: nearest neighbor is Muladhara at ≈0.50R
+    // separation, well clear of the ≈0.22-0.26R baseline used elsewhere.
+    //
+    // Appended at the END of MICRO — index 30; matching Node 30 block in
+    // applyNewDate() below.
+    { key:'LIFEPATH', num:_vals.lifePath, label:'Life Path',
+      pos: new THREE.Vector3(0, _R * 1.2, 0), color:0x9DFFD8, twk:{spd:0.66,off:5.9} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3288,6 +3398,10 @@ const ARCANA_ESSENCE = {
     // Node 29: Guardian Angel — mirrors the live Sky Line (B / month-of-birth) value
     _microTags[29].querySelector('.t-num').textContent = String(NODES[1].num);
     MICRO[29].num = NODES[1].num;
+
+    // Node 30: Life Path — recomputed each date change (full birthdate digit sum)
+    _microTags[30].querySelector('.t-num').textContent = String(_vals.lifePath);
+    MICRO[30].num = _vals.lifePath;
 
     return true;
   };
@@ -4366,6 +4480,113 @@ const ARCANA_ESSENCE = {
       empty.textContent = 'No stars match your search.';
       listEl.appendChild(empty);
     }
+  }
+
+  toggle.addEventListener('click', () => {
+    const opening = !root.classList.contains('open');
+    root.classList.toggle('open');
+    if (opening) render();
+  });
+
+  search.addEventListener('input', render);
+
+  document.addEventListener('click', (e) => {
+    if (root.classList.contains('open') && !root.contains(e.target)) {
+      root.classList.remove('open');
+    }
+  });
+
+  render(); // pre-render once so the very first open has content immediately
+})();
+
+// ── NUMEROLOGY INDEX PANEL ────────────────────────────────────────────────
+// Collapsible top-right quick-nav, mirroring Star Index's open/close/search
+// behaviour exactly, but with a small fixed curated list instead of an
+// aggregation across every _tierProviders tier — this panel's job is fast,
+// thematic access to the numerology-flavored stars/views, not a full index.
+// Built last, same as Star Index, so MICRO/_tierProviders/flyTo/NODES are
+// all already fully wired.
+;(function () {
+  const root   = document.getElementById('numerology-index');
+  const toggle = document.getElementById('ni-toggle');
+  const search = document.getElementById('ni-search');
+  const listEl = document.getElementById('ni-list');
+
+  // Look up MICRO indices by key at build time rather than hardcoding
+  // numbers, so this never breaks if the array order ever changes.
+  function microIdx(key) { return MICRO.findIndex(m => m.key === key); }
+
+  function buildRows() {
+    const rows = [];
+
+    const lifePathIdx = microIdx('LIFEPATH');
+    if (lifePathIdx !== -1) {
+      const d = MICRO[lifePathIdx];
+      rows.push({
+        label: 'Life Path', num: d.num,
+        color: '#' + new THREE.Color(d.color).getHexString(),
+        fly: () => _tierProviders.micro.fly(lifePathIdx),
+      });
+    }
+
+    const careerIdx = microIdx('CAREER');
+    if (careerIdx !== -1) {
+      const d = MICRO[careerIdx];
+      rows.push({
+        label: 'Career Paths', num: d.num,
+        color: '#' + new THREE.Color(d.color).getHexString(),
+        fly: () => _tierProviders.micro.fly(careerIdx),
+      });
+    }
+
+    const gaIdx = microIdx('GA');
+    if (gaIdx !== -1) {
+      const d = MICRO[gaIdx];
+      rows.push({
+        label: 'Guardian Angel', num: d.num,
+        color: '#' + new THREE.Color(d.color).getHexString(),
+        fly: () => _tierProviders.micro.fly(gaIdx),
+      });
+    }
+
+    // Soul Center (core index 4), jumped straight into its Numerology view
+    // rather than the Standard one — flyTo() calls showCard() on arrival,
+    // which reads currentMatrixView, so setting it first is sufficient.
+    rows.push({
+      label: 'Your Numerology', num: NODES[4].num,
+      color: '#' + new THREE.Color(NODES[4].color).getHexString(),
+      fly: () => { currentMatrixView = 'NUMEROLOGY'; flyTo(4); },
+    });
+
+    return rows;
+  }
+
+  function render() {
+    const q = search.value.trim().toLowerCase();
+    listEl.innerHTML = '';
+
+    const rows = buildRows().filter(r => !q || (r.label + ' ' + r.num).toLowerCase().includes(q));
+
+    if (!rows.length) {
+      const empty = document.createElement('div');
+      empty.className = 'si-empty';
+      empty.textContent = 'No matches.';
+      listEl.appendChild(empty);
+      return;
+    }
+
+    rows.forEach(r => {
+      const row = document.createElement('div');
+      row.className = 'si-row';
+      row.innerHTML = `<span class="si-num" style="color:${r.color}">${r.num}</span><span class="si-label">${r.label}</span>`;
+      row.addEventListener('click', () => {
+        if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+        root.classList.remove('open');
+        search.value = '';
+        r.fly();
+      });
+      listEl.appendChild(row);
+    });
   }
 
   toggle.addEventListener('click', () => {

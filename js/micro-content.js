@@ -3507,6 +3507,205 @@ window.DMicroContent = (function () {
       negative: `Your capacity to trust a leap without proof is completely real, and it keeps waiting for a guarantee this guidance was never going to give. That waiting isn't caution. It's a protection still untested, still waiting for the leap it was actually built for.`,
     },
 
+    // ── Life Path (full birthdate digit sum, base-22 reduced) ──────────────
+    '1_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Beginning Again`,
+      why: `The overarching theme your life keeps returning to is origination — not one single achievement, but the recurring task of starting something real from nothing, again and again, at whatever scale the current chapter calls for.`,
+      shadow: `The risk is measuring your life only by how many things you've started, without noticing whether any one of them ever got to become the through-line your whole path was actually pointing toward.`,
+      path: `Try naming one beginning from years ago that quietly became the thread your life has kept pulling on since. You are allowed to let one start matter more than the rest. Which beginning turned out to be the real one?`,
+      positive: `Your life path through beginning again hasn't changed — that pull to originate was always the throughline. What's different is that you now name the one beginning that actually became your thread, instead of counting every start equally. That naming is what finally lets the path be seen whole.`,
+      negative: `Your pull to keep beginning is completely real, and it keeps getting counted by quantity instead of by which one actually mattered. That counting isn't progress. It's a path still scattered, still waiting for one beginning to be recognized as the real one.`,
+    },
+
+    '2_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Trusting What You Already Know`,
+      why: `The overarching theme your life keeps returning to is quiet, inner knowing — a recurring invitation to trust a certainty you can feel before you can fully explain it, in relationship after relationship, decision after decision.`,
+      shadow: `The risk is spending a whole life gathering more outside opinions before ever acting on what you already sensed, so the same lesson keeps repeating in a new disguise each time.`,
+      path: `Try tracing one decision across your life where you eventually did what your quiet knowing said from the start, just later than you needed to. You are allowed to trust it sooner next time. What are you currently waiting for outside permission to confirm?`,
+      positive: `Your life path through inner knowing hasn't changed — that quiet certainty was always real. What's different is that you now trace where you eventually trusted it, and let that pattern shorten the wait next time. That shortening is what finally lets the path move faster.`,
+      negative: `Your inner knowing is completely real, and it keeps waiting for outside confirmation before you'll act on it. That waiting isn't humility. It's a path still repeating the same lesson in new disguises, still waiting to be trusted sooner.`,
+    },
+
+    '3_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Receiving, Not Just Giving`,
+      why: `The overarching theme your life keeps returning to is abundance that includes you — a recurring invitation to let yourself be nourished and cared for with the same generosity you so naturally extend outward.`,
+      shadow: `The risk is a whole life spent as the source everyone else draws from, arriving at its later chapters having built abundance everywhere except in your own reserve.`,
+      path: `Try naming one long-standing habit of giving without receiving back, and letting one exception happen this month. You are allowed to be included in your own abundance. Where has your life been quietly asking you to receive, not just provide?`,
+      positive: `Your life path through abundance hasn't changed — that generative capacity was always real. What's different is that you now let one exception happen, receiving instead of only giving. That receiving is what finally lets the abundance include you.`,
+      negative: `Your capacity for abundance is completely real, and it keeps flowing outward while your own reserve stays thin across an entire life. That imbalance isn't generosity working as intended. It's a path still excluding you, still waiting for receiving to be allowed.`,
+    },
+
+    '4_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Building Something That Holds`,
+      why: `The overarching theme your life keeps returning to is durable structure — a recurring task of building order, in your work, your relationships, or your own inner life, sturdy enough to actually hold weight over time.`,
+      shadow: `The risk is building and rebuilding the same kind of structure repeatedly without ever loosening your grip enough to let any version of it actually mature past your constant oversight.`,
+      path: `Try identifying one structure you've built more than once in your life, in different forms, and asking what it would take to finally trust one version of it. You are allowed to stop rebuilding and let something hold. What structure have you built the most times without ever fully trusting it?`,
+      positive: `Your life path through building structure hasn't changed — that architectural instinct was always real. What's different is that you now trust one version of it to actually hold, instead of rebuilding it again. That trust is what finally lets the structure mature.`,
+      negative: `Your instinct to build order is completely real, and it keeps getting rebuilt from scratch instead of trusted once it's standing. That rebuilding isn't diligence. It's a path still starting over, still waiting for one structure to be allowed to hold.`,
+    },
+
+    '5_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to What You're Meant to Pass On`,
+      why: `The overarching theme your life keeps returning to is transmission — a recurring pull toward acquiring real knowledge specifically so it can be taught, shared, or handed forward, not simply kept.`,
+      shadow: `The risk is spending a lifetime accumulating credentials and expertise while the actual teaching, the part that completes the pattern, keeps getting postponed for one more year of preparation.`,
+      path: `Try naming the single piece of hard-won knowledge you've been sitting on longest, and passing it to one person this month. You are allowed to teach before you feel fully finished learning. What do you already know that's overdue to be shared?`,
+      positive: `Your life path through transmission hasn't changed — that pull to pass knowledge forward was always real. What's different is that you now teach the piece you've sat on longest, instead of postponing it further. That teaching is what finally completes the pattern.`,
+      negative: `Your capacity to acquire real knowledge is completely real, and it keeps being postponed from ever being taught, one more year of preparation always claimed first. That postponing isn't humility. It's a path still incomplete, still waiting for the transmission side to happen.`,
+    },
+
+    '6_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Choosing, Deliberately, Again`,
+      why: `The overarching theme your life keeps returning to is conscious choice — a recurring invitation to keep choosing a person, a value, or a direction on purpose, rather than drifting into it once and calling the matter settled.`,
+      shadow: `The risk is mistaking one early choice for a permanent, closed decision, so the relationship or value quietly runs on autopilot instead of being renewed.`,
+      path: `Try naming one choice you made long ago that's due for a conscious re-choosing, not a reversal, just an honest renewal. You are allowed to choose the same thing again, on purpose. What commitment of yours hasn't been actively chosen in a while?`,
+      positive: `Your life path through conscious choice hasn't changed — that capacity to choose deliberately was always real. What's different is that you now actively re-choose one long-standing commitment, instead of letting it run on autopilot. That re-choosing is what keeps the path alive.`,
+      negative: `Your capacity for deliberate choice is completely real, and it keeps being spent once, early, and then left to run unexamined for years. That autopilot isn't commitment. It's a path still coasting, still waiting to be chosen again on purpose.`,
+    },
+
+    '7_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Aiming Your Drive Somewhere Real`,
+      why: `The overarching theme your life keeps returning to is directed momentum — a recurring task of taking real drive that's always been there and pointing it at a destination worth the whole force of it, rather than just staying busy.`,
+      shadow: `The risk is a lifetime of motion that never quite arrives anywhere in particular, because the destination kept getting deferred in favor of whatever was moving fastest at the time.`,
+      path: `Try naming the one destination your drive has quietly wanted all along, underneath whatever you've actually been busy with. You are allowed to aim the momentum you already have. What would you finally point your drive toward if speed weren't the goal, arrival was?`,
+      positive: `Your life path through directed momentum hasn't changed — that drive was always real fuel. What's different is that you now name the destination it's actually wanted, instead of letting motion substitute for arrival. That naming is what finally lets the drive arrive somewhere.`,
+      negative: `Your drive is completely real, and it keeps producing motion without ever quite arriving anywhere in particular. That motion isn't progress by itself. It's a path still circling, still waiting for a destination worth the force behind it.`,
+    },
+
+    '8_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Getting the Balance Right`,
+      why: `The overarching theme your life keeps returning to is fairness — a recurring task of squaring what you give against what you receive, across relationships, work, and your own sense of what you're owed and what you owe.`,
+      shadow: `The risk is keeping an internal ledger running for an entire lifetime, so old imbalances from decades ago still quietly shape how fair today's exchange feels.`,
+      path: `Try closing the books on one long-running sense of unfairness from years ago, consciously, instead of letting it keep coloring present exchanges. You are allowed to let an old imbalance actually close. What old score are you still keeping that's actually already settled?`,
+      positive: `Your life path through fairness hasn't changed — that instinct for balance was always real. What's different is that you now consciously close one long-running imbalance from years ago. That closing is what finally lets today's exchanges be evaluated on their own terms.`,
+      negative: `Your sense of fairness is completely real, and it keeps running an open ledger across decades instead of ever closing an account. That open ledger isn't precision. It's a path still weighed down by old scores, still waiting to be settled.`,
+    },
+
+    '9_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Finding Your Own Answer`,
+      why: `The overarching theme your life keeps returning to is solitary understanding — a recurring pull toward withdrawing from the noise specifically to find out what you actually think, beneath what everyone else has told you to think.`,
+      shadow: `The risk is retreating into solitude so completely, so often, that the understanding you find there never actually gets carried back out to the people who could use it.`,
+      path: `Try naming one piece of hard-won understanding from years of solitude that's never been shared with anyone. You are allowed to bring what you found back out into the world. What insight have you been sitting with the longest?`,
+      positive: `Your life path through solitary understanding hasn't changed — that depth was always real. What's different is that you now share one piece of hard-won insight that's been sitting unspoken. That sharing is what finally completes the withdrawal's purpose.`,
+      negative: `Your capacity for solitary depth is completely real, and it keeps producing understanding that never gets carried back out. That withholding isn't privacy. It's a path still half-finished, still waiting for the insight to be returned to the world.`,
+    },
+
+    '10_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Trusting Your Own Seasons`,
+      why: `The overarching theme your life keeps returning to is cyclical trust — a recurring task of learning to read your own rhythm of ups and downs as a genuine pattern to work with, rather than a problem to fight every single time it turns.`,
+      shadow: `The risk is treating every low season across an entire lifetime as a fresh emergency, never accumulating the trust that would let you recognize your own cycle when it comes back around.`,
+      path: `Try naming your own historical pattern — how your seasons have actually moved across your life so far — and meeting the current one with that recognition instead of alarm. You are allowed to know your own rhythm by now. What has every one of your low seasons had in common that you've never named out loud?`,
+      positive: `Your life path through cyclical trust hasn't changed — the pattern itself was always real. What's different is that you now name your own historical rhythm and meet the current season with recognition instead of alarm. That recognition is what finally lets the trust accumulate.`,
+      negative: `Your cyclical nature is completely real, and it keeps getting met with fresh alarm every time it turns, as if the pattern had never happened before. That alarm isn't caution. It's a path still un-recognized, still waiting for its own rhythm to finally be named.`,
+    },
+
+    '11_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Holding Steady Without an Audience`,
+      why: `The overarching theme your life keeps returning to is quiet endurance — a recurring task of holding real difficulty steady, again and again across different chapters, without needing anyone to witness how hard it actually was.`,
+      shadow: `The risk is a lifetime of unwitnessed strength quietly turning into unmet need, since no one ever gets shown enough to know you might need holding too.`,
+      path: `Try letting one long season of quiet endurance finally be told to someone, in full, not to be praised for it, just to be known. You are allowed to let your strength be seen at least once. What have you held steady through that no one has ever actually heard about?`,
+      positive: `Your life path through quiet endurance hasn't changed — that strength was always real. What's different is that you now let one season of it finally be told to someone, in full. That telling is what lets the strength be known, not just carried alone.`,
+      negative: `Your capacity for quiet endurance is completely real, and it keeps staying invisible across an entire lifetime. That invisibility isn't strength holding up. It's a path still unseen, still waiting for one chapter of it to finally be witnessed.`,
+    },
+
+    '12_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Releasing Control to See Clearly`,
+      why: `The overarching theme your life keeps returning to is productive surrender — a recurring pattern where your clearest perspective on your own life arrives specifically after you've stopped gripping the outcome, not while you're still forcing it.`,
+      shadow: `The risk is noticing this pattern in hindsight every time, after the fact, without ever learning to release the grip proactively, before the insight is forced out of you by circumstance.`,
+      path: `Try naming one situation right now where you're gripping tightly, and deliberately loosening it before circumstance forces the release. You are allowed to surrender on your own timing for once. What are you currently holding so tightly that clarity can't get through?`,
+      positive: `Your life path through productive surrender hasn't changed — the clarity that arrives after release was always real. What's different is that you now loosen your grip on your own timing, before circumstance forces it. That proactive release is what finally lets the pattern work for you instead of on you.`,
+      negative: `Your capacity for insight through surrender is completely real, and it keeps arriving only after circumstance forces your grip open. That forcing isn't the lesson failing. It's a path still waiting for you to release on your own terms, before it's taken from you.`,
+    },
+
+    '13_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Letting Old Versions of You End`,
+      why: `The overarching theme your life keeps returning to is real transformation — a recurring task of actually letting a former identity, role, or chapter finish completely, so a truer version of you has room to take its place.`,
+      shadow: `The risk is carrying every past version of yourself forward at once, never quite finishing an ending, so your present self stays crowded with who you used to be.`,
+      path: `Try naming one identity from an earlier chapter that's still quietly running your choices, and holding a real ending for it. You are allowed to let an old self finish. Which former version of you is still making decisions it no longer has any business making?`,
+      positive: `Your life path through transformation hasn't changed — that capacity to end and renew was always real. What's different is that you now hold a real ending for one identity from an earlier chapter. That ending is what finally makes room for who you've actually become.`,
+      negative: `Your capacity for transformation is completely real, and it keeps carrying every past version of you forward without ever finishing an ending. That carrying isn't memory. It's a path still crowded, still waiting for one old self to actually be let go.`,
+    },
+
+    '14_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Blending the Extremes`,
+      why: `The overarching theme your life keeps returning to is genuine integration — a recurring task of bringing two things you keep treating as opposites, in work, in relationships, in yourself, into one sustainable, blended whole.`,
+      shadow: `The risk is spending an entire life alternating between the same two extremes and calling the alternation balance, when the actual lesson was always to combine them.`,
+      path: `Try naming the two extremes you've swung between the longest across your life, and finding one small, genuinely blended version of them this month. You are allowed to stop alternating and actually combine. What two extremes has your whole life been asking you to blend, not choose between?`,
+      positive: `Your life path through integration hasn't changed — that capacity to blend was always real. What's different is that you now find one small, genuinely combined version of the two extremes you've swung between longest. That blending is what the whole pattern was actually asking for.`,
+      negative: `Your capacity for integration is completely real, and it keeps expressing itself as alternation instead of an actual blend. That swinging isn't balance. It's a path still oscillating, still waiting for the two extremes to finally be combined.`,
+    },
+
+    '15_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Facing What You're Attached To`,
+      why: `The overarching theme your life keeps returning to is honest reckoning — a recurring invitation to look directly at whatever you're compulsively attached to, across different chapters and different specific attachments, instead of managing it from a distance.`,
+      shadow: `The risk is a lifetime of quietly rotating through different attachments, never actually examining any one of them long enough to loosen its grip for good.`,
+      path: `Try naming your current attachment honestly, without judgment, and asking directly what it's actually giving you. You are allowed to examine a compulsion instead of just rotating to a new one. What are you attached to right now that you've never fully looked at?`,
+      positive: `Your life path through honest reckoning hasn't changed — that capacity to face attachment was always available. What's different is that you now name your current attachment honestly and ask what it's actually giving you. That examining is what finally loosens the grip.`,
+      negative: `Your pattern of attachment is completely real, and it keeps rotating from one compulsion to the next without ever being fully examined. That rotating isn't freedom. It's a path still gripped, still waiting for one attachment to finally be looked at directly.`,
+    },
+
+    '16_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Rebuilding on Truer Ground`,
+      why: `The overarching theme your life keeps returning to is disruption followed by real rebuilding — a recurring pattern where something has to genuinely collapse, more than once across a lifetime, before a sturdier version of your life can actually be built.`,
+      shadow: `The risk is defending a structure you already sense is unstable, again and again, delaying a collapse that would have actually served you sooner.`,
+      path: `Try naming one structure in your life right now that you're propping up despite already sensing it's unsound. You are allowed to let it fall on its own terms instead of defending it further. What are you currently protecting that's already asking to come down?`,
+      positive: `Your life path through disruption and rebuilding hasn't changed — that capacity to build something sturdier after a real collapse was always real. What's different is that you now let one already-unstable structure fall on its own terms, instead of defending it. That release is what finally lets the rebuilding begin.`,
+      negative: `Your capacity to rebuild is completely real, and it keeps being delayed by defending a structure you already sense is unsound. That defending isn't stability. It's a path still propped up, still waiting for the honest collapse that would let it actually rebuild.`,
+    },
+
+    '17_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Keeping Hope Visible`,
+      why: `The overarching theme your life keeps returning to is sustained, visible hope — a recurring task of letting genuine faith in a better outcome be seen at its real size, across a whole life, rather than shrinking it down to seem more reasonable.`,
+      shadow: `The risk is keeping your hope quiet and modest for decades, as if believing openly were somehow immature, until the hope itself starts to feel smaller than it actually is.`,
+      path: `Try naming one hope you've kept small for a long time, and letting it be seen at its real size this month. You are allowed to hope at full volume across an entire life. What hope have you been shrinking the longest?`,
+      positive: `Your life path through visible hope hasn't changed — that faith was always real. What's different is that you now let one long-held hope be seen at its actual size. That visibility is what the whole pattern of your life has been asking for.`,
+      negative: `Your capacity for hope is completely real, and it keeps being kept small and private across decades. That shrinking isn't modesty. It's a path still underestimating itself, still waiting for the hope to be let out at its real size.`,
+    },
+
+    '18_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Trusting What You Feel Beneath the Surface`,
+      why: `The overarching theme your life keeps returning to is the felt undercurrent — a recurring pattern where the truth of a situation reaches you first as a feeling, well before it can be proven, and your task across a lifetime is learning which feelings to trust.`,
+      shadow: `The risk is spending years either dismissing every feeling as irrational or believing every anxious feeling as fact, never developing the discernment to sort one from the other.`,
+      path: `Try checking one current strong feeling against real, concrete evidence before acting on it either way. You are allowed to trust the felt sense once you've actually checked it. What feeling have you been either dismissing or over-trusting without ever checking it against reality?`,
+      positive: `Your life path through the felt undercurrent hasn't changed — that early sensing was always real. What's different is that you now check one strong feeling against real evidence before acting. That checking is what finally builds the discernment the whole pattern was asking for.`,
+      negative: `Your sensitivity to the undercurrent is completely real, and it keeps swinging between total dismissal and total belief without ever being checked. That swinging isn't intuition failing. It's a path still undiscerning, still waiting for the feeling to be tested against reality.`,
+    },
+
+    '19_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Letting Your Joy Be Seen`,
+      why: `The overarching theme your life keeps returning to is visible, unmanaged joy — a recurring invitation to let your actual happiness show at full brightness, across every chapter, rather than dimming it to keep the room comfortable.`,
+      shadow: `The risk is a lifetime of managing your radiance down for other people's comfort, so your real joy stays private while a more modest performance of it gets shown instead.`,
+      path: `Try letting one piece of real joy show at full size this month, without dimming it for anyone watching. You are allowed to be visibly, fully happy across your whole life. Where have you been managing your brightness down the longest?`,
+      positive: `Your life path through visible joy hasn't changed — that radiance was always real. What's different is that you now let one piece of it show at full size, without managing it down. That visibility is what the whole pattern has been asking for.`,
+      negative: `Your capacity for joy is completely real, and it keeps getting dimmed for other people's comfort across an entire life. That dimming isn't consideration. It's a path still managed down, still waiting for the brightness to finally be let out.`,
+    },
+
+    '20_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to the Same Calling`,
+      why: `The overarching theme your life keeps returning to is a summons that never fully goes away — a recurring pattern where the same underlying calling resurfaces in different forms across decades, waiting for the moment it's finally answered rather than prepared for indefinitely.`,
+      shadow: `The risk is spending a lifetime endlessly preparing to answer, gathering one more qualification, one more sign, while the actual answering keeps getting pushed to a later chapter that never arrives.`,
+      path: `Try naming the calling that's returned to you the most times across your life, in whatever different forms it's taken, and answering it with one real step now. You are allowed to stop preparing and actually answer. What calling has followed you the longest?`,
+      positive: `Your life path through the recurring calling hasn't changed — that summons was always real. What's different is that you now name it across its many disguises and take one real step toward answering, instead of preparing further. That step is what finally lets the calling be met.`,
+      negative: `Your calling is completely real, and it keeps being met with more preparation across an entire lifetime instead of an actual answer. That preparing isn't readiness. It's a path still unanswered, still waiting for the step that isn't another course.`,
+    },
+
+    '21_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Letting Things Count as Finished`,
+      why: `The overarching theme your life keeps returning to is genuine completion — a recurring task of letting real accomplishments actually be named as done, across a whole life, rather than immediately relativizing them in favor of a bigger, still-unmet picture.`,
+      shadow: `The risk is reaching the end of decade after decade of real achievement without ever once letting a single one of them fully register as complete.`,
+      path: `Try naming one significant, already-finished accomplishment from your life and letting it count as done, fully, without qualifying it. You are allowed to let something be finished across a whole lifetime. What have you accomplished that's never once been allowed to feel complete?`,
+      positive: `Your life path through genuine completion hasn't changed — the capacity for real accomplishment was always there. What's different is that you now let one significant achievement actually count as finished, without qualifying it further. That naming is what the whole pattern has been asking for.`,
+      negative: `Your capacity for real accomplishment is completely real, and it keeps being relativized against an ever-bigger picture across an entire life. That relativizing isn't ambition. It's a path still unfinished, still waiting for one thing to actually be called done.`,
+    },
+
+    '22_LIFEPATH': {
+      heading: `Your Life Path Keeps Circling Back to Leaping Before the Guarantee`,
+      why: `The overarching theme your life keeps returning to is trust without proof — a recurring pattern where the biggest, most important moves of your life have always required stepping forward before any certainty was actually available, and always will.`,
+      shadow: `The risk is spending decades waiting for a guarantee this particular life path was simply never going to offer, missing leap after leap while holding out for a certainty that isn't coming.`,
+      path: `Try naming the leap you're currently waiting on a guarantee for, and taking one real step toward it anyway this month. You are allowed to trust the pattern of your whole life: the leap always came first, the guarantee never did. What leap has been waiting longest for you to stop expecting proof first?`,
+      positive: `Your life path through trust without proof hasn't changed — that willingness to leap was always the real pattern. What's different is that you now take one real step toward the leap you've been waiting on a guarantee for. That step is what your whole life has actually been built for.`,
+      negative: `Your capacity to leap is completely real, and it keeps waiting for a guarantee this life path was never going to provide. That waiting isn't caution. It's a pattern still unlived, still waiting for the leap it was always going to require.`,
+    },
+
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_F1': {
       heading: `A Venture Your Father's Male Line Never Got to Fully Launch Is Now Yours to Start`,

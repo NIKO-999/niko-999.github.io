@@ -35,6 +35,16 @@ function reduceArcana(num) {
   return n;
 }
 
+// Sums every individual digit of a number (no capping) — distinct from
+// reduceArcana, which reduces a single already-formed sum. Used by Life Path,
+// which digit-sums the raw day/month/year directly rather than combining
+// already-reduced A/B/C the way D and E do.
+function _digitSum(num) {
+  return String(Math.abs(Math.trunc(Number(num) || 0)))
+    .split('')
+    .reduce((sum, digit) => sum + Number(digit), 0);
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
@@ -217,6 +227,14 @@ function calculateDestinyMatrix(birthdateString) {
   const D = reduceArcana(A + B + C);      // Bottom — Karmic Tail Root
   const E = reduceArcana(A + B + C + D);  // Center — Comfort Zone / Soul
 
+  // ── LIFE PATH · full birthdate digit sum ──────────────────────────────────
+  // Distinct from A-E's chain of already-reduced sums: every individual digit
+  // of the day, month, and year is added directly (not A+B+C's reduced
+  // values), then run through this app's own base-22 reduceArcana — never
+  // collapsed past 22, matching every other position on this chart. This is
+  // deliberately NOT the classical Western 1-9/11/22/33 numerology cap.
+  const lifePath = reduceArcana(_digitSum(day) + _digitSum(month) + _digitSum(year));
+
   // ── ANCESTRAL STRAIGHT SQUARE · diagonal corners ──────────────────────────
   // Each corner = the two cross-vertices it sits between (also the age anchors).
   const TL = reduceArcana(A + B); // Age 10 · Paternal diagonal (TL↘BR)
@@ -386,6 +404,8 @@ function calculateDestinyMatrix(birthdateString) {
       D: { position: 'Bottom', value: D, label: 'Karmic Tail Root · Past-Life Lessons' },
       E: { position: 'Center', value: E, label: 'Comfort Zone / Soul Center' },
     },
+
+    lifePath: { value: lifePath, label: 'Life Path · Full Birthdate Digit Sum' },
 
     ancestralSquare: {
       TL: { value: TL, line: 'Paternal', ageAnchor: 10 },
