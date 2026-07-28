@@ -2595,6 +2595,32 @@ const ARCANA_ESSENCE = {
       pos: new THREE.Vector3(_R * 1.1203, -_R * 0.4300, 0), color:0xFFF1C1, twk:{spd:0.88,off:2.95} },
     { key:'SPP', num:_vals.atSPP, label:'Spiritual Purpose',
       pos: new THREE.Vector3(_R * 1.0963, _R * 0.4881, 0), color:0xFFFFFF, twk:{spd:1.02,off:4.65} },
+
+    // ── Career Paths (Money Channel — DestinyMatrix-Sheet.extracted.md Page
+    // 12, "Best Career Paths For Each Arcana"). Pulled out of MON's own
+    // content into its own dedicated star per user request — MON keeps its
+    // existing "Wealth Potential / Ideal Profession" psychology, this star
+    // gives the concrete professions list its own home. No separate diagram
+    // position exists for this table (Page 12 is a standalone reference, not
+    // an octagram callout), so it deliberately reuses MON's own value
+    // (_vals.mon) under a new star identity — the same technique already
+    // used for MK/atH/atCG (see the Money Channel sub-positions comment
+    // above); NON_NEGOTIABLE_RULES.md's Absolute System Isolation explicitly
+    // allows a shared numeric source as long as each position gets its own
+    // dedicated star and its own freshly-written content, which this has.
+    //
+    // Placement: r=1.20R ring, θ=249°, continuing the same ring already used
+    // by PP/SOP/SPP (θ=294°/339°/24°) one 45° step further around rather
+    // than starting a new radius. Verified by direct-distance check: nearest
+    // neighbor is Past Life Star at ≈0.49R separation, well clear of the
+    // ≈0.22-0.26R baseline used elsewhere on this diagram.
+    //
+    // Appended at the END of MICRO — see the Material Karma comment above
+    // for why (index-shift broke Past Life Star's refresh logic once
+    // already). This is index 28; the applyNewDate() hook below has a
+    // matching Node 28 block.
+    { key:'CAREER', num:_vals.mon, label:'Career Paths',
+      pos: new THREE.Vector3(-_R * 0.4300, -_R * 1.1203, 0), color:0xFFBB44, twk:{spd:0.94,off:1.05} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3223,6 +3249,10 @@ const ARCANA_ESSENCE = {
     MICRO[26].num = _vals.atSOP;
     _microTags[27].querySelector('.t-num').textContent = String(_vals.atSPP);
     MICRO[27].num = _vals.atSPP;
+
+    // Node 28: Career Paths — mirrors the live Money/Wealth Potential (MON) value
+    _microTags[28].querySelector('.t-num').textContent = String(_vals.mon);
+    MICRO[28].num = _vals.mon;
 
     return true;
   };

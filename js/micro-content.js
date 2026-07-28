@@ -3104,6 +3104,205 @@ window.DMicroContent = (function () {
       negative: `Your instinct for independence is completely real, and it keeps testing the freedom without ever building the passive structure underneath it. That untested freedom isn't liberation. It's a fortune still passing through your hands, still waiting for a floor to actually hold it.`,
     },
 
+    // ── Career Paths (Money Channel — Best Career Paths For Each Arcana) ──
+    '1_CAREER': {
+      heading: `Your Career Path Runs Through Starting Things Yourself`,
+      why: `Your career fit runs through initiative and origination — founding, launching, leading from the front. Real candidates: entrepreneur or startup founder, project manager, sales or marketing strategist, public speaker, business coach — anywhere the job is to generate momentum where there wasn't any.`,
+      shadow: `The risk is taking a role built around someone else's system instead of your own initiative — the fit fails not because you lack skill, but because the container gives you nothing to originate.`,
+      path: `Try naming one role or venture where you'd actually be the one starting things, not executing someone else's plan, and taking one real step toward it this month. You are allowed to want to lead from day one, not earn your way there. What would you build if the job description let you invent it?`,
+      positive: `Your fit for initiative and origination hasn't changed — that pull to start things was always real. What's different is that you now name one role or venture where you'd actually be the one starting things, and take a real step toward it. That step is what finally lets the fit be tested.`,
+      negative: `Your pull to originate is completely real, and it keeps landing in roles built around someone else's system instead of your own initiative. That landing isn't a skill problem. It's a fit still untested, still waiting for a container that actually lets you start things.`,
+    },
+
+    '2_CAREER': {
+      heading: `Your Career Path Runs Through What You Sense Before You Can Prove It`,
+      why: `Your career fit runs through depth and perception — psychologist or therapist, numerologist or astrologer, analyst or researcher, consultant or advisor, writer or editor — anywhere insight itself, not just visible output, is the actual product.`,
+      shadow: `The risk is taking a role that only rewards visible, provable output, leaving your real gift for reading what's underneath permanently uncredited.`,
+      path: `Try naming one field where your intuition would actually be the qualification, not a hidden bonus, and researching one real path into it this month. You are allowed to be hired for what you sense, not only what you can prove. Where has your read on a situation already been quietly right?`,
+      positive: `Your fit for depth and perception hasn't changed — that gift for sensing what's underneath was always real. What's different is that you now name one field where intuition is the actual qualification, and research a real path into it. That naming is what finally lets the gift be credited.`,
+      negative: `Your gift for perception is completely real, and it keeps landing in roles that only reward provable output. That mismatch isn't a lack of skill. It's a fit still uncredited, still waiting for a field that actually pays for what you sense.`,
+    },
+
+    '3_CAREER': {
+      heading: `Your Career Path Runs Through Creating and Cultivating`,
+      why: `Your career fit runs through generativity and beauty — designer (graphic, interior, fashion), the beauty industry, content creation, art direction, a business built around and for women — anywhere growth and craft are the actual work.`,
+      shadow: `The risk is taking a role that treats your creative or nurturing output as a hobby rather than a real profession, discounted the moment it starts to feel effortless.`,
+      path: `Try pricing or pitching one piece of your creative work this month as an actual profession, not a side project. You are allowed to make a living from what comes naturally. Where has 'effortless' been quietly read as 'not serious work'?`,
+      positive: `Your fit for generativity and beauty hasn't changed — that craft was always real work. What's different is that you now price or pitch one piece of it as an actual profession, not a side project. That pricing is what finally lets the craft be taken seriously.`,
+      negative: `Your creative, nurturing gift is completely real, and it keeps getting treated as a hobby the moment it feels effortless. That discounting isn't accuracy. It's a fit still sidelined, still waiting to be priced as the real profession it is.`,
+    },
+
+    '4_CAREER': {
+      heading: `Your Career Path Runs Through Building and Governing Structure`,
+      why: `Your career fit runs through ownership and command — business owner, executive or CEO, administrator or manager, leadership within government or corporate structure, real estate development — anywhere you actually get to build the system, not just staff it.`,
+      shadow: `The risk is taking a subordinate role inside someone else's structure, where your genuine capacity for order gets boxed rather than used.`,
+      path: `Try naming one place in your current work where you could actually own a system instead of just running it, and asking for that ownership directly. You are allowed to want to build the structure, not just maintain it. What would you organize if the authority were already yours?`,
+      positive: `Your fit for ownership and command hasn't changed — that capacity for order was always real. What's different is that you now name one system you could actually own, and ask for that ownership directly. That asking is what finally lets the capacity be used instead of boxed.`,
+      negative: `Your capacity for structure is completely real, and it keeps getting boxed inside a subordinate role. That boxing isn't a lack of readiness. It's a fit still unused, still waiting for the authority to actually be requested.`,
+    },
+
+    '5_CAREER': {
+      heading: `Your Career Path Runs Through Teaching What You Know`,
+      why: `Your career fit runs through transmission — teacher or mentor, spiritual guide or coach, HR or consulting, trainer or lecturer, a business built around education itself — anywhere passing knowledge forward is the literal job.`,
+      shadow: `The risk is staying a permanent student, collecting credentials in a field that never actually asks you to teach, so the fit never gets tested.`,
+      path: `Try teaching or mentoring one person this month in something you already know well. You are allowed to teach before you feel like the authority. What do you already know that someone else needs?`,
+      positive: `Your fit for transmission hasn't changed — that pull to pass knowledge forward was always real. What's different is that you now teach or mentor one person in something you already know well. That teaching is what finally lets the fit get tested.`,
+      negative: `Your pull toward teaching is completely real, and it keeps staying theoretical, credentials collected in a field that never actually asks you to teach. That collecting isn't preparation. It's a fit still untested, still waiting for one real student.`,
+    },
+
+    '6_CAREER': {
+      heading: `Your Career Path Runs Through People, Chosen Well`,
+      why: `Your career fit runs through relationship — relationship coaching, HR or recruiting, sales management, brand partnerships, PR and communications — anywhere reading and choosing well between people is the actual product.`,
+      shadow: `The risk is taking a role that treats people as a checklist rather than a relationship, flattening the exact skill that makes you good at this.`,
+      path: `Try naming one role where the job is explicitly about people, not just processing them, and applying or pitching yourself for it this month. You are allowed to make relationship-building the whole job, not a side skill. Where has your read on people already produced something no process could?`,
+      positive: `Your fit for reading people well hasn't changed — that skill was always real. What's different is that you now name one role where people are explicitly the job, not a checklist, and pitch yourself for it. That naming is what finally lets the skill be the whole job.`,
+      negative: `Your read on people is completely real, and it keeps getting flattened into checklist work that doesn't actually use it. That flattening isn't a fit problem with you. It's a role still mismatched, still waiting for people to be the actual product.`,
+    },
+
+    '7_CAREER': {
+      heading: `Your Career Path Runs Through Motion and a Clear Finish Line`,
+      why: `Your career fit runs through movement and results — logistics or transportation, the sports industry, event management, travel, operations — anywhere the job is literally to get something across a finish line.`,
+      shadow: `The risk is a desk role with no visible destination, where drive with nowhere to point turns into restlessness instead of results.`,
+      path: `Try naming one role with a visible finish line — a launch, a season, a delivery — and moving toward it this month. You are allowed to need momentum to feel like yourself at work. What destination would justify the drive you already have?`,
+      positive: `Your fit for movement and results hasn't changed — that drive toward a finish line was always real. What's different is that you now name one role with a visible destination and move toward it. That destination is what finally gives the drive somewhere to go.`,
+      negative: `Your drive is completely real, and it keeps landing in roles with no visible finish line. That mismatch isn't restlessness for its own sake. It's a fit still pointless, still waiting for a destination worth the momentum.`,
+    },
+
+    '8_CAREER': {
+      heading: `Your Career Path Runs Through Fairness Made Concrete`,
+      why: `Your career fit runs through balance and accountability — law or legal consulting, accounting or auditing, financial analysis, compliance, contract management — anywhere accuracy and fairness are the literal job, not just personal virtues.`,
+      shadow: `The risk is a role where fairness is expected but never actually rewarded, so the exact skill that makes you good at this goes uncompensated.`,
+      path: `Try naming one field where integrity is a paid asset, not just an expectation, and researching a real path into it. You are allowed to profit from being the honest one. Where has fairness already been your quiet advantage?`,
+      positive: `Your fit for fairness hasn't changed — that accuracy was always real strength. What's different is that you now name one field where integrity is actually paid, not just expected, and research a real path into it. That naming is what finally lets fairness be compensated.`,
+      negative: `Your sense of fairness is completely real, and it keeps landing in roles where it's expected but never rewarded. That expecting-without-paying isn't fair. It's a fit still uncompensated, still waiting for a field that actually pays for integrity.`,
+    },
+
+    '9_CAREER': {
+      heading: `Your Career Path Runs Through Depth, Not Breadth`,
+      why: `Your career fit runs through specialized mastery — niche consulting, strategic analysis, therapeutic or healing work, research, a solo practice — anywhere depth in one area matters more than a wide network.`,
+      shadow: `The risk is a role that demands constant networking and visibility, pulling you away from exactly the solitary depth that's your real asset.`,
+      path: `Try naming one narrow area you could go deeper in this year, and one way to make that depth visible to the people who'd pay for it. You are allowed to specialize instead of spreading thin. What have you already gone deeper into than almost anyone around you?`,
+      positive: `Your fit for specialized depth hasn't changed — that mastery was always real. What's different is that you now name one narrow area to go deeper in, and one way to make it visible. That visibility is what finally lets the depth be found and paid for.`,
+      negative: `Your depth is completely real, and it keeps getting pulled thin by roles demanding constant networking instead of mastery. That pulling isn't growth. It's a fit still diluted, still waiting for depth to be allowed to be the whole job.`,
+    },
+
+    '10_CAREER': {
+      heading: `Your Career Path Runs Through Adapting Faster Than Most`,
+      why: `Your career fit runs through flexibility — marketing, trading and investments, business development, tourism, freelance work across multiple projects — anywhere reading and riding a changing trend is the actual skill.`,
+      shadow: `The risk is a rigid, single-track role that punishes exactly the adaptability that's your real strength, leaving you bored or stuck.`,
+      path: `Try naming one part of your work you could deliberately diversify or make more freelance or project-based this year. You are allowed to build a career that moves instead of staying still. Where has adapting quickly already paid off for you?`,
+      positive: `Your fit for adaptability hasn't changed — that flexibility was always real strength. What's different is that you now deliberately diversify or make one part of your work more project-based. That diversifying is what finally lets the adaptability be used.`,
+      negative: `Your adaptability is completely real, and it keeps getting punished by a rigid, single-track role. That punishing isn't discipline. It's a fit still stuck, still waiting for a structure that actually moves with you.`,
+    },
+
+    '11_CAREER': {
+      heading: `Your Career Path Runs Through the Energy You Bring Into a Room`,
+      why: `Your career fit runs through presence — coaching or motivating others, building a personal brand, fitness and wellness, performing or public-figure visibility, leadership roles that depend on presence as much as position.`,
+      shadow: `The risk is a background role that asks you to shrink your presence rather than use it, spending charisma where it's never actually the point.`,
+      path: `Try naming one role or platform where your presence would be the explicit asset, not a bonus, and taking one visible step toward it this month. You are allowed to count your presence as real labor. What rooms change when you walk in — and are you being paid for that yet?`,
+      positive: `Your fit for presence hasn't changed — that charisma was always a real asset. What's different is that you now name one role where presence is the explicit point, and take a visible step toward it. That step is what finally lets the presence be compensated.`,
+      negative: `Your presence is completely real, and it keeps getting spent in background roles that ask you to shrink it. That shrinking isn't humility. It's a fit still uncompensated, still waiting for a room where your presence is actually the job.`,
+    },
+
+    '12_CAREER': {
+      heading: `Your Career Path Runs Through Staying With People Through Something Slow`,
+      why: `Your career fit runs through sustained service — counseling or psychology, medical or caregiving professions, social work, spiritual service, long-term transformational projects — anywhere depth of presence matters more than speed of result.`,
+      shadow: `The risk is a fast-turnaround role that never lets you actually stay with anyone long enough to do this work the way you're built for.`,
+      path: `Try naming one field of sustained service you've been drawn to, and taking one real step — a course, a conversation, an application — toward it this month. You are allowed to build a career around staying, not just fixing quickly. Whose slow transformation would you want to be part of?`,
+      positive: `Your fit for sustained service hasn't changed — that capacity to stay was always real. What's different is that you now name one field of sustained service and take a real step toward it. That step is what finally lets the capacity find its right pace.`,
+      negative: `Your capacity to stay with people is completely real, and it keeps getting rushed by fast-turnaround roles. That rushing isn't efficiency. It's a fit still mismatched, still waiting for work paced to match the depth you actually bring.`,
+    },
+
+    '13_CAREER': {
+      heading: `Your Career Path Runs Through Guiding Real Endings`,
+      why: `Your career fit runs through transformation — crisis management, psychotherapy, transformation coaching, medical work centered on renewal (surgery, rehabilitation), change management — anywhere guiding an ending into a genuine new beginning is the job.`,
+      shadow: `The risk is a role built entirely around maintaining the status quo, where your real gift for guiding change never gets used.`,
+      path: `Try naming one field built around transformation rather than maintenance, and researching a real path into it this month. You are allowed to build a career around change, not stability for its own sake. What ending have you already guided someone else through?`,
+      positive: `Your fit for guiding transformation hasn't changed — that comfort with endings was always real. What's different is that you now name one field built around transformation and research a real path into it. That naming is what finally lets the gift be used.`,
+      negative: `Your gift for guiding change is completely real, and it keeps sitting unused inside a role built around maintaining the status quo. That sitting isn't patience. It's a fit still wasted, still waiting for work that actually needs an ending guided.`,
+    },
+
+    '14_CAREER': {
+      heading: `Your Career Path Runs Through Blending What Others Keep Separate`,
+      why: `Your career fit runs through integration — holistic healing, nutrition or wellness coaching, mediation, integrative consulting, lifestyle consulting — fields that exist specifically at the intersection other professions leave unaddressed.`,
+      shadow: `The risk is a narrowly specialized role that forces you to leave half your actual skill set at the door.`,
+      path: `Try naming the two or three skills you keep being told to pick between, and researching one field where they're actually meant to combine. You are allowed to be the blend the industry didn't have a title for yet. Which of your combined skills is actually the product?`,
+      positive: `Your fit for integration hasn't changed — that ability to blend was always real. What's different is that you now name the skills you keep being told to pick between, and research a field where they're meant to combine. That naming is what finally lets the blend be the product.`,
+      negative: `Your ability to integrate is completely real, and it keeps getting forced into narrow roles that leave half your skill set at the door. That narrowing isn't focus. It's a fit still incomplete, still waiting for a field built for the blend.`,
+    },
+
+    '15_CAREER': {
+      heading: `Your Career Path Runs Through Understanding What Actually Drives People`,
+      why: `Your career fit runs through material power — business and finance, sales and negotiation, the entertainment industry, the luxury market, work built around understanding what compels people materially and psychologically.`,
+      shadow: `The risk is a role where that understanding gets used to grip control over people rather than serve a genuine transaction, costing trust in the long run.`,
+      path: `Try naming one field where your read on power and money could serve a genuinely good deal, not just a personal edge, and researching a real path into it. You are allowed to understand leverage without being owned by it. What could your honest read on influence build if you aimed it somewhere clean?`,
+      positive: `Your fit for understanding material power hasn't changed — that read was always real. What's different is that you now name one field where it could serve a genuinely good deal, not just a personal edge, and research a real path into it. That aiming is what keeps the gift clean.`,
+      negative: `Your read on material power is completely real, and it keeps being tempted toward gripping control rather than serving a genuine deal. That gripping isn't mastery. It's a fit still corroding trust, still waiting to be aimed somewhere clean.`,
+    },
+
+    '16_CAREER': {
+      heading: `Your Career Path Runs Through Rebuilding What's Broken`,
+      why: `Your career fit runs through disruption and reconstruction — engineering or architecture, IT and cybersecurity, crisis and risk management, construction, system transformation — anywhere reorganizing a failing structure is the actual job.`,
+      shadow: `The risk is a role that asks you to patch things quietly rather than actually rebuild them, leaving your real gift for structural change unused.`,
+      path: `Try naming one system, at work or elsewhere, that's genuinely due for a rebuild rather than another patch, and proposing the real fix. You are allowed to say the structure is failing before it's polite. What collapse have you already seen coming that no one else named yet?`,
+      positive: `Your fit for rebuilding hasn't changed — that gift for structural change was always real. What's different is that you now name one system due for a rebuild and propose the real fix, instead of another patch. That proposing is what finally lets the gift be used.`,
+      negative: `Your gift for structural change is completely real, and it keeps being asked to patch things quietly instead of actually rebuilding them. That patching isn't tact. It's a fit still unused, still waiting for permission to name the collapse out loud.`,
+    },
+
+    '17_CAREER': {
+      heading: `Your Career Path Runs Through Being Seen While You Create`,
+      why: `Your career fit runs through visible creativity — blogging or influencing, art and creative work released publicly, media and online projects, social initiatives, personal-brand monetization — anywhere hope and inspiration are the literal product.`,
+      shadow: `The risk is keeping the creative work private and unmonetized, waiting for it to be discovered instead of actively offering it.`,
+      path: `Try publishing or pitching one piece of your creative work this month at the size it's actually at, not the size you wish it were. You are allowed to be seen before you feel fully ready. What would you release if visibility paid what it actually pays?`,
+      positive: `Your fit for visible creativity hasn't changed — that gift for inspiring people was always real. What's different is that you now publish or pitch one piece of work at the size it's actually at. That releasing is what finally lets the gift be found.`,
+      negative: `Your creative gift is completely real, and it keeps staying private, waiting to be discovered instead of actively offered. That waiting isn't humility. It's a fit still unmonetized, still waiting for the work to actually be released.`,
+    },
+
+    '18_CAREER': {
+      heading: `Your Career Path Runs Through What You Sense but Can't Always Prove`,
+      why: `Your career fit runs through the intuitive and the felt — psychology or therapeutic work, filmmaking or visual art, photography, esoteric practice, creative healing professions — anywhere reading an unspoken undercurrent is the actual skill.`,
+      shadow: `The risk is a role that demands hard, provable data before anything is trusted, leaving your real gift for reading atmosphere and emotion sidelined.`,
+      path: `Try naming one field where an intuitive read is the qualification, not an obstacle to prove around, and researching a real path in. You are allowed to follow a professional hunch past what you can fully explain. What direction keeps tugging that your resume can't justify yet?`,
+      positive: `Your fit for the intuitive and the felt hasn't changed — that read on atmosphere was always real. What's different is that you now name one field where intuition is the qualification, not the obstacle, and research a real path in. That naming is what finally lets the gift be used.`,
+      negative: `Your intuitive gift is completely real, and it keeps getting sidelined by roles that demand hard, provable data first. That demanding isn't rigor. It's a fit still sidelined, still waiting for a field that actually trusts what you sense.`,
+    },
+
+    '19_CAREER': {
+      heading: `Your Career Path Runs Through Being Genuinely Yourself, Publicly`,
+      why: `Your career fit runs through visible warmth — public speaking, teaching children specifically, the entertainment industry, creative leadership, a personal-brand business built around simply being visibly, genuinely yourself.`,
+      shadow: `The risk is a role that requires a costume — professional distance, suppressed personality — draining exactly the natural ease that makes you good at this.`,
+      path: `Try naming one part of your work where you're currently performing professionalism instead of being yourself, and letting more of the real you show there this month. You are allowed to earn from work that feels like being yourself. Where does your labor still require a costume?`,
+      positive: `Your fit for visible warmth hasn't changed — that natural ease was always real. What's different is that you now let more of the real you show in one part of your work, instead of performing professionalism. That showing is what finally lets the ease be the asset.`,
+      negative: `Your natural warmth is completely real, and it keeps getting drained by a role that requires a costume. That costume isn't professionalism. It's a fit still exhausting, still waiting for a version of the work that doesn't ask you to hide.`,
+    },
+
+    '20_CAREER': {
+      heading: `Your Career Path Runs Through the Work You Keep Being Called Back To`,
+      why: `Your career fit runs through vocation — coaching or mentoring, public service, work on social projects, speaking on subjects that genuinely matter, transformational education — professions that function less like a job and more like an answer.`,
+      shadow: `The risk is staying in an adequate-but-outgrown role, endlessly preparing to answer the calling instead of actually making the leap.`,
+      path: `Try naming the work you keep returning to in your mind, and taking one real step toward it this month instead of more preparation. You are allowed to answer the calling that keeps calling. What is one real step, not another course, toward the work you keep circling?`,
+      positive: `Your fit for vocation hasn't changed — that calling was always real. What's different is that you now name the work you keep returning to, and take one real step toward it instead of more preparation. That step is what finally lets the calling be answered.`,
+      negative: `Your calling is completely real, and it keeps being met with more preparation instead of an actual leap. That preparing isn't readiness. It's a fit still unanswered, still waiting for a real step instead of another course.`,
+    },
+
+    '21_CAREER': {
+      heading: `Your Career Path Runs Through Work That Crosses Borders`,
+      why: `Your career fit runs through global reach — international business and trade, online platforms and digital ecosystems, cross-border projects, travel and tourism or relocation services, work embedded in genuinely large systems and networks rather than one local one.`,
+      shadow: `The risk is staying confined to a narrow, local version of your field long after your actual capacity has outgrown it.`,
+      path: `Try letting one part of your work deliberately cross a border this year — a client, a platform, a market — rather than assuming your reach has to stay local. You are allowed to work at the size of the whole map. What border is your work actually ready to cross?`,
+      positive: `Your fit for global reach hasn't changed — that capacity was always real. What's different is that you now let one part of your work deliberately cross a border, instead of assuming it has to stay local. That crossing is what finally lets the reach be used.`,
+      negative: `Your capacity for global reach is completely real, and it keeps staying confined to a narrow, local version of your field. That confinement isn't caution. It's a fit still capped, still waiting for a border it's actually ready to cross.`,
+    },
+
+    '22_CAREER': {
+      heading: `Your Career Path Runs Through Work That Doesn't Have a Template Yet`,
+      why: `Your career fit runs through original, unstructured paths — freelancing, creative entrepreneurship, working as a digital nomad, startups and experimental projects, any non-standard profession that didn't exist as a fixed category before you found it.`,
+      shadow: `The risk is forcing yourself into a fixed, conventional role that punishes exactly the originality that's your real asset, leaving you restless inside a template that was never built for you.`,
+      path: `Try naming one unconventional shape your work could actually take, and taking one real step toward building it this year. You are allowed to build a career with no template. What venture would you start if 'that's not a real job' stopped being a reason not to?`,
+      positive: `Your fit for original, unstructured work hasn't changed — that originality was always real. What's different is that you now name one unconventional shape your work could take, and take a real step toward building it. That step is what finally lets the originality lead.`,
+      negative: `Your originality is completely real, and it keeps getting forced into a fixed, conventional role that punishes it. That forcing isn't discipline. It's a fit still restless, still waiting for a template-free shape it's actually allowed to take.`,
+    },
+
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_F1': {
       heading: `A Venture Your Father's Male Line Never Got to Fully Launch Is Now Yours to Start`,
