@@ -2890,8 +2890,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence at starting ventures from scratch — earning through initiation, launching, building something new where nothing existed before. The Magician sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating the same old pattern alongside the competence — initiating a promising professional venture and then moving to the next before this one has actually paid off. If your career shows a string of strong starts without matching follow-through, that carried-over pattern may be worth addressing directly.`,
       path: `This may shift by choosing one current professional venture and deliberately staying with it well past the exciting starting phase. You are allowed to claim launching as a lineage skill, not a fluke. What would you start next if you treated beginning-from-nothing as your birthright?`,
-      positive: `You bring genuine, practiced skill to starting new ventures, and because you now stay through the follow-through phase too, that competence finally compounds into real career growth.`,
-      negative: `Real, inherited skill at starting things loses its financial value if the same old pattern of moving on too soon keeps repeating alongside it.`,
+      positive: `Your inherited competence at launching from nothing hasn't changed — that entry point was always real and well-practiced. What's different is that you now choose one current venture and deliberately stay with it well past the exciting starting phase. That staying is what finally lets the competence compound into growth.`,
+      negative: `Your competence at starting ventures is completely real, and it keeps repeating the old pattern of moving to the next before this one has paid off. That moving isn't ambition. It's a career still waiting for one start to actually be followed through.`,
     },
 
     // ── 2 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2900,8 +2900,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in intuitive, discerning, or advisory work — earning through insight, counsel, or a quiet read on situations others find opaque. The High Priestess sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of holding that insight back rather than offering it plainly, letting a genuinely marketable skill stay private and uncompensated. If your professional insight is often right but rarely credited or paid for directly, that old caution may be worth addressing.`,
       path: `This may shift by offering your intuitive read directly and explicitly in one professional context this week, rather than letting it stay implied. You are allowed to bill for the seeing, not just the doing. What do you routinely notice first that your work hasn't yet named as its edge?`,
-      positive: `You offer your genuine intuitive insight directly instead of holding it back, and your career finally reflects the real value of a competence you've always quietly had.`,
-      negative: `Real, inherited insight stays financially undervalued if an old caution keeps it private instead of offered plainly in professional contexts.`,
+      positive: `Your inherited competence at reading what others miss hasn't changed — that entry point was always real and well-practiced. What's different is that you now offer your intuitive read directly and explicitly, rather than letting it stay implied. That directness is what finally lets your career reflect its real value.`,
+      negative: `Your competence at intuitive insight is completely real, and it keeps repeating the old pattern of holding it back rather than offering it plainly. That holding back isn't discretion. It's a career still waiting for the seeing to be billed, not just the doing.`,
     },
 
     // ── 3 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2910,8 +2910,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in creative, hospitable, or nurturing professions — earning through generativity, care, beauty, or cultivation, work that produces real comfort and abundance for others. The Empress sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of under-pricing that generosity, giving so freely in professional contexts that the actual market value of the work goes uncollected. If your creative or nurturing work is appreciated but underpaid, that old pattern may be the piece still active.`,
       path: `This may shift by naming a fair, specific price for your creative or nurturing work this week, and holding to it without discounting out of habit. You are allowed to let the nurturing work be prestigious. Where does your creative, growing touch already produce what colder methods can't?`,
-      positive: `You price your creative and nurturing work fairly, and real abundance flows back to match the genuine value you've always brought to it.`,
-      negative: `A pattern of underpricing genuinely valuable creative or nurturing work keeps real professional abundance from actually reaching you.`,
+      positive: `Your inherited competence in creative, nurturing work hasn't changed — that entry point was always real and well-practiced. What's different is that you now name a fair, specific price for it and hold to it without discounting out of habit. That pricing is what finally lets abundance flow back to match the value.`,
+      negative: `Your competence in generative, nurturing work is completely real, and it keeps repeating the old pattern of underpricing that generosity. That underpricing isn't humility. It's an abundance still uncollected, still waiting for the market value to actually be charged.`,
     },
 
     // ── 4 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2920,8 +2920,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in organizational or leadership work — earning through building systems, directing effort, and creating the structure that lets an enterprise actually function. The Emperor sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of over-control, building structures so tightly held that they depend entirely on you, limiting how far your professional competence can actually scale. If your career growth keeps hitting a ceiling shaped by how much you can personally oversee, that old pattern may be worth addressing.`,
       path: `This may shift by building one system at work that runs correctly without your constant direct oversight, and trusting it to hold. You are allowed to lead as the inheritance intends — structurally, calmly, at scale. What is waiting to be organized under your hands?`,
-      positive: `You build structures that hold without requiring your constant oversight, and your real leadership competence finally scales past what you alone can manage.`,
-      negative: `Real, inherited leadership skill hits a ceiling if an old need for total control keeps every structure dependent on your constant personal oversight.`,
+      positive: `Your inherited competence in leadership and structure hasn't changed — that entry point was always real and well-practiced. What's different is that you now build one system that runs correctly without your constant direct oversight. That trust is what finally lets the competence scale.`,
+      negative: `Your competence in building structure is completely real, and it keeps repeating the old pattern of over-control, structures held so tightly they depend entirely on you. That control isn't leadership. It's a career still capped, still waiting for a system built to run without you.`,
     },
 
     // ── 5 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2930,8 +2930,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in teaching, mentorship, or institutional work — earning through transmitting knowledge, upholding standards, and guiding others through established frameworks. The Hierophant sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of clinging to outdated methods simply because they're familiar, letting genuinely valuable teaching competence calcify instead of adapting to what's actually needed now. If your professional approach hasn't updated in a while despite the field around it changing, that old rigidity may be worth addressing.`,
       path: `This may shift by updating one specific teaching or mentoring method you rely on, testing it against what's actually needed today rather than what's simply familiar. You are allowed to teach before you feel like the elder. What knowledge in you is already generations deep and ready to move forward?`,
-      positive: `You update your teaching and mentoring methods to match what's actually needed now, and your real competence stays relevant instead of calcifying.`,
-      negative: `Real, inherited teaching skill loses relevance if an old attachment to familiar methods keeps it from adapting to what the field actually needs now.`,
+      positive: `Your inherited competence in teaching and passing down knowledge hasn't changed — that entry point was always real and well-practiced. What's different is that you now update one specific method you rely on, testing it against what's actually needed today. That updating is what keeps the competence relevant instead of calcified.`,
+      negative: `Your competence in teaching is completely real, and it keeps repeating the old pattern of clinging to outdated methods simply because they're familiar. That clinging isn't tradition. It's a skill still waiting to adapt to what the field actually needs now.`,
     },
 
     // ── 6 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2940,8 +2940,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in partnership-based or relational professions — earning through discernment, matching, negotiating, or collaborative craft that depends on reading a relationship correctly. The Lovers sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of indecision at key professional forks, letting a genuinely valuable relational instinct stall out at the exact moments a clear choice was needed. If important collaborative decisions tend to sit unresolved longer than they should, that old hesitation may be worth addressing.`,
       path: `This may shift by making one pending collaborative or partnership decision this week, using your genuine relational instinct rather than continuing to defer it. You are allowed to count relationship-building as the profession it is. What collaboration have you made work that no one else could have held together?`,
-      positive: `You act decisively on your genuine relational instincts, and collaborative work finally moves forward instead of stalling at key decision points.`,
-      negative: `Real, inherited relational skill stalls out if an old pattern of indecision keeps key collaborative choices perpetually unresolved.`,
+      positive: `Your inherited competence in collaborative, relational work hasn't changed — that entry point was always real and well-practiced. What's different is that you now make one pending collaborative decision, using your genuine relational instinct rather than continuing to defer it. That decisiveness is what lets collaboration move forward.`,
+      negative: `Your relational competence is completely real, and it keeps repeating the old pattern of indecision at key professional forks. That hesitation isn't caution. It's collaborative work still stalled, still waiting for a clear choice.`,
     },
 
     // ── 7 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2950,8 +2950,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in competitive or high-momentum professions — earning through drive, decisive action, and a real capacity to push toward a goal and win it. The Chariot sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of relentless pushing without pacing, letting genuinely valuable drive burn out the very career it's meant to build. If your professional momentum tends to end in exhaustion rather than sustainable success, that old pattern may be worth addressing.`,
       path: `This may shift by building one deliberate pause into your current professional push, treating rest as part of the strategy rather than a departure from it. You are allowed to achieve at full throttle and rest between races. What high bar is genuinely yours to clear next — chosen, not compulsive?`,
-      positive: `You pair your genuine drive with real pacing, and sustainable career momentum replaces the old cycle of pushing hard and then burning out.`,
-      negative: `Real, inherited drive burns out its own career gains if an old pattern of relentless pushing never builds in genuine pacing.`,
+      positive: `Your inherited competence in driven, high-achievement work hasn't changed — that entry point was always real and well-practiced. What's different is that you now build one deliberate pause into your current push, treating rest as part of the strategy. That pacing is what makes momentum sustainable.`,
+      negative: `Your competence for drive is completely real, and it keeps repeating the old pattern of relentless pushing without pacing. That pushing isn't ambition. It's a career still waiting to trade burnout for a strategy that includes rest.`,
     },
 
     // ── 8 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2960,8 +2960,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in law, mediation, or standards-based professions — earning through a sharp, reliable sense of what's fair, balanced, and accountable. The Justice sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of applying that standard too rigidly or harshly, letting genuinely valuable judgment curdle into inflexibility that costs you professional goodwill. If your fairness sometimes reads as coldness to the people you work with, that old rigidity may be worth addressing.`,
       path: `This may shift by pairing one judgment call this week with visible compassion for the person on the other side of it, not just the correct standard. You are allowed to be the fair one professionally and prosper for it. Where is your judgment already the thing people quietly rely on?`,
-      positive: `You apply your genuine sense of fairness with real compassion alongside it, and your professional judgment earns trust instead of just correctness.`,
-      negative: `Real, inherited fairness curdles into costly rigidity if an old pattern of harsh application never softens into genuine compassion.`,
+      positive: `Your inherited competence in fairness and judgment hasn't changed — that entry point was always real and well-practiced. What's different is that you now pair one judgment call with visible compassion for the person on the other side of it. That compassion is what turns correctness into trust.`,
+      negative: `Your sense of fairness is completely real, and it keeps repeating the old pattern of applying that standard too rigidly or harshly. That rigidity isn't integrity. It's a judgment still waiting to soften into the compassion that would actually earn goodwill.`,
     },
 
     // ── 9 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
@@ -2970,8 +2970,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in independent, research-driven, or expert work — earning through depth, focus, and knowledge built alone over real time. The Hermit sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of isolating that expertise so completely it never reaches the audience or collaborators who'd actually pay for it. If your deep knowledge rarely gets shared in ways that translate into professional recognition or income, that old withdrawal may be worth addressing.`,
       path: `This may shift by sharing one piece of your expert knowledge publicly or professionally this week, rather than continuing to develop it in isolation. You are allowed to go deeper than the market's attention span and trust the value. What expertise of yours compounds precisely because few can follow you down?`,
-      positive: `You share your genuine expertise more openly, and real professional recognition finally reaches knowledge that used to stay developed in isolation.`,
-      negative: `Real, inherited expertise stays professionally invisible if an old pattern of isolation keeps it from ever reaching the people who'd value it.`,
+      positive: `Your inherited competence in deep, solitary expertise hasn't changed — that entry point was always real and well-practiced. What's different is that you now share one piece of that knowledge publicly or professionally, rather than continuing to develop it in isolation. That sharing is what finally lets recognition reach it.`,
+      negative: `Your expertise is completely real, and it keeps repeating the old pattern of isolating that knowledge so completely it never reaches anyone who'd pay for it. That isolation isn't rigor. It's a competence still invisible, still waiting to be offered instead of just possessed.`,
     },
 
     // ── 10 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -2980,8 +2980,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in professions shaped by change, timing, or cycles — earning through adaptability, reading shifting conditions, and moving fluidly as circumstances turn. The Wheel of Fortune sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of relying on favorable timing instead of building consistency underneath it, letting real adaptability substitute for a steadier professional foundation. If your career success seems to depend heavily on lucky timing rather than built structure, that old pattern may be worth addressing.`,
       path: `This may shift by building one consistent professional practice that holds steady regardless of which phase of the cycle you're currently in. You are allowed to ride the cycles as a skill, not a liability. What season is your work in right now — and what does mastery of this season look like?`,
-      positive: `You pair your genuine adaptability with real consistency underneath it, and career success stops depending so heavily on lucky timing.`,
-      negative: `Real, inherited adaptability stays fragile if an old reliance on favorable timing never gets paired with a steadier professional foundation.`,
+      positive: `Your inherited competence in adaptable, cyclical work hasn't changed — that entry point was always real and well-practiced. What's different is that you now build one consistent professional practice that holds steady regardless of the cycle's phase. That consistency is what stops success from depending on lucky timing.`,
+      negative: `Your adaptability is completely real, and it keeps repeating the old pattern of relying on favorable timing instead of building consistency underneath it. That reliance isn't skill. It's a foundation still fragile, still waiting for steadiness to be built in.`,
     },
 
     // ── 11 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -2990,8 +2990,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in caretaking or endurance-based professions — earning through reliability, quiet strength, and a real capacity to hold difficult work steady over time. The Strength sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of carrying professional burdens entirely alone, letting genuinely valuable resilience turn into isolation rather than sustainable strength. If you're relied on professionally but rarely supported in return, that old pattern may be worth addressing.`,
       path: `This may shift by naming one specific professional burden out loud to a colleague or collaborator this week, rather than continuing to carry it silently. You are allowed to let the caretaking competence care for you too. What steady, resilient work of yours deserves steadier, more resilient conditions?`,
-      positive: `You name real professional burdens instead of carrying them silently, and your genuine resilience becomes sustainable instead of isolating.`,
-      negative: `Real, inherited resilience becomes isolating if an old pattern of carrying every professional burden alone never gets named or shared.`,
+      positive: `Your inherited competence in steady, resilient caretaking hasn't changed — that entry point was always real and well-practiced. What's different is that you now name one specific professional burden out loud to a colleague, rather than continuing to carry it silently. That naming is what lets resilience become sustainable.`,
+      negative: `Your resilience is completely real, and it keeps repeating the old pattern of carrying every professional burden entirely alone. That carrying isn't strength. It's a competence still isolating, still waiting to be shared instead of only shouldered.`,
     },
 
     // ── 12 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3000,8 +3000,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in service-oriented or reframing professions — earning through patience, a willingness to see situations from an unconventional angle, and a capacity to hold difficulty without rushing it. The Hanged Man sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of self-sacrifice past the point of usefulness, letting genuinely valuable patience curdle into professional self-neglect. If you consistently put your own professional needs last, that old pattern may be worth addressing.`,
       path: `This may shift by naming one professional need of your own this week and prioritizing it, rather than automatically deferring it again. You are allowed to work at the pace where your perspective forms. What slow insight are you incubating that faster workers will never reach?`,
-      positive: `You prioritize your own professional needs alongside your genuine patience for others, and the old self-sacrifice no longer costs you what you actually need.`,
-      negative: `Real, inherited patience turns into costly self-neglect if an old pattern of self-sacrifice keeps overriding your own professional needs.`,
+      positive: `Your inherited competence in patient, perspective-shifting work hasn't changed — that entry point was always real and well-practiced. What's different is that you now name one professional need of your own and prioritize it, rather than automatically deferring it. That prioritizing is what stops the patience from costing you.`,
+      negative: `Your patience is completely real, and it keeps repeating the old pattern of self-sacrifice past the point of usefulness. That sacrifice isn't service. It's a competence still neglecting the one person it should also be caring for.`,
     },
 
     // ── 13 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3010,8 +3010,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in change-oriented professions — earning through guiding transitions, endings, and rebirths, work that requires real comfort with what other people find frightening. The Death sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of forcing dramatic professional overhauls instead of allowing gradual evolution, letting genuinely valuable transformative skill skip over smaller, necessary adjustments. If your career keeps needing complete resets rather than incremental growth, that old pattern may be worth addressing.`,
       path: `This may shift by making one small, incremental professional change now, rather than waiting for circumstances to force a complete overhaul. You are allowed to be the one who walks people across thresholds. Whose transformation is currently waiting for a guide with your exact scar tissue?`,
-      positive: `You make small professional adjustments as they're needed, and your genuine transformative skill gets applied by choice, not just by crisis.`,
-      negative: `Real, inherited transformative skill keeps getting used only in crisis if an old pattern of forcing dramatic resets skips over smaller, timely adjustments.`,
+      positive: `Your inherited competence in transformative, threshold-crossing work hasn't changed — that entry point was always real and well-practiced. What's different is that you now make one small, incremental professional change now, rather than waiting for circumstances to force a complete overhaul. That timing is what lets the skill get applied by choice.`,
+      negative: `Your transformative skill is completely real, and it keeps repeating the old pattern of forcing dramatic overhauls instead of allowing gradual evolution. That forcing isn't decisiveness. It's a competence still used only in crisis, still waiting for the smaller adjustments to count too.`,
     },
 
     // ── 14 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3020,8 +3020,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in blending or integrative professions — earning through combining disparate elements into something coherent, work that requires real patience and a steady hand. The Temperance sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of losing that careful balance exactly when professional pressure rises, letting genuinely valuable moderation give way to extremes right when steadiness matters most. If your usual measured approach tends to break down under real deadline or client pressure, that old pattern may be worth addressing.`,
       path: `This may shift by identifying your specific pressure point at work and deliberately practicing the moderate response there, rather than the extreme one. You are allowed to make integration itself the deliverable. What separated things in your field are waiting for your blend?`,
-      positive: `You maintain your genuine integrative balance even under real professional pressure, and that steadiness becomes reliable rather than conditional.`,
-      negative: `Real, inherited integrative skill breaks down under pressure if an old pattern of losing balance keeps surfacing exactly when steadiness matters most.`,
+      positive: `Your inherited competence in integrative, balance-oriented work hasn't changed — that entry point was always real and well-practiced. What's different is that you now identify your specific pressure point and deliberately practice the moderate response there. That practice is what makes the steadiness reliable rather than conditional.`,
+      negative: `Your integrative balance is completely real, and it keeps repeating the old pattern of losing that balance exactly when pressure rises. That losing isn't weakness. It's a skill still waiting to hold steady precisely where it matters most.`,
     },
 
     // ── 15 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3030,8 +3030,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in professions built on influence — earning through persuasion, negotiation, and a real, magnetic capacity to move other people toward a decision. The Devil sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of using that influence manipulatively, letting genuinely valuable persuasive skill curdle into something that damages trust rather than building it. If your professional relationships tend to cool once the deal is closed, that old pattern may be worth addressing.`,
       path: `This may shift by using your persuasive skill in one upcoming situation with full transparency about your actual interest, rather than obscuring it. You are allowed to persuade in the open, with consent, at full strength. What cause deserves the influence you've been keeping on a leash?`,
-      positive: `You use your genuine persuasive gift with real transparency, and professional trust deepens instead of eroding once the deal is done.`,
-      negative: `Real, inherited persuasive skill damages professional trust if an old pattern of obscured motive keeps surfacing once the influence has done its work.`,
+      positive: `Your inherited competence in persuasion and influence hasn't changed — that entry point was always real and well-practiced. What's different is that you now use it in one upcoming situation with full transparency about your actual interest, rather than obscuring it. That transparency is what deepens trust instead of eroding it.`,
+      negative: `Your persuasive skill is completely real, and it keeps repeating the old pattern of being used manipulatively. That obscuring isn't strategy. It's a trust still cooling once the deal closes, still waiting for the influence to be used in the open.`,
     },
 
     // ── 16 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3040,8 +3040,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in disruption-adjacent professions — earning through steadiness during upheaval and a real capacity to help rebuild what's collapsed. The Tower sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of ignoring early professional warning signs until a full collapse forces the issue, letting genuinely valuable crisis competence get used reactively instead of preventively. If disruptions in your career tend to feel sudden despite visible signals beforehand, that old pattern may be worth addressing.`,
       path: `This may shift by addressing one current professional warning sign directly now, rather than waiting for it to force a bigger disruption later. You are allowed to be at your best in the crisis without needing crises to be at your best. What rebuild is calling for the steadiness only you bring?`,
-      positive: `You address professional warning signs early, and your genuine crisis competence gets used preventively instead of only after things collapse.`,
-      negative: `Real, inherited crisis skill only gets used reactively if an old pattern of ignoring early signs keeps letting situations collapse before you act.`,
+      positive: `Your inherited competence in crisis and rebuilding hasn't changed — that entry point was always real and well-practiced. What's different is that you now address one current warning sign directly now, rather than waiting for it to force a bigger disruption. That early action is what lets the competence work preventively.`,
+      negative: `Your crisis competence is completely real, and it keeps repeating the old pattern of ignoring early warning signs until a full collapse forces the issue. That ignoring isn't calm. It's a skill still reactive, still waiting to be used before the collapse instead of after.`,
     },
 
     // ── 17 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3050,8 +3050,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in inspired or visionary professions — earning through creative vision, natural encouragement of others, and a real gift for making hope feel tangible. The Star sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of waiting passively for recognition rather than actively offering your work, letting genuinely valuable inspiration stay underexposed. If your creative or inspirational work rarely reaches the audience that would actually value it, that old passivity may be worth addressing.`,
       path: `This may shift by actively sharing one piece of your inspired work this week, rather than waiting for it to be discovered on its own. You are allowed to inspire as a vocation, not a side effect. What hope-carrying work of yours is ready to stop being informal?`,
-      positive: `You actively share your genuine creative gift instead of waiting to be discovered, and real recognition finally reaches work that's always deserved it.`,
-      negative: `Real, inherited creative inspiration stays underexposed if an old pattern of passive waiting keeps it from actively reaching the people who'd value it.`,
+      positive: `Your inherited competence in inspirational, creative work hasn't changed — that entry point was always real and well-practiced. What's different is that you now actively share one piece of that work, rather than waiting for it to be discovered on its own. That sharing is what lets recognition finally reach it.`,
+      negative: `Your creative inspiration is completely real, and it keeps repeating the old pattern of waiting passively for recognition. That waiting isn't humility. It's a gift still underexposed, still waiting to be actively offered instead of quietly hoped for.`,
     },
 
     // ── 18 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3060,8 +3060,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in intuitive or psychologically deep professions — earning through perceiving what's beneath the surface, work that requires real comfort with ambiguity and the subconscious. The Moon sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of losing clarity in that depth, letting genuinely valuable intuitive skill blur into confusion that undermines professional confidence in your own read. If your deep insight sometimes gets clouded by anxious uncertainty rather than trusted, that old pattern may be worth addressing.`,
       path: `This may shift by grounding one intuitive professional read this week against concrete, checkable evidence before acting on it fully. You are allowed to work in the depths professionally, with boundaries. What psychological gift of yours needs a container so it can be given without draining you?`,
-      positive: `You ground your genuine intuitive insight in concrete evidence, and deep perceptive skill becomes a trusted professional asset instead of a source of confusion.`,
-      negative: `Real, inherited intuitive skill loses professional trust if an old pattern of unclear, anxious uncertainty keeps clouding an otherwise accurate read.`,
+      positive: `Your inherited competence in deep, intuitive, psychological work hasn't changed — that entry point was always real and well-practiced. What's different is that you now ground one intuitive read against concrete, checkable evidence before acting on it fully. That grounding is what turns depth into a trusted asset.`,
+      negative: `Your intuitive skill is completely real, and it keeps repeating the old pattern of losing clarity in that depth. That losing isn't sensitivity. It's a competence still clouded by anxious uncertainty, still waiting for boundaries around the depth.`,
     },
 
     // ── 19 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3070,8 +3070,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in visible, celebratory, or life-affirming professions — earning through radiance, natural warmth, and a real gift for making people feel genuinely good. The Sun sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of performing that joy even when the underlying professional picture feels uncertain, letting genuine warmth cover concerns that need real attention. If you'd rarely let colleagues see you actually struggling professionally, that old performance may be worth addressing.`,
       path: `This may shift by letting one real professional difficulty be visible to a trusted colleague this week, instead of managing it entirely behind your usual brightness. You are allowed to make joy your professional signature. Where does your life-affirming presence already change outcomes that expertise alone couldn't?`,
-      positive: `You let real professional difficulty be visible sometimes, and the support that follows makes your genuine warmth sustainable instead of a constant performance.`,
-      negative: `Real, inherited warmth becomes an exhausting performance if an old pattern of hiding professional struggle behind it never gets addressed directly.`,
+      positive: `Your inherited competence in joyful, life-affirming work hasn't changed — that entry point was always real and well-practiced. What's different is that you now let one real professional difficulty be visible to a trusted colleague, instead of managing it entirely behind your usual brightness. That visibility is what makes the warmth sustainable.`,
+      negative: `Your warmth is completely real, and it keeps repeating the old pattern of performing joy even when the underlying picture feels uncertain. That performing isn't positivity. It's a warmth still exhausting, still waiting for the struggle underneath to be seen too.`,
     },
 
     // ── 20 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3080,8 +3080,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in calling-oriented professions — earning through advocacy, spiritual guidance, or work that helps other people recognize something they'd been avoiding. The Judgement sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of delaying your own necessary professional calls to action, applying your gift for waking others up while leaving your own overdue changes untouched. If you can see clearly what a colleague or client needs to face but avoid facing your own equivalent, that old delay may be worth addressing.`,
       path: `This may shift by acting on one piece of professional clarity you've already reached about your own path, rather than continuing to delay it. You are allowed to advocate at the volume of your conviction. What awakening work keeps summoning you that deserves your public yes?`,
-      positive: `You act on your own overdue professional clarity as readily as you help others act on theirs, and your genuine gift for advocacy finally includes yourself.`,
-      negative: `Real, inherited skill at awakening others to what they're avoiding loses its full value if an old pattern of self-delay keeps your own equivalent untouched.`,
+      positive: `Your inherited competence in awakening and advocacy hasn't changed — that entry point was always real and well-practiced. What's different is that you now act on one piece of professional clarity you've already reached about your own path, rather than continuing to delay it. That action is what lets the gift finally include you too.`,
+      negative: `Your gift for awakening others is completely real, and it keeps repeating the old pattern of delaying your own necessary calls to action. That delay isn't patience. It's an advocacy still incomplete, still waiting to be turned on your own overdue changes.`,
     },
 
     // ── 21 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3090,8 +3090,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in big-picture or synthesizing professions — earning through pulling disparate pieces into a coherent whole, work with real scope and reach. The World sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of never letting a project feel finished, relativizing genuine professional completions in favor of an ever-larger picture. If you can't recall the last time a big project felt fully, simply done, that old extension may be worth addressing.`,
       path: `This may shift by naming one large project that is, in practical terms, already complete, and letting it count as finished rather than extending it further. You are allowed to work at the scale you actually see at. What large, whole-picture project has been waiting for you to stop calling it too big?`,
-      positive: `You let genuinely complete large-scale work actually count as finished, and your real integrative skill gets to be felt as the accomplishment it is.`,
-      negative: `Real, inherited skill at large-scale synthesis rarely gets to feel complete if an old pattern of extension keeps relativizing every finish line.`,
+      positive: `Your inherited competence in large-scale, integrative work hasn't changed — that entry point was always real and well-practiced. What's different is that you now name one large project that's already complete and let it count as finished, rather than extending it further. That naming is what lets the accomplishment finally be felt.`,
+      negative: `Your integrative skill is completely real, and it keeps repeating the old pattern of never letting a project feel finished, relativizing every completion in favor of an ever-larger picture. That relativizing isn't ambition. It's an accomplishment still unfelt, still waiting to be called done.`,
     },
 
     // ── 22 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
@@ -3100,8 +3100,8 @@ window.DMicroContent = (function () {
       why: `Your money entry point reflects a genuine, carried-over competence in pioneering or independent professions — earning through courage, adaptability, and a real willingness to build a path that doesn't already exist. The Fool sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of leaping professionally without building the groundwork that would let the leap actually land, letting genuine courage substitute for preparation. If your unconventional career moves tend to work out through luck rather than groundwork, that old pattern may be worth addressing.`,
       path: `This may shift by pairing your next unconventional professional move with one concrete piece of preparation, rather than trusting the landing to courage alone. You are allowed to build a career with no template. What unconventional shape of work would fit you so well it stops feeling like risk?`,
-      positive: `You pair your genuine pioneering courage with real preparation, and unconventional career moves land on solid ground instead of depending on luck.`,
-      negative: `Real, inherited courage for unconventional paths depends too heavily on luck if an old pattern of leaping without groundwork never gets addressed.`,
+      positive: `Your inherited competence in unconventional, freedom-based work hasn't changed — that entry point was always real and well-practiced. What's different is that you now pair your next unconventional move with one concrete piece of preparation, rather than trusting the landing to courage alone. That preparation is what lets the leap land on solid ground.`,
+      negative: `Your pioneering courage is completely real, and it keeps repeating the old pattern of leaping without building the groundwork that would let the leap land. That leaping isn't boldness alone. It's a career still depending on luck, still waiting for courage to be paired with preparation.`,
     },
 
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
