@@ -3760,7 +3760,12 @@ const ARCANA_ESSENCE = {
     const num  = _talents[key];
     const icon = window.DMEngine.getIconType(num);
     const hex  = '#' + (ICON_COLOR_MAP[icon] || 0xAABBFF).toString(16).padStart(6, '0');
-    const content = window.DTalentContent.get(icon);
+    // Per-position, per-arcana tier (added 2026-07-28) takes priority — the
+    // archetype tier below it is now only a fallback for the two positions
+    // this renders (pastLife/personal); should never actually trigger once
+    // both are complete, kept for safety same as every other tier's fallback.
+    const content = (window.DTalentContent.getForPosition && DTalentContent.getForPosition(key, num))
+      || window.DTalentContent.get(icon);
     if (!content) return;
 
     document.getElementById('pb-prog-name').textContent = TALENT_LABEL[key] + '  ·  ' + num;
