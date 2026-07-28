@@ -3026,6 +3026,18 @@ const ARCANA_ESSENCE = {
        ${data.key === 'YE' && _yeMeta ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">CURRENTLY ACTIVE</div>
          <div class="pb-full-text">Ages ${_yeMeta.slotStartAge.toFixed(1)}–${_yeMeta.slotEndAge.toFixed(1)}, within the ${_yeMeta.decadeStart}–${_yeMeta.decadeEnd} life decade.</div>
+       </div>` : ''}
+       ${data.key === 'LIFEPATH' && mc.career ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">IN CAREER</div>
+         <div class="pb-full-text">${mc.career}</div>
+       </div>` : ''}
+       ${data.key === 'LIFEPATH' && mc.love ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">IN LOVE & RELATIONSHIPS</div>
+         <div class="pb-full-text">${mc.love}</div>
+       </div>` : ''}
+       ${data.key === 'LIFEPATH' && mc.path ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE INVITATION</div>
+         <div class="pb-full-text">${mc.path}</div>
        </div>` : ''}` : '';
 
     _mBanner.classList.add('open');
