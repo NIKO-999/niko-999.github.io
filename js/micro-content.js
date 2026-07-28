@@ -5198,8 +5198,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from motion — from knowing you can generate what you need out of nothing if you have to. The Magician grounds you through capability itself: as long as you can start something, you feel like you'll survive.`,
       shadow: `The risk is never actually letting the ground settle, staying in perpetual-start mode because stillness feels like the one thing your safety wasn't built to survive.`,
       path: `Try trusting that you're allowed to stop generating and just be held by what you've already built. You are allowed to feel safe without constantly proving you can begin again. What would it feel like to be grounded without needing to start something new to prove it?`,
-      positive: `You feel safe in stillness, not just in motion, and that settled ground is what actually lets your capability rest between efforts.`,
-      negative: `Safety that only exists in motion never gets to actually land — the ground stays theoretical, always one stop away from feeling unstable.`,
+      positive: `Your safety through capability hasn't changed — the ability to generate what you need from nothing is still real. What's different is that you now trust stillness too, letting yourself be held by what you've already built instead of needing to keep starting. That trust is what finally lets the ground settle.`,
+      negative: `Your safety through capability is completely real, and it keeps existing only in motion, never quite landing, always one stop away from feeling unstable. That restlessness isn't ambition. It's a ground still waiting for you to discover it holds even when you're not generating something new to prove it.`,
     },
 
     '2_MUL': {
@@ -5207,8 +5207,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from your own internal read of a situation — sensing what's true before anyone confirms it. The High Priestess grounds you through trusted inner knowing, a felt security that doesn't need outside verification.`,
       shadow: `The risk is that the security stays entirely private, so ungrounded to anyone else that it can be mistaken for absence rather than depth.`,
       path: `Try letting your grounded knowing show occasionally, so it can actually be recognized as the stability it is. You are allowed to let your quiet certainty be visible. What would it look like to let someone see how grounded you actually are?`,
-      positive: `You let your inner certainty be visible sometimes, and that visibility is what lets others actually recognize the safety you carry.`,
-      negative: `A groundedness kept entirely invisible reads as absence to everyone else, even while it's real and solid underneath.`,
+      positive: `Your safety through inner knowing hasn't changed — the felt certainty that doesn't need outside verification was always genuinely yours. What's different is that you now let it show occasionally, instead of keeping it entirely private. That visibility is what finally lets others recognize the ground you've actually been standing on.`,
+      negative: `Your safety through inner knowing is completely real, and it keeps staying entirely private, so hidden it can be mistaken for absence rather than depth. That invisibility isn't protection. It's a genuine groundedness still waiting for you to let it be seen.`,
     },
 
     '3_MUL': {
@@ -5216,8 +5216,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from resources, warmth, a home that actually holds you — material comfort as a real form of security, not excess for its own sake. The Empress grounds you through genuine, felt provision.`,
       shadow: `The risk is measuring your safety only by how much you're providing for others, letting your own basic needs go quietly unattended while you tend everyone else's.`,
       path: `Try including your own needs in the abundance you create. You are allowed to be as provided-for as you provide. What basic need of your own have you been quietly deferring while meeting everyone else's?`,
-      positive: `You provide for yourself with the same generosity you offer others, and that inclusion is what makes your groundedness genuinely whole.`,
-      negative: `Providing abundantly for everyone except yourself leaves your own foundation quietly unattended, however secure everyone around you feels.`,
+      positive: `Your safety through abundance and provision hasn't changed — genuine, felt security through resources and warmth was always real. What's different is that you now include your own needs in that abundance, instead of measuring safety only by what you provide others. That inclusion is what makes the ground whole.`,
+      negative: `Your safety through provision is completely real, and it keeps flowing entirely outward, measured by how well everyone else is cared for while your own needs go quietly unattended. That imbalance isn't generosity working as intended. It's a foundation still waiting to include the person building it.`,
     },
 
     '4_MUL': {
@@ -5225,8 +5225,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from order — systems, routines, a structure sturdy enough that you don't have to constantly monitor it. The Emperor grounds you through built, dependable stability.`,
       shadow: `The risk is that maintaining the structure becomes a full-time job in itself, so exhausting to uphold that the security it was supposed to provide gets spent on defending it instead.`,
       path: `Try building one piece of structure durable enough that it holds itself, without your constant oversight. You are allowed to trust a system you built. What structure of yours could actually run without your constant management?`,
-      positive: `You build structures sturdy enough to trust without constant oversight, and that trust is what finally lets the security feel restful instead of effortful.`,
-      negative: `A structure that requires constant vigilance to hold isn't actually secure — it just relocates the anxiety from chaos to maintenance.`,
+      positive: `Your safety through structure hasn't changed — dependable systems and routines were always the real foundation. What's different is that you now build one piece sturdy enough to trust without constant oversight, instead of monitoring it endlessly. That trust is what finally lets the security feel restful.`,
+      negative: `Your safety through structure is completely real, and it keeps requiring constant vigilance to hold, exhausting to maintain in a way that quietly relocates the original anxiety rather than resolving it. That vigilance isn't security. It's a ground still waiting for a structure you can actually trust to hold itself.`,
     },
 
     '5_MUL': {
@@ -5234,8 +5234,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from tradition, community, a shared framework of meaning bigger than any one day's uncertainty. The Hierophant grounds you through belonging.`,
       shadow: `The risk is that the belonging becomes the whole foundation, so that questioning any part of the tradition feels like losing the ground itself.`,
       path: `Try separating your security from any single belief so the ground survives even when one part of it gets questioned. You are allowed to feel safe even while doubting a piece of what you were taught. What would still hold you up if you let one inherited belief be wrong?`,
-      positive: `You separate your security from any single belief, and that separation is what lets genuine doubt coexist with real, lasting groundedness.`,
-      negative: `Ground built entirely on an unquestioned tradition collapses the moment any part of it is honestly examined, because nothing was actually load-bearing on its own.`,
+      positive: `Your safety through belonging hasn't changed — a shared framework of meaning larger than any single day was always real ground. What's different is that you now separate your security from any one belief within it, so the ground survives even when a part gets honestly questioned. That separation is what makes doubt and groundedness coexist.`,
+      negative: `Your safety through belonging is completely real, and it keeps depending on the whole tradition staying unquestioned, so any honest doubt threatens to take the ground down with it. That fragility isn't faith. It's a ground still waiting to be separated from any single belief within it.`,
     },
 
     '6_MUL': {
@@ -5243,8 +5243,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from connection — knowing you're wanted, not just tolerated, by the people closest to you. The Lovers grounds you through felt, mutual belonging.`,
       shadow: `The risk is chasing that feeling of being chosen so hard you accept relationships that don't actually offer it, mistaking any attention for the real thing.`,
       path: `Try noticing where you already are genuinely chosen and let that be enough ground for now. You are allowed to feel secure in love without constantly re-auditioning for it. Where are you already wanted exactly as you are, if you actually looked?`,
-      positive: `You recognize the places you're already genuinely chosen, and that recognition is real ground instead of a feeling you have to keep re-earning.`,
-      negative: `Chasing the feeling of being chosen through relationships that don't actually offer it leaves the ground perpetually unstable, no matter how much attention arrives.`,
+      positive: `Your safety through connection hasn't changed — felt, mutual belonging was always the real ground. What's different is that you now notice where you're already genuinely chosen, letting that be enough instead of chasing more proof. That recognition is real ground, not a feeling you have to keep re-earning.`,
+      negative: `Your safety through connection is completely real, and it keeps chasing the feeling of being chosen through relationships that don't actually offer it, mistaking any attention for the real thing. That chase isn't love. It's a ground still waiting for you to notice where you're already standing on solid, mutual belonging.`,
     },
 
     '7_MUL': {
@@ -5252,8 +5252,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from momentum — as long as you're moving toward something, the ground under you feels solid. The Chariot grounds you through purposeful direction.`,
       shadow: `The risk is that stillness starts to feel like danger, so any pause reads as the ground itself giving way rather than a normal part of any journey.`,
       path: `Try resting for one real stretch and noticing that the ground is actually still there. You are allowed to feel safe while standing still. What would it take to trust that stopping doesn't undo your progress?`,
-      positive: `You rest without the ground feeling like it's disappearing, and that trust is what lets momentum become sustainable instead of compulsive.`,
-      negative: `Ground that only exists in motion means every pause feels like collapse, even when nothing has actually been lost.`,
+      positive: `Your safety through momentum hasn't changed — purposeful direction still makes the ground feel solid. What's different is that you now rest for one real stretch and notice the ground is still there. That trust is what turns momentum sustainable instead of compulsive.`,
+      negative: `Your safety through momentum is completely real, and it keeps making stillness feel like danger, every pause registering as the ground giving way rather than a normal part of the journey. That fear isn't laziness catching up with you. It's a ground still waiting for you to discover it holds even while you're standing still.`,
     },
 
     '8_MUL': {
@@ -5261,8 +5261,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from balance — knowing the scales are even, that what's owed gets paid and what's earned gets received. Justice grounds you through a world that behaves the way it's supposed to.`,
       shadow: `The risk is that any unfairness, even small, can feel like the whole ground shifting, because your security is tied to a world staying perfectly calibrated.`,
       path: `Try letting your ground rest in your own integrity rather than the world's fairness, since only one of those is actually within your control. You are allowed to feel secure even when the world is unfair. What would let your footing hold steady even through one unresolved injustice?`,
-      positive: `You root your security in your own integrity rather than the world's cooperation, and that shift is what makes your ground finally steady regardless of outside conditions.`,
-      negative: `Ground that depends on the world staying perfectly fair will shake with every ordinary injustice, because that condition was never actually guaranteed.`,
+      positive: `Your safety through fairness hasn't changed — the desire for balance, for what's owed to be paid, was always real. What's different is that you now root your security in your own integrity rather than the world's cooperation. That shift is what finally makes the ground steady regardless of outside conditions.`,
+      negative: `Your safety through fairness is completely real, and it keeps depending on the world staying perfectly calibrated, so every ordinary injustice shakes the ground. That instability isn't oversensitivity. It's a security still tied to a condition that was never actually guaranteed, still waiting to be rooted in something within your control.`,
     },
 
     '9_MUL': {
@@ -5270,8 +5270,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from withdrawal — time alone to actually settle, away from the noise of other people's needs and opinions. The Hermit grounds you through chosen retreat.`,
       shadow: `The risk is that the retreat becomes permanent, security purchased at the price of connection you actually still need.`,
       path: `Try returning from your solitude with the ground intact and letting relationship not threaten it. You are allowed to be grounded in solitude and still stay connected. What would it look like to bring your settled self back into company without losing it?`,
-      positive: `You return from solitude still grounded, and that return proves the security was never actually dependent on staying alone.`,
-      negative: `Retreat that never ends purchases stability at a cost of connection that was never actually required to give up.`,
+      positive: `Your safety through solitude hasn't changed — chosen retreat, real time to settle, was always genuine ground. What's different is that you now return from it and stay grounded in company too, instead of needing the retreat to be permanent. That return proves the security was never actually dependent on staying alone.`,
+      negative: `Your safety through solitude is completely real, and the retreat keeps threatening to become permanent, stability purchased at a cost of connection you actually still need. That permanence isn't peace. It's a ground still waiting to prove it can survive the return to other people.`,
     },
 
     '10_MUL': {
@@ -5279,8 +5279,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from accepting that things cycle — the ability to trust a low point will actually turn, rather than needing certainty about outcomes. The Wheel of Fortune grounds you through faith in timing.`,
       shadow: `The risk is that every downturn still feels like proof the ground has given way, even when you know, intellectually, that it's just a phase.`,
       path: `Try meeting the next low point with the trust you already have in theory. You are allowed to feel grounded through a downturn, not just after it ends. What would it look like to feel secure while still mid-cycle, before the turn arrives?`,
-      positive: `You feel grounded through the downturn itself, not just after it resolves, and that mid-cycle trust is real, durable security.`,
-      negative: `Waiting for the turn to complete before feeling safe again means the ground never actually holds during the exact moments it's needed most.`,
+      positive: `Your safety through trusting the turning hasn't changed — faith that a low point will actually turn was always real. What's different is that you now feel grounded through the downturn itself, not just once it resolves. That mid-cycle trust is what makes the security durable rather than retrospective.`,
+      negative: `Your safety through trusting cycles is completely real in theory, and it keeps failing to land during the actual downturn, every low point still feeling like proof the ground gave way. That gap isn't hypocrisy. It's a trust still waiting to be felt mid-cycle, not just confirmed after the fact.`,
     },
 
     '11_MUL': {
@@ -5288,8 +5288,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from your own capacity to withstand — real, quiet endurance that doesn't need an audience. Strength grounds you through inner resilience.`,
       shadow: `The risk is turning that endurance into a performance, needing witnesses to confirm the resilience is real, which quietly undermines the very quality it's meant to prove.`,
       path: `Try letting your endurance be private again, unwitnessed, and trust it's still real. You are allowed to feel grounded without anyone seeing how strong you are. What would it feel like to be resilient with no one watching?`,
-      positive: `You let your resilience be private and unwitnessed, and that privacy is what confirms it was never actually dependent on an audience.`,
-      negative: `Endurance that needs to be seen to feel real stops actually being grounded — it becomes contingent on the witness instead of standing on its own.`,
+      positive: `Your safety through endurance hasn't changed — real, quiet resilience was always genuine ground. What's different is that you now let it be private again, unwitnessed, and trust it's still real. That privacy is what confirms the strength was never actually dependent on an audience.`,
+      negative: `Your safety through endurance is completely real, and it keeps needing a witness to feel confirmed, turning quiet resilience into a performance. That need isn't vanity. It's a genuine strength still waiting to be trusted on its own, without anyone watching to make it count.`,
     },
 
     '12_MUL': {
@@ -5297,8 +5297,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes, paradoxically, from surrender — trusting the situation enough to stop gripping it. The Hanged Man grounds you through release rather than control.`,
       shadow: `The risk is that the surrender turns into passivity, a permanent suspension mistaken for the release that was actually needed.`,
       path: `Try releasing your grip on one specific thing today and noticing the ground holds anyway. You are allowed to feel secure without controlling the outcome. What would you have to let go of to find out the ground was there the whole time?`,
-      positive: `You release control of something specific and find the ground holds anyway, and that discovery is what makes surrender genuinely grounding instead of merely passive.`,
-      negative: `Gripping control indefinitely, mistaking it for the only path to safety, keeps you from ever discovering the ground was already there.`,
+      positive: `Your safety through surrender hasn't changed — trusting a situation enough to stop gripping it was always the real ground, paradoxical as that is. What's different is that you now release your grip on one specific thing and notice the ground holds anyway. That discovery is what makes the surrender genuinely grounding.`,
+      negative: `Your safety through surrender is completely real in principle, and it keeps losing to a grip that mistakes control for the only path to safety. That grip isn't security. It's a ground still waiting to be discovered, still there underneath, unreachable until something is finally released.`,
     },
 
     '13_MUL': {
@@ -5306,8 +5306,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from your own capacity to actually end things and be renewed — real transformation as a source of stability, not a threat to it. Transformation grounds you through willingness to change.`,
       shadow: `The risk is ending things prematurely, mistaking any discomfort for a signal that the current chapter must be over, when it might just be difficult.`,
       path: `Try letting an ending complete at its actual pace rather than rushing it for the relief. You are allowed to feel grounded through change, not just after it's finished. What ending in your life deserves its full timeline instead of a rushed one?`,
-      positive: `You let real endings complete at their own pace, and that patience is what makes transformation a genuine source of ground rather than a scramble for relief.`,
-      negative: `Rushing every ending to escape discomfort skips the actual transformation, leaving the ground unsettled underneath the appearance of change.`,
+      positive: `Your safety through transformation hasn't changed — the capacity to end things and be renewed was always a real source of stability. What's different is that you now let an ending complete at its actual pace, instead of rushing it for relief. That patience is what makes the ground genuine rather than just the appearance of change.`,
+      negative: `Your safety through transformation is completely real, and it keeps rushing every ending to escape discomfort, skipping the actual work that would settle the ground. That haste isn't decisiveness. It's a transformation still waiting to be given its full timeline instead of a shortcut.`,
     },
 
     '14_MUL': {
@@ -5315,8 +5315,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from genuine integration — body, mind, and circumstance actually working together, not just alternating in turns. Temperance grounds you through real, felt equilibrium.`,
       shadow: `The risk is mistaking the alternation between extremes for balance itself, when true equilibrium was actually being asked for the whole time.`,
       path: `Try finding one small, actually blended version of two things you've been alternating between. You are allowed to want real balance, not managed extremes. What two things in your life are ready to work together instead of taking turns?`,
-      positive: `You find genuine integration instead of alternating extremes, and that blend is what finally provides the felt equilibrium your ground was asking for.`,
-      negative: `Alternating between extremes and calling it balance never actually produces the settled ground that real integration would.`,
+      positive: `Your safety through balance hasn't changed — genuine integration, body and mind and circumstance actually working together, was always the real ground. What's different is that you now find one small, actually blended version of two things you'd been alternating between. That blend is what finally provides the felt equilibrium.`,
+      negative: `Your safety through balance is completely real, and it keeps mistaking alternation between extremes for balance itself. That oscillation isn't equilibrium. It's a ground still waiting for real integration, still asking for two things to actually work together instead of taking turns.`,
     },
 
     '15_MUL': {
@@ -5324,8 +5324,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from honest reckoning with your own compulsions and desires — real security through self-knowledge, not through pretending the shadow isn't there. The Devil grounds you through confrontation, not denial.`,
       shadow: `The risk is performing a cleaner version of yourself while an unexamined pull runs quietly underneath, undermining the very ground the performance was meant to protect.`,
       path: `Try naming one real compulsion honestly, without judgment, today. You are allowed to feel grounded by facing your shadow instead of hiding it. What part of yourself have you been protecting the ground from instead of actually grounding it in?`,
-      positive: `You face a real compulsion honestly instead of denying it, and that honesty becomes the actual ground your safety was built to need.`,
-      negative: `A performed, cleaner self with an unexamined pull running underneath leaves the real ground unaddressed no matter how convincing the performance is.`,
+      positive: `Your safety through honest reckoning hasn't changed — real security through self-knowledge, not through pretending the shadow isn't there, was always the ground. What's different is that you now name one real compulsion honestly, without judgment. That honesty is the actual ground your safety needed all along.`,
+      negative: `Your safety through honest reckoning is completely real, and it keeps performing a cleaner version of yourself while an unexamined pull runs quietly underneath. That performance isn't safety. It's a ground still unaddressed, still waiting for the shadow to be faced instead of hidden from.`,
     },
 
     '16_MUL': {
@@ -5333,8 +5333,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from having already survived structural collapse — proof, hard-won, that you can rebuild. The Tower grounds you through resilience tested by real crisis.`,
       shadow: `The risk is bracing permanently for the next collapse, so vigilant against instability that you can never actually rest in the ground you've already rebuilt.`,
       path: `Try trusting the current structure without constantly checking it for cracks. You are allowed to feel grounded without waiting for the next collapse. What would it feel like to trust what you've already rebuilt?`,
-      positive: `You trust the structure you've already rebuilt instead of constantly checking it for cracks, and that trust is what lets the ground finally feel settled.`,
-      negative: `Permanent vigilance against the next collapse means you never actually get to rest in the ground you've already proven you can rebuild.`,
+      positive: `Your safety through survived collapse hasn't changed — real, hard-won proof that you can rebuild was always genuine ground. What's different is that you now trust the current structure without constantly checking it for cracks. That trust is what lets the ground finally feel settled instead of perpetually tested.`,
+      negative: `Your safety through survived collapse is completely real, and it keeps bracing permanently for the next one, so vigilant against instability that you never actually rest in what you've already rebuilt. That vigilance isn't wisdom anymore. It's a ground still waiting to be trusted, not just proven.`,
     },
 
     '17_MUL': {
@@ -5342,8 +5342,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from faith in a better outcome — hope itself as a stabilizing force, not dependent on evidence it will pan out. The Star grounds you through trust in the future.`,
       shadow: `The risk is keeping that hope so modest and private it barely functions as ground at all, too small to actually hold your weight.`,
       path: `Try letting your hope be as large and visible as it actually is. You are allowed to feel grounded in a hope you haven't shrunk down. What would your hope look like at its actual, unshrunken size?`,
-      positive: `You let your hope be large and visible, and that full size is what finally lets it function as real, load-bearing ground.`,
-      negative: `Hope kept deliberately small and private is too thin to actually hold any weight, even though the capacity for real ground was always there.`,
+      positive: `Your safety through hope hasn't changed — faith in a better outcome, not dependent on evidence, was always a real stabilizing force. What's different is that you now let it be as large and visible as it actually is, instead of shrinking it down. That full size is what finally lets it function as load-bearing ground.`,
+      negative: `Your safety through hope is completely real, and it keeps staying modest and private, too thin to actually hold any weight even though the capacity was always there. That smallness isn't humility. It's a ground still waiting to be let out at its real, unshrunken size.`,
     },
 
     '18_MUL': {
@@ -5351,8 +5351,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from a felt sense beneath the surface — intuition about atmosphere and undercurrent that turns out, again and again, to be accurate. The Moon grounds you through trust in the unseen.`,
       shadow: `The risk is that the felt sense curdles into anxious story, mistaking every strong feeling for confirmed danger rather than genuine signal.`,
       path: `Try checking one strong feeling against real evidence before treating it as settled fact. You are allowed to trust your intuition while still verifying it. What feeling have you been treating as certain that's actually still just a feeling?`,
-      positive: `You check your intuition against real evidence, and that verification is what turns a felt sense into genuinely trustworthy ground.`,
-      negative: `Treating every anxious feeling as confirmed fact keeps the ground shaky, mistaking noise for the real signal underneath it.`,
+      positive: `Your safety through the undercurrent hasn't changed — a felt sense beneath the surface, accurate again and again, was always real ground. What's different is that you now check one strong feeling against real evidence before treating it as settled fact. That verification is what turns intuition into trustworthy ground.`,
+      negative: `Your safety through the undercurrent is completely real, and it keeps curdling into anxious story, every strong feeling treated as confirmed danger rather than genuine signal. That confusion isn't intuition failing. It's a ground still waiting for the noise to be sorted from the real signal underneath.`,
     },
 
     '19_MUL': {
@@ -5360,8 +5360,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from vitality and open warmth — a felt sense that things are fundamentally good, not performed positivity but actual, lived brightness. The Sun grounds you through real joy.`,
       shadow: `The risk is that the warmth becomes a performance for other people's comfort, leaving your own harder feelings with nowhere safe to land.`,
       path: `Try letting one difficult feeling be visible alongside the warmth today. You are allowed to feel grounded even when you're not being bright. What would it feel like to be warmly received on a day you're not performing brightness at all?`,
-      positive: `You let difficult feelings be visible alongside your warmth, and that fuller honesty is what makes the ground genuinely stable instead of performed.`,
-      negative: `Warmth performed for others' comfort while your own hard feelings go unwitnessed leaves the real ground unaddressed underneath the glow.`,
+      positive: `Your safety through warmth hasn't changed — a felt sense that things are fundamentally good, real and lived, was always genuine ground. What's different is that you now let a difficult feeling be visible alongside the warmth, instead of only performing brightness. That fuller honesty is what makes the ground genuinely stable.`,
+      negative: `Your safety through warmth is completely real, and it keeps performing for other people's comfort while your own harder feelings go unwitnessed. That performance isn't dishonesty exactly. It's a ground still unaddressed underneath the glow, still waiting for the hard feelings to have somewhere safe to land too.`,
     },
 
     '20_MUL': {
@@ -5369,8 +5369,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from clarity acted on — knowing exactly what needs to change and actually rising to do it, rather than staying in ambiguous preparation. Judgement grounds you through decisive alignment.`,
       shadow: `The risk is that the clarity arrives and gets endlessly deferred, prepared-for instead of acted on, leaving the ground perpetually pending.`,
       path: `Try taking one concrete action toward the calling you've already heard clearly. You are allowed to feel grounded by acting on what you know, not just by knowing it. What is the smallest real step the clarity you already have is asking for?`,
-      positive: `You act on the clarity you've already received instead of endlessly preparing, and that action is what finally makes the ground solid rather than pending.`,
-      negative: `Clarity that's heard but perpetually deferred for more preparation leaves the ground permanently unsettled, no matter how well-understood the situation is.`,
+      positive: `Your safety through decisive alignment hasn't changed — clarity acted on, not just known, was always the real ground. What's different is that you now take one concrete action toward the calling you've already heard clearly, instead of staying in preparation. That action is what finally makes the ground solid rather than pending.`,
+      negative: `Your safety through clarity is completely real, and it keeps getting deferred for more preparation, understood but never acted on. That deferral isn't caution. It's a ground still pending, still waiting for the smallest real step the clarity has already been asking for.`,
     },
 
     '21_MUL': {
@@ -5378,8 +5378,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes from completion — real, acknowledged arrival, not another goal appended before the current one gets to count. The World grounds you through genuine closure.`,
       shadow: `The risk is reaching real completion and immediately relativizing it, adding one more condition before it's allowed to actually count as done.`,
       path: `Try letting one already-finished thing in your life actually be named as complete today. You are allowed to feel grounded in genuine arrival. What have you already finished that deserves to be acknowledged as done, not almost?`,
-      positive: `You let a genuine achievement actually be named as complete, and that acknowledgment is what finally gives the ground somewhere solid to rest.`,
-      negative: `Relativizing every completion by adding one more condition keeps the ground permanently unfinished, no matter how much has actually been accomplished.`,
+      positive: `Your safety through completion hasn't changed — real, acknowledged arrival, not another goal appended before the current one counts, was always the ground. What's different is that you now let one already-finished thing actually be named as complete. That acknowledgment is what finally gives the ground somewhere solid to rest.`,
+      negative: `Your safety through completion is completely real, and it keeps relativizing every finish by adding one more condition before it's allowed to count. That relativizing isn't ambition. It's a ground still permanently unfinished, still waiting for something already accomplished to actually be called done.`,
     },
 
     '22_MUL': {
@@ -5387,8 +5387,8 @@ window.DMicroContent = (function () {
       why: `Your sense of safety comes, unusually, from openness to the unknown — trusting the flow of life enough that not having a net doesn't feel like danger. The Fool grounds you through faith in your own adaptability.`,
       shadow: `The risk is that the openness becomes recklessness, leaping without any real discernment because the trust in adaptability has slipped into avoiding all preparation.`,
       path: `Try taking one real leap this season while still keeping your eyes open. You are allowed to feel grounded in trust rather than certainty. What would you leap toward if trusting your own adaptability were enough of a plan?`,
-      positive: `You leap with open eyes, trusting your own adaptability rather than needing a guaranteed outcome, and that trust becomes genuine, lived ground.`,
-      negative: `Leaping without any discernment at all mistakes recklessness for faith, and the ground that trust was supposed to provide never actually forms.`,
+      positive: `Your safety through trusting the leap hasn't changed — openness to the unknown, faith in your own adaptability, was always the real, if unusual, ground. What's different is that you now take one real leap this season while still keeping your eyes open. That combination is what turns trust into genuine, lived ground.`,
+      negative: `Your safety through openness is completely real, and it keeps tipping into recklessness, leaping without any real discernment because the trust in adaptability slipped into avoiding all preparation. That recklessness isn't faith. It's a ground that never actually forms, still waiting for the leap to be paired with open eyes.`,
     },
 
 
