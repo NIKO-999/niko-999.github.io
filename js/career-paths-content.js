@@ -12,10 +12,9 @@
  * content is the source's, not invented, only the sentence-level voice
  * is original.
  *
- * Arcana-keyed only (not position-specific) — same shape as
- * DNumerologyContent.getMatch(). Currently surfaced on the Money
- * Entry Point star only, since the source page's own header ties this
- * table to the Money Channel; not a standalone position.
+ * Arcana-keyed only (not position-specific). Currently surfaced on the
+ * Money Entry Point star only, since the source page's own header ties
+ * this table to the Money Channel; not a standalone position.
  *
  * API:
  *   DCareerPathsContent.get(arcanaNum) → { heading, text } or null

@@ -142,47 +142,6 @@
       margin-top: 5px;
       text-align: center;
     }
-    .ic-view-toggle {
-      display: flex;
-      gap: 6px;
-      margin-bottom: 18px;
-    }
-    .ic-view-btn {
-      font-family: 'DM Mono', monospace;
-      font-size: 7.5px;
-      font-weight: 300;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      color: rgba(180,210,255,0.32);
-      background: rgba(180,210,255,0.04);
-      border: 1px solid rgba(180,210,255,0.12);
-      border-radius: 2px;
-      padding: 5px 12px;
-      cursor: pointer;
-      pointer-events: all;
-      transition: color .2s, background .2s, border-color .2s;
-    }
-    .ic-view-btn:hover {
-      color: rgba(210,225,255,0.6);
-      border-color: rgba(180,210,255,0.22);
-    }
-    .ic-view-btn.active {
-      color: rgba(255,255,255,0.85);
-      background: rgba(180,210,255,0.14);
-      border-color: rgba(180,210,255,0.4);
-    }
-    .ic-correlation {
-      font-size: 11px;
-      font-weight: 300;
-      line-height: 1.75;
-      color: rgba(180,210,240,0.62);
-      letter-spacing: 0.1px;
-      padding: 12px 14px;
-      margin-bottom: 18px;
-      background: rgba(180,210,255,0.05);
-      border-left: 2px solid rgba(180,210,255,0.28);
-      border-radius: 0 2px 2px 0;
-    }
     #hud-back {
       position: absolute;
       bottom: 30px; left: 32px;
@@ -858,11 +817,6 @@
   <div class="ic-arcana"  id="ic-arcana"></div>
   <div class="ic-name"    id="ic-name"></div>
   <div class="ic-rule"></div>
-  <div class="ic-view-toggle" id="ic-view-toggle">
-    <div class="ic-view-btn" id="ic-view-standard">Standard</div>
-    <div class="ic-view-btn" id="ic-view-numerology">Numerology</div>
-  </div>
-  <div class="ic-correlation" id="ic-correlation" style="display:none"></div>
   <div class="ic-heading" id="ic-heading"></div>
   <div class="ic-sections" id="ic-sections">
     <div class="ic-section" id="ic-sec-why">
@@ -894,7 +848,6 @@
 <script src="js/micro-content.js"></script>
 <script src="js/matrix-engine.js"></script>
 <script src="js/talent-content.js"></script>
-<script src="js/numerology-content.js"></script>
 <script src="js/karmic-debt-content.js"></script>
 <script src="js/past-life-content.js"></script>
 <script src="js/sexual-line-content.js"></script>
@@ -1501,33 +1454,6 @@ let isFlying  = false;
 let activeIdx = -1;
 let hoveredIdx = -1;
 
-// ── NUMEROLOGY DATA MATRIX ───────────────────────────────────────────────
-// Replaces the retired Universal Law toggle (see research/11-Research-
-// Updates/30). Each arcana has exactly one curated numerology match
-// (DNumerologyContent.getMatch) — its own digital root — surfaced via a
-// simple Standard/Numerology toggle in the info-card, no picker.
-const NUMEROLOGY_LABELS = {
-  '1': 'Number 1', '2': 'Number 2', '3': 'Number 3', '4': 'Number 4',
-  '5': 'Number 5', '6': 'Number 6', '7': 'Number 7', '8': 'Number 8',
-  '9': 'Number 9', '11': 'Master 11', '22': 'Master 22',
-};
-let currentMatrixView = 'STANDARD'; // 'STANDARD' | 'NUMEROLOGY'
-
-function renderViewToggle() {
-  document.getElementById('ic-view-standard').classList.toggle('active', currentMatrixView === 'STANDARD');
-  document.getElementById('ic-view-numerology').classList.toggle('active', currentMatrixView === 'NUMEROLOGY');
-}
-document.getElementById('ic-view-standard').addEventListener('click', (e) => {
-  e.stopPropagation();
-  currentMatrixView = 'STANDARD';
-  if (activeIdx !== -1) showCard(activeIdx);
-});
-document.getElementById('ic-view-numerology').addEventListener('click', (e) => {
-  e.stopPropagation();
-  currentMatrixView = 'NUMEROLOGY';
-  if (activeIdx !== -1) showCard(activeIdx);
-});
-
 // Shared cross-tier zoom guard. The core arcana, program-star, and talent-star
 // click handlers each live in their own IIFE with a private "which one of mine
 // is zoomed" flag (_activeProgStar / _activeTalentStar) — none of them know
@@ -1773,7 +1699,6 @@ function returnToMap(onDone) {
   if (isFlying) return;
   isFlying = true;
   hideCard();
-  currentMatrixView = 'STANDARD'; // always reopen fresh cards on Standard, never sticky
   gsap.to('#hud-back', { opacity: 0, duration: 0.25 });
   // Clear any hover highlight immediately
   if (hoveredIdx !== -1) {
@@ -1818,32 +1743,6 @@ gsap.set(infoCard, { xPercent: -50, y: 24, opacity: 0, pointerEvents: 'none' });
 
 function showCard(idx) {
   const d   = NODES[idx];
-
-  renderViewToggle();
-
-  if (currentMatrixView === 'NUMEROLOGY') {
-    const match = window.DNumerologyContent && DNumerologyContent.getMatch(d.num);
-    if (match) {
-      document.getElementById('ic-arcana').textContent = `Numerology · ${NUMEROLOGY_LABELS[match.numberKey]}`;
-      document.getElementById('ic-name').textContent   = d.label;
-      document.getElementById('ic-correlation').textContent = match.correlation;
-      document.getElementById('ic-correlation').style.display = '';
-      document.getElementById('ic-heading').textContent  = match.heading;
-      document.getElementById('ic-why').textContent      = match.why;
-      document.getElementById('ic-shadow').textContent   = match.shadow;
-      document.getElementById('ic-path').textContent     = match.path;
-      document.getElementById('ic-sec-path').style.display = 'none';
-      document.getElementById('ic-sec-positive').style.display = 'none';
-      document.getElementById('ic-sec-negative').style.display = 'none';
-      document.getElementById('ic-heading').style.display  = '';
-      document.getElementById('ic-sections').style.display = '';
-      document.getElementById('ic-desc').style.display     = 'none';
-      gsap.to(infoCard, { y: 0, opacity: 1, duration: 0.75, ease: 'power2.out', pointerEvents: 'all' });
-      return;
-    }
-  }
-
-  document.getElementById('ic-correlation').style.display = 'none';
 
   const mc  = window.DMicroContent && DMicroContent.get(d.num, d.key);
 
@@ -4501,64 +4400,30 @@ const ARCANA_ESSENCE = {
 
 // ── NUMEROLOGY INDEX PANEL ────────────────────────────────────────────────
 // Collapsible top-right quick-nav, mirroring Star Index's open/close/search
-// behaviour exactly, but with a small fixed curated list instead of an
-// aggregation across every _tierProviders tier — this panel's job is fast,
-// thematic access to the numerology-flavored stars/views, not a full index.
-// Built last, same as Star Index, so MICRO/_tierProviders/flyTo/NODES are
-// all already fully wired.
+// behaviour exactly. Simplified to a single Life Path row per user request
+// (see research/11-Research-Updates/32) — Career Paths and Guardian Angel
+// remain fully intact, independently reachable via Star Index like any
+// other star, just no longer duplicated here.
+//
+// Bug fixed here (see note 32): the original version reached into the
+// `MICRO` array directly, but MICRO is a `const` scoped inside its own IIFE
+// and invisible here, so every lookup threw silently and the list never
+// populated. Fixed by going through `_tierProviders.micro.list()` /
+// `.fly(idx)` exclusively, the same interface Star Index itself uses.
 ;(function () {
   const root   = document.getElementById('numerology-index');
   const toggle = document.getElementById('ni-toggle');
   const search = document.getElementById('ni-search');
   const listEl = document.getElementById('ni-list');
 
-  // Look up MICRO indices by key at build time rather than hardcoding
-  // numbers, so this never breaks if the array order ever changes.
-  function microIdx(key) { return MICRO.findIndex(m => m.key === key); }
-
   function buildRows() {
-    const rows = [];
-
-    const lifePathIdx = microIdx('LIFEPATH');
-    if (lifePathIdx !== -1) {
-      const d = MICRO[lifePathIdx];
-      rows.push({
-        label: 'Life Path', num: d.num,
-        color: '#' + new THREE.Color(d.color).getHexString(),
-        fly: () => _tierProviders.micro.fly(lifePathIdx),
-      });
-    }
-
-    const careerIdx = microIdx('CAREER');
-    if (careerIdx !== -1) {
-      const d = MICRO[careerIdx];
-      rows.push({
-        label: 'Career Paths', num: d.num,
-        color: '#' + new THREE.Color(d.color).getHexString(),
-        fly: () => _tierProviders.micro.fly(careerIdx),
-      });
-    }
-
-    const gaIdx = microIdx('GA');
-    if (gaIdx !== -1) {
-      const d = MICRO[gaIdx];
-      rows.push({
-        label: 'Guardian Angel', num: d.num,
-        color: '#' + new THREE.Color(d.color).getHexString(),
-        fly: () => _tierProviders.micro.fly(gaIdx),
-      });
-    }
-
-    // Soul Center (core index 4), jumped straight into its Numerology view
-    // rather than the Standard one — flyTo() calls showCard() on arrival,
-    // which reads currentMatrixView, so setting it first is sufficient.
-    rows.push({
-      label: 'Your Numerology', num: NODES[4].num,
-      color: '#' + new THREE.Color(NODES[4].color).getHexString(),
-      fly: () => { currentMatrixView = 'NUMEROLOGY'; flyTo(4); },
-    });
-
-    return rows;
+    if (!_tierProviders.micro) return [];
+    const row = _tierProviders.micro.list().find(r => r.label === 'Life Path');
+    if (!row) return [];
+    return [{
+      label: row.label, num: row.num, color: row.color,
+      fly: () => _tierProviders.micro.fly(row.idx),
+    }];
   }
 
   function render() {

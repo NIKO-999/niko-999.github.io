@@ -45,6 +45,20 @@ function _digitSum(num) {
     .reduce((sum, digit) => sum + Number(digit), 0);
 }
 
+// Classical Western numerology reduction — distinct from reduceArcana (this
+// app's own base-22 rule). Reduces fully to a single digit UNLESS the result
+// is a master number (11, 22, 33), which stops the reduction immediately.
+// Used only by Life Path, which is a real, externally-known number (people
+// already know their own) and must match that convention, not this app's
+// 22-Arcana system.
+function _classicalReduce(num) {
+  let n = Math.abs(Math.trunc(Number(num) || 0));
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    n = _digitSum(n);
+  }
+  return n;
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
@@ -227,13 +241,15 @@ function calculateDestinyMatrix(birthdateString) {
   const D = reduceArcana(A + B + C);      // Bottom — Karmic Tail Root
   const E = reduceArcana(A + B + C + D);  // Center — Comfort Zone / Soul
 
-  // ── LIFE PATH · full birthdate digit sum ──────────────────────────────────
+  // ── LIFE PATH · full birthdate digit sum, classical reduction ─────────────
   // Distinct from A-E's chain of already-reduced sums: every individual digit
   // of the day, month, and year is added directly (not A+B+C's reduced
-  // values), then run through this app's own base-22 reduceArcana — never
-  // collapsed past 22, matching every other position on this chart. This is
-  // deliberately NOT the classical Western 1-9/11/22/33 numerology cap.
-  const lifePath = reduceArcana(_digitSum(day) + _digitSum(month) + _digitSum(year));
+  // values). Reduced via _classicalReduce (1-9, or master numbers 11/22/33),
+  // NOT this app's own base-22 reduceArcana — Life Path is a real, externally
+  // known number (people already know their own), verified against a real
+  // example: 2002-05-08 -> digitSum(8)+digitSum(5)+digitSum(2002) = 8+5+4=17
+  // -> classically reduced 1+7=8, matching the known value for that date.
+  const lifePath = _classicalReduce(_digitSum(day) + _digitSum(month) + _digitSum(year));
 
   // ── ANCESTRAL STRAIGHT SQUARE · diagonal corners ──────────────────────────
   // Each corner = the two cross-vertices it sits between (also the age anchors).
@@ -530,9 +546,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
