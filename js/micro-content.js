@@ -4997,8 +4997,8 @@ window.DMicroContent = (function () {
       why: `Underneath the day-to-day, your heart wants tangible achievement — a real place in the world built through your own talent, wealth and status that are actually earned, not borrowed. The Magician here names a material desire for visible, self-made ground.`,
       shadow: `Blocked, this can turn into generating idea after idea while none of them ever becomes the actual solid place you were building toward.`,
       path: `The path is carrying one material venture past its beginning, all the way to something you can stand on. You are allowed to want a solid, self-made place in the world. What would 'solid ground' actually look like for you if you built it start to finish?`,
-      positive: `You carry a material venture through to something real and standing, and that completion is exactly the solid ground your heart wanted.`,
-      negative: `Endless new ideas that never become a finished place to stand leave the heart's material desire permanently under construction.`,
+      positive: `The desire for a solid, self-made place in the world hasn't changed — visible, earned ground was always what your heart wanted. What's different is that you now carry one material venture past its beginning, all the way to something you can actually stand on. That completion is exactly the solid ground it was asking for.`,
+      negative: `The desire for real, self-made ground is completely genuine, and it keeps generating idea after idea that never quite becomes the finished place to stand. That pattern isn't a lack of talent. It's the heart's material desire still under construction, still waiting for one venture to actually be carried through.`,
     },
 
     '2_HZH': {
@@ -5006,8 +5006,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to leave a real impression — a mysterious, intriguing presence in the physical world, knowledge held and shared carefully, real impact made even from behind the scenes. The High Priestess here names a material desire for quiet but unmistakable influence.`,
       shadow: `Blocked, this can turn into staying so guarded that the impression never actually lands, influence withheld until it stops being influence at all.`,
       path: `The path is sharing one piece of what you know with someone who's actually earned it. You are allowed to want to be remembered, not just mysterious. What impression are you capable of leaving that you've been withholding out of habit?`,
-      positive: `You share your knowledge selectively but actually, and the memorable presence your heart wanted finally gets to land.`,
-      negative: `Guarding influence so completely it never lands anywhere keeps the heart's desire for a real, remembered presence unmet.`,
+      positive: `The desire for a presence people remember hasn't changed — real, unmistakable influence was always what your heart wanted. What's different is that you now share one piece of what you know with someone who's actually earned it. That sharing is what finally lets the impression land.`,
+      negative: `The desire to be genuinely remembered is completely real, and it keeps staying guarded so completely that the impression never actually reaches anyone. That guardedness isn't mystery. It's the heart's desire for real presence, still unmet, still waiting for one piece of knowledge to actually be offered.`,
     },
 
     '3_HZH': {
@@ -5015,8 +5015,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants family, home, and a peaceful, abundant physical life — comfort, luxury, and real beauty around it, not just enough to get by. The Empress here names a material desire for genuine domestic richness.`,
       shadow: `Blocked, this can turn into a home that runs efficiently but has nothing lovely in it, function standing in for the abundance that was actually wanted.`,
       path: `The path is adding one real piece of beauty to your home or daily life this week. You are allowed to want luxury and comfort, not just sufficiency. Where has your home gotten efficient at the cost of getting beautiful?`,
-      positive: `You let real beauty and comfort back into your home life, and that richness is exactly the abundance your heart was asking for.`,
-      negative: `A home optimized only for efficiency quietly starves the desire for beauty and comfort it was actually meant to hold.`,
+      positive: `The desire for a beautiful, abundant home hasn't changed — genuine domestic richness, not just sufficiency, was always what your heart wanted. What's different is that you now add one real piece of beauty to your home this week. That addition is exactly the abundance it was asking for.`,
+      negative: `The desire for domestic richness is completely genuine, and it keeps being answered with pure efficiency instead, a home that runs well and holds little loveliness. That efficiency isn't wrong, but it's not what was asked for. The heart's desire for beauty is still waiting for one real piece to be added back in.`,
     },
 
     '4_HZH': {
@@ -5024,8 +5024,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants power, authority, and financial security — a prestigious, controlled position in business and life, genuinely earned. The Emperor here names a material desire for durable, respected standing.`,
       shadow: `Blocked, this can turn into chasing the appearance of authority — the title, the office — while the actual financial security underneath stays thin.`,
       path: `The path is building one piece of real financial ground today, not just its appearance. You are allowed to want genuine security, not just its look. What would actual financial security require that mere status hasn't given you?`,
-      positive: `You build real financial ground rather than its appearance, and the security your heart wanted becomes actual instead of merely visible.`,
-      negative: `Chasing the look of authority while security stays thin leaves the heart's material desire unmet no matter how prestigious the title.`,
+      positive: `The desire for real authority and security hasn't changed — durable, respected standing, genuinely earned, was always what your heart wanted. What's different is that you now build one piece of actual financial ground today, instead of chasing its appearance. That building is what makes the security real, not just visible.`,
+      negative: `The desire for genuine financial security is completely real, and it keeps chasing the appearance of authority instead — the title, the office — while the actual ground underneath stays thin. That chase isn't ambition misapplied. It's the heart's real desire for security, still unmet beneath a prestigious surface.`,
     },
 
     '5_HZH': {
@@ -5033,8 +5033,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants academic or spiritual leadership, real respect in society, and a strong position rooted in traditional values. The Hierophant here names a material desire for earned, structural credibility.`,
       shadow: `Blocked, this can turn into collecting credentials that look respectable without ever building the actual standing they were supposed to represent.`,
       path: `The path is using one credential you already have to actually do something respected, not just held. You are allowed to want real, earned standing. What credibility have you already earned that you haven't yet put to actual use?`,
-      positive: `You put your earned credibility to real use, and the respected standing your heart wanted becomes lived instead of merely certified.`,
-      negative: `Credentials collected but never used leave the heart's desire for genuine, structural respect permanently on paper only.`,
+      positive: `The desire for respected standing hasn't changed — real, earned credibility rooted in something larger than yourself was always what your heart wanted. What's different is that you now use one credential you already have to actually do something respected, instead of just holding it. That use is what makes the standing lived.`,
+      negative: `The desire for genuine standing is completely real, and it keeps collecting credentials that look respectable without ever building the actual respect they were meant to represent. That collecting isn't achievement. It's the heart's desire for lived credibility, still on paper only, still waiting to be put to use.`,
     },
 
     '6_HZH': {
@@ -5042,8 +5042,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a passionate relationship, real romance, deep bonds actually lived in the physical world. The Lovers here names a material desire for love that's felt, not just described.`,
       shadow: `Blocked, this can turn into a relationship that looks passionate from the outside while the actual bond underneath stays thin and untested.`,
       path: `The path is deepening one real bond today rather than performing its appearance. You are allowed to want a love that's actually deep, not just visibly passionate. Where is a bond of yours performing depth it hasn't actually built yet?`,
-      positive: `You deepen a real bond rather than performing its appearance, and the passionate life your heart wanted becomes genuinely lived.`,
-      negative: `A relationship that performs passion without building real depth leaves the heart's material desire for a truly bonded life unmet.`,
+      positive: `The desire for a passionate, deeply bonded life hasn't changed — love that's actually felt, not just described, was always what your heart wanted. What's different is that you now deepen one real bond today, instead of performing its appearance. That deepening is what makes the passion genuinely lived.`,
+      negative: `The desire for real depth in love is completely genuine, and it keeps being answered with a bond that looks passionate from the outside while staying thin and untested underneath. That performance isn't intimacy. It's the heart's desire for a truly bonded life, still unmet, still waiting for the depth to actually be built.`,
     },
 
     '7_HZH': {
@@ -5051,8 +5051,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants success, travel, adventure — real victories won through motion, not a life spent standing still. The Chariot here names a material desire for visible, earned achievement in constant pursuit.`,
       shadow: `Blocked, this can turn into motion without any actual victories, momentum mistaken for the achievement it was supposed to produce.`,
       path: `The path is naming one concrete victory you're actually driving toward right now. You are allowed to want real wins, not just constant motion. What specific victory is your current momentum actually aimed at?`,
-      positive: `You aim your momentum at a real, named victory, and the achievement your heart wanted finally has a destination.`,
-      negative: `Motion without a named destination produces exhaustion instead of the victories the heart was actually asking for.`,
+      positive: `The desire for victory and forward motion hasn't changed — real, earned achievement was always what your heart wanted. What's different is that you now name one concrete victory you're actually driving toward. That naming is what finally gives the momentum a destination.`,
+      negative: `The desire for real victory is completely genuine, and it keeps generating motion without ever naming what it's actually for, momentum mistaken for the achievement it was supposed to produce. That exhaustion isn't laziness. It's the heart's desire for a named destination, still unmet, still waiting for one victory to be specified.`,
     },
 
     '8_HZH': {
@@ -5060,8 +5060,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a strong position in the world of law and rights — real fairness enacted, not just believed in privately. Justice here names a material desire for fairness that actually changes conditions.`,
       shadow: `Blocked, this can turn into holding strong opinions about fairness while never actually using your position to change anything.`,
       path: `The path is using whatever standing you have to correct one real unfairness this month. You are allowed to want to actually change something unfair, not just notice it. What position do you already hold that could make one situation more fair?`,
-      positive: `You use your actual standing to correct a real unfairness, and that action is exactly what your heart's desire for justice was asking for.`,
-      negative: `Noticing unfairness without using your position to change it leaves the heart's material desire for real fairness unmet.`,
+      positive: `The desire to make the world fairer hasn't changed — real fairness enacted, not just believed in privately, was always what your heart wanted. What's different is that you now use whatever standing you have to correct one real unfairness. That action is exactly what the desire for justice was asking for.`,
+      negative: `The desire for real fairness is completely genuine, and it keeps holding strong private opinions without ever using actual standing to change anything. That restraint isn't humility. It's the heart's material desire for justice, still unmet, still waiting for one position to actually be used.`,
     },
 
     '9_HZH': {
@@ -5069,8 +5069,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a life away from the noise, in harmony with nature — real retreat into your own inner world, individual discovery actually pursued. The Hermit here names a material desire for solitude with a purpose.`,
       shadow: `Blocked, this can turn into staying constantly busy in the city of your own responsibilities, retreat postponed indefinitely as impractical.`,
       path: `The path is taking one real day of retreat, however small, this month. You are allowed to want actual solitude, not just a break from noise. What would a real retreat look like for you, sized to what's actually possible right now?`,
-      positive: `You take a genuine retreat sized to what's actually possible, and the self-discovery your heart wanted has real room to happen.`,
-      negative: `Postponing retreat indefinitely as impractical keeps the heart's material desire for solitude and discovery permanently deferred.`,
+      positive: `The desire for retreat and self-discovery hasn't changed — real solitude with a purpose was always what your heart wanted. What's different is that you now take one real day of retreat, sized to what's actually possible. That sizing is what finally gives the discovery room to happen.`,
+      negative: `The desire for genuine retreat is completely real, and it keeps getting postponed as impractical, staying busy in the noise instead. That postponement isn't responsibility. It's the heart's material desire for solitude, still deferred, still waiting for one small, real retreat to actually be taken.`,
     },
 
     '10_HZH': {
@@ -5078,8 +5078,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants fortunate events and real material abundance — the sense of actually making the most of life's opportunities as they arrive. The Wheel of Fortune here names a material desire for good fortune met and used well.`,
       shadow: `Blocked, this can turn into good opportunities arriving and going unused because you're too busy bracing for the next downturn to actually receive them.`,
       path: `The path is receiving one current piece of good fortune fully, without immediately bracing for its opposite. You are allowed to want to actually enjoy good fortune when it arrives. What current good thing haven't you let yourself fully receive yet?`,
-      positive: `You receive good fortune fully instead of bracing against it, and the abundance your heart wanted finally gets to land.`,
-      negative: `Bracing for the next downturn instead of receiving the current upswing leaves fortune's material desire chronically unmet.`,
+      positive: `The desire for genuine material fortune hasn't changed — good fortune actually met and used well was always what your heart wanted. What's different is that you now receive one current piece of good fortune fully, without immediately bracing for its opposite. That reception is what finally lets the abundance land.`,
+      negative: `The desire for real material abundance is completely genuine, and it keeps going unreceived, good opportunities arriving while you're too busy bracing for the next downturn to notice them. That bracing isn't caution. It's the heart's desire for fortune, chronically unmet, still waiting for one good thing to actually be received.`,
     },
 
     '11_HZH': {
@@ -5087,8 +5087,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants real physical endurance, a healthy body, a presence strong enough to withstand life's challenges and inspire other people. Strength here names a material desire for embodied, magnetic resilience.`,
       shadow: `Blocked, this can turn into performing strength outwardly while your actual physical vitality goes quietly neglected underneath the performance.`,
       path: `The path is one real act of physical care today, not performance of strength but actual tending to it. You are allowed to want genuine vitality, not just the appearance of resilience. Where has physical performance replaced actual physical care?`,
-      positive: `You tend to your actual physical vitality rather than only performing strength, and the resilient presence your heart wanted becomes real instead of staged.`,
-      negative: `Performing strength while neglecting actual vitality leaves the heart's material desire for genuine, embodied resilience unmet.`,
+      positive: `The desire for a strong, charismatic presence hasn't changed — real, embodied resilience was always what your heart wanted. What's different is that you now tend to your actual physical vitality with one real act of care, instead of only performing strength. That tending is what makes the resilience genuine instead of staged.`,
+      negative: `The desire for genuine physical presence is completely real, and it keeps performing strength outwardly while actual vitality goes quietly neglected underneath. That performance isn't resilience. It's the heart's material desire for embodied strength, still unmet, still waiting for one act of real care.`,
     },
 
     '12_HZH': {
@@ -5096,8 +5096,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a genuine period of pause in the physical world — deep inner transformation, real freedom from old patterns, not a rushed-through interruption. The Hanged Man here names a material desire for suspension that's actually allowed to do its work.`,
       shadow: `Blocked, this can turn into rushing through the pause to get back to normal, skipping the transformation the suspension was actually there to produce.`,
       path: `The path is letting one current pause last exactly as long as it needs to. You are allowed to want the pause to actually finish its work. What transformation is this current pause trying to complete that rushing would cut short?`,
-      positive: `You let a real pause finish its work rather than rushing past it, and the transformation your heart wanted actually completes.`,
-      negative: `Rushing through a pause to return to normal skips the transformation it existed to produce, leaving the material desire unmet.`,
+      positive: `The desire for a real pause to actually transform hasn't changed — genuine suspension allowed to do its work, not a rushed interruption, was always what your heart wanted. What's different is that you now let one current pause last exactly as long as it needs to. That patience is what lets the transformation actually complete.`,
+      negative: `The desire for genuine transformative pause is completely real, and it keeps getting rushed through to get back to normal, skipping the work the suspension was actually there to do. That rushing isn't efficiency. It's the heart's material desire still unmet, still waiting for one pause to finish on its own timing.`,
     },
 
     '13_HZH': {
@@ -5105,8 +5105,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a major transformation in the material world — a completely renewed lifestyle, the old genuinely torn down to make room for something new. Transformation here names a material desire for real, structural change.`,
       shadow: `Blocked, this can turn into renovating the surface of your material life while the actual old structure underneath stays fully intact.`,
       path: `The path is tearing down one real piece of the old structure, not just its surface. You are allowed to want a genuinely rebuilt material life. What old structure is your heart actually ready to demolish, not just redecorate?`,
-      positive: `You tear down the actual old structure rather than redecorating its surface, and the renewed material life your heart wanted gets real room to be built.`,
-      negative: `Redecorating the surface while the old structure stays intact leaves the heart's desire for genuine material renewal unmet.`,
+      positive: `The desire to tear down the old and build the new hasn't changed — real, structural change was always what your heart wanted. What's different is that you now tear down one real piece of the old structure, not just its surface. That demolition is what finally gives the new material life room to be built.`,
+      negative: `The desire for genuine material renewal is completely real, and it keeps settling for redecorating the surface while the old structure underneath stays fully intact. That redecorating isn't renewal. It's the heart's desire for real change, still unmet, still waiting for one structure to actually come down.`,
     },
 
     '14_HZH': {
@@ -5114,8 +5114,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a genuinely healthy life — real, felt balance across body, mind, and spirit, not just adequate function in each separately. Temperance here names a material desire for lived, integrated wellbeing.`,
       shadow: `Blocked, this can turn into managing each area separately and reasonably well while the actual felt integration between them never quite arrives.`,
       path: `The path is finding one place today where body, mind, and spirit could work together instead of being managed separately. You are allowed to want them integrated, not just each individually maintained. Where could one small act serve all three at once?`,
-      positive: `You find one act that serves body, mind, and spirit together, and that integration is exactly the balance your heart was asking for.`,
-      negative: `Managing each area separately, however competently, leaves the heart's desire for genuinely felt integration unmet.`,
+      positive: `The desire for perfect balance across body, mind, and spirit hasn't changed — real, felt integration, not just adequate function in each, was always what your heart wanted. What's different is that you now find one act today that serves all three together. That integration is exactly the balance it was asking for.`,
+      negative: `The desire for genuine wellbeing is completely real, and it keeps managing each area competently but separately, with the actual felt integration between them never quite arriving. That management isn't wholeness. It's the heart's desire for real balance, still unmet, still waiting for one act to serve all three at once.`,
     },
 
     '15_HZH': {
@@ -5123,8 +5123,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants real passion, pleasure, and material wealth — sometimes a life that pushes boundaries, held honestly rather than apologetically. The Devil here names a material desire for power and pleasure examined rather than denied.`,
       shadow: `Blocked, this can turn into either denying the desire for wealth and pleasure outright, or pursuing it so unconsciously it curdles into compulsion.`,
       path: `The path is naming your actual desire for power or pleasure honestly, then choosing consciously whether and how to pursue it. You are allowed to want wealth and pleasure without shame. What material desire have you been either denying or chasing unconsciously?`,
-      positive: `You name your desire for wealth and pleasure honestly and pursue it consciously, and that honesty is exactly what your heart's material desire was asking for.`,
-      negative: `Denying or unconsciously chasing a real desire for power and pleasure leaves it either starved or compulsive — neither satisfies the heart.`,
+      positive: `The desire for pleasure, power, and material wealth hasn't changed — real desire, held honestly rather than apologetically, was always what your heart wanted. What's different is that you now name it plainly and choose consciously whether and how to pursue it. That honesty is exactly what was being asked for.`,
+      negative: `The desire for wealth and pleasure is completely real, and it keeps getting either denied outright or chased so unconsciously it curdles into compulsion. Neither satisfies the heart. What's actually being asked for is neither denial nor compulsion, but one honest naming of what you actually want.`,
     },
 
     '16_HZH': {
@@ -5132,8 +5132,8 @@ window.DMicroContent = (function () {
       why: `Your heart craves significant material change — the destruction of old structures and the chance for a genuinely new beginning, not incremental adjustment. The Tower here names a material desire for real, clean-slate renewal.`,
       shadow: `Blocked, this can turn into bracing against necessary collapse so hard that the new beginning never actually gets to arrive.`,
       path: `The path is letting one structure that's already failing actually finish falling. You are allowed to want a real new beginning, not a patched old one. What is already collapsing that you could stop propping up?`,
-      positive: `You let a failing structure actually finish falling, and the clean, new beginning your heart wanted has real room to start.`,
-      negative: `Propping up a structure that's already failing keeps the heart's desire for genuine new beginning permanently postponed.`,
+      positive: `The desire for a completely new material beginning hasn't changed — real, clean-slate renewal, not incremental adjustment, was always what your heart wanted. What's different is that you now let one already-failing structure actually finish falling, instead of propping it up. That release is what gives the new beginning room to start.`,
+      negative: `The desire for genuine new beginning is completely real, and it keeps propping up a structure that's already failing, bracing against the collapse instead of letting it complete. That propping isn't stability. It's the heart's desire for renewal, still postponed, still waiting for one structure to be let go.`,
     },
 
     '17_HZH': {
@@ -5141,8 +5141,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants art, creativity, a life lived close to nature — and to actually be an inspiring presence to the people around it, not just a private creative practice. The Star here names a material desire for creative work that's shared and seen.`,
       shadow: `Blocked, this can turn into making beautiful things privately while the inspiring, shared version of that creativity never actually gets offered.`,
       path: `The path is sharing one piece of your creative work with someone this week. You are allowed to want to inspire others, not just create privately. What creative work of yours is ready to stop being private?`,
-      positive: `You share your creative work rather than keeping it private, and the inspiring presence your heart wanted finally reaches someone.`,
-      negative: `Creativity kept entirely private denies the heart's material desire to actually be an inspiring presence to anyone.`,
+      positive: `The desire to be an inspiring creative presence hasn't changed — creative work that's shared and seen, not just privately made, was always what your heart wanted. What's different is that you now share one piece of your work with someone this week. That sharing is what finally lets the inspiration actually reach someone.`,
+      negative: `The desire for creative influence is completely real, and it keeps making beautiful things privately, with the inspiring, shared version never actually offered. That privacy isn't humility. It's the heart's material desire to inspire, still unmet, still waiting for one piece of work to leave the room.`,
     },
 
     '18_HZH': {
@@ -5150,8 +5150,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants dreams, artistic expression, mystical experience — a material life genuinely woven through with the supernatural and the strange, not scrubbed clean of it. The Moon here names a material desire for enchantment actually lived, not merely appreciated from a distance.`,
       shadow: `Blocked, this can turn into admiring mystery and art from a safe, tidy distance while never actually letting your own life be shaped by them.`,
       path: `The path is letting one real dream or mystical hunch actually influence a decision this week. You are allowed to want a life genuinely touched by mystery. What dream or hunch have you been admiring instead of actually following?`,
-      positive: `You let a real dream or hunch actually shape a decision, and the enchanted, art-touched life your heart wanted becomes lived rather than merely admired.`,
-      negative: `Admiring mystery from a safe distance without ever being shaped by it leaves the heart's material desire for enchantment unmet.`,
+      positive: `The desire for a life intertwined with mystery hasn't changed — enchantment actually lived, not merely appreciated from a distance, was always what your heart wanted. What's different is that you now let one real dream or hunch actually influence a decision. That influence is what makes the mystery lived rather than admired.`,
+      negative: `The desire for a mystery-touched life is completely genuine, and it keeps admiring dreams and hunches from a safe, tidy distance without ever letting them shape anything real. That distance isn't wisdom. It's the heart's desire for enchantment, still unmet, still waiting for one hunch to actually be followed.`,
     },
 
     '19_HZH': {
@@ -5159,8 +5159,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants happiness, success, health, and love-filled relationships in the physical world — the whole picture, not one piece traded for another. The Sun here names a material desire for wholeness across every domain at once.`,
       shadow: `Blocked, this can turn into succeeding in one domain while quietly sacrificing another, treating the trade as inevitable rather than examined.`,
       path: `The path is naming one domain you've quietly sacrificed for another and giving it real attention this week. You are allowed to want all of it, not just one piece at a time. Which part of your wholeness have you been trading away as if it were required?`,
-      positive: `You give real attention to the domain you'd been quietly sacrificing, and the full, undivided success your heart wanted becomes actually possible.`,
-      negative: `Trading one domain for another as if it were required leaves the heart's material desire for genuine wholeness permanently partial.`,
+      positive: `The desire for success, health, and love all at once hasn't changed — the whole picture, not one piece traded for another, was always what your heart wanted. What's different is that you now give real attention to the domain you'd been quietly sacrificing. That attention is what finally makes the wholeness possible.`,
+      negative: `The desire for a full, undivided life is completely genuine, and it keeps trading one domain for another as though the trade were required. That trade isn't inevitable. It's the heart's material desire for wholeness, still partial, still waiting for one sacrificed domain to get real attention again.`,
     },
 
     '20_HZH': {
@@ -5168,8 +5168,8 @@ window.DMicroContent = (function () {
       why: `Your heart yearns for radical transformation — a completely fresh start and the release of every past material burden, not a lightened version of the old life. Judgement here names a material desire for total, not partial, renewal.`,
       shadow: `Blocked, this can turn into making moderate improvements while calling them a fresh start, when something more total was actually being asked for.`,
       path: `The path is naming what a truly fresh start would require, even if you only take one real step toward it now. You are allowed to want total renewal, not a moderate upgrade. What would an actually fresh material start require of you?`,
-      positive: `You name and move toward what genuine renewal actually requires, and the fresh start your heart wanted stops being a moderate substitute.`,
-      negative: `Calling a moderate improvement a fresh start leaves the heart's desire for total material renewal quietly unmet.`,
+      positive: `The desire for a completely fresh material start hasn't changed — total, not partial, renewal was always what your heart wanted. What's different is that you now name what a truly fresh start would actually require, and take one real step toward it. That naming is what stops the fresh start from being a moderate substitute.`,
+      negative: `The desire for total renewal is completely real, and it keeps settling for moderate improvement dressed up as a fresh start. That substitution isn't progress. It's the heart's desire for real renewal, quietly unmet, still waiting for something more total than what's currently being offered.`,
     },
 
     '21_HZH': {
@@ -5177,8 +5177,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to travel, experience different cultures, and build a genuinely successful, fulfilling material life — not just imagine one. The World here names a material desire for lived breadth, not deferred plans.`,
       shadow: `Blocked, this can turn into planning a bigger life indefinitely while the actual, lived version keeps getting pushed to some more convenient year.`,
       path: `The path is booking, planning, or starting one real piece of the bigger life this month. You are allowed to want to actually live the fuller life, not just plan it. What piece of the life you keep planning could you actually start now?`,
-      positive: `You start one real piece of the fuller life rather than only planning it, and the lived breadth your heart wanted finally begins.`,
-      negative: `Planning a bigger life indefinitely without ever starting it leaves the heart's material desire for lived breadth permanently deferred.`,
+      positive: `The desire to travel the world and actually live it hasn't changed — lived breadth, not deferred plans, was always what your heart wanted. What's different is that you now book, plan, or start one real piece of the bigger life this month. That start is what finally makes the breadth lived instead of imagined.`,
+      negative: `The desire for a genuinely lived, expansive life is completely real, and it keeps planning a bigger version indefinitely without ever starting it. That planning isn't preparation. It's the heart's material desire for lived breadth, still deferred, still waiting for one real piece to actually begin.`,
     },
 
     '22_HZH': {
@@ -5186,8 +5186,8 @@ window.DMicroContent = (function () {
       why: `Your heart seeks constant new places, new people, living fully in the moment — an adventurous material life free from stereotypes and rigid systems, explored rather than merely imagined. The Fool here names a material desire for genuine freedom, lived.`,
       shadow: `Blocked, this can turn into staying inside a rigid system out of practicality while telling yourself the adventurous life is simply for later.`,
       path: `The path is one real, unplanned adventure this month, however small. You are allowed to want a genuinely free, unstructured life. What adventurous thing have you been postponing as impractical that's actually just overdue?`,
-      positive: `You take a real, unplanned adventure rather than deferring it, and the free, exploratory life your heart wanted becomes lived now instead of later.`,
-      negative: `Staying inside a rigid system out of practicality while calling adventure a 'someday' keeps the heart's material desire for real freedom unmet.`,
+      positive: `The desire for an adventurous, free life hasn't changed — genuine freedom lived, not merely imagined, was always what your heart wanted. What's different is that you now take one real, unplanned adventure this month, however small. That leap is what finally makes the free life lived now instead of later.`,
+      negative: `The desire for genuine adventure and freedom is completely real, and it keeps staying inside a rigid system out of practicality, calling the freer life a someday. That deferral isn't responsibility. It's the heart's material desire for real freedom, still unmet, still waiting for one overdue adventure.`,
     },
 
 
