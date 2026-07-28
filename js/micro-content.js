@@ -4796,8 +4796,8 @@ window.DMicroContent = (function () {
       why: `Underneath everything else, your heart wants to discover its own spiritual power and build a destiny that's actually authored by you — not one you're quietly living out on someone else's terms. The Magician here names a heart that wants mastery over its own becoming, guided by intuition rather than instruction.`,
       shadow: `When this desire gets blocked, you do what looks right instead of what feels true, and the gap between the two starts to feel like static — a low hum of not-quite-here-ness that no amount of external success actually quiets.`,
       path: `The way back is small: one choice this week made from your own intuitive pull rather than the expected script. You are allowed to want to author your own life. What would you create today if you trusted you were already spiritually equipped to?`,
-      positive: `You create from your own intuitive authority, and life stops feeling like a script you're reading from someone else's hand.`,
-      negative: `A life built on what looks right instead of what feels true keeps generating a quiet static that success alone never resolves.`,
+      positive: `The desire to author your own destiny hasn't changed — it was always the real ask underneath everything else. What's different is that you now make one choice this week from your own intuitive pull, instead of the expected script. That choice is what turns life from something you're reading off someone else's page into something you're actually writing.`,
+      negative: `The desire for a self-authored destiny is completely real, and it keeps getting answered with what looks right instead of what feels true. That gap isn't a small compromise. It's a quiet static running underneath everything, still waiting for one choice made from your own intuition instead of the script.`,
     },
 
     '2_HZV': {
@@ -4805,8 +4805,8 @@ window.DMicroContent = (function () {
       why: `Your heart's deepest wish is simple and rarely spoken: to trust its own intuition enough to actually live by it. The High Priestess here names a desire for inner wisdom to be believed, not just noticed in passing.`,
       shadow: `Blocked, this shows up as a persistent second-guessing — sensing something clearly and still waiting for outside confirmation before it counts as real.`,
       path: `The path is trusting one inner knowing today without asking anyone to confirm it first. You are allowed to believe your own intuition on its own authority. What do you already know that you're still waiting for permission to trust?`,
-      positive: `You trust your own inner knowing without needing it confirmed, and your spiritual awareness deepens simply because you finally believe it.`,
-      negative: `Waiting endlessly for outside confirmation of an inner knowing keeps your own wisdom permanently on probation.`,
+      positive: `The desire to trust your own inner knowing hasn't changed — it was always what your heart was actually asking for. What's different is that you now believe one knowing today without waiting for outside confirmation first. That trust is what finally lets your own wisdom stop living on probation.`,
+      negative: `The desire to trust your own intuition is completely real, and it keeps waiting for outside confirmation before it's allowed to count. That waiting isn't humility. It's your own wisdom held permanently on probation, still waiting for the one time you'll believe it without a second opinion.`,
     },
 
     '3_HZV': {
@@ -4814,8 +4814,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants harmony with nature, with the people around it, with a creative force larger than any single achievement — a nurturing, productive life filled with love and beauty. The Empress here names desire for a rich, connected existence, not just a comfortable one.`,
       shadow: `Blocked, you can end up productive and surrounded by very little beauty at all — busy in a way that quietly starves the part of you that actually wanted connection and loveliness.`,
       path: `The path is letting one ordinary moment today be beautiful on purpose. You are allowed to want a life that's lovely, not just functional. Where has your life gotten productive at the cost of getting lovely?`,
-      positive: `You let beauty and connection back into your ordinary days, and productivity stops being the only thing your life is measured by.`,
-      negative: `A life optimized purely for output quietly starves the desire for beauty it was supposed to be in service of.`,
+      positive: `The desire for a beautiful, connected life hasn't changed — it was always underneath the busyness. What's different is that you now let one ordinary moment today actually be beautiful on purpose, instead of only functional. That choice is what starts letting loveliness back in.`,
+      negative: `The desire for beauty and connection is completely real, and it keeps being starved by a life optimized purely for output. That starvation isn't a side effect of being productive. It's the very thing productivity was supposed to be in service of, still waiting for room to actually show up.`,
     },
 
     '4_HZV': {
@@ -4823,8 +4823,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a structured, solid spiritual foundation — to feel genuinely secure, managing life through conscious choice rather than reactive scrambling. The Emperor here names a desire for real, felt stability, not just the appearance of control.`,
       shadow: `Blocked, this can turn into controlling everything in sight because nothing underneath ever feels sturdy enough to relax into.`,
       path: `The path is building one small, real piece of structure rather than gripping the whole picture at once. You are allowed to want to feel secure without controlling everything. What structure, built rather than gripped, would let you actually rest?`,
-      positive: `You build real spiritual security through conscious choice, and control finally loosens because the foundation underneath is genuinely sturdy.`,
-      negative: `Gripping everything because nothing feels sturdy enough just proves, again, that nothing was ever actually secured — only held.`,
+      positive: `The desire for a sturdy foundation hasn't changed — real security, not just the appearance of control, was always what your heart wanted. What's different is that you now build one small, real piece of structure, instead of gripping the whole picture at once. That building is what finally lets you rest.`,
+      negative: `The desire for real security is completely genuine, and it keeps getting answered with gripping instead of building, controlling everything because nothing underneath feels sturdy. That grip isn't safety. It proves, again, that nothing was ever actually secured, only held, still waiting for one real piece of foundation.`,
     },
 
     '5_HZV': {
@@ -4832,8 +4832,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to learn spiritual teachings, spread real wisdom, and receive guidance — fulfillment through being in harmony with tradition and shared meaning. The Hierophant here names a desire to belong to something larger and to hand something forward.`,
       shadow: `Blocked, this can turn into collecting teachings without ever letting any of them actually change you, wisdom accumulated like credentials rather than lived.`,
       path: `The path is choosing one teaching you've already collected and actually living by it this week. You are allowed to want guidance and belonging both. Which piece of wisdom have you learned but not yet lived?`,
-      positive: `You live the wisdom you've gathered rather than only collecting it, and that embodiment is what finally lets it feel like belonging instead of accumulation.`,
-      negative: `Wisdom gathered but never lived stays inert — the desire for genuine belonging goes unmet no matter how much is learned.`,
+      positive: `The desire for wisdom worth passing on hasn't changed — belonging to something larger and handing something forward was always the real want. What's different is that you now actually live one piece of wisdom you've already collected, instead of only gathering more. That embodiment is what turns learning into belonging.`,
+      negative: `The desire for real wisdom and belonging is completely genuine, and it keeps being met with more collecting instead of more living, teachings accumulated like credentials rather than embodied. That accumulation isn't wisdom. It's a desire for belonging still waiting for one piece of learning to actually be lived.`,
     },
 
     '6_HZV': {
@@ -4841,8 +4841,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to find real, deep spiritual connection — a soulmate bond, love felt at its fullest rather than its most convenient. The Lovers here names a desire for genuine, chosen intimacy, not merely companionship.`,
       shadow: `Blocked, this can turn into settling for adequate connection while quietly starving for the deep kind, afraid that wanting more makes you ungrateful for what you have.`,
       path: `The path is naming, honestly, what depth of connection you actually want. You are allowed to want real spiritual intimacy, not just company. What would you ask for in love if wanting more didn't feel greedy?`,
-      positive: `You name and pursue the depth of connection you actually want, and that honesty is what finally lets real intimacy become possible.`,
-      negative: `Settling for adequate connection out of guilt keeps the heart quietly starved for the depth it was actually built to want.`,
+      positive: `The desire for love at its highest form hasn't changed — real, chosen intimacy was always what your heart was asking for, not just company. What's different is that you now name, honestly, the depth of connection you actually want. That honesty is what finally makes real intimacy possible.`,
+      negative: `The desire for deep, genuine connection is completely real, and it keeps settling for adequate instead, out of a guilt that wanting more makes you ungrateful. That settling isn't gratitude. It's a heart quietly starved for the depth it was actually built to want, still waiting to be named honestly.`,
     },
 
     '7_HZV': {
@@ -4850,8 +4850,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to discover its own inner strength and will — real spiritual progress, a path it's charting itself, and the felt certainty that no obstacle is actually final. The Chariot here names a desire for unstoppable, self-directed momentum.`,
       shadow: `Blocked, this can turn into constant motion that never actually proves the point, since proving requires stopping long enough to notice you've already arrived somewhere.`,
       path: `The path is letting one recent obstacle count as evidence you're already unstoppable. You are allowed to want proof of your own resilience. What difficulty have you already moved through that deserves to count as proof?`,
-      positive: `You let real, already-lived evidence of your resilience actually register, and the certainty you were chasing turns out to already be earned.`,
-      negative: `Constant motion that never pauses to notice what's already been overcome keeps the proof you're seeking permanently just out of reach.`,
+      positive: `The desire to know nothing can stop it hasn't changed — the want for unstoppable, self-directed momentum was always real. What's different is that you now let one recent obstacle actually count as evidence, instead of chasing more proof through constant motion. That registering is what finally lets the certainty land.`,
+      negative: `The desire for proof of your own resilience is completely genuine, and it keeps chasing more motion instead of noticing what's already been overcome. That chase isn't ambition. It's a certainty already earned, still waiting for you to pause long enough to actually let it register.`,
     },
 
     '8_HZV': {
@@ -4859,8 +4859,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants harmony with truth and justice — to understand karma, and to guide its own life by real, felt fairness rather than convenient rules. Justice here names a desire for integrity as a way of living, not just a standard applied to others.`,
       shadow: `Blocked, this can turn into a private tally of everyone else's unfairness while your own conduct goes quietly unexamined.`,
       path: `The path is applying today's fairness standard to yourself first. You are allowed to want a genuinely fair life, starting with your own conduct. Where would your own verdict change if you judged yourself as carefully as you judge fairness in the world?`,
-      positive: `You guide your own life by a fairness applied evenly, inward and outward, and that evenness is what your heart was actually asking for.`,
-      negative: `A fairness tracked only outward while the self stays exempt never actually satisfies the heart's real desire for integrity.`,
+      positive: `The desire for a life guided by fairness hasn't changed — integrity as a way of living, not just a standard for others, was always the real want. What's different is that you now apply today's fairness standard to yourself first. That evenness is exactly what your heart was actually asking for.`,
+      negative: `The desire for genuine fairness is completely real, and it keeps tracking everyone else's conduct while the self stays quietly exempt. That exemption isn't oversight. It's the heart's real desire for integrity still unmet, still waiting for the standard to finally include its own author.`,
     },
 
     '9_HZV': {
@@ -4868,8 +4868,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants a real inner journey — solitude deep enough to reach genuine spiritual understanding, not just a break from noise. The Hermit here names a desire for depth reached alone, on purpose.`,
       shadow: `Blocked, this can turn into staying busy specifically to avoid the solitude that would actually deliver what you're craving.`,
       path: `The path is one real hour of solitude, chosen rather than accidental. You are allowed to want to be alone with yourself on purpose. What would you find if you actually let yourself sit still long enough to look?`,
-      positive: `You take the solitude your heart has been asking for, and what you find there is exactly the understanding you were craving.`,
-      negative: `Staying busy to avoid solitude keeps the heart's actual desire — depth, found alone — permanently deferred.`,
+      positive: `The desire to go inward hasn't changed — real solitude, chosen on purpose, was always what your heart wanted. What's different is that you now take one real hour of it, instead of staying busy to avoid what it might deliver. That hour is what finally lets the depth you were craving actually arrive.`,
+      negative: `The desire for real solitude is completely genuine, and it keeps getting avoided through busyness, specifically because sitting still might deliver exactly what it's asking for. That avoidance isn't productivity. It's the heart's real desire for depth, still deferred, still waiting for one chosen hour alone.`,
     },
 
     '10_HZV': {
@@ -4877,8 +4877,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants harmony with universal timing — to accept change as it arrives and stay in the flow rather than fighting every shift. The Wheel of Fortune here names a desire for trust in cycles, not certainty about outcomes.`,
       shadow: `Blocked, this can turn into treating every downturn as a verdict, white-knuckling each low point instead of trusting it will actually turn.`,
       path: `The path is meeting today's specific change with curiosity instead of resistance. You are allowed to want to trust the timing instead of controlling it. What current shift might go easier if you actually trusted its timing?`,
-      positive: `You meet change with trust in its timing rather than resistance to its arrival, and the flow your heart wanted becomes available.`,
-      negative: `Fighting every shift as if it were a verdict keeps the heart from ever actually settling into the trust it was asking for.`,
+      positive: `The desire to trust the turning hasn't changed — harmony with timing, not certainty about outcomes, was always the real want. What's different is that you now meet today's specific change with curiosity instead of resistance. That trust is what finally lets the flow your heart wanted become available.`,
+      negative: `The desire to trust life's timing is completely real, and it keeps fighting every shift as though it were a verdict rather than simply a turn. That fighting isn't vigilance. It's the heart's own desire for trust, still unmet, still waiting for one change to be met with curiosity instead of resistance.`,
     },
 
     '11_HZV': {
@@ -4886,8 +4886,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to discover its inner power, face its fears directly, and let real transformation happen through love rather than force. Strength here names a desire for patient, gentle courage, not aggressive conquest.`,
       shadow: `Blocked, this can turn into gripping harder at exactly the moments gentleness was actually being asked for.`,
       path: `The path is meeting one current fear with softness instead of force. You are allowed to want to be gentle with your own fear. What would change if you met your fear the way you'd meet someone you loved who was afraid?`,
-      positive: `You meet your own fear with patience and love rather than force, and that gentleness is what actually transforms it.`,
-      negative: `Gripping harder at a fear that was asking for gentleness only reinforces it — the heart's real desire for patient courage goes unmet.`,
+      positive: `The desire to transform fear through love hasn't changed — patient, gentle courage, not aggressive conquest, was always what your heart was asking for. What's different is that you now meet one current fear with softness instead of force. That gentleness is what actually does the transforming.`,
+      negative: `The desire for gentle courage is completely real, and it keeps meeting fear with a tighter grip instead of the softness it was actually asking for. That grip isn't strength. It's the heart's real desire for patient love, still unmet, still waiting to meet its fear the way it would meet someone afraid that it loved.`,
     },
 
     '12_HZV': {
@@ -4895,8 +4895,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to trust the flow completely and view its own life from a genuinely different angle — surrender, not as defeat, but as a change of vantage point. The Hanged Man here names a desire for perspective gained through letting go.`,
       shadow: `Blocked, this can turn into gripping the old vantage point precisely because surrendering it feels like losing control entirely.`,
       path: `The path is letting one current situation be seen from an angle you haven't tried yet. You are allowed to want a new perspective more than you want to be right. What might this situation look like from underneath instead of straight on?`,
-      positive: `You let surrender actually change your vantage point, and the new view is exactly the perspective your heart was asking for.`,
-      negative: `Gripping the familiar angle because surrender feels risky keeps the heart's desire for a genuinely new perspective out of reach.`,
+      positive: `The desire to surrender and see differently hasn't changed — a genuinely new vantage point, not defeat, was always the real want. What's different is that you now let one current situation be seen from an angle you haven't tried yet. That letting-go is what finally delivers the new view.`,
+      negative: `The desire for a new perspective is completely real, and it keeps gripping the familiar angle instead, because surrendering it feels like losing control entirely. That grip isn't clarity. It's the heart's real desire for a different view, still out of reach, still waiting for one release.`,
     },
 
     '13_HZV': {
@@ -4904,8 +4904,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to release old identities, attachments, and emotional weight, and be genuinely reborn — spiritual transformation as an active, wanted thing, not a crisis to survive. Transformation here names a desire for real, willing endings.`,
       shadow: `Blocked, this can turn into holding an identity long past its natural life simply because letting it go feels like losing yourself entirely.`,
       path: `The path is naming one identity that's actually ready to end. You are allowed to want to become someone new. What version of yourself is your heart already finished being?`,
-      positive: `You let an outdated identity actually end, and the rebirth your heart wanted has real room to begin.`,
-      negative: `Holding an identity past its natural life keeps the heart's real desire for rebirth waiting on a permission that was never actually required.`,
+      positive: `The desire to leave the old self behind hasn't changed — real, willing endings, not a crisis to survive, were always the want. What's different is that you now name one identity that's actually ready to end. That naming is what finally gives the rebirth your heart wanted room to begin.`,
+      negative: `The desire for genuine rebirth is completely real, and it keeps waiting behind an identity held past its natural life, out of fear that releasing it means losing yourself entirely. That fear isn't self-preservation. It's the heart's real desire for renewal, still waiting on a permission it never actually needed.`,
     },
 
     '14_HZV': {
@@ -4913,8 +4913,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants inner peace and spiritual balance — a life where the different parts of you are actually working together rather than taking turns. Temperance here names a desire for integration, not just truce between opposites.`,
       shadow: `Blocked, this can turn into oscillating hard between extremes and calling the alternation 'balance,' when balance was actually being asked for the whole time.`,
       path: `The path is finding one small blend today instead of choosing one extreme. You are allowed to want genuine harmony, not just alternating extremes. What two parts of your life are ready to actually work together instead of taking turns?`,
-      positive: `You find a genuine blend rather than alternating extremes, and that integration is exactly the harmony your heart was asking for.`,
-      negative: `Swinging hard between extremes and calling it balance keeps the heart's real desire for integration permanently unmet.`,
+      positive: `The desire for harmony hasn't changed — genuine integration, not just a truce between opposites, was always what your heart wanted. What's different is that you now find one small blend today, instead of choosing one extreme. That blend is exactly the harmony your heart was asking for.`,
+      negative: `The desire for real integration is completely genuine, and it keeps getting answered with a hard swing between extremes mistaken for balance. That oscillation isn't harmony. It's the heart's actual desire for integration, still unmet, still waiting for two parts of your life to finally work together.`,
     },
 
     '15_HZV': {
@@ -4922,8 +4922,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to explore its desires, its shadow, even its compulsions — to face its own darkness honestly rather than pretend it isn't there. The Devil here names a desire for real self-confrontation, not denial dressed as virtue.`,
       shadow: `Blocked, this can turn into performing a cleaner version of yourself while the actual desire or compulsion runs quietly, unexamined, underneath.`,
       path: `The path is naming one real desire or compulsion honestly, without judgment. You are allowed to want to know your own shadow. What part of yourself have you been performing past instead of actually looking at?`,
-      positive: `You look at your own shadow honestly instead of performing past it, and that honesty is exactly the self-confrontation your heart wanted.`,
-      negative: `Performing a cleaner self while the real desire runs underneath keeps the heart's wish for honest self-knowledge unmet.`,
+      positive: `The desire to look directly at your own darkness hasn't changed — real self-confrontation, not denial dressed as virtue, was always the want. What's different is that you now name one real desire or compulsion honestly, without judgment. That naming is exactly the self-knowledge your heart was asking for.`,
+      negative: `The desire for honest self-confrontation is completely real, and it keeps getting answered with a cleaner performance instead, while the actual desire runs quietly underneath. That performance isn't peace. It's the heart's wish for real self-knowledge, still unmet, still waiting for one honest look.`,
     },
 
     '16_HZV': {
@@ -4931,8 +4931,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants significant transformation — freedom from old patterns and an actual spiritual rebirth, not a minor adjustment. The Tower here names a desire for real, structural change, even if it's disruptive.`,
       shadow: `Blocked, this can turn into making small, cosmetic changes that leave the old pattern's foundation completely intact.`,
       path: `The path is letting one old pattern actually fall rather than patching it again. You are allowed to want real change, not just the appearance of it. What pattern is your heart ready to let collapse for good?`,
-      positive: `You let an old pattern actually fall rather than patching it, and the real rebirth your heart wanted finally has room to happen.`,
-      negative: `Cosmetic changes to a pattern whose foundation stays intact keep the heart's desire for genuine rebirth permanently postponed.`,
+      positive: `The desire for a complete spiritual rebirth hasn't changed — real, structural change, even disruptive change, was always what your heart wanted. What's different is that you now let one old pattern actually fall, instead of patching it again. That fall is what finally gives the rebirth room to happen.`,
+      negative: `The desire for genuine rebirth is completely real, and it keeps getting answered with cosmetic changes that leave the old foundation fully intact. That patching isn't progress. It's the heart's real desire for structural change, still postponed, still waiting for one pattern to actually be let go.`,
     },
 
     '17_HZV': {
@@ -4940,8 +4940,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants divine guidance and to remain filled with hope — to shine spiritually and actually live in a way that inspires the people around it. The Star here names a desire for visible, generous hope, not private optimism kept to yourself.`,
       shadow: `Blocked, this can turn into hoping quietly and privately, as if letting hope be seen would somehow be presumptuous or naive.`,
       path: `The path is letting one piece of your hope be visible today. You are allowed to want to inspire, not just privately hope. What hope of yours would actually help someone if you let them see it?`,
-      positive: `You let your hope be visible rather than private, and that visibility is exactly the inspiring life your heart was asking for.`,
-      negative: `Hope kept strictly private denies the heart the inspiring, generous life it was actually built to want.`,
+      positive: `The desire to live an inspiring life hasn't changed — visible, generous hope, not private optimism, was always the real want. What's different is that you now let one piece of your hope be visible today. That visibility is exactly the inspiring life your heart was asking for.`,
+      negative: `The desire for an inspiring, hope-filled life is completely real, and it keeps staying private, as though letting hope be seen would somehow be presumptuous. That privacy isn't modesty. It's the heart's generous desire, still unmet, still waiting for one piece of hope to actually be shown.`,
     },
 
     '18_HZV': {
@@ -4949,8 +4949,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to explore the subconscious, strengthen its intuition, and actually understand its own spiritual mysteries rather than leave them unexamined. The Moon here names a desire for depth pursued deliberately, not just felt vaguely.`,
       shadow: `Blocked, this can turn into staying at the surface of a feeling because going deeper feels like it might reveal something you're not ready to see.`,
       path: `The path is following one recurring feeling all the way to its actual source. You are allowed to want to understand your own depths, not just feel them. What feeling keeps recurring that you haven't yet followed to where it actually comes from?`,
-      positive: `You follow a recurring feeling to its real source, and that pursuit is exactly the self-understanding your heart was asking for.`,
-      negative: `Staying at the surface of a feeling out of fear of what's underneath keeps the heart's desire for real depth unmet.`,
+      positive: `The desire to unravel its own mysteries hasn't changed — depth pursued deliberately, not just felt vaguely, was always what your heart wanted. What's different is that you now follow one recurring feeling all the way to its actual source. That pursuit is exactly the self-understanding it was asking for.`,
+      negative: `The desire for real self-understanding is completely genuine, and it keeps staying at the surface of a feeling, out of fear of what might be underneath. That surface-staying isn't safety. It's the heart's desire for depth, still unmet, still waiting for one feeling to actually be followed all the way down.`,
     },
 
     '19_HZV': {
@@ -4958,8 +4958,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants real happiness and spiritual enlightenment — a life full of love where it gets to express itself completely, without editing. The Sun here names a desire for joy that's whole, not managed or rationed.`,
       shadow: `Blocked, this can turn into performing lightness while the real joy stays muted, as if full expression would be somehow too much for the room.`,
       path: `The path is letting one piece of real joy show today, unmanaged. You are allowed to want joy at full volume. What happiness have you been quietly editing down to something more acceptable?`,
-      positive: `You let your joy show at its actual size, and that full expression is exactly what your heart was asking for.`,
-      negative: `Editing joy down to something more acceptable keeps the heart's real desire for full, unhidden happiness unmet.`,
+      positive: `The desire for pure, unhidden joy hasn't changed — whole, unmanaged happiness was always what your heart wanted. What's different is that you now let one piece of real joy show today, unedited. That full expression is exactly what it was asking for.`,
+      negative: `The desire for unhidden joy is completely real, and it keeps getting managed down to something more acceptable, as though full expression would be too much for the room. That editing isn't tact. It's the heart's real desire for whole happiness, still unmet, still waiting for one joy to show at its actual size.`,
     },
 
     '20_HZV': {
@@ -4967,8 +4967,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to release the burdens of the past and reach a genuinely new level of consciousness — real spiritual awakening, not a partial, managed improvement. Judgement here names a desire for full release, not incremental relief.`,
       shadow: `Blocked, this can turn into carrying the same old weight while telling yourself you've already mostly dealt with it.`,
       path: `The path is naming one piece of the past that's actually still being carried. You are allowed to want full release, not partial relief. What burden are you still carrying that you've told yourself is already handled?`,
-      positive: `You name and release what's actually still being carried, and the full awakening your heart wanted has real room to arrive.`,
-      negative: `Believing an old burden is already handled while still carrying its weight keeps full release just out of reach.`,
+      positive: `The desire to break free from the past hasn't changed — full release, not incremental relief, was always what your heart wanted. What's different is that you now name one piece of the past that's actually still being carried. That naming is what finally gives the full awakening room to arrive.`,
+      negative: `The desire for real release is completely genuine, and it keeps being told it's already handled while the weight is still quietly being carried. That belief isn't peace. It's the heart's desire for full awakening, still just out of reach, still waiting for one honest look at what's still there.`,
     },
 
     '21_HZV': {
@@ -4976,8 +4976,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants integration, spiritual fulfillment, and the actual feeling of completion — merging with something larger, not just checking off another achievement. The World here names a desire for wholeness, felt, not just accomplished.`,
       shadow: `Blocked, this can turn into reaching real milestones and still feeling like something essential hasn't quite landed.`,
       path: `The path is letting one genuine accomplishment actually be felt as complete, today. You are allowed to want to feel done, not just be done. What milestone have you reached that you haven't yet let yourself feel complete?`,
-      positive: `You let a genuine accomplishment actually be felt as complete, and that felt wholeness is exactly what your heart was asking for.`,
-      negative: `Reaching milestones without ever letting the completion be felt keeps the heart's desire for genuine wholeness unmet.`,
+      positive: `The desire to feel genuinely complete hasn't changed — felt wholeness, not just another achievement checked off, was always the real want. What's different is that you now let one genuine accomplishment actually be felt as complete today. That felt landing is exactly what your heart was asking for.`,
+      negative: `The desire for genuine wholeness is completely real, and it keeps reaching real milestones without ever letting the completion actually be felt. That gap isn't ingratitude. It's the heart's desire for felt fulfillment, still unmet, still waiting for one accomplishment to actually land as done.`,
     },
 
     '22_HZV': {
@@ -4985,8 +4985,8 @@ window.DMicroContent = (function () {
       why: `Your heart wants to be completely free — to leap without a net, trust the flow, stay open to new experience, and keep its inner child's sense of wonder alive. The Fool here names a desire for genuine, faithful openness, not caution disguised as wisdom.`,
       shadow: `Blocked, this can turn into calling caution wisdom, closing off the very openness your heart was actually asking to keep alive.`,
       path: `The path is one small, real leap today, taken with open eyes. You are allowed to want freedom more than certainty. What would you leap toward this month if trust in the unknown were enough of a reason?`,
-      positive: `You take a real leap in faith rather than settling for caution disguised as wisdom, and the freedom your heart wanted becomes lived, not just longed for.`,
-      negative: `Calling caution wisdom keeps the heart's real desire for open, faithful freedom permanently deferred.`,
+      positive: `The desire to take a fearless leap hasn't changed — genuine, faithful openness, not caution dressed as wisdom, was always what your heart wanted. What's different is that you now take one small, real leap today, with open eyes. That leap is what finally turns the longing into something lived.`,
+      negative: `The desire for open, faithful freedom is completely real, and it keeps getting answered with caution called wisdom instead. That caution isn't prudence. It's the heart's real desire for a fearless leap, still deferred, still waiting for one small jump taken with open eyes.`,
     },
 
 
