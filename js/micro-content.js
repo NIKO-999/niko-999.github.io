@@ -2670,8 +2670,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through active generation — earning feels legitimate, deserved, real, while money that arrives without your direct effort (a gift, a windfall, unearned interest) can feel oddly uncomfortable to simply receive. The Magician governs your Relationship with Money, meaning your instinct is to keep initiating income rather than letting it also just come to you.`,
       shadow: `The risk is turning down or minimizing genuinely available resources — support, gifts, easier income — because only self-generated money feels legitimate to hold onto. If you find yourself working harder for money you could have simply accepted, that discomfort with receiving may be the pattern still running.`,
       path: `This may shift by accepting one piece of unearned financial ease this week — a gift, an easier path, help offered — without converting it into something you have to justify through extra effort. You are allowed to receive money you didn't visibly sweat for. What arrived easily lately that you could practice simply keeping?`,
-      positive: `You receive both earned and unearned resources with equal ease, and your financial flow widens because you're no longer filtering out help that didn't require active generation.`,
-      negative: `Discomfort with unearned money keeps you working harder than necessary, turning down real ease because only self-generated income feels legitimate to hold.`,
+      positive: `Your trust in actively made money hasn't changed — earning through initiation was always genuine and legitimate. What's different is that you now accept one piece of unearned financial ease, a gift, an easier path, without converting it into something to justify through extra effort. That acceptance is what widens the flow.`,
+      negative: `Your instinct to keep initiating income is completely real, and it keeps discounting money that arrives without direct effort, turning down real ease because only self-generated income feels legitimate. That discounting isn't discipline. It's a flow still narrower than it needs to be, still waiting for receiving to feel as legitimate as earning.`,
     },
 
     // ── 2 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2680,8 +2680,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through quiet intuition — a real sense for when a financial opportunity is right, paired with real discomfort stating plainly what your work or time is actually worth. The High Priestess governs your Relationship with Money, meaning your financial insight tends to stay private, felt rather than spoken aloud in the transactional terms money actually requires.`,
       shadow: `The risk is that unclaimed insight goes uncompensated — you sense the right move, make it quietly, and let the value of that instinct go unnamed and underpaid. If your income doesn't reflect what you actually know, the silence around your own worth may be the pattern still active.`,
       path: `This may shift by stating one specific price or value out loud this week, rather than letting your financial instinct stay an unspoken, unpaid asset. You are allowed to name your price out loud and let the silence sit. What number would you quote tomorrow if flinching weren't part of the transaction?`,
-      positive: `You name your financial worth out loud, and your income finally reflects the real value of the instinct you've always quietly had.`,
-      negative: `Financial insight that stays private and unspoken keeps going uncompensated, no matter how consistently accurate that quiet instinct actually is.`,
+      positive: `Your quiet sense for financial opportunity hasn't changed — that intuition was always genuinely accurate. What's different is that you now state one specific price or value out loud, rather than letting the instinct stay an unspoken, unpaid asset. That naming is what finally lets income reflect the real value.`,
+      negative: `Your financial insight is completely real, and it keeps staying private, felt rather than spoken aloud in the transactional terms money actually requires. That silence isn't modesty. It's an income still uncompensated, still waiting for the price to actually be named.`,
     },
 
     // ── 3 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2690,8 +2690,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through generous, sensory expression — real ease spending on comfort, beauty, and care, for yourself and especially for others, with less natural pull toward accumulation or reserve. The Empress governs your Relationship with Money, meaning your financial flow is generative and warm, but not automatically protective of its own future.`,
       shadow: `The risk is that generosity, unchecked, leaves nothing set aside — real abundance moving freely outward while your own reserve stays thin. If you're comfortable and generous now but anxious about later, that imbalance may be the pattern still unresolved.`,
       path: `This may shift by setting aside a specific portion of any income for your own future before spending on comfort or generosity extends further. You are allowed to save for yourself with the same pleasure you spend on comfort. What would a beautiful act of saving look like?`,
-      positive: `Your natural generosity continues, now paired with a genuine reserve set aside first, so warmth outward no longer comes at the cost of your own future.`,
-      negative: `Spending easily on comfort and care for others, without setting anything aside first, keeps your own reserve thin no matter how much flows through your hands.`,
+      positive: `Your ease spending on comfort and beauty hasn't changed — generous, sensory expression was always genuine warmth. What's different is that you now set aside a specific portion of income for your own future before the comfort spending extends further. That reserve is what keeps the warmth from costing you your own security.`,
+      negative: `Your generosity is completely real, and it keeps moving freely outward while your own reserve stays thin. That thinness isn't recklessness. It's a future still unprotected, still waiting for saving to feel as pleasurable as spending.`,
     },
 
     // ── 4 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2700,8 +2700,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through control — structure, oversight, a firm hand on every account and decision, as though financial security depends entirely on your personal management of it. The Emperor governs your Relationship with Money, meaning your instinct is to build and defend systems rather than trust ones you didn't personally construct.`,
       shadow: `The risk is that the management itself becomes the source of stress, and delegating any part of your finances — even to a trustworthy system — feels like a genuine risk rather than a reasonable option. If you can't imagine your money being fine without your constant oversight, that's the pattern still active.`,
       path: `This may shift by handing one small piece of financial management to a system or person you trust, and observing whether it actually holds without you. You are allowed to let a detail go unmanaged and see it survive. Which piece of the money machinery could run a week without your eyes on it?`,
-      positive: `You've tested whether your finances hold without total personal control, and found real systems worth trusting beyond your own constant oversight.`,
-      negative: `A need to personally manage every financial detail keeps money feeling safe only under your direct control, which is exhausting to sustain indefinitely.`,
+      positive: `Your instinct to build and defend financial structure hasn't changed — that firm hand was always real competence. What's different is that you now hand one small piece of financial management to a system or person you trust, and observe whether it holds. That test is what finally lets security extend beyond your own oversight.`,
+      negative: `Your need for control is completely real, and it keeps making delegation feel like a genuine risk rather than a reasonable option. That risk-aversion isn't prudence. It's a security still exhausting to sustain, still waiting for a trusted system to be given the chance to hold.`,
     },
 
     // ── 5 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2710,8 +2710,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through inherited rules about correctness — a real sense that there's a proper, sanctioned way to earn and spend, and quiet discomfort whenever money arrives or leaves outside that framework. The Hierophant governs your Relationship with Money, meaning your instinct is to check financial choices against tradition or authority before trusting them.`,
       shadow: `The risk is passing up genuinely good financial opportunities simply because they don't match an inherited idea of the "proper" way to earn or spend. If you feel guilty about money that came easily or unconventionally, even when nothing about it was actually wrong, that inherited rule may be the pattern still active.`,
       path: `This may shift by naming one inherited money rule directly and testing whether it actually reflects your own values, or just an old, unexamined authority. You are allowed to earn and spend outside the inherited 'right way' without guilt attending. Whose voice is the guilt actually speaking in — and is it still your authority?`,
-      positive: `You've tested an inherited money rule against your own actual values, and now earn and spend according to what genuinely fits you, not just old convention.`,
-      negative: `An unexamined rule about the "proper" way to handle money can quietly disqualify genuinely good opportunities that simply don't match the old convention.`,
+      positive: `Your instinct to check financial choices against tradition hasn't changed — that framework was always genuinely meaningful. What's different is that you now name one inherited money rule directly and test whether it actually reflects your own values. That testing is what finally lets you earn and spend without guilt attached.`,
+      negative: `Your sense that there's a proper, sanctioned way to handle money is completely real, and it keeps disqualifying genuinely good opportunities that don't match the inherited framework. That disqualifying isn't wisdom. It's an opportunity still passed up, still waiting for the old rule to be examined instead of simply obeyed.`,
     },
 
     // ── 6 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2720,8 +2720,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through relational weighing — earning and spending decisions filtered through what a partner or loved one would think, want, or need, sometimes before your own actual preference gets consulted. The Lovers governs your Relationship with Money, meaning your financial choices are genuinely relational, for better and for worse.`,
       shadow: `The risk is that your own financial preference gets perpetually deferred to someone else's, leaving you unsure what you'd actually choose if the decision were only yours. If you can't say clearly what you want financially, independent of what someone else wants, that deference may be the pattern still unresolved.`,
       path: `This may shift by making one financial decision based purely on your own preference this week, and letting it stand without checking it against anyone else's wants first. You are allowed to weigh your own want first sometimes. What financial choice is currently pending that is genuinely yours alone to make?`,
-      positive: `You make real financial choices from your own genuine preference, and relational money decisions become a true collaboration instead of a one-sided deference.`,
-      negative: `Financial choices perpetually filtered through someone else's preference first leave your own actual financial wants quietly unexamined.`,
+      positive: `Your relational weighing of financial choices hasn't changed — genuinely considering a partner's wants was always real care. What's different is that you now make one financial decision based purely on your own preference, and let it stand without checking it against anyone else's first. That choice is what turns deference into true collaboration.`,
+      negative: `Your relational instinct around money is completely real, and it keeps filtering every choice through what someone else would want first. That filtering isn't consideration. It's a preference still unexamined, still waiting for your own want to be weighed first sometimes.`,
     },
 
     // ── 7 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2730,8 +2730,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through forward drive — real ambition and momentum toward the next financial target, arriving so quickly after the last one that there's rarely a pause to actually register what's already been earned. The Chariot governs your Relationship with Money, meaning your financial motion is genuinely strong, but rest and enjoyment haven't kept pace with it.`,
       shadow: `The risk is that money earned never actually gets to feel earned — spent, saved, or invested toward the next goal before its arrival is even acknowledged. If you can't recall the last time you paused to genuinely enjoy an income milestone, that restlessness may be the pattern still active.`,
       path: `This may shift by deliberately pausing after the next financial milestone, before setting the next target, long enough to actually register what's been reached. You are allowed to enjoy the goal you just reached before chasing the next. What recent win deserves an actual celebration, however small?`,
-      positive: `You pause to genuinely register each financial milestone before pushing toward the next, and the momentum starts to feel like progress instead of a treadmill.`,
-      negative: `Chasing the next income goal before acknowledging the last one keeps real financial progress from ever actually registering as such.`,
+      positive: `Your forward drive toward the next financial target hasn't changed — real ambition and momentum were always genuine strength. What's different is that you now pause deliberately after a milestone, before setting the next target, long enough to actually register what's been reached. That pause is what turns motion into felt progress.`,
+      negative: `Your financial momentum is completely real, and it keeps chasing the next goal so quickly there's rarely time to register the last one. That chasing isn't ambition alone. It's a progress still unfelt, still waiting for a pause to let it actually land.`,
     },
 
     // ── 8 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2740,8 +2740,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through fairness and precision — a sharp internal accounting of who owes what, whether compensation matches effort, whether an exchange was actually equal. The Justice governs your Relationship with Money, meaning your financial instinct is deeply oriented toward balance, sometimes at the cost of ease.`,
       shadow: `The risk is that the mental ledger never fully closes — small financial imbalances tracked and remembered long after they'd naturally resolve on their own, creating tension in relationships or transactions that could otherwise be simple. If you're still tallying a financial unfairness long after it stopped mattering to anyone else, that ledger may be the pattern still running.`,
       path: `This may shift by consciously closing one old financial account you're still mentally tracking, and letting the balance rest rather than continuing to tally it. You are allowed to close the ledger on exchanges that were already fair. Where could generosity replace precision without anything being lost?`,
-      positive: `You let old, settled financial imbalances actually close, and your sharp sense of fairness applies to what's current instead of what's long past.`,
-      negative: `A mental ledger that never closes keeps old, minor financial imbalances alive long after they'd naturally have stopped mattering to anyone else.`,
+      positive: `Your precise mental ledger hasn't changed — a sharp internal accounting of what's fair was always real orientation toward balance. What's different is that you now consciously close one old financial account you're still tracking, and let the balance rest. That closing is what lets fairness apply to what's current.`,
+      negative: `Your instinct for fairness is completely real, and it keeps the ledger open indefinitely, small imbalances tracked long after they'd naturally resolve. That tracking isn't precision. It's a fairness still tangled in the past, still waiting for an old account to actually be closed.`,
     },
 
     // ── 9 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
@@ -2750,8 +2750,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through self-sufficiency — a strong preference for earning and managing money independently, even when collaboration or support would genuinely increase what's available to you. The Hermit governs your Relationship with Money, meaning your financial instinct favors solitude over asking, even at a real cost.`,
       shadow: `The risk is undercharging or under-earning specifically to avoid the discomfort of financial interdependence — a self-sufficiency so strong it quietly limits your own income. If you'd rather make less alone than ask for help that could genuinely grow what you earn, that avoidance may be the pattern still active.`,
       path: `This may shift by asking for one specific piece of financial help or partnership this week, and noticing what actually becomes possible once you do. You are allowed to partner and still be self-made. What could you build with help that solitude has kept at half its size?`,
-      positive: `You ask for financial help or partnership when it would genuinely help, and your income grows because self-sufficiency is no longer the only option you'll consider.`,
-      negative: `Preferring to earn less entirely alone rather than ask for help quietly caps your income well below what real collaboration could unlock.`,
+      positive: `Your self-sufficiency around money hasn't changed — earning and managing independently was always real capability. What's different is that you now ask for one specific piece of financial help or partnership, and notice what becomes possible. That asking is what finally lets income grow past solitude's ceiling.`,
+      negative: `Your preference for earning alone is completely real, and it keeps limiting income specifically to avoid the discomfort of financial interdependence. That limiting isn't independence. It's an income still capped, still waiting for partnership to be allowed in.`,
     },
 
     // ── 10 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2760,8 +2760,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through cycles — real feast-and-famine patterns, income that surges and recedes, an instinct that treats sudden financial luck as more familiar than slow, steady accumulation. The Wheel of Fortune governs your Relationship with Money, meaning your financial rhythm is genuinely cyclical, for better and worse.`,
       shadow: `The risk is that steady income gets unconsciously undermined — quietly sabotaged or simply not trusted — because the wave pattern feels more like "how money actually works" than something reliable ever could. If consistent income opportunities keep slipping away just as they start to stabilize, that instinct may be the pattern still active.`,
       path: `This may shift by deliberately protecting one steady income source through a full cycle, resisting the urge to disrupt it just because it feels unfamiliar. You are allowed to trust steady money — it isn't a trick. What would you do differently if predictable income finally felt safe?`,
-      positive: `You let one steady income source hold through a full cycle without disrupting it, and real stability becomes as trustworthy as the old, familiar waves.`,
-      negative: `An instinct that only trusts feast-and-famine cycles can quietly undermine the steady income that would actually smooth them out.`,
+      positive: `Your feast-and-famine financial rhythm hasn't changed — real cycles of surge and recede were always the familiar pattern. What's different is that you now deliberately protect one steady income source through a full cycle, resisting the urge to disrupt it. That protection is what lets stability become trustworthy too.`,
+      negative: `Your cyclical financial instinct is completely real, and it keeps unconsciously undermining steady income because the wave pattern feels more like how money actually works. That undermining isn't caution. It's a stability still untrusted, still waiting for a full cycle to prove itself.`,
     },
 
     // ── 11 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2770,8 +2770,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through quiet endurance — real capacity to earn, support, and carry financial responsibility for others, paired with a much weaker instinct to ask the same in return. The Strength governs your Relationship with Money, meaning your financial resilience is genuine, but one-directional by default.`,
       shadow: `The risk is that the giving becomes depleting precisely because it's never balanced by receiving — real financial strength quietly costing you the support you'd need to actually sustain it. If you can provide for everyone but struggle to ask anyone to provide for you, that imbalance may be the pattern still unresolved.`,
       path: `This may shift by naming one specific financial need out loud to someone capable of helping, rather than continuing to carry it alone by default. You are allowed to be provided for before the emergency makes it necessary. What support would you accept today if asking cost nothing?`,
-      positive: `You name real financial needs out loud instead of only ever meeting others', and the support that follows makes your strength sustainable instead of depleting.`,
-      negative: `Providing financially for others while rarely asking to be provided for keeps real strength one-directional, and eventually, quietly depleting.`,
+      positive: `Your capacity to provide financially for others hasn't changed — that quiet endurance was always genuine strength. What's different is that you now name one specific financial need out loud to someone capable of helping, rather than carrying it alone by default. That naming is what makes the strength sustainable.`,
+      negative: `Your financial resilience is completely real, and it keeps staying one-directional, giving without ever asking the same in return. That one-directionality isn't strength holding steady. It's a resilience still depleting, still waiting to be balanced by receiving.`,
     },
 
     // ── 12 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2780,8 +2780,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through self-denial — a real instinct to withhold financial comfort from yourself specifically, even while resources exist, as though waiting or sacrificing has its own quiet virtue. The Hanged Man governs your Relationship with Money, meaning your financial instinct suspends your own comfort more readily than it suspends anyone else's.`,
       shadow: `The risk is that the denial outlives whatever it was originally protecting — money available for your own comfort, held back indefinitely, well past the point where the sacrifice actually serves anything. If you consistently postpone spending on yourself specifically, that suspension may be the pattern still active.`,
       path: `This may shift by spending, deliberately and without justification, on one thing for your own comfort this week — not as a reward, just as a choice. You are allowed to spend on yourself specifically, on purpose, soon. What denied purchase is actually a postponed kindness?`,
-      positive: `You spend on your own comfort without needing to justify or earn it first, and the old, indefinite self-denial finally has a real end point.`,
-      negative: `Indefinitely postponing spending on your own comfort, even when resources exist, keeps a form of self-denial running well past any actual necessity.`,
+      positive: `Your instinct to withhold financial comfort from yourself hasn't changed — that suspension was always a real, if costly, discipline. What's different is that you now spend, deliberately and without justification, on one thing for your own comfort. That spending is what finally gives the denial an end point.`,
+      negative: `Your self-denial around money is completely real, and it keeps postponing your own comfort well past the point where the sacrifice actually serves anything. That postponing isn't virtue. It's a comfort still delayed, still waiting for permission to simply be spent on.`,
     },
 
     // ── 13 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2790,8 +2790,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through transformation — real financial shifts that arrive as complete overhauls, a job left entirely, a whole system rebuilt from scratch, rather than gradual, incremental change. The Death governs your Relationship with Money, meaning your financial instinct favors the clean break over the slow adjustment.`,
       shadow: `The risk is that smaller, earlier course-corrections get skipped in favor of waiting for the big, dramatic reset — financial problems left unaddressed until they force a total overhaul that a gradual adjustment could have prevented. If your financial life keeps needing complete rebuilds rather than small tune-ups, that pattern may be the piece still unresolved.`,
       path: `This may shift by making one small, incremental financial adjustment now, rather than waiting for the situation to force a complete overhaul later. You are allowed to adjust gradually — not every change needs the wrecking ball. What small financial tweak could replace the next planned overhaul?`,
-      positive: `You make small financial adjustments as they're needed, and real transformation becomes something you choose deliberately, not something forced by neglect.`,
-      negative: `Skipping small financial course-corrections in favor of waiting for a dramatic reset tends to make the eventual overhaul more disruptive than it needed to be.`,
+      positive: `Your instinct toward total financial overhaul hasn't changed — the clean break was always your real strength. What's different is that you now make one small, incremental adjustment now, rather than waiting for a situation to force a complete reset. That timing is what makes the transformation deliberate instead of forced.`,
+      negative: `Your capacity for total financial transformation is completely real, and it keeps skipping the smaller, earlier course-corrections in favor of the dramatic reset. That skipping isn't decisiveness. It's an overhaul still more disruptive than it needed to be, still waiting for the small tweaks to be allowed too.`,
     },
 
     // ── 14 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2800,8 +2800,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through balance — genuinely steady and moderate when centered, but prone to swinging into strict restriction or full indulgence the moment real stress enters the picture. The Temperance governs your Relationship with Money, meaning your natural equilibrium is real, but conditional on your overall state.`,
       shadow: `The risk is that stress-driven financial swings undo the very balance that's otherwise your real strength — a period of discipline followed by a release that erases its progress, or the reverse. If your spending habits seem to track your stress level more than your actual financial plan, that swing may be the pattern still active.`,
       path: `This may shift by noticing the moment stress starts pulling your spending toward an extreme, and consciously choosing the smaller, steadier version of the response instead. You are allowed to meet stress without the pendulum. When pressure hits next — what would the moderate move look like, decided now, in calm?`,
-      positive: `You notice stress-driven financial swings as they start and choose the steadier response instead, letting your natural balance hold even under pressure.`,
-      negative: `Financial habits that track your stress level more than your actual plan keep undoing, under pressure, the very balance that's otherwise your real strength.`,
+      positive: `Your natural financial equilibrium hasn't changed — genuinely steady and moderate when centered was always real strength. What's different is that you now notice the moment stress starts pulling spending toward an extreme, and consciously choose the smaller, steadier response. That noticing is what lets the balance hold under pressure.`,
+      negative: `Your capacity for balance is completely real, and it keeps swinging into strict restriction or full indulgence the moment real stress enters. That swinging isn't a plan failing. It's a balance still conditional, still waiting to be chosen deliberately instead of overridden by pressure.`,
     },
 
     // ── 15 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2810,8 +2810,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through compulsion — a specific financial habit, whether spending, earning, or a particular relationship to a job or lifestyle, that feels less like an active choice and more like something you're bound to. The Devil governs your Relationship with Money, meaning at least one part of your financial life runs on autopilot rather than genuine decision.`,
       shadow: `The risk is mistaking the compulsive habit for simply how things are, never actually examining whether it's still necessary or just familiar. If a specific money habit feels like it's running you rather than the other way around, that unexamined grip may be the pattern still unresolved.`,
       path: `This may shift by naming the specific compulsive financial habit honestly, and asking directly what would actually happen if you loosened it. You are allowed to examine the compulsion with curiosity instead of shame. What is the habit actually purchasing for you, underneath the receipt?`,
-      positive: `You've examined a compulsive money habit directly and found it more changeable than it seemed, replacing autopilot with genuine, examined choice.`,
-      negative: `A financial habit that runs on autopilot, never actually questioned, keeps functioning as a compulsion rather than a choice you're still making.`,
+      positive: `Your specific financial compulsion hasn't changed — a habit that feels bound rather than chosen was always real. What's different is that you now name the compulsive habit honestly and ask directly what would happen if you loosened it. That honesty is what turns autopilot back into genuine choice.`,
+      negative: `Your compulsive financial habit is completely real, and it keeps being mistaken for simply how things are, never actually examined. That mistaking isn't acceptance. It's a habit still running you, still waiting to be looked at with curiosity instead of shame.`,
     },
 
     // ── 16 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2820,8 +2820,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through sudden disruption — real financial shifts that seem to hit abruptly, even in situations where warning signs were quietly present beforehand. The Tower governs your Relationship with Money, meaning your instinct is to maintain the current picture until it can no longer be maintained, rather than adjusting early.`,
       shadow: `The risk is that maintaining the appearance of financial stability, instead of addressing the strain underneath it, sets up exactly the sudden reversal the denial was meant to avoid. If financial surprises in your life tend to have visible signals in hindsight, that pattern of delayed reckoning may be active.`,
       path: `This may shift by identifying one financial strain currently being minimized, and addressing it directly before it forces a more disruptive, sudden correction. You are allowed to read the signs early and change course quietly. What current signal, honestly read, is asking for a small adjustment now?`,
-      positive: `You address financial strain at its early signs now, and gradual, chosen adjustment replaces the sudden reversals that used to catch you off guard.`,
-      negative: `Maintaining an appearance of financial stability while ignoring early strain tends to produce exactly the sudden disruption the denial was trying to avoid.`,
+      positive: `Your instinct to maintain the current financial picture hasn't changed — that steadiness was always a real, if costly, effort. What's different is that you now identify one financial strain currently being minimized and address it directly. That early action is what replaces sudden reversal with chosen adjustment.`,
+      negative: `Your tendency toward sudden financial disruption is completely real, and it keeps maintaining an appearance of stability instead of addressing the strain underneath. That maintaining isn't calm. It's a reckoning still delayed, still waiting for the early signal to actually be read.`,
     },
 
     // ── 17 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2830,8 +2830,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through hope and natural talent — real ease turning creative or inspired work into income, paired with a more passive hope that other financial areas will simply improve on their own over time. The Star governs your Relationship with Money, meaning your gift for monetizing inspiration is real, but it hasn't yet extended to areas that need direct action instead.`,
       shadow: `The risk is that hope substitutes for action in exactly the financial areas that need a concrete step, while your genuine talent for monetizing passion continues unaffected. If parts of your financial life have stayed the same for years despite hoping they'd improve, that passivity may be the pattern still active.`,
       path: `This may shift by naming one financial area you've been hoping will improve, and taking one concrete action toward it this week instead of continuing to wait. You are allowed to apply your monetizing gift to the unglamorous parts too. Which neglected corner of your finances would transform under the attention you give your inspirations?`,
-      positive: `You pair your natural gift for monetizing inspiration with real action in the areas that needed it, and hope finally has something concrete behind it.`,
-      negative: `Hoping a financial area will improve, without pairing that hope with any concrete action, tends to leave it exactly where it's always been.`,
+      positive: `Your gift for monetizing what inspires you hasn't changed — that natural ease was always real. What's different is that you now name one financial area you've been hoping will improve and take one concrete action toward it. That action is what finally gives the hope something to stand on.`,
+      negative: `Your talent for monetizing inspiration is completely real, and it keeps staying passive in other financial areas, hoping they'll simply improve on their own. That passivity isn't faith. It's a financial area still unchanged, still waiting for the same attention your passions already get.`,
     },
 
     // ── 18 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2840,8 +2840,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through anxious uncertainty — a real, felt worry about your financial state that's often more intense and less examined than the actual numbers would justify. The Moon governs your Relationship with Money, meaning your financial fear tends to run ahead of your financial facts.`,
       shadow: `The risk is that the anxiety perpetuates itself precisely because it's never actually checked against reality — a vague, unexamined fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual situation warrants, that gap between feeling and fact may be the pattern still active.`,
       path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess. You are allowed to let the numbers be clearer than the anxiety. What would you find if you looked — and how often has looking actually been worse than dreading?`,
-      positive: `You've replaced anxious financial guesswork with an actual, examined look at your numbers, and the fear settles into something workable.`,
-      negative: `An anxious, unexamined sense of your finances tends to grow precisely because it's never actually checked against the real, specific numbers.`,
+      positive: `Your anxious sense about your financial state hasn't changed in intensity — that worry was always real. What's different is that you now look directly at one specific, avoided financial number and let the actual figure replace the anxious guess. That look is what settles the fear into something workable.`,
+      negative: `Your financial anxiety is completely real, and it keeps running ahead of the actual facts, more intense than the numbers would justify. That running ahead isn't caution. It's a fear still unexamined, still waiting for the real figures to replace the guess.`,
     },
 
     // ── 19 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2850,8 +2850,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through performed confidence — a natural, radiant ease around money maintained outwardly, even during periods where the underlying picture feels genuinely uncertain. The Sun governs your Relationship with Money, meaning your real gift for financial optimism sometimes covers concerns that could use real attention instead.`,
       shadow: `The risk is that the consistent brightness prevents anyone, including you, from actually addressing what's uncertain underneath it — genuine financial concerns that never get real attention because the surface always looks fine. If you'd rarely let anyone see you actually worried about money, that consistent performance may be costing you real support.`,
       path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual ease. You are allowed to drop the performance of ease with one trusted person. Who could hold the worried version of you without your ease becoming a lie?`,
-      positive: `You let real financial uncertainty be visible sometimes, and the support that follows replaces the effort of maintaining constant, performed ease.`,
-      negative: `Performing financial confidence regardless of what's actually happening underneath keeps real concerns from ever getting the attention they need.`,
+      positive: `Your radiant ease around money hasn't changed — that natural optimism was always genuine gift. What's different is that you now let one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual brightness. That visibility is what finally lets the concern get real attention.`,
+      negative: `Your projected financial ease is completely real, and it keeps covering concerns that could use direct attention instead. That covering isn't positivity. It's a worry still unaddressed, still waiting behind a performance of ease that's costing you real support.`,
     },
 
     // ── 20 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2860,8 +2860,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through delayed reckoning — a pattern of eventually facing financial truths fully and honestly, but usually well after the signs pointing toward them first appeared. The Judgement governs your Relationship with Money, meaning your eventual clarity is genuine, but the timing tends to lag behind the actual evidence.`,
       shadow: `The risk is that the delay itself has a cost — financial issues left unaddressed longer than necessary, simply because the eventual reckoning always seems to arrive, so there's less urgency to act on early signs. If you tend to face financial truths only once they can no longer be avoided, that lag may be the pattern still active.`,
       path: `This may shift by acting on a current financial sign now, before it becomes the kind of situation that eventually forces a full reckoning. You are allowed to wake up before the call comes. What sign from the last month deserves to be treated as the wake-up now?`,
-      positive: `You act on financial signs as they appear, and the eventual, delayed reckoning gets replaced by earlier, less costly course-corrections.`,
-      negative: `Waiting for financial truths to become undeniable before facing them fully tends to make the eventual reckoning more costly than it needed to be.`,
+      positive: `Your eventual honesty about financial truths hasn't changed — that clarity, once it arrives, was always genuine. What's different is that you now act on a current financial sign now, before it becomes the kind of situation that forces a full reckoning. That earlier timing is what makes the correction less costly.`,
+      negative: `Your capacity for eventual financial clarity is completely real, and it keeps lagging behind the actual evidence, arriving only once things can no longer be avoided. That lagging isn't patience. It's a reckoning still delayed, still waiting for the early sign to be acted on instead of just noticed.`,
     },
 
     // ── 21 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2870,8 +2870,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through a large-scale, big-picture standard — real financial progress measured against an ideal, comprehensive version of success, rather than felt as complete on its own more modest terms. The World governs your Relationship with Money, meaning genuine financial wins can feel unfinished simply because the full picture hasn't yet arrived.`,
       shadow: `The risk is that real, current financial success never gets to be felt as success, because it's constantly measured against a bigger picture that hasn't materialized yet. If you can't recall the last time a financial win felt genuinely complete, that big-picture standard may be the pattern still active.`,
       path: `This may shift by naming one financial win that's genuinely real right now, and letting it count as complete on its own terms, without measuring it against the larger picture. You are allowed to let real success count even when it's smaller than the ideal picture. What have you built that the dream keeps refusing to credit?`,
-      positive: `You let real, current financial wins count as complete on their own terms, and success finally gets to be felt instead of endlessly deferred to a bigger picture.`,
-      negative: `Measuring every financial win against an ideal, bigger picture keeps real, current success from ever quite registering as success.`,
+      positive: `Your big-picture standard for financial success hasn't changed — measuring against a comprehensive, ideal version was always part of your ambition. What's different is that you now name one financial win that's genuinely real right now and let it count as complete on its own terms. That naming is what finally lets success be felt.`,
+      negative: `Your large-scale standard is completely real, and it keeps measuring every current win against a bigger picture that hasn't materialized yet. That measuring isn't ambition working right. It's a success still unfelt, still waiting to be allowed to count even when it's smaller than the dream.`,
     },
 
     // ── 22 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
@@ -2880,8 +2880,8 @@ window.DMicroContent = (function () {
       why: `Your subconscious relationship to money runs through spontaneous trust — real openness to financial risk and change, paired with a genuine belief that things will work out, more than a habit of building the structure that would make that outcome more certain. The Fool governs your Relationship with Money, meaning your financial optimism is real, but often unaccompanied by preparation.`,
       shadow: `The risk is that the trust alone gets asked to do the work that planning was meant to do — financial risks taken freely, with the landing left mostly to chance. If your financial life tends to work out through luck more than through preparation, that gap may be the pattern still unresolved.`,
       path: `This may shift by pairing your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism. You are allowed to keep the faith and also make the plan. What would trusting-with-a-spreadsheet look like for you this quarter?`,
-      positive: `You pair genuine financial optimism with real preparation, so the trust that things will work out is backed by something solid instead of chance alone.`,
-      negative: `Trusting that money will simply work out, without building any structure to support that outcome, leaves real financial risk dependent on luck.`,
+      positive: `Your spontaneous trust that money will work out hasn't changed — that openness and belief were always genuine. What's different is that you now pair your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism. That preparation is what backs the trust with something solid.`,
+      negative: `Your financial optimism is completely real, and it keeps asking trust alone to do the work planning was meant to do, risks taken freely with the landing left to chance. That trusting-without-planning isn't faith. It's an outcome still dependent on luck, still waiting for the plan to join the belief.`,
     },
 
     // ── 1 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
