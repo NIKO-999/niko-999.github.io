@@ -3003,6 +3003,10 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${hex}">THE WHY</div>
          <div class="pb-full-text">${mc.why || ''}</div>
        </div>
+       ${data.key === 'LIFEPATH' && mc.traits ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">KEY TRAITS</div>
+         <div class="pb-full-text">${mc.traits}</div>
+       </div>` : ''}
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
