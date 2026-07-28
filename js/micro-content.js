@@ -3992,8 +3992,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone carried the raw ability to begin — to spark a conviction, a practice, a way of seeing, from nothing. The Magician sits in your Paternal Spiritual Talent, meaning the gift you inherited here is a genuine capacity to originate belief rather than simply receive it.`,
       shadow: `The risk is treating the spark as something to perform rather than tend. You may light new spiritual interests easily and let each one go cold the moment the initial charge fades, mistaking novelty for depth.`,
       path: `This talent asks you to finish one spiritual thread instead of starting ten. You are allowed to let a single practice mature past its exciting beginning. What belief, sparked long ago, is ready for you to actually build something on?`,
-      positive: `You carry forward a real gift for spiritual initiation, and staying with one practice long enough lets it become something durable rather than another bright, brief start.`,
-      negative: `A spark treated as disposable repeats an old pattern of beginning without staying — the inherited gift stays raw instead of becoming a real foundation.`,
+      positive: `The gift for spiritual initiation hasn't changed — you still light new belief and practice easily, faster than most people manage. What's different is that you now stay with one thread long enough to let it mature past its exciting opening, so the spark you inherited finally becomes a foundation instead of one more bright, brief start.`,
+      negative: `The gift for spiritual initiation is completely real, and it keeps getting treated as disposable — a new practice lit easily, then let go cold the moment the initial charge fades. That pattern isn't fickleness. It's an inherited spark still waiting for the one thread you'll actually stay with long enough to build something on.`,
     },
 
     '2_F2': {
@@ -4001,8 +4001,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's line, someone trusted an inner knowing they couldn't fully explain — and that trust, not the explanation, is what reached you. The High Priestess in your Paternal Spiritual Talent means your inheritance is intuitive certainty itself.`,
       shadow: `The risk is keeping the knowing so private it never gets tested or used, treating unexplainable as a reason to stay silent rather than simply undemonstrated.`,
       path: `This talent asks you to act on the knowing before you can defend it in words. You are allowed to trust what you sense before you can explain it. What is that inherited knowing telling you right now?`,
-      positive: `You trust an inner certainty passed down wordlessly, and acting on it before it's provable is what lets its accuracy finally show.`,
-      negative: `A knowing kept too private to test never gets to prove itself — the gift stays theoretical instead of becoming trusted, lived guidance.`,
+      positive: `The inner knowing hasn't changed — it was always accurate, always arriving before proof. What's different is that you now act on it before you can fully defend it in words, letting the certainty be used instead of only held. Each time you do, the inherited trust your father's line passed down wordlessly gets to actually prove itself.`,
+      negative: `The inner knowing is completely real, and it keeps staying too private to ever be tested, treated as unexplainable rather than simply undemonstrated. That silence isn't humility. It's the gift staying theoretical, still waiting for the one time you'll act on it before you can defend it, the way it was originally meant to be used.`,
     },
 
     '3_F2': {
@@ -4010,8 +4010,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone held a real generosity of spirit — warmth, fertility of ideas, a hospitable inner life — that didn't need to announce itself to be real. The Empress in your Paternal Spiritual Talent means this abundance is yours to draw from.`,
       shadow: `The risk is keeping that abundance internal, tending your own rich inner world without ever letting it nourish anyone else, mistaking privacy for humility.`,
       path: `This talent asks you to let the abundance move outward. You are allowed to let your spiritual richness feed someone besides yourself. Who nearby is hungry for exactly the warmth you already carry?`,
-      positive: `You let an inherited spiritual abundance flow outward, and its impact grows precisely because it's no longer contained to your own inner life.`,
-      negative: `Abundance kept entirely private never gets to nourish anyone — the inherited gift stays a personal comfort instead of becoming a shared one.`,
+      positive: `The abundance was always genuinely there — a real generosity of spirit, a rich inner life. What's different is that it now moves outward, reaching someone besides yourself, instead of staying tended in private. That movement is what turns an inherited spiritual richness into the shared gift it was quietly built to become.`,
+      negative: `The abundance is completely real, and it keeps staying internal, tended carefully but never let out to nourish anyone else. That containment isn't humility. It's a generosity your father's line carried quietly, still waiting for someone to actually let it move toward another person.`,
     },
 
     '4_F2': {
@@ -4019,8 +4019,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone built a framework of belief sturdy enough to hold real weight — not a rigid cage, but scaffolding that let faith stand upright through hard seasons. The Emperor in your Paternal Spiritual Talent means structural steadiness is your inheritance.`,
       shadow: `The risk is mistaking the structure for the point, defending the framework itself rather than what it was built to hold, until the scaffolding starts to matter more than the faith inside it.`,
       path: `This talent asks you to keep the structure in service of the life, not the reverse. You are allowed to hold your convictions firmly without needing them unquestioned. Which spiritual structure of yours could flex without actually falling?`,
-      positive: `You hold a steady spiritual framework that flexes without collapsing, and that steadiness is what lets your faith outlast hard seasons instead of cracking under them.`,
-      negative: `A structure defended for its own sake calcifies — the inherited steadiness becomes rigidity, and what was built to hold faith starts to strangle it instead.`,
+      positive: `The structural steadiness hasn't changed — the framework still holds real weight. What's different is that you now keep it in service of the faith it was built to hold, rather than defending the structure for its own sake. That flexibility is what lets an inherited steadiness outlast hard seasons instead of cracking or strangling what's inside it.`,
+      negative: `The structural steadiness is completely real, and it keeps calcifying into something defended for its own sake, mattering more than the faith it was originally built to hold. That rigidity isn't strength. It's an inherited scaffolding your father's line built to hold weight, quietly strangling the very thing it was meant to support.`,
     },
 
     '5_F2': {
@@ -4028,8 +4028,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone received and carried forward an actual body of teaching — not a vague sense of tradition, but real, specific doctrine passed hand to hand. The Hierophant in your Paternal Spiritual Talent means you inherited the whole transmission, not just its outline.`,
       shadow: `The risk is carrying the doctrine unexamined, teaching what you were taught without ever testing it against your own lived encounter with the sacred.`,
       path: `This talent asks you to keep what still serves and release what doesn't, on your own authority. You are allowed to inherit the teaching and still make it yours. Which part of what you were handed has actually proven true in your own life?`,
-      positive: `You carry a real inherited body of teaching, tested and renewed by your own experience, so what you pass on next is alive rather than merely repeated.`,
-      negative: `Doctrine carried without ever being tested against lived experience calcifies into something recited rather than believed — the inheritance stops actually transmitting anything real.`,
+      positive: `The body of teaching hasn't changed — the actual doctrine your father's line handed down is still fully intact. What's different is that you've tested it against your own lived encounter with the sacred, keeping what holds and releasing what doesn't. That renewal is what makes the inheritance alive rather than merely recited.`,
+      negative: `The body of teaching is completely real, carried whole from your father's line, and it keeps going untested against your own actual experience, recited rather than believed. That habit isn't reverence. It's a real transmission quietly stopping at you, never renewed enough to genuinely pass on to anyone after.`,
     },
 
     '6_F2': {
@@ -4037,8 +4037,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone chose their faith rather than merely inheriting it — a real, examined devotion, arrived at rather than assumed. The Lovers in your Paternal Spiritual Talent means the gift you carry is the capacity to choose your beliefs on purpose.`,
       shadow: `The risk is going through the motions of choice while actually just accepting whatever was easiest or expected, mistaking inherited comfort for genuine conviction.`,
       path: `This talent asks you to actually examine what you believe and choose it again, deliberately. You are allowed to keep only the parts of your inherited faith that you would choose fresh today. What would you choose if no one before you had already chosen it?`,
-      positive: `You hold a devotion that's genuinely chosen rather than merely inherited, and that ownership is what makes your faith durable under real pressure.`,
-      negative: `Faith carried by default rather than choice thins out the moment it's tested — an inheritance never actually claimed as your own rarely holds.`,
+      positive: `The devotion hasn't changed — the capacity to actually choose your beliefs, rather than merely receive them, was always the real inheritance. What's different is that you've examined what you believe and chosen it again, deliberately, instead of accepting it by default. That ownership is what makes faith durable under real pressure.`,
+      negative: `The capacity for genuine, chosen devotion is completely real, and it keeps running on default acceptance instead of actual examination, faith carried because it's easiest rather than because it's been claimed. That default isn't peace with your tradition. It's an inheritance still waiting for you to choose it on purpose, the way your father's line once did.`,
     },
 
     '7_F2': {
@@ -4046,8 +4046,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone pointed real determination at a spiritual destination rather than letting it dissipate into mere busyness. The Chariot in your Paternal Spiritual Talent means directed spiritual will is your inheritance.`,
       shadow: `The risk is applying the drive without ever pausing to check the direction, moving hard toward a spiritual goal that was set for you rather than one you've actually examined.`,
       path: `This talent asks you to aim the inherited drive at a destination you've chosen yourself. You are allowed to slow down long enough to steer. What spiritual direction are you moving toward that you've actually chosen, not just inherited momentum toward?`,
-      positive: `You aim real spiritual drive at a destination you've deliberately chosen, and that alignment is what makes the momentum actually take you somewhere worth arriving.`,
-      negative: `Drive aimed at an inherited destination never actually examined burns real energy without ever quite arriving anywhere that's genuinely yours.`,
+      positive: `The drive hasn't changed — the determination itself was always real and considerable. What's different is that it's now aimed at a destination you've actually chosen, rather than one inherited and never examined. That alignment is what lets the momentum take you somewhere worth arriving, instead of just somewhere fast.`,
+      negative: `The spiritual drive is completely real, and it keeps burning hard toward a destination that was set for you rather than chosen by you, momentum spent without ever quite arriving anywhere genuinely yours. That expenditure isn't wasted ambition. It's inherited direction still waiting for you to actually steer it somewhere your own.`,
     },
 
     '8_F2': {
@@ -4055,8 +4055,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone held a real, careful sense of moral balance — not loud judgment, but a quiet insistence on doing right by people. Justice in your Paternal Spiritual Talent means integrity itself is your inheritance.`,
       shadow: `The risk is turning that fairness outward only, auditing everyone else's conduct while your own goes unexamined, mistaking vigilance for virtue.`,
       path: `This talent asks you to apply the inherited standard to yourself first. You are allowed to receive the same fairness you extend to others. Where would your own verdict soften if you judged yourself as gently as you judge fairly?`,
-      positive: `You hold a real integrity applied evenly, inward and outward alike, and that evenness is what makes your fairness trusted rather than merely feared.`,
-      negative: `Fairness applied only outward while the self goes unexamined curdles into quiet self-exemption — the inherited integrity stops being whole.`,
+      positive: `The integrity hasn't changed — the quiet insistence on doing right by people was always real. What's different is that the same standard now applies to you too, not just everyone else. That evenness is what turns an inherited fairness into something trusted rather than merely feared.`,
+      negative: `The moral integrity is completely real, and it keeps applying only outward, auditing everyone else's conduct while your own goes quietly unexamined. That imbalance isn't virtue. It's an inherited fairness curdling into self-exemption, still waiting for you to extend the same standard to yourself.`,
     },
 
     '9_F2': {
@@ -4064,8 +4064,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone found real understanding through solitude — withdrawal that produced depth rather than isolation. The Hermit in your Paternal Spiritual Talent means contemplative wisdom is your inheritance.`,
       shadow: `The risk is staying in the solitude past its purpose, gathering wisdom that never gets carried back out to anyone who could actually use it.`,
       path: `This talent asks you to return from the quiet with something to offer. You are allowed to bring the solitary understanding into shared light. Who nearby could use what your withdrawal has already shown you?`,
-      positive: `You gather real depth in solitude and bring it back into relationship, and that return is what turns private wisdom into a genuine gift.`,
-      negative: `Wisdom gathered alone and never brought back stays a private comfort — the inherited depth never reaches anyone it could actually help.`,
+      positive: `The capacity for solitary depth hasn't changed — real understanding still comes from withdrawal, the way it did for your father's line. What's different is that you now return from the quiet with something to offer, instead of keeping the wisdom entirely to yourself. That return is what turns it into a genuine gift.`,
+      negative: `The capacity for contemplative depth is completely real, and it keeps staying in the solitude past its purpose, wisdom gathered but never carried back out to anyone who could use it. That withholding isn't introversion. It's an inherited depth still waiting for someone to bring it back into the light.`,
     },
 
     '10_F2': {
@@ -4073,8 +4073,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone learned to read the turning of a spiritual season rather than fighting every downturn as a catastrophe. The Wheel of Fortune in your Paternal Spiritual Talent means faith through cycles is your inheritance.`,
       shadow: `The risk is forgetting the lesson under real pressure, treating every low spiritual season as proof that everything is failing rather than simply turning.`,
       path: `This talent asks you to trust the turning even when you're currently on the downswing. You are allowed to meet a hard season with curiosity instead of panic. What might this current spiritual low actually be clearing space for?`,
-      positive: `You meet spiritual downturns with earned patience rather than panic, and that patience is what lets the turning actually complete instead of being fought the whole way through.`,
-      negative: `Forgetting the inherited trust in cycles under pressure turns an ordinary low season into a full crisis — the wisdom is there but goes unused exactly when it's needed most.`,
+      positive: `The trust in spiritual timing hasn't changed — the ability to read a season turning was always real. What's different is that you now meet a downswing with the earned patience your father's line learned the hard way, instead of treating every low as catastrophe. That patience is what lets the turning actually complete.`,
+      negative: `The trust in cycles is completely real and hard-won, and it keeps getting forgotten exactly under pressure, an ordinary low season treated as proof everything is failing. That panic isn't a character flaw. It's inherited wisdom going unused precisely when it's needed most, still waiting for you to remember it mid-downturn.`,
     },
 
     '11_F2': {
@@ -4082,8 +4082,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone carried real inner steadiness that didn't need an audience to be true. Strength in your Paternal Spiritual Talent means quiet, unforced resilience is your inheritance.`,
       shadow: `The risk is performing the strength for others rather than simply holding it, turning an inward steadiness into something you feel you must constantly demonstrate.`,
       path: `This talent asks you to let the strength be private when it wants to be. You are allowed to be resilient without an audience or a test. Where in your spiritual life could you stop demonstrating and simply be steady?`,
-      positive: `You hold real steadiness without needing it witnessed, and that quiet resilience is what makes it durable rather than performance-dependent.`,
-      negative: `Strength performed for others rather than simply held starts to depend on the audience — remove the witnesses and the inherited steadiness wavers.`,
+      positive: `The inner steadiness hasn't changed — it never actually needed an audience to be real. What's different is that you now let it be private when it wants to be, instead of demonstrating it constantly. That quiet resilience is what makes an inherited strength durable rather than dependent on being witnessed.`,
+      negative: `The inner steadiness is completely real, and it keeps getting performed rather than simply held, demonstrated for others until the strength starts depending on being seen. That performance isn't confidence. It's an inherited resilience still waiting to be trusted quietly, without needing a witness to make it count.`,
     },
 
     '12_F2': {
@@ -4091,8 +4091,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone learned real patience through a season of genuine suspension — waiting that taught something standing still never could. The Hanged Man in your Paternal Spiritual Talent means patient perspective is your inheritance.`,
       shadow: `The risk is mistaking every pause for that same kind of productive suspension, staying in stuck situations indefinitely because waiting once paid off.`,
       path: `This talent asks you to tell the difference between a pause still doing work and one that's become avoidance. You are allowed to hang upside down a while longer only if the view is still teaching you. What is your current waiting actually showing you?`,
-      positive: `You can tell a generative pause from mere stalling, and that discernment is what lets the inherited patience keep producing real insight instead of just delay.`,
-      negative: `A pause mistaken for permanent wisdom becomes simple avoidance — the inherited patience stops teaching anything once it outlives its purpose.`,
+      positive: `The capacity for patient suspension hasn't changed — waiting really did teach your father's line something standing still never could. What's different is that you now tell a pause still doing work apart from one that's become avoidance. That discernment is what keeps the inherited patience producing insight instead of just delay.`,
+      negative: `The capacity for patient suspension is completely real, and it keeps getting applied to every pause indiscriminately, a stuck situation endured indefinitely because waiting once paid off. That confusion isn't wisdom. It's an inherited patience that's outlived its purpose, still waiting for you to notice when it's actually become avoidance.`,
     },
 
     '13_F2': {
@@ -4100,8 +4100,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone let a belief, a version of faith, or an old identity actually die when its time came, rather than propping it up past its natural end. Transformation in your Paternal Spiritual Talent means the capacity for real spiritual endings is your inheritance.`,
       shadow: `The risk is applying that willingness too readily, ending things prematurely just to avoid sitting with something difficult a little longer.`,
       path: `This talent asks you to let real endings complete without rushing them. You are allowed to let an old belief finish dying so something truer can be born. What version of your faith is quietly ready to be released?`,
-      positive: `You let outdated beliefs actually complete their ending, and that willingness is what makes room for a truer, more current faith to take their place.`,
-      negative: `Endings rushed just to avoid discomfort skip the actual completion — the inherited willingness to let go gets used as an exit instead of genuine release.`,
+      positive: `The capacity to let a belief actually die hasn't changed — that willingness was always your father's line's real inheritance. What's different is that you now let the ending complete fully, without rushing it just to escape the discomfort. That patience is what makes room for a truer faith to actually take its place.`,
+      negative: `The capacity to let old beliefs end is completely real, and it keeps getting used to skip discomfort rather than complete the actual ending, a version of faith abandoned before it's genuinely finished dying. That haste isn't decisiveness. It's an inherited willingness to let go, still waiting to be used as real release instead of a quick exit.`,
     },
 
     '14_F2': {
@@ -4109,8 +4109,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone found a genuine, working balance between devotion and daily life, discipline and ease, without needing a rulebook to get there. Temperance in your Paternal Spiritual Talent means integrated moderation is your inheritance.`,
       shadow: `The risk is treating the blend as fixed rather than living, applying an old formula for balance to a life that has since changed shape.`,
       path: `This talent asks you to keep re-blending rather than settling on one static mix. You are allowed to combine your spiritual practices slowly and call it mastery. What two parts of your faith are ready for a new blend?`,
-      positive: `You keep actively re-blending devotion and daily life as both evolve, and that living balance is what keeps the inherited integration genuinely working.`,
-      negative: `A once-working blend applied rigidly to a changed life stops actually balancing anything — the inherited integration calcifies into an old formula.`,
+      positive: `The gift for balance hasn't changed — the ability to blend devotion and daily life without a rulebook was always real. What's different is that you now keep re-blending as both evolve, instead of settling on one fixed mix. That ongoing calibration is what keeps an inherited integration genuinely working.`,
+      negative: `The gift for balance is completely real, and it keeps applying an old, once-working formula to a life that's since changed shape, a mix that no longer actually balances anything. That rigidity isn't consistency. It's an inherited integration calcified into a static blend, still waiting for you to remix it.`,
     },
 
     '15_F2': {
@@ -4118,8 +4118,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone faced a real compulsion — toward power, control, or an old attachment — honestly enough to loosen its grip rather than pretend it wasn't there. The Devil in your Paternal Spiritual Talent means honest reckoning with spiritual shadow is your inheritance.`,
       shadow: `The risk is inheriting the pull itself without inheriting the honesty that faced it, repeating the compulsion while skipping the reckoning that actually worked.`,
       path: `This talent asks you to look at your own pull as directly as your line once did. You are allowed to examine the compulsion without shame. What is the pull actually protecting you from feeling?`,
-      positive: `You face an inherited compulsion honestly rather than denying it, and that honesty is what actually loosens its grip the way it once loosened for your line.`,
-      negative: `A pull inherited without the honesty that once faced it just repeats itself unexamined — the compulsion returns because the reckoning never happened.`,
+      positive: `The pull hasn't disappeared — it was always real, inherited alongside the honesty that once faced it. What's different is that you've looked at your own version of it directly, the way your father's line once did, instead of pretending it wasn't there. That reckoning is what actually loosens its grip.`,
+      negative: `The pull is completely real, and it keeps repeating itself unexamined, inherited without the honesty that once faced it down. That repetition isn't weakness. It's a compulsion still waiting for the same direct reckoning that loosened it once before, in the line that handed it to you.`,
     },
 
     '16_F2': {
@@ -4127,8 +4127,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, a belief structure fell suddenly, and someone rebuilt afterward on more honest ground rather than reconstructing the same flawed shape. The Tower in your Paternal Spiritual Talent means resilience through spiritual collapse is your inheritance.`,
       shadow: `The risk is fearing collapse so much you avoid ever testing a belief that quietly needs it, propping up something you already suspect isn't sound.`,
       path: `This talent asks you to let a shaky structure fall on its own terms rather than defending it indefinitely. You are allowed to watch it fall without catching it this time. What belief of yours is already cracked and asking to be rebuilt honestly?`,
-      positive: `You let genuinely unstable beliefs fall and rebuild on truer ground, and that willingness is what keeps your faith actually sound instead of quietly propped up.`,
-      negative: `Defending a structure you already suspect is unsound just delays an inevitable, harder collapse — the inherited resilience never gets the chance to do its real work.`,
+      positive: `The resilience through collapse hasn't changed — the capacity to rebuild on truer ground was always the real inheritance. What's different is that you now let a shaky structure fall on its own terms, instead of defending something you already suspect isn't sound. That willingness is what keeps your faith actually sound.`,
+      negative: `The resilience through collapse is completely real, and it's being spent on defending a structure you already suspect is unsound, propping it up rather than letting it fall. That defense isn't faithfulness. It's an inherited resilience waiting to do its real work, delayed by a collapse you're postponing rather than allowing.`,
     },
 
     '17_F2': {
@@ -4136,8 +4136,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone kept faith burning through genuinely hard seasons, without needing evidence it would work out. The Star in your Paternal Spiritual Talent means unproven, durable hope is your inheritance.`,
       shadow: `The risk is keeping that hope modest and private, as if believing too openly or too largely would be tempting fate.`,
       path: `This talent asks you to let the hope be as large as it actually is. You are allowed to hope at full size. What immodest hope have you been quietly shrinking before anyone could hear it?`,
-      positive: `You keep a real, unproven hope burning openly rather than modestly, and that visible faith is what actually sustains people around you too.`,
-      negative: `Hope kept deliberately small and private stops doing the work it was built for — the inherited faith shrinks to fit a caution it never actually needed.`,
+      positive: `The hope hasn't changed — the capacity to keep faith burning through hard seasons, without needing proof, was always real. What's different is that you now let it be as large and visible as it actually is, instead of keeping it modest. That visibility is what lets an inherited hope sustain the people around you too.`,
+      negative: `The capacity for durable, unproven hope is completely real, and it keeps staying modest and private, as if believing too openly would be tempting fate. That caution isn't wisdom. It's an inherited faith shrunk to fit a fear it never actually needed, still waiting to be let out at its real size.`,
     },
 
     '18_F2': {
@@ -4145,8 +4145,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone trusted a felt spiritual undercurrent — a sensed presence, a hunch about meaning — before it could be proven or fully articulated. The Moon in your Paternal Spiritual Talent means trust in the unexplainable is your inheritance.`,
       shadow: `The risk is letting that trust curdle into anxious, unverified story, mistaking every strong feeling for confirmed spiritual truth.`,
       path: `This talent asks you to hold the sense as real without needing it verified. You are allowed to trust what you sense before you can explain it. What is that feeling actually pointing toward right now?`,
-      positive: `You trust real spiritual undercurrents without needing constant proof, and that trust is what lets genuine intuition guide you instead of anxiety impersonating it.`,
-      negative: `An unverified feeling treated as certain fact rather than a genuine hunch quietly curdles into anxiety wearing intuition's clothing.`,
+      positive: `The trust in unexplainable undercurrents hasn't changed — sensing meaning before it can be proven was always the real inheritance. What's different is that you now hold the sense as real without needing it verified, instead of letting every strong feeling curdle into anxious story. That discernment is what lets genuine intuition actually guide you.`,
+      negative: `The sensitivity to spiritual undercurrents is completely real, and it keeps getting treated as certain fact rather than a felt hunch, curdling into anxious, unverified story. That confusion isn't intuition failing. It's a genuine sensitivity still waiting for you to sort what's actually sensed from what's simply worried.`,
     },
 
     '19_F2': {
@@ -4154,8 +4154,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone let genuine delight sit inside devotion rather than treating seriousness as the only proof of sincerity. The Sun in your Paternal Spiritual Talent means joyful faith is your inheritance.`,
       shadow: `The risk is hiding that joy behind a more solemn presentation, performing gravity because it feels like the more respectable way to be spiritual.`,
       path: `This talent asks you to let the joy be visible, not just felt. You are allowed to keep a joyful faith — reverence and laughter were never enemies. What delight might be the most serious spiritual practice available to you right now?`,
-      positive: `You let real joy be visible inside your devotion, and that visibility is what makes your faith contagious rather than merely respectable.`,
-      negative: `Joy hidden behind solemn performance drains the faith of exactly the warmth that made it inheritable in the first place.`,
+      positive: `The joy hasn't changed — genuine delight was always allowed to sit inside your father's line's devotion. What's different is that you now let it be visible, not just felt, instead of hiding it behind a more solemn presentation. That visibility is what makes an inherited faith contagious rather than merely respectable.`,
+      negative: `The capacity for joyful faith is completely real, and it keeps hiding behind a more solemn performance, as though seriousness were the only proof of sincerity. That performance isn't reverence. It's an inherited warmth quietly drained out, still waiting for you to let the delight actually show.`,
     },
 
     '20_F2': {
@@ -4163,8 +4163,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone heard an unmistakable spiritual summons — and whether or not they fully answered it, they passed the hearing of it down to you. Judgement in your Paternal Spiritual Talent means the capacity to recognize a real calling is your inheritance.`,
       shadow: `The risk is hearing the summons clearly and still finding sophisticated reasons to keep preparing instead of rising to meet it.`,
       path: `This talent asks you to answer before you feel fully ready. You are allowed to rise before you feel prepared. What is the calling asking of you this month, specifically?`,
-      positive: `You recognize and answer a real calling without waiting for total readiness, and that responsiveness is what your line was hoping would finally happen.`,
-      negative: `A calling heard clearly but endlessly deferred for more preparation never actually gets answered — the inherited capacity to hear it goes unused.`,
+      positive: `The capacity to recognize a real calling hasn't changed — you've heard it as clearly as your father's line once did. What's different is that you now answer before feeling fully ready, instead of finding sophisticated reasons to keep preparing. That responsiveness is what your line was hoping would finally happen.`,
+      negative: `The capacity to hear a genuine calling is completely real, and it keeps being deferred for more preparation, heard clearly and still not answered. That delay isn't caution. It's an inherited summons still waiting for someone to rise to meet it before feeling fully ready.`,
     },
 
     '21_F2': {
@@ -4172,8 +4172,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's spiritual line, someone came close to real spiritual arrival — an integration, a sense of having actually gotten there — and, for reasons lost to time, never quite let it be acknowledged as complete. The World in your Paternal Spiritual Talent means the capacity for genuine spiritual completion is your inheritance, waiting to actually be claimed.`,
       shadow: `The risk is repeating the same near-arrival, reaching real integration and still finding a reason it doesn't quite count as finished.`,
       path: `This talent asks you to let a spiritual arrival actually be called complete. You are allowed to call it finished and mean it. What spiritual milestone have you already reached that deserves to be named as arrived, not almost?`,
-      positive: `You let a genuine spiritual arrival be acknowledged as complete, finishing what your line came close to but never quite claimed.`,
-      negative: `A spiritual completion that's reached but never acknowledged repeats the old near-arrival — the inherited capacity for genuine landing stays just out of reach.`,
+      positive: `The capacity for real spiritual arrival hasn't changed — you've reached genuine integration, the same way your father's line came close to. What's different is that you now let it actually be called complete, instead of finding a reason it doesn't quite count as finished. That naming is what finally lets the landing land.`,
+      negative: `The capacity for genuine spiritual arrival is completely real, and it keeps reaching real integration and finding a reason it doesn't quite count as finished. That habit isn't humility. It's an inherited near-arrival repeating itself, still waiting for someone to call a real milestone complete instead of almost.`,
     },
 
     '22_F2': {
@@ -4181,8 +4181,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's spiritual line, someone believed in spiritual freedom and possibility before circumstances made it safe to act on — faith as an act of daring, not just comfort. The Fool in your Paternal Spiritual Talent means the capacity for that kind of leap is your inheritance.`,
       shadow: `The risk is inheriting the belief in freedom without ever actually taking the leap it was pointing toward, keeping the possibility purely theoretical.`,
       path: `This talent asks you to actually take one leap this season. You are allowed to leap with open eyes and still call it faith. What would you begin if wisdom and boldness finally worked together instead of the boldness always waiting for permission?`,
-      positive: `You take a real spiritual leap rather than only believing one is possible, and that action is what turns inherited faith into inherited courage.`,
-      negative: `Belief in freedom that never becomes an actual leap stays a comforting idea rather than a lived inheritance — the courage waits indefinitely for permission that was never required.`,
+      positive: `The belief in spiritual freedom hasn't changed — faith as an act of daring was always your father's line's real inheritance. What's different is that you now actually take the leap it was pointing toward, instead of keeping the possibility theoretical. That action is what turns inherited faith into inherited courage.`,
+      negative: `The belief in spiritual freedom is completely real, and it keeps staying theoretical, a comforting idea that never becomes an actual leap. That hesitation isn't wisdom waiting for the right moment. It's inherited courage still waiting for a permission that was never actually required to begin with.`,
     },
 
 
