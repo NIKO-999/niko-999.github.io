@@ -4394,8 +4394,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone could start a venture, a trade, an income from bare circumstances — real, practical originating ability. The Magician in your Paternal Material Talent means launching from scratch is your inheritance.`,
       shadow: `The risk is starting many things and finishing few, spending the inherited spark on the exciting opening and losing interest once the harder building begins.`,
       path: `This talent asks you to carry one material venture past its beginning. You are allowed to finish something ordinary and let that count. What would you build if starting were the qualification, not finishing?`,
-      positive: `You carry a genuine gift for material initiation, and staying with one venture past its start turns raw spark into something that actually lasts.`,
-      negative: `A spark spent only on beginnings repeats a pattern of starting without staying — the inherited talent stays a series of openings instead of a real build.`,
+      positive: `The gift for material initiation hasn't changed — you can still start a venture from bare circumstances faster than most people manage. What's different is that you now carry one past its exciting opening, into the harder, less glamorous building. That persistence is what turns the inherited spark into something that actually lasts.`,
+      negative: `The gift for material initiation is completely real, and it keeps getting spent entirely on beginnings — venture after venture launched, then quietly abandoned once the harder building starts. That pattern isn't a lack of ability. It's an inherited spark still waiting for the one start you'll actually carry through to a finish.`,
     },
 
     '2_H2': {
@@ -4403,8 +4403,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone read a financial or practical situation correctly before the facts could confirm it — instinct that outran the spreadsheet and was usually right. The High Priestess in your Paternal Material Talent means that instinct is your inheritance.`,
       shadow: `The risk is trusting the instinct so privately it never gets acted on, letting a correct read go unused because it can't yet be justified on paper.`,
       path: `This talent asks you to act on the instinct and let the numbers catch up. You are allowed to trust the practical read before you can explain it. Where has that inherited gut-sense already been right, quietly, without credit?`,
-      positive: `You trust a real practical instinct and act on it before it's fully provable, and that trust is what makes the gift actually useful instead of merely accurate in hindsight.`,
-      negative: `An instinct trusted only in private, after the fact, never gets to actually change an outcome — the inherited read stays a quiet 'I knew it' instead of a decision.`,
+      positive: `The practical instinct hasn't changed — it still outruns the spreadsheet, and it's usually right. What's different is that you now act on it before it's fully provable, instead of confirming it privately after the fact. That willingness to move on the read is what makes an inherited instinct actually useful, not just accurate in hindsight.`,
+      negative: `The practical instinct is completely real, and it keeps being trusted only privately, confirmed quietly after the fact rather than acted on when it mattered. That habit isn't caution. It's an inherited gut-sense still waiting for the one time you'll let it change a decision instead of just narrate one afterward.`,
     },
 
     '3_H2': {
@@ -4412,8 +4412,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone made certain the people around them were fed, housed, and materially cared for — practical generosity as instinct, not effort. The Empress in your Paternal Material Talent means that provision is your inheritance.`,
       shadow: `The risk is providing for everyone except yourself, extending the generosity outward so consistently that your own material comfort quietly goes unattended.`,
       path: `This talent asks you to include yourself in the providing. You are allowed to be fed and held too, not just to make sure of it for others. Who checks whether you've eaten, rested, been materially cared for lately?`,
-      positive: `You provide for others and let yourself be provided for in turn, and that reciprocity is what keeps the inherited generosity sustainable instead of depleting.`,
-      negative: `Provision extended only outward eventually runs the well dry — the inherited generosity stops being sustainable once it excludes its own source.`,
+      positive: `The instinct to provide hasn't changed — making sure people are fed and cared for was always genuine, not effort. What's different is that you now let yourself be provided for too, instead of extending the generosity only outward. That reciprocity is what keeps an inherited gift sustainable rather than depleting.`,
+      negative: `The instinct to provide is completely real, and it keeps running exclusively outward, extended to everyone except the person extending it. That imbalance isn't generosity working as intended. It's an inherited provision that's excluded its own source, still waiting for you to let yourself be included in the care.`,
     },
 
     '4_H2': {
@@ -4421,8 +4421,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone built systems — a business, a household economy, a way of organizing resources — sturdy enough to actually last. The Emperor in your Paternal Material Talent means structural competence is your inheritance.`,
       shadow: `The risk is building structures so rigid they become a burden to maintain, mistaking control for stability until the system exists mainly to be defended.`,
       path: `This talent asks you to let the structure serve rather than dominate. You are allowed to hold power in your material life gently. Where could steadiness replace either the grip or the absence?`,
-      positive: `You build material structures that hold real weight without becoming a burden, and that ease is what makes the inherited competence actually livable.`,
-      negative: `A structure built to be controlled rather than lived inside becomes its own weight — the inherited competence turns into a system that must constantly be managed.`,
+      positive: `The structural competence hasn't changed — building systems sturdy enough to last was always the real inheritance. What's different is that you now let the structure serve the life inside it, rather than defending or managing it constantly. That ease is what makes an inherited competence actually livable.`,
+      negative: `The structural competence is completely real, and the systems it builds keep becoming their own burden, controlled rather than lived inside, requiring constant management to hold. That weight isn't the price of stability. It's an inherited competence still waiting to serve rather than dominate.`,
     },
 
     '5_H2': {
@@ -4430,8 +4430,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone carried real practical know-how — a trade, a craft, a way of handling money or materials — learned by doing rather than by certificate. The Hierophant in your Paternal Material Talent means that untaught expertise is your inheritance.`,
       shadow: `The risk is undervaluing the skill precisely because it wasn't formally credentialed, treating something genuinely expert as merely ordinary.`,
       path: `This talent asks you to name the skill as real expertise. You are allowed to own the abilities nobody certified. What untaught competence of yours deserves to be named as expertise rather than a knack?`,
-      positive: `You claim an inherited, uncertified skill as genuine expertise, and that claiming is what finally lets it be valued at its actual worth.`,
-      negative: `A real skill dismissed as merely a knack goes underpriced and underused — the inherited expertise stays invisible for lack of a name.`,
+      positive: `The skill hasn't changed — the practical know-how absorbed by watching, not by certificate, was always genuine expertise. What's different is that you now name it as such, instead of treating it as merely a knack because it wasn't formally taught. That naming is what finally lets it be valued at its actual worth.`,
+      negative: `The skill is completely real, learned by doing the way it always was in your father's line, and it keeps being dismissed as ordinary simply because no one certified it. That undervaluing isn't modesty. It's genuine expertise still waiting for someone to actually call it that.`,
     },
 
     '6_H2': {
@@ -4439,8 +4439,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone kept clear values intact even when money or resources were genuinely scarce — clarity about what mattered that didn't bend under pressure. The Lovers in your Paternal Material Talent means that clarity is your inheritance.`,
       shadow: `The risk is letting that clarity fade the moment resources become comfortable, forgetting under abundance the values that were so sharp under scarcity.`,
       path: `This talent asks you to keep the clarity active even when it isn't required. You are allowed to keep the essential things essential, scarce or not. What does your inheritance help you see that abundance tends to blur?`,
-      positive: `You keep the same material clarity whether resources are tight or plentiful, and that consistency is what makes the inherited values durable rather than situational.`,
-      negative: `Clarity about what matters that only shows up under scarcity isn't values, it's survival mode — the inherited gift stays dormant once things get easy.`,
+      positive: `The clarity about what matters hasn't changed — it held steady under real scarcity, the way it did for your father's line. What's different is that you now keep it active even when resources are comfortable, instead of letting it fade the moment pressure lifts. That consistency is what makes an inherited clarity durable rather than situational.`,
+      negative: `The clarity about what matters is completely real, sharp and dependable under scarcity, and it keeps going dormant the moment resources become comfortable. That fading isn't relaxation. It's an inherited value that only activates under survival pressure, still waiting to stay switched on when things get easy.`,
     },
 
     '7_H2': {
@@ -4448,8 +4448,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone drove a material goal forward alone, without waiting for permission or partnership to move. The Chariot in your Paternal Material Talent means self-directed material drive is your inheritance.`,
       shadow: `The risk is refusing help even when it's genuinely offered, treating solo determination as the only legitimate way to reach a material goal.`,
       path: `This talent asks you to keep the drive and add a hand. You are allowed to ask for help and keep the wheel. What are you steering alone right now that was never designed for one driver?`,
-      positive: `You keep real self-directed determination while letting help in when it's offered, and that combination is what actually accelerates the inherited drive.`,
-      negative: `Determination that refuses all help caps its own ceiling — the inherited drive stays solo-sized instead of reaching what partnership could build.`,
+      positive: `The self-directed determination hasn't changed — the drive to move a material goal forward alone was always real. What's different is that you now let a hand in when it's genuinely offered, instead of refusing help by default. That combination is what actually accelerates an inherited drive past what solo effort alone could reach.`,
+      negative: `The self-directed determination is completely real, and it keeps refusing help even when it's genuinely available, treating solo effort as the only legitimate way forward. That refusal isn't independence. It's an inherited drive capping its own ceiling, still waiting for a hand it's never let itself accept.`,
     },
 
     '8_H2': {
@@ -4457,8 +4457,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone divided resources, credit, and reward with real, careful fairness — not performative generosity, but actual balance. Justice in your Paternal Material Talent means that fairness is your inheritance.`,
       shadow: `The risk is applying that fairness to everyone except yourself, dividing carefully for others while leaving your own share consistently smallest.`,
       path: `This talent asks you to include yourself in the fair division. You are allowed to be part of your own fair share. When the careful dividing is done, what portion have you been leaving off your own plate?`,
-      positive: `You divide resources fairly, yourself included, and that inclusion is what makes the inherited fairness actually whole instead of self-sacrificing.`,
-      negative: `Fairness that always excludes the self isn't balance, it's quiet self-shortchanging — the inherited integrity stays incomplete.`,
+      positive: `The sense of material fairness hasn't changed — dividing resources and credit carefully was always the real inheritance. What's different is that you now include yourself in that fair division, instead of consistently taking the smallest share. That inclusion is what makes an inherited fairness actually whole.`,
+      negative: `The sense of material fairness is completely real, careful and consistent for everyone else, and it keeps excluding the person applying it. That exclusion isn't humility. It's an inherited integrity that's stayed incomplete, still waiting for you to put yourself on the ledger it so carefully balances for others.`,
     },
 
     '9_H2': {
@@ -4466,8 +4466,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone managed real material responsibility in solitude and did it capably, without needing company to get it right. The Hermit in your Paternal Material Talent means solitary material competence is your inheritance.`,
       shadow: `The risk is staying solitary in it even when company would genuinely help, treating solo capability as the only trustworthy way to handle things.`,
       path: `This talent asks you to let a task be witnessed or shared sometimes. You are allowed to be competent and accompanied. What material task could you let someone witness, or even share, this week?`,
-      positive: `You handle material responsibility capably and let it be shared when sharing would actually help, and that openness deepens rather than threatens the inherited competence.`,
-      negative: `Competence that refuses company even when company would help isolates its own gift — the inherited skill stays solitary by habit, not by necessity.`,
+      positive: `The solitary material competence hasn't changed — handling real responsibility alone and doing it well was always genuine. What's different is that you now let a task be witnessed or shared sometimes, instead of defaulting to solitude out of habit. That openness deepens an inherited competence instead of threatening it.`,
+      negative: `The solitary material competence is completely real, capable and self-sufficient, and it keeps staying solitary even when company would genuinely help. That isolation isn't necessity anymore. It's an inherited habit still waiting for you to notice when sharing the task would actually serve you better than carrying it alone.`,
     },
 
     '10_H2': {
@@ -4475,8 +4475,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone weathered real financial or material cycles — booms and busts — without being wrecked by either extreme. The Wheel of Fortune in your Paternal Material Talent means that endurance is your inheritance.`,
       shadow: `The risk is bracing so hard against the next downturn that you can't actually receive or enjoy the current upswing.`,
       path: `This talent asks you to let the good stretch actually land as good. You are allowed to expect good stretches, not just endure hard ones. What upswing might you be bracing against instead of receiving?`,
-      positive: `You meet material cycles with earned steadiness in both directions, and that evenness lets you actually receive the good seasons instead of just surviving the hard ones.`,
-      negative: `Bracing permanently against the next downturn means never fully receiving the current upswing — the inherited endurance becomes vigilance instead of resilience.`,
+      positive: `The endurance through material cycles hasn't changed — weathering real booms and busts without being wrecked by either was always the inheritance. What's different is that you now let a genuine upswing actually land as good, instead of bracing through it for the next downturn. That reception is what completes an inherited resilience.`,
+      negative: `The endurance through material cycles is completely real, hard-won across real booms and busts, and it keeps bracing so hard against the next downturn that the current upswing never fully registers as good. That vigilance isn't resilience anymore. It's an inherited endurance still waiting to actually receive a good stretch instead of just surviving the hard ones.`,
     },
 
     '11_H2': {
@@ -4484,8 +4484,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone stayed gentle through real material hardship — softness that endured rather than hardened. Strength in your Paternal Material Talent means that gentleness-under-pressure is your inheritance.`,
       shadow: `The risk is mistaking the gentleness for weakness under your own current strain, hardening reflexively instead of trusting the softness to hold.`,
       path: `This talent asks you to trust that the softness already proved itself. You are allowed to stay soft — the strain already proved it doesn't break you. Where is your gentleness quietly outlasting circumstances that were supposed to harden you?`,
-      positive: `You stay gentle under real material pressure, and that endurance is proof the softness was never actually fragile.`,
-      negative: `Hardening reflexively under strain abandons a gift that had already proven itself — the inherited gentleness gets replaced by armor it never needed.`,
+      positive: `The gentleness under material pressure hasn't changed — staying soft through real hardship rather than hardening was always the genuine inheritance. What's different is that you now trust it to hold under your own current strain, instead of reflexively hardening. That trust is proof the softness was never actually fragile.`,
+      negative: `The gentleness under material pressure is completely real, tested and proven across real hardship, and it keeps getting mistaken for weakness the moment strain arrives, hardened reflexively instead of trusted. That reflex isn't protection. It's an inherited softness that already proved it doesn't break, still waiting for you to trust it under your own pressure.`,
     },
 
     '12_H2': {
@@ -4493,8 +4493,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone waited out a slow material circumstance without forcing it, and it eventually resolved on its own timing. The Hanged Man in your Paternal Material Talent means that patience is your inheritance.`,
       shadow: `The risk is applying that patience to situations that actually need a push, mistaking every slow circumstance for one that just needs more waiting.`,
       path: `This talent asks you to nudge, sometimes, instead of only waiting. You are allowed to nudge the slow circumstances instead of only waiting them out. What patient situation of yours might respond to one small push?`,
-      positive: `You can tell a circumstance that needs time from one that needs a nudge, and that discernment is what makes the inherited patience actually productive.`,
-      negative: `Patience applied indiscriminately to every slow situation becomes passivity — the inherited gift stops distinguishing waiting from stalling.`,
+      positive: `The patience for slow material circumstances hasn't changed — waiting out a situation without forcing it was always the real inheritance. What's different is that you now tell a circumstance that needs time apart from one that actually needs a nudge, instead of applying patience indiscriminately. That discernment is what makes it productive.`,
+      negative: `The patience for slow material circumstances is completely real, and it keeps getting applied to every slow situation the same way, unable to distinguish genuine waiting from simple stalling. That confusion isn't wisdom. It's an inherited patience still waiting for you to notice which situations were actually asking for a small push instead.`,
     },
 
     '13_H2': {
@@ -4502,8 +4502,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone lost real material ground and rebuilt from close to nothing, more than once if needed. Transformation in your Paternal Material Talent means that rebuilding capacity is your inheritance.`,
       shadow: `The risk is waiting for an actual collapse to use the gift, letting things get much worse than necessary before finally rebuilding.`,
       path: `This talent asks you to rebuild before ruin forces it. You are allowed to rebuild without waiting for the ruin. What could you renovate now, while things still stand?`,
-      positive: `You use your rebuilding capacity proactively rather than only in crisis, and that timing is what makes the inherited resilience actually protective instead of reactive.`,
-      negative: `A rebuilding gift used only after total collapse lets damage go further than it needed to — the inherited capacity waits for an emergency it doesn't require.`,
+      positive: `The rebuilding capacity hasn't changed — the ability to reconstruct from almost nothing was always real, proven more than once. What's different is that you now use it proactively, before ruin forces it, instead of waiting for collapse to justify rebuilding. That timing is what makes an inherited resilience protective rather than reactive.`,
+      negative: `The rebuilding capacity is completely real, tested and proven across real loss, and it keeps waiting for an actual collapse before it activates, letting damage go further than it needed to. That waiting isn't patience. It's an inherited resilience still expecting an emergency it doesn't actually require to do its work.`,
     },
 
     '14_H2': {
@@ -4511,8 +4511,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone made scarce resources genuinely go further — not through deprivation, but through real practical skill. Temperance in your Paternal Material Talent means that stretching ability is your inheritance.`,
       shadow: `The risk is stretching resources even when stretching is no longer necessary, staying in scarcity-mode long after actual scarcity has passed.`,
       path: `This talent asks you to let margin be margin sometimes. You are allowed to have enough that nothing needs stretching. What would you do with real, unstretched margin?`,
-      positive: `You stretch resources skillfully when needed and let margin simply be margin when it's genuinely available, and that flexibility is the inherited skill at its fullest.`,
-      negative: `Stretching resources out of habit rather than necessity turns a skill into a limitation — the inherited talent keeps manufacturing scarcity that isn't actually there.`,
+      positive: `The skill for stretching resources hasn't changed — making scarce means genuinely go further was always real, practical ability. What's different is that you now let margin be margin when it's actually available, instead of stretching out of old habit. That flexibility is the inherited skill working at its fullest range.`,
+      negative: `The skill for stretching resources is completely real, and it keeps running long after actual scarcity has passed, staying in scarcity-mode out of habit rather than necessity. That habit isn't prudence. It's an inherited talent manufacturing a scarcity that isn't actually there anymore, still waiting for you to notice the margin is real.`,
     },
 
     '15_H2': {
@@ -4520,8 +4520,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone wrestled honestly with material power — who should hold it, how it should be used — rather than pretending the question was simple. The Devil in your Paternal Material Talent means that honest wrestling is your inheritance.`,
       shadow: `The risk is inheriting the discomfort around power without inheriting the honest examination that once accompanied it, avoiding material authority altogether instead of examining it.`,
       path: `This talent asks you to hold power and examine it, rather than avoiding it. You are allowed to hold material power without fearing your own hands. What motive, named honestly, would make your next use of influence feel clean?`,
-      positive: `You hold material power and examine your own motives honestly, and that honesty is what lets the inherited authority actually be used cleanly.`,
-      negative: `Avoiding material power altogether just because it's uncomfortable leaves the inherited authority unclaimed — the discomfort passed down without the honest reckoning that should accompany it.`,
+      positive: `The wrestling with material power hasn't changed — the honest questioning of who should hold it and how was always the real inheritance. What's different is that you now hold power and examine your own motives directly, instead of avoiding authority to sidestep the discomfort. That honesty is what lets it be used cleanly.`,
+      negative: `The discomfort around material power is completely real, inherited alongside the honest examination that once accompanied it — except the examination got left behind, and only the avoidance came through. That avoidance isn't humility. It's an inherited authority left unclaimed, still waiting for the honest reckoning that was supposed to come with it.`,
     },
 
     '16_H2': {
@@ -4529,8 +4529,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, a real financial or material collapse happened and was survived — but never fully talked through afterward. The Tower in your Paternal Material Talent means resilience through material collapse is your inheritance, alongside an unfinished conversation.`,
       shadow: `The risk is repeating a version of the same collapse because the original one was never actually processed, only survived.`,
       path: `This talent asks you to speak about the collapse that was never talked through. You are allowed to talk about the collapse that was never talked through. What might your money worries lose their grip on once the old story is finally told?`,
-      positive: `You name and process an old material collapse rather than only having survived it, and that processing is what finally lets the pattern stop repeating.`,
-      negative: `A collapse only survived and never discussed keeps its grip through silence — the inherited resilience is real, but the unfinished story keeps recreating the fear.`,
+      positive: `The resilience through material collapse hasn't changed — surviving real financial loss was always the genuine inheritance. What's different is that you've actually spoken about the collapse that was only ever survived, not discussed. That processing is what finally lets the old pattern stop quietly repeating itself.`,
+      negative: `The resilience through material collapse is completely real, survived once and carried forward, and it keeps staying unprocessed, felt but never actually talked through. That silence isn't strength. It's an inherited collapse still gripping through the story that was never finished, still waiting for someone to finally tell it.`,
     },
 
     '17_H2': {
@@ -4538,8 +4538,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone held onto real hope for better material circumstances, sized modestly enough to feel safe. The Star in your Paternal Material Talent means that hope is your inheritance.`,
       shadow: `The risk is keeping the hope permanently modest even once circumstances could support something larger, out of an old habit of not expecting too much.`,
       path: `This talent asks you to let the hope grow to match what's actually possible now. You are allowed to hope for more than the line permitted itself. What material dream have you been pre-shrinking before it can even be spoken?`,
-      positive: `You let material hope grow to actually match your present possibility, and that growth honors the inherited hope by finally giving it enough room.`,
-      negative: `Hope kept permanently modest regardless of actual circumstances shrinks a real capacity for more into a habit of expecting less.`,
+      positive: `The material hope hasn't changed — the genuine belief that things could get better was always real. What's different is that you now let it grow to match what's actually possible now, instead of keeping it sized for old, harder circumstances. That growth honors an inherited hope by finally giving it enough room.`,
+      negative: `The material hope is completely real, genuinely held even through hard circumstances, and it keeps staying permanently modest regardless of what's actually possible now. That smallness isn't realism. It's an inherited hope shrunk to fit an old habit of not expecting too much, still waiting to be let grow.`,
     },
 
     '18_H2': {
@@ -4547,8 +4547,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone carried a real financial fear that was never given words, only felt and passed along as atmosphere. The Moon in your Paternal Material Talent means that unnamed worry is your inheritance, waiting to finally be named.`,
       shadow: `The risk is letting the felt worry run your decisions without ever checking it against your own actual, current circumstances.`,
       path: `This talent asks you to translate the felt worry into words and test it. You are allowed to name the fear so it stops steering. If the unnamed financial dread had a sentence — what would it say, and is it still true for you?`,
-      positive: `You name the inherited financial fear plainly and check it against your real circumstances, and that clarity is what finally lets it stop steering decisions from the shadows.`,
-      negative: `A felt worry never translated into words keeps steering decisions invisibly — the inherited fear runs the show precisely because it was never named.`,
+      positive: `The financial worry hasn't changed — the real fear passed down as atmosphere, never quite given words, was always there. What's different is that you've translated it into something plain and checked it against your actual current circumstances. That clarity is what finally lets it stop steering decisions from the shadows.`,
+      negative: `The financial worry is completely real, inherited as feeling rather than explanation, and it keeps running decisions invisibly because it's never been translated into words. That silence isn't peace with money. It's an inherited fear still steering from the background, waiting for someone to finally name what it's actually about.`,
     },
 
     '19_H2': {
@@ -4556,8 +4556,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, someone stayed genuinely warm — generous, present, unguarded — even during real material hardship. The Sun in your Paternal Material Talent means that intact warmth is your inheritance.`,
       shadow: `The risk is assuming the warmth should be reserved until things are materially easier, holding back generosity as if it were conditional on comfort.`,
       path: `This talent asks you to let the warmth show now, regardless of current material conditions. You are allowed to trust that your warmth survives hardship — it already has, for generations. Who needs that intact warmth from you right now?`,
-      positive: `You let genuine warmth show regardless of material circumstance, proving the inherited gift was never actually conditional on comfort.`,
-      negative: `Warmth withheld until things feel materially easier repeats a needless bargain — the inherited generosity was never actually conditional, only treated as if it were.`,
+      positive: `The warmth hasn't changed — staying genuinely generous and present even through real material hardship was always the inheritance. What's different is that you now let it show regardless of current circumstance, instead of holding it back until things feel easier. That release proves the gift was never actually conditional on comfort.`,
+      negative: `The warmth is completely real, intact through generations of real hardship, and it keeps getting reserved for whenever things feel materially easier, as though generosity required comfort first. That bargain isn't necessary. It's an inherited warmth still waiting to be shown now, exactly as it survived before.`,
     },
 
     '20_H2': {
@@ -4565,8 +4565,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone sensed a bigger material possibility than circumstances ever let them pursue. Judgement in your Paternal Material Talent means that unclaimed potential is now yours to actually take up.`,
       shadow: `The risk is sensing the same larger possibility in your own life and, out of old habit, still finding reasons to wait for better conditions.`,
       path: `This talent asks you to answer the material calling with what you actually have available now. You are allowed to claim the potential they never got to. What material ambition would honor your line precisely by exceeding it?`,
-      positive: `You claim a material potential your line never got the chance to pursue, and that claiming honors them by finally living what they only sensed.`,
-      negative: `A sensed potential endlessly waiting for better conditions repeats an old deferral — the inherited possibility stays unclaimed exactly like it did before.`,
+      positive: `The sensed material potential hasn't changed — the bigger possibility was always genuinely there. What's different is that you've claimed it with what you actually have available now, instead of waiting for the better conditions your line never got either. That claiming is what finally lives out what was only sensed before.`,
+      negative: `The sensed material potential is completely real, felt clearly across generations, and it keeps waiting for conditions to improve before it's claimed. That waiting isn't prudence. It's an old deferral repeating itself, an inherited possibility still unclaimed exactly the way it stayed unclaimed the last time.`,
     },
 
     '21_H2': {
@@ -4574,8 +4574,8 @@ window.DMicroContent = (function () {
       why: `Somewhere in your father's material line, a material goal came close to being reached and was never quite allowed to be called finished. The World in your Paternal Material Talent means genuine material completion is your inheritance, waiting to actually be claimed.`,
       shadow: `The risk is repeating the same near-completion, reaching real material success and still finding a reason it doesn't count as done.`,
       path: `This talent asks you to let a material goal actually be finished. You are allowed to be the one who finishes. What almost-done thing in your material life is asking you to break the family pattern and complete it?`,
-      positive: `You let a genuine material achievement be called complete, finishing what your line came close to but never quite claimed.`,
-      negative: `A material success that's reached but never acknowledged as finished repeats the old near-completion — the inherited capacity for genuine arrival stays just out of reach.`,
+      positive: `The capacity for real material achievement hasn't changed — you've come close to genuine completion, the same way your line once did. What's different is that you now let it actually be called finished, instead of finding a reason it doesn't quite count as done. That naming is what finally lets the arrival land.`,
+      negative: `The capacity for real material achievement is completely real, reaching genuine success and still finding a reason it doesn't count as finished. That habit isn't humility. It's an old near-completion repeating itself, an inherited capacity for arrival still waiting for someone to call a real success exactly that.`,
     },
 
     '22_H2': {
@@ -4583,8 +4583,8 @@ window.DMicroContent = (function () {
       why: `Somewhere back along your father's material line, someone took a real, well-placed material risk when it mattered, rather than playing every situation safe. The Fool in your Paternal Material Talent means that calculated boldness is your inheritance.`,
       shadow: `The risk is inheriting caution instead of the boldness, letting an old fear of loss override a genuinely good opportunity in front of you now.`,
       path: `This talent asks you to size the risk with your own eyes, not old caution. You are allowed to take the practical risk when it matters — it's a family skill. What is the mattering moment in front of you right now?`,
-      positive: `You take a well-placed material risk when the moment actually calls for it, honoring an inherited boldness instead of an inherited fear.`,
-      negative: `Caution inherited in place of the actual boldness lets good opportunities pass unclaimed — the family skill for calculated risk goes unused out of old fear.`,
+      positive: `The capacity for well-placed material risk hasn't changed — taking a calculated leap when it mattered was always the real inheritance. What's different is that you now size the risk with your own eyes, instead of defaulting to inherited caution. That judgment is what lets the family skill for boldness actually get used.`,
+      negative: `The capacity for calculated material risk is completely real, a genuine family skill, and it keeps losing to an inherited caution that overrides good opportunities before they're even considered. That caution isn't wisdom. It's an old fear standing in for the actual boldness, still waiting for you to size the next risk yourself.`,
     },
 
 
