@@ -4130,12 +4130,25 @@ let _scanVals = null;
   }
   pbClose.addEventListener('click', () => { if (_open) closeChakraCard(); });
 
+  // Per-arcana tier (js/chakra-content.js's getForArcana), keyed on the
+  // chakra's EMOTIONAL value — the number already shown on the spine dot,
+  // "how it is actually felt". Physical and Energy are that value's two
+  // inputs, so they render as a generated "what feeds this" line naming the
+  // reader's own arcana there, same pattern as the Purposes cards — not full
+  // parallel write-ups. See js/chakra-content.js's header comment.
+  function _arcName(n) {
+    if (!window.DMArcana) return String(n);
+    try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
+  }
+
   function openChakra(key) {
     // Respect the shared guard — never open over a flying/active star.
     if (isFlying || activeIdx !== -1 || (activeExtraStar !== null && !_open)) return;
     const row = _chakras.list.find(r => r.key === key);
     const c   = DChakraContent.get(key);
     if (!row || !c) return;
+    const pc  = window.DChakraContent.getForArcana
+      ? DChakraContent.getForArcana(key, row.emotional) : null;
 
     _activeKey = key;
     activeExtraStar = { tier: 'chakra', key };
@@ -4143,30 +4156,46 @@ let _scanVals = null;
 
     const hex = row.colour;
     document.getElementById('pb-prog-name').textContent =
-      `${row.name}  ·  ${row.common}`;
+      `${row.name}  ·  ${row.common}  ·  ${row.emotional}`;
     document.getElementById('pb-prog-name').style.color = hex;
     document.getElementById('pb-section-label').textContent = 'Chakra Map';
     document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
-    document.getElementById('pb-heading').textContent = c.governs;
+    document.getElementById('pb-heading').textContent = (pc && pc.heading) || c.governs;
 
-    const aspect = (label, val, text) =>
+    const feedHtml =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">${label} · ${val}</div>
-         <div class="pb-full-text">${text}</div>
+         <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
+         <div class="pb-full-text">Physical ${_arcName(row.physical)}
+           &nbsp;+&nbsp; Energy ${_arcName(row.energy)}
+           &nbsp;→&nbsp; ${row.name} ${_arcName(row.emotional)}</div>
        </div>`;
-
-    document.getElementById('pb-body').innerHTML =
+    const whereHtml =
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">WHERE IT SITS</div>
          <div class="pb-full-text">${c.where}</div>
+       </div>`;
+
+    document.getElementById('pb-body').innerHTML = whereHtml + feedHtml + (pc ?
+      `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">WHY</div>
+         <div class="pb-full-text">${pc.why}</div>
        </div>
        <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-text">${pc.shadow}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">POSITIVE STATE</div>
+         <div class="pb-full-text">${pc.positive}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">NEGATIVE STATE</div>
+         <div class="pb-full-text">${pc.negative}</div>
+       </div>` :
+      `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">IN BALANCE</div>
          <div class="pb-full-text">${c.balanced}</div>
-       </div>` +
-      aspect('PHYSICAL', row.physical, c.physical) +
-      aspect('ENERGY',   row.energy,   c.energy) +
-      aspect('EMOTIONAL', row.emotional, c.emotional);
+       </div>`);
 
     banner.classList.add('open');
     banner.scrollTop = 0;
