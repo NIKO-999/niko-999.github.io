@@ -2450,8 +2450,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old, unresolved pattern of initiation without follow-through — a new plan, a fresh financial start, a different approach, each one arriving with real energy. The Magician sits in your Material Karma, meaning your unresolved material task centers specifically on origination: you're genuinely gifted at starting something from nothing, but the security that comes from letting one thing compound over time hasn't yet been claimed.`,
       shadow: `The risk is mistaking the next fresh start for progress, when what's actually needed is staying with the one already in motion. If your financial position keeps resetting to zero right before it would have compounded into something real, that's this pattern still unresolved.`,
       path: `This may shift by choosing the material plan already underway and deliberately not starting a new one until this one has had real time to mature. You are allowed to build on what's already there instead of clearing the ground again. What existing foundation deserves your next brick more than a fresh start does?`,
-      positive: `You let one material plan run its full course, and the security that comes from genuine compounding finally becomes available to you.`,
-      negative: `An old pull toward starting over keeps resetting your material position right before it would have compounded into real, lasting security.`,
+      positive: `The unresolved karmic pull toward fresh starts hasn't changed — genuine gift for origination was always real. What's different is that you now choose the material plan already underway and deliberately don't start a new one until it's had real time to mature. That staying is what finally lets compounding happen.`,
+      negative: `The karmic pattern of initiation without follow-through is completely real, and it keeps resetting your material position right before it would have compounded. That resetting isn't fresh energy. It's a security still waiting to be built on, not cleared and started over.`,
     },
 
     // ── 2 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2460,8 +2460,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of concealment — a preference for not looking too closely, not saying the real numbers out loud, keeping your actual financial state private even from people close to you. The High Priestess sits in your Material Karma, meaning your unresolved material task centers on bringing hidden financial reality into the light rather than continuing to sense it privately.`,
       shadow: `The risk is that what stays unexamined stays unmanaged — material security built on a foundation you've never actually looked at directly. If you can sense your financial position more than you can state it plainly, that avoidance may be the pattern still active.`,
       path: `This may shift by writing down your actual financial numbers once, in full, and letting them be seen — by yourself first, and then by one trusted other person. You are allowed to look at the full picture without it becoming a verdict. What single number could you gently look at this week that you've been avoiding?`,
-      positive: `You've brought your actual financial picture into full view, and the security that comes from truly knowing your position replaces the old comfort of not looking.`,
-      negative: `Keeping your real financial numbers private, even from yourself, leaves material security built on a foundation that's never actually been examined.`,
+      positive: `The karmic pattern of concealment hasn't changed — the preference for not looking too closely was always the old comfort. What's different is that you now write down your actual financial numbers once, in full, and let them be seen. That seeing is what finally lets security be built on a real foundation.`,
+      negative: `The pattern of hidden financial reality is completely real, and it keeps staying unexamined even by you. That hiddenness isn't privacy. It's a security still built on a foundation that's never actually been looked at.`,
     },
 
     // ── 3 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2470,8 +2470,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of giving that outpaces keeping — real warmth expressed through material generosity, resources shared freely, comfort extended to others before it's secured for yourself. The Empress sits in your Material Karma, meaning your unresolved material task centers on letting your own reserve grow alongside what you give.`,
       shadow: `The risk is that generosity, unchecked, becomes its own form of depletion — a pattern of material abundance flowing outward while your own foundation stays thin. If you're generous with others while quietly under-resourced yourself, that imbalance is the unresolved piece.`,
       path: `This may shift by setting aside a portion of any material gain for your own security first, before it gets extended to anyone else. You are allowed to cushion yourself with the same generosity you extend. What would giving to your own future self look like this month?`,
-      positive: `Your generosity continues, but now alongside a genuinely growing personal reserve — abundance that includes you, not just what flows outward from you.`,
-      negative: `Generosity that consistently outpaces your own material security keeps your foundation thin, no matter how much abundance passes through your hands.`,
+      positive: `The karmic pattern of giving that outpaces keeping hasn't changed — real warmth expressed through material generosity was always genuine. What's different is that you now set aside a portion of any material gain for your own security first. That setting-aside is what finally lets your own reserve grow too.`,
+      negative: `The pattern of generosity outpacing your own security is completely real, and it keeps flowing outward while your own foundation stays thin. That thinness isn't generosity's fault. It's a reserve still waiting to be included in the abundance you already create.`,
     },
 
     // ── 4 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2480,8 +2480,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of control — structure, oversight, and a firm hand over every financial detail, as though security depends entirely on your direct management of it. The Emperor sits in your Material Karma, meaning your unresolved material task centers on finding out whether real security can exist without total personal control over every part of it.`,
       shadow: `The risk is that the control itself becomes exhausting to maintain, and delegating or trusting a system you didn't build yourself feels like real danger rather than a reasonable option. If you can't imagine your material security holding without your constant oversight, that's the pattern still active.`,
       path: `This may shift by handing one specific piece of financial management to a trusted system or person, and observing whether the structure holds without your constant hand on it. You are allowed to loosen the grip without losing the money. What small financial delegation could prove the holding doesn't all depend on your hands?`,
-      positive: `You've tested whether your material security holds without total personal control, and found real structures you can actually trust beyond your own oversight.`,
-      negative: `A need for total control over every financial detail keeps security feeling fragile, entirely dependent on your constant, exhausting oversight.`,
+      positive: `The karmic pattern of tight control hasn't changed — a firm hand over every financial detail was always the old strategy for safety. What's different is that you now hand one specific piece of financial management to a trusted system or person and observe whether it holds. That test is what finally proves security beyond your own grip.`,
+      negative: `The pattern of controlling every detail is completely real, and it keeps making delegation feel like danger rather than a reasonable option. That danger-framing isn't prudence. It's a security still fragile, still waiting to be trusted without your constant hand on it.`,
     },
 
     // ── 5 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2490,8 +2490,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of deference to inherited financial rules — beliefs about money passed down from family, tradition, or authority, followed carefully even when they no longer fit your actual circumstances. The Hierophant sits in your Material Karma, meaning your unresolved material task centers on testing those inherited rules against your own direct experience.`,
       shadow: `The risk is following an outdated financial rule simply because it's familiar, even when it's quietly working against your actual security. If a "should" about money keeps overriding what your own numbers are telling you, that's the pattern still unresolved.`,
       path: `This may shift by naming one inherited belief about money directly and testing it against your current, actual circumstances rather than assuming it still applies. You are allowed to retire the old money rules that no longer describe your life. Which inherited 'should' about money would you strike from the record first?`,
-      positive: `You've tested an inherited financial rule against your real circumstances, and now follow only the guidance that actually serves your present security.`,
-      negative: `An old, unexamined rule about how money "should" work can quietly override what your actual financial reality is telling you.`,
+      positive: `The karmic deference to inherited financial rules hasn't changed — beliefs passed down through family or tradition were always followed carefully. What's different is that you now name one inherited belief directly and test it against your current, actual circumstances. That testing is what finally lets guidance serve your real security.`,
+      negative: `The pattern of deferring to old financial rules is completely real, and it keeps overriding what your actual numbers are telling you. That overriding isn't respect for tradition. It's a security still governed by a should that's never been examined.`,
     },
 
     // ── 6 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2500,8 +2500,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of indecision at real financial forks — a choice that would actually serve your security, deferred in favor of whatever keeps things comfortable in the moment. The Lovers sits in your Material Karma, meaning your unresolved material task centers on making the financial choice that reflects genuine preference, even when it isn't the easiest one.`,
       shadow: `The risk is that deferred financial choices don't actually disappear — they just accumulate, leaving your material security shaped more by avoidance than by decision. If you're still weighing the same financial choice long after enough information has arrived, that's the pattern still active.`,
       path: `This may shift by making one specific, deferred financial decision this week, even without full certainty, and letting the choice actually stand. You are allowed to make the financial choice even if it disturbs the peace. What decision have you been trading away, payment by payment, for calm?`,
-      positive: `You make real financial choices from genuine preference rather than deferring them, and your material security reflects decisions actually made.`,
-      negative: `A financial choice kept perpetually open, never quite decided, leaves material security shaped by avoidance rather than by an actual decision.`,
+      positive: `The karmic pattern of indecision at financial forks hasn't changed — deferring a real choice to keep the peace was always the old habit. What's different is that you now make one specific, deferred financial decision this week, even without full certainty. That decision is what finally lets security reflect an actual choice.`,
+      negative: `The pattern of deferred financial choice is completely real, and it keeps accumulating instead of disappearing, security shaped more by avoidance than decision. That avoidance isn't peace-keeping. It's a choice still open, still waiting to actually be made.`,
     },
 
     // ── 7 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2510,8 +2510,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of forward motion without arrival — real drive toward financial goals, one after another, with the sense of "enough" always sitting just past the next milestone. The Chariot sits in your Material Karma, meaning your unresolved material task centers on recognizing security you've actually already reached, rather than continuously pushing past it.`,
       shadow: `The risk is that genuine financial progress never registers as progress, because the goalpost keeps moving the moment it's reached. If you can't name a point at which you'd actually feel secure, that restlessness is the pattern still unresolved.`,
       path: `This may shift by naming one specific, concrete financial milestone as "enough," and pausing there deliberately once it's reached, rather than immediately setting the next one. You are allowed to notice the security you've already reached. If you paused the pursuit for one honest moment — how safe are you, actually, right now?`,
-      positive: `You recognize and rest in real financial milestones once they're reached, letting genuine progress actually register as security.`,
-      negative: `A goalpost that keeps moving the instant it's reached means real financial progress never gets to feel like the security it actually is.`,
+      positive: `The karmic pattern of forward motion without arrival hasn't changed — real drive toward financial goals was always genuine. What's different is that you now name one specific financial milestone as enough and pause there deliberately once reached. That pausing is what finally lets progress register as security.`,
+      negative: `The pattern of pushing past every milestone is completely real, and it keeps moving the goalpost the moment it's reached. That moving isn't ambition working. It's a security still unfelt, still waiting for a point to actually be called enough.`,
     },
 
     // ── 8 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2520,8 +2520,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old imbalance around fairness — a sense, not always articulated, that you were once shorted, overlooked, or unfairly treated in material terms, now shaping present-day vigilance around every financial exchange. The Justice sits in your Material Karma, meaning your unresolved material task centers on settling that old imbalance rather than continuing to guard against its repeat.`,
       shadow: `The risk is treating every current financial exchange as a potential repeat of the old unfairness, creating friction in transactions that have nothing to do with what actually happened before. If you feel disproportionately alert to being shortchanged, that history may still be running underneath it.`,
       path: `This may shift by naming, specifically, what the original financial unfairness was, and separating it consciously from whatever current exchange is actually in front of you. You are allowed to handle today's money without yesterday's injustice at the table. What old unfairness is still countersigning your financial decisions?`,
-      positive: `You've named the old financial unfairness directly, and current exchanges get evaluated on their own terms instead of through that old lens.`,
-      negative: `An unresolved sense of past financial unfairness can make present, unrelated transactions feel like a repeat of something that already happened once.`,
+      positive: `The karmic imbalance around fairness hasn't changed — a sense of once being shorted or overlooked was always real history. What's different is that you now name, specifically, what the original financial unfairness was and separate it consciously from what's actually in front of you. That naming is what settles the old imbalance.`,
+      negative: `The pattern of vigilance around fairness is completely real, and it keeps treating every current exchange as a potential repeat of the old unfairness. That vigilance isn't discernment. It's a history still uncountersigned, still waiting to be named and released.`,
     },
 
     // ── 9 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
@@ -2530,8 +2530,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of withdrawal from financial engagement — a preference for not looking too closely at bills, statements, or planning, retreating into other matters rather than confronting material reality head-on. The Hermit sits in your Material Karma, meaning your unresolved material task centers on engaging directly with money matters rather than continuing to avoid them.`,
       shadow: `The risk is that unexamined finances tend to drift, and the avoidance that once felt like peace becomes its own source of quiet financial stress. If you can't say clearly what your current financial state actually is, that avoidance may be costing you more than the discomfort of looking would.`,
       path: `This may shift by setting aside one specific, limited block of time to look directly at your actual financial state, without retreating from it partway through. You are allowed to face money matters in small, survivable doses. What fifteen-minute money task would shrink the dread most if done this week?`,
-      positive: `You engage directly with your financial reality instead of retreating from it, and the clarity that follows replaces the old, quiet stress of not knowing.`,
-      negative: `Avoiding direct engagement with money matters lets unexamined finances drift, turning old avoidance into a steady, quiet source of stress.`,
+      positive: `The karmic withdrawal from financial engagement hasn't changed — the preference for not looking too closely was always the old peace. What's different is that you now set aside one specific, limited block of time to look directly at your actual financial state. That looking is what finally replaces avoidance with clarity.`,
+      negative: `The pattern of retreating from money matters is completely real, and it keeps letting unexamined finances drift. That drifting isn't peace. It's a stress still quietly accumulating, still waiting for the avoidance to be faced directly.`,
     },
 
     // ── 10 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2540,8 +2540,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of instability — real upswings and real downturns, financial fortune that seems to move in cycles rather than settling into something steady. The Wheel of Fortune sits in your Material Karma, meaning your unresolved material task centers on building consistency underneath the cycle, rather than simply riding it up and down.`,
       shadow: `The risk is treating every upswing as permanent and every downturn as catastrophic, making decisions from whichever extreme you happen to be in rather than from a steadier, longer view. If your financial choices swing as widely as your circumstances do, the cycle may be running the decisions instead of the other way around.`,
       path: `This may shift by building one small, consistent financial habit that holds steady regardless of which phase of the cycle you're currently in. You are allowed to learn your own cycle instead of being surprised by it. Looking back honestly — when does money tend to arrive for you, and when does it leave?`,
-      positive: `You've built consistent habits that hold steady through both ups and downs, so the natural cycle no longer dictates your financial decisions.`,
-      negative: `Letting whichever phase of the cycle you're in — flush or lean — drive your financial decisions keeps real stability just out of reach.`,
+      positive: `The karmic instability of arriving and vanishing cycles hasn't changed — real upswings and downturns were always the actual pattern. What's different is that you now build one small, consistent financial habit that holds steady regardless of which phase you're in. That consistency is what stops the cycle from driving the decisions.`,
+      negative: `The pattern of cyclical instability is completely real, and it keeps treating every upswing as permanent and every downturn as catastrophic. That extremity isn't realism. It's a stability still out of reach, still waiting for a steadier habit underneath the cycle.`,
     },
 
     // ── 11 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2550,8 +2550,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of silent endurance — real financial hardship or pressure, held quietly and managed alone, without it ever being said plainly to anyone who might help. The Strength sits in your Material Karma, meaning your unresolved material task centers on naming financial strain directly rather than continuing to carry it in silence.`,
       shadow: `The risk is that silently-carried financial strain never gets the chance to be actually addressed, since no one close to you knows the real extent of it. If people would be surprised to learn how much financial pressure you're actually under, that silence is the pattern still active.`,
       path: `This may shift by naming your actual financial strain out loud to one trusted person this week, rather than continuing to manage it alone. You are allowed to say the strain out loud before it becomes an emergency. Who could hear one true sentence about your finances without flinching?`,
-      positive: `You've named real financial strain out loud, and the support that becomes available once it's spoken replaces the old weight of carrying it silently.`,
-      negative: `Financial strain carried silently, never spoken aloud to anyone, stays unaddressed no matter how capably you manage it alone.`,
+      positive: `The karmic pattern of silent endurance hasn't changed — real financial hardship held quietly and managed alone was always the old habit. What's different is that you now name your actual financial strain out loud to one trusted person. That naming is what finally lets support in.`,
+      negative: `The pattern of carrying financial strain in silence is completely real, and it keeps staying unaddressed because no one close to you knows its real extent. That silence isn't strength. It's a strain still unaddressed, still waiting to be spoken before it becomes an emergency.`,
     },
 
     // ── 12 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2560,8 +2560,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of self-imposed limbo — a financial decision or change left unmade, material comfort quietly sacrificed while waiting for a clarity that hasn't fully arrived. The Hanged Man sits in your Material Karma, meaning your unresolved material task centers on actually making the suspended decision rather than continuing to wait inside it.`,
       shadow: `The risk is mistaking the wait itself for necessary patience, when it may have quietly become its own form of avoidance. If the same financial decision has stayed unmade well past the point where the underlying uncertainty was resolved, the suspension may no longer be serving you.`,
       path: `This may shift by naming the specific financial decision that's been left suspended, and setting a real point by which it gets made, ready or not. You are allowed to decide — suspension has costs too. What would choosing, either way, finally release in you?`,
-      positive: `You've made the financial decision that had been left suspended, and material comfort no longer has to wait on a clarity that wasn't actually going to arrive.`,
-      negative: `A financial decision left suspended indefinitely quietly costs material comfort, mistaking avoidance for patience the longer it goes unmade.`,
+      positive: `The karmic pattern of self-imposed limbo hasn't changed — a decision left unmade while waiting for clarity was always the old suspension. What's different is that you now name the specific decision and set a real point by which it gets made, ready or not. That deadline is what finally releases the limbo.`,
+      negative: `The pattern of suspended financial decision is completely real, and it keeps mistaking the wait for necessary patience. That waiting isn't caution. It's a comfort still sacrificed, still waiting for the decision it's been quietly deferring.`,
     },
 
     // ── 13 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2570,8 +2570,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old fear of material loss — a resistance to endings, even financial ones that are clearly due, because letting go of a current arrangement feels like losing the security itself. The Death sits in your Material Karma, meaning your unresolved material task centers on recognizing that some financial endings are what actually make room for real security, not a threat to it.`,
       shadow: `The risk is holding onto a financial arrangement well past its useful life simply because ending it feels dangerous, even when the arrangement itself has stopped serving your actual security. If you're maintaining something financial mainly out of fear of what ending it might mean, that fear is the pattern still unresolved.`,
       path: `This may shift by identifying one financial arrangement that's clearly run its course, and letting it end deliberately rather than continuing to resist the ending. You are allowed to let the financial change happen while it's still gentle. What shift are you resisting that will only grow less optional?`,
-      positive: `You let a financial arrangement that had run its course actually end, and real room opens up for security that fits your current life.`,
-      negative: `Resisting a financial ending that's clearly due, out of fear rather than genuine need, blocks the room a real ending would otherwise create.`,
+      positive: `The karmic fear of material loss hasn't changed — resistance to endings that feel dangerous was always the old protection. What's different is that you now identify one financial arrangement that's clearly run its course and let it end deliberately. That ending is what finally opens room for real security.`,
+      negative: `The pattern of resisting necessary financial change is completely real, and it keeps holding onto arrangements past their useful life out of fear. That holding isn't security. It's a room still blocked, still waiting for the ending it's resisting.`,
     },
 
     // ── 14 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2580,8 +2580,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of extremes — strict financial discipline followed by periods of full release, each framed as the necessary correction for the one before it. The Temperance sits in your Material Karma, meaning your unresolved material task centers on finding a sustainable middle, rather than continuing to alternate between opposite poles.`,
       shadow: `The risk is that neither extreme, held alone, ever actually produces lasting security — restriction that eventually breaks, followed by release that undoes the restriction's progress. If your financial habits look more like a pendulum than a steady practice, that swing is the pattern still active.`,
       path: `This may shift by choosing one small, moderate financial habit and holding it consistently, resisting the pull toward either extreme. You are allowed to spend steadily instead of in penance and release. What would a middle-path week of spending actually look like?`,
-      positive: `You've replaced the swing between financial extremes with one sustainable, moderate habit, and real security compounds instead of resetting.`,
-      negative: `Alternating between full financial restriction and full release keeps undoing whatever progress the other extreme managed to build.`,
+      positive: `The karmic swing between full restriction and full release hasn't changed — each extreme framed as correction for the other was always the old pattern. What's different is that you now choose one small, moderate financial habit and hold it consistently. That moderation is what finally lets security compound instead of resetting.`,
+      negative: `The pattern of financial extremes is completely real, and it keeps alternating, restriction breaking into release and release undoing restriction's progress. That alternating isn't discipline. It's a security still resetting, still waiting for a sustainable middle.`,
     },
 
     // ── 15 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2590,8 +2590,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of compulsive attachment — a felt sense of being bound to financial obligations, possessions, or a particular lifestyle rather than genuinely choosing them. The Devil sits in your Material Karma, meaning your unresolved material task centers on examining that felt bondage directly, rather than continuing to experience it as simply how things are.`,
       shadow: `The risk is mistaking a compulsive material attachment for a fixed reality, when it may actually be a pattern that hasn't yet been questioned. If you feel trapped by a financial obligation without having genuinely examined whether it's still required, that unexamined bind is the pattern still unresolved.`,
       path: `This may shift by naming, honestly, one specific material attachment that feels like a trap, and asking directly what it would actually take to loosen it. You are allowed to hold money instead of being held by it. What one act would shift you from trapped to steward, even slightly?`,
-      positive: `You've examined a felt material bind directly and found it more loosenable than it seemed, replacing compulsion with genuine, examined choice.`,
-      negative: `A financial obligation felt as inescapable, but never actually examined, keeps functioning as a trap it may not need to be.`,
+      positive: `The karmic sense of compulsive material attachment hasn't changed — feeling bound to obligations rather than genuinely choosing them was always the old bind. What's different is that you now name, honestly, one specific attachment that feels like a trap and ask what it would take to loosen it. That examination is what turns the trap into stewardship.`,
+      negative: `The pattern of feeling trapped by money is completely real, and it keeps being mistaken for fixed reality rather than an unquestioned pattern. That mistaking isn't fate. It's a bind still unexamined, still waiting to be looked at directly.`,
     },
 
     // ── 16 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2600,8 +2600,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of denial toward early financial strain — signs of instability quietly maintained as "fine" until a sudden, more disruptive reckoning forces the issue. The Tower sits in your Material Karma, meaning your unresolved material task centers on taking early financial warning signs seriously, rather than waiting for a forced, sudden correction.`,
       shadow: `The risk is that maintaining the appearance of financial stability, rather than addressing what's actually straining underneath it, sets up exactly the sudden collapse the denial was meant to avoid. If financial reversals in your life tend to feel sudden despite visible signals beforehand, that pattern of delayed reckoning may be active.`,
       path: `This may shift by identifying, specifically, one financial strain currently being minimized, and addressing it directly before it forces a more disruptive correction. You are allowed to see the warning early and respond softly. What financial signal is currently blinking that deserves ten calm minutes?`,
-      positive: `You address financial strain at its early signs, and a gradual, chosen correction replaces the sudden reckoning denial would otherwise have forced.`,
-      negative: `Denying early financial warning signs to maintain an appearance of stability tends to produce exactly the sudden collapse the denial was trying to avoid.`,
+      positive: `The karmic pattern of missing early warning signs hasn't changed — quietly maintaining fine as the label was always the old denial. What's different is that you now identify one financial strain currently being minimized and address it directly. That early action is what replaces sudden collapse with chosen correction.`,
+      negative: `The pattern of denying early strain is completely real, and it keeps maintaining an appearance of stability instead of addressing what's underneath. That maintaining isn't calm. It's a collapse still being set up, still waiting for the early signal to be read.`,
     },
 
     // ── 17 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2610,8 +2610,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of passive hope — a genuine, sustaining belief that things will get better financially, held without yet converting into the concrete action that hope was meant to inspire. The Star sits in your Material Karma, meaning your unresolved material task centers on pairing real hope with real, specific action toward material improvement.`,
       shadow: `The risk is that hope alone, however genuine, doesn't move a financial position on its own — and waiting for improvement to simply arrive can substitute for the action that would actually produce it. If your financial hope hasn't yet translated into a concrete step, that gap is the pattern still unresolved.`,
       path: `This may shift by naming one small, concrete action your financial hope is actually pointing toward, and taking it this week. You are allowed to act on the hope, not just keep it warm. What is the first concrete move your financial hope has been waiting on?`,
-      positive: `You've paired genuine financial hope with real action, and material improvement starts arriving because of what you did, not just what you believed.`,
-      negative: `Hope for financial improvement, held without any concrete action behind it, doesn't move a material position on its own.`,
+      positive: `The karmic pattern of passive hope hasn't changed — a genuine, sustaining belief that things will improve was always real. What's different is that you now name one small, concrete action your financial hope is actually pointing toward and take it. That action is what finally moves the hope into improvement.`,
+      negative: `The pattern of hope without action is completely real, and it keeps waiting for improvement to simply arrive. That waiting isn't faith working. It's a position still unmoved, still waiting for the hope to be paired with something concrete.`,
     },
 
     // ── 18 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2620,8 +2620,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of anxious avoidance — a preference for a vague, felt sense of your financial position over a clear, examined one, because clarity itself feels like it might confirm something feared. The Moon sits in your Material Karma, meaning your unresolved material task centers on replacing that anxious haze with an actual, examined look at where things stand.`,
       shadow: `The risk is that the anxiety persists precisely because it's never actually checked against real numbers — a vague fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual numbers would justify, that gap between feeling and fact is the pattern still active.`,
       path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess. You are allowed to trade the haze for one clear fact at a time. Which unknown, once known, would quiet the most background noise?`,
-      positive: `You've replaced anxious financial guesswork with an actual, examined look at your numbers, and the haze clears into something workable.`,
-      negative: `An anxious, unexamined sense of your finances tends to persist and grow precisely because it's never actually checked against the real numbers.`,
+      positive: `The karmic pattern of anxious avoidance hasn't changed — a vague, felt sense of your position over a clear one was always the old preference. What's different is that you now look directly at one specific, avoided financial number and let the actual figure replace the anxious guess. That look is what clears the haze.`,
+      negative: `The pattern of financial anxiety is completely real, and it keeps persisting precisely because it's never actually checked against real numbers. That persisting isn't caution. It's a fear still vague, still waiting for one clear fact to replace it.`,
     },
 
     // ── 19 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2630,8 +2630,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of performed ease — an outward financial confidence maintained consistently, even in stretches where the underlying picture feels genuinely uncertain. The Sun sits in your Material Karma, meaning your unresolved material task centers on letting real uncertainty be visible sometimes, rather than maintaining brightness regardless of what's actually happening underneath.`,
       shadow: `The risk is that the performed confidence prevents anyone, including you, from actually addressing the uncertainty underneath it — a bright surface that keeps real financial concerns from getting real attention. If you'd never let anyone see you worried about money, that consistent brightness may be costing you the support that naming it would bring.`,
       path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual confidence. You are allowed to be privately unsure and say so somewhere safe. Who could know the real financial picture without your confidence collapsing?`,
-      positive: `You let real financial uncertainty be visible sometimes, and the support that follows replaces the effort of maintaining constant, performed confidence.`,
-      negative: `Performing financial confidence regardless of what's actually happening underneath keeps real concerns from ever getting the attention they need.`,
+      positive: `The karmic pattern of performed ease hasn't changed — outward financial confidence maintained consistently was always the old habit. What's different is that you now let one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual brightness. That visibility is what finally lets real concerns get attention.`,
+      negative: `The pattern of performed confidence is completely real, and it keeps preventing anyone, including you, from addressing the uncertainty underneath. That performing isn't strength. It's a concern still unaddressed, still waiting behind a brightness that's costing you support.`,
     },
 
     // ── 20 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2640,8 +2640,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of delay at the point of reckoning — a financial truth that's already become clear, met with more preparation, more waiting, one more condition before it's actually faced. The Judgement sits in your Material Karma, meaning your unresolved material task centers on acting on financial clarity that has, in most cases, already arrived.`,
       shadow: `The risk is that further preparation, past a certain point, functions as delay rather than genuine diligence — a reckoning kept perpetually one step away. If you already know what the financial situation actually calls for and still haven't acted, that delay is the pattern still unresolved.`,
       path: `This may shift by naming the specific action the financial clarity is already calling for, and taking a first concrete step this week rather than gathering more certainty first. You are allowed to have the reckoning on your own terms, now, gently. What would facing it this month cost — and what is postponement already costing?`,
-      positive: `You've acted on financial clarity that had already arrived, closing a reckoning that delay had kept perpetually just out of reach.`,
-      negative: `Financial clarity that's already arrived, but keeps being met with more preparation instead of action, turns necessary diligence into indefinite delay.`,
+      positive: `The karmic pattern of delay at reckoning hasn't changed — a financial truth met with more waiting was always the old habit. What's different is that you now name the specific action the clarity is already calling for and take a first concrete step. That step is what finally closes the reckoning.`,
+      negative: `The pattern of delaying financial reckoning is completely real, and it keeps meeting arrived clarity with more preparation instead of action. That preparing isn't diligence anymore. It's a reckoning still one step away, still waiting for the first move.`,
     },
 
     // ── 21 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2650,8 +2650,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of extending completion — a financial goal reached in practical terms, but immediately relativized, expanded, or set alongside a new condition before it's allowed to actually count as done. The World sits in your Material Karma, meaning your unresolved material task centers on letting a genuinely reached financial goal be named complete.`,
       shadow: `The risk is that material security never gets to be felt, because the finish line keeps moving the moment it's actually crossed. If you can't recall the last time a financial goal felt fully, simply done, that pattern of continuous extension is still active.`,
       path: `This may shift by identifying one financial goal that is, in practical terms, already reached, and deliberately naming it complete rather than adding one more condition first. You are allowed to let a financial goal be reached and felt. Which target have you already hit that never got its moment?`,
-      positive: `You let a genuinely reached financial goal be named complete, and the security it represents finally gets to be actually felt.`,
-      negative: `A financial goal that's reached but never allowed to count as finished means material security never quite gets the chance to be felt.`,
+      positive: `The karmic pattern of extending completion hasn't changed — relativizing a reached goal before it counts as done was always the old habit. What's different is that you now identify one financial goal that's practically already reached and deliberately name it complete. That naming is what finally lets the security be felt.`,
+      negative: `The pattern of extending financial completion is completely real, and it keeps moving the finish line the moment it's actually crossed. That moving isn't ambition. It's a security still unfelt, still waiting for a goal to be allowed to count as done.`,
     },
 
     // ── 22 in MATERIAL KARMA (Money Channel) ────────────────────────────────
@@ -2660,8 +2660,8 @@ window.DMicroContent = (function () {
       why: `Something in your relationship to material security carries an old pattern of leaping first — genuine openness to material risk, acted on with real courage, but often before the groundwork that would make the risk sustainable has actually been laid. The Fool sits in your Material Karma, meaning your unresolved material task centers on pairing that real courage with enough preparation to let the leap actually land.`,
       shadow: `The risk is that the leap itself becomes the whole story, with the landing left to chance — material risks taken freely, but rarely with a safety net considered in advance. If your financial risks tend to work out through luck rather than preparation, that gap is the pattern still unresolved.`,
       path: `This may shift by building one small piece of safety net before the next financial leap, rather than trusting the landing entirely to courage alone. You are allowed to weave the net before the next leap. What would a minimum floor look like that keeps your boldness alive and survivable?`,
-      positive: `You pair real financial courage with genuine preparation, so the leap lands on something solid instead of depending on luck.`,
-      negative: `Taking financial risks freely, without ever building the safety net first, leaves the landing dependent on luck rather than preparation.`,
+      positive: `The karmic pattern of leaping first hasn't changed — genuine openness to material risk, acted on with real courage, was always the old strength. What's different is that you now build one small piece of safety net before the next financial leap. That preparation is what finally lets the leap land.`,
+      negative: `The pattern of leaping before the net is completely real, and it keeps leaving the landing to chance, rarely considered in advance. That leaving isn't boldness alone. It's a risk still dependent on luck, still waiting for the groundwork that would make it sustainable.`,
     },
 
     // ── 1 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
