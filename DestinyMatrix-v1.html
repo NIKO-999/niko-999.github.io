@@ -774,7 +774,7 @@
   <div class="ic-rule"></div>
   <div class="ic-view-toggle" id="ic-view-toggle">
     <div class="ic-view-btn" id="ic-view-standard">Standard</div>
-    <div class="ic-view-btn" id="ic-view-law">Law</div>
+    <div class="ic-view-btn" id="ic-view-numerology">Numerology</div>
   </div>
   <div class="ic-correlation" id="ic-correlation" style="display:none"></div>
   <div class="ic-heading" id="ic-heading"></div>
@@ -808,7 +808,7 @@
 <script src="js/micro-content.js"></script>
 <script src="js/matrix-engine.js"></script>
 <script src="js/talent-content.js"></script>
-<script src="js/universal-law-content.js"></script>
+<script src="js/numerology-content.js"></script>
 <script src="js/karmic-debt-content.js"></script>
 <script src="js/past-life-content.js"></script>
 <script src="js/sexual-line-content.js"></script>
@@ -1415,29 +1415,30 @@ let isFlying  = false;
 let activeIdx = -1;
 let hoveredIdx = -1;
 
-// ── UNIVERSAL LAW DATA MATRIX (Part 14/15) ──────────────────────────────
-// Each arcana has exactly one curated law match (DUniversalLawContent.getMatch),
-// surfaced via a simple Standard/Law toggle in the info-card — no picker.
-const LAW_LABELS = {
-  mentalism: 'Mentalism', correspondence: 'Correspondence', vibration: 'Vibration',
-  causeEffect: 'Cause & Effect', polarity: 'Polarity', attraction: 'Attraction',
-  divineOneness: 'Divine Oneness', action: 'Action', compensation: 'Compensation',
-  perpetualTransmutation: 'Transmutation',
+// ── NUMEROLOGY DATA MATRIX ───────────────────────────────────────────────
+// Replaces the retired Universal Law toggle (see research/11-Research-
+// Updates/30). Each arcana has exactly one curated numerology match
+// (DNumerologyContent.getMatch) — its own digital root — surfaced via a
+// simple Standard/Numerology toggle in the info-card, no picker.
+const NUMEROLOGY_LABELS = {
+  '1': 'Number 1', '2': 'Number 2', '3': 'Number 3', '4': 'Number 4',
+  '5': 'Number 5', '6': 'Number 6', '7': 'Number 7', '8': 'Number 8',
+  '9': 'Number 9', '11': 'Master 11', '22': 'Master 22',
 };
-let currentMatrixView = 'STANDARD'; // 'STANDARD' | 'LAW'
+let currentMatrixView = 'STANDARD'; // 'STANDARD' | 'NUMEROLOGY'
 
 function renderViewToggle() {
   document.getElementById('ic-view-standard').classList.toggle('active', currentMatrixView === 'STANDARD');
-  document.getElementById('ic-view-law').classList.toggle('active', currentMatrixView === 'LAW');
+  document.getElementById('ic-view-numerology').classList.toggle('active', currentMatrixView === 'NUMEROLOGY');
 }
 document.getElementById('ic-view-standard').addEventListener('click', (e) => {
   e.stopPropagation();
   currentMatrixView = 'STANDARD';
   if (activeIdx !== -1) showCard(activeIdx);
 });
-document.getElementById('ic-view-law').addEventListener('click', (e) => {
+document.getElementById('ic-view-numerology').addEventListener('click', (e) => {
   e.stopPropagation();
-  currentMatrixView = 'LAW';
+  currentMatrixView = 'NUMEROLOGY';
   if (activeIdx !== -1) showCard(activeIdx);
 });
 
@@ -1734,10 +1735,10 @@ function showCard(idx) {
 
   renderViewToggle();
 
-  if (currentMatrixView === 'LAW') {
-    const match = window.DUniversalLawContent && DUniversalLawContent.getMatch(d.num);
+  if (currentMatrixView === 'NUMEROLOGY') {
+    const match = window.DNumerologyContent && DNumerologyContent.getMatch(d.num);
     if (match) {
-      document.getElementById('ic-arcana').textContent = `Law · ${LAW_LABELS[match.lawKey]}`;
+      document.getElementById('ic-arcana').textContent = `Numerology · ${NUMEROLOGY_LABELS[match.numberKey]}`;
       document.getElementById('ic-name').textContent   = d.label;
       document.getElementById('ic-correlation').textContent = match.correlation;
       document.getElementById('ic-correlation').style.display = '';
