@@ -5399,8 +5399,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows most freely at the start of things — the charge of a fresh idea, a new attraction, an unbuilt possibility. The Magician moves your sacral energy through initiation.`,
       shadow: `The risk is that the pleasure fades exactly when things stop being new, so your emotional flow depends entirely on novelty rather than depth.`,
       path: `Try staying with one pleasure past its newness and noticing what's still there. You are allowed to find delight in something familiar. What familiar pleasure of yours might still have more in it if you actually stayed?`,
-      positive: `You find real pleasure in things that have stopped being new, and that capacity is what lets your creative flow deepen instead of just restarting.`,
-      negative: `Pleasure that only exists at the start of things keeps your emotional flow shallow, always moving to the next new charge instead of into anything deeper.`,
+      positive: `Your pleasure through beginnings hasn't changed — the charge of a fresh idea, a new attraction, an unbuilt possibility, was always real fuel. What's different is that you now stay with one pleasure past its newness and notice what's still there. That staying is what lets creative flow deepen instead of just restarting.`,
+      negative: `Your pleasure through novelty is completely real, and it keeps fading exactly when things stop being new, emotional flow staying shallow because it only moves to the next charge. That fading isn't boredom. It's a pleasure still waiting to be found in something familiar, still untested past its first excitement.`,
     },
 
     '2_SWA': {
@@ -5408,8 +5408,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through mystery — attraction and creativity that thrive on what's suggested rather than stated outright. The High Priestess moves your sacral energy through withheld intimacy.`,
       shadow: `The risk is that everything stays so veiled that pleasure never quite gets to fully arrive, mystery becoming distance instead of allure.`,
       path: `Try letting one desire be spoken plainly instead of only implied. You are allowed to enjoy pleasure you've actually named out loud. What longing have you been hinting at that deserves to just be said?`,
-      positive: `You name a real desire plainly instead of only implying it, and that directness is what finally lets the pleasure fully arrive.`,
-      negative: `Pleasure kept perpetually veiled and unspoken stays perpetually withheld too, mystery curdling into distance instead of staying alluring.`,
+      positive: `Your pleasure through mystery hasn't changed — attraction and creativity that thrive on what's suggested rather than stated outright were always real. What's different is that you now let one desire be spoken plainly instead of only implied. That directness is what finally lets the pleasure fully arrive.`,
+      negative: `Your pleasure through the unspoken is completely real, and it keeps staying so veiled that it never quite gets to arrive, mystery becoming distance instead of allure. That distance isn't intrigue. It's a pleasure still waiting for one longing to actually be said out loud.`,
     },
 
     '3_SWA': {
@@ -5417,8 +5417,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through richness — nurturing, aesthetics, a body and life that feel genuinely fed. The Empress moves your sacral energy through embodied abundance.`,
       shadow: `The risk is that the abundance flows outward only, so you're generous with everyone's pleasure but your own, quietly, goes unattended.`,
       path: `Try including your own senses in the abundance you create for others. You are allowed to receive pleasure, not only produce it for other people. What sensory pleasure have you been offering everyone except yourself?`,
-      positive: `You include your own senses in the richness you create, and that inclusion is what makes your sacral flow genuinely abundant instead of one-directional.`,
-      negative: `Generosity that only flows outward leaves your own pleasure quietly unattended, however richly everyone around you gets to feast.`,
+      positive: `Your pleasure through beauty and abundance hasn't changed — nurturing, aesthetics, a body and life that feel genuinely fed, were always real. What's different is that you now include your own senses in the abundance you create for others. That inclusion is what makes the flow genuinely abundant instead of one-directional.`,
+      negative: `Your pleasure through abundance is completely real, and it keeps flowing outward only, generous with everyone's pleasure while your own goes quietly unattended. That imbalance isn't generosity working as intended. It's a richness still waiting to include the person creating it.`,
     },
 
     '4_SWA': {
@@ -5426,8 +5426,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through structure — knowing the container is sturdy enough to actually relax inside of. The Emperor moves your sacral energy through contained safety.`,
       shadow: `The risk is that the control itself becomes the point, so tightly managed that spontaneous pleasure never gets room to actually happen.`,
       path: `Try loosening your grip on one small pleasure and letting it be unplanned. You are allowed to enjoy something you didn't structure in advance. What would an unplanned pleasure feel like if you actually let it happen?`,
-      positive: `You loosen your grip on one small pleasure and let it be unplanned, and that release is what finally lets spontaneous joy actually arrive.`,
-      negative: `Control so tight it manages every pleasure in advance leaves no room for the spontaneous joy the structure was originally meant to protect.`,
+      positive: `Your pleasure through trustworthy control hasn't changed — knowing the container is sturdy enough to actually relax inside of was always real ground. What's different is that you now loosen your grip on one small pleasure and let it be unplanned. That release is what finally lets spontaneous joy arrive.`,
+      negative: `Your pleasure through control is completely real, and it keeps managing every pleasure so tightly that the control becomes the point, spontaneity never getting room to happen. That management isn't safety. It's a pleasure still waiting for the grip meant to protect it to actually loosen.`,
     },
 
     '5_SWA': {
@@ -5435,8 +5435,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through belonging to something with real values — creative expression that feels connected to purpose, not indulgence for its own sake. The Hierophant moves your sacral energy through meaningful creation.`,
       shadow: `The risk is that pleasure gets policed so hard by what's 'appropriate' that spontaneous enjoyment rarely survives the filter.`,
       path: `Try letting one pleasure be enjoyed simply because it feels good, without needing to justify its meaning. You are allowed to enjoy something just because it's pleasurable. What delight have you been requiring a justification for?`,
-      positive: `You let a pleasure be enjoyed for its own sake without requiring justification, and that permission is what finally lets spontaneous joy through the filter.`,
-      negative: `Requiring every pleasure to justify its meaning filters out most spontaneous joy before it even has a chance to be felt.`,
+      positive: `Your pleasure through shared meaning hasn't changed — creative expression connected to purpose, not indulgence for its own sake, was always real. What's different is that you now let one pleasure be enjoyed simply because it feels good, without needing to justify its meaning. That permission is what finally lets spontaneous joy through.`,
+      negative: `Your pleasure through meaning is completely real, and it keeps policing enjoyment so hard for what's 'appropriate' that spontaneous pleasure rarely survives the filter. That policing isn't discernment. It's a joy still waiting to be allowed without a justification attached.`,
     },
 
     '6_SWA': {
@@ -5444,8 +5444,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through intimacy — genuine attraction and deep bonds, not performance of romance. The Lovers moves your sacral energy through chosen closeness.`,
       shadow: `The risk is confusing intensity with intimacy, chasing the charge of a connection rather than the depth actually available in it.`,
       path: `Try choosing depth over intensity in one connection this week and noticing what that actually feels like. You are allowed to want quiet intimacy more than exciting intensity. Which connection of yours might have more real depth than drama?`,
-      positive: `You choose depth over mere intensity, and that choice is what lets real intimacy — not just charge — actually flow.`,
-      negative: `Chasing intensity as if it were intimacy leaves the actual connection thin, however exciting the charge feels in the moment.`,
+      positive: `Your pleasure through connection hasn't changed — genuine attraction and deep bonds, not performance of romance, were always what you wanted. What's different is that you now choose depth over intensity in one connection and notice what that actually feels like. That choice is what lets real intimacy flow.`,
+      negative: `Your pleasure through connection is completely real, and it keeps confusing intensity with intimacy, chasing the charge of a connection rather than the depth available in it. That chase isn't passion. It's an intimacy still waiting to be chosen over drama.`,
     },
 
     '7_SWA': {
@@ -5453,8 +5453,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through achievement and motion — pleasure tied to victory, progress, actually getting somewhere. The Chariot moves your sacral energy through forward drive.`,
       shadow: `The risk is that pleasure only registers when you're winning, so ordinary, undramatic enjoyment barely counts as real to you.`,
       path: `Try enjoying one small, undramatic pleasure today without it needing to be a victory. You are allowed to feel good about something that isn't a win. What quiet, ordinary pleasure have you been dismissing as too small to count?`,
-      positive: `You enjoy small, undramatic pleasures without requiring them to be victories, and that shift lets ordinary joy actually register as real.`,
-      negative: `Pleasure that only counts when it's a win leaves most of ordinary life feeling flat, however much genuine enjoyment is actually available in it.`,
+      positive: `Your pleasure through achievement hasn't changed — pleasure tied to victory, progress, actually getting somewhere, was always real fuel. What's different is that you now enjoy one small, undramatic pleasure without it needing to be a win. That shift lets ordinary joy actually register as real.`,
+      negative: `Your pleasure through winning is completely real, and it keeps registering only when you're ahead, ordinary undramatic enjoyment barely counting. That filter isn't ambition. It's a pleasure still waiting for something small and quiet to be allowed to count.`,
     },
 
     '8_SWA': {
@@ -5462,8 +5462,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through balance — pleasure that feels earned and evenly distributed, not taken at someone else's expense. Justice moves your sacral energy through equitable exchange.`,
       shadow: `The risk is that you monitor fairness so closely you can't actually relax into pleasure without auditing whether you deserve it.`,
       path: `Try enjoying one pleasure today without checking whether it's been earned first. You are allowed to enjoy something simply because it feels good, not because you've calculated you deserve it. What pleasure have you been withholding pending an audit that isn't actually required?`,
-      positive: `You enjoy a pleasure without first auditing whether you've earned it, and that release is what finally lets sacral joy flow freely.`,
-      negative: `Auditing every pleasure for whether it's deserved before allowing it keeps genuine enjoyment perpetually on hold.`,
+      positive: `Your pleasure through fairness hasn't changed — pleasure that feels earned and evenly distributed, not taken at anyone's expense, was always what you wanted. What's different is that you now enjoy one pleasure without first auditing whether it's been earned. That release is what finally lets joy flow freely.`,
+      negative: `Your pleasure through balance is completely real, and it keeps monitoring fairness so closely that relaxing into enjoyment requires an audit first. That auditing isn't integrity. It's a pleasure still on hold, still waiting to be allowed without a deserving-calculation attached.`,
     },
 
     '9_SWA': {
@@ -5471,8 +5471,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through solitude — real satisfaction found in your own inner world, not dependent on company. The Hermit moves your sacral energy through private depth.`,
       shadow: `The risk is that the solitude becomes so complete that shared pleasure, the kind that actually requires another person, gets avoided entirely.`,
       path: `Try letting one pleasure be shared rather than solitary this week. You are allowed to enjoy connection, not only depth found alone. What pleasure have you been keeping solitary that could actually be shared?`,
-      positive: `You let a real pleasure be shared rather than kept solitary, and that sharing is what lets your sacral energy include connection alongside depth.`,
-      negative: `Solitude so complete it avoids shared pleasure entirely leaves half of what sacral energy is actually for permanently untapped.`,
+      positive: `Your pleasure through solitude hasn't changed — real satisfaction found in your own inner world, not dependent on company, was always genuine. What's different is that you now let one pleasure be shared rather than kept solitary. That sharing lets your sacral energy include connection alongside depth.`,
+      negative: `Your pleasure through solitude is completely real, and it keeps staying so complete that shared pleasure gets avoided entirely. That avoidance isn't self-sufficiency. It's half of sacral energy still waiting to be tapped through someone else.`,
     },
 
     '10_SWA': {
@@ -5480,8 +5480,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows in cycles — periods of real abundance and enjoyment, followed by quieter stretches that are just as legitimate. The Wheel of Fortune moves your sacral energy through rhythm.`,
       shadow: `The risk is fighting the quiet stretches as though they were failures of pleasure, rather than trusting the rhythm to bring the fuller stretch back around.`,
       path: `Try meeting your current quiet stretch with patience instead of alarm. You are allowed to feel low pleasure sometimes without it being a crisis. What would it feel like to trust that this quiet season is simply a phase, not a verdict?`,
-      positive: `You meet a quiet stretch with patience rather than alarm, and that trust is what lets the natural rhythm of pleasure keep flowing instead of getting fought.`,
-      negative: `Fighting every quiet stretch as a crisis exhausts the very flow that would otherwise simply cycle back around on its own.`,
+      positive: `Your pleasure through rhythm hasn't changed — periods of real abundance and enjoyment followed by quieter, equally legitimate stretches, was always the true cycle. What's different is that you now meet a current quiet stretch with patience instead of alarm. That trust lets the rhythm keep flowing instead of getting fought.`,
+      negative: `Your pleasure through rhythm is completely real, and it keeps fighting the quiet stretches as though they were failures. That fighting isn't vigilance. It's a rhythm still waiting to be trusted to bring the fuller stretch back around on its own.`,
     },
 
     '11_SWA': {
@@ -5489,8 +5489,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through quiet resilience — a body and spirit that can hold real intensity without needing anyone to witness it. Strength moves your sacral energy through unshowy staying power.`,
       shadow: `The risk is performing that endurance for an audience, turning private resilience into something that needs external confirmation to feel real.`,
       path: `Try letting your resilience be unwitnessed today and trusting it's still real. You are allowed to feel good about your own staying power with no one watching. What would it feel like to be resilient with absolutely no audience?`,
-      positive: `You let your resilience go unwitnessed and trust it anyway, and that private confidence is what makes the pleasure of your own endurance genuinely yours.`,
-      negative: `Endurance performed for an audience makes the pleasure of it contingent on being seen, instead of standing on its own as it was meant to.`,
+      positive: `Your pleasure through endurance hasn't changed — a body and spirit that can hold real intensity without needing anyone to witness it, was always real strength. What's different is that you now let your resilience be unwitnessed today and trust it anyway. That privacy makes the pleasure genuinely yours.`,
+      negative: `Your pleasure through endurance is completely real, and it keeps performing that endurance for an audience, needing external confirmation to feel real. That performing isn't strength. It's a pleasure still waiting to stand on its own with no one watching.`,
     },
 
     '12_SWA': {
@@ -5498,8 +5498,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows best when you stop directing it — pleasure that arrives through release rather than management. The Hanged Man moves your sacral energy through letting go.`,
       shadow: `The risk is that the surrender turns into passivity, waiting indefinitely for pleasure to arrive rather than actually meeting it halfway.`,
       path: `Try releasing your grip on one specific outcome today and noticing what pleasure actually shows up. You are allowed to enjoy what arrives without controlling its shape. What might you feel if you stopped directing exactly how the pleasure has to go?`,
-      positive: `You release control over the shape of a pleasure and let it arrive on its own terms, and that release is what finally lets it actually land.`,
-      negative: `Waiting passively for pleasure instead of meeting it at all leaves the release incomplete — surrender without engagement isn't actually flow.`,
+      positive: `Your pleasure through surrender hasn't changed — pleasure that arrives through release rather than management, once you stop directing it, was always real. What's different is that you now release your grip on one specific outcome and notice what pleasure actually shows up. That release is what finally lets it land.`,
+      negative: `Your pleasure through surrender is completely real, and it keeps turning into passivity, waiting indefinitely instead of actually meeting pleasure halfway. That waiting isn't letting go. It's a flow still waiting for engagement to meet the release.`,
     },
 
     '13_SWA': {
@@ -5507,8 +5507,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through real transformation — letting an old want or old identity actually end so a truer one can take its place. Transformation moves your sacral energy through renewal.`,
       shadow: `The risk is clinging to an old source of pleasure well past its natural life, because ending it feels like losing access to joy altogether.`,
       path: `Try letting one outdated pleasure or desire actually complete its ending. You are allowed to let an old joy go so a truer one can arrive. What pleasure from an earlier chapter is your heart quietly finished with?`,
-      positive: `You let an outdated pleasure complete its ending, and that release makes room for a truer, more current joy to actually take its place.`,
-      negative: `Clinging to an old source of pleasure past its natural life blocks the truer joy that renewal was actually trying to bring in.`,
+      positive: `Your pleasure through transformation hasn't changed — letting an old want or identity actually end so a truer one can take its place, was always real growth. What's different is that you now let one outdated pleasure or desire actually complete its ending. That release makes room for the truer joy.`,
+      negative: `Your pleasure through transformation is completely real, and it keeps clinging to an old source past its natural life, ending feeling like losing access to joy altogether. That clinging isn't loyalty. It's a truer joy still waiting for the old one to finally be let go.`,
     },
 
     '14_SWA': {
@@ -5516,8 +5516,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through actual integration — indulgence and discipline working together, not taking turns. Temperance moves your sacral energy through real balance.`,
       shadow: `The risk is swinging hard between full indulgence and total restriction, mistaking the alternation for the balance that was actually being asked for.`,
       path: `Try finding one small, genuinely blended pleasure today instead of choosing an extreme. You are allowed to want moderate, sustainable enjoyment, not just intense swings. What would a blended, sustainable pleasure actually look like this week?`,
-      positive: `You find a genuinely blended pleasure instead of swinging between extremes, and that integration is what finally produces sustainable enjoyment.`,
-      negative: `Alternating between full indulgence and total restriction and calling it balance never actually produces the sustainable pleasure real integration would.`,
+      positive: `Your pleasure through balance hasn't changed — indulgence and discipline actually working together, not taking turns, was always the real goal. What's different is that you now find one small, genuinely blended pleasure instead of choosing an extreme. That integration finally produces sustainable enjoyment.`,
+      negative: `Your pleasure through moderation is completely real, and it keeps swinging hard between full indulgence and total restriction, mistaking the alternation for balance. That swinging isn't temperance. It's a sustainable pleasure still waiting for real blending instead of taking turns.`,
     },
 
     '15_SWA': {
@@ -5525,8 +5525,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through honest confrontation with desire — real pleasure available once the craving is actually examined instead of denied. The Devil moves your sacral energy through reckoning.`,
       shadow: `The risk is either denying the desire entirely or chasing it so unconsciously that pleasure curdles into compulsion.`,
       path: `Try naming one real desire honestly, without judgment, and choosing consciously whether to pursue it. You are allowed to want pleasure and examine it at the same time. What craving have you been either denying or chasing on autopilot?`,
-      positive: `You name a real desire honestly and choose consciously how to meet it, and that awareness is what turns compulsion back into genuine pleasure.`,
-      negative: `Denying a desire or chasing it unconsciously leaves pleasure either starved or compulsive — neither actually satisfies the sacral energy underneath.`,
+      positive: `Your pleasure through honest reckoning hasn't changed — real pleasure available once a craving is actually examined instead of denied, was always the path. What's different is that you now name one real desire honestly, without judgment, and choose consciously whether to pursue it. That awareness turns compulsion back into pleasure.`,
+      negative: `Your pleasure through desire is completely real, and it keeps either being denied entirely or chased so unconsciously it curdles into compulsion. That extreme isn't honesty. It's a pleasure still waiting for the middle path of conscious, examined wanting.`,
     },
 
     '16_SWA': {
@@ -5534,8 +5534,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through renewal after upheaval — real pleasure rediscovered once an old structure has actually fallen and been rebuilt. The Tower moves your sacral energy through disruption and rebirth.`,
       shadow: `The risk is fearing pleasure itself after a collapse, treating enjoyment as risky because the last collapse arrived unannounced.`,
       path: `Try letting yourself enjoy one small thing today without waiting for proof it's safe. You are allowed to feel pleasure again after upheaval, without needing a guarantee first. What small joy have you been withholding until you feel fully safe again?`,
-      positive: `You let yourself feel pleasure again without waiting for a guarantee, and that willingness is what lets real enjoyment return after the rebuilding.`,
-      negative: `Withholding all pleasure until safety is guaranteed keeps joy indefinitely postponed, long after the actual rebuilding has already happened.`,
+      positive: `Your pleasure through rebuilding hasn't changed — real pleasure rediscovered once an old structure has actually fallen and been rebuilt, was always available. What's different is that you now let yourself enjoy one small thing today without waiting for proof it's safe. That willingness lets real enjoyment return.`,
+      negative: `Your pleasure through renewal is completely real, and it keeps fearing pleasure itself after a collapse, treating enjoyment as risky because the last one arrived unannounced. That fear isn't caution anymore. It's a joy still waiting to be trusted after the rebuilding has already happened.`,
     },
 
     '17_SWA': {
@@ -5543,8 +5543,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through inspired hope — real joy found in making, dreaming, and believing in a better version of things. The Star moves your sacral energy through creative faith.`,
       shadow: `The risk is keeping that creative joy modest and private, as if letting it be seen fully would be too much or too naive.`,
       path: `Try letting one piece of your creative joy be visible today, at full size. You are allowed to enjoy your own inspiration in front of other people. What creative pleasure have you been keeping smaller than it actually is?`,
-      positive: `You let your creative joy be visible at its actual size, and that visibility is what finally lets the pleasure of inspiration be fully shared.`,
-      negative: `Creative joy kept modest and private denies the sacral energy the full, shared expression it was actually built for.`,
+      positive: `Your pleasure through inspired hope hasn't changed — real joy found in making, dreaming, and believing in a better version of things, was always genuine. What's different is that you now let one piece of your creative joy be visible today, at full size. That visibility lets the pleasure be fully shared.`,
+      negative: `Your pleasure through creative hope is completely real, and it keeps staying modest and private, as if being seen fully would be too much. That smallness isn't humility. It's a joy still waiting for the full, shared expression it was actually built for.`,
     },
 
     '18_SWA': {
@@ -5552,8 +5552,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through the mysterious and the felt — pleasure connected to dreams, intuition, art that touches something beneath the surface. The Moon moves your sacral energy through enchantment.`,
       shadow: `The risk is that the mystery curdles into anxious uncertainty, so pleasure gets tangled up with unease instead of staying genuinely enchanting.`,
       path: `Try letting one mysterious pleasure just be enjoyed, without needing to fully explain or resolve it. You are allowed to enjoy something you can't fully articulate. What pleasure have you been over-analyzing instead of simply feeling?`,
-      positive: `You let a mysterious pleasure simply be felt without over-analyzing it, and that trust is what keeps enchantment from curdling into anxiety.`,
-      negative: `Over-analyzing every mysterious pleasure until it's fully explained strips it of the enchantment that was actually the point.`,
+      positive: `Your pleasure through mystery hasn't changed — pleasure connected to dreams, intuition, art that touches something beneath the surface, was always real enchantment. What's different is that you now let one mysterious pleasure just be enjoyed, without needing to fully explain it. That trust keeps the enchantment from curdling into anxiety.`,
+      negative: `Your pleasure through the mysterious is completely real, and it keeps curdling into anxious uncertainty, tangled up with unease instead of staying enchanting. That unease isn't insight. It's a pleasure still waiting to simply be felt instead of resolved.`,
     },
 
     '19_SWA': {
@@ -5561,8 +5561,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through unguarded happiness — pleasure expressed fully and openly, not managed for anyone else's comfort. The Sun moves your sacral energy through radiant, shared delight.`,
       shadow: `The risk is performing lightness while your deeper pleasure stays private and unexpressed, as if full joy would be too much for the room.`,
       path: `Try letting one piece of real joy show at full volume today. You are allowed to enjoy something without dimming it for anyone else's comfort. What happiness have you been quietly managing down to something more acceptable?`,
-      positive: `You let real joy show at full volume without managing it down, and that openness is what finally lets your pleasure be genuinely shared.`,
-      negative: `Dimming joy for other people's comfort keeps the sacral energy's real pleasure private, however bright the performed version looks from outside.`,
+      positive: `Your pleasure through open joy hasn't changed — pleasure expressed fully and openly, not managed for anyone else's comfort, was always the real gift. What's different is that you now let one piece of real joy show at full volume today. That openness lets your pleasure be genuinely shared.`,
+      negative: `Your pleasure through radiance is completely real, and it keeps performing lightness while the deeper pleasure stays private and unexpressed. That performance isn't happiness. It's a joy still waiting to be let out at its actual brightness.`,
     },
 
     '20_SWA': {
@@ -5570,8 +5570,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through aligned action — real pleasure found in finally doing the thing you've sensed you should do for a while. Judgement moves your sacral energy through responsive alignment.`,
       shadow: `The risk is sensing the call clearly and still finding reasons to delay acting on it, leaving the pleasure of alignment permanently just out of reach.`,
       path: `Try taking one concrete step toward what you already feel called to enjoy or create. You are allowed to feel pleasure in finally answering a call you've been sensing. What creative or sensual calling have you been delaying acting on?`,
-      positive: `You act on a calling you've already sensed instead of delaying it further, and that action is exactly the pleasure of alignment your sacral energy was asking for.`,
-      negative: `Sensing a call clearly but endlessly deferring it for more readiness leaves the pleasure of alignment permanently unfelt.`,
+      positive: `Your pleasure through answering the call hasn't changed — real pleasure found in finally doing what you've sensed you should do, was always available. What's different is that you now take one concrete step toward what you already feel called to enjoy or create. That action is exactly the pleasure of alignment.`,
+      negative: `Your pleasure through aligned action is completely real, and it keeps sensing the call clearly while finding reasons to delay acting on it. That delay isn't preparation. It's a pleasure of alignment still waiting just out of reach.`,
     },
 
     '21_SWA': {
@@ -5579,8 +5579,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through real integration and arrival — pleasure that comes from a felt sense of wholeness, not another unmet want appended to the list. The World moves your sacral energy through fulfillment.`,
       shadow: `The risk is reaching a genuinely fulfilling moment and immediately looking for the next thing, never quite letting the completion register as pleasure in itself.`,
       path: `Try letting one already-fulfilling moment today actually be felt as enough. You are allowed to feel pleasure in completion, not only in pursuit. What moment of genuine fulfillment have you rushed past without actually feeling it?`,
-      positive: `You let a genuinely fulfilling moment actually register as enough, and that felt completion is exactly the pleasure your sacral energy was asking for.`,
-      negative: `Rushing past fulfillment toward the next want keeps the pleasure of genuine completion permanently unfelt, however much is actually accomplished.`,
+      positive: `Your pleasure through completion hasn't changed — a felt sense of wholeness, not another unmet want appended to the list, was always what you were reaching for. What's different is that you now let one already-fulfilling moment actually be felt as enough. That felt completion is exactly the pleasure you were asking for.`,
+      negative: `Your pleasure through fulfillment is completely real, and it keeps reaching a genuinely fulfilling moment only to immediately look for the next thing. That reaching isn't ambition. It's a completion still waiting to actually register as pleasure in itself.`,
     },
 
     '22_SWA': {
@@ -5588,8 +5588,8 @@ window.DMicroContent = (function () {
       why: `Your creative and sensual energy flows through openness to the unknown — real joy found in spontaneity, new experience, and trusting the flow without needing certainty first. The Fool moves your sacral energy through faithful adventure.`,
       shadow: `The risk is that the openness turns into recklessness, chasing every new sensation without any real discernment about what actually nourishes you.`,
       path: `Try taking one real, spontaneous pleasure this month, chosen with open eyes rather than pure impulse. You are allowed to enjoy adventure and still exercise real discernment. What spontaneous joy would you choose if you trusted your own judgment enough to pick it consciously?`,
-      positive: `You choose spontaneous pleasure with open eyes and real discernment, and that combination is what makes the adventure genuinely nourishing rather than merely reckless.`,
-      negative: `Chasing every new sensation without discernment mistakes recklessness for openness, and the nourishing joy that real adventure offers never actually arrives.`,
+      positive: `Your pleasure through trust and openness hasn't changed — real joy found in spontaneity, new experience, trusting the flow without needing certainty first, was always genuine. What's different is that you now take one real, spontaneous pleasure this month, chosen with open eyes rather than pure impulse. That discernment makes the adventure genuinely nourishing.`,
+      negative: `Your pleasure through openness is completely real, and it keeps chasing every new sensation without any real discernment about what actually nourishes you. That chasing isn't adventure. It's a nourishing joy still waiting for open eyes instead of pure impulse.`,
     },
 
 
