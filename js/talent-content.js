@@ -70,10 +70,249 @@ window.DTalentContent = (function () {
 
   };
 
+  /**
+   * PER-POSITION, PER-ARCANA TIER (added 2026-07-28)
+   * ─────────────────────────────────────────────────
+   * The archetype tier above has only 5 entries, shared across 3-5 arcana
+   * each — the last remaining spot in the app where genuinely different
+   * readers could see identical copy. Two star positions actually render
+   * this content: `pastLife` (P, "Hidden Past-Life Talent") and `personal`
+   * (K, "Self-Expression & Social Interaction") — see js/matrix-engine.js's
+   * TALENT STAR LINE comment for the naming correction this followed. Crown
+   * (B) is not included here: it's already rendered as the Sky Line arcana
+   * star with its own full micro-content.js position-specific reading.
+   *
+   * P and K happen to be the same raw values used as Ajna's and Vishuddha's
+   * Physical/Energy inputs in js/chakra-content.js, but per NON_NEGOTIABLE_
+   * RULES' Absolute System Isolation, this is written as its own distinct
+   * content — a shared numeric source doesn't mean shared language. The
+   * Talent Star Line asks a different question of the same number: not "how
+   * does this chakra feel" but "what is this talent, and what blocks it."
+   *
+   * Field shape matches the archetype tier: heading / why / shadow / blocks
+   * / path (written, not rendered — same decision as everywhere else) /
+   * positive / negative.
+   *
+   * API: DTalentContent.getForPosition(key, arcanaNum) → entry or null
+   */
+  const positions = {
+
+    pastLife: {
+      1: {
+        heading: `A Skill You Already Have, From Before You Learned It Here`,
+        why: `Something in you can already initiate — decisively, without the usual runway most people need to work up to starting. It doesn't feel learned because it wasn't, not fully, not this time. You watch other people build up courage to begin something and feel a faint impatience, as though you're waiting for them to catch up to a starting line you were already standing past.`,
+        shadow: `The risk is treating an inherited fluency as proof you should never need to prepare, so you skip the groundwork a genuinely new situation actually requires, trusting old instinct to carry you through unfamiliar terrain it was never built for.`,
+        blocks: `What can block this talent: assuming the old fluency transfers automatically to situations it was never actually tested against.`,
+        path: `Try pairing the instinct with real preparation, at least once, in a genuinely new arena. You are allowed to have a head start and still do the homework. Where have you skipped preparing because starting has always come easily?`,
+        positive: `The inherited fluency for starting is still real and still yours — that hasn't changed — but you've paired it with real preparation in at least one genuinely new arena, instead of trusting old instinct alone to carry unfamiliar terrain. The head start compounds now, instead of occasionally running out from under you.`,
+        negative: `The inherited ease with initiating is genuine, and it's being trusted past where it was actually tested, skipping preparation a new situation would benefit from. You might notice you've stumbled somewhere unfamiliar precisely because starting has always come so easily that preparing never occurred to you.`,
+      },
+      2: {
+        heading: `A Perceptiveness You Brought With You, Already Trained`,
+        why: `You read situations with an accuracy that outpaces your actual experience of them, as though some prior fluency in reading people and rooms simply carried over. It rarely feels like learning; it feels more like remembering something you already knew how to do.`,
+        shadow: `The risk is trusting this inherited perceptiveness so completely that you stop checking it against present reality, treating an old, well-worn read as sufficient for a genuinely new situation it wasn't actually calibrated for.`,
+        blocks: `What can block this talent: applying an old pattern-read to a new situation without checking whether it actually still fits.`,
+        path: `Try verifying one inherited read against the actual present facts before acting on it. You are allowed to have deep perceptiveness and still fact-check it sometimes. Where have you trusted an old pattern that might not fit this particular situation?`,
+        positive: `The inherited perceptiveness is still exactly as sharp as it's always been — that hasn't changed — but you've started checking it against present reality at least once, instead of trusting an old pattern-read automatically. Your accuracy is even higher now, because it's being tested, not just trusted.`,
+        negative: `The inherited perceptiveness is genuine, and it's being trusted without verification, applying an old, well-worn read to situations it was never actually calibrated for. You might notice you've misjudged something specifically because the old pattern felt too familiar to question.`,
+      },
+      3: {
+        heading: `A Capacity to Nurture That Arrived Already Fluent`,
+        why: `You know how to tend, grow, and provide for people with a fluency that feels inherited rather than built — as though some prior lifetime of caretaking simply carried its skill forward into this one, already practiced.`,
+        shadow: `The risk is that this inherited fluency makes you the automatic caretaker in any new situation, regardless of whether that role actually fits or whether anyone's asked for it, because providing is simply what the old skill knows how to do.`,
+        blocks: `What can block this talent: stepping into the caretaker role automatically, whether or not it's actually needed or wanted.`,
+        path: `Try entering one new situation without automatically becoming its caretaker. You are allowed to have deep nurturing fluency and not deploy it by default. Where have you taken on care nobody actually asked you for?`,
+        positive: `The inherited fluency for nurturing is still real and still generous — that hasn't changed — but you've entered at least one situation without automatically becoming its caretaker, letting the role be chosen rather than defaulted into. Your care lands more precisely now, because it's offered rather than assumed.`,
+        negative: `The inherited nurturing fluency is genuine, and it's deploying automatically in situations that never actually asked for it, making you the default caretaker whether or not the role fits. You might notice you've taken on care nobody requested, simply because providing is what the old skill knows how to do.`,
+      },
+      4: {
+        heading: `A Command Over Structure That Feels Older Than Your Actual Practice`,
+        why: `You can organize, direct, and hold authority with a steadiness that outpaces how much practice you've actually had at it in this life — as though some prior fluency in structure and command carried forward, already seasoned.`,
+        shadow: `The risk is that this inherited authority applies itself to situations that were never actually yours to direct, an old command reflex reaching for control in territory that belongs to someone else.`,
+        blocks: `What can block this talent: directing situations reflexively, out of old habit, that were never actually yours to control.`,
+        path: `Try stepping back from one situation your inherited command reflex wants to direct, and checking whether it's actually yours. You are allowed to hold deep authority and still ask whose turn it is. Where have you taken charge out of old habit rather than actual invitation?`,
+        positive: `The inherited command over structure is still real and still steadying — that hasn't changed — but you've checked at least once whether a situation was actually yours to direct, instead of reaching for control out of old reflex. Your authority lands better now, because it's invited more often than assumed.`,
+        negative: `The inherited authority is genuine, and it's reaching reflexively into situations that were never actually yours to direct. You might notice you've taken charge somewhere out of old habit, only to find the control wasn't wanted or needed there.`,
+      },
+      5: {
+        heading: `A Body of Knowledge That Feels Already Studied`,
+        why: `You grasp frameworks, traditions, and teachings with a speed that suggests you've studied this before — some prior fluency in transmitted wisdom carrying forward, ready to be picked back up rather than learned from nothing.`,
+        shadow: `The risk is treating inherited certainty as settled fact rather than as a starting hypothesis, defending an old framework more fiercely than the actual evidence in front of you currently warrants.`,
+        blocks: `What can block this talent: defending an inherited framework out of old certainty, rather than testing it against present evidence.`,
+        path: `Try testing one piece of your inherited certainty against something you're currently learning fresh. You are allowed to hold deep prior knowledge and still update it. What old certainty of yours might need a second look?`,
+        positive: `The inherited fluency with frameworks and teachings is still real and still valuable — that hasn't changed — but you've tested at least one piece of old certainty against fresh evidence, instead of defending it automatically. Your knowledge is more alive now, because it's still being updated, not just inherited.`,
+        negative: `The inherited body of knowledge is genuine, and it's being defended as settled fact rather than tested as a starting point, holding an old framework more fiercely than the current evidence warrants. You might notice you've resisted updating something simply because it arrived already feeling certain.`,
+      },
+      6: {
+        heading: `A Way of Choosing That Feels Already Practiced`,
+        why: `You choose people and paths with a discernment that feels inherited — as though some prior lifetime of relational decision-making carried its skill forward, already fluent at knowing what genuinely fits.`,
+        shadow: `The risk is that this inherited discernment applies an old template to new people, reading someone through the shape of a prior choice rather than actually seeing who's in front of you now.`,
+        blocks: `What can block this talent: reading a new person through an old relational template instead of actually seeing them fresh.`,
+        path: `Try meeting one person without the inherited template, actually seeing them as new rather than as a variation on someone before. You are allowed to have deep relational instinct and still look freshly. Who have you been reading through an old pattern instead of actually seeing?`,
+        positive: `The inherited discernment for choosing well is still real and still valuable — that hasn't changed — but you've met at least one person freshly, without the old template doing the reading for you. Your choices land better now, because they're based on who's actually there.`,
+        negative: `The inherited relational discernment is genuine, and it's reading new people through an old template rather than actually seeing them. You might notice you've misjudged someone specifically because they resembled a prior pattern that didn't actually apply.`,
+      },
+      7: {
+        heading: `A Drive That Already Knows How to Move`,
+        why: `You move toward goals with a momentum that feels seasoned rather than newly built — some prior fluency in directed pursuit carrying forward, already knowing how to steer toward something.`,
+        shadow: `The risk is that this inherited momentum keeps moving toward goals that mattered in some other context, without checking whether the current direction is actually the one that matters now.`,
+        blocks: `What can block this talent: pursuing an old, inherited direction without checking whether it's actually where you want to go now.`,
+        path: `Try pausing the momentum once to check whether the current direction is actually yours, not just familiar. You are allowed to have deep drive and still redirect it. Where might your momentum be pointed at an old goal rather than a current one?`,
+        positive: `The inherited momentum for directed pursuit is still real and still considerable — that hasn't changed — but you've paused it at least once to check the direction was actually yours now, not just familiar. Your drive is more precisely aimed, because it's been recalibrated rather than assumed.`,
+        negative: `The inherited momentum is genuine, and it keeps moving toward a direction that may have mattered in some other context, without being checked against what actually matters now. You might notice real energy being spent on a goal that no longer fits, simply because the drive toward it feels so familiar.`,
+      },
+      8: {
+        heading: `A Sense of Fairness That Arrived Already Calibrated`,
+        why: `You read what's fair and what isn't with a precision that feels inherited — some prior fluency with justice and balance carrying forward, already trained rather than newly developed.`,
+        shadow: `The risk is applying an old standard of fairness to a present situation that actually calls for a different calibration, holding everyone to a bar set somewhere else, in some other context.`,
+        blocks: `What can block this talent: applying an inherited fairness standard rigidly, without checking whether it actually fits the present situation.`,
+        path: `Try checking one inherited fairness judgment against the actual specifics of your current situation. You are allowed to have deep moral instinct and still recalibrate it. Where might your sense of what's fair be set by an old standard rather than this particular case?`,
+        positive: `The inherited sense of fairness is still real and still precise — that hasn't changed — but you've checked at least one judgment against the actual present situation, instead of applying an old standard automatically. Your fairness lands more accurately now, calibrated to what's actually in front of you.`,
+        negative: `The inherited fairness calibration is genuine, and it's being applied rigidly to situations that actually call for different terms, holding a present case to a standard set somewhere else. You might notice a judgment that felt certain turned out to be measuring the wrong thing for this particular situation.`,
+      },
+      9: {
+        heading: `A Depth You Already Know How to Reach`,
+        why: `You can go inward and find real understanding with a fluency that feels practiced rather than newly discovered — some prior lifetime of solitary depth-work carrying forward, already knowing the way down.`,
+        shadow: `The risk is that this inherited fluency for solitude makes withdrawal your automatic answer to anything difficult, reaching for the old, familiar depth instead of trying a genuinely new approach a current situation might actually need.`,
+        blocks: `What can block this talent: retreating into old, familiar solitude by default, instead of trying an approach the current situation actually needs.`,
+        path: `Try meeting one difficulty without your automatic retreat into solitude, at least at first. You are allowed to have deep inner resources and still try something else first. Where have you withdrawn out of old habit rather than genuine current need?`,
+        positive: `The inherited fluency for depth and solitude is still real and still valuable — that hasn't changed — but you've met at least one difficulty without the automatic retreat, trying something else first. Your solitude is more chosen now, not just the old default.`,
+        negative: `The inherited capacity for solitary depth is genuine, and it's become the automatic answer to anything difficult, reaching for old familiar withdrawal rather than trying what the current situation might actually need. You might notice you've retreated somewhere that could have used a different, less practiced response.`,
+      },
+      10: {
+        heading: `An Adaptability That Already Knows the Turning`,
+        why: `You move with change more fluently than your actual experience would predict, as though some prior lifetime of navigating cycles and reversals carried its skill forward, already knowing how circumstances turn.`,
+        shadow: `The risk is that this inherited fluency with change makes you expect every situation to turn the way old ones did, missing that a genuinely new circumstance might follow a different pattern entirely.`,
+        blocks: `What can block this talent: expecting a present situation to follow an old cyclical pattern that may not actually apply here.`,
+        path: `Try treating one current change as genuinely new, rather than assuming it follows the old, familiar turning. You are allowed to have deep adaptive instinct and still check the pattern. Where might you be expecting an old cycle that this situation isn't actually following?`,
+        positive: `The inherited fluency with change and cycles is still real and still useful — that hasn't changed — but you've treated at least one current situation as genuinely new, instead of assuming the old pattern applies. Your adaptability is sharper now, because it's checking rather than just assuming.`,
+        negative: `The inherited adaptability is genuine, and it's assuming present situations follow old cyclical patterns that may not actually apply here. You might notice you braced for a turning that never came, because a new circumstance simply didn't follow the old shape.`,
+      },
+      11: {
+        heading: `A Steadiness That Arrived Already Tested`,
+        why: `You hold up under pressure with a calm that feels inherited rather than newly built — some prior lifetime of enduring real strain carrying its steadiness forward, already proven rather than freshly discovered.`,
+        shadow: `The risk is that this inherited steadiness gets assumed to be limitless, so you keep absorbing new strain on old confidence without checking whether this particular load is actually within current capacity.`,
+        blocks: `What can block this talent: assuming an inherited steadiness is limitless, absorbing new strain without checking your actual current capacity.`,
+        path: `Try checking your actual current capacity before absorbing one more thing, rather than trusting the old steadiness automatically. You are allowed to have deep endurance and still have a limit today. What load are you carrying on old confidence rather than current capacity?`,
+        positive: `The inherited steadiness under pressure is still real and still genuine — that hasn't changed — but you've checked your actual current capacity at least once, instead of trusting old confidence automatically. Your endurance is more sustainable now, because it's being measured, not just assumed.`,
+        negative: `The inherited steadiness is genuine, and it's being assumed limitless, absorbing new strain on old confidence without checking actual current capacity. You might notice you're carrying more than you can currently sustain, simply because the steadiness has always held before.`,
+      },
+      12: {
+        heading: `A Capacity for Stillness That Already Knows How to Wait`,
+        why: `You can hold suspension and uncertainty with a patience that feels practiced rather than newly learned — some prior lifetime of waiting and reflecting carrying its skill forward, already fluent at not-yet.`,
+        shadow: `The risk is that this inherited patience becomes an automatic response even to situations that actually need action now, mistaking old, comfortable waiting for the wisdom of the pause.`,
+        blocks: `What can block this talent: waiting reflexively, out of old comfort with suspension, even when a situation actually calls for action.`,
+        path: `Try acting on one thing you'd normally let sit in inherited patience, checking whether waiting is actually still called for. You are allowed to have deep capacity for stillness and still move when it's time. Where has your patience become avoidance rather than genuine waiting?`,
+        positive: `The inherited capacity for patient stillness is still real and still valuable — that hasn't changed — but you've acted on at least one thing you'd normally let sit, checking whether the waiting was still actually needed. Your patience is more discerning now, not just a comfortable default.`,
+        negative: `The inherited patience is genuine, and it's becoming an automatic response even where action is actually needed, mistaking old comfortable waiting for present wisdom. You might notice something has sat too long in stillness that actually needed you to move.`,
+      },
+      13: {
+        heading: `A Fluency With Ending and Rebuilding That Feels Already Practiced`,
+        why: `You move through endings and reconstructions with a fluency that outpaces your actual experience — some prior lifetime of transformation carrying its skill forward, already knowing how to let something die and build again.`,
+        shadow: `The risk is that this inherited fluency with ending makes you end things prematurely, applying old transformation instinct to situations that might actually have more life left in them than the reflex assumes.`,
+        blocks: `What can block this talent: ending things prematurely out of old reflex, before checking whether they actually still have life in them.`,
+        path: `Try checking one thing your ending-instinct wants to close, to see whether it's actually finished. You are allowed to have deep transformative fluency and still ask if it's really over. What have you been ready to end that might not actually be done?`,
+        positive: `The inherited fluency with ending and rebuilding is still real and still valuable — that hasn't changed — but you've checked at least one thing before closing it, finding it had more life left than the old reflex assumed. Your endings land more accurately now, timed to what's actually finished.`,
+        negative: `The inherited fluency with ending is genuine, and it's closing things prematurely, applying old transformation instinct to situations that might have had more life in them. You might notice you've ended something that, checked more carefully, wasn't actually done.`,
+      },
+      14: {
+        heading: `A Balance That Arrived Already Calibrated`,
+        why: `You find equilibrium between competing demands with a fluency that feels inherited — some prior lifetime of blending and moderating carrying its skill forward, already practiced at finding the workable mix.`,
+        shadow: `The risk is that this inherited calibration applies an old blend to a new situation that might actually need a different, less familiar proportion entirely.`,
+        blocks: `What can block this talent: applying an old, familiar balance to a situation that might actually need a different proportion.`,
+        path: `Try letting one situation find its own proportion, rather than defaulting to the old inherited blend. You are allowed to have deep calibration instinct and still recheck the mix. Where might your usual balance not actually fit this particular situation?`,
+        positive: `The inherited fluency for balance is still real and still genuinely useful — that hasn't changed — but you've let at least one situation find its own proportion, instead of defaulting to the old blend. Your calibration is more precise now, fitted to what's actually in front of you.`,
+        negative: `The inherited calibration is genuine, and it's applying an old, familiar blend to situations that might need a different proportion entirely. You might notice a balance that's always worked before isn't quite fitting this particular case.`,
+      },
+      15: {
+        heading: `An Intensity You Already Know How to Hold`,
+        why: `You carry strong appetite and desire with a fluency that feels inherited — some prior lifetime of wanting deeply carrying its intensity forward, already practiced at holding what most people find overwhelming.`,
+        shadow: `The risk is that this inherited intensity gets treated as simply how you are, rather than examined for whether it's actually serving you now, letting an old pattern of wanting run unexamined.`,
+        blocks: `What can block this talent: treating inherited intensity as simply fixed, rather than examining whether it's actually serving you now.`,
+        path: `Try examining one piece of inherited intensity honestly, checking what it's actually serving. You are allowed to have deep capacity for wanting and still examine it. What intense pattern have you never questioned because it's simply always been there?`,
+        positive: `The inherited intensity is still real and still considerable — that hasn't changed — but you've examined at least one piece of it honestly, checking what it's actually serving now. Your capacity for wanting is more consciously held, not just running on old, unexamined pattern.`,
+        negative: `The inherited intensity is genuine, and it's running unexamined, treated as simply how you are rather than checked against whether it still serves you. You might notice a pattern of wanting that's never been questioned, simply because it arrived already this strong.`,
+      },
+      16: {
+        heading: `A Resilience That Was Already Proven Before This Life`,
+        why: `You come back from collapse with a speed that feels inherited — some prior lifetime of surviving sudden rupture carrying its resilience forward, already tested rather than newly discovered.`,
+        shadow: `The risk is that this inherited resilience gets relied on so completely that you stop taking precautions against collapse, trusting the old recovery skill to handle whatever comes rather than working to prevent it.`,
+        blocks: `What can block this talent: relying on inherited resilience instead of taking reasonable precautions against a collapse actually being preventable.`,
+        path: `Try applying some of your rebuilding capacity toward prevention, for once, instead of only trusting recovery. You are allowed to have deep resilience and still build safeguards. What could you protect now, rather than trusting you'll rebuild it later?`,
+        positive: `The inherited resilience after collapse is still real and still proven — that hasn't changed — but you've applied some of that capacity toward prevention too, instead of only trusting recovery. You're building safeguards now, not just trusting the old rebuilding skill to handle everything after the fact.`,
+        negative: `The inherited resilience is genuine, and it's being relied on so completely that precautions against collapse go unconsidered, trusting old recovery skill over prevention. You might notice something fell that reasonable safeguards could have caught, because the recovery skill felt sufficient on its own.`,
+      },
+      17: {
+        heading: `A Hope That Arrived Already Trusting`,
+        why: `You carry an undertone of trust that things turn out well, a fluency that feels inherited — some prior lifetime of hoping through difficulty carrying its quiet trust forward, already practiced.`,
+        shadow: `The risk is that this inherited hope stays deliberately modest, protecting itself from disappointment the way it may have needed to before, even when your current circumstances could actually support wanting more.`,
+        blocks: `What can block this talent: keeping inherited hope modest out of old protective habit, even when current circumstances could support more.`,
+        path: `Try letting the inherited hope be fully sized once, checking whether your current circumstances actually warrant the old caution. You are allowed to hope at full size now. What hope have you been keeping small out of an old habit that might not fit anymore?`,
+        positive: `The inherited hope is still real and still genuinely yours — that hasn't changed — but you've let it be fully sized at least once, checking that your current circumstances actually warrant less caution than the old habit assumed. Your hope carries more weight now, matched to what's actually possible.`,
+        negative: `The inherited hope is genuine, and it's staying deliberately modest out of old protective habit, even where current circumstances could support wanting more. You might notice you underclaim a hope that your actual situation would justify at full size.`,
+      },
+      18: {
+        heading: `A Sensitivity That Arrived Already Attuned, Even If Foggy`,
+        why: `You sense undercurrents and hidden material with a fluency that feels inherited — some prior lifetime of perceiving below the surface carrying its attunement forward, real even when it's hard to fully articulate.`,
+        shadow: `The risk is that this inherited sensitivity stays entirely unsorted, so old, absorbed material and genuinely current perception blur together, making it hard to tell which fog belongs to now.`,
+        blocks: `What can block this talent: leaving inherited and current sensitivity unsorted, so old absorbed material gets mistaken for present signal.`,
+        path: `Try sorting one piece of foggy perception — asking whether it's genuinely current or something older you're still carrying. You are allowed to have deep sensitivity and still do the sorting work. What unease have you been carrying that might actually belong to somewhere else?`,
+        positive: `The inherited sensitivity is still real and still genuinely attuned — that hasn't changed — but you've sorted at least one piece of fog, distinguishing what's actually current from what's older material still being carried. Your perception is clearer now, because some of it has been sorted.`,
+        negative: `The inherited sensitivity is genuine, and it's staying entirely unsorted, blurring old absorbed material with current perception. You might notice an unease you can't quite place, because it may belong to something older than your present circumstances.`,
+      },
+      19: {
+        heading: `A Warmth That Arrived Already Open`,
+        why: `You carry vitality and open-heartedness with a fluency that feels inherited — some prior lifetime of resilient warmth carrying itself forward, already practiced at staying bright.`,
+        shadow: `The risk is that this inherited warmth becomes a requirement rather than a genuine expression, staying visibly bright even in moments that would reasonably call for acknowledging real difficulty.`,
+        blocks: `What can block this talent: performing inherited warmth even in moments that actually call for acknowledging real difficulty first.`,
+        path: `Try letting one real difficulty be named plainly, before the inherited warmth automatically smooths it over. You are allowed to have deep vitality and still sit with something hard. What difficulty has your warmth been quietly covering?`,
+        positive: `The inherited warmth is still real and still genuinely yours — that hasn't changed — but you've let at least one real difficulty be named plainly, before the warmth automatically smoothed it over. Your brightness includes honesty now, not just performance.`,
+        negative: `The inherited warmth is genuine, and it's performing even in moments that actually call for acknowledging real difficulty first. You might notice a hard thing got smoothed over by old, automatic brightness before it was actually addressed.`,
+      },
+      20: {
+        heading: `A Readiness to Answer a Call That Was Already Familiar`,
+        why: `You sense a summons — a bigger purpose, a reckoning — with a fluency that feels inherited, some prior lifetime of answering a call carrying its readiness forward, already primed for this.`,
+        shadow: `The risk is that this inherited readiness stays permanently primed without ever actually answering, since the sense of being called can feel complete on its own, without the corresponding action.`,
+        blocks: `What can block this talent: staying inherited-ready to answer a call indefinitely, without the readiness ever converting into actual response.`,
+        path: `Try converting the inherited readiness into one actual step, rather than letting the primed feeling stand in for the answer. You are allowed to act on the summons now, imperfectly. What call have you felt ready for, for a long time, without actually answering it?`,
+        positive: `The inherited readiness to answer a call is still real and still primed — that hasn't changed — but you've converted it into an actual step at least once, instead of letting the readiness stand in for the response. The summons is being answered now, not just sensed.`,
+        negative: `The inherited readiness is genuine, and it's staying permanently primed without converting into actual action, since feeling called can seem complete on its own. You might notice you've felt ready for something important for a long time without ever actually responding to it.`,
+      },
+      21: {
+        heading: `A Sense of the Whole That Arrived Already Integrated`,
+        why: `You see how pieces connect into a larger picture with a fluency that feels inherited — some prior lifetime of synthesizing and integrating carrying its wholeness forward, already practiced at seeing the whole system.`,
+        shadow: `The risk is that this inherited need for wholeness delays action on things you're actually ready to do, waiting for a comprehensive picture that isn't always necessary before moving.`,
+        blocks: `What can block this talent: waiting for the inherited whole-picture view before acting on something you're actually already ready for.`,
+        path: `Try acting on one isolated thing you're ready for, without waiting for the inherited need for the whole picture first. You are allowed to have deep integrative capacity and still act on a fragment. What have you delayed because you were waiting to see how it all connects?`,
+        positive: `The inherited capacity for seeing the whole picture is still real and still sophisticated — that hasn't changed — but you've acted on at least one isolated thing you were ready for, without waiting for full integration first. Your capability is more available now, not gated behind needing to see everything at once.`,
+        negative: `The inherited need for wholeness is genuine, and it's delaying action on things you're actually ready for, waiting for a comprehensive picture that isn't always necessary. You might notice something you were ready to do got delayed simply because the full picture wasn't yet visible.`,
+      },
+      22: {
+        heading: `A Trust in the Leap That Was Already Practiced`,
+        why: `You move toward the unknown with a fluency that feels inherited — some prior lifetime of trusting uncertain leaps carrying its openness forward, already practiced at not needing the guarantee first.`,
+        shadow: `The risk is that this inherited trust in leaping gets used to skip preparation that a genuinely new situation would actually benefit from, relying on old courage rather than building anything new to stand on.`,
+        blocks: `What can block this talent: leaping on inherited courage alone, skipping preparation a genuinely new situation would actually benefit from.`,
+        path: `Try pairing one leap with real preparation, rather than trusting the inherited openness alone. You are allowed to have deep trust in uncertainty and still prepare. What leap could use a little more groundwork than your old courage usually bothers with?`,
+        positive: `The inherited trust in leaping is still fully real — that openness isn't going anywhere — but you've paired it with real preparation at least once, instead of relying on old courage alone. Your capacity for the unknown is more grounded now, not just braver.`,
+        negative: `The inherited trust in leaping is genuine, and it's being used to skip preparation a genuinely new situation would actually benefit from, relying on old courage rather than building something new to stand on. You might notice a leap that could have used more groundwork than the old courage provided.`,
+      },
+    },
+
+    personal: {
+    },
+
+  };
+
   function get(iconType) {
     return archetypes[iconType] || null;
   }
 
-  return { get };
+  function getForPosition(key, arcanaNum) {
+    const group = positions[key];
+    if (!group) return null;
+    return group[Number(arcanaNum)] || null;
+  }
+
+  return { get, getForPosition };
 
 })();
