@@ -202,33 +202,51 @@ window.DChallengesContent = (function () {
 })();
 
 /**
- * Karmic Debt Numbers (classical: 13, 14, 16, 19) — a bonus flag on the Life
- * Path card, not a standalone star. Distinct from `DKarmicDebtContent`
+ * Karmic Debt Numbers (classical: 13, 14, 16, 19) — a bonus section on the
+ * Life Path card, not a standalone star (most birthdates have none — see
+ * js/matrix-engine.js's `karmicDebtFlags()`, and the "not a new star"
+ * reasoning there). Distinct from `DKarmicDebtContent`
  * (js/karmic-debt-content.js), this app's own Arcana-based "Karmic Debt"
- * system (KARMA key) — that's a completely different system; this is the
- * classical numerology convention layered on top of Life Path specifically.
- * See js/matrix-engine.js's `karmicDebtFlags()`.
+ * system (KARMA key) — a completely different system; this is the classical
+ * numerology convention layered on top of Life Path specifically.
  *
- * API: DKarmicDebtNumberContent.get(num) -> { heading, text } or null
+ * Full depth (heading/why/traits/shadow/path), matching the rest of the
+ * Numerology section — this set was originally a two-line stub and read as
+ * noticeably thinner than everything around it once the rest of the
+ * dropdown was built out to full depth.
+ *
+ * API: DKarmicDebtNumberContent.get(num) -> { heading, why, traits, shadow, path } or null
  */
 window.DKarmicDebtNumberContent = (function () {
 
   const debts = {
     13: {
-      heading: `A Classical Karmic Debt: 13`,
-      text: `This number traditionally points to a pattern of avoided work finally catching up — effort put off, corners cut, or promises made and not kept somewhere along the way. It's not a punishment; it's a nudge toward consistency. You are allowed to build steadily instead of scrambling at the deadline.`,
+      heading: `Karmic Debt 13 — The Debt of Avoided Work`,
+      why: `Classical numerology reads this number as a pattern carried forward rather than started fresh — a history, somewhere back, of shortcuts taken, effort dodged, or promises made without the follow-through to back them up. This life tends to keep circling back to situations that demand the opposite: real, sustained, occasionally tedious effort, applied consistently rather than in scrambled last-minute bursts.`,
+      traits: `Deadlines and half-finished projects likely carry more weight for you than they do for most people. You may notice a pattern of big pushes followed by real burnout, rather than a steady middle pace. Consistency, more than talent, tends to be the actual lesson this number keeps circling back to.`,
+      shadow: `Left unaddressed, the old pattern reasserts itself — corners cut under pressure, effort withheld until the deadline forces it, and a nagging sense that something is always catching up with you no matter how far ahead you think you've gotten.`,
+      path: `Try finishing one piece of unglamorous work this week before it becomes urgent. You are allowed to build steadily instead of scrambling at the deadline. Where has avoided effort been quietly compounding into something bigger than it needed to be?`,
     },
     14: {
-      heading: `A Classical Karmic Debt: 14`,
-      text: `This number traditionally points to a pattern around freedom and self-control — appetite or impulse that's run unchecked before, asking to be met with more discipline this time around. You are allowed to want freedom and still choose restraint on purpose.`,
+      heading: `Karmic Debt 14 — The Debt of Unchecked Appetite`,
+      why: `Classical numerology reads this number as a pattern around freedom and restraint — a history, somewhere back, of appetite or impulse running further than it should have, without the discipline to hold it in check. This life tends to bring real temptation and real instability back into view, specifically so the lesson of moderation can finally be learned on purpose rather than avoided.`,
+      traits: `Sudden shifts — in plans, relationships, habits, or location — may show up more often in your life than they do for most people. Freedom likely matters to you intensely, sometimes more than stability does. Self-control, when you actually choose it, tends to feel less like restriction and more like relief than you'd expect.`,
+      shadow: `Left unaddressed, the old pattern reasserts itself — impulse overriding judgment, freedom curdling into instability, and a life that keeps rearranging itself around you instead of moving in a direction you actually chose.`,
+      path: `Try choosing one form of restraint this week deliberately, not because you have to but because you're picking it. You are allowed to want freedom and still choose discipline on purpose. Where has unchecked appetite been quietly running your life instead of you?`,
     },
     16: {
-      heading: `A Classical Karmic Debt: 16`,
-      text: `This number traditionally points to a pattern of ego or pride getting knocked down before something truer could be rebuilt in its place — often through an unexpected fall from a position that felt secure. You are allowed to let go of a self-image that was never quite honest.`,
+      heading: `Karmic Debt 16 — The Debt of the Fallen Tower`,
+      why: `Classical numerology reads this number as a pattern around pride and position — a history, somewhere back, of ego or status built on a foundation that wasn't entirely honest. This life tends to include at least one sudden, humbling fall from something that felt secure — a reputation, a relationship, a sense of self — specifically so something truer can be rebuilt in its place.`,
+      traits: `You may have already experienced at least one unexpected collapse of something you thought was stable — a job, a relationship, a self-image — that in hindsight cleared space for something more honest. Pride likely runs deeper in you than you'd readily admit. The rebuilding, when it happens, tends to be sturdier than what came before it.`,
+      shadow: `Left unaddressed, the old pattern reasserts itself — clinging to a self-image that was never quite true, and being caught off guard, again, when reality eventually insists on correcting it.`,
+      path: `Try letting go of one piece of self-image this week that you suspect isn't entirely honest. You are allowed to release a version of yourself that was built on shaky ground. What would rebuilding on more honest footing actually look like?`,
     },
     19: {
-      heading: `A Classical Karmic Debt: 19`,
-      text: `This number traditionally points to a pattern of leaning too hard on others instead of standing on your own judgment — needing to relearn genuine self-reliance without swinging into total isolation. You are allowed to ask for help and still be capable.`,
+      heading: `Karmic Debt 19 — The Debt of the Isolated King`,
+      why: `Classical numerology reads this number as a pattern around power and isolation — a history, somewhere back, of standing entirely on your own, sometimes by choice and sometimes by an unwillingness to lean on anyone else. This life tends to keep testing genuine self-reliance while also, quietly, asking you to relearn how to accept real help without treating it as weakness.`,
+      traits: `Asking for help likely costs you more than it costs most people, even when you clearly need it. You may take real pride in handling things entirely on your own. Isolation can creep in disguised as independence, more easily for you than for most.`,
+      shadow: `Left unaddressed, the old pattern reasserts itself — self-reliance tipping into total isolation, and a life that looks capable from the outside while quietly running low on the support it actually needs.`,
+      path: `Try asking one person for real help this week with something you'd normally handle alone. You are allowed to be capable and still need people. Where has independence been quietly costing you connection?`,
     },
   };
 

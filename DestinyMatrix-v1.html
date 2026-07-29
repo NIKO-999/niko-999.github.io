@@ -3369,14 +3369,17 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${hex}">${pathLabel}</div>
          <div class="pb-full-text">${mc.path}</div>
        </div>` : ''}
-       ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? (() => {
-         const kd = DKarmicDebtNumberContent.get(_vals.karmicDebtFlags[0]);
-         return kd ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">A CLASSICAL KARMIC DEBT NUMBER</div>
-           <div class="pb-full-text"><em>${kd.heading}</em></div>
-           <div class="pb-full-text" style="margin-top:8px">${kd.text}</div>
-         </div>` : '';
-       })() : ''}` : '';
+       ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? _vals.karmicDebtFlags.map(n => {
+         const kd = DKarmicDebtNumberContent.get(n);
+         if (!kd) return '';
+         return `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">${kd.heading.toUpperCase()}</div>
+           <div class="pb-full-text">${kd.why}</div>
+           <div class="pb-full-text" style="margin-top:8px">${kd.traits}</div>
+           <div class="pb-full-text" style="margin-top:8px">${kd.shadow}</div>
+           <div class="pb-full-text" style="margin-top:8px">${kd.path}</div>
+         </div>`;
+       }).join('') : ''}` : '';
 
     _mBanner.classList.add('open');
     _mBanner.scrollTop = 0;
