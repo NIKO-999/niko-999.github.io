@@ -320,6 +320,12 @@
       max-height: min(55vh, 380px);
       opacity: 1;
     }
+    /* font-size: 16px (not a transform trick) is the only reliable way to
+       stop iOS Safari/Chrome mobile auto-zooming the page on focus — same
+       fix already applied to .dob-edit/.l-gate-input above; anything under
+       16px triggers that native zoom regardless of viewport meta settings.
+       Letter-spacing/padding compensate so it still reads as part of this
+       panel's smaller typography. */
     #ni-search {
       display: block;
       width: 100%;
@@ -329,9 +335,9 @@
       border-bottom: 1px solid rgba(180,210,255,0.12);
       color: rgba(255,255,255,0.75);
       font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.4px;
-      padding: 7px 9px;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      padding: 5px 9px;
       outline: none;
     }
     #ni-search::placeholder { color: rgba(180,210,255,0.28); }
@@ -339,6 +345,7 @@
       padding: 8px 9px 6px;
       border-bottom: 1px solid rgba(180,210,255,0.08);
     }
+    /* font-size: 16px — same iOS-zoom fix as #ni-search/.dob-edit above. */
     #ni-name-input {
       display: block;
       width: 100%;
@@ -348,9 +355,9 @@
       border-radius: 2px;
       color: rgba(255,255,255,0.75);
       font-family: 'DM Mono', monospace;
-      font-size: 9px;
-      letter-spacing: 0.4px;
-      padding: 6px 8px;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      padding: 5px 8px;
       outline: none;
     }
     #ni-name-input::placeholder { color: rgba(180,210,255,0.28); }
