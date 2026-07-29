@@ -320,32 +320,13 @@
       max-height: min(55vh, 380px);
       opacity: 1;
     }
-    /* font-size: 16px (not a transform trick) is the only reliable way to
-       stop iOS Safari/Chrome mobile auto-zooming the page on focus — same
-       fix already applied to .dob-edit/.l-gate-input above; anything under
-       16px triggers that native zoom regardless of viewport meta settings.
-       Letter-spacing/padding compensate so it still reads as part of this
-       panel's smaller typography. */
-    #ni-search {
-      display: block;
-      width: 100%;
-      box-sizing: border-box;
-      background: rgba(180,210,255,0.05);
-      border: none;
-      border-bottom: 1px solid rgba(180,210,255,0.12);
-      color: rgba(255,255,255,0.75);
-      font-family: 'DM Mono', monospace;
-      font-size: 16px;
-      letter-spacing: 0.2px;
-      padding: 5px 9px;
-      outline: none;
-    }
-    #ni-search::placeholder { color: rgba(180,210,255,0.28); }
     #ni-name-row {
       padding: 8px 9px 6px;
       border-bottom: 1px solid rgba(180,210,255,0.08);
     }
-    /* font-size: 16px — same iOS-zoom fix as #ni-search/.dob-edit above. */
+    /* font-size: 16px — same iOS-zoom fix as .dob-edit/.l-gate-input above
+       (anything under 16px triggers iOS Safari/Chrome's native
+       auto-zoom-on-focus regardless of viewport meta settings). */
     #ni-name-input {
       display: block;
       width: 100%;
@@ -816,7 +797,6 @@
         <input id="ni-name-input" type="text" placeholder="Enter your name to unlock Expression, Soul Urge, Personality & Maturity…" autocomplete="off" />
         <div id="ni-name-hint">Optional · never saved or sent anywhere · unlocks 4 more numbers below</div>
       </div>
-      <input id="ni-search" type="text" placeholder="Search numerology…" autocomplete="off" />
       <div id="ni-list"></div>
     </div>
   </div>
@@ -4704,7 +4684,6 @@ const ARCANA_ESSENCE = {
 ;(function () {
   const root   = document.getElementById('numerology-index');
   const toggle = document.getElementById('ni-toggle');
-  const search = document.getElementById('ni-search');
   const listEl = document.getElementById('ni-list');
   const nameInput = document.getElementById('ni-name-input');
 
@@ -4743,10 +4722,9 @@ const ARCANA_ESSENCE = {
   }
 
   function render() {
-    const q = search.value.trim().toLowerCase();
     listEl.innerHTML = '';
 
-    const rows = buildRows().filter(r => !q || (r.label + ' ' + r.num).toLowerCase().includes(q));
+    const rows = buildRows();
 
     if (!rows.length) {
       const empty = document.createElement('div');
@@ -4764,7 +4742,6 @@ const ARCANA_ESSENCE = {
         if (r.isPlaceholder) { r.fly(); return; } // focus the name input — don't close the panel or fly
         if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
         root.classList.remove('open');
-        search.value = '';
         r.fly();
       });
       listEl.appendChild(row);
@@ -4776,8 +4753,6 @@ const ARCANA_ESSENCE = {
     root.classList.toggle('open');
     if (opening) render();
   });
-
-  search.addEventListener('input', render);
 
   nameInput.addEventListener('input', () => {
     if (_tierProviders.setName) _tierProviders.setName(nameInput.value);
