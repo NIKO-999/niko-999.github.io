@@ -352,6 +352,38 @@ function bridgeNumber(lifePathValue, expressionValue) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 1f · COMPATIBILITY — Life Path only, birthdate-only for BOTH people (no
+ *    second name required — keeps this simple and doesn't ask for a second
+ *    person's full name just to unlock it). Two numbers, same relationship
+ *    every other pairing-of-two-values reading in this file uses:
+ *      Relationship Number — _classicalReduce(lifePathA + lifePathB),
+ *        master numbers preserved, same as Life Path itself. What the two
+ *        Life Paths create TOGETHER, as its own third thing.
+ *      Compatibility Gap   — _reduceToSingleDigit(|lifePathA - lifePathB|),
+ *        0-8, same reduction Bridge/Challenges use. How much conscious
+ *        bridging this specific pairing needs.
+ * ─────────────────────────────────────────────────────────────────────────── */
+function relationshipNumber(lifePathA, lifePathB) {
+  return _classicalReduce(Number(lifePathA) + Number(lifePathB));
+}
+
+function compatibilityGapNumber(lifePathA, lifePathB) {
+  return _reduceToSingleDigit(Math.abs(Number(lifePathA) - Number(lifePathB)));
+}
+
+// Convenience wrapper — takes two birthdates, returns both Life Paths plus
+// the two derived compatibility numbers. Neither birthdate needs a name.
+function getCompatibility(birthdateA, birthdateB) {
+  const lifePathA = calculateDestinyMatrix(birthdateA).lifePath.value;
+  const lifePathB = calculateDestinyMatrix(birthdateB).lifePath.value;
+  return {
+    lifePathA, lifePathB,
+    relationship: { value: relationshipNumber(lifePathA, lifePathB), label: 'Relationship Number' },
+    gap: { value: compatibilityGapNumber(lifePathA, lifePathB), label: 'Compatibility Gap' },
+  };
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
 
@@ -862,9 +894,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

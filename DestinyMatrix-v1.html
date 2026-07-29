@@ -350,6 +350,34 @@
       letter-spacing: 0.3px;
       color: rgba(180,210,255,0.32);
     }
+    #ni-compat-row {
+      padding: 8px 9px 6px;
+      border-bottom: 1px solid rgba(180,210,255,0.08);
+    }
+    /* font-size: 16px — same iOS-zoom fix as #ni-name-input/.dob-edit above. */
+    #ni-compat-input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(180,210,255,0.05);
+      border: 1px solid rgba(180,210,255,0.12);
+      border-radius: 2px;
+      color: rgba(255,255,255,0.75);
+      color-scheme: dark;
+      font-family: 'DM Mono', monospace;
+      font-size: 16px;
+      letter-spacing: 0.2px;
+      padding: 5px 8px;
+      outline: none;
+    }
+    #ni-compat-input:focus { border-color: rgba(180,210,255,0.3); }
+    #ni-compat-hint {
+      margin-top: 5px;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.3px;
+      color: rgba(180,210,255,0.32);
+    }
     #ni-list {
       max-height: min(45vh, 300px);
       overflow-y: auto;
@@ -797,6 +825,10 @@
         <input id="ni-name-input" type="text" placeholder="Enter your name to unlock Expression, Soul Urge, Personality & Maturity…" autocomplete="off" />
         <div id="ni-name-hint">Optional · never saved or sent anywhere · unlocks 4 more numbers below</div>
       </div>
+      <div id="ni-compat-row">
+        <input id="ni-compat-input" type="date" placeholder="Someone else's birthdate, for Compatibility" />
+        <div id="ni-compat-hint">Optional · their DOB is never saved or sent anywhere · unlocks Compatibility below</div>
+      </div>
       <div id="ni-list"></div>
     </div>
   </div>
@@ -877,6 +909,7 @@
 <script src="js/pinnacles-challenges-content.js"></script>
 <script src="js/name-numbers-content.js"></script>
 <script src="js/hidden-numbers-content.js"></script>
+<script src="js/compatibility-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2467,6 +2500,26 @@ const ARCANA_ESSENCE = {
     };
   }
 
+  // Compatibility — birthdate-only for BOTH people, entirely separate from
+  // the name-based gate above (no second name required). Same "exists in
+  // the scene but hidden/unclickable until active" treatment as NAME_KEYS
+  // and the Sexual Line before it.
+  const COMPAT_KEYS = new Set(['COMPATIBILITY']);
+  let _partnerDob = '';
+  let _compatActive = false;
+  const _emptyCompatVals = { relationship: null, gap: null, partnerLifePath: null };
+  let _compatVals = { ..._emptyCompatVals };
+  function _computeCompatVals(partnerDobIso) {
+    if (!window.DMEngine || !partnerDobIso) return { ..._emptyCompatVals };
+    const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+    try {
+      const compat = window.DMEngine.getCompatibility(dobIso, partnerDobIso);
+      return { relationship: compat.relationship.value, gap: compat.gap.value, partnerLifePath: compat.lifePathB };
+    } catch (_) {
+      return { ..._emptyCompatVals }; // invalid/incomplete partner date typed so far
+    }
+  }
+
   // ── 6 micro-nodes ────────────────────────────────────────────────────────
   const MICRO = [
     // Love & Money: positioned in the lower-right quadrant between Soul
@@ -2790,6 +2843,13 @@ const ARCANA_ESSENCE = {
     // the θ=290° Cornerstone/Capstone-adjacent point, same ring.
     { key:'BRIDGE', num:_nameVals.bridge, label:'Bridge Number',
       pos: new THREE.Vector3(_R * 0.7713, -_R * 0.9192, 0), color:0x7ED9C4, twk:{spd:0.68,off:5.7} },
+
+    // ── Compatibility — Life Path only, birthdate-only for BOTH people.
+    // Hidden until a partner DOB is entered (COMPAT_KEYS above), separate
+    // gate from the name-based NAME_KEYS entries. θ=350°, ≈0.42R clear of
+    // Soul Urge (θ=10°) and Bridge (θ=310°), same ring.
+    { key:'COMPATIBILITY', num:_compatVals.relationship, label:'Compatibility',
+      pos: new THREE.Vector3(_R * 1.1818, -_R * 0.2083, 0), color:0xFF9ECD, twk:{spd:0.76,off:4.4} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2799,11 +2859,13 @@ const ARCANA_ESSENCE = {
   let _sexLineHit = null; // kept out of _microHits (not raycastable) whenever inactive
 
   const _nameHits = []; // NAME_KEYS hits, kept out of _microHits until _nameActive (mirrors _sexLineHit)
+  const _compatHits = []; // COMPAT_KEYS hits, kept out of _microHits until _compatActive
 
   MICRO.forEach((data, i) => {
     const sz = i < 2 ? 0.20 : 0.22;   // corners slightly larger than channel nodes
     const isSexLine = data.key === 'SEXLINE';
     const isNameBased = NAME_KEYS.has(data.key);
+    const isCompat = COMPAT_KEYS.has(data.key);
 
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: nodeTex,
@@ -2817,6 +2879,7 @@ const ARCANA_ESSENCE = {
     sp.scale.set(sz, sz, 1);
     if (isSexLine) sp.visible = _sexLineActive;
     if (isNameBased) sp.visible = _nameActive;
+    if (isCompat) sp.visible = _compatActive;
     scene.add(sp);
     data.sprite    = sp;
     data.baseScale = sz;
@@ -2838,6 +2901,9 @@ const ARCANA_ESSENCE = {
       _nameHits.push(hit);
       if (_nameActive) _microHits.push(hit);
       // else: same treatment as the Sexual Line hit above — exists but unclickable.
+    } else if (isCompat) {
+      _compatHits.push(hit);
+      if (_compatActive) _microHits.push(hit);
     } else {
       _microHits.push(hit);
     }
@@ -2853,6 +2919,7 @@ const ARCANA_ESSENCE = {
     el.innerHTML = `<div class="micro-inner"><div class="t-num">${data.num}${icon}</div>${lbl}${arch}</div>`;
     if (data.key === 'SEXLINE' && !_sexLineActive) el.style.display = 'none';
     if (NAME_KEYS.has(data.key) && !_nameActive) el.style.display = 'none';
+    if (COMPAT_KEYS.has(data.key) && !_compatActive) el.style.display = 'none';
     overlayEl.appendChild(el);
     return el;
   });
@@ -3240,6 +3307,46 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-body').innerHTML =
         sub('CORNERSTONE · HOW YOU BEGIN', _nameVals.cornerstone, cornerC) +
         sub('CAPSTONE · HOW YOU FINISH', _nameVals.capstone, capC);
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Compatibility — Relationship Number + Compatibility Gap, one paired
+    // card, same shape as Cornerstone & Capstone above. Birthdate-only for
+    // both people (js/compatibility-content.js), gated behind the
+    // #ni-compat-input partner-DOB field, not the name input.
+    if (data.key === 'COMPATIBILITY') {
+      const relC = window.DRelationshipContent ? window.DRelationshipContent.get(_compatVals.relationship) : null;
+      const gapC = window.DCompatibilityGapContent ? window.DCompatibilityGapContent.get(_compatVals.gap) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + _compatVals.relationship + ' / ' + _compatVals.gap;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Numerology · Compatibility';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = 'Compatibility';
+
+      const sub = (label, num, c) => c ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">${label} · ${num}</div>
+           <div class="pb-full-text"><em>${c.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
+           ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
+           <div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>
+           <div class="pb-full-text" style="margin-top:8px">${c.path}</div>
+         </div>` : '';
+
+      const context = `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE TWO LIFE PATHS</div>
+           <div class="pb-full-text">Your Life Path is ${_vals.lifePath}. Theirs is ${_compatVals.partnerLifePath}. Everything below is what those two numbers create together, not a description of either of you individually.</div>
+         </div>`;
+
+      document.getElementById('pb-body').innerHTML =
+        context +
+        sub('RELATIONSHIP NUMBER · WHAT THIS PAIRING CREATES', _compatVals.relationship, relC) +
+        sub('COMPATIBILITY GAP · HOW MUCH BRIDGING IT NEEDS', _compatVals.gap, gapC);
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
@@ -3675,7 +3782,8 @@ const ARCANA_ESSENCE = {
     list: () => MICRO
       .map((d, i) => ({ idx: i, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
       .filter((r) => r.idx !== 7 || _sexLineActive) // Sexual Line: only list it when it's actually on the diagram
-      .filter((r) => !NAME_KEYS.has(MICRO[r.idx].key) || _nameActive), // name-based numbers: only once a name is entered
+      .filter((r) => !NAME_KEYS.has(MICRO[r.idx].key) || _nameActive) // name-based numbers: only once a name is entered
+      .filter((r) => !COMPAT_KEYS.has(MICRO[r.idx].key) || _compatActive), // Compatibility: only once a partner DOB is entered
     fly: (idx) => flyToMicro(idx),
   };
 
@@ -3715,6 +3823,37 @@ const ARCANA_ESSENCE = {
     }
   }
   _tierProviders.setName = _setName;
+
+  // Called by the Numerology panel's optional partner-DOB input. Mirrors
+  // _setName exactly, but for the single COMPATIBILITY entry, keyed off a
+  // second birthdate instead of a name.
+  function _setPartnerDob(partnerDobIso) {
+    _partnerDob = partnerDobIso || '';
+    _compatVals = _computeCompatVals(_partnerDob);
+    const wasActive = _compatActive;
+    _compatActive = !!(_compatVals.relationship !== null);
+
+    MICRO.forEach((data, i) => {
+      if (!COMPAT_KEYS.has(data.key)) return;
+      const v = _compatVals.relationship;
+      data.num = v;
+      _microTags[i].querySelector('.t-num').textContent = String(v);
+      _microTags[i].style.display = _compatActive ? '' : 'none';
+      if (data.sprite) data.sprite.visible = _compatActive;
+    });
+
+    if (_compatActive !== wasActive) {
+      if (_compatActive) {
+        _compatHits.forEach((hit) => { if (!_microHits.includes(hit)) _microHits.push(hit); });
+      } else {
+        _compatHits.forEach((hit) => {
+          const idx = _microHits.indexOf(hit);
+          if (idx !== -1) _microHits.splice(idx, 1);
+        });
+      }
+    }
+  }
+  _tierProviders.setPartnerDob = _setPartnerDob;
 
 })();
 
@@ -4818,6 +4957,7 @@ const ARCANA_ESSENCE = {
   const toggle = document.getElementById('ni-toggle');
   const listEl = document.getElementById('ni-list');
   const nameInput = document.getElementById('ni-name-input');
+  const compatInput = document.getElementById('ni-compat-input');
 
   // Labels shown in this panel, in display order — extend this list as new
   // birthdate-only / name-based numerology stars are added.
@@ -4832,6 +4972,11 @@ const ARCANA_ESSENCE = {
     'Expression Number', 'Soul Urge Number', 'Personality Number', 'Maturity Number',
     'Hidden Passion Number', 'Subconscious Self Number', 'Cornerstone & Capstone', 'Bridge Number',
   ];
+
+  // Compatibility gets its own placeholder group, gated behind the partner-
+  // DOB input instead of the name input — same honest "not yet unlocked"
+  // philosophy, different unlock action when clicked before it's active.
+  const COMPAT_ROW_LABELS = ['Compatibility'];
 
   function buildRows() {
     if (!_tierProviders.micro) return [];
@@ -4853,7 +4998,17 @@ const ARCANA_ESSENCE = {
         fly: () => { nameInput.focus(); },
       };
     });
-    return coreRows.concat(nameRows);
+    const compatRows = COMPAT_ROW_LABELS.map(label => {
+      const row = all.find(r => r.label === label);
+      if (row) {
+        return { label: row.label, num: row.num, color: row.color, fly: () => _tierProviders.micro.fly(row.idx) };
+      }
+      return {
+        label, num: '—', color: 'rgba(255,255,255,0.28)', isPlaceholder: true,
+        fly: () => { compatInput.focus(); },
+      };
+    });
+    return coreRows.concat(nameRows).concat(compatRows);
   }
 
   function render() {
@@ -4894,6 +5049,12 @@ const ARCANA_ESSENCE = {
     render();
   });
   nameInput.addEventListener('click', (e) => e.stopPropagation());
+
+  compatInput.addEventListener('input', () => {
+    if (_tierProviders.setPartnerDob) _tierProviders.setPartnerDob(compatInput.value);
+    render();
+  });
+  compatInput.addEventListener('click', (e) => e.stopPropagation());
 
   document.addEventListener('click', (e) => {
     if (root.classList.contains('open') && !root.contains(e.target)) {
