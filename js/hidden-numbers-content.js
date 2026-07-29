@@ -24,6 +24,13 @@
  *                       approach new opportunities and beginnings.
  *   Capstone          — last letter of the last name (1-9). How you
  *                       follow through and finish what you start.
+ *   Bridge            — |Life Path - Expression|, reduced 0-8 (same
+ *                       gap-number reduction as Challenges, no master
+ *                       numbers preserved). How much conscious work it
+ *                       takes to make what your life is fundamentally
+ *                       about (Life Path) agree with how you naturally
+ *                       act (Expression). Needs both a birthdate and a
+ *                       name, same as Maturity.
  *
  * All content originally composed, full depth (matching the Life Path/
  * Numerology-section density), rendered under this app's Numerology
@@ -43,6 +50,7 @@
  *   DSubconsciousSelfContent.get(num)-> { heading, why, traits, shadow, path } or null
  *   DKarmicLessonContent.get(num)    -> { heading, text } or null (short, list-item form)
  *   DCornerstoneContent.get(num)     -> { heading, why, traits, shadow, path } or null
+ *   DBridgeContent.get(num)          -> { heading, why, traits, shadow, path } or null
  *   DCapstoneContent.get(num)        -> { heading, why, traits, shadow, path } or null
  */
 
@@ -366,6 +374,79 @@ window.DCapstoneContent = (function () {
       traits: `The broader impact of a finished project tends to occupy you as much as its immediate outcome. Endings prompt you to consider what comes next for everyone involved, not only for you. Generosity, more than urgency, defines how you close things out.`,
       shadow: `A focus this wide can miss the immediate, practical details right in front of you — an ending well-considered in theory, loose in the actual particulars.`,
       path: `Try attending to one immediate, practical detail this week before considering the bigger picture of an ending. You are allowed to think about legacy and still handle what's right in front of you first. Where has the wider view distracted from what needed closing out?`,
+    },
+  };
+  function get(num) { return data[num] || null; }
+  return { get };
+})();
+
+// Bridge Number — |Life Path - Expression|, reduced. Needs both a
+// birthdate and a name (like Maturity), so it's gated behind the same
+// optional name input as everything else in this file.
+window.DBridgeContent = (function () {
+  const data = {
+    0: {
+      heading: `Bridge 0 — What You Want and How You Act Are the Same Thing`,
+      why: `Reduce the distance between your Life Path and your Expression number down to its simplest form, and for you it lands on zero — no gap at all. The number that describes what your life is fundamentally about and the number that describes how you naturally act turn out, after reduction, to be the same underlying number. That's genuinely rare, and it means the usual translation work most people have to do between wanting something and actually moving toward it barely exists for you.`,
+      traits: `Your daily actions tend to already point toward your deeper purpose without you having to force the connection. People who know you well would probably describe your life as coherent — what you do and what you're clearly about rarely seem to contradict each other. You likely spend less energy than most people reconciling who you are with what you're doing.`,
+      shadow: `The risk of alignment this complete is complacency — assuming the fit will always hold without maintenance, and being genuinely thrown when life eventually asks you to grow in a direction your current alignment didn't anticipate.`,
+      path: `Try noticing one place this week where this ease might be masking a change that's actually due. You are allowed to have real alignment and still keep checking it. Where might comfort be standing in for growth?`,
+    },
+    1: {
+      heading: `Bridge 1 — A Narrow, Easily Closed Gap`,
+      why: `Reduce the distance between your Life Path and your Expression number, and for you it comes out to almost nothing — a gap of one. What your life is fundamentally about and how you naturally act sit close enough together that closing the remaining space rarely takes much conscious effort; it's more like a small adjustment than a real crossing.`,
+      traits: `Your instinctive actions usually serve your deeper purpose without much translation required. Small course corrections, when they're needed, tend to come easily. You probably don't think of yourself as someone who has to "work at" alignment, because for you it mostly isn't work.`,
+      shadow: `A gap this small is easy to stop noticing entirely, and the one place it does show up can go unaddressed simply because it's too minor to seem worth the attention.`,
+      path: `Try naming the one place this week where want and action don't quite match. You are allowed to have an easy alignment and still tend to its one loose thread. What small adjustment have you been letting slide because the rest already works?`,
+    },
+    2: {
+      heading: `Bridge 2 — A Light, Manageable Distance`,
+      why: `Reduce the distance between your Life Path and your Expression number and you land on two — a light, genuinely manageable gap between what your life is fundamentally about and how you naturally act. It's real, but it rarely demands much more than a small, regular correction to keep the two pointed the same direction.`,
+      traits: `You likely notice fairly quickly when your day-to-day actions have drifted from what actually matters to you, and correcting course doesn't usually take long. The gap shows up more as minor friction than real conflict. Most days, purpose and behavior cooperate without much negotiation.`,
+      shadow: `A distance this manageable can be ignored precisely because it's manageable, letting small, repeated drift accumulate into something bigger than any single instance would suggest.`,
+      path: `Try closing one small gap this week between something you want and something you're actually doing about it. You are allowed to have an easy bridge and still walk across it on purpose. Where has minor drift been adding up quietly?`,
+    },
+    3: {
+      heading: `Bridge 3 — A Real but Bridgeable Gap`,
+      why: `Reduce the distance between your Life Path and your Expression number and you get three — a real, noticeable gap between what your life is fundamentally about and how you naturally act. It's not so wide that it defines your daily experience, but it's wide enough that the two don't automatically line up without you doing something about it.`,
+      traits: `You likely feel a genuine pull in two directions sometimes — one toward what you know matters, one toward what actually comes naturally in the moment. Bridging the two usually takes a deliberate decision rather than an automatic one. The effort is real but rarely overwhelming.`,
+      shadow: `A gap this size, left unattended, tends to widen slowly — small, repeated choices to act on impulse instead of purpose, each one small enough to excuse, until the distance is bigger than it started.`,
+      path: `Try making one deliberate choice this week that closes the gap instead of widening it. You are allowed to need effort here — it doesn't mean something's wrong. Which direction have you been drifting without quite deciding to?`,
+    },
+    4: {
+      heading: `Bridge 4 — A Genuine Structural Gap`,
+      why: `Reduce the distance between your Life Path and your Expression number and you land on four — a real, structural gap between what your life is fundamentally about and how you naturally act. The two aren't opposed, but they don't share a wall either; building the connection between them takes actual, sustained effort rather than a passing adjustment.`,
+      traits: `You likely notice, more often than someone with a smaller gap, that your instinctive actions and your deeper sense of purpose want different things in the moment. Bridging them tends to require real intention, applied consistently rather than once. This isn't dysfunction — it's simply more construction work than some people have to do.`,
+      shadow: `A gap this size, without ongoing attention, can settle into two separate tracks that stop actively talking to each other — a life that technically functions but has quietly split into a "what I want" side and a "what I do" side.`,
+      path: `Try building one small, repeated habit this week that deliberately connects the two. You are allowed to need real structure here. What would a genuine bridge, built on purpose, actually look like for you?`,
+    },
+    5: {
+      heading: `Bridge 5 — A Wide Gap That Wants Real Attention`,
+      why: `Reduce the distance between your Life Path and your Expression number and you get five — a wide gap between what your life is fundamentally about and how you naturally act. Left alone, the two genuinely drift; closing the distance is real, ongoing work, not a one-time fix.`,
+      traits: `You likely feel the pull between purpose and instinct fairly often, sometimes as real internal friction rather than mild inconvenience. Actions that come naturally to you don't automatically serve what you actually care about most. Bridging the two probably requires conscious, repeated choice.`,
+      shadow: `Left unattended, a gap this wide tends to produce a life that looks active and busy on the surface while quietly drifting further from what actually matters underneath it.`,
+      path: `Try naming, honestly, one recurring action this week that pulls you away from your deeper purpose. You are allowed to need real, ongoing attention here. What would it take to make that action serve the purpose instead of competing with it?`,
+    },
+    6: {
+      heading: `Bridge 6 — A Substantial Gap Between Purpose and Instinct`,
+      why: `Reduce the distance between your Life Path and your Expression number and you land on six — a substantial gap between what your life is fundamentally about and how you naturally act. The two aren't at war, but they clearly aren't the same conversation either, and bridging them takes real, deliberate architecture, not a quick patch.`,
+      traits: `You likely experience a genuine split, at times, between what you know matters and what you actually reach for. Instinctive action and deeper purpose can pull hard enough in different directions that ignoring the tension isn't really an option. Bridging the two tends to be effortful, ongoing work rather than an occasional correction.`,
+      shadow: `A gap this size, without real attention, can produce a life that runs efficiently on autopilot while drifting steadily away from anything that would actually feel meaningful in hindsight.`,
+      path: `Try choosing one action this week specifically because it serves your deeper purpose, even when instinct points elsewhere. You are allowed to need real, sustained work on this bridge. Where has autopilot been quietly running the show?`,
+    },
+    7: {
+      heading: `Bridge 7 — A Deep Gap Worth Taking Seriously`,
+      why: `Reduce the distance between your Life Path and your Expression number and you get seven — a deep gap between what your life is fundamentally about and how you naturally act. This isn't a small misalignment; it's a genuine, structural distance that asks for real, ongoing attention if the two are ever going to cooperate reliably.`,
+      traits: `You likely feel real tension, more often than not, between what you're instinctively drawn to do and what you know your life is actually about. The two can feel like separate forces rather than a single coherent pull. Bridging them tends to require deliberate, sustained effort — not a single decision, but a practice.`,
+      shadow: `Left unattended, a gap this deep tends to produce real internal conflict — a life that technically works but quietly feels like it's being lived by two different people taking turns.`,
+      path: `Try naming, plainly, one place this week where instinct and purpose are actively pulling apart. You are allowed to take this gap seriously without treating it as a crisis. What would it take to build one genuine plank of the bridge, today?`,
+    },
+    8: {
+      heading: `Bridge 8 — The Widest Possible Gap`,
+      why: `Reduce the distance between your Life Path and your Expression number and you land on eight — the widest gap this reduction can produce. What your life is fundamentally about and how you naturally act sit about as far apart as this system allows, meaning the bridge between them has to be built consciously, deliberately, and more or less continuously.`,
+      traits: `You likely experience a real, recurring split between instinct and purpose — actions that come easily rarely serve what you actually care about most without deliberate redirection. This isn't a flaw in your chart; it's simply more construction work than most people are asked to do. The upside is that the bridge, once built, tends to be unusually strong, precisely because it was never accidental.`,
+      shadow: `Left completely unattended, a gap this wide can split into two genuinely separate lives — one lived on instinct, one held privately as "what actually matters" — with less and less traffic running between them over time.`,
+      path: `Try building one deliberate connection this week between something you instinctively do and something you actually care about. You are allowed to need constant, conscious work here — it's not a failure, it's the actual shape of this particular chart. What's the first plank of that bridge?`,
     },
   };
   function get(num) { return data[num] || null; }

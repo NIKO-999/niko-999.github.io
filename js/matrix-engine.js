@@ -339,6 +339,18 @@ function capstoneNumber(name) {
   return last ? PYTHAGOREAN_LETTER_VALUES[last] : null;
 }
 
+// Bridge Number — the gap between Life Path (what your life is
+// fundamentally about) and Expression (how you naturally act), reduced.
+// Read as how much conscious effort it takes to make your inner drive and
+// your outward action actually agree with each other. Uses
+// _reduceToSingleDigit, the same "gap number" reduction Challenges uses
+// (0-8, master numbers never preserved) — a genuine tension measure, not
+// a sum, so it belongs with that family of reductions rather than
+// _classicalReduce's master-number-preserving one.
+function bridgeNumber(lifePathValue, expressionValue) {
+  return _reduceToSingleDigit(Math.abs(Number(lifePathValue) - Number(expressionValue)));
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
@@ -850,9 +862,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

@@ -2444,13 +2444,13 @@ const ARCANA_ESSENCE = {
   // Entirely optional and never persisted; lives only in this variable for
   // the current tab session. Mirrors the Sexual Line's "exists in the scene
   // but hidden/unclickable until active" pattern (see _sexLineActive above).
-  const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY', 'HIDDENPASSION', 'SUBCONSCIOUS', 'CORNERCAP']);
+  const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY', 'HIDDENPASSION', 'SUBCONSCIOUS', 'CORNERCAP', 'BRIDGE']);
   let _currentName = '';
   let _nameActive = false;
   const _emptyNameVals = {
     expression: null, soulUrge: null, personality: null, maturity: null,
     hiddenPassion: null, subconsciousSelf: null, missingNumbers: [],
-    cornerstone: null, capstone: null,
+    cornerstone: null, capstone: null, bridge: null,
   };
   let _nameVals = { ..._emptyNameVals };
   function _computeNameVals(name) {
@@ -2463,6 +2463,7 @@ const ARCANA_ESSENCE = {
       expression: nn.expression.value, soulUrge: nn.soulUrge.value, personality: nn.personality.value, maturity: nn.maturity.value,
       hiddenPassion: hp.value, subconsciousSelf: sc.value, missingNumbers: sc.missingNumbers,
       cornerstone: window.DMEngine.cornerstoneNumber(name), capstone: window.DMEngine.capstoneNumber(name),
+      bridge: window.DMEngine.bridgeNumber(_vals.lifePath, nn.expression.value),
     };
   }
 
@@ -2782,6 +2783,13 @@ const ARCANA_ESSENCE = {
       pos: new THREE.Vector3(0, -_R * 1.2, 0), color:0x6BCBFF, twk:{spd:0.72,off:3.9} },
     { key:'CORNERCAP', num:_nameVals.cornerstone, label:'Cornerstone & Capstone',
       pos: new THREE.Vector3(_R * 0.4104, -_R * 1.1276, 0), color:0xC9A876, twk:{spd:0.80,off:4.6} },
+
+    // ── Bridge Number — |Life Path - Expression|, reduced. Needs both a
+    // birthdate and a name (like Maturity). Same hidden-until-active
+    // treatment as every other NAME_KEYS entry. θ=310°, ≈0.42R clear of
+    // the θ=290° Cornerstone/Capstone-adjacent point, same ring.
+    { key:'BRIDGE', num:_nameVals.bridge, label:'Bridge Number',
+      pos: new THREE.Vector3(_R * 0.7713, -_R * 0.9192, 0), color:0x7ED9C4, twk:{spd:0.68,off:5.7} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3248,7 +3256,7 @@ const ARCANA_ESSENCE = {
       const sourceByKey = {
         EXPRESSION: window.DExpressionContent, SOULURGE: window.DSoulUrgeContent,
         PERSONALITY: window.DPersonalityContent, MATURITY: window.DMaturityContent,
-        HIDDENPASSION: window.DHiddenPassionContent,
+        HIDDENPASSION: window.DHiddenPassionContent, BRIDGE: window.DBridgeContent,
       };
       const nc = sourceByKey[data.key] ? sourceByKey[data.key].get(data.num) : null;
 
@@ -3681,7 +3689,7 @@ const ARCANA_ESSENCE = {
 
     const KEY_TO_VAL = {
       EXPRESSION: 'expression', SOULURGE: 'soulUrge', PERSONALITY: 'personality', MATURITY: 'maturity',
-      HIDDENPASSION: 'hiddenPassion', SUBCONSCIOUS: 'subconsciousSelf', CORNERCAP: 'cornerstone',
+      HIDDENPASSION: 'hiddenPassion', SUBCONSCIOUS: 'subconsciousSelf', CORNERCAP: 'cornerstone', BRIDGE: 'bridge',
     };
     MICRO.forEach((data, i) => {
       if (!NAME_KEYS.has(data.key)) return;
@@ -4819,7 +4827,7 @@ const ARCANA_ESSENCE = {
   // active, _tierProviders.micro.list() includes them with real numbers.
   const NAME_ROW_LABELS = [
     'Expression Number', 'Soul Urge Number', 'Personality Number', 'Maturity Number',
-    'Hidden Passion Number', 'Subconscious Self Number', 'Cornerstone & Capstone',
+    'Hidden Passion Number', 'Subconscious Self Number', 'Cornerstone & Capstone', 'Bridge Number',
   ];
 
   function buildRows() {
