@@ -3633,6 +3633,158 @@ window.DMicroContent = (function () {
       path: `Try letting one act of care land this week without deflecting it, minimizing it, or rushing to return the favor. You are allowed to be healed, not only to heal. What has your own selfless giving been quietly costing you?`,
     },
 
+    // ── Birthday Number (classical, day-of-birth only — natural-talent
+    // number, distinct from Life Path). See research build note for the
+    // formula (js/matrix-engine.js's birthdayNumber()). ─────────────────────
+    '1_BIRTHDAY': {
+      heading: `Birthday Number 1 — A Talent for Starting Things`,
+      why: `You came in with a natural knack for initiative — the specific gift that colors how you move through your Life Path is starting things before anyone else is ready to.`,
+      shadow: `Left unused, it shows up as impatience with anyone slower to act than you are.`,
+      path: `Try using that starting instinct on something small today. You are allowed to lead in miniature, not just in the big moments.`,
+    },
+    '2_BIRTHDAY': {
+      heading: `Birthday Number 2 — A Talent for Reading the Room`,
+      why: `You came in with a natural sensitivity to what other people need before they say it — the gift that colors your Life Path is tact, timing, and genuine cooperation.`,
+      shadow: `Left unused, it shows up as over-adjusting yourself to match everyone else's mood.`,
+      path: `Try trusting your read on someone today instead of second-guessing it. You are allowed to know things without proof.`,
+    },
+    '3_BIRTHDAY': {
+      heading: `Birthday Number 3 — A Talent for Expression`,
+      why: `You came in with a natural gift for words and warmth — the specific talent coloring your Life Path is making things lighter and more alive just by showing up.`,
+      shadow: `Left unused, it shows up as deflecting anything serious with a joke.`,
+      path: `Try saying one true thing today without softening it into a bit. You are allowed to be funny and also be taken seriously.`,
+    },
+    '4_BIRTHDAY': {
+      heading: `Birthday Number 4 — A Talent for Building`,
+      why: `You came in with a natural instinct for structure — the gift that colors your Life Path is the ability to make something solid out of raw material.`,
+      shadow: `Left unused, it shows up as rigidity about the one right way to do things.`,
+      path: `Try loosening your grip on one process today that doesn't actually need to be so exact. You are allowed to build and still flex.`,
+    },
+    '5_BIRTHDAY': {
+      heading: `Birthday Number 5 — A Talent for Adapting`,
+      why: `You came in with a natural resourcefulness — the gift that colors your Life Path is thriving on change other people find destabilizing.`,
+      shadow: `Left unused, it shows up as restlessness that never lets anything settle long enough to matter.`,
+      path: `Try staying in one uncomfortable moment today instead of moving past it. You are allowed to adapt and still stay put sometimes.`,
+    },
+    '6_BIRTHDAY': {
+      heading: `Birthday Number 6 — A Talent for Care`,
+      why: `You came in with a natural instinct to look after people and spaces — the gift that colors your Life Path is making things feel held.`,
+      shadow: `Left unused, it shows up as taking on responsibility nobody actually asked you to carry.`,
+      path: `Try letting one thing today go uncared-for that isn't actually yours to manage. You are allowed to care selectively.`,
+    },
+    '7_BIRTHDAY': {
+      heading: `Birthday Number 7 — A Talent for Depth`,
+      why: `You came in with a natural pull toward understanding things fully — the gift that colors your Life Path is genuine insight other people have to work harder for.`,
+      shadow: `Left unused, it shows up as overthinking replacing actual rest.`,
+      path: `Try letting one question stay unanswered today instead of chasing it down. You are allowed to not fully understand something yet.`,
+    },
+    '8_BIRTHDAY': {
+      heading: `Birthday Number 8 — A Talent for Execution`,
+      why: `You came in with a natural instinct for getting real things done — the gift that colors your Life Path is turning ambition into something tangible.`,
+      shadow: `Left unused, it shows up as measuring a good day purely by output.`,
+      path: `Try counting today as good for a reason that has nothing to do with what you produced. You are allowed to rest and still call it a win.`,
+    },
+    '9_BIRTHDAY': {
+      heading: `Birthday Number 9 — A Talent for Compassion`,
+      why: `You came in with a natural capacity to feel what other people are going through — the gift that colors your Life Path is generosity that doesn't have to be taught.`,
+      shadow: `Left unused, it shows up as giving until there's nothing left for yourself.`,
+      path: `Try keeping one small thing today just for yourself. You are allowed to be generous and still hold something back.`,
+    },
+    '11_BIRTHDAY': {
+      heading: `Birthday Number 11 — A Talent for Insight`,
+      why: `You came in with a heightened intuitive gift — the talent coloring your Life Path is sensing what's coming before the evidence catches up.`,
+      shadow: `Left unused, it shows up as staying in your head instead of acting on what you already know.`,
+      path: `Try following one instinct today, even without proof yet. You are allowed to trust the download before you can explain it.`,
+    },
+    '22_BIRTHDAY': {
+      heading: `Birthday Number 22 — A Talent for Making Things Real`,
+      why: `You came in with a rare combination of vision and practicality — the gift coloring your Life Path is the ability to actually build what other people only imagine.`,
+      shadow: `Left unused, it shows up as ambition that never gets past the planning stage.`,
+      path: `Try turning one idea into a first real step today. You are allowed to start small on something big.`,
+    },
+    '33_BIRTHDAY': {
+      heading: `Birthday Number 33 — A Talent for Healing`,
+      why: `You came in with an unusually deep capacity for service — the gift coloring your Life Path is care that other people can genuinely feel.`,
+      shadow: `Left unused, it shows up as giving so completely that your own needs go unspoken.`,
+      path: `Try naming one thing you need today instead of assuming it can wait. You are allowed to be looked after too.`,
+    },
+
+    // ── Personal Year (classical, birth month + birth day + CURRENT year —
+    // dynamic, changes annually). Distinct from the app's Arcana-based
+    // Yearly Energy. ─────────────────────────────────────────────────────────
+    '1_PYEAR': {
+      heading: `Personal Year 1 — A Year for Starting Over`,
+      why: `This year favors fresh starts — new projects, new directions, permission to begin again rather than keep patching up what's already worn out.`,
+      shadow: `Rushing every decision just to feel like something's moving can start things that don't actually deserve your energy.`,
+      path: `Try beginning one thing this month you've been circling for a while. You are allowed to start before you feel fully ready.`,
+    },
+    '2_PYEAR': {
+      heading: `Personal Year 2 — A Year for Partnership`,
+      why: `This year slows the pace and puts relationships in focus — patience, cooperation, and letting things develop instead of forcing them.`,
+      shadow: `Passivity can masquerade as patience if you let every decision default to waiting.`,
+      path: `Try being patient with one thing this month without giving up your own voice in it. You are allowed to wait and still speak up.`,
+    },
+    '3_PYEAR': {
+      heading: `Personal Year 3 — A Year for Being Seen`,
+      why: `This year favors expression, creativity, and social expansion — a genuinely good stretch for putting yourself and your work out into the world.`,
+      shadow: `Scattering your energy across too many fun distractions can leave the actual creative work unfinished.`,
+      path: `Try sharing one thing you've made this month, even unfinished. You are allowed to be seen before it's perfect.`,
+    },
+    '4_PYEAR': {
+      heading: `Personal Year 4 — A Year for Groundwork`,
+      why: `This year rewards discipline and structure — less exciting than other years, but a genuinely good stretch for building something that lasts.`,
+      shadow: `Rigid over-control can turn necessary structure into a cage you built for yourself.`,
+      path: `Try sticking with one unglamorous task this month past the point of boredom. You are allowed to find it dull and still show up.`,
+    },
+    '5_PYEAR': {
+      heading: `Personal Year 5 — A Year for Change`,
+      why: `This year brings genuine unpredictability — travel, shifts, new people — and rewards flexibility over resistance.`,
+      shadow: `Chasing every new option can leave nothing enough time to actually become something.`,
+      path: `Try saying yes to one unplanned opportunity this month. You are allowed to let this year surprise you.`,
+    },
+    '6_PYEAR': {
+      heading: `Personal Year 6 — A Year for Home and Responsibility`,
+      why: `This year centers family, home, and close relationships — real responsibility arrives, and so does the reward of tending to what actually matters to you.`,
+      shadow: `Over-functioning for everyone around you can quietly use up the whole year without you noticing.`,
+      path: `Try asking someone for real help with one responsibility this month. You are allowed to be supported, not just supportive.`,
+    },
+    '7_PYEAR': {
+      heading: `Personal Year 7 — A Year for Reflection`,
+      why: `This year pulls inward — study, solitude, and real reflection are favored over outward momentum this time around.`,
+      shadow: `Isolating for too long can turn needed rest into genuine disconnection from people who care about you.`,
+      path: `Try reaching out to one person this month even while you're in a quieter season. You are allowed to reflect and still stay connected.`,
+    },
+    '8_PYEAR': {
+      heading: `Personal Year 8 — A Year for Ambition`,
+      why: `This year favors material progress — career, money, and real authority tend to move this year, rewarding focused, deliberate effort.`,
+      shadow: `Measuring the whole year purely by results can crowd out everything that isn't on the scoreboard.`,
+      path: `Try noting one non-material win this month alongside the material ones. You are allowed to be ambitious and still count the soft stuff.`,
+    },
+    '9_PYEAR': {
+      heading: `Personal Year 9 — A Year for Letting Go`,
+      why: `This year closes chapters — endings, release, and clearing space for what's next, even when the letting go is hard.`,
+      shadow: `Clinging to what this year is trying to close can drag an ending out longer than it needs to be.`,
+      path: `Try releasing one thing this month that's already run its course. You are allowed to grieve it and still let it go.`,
+    },
+    '11_PYEAR': {
+      heading: `Personal Year 11 — A Year of Heightened Intuition`,
+      why: `This year runs on inspiration and insight more than logic — genuine creative and spiritual downloads arrive, asking to be acted on rather than just noticed.`,
+      shadow: `Staying purely inspired without grounding any of it can leave the year feeling wired but unfulfilled.`,
+      path: `Try turning one insight this month into a real, concrete action. You are allowed to be inspired and still be practical.`,
+    },
+    '22_PYEAR': {
+      heading: `Personal Year 22 — A Year for Building Big`,
+      why: `This year carries real capacity to build something large and lasting — the combination of vision and practical follow-through is unusually strong right now.`,
+      shadow: `Overextending past your actual capacity can turn a powerful year into a depleting one.`,
+      path: `Try pacing one big project this month against your real energy, not just its potential. You are allowed to build big and still rest.`,
+    },
+    '33_PYEAR': {
+      heading: `Personal Year 33 — A Year of Deep Service`,
+      why: `This year puts you in a position to genuinely help or teach others — the capacity for real service is heightened right now.`,
+      shadow: `Giving so completely to others this year that your own needs get quietly deprioritized.`,
+      path: `Try keeping one part of this month purely for yourself. You are allowed to serve others and still be replenished.`,
+    },
+
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_F1': {
       heading: `A Venture Your Father's Male Line Never Got to Fully Launch Is Now Yours to Start`,

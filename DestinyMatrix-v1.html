@@ -854,6 +854,7 @@
 <script src="js/career-paths-content.js"></script>
 <script src="js/purpose-content.js"></script>
 <script src="js/chakra-content.js"></script>
+<script src="js/pinnacles-challenges-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2316,6 +2317,17 @@ const ARCANA_ESSENCE = {
     // digits, not the already-reduced A/B/C locals above. See
     // research/11-Research-Updates/31.
     let lifePathV = E;
+    // Birthdate-only classical numerology (Birthday Number, Personal Year,
+    // Pinnacles, Challenges, Karmic Debt flags) — all distinct from Life
+    // Path and from this app's own Arcana system. See js/matrix-engine.js's
+    // birthdayNumber()/pinnacles()/challenges()/karmicDebtFlags()/
+    // getPersonalYear() and research build note. PINNACLES/CHALLENGES stars
+    // display the CURRENTLY ACTIVE stage's number as their badge (same
+    // "currently active slot" idea Yearly Energy already uses); the card
+    // itself shows all 4 stages.
+    let birthdayV = null, pinnaclesV = null, challengesV = null, karmicDebtFlagsV = [];
+    let pinnacleActiveNum = null, challengeActiveNum = null, personalYearV = null;
+    let stageAgesV = null, activeStageV = null;
     if (window.DMEngine) {
       const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
       yeMeta = DMEngine.getYearlyEnergy(dobIso);
@@ -2323,6 +2335,17 @@ const ARCANA_ESSENCE = {
       const _fullChart = DMEngine.calculateDestinyMatrix(dobIso);
       chLetters = _fullChart.chakras.letters;
       lifePathV = _fullChart.lifePath.value;
+      birthdayV = _fullChart.birthdayNumber.value;
+      pinnaclesV = _fullChart.pinnacles;
+      challengesV = _fullChart.challenges;
+      karmicDebtFlagsV = _fullChart.karmicDebt.flags;
+      stageAgesV = _fullChart.pinnacles.ages;
+      let _activeStage = 4;
+      for (const r of stageAgesV) { if (r.endAge === null || yeMeta.ageYears < r.endAge) { _activeStage = r.stage; break; } }
+      activeStageV = _activeStage;
+      pinnacleActiveNum  = pinnaclesV['p' + _activeStage];
+      challengeActiveNum = challengesV['c' + _activeStage];
+      personalYearV = DMEngine.getPersonalYear(dobIso).value;
     }
     _yeMeta = yeMeta;
 
@@ -2357,6 +2380,9 @@ const ARCANA_ESSENCE = {
       atMUL: mulV, atSWA: swaV,
       atYE: yeV,
       lifePath: lifePathV,
+      birthdayNumber: birthdayV, personalYear: personalYearV,
+      pinnacles: pinnaclesV, challenges: challengesV, karmicDebtFlags: karmicDebtFlagsV,
+      pinnacleActiveNum, challengeActiveNum, stageAges: stageAgesV, activeStage: activeStageV,
       atPP: ppV, atSOP: sopV, atSPP: sppV,
       // Lettered arm points — consumed by the program scanner (see above).
       // atP/atK are the two Talent Star Line positions (Ajna / Vishuddha
@@ -2661,6 +2687,23 @@ const ARCANA_ESSENCE = {
     // applyNewDate() below.
     { key:'LIFEPATH', num:_vals.lifePath, label:'Life Path',
       pos: new THREE.Vector3(0, _R * 1.2, 0), color:0x9DFFD8, twk:{spd:0.66,off:5.9} },
+
+    // ── Birthdate-only classical numerology, round 2 — Birthday Number,
+    // Personal Year, Pinnacles, Challenges. All distinct from Life Path and
+    // from this app's own Arcana system (see js/matrix-engine.js and
+    // js/pinnacles-challenges-content.js). Appended at the END of MICRO —
+    // indices 31-34; same r=1.20R ring as Life Path/Guardian Angel, spread
+    // at 20° increments either side of Life Path's θ=90°. Distance-checked:
+    // nearest neighbor to Life Path/each other is ≈0.42R, clear of the
+    // ≈0.22-0.26R baseline used elsewhere.
+    { key:'BIRTHDAY', num:_vals.birthdayNumber, label:'Birthday Number',
+      pos: new THREE.Vector3(_R * 0.4104, _R * 1.1276, 0), color:0xFFD59D, twk:{spd:0.74,off:4.2} },
+    { key:'PYEAR', num:_vals.personalYear, label:'Personal Year',
+      pos: new THREE.Vector3(-_R * 0.4104, _R * 1.1276, 0), color:0x9DC5FF, twk:{spd:0.82,off:3.6} },
+    { key:'PINNACLES', num:_vals.pinnacleActiveNum, label:'Pinnacles',
+      pos: new THREE.Vector3(_R * 0.7713, _R * 0.9192, 0), color:0xC29DFF, twk:{spd:0.58,off:5.1} },
+    { key:'CHALLENGES', num:_vals.challengeActiveNum, label:'Challenges',
+      pos: new THREE.Vector3(-_R * 0.7713, _R * 0.9192, 0), color:0xFF9D9D, twk:{spd:0.90,off:4.7} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2976,6 +3019,49 @@ const ARCANA_ESSENCE = {
       return;
     }
 
+    // Pinnacles / Challenges — classical birthdate-only life-stage cycles.
+    // Own template: all 4 stages in one card, each with a live-computed age
+    // range (from _vals.stageAges) and the currently-active stage marked.
+    // Content is per-NUMBER (js/pinnacles-challenges-content.js), not
+    // per-stage-and-number — the stage/age framing is generated here.
+    if (data.key === 'PINNACLES' || data.key === 'CHALLENGES') {
+      const isPinnacle = data.key === 'PINNACLES';
+      const set     = isPinnacle ? _vals.pinnacles : _vals.challenges;
+      const source  = isPinnacle ? window.DPinnaclesContent : window.DChallengesContent;
+      const prefix  = isPinnacle ? 'p' : 'c';
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = isPinnacle
+        ? 'Pinnacles · Four Life-Stage Cycles' : 'Challenges · Four Life-Stage Obstacles';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = data.label;
+
+      const stageHtml = (_vals.stageAges || []).map(r => {
+        const num = set ? set[prefix + r.stage] : null;
+        const c   = source && num !== null && num !== undefined ? source.get(num) : null;
+        const ageLabel = r.endAge === null
+          ? `Age ${r.startAge.toFixed(0)}+`
+          : `Age ${r.startAge.toFixed(0)}–${r.endAge.toFixed(0)}`;
+        const activeTag = r.stage === _vals.activeStage ? ' · CURRENTLY ACTIVE' : '';
+        return `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">STAGE ${r.stage} · ${ageLabel}${activeTag}</div>
+           <div class="pb-full-text"><em>${(c && c.heading) || (data.label + ' ' + num)}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${c ? c.why : ''}</div>
+           ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>` : ''}
+           ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.path}</div>` : ''}
+         </div>`;
+      }).join('');
+
+      document.getElementById('pb-body').innerHTML = stageHtml;
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
     const mc   = window.DMicroContent && DMicroContent.get(data.num, data.key);
     const sectionLabel = (data.key === 'LOVE' || data.key === 'MON')
       ? 'Love & Money Channel'
@@ -2991,6 +3077,8 @@ const ARCANA_ESSENCE = {
       ? 'Chakra Map'
       : (data.key === 'YE')
       ? 'Yearly Energy Forecast'
+      : (data.key === 'BIRTHDAY' || data.key === 'PYEAR')
+      ? 'Numerology'
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
@@ -3039,10 +3127,18 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${hex}">IN LOVE & RELATIONSHIPS</div>
          <div class="pb-full-text">${mc.love}</div>
        </div>` : ''}
-       ${data.key === 'LIFEPATH' && mc.path ? `<div class="pb-full-section">
+       ${(data.key === 'LIFEPATH' || data.key === 'BIRTHDAY' || data.key === 'PYEAR') && mc.path ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${hex}">THE INVITATION</div>
          <div class="pb-full-text">${mc.path}</div>
-       </div>` : ''}` : '';
+       </div>` : ''}
+       ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? (() => {
+         const kd = DKarmicDebtNumberContent.get(_vals.karmicDebtFlags[0]);
+         return kd ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">A CLASSICAL KARMIC DEBT NUMBER</div>
+           <div class="pb-full-text"><em>${kd.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${kd.text}</div>
+         </div>` : '';
+       })() : ''}` : '';
 
     _mBanner.classList.add('open');
     _mBanner.scrollTop = 0;
@@ -3317,6 +3413,18 @@ const ARCANA_ESSENCE = {
     // Node 30: Life Path — recomputed each date change (full birthdate digit sum)
     _microTags[30].querySelector('.t-num').textContent = String(_vals.lifePath);
     MICRO[30].num = _vals.lifePath;
+
+    // Nodes 31-34: Birthday Number, Personal Year, Pinnacles, Challenges —
+    // recomputed each date change. Personal Year also changes year to year
+    // even without a date change, same caveat as Yearly Energy above.
+    _microTags[31].querySelector('.t-num').textContent = String(_vals.birthdayNumber);
+    MICRO[31].num = _vals.birthdayNumber;
+    _microTags[32].querySelector('.t-num').textContent = String(_vals.personalYear);
+    MICRO[32].num = _vals.personalYear;
+    _microTags[33].querySelector('.t-num').textContent = String(_vals.pinnacleActiveNum);
+    MICRO[33].num = _vals.pinnacleActiveNum;
+    _microTags[34].querySelector('.t-num').textContent = String(_vals.challengeActiveNum);
+    MICRO[34].num = _vals.challengeActiveNum;
 
     return true;
   };
@@ -4432,14 +4540,20 @@ const ARCANA_ESSENCE = {
   const search = document.getElementById('ni-search');
   const listEl = document.getElementById('ni-list');
 
+  // Labels shown in this panel, in display order — extend this list as new
+  // birthdate-only / name-based numerology stars are added.
+  const NUMEROLOGY_ROW_LABELS = ['Life Path', 'Birthday Number', 'Personal Year', 'Pinnacles', 'Challenges'];
+
   function buildRows() {
     if (!_tierProviders.micro) return [];
-    const row = _tierProviders.micro.list().find(r => r.label === 'Life Path');
-    if (!row) return [];
-    return [{
-      label: row.label, num: row.num, color: row.color,
-      fly: () => _tierProviders.micro.fly(row.idx),
-    }];
+    const all = _tierProviders.micro.list();
+    return NUMEROLOGY_ROW_LABELS
+      .map(label => all.find(r => r.label === label))
+      .filter(Boolean)
+      .map(row => ({
+        label: row.label, num: row.num, color: row.color,
+        fly: () => _tierProviders.micro.fly(row.idx),
+      }));
   }
 
   function render() {

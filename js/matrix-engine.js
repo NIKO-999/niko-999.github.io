@@ -59,6 +59,121 @@ function _classicalReduce(num) {
   return n;
 }
 
+// Reduces fully to a single digit (0-9), NEVER stopping at a master number —
+// distinct from _classicalReduce. Used only by Challenge Numbers, which by
+// standard convention always land in 0-8, unlike Pinnacles/Life Path/Birthday
+// Number, which preserve 11/22/33.
+function _reduceToSingleDigit(num) {
+  let n = Math.abs(Math.trunc(Number(num) || 0));
+  while (n > 9) n = _digitSum(n);
+  return n;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
+ * 1c · BIRTHDATE-ONLY CLASSICAL NUMEROLOGY
+ *    Birthday Number, Pinnacles, Challenges, Karmic Debt flags, Personal
+ *    Year — all computable from day/month/year alone (no name required),
+ *    and all distinct from both this app's own base-22 Arcana system and
+ *    from Life Path (Life Path is the digit-sum of the whole birthdate;
+ *    these are separate, standard classical-numerology concepts layered on
+ *    top of the same three raw inputs).
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+// Natural-talent number — classical reduction of the raw day of birth alone.
+// e.g. day 29 -> digitSum 11, a master number, stops there (matches
+// _classicalReduce's own master-number-preserving behavior).
+function birthdayNumber(day) {
+  return _classicalReduce(day);
+}
+
+// Four Pinnacles — standard formula: reduce month/day/year to single
+// classical digits first (master numbers preserved at this step), then
+// combine. P1 = month+day (first life stage), P2 = day+year, P4 = month+year,
+// P3 = P1+P2 (the "bridge" pinnacle). Stage age ranges come from
+// pinnacleAgeRanges() below, keyed off Life Path.
+function pinnacles(day, month, year) {
+  const rMonth = _classicalReduce(month);
+  const rDay   = _classicalReduce(day);
+  const rYear  = _classicalReduce(year);
+  const p1 = _classicalReduce(rMonth + rDay);
+  const p2 = _classicalReduce(rDay + rYear);
+  const p4 = _classicalReduce(rMonth + rYear);
+  const p3 = _classicalReduce(p1 + p2);
+  return { p1, p2, p3, p4 };
+}
+
+// Four Challenges — same reduced month/day/year inputs as Pinnacles, but via
+// absolute difference, and always collapsed to a single digit 0-8 (master
+// numbers are NOT preserved for Challenges, per standard convention — see
+// _reduceToSingleDigit). Each challenge shares its life-stage age range with
+// the correspondingly-numbered Pinnacle.
+function challenges(day, month, year) {
+  const rMonth = _classicalReduce(month);
+  const rDay   = _classicalReduce(day);
+  const rYear  = _classicalReduce(year);
+  const c1 = _reduceToSingleDigit(Math.abs(rMonth - rDay));
+  const c2 = _reduceToSingleDigit(Math.abs(rDay - rYear));
+  const c4 = _reduceToSingleDigit(Math.abs(rMonth - rYear));
+  const c3 = _reduceToSingleDigit(Math.abs(c1 - c2));
+  return { c1, c2, c3, c4 };
+}
+
+// Life-stage age ranges shared by both Pinnacles and Challenges, keyed off
+// the person's own Life Path number (standard formula: stage 1 ends at
+// 36 - lifePathValue; stages 2 and 3 each last 9 years; stage 4 runs for the
+// rest of life). Computed live from the chart rather than hard-coded, so the
+// UI can generate "which stage, what age range" framing per person.
+function pinnacleAgeRanges(lifePathValue) {
+  const end1 = 36 - lifePathValue;
+  const end2 = end1 + 9;
+  const end3 = end2 + 9;
+  return [
+    { stage: 1, startAge: 0,    endAge: end1 },
+    { stage: 2, startAge: end1, endAge: end2 },
+    { stage: 3, startAge: end2, endAge: end3 },
+    { stage: 4, startAge: end3, endAge: null }, // rest of life
+  ];
+}
+
+// Karmic Debt Numbers (classical: 13, 14, 16, 19) — a bonus flag, not a
+// standalone chart position. Flagged when the birth day itself is one of
+// these, OR when Life Path's own reduction chain (digitSum(day)+digitSum
+// (month)+digitSum(year), reduced via the same loop _classicalReduce uses)
+// passes through one of these values before its final collapse. Distinct
+// from this app's own Arcana-based "Karmic Debt" star (KARMA key) — that is
+// a completely different, Arcana-flavored system; this is the classical
+// numerology convention layered on top of Life Path specifically.
+function karmicDebtFlags(day, month, year) {
+  const DEBT_NUMBERS = [13, 14, 16, 19];
+  const flags = new Set();
+  if (DEBT_NUMBERS.includes(day)) flags.add(day);
+  let n = _digitSum(day) + _digitSum(month) + _digitSum(year);
+  while (n > 9 && n !== 11 && n !== 22 && n !== 33) {
+    if (DEBT_NUMBERS.includes(n)) flags.add(n);
+    n = _digitSum(n);
+  }
+  return Array.from(flags).sort((a, b) => a - b);
+}
+
+// Personal Year — classical cyclical number, birth month + birth day +
+// CURRENT year (not birth year). Distinct from this app's existing
+// Arcana-based getYearlyEnergy() — same relationship as Karmic Tail and
+// Sexual Line already coexisting as parallel systems over the same inputs.
+function personalYear(day, month, currentYear) {
+  return _classicalReduce(_digitSum(month) + _digitSum(day) + _digitSum(currentYear));
+}
+
+// Convenience wrapper mirroring getYearlyEnergy()'s (birthdateString,
+// asOfDateString) signature, so UI code doesn't need to re-parse the ISO
+// date string itself.
+function getPersonalYear(birthdateString, asOfDateString) {
+  const bm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdateString).trim());
+  if (!bm) throw new Error(`Invalid date "${birthdateString}". Expected format "YYYY-MM-DD".`);
+  const day = Number(bm[3]), month = Number(bm[2]);
+  const asOfYear = asOfDateString ? new Date(asOfDateString).getFullYear() : new Date().getFullYear();
+  return { value: personalYear(day, month, asOfYear), asOfYear, label: `Personal Year · ${asOfYear}` };
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
@@ -251,6 +366,14 @@ function calculateDestinyMatrix(birthdateString) {
   // -> classically reduced 1+7=8, matching the known value for that date.
   const lifePath = _classicalReduce(_digitSum(day) + _digitSum(month) + _digitSum(year));
 
+  // ── BIRTHDATE-ONLY CLASSICAL NUMEROLOGY · Birthday Number, Pinnacles,
+  //    Challenges, Karmic Debt flags ─────────────────────────────────────────
+  const birthday      = birthdayNumber(day);
+  const pinnacleSet   = pinnacles(day, month, year);
+  const challengeSet  = challenges(day, month, year);
+  const karmicDebt    = karmicDebtFlags(day, month, year);
+  const pinnacleAges  = pinnacleAgeRanges(lifePath);
+
   // ── ANCESTRAL STRAIGHT SQUARE · diagonal corners ──────────────────────────
   // Each corner = the two cross-vertices it sits between (also the age anchors).
   const TL = reduceArcana(A + B); // Age 10 · Paternal diagonal (TL↘BR)
@@ -423,6 +546,22 @@ function calculateDestinyMatrix(birthdateString) {
 
     lifePath: { value: lifePath, label: 'Life Path · Full Birthdate Digit Sum' },
 
+    birthdayNumber: { value: birthday, label: 'Birthday Number · Day of Birth' },
+
+    pinnacles: {
+      ...pinnacleSet,
+      ages: pinnacleAges,
+      label: 'Pinnacles · Four Life-Stage Cycles',
+    },
+
+    challenges: {
+      ...challengeSet,
+      ages: pinnacleAges,
+      label: 'Challenges · Four Life-Stage Obstacles',
+    },
+
+    karmicDebt: { flags: karmicDebt, label: 'Karmic Debt Numbers (Classical)' },
+
     ancestralSquare: {
       TL: { value: TL, line: 'Paternal', ageAnchor: 10 },
       TR: { value: TR, line: 'Maternal', ageAnchor: 30 },
@@ -546,9 +685,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
