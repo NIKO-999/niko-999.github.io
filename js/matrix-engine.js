@@ -263,6 +263,83 @@ function getNameNumbers(birthdateString, name) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 1e · NAME-BASED NUMEROLOGY, ROUND 2 — Hidden Passion, Subconscious Self /
+ *    Karmic Lessons, Cornerstone & Capstone. All still name-based (require
+ *    the same optional name input as Expression/Soul Urge/Personality/
+ *    Maturity), but built from letter FREQUENCY and PRESENCE rather than
+ *    sums — a genuinely different mechanism, not just another total.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+// Hidden Passion Number — the digit (1-9) whose letters occur most often
+// across the full name. Reveals a natural, sometimes under-used talent —
+// distinct from Expression/Soul Urge/Personality, which are all sums; this
+// is about which single digit shows up over and over. Ties resolve to the
+// lowest tied digit (a deterministic, commonly-used convention).
+function hiddenPassionNumber(name) {
+  const letters = _lettersOnly(name);
+  const counts = {};
+  for (const ch of letters) {
+    const v = PYTHAGOREAN_LETTER_VALUES[ch];
+    if (v) counts[v] = (counts[v] || 0) + 1;
+  }
+  let value = null, count = 0;
+  for (let d = 1; d <= 9; d++) {
+    const c = counts[d] || 0;
+    if (c > count) { count = c; value = d; }
+  }
+  return { value, count };
+}
+
+// Subconscious Self Number — how many of the 9 digits (1-9) are present AT
+// ALL among the letters of the full name; ranges 1-9 itself, read as a
+// measure of resourcefulness/self-confidence under pressure. Karmic
+// Lessons — the digits NOT present at all — read as areas still being
+// developed rather than natural strengths. Classical numerology treats
+// absence as meaningfully as presence, which is why this is a genuinely
+// different mechanism from every sum-based number elsewhere in this file.
+function subconsciousSelfAndLessons(name) {
+  const letters = _lettersOnly(name);
+  const present = new Set();
+  for (const ch of letters) {
+    const v = PYTHAGOREAN_LETTER_VALUES[ch];
+    if (v) present.add(v);
+  }
+  const missingNumbers = [];
+  for (let d = 1; d <= 9; d++) if (!present.has(d)) missingNumbers.push(d);
+  return { value: present.size, missingNumbers };
+}
+
+// Splits a full name into whitespace-separated parts. Used by Cornerstone/
+// Capstone, which specifically look at the first name's first letter and
+// the last name's last letter — not the name as one undifferentiated
+// string, the way Expression/Soul Urge/Personality treat it.
+function _nameParts(name) {
+  return String(name || '').trim().split(/\s+/).filter(Boolean);
+}
+
+// Cornerstone — the Pythagorean value of the FIRST letter of the first
+// name. Read as how you approach new opportunities and beginnings. Returns
+// null if no usable letter is present (e.g. an empty/unparseable name).
+function cornerstoneNumber(name) {
+  const parts = _nameParts(name);
+  if (!parts.length) return null;
+  const letters = _lettersOnly(parts[0]);
+  const first = letters[0];
+  return first ? PYTHAGOREAN_LETTER_VALUES[first] : null;
+}
+
+// Capstone — the Pythagorean value of the LAST letter of the last name
+// part. Read as how you follow through and finish things. Falls back to
+// the same single word Cornerstone used when only one name part is given.
+function capstoneNumber(name) {
+  const parts = _nameParts(name);
+  if (!parts.length) return null;
+  const letters = _lettersOnly(parts[parts.length - 1]);
+  const last = letters[letters.length - 1];
+  return last ? PYTHAGOREAN_LETTER_VALUES[last] : null;
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
 
@@ -773,9 +850,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

@@ -876,6 +876,7 @@
 <script src="js/chakra-content.js"></script>
 <script src="js/pinnacles-challenges-content.js"></script>
 <script src="js/name-numbers-content.js"></script>
+<script src="js/hidden-numbers-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2443,15 +2444,26 @@ const ARCANA_ESSENCE = {
   // Entirely optional and never persisted; lives only in this variable for
   // the current tab session. Mirrors the Sexual Line's "exists in the scene
   // but hidden/unclickable until active" pattern (see _sexLineActive above).
-  const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY']);
+  const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY', 'HIDDENPASSION', 'SUBCONSCIOUS', 'CORNERCAP']);
   let _currentName = '';
   let _nameActive = false;
-  let _nameVals = { expression: null, soulUrge: null, personality: null, maturity: null };
+  const _emptyNameVals = {
+    expression: null, soulUrge: null, personality: null, maturity: null,
+    hiddenPassion: null, subconsciousSelf: null, missingNumbers: [],
+    cornerstone: null, capstone: null,
+  };
+  let _nameVals = { ..._emptyNameVals };
   function _computeNameVals(name) {
-    if (!window.DMEngine || !name || !name.trim()) return { expression: null, soulUrge: null, personality: null, maturity: null };
+    if (!window.DMEngine || !name || !name.trim()) return { ..._emptyNameVals };
     const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
     const nn = window.DMEngine.getNameNumbers(dobIso, name);
-    return { expression: nn.expression.value, soulUrge: nn.soulUrge.value, personality: nn.personality.value, maturity: nn.maturity.value };
+    const hp = window.DMEngine.hiddenPassionNumber(name);
+    const sc = window.DMEngine.subconsciousSelfAndLessons(name);
+    return {
+      expression: nn.expression.value, soulUrge: nn.soulUrge.value, personality: nn.personality.value, maturity: nn.maturity.value,
+      hiddenPassion: hp.value, subconsciousSelf: sc.value, missingNumbers: sc.missingNumbers,
+      cornerstone: window.DMEngine.cornerstoneNumber(name), capstone: window.DMEngine.capstoneNumber(name),
+    };
   }
 
   // ── 6 micro-nodes ────────────────────────────────────────────────────────
@@ -2756,6 +2768,20 @@ const ARCANA_ESSENCE = {
       pos: new THREE.Vector3(-_R * 1.0392, _R * 0.6, 0), color:0xFFE4B6, twk:{spd:0.62,off:5.6} },
     { key:'MATURITY', num:_nameVals.maturity, label:'Maturity Number',
       pos: new THREE.Vector3(_R * 1.0392, _R * 0.6, 0), color:0xD4B6FF, twk:{spd:0.86,off:4.1} },
+
+    // ── Name-based numerology, round 3 — Hidden Passion, Subconscious Self
+    // (with Karmic Lessons folded into the same card), Cornerstone &
+    // Capstone (a single paired card). Same hidden/unclickable-until-
+    // -active treatment as the other NAME_KEYS entries. r=1.20R ring,
+    // θ=250°/270°/290° — well clear of Guardian Angel (θ≈204°) and every
+    // other point on this ring; ≈0.42R apart from each other, same
+    // spacing pattern used throughout this ring.
+    { key:'HIDDENPASSION', num:_nameVals.hiddenPassion, label:'Hidden Passion Number',
+      pos: new THREE.Vector3(-_R * 0.4104, -_R * 1.1276, 0), color:0xFF6B9D, twk:{spd:0.64,off:5.3} },
+    { key:'SUBCONSCIOUS', num:_nameVals.subconsciousSelf, label:'Subconscious Self Number',
+      pos: new THREE.Vector3(0, -_R * 1.2, 0), color:0x6BCBFF, twk:{spd:0.72,off:3.9} },
+    { key:'CORNERCAP', num:_nameVals.cornerstone, label:'Cornerstone & Capstone',
+      pos: new THREE.Vector3(_R * 0.4104, -_R * 1.1276, 0), color:0xC9A876, twk:{spd:0.80,off:4.6} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3124,13 +3150,105 @@ const ARCANA_ESSENCE = {
       return;
     }
 
-    // Name-based numerology — Expression, Soul Urge, Personality, Maturity.
-    // Own content globals (js/name-numbers-content.js), not DMicroContent —
-    // same WHY/SHADOW/INVITATION shape as Birthday Number/Personal Year.
+    // Subconscious Self Number + Karmic Lessons — one card, two parts. The
+    // main reading is Subconscious Self (1-9, how many of the 9 base digits
+    // are present in the name at all); folded into the same card is a
+    // live-generated list of whichever digits are NOT present (0 to
+    // several), each a short Karmic Lesson entry. An honest "no lessons"
+    // state renders if all 9 digits are present — same "unwritten entry
+    // renders an honest note" philosophy as everywhere else in this app.
+    if (data.key === 'SUBCONSCIOUS') {
+      const nc = window.DSubconsciousSelfContent ? window.DSubconsciousSelfContent.get(data.num) : null;
+      const missing = _nameVals.missingNumbers || [];
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
+
+      const lessonsHtml = missing.length
+        ? missing.map(n => {
+            const lc = window.DKarmicLessonContent ? window.DKarmicLessonContent.get(n) : null;
+            return lc ? `<div class="pb-full-section">
+               <div class="pb-full-label" style="color:${hex}">${lc.heading.toUpperCase()}</div>
+               <div class="pb-full-text">${lc.text}</div>
+             </div>` : '';
+          }).join('')
+        : `<div class="pb-full-section">
+             <div class="pb-full-label" style="color:${hex}">KARMIC LESSONS</div>
+             <div class="pb-full-text">All 9 base numbers are present in your name — no missing digits, no karmic lessons flagged. Your internal toolkit is already, in this specific sense, complete.</div>
+           </div>`;
+
+      document.getElementById('pb-body').innerHTML = nc ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE CORE VIBRATION</div>
+           <div class="pb-full-text">${nc.why || ''}</div>
+         </div>
+         ${nc.traits ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">HOW IT LIVES IN YOU</div>
+           <div class="pb-full-text">${nc.traits}</div>
+         </div>` : ''}
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE SHADOW SIDE</div>
+           <div class="pb-full-text">${nc.shadow || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE OPENING</div>
+           <div class="pb-full-text">${nc.path || ''}</div>
+         </div>
+         ${lessonsHtml}` : '';
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Cornerstone & Capstone — one paired card, two distinct readings
+    // (first letter of first name / last letter of last name). Content
+    // sources and values differ, but the shared card mirrors the
+    // Pinnacles/Challenges "several sub-readings in one card" pattern.
+    if (data.key === 'CORNERCAP') {
+      const cornerC = window.DCornerstoneContent ? window.DCornerstoneContent.get(_nameVals.cornerstone) : null;
+      const capC    = window.DCapstoneContent ? window.DCapstoneContent.get(_nameVals.capstone) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + _nameVals.cornerstone + ' / ' + _nameVals.capstone;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = 'Cornerstone & Capstone';
+
+      const sub = (label, num, c) => c ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">${label} · ${num}</div>
+           <div class="pb-full-text"><em>${c.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
+           ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
+           <div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>
+           <div class="pb-full-text" style="margin-top:8px">${c.path}</div>
+         </div>` : '';
+
+      document.getElementById('pb-body').innerHTML =
+        sub('CORNERSTONE · HOW YOU BEGIN', _nameVals.cornerstone, cornerC) +
+        sub('CAPSTONE · HOW YOU FINISH', _nameVals.capstone, capC);
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Name-based numerology — Expression, Soul Urge, Personality, Maturity,
+    // Hidden Passion. Own content globals (js/name-numbers-content.js /
+    // js/hidden-numbers-content.js), not DMicroContent — same WHY/SHADOW/
+    // INVITATION shape as Birthday Number/Personal Year.
     if (NAME_KEYS.has(data.key)) {
       const sourceByKey = {
         EXPRESSION: window.DExpressionContent, SOULURGE: window.DSoulUrgeContent,
         PERSONALITY: window.DPersonalityContent, MATURITY: window.DMaturityContent,
+        HIDDENPASSION: window.DHiddenPassionContent,
       };
       const nc = sourceByKey[data.key] ? sourceByKey[data.key].get(data.num) : null;
 
@@ -3561,7 +3679,10 @@ const ARCANA_ESSENCE = {
     const wasActive = _nameActive;
     _nameActive = !!(_currentName && _currentName.trim());
 
-    const KEY_TO_VAL = { EXPRESSION: 'expression', SOULURGE: 'soulUrge', PERSONALITY: 'personality', MATURITY: 'maturity' };
+    const KEY_TO_VAL = {
+      EXPRESSION: 'expression', SOULURGE: 'soulUrge', PERSONALITY: 'personality', MATURITY: 'maturity',
+      HIDDENPASSION: 'hiddenPassion', SUBCONSCIOUS: 'subconsciousSelf', CORNERCAP: 'cornerstone',
+    };
     MICRO.forEach((data, i) => {
       if (!NAME_KEYS.has(data.key)) return;
       const v = _nameVals[KEY_TO_VAL[data.key]];
@@ -4696,7 +4817,10 @@ const ARCANA_ESSENCE = {
   // absent (same "an unwritten entry renders an honest note rather than
   // fabricated content" philosophy the Purpose stars established). Once
   // active, _tierProviders.micro.list() includes them with real numbers.
-  const NAME_ROW_LABELS = ['Expression Number', 'Soul Urge Number', 'Personality Number', 'Maturity Number'];
+  const NAME_ROW_LABELS = [
+    'Expression Number', 'Soul Urge Number', 'Personality Number', 'Maturity Number',
+    'Hidden Passion Number', 'Subconscious Self Number', 'Cornerstone & Capstone',
+  ];
 
   function buildRows() {
     if (!_tierProviders.micro) return [];
