@@ -3122,6 +3122,7 @@ const ARCANA_ESSENCE = {
            <div class="pb-full-label" style="color:${hex}">STAGE ${r.stage} · ${ageLabel}${activeTag}</div>
            <div class="pb-full-text"><em>${(c && c.heading) || (data.label + ' ' + num)}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${c ? c.why : ''}</div>
+           ${c && c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
            ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>` : ''}
            ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.path}</div>` : ''}
          </div>`;
@@ -3153,15 +3154,19 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = nc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+           <div class="pb-full-label" style="color:${hex}">THE CORE VIBRATION</div>
            <div class="pb-full-text">${nc.why || ''}</div>
          </div>
+         ${nc.traits ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">HOW IT LIVES IN YOU</div>
+           <div class="pb-full-text">${nc.traits}</div>
+         </div>` : ''}
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+           <div class="pb-full-label" style="color:${hex}">THE SHADOW SIDE</div>
            <div class="pb-full-text">${nc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE INVITATION</div>
+           <div class="pb-full-label" style="color:${hex}">THE OPENING</div>
            <div class="pb-full-text">${nc.path || ''}</div>
          </div>` : '';
 
@@ -3195,18 +3200,28 @@ const ARCANA_ESSENCE = {
     document.getElementById('pb-prog-name').style.color = hex;
     document.getElementById('pb-section-label').textContent = sectionLabel;
     document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    // Numerology cards (Life Path/Birthday Number/Personal Year) use their
+    // own subheading vocabulary, distinct from the Arcana-wide THE WHY/THE
+    // SHADOW/THE INVITATION labels every other position on this shared
+    // template uses — a deliberate identity split, not an inconsistency.
+    const isNumerologyKey = data.key === 'LIFEPATH' || data.key === 'BIRTHDAY' || data.key === 'PYEAR';
+    const whyLabel    = isNumerologyKey ? 'THE CORE VIBRATION'   : 'THE WHY';
+    const traitsLabel = isNumerologyKey ? 'HOW IT LIVES IN YOU'  : 'KEY TRAITS';
+    const shadowLabel = isNumerologyKey ? 'THE SHADOW SIDE'      : 'THE SHADOW';
+    const pathLabel    = isNumerologyKey ? 'THE OPENING'         : 'THE INVITATION';
+
     document.getElementById('pb-heading').textContent = (mc && mc.heading) || data.label;
     document.getElementById('pb-body').innerHTML = mc ?
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+         <div class="pb-full-label" style="color:${hex}">${whyLabel}</div>
          <div class="pb-full-text">${mc.why || ''}</div>
        </div>
-       ${data.key === 'LIFEPATH' && mc.traits ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">KEY TRAITS</div>
+       ${isNumerologyKey && mc.traits ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">${traitsLabel}</div>
          <div class="pb-full-text">${mc.traits}</div>
        </div>` : ''}
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-label" style="color:${hex}">${shadowLabel}</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
        </div>
        ${mc.positive ? `<div class="pb-full-section">
@@ -3237,8 +3252,8 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${hex}">IN LOVE & RELATIONSHIPS</div>
          <div class="pb-full-text">${mc.love}</div>
        </div>` : ''}
-       ${(data.key === 'LIFEPATH' || data.key === 'BIRTHDAY' || data.key === 'PYEAR') && mc.path ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE INVITATION</div>
+       ${isNumerologyKey && mc.path ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${hex}">${pathLabel}</div>
          <div class="pb-full-text">${mc.path}</div>
        </div>` : ''}
        ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? (() => {
