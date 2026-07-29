@@ -5050,10 +5050,19 @@ const ARCANA_ESSENCE = {
   });
   nameInput.addEventListener('click', (e) => e.stopPropagation());
 
-  compatInput.addEventListener('input', () => {
+  // Native <input type="date"> doesn't reliably fire 'input' across every
+  // browser/OS date-picker combination — the same reason the main DOB gate
+  // field (l-gate-input, applyNewDate() above) commits on 'blur' rather
+  // than 'input'/'change' alone. Listening on all three here covers typing,
+  // the native picker UI, and tabbing away, so a completed date is never
+  // silently missed regardless of how it was entered.
+  const _onCompatDobChange = () => {
     if (_tierProviders.setPartnerDob) _tierProviders.setPartnerDob(compatInput.value);
     render();
-  });
+  };
+  compatInput.addEventListener('input', _onCompatDobChange);
+  compatInput.addEventListener('change', _onCompatDobChange);
+  compatInput.addEventListener('blur', _onCompatDobChange);
   compatInput.addEventListener('click', (e) => e.stopPropagation());
 
   document.addEventListener('click', (e) => {
