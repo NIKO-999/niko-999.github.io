@@ -4958,6 +4958,9 @@ const ARCANA_ESSENCE = {
   const listEl = document.getElementById('ni-list');
   const nameInput = document.getElementById('ni-name-input');
   const compatInput = document.getElementById('ni-compat-input');
+  let _lastSyncedName = null;
+  let _lastSyncedCompatDob = null;
+  let _pollTimer = null;
 
   // Labels shown in this panel, in display order — extend this list as new
   // birthdate-only / name-based numerology stars are added.
@@ -5011,7 +5014,31 @@ const ARCANA_ESSENCE = {
     return coreRows.concat(nameRows).concat(compatRows);
   }
 
+  // Re-derives name/partner-DOB state from each field's current value,
+  // independent of whatever DOM event actually fired (or didn't). Native
+  // inputs — especially <input type="date"> — don't reliably fire
+  // input/change/blur the same way across every browser/OS date-picker
+  // combination; rather than chase every platform's quirk individually,
+  // this just checks both fields' current values against what was last
+  // synced. Returns true if anything actually changed, so callers (the
+  // poll below in particular) can skip a full render() when nothing did.
+  function _syncFromInputs() {
+    let changed = false;
+    if (_tierProviders.setName && nameInput.value !== _lastSyncedName) {
+      _lastSyncedName = nameInput.value;
+      _tierProviders.setName(nameInput.value);
+      changed = true;
+    }
+    if (_tierProviders.setPartnerDob && compatInput.value !== _lastSyncedCompatDob) {
+      _lastSyncedCompatDob = compatInput.value;
+      _tierProviders.setPartnerDob(compatInput.value);
+      changed = true;
+    }
+    return changed;
+  }
+
   function render() {
+    _syncFromInputs();
     listEl.innerHTML = '';
 
     const rows = buildRows();
@@ -5041,7 +5068,19 @@ const ARCANA_ESSENCE = {
   toggle.addEventListener('click', () => {
     const opening = !root.classList.contains('open');
     root.classList.toggle('open');
-    if (opening) render();
+    if (opening) {
+      render();
+      // Belt-and-suspenders: poll while the panel is open so a completed
+      // name/partner-DOB entry is always picked up within half a second,
+      // even on a browser/OS combination where none of input/change/blur
+      // fire the way they do everywhere I could test this. render() itself
+      // is cheap and already no-ops when nothing's actually changed.
+      if (_pollTimer) clearInterval(_pollTimer);
+      _pollTimer = setInterval(() => { if (_syncFromInputs()) render(); }, 500);
+    } else if (_pollTimer) {
+      clearInterval(_pollTimer);
+      _pollTimer = null;
+    }
   });
 
   nameInput.addEventListener('input', () => {
