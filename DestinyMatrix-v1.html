@@ -224,6 +224,8 @@
     #si-list {
       max-height: min(45vh, 300px);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       scrollbar-width: thin;
       scrollbar-color: rgba(180,210,255,0.14) transparent;
       padding: 3px 0 6px;
@@ -381,6 +383,8 @@
     #ni-list {
       max-height: min(45vh, 300px);
       overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      touch-action: pan-y;
       scrollbar-width: thin;
       scrollbar-color: rgba(180,210,255,0.14) transparent;
       padding: 3px 0 6px;
@@ -1613,6 +1617,15 @@ document.addEventListener('pointerdown', e => {
 
   wasDragging = false; // each new gesture starts clean — don't let a stale drag eat this tap
   if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+
+  // A touch starting on a scrollable/interactive overlay panel (Star Index,
+  // Numerology, the info card, etc.) should scroll/tap that panel, not pan
+  // or pinch-zoom the 3D camera underneath it. Without this, dragging a
+  // finger inside e.g. #ni-list to scroll the Numerology row list got
+  // tracked here as a camera-pan gesture instead, and the panel never
+  // visibly scrolled. touch-action: pan-y on the scrollable lists (see CSS)
+  // handles the native-scroll side of this; this handles the JS side.
+  if (e.target.closest('#star-index, #numerology-index, #chakra-rail, #prog-banner, #info-card, #loader')) return;
 
   activeTouches.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
