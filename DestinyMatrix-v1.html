@@ -319,7 +319,11 @@
       -webkit-backdrop-filter: blur(18px);
     }
     #numerology-index.open #ni-panel {
-      max-height: min(55vh, 380px);
+      /* Large fixed value rather than none/auto so the open/close
+         transition still animates — comfortably larger than this panel's
+         content will ever need, so it never visually clips. The panel just
+         grows to fit all rows now instead of scrolling internally. */
+      max-height: 900px;
       opacity: 1;
     }
     #ni-name-row {
@@ -381,12 +385,8 @@
       color: rgba(180,210,255,0.32);
     }
     #ni-list {
-      max-height: min(45vh, 300px);
-      overflow-y: auto;
-      -webkit-overflow-scrolling: touch;
-      touch-action: pan-y;
-      scrollbar-width: thin;
-      scrollbar-color: rgba(180,210,255,0.14) transparent;
+      /* No internal scroll — the card (see #ni-panel above) just grows
+         tall enough to show every row instead. */
       padding: 3px 0 6px;
     }
 
