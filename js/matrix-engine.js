@@ -175,6 +175,94 @@ function getPersonalYear(birthdateString, asOfDateString) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 1d · NAME-BASED CLASSICAL NUMEROLOGY
+ *    Expression, Soul Urge, Personality, Maturity — the standard numbers
+ *    that require a full NAME rather than just a birthdate. Uses the
+ *    Pythagorean letter-value grid (A/J/S=1 ... I/R=9), the system most
+ *    people already expect from their own "Expression Number," distinct
+ *    from Numberolgy-data.pdf's own Chaldean grid. Entirely optional in
+ *    this app — a name is never required to see the core Destiny Matrix
+ *    chart, only to unlock these four numbers. Nothing here is persisted
+ *    or sent anywhere; the name lives only in the browser tab's memory.
+ * ─────────────────────────────────────────────────────────────────────────── */
+const PYTHAGOREAN_LETTER_VALUES = {
+  A:1, J:1, S:1,
+  B:2, K:2, T:2,
+  C:3, L:3, U:3,
+  D:4, M:4, V:4,
+  E:5, N:5, W:5,
+  F:6, O:6, X:6,
+  G:7, P:7, Y:7,
+  H:8, Q:8, Z:8,
+  I:9, R:9,
+};
+const VOWELS = new Set(['A', 'E', 'I', 'O', 'U']);
+
+// Letters only, uppercased — strips spaces, punctuation, digits.
+function _lettersOnly(name) {
+  return String(name || '').toUpperCase().replace(/[^A-Z]/g, '');
+}
+
+// Y counts as a vowel only when it's the sole vowel sound in its stretch of
+// the name — i.e. no A/E/I/O/U immediately before or after it. This is the
+// standard simplified heuristic (the one genuinely fuzzy rule in the whole
+// system); every other letter's vowel/consonant status is fixed.
+function _isVowelAt(letters, i) {
+  const ch = letters[i];
+  if (VOWELS.has(ch)) return true;
+  if (ch !== 'Y') return false;
+  const prevIsVowel = i > 0 && VOWELS.has(letters[i - 1]);
+  const nextIsVowel = i < letters.length - 1 && VOWELS.has(letters[i + 1]);
+  return !prevIsVowel && !nextIsVowel;
+}
+
+function expressionNumber(name) {
+  const letters = _lettersOnly(name);
+  let sum = 0;
+  for (const ch of letters) sum += PYTHAGOREAN_LETTER_VALUES[ch] || 0;
+  return _classicalReduce(sum);
+}
+
+function soulUrgeNumber(name) {
+  const letters = _lettersOnly(name);
+  let sum = 0;
+  for (let i = 0; i < letters.length; i++) {
+    if (_isVowelAt(letters, i)) sum += PYTHAGOREAN_LETTER_VALUES[letters[i]] || 0;
+  }
+  return _classicalReduce(sum);
+}
+
+function personalityNumber(name) {
+  const letters = _lettersOnly(name);
+  let sum = 0;
+  for (let i = 0; i < letters.length; i++) {
+    if (!_isVowelAt(letters, i)) sum += PYTHAGOREAN_LETTER_VALUES[letters[i]] || 0;
+  }
+  return _classicalReduce(sum);
+}
+
+function maturityNumber(lifePathValue, expressionValue) {
+  return _classicalReduce(Number(lifePathValue) + Number(expressionValue));
+}
+
+// Convenience wrapper — computes all four from a birthdate + name together,
+// matching the calculateDestinyMatrix/getPersonalYear convenience-wrapper
+// pattern used elsewhere in this file.
+function getNameNumbers(birthdateString, name) {
+  const chart = calculateDestinyMatrix(birthdateString);
+  const expression  = expressionNumber(name);
+  const soulUrge     = soulUrgeNumber(name);
+  const personality = personalityNumber(name);
+  const maturity     = maturityNumber(chart.lifePath.value, expression);
+  return {
+    expression:  { value: expression,  label: 'Expression Number' },
+    soulUrge:    { value: soulUrge,    label: 'Soul Urge Number' },
+    personality: { value: personality, label: 'Personality Number' },
+    maturity:    { value: maturity,    label: 'Maturity Number' },
+  };
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 1b · TALENT STAR LINE — ICON & ARCHETYPE STRING MAPS
  * ─────────────────────────────────────────────────────────────────────────── */
 
@@ -685,9 +773,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

@@ -246,6 +246,8 @@
       transition: background .15s;
     }
     .si-row:hover { background: rgba(180,210,255,0.08); }
+    .si-row-placeholder { opacity: 0.55; }
+    .si-row-placeholder:hover { opacity: 0.85; }
     .si-num {
       font-family: 'DM Mono', monospace;
       font-size: 7.5px;
@@ -333,6 +335,33 @@
       outline: none;
     }
     #ni-search::placeholder { color: rgba(180,210,255,0.28); }
+    #ni-name-row {
+      padding: 8px 9px 6px;
+      border-bottom: 1px solid rgba(180,210,255,0.08);
+    }
+    #ni-name-input {
+      display: block;
+      width: 100%;
+      box-sizing: border-box;
+      background: rgba(180,210,255,0.05);
+      border: 1px solid rgba(180,210,255,0.12);
+      border-radius: 2px;
+      color: rgba(255,255,255,0.75);
+      font-family: 'DM Mono', monospace;
+      font-size: 9px;
+      letter-spacing: 0.4px;
+      padding: 6px 8px;
+      outline: none;
+    }
+    #ni-name-input::placeholder { color: rgba(180,210,255,0.28); }
+    #ni-name-input:focus { border-color: rgba(180,210,255,0.3); }
+    #ni-name-hint {
+      margin-top: 5px;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      letter-spacing: 0.3px;
+      color: rgba(180,210,255,0.32);
+    }
     #ni-list {
       max-height: min(45vh, 300px);
       overflow-y: auto;
@@ -776,6 +805,10 @@
   <div id="numerology-index">
     <div id="ni-toggle"><span class="ni-chevron">▾</span><span>Numerology</span></div>
     <div id="ni-panel">
+      <div id="ni-name-row">
+        <input id="ni-name-input" type="text" placeholder="Enter your name to unlock Expression, Soul Urge, Personality & Maturity…" autocomplete="off" />
+        <div id="ni-name-hint">Optional · never saved or sent anywhere · unlocks 4 more numbers below</div>
+      </div>
       <input id="ni-search" type="text" placeholder="Search numerology…" autocomplete="off" />
       <div id="ni-list"></div>
     </div>
@@ -855,6 +888,7 @@
 <script src="js/purpose-content.js"></script>
 <script src="js/chakra-content.js"></script>
 <script src="js/pinnacles-challenges-content.js"></script>
+<script src="js/name-numbers-content.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 <script>
@@ -2417,6 +2451,22 @@ const ARCANA_ESSENCE = {
   }
   let _sexLineActive = !!_sexLineMatch();
 
+  // Name-based numerology (Expression/Soul Urge/Personality/Maturity) — the
+  // only content in this app that needs a NAME, not just a birthdate.
+  // Entirely optional and never persisted; lives only in this variable for
+  // the current tab session. Mirrors the Sexual Line's "exists in the scene
+  // but hidden/unclickable until active" pattern (see _sexLineActive above).
+  const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY']);
+  let _currentName = '';
+  let _nameActive = false;
+  let _nameVals = { expression: null, soulUrge: null, personality: null, maturity: null };
+  function _computeNameVals(name) {
+    if (!window.DMEngine || !name || !name.trim()) return { expression: null, soulUrge: null, personality: null, maturity: null };
+    const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
+    const nn = window.DMEngine.getNameNumbers(dobIso, name);
+    return { expression: nn.expression.value, soulUrge: nn.soulUrge.value, personality: nn.personality.value, maturity: nn.maturity.value };
+  }
+
   // ── 6 micro-nodes ────────────────────────────────────────────────────────
   const MICRO = [
     // Love & Money: positioned in the lower-right quadrant between Soul
@@ -2704,6 +2754,21 @@ const ARCANA_ESSENCE = {
       pos: new THREE.Vector3(_R * 0.7713, _R * 0.9192, 0), color:0xC29DFF, twk:{spd:0.58,off:5.1} },
     { key:'CHALLENGES', num:_vals.challengeActiveNum, label:'Challenges',
       pos: new THREE.Vector3(-_R * 0.7713, _R * 0.9192, 0), color:0xFF9D9D, twk:{spd:0.90,off:4.7} },
+
+    // ── Name-based numerology — Expression, Soul Urge, Personality,
+    // Maturity. Hidden (sprite/hit/tag) until a name is entered in the
+    // Numerology panel's optional name field — see NAME_KEYS/_nameActive
+    // above and js/name-numbers-content.js. Appended at the END of MICRO —
+    // indices 35-38; same r=1.20R ring, spread at 20° increments further
+    // out from the birthdate-only cluster.
+    { key:'EXPRESSION', num:_nameVals.expression, label:'Expression Number',
+      pos: new THREE.Vector3(-_R * 1.1818, _R * 0.2083, 0), color:0xFFB6C1, twk:{spd:0.70,off:4.9} },
+    { key:'SOULURGE', num:_nameVals.soulUrge, label:'Soul Urge Number',
+      pos: new THREE.Vector3(_R * 1.1818, _R * 0.2083, 0), color:0xB6FFDA, twk:{spd:0.78,off:3.4} },
+    { key:'PERSONALITY', num:_nameVals.personality, label:'Personality Number',
+      pos: new THREE.Vector3(-_R * 1.0392, _R * 0.6, 0), color:0xFFE4B6, twk:{spd:0.62,off:5.6} },
+    { key:'MATURITY', num:_nameVals.maturity, label:'Maturity Number',
+      pos: new THREE.Vector3(_R * 1.0392, _R * 0.6, 0), color:0xD4B6FF, twk:{spd:0.86,off:4.1} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -2712,9 +2777,12 @@ const ARCANA_ESSENCE = {
   let _activeMicroStar = -1;
   let _sexLineHit = null; // kept out of _microHits (not raycastable) whenever inactive
 
+  const _nameHits = []; // NAME_KEYS hits, kept out of _microHits until _nameActive (mirrors _sexLineHit)
+
   MICRO.forEach((data, i) => {
     const sz = i < 2 ? 0.20 : 0.22;   // corners slightly larger than channel nodes
     const isSexLine = data.key === 'SEXLINE';
+    const isNameBased = NAME_KEYS.has(data.key);
 
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: nodeTex,
@@ -2727,6 +2795,7 @@ const ARCANA_ESSENCE = {
     sp.position.copy(data.pos);
     sp.scale.set(sz, sz, 1);
     if (isSexLine) sp.visible = _sexLineActive;
+    if (isNameBased) sp.visible = _nameActive;
     scene.add(sp);
     data.sprite    = sp;
     data.baseScale = sz;
@@ -2744,6 +2813,10 @@ const ARCANA_ESSENCE = {
       if (_sexLineActive) _microHits.push(hit);
       // else: exists in the scene (harmless, invisible, never raycast against)
       // but deliberately left out of _microHits so it can never be clicked.
+    } else if (isNameBased) {
+      _nameHits.push(hit);
+      if (_nameActive) _microHits.push(hit);
+      // else: same treatment as the Sexual Line hit above — exists but unclickable.
     } else {
       _microHits.push(hit);
     }
@@ -2758,6 +2831,7 @@ const ARCANA_ESSENCE = {
     const arch = data.archetype ? `<div class="t-archetype">${data.archetype}</div>` : '';
     el.innerHTML = `<div class="micro-inner"><div class="t-num">${data.num}${icon}</div>${lbl}${arch}</div>`;
     if (data.key === 'SEXLINE' && !_sexLineActive) el.style.display = 'none';
+    if (NAME_KEYS.has(data.key) && !_nameActive) el.style.display = 'none';
     overlayEl.appendChild(el);
     return el;
   });
@@ -3054,6 +3128,42 @@ const ARCANA_ESSENCE = {
       }).join('');
 
       document.getElementById('pb-body').innerHTML = stageHtml;
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Name-based numerology — Expression, Soul Urge, Personality, Maturity.
+    // Own content globals (js/name-numbers-content.js), not DMicroContent —
+    // same WHY/SHADOW/INVITATION shape as Birthday Number/Personal Year.
+    if (NAME_KEYS.has(data.key)) {
+      const sourceByKey = {
+        EXPRESSION: window.DExpressionContent, SOULURGE: window.DSoulUrgeContent,
+        PERSONALITY: window.DPersonalityContent, MATURITY: window.DMaturityContent,
+      };
+      const nc = sourceByKey[data.key] ? sourceByKey[data.key].get(data.num) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
+      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
+      document.getElementById('pb-body').innerHTML = nc ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+           <div class="pb-full-text">${nc.why || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+           <div class="pb-full-text">${nc.shadow || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${hex}">THE INVITATION</div>
+           <div class="pb-full-text">${nc.path || ''}</div>
+         </div>` : '';
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
@@ -3433,9 +3543,44 @@ const ARCANA_ESSENCE = {
   _tierProviders.micro = {
     list: () => MICRO
       .map((d, i) => ({ idx: i, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
-      .filter((r) => r.idx !== 7 || _sexLineActive), // Sexual Line: only list it when it's actually on the diagram
+      .filter((r) => r.idx !== 7 || _sexLineActive) // Sexual Line: only list it when it's actually on the diagram
+      .filter((r) => !NAME_KEYS.has(MICRO[r.idx].key) || _nameActive), // name-based numbers: only once a name is entered
     fly: (idx) => flyToMicro(idx),
   };
+
+  // Called by the Numerology panel's optional name input. Recomputes the 4
+  // name-based numbers, updates their MICRO entries/tags/sprites/hit-test
+  // eligibility, and toggles _nameActive — mirrors the Sexual Line's
+  // recompute-on-change pattern inside applyNewDate() above, but triggered
+  // by name input instead of a date change.
+  function _setName(name) {
+    _currentName = name || '';
+    _nameVals = _computeNameVals(_currentName);
+    const wasActive = _nameActive;
+    _nameActive = !!(_currentName && _currentName.trim());
+
+    const KEY_TO_VAL = { EXPRESSION: 'expression', SOULURGE: 'soulUrge', PERSONALITY: 'personality', MATURITY: 'maturity' };
+    MICRO.forEach((data, i) => {
+      if (!NAME_KEYS.has(data.key)) return;
+      const v = _nameVals[KEY_TO_VAL[data.key]];
+      data.num = v;
+      _microTags[i].querySelector('.t-num').textContent = String(v);
+      _microTags[i].style.display = _nameActive ? '' : 'none';
+      if (data.sprite) data.sprite.visible = _nameActive;
+    });
+
+    if (_nameActive !== wasActive) {
+      if (_nameActive) {
+        _nameHits.forEach((hit) => { if (!_microHits.includes(hit)) _microHits.push(hit); });
+      } else {
+        _nameHits.forEach((hit) => {
+          const idx = _microHits.indexOf(hit);
+          if (idx !== -1) _microHits.splice(idx, 1);
+        });
+      }
+    }
+  }
+  _tierProviders.setName = _setName;
 
 })();
 
@@ -4539,21 +4684,40 @@ const ARCANA_ESSENCE = {
   const toggle = document.getElementById('ni-toggle');
   const search = document.getElementById('ni-search');
   const listEl = document.getElementById('ni-list');
+  const nameInput = document.getElementById('ni-name-input');
 
   // Labels shown in this panel, in display order — extend this list as new
   // birthdate-only / name-based numerology stars are added.
   const NUMEROLOGY_ROW_LABELS = ['Life Path', 'Birthday Number', 'Personal Year', 'Pinnacles', 'Challenges'];
 
+  // Name-based labels are always shown here, even before a name is entered —
+  // as an honest "not yet unlocked" placeholder row rather than being simply
+  // absent (same "an unwritten entry renders an honest note rather than
+  // fabricated content" philosophy the Purpose stars established). Once
+  // active, _tierProviders.micro.list() includes them with real numbers.
+  const NAME_ROW_LABELS = ['Expression Number', 'Soul Urge Number', 'Personality Number', 'Maturity Number'];
+
   function buildRows() {
     if (!_tierProviders.micro) return [];
     const all = _tierProviders.micro.list();
-    return NUMEROLOGY_ROW_LABELS
+    const coreRows = NUMEROLOGY_ROW_LABELS
       .map(label => all.find(r => r.label === label))
       .filter(Boolean)
       .map(row => ({
         label: row.label, num: row.num, color: row.color,
         fly: () => _tierProviders.micro.fly(row.idx),
       }));
+    const nameRows = NAME_ROW_LABELS.map(label => {
+      const row = all.find(r => r.label === label);
+      if (row) {
+        return { label: row.label, num: row.num, color: row.color, fly: () => _tierProviders.micro.fly(row.idx) };
+      }
+      return {
+        label, num: '—', color: 'rgba(255,255,255,0.28)', isPlaceholder: true,
+        fly: () => { nameInput.focus(); },
+      };
+    });
+    return coreRows.concat(nameRows);
   }
 
   function render() {
@@ -4572,9 +4736,10 @@ const ARCANA_ESSENCE = {
 
     rows.forEach(r => {
       const row = document.createElement('div');
-      row.className = 'si-row';
+      row.className = 'si-row' + (r.isPlaceholder ? ' si-row-placeholder' : '');
       row.innerHTML = `<span class="si-num" style="color:${r.color}">${r.num}</span><span class="si-label">${r.label}</span>`;
       row.addEventListener('click', () => {
+        if (r.isPlaceholder) { r.fly(); return; } // focus the name input — don't close the panel or fly
         if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
         root.classList.remove('open');
         search.value = '';
@@ -4591,6 +4756,12 @@ const ARCANA_ESSENCE = {
   });
 
   search.addEventListener('input', render);
+
+  nameInput.addEventListener('input', () => {
+    if (_tierProviders.setName) _tierProviders.setName(nameInput.value);
+    render();
+  });
+  nameInput.addEventListener('click', (e) => e.stopPropagation());
 
   document.addEventListener('click', (e) => {
     if (root.classList.contains('open') && !root.contains(e.target)) {
