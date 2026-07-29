@@ -152,7 +152,7 @@
     }
     #hud-back {
       position: absolute;
-      bottom: 30px; left: 32px;
+      bottom: 58px; left: 32px;
       font-size: 8px;
       font-weight: 400;
       letter-spacing: 3px;
@@ -166,6 +166,23 @@
       transition: color .2s;
     }
     #hud-back:hover { color: rgba(255,255,255,0.55); }
+    #share-btn {
+      position: absolute;
+      bottom: 30px; left: 32px;
+      font-family: 'DM Mono', monospace;
+      font-size: 8px;
+      font-weight: 400;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.3);
+      cursor: pointer;
+      pointer-events: all;
+      user-select: none;
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+      padding-bottom: 2px;
+      transition: color .2s;
+    }
+    #share-btn:hover { color: rgba(255,255,255,0.55); }
 
     /* ── Star Index (collapsible quick-nav) ──────────── */
     #star-index {
@@ -817,6 +834,7 @@
   <div id="hud-label">Destiny Matrix</div>
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
+  <div id="share-btn" title="Share this app — never includes your birthdate">⤴ Share</div>
 
   <div id="star-index">
     <div id="si-toggle"><span class="si-chevron">▾</span><span>Star Index</span></div>
@@ -4696,6 +4714,34 @@ const ARCANA_ESSENCE = {
 
   const paramDob = new URLSearchParams(location.search).get('dob');
   if (paramDob) applyNewDate(paramDob); // silently falls back to the default on invalid input
+})();
+
+// ── SHARE BUTTON ──────────────────────────────────────────────────────────
+// The address bar deliberately carries ?dob= (see above) so a reading can be
+// shared deliberately. This button is the opposite case: always share the
+// bare app link, with no date baked in, regardless of what's currently
+// loaded — so a casual "check this out" share never leaks the sender's own
+// birthdate.
+;(function () {
+  const btn = document.getElementById('share-btn');
+  if (!btn) return;
+  const cleanUrl = () => `${location.origin}${location.pathname}`;
+
+  btn.addEventListener('click', async () => {
+    const url = cleanUrl();
+    if (navigator.share) {
+      try { await navigator.share({ title: 'Destiny Matrix', url }); return; }
+      catch (_) { return; } // user cancelled the share sheet — no fallback needed
+    }
+    try {
+      await navigator.clipboard.writeText(url);
+      const original = btn.textContent;
+      btn.textContent = 'Copied';
+      setTimeout(() => { btn.textContent = original; }, 1500);
+    } catch (_) {
+      // Clipboard blocked (e.g. insecure context) — nothing more we can do silently.
+    }
+  });
 })();
 
 // ── CHAKRA RAIL ───────────────────────────────────────────────────────────
