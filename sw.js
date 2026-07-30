@@ -2,7 +2,7 @@
 // works offline. Never caches or intercepts anything user-entered — all
 // personal data (name, DOB, partner DOB) stays purely client-side in memory,
 // same as the rest of the app.
-const CACHE_NAME = 'destiny-matrix-v1';
+const CACHE_NAME = 'destiny-matrix-v2';
 const APP_SHELL = [
   './DestinyMatrix-v1.html',
   './manifest.json',
@@ -27,20 +27,21 @@ self.addEventListener('activate', (event) => {
   self.clients.claim();
 });
 
+// Network-first: always prefer the live deploy while online, so a normal
+// refresh never shows a stale cached page. Cache is only a fallback for
+// being genuinely offline, and stays updated in the background whenever a
+// network fetch succeeds.
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   event.respondWith(
-    caches.match(event.request).then((cached) => {
-      const network = fetch(event.request)
-        .then((response) => {
-          if (response.ok) {
-            const copy = response.clone();
-            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
-          }
-          return response;
-        })
-        .catch(() => cached);
-      return cached || network;
-    })
+    fetch(event.request)
+      .then((response) => {
+        if (response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, copy));
+        }
+        return response;
+      })
+      .catch(() => caches.match(event.request))
   );
 });
