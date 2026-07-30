@@ -16,10 +16,37 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+    /* ── Theme tokens ─────────────────────────────────────────────────────
+       Dark is the original, hand-tuned design (default, and every value
+       below matches what used to be hardcoded throughout this file). Light
+       is a proper second palette, not a filter: same role names, deliberately
+       chosen values so every piece of text/UI stays readable against a light
+       backdrop. Applied by toggling [data-theme] on <html> — see the THEME
+       block further down for the JS half (scene background, per-star sprite
+       colours, per-card accent hex via themedHex()). */
+    :root {
+      --bg: #01030d;
+      --fg-rgb: 255,255,255;
+      --accent-rgb: 180,210,255;
+      --panel-bg-rgb: 4,7,22;
+      --positive-rgb: 130,220,170;
+      --negative-rgb: 230,130,130;
+      --input-scheme: dark;
+    }
+    :root[data-theme="light"] {
+      --bg: #eef1f8;
+      --fg-rgb: 18,22,36;
+      --accent-rgb: 30,64,140;
+      --panel-bg-rgb: 255,255,255;
+      --positive-rgb: 20,120,70;
+      --negative-rgb: 178,32,32;
+      --input-scheme: light;
+    }
+
     html, body {
       width: 100%; height: 100%;
       overflow: hidden;
-      background: #01030d;
+      background: var(--bg);
       font-family: 'Inter', sans-serif;
       cursor: none;
     }
@@ -36,7 +63,7 @@
       position: fixed;
       width: 5px; height: 5px;
       border-radius: 50%;
-      background: rgba(255,255,255,0.88);
+      background: rgba(var(--fg-rgb),0.88);
       pointer-events: none;
       z-index: 1000;
       transform: translate(-50%, -50%);
@@ -46,7 +73,7 @@
     #cursor.on-star {
       width: 32px; height: 32px;
       background: transparent;
-      border: 1px solid rgba(255,255,255,0.36);
+      border: 1px solid rgba(var(--fg-rgb),0.36);
     }
 
     /* ── Node overlays ───────────────────────────────── */
@@ -67,10 +94,10 @@
       font-family: 'DM Mono', monospace;
       font-size: 13px;
       font-weight: 300;
-      color: rgba(255,255,255,0.88);
+      color: rgba(var(--fg-rgb),0.88);
       letter-spacing: 1px;
       line-height: 1;
-      text-shadow: 0 0 14px rgba(180,220,255,0.7);
+      text-shadow: 0 0 14px rgba(var(--accent-rgb),0.7);
       transition: opacity .5s;
     }
     .node-tag .t-label {
@@ -78,7 +105,7 @@
       font-weight: 400;
       letter-spacing: 2.8px;
       text-transform: uppercase;
-      color: rgba(180,210,255,0.42);
+      color: rgba(var(--accent-rgb),0.42);
       margin-top: 6px;
       white-space: nowrap;
       opacity: 0;
@@ -101,7 +128,7 @@
       font-weight: 500;
       letter-spacing: 7px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.22);
+      color: rgba(var(--fg-rgb),0.22);
       white-space: nowrap;
     }
     #hud-date {
@@ -111,12 +138,12 @@
       font-size: 9px;
       font-weight: 300;
       letter-spacing: 3px;
-      color: rgba(255,255,255,0.14);
+      color: rgba(var(--fg-rgb),0.14);
       pointer-events: all;
       cursor: none;
       transition: color .25s;
     }
-    #hud-date:hover { color: rgba(255,255,255,0.38); }
+    #hud-date:hover { color: rgba(var(--fg-rgb),0.38); }
 
     /* DOB inline edit — native <input type="date">. Real 16px font (not a
        scale-transform trick) is the only reliable way to stop iOS Safari /
@@ -130,9 +157,9 @@
     #hud-date input.dob-edit {
       background: transparent;
       border: none;
-      border-bottom: 1px solid rgba(180,210,255,0.28);
-      color: rgba(255,255,255,0.65);
-      color-scheme: dark;
+      border-bottom: 1px solid rgba(var(--accent-rgb),0.28);
+      color: rgba(var(--fg-rgb),0.65);
+      color-scheme: var(--input-scheme);
       font-family: 'DM Mono', monospace;
       font-size: 16px;
       font-weight: 300;
@@ -146,7 +173,7 @@
       display: block;
       font-size: 7px;
       letter-spacing: 2px;
-      color: rgba(180,210,255,0.22);
+      color: rgba(var(--accent-rgb),0.22);
       margin-top: 5px;
       text-align: center;
     }
@@ -157,15 +184,15 @@
       font-weight: 400;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
+      color: rgba(var(--fg-rgb),0.3);
       cursor: none;
       pointer-events: all;
       opacity: 0;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(var(--fg-rgb),0.12);
       padding-bottom: 2px;
       transition: color .2s;
     }
-    #hud-back:hover { color: rgba(255,255,255,0.55); }
+    #hud-back:hover { color: rgba(var(--fg-rgb),0.55); }
     #share-btn {
       position: absolute;
       bottom: 30px; left: 32px;
@@ -174,15 +201,26 @@
       font-weight: 400;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
+      color: rgba(var(--fg-rgb),0.3);
       cursor: pointer;
       pointer-events: all;
       user-select: none;
-      border-bottom: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(var(--fg-rgb),0.12);
       padding-bottom: 2px;
       transition: color .2s;
     }
-    #share-btn:hover { color: rgba(255,255,255,0.55); }
+    #share-btn:hover { color: rgba(var(--fg-rgb),0.55); }
+    #theme-toggle {
+      position: absolute;
+      top: 26px; right: 30px;
+      font-size: 13px;
+      color: rgba(var(--fg-rgb),0.3);
+      cursor: pointer;
+      pointer-events: all;
+      user-select: none;
+      transition: color .2s;
+    }
+    #theme-toggle:hover { color: rgba(var(--fg-rgb),0.6); }
 
     /* ── Star Index (collapsible quick-nav) ──────────── */
     #star-index {
@@ -202,12 +240,12 @@
       font-weight: 400;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
+      color: rgba(var(--fg-rgb),0.3);
       cursor: pointer;
       user-select: none;
       transition: color .2s;
     }
-    #si-toggle:hover { color: rgba(255,255,255,0.55); }
+    #si-toggle:hover { color: rgba(var(--fg-rgb),0.55); }
     #si-toggle .si-chevron {
       display: inline-block;
       font-size: 7px;
@@ -221,8 +259,8 @@
       opacity: 0;
       transition: max-height .35s ease, opacity .25s ease;
       margin-top: 7px;
-      background: rgba(4, 7, 22, 0.88);
-      border: 1px solid rgba(180,210,255,0.11);
+      background: rgba(var(--panel-bg-rgb), 0.88);
+      border: 1px solid rgba(var(--accent-rgb),0.11);
       border-radius: 2px;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
@@ -235,24 +273,24 @@
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: rgba(180,210,255,0.05);
+      background: rgba(var(--accent-rgb),0.05);
       border: none;
-      border-bottom: 1px solid rgba(180,210,255,0.12);
-      color: rgba(255,255,255,0.75);
+      border-bottom: 1px solid rgba(var(--accent-rgb),0.12);
+      color: rgba(var(--fg-rgb),0.75);
       font-family: 'DM Mono', monospace;
       font-size: 9px;
       letter-spacing: 0.4px;
       padding: 7px 9px;
       outline: none;
     }
-    #si-search::placeholder { color: rgba(180,210,255,0.28); }
+    #si-search::placeholder { color: rgba(var(--accent-rgb),0.28); }
     #si-list {
       max-height: min(45vh, 300px);
       overflow-y: auto;
       -webkit-overflow-scrolling: touch;
       touch-action: pan-y;
       scrollbar-width: thin;
-      scrollbar-color: rgba(180,210,255,0.14) transparent;
+      scrollbar-color: rgba(var(--accent-rgb),0.14) transparent;
       padding: 3px 0 6px;
     }
     .si-group-label {
@@ -261,7 +299,7 @@
       font-weight: 300;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(160,200,255,0.35);
+      color: rgba(var(--accent-rgb),0.35);
       padding: 7px 9px 3px;
     }
     .si-row {
@@ -272,7 +310,7 @@
       cursor: pointer;
       transition: background .15s;
     }
-    .si-row:hover { background: rgba(180,210,255,0.08); }
+    .si-row:hover { background: rgba(var(--accent-rgb),0.08); }
     .si-row-placeholder { opacity: 0.55; }
     .si-row-placeholder:hover { opacity: 0.85; }
     .si-num {
@@ -286,13 +324,13 @@
       font-size: 9px;
       font-weight: 300;
       letter-spacing: 0.15px;
-      color: rgba(210,225,255,0.68);
+      color: rgba(var(--accent-rgb),0.68);
       line-height: 1.25;
     }
     .si-empty {
       padding: 10px 9px;
       font-size: 8.5px;
-      color: rgba(180,210,255,0.3);
+      color: rgba(var(--accent-rgb),0.3);
       font-style: italic;
     }
 
@@ -317,13 +355,13 @@
       font-weight: 400;
       letter-spacing: 2.5px;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
+      color: rgba(var(--fg-rgb),0.3);
       cursor: pointer;
       user-select: none;
       transition: color .2s;
       justify-content: flex-end;
     }
-    #ni-toggle:hover { color: rgba(255,255,255,0.55); }
+    #ni-toggle:hover { color: rgba(var(--fg-rgb),0.55); }
     #ni-toggle .ni-chevron {
       display: inline-block;
       font-size: 7px;
@@ -337,8 +375,8 @@
       opacity: 0;
       transition: max-height .35s ease, opacity .25s ease;
       margin-top: 7px;
-      background: rgba(4, 7, 22, 0.88);
-      border: 1px solid rgba(180,210,255,0.11);
+      background: rgba(var(--panel-bg-rgb), 0.88);
+      border: 1px solid rgba(var(--accent-rgb),0.11);
       border-radius: 2px;
       backdrop-filter: blur(18px);
       -webkit-backdrop-filter: blur(18px);
@@ -353,7 +391,7 @@
     }
     #ni-name-row {
       padding: 8px 9px 6px;
-      border-bottom: 1px solid rgba(180,210,255,0.08);
+      border-bottom: 1px solid rgba(var(--accent-rgb),0.08);
     }
     /* font-size: 16px — same iOS-zoom fix as .dob-edit/.l-gate-input above
        (anything under 16px triggers iOS Safari/Chrome's native
@@ -362,52 +400,52 @@
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: rgba(180,210,255,0.05);
-      border: 1px solid rgba(180,210,255,0.12);
+      background: rgba(var(--accent-rgb),0.05);
+      border: 1px solid rgba(var(--accent-rgb),0.12);
       border-radius: 2px;
-      color: rgba(255,255,255,0.75);
+      color: rgba(var(--fg-rgb),0.75);
       font-family: 'DM Mono', monospace;
       font-size: 16px;
       letter-spacing: 0.2px;
       padding: 5px 8px;
       outline: none;
     }
-    #ni-name-input::placeholder { color: rgba(180,210,255,0.28); }
-    #ni-name-input:focus { border-color: rgba(180,210,255,0.3); }
+    #ni-name-input::placeholder { color: rgba(var(--accent-rgb),0.28); }
+    #ni-name-input:focus { border-color: rgba(var(--accent-rgb),0.3); }
     #ni-name-hint {
       margin-top: 5px;
       font-family: 'DM Mono', monospace;
       font-size: 8px;
       letter-spacing: 0.3px;
-      color: rgba(180,210,255,0.32);
+      color: rgba(var(--accent-rgb),0.32);
     }
     #ni-compat-row {
       padding: 8px 9px 6px;
-      border-bottom: 1px solid rgba(180,210,255,0.08);
+      border-bottom: 1px solid rgba(var(--accent-rgb),0.08);
     }
     /* font-size: 16px — same iOS-zoom fix as #ni-name-input/.dob-edit above. */
     #ni-compat-input {
       display: block;
       width: 100%;
       box-sizing: border-box;
-      background: rgba(180,210,255,0.05);
-      border: 1px solid rgba(180,210,255,0.12);
+      background: rgba(var(--accent-rgb),0.05);
+      border: 1px solid rgba(var(--accent-rgb),0.12);
       border-radius: 2px;
-      color: rgba(255,255,255,0.75);
-      color-scheme: dark;
+      color: rgba(var(--fg-rgb),0.75);
+      color-scheme: var(--input-scheme);
       font-family: 'DM Mono', monospace;
       font-size: 16px;
       letter-spacing: 0.2px;
       padding: 5px 8px;
       outline: none;
     }
-    #ni-compat-input:focus { border-color: rgba(180,210,255,0.3); }
+    #ni-compat-input:focus { border-color: rgba(var(--accent-rgb),0.3); }
     #ni-compat-hint {
       margin-top: 5px;
       font-family: 'DM Mono', monospace;
       font-size: 8px;
       letter-spacing: 0.3px;
-      color: rgba(180,210,255,0.32);
+      color: rgba(var(--accent-rgb),0.32);
     }
     #ni-list {
       /* No internal scroll — the card (see #ni-panel above) just grows
@@ -433,8 +471,8 @@
       overflow: hidden;
       width: 0; opacity: 0;
       transition: width .35s ease, opacity .25s ease;
-      background: rgba(4, 7, 22, 0.88);
-      border: 1px solid rgba(180,210,255,0.11);
+      background: rgba(var(--panel-bg-rgb), 0.88);
+      border: 1px solid rgba(var(--accent-rgb),0.11);
       border-right: none;
       border-radius: 2px 0 0 2px;
       backdrop-filter: blur(18px);
@@ -446,7 +484,7 @@
       font-family: 'DM Mono', monospace;
       font-size: 5.5px; font-weight: 300;
       letter-spacing: 2px; text-transform: uppercase;
-      color: rgba(160,200,255,0.35);
+      color: rgba(var(--accent-rgb),0.35);
       padding: 9px 11px 5px;
       white-space: nowrap;
     }
@@ -456,29 +494,29 @@
       transition: background .15s;
       white-space: nowrap;
     }
-    .cr-row:hover { background: rgba(180,210,255,0.08); }
+    .cr-row:hover { background: rgba(var(--accent-rgb),0.08); }
     .cr-name {
       font-size: 8.5px; font-weight: 300;
-      color: rgba(210,225,255,0.68);
+      color: rgba(var(--accent-rgb),0.68);
       flex: 1; letter-spacing: .15px;
     }
     .cr-name small {
       display: block;
       font-size: 6px; letter-spacing: 1.4px; text-transform: uppercase;
-      color: rgba(180,210,255,0.3);
+      color: rgba(var(--accent-rgb),0.3);
     }
     .cr-vals {
       font-family: 'DM Mono', monospace;
       font-size: 7.5px; font-weight: 400;
-      color: rgba(210,225,255,0.5);
+      color: rgba(var(--accent-rgb),0.5);
       letter-spacing: .5px; flex-shrink: 0;
     }
     #cr-totals {
-      border-top: 1px solid rgba(180,210,255,0.09);
+      border-top: 1px solid rgba(var(--accent-rgb),0.09);
       margin-top: 4px; padding: 6px 11px 9px;
       font-family: 'DM Mono', monospace;
       font-size: 6.5px; letter-spacing: 1px;
-      color: rgba(180,210,255,0.34);
+      color: rgba(var(--accent-rgb),0.34);
       display: flex; justify-content: space-between; white-space: nowrap;
     }
     /* the spine — always visible */
@@ -487,8 +525,8 @@
       display: flex; flex-direction: column;
       align-items: center; justify-content: center;
       gap: 9px; padding: 10px 0;
-      background: rgba(4, 7, 22, 0.72);
-      border-left: 1px solid rgba(180,210,255,0.09);
+      background: rgba(var(--panel-bg-rgb), 0.72);
+      border-left: 1px solid rgba(var(--accent-rgb),0.09);
       backdrop-filter: blur(14px);
       -webkit-backdrop-filter: blur(14px);
       align-self: center;
@@ -496,12 +534,12 @@
     }
     #cr-toggle {
       font-family: 'DM Mono', monospace;
-      font-size: 7px; color: rgba(255,255,255,0.3);
+      font-size: 7px; color: rgba(var(--fg-rgb),0.3);
       cursor: pointer; user-select: none;
       transition: color .2s, transform .3s ease;
       margin-bottom: 3px;
     }
-    #cr-toggle:hover { color: rgba(255,255,255,0.6); }
+    #cr-toggle:hover { color: rgba(var(--fg-rgb),0.6); }
     #chakra-rail.open #cr-toggle { transform: rotate(180deg); }
     #cr-dots {
       display: flex; flex-direction: column;
@@ -512,7 +550,7 @@
       display: flex; align-items: center; justify-content: center;
       font-family: 'DM Mono', monospace;
       font-size: 5.5px; font-weight: 500;
-      color: rgba(255,255,255,0.82);
+      color: rgba(var(--fg-rgb),0.82);
       cursor: pointer;
       opacity: 0.62;
       transition: opacity .2s, transform .2s;
@@ -530,8 +568,8 @@
       width: min(480px, 92vw);
       max-height: 72vh;
       overflow-y: auto;
-      background: rgba(4, 7, 22, 0.88);
-      border: 1px solid rgba(180,210,255,0.11);
+      background: rgba(var(--panel-bg-rgb), 0.88);
+      border: 1px solid rgba(var(--accent-rgb),0.11);
       border-radius: 2px;
       padding: 22px 26px 24px;
       backdrop-filter: blur(18px);
@@ -539,14 +577,14 @@
       z-index: 30;
       pointer-events: none;
       scrollbar-width: thin;
-      scrollbar-color: rgba(180,210,255,0.12) transparent;
+      scrollbar-color: rgba(var(--accent-rgb),0.12) transparent;
     }
     #info-card::after {
       content: '';
       position: absolute;
       top: 0; left: 28px; right: 28px;
       height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(180,210,255,0.35), transparent);
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),0.35), transparent);
     }
     .ic-arcana {
       font-family: 'DM Mono', monospace;
@@ -554,33 +592,33 @@
       font-weight: 300;
       letter-spacing: 3.5px;
       text-transform: uppercase;
-      color: rgba(160,200,255,0.55);
+      color: rgba(var(--accent-rgb),0.55);
       margin-bottom: 9px;
     }
     .ic-name {
       font-size: 19px;
       font-weight: 300;
-      color: rgba(255,255,255,0.92);
+      color: rgba(var(--fg-rgb),0.92);
       letter-spacing: 0.3px;
       margin-bottom: 18px;
     }
     .ic-rule {
       width: 22px;
       height: 1px;
-      background: rgba(180,210,255,0.18);
+      background: rgba(var(--accent-rgb),0.18);
       margin-bottom: 16px;
     }
     .ic-desc {
       font-size: 11.5px;
       font-weight: 300;
       line-height: 1.88;
-      color: rgba(180,210,240,0.5);
+      color: rgba(var(--accent-rgb),0.5);
       letter-spacing: 0.1px;
     }
     .ic-heading {
       font-size: 13px;
       font-weight: 400;
-      color: rgba(255,255,255,0.72);
+      color: rgba(var(--fg-rgb),0.72);
       letter-spacing: 0.2px;
       margin-bottom: 18px;
       line-height: 1.5;
@@ -594,17 +632,17 @@
       font-weight: 300;
       letter-spacing: 3px;
       text-transform: uppercase;
-      color: rgba(160,200,255,0.38);
+      color: rgba(var(--accent-rgb),0.38);
       margin-bottom: 7px;
     }
-    .ic-section-state { padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.06); }
-    .ic-state-label-positive { color: rgba(130,220,170,0.55); }
-    .ic-state-label-negative { color: rgba(230,130,130,0.55); }
+    .ic-section-state { padding-top: 10px; border-top: 1px solid rgba(var(--fg-rgb),0.06); }
+    .ic-state-label-positive { color: rgba(var(--positive-rgb),0.55); }
+    .ic-state-label-negative { color: rgba(var(--negative-rgb),0.55); }
     .ic-section-body {
       font-size: 11px;
       font-weight: 300;
       line-height: 1.95;
-      color: rgba(180,210,240,0.48);
+      color: rgba(var(--accent-rgb),0.48);
       letter-spacing: 0.1px;
     }
 
@@ -616,8 +654,8 @@
       transform: translateX(-50%) translateY(105%);
       width: min(720px, 96vw);
       max-height: 54vh;
-      background: rgba(3, 5, 18, 0.93);
-      border: 1px solid rgba(180,210,255,0.1);
+      background: rgba(var(--panel-bg-rgb), 0.93);
+      border: 1px solid rgba(var(--accent-rgb),0.1);
       border-bottom: none;
       border-radius: 16px 16px 0 0;
       padding: 30px 38px 40px;
@@ -627,7 +665,7 @@
       z-index: 50;
       pointer-events: none;
       scrollbar-width: thin;
-      scrollbar-color: rgba(180,210,255,0.15) transparent;
+      scrollbar-color: rgba(var(--accent-rgb),0.15) transparent;
     }
     #prog-banner.open { pointer-events: all; }
     .pb-full-section { margin-bottom: 28px; }
@@ -643,30 +681,30 @@
       font-size: 12px;
       font-weight: 300;
       line-height: 1.9;
-      color: rgba(190,215,245,0.60);
+      color: rgba(var(--accent-rgb),0.60);
       letter-spacing: 0.1px;
     }
     #prog-banner::before {
       content: '';
       position: absolute;
       top: 0; left: 36px; right: 36px; height: 1px;
-      background: linear-gradient(90deg, transparent, rgba(180,210,255,0.28), transparent);
+      background: linear-gradient(90deg, transparent, rgba(var(--accent-rgb),0.28), transparent);
     }
     .pb-close {
       position: absolute;
       top: 20px; right: 28px;
       font-family: 'DM Mono', monospace;
       font-size: 7px; letter-spacing: 2.5px;
-      color: rgba(255,255,255,0.22);
+      color: rgba(var(--fg-rgb),0.22);
       cursor: pointer;
       transition: color .2s;
       text-transform: uppercase;
     }
-    .pb-close:hover { color: rgba(255,255,255,0.65); }
+    .pb-close:hover { color: rgba(var(--fg-rgb),0.65); }
     .pb-prog-name {
       font-family: 'DM Mono', monospace;
       font-size: 7px; letter-spacing: 3px; text-transform: uppercase;
-      color: rgba(180,210,255,0.32); margin-bottom: 16px;
+      color: rgba(var(--accent-rgb),0.32); margin-bottom: 16px;
     }
     .pb-section-label {
       font-family: 'DM Mono', monospace;
@@ -675,13 +713,13 @@
     }
     .pb-heading {
       font-size: 17px; font-weight: 300;
-      color: rgba(255,255,255,0.88);
+      color: rgba(var(--fg-rgb),0.88);
       letter-spacing: 0.2px; line-height: 1.5;
       margin-bottom: 22px;
     }
     .pb-body {
       font-size: 11.5px; font-weight: 300;
-      line-height: 2.05; color: rgba(180,210,240,0.5);
+      line-height: 2.05; color: rgba(var(--accent-rgb),0.5);
       letter-spacing: 0.1px;
     }
 
@@ -699,8 +737,8 @@
     .orbit-label {
       font-family: 'DM Mono', monospace;
       font-size: 6.5px; letter-spacing: 2.5px; text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
-      text-shadow: 0 0 10px rgba(200,220,255,0.5);
+      color: rgba(var(--fg-rgb),0.6);
+      text-shadow: 0 0 10px rgba(var(--accent-rgb),0.5);
       white-space: nowrap;
     }
     /* planet name tags */
@@ -716,20 +754,20 @@
     .planet-name {
       font-size: 9px; font-family: 'DM Mono', monospace; font-weight: 300;
       letter-spacing: 2.5px; text-transform: uppercase;
-      color: rgba(255,255,255,0.78);
-      text-shadow: 0 0 14px rgba(200,220,255,0.6);
+      color: rgba(var(--fg-rgb),0.78);
+      text-shadow: 0 0 14px rgba(var(--accent-rgb),0.6);
       white-space: nowrap;
     }
     .planet-nums {
       font-size: 6.5px; font-family: 'DM Mono', monospace;
-      color: rgba(255,255,255,0.3); letter-spacing: 1.5px; margin-top: 4px;
+      color: rgba(var(--fg-rgb),0.3); letter-spacing: 1.5px; margin-top: 4px;
     }
 
     /* ── Loader ──────────────────────────────────────── */
     #loader {
       position: fixed;
       inset: 0;
-      background: #01030d;
+      background: var(--bg);
       display: flex;
       align-items: center;
       justify-content: center;
@@ -742,17 +780,17 @@
       font-weight: 400;
       letter-spacing: 8px;
       text-transform: uppercase;
-      color: rgba(180,210,255,0.38);
+      color: rgba(var(--accent-rgb),0.38);
     }
     #loader .l-track {
       width: 72px;
       height: 1px;
-      background: rgba(180,210,255,0.1);
+      background: rgba(var(--accent-rgb),0.1);
       overflow: hidden;
     }
     #loader .l-fill {
       height: 100%;
-      background: rgba(180,210,255,0.55);
+      background: rgba(var(--accent-rgb),0.55);
       animation: lf 1.6s cubic-bezier(.4,0,.2,1) forwards;
       width: 0;
     }
@@ -772,15 +810,15 @@
       font-weight: 400;
       letter-spacing: 2px;
       text-transform: uppercase;
-      color: rgba(180,210,255,0.28);
+      color: rgba(var(--accent-rgb),0.28);
     }
     /* Native <input type="date"> — same real-16px reasoning as .dob-edit. */
     #loader .l-gate-input {
       background: transparent;
       border: none;
-      border-bottom: 1px solid rgba(180,210,255,0.28);
-      color: rgba(255,255,255,0.75);
-      color-scheme: dark;
+      border-bottom: 1px solid rgba(var(--accent-rgb),0.28);
+      color: rgba(var(--fg-rgb),0.75);
+      color-scheme: var(--input-scheme);
       font-family: 'DM Mono', monospace;
       font-size: 16px;
       font-weight: 300;
@@ -793,7 +831,7 @@
     #loader .l-gate-error {
       font-size: 7px;
       letter-spacing: 1.5px;
-      color: rgba(255,120,120,0.55);
+      color: rgba(var(--negative-rgb),0.55);
       height: 9px;
     }
 
@@ -835,6 +873,7 @@
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
   <div id="share-btn" title="Share this app — never includes your birthdate">⤴ Share</div>
+  <div id="theme-toggle" title="Switch light/dark theme">☾</div>
 
   <div id="star-index">
     <div id="si-toggle"><span class="si-chevron">▾</span><span>Star Index</span></div>
@@ -1012,6 +1051,129 @@ const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
 camera.position.set(0, 0, 12);
 
+// ── THEME ────────────────────────────────────────────────────────────────
+// Dark is the original design and needs no runtime changes at all. Light
+// mode does two things: (1) every CSS role variable defined in <style>
+// flips via [data-theme="light"] — pure CSS, handled there. (2) the 3D scene
+// needs its own treatment, because the whole star aesthetic is built on
+// THREE.AdditiveBlending (light added onto near-black) — additive glow is
+// nearly invisible added onto a light background. So in light mode:
+//   - Purely decorative ambient effects (the 6500-star background field,
+//     nebula dust clouds, quantum particle field, electron orbit rings) are
+//     hidden outright rather than recoloured — a night-sky ambiance doesn't
+//     read as "light theme" anyway, and their colour is baked into custom
+//     GLSL shaders / canvas textures that additive-blending depends on, so
+//     hiding them (zero risk) beats a shader rewrite (high risk) for content
+//     that carries no information.
+//   - Every informational/interactive star sprite (core arcana stars, micro
+//     nodes, program stars, talent stars) switches to THREE.NormalBlending
+//     with a deepened, saturated version of its own colour via
+//     lightModeColorNum() below, so it reads as a solid, clearly-coloured
+//     dot instead of washing out to white.
+//   - Every per-card accent colour used in the HTML card UI (the `hex` /
+//     `cd.hex` / `r.color` / `r.colour` variables threaded through every
+//     card-render function) is passed through themedHex() at the point it's
+//     written into a style, which applies the same deepen-for-light
+//     transform to CSS hex strings.
+let _theme = (function () {
+  try { return localStorage.getItem('dm-theme') === 'light' ? 'light' : 'dark'; }
+  catch (_) { return 'dark'; }
+})();
+
+function _rgbToHsl(r, g, b) {
+  r /= 255; g /= 255; b /= 255;
+  const max = Math.max(r, g, b), min = Math.min(r, g, b);
+  let h, s, l = (max + min) / 2;
+  if (max === min) { h = s = 0; }
+  else {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r: h = (g - b) / d + (g < b ? 6 : 0); break;
+      case g: h = (b - r) / d + 2; break;
+      default: h = (r - g) / d + 4; break;
+    }
+    h /= 6;
+  }
+  return [h, s, l];
+}
+function _hslToRgb(h, s, l) {
+  const hue2rgb = (p, q, t) => {
+    if (t < 0) t += 1;
+    if (t > 1) t -= 1;
+    if (t < 1/6) return p + (q - p) * 6 * t;
+    if (t < 1/2) return q;
+    if (t < 2/3) return p + (q - p) * (2/3 - t) * 6;
+    return p;
+  };
+  const q = l < 0.5 ? l * (1 + s) : l + s - l * s;
+  const p = 2 * l - q;
+  return [
+    Math.round(hue2rgb(p, q, h + 1/3) * 255),
+    Math.round(hue2rgb(p, q, h) * 255),
+    Math.round(hue2rgb(p, q, h - 1/3) * 255),
+  ];
+}
+// Any of this app's pale, dark-mode-tuned glow colours -> a deeper, more
+// saturated version of the same hue that reads clearly on a light backdrop.
+function _lightModeRgb(r, g, b) {
+  const [h, s] = _rgbToHsl(r, g, b);
+  return _hslToRgb(h, Math.min(0.85, Math.max(s, 0.55)), 0.38);
+}
+function lightModeColorNum(hexNum) {
+  const [r, g, b] = _lightModeRgb((hexNum >> 16) & 255, (hexNum >> 8) & 255, hexNum & 255);
+  return (r << 16) | (g << 8) | b;
+}
+// CSS hex string ('#rrggbb') -> itself in dark mode, deepened in light mode.
+// Used for every per-card/per-row accent colour threaded through the HTML UI.
+function themedHex(hexStr) {
+  if (_theme !== 'light' || !hexStr) return hexStr;
+  const n = parseInt(hexStr.replace('#', ''), 16);
+  if (Number.isNaN(n)) return hexStr;
+  const [r, g, b] = _lightModeRgb((n >> 16) & 255, (n >> 8) & 255, n & 255);
+  return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// Every informational star sprite registers itself here at creation time so
+// applyTheme() can retint them all in one pass, regardless of which of the
+// several star tiers (each built by its own IIFE, later in this script)
+// created it.
+const _starThemeRegistry = [];
+function registerThemedSprite(material, baseColorNum, baseOpacity) {
+  _starThemeRegistry.push({ material, baseColorNum, baseOpacity });
+  return material;
+}
+// Purely decorative scene objects (background starfield, dust, quantum
+// particles, electron orbit rings) — hidden outright in light mode. Filled
+// in by the ambient-effects builders further down.
+const _ambientOnlyObjects = [];
+
+function applyTheme(theme) {
+  _theme = theme === 'light' ? 'light' : 'dark';
+  document.documentElement.setAttribute('data-theme', _theme);
+
+  const metaTheme = document.querySelector('meta[name="theme-color"]');
+  if (metaTheme) metaTheme.content = _theme === 'light' ? '#eef1f8' : '#01030d';
+
+  renderer.setClearColor(_theme === 'light' ? 0xeef1f8 : 0x01030d, 1);
+
+  _ambientOnlyObjects.forEach(obj => { obj.visible = _theme === 'dark'; });
+
+  _starThemeRegistry.forEach(({ material, baseColorNum, baseOpacity }) => {
+    if (_theme === 'light') {
+      material.color.setHex(lightModeColorNum(baseColorNum));
+      material.blending = THREE.NormalBlending;
+      material.opacity = Math.min(1, baseOpacity * 1.5);
+    } else {
+      material.color.setHex(baseColorNum);
+      material.blending = THREE.AdditiveBlending;
+      material.opacity = baseOpacity;
+    }
+  });
+
+  try { localStorage.setItem('dm-theme', _theme); } catch (_) {}
+}
+
 // ── TEXTURE BUILDERS ───────────────────────────────────────────────────────
 
 // Star sprite: glow + two diffraction spikes + hard core
@@ -1101,6 +1263,7 @@ const dustTex  = makeDustTex();
 // ── STAR FIELD (background, inside a rotating group) ─────────────────────
 const starGroup = new THREE.Group();
 scene.add(starGroup);
+_ambientOnlyObjects.push(starGroup); // background field + dust clouds — decorative only
 
 (function buildStars() {
   const N = 6500;
@@ -1222,6 +1385,7 @@ scene.add(starGroup);
     const orbitLine = new THREE.Line(lineGeoOrb, lineMtl);
     orbitLine.frustumCulled = false;
     scene.add(orbitLine);
+    _ambientOnlyObjects.push(orbitLine);
 
     // 5 electrons per ring — tiny, black with white core using qTex-style texture
     const electrons = [];
@@ -1236,6 +1400,7 @@ scene.add(starGroup);
       dot.scale.set(0.18, 0.18, 1);
       dot.frustumCulled = false;
       scene.add(dot);
+      _ambientOnlyObjects.push(dot);
 
       electrons.push({ dot, halo: null, phase });
     }
@@ -1312,6 +1477,7 @@ scene.add(starGroup);
   });
   const qPoints = new THREE.Points(qGeo, qMat);
   scene.add(qPoints);
+  _ambientOnlyObjects.push(qPoints);
 
   // ── 3. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
   const pulsePts = [];
@@ -1472,6 +1638,7 @@ NODES.forEach((data, i) => {
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   }));
+  registerThemedSprite(sp.material, data.color, 1);
   sp.position.copy(data.pos);
   sp.scale.set(sz, sz, 1);
   scene.add(sp);
@@ -1772,8 +1939,8 @@ function flyTo(idx) {
   veil.style.background = [
     `radial-gradient(ellipse at center,`,
     `  #ffffff 0%,`,
-    `  ${hex}cc 18%,`,
-    `  ${hex}55 50%,`,
+    `  ${themedHex(hex)}cc 18%,`,
+    `  ${themedHex(hex)}55 50%,`,
     `  transparent 80%)`,
   ].join('');
   gsap.to(veil, { opacity: 1, duration: 0.18, delay: 1.82,
@@ -1781,8 +1948,8 @@ function flyTo(idx) {
       // Dim to a soft ambient nebula glow
       veil.style.background = [
         `radial-gradient(ellipse at center,`,
-        `  ${hex}22 0%,`,
-        `  ${hex}10 45%,`,
+        `  ${themedHex(hex)}22 0%,`,
+        `  ${themedHex(hex)}10 45%,`,
         `  transparent 75%)`,
       ].join('');
       gsap.to(veil, { opacity: 1, duration: 0.6 });
@@ -2240,12 +2407,12 @@ const ARCANA_ESSENCE = {
     .micro-tag.lit .micro-inner { transform: scale(1); opacity: 1; }
     .micro-tag .t-num {
       font-size:13px; font-family:'DM Mono',monospace; font-weight:300;
-      color:rgba(255,255,255,0.88); letter-spacing:1px;
-      text-shadow:0 0 12px rgba(200,220,255,0.7);
+      color:rgba(var(--fg-rgb),0.88); letter-spacing:1px;
+      text-shadow:0 0 12px rgba(var(--accent-rgb),0.7);
     }
     .micro-tag .t-label {
       font-size:7px; letter-spacing:2.5px; text-transform:uppercase;
-      color:rgba(180,210,255,0.42); margin-top:5px; white-space:nowrap;
+      color:rgba(var(--accent-rgb),0.42); margin-top:5px; white-space:nowrap;
       opacity:0; transition:opacity .3s;
     }
     .micro-tag.lit .t-label { opacity:1; }
@@ -2255,7 +2422,7 @@ const ARCANA_ESSENCE = {
     }
     .micro-tag .t-archetype {
       font-size:5.5px; letter-spacing:1.6px; text-transform:uppercase;
-      color:rgba(180,210,255,0.28); margin-top:2px; white-space:nowrap;
+      color:rgba(var(--accent-rgb),0.28); margin-top:2px; white-space:nowrap;
       opacity:0; transition:opacity .3s;
     }
     .micro-tag.lit .t-archetype { opacity:1; }
@@ -2269,7 +2436,7 @@ const ARCANA_ESSENCE = {
     }
     .talent-tag .t-label {
       font-size:6.5px; letter-spacing:2.2px; text-transform:uppercase;
-      color:rgba(190,215,245,0.5); margin-top:4px; white-space:nowrap;
+      color:rgba(var(--accent-rgb),0.5); margin-top:4px; white-space:nowrap;
       opacity:0; transition:opacity .3s;
     }
     .talent-tag.lit .t-label { opacity:1; }
@@ -2914,6 +3081,7 @@ const ARCANA_ESSENCE = {
       depthWrite: false,
       opacity: 0.28,
     }));
+    registerThemedSprite(sp.material, data.color, 0.28);
     sp.position.copy(data.pos);
     sp.scale.set(sz, sz, 1);
     if (isSexLine) sp.visible = _sexLineActive;
@@ -3060,36 +3228,36 @@ const ARCANA_ESSENCE = {
           : [['Personal Purpose', _vals.atPP], ['Social Purpose', _vals.atSOP]];
       const feedHtml =
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT FEEDS THIS</div>
            <div class="pb-full-text">${feed[0][0]} is ${nm(feed[0][1])}${essence(feed[0][1])}.
              ${feed[1][0]} is ${nm(feed[1][1])}${essence(feed[1][1])}.
              Together those two shape your ${data.label}: ${nm(data.num)}${essence(data.num)}.</div>
          </div>`;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = SECTION_LABEL[data.key];
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (pc && pc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = feedHtml + (pc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SYNTHESIS</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SYNTHESIS</div>
            <div class="pb-full-text">${pc.synthesis || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">WHY</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHY</div>
            <div class="pb-full-text">${pc.why || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
            <div class="pb-full-text">${pc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">POSITIVE STATE</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">POSITIVE STATE</div>
            <div class="pb-full-text">${pc.positive || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">NEGATIVE STATE</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">NEGATIVE STATE</div>
            <div class="pb-full-text">${pc.negative || ''}</div>
          </div>` :
         `<div class="pb-full-section">
@@ -3116,21 +3284,21 @@ const ARCANA_ESSENCE = {
       }
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = isNamedSeed ? 'Named Karmic Seed' : 'Karmic Debt';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (kc && kc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = kc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE PATTERN</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATTERN</div>
            <div class="pb-full-text">${kc.pattern || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE CORE LESSON</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE LESSON</div>
            <div class="pb-full-text">${kc.lesson || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE PATH FORWARD</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATH FORWARD</div>
            <div class="pb-full-text">${kc.path || ''}</div>
          </div>` : '';
 
@@ -3156,21 +3324,21 @@ const ARCANA_ESSENCE = {
       }
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Sexual Line';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (sc && sc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = sc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE PATTERN</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATTERN</div>
            <div class="pb-full-text">${sc.pattern || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE CORE LESSON</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE LESSON</div>
            <div class="pb-full-text">${sc.lesson || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE PATH FORWARD</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATH FORWARD</div>
            <div class="pb-full-text">${sc.path || ''}</div>
          </div>` :
         `<div class="pb-full-section">
@@ -3191,25 +3359,25 @@ const ARCANA_ESSENCE = {
       const pl = window.DPastLifeContent ? window.DPastLifeContent.get(data.num) : null;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Past Life Star';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (pl && pl.heading) || data.label;
       document.getElementById('pb-body').innerHTML = pl ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">POSSIBLE ORIGIN EXPRESSIONS</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">POSSIBLE ORIGIN EXPRESSIONS</div>
            <div class="pb-full-text">${pl.expressions || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SHARED THEME</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHARED THEME</div>
            <div class="pb-full-text">${pl.theme || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE EMOTIONAL IMPRINT</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE EMOTIONAL IMPRINT</div>
            <div class="pb-full-text">${pl.imprint || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">HOW THIS MAY FEEL FAMILIAR TODAY</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW THIS MAY FEEL FAMILIAR TODAY</div>
            <div class="pb-full-text">${pl.today || ''}</div>
          </div>` : '';
 
@@ -3232,10 +3400,10 @@ const ARCANA_ESSENCE = {
       const prefix  = isPinnacle ? 'p' : 'c';
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = isPinnacle
         ? 'Pinnacles · Four Life-Stage Cycles' : 'Challenges · Four Life-Stage Obstacles';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = data.label;
 
       const stageHtml = (_vals.stageAges || []).map(r => {
@@ -3246,7 +3414,7 @@ const ARCANA_ESSENCE = {
           : `Age ${r.startAge.toFixed(0)}–${r.endAge.toFixed(0)}`;
         const activeTag = r.stage === _vals.activeStage ? ' · CURRENTLY ACTIVE' : '';
         return `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">STAGE ${r.stage} · ${ageLabel}${activeTag}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">STAGE ${r.stage} · ${ageLabel}${activeTag}</div>
            <div class="pb-full-text"><em>${(c && c.heading) || (data.label + ' ' + num)}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${c ? c.why : ''}</div>
            ${c && c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
@@ -3276,39 +3444,39 @@ const ARCANA_ESSENCE = {
       const missing = _nameVals.missingNumbers || [];
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
 
       const lessonsHtml = missing.length
         ? missing.map(n => {
             const lc = window.DKarmicLessonContent ? window.DKarmicLessonContent.get(n) : null;
             return lc ? `<div class="pb-full-section">
-               <div class="pb-full-label" style="color:${hex}">${lc.heading.toUpperCase()}</div>
+               <div class="pb-full-label" style="color:${themedHex(hex)}">${lc.heading.toUpperCase()}</div>
                <div class="pb-full-text">${lc.text}</div>
              </div>` : '';
           }).join('')
         : `<div class="pb-full-section">
-             <div class="pb-full-label" style="color:${hex}">KARMIC LESSONS</div>
+             <div class="pb-full-label" style="color:${themedHex(hex)}">KARMIC LESSONS</div>
              <div class="pb-full-text">All 9 base numbers are present in your name — no missing digits, no karmic lessons flagged. Your internal toolkit is already, in this specific sense, complete.</div>
            </div>`;
 
       document.getElementById('pb-body').innerHTML = nc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE CORE VIBRATION</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE VIBRATION</div>
            <div class="pb-full-text">${nc.why || ''}</div>
          </div>
          ${nc.traits ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">HOW IT LIVES IN YOU</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW IT LIVES IN YOU</div>
            <div class="pb-full-text">${nc.traits}</div>
          </div>` : ''}
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SHADOW SIDE</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW SIDE</div>
            <div class="pb-full-text">${nc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE OPENING</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
            <div class="pb-full-text">${nc.path || ''}</div>
          </div>
          ${lessonsHtml}` : '';
@@ -3329,13 +3497,13 @@ const ARCANA_ESSENCE = {
       const capC    = window.DCapstoneContent ? window.DCapstoneContent.get(_nameVals.capstone) : null;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + _nameVals.cornerstone + ' / ' + _nameVals.capstone;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = 'Cornerstone & Capstone';
 
       const sub = (label, num, c) => c ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">${label} · ${num}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">${label} · ${num}</div>
            <div class="pb-full-text"><em>${c.heading}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
            ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
@@ -3363,13 +3531,13 @@ const ARCANA_ESSENCE = {
       const gapC = window.DCompatibilityGapContent ? window.DCompatibilityGapContent.get(_compatVals.gap) : null;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + _compatVals.relationship + ' / ' + _compatVals.gap;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Numerology · Compatibility';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = 'Compatibility';
 
       const sub = (label, num, c) => c ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">${label} · ${num}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">${label} · ${num}</div>
            <div class="pb-full-text"><em>${c.heading}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
            ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
@@ -3378,7 +3546,7 @@ const ARCANA_ESSENCE = {
          </div>` : '';
 
       const context = `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE TWO LIFE PATHS</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE TWO LIFE PATHS</div>
            <div class="pb-full-text">Your Life Path is ${_vals.lifePath}. Theirs is ${_compatVals.partnerLifePath}. Everything below is what those two numbers create together, not a description of either of you individually.</div>
          </div>`;
 
@@ -3407,25 +3575,25 @@ const ARCANA_ESSENCE = {
       const nc = sourceByKey[data.key] ? sourceByKey[data.key].get(data.num) : null;
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-      document.getElementById('pb-prog-name').style.color = hex;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
-      document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
       document.getElementById('pb-body').innerHTML = nc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE CORE VIBRATION</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE VIBRATION</div>
            <div class="pb-full-text">${nc.why || ''}</div>
          </div>
          ${nc.traits ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">HOW IT LIVES IN YOU</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW IT LIVES IN YOU</div>
            <div class="pb-full-text">${nc.traits}</div>
          </div>` : ''}
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE SHADOW SIDE</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW SIDE</div>
            <div class="pb-full-text">${nc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">THE OPENING</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
            <div class="pb-full-text">${nc.path || ''}</div>
          </div>` : '';
 
@@ -3456,9 +3624,9 @@ const ARCANA_ESSENCE = {
       : 'Ancestral Square';
 
     document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
-    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-prog-name').style.color = themedHex(hex);
     document.getElementById('pb-section-label').textContent = sectionLabel;
-    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
     // Numerology cards (Life Path/Birthday Number/Personal Year) use their
     // own subheading vocabulary, distinct from the Arcana-wide THE WHY/THE
     // SHADOW/THE INVITATION labels every other position on this shared
@@ -3472,54 +3640,54 @@ const ARCANA_ESSENCE = {
     document.getElementById('pb-heading').textContent = (mc && mc.heading) || data.label;
     document.getElementById('pb-body').innerHTML = mc ?
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">${whyLabel}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">${whyLabel}</div>
          <div class="pb-full-text">${mc.why || ''}</div>
        </div>
        ${isNumerologyKey && mc.traits ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">${traitsLabel}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">${traitsLabel}</div>
          <div class="pb-full-text">${mc.traits}</div>
        </div>` : ''}
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">${shadowLabel}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">${shadowLabel}</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
        </div>
        ${mc.positive ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${mc.positive}</div>
        </div>` : ''}
        ${mc.negative ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
          <div class="pb-full-text">${mc.negative}</div>
        </div>` : ''}
        ${data.key === 'MEP' && window.DCareerPathsContent ? (() => {
          const cp = DCareerPathsContent.get(data.num);
          return cp ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">CAREER PATHS</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">CAREER PATHS</div>
            <div class="pb-full-text"><em>${cp.heading}</em></div>
            <div class="pb-full-text" style="margin-top:8px">${cp.text}</div>
          </div>` : '';
        })() : ''}
        ${data.key === 'YE' && _yeMeta ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">CURRENTLY ACTIVE</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">CURRENTLY ACTIVE</div>
          <div class="pb-full-text">Ages ${_yeMeta.slotStartAge.toFixed(1)}–${_yeMeta.slotEndAge.toFixed(1)}, within the ${_yeMeta.decadeStart}–${_yeMeta.decadeEnd} life decade.</div>
        </div>` : ''}
        ${data.key === 'LIFEPATH' && mc.career ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">IN CAREER</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">IN CAREER</div>
          <div class="pb-full-text">${mc.career}</div>
        </div>` : ''}
        ${data.key === 'LIFEPATH' && mc.love ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">IN LOVE & RELATIONSHIPS</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">IN LOVE & RELATIONSHIPS</div>
          <div class="pb-full-text">${mc.love}</div>
        </div>` : ''}
        ${isNumerologyKey && mc.path ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">${pathLabel}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">${pathLabel}</div>
          <div class="pb-full-text">${mc.path}</div>
        </div>` : ''}
        ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? _vals.karmicDebtFlags.map(n => {
          const kd = DKarmicDebtNumberContent.get(n);
          if (!kd) return '';
          return `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${hex}">${kd.heading.toUpperCase()}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">${kd.heading.toUpperCase()}</div>
            <div class="pb-full-text">${kd.why}</div>
            <div class="pb-full-text" style="margin-top:8px">${kd.traits}</div>
            <div class="pb-full-text" style="margin-top:8px">${kd.shadow}</div>
@@ -3604,16 +3772,16 @@ const ARCANA_ESSENCE = {
     veil.style.background = [
       `radial-gradient(ellipse at center,`,
       `  #ffffff 0%,`,
-      `  ${hex}cc 18%,`,
-      `  ${hex}55 50%,`,
+      `  ${themedHex(hex)}cc 18%,`,
+      `  ${themedHex(hex)}55 50%,`,
       `  transparent 80%)`,
     ].join('');
     gsap.to(veil, { opacity: 1, duration: 0.18, delay: 1.82,
       onComplete() {
         veil.style.background = [
           `radial-gradient(ellipse at center,`,
-          `  ${hex}22 0%,`,
-          `  ${hex}10 45%,`,
+          `  ${themedHex(hex)}22 0%,`,
+          `  ${themedHex(hex)}10 45%,`,
           `  transparent 75%)`,
         ].join('');
         gsap.to(veil, { opacity: 1, duration: 0.6 });
@@ -4031,37 +4199,37 @@ const ARCANA_ESSENCE = {
     const cd   = CAT_COLORS[prog.category] || { hex:'#AABBFF', num:0xAABBFF };
     // Build full multi-section content inside banner body
     document.getElementById('pb-prog-name').textContent = prog.name + '  ·  ' + prog.numbers.join(' · ');
-    document.getElementById('pb-prog-name').style.color = cd.hex;
+    document.getElementById('pb-prog-name').style.color = themedHex(cd.hex);
     document.getElementById('pb-section-label').textContent = prog.category;
-    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
     document.getElementById('pb-heading').textContent = prog.heading || prog.name;
     document.getElementById('pb-body').innerHTML =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">THE WHY</div>
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">THE WHY</div>
          <div class="pb-full-text">${prog.why || ''}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">THE SHADOW</div>
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">THE SHADOW</div>
          <div class="pb-full-text">${prog.shadow || ''}</div>
        </div>
        ${Array.isArray(prog.indicators) && prog.indicators.length ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">INDICATORS</div>
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">INDICATORS</div>
          <div class="pb-full-text">${prog.indicators.join(' &nbsp;·&nbsp; ')}</div>
        </div>` : ''}
        ${prog.newStrategy ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">NEW STRATEGY</div>
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">NEW STRATEGY</div>
          <div class="pb-full-text">${prog.newStrategy}</div>
        </div>` : ''}
        ${Array.isArray(prog.stepsToTake) && prog.stepsToTake.length ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${cd.hex}">STEPS TO TAKE</div>
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">STEPS TO TAKE</div>
          <div class="pb-full-text">${prog.stepsToTake.map((s,i) => (i+1) + '. ' + s).join('<br>')}</div>
        </div>` : ''}
        ${prog.positive ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${prog.positive}</div>
        </div>` : ''}
        ${prog.negative ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
          <div class="pb-full-text">${prog.negative}</div>
        </div>` : ''}`;
     banner.classList.add('open');
@@ -4126,6 +4294,7 @@ const ARCANA_ESSENCE = {
         transparent: true, blending: THREE.AdditiveBlending,
         depthWrite: false, opacity: 0.95,
       }));
+      registerThemedSprite(coreSp.material, cd.num, 0.95);
       coreSp.scale.set(1.1, 1.1, 1);
       coreSp.position.copy(pos);
       coreSp.frustumCulled = false;
@@ -4137,6 +4306,7 @@ const ARCANA_ESSENCE = {
         transparent: true, blending: THREE.AdditiveBlending,
         depthWrite: false, opacity: 0.22,
       }));
+      registerThemedSprite(haloSp.material, cd.num, 0.22);
       haloSp.scale.set(3.5, 3.5, 1);
       haloSp.position.copy(pos);
       haloSp.frustumCulled = false;
@@ -4428,29 +4598,29 @@ const ARCANA_ESSENCE = {
     if (!content) return;
 
     document.getElementById('pb-prog-name').textContent = TALENT_LABEL[key] + '  ·  ' + num;
-    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-prog-name').style.color = themedHex(hex);
     document.getElementById('pb-section-label').textContent = 'Talent Star Line';
-    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
     document.getElementById('pb-heading').textContent = content.heading;
     document.getElementById('pb-body').innerHTML =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE WHY</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">THE WHY</div>
          <div class="pb-full-text">${content.why || ''}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
          <div class="pb-full-text">${content.shadow || ''}</div>
        </div>
        ${content.blocks ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">WHAT CAN BLOCK THIS TALENT</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT CAN BLOCK THIS TALENT</div>
          <div class="pb-full-text">${content.blocks}</div>
        </div>` : ''}
        ${content.positive ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(130,220,170,0.75)">POSITIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${content.positive}</div>
        </div>` : ''}
        ${content.negative ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(230,130,130,0.75)">NEGATIVE STATE</div>
+         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
          <div class="pb-full-text">${content.negative}</div>
        </div>` : ''}`;
     banner.classList.add('open');
@@ -4477,13 +4647,15 @@ const ARCANA_ESSENCE = {
     const pos  = TALENT_POS[key];
     const num  = _talents[key];
     const icon = window.DMEngine.getIconType(num);
-    const col  = new THREE.Color(ICON_COLOR_MAP[icon] || 0xAABBFF);
+    const colNum = ICON_COLOR_MAP[icon] || 0xAABBFF;
+    const col  = new THREE.Color(colNum);
 
     const coreSp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: nodeTex, color: col,
       transparent: true, blending: THREE.AdditiveBlending,
       depthWrite: false, opacity: 0.85,
     }));
+    registerThemedSprite(coreSp.material, colNum, 0.85);
     coreSp.scale.set(0.55, 0.55, 1);
     coreSp.position.copy(pos);
     coreSp.frustumCulled = false;
@@ -4494,6 +4666,7 @@ const ARCANA_ESSENCE = {
       transparent: true, blending: THREE.AdditiveBlending,
       depthWrite: false, opacity: 0.20,
     }));
+    registerThemedSprite(haloSp.material, colNum, 0.20);
     haloSp.scale.set(1.9, 1.9, 1);
     haloSp.position.copy(pos);
     haloSp.frustumCulled = false;
@@ -4571,10 +4744,10 @@ const ARCANA_ESSENCE = {
     });
 
     const hex = '#' + s.col.getHexString();
-    veil.style.background = `radial-gradient(ellipse at center,#fff 0%,${hex}cc 18%,${hex}55 50%,transparent 80%)`;
+    veil.style.background = `radial-gradient(ellipse at center,#fff 0%,${themedHex(hex)}cc 18%,${themedHex(hex)}55 50%,transparent 80%)`;
     gsap.to(veil, { opacity:1, duration:0.18, delay:1.82,
       onComplete() {
-        veil.style.background = `radial-gradient(ellipse at center,${hex}22 0%,${hex}10 45%,transparent 75%)`;
+        veil.style.background = `radial-gradient(ellipse at center,${themedHex(hex)}22 0%,${themedHex(hex)}10 45%,transparent 75%)`;
         gsap.to(veil, { opacity:1, duration:0.6 });
       },
     });
@@ -4744,6 +4917,19 @@ const ARCANA_ESSENCE = {
   });
 })();
 
+// ── THEME TOGGLE ───────────────────────────────────────────────────────────
+// applyTheme()/themedHex()/registerThemedSprite() are defined up near the
+// renderer setup, close to the scene they affect. This just wires the button.
+;(function () {
+  const btn = document.getElementById('theme-toggle');
+  if (!btn) return;
+  btn.textContent = _theme === 'light' ? '☀' : '☾';
+  btn.addEventListener('click', () => {
+    applyTheme(_theme === 'light' ? 'dark' : 'light');
+    btn.textContent = _theme === 'light' ? '☀' : '☾';
+  });
+})();
+
 // ── CHAKRA RAIL ───────────────────────────────────────────────────────────
 // The Chakra Map is deliberately NOT a star tier. The seven centres are an
 // ordered vertical stack mapped to the body, so they get a full-height rail on
@@ -4817,47 +5003,47 @@ const ARCANA_ESSENCE = {
     const hex = row.colour;
     document.getElementById('pb-prog-name').textContent =
       `${row.name}  ·  ${row.common}  ·  ${row.emotional}`;
-    document.getElementById('pb-prog-name').style.color = hex;
+    document.getElementById('pb-prog-name').style.color = themedHex(hex);
     document.getElementById('pb-section-label').textContent = 'Chakra Map';
-    document.getElementById('pb-section-label').style.color = 'rgba(255,255,255,0.35)';
+    document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
     document.getElementById('pb-heading').textContent = (pc && pc.heading) || c.governs;
 
     const feedHtml =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">WHAT FEEDS THIS</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT FEEDS THIS</div>
          <div class="pb-full-text">Physical is ${_arcName(row.physical)}${_arcEssence(row.physical)}.
            Energy is ${_arcName(row.energy)}${_arcEssence(row.energy)}.
            Together those two shape your ${row.name}: ${_arcName(row.emotional)}${_arcEssence(row.emotional)}.</div>
        </div>`;
     const whereHtml =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">WHERE IT SITS</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">WHERE IT SITS</div>
          <div class="pb-full-text">${c.where}</div>
        </div>`;
 
     document.getElementById('pb-body').innerHTML = whereHtml + feedHtml + (pc ?
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">WHY</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">WHY</div>
          <div class="pb-full-text">${pc.why}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE SHADOW</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
          <div class="pb-full-text">${pc.shadow}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">POSITIVE STATE</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">POSITIVE STATE</div>
          <div class="pb-full-text">${pc.positive}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">NEGATIVE STATE</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">NEGATIVE STATE</div>
          <div class="pb-full-text">${pc.negative}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">THE OPENING</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
          <div class="pb-full-text">${pc.path}</div>
        </div>` :
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${hex}">IN BALANCE</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">IN BALANCE</div>
          <div class="pb-full-text">${c.balanced}</div>
        </div>`);
 
@@ -4874,7 +5060,7 @@ const ARCANA_ESSENCE = {
       const dot = document.createElement('div');
       dot.className = 'cr-dot';
       dot.dataset.key = r.key;
-      dot.style.background = r.colour;
+      dot.style.background = themedHex(r.colour);
       dot.title = `${r.name} · ${r.common}`;
       dot.textContent = r.emotional;
       dot.addEventListener('click', (e) => { e.stopPropagation(); openChakra(r.key); });
@@ -4883,7 +5069,7 @@ const ARCANA_ESSENCE = {
       const row = document.createElement('div');
       row.className = 'cr-row';
       row.innerHTML =
-        `<span class="cr-dot" style="background:${r.colour};opacity:.85;cursor:default"></span>` +
+        `<span class="cr-dot" style="background:${themedHex(r.colour)};opacity:.85;cursor:default"></span>` +
         `<span class="cr-name">${r.name}<small>${r.common}</small></span>` +
         `<span class="cr-vals">${r.physical} / ${r.energy} / ${r.emotional}</span>`;
       row.addEventListener('click', () => openChakra(r.key));
@@ -4972,7 +5158,7 @@ const ARCANA_ESSENCE = {
       rows.forEach(r => {
         const row = document.createElement('div');
         row.className = 'si-row';
-        row.innerHTML = `<span class="si-num" style="color:${r.color}">${r.num}</span><span class="si-label">${r.label}</span>`;
+        row.innerHTML = `<span class="si-num" style="color:${themedHex(r.color)}">${r.num}</span><span class="si-label">${r.label}</span>`;
         row.addEventListener('click', () => {
           // Every fly*() function already self-guards on isFlying/activeIdx/
           // activeExtraStar — checking here too just avoids the pointless
@@ -5068,7 +5254,7 @@ const ARCANA_ESSENCE = {
         return { label: row.label, num: row.num, color: row.color, fly: () => _tierProviders.micro.fly(row.idx) };
       }
       return {
-        label, num: '—', color: 'rgba(255,255,255,0.28)', isPlaceholder: true,
+        label, num: '—', color: 'rgba(var(--fg-rgb),0.28)', isPlaceholder: true,
         fly: () => { nameInput.focus(); },
       };
     });
@@ -5078,7 +5264,7 @@ const ARCANA_ESSENCE = {
         return { label: row.label, num: row.num, color: row.color, fly: () => _tierProviders.micro.fly(row.idx) };
       }
       return {
-        label, num: '—', color: 'rgba(255,255,255,0.28)', isPlaceholder: true,
+        label, num: '—', color: 'rgba(var(--fg-rgb),0.28)', isPlaceholder: true,
         fly: () => { compatInput.focus(); },
       };
     });
@@ -5125,7 +5311,7 @@ const ARCANA_ESSENCE = {
     rows.forEach(r => {
       const row = document.createElement('div');
       row.className = 'si-row' + (r.isPlaceholder ? ' si-row-placeholder' : '');
-      row.innerHTML = `<span class="si-num" style="color:${r.color}">${r.num}</span><span class="si-label">${r.label}</span>`;
+      row.innerHTML = `<span class="si-num" style="color:${themedHex(r.color)}">${r.num}</span><span class="si-label">${r.label}</span>`;
       row.addEventListener('click', () => {
         if (r.isPlaceholder) { r.fly(); return; } // focus the name input — don't close the panel or fly
         if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
@@ -5183,6 +5369,10 @@ const ARCANA_ESSENCE = {
 
   render(); // pre-render once so the very first open has content immediately
 })();
+
+// Apply the persisted (or default) theme now that every sprite/ambient
+// object in every tier above has been created and registered.
+applyTheme(_theme);
 
 })();
 </script>
