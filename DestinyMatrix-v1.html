@@ -844,16 +844,15 @@
     /* ── Light-mode text darkening ───────────────────────
        These four classes carry the actual reading prose (card body text,
        across both card systems: #info-card's .ic-* and #prog-banner's
-       .pb-*). Their dark-mode opacity (0.48-0.60) reads fine as a pale
-       blue-tinted body text against near-black, but the same low opacity
-       against a light background stays too close to the backdrop's own
-       lightness to read comfortably. Same colour (--accent-rgb), just far
-       less transparent, so it reads as a solid, clearly darker blue. */
+       .pb-*). In light mode this reads best as plain dark ink, not a
+       blue tint — the accent colour stays reserved for subheadings/labels
+       (.pb-full-label, .pb-section-label, .ic-section-label etc., which
+       are coloured per-star via themedHex() and are left untouched). */
     :root[data-theme="light"] .ic-desc,
     :root[data-theme="light"] .ic-section-body,
     :root[data-theme="light"] .pb-full-text,
     :root[data-theme="light"] .pb-body {
-      color: rgba(var(--accent-rgb), 0.92);
+      color: rgba(var(--fg-rgb), 0.86);
     }
   </style>
 </head>
@@ -1174,6 +1173,23 @@ function registerThemedLine(material, dark, light) {
   return material;
 }
 
+// Flat-tinted (non-glow) sprites, e.g. the electron-orbit dots — colour only,
+// blending stays whatever it already was (no additive/normal swap needed).
+const _dotThemeRegistry = [];
+function registerThemedDot(material, darkColorNum, lightColorNum) {
+  _dotThemeRegistry.push({ material, darkColorNum, lightColorNum });
+  return material;
+}
+
+// Custom ShaderMaterials (background starfield, quantum particle field) that
+// have no material.color to swap — a uTint uniform on the material multiplies
+// the shader's sampled colour instead.
+const _shaderTintRegistry = [];
+function registerThemedShaderTint(material, dark, light) {
+  _shaderTintRegistry.push({ material, dark, light });
+  return material;
+}
+
 function applyTheme(theme) {
   _theme = theme === 'light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', _theme);
@@ -1201,6 +1217,15 @@ function applyTheme(theme) {
     const c = _theme === 'light' ? light : dark;
     material.color.setHex(c.color);
     material.opacity = c.opacity;
+  });
+
+  _dotThemeRegistry.forEach(({ material, darkColorNum, lightColorNum }) => {
+    material.color.setHex(_theme === 'light' ? lightColorNum : darkColorNum);
+  });
+
+  _shaderTintRegistry.forEach(({ material, dark, light }) => {
+    const c = _theme === 'light' ? light : dark;
+    material.uniforms.uTint.value.set(c[0], c[1], c[2]);
   });
 
   try { localStorage.setItem('dm-theme', _theme); } catch (_) {}
@@ -1414,10 +1439,12 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
     const lineMtl    = new THREE.LineBasicMaterial({
       color: 0x888888, transparent: true, opacity: 0.18, depthWrite: false,
     });
+    registerThemedLine(lineMtl,
+      { color: 0x888888, opacity: 0.18 },
+      { color: 0x4a4a5c, opacity: 0.4 });
     const orbitLine = new THREE.Line(lineGeoOrb, lineMtl);
     orbitLine.frustumCulled = false;
     scene.add(orbitLine);
-    _ambientOnlyObjects.push(orbitLine);
 
     // 5 electrons per ring — tiny, black with white core using qTex-style texture
     const electrons = [];
@@ -1429,10 +1456,12 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
         transparent: true, blending: THREE.NormalBlending,
         depthWrite: false, opacity: 0.9,
       }));
+      // Pure white reads fine on black but disappears on a light backdrop —
+      // a solid dark ink dot in light mode instead of hiding it outright.
+      registerThemedDot(dot.material, 0xffffff, 0x1c2438);
       dot.scale.set(0.18, 0.18, 1);
       dot.frustumCulled = false;
       scene.add(dot);
-      _ambientOnlyObjects.push(dot);
 
       electrons.push({ dot, halo: null, phase });
     }
@@ -1488,7 +1517,12 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
   qGeo.setAttribute('aSize',    new THREE.BufferAttribute(qSize, 1));
 
   const qMat = new THREE.ShaderMaterial({
-    uniforms: { uTex: { value: qTex } },
+    // uTint multiplies the sampled texture colour — 1,1,1 (no change) in
+    // dark mode. The texture's white "core" reads fine glowing on black,
+    // but blends invisibly into a light background, so light mode tints
+    // it down to a solid dark ink dot instead (the dark ring around it
+    // already reads fine on either background unmodified).
+    uniforms: { uTex: { value: qTex }, uTint: { value: new THREE.Vector3(1, 1, 1) } },
     vertexShader: `
       attribute float aSize;
       void main() {
@@ -1498,18 +1532,19 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
     `,
     fragmentShader: `
       uniform sampler2D uTex;
+      uniform vec3 uTint;
       void main() {
         vec4 t = texture2D(uTex, gl_PointCoord);
         if (t.a < 0.01) discard;
-        gl_FragColor = t;
+        gl_FragColor = vec4(t.rgb * uTint, t.a);
       }
     `,
     transparent: true, depthWrite: false,
     blending: THREE.NormalBlending,
   });
+  registerThemedShaderTint(qMat, [1, 1, 1], [0.14, 0.18, 0.34]);
   const qPoints = new THREE.Points(qGeo, qMat);
   scene.add(qPoints);
-  _ambientOnlyObjects.push(qPoints);
 
   // ── 3. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
   const pulsePts = [];
