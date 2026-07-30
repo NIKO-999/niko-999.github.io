@@ -840,6 +840,21 @@
       pointer-events: none;
       opacity: 0;
     }
+
+    /* ── Light-mode text darkening ───────────────────────
+       These four classes carry the actual reading prose (card body text,
+       across both card systems: #info-card's .ic-* and #prog-banner's
+       .pb-*). Their dark-mode opacity (0.48-0.60) reads fine as a pale
+       blue-tinted body text against near-black, but the same low opacity
+       against a light background stays too close to the backdrop's own
+       lightness to read comfortably. Same colour (--accent-rgb), just far
+       less transparent, so it reads as a solid, clearly darker blue. */
+    :root[data-theme="light"] .ic-desc,
+    :root[data-theme="light"] .ic-section-body,
+    :root[data-theme="light"] .pb-full-text,
+    :root[data-theme="light"] .pb-body {
+      color: rgba(var(--accent-rgb), 0.92);
+    }
   </style>
 </head>
 <body>
@@ -1147,6 +1162,18 @@ function registerThemedSprite(material, baseColorNum, baseOpacity) {
 // in by the ambient-effects builders further down.
 const _ambientOnlyObjects = [];
 
+// Plain (non-sprite) line materials — the central-cross constellation lines
+// and its concentric rings. These were tuned as faint pale-on-black lines,
+// which is nearly invisible against a light background (a pale colour at
+// low opacity barely differs from a pale backdrop). Unlike the glow sprites
+// above, there's no good generic formula for "faint decorative line, still
+// readable on either background" — hand-picked dark/light pairs instead.
+const _lineThemeRegistry = [];
+function registerThemedLine(material, dark, light) {
+  _lineThemeRegistry.push({ material, dark, light });
+  return material;
+}
+
 function applyTheme(theme) {
   _theme = theme === 'light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', _theme);
@@ -1168,6 +1195,12 @@ function applyTheme(theme) {
       material.blending = THREE.AdditiveBlending;
       material.opacity = baseOpacity;
     }
+  });
+
+  _lineThemeRegistry.forEach(({ material, dark, light }) => {
+    const c = _theme === 'light' ? light : dark;
+    material.color.setHex(c.color);
+    material.opacity = c.opacity;
   });
 
   try { localStorage.setItem('dm-theme', _theme); } catch (_) {}
@@ -1604,6 +1637,9 @@ const lineMat = new THREE.LineBasicMaterial({
   opacity: 0.11,
   transparent: true,
 });
+registerThemedLine(lineMat,
+  { color: 0xb0c8f0, opacity: 0.11 },
+  { color: 0x3a4a72, opacity: 0.4 });
 const constellLines = new THREE.LineSegments(lineGeo, lineMat);
 scene.add(constellLines);
 
@@ -1615,11 +1651,16 @@ scene.add(constellLines);
     pts.push(new THREE.Vector3(Math.cos(ang)*r, Math.sin(ang)*r, 0));
   }
   const rGeo = new THREE.BufferGeometry().setFromPoints(pts);
+  const darkOpacity  = [0.055, 0.040, 0.025][i];
+  const lightOpacity = [0.20, 0.15, 0.10][i];
   const rMat = new THREE.LineBasicMaterial({
     color: 0x6070a0,
-    opacity: [0.055, 0.040, 0.025][i],
+    opacity: darkOpacity,
     transparent: true,
   });
+  registerThemedLine(rMat,
+    { color: 0x6070a0, opacity: darkOpacity },
+    { color: 0x2c3a5e, opacity: lightOpacity });
   scene.add(new THREE.Line(rGeo, rMat));
 });
 
