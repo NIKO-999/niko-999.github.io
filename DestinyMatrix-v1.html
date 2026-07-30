@@ -1181,15 +1181,6 @@ function registerThemedDot(material, darkColorNum, lightColorNum) {
   return material;
 }
 
-// Custom ShaderMaterials (background starfield, quantum particle field) that
-// have no material.color to swap — a uTint uniform on the material multiplies
-// the shader's sampled colour instead.
-const _shaderTintRegistry = [];
-function registerThemedShaderTint(material, dark, light) {
-  _shaderTintRegistry.push({ material, dark, light });
-  return material;
-}
-
 function applyTheme(theme) {
   _theme = theme === 'light' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', _theme);
@@ -1221,11 +1212,6 @@ function applyTheme(theme) {
 
   _dotThemeRegistry.forEach(({ material, darkColorNum, lightColorNum }) => {
     material.color.setHex(_theme === 'light' ? lightColorNum : darkColorNum);
-  });
-
-  _shaderTintRegistry.forEach(({ material, dark, light }) => {
-    const c = _theme === 'light' ? light : dark;
-    material.uniforms.uTint.value.set(c[0], c[1], c[2]);
   });
 
   try { localStorage.setItem('dm-theme', _theme); } catch (_) {}
@@ -1446,7 +1432,7 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
     orbitLine.frustumCulled = false;
     scene.add(orbitLine);
 
-    // 5 electrons per ring — tiny, black with white core using qTex-style texture
+    // 5 electrons per ring
     const electrons = [];
     for (let k = 0; k < 5; k++) {
       const phase = (k / 5) * Math.PI * 2;
@@ -1468,85 +1454,7 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
     _electronData.push({ tiltMtx, speed: orb.speed, electrons });
   });
 
-  // ── 2. QUANTUM PARTICLE FIELD ──────────────────────────────────────────
-  // Texture: dark ring with bright white core
-  const qCv = document.createElement('canvas');
-  qCv.width = qCv.height = 64;
-  const qCtx = qCv.getContext('2d');
-  const qH = 32;
-  // Dark halo ring
-  const qRing = qCtx.createRadialGradient(qH,qH, qH*0.18, qH,qH, qH*0.9);
-  qRing.addColorStop(0,   'rgba(0,0,0,0)');
-  qRing.addColorStop(0.25,'rgba(0,0,0,0.92)');
-  qRing.addColorStop(0.65,'rgba(0,0,0,0.75)');
-  qRing.addColorStop(1,   'rgba(0,0,0,0)');
-  qCtx.fillStyle = qRing; qCtx.fillRect(0,0,64,64);
-  // White core
-  const qCore = qCtx.createRadialGradient(qH,qH, 0, qH,qH, qH*0.22);
-  qCore.addColorStop(0,   'rgba(255,255,255,1)');
-  qCore.addColorStop(0.55,'rgba(220,235,255,0.85)');
-  qCore.addColorStop(1,   'rgba(180,210,255,0)');
-  qCtx.fillStyle = qCore; qCtx.fillRect(0,0,64,64);
-  const qTex = new THREE.CanvasTexture(qCv);
-
-  const QN    = 300;
-  const qPos  = new Float32Array(QN * 3);
-  const qVel  = new Float32Array(QN * 3);
-  const qSize = new Float32Array(QN);
-
-  for (let i = 0; i < QN; i++) {
-    const r  = 4 + Math.random() * 10;
-    const th = Math.random() * Math.PI * 2;
-    const ph = Math.acos(2 * Math.random() - 1);
-    qPos[i*3]   = r * Math.sin(ph) * Math.cos(th);
-    qPos[i*3+1] = r * Math.sin(ph) * Math.sin(th);
-    qPos[i*3+2] = r * Math.cos(ph);
-
-    const vr  = 0.004 + Math.random() * 0.006;
-    const vth = Math.random() * Math.PI * 2;
-    const vph = Math.acos(2 * Math.random() - 1);
-    qVel[i*3]   = vr * Math.sin(vph) * Math.cos(vth);
-    qVel[i*3+1] = vr * Math.sin(vph) * Math.sin(vth);
-    qVel[i*3+2] = vr * Math.cos(vph);
-
-    qSize[i] = 3.0 + Math.random() * 2.5;  // small but visible
-  }
-
-  const qGeo = new THREE.BufferGeometry();
-  qGeo.setAttribute('position', new THREE.BufferAttribute(qPos, 3));
-  qGeo.setAttribute('aSize',    new THREE.BufferAttribute(qSize, 1));
-
-  const qMat = new THREE.ShaderMaterial({
-    // uTint multiplies the sampled texture colour — 1,1,1 (no change) in
-    // dark mode. The texture's white "core" reads fine glowing on black,
-    // but blends invisibly into a light background, so light mode tints
-    // it down to a solid dark ink dot instead (the dark ring around it
-    // already reads fine on either background unmodified).
-    uniforms: { uTex: { value: qTex }, uTint: { value: new THREE.Vector3(1, 1, 1) } },
-    vertexShader: `
-      attribute float aSize;
-      void main() {
-        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-        gl_PointSize = aSize;
-      }
-    `,
-    fragmentShader: `
-      uniform sampler2D uTex;
-      uniform vec3 uTint;
-      void main() {
-        vec4 t = texture2D(uTex, gl_PointCoord);
-        if (t.a < 0.01) discard;
-        gl_FragColor = vec4(t.rgb * uTint, t.a);
-      }
-    `,
-    transparent: true, depthWrite: false,
-    blending: THREE.NormalBlending,
-  });
-  registerThemedShaderTint(qMat, [1, 1, 1], [0.14, 0.18, 0.34]);
-  const qPoints = new THREE.Points(qGeo, qMat);
-  scene.add(qPoints);
-
-  // ── 3. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
+  // ── 2. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
   const pulsePts = [];
   for (let i = 0; i <= 64; i++) {
     const a = (i / 64) * Math.PI * 2;
@@ -1636,25 +1544,6 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
         if (e.halo) e.halo.position.copy(loc);
       });
     });
-
-    // Quantum particles
-    const pa = qGeo.attributes.position.array;
-    for (let i = 0; i < QN; i++) {
-      pa[i*3]   += qVel[i*3];
-      pa[i*3+1] += qVel[i*3+1];
-      pa[i*3+2] += qVel[i*3+2];
-      // Wrap if too far
-      const dx = pa[i*3], dy = pa[i*3+1], dz = pa[i*3+2];
-      if (dx*dx + dy*dy + dz*dz > 18*18) {
-        const rr = 4 + Math.random() * 3;
-        const th2 = Math.random() * Math.PI * 2;
-        const ph2 = Math.acos(2 * Math.random() - 1);
-        pa[i*3]   = rr * Math.sin(ph2) * Math.cos(th2);
-        pa[i*3+1] = rr * Math.sin(ph2) * Math.sin(th2);
-        pa[i*3+2] = rr * Math.cos(ph2);
-      }
-    }
-    qGeo.attributes.position.needsUpdate = true;
   };
 
 })();
