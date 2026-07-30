@@ -13,7 +13,7 @@
   <meta property="og:url" content="https://niko-999.github.io/DestinyMatrix-v1.html">
   <meta name="twitter:card" content="summary">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#01030d">
+  <meta name="theme-color" content="#eef1f8">
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -25,23 +25,16 @@
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     /* ── Theme tokens ─────────────────────────────────────────────────────
-       Dark is the original, hand-tuned design (default, and every value
-       below matches what used to be hardcoded throughout this file). Light
-       is a proper second palette, not a filter: same role names, deliberately
-       chosen values so every piece of text/UI stays readable against a light
-       backdrop. Applied by toggling [data-theme] on <html> — see the THEME
-       block further down for the JS half (scene background, per-star sprite
-       colours, per-card accent hex via themedHex()). */
+       Light is the default for a first-time visitor, and lives on the bare
+       :root so it's already correct on first paint, before the boot script
+       runs applyTheme() (see THEME block further down) — no flash of the
+       wrong theme. Dark was the original, hand-tuned design and is now the
+       [data-theme="dark"] override; every value there matches what used to
+       be hardcoded throughout this file, unchanged. Applied by toggling
+       [data-theme] on <html> — see the THEME block further down for the JS
+       half (scene background, per-star sprite colours, per-card accent hex
+       via themedHex()). */
     :root {
-      --bg: #01030d;
-      --fg-rgb: 255,255,255;
-      --accent-rgb: 180,210,255;
-      --panel-bg-rgb: 4,7,22;
-      --positive-rgb: 130,220,170;
-      --negative-rgb: 230,130,130;
-      --input-scheme: dark;
-    }
-    :root[data-theme="light"] {
       --bg: #eef1f8;
       --fg-rgb: 18,22,36;
       --accent-rgb: 30,64,140;
@@ -49,6 +42,15 @@
       --positive-rgb: 20,120,70;
       --negative-rgb: 178,32,32;
       --input-scheme: light;
+    }
+    :root[data-theme="dark"] {
+      --bg: #01030d;
+      --fg-rgb: 255,255,255;
+      --accent-rgb: 180,210,255;
+      --panel-bg-rgb: 4,7,22;
+      --positive-rgb: 130,220,170;
+      --negative-rgb: 230,130,130;
+      --input-scheme: dark;
     }
 
     html, body {
@@ -850,19 +852,22 @@
       opacity: 0;
     }
 
-    /* ── Light-mode text darkening ───────────────────────
+    /* ── Card body text colour ───────────────────────────
        These four classes carry the actual reading prose (card body text,
        across both card systems: #info-card's .ic-* and #prog-banner's
-       .pb-*). In light mode this reads best as plain dark ink, not a
-       blue tint — the accent colour stays reserved for subheadings/labels
-       (.pb-full-label, .pb-section-label, .ic-section-label etc., which
-       are coloured per-star via themedHex() and are left untouched). */
-    :root[data-theme="light"] .ic-desc,
-    :root[data-theme="light"] .ic-section-body,
-    :root[data-theme="light"] .pb-full-text,
-    :root[data-theme="light"] .pb-body {
+       .pb-*). Light (the default) reads best as plain dark ink, not a blue
+       tint — overrides the accent-tinted base rules defined above. Dark
+       mode restores that original blue-tinted look below. The accent
+       colour stays reserved for subheadings/labels (.pb-full-label,
+       .pb-section-label, .ic-section-label etc., coloured per-star via
+       themedHex()) in both themes, untouched by this block. */
+    .ic-desc, .ic-section-body, .pb-full-text, .pb-body {
       color: rgba(var(--fg-rgb), 0.86);
     }
+    :root[data-theme="dark"] .ic-desc       { color: rgba(var(--accent-rgb), 0.5); }
+    :root[data-theme="dark"] .ic-section-body { color: rgba(var(--accent-rgb), 0.48); }
+    :root[data-theme="dark"] .pb-full-text  { color: rgba(var(--accent-rgb), 0.60); }
+    :root[data-theme="dark"] .pb-body       { color: rgba(var(--accent-rgb), 0.5); }
   </style>
 </head>
 <body>
@@ -1070,7 +1075,7 @@ const canvas   = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: window.devicePixelRatio < 2 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x01030d, 1);
+renderer.setClearColor(0xeef1f8, 1); // light default — applyTheme(_theme) below corrects this synchronously if dark
 
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
@@ -1100,9 +1105,15 @@ camera.position.set(0, 0, 12);
 //     card-render function) is passed through themedHex() at the point it's
 //     written into a style, which applies the same deepen-for-light
 //     transform to CSS hex strings.
+// Light is the default for a first-time visitor (no stored preference yet).
+// Once someone actually toggles it, applyTheme() persists their choice and
+// that's what boots next time — this only decides the very first visit.
 let _theme = (function () {
-  try { return localStorage.getItem('dm-theme') === 'light' ? 'light' : 'dark'; }
-  catch (_) { return 'dark'; }
+  try {
+    const stored = localStorage.getItem('dm-theme');
+    return stored === 'dark' ? 'dark' : 'light';
+  }
+  catch (_) { return 'light'; }
 })();
 
 function _rgbToHsl(r, g, b) {
@@ -1414,10 +1425,19 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
 ;(function buildAmbient() {
 
   // ── 1. ELECTRON ORBITS ─────────────────────────────────────────────────
+  // centerOffset: the near-vertical (Y-tilt-dominant) ring's own 3D centre
+  // IS the origin (pure rotation, no translation) — but under this camera's
+  // perspective projection, a circle tilted this way still projects to an
+  // ellipse whose on-screen centre sits measurably left of that, since a
+  // tilted circle's near/far points don't foreshorten symmetrically. Solved
+  // numerically (not eyeballed): +0.5116 world-space X exactly recentres it
+  // in NDC for every portrait phone aspect ratio tested. The other two
+  // rings are already centred as-is (their flatter tilt doesn't produce the
+  // same asymmetry), so they get no offset.
   const ORBS = [
-    { color: 0xFFCC44, tilt: new THREE.Euler(1.20,  0,  0.40), speed: 0.28 },
-    { color: 0x44AAFF, tilt: new THREE.Euler(0.55,  0, -1.10), speed: 0.21 },
-    { color: 0xCC66FF, tilt: new THREE.Euler(0.00, 1.05, 0.60), speed: 0.17 },
+    { color: 0xFFCC44, tilt: new THREE.Euler(1.20,  0,  0.40), speed: 0.28, centerOffset: new THREE.Vector3(0, 0, 0) },
+    { color: 0x44AAFF, tilt: new THREE.Euler(0.55,  0, -1.10), speed: 0.21, centerOffset: new THREE.Vector3(0, 0, 0) },
+    { color: 0xCC66FF, tilt: new THREE.Euler(0.00, 1.05, 0.60), speed: 0.17, centerOffset: new THREE.Vector3(0.5116, 0, 0) },
   ];
   const ORBIT_R = 5.5;
   const _electronData = [];
@@ -1431,6 +1451,7 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
       const a = (i / 64) * Math.PI * 2;
       const v = new THREE.Vector3(Math.cos(a) * ORBIT_R, Math.sin(a) * ORBIT_R, 0);
       v.applyMatrix4(tiltMtx);
+      v.add(orb.centerOffset);
       pts.push(v);
     }
     const lineGeoOrb = new THREE.BufferGeometry().setFromPoints(pts);
@@ -1463,7 +1484,7 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
 
       electrons.push({ dot, halo: null, phase });
     }
-    _electronData.push({ tiltMtx, speed: orb.speed, electrons });
+    _electronData.push({ tiltMtx, speed: orb.speed, centerOffset: orb.centerOffset, electrons });
   });
 
   // ── 2. SOUL-NODE ENERGY PULSE ──────────────────────────────────────────
@@ -1552,6 +1573,7 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
         const a   = t * orb.speed + e.phase;
         const loc = new THREE.Vector3(Math.cos(a)*ORBIT_R, Math.sin(a)*ORBIT_R, 0);
         loc.applyMatrix4(orb.tiltMtx);
+        loc.add(orb.centerOffset);
         e.dot.position.copy(loc);
         if (e.halo) e.halo.position.copy(loc);
       });
