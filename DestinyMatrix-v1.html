@@ -193,26 +193,16 @@
       transition: color .2s;
     }
     #hud-back:hover { color: rgba(var(--fg-rgb),0.55); }
-    #share-btn {
+    #bottom-left-actions {
       position: absolute;
       bottom: 30px; left: 32px;
-      font-family: 'DM Mono', monospace;
-      font-size: 8px;
-      font-weight: 400;
-      letter-spacing: 3px;
-      text-transform: uppercase;
-      color: rgba(var(--fg-rgb),0.3);
-      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 18px;
       pointer-events: all;
-      user-select: none;
-      border-bottom: 1px solid rgba(var(--fg-rgb),0.12);
-      padding-bottom: 2px;
-      transition: color .2s;
+      z-index: 25;
     }
-    #share-btn:hover { color: rgba(var(--fg-rgb),0.55); }
-    #theme-toggle {
-      position: absolute;
-      top: 30px; right: 32px;
+    #share-btn, #theme-toggle {
       font-family: 'DM Mono', monospace;
       font-size: 8px;
       font-weight: 400;
@@ -227,7 +217,7 @@
       padding-bottom: 2px;
       transition: color .2s;
     }
-    #theme-toggle:hover { color: rgba(var(--fg-rgb),0.55); }
+    #share-btn:hover, #theme-toggle:hover { color: rgba(var(--fg-rgb),0.55); }
 
     /* ── Star Index (collapsible quick-nav) ──────────── */
     #star-index {
@@ -879,8 +869,10 @@
   <div id="hud-label">Destiny Matrix</div>
   <div id="hud-date">08 · 05 · 2002</div>
   <div id="hud-back" id="hud-back">← Return</div>
-  <div id="share-btn" title="Share this app — never includes your birthdate">Share</div>
-  <div id="theme-toggle" title="Switch light/dark theme">Light Mode</div>
+  <div id="bottom-left-actions">
+    <div id="share-btn" title="Share this app — never includes your birthdate">Share</div>
+    <div id="theme-toggle" title="Switch light/dark theme">Light Mode</div>
+  </div>
 
   <div id="star-index">
     <div id="si-toggle"><span class="si-chevron">▾</span><span>Star Index</span></div>
