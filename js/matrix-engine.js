@@ -174,6 +174,32 @@ function getPersonalYear(birthdateString, asOfDateString) {
   return { value: personalYear(day, month, asOfYear), asOfYear, label: `Personal Year · ${asOfYear}` };
 }
 
+// Personal Month / Personal Day — the same cyclical system narrowed to a
+// specific month/day, standard classical chain: Personal Month reduces
+// (Personal Year + current month), Personal Day reduces (Personal Month +
+// current day). Used for the native app's daily reminder + widget, where
+// there's no birthdate re-entry each time — see getPersonalDay() below.
+function personalMonth(day, month, asOfYear, asOfMonth) {
+  return _classicalReduce(personalYear(day, month, asOfYear) + _digitSum(asOfMonth));
+}
+function personalDay(day, month, asOfYear, asOfMonth, asOfDay) {
+  return _classicalReduce(personalMonth(day, month, asOfYear, asOfMonth) + _digitSum(asOfDay));
+}
+
+// Convenience wrapper mirroring getPersonalYear()'s signature.
+function getPersonalDay(birthdateString, asOfDateString) {
+  const bm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdateString).trim());
+  if (!bm) throw new Error(`Invalid date "${birthdateString}". Expected format "YYYY-MM-DD".`);
+  const day = Number(bm[3]), month = Number(bm[2]);
+  const asOf = asOfDateString ? new Date(asOfDateString) : new Date();
+  const asOfYear = asOf.getFullYear(), asOfMonth = asOf.getMonth() + 1, asOfDay = asOf.getDate();
+  return {
+    value: personalDay(day, month, asOfYear, asOfMonth, asOfDay),
+    asOfYear, asOfMonth, asOfDay,
+    label: `Personal Day · ${asOfYear}-${String(asOfMonth).padStart(2, '0')}-${String(asOfDay).padStart(2, '0')}`,
+  };
+}
+
 /* ───────────────────────────────────────────────────────────────────────────
  * 1d · NAME-BASED CLASSICAL NUMEROLOGY
  *    Expression, Soul Urge, Personality, Maturity — the standard numbers
@@ -894,9 +920,9 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
