@@ -26,7 +26,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '8_A': {
-      heading: `You Arrived Already Keeping the Score`,
+      heading: `Keeping Score, Instinctively`,
       why: `You were born with an instinct for fairness that most people spend a lifetime developing. Before you say a word, people sense a kind of moral gravity in you — the sense that you're quietly reading a room for what's true, what's owed, what's out of balance. As a child, you were probably the one who noticed the inconsistency, who felt an injustice land in your body before you could explain why, who couldn't let a broken promise pass without something in you registering it. That's not you being difficult. That's Justice — the 8th Arcana — sitting in your Core Character, the persona you project before you even say a word. It gives you real steadiness, an honesty people learn to rely on, and a gut sense that every action eventually comes back around.`,
       shadow: `The same instinct that reads a room so accurately can slide into something harder: a habit of quietly judging everyone, including yourself, against a standard no one actually meets. You might catch yourself complaining, out loud or just internally, that people don't play fair, that the world keeps breaking its own rules — and the complaint becomes its own trap, keeping you locked in a fight with a reality that won't bend to your ledger. Here's the harder question worth asking: what does it say about you that this keeps happening? A life that keeps handing you broken promises and unpunished unfairness usually isn't bad luck — it's often an echo of something in you that's still bracing for injustice, or still keeping score in ways that make people want to hide their own. You might even notice yourself doing, in small ways, the very thing you can't stand in others — withholding, controlling, keeping tabs — which only invites more of the same back.`,
       path: `Try turning the scales inward before you turn them on the world. Not to punish yourself — that's not the point — but to actually check your own calibration. This is the less comfortable path, because it puts the responsibility for what you keep running into on you instead of on everyone else. But it's also the more empowering one, because it means the fairness you're looking for doesn't have to wait on the world to hand it to you. Start by noticing where imbalance keeps showing up — money, relationships, work — and instead of treating each one as more proof the world is unfair, ask what it's telling you about what you're still carrying. Real justice isn't a pile of verdicts against people who've wronged you. It's restoring your own internal balance — and that's the part that actually changes what starts showing up for you. You are allowed to retire from the judge's bench in your own home. Where would your attention go if the ledger finally closed?`,
@@ -36,7 +36,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '1_A': {
-      heading: `People Read You As Capable Before You've Done Anything`,
+      heading: `Capable on Arrival`,
       why: `People sense competence radiating off you before you've done anything — a coiled readiness, the sense that you could make things happen if you decided to. That's the very first impression you make, the persona you carry into a room before a single word is spoken. The Magician sits in your Core Character to produce exactly this: the mask of the doer, the one who looks like they already have a plan. It's not performance, exactly — it really is how you're wired — but it is the specific way your character presents itself to the world, distinct from what's actually happening underneath.`,
       shadow: `The risk is that the persona outruns the person — you get cast, again and again, as "the capable one" in every room, and the role calcifies into an expectation you have to keep performing even on days you have nothing left to give. People stop asking if you're okay because you never look like you're not. If you keep ending up as everyone's default problem-solver while your own needs go quietly unasked-after, that's the cost of a persona too convincing for its own good.`,
       path: `Let your persona occasionally show the gap between "looks capable" and "is currently capable." That's not weakness — it's accuracy, and it gives people permission to actually see you instead of just your competence. The mask doesn't need to be dropped, just loosened enough that something real can show through it. You are allowed to be met on the days you have nothing to prove. When was the last time someone saw you rest — and what did it cost you to let them?`,
@@ -46,7 +46,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '2_A': {
-      heading: `You Read as Someone Holding Something Back`,
+      heading: `Holding Something Back`,
       why: `You give off quiet depth before you've said a word — an unreadable quality that makes people sense there's more to you than what's on the surface, without being able to say exactly what. That's the very first impression you make. The High Priestess in your Core Character produces this persona of the keeper: composed, observant, giving away only what you choose to. People often feel like they have to earn access to you, and most of the time, they're right.`,
       shadow: `The risk is a persona so guarded it starts reading as coldness instead of depth — people mistaking your natural reserve for disinterest, and quietly deciding not to bother trying to get past it. If you keep meeting people who never really push to know you, that's less about them and more about a mask that's stopped signaling there's anything worth pushing for.`,
       path: `Let your face occasionally show what you actually know or feel, even briefly. You don't have to explain the depth — just stop hiding that it's there. A little visible warmth is what turns "unreadable" from a wall into an invitation. You are allowed to be as readable as you are deep. What would you let show first, if showing were safe?`,
@@ -56,7 +56,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '3_A': {
-      heading: `People Relax the Moment You Walk In`,
+      heading: `A Room, Relaxed`,
       why: `People relax the moment you walk in, feeling instinctively cared for, comfortable, like there's room for them around you — and that warmth is the very first thing anyone registers about you. The Empress in your Core Character produces this nurturer's mask: soft where others are guarded, generous with attention, the kind of presence that makes people exhale. It's a real gift.`,
       shadow: `The risk is becoming everyone's emotional landing pad by default, cast as the caretaker in every room whether or not you signed up for it. People bring you their needs before they even ask if you have room for them, because the persona itself seems to be offering. If you're perpetually the one holding space and rarely the one being held, that's the warmth of your mask outpacing anyone's awareness of what's underneath it.`,
       path: `Let your persona include visible limits, not just visible warmth. Saying "I don't have capacity for that right now" doesn't undo the nurturing — it makes it sustainable, and it teaches people to actually see you as a person with needs, not just a resource. You are allowed to need the same care you radiate. Who do you trust enough to hand your own tiredness to?`,
@@ -66,7 +66,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '4_A': {
-      heading: `You Read as the One Who's Already in Charge`,
+      heading: `Already in Charge`,
       why: `People sense authority off you before you've claimed any — a solidity, a sense that you're someone who holds things together. The Emperor in your Core Character gives you this persona of natural command: steady posture, decisive presence, the kind of energy that makes a room quietly organize itself around you. People often defer to you by instinct, sometimes before you've even offered an opinion.`,
       shadow: `The risk is a mask so commanding that people stop bringing you their actual thoughts, assuming you've already got it handled or won't want the input. That isolates you inside your own authority — surrounded by deference instead of real collaboration. If people keep agreeing with you a little too fast, that's often the persona doing the talking before anyone's had a chance to actually weigh in.`,
       path: `Practice visibly inviting disagreement, not just tolerating it if it happens to arrive. Ask a real question and then actually wait. The authority isn't at risk — what changes is whether people believe you want their real answer, not just their compliance. You are allowed to be followed by choice, not by default. What might people offer you if they stopped waiting for your orders?`,
@@ -76,7 +76,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '5_A': {
-      heading: `People Assume You Already Know the Right Way`,
+      heading: `Presumed to Know`,
       why: `Your very presence reads as someone who knows how things are properly done — a persona of quiet authority on right and wrong, correct and incorrect, earned and unearned. The Hierophant in your Core Character makes you the one people come to instinctively for guidance, assuming before you've said anything that you'll have a grounded, reliable answer. It's the mask of the trusted elder, regardless of your actual age.`,
       shadow: `The risk is getting boxed into always having to be right, or always being expected to know — a persona that leaves no visible room for your own uncertainty. People stop offering you their doubts because they've cast you as the one who's already settled. If you feel quietly lonely in your own not-knowing, that's the cost of a mask that never shows it.`,
       path: `Let people see you genuinely unsure sometimes, out loud. It won't cost you the trust — if anything, it makes the guidance you do offer land as more real, because it's clearly coming from an actual person and not a fixed role. You are allowed to be a student again in the middle of being the guide. What question would you ask out loud if not-knowing were part of your authority?`,
@@ -86,7 +86,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '6_A': {
-      heading: `People Feel Like Being Chosen By You Means Something`,
+      heading: `Chosen Means Something`,
       why: `Your persona carries a quiet, magnetic quality of selectiveness — people sense that your attention and approval aren't handed out freely, which makes being genuinely chosen by you feel like it means something. The Lovers in your Core Character produce this mask of discernment: warm, but visibly weighing, visibly valuing. People want to be picked by you, specifically because it's clear you don't pick everyone.`,
       shadow: `The risk is a persona that reads as constantly auditioning people — friends and partners sensing they're being quietly evaluated against a standard they can't see, which can make closeness with you feel like a test rather than a resting place. If people keep trying a little too hard to earn your approval, that's often the mask of discernment showing more than the warmth underneath it.`,
       path: `Let your warmth be visible before your discernment is. People can feel evaluated and safe at the same time, but only if the safety comes first. Once someone knows they're wanted, being chosen by you becomes a gift instead of a verdict. You are allowed to choose people without ranking them first. What happens in you when someone feels safe with you before they feel selected?`,
@@ -96,7 +96,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '7_A': {
-      heading: `You Read as Someone Already Headed Somewhere`,
+      heading: `Already Headed Somewhere`,
       why: `People sense direction in you before you've said where you're headed — the impression of someone who's going somewhere and knows it, even in casual moments. The Chariot in your Core Character gives you this persona of visible momentum: purposeful posture, a kind of contained urgency. People often assume you're busy, driven, or already in the middle of something important, whether or not that's literally true in the moment.`,
       shadow: `The risk is a persona so oriented toward "going somewhere" that people hesitate to slow you down, even when you'd genuinely welcome the interruption. You can end up isolated inside your own momentum, rarely approached casually because you never look like you have time for casual. If people keep only ever bringing you urgent things, that's the mask filtering out the ordinary connection you might actually want.`,
       path: `Let your persona include visible stillness sometimes — being seen doing nothing, unhurried, available. That's not a contradiction of your drive; it's proof the drive is a choice and not a permanent state, which makes you far more approachable in the moments it's actually off. You are allowed to be somewhere, not just on the way somewhere. What would today look like if it didn't have to lead anywhere?`,
@@ -106,7 +106,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '9_A': {
-      heading: `People Sense You Need Room Before You Ask For It`,
+      heading: `Room, Sensed Before Asked`,
       why: `People can tell, almost immediately, that you process things internally and need space to do it. The Hermit in your Core Character gives off this persona of thoughtful reserve: measured, unhurried in conversation, giving the impression of someone with a rich internal world they're not in a rush to narrate. People often instinctively give you room without being asked.`,
       shadow: `The risk is a persona so associated with needing space that people stop actively including you, assuming you'd rather be left alone even on the occasions you wouldn't. Being given room can slide into being quietly left out. If invitations keep drying up, that's not necessarily your solitude working as intended — it might be a mask read a little too literally.`,
       path: `Let people know, explicitly sometimes, when you actually want to be included. The reserved persona will keep doing its job of protecting your space by default — your work is occasionally overriding it on purpose, so people learn the difference between your need for solitude and your want for connection. You are allowed to want company and still love your solitude. When did you last invite someone in before the door had to be knocked on?`,
@@ -116,7 +116,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '10_A': {
-      heading: `People Expect Things to Shift Around You`,
+      heading: `Things Shift Around You`,
       why: `People sense that things move around you — that you're someone whose circumstances, moods, and plans turn more visibly than most. The Wheel of Fortune in your Core Character gives your persona this association with change: the mask of the mercurial, interesting, a little unpredictable, someone people watch with a kind of curiosity about what's coming next for you.`,
       shadow: `The risk is being typecast as unreliable simply because you're associated with flux — people hesitating to build long-term plans with you, assuming things will shift before you get there, even in situations where you're actually steady. If people keep hedging their bets around you, that's often the persona of change outrunning your actual consistency.`,
       path: `Let your follow-through be as visible as your changeability. You don't have to become predictable — just let people see the threads that do stay constant, so the mask of flux doesn't crowd out the evidence of your reliability. You are allowed to be constant and still be interesting. Which steady thread of yours deserves to be seen as clearly as the changes are?`,
@@ -126,7 +126,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '11_A': {
-      heading: `People Bring You Their Hardest Moments Without Asking`,
+      heading: `Trusted With the Hardest`,
       why: `People bring you their hardest moments without asking, sensing almost physically that you can hold weight without cracking. Strength in your Core Character gives you this persona of quiet, embodied steadiness: not loud confidence, but a grounded presence that makes people feel safe bringing you difficult things. Others often confide in you faster than they mean to, simply because something about your presence tells them it's safe.`,
       shadow: `The risk is becoming everyone's emotional shock absorber by default — cast as unshakeable so consistently that people forget to check whether you're actually okay. Your own hard moments can go unnoticed because your mask never visibly cracks, even when you'd genuinely like it to. If no one ever asks how you're really doing, that's the steadiness of your persona working a little too well.`,
       path: `Let your composure visibly slip sometimes, on purpose, in front of people you trust. That's not a failure of the strength — it's proof there's a real person generating it, and it gives people permission to actually reciprocate the care they've been bringing you. You are allowed to be held by the people you hold. What would it feel like to bring someone your hardest moment first?`,
@@ -136,7 +136,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '12_A': {
-      heading: `You Read as Someone Operating on a Different Clock`,
+      heading: `A Different Clock`,
       why: `People sense you're not moved by the same urgency everyone else runs on, that you see situations from an angle they hadn't considered. The Hanged Man in your Core Character gives your persona this distinct, unhurried quality: the mask of the patient outlier, calm in chaos, faintly unconventional, the person whose stillness in a crisis reads as almost strange until it turns out to be useful.`,
       shadow: `The risk is being read as detached or checked-out simply because your pace doesn't match the room's — people mistaking your different angle for not caring, or your patience for passivity. If people keep leaving you out of urgent decisions, assuming you won't engage with the pressure, that's the mask of stillness being misread as absence.`,
       path: `Let your different perspective be spoken, not just held. Silence paired with an unusual pace reads as detachment; the same pace paired with an occasional sharp observation reads as exactly what it is — someone seeing clearly from an angle worth hearing. You are allowed to move at your own clock and still be reached. What have you been seeing from your angle that's ready to be said?`,
@@ -146,7 +146,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '13_A': {
-      heading: `People Can Tell You've Already Been Rebuilt Once`,
+      heading: `Rebuilt Once Already`,
       why: `People sense, without being told, that you've been through something that changed you — it shows in a kind of grounded gravity most people your age or in your position don't carry. Transformation in your Core Character gives your persona this quiet intensity: the mask of the survivor-turned-something-else, not fragile, not performing toughness, just visibly someone who's already met a version of collapse and kept going.`,
       shadow: `The risk is a persona so associated with heaviness that people handle you carefully, hesitant to bring you anything light, assuming you're always processing something deep. That can leave you starved for ease — treated as profound so consistently that no one offers you simple fun anymore. If your relationships keep feeling weightier than you actually want them to be, the mask of intensity may be doing more work than you intended.`,
       path: `Let your lightness be visible too. You don't have to perform depth to be taken seriously — the gravity is already there. Showing people your humor, your ease, your capacity for the trivial, rounds out the persona instead of undercutting it. You are allowed to be light without betraying what you survived. What small, trivial joy have you been postponing as if it needed earning?`,
@@ -156,7 +156,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '14_A': {
-      heading: `You're the One People Assume Will Keep the Peace`,
+      heading: `Keeper of the Peace`,
       why: `People read you as even-keeled, diplomatic, the one who can hold two opposing views in the same room without either side feeling dismissed. Temperance in your Core Character gives your persona this natural sense of balance: the mask of the mediator, easy to talk to, hard to offend, quietly trusted to keep things from tipping over. People often assume, correctly, that you're good in the middle of tension.`,
       shadow: `The risk is becoming the designated peacekeeper in every group, expected to smooth things over even when you're the one who needs smoothing yourself. The persona of balance can leave no visible room for you to actually take a side or have an unmixed feeling. If your own conflicts keep going unaddressed while you manage everyone else's, that's the mediator mask working overtime.`,
       path: `Let people see you land somewhere occasionally, instead of always holding the middle. A clear, unmediated opinion doesn't undo your gift for balance — it reminds people there's a whole person generating it, not just a permanently neutral function. You are allowed to take a side and still be the peace. What opinion of yours has been waiting behind the neutrality?`,
@@ -166,7 +166,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '15_A': {
-      heading: `People Sense an Edge in You They Can't Quite Name`,
+      heading: `An Edge, Unnamed`,
       why: `People sense something compelling and a little dangerous about you, even if you're genuinely gentle underneath it. The Devil in your Core Character gives your persona this magnetic, slightly untamed edge: the mask of raw appeal, intensity that draws people in, a sense that you know something about desire, power, or the material world that most people keep more carefully hidden.`,
       shadow: `The risk is being cast as more reckless or unavailable than you actually are, simply because the persona reads as edgy — people either chasing the intensity for the wrong reasons or keeping a wary distance from someone they've decided is "too much." If your real gentleness keeps getting missed, that's the edge of the mask overshadowing what's actually underneath it.`,
       path: `Let your softness be visible alongside the intensity, not instead of it. The edge is real and it's yours — showing the tenderness that coexists with it gives people the fuller, more accurate picture instead of the magnetic silhouette. You are allowed to let the tenderness be as visible as the edge. Who has already sensed the softness you keep off-camera?`,
@@ -176,7 +176,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '16_A': {
-      heading: `People Half-Expect You to Say the Thing No One Else Will`,
+      heading: `Saying What Others Won't`,
       why: `People sense that you're capable of cutting straight through a polite fiction the rest of the room is maintaining. The Tower in your Core Character gives your persona this charged, unpredictable edge: the mask of the truth-jolt, not chaotic for its own sake, but carrying a kind of electric honesty that makes people both a little nervous around you and quietly relieved when you use it.`,
       shadow: `The risk is being pre-emptively excluded from delicate situations, people managing information around you because they expect disruption before you've done anything. That can leave you isolated from exactly the moments where your honesty would actually help. If people keep going quiet or careful the second you walk in, the mask of the jolt may be arriving louder than you are.`,
       path: `Let your steadiness be visible in the ordinary moments, so the intensity reads as something you can choose to use rather than something that's always simmering. The honesty stays available; the people around you just stop bracing for it by default. You are allowed to hold your truth without it having to detonate. What honest thing could you say gently this week, on purpose?`,
@@ -186,7 +186,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '17_A': {
-      heading: `You Read as Someone Who Still Believes In Something`,
+      heading: `Still Believing`,
       why: `People sense hope in you that hasn't hardened into naivety — a warmth that makes you feel like a genuinely safe person to be discouraged around. The Star in your Core Character gives your persona this quiet, steady optimism: the mask of the believer, not blindly positive, but visibly unwilling to give up on things mattering, which draws people who are running low on their own hope.`,
       shadow: `The risk is becoming everyone's designated source of encouragement, expected to stay hopeful on demand even when your own light is running low. People can lean on your optimism so heavily that your discouraged days feel like a betrayal of the role, so you hide them. If you're always the one talking others off the ledge and never the one being talked down, that's the mask of hope working overtime.`,
       path: `Let your own doubt be visible sometimes, without rushing to reassure people it'll be fine. Real hope includes room for the days it flickers — showing that doesn't undercut your gift, it makes it something people can actually trust instead of a performance they depend on. You are allowed to flicker and still be the believer. Who could hold your doubt without needing your hope to be constant?`,
@@ -196,7 +196,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '18_A': {
-      heading: `People Can Tell There's a Whole Weather System Behind Your Eyes`,
+      heading: `Weather Behind the Eyes`,
       why: `People sense there's a rich, shifting interior life behind your expression, even when you're not saying much. The Moon in your Core Character gives your persona this unmistakable emotional depth: the mask of the dreamer, a little mysterious, hard to fully predict, someone people intuit is feeling more than they're showing. It draws people in with genuine curiosity about who you really are underneath it.`,
       shadow: `The risk is a persona so associated with unpredictability that people start treating you as inherently confusing or hard to reach, hedging around you rather than approaching directly. If people keep guessing at your mood instead of just asking, that's the mystery of the mask outpacing your actual availability. You may also notice people project their own anxieties onto your silences, assuming the worst about what's behind your expression.`,
       path: `Name what you're actually feeling sometimes, out loud, even briefly. That doesn't dissolve the depth — it gives people something real to hold onto instead of guessing, and it stops the mystery from curdling into misunderstanding. You are allowed to translate your weather instead of hiding the sky. What is moving through you right now that one sentence could make shareable?`,
@@ -206,7 +206,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '19_A': {
-      heading: `People Feel Better the Moment They're Near You`,
+      heading: `Better, Just Being Near`,
       why: `People feel lighter, more themselves, simply by being around you. The Sun in your Core Character means your persona radiates this genuine warmth and ease: the mask of natural brightness, unforced joy, an authentic openness that puts people at ease almost instantly. It's one of the most immediately likable presentations in the whole system, and it usually is exactly what it looks like.`,
       shadow: `The risk is people assuming the brightness is permanent and unconditional — expecting you to show up radiant regardless of what you're actually carrying, and quietly withdrawing or growing uncomfortable on the days you don't. If your harder moments get met with confusion instead of care, that's the persona of constant sunshine having convinced people there's nothing underneath it to tend to.`,
       path: `Let your bad days be visible sometimes, without apologizing for breaking character. The warmth doesn't need to be constant to be real — people who actually care about you will meet the full range, not just the bright half you've been offering by default. You are allowed to be met on your dim days too. What might change if the people who love your light got to love your shadow?`,
@@ -216,7 +216,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '20_A': {
-      heading: `People Sense You're Mid-Becoming Something`,
+      heading: `Mid-Becoming`,
       why: `People sense you're in the middle of becoming someone, that a bigger version of you is actively arriving even if it isn't fully visible yet. Judgement in your Core Character gives your persona this distinct sense of unfinished momentum: the mask of imminent arrival, alert, a little restless, carrying the quiet charge of someone who's about to be called toward something larger.`,
       shadow: `The risk is people relating to you as perpetually "about to" rather than actually present — treating your current self as a placeholder for whoever you're becoming, which can leave you feeling half-seen even by people close to you. If you keep sensing that people are waiting for the "real" you to show up, that's the mask of imminent change eclipsing who you already, actually are right now.`,
       path: `Let people meet who you are today, not just who you're becoming. The arrival is real and it's coming — but you don't have to defer being known until it lands. Being fully present now doesn't cancel the unfolding; it just makes sure you're not missing your own life while it happens. You are allowed to be fully here while you're still becoming. What in this exact chapter deserves your presence before it passes?`,
@@ -226,7 +226,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '21_A': {
-      heading: `People Assume You've Already Figured It Out`,
+      heading: `Presumed Figured Out`,
       why: `People sense wholeness in you, an ease that reads as someone who's already arrived somewhere most people are still working toward. The World in your Core Character means your persona radiates this sense of completion: the mask of quiet mastery, put-together, self-possessed, the kind of presence people assume has already solved the things they're still struggling with.`,
       shadow: `The risk is people assuming you don't need anything, since you don't look like you're missing anything — leaving your own unfinished business, doubts, and struggles invisible behind a persona of arrival. If support stops being offered to you specifically, that's often the cost of looking too complete for anyone to think you might need it.`,
       path: `Let your actual in-progress parts be visible sometimes. Wholeness doesn't mean finished — showing people the parts of you that are still becoming makes the persona of completion accurate instead of a performance, and lets real support actually reach you. You are allowed to be finished in some places and unfinished in others. What still-forming part of you is ready to be witnessed?`,
@@ -236,7 +236,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '22_A': {
-      heading: `People Feel Like They Can Just Be Themselves Around You`,
+      heading: `Permission to Be Real`,
       why: `People sense there's no elaborate performance between you and them, that you meet each moment freshly rather than through a rehearsed social mask. The Fool in your Core Character gives your persona this genuine, unguarded openness: the persona of uncomplicated presence, approachable, easy, the kind of person who makes others feel like they don't need to perform either.`,
       shadow: `The risk is being underestimated — that same openness read as naivety, people assuming you're less experienced or less serious than you actually are, and quietly leaving you out of conversations that assume gravity you clearly carry but don't visibly display. If your input keeps going unweighted in rooms where it matters, the freshness of the mask may be obscuring the substance underneath it.`,
       path: `Let your actual experience and depth show through the openness sometimes, without needing to abandon the ease that makes you who you are. The freshness and the substance aren't in conflict — people just need occasional proof that both are really there. You are allowed to be light-hearted and taken seriously in the same breath. Where could you let your depth surprise someone this week?`,
@@ -1786,7 +1786,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '9_G': {
-      heading: `You Learned Depth Before You Learned to Speak It`,
+      heading: `Depth Before Words`,
       why: `The spiritual inheritance passed down through your mother's line arrived mostly through silence rather than instruction — an inward, private relationship to meaning, faith, or inner knowing that was modeled more than it was taught. The Hermit sits in your Maternal Spiritual corner, and the gift here is real: you likely carry an inherited capacity for genuine solitary depth, an ability to sit with the unanswerable that most people never develop. But because it arrived wordlessly, you may have also inherited the assumption that the deepest spiritual matters aren't things you talk about — that the correct response to the sacred is to go quiet and go inward, the way the maternal line did before you.`,
       shadow: `This can show up as a spiritual life that stays entirely private by default — not because you chose that, but because the maternal lineage never modeled another option. You might have genuine wisdom that never gets offered to the people who could actually use it, or a quiet, generational loneliness — women in your line who each carried real inner depth alone, never quite realizing the people around them were carrying something similar in the same silence. If you keep feeling spiritually or emotionally unseen by the people closest to you, generation after generation, that's less a personal failing than an inherited pattern that was never given the chance to become spoken.`,
       path: `Try honoring the depth of what was passed down while consciously giving it a voice the generations before you may not have had access to. That doesn't mean abandoning your inward orientation — the solitary depth is a genuine gift — it means occasionally bringing what you find there back out into relationship, breaking a silence that was inherited rather than chosen. Every time you speak the maternal line's quiet wisdom out loud, you complete something that was waiting, for at least one generation, to finally be received. You are allowed to speak the depth you learned in silence. What early wordless knowing of yours is finally ready for language?`,
@@ -1796,7 +1796,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '1_G': {
-      heading: `You Inherited a Quiet, Unspoken Belief That You Can Make Things Happen`,
+      heading: `Making It Happen, Quietly`,
       why: `Women in your mother's line likely modeled real spiritual capability without ever framing it as such, simply moving through life with a kind of unspoken confidence that things could be willed into being. The Magician sits in your Maternal Spiritual corner, marking this generational transmission of quiet agency. You inherited this as a felt sense rather than a taught lesson: capability transmitted through example, not explanation.`,
       shadow: `The trap is inheriting the capability without the language to name or claim it — a quiet confidence that never gets spoken aloud, so it stays instinctual rather than becoming something you can consciously wield. If you sense you have real spiritual agency but struggle to explain or claim it, that's often maternal wisdom that was modeled but never voiced.`,
       path: `Try naming your own capability out loud, giving language to what was only ever demonstrated before you. Speaking it doesn't diminish it — it makes it usable in ways silent modeling never could. You are allowed to claim the making-things-happen power out loud. What could you create this season if you stopped keeping the ability quiet?`,
@@ -1806,7 +1806,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '2_G': {
-      heading: `You Inherited a Way of Knowing That Never Needed Proof`,
+      heading: `Knowing Without Proof`,
       why: `Women in your mother's line likely trusted their inner sense of things without needing external validation, moving through cycles of clarity and mystery as simply how knowing worked. The High Priestess sits in your Maternal Spiritual corner, marking this generational transmission of intuitive knowing. You inherited this as an embodied trust: knowing that arrives without argument, modeled rather than explained.`,
       shadow: `The trap is inheriting the trust without ever testing it against the world — an intuitive certainty so deeply modeled that you never learned to distinguish genuine knowing from simple assumption. If your intuitions feel unquestionable even when they turn out wrong, that's often inherited certainty that was never actually taught how to self-correct.`,
       path: `Try holding your intuitive knowing as genuinely valuable and still open to being wrong sometimes. Real trust in your inner sense doesn't require it to be infallible — it requires you to keep listening even when it needs updating. You are allowed to trust the proofless knowing she handed you. What does that inherited sense keep telling you lately?`,
@@ -1816,7 +1816,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '3_G': {
-      heading: `You Inherited a Spiritual Warmth That Was Never Explained, Just Lived`,
+      heading: `Warmth Never Explained`,
       why: `Women in your mother's line likely modeled a warm, generative relationship to faith or meaning, simply living it rather than teaching it directly. The Empress sits in your Maternal Spiritual corner, marking this generational transmission of nurturing spiritual presence. You inherited this as felt atmosphere: spiritual abundance transmitted through presence, not instruction.`,
       shadow: `The trap is inheriting the warmth without the words for it — spiritual generativity that stays purely atmospheric, never becoming something you can consciously offer or teach to someone else. If your spiritual nurturing feels natural but hard to articulate, that's often maternal wisdom that was lived but never spoken.`,
       path: `Try putting words to the spiritual warmth you carry, even if it feels reductive at first. Naming it is what lets you offer it deliberately, not just radiate it by accident. You are allowed to live the warmth forward without needing to explain it either. Who in your life is due some of the unexplained tenderness you were raised inside?`,
@@ -1826,7 +1826,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '4_G': {
-      heading: `You Inherited an Authority That Never Had to Raise Its Voice`,
+      heading: `Authority Without Volume`,
       why: `Women in your mother's line likely held real spiritual order and steadiness without ever asserting it loudly, maintaining structure through presence rather than proclamation. The Emperor sits in your Maternal Spiritual corner, marking this generational transmission of quiet structural authority. You inherited this as an unspoken model: authority that doesn't need to announce itself to be real.`,
       shadow: `The trap is inheriting the quietness without the actual claiming — a real capacity for spiritual leadership that stays so unassuming it never gets recognized, including by you. If your steadiness goes unnoticed and uncredited, that's often maternal authority that was modeled too quietly to be seen.`,
       path: `Try letting your quiet spiritual authority be visible sometimes, even if it feels like breaking a pattern. Real steadiness doesn't lose its power by being acknowledged. You are allowed to lead the way she did — quietly, and completely. Where could your unraised voice already carry the room?`,
@@ -1836,7 +1836,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '5_G': {
-      heading: `You Inherited Wisdom Passed Through Relationship, Not Rulebooks`,
+      heading: `Wisdom Through Relationship`,
       why: `Women in your mother's line likely passed down spiritual understanding through relationship and lived example rather than formal doctrine or codified teaching. The Hierophant sits in your Maternal Spiritual corner, marking this generational transmission of relational, informal wisdom. You inherited this as embedded knowledge: wisdom you absorbed by proximity rather than instruction.`,
       shadow: `The trap is inheriting wisdom so informally that it never gets recognized as a real body of knowledge, easy to dismiss as "just how mom was" rather than something genuinely worth carrying forward deliberately. If you undervalue what you learned this way, that's often because it never arrived with the credibility of formal teaching.`,
       path: `Try treating what you absorbed relationally as real, valuable knowledge, worth naming and passing on with the same seriousness as any formal teaching. You are allowed to pass wisdom through closeness, not curriculum. Which relationship of yours is already the classroom?`,
@@ -1846,7 +1846,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '6_G': {
-      heading: `You Inherited a Sense of Spiritual Values Modeled Through Who She Chose to Be`,
+      heading: `Values Modeled, Not Taught`,
       why: `Women in your mother's line likely demonstrated their spiritual priorities through the relationships and commitments they actually made, rather than stating those values outright. The Lovers sit in your Maternal Spiritual corner, marking this generational transmission of values shown through lived choice. You inherited this by watching: values transmitted through example rather than declaration.`,
       shadow: `The trap is absorbing the values without ever examining whether they're genuinely yours, simply repeating the same relational choices because that's the pattern you watched, not because you've actually chosen it. If your relationship choices feel automatic rather than examined, that's often inherited example standing in for your own values.`,
       path: `Try naming the values you actually watched get modeled, and consciously decide which ones you're keeping. Choosing deliberately what you'll otherwise inherit by default is the real work here. You are allowed to model your values instead of arguing them. What would the people watching you learn from this week, unspoken?`,
@@ -1856,7 +1856,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '7_G': {
-      heading: `You Inherited a Determination That Never Needed to Announce Itself`,
+      heading: `Determination, Unannounced`,
       why: `Women in your mother's line likely kept a steady spiritual direction through real difficulty, modeling determination without drama. The Chariot sits in your Maternal Spiritual corner, marking this generational transmission of quiet, sustained spiritual will. You inherited this as embodied endurance: forward motion transmitted through simply watching someone keep going.`,
       shadow: `The trap is inheriting the endurance without ever questioning whether the direction itself was actually chosen, or simply the only path modeled. If you find yourself pushing forward spiritually without a clear sense of why, that's often inherited momentum running on autopilot.`,
       path: `Try pausing to ask whether your spiritual direction is genuinely yours, chosen consciously, or simply the shape of momentum you absorbed. Redirect if needed — the determination itself is a real gift regardless of where it's currently pointed. You are allowed to be quietly unstoppable. What are you steadily moving toward that needs no announcement to be real?`,
@@ -1866,7 +1866,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '8_G': {
-      heading: `You Inherited a Sense of Right and Wrong That Was Never Explained, Just Demonstrated`,
+      heading: `Right and Wrong, Demonstrated`,
       why: `Women in your mother's line likely lived by a clear internal moral compass without ever spelling it out, letting their consistent actions speak for the standard. Justice sits in your Maternal Spiritual corner, marking this generational transmission of embodied fairness. You inherited this as felt conviction: a sense of right and wrong absorbed by watching, not by being told.`,
       shadow: `The trap is inheriting the conviction without ever examining its actual content, applying an unexamined standard that may not perfectly fit your own circumstances. If your sense of fairness feels rigid in situations it wasn't originally built for, that's often an inherited standard applied without adjustment.`,
       path: `Try naming the specific standard you absorbed, and checking whether it actually fits situations your mother's line never encountered. Update what needs updating; keep what genuinely holds. You are allowed to demonstrate your ethics the way she did — and to explain them when you choose. What right thing are you already doing that deserves to be understood, not just observed?`,
@@ -1876,7 +1876,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ──────────
     '10_G': {
-      heading: `You Inherited a Quiet Trust That Things Eventually Turn`,
+      heading: `Trust That Things Turn`,
       why: `Women in your mother's line likely moved through real hardship and renewal without dramatizing either, modeling a quiet trust that difficult seasons pass. The Wheel of Fortune sits in your Maternal Spiritual corner, marking this generational transmission of cyclical resilience. You inherited this as embodied patience: trust in cycles transmitted through simply watching someone endure and recover.`,
       shadow: `The trap is inheriting the patience without the active participation — a passive waiting-it-out that never quite engages with what could actually be done during a difficult season. If you find yourself simply enduring rather than actively navigating hard times, that's often inherited patience without its complementary agency.`,
       path: `Try pairing your inherited trust in cycles with active engagement — not just waiting for the turn, but participating in it. Both were likely present in your mother's line; make sure you inherited the whole picture, not just the waiting half. You are allowed to trust the turning without forcing the wheel. What situation in your life is already turning that worry keeps gripping?`,
@@ -1886,7 +1886,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '11_G': {
-      heading: `You Inherited a Softness That Was Somehow Also Unbreakable`,
+      heading: `Soft Yet Unbreakable`,
       why: `Women in your mother's line likely held real difficulty with a soft, embodied steadiness rather than hardened toughness, modeling a strength that never needed to look fierce to be real. Strength sits in your Maternal Spiritual corner, marking this generational transmission of gentle endurance. You inherited this as felt permission: the sense that gentleness and real resilience aren't opposites.`,
       shadow: `The trap is inheriting the softness without recognizing its actual strength, mistaking your own gentle steadiness for weakness because it doesn't look like conventional toughness. If you undervalue your own resilience because it's quiet, that's often maternal strength that was never named as strength.`,
       path: `Try naming your gentle endurance as the real strength it is, out loud, to yourself if no one else. It doesn't need to look hard to be genuinely unbreakable. You are allowed to be soft and unbreakable at once — you watched it done. Where is your gentleness currently the strongest thing in the room?`,
@@ -1896,7 +1896,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '12_G': {
-      heading: `You Inherited a Patience for Not Knowing Yet`,
+      heading: `Patience for Not Knowing`,
       why: `Women in your mother's line likely modeled a genuine comfort with not having answers yet, letting understanding arrive in its own time rather than forcing it. The Hanged Man sits in your Maternal Spiritual corner, marking this generational transmission of receptive waiting. You inherited this as embodied patience: the sense that suspension itself can be productive.`,
       shadow: `The trap is inheriting the waiting without its eventual resolution — staying suspended indefinitely because that's the pattern you watched, without the corresponding modeled return to action. If your patience never seems to convert into actual movement, that's often inherited waiting without its other half.`,
       path: `Try letting your patience have a deliberate endpoint. The receptivity is a real gift — pairing it with an eventual, chosen return to action completes what may have only been partially modeled. You are allowed to not know yet, at her patient pace. What question in your life deserves the dignity of remaining open a while longer?`,
@@ -1906,7 +1906,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '13_G': {
-      heading: `You Inherited a Quiet Ability to Become Someone New When It Mattered`,
+      heading: `Becoming New, Quietly`,
       why: `Women in your mother's line likely underwent real personal transformation without much fanfare, simply becoming who they needed to become as circumstances demanded. Transformation sits in your Maternal Spiritual corner, marking this generational transmission of quiet reinvention. You inherited this as embodied permission: change transmitted through watching someone quietly become new.`,
       shadow: `The trap is inheriting the capacity for change without ever consciously choosing your own transformations, simply reacting to circumstance the way you watched rather than actively directing your own becoming. If your changes feel like they happen to you rather than through your own choice, that's often inherited reactive transformation.`,
       path: `Try initiating a change deliberately, rather than only transforming under pressure. The capacity is real — direct it consciously instead of only accessing it in crisis. You are allowed to become someone new when it matters — it's in your blood. What quiet transformation is already underway in you?`,
@@ -1916,7 +1916,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '14_G': {
-      heading: `You Inherited a Way of Holding Contradictions Without Making a Fuss`,
+      heading: `Holding Contradictions`,
       why: `Women in your mother's line likely held real contradictions (duty and desire, strength and softness) without ever treating them as a crisis, simply living the blend day to day. Temperance sits in your Maternal Spiritual corner, marking this generational transmission of quiet integration. You inherited this as embodied ease: the sense that holding two true things at once doesn't require resolution, just steadiness.`,
       shadow: `The trap is inheriting the quiet holding without ever actually examining the contradictions being held, absorbing an ease with paradox that can shade into avoiding real tension that actually needs addressing. If you find yourself calmly holding a contradiction that's genuinely causing harm, that's often inherited ease applied where real change was needed instead.`,
       path: `Try distinguishing which contradictions genuinely just need patient holding, and which ones need actual resolution. Your inherited ease is a real gift — it works best paired with discernment about when it's actually appropriate. You are allowed to hold your contradictions without resolving them for anyone. Which two truths of yours can finally stop competing?`,
@@ -1926,7 +1926,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '15_G': {
-      heading: `You Inherited an Unspoken Rule About What a Woman Is Allowed to Want`,
+      heading: `What a Woman Is Allowed`,
       why: `Women in your mother's line likely carried real desire or material want that went largely unvoiced, modeling restraint around wanting rather than open acknowledgment of it. The Devil sits in your Maternal Spiritual corner, marking this generational transmission of unspoken constraint. You inherited this as felt limitation: a sense of what's allowed to be wanted, absorbed without ever being explicitly taught.`,
       shadow: `The trap is inheriting the restraint without examining it — carrying an unspoken sense that wanting too openly is somehow inappropriate, which can leave your own genuine desires feeling like something to hide or minimize. If you struggle to name what you actually want, that's often an inherited, unspoken limitation still running.`,
       path: `Try naming a genuine want out loud, plainly, without the inherited hedge. This isn't a betrayal of your mother's line — it's completing a permission that may have been waiting for a generation to actually claim it. You are allowed to want what the unspoken rule forbade. What desire have you inherited permission to deny — and are ready to reclaim?`,
@@ -1936,7 +1936,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '16_G': {
-      heading: `You Inherited an Upheaval That Was Never Spoken About Afterward`,
+      heading: `An Upheaval, Unspoken`,
       why: `Something in your mother's line likely underwent a real spiritual or emotional collapse that was survived but never discussed, its aftershock passed down as atmosphere rather than story. The Tower sits in your Maternal Spiritual corner, marking this generational transmission of unprocessed rupture. You inherited this as unnamed residue: real capacity for clarity that arrived tangled with an inherited, silent upheaval.`,
       shadow: `The trap is inheriting the aftershock without the story — a diffuse unease around sudden change that doesn't connect to anything in your own actual life. If you feel disproportionate dread around instability, that's often an inherited rupture still circling, waiting for its story to be told.`,
       path: `Try asking, even if only of yourself, what might have happened in your mother's line that was never spoken about. Naming what you can, even speculatively, helps the inheritance finally settle. You are allowed to speak about the upheaval that was never mentioned. What silence in your maternal line might your naming finally lay to rest?`,
@@ -1956,7 +1956,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '18_G': {
-      heading: `You Inherited an Emotional Depth That Was Never Fully Explained`,
+      heading: `Depth Never Explained`,
       why: `Women in your mother's line likely carried a rich, sometimes overwhelming inner world, felt more than discussed, modeled through mood and atmosphere rather than explanation. The Moon sits in your Maternal Spiritual corner, marking this generational transmission of deep emotional and intuitive life. You inherited this as felt inheritance: sensitivity transmitted through emotional proximity, not instruction.`,
       shadow: `The trap is inheriting the depth without a way to process it, absorbing emotional atmosphere that was never actually named, which can leave you carrying feelings that aren't clearly your own. If your emotional world feels sometimes inexplicably heavy, that's often inherited, unprocessed feeling circulating without a name.`,
       path: `Try distinguishing your own feelings from what you may have absorbed. Naming and sorting what's genuinely yours from what was simply present around you as a child is real, valuable work here. You are allowed to explore the depths she never explained. What emotional inheritance of yours is asking to be understood instead of just felt?`,
@@ -1966,7 +1966,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '19_G': {
-      heading: `You Inherited a Warmth That Was Simply How She Showed Up`,
+      heading: `Warmth as Presence`,
       why: `Women in your mother's line likely radiated real vitality and joy simply through how they showed up, without needing to explain or perform it. The Sun sits in your Maternal Spiritual corner, marking this generational transmission of genuine warmth. You inherited this as felt permission: joy transmitted through presence, modeled as simply available rather than earned.`,
       shadow: `The trap is inheriting the warmth without recognizing it as something you're allowed to also embody fully, staying in its glow rather than becoming a source of it yourself. If you feel like joy is something you receive rather than generate, that's often maternal radiance that was witnessed but not yet claimed as your own.`,
       path: `Try letting your own warmth be a source, not just a reflection of hers. The permission to radiate was always meant to be passed on, not just observed. You are allowed to let warmth be your presence, not your performance. Who receives the truest version of your care simply by being near you?`,
@@ -1976,7 +1976,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '20_G': {
-      heading: `You Inherited a Summons That Was Sensed but Never Spoken Aloud`,
+      heading: `A Summons, Unspoken`,
       why: `Women in your mother's line likely sensed a pull toward something larger than their circumstances allowed, a summons felt but rarely voiced or acted on fully. Judgement sits in your Maternal Spiritual corner, marking this generational transmission of a quiet, unspoken calling. You inherited this as felt momentum: an awakening passed down along with its own quiet postponement.`,
       shadow: `The trap is inheriting the sensing without the answering — feeling a persistent, wordless pull toward something more, without ever quite naming what it is or moving toward it. If you keep sensing a bigger calling you can't quite articulate, that's often an inherited summons still waiting for someone to actually name and answer it.`,
       path: `Try naming the pull as specifically as you can, even if it feels presumptuous. Voicing it is what starts turning inherited sensing into something you can actually act on. You are allowed to speak the summons she only sensed. What calling in your life feels older than you — and what would answering it out loud begin?`,
@@ -1986,7 +1986,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '21_G': {
-      heading: `You Inherited a Sense of Enoughness That Was Never Loudly Declared`,
+      heading: `Enoughness, Never Declared`,
       why: `Women in your mother's line likely carried a real, settled sense of being enough, demonstrated through simply living without constant striving rather than declared outright. The World sits in your Maternal Spiritual corner, marking this generational transmission of quiet wholeness. You inherited this as felt permission: completeness modeled through presence, not proclaimed through achievement.`,
       shadow: `The trap is inheriting the sense of enoughness without recognizing it as something to actively claim, waiting for it to simply arrive the way it seemed to for the women before you, rather than actively cultivating it in your own different circumstances. If wholeness feels like something you're still waiting for, that's often an inherited state that needs conscious claiming, not just patience.`,
       path: `Try actively naming your own sense of "enough" rather than waiting for it to simply arrive the way it seemed to for the women who came before you. What was quietly embodied for them may need to be consciously claimed by you. You are allowed to know you're enough without a declaration. Where in your life is the quiet sense of enoughness already true, waiting to be believed?`,
@@ -1996,7 +1996,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '22_G': {
-      heading: `You Inherited a Quiet Willingness to Start Over Without Complaint`,
+      heading: `Starting Over, Without Complaint`,
       why: `Women in your mother's line likely faced real fresh starts, sometimes forced ones, with a kind of unspoken trust that beginning again was simply possible. The Fool sits in your Maternal Spiritual corner, marking this generational transmission of quiet resilience through new beginnings. You inherited this as embodied openness: the sense that starting over doesn't require fanfare or permission, just willingness.`,
       shadow: `The trap is inheriting the willingness without ever examining whether each fresh start was actually chosen or simply endured, absorbing a pattern of quiet restarting that may mask unprocessed grief about what was left behind each time. If your own fresh starts feel oddly hollow, that's often inherited resilience without its accompanying acknowledgment of loss.`,
       path: `Try letting yourself actually grieve what a fresh start requires leaving behind, rather than just quietly moving forward the way you watched. Real openness includes acknowledgment, not just forward motion. You are allowed to start over and also to grieve the starting. What new beginning could you meet with both her grace and your own honest feeling?`,
