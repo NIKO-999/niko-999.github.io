@@ -201,39 +201,39 @@ window.DKarmicLessonContent = (function () {
   const data = {
     1: {
       heading: `Karmic Lesson: 1 — Developing Independent Initiative`,
-      text: `No letter value tied to this number appears anywhere in your name — in classical numerology, that absence marks a lesson still being built, not a flaw. Going first, without waiting for someone else to move, isn't automatic for you the way it is for some people. You are allowed to practice starting things before you feel ready, on purpose, as a skill rather than a personality trait you're missing.`,
+      text: `Waiting for someone else to move first is a familiar position for you, more familiar than it is for most people — and the letters behind this number are the reason why: none of them appear anywhere in your name, so going first was never handed to you as a reflex. Classical numerology reads that kind of absence as unfinished, not broken. You are allowed to practice starting things before you feel fully ready, on purpose, treating initiative as a skill under construction rather than a trait you were simply born without.`,
     },
     2: {
       heading: `Karmic Lesson: 2 — Developing Patience and Partnership`,
-      text: `This number never appears in your name at all — a genuine gap, not a character flaw. Slowing down enough for real cooperation, letting a partnership actually develop instead of rushing it, isn't an instinct you were handed. You are allowed to build the patience for that deliberately, treating it as a skill worth practicing rather than something you should already have.`,
+      text: `Real cooperation — the kind that lets a partnership actually develop instead of getting rushed toward an outcome — asks for a patience that isn't wired into you by default. This is the one number with zero letters in your name to draw on, a genuine gap rather than a character flaw. You are allowed to build that patience deliberately, treating it as something worth practicing rather than something you should have arrived with already.`,
     },
     3: {
       heading: `Karmic Lesson: 3 — Developing Self-Expression`,
-      text: `Nowhere in your name does this number show up — classical numerology reads that as unfinished work, not a permanent limit. Comfort putting yourself forward, creatively or socially, isn't something that arrives on its own for you. You are allowed to practice being seen and heard more openly, treating visibility as a skill to build rather than a risk to avoid.`,
+      text: `Putting yourself forward — creatively, socially, out loud — has probably never felt like the easy option. Numerologically, that tracks: this number is absent from every letter in your name, so visibility was never wired in as a default setting, only as unfinished work still worth doing. You are allowed to practice being seen and heard more openly, treating it as a skill you're building rather than a risk you're avoiding.`,
     },
     4: {
       heading: `Karmic Lesson: 4 — Developing Discipline and Structure`,
-      text: `This number is absent from your name entirely — a genuine blind spot, not a moral failing. Steady, unglamorous follow-through past the point something stops being exciting isn't automatic for you. You are allowed to build that discipline on purpose, treating consistency as a muscle rather than a trait you either have or don't.`,
+      text: `Think of this one as a muscle that's simply never been worked — not because you lack discipline as a trait, but because this number carries zero letters in your name, so steady, unglamorous follow-through was never built in as instinct. You are allowed to build that consistency on purpose, especially past the point something stops feeling exciting, treating it as something trainable rather than a fixed part of who you are.`,
     },
     5: {
       heading: `Karmic Lesson: 5 — Developing Adaptability`,
-      text: `No letter carrying this number appears in your name — a real gap, not a personal shortcoming. Meeting sudden change with curiosity instead of resistance isn't a reflex you were handed. You are allowed to practice flexibility deliberately, treating it as a skill still being built rather than proof of something missing in you.`,
+      text: `Sudden change tends to meet resistance in you before it meets curiosity — and there's a reason: not one letter in your name carries this number, so flexibility was never handed to you as a reflex the way it is for some people. Classical numerology treats that as a real gap, not a personal shortcoming. You are allowed to practice meeting the unexpected more openly, on purpose, as a skill still being built rather than proof of something missing.`,
     },
     6: {
       heading: `Karmic Lesson: 6 — Developing Responsibility to Others`,
-      text: `This number is missing from your name entirely — an area still being formed, not evidence you don't care. Showing up consistently for the people and spaces closest to you isn't automatic for you the way it is for some. You are allowed to build that responsibility on purpose, without needing to feel naturally inclined toward it first.`,
+      text: `Showing up consistently for the people and spaces closest to you can take more deliberate effort for you than it visibly takes for other people — this number simply isn't present anywhere in your name's letters, an area still being formed rather than evidence you don't care. You are allowed to build that responsibility on purpose, without needing to feel naturally inclined toward it first for it to actually count.`,
     },
     7: {
       heading: `Karmic Lesson: 7 — Developing Depth and Reflection`,
-      text: `Nowhere does this number appear in your name — classical numerology reads that as unfinished, not broken. Sitting with a question long enough to actually understand it, rather than moving on early, isn't second nature for you. You are allowed to practice that kind of patience deliberately, as a skill worth building rather than a trait you lack.`,
+      text: `There's a particular kind of patience — sitting with a question long enough to actually understand it, instead of moving on at the first plausible answer — that isn't second nature here, because this number never once turns up in your name's letters. Numerology reads that as unfinished, not broken. You are allowed to practice that depth deliberately, as a skill worth building rather than a trait you were simply left without.`,
     },
     8: {
       heading: `Karmic Lesson: 8 — Developing a Healthy Relationship With Power`,
-      text: `This number never shows up in your name — a genuine gap, not a character judgment. A steady, uncomplicated relationship with money, authority, and material responsibility isn't handed to you automatically. You are allowed to build that relationship on purpose, learning to hold real power without either grabbing for more of it or flinching away from it.`,
+      text: `Money, authority, material responsibility — a steady, uncomplicated relationship with any of it isn't something you were handed automatically. The letters that carry this number are entirely absent from your name, a genuine gap rather than a judgment on your character. You are allowed to build that relationship deliberately, learning to hold real power without either grabbing for more of it or flinching away the moment it arrives.`,
     },
     9: {
       heading: `Karmic Lesson: 9 — Developing Broad Compassion`,
-      text: `No letter tied to this number appears anywhere in your name — an area still forming, not a verdict on your character. Caring instinctively about people and causes outside your own immediate circle isn't automatic for you. You are allowed to build that wider compassion deliberately, as something you practice rather than something you either have or don't.`,
+      text: `Caring instinctively about people and causes well outside your own immediate circle takes more conscious reaching for you than it does for people who happen to carry this number in their name — you don't, not in a single letter. An area still forming, not a verdict on your character. You are allowed to build that wider compassion on purpose, as something you practice rather than something you simply either have or don't.`,
     },
   };
   function get(num) { return data[num] || null; }
