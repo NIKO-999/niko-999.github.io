@@ -1346,7 +1346,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '17_MON': {
-      heading: `Your Money Follows Your Willingness to Be Seen`,
+      heading: `Visibility Pays`,
       why: `Your most abundant income tends to show up exactly when you're operating from genuine visibility — sharing your real gift, letting your actual light be seen in your work — rather than following a strategy borrowed from someone else's idea of a stable career. The Star governs your money channel, tying your financial flow directly to hope and authentic radiance rather than to grinding, joyless effort. This tends to look like work built around being seen at all — blogging or influencing, art and creative work released publicly, media and online projects, a personal brand monetized directly rather than folded into someone else's — money that arrives almost as a byproduct of authenticity, once you actually offer the authenticity instead of rehearsing it in private.`,
       shadow: `The risk is income that stays conditional on approval before it's allowed to flow — a launch you keep delaying until every condition feels perfect, a rate you quietly undercut because charging full price for something so personal feels like too much, a body of work you keep private until it's "ready" in a way that never quite arrives. Because your gift is genuine, withholding it is expensive: a thin, sporadic bank account is often a light that's still being kept low rather than freely offered to a market that would gladly pay for it.`,
       path: `Try treating visibility itself as the transaction — letting your work be seen at the stage it's actually in, rather than the stage you wish it had reached. That's uncomfortable, because it removes the comfort of staying private while you perfect things, and it puts the responsibility on what you're willing to show right now. Start with the smallest real offer: a rate that reflects the actual value of your work, a piece released before it feels fully polished. The financial flow you're waiting to feel ready for is, for you, directly downstream of the visibility you're willing to allow today. You are allowed to be seen at the scale of your actual gift. What work would you show publicly this month if visibility paid what it actually pays?`,
@@ -1356,7 +1356,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '1_MON': {
-      heading: `Your Ideal Work Lets You Build Something From Scratch`,
+      heading: `Building From Nothing`,
       why: `You're not suited to a fixed, pre-built role; your income flows most freely when your profession gives you real room to generate something new rather than maintain something already built. The Magician governs your money channel, meaning your wealth potential is tied directly to work that lets you originate — building something from nothing, launching, creating, initiating. This tends to look like entrepreneurship in its most direct form: founding something yourself, running projects rather than being run by them, selling or speaking on your own initiative, even coaching others in exactly this kind of self-starting.`,
       shadow: `The risk is chasing the excitement of a new venture at the expense of ever letting one mature into steady income — jumping between projects, ideas, or roles before any of them has had time to actually pay off. If your income feels inconsistent despite real talent, the pattern may be starting more than sustaining.`,
       path: `Let your ideal work include at least one long-running thread you don't abandon. The initiating gift is real; pairing it with follow-through is what turns a string of launches into an actual, sustainable livelihood. You are allowed to build from scratch again, even after finished things. What would you start building tomorrow if the blank page were an invitation instead of a test?`,
@@ -1366,7 +1366,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '2_MON': {
-      heading: `Your Ideal Work Trusts What You Sense Before You Can Prove It`,
+      heading: `Trusting Before Proving`,
       why: `You're suited to roles that trust your read on a situation, even before it's fully explainable. The High Priestess governs your money channel, meaning your ideal profession draws on intuitive, often behind-the-scenes insight — work where your instinct for what's true or what's coming matters more than loud, visible credentials. This tends to look like work built entirely around depth of perception: psychology or therapeutic work, numerology or other intuitive disciplines, research and analysis, advisory or consulting roles, writing and editing — professions that pay you specifically for seeing what's underneath the surface.`,
       shadow: `The risk is undervaluing that intuitive skill precisely because it's hard to quantify, staying in the background so consistently that your actual contribution goes unrecognized and underpaid. If your income doesn't reflect your real insight, the quietness of your gift may be costing you its market value.`,
       path: `Let your intuitive contribution be named and priced, even if it's hard to fully explain in a resume. Your insight is a real professional asset — it just needs to be claimed out loud to actually be compensated. You are allowed to be paid for perception, not just production. Where does your unproven sense keep being right at work — and who needs to know that?`,
@@ -1376,7 +1376,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '3_MON': {
-      heading: `Your Ideal Work Lets You Grow Something Real`,
+      heading: `Growing Something Real`,
       why: `Your income thrives when your profession lets you actually create — creative fields, caregiving, cultivation of any kind, roles where you get to grow something (a project, a person, a body of work) rather than simply manage an existing system. The Empress governs your money channel, meaning your wealth potential flows through generative, nurturing work. This tends to look like design in any of its forms — graphic, interior, fashion — the beauty industry, content creation, art direction, or a business built around and for women specifically, anywhere beauty and cultivation are the actual product.`,
       shadow: `The risk is undercharging for generative work because it doesn't feel like conventional "labor," or giving so much creative energy away for free that your professional output never converts into real income. If you're prolific but underpaid, the generosity of your gift may need a price tag.`,
       path: `Let your creative or nurturing output be priced at its real value, not discounted because it comes easily to you. Ease of creation doesn't mean it's worth less — it means you're well-suited to it. You are allowed to grow something at its own pace and call that productivity. What have you been cultivating professionally that's closer to harvest than it looks?`,
@@ -1386,7 +1386,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '4_MON': {
-      heading: `Your Ideal Work Lets You Build the System, Not Just Work Inside One`,
+      heading: `Systems Over Roles`,
       why: `You thrive financially when you're given real authority to organize — leadership, management, systems-building, work where your capacity for order and responsibility is actually put to use rather than boxed in by someone else's framework. The Emperor governs your money channel, meaning your wealth potential flows through roles that let you build or govern structure. This tends to look like ownership and executive command directly — running a business, holding a CEO or senior administrative role, leading within government or corporate structure, or building material wealth through something as concrete as real estate development.`,
       shadow: `The risk is staying in a role that under-uses your capacity for structure, following someone else's system so completely that your own gift for building never gets exercised, or applied for financial value. If you feel financially capped despite real capability, the structure you're operating inside may not be yours to shape.`,
       path: `Seek or create roles where you actually get to build the system, not just staff it. Your financial ceiling tends to lift the moment your capacity for structure has somewhere real to go. You are allowed to design the system instead of surviving inside one. What structure would you build if someone finally handed you the blueprint pen?`,
@@ -1396,7 +1396,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '5_MON': {
-      heading: `Your Ideal Work Passes Something On`,
+      heading: `Passing It On`,
       why: `Your income thrives when your profession includes passing something on — teaching, mentoring, or tradition-rooted work, professions where you're transmitting real, earned knowledge to someone else, whether formally (education, training) or informally (mentorship within any field). The Hierophant governs your money channel, meaning your wealth potential flows through exactly this kind of work. This tends to look like teaching and mentorship directly, spiritual guidance or coaching, HR or consulting roles built around developing people, training and lecturing, or a business built specifically around education itself.`,
       shadow: `The risk is staying a perpetual student, accumulating credentials and knowledge without ever stepping into the teaching role that would actually convert it into income. If your expertise feels real but your income doesn't reflect it, the transmission side of the equation may be missing.`,
       path: `Let yourself teach before you feel fully ready. The financial version of your gift activates once knowledge starts moving through you to someone else, not just accumulating in you. You are allowed to teach while you're still learning. What knowledge of yours is ready to be passed on exactly as it is?`,
@@ -1406,7 +1406,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '6_MON': {
-      heading: `Your Ideal Work Runs Through People, Not Just Principle`,
+      heading: `Work Through People`,
       why: `Your income thrives specifically through people — connecting them, choosing well between them, building the kind of partnership that makes a deal or a relationship actually work. The Lovers governing your money channel means your wealth potential is tied to work built around relationship itself, not simply values in the abstract: relationship coaching, HR or recruiting, sales management, brand partnerships, PR and communications — any profession where reading and choosing well between people is the literal product.`,
       shadow: `The risk is perpetual indecision when a professional choice feels like it involves people or values in conflict, weighing every option so exhaustively that you never commit long enough to actually build income in any one direction. If your career feels stalled at the crossroads, discernment may need to resolve into an actual choice.`,
       path: `Choose a direction built around genuine connection and commit to it fully, even without perfect certainty. Income builds through sustained commitment to a people-centered path, not through endlessly comparing options. You are allowed to make people the work, not the interruption of it. Where does your gift for connection already produce what no process could?`,
@@ -1416,7 +1416,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '7_MON': {
-      heading: `Your Ideal Work Lets You Actually Drive Toward Something`,
+      heading: `Driving Your Own Direction`,
       why: `Your income thrives when your career has genuine forward motion you control — a profession where you're visibly moving toward a goal you've set, not just executing someone else's static task list. The Chariot governs your money channel, meaning your wealth potential flows through work with exactly this real, self-directed momentum. This tends to look like logistics or transportation, the sports industry, event management, travel, or operations roles — any field built around literal movement, results, and getting something across a finish line.`,
       shadow: `The risk is staying in a role with no real trajectory, generating internal frustration that shows up as burnout even when the workload itself is manageable — the problem isn't the effort, it's the absence of visible direction. If your income feels stuck despite real effort, the role may lack the momentum this profile actually needs to thrive.`,
       path: `Seek or build a professional path with a visible trajectory you're steering. Your financial growth tracks your sense of forward motion more than it tracks raw hours worked. You are allowed to drive hard toward what's actually yours. What professional destination would justify the full force of your momentum?`,
@@ -1426,7 +1426,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '8_MON': {
-      heading: `Your Ideal Work Rewards You for Being the Honest One`,
+      heading: `Honesty as Currency`,
       why: `Your income thrives in roles where integrity is actually rewarded, not just expected — law, mediation, ethics-driven business, any profession where your reputation for honest dealing is itself a professional asset. Justice governs your money channel, meaning your wealth potential flows through work grounded in fairness and accountability. This tends to look like law and legal consulting directly, accounting and auditing, financial analysis, compliance work, or contract management — professions where accuracy and fairness aren't just personal virtues but the literal job.`,
       shadow: `The risk is staying in environments where your honesty goes financially unrewarded, or even punished, while less scrupulous colleagues advance faster. If integrity keeps costing you opportunities, the environment may not be matched to the gift.`,
       path: `Seek out or build professional environments that actually reward fairness, rather than staying somewhere your integrity is merely tolerated. Your financial growth depends on being somewhere honest dealing is genuinely valued. You are allowed to profit from your honesty rather than despite it. Where has being the truthful one already become your quiet competitive edge?`,
@@ -1436,7 +1436,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '9_MON': {
-      heading: `Your Ideal Work Rewards Deep, Solitary Mastery`,
+      heading: `Depth Over Range`,
       why: `Your income thrives in roles that let you work with real autonomy, converting solitary mastery into a valuable, sought-after skill — work that rewards how deep you've gone in one specific area rather than how broadly you network or collaborate. The Hermit governs your money channel, meaning your wealth potential flows through exactly this kind of specialized, independent expertise. This tends to look like niche consulting, strategic analysis, therapeutic or healing work, research, or running your own solo practice entirely — professions built to reward depth over reach.`,
       shadow: `The risk is staying so independent that your expertise never gets marketed or made visible enough for anyone to actually pay for it. Deep knowledge, kept private, doesn't automatically convert into income — it has to be offered. If your income doesn't reflect your actual depth, visibility may be the missing piece.`,
       path: `Let your specialized expertise be visibly offered — published, priced, put forward — rather than just quietly possessed. The depth is already valuable; it needs a way to actually reach the people who'd pay for it. You are allowed to go deep alone and surface with something valuable. What mastery are you building in private that the world hasn't priced yet?`,
@@ -1446,7 +1446,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '10_MON': {
-      heading: `Your Ideal Work Moves With the Seasons Instead of Fighting Them`,
+      heading: `Working With Seasons`,
       why: `You thrive financially when your career has room to change shape as circumstances turn, rather than punishing you for needing to pivot — work that can adapt to cycles and shifting conditions rather than professions demanding rigid permanence. The Wheel of Fortune governs your money channel, meaning your wealth potential flows through exactly this kind of career flexibility. This tends to look like marketing work that shifts with trends, trading and investment, business development, the tourism industry, or freelance work spread across multiple projects at once — income built to move with the cycle rather than resist it.`,
       shadow: `The risk is staying locked into a rigid career path out of fear of the instability that change might bring, even once that path has clearly stopped serving you. If your income feels stagnant despite the world around you clearly shifting, the rigidity of the role may be the actual constraint.`,
       path: `Build genuine flexibility into your career — multiple skills, adaptable income streams, willingness to pivot with the cycle rather than against it. Your financial resilience comes from adaptability, not from forcing permanence onto something naturally cyclical. You are allowed to work with your seasons instead of against your calendar. What would your career look like if timing became a tool instead of an obstacle?`,
@@ -1456,7 +1456,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '11_MON': {
-      heading: `Your Ideal Work Pays You for the Energy You Bring Into a Room`,
+      heading: `Presence as Payment`,
       why: `Your income thrives where your charisma is the actual asset being paid for — not quiet steadiness in the background, but a magnetic, public-facing presence that draws people in and moves them. Strength governs your money channel, meaning your wealth potential flows through work that puts your influence and energy directly on display: coaching or motivating others, building a personal brand around yourself specifically, the fitness and wellness industry, performing or holding public-figure visibility, and leadership roles that depend on presence as much as position.`,
       shadow: `The risk is burning that same energy in rooms and roles that don't actually pay for it, performing charisma for free until the well runs dry, or leaning so hard on presence that the underlying substance never gets built. If you're widely admired but underpaid, the energy may need a more direct professional container.`,
       path: `Let your natural charisma become the explicit center of your professional offer, not just a pleasant side effect of it. Name the influence you carry, and build or seek work that pays for it directly. You are allowed to count your presence as labor. What rooms change when you enter them — and are you being valued for that yet?`,
@@ -1466,7 +1466,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '12_MON': {
-      heading: `Your Ideal Work Asks You to Actually Stay With Someone's Pain`,
+      heading: `Staying Through the Slow`,
       why: `Your income thrives in roles built around patient, sustained service to people in genuine difficulty — not a quick fix, but the willingness to remain present through something slow. The Hanged Man governs your money channel, meaning your wealth potential flows through work like counseling or psychology, medical or caregiving professions, social work, spiritual service, or long-term transformational projects that don't resolve quickly — anywhere depth of presence matters more than speed of result.`,
       shadow: `The risk is staying suspended in the idea of this kind of service without actually committing to the training, credentialing, or sustained practice it demands, treating the calling as a nice thought rather than an actual career. If your income feels stuck in potential, the service needs to become a real professional commitment.`,
       path: `Let the pull toward sustained, patient service resolve into an actual professional path, even a modest first step into it. The depth only pays off once you build real practice around it. You are allowed to do the staying work and let it sustain you too. Whose pain have you stayed with lately — and who stays with yours?`,
@@ -1476,7 +1476,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '13_MON': {
-      heading: `Your Ideal Work Requires You to Actually Let the Old Career Die`,
+      heading: `Old Career, Let Die`,
       why: `You thrive financially in fields or roles that reward genuine change rather than punishing it — real financial growth for you tends to require releasing an outdated career identity or income source so a better-fitting one can take its place. Transformation governs your money channel, meaning your wealth potential flows through exactly this kind of professional reinvention. This tends to look like crisis management, psychotherapy, transformation coaching, medical work centered on renewal (surgery, rehabilitation), or change management directly — professions built entirely around guiding an ending into a genuine new beginning.`,
       shadow: `The risk is clinging to a professional identity that's already run its course, staying in a dying career lane out of fear of the uncertain gap between old and new. If your income feels stuck in decline, something professional may need to be actively released rather than further optimized.`,
       path: `Let a professional ending be deliberate. Identify what's actually complete in your career, and release it on your own terms before it forces the issue. The reinvention happens in the gap you're willing to walk through. You are allowed to bury the old career with honors and walk on. What professional identity has already served its full term?`,
@@ -1486,7 +1486,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '14_MON': {
-      heading: `Your Ideal Work Blends What Other People Keep Separate`,
+      heading: `Blending What Others Separate`,
       why: `Your income thrives when you're not forced to specialize narrowly, but allowed to synthesize — combining skills, fields, or roles that other people keep siloed, into one integrated career that plays to your full range. Temperance governs your money channel, meaning your wealth potential flows through exactly this kind of professional blending. This tends to look like holistic healing work, nutrition or wellness coaching, mediation, integrative consulting, or lifestyle consulting — fields that exist specifically at the intersection other professions leave unaddressed.`,
       shadow: `The risk is spreading across so many skills or roles that none of them develops enough depth to actually be paid for at a professional level. Balance can become an excuse to avoid committing seriously to any one thing. If your income feels thin, the blend may need fewer ingredients, held longer.`,
       path: `Let a few of your combined skills go deep enough to actually be marketable, rather than staying broadly competent at everything. Real integration still requires depth in its component parts. You are allowed to be the blend the industry didn't have a title for. Which of your combined skills is actually the product?`,
@@ -1496,7 +1496,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '15_MON': {
-      heading: `Your Ideal Work Understands Power and Money Honestly`,
+      heading: `Power Named Honestly`,
       why: `You thrive financially in roles that don't pretend money and leverage aren't real forces — negotiation, finance, sales, any field where understanding what actually drives people materially is the genuine skill being paid for. The Devil governs your money channel, meaning your wealth potential flows through work that engages directly with material power. This tends to look like business and finance broadly, sales and negotiation specifically, the entertainment industry, the luxury market, or work built directly around understanding what compels people materially and psychologically.`,
       shadow: `The risk is using that understanding to grip control over colleagues, clients, or resources rather than to genuinely serve a transaction, eventually costing you trust and reputation. If wealth keeps arriving alongside growing isolation, the leverage may be gripped tighter than the work requires.`,
       path: `Use your honest read on material power in service of genuinely good deals, not just personal control. Real mastery here builds wealth and keeps trust intact at the same time. You are allowed to understand power without being owned by it. What could your honest read of money and influence build if you aimed it somewhere clean?`,
@@ -1506,7 +1506,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '16_MON': {
-      heading: `Your Ideal Work Rewards You for Seeing the Collapse Coming`,
+      heading: `Seeing the Collapse First`,
       why: `You thrive financially in roles that value sudden, decisive clarity over slow, incremental process — crisis management, innovation, any field that pays for the ability to see a failing structure clearly and reorganize fast. The Tower governs your money channel, meaning your wealth potential flows through exactly this kind of disruption-facing work. This tends to look like engineering or architecture, IT and cybersecurity, crisis and risk management, construction, or roles built around genuinely transforming a system rather than patching it.`,
       shadow: `The risk is generating unnecessary disruption to feel financially useful, provoking crises in stable systems because your gift needs somewhere to apply itself. If your professional life feels chaotic even in calm periods, the disruption may be self-generated rather than genuinely needed.`,
       path: `Save your gift for structures that actually need reorganizing, rather than manufacturing instability elsewhere. Real financial value here comes from precision, not from constant upheaval. You are allowed to say the structure is failing before it's polite. What collapse do you currently see coming that your integrity wants named?`,
@@ -1516,7 +1516,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '18_MON': {
-      heading: `Your Ideal Work Trusts the Sense You Can't Fully Explain Yet`,
+      heading: `Instinct Before Certainty`,
       why: `You thrive financially in roles that don't demand you justify every insight with hard data before it's trusted — work that draws on intuitive or emotionally attuned insight, creative fields, therapeutic work, anything where reading an unspoken undercurrent is the actual skill. The Moon governs your money channel, meaning your wealth potential flows through exactly this kind of work. This tends to look like psychology or therapeutic work, filmmaking or other visual art, photography, esoteric practice, or creative healing professions — any field built around what can be sensed before it can be proven.`,
       shadow: `The risk is staying in unstable, ungrounded professional territory because the intuitive gift never gets paired with any concrete structure — inconsistent income, vague offerings, real insight that never becomes a sellable service. If your income feels foggy, the gift may need more grounding, not more mystique.`,
       path: `Pair your intuitive professional gift with something concrete — a clear offering, a defined process, a tangible deliverable. The insight is real; it needs a container to actually be paid for. You are allowed to follow the professional hunch past the explainable. What direction keeps tugging that your resume can't justify yet?`,
@@ -1526,7 +1526,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '19_MON': {
-      heading: `Your Ideal Work Actually Feels Like You`,
+      heading: `Work That Feels Like You`,
       why: `You thrive financially in professions where your natural personality is actually the asset, not something to suppress for professionalism's sake — work that genuinely feels like you, authentic, visible, offered without the heaviness of grinding through something that doesn't fit. The Sun governs your money channel, meaning your wealth potential flows most easily through exactly this kind of work. This tends to look like public speaking, teaching children specifically, the entertainment industry, creative leadership roles, or a personal brand business built around simply being visibly, genuinely yourself.`,
       shadow: `The risk is undervaluing work that comes easily and joyfully, assuming real professional value requires more struggle than you're actually experiencing. If you're underpaid for work that lights you up, the ease may be masking its own worth.`,
       path: `Let joy and price coexist. Work that feels easy to you can still be genuinely valuable — the ease of your gift doesn't lower what it's worth to someone else. You are allowed to earn from work that feels like being yourself. Where does your labor still require a costume?`,
@@ -1536,7 +1536,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '20_MON': {
-      heading: `Your Ideal Work Is the One You Keep Being Called Back Toward`,
+      heading: `The Calling, Not the Comfortable`,
       why: `You thrive financially once you actually answer a genuine vocational calling rather than settling for merely adequate — a career that keeps summoning you, growing harder to ignore, even if the practical version of it feels riskier than staying put. Judgement governs your money channel, meaning your wealth potential flows most freely through exactly this kind of work. This tends to look like coaching or mentoring, public service, work on social projects, speaking on subjects that genuinely matter, or transformational education — professions that function less like a job and more like an answer.`,
       shadow: `The risk is hearing the calling and spending years preparing to answer it, staying in the adequate-but-outgrown role while endlessly upskilling instead of actually making the leap. If your income has stagnated despite real effort, the effort may be going into preparation rather than the actual move.`,
       path: `Answer the professional call before you feel fully ready. Financial growth tends to arrive in the moving, not the endless preparing. You are allowed to answer the calling that keeps calling. What work do you keep returning to in your mind — and what is one real step toward it?`,
@@ -1546,7 +1546,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '21_MON': {
-      heading: `Your Ideal Work Doesn't Stay Inside One Country or One System`,
+      heading: `Beyond One System`,
       why: `You thrive financially once your work is allowed to cross borders rather than stay contained inside one local system — real wealth potential for you tends to open up specifically through global reach, not through going deeper into one fixed place. The World governs your money channel, meaning your career grows through international business and global trade, online platforms and digital ecosystems that don't respect borders, cross-border projects, travel, tourism or relocation services, or work embedded in genuinely large systems and networks rather than a single local one.`,
       shadow: `The risk is staying confined to a local or narrowly-scoped version of your field long after your actual capacity has outgrown it, mistaking a comfortable boundary for a necessary one. If your income feels capped despite real skill, the ceiling may simply be geographic or systemic rather than personal.`,
       path: `Let one part of your work deliberately cross a border — a client, a platform, a market — rather than assuming your reach has to stay local. Your financial growth tends to track how far your work is actually allowed to travel. You are allowed to work at the size of the whole map. What border — literal or invented — is your work ready to cross?`,
@@ -1556,7 +1556,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '22_MON': {
-      heading: `Your Ideal Work Starts Before You Have Any Guarantee It'll Work`,
+      heading: `Starting Without Guarantee`,
       why: `You thrive financially in careers or ventures that reward genuine courage, letting you access opportunities that people requiring more proof simply never reach — a willingness to start a new venture, role, or path without needing certainty first. The Fool governs your money channel, meaning your wealth potential flows through exactly this kind of professional risk-taking. This tends to look like freelancing, creative entrepreneurship, working as a digital nomad, joining or building genuine startups and experimental projects, or any non-standard profession that didn't exist as a fixed category before you found it.`,
       shadow: `The risk is repeating the same fresh professional start without absorbing what the last one taught you, leaping into new ventures with the same openness every time but no accumulating wisdom underneath it. If your career keeps resetting instead of building, the openness may need a partner in discernment.`,
       path: `Let each professional leap teach you something concrete you actually carry into the next one. The courage to start fresh is real — pairing it with genuine reflection is what turns repeated starts into accumulating expertise and income. You are allowed to begin before the guarantee arrives. What venture would you open this year if faith counted as capital?`,
@@ -2886,7 +2886,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '1_MEP': {
-      heading: `You Carry Real, Inherited Competence at Launching Things From Nothing`,
+      heading: `Inherited, Not Invented`,
       why: `Your money entry point reflects a genuine, carried-over competence at starting ventures from scratch — earning through initiation, launching, building something new where nothing existed before. The Magician sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating the same old pattern alongside the competence — initiating a promising professional venture and then moving to the next before this one has actually paid off. If your career shows a string of strong starts without matching follow-through, that carried-over pattern may be worth addressing directly.`,
       path: `This may shift by choosing one current professional venture and deliberately staying with it well past the exciting starting phase. You are allowed to claim launching as a lineage skill, not a fluke. What would you start next if you treated beginning-from-nothing as your birthright?`,
@@ -2896,7 +2896,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '2_MEP': {
-      heading: `You Carry Real, Inherited Competence at Reading What Others Miss`,
+      heading: `Insight Inherited`,
       why: `Your money entry point reflects a genuine, carried-over competence in intuitive, discerning, or advisory work — earning through insight, counsel, or a quiet read on situations others find opaque. The High Priestess sits at your Money Entry Point, meaning your inner experience here is real and well-practiced, not a skill you're building for the first time.`,
       shadow: `The risk is repeating an old pattern of holding that insight back rather than offering it plainly, letting a genuinely marketable skill stay private and uncompensated. If your professional insight is often right but rarely credited or paid for directly, that old caution may be worth addressing.`,
       path: `This may shift by offering your intuitive read directly and explicitly in one professional context this week, rather than letting it stay implied. You are allowed to bill for the seeing, not just the doing. What do you routinely notice first that your work hasn't yet named as its edge?`,
@@ -2906,7 +2906,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '3_MEP': {
-      heading: `Money Comes Through Your Instinct to Build an Empire`,
+      heading: `Empire From Instinct`,
       why: `Your money entry point carries real, inherited competence in nurturing and multiplying resources — the Empress in you knows how to delegate instead of carrying everything alone, and that's exactly what turns a small operation into an empire, whether that empire is a kitchen or a country. Professions touching beauty, hospitality, care, and cultivation — design, food, wellness, education, women- and family-centered work — tend to be where this instinct actually pays.`,
       shadow: `The risk is applying pressure instead of invitation: harshness, a quick temper, an inability to compromise or negotiate, which shuts down the very collaboration this abundance depends on.`,
       path: `This may shift by delegating one task you've been holding onto solely, this week, and letting someone else's contribution actually count toward the whole. You are allowed to build the empire by sharing it, not carrying it alone. What piece of your work is ready to be handed to someone else's capable hands?`,
@@ -2916,7 +2916,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '4_MEP': {
-      heading: `Money Comes Through Your Instinct to Build Order`,
+      heading: `Order Built to Last`,
       why: `Your money entry point carries real, inherited competence in structure and control — a capacity to make a system actually hold. That instinct tends to pay through physical craft and construction, or through roles that enforce order directly: management, law, and enforcement, anywhere control and order are genuinely required.`,
       shadow: `The risk is that the same control that builds the structure turns into pressure on the people inside it — harshness, a quick temper, an inability to compromise or negotiate — until the order starts costing you the cooperation it needs to actually function.`,
       path: `This may shift by loosening your grip on one specific system this week and letting it hold without your direct pressure on the people running it. You are allowed to lead the structure without gripping it. Where might negotiation get you further this week than control would?`,
@@ -2926,7 +2926,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '5_MEP': {
-      heading: `Money Comes Through Knowledge You Actually Share`,
+      heading: `Knowledge Shared, Money Moves`,
       why: `Your money entry point carries real, inherited competence in structured, transmittable knowledge — mathematics, systems, law, finance, methodology — money moves through this competence once it's actually taught and shared, not just accumulated for yourself.`,
       shadow: `The risk is holding the knowledge back, or letting the sharing curdle into preaching instead of teaching — lecturing at people rather than actually handing them something usable.`,
       path: `This may shift by teaching one specific piece of your expertise plainly this week, without turning it into a sermon. You are allowed to be both the student and the teacher of your own knowledge. What have you learned that's ready to be handed over, not preached?`,
@@ -2936,7 +2936,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '6_MEP': {
-      heading: `Money Comes Through What You Actually Love Doing`,
+      heading: `Love Turned Into Income`,
       why: `Your money entry point carries real, inherited competence in beauty and connection — creative and relational fields, design, styling, photography, sales built on real rapport, pay specifically when the love for the work outweighs the chase for the money itself.`,
       shadow: `The risk is idealizing — refusing a real opportunity, client, or collaborator because they don't match some invented image — and underneath that, a quieter block: not believing you're worthy of the money or the recognition, so you can't actually let it land.`,
       path: `This may shift by receiving one payment, compliment, or gift this week without deflecting it. You are allowed to be paid well for work you love. What good thing have you been quietly turning down because it felt like too much?`,
@@ -2946,7 +2946,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '7_MEP': {
-      heading: `Money Comes Through Momentum You Actually Aim`,
+      heading: `Momentum, Aimed`,
       why: `Your money entry point carries real, inherited competence in decisive movement — fields built on motion and command, logistics, transport, sports, law enforcement, leadership, pay once you name a real number and drive toward it, not just move fast in general.`,
       shadow: `The risk is that the same warrior drive that wins goals turns into scheming against whoever's in the way — pressuring or out-maneuvering competitors instead of building a team that actually wants to follow you.`,
       path: `This may shift by naming one specific financial number you're driving toward this week, instead of vague ambition, and helping one competitor rather than out-maneuvering them. You are allowed to want a number and say it out loud. What amount have you been chasing without ever actually naming?`,
@@ -2956,7 +2956,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '8_MEP': {
-      heading: `Money Comes Through a Fair Exchange, Both Directions`,
+      heading: `Fair in Both Directions`,
       why: `Your money entry point carries real, inherited competence in fairness — professions built on law, accounting, tax, journalism, or genuinely helping people understand cause and effect are where this instinct actually earns, because it's built to keep taking and giving in balance.`,
       shadow: `The risk is that when the balance actually tips, it doesn't register as bad luck — it registers as everyone's a thief, everything's overpriced, debts pile up, and the whole exchange starts to feel rigged against you.`,
       path: `This may shift by naming one specific cause-and-effect chain in your own finances this week — not what happened to you, but what you actually did that led here. You are allowed to give and receive in the same fair measure. Where has "everyone's taking from me" actually been a debt you haven't named yet?`,
@@ -2966,7 +2966,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
     '9_MEP': {
-      heading: `Money Comes Through Wisdom You Actually Spend On Yourself Too`,
+      heading: `Depth Spent on Yourself`,
       why: `Your money entry point carries real, inherited competence in analysis and depth — translation, research, science, writing, IT, the kind of expertise built through solitary study — money flows through sharing that knowledge with the world, not just accumulating it privately.`,
       shadow: `The risk is a quiet intellectual pride — looking down on the material world or on people who know less — paired with an excessive frugality toward yourself, choosing the cheapest option even when you can afford better, which drains the very energy the expertise runs on.`,
       path: `This may shift by spending on yourself, once, with the same generosity you'd extend to sharing knowledge — no discount, no cheapest option by default. You are allowed to be both deeply knowledgeable and genuinely well cared for. What have you been denying yourself out of thrift rather than actual need?`,
@@ -2976,7 +2976,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '10_MEP': {
-      heading: `Money Comes Easily Once You Actually Let Yourself Relax`,
+      heading: `Ease, Once Allowed`,
       why: `Your money entry point carries real, inherited competence in flow and support — not the leader out front, but the deputy, the executor, the one who makes any team or project actually run, which means money genuinely does come easily once the work is right.`,
       shadow: `The risk is laziness masquerading as ease — but the deeper block is usually the opposite: an inability to actually relax and enjoy what's already flowing, so the ease this energy is built for never gets to be felt.`,
       path: `This may shift by taking one afternoon this week purely for pleasure, with no productive justification attached. You are allowed to let money come easily without needing to have earned the rest first. What would it look like to actually enjoy what's already arrived?`,
@@ -2986,7 +2986,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '11_MEP': {
-      heading: `Money Comes Through Effort That Doesn't Cost You Your Body`,
+      heading: `Strength That Spares the Body`,
       why: `Your money entry point carries real, inherited competence in tireless, physical strength — athletics, rescue work, building, repair, enterprise leadership, anywhere real endurance and the ability to manage people through sheer effort are required.`,
       shadow: `The risk is workaholism — pressure turned inward instead of outward, striving so hard toward a goal that nothing else registers — and the block that follows is often illness, the body forcing a stop the mind wouldn't choose on its own.`,
       path: `This may shift by building one real rest day into this week before your body demands it. You are allowed to be strong without needing to prove it without pause. What would it cost you to stop one day before you absolutely have to?`,
@@ -2996,7 +2996,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '12_MEP': {
-      heading: `Money Comes Through Service You Actually Charge For`,
+      heading: `Charging for the Care You Give`,
       why: `Your money entry point carries real, inherited competence in seeing what others miss and caring for people directly — creative work, social work, medicine, education, work with animals or the vulnerable, wherever a genuinely different vision serves someone else.`,
       shadow: `The risk is the victim mentality — serving until feedback stops arriving and then feeling unseen — paired with a refusal to actually charge for the work, working free or near-free and then resenting the lack of appreciation that follows.`,
       path: `This may shift by naming a real price for one piece of service you've been giving away or undercharging for, this week. You are allowed to say no, and to charge, without it undoing the care. What service of yours has been free for so long that its value has gone quiet?`,
@@ -3006,7 +3006,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '13_MEP': {
-      heading: `Money Comes Through What You're Willing to Let End`,
+      heading: `Willing to Let It End`,
       why: `Your money entry point carries real, inherited competence in the threshold professions — the ones that live between life and death, medicine, emergency services, law enforcement, work with the newly born or the gravely ill — a genuine comfort with endings that most people flinch from.`,
       shadow: `The risk is stagnation — staying in a role or approach past the point it's still teaching you anything, because change itself feels like the very endings this competence is supposed to be comfortable with.`,
       path: `This may shift by naming one specific part of your current work that's gone stagnant, and deliberately changing it this month, even in a small way. You are allowed to let a version of your career end so a truer one can begin. What in your work has quietly finished without your permission yet?`,
@@ -3016,7 +3016,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '14_MEP': {
-      heading: `Money Comes Through Creativity You Actually Follow`,
+      heading: `Creativity, Followed`,
       why: `Your money entry point carries real, inherited competence in intuitive, creative expression — art, healing, work touching water and nature, the kind of work that requires you to keep opening your soul rather than performing a role, and that pays specifically when compassion stays part of the work.`,
       shadow: `The risk is that the constant tests of whether you're truly engaged, rather than just going through the motions, get answered by drifting toward what's safe instead of what your soul actually wants, until the compassion, and the flow, quietly dries up.`,
       path: `This may shift by choosing one piece of your current work and asking honestly whether your heart is actually in it, then acting on the answer. You are allowed to follow your heart even when it costs you the safer choice. Where has compassion gone missing from work that used to have it?`,
@@ -3026,7 +3026,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '15_MEP': {
-      heading: `Money Comes, But How You Take It Is the Real Test`,
+      heading: `How You Take It Matters`,
       why: `Your money entry point carries real, inherited competence in significant material power — this energy is capable of bringing serious money into your life, through fields that manage people, resources, or high stakes directly: business, finance, banking, casinos, public relations.`,
       shadow: `The risk is genuinely large, not a metaphor: money obtained through deception, broken agreements, or taking from others invites exactly the kind of reversal this energy is known for, the same force that gave it being fully capable of taking it back.`,
       path: `This may shift by naming, honestly, one financial decision you're currently facing where the easy path and the honest path diverge — and choosing the honest one, even if it's smaller. You are allowed to want significant money and still insist it arrive cleanly. Where is a shortcut currently tempting you toward something you'd regret?`,
@@ -3036,7 +3036,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '16_MEP': {
-      heading: `Money Comes Through Complete Rebuilding, Not Patching`,
+      heading: `Rebuilding, Not Patching`,
       why: `Your money entry point carries real, inherited competence in total transformation — builders, architects, crisis managers, directors, anyone with the energy to destroy what's outdated and build something genuinely new from the ground up.`,
       shadow: `The risk is entanglement in the material world for its own sake — wanting wealth becomes the whole focus rather than one part of a fuller life, and when money is missing, it's often because that entanglement, not fate, is what's actually blocking it.`,
       path: `This may shift by naming one area of your life outside of money that's gone neglected while you chased financial goals, and giving it real attention this week. You are allowed to want material wealth without it being the only thing you want. What non-financial part of your life is asking to matter again?`,
@@ -3046,7 +3046,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '17_MEP': {
-      heading: `Money Comes Through Creativity You Let Be Seen`,
+      heading: `Creativity, Seen`,
       why: `Your money entry point carries real, inherited competence in creative visibility — dance, design, acting, art, journalism, coaching, healing — the ability to fold creativity directly into how you earn, realizing yourself both financially and artistically at once.`,
       shadow: `The risk is pride — once you start believing your creativity is the only worthwhile version and everyone else's is lesser, recognition tends to quietly diminish, as if the test exists specifically to correct that belief.`,
       path: `This may shift by genuinely appreciating one other person's creative work this week, out loud, without needing to rank it against your own. You are allowed to shine without needing to be the only light. Whose creative work have you been quietly dismissing that actually deserves your respect?`,
@@ -3056,7 +3056,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '18_MEP': {
-      heading: `Money Comes Through Visions You Actually Bring to Life`,
+      heading: `Vision Made Real`,
       why: `Your money entry point carries real, inherited competence in visualization and the subconscious — psychology, illusion, photography, design, bioenergy work, anything that turns an internal image into something others can see and feel.`,
       shadow: `The risk is fear itself, specifically the fear of poverty — because this energy is so genuinely capable of manifesting what it holds, a fear held tightly enough can materialize just as easily as a vision can.`,
       path: `This may shift by naming, honestly, one financial fear you've been carrying and replacing it deliberately with one specific image of what you actually want instead. You are allowed to trust your visions more than your fears. What fear have you been unknowingly feeding the same energy you'd rather spend on a vision?`,
@@ -3066,7 +3066,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '19_MEP': {
-      heading: `Money Comes Through Light You Actually Share`,
+      heading: `Light, Shared at Scale`,
       why: `Your money entry point carries real, inherited competence in illuminating people at scale — public speaking, leadership, the arts, sales, anywhere the ability to draw a crowd and make them feel good is the literal asset, and the flow only increases the more generously it's shared.`,
       shadow: `The risk is guilt — feeling wrong for doing well while others struggle — which curdles into nitpicking and hypercontrol over others, or a quiet pride that needs constant confirmation.`,
       path: `This may shift by creating one real opportunity for someone else this week — a job, a referral, a share of the spotlight — instead of managing your guilt about having more. You are allowed to shine brightly and still be generous, not either-or. Who could you actually bring up with you instead of feeling guilty in front of?`,
@@ -3076,7 +3076,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '20_MEP': {
-      heading: `Money Comes Once You Stop Judging How Your Parents Handled It`,
+      heading: `Judgment Released, Money Opens`,
       why: `Your money entry point carries real, inherited competence in transmission — family business, communication, information passed hand to hand — and it opens fully once you actually examine what your parents believed about money instead of just inheriting the belief unexamined.`,
       shadow: `The risk is exactly that: an unexamined inherited belief, often something like "money is only obtained through hard work," running quietly underneath your own choices, made worse by judging your parents for having it, which blocks the flow further rather than freeing it.`,
       path: `This may shift by naming one specific belief about money you can trace directly to a parent, and asking whether it's actually true for you now. You are allowed to release the belief without needing to blame the person who gave it to you. What financial rule of theirs have you been obeying without ever examining it?`,
@@ -3086,7 +3086,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '21_MEP': {
-      heading: `Money Comes Through Reach That Actually Crosses Borders`,
+      heading: `Reach Beyond Borders`,
       why: `Your money entry point carries real, inherited competence in scale and reach — this energy earns through setting genuinely significant financial goals and letting the work travel: diplomacy, journalism, human rights, geography, anywhere the horizon is allowed to actually expand.`,
       shadow: `The risk is compromising that reach for a quick or easy income — work whose real cost, to health or to conscience, contradicts the expansive, peacekeeping nature this competence is actually built for.`,
       path: `This may shift by naming one financial goal that's genuinely large, not modest by habit, and taking one real step toward it this month. You are allowed to want a horizon this wide and go get it. What border, literal or professional, have you been staying inside out of habit rather than necessity?`,
@@ -3096,7 +3096,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in MONEY ENTRY POINT (Money Channel) ─────────────────────────────
     '22_MEP': {
-      heading: `Money Comes Through Freedom You Actually Protect`,
+      heading: `Freedom, Protected`,
       why: `Your money entry point carries real, inherited competence in financial independence itself — not a fixed schedule or a boss, but passive income that exceeds your expenses, results-based work with no boundaries imposed from outside.`,
       shadow: `The risk is testing that freedom constantly without ever building the passive structure that would actually secure it — welcoming money in easily, then letting it go just as easily, so independence stays a feeling instead of becoming a fact.`,
       path: `This may shift by building one small piece of passive income this month, however modest, instead of relying entirely on active results. You are allowed to want total freedom and still build the floor underneath it. What fixed structure have you been avoiding that would actually protect the freedom you want?`,
