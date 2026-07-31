@@ -1566,7 +1566,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ──────────
     '13_F': {
-      heading: `You Inherited Raw Material, Not a Finished Belief`,
+      heading: `Raw Material, Not Belief`,
       why: `The belief system, worldview, or spiritual inheritance passed down through your father's line was never meant to be received intact — it was meant to be transformed. Transformation, the 13th Arcana, sits in your Paternal Spiritual corner as a generational instruction: something in that lineage — a rigid faith, an unspoken code about how a man is supposed to relate to meaning, a belief about what's allowed to be questioned — reached the end of its natural life inside you specifically so it could be rebuilt into something that actually fits who you became. You didn't inherit a finished structure. You inherited raw material, and a mandate to remake it.`,
       shadow: `The trap is treating that inheritance as something to either swallow whole or reject entirely, rather than actually work through. Swallowed whole, it becomes belief you never examined, quietly running your life from behind the curtain. Rejected outright, it becomes an equally unexamined reaction — defining yourself by opposition to your father's worldview instead of by any actual position of your own. Both are ways of avoiding the harder work: taking what was given, letting the parts that no longer serve you actually die, and consciously choosing what's worth keeping. If you keep circling the same unresolved question about faith, authority, or meaning — showing up in new disguises but never quite settling — that's often the paternal line's spiritual inheritance still waiting for its ending.`,
       path: `Try a conscious inheritance audit: name, specifically, what belief or worldview arrived through your father's line, and ask honestly what part of it is genuinely yours versus what you've simply never gotten around to examining. This isn't a betrayal of your father — this isn't asking you to reject him, it's asking you to complete a transformation that was likely his to do as well, and may not have finished. What survives the audit becomes real conviction instead of inherited furniture. What doesn't survive gets released with respect instead of resentment — and the spiritual restlessness that's been following you finally has somewhere to land. You are allowed to shape the raw material into your own belief. What conviction is forming in you that belongs to no generation but yours?`,
@@ -1576,7 +1576,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '1_F': {
-      heading: `You Inherited a Belief That Faith Requires Doing Something`,
+      heading: `Faith Meant Doing`,
       why: `Something in your father's line treated spirituality as active rather than passive — faith proven through initiative, will, and the capacity to make things happen, rather than through quiet acceptance. The Magician sits in your Paternal Spiritual corner, marking this generational instruction about action and belief. You inherited raw material here, not a finished belief: an orientation toward spiritual agency that's yours to examine and consciously keep or release.`,
       shadow: `The trap is inheriting the compulsive half of that agency without the discernment — a belief that spiritual worth must be constantly proven through visible effort, that stillness or simply receiving is somehow a spiritual failure. If you keep feeling like your faith isn't "enough" unless you're actively doing something with it, that's often the paternal line's unexamined relationship to spiritual agency still running.`,
       path: `Try separating the genuine gift — real spiritual initiative — from the anxious compulsion to prove it constantly. Ask what your father's line was actually trying to protect by tying faith to action, and decide consciously how much of that tying-together is actually yours to keep. You are allowed to let faith rest sometimes instead of always working. What might stillness offer your spirit that effort never has?`,
@@ -1586,7 +1586,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '2_F': {
-      heading: `You Inherited a Silence Around What Your Father's Line Sensed but Never Said`,
+      heading: `Sensed, Never Said`,
       why: `A paternal line more comfortable with what could be proven than what was simply sensed likely never gave intuitive knowing much open expression. The High Priestess sits in your Paternal Spiritual corner, marking this generational pattern. You inherited the raw material of that suppressed intuition: a real capacity for inner knowing that may have gone unspoken for at least a generation before you.`,
       shadow: `The trap is inheriting the silence along with the sensitivity — carrying real intuitive capacity but an unexamined belief that it shouldn't be voiced, especially not as confidently as more "provable" claims. If you find yourself downplaying your own inner knowing around authority figures, that's often the paternal line's suppressed mystery still running its old caution.`,
       path: `Try naming your intuitive sense out loud in contexts where your father's line would have stayed quiet. This isn't a rejection of him — it's completing a transmission that was likely his to voice as well, and may not have finished. You are allowed to say aloud what the line before you only sensed. What unspoken knowing in your family is waiting for your voice to finish it?`,
@@ -1596,7 +1596,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '3_F': {
-      heading: `You Inherited a Belief That Spiritual Abundance Has to Be Earned Hard`,
+      heading: `Abundance Earned Hard`,
       why: `Something in your father's line treated spiritual nurturing or ease as scarce, perhaps something worked for rather than simply received. The Empress sits in your Paternal Spiritual corner, marking this generational instruction about generativity and spiritual abundance. You inherited raw material here: a real capacity for spiritual abundance that may have arrived wrapped in an old belief that it has to be difficult to be legitimate.`,
       shadow: `The trap is inheriting the scarcity without examining it — a belief that spiritual peace or generativity must be earned through struggle, making genuine ease around faith feel suspicious or unearned. If your spiritual life feels like it's always working uphill, that's often the paternal line's unexamined scarcity still running.`,
       path: `Try letting spiritual ease be legitimate, even if your father's line never modeled it as such. Ask what belief about earning was actually being protected, and consciously decide how much of that difficulty is genuinely yours to keep carrying. You are allowed to receive grace that wasn't earned the hard way. What spiritual gift might already be yours without another payment?`,
@@ -1606,7 +1606,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '4_F': {
-      heading: `You Inherited a Belief About Who's Allowed to Define What's True`,
+      heading: `Who Defines Truth`,
       why: `Your father's line likely held firm, hierarchical beliefs about how faith should be organized and who holds the right to define it. The Emperor sits in your Paternal Spiritual corner, marking this generational instruction about spiritual authority and structure. You inherited raw material here: a real respect for spiritual structure that arrived bundled with an unexamined belief about where authority is allowed to live.`,
       shadow: `The trap is inheriting the rigidity without the discernment — either submitting entirely to inherited spiritual authority without examining it, or rejecting all structure reflexively because the inherited version felt oppressive. If you keep circling questions of spiritual authority without landing anywhere, that's often unfinished paternal work.`,
       path: `Try building your own relationship to spiritual structure — neither fully inherited nor fully rejected, but consciously assembled from what actually serves you. This completes work your father's line likely didn't finish either. You are allowed to define what's true from your own lived encounter with it. What belief would you keep if no one upstream had to approve it?`,
@@ -1616,7 +1616,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '5_F': {
-      heading: `You Inherited the Actual Doctrine, Not Just a General Orientation`,
+      heading: `Doctrine, Not Orientation`,
       why: `You inherited an actual doctrine, formal tradition, or specific set of codified beliefs passed down through your father's line, not just a general spiritual orientation. The Hierophant sits in your Paternal Spiritual corner, marking the most literal version of this inheritance. You inherited raw material here in its most concrete form — real teachings, rules, or a specific framework that was handed to you largely intact.`,
       shadow: `The trap is treating the specific doctrine as non-negotiable simply because it arrived so formally packaged — mistaking the formality of the transmission for proof it doesn't need examining. If you feel unable to question a specific belief without feeling like you're betraying your father's line, that's the doctrine's packaging outweighing its actual content.`,
       path: `Try examining the specific doctrine piece by piece, the way you'd examine any teaching — some of it may hold up genuinely, some may not. The formality of how it arrived doesn't exempt it from your own honest evaluation. You are allowed to keep the doctrine's beauty and release its weight. Which inherited teaching still feeds you — and which one only watches you?`,
@@ -1626,7 +1626,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '6_F': {
-      heading: `You Inherited a Belief About What Spiritual Commitment Is Supposed to Look Like`,
+      heading: `Commitment, Defined for You`,
       why: `Your father's line likely modeled a specific idea of what devoted, "correct" spiritual commitment looks like, perhaps built around loyalty to one path rather than genuine, examined alignment. The Lovers sit in your Paternal Spiritual corner, marking this generational instruction about spiritual choice and commitment. You inherited raw material here: real capacity for spiritual devotion that arrived with an inherited definition of what that devotion should look like.`,
       shadow: `The trap is inheriting the commitment without the choice — staying loyal to a specific spiritual path out of inherited obligation rather than genuine, examined alignment. If your spiritual commitment feels more like duty than devotion, that's often the paternal line's inherited definition still standing in for your own.`,
       path: `Try consciously choosing your spiritual commitments rather than assuming the inherited ones. This isn't necessarily rejecting your father's path — it's making sure whatever you keep is actually chosen, not simply carried forward by default. You are allowed to let your commitment look like you, not like the template. What shape would your devotion take if it stopped performing the inherited one?`,
@@ -1636,7 +1636,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '7_F': {
-      heading: `You Inherited a Belief That Spiritual Growth Requires Constant Forward Push`,
+      heading: `Growth Meant Pushing`,
       why: `Your father's line likely modeled faith as something actively steered and pushed toward, with real emphasis on willpower and forward motion. The Chariot sits in your Paternal Spiritual corner, marking this generational instruction about disciplined spiritual pursuit. You inherited raw material here: genuine spiritual discipline that arrived bundled with an unexamined belief that stillness or rest is a kind of spiritual failure.`,
       shadow: `The trap is inheriting the drive without ever questioning whether constant forward motion is actually what your own spiritual life needs. If you feel guilty resting from spiritual practice, or restless during genuinely still periods, that's often the paternal line's unexamined momentum still running.`,
       path: `Try letting your spiritual practice include real stillness without guilt. This completes work your father's line may not have finished — distinguishing disciplined pursuit from an inability to ever simply arrive. You are allowed to grow while standing still. What might deepen in you the moment the forward push pauses?`,
@@ -1646,7 +1646,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '8_F': {
-      heading: `You Inherited a Belief About How Strictly Spiritual Accounts Get Settled`,
+      heading: `Accounts, Strictly Settled`,
       why: `Your father's line likely held firm beliefs about consequence, fairness, and what's owed in the spiritual ledger. Justice sits in your Paternal Spiritual corner, marking this generational instruction about moral and spiritual accountability. You inherited raw material here: a real sense of spiritual integrity that arrived with an inherited standard for exactly how harshly, or how precisely, accounts are supposed to be settled.`,
       shadow: `The trap is inheriting the harshness of the standard without questioning whether it's actually accurate — carrying an unexamined belief that spiritual failing demands strict, specific consequence, which can make your own relationship to faith feel more like fear of judgment than genuine integrity. If you feel constantly spiritually "in debt," that may be an inherited ledger, not an accurate one.`,
       path: `Try examining the specific standard of spiritual accountability you inherited, and consciously decide how much of its strictness actually reflects your own sense of what's fair. You are allowed to trust a mercy stricter accounting never taught. What debt to the divine have you been repaying that was never actually owed?`,
@@ -1656,7 +1656,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '9_F': {
-      heading: `You Inherited a Belief That Spiritual Truth Is Found Alone`,
+      heading: `Truth Found Alone`,
       why: `Your father's line likely modeled faith as something pursued in withdrawal, privately, without much communal sharing. The Hermit sits in your Paternal Spiritual corner, marking this generational instruction about solitary spiritual seeking. You inherited raw material here: a real capacity for deep, solitary spiritual reflection that arrived with an inherited assumption that spiritual matters simply aren't discussed.`,
       shadow: `The trap is inheriting the isolation along with the depth — carrying real spiritual insight but an unexamined belief that it should stay private, which can leave you feeling spiritually lonely even when connection is genuinely available. If you keep your deepest spiritual questions to yourself by default, that's often the paternal line's inherited withdrawal.`,
       path: `Try sharing a piece of your solitary spiritual insight with someone, breaking a silence that may have been inherited rather than chosen. This completes transmission your father's line may not have finished. You are allowed to find truth in company, not only in solitude. Who could walk one stretch of the path beside you without diluting it?`,
@@ -1666,7 +1666,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ──────────
     '10_F': {
-      heading: `You Inherited a Belief About How Much Say You Actually Have in Your Own Fate`,
+      heading: `How Much Say You Have`,
       why: `Your father's line likely held a specific belief about how much control a person actually has over their own turning, whether leaning toward fatalism or toward active participation in one's fortune. The Wheel of Fortune sits in your Paternal Spiritual corner, marking this generational instruction about fate and spiritual cycles. You inherited raw material here: a real relationship to spiritual timing that arrived with an inherited answer to a question worth re-asking.`,
       shadow: `The trap is inheriting either the fatalism or the over-control without examining which one actually fits you. If you find yourself either passively accepting hardship as "meant to be" or gripping too tightly to control outcomes, that's often an inherited belief about fate still running rather than your own tested conclusion.`,
       path: `Try examining your actual, lived relationship to timing and fate, separate from what your father's line assumed. Some inherited fatalism, or some inherited need for control, may need updating to match your own experience. You are allowed to claim more say in your fate than your line believed it had. What would you steer toward this year if the wheel were actually in your hands?`,
@@ -1676,7 +1676,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '11_F': {
-      heading: `You Inherited a Belief That Spiritual Strength Means Never Showing Strain`,
+      heading: `Strength Without Strain Showing`,
       why: `Your father's line likely modeled faith as quiet, uncomplaining fortitude, strength shown through never visibly cracking. Strength sits in your Paternal Spiritual corner, marking this generational instruction about spiritual endurance. You inherited raw material here: real capacity for spiritual resilience that arrived bundled with an unexamined belief that struggle should stay hidden.`,
       shadow: `The trap is inheriting the suppression along with the endurance — carrying real spiritual strength but an inherited discomfort with visible doubt or difficulty, which can leave your own spiritual struggles feeling shameful to admit. If you hide your genuine crises of faith even from people who'd understand, that's often the paternal line's inherited stoicism.`,
       path: `Try letting a real spiritual struggle be visible to someone you trust. This completes work your father's line may not have finished — separating genuine strength from an inherited requirement to look unshaken. You are allowed to show the strain and remain strong. What weight could you name out loud that your fathers carried silently?`,
@@ -1686,7 +1686,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '12_F': {
-      heading: `You Inherited a Belief About What Spiritual Sacrifice Is Supposed to Cost`,
+      heading: `What Sacrifice Costs`,
       why: `Your father's line likely modeled a specific relationship to giving something up for faith, perhaps one that looked more like quiet martyrdom than genuine, chosen release. The Hanged Man sits in your Paternal Spiritual corner, marking this generational instruction about spiritual surrender and sacrifice. You inherited raw material here: a real capacity for spiritual surrender that arrived with an inherited belief about what that surrender is supposed to cost.`,
       shadow: `The trap is inheriting the martyrdom without examining whether real sacrifice is actually being asked, or whether suffering has simply been mistaken for spiritual depth. If your spiritual life feels weighted by an obligation to suffer for it to count, that's often unfinished paternal work.`,
       path: `Try examining whether your spiritual surrenders are genuinely chosen or inherited as obligation. Real release doesn't require performed suffering — it requires an honest yes. You are allowed to hold a faith that doesn't require your suffering as proof. What have you been sacrificing that the sacred never asked for?`,
@@ -1696,7 +1696,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '14_F': {
-      heading: `You Inherited a Belief That Spiritual Balance Means Staying Neutral`,
+      heading: `Balance Meant Neutral`,
       why: `Your father's line likely modeled faith as measured, careful, avoiding extremes, which may have shaded into genuine emotional distance from spiritual intensity altogether. Temperance sits in your Paternal Spiritual corner, marking this generational instruction about spiritual moderation. You inherited raw material here: a real capacity for balanced spiritual integration that arrived with an inherited caution against actually feeling anything too deeply.`,
       shadow: `The trap is inheriting the neutrality without the genuine integration — staying so moderate about spiritual matters that real intensity or passion never gets to show up at all. If your spiritual life feels calm but strangely flat, that's often inherited caution standing in for real balance.`,
       path: `Try letting real spiritual intensity in before you moderate it. Genuine temperance requires actually feeling both extremes, not avoiding them from the start. You are allowed to care openly instead of staying neutral. What matters enough to you spiritually that neutrality has become its own cost?`,
@@ -1706,7 +1706,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '15_F': {
-      heading: `You Inherited a Belief That Spiritual Life and Real Desire Can't Coexist`,
+      heading: `Spirit Against Desire`,
       why: `Your father's line likely held tension between faith and material or bodily desire, perhaps resolved through denial rather than genuine integration. The Devil sits in your Paternal Spiritual corner, marking this generational instruction about spiritual repression. You inherited raw material here: real spiritual depth that arrived bundled with an inherited belief that desire itself is spiritually dangerous.`,
       shadow: `The trap is inheriting the repression without examining it — carrying an unexamined shame around desire, pleasure, or material want that quietly undermines your actual spiritual peace. If you feel spiritual guilt around ordinary human wants, that's often the paternal line's unresolved tension still running.`,
       path: `Try examining whether desire and faith actually have to be enemies, or whether that was simply your father's line's unresolved conflict. Genuine spiritual maturity can hold both. You are allowed to hold desire and devotion in the same hands. What longing have you exiled from your spiritual life that might actually belong there?`,
@@ -1716,7 +1716,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '16_F': {
-      heading: `You Inherited an Unfinished Spiritual Collapse`,
+      heading: `An Unfinished Collapse`,
       why: `Something in your father's line's faith likely underwent a genuine collapse or crisis that was never fully processed, leaving its aftershock to pass down instead of its resolution. The Tower sits in your Paternal Spiritual corner, marking this generational instruction shaped by real spiritual rupture. You inherited raw material here: real capacity for spiritual clarity that arrived tangled with an unfinished upheaval.`,
       shadow: `The trap is inheriting the instability without ever getting to actually process the original rupture — a free-floating spiritual unease whose source predates you. If you feel a vague, hard-to-place distrust of spiritual structures, that's often an inherited collapse still looking for its resolution.`,
       path: `Try naming the collapse, even speculatively — what belief in your father's line might have come down hard, and what clarity came, or should have come, after. Giving it words can finish what was left incomplete. You are allowed to finish the collapse your line paused mid-fall. What broken structure of belief is yours to finally clear and rebuild honestly?`,
@@ -1726,7 +1726,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '17_F': {
-      heading: `You Inherited a Belief That Spiritual Hope Has to Be Kept Modest`,
+      heading: `Hope Kept Modest`,
       why: `Your father's line likely modeled a modest, guarded relationship to spiritual optimism, hope kept quiet rather than fully expressed, perhaps to protect against disappointment. The Star sits in your Paternal Spiritual corner, marking this generational instruction about hope itself. You inherited raw material here: real capacity for spiritual renewal that arrived with an inherited caution against hoping too visibly.`,
       shadow: `The trap is inheriting the caution without questioning it — carrying real hope but an unexamined belief that expressing it fully invites disappointment. If you find yourself hedging every spiritual hope with a disclaimer, that's often the paternal line's dimmed light still running.`,
       path: `Try letting one spiritual hope be fully, visibly held, without the inherited hedge. This completes work your father's line may not have finished — separating wisdom from muted expectation. You are allowed to hope at full size. What immodest, unreasonable hope have you been keeping in the drawer?`,
@@ -1736,7 +1736,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '18_F': {
-      heading: `You Inherited a Fear Your Father's Line Never Fully Named`,
+      heading: `A Fear Never Named`,
       why: `Something in your father's line's spiritual life likely carried real unease that was never directly faced, just quietly passed down as vague unease instead of a fear with a name. The Moon sits in your Paternal Spiritual corner, marking this generational instruction shaped by unprocessed fear. You inherited raw material here: real spiritual sensitivity that arrived tangled with an inherited, unnamed dread.`,
       shadow: `The trap is inheriting the fog without the clarity — carrying a diffuse spiritual anxiety that doesn't attach to anything specific in your own life. If unease around faith or the unknown keeps surfacing without clear cause, that's often an inherited fear still circling, waiting for its name.`,
       path: `Try tracing the anxiety back as far as you can, even speculatively — what might your father's line have been afraid of spiritually that never got said aloud? Naming it, even provisionally, can finally give it somewhere to land. You are allowed to name the fear your line only passed forward. If you spoke it plainly once — what might stop traveling down the generations?`,
@@ -1746,7 +1746,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '19_F': {
-      heading: `You Inherited a Belief That Spiritual Seriousness Rules Out Real Joy`,
+      heading: `Seriousness Over Joy`,
       why: `Your father's line likely modeled spirituality as a serious, weighty matter, with genuine delight or lightness treated as somehow beside the point. The Sun sits in your Paternal Spiritual corner, marking this generational instruction about joy in faith. You inherited raw material here: real capacity for radiant, joyful faith that arrived with an inherited assumption that seriousness is what makes belief legitimate.`,
       shadow: `The trap is inheriting the heaviness without questioning it — muting your own genuine spiritual joy because it doesn't match the solemn tone modeled before you. If your faith feels dutiful rather than delightful, that's often an inherited seriousness standing in for actual reverence.`,
       path: `Try letting genuine joy be a legitimate part of your spiritual life, without needing to justify it with gravity. This completes work your father's line may not have finished — proving faith can be light and still be real. You are allowed to keep a joyful faith — reverence and laughter were never enemies. What delight might be the most serious spiritual practice available to you?`,
@@ -1756,7 +1756,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '20_F': {
-      heading: `You Inherited a Calling Your Father's Line Left Unanswered`,
+      heading: `A Calling Left Unanswered`,
       why: `Something in your father's line likely sensed a larger calling toward deeper faith or purpose and set it aside, whether from circumstance or fear. Judgement sits in your Paternal Spiritual corner, marking this generational instruction shaped by a postponed spiritual awakening. You inherited raw material here: a real capacity to answer that calling, passed down along with the fact that it was once left unaddressed.`,
       shadow: `The trap is inheriting the postponement itself — sensing a spiritual summons and, without quite knowing why, setting it aside the same way, as though delay were simply how this family relates to its deeper calls. If you keep almost-answering a spiritual pull without ever fully committing, that's often unfinished paternal work.`,
       path: `Try answering the call your own way, even if your father's line never did. You're not obligated to repeat the postponement — you're free to be the one who actually responds. You are allowed to answer the calling your line left ringing. What summons has waited generations for someone exactly like you to pick it up?`,
@@ -1766,7 +1766,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '21_F': {
-      heading: `You Inherited a Spiritual Cycle Your Father's Line Never Got to Close`,
+      heading: `A Cycle Never Closed`,
       why: `Your father's line likely worked toward real spiritual wholeness or mastery but never quite arrived at it, the cycle interrupted before its natural end. The World sits in your Paternal Spiritual corner, marking this generational instruction shaped by unfinished spiritual completion. You inherited raw material here: real capacity for genuine spiritual integration, passed down along with the incompleteness that came before you.`,
       shadow: `The trap is inheriting the same near-completion — sensing yourself close to real spiritual wholeness and then, without clear cause, stopping just short, echoing a pattern that predates your own choices. If your spiritual growth keeps feeling almost-there, that's often an old, unfinished cycle looking for someone to finally close it.`,
       path: `Try being the one who lets the cycle actually complete. Your father's line got close — you're free to be the one who finishes it, on your own terms. You are allowed to close the circle your fathers left open. What completion in your life would quietly settle theirs too?`,
@@ -1776,7 +1776,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '22_F': {
-      heading: `You Inherited a Caution About Spiritual Leaps Your Father's Line Never Took`,
+      heading: `Caution Never Tested`,
       why: `Your father's line likely held real caution around unproven spiritual paths, favoring the tested and familiar over genuine leaps into the unknown. The Fool sits in your Paternal Spiritual corner, marking this generational instruction about spiritual risk. You inherited raw material here: real capacity for spiritual openness and trust that arrived with an inherited wariness of anything too new.`,
       shadow: `The trap is inheriting the caution without examining it — staying spiritually within familiar, approved territory even when something genuinely new is calling you, out of a hesitation that isn't actually yours. If you feel a reflexive suspicion of unfamiliar spiritual paths, that's often the paternal line's unexamined wariness.`,
       path: `Try taking one small, genuine spiritual leap your father's line likely wouldn't have. This isn't disrespect — it's completing an openness that was likely his to explore as well. You are allowed to take the leap they only studied. What faithful risk is yours to finally take on behalf of everyone who couldn't?`,
@@ -1946,7 +1946,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '17_G': {
-      heading: `You Inherited a Belief That Spiritual Hope Has to Be Kept Modest`,
+      heading: `Optimism, Hedged`,
       why: `Women in your mother's line likely carried real optimism kept close, quietly, rather than fully expressed, perhaps to protect against disappointment. The Star sits in your Maternal Spiritual corner, marking this generational transmission of guarded hope. You inherited this as felt caution: renewal transmitted alongside a hedge against hoping too visibly.`,
       shadow: `The trap is inheriting the caution without questioning it — carrying real hope but an unexamined restraint around expressing it fully. If you find yourself hedging every hope with a disclaimer, that's often the maternal line's dimmed light still running.`,
       path: `Try letting one hope be fully, visibly held, without the inherited hedge. This completes work your mother's line may not have finished — separating quiet wisdom from muted expectation. You are allowed to hope larger than the line's careful modesty. What dream would honor her by outgrowing what she permitted herself?`,
@@ -3106,7 +3106,7 @@ window.DMicroContent = (function () {
 
     // ── Career Paths (Money Channel — Best Career Paths For Each Arcana) ──
     '1_CAREER': {
-      heading: `Your Career Path Runs Through Starting Things Yourself`,
+      heading: `Starting Things Yourself`,
       why: `Your career fit runs through initiative and origination — founding, launching, leading from the front: entrepreneur or startup founder, project manager, sales or marketing strategist, public speaker, business coach. The same energy shows up in hands-on craft too — jewellers, tailors, wood carvers, sculptors, blacksmiths — and in inventors, scientists, and practitioners of energy work: bioenergetic therapists, healers, anyone working with forces most people can't see. What ties them together isn't the trade, it's generating something from nothing.`,
       shadow: `The risk is taking a role built around someone else's system instead of your own initiative — the fit fails not because you lack skill, but because the container gives you nothing to originate.`,
       path: `Try naming one role or venture where you'd actually be the one starting things, not executing someone else's plan, and taking one real step toward it this month. You are allowed to want to lead from day one, not earn your way there. What would you build if the job description let you invent it?`,
@@ -3115,7 +3115,7 @@ window.DMicroContent = (function () {
     },
 
     '2_CAREER': {
-      heading: `Your Career Path Runs Through What You Sense Before You Can Prove It`,
+      heading: `Sensing Before Proving`,
       why: `Your career fit runs through depth and perception — psychologist or therapist, numerologist or astrologer, analyst or researcher, consultant or advisor, writer or editor. The same read-what's-underneath instinct fits diplomacy, medicine and healing, the natural sciences, meteorology and astronomy, even acting — and, less obviously, investigation: detective work, surveillance, forensics, anywhere the job is to notice what isn't being said.`,
       shadow: `The risk is taking a role that only rewards visible, provable output, leaving your real gift for reading what's underneath permanently uncredited.`,
       path: `Try naming one field where your intuition would actually be the qualification, not a hidden bonus, and researching one real path into it this month. You are allowed to be hired for what you sense, not only what you can prove. Where has your read on a situation already been quietly right?`,
@@ -3124,7 +3124,7 @@ window.DMicroContent = (function () {
     },
 
     '3_CAREER': {
-      heading: `Your Career Path Runs Through Creating and Cultivating`,
+      heading: `Creating and Cultivating`,
       why: `Your career fit runs through generativity and beauty — designer (graphic, interior, fashion), the beauty industry, content creation, art direction, a business built around and for women. That same instinct for cultivation runs hospitality and care at scale too: house and estate management, nursery and beauty-salon direction, restaurant and kitchen leadership, chefs and confectioners — anywhere growth, craft, and genuine nurturing are the actual work.`,
       shadow: `The risk is taking a role that treats your creative or nurturing output as a hobby rather than a real profession, discounted the moment it starts to feel effortless.`,
       path: `Try pricing or pitching one piece of your creative work this month as an actual profession, not a side project. You are allowed to make a living from what comes naturally. Where has 'effortless' been quietly read as 'not serious work'?`,
@@ -3133,7 +3133,7 @@ window.DMicroContent = (function () {
     },
 
     '4_CAREER': {
-      heading: `Your Career Path Runs Through Building and Governing Structure`,
+      heading: `Building Structure That Holds`,
       why: `Your career fit runs through ownership and command — business owner, executive or CEO, administrator or manager, leadership within government or corporate structure, real estate development. That same capacity for order shows up in construction and land: supervisors, architects, farm and estate management — and in hands-on mechanical control: machine operators, crane operators, mechanics — anywhere you actually get to build or run the system, not just staff it.`,
       shadow: `The risk is taking a subordinate role inside someone else's structure, where your genuine capacity for order gets boxed rather than used.`,
       path: `Try naming one place in your current work where you could actually own a system instead of just running it, and asking for that ownership directly. You are allowed to want to build the structure, not just maintain it. What would you organize if the authority were already yours?`,
@@ -3142,7 +3142,7 @@ window.DMicroContent = (function () {
     },
 
     '5_CAREER': {
-      heading: `Your Career Path Runs Through Teaching What You Know`,
+      heading: `Teaching What You Know`,
       why: `Your career fit runs through transmission — teacher or mentor, spiritual guide or coach, HR or consulting, trainer or lecturer, a business built around education itself. The same structured-knowledge instinct fits law directly (attorney, judge), finance and the stock market, real estate, programming and IT, and family counseling — anywhere passing a system of knowledge forward, not just holding it, is the literal job.`,
       shadow: `The risk is staying a permanent student, collecting credentials in a field that never actually asks you to teach, so the fit never gets tested.`,
       path: `Try teaching or mentoring one person this month in something you already know well. You are allowed to teach before you feel like the authority. What do you already know that someone else needs?`,
@@ -3151,7 +3151,7 @@ window.DMicroContent = (function () {
     },
 
     '6_CAREER': {
-      heading: `Your Career Path Runs Through People, Chosen Well`,
+      heading: `People, Chosen Well`,
       why: `Your career fit runs through relationship — relationship coaching, HR or recruiting, sales management, brand partnerships, PR and communications. The same read-people-well instinct fits performance and hosting directly: concert and festival hosts, toastmasters, conductors, DJs, film directors — and beauty and design work built on client rapport: stylists, makeup artists, fashion designers — anywhere reading and choosing well between people is the actual product.`,
       shadow: `The risk is taking a role that treats people as a checklist rather than a relationship, flattening the exact skill that makes you good at this.`,
       path: `Try naming one role where the job is explicitly about people, not just processing them, and applying or pitching yourself for it this month. You are allowed to make relationship-building the whole job, not a side skill. Where has your read on people already produced something no process could?`,
@@ -3160,7 +3160,7 @@ window.DMicroContent = (function () {
     },
 
     '7_CAREER': {
-      heading: `Your Career Path Runs Through Motion and a Clear Finish Line`,
+      heading: `Motion With a Finish Line`,
       why: `Your career fit runs through movement and results — logistics or transportation, the sports industry, event management, travel, operations. Specifically: long-distance drivers, couriers, tour guides, martial arts and fitness coaching, military and law enforcement at any rank — anywhere the job is literally to get something, or someone, across a finish line.`,
       shadow: `The risk is a desk role with no visible destination, where drive with nowhere to point turns into restlessness instead of results.`,
       path: `Try naming one role with a visible finish line — a launch, a season, a delivery — and moving toward it this month. You are allowed to need momentum to feel like yourself at work. What destination would justify the drive you already have?`,
@@ -3169,7 +3169,7 @@ window.DMicroContent = (function () {
     },
 
     '8_CAREER': {
-      heading: `Your Career Path Runs Through Fairness Made Concrete`,
+      heading: `Fairness Made Concrete`,
       why: `Your career fit runs through balance and accountability — law or legal consulting, accounting or auditing, financial analysis, compliance, contract management. Less expectedly, the same fairness instinct fits karmic and esoteric work directly — fortune-telling, destiny improvement, karmic healing — anywhere accuracy and fairness, whether in a ledger or a life, are the literal job.`,
       shadow: `The risk is a role where fairness is expected but never actually rewarded, so the exact skill that makes you good at this goes uncompensated.`,
       path: `Try naming one field where integrity is a paid asset, not just an expectation, and researching a real path into it. You are allowed to profit from being the honest one. Where has fairness already been your quiet advantage?`,
@@ -3178,7 +3178,7 @@ window.DMicroContent = (function () {
     },
 
     '9_CAREER': {
-      heading: `Your Career Path Runs Through Depth, Not Breadth`,
+      heading: `Depth Over Breadth`,
       why: `Your career fit runs through specialized mastery — niche consulting, strategic analysis, therapeutic or healing work, research, a solo practice. This same depth-over-breadth instinct runs surprisingly wide: archaeology, linguistics, veterinary science, beekeeping and gardening, even monastic or priestly life — anywhere going deep in one area, largely alone, matters more than a wide network.`,
       shadow: `The risk is a role that demands constant networking and visibility, pulling you away from exactly the solitary depth that's your real asset.`,
       path: `Try naming one narrow area you could go deeper in this year, and one way to make that depth visible to the people who'd pay for it. You are allowed to specialize instead of spreading thin. What have you already gone deeper into than almost anyone around you?`,
@@ -3187,7 +3187,7 @@ window.DMicroContent = (function () {
     },
 
     '10_CAREER': {
-      heading: `Your Career Path Runs Through Adapting Faster Than Most`,
+      heading: `Adapting Faster Than Most`,
       why: `Your career fit runs through flexibility — marketing, trading and investments, business development, tourism, freelance work across multiple projects. That same instinct leans hard into team and motion work too: flight attendants, traffic controllers, telecommunications, team sports, restaurant and hospitality service, choirs and dance groups — anywhere reading and riding a changing situation alongside other people is the actual skill.`,
       shadow: `The risk is a rigid, single-track role that punishes exactly the adaptability that's your real strength, leaving you bored or stuck.`,
       path: `Try naming one part of your work you could deliberately diversify or make more freelance or project-based this year. You are allowed to build a career that moves instead of staying still. Where has adapting quickly already paid off for you?`,
@@ -3196,7 +3196,7 @@ window.DMicroContent = (function () {
     },
 
     '11_CAREER': {
-      heading: `Your Career Path Runs Through the Energy You Bring Into a Room`,
+      heading: `Presence as the Product`,
       why: `Your career fit runs through presence — coaching or motivating others, building a personal brand, fitness and wellness, performing or public-figure visibility, leadership roles that depend on presence as much as position. The same tireless-capacity instinct fits rescue and security work directly — lifeguard, Federal Rescue Services, security — and energetic healing, anywhere real physical or energetic force is genuinely required.`,
       shadow: `The risk is a background role that asks you to shrink your presence rather than use it, spending charisma where it's never actually the point.`,
       path: `Try naming one role or platform where your presence would be the explicit asset, not a bonus, and taking one visible step toward it this month. You are allowed to count your presence as real labor. What rooms change when you walk in — and are you being paid for that yet?`,
@@ -3205,7 +3205,7 @@ window.DMicroContent = (function () {
     },
 
     '12_CAREER': {
-      heading: `Your Career Path Runs Through Staying With People Through Something Slow`,
+      heading: `Sustained Service Over Speed`,
       why: `Your career fit runs through sustained service — counseling or psychology, medical or caregiving professions, social work, spiritual service, long-term transformational projects. Specifically: orphanages, retirement funds, disability services, animal and nature protection, homeopathic and herbal medicine — anywhere depth of presence with someone vulnerable matters more than speed of result.`,
       shadow: `The risk is a fast-turnaround role that never lets you actually stay with anyone long enough to do this work the way you're built for.`,
       path: `Try naming one field of sustained service you've been drawn to, and taking one real step — a course, a conversation, an application — toward it this month. You are allowed to build a career around staying, not just fixing quickly. Whose slow transformation would you want to be part of?`,
@@ -3214,7 +3214,7 @@ window.DMicroContent = (function () {
     },
 
     '13_CAREER': {
-      heading: `Your Career Path Runs Through Guiding Real Endings`,
+      heading: `Guiding Real Endings`,
       why: `Your career fit runs through transformation — crisis management, psychotherapy, transformation coaching, medical work centered on renewal (surgery, rehabilitation), change management. It also runs through literal thresholds: obstetrics, forensic science, emergency medicine, firefighting, extreme sports — anywhere guiding an ending into a genuine new beginning, sometimes literally, is the job.`,
       shadow: `The risk is a role built entirely around maintaining the status quo, where your real gift for guiding change never gets used.`,
       path: `Try naming one field built around transformation rather than maintenance, and researching a real path into it this month. You are allowed to build a career around change, not stability for its own sake. What ending have you already guided someone else through?`,
@@ -3223,7 +3223,7 @@ window.DMicroContent = (function () {
     },
 
     '14_CAREER': {
-      heading: `Your Career Path Runs Through Blending What Others Keep Separate`,
+      heading: `Integration as a Career`,
       why: `Your career fit runs through integration — holistic healing, nutrition or wellness coaching, mediation, integrative consulting, lifestyle consulting. The blending instinct gets unusually specific too: perfumery, sauna and bath therapy, museum curation, epidemiological and lab work alongside theatre, dance, and music — anywhere combining disparate elements into something whole, physically or artistically, is the actual craft.`,
       shadow: `The risk is a narrowly specialized role that forces you to leave half your actual skill set at the door.`,
       path: `Try naming the two or three skills you keep being told to pick between, and researching one field where they're actually meant to combine. You are allowed to be the blend the industry didn't have a title for yet. Which of your combined skills is actually the product?`,
@@ -3232,7 +3232,7 @@ window.DMicroContent = (function () {
     },
 
     '15_CAREER': {
-      heading: `Your Career Path Runs Through Understanding What Actually Drives People`,
+      heading: `Understanding What Drives People`,
       why: `Your career fit runs through material power — business and finance, sales and negotiation, the entertainment industry, the luxury market, work built around understanding what compels people materially and psychologically. It extends into gaming and recreational business, brokerage, and addiction or narcology work directly — anywhere serious money and serious temptation sit in the same room.`,
       shadow: `The risk is a role where that understanding gets used to grip control over people rather than serve a genuine transaction, costing trust in the long run.`,
       path: `Try naming one field where your read on power and money could serve a genuinely good deal, not just a personal edge, and researching a real path into it. You are allowed to understand leverage without being owned by it. What could your honest read on influence build if you aimed it somewhere clean?`,
@@ -3241,7 +3241,7 @@ window.DMicroContent = (function () {
     },
 
     '16_CAREER': {
-      heading: `Your Career Path Runs Through Rebuilding What's Broken`,
+      heading: `Rebuilding What's Broken`,
       why: `Your career fit runs through disruption and reconstruction — engineering or architecture, IT and cybersecurity, crisis and risk management, construction, system transformation. It gets vivid and literal too: demolition, mining, atomic science, steeplejacking, criminal investigation — anywhere reorganizing, or literally taking apart, a failing structure is the actual job.`,
       shadow: `The risk is a role that asks you to patch things quietly rather than actually rebuild them, leaving your real gift for structural change unused.`,
       path: `Try naming one system, at work or elsewhere, that's genuinely due for a rebuild rather than another patch, and proposing the real fix. You are allowed to say the structure is failing before it's polite. What collapse have you already seen coming that no one else named yet?`,
@@ -3250,7 +3250,7 @@ window.DMicroContent = (function () {
     },
 
     '17_CAREER': {
-      heading: `Your Career Path Runs Through Being Seen While You Create`,
+      heading: `Seen While You Create`,
       why: `Your career fit runs through visible creativity — blogging or influencing, art and creative work released publicly, media and online projects, social initiatives, personal-brand monetization. It reaches into an unexpectedly wide range within that same visibility: polar research, astronomy, maritime and agricultural work, radio and TV hosting — anywhere hope and inspiration, shared publicly, are the literal product.`,
       shadow: `The risk is keeping the creative work private and unmonetized, waiting for it to be discovered instead of actively offering it.`,
       path: `Try publishing or pitching one piece of your creative work this month at the size it's actually at, not the size you wish it were. You are allowed to be seen before you feel fully ready. What would you release if visibility paid what it actually pays?`,
@@ -3259,7 +3259,7 @@ window.DMicroContent = (function () {
     },
 
     '18_CAREER': {
-      heading: `Your Career Path Runs Through What You Sense but Can't Always Prove`,
+      heading: `Sensed, Not Always Proven`,
       why: `Your career fit runs through the intuitive and the felt — psychology or therapeutic work, filmmaking or visual art, photography, esoteric practice, creative healing professions. Specifically: fantasy and fairy-tale writing, puppetry, clairvoyance and soothsaying, orientalist and linguistic studies — and, less expectedly, criminal investigation and interpretation work — anywhere reading an unspoken undercurrent, real or fictional, is the actual skill.`,
       shadow: `The risk is a role that demands hard, provable data before anything is trusted, leaving your real gift for reading atmosphere and emotion sidelined.`,
       path: `Try naming one field where an intuitive read is the qualification, not an obstacle to prove around, and researching a real path in. You are allowed to follow a professional hunch past what you can fully explain. What direction keeps tugging that your resume can't justify yet?`,
@@ -3268,7 +3268,7 @@ window.DMicroContent = (function () {
     },
 
     '19_CAREER': {
-      heading: `Your Career Path Runs Through Being Genuinely Yourself, Publicly`,
+      heading: `Genuinely Yourself, Publicly`,
       why: `Your career fit runs through visible warmth — public speaking, teaching children specifically, the entertainment industry, creative leadership, a personal-brand business built around simply being visibly, genuinely yourself. It also carries real institutional weight: military command, state governance, directing plants and enterprises, nuclear physics — anywhere your natural radiance is also trusted with genuine responsibility.`,
       shadow: `The risk is a role that requires a costume — professional distance, suppressed personality — draining exactly the natural ease that makes you good at this.`,
       path: `Try naming one part of your work where you're currently performing professionalism instead of being yourself, and letting more of the real you show there this month. You are allowed to earn from work that feels like being yourself. Where does your labor still require a costume?`,
@@ -3277,7 +3277,7 @@ window.DMicroContent = (function () {
     },
 
     '20_CAREER': {
-      heading: `Your Career Path Runs Through the Work You Keep Being Called Back To`,
+      heading: `The Work You're Called Back To`,
       why: `Your career fit runs through vocation — coaching or mentoring, public service, work on social projects, speaking on subjects that genuinely matter, transformational education. It runs directly into the threshold work underneath that calling too: pathology, funeral and cemetery service, work with problem teenagers, prison staff, and paranormal research — professions that function less like a job and more like an answer to something.`,
       shadow: `The risk is staying in an adequate-but-outgrown role, endlessly preparing to answer the calling instead of actually making the leap.`,
       path: `Try naming the work you keep returning to in your mind, and taking one real step toward it this month instead of more preparation. You are allowed to answer the calling that keeps calling. What is one real step, not another course, toward the work you keep circling?`,
@@ -3286,7 +3286,7 @@ window.DMicroContent = (function () {
     },
 
     '21_CAREER': {
-      heading: `Your Career Path Runs Through Work That Crosses Borders`,
+      heading: `Work That Crosses Borders`,
       why: `Your career fit runs through global reach — international business and trade, online platforms and digital ecosystems, cross-border projects, travel and tourism or relocation services. It runs through peace-making and mineral industries specifically too: missionary and interfaith work, shipping and aviation, oil and geology — anywhere work is embedded in genuinely large systems and networks rather than one local one.`,
       shadow: `The risk is staying confined to a narrow, local version of your field long after your actual capacity has outgrown it.`,
       path: `Try letting one part of your work deliberately cross a border this year — a client, a platform, a market — rather than assuming your reach has to stay local. You are allowed to work at the size of the whole map. What border is your work actually ready to cross?`,
@@ -3295,7 +3295,7 @@ window.DMicroContent = (function () {
     },
 
     '22_CAREER': {
-      heading: `Your Career Path Runs Through Work That Doesn't Have a Template Yet`,
+      heading: `No Template Yet`,
       why: `Your career fit runs through original, unstructured paths — freelancing, creative entrepreneurship, working as a digital nomad, startups and experimental projects. It leans into the literally boundary-crossing too: paratrooper, mountaineer, astronaut, circus performer, illusionist, shaman — anywhere a job description would have to be invented to describe what you actually do.`,
       shadow: `The risk is forcing yourself into a fixed, conventional role that punishes exactly the originality that's your real asset, leaving you restless inside a template that was never built for you.`,
       path: `Try naming one unconventional shape your work could actually take, and taking one real step toward building it this year. You are allowed to build a career with no template. What venture would you start if 'that's not a real job' stopped being a reason not to?`,
