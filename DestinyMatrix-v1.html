@@ -1105,16 +1105,10 @@ camera.position.set(0, 0, 12);
 //     card-render function) is passed through themedHex() at the point it's
 //     written into a style, which applies the same deepen-for-light
 //     transform to CSS hex strings.
-// Light is the default for a first-time visitor (no stored preference yet).
-// Once someone actually toggles it, applyTheme() persists their choice and
-// that's what boots next time — this only decides the very first visit.
-let _theme = (function () {
-  try {
-    const stored = localStorage.getItem('dm-theme');
-    return stored === 'dark' ? 'dark' : 'light';
-  }
-  catch (_) { return 'light'; }
-})();
+// Light always opens by default — deliberately not persisted across visits.
+// Toggling to dark only lasts for the current viewing session; every fresh
+// load/reload boots back into light regardless of what was last toggled.
+let _theme = 'light';
 
 function _rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
@@ -1236,8 +1230,6 @@ function applyTheme(theme) {
   _dotThemeRegistry.forEach(({ material, darkColorNum, lightColorNum }) => {
     material.color.setHex(_theme === 'light' ? lightColorNum : darkColorNum);
   });
-
-  try { localStorage.setItem('dm-theme', _theme); } catch (_) {}
 }
 
 // ── TEXTURE BUILDERS ───────────────────────────────────────────────────────
