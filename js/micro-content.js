@@ -4471,7 +4471,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '1_I1': {
-      heading: `A Venture Your Mother's Mother Never Got to Fully Launch Is Now Yours to Start`,
+      heading: `The Venture Grandmother Left Undone`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Maternal Feminine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
       shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
       path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea. You are allowed to begin the thing her world called impossible. What is the modern, possible version of her impossible venture?`,
@@ -4481,7 +4481,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '2_I1': {
-      heading: `Trusting Your Own Instinct Where Your Mother's Mother Couldn't Is Now Yours to Complete`,
+      heading: `Instinct She Couldn't Trust`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real inner knowing that circumstance, expectation, or a demand for constant practicality never allowed to be trusted or acted on. The High Priestess sits in your Maternal Feminine Line, meaning this generation's task may be to trust intuition the way she never got permission to.`,
       shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
       path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it. You are allowed to let your knowing lead where hers had to follow. What choice would you make today by instinct alone?`,
@@ -4491,7 +4491,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '3_I1': {
-      heading: `A Creative Ambition of Your Mother's Mother Was Set Aside and Is Now Yours to Live`,
+      heading: `An Ambition Deferred, Now Lived`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for creativity, nurture, or generative abundance that circumstance or expectation never allowed her to fully express beyond the domestic sphere. The Empress sits in your Maternal Feminine Line, meaning this generation's task may be to live openly what she had to keep contained.`,
       shadow: `The risk is inheriting the same containment — real creative or nurturing capacity present in you, but kept small or minimized out of an old, unexamined caution. If your gifts rarely get to expand beyond what feels safely modest, that inherited caution may still be running.`,
       path: `This may shift by expressing your creativity or generosity at full scale in one specific setting this week, without shrinking it as you might by habit. You are allowed to give the creative ambition a real room in your life. What set-aside making of hers is quietly alive in your hands?`,
@@ -4501,7 +4501,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '4_I1': {
-      heading: `An Authority Your Mother's Mother Never Got to Claim Is Now Yours to Hold Well`,
+      heading: `Authority She Never Claimed`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — real leadership potential either never claimed at all, or exercised quietly behind the scenes rather than openly. The Emperor sits in your Maternal Feminine Line, meaning this generation's task may be to hold visible authority in a way she never got to.`,
       shadow: `The risk is repeating the same pattern of influence without visibility — real capability exercised behind the scenes, never claimed openly as leadership in its own right. If you tend to manage things quietly rather than lead them visibly, that old pattern may still be running.`,
       path: `This may shift by taking on one piece of real, visible responsibility this week, leading it openly rather than managing it from behind the scenes. You are allowed to hold the authority two generations prepared you for. Where are you still asking permission that she never even got to ask?`,
@@ -4511,7 +4511,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '5_I1': {
-      heading: `A Calling to Teach or Guide Others Was Set Aside by Your Mother's Mother and Is Now Yours to Answer`,
+      heading: `A Guidance Role, Long Overdue`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected role. The Hierophant sits in your Maternal Feminine Line, meaning this generation's task may be to actually answer a calling she had to set down.`,
       shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
       path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such. You are allowed to teach the wisdom she practiced in silence. What lesson of hers reaches further the moment you speak it?`,
@@ -4521,7 +4521,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '6_I1': {
-      heading: `A Love Your Mother's Mother Chose for Duty Instead of the Heart Is Now Yours to Choose Freely`,
+      heading: `Choosing Heart Over Duty`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Maternal Feminine Line, meaning this generation's task may be to choose love from genuine preference where she couldn't.`,
       shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
       path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice. You are allowed to choose the heart's love she was never offered. What would your choosing freely give back to her story?`,
@@ -4531,7 +4531,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '7_I1': {
-      heading: `A Goal Your Mother's Mother Left Interrupted Is Now Yours to Actually Finish`,
+      heading: `Finishing What She Started`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Maternal Feminine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
       shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
       path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted. You are allowed to complete her goal in your own dialect. What does the finished version look like when it's genuinely yours?`,
@@ -4541,7 +4541,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '8_I1': {
-      heading: `An Old Unresolved Unfairness in Your Mother's Mother's Life Is Now Yours to Actually Settle`,
+      heading: `An Old Score, Finally Settled`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Maternal Feminine Line, meaning this generation's task may be to bring genuine resolution to something she had to leave unsettled.`,
       shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
       path: `This may shift by naming, as specifically as you can, what the original unfairness was, and consciously choosing to resolve rather than continue carrying it. You are allowed to be the generation where the unfairness stops. What pattern ends with you — decided today?`,
@@ -4551,7 +4551,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in MATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
     '9_I1': {
-      heading: `A Need for Real Solitude Your Mother's Mother Never Got Is Now Yours to Finally Claim`,
+      heading: `Solitude She Was Denied`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Maternal Feminine Line, meaning this generation's task may be to claim the solitude she was never allowed to take.`,
       shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
       path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first. You are allowed to take the solitude she was never once granted. What would a protected, regular stillness change in your weeks?`,
@@ -4561,7 +4561,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '10_I1': {
-      heading: `A Plan Your Mother's Mother Saw Derailed Is Now Yours to Make Peace With`,
+      heading: `Making Peace With Her Derailment`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Maternal Feminine Line, meaning this generation's task may be to find peace with life's turns where she couldn't.`,
       shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
       path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it. You are allowed to bless the derailed plan and walk on. What might flow easier once the old grief is honored instead of solved?`,
@@ -4571,7 +4571,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '11_I1': {
-      heading: `A Strength That Includes Gentleness Is Now Yours to Embody Where Your Mother's Mother Only Showed Toughness`,
+      heading: `Toughness Softened, At Last`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for compassionate strength, overridden by a demand to appear unshaken, endlessly capable, or hardened instead. The Strength sits in your Maternal Feminine Line, meaning this generation's task may be to lead with a strength she was only allowed to show as endurance.`,
       shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as endurance, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
       path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it. You are allowed to let gentleness be your version of her endurance. Where would soft persistence carry you now?`,
@@ -4581,7 +4581,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '12_I1': {
-      heading: `A Life Your Mother's Mother Gave Entirely to Others Is Now Yours to Rebalance`,
+      heading: `Reclaiming a Life Given Away`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Maternal Feminine Line, meaning this generation's task may be to reclaim active choice for yourself where she only ever gave it away.`,
       shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
       path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's. You are allowed to receive in a line of women who only gave. What would you accept this month, deliberately, in her name and yours?`,
@@ -4591,7 +4591,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '13_I1': {
-      heading: `A Change Your Mother's Mother Resisted Until the End Is Now Yours to Complete Instead of Avoid`,
+      heading: `Finishing the Change She Feared`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Maternal Feminine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way she did.`,
       shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
       path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it. You are allowed to cross the threshold she stood at all her life. What is one concrete step over it this season?`,
@@ -4601,7 +4601,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '14_I1': {
-      heading: `A Life Your Mother's Mother Lost to Extremes Is Now Yours to Steady`,
+      heading: `Steadying Her Swing to Extremes`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, self-denial, or relentless caretaking. The Temperance sits in your Maternal Feminine Line, meaning this generation's task may be to find the steadiness her life never actually held.`,
       shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or depletion, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
       path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme. You are allowed to build a steadiness her life never permitted. What extreme are you ready to lay down for both of you?`,
@@ -4611,7 +4611,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '15_I1': {
-      heading: `A Bind Your Mother's Mother Never Broke Is Now Yours to Actually Release`,
+      heading: `A Bind, Finally Broken`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real entrapment, whether a compulsion or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Maternal Feminine Line, meaning this generation's task may be to release a bind she was never able to escape.`,
       shadow: `The risk is inheriting a compulsive attachment of your own — to a pattern, a role, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
       path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed. You are allowed to release the bind — the key was always going to reach your generation. What does turning it look like in practice?`,
@@ -4621,7 +4621,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '16_I1': {
-      heading: `A Collapse Your Mother's Mother Never Fully Rebuilt From Is Now Yours to Finish Rebuilding`,
+      heading: `Completing an Old Rebuild`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Maternal Feminine Line, meaning this generation's task may be to complete a reconstruction she started but didn't finish.`,
       shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
       path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse. You are allowed to rebuild past survival into actual flourishing. What would flourishing — not just standing — look like for you?`,
@@ -4631,7 +4631,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '17_I1': {
-      heading: `A Hope Your Mother's Mother Abandoned Is Now Yours to Restore`,
+      heading: `Reviving an Abandoned Hope`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Maternal Feminine Line, meaning this generation's task may be to restore a hope she felt forced to give up.`,
       shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
       path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it. You are allowed to re-light the hope she had to blow out. What small daily act would keep it burning this time?`,
@@ -4641,7 +4641,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '18_I1': {
-      heading: `A Fear Your Mother's Mother Never Faced Is Now Yours to Finally See Clearly`,
+      heading: `Naming a Fear She Wouldn't`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Maternal Feminine Line, meaning this generation's task may be to see clearly what she could never quite look at directly.`,
       shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
       path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it. You are allowed to name the fear she carried namelessly. Spoken in your voice — what is it, and is it still yours to keep?`,
@@ -4651,7 +4651,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '19_I1': {
-      heading: `A Joy Your Mother's Mother Kept Hidden Is Now Yours to Let Be Seen`,
+      heading: `Her Hidden Joy, Unhidden`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real capacity for open joy and warmth, kept behind quiet composure considered proper or necessary. The Sun sits in your Maternal Feminine Line, meaning this generation's task may be to let visible joy exist where she only ever allowed restraint.`,
       shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a composed surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
       path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure. You are allowed to let the hidden joy out into ordinary daylight. What delight of yours has waited generations for an audience?`,
@@ -4661,7 +4661,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '20_I1': {
-      heading: `A Calling Your Mother's Mother Never Answered Is Now Yours to Finally Take Up`,
+      heading: `A Calling She Set Down`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Maternal Feminine Line, meaning this generation's task may be to answer a call she heard but couldn't take up.`,
       shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
       path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it. You are allowed to take up the calling as its rightful heir. What would honoring it this year actually require of you?`,
@@ -4671,7 +4671,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '21_I1': {
-      heading: `Something Your Mother's Mother Left Permanently Unfinished Is Now Yours to Actually Complete`,
+      heading: `The Ending She Never Reached`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Maternal Feminine Line, meaning this generation's task may be to reach a completion she never got to feel.`,
       shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
       path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further. You are allowed to complete what her whole life circled. What is your next move on the unfinished thing — this week, not someday?`,
@@ -4681,7 +4681,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in MATERNAL FEMININE LINE (Ancestral Tasks) ──────────────────────
     '22_I1': {
-      heading: `A Freedom Your Mother's Mother Traded Away Is Now Yours to Reclaim`,
+      heading: `Freedom She Gave Up First`,
       why: `This Ancestral Task may carry an unfulfilled dream from your mother's mother — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Maternal Feminine Line, meaning this generation's task may be to reclaim the freedom she gave up.`,
       shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
       path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety. You are allowed to live the freedom she only imagined. What imagined liberty of hers could become your Tuesday?`,
@@ -5296,7 +5296,7 @@ window.DMicroContent = (function () {
     // ── Lineage Square Talents: Maternal Material Talent (I2) ───────────────
 
     '1_I2': {
-      heading: `A Knack for Making Something From Very Little`,
+      heading: `Very Little, Made Enough`,
       why: `Somewhere in your mother's material line, someone could start a venture, a household economy, an income from bare circumstances — real, practical originating ability. The Magician in your Maternal Material Talent means launching from scratch is your inheritance.`,
       shadow: `The risk is starting many things and finishing few, spending the inherited spark on the exciting opening and losing interest once the harder building begins.`,
       path: `This talent asks you to carry one material venture past its beginning. You are allowed to make from abundance too, not only from scraps. What could your resourcefulness build if it finally had full materials?`,
@@ -5305,7 +5305,7 @@ window.DMicroContent = (function () {
     },
 
     '2_I2': {
-      heading: `A Practical Instinct That Runs Ahead of the Numbers`,
+      heading: `Ahead of the Numbers`,
       why: `Somewhere back along your mother's material line, someone read a financial or practical situation correctly before the facts could confirm it. The High Priestess in your Maternal Material Talent means that instinct is your inheritance.`,
       shadow: `The risk is trusting the instinct so privately it never gets acted on, letting a correct read go unused because it can't yet be justified on paper.`,
       path: `This talent asks you to act on the instinct and let the numbers catch up. You are allowed to trust the practical instinct and let the numbers catch up. Where has that inherited gut-sense already saved you recently?`,
@@ -5314,7 +5314,7 @@ window.DMicroContent = (function () {
     },
 
     '3_I2': {
-      heading: `A Belief That Making Sure Everyone's Fed and Held Is Simply What You Do`,
+      heading: `Feeding and Holding Everyone`,
       why: `Somewhere in your mother's material line, someone made certain the people around them were fed, housed, and materially cared for, as instinct rather than effort. The Empress in your Maternal Material Talent means that provision is your inheritance.`,
       shadow: `The risk is providing for everyone except yourself, extending the care outward so consistently that your own material comfort quietly goes unattended.`,
       path: `This talent asks you to include yourself in the providing. You are allowed to be fed and held too, not just to make sure of it for others. Who checks whether you've eaten, rested, been carried lately?`,
@@ -5323,7 +5323,7 @@ window.DMicroContent = (function () {
     },
 
     '4_I2': {
-      heading: `The Job of Keeping Things Materially Organized, Without Ever Being Asked`,
+      heading: `Organizing, Never Asked`,
       why: `Somewhere back along your mother's material line, someone quietly organized the household economy, the logistics, the practical structure everyone else relied on without ever formally being asked to. The Emperor in your Maternal Material Talent means that organizing competence is your inheritance.`,
       shadow: `The risk is holding the job forever without ever being relieved of it, keeping the organizing entirely on your own shoulders because no one else was ever asked to share it.`,
       path: `This talent asks you to let the job be shared sometimes. You are allowed to resign from the unasked-for job sometimes. What would happen if the organizing waited for you to be actually willing?`,
@@ -5332,7 +5332,7 @@ window.DMicroContent = (function () {
     },
 
     '5_I2': {
-      heading: `Practical Skills Nobody Ever Formally Taught You`,
+      heading: `Skills Absorbed, Not Taught`,
       why: `Somewhere in your mother's material line, someone carried real practical know-how learned by doing rather than by certificate. The Hierophant in your Maternal Material Talent means that untaught expertise is your inheritance.`,
       shadow: `The risk is undervaluing the skill precisely because it wasn't formally credentialed.`,
       path: `This talent asks you to name the skill as real expertise. You are allowed to own the skills nobody formally certified. What untaught competence of yours deserves to be named as expertise?`,
@@ -5341,7 +5341,7 @@ window.DMicroContent = (function () {
     },
 
     '6_I2': {
-      heading: `A Sense of What Actually Matters When Resources Are Limited`,
+      heading: `Knowing What Matters When Little`,
       why: `Somewhere back along your mother's material line, someone kept clear values intact even when money or resources were genuinely scarce. The Lovers in your Maternal Material Talent means that clarity is your inheritance.`,
       shadow: `The risk is letting that clarity fade the moment resources become comfortable, forgetting under abundance the values that were so sharp under scarcity.`,
       path: `This talent asks you to keep the clarity active even when it isn't required. You are allowed to keep the clarity even when resources aren't limited. What essential thing does your inheritance help you see that abundance tends to blur?`,
@@ -5350,7 +5350,7 @@ window.DMicroContent = (function () {
     },
 
     '7_I2': {
-      heading: `Learning to Steer, Never to Ask for a Hand`,
+      heading: `Steering Solo`,
       why: `Somewhere in your mother's material line, someone drove a material goal forward alone, without waiting for permission or partnership to move. The Chariot in your Maternal Material Talent means self-directed material drive is your inheritance.`,
       shadow: `The risk is refusing help even when it's genuinely offered, treating solo determination as the only legitimate way to reach a material goal.`,
       path: `This talent asks you to keep the drive and add a hand. You are allowed to ask for a hand and keep the wheel. What are you steering alone right now that was never designed for one driver?`,
@@ -5359,7 +5359,7 @@ window.DMicroContent = (function () {
     },
 
     '8_I2': {
-      heading: `A Careful Sense of Fairness About Who Gets What`,
+      heading: `Fair Shares, Carefully Judged`,
       why: `Somewhere back along your mother's material line, someone divided resources, credit, and reward with real, careful fairness. Justice in your Maternal Material Talent means that fairness is your inheritance.`,
       shadow: `The risk is applying that fairness to everyone except yourself, dividing carefully for others while leaving your own share consistently smallest.`,
       path: `This talent asks you to include yourself in the fair division. You are allowed to include yourself in the fair share. When the careful dividing is done, what portion have you been leaving off your own plate?`,
@@ -5368,7 +5368,7 @@ window.DMicroContent = (function () {
     },
 
     '9_I2': {
-      heading: `A Quiet Competence for Handling Material Life Alone`,
+      heading: `Quiet Mastery, Alone`,
       why: `Somewhere in your mother's material line, someone managed real material responsibility in solitude and did it capably. The Hermit in your Maternal Material Talent means solitary material competence is your inheritance.`,
       shadow: `The risk is staying solitary in it even when company would genuinely help.`,
       path: `This talent asks you to let a task be witnessed or shared sometimes. You are allowed to be competent and accompanied. What material task could you let someone witness, or even share, this week?`,
@@ -5377,7 +5377,7 @@ window.DMicroContent = (function () {
     },
 
     '10_I2': {
-      heading: `A Quiet Endurance for Material Life's Ups and Downs`,
+      heading: `Riding the Financial Waves`,
       why: `Somewhere back along your mother's material line, someone weathered real financial cycles without being wrecked by either extreme. The Wheel of Fortune in your Maternal Material Talent means that endurance is your inheritance.`,
       shadow: `The risk is bracing so hard against the next downturn that you can't actually receive or enjoy the current upswing.`,
       path: `This talent asks you to let the good stretch actually land as good. You are allowed to expect good stretches, not just endure hard ones. What upswing might you be bracing against instead of receiving?`,
@@ -5386,7 +5386,7 @@ window.DMicroContent = (function () {
     },
 
     '11_I2': {
-      heading: `A Softness That Somehow Never Actually Broke Under Material Strain`,
+      heading: `Strain Without Breaking`,
       why: `Somewhere in your mother's material line, someone stayed gentle through real material hardship — softness that endured rather than hardened. Strength in your Maternal Material Talent means that gentleness-under-pressure is your inheritance.`,
       shadow: `The risk is mistaking the gentleness for weakness under your own current strain, hardening reflexively instead of trusting the softness to hold.`,
       path: `This talent asks you to trust that the softness already proved itself. You are allowed to stay soft — the strain already proved it doesn't break you. Where is your gentleness quietly outlasting circumstances that were supposed to harden you?`,
@@ -5395,7 +5395,7 @@ window.DMicroContent = (function () {
     },
 
     '12_I2': {
-      heading: `A Patience for Material Circumstances That Take Their Time to Change`,
+      heading: `Patience for What Takes Time`,
       why: `Somewhere back along your mother's material line, someone waited out a slow material circumstance without forcing it, and it eventually resolved on its own timing. The Hanged Man in your Maternal Material Talent means that patience is your inheritance.`,
       shadow: `The risk is applying that patience to situations that actually need a push.`,
       path: `This talent asks you to nudge, sometimes, instead of only waiting. You are allowed to nudge the slow circumstances instead of only waiting them out. What patient situation of yours might respond to one small push?`,
@@ -5404,7 +5404,7 @@ window.DMicroContent = (function () {
     },
 
     '13_I2': {
-      heading: `A Real Capacity to Rebuild Materially From Almost Nothing`,
+      heading: `Rebuilding From Nearly Nothing`,
       why: `Somewhere in your mother's material line, someone lost real material ground and rebuilt from close to nothing, more than once if needed. Transformation in your Maternal Material Talent means that rebuilding capacity is your inheritance.`,
       shadow: `The risk is waiting for an actual collapse to use the gift, letting things get much worse than necessary before finally rebuilding.`,
       path: `This talent asks you to rebuild before ruin forces it. You are allowed to rebuild without waiting for the ruin. What could you renovate now, while things still stand?`,
@@ -5413,7 +5413,7 @@ window.DMicroContent = (function () {
     },
 
     '14_I2': {
-      heading: `A Real Skill for Making Limited Resources Actually Stretch`,
+      heading: `Stretching the Little There Is`,
       why: `Somewhere back along your mother's material line, someone made scarce resources genuinely go further through real practical skill, not deprivation. Temperance in your Maternal Material Talent means that stretching ability is your inheritance.`,
       shadow: `The risk is stretching resources even when stretching is no longer necessary, staying in scarcity-mode long after actual scarcity has passed.`,
       path: `This talent asks you to let margin be margin sometimes. You are allowed to have enough that nothing needs stretching. What would you do with real, unstretched margin?`,
@@ -5422,7 +5422,7 @@ window.DMicroContent = (function () {
     },
 
     '15_I2': {
-      heading: `A Complicated Relationship to Material Dependence`,
+      heading: `A Tangled Dependence`,
       why: `Somewhere in your mother's material line, someone wrestled honestly with material dependence — needing help, receiving support — rather than pretending independence was always possible or always required. The Devil in your Maternal Material Talent means that honest wrestling is your inheritance.`,
       shadow: `The risk is inheriting the discomfort around dependence without inheriting the honest examination that once accompanied it, refusing support altogether rather than examining the discomfort.`,
       path: `This talent asks you to depend and examine it honestly, rather than avoiding it outright. You are allowed to depend and remain whole. What support could you accept this season without it costing your self-respect?`,
@@ -5431,7 +5431,7 @@ window.DMicroContent = (function () {
     },
 
     '16_I2': {
-      heading: `A Material Loss That Was Survived but Never Fully Discussed`,
+      heading: `A Loss, Quietly Survived`,
       why: `Somewhere back along your mother's material line, a real financial loss happened and was survived — but never fully talked through afterward. The Tower in your Maternal Material Talent means resilience through material loss is your inheritance, alongside an unfinished conversation.`,
       shadow: `The risk is repeating a version of the same loss because the original one was never actually processed, only survived.`,
       path: `This talent asks you to speak about the loss that was only survived. You are allowed to speak about the loss that was only survived. What might your money worries lose their grip on once the old story is finally told?`,
@@ -5440,7 +5440,7 @@ window.DMicroContent = (function () {
     },
 
     '17_I2': {
-      heading: `A Quiet, Modest Hope That Things Would Materially Get Better`,
+      heading: `Hope Held Modestly`,
       why: `Somewhere in your mother's material line, someone held onto real hope for better material circumstances, sized modestly enough to feel safe. The Star in your Maternal Material Talent means that hope is your inheritance.`,
       shadow: `The risk is keeping the hope permanently modest even once circumstances could support something larger.`,
       path: `This talent asks you to let the hope grow to match what's actually possible now. You are allowed to hope at a size she couldn't afford. What better-than-modest future would you name out loud if hope were free?`,
@@ -5449,7 +5449,7 @@ window.DMicroContent = (function () {
     },
 
     '18_I2': {
-      heading: `A Material Worry That Was Felt More Than It Was Ever Explained`,
+      heading: `Worry Beneath the Surface`,
       why: `Somewhere back along your mother's material line, someone carried a real financial fear that was never given words, only felt and passed along as atmosphere. The Moon in your Maternal Material Talent means that unnamed worry is your inheritance, waiting to finally be named.`,
       shadow: `The risk is letting the felt worry run your decisions without ever checking it against your own actual, current circumstances.`,
       path: `This talent asks you to translate the felt worry into words and test it. You are allowed to translate the felt worry into words and check it. What is the inherited unease actually about — and does your present life still match it?`,
@@ -5458,7 +5458,7 @@ window.DMicroContent = (function () {
     },
 
     '19_I2': {
-      heading: `A Warmth That Stayed Intact Even During Real Material Hardship`,
+      heading: `Warmth Intact Through Hardship`,
       why: `Somewhere in your mother's material line, someone stayed genuinely warm even during real material hardship. The Sun in your Maternal Material Talent means that intact warmth is your inheritance.`,
       shadow: `The risk is assuming the warmth should be reserved until things are materially easier, holding back generosity as if it were conditional on comfort.`,
       path: `This talent asks you to let the warmth show now, regardless of current material conditions. You are allowed to trust that your warmth survives hardship — it already has for generations. Who needs that intact warmth from you right now?`,
@@ -5467,7 +5467,7 @@ window.DMicroContent = (function () {
     },
 
     '20_I2': {
-      heading: `A Sense of Material Potential That Circumstances Never Let Her Pursue`,
+      heading: `A Potential She Never Pursued`,
       why: `Somewhere back along your mother's material line, someone sensed a bigger material possibility than circumstances ever let them pursue. Judgement in your Maternal Material Talent means that unclaimed potential is now yours to actually take up.`,
       shadow: `The risk is sensing the same larger possibility in your own life and, out of old habit, still finding reasons to wait for better conditions.`,
       path: `This talent asks you to answer the material calling with what you actually have available now. You are allowed to pursue what her circumstances forbade. What material possibility would live twice if you lived it — once for you, once for her?`,
@@ -5476,7 +5476,7 @@ window.DMicroContent = (function () {
     },
 
     '21_I2': {
-      heading: `A Quiet Sense That What You Have Can Actually Be Enough`,
+      heading: `Sensing Enough`,
       why: `Somewhere in your mother's material line, a material goal came close to being reached and was never quite allowed to be called finished, or enough. The World in your Maternal Material Talent means genuine material sufficiency is your inheritance, waiting to actually be claimed.`,
       shadow: `The risk is repeating the same near-completion, reaching real material stability and still finding a reason it doesn't count as enough.`,
       path: `This talent asks you to let what you have actually be counted as enough. You are allowed to feel the enoughness now, not after the next milestone. What do you already have that, honestly counted, is enough?`,
@@ -5485,7 +5485,7 @@ window.DMicroContent = (function () {
     },
 
     '22_I2': {
-      heading: `A Willingness to Take a Real Practical Risk When It Mattered`,
+      heading: `A Risk Worth Taking`,
       why: `Somewhere back along your mother's material line, someone took a real, well-placed material risk when it mattered, rather than playing every situation safe. The Fool in your Maternal Material Talent means that calculated boldness is your inheritance.`,
       shadow: `The risk is inheriting caution instead of the boldness, letting an old fear of loss override a genuinely good opportunity in front of you now.`,
       path: `This talent asks you to size the risk with your own eyes, not old caution. You are allowed to take the practical risk when it matters — it's a family skill. What is the mattering moment in front of you right now?`,
