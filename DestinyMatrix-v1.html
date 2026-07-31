@@ -1456,10 +1456,10 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
     }
     const lineGeoOrb = new THREE.BufferGeometry().setFromPoints(pts);
     const lineMtl    = new THREE.LineBasicMaterial({
-      color: 0x888888, transparent: true, opacity: 0.18, depthWrite: false,
+      color: 0xaaaaaa, transparent: true, opacity: 0.34, depthWrite: false,
     });
     registerThemedLine(lineMtl,
-      { color: 0x888888, opacity: 0.18 },
+      { color: 0xaaaaaa, opacity: 0.34 },
       { color: 0x4a4a5c, opacity: 0.4 });
     const orbitLine = new THREE.Line(lineGeoOrb, lineMtl);
     orbitLine.frustumCulled = false;
@@ -1592,11 +1592,11 @@ const lineGeo = new THREE.BufferGeometry();
 lineGeo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(lineVerts), 3));
 const lineMat = new THREE.LineBasicMaterial({
   color: 0xb0c8f0,
-  opacity: 0.11,
+  opacity: 0.3,
   transparent: true,
 });
 registerThemedLine(lineMat,
-  { color: 0xb0c8f0, opacity: 0.11 },
+  { color: 0xb0c8f0, opacity: 0.3 },
   { color: 0x3a4a72, opacity: 0.4 });
 const constellLines = new THREE.LineSegments(lineGeo, lineMat);
 scene.add(constellLines);
@@ -1609,15 +1609,15 @@ scene.add(constellLines);
     pts.push(new THREE.Vector3(Math.cos(ang)*r, Math.sin(ang)*r, 0));
   }
   const rGeo = new THREE.BufferGeometry().setFromPoints(pts);
-  const darkOpacity  = [0.055, 0.040, 0.025][i];
+  const darkOpacity  = [0.16, 0.12, 0.08][i];
   const lightOpacity = [0.20, 0.15, 0.10][i];
   const rMat = new THREE.LineBasicMaterial({
-    color: 0x6070a0,
+    color: 0x8fa8d8,
     opacity: darkOpacity,
     transparent: true,
   });
   registerThemedLine(rMat,
-    { color: 0x6070a0, opacity: darkOpacity },
+    { color: 0x8fa8d8, opacity: darkOpacity },
     { color: 0x2c3a5e, opacity: lightOpacity });
   scene.add(new THREE.Line(rGeo, rMat));
 });
