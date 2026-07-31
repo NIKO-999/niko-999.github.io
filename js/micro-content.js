@@ -2446,7 +2446,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '1_MK': {
-      heading: `You Keep Starting Over With Money Instead of Building on What's There`,
+      heading: `Starting Over, Not Building`,
       why: `Something in your relationship to material security carries an old, unresolved pattern of initiation without follow-through — a new plan, a fresh financial start, a different approach, each one arriving with real energy. The Magician sits in your Material Karma, meaning your unresolved material task centers specifically on origination: you're genuinely gifted at starting something from nothing, but the security that comes from letting one thing compound over time hasn't yet been claimed.`,
       shadow: `The risk is mistaking the next fresh start for progress, when what's actually needed is staying with the one already in motion. If your financial position keeps resetting to zero right before it would have compounded into something real, that's this pattern still unresolved.`,
       path: `This may shift by choosing the material plan already underway and deliberately not starting a new one until this one has had real time to mature. You are allowed to build on what's already there instead of clearing the ground again. What existing foundation deserves your next brick more than a fresh start does?`,
@@ -2456,7 +2456,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '2_MK': {
-      heading: `Your Actual Financial Picture Stays Quietly Hidden, Even From You`,
+      heading: `Numbers Kept Quiet`,
       why: `Something in your relationship to material security carries an old pattern of concealment — a preference for not looking too closely, not saying the real numbers out loud, keeping your actual financial state private even from people close to you. The High Priestess sits in your Material Karma, meaning your unresolved material task centers on bringing hidden financial reality into the light rather than continuing to sense it privately.`,
       shadow: `The risk is that what stays unexamined stays unmanaged — material security built on a foundation you've never actually looked at directly. If you can sense your financial position more than you can state it plainly, that avoidance may be the pattern still active.`,
       path: `This may shift by writing down your actual financial numbers once, in full, and letting them be seen — by yourself first, and then by one trusted other person. You are allowed to look at the full picture without it becoming a verdict. What single number could you gently look at this week that you've been avoiding?`,
@@ -2466,7 +2466,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '3_MK': {
-      heading: `Generosity Comes Easily, But Your Own Material Cushion Rarely Grows`,
+      heading: `Giving Over Keeping`,
       why: `Something in your relationship to material security carries an old pattern of giving that outpaces keeping — real warmth expressed through material generosity, resources shared freely, comfort extended to others before it's secured for yourself. The Empress sits in your Material Karma, meaning your unresolved material task centers on letting your own reserve grow alongside what you give.`,
       shadow: `The risk is that generosity, unchecked, becomes its own form of depletion — a pattern of material abundance flowing outward while your own foundation stays thin. If you're generous with others while quietly under-resourced yourself, that imbalance is the unresolved piece.`,
       path: `This may shift by setting aside a portion of any material gain for your own security first, before it gets extended to anyone else. You are allowed to cushion yourself with the same generosity you extend. What would giving to your own future self look like this month?`,
@@ -2476,7 +2476,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '4_MK': {
-      heading: `You Hold Tight Control Over Money, As If Loosening It Means Losing It`,
+      heading: `Control Over Trust`,
       why: `Something in your relationship to material security carries an old pattern of control — structure, oversight, and a firm hand over every financial detail, as though security depends entirely on your direct management of it. The Emperor sits in your Material Karma, meaning your unresolved material task centers on finding out whether real security can exist without total personal control over every part of it.`,
       shadow: `The risk is that the control itself becomes exhausting to maintain, and delegating or trusting a system you didn't build yourself feels like real danger rather than a reasonable option. If you can't imagine your material security holding without your constant oversight, that's the pattern still active.`,
       path: `This may shift by handing one specific piece of financial management to a trusted system or person, and observing whether the structure holds without your constant hand on it. You are allowed to loosen the grip without losing the money. What small financial delegation could prove the holding doesn't all depend on your hands?`,
@@ -2486,7 +2486,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '5_MK': {
-      heading: `Old Rules About How Money "Should" Work Still Quietly Run the Show`,
+      heading: `Inherited Rules, Still Running`,
       why: `Something in your relationship to material security carries an old pattern of deference to inherited financial rules — beliefs about money passed down from family, tradition, or authority, followed carefully even when they no longer fit your actual circumstances. The Hierophant sits in your Material Karma, meaning your unresolved material task centers on testing those inherited rules against your own direct experience.`,
       shadow: `The risk is following an outdated financial rule simply because it's familiar, even when it's quietly working against your actual security. If a "should" about money keeps overriding what your own numbers are telling you, that's the pattern still unresolved.`,
       path: `This may shift by naming one inherited belief about money directly and testing it against your current, actual circumstances rather than assuming it still applies. You are allowed to retire the old money rules that no longer describe your life. Which inherited 'should' about money would you strike from the record first?`,
@@ -2496,7 +2496,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '6_MK': {
-      heading: `A Real Financial Choice Keeps Getting Deferred in Favor of Keeping the Peace`,
+      heading: `Peace Over Decision`,
       why: `Something in your relationship to material security carries an old pattern of indecision at real financial forks — a choice that would actually serve your security, deferred in favor of whatever keeps things comfortable in the moment. The Lovers sits in your Material Karma, meaning your unresolved material task centers on making the financial choice that reflects genuine preference, even when it isn't the easiest one.`,
       shadow: `The risk is that deferred financial choices don't actually disappear — they just accumulate, leaving your material security shaped more by avoidance than by decision. If you're still weighing the same financial choice long after enough information has arrived, that's the pattern still active.`,
       path: `This may shift by making one specific, deferred financial decision this week, even without full certainty, and letting the choice actually stand. You are allowed to make the financial choice even if it disturbs the peace. What decision have you been trading away, payment by payment, for calm?`,
@@ -2506,7 +2506,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '7_MK': {
-      heading: `You're Always Pushing Toward More Security, Never Quite Arriving`,
+      heading: `Motion Without Arrival`,
       why: `Something in your relationship to material security carries an old pattern of forward motion without arrival — real drive toward financial goals, one after another, with the sense of "enough" always sitting just past the next milestone. The Chariot sits in your Material Karma, meaning your unresolved material task centers on recognizing security you've actually already reached, rather than continuously pushing past it.`,
       shadow: `The risk is that genuine financial progress never registers as progress, because the goalpost keeps moving the moment it's reached. If you can't name a point at which you'd actually feel secure, that restlessness is the pattern still unresolved.`,
       path: `This may shift by naming one specific, concrete financial milestone as "enough," and pausing there deliberately once it's reached, rather than immediately setting the next one. You are allowed to notice the security you've already reached. If you paused the pursuit for one honest moment — how safe are you, actually, right now?`,
@@ -2516,7 +2516,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '8_MK': {
-      heading: `An Old Sense of Financial Unfairness Still Shapes How You Handle Money`,
+      heading: `Old Unfairness, Still Shaping`,
       why: `Something in your relationship to material security carries an old imbalance around fairness — a sense, not always articulated, that you were once shorted, overlooked, or unfairly treated in material terms, now shaping present-day vigilance around every financial exchange. The Justice sits in your Material Karma, meaning your unresolved material task centers on settling that old imbalance rather than continuing to guard against its repeat.`,
       shadow: `The risk is treating every current financial exchange as a potential repeat of the old unfairness, creating friction in transactions that have nothing to do with what actually happened before. If you feel disproportionately alert to being shortchanged, that history may still be running underneath it.`,
       path: `This may shift by naming, specifically, what the original financial unfairness was, and separating it consciously from whatever current exchange is actually in front of you. You are allowed to handle today's money without yesterday's injustice at the table. What old unfairness is still countersigning your financial decisions?`,
@@ -2526,7 +2526,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '9_MK': {
-      heading: `You'd Rather Not Deal With Money Matters Directly If You Can Help It`,
+      heading: `Avoidance Over Engagement`,
       why: `Something in your relationship to material security carries an old pattern of withdrawal from financial engagement — a preference for not looking too closely at bills, statements, or planning, retreating into other matters rather than confronting material reality head-on. The Hermit sits in your Material Karma, meaning your unresolved material task centers on engaging directly with money matters rather than continuing to avoid them.`,
       shadow: `The risk is that unexamined finances tend to drift, and the avoidance that once felt like peace becomes its own source of quiet financial stress. If you can't say clearly what your current financial state actually is, that avoidance may be costing you more than the discomfort of looking would.`,
       path: `This may shift by setting aside one specific, limited block of time to look directly at your actual financial state, without retreating from it partway through. You are allowed to face money matters in small, survivable doses. What fifteen-minute money task would shrink the dread most if done this week?`,
@@ -2536,7 +2536,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '10_MK': {
-      heading: `Money Seems to Arrive and Vanish in Cycles You Can't Quite Predict`,
+      heading: `Cycles, Unpredicted`,
       why: `Something in your relationship to material security carries an old pattern of instability — real upswings and real downturns, financial fortune that seems to move in cycles rather than settling into something steady. The Wheel of Fortune sits in your Material Karma, meaning your unresolved material task centers on building consistency underneath the cycle, rather than simply riding it up and down.`,
       shadow: `The risk is treating every upswing as permanent and every downturn as catastrophic, making decisions from whichever extreme you happen to be in rather than from a steadier, longer view. If your financial choices swing as widely as your circumstances do, the cycle may be running the decisions instead of the other way around.`,
       path: `This may shift by building one small, consistent financial habit that holds steady regardless of which phase of the cycle you're currently in. You are allowed to learn your own cycle instead of being surprised by it. Looking back honestly — when does money tend to arrive for you, and when does it leave?`,
@@ -2546,7 +2546,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '11_MK': {
-      heading: `You Carry Financial Strain Alone Rather Than Naming It Out Loud`,
+      heading: `Silence Over Naming`,
       why: `Something in your relationship to material security carries an old pattern of silent endurance — real financial hardship or pressure, held quietly and managed alone, without it ever being said plainly to anyone who might help. The Strength sits in your Material Karma, meaning your unresolved material task centers on naming financial strain directly rather than continuing to carry it in silence.`,
       shadow: `The risk is that silently-carried financial strain never gets the chance to be actually addressed, since no one close to you knows the real extent of it. If people would be surprised to learn how much financial pressure you're actually under, that silence is the pattern still active.`,
       path: `This may shift by naming your actual financial strain out loud to one trusted person this week, rather than continuing to manage it alone. You are allowed to say the strain out loud before it becomes an emergency. Who could hear one true sentence about your finances without flinching?`,
@@ -2556,7 +2556,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '12_MK': {
-      heading: `A Real Financial Decision Has Been Left Suspended for a Long Time`,
+      heading: `Suspended, Not Decided`,
       why: `Something in your relationship to material security carries an old pattern of self-imposed limbo — a financial decision or change left unmade, material comfort quietly sacrificed while waiting for a clarity that hasn't fully arrived. The Hanged Man sits in your Material Karma, meaning your unresolved material task centers on actually making the suspended decision rather than continuing to wait inside it.`,
       shadow: `The risk is mistaking the wait itself for necessary patience, when it may have quietly become its own form of avoidance. If the same financial decision has stayed unmade well past the point where the underlying uncertainty was resolved, the suspension may no longer be serving you.`,
       path: `This may shift by naming the specific financial decision that's been left suspended, and setting a real point by which it gets made, ready or not. You are allowed to decide — suspension has costs too. What would choosing, either way, finally release in you?`,
@@ -2566,7 +2566,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '13_MK': {
-      heading: `Necessary Financial Change Gets Resisted Longer Than It Needs To`,
+      heading: `Resistance to Necessary Change`,
       why: `Something in your relationship to material security carries an old fear of material loss — a resistance to endings, even financial ones that are clearly due, because letting go of a current arrangement feels like losing the security itself. The Death sits in your Material Karma, meaning your unresolved material task centers on recognizing that some financial endings are what actually make room for real security, not a threat to it.`,
       shadow: `The risk is holding onto a financial arrangement well past its useful life simply because ending it feels dangerous, even when the arrangement itself has stopped serving your actual security. If you're maintaining something financial mainly out of fear of what ending it might mean, that fear is the pattern still unresolved.`,
       path: `This may shift by identifying one financial arrangement that's clearly run its course, and letting it end deliberately rather than continuing to resist the ending. You are allowed to let the financial change happen while it's still gentle. What shift are you resisting that will only grow less optional?`,
@@ -2576,7 +2576,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '14_MK': {
-      heading: `Your Spending Swings Between Full Restriction and Full Release`,
+      heading: `Restriction, Then Release`,
       why: `Something in your relationship to material security carries an old pattern of extremes — strict financial discipline followed by periods of full release, each framed as the necessary correction for the one before it. The Temperance sits in your Material Karma, meaning your unresolved material task centers on finding a sustainable middle, rather than continuing to alternate between opposite poles.`,
       shadow: `The risk is that neither extreme, held alone, ever actually produces lasting security — restriction that eventually breaks, followed by release that undoes the restriction's progress. If your financial habits look more like a pendulum than a steady practice, that swing is the pattern still active.`,
       path: `This may shift by choosing one small, moderate financial habit and holding it consistently, resisting the pull toward either extreme. You are allowed to spend steadily instead of in penance and release. What would a middle-path week of spending actually look like?`,
@@ -2586,7 +2586,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '15_MK': {
-      heading: `Money Sometimes Feels Like Something You're Trapped By, Not Something You Hold`,
+      heading: `Bound, Not Held`,
       why: `Something in your relationship to material security carries an old pattern of compulsive attachment — a felt sense of being bound to financial obligations, possessions, or a particular lifestyle rather than genuinely choosing them. The Devil sits in your Material Karma, meaning your unresolved material task centers on examining that felt bondage directly, rather than continuing to experience it as simply how things are.`,
       shadow: `The risk is mistaking a compulsive material attachment for a fixed reality, when it may actually be a pattern that hasn't yet been questioned. If you feel trapped by a financial obligation without having genuinely examined whether it's still required, that unexamined bind is the pattern still unresolved.`,
       path: `This may shift by naming, honestly, one specific material attachment that feels like a trap, and asking directly what it would actually take to loosen it. You are allowed to hold money instead of being held by it. What one act would shift you from trapped to steward, even slightly?`,
@@ -2596,7 +2596,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '16_MK': {
-      heading: `Financial Warning Signs Tend to Get Missed Until They Can't Be`,
+      heading: `Warning Signs, Missed`,
       why: `Something in your relationship to material security carries an old pattern of denial toward early financial strain — signs of instability quietly maintained as "fine" until a sudden, more disruptive reckoning forces the issue. The Tower sits in your Material Karma, meaning your unresolved material task centers on taking early financial warning signs seriously, rather than waiting for a forced, sudden correction.`,
       shadow: `The risk is that maintaining the appearance of financial stability, rather than addressing what's actually straining underneath it, sets up exactly the sudden collapse the denial was meant to avoid. If financial reversals in your life tend to feel sudden despite visible signals beforehand, that pattern of delayed reckoning may be active.`,
       path: `This may shift by identifying, specifically, one financial strain currently being minimized, and addressing it directly before it forces a more disruptive correction. You are allowed to see the warning early and respond softly. What financial signal is currently blinking that deserves ten calm minutes?`,
@@ -2606,7 +2606,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '17_MK': {
-      heading: `You Keep Hoping Your Finances Will Improve Without Yet Acting on That Hope`,
+      heading: `Hope Without Action`,
       why: `Something in your relationship to material security carries an old pattern of passive hope — a genuine, sustaining belief that things will get better financially, held without yet converting into the concrete action that hope was meant to inspire. The Star sits in your Material Karma, meaning your unresolved material task centers on pairing real hope with real, specific action toward material improvement.`,
       shadow: `The risk is that hope alone, however genuine, doesn't move a financial position on its own — and waiting for improvement to simply arrive can substitute for the action that would actually produce it. If your financial hope hasn't yet translated into a concrete step, that gap is the pattern still unresolved.`,
       path: `This may shift by naming one small, concrete action your financial hope is actually pointing toward, and taking it this week. You are allowed to act on the hope, not just keep it warm. What is the first concrete move your financial hope has been waiting on?`,
@@ -2616,7 +2616,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '18_MK': {
-      heading: `The Full Picture of Your Finances Feels Hazier Than It Probably Needs To Be`,
+      heading: `Vague Over Clear`,
       why: `Something in your relationship to material security carries an old pattern of anxious avoidance — a preference for a vague, felt sense of your financial position over a clear, examined one, because clarity itself feels like it might confirm something feared. The Moon sits in your Material Karma, meaning your unresolved material task centers on replacing that anxious haze with an actual, examined look at where things stand.`,
       shadow: `The risk is that the anxiety persists precisely because it's never actually checked against real numbers — a vague fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual numbers would justify, that gap between feeling and fact is the pattern still active.`,
       path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess. You are allowed to trade the haze for one clear fact at a time. Which unknown, once known, would quiet the most background noise?`,
@@ -2626,7 +2626,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '19_MK': {
-      heading: `You Project Financial Confidence Even in Moments You're Privately Unsure`,
+      heading: `Confidence, Performed`,
       why: `Something in your relationship to material security carries an old pattern of performed ease — an outward financial confidence maintained consistently, even in stretches where the underlying picture feels genuinely uncertain. The Sun sits in your Material Karma, meaning your unresolved material task centers on letting real uncertainty be visible sometimes, rather than maintaining brightness regardless of what's actually happening underneath.`,
       shadow: `The risk is that the performed confidence prevents anyone, including you, from actually addressing the uncertainty underneath it — a bright surface that keeps real financial concerns from getting real attention. If you'd never let anyone see you worried about money, that consistent brightness may be costing you the support that naming it would bring.`,
       path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual confidence. You are allowed to be privately unsure and say so somewhere safe. Who could know the real financial picture without your confidence collapsing?`,
@@ -2636,7 +2636,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '20_MK': {
-      heading: `A Real Financial Reckoning Keeps Getting Pushed a Little Further Out`,
+      heading: `Reckoning, Delayed`,
       why: `Something in your relationship to material security carries an old pattern of delay at the point of reckoning — a financial truth that's already become clear, met with more preparation, more waiting, one more condition before it's actually faced. The Judgement sits in your Material Karma, meaning your unresolved material task centers on acting on financial clarity that has, in most cases, already arrived.`,
       shadow: `The risk is that further preparation, past a certain point, functions as delay rather than genuine diligence — a reckoning kept perpetually one step away. If you already know what the financial situation actually calls for and still haven't acted, that delay is the pattern still unresolved.`,
       path: `This may shift by naming the specific action the financial clarity is already calling for, and taking a first concrete step this week rather than gathering more certainty first. You are allowed to have the reckoning on your own terms, now, gently. What would facing it this month cost — and what is postponement already costing?`,
@@ -2646,7 +2646,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '21_MK': {
-      heading: `A Financial Goal Rarely Gets to Feel Fully Finished`,
+      heading: `Never Fully Finished`,
       why: `Something in your relationship to material security carries an old pattern of extending completion — a financial goal reached in practical terms, but immediately relativized, expanded, or set alongside a new condition before it's allowed to actually count as done. The World sits in your Material Karma, meaning your unresolved material task centers on letting a genuinely reached financial goal be named complete.`,
       shadow: `The risk is that material security never gets to be felt, because the finish line keeps moving the moment it's actually crossed. If you can't recall the last time a financial goal felt fully, simply done, that pattern of continuous extension is still active.`,
       path: `This may shift by identifying one financial goal that is, in practical terms, already reached, and deliberately naming it complete rather than adding one more condition first. You are allowed to let a financial goal be reached and felt. Which target have you already hit that never got its moment?`,
@@ -2656,7 +2656,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '22_MK': {
-      heading: `Financial Risks Tend to Get Taken Before a Safety Net Is Actually in Place`,
+      heading: `Leap Before Net`,
       why: `Something in your relationship to material security carries an old pattern of leaping first — genuine openness to material risk, acted on with real courage, but often before the groundwork that would make the risk sustainable has actually been laid. The Fool sits in your Material Karma, meaning your unresolved material task centers on pairing that real courage with enough preparation to let the leap actually land.`,
       shadow: `The risk is that the leap itself becomes the whole story, with the landing left to chance — material risks taken freely, but rarely with a safety net considered in advance. If your financial risks tend to work out through luck rather than preparation, that gap is the pattern still unresolved.`,
       path: `This may shift by building one small piece of safety net before the next financial leap, rather than trusting the landing entirely to courage alone. You are allowed to weave the net before the next leap. What would a minimum floor look like that keeps your boldness alive and survivable?`,
@@ -2666,7 +2666,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '1_RWM': {
-      heading: `You Trust Money You Actively Made More Than Money That Just Arrived`,
+      heading: `Earned Over Given`,
       why: `Your subconscious relationship to money runs through active generation — earning feels legitimate, deserved, real, while money that arrives without your direct effort (a gift, a windfall, unearned interest) can feel oddly uncomfortable to simply receive. The Magician governs your Relationship with Money, meaning your instinct is to keep initiating income rather than letting it also just come to you.`,
       shadow: `The risk is turning down or minimizing genuinely available resources — support, gifts, easier income — because only self-generated money feels legitimate to hold onto. If you find yourself working harder for money you could have simply accepted, that discomfort with receiving may be the pattern still running.`,
       path: `This may shift by accepting one piece of unearned financial ease this week — a gift, an easier path, help offered — without converting it into something you have to justify through extra effort. You are allowed to receive money you didn't visibly sweat for. What arrived easily lately that you could practice simply keeping?`,
@@ -2676,7 +2676,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '2_RWM': {
-      heading: `You Sense Financial Opportunity Before You Can Explain It, But Rarely Name Your Price`,
+      heading: `Sensing, Not Naming`,
       why: `Your subconscious relationship to money runs through quiet intuition — a real sense for when a financial opportunity is right, paired with real discomfort stating plainly what your work or time is actually worth. The High Priestess governs your Relationship with Money, meaning your financial insight tends to stay private, felt rather than spoken aloud in the transactional terms money actually requires.`,
       shadow: `The risk is that unclaimed insight goes uncompensated — you sense the right move, make it quietly, and let the value of that instinct go unnamed and underpaid. If your income doesn't reflect what you actually know, the silence around your own worth may be the pattern still active.`,
       path: `This may shift by stating one specific price or value out loud this week, rather than letting your financial instinct stay an unspoken, unpaid asset. You are allowed to name your price out loud and let the silence sit. What number would you quote tomorrow if flinching weren't part of the transaction?`,
@@ -2686,7 +2686,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '3_RWM': {
-      heading: `Spending on Comfort and Beauty Comes Naturally; Saving for Yourself Does Not`,
+      heading: `Spending on Others, Not Self`,
       why: `Your subconscious relationship to money runs through generous, sensory expression — real ease spending on comfort, beauty, and care, for yourself and especially for others, with less natural pull toward accumulation or reserve. The Empress governs your Relationship with Money, meaning your financial flow is generative and warm, but not automatically protective of its own future.`,
       shadow: `The risk is that generosity, unchecked, leaves nothing set aside — real abundance moving freely outward while your own reserve stays thin. If you're comfortable and generous now but anxious about later, that imbalance may be the pattern still unresolved.`,
       path: `This may shift by setting aside a specific portion of any income for your own future before spending on comfort or generosity extends further. You are allowed to save for yourself with the same pleasure you spend on comfort. What would a beautiful act of saving look like?`,
@@ -2696,7 +2696,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '4_RWM': {
-      heading: `Money Feels Safest When You're the One Managing Every Detail of It`,
+      heading: `Safety Through Control`,
       why: `Your subconscious relationship to money runs through control — structure, oversight, a firm hand on every account and decision, as though financial security depends entirely on your personal management of it. The Emperor governs your Relationship with Money, meaning your instinct is to build and defend systems rather than trust ones you didn't personally construct.`,
       shadow: `The risk is that the management itself becomes the source of stress, and delegating any part of your finances — even to a trustworthy system — feels like a genuine risk rather than a reasonable option. If you can't imagine your money being fine without your constant oversight, that's the pattern still active.`,
       path: `This may shift by handing one small piece of financial management to a system or person you trust, and observing whether it actually holds without you. You are allowed to let a detail go unmanaged and see it survive. Which piece of the money machinery could run a week without your eyes on it?`,
@@ -2706,7 +2706,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '5_RWM': {
-      heading: `You Feel Guilty About Money Earned or Spent Outside the "Right" Way`,
+      heading: `Guilt Over the "Right Way"`,
       why: `Your subconscious relationship to money runs through inherited rules about correctness — a real sense that there's a proper, sanctioned way to earn and spend, and quiet discomfort whenever money arrives or leaves outside that framework. The Hierophant governs your Relationship with Money, meaning your instinct is to check financial choices against tradition or authority before trusting them.`,
       shadow: `The risk is passing up genuinely good financial opportunities simply because they don't match an inherited idea of the "proper" way to earn or spend. If you feel guilty about money that came easily or unconventionally, even when nothing about it was actually wrong, that inherited rule may be the pattern still active.`,
       path: `This may shift by naming one inherited money rule directly and testing whether it actually reflects your own values, or just an old, unexamined authority. You are allowed to earn and spend outside the inherited 'right way' without guilt attending. Whose voice is the guilt actually speaking in — and is it still your authority?`,
@@ -2716,7 +2716,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '6_RWM': {
-      heading: `Financial Choices Get Weighed Against What Someone Else Wants, Not Just What You Do`,
+      heading: `Weighed Against Someone Else`,
       why: `Your subconscious relationship to money runs through relational weighing — earning and spending decisions filtered through what a partner or loved one would think, want, or need, sometimes before your own actual preference gets consulted. The Lovers governs your Relationship with Money, meaning your financial choices are genuinely relational, for better and for worse.`,
       shadow: `The risk is that your own financial preference gets perpetually deferred to someone else's, leaving you unsure what you'd actually choose if the decision were only yours. If you can't say clearly what you want financially, independent of what someone else wants, that deference may be the pattern still unresolved.`,
       path: `This may shift by making one financial decision based purely on your own preference this week, and letting it stand without checking it against anyone else's wants first. You are allowed to weigh your own want first sometimes. What financial choice is currently pending that is genuinely yours alone to make?`,
@@ -2726,7 +2726,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '7_RWM': {
-      heading: `You Chase the Next Income Goal Before Actually Enjoying the Last One`,
+      heading: `Chasing Past Enjoying`,
       why: `Your subconscious relationship to money runs through forward drive — real ambition and momentum toward the next financial target, arriving so quickly after the last one that there's rarely a pause to actually register what's already been earned. The Chariot governs your Relationship with Money, meaning your financial motion is genuinely strong, but rest and enjoyment haven't kept pace with it.`,
       shadow: `The risk is that money earned never actually gets to feel earned — spent, saved, or invested toward the next goal before its arrival is even acknowledged. If you can't recall the last time you paused to genuinely enjoy an income milestone, that restlessness may be the pattern still active.`,
       path: `This may shift by deliberately pausing after the next financial milestone, before setting the next target, long enough to actually register what's been reached. You are allowed to enjoy the goal you just reached before chasing the next. What recent win deserves an actual celebration, however small?`,
@@ -2736,7 +2736,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '8_RWM': {
-      heading: `You Keep a Precise Mental Ledger of What's Fair in Every Financial Exchange`,
+      heading: `A Precise Mental Ledger`,
       why: `Your subconscious relationship to money runs through fairness and precision — a sharp internal accounting of who owes what, whether compensation matches effort, whether an exchange was actually equal. The Justice governs your Relationship with Money, meaning your financial instinct is deeply oriented toward balance, sometimes at the cost of ease.`,
       shadow: `The risk is that the mental ledger never fully closes — small financial imbalances tracked and remembered long after they'd naturally resolve on their own, creating tension in relationships or transactions that could otherwise be simple. If you're still tallying a financial unfairness long after it stopped mattering to anyone else, that ledger may be the pattern still running.`,
       path: `This may shift by consciously closing one old financial account you're still mentally tracking, and letting the balance rest rather than continuing to tally it. You are allowed to close the ledger on exchanges that were already fair. Where could generosity replace precision without anything being lost?`,
@@ -2746,7 +2746,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '9_RWM': {
-      heading: `You'd Rather Earn Less Alone Than Ask for Financial Help or Partnership`,
+      heading: `Alone Over Asking`,
       why: `Your subconscious relationship to money runs through self-sufficiency — a strong preference for earning and managing money independently, even when collaboration or support would genuinely increase what's available to you. The Hermit governs your Relationship with Money, meaning your financial instinct favors solitude over asking, even at a real cost.`,
       shadow: `The risk is undercharging or under-earning specifically to avoid the discomfort of financial interdependence — a self-sufficiency so strong it quietly limits your own income. If you'd rather make less alone than ask for help that could genuinely grow what you earn, that avoidance may be the pattern still active.`,
       path: `This may shift by asking for one specific piece of financial help or partnership this week, and noticing what actually becomes possible once you do. You are allowed to partner and still be self-made. What could you build with help that solitude has kept at half its size?`,
@@ -2756,7 +2756,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '10_RWM': {
-      heading: `Income Arrives in Waves, and Steady, Predictable Money Feels Almost Suspicious`,
+      heading: `Waves, Not Steady`,
       why: `Your subconscious relationship to money runs through cycles — real feast-and-famine patterns, income that surges and recedes, an instinct that treats sudden financial luck as more familiar than slow, steady accumulation. The Wheel of Fortune governs your Relationship with Money, meaning your financial rhythm is genuinely cyclical, for better and worse.`,
       shadow: `The risk is that steady income gets unconsciously undermined — quietly sabotaged or simply not trusted — because the wave pattern feels more like "how money actually works" than something reliable ever could. If consistent income opportunities keep slipping away just as they start to stabilize, that instinct may be the pattern still active.`,
       path: `This may shift by deliberately protecting one steady income source through a full cycle, resisting the urge to disrupt it just because it feels unfamiliar. You are allowed to trust steady money — it isn't a trick. What would you do differently if predictable income finally felt safe?`,
@@ -2766,7 +2766,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '11_RWM': {
-      heading: `You Provide Financially for Others Long Before You'd Ask to Be Provided For`,
+      heading: `Providing Before Provided For`,
       why: `Your subconscious relationship to money runs through quiet endurance — real capacity to earn, support, and carry financial responsibility for others, paired with a much weaker instinct to ask the same in return. The Strength governs your Relationship with Money, meaning your financial resilience is genuine, but one-directional by default.`,
       shadow: `The risk is that the giving becomes depleting precisely because it's never balanced by receiving — real financial strength quietly costing you the support you'd need to actually sustain it. If you can provide for everyone but struggle to ask anyone to provide for you, that imbalance may be the pattern still unresolved.`,
       path: `This may shift by naming one specific financial need out loud to someone capable of helping, rather than continuing to carry it alone by default. You are allowed to be provided for before the emergency makes it necessary. What support would you accept today if asking cost nothing?`,
@@ -2776,7 +2776,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '12_RWM': {
-      heading: `Spending on Yourself Specifically Tends to Get Delayed or Denied`,
+      heading: `Self, Last in Line`,
       why: `Your subconscious relationship to money runs through self-denial — a real instinct to withhold financial comfort from yourself specifically, even while resources exist, as though waiting or sacrificing has its own quiet virtue. The Hanged Man governs your Relationship with Money, meaning your financial instinct suspends your own comfort more readily than it suspends anyone else's.`,
       shadow: `The risk is that the denial outlives whatever it was originally protecting — money available for your own comfort, held back indefinitely, well past the point where the sacrifice actually serves anything. If you consistently postpone spending on yourself specifically, that suspension may be the pattern still active.`,
       path: `This may shift by spending, deliberately and without justification, on one thing for your own comfort this week — not as a reward, just as a choice. You are allowed to spend on yourself specifically, on purpose, soon. What denied purchase is actually a postponed kindness?`,
@@ -2786,7 +2786,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '13_RWM': {
-      heading: `Your Finances Tend to Change Through Total Overhaul, Not Gradual Adjustment`,
+      heading: `Overhaul, Not Adjustment`,
       why: `Your subconscious relationship to money runs through transformation — real financial shifts that arrive as complete overhauls, a job left entirely, a whole system rebuilt from scratch, rather than gradual, incremental change. The Death governs your Relationship with Money, meaning your financial instinct favors the clean break over the slow adjustment.`,
       shadow: `The risk is that smaller, earlier course-corrections get skipped in favor of waiting for the big, dramatic reset — financial problems left unaddressed until they force a total overhaul that a gradual adjustment could have prevented. If your financial life keeps needing complete rebuilds rather than small tune-ups, that pattern may be the piece still unresolved.`,
       path: `This may shift by making one small, incremental financial adjustment now, rather than waiting for the situation to force a complete overhaul later. You are allowed to adjust gradually — not every change needs the wrecking ball. What small financial tweak could replace the next planned overhaul?`,
@@ -2796,7 +2796,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '14_RWM': {
-      heading: `Under Stress, Your Spending Swings Hard Toward One Extreme or the Other`,
+      heading: `Extremes Under Stress`,
       why: `Your subconscious relationship to money runs through balance — genuinely steady and moderate when centered, but prone to swinging into strict restriction or full indulgence the moment real stress enters the picture. The Temperance governs your Relationship with Money, meaning your natural equilibrium is real, but conditional on your overall state.`,
       shadow: `The risk is that stress-driven financial swings undo the very balance that's otherwise your real strength — a period of discipline followed by a release that erases its progress, or the reverse. If your spending habits seem to track your stress level more than your actual financial plan, that swing may be the pattern still active.`,
       path: `This may shift by noticing the moment stress starts pulling your spending toward an extreme, and consciously choosing the smaller, steadier version of the response instead. You are allowed to meet stress without the pendulum. When pressure hits next — what would the moderate move look like, decided now, in calm?`,
@@ -2806,7 +2806,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '15_RWM': {
-      heading: `A Specific Spending or Earning Habit Feels More Compulsive Than Chosen`,
+      heading: `Compulsion Over Choice`,
       why: `Your subconscious relationship to money runs through compulsion — a specific financial habit, whether spending, earning, or a particular relationship to a job or lifestyle, that feels less like an active choice and more like something you're bound to. The Devil governs your Relationship with Money, meaning at least one part of your financial life runs on autopilot rather than genuine decision.`,
       shadow: `The risk is mistaking the compulsive habit for simply how things are, never actually examining whether it's still necessary or just familiar. If a specific money habit feels like it's running you rather than the other way around, that unexamined grip may be the pattern still unresolved.`,
       path: `This may shift by naming the specific compulsive financial habit honestly, and asking directly what would actually happen if you loosened it. You are allowed to examine the compulsion with curiosity instead of shame. What is the habit actually purchasing for you, underneath the receipt?`,
@@ -2816,7 +2816,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '16_RWM': {
-      heading: `Financial Change Tends to Arrive Suddenly, Even When Signs Were There`,
+      heading: `Sudden, Despite the Signs`,
       why: `Your subconscious relationship to money runs through sudden disruption — real financial shifts that seem to hit abruptly, even in situations where warning signs were quietly present beforehand. The Tower governs your Relationship with Money, meaning your instinct is to maintain the current picture until it can no longer be maintained, rather than adjusting early.`,
       shadow: `The risk is that maintaining the appearance of financial stability, instead of addressing the strain underneath it, sets up exactly the sudden reversal the denial was meant to avoid. If financial surprises in your life tend to have visible signals in hindsight, that pattern of delayed reckoning may be active.`,
       path: `This may shift by identifying one financial strain currently being minimized, and addressing it directly before it forces a more disruptive, sudden correction. You are allowed to read the signs early and change course quietly. What current signal, honestly read, is asking for a small adjustment now?`,
@@ -2826,7 +2826,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '17_RWM': {
-      heading: `You Naturally Monetize What Inspires You, But Wait Passively for the Rest to Improve`,
+      heading: `Passion Monetized, Rest Hoped For`,
       why: `Your subconscious relationship to money runs through hope and natural talent — real ease turning creative or inspired work into income, paired with a more passive hope that other financial areas will simply improve on their own over time. The Star governs your Relationship with Money, meaning your gift for monetizing inspiration is real, but it hasn't yet extended to areas that need direct action instead.`,
       shadow: `The risk is that hope substitutes for action in exactly the financial areas that need a concrete step, while your genuine talent for monetizing passion continues unaffected. If parts of your financial life have stayed the same for years despite hoping they'd improve, that passivity may be the pattern still active.`,
       path: `This may shift by naming one financial area you've been hoping will improve, and taking one concrete action toward it this week instead of continuing to wait. You are allowed to apply your monetizing gift to the unglamorous parts too. Which neglected corner of your finances would transform under the attention you give your inspirations?`,
@@ -2836,7 +2836,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '18_RWM': {
-      heading: `Your Actual Financial Numbers Feel Hazier Than the Anxiety About Them`,
+      heading: `Anxiety Louder Than the Numbers`,
       why: `Your subconscious relationship to money runs through anxious uncertainty — a real, felt worry about your financial state that's often more intense and less examined than the actual numbers would justify. The Moon governs your Relationship with Money, meaning your financial fear tends to run ahead of your financial facts.`,
       shadow: `The risk is that the anxiety perpetuates itself precisely because it's never actually checked against reality — a vague, unexamined fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual situation warrants, that gap between feeling and fact may be the pattern still active.`,
       path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess. You are allowed to let the numbers be clearer than the anxiety. What would you find if you looked — and how often has looking actually been worse than dreading?`,
@@ -2846,7 +2846,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '19_RWM': {
-      heading: `You Project Financial Ease Even in Stretches You're Privately Worried`,
+      heading: `Ease Performed, Worry Private`,
       why: `Your subconscious relationship to money runs through performed confidence — a natural, radiant ease around money maintained outwardly, even during periods where the underlying picture feels genuinely uncertain. The Sun governs your Relationship with Money, meaning your real gift for financial optimism sometimes covers concerns that could use real attention instead.`,
       shadow: `The risk is that the consistent brightness prevents anyone, including you, from actually addressing what's uncertain underneath it — genuine financial concerns that never get real attention because the surface always looks fine. If you'd rarely let anyone see you actually worried about money, that consistent performance may be costing you real support.`,
       path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual ease. You are allowed to drop the performance of ease with one trusted person. Who could hold the worried version of you without your ease becoming a lie?`,
@@ -2856,7 +2856,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '20_RWM': {
-      heading: `A Financial Wake-Up Call Tends to Arrive Later Than the Signs Did`,
+      heading: `Reckoning, Later Than the Signs`,
       why: `Your subconscious relationship to money runs through delayed reckoning — a pattern of eventually facing financial truths fully and honestly, but usually well after the signs pointing toward them first appeared. The Judgement governs your Relationship with Money, meaning your eventual clarity is genuine, but the timing tends to lag behind the actual evidence.`,
       shadow: `The risk is that the delay itself has a cost — financial issues left unaddressed longer than necessary, simply because the eventual reckoning always seems to arrive, so there's less urgency to act on early signs. If you tend to face financial truths only once they can no longer be avoided, that lag may be the pattern still active.`,
       path: `This may shift by acting on a current financial sign now, before it becomes the kind of situation that eventually forces a full reckoning. You are allowed to wake up before the call comes. What sign from the last month deserves to be treated as the wake-up now?`,
@@ -2866,7 +2866,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '21_RWM': {
-      heading: `Financial Success Rarely Feels Complete Until It Matches a Bigger, Ideal Picture`,
+      heading: `Complete Only at Scale`,
       why: `Your subconscious relationship to money runs through a large-scale, big-picture standard — real financial progress measured against an ideal, comprehensive version of success, rather than felt as complete on its own more modest terms. The World governs your Relationship with Money, meaning genuine financial wins can feel unfinished simply because the full picture hasn't yet arrived.`,
       shadow: `The risk is that real, current financial success never gets to be felt as success, because it's constantly measured against a bigger picture that hasn't materialized yet. If you can't recall the last time a financial win felt genuinely complete, that big-picture standard may be the pattern still active.`,
       path: `This may shift by naming one financial win that's genuinely real right now, and letting it count as complete on its own terms, without measuring it against the larger picture. You are allowed to let real success count even when it's smaller than the ideal picture. What have you built that the dream keeps refusing to credit?`,
@@ -2876,7 +2876,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '22_RWM': {
-      heading: `You Trust That Money Will Work Out More Than You Plan for It To`,
+      heading: `Trust Over Planning`,
       why: `Your subconscious relationship to money runs through spontaneous trust — real openness to financial risk and change, paired with a genuine belief that things will work out, more than a habit of building the structure that would make that outcome more certain. The Fool governs your Relationship with Money, meaning your financial optimism is real, but often unaccompanied by preparation.`,
       shadow: `The risk is that the trust alone gets asked to do the work that planning was meant to do — financial risks taken freely, with the landing left mostly to chance. If your financial life tends to work out through luck more than through preparation, that gap may be the pattern still unresolved.`,
       path: `This may shift by pairing your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism. You are allowed to keep the faith and also make the plan. What would trusting-with-a-spreadsheet look like for you this quarter?`,
