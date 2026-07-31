@@ -906,7 +906,7 @@ window.DMicroContent = (function () {
 
     // ── 7 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '7_E': {
-      heading: `You're Here to Navigate, Not to Arrive`,
+      heading: `Direction Before Destination`,
       why: `You might experience stillness as failure long before you learn to recognize it as preparation — and that's one of the clearest signs of where you are. The Chariot sits at the absolute center of your matrix, in your Soul Purpose, and it doesn't mean you're here to reach some fixed destination. It means your fundamental life current is navigation itself. You're here to master movement — not necessarily speed, not conventional achievement, but the sustained, disciplined, internally generated ability to keep going in a chosen direction no matter what conditions show up. That's both a real gift and real pressure. Your soul carries something like a built-in compass, an internal sense of true north that keeps working even when everyone else's map points somewhere different. The lifelong work is trusting that compass over the noise of everyone telling you what to do instead.`,
       shadow: `The deepest trap here is a belief you've probably never fully examined: that you have to figure everything out alone. The Chariot is a solitary image — powerful, contained, masterful — and over time, that image can quietly become an elegant prison. You've likely built an extraordinary capacity for self-sufficiency that, looked at honestly, is also an extraordinary capacity for a very particular kind of loneliness — the loneliness of someone who's learned that asking for help usually creates more complication than it solves. It's worth noticing: if help keeps arriving unreliable or too late to matter, that's rarely just proof that people can't be trusted. More often, the world is matching something you decided long before anyone actually let you down — that receiving isn't safe. You might not experience yourself as lonely. You might just experience yourself as efficient. But efficiency, in the domain of the soul, isn't a virtue — it's a coping strategy that's outlived its usefulness, and it quietly keeps real support at arm's length.`,
       path: `You'll likely discover, often through a moment that overrides your usual self-sufficiency, that the Chariot was never meant to be driven by one person alone. A chariot needs a driver, horses, and terrain — a collaboration between will, energy, and the actual world as it is. Your path forward is the uncomfortable, counter-instinctive practice of receiving: taking help without immediately fixing it, taking love without cataloguing its flaws, taking in the perspective of people who see you differently than you see yourself. This is the harder truth to sit with, because it removes the comfort of "people just aren't reliable" and puts the responsibility on what you're actually willing to receive — but change what you're open to, and what shows up to meet you changes right along with it. Your soul's purpose is movement, and the most meaningful movement right now might be the inward one — toward trust, toward letting your reliable compass be read by someone else alongside you. You are allowed to love the road without demanding a destination. What is the journey itself giving you that arrival never could?`,
@@ -916,7 +916,7 @@ window.DMicroContent = (function () {
 
     // ── 1 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '1_E': {
-      heading: `Your Soul's Purpose Is Simply to Begin`,
+      heading: `Starting Over Waiting`,
       why: `At the deepest level, you feel most like yourself not when you've arrived somewhere, but in the act of beginning something real — you're here to be a source: someone through whom things get started, willed into being, brought from idea into form. The Magician sits at the absolute center of your matrix, in your Soul Center — your foundation of purpose — and it means your core purpose isn't a fixed destination, it's origination itself.`,
       shadow: `The trap is believing that only the beginning counts, and that your soul's worth is tied to how many things you can originate rather than to the quality of what you're willing to sustain. You can end up scattered across a lifetime of starts, chasing the high of origination itself, never quite settling into the deeper purpose underneath it — which was never just to start things, but to prove that beginning, done honestly, actually changes reality.`,
       path: `Let your purpose include follow-through as sacred, not just secondary. One thing, seen through, is worth more to your soul than ten things merely sparked. The deepest version of your purpose isn't endless beginning — it's proving, to yourself most of all, that what you start actually matters enough to finish. You are allowed to begin badly — beginning was always the whole assignment. What would you start today if the first draft didn't have to prove anything?`,
@@ -926,7 +926,7 @@ window.DMicroContent = (function () {
 
     // ── 2 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '2_E': {
-      heading: `Your Soul's Purpose Is to Trust What It Already Knows`,
+      heading: `Knowing Before Proving`,
       why: `At your core, you feel most like yourself in moments of quiet certainty, when something in you knows before your mind has caught up. The High Priestess at the center of your matrix means your foundation of purpose is inner knowing itself — you're here to develop and trust a relationship with truth that doesn't depend on outside confirmation. Your soul's work is learning to act from that knowing rather than waiting for permission to believe it.`,
       shadow: `The trap is staying so private with your knowing that your purpose never actually meets the world — a rich inner life that never translates into anything visible, leaving you feeling quietly purposeless despite carrying real depth. If your life feels like it's missing a "why" you can point to, that's often a knowing that hasn't yet been trusted enough to guide action.`,
       path: `Let your inner knowing direct real choices, not just private reflection. Your purpose isn't to accumulate more insight — it's to actually live from the insight you already have. Trust becomes purpose the moment it starts shaping what you do. You are allowed to trust the knowing before it has references. What does your quietest inner voice keep repeating that you haven't yet obeyed?`,
@@ -936,7 +936,7 @@ window.DMicroContent = (function () {
 
     // ── 3 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '3_E': {
-      heading: `Your Soul's Purpose Is to Help Things Grow`,
+      heading: `Growth Over Control`,
       why: `At your core, you feel most like yourself when you're actively growing something, tending it with real care rather than rushing its unfolding. The Empress at the center of your matrix means your foundation of purpose is generativity itself — you're here to nurture something into being, whether a creative body of work, a family, a community, or your own unfolding life. This is purpose as cultivation, not achievement.`,
       shadow: `The trap is losing your own purpose inside everyone else's growth — nurturing so consistently outward that you never actually plant anything of your own. If your life feels purposeful only when you're helping someone else become something, that's generativity without a root of its own to grow from.`,
       path: `Let yourself be the thing you're nurturing sometimes. Your own growth counts as much as anyone else's. Purpose here isn't just tending others — it's staying close enough to your own becoming to actually witness it. You are allowed to grow too, not just tend. What in your own life deserves the patient sunlight you give to everyone else's?`,
@@ -946,7 +946,7 @@ window.DMicroContent = (function () {
 
     // ── 4 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '4_E': {
-      heading: `Your Soul's Purpose Is to Build Something That Holds`,
+      heading: `Structure Before Speed`,
       why: `At your core, you feel most like yourself when you're constructing something meant to last, not chasing whatever's exciting in the moment. The Emperor at the center of your matrix means your foundation of purpose is structure itself — you're here to build something durable, whether a family, an institution, a body of work, or your own inner architecture, that can actually hold weight over time.`,
       shadow: `The trap is confusing the structure with the purpose — building rigid systems and mistaking their maintenance for the actual point, long after the structure has stopped serving anyone, including you. If your life feels dutiful but hollow, purpose may have quietly become upkeep instead of genuine building.`,
       path: `Regularly ask what the structure is actually for, and let that answer, not the structure itself, be the thing you're loyal to. Purpose here is building something that holds people, including you — not building for its own sake. You are allowed to build slowly and have it count the whole time. What foundation are you laying right now that no one applauds yet?`,
@@ -956,7 +956,7 @@ window.DMicroContent = (function () {
 
     // ── 5 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '5_E': {
-      heading: `Your Soul's Purpose Is to Carry Something Forward`,
+      heading: `Continuity Over Novelty`,
       why: `At your core, you feel most like yourself when you're either learning something deeply or teaching it, part of a lineage that runs through you rather than starting or ending with you. The Hierophant at the center of your matrix means your foundation of purpose is transmission — you're here to receive something real (wisdom, tradition, hard-won understanding) and carry it forward to whoever needs it next.`,
       shadow: `The trap is holding the wisdom so tightly, or so reverently, that it never actually moves through you to anyone else — a purpose that becomes about possessing knowledge rather than transmitting it. If your life feels purposeful in private but empty in practice, that's a channel that's stopped flowing.`,
       path: `Let your purpose be measured by what moves through you, not what you've accumulated. Teach, share, pass it on, even before you feel fully qualified. The transmission is the point, not the mastery. You are allowed to carry the tradition forward changed by your hands. What are you meant to pass on — and what is yours to leave behind?`,
@@ -966,7 +966,7 @@ window.DMicroContent = (function () {
 
     // ── 6 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '6_E': {
-      heading: `Your Soul's Purpose Is Choosing What's Actually Yours`,
+      heading: `Choice Before Comfort`,
       why: `At your core, you feel most like yourself in the moment of a clean, values-driven choice, even a hard one. The Lovers at the center of your matrix means your foundation of purpose is alignment — you're here to keep choosing, again and again, whatever actually reflects your real values over what's simply easy or expected. Your soul's work is less about a single destination than about a lifetime of aligned decisions.`,
       shadow: `The trap is treating every choice as equally weighty, exhausting yourself with deliberation until decision fatigue starts masquerading as depth. If your life feels perpetually unsettled, purpose may be getting lost in endless comparison rather than found in actual commitment.`,
       path: `Let some choices be small enough not to need this much scrutiny, and save your full discernment for the ones that matter. Purpose is built through a pattern of aligned choices, not through perfecting any single one. You are allowed to want what is actually yours, not what was assigned. If every expectation went silent for a day — what would you still choose?`,
@@ -976,7 +976,7 @@ window.DMicroContent = (function () {
 
     // ── 8 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '8_E': {
-      heading: `Your Soul's Purpose Is to Be Someone Whose Word Holds`,
+      heading: `Integrity Over Ease`,
       why: `At your core, you feel most like yourself when you're being genuinely honest, even when it costs you something. Justice at the center of your matrix means your foundation of purpose is integrity itself — you're here to be someone whose actions and words actually match, consistently, in a world where that's rarer than it should be. Your soul's deepest orientation is toward truth held steady, not truth wielded as a weapon.`,
       shadow: `The trap is turning that integrity into a permanent audit of everyone else, using your own honesty as a standard to judge the world by, rather than simply living it. If your purpose feels more like policing than embodying, the fairness has drifted outward when it was meant to stay grounded in you first.`,
       path: `Let your integrity be demonstrated, not enforced. Purpose here isn't correcting the world's imbalances — it's being, consistently, a fixed point of genuine fairness that other people can orient around if they choose to. You are allowed to be trusted slowly and deeply rather than quickly and thinly. Where does your word already hold weight you haven't noticed?`,
@@ -986,7 +986,7 @@ window.DMicroContent = (function () {
 
     // ── 9 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '9_E': {
-      heading: `Your Soul's Purpose Is Found in the Quiet, Not the Noise`,
+      heading: `Depth Before Noise`,
       why: `At your core, you feel most like yourself in quiet, unhurried reflection, and your sense of purpose tends to clarify in exactly those moments, not in the busy pursuit of it. The Hermit at the center of your matrix means your foundation of purpose is found through withdrawal — you're here to develop a genuine relationship with your own depths, in solitude, before that depth can mean anything to anyone else.`,
       shadow: `The trap is mistaking permanent withdrawal for purpose itself — staying so deep in solitary reflection that the insight never gets tested against an actual life. If your sense of purpose feels clear in theory but absent in practice, the lantern may need to be carried back out, not just refined further alone.`,
       path: `Let your solitude be in service of an eventual return. Purpose isn't just found in the quiet — it's proven in what you do with what the quiet gave you. Go inward to find it; come back out to live it. You are allowed to find your purpose in rooms with no audience. What has the quiet already shown you that the noise kept drowning out?`,
@@ -996,7 +996,7 @@ window.DMicroContent = (function () {
 
     // ── 10 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '10_E': {
-      heading: `Your Soul's Purpose Lives in How You Meet the Turning`,
+      heading: `Motion Over Control`,
       why: `At your core, you feel most like yourself not despite change, but through learning to move with it. The Wheel of Fortune at the center of your matrix means your foundation of purpose isn't a fixed point — it's your relationship to change itself. You're here to develop genuine equanimity through life's cycles, finding your sense of self not in any single circumstance but in how steadily you meet whatever's currently turning.`,
       shadow: `The trap is tying your sense of purpose to the current position of the wheel — feeling purposeful only when things are going well, and purposeless the moment they turn. If your sense of meaning keeps rising and collapsing with circumstance, purpose hasn't yet found its actual, steadier center.`,
       path: `Locate your purpose in your relationship to the turning, not in the position of the wheel at any given moment. That's the deeper, more durable version of meaning available here — one that survives the downswings instead of disappearing with them. You are allowed to meet the turning with curiosity instead of bracing. What is this current shift making possible that stability never did?`,
@@ -1006,7 +1006,7 @@ window.DMicroContent = (function () {
 
     // ── 11 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '11_E': {
-      heading: `Your Soul's Purpose Is Staying Gentle Under Real Pressure`,
+      heading: `Gentleness Over Force`,
       why: `At your core, you feel most like yourself in the quiet moments of holding something difficult without needing to fight it or flee it. Strength at the center of your matrix means your foundation of purpose is embodied endurance — you're here to develop the capacity to stay present, gentle, and steady under real pressure, rather than dominating it or collapsing beneath it.`,
       shadow: `The trap is confusing the endurance itself with the purpose, holding weight indefinitely as a kind of identity rather than a means to something else. If your life feels like an endless test of how much you can bear, purpose has drifted into proving capacity rather than living from it.`,
       path: `Let your endurance serve something beyond itself — a relationship, a piece of work, a version of yourself you're actually building toward. Purpose here isn't holding weight forever; it's what the steadiness makes possible once it's no longer being tested. You are allowed to stay soft in a world that rewards armor. When did your gentleness last change an outcome that force couldn't?`,
@@ -1016,7 +1016,7 @@ window.DMicroContent = (function () {
 
     // ── 12 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '12_E': {
-      heading: `Your Soul's Purpose Is Revealed From an Angle You Didn't Choose`,
+      heading: `Perspective Before Progress`,
       why: `At your core, you feel most like yourself in the moments you've stopped forcing an answer and let one arrive instead. The Hanged Man at the center of your matrix means your foundation of purpose is discovered through voluntary surrender — you're here to find meaning not by pushing forward in the expected direction, but by occasionally releasing your grip entirely and letting a different orientation show you something new.`,
       shadow: `The trap is staying suspended indefinitely, treating the not-knowing itself as the purpose rather than a passage toward one. If your life feels perpetually paused, waiting for revelation that never quite resolves into action, the suspension may have outlived its usefulness.`,
       path: `Let each period of surrender have an actual return. Purpose here is proven not in the hanging, but in what you do once you come back down changed. Receive the new angle, then act from it. You are allowed to find meaning in the angle you didn't choose. What has this unchosen vantage shown you that no comfortable seat ever would?`,
@@ -1026,7 +1026,7 @@ window.DMicroContent = (function () {
 
     // ── 13 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '13_E': {
-      heading: `Your Soul's Purpose Requires You to Keep Ending Old Versions of Yourself`,
+      heading: `Ending Before Becoming`,
       why: `At your core, you feel most like yourself not in any fixed identity, but in the act of becoming, again and again, willing to release what you were for the sake of what's next. Transformation at the center of your matrix means your foundation of purpose is genuine metamorphosis — you're here to keep letting old versions of yourself actually die so a truer one can take their place.`,
       shadow: `The trap is manufacturing endings for their own sake, mistaking constant reinvention for the deeper transformation this purpose actually asks for. If your identity keeps shifting without anything underneath it ever actually settling, the change may be circumstantial rather than genuinely transformative.`,
       path: `Let some transformations be slow and quiet rather than dramatic. Purpose here isn't measured by how often you change, but by whether each change is a genuine release of something that's actually complete. You are allowed to outgrow yourself again, even if the last version was hard-won. Which current self is quietly ready to be thanked and released?`,
@@ -1036,7 +1036,7 @@ window.DMicroContent = (function () {
 
     // ── 14 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '14_E': {
-      heading: `Your Soul's Purpose Is Held in the Blending, Not Either Side`,
+      heading: `Balance Over Extremes`,
       why: `At your core, you feel most like yourself in the space between extremes, where genuine synthesis happens slowly, over time. Temperance at the center of your matrix means your foundation of purpose is integration itself — you're here to hold seemingly opposed parts of yourself or your life in patient balance, rather than resolving the tension by picking a side.`,
       shadow: `The trap is using the blending as an excuse to avoid ever fully engaging either side, staying so centered that nothing actually gets lived with any intensity. If purpose feels vague or diluted, the balance may be avoiding real contact rather than genuinely integrating it.`,
       path: `Let yourself fully inhabit each side before blending them. Real integration requires actually meeting both extremes, not just hovering equidistant from them. Purpose deepens when the synthesis is earned, not avoided into. You are allowed to be the blend rather than picking a side. What would it feel like to stop auditioning between your opposites?`,
@@ -1046,7 +1046,7 @@ window.DMicroContent = (function () {
 
     // ── 15 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '15_E': {
-      heading: `Your Soul's Purpose Is Facing What You'd Rather Not Look At`,
+      heading: `Honesty Before Comfort`,
       why: `At your core, you feel most like yourself not in spite of your darker material, but through actually metabolizing it instead of denying it. The Devil at the center of your matrix means your foundation of purpose runs directly through your own shadow — you're here to face what's bound, hidden, or disowned in yourself with unusual honesty, and find genuine liberation on the other side of that honesty.`,
       shadow: `The trap is getting fascinated with the darkness itself, circling your own shadow material without ever actually working it through to freedom. If your sense of purpose feels heavy and stuck rather than deepening, the looking may have become its own attachment.`,
       path: `Let every honest look at your own shadow be in service of an actual unchaining. Purpose here isn't found in staying close to the darkness — it's found in what gets freed once you've genuinely faced it. You are allowed to look at the hard thing with kindness for the one who avoided it. What have you been circling that is finally ready to be faced?`,
@@ -1056,7 +1056,7 @@ window.DMicroContent = (function () {
 
     // ── 16 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '16_E': {
-      heading: `Your Soul's Purpose Arrives in the Moments Everything Reorganizes`,
+      heading: `Collapse Before Clarity`,
       why: `At your core, you feel most like yourself in the aftermath of a real reorganization, once the dust settles and you can see clearly again. The Tower at the center of your matrix means your foundation of purpose gets clarified through sudden collapse and rebuilding — you're here to periodically let a false structure in your life come down fast, and to trust that the resulting clarity, however disorienting, is actually pointing you truer.`,
       shadow: `The trap is needing the collapse itself to feel purposeful, unconsciously provoking crisis because gradual clarity feels less convincing than a dramatic one. If your life keeps reorganizing in upheaval, purpose may be getting confused with intensity.`,
       path: `Let clarity arrive gently when it can. Purpose isn't proven by how much collapsed to get you there — it's proven by how true the resulting direction actually is. Save the lightning for the structures that genuinely can't hold. You are allowed to find yourself in the reorganizing, not despite it. What did the last upheaval reveal about you that calm never had?`,
@@ -1066,7 +1066,7 @@ window.DMicroContent = (function () {
 
     // ── 17 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '17_E': {
-      heading: `Your Soul's Purpose Is Generating Hope Even Without Proof It's Warranted`,
+      heading: `Hope Before Evidence`,
       why: `At your core, you feel most like yourself when you're actively replenishing something — a person, a project, your own depleted reserves — trusting the process before there's outside evidence it's working. The Star at the center of your matrix means your foundation of purpose is genuine, structural hope — you're here to keep generating real renewal and light, for yourself and others, even in circumstances that don't yet confirm the hope is justified.`,
       shadow: `The trap is needing external proof before you'll let yourself hope, which cuts you off from your own deepest source of purpose. It can also show up as pouring hope outward so consistently that your own reserves run dry, offering renewal to everyone except yourself. If your purpose feels like it's always about lifting others and never about being lifted, the wellspring needs its own source too.`,
       path: `Let your hope be genuinely reciprocal — replenished as much as it replenishes. Purpose here isn't an inexhaustible personal resource; it's a real exchange that has to include you receiving, not just generating. You are allowed to hope without a permit. Where is your unproven faith already quietly keeping someone — maybe you — alive?`,
@@ -1076,7 +1076,7 @@ window.DMicroContent = (function () {
 
     // ── 18 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '18_E': {
-      heading: `Your Soul's Purpose Lives Beneath What You Can Explain`,
+      heading: `Feeling Before Explanation`,
       why: `At your core, you feel most like yourself when you're honoring what you sense rather than only what you can prove. The Moon at the center of your matrix means your foundation of purpose runs through your emotional and unconscious depths — you're here to trust the parts of yourself that can't be fully explained or justified, letting dreams, feelings, and intuition guide you as much as logic does.`,
       shadow: `The trap is getting lost in the depths without a way back to functioning, letting the felt sense of things override any grounded engagement with actual circumstances. If your purpose feels real but ungraspable, the depth may need more of a tether to ordinary life.`,
       path: `Let your intuition inform real decisions, anchored by something concrete — a practice, a body, a routine. Purpose here isn't choosing feeling over reality; it's letting feeling and reality actually talk to each other. You are allowed to trust what you cannot explain yet. What beneath-the-surface pull has been right too many times to keep dismissing?`,
@@ -1086,7 +1086,7 @@ window.DMicroContent = (function () {
 
     // ── 19 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '19_E': {
-      heading: `Your Soul's Purpose Is Simply to Be Genuinely, Visibly Yourself`,
+      heading: `Visibility Over Approval`,
       why: `At your core, you feel most like yourself in moments of genuine, unguarded joy — not chasing a bigger mission, but simply radiating who you already are. The Sun at the center of your matrix means your foundation of purpose is uncomplicated in a way that can be hard to trust: you're here to be authentically, visibly yourself, and to let the resulting warmth and vitality do their own work in the world.`,
       shadow: `The trap is believing that purpose this simple can't be enough — searching for something more complicated, more effortful, more "worthy," and dimming your natural radiance in the process. If your search for purpose feels exhausting, it may be more elaborate than what your soul is actually asking for.`,
       path: `Let simple, authentic joy count as purpose, without needing to justify it with a bigger mission. Your radiance, offered honestly, is already doing real work in the lives it touches. You are allowed to be visibly, unmistakably yourself and let that be the contribution. What part of you have you been formatting for other people's comfort?`,
@@ -1096,7 +1096,7 @@ window.DMicroContent = (function () {
 
     // ── 20 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '20_E': {
-      heading: `Your Soul's Purpose Keeps Calling You Toward a Bigger Version of Yourself`,
+      heading: `Becoming Over Staying`,
       why: `At your core, you feel most like yourself in the moments you actually rise to meet a call you could have easily ignored. Judgement at the center of your matrix means your foundation of purpose is an ongoing awakening — you're here to keep answering an inner summons toward a fuller version of yourself, again and again, rather than settling permanently into any single identity.`,
       shadow: `The trap is hearing the call and endlessly preparing to answer it, using self-improvement as a substitute for the actual leap. If your purpose feels perpetually almost-arrived, the summons may be waiting on an answer you keep deferring.`,
       path: `Answer the call before you feel fully ready. Purpose here is proven in the rising, not the readiness. Each time you actually move toward the bigger version of yourself, the purpose becomes real instead of theoretical. You are allowed to grow into the bigger version at your own pace. What is the larger life already asking of you in small, present-tense ways?`,
@@ -1106,7 +1106,7 @@ window.DMicroContent = (function () {
 
     // ── 21 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '21_E': {
-      heading: `Your Soul's Purpose Is to Actually Arrive Somewhere Whole`,
+      heading: `Arrival Over Departure`,
       why: `At your core, you feel most like yourself in moments of real, earned arrival, however temporary. The World at the center of your matrix means your foundation of purpose is genuine completion — you're here to integrate the many pieces of your life and self into an actual, felt wholeness, not to chase achievement after achievement without ever letting yourself land.`,
       shadow: `The trap is refusing to ever call anything complete, treating wholeness as a permanently receding goal because arriving would mean facing whatever comes after. If purpose feels expansive but never satisfied, completion itself may be the thing being avoided.`,
       path: `Let yourself actually arrive sometimes. Purpose here isn't only the striving — it's also the willingness to stand inside a genuine sense of "this is whole" before the next cycle inevitably begins. You are allowed to arrive whole rather than finished. What would wholeness look like if it stopped requiring perfection first?`,
@@ -1116,7 +1116,7 @@ window.DMicroContent = (function () {
 
     // ── 22 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '22_E': {
-      heading: `Your Soul's Purpose Is Renewed Every Time You Choose to Begin Again`,
+      heading: `Renewal Over Certainty`,
       why: `At your core, you feel most like yourself standing at the edge of something new, choosing to step forward without needing a guarantee first. The Fool at the center of your matrix means your foundation of purpose isn't a fixed destination at all — it's the ongoing willingness to begin again, with real trust, regardless of what the last chapter did or didn't resolve.`,
       shadow: `The trap is treating every fresh start as an escape from whatever the last one asked of you, so nothing ever accumulates into a deeper sense of self. If your life feels like a string of unconnected beginnings, purpose may be resetting instead of actually building.`,
       path: `Let each new beginning carry something forward from the last one — a lesson, a piece of wisdom, a scar that's actually healed. Purpose here is trust that accumulates, not trust that starts from zero every time. You are allowed to begin again without it erasing what came before. What fresh start is calling you that your history has actually prepared you for?`,
