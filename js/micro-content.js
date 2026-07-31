@@ -5899,7 +5899,7 @@ window.DMicroContent = (function () {
     // ── Chakra Map: Muladhara, Root Chakra (MUL) ────────────────────────────
 
     '1_MUL': {
-      heading: `Your Ground Is Built By Starting, Not By Arriving`,
+      heading: `Ground From Starting, Not Arriving`,
       why: `Your sense of safety comes from motion — from knowing you can generate what you need out of nothing if you have to. The Magician grounds you through capability itself: as long as you can start something, you feel like you'll survive.`,
       shadow: `The risk is never actually letting the ground settle, staying in perpetual-start mode because stillness feels like the one thing your safety wasn't built to survive.`,
       path: `Try trusting that you're allowed to stop generating and just be held by what you've already built. You are allowed to feel safe without constantly proving you can begin again. What would it feel like to be grounded without needing to start something new to prove it?`,
@@ -5908,7 +5908,7 @@ window.DMicroContent = (function () {
     },
 
     '2_MUL': {
-      heading: `Your Ground Is Built By Knowing Before You're Told`,
+      heading: `Ground From Knowing First`,
       why: `Your sense of safety comes from your own internal read of a situation — sensing what's true before anyone confirms it. The High Priestess grounds you through trusted inner knowing, a felt security that doesn't need outside verification.`,
       shadow: `The risk is that the security stays entirely private, so ungrounded to anyone else that it can be mistaken for absence rather than depth.`,
       path: `Try letting your grounded knowing show occasionally, so it can actually be recognized as the stability it is. You are allowed to let your quiet certainty be visible. What would it look like to let someone see how grounded you actually are?`,
@@ -5917,7 +5917,7 @@ window.DMicroContent = (function () {
     },
 
     '3_MUL': {
-      heading: `Your Ground Is Built By Abundance and Belonging`,
+      heading: `Ground From Belonging`,
       why: `Your sense of safety comes from resources, warmth, a home that actually holds you — material comfort as a real form of security, not excess for its own sake. The Empress grounds you through genuine, felt provision.`,
       shadow: `The risk is measuring your safety only by how much you're providing for others, letting your own basic needs go quietly unattended while you tend everyone else's.`,
       path: `Try including your own needs in the abundance you create. You are allowed to be as provided-for as you provide. What basic need of your own have you been quietly deferring while meeting everyone else's?`,
@@ -5926,7 +5926,7 @@ window.DMicroContent = (function () {
     },
 
     '4_MUL': {
-      heading: `Your Ground Is Built By Structure You Can Actually Rely On`,
+      heading: `Ground From Reliable Structure`,
       why: `Your sense of safety comes from order — systems, routines, a structure sturdy enough that you don't have to constantly monitor it. The Emperor grounds you through built, dependable stability.`,
       shadow: `The risk is that maintaining the structure becomes a full-time job in itself, so exhausting to uphold that the security it was supposed to provide gets spent on defending it instead.`,
       path: `Try building one piece of structure durable enough that it holds itself, without your constant oversight. You are allowed to trust a system you built. What structure of yours could actually run without your constant management?`,
@@ -5935,7 +5935,7 @@ window.DMicroContent = (function () {
     },
 
     '5_MUL': {
-      heading: `Your Ground Is Built By Belonging to Something Larger`,
+      heading: `Ground From Something Larger`,
       why: `Your sense of safety comes from tradition, community, a shared framework of meaning bigger than any one day's uncertainty. The Hierophant grounds you through belonging.`,
       shadow: `The risk is that the belonging becomes the whole foundation, so that questioning any part of the tradition feels like losing the ground itself.`,
       path: `Try separating your security from any single belief so the ground survives even when one part of it gets questioned. You are allowed to feel safe even while doubting a piece of what you were taught. What would still hold you up if you let one inherited belief be wrong?`,
@@ -5944,7 +5944,7 @@ window.DMicroContent = (function () {
     },
 
     '6_MUL': {
-      heading: `Your Ground Is Built By Being Genuinely Chosen`,
+      heading: `Ground From Being Chosen`,
       why: `Your sense of safety comes from connection — knowing you're wanted, not just tolerated, by the people closest to you. The Lovers grounds you through felt, mutual belonging.`,
       shadow: `The risk is chasing that feeling of being chosen so hard you accept relationships that don't actually offer it, mistaking any attention for the real thing.`,
       path: `Try noticing where you already are genuinely chosen and let that be enough ground for now. You are allowed to feel secure in love without constantly re-auditioning for it. Where are you already wanted exactly as you are, if you actually looked?`,
@@ -5953,7 +5953,7 @@ window.DMicroContent = (function () {
     },
 
     '7_MUL': {
-      heading: `Your Ground Is Built By Forward Motion Itself`,
+      heading: `Ground From Forward Motion`,
       why: `Your sense of safety comes from momentum — as long as you're moving toward something, the ground under you feels solid. The Chariot grounds you through purposeful direction.`,
       shadow: `The risk is that stillness starts to feel like danger, so any pause reads as the ground itself giving way rather than a normal part of any journey.`,
       path: `Try resting for one real stretch and noticing that the ground is actually still there. You are allowed to feel safe while standing still. What would it take to trust that stopping doesn't undo your progress?`,
@@ -5962,7 +5962,7 @@ window.DMicroContent = (function () {
     },
 
     '8_MUL': {
-      heading: `Your Ground Is Built By Things Being Fair`,
+      heading: `Ground From Fairness`,
       why: `Your sense of safety comes from balance — knowing the scales are even, that what's owed gets paid and what's earned gets received. Justice grounds you through a world that behaves the way it's supposed to.`,
       shadow: `The risk is that any unfairness, even small, can feel like the whole ground shifting, because your security is tied to a world staying perfectly calibrated.`,
       path: `Try letting your ground rest in your own integrity rather than the world's fairness, since only one of those is actually within your control. You are allowed to feel secure even when the world is unfair. What would let your footing hold steady even through one unresolved injustice?`,
@@ -5971,7 +5971,7 @@ window.DMicroContent = (function () {
     },
 
     '9_MUL': {
-      heading: `Your Ground Is Built in Solitude`,
+      heading: `Ground Built in Solitude`,
       why: `Your sense of safety comes from withdrawal — time alone to actually settle, away from the noise of other people's needs and opinions. The Hermit grounds you through chosen retreat.`,
       shadow: `The risk is that the retreat becomes permanent, security purchased at the price of connection you actually still need.`,
       path: `Try returning from your solitude with the ground intact and letting relationship not threaten it. You are allowed to be grounded in solitude and still stay connected. What would it look like to bring your settled self back into company without losing it?`,
@@ -5980,7 +5980,7 @@ window.DMicroContent = (function () {
     },
 
     '10_MUL': {
-      heading: `Your Ground Is Built By Trusting the Turning`,
+      heading: `Ground From Trusting the Turn`,
       why: `Your sense of safety comes from accepting that things cycle — the ability to trust a low point will actually turn, rather than needing certainty about outcomes. The Wheel of Fortune grounds you through faith in timing.`,
       shadow: `The risk is that every downturn still feels like proof the ground has given way, even when you know, intellectually, that it's just a phase.`,
       path: `Try meeting the next low point with the trust you already have in theory. You are allowed to feel grounded through a downturn, not just after it ends. What would it look like to feel secure while still mid-cycle, before the turn arrives?`,
@@ -5989,7 +5989,7 @@ window.DMicroContent = (function () {
     },
 
     '11_MUL': {
-      heading: `Your Ground Is Built By Enduring Without Needing to Prove It`,
+      heading: `Ground From Quiet Endurance`,
       why: `Your sense of safety comes from your own capacity to withstand — real, quiet endurance that doesn't need an audience. Strength grounds you through inner resilience.`,
       shadow: `The risk is turning that endurance into a performance, needing witnesses to confirm the resilience is real, which quietly undermines the very quality it's meant to prove.`,
       path: `Try letting your endurance be private again, unwitnessed, and trust it's still real. You are allowed to feel grounded without anyone seeing how strong you are. What would it feel like to be resilient with no one watching?`,
@@ -5998,7 +5998,7 @@ window.DMicroContent = (function () {
     },
 
     '12_MUL': {
-      heading: `Your Ground Is Built By Letting Go of Control`,
+      heading: `Ground From Letting Go`,
       why: `Your sense of safety comes, paradoxically, from surrender — trusting the situation enough to stop gripping it. The Hanged Man grounds you through release rather than control.`,
       shadow: `The risk is that the surrender turns into passivity, a permanent suspension mistaken for the release that was actually needed.`,
       path: `Try releasing your grip on one specific thing today and noticing the ground holds anyway. You are allowed to feel secure without controlling the outcome. What would you have to let go of to find out the ground was there the whole time?`,
@@ -6007,7 +6007,7 @@ window.DMicroContent = (function () {
     },
 
     '13_MUL': {
-      heading: `Your Ground Is Built By Letting Old Versions of Yourself Die`,
+      heading: `Ground From Letting Old Selves Die`,
       why: `Your sense of safety comes from your own capacity to actually end things and be renewed — real transformation as a source of stability, not a threat to it. Transformation grounds you through willingness to change.`,
       shadow: `The risk is ending things prematurely, mistaking any discomfort for a signal that the current chapter must be over, when it might just be difficult.`,
       path: `Try letting an ending complete at its actual pace rather than rushing it for the relief. You are allowed to feel grounded through change, not just after it's finished. What ending in your life deserves its full timeline instead of a rushed one?`,
@@ -6016,7 +6016,7 @@ window.DMicroContent = (function () {
     },
 
     '14_MUL': {
-      heading: `Your Ground Is Built By Actual Balance, Not Managed Extremes`,
+      heading: `Ground From Real Balance`,
       why: `Your sense of safety comes from genuine integration — body, mind, and circumstance actually working together, not just alternating in turns. Temperance grounds you through real, felt equilibrium.`,
       shadow: `The risk is mistaking the alternation between extremes for balance itself, when true equilibrium was actually being asked for the whole time.`,
       path: `Try finding one small, actually blended version of two things you've been alternating between. You are allowed to want real balance, not managed extremes. What two things in your life are ready to work together instead of taking turns?`,
@@ -6025,7 +6025,7 @@ window.DMicroContent = (function () {
     },
 
     '15_MUL': {
-      heading: `Your Ground Is Built By Facing What You'd Rather Deny`,
+      heading: `Ground From Facing Denial`,
       why: `Your sense of safety comes from honest reckoning with your own compulsions and desires — real security through self-knowledge, not through pretending the shadow isn't there. The Devil grounds you through confrontation, not denial.`,
       shadow: `The risk is performing a cleaner version of yourself while an unexamined pull runs quietly underneath, undermining the very ground the performance was meant to protect.`,
       path: `Try naming one real compulsion honestly, without judgment, today. You are allowed to feel grounded by facing your shadow instead of hiding it. What part of yourself have you been protecting the ground from instead of actually grounding it in?`,
@@ -6034,7 +6034,7 @@ window.DMicroContent = (function () {
     },
 
     '16_MUL': {
-      heading: `Your Ground Is Built By Surviving What Collapses`,
+      heading: `Ground From Surviving Collapse`,
       why: `Your sense of safety comes from having already survived structural collapse — proof, hard-won, that you can rebuild. The Tower grounds you through resilience tested by real crisis.`,
       shadow: `The risk is bracing permanently for the next collapse, so vigilant against instability that you can never actually rest in the ground you've already rebuilt.`,
       path: `Try trusting the current structure without constantly checking it for cracks. You are allowed to feel grounded without waiting for the next collapse. What would it feel like to trust what you've already rebuilt?`,
@@ -6043,7 +6043,7 @@ window.DMicroContent = (function () {
     },
 
     '17_MUL': {
-      heading: `Your Ground Is Built By Hope That Doesn't Need Proof`,
+      heading: `Ground From Hope Without Proof`,
       why: `Your sense of safety comes from faith in a better outcome — hope itself as a stabilizing force, not dependent on evidence it will pan out. The Star grounds you through trust in the future.`,
       shadow: `The risk is keeping that hope so modest and private it barely functions as ground at all, too small to actually hold your weight.`,
       path: `Try letting your hope be as large and visible as it actually is. You are allowed to feel grounded in a hope you haven't shrunk down. What would your hope look like at its actual, unshrunken size?`,
@@ -6052,7 +6052,7 @@ window.DMicroContent = (function () {
     },
 
     '18_MUL': {
-      heading: `Your Ground Is Built By Trusting the Undercurrent`,
+      heading: `Ground From the Undercurrent`,
       why: `Your sense of safety comes from a felt sense beneath the surface — intuition about atmosphere and undercurrent that turns out, again and again, to be accurate. The Moon grounds you through trust in the unseen.`,
       shadow: `The risk is that the felt sense curdles into anxious story, mistaking every strong feeling for confirmed danger rather than genuine signal.`,
       path: `Try checking one strong feeling against real evidence before treating it as settled fact. You are allowed to trust your intuition while still verifying it. What feeling have you been treating as certain that's actually still just a feeling?`,
@@ -6061,7 +6061,7 @@ window.DMicroContent = (function () {
     },
 
     '19_MUL': {
-      heading: `Your Ground Is Built By Being Genuinely Warm`,
+      heading: `Ground From Genuine Warmth`,
       why: `Your sense of safety comes from vitality and open warmth — a felt sense that things are fundamentally good, not performed positivity but actual, lived brightness. The Sun grounds you through real joy.`,
       shadow: `The risk is that the warmth becomes a performance for other people's comfort, leaving your own harder feelings with nowhere safe to land.`,
       path: `Try letting one difficult feeling be visible alongside the warmth today. You are allowed to feel grounded even when you're not being bright. What would it feel like to be warmly received on a day you're not performing brightness at all?`,
@@ -6070,7 +6070,7 @@ window.DMicroContent = (function () {
     },
 
     '20_MUL': {
-      heading: `Your Ground Is Built By Answering What You Already Know`,
+      heading: `Ground From Answering the Known`,
       why: `Your sense of safety comes from clarity acted on — knowing exactly what needs to change and actually rising to do it, rather than staying in ambiguous preparation. Judgement grounds you through decisive alignment.`,
       shadow: `The risk is that the clarity arrives and gets endlessly deferred, prepared-for instead of acted on, leaving the ground perpetually pending.`,
       path: `Try taking one concrete action toward the calling you've already heard clearly. You are allowed to feel grounded by acting on what you know, not just by knowing it. What is the smallest real step the clarity you already have is asking for?`,
@@ -6079,7 +6079,7 @@ window.DMicroContent = (function () {
     },
 
     '21_MUL': {
-      heading: `Your Ground Is Built By Letting Things Actually Finish`,
+      heading: `Ground From Letting Things Finish`,
       why: `Your sense of safety comes from completion — real, acknowledged arrival, not another goal appended before the current one gets to count. The World grounds you through genuine closure.`,
       shadow: `The risk is reaching real completion and immediately relativizing it, adding one more condition before it's allowed to actually count as done.`,
       path: `Try letting one already-finished thing in your life actually be named as complete today. You are allowed to feel grounded in genuine arrival. What have you already finished that deserves to be acknowledged as done, not almost?`,
@@ -6088,7 +6088,7 @@ window.DMicroContent = (function () {
     },
 
     '22_MUL': {
-      heading: `Your Ground Is Built By Trusting the Leap Itself`,
+      heading: `Ground From Trusting the Leap`,
       why: `Your sense of safety comes, unusually, from openness to the unknown — trusting the flow of life enough that not having a net doesn't feel like danger. The Fool grounds you through faith in your own adaptability.`,
       shadow: `The risk is that the openness becomes recklessness, leaping without any real discernment because the trust in adaptability has slipped into avoiding all preparation.`,
       path: `Try taking one real leap this season while still keeping your eyes open. You are allowed to feel grounded in trust rather than certainty. What would you leap toward if trusting your own adaptability were enough of a plan?`,
@@ -6100,7 +6100,7 @@ window.DMicroContent = (function () {
     // ── Chakra Map: Swadhisthana, Sacral Chakra (SWA) ───────────────────────
 
     '1_SWA': {
-      heading: `Your Pleasure Comes From Making Something New`,
+      heading: `Pleasure in Making Something New`,
       why: `Your creative and sensual energy flows most freely at the start of things — the charge of a fresh idea, a new attraction, an unbuilt possibility. The Magician moves your sacral energy through initiation.`,
       shadow: `The risk is that the pleasure fades exactly when things stop being new, so your emotional flow depends entirely on novelty rather than depth.`,
       path: `Try staying with one pleasure past its newness and noticing what's still there. You are allowed to find delight in something familiar. What familiar pleasure of yours might still have more in it if you actually stayed?`,
@@ -6109,7 +6109,7 @@ window.DMicroContent = (function () {
     },
 
     '2_SWA': {
-      heading: `Your Pleasure Comes From What Stays Unspoken`,
+      heading: `Pleasure in the Unspoken`,
       why: `Your creative and sensual energy flows through mystery — attraction and creativity that thrive on what's suggested rather than stated outright. The High Priestess moves your sacral energy through withheld intimacy.`,
       shadow: `The risk is that everything stays so veiled that pleasure never quite gets to fully arrive, mystery becoming distance instead of allure.`,
       path: `Try letting one desire be spoken plainly instead of only implied. You are allowed to enjoy pleasure you've actually named out loud. What longing have you been hinting at that deserves to just be said?`,
@@ -6118,7 +6118,7 @@ window.DMicroContent = (function () {
     },
 
     '3_SWA': {
-      heading: `Your Pleasure Comes From Beauty and Genuine Abundance`,
+      heading: `Pleasure in Beauty and Abundance`,
       why: `Your creative and sensual energy flows through richness — nurturing, aesthetics, a body and life that feel genuinely fed. The Empress moves your sacral energy through embodied abundance.`,
       shadow: `The risk is that the abundance flows outward only, so you're generous with everyone's pleasure but your own, quietly, goes unattended.`,
       path: `Try including your own senses in the abundance you create for others. You are allowed to receive pleasure, not only produce it for other people. What sensory pleasure have you been offering everyone except yourself?`,
@@ -6127,7 +6127,7 @@ window.DMicroContent = (function () {
     },
 
     '4_SWA': {
-      heading: `Your Pleasure Comes From Control You Can Actually Trust`,
+      heading: `Pleasure in Trusted Control`,
       why: `Your creative and sensual energy flows through structure — knowing the container is sturdy enough to actually relax inside of. The Emperor moves your sacral energy through contained safety.`,
       shadow: `The risk is that the control itself becomes the point, so tightly managed that spontaneous pleasure never gets room to actually happen.`,
       path: `Try loosening your grip on one small pleasure and letting it be unplanned. You are allowed to enjoy something you didn't structure in advance. What would an unplanned pleasure feel like if you actually let it happen?`,
@@ -6136,7 +6136,7 @@ window.DMicroContent = (function () {
     },
 
     '5_SWA': {
-      heading: `Your Pleasure Comes From Shared Meaning`,
+      heading: `Pleasure in Shared Meaning`,
       why: `Your creative and sensual energy flows through belonging to something with real values — creative expression that feels connected to purpose, not indulgence for its own sake. The Hierophant moves your sacral energy through meaningful creation.`,
       shadow: `The risk is that pleasure gets policed so hard by what's 'appropriate' that spontaneous enjoyment rarely survives the filter.`,
       path: `Try letting one pleasure be enjoyed simply because it feels good, without needing to justify its meaning. You are allowed to enjoy something just because it's pleasurable. What delight have you been requiring a justification for?`,
@@ -6145,7 +6145,7 @@ window.DMicroContent = (function () {
     },
 
     '6_SWA': {
-      heading: `Your Pleasure Comes From Real, Chosen Connection`,
+      heading: `Pleasure in Chosen Connection`,
       why: `Your creative and sensual energy flows through intimacy — genuine attraction and deep bonds, not performance of romance. The Lovers moves your sacral energy through chosen closeness.`,
       shadow: `The risk is confusing intensity with intimacy, chasing the charge of a connection rather than the depth actually available in it.`,
       path: `Try choosing depth over intensity in one connection this week and noticing what that actually feels like. You are allowed to want quiet intimacy more than exciting intensity. Which connection of yours might have more real depth than drama?`,
@@ -6154,7 +6154,7 @@ window.DMicroContent = (function () {
     },
 
     '7_SWA': {
-      heading: `Your Pleasure Comes From Winning and Moving Forward`,
+      heading: `Pleasure in Winning Forward`,
       why: `Your creative and sensual energy flows through achievement and motion — pleasure tied to victory, progress, actually getting somewhere. The Chariot moves your sacral energy through forward drive.`,
       shadow: `The risk is that pleasure only registers when you're winning, so ordinary, undramatic enjoyment barely counts as real to you.`,
       path: `Try enjoying one small, undramatic pleasure today without it needing to be a victory. You are allowed to feel good about something that isn't a win. What quiet, ordinary pleasure have you been dismissing as too small to count?`,
@@ -6163,7 +6163,7 @@ window.DMicroContent = (function () {
     },
 
     '8_SWA': {
-      heading: `Your Pleasure Comes From Things Being Fair`,
+      heading: `Pleasure in Fairness`,
       why: `Your creative and sensual energy flows through balance — pleasure that feels earned and evenly distributed, not taken at someone else's expense. Justice moves your sacral energy through equitable exchange.`,
       shadow: `The risk is that you monitor fairness so closely you can't actually relax into pleasure without auditing whether you deserve it.`,
       path: `Try enjoying one pleasure today without checking whether it's been earned first. You are allowed to enjoy something simply because it feels good, not because you've calculated you deserve it. What pleasure have you been withholding pending an audit that isn't actually required?`,
@@ -6172,7 +6172,7 @@ window.DMicroContent = (function () {
     },
 
     '9_SWA': {
-      heading: `Your Pleasure Comes From Depth Found Alone`,
+      heading: `Pleasure Found Alone`,
       why: `Your creative and sensual energy flows through solitude — real satisfaction found in your own inner world, not dependent on company. The Hermit moves your sacral energy through private depth.`,
       shadow: `The risk is that the solitude becomes so complete that shared pleasure, the kind that actually requires another person, gets avoided entirely.`,
       path: `Try letting one pleasure be shared rather than solitary this week. You are allowed to enjoy connection, not only depth found alone. What pleasure have you been keeping solitary that could actually be shared?`,
@@ -6181,7 +6181,7 @@ window.DMicroContent = (function () {
     },
 
     '10_SWA': {
-      heading: `Your Pleasure Comes and Goes in Waves You Can Trust`,
+      heading: `Pleasure in Trusted Waves`,
       why: `Your creative and sensual energy flows in cycles — periods of real abundance and enjoyment, followed by quieter stretches that are just as legitimate. The Wheel of Fortune moves your sacral energy through rhythm.`,
       shadow: `The risk is fighting the quiet stretches as though they were failures of pleasure, rather than trusting the rhythm to bring the fuller stretch back around.`,
       path: `Try meeting your current quiet stretch with patience instead of alarm. You are allowed to feel low pleasure sometimes without it being a crisis. What would it feel like to trust that this quiet season is simply a phase, not a verdict?`,
@@ -6190,7 +6190,7 @@ window.DMicroContent = (function () {
     },
 
     '11_SWA': {
-      heading: `Your Pleasure Comes From Endurance That Doesn't Need Applause`,
+      heading: `Pleasure Without Applause`,
       why: `Your creative and sensual energy flows through quiet resilience — a body and spirit that can hold real intensity without needing anyone to witness it. Strength moves your sacral energy through unshowy staying power.`,
       shadow: `The risk is performing that endurance for an audience, turning private resilience into something that needs external confirmation to feel real.`,
       path: `Try letting your resilience be unwitnessed today and trusting it's still real. You are allowed to feel good about your own staying power with no one watching. What would it feel like to be resilient with absolutely no audience?`,
@@ -6199,7 +6199,7 @@ window.DMicroContent = (function () {
     },
 
     '12_SWA': {
-      heading: `Your Pleasure Comes From Surrendering the Need to Control It`,
+      heading: `Pleasure in Letting Go of Control`,
       why: `Your creative and sensual energy flows best when you stop directing it — pleasure that arrives through release rather than management. The Hanged Man moves your sacral energy through letting go.`,
       shadow: `The risk is that the surrender turns into passivity, waiting indefinitely for pleasure to arrive rather than actually meeting it halfway.`,
       path: `Try releasing your grip on one specific outcome today and noticing what pleasure actually shows up. You are allowed to enjoy what arrives without controlling its shape. What might you feel if you stopped directing exactly how the pleasure has to go?`,
@@ -6208,7 +6208,7 @@ window.DMicroContent = (function () {
     },
 
     '13_SWA': {
-      heading: `Your Pleasure Comes From Letting Old Versions of Desire Die`,
+      heading: `Pleasure Past Old Desire`,
       why: `Your creative and sensual energy flows through real transformation — letting an old want or old identity actually end so a truer one can take its place. Transformation moves your sacral energy through renewal.`,
       shadow: `The risk is clinging to an old source of pleasure well past its natural life, because ending it feels like losing access to joy altogether.`,
       path: `Try letting one outdated pleasure or desire actually complete its ending. You are allowed to let an old joy go so a truer one can arrive. What pleasure from an earlier chapter is your heart quietly finished with?`,
@@ -6217,7 +6217,7 @@ window.DMicroContent = (function () {
     },
 
     '14_SWA': {
-      heading: `Your Pleasure Comes From Genuine Blending, Not Alternating Extremes`,
+      heading: `Pleasure in Real Blending`,
       why: `Your creative and sensual energy flows through actual integration — indulgence and discipline working together, not taking turns. Temperance moves your sacral energy through real balance.`,
       shadow: `The risk is swinging hard between full indulgence and total restriction, mistaking the alternation for the balance that was actually being asked for.`,
       path: `Try finding one small, genuinely blended pleasure today instead of choosing an extreme. You are allowed to want moderate, sustainable enjoyment, not just intense swings. What would a blended, sustainable pleasure actually look like this week?`,
@@ -6226,7 +6226,7 @@ window.DMicroContent = (function () {
     },
 
     '15_SWA': {
-      heading: `Your Pleasure Comes From Looking Directly at What You Want`,
+      heading: `Pleasure in Naming Desire`,
       why: `Your creative and sensual energy flows through honest confrontation with desire — real pleasure available once the craving is actually examined instead of denied. The Devil moves your sacral energy through reckoning.`,
       shadow: `The risk is either denying the desire entirely or chasing it so unconsciously that pleasure curdles into compulsion.`,
       path: `Try naming one real desire honestly, without judgment, and choosing consciously whether to pursue it. You are allowed to want pleasure and examine it at the same time. What craving have you been either denying or chasing on autopilot?`,
@@ -6235,7 +6235,7 @@ window.DMicroContent = (function () {
     },
 
     '16_SWA': {
-      heading: `Your Pleasure Comes From Rebuilding After Real Collapse`,
+      heading: `Pleasure After Collapse`,
       why: `Your creative and sensual energy flows through renewal after upheaval — real pleasure rediscovered once an old structure has actually fallen and been rebuilt. The Tower moves your sacral energy through disruption and rebirth.`,
       shadow: `The risk is fearing pleasure itself after a collapse, treating enjoyment as risky because the last collapse arrived unannounced.`,
       path: `Try letting yourself enjoy one small thing today without waiting for proof it's safe. You are allowed to feel pleasure again after upheaval, without needing a guarantee first. What small joy have you been withholding until you feel fully safe again?`,
@@ -6244,7 +6244,7 @@ window.DMicroContent = (function () {
     },
 
     '17_SWA': {
-      heading: `Your Pleasure Comes From Hope and Creative Inspiration`,
+      heading: `Pleasure in Hope and Inspiration`,
       why: `Your creative and sensual energy flows through inspired hope — real joy found in making, dreaming, and believing in a better version of things. The Star moves your sacral energy through creative faith.`,
       shadow: `The risk is keeping that creative joy modest and private, as if letting it be seen fully would be too much or too naive.`,
       path: `Try letting one piece of your creative joy be visible today, at full size. You are allowed to enjoy your own inspiration in front of other people. What creative pleasure have you been keeping smaller than it actually is?`,
@@ -6253,7 +6253,7 @@ window.DMicroContent = (function () {
     },
 
     '18_SWA': {
-      heading: `Your Pleasure Comes From What You Can't Fully Explain`,
+      heading: `Pleasure Beyond Explanation`,
       why: `Your creative and sensual energy flows through the mysterious and the felt — pleasure connected to dreams, intuition, art that touches something beneath the surface. The Moon moves your sacral energy through enchantment.`,
       shadow: `The risk is that the mystery curdles into anxious uncertainty, so pleasure gets tangled up with unease instead of staying genuinely enchanting.`,
       path: `Try letting one mysterious pleasure just be enjoyed, without needing to fully explain or resolve it. You are allowed to enjoy something you can't fully articulate. What pleasure have you been over-analyzing instead of simply feeling?`,
@@ -6262,7 +6262,7 @@ window.DMicroContent = (function () {
     },
 
     '19_SWA': {
-      heading: `Your Pleasure Comes From Open, Visible Joy`,
+      heading: `Pleasure, Visible and Open`,
       why: `Your creative and sensual energy flows through unguarded happiness — pleasure expressed fully and openly, not managed for anyone else's comfort. The Sun moves your sacral energy through radiant, shared delight.`,
       shadow: `The risk is performing lightness while your deeper pleasure stays private and unexpressed, as if full joy would be too much for the room.`,
       path: `Try letting one piece of real joy show at full volume today. You are allowed to enjoy something without dimming it for anyone else's comfort. What happiness have you been quietly managing down to something more acceptable?`,
@@ -6271,7 +6271,7 @@ window.DMicroContent = (function () {
     },
 
     '20_SWA': {
-      heading: `Your Pleasure Comes From Answering What You Already Feel Called To`,
+      heading: `Pleasure in Answering the Call`,
       why: `Your creative and sensual energy flows through aligned action — real pleasure found in finally doing the thing you've sensed you should do for a while. Judgement moves your sacral energy through responsive alignment.`,
       shadow: `The risk is sensing the call clearly and still finding reasons to delay acting on it, leaving the pleasure of alignment permanently just out of reach.`,
       path: `Try taking one concrete step toward what you already feel called to enjoy or create. You are allowed to feel pleasure in finally answering a call you've been sensing. What creative or sensual calling have you been delaying acting on?`,
@@ -6280,7 +6280,7 @@ window.DMicroContent = (function () {
     },
 
     '21_SWA': {
-      heading: `Your Pleasure Comes From Feeling Genuinely Complete`,
+      heading: `Pleasure in Feeling Complete`,
       why: `Your creative and sensual energy flows through real integration and arrival — pleasure that comes from a felt sense of wholeness, not another unmet want appended to the list. The World moves your sacral energy through fulfillment.`,
       shadow: `The risk is reaching a genuinely fulfilling moment and immediately looking for the next thing, never quite letting the completion register as pleasure in itself.`,
       path: `Try letting one already-fulfilling moment today actually be felt as enough. You are allowed to feel pleasure in completion, not only in pursuit. What moment of genuine fulfillment have you rushed past without actually feeling it?`,
@@ -6289,7 +6289,7 @@ window.DMicroContent = (function () {
     },
 
     '22_SWA': {
-      heading: `Your Pleasure Comes From Trusting Life Without a Net`,
+      heading: `Pleasure in Trusting Without a Net`,
       why: `Your creative and sensual energy flows through openness to the unknown — real joy found in spontaneity, new experience, and trusting the flow without needing certainty first. The Fool moves your sacral energy through faithful adventure.`,
       shadow: `The risk is that the openness turns into recklessness, chasing every new sensation without any real discernment about what actually nourishes you.`,
       path: `Try taking one real, spontaneous pleasure this month, chosen with open eyes rather than pure impulse. You are allowed to enjoy adventure and still exercise real discernment. What spontaneous joy would you choose if you trusted your own judgment enough to pick it consciously?`,
@@ -6301,7 +6301,7 @@ window.DMicroContent = (function () {
     // ── Yearly Energy Forecast (YE) — the one time-varying position ─────────
 
     '1_YE': {
-      heading: `Right Now, Life Is Asking You to Begin Something`,
+      heading: `A Season for Beginning`,
       why: `This stretch of your life is carrying Magician energy — a season built for starting things, not for finishing what's already comfortable. Whatever's been sitting half-formed in your mind may be more ready than you've been treating it as.`,
       shadow: `The risk this season is starting five things and staying with none of them, mistaking the charge of a new idea for evidence it's actually the right one.`,
       path: `Try picking one beginning and actually following it past its first exciting week. You are allowed to begin before you feel fully ready. What has this season been quietly nudging you to finally start?`,
@@ -6310,7 +6310,7 @@ window.DMicroContent = (function () {
     },
 
     '2_YE': {
-      heading: `Right Now, Life Is Asking You to Trust What You Sense`,
+      heading: `A Season to Trust the Sense`,
       why: `This stretch of your life is carrying High Priestess energy — a season for listening inward rather than gathering more outside opinions. Whatever quiet certainty you've been sitting on may be more trustworthy right now than it usually gets credit for.`,
       shadow: `The risk this season is staying so private with your knowing that it never actually gets tested or acted on.`,
       path: `Try acting on one inner certainty this month before you can fully justify it to anyone else. You are allowed to trust what you sense before you can explain it. What has your intuition been quietly telling you during this stretch?`,
@@ -6319,7 +6319,7 @@ window.DMicroContent = (function () {
     },
 
     '3_YE': {
-      heading: `Right Now, Life Is Asking You to Let Something Grow`,
+      heading: `A Season for Growth`,
       why: `This stretch of your life is carrying Empress energy — a season built for nurturing, abundance, and letting something take its natural time to develop. Whatever you've been tending may be closer to bearing fruit than it looks.`,
       shadow: `The risk this season is rushing the growth, or pouring so much outward that your own reserves quietly run thin.`,
       path: `Try tending one thing patiently this season without forcing its pace, and make sure you're included in what gets nurtured. You are allowed to grow slowly and still be growing. What has been quietly developing during this stretch that deserves more patience?`,
@@ -6328,7 +6328,7 @@ window.DMicroContent = (function () {
     },
 
     '4_YE': {
-      heading: `Right Now, Life Is Asking You to Build Something Sturdy`,
+      heading: `A Season for Building Sturdy`,
       why: `This stretch of your life is carrying Emperor energy — a season for establishing real structure, not just holding things together improvised. Whatever system or foundation you've been meaning to formalize may finally have the conditions to actually hold.`,
       shadow: `The risk this season is gripping control so tightly that the structure becomes a burden rather than support.`,
       path: `Try building one piece of real, durable structure this season and then letting it hold without your constant oversight. You are allowed to build steadiness without needing to control everything within it. What foundation is this season asking you to finally make solid?`,
@@ -6337,7 +6337,7 @@ window.DMicroContent = (function () {
     },
 
     '5_YE': {
-      heading: `Right Now, Life Is Asking You to Learn or Teach Something Real`,
+      heading: `A Season to Learn or Teach`,
       why: `This stretch of your life is carrying Hierophant energy — a season for engaging seriously with tradition, mentorship, or a body of real knowledge, in whichever direction it moves for you. Whatever teaching or learning has been calling may be especially available right now.`,
       shadow: `The risk this season is treating the knowledge as something to collect rather than something to actually apply and pass on.`,
       path: `Try either learning one thing deeply or teaching one thing you already know, fully, this season. You are allowed to take guidance seriously without losing your own authority. What real knowledge is this stretch of life asking you to either receive or pass forward?`,
@@ -6346,7 +6346,7 @@ window.DMicroContent = (function () {
     },
 
     '6_YE': {
-      heading: `Right Now, Life Is Asking You to Choose, Not Just Feel`,
+      heading: `A Season to Choose, Not Feel`,
       why: `This stretch of your life is carrying Lovers energy — a season for making a real, examined choice about a relationship or a value, rather than drifting along an existing arrangement. Whatever connection has been asking for a decision may finally have the clarity to make one.`,
       shadow: `The risk this season is going through the motions of a choice you've actually already made by default, without ever consciously reclaiming it.`,
       path: `Try naming, out loud, one choice you've been making silently by default. You are allowed to choose deliberately what you've been accepting by habit. What relationship or value is this season asking you to actually choose rather than just continue?`,
@@ -6355,7 +6355,7 @@ window.DMicroContent = (function () {
     },
 
     '7_YE': {
-      heading: `Right Now, Life Is Asking You to Move Toward Something`,
+      heading: `A Season for Moving Forward`,
       why: `This stretch of your life is carrying Chariot energy — a season for directed momentum, not just staying busy. Whatever goal you've been circling may finally have real traction available if you actually aim at it.`,
       shadow: `The risk this season is moving hard without checking the direction, mistaking speed itself for progress.`,
       path: `Try naming one specific destination this season and aiming your current momentum at it deliberately. You are allowed to slow down just long enough to steer. What direction is this stretch of life actually asking your drive to move toward?`,
@@ -6364,7 +6364,7 @@ window.DMicroContent = (function () {
     },
 
     '8_YE': {
-      heading: `Right Now, Life Is Asking You to Set Something Right`,
+      heading: `A Season to Set It Right`,
       why: `This stretch of your life is carrying Justice energy — a season for addressing an imbalance honestly, including one closer to home than you'd usually look. Whatever fairness question has been sitting unresolved may finally have the conditions to actually be settled.`,
       shadow: `The risk this season is applying that clarity outward only, auditing everyone else while your own conduct goes unexamined.`,
       path: `Try applying the same fair standard to yourself that you'd apply to anyone else, once, this season. You are allowed to receive the same fairness you extend to others. What imbalance is this stretch of life actually asking you to set right?`,
@@ -6373,7 +6373,7 @@ window.DMicroContent = (function () {
     },
 
     '9_YE': {
-      heading: `Right Now, Life Is Asking You to Go Inward for a While`,
+      heading: `A Season Turned Inward`,
       why: `This stretch of your life is carrying Hermit energy — a season for withdrawal and depth, not constant availability to everyone else. Whatever understanding you've been circling may finally have room to actually settle if you give it real solitude.`,
       shadow: `The risk this season is staying in the withdrawal past its purpose, gathering depth that never gets carried back out.`,
       path: `Try taking real, chosen solitude this season, and then bringing back one thing you learn there to share. You are allowed to withdraw for a while and still plan to return. What understanding is this stretch of life asking you to sit with alone before you offer it to anyone?`,
@@ -6382,7 +6382,7 @@ window.DMicroContent = (function () {
     },
 
     '10_YE': {
-      heading: `Right Now, Life Is Turning, Whether You Push or Not`,
+      heading: `A Season of Turning`,
       why: `This stretch of your life is carrying Wheel of Fortune energy — a season of genuine turning, where trusting the timing matters more than forcing an outcome. Whatever's currently shifting may be exactly on schedule, even if it doesn't feel that way.`,
       shadow: `The risk this season is treating a normal turn as a crisis, either bracing hard against a downturn or refusing to trust an upswing.`,
       path: `Try meeting whatever's currently turning — up or down — with curiosity instead of alarm. You are allowed to trust the timing even mid-turn. What is this season's turning actually clearing space for?`,
@@ -6391,7 +6391,7 @@ window.DMicroContent = (function () {
     },
 
     '11_YE': {
-      heading: `Right Now, Life Is Asking for Quiet Endurance`,
+      heading: `A Season of Quiet Endurance`,
       why: `This stretch of your life is carrying Strength energy — a season for holding steady through real pressure, gently rather than by force. Whatever's currently demanding your resilience may be exactly the kind of test this quieter strength is built for.`,
       shadow: `The risk this season is performing unbreakability for an audience rather than simply, privately, holding steady.`,
       path: `Try letting your endurance be private this season and trusting it doesn't need to be witnessed to be real. You are allowed to be resilient without anyone seeing it. What is this stretch of life quietly asking you to hold with gentleness instead of force?`,
@@ -6400,7 +6400,7 @@ window.DMicroContent = (function () {
     },
 
     '12_YE': {
-      heading: `Right Now, Life Is Asking You to Pause on Purpose`,
+      heading: `A Season for a Real Pause`,
       why: `This stretch of your life is carrying Hanged Man energy — a season for suspension that's actually doing work, not stalling. Whatever's currently on hold may be gathering exactly the perspective it needs before it can move again.`,
       shadow: `The risk this season is mistaking every pause for permission to avoid a decision indefinitely.`,
       path: `Try checking whether your current pause is still teaching you something or has quietly become avoidance. You are allowed to stay in the pause a while longer if the view is still changing. What is this season's suspension actually showing you that standing still never could?`,
@@ -6409,7 +6409,7 @@ window.DMicroContent = (function () {
     },
 
     '13_YE': {
-      heading: `Right Now, Life Is Asking Something in You to End`,
+      heading: `A Season for an Ending`,
       why: `This stretch of your life is carrying Transformation energy — a season for a real ending, not a patched-over version of the same old thing. Whatever identity or arrangement has quietly run its course may finally have the conditions to actually complete.`,
       shadow: `The risk this season is rushing the ending to avoid discomfort, or refusing to let it happen at all.`,
       path: `Try naming one thing that's actually ready to end and letting it complete at its own pace. You are allowed to let something die so something truer can begin. What is this stretch of life asking you to finally let go of?`,
@@ -6418,7 +6418,7 @@ window.DMicroContent = (function () {
     },
 
     '14_YE': {
-      heading: `Right Now, Life Is Asking for Real Balance, Not Managed Extremes`,
+      heading: `A Season for Real Balance`,
       why: `This stretch of your life is carrying Temperance energy — a season for genuine integration between two things you've been treating as opposites. Whatever you've been alternating between may actually be ready to work together.`,
       shadow: `The risk this season is swinging hard between extremes and calling the alternation balance.`,
       path: `Try finding one small, actually blended version of two things you've been keeping separate. You are allowed to combine things slowly instead of choosing one extreme. What two parts of your life is this season asking you to finally integrate?`,
@@ -6427,7 +6427,7 @@ window.DMicroContent = (function () {
     },
 
     '15_YE': {
-      heading: `Right Now, Life Is Asking You to Look at a Pull Honestly`,
+      heading: `A Season to Face the Pull`,
       why: `This stretch of your life is carrying Devil energy — a season for facing a compulsion or attachment honestly, rather than pretending it isn't there. Whatever pull has been quietly running things may finally be visible enough to actually examine.`,
       shadow: `The risk this season is denying the pull entirely, which only tightens its grip.`,
       path: `Try naming one real compulsion or attachment honestly, without shame, this season. You are allowed to examine the pull without judging yourself for having it. What is this stretch of life asking you to finally look at directly?`,
@@ -6436,7 +6436,7 @@ window.DMicroContent = (function () {
     },
 
     '16_YE': {
-      heading: `Right Now, Life Is Rebuilding Something That Had to Fall`,
+      heading: `A Season Rebuilding From the Fall`,
       why: `This stretch of your life is carrying Tower energy — a season of real collapse followed by real rebuilding, on more honest ground. Whatever's currently falling apart may have needed to, in order to make room for something sturdier.`,
       shadow: `The risk this season is defending a structure you already suspect isn't sound, just to avoid the collapse.`,
       path: `Try letting one shaky structure fall on its own terms instead of propping it up further. You are allowed to rebuild on more honest ground. What is this season asking you to stop defending so it can actually be rebuilt properly?`,
@@ -6445,7 +6445,7 @@ window.DMicroContent = (function () {
     },
 
     '17_YE': {
-      heading: `Right Now, Life Is Asking You to Hope at Full Size`,
+      heading: `A Season to Hope at Full Size`,
       why: `This stretch of your life is carrying Star energy — a season for real, visible hope, not a modest, private version of it. Whatever faith you've been keeping small may be ready to actually take up its full space.`,
       shadow: `The risk this season is keeping that hope quiet and shrunken, as if believing too openly would be tempting fate.`,
       path: `Try letting one hope be as large and visible as it actually is this season. You are allowed to hope at full size. What hope has this stretch of life been asking you to stop shrinking?`,
@@ -6454,7 +6454,7 @@ window.DMicroContent = (function () {
     },
 
     '18_YE': {
-      heading: `Right Now, Life Is Asking You to Trust What You Can't Yet Explain`,
+      heading: `A Season to Trust the Unexplained`,
       why: `This stretch of your life is carrying Moon energy — a season for trusting an undercurrent before it's fully provable. Whatever feeling has been running beneath the surface may be worth taking seriously right now, even unverified.`,
       shadow: `The risk this season is letting that feeling curdle into anxious story instead of staying a genuine, worth-checking signal.`,
       path: `Try holding one strong feeling as real information this season, and checking it gently against what's actually happening. You are allowed to trust what you sense before you can explain it. What undercurrent is this stretch of life asking you to take seriously?`,
@@ -6463,7 +6463,7 @@ window.DMicroContent = (function () {
     },
 
     '19_YE': {
-      heading: `Right Now, Life Is Asking You to Let Joy Be Visible`,
+      heading: `A Season for Visible Joy`,
       why: `This stretch of your life is carrying Sun energy — a season for real, open happiness, not a managed or modest version of it. Whatever delight has been available may be more ready to be lived out loud than you've been letting it.`,
       shadow: `The risk this season is dimming the joy for other people's comfort, keeping it smaller than it actually is.`,
       path: `Try letting one real joy show at its full size this season, without managing it down. You are allowed to be openly happy without apologizing for it. What delight has this season been offering that you've been quietly dimming?`,
@@ -6472,7 +6472,7 @@ window.DMicroContent = (function () {
     },
 
     '20_YE': {
-      heading: `Right Now, Life Is Asking You to Answer a Calling`,
+      heading: `A Season to Answer the Call`,
       why: `This stretch of your life is carrying Judgement energy — a season for actually rising to something you've already heard clearly, rather than continuing to prepare for it indefinitely. Whatever summons has been sitting with you may finally have the conditions to be answered.`,
       shadow: `The risk this season is hearing the calling clearly and still finding sophisticated reasons to keep waiting.`,
       path: `Try taking one concrete step toward the calling you've already heard, this season, without waiting to feel fully ready. You are allowed to rise before you feel prepared. What is this stretch of life asking you to finally answer?`,
@@ -6481,7 +6481,7 @@ window.DMicroContent = (function () {
     },
 
     '21_YE': {
-      heading: `Right Now, Life Is Asking You to Call Something Finished`,
+      heading: `A Season to Call It Finished`,
       why: `This stretch of your life is carrying World energy — a season for genuine completion, not another condition appended before something is allowed to count as done. Whatever you've already achieved may deserve to actually be named as arrived.`,
       shadow: `The risk this season is reaching real completion and immediately relativizing it, finding a reason it doesn't quite count yet.`,
       path: `Try letting one already-finished thing in your life actually be called complete this season. You are allowed to call it finished and mean it. What have you already accomplished that deserves to be named as done, not almost?`,
@@ -6490,7 +6490,7 @@ window.DMicroContent = (function () {
     },
 
     '22_YE': {
-      heading: `Right Now, Life Is Asking You to Take One Real Leap`,
+      heading: `A Season for One Real Leap`,
       why: `This stretch of your life is carrying Fool energy — a season for beginning something with open eyes, trusting the unknown rather than waiting for full certainty. Whatever leap has been waiting for permission may have exactly the conditions it needs right now.`,
       shadow: `The risk this season is inheriting caution instead of the boldness, letting an old fear override a genuinely good opportunity in front of you.`,
       path: `Try taking one real leap this season, with your eyes open, rather than waiting for a guarantee that isn't coming. You are allowed to leap with open eyes and still call it wisdom. What would you begin this season if trust in the unknown were reason enough?`,
