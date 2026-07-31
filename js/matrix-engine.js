@@ -203,13 +203,17 @@ function getPersonalDay(birthdateString, asOfDateString) {
 /* ───────────────────────────────────────────────────────────────────────────
  * 1d · NAME-BASED CLASSICAL NUMEROLOGY
  *    Expression, Soul Urge, Personality, Maturity — the standard numbers
- *    that require a full NAME rather than just a birthdate. Uses the
+ *    that require a NAME rather than just a birthdate. Uses the
  *    Pythagorean letter-value grid (A/J/S=1 ... I/R=9), the system most
  *    people already expect from their own "Expression Number," distinct
  *    from Numberolgy-data.pdf's own Chaldean grid. Entirely optional in
  *    this app — a name is never required to see the core Destiny Matrix
  *    chart, only to unlock these four numbers. Nothing here is persisted
  *    or sent anywhere; the name lives only in the browser tab's memory.
+ *    Deliberately computed from the FIRST name only, even if someone types
+ *    a full name into the input — see _firstName() above, which every
+ *    function below (and in the "round 2" section further down) routes
+ *    through before doing anything else.
  * ─────────────────────────────────────────────────────────────────────────── */
 const PYTHAGOREAN_LETTER_VALUES = {
   A:1, J:1, S:1,
@@ -229,6 +233,18 @@ function _lettersOnly(name) {
   return String(name || '').toUpperCase().replace(/[^A-Z]/g, '');
 }
 
+// This app computes every name-based number from the FIRST name only, even
+// if someone types a full "First Last" name into the input — a deliberate
+// product decision (not every name-numerology system agrees on full name
+// vs. first name; this app picked first name). Centralizing the truncation
+// here, rather than at the UI input layer, guarantees every function below
+// behaves identically regardless of what's actually typed. Uses _nameParts()
+// (defined further down, in the Cornerstone/Capstone section) — hoisted, so
+// definition order doesn't matter.
+function _firstName(name) {
+  return _nameParts(name)[0] || '';
+}
+
 // Y counts as a vowel only when it's the sole vowel sound in its stretch of
 // the name — i.e. no A/E/I/O/U immediately before or after it. This is the
 // standard simplified heuristic (the one genuinely fuzzy rule in the whole
@@ -243,14 +259,14 @@ function _isVowelAt(letters, i) {
 }
 
 function expressionNumber(name) {
-  const letters = _lettersOnly(name);
+  const letters = _lettersOnly(_firstName(name));
   let sum = 0;
   for (const ch of letters) sum += PYTHAGOREAN_LETTER_VALUES[ch] || 0;
   return _classicalReduce(sum);
 }
 
 function soulUrgeNumber(name) {
-  const letters = _lettersOnly(name);
+  const letters = _lettersOnly(_firstName(name));
   let sum = 0;
   for (let i = 0; i < letters.length; i++) {
     if (_isVowelAt(letters, i)) sum += PYTHAGOREAN_LETTER_VALUES[letters[i]] || 0;
@@ -259,7 +275,7 @@ function soulUrgeNumber(name) {
 }
 
 function personalityNumber(name) {
-  const letters = _lettersOnly(name);
+  const letters = _lettersOnly(_firstName(name));
   let sum = 0;
   for (let i = 0; i < letters.length; i++) {
     if (!_isVowelAt(letters, i)) sum += PYTHAGOREAN_LETTER_VALUES[letters[i]] || 0;
@@ -297,12 +313,12 @@ function getNameNumbers(birthdateString, name) {
  * ─────────────────────────────────────────────────────────────────────────── */
 
 // Hidden Passion Number — the digit (1-9) whose letters occur most often
-// across the full name. Reveals a natural, sometimes under-used talent —
+// across the first name. Reveals a natural, sometimes under-used talent —
 // distinct from Expression/Soul Urge/Personality, which are all sums; this
 // is about which single digit shows up over and over. Ties resolve to the
 // lowest tied digit (a deterministic, commonly-used convention).
 function hiddenPassionNumber(name) {
-  const letters = _lettersOnly(name);
+  const letters = _lettersOnly(_firstName(name));
   const counts = {};
   for (const ch of letters) {
     const v = PYTHAGOREAN_LETTER_VALUES[ch];
@@ -317,14 +333,14 @@ function hiddenPassionNumber(name) {
 }
 
 // Subconscious Self Number — how many of the 9 digits (1-9) are present AT
-// ALL among the letters of the full name; ranges 1-9 itself, read as a
+// ALL among the letters of the first name; ranges 1-9 itself, read as a
 // measure of resourcefulness/self-confidence under pressure. Karmic
 // Lessons — the digits NOT present at all — read as areas still being
 // developed rather than natural strengths. Classical numerology treats
 // absence as meaningfully as presence, which is why this is a genuinely
 // different mechanism from every sum-based number elsewhere in this file.
 function subconsciousSelfAndLessons(name) {
-  const letters = _lettersOnly(name);
+  const letters = _lettersOnly(_firstName(name));
   const present = new Set();
   for (const ch of letters) {
     const v = PYTHAGOREAN_LETTER_VALUES[ch];
@@ -335,10 +351,11 @@ function subconsciousSelfAndLessons(name) {
   return { value: present.size, missingNumbers };
 }
 
-// Splits a full name into whitespace-separated parts. Used by Cornerstone/
-// Capstone, which specifically look at the first name's first letter and
-// the last name's last letter — not the name as one undifferentiated
-// string, the way Expression/Soul Urge/Personality treat it.
+// Splits a name into whitespace-separated parts. _firstName() above uses
+// this to isolate the first word — the only part any function in this file
+// actually reads — but kept as its own function since Cornerstone/Capstone
+// below still conceptually mean "first letter of the name" / "last letter
+// of the name," just now always the same single first-name word.
 function _nameParts(name) {
   return String(name || '').trim().split(/\s+/).filter(Boolean);
 }
@@ -347,20 +364,17 @@ function _nameParts(name) {
 // name. Read as how you approach new opportunities and beginnings. Returns
 // null if no usable letter is present (e.g. an empty/unparseable name).
 function cornerstoneNumber(name) {
-  const parts = _nameParts(name);
-  if (!parts.length) return null;
-  const letters = _lettersOnly(parts[0]);
+  const letters = _lettersOnly(_firstName(name));
   const first = letters[0];
   return first ? PYTHAGOREAN_LETTER_VALUES[first] : null;
 }
 
-// Capstone — the Pythagorean value of the LAST letter of the last name
-// part. Read as how you follow through and finish things. Falls back to
-// the same single word Cornerstone used when only one name part is given.
+// Capstone — the Pythagorean value of the LAST letter of the first name
+// (this app computes every name-based number from the first name only —
+// see _firstName() — so this is no longer a distinct "last name" concept,
+// just the closing letter of the same word Cornerstone opens on).
 function capstoneNumber(name) {
-  const parts = _nameParts(name);
-  if (!parts.length) return null;
-  const letters = _lettersOnly(parts[parts.length - 1]);
+  const letters = _lettersOnly(_firstName(name));
   const last = letters[letters.length - 1];
   return last ? PYTHAGOREAN_LETTER_VALUES[last] : null;
 }

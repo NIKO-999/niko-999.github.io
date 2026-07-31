@@ -919,8 +919,8 @@
     <div id="ni-toggle"><span class="ni-chevron">▾</span><span>Numerology</span></div>
     <div id="ni-panel">
       <div id="ni-name-row">
-        <input id="ni-name-input" type="text" placeholder="Enter your name to unlock Expression, Soul Urge, Personality & Maturity…" autocomplete="off" />
-        <div id="ni-name-hint">Optional · never saved or sent anywhere · unlocks 4 more numbers below</div>
+        <input id="ni-name-input" type="text" placeholder="Enter your first name to unlock Expression, Soul Urge, Personality & Maturity…" autocomplete="off" />
+        <div id="ni-name-hint">Optional · first name only · never saved or sent anywhere · unlocks 4 more numbers below</div>
       </div>
       <div id="ni-compat-row">
         <input id="ni-compat-input" type="date" placeholder="Someone else's birthdate, for Compatibility" />
@@ -3487,10 +3487,11 @@ const ARCANA_ESSENCE = {
       return;
     }
 
-    // Cornerstone & Capstone — one paired card, two distinct readings
-    // (first letter of first name / last letter of last name). Content
-    // sources and values differ, but the shared card mirrors the
-    // Pinnacles/Challenges "several sub-readings in one card" pattern.
+    // Cornerstone & Capstone — one paired card, two distinct readings from
+    // the same first name (first letter / last letter — see
+    // matrix-engine.js's _firstName()). Content sources and values differ,
+    // but the shared card mirrors the Pinnacles/Challenges "several
+    // sub-readings in one card" pattern.
     if (data.key === 'CORNERCAP') {
       const cornerC = window.DCornerstoneContent ? window.DCornerstoneContent.get(_nameVals.cornerstone) : null;
       const capC    = window.DCapstoneContent ? window.DCapstoneContent.get(_nameVals.capstone) : null;

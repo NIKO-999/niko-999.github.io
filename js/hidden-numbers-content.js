@@ -11,10 +11,10 @@
  * subconsciousSelfAndLessons()/cornerstoneNumber()/capstoneNumber().
  *
  *   Hidden Passion   — the digit whose letters repeat most often in the
- *                       full name (1-9). A natural talent, possibly
+ *                       first name (1-9). A natural talent, possibly
  *                       under-used precisely because it's so automatic.
  *   Subconscious Self — how many of the 9 digits are present at all in the
- *                       name (1-9 itself). Read as resourcefulness/
+ *                       first name (1-9 itself). Read as resourcefulness/
  *                       self-confidence under real pressure.
  *   Karmic Lessons    — the digits NOT present at all. Read as areas still
  *                       being developed, not natural strengths. A person
@@ -22,8 +22,11 @@
  *                       whichever apply, live, from DestinyMatrix-v1.html.
  *   Cornerstone       — first letter of the first name (1-9). How you
  *                       approach new opportunities and beginnings.
- *   Capstone          — last letter of the last name (1-9). How you
- *                       follow through and finish what you start.
+ *   Capstone          — last letter of the first name (1-9) — this app
+ *                       computes every name-based number from the first
+ *                       name only (see matrix-engine.js's _firstName()),
+ *                       so this reads the same word Cornerstone opens on.
+ *                       How you follow through and finish what you start.
  *   Bridge            — |Life Path - Expression|, reduced 0-8 (same
  *                       gap-number reduction as Challenges, no master
  *                       numbers preserved). How much conscious work it
