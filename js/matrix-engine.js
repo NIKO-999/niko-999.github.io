@@ -931,12 +931,161 @@ function getYearlyEnergy(birthdateString, asOfDateString) {
 }
 
 /* ───────────────────────────────────────────────────────────────────────────
+ * 3b · MOST PROMINENT ARCANA — weighted-influence algorithm
+ *    Which single Arcana (1-22) carries the greatest weight across a
+ *    person's permanent blueprint. Deliberately NOT "which number repeats
+ *    most" — a tiered, geometrically-spaced weighting makes depth of
+ *    placement structurally beat sheer frequency (see the weight table
+ *    below and its own comment for the proof). Arcana-system only —
+ *    classical numerology (Life Path, Expression, etc.) never competes
+ *    here; callers layer it in afterward as reinforcement, not as input.
+ *
+ *    The 26 positions counted, and why exactly these 26: every Arcana-
+ *    valued position in the app (reduceArcana-based, i.e. NOT classical
+ *    numerology) MINUS (a) Yearly Energy / Personal Year — time-varying,
+ *    describe the current season not the lifelong blueprint, and (b) 8
+ *    positions confirmed, by reading both _calcVals() in
+ *    DestinyMatrix-v1.html and this file's own section comments, to be
+ *    exact numeric duplicates of a position already counted (the app
+ *    deliberately reuses a value under a new *content* identity for these
+ *    — genuinely useful for giving readers more distinct readings, but it
+ *    would silently double/triple-count that number's weight here):
+ *      GA (Guardian Angel)   == B   (Sky Line)
+ *      MK (Material Karma)   == C   (Earth Line)
+ *      MEP (Money Entry Pt.) == H   (Paternal Material)
+ *      CAREER (Career Paths) == MON (Money)
+ *      SWA (Swadhisthana)    == MON (Money)
+ *      KARMA/SEXLINE/PASTLIFE all == D's own derived value (atK)
+ *    D/B/C/H/MON are already counted directly, so all eight are excluded
+ *    here (their own stars and content are untouched — this only affects
+ *    the prominence score).
+ *
+ *    Formulas below mirror DestinyMatrix-v1.html's _calcVals() exactly
+ *    (same variable names/order, cross-referenced) since that function
+ *    isn't itself importable here — see this project's plan file for the
+ *    lower-risk-vs-full-consolidation trade-off this duplication accepts.
+ * ─────────────────────────────────────────────────────────────────────────── */
+
+const PROMINENCE_TIER_WEIGHT = { 1: 100, 2: 32, 3: 10, 4: 3, 5: 1 };
+
+// position key -> tier. Order here also fixes the deterministic iteration
+// order used for `positions` in the result and for breadth tie-breaking.
+const PROMINENCE_POSITION_TIERS = {
+  A: 1, E: 1, PP: 1, SOP: 1, SPP: 1,
+  B: 2, C: 2, D: 2,
+  MON: 3, LOVE: 3, RWM: 3,
+  F: 4, G: 4, H: 4, I: 4,
+  F1: 5, F2: 5, G1: 5, G2: 5, H1: 5, H2: 5, I1: 5, I2: 5, HZV: 5, HZH: 5, MUL: 5,
+};
+
+function mostProminentArcana(birthdateString) {
+  const bm = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(birthdateString).trim());
+  if (!bm) throw new Error(`Invalid date "${birthdateString}". Expected format "YYYY-MM-DD".`);
+  const year = Number(bm[1]), month = Number(bm[2]), day = Number(bm[3]);
+
+  // ── Central cross (mirrors _calcVals' NODES[0..4].num / calculateDestinyMatrix's A-E) ──
+  const A = reduceArcana(day);
+  const B = reduceArcana(month);
+  const C = reduceArcana(year);
+  const D = reduceArcana(A + B + C);
+  const E = reduceArcana(A + B + C + D);
+
+  // ── Ancestral square corners ──
+  const F = reduceArcana(A + B); // TL — Paternal Spiritual
+  const G = reduceArcana(B + C); // TR — Maternal Spiritual
+  const H = reduceArcana(C + D); // BR — Paternal Material
+  const I = reduceArcana(D + A); // BL — Maternal Material
+
+  // ── Money/Love channel ──
+  const atK  = reduceArcana(D + E); // Inner Bottom
+  const atCG = reduceArcana(C + E); // Inner Right == RWM
+  const MON  = reduceArcana(atCG + atK);
+  const LOVE = reduceArcana(atK + MON);
+
+  // ── Ancestral Tasks / Lineage Square Talents ──
+  const L2 = reduceArcana(F + G + H + I);
+  const F2 = reduceArcana(F + L2), G2 = reduceArcana(G + L2), H2 = reduceArcana(H + L2), I2 = reduceArcana(I + L2);
+  const F1 = reduceArcana(F + F2), G1 = reduceArcana(G + G2), H1 = reduceArcana(H + H2), I1 = reduceArcana(I + I2);
+
+  // ── Heart Zone ──
+  const HZV = reduceArcana(B + D); // spiritual desire
+  const HZH = reduceArcana(A + C); // material desire
+
+  // ── Muladhara (Chakra Map's only non-duplicate formula-confirmed chakra) ──
+  const MUL = reduceArcana(C + D);
+
+  // ── Three Life Purposes ──
+  const patV = reduceArcana(F + H);
+  const matV = reduceArcana(G + I);
+  const PP  = reduceArcana(HZH + HZV);
+  const SOP = reduceArcana(patV + matV);
+  const SPP = reduceArcana(PP + SOP);
+
+  const positionValues = {
+    A, E, PP, SOP, SPP,
+    B, C, D,
+    MON, LOVE, RWM: atCG,
+    F, G, H, I,
+    F1, F2, G1, G2, H1, H2, I1, I2, HZV, HZH, MUL,
+  };
+
+  // ── Score every Arcana 1-22 ──
+  const scores = {};      // number -> total weighted score
+  const holders = {};     // number -> [position keys]
+  const tierCounts = {};  // number -> { 1: n, 2: n, ... }
+  for (let n = 1; n <= 22; n++) { scores[n] = 0; holders[n] = []; tierCounts[n] = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 }; }
+
+  for (const posKey of Object.keys(PROMINENCE_POSITION_TIERS)) {
+    const value = positionValues[posKey];
+    const tier = PROMINENCE_POSITION_TIERS[posKey];
+    scores[value]  += PROMINENCE_TIER_WEIGHT[tier];
+    holders[value].push(posKey);
+    tierCounts[value][tier] += 1;
+  }
+
+  // ── Pick the winner: highest score, tie-broken by tier depth then breadth
+  //    then lowest number (deterministic, matches this app's existing
+  //    tie-break convention, e.g. Hidden Passion Number). ──
+  const candidates = Object.keys(scores).map(Number).filter(n => scores[n] > 0);
+  candidates.sort((a, b) => {
+    if (scores[b] !== scores[a]) return scores[b] - scores[a];
+    for (let tier = 1; tier <= 5; tier++) {
+      if (tierCounts[b][tier] !== tierCounts[a][tier]) return tierCounts[b][tier] - tierCounts[a][tier];
+    }
+    if (holders[b].length !== holders[a].length) return holders[b].length - holders[a].length;
+    return a - b;
+  });
+
+  const dominant = candidates[0];
+  const runnerUpNum = candidates[1] ?? null;
+  const dominantScore = scores[dominant];
+  const runnerUpScore = runnerUpNum !== null ? scores[runnerUpNum] : 0;
+  const margin = dominantScore > 0 ? (dominantScore - runnerUpScore) / dominantScore : 0;
+
+  // tieBreakApplied: true if more than one number reached the top score
+  // (the sort above already picked a definitive winner via tier/breadth/
+  // number tie-breaks, but callers may want to know a literal score-tie
+  // actually occurred).
+  const tieBreakApplied = runnerUpNum !== null && scores[runnerUpNum] === dominantScore;
+
+  return {
+    dominant,
+    score: dominantScore,
+    runnerUp: runnerUpNum !== null ? { number: runnerUpNum, score: runnerUpScore } : null,
+    margin,
+    positions: holders[dominant],
+    tierCounts: tierCounts[dominant],
+    tieBreakApplied,
+  };
+}
+
+/* ───────────────────────────────────────────────────────────────────────────
  * 4 · EXPORTS  (Node + browser global)
  * ─────────────────────────────────────────────────────────────────────────── */
 if (typeof module !== 'undefined' && module.exports) {
-  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  module.exports = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy, mostProminentArcana };
 } else {
-  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy };
+  window.DMEngine = { reduceArcana, _classicalReduce, birthdayNumber, pinnacles, challenges, pinnacleAgeRanges, karmicDebtFlags, personalYear, getPersonalYear, personalMonth, personalDay, getPersonalDay, expressionNumber, soulUrgeNumber, personalityNumber, maturityNumber, getNameNumbers, hiddenPassionNumber, subconsciousSelfAndLessons, cornerstoneNumber, capstoneNumber, bridgeNumber, relationshipNumber, compatibilityGapNumber, getCompatibility, matchKarmicTailCode, matchSexualLineCode, matchTalentProgram, getIconType, getArchetype, calculateDestinyMatrix, matrixFromDate, getYearlyEnergy, mostProminentArcana };
 }
 
 /* ───────────────────────────────────────────────────────────────────────────

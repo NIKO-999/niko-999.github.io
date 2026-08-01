@@ -2580,6 +2580,7 @@ const ARCANA_ESSENCE = {
     let birthdayV = null, pinnaclesV = null, challengesV = null, karmicDebtFlagsV = [];
     let pinnacleActiveNum = null, challengeActiveNum = null, personalYearV = null;
     let stageAgesV = null, activeStageV = null;
+    let prominentV = null, prominentResult = null;
     if (window.DMEngine) {
       const dobIso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
       yeMeta = DMEngine.getYearlyEnergy(dobIso);
@@ -2598,8 +2599,16 @@ const ARCANA_ESSENCE = {
       pinnacleActiveNum  = pinnaclesV['p' + _activeStage];
       challengeActiveNum = challengesV['c' + _activeStage];
       personalYearV = DMEngine.getPersonalYear(dobIso).value;
+      // Most Prominent Arcana — weighted-influence algorithm, Arcana-system
+      // only (see js/matrix-engine.js's mostProminentArcana() header comment
+      // for the full methodology). Numerology reinforcement is computed
+      // separately, live, in the card-render branch below — never fed back
+      // into the score itself.
+      prominentResult = DMEngine.mostProminentArcana(dobIso);
+      prominentV = prominentResult.dominant;
     }
     _yeMeta = yeMeta;
+    _prominentResult = prominentResult;
 
     // Three Life Purposes (research/01-Foundation/Destiny-Matrix-Calculation-
     // Guide.extracted.md, Page 11 — "Life Purpose: Personal, Social, and
@@ -2636,6 +2645,7 @@ const ARCANA_ESSENCE = {
       pinnacles: pinnaclesV, challenges: challengesV, karmicDebtFlags: karmicDebtFlagsV,
       pinnacleActiveNum, challengeActiveNum, stageAges: stageAgesV, activeStage: activeStageV,
       atPP: ppV, atSOP: sopV, atSPP: sppV,
+      atProminent: prominentV,
       // Lettered arm points — consumed by the program scanner (see above).
       // atP/atK are the two Talent Star Line positions (Ajna / Vishuddha
       // values); atT is Anahata, which belongs to the Chakra Map.
@@ -2657,6 +2667,7 @@ const ARCANA_ESSENCE = {
   }
 
   let _yeMeta = null; // set by _calcVals(); read by the YE card's section body
+  let _prominentResult = null; // set by _calcVals(); read by the PROMINENT card's section body
 
   let _vals = _calcVals();
 
@@ -3047,6 +3058,18 @@ const ARCANA_ESSENCE = {
     // Soul Urge (θ=10°) and Bridge (θ=310°), same ring.
     { key:'COMPATIBILITY', num:_compatVals.relationship, label:'Compatibility',
       pos: new THREE.Vector3(_R * 1.1818, -_R * 0.2083, 0), color:0xFF9ECD, twk:{spd:0.76,off:4.4} },
+
+    // ── Most Prominent — the single Arcana with the greatest weighted
+    // influence across the whole chart (see js/matrix-engine.js's
+    // mostProminentArcana() for the full methodology: tiered, geometrically-
+    // weighted so depth of placement structurally beats sheer frequency,
+    // Arcana-system only). Always visible (no gate) — unlike the name/
+    // compatibility-based stars above, this needs only the birthdate
+    // already on screen. Placed at a slightly larger radius (r=1.35R,
+    // θ=160°) than the rest of the r=1.20R ring, clear of every existing
+    // point on it without needing to interleave a new angle between them.
+    { key:'PROMINENT', num:_vals.atProminent, label:'Most Prominent',
+      pos: new THREE.Vector3(-_R * 1.2687, _R * 0.4619, 0), color:0xFFD700, twk:{spd:0.60,off:2.2} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3546,6 +3569,121 @@ const ARCANA_ESSENCE = {
         context +
         sub('RELATIONSHIP NUMBER · WHAT THIS PAIRING CREATES', _compatVals.relationship, relC) +
         sub('COMPATIBILITY GAP · HOW MUCH BRIDGING IT NEEDS', _compatVals.gap, gapC);
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Most Prominent — the single Arcana with the greatest weighted
+    // influence across the whole chart. THE DOMINANT NUMBER and the
+    // numerology-reinforcement paragraph are both generated live from
+    // _prominentResult (js/matrix-engine.js's mostProminentArcana()) — never
+    // hand-written, since they describe THIS reader's specific chart. The 5
+    // written subsections (what the number means, why it's loud, how it
+    // shows up, the shadow of too much, the invitation) come from
+    // js/most-prominent-content.js, one entry per Arcana — not yet written
+    // (Phase 2 of this build), so an honest placeholder renders until then,
+    // matching this app's established "unwritten entry renders an honest
+    // note" convention (see the Purpose stars).
+    if (data.key === 'PROMINENT' && _prominentResult) {
+      const r = _prominentResult;
+      const pc = window.DMostProminentContent ? window.DMostProminentContent.get(r.dominant) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + r.dominant;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
+      document.getElementById('pb-section-label').textContent = 'Whole-Chart Synthesis';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
+      document.getElementById('pb-heading').textContent = (pc && pc.heading) || `Arcana ${r.dominant} Defines Your Chart`;
+
+      const POSITION_NAMES = {
+        A:'Core Character', E:'Soul Center', PP:'Personal Purpose', SOP:'Social Purpose', SPP:'Spiritual Purpose',
+        B:'Sky Line', C:'Earth Line', D:'Karmic Tail',
+        MON:'Money', LOVE:'Relationship', RWM:'Relationship with Money',
+        F:'Paternal Spiritual', G:'Maternal Spiritual', H:'Paternal Material', I:'Maternal Material',
+        F1:'Paternal Masculine Line', F2:'Paternal Spiritual Talent',
+        G1:'Maternal Masculine Line', G2:'Maternal Spiritual Talent',
+        H1:'Paternal Feminine Line', H2:'Paternal Material Talent',
+        I1:'Maternal Feminine Line', I2:'Maternal Material Talent',
+        HZV:'Heart Zone · Spiritual Desire', HZH:'Heart Zone · Material Desire', MUL:'Muladhara · Root Chakra',
+      };
+      const whereList = r.positions.map(k => POSITION_NAMES[k] || k).join(', ');
+      const intensity = r.margin >= 0.20
+        ? `unmistakably defines your chart, leading by a clear margin`
+        : `leads your chart, though narrowly — several energies are genuinely competing for dominance here`;
+      const dominantHtml = `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE DOMINANT NUMBER</div>
+           <div class="pb-full-text">Arcana ${r.dominant} ${intensity}. It carries real weight in ${r.positions.length} independent position${r.positions.length === 1 ? '' : 's'} across your blueprint — ${whereList} — including the positions that matter most to who you fundamentally are, not just how often a number happens to repeat.</div>
+         </div>`;
+
+      // Numerology reinforcement — Arcana-derived result only; numerology
+      // never feeds back into which number won, it only confirms or adds
+      // nuance afterward. Direct match only for Arcana <=9 or 11/22/33
+      // (the only values classical numerology can ever produce); anything
+      // else is honestly labeled a "reduces to" match, never implied direct.
+      const classicalCap = new Set([11, 22, 33]);
+      const reduced = (r.dominant <= 9 || classicalCap.has(r.dominant)) ? null : DMEngine._classicalReduce(r.dominant);
+      const compareValue = reduced === null ? r.dominant : reduced;
+
+      const numerologyCandidates = [
+        ['Life Path', _vals.lifePath],
+        ['Birthday Number', _vals.birthdayNumber],
+      ];
+      if (_nameActive) {
+        numerologyCandidates.push(
+          ['Expression', _nameVals.expression],
+          ['Soul Urge', _nameVals.soulUrge],
+          ['Personality', _nameVals.personality],
+          ['Maturity', _nameVals.maturity],
+        );
+      }
+      const matches = numerologyCandidates.filter(([, v]) => v === compareValue).map(([label]) => label);
+
+      let reinforcementText;
+      if (matches.length) {
+        const matchList = matches.join(' and your ');
+        reinforcementText = reduced === null
+          ? `Your numerology echoes this directly: your ${matchList} ${matches.length === 1 ? 'is' : 'are'} also ${r.dominant}. That's real reinforcement — two independent systems landing on the same number.`
+          : `Arcana ${r.dominant} reduces to ${reduced} in classical numerology, and your ${matchList} ${matches.length === 1 ? 'matches' : 'match'} that reduced number — a secondary echo, not a direct one, but still a real point of agreement between systems.`;
+      } else {
+        reinforcementText = _nameActive
+          ? `Your numerology doesn't echo this number directly — and that's fine. This influence is carried entirely by your Arcana chart; it never needed a numeric confirmation elsewhere to be real.`
+          : `Enter your name above to see whether your name-based numerology reinforces this number too. Even without it, this influence is already fully carried by your Arcana chart on its own.`;
+      }
+      const reinforcementHtml = `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">NUMEROLOGY REINFORCEMENT</div>
+           <div class="pb-full-text">${reinforcementText}</div>
+         </div>`;
+
+      const writtenHtml = pc ? `
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT ${r.dominant} MEANS AT ITS CORE</div>
+           <div class="pb-full-text">${pc.why || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHY IT'S SO LOUD IN YOUR CHART</div>
+           <div class="pb-full-text">${pc.synthesis || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW IT SHOWS UP IN YOUR LIFE</div>
+           <div class="pb-full-text">${pc.traits || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW OF TOO MUCH OF ONE THING</div>
+           <div class="pb-full-text">${pc.shadow || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE INVITATION</div>
+           <div class="pb-full-text">${pc.path || ''}</div>
+         </div>` : `
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE FULL READING</div>
+           <div class="pb-full-text">The written interpretation for Arcana ${r.dominant} as a Most Prominent number is still being written. The number above and everywhere it shows up in your chart are both real and already calculated correctly — only the deeper prose is still to come.</div>
+         </div>`;
+
+      document.getElementById('pb-body').innerHTML = dominantHtml + reinforcementHtml + writtenHtml;
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
