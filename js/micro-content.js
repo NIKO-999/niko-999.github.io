@@ -622,8 +622,8 @@ window.DMicroContent = (function () {
     '17_D': {
       title: `17 in Karmic Tail — The Star`,
       tagline: `A Design of Reclaimed Light`,
-      mastery: `You carry real, luminous conviction — you're meant to shine, and when you let it, you offer real hope to people around you.`,
-      shadow: `You dim your own light on reflex, staying half-developed so it can never be judged, undercharging and underselling what you're actually worth.`,
+      mastery: `You carry real, luminous conviction — you're meant to shine, and when you actually let yourself, you offer genuine hope to the people around you rather than a performance of it. It gives you a real head start on almost anything.`,
+      shadow: `You dim your own light on reflex, staying half-developed so it can never be fully judged, undercharging and underselling what you're actually worth because visibility itself feels like exposure.`,
       invitation: `Let one piece of your work or talent be fully visible today, at full brightness, with no hedging.`,
     },
 
@@ -631,8 +631,8 @@ window.DMicroContent = (function () {
     '1_D': {
       title: `1 in Karmic Tail — The Magician`,
       tagline: `A Design of the Finished Start`,
-      mastery: `You generate real capability and can build something durable with it, once you actually stay.`,
-      shadow: `You start with real force and abandon it the moment the initial spark fades. Income streams and relationships alike get left half-built.`,
+      mastery: `You generate real capability and can build something durable with it, once you actually stay long enough to let the initial spark turn into something finished. The follow-through, once you commit to it, is genuinely reliable.`,
+      shadow: `You start with real force and abandon it the moment the initial spark fades. Income streams and relationships alike get left half-built, still carrying the promise of what they could have become, and the pattern repeats because starting is what feels most alive.`,
       invitation: `Finish one thing today you already started, especially now that a new idea looks more appealing.`,
     },
 
@@ -640,8 +640,8 @@ window.DMicroContent = (function () {
     '2_D': {
       title: `2 in Karmic Tail — The High Priestess`,
       tagline: `A Design of the Spoken Knowing`,
-      mastery: `You have real, accurate inner knowing. When you speak it, people trust it because it's earned.`,
-      shadow: `You sense things clearly and say nothing, letting other people arrive at the same conclusion slower, alone, over and over.`,
+      mastery: `You have real, accurate inner knowing. When you actually speak it, people trust it because it's earned — not guessed, not performed, genuinely known, and it tends to be right more often than the louder opinions in the room.`,
+      shadow: `You sense things clearly and say nothing, letting other people arrive at the same conclusion slower, alone, over and over, when you could have simply told them what you already saw and spared them the delay.`,
       invitation: `Say one true thing out loud today that you'd normally keep to yourself.`,
     },
 
@@ -649,8 +649,8 @@ window.DMicroContent = (function () {
     '3_D': {
       title: `3 in Karmic Tail — The Empress`,
       tagline: `A Design of Received Care`,
-      mastery: `You give generously, and it's a real gift — capacity for care that's already proven.`,
-      shadow: `You give until you're empty and can't let yourself be cared for in return. Exhaustion becomes normal.`,
+      mastery: `You give generously, and it's a real gift — a capacity for care that's already proven itself many times over in the lives of the people around you, freely and without needing to be asked.`,
+      shadow: `You give until you're empty and can't let yourself be cared for in return. Exhaustion becomes normal, treated as simply the cost of who you are rather than a signal something needs to change, so the depletion just keeps compounding quietly.`,
       invitation: `Let someone take care of you in one specific way today, without deflecting or repaying it immediately.`,
     },
 
@@ -658,8 +658,8 @@ window.DMicroContent = (function () {
     '4_D': {
       title: `4 in Karmic Tail — The Emperor`,
       tagline: `A Design of Trusted Authority`,
-      mastery: `You can hold real, steady authority — neither gripping it too hard nor giving it away.`,
-      shadow: `You either grip control rigidly or abandon authority altogether, uncomfortable in the space between.`,
+      mastery: `You can hold real, steady authority — neither gripping it too hard nor giving it away the moment it becomes uncomfortable. That balance is genuinely rare, and people around you can feel the difference.`,
+      shadow: `You either grip control rigidly or abandon authority altogether, uncomfortable in the space between — as if the only two options were total command or total surrender, with nothing steady in the middle.`,
       invitation: `Own one decision today, gently but firmly, without either gripping it or handing it off.`,
     },
 
@@ -667,8 +667,8 @@ window.DMicroContent = (function () {
     '5_D': {
       title: `5 in Karmic Tail — The Hierophant`,
       tagline: `A Design of Examined Belief`,
-      mastery: `You can examine a belief you inherited and consciously choose what actually stays. Real, lived wisdom, not installed doctrine.`,
-      shadow: `You swing between rigid certainty and total skepticism, rarely landing on a belief you've actually tested and kept.`,
+      mastery: `You can examine a belief you inherited and consciously choose what actually stays. That's real, lived wisdom, earned through your own testing rather than simply installed doctrine you never questioned.`,
+      shadow: `You swing between rigid certainty and total skepticism, rarely landing on a belief you've actually tested and consciously decided to keep, so your convictions stay borrowed either way.`,
       invitation: `Examine one inherited belief today — about money, love, or authority — and decide, on purpose, whether it's actually yours.`,
     },
 
@@ -676,8 +676,8 @@ window.DMicroContent = (function () {
     '6_D': {
       title: `6 in Karmic Tail — The Lovers`,
       tagline: `A Design of the Kept Choice`,
-      mastery: `You can make a real choice from your own values and stay inside it. Commitment that actually holds.`,
-      shadow: `You keep one foot out the door on decisions that matter, holding relationships and paths loosely enough to exit without cost.`,
+      mastery: `You can make a real choice from your own values and actually stay inside it. That's commitment that holds, not just a decision made in a good moment and abandoned once the mood changes.`,
+      shadow: `You keep one foot out the door on decisions that matter, holding relationships and paths loosely enough to exit without much cost, which quietly prevents them from ever becoming fully real for either side.`,
       invitation: `Recommit fully today to one choice you've been keeping half-made.`,
     },
 
@@ -685,8 +685,8 @@ window.DMicroContent = (function () {
     '7_D': {
       title: `7 in Karmic Tail — The Chariot`,
       tagline: `A Design of Trusted Direction`,
-      mastery: `You can hold direction firmly without gripping it — steady, trusting forward motion.`,
-      shadow: `You either force your way through everything or drift without any real momentum, rarely finding the steady middle.`,
+      mastery: `You can hold direction firmly without gripping it too tightly — steady, trusting forward motion that doesn't need to force its way through everything to actually arrive somewhere. It carries real weight in a room.`,
+      shadow: `You either force your way through everything or drift without any real momentum, rarely finding the steady middle where direction and ease can actually coexist without one canceling the other.`,
       invitation: `Loosen your grip on one thing you've been forcing today, or choose direction on one thing you've let drift.`,
     },
 
@@ -694,8 +694,8 @@ window.DMicroContent = (function () {
     '8_D': {
       title: `8 in Karmic Tail — Justice`,
       tagline: `A Design of the Settled Account`,
-      mastery: `You can make an honest accounting — an apology, a boundary, a debt repaid — and actually settle it.`,
-      shadow: `You carry a persistent, hard-to-place sense of owing or being owed that never resolves, especially around money and unspoken relational ledgers.`,
+      mastery: `You can make an honest accounting — an apology, a boundary, a debt repaid — and actually settle it, rather than letting it sit half-acknowledged indefinitely, quietly costing more the longer it's left open.`,
+      shadow: `You carry a persistent, hard-to-place sense of owing or being owed that never resolves, especially around money and unspoken relational ledgers nobody's ever actually named out loud to anyone.`,
       invitation: `Settle one small account today — an apology, a repayment, a boundary you've been avoiding.`,
     },
 
@@ -703,8 +703,8 @@ window.DMicroContent = (function () {
     '9_D': {
       title: `9 in Karmic Tail — The Hermit`,
       tagline: `A Design of the Offered Lantern`,
-      mastery: `You gather real wisdom in solitude, and when you offer it, it genuinely helps someone.`,
-      shadow: `You withdraw past what reflection requires, using solitude to avoid rather than gather, and keep hard-won expertise entirely to yourself.`,
+      mastery: `You gather real wisdom in solitude, and when you actually offer it, it genuinely helps someone — the reflection wasn't wasted, it just needed to leave the room eventually to matter to anyone else.`,
+      shadow: `You withdraw past what reflection actually requires, using solitude to avoid rather than to gather, and keep hard-won expertise entirely to yourself long after it could have helped someone waiting on it.`,
       invitation: `Share one thing you've learned in solitude today with someone who could actually use it.`,
     },
 
@@ -712,8 +712,8 @@ window.DMicroContent = (function () {
     '10_D': {
       title: `10 in Karmic Tail — The Wheel of Fortune`,
       tagline: `A Design of the Trusted Turn`,
-      mastery: `You can let a natural cycle turn — a season ending, a role changing — without gripping against it.`,
-      shadow: `You dread the downswing and grip hardest exactly at the high point, refusing to let a cycle complete naturally.`,
+      mastery: `You can let a natural cycle turn — a season ending, a role changing — without gripping against it or trying to hold the wheel in place by sheer force of will. You trust the season rather than fighting it.`,
+      shadow: `You dread the downswing and grip hardest exactly at the high point, refusing to let a cycle complete naturally, which usually only makes the eventual turn harder and more disruptive than it needed to be.`,
       invitation: `Let one cycle in your life turn today without resisting it.`,
     },
 
@@ -721,8 +721,8 @@ window.DMicroContent = (function () {
     '11_D': {
       title: `11 in Karmic Tail — Strength`,
       tagline: `A Design of Gentle Endurance`,
-      mastery: `You can meet a hard moment with patient, embodied calm — real strength, not force or collapse.`,
-      shadow: `You either overpower situations that needed patience or collapse under pressure that gentleness could have held.`,
+      mastery: `You can meet a hard moment with patient, embodied calm — real strength, distinct from both raw force and simple collapse, that people can feel and lean on. People notice the difference immediately.`,
+      shadow: `You either overpower situations that actually needed patience or collapse under pressure that gentleness could have held instead, rarely landing on the steadier middle path between the two extremes.`,
       invitation: `Meet one difficult moment today with calm instead of force or giving up.`,
     },
 
@@ -730,8 +730,8 @@ window.DMicroContent = (function () {
     '12_D': {
       title: `12 in Karmic Tail — The Hanged Man`,
       tagline: `A Design of Voluntary Release`,
-      mastery: `You can release something voluntarily, before you're forced to, and actually mean it.`,
-      shadow: `You grip control until circumstances force your hand, or perform sacrifice while privately resenting it.`,
+      mastery: `You can release something voluntarily, before you're forced to, and actually mean it — a real, chosen letting go rather than a resignation dressed up as one to save face. It's a genuine choice, not a concession.`,
+      shadow: `You grip control until circumstances force your hand, or you perform sacrifice while privately resenting it, which quietly poisons what was meant to be a genuine release into something else entirely.`,
       invitation: `Release one thing today on your own terms, before you're forced to.`,
     },
 
@@ -739,8 +739,8 @@ window.DMicroContent = (function () {
     '13_D': {
       title: `13 in Karmic Tail — Transformation`,
       tagline: `A Design of the Complete Ending`,
-      mastery: `You can let an ending actually finish — completely, with nothing lingering.`,
-      shadow: `You leave things half-ended, one foot still in a door you've already decided to walk through.`,
+      mastery: `You can let an ending actually finish — completely, with nothing lingering to quietly pull you back toward what's already over and done with. Nothing gets left half-resolved behind you.`,
+      shadow: `You leave things half-ended, one foot still in a door you've already decided to walk through, which keeps both the old and the new from ever fully becoming real for you. Neither the old nor new life ever fully starts.`,
       invitation: `Let one lingering ending in your life actually finish today, fully.`,
     },
 
@@ -748,8 +748,8 @@ window.DMicroContent = (function () {
     '14_D': {
       title: `14 in Karmic Tail — Temperance`,
       tagline: `A Design of Held Extremes`,
-      mastery: `You can hold two opposing things at once without collapsing into either extreme. Real, patient synthesis.`,
-      shadow: `You swing between all-or-nothing states — total immersion or total withdrawal, reckless spending or fear-driven restriction.`,
+      mastery: `You can hold two opposing things at once without collapsing into either extreme. That's real, patient synthesis, not indecision dressed up as balance. It shows up as real, steady judgment.`,
+      shadow: `You swing between all-or-nothing states — total immersion or total withdrawal, reckless spending or fear-driven restriction — rarely landing anywhere in between for very long. The middle ground rarely gets a real chance.`,
       invitation: `Hold the middle on one thing today instead of swinging to either extreme.`,
     },
 
@@ -757,8 +757,8 @@ window.DMicroContent = (function () {
     '15_D': {
       title: `15 in Karmic Tail — The Devil`,
       tagline: `A Design of Loosened Chains`,
-      mastery: `You can name an attachment honestly and take one real step to loosen it. Real, conscious liberation.`,
-      shadow: `You recreate dynamics of control — being controlled or controlling — without seeing the pattern while it's happening.`,
+      mastery: `You can name an attachment honestly and take one real step to loosen it. That's genuine, conscious liberation, not simply talking about freedom while staying fully attached underneath.`,
+      shadow: `You recreate dynamics of control — being controlled or controlling — without seeing the pattern while it's actually happening, only recognizing it clearly after the fact, once it's already run its course.`,
       invitation: `Name one attachment or control dynamic honestly today, and take one step to loosen it.`,
     },
 
@@ -766,8 +766,8 @@ window.DMicroContent = (function () {
     '16_D': {
       title: `16 in Karmic Tail — The Tower`,
       tagline: `A Design of the Finished Collapse`,
-      mastery: `You can let a structure that's already failing actually fall, on your own terms, instead of propping it up.`,
-      shadow: `You maintain beliefs, relationships, or identities long past the point they're standing on solid ground, out of fear of collapse.`,
+      mastery: `You can let a structure that's already failing actually fall, on your own terms, instead of propping it up long past the point it can genuinely hold any real weight. You'd rather face it than keep pretending.`,
+      shadow: `You maintain beliefs, relationships, or identities long past the point they're standing on solid ground, out of fear of what the collapse might actually mean about who you are. The eventual fall is only ever harder for the delay.`,
       invitation: `Let one thing that's already failing fall today, deliberately, instead of propping it up further.`,
     },
 
@@ -775,8 +775,8 @@ window.DMicroContent = (function () {
     '18_D': {
       title: `18 in Karmic Tail — The Moon`,
       tagline: `A Design of the Faced Fog`,
-      mastery: `You can walk directly into an uncertain situation and let real clarity come from actually being inside it.`,
-      shadow: `You carry free-floating anxiety that doesn't attach to anything specific, and avoid situations that would require facing something head-on.`,
+      mastery: `You can walk directly into an uncertain situation and let real clarity come from actually being inside it, rather than needing certainty before you're willing to move at all. Being inside it beats waiting outside it.`,
+      shadow: `You carry free-floating anxiety that doesn't attach to anything specific, and you avoid situations that would require facing something head-on, letting the fog stay undisturbed for far longer than it needs to.`,
       invitation: `Walk toward one uncertain thing today instead of avoiding it — check the number, have the conversation.`,
     },
 
@@ -784,8 +784,8 @@ window.DMicroContent = (function () {
     '19_D': {
       title: `19 in Karmic Tail — The Sun`,
       tagline: `A Design of Undimmed Joy`,
-      mastery: `You can let joy be fully, visibly felt — real vitality offered without apology.`,
-      shadow: `You downplay good news and mute your own excitement, feeling guilty when things are genuinely going well.`,
+      mastery: `You can let joy be fully, visibly felt — real vitality offered without apology, without needing to shrink it down to make it acceptable to anyone else in the room. It's a genuine, uncomplicated gift to be around.`,
+      shadow: `You downplay good news and mute your own excitement, feeling a strange guilt when things are genuinely going well, as if visible joy required some kind of justification you haven't earned.`,
       invitation: `Let one piece of good news be fully celebrated today, at full volume, no minimizing.`,
     },
 
@@ -793,8 +793,8 @@ window.DMicroContent = (function () {
     '20_D': {
       title: `20 in Karmic Tail — Judgement`,
       tagline: `A Design of the Answered Summons`,
-      mastery: `You can answer a call you've been postponing, even before you feel ready.`,
-      shadow: `You get close to something important and stall just short of the actual leap, again and again.`,
+      mastery: `You can answer a call you've been postponing, even before you feel fully ready, trusting that readiness will catch up once you've actually started moving toward it. Readiness was never actually the real requirement.`,
+      shadow: `You get close to something important and stall just short of the actual leap, again and again, always circling the same threshold without ever quite crossing over it. The threshold stays exactly where it's always been.`,
       invitation: `Answer one call you've been postponing today, imperfectly, before you feel ready.`,
     },
 
@@ -802,8 +802,8 @@ window.DMicroContent = (function () {
     '21_D': {
       title: `21 in Karmic Tail — The World`,
       tagline: `A Design of the Closed Circle`,
-      mastery: `You can let something nearly-finished actually complete, resisting the old pull to stop short.`,
-      shadow: `You stop just short of finishing — projects, relationships, goals that get to nearly-there and quietly stall.`,
+      mastery: `You can let something nearly-finished actually complete, resisting the old pull to stop short right before the very end where it actually matters most. The finishing is what actually counts.`,
+      shadow: `You stop just short of finishing — projects, relationships, goals that get to nearly-there and quietly stall, leaving behind a long trail of almost-done things. Almost-done things quietly weigh more than finished ones.`,
       invitation: `Complete one nearly-finished thing today instead of letting it stay at "almost."`,
     },
 
@@ -811,8 +811,8 @@ window.DMicroContent = (function () {
     '22_D': {
       title: `22 in Karmic Tail — The Fool`,
       tagline: `A Design of the Considered Leap`,
-      mastery: `You can take a real leap deliberately, with your eyes open — genuine trust, not recklessness or total caution.`,
-      shadow: `You either leap without any real consideration or refuse to leap at all, rarely finding trust that includes awareness.`,
+      mastery: `You can take a real leap deliberately, with your eyes open — genuine trust that includes awareness, distinct from both recklessness and total caution holding you back. That's the version worth actually building on.`,
+      shadow: `You either leap without any real consideration or refuse to leap at all, rarely finding the trust that includes awareness rather than defaulting to one extreme or the other. Neither extreme teaches you very much.`,
       invitation: `Take one real, considered leap today — not reckless, not avoided, just chosen.`,
     },
 
@@ -820,7 +820,7 @@ window.DMicroContent = (function () {
     '7_E': {
       title: `7 in Soul Center — The Chariot`,
       tagline: `A Design of the Trusted Compass`,
-      mastery: `You navigate. Not speed, not achievement — the sustained, disciplined ability to keep moving in a chosen direction no matter what shows up. Real, internally generated direction.`,
+      mastery: `You steer your own life. Not speed, not achievement — the sustained, disciplined ability to keep moving in a chosen direction no matter what shows up. That's real, internally generated direction most people never develop.`,
       shadow: `You believe you have to figure everything out alone. Self-sufficiency becomes a very specific kind of loneliness, and help that arrives late isn't proof people can't be trusted — it's proof you decided long ago that receiving wasn't safe.`,
       invitation: `Take one piece of help today without immediately fixing or repaying it.`,
     },
@@ -829,8 +829,8 @@ window.DMicroContent = (function () {
     '1_E': {
       title: `1 in Soul Center — The Magician`,
       tagline: `A Design of the Sacred Beginning`,
-      mastery: `You feel most like yourself in the act of beginning. You're a source — someone through whom things get started and brought into form.`,
-      shadow: `You believe only the beginning counts. You scatter across a lifetime of starts, chasing the high of originating, never settling into what you actually started to prove.`,
+      mastery: `You feel most like yourself in the act of beginning. You're a source — someone through whom things get started and brought into form, and that origination is a genuine part of your purpose, not a phase to grow out of.`,
+      shadow: `You believe only the beginning counts. You scatter across a lifetime of starts, chasing the high of originating something new, never settling long enough into what you actually started to find out what it was proving.`,
       invitation: `Finish one thing today instead of starting something new.`,
     },
 
@@ -838,8 +838,8 @@ window.DMicroContent = (function () {
     '2_E': {
       title: `2 in Soul Center — The High Priestess`,
       tagline: `A Design of Quiet Certainty`,
-      mastery: `You feel most like yourself in quiet certainty — knowing before your mind catches up. Real, undemanding inner truth.`,
-      shadow: `You stay so private with your knowing that it never meets the world. A rich inner life that never translates into anything visible.`,
+      mastery: `You feel most like yourself in quiet certainty — knowing before your mind catches up to explain why. That's real, undemanding inner truth, and it's more trustworthy than it might seem from the outside.`,
+      shadow: `You stay so private with your knowing that it never actually meets the world. A rich inner life accumulates, but it never translates into anything visible, so the depth stays entirely yours and reaches no one else.`,
       invitation: `Let your inner knowing direct one real choice today, not just private reflection.`,
     },
 
@@ -847,8 +847,8 @@ window.DMicroContent = (function () {
     '3_E': {
       title: `3 in Soul Center — The Empress`,
       tagline: `A Design of Rooted Cultivation`,
-      mastery: `You feel most like yourself actively growing something — tending it with real care rather than rushing it.`,
-      shadow: `You lose your own purpose inside everyone else's growth, nurturing outward so consistently that nothing of your own ever gets planted.`,
+      mastery: `You feel most like yourself actively growing something — tending it with real, patient care rather than rushing it toward a result before it's actually ready to arrive. That patience is the whole practice.`,
+      shadow: `You lose your own purpose inside everyone else's growth, nurturing outward so consistently that nothing of your own ever actually gets planted, tended, or allowed to become anything of its own.`,
       invitation: `Give yourself today the same patient attention you give everyone else's growth.`,
     },
 
@@ -856,8 +856,8 @@ window.DMicroContent = (function () {
     '4_E': {
       title: `4 in Soul Center — The Emperor`,
       tagline: `A Design of Purposeful Structure`,
-      mastery: `You feel most like yourself constructing something meant to last — real, durable structure that holds weight over time.`,
-      shadow: `You confuse the structure with the purpose, maintaining rigid systems long after they've stopped serving anyone, including you.`,
+      mastery: `You feel most like yourself constructing something meant to last — real, durable structure that holds weight over time rather than collapsing under the first real pressure it meets.`,
+      shadow: `You confuse the structure with the purpose itself, maintaining rigid systems long after they've stopped serving anyone, including you, simply because dismantling them feels like admitting failure.`,
       invitation: `Ask today what one of your structures is actually for, and stay loyal to that answer.`,
     },
 
@@ -865,8 +865,8 @@ window.DMicroContent = (function () {
     '5_E': {
       title: `5 in Soul Center — The Hierophant`,
       tagline: `A Design of Living Transmission`,
-      mastery: `You feel most like yourself learning or teaching something real — part of a lineage that runs through you.`,
-      shadow: `You hold wisdom so tightly it never actually moves through you to anyone else. Purpose that stays private stops being purpose.`,
+      mastery: `You feel most like yourself learning or teaching something real — part of a lineage of understanding that runs through you rather than stopping with you and going no further. It doesn't need to stop with you to matter.`,
+      shadow: `You hold wisdom so tightly it never actually moves through you to anyone else. Purpose that stays entirely private eventually stops functioning as purpose at all, since nothing it produces ever reaches anyone who needs it.`,
       invitation: `Teach or share one thing today, even before you feel fully qualified.`,
     },
 
@@ -874,8 +874,8 @@ window.DMicroContent = (function () {
     '6_E': {
       title: `6 in Soul Center — The Lovers`,
       tagline: `A Design of Lived Alignment`,
-      mastery: `You feel most like yourself in a clean, values-driven choice, even a hard one. Real alignment, not mere comfort.`,
-      shadow: `You treat every choice as equally weighty, exhausting yourself with deliberation until fatigue masquerades as depth.`,
+      mastery: `You feel most like yourself in a clean, values-driven choice, even a hard one that costs you something. That's real alignment, distinct from mere comfort or convenience. That's discernment, not indifference.`,
+      shadow: `You treat every choice as equally weighty, exhausting yourself with deliberation until fatigue masquerades as depth, and the genuinely important decisions get no more real attention than the trivial ones do.`,
       invitation: `Let one small choice today be small. Save your full attention for the one that actually matters.`,
     },
 
@@ -883,8 +883,8 @@ window.DMicroContent = (function () {
     '8_E': {
       title: `8 in Soul Center — Justice`,
       tagline: `A Design of Grounded Integrity`,
-      mastery: `You feel most like yourself being genuinely honest, even when it costs you. Real integrity, held steady.`,
-      shadow: `You turn that integrity into a permanent audit of everyone else, using your own honesty to judge the world instead of just living it.`,
+      mastery: `You feel most like yourself being genuinely honest, even when it costs you something real. That's integrity actually held steady under pressure, not merely claimed when it's easy. It's demonstrated, not merely believed.`,
+      shadow: `You turn that integrity into a permanent audit of everyone else, using your own honesty as a standard to judge the world by instead of simply living inside it yourself, quietly. Living it is different from grading everyone else by it.`,
       invitation: `Let your integrity be demonstrated today, not enforced on anyone else.`,
     },
 
@@ -892,8 +892,8 @@ window.DMicroContent = (function () {
     '9_E': {
       title: `9 in Soul Center — The Hermit`,
       tagline: `A Design of Depth in Motion`,
-      mastery: `You feel most like yourself in quiet, unhurried reflection. Real clarity that comes from solitude.`,
-      shadow: `You mistake permanent withdrawal for purpose itself, staying so deep in reflection the insight never gets tested against an actual life.`,
+      mastery: `You feel most like yourself in quiet, unhurried reflection. That's real clarity, the kind that only comes from actually spending unhurried time in solitude with your own thoughts. The stillness is where the clarity actually forms.`,
+      shadow: `You mistake permanent withdrawal for purpose itself, staying so deep in reflection that the insight you're generating never gets tested against an actual, lived life outside your own head.`,
       invitation: `Bring one thing the quiet showed you back out into your actual life today.`,
     },
 
@@ -901,8 +901,8 @@ window.DMicroContent = (function () {
     '10_E': {
       title: `10 in Soul Center — The Wheel of Fortune`,
       tagline: `A Design of the Steady Center`,
-      mastery: `You feel most like yourself moving with change, not despite it. Real equanimity through life's cycles.`,
-      shadow: `You tie your sense of purpose to the wheel's current position — purposeful when things go well, purposeless the moment they turn.`,
+      mastery: `You feel most like yourself moving with change, not despite it. That's real equanimity through life's cycles, rather than a hard-won tolerance you're constantly managing. The steadiness isn't conditional on the outcome.`,
+      shadow: `You tie your sense of purpose to the wheel's current position — purposeful when things go well, purposeless the moment they turn, as if meaning itself rose and fell with circumstance alone.`,
       invitation: `Find your footing today in your relationship to the turning, not in where the wheel currently sits.`,
     },
 
@@ -910,8 +910,8 @@ window.DMicroContent = (function () {
     '11_E': {
       title: `11 in Soul Center — Strength`,
       tagline: `A Design of Purposeful Endurance`,
-      mastery: `You feel most like yourself holding something difficult without fighting or fleeing it. Real, embodied endurance.`,
-      shadow: `You confuse endurance itself with the purpose, holding weight indefinitely as an identity instead of a means to something else.`,
+      mastery: `You feel most like yourself holding something difficult without fighting it or fleeing it. That's real, embodied endurance, not mere stubbornness dressed up as calm. It holds because it's chosen, not just endured.`,
+      shadow: `You confuse endurance itself with the purpose, holding weight indefinitely as an identity rather than as a means toward something else that actually needs it held for a while. Weight held forever stops serving anything real.`,
       invitation: `Let your steadiness serve something beyond itself today — a relationship, a piece of work, not just the holding.`,
     },
 
@@ -919,8 +919,8 @@ window.DMicroContent = (function () {
     '12_E': {
       title: `12 in Soul Center — The Hanged Man`,
       tagline: `A Design of the Returned Surrender`,
-      mastery: `You feel most like yourself once you've stopped forcing an answer and let one arrive. Real meaning through voluntary surrender.`,
-      shadow: `You stay suspended indefinitely, treating the not-knowing itself as the purpose instead of a passage toward one.`,
+      mastery: `You feel most like yourself once you've stopped forcing an answer and let one actually arrive on its own time. That's real meaning found through voluntary surrender, not passivity.`,
+      shadow: `You stay suspended indefinitely, treating the not-knowing itself as the purpose instead of the passage toward one it was actually meant to be all along. Suspension on its own resolves nothing.`,
       invitation: `Take the new angle your last surrender revealed and actually act on it today.`,
     },
 
@@ -928,8 +928,8 @@ window.DMicroContent = (function () {
     '13_E': {
       title: `13 in Soul Center — Transformation`,
       tagline: `A Design of Genuine Becoming`,
-      mastery: `You feel most like yourself in the act of becoming — willing to let old versions of yourself die for a truer one.`,
-      shadow: `You manufacture endings for their own sake, mistaking constant reinvention for the deeper transformation this actually asks for.`,
+      mastery: `You feel most like yourself in the act of becoming — willing to let old versions of yourself die for a truer one, over and over, without needing to stay who you already were. The becoming doesn't need to be loud to be real.`,
+      shadow: `You manufacture endings for their own sake, mistaking constant reinvention for the deeper transformation this actually asks for, when what's needed instead is patience. Reinvention isn't the same thing as growth.`,
       invitation: `Let one transformation today be slow and quiet instead of dramatic.`,
     },
 
@@ -937,8 +937,8 @@ window.DMicroContent = (function () {
     '14_E': {
       title: `14 in Soul Center — Temperance`,
       tagline: `A Design of Earned Synthesis`,
-      mastery: `You feel most like yourself in the space between extremes, where genuine synthesis happens over time.`,
-      shadow: `You use the blending as an excuse to avoid fully engaging either side, staying so centered that nothing gets lived with any intensity.`,
+      mastery: `You feel most like yourself in the space between extremes, where genuine synthesis happens gradually, over time, rather than through a single decisive choice made once. The middle is a real place, not a compromise.`,
+      shadow: `You use the blending as an excuse to avoid fully engaging either side, staying so centered that nothing actually gets lived with any real intensity or commitment to it. Nothing centered ever gets lived at full intensity.`,
       invitation: `Fully inhabit one side of something today before trying to blend it.`,
     },
 
@@ -946,8 +946,8 @@ window.DMicroContent = (function () {
     '15_E': {
       title: `15 in Soul Center — The Devil`,
       tagline: `A Design of Metabolized Shadow`,
-      mastery: `You feel most like yourself metabolizing your own darker material instead of denying it. Real honesty, real liberation.`,
-      shadow: `You get fascinated with the darkness itself, circling your own shadow material without ever working it through to freedom.`,
+      mastery: `You feel most like yourself metabolizing your own darker material instead of denying it exists at all. That's real honesty, and it leads to real liberation over time. That honesty is what actually frees you.`,
+      shadow: `You get fascinated with the darkness itself, circling your own shadow material endlessly without ever actually working it through to the freedom it was supposed to lead toward eventually.`,
       invitation: `Take one honest look at something you've been circling today, and let it actually free something.`,
     },
 
@@ -955,8 +955,8 @@ window.DMicroContent = (function () {
     '16_E': {
       title: `16 in Soul Center — The Tower`,
       tagline: `A Design of Earned Clarity`,
-      mastery: `You feel most like yourself in the aftermath of a real reorganization, once the dust settles and you can see clearly.`,
-      shadow: `You need the collapse itself to feel purposeful, provoking crisis because gradual clarity feels less convincing than a dramatic one.`,
+      mastery: `You feel most like yourself in the aftermath of a real reorganization, once the dust settles and you can finally see clearly what's actually still standing. The clarity was always going to arrive either way.`,
+      shadow: `You need the collapse itself to feel purposeful, sometimes provoking crisis because gradual, quiet clarity feels less convincing to you than a dramatic one would. Manufactured crisis isn't the same as real change.`,
       invitation: `Let one piece of clarity arrive gently today instead of waiting for collapse to force it.`,
     },
 
@@ -964,8 +964,8 @@ window.DMicroContent = (function () {
     '17_E': {
       title: `17 in Soul Center — The Star`,
       tagline: `A Design of Reciprocal Hope`,
-      mastery: `You feel most like yourself actively replenishing something — trusting the process before there's proof it's working.`,
-      shadow: `You pour hope outward so consistently your own reserves run dry, offering renewal to everyone except yourself.`,
+      mastery: `You feel most like yourself actively replenishing something — trusting the process before there's any proof yet that it's working, and staying with it anyway, patiently. The trust itself is the practice.`,
+      shadow: `You pour hope outward so consistently that your own reserves run dry, offering renewal to everyone except yourself, as though you alone were exempt from needing any back. Hope given only outward eventually runs out.`,
       invitation: `Let yourself be replenished by someone today instead of only replenishing others.`,
     },
 
@@ -973,8 +973,8 @@ window.DMicroContent = (function () {
     '18_E': {
       title: `18 in Soul Center — The Moon`,
       tagline: `A Design of Trusted Feeling`,
-      mastery: `You feel most like yourself honoring what you sense rather than only what you can prove. Real intuition, trusted.`,
-      shadow: `You get lost in the depths without a way back to functioning, letting the felt sense override any grounded engagement with reality.`,
+      mastery: `You feel most like yourself honoring what you sense rather than only what you can prove outright with hard evidence. That's real intuition, genuinely trusted. The sense is worth trusting on its own terms.`,
+      shadow: `You get lost in the depths without a clear way back to functioning, letting the felt sense override any grounded engagement with the reality actually in front of you right now. Feeling untethered from reality helps no one.`,
       invitation: `Anchor one intuition today to something concrete — a number, a conversation, a real decision.`,
     },
 
@@ -982,8 +982,8 @@ window.DMicroContent = (function () {
     '19_E': {
       title: `19 in Soul Center — The Sun`,
       tagline: `A Design of Uncomplicated Radiance`,
-      mastery: `You feel most like yourself in unguarded joy — simply radiating who you already are. Real, uncomplicated purpose.`,
-      shadow: `You believe purpose this simple can't be enough, searching for something more complicated and dimming your natural radiance in the process.`,
+      mastery: `You feel most like yourself in unguarded joy — simply radiating who you already are, with nothing extra required to justify it or earn it first. That's real, uncomplicated purpose.`,
+      shadow: `You believe purpose this simple can't possibly be enough, searching for something more complicated to prove yourself with and dimming your natural radiance in the process of looking.`,
       invitation: `Let one moment of simple joy today count as purpose, with no bigger mission required to justify it.`,
     },
 
@@ -991,8 +991,8 @@ window.DMicroContent = (function () {
     '20_E': {
       title: `20 in Soul Center — Judgement`,
       tagline: `A Design of the Ongoing Awakening`,
-      mastery: `You feel most like yourself rising to meet a call you could have easily ignored. Real, ongoing awakening.`,
-      shadow: `You hear the call and endlessly prepare to answer it, using self-improvement as a substitute for the actual leap.`,
+      mastery: `You feel most like yourself rising to meet a call you could have easily ignored instead. That's real, ongoing awakening, chosen again and again rather than granted once. The call doesn't wait for perfect readiness.`,
+      shadow: `You hear the call and endlessly prepare to answer it, using self-improvement as a substitute for the actual leap, so the preparation itself quietly becomes a way of never arriving anywhere.`,
       invitation: `Answer one call today before you feel fully ready.`,
     },
 
@@ -1000,8 +1000,8 @@ window.DMicroContent = (function () {
     '21_E': {
       title: `21 in Soul Center — The World`,
       tagline: `A Design of Earned Arrival`,
-      mastery: `You feel most like yourself in a moment of real, earned arrival, however temporary. Genuine completion, genuinely felt.`,
-      shadow: `You refuse to ever call anything complete, treating wholeness as a permanently receding goal because arriving means facing what comes next.`,
+      mastery: `You feel most like yourself in a moment of real, earned arrival, however temporary it turns out to be afterward. Genuine completion, genuinely felt, not merely declared out loud. The arrival deserves to be actually felt.`,
+      shadow: `You refuse to ever call anything complete, treating wholeness as a permanently receding goal, because arriving would mean facing whatever comes right after it. Nothing ever gets to just be finished.`,
       invitation: `Let yourself actually land in one "this is whole" moment today, before the next cycle begins.`,
     },
 
@@ -1009,8 +1009,8 @@ window.DMicroContent = (function () {
     '22_E': {
       title: `22 in Soul Center — The Fool`,
       tagline: `A Design of Accumulating Trust`,
-      mastery: `You feel most like yourself at the edge of something new, stepping forward without needing a guarantee first.`,
-      shadow: `You treat every fresh start as an escape from whatever the last one asked of you, so nothing ever accumulates into a deeper self.`,
+      mastery: `You feel most like yourself at the edge of something new, stepping forward without needing a guarantee first — real, uncommon trust rather than simple naivety. That trust compounds the more it's used.`,
+      shadow: `You treat every fresh start as an escape from whatever the last one asked of you, so nothing ever actually accumulates into a deeper, more tested version of yourself. Nothing ever gets the chance to actually deepen.`,
       invitation: `Carry one lesson from your last beginning into whatever you start today.`,
     },
 
