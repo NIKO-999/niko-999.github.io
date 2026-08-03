@@ -969,23 +969,23 @@
   <div class="ic-heading" id="ic-heading"></div>
   <div class="ic-sections" id="ic-sections">
     <div class="ic-section" id="ic-sec-why">
-      <div class="ic-section-label">The Why</div>
+      <div class="ic-section-label" id="ic-lbl-why">The Why</div>
       <div class="ic-section-body" id="ic-why"></div>
     </div>
     <div class="ic-section" id="ic-sec-shadow">
-      <div class="ic-section-label">The Shadow</div>
+      <div class="ic-section-label" id="ic-lbl-shadow">The Shadow</div>
       <div class="ic-section-body" id="ic-shadow"></div>
     </div>
     <div class="ic-section" id="ic-sec-path">
-      <div class="ic-section-label">The Path</div>
+      <div class="ic-section-label" id="ic-lbl-path">The Path</div>
       <div class="ic-section-body" id="ic-path"></div>
     </div>
     <div class="ic-section ic-section-state" id="ic-sec-positive">
-      <div class="ic-section-label ic-state-label-positive">Positive State</div>
+      <div class="ic-section-label ic-state-label-positive" id="ic-lbl-positive">Positive State</div>
       <div class="ic-section-body" id="ic-positive"></div>
     </div>
     <div class="ic-section ic-section-state" id="ic-sec-negative">
-      <div class="ic-section-label ic-state-label-negative">Negative State</div>
+      <div class="ic-section-label ic-state-label-negative" id="ic-lbl-negative">Negative State</div>
       <div class="ic-section-body" id="ic-negative"></div>
     </div>
   </div>
@@ -2003,11 +2003,31 @@ function showCard(idx) {
   document.getElementById('ic-arcana').textContent = `Arcana · ${d.arcana}`;
   document.getElementById('ic-name').textContent   = d.label;
 
-  if (mc) {
+  if (mc && mc.mastery) {
+    // New Mastery/Shadow/Invitation voice
+    document.getElementById('ic-heading').textContent  = mc.title || mc.heading;
+    document.getElementById('ic-lbl-why').textContent    = 'Mastery';
+    document.getElementById('ic-why').textContent        = mc.mastery;
+    document.getElementById('ic-lbl-shadow').textContent = 'Shadow';
+    document.getElementById('ic-shadow').textContent     = mc.shadow;
+    document.getElementById('ic-lbl-positive').textContent = 'Invitation';
+    document.getElementById('ic-positive').textContent     = mc.invitation || '';
+    document.getElementById('ic-sec-path').style.display = 'none';
+    document.getElementById('ic-sec-positive').style.display = mc.invitation ? '' : 'none';
+    document.getElementById('ic-sec-negative').style.display = 'none';
+    document.getElementById('ic-heading').style.display  = '';
+    document.getElementById('ic-sections').style.display = '';
+    document.getElementById('ic-desc').style.display     = 'none';
+  } else if (mc) {
+    // Legacy heading/why/shadow/path/positive/negative voice
     document.getElementById('ic-heading').textContent  = mc.heading;
+    document.getElementById('ic-lbl-why').textContent    = 'The Why';
     document.getElementById('ic-why').textContent      = mc.why;
+    document.getElementById('ic-lbl-shadow').textContent = 'The Shadow';
     document.getElementById('ic-shadow').textContent   = mc.shadow;
+    document.getElementById('ic-lbl-path').textContent  = 'The Path';
     document.getElementById('ic-path').textContent     = mc.path;
+    document.getElementById('ic-lbl-positive').textContent = 'Positive State';
     document.getElementById('ic-positive').textContent = mc.positive || '';
     document.getElementById('ic-negative').textContent = mc.negative || '';
     document.getElementById('ic-sec-path').style.display = 'none';
@@ -3763,16 +3783,17 @@ const ARCANA_ESSENCE = {
     // SHADOW/THE INVITATION labels every other position on this shared
     // template uses — a deliberate identity split, not an inconsistency.
     const isNumerologyKey = data.key === 'LIFEPATH' || data.key === 'BIRTHDAY' || data.key === 'PYEAR';
-    const whyLabel    = isNumerologyKey ? 'THE CORE VIBRATION'   : 'THE WHY';
+    const isNewVoice = !!(mc && mc.mastery);
+    const whyLabel    = isNumerologyKey ? 'THE CORE VIBRATION'   : (isNewVoice ? 'MASTERY' : 'THE WHY');
     const traitsLabel = isNumerologyKey ? 'HOW IT LIVES IN YOU'  : 'KEY TRAITS';
     const shadowLabel = isNumerologyKey ? 'THE SHADOW SIDE'      : 'THE SHADOW';
     const pathLabel    = isNumerologyKey ? 'THE OPENING'         : 'THE INVITATION';
 
-    document.getElementById('pb-heading').textContent = (mc && mc.heading) || data.label;
+    document.getElementById('pb-heading').textContent = (mc && (mc.title || mc.heading)) || data.label;
     document.getElementById('pb-body').innerHTML = mc ?
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">${whyLabel}</div>
-         <div class="pb-full-text">${mc.why || ''}</div>
+         <div class="pb-full-text">${(isNewVoice ? mc.mastery : mc.why) || ''}</div>
        </div>
        ${isNumerologyKey && mc.traits ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">${traitsLabel}</div>
@@ -3782,11 +3803,15 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${themedHex(hex)}">${shadowLabel}</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
        </div>
-       ${mc.positive ? `<div class="pb-full-section">
+       ${isNewVoice && mc.invitation ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+         <div class="pb-full-text">${mc.invitation}</div>
+       </div>` : ''}
+       ${!isNewVoice && mc.positive ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
          <div class="pb-full-text">${mc.positive}</div>
        </div>` : ''}
-       ${mc.negative ? `<div class="pb-full-section">
+       ${!isNewVoice && mc.negative ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
          <div class="pb-full-text">${mc.negative}</div>
        </div>` : ''}
