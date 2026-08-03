@@ -5225,8 +5225,16 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-text">${pc.path}</div>
        </div>` :
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">IN BALANCE</div>
-         <div class="pb-full-text">${c.balanced}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">OPEN</div>
+         <div class="pb-full-text">${c.open}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(hex)}">BLOCKED</div>
+         <div class="pb-full-text">${c.blocked}</div>
+       </div>
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+         <div class="pb-full-text">${c.invitation}</div>
        </div>`);
 
     banner.classList.add('open');
