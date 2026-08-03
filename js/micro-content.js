@@ -28,8 +28,8 @@ window.DMicroContent = (function () {
     '8_A': {
       title: `8 in Core Character — Justice`,
       tagline: `A Design of the Reading Room`,
-      mastery: `You read fairness and imbalance before anyone says a word, and you hold yourself to the same standard you hold everyone else to. That's steadiness people can actually rely on.`,
-      shadow: `You judge everyone by a standard you quietly exempt yourself from. You keep score, complain the world isn't fair, and never turn the same ledger on your own conduct.`,
+      mastery: `You read fairness and imbalance before anyone says a word, and you hold yourself to the same standard you hold everyone else to. That double application is what makes people trust you specifically — not because you're gentle, but because you're consistent, and consistency is rarer and more valuable than most people realize until they've lived without it.`,
+      shadow: `You judge everyone by a standard you quietly exempt yourself from. You keep score, notice every imbalance in how you're treated, and complain that the world isn't fair — while somehow never turning the same precise ledger on your own conduct. The exemption is invisible to you because it always feels like a special case.`,
       invitation: `Apply your own standard to yourself once today, out loud, before you apply it to anyone else.`,
     },
 
@@ -37,8 +37,8 @@ window.DMicroContent = (function () {
     '1_A': {
       title: `1 in Core Character — The Magician`,
       tagline: `A Design of Instant Competence`,
-      mastery: `You radiate competence before you've done anything. People trust you with things that matter because something in you simply reads as capable.`,
-      shadow: `You become everyone's default problem-solver and let the mask do all the work, never showing the days you have nothing left. People stop checking if you're okay because you never look like you're not.`,
+      mastery: `You radiate competence before you've done anything to earn it. People trust you with things that matter almost on sight, because something in your bearing simply reads as capable — and more often than not, you back that impression up the moment you're actually tested.`,
+      shadow: `You become everyone's default problem-solver and let the mask do all the work, never showing the days you have nothing left. People stop checking if you're okay because you never once looked like you weren't, which means the one time you actually needed someone, nobody thought to ask.`,
       invitation: `Let one person see you not have it handled today.`,
     },
 
@@ -46,8 +46,8 @@ window.DMicroContent = (function () {
     '2_A': {
       title: `2 in Core Character — The High Priestess`,
       tagline: `A Design of the Held Depth`,
-      mastery: `You hold real depth, and people sense there's more to you without needing it explained. That quiet reserve reads as substance, not distance.`,
-      shadow: `You guard so completely it reads as cold instead of deep. People stop trying to get past a wall that never signals anything's worth reaching for.`,
+      mastery: `You hold real depth, and people sense there's more to you without needing it explained or performed. That quiet reserve reads as substance rather than distance — the sense that whatever you eventually choose to say has actually been considered first.`,
+      shadow: `You guard so completely it reads as cold instead of deep. People stop trying to get past a wall that never signals anything's worth reaching for, and the very depth you're protecting ends up going almost entirely unwitnessed, mistaken for simply having nothing there.`,
       invitation: `Let one true thing show on your face today, even briefly, without explaining it.`,
     },
 
@@ -55,8 +55,8 @@ window.DMicroContent = (function () {
     '3_A': {
       title: `3 in Core Character — The Empress`,
       tagline: `A Design of the Room That Exhales`,
-      mastery: `People relax the moment you walk in. Your warmth is real, and it makes space for others without you having to try.`,
-      shadow: `You become everyone's landing pad by default, holding space for everyone and rarely being held yourself. The tiredness never announces itself, it just accumulates.`,
+      mastery: `People relax the moment you walk in. Your warmth is real, not performed, and it makes space for others simply by your being present — you don't have to work at hospitality, it's closer to your resting state.`,
+      shadow: `You become everyone's landing pad by default, holding space for everyone and rarely being held yourself. The tiredness never announces itself with any single dramatic moment — it just accumulates quietly, invisible to the people who've come to rely on you being endlessly available.`,
       invitation: `Say "I don't have capacity for that right now" once today, and mean it.`,
     },
 
@@ -64,8 +64,8 @@ window.DMicroContent = (function () {
     '4_A': {
       title: `4 in Core Character — The Emperor`,
       tagline: `A Design of Assumed Command`,
-      mastery: `A room organizes itself around your steadiness before you've said a word. That's real, earned authority, not performance.`,
-      shadow: `People stop bringing you their actual thoughts because you look like you've already decided. Agreement arrives too fast to be trustworthy.`,
+      mastery: `A room organizes itself around your steadiness before you've said a word. That's real, earned authority rather than performance — people take direction from you because something about your presence signals you can actually be trusted to hold it.`,
+      shadow: `People stop bringing you their actual thoughts because you look like you've already decided. Agreement arrives too fast to be trustworthy, and you can go a long time not realizing that what looks like consensus is actually just people declining to argue with you.`,
       invitation: `Ask a real question today and actually wait for the answer.`,
     },
 
@@ -73,8 +73,8 @@ window.DMicroContent = (function () {
     '5_A': {
       title: `5 in Core Character — The Hierophant`,
       tagline: `A Design of Assumed Rightness`,
-      mastery: `People trust your read on things before you've proven anything. You carry the presence of someone who already knows how things are properly done.`,
-      shadow: `You get boxed into always having to be right. People stop bringing you their doubts because they've cast you as already settled.`,
+      mastery: `People trust your read on things before you've proven anything specific. You carry the presence of someone who already knows how things are properly done, and that presence alone is often enough to settle a room's uncertainty.`,
+      shadow: `You get boxed into always having to be right. People stop bringing you their doubts because they've cast you as already settled, which means you lose access to exactly the uncertainty and disagreement that would have kept your own thinking sharp.`,
       invitation: `Say "I don't know" out loud today, to someone who expects you to.`,
     },
 
@@ -82,8 +82,8 @@ window.DMicroContent = (function () {
     '6_A': {
       title: `6 in Core Character — The Lovers`,
       tagline: `A Design of the Meaningful Yes`,
-      mastery: `Your attention isn't handed out freely, so being chosen by you actually means something. People want in specifically because you don't pick everyone.`,
-      shadow: `You read as constantly evaluating people against a standard they can't see. Closeness with you starts to feel like an audition instead of a place to land.`,
+      mastery: `Your attention isn't handed out freely, so being chosen by you actually means something. People want in specifically because you don't pick everyone, and that discernment gives your closeness a weight that indiscriminate warmth never has.`,
+      shadow: `You read as constantly evaluating people against a standard they can't see. Closeness with you starts to feel like an audition instead of a place to land, and people who might have opened up to you instead spend their energy trying to pass a test you never actually announced.`,
       invitation: `Let your warmth arrive first today, before any sense of being weighed.`,
     },
 
@@ -91,8 +91,8 @@ window.DMicroContent = (function () {
     '7_A': {
       title: `7 in Core Character — The Chariot`,
       tagline: `A Design of Visible Momentum`,
-      mastery: `You carry visible direction before you've said where you're headed. People sense momentum in you, and it's real.`,
-      shadow: `You look so busy that people stop bringing you the ordinary, casual stuff. You end up isolated inside your own momentum.`,
+      mastery: `You carry visible direction before you've even said where you're headed. People sense real momentum in you, and it's not an illusion — you're actually going somewhere, and that legible drive is part of what makes people want to follow.`,
+      shadow: `You look so busy that people stop bringing you the ordinary, casual stuff — the small check-ins, the low-stakes conversations that build real closeness over time. You end up isolated inside your own momentum, surrounded by people who assumed you didn't have room for them.`,
       invitation: `Let yourself be seen doing nothing today, unhurried, on purpose.`,
     },
 
@@ -100,8 +100,8 @@ window.DMicroContent = (function () {
     '9_A': {
       title: `9 in Core Character — The Hermit`,
       tagline: `A Design of Presumed Solitude`,
-      mastery: `People give you space without being asked, because you clearly process things internally. That's a real gift, not standoffishness.`,
-      shadow: `People stop including you at all, assuming you'd rather be alone even on the days you wouldn't. Invitations just quietly dry up.`,
+      mastery: `People give you space without being asked, because you clearly process things internally rather than out loud. That's a real gift, not standoffishness — it means you're rarely crowded by people who haven't first considered whether you actually want company.`,
+      shadow: `People stop including you at all, assuming you'd rather be alone even on the days you genuinely wouldn't. Invitations just quietly dry up over time, not from any single decision, but from an accumulated assumption nobody ever checked with you directly.`,
       invitation: `Tell someone explicitly today that you want to be included.`,
     },
 
@@ -109,8 +109,8 @@ window.DMicroContent = (function () {
     '10_A': {
       title: `10 in Core Character — The Wheel of Fortune`,
       tagline: `A Design of the Watched Shift`,
-      mastery: `You're genuinely interesting to watch — things move around you, and people are curious what's next for you.`,
-      shadow: `You get typecast as unreliable simply because you're associated with change. People hedge their bets and hesitate to build anything long-term with you.`,
+      mastery: `You're genuinely interesting to watch — things move around you, circumstances shift, and people stay curious about what's coming next for you in a way that keeps them engaged with your life over time.`,
+      shadow: `You get typecast as unreliable simply because you're associated with change. People hedge their bets around you and hesitate to build anything long-term, assuming the next shift is always just around the corner, even in the periods where you're actually completely steady.`,
       invitation: `Show someone one thread in your life that's stayed exactly the same for years.`,
     },
 
@@ -118,8 +118,8 @@ window.DMicroContent = (function () {
     '11_A': {
       title: `11 in Core Character — Strength`,
       tagline: `A Design of the Safe Weight`,
-      mastery: `People bring you their hardest moments without asking, because something about you reads as able to hold weight without cracking.`,
-      shadow: `You become everyone's shock absorber. Your own hard moments go completely unnoticed because your mask never visibly cracks.`,
+      mastery: `People bring you their hardest moments without asking permission first, because something about you reads as able to hold real weight without cracking. That capacity is genuine, and it makes you a rare, trusted presence in a crisis.`,
+      shadow: `You become everyone's shock absorber by default. Your own hard moments go completely unnoticed because your composure never visibly cracks — which means the same steadiness that draws people to you for support is precisely what keeps anyone from ever offering it back.`,
       invitation: `Let your composure visibly slip once today, in front of someone you trust.`,
     },
 
@@ -127,8 +127,8 @@ window.DMicroContent = (function () {
     '12_A': {
       title: `12 in Core Character — The Hanged Man`,
       tagline: `A Design of the Different Clock`,
-      mastery: `You're not moved by the same urgency as everyone else, and you see angles they miss. That patience is a real advantage.`,
-      shadow: `You get read as detached or checked-out because your pace doesn't match the room. People leave you out of urgent decisions assuming you won't engage.`,
+      mastery: `You're not moved by the same urgency as everyone else, and from that different pace you see angles the room genuinely misses. That patience is a real advantage, not a lack of engagement — it just doesn't look like engagement to people running faster.`,
+      shadow: `You get read as detached or checked-out because your pace doesn't match the room's. People leave you out of urgent decisions, assuming you won't engage with the timeline, and your genuinely valuable perspective never gets asked for because nobody thought to wait for it.`,
       invitation: `Say the sharp observation you're holding today, out loud, instead of just holding it.`,
     },
 
@@ -136,8 +136,8 @@ window.DMicroContent = (function () {
     '13_A': {
       title: `13 in Core Character — Transformation`,
       tagline: `A Design of Grounded Gravity`,
-      mastery: `You carry the grounded gravity of someone who's already survived something real. People sense it without you saying a word.`,
-      shadow: `People handle you too carefully, assuming you're always processing something deep. You get starved of the light, easy, trivial stuff.`,
+      mastery: `You carry the grounded gravity of someone who's already survived something real. People sense it without you saying a word, and it earns you a kind of trust that usually takes much longer to build.`,
+      shadow: `People handle you too carefully, assuming you're always processing something deep beneath the surface. You get starved of the light, easy, trivial stuff — small talk, silliness, the ordinary texture of a normal day — because everyone around you has quietly decided you're above it.`,
       invitation: `Bring one genuinely trivial joy into a conversation today, without earning it first.`,
     },
 
@@ -145,8 +145,8 @@ window.DMicroContent = (function () {
     '14_A': {
       title: `14 in Core Character — Temperance`,
       tagline: `A Design of the Trusted Middle`,
-      mastery: `You can hold two opposing views in the same room without dismissing either side. People trust you specifically because you're good in the middle of tension.`,
-      shadow: `You become the designated peacekeeper in every group, smoothing things over even when you're the one who needs smoothing. Your own conflicts go unaddressed.`,
+      mastery: `You can hold two opposing views in the same room without dismissing either side. People trust you specifically because you're good in the middle of tension, able to translate between positions that would otherwise talk past each other.`,
+      shadow: `You become the designated peacekeeper in every group, smoothing things over even when you're the one who actually needs smoothing. Your own conflicts go unaddressed, because you've become so identified with resolving other people's tension that nobody thinks to help you with yours.`,
       invitation: `Land somewhere today. Give one clear, unmixed opinion.`,
     },
 
@@ -154,8 +154,8 @@ window.DMicroContent = (function () {
     '15_A': {
       title: `15 in Core Character — The Devil`,
       tagline: `A Design of the Compelling Edge`,
-      mastery: `People sense something compelling and a little dangerous about you. That magnetic edge is real, and it draws people in.`,
-      shadow: `People either chase the intensity for the wrong reasons or keep a wary distance, deciding you're "too much." Your actual gentleness keeps getting missed.`,
+      mastery: `People sense something compelling and a little dangerous about you. That magnetic edge is real, and it draws people in with a pull that more conventionally pleasant presences simply don't generate.`,
+      shadow: `People either chase the intensity for the wrong reasons or keep a wary distance, quietly deciding you're "too much" before they've actually gotten to know you. Your genuine gentleness keeps getting missed entirely, buried under a first impression that reads as more extreme than you are.`,
       invitation: `Let your softness show today, right alongside the edge, not instead of it.`,
     },
 
@@ -163,8 +163,8 @@ window.DMicroContent = (function () {
     '16_A': {
       title: `16 in Core Character — The Tower`,
       tagline: `A Design of the Truth-Jolt`,
-      mastery: `You cut straight through polite fictions the rest of the room is maintaining. That electric honesty is a real gift.`,
-      shadow: `People start managing information around you and bracing for disruption before you've done anything. You get pre-emptively excluded from delicate moments.`,
+      mastery: `You cut straight through the polite fictions the rest of the room is quietly maintaining. That electric honesty is a real gift — the thing everyone else was avoiding saying, you actually say, and rooms are often better for it once the shock passes.`,
+      shadow: `People start managing information around you and bracing for disruption before you've actually done anything. You get pre-emptively excluded from delicate moments, treated as a risk to be contained rather than a person who might, this time, have something gentler to offer.`,
       invitation: `Say one honest thing gently today, on purpose, to prove the honesty doesn't have to detonate.`,
     },
 
@@ -172,8 +172,8 @@ window.DMicroContent = (function () {
     '17_A': {
       title: `17 in Core Character — The Star`,
       tagline: `A Design of Unhardened Hope`,
-      mastery: `You carry hope that hasn't hardened into naivety. People feel safe being discouraged around you, because your optimism is real, not performed.`,
-      shadow: `You become everyone's designated source of encouragement, expected to stay hopeful on demand. Your own low days feel like a betrayal of the role, so you hide them.`,
+      mastery: `You carry hope that hasn't hardened into naivety. People feel safe being discouraged around you, because your optimism is genuinely earned rather than performed, and it doesn't flinch away from hearing something difficult first.`,
+      shadow: `You become everyone's designated source of encouragement, expected to stay hopeful more or less on demand. Your own low days start to feel like a betrayal of the role you've been cast in, so you hide them — which means the one place you might have received hope back never gets the chance to offer it.`,
       invitation: `Let your own doubt be visible today, without rushing to reassure anyone it'll be fine.`,
     },
 
@@ -181,8 +181,8 @@ window.DMicroContent = (function () {
     '18_A': {
       title: `18 in Core Character — The Moon`,
       tagline: `A Design of the Weather Behind the Eyes`,
-      mastery: `You carry a rich, shifting interior life that draws people in with real curiosity about who you actually are.`,
-      shadow: `People guess at your mood instead of asking, and they usually guess toward the worst. Your silence gets filled with their own anxieties.`,
+      mastery: `You carry a rich, shifting interior life that draws people in with real curiosity about who you actually are. There's genuine depth behind your eyes, and people can sense it even before they know you well enough to name it.`,
+      shadow: `People guess at your mood instead of asking directly, and they usually guess toward the worst. Your silence gets filled with their own anxieties rather than your actual state, and a great deal of unnecessary tension gets generated simply because nobody thought to check.`,
       invitation: `Name what you're actually feeling today, out loud, in one sentence.`,
     },
 
@@ -190,8 +190,8 @@ window.DMicroContent = (function () {
     '19_A': {
       title: `19 in Core Character — The Sun`,
       tagline: `A Design of Instant Warmth`,
-      mastery: `People feel lighter just being near you. That warmth is genuine, and it's one of the most immediately likable things about you.`,
-      shadow: `People assume the brightness is constant and unconditional, and they get confused instead of caring on the days you're actually struggling.`,
+      mastery: `People feel lighter just being near you. That warmth is genuine rather than performed, and it's one of the most immediately likable things about you — it puts people at ease before you've done anything specific to earn it.`,
+      shadow: `People assume the brightness is constant and unconditional, and they get confused rather than caring on the days you're actually struggling. The very thing that makes you easy to love also makes it hard for anyone to notice when you're not okay.`,
       invitation: `Let one bad day show today, without apologizing for it.`,
     },
 
@@ -199,8 +199,8 @@ window.DMicroContent = (function () {
     '20_A': {
       title: `20 in Core Character — Judgement`,
       tagline: `A Design of Imminent Arrival`,
-      mastery: `You carry the charge of someone actively becoming something bigger. People sense the momentum, and it's real.`,
-      shadow: `People relate to who you're becoming instead of who you actually are right now. You end up half-seen, waiting alongside everyone else for the "real" you to show up.`,
+      mastery: `You carry the charge of someone actively becoming something bigger. People sense the momentum, and it's real — there's a genuine sense of unfolding around you that makes people want to watch what you turn into.`,
+      shadow: `People relate to who you're becoming instead of who you actually are right now. You end up half-seen, waiting alongside everyone else for the "real," finished version of you to show up — while the actual, current you goes largely unmet in the meantime.`,
       invitation: `Let someone meet exactly who you are today, not who you're on your way to becoming.`,
     },
 
@@ -208,8 +208,8 @@ window.DMicroContent = (function () {
     '21_A': {
       title: `21 in Core Character — The World`,
       tagline: `A Design of Presumed Completion`,
-      mastery: `You carry real wholeness — the ease of someone who's already arrived somewhere most people are still working toward.`,
-      shadow: `People assume you don't need anything, since you don't look like you're missing anything. Your actual struggles stay invisible, and support stops reaching you.`,
+      mastery: `You carry real wholeness — the ease of someone who's already arrived somewhere most people are still working toward. That settledness is genuine, and it's part of why people find you reassuring to be around.`,
+      shadow: `People assume you don't need anything, since you don't look like you're missing anything. Your actual struggles stay invisible, and support stops reaching you specifically because everyone else has already decided, without checking, that you've got it covered.`,
       invitation: `Show one still-forming, unfinished part of yourself to someone today.`,
     },
 
@@ -217,8 +217,8 @@ window.DMicroContent = (function () {
     '22_A': {
       title: `22 in Core Character — The Fool`,
       tagline: `A Design of Unrehearsed Presence`,
-      mastery: `You meet every moment fresh, with no rehearsed social mask. People feel like they don't have to perform around you either.`,
-      shadow: `That same openness reads as naivety. People underestimate your experience and leave you out of conversations that assume a gravity you clearly carry but don't display.`,
+      mastery: `You meet every moment fresh, with no rehearsed social mask standing between you and whoever's in front of you. People feel like they don't have to perform around you either, which makes you an unusually easy person to actually relax with.`,
+      shadow: `That same openness reads as naivety to people who haven't looked closer. People underestimate your experience and leave you out of conversations that assume a gravity you clearly carry but rarely display, simply because your ease doesn't advertise everything you've actually been through.`,
       invitation: `Let your actual depth show through the ease once today, on purpose.`,
     },
 
@@ -226,8 +226,8 @@ window.DMicroContent = (function () {
     '5_B': {
       title: `5 in Sky Line — The Hierophant`,
       tagline: `A Design of Received Structure`,
-      mastery: `You sense the deeper structure underneath things before anyone explains it to you. That's a real aptitude for wisdom — study that turns into devotion, understanding you can actually pass on.`,
-      shadow: `Your reverence for structure curdles into certainty there's exactly one right way. You lecture when you meant to teach, and the channel that should receive stops receiving.`,
+      mastery: `You sense the deeper structure underneath things before anyone explains it to you. That's a real aptitude for wisdom — study that turns into devotion, understanding that doesn't stay theoretical but actually becomes something you can pass on to someone else intact.`,
+      shadow: `Your reverence for structure curdles into certainty there's exactly one right way to arrive at what you know. You lecture when you meant to teach, and the channel that should receive new understanding stops receiving it, closed off by the very conviction that once made you a good student.`,
       invitation: `Ask one person today what they see differently than you do about something you're certain of. Actually listen.`,
     },
 
@@ -235,8 +235,8 @@ window.DMicroContent = (function () {
     '1_B': {
       title: `1 in Sky Line — The Magician`,
       tagline: `A Design of the Direct Line`,
-      mastery: `You catch inspiration and immediately know how to give it shape. That translation — turning the invisible into something usable — is a real spiritual gift.`,
-      shadow: `You claim as personal genius what actually moved through you, and hoard half-finished downloads because starting the next one feels more alive than finishing the last.`,
+      mastery: `You catch inspiration and immediately know how to give it shape. That translation — turning the invisible into something usable — is a real spiritual gift, and it happens for you with a speed most people spend years trying to develop.`,
+      shadow: `You claim as personal genius what actually moved through you, and you hoard half-finished downloads because starting the next one feels more alive than finishing the last. What accumulates is a long trail of brilliant, abandoned beginnings that never got to become anything real.`,
       invitation: `Finish one spiritual idea you've been sitting on today, instead of reaching for a new one.`,
     },
 
@@ -244,8 +244,8 @@ window.DMicroContent = (function () {
     '2_B': {
       title: `2 in Sky Line — The High Priestess`,
       tagline: `A Design of the Unspoken Knowing`,
-      mastery: `You sense what's forming before it's announced — real fluency in symbol and undercurrent, access to meaning most people walk past.`,
-      shadow: `You guard the veil instead of lifting it. Your insight stays too sacred to offer, and people sense you know something you're not saying.`,
+      mastery: `You sense what's forming before it's announced — a real fluency in symbol and undercurrent, access to meaning most people walk straight past without noticing it was ever there. That's genuine perceptiveness, not vague guessing.`,
+      shadow: `You guard the veil instead of lifting it. Your insight stays too sacred to offer out loud, and people sense you know something you're not saying — which can read as withholding, even when your intention was only ever reverence.`,
       invitation: `Say "here's what I'm sensing" out loud today, even without proof.`,
     },
 
@@ -253,8 +253,8 @@ window.DMicroContent = (function () {
     '3_B': {
       title: `3 in Sky Line — The Empress`,
       tagline: `A Design of Generative Presence`,
-      mastery: `Things come alive around you just by your being present. That's a genuine spiritual gift, not a skill you perform.`,
-      shadow: `You can't tolerate anything staying dormant, and you resent when the fertility you spark in others doesn't get credited back to you.`,
+      mastery: `Things come alive around you just by your being present. That's a genuine spiritual gift, not a skill you perform — growth and possibility seem to organize themselves around you without your having to try.`,
+      shadow: `You can't tolerate anything staying dormant, and you resent when the fertility you spark in others doesn't get credited back to you. What should be pure generativity starts carrying a quiet expectation of acknowledgment that undercuts the gift.`,
       invitation: `Let one thing near you stay fallow today. Don't push it to grow.`,
     },
 
@@ -262,8 +262,8 @@ window.DMicroContent = (function () {
     '4_B': {
       title: `4 in Sky Line — The Emperor`,
       tagline: `A Design of Sacred Architecture`,
-      mastery: `You take something vast and formless and give it a structure sturdy enough to actually hold. That's architecture in service of the sacred.`,
-      shadow: `You defend the frame long after the spirit inside it has moved on. Your spiritual life starts running on maintenance instead of discovery.`,
+      mastery: `You take something vast and formless and give it a structure sturdy enough to actually hold. That's architecture in service of the sacred — the rare capacity to make the ineffable practicable without diminishing it.`,
+      shadow: `You defend the frame long after the spirit inside it has moved on. Your spiritual life starts running on maintenance instead of discovery, because the structure you built to protect something living has quietly become more important than the life it was meant to hold.`,
       invitation: `Ask today whether one of your spiritual structures is still serving what it was built to protect.`,
     },
 
@@ -271,8 +271,8 @@ window.DMicroContent = (function () {
     '6_B': {
       title: `6 in Sky Line — The Lovers`,
       tagline: `A Design of the True Frequency`,
-      mastery: `You feel the difference between what's spiritually true for you and what's merely appealing, even when the appealing version is louder.`,
-      shadow: `You stay suspended at the crossroads, feeling both paths so acutely that choosing either one feels like betrayal. Nothing gets committed to.`,
+      mastery: `You feel the difference between what's spiritually true for you and what's merely appealing, even when the appealing version is louder, more popular, or easier to justify to other people.`,
+      shadow: `You stay suspended at the crossroads, feeling both paths so acutely that choosing either one feels like a betrayal of the other. Nothing actually gets committed to, and the suspension itself starts to feel like a spiritual practice rather than the avoidance it actually is.`,
       invitation: `Choose the resonance you actually feel today, even imperfectly, and let the other path go.`,
     },
 
@@ -280,8 +280,8 @@ window.DMicroContent = (function () {
     '7_B': {
       title: `7 in Sky Line — The Chariot`,
       tagline: `A Design of Spiritual Perseverance`,
-      mastery: `You keep a spiritual practice moving on will alone, long after the initial inspiration has faded. That's real perseverance.`,
-      shadow: `You insist on driving alone, refusing teachers or community because receiving help feels like losing control. Discipline becomes a substitute for actual encounter.`,
+      mastery: `You keep a spiritual practice moving on will alone, long after the initial inspiration has faded. That's real perseverance — the kind most people's practices don't survive without you.`,
+      shadow: `You insist on driving alone, refusing teachers or community because receiving help feels like losing control of the very practice you've built. Discipline becomes a substitute for actual encounter, and the solitude that once felt like strength starts to feel like a wall.`,
       invitation: `Let someone else in on your practice today — a teacher, a book, a conversation.`,
     },
 
@@ -289,8 +289,8 @@ window.DMicroContent = (function () {
     '8_B': {
       title: `8 in Sky Line — Justice`,
       tagline: `A Design of Hollowness Detection`,
-      mastery: `You sense when something claiming to be sacred has actually gone hollow. That discernment is real and rare.`,
-      shadow: `You turn that clarity into permanent suspicion, unable to rest inside any practice because you're always auditing it for hypocrisy.`,
+      mastery: `You sense when something claiming to be sacred has actually gone hollow. That discernment is real and rare — you're rarely fooled by the performance of depth when there's nothing actually underneath it.`,
+      shadow: `You turn that clarity into permanent suspicion, unable to rest inside any practice because you're always auditing it for hypocrisy. The gift for detecting hollowness starts detecting it everywhere, including in genuinely sincere places that simply aren't perfect.`,
       invitation: `Let one small imperfection in a spiritual community or practice be ordinary humanness today, not proof of hollowness.`,
     },
 
@@ -298,8 +298,8 @@ window.DMicroContent = (function () {
     '9_B': {
       title: `9 in Sky Line — The Hermit`,
       tagline: `A Design of Contemplative Range`,
-      mastery: `Left alone with enough quiet, you access a different register of consciousness. That contemplative range is a genuine gift.`,
-      shadow: `You chase the peak state again and again, retreating further from ordinary life because it can't compete with what solitude gives you.`,
+      mastery: `Left alone with enough quiet, you access a different register of consciousness than most people ever reach. That contemplative range is a genuine gift, not simply a preference for solitude.`,
+      shadow: `You chase the peak state again and again, retreating further from ordinary life because it can't compete with what solitude gives you. The world of other people starts to feel thin and unrewarding next to what you find alone, and the retreat deepens past the point of being restorative.`,
       invitation: `Bring one thing back from your solitude today and actually share it with someone.`,
     },
 
@@ -307,8 +307,8 @@ window.DMicroContent = (function () {
     '10_B': {
       title: `10 in Sky Line — The Wheel of Fortune`,
       tagline: `A Design of Divine Timing`,
-      mastery: `You have an instinct for when the moment has actually arrived, even when nothing external has announced it. That's a rare gift of trust, not prediction.`,
-      shadow: `You use "it's not the right time yet" as a permanent excuse, always sensing a better season just ahead while the present stays untouched.`,
+      mastery: `You have an instinct for when the moment has actually arrived, even when nothing external has announced it. That's a rare gift of trust rather than prediction — you act on the sense of rightness itself.`,
+      shadow: `You use "it's not the right time yet" as a permanent excuse, always sensing a better season just ahead while the present stays untouched. Genuine timing wisdom curdles into an endless deferral that never actually resolves into action.`,
       invitation: `Trust one "yes" today, right now, instead of deferring it to a better-timed future.`,
     },
 
@@ -316,8 +316,8 @@ window.DMicroContent = (function () {
     '11_B': {
       title: `11 in Sky Line — Strength`,
       tagline: `A Design of the Tamed Wild`,
-      mastery: `You can stay present with raw, unruly inner states without needing to suppress or be ruled by them. That's real, hard-won spiritual strength.`,
-      shadow: `You perform calm instead of achieving it. The suppressed intensity moves underground and surfaces later as tension or eruptions that surprise you.`,
+      mastery: `You can stay present with raw, unruly inner states without needing to suppress them or be ruled by them. That's real, hard-won spiritual strength — the capacity to hold intensity without either fleeing it or being consumed by it.`,
+      shadow: `You perform calm instead of actually achieving it. The suppressed intensity moves underground and surfaces later as tension or unexpected eruptions that surprise you as much as anyone else, precisely because you'd convinced yourself the calm was real.`,
       invitation: `Let one feeling be fully felt today before you try to manage it.`,
     },
 
@@ -325,8 +325,8 @@ window.DMicroContent = (function () {
     '12_B': {
       title: `12 in Sky Line — The Hanged Man`,
       tagline: `A Design of Skilled Surrender`,
-      mastery: `You can stop pushing and let revelation arrive through release. That comfort with not-knowing is a real spiritual skill.`,
-      shadow: `You confuse surrender with permanent inaction, staying suspended because the pause feels safer than descending back into choice.`,
+      mastery: `You can stop pushing and let revelation arrive through release rather than effort. That comfort with not-knowing is a real spiritual skill, one most people never develop because it requires trusting something they can't control.`,
+      shadow: `You confuse surrender with permanent inaction, staying suspended because the pause feels safer than descending back into the risk of choice. What began as a genuine spiritual posture becomes a way of never having to act on anything the suspension actually revealed.`,
       invitation: `Take what your last surrender revealed and actually act on it today.`,
     },
 
@@ -334,8 +334,8 @@ window.DMicroContent = (function () {
     '13_B': {
       title: `13 in Sky Line — Transformation`,
       tagline: `A Design of Real Initiation`,
-      mastery: `You've survived genuine ego-death before, and something truer rose in its place. That's a real aptitude for spiritual initiation.`,
-      shadow: `You engineer crisis after crisis because ordinary growth feels unconvincing next to dramatic collapse.`,
+      mastery: `You've survived genuine ego-death before, and something truer rose in its place. That's a real aptitude for spiritual initiation — you know, from direct experience, that total collapse can lead somewhere worth arriving at.`,
+      shadow: `You engineer crisis after crisis because ordinary, gradual growth feels unconvincing next to dramatic collapse. The intensity of transformation becomes the proof you require, and quiet, undramatic change starts to feel like it doesn't count.`,
       invitation: `Let one piece of growth happen quietly today, with no crisis required to make it feel real.`,
     },
 
@@ -343,8 +343,8 @@ window.DMicroContent = (function () {
     '14_B': {
       title: `14 in Sky Line — Temperance`,
       tagline: `A Design of the Poured Vessel`,
-      mastery: `You hold different truths at the meeting point without needing either to collapse. That's genuine mediator's work, real spiritual healing.`,
-      shadow: `You lose your own footing holding everyone else's. You pour outward endlessly and never let yourself be healed in return.`,
+      mastery: `You hold different truths at the meeting point without needing either one to collapse. That's genuine mediator's work, real spiritual healing that comes from your capacity to contain contradiction rather than needing to resolve it prematurely.`,
+      shadow: `You lose your own footing holding everyone else's. You pour outward endlessly and rarely let yourself be healed in return, because the role of healer has become so central to your identity that receiving would feel like stepping out of it.`,
       invitation: `Receive one act of care today instead of only offering it.`,
     },
 
@@ -352,8 +352,8 @@ window.DMicroContent = (function () {
     '15_B': {
       title: `15 in Sky Line — The Devil`,
       tagline: `A Design of Fearless Looking`,
-      mastery: `You can look directly at darkness — your own or the collective's — without flinching or bypassing it. That's genuine depth work.`,
-      shadow: `You circle the same dark material because the intensity of looking has become its own reward, mistaking proximity to darkness for actual freedom from it.`,
+      mastery: `You can look directly at darkness — your own or the collective's — without flinching or bypassing it. That's genuine depth work, the kind most spiritual approaches actively avoid because it's uncomfortable.`,
+      shadow: `You circle the same dark material again and again because the intensity of looking has become its own reward. Proximity to darkness starts standing in for actual freedom from it, and the looking never quite converts into the liberation it was originally meant to serve.`,
       invitation: `Turn one thing you've been looking at into an actual action toward freedom today, not just more insight.`,
     },
 
@@ -361,8 +361,8 @@ window.DMicroContent = (function () {
     '16_B': {
       title: `16 in Sky Line — The Tower`,
       tagline: `A Design of Lightning Revelation`,
-      mastery: `You receive revelation as lightning — sudden, restructuring clarity that arrives all at once. That's a real spiritual gift.`,
-      shadow: `You need the collapse to feel like growth is real, sometimes provoking crisis in your own beliefs just to feel the jolt again.`,
+      mastery: `You receive revelation as lightning — sudden, restructuring clarity that arrives all at once rather than through gradual accumulation. That's a real spiritual gift, and it changes you faster than slower paths tend to.`,
+      shadow: `You need the collapse to feel like growth is real, sometimes provoking crisis in your own beliefs just to feel that jolt of clarity again. Quiet, incremental understanding starts to feel unconvincing next to the dramatic restructuring you've come to associate with genuine insight.`,
       invitation: `Let one truth land gently today instead of through demolition.`,
     },
 
@@ -370,8 +370,8 @@ window.DMicroContent = (function () {
     '17_B': {
       title: `17 in Sky Line — The Star`,
       tagline: `A Design of the Living Wellspring`,
-      mastery: `Your faith stays lit without needing proof, and it's contagious. You're a real source other people draw hope from.`,
-      shadow: `You treat your faith as a private reserve instead of a wellspring, performing hope you don't feel because you're known as the one who's always fine.`,
+      mastery: `Your faith stays lit without needing proof, and it's genuinely contagious. You're a real source other people draw hope from, not because you perform certainty but because your hope is actually alive.`,
+      shadow: `You treat your faith as a private reserve instead of a wellspring, performing hope you don't currently feel because you've become known as the one who's always fine. The role of being everyone's source of light leaves your own doubt with nowhere honest to go.`,
       invitation: `Let your own doubt be witnessed today, honestly, by someone who cares about you.`,
     },
 
@@ -379,8 +379,8 @@ window.DMicroContent = (function () {
     '18_B': {
       title: `18 in Sky Line — The Moon`,
       tagline: `A Design of the Threshold at Home`,
-      mastery: `You're fluent in liminal space — dreams, the unseen, the threshold most people find disorienting. You feel at home there.`,
-      shadow: `You lose the thread back to consensus reality. Ordinary daylight functioning starts to feel thin compared to what the threshold offers.`,
+      mastery: `You're fluent in liminal space — dreams, the unseen, the threshold most people find disorienting. You feel genuinely at home there, in territory that unsettles almost everyone else.`,
+      shadow: `You lose the thread back to consensus reality. Ordinary daylight functioning starts to feel thin and unsatisfying compared to what the threshold offers, and the pull toward the inner world can leave the practical, relational world quietly neglected.`,
       invitation: `Bring one thing back from your inner world today and ground it in something physical or relational.`,
     },
 
@@ -388,8 +388,8 @@ window.DMicroContent = (function () {
     '19_B': {
       title: `19 in Sky Line — The Sun`,
       tagline: `A Design of Effortless Clarity`,
-      mastery: `Clarity arrives for you light and immediate, without needing struggle first. Ease itself is a real spiritual practice for you.`,
-      shadow: `You feel pressure to manufacture struggle so your insight seems more credible, dimming your natural clarity to fit a world that equates depth with difficulty.`,
+      mastery: `Clarity arrives for you light and immediate, without needing struggle first to earn it. Ease itself is a real spiritual practice for you, one that most traditions treat as suspicious but that's genuinely yours.`,
+      shadow: `You feel pressure to manufacture struggle so your insight seems more credible to a world that equates depth with difficulty. Your natural clarity gets dimmed on purpose, dressed up in more effortful language than it actually needed.`,
       invitation: `Offer something you know today exactly as lightly as it arrived. No harder story attached.`,
     },
 
@@ -397,8 +397,8 @@ window.DMicroContent = (function () {
     '20_B': {
       title: `20 in Sky Line — Judgement`,
       tagline: `A Design of Vocational Hearing`,
-      mastery: `You recognize a genuine calling when it arrives, distinct from noise or wishful thinking. That's real vocational discernment.`,
-      shadow: `You mistake every strong feeling for a divine instruction, chasing missions that don't hold up, or pressuring other people toward awakenings they're not ready for.`,
+      mastery: `You recognize a genuine calling when it arrives, distinct from noise or wishful thinking. That's real vocational discernment — you can tell the difference between an authentic summons and simply wanting something badly.`,
+      shadow: `You mistake every strong feeling for a divine instruction, chasing missions that don't hold up under scrutiny, or pressuring other people toward awakenings they're not actually ready for. The gift for hearing a real call gets diluted by treating every impulse as one.`,
       invitation: `Let one "calling" prove itself over time today before committing to it fully.`,
     },
 
@@ -406,8 +406,8 @@ window.DMicroContent = (function () {
     '21_B': {
       title: `21 in Sky Line — The World`,
       tagline: `A Design of Whole-Life Synthesis`,
-      mastery: `You weave different traditions and practices into one coherent whole instead of experiencing them as competing systems. That's real spiritual synthesis.`,
-      shadow: `You collect breadth without depth, gathering more frameworks in the name of wholeness without letting any one of them actually change you.`,
+      mastery: `You weave different traditions and practices into one coherent whole instead of experiencing them as competing systems. That's real spiritual synthesis — a genuine capacity to see how disparate frameworks actually fit together.`,
+      shadow: `You collect breadth without depth, gathering more frameworks in the name of wholeness without letting any single one of them actually change you. The synthesis stays theoretical, more about accumulation than about being transformed by what you've gathered.`,
       invitation: `Stay with one dimension of your understanding today, instead of reaching for something new to add.`,
     },
 
@@ -415,8 +415,8 @@ window.DMicroContent = (function () {
     '22_B': {
       title: `22 in Sky Line — The Fool`,
       tagline: `A Design of the Natural Passport`,
-      mastery: `You have direct, unmediated access to the sacred, without needing a doctrine or credential first. That openness is rare and real.`,
-      shadow: `You trust every experience equally as sacred, with no discernment, leaping toward the next revelation before the last one taught you anything durable.`,
+      mastery: `You have direct, unmediated access to the sacred, without needing a doctrine or credential first to grant you entry. That openness is rare and real, and it lets you encounter the sacred the way a child encounters anything new — directly.`,
+      shadow: `You trust every experience equally as sacred, with no discernment between them, leaping toward the next revelation before the last one has taught you anything durable. Openness without any filter leaves you collecting experiences rather than actually being changed by them.`,
       invitation: `Let one thing you learned in your last spiritual leap actually carry into today's decision.`,
     },
 
@@ -424,8 +424,8 @@ window.DMicroContent = (function () {
     '4_C': {
       title: `4 in Earth Line — The Emperor`,
       tagline: `A Design of Constructed Security`,
-      mastery: `You build real, durable material security — wealth constructed through discipline, not luck. You can stay with unglamorous foundational work others abandon.`,
-      shadow: `You grip resources so tightly nothing new can get in, mistaking control for prosperity. Money that won't move isn't protected, it's scarce on purpose.`,
+      mastery: `You build real, durable material security — wealth constructed through discipline rather than luck. You can stay with unglamorous foundational work that most people abandon well before it starts paying off.`,
+      shadow: `You grip resources so tightly nothing new can get in, mistaking control for prosperity. Money that won't move isn't protected, it's scarce on purpose, and the same discipline that built your security can quietly become the thing that keeps it from growing further.`,
       invitation: `Let one dollar move today that you'd normally hold onto out of caution.`,
     },
 
@@ -433,8 +433,8 @@ window.DMicroContent = (function () {
     '1_C': {
       title: `1 in Earth Line — The Magician`,
       tagline: `A Design of Instant Origination`,
-      mastery: `You spot an opening and turn it into income before anyone else finishes thinking. Real entrepreneurial instinct, real material result.`,
-      shadow: `Your financial life is built entirely on starts. Money made fast leaves just as fast because nothing's built to hold it.`,
+      mastery: `You spot an opening and turn it into income before anyone else has finished thinking about it. That's real entrepreneurial instinct, converting straight into real material result, and it's a genuine edge most people never develop.`,
+      shadow: `Your financial life is built entirely on starts. Money made fast leaves just as fast, because nothing's actually built to hold it — you're skilled at generating opportunity and comparatively untrained in the slower work of retaining it.`,
       invitation: `Pick one income stream today and commit to staying with it past the exciting part.`,
     },
 
@@ -442,8 +442,8 @@ window.DMicroContent = (function () {
     '2_C': {
       title: `2 in Earth Line — The High Priestess`,
       tagline: `A Design of Quiet Financial Instinct`,
-      mastery: `You have a felt sense for financial timing that outperforms the visible data. Quiet material intelligence, not loud but reliable.`,
-      shadow: `You second-guess your own gut into silence, deferring to louder, more "rational" advice, and watch your instinct get overridden every time.`,
+      mastery: `You have a felt sense for financial timing that outperforms the visible data. It's quiet material intelligence — not loud, not easily explained, but reliably right when you actually trust it.`,
+      shadow: `You second-guess your own gut into silence, deferring to louder, more "rational" advice, and watch your instinct get overridden every time — often by counsel that turns out to have been worse than what you already knew.`,
       invitation: `Act on one quiet financial certainty today before asking anyone else's opinion.`,
     },
 
@@ -451,8 +451,8 @@ window.DMicroContent = (function () {
     '3_C': {
       title: `3 in Earth Line — The Empress`,
       tagline: `A Design of Cultivated Wealth`,
-      mastery: `You cultivate material resources patiently, the way you'd tend something alive. Real, generative wealth, not transactional.`,
-      shadow: `You pour resources into something that's stopped growing out of attachment, and give your abundance away too freely, undervaluing your own work.`,
+      mastery: `You cultivate material resources patiently, the way you'd tend something alive rather than something to be extracted from. It produces real, generative wealth, not merely transactional gain.`,
+      shadow: `You pour resources into something that's stopped growing out of attachment to what it once was, and you give your abundance away too freely, undervaluing your own work in a way that quietly erodes what you've built.`,
       invitation: `Prune one thing today that's stopped growing, and price one thing you've been giving away for free.`,
     },
 
@@ -460,8 +460,8 @@ window.DMicroContent = (function () {
     '5_C': {
       title: `5 in Earth Line — The Hierophant`,
       tagline: `A Design of Inherited Discipline`,
-      mastery: `You absorb how wealth actually gets built from people who've done it, and apply that with real discipline.`,
-      shadow: `You cling to an inherited financial system past the point it fits your actual life, following the rules exactly even when conditions have changed.`,
+      mastery: `You absorb how wealth actually gets built from people who've actually done it, and you apply what you learn with real, sustained discipline rather than treating it as theory. That transmission of hard-won knowledge is a genuine strength.`,
+      shadow: `You cling to an inherited financial system past the point it fits your actual life, following the rules exactly even when the conditions that made them true have quietly changed underneath you.`,
       invitation: `Name one inherited money rule today that's quietly expired for the life you actually live.`,
     },
 
@@ -469,8 +469,8 @@ window.DMicroContent = (function () {
     '6_C': {
       title: `6 in Earth Line — The Lovers`,
       tagline: `A Design of Aligned Income`,
-      mastery: `You build wealth only through work that reflects your actual values. Real material discernment, not just idealism.`,
-      shadow: `You weigh every financial choice so exhaustively against your values that you never commit, watching opportunities pass while you deliberate.`,
+      mastery: `You build wealth only through work that reflects your actual values. That's real material discernment, not simply idealism — you know the difference between money you'd take and money you'd regret.`,
+      shadow: `You weigh every financial choice so exhaustively against your values that you never actually commit, watching real opportunities pass by while you're still deliberating whether they're pure enough.`,
       invitation: `Commit fully to one values-aligned choice today, even if it's not perfect.`,
     },
 
@@ -478,8 +478,8 @@ window.DMicroContent = (function () {
     '7_C': {
       title: `7 in Earth Line — The Chariot`,
       tagline: `A Design of Willed Momentum`,
-      mastery: `You set a material goal and steer through setbacks that would derail most people. Real sustained, willed momentum.`,
-      shadow: `You grip the plan so tightly you can't adapt when things genuinely change, and refuse help even when it would get you there faster.`,
+      mastery: `You set a material goal and steer through setbacks that would derail most people entirely. That's real, sustained, willed momentum — you don't stop just because the road got harder.`,
+      shadow: `You grip the plan so tightly you can't adapt when things genuinely change, and you refuse help even when accepting it would get you there considerably faster and with less cost to you.`,
       invitation: `Let one capable person help carry a financial load today instead of doing it alone.`,
     },
 
@@ -487,8 +487,8 @@ window.DMicroContent = (function () {
     '8_C': {
       title: `8 in Earth Line — Justice`,
       tagline: `A Design of Fair Dealing`,
-      mastery: `You build wealth through balanced, fair dealing — real, durable security through honesty, not advantage taken.`,
-      shadow: `You over-scrutinize every deal for hidden unfairness until you hesitate to invest or commit even when the deal is genuinely sound.`,
+      mastery: `You build wealth through balanced, fair dealing — real, durable security earned through honesty rather than advantage taken at someone else's expense. That reputation for fairness compounds over time.`,
+      shadow: `You over-scrutinize every deal for hidden unfairness until you hesitate to invest or commit even when the deal is genuinely sound, and the caution that should protect you starts costing you opportunities that were never actually risky.`,
       invitation: `Move forward on one opportunity today instead of auditing it further.`,
     },
 
@@ -496,8 +496,8 @@ window.DMicroContent = (function () {
     '9_C': {
       title: `9 in Earth Line — The Hermit`,
       tagline: `A Design of Rare Depth`,
-      mastery: `You build material security through deep, solitary mastery of a specific craft. Real expertise, rare because you went deeper than most.`,
-      shadow: `Your expertise stays private, undervalued, because putting yourself forward as an expert feels like a departure from the solitude that built it.`,
+      mastery: `You build material security through deep, solitary mastery of a specific craft. That's real expertise, made rare precisely because you went further into it than most people are willing to.`,
+      shadow: `Your expertise stays private and undervalued, because putting yourself forward as an expert feels like a departure from the very solitude that built it — so the depth you've earned goes largely unmonetized.`,
       invitation: `Price or offer one piece of your expertise publicly today instead of keeping it to yourself.`,
     },
 
@@ -505,8 +505,8 @@ window.DMicroContent = (function () {
     '10_C': {
       title: `10 in Earth Line — The Wheel of Fortune`,
       tagline: `A Design of Financial Seasons`,
-      mastery: `You sense when a financial cycle is turning — when to invest, when to hold. Real timing intelligence, not guesswork.`,
-      shadow: `You treat a downturn as proof your luck has run out permanently, or chase every upswing without discernment, mistaking motion for a real turn.`,
+      mastery: `You sense when a financial cycle is actually turning — when to invest, when to hold. That's real timing intelligence, not guesswork dressed up as instinct, and it saves you from decisions made purely on momentum.`,
+      shadow: `You treat a downturn as proof your luck has run out permanently, or you chase every upswing without discernment, mistaking motion itself for a genuine turn in the cycle rather than checking what's actually driving it.`,
       invitation: `Name which phase of your money cycle you're actually in right now, and act accordingly.`,
     },
 
@@ -514,8 +514,8 @@ window.DMicroContent = (function () {
     '11_C': {
       title: `11 in Earth Line — Strength`,
       tagline: `A Design of Financial Endurance`,
-      mastery: `You hold steady through financial pressure that would rattle most people, without panicking into rash decisions.`,
-      shadow: `You endure financial strain quietly for far too long, refusing to ask for help because your identity is tied to handling it alone.`,
+      mastery: `You hold steady through financial pressure that would rattle most people, without panicking into rash decisions that would only make things worse. That composure under strain is a genuine, rare asset.`,
+      shadow: `You endure financial strain quietly for far too long, refusing to ask for help because your identity has become tied to handling it entirely alone — even once asking would clearly be the faster, smarter move.`,
       invitation: `Ask for one piece of financial support today, before the pressure becomes a crisis.`,
     },
 
@@ -523,8 +523,8 @@ window.DMicroContent = (function () {
     '12_C': {
       title: `12 in Earth Line — The Hanged Man`,
       tagline: `A Design of the Unconventional Path`,
-      mastery: `Your financial breakthroughs come from stepping back from the expected route. Real material patience for an unconventional path.`,
-      shadow: `You stay suspended in the wait-and-see posture indefinitely, because it's more comfortable than actually committing to the different path.`,
+      mastery: `Your financial breakthroughs come from stepping back from the expected route entirely. That's real material patience in service of an unconventional path other people wouldn't have the nerve to take.`,
+      shadow: `You stay suspended in the wait-and-see posture indefinitely, because it's more comfortable than actually committing to the different path you keep sensing but never quite step onto.`,
       invitation: `Convert one unconventional financial idea you've been sitting on into an actual move today.`,
     },
 
@@ -532,8 +532,8 @@ window.DMicroContent = (function () {
     '13_C': {
       title: `13 in Earth Line — Transformation`,
       tagline: `A Design of Deliberate Ending`,
-      mastery: `You release material security that's become familiar but limiting, in service of something bigger. Real financial reinvention.`,
-      shadow: `You hold onto a dying income stream out of fear, not function, because the uncertain gap between old and new feels more dangerous than slow decline.`,
+      mastery: `You release material security that's become familiar but limiting, in service of something bigger you can already sense on the other side. That's real financial reinvention, not recklessness.`,
+      shadow: `You hold onto a dying income stream out of fear rather than function, because the uncertain gap between the old and the new feels more dangerous to you than a slow, familiar decline.`,
       invitation: `Name one financial chapter that's already ended except on paper, and release it today.`,
     },
 
@@ -541,8 +541,8 @@ window.DMicroContent = (function () {
     '14_C': {
       title: `14 in Earth Line — Temperance`,
       tagline: `A Design of Patient Blending`,
-      mastery: `You blend multiple income streams and strategies into one sustainable whole, patiently, rather than betting everything on one method.`,
-      shadow: `You spread so thin across strategies that nothing ever compounds into something substantial. Diversification becomes dilution.`,
+      mastery: `You blend multiple income streams and strategies into one sustainable whole, patiently, rather than betting everything on a single method that could fail all at once. That patience is a genuine financial skill.`,
+      shadow: `You spread so thin across strategies that nothing ever compounds into something substantial. What looks like sensible diversification quietly becomes dilution, and none of it ever gets the sustained attention it would need to actually grow.`,
       invitation: `Pick two of your financial approaches today and go deeper into them instead of spreading wider.`,
     },
 
@@ -550,8 +550,8 @@ window.DMicroContent = (function () {
     '15_C': {
       title: `15 in Earth Line — The Devil`,
       tagline: `A Design of Unflinching Material Truth`,
-      mastery: `You understand exactly how money and power actually work on people, including yourself. Real, unflinching material intelligence.`,
-      shadow: `You grip money and status so tightly that "enough" never arrives, because the attachment was never really about the number.`,
+      mastery: `You understand exactly how money and power actually work on people, including yourself. That's real, unflinching material intelligence most people prefer not to look at directly, and it makes you very hard to manipulate.`,
+      shadow: `You grip money and status so tightly that "enough" never arrives, because the attachment was never really about the number in the first place — it was standing in for something the accumulation can't actually provide.`,
       invitation: `Name today what the accumulation is actually trying to provide you, and ask honestly if more will deliver it.`,
     },
 
@@ -559,8 +559,8 @@ window.DMicroContent = (function () {
     '16_C': {
       title: `16 in Earth Line — The Tower`,
       tagline: `A Design of Sudden Material Clarity`,
-      mastery: `You see a failing financial structure before anyone else admits it's failing. Real, sudden material clarity.`,
-      shadow: `You provoke collapse before it's actually necessary, walking away from something at the first crack out of impatience, not evidence.`,
+      mastery: `You see a failing financial structure before anyone else is willing to admit it's failing. That's real, sudden material clarity — you notice the crack long before the wall comes down, and you act on it while others still deny it.`,
+      shadow: `You provoke collapse before it's actually necessary, walking away from something at the first crack purely out of impatience rather than genuine evidence it can't be saved, when reinforcing it might have worked just as well.`,
       invitation: `Reinforce one financial structure today instead of demolishing it on reflex.`,
     },
 
@@ -568,8 +568,8 @@ window.DMicroContent = (function () {
     '17_C': {
       title: `17 in Earth Line — The Star`,
       tagline: `A Design of Rebuilt Renewal`,
-      mastery: `You can restore your material life even from real loss — hope translated into the patient reconstruction of your resources.`,
-      shadow: `You wait passively for renewal to arrive, treating hope as a strategy instead of a starting point, without doing the rebuilding work.`,
+      mastery: `You can restore your material life even from real loss — hope translated into the patient, concrete reconstruction of your resources rather than staying abstract. Renewal isn't theoretical for you; you've actually done it.`,
+      shadow: `You wait passively for renewal to arrive, treating hope as a strategy in itself instead of the starting point it's meant to be, without ever doing the actual rebuilding work underneath it.`,
       invitation: `Take one concrete rebuilding step today, not just a hopeful one.`,
     },
 
@@ -577,8 +577,8 @@ window.DMicroContent = (function () {
     '18_C': {
       title: `18 in Earth Line — The Moon`,
       tagline: `A Design of Sensitive Financial Instinct`,
-      mastery: `You sense hidden financial risk or opportunity long before it shows up in any data. Real, sensitive material intuition.`,
-      shadow: `Your financial anxiety runs unmoored from actual signal, making it hard to tell real warning from simple fear. You freeze or chase illusory security.`,
+      mastery: `You sense hidden financial risk or opportunity long before it shows up in any data. That's real, sensitive material intuition, picking up signal well ahead of the numbers — genuine sensitivity, not anxiety.`,
+      shadow: `Your financial anxiety runs unmoored from actual signal, making it hard to tell a real warning from simple fear. You end up freezing, or chasing illusory security, based on feelings that were never actually tracking the real risk.`,
       invitation: `Check one financial feeling against a real number today — a budget, an account, something tangible.`,
     },
 
@@ -586,8 +586,8 @@ window.DMicroContent = (function () {
     '19_C': {
       title: `19 in Earth Line — The Sun`,
       tagline: `A Design of Uncomplicated Ease`,
-      mastery: `You build wealth most easily through work that genuinely feels like you. Real, uncomplicated ease with money.`,
-      shadow: `You underprice joyful work because it didn't feel like enough of a struggle to be worth real money.`,
+      mastery: `You build wealth most easily through work that genuinely feels like you. It's real, uncomplicated ease with money — the income arrives without the struggle other people assume has to come first.`,
+      shadow: `You underprice joyful work because it didn't feel like enough of a struggle to be worth real money, as if difficulty were the actual measure of value rather than the result itself.`,
       invitation: `Raise the price on one thing today that you've been undercharging for because it comes easily to you.`,
     },
 
@@ -595,8 +595,8 @@ window.DMicroContent = (function () {
     '20_C': {
       title: `20 in Earth Line — Judgement`,
       tagline: `A Design of the Financial Summons`,
-      mastery: `You recognize when it's time to leave a financially adequate but outgrown position for one that actually fits. Real vocational courage.`,
-      shadow: `You spend years preparing to answer that summons instead of actually answering it — upskilling and researching instead of moving.`,
+      mastery: `You recognize when it's time to leave a financially adequate but outgrown position for one that actually fits who you've become. That's real vocational courage, not restlessness — you hear the summons clearly.`,
+      shadow: `You spend years preparing to answer that summons instead of actually answering it — endlessly upskilling and researching instead of making the move you already know you're going to eventually make.`,
       invitation: `Take one real step today toward the truer income source, not another round of research.`,
     },
 
@@ -604,8 +604,8 @@ window.DMicroContent = (function () {
     '21_C': {
       title: `21 in Earth Line — The World`,
       tagline: `A Design of Recognized Enough`,
-      mastery: `You can actually feel and recognize when a level of material security has been reached, instead of endlessly redefining "enough."`,
-      shadow: `You treat arrival as dangerous, always needing one more milestone before you'll let yourself feel secure.`,
+      mastery: `You can actually feel and recognize when a level of material security has been reached, instead of endlessly redefining "enough" further and further out of reach. That capacity to land is genuinely rare.`,
+      shadow: `You treat arrival as dangerous, always needing one more milestone before you'll let yourself feel secure — so the security you've genuinely already built never quite gets to register as real.`,
       invitation: `Name one number or state today as genuinely enough, and let yourself land in it.`,
     },
 
@@ -613,8 +613,8 @@ window.DMicroContent = (function () {
     '22_C': {
       title: `22 in Earth Line — The Fool`,
       tagline: `A Design of Unproven Courage`,
-      mastery: `You start a financial venture without needing a guarantee first. Real, uncommon material courage — trust as strategy.`,
-      shadow: `You repeat the same fresh start without absorbing what the last one taught you, so the same mistakes recur in new disguises.`,
+      mastery: `You start a financial venture without needing a guarantee first. That's real, uncommon material courage — trust used as an actual strategy rather than a leap of naivety, and it opens doors more cautious people never reach.`,
+      shadow: `You repeat the same fresh start without absorbing what the last one actually taught you, so the same mistakes recur in new disguises, dressed up as a different opportunity each time.`,
       invitation: `Name one concrete lesson from your last financial leap and carry it into your next decision today.`,
     },
 
