@@ -1016,442 +1016,398 @@ window.DMicroContent = (function () {
 
     // ── 5 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '5_LOVE': {
-      heading: `Substance Over Spark`,
-      why: `You're not drawn to a connection just because it feels good in the moment — you fall in love with substance. The Hierophant governs your relationship channel, which means intimacy runs on the frequency of the seeker and keeper of codes: earned structure, depth, the difference between a connection that's been tested against real standards and one that's just easy. You're drawn to partners who carry some kind of depth, tradition, or hard-won knowledge — loyal, value-oriented, spiritually or morally aligned with you, genuinely ready for real commitment — and in return you offer something rare — genuine reverence, the willingness to actually study another person, to learn the specific architecture of how they work, and to honor what it took them to become who they are. For you, relationship is one of the primary places you expect to be taught something true about how life actually works.`,
-      shadow: `The risk is love organized around an unspoken exam. You might find yourself measuring a partner against a standard of what a relationship is "supposed" to look like — inherited from family, culture, or an idealized version of commitment — while quietly holding back your full arrival until they pass. A subtler trap is treating a partner like a student rather than an equal: correcting, instructing, holding the position of the one who knows how this is done. And because you respect earned authority, you might also defer to a partner's confidence over your own read of what's actually happening between you, mistaking their certainty for correctness. If your relationships keep handing you partners who feel like they're auditioning for you, or who audition you right back, that's often a sign intimacy hasn't yet been allowed to exist without a passing grade.`,
-      path: `Try letting the relationship itself become the sacred text, instead of measuring it against one you inherited somewhere else. That's the harder, more exposing shift — it means letting go of an external rulebook and trusting what's actually true between the two of you, even when it doesn't match the tradition you were handed. Practice offering your attention and reverence without requiring the relationship to earn it first. The standard that actually matters is the one you build together, not the one you bring in ahead of time. Once love stops being graded, it finally has room to teach you something no book ever could. You are allowed to want depth and delight in the same person. Where has substance already been quietly winning over spark in your life?`,
-      positive: `The gift for loving substance and earned depth hasn't changed — reverence for what it took a partner to become who they are was always real. What's different is that you now let the relationship itself become the sacred text, instead of measuring it against a rulebook you inherited elsewhere. That shift is what finally lets love stop being graded.`,
-      negative: `The respect for depth and earned trust you bring to love is completely real, and it keeps organizing intimacy around an unspoken exam, partners arriving to audition or auditioning you right back. That grading isn't discernment. It's an intimacy still waiting to exist without first passing a test.`,
+      title: `5 in Ideal Partner — The Hierophant`,
+      tagline: `A Design of the Ungraded Bond`,
+      mastery: `You fall in love with substance, offering genuine reverence for who a partner had to become.`,
+      shadow: `You measure a partner against an inherited standard, holding back your full arrival until they pass.`,
+      invitation: `Let the relationship itself be the standard today, instead of measuring it against a rulebook you inherited.`,
     },
 
     // ── 1 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '1_LOVE': {
-      heading: `Momentum Over Comfort`,
-      why: `You're drawn to partners with real agency, people who turn intention into action, and in return you offer a rare gift: the ability to make a relationship feel alive, to generate momentum in a connection that might otherwise stall. The Magician governs your relationship channel, meaning intimacy runs on the frequency of origination. Your ideal partner tends to be confident and proactive, someone intellectually stimulating who genuinely supports your independence rather than needing to constrain it, inspiring real growth in you the way you inspire it in them. For you, love often starts with genuine excitement, a spark that both people can feel building something together in real time.`,
-      shadow: `The risk is loving the spark more than the substance — chasing the electric feeling of a new connection's beginning and losing interest once it settles into the quieter, steadier stage that follow-through requires. You might also fall for potential rather than the actual person, drawn to what a partner could become rather than who they currently are. If your relationships keep fizzling right after the exciting start, that's the shadow of origination without staying power.`,
-      path: `Try letting a relationship's quieter chapter feel as alive as its beginning. The real magic isn't only in the spark — it's in what you're both willing to keep building once the initial charge settles. Staying is its own kind of magic, one you're fully capable of. You are allowed to be pursued too, not just impressed. What would it feel like to be the one someone moves mountains toward?`,
-      positive: `The gift for generative energy in relationships hasn't changed — the ability to make a connection feel alive was always real. What's different is that you now let a relationship's quieter chapter feel as alive as its beginning. That maturing is what keeps love building instead of flaming out after the exciting start.`,
-      negative: `The spark you bring to new connection is completely real, and it keeps fizzling right when the quieter, more durable stage was about to begin. That fizzling isn't loss of interest exactly. It's an origination still waiting for the staying power that turns a beginning into something lasting.`,
+      title: `1 in Ideal Partner — The Magician`,
+      tagline: `A Design of the Quiet Chapter`,
+      mastery: `You make a relationship feel alive, generating momentum in a connection that might otherwise stall.`,
+      shadow: `You chase the electric feeling of a new connection's beginning and lose interest once it settles.`,
+      invitation: `Let one quiet chapter of your relationship today feel as alive as its beginning.`,
     },
 
     // ── 2 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '2_LOVE': {
-      heading: `Depth Over Surface`,
-      why: `You're drawn to partners who carry real interiority, and you offer something rare in return: patient, perceptive attention that makes people feel truly seen rather than just looked at. The High Priestess governs your relationship channel, meaning intimacy for you runs on depth and quiet knowing rather than surface chemistry. Your ideal partner tends to be emotionally sensitive and intuitive themselves, patient with you, genuinely respectful of your need for personal space, someone capable of deeply understanding rather than just accompanying you. Your love tends to build slowly, through accumulated trust rather than instant certainty.`,
-      shadow: `The risk is staying so guarded yourself that intimacy becomes one-directional — you perceive your partner deeply while remaining genuinely unreadable to them, which can leave them feeling like they're loving a mystery instead of a person. If your relationships keep stalling at a certain depth without ever going further, that's often your own guardedness setting the ceiling.`,
-      path: `Let yourself be known at the same pace you come to know someone else. Depth in a relationship has to run both directions to actually become intimacy. Your perceptiveness is a real gift — pair it with equal visibility, and closeness stops having a ceiling. You are allowed to say what you sense in a partner instead of only holding it. What have you perceived in your closest bond that deserves daylight?`,
-      positive: `The gift for perceiving a partner deeply hasn't changed — patient, quiet knowing was always real. What's different is that you now let yourself be known at the same pace you come to know someone else. That mutual visibility is what lets intimacy build in both directions instead of stalling.`,
-      negative: `The depth of perception you bring to a partner is completely real, and it keeps staying one-directional, you fully known to no one while knowing everyone else fully. That imbalance isn't privacy. It's an intimacy still capped, still waiting for you to let yourself be seen at the same depth.`,
+      title: `2 in Ideal Partner — The High Priestess`,
+      tagline: `A Design of Mutual Depth`,
+      mastery: `You offer patient, perceptive attention that makes a partner feel truly seen.`,
+      shadow: `You stay so guarded yourself that intimacy becomes one-directional.`,
+      invitation: `Let yourself be known today at the same pace you come to know your partner.`,
     },
 
     // ── 3 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '3_LOVE': {
-      heading: `Tending Over Chasing`,
-      why: `You're drawn to people you can pour into, and your gift for creating warmth and abundance in a relationship is real and rare. The Empress governs your relationship channel, meaning love for you is expressed through nurturing — genuine, generous care that makes a partner feel tended to in a way they may never have experienced before. Your ideal partner meets that generosity with their own — nurturing and affectionate in return, genuinely appreciative of beauty, emotionally available enough to actually receive what you're offering rather than simply absorbing it.`,
-      shadow: `The risk is a relationship organized entirely around your giving, where your own needs quietly go unspoken because tending to your partner has become the whole shape of the connection. You might attract partners who are comfortable receiving endlessly without reciprocating, because the dynamic never asked them to. If you're always the one nurturing and rarely the one being nurtured, that's an imbalance worth naming out loud.`,
-      path: `Let yourself be tended to as openly as you tend to others. Real intimacy requires you to actually need something and let your partner meet it — not just be the reliable source of care. Receiving isn't a departure from your gift; it completes it. You are allowed to be tended to with the same completeness you offer. Who could you let take care of you this week without supervising them?`,
-      positive: `The gift for generous, tending care hasn't changed — real warmth and abundance offered to a partner were always genuine. What's different is that you now let yourself be tended to as openly as you tend to others. That receiving is what makes the nurturing mutual instead of one-directional.`,
-      negative: `The care you pour into a relationship is completely real, and it keeps organizing the whole connection around your giving, your own needs staying unspoken. That silence isn't selflessness. It's a nurturing still waiting to flow back toward the person creating it.`,
+      title: `3 in Ideal Partner — The Empress`,
+      tagline: `A Design of Received Tending`,
+      mastery: `You create real warmth and abundance, making a partner feel genuinely tended to.`,
+      shadow: `You organize the whole relationship around your giving, your own needs staying unspoken.`,
+      invitation: `Let yourself be tended to today, as openly as you tend to others.`,
     },
 
     // ── 4 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '4_LOVE': {
-      heading: `Building Over Chemistry`,
-      why: `You're drawn to partners who value real solidity, and you build relationships the way you'd build anything meant to last, with real commitment to the container itself: consistency, follow-through, a partner who can trust exactly where they stand with you. The Emperor governs your relationship channel, meaning love for you is expressed through structure and reliability. Your ideal partner is reliable and strong in their own right, responsible and protective, genuinely capable of providing the same stability and leadership you bring, rather than simply admiring it in you.`,
-      shadow: `The risk is prioritizing the structure of the relationship over its actual aliveness — maintaining the form (the routines, the roles, the commitment) even after the genuine connection inside it has started to fade. You might also try to control the relationship's shape more than a partner can comfortably live inside. If your relationship feels stable but quietly stagnant, structure may have outpaced intimacy.`,
-      path: `Let the container flex sometimes. Real stability doesn't require rigid form — it requires trust strong enough to survive some genuine change in how the relationship looks. Build something solid enough to bend without breaking. You are allowed to rest inside what you've built together instead of endlessly maintaining it. What would love feel like on a day you weren't the load-bearing wall?`,
-      positive: `The gift for building solid, reliable love hasn't changed — real commitment to the container, consistency, follow-through, was always genuine. What's different is that you now let the container flex sometimes instead of maintaining rigid form. That flexibility is what keeps the relationship alive, not just structurally intact.`,
-      negative: `The structure you build in love is completely real, and it keeps getting maintained even after the genuine connection inside it has started to fade. That maintaining isn't commitment. It's a relationship still waiting to feel as alive as it looks stable.`,
+      title: `4 in Ideal Partner — The Emperor`,
+      tagline: `A Design of the Flexed Container`,
+      mastery: `You build relationships with real commitment to the container itself: consistency and follow-through.`,
+      shadow: `You prioritize the structure of the relationship over its actual aliveness, maintaining the form after connection fades.`,
+      invitation: `Let the container flex today in one small way, instead of maintaining rigid form.`,
     },
 
     // ── 6 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '6_LOVE': {
-      heading: `Values Over Surface`,
-      why: `You're drawn to partners whose core principles genuinely match yours, and the relationship itself becomes an ongoing series of aligned choices rather than one initial spark. The Lovers governing your relationship channel is almost too on the nose — but what it actually means is that your love is built on genuine alignment: shared values, a real sense of choosing each other deliberately rather than falling together by convenience. Your ideal partner is romantic and genuinely communicative, emotionally open rather than guarded, someone who chooses the relationship consciously alongside you rather than drifting into it.`,
-      shadow: `The risk is treating every disagreement as evidence of misalignment, testing a partner's values so exhaustively that the relationship starts to feel like an audit rather than a partnership. You might also idealize a partner's values early on and feel betrayed when they turn out to be an actual, imperfect person. If your relationships keep ending over values gaps that seem small in hindsight, the standard may be set too high to survive real intimacy.`,
-      path: `Let alignment be a direction you're both moving in, not a static test a partner has to pass upfront. Real values-alignment is built through actually living together, choice by choice, not verified before you begin. You are allowed to be loved for your values, not despite them. Which of your core convictions deserves a partner who shares its weight?`,
-      positive: `The gift for loving someone's actual values hasn't changed — genuine alignment, choosing each other deliberately, was always the real foundation. What's different is that you now let alignment be a direction you're both moving in, not a static test a partner has to pass upfront. That shift is what lets love deepen through lived choices.`,
-      negative: `The standard you hold for shared values is completely real, and it keeps auditing a partner against an idealized version, small gaps starting to feel like betrayals. That auditing isn't discernment. It's an alignment still waiting to be built together instead of verified in advance.`,
+      title: `6 in Ideal Partner — The Lovers`,
+      tagline: `A Design of Lived Alignment`,
+      mastery: `Your love is built on genuine, deliberate alignment — shared values chosen rather than assumed.`,
+      shadow: `You treat every disagreement as evidence of misalignment, auditing a partner exhaustively.`,
+      invitation: `Let alignment today be a direction you're both moving in, not a static test to pass.`,
     },
 
     // ── 7 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '7_LOVE': {
-      heading: `Momentum Shared, Not Carried`,
-      why: `You're drawn to partners who are also going somewhere, who bring their own momentum to the relationship rather than needing you to supply all of it. The Chariot governing your relationship channel means love for you thrives on shared direction. Your ideal partner is ambitious and active, genuinely goal-driven, someone who actively supports real movement, growth, and shared victories rather than just tolerating your drive. At your best, love feels like navigating life together, two people steering a shared course with mutual respect for each other's will.`,
-      shadow: `The risk is turning the relationship into a solo drive with a passenger — setting the direction and expecting your partner to simply come along, rather than actually steering together. You might also struggle with a partner whose pace differs from yours, experiencing their need to pause as a threat to your forward motion. If your relationships keep feeling like you're pulling the weight alone, the reins may need to be shared more evenly.`,
-      path: `Let your partner actually hold some of the reins. Real partnership means occasionally slowing to their pace, or trusting their read on the terrain even when it differs from yours. Shared direction requires two hands on the wheel, not one driver and one passenger. You are allowed to slow the journey to let the togetherness catch up. What destination are you racing toward that might matter less than who's beside you?`,
-      positive: `The gift for shared direction hasn't changed — momentum, navigating life together, was always the real draw. What's different is that you now let your partner actually hold some of the reins instead of setting the pace alone. That shared steering is what turns the drive into a genuine partnership.`,
-      negative: `The momentum you bring to a relationship is completely real, and it keeps turning into a solo drive with a passenger, direction set and a partner expected to simply follow. That solo driving isn't leadership. It's a partnership still waiting for two hands on the wheel instead of one.`,
+      title: `7 in Ideal Partner — The Chariot`,
+      tagline: `A Design of Two Hands on the Wheel`,
+      mastery: `You bring real momentum to a relationship, navigating life together with shared direction.`,
+      shadow: `You turn the relationship into a solo drive with a passenger, setting the direction alone.`,
+      invitation: `Let your partner actually hold some of the reins today.`,
     },
 
     // ── 8 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '8_LOVE': {
-      heading: `Word Kept, Trust Built`,
-      why: `You're drawn to partners who follow through on what they say, who hold themselves accountable the way you hold yourself, and you offer a relationship built on genuine reciprocity rather than unspoken imbalance. Justice governing your relationship channel means intimacy for you runs on fairness. Your ideal partner is fair and honest in their own right, emotionally balanced, genuinely respectful of your boundaries, someone reliable in the agreements you make together. Trust, for you, is built transaction by transaction, promise by kept promise.`,
-      shadow: `The risk is keeping an internal ledger of who's done more, who owes what, turning intimacy into an accounting exercise rather than a felt connection. You might also struggle to forgive a partner's genuine mistake, holding them to a standard of consistency no real relationship can maintain perfectly. If your relationships keep feeling like negotiations, the fairness may have crowded out the warmth.`,
-      path: `Let some imbalance be human rather than a violation. Real fairness in love isn't a perfectly even ledger — it's mutual good faith over time. Let go of tracking every exchange and trust the overall pattern instead. You are allowed to relax once someone has proven their word. Whose kept promises have you not yet let yourself fully trust?`,
-      positive: `The gift for fairness and reciprocity hasn't changed — trust built promise by kept promise was always real. What's different is that you now let some imbalance be human instead of tracking every exchange. That release is what lets fairness support warmth instead of replacing it.`,
-      negative: `The fairness you bring to love is completely real, and it keeps keeping an internal ledger of who's done more, turning intimacy into an accounting exercise. That accounting isn't integrity. It's a warmth still waiting for the tracking to stop.`,
+      title: `8 in Ideal Partner — Justice`,
+      tagline: `A Design of the Released Ledger`,
+      mastery: `You build trust in love promise by kept promise, through genuine reciprocity.`,
+      shadow: `You keep an internal ledger of who's done more, turning intimacy into an accounting exercise.`,
+      invitation: `Let one imbalance today be human instead of tracked.`,
     },
 
     // ── 9 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '9_LOVE': {
-      heading: `Silence Without Distance`,
-      why: `You're drawn to partners who have their own rich inner life and don't need constant togetherness to feel connected. The Hermit governing your relationship channel means intimacy for you includes real respect for solitude. Your ideal partner is wise and mature, emotionally self-sufficient in their own right, genuinely respectful of solitude rather than threatened by it, deep and thoughtful the way you are. Your love is patient and deep rather than constant and loud, built in the quiet moments as much as the shared ones.`,
-      shadow: `The risk is using your need for space as a way to avoid real vulnerability, retreating into solitude precisely when a relationship asks for more closeness than feels comfortable. A partner can end up feeling shut out rather than respected. If you notice your partner repeatedly asking for more presence than you're offering, the withdrawal may be protecting you from intimacy rather than honoring a genuine need.`,
-      path: `Let your partner know when solitude is genuine need versus avoidance, and practice staying present even when closeness feels exposing. Real intimacy includes some discomfort — the solitude that protects you can't be the whole relationship. You are allowed to share the silence instead of guarding it. Who in your life already knows how to be quiet with you?`,
-      positive: `The gift for respecting solitude hasn't changed — patient, deep love built in the quiet moments was always real. What's different is that you now let your partner know when solitude is genuine need versus avoidance, and stay present when closeness is asked for. That honesty is what keeps a partner feeling respected instead of shut out.`,
-      negative: `The need for space you carry is completely real, and it keeps functioning as a way to avoid real vulnerability, retreating precisely when the relationship asks for more closeness. That retreat isn't a boundary. It's an intimacy still waiting for you to stay present through the exposing part.`,
+      title: `9 in Ideal Partner — The Hermit`,
+      tagline: `A Design of Shared Silence`,
+      mastery: `Your love is patient and deep, including real respect for solitude.`,
+      shadow: `You use your need for space to avoid real vulnerability, retreating precisely when closeness is asked for.`,
+      invitation: `Tell your partner today whether your solitude is genuine need or avoidance, and stay present.`,
     },
 
     // ── 10 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '10_LOVE': {
-      heading: `Seasons, Not Straight Lines`,
-      why: `Your love life genuinely moves in cycles — periods of real connection followed by periods of solitude or change, relationships that seem to arrive right when you're ready for them. The Wheel of Fortune governing your relationship channel names exactly this pattern. Your ideal partner is flexible and adaptable themselves, genuinely optimistic, open to change rather than braced against it, someone capable of actually growing through life's cycles alongside you instead of resisting them. You have a real gift for meeting a relationship's current season honestly, rather than forcing permanence on something that's naturally shifting.`,
-      shadow: `The risk is treating a relationship's downswing as proof it's over, bailing at the first sign of a natural low rather than riding the cycle through to see what's on the other side. You might also chase the excitement of new connections whenever an existing one settles into a quieter phase. If your relationships keep ending right as they'd naturally deepen, the fear of the turn may be causing it.`,
-      path: `Let a relationship's low season be a season, not a verdict. Real partnership survives more than one turn of the wheel. Stay through at least one full cycle before deciding what a relationship actually is. You are allowed to trust a winter without declaring the garden dead. Which season is your love actually in right now — and what does that season need?`,
-      positive: `The gift for meeting a relationship's seasons honestly hasn't changed — real cycles of connection and solitude were always the true pattern. What's different is that you now let a low season be a season, not a verdict, staying through at least one full cycle. That trust is what lets connections survive to deepen.`,
-      negative: `The honesty about a relationship's seasons is completely real, and it keeps treating a downswing as proof it's over, bailing at the first natural low. That bailing isn't self-protection. It's a connection still waiting to be given a full cycle before being judged.`,
+      title: `10 in Ideal Partner — Wheel of Fortune`,
+      tagline: `A Design of the Full Cycle`,
+      mastery: `You meet a relationship's current season honestly, without forcing false permanence.`,
+      shadow: `You treat a relationship's downswing as proof it's over, bailing at the first natural low.`,
+      invitation: `Let today's low season be a season, not a verdict, and stay through the full cycle.`,
     },
 
     // ── 11 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '11_LOVE': {
-      heading: `Steadiness Over Spark`,
-      why: `You're the partner who can hold a hard conversation, a difficult season, or a partner's raw emotion without flinching or needing to fix it immediately. Strength governing your relationship channel means love for you is expressed through embodied calm. Your ideal partner meets that calm with their own passion and emotional strength — genuinely supportive, actively encouraging your confidence the way you encourage theirs, so the relationship runs on mutual empowerment rather than your steadiness alone. Partners often feel safest with you specifically because your steadiness doesn't waver under real pressure.`,
-      shadow: `The risk is holding all the relationship's difficulty yourself, becoming the strong one so consistently that your partner never learns to hold weight for you in return. You might also suppress your own hard feelings to maintain the calm, leaving your own needs quietly invisible inside the relationship. If you're always the one being steady, that steadiness may be costing you real reciprocity.`,
-      path: `Let your own difficulty be visible sometimes, on purpose. Real intimacy needs both people to be held, not just one person holding. Your calm is a gift — it becomes a trap if it never includes your own turn to lean. You are allowed to wobble and still be the steady one. Who gets to hold you on the days the room leans on you hardest?`,
-      positive: `The gift for embodied calm hasn't changed — holding a hard conversation without flinching was always real strength. What's different is that you now let your own difficulty be visible sometimes, on purpose. That visibility is what lets the relationship carry weight both ways instead of only through you.`,
-      negative: `The steadiness you offer a relationship is completely real, and it keeps holding all the difficulty yourself, your own hard feelings staying invisible. That invisibility isn't strength. It's a reciprocity still waiting for your own turn to lean.`,
+      title: `11 in Ideal Partner — Strength`,
+      tagline: `A Design of the Visible Wobble`,
+      mastery: `You hold a hard conversation or a partner's raw emotion without flinching.`,
+      shadow: `You hold all the relationship's difficulty yourself, your own hard feelings staying invisible.`,
+      invitation: `Let your own difficulty be visible today, on purpose.`,
     },
 
     // ── 12 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '12_LOVE': {
-      heading: `Ease Over Force`,
-      why: `Real connection tends to show up once you've released your grip on how or when it's supposed to happen. The Hanged Man governing your relationship channel means intimacy for you often arrives through surrender rather than pursuit. Your ideal partner is compassionate and patient in their own right, genuinely empathetic, willing to actually support your emotional and spiritual growth rather than just waiting for you to arrive somewhere. You have a genuine gift for seeing a relationship from an angle a partner hadn't considered, patient enough to let understanding unfold rather than forcing resolution.`,
-      shadow: `The risk is passivity dressed as patience — waiting indefinitely for a relationship to clarify itself rather than ever actually engaging directly, leaving a partner uncertain where they stand. If your relationships stay suspended in ambiguity for a long time, the patience may have become avoidance of a real decision.`,
-      path: `Let your patience have a deadline. Real surrender in love means releasing control over outcome, not avoiding the actual choice in front of you. At some point, come down from the suspension and commit to what the waiting revealed. You are allowed to stop forcing and see what arrives. What might come toward you the moment you put the effort down?`,
-      positive: `The gift for surrendering the grip on how connection should happen hasn't changed — real intimacy arriving through release rather than pursuit was always true for you. What's different is that you now let your patience have a deadline and commit to what the waiting revealed. That commitment is what moves ambiguity into real partnership.`,
-      negative: `The patience you bring to relationships is completely real, and it keeps waiting indefinitely for clarity rather than ever actually engaging directly. That waiting isn't surrender. It's a partnership still suspended, still waiting for the patience to resolve into an actual choice.`,
+      title: `12 in Ideal Partner — The Hanged Man`,
+      tagline: `A Design of the Patient Deadline`,
+      mastery: `Real connection shows up for you once you release the grip on how or when it happens.`,
+      shadow: `You wait indefinitely for a relationship to clarify itself rather than ever actually engaging directly.`,
+      invitation: `Give your patience a deadline today, and commit to what the waiting has already revealed.`,
     },
 
     // ── 13 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '13_LOVE': {
-      heading: `Change Invited, Not Feared`,
-      why: `Real relationships change who you are, and you're drawn to partners capable of that same depth of transformation rather than people who'll keep you exactly as you were. Transformation governing your relationship channel means love for you is genuinely metamorphic. Your ideal partner is genuinely ready for deep transformation themselves, honest and courageous, someone actively open to change and renewal rather than clinging to who they already were. You bring real intensity and a willingness to actually grow because of a connection, not just alongside it.`,
-      shadow: `The risk is needing every relationship to be transformative to feel real, which can make ordinary, steady affection feel unsatisfying by comparison, or push you to manufacture intensity where genuine ease would actually serve you better. If your relationships keep running hot and dramatic, the transformation may be getting confused with turbulence.`,
-      path: `Let some relationship growth happen quietly. Real transformation doesn't require constant intensity — some of your deepest changes will come through steady, undramatic companionship. Depth doesn't need to be loud to be real. You are allowed to be changed by love without losing yourself to it. What has loving deeply already transformed in you that you're grateful for?`,
-      positive: `The gift for metamorphic love hasn't changed — real intensity and willingness to grow because of a connection was always genuine. What's different is that you now let some relationship growth happen quietly, without needing constant drama. That quiet growth is what lets depth register without needing to be loud.`,
-      negative: `The capacity for transformation through love is completely real, and it keeps needing every relationship to feel dramatic to count as real. That drama isn't depth. It's a transformation still waiting to be found in steady, undramatic companionship too.`,
+      title: `13 in Ideal Partner — Transformation`,
+      tagline: `A Design of Quiet Growth`,
+      mastery: `Your love is genuinely metamorphic, bringing real intensity and willingness to grow because of a connection.`,
+      shadow: `You need every relationship to be transformative to feel real, manufacturing intensity where ease would serve better.`,
+      invitation: `Let one piece of relationship growth today happen quietly, without drama.`,
     },
 
     // ── 14 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '14_LOVE': {
-      heading: `Blending Two Into One`,
-      why: `You're genuinely skilled at blending two different lives, temperaments, or even value systems into something that works for both people, without either partner losing themselves in the process. Temperance governing your relationship channel means love for you is expressed through patient integration. Your ideal partner is calm and harmonious in their own right, emotionally balanced, genuinely supportive of healing and the kind of long-term harmony you're building rather than resisting the pace of it. Your relationships tend to feel balanced, considerate, genuinely fair to both sides.`,
-      shadow: `The risk is over-moderating the relationship to avoid real friction, smoothing over genuine differences so consistently that neither partner's true needs actually get met directly. Real intimacy sometimes needs tension before it needs balance. If your relationship feels calm but strangely unsatisfying, the blending may be avoiding real contact rather than achieving it.`,
-      path: `Let real differences surface and stay long enough to be genuinely worked through, rather than smoothed over immediately. Balance built after real friction is sturdier than balance that avoided it. You are allowed to take the blending slowly and call the slowness devotion. What part of your two lives is ready for its next gentle weave?`,
-      positive: `The gift for patient integration hasn't changed — blending two lives without either partner losing themselves was always real skill. What's different is that you now let real differences surface and stay long enough to be genuinely worked through. That friction is what makes the balance sturdy instead of just smooth.`,
-      negative: `The patience you bring to blending two lives is completely real, and it keeps smoothing over genuine differences so consistently that real needs never get met directly. That smoothing isn't harmony. It's a balance still waiting for the friction real intimacy requires.`,
+      title: `14 in Ideal Partner — Temperance`,
+      tagline: `A Design of Worked-Through Friction`,
+      mastery: `You're genuinely skilled at blending two lives into something that works for both people.`,
+      shadow: `You over-moderate the relationship to avoid real friction, smoothing over genuine differences.`,
+      invitation: `Let one real difference surface today and stay long enough to be worked through.`,
     },
 
     // ── 15 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '15_LOVE': {
-      heading: `Chemistry Undeniable`,
-      why: `Your romantic connections run on real, undeniable magnetism — physical chemistry, material compatibility, an intensity that's honest about desire rather than polite about it. The Devil governing your relationship channel names exactly this. You're drawn to partners who match that intensity — passionate and sensual, emotionally intense in their own right, genuinely capable of conscious desire without sliding into dependency — and you offer a rare willingness to actually engage with the less "acceptable" parts of intimacy: desire, power, need.`,
-      shadow: `The risk is mistaking intensity for genuine compatibility, staying bound to a chemistry-heavy relationship that doesn't actually serve you outside the bedroom. You might also use material or physical control as a substitute for emotional vulnerability. If your relationships feel magnetic but ultimately unfree, the chain may be tighter than the connection requires.`,
-      path: `Let the chemistry be honest evidence, not the whole verdict. Ask what the relationship offers outside its intensity. Real freedom here means enjoying the magnetism without needing it to be the only thing holding you there. You are allowed to have the undeniable chemistry and ask for tenderness too. What would this intensity become if it also felt completely safe?`,
-      positive: `The gift for undeniable magnetism hasn't changed — real, honest desire, intensity that doesn't apologize for itself, was always genuine. What's different is that you now let the chemistry be honest evidence, not the whole verdict, asking what the relationship offers outside its intensity. That question is what turns magnetism into freedom.`,
-      negative: `The chemistry you feel is completely real, and it keeps getting mistaken for the whole compatibility, keeping you bound to a connection that doesn't actually serve you once the intensity is set aside. That binding isn't passion. It's a freedom still waiting to be claimed alongside the magnetism.`,
+      title: `15 in Ideal Partner — The Devil`,
+      tagline: `A Design of Chemistry Plus Tenderness`,
+      mastery: `Your romantic connections run on real, undeniable magnetism and honest desire.`,
+      shadow: `You mistake intensity for genuine compatibility, staying bound to chemistry that doesn't serve you otherwise.`,
+      invitation: `Ask today what your relationship offers outside its intensity.`,
     },
 
     // ── 16 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '16_LOVE': {
-      heading: `Truth Before Convenience`,
-      why: `You sense when something's fundamentally not working well before it would be convenient to admit it, and you're capable of ending things decisively once that clarity fully lands. The Tower governing your relationship channel gives you real, often unwelcome clarity about your relationships. Your ideal partner is honest and emotionally mature in their own right, genuinely able to rebuild after a real crisis, actively supportive during change rather than destabilized by it. This honesty, while disruptive, spares you years spent inside a slowly failing connection.`,
-      shadow: `The risk is provoking a relationship's collapse prematurely, out of impatience with the discomfort of uncertainty rather than genuine evidence the connection can't hold. You might also carry a reputation for sudden, dramatic breakups that could have been gentler conversations instead. If your relationships keep ending in upheaval, some of that ending may not have needed to be so abrupt.`,
-      path: `Let your clarity inform a deliberate conversation before it becomes a sudden exit. Not every relationship in trouble needs demolition — some genuinely can be rebuilt if you bring the truth to the table instead of just acting on it alone. You are allowed to know the truth early and act on it kindly. What has your clarity already told you that patience keeps overruling?`,
-      positive: `The gift for early relational clarity hasn't changed — sensing what's fundamentally not working before it's convenient to admit it was always real perception. What's different is that you now let that clarity inform a deliberate conversation before it becomes a sudden exit. That conversation is what turns disruption into honest repair.`,
-      negative: `The clarity you carry about a relationship's truth is completely real, and it keeps acting alone on that clarity instead of bringing it to the table first. That solitary acting isn't decisiveness. It's an ending still waiting to become a conversation instead of an upheaval.`,
+      title: `16 in Ideal Partner — The Tower`,
+      tagline: `A Design of the Deliberate Conversation`,
+      mastery: `You sense when something's fundamentally not working before it's convenient to admit it.`,
+      shadow: `You provoke a relationship's collapse prematurely, out of impatience with uncertainty.`,
+      invitation: `Bring one piece of relational clarity today to an actual conversation, before acting alone on it.`,
     },
 
     // ── 17 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '17_LOVE': {
-      heading: `Hope Over Certainty`,
-      why: `You're drawn to partners you can believe in, and you offer a rare, real gift in return: unwavering faith in who they're capable of becoming, offered without needing proof upfront. The Star governing your relationship channel means love for you is deeply tied to genuine hope. Your ideal partner is inspiring and gentle in their own right, genuinely emotionally supportive, hopeful the way you are, someone who actively encourages your dreams and authenticity rather than quietly doubting them. Your relationships often function as a source of renewal for both people, a place where discouragement gets met with real, structural hope rather than empty reassurance.`,
-      shadow: `The risk is loving someone's potential more than who they actually, currently are — staying in relationships that keep disappointing the present moment because your hope is pointed at who they could be instead of who they're actually showing up as. If your relationships keep feeling like an act of faith rather than a present-tense connection, the hope may be substituting for honest assessment.`,
-      path: `Try letting your hope meet a partner exactly where they currently are, not just where you believe they're headed. Real love here offers renewal to what's actually present, not just to potential. You are allowed to be hoped for the way you hope for others. Who sees a future in you that you haven't dared to see yourself?`,
-      positive: `The gift for hoping in a partner hasn't changed — unwavering faith in who they're capable of becoming, offered without proof, was always real. What's different is that you now let your hope meet a partner exactly where they currently are, not just where you believe they're headed. That meeting is what turns hope into presence.`,
-      negative: `The hope you bring to love is completely real, and it keeps loving someone's potential more than who they actually, currently are. That aspiration isn't faith. It's a love still waiting to meet the present person instead of the future one.`,
+      title: `17 in Ideal Partner — The Star`,
+      tagline: `A Design of Present-Tense Hope`,
+      mastery: `You offer unwavering faith in who a partner is capable of becoming.`,
+      shadow: `You love someone's potential more than who they actually, currently are.`,
+      invitation: `Let your hope today meet your partner exactly where they currently are.`,
     },
 
     // ── 18 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '18_LOVE': {
-      heading: `Feeling Over Explanation`,
-      why: `You sense a connection's truth before you can articulate it, drawn to partners who can meet you in a felt, sometimes wordless understanding. The Moon governing your relationship channel means intimacy for you runs on emotional and intuitive depth. Your ideal partner is emotionally deep and intuitive themselves, genuinely sensitive, someone who feels safe to navigate emotion alongside without either of you needing to fear what surfaces. Your relationships carry real emotional richness, a shared inner world that doesn't always need explaining.`,
-      shadow: `The risk is letting unprocessed fear or anxiety color how you read a partner, projecting old wounds onto present behavior and reacting to a story rather than what's actually happening. Jealousy or suspicion can arise from an internal weather system rather than any real evidence. If you keep misreading a partner's intentions, the fog may need more grounding, not more feeling.`,
-      path: `Check your emotional read against something concrete — an actual conversation, not just the felt sense. Your intuition about a relationship is genuinely valuable; it just needs occasional reality-testing so it doesn't drift into anxious projection. You are allowed to follow the inexplicable feeling and still keep your feet. What is the feeling actually pointing to, beneath the mystery of it?`,
-      positive: `The gift for sensing a connection's truth hasn't changed — felt, sometimes wordless understanding was always real. What's different is that you now check your emotional read against something concrete, an actual conversation. That reality-testing is what lets intuition strengthen the connection instead of drifting into anxious projection.`,
-      negative: `The emotional depth you bring to a relationship is completely real, and it keeps letting unprocessed fear color how you read a partner, projecting old wounds onto present behavior. That projection isn't insight. It's an intuition still waiting for grounding, not more feeling.`,
+      title: `18 in Ideal Partner — The Moon`,
+      tagline: `A Design of the Tested Feeling`,
+      mastery: `You sense a connection's truth before you can articulate it, a felt, wordless understanding.`,
+      shadow: `You let unprocessed fear color how you read a partner, projecting old wounds onto present behavior.`,
+      invitation: `Check one emotional read today against an actual conversation.`,
     },
 
     // ── 19 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '19_LOVE': {
-      heading: `Relief Over Performance`,
-      why: `You're drawn to partners who can be fully themselves around you, and you offer the same unguarded warmth in return. The Sun governing your relationship channel means love for you is meant to feel genuinely light — real, sustainable relationships for you run on authentic joy and ease rather than struggle or proving yourself. Your ideal partner is warm and joyful in their own right, open-hearted, genuinely positive, someone who actively supports shared happiness and creativity rather than dimming either.`,
-      shadow: `The risk is avoiding relationships, or specific hard conversations within one, the moment they stop feeling easy — mistaking necessary friction for incompatibility because your radar is tuned to joy above all else. If you keep leaving relationships the moment things get genuinely difficult, the ease may be masking an avoidance of real depth.`,
-      path: `Let a relationship include hard, unglamorous moments without deciding those moments mean it's wrong. Real joy in love can coexist with real effort — the two aren't actually opposites. You are allowed to choose the love that feels like relief without suspecting it. Where has ease been trying to convince you it's real?`,
-      positive: `The gift for authentic joy and ease hasn't changed — real, sustainable relationships running on lightness rather than struggle was always what you wanted. What's different is that you now let a relationship include hard, unglamorous moments without deciding those moments mean it's wrong. That inclusion is what lets ease and depth grow together.`,
-      negative: `The joy you bring to a relationship is completely real, and it keeps avoiding relationships, or hard conversations within one, the moment they stop feeling easy. That avoidance isn't lightness. It's a depth still waiting for the friction it actually requires.`,
+      title: `19 in Ideal Partner — The Sun`,
+      tagline: `A Design of Included Difficulty`,
+      mastery: `Your love runs on authentic joy and ease rather than struggle or proving yourself.`,
+      shadow: `You avoid a relationship, or hard conversations within it, the moment things stop feeling easy.`,
+      invitation: `Let one hard, unglamorous moment today stay in the relationship without deciding it's wrong.`,
     },
 
     // ── 20 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '20_LOVE': {
-      heading: `Becoming, Together`,
-      why: `You're drawn to people who see a fuller version of you than you've fully claimed yet, and you offer that same recognition in return. Judgement governing your relationship channel means your romantic connections tend to function as genuine catalysts — partners who call something larger out of you, relationships that coincide with real periods of personal awakening. Your ideal partner is purpose-driven and emotionally mature in their own right, genuinely spiritually aware, someone who actively supports the growth of your soul rather than just observing it.`,
-      shadow: `The risk is staying in a relationship past its natural end because it once served as a catalyst, holding onto the growth it represented rather than the actual connection as it currently is. You might also expect every partner to keep triggering growth, exhausting a relationship that's simply allowed to be steady for a while. If a relationship feels stagnant, the calling may have already moved on.`,
-      path: `Let a relationship be honored for the growth it already gave you, even if it's time to let it go. Not every phase of love needs to keep summoning you forward — some of it is allowed to just be restful. You are allowed to become who you're becoming without apologizing to who you were. What is your closest relationship currently calling you toward?`,
-      positive: `The gift for catalytic love hasn't changed — connections that call something larger out of you were always real. What's different is that you now honor a relationship for the growth it already gave you, even while letting it go if it's time. That honesty is what lets the calling keep moving instead of getting stuck.`,
-      negative: `The growth you seek through relationship is completely real, and it keeps staying in a connection past its natural end because it once served as a catalyst. That staying isn't gratitude. It's a calling still waiting to be released so it can actually move on.`,
+      title: `20 in Ideal Partner — Judgement`,
+      tagline: `A Design of the Honored Growth`,
+      mastery: `Your romantic connections function as genuine catalysts, calling something larger out of you.`,
+      shadow: `You stay in a relationship past its natural end because it once served as a catalyst.`,
+      invitation: `Honor one relationship today for the growth it already gave you, even while letting it go if it's time.`,
     },
 
     // ── 21 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '21_LOVE': {
-      heading: `Expansion Over Containment`,
-      why: `You have a real capacity for mature, mutual love, but it thrives specifically when it isn't asked to stay small or contained — a shared life that can genuinely expand, cross borders, absorb new places and people rather than settling into one fixed, narrow shape. The World governing your relationship channel means you're oriented toward real relational expansiveness. Your ideal partner is open-minded and genuinely globally oriented, someone who actively supports growth, freedom, and a shared vision of life bigger than either of you would build alone.`,
-      shadow: `The risk is staying in a relationship that's quietly closed the world down — a shared life that's contracted to the smallest, safest version of itself, freedom and expansion traded for a comfortable routine neither of you actually chose on purpose. If your relationship feels stable but has stopped genuinely growing or reaching outward, that containment may be the thing worth naming.`,
-      path: `Let the relationship actually expand — a new place, a shared vision genuinely built together, room for both of you to keep growing rather than settling for what's already familiar. Real partnership here is meant to open outward, not just hold steady. You are allowed to love at the scale you were built for. What bigger life is your love waiting for permission to inhabit?`,
-      positive: `The gift for relational expansiveness hasn't changed — love that thrives when it isn't asked to stay small was always real. What's different is that you now let the relationship actually expand, a new place, a shared vision genuinely built together. That expansion is what love was built for.`,
-      negative: `The expansiveness you carry into love is completely real, and it keeps quietly closing the world down, freedom traded for a comfortable routine neither of you chose on purpose. That contraction isn't stability. It's an expansiveness still sitting unused, still waiting to be named and reopened.`,
+      title: `21 in Ideal Partner — The World`,
+      tagline: `A Design of the Open Life`,
+      mastery: `Your love thrives when it isn't asked to stay small — a shared life that can genuinely expand.`,
+      shadow: `You let the relationship quietly close the world down, freedom traded for a comfortable routine.`,
+      invitation: `Let the relationship actually expand today, one new place or shared vision at a time.`,
     },
 
     // ── 22 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '22_LOVE': {
-      heading: `Faith Over Proof`,
-      why: `You carry a genuine, uncommon openness to love — a willingness to step into a real connection without needing certainty about where it'll lead. The Fool governing your relationship channel names exactly this. Your ideal partner is genuinely free-spirited and playful themselves, open to new experiences, trusting rather than guarded, someone who actively supports your authenticity instead of asking you to tame it. You offer partners real freshness: presence without an agenda, trust extended before it's been fully earned, which lets intimacy begin faster and more genuinely than caution usually allows.`,
-      shadow: `The risk is repeating the same relational pattern with new people, leaping into connection with the same openness each time but no accumulated wisdom about what's actually worked or not. If your relationships keep starting fresh and ending the same way, the openness may need a partner in genuine reflection.`,
-      path: `Let each relationship teach you something concrete you actually carry into the next one. Your openness to love is a real gift — pairing it with real self-knowledge is what turns repeated beginnings into an actual, growing capacity for lasting love. You are allowed to leap into love and learn as you fall. What would you say yes to this month if certainty stopped being the price of entry?`,
-      positive: `The gift for falling in love without needing proof hasn't changed — real openness, presence without an agenda, was always genuine. What's different is that you now let each relationship teach you something concrete you actually carry into the next one. That accumulated wisdom is what turns repeated beginnings into a growing capacity for lasting love.`,
-      negative: `The openness you bring to new love is completely real, and it keeps repeating the same relational pattern with new people, no accumulated wisdom carried forward. That repetition isn't freshness. It's a capacity for lasting love still waiting for genuine reflection to join the openness.`,
+      title: `22 in Ideal Partner — The Fool`,
+      tagline: `A Design of the Carried Lesson`,
+      mastery: `You carry a genuine, uncommon openness to love — presence without an agenda.`,
+      shadow: `You repeat the same relational pattern with new people, with no accumulated wisdom carried forward.`,
+      invitation: `Carry one concrete lesson today from your last relationship into how you love now.`,
     },
 
     // ── 17 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '17_MON': {
-      heading: `Visibility Pays`,
-      why: `Your most abundant income tends to show up exactly when you're operating from genuine visibility — sharing your real gift, letting your actual light be seen in your work — rather than following a strategy borrowed from someone else's idea of a stable career. The Star governs your money channel, tying your financial flow directly to hope and authentic radiance rather than to grinding, joyless effort. This tends to look like work built around being seen at all — blogging or influencing, art and creative work released publicly, media and online projects, a personal brand monetized directly rather than folded into someone else's — money that arrives almost as a byproduct of authenticity, once you actually offer the authenticity instead of rehearsing it in private.`,
-      shadow: `The risk is income that stays conditional on approval before it's allowed to flow — a launch you keep delaying until every condition feels perfect, a rate you quietly undercut because charging full price for something so personal feels like too much, a body of work you keep private until it's "ready" in a way that never quite arrives. Because your gift is genuine, withholding it is expensive: a thin, sporadic bank account is often a light that's still being kept low rather than freely offered to a market that would gladly pay for it.`,
-      path: `Try treating visibility itself as the transaction — letting your work be seen at the stage it's actually in, rather than the stage you wish it had reached. That's uncomfortable, because it removes the comfort of staying private while you perfect things, and it puts the responsibility on what you're willing to show right now. Start with the smallest real offer: a rate that reflects the actual value of your work, a piece released before it feels fully polished. The financial flow you're waiting to feel ready for is, for you, directly downstream of the visibility you're willing to allow today. You are allowed to be seen at the scale of your actual gift. What work would you show publicly this month if visibility paid what it actually pays?`,
-      positive: `Money arrives in rhythm with genuine visibility — the more authentically you let your work be seen at the stage it's actually in, the more consistently and generously it gets paid for.`,
-      negative: `Income stays sporadic and undervalued when your light is still being kept low — a launch delayed, a rate undercut, a body of work withheld until conditions that never quite arrive.`,
+      title: `17 in Wealth Potential — The Star`,
+      tagline: `A Design of Paid Visibility`,
+      mastery: `Your income arrives in rhythm with genuine visibility, sharing your real gift where it can actually be seen.`,
+      shadow: `You keep income conditional on approval before it's allowed to flow, delaying a launch or undercutting a rate until conditions feel perfect.`,
+      invitation: `Show one piece of work publicly today at the stage it's actually in, priced at its real value.`,
     },
 
     // ── 1 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '1_MON': {
-      heading: `Building From Nothing`,
-      why: `You're not suited to a fixed, pre-built role; your income flows most freely when your profession gives you real room to generate something new rather than maintain something already built. The Magician governs your money channel, meaning your wealth potential is tied directly to work that lets you originate — building something from nothing, launching, creating, initiating. This tends to look like entrepreneurship in its most direct form: founding something yourself, running projects rather than being run by them, selling or speaking on your own initiative, even coaching others in exactly this kind of self-starting.`,
-      shadow: `The risk is chasing the excitement of a new venture at the expense of ever letting one mature into steady income — jumping between projects, ideas, or roles before any of them has had time to actually pay off. If your income feels inconsistent despite real talent, the pattern may be starting more than sustaining.`,
-      path: `Let your ideal work include at least one long-running thread you don't abandon. The initiating gift is real; pairing it with follow-through is what turns a string of launches into an actual, sustainable livelihood. You are allowed to build from scratch again, even after finished things. What would you start building tomorrow if the blank page were an invitation instead of a test?`,
-      positive: `Your income through origination hasn't changed — work that lets you generate something new was always the real fuel. What's different is that you now let your ideal work include at least one long-running thread you don't abandon. That follow-through is what turns launches into a sustainable livelihood.`,
-      negative: `Your income through origination is completely real, and it keeps chasing the excitement of a new venture before any one matures. That chasing isn't ambition. It's an income still waiting for one thread to actually be sustained long enough to pay off.`,
+      title: `1 in Wealth Potential — The Magician`,
+      tagline: `A Design of the Sustained Launch`,
+      mastery: `Your income flows most freely through work that lets you originate — building something from nothing.`,
+      shadow: `You chase the excitement of a new venture at the expense of ever letting one mature into steady income.`,
+      invitation: `Commit today to one long-running thread you won't abandon for the next new idea.`,
     },
 
     // ── 2 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '2_MON': {
-      heading: `Trusting Before Proving`,
-      why: `You're suited to roles that trust your read on a situation, even before it's fully explainable. The High Priestess governs your money channel, meaning your ideal profession draws on intuitive, often behind-the-scenes insight — work where your instinct for what's true or what's coming matters more than loud, visible credentials. This tends to look like work built entirely around depth of perception: psychology or therapeutic work, numerology or other intuitive disciplines, research and analysis, advisory or consulting roles, writing and editing — professions that pay you specifically for seeing what's underneath the surface.`,
-      shadow: `The risk is undervaluing that intuitive skill precisely because it's hard to quantify, staying in the background so consistently that your actual contribution goes unrecognized and underpaid. If your income doesn't reflect your real insight, the quietness of your gift may be costing you its market value.`,
-      path: `Let your intuitive contribution be named and priced, even if it's hard to fully explain in a resume. Your insight is a real professional asset — it just needs to be claimed out loud to actually be compensated. You are allowed to be paid for perception, not just production. Where does your unproven sense keep being right at work — and who needs to know that?`,
-      positive: `Your income through intuitive insight hasn't changed — trusting your read on a situation before it's fully explainable was always a real professional asset. What's different is that you now let that contribution be named and priced, even if it's hard to fully explain. That claiming is what finally lets income reflect the real value.`,
-      negative: `Your insight is completely real, and it keeps staying undervalued precisely because it's hard to quantify, background work going unrecognized. That quietness isn't humility. It's an income still waiting for the gift to be claimed out loud.`,
+      title: `2 in Wealth Potential — The High Priestess`,
+      tagline: `A Design of the Priced Insight`,
+      mastery: `Your income draws on intuitive, often behind-the-scenes insight — trusting your read before it's fully explainable.`,
+      shadow: `You undervalue that intuitive skill precisely because it's hard to quantify, staying background and underpaid.`,
+      invitation: `Name and price one intuitive contribution today, even if you can't fully explain it.`,
     },
 
     // ── 3 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '3_MON': {
-      heading: `Growing Something Real`,
-      why: `Your income thrives when your profession lets you actually create — creative fields, caregiving, cultivation of any kind, roles where you get to grow something (a project, a person, a body of work) rather than simply manage an existing system. The Empress governs your money channel, meaning your wealth potential flows through generative, nurturing work. This tends to look like design in any of its forms — graphic, interior, fashion — the beauty industry, content creation, art direction, or a business built around and for women specifically, anywhere beauty and cultivation are the actual product.`,
-      shadow: `The risk is undercharging for generative work because it doesn't feel like conventional "labor," or giving so much creative energy away for free that your professional output never converts into real income. If you're prolific but underpaid, the generosity of your gift may need a price tag.`,
-      path: `Let your creative or nurturing output be priced at its real value, not discounted because it comes easily to you. Ease of creation doesn't mean it's worth less — it means you're well-suited to it. You are allowed to grow something at its own pace and call that productivity. What have you been cultivating professionally that's closer to harvest than it looks?`,
-      positive: `Your income through generative, nurturing work hasn't changed — creating, growing something real, was always the true source. What's different is that you now let your creative output be priced at its real value, not discounted because it comes easily. That pricing is what finally converts prolific output into real income.`,
-      negative: `Your creative gift is completely real, and it keeps being undercharged because it doesn't feel like conventional labor. That discounting isn't modesty. It's an income still waiting for a price tag that matches the actual value.`,
+      title: `3 in Wealth Potential — The Empress`,
+      tagline: `A Design of the Priced Gift`,
+      mastery: `Your income thrives when your profession lets you actually create and grow something real.`,
+      shadow: `You undercharge for generative work because it doesn't feel like conventional labor.`,
+      invitation: `Price one piece of your creative or nurturing output today at its real value, not discounted.`,
     },
 
     // ── 4 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '4_MON': {
-      heading: `Systems Over Roles`,
-      why: `You thrive financially when you're given real authority to organize — leadership, management, systems-building, work where your capacity for order and responsibility is actually put to use rather than boxed in by someone else's framework. The Emperor governs your money channel, meaning your wealth potential flows through roles that let you build or govern structure. This tends to look like ownership and executive command directly — running a business, holding a CEO or senior administrative role, leading within government or corporate structure, or building material wealth through something as concrete as real estate development.`,
-      shadow: `The risk is staying in a role that under-uses your capacity for structure, following someone else's system so completely that your own gift for building never gets exercised, or applied for financial value. If you feel financially capped despite real capability, the structure you're operating inside may not be yours to shape.`,
-      path: `Seek or create roles where you actually get to build the system, not just staff it. Your financial ceiling tends to lift the moment your capacity for structure has somewhere real to go. You are allowed to design the system instead of surviving inside one. What structure would you build if someone finally handed you the blueprint pen?`,
-      positive: `Your income through structure hasn't changed — real authority to organize, lead, build was always the true source. What's different is that you now seek or create roles where you actually get to build the system, not just staff it. That authority is what lifts the financial ceiling.`,
-      negative: `Your capacity for structure is completely real, and it keeps staying boxed inside someone else's system, your own gift for building never exercised. That boxing isn't stability. It's an income still capped, still waiting for a system that's actually yours to shape.`,
+      title: `4 in Wealth Potential — The Emperor`,
+      tagline: `A Design of the Built System`,
+      mastery: `You thrive financially when given real authority to organize, lead, and build structure.`,
+      shadow: `You stay in a role that under-uses your capacity for structure, following someone else's system completely.`,
+      invitation: `Seek or create one role today where you actually get to build the system, not just staff it.`,
     },
 
     // ── 5 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '5_MON': {
-      heading: `Passing It On`,
-      why: `Your income thrives when your profession includes passing something on — teaching, mentoring, or tradition-rooted work, professions where you're transmitting real, earned knowledge to someone else, whether formally (education, training) or informally (mentorship within any field). The Hierophant governs your money channel, meaning your wealth potential flows through exactly this kind of work. This tends to look like teaching and mentorship directly, spiritual guidance or coaching, HR or consulting roles built around developing people, training and lecturing, or a business built specifically around education itself.`,
-      shadow: `The risk is staying a perpetual student, accumulating credentials and knowledge without ever stepping into the teaching role that would actually convert it into income. If your expertise feels real but your income doesn't reflect it, the transmission side of the equation may be missing.`,
-      path: `Let yourself teach before you feel fully ready. The financial version of your gift activates once knowledge starts moving through you to someone else, not just accumulating in you. You are allowed to teach while you're still learning. What knowledge of yours is ready to be passed on exactly as it is?`,
-      positive: `Your income through transmission hasn't changed — passing on real, earned knowledge was always the true source. What's different is that you now let yourself teach before you feel fully ready. That teaching is what activates the financial version of your gift.`,
-      negative: `Your expertise is completely real, and it keeps accumulating without ever converting into teaching or mentoring. That accumulation isn't preparation. It's an income still undervalued, still waiting for the transmission side to begin.`,
+      title: `5 in Wealth Potential — The Hierophant`,
+      tagline: `A Design of the Taught Knowledge`,
+      mastery: `Your income thrives when your profession includes passing on real, earned knowledge to someone else.`,
+      shadow: `You stay a perpetual student, accumulating credentials without ever stepping into the teaching role.`,
+      invitation: `Teach one piece of knowledge today, exactly as it is, before you feel fully ready.`,
     },
 
     // ── 6 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '6_MON': {
-      heading: `Work Through People`,
-      why: `Your income thrives specifically through people — connecting them, choosing well between them, building the kind of partnership that makes a deal or a relationship actually work. The Lovers governing your money channel means your wealth potential is tied to work built around relationship itself, not simply values in the abstract: relationship coaching, HR or recruiting, sales management, brand partnerships, PR and communications — any profession where reading and choosing well between people is the literal product.`,
-      shadow: `The risk is perpetual indecision when a professional choice feels like it involves people or values in conflict, weighing every option so exhaustively that you never commit long enough to actually build income in any one direction. If your career feels stalled at the crossroads, discernment may need to resolve into an actual choice.`,
-      path: `Choose a direction built around genuine connection and commit to it fully, even without perfect certainty. Income builds through sustained commitment to a people-centered path, not through endlessly comparing options. You are allowed to make people the work, not the interruption of it. Where does your gift for connection already produce what no process could?`,
-      positive: `Your income through connection hasn't changed — reading and choosing well between people was always the real asset. What's different is that you now choose a direction built around genuine connection and commit to it fully, even without perfect certainty. That commitment is what lets income actually build.`,
-      negative: `Your gift for connection is completely real, and it keeps weighing every option so exhaustively that you never commit long enough to build income in one direction. That weighing isn't discernment. It's a career still stalled at the crossroads, still waiting for commitment.`,
+      title: `6 in Wealth Potential — The Lovers`,
+      tagline: `A Design of the Committed Direction`,
+      mastery: `Your income thrives specifically through people — connecting them, choosing well between them.`,
+      shadow: `You weigh every professional option so exhaustively that you never commit long enough to build income in one direction.`,
+      invitation: `Choose one direction built around genuine connection today, and commit to it fully.`,
     },
 
     // ── 7 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '7_MON': {
-      heading: `Driving Your Own Direction`,
-      why: `Your income thrives when your career has genuine forward motion you control — a profession where you're visibly moving toward a goal you've set, not just executing someone else's static task list. The Chariot governs your money channel, meaning your wealth potential flows through work with exactly this real, self-directed momentum. This tends to look like logistics or transportation, the sports industry, event management, travel, or operations roles — any field built around literal movement, results, and getting something across a finish line.`,
-      shadow: `The risk is staying in a role with no real trajectory, generating internal frustration that shows up as burnout even when the workload itself is manageable — the problem isn't the effort, it's the absence of visible direction. If your income feels stuck despite real effort, the role may lack the momentum this profile actually needs to thrive.`,
-      path: `Seek or build a professional path with a visible trajectory you're steering. Your financial growth tracks your sense of forward motion more than it tracks raw hours worked. You are allowed to drive hard toward what's actually yours. What professional destination would justify the full force of your momentum?`,
-      positive: `Your income through momentum hasn't changed — genuine forward motion you control was always the true fuel. What's different is that you now seek or build a professional path with a visible trajectory you're steering. That visible direction is what drives income forward, not raw hours.`,
-      negative: `Your drive is completely real, and it keeps landing in roles with no real trajectory, generating burnout even when the workload is manageable. That burnout isn't overwork. It's an income still stalled, still waiting for a visible direction to move toward.`,
+      title: `7 in Wealth Potential — The Chariot`,
+      tagline: `A Design of the Visible Trajectory`,
+      mastery: `Your income thrives when your career has genuine forward motion you control.`,
+      shadow: `You stay in a role with no real trajectory, generating burnout even when the workload is manageable.`,
+      invitation: `Seek or build one visible professional trajectory today that you're actually steering.`,
     },
 
     // ── 8 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '8_MON': {
-      heading: `Honesty as Currency`,
-      why: `Your income thrives in roles where integrity is actually rewarded, not just expected — law, mediation, ethics-driven business, any profession where your reputation for honest dealing is itself a professional asset. Justice governs your money channel, meaning your wealth potential flows through work grounded in fairness and accountability. This tends to look like law and legal consulting directly, accounting and auditing, financial analysis, compliance work, or contract management — professions where accuracy and fairness aren't just personal virtues but the literal job.`,
-      shadow: `The risk is staying in environments where your honesty goes financially unrewarded, or even punished, while less scrupulous colleagues advance faster. If integrity keeps costing you opportunities, the environment may not be matched to the gift.`,
-      path: `Seek out or build professional environments that actually reward fairness, rather than staying somewhere your integrity is merely tolerated. Your financial growth depends on being somewhere honest dealing is genuinely valued. You are allowed to profit from your honesty rather than despite it. Where has being the truthful one already become your quiet competitive edge?`,
-      positive: `Your income through integrity hasn't changed — honest dealing as an actual professional asset was always the real strength. What's different is that you now seek out or build environments that actually reward fairness, rather than staying somewhere it's merely tolerated. That environment is what lets integrity translate into income.`,
-      negative: `Your honesty is completely real, and it keeps staying in environments where it goes unrewarded, even punished, while less scrupulous colleagues advance. That staying isn't loyalty. It's a fairness still waiting for financial recognition in the right environment.`,
+      title: `8 in Wealth Potential — Justice`,
+      tagline: `A Design of the Rewarded Honesty`,
+      mastery: `Your income thrives in roles where integrity is actually rewarded, not just expected.`,
+      shadow: `You stay in environments where your honesty goes financially unrewarded, even punished.`,
+      invitation: `Seek out or build one environment today that actually rewards fairness.`,
     },
 
     // ── 9 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '9_MON': {
-      heading: `Depth Over Range`,
-      why: `Your income thrives in roles that let you work with real autonomy, converting solitary mastery into a valuable, sought-after skill — work that rewards how deep you've gone in one specific area rather than how broadly you network or collaborate. The Hermit governs your money channel, meaning your wealth potential flows through exactly this kind of specialized, independent expertise. This tends to look like niche consulting, strategic analysis, therapeutic or healing work, research, or running your own solo practice entirely — professions built to reward depth over reach.`,
-      shadow: `The risk is staying so independent that your expertise never gets marketed or made visible enough for anyone to actually pay for it. Deep knowledge, kept private, doesn't automatically convert into income — it has to be offered. If your income doesn't reflect your actual depth, visibility may be the missing piece.`,
-      path: `Let your specialized expertise be visibly offered — published, priced, put forward — rather than just quietly possessed. The depth is already valuable; it needs a way to actually reach the people who'd pay for it. You are allowed to go deep alone and surface with something valuable. What mastery are you building in private that the world hasn't priced yet?`,
-      positive: `Your income through solitary mastery hasn't changed — deep, specialized expertise built in autonomy was always genuinely valuable. What's different is that you now let it be visibly offered, published, priced, put forward, rather than just quietly possessed. That offering is what converts depth into income.`,
-      negative: `Your mastery is completely real, and it keeps staying too private to be marketed, never made visible enough for anyone to pay for it. That privacy isn't discretion. It's an income still waiting for the depth to be offered, not just possessed.`,
+      title: `9 in Wealth Potential — The Hermit`,
+      tagline: `A Design of the Offered Mastery`,
+      mastery: `Your income thrives in roles that convert solitary mastery into a valuable, sought-after skill.`,
+      shadow: `You stay so independent that your expertise never gets marketed or made visible enough to pay for.`,
+      invitation: `Publish, price, or put forward one piece of your specialized expertise today.`,
     },
 
     // ── 10 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '10_MON': {
-      heading: `Working With Seasons`,
-      why: `You thrive financially when your career has room to change shape as circumstances turn, rather than punishing you for needing to pivot — work that can adapt to cycles and shifting conditions rather than professions demanding rigid permanence. The Wheel of Fortune governs your money channel, meaning your wealth potential flows through exactly this kind of career flexibility. This tends to look like marketing work that shifts with trends, trading and investment, business development, the tourism industry, or freelance work spread across multiple projects at once — income built to move with the cycle rather than resist it.`,
-      shadow: `The risk is staying locked into a rigid career path out of fear of the instability that change might bring, even once that path has clearly stopped serving you. If your income feels stagnant despite the world around you clearly shifting, the rigidity of the role may be the actual constraint.`,
-      path: `Build genuine flexibility into your career — multiple skills, adaptable income streams, willingness to pivot with the cycle rather than against it. Your financial resilience comes from adaptability, not from forcing permanence onto something naturally cyclical. You are allowed to work with your seasons instead of against your calendar. What would your career look like if timing became a tool instead of an obstacle?`,
-      positive: `Your income through adaptability hasn't changed — career flexibility, room to shift with circumstances, was always the true source of resilience. What's different is that you now build genuine flexibility, multiple skills, adaptable streams, willingness to pivot with the cycle. That adaptability is what keeps income resilient.`,
-      negative: `Your adaptability is completely real, and it keeps staying locked into a rigid career path out of fear of instability. That rigidity isn't safety. It's an income still stagnant, still waiting for the flexibility that was always available to you.`,
+      title: `10 in Wealth Potential — Wheel of Fortune`,
+      tagline: `A Design of the Built Flexibility`,
+      mastery: `You thrive financially when your career has room to change shape as circumstances turn.`,
+      shadow: `You stay locked into a rigid career path out of fear of the instability that change might bring.`,
+      invitation: `Build one piece of real flexibility today into your career or income streams.`,
     },
 
     // ── 11 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '11_MON': {
-      heading: `Presence as Payment`,
-      why: `Your income thrives where your charisma is the actual asset being paid for — not quiet steadiness in the background, but a magnetic, public-facing presence that draws people in and moves them. Strength governs your money channel, meaning your wealth potential flows through work that puts your influence and energy directly on display: coaching or motivating others, building a personal brand around yourself specifically, the fitness and wellness industry, performing or holding public-figure visibility, and leadership roles that depend on presence as much as position.`,
-      shadow: `The risk is burning that same energy in rooms and roles that don't actually pay for it, performing charisma for free until the well runs dry, or leaning so hard on presence that the underlying substance never gets built. If you're widely admired but underpaid, the energy may need a more direct professional container.`,
-      path: `Let your natural charisma become the explicit center of your professional offer, not just a pleasant side effect of it. Name the influence you carry, and build or seek work that pays for it directly. You are allowed to count your presence as labor. What rooms change when you enter them — and are you being valued for that yet?`,
-      positive: `Your income through presence hasn't changed — magnetic, public-facing energy was always the real asset. What's different is that you now let your natural charisma become the explicit center of your professional offer, not just a pleasant side effect. That naming is what finally gets influence compensated.`,
-      negative: `Your charisma is completely real, and it keeps getting spent in rooms and roles that don't actually pay for it, performed for free until the well runs dry. That performing isn't generosity. It's an income still waiting for the presence to be counted as labor.`,
+      title: `11 in Wealth Potential — Strength`,
+      tagline: `A Design of Counted Presence`,
+      mastery: `Your income thrives where your charisma is the actual asset being paid for.`,
+      shadow: `You burn that same energy in rooms and roles that don't actually pay for it, performing for free.`,
+      invitation: `Name your charisma today as the explicit center of one professional offer.`,
     },
 
     // ── 12 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '12_MON': {
-      heading: `Staying Through the Slow`,
-      why: `Your income thrives in roles built around patient, sustained service to people in genuine difficulty — not a quick fix, but the willingness to remain present through something slow. The Hanged Man governs your money channel, meaning your wealth potential flows through work like counseling or psychology, medical or caregiving professions, social work, spiritual service, or long-term transformational projects that don't resolve quickly — anywhere depth of presence matters more than speed of result.`,
-      shadow: `The risk is staying suspended in the idea of this kind of service without actually committing to the training, credentialing, or sustained practice it demands, treating the calling as a nice thought rather than an actual career. If your income feels stuck in potential, the service needs to become a real professional commitment.`,
-      path: `Let the pull toward sustained, patient service resolve into an actual professional path, even a modest first step into it. The depth only pays off once you build real practice around it. You are allowed to do the staying work and let it sustain you too. Whose pain have you stayed with lately — and who stays with yours?`,
-      positive: `Your income through sustained service hasn't changed — the willingness to remain present through something slow was always the true offer. What's different is that you now let the pull toward patient service resolve into an actual professional path, even a modest first step. That commitment is what converts calling into income.`,
-      negative: `Your capacity for service is completely real, and it keeps staying suspended in the idea of it without ever committing to real training or practice. That suspension isn't humility. It's an income still stuck in potential, still waiting for the actual practice to begin.`,
+      title: `12 in Wealth Potential — The Hanged Man`,
+      tagline: `A Design of the Committed Practice`,
+      mastery: `Your income thrives in roles built around patient, sustained service to people in genuine difficulty.`,
+      shadow: `You stay suspended in the idea of that service without ever committing to the training it demands.`,
+      invitation: `Take one modest, real step today into actual professional training or practice.`,
     },
 
     // ── 13 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '13_MON': {
-      heading: `Old Career, Let Die`,
-      why: `You thrive financially in fields or roles that reward genuine change rather than punishing it — real financial growth for you tends to require releasing an outdated career identity or income source so a better-fitting one can take its place. Transformation governs your money channel, meaning your wealth potential flows through exactly this kind of professional reinvention. This tends to look like crisis management, psychotherapy, transformation coaching, medical work centered on renewal (surgery, rehabilitation), or change management directly — professions built entirely around guiding an ending into a genuine new beginning.`,
-      shadow: `The risk is clinging to a professional identity that's already run its course, staying in a dying career lane out of fear of the uncertain gap between old and new. If your income feels stuck in decline, something professional may need to be actively released rather than further optimized.`,
-      path: `Let a professional ending be deliberate. Identify what's actually complete in your career, and release it on your own terms before it forces the issue. The reinvention happens in the gap you're willing to walk through. You are allowed to bury the old career with honors and walk on. What professional identity has already served its full term?`,
-      positive: `Your income through professional reinvention hasn't changed — genuine change, not punishment for it, was always the real reward. What's different is that you now let a professional ending be deliberate, releasing what's complete on your own terms. That release is what makes room for the reinvention.`,
-      negative: `Your capacity for reinvention is completely real, and it keeps clinging to a career identity that's already run its course, out of fear of the gap. That clinging isn't loyalty. It's an income still stuck in decline, still waiting for a clean ending.`,
+      title: `13 in Wealth Potential — Transformation`,
+      tagline: `A Design of the Deliberate Ending`,
+      mastery: `You thrive financially in fields that reward genuine professional reinvention.`,
+      shadow: `You cling to a professional identity that's already run its course, out of fear of the gap.`,
+      invitation: `Release one completed professional identity today, deliberately, on your own terms.`,
     },
 
     // ── 14 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '14_MON': {
-      heading: `Blending What Others Separate`,
-      why: `Your income thrives when you're not forced to specialize narrowly, but allowed to synthesize — combining skills, fields, or roles that other people keep siloed, into one integrated career that plays to your full range. Temperance governs your money channel, meaning your wealth potential flows through exactly this kind of professional blending. This tends to look like holistic healing work, nutrition or wellness coaching, mediation, integrative consulting, or lifestyle consulting — fields that exist specifically at the intersection other professions leave unaddressed.`,
-      shadow: `The risk is spreading across so many skills or roles that none of them develops enough depth to actually be paid for at a professional level. Balance can become an excuse to avoid committing seriously to any one thing. If your income feels thin, the blend may need fewer ingredients, held longer.`,
-      path: `Let a few of your combined skills go deep enough to actually be marketable, rather than staying broadly competent at everything. Real integration still requires depth in its component parts. You are allowed to be the blend the industry didn't have a title for. Which of your combined skills is actually the product?`,
-      positive: `Your income through synthesis hasn't changed — combining fields other people keep siloed was always the real strength. What's different is that you now let a few of your combined skills go deep enough to actually be marketable, instead of staying broadly competent at everything. That depth is what makes income substantial.`,
-      negative: `Your versatility is completely real, and it keeps spreading across so many skills that none develops enough depth to be paid for. That spreading isn't balance. It's an income still thin, still waiting for a few ingredients to be held longer.`,
+      title: `14 in Wealth Potential — Temperance`,
+      tagline: `A Design of the Marketable Blend`,
+      mastery: `Your income thrives when allowed to synthesize skills or fields other people keep siloed.`,
+      shadow: `You spread across so many skills that none develops enough depth to actually be paid for.`,
+      invitation: `Go deep today on one or two of your combined skills instead of staying broadly competent at everything.`,
     },
 
     // ── 15 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '15_MON': {
-      heading: `Power Named Honestly`,
-      why: `You thrive financially in roles that don't pretend money and leverage aren't real forces — negotiation, finance, sales, any field where understanding what actually drives people materially is the genuine skill being paid for. The Devil governs your money channel, meaning your wealth potential flows through work that engages directly with material power. This tends to look like business and finance broadly, sales and negotiation specifically, the entertainment industry, the luxury market, or work built directly around understanding what compels people materially and psychologically.`,
-      shadow: `The risk is using that understanding to grip control over colleagues, clients, or resources rather than to genuinely serve a transaction, eventually costing you trust and reputation. If wealth keeps arriving alongside growing isolation, the leverage may be gripped tighter than the work requires.`,
-      path: `Use your honest read on material power in service of genuinely good deals, not just personal control. Real mastery here builds wealth and keeps trust intact at the same time. You are allowed to understand power without being owned by it. What could your honest read of money and influence build if you aimed it somewhere clean?`,
-      positive: `Your income through understanding material power hasn't changed — an honest read on what drives people materially was always the real skill. What's different is that you now use that read in service of genuinely good deals, not personal control. That service is what builds wealth while keeping trust intact.`,
-      negative: `Your understanding of leverage is completely real, and it keeps being used to grip control over colleagues or resources rather than serve a transaction. That gripping isn't mastery. It's a wealth still arriving alongside isolation, still waiting for the grip to loosen.`,
+      title: `15 in Wealth Potential — The Devil`,
+      tagline: `A Design of Clean Leverage`,
+      mastery: `You thrive financially in roles that engage directly and honestly with material power.`,
+      shadow: `You use that understanding to grip control over colleagues or resources rather than serve a transaction.`,
+      invitation: `Use your honest read on material power today in service of one genuinely good deal.`,
     },
 
     // ── 16 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '16_MON': {
-      heading: `Seeing the Collapse First`,
-      why: `You thrive financially in roles that value sudden, decisive clarity over slow, incremental process — crisis management, innovation, any field that pays for the ability to see a failing structure clearly and reorganize fast. The Tower governs your money channel, meaning your wealth potential flows through exactly this kind of disruption-facing work. This tends to look like engineering or architecture, IT and cybersecurity, crisis and risk management, construction, or roles built around genuinely transforming a system rather than patching it.`,
-      shadow: `The risk is generating unnecessary disruption to feel financially useful, provoking crises in stable systems because your gift needs somewhere to apply itself. If your professional life feels chaotic even in calm periods, the disruption may be self-generated rather than genuinely needed.`,
-      path: `Save your gift for structures that actually need reorganizing, rather than manufacturing instability elsewhere. Real financial value here comes from precision, not from constant upheaval. You are allowed to say the structure is failing before it's polite. What collapse do you currently see coming that your integrity wants named?`,
-      positive: `Your income through disruption-facing clarity hasn't changed — the ability to see a failing structure and reorganize fast was always the real value. What's different is that you now save that gift for structures that actually need reorganizing, rather than manufacturing instability elsewhere. That precision is what makes the work valuable.`,
-      negative: `Your clarity is completely real, and it keeps generating unnecessary disruption to feel financially useful, provoking crises in stable systems. That provoking isn't vision. It's a gift still waiting for a structure that genuinely needs it.`,
+      title: `16 in Wealth Potential — The Tower`,
+      tagline: `A Design of Precise Disruption`,
+      mastery: `You thrive financially in roles that value the ability to see a failing structure clearly and reorganize fast.`,
+      shadow: `You generate unnecessary disruption to feel financially useful, provoking crises in stable systems.`,
+      invitation: `Save your clarity today for one structure that genuinely needs reorganizing.`,
     },
 
     // ── 18 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '18_MON': {
-      heading: `Instinct Before Certainty`,
-      why: `You thrive financially in roles that don't demand you justify every insight with hard data before it's trusted — work that draws on intuitive or emotionally attuned insight, creative fields, therapeutic work, anything where reading an unspoken undercurrent is the actual skill. The Moon governs your money channel, meaning your wealth potential flows through exactly this kind of work. This tends to look like psychology or therapeutic work, filmmaking or other visual art, photography, esoteric practice, or creative healing professions — any field built around what can be sensed before it can be proven.`,
-      shadow: `The risk is staying in unstable, ungrounded professional territory because the intuitive gift never gets paired with any concrete structure — inconsistent income, vague offerings, real insight that never becomes a sellable service. If your income feels foggy, the gift may need more grounding, not more mystique.`,
-      path: `Pair your intuitive professional gift with something concrete — a clear offering, a defined process, a tangible deliverable. The insight is real; it needs a container to actually be paid for. You are allowed to follow the professional hunch past the explainable. What direction keeps tugging that your resume can't justify yet?`,
-      positive: `Your income through intuitive insight hasn't changed — reading an unspoken undercurrent, sensing before proving, was always the real skill. What's different is that you now pair that gift with something concrete, a clear offering, a defined process. That container is what finally lets insight convert into income.`,
-      negative: `Your intuitive gift is completely real, and it keeps staying in unstable, ungrounded territory, never paired with any concrete structure. That fogginess isn't mystique. It's an income still unmonetized, still waiting for grounding instead of more mystery.`,
+      title: `18 in Wealth Potential — The Moon`,
+      tagline: `A Design of the Grounded Hunch`,
+      mastery: `Your income thrives in roles that draw on intuitive, emotionally attuned insight.`,
+      shadow: `You stay in unstable, ungrounded professional territory because the gift never gets paired with concrete structure.`,
+      invitation: `Pair your intuitive gift today with one concrete offering or defined process.`,
     },
 
     // ── 19 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '19_MON': {
-      heading: `Work That Feels Like You`,
-      why: `You thrive financially in professions where your natural personality is actually the asset, not something to suppress for professionalism's sake — work that genuinely feels like you, authentic, visible, offered without the heaviness of grinding through something that doesn't fit. The Sun governs your money channel, meaning your wealth potential flows most easily through exactly this kind of work. This tends to look like public speaking, teaching children specifically, the entertainment industry, creative leadership roles, or a personal brand business built around simply being visibly, genuinely yourself.`,
-      shadow: `The risk is undervaluing work that comes easily and joyfully, assuming real professional value requires more struggle than you're actually experiencing. If you're underpaid for work that lights you up, the ease may be masking its own worth.`,
-      path: `Let joy and price coexist. Work that feels easy to you can still be genuinely valuable — the ease of your gift doesn't lower what it's worth to someone else. You are allowed to earn from work that feels like being yourself. Where does your labor still require a costume?`,
-      positive: `Your income through authenticity hasn't changed — work that genuinely feels like you, visible and unforced, was always the real asset. What's different is that you now let joy and price coexist, pricing the work honestly instead of discounting it for feeling easy. That honesty is what makes the ease sustainable income.`,
-      negative: `Your natural fit for the work is completely real, and it keeps being undervalued, assumed to be worth less because it doesn't feel like struggle. That assumption isn't humility. It's an income still underpriced, still waiting for ease to be counted as real value.`,
+      title: `19 in Wealth Potential — The Sun`,
+      tagline: `A Design of Priced Joy`,
+      mastery: `Your income thrives in work where your natural personality is actually the asset.`,
+      shadow: `You undervalue work that comes easily and joyfully, assuming real value requires more struggle.`,
+      invitation: `Price one piece of easy, joyful work today honestly, without discounting it.`,
     },
 
     // ── 20 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '20_MON': {
-      heading: `The Calling, Not the Comfortable`,
-      why: `You thrive financially once you actually answer a genuine vocational calling rather than settling for merely adequate — a career that keeps summoning you, growing harder to ignore, even if the practical version of it feels riskier than staying put. Judgement governs your money channel, meaning your wealth potential flows most freely through exactly this kind of work. This tends to look like coaching or mentoring, public service, work on social projects, speaking on subjects that genuinely matter, or transformational education — professions that function less like a job and more like an answer.`,
-      shadow: `The risk is hearing the calling and spending years preparing to answer it, staying in the adequate-but-outgrown role while endlessly upskilling instead of actually making the leap. If your income has stagnated despite real effort, the effort may be going into preparation rather than the actual move.`,
-      path: `Answer the professional call before you feel fully ready. Financial growth tends to arrive in the moving, not the endless preparing. You are allowed to answer the calling that keeps calling. What work do you keep returning to in your mind — and what is one real step toward it?`,
-      positive: `Your income through vocational calling hasn't changed — a career that keeps summoning you, growing harder to ignore, was always real. What's different is that you now answer the professional call before you feel fully ready, instead of endlessly upskilling. That answering is what lets financial growth arrive.`,
-      negative: `Your calling is completely real, and it keeps being met with years of preparation instead of an actual leap, staying in the adequate-but-outgrown role. That preparing isn't diligence. It's an income still stagnant, still waiting for the actual move.`,
+      title: `20 in Wealth Potential — Judgement`,
+      tagline: `A Design of the Answered Call`,
+      mastery: `You thrive financially once you actually answer a genuine vocational calling.`,
+      shadow: `You spend years preparing to answer it, staying in the adequate-but-outgrown role.`,
+      invitation: `Take one real step today toward the calling, before you feel fully ready.`,
     },
 
     // ── 21 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '21_MON': {
-      heading: `Beyond One System`,
-      why: `You thrive financially once your work is allowed to cross borders rather than stay contained inside one local system — real wealth potential for you tends to open up specifically through global reach, not through going deeper into one fixed place. The World governs your money channel, meaning your career grows through international business and global trade, online platforms and digital ecosystems that don't respect borders, cross-border projects, travel, tourism or relocation services, or work embedded in genuinely large systems and networks rather than a single local one.`,
-      shadow: `The risk is staying confined to a local or narrowly-scoped version of your field long after your actual capacity has outgrown it, mistaking a comfortable boundary for a necessary one. If your income feels capped despite real skill, the ceiling may simply be geographic or systemic rather than personal.`,
-      path: `Let one part of your work deliberately cross a border — a client, a platform, a market — rather than assuming your reach has to stay local. Your financial growth tends to track how far your work is actually allowed to travel. You are allowed to work at the size of the whole map. What border — literal or invented — is your work ready to cross?`,
-      positive: `Your income through global reach hasn't changed — wealth potential opening through crossing borders, not staying contained locally, was always the real pattern. What's different is that you now let one part of your work deliberately cross a border, a client, a platform, a market. That crossing is what lets income grow past its old ceiling.`,
-      negative: `Your capacity for global-scale work is completely real, and it keeps staying confined to a narrow, local version of the field. That confinement isn't caution. It's an income still capped, still waiting for the border it's actually ready to cross.`,
+      title: `21 in Wealth Potential — The World`,
+      tagline: `A Design of the Crossed Border`,
+      mastery: `Your wealth potential opens up specifically through global reach.`,
+      shadow: `You stay confined to a local or narrowly-scoped version of your field long after your capacity has outgrown it.`,
+      invitation: `Let one part of your work today deliberately cross a border — a client, a platform, a market.`,
     },
 
     // ── 22 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '22_MON': {
-      heading: `Starting Without Guarantee`,
-      why: `You thrive financially in careers or ventures that reward genuine courage, letting you access opportunities that people requiring more proof simply never reach — a willingness to start a new venture, role, or path without needing certainty first. The Fool governs your money channel, meaning your wealth potential flows through exactly this kind of professional risk-taking. This tends to look like freelancing, creative entrepreneurship, working as a digital nomad, joining or building genuine startups and experimental projects, or any non-standard profession that didn't exist as a fixed category before you found it.`,
-      shadow: `The risk is repeating the same fresh professional start without absorbing what the last one taught you, leaping into new ventures with the same openness every time but no accumulating wisdom underneath it. If your career keeps resetting instead of building, the openness may need a partner in discernment.`,
-      path: `Let each professional leap teach you something concrete you actually carry into the next one. The courage to start fresh is real — pairing it with genuine reflection is what turns repeated starts into accumulating expertise and income. You are allowed to begin before the guarantee arrives. What venture would you open this year if faith counted as capital?`,
-      positive: `Your income through professional courage hasn't changed — the willingness to start without certainty was always the real edge. What's different is that you now let each professional leap teach you something concrete you actually carry into the next one. That reflection is what turns repeated starts into accumulating expertise.`,
-      negative: `Your courage to start is completely real, and it keeps repeating the same fresh professional start without absorbing what the last one taught you. That repeating isn't boldness. It's a career still resetting, still waiting for the openness to be paired with discernment.`,
+      title: `22 in Wealth Potential — The Fool`,
+      tagline: `A Design of the Reflected Leap`,
+      mastery: `You thrive financially in careers that reward genuine courage — starting without certainty.`,
+      shadow: `You repeat the same fresh professional start without absorbing what the last one taught you.`,
+      invitation: `Carry one concrete lesson today from your last leap into whatever comes next.`,
     },
 
     // ── 13 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ──────────
@@ -2468,222 +2424,200 @@ window.DMicroContent = (function () {
 
     // ── 1 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '1_RWM': {
-      heading: `Earned Over Given`,
-      why: `Your subconscious relationship to money runs through active generation — earning feels legitimate, deserved, real, while money that arrives without your direct effort (a gift, a windfall, unearned interest) can feel oddly uncomfortable to simply receive. The Magician governs your Relationship with Money, meaning your instinct is to keep initiating income rather than letting it also just come to you.`,
-      shadow: `The risk is turning down or minimizing genuinely available resources — support, gifts, easier income — because only self-generated money feels legitimate to hold onto. If you find yourself working harder for money you could have simply accepted, that discomfort with receiving may be the pattern still running.`,
-      path: `This may shift by accepting one piece of unearned financial ease this week — a gift, an easier path, help offered — without converting it into something you have to justify through extra effort. You are allowed to receive money you didn't visibly sweat for. What arrived easily lately that you could practice simply keeping?`,
-      positive: `Your trust in actively made money hasn't changed — earning through initiation was always genuine and legitimate. What's different is that you now accept one piece of unearned financial ease, a gift, an easier path, without converting it into something to justify through extra effort. That acceptance is what widens the flow.`,
-      negative: `Your instinct to keep initiating income is completely real, and it keeps discounting money that arrives without direct effort, turning down real ease because only self-generated income feels legitimate. That discounting isn't discipline. It's a flow still narrower than it needs to be, still waiting for receiving to feel as legitimate as earning.`,
+      title: `1 in Relationship with Money — The Magician`,
+      tagline: `A Design of the Kept Gift`,
+      mastery: `You initiate income actively — earning feels legitimate, deserved, and real.`,
+      shadow: `You minimize genuinely available resources because only self-generated money feels legitimate to hold onto.`,
+      invitation: `Accept one piece of unearned financial ease today without justifying it through extra effort.`,
     },
 
     // ── 2 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '2_RWM': {
-      heading: `Sensing, Not Naming`,
-      why: `Your subconscious relationship to money runs through quiet intuition — a real sense for when a financial opportunity is right, paired with real discomfort stating plainly what your work or time is actually worth. The High Priestess governs your Relationship with Money, meaning your financial insight tends to stay private, felt rather than spoken aloud in the transactional terms money actually requires.`,
-      shadow: `The risk is that unclaimed insight goes uncompensated — you sense the right move, make it quietly, and let the value of that instinct go unnamed and underpaid. If your income doesn't reflect what you actually know, the silence around your own worth may be the pattern still active.`,
-      path: `This may shift by stating one specific price or value out loud this week, rather than letting your financial instinct stay an unspoken, unpaid asset. You are allowed to name your price out loud and let the silence sit. What number would you quote tomorrow if flinching weren't part of the transaction?`,
-      positive: `Your quiet sense for financial opportunity hasn't changed — that intuition was always genuinely accurate. What's different is that you now state one specific price or value out loud, rather than letting the instinct stay an unspoken, unpaid asset. That naming is what finally lets income reflect the real value.`,
-      negative: `Your financial insight is completely real, and it keeps staying private, felt rather than spoken aloud in the transactional terms money actually requires. That silence isn't modesty. It's an income still uncompensated, still waiting for the price to actually be named.`,
+      title: `2 in Relationship with Money — The High Priestess`,
+      tagline: `A Design of the Named Price`,
+      mastery: `You carry a real, quiet sense for when a financial opportunity is right.`,
+      shadow: `You leave that insight unclaimed and uncompensated, sensed but never stated aloud.`,
+      invitation: `State one specific price or value out loud today.`,
     },
 
     // ── 3 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '3_RWM': {
-      heading: `Spending on Others, Not Self`,
-      why: `Your subconscious relationship to money runs through generous, sensory expression — real ease spending on comfort, beauty, and care, for yourself and especially for others, with less natural pull toward accumulation or reserve. The Empress governs your Relationship with Money, meaning your financial flow is generative and warm, but not automatically protective of its own future.`,
-      shadow: `The risk is that generosity, unchecked, leaves nothing set aside — real abundance moving freely outward while your own reserve stays thin. If you're comfortable and generous now but anxious about later, that imbalance may be the pattern still unresolved.`,
-      path: `This may shift by setting aside a specific portion of any income for your own future before spending on comfort or generosity extends further. You are allowed to save for yourself with the same pleasure you spend on comfort. What would a beautiful act of saving look like?`,
-      positive: `Your ease spending on comfort and beauty hasn't changed — generous, sensory expression was always genuine warmth. What's different is that you now set aside a specific portion of income for your own future before the comfort spending extends further. That reserve is what keeps the warmth from costing you your own security.`,
-      negative: `Your generosity is completely real, and it keeps moving freely outward while your own reserve stays thin. That thinness isn't recklessness. It's a future still unprotected, still waiting for saving to feel as pleasurable as spending.`,
+      title: `3 in Relationship with Money — The Empress`,
+      tagline: `A Design of Pleasurable Saving`,
+      mastery: `You spend with real ease on comfort, beauty, and care for yourself and others.`,
+      shadow: `Your generosity moves freely outward while your own reserve stays thin.`,
+      invitation: `Set aside one specific portion of income today for your own future.`,
     },
 
     // ── 4 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '4_RWM': {
-      heading: `Safety Through Control`,
-      why: `Your subconscious relationship to money runs through control — structure, oversight, a firm hand on every account and decision, as though financial security depends entirely on your personal management of it. The Emperor governs your Relationship with Money, meaning your instinct is to build and defend systems rather than trust ones you didn't personally construct.`,
-      shadow: `The risk is that the management itself becomes the source of stress, and delegating any part of your finances — even to a trustworthy system — feels like a genuine risk rather than a reasonable option. If you can't imagine your money being fine without your constant oversight, that's the pattern still active.`,
-      path: `This may shift by handing one small piece of financial management to a system or person you trust, and observing whether it actually holds without you. You are allowed to let a detail go unmanaged and see it survive. Which piece of the money machinery could run a week without your eyes on it?`,
-      positive: `Your instinct to build and defend financial structure hasn't changed — that firm hand was always real competence. What's different is that you now hand one small piece of financial management to a system or person you trust, and observe whether it holds. That test is what finally lets security extend beyond your own oversight.`,
-      negative: `Your need for control is completely real, and it keeps making delegation feel like a genuine risk rather than a reasonable option. That risk-aversion isn't prudence. It's a security still exhausting to sustain, still waiting for a trusted system to be given the chance to hold.`,
+      title: `4 in Relationship with Money — The Emperor`,
+      tagline: `A Design of Tested Delegation`,
+      mastery: `You build and defend real financial structure, a firm hand on every account.`,
+      shadow: `You can't imagine your money being fine without your constant oversight.`,
+      invitation: `Hand one small piece of financial management today to a system or person you trust.`,
     },
 
     // ── 5 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '5_RWM': {
-      heading: `Guilt Over the "Right Way"`,
-      why: `Your subconscious relationship to money runs through inherited rules about correctness — a real sense that there's a proper, sanctioned way to earn and spend, and quiet discomfort whenever money arrives or leaves outside that framework. The Hierophant governs your Relationship with Money, meaning your instinct is to check financial choices against tradition or authority before trusting them.`,
-      shadow: `The risk is passing up genuinely good financial opportunities simply because they don't match an inherited idea of the "proper" way to earn or spend. If you feel guilty about money that came easily or unconventionally, even when nothing about it was actually wrong, that inherited rule may be the pattern still active.`,
-      path: `This may shift by naming one inherited money rule directly and testing whether it actually reflects your own values, or just an old, unexamined authority. You are allowed to earn and spend outside the inherited 'right way' without guilt attending. Whose voice is the guilt actually speaking in — and is it still your authority?`,
-      positive: `Your instinct to check financial choices against tradition hasn't changed — that framework was always genuinely meaningful. What's different is that you now name one inherited money rule directly and test whether it actually reflects your own values. That testing is what finally lets you earn and spend without guilt attached.`,
-      negative: `Your sense that there's a proper, sanctioned way to handle money is completely real, and it keeps disqualifying genuinely good opportunities that don't match the inherited framework. That disqualifying isn't wisdom. It's an opportunity still passed up, still waiting for the old rule to be examined instead of simply obeyed.`,
+      title: `5 in Relationship with Money — The Hierophant`,
+      tagline: `A Design of the Tested Rule`,
+      mastery: `You check financial choices against a real sense of proper, sanctioned tradition.`,
+      shadow: `You pass up genuinely good opportunities simply because they don't match an inherited "right way."`,
+      invitation: `Name one inherited money rule today and test whether it reflects your own values.`,
     },
 
     // ── 6 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '6_RWM': {
-      heading: `Weighed Against Someone Else`,
-      why: `Your subconscious relationship to money runs through relational weighing — earning and spending decisions filtered through what a partner or loved one would think, want, or need, sometimes before your own actual preference gets consulted. The Lovers governs your Relationship with Money, meaning your financial choices are genuinely relational, for better and for worse.`,
-      shadow: `The risk is that your own financial preference gets perpetually deferred to someone else's, leaving you unsure what you'd actually choose if the decision were only yours. If you can't say clearly what you want financially, independent of what someone else wants, that deference may be the pattern still unresolved.`,
-      path: `This may shift by making one financial decision based purely on your own preference this week, and letting it stand without checking it against anyone else's wants first. You are allowed to weigh your own want first sometimes. What financial choice is currently pending that is genuinely yours alone to make?`,
-      positive: `Your relational weighing of financial choices hasn't changed — genuinely considering a partner's wants was always real care. What's different is that you now make one financial decision based purely on your own preference, and let it stand without checking it against anyone else's first. That choice is what turns deference into true collaboration.`,
-      negative: `Your relational instinct around money is completely real, and it keeps filtering every choice through what someone else would want first. That filtering isn't consideration. It's a preference still unexamined, still waiting for your own want to be weighed first sometimes.`,
+      title: `6 in Relationship with Money — The Lovers`,
+      tagline: `A Design of the Weighed Want`,
+      mastery: `Your financial choices are genuinely relational, considering what a partner would think or need.`,
+      shadow: `Your own financial preference gets perpetually deferred to someone else's.`,
+      invitation: `Make one financial decision today based purely on your own preference.`,
     },
 
     // ── 7 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '7_RWM': {
-      heading: `Chasing Past Enjoying`,
-      why: `Your subconscious relationship to money runs through forward drive — real ambition and momentum toward the next financial target, arriving so quickly after the last one that there's rarely a pause to actually register what's already been earned. The Chariot governs your Relationship with Money, meaning your financial motion is genuinely strong, but rest and enjoyment haven't kept pace with it.`,
-      shadow: `The risk is that money earned never actually gets to feel earned — spent, saved, or invested toward the next goal before its arrival is even acknowledged. If you can't recall the last time you paused to genuinely enjoy an income milestone, that restlessness may be the pattern still active.`,
-      path: `This may shift by deliberately pausing after the next financial milestone, before setting the next target, long enough to actually register what's been reached. You are allowed to enjoy the goal you just reached before chasing the next. What recent win deserves an actual celebration, however small?`,
-      positive: `Your forward drive toward the next financial target hasn't changed — real ambition and momentum were always genuine strength. What's different is that you now pause deliberately after a milestone, before setting the next target, long enough to actually register what's been reached. That pause is what turns motion into felt progress.`,
-      negative: `Your financial momentum is completely real, and it keeps chasing the next goal so quickly there's rarely time to register the last one. That chasing isn't ambition alone. It's a progress still unfelt, still waiting for a pause to let it actually land.`,
+      title: `7 in Relationship with Money — The Chariot`,
+      tagline: `A Design of the Registered Milestone`,
+      mastery: `You carry real ambition and momentum toward the next financial target.`,
+      shadow: `Money earned never actually gets to feel earned, chased past before it's acknowledged.`,
+      invitation: `Pause today after one financial milestone, long enough to actually register it.`,
     },
 
     // ── 8 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '8_RWM': {
-      heading: `A Precise Mental Ledger`,
-      why: `Your subconscious relationship to money runs through fairness and precision — a sharp internal accounting of who owes what, whether compensation matches effort, whether an exchange was actually equal. The Justice governs your Relationship with Money, meaning your financial instinct is deeply oriented toward balance, sometimes at the cost of ease.`,
-      shadow: `The risk is that the mental ledger never fully closes — small financial imbalances tracked and remembered long after they'd naturally resolve on their own, creating tension in relationships or transactions that could otherwise be simple. If you're still tallying a financial unfairness long after it stopped mattering to anyone else, that ledger may be the pattern still running.`,
-      path: `This may shift by consciously closing one old financial account you're still mentally tracking, and letting the balance rest rather than continuing to tally it. You are allowed to close the ledger on exchanges that were already fair. Where could generosity replace precision without anything being lost?`,
-      positive: `Your precise mental ledger hasn't changed — a sharp internal accounting of what's fair was always real orientation toward balance. What's different is that you now consciously close one old financial account you're still tracking, and let the balance rest. That closing is what lets fairness apply to what's current.`,
-      negative: `Your instinct for fairness is completely real, and it keeps the ledger open indefinitely, small imbalances tracked long after they'd naturally resolve. That tracking isn't precision. It's a fairness still tangled in the past, still waiting for an old account to actually be closed.`,
+      title: `8 in Relationship with Money — Justice`,
+      tagline: `A Design of the Closed Account`,
+      mastery: `You carry a sharp, real orientation toward financial fairness and precision.`,
+      shadow: `Your mental ledger never fully closes, small imbalances tracked long after they'd naturally resolve.`,
+      invitation: `Consciously close one old financial account today that you're still mentally tracking.`,
     },
 
     // ── 9 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '9_RWM': {
-      heading: `Alone Over Asking`,
-      why: `Your subconscious relationship to money runs through self-sufficiency — a strong preference for earning and managing money independently, even when collaboration or support would genuinely increase what's available to you. The Hermit governs your Relationship with Money, meaning your financial instinct favors solitude over asking, even at a real cost.`,
-      shadow: `The risk is undercharging or under-earning specifically to avoid the discomfort of financial interdependence — a self-sufficiency so strong it quietly limits your own income. If you'd rather make less alone than ask for help that could genuinely grow what you earn, that avoidance may be the pattern still active.`,
-      path: `This may shift by asking for one specific piece of financial help or partnership this week, and noticing what actually becomes possible once you do. You are allowed to partner and still be self-made. What could you build with help that solitude has kept at half its size?`,
-      positive: `Your self-sufficiency around money hasn't changed — earning and managing independently was always real capability. What's different is that you now ask for one specific piece of financial help or partnership, and notice what becomes possible. That asking is what finally lets income grow past solitude's ceiling.`,
-      negative: `Your preference for earning alone is completely real, and it keeps limiting income specifically to avoid the discomfort of financial interdependence. That limiting isn't independence. It's an income still capped, still waiting for partnership to be allowed in.`,
+      title: `9 in Relationship with Money — The Hermit`,
+      tagline: `A Design of the Accepted Partnership`,
+      mastery: `You carry real self-sufficiency, earning and managing money independently.`,
+      shadow: `You undercharge or under-earn specifically to avoid the discomfort of financial interdependence.`,
+      invitation: `Ask for one specific piece of financial help or partnership today.`,
     },
 
     // ── 10 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '10_RWM': {
-      heading: `Waves, Not Steady`,
-      why: `Your subconscious relationship to money runs through cycles — real feast-and-famine patterns, income that surges and recedes, an instinct that treats sudden financial luck as more familiar than slow, steady accumulation. The Wheel of Fortune governs your Relationship with Money, meaning your financial rhythm is genuinely cyclical, for better and worse.`,
-      shadow: `The risk is that steady income gets unconsciously undermined — quietly sabotaged or simply not trusted — because the wave pattern feels more like "how money actually works" than something reliable ever could. If consistent income opportunities keep slipping away just as they start to stabilize, that instinct may be the pattern still active.`,
-      path: `This may shift by deliberately protecting one steady income source through a full cycle, resisting the urge to disrupt it just because it feels unfamiliar. You are allowed to trust steady money — it isn't a trick. What would you do differently if predictable income finally felt safe?`,
-      positive: `Your feast-and-famine financial rhythm hasn't changed — real cycles of surge and recede were always the familiar pattern. What's different is that you now deliberately protect one steady income source through a full cycle, resisting the urge to disrupt it. That protection is what lets stability become trustworthy too.`,
-      negative: `Your cyclical financial instinct is completely real, and it keeps unconsciously undermining steady income because the wave pattern feels more like how money actually works. That undermining isn't caution. It's a stability still untrusted, still waiting for a full cycle to prove itself.`,
+      title: `10 in Relationship with Money — Wheel of Fortune`,
+      tagline: `A Design of the Trusted Cycle`,
+      mastery: `Your financial rhythm is genuinely cyclical, feast and famine, surge and recede.`,
+      shadow: `You unconsciously undermine steady income because the wave pattern feels more familiar than stability.`,
+      invitation: `Protect one steady income source today through its full cycle, without disrupting it.`,
     },
 
     // ── 11 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '11_RWM': {
-      heading: `Providing Before Provided For`,
-      why: `Your subconscious relationship to money runs through quiet endurance — real capacity to earn, support, and carry financial responsibility for others, paired with a much weaker instinct to ask the same in return. The Strength governs your Relationship with Money, meaning your financial resilience is genuine, but one-directional by default.`,
-      shadow: `The risk is that the giving becomes depleting precisely because it's never balanced by receiving — real financial strength quietly costing you the support you'd need to actually sustain it. If you can provide for everyone but struggle to ask anyone to provide for you, that imbalance may be the pattern still unresolved.`,
-      path: `This may shift by naming one specific financial need out loud to someone capable of helping, rather than continuing to carry it alone by default. You are allowed to be provided for before the emergency makes it necessary. What support would you accept today if asking cost nothing?`,
-      positive: `Your capacity to provide financially for others hasn't changed — that quiet endurance was always genuine strength. What's different is that you now name one specific financial need out loud to someone capable of helping, rather than carrying it alone by default. That naming is what makes the strength sustainable.`,
-      negative: `Your financial resilience is completely real, and it keeps staying one-directional, giving without ever asking the same in return. That one-directionality isn't strength holding steady. It's a resilience still depleting, still waiting to be balanced by receiving.`,
+      title: `11 in Relationship with Money — Strength`,
+      tagline: `A Design of the Named Need`,
+      mastery: `You carry real capacity to earn, support, and provide financially for others.`,
+      shadow: `That giving becomes depleting because it's never balanced by asking for the same in return.`,
+      invitation: `Name one specific financial need out loud today to someone capable of helping.`,
     },
 
     // ── 12 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '12_RWM': {
-      heading: `Self, Last in Line`,
-      why: `Your subconscious relationship to money runs through self-denial — a real instinct to withhold financial comfort from yourself specifically, even while resources exist, as though waiting or sacrificing has its own quiet virtue. The Hanged Man governs your Relationship with Money, meaning your financial instinct suspends your own comfort more readily than it suspends anyone else's.`,
-      shadow: `The risk is that the denial outlives whatever it was originally protecting — money available for your own comfort, held back indefinitely, well past the point where the sacrifice actually serves anything. If you consistently postpone spending on yourself specifically, that suspension may be the pattern still active.`,
-      path: `This may shift by spending, deliberately and without justification, on one thing for your own comfort this week — not as a reward, just as a choice. You are allowed to spend on yourself specifically, on purpose, soon. What denied purchase is actually a postponed kindness?`,
-      positive: `Your instinct to withhold financial comfort from yourself hasn't changed — that suspension was always a real, if costly, discipline. What's different is that you now spend, deliberately and without justification, on one thing for your own comfort. That spending is what finally gives the denial an end point.`,
-      negative: `Your self-denial around money is completely real, and it keeps postponing your own comfort well past the point where the sacrifice actually serves anything. That postponing isn't virtue. It's a comfort still delayed, still waiting for permission to simply be spent on.`,
+      title: `12 in Relationship with Money — The Hanged Man`,
+      tagline: `A Design of the Ended Denial`,
+      mastery: `You carry a real instinct to withhold financial comfort from yourself out of quiet discipline.`,
+      shadow: `That denial outlives whatever it was originally protecting, well past the point of serving anything.`,
+      invitation: `Spend, deliberately and without justification, on one thing for your own comfort today.`,
     },
 
     // ── 13 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '13_RWM': {
-      heading: `Overhaul, Not Adjustment`,
-      why: `Your subconscious relationship to money runs through transformation — real financial shifts that arrive as complete overhauls, a job left entirely, a whole system rebuilt from scratch, rather than gradual, incremental change. The Death governs your Relationship with Money, meaning your financial instinct favors the clean break over the slow adjustment.`,
-      shadow: `The risk is that smaller, earlier course-corrections get skipped in favor of waiting for the big, dramatic reset — financial problems left unaddressed until they force a total overhaul that a gradual adjustment could have prevented. If your financial life keeps needing complete rebuilds rather than small tune-ups, that pattern may be the piece still unresolved.`,
-      path: `This may shift by making one small, incremental financial adjustment now, rather than waiting for the situation to force a complete overhaul later. You are allowed to adjust gradually — not every change needs the wrecking ball. What small financial tweak could replace the next planned overhaul?`,
-      positive: `Your instinct toward total financial overhaul hasn't changed — the clean break was always your real strength. What's different is that you now make one small, incremental adjustment now, rather than waiting for a situation to force a complete reset. That timing is what makes the transformation deliberate instead of forced.`,
-      negative: `Your capacity for total financial transformation is completely real, and it keeps skipping the smaller, earlier course-corrections in favor of the dramatic reset. That skipping isn't decisiveness. It's an overhaul still more disruptive than it needed to be, still waiting for the small tweaks to be allowed too.`,
+      title: `13 in Relationship with Money — The Death`,
+      tagline: `A Design of the Small Adjustment`,
+      mastery: `Your financial shifts arrive as complete, real overhauls rather than gradual change.`,
+      shadow: `You skip smaller, earlier course-corrections in favor of waiting for the dramatic reset.`,
+      invitation: `Make one small, incremental financial adjustment today, rather than waiting for a forced overhaul.`,
     },
 
     // ── 14 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '14_RWM': {
-      heading: `Extremes Under Stress`,
-      why: `Your subconscious relationship to money runs through balance — genuinely steady and moderate when centered, but prone to swinging into strict restriction or full indulgence the moment real stress enters the picture. The Temperance governs your Relationship with Money, meaning your natural equilibrium is real, but conditional on your overall state.`,
-      shadow: `The risk is that stress-driven financial swings undo the very balance that's otherwise your real strength — a period of discipline followed by a release that erases its progress, or the reverse. If your spending habits seem to track your stress level more than your actual financial plan, that swing may be the pattern still active.`,
-      path: `This may shift by noticing the moment stress starts pulling your spending toward an extreme, and consciously choosing the smaller, steadier version of the response instead. You are allowed to meet stress without the pendulum. When pressure hits next — what would the moderate move look like, decided now, in calm?`,
-      positive: `Your natural financial equilibrium hasn't changed — genuinely steady and moderate when centered was always real strength. What's different is that you now notice the moment stress starts pulling spending toward an extreme, and consciously choose the smaller, steadier response. That noticing is what lets the balance hold under pressure.`,
-      negative: `Your capacity for balance is completely real, and it keeps swinging into strict restriction or full indulgence the moment real stress enters. That swinging isn't a plan failing. It's a balance still conditional, still waiting to be chosen deliberately instead of overridden by pressure.`,
+      title: `14 in Relationship with Money — Temperance`,
+      tagline: `A Design of the Chosen Middle`,
+      mastery: `You carry a real, steady financial equilibrium when centered.`,
+      shadow: `You swing into strict restriction or full indulgence the moment real stress enters.`,
+      invitation: `Notice today the moment stress pulls your spending toward an extreme, and choose the steadier response.`,
     },
 
     // ── 15 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '15_RWM': {
-      heading: `Compulsion Over Choice`,
-      why: `Your subconscious relationship to money runs through compulsion — a specific financial habit, whether spending, earning, or a particular relationship to a job or lifestyle, that feels less like an active choice and more like something you're bound to. The Devil governs your Relationship with Money, meaning at least one part of your financial life runs on autopilot rather than genuine decision.`,
-      shadow: `The risk is mistaking the compulsive habit for simply how things are, never actually examining whether it's still necessary or just familiar. If a specific money habit feels like it's running you rather than the other way around, that unexamined grip may be the pattern still unresolved.`,
-      path: `This may shift by naming the specific compulsive financial habit honestly, and asking directly what would actually happen if you loosened it. You are allowed to examine the compulsion with curiosity instead of shame. What is the habit actually purchasing for you, underneath the receipt?`,
-      positive: `Your specific financial compulsion hasn't changed — a habit that feels bound rather than chosen was always real. What's different is that you now name the compulsive habit honestly and ask directly what would happen if you loosened it. That honesty is what turns autopilot back into genuine choice.`,
-      negative: `Your compulsive financial habit is completely real, and it keeps being mistaken for simply how things are, never actually examined. That mistaking isn't acceptance. It's a habit still running you, still waiting to be looked at with curiosity instead of shame.`,
+      title: `15 in Relationship with Money — The Devil`,
+      tagline: `A Design of the Honest Habit`,
+      mastery: `You carry a real capacity to notice a specific financial compulsion running on autopilot.`,
+      shadow: `You mistake that compulsive habit for simply how things are, never actually examined.`,
+      invitation: `Name one compulsive financial habit honestly today, and ask what would happen if you loosened it.`,
     },
 
     // ── 16 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '16_RWM': {
-      heading: `Sudden, Despite the Signs`,
-      why: `Your subconscious relationship to money runs through sudden disruption — real financial shifts that seem to hit abruptly, even in situations where warning signs were quietly present beforehand. The Tower governs your Relationship with Money, meaning your instinct is to maintain the current picture until it can no longer be maintained, rather than adjusting early.`,
-      shadow: `The risk is that maintaining the appearance of financial stability, instead of addressing the strain underneath it, sets up exactly the sudden reversal the denial was meant to avoid. If financial surprises in your life tend to have visible signals in hindsight, that pattern of delayed reckoning may be active.`,
-      path: `This may shift by identifying one financial strain currently being minimized, and addressing it directly before it forces a more disruptive, sudden correction. You are allowed to read the signs early and change course quietly. What current signal, honestly read, is asking for a small adjustment now?`,
-      positive: `Your instinct to maintain the current financial picture hasn't changed — that steadiness was always a real, if costly, effort. What's different is that you now identify one financial strain currently being minimized and address it directly. That early action is what replaces sudden reversal with chosen adjustment.`,
-      negative: `Your tendency toward sudden financial disruption is completely real, and it keeps maintaining an appearance of stability instead of addressing the strain underneath. That maintaining isn't calm. It's a reckoning still delayed, still waiting for the early signal to actually be read.`,
+      title: `16 in Relationship with Money — The Tower`,
+      tagline: `A Design of the Early Signal`,
+      mastery: `You carry a real instinct to maintain financial stability under pressure.`,
+      shadow: `You maintain the appearance of stability instead of addressing the strain underneath, until it forces a sudden reversal.`,
+      invitation: `Identify one financial strain being minimized today, and address it directly.`,
     },
 
     // ── 17 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '17_RWM': {
-      heading: `Passion Monetized, Rest Hoped For`,
-      why: `Your subconscious relationship to money runs through hope and natural talent — real ease turning creative or inspired work into income, paired with a more passive hope that other financial areas will simply improve on their own over time. The Star governs your Relationship with Money, meaning your gift for monetizing inspiration is real, but it hasn't yet extended to areas that need direct action instead.`,
-      shadow: `The risk is that hope substitutes for action in exactly the financial areas that need a concrete step, while your genuine talent for monetizing passion continues unaffected. If parts of your financial life have stayed the same for years despite hoping they'd improve, that passivity may be the pattern still active.`,
-      path: `This may shift by naming one financial area you've been hoping will improve, and taking one concrete action toward it this week instead of continuing to wait. You are allowed to apply your monetizing gift to the unglamorous parts too. Which neglected corner of your finances would transform under the attention you give your inspirations?`,
-      positive: `Your gift for monetizing what inspires you hasn't changed — that natural ease was always real. What's different is that you now name one financial area you've been hoping will improve and take one concrete action toward it. That action is what finally gives the hope something to stand on.`,
-      negative: `Your talent for monetizing inspiration is completely real, and it keeps staying passive in other financial areas, hoping they'll simply improve on their own. That passivity isn't faith. It's a financial area still unchanged, still waiting for the same attention your passions already get.`,
+      title: `17 in Relationship with Money — The Star`,
+      tagline: `A Design of the Attended Corner`,
+      mastery: `You carry real ease turning creative or inspired work into income.`,
+      shadow: `You hope other financial areas will simply improve on their own, without direct action.`,
+      invitation: `Name one financial area you've been hoping will improve today, and take one concrete action toward it.`,
     },
 
     // ── 18 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '18_RWM': {
-      heading: `Anxiety Louder Than the Numbers`,
-      why: `Your subconscious relationship to money runs through anxious uncertainty — a real, felt worry about your financial state that's often more intense and less examined than the actual numbers would justify. The Moon governs your Relationship with Money, meaning your financial fear tends to run ahead of your financial facts.`,
-      shadow: `The risk is that the anxiety perpetuates itself precisely because it's never actually checked against reality — a vague, unexamined fear is harder to resolve than a specific, known one. If you feel more anxious about money than your actual situation warrants, that gap between feeling and fact may be the pattern still active.`,
-      path: `This may shift by looking directly at one specific, avoided financial number this week, and letting the actual figure replace the anxious guess. You are allowed to let the numbers be clearer than the anxiety. What would you find if you looked — and how often has looking actually been worse than dreading?`,
-      positive: `Your anxious sense about your financial state hasn't changed in intensity — that worry was always real. What's different is that you now look directly at one specific, avoided financial number and let the actual figure replace the anxious guess. That look is what settles the fear into something workable.`,
-      negative: `Your financial anxiety is completely real, and it keeps running ahead of the actual facts, more intense than the numbers would justify. That running ahead isn't caution. It's a fear still unexamined, still waiting for the real figures to replace the guess.`,
+      title: `18 in Relationship with Money — The Moon`,
+      tagline: `A Design of the Checked Number`,
+      mastery: `You carry a real, felt sensitivity about your financial state.`,
+      shadow: `Your financial anxiety runs ahead of the actual facts, more intense than the numbers would justify.`,
+      invitation: `Look directly today at one specific, avoided financial number.`,
     },
 
     // ── 19 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '19_RWM': {
-      heading: `Ease Performed, Worry Private`,
-      why: `Your subconscious relationship to money runs through performed confidence — a natural, radiant ease around money maintained outwardly, even during periods where the underlying picture feels genuinely uncertain. The Sun governs your Relationship with Money, meaning your real gift for financial optimism sometimes covers concerns that could use real attention instead.`,
-      shadow: `The risk is that the consistent brightness prevents anyone, including you, from actually addressing what's uncertain underneath it — genuine financial concerns that never get real attention because the surface always looks fine. If you'd rarely let anyone see you actually worried about money, that consistent performance may be costing you real support.`,
-      path: `This may shift by letting one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual ease. You are allowed to drop the performance of ease with one trusted person. Who could hold the worried version of you without your ease becoming a lie?`,
-      positive: `Your radiant ease around money hasn't changed — that natural optimism was always genuine gift. What's different is that you now let one specific financial worry be visible to someone trustworthy, instead of managing it entirely behind the usual brightness. That visibility is what finally lets the concern get real attention.`,
-      negative: `Your projected financial ease is completely real, and it keeps covering concerns that could use direct attention instead. That covering isn't positivity. It's a worry still unaddressed, still waiting behind a performance of ease that's costing you real support.`,
+      title: `19 in Relationship with Money — The Sun`,
+      tagline: `A Design of the Visible Worry`,
+      mastery: `You carry a real, radiant ease around money, maintained even under real uncertainty.`,
+      shadow: `That consistent brightness prevents anyone, including you, from actually addressing what's uncertain.`,
+      invitation: `Let one specific financial worry be visible today to someone trustworthy.`,
     },
 
     // ── 20 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '20_RWM': {
-      heading: `Reckoning, Later Than the Signs`,
-      why: `Your subconscious relationship to money runs through delayed reckoning — a pattern of eventually facing financial truths fully and honestly, but usually well after the signs pointing toward them first appeared. The Judgement governs your Relationship with Money, meaning your eventual clarity is genuine, but the timing tends to lag behind the actual evidence.`,
-      shadow: `The risk is that the delay itself has a cost — financial issues left unaddressed longer than necessary, simply because the eventual reckoning always seems to arrive, so there's less urgency to act on early signs. If you tend to face financial truths only once they can no longer be avoided, that lag may be the pattern still active.`,
-      path: `This may shift by acting on a current financial sign now, before it becomes the kind of situation that eventually forces a full reckoning. You are allowed to wake up before the call comes. What sign from the last month deserves to be treated as the wake-up now?`,
-      positive: `Your eventual honesty about financial truths hasn't changed — that clarity, once it arrives, was always genuine. What's different is that you now act on a current financial sign now, before it becomes the kind of situation that forces a full reckoning. That earlier timing is what makes the correction less costly.`,
-      negative: `Your capacity for eventual financial clarity is completely real, and it keeps lagging behind the actual evidence, arriving only once things can no longer be avoided. That lagging isn't patience. It's a reckoning still delayed, still waiting for the early sign to be acted on instead of just noticed.`,
+      title: `20 in Relationship with Money — Judgement`,
+      tagline: `A Design of the Early Wake-Up`,
+      mastery: `You eventually face financial truths fully and honestly.`,
+      shadow: `That clarity arrives well after the signs pointing toward it first appeared.`,
+      invitation: `Act today on one current financial sign, before it forces a full reckoning.`,
     },
 
     // ── 21 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '21_RWM': {
-      heading: `Complete Only at Scale`,
-      why: `Your subconscious relationship to money runs through a large-scale, big-picture standard — real financial progress measured against an ideal, comprehensive version of success, rather than felt as complete on its own more modest terms. The World governs your Relationship with Money, meaning genuine financial wins can feel unfinished simply because the full picture hasn't yet arrived.`,
-      shadow: `The risk is that real, current financial success never gets to be felt as success, because it's constantly measured against a bigger picture that hasn't materialized yet. If you can't recall the last time a financial win felt genuinely complete, that big-picture standard may be the pattern still active.`,
-      path: `This may shift by naming one financial win that's genuinely real right now, and letting it count as complete on its own terms, without measuring it against the larger picture. You are allowed to let real success count even when it's smaller than the ideal picture. What have you built that the dream keeps refusing to credit?`,
-      positive: `Your big-picture standard for financial success hasn't changed — measuring against a comprehensive, ideal version was always part of your ambition. What's different is that you now name one financial win that's genuinely real right now and let it count as complete on its own terms. That naming is what finally lets success be felt.`,
-      negative: `Your large-scale standard is completely real, and it keeps measuring every current win against a bigger picture that hasn't materialized yet. That measuring isn't ambition working right. It's a success still unfelt, still waiting to be allowed to count even when it's smaller than the dream.`,
+      title: `21 in Relationship with Money — The World`,
+      tagline: `A Design of the Counted Win`,
+      mastery: `You measure real financial progress against a comprehensive, ideal version of success.`,
+      shadow: `Real, current success never gets to feel like success because the bigger picture hasn't arrived yet.`,
+      invitation: `Name one financial win today that's genuinely real, and let it count as complete on its own terms.`,
     },
 
     // ── 22 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '22_RWM': {
-      heading: `Trust Over Planning`,
-      why: `Your subconscious relationship to money runs through spontaneous trust — real openness to financial risk and change, paired with a genuine belief that things will work out, more than a habit of building the structure that would make that outcome more certain. The Fool governs your Relationship with Money, meaning your financial optimism is real, but often unaccompanied by preparation.`,
-      shadow: `The risk is that the trust alone gets asked to do the work that planning was meant to do — financial risks taken freely, with the landing left mostly to chance. If your financial life tends to work out through luck more than through preparation, that gap may be the pattern still unresolved.`,
-      path: `This may shift by pairing your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism. You are allowed to keep the faith and also make the plan. What would trusting-with-a-spreadsheet look like for you this quarter?`,
-      positive: `Your spontaneous trust that money will work out hasn't changed — that openness and belief were always genuine. What's different is that you now pair your next financial risk with one small, concrete piece of preparation, rather than trusting the outcome entirely to optimism. That preparation is what backs the trust with something solid.`,
-      negative: `Your financial optimism is completely real, and it keeps asking trust alone to do the work planning was meant to do, risks taken freely with the landing left to chance. That trusting-without-planning isn't faith. It's an outcome still dependent on luck, still waiting for the plan to join the belief.`,
+      title: `22 in Relationship with Money — The Fool`,
+      tagline: `A Design of the Backed Trust`,
+      mastery: `You carry a real, spontaneous openness to financial risk and a genuine belief things will work out.`,
+      shadow: `You ask trust alone to do the work planning was meant to do, leaving the landing to chance.`,
+      invitation: `Pair your next financial risk today with one small, concrete piece of preparation.`,
     },
 
     // ── 1 in MONEY ENTRY POINT (Money Channel) ──────────────────────────────
