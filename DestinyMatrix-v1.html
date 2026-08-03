@@ -3574,11 +3574,10 @@ const ARCANA_ESSENCE = {
 
       const sub = (label, num, c) => c ? `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">${label} · ${num}</div>
-           <div class="pb-full-text"><em>${c.heading}</em></div>
-           <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
-           ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
-           <div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>
-           <div class="pb-full-text" style="margin-top:8px">${c.path}</div>
+           <div class="pb-full-text"><em>${c.title || c.heading}</em>${c.tagline ? ` — ${c.tagline}` : ''}</div>
+           <div class="pb-full-text" style="margin-top:8px"><strong>Strength:</strong> ${c.strength}</div>
+           <div class="pb-full-text" style="margin-top:8px"><strong>Friction:</strong> ${c.friction}</div>
+           <div class="pb-full-text" style="margin-top:8px"><strong>Invitation:</strong> ${c.invitation}</div>
          </div>` : '';
 
       const context = `<div class="pb-full-section">
