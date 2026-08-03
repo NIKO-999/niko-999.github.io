@@ -4368,18 +4368,6 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">SHADOW</div>
          <div class="pb-full-text">${prog.shadow || ''}</div>
        </div>
-       ${Array.isArray(prog.indicators) && prog.indicators.length ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">INDICATORS</div>
-         <div class="pb-full-text">${prog.indicators.join(' &nbsp;·&nbsp; ')}</div>
-       </div>` : ''}
-       ${prog.newStrategy ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">NEW STRATEGY</div>
-         <div class="pb-full-text">${prog.newStrategy}</div>
-       </div>` : ''}
-       ${Array.isArray(prog.stepsToTake) && prog.stepsToTake.length ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">STEPS TO TAKE</div>
-         <div class="pb-full-text">${prog.stepsToTake.map((s,i) => (i+1) + '. ' + s).join('<br>')}</div>
-       </div>` : ''}
        ${prog.invitation ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(cd.hex)}">INVITATION</div>
          <div class="pb-full-text">${prog.invitation}</div>
