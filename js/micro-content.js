@@ -1852,222 +1852,200 @@ window.DMicroContent = (function () {
 
     // ── 21 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '21_H': {
-      heading: `Kept Almost Finishing`,
-      why: `The material legacy from your father's line — how to build, provide, and arrive at a durable, complete result — was oriented toward genuine mastery, not just survival. The World sits in your Paternal Material corner, and it points to a paternal lineage working, at some level, toward full arrival: a finished house, a business brought to maturity, a life's work rounded into something whole. Whether or not anyone in that line actually reached full completion, the orientation itself — build toward whole, not partial — is what arrived in you materially through your father's side.`,
-      shadow: `The risk is an inherited material perfectionism: the sense that nothing truly counts as built until it's completely, unquestionably finished, which can make you reluctant to claim real progress that just isn't total yet. This can also show up as a generational pattern of almost-arrivals — a father's line where the business nearly succeeded, the property was nearly paid off, the plan nearly reached its full form, again and again, one generation handing the nearly-there quality to the next along with the unfinished project itself. A financial life that keeps feeling permanently one stage short of secure is often this inherited orientation toward totality, still waiting for someone in the line to actually let a cycle complete.`,
-      path: `Try being the one who actually closes a cycle your paternal line kept almost-closing. Let material progress count as real before it's total — recognize a milestone as an actual arrival rather than a waypoint to some further, always-receding finish line. You inherited the orientation toward mastery. The specific gift you can offer your line now is completion itself — permission to say a stage of building is genuinely, currently done. You are allowed to be the one who finishes. What almost-done thing in your material life is asking you to break the family pattern and complete it?`,
-      positive: `The orientation toward genuine material mastery hasn't changed — what's different is that you now let progress count as real before it's total, recognizing a milestone as an actual arrival rather than a waypoint to some further, always-receding finish line. You've become the one who actually closes a cycle your paternal line kept almost-closing, and the almost-done thing that was asking you to break the family pattern finally gets to be finished, on your own terms.`,
-      negative: `The orientation toward genuine material mastery, working toward full arrival rather than partial success, is completely real, and it's showing up as an inherited perfectionism — nothing truly counting as built until it's completely, unquestionably finished. A financial life that feels permanently one stage short of secure is often this inherited orientation toward totality, still waiting for someone in the line to actually let a cycle complete, not evidence that real progress hasn't happened.`,
+      title: `21 in Paternal Material — The World`,
+      tagline: `A Design of Claimed Progress`,
+      mastery: `You inherited an orientation toward real material mastery — building all the way to genuine completion, not just partial success.`,
+      shadow: `You inherit a perfectionism where nothing counts as built until totally finished, leaving your material life feeling permanently one stage short of secure.`,
+      invitation: `Let one piece of material progress count as done today, even though it's not total.`,
     },
 
     // ── 1 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '1_H': {
-      heading: `Built From Nothing`,
-      why: `Your father's line likely modeled real material initiative, an ability to generate opportunity or income through sheer will and resourcefulness. The Magician sits in your Paternal Material corner, marking this generational instruction about resourcefulness. You inherited raw material here: genuine capacity to build from scratch, passed down as an assumed baseline rather than a taught skill.`,
-      shadow: `The trap is inheriting the expectation of resourcefulness without permission to ever need help — a belief that real material capability means never starting from anything but your own bare hands. If asking for material support feels like a personal failure, that's often an inherited standard about self-generated success still running unexamined.`,
-      path: `Try separating the genuine gift for resourcefulness from an inherited shame around needing support. Building from nothing is a real skill — it doesn't have to mean building entirely alone. You are allowed to build with help and materials this time. What might you make if starting from nothing stopped being the entry requirement?`,
-      positive: `The genuine capacity to build from scratch hasn't changed — what's different is that you've separated it from an inherited shame around needing support. Building from nothing is a real skill, and now it doesn't have to mean building entirely alone. What you might make, now that starting from nothing has stopped being the entry requirement, finally gets built with both your own hands and whatever help genuinely makes it better.`,
-      negative: `The genuine capacity to build from scratch, modeled as real material initiative through sheer will and resourcefulness, is completely real, and it arrived without permission to ever need help — a belief that real material capability means never starting from anything but your own bare hands. Material support feeling like a personal failure is often an inherited standard about self-generated success still running unexamined, not evidence that needing help is actually a weakness.`,
+      title: `1 in Paternal Material — The Magician`,
+      tagline: `A Design of Accepted Help`,
+      mastery: `You carry real capacity to build material security from nothing, through sheer resourcefulness.`,
+      shadow: `You inherit the expectation of total self-reliance, so needing material help feels like personal failure.`,
+      invitation: `Accept one piece of material help today instead of building it entirely alone.`,
     },
 
     // ── 2 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '2_H': {
-      heading: `Decisions Made Alone`,
-      why: `Your father's line likely made significant financial or practical decisions internally, without much outward deliberation or consultation. The High Priestess sits in your Paternal Material corner, marking this generational instruction about private material discernment. You inherited raw material here: real intuitive capacity for material judgment, passed down alongside an assumption that such decisions aren't discussed openly.`,
-      shadow: `The trap is inheriting the privacy without examining whether it actually serves you — making major material decisions in isolation, even when input or transparency would genuinely help, because that's the model you watched. If your material choices keep surprising the people close to you, that's often an inherited pattern of quiet, undiscussed decision-making.`,
-      path: `Try bringing a material decision into the open before finalizing it, even partially. This isn't a rejection of your own discernment — it's testing whether the privacy was actually necessary or simply inherited habit. You are allowed to think a money decision through out loud with someone. What financial question are you currently carrying alone that a second voice could halve?`,
-      positive: `The real intuitive capacity for material judgment hasn't changed — what's different is that you now bring a material decision into the open before finalizing it, even partially. This isn't a rejection of your own discernment; it's testing whether the privacy was actually necessary or simply inherited habit. The financial question you'd been carrying alone finally gets a second voice, and the people close to you stop being surprised by choices they had no part in.`,
-      negative: `The real intuitive capacity for material judgment, made internally without much outward deliberation, is completely genuine, and the privacy arrived without ever being examined for whether it actually serves you — major material decisions made in isolation even when input or transparency would genuinely help. Material choices that keep surprising the people close to you are often an inherited pattern of quiet, undiscussed decision-making, not evidence your judgment itself is unreliable.`,
+      title: `2 in Paternal Material — The High Priestess`,
+      tagline: `A Design of the Open Decision`,
+      mastery: `You carry real intuitive capacity for material judgment and financial decisions.`,
+      shadow: `You make major material decisions in total isolation, even when transparency would genuinely help.`,
+      invitation: `Bring one financial decision into the open today, before finalizing it.`,
     },
 
     // ── 3 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '3_H': {
-      heading: `Providing as Care`,
-      why: `Your father's line likely equated genuine care with material provision, giving generously as the primary language of love. The Empress sits in your Paternal Material corner, marking this generational instruction about material generosity. You inherited raw material here: real capacity for material abundance and generosity, passed down alongside an assumption that giving is the main way care gets shown.`,
-      shadow: `The trap is inheriting the equation between giving and love so completely that receiving, or expressing care in other ways, feels foreign or insufficient. If you find it hard to accept material help, or to express care without giving something material, that's often an inherited pattern worth examining.`,
-      path: `Try letting care be expressed and received in ways beyond material giving. Your generosity is a real gift — it doesn't have to be the only language available to you. You are allowed to show care in ways that don't cost you. Who might feel more loved by your presence this week than by your providing?`,
-      positive: `The real capacity for material abundance and generosity hasn't changed — what's different is that care now gets expressed and received in ways beyond material giving. Your generosity stays a real gift; it's simply no longer the only language available to you. Whoever might feel more loved by your presence than by your providing this week finally gets to receive that too, and receiving help yourself stops feeling foreign.`,
-      negative: `The real capacity for material abundance and generosity, equated with genuine care through provision, is completely real, and the equation between giving and love arrived so completely that receiving, or expressing care other ways, feels foreign or insufficient. Difficulty accepting material help, or expressing care without giving something material, is often an inherited pattern worth examining, not evidence that generosity itself needs to be the only language you speak.`,
+      title: `3 in Paternal Material — The Empress`,
+      tagline: `A Design of Received Care`,
+      mastery: `You carry real material generosity — capacity to give abundantly as an expression of care.`,
+      shadow: `You equate giving with love so completely that receiving material help feels foreign or insufficient.`,
+      invitation: `Let someone show you care today in a way that costs you nothing to receive.`,
     },
 
     // ── 4 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '4_H': {
-      heading: `A Provider's Shape, Defined`,
-      why: `Your father's line likely modeled a very specific structure for what responsible providing looks like: a particular career shape, a particular relationship to control over resources. The Emperor sits in your Paternal Material corner, marking this generational instruction about material authority and provision. You inherited raw material here: real capacity for material leadership, passed down alongside a fairly rigid template for what that's supposed to look like.`,
-      shadow: `The trap is inheriting the specific template without examining whether it actually fits your circumstances — measuring your own material life against a structure built for a different era or different person, and feeling like you're failing a standard that was never actually yours to meet. If you feel chronically behind on an inherited timeline, that template may need updating.`,
-      path: `Try building your own definition of responsible providing, informed by but not identical to your father's line's template. What worked in a different context may need real adaptation now. You are allowed to provide in a shape that fits your actual life. What would providing look like if the old template lost its authority?`,
-      positive: `The real capacity for material leadership hasn't changed — what's different is that you've built your own definition of responsible providing, informed by but not identical to your father's line's template. What worked in a different context has been genuinely adapted now, and providing finally looks like a shape that fits your actual life, instead of a standard measured against an old timeline that was never meant for you.`,
-      negative: `The real capacity for material leadership, modeled through a specific structure for responsible providing, is completely genuine, and the template arrived without examination for whether it actually fits your circumstances — measuring your own material life against a structure built for a different era or different person. Feeling chronically behind an inherited timeline is often that mismatch, not evidence you're actually falling short.`,
+      title: `4 in Paternal Material — The Emperor`,
+      tagline: `A Design of the Own Template`,
+      mastery: `You carry real capacity for material leadership and responsible providing.`,
+      shadow: `You measure your material life against a rigid, inherited template that was never built for your actual circumstances.`,
+      invitation: `Define what responsible providing looks like today, on your own terms, not the inherited one.`,
     },
 
     // ── 5 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '5_H': {
-      heading: `Rules About Money and Work`,
-      why: `Your father's line likely passed down specific, concrete rules about work and money: what a stable career looks like, what counts as responsible spending, which paths are trustworthy. The Hierophant sits in your Paternal Material corner, marking this generational instruction about proven material methods. You inherited raw material here in its most literal form: an actual, specific rulebook about material life.`,
-      shadow: `The trap is following the specific rules without checking whether the conditions that made them true still apply. Economic and professional landscapes change; a rule that protected your father's line in their era might genuinely not serve you in yours. If following the inherited rules feels like it's not working despite real discipline, the rulebook may need updating, not just more devoted application.`,
-      path: `Try treating the inherited material rules as a starting point for investigation, not a fixed law. Test each one against your actual current circumstances, and keep what genuinely still holds. You are allowed to rewrite the money rules for the economy you actually live in. Which inherited work rule has quietly stopped being true?`,
-      positive: `The specific, concrete rules about work and money hasn't changed as raw material — what's different is that you now treat them as a starting point for investigation, not a fixed law. Each one gets tested against your actual current circumstances, and what genuinely still holds gets kept. The inherited work rule that had quietly stopped being true finally gets identified and rewritten for the economy you actually live in.`,
-      negative: `The specific, concrete rules about work and money passed down through your father's line are completely real, and they're being followed without checking whether the conditions that made them true still apply — economic and professional landscapes changing while the rule stays fixed. Discipline that isn't translating into results despite real effort often means the rulebook needs updating, not more devoted application of something that no longer fits.`,
+      title: `5 in Paternal Material — The Hierophant`,
+      tagline: `A Design of the Tested Rulebook`,
+      mastery: `You carry real, specific knowledge about how work and money actually function.`,
+      shadow: `You follow inherited money rules without checking whether the conditions that made them true still apply.`,
+      invitation: `Test one inherited money rule today against your actual current circumstances.`,
     },
 
     // ── 6 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '6_H': {
-      heading: `What Work Is "Worth"`,
-      why: `Your father's line likely held clear convictions about which kinds of work or material pursuits were genuinely worthwhile versus merely lucrative. The Lovers sit in your Paternal Material corner, marking this generational instruction about values in material choices. You inherited raw material here: real capacity for values-driven material decisions, passed down alongside a specific, inherited definition of "worthwhile."`,
-      shadow: `The trap is inheriting the definition without examining whether it fits your own actual values, potentially rejecting genuinely good material opportunities because they don't match an inherited category of "worthy work." If you keep passing on opportunities that would serve you, out of an unexamined values filter, that filter may need re-checking.`,
-      path: `Try examining your inherited definition of worthwhile work against what you actually value now. Some of it may hold up genuinely; some may just be inherited categorization. You are allowed to call your own work worthy without the old measuring stick. What labor of yours deserves respect the inherited standard can't see?`,
-      positive: `The real capacity for values-driven material decisions hasn't changed — what's different is that you've examined your inherited definition of worthwhile work against what you actually value now. Some of it held up genuinely; some was just inherited categorization, and you've updated accordingly. The labor that deserves respect the inherited standard couldn't see finally gets called worthy, on your own terms.`,
-      negative: `The real capacity for values-driven material decisions, alongside clear paternal convictions about which work was genuinely worthwhile, is completely real, and the definition arrived without examination — potentially rejecting genuinely good material opportunities because they don't match an inherited category of "worthy work." Passing on opportunities that would serve you, out of an unexamined values filter, is worth re-checking, not a sign your judgment about worth is sound as-is.`,
+      title: `6 in Paternal Material — The Lovers`,
+      tagline: `A Design of the Own Definition`,
+      mastery: `You carry real, values-driven judgment about which material pursuits are genuinely worthwhile.`,
+      shadow: `You reject good opportunities because they don't match an inherited, unexamined definition of "worthy work."`,
+      invitation: `Reconsider one opportunity today you dismissed on an inherited value filter.`,
     },
 
     // ── 7 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '7_H': {
-      heading: `Success Meant Pushing`,
-      why: `Your father's line likely modeled relentless forward motion toward material goals, real willpower applied to work and provision. The Chariot sits in your Paternal Material corner, marking this generational instruction about disciplined material pursuit. You inherited raw material here: genuine capacity for material discipline, passed down alongside an assumption that stopping or resting is a kind of material failure.`,
-      shadow: `The trap is inheriting the drive without permission to ever actually arrive or rest — a belief that material worth is proven through continuous motion, making stillness or contentment feel like giving up. If you feel unable to enjoy material success once it arrives, that's often the paternal line's unexamined momentum still running.`,
-      path: `Try letting a material win actually be enjoyed, fully, before pushing toward the next goal. Real discipline includes knowing when to pause — that's not the opposite of the gift, it's what makes the gift sustainable. You are allowed to consolidate without it counting as retreat. What have you already built that deserves tending more than topping?`,
-      positive: `The genuine capacity for material discipline hasn't changed — what's different is that a material win now gets to be enjoyed, fully, before you push toward the next goal. Real discipline includes knowing when to pause, and that's not the opposite of the gift, it's what makes it sustainable. What you've already built finally gets tended instead of only ever topped, and success gets to actually feel like something instead of just another launching point.`,
-      negative: `The genuine capacity for material discipline, modeled through relentless forward motion toward material goals, is completely real, and it arrived without permission to ever actually arrive or rest — material worth proven through continuous motion, making stillness or contentment feel like giving up. Being unable to enjoy material success once it arrives is often the paternal line's unexamined momentum still running, not evidence the success itself isn't real.`,
+      title: `7 in Paternal Material — The Chariot`,
+      tagline: `A Design of the Enjoyed Win`,
+      mastery: `You carry real material discipline and drive toward provision.`,
+      shadow: `You inherit the belief that stopping to enjoy a win counts as material failure, so success never gets to feel like anything.`,
+      invitation: `Let one material win be fully enjoyed today, before pushing toward the next goal.`,
     },
 
     // ── 8 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '8_H': {
-      heading: `A Standard for Honest Dealing`,
-      why: `Your father's line likely held firm, specific beliefs about ethical work and honest dealing, a standard passed down as the correct way to handle money and resources. Justice sits in your Paternal Material corner, marking this generational instruction about material fairness. You inherited raw material here: real material integrity, alongside a specific, inherited version of what "fair" actually means.`,
-      shadow: `The trap is applying the inherited standard so rigidly that ordinary material negotiation feels like a moral compromise, making you either overly rigid in deals or quietly resentful of anyone who negotiates more flexibly than your father's line modeled. If material fairness feels like a constant, exhausting vigilance, the standard may be stricter than actually necessary.`,
-      path: `Try examining your inherited material fairness standard and checking whether its strictness genuinely reflects your own values, or simply an inherited, unexamined rule. You are allowed to keep the honest standard and drop the constant self-audit. Where has your integrity already been established beyond question?`,
-      positive: `The real material integrity hasn't changed — what's different is that you've examined your inherited fairness standard and checked whether its strictness genuinely reflects your own values, or was simply an inherited, unexamined rule. You've kept the honest standard and dropped the constant self-audit, and the integrity already established beyond question finally gets to rest instead of needing constant re-proving.`,
-      negative: `The real material integrity, passed down as a specific standard for ethical work and honest dealing, is completely genuine, and it's being applied so rigidly that ordinary material negotiation feels like a moral compromise — either overly rigid in deals or quietly resentful of anyone who negotiates more flexibly. Material fairness that feels like constant, exhausting vigilance is often a standard stricter than actually necessary, not evidence your own integrity is in question.`,
+      title: `8 in Paternal Material — Justice`,
+      tagline: `A Design of Flexible Integrity`,
+      mastery: `You carry real material integrity — an honest standard for fair dealing.`,
+      shadow: `You apply that standard so rigidly that ordinary negotiation feels like moral compromise, exhausting yourself with vigilance.`,
+      invitation: `Let one negotiation today be flexible without treating it as a compromise of your integrity.`,
     },
 
     // ── 9 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ────────────
     '9_H': {
-      heading: `Security Meant Alone`,
-      why: `Your father's line likely modeled handling financial and practical matters independently, without much outward reliance on others. The Hermit sits in your Paternal Material corner, marking this generational instruction about material self-reliance. You inherited raw material here: real capacity for material self-sufficiency, passed down alongside an assumption that needing material help signals some kind of failure.`,
-      shadow: `The trap is inheriting the self-reliance without permission to ever actually receive material support, even when it's genuinely available and would help. If asking for practical or financial help feels deeply uncomfortable regardless of how reasonable the need is, that's often the paternal line's inherited isolation.`,
-      path: `Try accepting one piece of material help, deliberately, even when you could technically handle it alone. Self-sufficiency is a real strength — it doesn't have to mean permanent isolation. You are allowed to let security be a shared project. What material weight could two sets of hands actually hold better?`,
-      positive: `The real capacity for material self-sufficiency hasn't changed — what's different is that you now accept a piece of material help, deliberately, even when you could technically handle it alone. Self-sufficiency stays a real strength; it just doesn't have to mean permanent isolation anymore. The material weight that two sets of hands could actually hold better finally gets shared, and security becomes something built together rather than defended alone.`,
-      negative: `The real capacity for material self-sufficiency, modeled through handling financial matters independently, is completely genuine, and it arrived without permission to ever actually receive support — needing material help treated as a kind of failure, even when it's genuinely available and would help. Discomfort asking for practical or financial help regardless of how reasonable the need is is often the paternal line's inherited isolation, not evidence you're actually incapable.`,
+      title: `9 in Paternal Material — The Hermit`,
+      tagline: `A Design of Accepted Support`,
+      mastery: `You carry real material self-sufficiency, capable of handling things independently.`,
+      shadow: `You inherit the belief that needing material help signals failure, so you never actually let anyone assist.`,
+      invitation: `Accept one piece of practical or financial help today, even though you could handle it alone.`,
     },
 
     // ── 10 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '10_H': {
-      heading: `How Much Control You Have`,
-      why: `Your father's line likely held a specific belief about how much genuine control a person has over their financial circumstances, whether trusting active effort or leaning toward material fatalism. The Wheel of Fortune sits in your Paternal Material corner, marking this generational instruction about material fate. You inherited raw material here: a real relationship to material timing, alongside an inherited answer to a question worth re-examining.`,
-      shadow: `The trap is inheriting either the fatalism or the excessive need for control without checking which actually fits your own experience. If you find yourself either passively accepting financial setbacks as inevitable or gripping too tightly to control every material variable, that's often an inherited belief still running.`,
-      path: `Try examining your own actual, lived relationship to material timing and effort, separate from what your father's line assumed. Update what doesn't match your real experience. You are allowed to plan as if your choices matter — they do. What money outcome this year is genuinely yours to influence?`,
-      positive: `The real relationship to material timing hasn't changed — what's different is that you've examined your own actual, lived relationship to material effort and control, separate from what your father's line assumed. You plan as if your choices matter, because they do, and the money outcome that's genuinely yours to influence finally gets influenced, neither passively accepted as fate nor gripped for control by old default.`,
-      negative: `The real relationship to material timing, inherited alongside a specific paternal belief about how much control a person has over their financial circumstances, is completely genuine, and it's running on an inherited answer rather than your own tested conclusion — either passive acceptance of financial setbacks as inevitable, or an anxious gripping to control every material variable. This isn't your own tested relationship to money; it's an inherited one still waiting for its re-examination.`,
+      title: `10 in Paternal Material — Wheel of Fortune`,
+      tagline: `A Design of Tested Timing`,
+      mastery: `You carry a real relationship to material timing and cycles.`,
+      shadow: `You inherit either fatalism or excessive control around money, without testing which actually fits your own experience.`,
+      invitation: `Take one action today that assumes your financial choices genuinely matter.`,
     },
 
     // ── 11 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '11_H': {
-      heading: `Providers Don't Show Strain`,
-      why: `Your father's line likely modeled providing through real hardship without visibly cracking, quiet fortitude as the expected response to financial pressure. Strength sits in your Paternal Material corner, marking this generational instruction about material endurance. You inherited raw material here: genuine capacity for material resilience, passed down alongside an assumption that struggle should stay hidden.`,
-      shadow: `The trap is inheriting the suppression along with the endurance — carrying real financial stress silently because visible strain feels like a failure of the provider role. If you hide material difficulty even from people who could genuinely help, that's often the paternal line's inherited stoicism.`,
-      path: `Try letting real financial strain be visible to someone you trust, before it becomes a crisis. This completes work your father's line may not have finished — separating genuine strength from an inherited requirement to look unshaken. You are allowed to admit the providing is heavy. Who could hear that honestly without you losing the provider's dignity?`,
-      positive: `The genuine capacity for material resilience hasn't changed — what's different is that real financial strain now gets to be visible to someone you trust, before it becomes a crisis. This completes work your father's line may not have finished: separating genuine strength from an inherited requirement to look unshaken. Someone finally gets to hear that the providing is heavy, without you losing the provider's dignity in the telling.`,
-      negative: `The genuine capacity for material resilience, modeled through providing during hardship without visibly cracking, is completely real, and the suppression arrived along with the endurance — real financial stress carried silently because visible strain feels like a failure of the provider role. Hiding material difficulty even from people who could genuinely help is often the paternal line's inherited stoicism, not evidence the struggle itself is shameful.`,
+      title: `11 in Paternal Material — Strength`,
+      tagline: `A Design of Visible Strain`,
+      mastery: `You carry real material resilience — the ability to provide through real hardship.`,
+      shadow: `You carry financial stress silently because visible strain feels like failing the provider role.`,
+      invitation: `Let one piece of real financial strain be visible to someone you trust today.`,
     },
 
     // ── 12 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '12_H': {
-      heading: `Waiting for the Right Move`,
-      why: `Your father's line likely modeled a willingness to hold off on conventional material moves, trusting a different timing than the expected path. The Hanged Man sits in your Paternal Material corner, marking this generational instruction about material patience. You inherited raw material here: real capacity for material patience, passed down alongside a caution about whether that patience always resolved into actual action.`,
-      shadow: `The trap is inheriting the waiting without its resolution — staying suspended in "not yet" regarding a material decision indefinitely, because that's the pattern you watched, without a clear model for when patience should convert into action. If your finances feel perpetually paused, the inherited patience may need a deadline.`,
-      path: `Try letting your material patience have an actual endpoint. The unconventional timing sense is a real gift — pairing it with an eventual, deliberate move is what makes it useful rather than just cautious. You are allowed to move before conditions are perfect. What right material move has waited long enough?`,
-      positive: `The real capacity for material patience hasn't changed — what's different is that it now has an actual endpoint. The unconventional timing sense is a real gift, and pairing it with an eventual, deliberate move is what makes it useful rather than just cautious. The right material move that had waited long enough finally happens, patience converting into real movement instead of staying suspended in "not yet."`,
-      negative: `The real capacity for material patience, modeled through holding off on conventional moves and trusting different timing, is completely genuine, and it arrived without its resolution — staying suspended in "not yet" regarding a material decision indefinitely, with no clear model for when patience should convert into action. Finances that feel perpetually paused often need the inherited patience given an actual deadline, not more waiting.`,
+      title: `12 in Paternal Material — The Hanged Man`,
+      tagline: `A Design of the Real Deadline`,
+      mastery: `You carry real material patience, willing to hold off on the conventional move for better timing.`,
+      shadow: `You stay suspended in "not yet" on a material decision indefinitely, with no deadline attached.`,
+      invitation: `Give one material decision a real deadline today instead of waiting indefinitely.`,
     },
 
     // ── 13 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '13_H': {
-      heading: `Is It Safe to Start Over`,
-      why: `Your father's line either modeled genuine willingness to release an outdated career or financial strategy for a better one, or clung hard to material identities well past their natural end. Transformation sits in your Paternal Material corner, marking this generational instruction about material reinvention. You inherited raw material here: a real relationship to material change, alongside whichever version of that pattern was actually modeled.`,
-      shadow: `The trap is inheriting resistance to material reinvention without examining it — staying in a financially outdated role or strategy because your father's line modeled endurance over release, even when release would genuinely serve you better now. If your material life feels stuck despite real effort, an old ending may be overdue.`,
-      path: `Try letting one outdated material identity or strategy actually end, deliberately, rather than maintaining it out of inherited loyalty to endurance. The reinvention happens in the release. You are allowed to start the material life over — survival is in your lineage. What rebuild are you more ready for than the old fear admits?`,
-      positive: `The real relationship to material change hasn't shifted — what's different is that you now let one outdated material identity or strategy actually end, deliberately, rather than maintaining it out of inherited loyalty to endurance. The reinvention happens in the release, and the rebuild you're more ready for than the old fear admits finally gets to happen, because survival was always in your lineage, and now so is letting go.`,
-      negative: `The real relationship to material change, shaped by whichever pattern of endurance-versus-release was actually modeled, is completely real, and resistance to reinvention arrived without examination — staying in a financially outdated role or strategy because your father's line modeled endurance over release, even when release would genuinely serve you now. A material life that feels stuck despite real effort often means an old ending is overdue, not that effort itself has failed.`,
+      title: `13 in Paternal Material — Transformation`,
+      tagline: `A Design of the Deliberate Ending`,
+      mastery: `You carry real capacity for material reinvention — releasing what's outdated for something that actually fits.`,
+      shadow: `You cling to a financially outdated role or strategy because your line modeled endurance over release.`,
+      invitation: `Let one outdated material identity or strategy actually end today, deliberately.`,
     },
 
     // ── 14 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '14_H': {
-      heading: `Moderate, By Default`,
-      why: `Your father's line likely modeled careful moderation in work and money, avoiding material extremes in either direction. Temperance sits in your Paternal Material corner, marking this generational instruction about material balance. You inherited raw material here: real capacity for sustainable material balance, passed down alongside a caution against ever taking a bigger material risk.`,
-      shadow: `The trap is inheriting the moderation so completely that genuine, worthwhile material risk feels off-limits, even when the potential reward would justify it. If you find yourself passing on real opportunities because they feel "too much," that's often inherited caution standing in for actual judgment.`,
-      path: `Try letting one calculated, worthwhile material risk through the inherited caution. Real balance includes knowing when moderation itself has become the more limiting choice. You are allowed to want more than careful moderation. What would modest-plus-one look like in your material life this year?`,
-      positive: `The real capacity for sustainable material balance hasn't changed — what's different is that one calculated, worthwhile material risk now gets to pass through the inherited caution. Real balance includes knowing when moderation itself has become the more limiting choice, and modest-plus-one finally gets to describe your material life this year, instead of caution filtering out every opportunity that felt like "too much."`,
-      negative: `The real capacity for sustainable material balance, modeled through careful moderation and avoidance of extremes, is completely genuine, and the moderation arrived so completely that worthwhile material risk feels off-limits, even when the potential reward would justify it. Passing on real opportunities because they feel "too much" is often inherited caution standing in for actual judgment, not evidence the risk itself is unwise.`,
+      title: `14 in Paternal Material — Temperance`,
+      tagline: `A Design of the Worthwhile Risk`,
+      mastery: `You carry real, sustainable material balance.`,
+      shadow: `You inherit such complete moderation that worthwhile material risk feels off-limits, even when it's actually warranted.`,
+      invitation: `Let one calculated, worthwhile material risk through today instead of defaulting to caution.`,
     },
 
     // ── 15 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '15_H': {
-      heading: `Who Holds the Power`,
-      why: `Your father's line likely held real, sometimes uncomfortable dynamics around control, money, and leverage, whether wielding it heavily or being subject to someone else wielding it over them. The Devil sits in your Paternal Material corner, marking this generational instruction about material power. You inherited raw material here: a real, honest understanding of material power, alongside whatever specific dynamic was actually modeled.`,
-      shadow: `The trap is repeating the inherited dynamic without examining it — either gripping control over material resources the way it was modeled, or unconsciously accepting being controlled the same way. If your material relationships keep echoing an old power imbalance, that pattern may need direct examination rather than automatic repetition.`,
-      path: `Try naming the specific material power dynamic you inherited, and consciously deciding whether it's actually serving your current relationships or simply repeating an old pattern. You are allowed to hold material power without repeating how it was held over others. What would power in your hands do differently?`,
-      positive: `The real, honest understanding of material power hasn't changed — what's different is that you've named the specific dynamic you inherited and consciously decided whether it's actually serving your current relationships or simply repeating an old pattern. Power in your hands finally gets to do something different, because the dynamic you're operating from now was chosen, not simply inherited and repeated on autopilot.`,
-      negative: `The real, honest understanding of material power, shaped by whatever dynamic around control, money, and leverage your father's line actually modeled, is completely genuine, and it's repeating without examination — either gripping control over material resources the way it was modeled, or unconsciously accepting being controlled the same way. Material relationships that keep echoing an old power imbalance need direct examination, not automatic repetition.`,
+      title: `15 in Paternal Material — The Devil`,
+      tagline: `A Design of the Named Dynamic`,
+      mastery: `You carry a real, honest understanding of material power and leverage.`,
+      shadow: `You repeat an inherited power dynamic without examining it — either gripping control or accepting being controlled by default.`,
+      invitation: `Name one material power dynamic today you've been repeating without examining it.`,
     },
 
     // ── 16 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '16_H': {
-      heading: `A Collapse, Untalked`,
-      why: `Your father's line likely underwent a genuine financial or practical collapse that was survived but never fully processed, its aftershock passed down instead of its resolution. The Tower sits in your Paternal Material corner, marking this generational instruction shaped by real material rupture. You inherited raw material here: real capacity for material clarity, tangled with an unfinished upheaval.`,
-      shadow: `The trap is inheriting the instability without ever processing the original collapse — a disproportionate financial anxiety whose source predates your own circumstances. If you feel a vague dread around money that doesn't match your actual situation, that's often an inherited rupture still looking for its resolution.`,
-      path: `Try naming the collapse, even speculatively — what happened materially in your father's line that was never fully discussed, and what clarity should have followed. Giving it words can finish what was left incomplete. You are allowed to talk about the collapse that was never talked through. What might naming that old loss release in how you hold money now?`,
-      positive: `The real capacity for material clarity hasn't changed — what's different is that you've named the collapse, even speculatively, what happened materially in your father's line that was never fully discussed, and what clarity should have followed. Giving it words finishes what was left incomplete, and how you hold money now finally gets to loosen, because naming the old loss released something that had been quietly running underneath it.`,
-      negative: `The real capacity for material clarity, tangled with a financial or practical collapse in your father's line that was survived but never fully processed, is completely genuine, and the instability arrived without ever processing the original collapse — a disproportionate financial anxiety whose source predates your own circumstances. A vague dread around money that doesn't match your actual situation is often an inherited rupture still looking for its resolution.`,
+      title: `16 in Paternal Material — The Tower`,
+      tagline: `A Design of the Named Collapse`,
+      mastery: `You carry real capacity for material clarity, even through past collapse.`,
+      shadow: `You carry a disproportionate financial anxiety whose actual source, an unprocessed collapse, predates your own circumstances.`,
+      invitation: `Name today, even speculatively, what happened materially in your father's line that was never discussed.`,
     },
 
     // ── 17 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '17_H': {
-      heading: `Material Hope, Kept Modest`,
-      why: `Your father's line likely held modest, guarded material ambitions, hoping for security rather than fully allowing themselves to hope for abundance. The Star sits in your Paternal Material corner, marking this generational instruction about material hope. You inherited raw material here: real capacity for genuine material renewal and hope, passed down alongside an inherited ceiling on how big that hope was allowed to be.`,
-      shadow: `The trap is inheriting the modest ceiling without questioning it — capping your own material aspirations at what felt safe for your father's line, even when your actual circumstances could support more. If you notice yourself downgrading real material dreams before you've even tested them, that's often an inherited caution against hoping too visibly.`,
-      path: `Try letting one material hope be fully-sized, without the inherited discount. This completes work your father's line may not have finished — separating caution from an actual ceiling on what's possible. You are allowed to hope for more than the line permitted itself. What material dream have you been pre-shrinking before it can even be spoken?`,
-      positive: `The real capacity for material renewal and hope hasn't changed — what's different is that one material hope now gets to be fully-sized, without the inherited discount. This completes work your father's line may not have finished: separating caution from an actual ceiling on what's possible. The material dream you'd been pre-shrinking before it could even be spoken finally gets to be spoken, at its actual size.`,
-      negative: `The real capacity for material renewal and hope, inherited alongside modest, guarded material ambitions, is completely genuine, and the ceiling arrived without question — capping your own material aspirations at what felt safe for your father's line, even when your actual circumstances could support more. Downgrading real material dreams before you've even tested them is often an inherited caution against hoping too visibly, not an accurate read of what's actually possible.`,
+      title: `17 in Paternal Material — The Star`,
+      tagline: `A Design of the Full-Sized Hope`,
+      mastery: `You carry real capacity for material hope and renewal.`,
+      shadow: `You cap your own material ambitions at an inherited, modest ceiling, even when your actual circumstances could support more.`,
+      invitation: `Let one material dream be fully-sized today, with no inherited discount applied.`,
     },
 
     // ── 18 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '18_H': {
-      heading: `An Unnamed Financial Dread`,
-      why: `Your father's line likely carried real financial anxiety that was never directly named or discussed, passed down as vague unease rather than a specific, addressable concern. The Moon sits in your Paternal Material corner, marking this generational instruction shaped by unprocessed material fear. You inherited raw material here: real material sensitivity, tangled with an inherited, unnamed dread.`,
-      shadow: `The trap is inheriting the fog without the clarity — carrying diffuse financial anxiety that doesn't attach to your actual current circumstances. If money worry surfaces disproportionately to your real situation, that's often an inherited fear still circling, waiting for its name.`,
-      path: `Try tracing the anxiety back as far as you can, even speculatively. What might your father's line have actually feared financially that never got said aloud? Naming it, even provisionally, can finally give it somewhere to land. You are allowed to name the fear so it stops steering. If the unnamed financial dread had a sentence — what would it say, and is it still true?`,
-      positive: `The real material sensitivity hasn't changed — what's different is that you've traced the anxiety back as far as you can, even speculatively, asking what your father's line might have actually feared financially that never got said aloud. Naming it, even provisionally, finally gives it somewhere to land, and the unnamed financial dread finally stops steering decisions from the shadows, because it's been spoken plainly, once, by you.`,
-      negative: `The real material sensitivity, tangled with financial anxiety that was never directly named or discussed, is completely genuine, and it arrived as fog without clarity — diffuse anxiety that doesn't attach to your actual current circumstances. Money worry surfacing disproportionately to your real situation is often an inherited fear still circling, waiting for a name it's never actually been given.`,
+      title: `18 in Paternal Material — The Moon`,
+      tagline: `A Design of the Traced Worry`,
+      mastery: `You carry real material sensitivity — the ability to sense financial risk or opportunity early.`,
+      shadow: `You carry diffuse financial anxiety that doesn't attach to your actual current circumstances.`,
+      invitation: `Trace one money worry back today, even speculatively, and give it an actual name.`,
     },
 
     // ── 19 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '19_H': {
-      heading: `Money Too Serious for Joy`,
-      why: `Your father's line likely treated financial and practical matters as weighty, effortful business, with genuine ease or delight around money treated as somehow inappropriate. The Sun sits in your Paternal Material corner, marking this generational instruction about material seriousness. You inherited raw material here: real capacity for a joyful, light relationship to material life, passed down alongside an inherited assumption that money has to be handled gravely.`,
-      shadow: `The trap is inheriting the heaviness without questioning it — approaching your own material life with more grim seriousness than it actually requires, because that's the tone modeled before you. If financial conversations always feel weighty regardless of the actual stakes, that's often inherited gravity standing in for genuine caution.`,
-      path: `Try letting a material decision be made with genuine lightness sometimes, without needing to justify the ease with extra gravity. This completes work your father's line may not have finished. You are allowed to enjoy money — seriousness was never the price of stewardship. What would a genuinely joyful purchase or gift feel like this month?`,
-      positive: `The real capacity for a joyful, light relationship to material life hasn't changed — what's different is that a material decision now gets made with genuine lightness sometimes, without needing to justify the ease with extra gravity. This completes work your father's line may not have finished. A genuinely joyful purchase or gift finally gets to feel exactly that way, proving seriousness was never actually the price of good stewardship.`,
-      negative: `The real capacity for a joyful, light relationship to material life, inherited alongside a paternal treatment of money as weighty, effortful business, is completely genuine, and the heaviness arrived without question — approaching your own material life with more grim seriousness than it actually requires. Financial conversations feeling weighty regardless of actual stakes is often inherited gravity standing in for genuine caution, not a real requirement of handling money well.`,
+      title: `19 in Paternal Material — The Sun`,
+      tagline: `A Design of Genuine Lightness`,
+      mastery: `You carry real capacity for a joyful, light relationship to material life.`,
+      shadow: `You treat money matters with more grim seriousness than they actually require, because that's the tone you inherited.`,
+      invitation: `Make one material decision today with genuine lightness, no extra gravity attached.`,
     },
 
     // ── 20 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '20_H': {
-      heading: `Potential Never Claimed`,
-      why: `Your father's line likely sensed a bigger financial or professional possibility and, for whatever reason, didn't fully pursue it. Judgement sits in your Paternal Material corner, marking this generational instruction shaped by unclaimed material potential. You inherited raw material here: real capacity to answer that call, passed down alongside the fact that it was once left unaddressed.`,
-      shadow: `The trap is inheriting the postponement itself — sensing your own bigger material potential and, without quite knowing why, hesitating the same way, as though delay were simply the family pattern. If you keep almost-pursuing a material opportunity without ever fully committing, that's often unfinished paternal work.`,
-      path: `Try answering the material call your own way, even if your father's line never did. You're not obligated to repeat the postponement — you're free to be the one who actually claims it. You are allowed to claim the potential they never got to. What material ambition would honor your line precisely by exceeding it?`,
-      positive: `The real capacity to answer a bigger material call hasn't changed — what's different is that you now answer it your own way, even if your father's line never did. You're not obligated to repeat the postponement; you're free to be the one who actually claims it. The material ambition that would honor your line precisely by exceeding it finally gets pursued, instead of sensed and set aside again.`,
-      negative: `The real capacity to answer a bigger material call, inherited alongside a sensed but unpursued financial or professional possibility, is completely genuine, and the postponement itself got inherited too — sensing your own bigger material potential and, without quite knowing why, hesitating the same way, as though delay were simply the family pattern. Almost-pursuing an opportunity without ever fully committing is often unfinished paternal work, not evidence the potential isn't real.`,
+      title: `20 in Paternal Material — Judgement`,
+      tagline: `A Design of the Answered Call`,
+      mastery: `You carry real capacity to answer a bigger material calling.`,
+      shadow: `You inherit the postponement itself — sensing your own bigger potential and hesitating the same way your line always did.`,
+      invitation: `Take one real step today toward the material potential you've been sensing but not pursuing.`,
     },
 
     // ── 22 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
     '22_H': {
-      heading: `How Much Risk Is Safe`,
-      why: `Your father's line likely held a specific comfort level with financial or practical risk-taking, whether cautious or bold, that got passed down as the assumed baseline. The Fool sits in your Paternal Material corner, marking this generational instruction about material risk. You inherited raw material here: a real relationship to material trust and risk, alongside an inherited calibration of what counts as "too much."`,
-      shadow: `The trap is inheriting the calibration without examining whether it fits your own actual circumstances — staying more cautious (or more reckless) than your current situation actually calls for, simply because that's the baseline you absorbed. If your material choices feel mismatched to your real risk tolerance, that calibration may need resetting.`,
-      path: `Try examining your inherited sense of acceptable material risk against your own actual circumstances and goals, and adjust deliberately rather than defaulting to the inherited setting. You are allowed to size the risk with your own eyes, not the old caution. What calculated leap is genuinely safer than staying still?`,
-      positive: `The real relationship to material trust and risk hasn't changed — what's different is that you've examined your inherited sense of acceptable material risk against your own actual circumstances and goals, and adjusted deliberately rather than defaulting to the inherited setting. The calculated leap that's genuinely safer than staying still finally gets sized with your own eyes, not the old caution.`,
-      negative: `The real relationship to material trust and risk, calibrated by whatever comfort level with risk-taking your father's line actually modeled, is completely genuine, and the calibration arrived without examination — staying more cautious, or more reckless, than your current situation actually calls for, simply because that's the baseline you absorbed. Material choices that feel mismatched to your real risk tolerance often need that calibration reset, not more deference to the old setting.`,
+      title: `22 in Paternal Material — The Fool`,
+      tagline: `A Design of the Reassessed Risk`,
+      mastery: `You carry a real relationship to material trust and risk, capable of leaping without a total guarantee.`,
+      shadow: `You default to an inherited calibration of "too much" risk that may not actually fit your real circumstances.`,
+      invitation: `Reassess one material risk today with your own eyes, not the inherited caution.`,
     },
 
     // ── 7 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
