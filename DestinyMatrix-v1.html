@@ -3723,13 +3723,26 @@ const ARCANA_ESSENCE = {
         HIDDENPASSION: window.DHiddenPassionContent, BRIDGE: window.DBridgeContent,
       };
       const nc = sourceByKey[data.key] ? sourceByKey[data.key].get(data.num) : null;
+      const ncNewVoice = !!(nc && nc.mastery);
 
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
-      document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
+      document.getElementById('pb-section-label').textContent = ncNewVoice ? (nc.tagline || 'Numerology · Name-Based') : 'Numerology · Name-Based';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
-      document.getElementById('pb-body').innerHTML = nc ?
+      document.getElementById('pb-heading').textContent = (nc && (nc.title || nc.heading)) || data.label;
+      document.getElementById('pb-body').innerHTML = nc ? (ncNewVoice ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${nc.mastery}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">SHADOW</div>
+           <div class="pb-full-text">${nc.shadow}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${nc.invitation}</div>
+         </div>` :
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE VIBRATION</div>
            <div class="pb-full-text">${nc.why || ''}</div>
@@ -3745,7 +3758,7 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
            <div class="pb-full-text">${nc.path || ''}</div>
-         </div>` : '';
+         </div>`) : '';
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
