@@ -3269,12 +3269,30 @@ const ARCANA_ESSENCE = {
              Together those two shape your ${data.label}: ${nm(data.num)}${essence(data.num)}.</div>
          </div>`;
 
+      const isNewVoice = !!(pc && pc.mastery);
       document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = SECTION_LABEL[data.key];
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (pc && pc.heading) || data.label;
+      document.getElementById('pb-heading').textContent = (pc && (pc.title || pc.heading)) || data.label;
       document.getElementById('pb-body').innerHTML = feedHtml + (pc ?
+        (isNewVoice ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SYNTHESIS</div>
+           <div class="pb-full-text">${pc.synthesis || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${pc.mastery || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
+           <div class="pb-full-text">${pc.shadow || ''}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${pc.invitation || ''}</div>
+         </div>` :
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE SYNTHESIS</div>
            <div class="pb-full-text">${pc.synthesis || ''}</div>
@@ -3294,7 +3312,7 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">NEGATIVE STATE</div>
            <div class="pb-full-text">${pc.negative || ''}</div>
-         </div>` :
+         </div>`) :
         `<div class="pb-full-section">
            <div class="pb-full-text">This combination hasn't been written yet.</div>
          </div>`);
