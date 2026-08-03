@@ -3613,442 +3613,398 @@ window.DMicroContent = (function () {
 
     // ── 1 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_F1': {
-      heading: `Launching What He Couldn't`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Paternal Masculine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
-      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
-      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea. You are allowed to launch it for yourself, not only for them. What venture would feel like your own even as it completes theirs?`,
-      positive: `The pull to start what your paternal line never launched hasn't changed — what's different is that you now follow it all the way through. You still feel that same charge toward the venture, but it's converting into something actually built now, instead of another almost-beginning. Every step you carry past the point they stalled finishes a little more of what was only ever wanted, not attempted.`,
-      negative: `The pull to start what your paternal line never launched is completely real, and it keeps arriving without the follow-through attached — venture after venture almost-begun, each one carrying the same unexplained charge as the last. That repeated near-miss isn't a personal failure of commitment. It's an old incompleteness still looking for the one launch that actually gets finished.`,
+      title: `1 in Paternal Masculine Line — The Magician`,
+      tagline: `A Design of the Finished Launch`,
+      mastery: `You carry a real, inherited pull to initiate a venture your paternal line wanted but never actually began.`,
+      shadow: `You keep almost-launching something significant without ever fully committing to it.`,
+      invitation: `Take one real, committed step today on the venture you keep almost-starting.`,
     },
 
     // ── 2 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '2_F1': {
-      heading: `Instinct Over Inheritance`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real inner knowing that circumstance, expectation, or a demand for constant rationality never allowed to be trusted or acted on. The High Priestess sits in your Paternal Masculine Line, meaning this generation's task may be to trust intuition the way that line never got permission to.`,
-      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
-      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it. You are allowed to trust the instinct they had to override. What is your gut currently saying that a man before you was never permitted to follow?`,
-      positive: `The instinct itself hasn't changed — it was always sharp, always early, always more accurate than it had proof for. What's different is that you now act on it before you've built the rational case, letting a felt sense be reason enough sometimes. Each time you follow it and it lands, you're completing a permission the men in your line sensed but never let themselves take.`,
-      negative: `The instinct is completely real, and it keeps getting overridden the moment it can't be logically justified — a true read set aside in favor of whatever can be proven instead. That habit of second-guessing what you already know isn't caution; it's the same silencing that kept your paternal line from ever trusting their own gut, still running through you unexamined.`,
+      title: `2 in Paternal Masculine Line — The High Priestess`,
+      tagline: `A Design of the Trusted Gut`,
+      mastery: `You carry real, sharp intuition, inherited from a line that was never given permission to trust its own instinct.`,
+      shadow: `You override a strong instinct the moment it can't be logically justified, silencing exactly what should be trusted.`,
+      invitation: `Act on one genuine instinct today without requiring a rational case for it first.`,
     },
 
     // ── 3 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '3_F1': {
-      heading: `Softness, Reclaimed`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for creativity, nurture, or open warmth that rigid expectations of masculinity never allowed to be expressed. The Empress sits in your Paternal Masculine Line, meaning this generation's task may be to live openly what that line had to keep hidden.`,
-      shadow: `The risk is inheriting the same suppression in a new form — real creative or nurturing capacity present in you, but kept private or minimized out of an old, unexamined caution. If your gentler, more generative side rarely gets to show fully, that inherited caution may still be running.`,
-      path: `This may shift by expressing your creativity or warmth openly in one specific setting this week, without softening or hiding it as you might by habit. You are allowed to be soft in public, on the record. What creative tenderness could you live this month that the line kept indoors?`,
-      positive: `The creativity and warmth were always genuinely there — what's different is that they're no longer kept indoors. One setting at a time, you let the softer, more generative side of yourself take up real space, instead of trimming it down before anyone can see it. Each time you do, you're living openly what your paternal line had to keep private.`,
-      negative: `The creative and nurturing capacity is completely real, and it stays minimized or hidden more often than not, trimmed down out of an old, unexamined caution about what men in that line were allowed to show. That habit of shrinking your gentler side before it's fully expressed isn't modesty — it's the same suppression this task exists to finally end.`,
+      title: `3 in Paternal Masculine Line — The Empress`,
+      tagline: `A Design of Visible Warmth`,
+      mastery: `You carry real creative and nurturing capacity, inherited from a line that rigid masculinity never let express it.`,
+      shadow: `You keep that gentler, generative side private or minimized out of an old, unexamined caution.`,
+      invitation: `Express your creativity or warmth openly today, in one specific setting, without softening it.`,
     },
 
     // ── 4 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '4_F1': {
-      heading: `Authority, Rebalanced`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — real leadership potential either never claimed at all, or claimed in a way that curdled into harshness rather than genuine authority. The Emperor sits in your Paternal Masculine Line, meaning this generation's task may be to hold authority in a way that line never managed to.`,
-      shadow: `The risk is repeating whichever half of the imbalance was more prominent — either avoiding authority entirely out of fear of becoming harsh, or gripping control too tightly the way an ancestor once did. If your relationship to leadership swings toward one of these extremes, that old imbalance may still be running.`,
-      path: `This may shift by taking on one piece of real responsibility this week, leading it with firmness and genuine care held together, not one at the expense of the other. You are allowed to hold authority without repeating either the absence or the iron. What would balanced command look like in your actual week?`,
-      positive: `Your capacity for real authority hasn't changed — what's different is that firmness and genuine care now show up together instead of one crowding out the other. Leading a piece of responsibility no longer means choosing between being effective and being kind. That combination is exactly the balance the men in your line either avoided or gripped too hard to find.`,
-      negative: `The authority is completely real, and it keeps swinging to one extreme or the other — either avoided out of fear of becoming harsh, or gripped tightly the way it was once modelled. That oscillation isn't indecision about leadership. It's an old imbalance between claiming power and fearing its cost, still unresolved and still running its course through you.`,
+      title: `4 in Paternal Masculine Line — The Emperor`,
+      tagline: `A Design of Balanced Command`,
+      mastery: `You carry real leadership capacity, capable of holding authority with both firmness and genuine care.`,
+      shadow: `You swing to one extreme — avoiding authority out of fear of harshness, or gripping control too tightly.`,
+      invitation: `Lead one piece of real responsibility today with firmness and care held together, not one at the other's expense.`,
     },
 
     // ── 5 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '5_F1': {
-      heading: `A Calling, Answered`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected path. The Hierophant sits in your Paternal Masculine Line, meaning this generation's task may be to actually answer a calling that line had to set down.`,
-      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
-      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such. You are allowed to guide before you feel qualified — the calling has waited long enough. Who is already learning from you informally?`,
-      positive: `The pull toward teaching and guidance hasn't changed — what's different is that you now name it outright instead of offering it quietly on the side. One role claimed formally, instead of one more year of unofficial mentoring, completes something the men in your line had to set down for a more conventional path they felt safer taking.`,
-      negative: `The calling toward teaching or guiding others is completely real, and it keeps arriving informally — advice given, wisdom shared, never actually named as the role it already functions as. That reluctance to claim it outright isn't humility. It's the same setting-aside your paternal line practiced, still shaping how much of the calling you'll let yourself own.`,
+      title: `5 in Paternal Masculine Line — The Hierophant`,
+      tagline: `A Design of the Claimed Role`,
+      mastery: `You carry a real pull toward teaching, mentorship, or guidance.`,
+      shadow: `You offer that guidance informally, forever, without ever formally naming or claiming the role it already functions as.`,
+      invitation: `Claim one specific teaching or mentoring role today instead of continuing to offer it informally.`,
     },
 
     // ── 6 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '6_F1': {
-      heading: `Choosing Love Freely`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Paternal Masculine Line, meaning this generation's task may be to choose love from genuine preference where that line couldn't.`,
-      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
-      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice. You are allowed to choose love with your heart and let duty adjust. What would choosing freely look like in your closest bond right now?`,
-      positive: `Your capacity for real partnership hasn't changed — what's different is that genuine desire now leads the choosing, with duty adjusting around it instead of the other way around. Naming what you actually want and choosing toward it, even when it costs some comfort, completes a freedom the men in your line never let themselves exercise.`,
-      negative: `The capacity to love is completely real, and the choosing keeps running on duty and expectation rather than genuine wanting — a partner selected, or stayed with, because it satisfies what's expected rather than what's actually desired. That pattern isn't commitment. It's the same sacrifice your paternal line made, still shaping your closest bond from underneath.`,
+      title: `6 in Paternal Masculine Line — The Lovers`,
+      tagline: `A Design of the Free Choice`,
+      mastery: `You carry a real capacity for partnership chosen from genuine desire, not obligation.`,
+      shadow: `You let your relationship choices run on duty and expectation rather than your own actual wanting.`,
+      invitation: `Name today what you actually want in partnership, separate from what's expected of you.`,
     },
 
     // ── 7 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '7_F1': {
-      heading: `Finishing What Stalled`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Paternal Masculine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
-      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
-      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted. You are allowed to finish it slowly, imperfectly, but actually. What interrupted goal in your life rhymes with theirs — and what is its next step?`,
-      positive: `The drive toward the goal hasn't changed — what's different is that it now carries through to an actual finish instead of stopping short. One stalled ambition, pushed the last distance rather than left interrupted, resolves something the men in your line never got the circumstances to complete for themselves.`,
-      negative: `The ambition and drive are completely real, and they keep stalling at nearly the same point every time — momentum spent, then quietly abandoned just short of the line. That pattern isn't a lack of stamina. It's an old interruption echoing forward, still stopping the pursuit exactly where circumstance once stopped it for someone before you.`,
+      title: `7 in Paternal Masculine Line — The Chariot`,
+      tagline: `A Design of the Actual Finish`,
+      mastery: `You carry real, genuine drive toward ambitious goals.`,
+      shadow: `Your ambitions have a pattern of stalling or getting abandoned just short of the finish line.`,
+      invitation: `Push one currently stalled goal forward today, toward its actual completion.`,
     },
 
     // ── 8 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '8_F1': {
-      heading: `Settling an Old Unfairness`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Paternal Masculine Line, meaning this generation's task may be to bring genuine resolution to something that line had to leave unsettled.`,
-      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
-      path: `This may shift by naming, as specifically as you can, what the original unfairness in your paternal line actually was, and consciously choosing to resolve rather than continue carrying it. You are allowed to settle the account by living justly, not by re-litigating it. What would settled feel like in your body?`,
-      positive: `The sensitivity to unfairness hasn't changed — it was always sharp and always real — but you've named what the original imbalance actually was and let yourself settle it by living justly rather than re-litigating it. That resolution is exactly what the men in your line had to leave standing, unable to close it in their own time.`,
-      negative: `The sensitivity to injustice is completely real, and its intensity keeps outrunning whatever's actually happening in front of you — a present slight met with a reaction that belongs to something considerably older. That disproportion isn't oversensitivity. It's an unresolved unfairness from your paternal line still generating heat, waiting for someone to finally settle the account.`,
+      title: `8 in Paternal Masculine Line — Justice`,
+      tagline: `A Design of the Settled Account`,
+      mastery: `You carry a real, sharp sensitivity to unfairness.`,
+      shadow: `That sensitivity reacts to present situations with an intensity that belongs to something older, unresolved, and unnamed.`,
+      invitation: `Name, as specifically as you can today, what the original unfairness in your paternal line actually was.`,
     },
 
     // ── 9 in PATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '9_F1': {
-      heading: `Solitude, Finally Claimed`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Paternal Masculine Line, meaning this generation's task may be to claim the solitude that line was never allowed to take.`,
-      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
-      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first. You are allowed to take the solitude without apology or permission slip. What would one genuinely unaccountable afternoon give you?`,
-      positive: `The need for real withdrawal hasn't changed — what's different is that you now take it without needing to justify it as productive first. One genuinely unaccountable afternoon, claimed outright, completes a permission the men in your line were never allowed to give themselves under the weight of constant duty.`,
-      negative: `The need for solitude is completely real, and it keeps losing to an inherited compulsion to fill every available space with obligation to someone else. That inability to justify time alone, even when nothing urgent requires you, isn't diligence. It's the same relentless duty your paternal line carried, still deciding your schedule from underneath.`,
+      title: `9 in Paternal Masculine Line — The Hermit`,
+      tagline: `A Design of Unapologetic Solitude`,
+      mastery: `You carry a real need for withdrawal, reflection, and solitary space.`,
+      shadow: `You fill every available space with obligation to others, unable to justify solitude even when it's genuinely needed.`,
+      invitation: `Claim one period of genuine solitude today without justifying it as productive first.`,
     },
 
     // ── 10 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '10_F1': {
-      heading: `Peace With a Derailed Plan`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Paternal Masculine Line, meaning this generation's task may be to find peace with life's turns where that line couldn't.`,
-      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
-      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it. You are allowed to make peace with what no one could have controlled. What derailed plan — theirs or yours — is ready to be grieved rather than fixed?`,
-      positive: `The sensitivity to disruption hasn't changed — sudden turns still register — but you've named one circumstance genuinely beyond your control and chosen acceptance over continued resistance to it. That shift resolves a bitterness the men in your line carried toward a plan that was derailed by nothing they could have prevented.`,
-      negative: `The sensitivity to disrupted plans is completely real, and every uncontrollable turn keeps landing as personal injustice rather than simply how life moves. That disproportionate unfairness isn't paranoia. It's an inherited resistance to circumstances no one could have controlled, still refusing to settle in you the way it never settled in the line before you.`,
+      title: `10 in Paternal Masculine Line — Wheel of Fortune`,
+      tagline: `A Design of Chosen Peace`,
+      mastery: `You carry a real capacity to weather life's unpredictable turns.`,
+      shadow: `You treat every uncontrollable turn as personal injustice rather than simply how life moves.`,
+      invitation: `Name one circumstance today genuinely beyond your control, and choose acceptance over resistance to it.`,
     },
 
     // ── 11 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '11_F1': {
-      heading: `Strength That Includes Softness`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for compassionate strength, overridden by a demand to appear tough, unaffected, or hardened instead. The Strength sits in your Paternal Masculine Line, meaning this generation's task may be to lead with a strength that line was only allowed to show as harshness.`,
-      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as toughness, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
-      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it. You are allowed to let gentleness count as the strength. Where could softness succeed this week where toughness has been stalling?`,
-      positive: `The strength was always real — what's different is that gentleness now stands alongside it instead of being hidden by it. Leading a difficult moment with visible compassion, not just toughness, completes a fuller resilience than the men in your line were ever permitted to show, since they were only allowed to harden.`,
-      negative: `The capacity for real strength is completely genuine, and it keeps expressing itself only as toughness, cut off from the compassionate counterpart that was always available underneath. That hardening isn't who you actually are. It's the version of strength your paternal line was forced into, still standing in for the fuller one you're capable of.`,
+      title: `11 in Paternal Masculine Line — Strength`,
+      tagline: `A Design of Visible Compassion`,
+      mastery: `You carry real, genuine resilience and strength.`,
+      shadow: `You express that strength only as toughness, cut off from the compassionate strength that's actually available underneath.`,
+      invitation: `Lead one difficult moment today with visible compassion standing alongside your strength.`,
     },
 
     // ── 12 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '12_F1': {
-      heading: `Rebalancing a Life Given Away`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Paternal Masculine Line, meaning this generation's task may be to reclaim active choice for yourself where that line only ever gave it away.`,
-      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
-      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's. You are allowed to put your own needs on the ledger they left blank. What would you claim for yourself first if rebalancing started today?`,
-      positive: `The capacity for genuine care and duty hasn't changed — what's different is that your own needs now get named and prioritized alongside it, instead of deferred indefinitely. Claiming something for yourself first, even briefly, completes a balance the men in your line never got the room to ask for.`,
-      negative: `The devotion to others' needs is completely real, and your own keep going unconsidered underneath it, so thoroughly that you may struggle to even name what you currently need. That total deferral isn't selflessness. It's the same imbalance your paternal line lived inside, a life given entirely away with nothing set aside.`,
+      title: `12 in Paternal Masculine Line — The Hanged Man`,
+      tagline: `A Design of the Named Need`,
+      mastery: `You carry a real capacity for care and devotion to others.`,
+      shadow: `Your own needs go perpetually unconsidered underneath that devotion, so thoroughly you struggle to even name them.`,
+      invitation: `Name one of your own needs today, directly, and prioritize it, even briefly.`,
     },
 
     // ── 13 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '13_F1': {
-      heading: `Completing What He Avoided`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Paternal Masculine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way that line did.`,
-      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
-      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it. You are allowed to walk into the change they turned from. What transition are you uniquely positioned to complete instead of inherit?`,
-      positive: `The instinct to hold on hasn't disappeared — but you've identified one ending that's clearly due and chosen to meet it directly instead of continuing to resist it. That willingness to walk into necessary change completes a transformation the men in your line postponed until circumstance forced it on them anyway.`,
-      negative: `The resistance to change is completely real, and it keeps gripping tightly to what's already finished, simply because letting go feels dangerous rather than simply overdue. That grip isn't loyalty to what was. It's an old avoidance from your paternal line, still refusing the ending that eventually arrives regardless.`,
+      title: `13 in Paternal Masculine Line — Transformation`,
+      tagline: `A Design of the Direct Ending`,
+      mastery: `You carry a real capacity to meet necessary change directly.`,
+      shadow: `You grip tightly to something you already know has run its course, simply because letting go feels dangerous.`,
+      invitation: `Identify one ending that's clearly due in your life today, and meet it directly.`,
     },
 
     // ── 14 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '14_F1': {
-      heading: `Steadying a Life of Extremes`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, excess, or rigid self-denial. The Temperance sits in your Paternal Masculine Line, meaning this generation's task may be to find the steadiness that line's life never actually held.`,
-      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or excess, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
-      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme. You are allowed to live steadily without it feeling like a smaller life. What extreme are you ready to retire on the line's behalf?`,
-      positive: `The capacity for real commitment hasn't changed — what's different is that it now runs at a sustainable pace instead of swinging between extremes. One small, steady practice, held rather than abandoned, completes a balance the men in your line's lives never actually managed to find between overwork and collapse.`,
-      negative: `The intensity is completely real, and it keeps alternating between overexertion and equally intense collapse or excess, with nothing steady in between. That swing isn't a personality trait. It's an old imbalance from your paternal line, still running through you as the only two speeds available.`,
+      title: `14 in Paternal Masculine Line — Temperance`,
+      tagline: `A Design of the Steady Middle`,
+      mastery: `You carry a real capacity for commitment and sustained effort.`,
+      shadow: `You alternate sharply between overexertion and equally intense collapse or excess, with nothing steady in between.`,
+      invitation: `Choose one small, sustainable practice today and hold it steadily, resisting either extreme.`,
     },
 
     // ── 15 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '15_F1': {
-      heading: `A Bind, Released`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real entrapment, whether addiction, compulsion, or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Paternal Masculine Line, meaning this generation's task may be to release a bind that line was never able to escape.`,
-      shadow: `The risk is inheriting a compulsive attachment of your own — to a substance, a pattern, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
-      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed. You are allowed to release the bind — your hands are freer than theirs were. What first loosening is actually available to you this month?`,
-      positive: `The pull toward the bind hasn't necessarily vanished — but you've named your own version of it honestly and taken one real step toward loosening it, rather than accepting it as fixed. That step completes a freedom the men in your line sensed but were never able to actually reach.`,
-      negative: `The bind is completely real, and it keeps being accepted as simply how things are, never questioned, never approached as something that could actually loosen. That acceptance isn't peace with your circumstances. It's an old entrapment from your paternal line, still running because it's never been named as something to release.`,
+      title: `15 in Paternal Masculine Line — The Devil`,
+      tagline: `A Design of the First Loosening`,
+      mastery: `You carry a real capacity to recognize and release what binds you.`,
+      shadow: `You accept some compulsion, pattern, or obligation as simply how things are, never questioned, never approached as changeable.`,
+      invitation: `Name your own version of the bind honestly today, and take one concrete step toward loosening it.`,
     },
 
     // ── 16 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '16_F1': {
-      heading: `Finishing the Rebuild`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Paternal Masculine Line, meaning this generation's task may be to complete a reconstruction that line started but didn't finish.`,
-      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
-      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse. You are allowed to rebuild past where the rebuilding stopped. What would finished look like — not restored, but truly rebuilt?`,
-      positive: `The caution after collapse hasn't fully disappeared — but you've fully invested in one area of stability instead of holding back in anticipation of its fall. That investment completes a reconstruction the men in your line survived enough to start and never had the chance to actually finish.`,
-      negative: `The caution around stability is completely understandable, and it keeps holding you back from fully investing in what's actually solid, bracing for a collapse that already happened once, long ago. That hesitation isn't wisdom. It's an unfinished rebuilding from your paternal line, still treating stability as something that hasn't been earned back yet.`,
+      title: `16 in Paternal Masculine Line — The Tower`,
+      tagline: `A Design of Full Investment`,
+      mastery: `You carry a real capacity to rebuild fully after loss.`,
+      shadow: `You hold back from fully investing in something stable, still bracing for a collapse that already happened once, long ago.`,
+      invitation: `Fully invest in one area of stability today, without holding back in anticipation of its collapse.`,
     },
 
     // ── 17 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '17_F1': {
-      heading: `Restoring Abandoned Hope`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Paternal Masculine Line, meaning this generation's task may be to restore a hope that line felt forced to give up.`,
-      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
-      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it. You are allowed to hope again where the line went quiet. What abandoned hope of theirs feels strangely alive in you?`,
-      positive: `The guardedness around hope hasn't fully lifted — but you've named one genuine hope out loud and let yourself act on it rather than defending against it. That willingness restores something the men in your line felt forced to abandon after a disappointment real enough to make hoping again feel unsafe.`,
-      negative: `The guardedness against hope is completely understandable, and it keeps functioning as protection from disappointment at the cost of ever genuinely believing things could improve. That reflexive cynicism isn't realism. It's an old abandonment from your paternal line, still deciding what you'll let yourself want.`,
+      title: `17 in Paternal Masculine Line — The Star`,
+      tagline: `A Design of Spoken Hope`,
+      mastery: `You carry a real capacity for genuine hope and faith in a better future.`,
+      shadow: `You default to reflexive cynicism, protecting against disappointment at the cost of ever genuinely believing things could improve.`,
+      invitation: `Name one genuine hope you actually hold today, out loud, and act on it.`,
     },
 
     // ── 18 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '18_F1': {
-      heading: `Seeing the Unfaced Fear`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Paternal Masculine Line, meaning this generation's task may be to see clearly what that line could never quite look at directly.`,
-      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
-      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it. You are allowed to look at the fear in full light. If you faced it plainly once — what might stop being handed down?`,
-      positive: `The unease hasn't necessarily disappeared — but you've named one fear as specifically as you can and looked at it directly instead of around it. That clarity is exactly what the men in your line were never able to reach, leaving the fear to operate in the background instead.`,
-      negative: `The unease is completely real, and it keeps shaping decisions from the background without ever being examined directly, an anxiety with no clear name attached to it. That fog isn't confusion about what you want. It's an old, unfaced fear from your paternal line, still steering choices from somewhere just out of view.`,
+      title: `18 in Paternal Masculine Line — The Moon`,
+      tagline: `A Design of Named Fear`,
+      mastery: `You carry a real capacity to see clearly what's been operating in the background.`,
+      shadow: `An unnamed anxiety shapes your decisions from the background without ever being examined directly.`,
+      invitation: `Name, as specifically as possible, one fear that's been operating in the background, and look at it directly today.`,
     },
 
     // ── 19 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '19_F1': {
-      heading: `Letting Joy Be Seen`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real capacity for open joy and warmth, kept behind a wall of stoicism or emotional reserve considered proper or necessary. The Sun sits in your Paternal Masculine Line, meaning this generation's task may be to let visible joy exist where that line only ever allowed restraint.`,
-      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a controlled surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
-      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure. You are allowed to be visibly, audibly glad. What joy could you let show this week that stoicism would have swallowed?`,
-      positive: `The joy was always genuinely there — what's different is that it's now visible, audible, let out from behind the usual composure. One moment of real happiness shown openly completes a warmth the men in your line actually felt but were never permitted to display.`,
-      negative: `The capacity for real joy is completely genuine, and it keeps staying behind a controlled, stoic surface, felt more than it's ever shown. That restraint isn't dignity. It's an old inheritance from your paternal line, where visible gladness was considered improper, still deciding how much of your happiness reaches your face.`,
+      title: `19 in Paternal Masculine Line — The Sun`,
+      tagline: `A Design of Visible Gladness`,
+      mastery: `You carry a real capacity for genuine joy and warmth.`,
+      shadow: `You keep that joy behind a controlled, stoic surface, felt more than it's ever actually shown.`,
+      invitation: `Let one moment of real joy today be visibly, openly expressed, without your usual composure.`,
     },
 
     // ── 20 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '20_F1': {
-      heading: `Taking Up the Calling`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Paternal Masculine Line, meaning this generation's task may be to answer a call that line heard but couldn't take up.`,
-      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
-      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it. You are allowed to take up the calling mid-life, mid-doubt. What would answering it look like at the smallest real scale?`,
-      positive: `The calling hasn't changed — you've sensed it clearly for a while — but you've taken one concrete first step toward it instead of continuing to only recognize it. That step completes an awakening the men in your line heard just as clearly and were never able to actually take up.`,
-      negative: `The calling is completely real, sensed clearly and specifically, and it keeps being delayed rather than acted on, as though recognizing it were the same as answering it. That delay isn't indecision. It's an old, unanswered call from your paternal line, still waiting for someone to move on it instead of just hearing it.`,
+      title: `20 in Paternal Masculine Line — Judgement`,
+      tagline: `A Design of the First Step`,
+      mastery: `You carry a real, clearly sensed calling.`,
+      shadow: `You keep delaying it, treating recognizing the call as though it were the same as answering it.`,
+      invitation: `Take one concrete first step today toward the calling you already recognize.`,
     },
 
     // ── 21 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '21_F1': {
-      heading: `Completing the Unfinished`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Paternal Masculine Line, meaning this generation's task may be to reach a completion that line never got to feel.`,
-      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
-      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further. You are allowed to be the completion the line was waiting for. What unfinished thing, finished by you, would echo backward through generations?`,
-      positive: `The capacity for real, sustained effort hasn't changed — what's different is that you've identified one near-complete piece of work and deliberately closed it out instead of extending it further. That closure resolves an incompletion the men in your line worked toward for a lifetime without ever getting to feel the finish.`,
-      negative: `The effort and progress are completely real, and the finish line keeps moving just out of reach, treated as always one step further than wherever you currently are. That perpetual almost-there isn't a lack of capability. It's an old incompletion from your paternal line, still deciding that arrival isn't actually available to you.`,
+      title: `21 in Paternal Masculine Line — The World`,
+      tagline: `A Design of Genuine Arrival`,
+      mastery: `You carry real, sustained capacity for effort and progress.`,
+      shadow: `The finish line keeps moving just out of reach, treated as always one step further than wherever you currently are.`,
+      invitation: `Identify one genuinely near-complete effort today, and deliberately close it out.`,
     },
 
     // ── 22 in PATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '22_F1': {
-      heading: `Reclaiming Traded Freedom`,
-      why: `This Ancestral Task may carry an unfulfilled dream from the men in your father's direct line — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Paternal Masculine Line, meaning this generation's task may be to reclaim the freedom that line gave up.`,
-      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
-      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety. You are allowed to buy the freedom back — the trade wasn't permanent. What secure thing would you loosen first to breathe again?`,
-      positive: `The pull toward the safer option hasn't necessarily vanished — but you've chosen the freer, less conventional path in one specific situation instead of defaulting to security again. That choice reclaims a freedom the men in your line traded away for a safety they felt they had no other option but to choose.`,
-      negative: `The desire for real freedom is completely genuine, and it keeps losing to a reflexive pull toward the secure option, even in situations where the risk would actually be worth taking. That default isn't prudence. It's an old trade from your paternal line, still deciding that safety wins by default, whether or not it's actually needed.`,
+      title: `22 in Paternal Masculine Line — The Fool`,
+      tagline: `A Design of Bought-Back Freedom`,
+      mastery: `You carry a real, genuine desire for freedom, adventure, and an unconventional path.`,
+      shadow: `You default to the secure option reflexively, even in situations where the risk would actually be worth taking.`,
+      invitation: `Choose the freer, less conventional option today in one specific situation, instead of defaulting to safety.`,
     },
 
     // ── 1 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '1_G1': {
-      heading: `Starting Where He Stalled`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real enterprise, idea, or independent undertaking that circumstance, resources, or timing never allowed to actually begin. The Magician sits in your Maternal Masculine Line, meaning this generation's task may be to finally initiate what was wanted but never launched.`,
-      shadow: `The risk is feeling a persistent, unexplained pull to start something without ever following through, as though the incompleteness itself got inherited alongside the ambition. If you keep almost-launching something significant without quite committing, that unfinished thread may still be running.`,
-      path: `This may shift by actually starting the venture your own instinct keeps pointing toward, treating it as the completion of something rather than a fresh, unrelated idea. You are allowed to start what he could only imagine starting. What would the first week of that venture actually contain?`,
-      positive: `The pull to start what your mother's father never launched hasn't changed — what's different is that you now follow it all the way through. You still feel that same charge toward the venture, but it's converting into something actually built now, instead of another almost-beginning. Every step you carry past the point he stalled finishes a little more of what was only ever wanted, not attempted.`,
-      negative: `The pull to start what your mother's father never launched is completely real, and it keeps arriving without the follow-through attached — venture after venture almost-begun, each one carrying the same unexplained charge as the last. That repeated near-miss isn't a personal failure of commitment. It's an old incompleteness still looking for the one launch that actually gets finished.`,
+      title: `1 in Maternal Masculine Line — The Magician`,
+      tagline: `A Design of the Started Venture`,
+      mastery: `You carry a real, inherited pull to initiate a venture your mother's father wanted but never actually began.`,
+      shadow: `You keep almost-launching something significant without ever fully committing to it.`,
+      invitation: `Take one real, committed step today on the venture you keep almost-starting.`,
     },
 
     // ── 2 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '2_G1': {
-      heading: `Trusting What He Doubted`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real inner knowing that circumstance, expectation, or a demand for constant rationality never allowed to be trusted or acted on. The High Priestess sits in your Maternal Masculine Line, meaning this generation's task may be to trust intuition the way he never got permission to.`,
-      shadow: `The risk is inheriting the same suppression — sensing something true and dismissing it in favor of what can be logically justified, repeating the exact silencing this task is meant to resolve. If you consistently override a strong instinct because it isn't provable, that old pattern may still be running.`,
-      path: `This may shift by acting on one genuine instinct this week without first requiring full rational justification for it. You are allowed to follow your knowing where his had to defer. What decision is yours right now that instinct has already made?`,
-      positive: `The instinct itself hasn't changed — it was always sharp, always early, always more accurate than it had proof for. What's different is that you now act on it before you've built the rational case, letting a felt sense be reason enough sometimes. Each time you follow it and it lands, you're completing a permission your mother's father sensed but never let himself take.`,
-      negative: `The instinct is completely real, and it keeps getting overridden the moment it can't be logically justified — a true read set aside in favor of whatever can be proven instead. That habit of second-guessing what you already know isn't caution; it's the same silencing that kept your mother's father from ever trusting his own gut, still running through you unexamined.`,
+      title: `2 in Maternal Masculine Line — The High Priestess`,
+      tagline: `A Design of the Followed Knowing`,
+      mastery: `You carry real, sharp intuition, inherited from a man who was never given permission to trust his own instinct.`,
+      shadow: `You override a strong instinct the moment it can't be logically justified, silencing exactly what should be trusted.`,
+      invitation: `Act on one genuine instinct today without requiring a rational case for it first.`,
     },
 
     // ── 3 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '3_G1': {
-      heading: `Reclaiming a Softer Side`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for creativity, nurture, or open warmth that rigid expectations of masculinity never allowed him to express. The Empress sits in your Maternal Masculine Line, meaning this generation's task may be to live openly what he had to keep hidden.`,
-      shadow: `The risk is inheriting the same suppression in a new form — real creative or nurturing capacity present in you, but kept private or minimized out of an old, unexamined caution. If your gentler, more generative side rarely gets to show fully, that inherited caution may still be running.`,
-      path: `This may shift by expressing your creativity or warmth openly in one specific setting this week, without softening or hiding it as you might by habit. You are allowed to live the creative side he kept in the drawer. What making, tending, or beautifying is asking to enter your ordinary days?`,
-      positive: `The creativity and warmth were always genuinely there — what's different is that they're no longer kept indoors. One setting at a time, you let the softer, more generative side of yourself take up real space, instead of trimming it down before anyone can see it. Each time you do, you're living openly what your mother's father had to keep private.`,
-      negative: `The creative and nurturing capacity is completely real, and it stays minimized or hidden more often than not, trimmed down out of an old, unexamined caution about what he was allowed to show. That habit of shrinking your gentler side before it's fully expressed isn't modesty — it's the same suppression this task exists to finally end.`,
+      title: `3 in Maternal Masculine Line — The Empress`,
+      tagline: `A Design of the Open Softness`,
+      mastery: `You carry real creative and nurturing capacity, inherited from a man rigid masculinity never let express it.`,
+      shadow: `You keep that gentler, generative side private or minimized out of an old, unexamined caution.`,
+      invitation: `Express your creativity or warmth openly today, in one specific setting, without softening it.`,
     },
 
     // ── 4 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '4_G1': {
-      heading: `Holding Authority Well`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — real leadership potential either never claimed at all, or claimed in a way that curdled into harshness rather than genuine authority. The Emperor sits in your Maternal Masculine Line, meaning this generation's task may be to hold authority in a way he never managed to.`,
-      shadow: `The risk is repeating whichever half of the imbalance was more prominent — either avoiding authority entirely out of fear of becoming harsh, or gripping control too tightly the way he once did. If your relationship to leadership swings toward one of these extremes, that old imbalance may still be running.`,
-      path: `This may shift by taking on one piece of real responsibility this week, leading it with firmness and genuine care held together, not one at the expense of the other. You are allowed to hold power in the proportion he never found. Where in your life does authority need neither raising nor abandoning — just holding?`,
-      positive: `Your capacity for real authority hasn't changed — what's different is that firmness and genuine care now show up together instead of one crowding out the other. Leading a piece of responsibility no longer means choosing between being effective and being kind. That combination is exactly the balance your mother's father either avoided or gripped too hard to find.`,
-      negative: `The authority is completely real, and it keeps swinging to one extreme or the other — either avoided out of fear of becoming harsh, or gripped tightly the way it was once modelled. That oscillation isn't indecision about leadership. It's an old imbalance between claiming power and fearing its cost, still unresolved and still running its course through you.`,
+      title: `4 in Maternal Masculine Line — The Emperor`,
+      tagline: `A Design of Held Power`,
+      mastery: `You carry real leadership capacity, capable of holding authority with both firmness and genuine care.`,
+      shadow: `You swing to one extreme — avoiding authority out of fear of harshness, or gripping control too tightly.`,
+      invitation: `Lead one piece of real responsibility today with firmness and care held together, not one at the other's expense.`,
     },
 
     // ── 5 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '5_G1': {
-      heading: `Answering a Set-Aside Calling`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real pull toward teaching, mentorship, or spiritual guidance, set aside in favor of a more conventional or expected path. The Hierophant sits in your Maternal Masculine Line, meaning this generation's task may be to actually answer a calling he had to set down.`,
-      shadow: `The risk is feeling the pull toward guiding or teaching others without ever fully stepping into it, treating the calling as a hobby or side interest rather than something to actually claim. If you're regularly sought out for guidance but never formalize or fully own that role, that set-aside calling may still be running.`,
-      path: `This may shift by claiming one specific teaching or mentoring role this week, rather than continuing to offer guidance informally without naming it as such. You are allowed to teach what he set aside teaching. What do you keep explaining to people that is actually a vocation knocking?`,
-      positive: `The pull toward teaching and guidance hasn't changed — what's different is that you now name it outright instead of offering it quietly on the side. One role claimed formally, instead of one more year of unofficial mentoring, completes something your mother's father had to set down for a more conventional path he felt safer taking.`,
-      negative: `The calling toward teaching or guiding others is completely real, and it keeps arriving informally — advice given, wisdom shared, never actually named as the role it already functions as. That reluctance to claim it outright isn't humility. It's the same setting-aside your mother's father practiced, still shaping how much of the calling you'll let yourself own.`,
+      title: `5 in Maternal Masculine Line — The Hierophant`,
+      tagline: `A Design of the Claimed Vocation`,
+      mastery: `You carry a real pull toward teaching, mentorship, or guidance.`,
+      shadow: `You offer that guidance informally, forever, without ever formally naming or claiming the role it already functions as.`,
+      invitation: `Claim one specific teaching or mentoring role today instead of continuing to offer it informally.`,
     },
 
     // ── 6 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '6_G1': {
-      heading: `Choosing Love, Not Duty`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real partnership or love genuinely wanted, set aside in favor of an arrangement made for duty, family expectation, or practicality instead. The Lovers sits in your Maternal Masculine Line, meaning this generation's task may be to choose love from genuine preference where he couldn't.`,
-      shadow: `The risk is inheriting the same deference — choosing a partner or staying in a relationship primarily to satisfy expectation rather than genuine desire, repeating exactly the sacrifice this task exists to resolve. If your relationship choices are shaped more by duty than by your own actual wanting, that pattern may still be running.`,
-      path: `This may shift by naming, honestly, what you actually want in partnership, separate from what would be expected of you, and letting that genuine want guide the next choice. You are allowed to let the heart outvote the duty. What choice in love would honor him precisely by being freer than his?`,
-      positive: `Your capacity for real partnership hasn't changed — what's different is that genuine desire now leads the choosing, with duty adjusting around it instead of the other way around. Naming what you actually want and choosing toward it, even when it costs some comfort, completes a freedom your mother's father never let himself exercise.`,
-      negative: `The capacity to love is completely real, and the choosing keeps running on duty and expectation rather than genuine wanting — a partner selected, or stayed with, because it satisfies what's expected rather than what's actually desired. That pattern isn't commitment. It's the same sacrifice your mother's father made, still shaping your closest bond from underneath.`,
+      title: `6 in Maternal Masculine Line — The Lovers`,
+      tagline: `A Design of the Heart's Vote`,
+      mastery: `You carry a real capacity for partnership chosen from genuine desire, not obligation.`,
+      shadow: `You let your relationship choices run on duty and expectation rather than your own actual wanting.`,
+      invitation: `Name today what you actually want in partnership, separate from what's expected of you.`,
     },
 
     // ── 7 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '7_G1': {
-      heading: `Finishing His Interrupted Goal`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real ambition pursued with genuine drive, but stalled or interrupted by circumstance before it could actually be completed. The Chariot sits in your Maternal Masculine Line, meaning this generation's task may be to carry a stalled pursuit all the way to its finish.`,
-      shadow: `The risk is inheriting the drive without the completion — real momentum toward goals that keep getting interrupted or abandoned partway, echoing the original stall rather than resolving it. If your ambitions have a pattern of stopping just short of the finish line, that inherited interruption may still be running.`,
-      path: `This may shift by identifying one goal currently stalled partway through, and deliberately pushing it to genuine completion rather than letting it stay interrupted. You are allowed to carry his interrupted goal across your own finish line. What does completing it — your way — actually require next?`,
-      positive: `The drive toward the goal hasn't changed — what's different is that it now carries through to an actual finish instead of stopping short. One stalled ambition, pushed the last distance rather than left interrupted, resolves something your mother's father never got the circumstances to complete for himself.`,
-      negative: `The ambition and drive are completely real, and they keep stalling at nearly the same point every time — momentum spent, then quietly abandoned just short of the line. That pattern isn't a lack of stamina. It's an old interruption echoing forward, still stopping the pursuit exactly where circumstance once stopped it for him.`,
+      title: `7 in Maternal Masculine Line — The Chariot`,
+      tagline: `A Design of the Crossed Line`,
+      mastery: `You carry real, genuine drive toward ambitious goals.`,
+      shadow: `Your ambitions have a pattern of stalling or getting abandoned just short of the finish line.`,
+      invitation: `Push one currently stalled goal forward today, toward its actual completion.`,
     },
 
     // ── 8 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '8_G1': {
-      heading: `Settling His Old Unfairness`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real wrong, injustice, or imbalance that was never actually resolved, whether suffered or caused, left standing rather than made right. The Justice sits in your Maternal Masculine Line, meaning this generation's task may be to bring genuine resolution to something he had to leave unsettled.`,
-      shadow: `The risk is carrying a vigilant, unexplained sensitivity to unfairness that traces back further than your own experience, reacting to present situations with an intensity that belongs to something older. If a sense of injustice feels disproportionately personal in ways you can't fully explain, that unresolved history may still be active.`,
-      path: `This may shift by naming, as specifically as you can, what the original unfairness was, and consciously choosing to resolve rather than continue carrying it. You are allowed to close his old unfairness by refusing to pass it on. What would justice done quietly, in your own conduct, look like?`,
-      positive: `The sensitivity to unfairness hasn't changed — it was always sharp and always real — but you've named what the original imbalance actually was and let yourself settle it by living justly rather than re-litigating it. That resolution is exactly what your mother's father had to leave standing, unable to close it in his own time.`,
-      negative: `The sensitivity to injustice is completely real, and its intensity keeps outrunning whatever's actually happening in front of you — a present slight met with a reaction that belongs to something considerably older. That disproportion isn't oversensitivity. It's an unresolved unfairness from your mother's father still generating heat, waiting for someone to finally settle the account.`,
+      title: `8 in Maternal Masculine Line — Justice`,
+      tagline: `A Design of the Closed Account`,
+      mastery: `You carry a real, sharp sensitivity to unfairness.`,
+      shadow: `That sensitivity reacts to present situations with an intensity that belongs to something older, unresolved, and unnamed.`,
+      invitation: `Name, as specifically as you can today, what the original unfairness in your maternal line actually was.`,
     },
 
     // ── 9 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '9_G1': {
-      heading: `Claiming the Solitude He Never Had`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real need for withdrawal, reflection, or solitary space, never permitted by relentless duty or responsibility to others. The Hermit sits in your Maternal Masculine Line, meaning this generation's task may be to claim the solitude he was never allowed to take.`,
-      shadow: `The risk is inheriting the same relentless duty — filling every available space with obligation to others, unable to justify solitude even when it's genuinely needed. If you feel guilty taking real time alone, even when nothing urgent requires your attention, that inherited pattern may still be running.`,
-      path: `This may shift by claiming one period of genuine, unapologetic solitude this week, without needing to justify it as productive or necessary first. You are allowed to take the stillness he never got. What would you hear in a solitude that no one could interrupt?`,
-      positive: `The need for real withdrawal hasn't changed — what's different is that you now take it without needing to justify it as productive first. One genuinely unaccountable afternoon, claimed outright, completes a permission your mother's father was never allowed to give himself under the weight of constant duty.`,
-      negative: `The need for solitude is completely real, and it keeps losing to an inherited compulsion to fill every available space with obligation to someone else. That inability to justify time alone, even when nothing urgent requires you, isn't diligence. It's the same relentless duty your mother's father carried, still deciding your schedule from underneath.`,
+      title: `9 in Maternal Masculine Line — The Hermit`,
+      tagline: `A Design of Claimed Stillness`,
+      mastery: `You carry a real need for withdrawal, reflection, and solitary space.`,
+      shadow: `You fill every available space with obligation to others, unable to justify solitude even when it's genuinely needed.`,
+      invitation: `Claim one period of genuine solitude today without justifying it as productive first.`,
     },
 
     // ── 10 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '10_G1': {
-      heading: `Making Peace With His Derailed Plan`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real plan or path, altered or ended by circumstances genuinely beyond anyone's control, rather than by any failure of effort or will. The Wheel of Fortune sits in your Maternal Masculine Line, meaning this generation's task may be to find peace with life's turns where he couldn't.`,
-      shadow: `The risk is inheriting a bitterness or resistance toward circumstances beyond your control, treating every unpredictable turn as a personal injustice rather than simply part of how life moves. If unexpected change tends to provoke a disproportionate sense of unfairness in you, that old resistance may still be active.`,
-      path: `This may shift by naming one current circumstance genuinely beyond your control, and consciously choosing acceptance over continued resistance to it. You are allowed to lay his derailed plan down with honor. What acceptance is available to you that circumstance never offered him?`,
-      positive: `The sensitivity to disruption hasn't changed — sudden turns still register — but you've named one circumstance genuinely beyond your control and chosen acceptance over continued resistance to it. That shift resolves a bitterness your mother's father carried toward a plan that was derailed by nothing he could have prevented.`,
-      negative: `The sensitivity to disrupted plans is completely real, and every uncontrollable turn keeps landing as personal injustice rather than simply how life moves. That disproportionate unfairness isn't paranoia. It's an inherited resistance to circumstances no one could have controlled, still refusing to settle in you the way it never settled in him.`,
+      title: `10 in Maternal Masculine Line — Wheel of Fortune`,
+      tagline: `A Design of the Honored Peace`,
+      mastery: `You carry a real capacity to weather life's unpredictable turns.`,
+      shadow: `You treat every uncontrollable turn as personal injustice rather than simply how life moves.`,
+      invitation: `Name one circumstance today genuinely beyond your control, and choose acceptance over resistance to it.`,
     },
 
     // ── 11 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '11_G1': {
-      heading: `Gentleness Where He Showed Toughness`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for compassionate strength, overridden by a demand to appear tough, unaffected, or hardened instead. The Strength sits in your Maternal Masculine Line, meaning this generation's task may be to lead with a strength he was only allowed to show as harshness.`,
-      shadow: `The risk is inheriting the hardened version without its gentler counterpart — real resilience expressed only as toughness, cutting you off from the compassionate strength that was actually available underneath. If your version of strength rarely includes visible tenderness, that inherited hardening may still be running.`,
-      path: `This may shift by leading with visible compassion in one difficult situation this week, letting it stand alongside your strength rather than being hidden by it. You are allowed to be gentle where he could only be hard. Who in your life would feel the difference first?`,
-      positive: `The strength was always real — what's different is that gentleness now stands alongside it instead of being hidden by it. Leading a difficult moment with visible compassion, not just toughness, completes a fuller resilience than your mother's father was ever permitted to show, since he was only allowed to harden.`,
-      negative: `The capacity for real strength is completely genuine, and it keeps expressing itself only as toughness, cut off from the compassionate counterpart that was always available underneath. That hardening isn't who you actually are. It's the version of strength your mother's father was forced into, still standing in for the fuller one you're capable of.`,
+      title: `11 in Maternal Masculine Line — Strength`,
+      tagline: `A Design of the Gentle Difference`,
+      mastery: `You carry real, genuine resilience and strength.`,
+      shadow: `You express that strength only as toughness, cut off from the compassionate strength that's actually available underneath.`,
+      invitation: `Lead one difficult moment today with visible compassion standing alongside your strength.`,
     },
 
     // ── 12 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '12_G1': {
-      heading: `Rebalancing a Life Given to Others`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a life shaped entirely around duty and sacrifice for others, with personal wants or needs never once prioritized or even considered. The Hanged Man sits in your Maternal Masculine Line, meaning this generation's task may be to reclaim active choice for yourself where he only ever gave it away.`,
-      shadow: `The risk is inheriting the same total self-sacrifice — a life so oriented around others' needs that your own stay perpetually unconsidered, repeating exactly the imbalance this task exists to resolve. If you can't easily name your own current needs, that inherited pattern of total deferral may still be running.`,
-      path: `This may shift by naming one of your own needs directly this week and prioritizing it, even briefly, rather than automatically deferring to someone else's. You are allowed to keep some of the life for yourself. What need of yours goes on the list today, above the fold?`,
-      positive: `The capacity for genuine care and duty hasn't changed — what's different is that your own needs now get named and prioritized alongside it, instead of deferred indefinitely. Claiming something for yourself first, even briefly, completes a balance your mother's father never got the room to ask for.`,
-      negative: `The devotion to others' needs is completely real, and your own keep going unconsidered underneath it, so thoroughly that you may struggle to even name what you currently need. That total deferral isn't selflessness. It's the same imbalance your mother's father lived inside, a life given entirely away with nothing set aside.`,
+      title: `12 in Maternal Masculine Line — The Hanged Man`,
+      tagline: `A Design of the Named List`,
+      mastery: `You carry a real capacity for care and devotion to others.`,
+      shadow: `Your own needs go perpetually unconsidered underneath that devotion, so thoroughly you struggle to even name them.`,
+      invitation: `Name one of your own needs today, directly, and prioritize it, even briefly.`,
     },
 
     // ── 13 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '13_G1': {
-      heading: `Completing the Change He Resisted`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a necessary ending or transformation, resisted and postponed rather than faced directly, until circumstance forced it regardless. The Death sits in your Maternal Masculine Line, meaning this generation's task may be to meet necessary change directly, rather than resisting it the way he did.`,
-      shadow: `The risk is inheriting the same resistance — holding onto what's clearly finished simply because letting go feels dangerous, repeating exactly the avoidance this task exists to resolve. If you find yourself gripping tightly to something you already know has run its course, that inherited resistance may still be running.`,
-      path: `This may shift by identifying one ending that's clearly due in your own life, and choosing to meet it directly rather than continuing to resist it. You are allowed to say yes to the change he refused to the end. What door is open in front of you that stayed shut in front of him?`,
-      positive: `The instinct to hold on hasn't disappeared — but you've identified one ending that's clearly due and chosen to meet it directly instead of continuing to resist it. That willingness to walk into necessary change completes a transformation your mother's father postponed until circumstance forced it on him anyway.`,
-      negative: `The resistance to change is completely real, and it keeps gripping tightly to what's already finished, simply because letting go feels dangerous rather than simply overdue. That grip isn't loyalty to what was. It's an old avoidance from your mother's father, still refusing the ending that eventually arrives regardless.`,
+      title: `13 in Maternal Masculine Line — Transformation`,
+      tagline: `A Design of the Open Door`,
+      mastery: `You carry a real capacity to meet necessary change directly.`,
+      shadow: `You grip tightly to something you already know has run its course, simply because letting go feels dangerous.`,
+      invitation: `Identify one ending that's clearly due in your life today, and meet it directly.`,
     },
 
     // ── 14 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '14_G1': {
-      heading: `Steadying What He Lost to Extremes`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine desire for a balanced, moderate life, lost instead to extremes of overwork, excess, or rigid self-denial. The Temperance sits in your Maternal Masculine Line, meaning this generation's task may be to find the steadiness his life never actually held.`,
-      shadow: `The risk is inheriting the same swing between extremes — periods of intense overexertion followed by equally intense collapse or excess, repeating the very imbalance this task exists to resolve. If your own life alternates sharply between overdoing and depleting, that inherited pattern may still be running.`,
-      path: `This may shift by choosing one small, sustainable, moderate practice and holding it steadily, resisting the pull toward either extreme. You are allowed to live between the extremes he swung across. What steady rhythm could your days take that his never found?`,
-      positive: `The capacity for real commitment hasn't changed — what's different is that it now runs at a sustainable pace instead of swinging between extremes. One small, steady practice, held rather than abandoned, completes a balance your mother's father's life never actually managed to find between overwork and collapse.`,
-      negative: `The intensity is completely real, and it keeps alternating between overexertion and equally intense collapse or excess, with nothing steady in between. That swing isn't a personality trait. It's an old imbalance from your mother's father, still running through you as the only two speeds available.`,
+      title: `14 in Maternal Masculine Line — Temperance`,
+      tagline: `A Design of the Steady Rhythm`,
+      mastery: `You carry a real capacity for commitment and sustained effort.`,
+      shadow: `You alternate sharply between overexertion and equally intense collapse or excess, with nothing steady in between.`,
+      invitation: `Choose one small, sustainable practice today and hold it steadily, resisting either extreme.`,
     },
 
     // ── 15 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '15_G1': {
-      heading: `Releasing a Bind He Couldn't Break`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real entrapment, whether addiction, compulsion, or a duty-bound obligation that felt impossible to escape, carried without ever being fully broken. The Devil sits in your Maternal Masculine Line, meaning this generation's task may be to release a bind he was never able to escape.`,
-      shadow: `The risk is inheriting a compulsive attachment of your own — to a substance, a pattern, or an obligation — that feels similarly impossible to question or release. If something in your life feels like it's simply how things are rather than an actual choice, that inherited bind may still be active.`,
-      path: `This may shift by naming your own version of that bind honestly, and taking one concrete step toward loosening it rather than continuing to accept it as fixed. You are allowed to walk out of the bind he died inside. What is the one strand of it you could cut this season?`,
-      positive: `The pull toward the bind hasn't necessarily vanished — but you've named your own version of it honestly and taken one real step toward loosening it, rather than accepting it as fixed. That step completes a freedom your mother's father sensed but was never able to actually reach.`,
-      negative: `The bind is completely real, and it keeps being accepted as simply how things are, never questioned, never approached as something that could actually loosen. That acceptance isn't peace with your circumstances. It's an old entrapment from your mother's father, still running because it's never been named as something to release.`,
+      title: `15 in Maternal Masculine Line — The Devil`,
+      tagline: `A Design of the Cut Strand`,
+      mastery: `You carry a real capacity to recognize and release what binds you.`,
+      shadow: `You accept some compulsion, pattern, or obligation as simply how things are, never questioned, never approached as changeable.`,
+      invitation: `Name your own version of the bind honestly today, and take one concrete step toward loosening it.`,
     },
 
     // ── 16 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '16_G1': {
-      heading: `Finishing His Unrebuilt Collapse`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real loss or ruin that arrived suddenly and was survived, but never fully rebuilt from, the rebuilding left incomplete. The Tower sits in your Maternal Masculine Line, meaning this generation's task may be to complete a reconstruction he started but didn't finish.`,
-      shadow: `The risk is inheriting a lingering bracing for disaster, treating stability itself with suspicion, as though rebuilding fully would only invite another collapse. If you hold back from fully investing in something stable because part of you is still waiting for it to fall apart, that inherited caution may still be running.`,
-      path: `This may shift by fully investing in one area of stability in your life this week, without holding back in anticipation of its collapse. You are allowed to finish the rebuild he only began. What in your life is standing at half-height, waiting for your decision to complete it?`,
-      positive: `The caution after collapse hasn't fully disappeared — but you've fully invested in one area of stability instead of holding back in anticipation of its fall. That investment completes a reconstruction your mother's father survived enough to start and never had the chance to actually finish.`,
-      negative: `The caution around stability is completely understandable, and it keeps holding you back from fully investing in what's actually solid, bracing for a collapse that already happened once, long ago. That hesitation isn't wisdom. It's an unfinished rebuilding from your mother's father, still treating stability as something that hasn't been earned back yet.`,
+      title: `16 in Maternal Masculine Line — The Tower`,
+      tagline: `A Design of the Finished Rebuild`,
+      mastery: `You carry a real capacity to rebuild fully after loss.`,
+      shadow: `You hold back from fully investing in something stable, still bracing for a collapse that already happened once, long ago.`,
+      invitation: `Fully invest in one area of stability today, without holding back in anticipation of its collapse.`,
     },
 
     // ── 17 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '17_G1': {
-      heading: `Restoring Hope He Abandoned`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine hope or faith in a better future, abandoned after a real disappointment made it feel foolish or unsafe to keep holding. The Star sits in your Maternal Masculine Line, meaning this generation's task may be to restore a hope he felt forced to give up.`,
-      shadow: `The risk is inheriting the same guardedness against hope — a reflexive cynicism or resignation that protects against future disappointment at the cost of ever genuinely believing things could improve. If hope feels naive or dangerous to you specifically, that inherited protection may still be active.`,
-      path: `This may shift by naming one genuine hope you actually hold, out loud, and letting yourself act on it rather than guarding against it. You are allowed to restore the hope past his disappointment. What would hoping again, carefully but truly, look like this year?`,
-      positive: `The guardedness around hope hasn't fully lifted — but you've named one genuine hope out loud and let yourself act on it rather than defending against it. That willingness restores something your mother's father felt forced to abandon after a disappointment real enough to make hoping again feel unsafe.`,
-      negative: `The guardedness against hope is completely understandable, and it keeps functioning as protection from disappointment at the cost of ever genuinely believing things could improve. That reflexive cynicism isn't realism. It's an old abandonment from your mother's father, still deciding what you'll let yourself want.`,
+      title: `17 in Maternal Masculine Line — The Star`,
+      tagline: `A Design of the Restored Hope`,
+      mastery: `You carry a real capacity for genuine hope and faith in a better future.`,
+      shadow: `You default to reflexive cynicism, protecting against disappointment at the cost of ever genuinely believing things could improve.`,
+      invitation: `Name one genuine hope you actually hold today, out loud, and act on it.`,
     },
 
     // ── 18 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '18_G1': {
-      heading: `Facing the Fear He Avoided`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real fear or confusion, never faced directly, left to operate in the background rather than being brought into clear light. The Moon sits in your Maternal Masculine Line, meaning this generation's task may be to see clearly what he could never quite look at directly.`,
-      shadow: `The risk is inheriting the same avoidance — an unnamed anxiety that shapes decisions from the background without ever being examined directly, repeating the very obscurity this task exists to resolve. If a persistent unease affects your choices without your being able to name its actual source, that inherited fog may still be active.`,
-      path: `This may shift by naming, as specifically as possible, one fear that's been operating in the background, and looking at it directly rather than around it. You are allowed to see the fear clearly that he only felt darkly. Named and measured — how big is it really?`,
-      positive: `The unease hasn't necessarily disappeared — but you've named one fear as specifically as you can and looked at it directly instead of around it. That clarity is exactly what your mother's father was never able to reach, leaving the fear to operate in the background instead.`,
-      negative: `The unease is completely real, and it keeps shaping decisions from the background without ever being examined directly, an anxiety with no clear name attached to it. That fog isn't confusion about what you want. It's an old, unfaced fear from your mother's father, still steering choices from somewhere just out of view.`,
+      title: `18 in Maternal Masculine Line — The Moon`,
+      tagline: `A Design of the Measured Fear`,
+      mastery: `You carry a real capacity to see clearly what's been operating in the background.`,
+      shadow: `An unnamed anxiety shapes your decisions from the background without ever being examined directly.`,
+      invitation: `Name, as specifically as possible, one fear that's been operating in the background, and look at it directly today.`,
     },
 
     // ── 19 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '19_G1': {
-      heading: `Letting His Hidden Joy Be Seen`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real capacity for open joy and warmth, kept behind a wall of stoicism or emotional reserve considered proper or necessary. The Sun sits in your Maternal Masculine Line, meaning this generation's task may be to let visible joy exist where he only ever allowed restraint.`,
-      shadow: `The risk is inheriting the same reserve — genuine happiness felt but rarely shown, kept behind a controlled surface out of old habit rather than actual preference. If you feel joy more than you show it, that inherited restraint may still be running.`,
-      path: `This may shift by letting one moment of real joy be visibly, openly expressed this week, rather than kept behind your usual composure. You are allowed to let the gladness through the stoic gate. What happiness would you show today if showing it were a family repair?`,
-      positive: `The joy was always genuinely there — what's different is that it's now visible, audible, let out from behind the usual composure. One moment of real happiness shown openly completes a warmth your mother's father actually felt but was never permitted to display.`,
-      negative: `The capacity for real joy is completely genuine, and it keeps staying behind a controlled, stoic surface, felt more than it's ever shown. That restraint isn't dignity. It's an old inheritance from your mother's father, where visible gladness was considered improper, still deciding how much of your happiness reaches your face.`,
+      title: `19 in Maternal Masculine Line — The Sun`,
+      tagline: `A Design of the Family Repair`,
+      mastery: `You carry a real capacity for genuine joy and warmth.`,
+      shadow: `You keep that joy behind a controlled, stoic surface, felt more than it's ever actually shown.`,
+      invitation: `Let one moment of real joy today be visibly, openly expressed, without your usual composure.`,
     },
 
     // ── 20 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '20_G1': {
-      heading: `Taking Up His Unanswered Calling`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a real calling or awakening, sensed but never actually answered, set aside for a life that didn't fully account for it. The Judgement sits in your Maternal Masculine Line, meaning this generation's task may be to answer a call he heard but couldn't take up.`,
-      shadow: `The risk is sensing your own version of that call and continuing to delay it, treating the recognition itself as enough without ever actually acting on it. If you already know what you're being called toward and still haven't moved, that inherited delay may still be running.`,
-      path: `This may shift by taking one concrete first step toward the calling you already recognize, rather than continuing to only sense it. You are allowed to answer the summons he heard and set down. What is it asking of you specifically — not of him, of you?`,
-      positive: `The calling hasn't changed — you've sensed it clearly for a while — but you've taken one concrete first step toward it instead of continuing to only recognize it. That step completes an awakening your mother's father heard just as clearly and was never able to actually take up.`,
-      negative: `The calling is completely real, sensed clearly and specifically, and it keeps being delayed rather than acted on, as though recognizing it were the same as answering it. That delay isn't indecision. It's an old, unanswered call from your mother's father, still waiting for someone to move on it instead of just hearing it.`,
+      title: `20 in Maternal Masculine Line — Judgement`,
+      tagline: `A Design of the Answered Summons`,
+      mastery: `You carry a real, clearly sensed calling.`,
+      shadow: `You keep delaying it, treating recognizing the call as though it were the same as answering it.`,
+      invitation: `Take one concrete first step today toward the calling you already recognize.`,
     },
 
     // ── 21 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '21_G1': {
-      heading: `Completing What He Left Undone`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine goal or life's work, left permanently incomplete, without ever reaching the sense of arrival it was working toward. The World sits in your Maternal Masculine Line, meaning this generation's task may be to reach a completion he never got to feel.`,
-      shadow: `The risk is inheriting the same perpetual incompletion — real progress made, but the finish line never actually crossed, treated as always just out of reach. If your own significant efforts rarely get to feel finished, that inherited pattern may still be running.`,
-      path: `This may shift by identifying one genuinely near-complete effort in your own life, and deliberately closing it out rather than extending it further. You are allowed to write the ending he never reached. What completion in your hands would let something in the line finally rest?`,
-      positive: `The capacity for real, sustained effort hasn't changed — what's different is that you've identified one near-complete piece of work and deliberately closed it out instead of extending it further. That closure resolves an incompletion your mother's father worked toward for a lifetime without ever getting to feel the finish.`,
-      negative: `The effort and progress are completely real, and the finish line keeps moving just out of reach, treated as always one step further than wherever you currently are. That perpetual almost-there isn't a lack of capability. It's an old incompletion from your mother's father, still deciding that arrival isn't actually available to you.`,
+      title: `21 in Maternal Masculine Line — The World`,
+      tagline: `A Design of the Written Ending`,
+      mastery: `You carry real, sustained capacity for effort and progress.`,
+      shadow: `The finish line keeps moving just out of reach, treated as always one step further than wherever you currently are.`,
+      invitation: `Identify one genuinely near-complete effort today, and deliberately close it out.`,
     },
 
     // ── 22 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '22_G1': {
-      heading: `Reclaiming Freedom He Traded Away`,
-      why: `This Ancestral Task may carry an unfulfilled dream from your mother's father — a genuine desire for freedom, adventure, or an unconventional path, traded away for the security of a safer, more expected route. The Fool sits in your Maternal Masculine Line, meaning this generation's task may be to reclaim the freedom he gave up.`,
-      shadow: `The risk is inheriting the same trade — choosing safety reflexively over genuine freedom, even in situations where the risk would actually be worth taking. If you consistently pick the secure option over the one that would actually feel alive, that inherited trade may still be running.`,
-      path: `This may shift by choosing the freer, less conventional option in one specific situation this week, rather than defaulting again to safety. You are allowed to reclaim the freedom his security cost. What reclaimed liberty would you actually use — and for what?`,
-      positive: `The pull toward the safer option hasn't necessarily vanished — but you've chosen the freer, less conventional path in one specific situation instead of defaulting to security again. That choice reclaims a freedom your mother's father traded away for a safety he felt he had no other option but to choose.`,
-      negative: `The desire for real freedom is completely genuine, and it keeps losing to a reflexive pull toward the secure option, even in situations where the risk would actually be worth taking. That default isn't prudence. It's an old trade from your mother's father, still deciding that safety wins by default, whether or not it's actually needed.`,
+      title: `22 in Maternal Masculine Line — The Fool`,
+      tagline: `A Design of Reclaimed Liberty`,
+      mastery: `You carry a real, genuine desire for freedom, adventure, and an unconventional path.`,
+      shadow: `You default to the secure option reflexively, even in situations where the risk would actually be worth taking.`,
+      invitation: `Choose the freer, less conventional option today in one specific situation, instead of defaulting to safety.`,
     },
 
     // ── 1 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
