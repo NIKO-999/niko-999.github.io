@@ -1654,222 +1654,200 @@ window.DMicroContent = (function () {
 
     // ── 9 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '9_G': {
-      heading: `Depth Before Words`,
-      why: `The spiritual inheritance passed down through your mother's line arrived mostly through silence rather than instruction — an inward, private relationship to meaning, faith, or inner knowing that was modeled more than it was taught. The Hermit sits in your Maternal Spiritual corner, and the gift here is real: you likely carry an inherited capacity for genuine solitary depth, an ability to sit with the unanswerable that most people never develop. But because it arrived wordlessly, you may have also inherited the assumption that the deepest spiritual matters aren't things you talk about — that the correct response to the sacred is to go quiet and go inward, the way the maternal line did before you.`,
-      shadow: `This can show up as a spiritual life that stays entirely private by default — not because you chose that, but because the maternal lineage never modeled another option. You might have genuine wisdom that never gets offered to the people who could actually use it, or a quiet, generational loneliness — women in your line who each carried real inner depth alone, never quite realizing the people around them were carrying something similar in the same silence. If you keep feeling spiritually or emotionally unseen by the people closest to you, generation after generation, that's less a personal failing than an inherited pattern that was never given the chance to become spoken.`,
-      path: `Try honoring the depth of what was passed down while consciously giving it a voice the generations before you may not have had access to. That doesn't mean abandoning your inward orientation — the solitary depth is a genuine gift — it means occasionally bringing what you find there back out into relationship, breaking a silence that was inherited rather than chosen. Every time you speak the maternal line's quiet wisdom out loud, you complete something that was waiting, for at least one generation, to finally be received. You are allowed to speak the depth you learned in silence. What early wordless knowing of yours is finally ready for language?`,
-      positive: `The genuine capacity for solitary depth hasn't changed — what's different is that you now consciously give it a voice the generations before you may not have had access to. You still go inward the way the maternal line always did, but you bring what you find there back out into relationship, breaking a silence that was inherited rather than chosen. Every time the quiet wisdom gets spoken out loud, something waiting for at least one generation finally gets received, and the loneliness that used to repeat itself, generation after generation, finally has an opening to end with you.`,
-      negative: `The inherited capacity for genuine solitary depth is completely real, and it arrived wordlessly, along with the assumption that the deepest spiritual matters simply aren't discussed — the correct response to the sacred modeled as going quiet and going inward, nothing more. Feeling spiritually or emotionally unseen by the people closest to you, generation after generation, is less a personal failing than an inherited pattern that was never given the chance to become spoken, still waiting for someone to finally say it out loud.`,
+      title: `9 in Maternal Spiritual — The Hermit`,
+      tagline: `A Design of the Spoken Depth`,
+      mastery: `You carry real, inherited depth — the capacity to sit with the unanswerable, modeled through your mother's line's quiet.`,
+      shadow: `You inherit the assumption that deep things aren't discussed, staying entirely private with wisdom that could actually help someone.`,
+      invitation: `Speak one piece of your inward wisdom out loud today, to someone who could use it.`,
     },
 
     // ── 1 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '1_G': {
-      heading: `Making It Happen, Quietly`,
-      why: `Women in your mother's line likely modeled real spiritual capability without ever framing it as such, simply moving through life with a kind of unspoken confidence that things could be willed into being. The Magician sits in your Maternal Spiritual corner, marking this generational transmission of quiet agency. You inherited this as a felt sense rather than a taught lesson: capability transmitted through example, not explanation.`,
-      shadow: `The trap is inheriting the capability without the language to name or claim it — a quiet confidence that never gets spoken aloud, so it stays instinctual rather than becoming something you can consciously wield. If you sense you have real spiritual agency but struggle to explain or claim it, that's often maternal wisdom that was modeled but never voiced.`,
-      path: `Try naming your own capability out loud, giving language to what was only ever demonstrated before you. Speaking it doesn't diminish it — it makes it usable in ways silent modeling never could. You are allowed to claim the making-things-happen power out loud. What could you create this season if you stopped keeping the ability quiet?`,
-      positive: `The quiet confidence that things could be willed into being hasn't changed — what's different is that you now name your own capability out loud, giving language to what was only ever demonstrated before you. Speaking it doesn't diminish it; it makes it usable in ways silent modeling never could. What you could create this season finally gets built consciously, because the making-things-happen power that was always yours has finally been claimed out loud instead of just quietly assumed.`,
-      negative: `The inherited felt sense of spiritual capability, transmitted through example rather than explanation, is completely real, and it's staying instinctual because it's never been given language — a quiet confidence that never gets spoken aloud, so it can't yet be consciously wielded. Sensing real spiritual agency but struggling to explain or claim it is often maternal wisdom that was modeled but never voiced, not a genuine absence of the capability itself.`,
+      title: `1 in Maternal Spiritual — The Magician`,
+      tagline: `A Design of the Named Capability`,
+      mastery: `You carry real spiritual capability, modeled through quiet confidence rather than explanation.`,
+      shadow: `The capability stays instinctual because it was never given language — you sense your own agency but struggle to claim it.`,
+      invitation: `Name your own capability out loud today, instead of just quietly demonstrating it.`,
     },
 
     // ── 2 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '2_G': {
-      heading: `Knowing Without Proof`,
-      why: `Women in your mother's line likely trusted their inner sense of things without needing external validation, moving through cycles of clarity and mystery as simply how knowing worked. The High Priestess sits in your Maternal Spiritual corner, marking this generational transmission of intuitive knowing. You inherited this as an embodied trust: knowing that arrives without argument, modeled rather than explained.`,
-      shadow: `The trap is inheriting the trust without ever testing it against the world — an intuitive certainty so deeply modeled that you never learned to distinguish genuine knowing from simple assumption. If your intuitions feel unquestionable even when they turn out wrong, that's often inherited certainty that was never actually taught how to self-correct.`,
-      path: `Try holding your intuitive knowing as genuinely valuable and still open to being wrong sometimes. Real trust in your inner sense doesn't require it to be infallible — it requires you to keep listening even when it needs updating. You are allowed to trust the proofless knowing she handed you. What does that inherited sense keep telling you lately?`,
-      positive: `The embodied trust in inner knowing hasn't changed — what's different is that you now hold it as genuinely valuable and still open to being wrong sometimes. Real trust in your inner sense doesn't require infallibility; it requires you to keep listening even when it needs updating, and that's exactly what you now do. The proofless knowing she handed you gets to function as genuine wisdom now, tested against the world instead of simply assumed to be correct.`,
-      negative: `The embodied trust in inner knowing, modeled rather than explained by women in your mother's line, is completely real, and it arrived without ever being tested against the world — an intuitive certainty so deeply modeled that distinguishing genuine knowing from simple assumption never got learned. Intuitions that feel unquestionable even when they turn out wrong are often inherited certainty that was never actually taught how to self-correct, not proof the knowing itself is unreliable.`,
+      title: `2 in Maternal Spiritual — The High Priestess`,
+      tagline: `A Design of Tested Trust`,
+      mastery: `You carry real, embodied trust in your inner sense of things.`,
+      shadow: `That certainty was never taught to self-correct, so you can hold a wrong intuition as unquestionable.`,
+      invitation: `Test one intuition against the world today instead of assuming it's automatically right.`,
     },
 
     // ── 3 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '3_G': {
-      heading: `Warmth Never Explained`,
-      why: `Women in your mother's line likely modeled a warm, generative relationship to faith or meaning, simply living it rather than teaching it directly. The Empress sits in your Maternal Spiritual corner, marking this generational transmission of nurturing spiritual presence. You inherited this as felt atmosphere: spiritual abundance transmitted through presence, not instruction.`,
-      shadow: `The trap is inheriting the warmth without the words for it — spiritual generativity that stays purely atmospheric, never becoming something you can consciously offer or teach to someone else. If your spiritual nurturing feels natural but hard to articulate, that's often maternal wisdom that was lived but never spoken.`,
-      path: `Try putting words to the spiritual warmth you carry, even if it feels reductive at first. Naming it is what lets you offer it deliberately, not just radiate it by accident. You are allowed to live the warmth forward without needing to explain it either. Who in your life is due some of the unexplained tenderness you were raised inside?`,
-      positive: `The felt atmosphere of spiritual warmth hasn't changed — what's different is that you've found words for it, even if naming it felt reductive at first. Putting language to what you carry is what lets you offer it deliberately now, instead of only ever radiating it by accident. The unexplained tenderness you were raised inside finally gets to reach someone on purpose, offered rather than merely present.`,
-      negative: `The felt atmosphere of spiritual warmth, transmitted through presence rather than instruction, is completely real, and it's staying purely atmospheric because it's never been given words — spiritual generativity that can't yet be consciously offered or taught to someone else. Nurturing that feels natural but hard to articulate is often maternal wisdom that was lived but never spoken, not a genuine limit on what you actually carry.`,
+      title: `3 in Maternal Spiritual — The Empress`,
+      tagline: `A Design of the Named Warmth`,
+      mastery: `You carry real, warm spiritual generativity — a presence that nurtures without needing to explain itself.`,
+      shadow: `The warmth stays purely atmospheric because it was never put into words, so you can't offer it deliberately.`,
+      invitation: `Put words to the spiritual warmth you carry today, and offer it to one specific person on purpose.`,
     },
 
     // ── 4 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '4_G': {
-      heading: `Authority Without Volume`,
-      why: `Women in your mother's line likely held real spiritual order and steadiness without ever asserting it loudly, maintaining structure through presence rather than proclamation. The Emperor sits in your Maternal Spiritual corner, marking this generational transmission of quiet structural authority. You inherited this as an unspoken model: authority that doesn't need to announce itself to be real.`,
-      shadow: `The trap is inheriting the quietness without the actual claiming — a real capacity for spiritual leadership that stays so unassuming it never gets recognized, including by you. If your steadiness goes unnoticed and uncredited, that's often maternal authority that was modeled too quietly to be seen.`,
-      path: `Try letting your quiet spiritual authority be visible sometimes, even if it feels like breaking a pattern. Real steadiness doesn't lose its power by being acknowledged. You are allowed to lead the way she did — quietly, and completely. Where could your unraised voice already carry the room?`,
-      positive: `The real spiritual order and steadiness hasn't changed — what's different is that you now let your quiet authority be visible sometimes, even though it feels like breaking a pattern. Real steadiness doesn't lose its power by being acknowledged, and the unraised voice that could already carry the room finally gets to be heard. Recognition finally reaches an authority that was always genuine, just previously too unassuming to be seen, including by you.`,
-      negative: `The real spiritual order and steadiness inherited through your mother's line, held without ever being asserted loudly, is completely genuine, and the quietness arrived without any actual claiming attached — real capacity for spiritual leadership so unassuming it never gets recognized, including by you. Steadiness that goes unnoticed and uncredited is often maternal authority modeled too quietly to be seen, not a real absence of leadership.`,
+      title: `4 in Maternal Spiritual — The Emperor`,
+      tagline: `A Design of Visible Authority`,
+      mastery: `You carry real spiritual steadiness and order, held quietly rather than announced.`,
+      shadow: `The quietness goes so far your own authority never gets recognized, including by you.`,
+      invitation: `Let your quiet spiritual authority be visible today, even if it feels like breaking a pattern.`,
     },
 
     // ── 5 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '5_G': {
-      heading: `Wisdom Through Relationship`,
-      why: `Women in your mother's line likely passed down spiritual understanding through relationship and lived example rather than formal doctrine or codified teaching. The Hierophant sits in your Maternal Spiritual corner, marking this generational transmission of relational, informal wisdom. You inherited this as embedded knowledge: wisdom you absorbed by proximity rather than instruction.`,
-      shadow: `The trap is inheriting wisdom so informally that it never gets recognized as a real body of knowledge, easy to dismiss as "just how mom was" rather than something genuinely worth carrying forward deliberately. If you undervalue what you learned this way, that's often because it never arrived with the credibility of formal teaching.`,
-      path: `Try treating what you absorbed relationally as real, valuable knowledge, worth naming and passing on with the same seriousness as any formal teaching. You are allowed to pass wisdom through closeness, not curriculum. Which relationship of yours is already the classroom?`,
-      positive: `The embedded knowledge absorbed by proximity hasn't changed — what's different is that you now treat what you absorbed relationally as real, valuable knowledge, worth naming and passing on with the same seriousness as any formal teaching. The relationship that was already the classroom finally gets recognized as one, and the wisdom that used to be dismissed as "just how mom was" finally gets carried forward deliberately, credited as the real body of knowledge it always was.`,
-      negative: `The embedded knowledge absorbed by proximity rather than instruction, passed down through relationship and lived example, is completely real, and it's going unrecognized as an actual body of knowledge — easy to dismiss as "just how mom was" rather than something genuinely worth carrying forward deliberately. Undervaluing what you learned this way is often because it never arrived with the credibility of formal teaching, not because the wisdom itself is thin.`,
+      title: `5 in Maternal Spiritual — The Hierophant`,
+      tagline: `A Design of Credited Wisdom`,
+      mastery: `You carry real wisdom, absorbed through relationship and lived example rather than formal teaching.`,
+      shadow: `You dismiss that wisdom as "just how she was," undervaluing it because it never arrived with formal credibility.`,
+      invitation: `Name one piece of relational wisdom today as real knowledge, worth passing on deliberately.`,
     },
 
     // ── 6 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '6_G': {
-      heading: `Values Modeled, Not Taught`,
-      why: `Women in your mother's line likely demonstrated their spiritual priorities through the relationships and commitments they actually made, rather than stating those values outright. The Lovers sit in your Maternal Spiritual corner, marking this generational transmission of values shown through lived choice. You inherited this by watching: values transmitted through example rather than declaration.`,
-      shadow: `The trap is absorbing the values without ever examining whether they're genuinely yours, simply repeating the same relational choices because that's the pattern you watched, not because you've actually chosen it. If your relationship choices feel automatic rather than examined, that's often inherited example standing in for your own values.`,
-      path: `Try naming the values you actually watched get modeled, and consciously decide which ones you're keeping. Choosing deliberately what you'll otherwise inherit by default is the real work here. You are allowed to model your values instead of arguing them. What would the people watching you learn from this week, unspoken?`,
-      positive: `The values transmitted through example haven't changed — what's different is that you've named the ones you actually watched get modeled and consciously decided which you're keeping. Choosing deliberately what you'd otherwise inherit by default is the real work, and relationship choices finally feel examined rather than automatic. What the people watching you would learn this week finally reflects a value you actually chose, not just one you happened to absorb.`,
-      negative: `The values transmitted through example, demonstrated through relationships and commitments actually made rather than stated outright, are completely real, and they're being absorbed without ever being examined for whether they're genuinely yours — the same relational choices repeating simply because that's the pattern watched, not because it's been actually chosen. Relationship choices that feel automatic rather than examined are often inherited example standing in for your own values.`,
+      title: `6 in Maternal Spiritual — The Lovers`,
+      tagline: `A Design of Examined Values`,
+      mastery: `You carry real values, demonstrated through the choices your mother's line actually made.`,
+      shadow: `You repeat the same relational choices automatically, without ever examining whether they're genuinely yours.`,
+      invitation: `Name one value you actually watched get modeled today, and consciously decide if you're keeping it.`,
     },
 
     // ── 7 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '7_G': {
-      heading: `Determination, Unannounced`,
-      why: `Women in your mother's line likely kept a steady spiritual direction through real difficulty, modeling determination without drama. The Chariot sits in your Maternal Spiritual corner, marking this generational transmission of quiet, sustained spiritual will. You inherited this as embodied endurance: forward motion transmitted through simply watching someone keep going.`,
-      shadow: `The trap is inheriting the endurance without ever questioning whether the direction itself was actually chosen, or simply the only path modeled. If you find yourself pushing forward spiritually without a clear sense of why, that's often inherited momentum running on autopilot.`,
-      path: `Try pausing to ask whether your spiritual direction is genuinely yours, chosen consciously, or simply the shape of momentum you absorbed. Redirect if needed — the determination itself is a real gift regardless of where it's currently pointed. You are allowed to be quietly unstoppable. What are you steadily moving toward that needs no announcement to be real?`,
-      positive: `The quiet, sustained spiritual will hasn't changed — what's different is that you've paused to ask whether your direction is genuinely yours, chosen consciously, rather than simply the shape of momentum you absorbed. You redirect where needed, keeping the real gift of determination while making sure it's actually pointed where you want. What you're steadily moving toward finally needs no announcement to be real, because it's finally your own chosen direction, not inherited autopilot.`,
-      negative: `The quiet, sustained spiritual will inherited through your mother's line, determination modeled without drama, is completely real, and it arrived without ever being questioned about whether the direction itself was chosen, or simply the only path modeled. Pushing forward spiritually without a clear sense of why is often inherited momentum running on autopilot, not a genuine, examined commitment to where it's headed.`,
+      title: `7 in Maternal Spiritual — The Chariot`,
+      tagline: `A Design of Chosen Direction`,
+      mastery: `You carry real, quiet, sustained spiritual will — determination without drama.`,
+      shadow: `You push forward without questioning whether the direction was actually chosen or just the only path modeled.`,
+      invitation: `Pause today and ask whether your current spiritual direction is genuinely yours.`,
     },
 
     // ── 8 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '8_G': {
-      heading: `Right and Wrong, Demonstrated`,
-      why: `Women in your mother's line likely lived by a clear internal moral compass without ever spelling it out, letting their consistent actions speak for the standard. Justice sits in your Maternal Spiritual corner, marking this generational transmission of embodied fairness. You inherited this as felt conviction: a sense of right and wrong absorbed by watching, not by being told.`,
-      shadow: `The trap is inheriting the conviction without ever examining its actual content, applying an unexamined standard that may not perfectly fit your own circumstances. If your sense of fairness feels rigid in situations it wasn't originally built for, that's often an inherited standard applied without adjustment.`,
-      path: `Try naming the specific standard you absorbed, and checking whether it actually fits situations your mother's line never encountered. Update what needs updating; keep what genuinely holds. You are allowed to demonstrate your ethics the way she did — and to explain them when you choose. What right thing are you already doing that deserves to be understood, not just observed?`,
-      positive: `The felt conviction about right and wrong hasn't changed — what's different is that you've named the specific standard you absorbed and checked whether it actually fits situations your mother's line never encountered. What needed updating got updated; what genuinely holds got kept. The right thing you're already doing finally gets to be understood, not just observed, because the standard behind it is now something you consciously hold rather than simply inherited whole.`,
-      negative: `The felt conviction about right and wrong, absorbed by watching rather than being told, is completely real, and it's being applied without ever examining its actual content — an unexamined standard that may not perfectly fit your own circumstances. A sense of fairness that feels rigid in situations it wasn't originally built for is often an inherited standard applied without adjustment, not evidence the underlying conviction is wrong.`,
+      title: `8 in Maternal Spiritual — Justice`,
+      tagline: `A Design of the Updated Standard`,
+      mastery: `You carry a real, felt sense of right and wrong, absorbed by watching consistent action.`,
+      shadow: `You apply that inherited standard rigidly, even in situations it wasn't actually built for.`,
+      invitation: `Check one inherited standard of fairness today against your own actual circumstances.`,
     },
 
     // ── 10 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ──────────
     '10_G': {
-      heading: `Trust That Things Turn`,
-      why: `Women in your mother's line likely moved through real hardship and renewal without dramatizing either, modeling a quiet trust that difficult seasons pass. The Wheel of Fortune sits in your Maternal Spiritual corner, marking this generational transmission of cyclical resilience. You inherited this as embodied patience: trust in cycles transmitted through simply watching someone endure and recover.`,
-      shadow: `The trap is inheriting the patience without the active participation — a passive waiting-it-out that never quite engages with what could actually be done during a difficult season. If you find yourself simply enduring rather than actively navigating hard times, that's often inherited patience without its complementary agency.`,
-      path: `Try pairing your inherited trust in cycles with active engagement — not just waiting for the turn, but participating in it. Both were likely present in your mother's line; make sure you inherited the whole picture, not just the waiting half. You are allowed to trust the turning without forcing the wheel. What situation in your life is already turning that worry keeps gripping?`,
-      positive: `The embodied patience through hardship hasn't changed — what's different is that you now pair the inherited trust in cycles with active engagement, not just waiting for the turn but participating in it. Both were likely present in your mother's line, and you've made sure you inherited the whole picture, not just the waiting half. Situations that are already turning finally get navigated instead of merely endured, worry giving way to genuine participation.`,
-      negative: `The embodied patience through hardship, modeled without dramatizing it, is completely real, and it arrived without its complementary agency — a passive waiting-it-out that never quite engages with what could actually be done during a difficult season. Simply enduring rather than actively navigating hard times is often inherited patience without its other half, not evidence that engagement itself wouldn't help.`,
+      title: `10 in Maternal Spiritual — The Wheel of Fortune`,
+      tagline: `A Design of Active Trust`,
+      mastery: `You carry real, quiet trust that hard seasons pass — cyclical resilience modeled without drama.`,
+      shadow: `That patience arrives without its complementary agency — you endure passively instead of actively navigating.`,
+      invitation: `Take one active step today in a hard season you've just been waiting out.`,
     },
 
     // ── 11 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '11_G': {
-      heading: `Soft Yet Unbreakable`,
-      why: `Women in your mother's line likely held real difficulty with a soft, embodied steadiness rather than hardened toughness, modeling a strength that never needed to look fierce to be real. Strength sits in your Maternal Spiritual corner, marking this generational transmission of gentle endurance. You inherited this as felt permission: the sense that gentleness and real resilience aren't opposites.`,
-      shadow: `The trap is inheriting the softness without recognizing its actual strength, mistaking your own gentle steadiness for weakness because it doesn't look like conventional toughness. If you undervalue your own resilience because it's quiet, that's often maternal strength that was never named as strength.`,
-      path: `Try naming your gentle endurance as the real strength it is, out loud, to yourself if no one else. It doesn't need to look hard to be genuinely unbreakable. You are allowed to be soft and unbreakable at once — you watched it done. Where is your gentleness currently the strongest thing in the room?`,
-      positive: `The gentle, embodied steadiness hasn't changed — what's different is that you now name it as the real strength it is, out loud, even if only to yourself. It doesn't need to look hard to be genuinely unbreakable, and you know that now. The gentleness that's currently the strongest thing in the room finally gets recognized as strength, not mistaken for its absence, because you watched it done and you've finally called it what it is.`,
-      negative: `The gentle, embodied steadiness inherited through your mother's line, held difficulty without hardened toughness, is completely real, and it's going unrecognized as strength — mistaken for weakness because it doesn't look like conventional toughness. Undervaluing your own resilience because it's quiet is often maternal strength that was never named as strength, not a genuine absence of resilience.`,
+      title: `11 in Maternal Spiritual — Strength`,
+      tagline: `A Design of Named Softness`,
+      mastery: `You carry real gentle endurance — strength that never needed to look fierce to be real.`,
+      shadow: `You mistake your own quiet resilience for weakness because it doesn't look like conventional toughness.`,
+      invitation: `Name your gentle endurance as real strength today, out loud, even just to yourself.`,
     },
 
     // ── 12 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '12_G': {
-      heading: `Patience for Not Knowing`,
-      why: `Women in your mother's line likely modeled a genuine comfort with not having answers yet, letting understanding arrive in its own time rather than forcing it. The Hanged Man sits in your Maternal Spiritual corner, marking this generational transmission of receptive waiting. You inherited this as embodied patience: the sense that suspension itself can be productive.`,
-      shadow: `The trap is inheriting the waiting without its eventual resolution — staying suspended indefinitely because that's the pattern you watched, without the corresponding modeled return to action. If your patience never seems to convert into actual movement, that's often inherited waiting without its other half.`,
-      path: `Try letting your patience have a deliberate endpoint. The receptivity is a real gift — pairing it with an eventual, chosen return to action completes what may have only been partially modeled. You are allowed to not know yet, at her patient pace. What question in your life deserves the dignity of remaining open a while longer?`,
-      positive: `The embodied patience with not-knowing hasn't changed — what's different is that it now has a deliberate endpoint. The receptivity is a real gift, and pairing it with an eventual, chosen return to action completes what may have only been partially modeled before you. The question that deserved to remain open finally gets its answer in its own time, and patience finally converts into real movement instead of staying suspended indefinitely.`,
-      negative: `The embodied patience with not-knowing, modeled as genuine comfort with unanswered questions, is completely real, and it arrived without its eventual resolution — staying suspended indefinitely because that's the pattern watched, without the corresponding modeled return to action. Patience that never seems to convert into actual movement is often inherited waiting without its other half, not evidence that action itself isn't warranted.`,
+      title: `12 in Maternal Spiritual — The Hanged Man`,
+      tagline: `A Design of the Resolved Wait`,
+      mastery: `You carry real comfort with not having answers yet — receptive patience that lets understanding arrive in its own time.`,
+      shadow: `That waiting never resolves into action — you can stay suspended indefinitely with no modeled return.`,
+      invitation: `Give one piece of your patience a deliberate endpoint today — choose to act.`,
     },
 
     // ── 13 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '13_G': {
-      heading: `Becoming New, Quietly`,
-      why: `Women in your mother's line likely underwent real personal transformation without much fanfare, simply becoming who they needed to become as circumstances demanded. Transformation sits in your Maternal Spiritual corner, marking this generational transmission of quiet reinvention. You inherited this as embodied permission: change transmitted through watching someone quietly become new.`,
-      shadow: `The trap is inheriting the capacity for change without ever consciously choosing your own transformations, simply reacting to circumstance the way you watched rather than actively directing your own becoming. If your changes feel like they happen to you rather than through your own choice, that's often inherited reactive transformation.`,
-      path: `Try initiating a change deliberately, rather than only transforming under pressure. The capacity is real — direct it consciously instead of only accessing it in crisis. You are allowed to become someone new when it matters — it's in your blood. What quiet transformation is already underway in you?`,
-      positive: `The capacity for quiet reinvention hasn't changed — what's different is that you now initiate change deliberately, rather than only transforming under pressure. The capacity was always real, and directing it consciously instead of only accessing it in crisis means the quiet transformation already underway in you finally happens through your own choosing. It's in your blood, and now it's also in your hands.`,
-      negative: `The capacity for quiet reinvention, transmitted by watching someone become new without fanfare, is completely real, and it's arriving only reactively — transforming under pressure without ever consciously choosing your own becoming, simply reacting to circumstance the way you watched. Changes that feel like they happen to you rather than through your own choice are often inherited reactive transformation, not a genuine limit on your capacity to direct it.`,
+      title: `13 in Maternal Spiritual — Transformation`,
+      tagline: `A Design of Chosen Reinvention`,
+      mastery: `You carry real capacity for quiet reinvention — becoming who you need to become.`,
+      shadow: `That change only happens reactively, under pressure, instead of through your own conscious choice.`,
+      invitation: `Initiate one change deliberately today, instead of waiting for pressure to force it.`,
     },
 
     // ── 14 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '14_G': {
-      heading: `Holding Contradictions`,
-      why: `Women in your mother's line likely held real contradictions (duty and desire, strength and softness) without ever treating them as a crisis, simply living the blend day to day. Temperance sits in your Maternal Spiritual corner, marking this generational transmission of quiet integration. You inherited this as embodied ease: the sense that holding two true things at once doesn't require resolution, just steadiness.`,
-      shadow: `The trap is inheriting the quiet holding without ever actually examining the contradictions being held, absorbing an ease with paradox that can shade into avoiding real tension that actually needs addressing. If you find yourself calmly holding a contradiction that's genuinely causing harm, that's often inherited ease applied where real change was needed instead.`,
-      path: `Try distinguishing which contradictions genuinely just need patient holding, and which ones need actual resolution. Your inherited ease is a real gift — it works best paired with discernment about when it's actually appropriate. You are allowed to hold your contradictions without resolving them for anyone. Which two truths of yours can finally stop competing?`,
-      positive: `The quiet ease with holding contradictions hasn't changed — what's different is that you now distinguish which ones genuinely just need patient holding, and which ones need actual resolution. Your inherited ease pairs with real discernment about when it's actually appropriate, and the two truths that used to compete finally stop, because you've learned which contradictions to simply hold and which ones actually needed you to act.`,
-      negative: `The quiet ease with holding contradictions, living the blend of duty and desire or strength and softness without treating it as a crisis, is completely real, and it's being applied without ever examining what's actually being held — absorbing an ease with paradox that can shade into avoiding real tension that needs addressing. Calmly holding a contradiction that's genuinely causing harm is often inherited ease applied where real change was actually needed.`,
+      title: `14 in Maternal Spiritual — Temperance`,
+      tagline: `A Design of the Named Contradiction`,
+      mastery: `You carry real ease holding contradictions — duty and desire, strength and softness, without treating them as crisis.`,
+      shadow: `That ease can mean calmly holding a contradiction that's actually causing harm, avoiding real tension that needs addressing.`,
+      invitation: `Name one contradiction today that actually needs resolving, not just patient holding.`,
     },
 
     // ── 15 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '15_G': {
-      heading: `What a Woman Is Allowed`,
-      why: `Women in your mother's line likely carried real desire or material want that went largely unvoiced, modeling restraint around wanting rather than open acknowledgment of it. The Devil sits in your Maternal Spiritual corner, marking this generational transmission of unspoken constraint. You inherited this as felt limitation: a sense of what's allowed to be wanted, absorbed without ever being explicitly taught.`,
-      shadow: `The trap is inheriting the restraint without examining it — carrying an unspoken sense that wanting too openly is somehow inappropriate, which can leave your own genuine desires feeling like something to hide or minimize. If you struggle to name what you actually want, that's often an inherited, unspoken limitation still running.`,
-      path: `Try naming a genuine want out loud, plainly, without the inherited hedge. This isn't a betrayal of your mother's line — it's completing a permission that may have been waiting for a generation to actually claim it. You are allowed to want what the unspoken rule forbade. What desire have you inherited permission to deny — and are ready to reclaim?`,
-      positive: `The real desire and material want hasn't changed — what's different is that you now name a genuine want out loud, plainly, without the inherited hedge. This isn't a betrayal of your mother's line; it's completing a permission that may have been waiting a generation to actually be claimed. The desire you'd inherited permission to deny finally gets reclaimed, wanted openly instead of minimized.`,
-      negative: `The real desire and material want carried by women in your mother's line, largely unvoiced, is completely genuine, and the restraint arrived without examination — an unspoken sense that wanting too openly is somehow inappropriate, which can leave your own genuine desires feeling like something to hide or minimize. Struggling to name what you actually want is often an inherited, unspoken limitation still running, not evidence the wanting itself is wrong.`,
+      title: `15 in Maternal Spiritual — The Devil`,
+      tagline: `A Design of Reclaimed Wanting`,
+      mastery: `You carry real desire and material want, worth naming plainly.`,
+      shadow: `You inherit an unspoken restraint that makes wanting openly feel inappropriate, so your desires stay hidden even from yourself.`,
+      invitation: `Name one genuine want out loud today, plainly, with no hedge attached.`,
     },
 
     // ── 16 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '16_G': {
-      heading: `An Upheaval, Unspoken`,
-      why: `Something in your mother's line likely underwent a real spiritual or emotional collapse that was survived but never discussed, its aftershock passed down as atmosphere rather than story. The Tower sits in your Maternal Spiritual corner, marking this generational transmission of unprocessed rupture. You inherited this as unnamed residue: real capacity for clarity that arrived tangled with an inherited, silent upheaval.`,
-      shadow: `The trap is inheriting the aftershock without the story — a diffuse unease around sudden change that doesn't connect to anything in your own actual life. If you feel disproportionate dread around instability, that's often an inherited rupture still circling, waiting for its story to be told.`,
-      path: `Try asking, even if only of yourself, what might have happened in your mother's line that was never spoken about. Naming what you can, even speculatively, helps the inheritance finally settle. You are allowed to speak about the upheaval that was never mentioned. What silence in your maternal line might your naming finally lay to rest?`,
-      positive: `The capacity for real clarity hasn't changed — what's different is that you've asked, even just of yourself, what might have happened in your mother's line that was never spoken about. Naming what you can, even speculatively, helps the inheritance finally settle, and the silence in your maternal line that needed laying to rest finally has words attached to it, instead of just an atmosphere no one could explain.`,
-      negative: `The capacity for real clarity, tangled with a spiritual or emotional collapse in your mother's line that was survived but never discussed, is completely genuine, and the aftershock arrived without the story — a diffuse unease around sudden change that doesn't connect to anything in your own actual life. Disproportionate dread around instability is often an inherited rupture still circling, waiting for its story to finally be told.`,
+      title: `16 in Maternal Spiritual — The Tower`,
+      tagline: `A Design of the Told Story`,
+      mastery: `You carry real capacity for clarity, even through past rupture.`,
+      shadow: `You carry a diffuse unease around instability whose actual story was never told.`,
+      invitation: `Ask today, even just of yourself, what happened in your mother's line that was never spoken about.`,
     },
 
     // ── 17 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '17_G': {
-      heading: `Optimism, Hedged`,
-      why: `Women in your mother's line likely carried real optimism kept close, quietly, rather than fully expressed, perhaps to protect against disappointment. The Star sits in your Maternal Spiritual corner, marking this generational transmission of guarded hope. You inherited this as felt caution: renewal transmitted alongside a hedge against hoping too visibly.`,
-      shadow: `The trap is inheriting the caution without questioning it — carrying real hope but an unexamined restraint around expressing it fully. If you find yourself hedging every hope with a disclaimer, that's often the maternal line's dimmed light still running.`,
-      path: `Try letting one hope be fully, visibly held, without the inherited hedge. This completes work your mother's line may not have finished — separating quiet wisdom from muted expectation. You are allowed to hope larger than the line's careful modesty. What dream would honor her by outgrowing what she permitted herself?`,
-      positive: `The real optimism inherited from your mother's line hasn't changed — what's different is that you now let one hope be fully, visibly held, without the inherited hedge. This completes work your mother's line may not have finished: separating quiet wisdom from muted expectation. The dream that would honor her by outgrowing what she permitted herself finally gets dreamed at its actual size.`,
-      negative: `The real optimism carried by women in your mother's line, kept close and quiet rather than fully expressed, is completely genuine, and the caution arrived without question — real hope carrying an unexamined restraint around expressing it fully. Hedging every hope with a disclaimer is often the maternal line's dimmed light still running, not evidence that hoping visibly actually invites disappointment.`,
+      title: `17 in Maternal Spiritual — The Star`,
+      tagline: `A Design of Unhedged Hope`,
+      mastery: `You carry real optimism and hope.`,
+      shadow: `You inherit a caution against hoping too visibly, hedging every hope with a disclaimer.`,
+      invitation: `Let one hope be fully, visibly held today, with no hedge.`,
     },
 
     // ── 18 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '18_G': {
-      heading: `Depth Never Explained`,
-      why: `Women in your mother's line likely carried a rich, sometimes overwhelming inner world, felt more than discussed, modeled through mood and atmosphere rather than explanation. The Moon sits in your Maternal Spiritual corner, marking this generational transmission of deep emotional and intuitive life. You inherited this as felt inheritance: sensitivity transmitted through emotional proximity, not instruction.`,
-      shadow: `The trap is inheriting the depth without a way to process it, absorbing emotional atmosphere that was never actually named, which can leave you carrying feelings that aren't clearly your own. If your emotional world feels sometimes inexplicably heavy, that's often inherited, unprocessed feeling circulating without a name.`,
-      path: `Try distinguishing your own feelings from what you may have absorbed. Naming and sorting what's genuinely yours from what was simply present around you as a child is real, valuable work here. You are allowed to explore the depths she never explained. What emotional inheritance of yours is asking to be understood instead of just felt?`,
-      positive: `The rich, sometimes overwhelming inner world hasn't changed — what's different is that you now distinguish your own feelings from what you may have absorbed. Naming and sorting what's genuinely yours from what was simply present around you as a child is real, valuable work, and it's finally being done. The emotional inheritance that used to just be felt now gets to be understood, and heaviness that isn't actually yours finally gets to be set down.`,
-      negative: `The rich, sometimes overwhelming inner world carried by women in your mother's line, felt more than discussed, is completely real, and it arrived without a way to process it — emotional atmosphere absorbed but never actually named, leaving you carrying feelings that aren't clearly your own. An emotional world that feels sometimes inexplicably heavy is often inherited, unprocessed feeling circulating without a name, not evidence something is currently wrong.`,
+      title: `18 in Maternal Spiritual — The Moon`,
+      tagline: `A Design of Sorted Feeling`,
+      mastery: `You carry a rich, deep inner and intuitive life.`,
+      shadow: `You carry unprocessed emotional atmosphere that was never named, feelings that may not actually be yours.`,
+      invitation: `Sort one feeling today — decide honestly whether it's actually yours or something you absorbed.`,
     },
 
     // ── 19 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '19_G': {
-      heading: `Warmth as Presence`,
-      why: `Women in your mother's line likely radiated real vitality and joy simply through how they showed up, without needing to explain or perform it. The Sun sits in your Maternal Spiritual corner, marking this generational transmission of genuine warmth. You inherited this as felt permission: joy transmitted through presence, modeled as simply available rather than earned.`,
-      shadow: `The trap is inheriting the warmth without recognizing it as something you're allowed to also embody fully, staying in its glow rather than becoming a source of it yourself. If you feel like joy is something you receive rather than generate, that's often maternal radiance that was witnessed but not yet claimed as your own.`,
-      path: `Try letting your own warmth be a source, not just a reflection of hers. The permission to radiate was always meant to be passed on, not just observed. You are allowed to let warmth be your presence, not your performance. Who receives the truest version of your care simply by being near you?`,
-      positive: `The genuine vitality and joy hasn't changed — what's different is that you now let your own warmth be a source, not just a reflection of hers. The permission to radiate was always meant to be passed on, not just observed, and you've finally claimed it. Whoever receives the truest version of your care simply by being near you is now receiving something you generate, not just something you learned to stand inside.`,
-      negative: `The genuine vitality and joy radiated by women in your mother's line, simply through how they showed up, is completely real, and it's leaving you standing in its glow rather than becoming a source of it yourself. Feeling like joy is something you receive rather than generate is often maternal radiance that was witnessed but not yet claimed as your own, not evidence you don't carry the same warmth.`,
+      title: `19 in Maternal Spiritual — The Sun`,
+      tagline: `A Design of Generated Warmth`,
+      mastery: `You carry real vitality and joy, radiating simply through how you show up.`,
+      shadow: `You stand in the glow of that warmth without becoming a source of it yourself, treating joy as received, not generated.`,
+      invitation: `Let your own warmth be a source for someone today, not just a reflection of what you received.`,
     },
 
     // ── 20 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '20_G': {
-      heading: `A Summons, Unspoken`,
-      why: `Women in your mother's line likely sensed a pull toward something larger than their circumstances allowed, a summons felt but rarely voiced or acted on fully. Judgement sits in your Maternal Spiritual corner, marking this generational transmission of a quiet, unspoken calling. You inherited this as felt momentum: an awakening passed down along with its own quiet postponement.`,
-      shadow: `The trap is inheriting the sensing without the answering — feeling a persistent, wordless pull toward something more, without ever quite naming what it is or moving toward it. If you keep sensing a bigger calling you can't quite articulate, that's often an inherited summons still waiting for someone to actually name and answer it.`,
-      path: `Try naming the pull as specifically as you can, even if it feels presumptuous. Voicing it is what starts turning inherited sensing into something you can actually act on. You are allowed to speak the summons she only sensed. What calling in your life feels older than you — and what would answering it out loud begin?`,
-      positive: `The felt momentum toward something larger hasn't changed — what's different is that you now name the pull as specifically as you can, even if it feels presumptuous. Voicing it is what starts turning inherited sensing into something you can actually act on. The calling that felt older than you finally gets spoken out loud, and answering it finally becomes possible instead of remaining a wordless, generational sensation.`,
-      negative: `The felt momentum toward something larger than circumstances allowed, sensed by women in your mother's line but rarely voiced, is completely real, and it's staying wordless — a persistent pull toward something more, without ever quite naming what it is or moving toward it. Sensing a bigger calling you can't quite articulate is often an inherited summons still waiting for someone to actually name and answer it.`,
+      title: `20 in Maternal Spiritual — Judgement`,
+      tagline: `A Design of the Named Pull`,
+      mastery: `You carry a real, felt pull toward something larger than your current circumstances.`,
+      shadow: `That pull stays wordless — you sense a bigger calling without ever naming or moving toward it.`,
+      invitation: `Name your calling as specifically as you can today, even if it feels presumptuous.`,
     },
 
     // ── 21 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '21_G': {
-      heading: `Enoughness, Never Declared`,
-      why: `Women in your mother's line likely carried a real, settled sense of being enough, demonstrated through simply living without constant striving rather than declared outright. The World sits in your Maternal Spiritual corner, marking this generational transmission of quiet wholeness. You inherited this as felt permission: completeness modeled through presence, not proclaimed through achievement.`,
-      shadow: `The trap is inheriting the sense of enoughness without recognizing it as something to actively claim, waiting for it to simply arrive the way it seemed to for the women before you, rather than actively cultivating it in your own different circumstances. If wholeness feels like something you're still waiting for, that's often an inherited state that needs conscious claiming, not just patience.`,
-      path: `Try actively naming your own sense of "enough" rather than waiting for it to simply arrive the way it seemed to for the women who came before you. What was quietly embodied for them may need to be consciously claimed by you. You are allowed to know you're enough without a declaration. Where in your life is the quiet sense of enoughness already true, waiting to be believed?`,
-      positive: `The settled sense of being enough hasn't changed — what's different is that you now actively name your own sense of "enough," rather than waiting for it to simply arrive the way it seemed to for the women before you. What was quietly embodied for them gets consciously claimed by you, and the quiet sense of enoughness that was already true finally gets believed, not just waited for.`,
-      negative: `The settled sense of being enough carried by women in your mother's line, demonstrated through simply living rather than declared outright, is completely real, and it's being waited for rather than claimed — expecting it to simply arrive the way it seemed to for the women before you, rather than actively cultivating it in your own different circumstances. Wholeness that feels like something you're still waiting for is often an inherited state that needs conscious claiming, not more patience.`,
+      title: `21 in Maternal Spiritual — The World`,
+      tagline: `A Design of Claimed Enoughness`,
+      mastery: `You carry a real, settled sense of being enough, modeled through simply living rather than declared.`,
+      shadow: `You wait for that wholeness to simply arrive instead of actively claiming it in your own circumstances.`,
+      invitation: `Actively name your own sense of "enough" today, instead of waiting for it to arrive.`,
     },
 
     // ── 22 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '22_G': {
-      heading: `Starting Over, Without Complaint`,
-      why: `Women in your mother's line likely faced real fresh starts, sometimes forced ones, with a kind of unspoken trust that beginning again was simply possible. The Fool sits in your Maternal Spiritual corner, marking this generational transmission of quiet resilience through new beginnings. You inherited this as embodied openness: the sense that starting over doesn't require fanfare or permission, just willingness.`,
-      shadow: `The trap is inheriting the willingness without ever examining whether each fresh start was actually chosen or simply endured, absorbing a pattern of quiet restarting that may mask unprocessed grief about what was left behind each time. If your own fresh starts feel oddly hollow, that's often inherited resilience without its accompanying acknowledgment of loss.`,
-      path: `Try letting yourself actually grieve what a fresh start requires leaving behind, rather than just quietly moving forward the way you watched. Real openness includes acknowledgment, not just forward motion. You are allowed to start over and also to grieve the starting. What new beginning could you meet with both her grace and your own honest feeling?`,
-      positive: `The quiet resilience through fresh starts hasn't changed — what's different is that you now let yourself actually grieve what a fresh start requires leaving behind, rather than just quietly moving forward the way you watched. Real openness includes acknowledgment, not just forward motion, and the new beginning in front of you finally gets met with both her grace and your own honest feeling, instead of grace alone standing in for grief that was never let through.`,
-      negative: `The quiet resilience through fresh starts, faced by women in your mother's line with unspoken trust that beginning again was simply possible, is completely real, and it's arriving without ever examining whether each start was actually chosen or simply endured — a pattern of quiet restarting that may mask unprocessed grief about what was left behind each time. Fresh starts that feel oddly hollow are often inherited resilience without its accompanying acknowledgment of loss.`,
+      title: `22 in Maternal Spiritual — The Fool`,
+      tagline: `A Design of the Grieved Restart`,
+      mastery: `You carry real resilience through fresh starts — the sense that beginning again is simply possible.`,
+      shadow: `You inherit the willingness to restart without ever grieving what each fresh start actually cost.`,
+      invitation: `Let yourself grieve one thing a past fresh start required leaving behind, today.`,
     },
 
     // ── 21 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
