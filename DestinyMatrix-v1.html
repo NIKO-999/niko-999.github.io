@@ -4331,16 +4331,16 @@ const ARCANA_ESSENCE = {
     // Build full multi-section content inside banner body
     document.getElementById('pb-prog-name').textContent = prog.name + '  ·  ' + prog.numbers.join(' · ');
     document.getElementById('pb-prog-name').style.color = themedHex(cd.hex);
-    document.getElementById('pb-section-label').textContent = prog.category;
+    document.getElementById('pb-section-label').textContent = prog.tagline || prog.category;
     document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-    document.getElementById('pb-heading').textContent = prog.heading || prog.name;
+    document.getElementById('pb-heading').textContent = prog.title || prog.name;
     document.getElementById('pb-body').innerHTML =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">THE WHY</div>
-         <div class="pb-full-text">${prog.why || ''}</div>
+         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">MASTERY</div>
+         <div class="pb-full-text">${prog.mastery || ''}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">THE SHADOW</div>
+         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">SHADOW</div>
          <div class="pb-full-text">${prog.shadow || ''}</div>
        </div>
        ${Array.isArray(prog.indicators) && prog.indicators.length ? `<div class="pb-full-section">
@@ -4355,13 +4355,9 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${themedHex(cd.hex)}">STEPS TO TAKE</div>
          <div class="pb-full-text">${prog.stepsToTake.map((s,i) => (i+1) + '. ' + s).join('<br>')}</div>
        </div>` : ''}
-       ${prog.positive ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
-         <div class="pb-full-text">${prog.positive}</div>
-       </div>` : ''}
-       ${prog.negative ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
-         <div class="pb-full-text">${prog.negative}</div>
+       ${prog.invitation ? `<div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(cd.hex)}">INVITATION</div>
+         <div class="pb-full-text">${prog.invitation}</div>
        </div>` : ''}`;
     banner.classList.add('open');
     banner.scrollTop = 0;
