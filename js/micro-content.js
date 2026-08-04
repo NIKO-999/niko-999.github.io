@@ -226,198 +226,198 @@ window.DMicroContent = (function () {
     '5_B': {
       title: `5 in Sky Line — The Hierophant`,
       tagline: `A Design of Received Structure`,
-      mastery: `You sense the deeper structure underneath things before anyone explains it to you. That's a real aptitude for wisdom — study that turns into devotion, understanding that doesn't stay theoretical but actually becomes something you can pass on to someone else intact.`,
-      shadow: `Your reverence for structure curdles into certainty there's exactly one right way to arrive at what you know. You lecture when you meant to teach, and the channel that should receive new understanding stops receiving it, closed off by the very conviction that once made you a good student.`,
-      invitation: `Ask one person today what they see differently than you do about something you're certain of. Actually listen.`,
+      mastery: `You sense the deeper structure underneath things before anyone has explained a word of it to you. Study turns into devotion for you, not obligation, and understanding doesn't stay locked in your own head — it becomes something you can hand to another person fully intact. People come to you when they want the real architecture of an idea, not the simplified version. That transmission is a genuine spiritual gift, and it's rarer than raw intelligence.`,
+      shadow: `The reverence for structure curdles into certainty that there's exactly one right way to arrive at what you know. You start lecturing when you meant to teach, and the tone shift is one only you don't notice. The channel that should be receiving new understanding closes, sealed by the very conviction that once made you such a good student. You become someone who defends a doctrine instead of someone still discovering one.`,
+      invitation: `Ask one person today what they see differently than you do about something you're certain of, and actually let them finish. Don't correct the gaps in their view while they're still talking. Sit with their answer for a full minute before responding at all. You're checking whether your certainty can survive contact with someone else's honest disagreement, and it needs the practice.`,
     },
 
     // ── 1 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '1_B': {
       title: `1 in Sky Line — The Magician`,
       tagline: `A Design of the Direct Line`,
-      mastery: `You catch inspiration and immediately know how to give it shape. That translation — turning the invisible into something usable — is a real spiritual gift, and it happens for you with a speed most people spend years trying to develop.`,
-      shadow: `You claim as personal genius what actually moved through you, and you hoard half-finished downloads because starting the next one feels more alive than finishing the last. What accumulates is a long trail of brilliant, abandoned beginnings that never got to become anything real.`,
-      invitation: `Finish one spiritual idea you've been sitting on today, instead of reaching for a new one.`,
+      mastery: `Inspiration arrives and you know immediately how to give it a shape someone else can actually use. That translation — turning the invisible into something workable — is a real spiritual gift, not a coincidence of timing. It happens at a speed most people spend years training themselves to reach. You are a direct line between the idea and the thing, and very few people can move that fast without losing the signal along the way.`,
+      shadow: `You start claiming as personal genius what actually just moved through you, and the credit quietly warps your relationship to your own gift. You hoard half-finished downloads because starting the next one feels more alive than finishing the last one ever will. What accumulates behind you is a long trail of brilliant, abandoned beginnings that never got to become anything real for anyone. The gift for catching inspiration becomes, over time, a reason nothing you catch ever lands.`,
+      invitation: `Finish one spiritual idea you've been sitting on today instead of reaching for a new one. Pick the oldest one still in your notes or your head, not the newest and most exciting. Do the unglamorous last ten percent that turns a download into something someone else can actually receive. Don't let yourself start anything new until this one is genuinely done.`,
     },
 
     // ── 2 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '2_B': {
       title: `2 in Sky Line — The High Priestess`,
       tagline: `A Design of the Unspoken Knowing`,
-      mastery: `You sense what's forming before it's announced — a real fluency in symbol and undercurrent, access to meaning most people walk straight past without noticing it was ever there. That's genuine perceptiveness, not vague guessing.`,
-      shadow: `You guard the veil instead of lifting it. Your insight stays too sacred to offer out loud, and people sense you know something you're not saying — which can read as withholding, even when your intention was only ever reverence.`,
-      invitation: `Say "here's what I'm sensing" out loud today, even without proof.`,
+      mastery: `You sense what's forming before it's ever announced. There's a real fluency in you for symbol and undercurrent, an access to meaning that most people walk straight past without noticing it was even there. This isn't vague guessing dressed up as mysticism — it's a genuine perceptual skill, and it's usually right. People who spend time around you start noticing things they never used to see, simply because you point at what's forming before it fully arrives.`,
+      shadow: `You guard the veil instead of lifting it, treating your own insight as too sacred to say out loud. People sense you know something you're not telling them, and it reads as withholding no matter how reverent your actual intention was. The insight stays locked inside a private register only you can access, which means it helps exactly one person. Your reverence for the mystery ends up functioning as a wall between what you see and everyone who could have used it.`,
+      invitation: `Say "here's what I'm sensing" out loud today, even without proof to back it up. Pick something you'd normally keep to yourself because you can't fully justify it yet. Offer it plainly, without a disclaimer that undercuts it before anyone's heard it. Let the other person do something with it — that's the whole point of finally speaking it.`,
     },
 
     // ── 3 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '3_B': {
       title: `3 in Sky Line — The Empress`,
       tagline: `A Design of Generative Presence`,
-      mastery: `Things come alive around you just by your being present. That's a genuine spiritual gift, not a skill you perform — growth and possibility seem to organize themselves around you without your having to try.`,
-      shadow: `You can't tolerate anything staying dormant, and you resent when the fertility you spark in others doesn't get credited back to you. What should be pure generativity starts carrying a quiet expectation of acknowledgment that undercuts the gift.`,
-      invitation: `Let one thing near you stay fallow today. Don't push it to grow.`,
+      mastery: `Things come alive around you simply because you're present, and you're not performing this — it's your actual nature. Growth and possibility organise themselves in your vicinity without your having to push, plan, or ask. People walk away from time with you carrying ideas and energy they didn't bring in. This is a genuine spiritual gift, and it's one of the rarer ones, because it works on people who have no idea it's happening.`,
+      shadow: `You can't tolerate anything staying dormant, including things that need to rest before they can grow again. You start resenting it when the fertility you spark in others doesn't circle back with credit attached to your name. What should be pure, unconditional generativity picks up a quiet expectation of acknowledgment, and that expectation undercuts the very gift it's attached to. People start feeling farmed instead of nurtured, even though you'd never describe it that way yourself.`,
+      invitation: `Let one thing near you stay fallow today, on purpose, without pushing it to grow. Notice the urge to intervene, encourage, or nudge it forward, and don't act on it. Let it simply exist in its current, undeveloped state for the full day. You're practising the version of your gift that doesn't require constant output to feel real.`,
     },
 
     // ── 4 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '4_B': {
       title: `4 in Sky Line — The Emperor`,
       tagline: `A Design of Sacred Architecture`,
-      mastery: `You take something vast and formless and give it a structure sturdy enough to actually hold. That's architecture in service of the sacred — the rare capacity to make the ineffable practicable without diminishing it.`,
-      shadow: `You defend the frame long after the spirit inside it has moved on. Your spiritual life starts running on maintenance instead of discovery, because the structure you built to protect something living has quietly become more important than the life it was meant to hold.`,
-      invitation: `Ask today whether one of your spiritual structures is still serving what it was built to protect.`,
+      mastery: `You take something vast and formless and build a structure sturdy enough to actually hold it. That's architecture in service of the sacred — the rare capacity to make the ineffable practicable without flattening it into something smaller. People rely on the frameworks you build because they've been tested against reality, not just imagined. You give shape to what would otherwise stay abstract forever, and that shape is a genuine gift to everyone who needed somewhere to stand.`,
+      shadow: `You defend the frame long after the life inside it has moved on somewhere else. Your spiritual practice starts running on maintenance instead of discovery, because the structure you built to protect something living has quietly become more important to you than the life it was built to hold. You keep polishing the container while what it once held has already left. People around you can feel the difference between devotion and upkeep, even when you can't yet.`,
+      invitation: `Ask today, honestly, whether one of your spiritual structures is still serving what it was originally built to protect. Pick the practice or ritual you're most attached to and interrogate it directly. If the answer is no, don't wait for a better moment to change it. Adjust or retire it this week, even if it means admitting the structure outlived its purpose before you noticed.`,
     },
 
     // ── 6 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '6_B': {
       title: `6 in Sky Line — The Lovers`,
       tagline: `A Design of the True Frequency`,
-      mastery: `You feel the difference between what's spiritually true for you and what's merely appealing, even when the appealing version is louder, more popular, or easier to justify to other people.`,
-      shadow: `You stay suspended at the crossroads, feeling both paths so acutely that choosing either one feels like a betrayal of the other. Nothing actually gets committed to, and the suspension itself starts to feel like a spiritual practice rather than the avoidance it actually is.`,
-      invitation: `Choose the resonance you actually feel today, even imperfectly, and let the other path go.`,
+      mastery: `You can feel the difference between what's actually spiritually true for you and what's simply appealing, even when the appealing version is louder and easier to justify to everyone around you. That discernment holds under real social pressure, not just in quiet moments alone. You don't confuse popularity with resonance, and that clarity is rarer than most people assume until they watch you decline something everyone else has chosen. It's a genuine form of spiritual maturity, not stubbornness.`,
+      shadow: `You stay suspended at the crossroads, feeling both paths so intensely that choosing either one starts to feel like betraying the other. Nothing actually gets committed to, year after year, and the suspension itself starts masquerading as a spiritual practice rather than what it actually is — avoidance. You mistake the intensity of feeling torn for depth, when it's really just fear of the loss that comes with any real choice. People around you watch you stand at the same fork for far longer than the decision should ever take.`,
+      invitation: `Choose the resonance you actually feel today, even if the choice is imperfect and even if you're not fully certain. Pick between the two paths you've been holding open and let the other one go, out loud, to someone who'll hold you to it. Don't leave yourself a quiet way back to the option you didn't choose. A real choice, even an imperfect one, teaches you more than another year of feeling both.`,
     },
 
     // ── 7 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '7_B': {
       title: `7 in Sky Line — The Chariot`,
       tagline: `A Design of Spiritual Perseverance`,
-      mastery: `You keep a spiritual practice moving on will alone, long after the initial inspiration has faded. That's real perseverance — the kind most people's practices don't survive without you.`,
-      shadow: `You insist on driving alone, refusing teachers or community because receiving help feels like losing control of the very practice you've built. Discipline becomes a substitute for actual encounter, and the solitude that once felt like strength starts to feel like a wall.`,
-      invitation: `Let someone else in on your practice today — a teacher, a book, a conversation.`,
+      mastery: `You keep a spiritual practice moving on will alone, long after the initial spark that started it has faded completely. That's real perseverance, and it's the specific kind most people's practices simply don't survive without. You show up on the flat, uninspiring days as reliably as you did on the exciting first one. That consistency is what actually produces depth over time, far more than intensity ever could.`,
+      shadow: `You insist on driving the whole practice alone, refusing teachers or community because receiving help feels like losing control of something you built yourself. Discipline quietly becomes a substitute for actual encounter with anything outside your own head. The solitude that once felt like strength starts to feel like a wall, and you can't always tell the difference between the two from the inside. You end up disciplined and isolated at the same time, mistaking one for proof against the other.`,
+      invitation: `Let someone else into your practice today — a teacher, a book that actually challenges you, a real conversation about what you believe. Choose something that requires you to receive rather than simply perform your discipline for an audience. Sit with the discomfort of not being the one steering for once. You're testing whether the practice can survive contact with another person's perspective, and it can.`,
     },
 
     // ── 8 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '8_B': {
       title: `8 in Sky Line — Justice`,
       tagline: `A Design of Hollowness Detection`,
-      mastery: `You sense when something claiming to be sacred has actually gone hollow. That discernment is real and rare — you're rarely fooled by the performance of depth when there's nothing actually underneath it.`,
-      shadow: `You turn that clarity into permanent suspicion, unable to rest inside any practice because you're always auditing it for hypocrisy. The gift for detecting hollowness starts detecting it everywhere, including in genuinely sincere places that simply aren't perfect.`,
-      invitation: `Let one small imperfection in a spiritual community or practice be ordinary humanness today, not proof of hollowness.`,
+      mastery: `You can sense when something claiming to be sacred has actually gone hollow underneath the performance. That discernment is real, rare, and genuinely protective — you're not easily fooled by depth that's only being performed for an audience. People trust your read on a teacher, a community, or a practice, because your radar for hypocrisy is unusually well calibrated. You catch what others miss because you're not distracted by how convincing the surface looks.`,
+      shadow: `That clarity turns into permanent suspicion, and you stop being able to rest inside any practice at all. You're constantly auditing everything for hypocrisy, and the gift for detecting real hollowness starts firing on genuinely sincere places that are simply human and imperfect. You end up alone with your discernment, unable to belong anywhere, because nothing survives the scrutiny of a standard built for detecting fraud rather than tolerating flaws. The gift that was meant to protect you from being fooled ends up isolating you from everything real too.`,
+      invitation: `Let one small imperfection in a spiritual community or practice be ordinary humanness today, not proof of hollowness. Notice the exact moment your radar fires on something minor, and pause before reacting to it. Ask yourself whether this is actual fraud or simply a person being human inside something sincere. Stay in the room a little longer than your instinct wants you to, and see what happens.`,
     },
 
     // ── 9 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
     '9_B': {
       title: `9 in Sky Line — The Hermit`,
       tagline: `A Design of Contemplative Range`,
-      mastery: `Left alone with enough quiet, you access a different register of consciousness than most people ever reach. That contemplative range is a genuine gift, not simply a preference for solitude.`,
-      shadow: `You chase the peak state again and again, retreating further from ordinary life because it can't compete with what solitude gives you. The world of other people starts to feel thin and unrewarding next to what you find alone, and the retreat deepens past the point of being restorative.`,
-      invitation: `Bring one thing back from your solitude today and actually share it with someone.`,
+      mastery: `Given enough quiet, you can access a register of consciousness that most people never reach in an entire lifetime. That's a genuine contemplative gift, not just an introverted preference for being alone. You return from real solitude with something usable — clarity, perspective, a settledness that outlasts the retreat itself. Few people can go that deep into stillness and come back with anything at all, let alone something worth bringing back.`,
+      shadow: `You start chasing the peak state again and again, retreating further and further from ordinary life because it simply can't compete with what solitude reliably gives you. The world of other people starts to feel thin and unrewarding compared to what you find alone, so you keep going back for more of it. The retreat deepens past the point of being restorative and starts functioning as escape instead. You end up spiritually rich and relationally starving, and it takes a long time to notice the second part.`,
+      invitation: `Bring one thing back from your solitude today and actually share it with another person, out loud. Don't wait until it's fully formed or perfectly articulated — offer it while it's still a little raw. Choose someone who won't just nod along, someone who'll actually engage with it. The gift only becomes a gift once it leaves your own head and does something in someone else's.`,
     },
 
     // ── 10 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '10_B': {
       title: `10 in Sky Line — The Wheel of Fortune`,
       tagline: `A Design of Divine Timing`,
-      mastery: `You have an instinct for when the moment has actually arrived, even when nothing external has announced it. That's a rare gift of trust rather than prediction — you act on the sense of rightness itself.`,
-      shadow: `You use "it's not the right time yet" as a permanent excuse, always sensing a better season just ahead while the present stays untouched. Genuine timing wisdom curdles into an endless deferral that never actually resolves into action.`,
-      invitation: `Trust one "yes" today, right now, instead of deferring it to a better-timed future.`,
+      mastery: `You have a real instinct for when the moment has actually arrived, even when nothing external has announced it yet. That's a rare gift of trust rather than prediction — you're not calculating odds, you're reading the actual texture of the moment. You act on that sense of rightness directly, and it's usually correct in ways that surprise people who only trust visible evidence. Timing that other people force through analysis, you simply feel.`,
+      shadow: `"It's not the right time yet" becomes a permanent excuse you can deploy against anything you're actually afraid to do. You keep sensing a better season just ahead, indefinitely, while the actual present stays completely untouched. Genuine timing wisdom curdles into an endless deferral that never once resolves into real action. Years pass while you wait for a signal that was never going to arrive any clearer than it already has.`,
+      invitation: `Trust one "yes" today, right now, instead of pushing it off to some better-timed future. Pick the thing you've been waiting for a clearer sign about and act on it before the day ends. Don't ask for one more piece of confirmation first. You already have the instinct — the only thing missing is letting it actually move you instead of just informing you.`,
     },
 
     // ── 11 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '11_B': {
       title: `11 in Sky Line — Strength`,
       tagline: `A Design of the Tamed Wild`,
-      mastery: `You can stay present with raw, unruly inner states without needing to suppress them or be ruled by them. That's real, hard-won spiritual strength — the capacity to hold intensity without either fleeing it or being consumed by it.`,
-      shadow: `You perform calm instead of actually achieving it. The suppressed intensity moves underground and surfaces later as tension or unexpected eruptions that surprise you as much as anyone else, precisely because you'd convinced yourself the calm was real.`,
-      invitation: `Let one feeling be fully felt today before you try to manage it.`,
+      mastery: `You can stay present with raw, unruly inner states without needing to suppress them or being ruled by them either. That's real, hard-won spiritual strength — the capacity to hold real intensity without fleeing it or drowning in it. Most people manage one side of that equation and fail badly at the other. You've built the rarer skill of standing steady inside a feeling that would flatten most people, and staying yourself the whole way through.`,
+      shadow: `You perform calm instead of actually reaching it, and the difference is invisible to everyone including you at first. The intensity you think you've managed moves underground and resurfaces later as tension, irritability, or a sudden eruption that catches you as off-guard as anyone else in the room. This happens precisely because you'd convinced yourself the calm was real rather than borrowed against later. What looks like strength from the outside is sometimes just deferral with better posture.`,
+      invitation: `Let one feeling be fully felt today before you try to manage or contain it at all. Notice the moment your instinct reaches for control, and delay that reach by even thirty seconds. Stay inside the raw version of the feeling without narrating it into something calmer than it is. You're finding out whether your strength holds when it isn't performing.`,
     },
 
     // ── 12 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '12_B': {
       title: `12 in Sky Line — The Hanged Man`,
       tagline: `A Design of Skilled Surrender`,
-      mastery: `You can stop pushing and let revelation arrive through release rather than effort. That comfort with not-knowing is a real spiritual skill, one most people never develop because it requires trusting something they can't control.`,
-      shadow: `You confuse surrender with permanent inaction, staying suspended because the pause feels safer than descending back into the risk of choice. What began as a genuine spiritual posture becomes a way of never having to act on anything the suspension actually revealed.`,
-      invitation: `Take what your last surrender revealed and actually act on it today.`,
+      mastery: `You can stop pushing entirely and let revelation arrive through release rather than through effort. That comfort with not-knowing is a real spiritual skill, and most people never develop it because it requires trusting something they can't control or verify in advance. You've learned that some answers only come once you stop chasing them, and you can actually let go long enough to find out. That patience produces insight that force never could have reached.`,
+      shadow: `You confuse surrender with permanent inaction, staying suspended indefinitely because the pause feels safer than descending back into the risk of an actual choice. What began as a genuine spiritual posture quietly becomes a way of never having to act on anything the suspension revealed to you. You collect insight after insight from the stillness and let every single one of them go unused. The letting go that was supposed to lead somewhere becomes its own permanent destination.`,
+      invitation: `Take what your last surrender revealed to you and actually act on it today, concretely. Name the insight plainly, then take one real step that puts it into motion. Don't let this become another thing you understand but never do anything with. The surrender only means something once it changes what you actually do next.`,
     },
 
     // ── 13 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '13_B': {
       title: `13 in Sky Line — Transformation`,
       tagline: `A Design of Real Initiation`,
-      mastery: `You've survived genuine ego-death before, and something truer rose in its place. That's a real aptitude for spiritual initiation — you know, from direct experience, that total collapse can lead somewhere worth arriving at.`,
-      shadow: `You engineer crisis after crisis because ordinary, gradual growth feels unconvincing next to dramatic collapse. The intensity of transformation becomes the proof you require, and quiet, undramatic change starts to feel like it doesn't count.`,
-      invitation: `Let one piece of growth happen quietly today, with no crisis required to make it feel real.`,
+      mastery: `You've survived a genuine ego-death before, and something truer rose up in its place afterward. That's a real aptitude for spiritual initiation — you know from direct, lived experience that total collapse can lead somewhere worth actually arriving at. Most people fear that kind of dissolution instinctively. You've been through it and come out more yourself, and that knowledge changes how you move through every difficulty afterward.`,
+      shadow: `You start engineering crisis after crisis because ordinary, gradual growth feels unconvincing next to the drama of collapse. The intensity of transformation becomes the proof you require before you'll believe anything real is happening. Quiet, undramatic change starts to feel like it doesn't count, so you manufacture upheaval just to feel like you're still evolving. You end up addicted to your own reconstruction, unable to trust the version of growth that doesn't require tearing something down first.`,
+      invitation: `Let one piece of growth happen quietly today, with absolutely no crisis required to make it feel real. Choose something small you've been meaning to shift, and change it without drama or announcement. Resist the urge to make it a bigger moment than it needs to be. You're proving to yourself that transformation doesn't have to hurt to count.`,
     },
 
     // ── 14 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '14_B': {
       title: `14 in Sky Line — Temperance`,
       tagline: `A Design of the Poured Vessel`,
-      mastery: `You hold different truths at the meeting point without needing either one to collapse. That's genuine mediator's work, real spiritual healing that comes from your capacity to contain contradiction rather than needing to resolve it prematurely.`,
-      shadow: `You lose your own footing holding everyone else's. You pour outward endlessly and rarely let yourself be healed in return, because the role of healer has become so central to your identity that receiving would feel like stepping out of it.`,
-      invitation: `Receive one act of care today instead of only offering it.`,
+      mastery: `You hold different truths at their meeting point without needing either one to collapse into the other. That's genuine mediator's work, real spiritual healing that comes from your capacity to contain contradiction rather than rushing to resolve it prematurely. People bring you their conflicting realities because you can actually hold both without picking a side too early. That patience with paradox is a rare and healing gift, and it works precisely because you don't force resolution before it's ready.`,
+      shadow: `You lose your own footing while holding everyone else's steady. You pour outward endlessly and rarely let yourself be healed in return, because the role of healer has become so central to who you are that receiving care would feel like stepping outside your own identity. You keep giving from a well nobody's refilling, and you don't notice the depletion because you're too busy tending to everyone else's balance. The mediator who never gets mediated for eventually runs completely dry.`,
+      invitation: `Receive one act of care today instead of only offering it to someone else. Let a specific person do something for you without deflecting it or immediately trying to return the favour. Sit with the discomfort of being on the receiving end instead of managing it away. You need proof that you can be held too, not just that you're good at holding.`,
     },
 
     // ── 15 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '15_B': {
       title: `15 in Sky Line — The Devil`,
       tagline: `A Design of Fearless Looking`,
-      mastery: `You can look directly at darkness — your own or the collective's — without flinching or bypassing it. That's genuine depth work, the kind most spiritual approaches actively avoid because it's uncomfortable.`,
-      shadow: `You circle the same dark material again and again because the intensity of looking has become its own reward. Proximity to darkness starts standing in for actual freedom from it, and the looking never quite converts into the liberation it was originally meant to serve.`,
-      invitation: `Turn one thing you've been looking at into an actual action toward freedom today, not just more insight.`,
+      mastery: `You can look directly at darkness — your own or the collective's — without flinching away or spiritually bypassing it into something more comfortable. That's genuine depth work, exactly the kind most spiritual approaches actively avoid because it's uncomfortable to sit inside. You don't need the darkness dressed up as a lesson before you're willing to look at it. That fearless looking is rare, and it's the actual precondition for real liberation, not just a detour on the way to it.`,
+      shadow: `You circle the same dark material again and again because the intensity of looking at it has quietly become its own reward. Proximity to darkness starts standing in for actual freedom from it, and the looking never converts into the liberation it was originally meant to produce. You mistake the courage of staring at something hard for the harder work of actually changing your relationship to it. Years can pass with you deeply, admirably familiar with your own shadow and no more free of it than when you started.`,
+      invitation: `Turn one thing you've been looking at into an actual action toward freedom today, not just more insight about it. Name the specific pattern you've already examined enough times to understand. Take one concrete step that changes your behaviour around it, not your understanding of it. You already have the insight — what's missing is the part where it costs you something to change.`,
     },
 
     // ── 16 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '16_B': {
       title: `16 in Sky Line — The Tower`,
       tagline: `A Design of Lightning Revelation`,
-      mastery: `You receive revelation as lightning — sudden, restructuring clarity that arrives all at once rather than through gradual accumulation. That's a real spiritual gift, and it changes you faster than slower paths tend to.`,
-      shadow: `You need the collapse to feel like growth is real, sometimes provoking crisis in your own beliefs just to feel that jolt of clarity again. Quiet, incremental understanding starts to feel unconvincing next to the dramatic restructuring you've come to associate with genuine insight.`,
-      invitation: `Let one truth land gently today instead of through demolition.`,
+      mastery: `You receive revelation as lightning — sudden, restructuring clarity that arrives all at once rather than accumulating slowly over months. That's a real spiritual gift, and it changes you faster than the gradual paths most people are stuck taking. When something breaks open for you, it breaks open completely, and you don't need years to integrate what you've just seen. Few people can absorb that much change that fast without shattering, and you can.`,
+      shadow: `You start needing the collapse before you'll believe growth is actually happening, sometimes provoking crisis in your own beliefs just to feel that jolt of clarity return. Quiet, incremental understanding starts to feel unconvincing, almost fake, next to the dramatic restructuring you've come to associate with real insight. You keep breaking things that were fine so you can have the satisfaction of rebuilding them. The lightning becomes something you chase rather than something that simply arrives.`,
+      invitation: `Let one truth land gently today instead of through demolition. Choose an understanding you've been circling and let it settle in slowly, without forcing the dramatic version. Notice the pull to make it bigger or more disruptive than it needs to be, and resist it. You're proving that clarity doesn't need a crisis attached to be real.`,
     },
 
     // ── 17 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '17_B': {
       title: `17 in Sky Line — The Star`,
       tagline: `A Design of the Living Wellspring`,
-      mastery: `Your faith stays lit without needing proof, and it's genuinely contagious. You're a real source other people draw hope from, not because you perform certainty but because your hope is actually alive.`,
-      shadow: `You treat your faith as a private reserve instead of a wellspring, performing hope you don't currently feel because you've become known as the one who's always fine. The role of being everyone's source of light leaves your own doubt with nowhere honest to go.`,
-      invitation: `Let your own doubt be witnessed today, honestly, by someone who cares about you.`,
+      mastery: `Your faith stays lit without needing proof to keep it burning, and that quality is genuinely contagious to the people around you. You become a real source other people draw hope from, not because you perform certainty convincingly but because the hope in you is actually alive and renewing itself. People can tell the difference between borrowed optimism and yours, and they gravitate toward the real thing. That living faith is a gift you give simply by staying near it yourself.`,
+      shadow: `You start treating your faith as a private reserve to protect instead of a wellspring meant to keep flowing, performing hope you don't currently feel because you've become known as the one who's always fine. The role of being everyone's source of light leaves your own doubt with nowhere honest to go, so it gets buried under a version of you that never runs dry in public. People stop checking on you specifically because you've made your steadiness look effortless. The wellspring starts running on reserves instead of being fed, and nobody notices until it's nearly empty.`,
+      invitation: `Let your own doubt be witnessed today, honestly, by someone who actually cares about you. Say out loud, plainly, one thing you're currently unsure of or struggling to have faith in. Don't rush to close the conversation with a hopeful reframe. You're finding out whether the people who lean on your hope can also hold you, and they can, if you let them see the real thing.`,
     },
 
     // ── 18 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '18_B': {
       title: `18 in Sky Line — The Moon`,
       tagline: `A Design of the Threshold at Home`,
-      mastery: `You're fluent in liminal space — dreams, the unseen, the threshold most people find disorienting. You feel genuinely at home there, in territory that unsettles almost everyone else.`,
-      shadow: `You lose the thread back to consensus reality. Ordinary daylight functioning starts to feel thin and unsatisfying compared to what the threshold offers, and the pull toward the inner world can leave the practical, relational world quietly neglected.`,
-      invitation: `Bring one thing back from your inner world today and ground it in something physical or relational.`,
+      mastery: `You're fluent in liminal space — dreams, the unseen, the threshold territory that most people find deeply disorienting. You feel genuinely at home in exactly the terrain that unsettles almost everyone else around you. You navigate the unclear, the symbolic, the not-yet-formed with an ease that reads to others as unusual and slightly uncanny. That fluency lets you make sense of things long before they've become sense-able to anyone still standing in the daylight.`,
+      shadow: `You start losing the thread back to consensus reality, and the drift happens gradually enough that you don't notice it in the moment. Ordinary daylight functioning starts to feel thin and unsatisfying compared to what the threshold reliably offers you. The pull toward the inner world leaves the practical, relational world quietly neglected — bills unpaid, people unanswered, plans left unmade. You become genuinely fluent in the unseen and increasingly fluent in nothing that anyone else can actually share with you.`,
+      invitation: `Bring one thing back from your inner world today and ground it in something physical or relational. Take a symbol, a dream, or an insight from the threshold and turn it into one concrete action in ordinary life. Tell a real person about it in plain, un-mystical language. You're building the bridge back, one deliberate crossing at a time.`,
     },
 
     // ── 19 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '19_B': {
       title: `19 in Sky Line — The Sun`,
       tagline: `A Design of Effortless Clarity`,
-      mastery: `Clarity arrives for you light and immediate, without needing struggle first to earn it. Ease itself is a real spiritual practice for you, one that most traditions treat as suspicious but that's genuinely yours.`,
-      shadow: `You feel pressure to manufacture struggle so your insight seems more credible to a world that equates depth with difficulty. Your natural clarity gets dimmed on purpose, dressed up in more effortful language than it actually needed.`,
-      invitation: `Offer something you know today exactly as lightly as it arrived. No harder story attached.`,
+      mastery: `Clarity arrives for you light and immediate, without needing a struggle first to earn its legitimacy. Ease itself functions as a real spiritual practice for you, and most traditions treat that kind of ease with suspicion — but it's genuinely, legitimately yours. Understanding doesn't have to hurt to be true, and you're proof of that in a way that makes people around you reconsider their own assumptions. What comes to you effortlessly is not shallow simply because it was easy.`,
+      shadow: `You start feeling pressure to manufacture struggle so your insight seems more credible to a world that equates depth with difficulty. Your natural clarity gets dimmed on purpose, dressed up in more effortful, complicated language than it ever actually needed. You talk yourself out of trusting what arrived easily, assuming real wisdom must have cost more than it did. The gift for lightness becomes something you apologise for instead of something you simply offer.`,
+      invitation: `Offer something you know today exactly as lightly as it arrived to you, with no harder story attached to make it sound earned. Say the simple version out loud, without padding it with difficulty you didn't actually experience. Notice the urge to add weight to make it sound legitimate, and resist it. You're finding out that people can receive the easy truth just as fully as the hard-won one.`,
     },
 
     // ── 20 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '20_B': {
       title: `20 in Sky Line — Judgement`,
       tagline: `A Design of Vocational Hearing`,
-      mastery: `You recognize a genuine calling when it arrives, distinct from noise or wishful thinking. That's real vocational discernment — you can tell the difference between an authentic summons and simply wanting something badly.`,
-      shadow: `You mistake every strong feeling for a divine instruction, chasing missions that don't hold up under scrutiny, or pressuring other people toward awakenings they're not actually ready for. The gift for hearing a real call gets diluted by treating every impulse as one.`,
-      invitation: `Let one "calling" prove itself over time today before committing to it fully.`,
+      mastery: `You recognise a genuine calling when it arrives, clearly distinct from noise or ordinary wishful thinking. That's real vocational discernment — you can tell the difference between an authentic summons and simply wanting something very badly. People trust your read on their own crossroads because you're not swayed by the loudest impulse in the room, including your own. What you commit to tends to hold up, because you didn't mistake urgency for truth to get there.`,
+      shadow: `You start mistaking every strong feeling for a divine instruction, chasing missions that don't actually hold up once you slow down and examine them. You end up pressuring other people toward awakenings and changes they're not actually ready for, mistaking your certainty for theirs. The genuine gift for hearing a real call gets diluted by treating every passing impulse as one, so people stop being able to tell which of your calls to actually take seriously. Your credibility erodes exactly where it used to be strongest.`,
+      invitation: `Let one "calling" prove itself over time today before committing to it fully or announcing it to anyone. Write down what you're feeling called toward, then set a real waiting period before you act. Watch whether the pull is still there once the initial intensity fades. You're testing your own discernment against time, which is the only test that actually separates a calling from a craving.`,
     },
 
     // ── 21 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '21_B': {
       title: `21 in Sky Line — The World`,
       tagline: `A Design of Whole-Life Synthesis`,
-      mastery: `You weave different traditions and practices into one coherent whole instead of experiencing them as competing systems. That's real spiritual synthesis — a genuine capacity to see how disparate frameworks actually fit together.`,
-      shadow: `You collect breadth without depth, gathering more frameworks in the name of wholeness without letting any single one of them actually change you. The synthesis stays theoretical, more about accumulation than about being transformed by what you've gathered.`,
-      invitation: `Stay with one dimension of your understanding today, instead of reaching for something new to add.`,
+      mastery: `You weave different traditions and practices into one coherent whole instead of treating them as competing systems that must be chosen between. That's real spiritual synthesis — a genuine capacity to see how disparate frameworks actually fit together underneath their surface differences. People who feel torn between traditions come to you because you've already found the throughline they're still searching for. That integrative view is rare, and it's earned through actually living inside more than one system rather than skimming several.`,
+      shadow: `You start collecting breadth without depth, gathering more frameworks in the name of wholeness without letting any single one of them actually change you. The synthesis stays theoretical, more about accumulation and clever connection-making than about being transformed by what you've gathered. You can explain how six traditions relate to each other and still be exactly the same person you were before you learned any of them. Wholeness becomes a collection, not a transformation.`,
+      invitation: `Stay with one dimension of your understanding today instead of reaching for something new to add to the collection. Choose the framework or practice you already know best and go one layer deeper into it. Resist the pull toward the next book, teacher, or tradition that promises to complete the picture. You're testing whether depth in one place changes you more than breadth across many ever has.`,
     },
 
     // ── 22 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ────
     '22_B': {
       title: `22 in Sky Line — The Fool`,
       tagline: `A Design of the Natural Passport`,
-      mastery: `You have direct, unmediated access to the sacred, without needing a doctrine or credential first to grant you entry. That openness is rare and real, and it lets you encounter the sacred the way a child encounters anything new — directly.`,
-      shadow: `You trust every experience equally as sacred, with no discernment between them, leaping toward the next revelation before the last one has taught you anything durable. Openness without any filter leaves you collecting experiences rather than actually being changed by them.`,
-      invitation: `Let one thing you learned in your last spiritual leap actually carry into today's decision.`,
+      mastery: `You have direct, unmediated access to the sacred, without needing a doctrine or a credential to grant you permission to enter. That openness is rare and genuinely real, and it lets you encounter the sacred the way a child encounters anything entirely new — directly, without the layer of interpretation most adults can't get past. You leap toward experience before you've fully theorized it, and something in you trusts that the leap itself is a legitimate form of knowing. Very few people retain that kind of unguarded access once they've accumulated enough belief systems to filter through first.`,
+      shadow: `You start trusting every experience as equally sacred, with no discernment between them, leaping toward the next revelation before the last one has taught you anything durable enough to keep. Openness without any filter leaves you collecting spiritual experiences rather than actually being changed by any single one of them. You mistake the volume of leaps for the depth of your growth, and the pattern repeats because nothing ever gets integrated long enough to matter. You end up spiritually well-travelled and strangely unchanged.`,
+      invitation: `Let one thing you learned in your last spiritual leap actually carry into today's decision, concretely. Name the specific lesson from your most recent leap before reaching for the next one. Apply it to something ordinary happening right now, not another dramatic leap. You're proving to yourself that integration matters as much as the leap itself.`,
     },
 
     // ── 4 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
