@@ -992,7 +992,6 @@
   <div class="ic-desc" id="ic-desc" style="display:none"></div>
 </div>
 
-<script src="js/arcana.js"></script>
 <script src="js/programs.js"></script>
 <script src="js/micro-content.js"></script>
 <script src="js/matrix-engine.js"></script>
@@ -2271,14 +2270,6 @@ function applyNewDate(dateStr) {
       NODES[i].num    = val;
       NODES[i].arcana = toRoman(val);
 
-      // Swap arcana reading into label/desc if arcana.js is loaded
-      if (window.DMArcana) {
-        try {
-          const a = window.DMArcana.getArcana(val);
-          NODES[i].desc = a.identity.split('. ')[0] + '.';
-        } catch (_) {}
-      }
-
       // Fade number out → update → fade in
       const numEl = tagEls[i].querySelector('.t-num');
       gsap.to(numEl, {
@@ -2375,6 +2366,15 @@ let _scanVals = null;
 // not just name it. Compact and reusable — outer scope so every tier can
 // read it. Phrasing matches the established meaning of each arcana already
 // used throughout micro-content.js / purpose-content.js / chakra-content.js.
+const ARCANA_NAMES = {
+  1: 'The Magician', 2: 'The High Priestess', 3: 'The Empress', 4: 'The Emperor',
+  5: 'The Hierophant', 6: 'The Lovers', 7: 'The Chariot', 8: 'Justice',
+  9: 'The Hermit', 10: 'The Wheel of Fortune', 11: 'Strength', 12: 'The Hanged Man',
+  13: 'Transformation', 14: 'Temperance', 15: 'The Devil', 16: 'The Tower',
+  17: 'The Star', 18: 'The Moon', 19: 'The Sun', 20: 'Judgement',
+  21: 'The World', 22: 'The Fool',
+};
+
 const ARCANA_ESSENCE = {
   1: 'decisive, quick to start, turns will into motion',
   2: 'perceptive, private, trusts an unproven knowing',
@@ -3251,10 +3251,7 @@ const ARCANA_ESSENCE = {
       // before its per-arcana pass. The written `synthesis` field stays fixed
       // per resulting arcana (that's the position's own psychology); this line
       // is what actually varies per reader.
-      const nm = (n) => {
-        if (!window.DMArcana) return String(n);
-        try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
-      };
+      const nm = (n) => ARCANA_NAMES[n] ? (n + ' · ' + ARCANA_NAMES[n]) : String(n);
       const essence = (n) => ARCANA_ESSENCE[n] ? ` — ${ARCANA_ESSENCE[n]}` : '';
       const feed = data.key === 'PP'
         ? [['Sky Line', _vals.pSky], ['Earth Line', _vals.pEarth]]
@@ -5169,8 +5166,7 @@ const ARCANA_ESSENCE = {
   // reader's own arcana there, same pattern as the Purposes cards — not full
   // parallel write-ups. See js/chakra-content.js's header comment.
   function _arcName(n) {
-    if (!window.DMArcana) return String(n);
-    try { return n + ' · ' + DMArcana.getArcana(n).name; } catch (_) { return String(n); }
+    return ARCANA_NAMES[n] ? (n + ' · ' + ARCANA_NAMES[n]) : String(n);
   }
   function _arcEssence(n) {
     return ARCANA_ESSENCE[n] ? ` — ${ARCANA_ESSENCE[n]}` : '';
