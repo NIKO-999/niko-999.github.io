@@ -3380,22 +3380,22 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Sexual Line';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (sc && sc.heading) || data.label;
+      document.getElementById('pb-heading').textContent = (sc && (sc.title || sc.heading)) || data.label;
       document.getElementById('pb-body').innerHTML = sc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATTERN</div>
-           <div class="pb-full-text">${sc.pattern || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${sc.mastery || sc.pattern || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE LESSON</div>
-           <div class="pb-full-text">${sc.lesson || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
+           <div class="pb-full-text">${sc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATH FORWARD</div>
-           <div class="pb-full-text">${sc.path || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${sc.invitation || sc.path || ''}</div>
          </div>` :
         `<div class="pb-full-section">
-           <div class="pb-full-text">This particular pairing doesn't correspond to one of the 26 named Sexual Line configurations in the source material.</div>
+           <div class="pb-full-text">This particular pairing doesn't correspond to one of the 25 named Sexual Line configurations in the source material.</div>
          </div>`;
 
       _mBanner.classList.add('open');
