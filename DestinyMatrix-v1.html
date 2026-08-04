@@ -3500,7 +3500,7 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Numerology · Name-Based';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (nc && nc.heading) || data.label;
+      document.getElementById('pb-heading').textContent = (nc && (nc.title || nc.heading)) || data.label;
 
       const lessonsHtml = missing.length
         ? missing.map(n => {
@@ -3517,20 +3517,16 @@ const ARCANA_ESSENCE = {
 
       document.getElementById('pb-body').innerHTML = nc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE VIBRATION</div>
-           <div class="pb-full-text">${nc.why || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${nc.mastery || nc.why || ''}</div>
          </div>
-         ${nc.traits ? `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW IT LIVES IN YOU</div>
-           <div class="pb-full-text">${nc.traits}</div>
-         </div>` : ''}
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW SIDE</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
            <div class="pb-full-text">${nc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
-           <div class="pb-full-text">${nc.path || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${nc.invitation || nc.path || ''}</div>
          </div>
          ${lessonsHtml}` : '';
 
@@ -3558,11 +3554,10 @@ const ARCANA_ESSENCE = {
 
       const sub = (label, num, c) => c ? `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">${label} · ${num}</div>
-           <div class="pb-full-text"><em>${c.heading}</em></div>
-           <div class="pb-full-text" style="margin-top:8px">${c.why}</div>
-           ${c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
+           <div class="pb-full-text"><em>${c.title || c.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${c.mastery || c.why}</div>
            <div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>
-           <div class="pb-full-text" style="margin-top:8px">${c.path}</div>
+           <div class="pb-full-text" style="margin-top:8px">${c.invitation || c.path}</div>
          </div>` : '';
 
       document.getElementById('pb-body').innerHTML =
