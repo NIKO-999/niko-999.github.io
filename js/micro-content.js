@@ -2076,198 +2076,198 @@ window.DMicroContent = (function () {
     '7_I': {
       title: `7 in Maternal Material — The Chariot`,
       tagline: `A Design of Shared Steering`,
-      mastery: `You carry real material resourcefulness and directed determination, keeping the practical vehicle of your life moving under difficult conditions.`,
-      shadow: `You inherit the belief that the only way to keep it moving is to drive it entirely alone, so real support goes reflexively refused.`,
-      invitation: `Let one material task today — a bill, a decision, a piece of the load — be shared instead of solely carried.`,
+      mastery: `You carry real material resourcefulness and directed determination, keeping the practical vehicle of your life moving even under genuinely difficult conditions. You hold competing demands together and still get the household or the obligation where it needs to go. That drive was inherited already-formed, a real capacity from the maternal line. And you can sustain the momentum without it costing you everything else.`,
+      shadow: `You inherit the belief that the only way to keep it moving is to drive it entirely alone, so real support goes reflexively refused. Underneath the refusal is often a fear that sharing the wheel would mean losing the control that's kept things from falling apart. You carry a load built for two hands as though it required only yours. The solo effort costs you an exhaustion that was never actually necessary.`,
+      invitation: `Ask yourself honestly what letting someone else steer here would actually threaten. Let one material task today, a bill, a decision, a piece of the load, be shared instead of solely carried. Hand it over completely, not just partially. Notice that the vehicle keeps moving with someone else's hands on it too.`,
     },
 
     // ── 1 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '1_I': {
       title: `1 in Maternal Material — The Magician`,
       tagline: `A Design of Full Materials`,
-      mastery: `You carry real capability for resourceful improvisation, generating material results from modest means.`,
-      shadow: `You inherit a habit of making do so consistently that asking for adequate support feels like admitting failure.`,
-      invitation: `Ask for one adequate resource today before you're forced to improvise around its absence.`,
+      mastery: `You carry real capability for resourceful improvisation, generating material results from modest means without waiting for ideal conditions. You see the workable solution hiding inside limited resources faster than most. That capacity was handed to you already-formed, a genuine inheritance from a line that had to make things work. And you can produce real results this way without it ever feeling like scraping by.`,
+      shadow: `You inherit a habit of making do so consistently that asking for adequate support feels like admitting failure. Underneath the refusal is often a fear that requesting enough would expose a need the line always managed silently. You improvise around a shortage that doesn't actually need to exist anymore. The workaround becomes the default even when the straightforward resource was available the whole time.`,
+      invitation: `Ask yourself honestly what asking for adequate support would seem to say about your own capability. Ask for one adequate resource today before you're forced to improvise around its absence. Request the full amount, not the trimmed version you'd normally settle for. Notice that your resourcefulness survives having enough.`,
     },
 
     // ── 2 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '2_I': {
       title: `2 in Maternal Material — The High Priestess`,
       tagline: `A Design of the Shared Instinct`,
-      mastery: `You carry real, intuitive practical management — a felt sense of what's needed ahead of any obvious sign.`,
-      shadow: `You manage material matters quietly and alone, even when sharing the reasoning would genuinely help.`,
-      invitation: `Voice one practical instinct out loud today before acting on it, instead of only announcing the result.`,
+      mastery: `You carry real, intuitive practical management, a felt sense of what's needed before any obvious sign confirms it. You anticipate a material shortfall or opportunity while it's still forming. That instinct was inherited already-tuned, a genuine perceptual gift passed down the maternal line. And acting on it quietly still produces results that hold up when examined afterward.`,
+      shadow: `You manage material matters quietly and alone, even when sharing the reasoning would genuinely help someone else understand or contribute. Underneath the silence is often a fear that explaining the instinct would somehow dissolve its accuracy. You announce the decision but withhold the thinking that produced it, leaving others unable to follow or challenge it. That opacity costs you real collaboration that was available.`,
+      invitation: `Ask yourself honestly what explaining your reasoning here would actually risk. Voice one practical instinct out loud today before acting on it, instead of only announcing the result. Say the reasoning, not just the conclusion. Notice that the instinct doesn't lose its power by being spoken.`,
     },
 
     // ── 3 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '3_I': {
       title: `3 in Maternal Material — The Empress`,
       tagline: `A Design of Received Tending`,
-      mastery: `You carry real material nurturing — meeting practical needs for everyone around you.`,
-      shadow: `You provide for others' practical needs so automatically that your own go unnoticed, even by you.`,
-      invitation: `Let one of your own material needs be tended today, as visibly as you tend everyone else's.`,
+      mastery: `You carry real material nurturing, an instinct for meeting practical needs for everyone around you before they have to ask. You notice what a household or family actually requires and supply it without fanfare. That capacity was handed to you already-formed, a genuine gift from the maternal line. And the people you tend this way are actually, materially, better off for it.`,
+      shadow: `You provide for others' practical needs so automatically that your own go unnoticed, even by you. Underneath the blind spot is often a fear that naming your own needs would mean competing with the people you're supposed to be tending. You keep giving material care outward while your own account runs quietly empty. The depletion goes unaddressed because attending to it was never modeled as an option.`,
+      invitation: `Ask yourself honestly what material need of your own you've stopped noticing you have. Let one of your own material needs be tended today, as visibly as you tend everyone else's. Name it out loud to someone, not just to yourself. Notice that meeting it doesn't take anything away from the people you usually tend.`,
     },
 
     // ── 4 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '4_I': {
       title: `4 in Maternal Material — The Emperor`,
       tagline: `A Design of Named Authority`,
-      mastery: `You carry real material organizational authority, holding the practical structure of a household or family together.`,
-      shadow: `You carry that weight unacknowledged, including by yourself, because it was never framed as leadership.`,
-      invitation: `Name your organizational role today, out loud, to yourself, as the real authority it actually is.`,
+      mastery: `You carry real material organizational authority, holding the practical structure of a household or family together through consistent, competent management. You track what needs to happen and make sure it does, without needing the title of "leader" to do it well. That capacity was inherited already-formed, a genuine strength passed down the maternal line. And the structure you maintain actually functions, whether or not anyone names it as leadership.`,
+      shadow: `You carry that organizational weight unacknowledged, including by yourself, because it was never framed as leadership in the first place. Underneath the lack of acknowledgment is often a fear that claiming the authority openly would look like overreaching a role that was supposed to stay invisible. You do the actual work of running things while deferring credit or decision-making status to someone else. The mismatch between your real authority and its recognition costs you both respect and support.`,
+      invitation: `Ask yourself honestly what naming this authority out loud would actually risk. Name your organizational role today, out loud, to yourself, as the real authority it actually is. Say it plainly to at least one other person too. Notice that claiming it doesn't make you less capable of holding it.`,
     },
 
     // ── 5 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '5_I': {
       title: `5 in Maternal Material — The Hierophant`,
       tagline: `A Design of Named Expertise`,
-      mastery: `You carry real, embedded practical wisdom — skills passed down through doing rather than teaching.`,
-      shadow: `You dismiss your own practical capability as "just common sense" because no one ever certified it.`,
-      invitation: `Name one untaught skill of yours today as the real expertise it actually is.`,
+      mastery: `You carry real, embedded practical wisdom, skills passed down through doing rather than through formal teaching. You know how to handle real material situations because you watched them handled, over and over, until the knowledge became yours. That competence runs deep precisely because it was earned through lived repetition, not a course. And it holds up under pressure in ways certified knowledge sometimes doesn't.`,
+      shadow: `You dismiss your own practical capability as "just common sense" because no one ever certified it as expertise. Underneath the dismissal is often a fear that claiming it as real skill would sound like overstating something ordinary. You undersell what you actually know how to do, deferring to people with credentials even when your judgment is sounder. That undervaluing costs you both recognition and the compensation your actual expertise would command.`,
+      invitation: `Ask yourself honestly what this skill would be called if someone else had learned it in a classroom. Name one untaught skill of yours today as the real expertise it actually is. Say it in those exact terms, expertise, not just experience. Notice that naming it doesn't make it any less earned.`,
     },
 
     // ── 6 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '6_I': {
       title: `6 in Maternal Material — The Lovers`,
       tagline: `A Design of Chosen Priority`,
-      mastery: `You carry a real, values-driven sense of what genuinely matters materially.`,
-      shadow: `You default to the same material allocations because that's the pattern you watched, not because you've consciously chosen it.`,
-      invitation: `Name today the one material priority you actually watched get modeled, and decide if it's genuinely yours.`,
+      mastery: `You carry a real, values-driven sense of what genuinely matters materially, able to direct resources toward what actually counts rather than what's merely urgent. You weigh competing needs and land on an allocation that reflects real priority. That discernment was inherited already-formed, a genuine gift from the maternal line. And the choices it produces tend to hold up well after the fact, not just in the moment.`,
+      shadow: `You default to the same material allocations because that's the pattern you watched, not because you've consciously chosen it yourself. Underneath the default is often a fear that choosing differently would mean rejecting the values the pattern was built to express. You repeat the exact spending or saving priorities modeled for you without checking whether they fit your actual life. The unexamined repetition can quietly cost you years of misallocated resources.`,
+      invitation: `Ask yourself honestly whether this material priority is genuinely yours or simply the one you watched modeled. Name today the one material priority you actually watched get modeled, and decide if it's genuinely yours. Adjust one allocation if it isn't. Notice that changing it doesn't dishonor where it came from.`,
     },
 
     // ── 8 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '8_I': {
       title: `8 in Maternal Material — Justice`,
       tagline: `A Design of the Included Share`,
-      mastery: `You carry a real, careful sense of equitable material distribution.`,
-      shadow: `You apply that fairness so rigidly to others that you consistently leave yourself off your own accounting.`,
-      invitation: `Include yourself today in one fair share you'd normally give away first.`,
+      mastery: `You carry a real, careful sense of equitable material distribution, able to divide resources so everyone actually gets a fair share. You notice when an allocation is genuinely unbalanced and correct it. That fairness was inherited already-formed, a real ethical instinct from the maternal line. And the people around you can trust the distribution because it's actually accurate, not just well-intentioned.`,
+      shadow: `You apply that fairness so rigidly to others that you consistently leave yourself off your own accounting. Underneath the omission is often a fear that including yourself in the fair share would tip the balance you're responsible for keeping. You track everyone else's portion with precision while your own goes uncounted. The pattern leaves you materially shorted by your own hand, repeatedly.`,
+      invitation: `Ask yourself honestly when you last actually counted yourself in a fair division. Include yourself today in one fair share you'd normally give away first. Take the portion before offering the rest. Notice that including yourself doesn't make the distribution any less fair.`,
     },
 
     // ── 9 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ────────────
     '9_I': {
       title: `9 in Maternal Material — The Hermit`,
       tagline: `A Design of Accompanied Competence`,
-      mastery: `You carry real practical self-sufficiency, handling material needs independently.`,
-      shadow: `You refuse material help even when your actual circumstances no longer demand total independence.`,
-      invitation: `Let one material task today be witnessed or shared, instead of handled alone by default.`,
+      mastery: `You carry real practical self-sufficiency, handling material needs independently and competently, without it curdling into isolation. You manage what needs managing without waiting on anyone else to step in. That capacity was inherited already-formed, a genuine strength from the maternal line. And you can be self-sufficient while still letting people stay close to you.`,
+      shadow: `You refuse material help even when your actual circumstances no longer demand total independence. Underneath the refusal is often a fear that accepting help would mean the self-sufficiency itself was never as solid as it seemed. You handle things alone that would genuinely go easier or better shared. The independence becomes a habit maintained past its usefulness, at real cost to you.`,
+      invitation: `Ask yourself honestly what accepting help here would actually cost the self-sufficiency you've built. Let one material task today be witnessed or shared, instead of handled alone by default. Invite someone in on it explicitly. Notice that the self-sufficiency survives being shared once.`,
     },
 
     // ── 10 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '10_I': {
       title: `10 in Maternal Material — Wheel of Fortune`,
       tagline: `A Design of Received Stability`,
-      mastery: `You carry real material resilience, weathering financial instability without being undone by it.`,
-      shadow: `You stay braced for the next downturn even during periods of genuine security, unable to relax into good fortune.`,
-      invitation: `Let yourself actually trust one piece of current material stability today, instead of bracing for its end.`,
+      mastery: `You carry real material resilience, weathering financial instability without being undone by it. You keep functioning through a downturn that would knock other people flat. That endurance was inherited already-proven, tested through real instability the maternal line actually survived. And when stability returns, you're able to use it rather than simply waiting for it to end.`,
+      shadow: `You stay braced for the next downturn even during periods of genuine security, unable to relax into good fortune when it actually arrives. Underneath the bracing is often a fear that trusting stability would leave you unprepared when it inevitably breaks. You treat every calm period as merely the lull before collapse. The vigilance costs you a present-tense ease your actual circumstances would otherwise support.`,
+      invitation: `Ask yourself honestly whether this bracing matches your current situation or an inherited expectation. Let yourself actually trust one piece of current material stability today, instead of bracing for its end. Spend or rest into it without the usual caveat. Notice that trusting it once doesn't summon the collapse you're expecting.`,
     },
 
     // ── 11 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '11_I': {
       title: `11 in Maternal Material — Strength`,
       tagline: `A Design of Named Softness`,
-      mastery: `You carry real, gentle material endurance — resilience that never needed to look fierce.`,
-      shadow: `You mistake your own steadiness for fragility because it doesn't look like conventional toughness.`,
-      invitation: `Name your gentle endurance today as the real strength it is, to yourself, out loud.`,
+      mastery: `You carry real, gentle material endurance, a resilience that never needed to look fierce to be genuine. You hold steady through practical hardship without hardening into something brittle. That quiet strength was inherited already-formed, a real capacity from the maternal line. And it outlasts more visibly aggressive forms of toughness because it doesn't burn out the same way.`,
+      shadow: `You mistake your own steadiness for fragility because it doesn't look like the conventional toughness you were taught to recognize as real strength. Underneath the mistake is often a fear that naming it as strength would sound like overclaiming something soft. You discount your own endurance every time it doesn't announce itself loudly. That discounting costs you the credit and confidence your actual resilience has earned.`,
+      invitation: `Ask yourself honestly what you'd call this endurance if it showed up louder. Name your gentle endurance today as the real strength it is, to yourself, out loud. Use the word "strength" specifically, not a softer substitute. Notice that saying it doesn't make it any less gentle.`,
     },
 
     // ── 12 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '12_I': {
       title: `12 in Maternal Material — The Hanged Man`,
       tagline: `A Design of the Small Push`,
-      mastery: `You carry real material patience, trusting circumstances to shift even without a clear timeline.`,
-      shadow: `You stay suspended in old waiting out of habit, even once new options have actually become available.`,
-      invitation: `Give one stuck material situation today the small push it's actually ready for.`,
+      mastery: `You carry real material patience, trusting that circumstances will shift even without a clear timeline attached. You can hold a difficult financial situation without forcing a premature resolution. That trust was inherited already-formed, a genuine steadiness from the maternal line. And when the moment to act actually arrives, you're able to recognize and take it.`,
+      shadow: `You stay suspended in old waiting out of habit, even once new options have actually become available to you. Underneath the habit is often a fear that acting now would mean the earlier waiting was wasted or wrong. You keep treating a resolved situation as still stuck, missing the moment it quietly opened up. Real opportunities pass by while you're still waiting for a signal that already arrived.`,
+      invitation: `Ask yourself honestly whether this situation is actually still stuck or just habitually treated that way. Give one stuck material situation today the small push it's actually ready for. Take the smallest possible action rather than the full leap. Notice that the situation moves once you stop waiting for permission.`,
     },
 
     // ── 13 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '13_I': {
       title: `13 in Maternal Material — Transformation`,
       tagline: `A Design of Early Renovation`,
-      mastery: `You carry real capacity for material rebuilding, reconstructing a practical life after genuine loss.`,
-      shadow: `You treat repeated collapse as simply normal, instead of something worth actively preventing.`,
-      invitation: `Renovate or secure one thing today that's still standing, before it needs rebuilding.`,
+      mastery: `You carry real capacity for material rebuilding, reconstructing a practical life after genuine loss without losing your footing entirely. You can start over from very little and produce something functional again. That rebuilding capacity was inherited already-proven, tested through real reconstruction the maternal line actually did. And what you rebuild tends to be sturdier for having been rebuilt deliberately.`,
+      shadow: `You treat repeated collapse as simply normal, instead of something worth actively preventing before it happens again. Underneath the normalization is often a fear that trying to prevent it would be tempting a fate that seems to run in the line. You let structures erode because rebuilding, however costly, feels more familiar than maintaining. The pattern repeats because prevention was never actually modeled as an option.`,
+      invitation: `Ask yourself honestly what maintaining, instead of eventually rebuilding, would actually require of you now. Renovate or secure one thing today that's still standing, before it needs rebuilding. Do the small maintenance now, while it's still cheap and easy. Notice that prevention doesn't require the same crisis energy rebuilding does.`,
     },
 
     // ── 14 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '14_I': {
       title: `14 in Maternal Material — Temperance`,
       tagline: `A Design of Unstretched Margin`,
-      mastery: `You carry a real skill for stretching limited resources to cover genuine needs.`,
-      shadow: `You keep stretching resources that don't need stretching anymore, stuck in old scarcity-mode habits.`,
-      invitation: `Let your actual current resources, not the old scarcity habit, decide one spending choice today.`,
+      mastery: `You carry a real skill for stretching limited resources to cover genuine needs, making modest means go further than they should be able to. You can meet a real shortfall without panic, drawing on a resourcefulness that's been tested before. That skill was inherited already-formed, a genuine gift from the maternal line. And it means you're rarely caught with nothing when circumstances actually get tight.`,
+      shadow: `You keep stretching resources that don't need stretching anymore, stuck in old scarcity-mode habits your current circumstances have outgrown. Underneath the habit is often a fear that spending normally would be tempting a shortage that's no longer actually present. You ration what's actually abundant, treating every purchase as though margin were still thin. The unnecessary stretching costs you a present-tense ease your real resources would support.`,
+      invitation: `Ask yourself honestly whether this margin is actually needed or simply an old habit running unchecked. Let your actual current resources, not the old scarcity habit, decide one spending choice today. Spend the full, unstretched amount on it. Notice that spending normally once doesn't summon the shortage back.`,
     },
 
     // ── 15 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '15_I': {
       title: `15 in Maternal Material — The Devil`,
       tagline: `A Design of the Named Dependence`,
-      mastery: `You carry a real, complicated relationship to material dependence, whichever direction it runs.`,
-      shadow: `You repeat the inherited dynamic without examining it — accepting unwanted dependence, or resisting genuinely helpful support.`,
-      invitation: `Name the specific dependence dynamic you inherited today, and decide what healthy interdependence actually looks like now.`,
+      mastery: `You carry a real, honest capacity to see material dependence clearly, whichever direction it actually runs in a given relationship. You can name who genuinely relies on whom instead of pretending the dynamic isn't there. That clarity lets you choose interdependence deliberately rather than falling into it by default. And naming the dynamic out loud tends to loosen its grip rather than tighten it.`,
+      shadow: `You repeat an inherited dependence dynamic without examining it, either accepting unwanted dependence or resisting genuinely helpful support. Underneath the repetition is often a fear that questioning the pattern would destabilize the whole relationship it's embedded in. You slot into the same role, dependent or depended-upon, without checking whether it actually fits your current life. The pattern runs unexamined because naming it feels riskier than simply living inside it.`,
+      invitation: `Ask yourself honestly which side of this dependence you default into without deciding to. Name the specific dependence dynamic you inherited today, and decide what healthy interdependence actually looks like now. Say it plainly, even just to yourself. Notice that naming it doesn't force an immediate change, only honesty.`,
     },
 
     // ── 16 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '16_I': {
       title: `16 in Maternal Material — The Tower`,
       tagline: `A Design of the Told Story`,
-      mastery: `You carry real material resilience, having survived a financial or practical collapse.`,
-      shadow: `You carry disproportionate anxiety around material stability that doesn't match your own current situation.`,
-      invitation: `Ask today, even speculatively, what material collapse in your mother's line was never fully discussed.`,
+      mastery: `You carry real material resilience, having survived, or descended from someone who survived, a genuine financial or practical collapse. You can rebuild on solid ground once an old structure is actually gone, without needing the illusion of permanence to function. That clear-eyed rebuilding is a real inheritance, proven through what the line actually endured. And what you build afterward tends to be sturdier than what came before it.`,
+      shadow: `You carry disproportionate anxiety around material stability that doesn't match your own current situation at all. Underneath the anxiety is often a fear that stability itself is temporary, since it was for the line before you. You brace for a collapse that isn't actually coming, reading ordinary uncertainty as impending disaster. The bracing costs you a present-tense calm your real circumstances would otherwise support.`,
+      invitation: `Ask yourself honestly whether this fear belongs to your present circumstances or an inherited past one. Ask today, even speculatively, what material collapse in your mother's line was never fully discussed. Write it down or say it to someone, however incomplete the picture is. Notice whether the anxiety loosens once it has an actual source attached to it.`,
     },
 
     // ── 17 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '17_I': {
       title: `17 in Maternal Material — The Star`,
       tagline: `A Design of the Full-Sized Hope`,
-      mastery: `You carry real material hope, capacity for genuine renewal even after hard circumstances.`,
-      shadow: `You pre-emptively scale down your material aspirations to a modest ceiling that no longer fits your actual circumstances.`,
-      invitation: `Let one material hope be named today at its full, untrimmed size.`,
+      mastery: `You carry real material hope, a genuine capacity for renewal even after hard circumstances have tested it. You can imagine a better financial future without it feeling naive or unearned. That hopefulness was handed to you already-formed, a real inheritance rather than blind optimism. And it lets you keep building toward something larger even after a setback.`,
+      shadow: `You pre-emptively scale down your material aspirations to a modest ceiling that no longer fits your actual circumstances. Underneath the scaling-down is often a fear that wanting more than the line ever had would be its own kind of betrayal. You round your goals down before you've even tested what's actually possible for you now. The discount happens automatically, so quietly you may not notice you're applying it.`,
+      invitation: `Ask yourself honestly what number or goal you'd name if the inherited ceiling didn't apply. Let one material hope be named today at its full, untrimmed size. Say the real version, not the modest one you'd normally offer. Notice whether the full-sized version actually feels impossible or just unfamiliar.`,
     },
 
     // ── 18 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '18_I': {
       title: `18 in Maternal Material — The Moon`,
       tagline: `A Design of the Distinguished Worry`,
-      mastery: `You carry real material sensitivity, a felt attunement to financial risk.`,
-      shadow: `You carry diffuse material anxiety that doesn't clearly attach to your own current circumstances.`,
-      invitation: `Distinguish today which piece of your financial worry is genuinely yours versus simply absorbed.`,
+      mastery: `You carry real material sensitivity, a felt attunement to financial risk before it's fully visible in the numbers. You pick up on the early signal, the shift in a situation before it's confirmed. That instinct was inherited already-tuned, a genuine perceptual gift rather than generic worry. And when you trust it and check it against reality, it proves reliable more often than not.`,
+      shadow: `You carry diffuse material anxiety that doesn't clearly attach to your own current circumstances at all. Underneath the diffuseness is often a fear that naming the actual source would make it too real to manage. You feel unsettled about money without being able to say specifically why, absorbing worry that may have started with someone else. The anxiety never resolves because it was never actually about anything in your own life.`,
+      invitation: `Ask yourself honestly which piece of this financial worry is actually yours. Distinguish today which piece of your financial worry is genuinely yours versus simply absorbed. Set down the part that was never actually yours to carry. Notice whether the remaining worry feels smaller and more workable.`,
     },
 
     // ── 19 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '19_I': {
       title: `19 in Maternal Material — The Sun`,
       tagline: `A Design of Honest Warmth`,
-      mastery: `You carry real, resilient warmth, maintaining vitality and joy even through material difficulty.`,
-      shadow: `You perform positivity through real financial strain instead of naming the difficulty directly.`,
-      invitation: `Name one material difficulty directly today, without covering it with performed warmth.`,
+      mastery: `You carry real, resilient warmth, maintaining genuine vitality and joy even through material difficulty. You can hold hard financial circumstances and still access real lightness, not as denial but as an actual, sustained capacity. That warmth was inherited already-formed, a real strength from the maternal line. And it means hardship doesn't get to define the whole emotional tone of your life.`,
+      shadow: `You perform positivity through real financial strain instead of naming the difficulty directly to the people around you. Underneath the performance is often a fear that showing the actual strain would extinguish the warmth that's supposed to hold everything together. You maintain a cheerful surface while the real difficulty goes unspoken and unaddressed. The gap between the performance and the reality leaves you carrying the strain alone.`,
+      invitation: `Ask yourself honestly what naming this difficulty directly would actually cost the warmth you maintain. Name one material difficulty directly today, without covering it with performed warmth. Say the plain, unvarnished version to someone you trust. Notice that the warmth survives one honest, unperformed moment.`,
     },
 
     // ── 20 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '20_I': {
       title: `20 in Maternal Material — Judgement`,
       tagline: `A Design of the Claimed Potential`,
-      mastery: `You carry real material potential, capability sensed but historically unclaimed by circumstance.`,
-      shadow: `You inherit the postponement itself, holding back on real potential the same way, without examining why.`,
-      invitation: `Take one real step today toward the material potential your circumstances would actually now allow.`,
+      mastery: `You carry real material potential, a capability that's been sensed clearly even where circumstance kept it from being fully claimed. You can hear the call to something bigger, distinct from ordinary ambition. That capacity to actually recognize it, not just sense it vaguely, is a genuine inheritance. And once your actual circumstances allow it, that potential is ready to be claimed rather than rebuilt from scratch.`,
+      shadow: `You inherit the postponement itself, holding back on real potential the same way the line always did, without ever examining why. Underneath the hesitation is often a fear that claiming the potential would mean outgrowing the very circumstances that shaped you. You hear the call clearly and then wait, indefinitely, for a readiness that never quite arrives. Years pass with the potential sensed but never actually pursued.`,
+      invitation: `Ask yourself honestly what you're actually waiting to feel ready for. Take one real step today toward the material potential your circumstances would actually now allow. Make it concrete and small enough to actually do today. Notice that the step doesn't require the full readiness you've been waiting for.`,
     },
 
     // ── 21 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '21_I': {
       title: `21 in Maternal Material — The World`,
       tagline: `A Design of Current Enoughness`,
-      mastery: `You carry a real, settled sense of material sufficiency, contentment achievable without excess.`,
-      shadow: `You settle for less than what's actually available now because "enough" was calibrated to circumstances that no longer apply.`,
-      invitation: `Recount today, honestly, what you already have that qualifies as enough right now.`,
+      mastery: `You carry a real, settled sense of material sufficiency, able to feel genuine contentment without needing excess to get there. You recognize when you actually have enough instead of chasing a moving target. That settledness was inherited already-formed, a real wisdom from the maternal line. And it lets you enjoy what you have instead of perpetually reaching past it.`,
+      shadow: `You settle for less than what's actually available now because "enough" was calibrated to circumstances that no longer apply. Underneath the miscalibration is often a fear that wanting more than the old "enough" would be a kind of ingratitude toward what the line survived on. You accept a smaller share than your current life could actually support. The old ceiling stays in place long after the circumstances that set it have changed.`,
+      invitation: `Ask yourself honestly whether this "enough" reflects your current life or an old, inherited calibration. Recount today, honestly, what you already have that qualifies as enough right now. Let the number reflect your actual present circumstances, not the old one. Notice whether your real "enough" is larger than the one you've been living by.`,
     },
 
     // ── 22 in MATERNAL MATERIAL (Ancestral Square, Age-70 anchor) ───────────
     '22_I': {
       title: `22 in Maternal Material — The Fool`,
       tagline: `A Design of the Chosen Leap`,
-      mastery: `You carry real material courage, taking practical chances when circumstances demand it.`,
-      shadow: `You take risks reactively out of old urgency, rather than choosing them deliberately from actual stability.`,
-      invitation: `Meet one mattering moment today by genuine, deliberate choice rather than inherited urgency.`,
+      mastery: `You carry real material courage, capable of taking a practical chance when circumstances genuinely call for it. You act without needing every guarantee lined up first. That willingness to leap was handed to you already-formed, a real inheritance of trust in your own judgment. And more often than not, the leap lands, because it was never actually reckless.`,
+      shadow: `You take risks reactively out of old urgency, rather than choosing them deliberately from a place of actual stability. Underneath the reactivity is often a fear that waiting for genuine stability would mean the opportunity, or the crisis, would pass you by regardless. You leap because something feels urgent, not because you've actually assessed the moment. The pattern costs you the steadier, more considered version of the same courage.`,
+      invitation: `Ask yourself honestly whether this urgency is real or an old, inherited reflex. Meet one mattering moment today by genuine, deliberate choice rather than inherited urgency. Pause long enough to actually decide, rather than simply react. Notice that the courage still shows up even without the old urgency driving it.`,
     },
 
     // ── 1 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
