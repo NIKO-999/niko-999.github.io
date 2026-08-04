@@ -4771,28 +4771,20 @@ const ARCANA_ESSENCE = {
     document.getElementById('pb-prog-name').style.color = themedHex(hex);
     document.getElementById('pb-section-label').textContent = 'Talent Star Line';
     document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-    document.getElementById('pb-heading').textContent = content.heading;
+    document.getElementById('pb-heading').textContent = content.title || content.heading;
     document.getElementById('pb-body').innerHTML =
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">THE WHY</div>
-         <div class="pb-full-text">${content.why || ''}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+         <div class="pb-full-text">${content.mastery || ''}</div>
        </div>
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
          <div class="pb-full-text">${content.shadow || ''}</div>
        </div>
-       ${content.blocks ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT CAN BLOCK THIS TALENT</div>
-         <div class="pb-full-text">${content.blocks}</div>
-       </div>` : ''}
-       ${content.positive ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(var(--positive-rgb),0.75)">POSITIVE STATE</div>
-         <div class="pb-full-text">${content.positive}</div>
-       </div>` : ''}
-       ${content.negative ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:rgba(var(--negative-rgb),0.75)">NEGATIVE STATE</div>
-         <div class="pb-full-text">${content.negative}</div>
-       </div>` : ''}`;
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+         <div class="pb-full-text">${content.invitation || ''}</div>
+       </div>`;
     banner.classList.add('open');
     banner.scrollTop = 0;
     gsap.to(banner, { y:'0%', duration:0.55, ease:'power3.out' });
