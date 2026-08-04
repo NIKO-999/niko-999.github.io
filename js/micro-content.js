@@ -1482,198 +1482,198 @@ window.DMicroContent = (function () {
     '13_F': {
       title: `13 in Paternal Spiritual — Transformation`,
       tagline: `A Design of Reworked Inheritance`,
-      mastery: `You take the belief system inherited from your father's line and actually transform it into something that fits who you became, instead of receiving it intact.`,
-      shadow: `You either swallow the inheritance whole or reject it entirely — both ways of avoiding the actual work of sorting what's genuinely yours.`,
-      invitation: `Name one specific belief from your father's line today, and decide honestly whether it's actually yours.`,
+      mastery: `You take the belief system inherited from your father's line and actually transform it into something that fits who you became, instead of receiving it intact. You can let an inherited framework die so a truer, tested version can take its place. And what you eventually hold has been through your own reckoning, not simply handed down. That patience with paradox is a rare and genuinely inherited gift.`,
+      shadow: `You either swallow the inheritance whole or reject it entirely, both ways of avoiding the actual work of sorting what's genuinely yours. Underneath the extreme is often a fear that questioning any part of it means betraying the whole line. Your belief system reflects your father's line intact, unexamined, or reflects a total rejection that's really just the inheritance in reverse. Real intensity waits at the door and rarely gets let all the way in.`,
+      invitation: `Ask yourself honestly which piece of this inheritance you've never actually tested yourself. Name one specific belief from your father's line today, and decide honestly whether it's actually yours. Test it against your own real experience rather than the assumption behind it. Notice what holds up and what was only ever received.`,
     },
 
     // ── 1 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '1_F': {
       title: `1 in Paternal Spiritual — The Magician`,
       tagline: `A Design of Active Faith`,
-      mastery: `You treat faith as active — proven through initiative and real spiritual agency, not passive acceptance.`,
-      shadow: `You inherit the compulsion without the discernment, believing spiritual worth must be constantly proven through visible effort.`,
-      invitation: `Let your faith rest today instead of working. Do nothing spiritually and call it enough.`,
+      mastery: `You treat faith as active — proven through initiative and real spiritual agency, not passive acceptance. You act on a spiritual instinct the moment it arrives, translating it into something real rather than sitting on it. And that capacity for spiritual initiative was handed to you already-formed, a real inheritance you didn't have to earn from scratch. You don't have to prove your faith moving to know it's real.`,
+      shadow: `You inherit the compulsion without the discernment, believing spiritual worth must be constantly proven through visible effort. Underneath the compulsion is often a fear that stillness would mean the faith itself wasn't real. You keep initiating spiritual practice past the point of usefulness, unable to tell productive devotion from restless proving. That restlessness rarely converts into anything deeper than motion.`,
+      invitation: `Ask yourself honestly what resting spiritually would seem to prove about your faith. Let your faith rest today instead of working. Do nothing spiritually and call it enough. Notice that the faith survives a day without visible effort.`,
     },
 
     // ── 2 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '2_F': {
       title: `2 in Paternal Spiritual — The High Priestess`,
       tagline: `A Design of Spoken Intuition`,
-      mastery: `You carry real intuitive capacity — inner knowing that doesn't need to be proven to be trusted.`,
-      shadow: `You inherit the silence along with the sensitivity, downplaying your own knowing around authority figures.`,
-      invitation: `Say your intuitive sense out loud today, in a context where you'd normally stay quiet.`,
+      mastery: `You carry real intuitive capacity — inner knowing that doesn't need to be proven to be trusted. That knowing arrived in you already-formed, passed down rather than built from scratch. And when you do speak it, it tends to land with a weight explanation alone never produces. Strangers sense the depth before you've said a word to earn it.`,
+      shadow: `You inherit the silence along with the sensitivity, downplaying your own knowing around authority figures. Underneath the downplaying is often a fear that trusting your own perception openly would mean challenging the line's actual authority. You withhold what you sense rather than defend it, exactly as the line modeled. The silence gets mistaken for having nothing to say.`,
+      invitation: `Ask yourself honestly whose authority you're deferring to instead of your own perception. Say your intuitive sense out loud today, in a context where you'd normally stay quiet. Say it plainly, without softening it first. Notice that your knowing survives being tested against authority.`,
     },
 
     // ── 3 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '3_F': {
       title: `3 in Paternal Spiritual — The Empress`,
       tagline: `A Design of Unearned Ease`,
-      mastery: `You carry real capacity for spiritual abundance and ease.`,
-      shadow: `You inherit the belief that spiritual peace has to be earned through struggle, making genuine ease feel suspicious.`,
-      invitation: `Let one spiritual ease be legitimate today, with no struggle attached to earn it.`,
+      mastery: `You carry real capacity for spiritual abundance and ease, a gift passed down rather than earned firsthand. You can let spiritual growth happen patiently, without needing to force or prove it. And what comes to you easily in this domain isn't shallow simply because it arrived without struggle. People around you feel the abundance without you performing it.`,
+      shadow: `You inherit the belief that spiritual peace has to be earned through struggle, making genuine ease feel suspicious. Underneath the suspicion is often a fear that trusting ease would mean betraying a line that always paid for peace in difficulty. You manufacture struggle to make your own spiritual ease feel legitimate. The manufactured difficulty rarely produces anything the ease wouldn't have.`,
+      invitation: `Ask yourself honestly what you're afraid unearned spiritual ease would say about you. Let one spiritual ease be legitimate today, with no struggle attached to earn it. Receive it without manufacturing difficulty first. Notice that the ease doesn't need justifying.`,
     },
 
     // ── 4 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '4_F': {
       title: `4 in Paternal Spiritual — The Emperor`,
       tagline: `A Design of Chosen Structure`,
-      mastery: `You carry real respect for spiritual structure — something worth building and defending.`,
-      shadow: `You either submit entirely to inherited spiritual authority or reject all structure reflexively, never landing anywhere of your own.`,
-      invitation: `Name one piece of spiritual structure today that's actually yours, chosen, not inherited or reacted against.`,
+      mastery: `You carry real respect for spiritual structure — something worth building and defending, inherited from a line that valued order in faith. You can build spiritual frameworks that actually hold weight over time. And you know how to hold that structure without needing to dominate everyone operating inside it. People trust the frame because it was actually tested, not just assumed.`,
+      shadow: `You either submit entirely to inherited spiritual authority or reject all structure reflexively, never landing anywhere of your own. Underneath the extreme is often a fear that choosing your own structure would mean disowning the line that gave you one. You never land anywhere that's actually yours, chosen rather than inherited or reacted against. You end up loyal to a structure, or its absence, that was never fully yours.`,
+      invitation: `Ask yourself honestly whether your spiritual structure is chosen or simply inherited by default. Name one piece of spiritual structure today that's actually yours, chosen, not inherited or reacted against. Say it plainly, distinct from what you were given. Notice that choosing your own doesn't require rejecting theirs.`,
     },
 
     // ── 5 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '5_F': {
       title: `5 in Paternal Spiritual — The Hierophant`,
       tagline: `A Design of Examined Doctrine`,
-      mastery: `You carry real, concrete spiritual teaching — an actual doctrine you can examine and use.`,
-      shadow: `You treat the doctrine as non-negotiable simply because it arrived so formally packaged, afraid that questioning it means betrayal.`,
-      invitation: `Examine one specific piece of inherited doctrine today, on its own merits, not its packaging.`,
+      mastery: `You carry real, concrete spiritual teaching — an actual doctrine you can examine and use, not vague inheritance. You test what you've been taught against your own lived experience before you fully adopt it. And what survives that testing becomes something you can actually transmit intact to someone else. What survives your testing carries real weight when you pass it on.`,
+      shadow: `You treat the doctrine as non-negotiable simply because it arrived so formally packaged. Underneath the non-negotiable stance is often a fear that questioning any part of it means betraying the whole inheritance. You accept the doctrine wholesale rather than examining it on its own merits. The packaging determines your loyalty more than the substance does.`,
+      invitation: `Ask yourself honestly what you're afraid examining this doctrine would reveal. Examine one specific piece of inherited doctrine today, on its own merits, not its packaging. Test it against your own experience directly. Notice that questioning it doesn't automatically betray where it came from.`,
     },
 
     // ── 6 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '6_F': {
       title: `6 in Paternal Spiritual — The Lovers`,
       tagline: `A Design of Chosen Devotion`,
-      mastery: `You carry real capacity for spiritual devotion and commitment.`,
-      shadow: `You stay loyal to an inherited spiritual path out of obligation, not genuine, examined alignment.`,
-      invitation: `Choose one spiritual commitment today consciously, instead of assuming the inherited one.`,
+      mastery: `You carry real capacity for spiritual devotion and commitment, passed down as a genuine gift for staying with something. You can hold competing spiritual pulls without pretending one doesn't exist, and still choose. And once you choose consciously, you commit fully, rather than defaulting to what was simply handed to you. People who receive that devotion know it's the full version, not a duty.`,
+      shadow: `You stay loyal to an inherited spiritual path out of obligation, not genuine, examined alignment. Underneath the obligation is often a fear that choosing differently would mean betraying the people who gave you the path. Your loyalty runs on default rather than on anything you've actually tested and chosen. The obligation runs quietly under every choice you make in its name.`,
+      invitation: `Ask yourself honestly whether your spiritual commitment is chosen or simply assumed. Choose one spiritual commitment today consciously, instead of assuming the inherited one. Say out loud that it's your choice, not just your inheritance. Notice that a conscious choice can land on the same path and still feel entirely different.`,
     },
 
     // ── 7 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '7_F': {
       title: `7 in Paternal Spiritual — The Chariot`,
       tagline: `A Design of Earned Stillness`,
-      mastery: `You carry genuine spiritual discipline and forward motion.`,
-      shadow: `You inherit the drive without questioning it, feeling guilty resting or going still in your spiritual life.`,
-      invitation: `Let your spiritual practice include real stillness today, with no guilt attached.`,
+      mastery: `You carry genuine spiritual discipline and forward motion, a real inheritance of momentum you didn't have to build alone. You keep a spiritual practice moving on will alone, long after the initial spark has faded. And that consistency produces depth over time, far more than intensity ever could. You show up on the flat, uninspiring days as reliably as the exciting ones.`,
+      shadow: `You inherit the drive without questioning it, feeling guilty resting or going still in your spiritual life. Underneath the guilt is often a fear that stillness would mean the discipline, and the line behind it, wasn't real. You keep moving spiritually past the point of usefulness, unable to distinguish practice from restlessness. The guilt shows up exactly when rest would actually help most.`,
+      invitation: `Ask yourself honestly what stillness in your spiritual practice would seem to prove about your discipline. Let your spiritual practice include real stillness today, with no guilt attached. Stop moving on purpose. Notice that the discipline survives a day of genuine rest.`,
     },
 
     // ── 8 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '8_F': {
       title: `8 in Paternal Spiritual — Justice`,
       tagline: `A Design of the Honest Ledger`,
-      mastery: `You carry a real sense of spiritual integrity and fairness.`,
-      shadow: `You inherit a harsh standard of spiritual accountability, feeling constantly "in debt" spiritually.`,
-      invitation: `Examine one spiritual debt you've been repaying today, and ask honestly if it's actually owed.`,
+      mastery: `You carry a real sense of spiritual integrity and fairness, an inherited scale that catches imbalance most people miss. You hold yourself to the same standard you'd hold anyone else to, which is what gives the inheritance credibility. And you can deliver an honest spiritual accounting without needing it to be punishing. That integrity holds even when nobody's checking your account.`,
+      shadow: `You inherit a harsh standard of spiritual accountability, feeling constantly "in debt" spiritually. Underneath the debt is often a fear that questioning the harshness of the standard would mean abandoning fairness altogether. You keep a running ledger of spiritual obligation that was never actually yours to owe. The ledger runs in the background of nearly every choice you make.`,
+      invitation: `Ask yourself honestly whether this spiritual debt is genuinely owed or simply inherited as a default. Examine one spiritual debt you've been repaying today, and ask honestly if it's actually owed. Release it if it isn't. Notice that questioning the debt doesn't undo your actual integrity.`,
     },
 
     // ── 9 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ───────────
     '9_F': {
       title: `9 in Paternal Spiritual — The Hermit`,
       tagline: `A Design of Shared Insight`,
-      mastery: `You carry real capacity for deep, solitary spiritual reflection.`,
-      shadow: `You inherit the isolation along with the depth, keeping your deepest spiritual questions to yourself by default.`,
-      invitation: `Share one piece of solitary spiritual insight with someone today.`,
+      mastery: `You carry real capacity for deep, solitary spiritual reflection, a genuine inheritance of contemplative depth. You can be self-sufficient in your spiritual practice without it curdling into isolation. And what you bring back from that reflection tends to be sharper than anything generated under pressure or in company. Few people can go that deep into stillness and come back with anything at all.`,
+      shadow: `You inherit the isolation along with the depth, keeping your deepest spiritual questions to yourself by default. Underneath the default silence is often a fear that sharing the insight would make it feel less sacred or less yours. Hard-won reflection stays entirely locked inside you, unshared. The depth accumulates and reaches exactly nobody.`,
+      invitation: `Ask yourself honestly what sharing your solitary insight would actually cost its depth. Share one piece of solitary spiritual insight with someone today. Offer it plainly, while it's still a little raw. Notice that the insight survives being spoken.`,
     },
 
     // ── 10 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ──────────
     '10_F': {
       title: `10 in Paternal Spiritual — The Wheel of Fortune`,
       tagline: `A Design of Reclaimed Say`,
-      mastery: `You carry a real relationship to spiritual timing and cycles.`,
-      shadow: `You inherit either fatalism or over-control around fate, without ever testing which one actually fits you.`,
-      invitation: `Claim one piece of say in your own fate today that your inherited belief said you didn't have.`,
+      mastery: `You carry a real relationship to spiritual timing and cycles, a genuine inherited instinct for when a moment has actually arrived. You can sense a spiritual shift before it's externally confirmed. And that instinct saves you from decisions made purely on inherited assumption about fate. You read the actual texture of a moment instead of just reacting to it.`,
+      shadow: `You inherit either fatalism or over-control around fate, without ever testing which one actually fits you. Underneath the untested inheritance is often a fear that examining it would mean losing the certainty it provides. You default to whichever stance the line handed you, never checking it against your own real experience. Neither stance gets checked against what's actually happening in your life.`,
+      invitation: `Ask yourself honestly whether your belief about fate is tested or simply inherited. Claim one piece of say in your own fate today that your inherited belief said you didn't have. Act on it directly. Notice whether the inherited fatalism or control actually held up.`,
     },
 
     // ── 11 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '11_F': {
       title: `11 in Paternal Spiritual — Strength`,
       tagline: `A Design of Visible Strain`,
-      mastery: `You carry real spiritual resilience and endurance.`,
-      shadow: `You inherit the belief that struggle should stay hidden, making your own spiritual crises feel shameful to admit.`,
-      invitation: `Let one real spiritual struggle be visible to someone you trust today.`,
+      mastery: `You carry real spiritual resilience and endurance, a genuine inheritance of staying soft under pressure without breaking. You can stay present with raw spiritual doubt without needing to suppress it or be ruled by it. And that endurance was handed to you already-formed, not something you had to build entirely alone. People who know your history are surprised by how little it shows.`,
+      shadow: `You inherit the belief that struggle should stay hidden, making your own spiritual crises feel shameful to admit. Underneath the hiding is often a fear that visible struggle would look like a failure of the inheritance itself. You perform spiritual steadiness while your actual crises go unspoken. The hiding costs you the support that would have made it lighter.`,
+      invitation: `Ask yourself honestly what visible spiritual struggle would seem to say about the line you come from. Let one real spiritual struggle be visible to someone you trust today. Say it plainly, without managing it into something smaller. Notice that the struggle doesn't undo the inheritance of resilience.`,
     },
 
     // ── 12 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '12_F': {
       title: `12 in Paternal Spiritual — The Hanged Man`,
       tagline: `A Design of the Honest Yes`,
-      mastery: `You carry real capacity for spiritual surrender and release.`,
-      shadow: `You inherit martyrdom instead of genuine surrender, feeling obligated to suffer for your faith to count.`,
-      invitation: `Examine one spiritual sacrifice today and ask honestly if it was ever actually asked for.`,
+      mastery: `You carry real capacity for spiritual surrender and release, a genuine inherited comfort with not-knowing. You can pause a spiritual decision without anxiety, trusting the pause is doing real work. And that patience produces insight that inherited urgency never could have reached. You can let go long enough to find out what the release actually reveals.`,
+      shadow: `You inherit martyrdom instead of genuine surrender, feeling obligated to suffer for your faith to count. Underneath the obligation is often a fear that a surrender without suffering wouldn't be taken seriously by the line that modeled it. You perform sacrifice rather than actually releasing anything. The performance costs you the freedom the surrender was supposed to produce.`,
+      invitation: `Ask yourself honestly whether this spiritual sacrifice was ever actually asked for, or just assumed. Examine one spiritual sacrifice today and ask honestly if it was ever actually asked for. Release it if it wasn't. Notice that surrender without suffering still counts.`,
     },
 
     // ── 14 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '14_F': {
       title: `14 in Paternal Spiritual — Temperance`,
       tagline: `A Design of Earned Balance`,
-      mastery: `You carry real capacity for balanced spiritual integration.`,
-      shadow: `You inherit neutrality without genuine integration, staying so moderate that real intensity never shows up at all.`,
-      invitation: `Let one real spiritual intensity in today, fully, before you moderate it.`,
+      mastery: `You carry real capacity for balanced spiritual integration, an inherited gift for blending what doesn't obviously mix. You blend in the right proportion for the specific moment, not by rote formula. And you moderate your own extremes naturally, which makes your spiritual life sustainable in a way inherited intensity rarely is. That's a rare and genuinely useful combination to have been handed.`,
+      shadow: `You inherit neutrality without genuine integration, staying so moderate that real intensity never shows up at all. Underneath the moderation is often a fear that full spiritual intensity would cost you the balance the line valued. You use the middle to avoid ever fully committing to anything intense. The shame outlives whatever originally justified it.`,
+      invitation: `Ask yourself honestly what full spiritual intensity would actually cost the balance you've inherited. Let one real spiritual intensity in today, fully, before you moderate it. Don't dilute it immediately. Notice that intensity doesn't have to threaten the integration.`,
     },
 
     // ── 15 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '15_F': {
       title: `15 in Paternal Spiritual — The Devil`,
       tagline: `A Design of Held Desire`,
-      mastery: `You carry real spiritual depth alongside real desire — capable of holding both.`,
-      shadow: `You inherit shame around desire, feeling spiritual guilt around ordinary human wants.`,
-      invitation: `Let one desire and one devotion sit in the same hands today, without treating them as enemies.`,
+      mastery: `You carry real spiritual depth alongside real desire — capable of holding both, a genuine inherited capacity for appetite without shame. You look directly at your own wanting without flinching away or pretending it isn't there. And you understand your own attachments well enough to use them deliberately, rather than being run by inherited guilt about them. You notice the crack in a spiritual structure before anyone else admits it's there.`,
+      shadow: `You inherit shame around desire, feeling spiritual guilt around ordinary human wants. Underneath the shame is often a fear that admitting desire plainly would mean the depth wasn't real devotion. You treat desire and devotion as enemies, exactly as the line modeled. The unnamed dread outlives the actual event that caused it.`,
+      invitation: `Ask yourself honestly what you're afraid naming your actual desire would say about your devotion. Let one desire and one devotion sit in the same hands today, without treating them as enemies. Name both plainly, together. Notice that they don't cancel each other out.`,
     },
 
     // ── 16 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '16_F': {
       title: `16 in Paternal Spiritual — The Tower`,
       tagline: `A Design of the Named Collapse`,
-      mastery: `You carry real capacity for spiritual clarity, even through rupture.`,
-      shadow: `You inherit an unprocessed collapse — a vague, hard-to-place distrust of spiritual structures whose source predates you.`,
-      invitation: `Name today, even speculatively, what collapsed in your father's line's faith, and what clarity should have followed.`,
+      mastery: `You carry real capacity for spiritual clarity, even through rupture, a genuine inherited resilience for surviving collapse. You can let a false spiritual structure fall rather than propping it up indefinitely. And you recover fast from spiritual upheaval, integrating what it showed you rather than just surviving it. That hope tends to draw people toward you rather than away.`,
+      shadow: `You inherit an unprocessed collapse — a vague, hard-to-place distrust of spiritual structures whose source predates you. Underneath the vague distrust is often a fear that tracing it to its actual source would mean reopening a wound that isn't even yours. You carry the aftershock of a rupture you never witnessed. The disclaimer undercuts the hope before anyone's had the chance to receive it.`,
+      invitation: `Ask yourself honestly what collapsed in your father's line's faith that you've never actually named. Name today, even speculatively, what collapsed and what clarity should have followed. Say it plainly, even as a guess. Notice that naming it loosens its hold on your own spiritual life.`,
     },
 
     // ── 17 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '17_F': {
       title: `17 in Paternal Spiritual — The Star`,
       tagline: `A Design of Full-Sized Hope`,
-      mastery: `You carry real capacity for spiritual renewal and hope.`,
-      shadow: `You inherit a caution against hoping too visibly, hedging every spiritual hope with a disclaimer.`,
-      invitation: `Let one spiritual hope be fully, visibly held today, with no hedge attached.`,
+      mastery: `You carry real capacity for spiritual renewal and hope, a genuine inheritance that hasn't hardened into naivety. You carry hope that's actually looked at the hard parts and stayed intact anyway. And you inspire real optimism in others just by being near them, without needing to perform positivity to do it. You can hold ambiguity without needing to resolve it prematurely.`,
+      shadow: `You inherit a caution against hoping too visibly, hedging every spiritual hope with a disclaimer. Underneath the hedging is often a fear that a hope stated fully and disappointed would be unbearable, exactly as it may have been for the line before you. You pre-shrink every hope before anyone can test it. The unnamed dread keeps costing you long after its actual source has passed.`,
+      invitation: `Ask yourself honestly what you're afraid would happen if the hope, stated fully, disappointed you. Let one spiritual hope be fully, visibly held today, with no hedge attached. Say it at its real size. Notice that stating it plainly doesn't make the risk any worse.`,
     },
 
     // ── 18 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '18_F': {
       title: `18 in Paternal Spiritual — The Moon`,
       tagline: `A Design of the Named Fear`,
-      mastery: `You carry real spiritual sensitivity and depth.`,
-      shadow: `You inherit a diffuse, unnamed spiritual dread that doesn't attach to anything specific in your own life.`,
-      invitation: `Trace one spiritual anxiety back today, even speculatively, and give it an actual name.`,
+      mastery: `You carry real spiritual sensitivity and depth, a genuine inherited fluency for the unseen and unspoken. You navigate spiritual uncertainty without needing everything resolved before you'll trust what you're sensing. And you can hold conflicting spiritual feelings at once without needing them reconciled first. People feel the warmth as real precisely because it doesn't need gravity to back it up.`,
+      shadow: `You inherit a diffuse, unnamed spiritual dread that doesn't attach to anything specific in your own life. Underneath the diffuseness is often a fear that tracing it to its actual source would mean reliving something that isn't yours to relive. You mistake inherited fog for a fact about your own character. The muting costs you exactly the joy the faith was supposed to produce.`,
+      invitation: `Ask yourself honestly whether this dread is signal from your own life or unmoored anxiety inherited from the line. Trace one spiritual anxiety back today, even speculatively, and give it an actual name. Check it against your own real circumstances. Notice how much of it was never actually about you.`,
     },
 
     // ── 19 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '19_F': {
       title: `19 in Paternal Spiritual — The Sun`,
       tagline: `A Design of Legitimate Joy`,
-      mastery: `You carry real capacity for radiant, joyful faith.`,
-      shadow: `You inherit the belief that seriousness is what makes faith legitimate, muting your own genuine spiritual joy.`,
-      invitation: `Let one moment of spiritual joy be fully legitimate today, with no gravity required to justify it.`,
+      mastery: `You carry real capacity for radiant, joyful faith, a genuine inherited vitality that doesn't need to be earned through struggle. You bring genuine warmth into a spiritual space just by being in it, contagious rather than performed. And that uncomplicated joy is not shallow simply because it arrived without difficulty. That discernment is a genuine gift, not just caution dressed up as wisdom.`,
+      shadow: `You inherit the belief that seriousness is what makes faith legitimate, muting your own genuine spiritual joy. Underneath the muting is often a fear that visible joy would read as less devoted than the line's more solemn model. You dim your natural radiance to look appropriately grave. The pattern repeats until someone in the line finally breaks it.`,
+      invitation: `Ask yourself honestly what your joy would seem to say about how seriously you take your faith. Let one moment of spiritual joy be fully legitimate today, with no gravity required to justify it. Let it be light, unearned, and real. Notice that joy doesn't undercut the depth of your faith.`,
     },
 
     // ── 20 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '20_F': {
       title: `20 in Paternal Spiritual — Judgement`,
       tagline: `A Design of the Answered Pull`,
-      mastery: `You carry real capacity to answer a larger spiritual calling.`,
-      shadow: `You inherit the postponement itself, sensing a summons and setting it aside the way your line always did.`,
-      invitation: `Answer one spiritual pull today, your own way, instead of postponing it again.`,
+      mastery: `You carry real capacity to answer a larger spiritual calling, a genuine inherited discernment for a real summons. You act on the call before you've fully rehearsed it, trusting readiness catches up once you've started. And you can genuinely evaluate the call honestly, without inflating or dismissing it. What you finish carries the weight of an entire lineage actually arriving somewhere.`,
+      shadow: `You inherit the postponement itself, sensing a summons and setting it aside the way your line always did. Underneath the postponing is often a fear that answering differently than the line did would mean breaking from them entirely. You gather more information, wait for better conditions, prepare a little further, exactly as they did. The pattern of almost-there gets inherited right along with everything else.`,
+      invitation: `Ask yourself honestly what answering this call your own way would risk about your standing in the line. Answer one spiritual pull today, your own way, instead of postponing it again. Take the step now, imperfectly. Notice that answering it doesn't require breaking from where you came from.`,
     },
 
     // ── 21 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '21_F': {
       title: `21 in Paternal Spiritual — The World`,
       tagline: `A Design of the Closed Cycle`,
-      mastery: `You carry real capacity for genuine spiritual wholeness and completion.`,
-      shadow: `You inherit near-completion — stopping just short of real spiritual wholeness, echoing a pattern that predates your choices.`,
-      invitation: `Let one spiritual cycle actually complete today instead of stopping just short of it.`,
+      mastery: `You carry real capacity for genuine spiritual wholeness and completion, a genuine inherited gift for the full arc rather than the promising start. You integrate everything, the hard parts and the good parts, into one coherent spiritual whole. And you find genuine satisfaction in completion itself, not just in what it opens up next. That trust lets you access what a more cautious inheritance never would.`,
+      shadow: `You inherit near-completion — stopping just short of real spiritual wholeness, echoing a pattern that predates your choices. Underneath the near-completion is often a fear that finishing where the line always stopped short would set you apart from them. You widen the scope indefinitely rather than closing it. The hesitation gets mistaken for wisdom simply because it's familiar.`,
+      invitation: `Ask yourself honestly what completing this spiritual cycle would risk about your connection to the pattern before you. Let one spiritual cycle actually complete today instead of stopping just short of it. Close it deliberately. Notice that finishing doesn't sever you from where you came from.`,
     },
 
     // ── 22 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ─────────
     '22_F': {
       title: `22 in Paternal Spiritual — The Fool`,
       tagline: `A Design of the Untested Leap`,
-      mastery: `You carry real capacity for spiritual openness and trust in the unknown.`,
-      shadow: `You inherit caution around anything unproven, staying within familiar, approved spiritual territory out of a hesitation that isn't yours.`,
-      invitation: `Take one small, genuine spiritual leap today that your inherited caution would have avoided.`,
+      mastery: `You carry real capacity for spiritual openness and trust in the unknown, a genuine inherited willingness to step forward without a guarantee. You bring genuine spontaneity to your own spiritual growth, unafraid of what most people talk themselves out of. That trust compounds the more you use it, letting you access experiences a more cautious inheritance would never permit. And each leap builds a track record that makes the next one easier to take.`,
+      shadow: `You inherit caution around anything unproven, staying within familiar, approved spiritual territory out of a hesitation that isn't yours. Underneath the hesitation is often a fear that stepping outside approved territory would mean losing standing with the line that approved it. You mistake inherited caution for your own considered wisdom. The territory you consider safe was mapped by someone else's fear, not yours.`,
+      invitation: `Ask yourself honestly whether this caution is actually yours or simply inherited by default. Take one small, genuine spiritual leap today that your inherited caution would have avoided. Take it deliberately, with your eyes open. Notice that the leap doesn't cost you what the caution promised to protect.`,
     },
 
     // ── 9 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
