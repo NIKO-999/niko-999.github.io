@@ -5310,7 +5310,7 @@ const ARCANA_ESSENCE = {
   const MICRO_GROUPS = [
     { title: 'Love & Money',        keys: ['LOVE', 'MON', 'RWM', 'MK', 'MEP', 'CAREER', 'GA'] },
     { title: 'Ancestral Square',    keys: ['F', 'G', 'H', 'I'] },
-    { title: 'Ancestral Lineage',   keys: ['F1', 'G1', 'H1', 'I1', 'F2', 'G2', 'H2', 'I2'] },
+    { title: 'Ancestral Tasks',     keys: ['F1', 'G1', 'H1', 'I1'] },
     { title: 'Karmic & Past',       keys: ['KARMA', 'SEXLINE', 'PASTLIFE'] },
     { title: 'Heart Zone & Chakras', keys: ['HZV', 'HZH', 'MUL', 'SWA'] },
     { title: 'Yearly Energy',       keys: ['YE'] },
@@ -5325,29 +5325,42 @@ const ARCANA_ESSENCE = {
 
   function buildGroups() {
     const groups = [{ title: 'Core Cross', rows: coreRows() }];
+    let all = [];
+    let microByKey = new Map();
+    const used = new Set();
     if (_tierProviders.micro) {
-      const all = _tierProviders.micro.list()
+      all = _tierProviders.micro.list()
         .filter(r => !NUMEROLOGY_PANEL_KEYS.has(r.key))
         .map(r => ({ ...r, fly: () => _tierProviders.micro.fly(r.idx) }));
-      const byKey = new Map(all.map(r => [r.key, r]));
-      const used = new Set();
+      microByKey = new Map(all.map(r => [r.key, r]));
       MICRO_GROUPS.forEach(g => {
-        const rows = g.keys.map(k => byKey.get(k)).filter(Boolean);
+        const rows = g.keys.map(k => microByKey.get(k)).filter(Boolean);
         rows.forEach(r => used.add(r.key));
         if (rows.length) groups.push({ title: g.title, rows });
       });
-      // Safety net: any micro-tier key not yet assigned to a group above
-      // (e.g. a newly added position type) still shows up here instead of
-      // silently vanishing from the index.
-      const leftover = all.filter(r => !used.has(r.key));
-      if (leftover.length) groups.push({ title: 'Other', rows: leftover });
     }
     if (_tierProviders.talent) {
+      // The paternal/maternal talent positions (F2/G2/H2/I2 — Ancestral
+      // Inherited Talents) live in the micro tier but belong conceptually
+      // with the Talent Star Line, not the Ancestral square/tasks groups.
+      // While they're in HIDDEN_KEYS (no written content yet), micro.list()
+      // won't include them, so this is a no-op until they're unhidden —
+      // at which point they'll appear here automatically, no further
+      // wiring needed.
+      const ancestralTalentKeys = ['F2', 'G2', 'H2', 'I2'];
+      const ancestralTalentRows = ancestralTalentKeys.map(k => microByKey.get(k)).filter(Boolean);
+      ancestralTalentRows.forEach(r => used.add(r.key));
       groups.push({
         title: 'Talent Star Line',
-        rows: _tierProviders.talent.list().map(r => ({ ...r, fly: () => _tierProviders.talent.fly(r.key) })),
+        rows: _tierProviders.talent.list().map(r => ({ ...r, fly: () => _tierProviders.talent.fly(r.key) }))
+          .concat(ancestralTalentRows),
       });
     }
+    // Safety net: any micro-tier key not yet assigned to a group above
+    // (e.g. a newly added position type) still shows up here instead of
+    // silently vanishing from the index.
+    const leftover = all.filter(r => !used.has(r.key));
+    if (leftover.length) groups.push({ title: 'Other', rows: leftover });
     if (_tierProviders.prog) {
       const rows = _tierProviders.prog.list().map(r => ({ ...r, fly: () => _tierProviders.prog.fly(r.idx) }));
       if (rows.length) groups.push({ title: 'Karmic Programs', rows });
