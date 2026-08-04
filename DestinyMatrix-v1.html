@@ -3624,7 +3624,7 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Whole-Chart Synthesis';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (pc && pc.heading) || `Arcana ${r.dominant} Defines Your Chart`;
+      document.getElementById('pb-heading').textContent = (pc && (pc.title || pc.heading)) || `Arcana ${r.dominant} Defines Your Chart`;
 
       const POSITION_NAMES = {
         A:'Core Character', E:'Soul Center', PP:'Personal Purpose', SOP:'Social Purpose', SPP:'Spiritual Purpose',
@@ -3687,24 +3687,20 @@ const ARCANA_ESSENCE = {
 
       const writtenHtml = pc ? `
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT ${r.dominant} MEANS AT ITS CORE</div>
-           <div class="pb-full-text">${pc.why || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${pc.mastery || pc.why || ''}</div>
          </div>
          <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">WHY IT'S SO LOUD IN YOUR CHART</div>
            <div class="pb-full-text">${pc.synthesis || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW IT SHOWS UP IN YOUR LIFE</div>
-           <div class="pb-full-text">${pc.traits || ''}</div>
-         </div>
-         <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW OF TOO MUCH OF ONE THING</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
            <div class="pb-full-text">${pc.shadow || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE INVITATION</div>
-           <div class="pb-full-text">${pc.path || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${pc.invitation || pc.path || ''}</div>
          </div>` : `
          <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE FULL READING</div>
