@@ -622,198 +622,198 @@ window.DMicroContent = (function () {
     '17_D': {
       title: `17 in Karmic Tail — The Star`,
       tagline: `A Design of Reclaimed Light`,
-      mastery: `You carry real, luminous conviction — you're meant to shine, and when you actually let yourself, you offer genuine hope to the people around you rather than a performance of it. It gives you a real head start on almost anything.`,
-      shadow: `You dim your own light on reflex, staying half-developed so it can never be fully judged, undercharging and underselling what you're actually worth because visibility itself feels like exposure.`,
-      invitation: `Let one piece of your work or talent be fully visible today, at full brightness, with no hedging.`,
+      mastery: `You carry real, luminous conviction — you're meant to shine, and when you actually let yourself do it, you offer genuine hope to the people around you rather than a performance of it. Your presence gives you a real head start on almost anything you attempt, before you've even proven the skill underneath it. People feel drawn toward the light in you before they know why. That's not vanity — it's a legitimate gift that most people spend their whole lives learning to fake.`,
+      shadow: `You dim your own light on reflex, staying deliberately half-developed so the work can never be fully judged in its finished form. You undercharge and undersell what you're actually worth, because full visibility itself feels like exposure rather than success. The habit becomes so automatic you stop noticing you're doing it — every project stays 80% finished, every talent stays slightly hidden. What should have shone brightest ends up permanently dimmed by your own hand.`,
+      invitation: `Let one piece of your work or talent be fully visible today, at full brightness, with no hedging attached to it. Finish the thing you've been keeping at 80% and put it in front of someone. Don't preface it with a disclaimer about how it's not quite ready. You're finding out whether the exposure you fear actually costs you anything, and it won't.`,
     },
 
     // ── 1 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '1_D': {
       title: `1 in Karmic Tail — The Magician`,
       tagline: `A Design of the Finished Start`,
-      mastery: `You generate real capability and can build something durable with it, once you actually stay long enough to let the initial spark turn into something finished. The follow-through, once you commit to it, is genuinely reliable.`,
-      shadow: `You start with real force and abandon it the moment the initial spark fades. Income streams and relationships alike get left half-built, still carrying the promise of what they could have become, and the pattern repeats because starting is what feels most alive.`,
-      invitation: `Finish one thing today you already started, especially now that a new idea looks more appealing.`,
+      mastery: `You generate real capability, and you can build something genuinely durable with it once you actually stay long enough to let the initial spark turn into something finished. The follow-through, once you actually commit to it, is reliable in a way most people's isn't. You have the raw material to build things that last — the only variable is whether you stick around past the exciting part. When you do stay, the result holds.`,
+      shadow: `You start with real force and abandon it the moment the initial spark fades into something more ordinary. Income streams and relationships alike get left half-built, still carrying the promise of what they could have become if you'd stayed. The pattern repeats because starting is what feels most alive to you, and staying feels like a slow loss of that aliveness. You end up with a long trail of beginnings and very few things you can point to as finished.`,
+      invitation: `Finish one thing today you already started, especially now that a new idea looks more appealing than the old one. Identify the exact project you've quietly begun losing interest in. Do the next unglamorous step on it before you let yourself think about anything new. You're proving to yourself that staying doesn't have to feel like losing the spark — it's actually where the spark becomes real.`,
     },
 
     // ── 2 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '2_D': {
       title: `2 in Karmic Tail — The High Priestess`,
       tagline: `A Design of the Spoken Knowing`,
-      mastery: `You have real, accurate inner knowing. When you actually speak it, people trust it because it's earned — not guessed, not performed, genuinely known, and it tends to be right more often than the louder opinions in the room.`,
-      shadow: `You sense things clearly and say nothing, letting other people arrive at the same conclusion slower, alone, over and over, when you could have simply told them what you already saw and spared them the delay.`,
-      invitation: `Say one true thing out loud today that you'd normally keep to yourself.`,
+      mastery: `You have real, accurate inner knowing, and when you actually speak it out loud, people trust it because it's genuinely earned. It's not guessing, not performance, not a lucky read — it's earned knowledge, and it tends to be right more often than the loudest opinions in the room. People who've watched you be quietly correct for years start seeking you out specifically for that accuracy. Your instinct is a real, functioning instrument, not a personality quirk.`,
+      shadow: `You sense things clearly and say absolutely nothing, letting other people arrive at the same conclusion slower, alone, and painfully, over and over again. You could have simply told them what you already saw and spared everyone the delay, but the sentence stays unsaid. The silence starts to feel like humility, when it's actually withholding something people needed. Years of accurate, unspoken observations accumulate behind you, helping no one but you.`,
+      invitation: `Say one true thing out loud today that you'd normally keep to yourself. Choose something you've already privately concluded and haven't voiced. Say it plainly, without softening it into a question or a maybe. You're finding out that your accurate read is more useful spoken than silently held.`,
     },
 
     // ── 3 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '3_D': {
       title: `3 in Karmic Tail — The Empress`,
       tagline: `A Design of Received Care`,
-      mastery: `You give generously, and it's a real gift — a capacity for care that's already proven itself many times over in the lives of the people around you, freely and without needing to be asked.`,
-      shadow: `You give until you're empty and can't let yourself be cared for in return. Exhaustion becomes normal, treated as simply the cost of who you are rather than a signal something needs to change, so the depletion just keeps compounding quietly.`,
-      invitation: `Let someone take care of you in one specific way today, without deflecting or repaying it immediately.`,
+      mastery: `You give generously, and it's a real gift — a capacity for care that's already proven itself many times over in the actual lives of the people around you. You give freely, without needing to be asked first or thanked afterward, and the giving is genuine rather than transactional. People remember specific moments when you showed up for them without being prompted. That's a real and rare form of steadiness, not just a personality trait.`,
+      shadow: `You give until you're completely empty and cannot let yourself be cared for in return, even when it's plainly offered. Exhaustion becomes your normal state, treated as simply the cost of being who you are rather than a clear signal that something needs to change. The depletion compounds quietly, year over year, because you never let anyone see the tank running low. You end up the most generous person in every room and the least replenished one in it.`,
+      invitation: `Let someone take care of you in one specific way today, without deflecting it or immediately trying to repay it. Name exactly what you need, out loud, to someone who's offered before. Receive what they give without turning it into a transaction. You're proving that being cared for doesn't cost you the identity you've built around caring for others.`,
     },
 
     // ── 4 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '4_D': {
       title: `4 in Karmic Tail — The Emperor`,
       tagline: `A Design of Trusted Authority`,
-      mastery: `You can hold real, steady authority — neither gripping it too hard nor giving it away the moment it becomes uncomfortable. That balance is genuinely rare, and people around you can feel the difference.`,
-      shadow: `You either grip control rigidly or abandon authority altogether, uncomfortable in the space between — as if the only two options were total command or total surrender, with nothing steady in the middle.`,
-      invitation: `Own one decision today, gently but firmly, without either gripping it or handing it off.`,
+      mastery: `You can hold real, steady authority — neither gripping it too tightly nor giving it away the second it becomes uncomfortable to hold. That balance is genuinely rare, and people around you can feel the specific difference between you and someone performing confidence. You lead without needing to dominate, and you follow without disappearing. That middle ground is where trust actually forms, and you know how to stand in it.`,
+      shadow: `You either grip control rigidly, refusing to let anyone else touch the decision, or abandon authority entirely, handing it off the moment it gets uncomfortable to hold. The space between those two extremes feels foreign to you, as if command and surrender were the only two available modes. People around you never quite know which version they'll get, and the unpredictability erodes trust faster than either extreme alone would. You swing between overcorrecting and disappearing, never landing anywhere steady.`,
+      invitation: `Own one decision today, gently but firmly, without either gripping it too tightly or handing it off to someone else. Choose something real, not a low-stakes practice decision. State your position clearly and hold it through the first pushback without either escalating or folding. You're building the muscle for the steady middle you don't currently trust yourself to hold.`,
     },
 
     // ── 5 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '5_D': {
       title: `5 in Karmic Tail — The Hierophant`,
       tagline: `A Design of Examined Belief`,
-      mastery: `You can examine a belief you inherited and consciously choose what actually stays. That's real, lived wisdom, earned through your own testing rather than simply installed doctrine you never questioned.`,
-      shadow: `You swing between rigid certainty and total skepticism, rarely landing on a belief you've actually tested and consciously decided to keep, so your convictions stay borrowed either way.`,
-      invitation: `Examine one inherited belief today — about money, love, or authority — and decide, on purpose, whether it's actually yours.`,
+      mastery: `You can examine a belief you inherited from your family, culture, or upbringing and consciously choose what actually deserves to stay. That's real, lived wisdom, earned through your own testing rather than simply installed doctrine you absorbed without questioning. You're willing to keep what holds up and discard what doesn't, even when discarding it means disagreeing with people who raised you. That capacity for genuine, independent evaluation is a rare form of maturity.`,
+      shadow: `You swing between rigid certainty and total skepticism, rarely landing on a belief you've actually tested yourself and consciously decided to keep. Your convictions stay borrowed either way — either uncritically inherited or uncritically rejected, with very little of your own thinking actually applied to either. You can hold strong opinions that turn out, on inspection, to belong entirely to someone else. This leaves you certain and unmoored at the same time, which is a strange and exhausting place to live.`,
+      invitation: `Examine one inherited belief today — about money, love, or authority — and decide, on purpose, whether it's actually yours. Name the belief plainly and trace where it actually came from. Test it against your own real experience rather than the assumption behind it. Keep it or discard it deliberately, and say your decision out loud to someone.`,
     },
 
     // ── 6 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '6_D': {
       title: `6 in Karmic Tail — The Lovers`,
       tagline: `A Design of the Kept Choice`,
-      mastery: `You can make a real choice from your own values and actually stay inside it. That's commitment that holds, not just a decision made in a good moment and abandoned once the mood changes.`,
-      shadow: `You keep one foot out the door on decisions that matter, holding relationships and paths loosely enough to exit without much cost, which quietly prevents them from ever becoming fully real for either side.`,
-      invitation: `Recommit fully today to one choice you've been keeping half-made.`,
+      mastery: `You can make a real choice from your own values and actually stay inside it once the initial excitement fades. That's commitment that holds — not just a decision made in a good moment and quietly abandoned once the mood shifts. People who choose you know they're getting the full version, not a conditional one. That reliability is a genuine strength, and it's built one kept promise at a time.`,
+      shadow: `You keep one foot out the door on decisions that actually matter, holding relationships and paths loosely enough to exit without much cost if things get hard. The half-commitment quietly prevents anything from ever becoming fully real for either side, since nobody's building on ground that might shift. You tell yourself you're keeping options open, but what you're actually doing is withholding the full weight of your presence. Years pass in this half-committed state, and nothing quite deepens the way it could have.`,
+      invitation: `Recommit fully today to one choice you've been keeping half-made. Name the specific choice and the specific way you've been hedging it. Say, out loud, to the person or situation involved, that you're in fully now. Remove the exit you'd quietly kept open for yourself.`,
     },
 
     // ── 7 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '7_D': {
       title: `7 in Karmic Tail — The Chariot`,
       tagline: `A Design of Trusted Direction`,
-      mastery: `You can hold direction firmly without gripping it too tightly — steady, trusting forward motion that doesn't need to force its way through everything to actually arrive somewhere. It carries real weight in a room.`,
-      shadow: `You either force your way through everything or drift without any real momentum, rarely finding the steady middle where direction and ease can actually coexist without one canceling the other.`,
-      invitation: `Loosen your grip on one thing you've been forcing today, or choose direction on one thing you've let drift.`,
+      mastery: `You can hold direction firmly without gripping it too tightly — steady, trusting forward motion that doesn't need to force its way through everything to actually arrive somewhere real. That kind of movement carries genuine weight in any room you enter. People sense when someone's actually going somewhere versus performing busyness, and they trust the difference. Your direction is legible without being aggressive, and that combination is rare.`,
+      shadow: `You either force your way through everything with unnecessary strain, or drift without any real momentum at all, rarely finding the steady middle where direction and ease can genuinely coexist. One mode exhausts you and everyone around you; the other leaves you going nowhere in particular for long stretches of time. You can't seem to trust that forward motion doesn't require constant effort to stay real. The oscillation between forcing and drifting costs you more energy than a steady pace ever would.`,
+      invitation: `Loosen your grip on one thing you've been forcing today, or choose real direction on one thing you've let drift — pick whichever applies right now. If you've been forcing, ease off deliberately and notice whether it actually falls apart. If you've been drifting, name one clear direction and take a single concrete step toward it. You're testing whether steady, unforced motion is actually possible for you, and it is.`,
     },
 
     // ── 8 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '8_D': {
       title: `8 in Karmic Tail — Justice`,
       tagline: `A Design of the Settled Account`,
-      mastery: `You can make an honest accounting — an apology, a boundary, a debt repaid — and actually settle it, rather than letting it sit half-acknowledged indefinitely, quietly costing more the longer it's left open.`,
-      shadow: `You carry a persistent, hard-to-place sense of owing or being owed that never resolves, especially around money and unspoken relational ledgers nobody's ever actually named out loud to anyone.`,
-      invitation: `Settle one small account today — an apology, a repayment, a boundary you've been avoiding.`,
+      mastery: `You can make an honest accounting — an apology, a boundary, a debt repaid — and actually see it through to genuine settlement, rather than letting it sit half-acknowledged indefinitely. You understand instinctively that unresolved accounts quietly cost more the longer they're left open, so you close the loop while it's still small. People trust you specifically because you don't let things fester between you unnamed. That willingness to settle is a real form of integrity most people avoid.`,
+      shadow: `You carry a persistent, hard-to-place sense of owing or being owed that never actually resolves, especially around money and the unspoken relational ledgers nobody's ever named out loud. The feeling sits underneath ordinary interactions, quietly shaping how generous or guarded you are without your fully realising why. You keep score in a system nobody agreed to, and it distorts relationships that could otherwise be simple. The debt, real or imagined, never gets settled because it was never spoken.`,
+      invitation: `Settle one small account today — an apology, a repayment, a boundary you've been avoiding stating clearly. Name the specific thing that's been sitting unresolved. Take the concrete action that actually closes it, not just the thought of closing it. You're clearing one entry off a ledger that's been running longer than it needed to.`,
     },
 
     // ── 9 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ──────
     '9_D': {
       title: `9 in Karmic Tail — The Hermit`,
       tagline: `A Design of the Offered Lantern`,
-      mastery: `You gather real wisdom in solitude, and when you actually offer it, it genuinely helps someone — the reflection wasn't wasted, it just needed to leave the room eventually to matter to anyone else.`,
-      shadow: `You withdraw past what reflection actually requires, using solitude to avoid rather than to gather, and keep hard-won expertise entirely to yourself long after it could have helped someone waiting on it.`,
-      invitation: `Share one thing you've learned in solitude today with someone who could actually use it.`,
+      mastery: `You gather real wisdom in solitude, and when you actually offer it, it genuinely helps someone in a way faster advice rarely does. The reflection wasn't wasted time — it just needed to leave the quiet room eventually to matter to anyone else. What you bring back from time alone has weight, because it was actually earned through patience rather than borrowed from someone else's summary. People who receive your considered thoughts notice the difference from advice given on the fly.`,
+      shadow: `You withdraw past what reflection actually requires, using solitude to avoid people rather than to genuinely gather insight. Hard-won expertise stays entirely locked inside you, long after it could have helped someone who was actively waiting for it. The withdrawal starts disguising itself as depth, when really it's become a comfortable way of not having to show up. Years of quiet wisdom accumulate with almost nobody ever getting the benefit of it.`,
+      invitation: `Share one thing you've learned in solitude today with someone who could actually use it right now. Think of the specific person who needs exactly this insight. Reach out and offer it plainly, without waiting for them to ask first. You're finding out that your solitude was always meant to feed something beyond itself.`,
     },
 
     // ── 10 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '10_D': {
       title: `10 in Karmic Tail — The Wheel of Fortune`,
       tagline: `A Design of the Trusted Turn`,
-      mastery: `You can let a natural cycle turn — a season ending, a role changing — without gripping against it or trying to hold the wheel in place by sheer force of will. You trust the season rather than fighting it.`,
-      shadow: `You dread the downswing and grip hardest exactly at the high point, refusing to let a cycle complete naturally, which usually only makes the eventual turn harder and more disruptive than it needed to be.`,
-      invitation: `Let one cycle in your life turn today without resisting it.`,
+      mastery: `You can let a natural cycle turn — a season ending, a role changing — without gripping against it or trying to hold the wheel in place through sheer force of will. You trust the season rather than fighting it, and that trust actually makes the transitions gentler than they'd otherwise be. People watch you move through endings and beginnings with a steadiness they envy. It's not indifference — it's genuine faith that the next turn has something in it for you too.`,
+      shadow: `You dread the downswing and grip hardest exactly at the high point, refusing to let a cycle complete naturally the way it needs to. This resistance usually only makes the eventual turn harder and more disruptive than it ever needed to be. You spend the good phase bracing for its end instead of living inside it, which quietly poisons the enjoyment of the very thing you're afraid to lose. The grip you use to try to hold the wheel still is exactly what makes its inevitable turn feel like a wrench instead of a shift.`,
+      invitation: `Let one cycle in your life turn today without resisting it or bracing against the change. Name the specific thing you can feel ending or shifting. Actively let go of one piece of control over how or when it happens. You're practising trust in a process that's going to happen with or without your grip on it.`,
     },
 
     // ── 11 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '11_D': {
       title: `11 in Karmic Tail — Strength`,
       tagline: `A Design of Gentle Endurance`,
-      mastery: `You can meet a hard moment with patient, embodied calm — real strength, distinct from both raw force and simple collapse, that people can feel and lean on. People notice the difference immediately.`,
-      shadow: `You either overpower situations that actually needed patience or collapse under pressure that gentleness could have held instead, rarely landing on the steadier middle path between the two extremes.`,
-      invitation: `Meet one difficult moment today with calm instead of force or giving up.`,
+      mastery: `You can meet a hard moment with patient, embodied calm — real strength, distinct from both raw force and simple collapse, that people can feel and actually lean on. People notice the difference between you and someone merely suppressing panic almost immediately. Your calm isn't the absence of feeling; it's the capacity to stay present inside difficulty without being ruled by it. That specific quality makes you the person others quietly move toward in a crisis.`,
+      shadow: `You either overpower situations that actually needed patience with sheer force, or collapse under pressure that gentleness alone could have held instead. You rarely find the steadier middle path between those two extremes, swinging from one to the other depending on the day. People around you can't predict which version of you they'll get, which erodes the very trust your calm was supposed to build. The steadiness people need from you becomes unreliable exactly when it matters most.`,
+      invitation: `Meet one difficult moment today with calm instead of force or giving up entirely. Choose a specific situation you know is coming that would normally trigger one extreme or the other. Practise staying present in it without pushing through aggressively or checking out completely. You're proving to yourself that the steady middle is available to you, not just something you offer other people.`,
     },
 
     // ── 12 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '12_D': {
       title: `12 in Karmic Tail — The Hanged Man`,
       tagline: `A Design of Voluntary Release`,
-      mastery: `You can release something voluntarily, before you're forced to, and actually mean it — a real, chosen letting go rather than a resignation dressed up as one to save face. It's a genuine choice, not a concession.`,
-      shadow: `You grip control until circumstances force your hand, or you perform sacrifice while privately resenting it, which quietly poisons what was meant to be a genuine release into something else entirely.`,
-      invitation: `Release one thing today on your own terms, before you're forced to.`,
+      mastery: `You can release something voluntarily, before you're ever forced to, and actually mean it when you do. That's a real, chosen letting go, not a resignation dressed up as one to save face after the fact. It's a genuine act of will, not a concession made once you had no other option left. People trust the things you release because they can tell you weren't cornered into it — you actually decided.`,
+      shadow: `You grip control until circumstances eventually force your hand, or you perform sacrifice while privately resenting every second of it. That resentment quietly poisons what was supposed to be a genuine release into something worse than what you started with. You end up letting go of things too late to feel any of the grace that timely release would have given you. The release happens either way — the only question is whether it costs you your dignity along with it.`,
+      invitation: `Release one thing today on your own terms, before you're forced to give it up by circumstance. Choose something you've been quietly holding on to past its natural end. Let it go deliberately, on your own timing, and say plainly that it was your choice. You're claiming the release before it claims you instead.`,
     },
 
     // ── 13 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '13_D': {
       title: `13 in Karmic Tail — Transformation`,
       tagline: `A Design of the Complete Ending`,
-      mastery: `You can let an ending actually finish — completely, with nothing lingering to quietly pull you back toward what's already over and done with. Nothing gets left half-resolved behind you.`,
-      shadow: `You leave things half-ended, one foot still in a door you've already decided to walk through, which keeps both the old and the new from ever fully becoming real for you. Neither the old nor new life ever fully starts.`,
-      invitation: `Let one lingering ending in your life actually finish today, fully.`,
+      mastery: `You can let an ending actually finish — completely, with nothing lingering behind to quietly pull you back toward what's already over. Nothing gets left half-resolved trailing behind you into the next chapter. That completeness is rare, and it means the new life you build afterward isn't competing with unfinished business from the old one. You close doors fully, and that's precisely what lets you actually walk through the new one.`,
+      shadow: `You leave things half-ended, one foot still in a door you already decided to walk through, which keeps both the old and the new from ever fully becoming real for you. Neither life gets to fully start, because you're technically standing between the two of them indefinitely. You tell yourself you're keeping options open, but what's actually happening is that nothing gets your full presence. Years can pass in this suspended, half-ended state without you noticing how long it's been.`,
+      invitation: `Let one lingering ending in your life actually finish today, fully, with nothing held back. Name the ending you've been keeping technically open. Take the concrete action that closes it completely — the conversation, the paperwork, the final word. Don't leave yourself a door back into it.`,
     },
 
     // ── 14 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '14_D': {
       title: `14 in Karmic Tail — Temperance`,
       tagline: `A Design of Held Extremes`,
-      mastery: `You can hold two opposing things at once without collapsing into either extreme. That's real, patient synthesis, not indecision dressed up as balance. It shows up as real, steady judgment.`,
-      shadow: `You swing between all-or-nothing states — total immersion or total withdrawal, reckless spending or fear-driven restriction — rarely landing anywhere in between for very long. The middle ground rarely gets a real chance.`,
-      invitation: `Hold the middle on one thing today instead of swinging to either extreme.`,
+      mastery: `You can hold two opposing things at once without collapsing into either extreme to resolve the tension too early. That's real, patient synthesis, not indecision dressed up as balance to sound wiser than it is. It shows up in your life as genuinely steady judgment, the kind that doesn't need a quick answer to feel resolved. People bring you their conflicts because you can actually hold both sides without flattening either one.`,
+      shadow: `You swing between all-or-nothing states — total immersion or total withdrawal, reckless spending or fear-driven restriction — rarely landing anywhere in between for very long. The middle ground almost never gets a real chance to develop, because you keep overcorrecting the instant one extreme starts to feel uncomfortable. Each swing convinces you the opposite extreme must be the correction, and the pattern loops indefinitely. You spend years oscillating instead of settling.`,
+      invitation: `Hold the middle on one thing today instead of swinging to either extreme the moment discomfort shows up. Choose the specific area where you usually overcorrect — spending, effort, involvement. Deliberately pick a moderate response and stay with it even when the pull toward one extreme intensifies. You're proving to yourself the middle is a real, livable place, not just a brief stop between two poles.`,
     },
 
     // ── 15 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '15_D': {
       title: `15 in Karmic Tail — The Devil`,
       tagline: `A Design of Loosened Chains`,
-      mastery: `You can name an attachment honestly and take one real step to loosen it. That's genuine, conscious liberation, not simply talking about freedom while staying fully attached underneath.`,
-      shadow: `You recreate dynamics of control — being controlled or controlling — without seeing the pattern while it's actually happening, only recognizing it clearly after the fact, once it's already run its course.`,
-      invitation: `Name one attachment or control dynamic honestly today, and take one step to loosen it.`,
+      mastery: `You can name an attachment honestly, without dressing it up as something nobler, and take one real step to loosen its grip on you. That's genuine, conscious liberation, not simply talking about freedom while staying fully attached underneath the language. You're willing to look directly at what actually has a hold on you instead of at a more flattering version of it. That honesty is the entire mechanism that lets real change happen at all.`,
+      shadow: `You recreate dynamics of control — being controlled or controlling someone else — without seeing the pattern while it's actually unfolding in real time. You only recognise it clearly after the fact, once it's already run its full course and done its damage. The insight always arrives late, well after the moment it could have changed anything. You keep repeating a shape you can describe perfectly in hindsight and somehow never catch while you're inside it.`,
+      invitation: `Name one attachment or control dynamic honestly today, and take one concrete step to loosen it. Say plainly, out loud, what actually has a hold on you or who you're trying to hold onto too tightly. Take one specific action that reduces the grip, even slightly. You're catching the pattern while it's live instead of waiting for the usual too-late realisation.`,
     },
 
     // ── 16 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '16_D': {
       title: `16 in Karmic Tail — The Tower`,
       tagline: `A Design of the Finished Collapse`,
-      mastery: `You can let a structure that's already failing actually fall, on your own terms, instead of propping it up long past the point it can genuinely hold any real weight. You'd rather face it than keep pretending.`,
-      shadow: `You maintain beliefs, relationships, or identities long past the point they're standing on solid ground, out of fear of what the collapse might actually mean about who you are. The eventual fall is only ever harder for the delay.`,
-      invitation: `Let one thing that's already failing fall today, deliberately, instead of propping it up further.`,
+      mastery: `You can let a structure that's already failing actually fall, on your own terms, instead of propping it up long past the point it can genuinely hold any real weight. You'd rather face the collapse directly than keep pretending the structure is still sound. That willingness to let something end when it's actually over is a real strength, even though it looks harsh from the outside. People eventually respect the honesty of it more than the false stability of the alternative.`,
+      shadow: `You maintain beliefs, relationships, or identities long past the point they're actually standing on any solid ground, out of fear of what the collapse might mean about who you are. The structure gets propped up with more and more effort as the actual foundation continues eroding underneath it. The eventual fall only gets harder and more disruptive the longer the delay runs. You spend years defending something that was quietly finished long before you were willing to admit it.`,
+      invitation: `Let one thing that's already failing fall today, deliberately, instead of propping it up any further. Name the specific structure you already know isn't holding weight anymore. Stop the maintenance you've been doing to keep it upright. Let the collapse happen on your terms rather than waiting for it to happen on its own.`,
     },
 
     // ── 18 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '18_D': {
       title: `18 in Karmic Tail — The Moon`,
       tagline: `A Design of the Faced Fog`,
-      mastery: `You can walk directly into an uncertain situation and let real clarity come from actually being inside it, rather than needing certainty before you're willing to move at all. Being inside it beats waiting outside it.`,
-      shadow: `You carry free-floating anxiety that doesn't attach to anything specific, and you avoid situations that would require facing something head-on, letting the fog stay undisturbed for far longer than it needs to.`,
-      invitation: `Walk toward one uncertain thing today instead of avoiding it — check the number, have the conversation.`,
+      mastery: `You can walk directly into an uncertain situation and let real clarity come from actually being inside it, rather than requiring certainty before you're willing to move at all. Being inside the fog gives you information that standing outside it never could. That willingness to move without a guarantee is what lets you get answers other people are still waiting to receive. You resolve uncertainty by entering it, not by circling it forever.`,
+      shadow: `You carry free-floating anxiety that doesn't attach itself to anything specific, and you avoid the exact situations that would require facing something head-on. Avoidance lets the fog stay completely undisturbed for far longer than it ever needed to. The vague dread stays vague precisely because you never walk close enough to it to find out what it actually is. Years of low-grade anxiety accumulate around problems that a single direct look could have resolved in an afternoon.`,
+      invitation: `Walk toward one uncertain thing today instead of avoiding it — check the number, have the conversation, look directly at it. Choose the specific thing generating the most background anxiety right now. Get the actual information today rather than continuing to guess at it. You're finding out that the fog was worse than whatever's actually inside it.`,
     },
 
     // ── 19 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '19_D': {
       title: `19 in Karmic Tail — The Sun`,
       tagline: `A Design of Undimmed Joy`,
-      mastery: `You can let joy be fully, visibly felt — real vitality offered without apology, without needing to shrink it down to make it acceptable to anyone else in the room. It's a genuine, uncomplicated gift to be around.`,
-      shadow: `You downplay good news and mute your own excitement, feeling a strange guilt when things are genuinely going well, as if visible joy required some kind of justification you haven't earned.`,
-      invitation: `Let one piece of good news be fully celebrated today, at full volume, no minimizing.`,
+      mastery: `You can let joy be fully, visibly felt — real vitality offered without apology, without needing to shrink it to make it acceptable to anyone else in the room. Being around you when things are going well feels genuinely good, not performative, because your excitement is real and undiluted. That uncomplicated capacity for full joy is a real gift, one most people have trained themselves out of somewhere along the way. You haven't, and it shows.`,
+      shadow: `You downplay good news and mute your own excitement, feeling a strange, unearned guilt whenever things are genuinely going well for you. Visible joy starts to feel like it requires some kind of justification you don't currently have. You minimise your wins in front of other people before they've even had the chance to celebrate them with you. Over time this trains everyone around you to underreact to your successes too, since you've modeled exactly how small they should be treated.`,
+      invitation: `Let one piece of good news be fully celebrated today, at full volume, with no minimizing attached to it. Tell someone the good news without immediately downplaying it or deflecting the attention. Let their excitement land instead of correcting it downward. You're practising receiving the full size of your own good moment instead of pre-shrinking it for everyone's comfort.`,
     },
 
     // ── 20 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '20_D': {
       title: `20 in Karmic Tail — Judgement`,
       tagline: `A Design of the Answered Summons`,
-      mastery: `You can answer a call you've been postponing, even before you feel fully ready, trusting that readiness will catch up once you've actually started moving toward it. Readiness was never actually the real requirement.`,
-      shadow: `You get close to something important and stall just short of the actual leap, again and again, always circling the same threshold without ever quite crossing over it. The threshold stays exactly where it's always been.`,
-      invitation: `Answer one call you've been postponing today, imperfectly, before you feel ready.`,
+      mastery: `You can answer a call you've been postponing, even before you feel fully ready, trusting that readiness will actually catch up once you've started moving toward it. You've learned from direct experience that readiness was never really the requirement — motion produces it, not the other way around. You act on the summons before you've fully rehearsed it, and it works out more often than waiting ever did. That trust in your own capacity to grow into a decision is genuinely rare.`,
+      shadow: `You get close to something important and stall just short of the actual leap, again and again, always circling the same threshold without ever fully crossing it. The threshold stays exactly where it's always been, because you keep approaching it and pulling back at the last moment. Each circling feels like progress in the moment, but the pattern repeats identically the next time you get close. Years of near-misses accumulate without a single actual leap taken.`,
+      invitation: `Answer one call you've been postponing today, imperfectly, before you feel fully ready to do it. Choose the specific thing you keep circling without ever crossing. Take the actual step today, even in an unpolished, underprepared form. You're proving that the readiness you've been waiting for was always going to arrive after the leap, not before it.`,
     },
 
     // ── 21 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '21_D': {
       title: `21 in Karmic Tail — The World`,
       tagline: `A Design of the Closed Circle`,
-      mastery: `You can let something nearly-finished actually complete, resisting the old pull to stop short right before the very end where it actually matters most. The finishing is what actually counts.`,
-      shadow: `You stop just short of finishing — projects, relationships, goals that get to nearly-there and quietly stall, leaving behind a long trail of almost-done things. Almost-done things quietly weigh more than finished ones.`,
-      invitation: `Complete one nearly-finished thing today instead of letting it stay at "almost."`,
+      mastery: `You can let something nearly-finished actually complete, resisting the old pull to stop short right before the very end where the last effort actually matters most. The finishing is what genuinely counts, and you're willing to push through the tedious, unglamorous final stretch that most people abandon. What you complete carries real weight because you actually saw it all the way through. That capacity to close the loop is worth more than most people credit it for.`,
+      shadow: `You stop just short of finishing — projects, relationships, goals that get to nearly-there and then quietly stall out for no clear reason. A long trail of almost-done things builds up behind you, and each one weighs on you more than a finished one ever would. You can point to dozens of efforts that were 90% complete and never crossed the line. The almost becomes its own strange, cluttered category of unresolved weight you carry around indefinitely.`,
+      invitation: `Complete one nearly-finished thing today instead of letting it stay permanently at "almost." Pick the project or task closest to done that's been sitting untouched. Do the final, tedious step that would actually close it out. Don't start anything new until this one is genuinely finished. Mark it done somewhere visible so you can actually see it cross the line.`,
     },
 
     // ── 22 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ─────
     '22_D': {
       title: `22 in Karmic Tail — The Fool`,
       tagline: `A Design of the Considered Leap`,
-      mastery: `You can take a real leap deliberately, with your eyes open — genuine trust that includes awareness, distinct from both recklessness and total caution holding you back. That's the version worth actually building on.`,
-      shadow: `You either leap without any real consideration or refuse to leap at all, rarely finding the trust that includes awareness rather than defaulting to one extreme or the other. Neither extreme teaches you very much.`,
-      invitation: `Take one real, considered leap today — not reckless, not avoided, just chosen.`,
+      mastery: `You can take a real leap deliberately, with your eyes fully open — genuine trust that includes awareness, distinct from both blind recklessness and the total caution that just keeps you standing still. That's the version of courage actually worth building a life on. You weigh the risk honestly and still choose to move, which is a very different thing from either ignoring the risk or being paralysed by it. People who watch you leap this way start trusting your judgment about their own leaps too.`,
+      shadow: `You either leap without any real consideration at all, or refuse to leap at all, rarely finding the trust that includes awareness rather than defaulting to one extreme or the other. Neither version teaches you very much about your own actual judgment, since one skips the thinking and the other skips the doing. You mistake recklessness for boldness on one side and mistake caution for wisdom on the other. The considered leap — the one that would actually build your confidence — keeps getting bypassed in favour of the easier extreme.`,
+      invitation: `Take one real, considered leap today — not reckless, not avoided, just genuinely chosen after honest thought. Name the risk plainly and weigh it for real, not performatively. Then act, on a real timeline, not an indefinite one. You're building the specific muscle of leaping with your eyes open instead of either closing them or staying put.`,
     },
 
     // ── 7 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
