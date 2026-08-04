@@ -424,198 +424,198 @@ window.DMicroContent = (function () {
     '4_C': {
       title: `4 in Earth Line — The Emperor`,
       tagline: `A Design of Constructed Security`,
-      mastery: `You build real, durable material security — wealth constructed through discipline rather than luck. You can stay with unglamorous foundational work that most people abandon well before it starts paying off.`,
-      shadow: `You grip resources so tightly nothing new can get in, mistaking control for prosperity. Money that won't move isn't protected, it's scarce on purpose, and the same discipline that built your security can quietly become the thing that keeps it from growing further.`,
-      invitation: `Let one dollar move today that you'd normally hold onto out of caution.`,
+      mastery: `You build real, durable material security through discipline rather than luck, and you construct it one unglamorous layer at a time. You stay with the foundational work — the boring maintenance, the unremarkable follow-through — long after most people have abandoned it out of boredom. That patience is the actual mechanism behind lasting wealth, not the flashy decision everyone else assumes matters more. Nobody sees the years of consistency it took, and you built it anyway.`,
+      shadow: `You start gripping resources so tightly that nothing new can actually get in. Control gets mistaken for prosperity, and money that never moves isn't protected — it's simply scarce on purpose, hoarded against a threat that mostly exists in your own head. The discipline that built your security quietly turns into the exact thing preventing it from growing any further. You end up sitting on a fortress instead of standing inside a living structure.`,
+      invitation: `Let one dollar move today that you'd normally hold onto purely out of caution. Choose something small enough that losing it wouldn't actually hurt. Spend it, invest it, or give it away without running the usual internal audit first. You're testing whether the world actually punishes you for loosening the grip, and it won't.`,
     },
 
     // ── 1 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '1_C': {
       title: `1 in Earth Line — The Magician`,
       tagline: `A Design of Instant Origination`,
-      mastery: `You spot an opening and turn it into income before anyone else has finished thinking about it. That's real entrepreneurial instinct, converting straight into real material result, and it's a genuine edge most people never develop.`,
-      shadow: `Your financial life is built entirely on starts. Money made fast leaves just as fast, because nothing's actually built to hold it — you're skilled at generating opportunity and comparatively untrained in the slower work of retaining it.`,
-      invitation: `Pick one income stream today and commit to staying with it past the exciting part.`,
+      mastery: `You spot an opening and convert it into income before anyone else has even finished thinking it through. That's real entrepreneurial instinct, and it converts straight into material result far more often than luck alone could explain. You move on opportunity while other people are still debating whether it's real. That speed is a genuine edge, and most people never develop it no matter how long they study the market.`,
+      shadow: `Your financial life ends up built almost entirely on beginnings. Money made fast tends to leave just as fast, because nothing was ever actually built to hold it once it arrived. You're highly skilled at generating opportunity and comparatively untrained in the slower, less exciting work of retaining what you've generated. The pattern repeats across years — a string of strong starts with very little compounding behind any of them.`,
+      invitation: `Pick one income stream today and commit to staying with it specifically past the exciting part. Choose the one that's already producing something, not the newest idea competing for your attention. Set a real minimum timeframe you won't abandon it before, and write it down somewhere you'll see it. You're building the muscle for retention, which is the one skill your instinct for starting never had to develop.`,
     },
 
     // ── 2 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '2_C': {
       title: `2 in Earth Line — The High Priestess`,
       tagline: `A Design of Quiet Financial Instinct`,
-      mastery: `You have a felt sense for financial timing that outperforms the visible data. It's quiet material intelligence — not loud, not easily explained, but reliably right when you actually trust it.`,
-      shadow: `You second-guess your own gut into silence, deferring to louder, more "rational" advice, and watch your instinct get overridden every time — often by counsel that turns out to have been worse than what you already knew.`,
-      invitation: `Act on one quiet financial certainty today before asking anyone else's opinion.`,
+      mastery: `You have a felt sense for financial timing that consistently outperforms the visible data everyone else is staring at. It's a quiet form of material intelligence — not loud, not easily explained on a spreadsheet, but reliably right whenever you actually trust it fully. You sense the shift in a market or a situation before the numbers catch up and confirm it. That instinct is a genuine asset, even though it rarely gets credited as one.`,
+      shadow: `You second-guess your own gut into complete silence, deferring instead to whoever sounds louder or more officially rational in the room. You watch your instinct get overridden again and again, often by counsel that turns out, in hindsight, to have been worse than what you already quietly knew. The pattern repeats because you keep mistaking confidence in someone else's voice for actual accuracy. You end up with a track record of good instincts you didn't act on and bad advice you did.`,
+      invitation: `Act on one quiet financial certainty today before you ask anyone else's opinion about it. Choose something small enough that acting on it alone feels manageable. Notice the urge to check it against someone louder before you commit, and don't. You're rebuilding trust in your own read, and it only comes back through use.`,
     },
 
     // ── 3 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '3_C': {
       title: `3 in Earth Line — The Empress`,
       tagline: `A Design of Cultivated Wealth`,
-      mastery: `You cultivate material resources patiently, the way you'd tend something alive rather than something to be extracted from. It produces real, generative wealth, not merely transactional gain.`,
-      shadow: `You pour resources into something that's stopped growing out of attachment to what it once was, and you give your abundance away too freely, undervaluing your own work in a way that quietly erodes what you've built.`,
-      invitation: `Prune one thing today that's stopped growing, and price one thing you've been giving away for free.`,
+      mastery: `You cultivate material resources patiently, tending them the way you'd tend something genuinely alive rather than something purely to be extracted from. That patience produces real, generative wealth over time, not just a single transactional win. You understand that money grown carefully behaves differently than money grabbed quickly. What you build tends to actually last, because you built it the way things that last are built.`,
+      shadow: `You start pouring resources into something that's stopped growing, out of attachment to what it once was rather than what it's actually becoming. At the same time, you give your abundance away too freely, undervaluing the real work behind it in a way that quietly erodes what you've spent years building. The two habits reinforce each other — holding onto dead growth while underpricing living growth — and both drain the same well from opposite directions. You end up with less than the effort should have produced.`,
+      invitation: `Prune one thing today that's stopped growing, and price one thing today that you've been giving away for free. Do both in the same sitting, since they're two sides of the same habit. Name the dead thing plainly and let it go without sentimentality. Then name a fair price for the live thing you've been underselling, and say it out loud to someone.`,
     },
 
     // ── 5 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '5_C': {
       title: `5 in Earth Line — The Hierophant`,
       tagline: `A Design of Inherited Discipline`,
-      mastery: `You absorb how wealth actually gets built from people who've actually done it, and you apply what you learn with real, sustained discipline rather than treating it as theory. That transmission of hard-won knowledge is a genuine strength.`,
-      shadow: `You cling to an inherited financial system past the point it fits your actual life, following the rules exactly even when the conditions that made them true have quietly changed underneath you.`,
-      invitation: `Name one inherited money rule today that's quietly expired for the life you actually live.`,
+      mastery: `You absorb how wealth actually gets built by watching people who've genuinely done it, and you apply what you learn with real, sustained discipline rather than treating it as abstract theory. That capacity to receive hard-won knowledge and put it into practice is a genuine strength, not simple imitation. You take what works and actually use it, consistently, over years. That's rarer than people assume — most take advice once and drift back to old habits within weeks.`,
+      shadow: `You start clinging to an inherited financial system long past the point it actually fits your current life. You follow the rules exactly as they were handed to you, even once the conditions that made them true have quietly shifted underneath you without your noticing. The discipline that once served you becomes rigidity, applied to a situation the original rule was never designed for. You end up financially correct by an outdated standard and quietly worse off by the one that actually matters now.`,
+      invitation: `Name one inherited money rule today that's quietly expired for the life you actually live now. Say it out loud, specifically — not "I should be more careful," but the exact rule and where it came from. Ask whether it still fits your current circumstances or just your old ones. Replace it with one small action that reflects the life you're actually living today.`,
     },
 
     // ── 6 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '6_C': {
       title: `6 in Earth Line — The Lovers`,
       tagline: `A Design of Aligned Income`,
-      mastery: `You build wealth only through work that reflects your actual values. That's real material discernment, not simply idealism — you know the difference between money you'd take and money you'd regret.`,
-      shadow: `You weigh every financial choice so exhaustively against your values that you never actually commit, watching real opportunities pass by while you're still deliberating whether they're pure enough.`,
-      invitation: `Commit fully to one values-aligned choice today, even if it's not perfect.`,
+      mastery: `You build wealth only through work that genuinely reflects your actual values, and you don't compromise that alignment just because a faster option appears. That's real material discernment, not naive idealism — you know precisely the difference between money you'd take and money you'd regret taking. People trust that what you've built wasn't compromised to get there. That integrity ends up being an asset, not just a principle.`,
+      shadow: `You weigh every financial choice so exhaustively against your values that you never actually commit to anything at all. Real opportunities pass by, one after another, while you're still deliberating whether they're pure enough to meet your own standard. The deliberation starts to function as a permanent excuse for inaction rather than genuine ethical care. You end up with impeccable values and very little to show for them, because purity became more important to you than progress.`,
+      invitation: `Commit fully to one values-aligned choice today, even if it isn't perfect in every respect. Pick the opportunity you've been circling and stop auditing it for the ideal version that doesn't exist. Accept the version that's genuinely good enough and act on it before the day ends. You're proving that alignment doesn't require perfection, only honesty.`,
     },
 
     // ── 7 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '7_C': {
       title: `7 in Earth Line — The Chariot`,
       tagline: `A Design of Willed Momentum`,
-      mastery: `You set a material goal and steer through setbacks that would derail most people entirely. That's real, sustained, willed momentum — you don't stop just because the road got harder.`,
-      shadow: `You grip the plan so tightly you can't adapt when things genuinely change, and you refuse help even when accepting it would get you there considerably faster and with less cost to you.`,
-      invitation: `Let one capable person help carry a financial load today instead of doing it alone.`,
+      mastery: `You set a material goal and steer straight through setbacks that would fully derail most people. That's real, sustained, willed momentum — you don't stop simply because the road turned out to be harder than expected. People watch you keep moving through obstacles they'd have quit at and start to trust your follow-through more than your plans. That willpower is genuine, not stubbornness dressed up as virtue.`,
+      shadow: `You grip the plan so tightly you can't adapt when circumstances genuinely change around it. You refuse help even in situations where accepting it would clearly get you there faster and cost you considerably less. The willpower that drives you forward starts working against you the moment the terrain shifts and the original plan stops being the right one. You end up finishing a goal that no longer matches what actually would have served you.`,
+      invitation: `Let one capable person help carry a financial load today instead of doing it entirely alone. Identify the specific piece you've been shouldering solo out of habit rather than necessity. Ask directly for help with that one piece, and let them actually take it. You're testing whether the momentum survives being shared, and it does — it usually gets faster.`,
     },
 
     // ── 8 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '8_C': {
       title: `8 in Earth Line — Justice`,
       tagline: `A Design of Fair Dealing`,
-      mastery: `You build wealth through balanced, fair dealing — real, durable security earned through honesty rather than advantage taken at someone else's expense. That reputation for fairness compounds over time.`,
-      shadow: `You over-scrutinize every deal for hidden unfairness until you hesitate to invest or commit even when the deal is genuinely sound, and the caution that should protect you starts costing you opportunities that were never actually risky.`,
-      invitation: `Move forward on one opportunity today instead of auditing it further.`,
+      mastery: `You build wealth through balanced, fair dealing, earning real, durable security through honesty rather than through advantage taken at someone else's expense. People come back to work with you specifically because your reputation for fairness precedes you. That reputation compounds quietly over years into opportunities that never would have reached someone who cut corners. You've proven that integrity and profit aren't actually in competition the way people assume.`,
+      shadow: `You start over-scrutinizing every deal for hidden unfairness, until you hesitate to invest or commit even when the deal in front of you is genuinely sound. The caution that's supposed to protect you starts quietly costing you real opportunities that were never actually risky in the first place. You mistake your own anxiety for due diligence, and the line between the two gets harder to see the longer this runs. Deals that should have closed easily die slowly under an audit nobody asked for.`,
+      invitation: `Move forward on one opportunity today instead of auditing it any further. Pick the deal you've already scrutinized more than it needed. Set a firm decision point for today and act on it once you reach that point, no extending the deadline. You're testing whether your instinct for fairness was ever actually the thing slowing you down, and it wasn't — the fear dressed as caution was.`,
     },
 
     // ── 9 in EARTH LINE (C · Right / Material & Money / Year of Birth) ──────
     '9_C': {
       title: `9 in Earth Line — The Hermit`,
       tagline: `A Design of Rare Depth`,
-      mastery: `You build material security through deep, solitary mastery of a specific craft. That's real expertise, made rare precisely because you went further into it than most people are willing to.`,
-      shadow: `Your expertise stays private and undervalued, because putting yourself forward as an expert feels like a departure from the very solitude that built it — so the depth you've earned goes largely unmonetized.`,
-      invitation: `Price or offer one piece of your expertise publicly today instead of keeping it to yourself.`,
+      mastery: `You build material security through deep, solitary mastery of a specific craft, going further into it than nearly anyone else is willing to go alone. That's real expertise, made genuinely rare by the sheer amount of unwitnessed time you put into it. Nobody handed you shortcuts, so what you know actually holds up under pressure. The depth is real, even on the days nobody's asking you to prove it.`,
+      shadow: `Your expertise stays private and badly undervalued, because putting yourself forward as an expert feels like a betrayal of the very solitude that built it in the first place. The depth you've earned through years of quiet work goes largely unmonetized, sitting inside you while people with a fraction of your knowledge charge confidently for theirs. You mistake visibility for immodesty, and the mistake costs you real money every single year it continues. Nobody can pay for what they don't know you have.`,
+      invitation: `Price or offer one piece of your expertise publicly today, instead of keeping it entirely to yourself. Write down what you know that other people would genuinely pay for. Name an actual number or a specific offer, out loud, to someone who could use it. You're finding out that stepping into visibility doesn't cost you the depth — it just finally lets someone benefit from it.`,
     },
 
     // ── 10 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '10_C': {
       title: `10 in Earth Line — The Wheel of Fortune`,
       tagline: `A Design of Financial Seasons`,
-      mastery: `You sense when a financial cycle is actually turning — when to invest, when to hold. That's real timing intelligence, not guesswork dressed up as instinct, and it saves you from decisions made purely on momentum.`,
-      shadow: `You treat a downturn as proof your luck has run out permanently, or you chase every upswing without discernment, mistaking motion itself for a genuine turn in the cycle rather than checking what's actually driving it.`,
-      invitation: `Name which phase of your money cycle you're actually in right now, and act accordingly.`,
+      mastery: `You sense when a financial cycle is actually turning — when to invest, and just as importantly, when to hold. That's real timing intelligence, not guesswork dressed up as instinct after the fact. It saves you from the decisions most people make purely on momentum, chasing whatever direction things already happen to be moving. You read the season correctly more often than not, and that accuracy compounds over a lifetime of decisions.`,
+      shadow: `You start treating a single downturn as proof your luck has run out permanently, or you chase every upswing without any real discernment about what's actually driving it. Motion itself gets mistaken for a genuine turn in the cycle, so you react to noise as if it were signal. The timing intelligence that usually serves you gets overridden by panic in one direction or greed in the other. You end up making your worst financial decisions exactly when your instinct should have been sharpest.`,
+      invitation: `Name which phase of your money cycle you're actually in right now, plainly, before you act on anything else. Write it down — rising, holding, contracting — and check that assessment against what's actually driving it, not just how it feels. Act in line with that phase rather than your emotional reaction to it. You're separating the instinct that's usually right from the panic that occasionally hijacks it.`,
     },
 
     // ── 11 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '11_C': {
       title: `11 in Earth Line — Strength`,
       tagline: `A Design of Financial Endurance`,
-      mastery: `You hold steady through financial pressure that would rattle most people, without panicking into rash decisions that would only make things worse. That composure under strain is a genuine, rare asset.`,
-      shadow: `You endure financial strain quietly for far too long, refusing to ask for help because your identity has become tied to handling it entirely alone — even once asking would clearly be the faster, smarter move.`,
-      invitation: `Ask for one piece of financial support today, before the pressure becomes a crisis.`,
+      mastery: `You hold steady through financial pressure that would rattle almost anyone else, without panicking into the rash decisions that would only make the situation worse. That composure under real strain is a genuine, rare asset, not just a personality trait. You think clearly when the stakes are highest, which is precisely when most people's judgment collapses. People trust you in a financial crisis for a reason.`,
+      shadow: `You endure financial strain quietly, for far too long, refusing to ask for help because your entire identity has become tied to handling it completely alone. You keep this up even once asking would obviously be the faster, smarter, less costly move available to you. The endurance that makes you reliable to others becomes a trap when there's nobody left to notice you're struggling. You suffer through problems that a single honest conversation could have solved months earlier.`,
+      invitation: `Ask for one piece of financial support today, before the pressure has a chance to become an actual crisis. Name the specific thing you need — advice, a loan, an introduction — and ask a specific person directly. Don't wrap the request in a story about how you're mostly fine. You're testing whether your composure can include being helped, and it can.`,
     },
 
     // ── 12 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '12_C': {
       title: `12 in Earth Line — The Hanged Man`,
       tagline: `A Design of the Unconventional Path`,
-      mastery: `Your financial breakthroughs come from stepping back from the expected route entirely. That's real material patience in service of an unconventional path other people wouldn't have the nerve to take.`,
-      shadow: `You stay suspended in the wait-and-see posture indefinitely, because it's more comfortable than actually committing to the different path you keep sensing but never quite step onto.`,
-      invitation: `Convert one unconventional financial idea you've been sitting on into an actual move today.`,
+      mastery: `Your financial breakthroughs come specifically from stepping back from the expected, obvious route entirely. That's real material patience in service of an unconventional path most people wouldn't have the nerve to actually take. You can see value in the pause that other people rush straight past on their way to the predictable choice. What looks like inaction from outside is often the exact thing that produces your best results later.`,
+      shadow: `You stay suspended in a wait-and-see posture indefinitely, because it's genuinely more comfortable than committing to the different path you keep quietly sensing but never actually step onto. The patience that once served you becomes a permanent holding pattern with no landing in sight. Years pass in the suspended state while the unconventional idea stays exactly that — an idea. You mistake the comfort of not choosing for the wisdom of waiting for the right moment.`,
+      invitation: `Convert one unconventional financial idea you've been sitting on into an actual, concrete move today. Choose the specific idea you've turned over the most and take the first real step toward it. Don't let it stay theoretical past today — make one call, send one message, spend one dollar toward it. You're finding out whether the patience was strategic or just fear wearing a calmer name.`,
     },
 
     // ── 13 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '13_C': {
       title: `13 in Earth Line — Transformation`,
       tagline: `A Design of Deliberate Ending`,
-      mastery: `You release material security that's become familiar but limiting, in service of something bigger you can already sense on the other side. That's real financial reinvention, not recklessness.`,
-      shadow: `You hold onto a dying income stream out of fear rather than function, because the uncertain gap between the old and the new feels more dangerous to you than a slow, familiar decline.`,
-      invitation: `Name one financial chapter that's already ended except on paper, and release it today.`,
+      mastery: `You release material security that's become familiar but genuinely limiting, in service of something bigger you can already sense waiting on the other side. That's real financial reinvention, not recklessness dressed up as boldness. You know the difference between a safety net and a ceiling, and you're willing to let go of one to stop living under the other. That capacity to end something that still technically works is a rare and valuable form of courage.`,
+      shadow: `You hold onto a dying income stream out of fear rather than actual function, because the uncertain gap between the old and the new feels more dangerous than a slow, familiar decline. You'd rather watch something diminish gradually than face the sharper discomfort of a clean ending. The reinvention that could have happened years ago keeps getting postponed for one more quarter, one more year, one more excuse. You mistake familiarity for safety long after the two have stopped meaning the same thing.`,
+      invitation: `Name one financial chapter that's already ended except on paper, and release it today, formally. Say out loud, specifically, what it is and that it's over. Take one concrete step to actually close it — cancel it, sell it, stop funding it. You're removing the paper fiction that's kept a dead thing technically alive.`,
     },
 
     // ── 14 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '14_C': {
       title: `14 in Earth Line — Temperance`,
       tagline: `A Design of Patient Blending`,
-      mastery: `You blend multiple income streams and strategies into one sustainable whole, patiently, rather than betting everything on a single method that could fail all at once. That patience is a genuine financial skill.`,
-      shadow: `You spread so thin across strategies that nothing ever compounds into something substantial. What looks like sensible diversification quietly becomes dilution, and none of it ever gets the sustained attention it would need to actually grow.`,
-      invitation: `Pick two of your financial approaches today and go deeper into them instead of spreading wider.`,
+      mastery: `You blend multiple income streams and strategies into one sustainable whole, patiently, rather than betting everything on a single method that could fail all at once. That patience is a genuine financial skill, not indecision dressed up as caution. You know how to let different sources support each other instead of competing for the same limited attention. What you've built has real resilience precisely because it doesn't depend on any one thing working perfectly.`,
+      shadow: `You spread so thin across strategies that nothing ever gets the chance to compound into something substantial. What looks like sensible diversification from the outside quietly becomes dilution from the inside, and none of it receives the sustained attention it would actually need to grow. You mistake activity across many fronts for progress on any one of them. Years pass with a wide, shallow portfolio of half-tended efforts instead of a smaller number that actually paid off.`,
+      invitation: `Pick two of your financial approaches today and go deeper into them instead of spreading wider across a third. Choose the two with the most real potential, not the two that feel safest. Deliberately stop adding new strategies for the next month while you actually build these two out. You're testing whether depth produces more than breadth ever did, and it will.`,
     },
 
     // ── 15 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '15_C': {
       title: `15 in Earth Line — The Devil`,
       tagline: `A Design of Unflinching Material Truth`,
-      mastery: `You understand exactly how money and power actually work on people, including yourself. That's real, unflinching material intelligence most people prefer not to look at directly, and it makes you very hard to manipulate.`,
-      shadow: `You grip money and status so tightly that "enough" never arrives, because the attachment was never really about the number in the first place — it was standing in for something the accumulation can't actually provide.`,
-      invitation: `Name today what the accumulation is actually trying to provide you, and ask honestly if more will deliver it.`,
+      mastery: `You understand exactly how money and power actually operate on people, including precisely how they operate on you. That's real, unflinching material intelligence — the kind most people prefer not to look at directly because it's uncomfortable. This clarity makes you very hard to manipulate financially, because you can see the mechanism other people are still unconsciously reacting to. You use that understanding instead of being used by it, which is rarer than it sounds.`,
+      shadow: `You grip money and status so tightly that "enough" never actually arrives, no matter how much accumulates. The attachment was never really about the number in the first place — it was standing in for something the accumulation genuinely cannot provide, no matter how large it grows. You keep chasing the next threshold, certain it will finally deliver the relief the last one didn't. The clarity you have about how money works on other people somehow never gets turned fully on yourself.`,
+      invitation: `Name today, honestly, what the accumulation is actually trying to provide you underneath the number itself. Say the real thing out loud — safety, worth, proof, whatever it is. Ask directly whether more money would actually deliver that thing, or whether it's been substituting for something else entirely. Sit with the answer instead of reaching for the next milestone to avoid it.`,
     },
 
     // ── 16 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '16_C': {
       title: `16 in Earth Line — The Tower`,
       tagline: `A Design of Sudden Material Clarity`,
-      mastery: `You see a failing financial structure before anyone else is willing to admit it's failing. That's real, sudden material clarity — you notice the crack long before the wall comes down, and you act on it while others still deny it.`,
-      shadow: `You provoke collapse before it's actually necessary, walking away from something at the first crack purely out of impatience rather than genuine evidence it can't be saved, when reinforcing it might have worked just as well.`,
-      invitation: `Reinforce one financial structure today instead of demolishing it on reflex.`,
+      mastery: `You see a failing financial structure well before anyone else in the room is willing to admit it's actually failing. That's real, sudden material clarity — you notice the crack forming long before the wall comes down on everyone else. You're willing to act on that clarity while other people are still in denial about what's obviously happening. That early recognition has saved you from losses other people didn't see coming until it was too late.`,
+      shadow: `You start provoking collapse before it's actually necessary, walking away from something at the very first crack purely out of impatience rather than genuine evidence it can't be saved. Reinforcement might have worked just as well, but demolition feels more decisive and more in character, so you choose it by default. You mistake your own restlessness for foresight, and things that could have been repaired get abandoned instead. The clarity that once protected you starts destroying things that were still fixable.`,
+      invitation: `Reinforce one financial structure today instead of demolishing it on reflex. Choose something you've been quietly ready to walk away from, and look honestly at whether it's actually failed or just cracked. Take one concrete step to shore it up rather than one step toward exiting it. You're finding out whether your instinct for collapse was reading real failure or just your own low tolerance for imperfection.`,
     },
 
     // ── 17 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '17_C': {
       title: `17 in Earth Line — The Star`,
       tagline: `A Design of Rebuilt Renewal`,
-      mastery: `You can restore your material life even from real loss — hope translated into the patient, concrete reconstruction of your resources rather than staying abstract. Renewal isn't theoretical for you; you've actually done it.`,
-      shadow: `You wait passively for renewal to arrive, treating hope as a strategy in itself instead of the starting point it's meant to be, without ever doing the actual rebuilding work underneath it.`,
-      invitation: `Take one concrete rebuilding step today, not just a hopeful one.`,
+      mastery: `You can restore your material life even from real, significant loss, translating hope into the patient, concrete reconstruction of your resources rather than letting it stay an abstract feeling. Renewal isn't theoretical for you — you've actually lived it, more than once, and the proof is in what you rebuilt afterward. People who've never faced real loss doubt they could recover; you know exactly what recovery requires because you've done the work of it. That lived knowledge makes you steadier in a downturn than people who've only ever had good years.`,
+      shadow: `You wait passively for renewal to simply arrive, treating hope itself as though it were a strategy instead of the starting point it's actually meant to be. Hope stays purely a feeling, never converting into the actual rebuilding work underneath it that would make it real. Months or years can pass in this hopeful holding pattern, with nothing concrete changing in your circumstances. You mistake feeling optimistic for making progress, and the two are not the same thing.`,
+      invitation: `Take one concrete rebuilding step today, not just a hopeful one. Choose a specific, physical, measurable action toward restoring what was lost. Do it today rather than waiting for the right feeling to arrive first. You're proving that hope is fuel for action, not a substitute for it.`,
     },
 
     // ── 18 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '18_C': {
       title: `18 in Earth Line — The Moon`,
       tagline: `A Design of Sensitive Financial Instinct`,
-      mastery: `You sense hidden financial risk or opportunity long before it shows up in any data. That's real, sensitive material intuition, picking up signal well ahead of the numbers — genuine sensitivity, not anxiety.`,
-      shadow: `Your financial anxiety runs unmoored from actual signal, making it hard to tell a real warning from simple fear. You end up freezing, or chasing illusory security, based on feelings that were never actually tracking the real risk.`,
-      invitation: `Check one financial feeling against a real number today — a budget, an account, something tangible.`,
+      mastery: `You sense hidden financial risk or opportunity long before it ever shows up in any hard data. That's real, sensitive material intuition, picking up signal well ahead of the numbers that will eventually confirm what you already felt. It's genuine sensitivity, not anxiety dressed up as insight, and the difference shows in how often you're actually right. People who dismiss feeling as unreliable in finance have never watched yours prove accurate as many times as it has.`,
+      shadow: `Your financial anxiety starts running unmoored from any actual signal, making it genuinely hard to tell a real warning apart from simple, undirected fear. You end up freezing at exactly the wrong moment, or chasing illusory security based on feelings that were never actually tracking the real risk in front of you. The sensitivity that usually serves you gets hijacked by worry that has nothing to do with your actual financial situation. You spend energy defending against threats that were never there while the real ones go unnoticed.`,
+      invitation: `Check one financial feeling against a real number today — an actual budget, an account balance, something tangible you can look at directly. Notice whether the feeling matches the evidence or whether it's running independently of it. If the number contradicts the feeling, trust the number for today. You're building a habit that lets you keep the intuition without letting it run unchecked.`,
     },
 
     // ── 19 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '19_C': {
       title: `19 in Earth Line — The Sun`,
       tagline: `A Design of Uncomplicated Ease`,
-      mastery: `You build wealth most easily through work that genuinely feels like you. It's real, uncomplicated ease with money — the income arrives without the struggle other people assume has to come first.`,
-      shadow: `You underprice joyful work because it didn't feel like enough of a struggle to be worth real money, as if difficulty were the actual measure of value rather than the result itself.`,
-      invitation: `Raise the price on one thing today that you've been undercharging for because it comes easily to you.`,
+      mastery: `You build wealth most easily through work that genuinely feels like an expression of who you are. It's real, uncomplicated ease with money — the income arrives without the manufactured struggle other people assume has to come first. What comes naturally to you turns out to be exactly what people are willing to pay for. You've stopped needing to suffer for money to believe you've earned it.`,
+      shadow: `You start underpricing joyful work because it didn't feel like enough of a struggle to justify real money in your own mind. Difficulty becomes your unconscious measure of value, rather than the actual result the work produces for the person paying for it. You charge less for the thing you're best at simply because it was easy for you to do. Over time this quietly trains the market — and you — to believe your real talent is worth less than your effort.`,
+      invitation: `Raise the price on one thing today that you've been undercharging for specifically because it comes easily to you. Pick the exact offer you know is underpriced. Name a new number that reflects the actual result it produces, not the effort it cost you. Say it out loud to the next person who asks, without apologising for it.`,
     },
 
     // ── 20 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '20_C': {
       title: `20 in Earth Line — Judgement`,
       tagline: `A Design of the Financial Summons`,
-      mastery: `You recognize when it's time to leave a financially adequate but outgrown position for one that actually fits who you've become. That's real vocational courage, not restlessness — you hear the summons clearly.`,
-      shadow: `You spend years preparing to answer that summons instead of actually answering it — endlessly upskilling and researching instead of making the move you already know you're going to eventually make.`,
-      invitation: `Take one real step today toward the truer income source, not another round of research.`,
+      mastery: `You recognise when it's time to leave a financially adequate but genuinely outgrown position for one that actually fits who you've become. That's real vocational courage, not restlessness dressed up as ambition — you hear the summons clearly and you take it seriously. Most people ignore that call for years out of fear of losing what's stable. You've proven you can walk away from adequate to reach for actually right.`,
+      shadow: `You spend years preparing to answer the summons instead of actually answering it, endlessly upskilling, researching, and refining a plan you already know the shape of. The move you're clearly going to eventually make keeps getting pushed one more credential, one more course, one more year of readiness away. Preparation becomes a sophisticated form of avoidance that looks responsible from the outside. You end up more qualified than ever and no closer to actually making the change.`,
+      invitation: `Take one real step today toward the truer income source, not another round of research or preparation. Choose the specific action that would actually move you forward — a conversation, an application, a resignation. Do it this week, not after the next course finishes. You already know what you'd do if you weren't waiting to feel fully ready.`,
     },
 
     // ── 21 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '21_C': {
       title: `21 in Earth Line — The World`,
       tagline: `A Design of Recognized Enough`,
-      mastery: `You can actually feel and recognize when a level of material security has been reached, instead of endlessly redefining "enough" further and further out of reach. That capacity to land is genuinely rare.`,
-      shadow: `You treat arrival as dangerous, always needing one more milestone before you'll let yourself feel secure — so the security you've genuinely already built never quite gets to register as real.`,
-      invitation: `Name one number or state today as genuinely enough, and let yourself land in it.`,
+      mastery: `You can actually feel and recognise the moment a real level of material security has been reached, instead of endlessly redefining "enough" further and further out of your own reach. That capacity to land, to actually stop and feel secure, is genuinely rare in a culture built around perpetual striving. You let yourself experience arrival rather than immediately generating a new target the moment you get close. That's not complacency — it's a genuine, rare skill.`,
+      shadow: `You start treating arrival itself as dangerous, always needing one more milestone before you'll finally let yourself feel secure. The security you've genuinely already built never quite gets to register as real, because the goalpost keeps moving the instant you get close to it. You live in a permanent state of almost-there, no matter how objectively far you've come. The finish line becomes something you use to avoid ever actually crossing one.`,
+      invitation: `Name one number or state today as genuinely enough, out loud, and let yourself actually land in it. Pick the specific figure or milestone you already privately know qualifies. Say it's enough, plainly, to someone who'll hold you to it. Notice the discomfort of stopping, and stay in it instead of immediately setting the next target.`,
     },
 
     // ── 22 in EARTH LINE (C · Right / Material & Money / Year of Birth) ─────
     '22_C': {
       title: `22 in Earth Line — The Fool`,
       tagline: `A Design of Unproven Courage`,
-      mastery: `You start a financial venture without needing a guarantee first. That's real, uncommon material courage — trust used as an actual strategy rather than a leap of naivety, and it opens doors more cautious people never reach.`,
-      shadow: `You repeat the same fresh start without absorbing what the last one actually taught you, so the same mistakes recur in new disguises, dressed up as a different opportunity each time.`,
-      invitation: `Name one concrete lesson from your last financial leap and carry it into your next decision today.`,
+      mastery: `You start a financial venture without needing a guarantee handed to you first. That's real, uncommon material courage — trust used deliberately as an actual strategy, not a naive leap made without thinking it through. You move on real opportunity while people waiting for certainty are still waiting. That willingness opens doors more cautious people never even see, let alone reach.`,
+      shadow: `You repeat the same kind of fresh start without absorbing what the last one actually tried to teach you, so the same underlying mistakes recur in new disguises, dressed up as a different opportunity each time. The courage that lets you leap never gets paired with the reflection that would let you leap smarter. You mistake motion for progress, starting again and again from the same unexamined starting point. Years of ventures accumulate without the compounding wisdom that should have come from all of them.`,
+      invitation: `Name one concrete lesson from your last financial leap and carry it deliberately into your next decision today. Write down specifically what went wrong or right last time, in plain terms. Before you commit to the next venture, check the decision against that lesson directly. You're building the one habit that turns repeated leaps into actual growth instead of repetition.`,
     },
 
     // ── 17 in KARMIC TAIL (D · Bottom / Past-Life Lessons / Core Karma) ───
