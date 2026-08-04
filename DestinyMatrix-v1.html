@@ -2710,9 +2710,12 @@ const ARCANA_ESSENCE = {
 
   // Temporarily hidden stars — content/design still being decided on, not a
   // permanent removal. Add/remove keys here to toggle visibility; nothing
-  // else in the app needs to change. Currently: Most Prominent (PROMINENT),
-  // Guardian Angel (GA).
-  const HIDDEN_KEYS = new Set(['PROMINENT', 'GA']);
+  // else in the app needs to change. Currently: Most Prominent (PROMINENT);
+  // the 3 structural-duplicate positions (GA, MEP, SWA); and Ancestral
+  // Tasks/Talents (F1/G1/H1/I1/F2/G2/H2/I2), none of which have written
+  // position-specific content yet (see js/micro-content.js — currently
+  // falling back to the generic general[] entries).
+  const HIDDEN_KEYS = new Set(['PROMINENT', 'GA', 'MEP', 'SWA', 'F1', 'G1', 'H1', 'I1', 'F2', 'G2', 'H2', 'I2']);
   let _currentName = '';
   let _nameActive = false;
   const _emptyNameVals = {
