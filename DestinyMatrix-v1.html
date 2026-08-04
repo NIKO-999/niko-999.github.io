@@ -2712,10 +2712,10 @@ const ARCANA_ESSENCE = {
   // permanent removal. Add/remove keys here to toggle visibility; nothing
   // else in the app needs to change. Currently: Most Prominent (PROMINENT);
   // the 3 structural-duplicate positions (GA, MEP, SWA); and Ancestral
-  // Tasks/Talents (F1/G1/H1/I1/F2/G2/H2/I2), none of which have written
-  // position-specific content yet (see js/micro-content.js — currently
-  // falling back to the generic general[] entries).
-  const HIDDEN_KEYS = new Set(['PROMINENT', 'GA', 'MEP', 'SWA', 'F1', 'G1', 'H1', 'I1', 'F2', 'G2', 'H2', 'I2']);
+  // Tasks (F1/G1/H1/I1), which still have no written position-specific
+  // content (see js/micro-content.js). F2/G2/H2/I2 (Ancestral Talents) now
+  // have full Golden Standard content and are unhidden.
+  const HIDDEN_KEYS = new Set(['PROMINENT', 'GA', 'MEP', 'SWA', 'F1', 'G1', 'H1', 'I1']);
   let _currentName = '';
   let _nameActive = false;
   const _emptyNameVals = {
