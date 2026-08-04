@@ -3727,198 +3727,198 @@ window.DMicroContent = (function () {
     '1_G1': {
       title: `1 in Maternal Masculine Line — The Magician`,
       tagline: `A Design of the Started Venture`,
-      mastery: `You carry a real, inherited pull to initiate a venture your mother's father wanted but never actually began.`,
-      shadow: `You keep almost-launching something significant without ever fully committing to it.`,
-      invitation: `Take one real, committed step today on the venture you keep almost-starting.`,
+      mastery: `You carry a real, inherited pull to initiate a venture your mother's father wanted but never actually began. You recognize the shape of the unstarted thing the moment it crosses your path, as though you'd been briefed on it. That recognition is a genuine inheritance, not a random ambition — he handed you both the pull and the capability to act on it. And when you do act, the launch tends to actually take, unlike the false starts before you.`,
+      shadow: `You keep almost-launching something significant without ever fully committing to it. Underneath the almost-launching is often a fear that finishing what he couldn't would somehow indict a man you never even met. You gather momentum right up to the actual commitment point and then quietly let it stall. The venture stays permanently at ninety percent, inherited and re-abandoned rather than completed.`,
+      invitation: `Ask yourself honestly what finishing this would actually mean about the man who didn't. Take one real, committed step today on the venture you keep almost-starting. Make it the step that can't be quietly walked back. Notice that completing it honors him rather than betraying him.`,
     },
 
     // ── 2 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '2_G1': {
       title: `2 in Maternal Masculine Line — The High Priestess`,
       tagline: `A Design of the Followed Knowing`,
-      mastery: `You carry real, sharp intuition, inherited from a man who was never given permission to trust his own instinct.`,
-      shadow: `You override a strong instinct the moment it can't be logically justified, silencing exactly what should be trusted.`,
-      invitation: `Act on one genuine instinct today without requiring a rational case for it first.`,
+      mastery: `You carry real, sharp intuition, inherited from a man who was never given permission to trust his own instinct. You sense the accurate read on a situation before you can fully explain why. That instinct runs unusually deep precisely because it was never allowed expression in him. And when you follow it, it holds up, vindicating a trust he never got to place in himself.`,
+      shadow: `You override a strong instinct the moment it can't be logically justified, silencing exactly what should be trusted. Underneath the override is often a fear that acting on unproven feeling would repeat whatever cost him for trusting instinct once before. You demand rational proof for something that was never going to arrive rationally. The demand for justification kills the instinct before it ever gets tested.`,
+      invitation: `Ask yourself honestly what this instinct is telling you, before you reach for the rational case. Act on one genuine instinct today without requiring a rational case for it first. Follow it in something small enough to risk. Notice whether it was right, and let that evidence count.`,
     },
 
     // ── 3 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '3_G1': {
       title: `3 in Maternal Masculine Line — The Empress`,
       tagline: `A Design of the Open Softness`,
-      mastery: `You carry real creative and nurturing capacity, inherited from a man rigid masculinity never let express it.`,
-      shadow: `You keep that gentler, generative side private or minimized out of an old, unexamined caution.`,
-      invitation: `Express your creativity or warmth openly today, in one specific setting, without softening it.`,
+      mastery: `You carry real creative and nurturing capacity, inherited from a man rigid masculinity never let fully express it. You generate warmth and make things grow, in relationships or in work, with a genuine gentleness. That capacity runs deep precisely because it was suppressed in him and reached you unspent. And expressing it openly doesn't cost you any of the strength people already recognize in you.`,
+      shadow: `You keep that gentler, generative side private or minimized out of an old, unexamined caution about how it will be read. Underneath the caution is often a fear that visible warmth would be mistaken for weakness the way it may have been for him. You soften or hide the nurturing instinct in front of exactly the people who'd benefit most from seeing it. The hiding costs you closeness that visible warmth would otherwise create.`,
+      invitation: `Ask yourself honestly what showing this warmth openly would actually risk for you. Express your creativity or warmth openly today, in one specific setting, without softening it. Let it be visible, not filtered down to something smaller. Notice that being seen this way doesn't diminish you.`,
     },
 
     // ── 4 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '4_G1': {
       title: `4 in Maternal Masculine Line — The Emperor`,
       tagline: `A Design of Held Power`,
-      mastery: `You carry real leadership capacity, capable of holding authority with both firmness and genuine care.`,
-      shadow: `You swing to one extreme — avoiding authority out of fear of harshness, or gripping control too tightly.`,
-      invitation: `Lead one piece of real responsibility today with firmness and care held together, not one at the other's expense.`,
+      mastery: `You carry real leadership capacity, capable of holding authority with both firmness and genuine care at the same time. You give a clear directive and stay attuned to the person receiving it, without needing to sacrifice one for the other. That integrated authority is a real inheritance, correcting a pattern he never quite balanced. And people trust the leadership because it's consistent, not because it's either harsh or permissive.`,
+      shadow: `You swing to one extreme, avoiding authority out of fear of harshness, or gripping control too tightly out of fear of being seen as weak. Underneath the swing is often a fear that the middle ground doesn't actually exist, that authority always curdles into one failure mode or the other. You alternate between over-controlling and abdicating, rarely landing on steady command. Both extremes cost you the trust genuine balance would earn.`,
+      invitation: `Ask yourself honestly which extreme you're defaulting to in this particular responsibility. Lead one piece of real responsibility today with firmness and care held together, not one at the other's expense. Give the clear directive and check in on the person, in the same conversation. Notice that holding both doesn't dilute either one.`,
     },
 
     // ── 5 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '5_G1': {
       title: `5 in Maternal Masculine Line — The Hierophant`,
       tagline: `A Design of the Claimed Vocation`,
-      mastery: `You carry a real pull toward teaching, mentorship, or guidance.`,
-      shadow: `You offer that guidance informally, forever, without ever formally naming or claiming the role it already functions as.`,
-      invitation: `Claim one specific teaching or mentoring role today instead of continuing to offer it informally.`,
+      mastery: `You carry a real pull toward teaching, mentorship, or guidance, an instinct for helping someone else find their footing. You explain things in a way that actually lands, patiently, without condescension. That capacity was inherited already-formed, a genuine gift handed to you unclaimed. And the people you guide this way tend to genuinely improve because of it.`,
+      shadow: `You offer that guidance informally, forever, without ever formally naming or claiming the role it already functions as. Underneath the informality is often a fear that naming yourself a teacher or mentor would invite scrutiny the quiet version never had to face. You do the actual work of guiding people while declining the title or the compensation that would come with claiming it. The unclaimed role costs you recognition and opportunity that formal claiming would unlock.`,
+      invitation: `Ask yourself honestly what claiming this role formally would actually expose you to. Claim one specific teaching or mentoring role today instead of continuing to offer it informally. Say the title out loud, to yourself or to someone else. Notice that naming it doesn't change how well you already do it.`,
     },
 
     // ── 6 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '6_G1': {
       title: `6 in Maternal Masculine Line — The Lovers`,
       tagline: `A Design of the Heart's Vote`,
-      mastery: `You carry a real capacity for partnership chosen from genuine desire, not obligation.`,
-      shadow: `You let your relationship choices run on duty and expectation rather than your own actual wanting.`,
-      invitation: `Name today what you actually want in partnership, separate from what's expected of you.`,
+      mastery: `You carry a real capacity for partnership chosen from genuine desire, not obligation inherited from what a relationship was supposed to look like. You can identify what you actually want in a partner, separate from the checklist you were handed. That clarity is a real inheritance, correcting a pattern he never got to practice. And the partnerships you choose this way tend to actually fit you, not just the role.`,
+      shadow: `You let your relationship choices run on duty and expectation rather than your own actual wanting. Underneath the duty is often a fear that naming a real desire and having it differ from the expected path would be its own kind of abandonment. You choose or stay with a partner because it's the expected move, not because it's the wanted one. The gap between duty and desire quietly costs you a partnership that would have actually fit.`,
+      invitation: `Ask yourself honestly what you'd want in partnership if expectation weren't part of the equation. Name today what you actually want in partnership, separate from what's expected of you. Write it down plainly, without editing it toward acceptability. Notice where your actual choices already match it, and where they don't.`,
     },
 
     // ── 7 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '7_G1': {
       title: `7 in Maternal Masculine Line — The Chariot`,
       tagline: `A Design of the Crossed Line`,
-      mastery: `You carry real, genuine drive toward ambitious goals.`,
-      shadow: `Your ambitions have a pattern of stalling or getting abandoned just short of the finish line.`,
-      invitation: `Push one currently stalled goal forward today, toward its actual completion.`,
+      mastery: `You carry real, genuine drive toward ambitious goals, the capacity to set a large target and actually move toward it. You sustain momentum through the middle stretch where most drive quietly evaporates. That endurance is a real inheritance, one handed to you along with the ambition itself. And you're capable of carrying a goal all the way to its actual completion, not just its early excitement.`,
+      shadow: `Your ambitions have a pattern of stalling or getting abandoned just short of the finish line, again and again. Underneath the stalling is often a fear that finishing would mean facing whatever comes after, with no goal left to hide behind. You do the hard early and middle work and then quietly let the final stretch go unclaimed. The pattern repeats because the near-finish, not the start, is where it actually breaks down.`,
+      invitation: `Ask yourself honestly what finishing this goal would actually require you to face next. Push one currently stalled goal forward today, toward its actual completion. Do the specific next step that's been sitting undone. Notice that completing it doesn't require having the next goal ready yet.`,
     },
 
     // ── 8 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '8_G1': {
       title: `8 in Maternal Masculine Line — Justice`,
       tagline: `A Design of the Closed Account`,
-      mastery: `You carry a real, sharp sensitivity to unfairness.`,
-      shadow: `That sensitivity reacts to present situations with an intensity that belongs to something older, unresolved, and unnamed.`,
-      invitation: `Name, as specifically as you can today, what the original unfairness in your maternal line actually was.`,
+      mastery: `You carry a real, sharp sensitivity to unfairness, an instinct that notices imbalance before most people register it. You call out an inequity clearly, with the accuracy of someone who's studied the pattern closely. That sensitivity is a genuine inheritance, sharpened by whatever he actually endured. And when it's pointed at something real, it moves people toward correcting it.`,
+      shadow: `That sensitivity reacts to present situations with an intensity that actually belongs to something older, unresolved, and unnamed. Underneath the intensity is often a fear that the original unfairness will never be acknowledged unless every echo of it gets fought as hard as the first one should have been. You escalate a minor present injustice with the full force of an old, unaddressed one. The mismatch costs you credibility and relationships that a calibrated response would have preserved.`,
+      invitation: `Ask yourself honestly whether this reaction fits the present situation or an older one underneath it. Name, as specifically as you can today, what the original unfairness in your maternal line actually was. Write it down or say it out loud, however incomplete the picture is. Notice whether the present reaction settles once the old one has a name.`,
     },
 
     // ── 9 in MATERNAL MASCULINE LINE (Ancestral Tasks) ──────────────────────
     '9_G1': {
       title: `9 in Maternal Masculine Line — The Hermit`,
       tagline: `A Design of Claimed Stillness`,
-      mastery: `You carry a real need for withdrawal, reflection, and solitary space.`,
-      shadow: `You fill every available space with obligation to others, unable to justify solitude even when it's genuinely needed.`,
-      invitation: `Claim one period of genuine solitude today without justifying it as productive first.`,
+      mastery: `You carry a real need for withdrawal, reflection, and solitary space, one he likely never had permission to honor. You know precisely when you need to step back, and the insight you return with afterward is genuine. That self-knowledge is a real inheritance, correcting a pattern of constant availability he couldn't break. And the solitude actually restores you, rather than becoming another form of avoidance.`,
+      shadow: `You fill every available space with obligation to others, unable to justify solitude even when it's genuinely needed. Underneath the inability is often a fear that claiming withdrawal would be read as selfishness or abandonment, the way it may have been for him. You keep saying yes to presence long after your capacity for it has run out. The unclaimed solitude costs you the clarity it would have restored.`,
+      invitation: `Ask yourself honestly what claiming this solitude would seem to cost the people around you. Claim one period of genuine solitude today without justifying it as productive first. Take it even without a reason you'd need to defend. Notice that the people who matter are still there when you return.`,
     },
 
     // ── 10 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '10_G1': {
       title: `10 in Maternal Masculine Line — Wheel of Fortune`,
       tagline: `A Design of the Honored Peace`,
-      mastery: `You carry a real capacity to weather life's unpredictable turns.`,
-      shadow: `You treat every uncontrollable turn as personal injustice rather than simply how life moves.`,
-      invitation: `Name one circumstance today genuinely beyond your control, and choose acceptance over resistance to it.`,
+      mastery: `You carry a real capacity to weather life's unpredictable turns, staying functional when circumstances shift without warning. You adapt to the new situation instead of demanding the old one return. That flexibility is a genuine inheritance, one handed to you even through his own instability. And it means an unexpected turn doesn't cost you your footing the way it might cost someone else.`,
+      shadow: `You treat every uncontrollable turn as a personal injustice rather than simply how life moves for everyone. Underneath the reaction is often a fear that accepting the turn as ordinary would mean his specific hardships were never actually unfair. You resist circumstances you have no power to change, spending energy on the resistance instead of the adaptation. The resistance costs you the peace that acceptance would have offered at no real loss.`,
+      invitation: `Ask yourself honestly whether this circumstance is genuinely within your control to change. Name one circumstance today genuinely beyond your control, and choose acceptance over resistance to it. Let the resistance go, specifically, on purpose. Notice that accepting it doesn't mean agreeing it was fair.`,
     },
 
     // ── 11 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '11_G1': {
       title: `11 in Maternal Masculine Line — Strength`,
       tagline: `A Design of the Gentle Difference`,
-      mastery: `You carry real, genuine resilience and strength.`,
-      shadow: `You express that strength only as toughness, cut off from the compassionate strength that's actually available underneath.`,
-      invitation: `Lead one difficult moment today with visible compassion standing alongside your strength.`,
+      mastery: `You carry real, genuine resilience and strength, the capacity to hold steady through real difficulty. You can stay present for someone else's hard moment without being knocked off balance by it. That strength is a real inheritance, tested and proven by whatever he actually endured. And it can hold both firmness and gentleness at once, without either one canceling the other.`,
+      shadow: `You express that strength only as toughness, cut off from the compassionate strength that's actually available underneath it. Underneath the cutoff is often a fear that visible tenderness would be read as the strength wearing thin. You show up hard and capable in a crisis while withholding the warmth that would make the strength feel safe to lean on. People get your resilience without your presence, and that costs the closeness both could have offered together.`,
+      invitation: `Ask yourself honestly what showing compassion alongside this strength would actually risk. Lead one difficult moment today with visible compassion standing alongside your strength. Let both show at once, not one after the other. Notice that the compassion doesn't undercut how capable you clearly are.`,
     },
 
     // ── 12 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '12_G1': {
       title: `12 in Maternal Masculine Line — The Hanged Man`,
       tagline: `A Design of the Named List`,
-      mastery: `You carry a real capacity for care and devotion to others.`,
-      shadow: `Your own needs go perpetually unconsidered underneath that devotion, so thoroughly you struggle to even name them.`,
-      invitation: `Name one of your own needs today, directly, and prioritize it, even briefly.`,
+      mastery: `You carry a real capacity for care and devotion to others, the ability to hold someone else's needs with genuine attention. You show up consistently for people who depend on you, in a way that actually meets what they need. That devotion is a real inheritance, one he practiced deeply even at real cost to himself. And you can offer this care without it draining you completely, once you also count yourself in it.`,
+      shadow: `Your own needs go perpetually unconsidered underneath that devotion, so thoroughly you struggle to even name them when asked. Underneath the struggle is often a fear that naming a need of your own would compete with, or diminish, the devotion he built his identity on. You can list what everyone else requires in detail while drawing a blank on your own. The blank spot costs you a version of care that was never actually reciprocated.`,
+      invitation: `Ask yourself honestly what you actually need right now, before answering what everyone else needs. Name one of your own needs today, directly, and prioritize it, even briefly. Say it out loud to someone, not just internally. Notice that naming it doesn't make you less devoted to the people you care for.`,
     },
 
     // ── 13 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '13_G1': {
       title: `13 in Maternal Masculine Line — Transformation`,
       tagline: `A Design of the Open Door`,
-      mastery: `You carry a real capacity to meet necessary change directly.`,
-      shadow: `You grip tightly to something you already know has run its course, simply because letting go feels dangerous.`,
-      invitation: `Identify one ending that's clearly due in your life today, and meet it directly.`,
+      mastery: `You carry a real capacity to meet necessary change directly, ending what's actually finished instead of dragging it forward. You recognize the exact moment a chapter is over, even when it's uncomfortable to admit. That directness is a real inheritance, correcting a pattern he struggled with himself. And what follows the ending tends to be better than what you were protecting by delaying it.`,
+      shadow: `You grip tightly to something you already know has run its course, simply because letting go feels dangerous in a way you can't quite name. Underneath the grip is often a fear that ending it would mean repeating a loss he never fully recovered from. You maintain a relationship, role, or commitment well past the point you privately know it's over. The grip costs you the energy and space the ending would have freed up.`,
+      invitation: `Ask yourself honestly what you already privately know is over but haven't admitted. Identify one ending that's clearly due in your life today, and meet it directly. Say it's over, in plain terms, to yourself or to the relevant person. Notice that facing the ending is less dangerous than the anticipation of it.`,
     },
 
     // ── 14 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '14_G1': {
       title: `14 in Maternal Masculine Line — Temperance`,
       tagline: `A Design of the Steady Rhythm`,
-      mastery: `You carry a real capacity for commitment and sustained effort.`,
-      shadow: `You alternate sharply between overexertion and equally intense collapse or excess, with nothing steady in between.`,
-      invitation: `Choose one small, sustainable practice today and hold it steadily, resisting either extreme.`,
+      mastery: `You carry a real capacity for commitment and sustained effort, able to hold a practice or a discipline over the long run. You can stay in the moderate middle of a commitment instead of needing constant intensity to feel like it counts. That steadiness is a real inheritance, worth claiming even where he struggled with it. And what you build through consistent, moderate effort tends to actually last.`,
+      shadow: `You alternate sharply between overexertion and equally intense collapse or excess, with nothing steady in the middle. Underneath the swing is often a fear that moderation itself is a kind of failure, that anything short of total effort doesn't really count. You push hard until you burn out, then collapse into the opposite extreme, treating the middle ground as invisible. The alternation costs you the sustainable progress steady effort would have produced.`,
+      invitation: `Ask yourself honestly whether this intensity is genuinely needed or just the only mode you trust. Choose one small, sustainable practice today and hold it steadily, resisting either extreme. Do the modest version, not the maximal one. Notice that moderate and steady still counts as real commitment.`,
     },
 
     // ── 15 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '15_G1': {
       title: `15 in Maternal Masculine Line — The Devil`,
       tagline: `A Design of the Cut Strand`,
-      mastery: `You carry a real capacity to recognize and release what binds you.`,
-      shadow: `You accept some compulsion, pattern, or obligation as simply how things are, never questioned, never approached as changeable.`,
-      invitation: `Name your own version of the bind honestly today, and take one concrete step toward loosening it.`,
+      mastery: `You carry a real capacity to recognize and release what binds you, seeing a compulsion or pattern for what it actually is. You can name a bind honestly instead of normalizing it as simply how things are. That clarity is a genuine inheritance, one that starts to interrupt a pattern he never got to question. And loosening the bind, once named, tends to happen faster than expected.`,
+      shadow: `You accept some compulsion, pattern, or obligation as simply how things are, never questioned, never approached as something changeable. Underneath the acceptance is often a fear that questioning it would mean confronting how deep the bind actually runs. You live around the pattern, accommodating it, rather than examining whether it's actually necessary. The unexamined bind costs you the freedom that naming it would begin to restore.`,
+      invitation: `Ask yourself honestly what bind you've stopped questioning because it feels too permanent to touch. Name your own version of the bind honestly today, and take one concrete step toward loosening it. Make the step small enough to actually complete. Notice that naming the bind starts loosening it before you've fully escaped it.`,
     },
 
     // ── 16 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '16_G1': {
       title: `16 in Maternal Masculine Line — The Tower`,
       tagline: `A Design of the Finished Rebuild`,
-      mastery: `You carry a real capacity to rebuild fully after loss.`,
-      shadow: `You hold back from fully investing in something stable, still bracing for a collapse that already happened once, long ago.`,
-      invitation: `Fully invest in one area of stability today, without holding back in anticipation of its collapse.`,
+      mastery: `You carry a real capacity to rebuild fully after loss, reconstructing something genuinely solid from what's left. You can commit completely to a new structure once the old one has actually fallen. That rebuilding capacity is a real inheritance, proven through whatever collapse he actually survived. And what you build afterward holds up, because you're not holding part of yourself back from it.`,
+      shadow: `You hold back from fully investing in something stable, still bracing for a collapse that already happened once, long ago. Underneath the bracing is often a fear that full investment would mean full exposure to a loss like the one before. You keep one foot outside every stable structure you're actually in, unable to fully trust it. The half-investment costs you the depth and security the full version would have provided.`,
+      invitation: `Ask yourself honestly what full investment here would expose you to that you're currently protecting against. Fully invest in one area of stability today, without holding back in anticipation of its collapse. Commit the part of yourself you've been keeping in reserve. Notice that this structure isn't the one that fell before.`,
     },
 
     // ── 17 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '17_G1': {
       title: `17 in Maternal Masculine Line — The Star`,
       tagline: `A Design of the Restored Hope`,
-      mastery: `You carry a real capacity for genuine hope and faith in a better future.`,
-      shadow: `You default to reflexive cynicism, protecting against disappointment at the cost of ever genuinely believing things could improve.`,
-      invitation: `Name one genuine hope you actually hold today, out loud, and act on it.`,
+      mastery: `You carry a real capacity for genuine hope and faith in a better future, able to believe things can improve without it being naive. You hold ambition and realism together, imagining a better outcome you can actually work toward. That hopefulness is a real inheritance, worth claiming even where he struggled to sustain it. And speaking a real hope out loud tends to make it more, not less, achievable.`,
+      shadow: `You default to reflexive cynicism, protecting against disappointment at the cost of ever genuinely believing things could improve. Underneath the cynicism is often a fear that hoping and then being let down would repeat a disappointment he already absorbed once. You dismiss a genuine possibility before testing it, preferring the safety of low expectations. The cynicism costs you outcomes that real hope, tested, might actually have produced.`,
+      invitation: `Ask yourself honestly what hope you're protecting yourself from feeling right now. Name one genuine hope you actually hold today, out loud, and act on it. Say it to someone, then take one step toward it. Notice that naming the hope doesn't guarantee the disappointment you're bracing for.`,
     },
 
     // ── 18 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '18_G1': {
       title: `18 in Maternal Masculine Line — The Moon`,
       tagline: `A Design of the Measured Fear`,
-      mastery: `You carry a real capacity to see clearly what's been operating in the background.`,
-      shadow: `An unnamed anxiety shapes your decisions from the background without ever being examined directly.`,
-      invitation: `Name, as specifically as possible, one fear that's been operating in the background, and look at it directly today.`,
+      mastery: `You carry a real capacity to see clearly what's been operating in the background, naming a fear or pattern others leave unexamined. You can bring an unspoken dynamic into the light without flinching from what it reveals. That clarity is a real inheritance, one that starts to interrupt a fog he lived inside without questioning. And naming what's actually there tends to be less frightening than the vague version was.`,
+      shadow: `An unnamed anxiety shapes your decisions from the background without ever being examined directly. Underneath the avoidance is often a fear that looking directly at it would confirm something worse than the vague unease already suggests. You let the anxiety steer choices while never actually naming what it's about. The unexamined fear costs you decisions that a clear-eyed look would have made differently.`,
+      invitation: `Ask yourself honestly what fear has been quietly shaping your decisions lately. Name, as specifically as possible, one fear that's been operating in the background, and look at it directly today. Write it down in plain language, not the vague version. Notice that naming it directly makes it smaller, not bigger.`,
     },
 
     // ── 19 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '19_G1': {
       title: `19 in Maternal Masculine Line — The Sun`,
       tagline: `A Design of the Family Repair`,
-      mastery: `You carry a real capacity for genuine joy and warmth.`,
-      shadow: `You keep that joy behind a controlled, stoic surface, felt more than it's ever actually shown.`,
-      invitation: `Let one moment of real joy today be visibly, openly expressed, without your usual composure.`,
+      mastery: `You carry a real capacity for genuine joy and warmth, feeling it fully even where he was taught restraint. You experience real delight, not a muted version filtered for acceptability. That capacity is a genuine inheritance, one worth expressing rather than only privately holding. And letting the joy show doesn't cost you any of the composure people already respect in you.`,
+      shadow: `You keep that joy behind a controlled, stoic surface, felt more than it's ever actually shown to anyone else. Underneath the containment is often a fear that visible joy would be read as a loss of the composure he valued above almost everything. You feel the delight fully and privately while presenting something flatter to the world. The gap between the felt joy and the shown one costs you a closeness visible joy would create.`,
+      invitation: `Ask yourself honestly what showing this joy openly would actually cost your composure. Let one moment of real joy today be visibly, openly expressed, without your usual composure. Let your face or your voice show it, not just your private sense of it. Notice that visible joy doesn't make you less steady.`,
     },
 
     // ── 20 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '20_G1': {
       title: `20 in Maternal Masculine Line — Judgement`,
       tagline: `A Design of the Answered Summons`,
-      mastery: `You carry a real, clearly sensed calling.`,
-      shadow: `You keep delaying it, treating recognizing the call as though it were the same as answering it.`,
-      invitation: `Take one concrete first step today toward the calling you already recognize.`,
+      mastery: `You carry a real, clearly sensed calling, one that arrives with unusual specificity rather than vague ambition. You recognize exactly what it's asking of you, without needing to invent the shape of it. That clarity is a genuine inheritance, sharper for having waited a generation to be answered. And once you actually step toward it, the calling proves as real as it felt.`,
+      shadow: `You keep delaying it, treating recognizing the call as though it were the same as answering it. Underneath the delay is often a fear that actually answering would mean outgrowing the circumstances that produced the calling in the first place. You describe the calling accurately to anyone who asks, and then take no further action. Years pass with the recognition intact and the answer still pending.`,
+      invitation: `Ask yourself honestly what you're actually waiting for before you begin. Take one concrete first step today toward the calling you already recognize. Do the smallest real action, not another round of clarifying it. Notice that the step doesn't require the calling's full shape to be settled first.`,
     },
 
     // ── 21 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '21_G1': {
       title: `21 in Maternal Masculine Line — The World`,
       tagline: `A Design of the Written Ending`,
-      mastery: `You carry real, sustained capacity for effort and progress.`,
-      shadow: `The finish line keeps moving just out of reach, treated as always one step further than wherever you currently are.`,
-      invitation: `Identify one genuinely near-complete effort today, and deliberately close it out.`,
+      mastery: `You carry real, sustained capacity for effort and progress, able to move a long project forward across real time. You keep showing up to the work through the unglamorous middle stretch. That endurance is a genuine inheritance, one that can carry something all the way to an actual, claimed completion. And recognizing an ending as arrived, not just close, lets you actually rest in what you've built.`,
+      shadow: `The finish line keeps moving just out of reach, treated as always one step further than wherever you currently are. Underneath the moving target is often a fear that arriving would mean the effort, and the identity built around it, has to end. You redefine "almost there" every time you get close, so completion never actually lands. The pattern costs you the rest and satisfaction genuine completion would provide.`,
+      invitation: `Ask yourself honestly whether this goal is actually unfinished or simply never allowed to finish. Identify one genuinely near-complete effort today, and deliberately close it out. Declare it done, in explicit terms, rather than extending it again. Notice that arriving doesn't require inventing the next unfinished thing immediately.`,
     },
 
     // ── 22 in MATERNAL MASCULINE LINE (Ancestral Tasks) ─────────────────────
     '22_G1': {
       title: `22 in Maternal Masculine Line — The Fool`,
       tagline: `A Design of Reclaimed Liberty`,
-      mastery: `You carry a real, genuine desire for freedom, adventure, and an unconventional path.`,
-      shadow: `You default to the secure option reflexively, even in situations where the risk would actually be worth taking.`,
-      invitation: `Choose the freer, less conventional option today in one specific situation, instead of defaulting to safety.`,
+      mastery: `You carry a real, genuine desire for freedom, adventure, and an unconventional path, one he likely never got to follow. You can imagine and choose a less secure route because it's more genuinely yours. That desire is a real inheritance, worth honoring rather than trading away automatically for safety. And the unconventional choice tends to serve you well precisely because it's actually chosen, not defaulted into.`,
+      shadow: `You default to the secure option reflexively, even in situations where the risk would actually be worth taking. Underneath the reflex is often a fear that choosing freedom would mean repeating an instability he worked hard to escape. You pick the safe path automatically, without weighing whether this particular moment actually calls for caution. The reflex costs you a life more genuinely yours, traded quietly for a security you didn't actually need.`,
+      invitation: `Ask yourself honestly whether this caution is genuinely warranted or simply reflexive. Choose the freer, less conventional option today in one specific situation, instead of defaulting to safety. Take the smaller version of the leap if the full version feels like too much. Notice that choosing it once doesn't undo the security you've built.`,
     },
 
     // ── 1 in PATERNAL FEMININE LINE (Ancestral Tasks) ───────────────────────
