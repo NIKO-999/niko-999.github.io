@@ -3523,7 +3523,11 @@ const ARCANA_ESSENCE = {
            </div>`;
 
       document.getElementById('pb-body').innerHTML = nc ?
-        `<div class="pb-full-section">
+        `${nc.context ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT THIS IS</div>
+           <div class="pb-full-text">${nc.context}</div>
+         </div>` : ''}
+         <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${nc.mastery || nc.why || ''}</div>
          </div>
@@ -3562,6 +3566,7 @@ const ARCANA_ESSENCE = {
       const sub = (label, num, c) => c ? `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">${label} · ${num}</div>
            <div class="pb-full-text"><em>${c.title || c.heading}</em></div>
+           ${c.context ? `<div class="pb-full-text" style="margin-top:8px;opacity:0.75">${c.context}</div>` : ''}
            <div class="pb-full-text" style="margin-top:8px">${c.mastery || c.why}</div>
            <div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>
            <div class="pb-full-text" style="margin-top:8px">${c.invitation || c.path}</div>
@@ -3745,7 +3750,11 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (nc && (nc.title || nc.heading)) || data.label;
       document.getElementById('pb-body').innerHTML = nc ? (ncNewVoice ?
-        `<div class="pb-full-section">
+        `${nc.context ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT THIS IS</div>
+           <div class="pb-full-text">${nc.context}</div>
+         </div>` : ''}
+         <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${nc.mastery}</div>
          </div>
