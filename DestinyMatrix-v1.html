@@ -2707,6 +2707,11 @@ const ARCANA_ESSENCE = {
   // the current tab session. Mirrors the Sexual Line's "exists in the scene
   // but hidden/unclickable until active" pattern (see _sexLineActive above).
   const NAME_KEYS = new Set(['EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY', 'HIDDENPASSION', 'SUBCONSCIOUS', 'CORNERCAP', 'BRIDGE']);
+
+  // Temporarily hidden stars — content/design still being decided on, not a
+  // permanent removal. Add/remove keys here to toggle visibility; nothing
+  // else in the app needs to change. Currently: Most Prominent (PROMINENT).
+  const HIDDEN_KEYS = new Set(['PROMINENT']);
   let _currentName = '';
   let _nameActive = false;
   const _emptyNameVals = {
@@ -3107,6 +3112,7 @@ const ARCANA_ESSENCE = {
     const isSexLine = data.key === 'SEXLINE';
     const isNameBased = NAME_KEYS.has(data.key);
     const isCompat = COMPAT_KEYS.has(data.key);
+    const isHidden = HIDDEN_KEYS.has(data.key);
 
     const sp = new THREE.Sprite(new THREE.SpriteMaterial({
       map: nodeTex,
@@ -3122,6 +3128,7 @@ const ARCANA_ESSENCE = {
     if (isSexLine) sp.visible = _sexLineActive;
     if (isNameBased) sp.visible = _nameActive;
     if (isCompat) sp.visible = _compatActive;
+    if (isHidden) sp.visible = false;
     scene.add(sp);
     data.sprite    = sp;
     data.baseScale = sz;
@@ -3146,6 +3153,9 @@ const ARCANA_ESSENCE = {
     } else if (isCompat) {
       _compatHits.push(hit);
       if (_compatActive) _microHits.push(hit);
+    } else if (isHidden) {
+      // Temporarily hidden — exists in the scene but deliberately left out
+      // of _microHits so it can never be clicked while hidden.
     } else {
       _microHits.push(hit);
     }
@@ -3162,6 +3172,7 @@ const ARCANA_ESSENCE = {
     if (data.key === 'SEXLINE' && !_sexLineActive) el.style.display = 'none';
     if (NAME_KEYS.has(data.key) && !_nameActive) el.style.display = 'none';
     if (COMPAT_KEYS.has(data.key) && !_compatActive) el.style.display = 'none';
+    if (HIDDEN_KEYS.has(data.key)) el.style.display = 'none';
     overlayEl.appendChild(el);
     return el;
   });
@@ -3673,9 +3684,7 @@ const ARCANA_ESSENCE = {
           ? `Your numerology echoes this directly: your ${matchList} ${matches.length === 1 ? 'is' : 'are'} also ${r.dominant}. That's real reinforcement — two independent systems landing on the same number.`
           : `Arcana ${r.dominant} reduces to ${reduced} in classical numerology, and your ${matchList} ${matches.length === 1 ? 'matches' : 'match'} that reduced number — a secondary echo, not a direct one, but still a real point of agreement between systems.`;
       } else {
-        reinforcementText = _nameActive
-          ? `Your numerology doesn't echo this number directly — and that's fine. This influence is carried entirely by your Arcana chart; it never needed a numeric confirmation elsewhere to be real.`
-          : `Enter your name above to see whether your name-based numerology reinforces this number too. Even without it, this influence is already fully carried by your Arcana chart on its own.`;
+        reinforcementText = `Your numerology doesn't echo this number directly — and that's fine. This influence is carried entirely by your Arcana chart; it never needed a numeric confirmation elsewhere to be real.`;
       }
       const reinforcementHtml = `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">NUMEROLOGY REINFORCEMENT</div>
@@ -4158,7 +4167,8 @@ const ARCANA_ESSENCE = {
       .map((d, i) => ({ idx: i, key: d.key, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
       .filter((r) => r.idx !== 7 || _sexLineActive) // Sexual Line: only list it when it's actually on the diagram
       .filter((r) => !NAME_KEYS.has(MICRO[r.idx].key) || _nameActive) // name-based numbers: only once a name is entered
-      .filter((r) => !COMPAT_KEYS.has(MICRO[r.idx].key) || _compatActive), // Compatibility: only once a partner DOB is entered
+      .filter((r) => !COMPAT_KEYS.has(MICRO[r.idx].key) || _compatActive) // Compatibility: only once a partner DOB is entered
+      .filter((r) => !HIDDEN_KEYS.has(MICRO[r.idx].key)), // temporarily hidden stars — see HIDDEN_KEYS
     fly: (idx) => flyToMicro(idx),
   };
 
