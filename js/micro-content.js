@@ -820,198 +820,198 @@ window.DMicroContent = (function () {
     '7_E': {
       title: `7 in Soul Center — The Chariot`,
       tagline: `A Design of the Trusted Compass`,
-      mastery: `You steer your own life. Not speed, not achievement — the sustained, disciplined ability to keep moving in a chosen direction no matter what shows up. That's real, internally generated direction most people never develop.`,
-      shadow: `You believe you have to figure everything out alone. Self-sufficiency becomes a very specific kind of loneliness, and help that arrives late isn't proof people can't be trusted — it's proof you decided long ago that receiving wasn't safe.`,
-      invitation: `Take one piece of help today without immediately fixing or repaying it.`,
+      mastery: `You steer your own life, and that's the actual core of it — not speed, not visible achievement, but the sustained, disciplined ability to keep moving in a chosen direction no matter what shows up along the way. That's real, internally generated direction, and most people never develop it because they wait for external permission to move. You don't wait for the path to be cleared before you start walking it. That self-generated momentum is the deepest source of purpose available to you.`,
+      shadow: `You believe you have to figure everything out completely alone, without exception, as though asking counted as a form of failure. Self-sufficiency becomes a very specific kind of loneliness that nobody around you can see from the outside. Help that arrives late isn't proof people can't be trusted — it's proof you decided, long ago and quietly, that receiving wasn't safe for you. You keep steering solo through situations that were built for two, and you call the exhaustion independence.`,
+      invitation: `Take one piece of help today without immediately fixing it, repaying it, or minimising how much you needed it. Name the specific thing you need out loud to someone capable of giving it. Let them actually give it without you managing the exchange. You're testing whether receiving costs you the direction you've built, and it doesn't.`,
     },
 
     // ── 1 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '1_E': {
       title: `1 in Soul Center — The Magician`,
       tagline: `A Design of the Sacred Beginning`,
-      mastery: `You feel most like yourself in the act of beginning. You're a source — someone through whom things get started and brought into form, and that origination is a genuine part of your purpose, not a phase to grow out of.`,
-      shadow: `You believe only the beginning counts. You scatter across a lifetime of starts, chasing the high of originating something new, never settling long enough into what you actually started to find out what it was proving.`,
-      invitation: `Finish one thing today instead of starting something new.`,
+      mastery: `You feel most like yourself in the exact act of beginning something. You're a genuine source — someone through whom things get started and brought into form for the first time — and that origination is a real part of your purpose, not a phase you're meant to grow out of. Rooms come alive when you start something, because the energy you bring to a beginning is rare and immediately felt. That gift for initiation is worth protecting, not apologising for.`,
+      shadow: `You believe only the beginning actually counts, and everything after it feels like a slow decline from the real moment. You scatter across a lifetime of starts, chasing the high of originating something new over and over, never settling long enough into any single one to find out what it was actually proving. The accumulation of unfinished beginnings starts to feel like evidence against you, even though the beginnings themselves were genuinely good. You end up with more starts than you can count and very little you can point to as complete.`,
+      invitation: `Finish one thing today instead of starting something new, no matter how much better the new idea looks. Pick the oldest unfinished beginning you're still carrying. Do the next concrete step on it, not on anything new. Let the finishing, however unglamorous, be the thing you feel proud of today instead of another spark.`,
     },
 
     // ── 2 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '2_E': {
       title: `2 in Soul Center — The High Priestess`,
       tagline: `A Design of Quiet Certainty`,
-      mastery: `You feel most like yourself in quiet certainty — knowing before your mind catches up to explain why. That's real, undemanding inner truth, and it's more trustworthy than it might seem from the outside.`,
-      shadow: `You stay so private with your knowing that it never actually meets the world. A rich inner life accumulates, but it never translates into anything visible, so the depth stays entirely yours and reaches no one else.`,
-      invitation: `Let your inner knowing direct one real choice today, not just private reflection.`,
+      mastery: `You feel most like yourself in quiet certainty — knowing something before your mind has caught up to explain the reasoning behind it. That's real, undemanding inner truth, and it's more trustworthy than it might look from the outside precisely because it doesn't need to argue its way to a conclusion. You've learned to act on this kind of knowing when it matters, and it's rarely led you wrong. This isn't mysticism — it's a working sense you've earned through paying attention to yourself.`,
+      shadow: `You stay so private with your knowing that it never actually meets the world in any usable form. A rich inner life accumulates over years, but it never translates into anything visible, so the depth stays entirely yours and reaches no one who could have used it. People around you have no idea how much you actually understand, because none of it ever gets voiced. The purpose your inner knowing was meant to serve stalls out permanently inside your own head.`,
+      invitation: `Let your inner knowing direct one real choice today, not just a private reflection you keep to yourself afterward. Identify what your quiet certainty is already telling you about a decision in front of you. Act on it visibly, in a way someone else can see. You're finding out that your inner truth was always meant to move something in the world, not just settle inside you.`,
     },
 
     // ── 3 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '3_E': {
       title: `3 in Soul Center — The Empress`,
       tagline: `A Design of Rooted Cultivation`,
-      mastery: `You feel most like yourself actively growing something — tending it with real, patient care rather than rushing it toward a result before it's actually ready to arrive. That patience is the whole practice.`,
-      shadow: `You lose your own purpose inside everyone else's growth, nurturing outward so consistently that nothing of your own ever actually gets planted, tended, or allowed to become anything of its own.`,
-      invitation: `Give yourself today the same patient attention you give everyone else's growth.`,
+      mastery: `You feel most like yourself actively growing something — tending it with real, patient care rather than rushing it toward a result before it's actually ready to arrive on its own timeline. That patience is the entire practice, not a delay before the real work begins. You can watch something develop slowly without needing to force it faster, and that quality of attention is rare and genuinely valuable. What you tend tends to actually flourish, because you gave it real time.`,
+      shadow: `You lose your own purpose entirely inside everyone else's growth, nurturing outward so consistently that nothing of your own ever actually gets planted, tended, or allowed to become anything of its own. Your attention becomes a resource other people's lives absorb completely, while your own goes untended for years. You mistake being needed for having purpose, and the two aren't the same thing. Eventually you realise you've spent a decade cultivating everyone's life but your own.`,
+      invitation: `Give yourself today the same patient attention you routinely give everyone else's growth. Choose one part of your own life that's been left untended while you tended others. Spend real, deliberate time on it, the way you would for someone else. You're proving that your own growth is allowed to receive the same care you've always given away.`,
     },
 
     // ── 4 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '4_E': {
       title: `4 in Soul Center — The Emperor`,
       tagline: `A Design of Purposeful Structure`,
-      mastery: `You feel most like yourself constructing something meant to last — real, durable structure that holds weight over time rather than collapsing under the first real pressure it meets.`,
-      shadow: `You confuse the structure with the purpose itself, maintaining rigid systems long after they've stopped serving anyone, including you, simply because dismantling them feels like admitting failure.`,
-      invitation: `Ask today what one of your structures is actually for, and stay loyal to that answer.`,
+      mastery: `You feel most like yourself constructing something meant to actually last — real, durable structure that holds weight over time instead of collapsing under the first real pressure it encounters. You think in decades where most people think in weeks, and that long view produces something genuinely solid. People rely on what you build because it doesn't need constant repair to keep functioning. That's a real form of purpose, quiet and unglamorous, and it's exactly why it matters.`,
+      shadow: `You confuse the structure itself with the purpose it was built to serve, maintaining rigid systems long after they've stopped serving anyone, including you. Dismantling something you built feels like admitting failure, so you keep it standing well past the point it's actually useful. The purpose the structure once protected has moved on, but the structure hasn't, and you keep defending its existence anyway. You end up loyal to the container long after what it held is already gone.`,
+      invitation: `Ask today, honestly, what one of your structures is actually for, and stay loyal to that answer rather than to the structure itself. Pick the system or routine you're most attached to maintaining. Check whether it's still serving its original purpose or just persisting out of habit. If it's outlived its purpose, take the first real step toward retiring it.`,
     },
 
     // ── 5 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '5_E': {
       title: `5 in Soul Center — The Hierophant`,
       tagline: `A Design of Living Transmission`,
-      mastery: `You feel most like yourself learning or teaching something real — part of a lineage of understanding that runs through you rather than stopping with you and going no further. It doesn't need to stop with you to matter.`,
-      shadow: `You hold wisdom so tightly it never actually moves through you to anyone else. Purpose that stays entirely private eventually stops functioning as purpose at all, since nothing it produces ever reaches anyone who needs it.`,
-      invitation: `Teach or share one thing today, even before you feel fully qualified.`,
+      mastery: `You feel most like yourself learning or teaching something real — part of a lineage of understanding that runs through you rather than stopping there and going no further. It doesn't need to end with you to actually matter; the point was always for it to keep moving. You take in knowledge and pass it forward, and both directions feel equally natural to you. That transmission is the real shape of your purpose, not a side effect of it.`,
+      shadow: `You hold wisdom so tightly it never actually moves through you to anyone else who could use it. Purpose that stays entirely private eventually stops functioning as purpose at all, since nothing it produces ever reaches a single person who needed it. You collect understanding the way some people collect objects, keeping it rather than circulating it. The lineage that was supposed to run through you quietly ends with you instead.`,
+      invitation: `Teach or share one thing today, even before you feel fully qualified to be teaching it. Choose something you know well enough to be useful, even if you're not the world's expert on it. Offer it plainly to someone who doesn't have it yet. You're testing whether the transmission matters more than the credential, and it does.`,
     },
 
     // ── 6 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '6_E': {
       title: `6 in Soul Center — The Lovers`,
       tagline: `A Design of Lived Alignment`,
-      mastery: `You feel most like yourself in a clean, values-driven choice, even a hard one that costs you something. That's real alignment, distinct from mere comfort or convenience. That's discernment, not indifference.`,
-      shadow: `You treat every choice as equally weighty, exhausting yourself with deliberation until fatigue masquerades as depth, and the genuinely important decisions get no more real attention than the trivial ones do.`,
-      invitation: `Let one small choice today be small. Save your full attention for the one that actually matters.`,
+      mastery: `You feel most like yourself in a clean, values-driven choice, even a hard one that genuinely costs you something to make. That's real alignment, distinct from mere comfort or convenience masquerading as principle. You know the difference between a choice that feels good and a choice that's actually right, and you can act on the second one even when it's harder. That discernment is a real form of self-respect, not indifference to consequence.`,
+      shadow: `You treat every choice as equally weighty, exhausting yourself with deliberation until fatigue starts masquerading as depth. The genuinely important decisions get no more real attention than the trivial ones, because you've stopped being able to tell which is which. You wear yourself out on what to eat with the same seriousness you'd bring to a life-altering decision. By the time the actual big choice arrives, you have nothing left to bring to it.`,
+      invitation: `Let one small choice today be genuinely small, without deliberation, and save your full attention for the one that actually matters. Notice the next minor decision you're about to overthink and just make it fast, on instinct. Redirect the energy you saved toward the decision that's actually significant right now. You're rebuilding the ability to tell weight from noise.`,
     },
 
     // ── 8 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '8_E': {
       title: `8 in Soul Center — Justice`,
       tagline: `A Design of Grounded Integrity`,
-      mastery: `You feel most like yourself being genuinely honest, even when it costs you something real. That's integrity actually held steady under pressure, not merely claimed when it's easy. It's demonstrated, not merely believed.`,
-      shadow: `You turn that integrity into a permanent audit of everyone else, using your own honesty as a standard to judge the world by instead of simply living inside it yourself, quietly. Living it is different from grading everyone else by it.`,
-      invitation: `Let your integrity be demonstrated today, not enforced on anyone else.`,
+      mastery: `You feel most like yourself being genuinely honest, even when honesty costs you something real in the moment. That's integrity actually held steady under pressure, not just a value you claim when it's easy and convenient. It's demonstrated through action, not merely believed about yourself in private. People who've watched you choose the truth when a comfortable lie was right there know exactly what you're made of.`,
+      shadow: `You turn that integrity into a permanent audit of everyone else around you, using your own honesty as a standard to measure the world against instead of simply living inside it yourself. Living your own values quietly is different from grading everyone else's failure to match them. You become someone people brace for, not someone people relax around, because your honesty has started arriving as judgment rather than presence. The very thing that made you trustworthy starts making you exhausting to be near.`,
+      invitation: `Let your integrity be demonstrated today, through your own actions, not enforced on anyone else's behavior. Notice the next time you're tempted to correct someone else's ethics instead of tending your own. Redirect that energy into one honest action of your own instead. You're proving your integrity holds up on its own, without needing an audience to measure itself against.`,
     },
 
     // ── 9 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ──
     '9_E': {
       title: `9 in Soul Center — The Hermit`,
       tagline: `A Design of Depth in Motion`,
-      mastery: `You feel most like yourself in quiet, unhurried reflection. That's real clarity, the kind that only comes from actually spending unhurried time in solitude with your own thoughts. The stillness is where the clarity actually forms.`,
-      shadow: `You mistake permanent withdrawal for purpose itself, staying so deep in reflection that the insight you're generating never gets tested against an actual, lived life outside your own head.`,
-      invitation: `Bring one thing the quiet showed you back out into your actual life today.`,
+      mastery: `You feel most like yourself in quiet, unhurried reflection, away from the noise other people need to feel productive. That's real clarity, the kind that only comes from actually spending unhurried time alone with your own thoughts. The stillness is where the clarity genuinely forms, not a break before the real thinking starts. What you bring back from that solitude tends to be sharper and more useful than anything generated under pressure.`,
+      shadow: `You mistake permanent withdrawal for purpose itself, staying so deep in reflection that the insight you're generating never gets tested against an actual, lived life outside your own head. The stillness that once produced clarity starts producing only more stillness, an endless loop of thinking about thinking. You avoid the friction of real engagement by telling yourself you're still processing. Years of insight accumulate that were never actually applied to anything.`,
+      invitation: `Bring one thing the quiet showed you back out into your actual life today, concretely. Name the insight from your reflection plainly. Take one visible action based on it, in the world, with another person involved. You're proving the stillness was always meant to feed something beyond itself.`,
     },
 
     // ── 10 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '10_E': {
       title: `10 in Soul Center — The Wheel of Fortune`,
       tagline: `A Design of the Steady Center`,
-      mastery: `You feel most like yourself moving with change, not despite it. That's real equanimity through life's cycles, rather than a hard-won tolerance you're constantly managing. The steadiness isn't conditional on the outcome.`,
-      shadow: `You tie your sense of purpose to the wheel's current position — purposeful when things go well, purposeless the moment they turn, as if meaning itself rose and fell with circumstance alone.`,
-      invitation: `Find your footing today in your relationship to the turning, not in where the wheel currently sits.`,
+      mastery: `You feel most like yourself moving with change, not merely tolerating it while it happens to you. That's real equanimity through life's cycles, distinct from a hard-won tolerance you're constantly having to manage and rebuild. The steadiness isn't conditional on the outcome going your way, which is exactly what makes it real steadiness rather than luck dressed up as calm. You've built a self that holds together through the turns other people get thrown by.`,
+      shadow: `You tie your entire sense of purpose to the wheel's current position — purposeful when things are going well, purposeless the instant they turn against you. It's as though meaning itself were supposed to rise and fall along with circumstance alone. You lose access to your own steadiness precisely when a downturn arrives, which is exactly when you need it most. Good seasons feel meaningful and bad ones feel like proof you were never actually purposeful to begin with.`,
+      invitation: `Find your footing today in your actual relationship to the turning, not in wherever the wheel currently happens to sit. Notice the specific way your mood or sense of purpose tracks your current circumstances. Choose one small action today that isn't dependent on things going well. You're practising a steadiness that doesn't need the season to cooperate.`,
     },
 
     // ── 11 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '11_E': {
       title: `11 in Soul Center — Strength`,
       tagline: `A Design of Purposeful Endurance`,
-      mastery: `You feel most like yourself holding something difficult without fighting it or fleeing it. That's real, embodied endurance, not mere stubbornness dressed up as calm. It holds because it's chosen, not just endured.`,
-      shadow: `You confuse endurance itself with the purpose, holding weight indefinitely as an identity rather than as a means toward something else that actually needs it held for a while. Weight held forever stops serving anything real.`,
-      invitation: `Let your steadiness serve something beyond itself today — a relationship, a piece of work, not just the holding.`,
+      mastery: `You feel most like yourself holding something genuinely difficult without either fighting it or fleeing from it. That's real, embodied endurance, not mere stubbornness dressed up as inner calm. It holds because it's a chosen stance, not because you're simply too stuck to move. People notice that your steadiness has a purpose behind it, which is exactly what separates it from just enduring for its own sake.`,
+      shadow: `You confuse the endurance itself with the actual purpose, holding weight indefinitely as an identity rather than as a means toward something else that genuinely needed it held for a while. Weight held forever, past its useful point, stops serving anything real at all. You keep carrying something long after the reason for carrying it has quietly disappeared, because putting it down would mean losing the identity built around holding it. The strength becomes an end in itself instead of a tool for something bigger.`,
+      invitation: `Let your steadiness serve something beyond itself today — a relationship, a piece of work, not just the holding for its own sake. Ask what the weight you're carrying is actually supposed to be building toward. Direct one specific action from that steadiness toward the real goal, not just toward proving you can bear it. You're finding out whether your endurance still has a purpose or has become the purpose itself.`,
     },
 
     // ── 12 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '12_E': {
       title: `12 in Soul Center — The Hanged Man`,
       tagline: `A Design of the Returned Surrender`,
-      mastery: `You feel most like yourself once you've stopped forcing an answer and let one actually arrive on its own time. That's real meaning found through voluntary surrender, not passivity.`,
-      shadow: `You stay suspended indefinitely, treating the not-knowing itself as the purpose instead of the passage toward one it was actually meant to be all along. Suspension on its own resolves nothing.`,
-      invitation: `Take the new angle your last surrender revealed and actually act on it today.`,
+      mastery: `You feel most like yourself once you've stopped forcing an answer and let one actually arrive in its own time. That's real meaning found through voluntary surrender, distinct from passivity dressed up as wisdom. You've learned that some clarity only shows up once you stop grabbing for it, and you can genuinely let go long enough to find out. That patience produces answers that pressure never would have reached.`,
+      shadow: `You stay suspended indefinitely, treating the not-knowing itself as the purpose instead of the passage toward one it was actually always meant to become. Suspension on its own resolves absolutely nothing, no matter how spiritually significant it might feel while you're inside it. You collect insight after insight from the waiting and never once let any of it change what you actually do. The letting go that was supposed to lead somewhere becomes its own permanent, comfortable destination.`,
+      invitation: `Take the new angle your last surrender revealed and actually act on it today, concretely. Name the insight plainly, out loud, to yourself or someone else. Take one real step that puts it into motion rather than just holding it as another realisation. You're finding out whether the surrender means anything beyond the feeling it produced.`,
     },
 
     // ── 13 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '13_E': {
       title: `13 in Soul Center — Transformation`,
       tagline: `A Design of Genuine Becoming`,
-      mastery: `You feel most like yourself in the act of becoming — willing to let old versions of yourself die for a truer one, over and over, without needing to stay who you already were. The becoming doesn't need to be loud to be real.`,
-      shadow: `You manufacture endings for their own sake, mistaking constant reinvention for the deeper transformation this actually asks for, when what's needed instead is patience. Reinvention isn't the same thing as growth.`,
-      invitation: `Let one transformation today be slow and quiet instead of dramatic.`,
+      mastery: `You feel most like yourself in the act of becoming — willing to let old versions of yourself die for a truer one, over and over, without needing to stay attached to who you already were. The becoming doesn't need to be loud to be genuinely real. You can change without needing an audience to witness it or a story to justify it. That quiet capacity for real transformation is a deep and rare form of self-honesty.`,
+      shadow: `You manufacture endings for their own sake, mistaking constant reinvention for the deeper transformation this actually asks of you, when what's actually needed instead is patience. Reinvention isn't the same thing as growth, even though it can look identical from the outside for a while. You keep starting over at the exact point where staying and working something through would have taught you more. The pattern of dramatic change becomes a way to avoid the slower, harder change that would have actually mattered.`,
+      invitation: `Let one transformation today be slow and quiet instead of dramatic and announced. Choose something you'd normally turn into a big reinvention moment. Change it gradually instead, without telling anyone or making it a story. You're testing whether real growth needs an audience, and it doesn't.`,
     },
 
     // ── 14 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '14_E': {
       title: `14 in Soul Center — Temperance`,
       tagline: `A Design of Earned Synthesis`,
-      mastery: `You feel most like yourself in the space between extremes, where genuine synthesis happens gradually, over time, rather than through a single decisive choice made once. The middle is a real place, not a compromise.`,
-      shadow: `You use the blending as an excuse to avoid fully engaging either side, staying so centered that nothing actually gets lived with any real intensity or commitment to it. Nothing centered ever gets lived at full intensity.`,
-      invitation: `Fully inhabit one side of something today before trying to blend it.`,
+      mastery: `You feel most like yourself in the space between extremes, where genuine synthesis actually happens gradually over time rather than through one decisive choice made once and forgotten. The middle is a real place for you, not a compromise or a failure to commit to a side. You can hold two directions at once and let them slowly become one integrated thing, which most people rush past in their hurry to pick a lane. That patience produces a wholeness other approaches can't reach.`,
+      shadow: `You use the blending itself as an excuse to avoid fully engaging with either side of anything, staying so centered that nothing actually gets lived with any real intensity or genuine commitment. Nothing centered ever gets lived at full intensity, which means you can spend years in careful balance without ever actually experiencing either extreme fully enough to learn from it. The synthesis you're aiming for needs real material from both sides, and you keep starving it by never fully entering either one. Balance becomes a way of staying safely uncommitted.`,
+      invitation: `Fully inhabit one side of something today before trying to blend it with anything else. Choose a tension you'd normally split the difference on immediately. Commit to one side completely for the day, without hedging toward the other. You're gathering the real material your synthesis has been missing.`,
     },
 
     // ── 15 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '15_E': {
       title: `15 in Soul Center — The Devil`,
       tagline: `A Design of Metabolized Shadow`,
-      mastery: `You feel most like yourself metabolizing your own darker material instead of denying it exists at all. That's real honesty, and it leads to real liberation over time. That honesty is what actually frees you.`,
-      shadow: `You get fascinated with the darkness itself, circling your own shadow material endlessly without ever actually working it through to the freedom it was supposed to lead toward eventually.`,
-      invitation: `Take one honest look at something you've been circling today, and let it actually free something.`,
+      mastery: `You feel most like yourself metabolizing your own darker material instead of denying it exists at all or pretending it belongs to someone else. That's real honesty, and it leads to real liberation over time, not just temporary relief from guilt. That honesty is what actually frees you, not the avoidance most people mistake for peace. You can look directly at what's uncomfortable about yourself and use it, rather than being ruled by it in secret.`,
+      shadow: `You get fascinated with the darkness itself, circling your own shadow material endlessly without ever actually working it through to the freedom it was supposed to lead toward eventually. The looking becomes its own reward, a kind of edgy self-knowledge that never converts into any real change in how you actually live. You mistake understanding your patterns for having transformed them. Years pass with impressive self-awareness and remarkably little difference in the actual behavior.`,
+      invitation: `Take one honest look at something you've been circling today, and let it actually free something in your behaviour, not just your understanding. Name the pattern plainly. Take one concrete action that changes how you respond to it, not just how well you can describe it. You already have the insight — what's missing is letting it cost you something to act on.`,
     },
 
     // ── 16 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '16_E': {
       title: `16 in Soul Center — The Tower`,
       tagline: `A Design of Earned Clarity`,
-      mastery: `You feel most like yourself in the aftermath of a real reorganization, once the dust settles and you can finally see clearly what's actually still standing. The clarity was always going to arrive either way.`,
-      shadow: `You need the collapse itself to feel purposeful, sometimes provoking crisis because gradual, quiet clarity feels less convincing to you than a dramatic one would. Manufactured crisis isn't the same as real change.`,
-      invitation: `Let one piece of clarity arrive gently today instead of waiting for collapse to force it.`,
+      mastery: `You feel most like yourself in the aftermath of a real reorganization, once the dust has genuinely settled and you can finally see clearly what's actually still standing. That clarity was always going to arrive one way or another, and you're one of the few people who can actually receive it without being destroyed by the process that produced it. You come out the other side of upheaval more precise about what matters, not just relieved it's over. That's a real strength, not just resilience.`,
+      shadow: `You need the collapse itself to feel purposeful, sometimes provoking crisis because gradual, quiet clarity feels less convincing to you than a dramatic, obvious one would. Manufactured crisis isn't the same thing as real change, no matter how much upheaval you generate to produce the feeling of it. You keep breaking things that were actually fine just to get the reorganizing sensation you've come to associate with growth. The pattern costs you relationships and stability that never needed to be sacrificed for insight you could have reached more gently.`,
+      invitation: `Let one piece of clarity arrive gently today instead of waiting for a collapse to force it into view. Choose something you've been tempted to blow up just to see clearly. Sit with it quietly instead and let the understanding come without the drama. You're proving that clarity doesn't need a crisis attached to be real.`,
     },
 
     // ── 17 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '17_E': {
       title: `17 in Soul Center — The Star`,
       tagline: `A Design of Reciprocal Hope`,
-      mastery: `You feel most like yourself actively replenishing something — trusting the process before there's any proof yet that it's working, and staying with it anyway, patiently. The trust itself is the practice.`,
-      shadow: `You pour hope outward so consistently that your own reserves run dry, offering renewal to everyone except yourself, as though you alone were exempt from needing any back. Hope given only outward eventually runs out.`,
-      invitation: `Let yourself be replenished by someone today instead of only replenishing others.`,
+      mastery: `You feel most like yourself actively replenishing something — trusting the process before there's any proof yet that it's actually working, and staying with it patiently anyway. The trust itself is the entire practice, not a strategy you'll abandon if results don't show up on schedule. You keep tending things through the invisible stretch where nothing looks like it's changing yet. That patient trust is a real and rare gift you offer, both to yourself and everyone around you.`,
+      shadow: `You pour hope outward so consistently and completely that your own reserves run dry, offering renewal to everyone except yourself, as though you alone were somehow exempt from needing any back. Hope given only outward, never inward, eventually runs out no matter how deep the well originally was. You keep replenishing everyone else's belief in the future while your own quietly drains without anyone noticing, including you. The generosity that defines you becomes the exact thing depleting you.`,
+      invitation: `Let yourself be replenished by someone today instead of only replenishing others as usual. Name specifically what would restore you right now. Ask someone directly for it and actually receive it without deflecting or minimising. You're testing whether the well can be filled from outside, not just drawn from indefinitely.`,
     },
 
     // ── 18 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '18_E': {
       title: `18 in Soul Center — The Moon`,
       tagline: `A Design of Trusted Feeling`,
-      mastery: `You feel most like yourself honoring what you sense rather than only what you can prove outright with hard evidence. That's real intuition, genuinely trusted. The sense is worth trusting on its own terms.`,
-      shadow: `You get lost in the depths without a clear way back to functioning, letting the felt sense override any grounded engagement with the reality actually in front of you right now. Feeling untethered from reality helps no one.`,
-      invitation: `Anchor one intuition today to something concrete — a number, a conversation, a real decision.`,
+      mastery: `You feel most like yourself honoring what you sense rather than requiring only what you can prove outright with hard evidence first. That's real intuition, genuinely trusted, not superstition dressed up as spirituality. The sense is worth trusting on its own terms, because it consistently picks up something the visible facts alone don't capture. You act on feeling with a confidence most people reserve only for certainty, and it's earned you real insight nobody else in the room had access to.`,
+      shadow: `You get lost in the depths without any clear way back to actual functioning, letting the felt sense override any grounded engagement with the reality genuinely in front of you right now. Feeling completely untethered from reality helps no one, least of all you, even though it feels significant in the moment. You mistake the intensity of a feeling for its accuracy, and the two aren't the same thing at all. Decisions made purely from the depths, with no anchor, start costing you in ways the depths themselves never warned you about.`,
+      invitation: `Anchor one intuition today to something concrete — a real number, an actual conversation, a decision you can point to. Take the feeling you're currently trusting and check it against one piece of hard evidence. If they align, act with full confidence. If they don't, investigate the gap before you move. You're building the discipline that lets your intuition stay powerful without becoming untethered.`,
     },
 
     // ── 19 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '19_E': {
       title: `19 in Soul Center — The Sun`,
       tagline: `A Design of Uncomplicated Radiance`,
-      mastery: `You feel most like yourself in unguarded joy — simply radiating who you already are, with nothing extra required to justify it or earn it first. That's real, uncomplicated purpose.`,
-      shadow: `You believe purpose this simple can't possibly be enough, searching for something more complicated to prove yourself with and dimming your natural radiance in the process of looking.`,
-      invitation: `Let one moment of simple joy today count as purpose, with no bigger mission required to justify it.`,
+      mastery: `You feel most like yourself in unguarded joy — simply radiating who you already are, with nothing extra required to justify it or earn it beforehand. That's real, uncomplicated purpose, and it's more legitimate than the complicated versions everyone else is chasing. Being fully yourself, openly, is already the thing — not a warmup for some grander mission still to come. People are drawn to you precisely because you're not performing significance; you're simply being it.`,
+      shadow: `You believe purpose this genuinely simple can't possibly be enough, so you go searching for something more complicated to prove yourself with instead. The search itself dims your natural radiance, because you start treating the very thing you're best at as somehow insufficient. You chase grand missions that feel more legitimate on paper while the actual gift — your unguarded aliveness — sits neglected and unused. You end up striving for a purpose you already had before you started looking for one.`,
+      invitation: `Let one moment of simple joy today count as purpose, with no bigger mission required to justify it. Notice the pull to add significance or explanation to something that felt good on its own. Let it stand as enough, without dressing it up. You're practising trusting that your radiance was never supposed to need a bigger reason.`,
     },
 
     // ── 20 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '20_E': {
       title: `20 in Soul Center — Judgement`,
       tagline: `A Design of the Ongoing Awakening`,
-      mastery: `You feel most like yourself rising to meet a call you could have easily ignored instead. That's real, ongoing awakening, chosen again and again rather than granted once. The call doesn't wait for perfect readiness.`,
-      shadow: `You hear the call and endlessly prepare to answer it, using self-improvement as a substitute for the actual leap, so the preparation itself quietly becomes a way of never arriving anywhere.`,
-      invitation: `Answer one call today before you feel fully ready.`,
+      mastery: `You feel most like yourself rising to meet a call you could have easily ignored, one that would have cost you nothing to walk past. That's real, ongoing awakening, chosen again and again rather than granted to you once and left to coast. The call doesn't wait for perfect readiness, and you've learned to answer it anyway, imperfectly, on time. That willingness to keep rising is the actual engine of your growth, not a series of finished milestones.`,
+      shadow: `You hear the call clearly and then endlessly prepare to answer it, using self-improvement as a substitute for the actual leap you know you're supposed to be taking. The preparation itself quietly becomes a way of never arriving anywhere real, dressed up as diligence. You collect skills and readiness indefinitely while the actual moment the call was pointing toward keeps sliding further away. Years pass in a state of almost-ready that never converts into answered.`,
+      invitation: `Answer one call today before you feel fully ready to answer it. Identify the specific call you've been preparing for instead of taking. Act on it now, in whatever imperfect form is available to you today. You're proving that the call was always more important than the preparation you kept substituting for it.`,
     },
 
     // ── 21 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '21_E': {
       title: `21 in Soul Center — The World`,
       tagline: `A Design of Earned Arrival`,
-      mastery: `You feel most like yourself in a moment of real, earned arrival, however temporary it turns out to be afterward. Genuine completion, genuinely felt, not merely declared out loud. The arrival deserves to be actually felt.`,
-      shadow: `You refuse to ever call anything complete, treating wholeness as a permanently receding goal, because arriving would mean facing whatever comes right after it. Nothing ever gets to just be finished.`,
-      invitation: `Let yourself actually land in one "this is whole" moment today, before the next cycle begins.`,
+      mastery: `You feel most like yourself in a moment of real, earned arrival, however temporary that arrival eventually turns out to be. Genuine completion, genuinely felt, not merely declared out loud to sound like it counts. The arrival deserves to actually be felt in your body, not just checked off a list on the way to the next thing. You know how to stop and let a finished thing be finished, and that's a rarer skill than people assume.`,
+      shadow: `You refuse to ever call anything truly complete, treating wholeness as a permanently receding goal that stays just out of reach no matter how close you get. Arriving would mean facing whatever comes right after it, so you keep the finish line moving to avoid that confrontation. Nothing ever actually gets to be finished, which means nothing ever gets to be celebrated either. You live in a permanent almost-there, mistaking the striving itself for the purpose.`,
+      invitation: `Let yourself actually land in one "this is whole" moment today, before the next cycle inevitably begins. Choose something genuinely complete and name it as finished, out loud. Resist the urge to immediately point toward what's next. Stay in the feeling of arrival for longer than feels comfortable.`,
     },
 
     // ── 22 in SOUL CENTER (E · Center / Comfort Zone / Foundation of Purpose) ─
     '22_E': {
       title: `22 in Soul Center — The Fool`,
       tagline: `A Design of Accumulating Trust`,
-      mastery: `You feel most like yourself at the edge of something new, stepping forward without needing a guarantee first — real, uncommon trust rather than simple naivety. That trust compounds the more it's used.`,
-      shadow: `You treat every fresh start as an escape from whatever the last one asked of you, so nothing ever actually accumulates into a deeper, more tested version of yourself. Nothing ever gets the chance to actually deepen.`,
-      invitation: `Carry one lesson from your last beginning into whatever you start today.`,
+      mastery: `You feel most like yourself at the edge of something new, stepping forward without needing a guarantee handed to you first. That's real, uncommon trust, not naivety, because you go anyway even knowing exactly how it could go wrong. That trust compounds the more it's used, building a track record of leaps that mostly worked out because you were willing to take them. You've become genuinely good at beginning, in a way most people never let themselves practise.`,
+      shadow: `You treat every fresh start as an escape from whatever the last one asked of you, so nothing ever actually accumulates into a deeper, more tested version of yourself over time. Nothing ever gets the chance to genuinely deepen, because you're already reaching for the next edge before the current one has taught you what it had to teach. The pattern repeats identically across years, dressed up each time as a new adventure. You end up with an impressive collection of beginnings and very little cumulative wisdom to show for any of them.`,
+      invitation: `Carry one lesson from your last beginning into whatever you start today, deliberately. Name what the previous leap actually taught you, specifically. Apply that lesson to the new thing before you dive in. You're proving that beginnings can build on each other instead of resetting you back to zero every time.`,
     },
 
     // ── 5 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
