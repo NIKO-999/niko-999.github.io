@@ -1086,198 +1086,198 @@ window.DMicroContent = (function () {
     '5_LOVE': {
       title: `5 in Ideal Partner — The Hierophant`,
       tagline: `A Design of the Ungraded Bond`,
-      mastery: `You fall in love with substance, offering genuine reverence for who a partner had to become.`,
-      shadow: `You measure a partner against an inherited standard, holding back your full arrival until they pass.`,
-      invitation: `Let the relationship itself be the standard today, instead of measuring it against a rulebook you inherited.`,
+      mastery: `You fall in love with substance, offering genuine reverence for who a partner actually had to become to arrive where they are. You see the real story underneath the person, not just the surface presentation. That depth of regard is a genuine gift, rare enough that partners feel actually witnessed by it. And you can offer this reverence fully once you stop measuring it against a standard that was never actually about this relationship.`,
+      shadow: `You measure a partner against an inherited standard, holding back your full arrival until they pass a test they never agreed to take. Underneath the measuring is often a fear that committing fully without the standard would mean settling for less than you deserve. You withhold complete presence while quietly grading the relationship against a rulebook that predates it. The grading costs you the very depth of connection your reverence is actually capable of producing.`,
+      invitation: `Ask yourself honestly what inherited standard you've been measuring this relationship against. Let the relationship itself be the standard today, instead of measuring it against a rulebook you inherited. Show up fully, without the private grading. Notice that the connection doesn't need external validation to be real.`,
     },
 
     // ── 1 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '1_LOVE': {
       title: `1 in Ideal Partner — The Magician`,
       tagline: `A Design of the Quiet Chapter`,
-      mastery: `You make a relationship feel alive, generating momentum in a connection that might otherwise stall.`,
-      shadow: `You chase the electric feeling of a new connection's beginning and lose interest once it settles.`,
-      invitation: `Let one quiet chapter of your relationship today feel as alive as its beginning.`,
+      mastery: `You make a relationship feel alive, generating real momentum in a connection that might otherwise quietly stall. You initiate, you propose, you keep the energy moving forward rather than letting it drift. That capacity to actually animate a relationship is a genuine gift, not every partner has it. And you can bring that same aliveness to a settled chapter, not just a new one, once you actually try.`,
+      shadow: `You chase the electric feeling of a new connection's beginning and lose interest once it actually settles into something steady. Underneath the chasing is often a fear that a quiet, settled chapter means the relationship has stopped being alive at all. You mistake calm for stagnation, pulling away right when a deeper, steadier intimacy is actually available. The pattern costs you relationships that would have deepened, traded for another electric beginning that will settle again too.`,
+      invitation: `Ask yourself honestly whether this quiet chapter is actually stalled or just settled. Let one quiet chapter of your relationship today feel as alive as its beginning. Bring the same initiating energy to something ordinary. Notice that aliveness doesn't require novelty to exist.`,
     },
 
     // ── 2 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '2_LOVE': {
       title: `2 in Ideal Partner — The High Priestess`,
       tagline: `A Design of Mutual Depth`,
-      mastery: `You offer patient, perceptive attention that makes a partner feel truly seen.`,
-      shadow: `You stay so guarded yourself that intimacy becomes one-directional.`,
-      invitation: `Let yourself be known today at the same pace you come to know your partner.`,
+      mastery: `You offer patient, perceptive attention that makes a partner feel genuinely and accurately seen, not just noticed. You pick up on what's unspoken and hold it with real care. That perceptiveness is a rare gift, and partners generally recognize how deeply they're being understood. And you can receive the same depth of knowing you offer, once you let yourself actually be known back.`,
+      shadow: `You stay so guarded yourself that intimacy becomes one-directional, flowing toward the partner but rarely back toward you. Underneath the guardedness is often a fear that being as known as you know others would leave you without the safety your perceptiveness currently provides. You study your partner closely while remaining genuinely opaque to them. The imbalance costs you a mutual depth your own capacity for intimacy is actually built for.`,
+      invitation: `Ask yourself honestly what you've been keeping hidden while seeing your partner so clearly. Let yourself be known today at the same pace you come to know your partner. Share something real and unguarded, not just perceived. Notice that being known doesn't diminish the safety you've built.`,
     },
 
     // ── 3 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '3_LOVE': {
       title: `3 in Ideal Partner — The Empress`,
       tagline: `A Design of Received Tending`,
-      mastery: `You create real warmth and abundance, making a partner feel genuinely tended to.`,
-      shadow: `You organize the whole relationship around your giving, your own needs staying unspoken.`,
-      invitation: `Let yourself be tended to today, as openly as you tend to others.`,
+      mastery: `You create real warmth and abundance in a relationship, making a partner feel genuinely and consistently tended to. You notice what someone needs before they have to ask and provide it generously. That capacity for nurturing is a real gift, one that makes people feel cared for in a way that's rare and specific. And you can receive the same tending you give, once you actually let your own needs be spoken.`,
+      shadow: `You organize the whole relationship around your giving, while your own needs stay unspoken, even to yourself. Underneath the imbalance is often a fear that voicing a need would compete with, or diminish, the tending you're known for providing. You give generously and receive almost nothing in return, not because it isn't offered, but because you never ask. The pattern leaves you quietly depleted in a relationship that otherwise runs on real warmth.`,
+      invitation: `Ask yourself honestly what you need from this relationship that you've never actually voiced. Let yourself be tended to today, as openly as you tend to others. Name a specific need out loud, not just hint at it. Notice that asking doesn't make you less generous.`,
     },
 
     // ── 4 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '4_LOVE': {
       title: `4 in Ideal Partner — The Emperor`,
       tagline: `A Design of the Flexed Container`,
-      mastery: `You build relationships with real commitment to the container itself: consistency and follow-through.`,
-      shadow: `You prioritize the structure of the relationship over its actual aliveness, maintaining the form after connection fades.`,
-      invitation: `Let the container flex today in one small way, instead of maintaining rigid form.`,
+      mastery: `You build relationships with real commitment to the container itself, consistency and follow-through that partners can actually rely on. You show up when you said you would, keeping the structure of the relationship dependable. That reliability is a genuine gift, rare enough that partners often name it directly. And you can hold that same commitment while letting the container flex, once you notice the difference between structure and rigidity.`,
+      shadow: `You prioritize the structure of the relationship over its actual aliveness, maintaining the form well after the connection inside it has faded. Underneath the maintenance is often a fear that flexing the structure would mean the whole relationship might unravel entirely. You keep the rituals and routines intact while the felt connection quietly erodes underneath them. The maintained form costs you the chance to notice, and address, what's actually missing.`,
+      invitation: `Ask yourself honestly whether this structure is serving the relationship or replacing it. Let the container flex today in one small way, instead of maintaining rigid form. Change one routine deliberately and see what happens. Notice that flexibility doesn't dissolve the commitment underneath it.`,
     },
 
     // ── 6 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '6_LOVE': {
       title: `6 in Ideal Partner — The Lovers`,
       tagline: `A Design of Lived Alignment`,
-      mastery: `Your love is built on genuine, deliberate alignment — shared values chosen rather than assumed.`,
-      shadow: `You treat every disagreement as evidence of misalignment, auditing a partner exhaustively.`,
-      invitation: `Let alignment today be a direction you're both moving in, not a static test to pass.`,
+      mastery: `Your love is built on genuine, deliberate alignment, shared values that were actually chosen rather than simply assumed. You can name precisely what you and a partner agree matters, and build the relationship on that real foundation. That deliberateness is a genuine strength, producing partnerships with unusual clarity about their own values. And alignment can stay a shared direction you're both moving toward, rather than a fixed bar either of you has to clear.`,
+      shadow: `You treat every disagreement as evidence of misalignment, auditing a partner exhaustively for signs the shared values have failed. Underneath the auditing is often a fear that any real difference means the whole foundation was built on an illusion. You scrutinize ordinary disagreements as though they were verdicts on the relationship's viability. The scrutiny exhausts partners and manufactures instability where an ordinary difference of opinion was actually fine.`,
+      invitation: `Ask yourself honestly whether this disagreement is actually a misalignment or just a normal difference. Let alignment today be a direction you're both moving in, not a static test to pass. Treat the disagreement as ordinary, not diagnostic. Notice that the relationship can hold real differences without losing its foundation.`,
     },
 
     // ── 7 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '7_LOVE': {
       title: `7 in Ideal Partner — The Chariot`,
       tagline: `A Design of Two Hands on the Wheel`,
-      mastery: `You bring real momentum to a relationship, navigating life together with shared direction.`,
-      shadow: `You turn the relationship into a solo drive with a passenger, setting the direction alone.`,
-      invitation: `Let your partner actually hold some of the reins today.`,
+      mastery: `You bring real momentum to a relationship, steering life together with a shared direction that actually moves. You initiate plans and keep the partnership progressing rather than idling. That drive is a genuine strength, and relationships with you rarely stagnate. And the momentum can actually include two sets of hands on the wheel, once you make room for it.`,
+      shadow: `You turn the relationship into a solo drive with a passenger, setting the direction alone and expecting agreement rather than input. Underneath the solo driving is often a fear that shared steering would slow the momentum you've worked hard to build. You decide the destination and the pace without genuinely inviting a partner's direction into it. The pattern costs you a partner's real investment in a life that currently only reflects your own choices.`,
+      invitation: `Ask yourself honestly what decision you've been making alone that actually belongs to both of you. Let your partner actually hold some of the reins today. Ask for their direction on something concrete, and follow it. Notice that shared steering doesn't cost you the momentum.`,
     },
 
     // ── 8 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '8_LOVE': {
       title: `8 in Ideal Partner — Justice`,
       tagline: `A Design of the Released Ledger`,
-      mastery: `You build trust in love promise by kept promise, through genuine reciprocity.`,
-      shadow: `You keep an internal ledger of who's done more, turning intimacy into an accounting exercise.`,
-      invitation: `Let one imbalance today be human instead of tracked.`,
+      mastery: `You build trust in love promise by kept promise, through genuine reciprocity that partners come to rely on. You do what you said you'd do, consistently, and that consistency accumulates into real trust over time. That reliability is a genuine strength, rare enough that it becomes the foundation of long-term intimacy. And trust can hold even through an ordinary, human imbalance, once you stop needing every exchange to be exactly even.`,
+      shadow: `You keep an internal ledger of who's done more, turning intimacy into an accounting exercise instead of a felt connection. Underneath the ledger is often a fear that any real imbalance would mean you're being quietly taken advantage of. You track contributions with a precision that makes ordinary human unevenness feel like evidence of unfairness. The tracking costs you the ease and generosity that real intimacy actually requires.`,
+      invitation: `Ask yourself honestly what imbalance you've been tracking that's actually just ordinary human unevenness. Let one imbalance today be human instead of tracked. Let it go without logging it. Notice that releasing the ledger doesn't put you at risk.`,
     },
 
     // ── 9 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ──
     '9_LOVE': {
       title: `9 in Ideal Partner — The Hermit`,
       tagline: `A Design of Shared Silence`,
-      mastery: `Your love is patient and deep, including real respect for solitude.`,
-      shadow: `You use your need for space to avoid real vulnerability, retreating precisely when closeness is asked for.`,
-      invitation: `Tell your partner today whether your solitude is genuine need or avoidance, and stay present.`,
+      mastery: `Your love is patient and deep, including a real, healthy respect for solitude as part of genuine intimacy. You know how to hold space for yourself without it costing the relationship its closeness. That capacity for depth alongside independence is a real strength, producing a love that doesn't suffocate either person. And solitude can stay a genuine need rather than an escape, once you're honest about which one it actually is in the moment.`,
+      shadow: `You use your need for space to avoid real vulnerability, retreating precisely when closeness is actually being asked for. Underneath the retreat is often a fear that staying present through vulnerability would cost you the autonomy solitude currently protects. You reach for the language of "needing space" at the exact moments intimacy requires you to stay. The retreat costs partners a level of trust that consistent presence, even through discomfort, would have built instead.`,
+      invitation: `Ask yourself honestly whether this need for space is genuine or an avoidance of something uncomfortable. Tell your partner today whether your solitude is genuine need or avoidance, and stay present. Name it honestly, out loud, rather than just withdrawing. Notice that staying present through discomfort doesn't cost you your autonomy.`,
     },
 
     // ── 10 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '10_LOVE': {
       title: `10 in Ideal Partner — Wheel of Fortune`,
       tagline: `A Design of the Full Cycle`,
-      mastery: `You meet a relationship's current season honestly, without forcing false permanence.`,
-      shadow: `You treat a relationship's downswing as proof it's over, bailing at the first natural low.`,
-      invitation: `Let today's low season be a season, not a verdict, and stay through the full cycle.`,
+      mastery: `You meet a relationship's current season honestly, without forcing a false, permanent high onto something that naturally cycles. You can name that things are hard right now without needing that to mean something is fundamentally wrong. That honesty about seasons is a real strength, letting you stay grounded through natural ups and downs. And a low season can be met as exactly that, a season, once you resist reading it as a final verdict.`,
+      shadow: `You treat a relationship's downswing as proof it's over, bailing at the first natural low rather than riding out the cycle. Underneath the bailing is often a fear that staying through a hard season would trap you in something permanently bad. You exit relationships at their first real dip, mistaking an ordinary low for a fatal sign. The pattern costs you relationships that would have naturally turned, the way seasons do, if you'd stayed through the cycle.`,
+      invitation: `Ask yourself honestly whether this low is a season or something that's actually structurally broken. Let today's low season be a season, not a verdict, and stay through the full cycle. Commit to riding it out before deciding anything final. Notice that staying doesn't mean tolerating something genuinely harmful.`,
     },
 
     // ── 11 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '11_LOVE': {
       title: `11 in Ideal Partner — Strength`,
       tagline: `A Design of the Visible Wobble`,
-      mastery: `You hold a hard conversation or a partner's raw emotion without flinching.`,
-      shadow: `You hold all the relationship's difficulty yourself, your own hard feelings staying invisible.`,
-      invitation: `Let your own difficulty be visible today, on purpose.`,
+      mastery: `You hold a hard conversation or a partner's raw emotion without flinching, staying present through what would make others retreat. You provide real steadiness in a relationship's hardest moments. That capacity to hold difficulty is a genuine strength, one partners come to depend on deeply. And your own difficulty can be visible too, without it undermining the steadiness you're known for.`,
+      shadow: `You hold all the relationship's difficulty yourself, while your own hard feelings stay entirely invisible to your partner. Underneath the invisibility is often a fear that showing your own struggle would collapse the steadiness the relationship relies on you for. You absorb every hard moment without ever letting your partner see what it costs you. The invisibility leaves you carrying weight alone that could have been genuinely shared.`,
+      invitation: `Ask yourself honestly what difficulty you've been carrying invisibly in this relationship. Let your own difficulty be visible today, on purpose. Show the wobble instead of hiding it. Notice that visible difficulty doesn't undo the steadiness your partner relies on.`,
     },
 
     // ── 12 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '12_LOVE': {
       title: `12 in Ideal Partner — The Hanged Man`,
       tagline: `A Design of the Patient Deadline`,
-      mastery: `Real connection shows up for you once you release the grip on how or when it happens.`,
-      shadow: `You wait indefinitely for a relationship to clarify itself rather than ever actually engaging directly.`,
-      invitation: `Give your patience a deadline today, and commit to what the waiting has already revealed.`,
+      mastery: `Real connection shows up for you once you release the grip on how or when exactly it's supposed to happen. You trust timing that isn't forced, and relationships that arrive this way tend to be genuinely right rather than rushed into. That patience is a real strength, distinct from passivity, letting the right thing actually take shape. And the patience can have a deadline attached, once you're willing to act on what it's already shown you.`,
+      shadow: `You wait indefinitely for a relationship to clarify itself rather than ever actually engaging directly to move it forward. Underneath the waiting is often a fear that acting decisively and being wrong would be worse than staying in comfortable ambiguity. You let a relationship's status stay permanently unresolved, mistaking the waiting itself for patience. The indefinite wait costs you both the clarity and the relationship the waiting was meant to protect.`,
+      invitation: `Ask yourself honestly what the waiting has already revealed that you haven't acted on. Give your patience a deadline today, and commit to what the waiting has already revealed. Set an actual date and act when it arrives. Notice that a deadline doesn't undo the patience, it just gives it a shape.`,
     },
 
     // ── 13 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '13_LOVE': {
       title: `13 in Ideal Partner — Transformation`,
       tagline: `A Design of Quiet Growth`,
-      mastery: `Your love is genuinely metamorphic, bringing real intensity and willingness to grow because of a connection.`,
-      shadow: `You need every relationship to be transformative to feel real, manufacturing intensity where ease would serve better.`,
-      invitation: `Let one piece of relationship growth today happen quietly, without drama.`,
+      mastery: `Your love is genuinely metamorphic, bringing real intensity and a willingness to actually grow because of a connection. You let a relationship change you, in real, lasting ways, rather than staying the same person you were before it. That capacity for transformation through love is a genuine gift, not everyone lets themselves be changed this deeply. And the growth can happen quietly, without drama, and still be exactly as real.`,
+      shadow: `You need every relationship to be transformative to feel real, manufacturing intensity where ease would actually serve you better. Underneath the manufacturing is often a fear that a calm, undramatic relationship wouldn't be deep enough to matter. You escalate ordinary moments into significant ones, needing the intensity to confirm the connection is genuine. The manufactured intensity costs you relationships that would have grown you just as much, quietly.`,
+      invitation: `Ask yourself honestly whether this relationship needs the intensity or if you're supplying it. Let one piece of relationship growth today happen quietly, without drama. Let the change be undramatic and still count. Notice that quiet growth is no less real than the dramatic kind.`,
     },
 
     // ── 14 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '14_LOVE': {
       title: `14 in Ideal Partner — Temperance`,
       tagline: `A Design of Worked-Through Friction`,
-      mastery: `You're genuinely skilled at blending two lives into something that works for both people.`,
-      shadow: `You over-moderate the relationship to avoid real friction, smoothing over genuine differences.`,
-      invitation: `Let one real difference surface today and stay long enough to be worked through.`,
+      mastery: `You're genuinely skilled at blending two lives into something that actually works for both people, not just one. You find the workable middle between two different needs or habits without either person losing themselves. That blending skill is a real strength, and relationships with you tend to feel genuinely collaborative. And real differences can surface and get worked through, once you let friction do its actual job instead of smoothing past it.`,
+      shadow: `You over-moderate the relationship to avoid real friction, smoothing over genuine differences before they've actually been addressed. Underneath the smoothing is often a fear that real friction, allowed to surface, would threaten the harmony you've worked hard to maintain. You default to compromise before the actual disagreement has even been named. The premature smoothing costs you resolutions that would have held, instead of differences that just get buried again.`,
+      invitation: `Ask yourself honestly what real difference you've been smoothing over instead of addressing. Let one real difference surface today and stay long enough to be worked through. Don't rush to compromise before the disagreement is actually named. Notice that the friction doesn't have to threaten the relationship to be worth having.`,
     },
 
     // ── 15 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '15_LOVE': {
       title: `15 in Ideal Partner — The Devil`,
       tagline: `A Design of Chemistry Plus Tenderness`,
-      mastery: `Your romantic connections run on real, undeniable magnetism and honest desire.`,
-      shadow: `You mistake intensity for genuine compatibility, staying bound to chemistry that doesn't serve you otherwise.`,
-      invitation: `Ask today what your relationship offers outside its intensity.`,
+      mastery: `Your romantic connections run on real, undeniable magnetism and honest desire, not a diluted or apologetic version of wanting. You can hold real chemistry and real tenderness at once, without needing to choose between them. That capacity for full, honest desire is a genuine strength, rare enough that most people settle for one or the other. And the chemistry can be evaluated honestly for what else it offers, once you're willing to actually look.`,
+      shadow: `You mistake intensity for genuine compatibility, staying bound to chemistry that doesn't actually serve you outside the physical pull. Underneath the mistake is often a fear that questioning the chemistry would mean losing the one thing about the connection that feels undeniably real. You stay in a relationship because the pull is strong, without examining whether anything else is actually working. The intensity costs you relationships that would have served you better, evaluated honestly.`,
+      invitation: `Ask yourself honestly what this relationship offers you outside its intensity. Ask today what your relationship offers outside its intensity. Look at it clearly, without the chemistry doing the talking. Notice that the answer doesn't have to end the relationship, just inform it honestly.`,
     },
 
     // ── 16 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '16_LOVE': {
       title: `16 in Ideal Partner — The Tower`,
       tagline: `A Design of the Deliberate Conversation`,
-      mastery: `You sense when something's fundamentally not working before it's convenient to admit it.`,
-      shadow: `You provoke a relationship's collapse prematurely, out of impatience with uncertainty.`,
-      invitation: `Bring one piece of relational clarity today to an actual conversation, before acting alone on it.`,
+      mastery: `You sense when something's fundamentally not working before it's convenient or comfortable to admit it out loud. You catch the real signal early, rather than needing an obvious crisis to notice something is wrong. That early perception is a genuine strength, letting you address a problem before it fully compounds. And the clarity you sense can go into a real conversation, rather than a decision made unilaterally in your own head.`,
+      shadow: `You provoke a relationship's collapse prematurely, out of impatience with the uncertainty of letting things clarify naturally. Underneath the impatience is often a fear that sitting with ambiguity would be worse than forcing a resolution, even a destructive one. You act alone on a private read of the situation, ending or disrupting something before your partner even knows there's a problem. The premature action costs you a resolution that a real conversation might have actually produced.`,
+      invitation: `Ask yourself honestly whether you're clarifying this or just ending the uncertainty by force. Bring one piece of relational clarity today to an actual conversation, before acting alone on it. Say what you've noticed and let your partner respond. Notice that a real conversation doesn't require you to already know the outcome.`,
     },
 
     // ── 17 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '17_LOVE': {
       title: `17 in Ideal Partner — The Star`,
       tagline: `A Design of Present-Tense Hope`,
-      mastery: `You offer unwavering faith in who a partner is capable of becoming.`,
-      shadow: `You love someone's potential more than who they actually, currently are.`,
-      invitation: `Let your hope today meet your partner exactly where they currently are.`,
+      mastery: `You offer unwavering faith in who a partner is genuinely capable of becoming, seeing possibility others miss. You hold a real, sustaining hope for someone's growth, and that hope tends to actually help them get there. That capacity for faith in another person is a genuine gift, one that partners often credit for real change. And the hope can meet a partner exactly as they currently are, not only as who they might become.`,
+      shadow: `You love someone's potential more than who they actually, currently are, right now, unfinished and imperfect. Underneath the preference is often a fear that loving the present-tense version would mean settling for less than what's possible. You stay attached to a future version of your partner while the actual person in front of you goes quietly under-appreciated. The preference costs a partner the felt experience of being loved as they already are, not just as a work in progress.`,
+      invitation: `Ask yourself honestly whether you're loving who your partner is or who they might become. Let your hope today meet your partner exactly where they currently are. Appreciate the present version out loud, not just the potential one. Notice that meeting them where they are doesn't require giving up the hope.`,
     },
 
     // ── 18 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '18_LOVE': {
       title: `18 in Ideal Partner — The Moon`,
       tagline: `A Design of the Tested Feeling`,
-      mastery: `You sense a connection's truth before you can articulate it, a felt, wordless understanding.`,
-      shadow: `You let unprocessed fear color how you read a partner, projecting old wounds onto present behavior.`,
-      invitation: `Check one emotional read today against an actual conversation.`,
+      mastery: `You sense a connection's truth before you can fully articulate it, a felt, wordless understanding that usually turns out accurate. You pick up on the emotional undercurrent of a relationship before it's spoken out loud. That intuitive read is a genuine gift, and when tested it tends to hold up. And the read can be checked against an actual conversation, which sharpens the accuracy rather than undermining it.`,
+      shadow: `You let unprocessed fear color how you read a partner, projecting an old wound onto present, unrelated behavior. Underneath the projection is often a fear that questioning the read would mean losing the protective vigilance the fear currently provides. You interpret a partner's ordinary behavior through the lens of a past hurt that has nothing to do with them. The projection costs you accurate perception of the actual person in front of you, replaced by an old story.`,
+      invitation: `Ask yourself honestly whether this emotional read is about the present relationship or an old wound. Check one emotional read today against an actual conversation. Ask your partner directly rather than assuming your read is complete. Notice whether the read holds up once it's actually tested.`,
     },
 
     // ── 19 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '19_LOVE': {
       title: `19 in Ideal Partner — The Sun`,
       tagline: `A Design of Included Difficulty`,
-      mastery: `Your love runs on authentic joy and ease rather than struggle or proving yourself.`,
-      shadow: `You avoid a relationship, or hard conversations within it, the moment things stop feeling easy.`,
-      invitation: `Let one hard, unglamorous moment today stay in the relationship without deciding it's wrong.`,
+      mastery: `Your love runs on authentic joy and ease rather than struggle or the need to constantly prove yourself worthy of it. You bring real warmth and lightness into a relationship, and that ease is genuine, not performed. That capacity for joyful love is a real strength, and partners generally feel it as relief rather than superficiality. And the ease can hold through a hard, unglamorous moment too, once you stop reading difficulty as a sign something's wrong.`,
+      shadow: `You avoid a relationship, or hard conversations within it, the moment things stop feeling easy or light. Underneath the avoidance is often a fear that a hard moment means the joy was never real to begin with. You exit or deflect from difficulty, treating any friction as proof the relationship has gone wrong. The avoidance costs you relationships that would have deepened through the exact difficulty you were avoiding.`,
+      invitation: `Ask yourself honestly whether this hard moment actually threatens the relationship or is just ordinary difficulty. Let one hard, unglamorous moment today stay in the relationship without deciding it's wrong. Stay through it instead of exiting or deflecting. Notice that difficulty doesn't erase the ease that's actually there.`,
     },
 
     // ── 20 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '20_LOVE': {
       title: `20 in Ideal Partner — Judgement`,
       tagline: `A Design of the Honored Growth`,
-      mastery: `Your romantic connections function as genuine catalysts, calling something larger out of you.`,
-      shadow: `You stay in a relationship past its natural end because it once served as a catalyst.`,
-      invitation: `Honor one relationship today for the growth it already gave you, even while letting it go if it's time.`,
+      mastery: `Your romantic connections function as genuine catalysts, calling something larger and truer out of you than you'd have found alone. You grow in real, lasting ways because of who you've loved, not just alongside them. That catalytic quality is a genuine gift, one that makes your relationships meaningful even beyond their duration. And a relationship can be honored for the growth it gave you while still being released if it's actually over.`,
+      shadow: `You stay in a relationship past its natural end because it once served as a catalyst, and ending it feels like undoing the growth. Underneath the staying is often a fear that leaving would erase or invalidate everything the relationship already gave you. You hold on to a finished relationship, using its past catalytic value to justify a present that no longer serves you. The holding costs you the chance to actually carry the growth forward into something new.`,
+      invitation: `Ask yourself honestly whether this relationship is still catalyzing growth or just holding you in place. Honor one relationship today for the growth it already gave you, even while letting it go if it's time. Separate gratitude for the past from obligation to the present. Notice that releasing it doesn't undo what it already gave you.`,
     },
 
     // ── 21 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '21_LOVE': {
       title: `21 in Ideal Partner — The World`,
       tagline: `A Design of the Open Life`,
-      mastery: `Your love thrives when it isn't asked to stay small — a shared life that can genuinely expand.`,
-      shadow: `You let the relationship quietly close the world down, freedom traded for a comfortable routine.`,
-      invitation: `Let the relationship actually expand today, one new place or shared vision at a time.`,
+      mastery: `Your love thrives when it isn't asked to stay small, a shared life that can genuinely expand rather than settle into a fixed routine. You want a relationship that grows in scope, not just in years. That desire for genuine expansion is a real strength, keeping love from calcifying into mere comfort. And the relationship can actually expand, one new place or shared vision at a time, once you stop trading it for routine by default.`,
+      shadow: `You let the relationship quietly close the world down, real freedom traded for a comfortable, predictable routine. Underneath the trade is often a fear that keeping the world open would threaten the stability the routine currently provides. You settle into smaller and smaller shared horizons without ever deciding to. The narrowing costs you the expansive love your heart is actually built for.`,
+      invitation: `Ask yourself honestly what the relationship's world has quietly shrunk down to. Let the relationship actually expand today, one new place or shared vision at a time. Propose something genuinely new, not just a variation on routine. Notice that expansion doesn't threaten the stability you've built.`,
     },
 
     // ── 22 in RELATIONSHIP (Love channel — Ideal Partner / Relationship Harmony) ─
     '22_LOVE': {
       title: `22 in Ideal Partner — The Fool`,
       tagline: `A Design of the Carried Lesson`,
-      mastery: `You carry a genuine, uncommon openness to love — presence without an agenda.`,
-      shadow: `You repeat the same relational pattern with new people, with no accumulated wisdom carried forward.`,
-      invitation: `Carry one concrete lesson today from your last relationship into how you love now.`,
+      mastery: `You carry a genuine, uncommon openness to love, presence without an agenda or a script for how it should go. You meet someone new without the weight of expectations dictating the connection in advance. That openness is a real gift, letting relationships form freely rather than under pressure. And that same openness can carry real, accumulated wisdom forward, once you actually let a past lesson inform it.`,
+      shadow: `You repeat the same relational pattern with new people, with no accumulated wisdom actually carried forward from what came before. Underneath the repetition is often a fear that carrying a lesson forward would taint the fresh openness each new connection deserves. You meet someone new with genuine presence, and then unknowingly repeat the same dynamic that didn't work last time. The repetition costs you the growth your openness should be compounding into.`,
+      invitation: `Ask yourself honestly what pattern keeps recurring across your relationships, unexamined. Carry one concrete lesson today from your last relationship into how you love now. Name it specifically, not just as a vague sense of caution. Notice that carrying the lesson forward doesn't compromise your openness.`,
     },
 
     // ── 17 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
