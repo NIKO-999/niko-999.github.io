@@ -3340,19 +3340,19 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = isNamedSeed ? 'Named Karmic Seed' : 'Karmic Debt';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (kc && kc.heading) || data.label;
+      document.getElementById('pb-heading').textContent = (kc && (kc.title || kc.heading)) || data.label;
       document.getElementById('pb-body').innerHTML = kc ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATTERN</div>
-           <div class="pb-full-text">${kc.pattern || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${kc.mastery || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE CORE LESSON</div>
-           <div class="pb-full-text">${kc.lesson || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
+           <div class="pb-full-text">${kc.shadow || kc.pattern || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PATH FORWARD</div>
-           <div class="pb-full-text">${kc.path || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${kc.invitation || kc.path || ''}</div>
          </div>` : '';
 
       _mBanner.classList.add('open');
