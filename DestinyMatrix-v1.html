@@ -5220,39 +5220,24 @@ const ARCANA_ESSENCE = {
     document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
     document.getElementById('pb-heading').textContent = (pc && pc.heading) || c.governs;
 
-    const feedHtml =
-      `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT FEEDS THIS</div>
-         <div class="pb-full-text">Physical is ${_arcName(row.physical)}${_arcEssence(row.physical)}.
-           Energy is ${_arcName(row.energy)}${_arcEssence(row.energy)}.
-           Together those two shape your ${row.name}: ${_arcName(row.emotional)}${_arcEssence(row.emotional)}.</div>
-       </div>`;
     const whereHtml =
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">WHERE IT SITS</div>
          <div class="pb-full-text">${c.where}</div>
        </div>`;
 
-    document.getElementById('pb-body').innerHTML = whereHtml + feedHtml + (pc ?
+    document.getElementById('pb-body').innerHTML = whereHtml + (pc ?
       `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">WHY</div>
-         <div class="pb-full-text">${pc.why}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+         <div class="pb-full-text">${pc.mastery}</div>
        </div>
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
          <div class="pb-full-text">${pc.shadow}</div>
        </div>
        <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">POSITIVE STATE</div>
-         <div class="pb-full-text">${pc.positive}</div>
-       </div>
-       <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">NEGATIVE STATE</div>
-         <div class="pb-full-text">${pc.negative}</div>
-       </div>
-       <div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">THE OPENING</div>
-         <div class="pb-full-text">${pc.path}</div>
+         <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+         <div class="pb-full-text">${pc.invitation}</div>
        </div>` :
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">OPEN</div>
