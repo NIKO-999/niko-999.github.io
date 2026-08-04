@@ -3415,23 +3415,19 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-prog-name').style.color = themedHex(hex);
       document.getElementById('pb-section-label').textContent = 'Past Life Star';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-      document.getElementById('pb-heading').textContent = (pl && pl.heading) || data.label;
+      document.getElementById('pb-heading').textContent = (pl && (pl.title || pl.heading)) || data.label;
       document.getElementById('pb-body').innerHTML = pl ?
         `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">POSSIBLE ORIGIN EXPRESSIONS</div>
-           <div class="pb-full-text">${pl.expressions || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
+           <div class="pb-full-text">${pl.mastery || pl.expressions || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHARED THEME</div>
-           <div class="pb-full-text">${pl.theme || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE SHADOW</div>
+           <div class="pb-full-text">${pl.shadow || pl.imprint || ''}</div>
          </div>
          <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">THE EMOTIONAL IMPRINT</div>
-           <div class="pb-full-text">${pl.imprint || ''}</div>
-         </div>
-         <div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">HOW THIS MAY FEEL FAMILIAR TODAY</div>
-           <div class="pb-full-text">${pl.today || ''}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${pl.invitation || pl.today || ''}</div>
          </div>` : '';
 
       _mBanner.classList.add('open');
