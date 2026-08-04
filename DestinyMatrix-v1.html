@@ -3464,11 +3464,10 @@ const ARCANA_ESSENCE = {
         const activeTag = r.stage === _vals.activeStage ? ' · CURRENTLY ACTIVE' : '';
         return `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">STAGE ${r.stage} · ${ageLabel}${activeTag}</div>
-           <div class="pb-full-text"><em>${(c && c.heading) || (data.label + ' ' + num)}</em></div>
-           <div class="pb-full-text" style="margin-top:8px">${c ? c.why : ''}</div>
-           ${c && c.traits ? `<div class="pb-full-text" style="margin-top:8px">${c.traits}</div>` : ''}
+           <div class="pb-full-text"><em>${(c && (c.title || c.heading)) || (data.label + ' ' + num)}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${c ? (c.mastery || c.why) : ''}</div>
            ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.shadow}</div>` : ''}
-           ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.path}</div>` : ''}
+           ${c ? `<div class="pb-full-text" style="margin-top:8px">${c.invitation || c.path}</div>` : ''}
          </div>`;
       }).join('');
 
@@ -3864,11 +3863,10 @@ const ARCANA_ESSENCE = {
          const kd = DKarmicDebtNumberContent.get(n);
          if (!kd) return '';
          return `<div class="pb-full-section">
-           <div class="pb-full-label" style="color:${themedHex(hex)}">${kd.heading.toUpperCase()}</div>
-           <div class="pb-full-text">${kd.why}</div>
-           <div class="pb-full-text" style="margin-top:8px">${kd.traits}</div>
+           <div class="pb-full-label" style="color:${themedHex(hex)}">${(kd.title || kd.heading).toUpperCase()}</div>
+           <div class="pb-full-text">${kd.mastery || kd.why}</div>
            <div class="pb-full-text" style="margin-top:8px">${kd.shadow}</div>
-           <div class="pb-full-text" style="margin-top:8px">${kd.path}</div>
+           <div class="pb-full-text" style="margin-top:8px">${kd.invitation || kd.path}</div>
          </div>`;
        }).join('') : ''}` : '';
 
