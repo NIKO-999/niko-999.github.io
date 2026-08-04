@@ -2472,198 +2472,198 @@ window.DMicroContent = (function () {
     '1_RWM': {
       title: `1 in Relationship with Money — The Magician`,
       tagline: `A Design of the Kept Gift`,
-      mastery: `You initiate income actively — earning feels legitimate, deserved, and real.`,
-      shadow: `You minimize genuinely available resources because only self-generated money feels legitimate to hold onto.`,
-      invitation: `Accept one piece of unearned financial ease today without justifying it through extra effort.`,
+      mastery: `You initiate income actively, and earning genuinely feels legitimate, deserved, and real to you, not something you have to justify. You start ventures and generate money from a place of real confidence rather than apology. That sense of earned legitimacy is a genuine strength, letting money move toward you without internal resistance. And unearned financial ease can be accepted just as freely, once you notice the double standard you apply to it.`,
+      shadow: `You minimize genuinely available resources because only self-generated money feels legitimate enough to actually hold onto. Underneath the minimizing is often a fear that accepting unearned ease would mean the confident, self-made identity you've built isn't fully deserved. You decline or downplay a gift, inheritance, or windfall, treating it as somehow less real than earned income. The minimizing costs you real resources your own rule quietly disqualifies.`,
+      invitation: `Ask yourself honestly what unearned resource you've been minimizing or declining. Accept one piece of unearned financial ease today without justifying it through extra effort. Receive it plainly, without needing to earn it retroactively. Notice that accepting it doesn't undo your capacity to earn.`,
     },
 
     // ── 2 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '2_RWM': {
       title: `2 in Relationship with Money — The High Priestess`,
       tagline: `A Design of the Named Price`,
-      mastery: `You carry a real, quiet sense for when a financial opportunity is right.`,
-      shadow: `You leave that insight unclaimed and uncompensated, sensed but never stated aloud.`,
-      invitation: `State one specific price or value out loud today.`,
+      mastery: `You carry a real, quiet sense for when a financial opportunity is genuinely right, sensed before it's fully explainable in numbers. That instinct, when you actually voice it, tends to be accurate more often than not. It's a real financial asset, not just a private feeling to keep to yourself. And you're capable of stating a specific price or value plainly, out loud, rather than leaving it as an unspoken sense.`,
+      shadow: `You leave that insight unclaimed and uncompensated, sensed accurately but never actually stated aloud to anyone. Underneath the silence is often a fear that naming a specific number would expose the sense to scrutiny it can't fully justify. You know the right price or the right call and let someone else name it, or let the opportunity pass unclaimed. The silence costs you the compensation your own accurate sense had already earned.`,
+      invitation: `Ask yourself honestly what price or value you already sense but haven't said out loud. State one specific price or value out loud today. Say the number plainly, without hedging it. Notice that naming it doesn't require a fully rational justification first.`,
     },
 
     // ── 3 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '3_RWM': {
       title: `3 in Relationship with Money — The Empress`,
       tagline: `A Design of Pleasurable Saving`,
-      mastery: `You spend with real ease on comfort, beauty, and care for yourself and others.`,
-      shadow: `Your generosity moves freely outward while your own reserve stays thin.`,
-      invitation: `Set aside one specific portion of income today for your own future.`,
+      mastery: `You spend with real ease on comfort, beauty, and care, for yourself and for the people around you. That generosity is a genuine strength, and the richness you create with money is real, not wasteful. You're capable of extending that same ease to your own future, not just the present moment. And setting aside a real reserve doesn't require sacrificing the pleasure you're actually good at creating.`,
+      shadow: `Your generosity moves freely outward while your own reserve stays thin, under-tended relative to how well you tend everyone else's comfort. Underneath the thinness is often a fear that saving for yourself would compete with the generosity that feels like your actual identity. You spend easily on shared or others' comfort while your own future goes quietly unfunded. The thin reserve costs you a security your generosity, redirected slightly, could easily build.`,
+      invitation: `Ask yourself honestly what portion of your spending has gone outward without any going toward your own reserve. Set aside one specific portion of income today for your own future. Treat it with the same ease you'd apply to any other pleasurable spending. Notice that saving for yourself doesn't make you less generous.`,
     },
 
     // ── 4 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '4_RWM': {
       title: `4 in Relationship with Money — The Emperor`,
       tagline: `A Design of Tested Delegation`,
-      mastery: `You build and defend real financial structure, a firm hand on every account.`,
-      shadow: `You can't imagine your money being fine without your constant oversight.`,
-      invitation: `Hand one small piece of financial management today to a system or person you trust.`,
+      mastery: `You build and defend real financial structure, keeping a firm, competent hand on every account you manage. That structural discipline is a genuine strength, and your finances tend to be organized in a way that actually holds up. You're capable of delegating a piece of that management without the structure collapsing. And trusting a system or person with part of the oversight doesn't undo the discipline you've already built.`,
+      shadow: `You can't imagine your money being fine without your constant, personal oversight of every single account and decision. Underneath the constant oversight is often a fear that delegating any piece would mean losing the control that's kept things stable. You hold every financial thread yourself, even the ones a trusted system could easily handle. The constant oversight costs you time and ease that real, tested delegation would free up.`,
+      invitation: `Ask yourself honestly what piece of financial management you could actually hand off. Hand one small piece of financial management today to a system or person you trust. Delegate it fully, not just partially. Notice that the structure holds even without your hand on every single piece.`,
     },
 
     // ── 5 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '5_RWM': {
       title: `5 in Relationship with Money — The Hierophant`,
       tagline: `A Design of the Tested Rule`,
-      mastery: `You check financial choices against a real sense of proper, sanctioned tradition.`,
-      shadow: `You pass up genuinely good opportunities simply because they don't match an inherited "right way."`,
-      invitation: `Name one inherited money rule today and test whether it reflects your own values.`,
+      mastery: `You check financial choices against a real, grounded sense of tradition and proper practice, not just impulse. That grounding is a genuine strength, keeping your financial choices consistent with values you actually hold. You're capable of testing an inherited rule honestly, rather than following it automatically. And updating the rule where it no longer fits doesn't mean abandoning the values underneath it.`,
+      shadow: `You pass up genuinely good opportunities simply because they don't match an inherited "right way" of handling money. Underneath the passing up is often a fear that deviating from the inherited rule would mean betraying the tradition it came from. You apply an old standard automatically, without checking whether it actually reflects your own current values or circumstances. The automatic application costs you opportunities a tested, updated rule would have actually allowed.`,
+      invitation: `Ask yourself honestly which money rule you follow automatically without ever having tested it. Name one inherited money rule today and test whether it reflects your own values. Examine it directly instead of assuming it. Notice that updating the rule doesn't mean discarding the tradition entirely.`,
     },
 
     // ── 6 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '6_RWM': {
       title: `6 in Relationship with Money — The Lovers`,
       tagline: `A Design of the Weighed Want`,
-      mastery: `Your financial choices are genuinely relational, considering what a partner would think or need.`,
-      shadow: `Your own financial preference gets perpetually deferred to someone else's.`,
-      invitation: `Make one financial decision today based purely on your own preference.`,
+      mastery: `Your financial choices are genuinely relational, weighing what a partner would think or need alongside your own view. That relational consideration is a genuine strength, and it produces financial decisions that actually work for a shared life. You're capable of making a purely self-directed financial choice too, without that undermining the relationship. And weighing a partner's needs doesn't require permanently deferring your own.`,
+      shadow: `Your own financial preference gets perpetually deferred to someone else's, quietly and by default, in nearly every decision. Underneath the deferring is often a fear that prioritizing your own preference would look selfish or threaten the relationship's harmony. You default to what a partner would want before even fully forming your own view. The perpetual deferring costs you a financial life that reflects your own actual preferences, not just accommodation of someone else's.`,
+      invitation: `Ask yourself honestly what financial preference you've been deferring without even stating it. Make one financial decision today based purely on your own preference. State it and act on it without pre-negotiating it away. Notice that this doesn't damage the relational consideration you're actually good at.`,
     },
 
     // ── 7 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '7_RWM': {
       title: `7 in Relationship with Money — The Chariot`,
       tagline: `A Design of the Registered Milestone`,
-      mastery: `You carry real ambition and momentum toward the next financial target.`,
-      shadow: `Money earned never actually gets to feel earned, chased past before it's acknowledged.`,
-      invitation: `Pause today after one financial milestone, long enough to actually register it.`,
+      mastery: `You carry real ambition and momentum toward the next financial target, driving your income forward without stalling. That drive is a genuine strength, and it means your financial trajectory rarely goes stagnant. You're capable of pausing to actually register a milestone once you reach it, without that pause costing you the momentum. And registering the win doesn't slow down the next one.`,
+      shadow: `Money earned never actually gets to feel earned, chased past before it's even fully acknowledged as a real accomplishment. Underneath the chasing is often a fear that stopping to register a win would mean losing the drive that got you there. You hit a financial target and immediately move to the next one, without the current one ever registering as complete. The unregistered milestones cost you the satisfaction your actual achievements have already earned.`,
+      invitation: `Ask yourself honestly which recent financial milestone you never actually let yourself register. Pause today after one financial milestone, long enough to actually register it. Stop and name it as achieved before moving to the next target. Notice that the pause doesn't cost you your forward momentum.`,
     },
 
     // ── 8 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '8_RWM': {
       title: `8 in Relationship with Money — Justice`,
       tagline: `A Design of the Closed Account`,
-      mastery: `You carry a sharp, real orientation toward financial fairness and precision.`,
-      shadow: `Your mental ledger never fully closes, small imbalances tracked long after they'd naturally resolve.`,
-      invitation: `Consciously close one old financial account today that you're still mentally tracking.`,
+      mastery: `You carry a sharp, real orientation toward financial fairness and precision, noticing an imbalance others would miss entirely. That precision is a genuine strength, and it keeps your financial dealings honest and accurate. You're capable of consciously closing an old account, even a small imbalance, once you decide it's actually resolved. And closing it doesn't require abandoning your underlying commitment to fairness.`,
+      shadow: `Your mental ledger never fully closes, small imbalances tracked long after they'd naturally have resolved on their own. Underneath the perpetual tracking is often a fear that closing the ledger prematurely would mean letting an actual unfairness go unaddressed. You keep tabs on a small financial imbalance from years ago, unable to declare it settled. The perpetual tracking costs you mental space for something that's functionally already over.`,
+      invitation: `Ask yourself honestly what old financial imbalance you're still mentally tracking that's actually resolved. Consciously close one old financial account today that you're still mentally tracking. Declare it settled, explicitly, even if it wasn't perfectly even. Notice that closing it doesn't mean you've abandoned fairness as a value.`,
     },
 
     // ── 9 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
     '9_RWM': {
       title: `9 in Relationship with Money — The Hermit`,
       tagline: `A Design of the Accepted Partnership`,
-      mastery: `You carry real self-sufficiency, earning and managing money independently.`,
-      shadow: `You undercharge or under-earn specifically to avoid the discomfort of financial interdependence.`,
-      invitation: `Ask for one specific piece of financial help or partnership today.`,
+      mastery: `You carry real self-sufficiency, earning and managing money independently and competently without needing to lean on anyone. That independence is a genuine strength, and it means you can handle your own financial life reliably. You're capable of asking for real financial help or partnership without it undoing that self-sufficiency. And accepting interdependence, when it's actually useful, doesn't make you any less capable.`,
+      shadow: `You undercharge or under-earn specifically to avoid the discomfort of financial interdependence that a bigger role might require. Underneath the undercharging is often a fear that needing anyone financially would mean losing the independence that defines you. You keep your financial footprint small enough to never require partnership or help from anyone. The self-imposed smallness costs you income and opportunity that real interdependence would unlock.`,
+      invitation: `Ask yourself honestly what financial help you've avoided asking for out of a need to stay fully independent. Ask for one specific piece of financial help or partnership today. Make the request directly, without minimizing it. Notice that asking doesn't undo the self-sufficiency you've already proven.`,
     },
 
     // ── 10 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '10_RWM': {
       title: `10 in Relationship with Money — Wheel of Fortune`,
       tagline: `A Design of the Trusted Cycle`,
-      mastery: `Your financial rhythm is genuinely cyclical, feast and famine, surge and recede.`,
-      shadow: `You unconsciously undermine steady income because the wave pattern feels more familiar than stability.`,
-      invitation: `Protect one steady income source today through its full cycle, without disrupting it.`,
+      mastery: `Your financial rhythm is genuinely cyclical, feast and famine, surge and recede, and you can actually work with that rhythm rather than fighting it. That comfort with natural fluctuation is a genuine strength, letting you weather a downturn without panic. You're capable of protecting a steady income stream through its full cycle, once you trust that steadiness isn't a threat. And stability doesn't erase the rhythm you're used to, it just adds a floor underneath it.`,
+      shadow: `You unconsciously undermine steady income because the wave pattern feels more familiar and more like yourself than actual stability does. Underneath the undermining is often a fear that a truly steady income would mean losing the identity built around riding financial waves. You disrupt a source of consistent income right as it starts to actually stabilize. The disruption costs you the security a steady stream, protected through its cycle, would have provided.`,
+      invitation: `Ask yourself honestly what steady income source you've been quietly undermining. Protect one steady income source today through its full cycle, without disrupting it. Let it run without interference this time. Notice that the stability doesn't erase the rhythm you're used to.`,
     },
 
     // ── 11 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '11_RWM': {
       title: `11 in Relationship with Money — Strength`,
       tagline: `A Design of the Named Need`,
-      mastery: `You carry real capacity to earn, support, and provide financially for others.`,
-      shadow: `That giving becomes depleting because it's never balanced by asking for the same in return.`,
-      invitation: `Name one specific financial need out loud today to someone capable of helping.`,
+      mastery: `You carry real capacity to earn, support, and provide financially for others, and that capacity is a genuine strength you can rely on. You show up for people who need financial support, consistently and without resentment. That providing capacity is real, not performative, and people around you actually depend on it well. And you're capable of naming your own financial need out loud, without that undermining your ability to keep providing.`,
+      shadow: `That giving becomes depleting because it's never balanced by asking for the same kind of support in return. Underneath the imbalance is often a fear that voicing a need would compete with the provider identity you've built your worth around. You give financial support freely while your own needs go unspoken and unaddressed. The imbalance costs you the reciprocity that would let your own giving actually be sustainable.`,
+      invitation: `Ask yourself honestly what financial need you've never actually voiced to anyone. Name one specific financial need out loud today to someone capable of helping. Say it plainly, without minimizing it or offsetting it with an apology. Notice that naming it doesn't make you less capable of providing for others.`,
     },
 
     // ── 12 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '12_RWM': {
       title: `12 in Relationship with Money — The Hanged Man`,
       tagline: `A Design of the Ended Denial`,
-      mastery: `You carry a real instinct to withhold financial comfort from yourself out of quiet discipline.`,
-      shadow: `That denial outlives whatever it was originally protecting, well past the point of serving anything.`,
-      invitation: `Spend, deliberately and without justification, on one thing for your own comfort today.`,
+      mastery: `You carry a real instinct for financial discipline, capable of genuinely delaying gratification when it actually serves a larger purpose. That discipline is a real strength, letting you build toward something bigger than immediate comfort. You're capable of spending on your own comfort deliberately, without that undoing your underlying discipline. And discipline can coexist with real, unapologetic comfort, once you actually try it.`,
+      shadow: `That denial outlives whatever it was originally protecting, continuing well past the point of actually serving any real purpose. Underneath the outlived denial is often a fear that spending on comfort now would mean the discipline itself was never really necessary. You withhold financial ease from yourself out of a habit that's disconnected from any current actual goal. The outlived denial costs you comfort your own resources have already earned and can afford.`,
+      invitation: `Ask yourself honestly what this denial is currently protecting, if anything at all. Spend, deliberately and without justification, on one thing for your own comfort today. Choose it plainly, without needing a productivity reason to back it. Notice that spending once doesn't undo the discipline you've built.`,
     },
 
     // ── 13 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '13_RWM': {
       title: `13 in Relationship with Money — The Death`,
       tagline: `A Design of the Small Adjustment`,
-      mastery: `Your financial shifts arrive as complete, real overhauls rather than gradual change.`,
-      shadow: `You skip smaller, earlier course-corrections in favor of waiting for the dramatic reset.`,
-      invitation: `Make one small, incremental financial adjustment today, rather than waiting for a forced overhaul.`,
+      mastery: `Your financial shifts arrive as complete, real overhauls, transforming a whole system at once rather than nudging it incrementally. That capacity for total change is a genuine strength, letting you rebuild a financial life fundamentally when it's actually called for. You're capable of making a small, incremental adjustment too, without needing to wait for the dramatic version. And the small correction now can prevent needing the larger overhaul later.`,
+      shadow: `You skip smaller, earlier course-corrections in favor of waiting for the dramatic reset that finally forces real change. Underneath the skipping is often a fear that a small adjustment wouldn't be significant enough to actually count as real change. You let a financial problem compound until it demands a complete overhaul, rather than addressing it early and incrementally. The waiting costs you the smoother, less disruptive path a small correction would have provided.`,
+      invitation: `Ask yourself honestly what small financial adjustment you've been postponing in favor of a bigger eventual fix. Make one small, incremental financial adjustment today, rather than waiting for a forced overhaul. Take the modest action now, not the dramatic one later. Notice that the small correction still counts as real change.`,
     },
 
     // ── 14 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '14_RWM': {
       title: `14 in Relationship with Money — Temperance`,
       tagline: `A Design of the Chosen Middle`,
-      mastery: `You carry a real, steady financial equilibrium when centered.`,
-      shadow: `You swing into strict restriction or full indulgence the moment real stress enters.`,
-      invitation: `Notice today the moment stress pulls your spending toward an extreme, and choose the steadier response.`,
+      mastery: `You carry a real, steady financial equilibrium when centered, blending saving and spending into something sustainable. That equilibrium is a genuine strength, and when you're grounded, your financial choices reflect real balance. You're capable of catching the moment stress starts to pull you toward an extreme, before it takes hold. And returning to the steadier middle doesn't require eliminating stress first, just noticing the pull.`,
+      shadow: `You swing into strict restriction or full indulgence the moment real stress enters, abandoning the equilibrium you otherwise hold well. Underneath the swing is often a fear that staying centered under real pressure isn't actually possible, so the extreme feels more honest. You shift hard toward one pole the instant stress arrives, losing the steadiness that's usually your strength. The swing costs you the balance that would have actually served you better through the stress.`,
+      invitation: `Ask yourself honestly whether you're currently swinging toward an extreme in response to stress. Notice today the moment stress pulls your spending toward an extreme, and choose the steadier response. Catch it before the swing fully takes hold. Notice that steadiness is still available even under real pressure.`,
     },
 
     // ── 15 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '15_RWM': {
       title: `15 in Relationship with Money — The Devil`,
       tagline: `A Design of the Honest Habit`,
-      mastery: `You carry a real capacity to notice a specific financial compulsion running on autopilot.`,
-      shadow: `You mistake that compulsive habit for simply how things are, never actually examined.`,
-      invitation: `Name one compulsive financial habit honestly today, and ask what would happen if you loosened it.`,
+      mastery: `You carry a real capacity to notice a specific financial compulsion running on autopilot, seeing the pattern for what it is. That honest noticing is a genuine strength, letting you catch a habit before it fully runs your finances. You're capable of naming the compulsion plainly and asking what would happen if you actually loosened it. And examining it honestly tends to reduce its grip rather than tightening it.`,
+      shadow: `You mistake that compulsive habit for simply how things are, a fixed trait rather than an actual, examinable pattern. Underneath the mistaking is often a fear that naming the compulsion honestly would mean confronting how much control it actually has. You live around the habit, accommodating it, without ever really questioning whether it's necessary. The unexamined habit costs you the freedom that naming it would have already started to restore.`,
+      invitation: `Ask yourself honestly what financial habit runs on autopilot without you ever questioning it. Name one compulsive financial habit honestly today, and ask what would happen if you loosened it. Actually test loosening it in a small, low-stakes way. Notice that examining it doesn't require eliminating it entirely, just questioning it.`,
     },
 
     // ── 16 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '16_RWM': {
       title: `16 in Relationship with Money — The Tower`,
       tagline: `A Design of the Early Signal`,
-      mastery: `You carry a real instinct to maintain financial stability under pressure.`,
-      shadow: `You maintain the appearance of stability instead of addressing the strain underneath, until it forces a sudden reversal.`,
-      invitation: `Identify one financial strain being minimized today, and address it directly.`,
+      mastery: `You carry a real instinct to maintain financial stability under pressure, holding steady when circumstances get genuinely difficult. That instinct for stability is a genuine strength, and it's kept real crises from developing in the past. You're capable of identifying the strain underneath a stable appearance and addressing it directly, before it forces a sudden reversal. And addressing the strain early doesn't undo the stability, it protects it.`,
+      shadow: `You maintain the appearance of stability instead of addressing the actual strain underneath, until it eventually forces a sudden, disruptive reversal. Underneath the maintained appearance is often a fear that acknowledging the real strain would collapse the stability you're working so hard to project. You keep the surface calm while an underlying financial problem compounds, unaddressed, until it can't be contained anymore. The maintained appearance costs you the chance to address the strain while it was still manageable.`,
+      invitation: `Ask yourself honestly what financial strain you've been minimizing under a stable-looking surface. Identify one financial strain being minimized today, and address it directly. Name it plainly and take one concrete action toward it. Notice that addressing it early doesn't cause the collapse you were protecting against.`,
     },
 
     // ── 17 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '17_RWM': {
       title: `17 in Relationship with Money — The Star`,
       tagline: `A Design of the Attended Corner`,
-      mastery: `You carry real ease turning creative or inspired work into income.`,
-      shadow: `You hope other financial areas will simply improve on their own, without direct action.`,
-      invitation: `Name one financial area you've been hoping will improve today, and take one concrete action toward it.`,
+      mastery: `You carry real ease turning creative or inspired work into actual income, translating vision into something payable. That ease is a genuine strength, particularly in areas most people find harder to monetize. You're capable of applying the same active energy to other neglected financial areas, not just the inspired ones. And direct action in an under-attended area tends to move it faster than hoping ever would.`,
+      shadow: `You hope other financial areas will simply improve on their own, without direct action, the way your inspired work naturally has. Underneath the hoping is often a fear that the active effort your creative work requires wouldn't transfer to areas that feel less inspired. You wait for a less exciting financial area to resolve itself while actively working only where the ease already exists. The hoping costs you improvement in exactly the areas that need deliberate attention, not luck.`,
+      invitation: `Ask yourself honestly what financial area you've been hoping would improve without any direct action. Name one financial area you've been hoping will improve today, and take one concrete action toward it. Apply the same active energy you use elsewhere. Notice that direct action here doesn't require it to feel inspired first.`,
     },
 
     // ── 18 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '18_RWM': {
       title: `18 in Relationship with Money — The Moon`,
       tagline: `A Design of the Checked Number`,
-      mastery: `You carry a real, felt sensitivity about your financial state.`,
-      shadow: `Your financial anxiety runs ahead of the actual facts, more intense than the numbers would justify.`,
-      invitation: `Look directly today at one specific, avoided financial number.`,
+      mastery: `You carry a real, felt sensitivity about your financial state, picking up on a shift before it's fully confirmed by the numbers. That sensitivity is a genuine strength, an early-warning system that often catches something real. You're capable of checking that felt sense directly against the actual numbers, which sharpens its accuracy rather than dismissing it. And looking directly at an avoided number tends to be less frightening than the anxiety about it.`,
+      shadow: `Your financial anxiety runs ahead of the actual facts, more intense and more constant than the numbers would actually justify. Underneath the runaway anxiety is often a fear that checking the real numbers would confirm something worse than the vague dread currently suggests. You avoid a specific financial number, letting the anxiety fill in the gap with something scarier than reality. The avoidance costs you the relief that an accurate, checked number would likely provide.`,
+      invitation: `Ask yourself honestly what specific financial number you've been avoiding looking at directly. Look directly today at one specific, avoided financial number. Check it plainly, without a story attached in advance. Notice whether the actual number is less alarming than the anxiety about it.`,
     },
 
     // ── 19 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '19_RWM': {
       title: `19 in Relationship with Money — The Sun`,
       tagline: `A Design of the Visible Worry`,
-      mastery: `You carry a real, radiant ease around money, maintained even under real uncertainty.`,
-      shadow: `That consistent brightness prevents anyone, including you, from actually addressing what's uncertain.`,
-      invitation: `Let one specific financial worry be visible today to someone trustworthy.`,
+      mastery: `You carry a real, radiant ease around money, genuinely maintained even when the underlying situation is actually uncertain. That ease is a real strength, keeping panic from taking over during ordinary financial fluctuation. You're capable of letting a real worry be visible too, without that undoing the ease you're known for. And visible worry, shared with someone trustworthy, tends to get addressed faster than a hidden one ever could.`,
+      shadow: `That consistent brightness prevents anyone, including you, from actually addressing what's genuinely uncertain underneath it. Underneath the maintained brightness is often a fear that showing real worry would undo the ease that feels like your core identity. You project confidence over a financial situation that actually needs direct, honest attention. The projected brightness costs you the help and clarity that visibility would have already provided.`,
+      invitation: `Ask yourself honestly what financial worry you've been keeping hidden behind consistent brightness. Let one specific financial worry be visible today to someone trustworthy. Say the real concern plainly, without the usual reassuring gloss. Notice that visibility doesn't erase the ease, it just makes room for honesty alongside it.`,
     },
 
     // ── 20 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '20_RWM': {
       title: `20 in Relationship with Money — Judgement`,
       tagline: `A Design of the Early Wake-Up`,
-      mastery: `You eventually face financial truths fully and honestly.`,
-      shadow: `That clarity arrives well after the signs pointing toward it first appeared.`,
-      invitation: `Act today on one current financial sign, before it forces a full reckoning.`,
+      mastery: `You eventually face financial truths fully and honestly, without flinching once you actually get there. That capacity for full honesty is a genuine strength, and once you engage with a financial reality, you handle it well. You're capable of acting on a current sign now, before it forces the full reckoning you're already good at handling later. And acting early doesn't require waiting for the crisis point to arrive first.`,
+      shadow: `That clarity arrives well after the signs pointing toward it had already appeared, sometimes long after. Underneath the delay is often a fear that acting on an early sign would mean confronting the truth before you feel ready to handle it. You notice the warning signs and let them accumulate rather than acting on them individually. The delay costs you the smaller, earlier interventions that would have prevented the eventual full reckoning.`,
+      invitation: `Ask yourself honestly what current financial sign you've been noticing but not acting on. Act today on one current financial sign, before it forces a full reckoning. Take the small action now, while it's still manageable. Notice that acting early doesn't require the full clarity you'd eventually reach anyway.`,
     },
 
     // ── 21 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '21_RWM': {
       title: `21 in Relationship with Money — The World`,
       tagline: `A Design of the Counted Win`,
-      mastery: `You measure real financial progress against a comprehensive, ideal version of success.`,
-      shadow: `Real, current success never gets to feel like success because the bigger picture hasn't arrived yet.`,
-      invitation: `Name one financial win today that's genuinely real, and let it count as complete on its own terms.`,
+      mastery: `You measure real financial progress against a comprehensive, ideal version of success, keeping the bigger picture always in view. That comprehensive standard is a genuine strength, preventing you from settling for less than what's actually possible. You're capable of letting a current, real win count as complete on its own terms, without needing the entire picture to arrive first. And counting the current win doesn't lower the larger standard you're still working toward.`,
+      shadow: `Real, current success never gets to feel like success because the bigger, comprehensive picture hasn't fully arrived yet. Underneath the non-feeling is often a fear that celebrating a partial win would mean settling for less than the whole vision requires. You reach genuine financial milestones and immediately measure them against what's still missing. The non-feeling costs you the satisfaction of wins that are, by any reasonable measure, already real and complete.`,
+      invitation: `Ask yourself honestly which recent financial win you never let yourself count because the bigger picture wasn't finished. Name one financial win today that's genuinely real, and let it count as complete on its own terms. Stop measuring it against the unfinished whole. Notice that counting it doesn't lower your larger standard.`,
     },
 
     // ── 22 in RELATIONSHIP WITH MONEY (Money Channel) ───────────────────────
     '22_RWM': {
       title: `22 in Relationship with Money — The Fool`,
       tagline: `A Design of the Backed Trust`,
-      mastery: `You carry a real, spontaneous openness to financial risk and a genuine belief things will work out.`,
-      shadow: `You ask trust alone to do the work planning was meant to do, leaving the landing to chance.`,
-      invitation: `Pair your next financial risk today with one small, concrete piece of preparation.`,
+      mastery: `You carry a real, spontaneous openness to financial risk and a genuine belief that things will work out, more often than not backed by real evidence. That openness is a genuine strength, letting you take chances most people would talk themselves out of. You're capable of pairing that trust with one small, concrete piece of preparation, without it dampening the openness. And a little preparation tends to make the leap land more often, not less.`,
+      shadow: `You ask trust alone to do the work planning was meant to do, leaving the actual landing entirely to chance. Underneath the reliance on trust alone is often a fear that adding preparation would somehow taint the purity of the leap of faith. You take the risk on belief without any concrete backup, and when it doesn't land, there's nothing to catch the fall. The unpaired trust costs you outcomes that even minimal preparation would have secured.`,
+      invitation: `Ask yourself honestly what small piece of preparation you've been skipping in favor of pure trust. Pair your next financial risk today with one small, concrete piece of preparation. Add the backup plan without abandoning the leap itself. Notice that preparation doesn't diminish the trust, it just gives it a floor.`,
     },
 
     // ── Career Paths (Money Channel — Best Career Paths For Each Arcana) ──
