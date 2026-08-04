@@ -3801,16 +3801,9 @@ const ARCANA_ESSENCE = {
     document.getElementById('pb-prog-name').style.color = themedHex(hex);
     document.getElementById('pb-section-label').textContent = sectionLabel;
     document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
-    // Numerology cards (Life Path/Birthday Number/Personal Year) use their
-    // own subheading vocabulary, distinct from the Arcana-wide THE WHY/THE
-    // SHADOW/THE INVITATION labels every other position on this shared
-    // template uses — a deliberate identity split, not an inconsistency.
-    const isNumerologyKey = data.key === 'LIFEPATH' || data.key === 'BIRTHDAY' || data.key === 'PYEAR';
     const isNewVoice = !!(mc && mc.mastery);
-    const whyLabel    = isNumerologyKey ? 'THE CORE VIBRATION'   : (isNewVoice ? 'MASTERY' : 'THE WHY');
-    const traitsLabel = isNumerologyKey ? 'HOW IT LIVES IN YOU'  : 'KEY TRAITS';
-    const shadowLabel = isNumerologyKey ? 'THE SHADOW SIDE'      : 'THE SHADOW';
-    const pathLabel    = isNumerologyKey ? 'THE OPENING'         : 'THE INVITATION';
+    const whyLabel    = isNewVoice ? 'MASTERY' : 'THE WHY';
+    const shadowLabel = 'THE SHADOW';
 
     document.getElementById('pb-heading').textContent = (mc && (mc.title || mc.heading)) || data.label;
     document.getElementById('pb-body').innerHTML = mc ?
@@ -3818,10 +3811,6 @@ const ARCANA_ESSENCE = {
          <div class="pb-full-label" style="color:${themedHex(hex)}">${whyLabel}</div>
          <div class="pb-full-text">${(isNewVoice ? mc.mastery : mc.why) || ''}</div>
        </div>
-       ${isNumerologyKey && mc.traits ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">${traitsLabel}</div>
-         <div class="pb-full-text">${mc.traits}</div>
-       </div>` : ''}
        <div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">${shadowLabel}</div>
          <div class="pb-full-text">${mc.shadow || ''}</div>
@@ -3857,10 +3846,6 @@ const ARCANA_ESSENCE = {
        ${data.key === 'LIFEPATH' && mc.love ? `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">IN LOVE & RELATIONSHIPS</div>
          <div class="pb-full-text">${mc.love}</div>
-       </div>` : ''}
-       ${isNumerologyKey && mc.path ? `<div class="pb-full-section">
-         <div class="pb-full-label" style="color:${themedHex(hex)}">${pathLabel}</div>
-         <div class="pb-full-text">${mc.path}</div>
        </div>` : ''}
        ${data.key === 'LIFEPATH' && _vals.karmicDebtFlags && _vals.karmicDebtFlags.length && window.DKarmicDebtNumberContent ? _vals.karmicDebtFlags.map(n => {
          const kd = DKarmicDebtNumberContent.get(n);
