@@ -4173,7 +4173,7 @@ const ARCANA_ESSENCE = {
   // ── Star Index provider ──────────────────────────────────────────────────
   _tierProviders.micro = {
     list: () => MICRO
-      .map((d, i) => ({ idx: i, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
+      .map((d, i) => ({ idx: i, key: d.key, label: d.label, num: d.num, color: '#' + new THREE.Color(d.color).getHexString() }))
       .filter((r) => r.idx !== 7 || _sexLineActive) // Sexual Line: only list it when it's actually on the diagram
       .filter((r) => !NAME_KEYS.has(MICRO[r.idx].key) || _nameActive) // name-based numbers: only once a name is entered
       .filter((r) => !COMPAT_KEYS.has(MICRO[r.idx].key) || _compatActive), // Compatibility: only once a partner DOB is entered
@@ -5324,13 +5324,51 @@ const ARCANA_ESSENCE = {
     }));
   }
 
+  // Sub-groups within the micro tier, keyed by MICRO's own `key`. Replaces
+  // the old single "Ancestral & Channels" catch-all, which flattened ~30
+  // unrelated position types (love/money, ancestral corners, karmic debt,
+  // sexual line, past life, heart zone, chakras, yearly energy, the three
+  // purposes, plus every numerology star) into one undifferentiated list.
+  //
+  // Numerology-panel items (LIFEPATH/BIRTHDAY/PYEAR/PINNACLES/CHALLENGES,
+  // the NAME_KEYS name-based numbers, and COMPATIBILITY) are deliberately
+  // left OUT of this map and filtered out below — they already have their
+  // own dedicated Numerology Index panel, and showing them here too just
+  // duplicated the same rows across both panels.
+  const MICRO_GROUPS = [
+    { title: 'Love & Money',        keys: ['LOVE', 'MON', 'RWM', 'MK', 'MEP', 'CAREER', 'GA'] },
+    { title: 'Ancestral Square',    keys: ['F', 'G', 'H', 'I'] },
+    { title: 'Ancestral Lineage',   keys: ['F1', 'G1', 'H1', 'I1', 'F2', 'G2', 'H2', 'I2'] },
+    { title: 'Karmic & Past',       keys: ['KARMA', 'SEXLINE', 'PASTLIFE'] },
+    { title: 'Heart Zone & Chakras', keys: ['HZV', 'HZH', 'MUL', 'SWA'] },
+    { title: 'Yearly Energy',       keys: ['YE'] },
+    { title: 'Three Life Purposes', keys: ['PP', 'SOP', 'SPP'] },
+    { title: 'Most Prominent',      keys: ['PROMINENT'] },
+  ];
+  const NUMEROLOGY_PANEL_KEYS = new Set([
+    'LIFEPATH', 'BIRTHDAY', 'PYEAR', 'PINNACLES', 'CHALLENGES',
+    'EXPRESSION', 'SOULURGE', 'PERSONALITY', 'MATURITY',
+    'HIDDENPASSION', 'SUBCONSCIOUS', 'CORNERCAP', 'BRIDGE', 'COMPATIBILITY',
+  ]);
+
   function buildGroups() {
     const groups = [{ title: 'Core Cross', rows: coreRows() }];
     if (_tierProviders.micro) {
-      groups.push({
-        title: 'Ancestral & Channels',
-        rows: _tierProviders.micro.list().map(r => ({ ...r, fly: () => _tierProviders.micro.fly(r.idx) })),
+      const all = _tierProviders.micro.list()
+        .filter(r => !NUMEROLOGY_PANEL_KEYS.has(r.key))
+        .map(r => ({ ...r, fly: () => _tierProviders.micro.fly(r.idx) }));
+      const byKey = new Map(all.map(r => [r.key, r]));
+      const used = new Set();
+      MICRO_GROUPS.forEach(g => {
+        const rows = g.keys.map(k => byKey.get(k)).filter(Boolean);
+        rows.forEach(r => used.add(r.key));
+        if (rows.length) groups.push({ title: g.title, rows });
       });
+      // Safety net: any micro-tier key not yet assigned to a group above
+      // (e.g. a newly added position type) still shows up here instead of
+      // silently vanishing from the index.
+      const leftover = all.filter(r => !used.has(r.key));
+      if (leftover.length) groups.push({ title: 'Other', rows: leftover });
     }
     if (_tierProviders.talent) {
       groups.push({
