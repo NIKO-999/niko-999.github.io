@@ -28,198 +28,198 @@ window.DMicroContent = (function () {
     '8_A': {
       title: `8 in Core Character — Justice`,
       tagline: `A Design of the Reading Room`,
-      mastery: `You read fairness and imbalance before anyone says a word, and you hold yourself to the same standard you hold everyone else to. That double application is what makes people trust you specifically — not because you're gentle, but because you're consistent, and consistency is rarer and more valuable than most people realize until they've lived without it.`,
-      shadow: `You judge everyone by a standard you quietly exempt yourself from. You keep score, notice every imbalance in how you're treated, and complain that the world isn't fair — while somehow never turning the same precise ledger on your own conduct. The exemption is invisible to you because it always feels like a special case.`,
-      invitation: `Apply your own standard to yourself once today, out loud, before you apply it to anyone else.`,
+      mastery: `You read the balance of a room before anyone speaks. Who is carrying more than their share, who is quietly taking, where the arrangement stopped being fair three months ago and nobody said so — you clock all of it, fast, without effort. The rare part is that you turn the same instrument on yourself. You hold your own conduct to the standard you measure everyone else by, and that single fact is why people trust your judgment when they wouldn't trust someone smarter.`,
+      shadow: `The ledger stays open on everyone but you. You track every imbalance in how you're treated with total precision, build a running account of what you're owed, and never once audit your own column with the same rigour. Your exemptions always feel justified in the moment — this was different, that was a special case, they don't understand the pressure you were under. From outside it reads as someone who demands fairness constantly and practises it selectively, and it costs you the exact credibility your accuracy should have earned.`,
+      invitation: `Take the standard you've been holding someone else to and apply it to yourself out loud, today, in front of them. Pick a real one — a specific thing you've been quietly resenting them for. Say what you expect of them, then say plainly where you fall short of the same expectation. The point isn't apology, it's showing that the measure runs both directions, and you'll feel the room's posture toward you change the moment it does.`,
     },
 
     // ── 1 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '1_A': {
       title: `1 in Core Character — The Magician`,
       tagline: `A Design of Instant Competence`,
-      mastery: `You radiate competence before you've done anything to earn it. People trust you with things that matter almost on sight, because something in your bearing simply reads as capable — and more often than not, you back that impression up the moment you're actually tested.`,
-      shadow: `You become everyone's default problem-solver and let the mask do all the work, never showing the days you have nothing left. People stop checking if you're okay because you never once looked like you weren't, which means the one time you actually needed someone, nobody thought to ask.`,
-      invitation: `Let one person see you not have it handled today.`,
+      mastery: `Competence comes off you before you've done a thing to prove it. People hand you things that matter within minutes of meeting you, and they're not being careless — they're reading something real. You back it up when tested, which is why the impression holds instead of collapsing the way it does for people who only perform capability. Rooms reorganise around you quickly because you're the one who looks like you'll actually handle it.`,
+      shadow: `The mask does all the work and you stop taking it off. You become the default problem-solver in every group, and because you never once looked like you were struggling, nobody develops the habit of checking. The days you have nothing left look identical from outside to the days you're fine — same steady face, same handled tone. So when you finally needed someone, there was no one in the habit of asking, and you took that as proof you were right to rely on yourself.`,
+      invitation: `Tell one person today, plainly, about something you currently don't have handled. Not a past struggle you've already resolved into a good story — a live one, still unresolved. Say the sentence without the recovery attached to it and then stop talking, which will be the hard part. What you're looking for is whether they move toward you, and they will, and that's the information you've been missing.`,
     },
 
     // ── 2 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '2_A': {
       title: `2 in Core Character — The High Priestess`,
       tagline: `A Design of the Held Depth`,
-      mastery: `You hold real depth, and people sense there's more to you without needing it explained or performed. That quiet reserve reads as substance rather than distance — the sense that whatever you eventually choose to say has actually been considered first.`,
-      shadow: `You guard so completely it reads as cold instead of deep. People stop trying to get past a wall that never signals anything's worth reaching for, and the very depth you're protecting ends up going almost entirely unwitnessed, mistaken for simply having nothing there.`,
-      invitation: `Let one true thing show on your face today, even briefly, without explaining it.`,
+      mastery: `There is obviously more going on in you than you're showing, and people register it immediately. You don't fill silence to make others comfortable, so when you do speak, it lands with weight most people can't generate no matter how loudly they talk. Your reserve reads as consideration rather than absence — the sense that anything you say has already been through something before it reached the air. People lean toward you specifically because you're not handing yourself out.`,
+      shadow: `The guarding goes total and stops being a choice. You withhold so consistently that the wall gives off no signal at all — no hint that there's something behind it worth the effort of reaching. People try twice, get nothing legible back, and reclassify you from deep to simply cold. The depth you were protecting ends up witnessed by no one, which was never the trade you thought you were making.`,
+      invitation: `Let one true thing land on your face today and leave it there unexplained. A reaction you'd normally flatten, a flicker of what you actually thought — hold it for two seconds instead of erasing it. Don't narrate it afterward or apologise for it, because the explaining is how you take it back. You're testing whether being briefly readable costs you anything, and it won't.`,
     },
 
     // ── 3 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '3_A': {
       title: `3 in Core Character — The Empress`,
       tagline: `A Design of the Room That Exhales`,
-      mastery: `People relax the moment you walk in. Your warmth is real, not performed, and it makes space for others simply by your being present — you don't have to work at hospitality, it's closer to your resting state.`,
-      shadow: `You become everyone's landing pad by default, holding space for everyone and rarely being held yourself. The tiredness never announces itself with any single dramatic moment — it just accumulates quietly, invisible to the people who've come to rely on you being endlessly available.`,
-      invitation: `Say "I don't have capacity for that right now" once today, and mean it.`,
+      mastery: `Rooms exhale when you enter them. People drop their shoulders around you without deciding to, and they say things to you they hadn't planned on saying. None of this is technique — hospitality is closer to your resting state than a skill you deploy, which is exactly why it works on people who are immune to the performed version. You make others feel permitted, and that is a genuinely uncommon thing to do simply by being present.`,
+      shadow: `You become the landing pad and the arrangement never reverses. Everyone brings their weight to you, you hold all of it, and it does not occur to a single one of them that you might need the same. There's no dramatic breaking point — the tiredness just compounds, week over week, entirely invisible because you keep receiving people exactly as warmly on the empty days. You end up surrounded by people who love you and have no idea what's happening to you.`,
+      invitation: `Say "I don't have capacity for that right now" out loud today, once, to someone who will be surprised to hear it. Don't soften it with an explanation or offer an alternative time — the sentence works because it stops there. Watch what actually happens next, which is almost certainly nothing bad. You're gathering evidence that your capacity has a limit and the world tolerates it.`,
     },
 
     // ── 4 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '4_A': {
       title: `4 in Core Character — The Emperor`,
       tagline: `A Design of Assumed Command`,
-      mastery: `A room organizes itself around your steadiness before you've said a word. That's real, earned authority rather than performance — people take direction from you because something about your presence signals you can actually be trusted to hold it.`,
-      shadow: `People stop bringing you their actual thoughts because you look like you've already decided. Agreement arrives too fast to be trustworthy, and you can go a long time not realizing that what looks like consensus is actually just people declining to argue with you.`,
-      invitation: `Ask a real question today and actually wait for the answer.`,
+      mastery: `A room organises itself around you before you've said anything. People look to you for the call, and they're right to — you hold the weight without visible strain and you don't flinch when a decision turns out to cost something. This isn't projected authority or borrowed rank. It's the specific steadiness of someone who can be relied on to still be standing there when the situation gets difficult, and everyone can feel it.`,
+      shadow: `People stop telling you what they actually think. You look decided before the conversation starts, so they skip the part where they'd have disagreed and go straight to agreeing. The consensus around you gets faster and thinner every year, and you read the speed as alignment rather than what it is — a room that has learned arguing with you is not worth the friction. You end up making decisions on information that was quietly filtered before it ever got to you.`,
+      invitation: `Ask one real question today and then stay silent long past the point it gets uncomfortable. Pick something you already have a view on and ask someone who reports to you or defers to you what they'd do instead. Do not respond to the first answer — wait, because the first answer is the safe one and the second is the true one. If nothing more honest surfaces, that itself tells you how long the filtering has been running.`,
     },
 
     // ── 5 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '5_A': {
       title: `5 in Core Character — The Hierophant`,
       tagline: `A Design of Assumed Rightness`,
-      mastery: `People trust your read on things before you've proven anything specific. You carry the presence of someone who already knows how things are properly done, and that presence alone is often enough to settle a room's uncertainty.`,
-      shadow: `You get boxed into always having to be right. People stop bringing you their doubts because they've cast you as already settled, which means you lose access to exactly the uncertainty and disagreement that would have kept your own thinking sharp.`,
-      invitation: `Say "I don't know" out loud today, to someone who expects you to.`,
+      mastery: `You carry the bearing of someone who knows how things are properly done. People take your read before you've justified it, and an uncertain room settles when you state your position — not because you argued well, but because you sounded like someone who has already thought this through and found the floor. You're the person others check their instinct against. That's a real form of authority and you did not have to ask for it.`,
+      shadow: `The role hardens into a cage. You get cast as the one who already knows, so people stop bringing you their doubts, their half-formed objections, the things that would have sharpened you. You start defending positions past the point you believe them because reversing would break the character everyone's assigned you. The thinking that earned the authority quietly stops getting fed, and you're the last person in the room who'll notice.`,
+      invitation: `Say "I don't know" today to someone who fully expects you to. Pick a question inside your actual area of authority, not a safe one outside it, and let the sentence sit without immediately following it with a theory. Notice the pull to recover with a partial answer and refuse it. What you're rebuilding is the channel that brings you disagreement, and it only reopens if people see the certainty is optional.`,
     },
 
     // ── 6 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '6_A': {
       title: `6 in Core Character — The Lovers`,
       tagline: `A Design of the Meaningful Yes`,
-      mastery: `Your attention isn't handed out freely, so being chosen by you actually means something. People want in specifically because you don't pick everyone, and that discernment gives your closeness a weight that indiscriminate warmth never has.`,
-      shadow: `You read as constantly evaluating people against a standard they can't see. Closeness with you starts to feel like an audition instead of a place to land, and people who might have opened up to you instead spend their energy trying to pass a test you never actually announced.`,
-      invitation: `Let your warmth arrive first today, before any sense of being weighed.`,
+      mastery: `You don't hand your attention to everyone, so when someone actually gets it, they know. People want your closeness precisely because you don't distribute it freely, and that scarcity is not coldness — it's discernment, and it gives whatever you offer real weight. You choose people. It shows, and it's part of what makes being chosen by you land differently than being liked by someone who likes everyone.`,
+      shadow: `The discernment starts announcing itself before the warmth does. People feel evaluated against a standard they were never shown, so being near you starts to feel like an audition rather than an arrival. They spend their energy performing worthiness instead of actually opening up. The very thing that would have let you see them clearly never happens, because you made them audition for it first.`,
+      invitation: `Let your warmth go first today, before any read or assessment. Pick someone you'd normally size up before deciding how much to give, and give the warm version immediately, without waiting to see if they've earned it. Notice how much faster something real shows up when the evaluation isn't running first. This is the one thing worth testing more than once.`,
     },
 
     // ── 7 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '7_A': {
       title: `7 in Core Character — The Chariot`,
       tagline: `A Design of Visible Momentum`,
-      mastery: `You carry visible direction before you've even said where you're headed. People sense real momentum in you, and it's not an illusion — you're actually going somewhere, and that legible drive is part of what makes people want to follow.`,
-      shadow: `You look so busy that people stop bringing you the ordinary, casual stuff — the small check-ins, the low-stakes conversations that build real closeness over time. You end up isolated inside your own momentum, surrounded by people who assumed you didn't have room for them.`,
-      invitation: `Let yourself be seen doing nothing today, unhurried, on purpose.`,
+      mastery: `You carry direction before you've said a word about where you're headed. People clock it instantly — you're going somewhere, and it's not performed urgency, it's actual forward motion they can feel from across a room. That legibility is what draws people to follow you before you've even made the ask. Nobody has to guess whether you're serious. It's visible in how you move.`,
+      shadow: `The momentum reads as unavailability, and the small stuff stops arriving. People decide you're too busy for a low-stakes check-in, too focused for the casual conversation that would have actually built the closeness. So they simply stop offering it. You end up surrounded by people who assumed correctly that you didn't have room, and the isolation inside your own drive doesn't register as isolation — it just feels like being productive, right up until it doesn't.`,
+      invitation: `Let yourself be seen doing nothing today, deliberately, in front of someone who usually only sees you in motion. Sit still somewhere visible, no task in hand, no destination pending. Let the stillness run long enough that it's obviously on purpose and not just a pause between things. What you're proving to the people watching is that you have room, and the fastest way to prove it is to demonstrate it, not announce it.`,
     },
 
     // ── 9 in CORE CHARACTER (A · Left / Day of Birth) ───────────────────────
     '9_A': {
       title: `9 in Core Character — The Hermit`,
       tagline: `A Design of Presumed Solitude`,
-      mastery: `People give you space without being asked, because you clearly process things internally rather than out loud. That's a real gift, not standoffishness — it means you're rarely crowded by people who haven't first considered whether you actually want company.`,
-      shadow: `People stop including you at all, assuming you'd rather be alone even on the days you genuinely wouldn't. Invitations just quietly dry up over time, not from any single decision, but from an accumulated assumption nobody ever checked with you directly.`,
-      invitation: `Tell someone explicitly today that you want to be included.`,
+      mastery: `People give you space without needing to be asked, because it's obvious you process things internally rather than out loud. That's a real gift, not distance — it means the people around you have already learned to consider whether you actually want company before they impose. You're rarely crowded, and you rarely have to defend the solitude you need. Most people never earn that kind of default respect from a group.`,
+      shadow: `The default respect calcifies into permanent exclusion. People stop asking at all, assuming solitude is always the answer, and the assumption compounds silently over months until you're simply not on the list anymore. Nobody made a decision to leave you out — it just accumulated, invitation by unissued invitation, and you're the only one who can feel the gap it left. By the time you notice, it looks less like a misunderstanding and more like a verdict.`,
+      invitation: `Tell one person directly today that you want to be included in something specific — not a general statement, an actual thing coming up. Name it, and say plainly that you'd like to be asked next time without them having to guess. Watch their reaction, because most people will be relieved to finally know. This is the single sentence that undoes months of accumulated assumption.`,
     },
 
     // ── 10 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '10_A': {
       title: `10 in Core Character — The Wheel of Fortune`,
       tagline: `A Design of the Watched Shift`,
-      mastery: `You're genuinely interesting to watch — things move around you, circumstances shift, and people stay curious about what's coming next for you in a way that keeps them engaged with your life over time.`,
-      shadow: `You get typecast as unreliable simply because you're associated with change. People hedge their bets around you and hesitate to build anything long-term, assuming the next shift is always just around the corner, even in the periods where you're actually completely steady.`,
-      invitation: `Show someone one thread in your life that's stayed exactly the same for years.`,
+      mastery: `You're genuinely interesting to watch. Circumstances shift around you at a rate that keeps people curious rather than exhausted, and they stay engaged with your life over years because it never quite settles into something predictable. Change doesn't unsettle you the way it unsettles most people — you move with it, and that ease reads as a kind of confidence others don't have. People remember your story specifically because it keeps moving.`,
+      shadow: `The association hardens into a verdict — unreliable, simply because things move around you. People hedge their bets before committing to anything long-term with you, assuming the next shift is already loading. This holds true even during the long stretches where you're actually completely steady. You end up paying an unreliability tax for a season you're not even currently in, and nobody thinks to check whether the assumption still applies.`,
+      invitation: `Show one person today a single thread in your life that hasn't changed in years. A habit, a relationship, a commitment you've kept without interruption — pick something real and specific and put it in front of them plainly. Don't over-explain it or justify why you're bringing it up. You're giving them evidence that contradicts the story they've built about you, and evidence works faster than argument.`,
     },
 
     // ── 11 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '11_A': {
       title: `11 in Core Character — Strength`,
       tagline: `A Design of the Safe Weight`,
-      mastery: `People bring you their hardest moments without asking permission first, because something about you reads as able to hold real weight without cracking. That capacity is genuine, and it makes you a rare, trusted presence in a crisis.`,
-      shadow: `You become everyone's shock absorber by default. Your own hard moments go completely unnoticed because your composure never visibly cracks — which means the same steadiness that draws people to you for support is precisely what keeps anyone from ever offering it back.`,
-      invitation: `Let your composure visibly slip once today, in front of someone you trust.`,
+      mastery: `People bring you the worst moments of their lives without asking first whether you're up for it, because something about you reads as capable of holding real weight without cracking under it. That capacity is genuine, not performed toughness, and it's rare enough that you become the person a crisis actually gets handed to. You stay functional when other people would fold. That's not a small thing, and everyone around you knows it even if they've never said it out loud.`,
+      shadow: `You become the default shock absorber and nobody ever checks whether you're absorbing too much. Your own hard moments go completely unnoticed, because your composure never visibly cracks in front of anyone, so there's no signal for people to respond to. The same steadiness that makes you trusted in a crisis is exactly what guarantees nobody offers the same back to you. You end up the strongest person in every room and the least supported person in it, and both are true for the same reason.`,
+      invitation: `Let your composure actually slip once today, in front of someone you trust, on purpose. Don't wait for a big enough crisis to justify it — pick an ordinary moment and just stop holding it together for thirty seconds. Say what's actually hard right now instead of managing your face through it. You're not testing whether they can handle it. You're testing whether you'll let them try.`,
     },
 
     // ── 12 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '12_A': {
       title: `12 in Core Character — The Hanged Man`,
       tagline: `A Design of the Different Clock`,
-      mastery: `You're not moved by the same urgency as everyone else, and from that different pace you see angles the room genuinely misses. That patience is a real advantage, not a lack of engagement — it just doesn't look like engagement to people running faster.`,
-      shadow: `You get read as detached or checked-out because your pace doesn't match the room's. People leave you out of urgent decisions, assuming you won't engage with the timeline, and your genuinely valuable perspective never gets asked for because nobody thought to wait for it.`,
-      invitation: `Say the sharp observation you're holding today, out loud, instead of just holding it.`,
+      mastery: `You run on a different clock than everyone else in the room, and that gap is where you see what they miss. Urgency doesn't move you the way it moves other people, so you catch the angle that only shows up once the panic settles. This is a real advantage, not disengagement, even though it rarely looks like engagement to people sprinting past you. The observations you're sitting on are usually the ones the room needed most and asked for least.`,
+      shadow: `The different pace reads as checked-out, and people stop waiting for you. You get left out of urgent decisions entirely, quietly, because nobody wants to slow down to your speed when the clock is running. Your actually valuable perspective never gets solicited, because asking would mean waiting, and waiting is exactly what the room has decided it can't afford. You watch decisions get made badly in real time and say nothing, because nobody asked, and you've stopped expecting them to.`,
+      invitation: `Say the sharp observation you're holding today, out loud, unprompted, before someone asks for it. Don't wait for the room to slow down to your pace — interrupt at your own speed instead. Keep it to one clear sentence so it can't be dismissed as a tangent. You already know the thing that would change the decision. The only step left is saying it before it's too late to matter.`,
     },
 
     // ── 13 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '13_A': {
       title: `13 in Core Character — Transformation`,
       tagline: `A Design of Grounded Gravity`,
-      mastery: `You carry the grounded gravity of someone who's already survived something real. People sense it without you saying a word, and it earns you a kind of trust that usually takes much longer to build.`,
-      shadow: `People handle you too carefully, assuming you're always processing something deep beneath the surface. You get starved of the light, easy, trivial stuff — small talk, silliness, the ordinary texture of a normal day — because everyone around you has quietly decided you're above it.`,
-      invitation: `Bring one genuinely trivial joy into a conversation today, without earning it first.`,
+      mastery: `You carry the grounded weight of someone who has already survived something real, and people register it instantly without you explaining a thing. It earns you a trust most people spend years building and never quite reach. Strangers open up to you faster than they open up to people they've known longer, because something in your presence signals you won't flinch at what they say. That's not an accident of appearance — it's earned gravity, and it precedes you into every room.`,
+      shadow: `People start handling you like glass, assuming there's always something heavy running underneath. You get starved of the trivial — the small talk, the silliness, the ordinary texture of an unremarkable day — because everyone around you has quietly decided you're too deep for it. The isolation is polite and well-intentioned and still isolation. You end up missing the lightness you actually want, simply because nobody thought to offer it to someone who looks like you.`,
+      invitation: `Bring one genuinely trivial joy into a conversation today without earning it first — no serious topic to justify the shift, no meaningful segue. Just say the small, silly thing out loud. Watch the room's surprise, and let it be surprised. You're teaching people that lightness is allowed with you, and they will only learn it by watching you offer it first.`,
     },
 
     // ── 14 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '14_A': {
       title: `14 in Core Character — Temperance`,
       tagline: `A Design of the Trusted Middle`,
-      mastery: `You can hold two opposing views in the same room without dismissing either side. People trust you specifically because you're good in the middle of tension, able to translate between positions that would otherwise talk past each other.`,
-      shadow: `You become the designated peacekeeper in every group, smoothing things over even when you're the one who actually needs smoothing. Your own conflicts go unaddressed, because you've become so identified with resolving other people's tension that nobody thinks to help you with yours.`,
-      invitation: `Land somewhere today. Give one clear, unmixed opinion.`,
+      mastery: `You hold two opposing positions in the same room without dismissing either one, and that's a genuinely rare skill. People trust you specifically because you're useful in the middle of a fight — you translate between sides that would otherwise just talk past each other and escalate. Groups quietly funnel their tension toward you because you're the one who can actually metabolise it. That's real value, and it's earned through years of staying steady when everyone else picked a side too fast.`,
+      shadow: `You become the group's designated peacekeeper, and the role never comes off. You smooth over conflict on autopilot, even in the exact moments you're the one who actually needs smoothing, and nobody notices because you're too busy managing theirs. Your own disputes sit unresolved for years, since you've become so identified with fixing other people's tension that it doesn't occur to anyone — including you — that you might need the same service. You've mediated a hundred fights and never once let anyone mediate yours.`,
+      invitation: `Land somewhere today. Give one clear, unmixed opinion on something you'd normally hold in careful balance. State a side, plainly, with no "but I also see the other view" attached to it. Pick something low enough stakes that landing badly won't cost you much, and use it to practise the muscle. You need proof that having a side doesn't collapse the trust people place in your fairness.`,
     },
 
     // ── 15 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '15_A': {
       title: `15 in Core Character — The Devil`,
       tagline: `A Design of the Compelling Edge`,
-      mastery: `People sense something compelling and a little dangerous about you. That magnetic edge is real, and it draws people in with a pull that more conventionally pleasant presences simply don't generate.`,
-      shadow: `People either chase the intensity for the wrong reasons or keep a wary distance, quietly deciding you're "too much" before they've actually gotten to know you. Your genuine gentleness keeps getting missed entirely, buried under a first impression that reads as more extreme than you are.`,
-      invitation: `Let your softness show today, right alongside the edge, not instead of it.`,
+      mastery: `People feel something compelling and slightly dangerous about you before they can name it. That edge is real, and it generates a pull that more conventionally pleasant people simply cannot produce no matter how hard they try. You draw the kind of attention that isn't idle curiosity — it's genuine interest, sharpened by the sense that you're not entirely safe and entirely worth knowing anyway. That combination is rare and you carry it without needing to perform it.`,
+      shadow: `The intensity attracts exactly the wrong reasons or repels everyone before they get close enough to see past it. People either chase the edge for a thrill that has nothing to do with actually knowing you, or they decide from a distance that you're too much and never test the theory. Your real gentleness — and it's real — gets buried under a first impression that reads far more extreme than you actually are. You end up either used or avoided, and rarely simply known.`,
+      invitation: `Let your softness show today, right alongside the edge, not as a replacement for it. Say or do one gentle thing in the same conversation where you'd normally let the intensity carry the whole room. Don't apologise for the edge to make room for the softness — let both sit next to each other, visibly, at once. People need to see the combination to stop mistaking the edge for the whole story.`,
     },
 
     // ── 16 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '16_A': {
       title: `16 in Core Character — The Tower`,
       tagline: `A Design of the Truth-Jolt`,
-      mastery: `You cut straight through the polite fictions the rest of the room is quietly maintaining. That electric honesty is a real gift — the thing everyone else was avoiding saying, you actually say, and rooms are often better for it once the shock passes.`,
-      shadow: `People start managing information around you and bracing for disruption before you've actually done anything. You get pre-emptively excluded from delicate moments, treated as a risk to be contained rather than a person who might, this time, have something gentler to offer.`,
-      invitation: `Say one honest thing gently today, on purpose, to prove the honesty doesn't have to detonate.`,
+      mastery: `You cut through the polite fiction everyone else in the room is quietly protecting. The thing nobody wanted to say out loud, you say, and it lands like a jolt of electricity that clears the air whether people wanted it cleared or not. That honesty is a real gift, not a personality flaw people tolerate — rooms are frequently better for what you said, once the initial shock passes and the truth has time to settle. You don't perform bluntness for effect. You simply refuse to maintain a fiction everyone else has quietly agreed to.`,
+      shadow: `People start managing information around you before you've done anything at all. They brace for disruption preemptively, exclude you from delicate conversations on reflex, and treat you as a risk to be contained rather than a person who might, this particular time, have something careful to offer. The exclusion compounds — the less you're included, the more your rare appearances feel disruptive by contrast, which confirms the very reputation that got you excluded in the first place. You become the storm everyone plans around instead of the person occasionally in the room.`,
+      invitation: `Say one honest thing today, gently, on purpose, specifically to prove the honesty doesn't have to detonate. Choose something true you'd normally hold back or deliver too sharply, and deliver it slowly, with care for how it lands. Watch the room's face for the moment they realise this isn't the blast they braced for. You're building a track record, one gentle truth at a time, and it's the only thing that will actually change how people brace around you.`,
     },
 
     // ── 17 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '17_A': {
       title: `17 in Core Character — The Star`,
       tagline: `A Design of Unhardened Hope`,
-      mastery: `You carry hope that hasn't hardened into naivety. People feel safe being discouraged around you, because your optimism is genuinely earned rather than performed, and it doesn't flinch away from hearing something difficult first.`,
-      shadow: `You become everyone's designated source of encouragement, expected to stay hopeful more or less on demand. Your own low days start to feel like a betrayal of the role you've been cast in, so you hide them — which means the one place you might have received hope back never gets the chance to offer it.`,
-      invitation: `Let your own doubt be visible today, without rushing to reassure anyone it'll be fine.`,
+      mastery: `Your hope hasn't hardened into naivety, and people can feel the difference. They can be genuinely discouraged around you, because your optimism has already absorbed the bad news and stayed intact anyway — it's earned, not performed, and it doesn't need to look away from something hard to survive it. That combination makes you a safe place to be honest about a bad day, which is rarer than simple positivity and worth far more. People bring you their real state precisely because you won't flinch from it.`,
+      shadow: `You get cast as the group's permanent source of encouragement, expected to be hopeful more or less on schedule. Your own low days start to feel like a betrayal of the role everyone's assigned you, so you hide them behind the same steady optimism you offer everyone else. The one place that might have handed hope back to you never gets the chance, because you never show it the need. You end up propping up everyone's morale on a reserve nobody is refilling.`,
+      invitation: `Let your own doubt be visible today, out loud, without immediately following it with reassurance that it'll be fine. Tell someone specifically what you're actually unsure about right now. Resist the reflex to close the sentence with something comforting for their sake. You're finding out whether the hope people rely on from you can also be offered to you, and it can — but only if you stop hiding the doubt underneath it.`,
     },
 
     // ── 18 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '18_A': {
       title: `18 in Core Character — The Moon`,
       tagline: `A Design of the Weather Behind the Eyes`,
-      mastery: `You carry a rich, shifting interior life that draws people in with real curiosity about who you actually are. There's genuine depth behind your eyes, and people can sense it even before they know you well enough to name it.`,
-      shadow: `People guess at your mood instead of asking directly, and they usually guess toward the worst. Your silence gets filled with their own anxieties rather than your actual state, and a great deal of unnecessary tension gets generated simply because nobody thought to check.`,
-      invitation: `Name what you're actually feeling today, out loud, in one sentence.`,
+      mastery: `You carry a rich, shifting interior life that shows on your face before you say a word about it, and people notice. There's real curiosity generated by that visible depth — people want to know what's actually happening behind your eyes, even before they know you well enough to ask directly. That mystery isn't distance. It's the natural result of having a genuinely complex inner world that doesn't flatten itself for anyone's convenience.`,
+      shadow: `People start guessing at your mood instead of asking, and they guess toward the worst almost every time. Your silence becomes a screen they project their own anxieties onto. A room can fill with unnecessary tension over a mood you're not even in, simply because nobody thought to check. The gap between what you're actually feeling and what people assume you're feeling widens the longer it goes unaddressed, and you end up managing other people's misreads of your own inner weather.`,
+      invitation: `Name what you're actually feeling today, out loud, in one plain sentence, to someone who's clearly guessing. Don't dress it up or make it poetic — say it flat, the way you'd report a fact. Do this the moment you notice someone reading your silence wrong. One accurate sentence does more to settle a room than an hour of them guessing ever will.`,
     },
 
     // ── 19 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '19_A': {
       title: `19 in Core Character — The Sun`,
       tagline: `A Design of Instant Warmth`,
-      mastery: `People feel lighter just being near you. That warmth is genuine rather than performed, and it's one of the most immediately likable things about you — it puts people at ease before you've done anything specific to earn it.`,
-      shadow: `People assume the brightness is constant and unconditional, and they get confused rather than caring on the days you're actually struggling. The very thing that makes you easy to love also makes it hard for anyone to notice when you're not okay.`,
-      invitation: `Let one bad day show today, without apologizing for it.`,
+      mastery: `People feel lighter just standing near you, and it's not something you're producing on purpose. The warmth is genuine, not performed, and it's one of the most immediately likable things about you — it puts strangers at ease before you've done a single specific thing to earn it. You make rooms warmer by occupying them. That's a rare, real effect, and most people who have it never even notice they're generating it.`,
+      shadow: `People start assuming the brightness is constant and unconditional, a fixed feature rather than a mood. On the days you're actually struggling, they get confused instead of concerned. The very thing that makes you easy to love also makes it nearly impossible for anyone to clock when you're not okay, because your baseline reads as fine even when it isn't. You end up absorbing your own hard days alone, precisely because you're too consistently warm for anyone to think to check.`,
+      invitation: `Let one bad day actually show today, without apologising for it or performing your way back to brightness halfway through. Say, plainly, that today isn't a good one. Don't soften the landing for the people around you by cracking a joke to recover the mood. You're giving people the chance to finally notice, and they can't take that chance if you keep handing them the usual light instead.`,
     },
 
     // ── 20 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '20_A': {
       title: `20 in Core Character — Judgement`,
       tagline: `A Design of Imminent Arrival`,
-      mastery: `You carry the charge of someone actively becoming something bigger. People sense the momentum, and it's real — there's a genuine sense of unfolding around you that makes people want to watch what you turn into.`,
-      shadow: `People relate to who you're becoming instead of who you actually are right now. You end up half-seen, waiting alongside everyone else for the "real," finished version of you to show up — while the actual, current you goes largely unmet in the meantime.`,
-      invitation: `Let someone meet exactly who you are today, not who you're on your way to becoming.`,
+      mastery: `You carry the charge of someone actively becoming something bigger, and it's not a story you're telling — people feel the unfolding whether or not you've announced any of it. There's a genuine sense of imminence around you, the feeling that something is arriving, and it makes people pay closer attention to your life than they typically would to someone else's. You're never quite finished, and that incompleteness reads as momentum rather than deficiency. People want to watch what you turn into next, because the trajectory is visibly real.`,
+      shadow: `People start relating to who you're becoming instead of who you actually are right now, today, in front of them. You end up half-seen, waiting alongside everyone else for the finished version of you to arrive, while the current, actual you goes largely unmet in the meantime. Even your closest relationships can end up oriented toward your potential rather than your present, which leaves you strangely lonely inside all that anticipated arrival. You start to feel like a draft nobody's reading yet.`,
+      invitation: `Let someone meet exactly who you are today, not who you're becoming. Tell them plainly, without qualifying it against future plans, what's true about you right now. Resist the pull to frame yourself as a work in progress or apologise for not being further along. You're asking to be met in the present tense for once, and the only way to get that is to stop selling the future version first.`,
     },
 
     // ── 21 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '21_A': {
       title: `21 in Core Character — The World`,
       tagline: `A Design of Presumed Completion`,
-      mastery: `You carry real wholeness — the ease of someone who's already arrived somewhere most people are still working toward. That settledness is genuine, and it's part of why people find you reassuring to be around.`,
-      shadow: `People assume you don't need anything, since you don't look like you're missing anything. Your actual struggles stay invisible, and support stops reaching you specifically because everyone else has already decided, without checking, that you've got it covered.`,
-      invitation: `Show one still-forming, unfinished part of yourself to someone today.`,
+      mastery: `You carry a genuine sense of wholeness — the ease of someone who's already arrived somewhere most people are still striving toward. That settledness isn't a mask. People can feel that you're not visibly missing anything, and it makes you reassuring to be near in a way that's hard to fake. You don't radiate need, and in a world full of people performing that they're fine, your actual fine reads as something rarer and more grounding.`,
+      shadow: `People assume you don't need anything at all, precisely because you don't look like you're missing anything. Your real struggles go completely invisible, and support quietly stops reaching you. It's not out of neglect — everyone around you has already decided, without ever checking, that you've got it covered. You end up carrying real difficulty entirely alone inside a reputation for having arrived, and asking for help starts to feel like it would contradict everything people believe about you.`,
+      invitation: `Show one still-forming, unfinished part of yourself to someone today, plainly, without wrapping it in reassurance that you're still fine overall. Name something you're actually working through right now, not something already resolved into a tidy lesson. Let it sit as unfinished instead of rounding it off. You're giving people the opening to actually offer you something, which they can't do while they still believe you've arrived.`,
     },
 
     // ── 22 in CORE CHARACTER (A · Left / Day of Birth) ──────────────────────
     '22_A': {
       title: `22 in Core Character — The Fool`,
       tagline: `A Design of Unrehearsed Presence`,
-      mastery: `You meet every moment fresh, with no rehearsed social mask standing between you and whoever's in front of you. People feel like they don't have to perform around you either, which makes you an unusually easy person to actually relax with.`,
-      shadow: `That same openness reads as naivety to people who haven't looked closer. People underestimate your experience and leave you out of conversations that assume a gravity you clearly carry but rarely display, simply because your ease doesn't advertise everything you've actually been through.`,
-      invitation: `Let your actual depth show through the ease once today, on purpose.`,
+      mastery: `You meet every moment fresh, with no rehearsed social mask standing between you and whoever's actually in front of you. People feel it immediately and drop their own performance in response, which makes you one of the genuinely easiest people to relax around in any room. You don't carry the accumulated weariness most people build up over time — each interaction gets your full, unguarded attention. That openness is rare enough that people remember it long after the conversation ends.`,
+      shadow: `The same openness reads as naivety to people who haven't looked past the surface. They underestimate what you've actually lived through and leave you out of the heavier conversations, assuming a lightness that has nothing to do with your real depth. Your ease doesn't advertise everything you've carried, so people mistake unguarded for uninformed. You get quietly excluded from exactly the rooms where your perspective would matter most.`,
+      invitation: `Let your actual depth show through the ease today, once, on purpose. In a conversation where you'd normally stay light, say something that reveals what you've actually been through. Don't abandon the openness to do it — let the depth sit right alongside the ease instead of replacing it. People need to see both at once to stop underestimating you.`,
     },
 
     // ── 5 in SKY LINE (B · Top / Spiritual Potential / Divine Talents) ─────
