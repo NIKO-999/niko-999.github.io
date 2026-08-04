@@ -1680,198 +1680,198 @@ window.DMicroContent = (function () {
     '9_G': {
       title: `9 in Maternal Spiritual — The Hermit`,
       tagline: `A Design of the Spoken Depth`,
-      mastery: `You carry real, inherited depth — the capacity to sit with the unanswerable, modeled through your mother's line's quiet.`,
-      shadow: `You inherit the assumption that deep things aren't discussed, staying entirely private with wisdom that could actually help someone.`,
-      invitation: `Speak one piece of your inward wisdom out loud today, to someone who could use it.`,
+      mastery: `You carry real, inherited depth — the capacity to sit with the unanswerable, modeled through your mother's line's quiet. That depth arrived in you already-formed, absorbed through presence rather than instruction. And what you find in solitude tends to be sharper than anything generated under pressure. People who spend real time with you sense that depth even in silence.`,
+      shadow: `You inherit the assumption that deep things aren't discussed, staying entirely private with wisdom that could actually help someone. Underneath the privacy is often a fear that speaking it would break a silence the whole line kept. Hard-won understanding stays locked inside you, exactly as it did for the women before you. The knocking, if it ever comes, arrives from someone who never got the chance to hear it.`,
+      invitation: `Ask yourself honestly what breaking this particular silence would risk about your place in the line. Speak one piece of your inward wisdom out loud today, to someone who could use it. Say it plainly, without wrapping it in disclaimers. Notice that the depth survives being spoken.`,
     },
 
     // ── 1 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '1_G': {
       title: `1 in Maternal Spiritual — The Magician`,
       tagline: `A Design of the Named Capability`,
-      mastery: `You carry real spiritual capability, modeled through quiet confidence rather than explanation.`,
-      shadow: `The capability stays instinctual because it was never given language — you sense your own agency but struggle to claim it.`,
-      invitation: `Name your own capability out loud today, instead of just quietly demonstrating it.`,
+      mastery: `You carry real spiritual capability, modeled through quiet confidence rather than explanation. You act on that capability the moment it's needed, translating instinct into something real without waiting for permission. And that capacity was handed to you already-formed, a genuine inheritance you didn't have to build from nothing. People rely on that quiet capability without ever having heard you claim it.`,
+      shadow: `The capability stays instinctual because it was never given language, so you sense your own agency but struggle to claim it. Underneath the struggle is often a fear that naming it plainly would break with a line that always let it stay unspoken. You demonstrate the capability quietly rather than owning it out loud, exactly as it was modeled. The struggle to claim it costs you credit for work that was genuinely yours.`,
+      invitation: `Ask yourself honestly what naming your own capability out loud would risk. Name your own capability out loud today, instead of just quietly demonstrating it. Say it plainly to someone who'd notice the difference. Notice that claiming it doesn't make it any less real.`,
     },
 
     // ── 2 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '2_G': {
       title: `2 in Maternal Spiritual — The High Priestess`,
       tagline: `A Design of Tested Trust`,
-      mastery: `You carry real, embodied trust in your inner sense of things.`,
-      shadow: `That certainty was never taught to self-correct, so you can hold a wrong intuition as unquestionable.`,
-      invitation: `Test one intuition against the world today instead of assuming it's automatically right.`,
+      mastery: `You carry real, embodied trust in your inner sense of things, a felt certainty passed down rather than argued into you. You act on what you sense without needing a chain of reasoning to justify it first. And that trust in your own perception was handed to you already-formed, a genuine gift most people spend years trying to build. That embodied trust moves you faster than deliberation ever could.`,
+      shadow: `That certainty was never taught to self-correct, so you can hold a wrong intuition as unquestionable. Underneath the unquestionable stance is often a fear that testing it would mean doubting the very trust the line gave you. You mistake inherited confidence for accuracy, without ever checking the two against each other. The unquestioned intuition eventually costs you more than the testing would have.`,
+      invitation: `Ask yourself honestly when you last actually tested your intuition instead of simply trusting it. Test one intuition against the world today instead of assuming it's automatically right. Check it against something concrete. Notice that testing it doesn't undo the trust the line handed you.`,
     },
 
     // ── 3 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '3_G': {
       title: `3 in Maternal Spiritual — The Empress`,
       tagline: `A Design of the Named Warmth`,
-      mastery: `You carry real, warm spiritual generativity — a presence that nurtures without needing to explain itself.`,
-      shadow: `The warmth stays purely atmospheric because it was never put into words, so you can't offer it deliberately.`,
-      invitation: `Put words to the spiritual warmth you carry today, and offer it to one specific person on purpose.`,
+      mastery: `You carry real, warm spiritual generativity — a presence that nurtures without needing to explain itself, passed down through simply being near it. You cultivate what's around you patiently, without pushing or rushing it. And that abundance is real precisely because it was never performed, only modeled. People feel nourished around you without needing an explanation for why.`,
+      shadow: `The warmth stays purely atmospheric because it was never put into words, so you can't offer it deliberately. Underneath the wordlessness is often a fear that naming the warmth would make it feel calculated rather than genuine. You can't direct that nurturing on purpose because nobody in the line ever showed you how to name it. The atmosphere stays vague and undirected, generous but unaimed.`,
+      invitation: `Ask yourself honestly what naming your warmth out loud would risk about how genuine it feels. Put words to the spiritual warmth you carry today, and offer it to one specific person on purpose. Say it directly instead of just being present. Notice that naming it doesn't make it any less real.`,
     },
 
     // ── 4 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '4_G': {
       title: `4 in Maternal Spiritual — The Emperor`,
       tagline: `A Design of Visible Authority`,
-      mastery: `You carry real spiritual steadiness and order, held quietly rather than announced.`,
-      shadow: `The quietness goes so far your own authority never gets recognized, including by you.`,
-      invitation: `Let your quiet spiritual authority be visible today, even if it feels like breaking a pattern.`,
+      mastery: `You carry real spiritual steadiness and order, held quietly rather than announced, a genuine inheritance of authority that never needed to shout. You build spiritual structure that actually holds, even without anyone crediting you for it. And that steadiness was handed to you already-formed, real and dependable underneath the quiet. People quietly rely on that order without ever crediting where it comes from.`,
+      shadow: `The quietness goes so far your own authority never gets recognized, including by you. Underneath the invisibility is often a fear that claiming the authority openly would break the pattern the line always kept. You hold real steadiness and let it go entirely uncredited, exactly as modeled. You end up the load-bearing structure nobody, including you, ever names as such.`,
+      invitation: `Ask yourself honestly what making your authority visible would risk breaking. Let your quiet spiritual authority be visible today, even if it feels like breaking a pattern. Claim it plainly, once. Notice that visibility doesn't cost you the steadiness underneath it.`,
     },
 
     // ── 5 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '5_G': {
       title: `5 in Maternal Spiritual — The Hierophant`,
       tagline: `A Design of Credited Wisdom`,
-      mastery: `You carry real wisdom, absorbed through relationship and lived example rather than formal teaching.`,
-      shadow: `You dismiss that wisdom as "just how she was," undervaluing it because it never arrived with formal credibility.`,
-      invitation: `Name one piece of relational wisdom today as real knowledge, worth passing on deliberately.`,
+      mastery: `You carry real wisdom, absorbed through relationship and lived example rather than formal teaching. You test what you absorbed against your own experience before treating it as true. And what survives that testing is genuinely transmittable, whether or not it ever came with credentials attached. People who received it firsthand know exactly how real it was.`,
+      shadow: `You dismiss that wisdom as "just how she was," undervaluing it because it never arrived with formal credibility. Underneath the dismissal is often a fear that naming it as real knowledge would mean taking responsibility for passing it on deliberately. You let genuinely useful understanding go unclaimed simply because of how it arrived. You inherit the substance and discard the credibility it actually deserves.`,
+      invitation: `Ask yourself honestly what you're actually dismissing as "just how she was" that deserves to be named as knowledge. Name one piece of relational wisdom today as real knowledge, worth passing on deliberately. Say it plainly, without the "just" attached. Notice that its lack of formal packaging never made it less true.`,
     },
 
     // ── 6 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '6_G': {
       title: `6 in Maternal Spiritual — The Lovers`,
       tagline: `A Design of Examined Values`,
-      mastery: `You carry real values, demonstrated through the choices your mother's line actually made.`,
-      shadow: `You repeat the same relational choices automatically, without ever examining whether they're genuinely yours.`,
-      invitation: `Name one value you actually watched get modeled today, and consciously decide if you're keeping it.`,
+      mastery: `You carry real values, demonstrated through the choices your mother's line actually made rather than simply spoken about. You can hold competing values at once without pretending one doesn't exist, and still choose. And once you consciously choose, you commit fully, rather than repeating what was simply modeled. What you choose consciously carries more weight than what simply repeats.`,
+      shadow: `You repeat the same relational choices automatically, without ever examining whether they're genuinely yours. Underneath the automatic repeating is often a fear that examining the pattern would mean questioning the people who modeled it. Your values run on default rather than on anything you've actually tested and chosen. The unexamined pattern keeps running the same way it always has.`,
+      invitation: `Ask yourself honestly which of your values you've never actually examined yourself. Name one value you actually watched get modeled today, and consciously decide if you're keeping it. Say the decision out loud, either way. Notice that examining it doesn't require rejecting where it came from.`,
     },
 
     // ── 7 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '7_G': {
       title: `7 in Maternal Spiritual — The Chariot`,
       tagline: `A Design of Chosen Direction`,
-      mastery: `You carry real, quiet, sustained spiritual will — determination without drama.`,
-      shadow: `You push forward without questioning whether the direction was actually chosen or just the only path modeled.`,
-      invitation: `Pause today and ask whether your current spiritual direction is genuinely yours.`,
+      mastery: `You carry real, quiet, sustained spiritual will — determination without drama, a genuine inheritance of steady forward motion. You keep moving on will alone, long after the initial spark has faded, exactly as the line before you did. And that consistency produces real depth over time, without needing to announce itself. That will carries you through stretches drama-driven momentum never survives.`,
+      shadow: `You push forward without questioning whether the direction was actually chosen or just the only path modeled. Underneath the unquestioned momentum is often a fear that pausing to check would mean losing the drive itself. You keep moving in a direction you never actually tested against your own life. The unquestioned direction can run for years before anyone, including you, notices.`,
+      invitation: `Ask yourself honestly whether your current spiritual direction is genuinely yours or simply the only path you were shown. Pause today and ask that question directly. Sit with the uncertainty instead of pushing past it. Notice that pausing doesn't cost you the will underneath it.`,
     },
 
     // ── 8 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ───────────
     '8_G': {
       title: `8 in Maternal Spiritual — Justice`,
       tagline: `A Design of the Updated Standard`,
-      mastery: `You carry a real, felt sense of right and wrong, absorbed by watching consistent action.`,
-      shadow: `You apply that inherited standard rigidly, even in situations it wasn't actually built for.`,
-      invitation: `Check one inherited standard of fairness today against your own actual circumstances.`,
+      mastery: `You carry a real, felt sense of right and wrong, absorbed by watching consistent action rather than being told rules. You hold yourself to the same standard you'd hold anyone else to, which is what makes the inheritance credible. And you can deliver an honest assessment without needing it to be harsh. People trust your read precisely because it was built on real observation.`,
+      shadow: `You apply that inherited standard rigidly, even in situations it wasn't actually built for. Underneath the rigidity is often a fear that adapting the standard would mean abandoning the fairness it was meant to protect. You enforce a rule that was fitted to a different life than the one you're actually living. The mismatch between rule and reality goes unnoticed until it costs someone.`,
+      invitation: `Ask yourself honestly whether this standard actually fits your current circumstances or was just inherited whole. Check one inherited standard of fairness today against your own actual circumstances. Adjust it if it doesn't fit. Notice that adapting it doesn't undo the fairness underneath it.`,
     },
 
     // ── 10 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ──────────
     '10_G': {
       title: `10 in Maternal Spiritual — The Wheel of Fortune`,
       tagline: `A Design of Active Trust`,
-      mastery: `You carry real, quiet trust that hard seasons pass — cyclical resilience modeled without drama.`,
-      shadow: `That patience arrives without its complementary agency — you endure passively instead of actively navigating.`,
-      invitation: `Take one active step today in a hard season you've just been waiting out.`,
+      mastery: `You carry real, quiet trust that hard seasons pass — cyclical resilience modeled without drama, a genuine inheritance of faith in timing. You sense when a season is actually turning, without needing external proof first. And that trust makes the transitions gentler than they'd otherwise be. That trust makes even a hard season feel survivable rather than endless.`,
+      shadow: `That patience arrives without its complementary agency — you endure passively instead of actively steering what's actually yours to steer. Underneath the passivity is often a fear that taking action would mean the modeled patience wasn't enough on its own. You wait out hard seasons that actually had a piece you could have influenced. The passive endurance runs longer than it ever needed to.`,
+      invitation: `Ask yourself honestly what part of this hard season is actually yours to influence, not just endure. Take one active step today in a hard season you've just been waiting out. Act on the piece that's genuinely yours. Notice that action doesn't cancel the patience underneath it.`,
     },
 
     // ── 11 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '11_G': {
       title: `11 in Maternal Spiritual — Strength`,
       tagline: `A Design of Named Softness`,
-      mastery: `You carry real gentle endurance — strength that never needed to look fierce to be real.`,
-      shadow: `You mistake your own quiet resilience for weakness because it doesn't look like conventional toughness.`,
-      invitation: `Name your gentle endurance as real strength today, out loud, even just to yourself.`,
+      mastery: `You carry real gentle endurance — strength that never needed to look fierce to be real, a genuine inheritance of soft resilience. You can stay present with raw states without needing to suppress them or be ruled by them. And you know the difference between gentleness and weakness, so you can be soft without ever being a pushover. People who've leaned on it know exactly how much it can actually hold.`,
+      shadow: `You mistake your own quiet resilience for weakness because it doesn't look like conventional toughness. Underneath the mistaking is often a fear that naming it as strength would require proving it the way the world expects strength to look. You devalue an inheritance that's actually been carrying real weight the whole time. The mislabeling costs you the credit an inheritance like this deserves.`,
+      invitation: `Ask yourself honestly what your gentle endurance has actually carried that conventional toughness never could. Name your gentle endurance as real strength today, out loud, even just to yourself. Say it plainly, without hedging it. Notice that naming it doesn't require it to look fierce.`,
     },
 
     // ── 12 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '12_G': {
       title: `12 in Maternal Spiritual — The Hanged Man`,
       tagline: `A Design of the Resolved Wait`,
-      mastery: `You carry real comfort with not having answers yet — receptive patience that lets understanding arrive in its own time.`,
-      shadow: `That waiting never resolves into action — you can stay suspended indefinitely with no modeled return.`,
-      invitation: `Give one piece of your patience a deliberate endpoint today — choose to act.`,
+      mastery: `You carry real comfort with not having answers yet — receptive patience that lets understanding arrive in its own time, a genuine inherited gift for not-knowing. You can pause without anxiety, trusting the pause itself is doing real work. And that patience produces insight that force never could have reached. That patience produces understanding that force never could have reached.`,
+      shadow: `That waiting never resolves into action — you can stay suspended indefinitely with no modeled return. Underneath the endless suspension is often a fear that acting would mean the patience wasn't the actual point. You wait past the point where waiting was ever doing anything. The suspension runs indefinitely, with no model for how it was ever meant to end.`,
+      invitation: `Ask yourself honestly whether this waiting is still doing real work or has become a place to avoid choosing. Give one piece of your patience a deliberate endpoint today. Choose to act on it now. Notice that acting doesn't undo the receptivity that got you here.`,
     },
 
     // ── 13 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '13_G': {
       title: `13 in Maternal Spiritual — Transformation`,
       tagline: `A Design of Chosen Reinvention`,
-      mastery: `You carry real capacity for quiet reinvention — becoming who you need to become.`,
-      shadow: `That change only happens reactively, under pressure, instead of through your own conscious choice.`,
-      invitation: `Initiate one change deliberately today, instead of waiting for pressure to force it.`,
+      mastery: `You carry real capacity for quiet reinvention — becoming who you need to become, a genuine inherited fluency with change. You can let an old version of yourself die without needing the process to be dramatic. And you recover fast from real shifts, integrating what they showed you rather than just surviving them. What you become under your own choosing tends to actually last.`,
+      shadow: `That change only happens reactively, under pressure, instead of through your own conscious choice. Underneath the reactivity is often a fear that initiating change deliberately would mean the reinvention wasn't forced, and therefore wasn't real. You wait for pressure to do the deciding for you. The reactive version of change keeps arriving on someone else's timeline, not yours.`,
+      invitation: `Ask yourself honestly what change you've been waiting for pressure to force instead of choosing yourself. Initiate one change deliberately today, instead of waiting for pressure to force it. Choose it on your own timing. Notice that a chosen change counts just as much as a forced one.`,
     },
 
     // ── 14 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '14_G': {
       title: `14 in Maternal Spiritual — Temperance`,
       tagline: `A Design of the Named Contradiction`,
-      mastery: `You carry real ease holding contradictions — duty and desire, strength and softness, without treating them as crisis.`,
-      shadow: `That ease can mean calmly holding a contradiction that's actually causing harm, avoiding real tension that needs addressing.`,
-      invitation: `Name one contradiction today that actually needs resolving, not just patient holding.`,
+      mastery: `You carry real ease holding contradictions — duty and desire, strength and softness, without treating them as crisis. You blend in the right proportion for the specific moment, not by rote formula. And you moderate your own extremes naturally, which makes you sustainable in ways people who burn hot rarely are. That capacity makes you genuinely easier to be around during real tension.`,
+      shadow: `That ease can mean calmly holding a contradiction that's actually causing harm, avoiding real tension that needs addressing. Underneath the calm holding is often a fear that naming the tension as a problem would mean the modeled ease had failed. You mistake patience for resolution, and the contradiction never actually gets settled. The harm sits underneath the calm, technically held and never actually addressed.`,
+      invitation: `Ask yourself honestly which contradiction you've been patiently holding that actually needs resolving. Name one contradiction today that actually needs resolving, not just patient holding. Take a position instead of holding both sides equally. Notice that resolving it doesn't mean you've lost your capacity for ease.`,
     },
 
     // ── 15 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '15_G': {
       title: `15 in Maternal Spiritual — The Devil`,
       tagline: `A Design of Reclaimed Wanting`,
-      mastery: `You carry real desire and material want, worth naming plainly.`,
-      shadow: `You inherit an unspoken restraint that makes wanting openly feel inappropriate, so your desires stay hidden even from yourself.`,
-      invitation: `Name one genuine want out loud today, plainly, with no hedge attached.`,
+      mastery: `You carry real desire and material want, worth naming plainly, a genuine inheritance of appetite that doesn't need to apologize for itself. You look directly at your own wanting without flinching away or dressing it up. And that unflinching honesty is what actually makes real freedom possible. That plainness is a real form of honesty most people never reach.`,
+      shadow: `You inherit an unspoken restraint that makes wanting openly feel inappropriate, so your desires stay hidden even from yourself. Underneath the restraint is often a fear that naming a want plainly would break with a line that always kept desire quiet. You keep wanting things you've never once said out loud, not even to yourself. The hidden wanting doesn't disappear — it just stops being available to you consciously.`,
+      invitation: `Ask yourself honestly what you want that you've never actually said out loud. Name one genuine want out loud today, plainly, with no hedge attached. Say it without apologizing for it. Notice that naming it doesn't make you less like the women who came before you — it makes you more honest than they got to be.`,
     },
 
     // ── 16 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '16_G': {
       title: `16 in Maternal Spiritual — The Tower`,
       tagline: `A Design of the Told Story`,
-      mastery: `You carry real capacity for clarity, even through past rupture.`,
-      shadow: `You carry a diffuse unease around instability whose actual story was never told.`,
-      invitation: `Ask today, even just of yourself, what happened in your mother's line that was never spoken about.`,
+      mastery: `You carry real capacity for clarity, even through past rupture, a genuine inherited resilience for surviving collapse. You can let a false structure fall rather than propping it up indefinitely. And you recover fast from upheaval, integrating what it showed you rather than just enduring it. You notice the crack in a structure before anyone else admits it's there.`,
+      shadow: `You carry a diffuse unease around instability whose actual story was never told. Underneath the diffuseness is often a fear that asking about it would reopen a wound that isn't even yours to reopen. You inherit the aftershock of a rupture you never actually witnessed. The unease outlives the actual event that caused it, generation after generation.`,
+      invitation: `Ask yourself honestly what happened in your mother's line that was never spoken about. Ask today, even just of yourself, and see what you already sense the answer to be. Name it, even speculatively. Notice that naming it loosens its hold on your own life.`,
     },
 
     // ── 17 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '17_G': {
       title: `17 in Maternal Spiritual — The Star`,
       tagline: `A Design of Unhedged Hope`,
-      mastery: `You carry real optimism and hope.`,
-      shadow: `You inherit a caution against hoping too visibly, hedging every hope with a disclaimer.`,
-      invitation: `Let one hope be fully, visibly held today, with no hedge.`,
+      mastery: `You carry real optimism and hope, an inheritance that hasn't hardened into naivety. You hold hope that's actually looked at the hard parts and stayed intact anyway. And you inspire real optimism in others just by being near them, without needing to perform it. That hope tends to draw people toward you rather than away.`,
+      shadow: `You inherit a caution against hoping too visibly, hedging every hope with a disclaimer. Underneath the hedging is often a fear that a hope stated fully and disappointed would be unbearable, exactly as it may have been for the women before you. You pre-shrink every hope before anyone can test it. The disclaimer undercuts the hope before anyone's had the chance to receive it fully.`,
+      invitation: `Ask yourself honestly what you're afraid would happen if the hope, stated fully, disappointed you. Let one hope be fully, visibly held today, with no hedge. Say it at its real size. Notice that stating it plainly doesn't make the risk any worse.`,
     },
 
     // ── 18 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '18_G': {
       title: `18 in Maternal Spiritual — The Moon`,
       tagline: `A Design of Sorted Feeling`,
-      mastery: `You carry a rich, deep inner and intuitive life.`,
-      shadow: `You carry unprocessed emotional atmosphere that was never named, feelings that may not actually be yours.`,
-      invitation: `Sort one feeling today — decide honestly whether it's actually yours or something you absorbed.`,
+      mastery: `You carry a rich, deep inner and intuitive life, a genuine inherited fluency for the unseen and unspoken. You navigate uncertainty without needing everything resolved before you'll trust what you're sensing. And you can hold conflicting feelings at once without needing them reconciled first. You can hold ambiguity without needing to resolve it prematurely.`,
+      shadow: `You carry unprocessed emotional atmosphere that was never named, feelings that may not actually be yours. Underneath the unprocessed atmosphere is often a fear that sorting it would mean reliving something that belongs to someone else. You mistake inherited fog for a fact about your own character. The unsorted feeling keeps recurring, misfiled under your own name.`,
+      invitation: `Ask yourself honestly whether this feeling is actually yours or something absorbed from the line before you. Sort one feeling today — decide honestly whether it's actually yours or something you absorbed. Trace it back if you can. Notice how much lighter the ones that were never yours become once named.`,
     },
 
     // ── 19 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '19_G': {
       title: `19 in Maternal Spiritual — The Sun`,
       tagline: `A Design of Generated Warmth`,
-      mastery: `You carry real vitality and joy, radiating simply through how you show up.`,
-      shadow: `You stand in the glow of that warmth without becoming a source of it yourself, treating joy as received, not generated.`,
-      invitation: `Let your own warmth be a source for someone today, not just a reflection of what you received.`,
+      mastery: `You carry real vitality and joy, radiating simply through how you show up, a genuine inheritance you didn't have to build alone. You bring genuine warmth into a room just by being in it, contagious rather than performed. And what comes to you easily in this domain isn't shallow simply because it arrived without effort. That warmth was always more available in you than you gave yourself credit for.`,
+      shadow: `You stand in the glow of that warmth without becoming a source of it yourself, treating joy as received, not generated. Underneath the receiving-only stance is often a fear that generating your own warmth would mean you no longer needed the source you grew up standing near. You reflect the light instead of producing it. The reflection runs dim the moment the original source isn't in the room.`,
+      invitation: `Ask yourself honestly what generating your own warmth, instead of just receiving it, would actually change. Let your own warmth be a source for someone today, not just a reflection of what you received. Offer it first, before waiting to feel it from someone else. Notice that you have more of it than you thought.`,
     },
 
     // ── 20 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '20_G': {
       title: `20 in Maternal Spiritual — Judgement`,
       tagline: `A Design of the Named Pull`,
-      mastery: `You carry a real, felt pull toward something larger than your current circumstances.`,
-      shadow: `That pull stays wordless — you sense a bigger calling without ever naming or moving toward it.`,
-      invitation: `Name your calling as specifically as you can today, even if it feels presumptuous.`,
+      mastery: `You carry a real, felt pull toward something larger than your current circumstances, a genuine inherited discernment for a real summons. You sense the call clearly, distinct from noise or wishful thinking. And you can genuinely evaluate that pull honestly, without inflating or dismissing it. People sense there's a pull in you long before you name it yourself.`,
+      shadow: `That pull stays wordless — you sense a bigger calling without ever naming or moving toward it. Underneath the wordlessness is often a fear that naming it plainly would make disappointment, if it came, feel worse. You feel the summons and let it stay unspoken, exactly as the line before you may have. The pull keeps returning at the same intensity, unresolved, year after year.`,
+      invitation: `Ask yourself honestly what naming this calling specifically would risk if it turned out differently than hoped. Name your calling as specifically as you can today, even if it feels presumptuous. Say it out loud to someone. Notice that naming it doesn't obligate you to anything you're not ready for.`,
     },
 
     // ── 21 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '21_G': {
       title: `21 in Maternal Spiritual — The World`,
       tagline: `A Design of Claimed Enoughness`,
-      mastery: `You carry a real, settled sense of being enough, modeled through simply living rather than declared.`,
-      shadow: `You wait for that wholeness to simply arrive instead of actively claiming it in your own circumstances.`,
-      invitation: `Actively name your own sense of "enough" today, instead of waiting for it to arrive.`,
+      mastery: `You carry a real, settled sense of being enough, modeled through simply living rather than declared out loud. You integrate everything, the hard parts and the good parts, into one honest sense of wholeness. And you can actually feel and recognize enoughness when it's present, rather than always redefining it further out of reach. That settledness reads as real precisely because it was never performed.`,
+      shadow: `You wait for that wholeness to simply arrive instead of actively claiming it in your own circumstances. Underneath the waiting is often a fear that claiming it yourself would mean it wasn't genuinely modeled, only performed. You stay in a permanent almost-enough, never quite landing. The waiting can run an entire lifetime without the arrival ever actually happening.`,
+      invitation: `Ask yourself honestly what you're waiting for before you'll call your own life enough. Actively name your own sense of "enough" today, instead of waiting for it to arrive. Say it plainly, out loud. Notice that claiming it doesn't require it to look like what was modeled for you.`,
     },
 
     // ── 22 in MATERNAL SPIRITUAL (Ancestral Square, Age-30 anchor) ─────────
     '22_G': {
       title: `22 in Maternal Spiritual — The Fool`,
       tagline: `A Design of the Grieved Restart`,
-      mastery: `You carry real resilience through fresh starts — the sense that beginning again is simply possible.`,
-      shadow: `You inherit the willingness to restart without ever grieving what each fresh start actually cost.`,
-      invitation: `Let yourself grieve one thing a past fresh start required leaving behind, today.`,
+      mastery: `You carry real resilience through fresh starts — the sense that beginning again is simply possible, a genuine inherited trust that didn't need to be earned firsthand. You step forward without needing a guarantee handed to you first. And that trust compounds the more you use it, opening doors more cautious people never see. That resilience gets tested and proven every time you begin again.`,
+      shadow: `You inherit the willingness to restart without ever grieving what each fresh start actually cost. Underneath the ungrieved restarting is often a fear that pausing to grieve would slow the momentum that's kept the line moving. You carry the resilience and skip the mourning that would have made each fresh start lighter. The ungrieved cost accumulates quietly behind every fresh beginning.`,
+      invitation: `Ask yourself honestly what a past fresh start actually cost you that you never let yourself feel. Let yourself grieve one thing a past fresh start required leaving behind, today. Sit with the loss instead of moving past it. Notice that grieving it doesn't undo the resilience that carried you through.`,
     },
 
     // ── 21 in PATERNAL MATERIAL (Ancestral Square, Age-50 anchor) ───────────
