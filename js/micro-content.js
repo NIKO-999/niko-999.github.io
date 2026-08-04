@@ -2274,198 +2274,198 @@ window.DMicroContent = (function () {
     '1_MK': {
       title: `1 in Material Karma — The Magician`,
       tagline: `A Design of the Matured Plan`,
-      mastery: `You carry a genuine gift for origination — starting something financial from nothing, again and again.`,
-      shadow: `You mistake the next fresh start for progress, resetting your position right before it would have compounded.`,
-      invitation: `Choose today the material plan already underway, and don't start a new one until it's had real time to mature.`,
+      mastery: `You carry a genuine gift for origination, starting something financial from nothing, again and again, when others hesitate. That capacity to generate a real venture from scratch is a rare, valuable skill. You can spot an opportunity and act on it before it's fully validated by anyone else. And you're capable of letting one plan actually mature into compounding value, once you commit to staying with it.`,
+      shadow: `You mistake the next fresh start for progress, resetting your position right before it would have actually started to compound. Underneath the resetting is often a fear that staying with a maturing plan past its exciting beginning would mean facing the slower, harder work of building it out. You launch financial plans at a rate that outpaces your capacity to let any of them mature. The pattern costs you the compounding value a matured plan would have already produced.`,
+      invitation: `Ask yourself honestly which financial plan you're already tempted to abandon for something newer. Choose today the material plan already underway, and don't start a new one until it's had real time to mature. Commit to it deliberately, past the point of novelty. Notice that staying doesn't cost you your capacity to originate elsewhere later.`,
     },
 
     // ── 2 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '2_MK': {
       title: `2 in Material Karma — The High Priestess`,
       tagline: `A Design of the Seen Numbers`,
-      mastery: `You carry a quiet, private sense for your own financial reality.`,
-      shadow: `You keep the real numbers unexamined even by yourself, sensed but never looked at directly.`,
-      invitation: `Write down your actual financial numbers today, in full, and let them be seen.`,
+      mastery: `You carry a quiet, private sense for your own financial reality, an intuitive read that's often more accurate than you credit it for. That inner sense tends to pick up something real about your situation before the numbers confirm it. You're capable of trusting that sense as a genuine signal, not just background noise. And writing the actual numbers down sharpens that sense rather than replacing it.`,
+      shadow: `You keep the real numbers unexamined even by yourself, sensed vaguely but never looked at directly on paper. Underneath the avoidance is often a fear that seeing the actual figures would confirm something worse than the vague sense currently suggests. You let a private, sensed version of your finances stand in for the concrete facts. The avoidance costs you the clarity and control that seeing the real numbers would actually provide.`,
+      invitation: `Ask yourself honestly what actual number you've been avoiding looking at directly. Write down your actual financial numbers today, in full, and let them be seen. Do it in writing, not just mentally. Notice whether the real numbers are more or less alarming than the sensed version.`,
     },
 
     // ── 3 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '3_MK': {
       title: `3 in Material Karma — The Empress`,
       tagline: `A Design of the Included Reserve`,
-      mastery: `You carry real warmth expressed through material generosity, resources shared freely.`,
-      shadow: `That generosity flows outward while your own reserve stays thin and unattended.`,
-      invitation: `Set aside a portion of any material gain today for your own security first.`,
+      mastery: `You carry real warmth expressed through material generosity, sharing resources freely and easily with people around you. That generosity is a genuine strength, and the richness you create for others is real, not performative. You're capable of extending that same generosity to your own future, not just the present moment. And setting aside a reserve for yourself doesn't require sacrificing the generosity you're actually good at.`,
+      shadow: `That generosity flows outward while your own reserve stays thin and unattended, quietly under-tended relative to everyone else's. Underneath the thinness is often a fear that saving for yourself would compete with the generosity that feels like your core identity. You give easily to others while your own future goes unfunded. The thin reserve costs you a security your generosity, redirected slightly, could easily also build.`,
+      invitation: `Ask yourself honestly what portion of your giving has gone outward without any going toward your own security. Set aside a portion of any material gain today for your own security first. Treat it with the same ease you'd apply to any other giving. Notice that saving for yourself doesn't make you less generous.`,
     },
 
     // ── 4 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '4_MK': {
       title: `4 in Material Karma — The Emperor`,
       tagline: `A Design of the Tested Structure`,
-      mastery: `You carry a real, firm hand over every financial detail.`,
-      shadow: `Delegating or trusting a system you didn't build yourself feels like real danger rather than a reasonable option.`,
-      invitation: `Hand one specific piece of financial management today to a trusted system or person, and observe whether it holds.`,
+      mastery: `You carry a real, firm hand over every financial detail, keeping your accounts organized in a way that actually holds up. That structural discipline is a genuine strength, and your finances tend to be well-managed as a result. You're capable of delegating a piece of that management without the structure collapsing. And trusting a system or person with part of the oversight doesn't undo the discipline you've already built.`,
+      shadow: `Delegating or trusting a system you didn't build yourself feels like real danger rather than a reasonable, low-stakes option. Underneath the fear is often a belief that anything you don't personally control will inevitably go wrong. You hold every financial thread yourself, even the ones a trusted system could easily and safely handle. The constant holding costs you time and ease that real, tested delegation would free up.`,
+      invitation: `Ask yourself honestly what piece of financial management you could actually hand off. Hand one specific piece of financial management today to a trusted system or person, and observe whether it holds. Delegate it fully, not just partially. Notice that the structure holds even without your hand on every single piece.`,
     },
 
     // ── 5 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '5_MK': {
       title: `5 in Material Karma — The Hierophant`,
       tagline: `A Design of the Tested Belief`,
-      mastery: `You carry a real deference to inherited financial rules and tradition.`,
-      shadow: `You follow an outdated financial rule simply because it's familiar, even when it works against your actual security.`,
-      invitation: `Name one inherited belief about money today, and test it against your current, actual circumstances.`,
+      mastery: `You carry a real deference to inherited financial rules and tradition, grounding your choices in something proven rather than impulse. That grounding is a genuine strength, keeping your financial decisions consistent with real, tested values. You're capable of testing an inherited rule honestly instead of following it automatically. And updating a rule that no longer fits doesn't mean abandoning the tradition underneath it.`,
+      shadow: `You follow an outdated financial rule simply because it's familiar, even when it actively works against your current, real security. Underneath the following is often a fear that deviating from the inherited rule would mean betraying the tradition it came from. You apply an old standard automatically without checking whether it actually fits your present circumstances. The automatic application costs you outcomes a tested, updated rule would have actually allowed.`,
+      invitation: `Ask yourself honestly which financial rule you follow automatically without ever having tested it. Name one inherited belief about money today, and test it against your current, actual circumstances. Examine it directly instead of assuming it. Notice that updating the rule doesn't mean discarding the tradition entirely.`,
     },
 
     // ── 6 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '6_MK': {
       title: `6 in Material Karma — The Lovers`,
       tagline: `A Design of the Standing Choice`,
-      mastery: `You carry a real capacity to weigh a genuine financial choice.`,
-      shadow: `You defer the choice that would actually serve your security in favor of whatever keeps things comfortable.`,
-      invitation: `Make one specific, deferred financial decision today, even without full certainty, and let it stand.`,
+      mastery: `You carry a real capacity to weigh a genuine financial choice thoughtfully, considering the real trade-offs rather than deciding blindly. That deliberateness is a genuine strength, and your financial choices tend to be well-reasoned when you actually make them. You're capable of committing to a decision without full certainty, once you notice you've been avoiding it. And a decided, imperfect choice serves you better than an indefinitely deferred one.`,
+      shadow: `You defer the choice that would actually serve your security in favor of whatever keeps things comfortable in the short term. Underneath the deferring is often a fear that committing to a real choice would foreclose some better option you haven't found yet. You keep a decision technically pending indefinitely, mistaking the delay for careful weighing. The deferring costs you the security a decided, even imperfect, choice would already have provided.`,
+      invitation: `Ask yourself honestly what financial decision you've been deferring under the guise of careful consideration. Make one specific, deferred financial decision today, even without full certainty, and let it stand. Pick an actual answer and commit to it. Notice that an imperfect decided choice beats an indefinitely deferred one.`,
     },
 
     // ── 7 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '7_MK': {
       title: `7 in Material Karma — The Chariot`,
       tagline: `A Design of the Named Enough`,
-      mastery: `You carry real drive toward financial goals, one after another.`,
-      shadow: `The sense of "enough" always sits just past the next milestone, so genuine progress never registers as progress.`,
-      invitation: `Name one specific financial milestone today as "enough," and pause there deliberately once reached.`,
+      mastery: `You carry real drive toward financial goals, one after another, sustaining momentum most people can't match. That drive is a genuine strength, and it means your financial trajectory rarely goes stagnant. You're capable of pausing at an actual milestone once reached, rather than needing to chase the next one immediately. And declaring a specific point as "enough" doesn't diminish the drive, it just gives it a place to actually land.`,
+      shadow: `The sense of "enough" always sits just past the next milestone, so genuine progress never actually registers as progress. Underneath the constant relocation is often a fear that declaring something enough would mean the drive itself has nothing left to justify it. You hit a real financial target and immediately move the marker further out, before the achievement has registered. The relocation costs you the satisfaction real, already-reached milestones are actually capable of providing.`,
+      invitation: `Ask yourself honestly which recent financial milestone you never actually let count as enough. Name one specific financial milestone today as "enough," and pause there deliberately once reached. Stop and register it before pursuing the next one. Notice that the pause doesn't cost you your future drive.`,
     },
 
     // ── 8 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '8_MK': {
       title: `8 in Material Karma — Justice`,
       tagline: `A Design of the Named Unfairness`,
-      mastery: `You carry a real, sharp vigilance around fairness in financial exchange.`,
-      shadow: `You treat every current exchange as a potential repeat of an old unfairness that has nothing to do with what's actually happening now.`,
-      invitation: `Name, specifically, what the original financial unfairness was today, and separate it from what's actually in front of you.`,
+      mastery: `You carry a real, sharp vigilance around fairness in financial exchange, noticing an imbalance others would miss entirely. That vigilance is a genuine strength, keeping your financial dealings honest and protecting you from real exploitation. You're capable of applying that vigilance accurately to the present situation, not an old one. And naming the original unfairness explicitly lets you separate it cleanly from what's actually happening now.`,
+      shadow: `You treat every current exchange as a potential repeat of an old unfairness that has nothing to do with what's actually happening in front of you. Underneath the projection is often a fear that the original unfairness will never be acknowledged unless every echo of it gets fought as hard as the first one should have been. You escalate a minor present exchange with the full force of an old, unaddressed grievance. The projection costs you fair, ordinary financial relationships that don't deserve the old suspicion.`,
+      invitation: `Ask yourself honestly whether this reaction fits the present exchange or an older one underneath it. Name, specifically, what the original financial unfairness was today, and separate it from what's actually in front of you. Write it down or say it out loud, however incomplete the picture is. Notice whether the present reaction settles once the old one has a name.`,
     },
 
     // ── 9 in MATERIAL KARMA (Money Channel) ─────────────────────────────────
     '9_MK': {
       title: `9 in Material Karma — The Hermit`,
       tagline: `A Design of the Direct Look`,
-      mastery: `You carry a real preference for withdrawing from financial engagement, retreating rather than confronting it head-on.`,
-      shadow: `Unexamined finances drift, and the avoidance that once felt like peace becomes its own quiet stress.`,
-      invitation: `Set aside one specific, limited block of time today to look directly at your actual financial state.`,
+      mastery: `You carry a real preference for withdrawing to think through a financial matter alone before engaging with it directly. That preference for reflection is a genuine strength, letting you approach money decisions from a settled place. You're capable of setting a limited, bounded time to actually look directly at your finances, rather than avoiding them indefinitely. And a real, direct look tends to be less unsettling than the avoidance that preceded it.`,
+      shadow: `Unexamined finances drift, and the avoidance that once felt like peace becomes its own quiet, compounding stress over time. Underneath the drift is often a fear that a direct look would confirm something worse than the vague unease currently suggests. You retreat from financial engagement indefinitely, mistaking permanent avoidance for the healthy reflection it started as. The drift costs you the clarity a bounded, direct look would have already provided.`,
+      invitation: `Ask yourself honestly what financial reality you've been avoiding by staying withdrawn from it. Set aside one specific, limited block of time today to look directly at your actual financial state. Bound it clearly, so it feels manageable rather than overwhelming. Notice that the direct look is usually less alarming than the avoidance made it seem.`,
     },
 
     // ── 10 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '10_MK': {
       title: `10 in Material Karma — Wheel of Fortune`,
       tagline: `A Design of the Steady Habit`,
-      mastery: `You carry real financial cycles — genuine upswings and downturns rather than something steady.`,
-      shadow: `You treat every upswing as permanent and every downturn as catastrophic, letting the cycle run the decisions.`,
-      invitation: `Build one small, consistent financial habit today that holds steady regardless of which phase you're in.`,
+      mastery: `You carry real financial cycles, genuine upswings and downturns, rather than a flat, unvarying line. You can work with that natural rhythm rather than fighting it, adapting to whichever phase you're actually in. That comfort with fluctuation is a genuine strength, letting you weather a downturn without panic. And you're capable of building one small, consistent habit that holds steady through the cycle, adding a floor underneath the natural rhythm.`,
+      shadow: `You treat every upswing as permanent and every downturn as catastrophic, letting the cycle itself dictate every decision you make. Underneath the reactivity is often a fear that this particular fluctuation is different from all the others, the one that won't actually turn. You make major decisions based on wherever you currently are in the cycle, rather than on a steady, underlying plan. The reactivity costs you the consistency a habit-based floor would have provided regardless of the phase.`,
+      invitation: `Ask yourself honestly what decision you're making based on the current cycle phase rather than a steady plan. Build one small, consistent financial habit today that holds steady regardless of which phase you're in. Choose something modest enough to actually maintain either way. Notice that the habit doesn't erase the natural rhythm, it just adds ground underneath it.`,
     },
 
     // ── 11 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '11_MK': {
       title: `11 in Material Karma — Strength`,
       tagline: `A Design of the Spoken Strain`,
-      mastery: `You carry real financial hardship quietly, managed alone with genuine endurance.`,
-      shadow: `That strain never gets addressed, since no one close to you knows the real extent of it.`,
-      invitation: `Name your actual financial strain out loud today to one trusted person.`,
+      mastery: `You carry real financial hardship quietly, managed alone with genuine, tested endurance through difficult periods. That capacity to hold real strain without collapsing is a genuine strength, proven under actual pressure. You're capable of naming the strain out loud to someone trusted, without that undoing the resilience you've already shown. And visibility tends to bring help the quiet endurance alone never could.`,
+      shadow: `That strain never gets addressed, since no one close to you actually knows the real extent of it. Underneath the silence is often a fear that revealing the strain would mean admitting the endurance was costing more than it looked like from outside. You carry the full weight privately, and the strain compounds because it's never actually shared or addressed. The silence costs you the support that was likely available the whole time.`,
+      invitation: `Ask yourself honestly what financial strain you've been carrying without anyone actually knowing its real extent. Name your actual financial strain out loud today to one trusted person. Say the real number or the real worry, not a softened version. Notice that being seen struggling doesn't undo the endurance you've already proven.`,
     },
 
     // ── 12 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '12_MK': {
       title: `12 in Material Karma — The Hanged Man`,
       tagline: `A Design of the Real Deadline`,
-      mastery: `You carry a real financial decision left in self-imposed limbo, waiting for clarity.`,
-      shadow: `Material comfort gets quietly sacrificed while the wait mistakes itself for necessary patience.`,
-      invitation: `Name the specific financial decision that's been suspended today, and set a real point by which it gets made.`,
+      mastery: `You carry real patience with a financial decision, willing to hold off for genuine clarity rather than forcing a premature call. That patience is a real strength when the timing genuinely isn't right yet. You're capable of recognizing when the waiting has actually served its purpose and giving the decision a real deadline. And a deadline doesn't undo the value of the patience that preceded it.`,
+      shadow: `Material comfort gets quietly sacrificed while the wait mistakes itself for necessary patience, rather than actual avoidance. Underneath the mistake is often a fear that committing to a real choice would foreclose some better option you haven't found yet. You leave a financial decision suspended indefinitely, with no deadline ever attached to it. The indefinite suspension costs you comfort and progress a decided, even imperfect, choice would already have provided.`,
+      invitation: `Ask yourself honestly whether you're actually waiting for clarity or just avoiding the decision. Name the specific financial decision that's been suspended today, and set a real point by which it gets made. Pick an actual date and commit to deciding by then. Notice how it feels to have a decision that can't drift forever.`,
     },
 
     // ── 13 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '13_MK': {
       title: `13 in Material Karma — Transformation`,
       tagline: `A Design of the Deliberate Ending`,
-      mastery: `You carry a real fear of material loss, resisting endings even when they're clearly due.`,
-      shadow: `You hold onto a financial arrangement well past its useful life simply because ending it feels dangerous.`,
-      invitation: `Identify one financial arrangement today that's clearly run its course, and let it end deliberately.`,
+      mastery: `You carry a real capacity for material reinvention, once you actually let a finished arrangement genuinely end. You can recognize precisely when a financial chapter is over, even when admitting it is uncomfortable. That capacity for deliberate endings is a real strength, correcting the instinct to resist them out of fear. And what replaces a released arrangement tends to serve you better than what you were protecting by holding on.`,
+      shadow: `You hold onto a financial arrangement well past its useful life simply because ending it feels dangerous in a way you can't quite name. Underneath the fear is often a belief that any material loss, even a small or overdue one, threatens your whole financial footing. You maintain something you privately know is finished, avoiding a loss that's actually already happened in substance. The holding costs you the space and clarity a deliberate ending would free up.`,
+      invitation: `Ask yourself honestly what financial arrangement you already privately know has run its course. Identify one financial arrangement today that's clearly run its course, and let it end deliberately. Name it as over, in plain terms, rather than letting it drift. Notice that ending it doesn't erase what it once gave you.`,
     },
 
     // ── 14 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '14_MK': {
       title: `14 in Material Karma — Temperance`,
       tagline: `A Design of the Sustainable Middle`,
-      mastery: `You carry a real pattern of strict financial discipline followed by full release.`,
-      shadow: `Neither extreme held alone ever actually produces lasting security, restriction breaking into release and back.`,
-      invitation: `Choose one small, moderate financial habit today and hold it consistently, resisting either extreme.`,
+      mastery: `You carry a real capacity for both strict financial discipline and full release, able to access either mode when it's actually needed. That range is a real strength, distinct from most people who only manage one extreme well. You're capable of finding the sustainable middle between the two, once you notice the alternation isn't producing lasting security. And a small, consistently held habit tends to beat either extreme held alone.`,
+      shadow: `Neither extreme held alone ever actually produces lasting security, with restriction breaking into release and back again on repeat. Underneath the alternation is often a fear that the steady middle ground doesn't actually exist, that only swinging between the two poles is realistic. You cycle between strict control and full indulgence, never landing on a sustainable habit in between. The cycling costs you the compounding security a steady, moderate practice would have actually built.`,
+      invitation: `Ask yourself honestly whether you're currently in restriction or release, and what a steady middle would look like. Choose one small, moderate financial habit today and hold it consistently, resisting either extreme. Pick something modest enough to actually maintain. Notice that the middle holds steadier ground than either extreme did alone.`,
     },
 
     // ── 15 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '15_MK': {
       title: `15 in Material Karma — The Devil`,
       tagline: `A Design of the Loosened Bind`,
-      mastery: `You carry a real, felt sense of being bound to financial obligations or a particular lifestyle.`,
-      shadow: `You mistake that compulsive attachment for a fixed reality, when it may actually be an unquestioned pattern.`,
-      invitation: `Name honestly today one specific material attachment that feels like a trap, and ask what it would take to loosen it.`,
+      mastery: `You carry a real, honest capacity to notice when you're bound to a financial obligation or a lifestyle you didn't fully choose. That noticing is a genuine strength, letting you catch a pattern before it fully runs your finances. You're capable of naming the attachment plainly and asking what would actually be required to loosen it. And examining it honestly tends to loosen the grip rather than tightening it.`,
+      shadow: `You mistake that compulsive attachment for a fixed reality, when it may actually be an unquestioned pattern you've never examined. Underneath the mistake is often a fear that naming the attachment honestly would mean confronting how much control it actually has over your choices. You live around the obligation, accommodating it, rather than questioning whether it's genuinely necessary. The unexamined attachment costs you the freedom that naming it would have already started to restore.`,
+      invitation: `Ask yourself honestly what financial attachment feels like a trap that you've never actually questioned. Name honestly today one specific material attachment that feels like a trap, and ask what it would take to loosen it. Examine it directly instead of assuming it's fixed. Notice that examining it doesn't require escaping it immediately, just questioning it.`,
     },
 
     // ── 16 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '16_MK': {
       title: `16 in Material Karma — The Tower`,
       tagline: `A Design of the Early Correction`,
-      mastery: `You carry real instability quietly maintained as "fine" until a sudden reckoning forces the issue.`,
-      shadow: `Maintaining the appearance of stability instead of addressing the strain underneath sets up exactly the collapse the denial tried to avoid.`,
-      invitation: `Identify one financial strain being minimized today, and address it directly.`,
+      mastery: `You carry a real instinct to maintain financial stability under pressure, projecting calm through genuinely difficult periods. That instinct for stability is a genuine strength, and it's kept real crises from developing in the past. You're capable of identifying the strain underneath a stable appearance and addressing it directly, before it forces a sudden reversal. And addressing the strain early actually protects the stability, rather than threatening it.`,
+      shadow: `Maintaining the appearance of stability instead of addressing the strain underneath sets up exactly the collapse the maintaining was trying to avoid. Underneath the maintained appearance is often a fear that acknowledging the real strain would collapse the stability you've worked so hard to project. You keep the surface calm while an underlying financial problem compounds, unaddressed, until it can't be contained. The maintained appearance costs you the chance to address the strain while it was still manageable.`,
+      invitation: `Ask yourself honestly what financial strain you've been minimizing under a stable-looking surface. Identify one financial strain being minimized today, and address it directly. Name it plainly and take one concrete action toward it. Notice that addressing it early doesn't cause the collapse you were protecting against.`,
     },
 
     // ── 17 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '17_MK': {
       title: `17 in Material Karma — The Star`,
       tagline: `A Design of the Acted Hope`,
-      mastery: `You carry a genuine, sustaining belief that things will get better financially.`,
-      shadow: `That hope hasn't yet converted into the concrete action it was meant to inspire.`,
-      invitation: `Name one small, concrete action your financial hope is actually pointing toward today, and take it.`,
+      mastery: `You carry a genuine, sustaining belief that things will get better financially, hope that isn't naive but grounded in real possibility. That capacity for real hope is a genuine strength, keeping you moving through hard financial periods. You're capable of naming the concrete action the hope is actually pointing toward. And converting the hope into action, however small, tends to make it more, not less, likely to come true.`,
+      shadow: `That hope hasn't yet converted into the concrete action it was actually meant to inspire, staying purely internal instead. Underneath the non-conversion is often a fear that acting on the hope and having it not pay off would be worse than simply holding the belief privately. You hold onto genuine optimism while the specific step it implies stays untaken. The non-conversion costs you the progress this hope, actually acted on, would have already produced.`,
+      invitation: `Ask yourself honestly what concrete action your financial hope has been quietly pointing toward. Name one small, concrete action your financial hope is actually pointing toward today, and take it. Do the specific thing, not just hold the belief. Notice that acting on it doesn't risk the hope, it tests it.`,
     },
 
     // ── 18 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '18_MK': {
       title: `18 in Material Karma — The Moon`,
       tagline: `A Design of the Cleared Haze`,
-      mastery: `You carry a real, felt sense of your financial position, sensed more than examined.`,
-      shadow: `The anxiety persists precisely because it's never actually checked against real numbers.`,
-      invitation: `Look directly today at one specific, avoided financial number, and let the actual figure replace the guess.`,
+      mastery: `You carry a real, felt sense of your financial position, an intuitive read that picks up on a shift before it's confirmed. That sensitivity is a genuine strength, an early-warning system that often catches something real. You're capable of checking that felt sense directly against the actual figures, which sharpens its accuracy rather than dismissing it. And looking directly at an avoided number tends to be less frightening than the anxiety about it.`,
+      shadow: `The anxiety persists precisely because it's never actually checked against real numbers, staying vague and unresolved indefinitely. Underneath the persistence is often a fear that checking would confirm something worse than the vague dread currently suggests. You let the anxious sense run without ever comparing it to the actual, checkable facts. The avoidance costs you the relief that an accurate, checked number would likely provide.`,
+      invitation: `Ask yourself honestly what specific financial number you've been avoiding looking at directly. Look directly today at one specific, avoided financial number, and let the actual figure replace the guess. Check it plainly, without a story attached in advance. Notice whether the actual number is less alarming than the anxiety about it.`,
     },
 
     // ── 19 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '19_MK': {
       title: `19 in Material Karma — The Sun`,
       tagline: `A Design of Visible Uncertainty`,
-      mastery: `You carry a real, outward financial confidence maintained consistently.`,
-      shadow: `That performed confidence prevents anyone, including you, from actually addressing the uncertainty underneath.`,
-      invitation: `Let one specific financial worry be visible today to someone trustworthy.`,
+      mastery: `You carry a real, outward financial confidence, maintained consistently even through genuinely uncertain periods. That confidence is a real strength, keeping panic from taking over during ordinary financial fluctuation. You're capable of letting a real worry be visible too, without that undoing the confidence you're known for. And visible worry, shared with someone trustworthy, tends to get addressed faster than a hidden one ever could.`,
+      shadow: `That performed confidence prevents anyone, including you, from actually addressing the uncertainty genuinely underneath it. Underneath the maintained performance is often a fear that showing real worry would undo the confidence that feels like your core identity. You project steadiness over a financial situation that actually needs direct, honest attention. The projected confidence costs you the help and clarity that visibility would have already provided.`,
+      invitation: `Ask yourself honestly what financial worry you've been keeping hidden behind consistent confidence. Let one specific financial worry be visible today to someone trustworthy. Say the real concern plainly, without the usual reassuring gloss. Notice that visibility doesn't erase the confidence, it just makes room for honesty alongside it.`,
     },
 
     // ── 20 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '20_MK': {
       title: `20 in Material Karma — Judgement`,
       tagline: `A Design of the First Move`,
-      mastery: `You carry a genuine financial truth that's already become clear.`,
-      shadow: `You meet that clarity with more preparation and waiting, one more condition before it's actually faced.`,
-      invitation: `Name the specific action your financial clarity is already calling for today, and take a first concrete step.`,
+      mastery: `You carry a genuine financial truth that's already become clear, recognized precisely rather than left vague. That clarity is a real strength, and once it arrives, you're capable of acting on it decisively. You can rise to what the clarity is actually asking of you. And taking one concrete step now doesn't require every condition to feel perfectly ready first.`,
+      shadow: `You meet that clarity with more preparation and waiting, one more condition appended before it's actually faced or acted on. Underneath the added conditions is often a fear that acting on the clarity would mean confronting something before you feel fully ready to handle it. You recognize the financial truth accurately and then collect more readiness instead of moving on it. The waiting costs you the progress the clarity, actually acted on, would have already produced.`,
+      invitation: `Ask yourself honestly what you're actually still preparing for that you're already capable of doing. Name the specific action your financial clarity is already calling for today, and take a first concrete step. Do the real action, not another round of preparation. Notice that the step doesn't require full readiness to be worth taking.`,
     },
 
     // ── 21 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '21_MK': {
       title: `21 in Material Karma — The World`,
       tagline: `A Design of the Named Complete`,
-      mastery: `You carry real financial goals reached in practical terms.`,
-      shadow: `You immediately relativize the reached goal, expanding it or setting a new condition before it counts as done.`,
-      invitation: `Identify one financial goal today that's practically already reached, and deliberately name it complete.`,
+      mastery: `You carry real financial goals reached in practical, tangible terms, actual arrival rather than perpetual approach. You know what genuinely finished looks like, and reaching it gives you real, felt ground. That capacity to recognize and claim completion is a genuine strength. And you can let an already-reached goal actually be named complete, without adding one more condition first.`,
+      shadow: `You immediately relativize the reached goal, expanding it or setting a new condition before it's allowed to actually count as done. Underneath the relativizing is often a fear that claiming full completion would mean there's nothing left to strive toward. You hit a genuine financial target and move the goalposts before the achievement has even registered as real. The relativizing costs you the felt ground actual completion is supposed to provide.`,
+      invitation: `Ask yourself honestly what financial goal you've never let yourself call complete. Identify one financial goal today that's practically already reached, and deliberately name it complete. Say it's done, without adding a further condition. Notice that naming it complete doesn't stop you from setting the next goal later.`,
     },
 
     // ── 22 in MATERIAL KARMA (Money Channel) ────────────────────────────────
     '22_MK': {
       title: `22 in Material Karma — The Fool`,
       tagline: `A Design of the Woven Net`,
-      mastery: `You carry genuine openness to material risk, acted on with real courage.`,
-      shadow: `You leap before the groundwork that would make the risk sustainable has actually been laid.`,
-      invitation: `Build one small piece of safety net today before your next financial leap.`,
+      mastery: `You carry genuine openness to material risk, acted on with real courage most people talk themselves out of. That willingness to leap is a genuine strength, and it opens opportunities a more cautious approach would miss entirely. You're capable of pairing that courage with a small piece of preparation, without it dampening the openness. And a little groundwork tends to make the leap land more often, not less.`,
+      shadow: `You leap before the groundwork that would make the risk actually sustainable has been laid, leaving the landing to chance. Underneath the unpaired leap is often a fear that adding preparation would somehow taint the purity of the courageous risk you're taking. You take the material risk on courage alone, without any concrete backup, and when it doesn't land, there's nothing to catch the fall. The unpaired leap costs you outcomes that even minimal preparation would have secured.`,
+      invitation: `Ask yourself honestly what small piece of preparation you've been skipping in favor of pure courage. Build one small piece of safety net today before your next financial leap. Add the backup plan without abandoning the leap itself. Notice that preparation doesn't diminish the courage, it just gives it a floor.`,
     },
 
     // ── 1 in RELATIONSHIP WITH MONEY (Money Channel) ────────────────────────
