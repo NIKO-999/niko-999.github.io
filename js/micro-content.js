@@ -1284,198 +1284,198 @@ window.DMicroContent = (function () {
     '17_MON': {
       title: `17 in Wealth Potential — The Star`,
       tagline: `A Design of Paid Visibility`,
-      mastery: `Your income arrives in rhythm with genuine visibility, sharing your real gift where it can actually be seen.`,
-      shadow: `You keep income conditional on approval before it's allowed to flow, delaying a launch or undercutting a rate until conditions feel perfect.`,
-      invitation: `Show one piece of work publicly today at the stage it's actually in, priced at its real value.`,
+      mastery: `Your income arrives in rhythm with genuine visibility, sharing your real gift where it can actually be seen and paid for. You're capable of putting real work in front of people at the stage it's actually in, not waiting for a polished ideal. That rhythm between visibility and income is a genuine strength, and it compounds the more consistently you use it. And pricing the work at its real value, not a discounted one, is well within your capacity once you actually try it.`,
+      shadow: `You keep income conditional on approval before it's allowed to flow, delaying a launch or undercutting a rate until conditions feel perfect. Underneath the delay is often a fear that visible, priced work would be judged and found wanting in public. You wait for a certainty that never fully arrives, and the income that depends on visibility stays stalled with it. The waiting costs you real revenue that a less-than-perfect, actually-shown version of the work would have already earned.`,
+      invitation: `Ask yourself honestly what condition you're waiting to meet before you'll let this be seen. Show one piece of work publicly today at the stage it's actually in, priced at its real value. Post it, pitch it, or offer it now, not once it's flawless. Notice that visibility at this stage doesn't diminish the work's actual worth.`,
     },
 
     // ── 1 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '1_MON': {
       title: `1 in Wealth Potential — The Magician`,
       tagline: `A Design of the Sustained Launch`,
-      mastery: `Your income flows most freely through work that lets you originate — building something from nothing.`,
-      shadow: `You chase the excitement of a new venture at the expense of ever letting one mature into steady income.`,
-      invitation: `Commit today to one long-running thread you won't abandon for the next new idea.`,
+      mastery: `Your income flows most freely through work that lets you originate, building something real from nothing rather than maintaining what already exists. You generate ventures at a rate most people can't match, and each one carries genuine potential. That originating capacity is a real financial asset, distinct from mere idea generation. And you're capable of letting one venture mature into steady income once you actually commit past its exciting beginning.`,
+      shadow: `You chase the excitement of a new venture at the expense of ever letting one mature into steady, compounding income. Underneath the chase is often a fear that staying with one thing past its novelty would mean facing the harder, less thrilling work of actually building it out. You start ventures at a rate that outpaces your capacity to finish any of them. The pattern costs you the steady income a matured venture would have eventually produced.`,
+      invitation: `Ask yourself honestly which current venture you're already tempted to abandon for something newer. Commit today to one long-running thread you won't abandon for the next new idea. Choose it deliberately and give it real, sustained time. Notice that staying doesn't mean giving up your capacity to originate elsewhere later.`,
     },
 
     // ── 2 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '2_MON': {
       title: `2 in Wealth Potential — The High Priestess`,
       tagline: `A Design of the Priced Insight`,
-      mastery: `Your income draws on intuitive, often behind-the-scenes insight — trusting your read before it's fully explainable.`,
-      shadow: `You undervalue that intuitive skill precisely because it's hard to quantify, staying background and underpaid.`,
-      invitation: `Name and price one intuitive contribution today, even if you can't fully explain it.`,
+      mastery: `Your income draws on intuitive, often behind-the-scenes insight, trusting a read before it's fully explainable in conventional terms. You catch what others miss, and that perception genuinely shapes outcomes even when it stays uncredited. That intuitive skill is a real financial asset, not a soft add-on to more "legitimate" expertise. And it can be named and priced explicitly, even without a full rational explanation, once you're willing to claim it.`,
+      shadow: `You undervalue that intuitive skill precisely because it's hard to quantify, staying background and consistently underpaid for real contribution. Underneath the undervaluing is often a fear that pricing something you can't fully explain would expose it as illegitimate. You let the insight shape outcomes invisibly, while the credit and compensation go to more explainable work. The invisibility costs you income for a skill that's genuinely valuable, just harder to name.`,
+      invitation: `Ask yourself honestly what intuitive contribution you've been making without ever pricing it. Name and price one intuitive contribution today, even if you can't fully explain it. State its value plainly, without over-justifying it. Notice that pricing it doesn't require making it fully rational first.`,
     },
 
     // ── 3 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '3_MON': {
       title: `3 in Wealth Potential — The Empress`,
       tagline: `A Design of the Priced Gift`,
-      mastery: `Your income thrives when your profession lets you actually create and grow something real.`,
-      shadow: `You undercharge for generative work because it doesn't feel like conventional labor.`,
-      invitation: `Price one piece of your creative or nurturing output today at its real value, not discounted.`,
+      mastery: `Your income thrives when your profession lets you actually create and grow something real, not just maintain what already exists. You generate genuine output, whether creative or nurturing, that has real market value on its own terms. That generative capacity is a real financial asset, distinct from conventional productivity. And it can be priced at its actual worth once you stop treating it as something softer or less legitimate than other labor.`,
+      shadow: `You undercharge for generative work because it doesn't feel like conventional labor, even though it produces real, valuable results. Underneath the undercharging is often a fear that pricing creative or nurturing work fairly would mark it as less genuine than harder, more visibly effortful work. You discount output that took real skill and energy to produce, treating it as though it should come cheap because it came naturally. The discounting costs you income for work that's genuinely worth its full price.`,
+      invitation: `Ask yourself honestly what generative work you've been pricing below its actual value. Price one piece of your creative or nurturing output today at its real value, not discounted. Charge the full rate, without apologizing for it. Notice that the full price doesn't make the work less natural to produce.`,
     },
 
     // ── 4 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '4_MON': {
       title: `4 in Wealth Potential — The Emperor`,
       tagline: `A Design of the Built System`,
-      mastery: `You thrive financially when given real authority to organize, lead, and build structure.`,
-      shadow: `You stay in a role that under-uses your capacity for structure, following someone else's system completely.`,
-      invitation: `Seek or create one role today where you actually get to build the system, not just staff it.`,
+      mastery: `You thrive financially when given real authority to organize, lead, and actually build the structure others operate inside. You have a genuine capacity for architecting systems, not just executing within them. That structural authority is a real financial asset, and roles that grant it tend to compensate you accordingly. And you can actively seek or create that kind of role rather than waiting to be offered it.`,
+      shadow: `You stay in a role that under-uses your capacity for structure, following someone else's system completely without ever building your own. Underneath the staying is often a fear that seeking real authority would expose you to a failure more visible than staying in an executing role. You operate inside systems you could design better, without ever proposing the better version. The under-use costs you both income and the sense of authority your actual capacity supports.`,
+      invitation: `Ask yourself honestly what system you're currently just staffing that you could actually be building. Seek or create one role today where you actually get to build the system, not just staff it. Propose the structural change or the new role directly. Notice that claiming this authority doesn't require external permission to begin.`,
     },
 
     // ── 5 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '5_MON': {
       title: `5 in Wealth Potential — The Hierophant`,
       tagline: `A Design of the Taught Knowledge`,
-      mastery: `Your income thrives when your profession includes passing on real, earned knowledge to someone else.`,
-      shadow: `You stay a perpetual student, accumulating credentials without ever stepping into the teaching role.`,
-      invitation: `Teach one piece of knowledge today, exactly as it is, before you feel fully ready.`,
+      mastery: `Your income thrives when your profession includes passing on real, earned knowledge to someone else who needs it. You have genuine expertise worth transmitting, not just accumulating for its own sake. That teaching capacity is a real financial asset, and roles that let you use it tend to pay accordingly. And you're capable of stepping into the teaching role now, with what you already know, rather than waiting for more credentials first.`,
+      shadow: `You stay a perpetual student, accumulating credentials without ever actually stepping into the teaching role they were meant to support. Underneath the accumulating is often a fear that teaching now would expose gaps a few more credentials might have covered. You keep learning instead of transmitting, deferring the income that teaching would actually generate. The deferral costs you both income and the actual impact your existing knowledge could already be having.`,
+      invitation: `Ask yourself honestly what you already know well enough to teach right now. Teach one piece of knowledge today, exactly as it is, before you feel fully ready. Share it in its current, imperfect form. Notice that teaching it doesn't require having mastered everything first.`,
     },
 
     // ── 6 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '6_MON': {
       title: `6 in Wealth Potential — The Lovers`,
       tagline: `A Design of the Committed Direction`,
-      mastery: `Your income thrives specifically through people — connecting them, choosing well between them.`,
-      shadow: `You weigh every professional option so exhaustively that you never commit long enough to build income in one direction.`,
-      invitation: `Choose one direction built around genuine connection today, and commit to it fully.`,
+      mastery: `Your income thrives specifically through people, connecting them well and choosing your own professional alignments wisely. You have a genuine gift for matching the right people to the right opportunity. That relational skill is a real financial asset, and it compounds when you commit to a direction rather than staying uncommitted. And full commitment to one connection-based direction is well within your actual capacity, once you stop weighing every option indefinitely.`,
+      shadow: `You weigh every professional option so exhaustively that you never actually commit long enough to build income in one direction. Underneath the exhaustive weighing is often a fear that choosing one path would mean missing a better connection somewhere else. You keep every option open indefinitely, and the relational income your gift is built for never gets the chance to compound. The indecision costs you the depth of connection that real commitment would have produced.`,
+      invitation: `Ask yourself honestly what direction you've been weighing without ever actually choosing. Choose one direction built around genuine connection today, and commit to it fully. Close the other options deliberately, not by default. Notice that commitment doesn't require certainty, just a decision.`,
     },
 
     // ── 7 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '7_MON': {
       title: `7 in Wealth Potential — The Chariot`,
       tagline: `A Design of the Visible Trajectory`,
-      mastery: `Your income thrives when your career has genuine forward motion you control.`,
-      shadow: `You stay in a role with no real trajectory, generating burnout even when the workload is manageable.`,
-      invitation: `Seek or build one visible professional trajectory today that you're actually steering.`,
+      mastery: `Your income thrives when your career has genuine forward motion that you're actually steering, not just riding. You need direction and progress to stay energized, and when you have it, your output reflects that drive. That need for visible trajectory is a real asset, not restlessness, because you actually deliver when moving toward something. And you're capable of building that trajectory deliberately, rather than waiting for it to appear.`,
+      shadow: `You stay in a role with no real trajectory, generating burnout even when the actual workload itself is manageable. Underneath the burnout is often a fear that seeking a new trajectory would mean risking the stability of the role you already have. You stay static in a position that isn't going anywhere, and the lack of motion itself becomes exhausting. The staticness costs you the energy and output your career actually produces when it's moving.`,
+      invitation: `Ask yourself honestly whether this role has real forward motion or just steady output. Seek or build one visible professional trajectory today that you're actually steering. Take one concrete step that moves you toward it. Notice that building the trajectory yourself doesn't require permission from the current role.`,
     },
 
     // ── 8 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '8_MON': {
       title: `8 in Wealth Potential — Justice`,
       tagline: `A Design of the Rewarded Honesty`,
-      mastery: `Your income thrives in roles where integrity is actually rewarded, not just expected.`,
-      shadow: `You stay in environments where your honesty goes financially unrewarded, even punished.`,
-      invitation: `Seek out or build one environment today that actually rewards fairness.`,
+      mastery: `Your income thrives in roles where integrity is actually rewarded financially, not just quietly expected of you for free. You bring genuine honesty into professional dealings, and that reliability is worth real money to the right employer or client. That integrity is a real asset, not a cost, when it's placed in an environment that actually values it. And you can actively seek or build that environment rather than settling for one that doesn't.`,
+      shadow: `You stay in environments where your honesty goes financially unrewarded, sometimes even actively punished by comparison to less scrupulous colleagues. Underneath the staying is often a fear that seeking a better-aligned environment would mean an unstable transition you're not ready to risk. You keep providing the same integrity in a setting that doesn't compensate it, and the mismatch quietly costs you both income and morale. The staying costs you an income level your actual integrity, properly placed, would command.`,
+      invitation: `Ask yourself honestly whether your current environment actually rewards the integrity you bring to it. Seek out or build one environment today that actually rewards fairness. Take one concrete step toward it, even a small one. Notice that your integrity doesn't need to shrink to fit an environment that undervalues it.`,
     },
 
     // ── 9 in MONEY (Wealth Potential / Ideal Profession channel) ───────────
     '9_MON': {
       title: `9 in Wealth Potential — The Hermit`,
       tagline: `A Design of the Offered Mastery`,
-      mastery: `Your income thrives in roles that convert solitary mastery into a valuable, sought-after skill.`,
-      shadow: `You stay so independent that your expertise never gets marketed or made visible enough to pay for.`,
-      invitation: `Publish, price, or put forward one piece of your specialized expertise today.`,
+      mastery: `Your income thrives in roles that convert solitary mastery into a valuable, genuinely sought-after skill others will pay for. You develop real depth, working alone, that ends up worth more than most collaborative expertise. That mastery is a real financial asset, but only once it's actually visible to the people who'd pay for it. And you're capable of putting it forward publicly, without needing to abandon the independence that produced it.`,
+      shadow: `You stay so independent that your expertise never gets marketed or made visible enough for anyone to actually pay for it. Underneath the independence is often a fear that marketing the mastery would expose it to judgment the private version never had to face. You keep developing real depth in isolation while the income that depth could produce goes uncollected. The isolation costs you the value your actual expertise has already earned.`,
+      invitation: `Ask yourself honestly what expertise you have that no one outside your own head actually knows about. Publish, price, or put forward one piece of your specialized expertise today. Make it visible in a concrete, sellable form. Notice that visibility doesn't require abandoning the solitary work that built the mastery.`,
     },
 
     // ── 10 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '10_MON': {
       title: `10 in Wealth Potential — Wheel of Fortune`,
       tagline: `A Design of the Built Flexibility`,
-      mastery: `You thrive financially when your career has room to change shape as circumstances turn.`,
-      shadow: `You stay locked into a rigid career path out of fear of the instability that change might bring.`,
-      invitation: `Build one piece of real flexibility today into your career or income streams.`,
+      mastery: `You thrive financially when your career has room to change shape as circumstances shift, rather than staying locked into one path. You adapt readily, and your income holds up through change because you built room for it in advance. That flexibility is a real financial asset, distinct from instability. And you can build that flexibility deliberately into your career or income streams, rather than only discovering it's missing under pressure.`,
+      shadow: `You stay locked into a rigid career path out of fear of the instability that real change might actually bring. Underneath the rigidity is often a fear that flexibility itself would be the very instability you're trying to avoid. You commit fully to one narrow path, leaving no room to adapt when circumstances inevitably shift. The rigidity costs you resilience precisely when a flexible income structure would have protected you.`,
+      invitation: `Ask yourself honestly what part of your income has zero built-in flexibility right now. Build one piece of real flexibility today into your career or income streams. Add a second thread or a genuine option, deliberately. Notice that flexibility built in advance isn't the same as instability.`,
     },
 
     // ── 11 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '11_MON': {
       title: `11 in Wealth Potential — Strength`,
       tagline: `A Design of Counted Presence`,
-      mastery: `Your income thrives where your charisma is the actual asset being paid for.`,
-      shadow: `You burn that same energy in rooms and roles that don't actually pay for it, performing for free.`,
-      invitation: `Name your charisma today as the explicit center of one professional offer.`,
+      mastery: `Your income thrives where your charisma and presence are the actual asset being paid for, not a byproduct of the work. You bring a magnetic quality that genuinely draws people, attention, and opportunity. That charisma is a real financial asset, worth naming explicitly rather than treating as incidental. And you can build an offer where that presence is the center of the value, once you claim it plainly.`,
+      shadow: `You burn that same magnetic energy in rooms and roles that don't actually pay for it, performing generously for free. Underneath the free performance is often a fear that naming your charisma as a paid asset would come across as vain or self-important. You give the same compelling presence away in unpaid settings that would gladly compensate it elsewhere. The giving away costs you income for a genuine asset you're already using constantly.`,
+      invitation: `Ask yourself honestly where you're currently performing this charisma for free. Name your charisma today as the explicit center of one professional offer. State plainly what your presence is worth. Notice that claiming it doesn't make the charisma itself feel less genuine.`,
     },
 
     // ── 12 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '12_MON': {
       title: `12 in Wealth Potential — The Hanged Man`,
       tagline: `A Design of the Committed Practice`,
-      mastery: `Your income thrives in roles built around patient, sustained service to people in genuine difficulty.`,
-      shadow: `You stay suspended in the idea of that service without ever committing to the training it demands.`,
-      invitation: `Take one modest, real step today into actual professional training or practice.`,
+      mastery: `Your income thrives in roles built around patient, sustained service to people navigating genuine difficulty. You have a real capacity for the kind of committed, unglamorous care this work requires. That patience is a real financial asset once it's actually converted into trained, practiced skill. And you're capable of committing to the training itself, not just holding the idea of the service as an aspiration.`,
+      shadow: `You stay suspended in the idea of that service without ever actually committing to the training it genuinely demands. Underneath the suspension is often a fear that starting the training would confront you with how much work actually stands between the idea and the practice. You hold the calling as an identity while the concrete steps toward it stay indefinitely pending. The suspension costs you the income and impact the completed training would have already produced.`,
+      invitation: `Ask yourself honestly what training you've been meaning to start but haven't. Take one modest, real step today into actual professional training or practice. Enroll, apply, or begin the smallest concrete piece. Notice that starting modestly doesn't require the full commitment to be settled first.`,
     },
 
     // ── 13 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '13_MON': {
       title: `13 in Wealth Potential — Transformation`,
       tagline: `A Design of the Deliberate Ending`,
-      mastery: `You thrive financially in fields that reward genuine professional reinvention.`,
-      shadow: `You cling to a professional identity that's already run its course, out of fear of the gap.`,
-      invitation: `Release one completed professional identity today, deliberately, on your own terms.`,
+      mastery: `You thrive financially in fields that reward genuine professional reinvention, releasing an outdated identity for one that actually fits. You can end a professional chapter deliberately, on your own terms, rather than waiting to be pushed out of it. That capacity for chosen reinvention is a real financial asset, letting you move toward roles that pay better before you're forced to. And you're capable of releasing what's finished now, rather than clinging past its natural end.`,
+      shadow: `You cling to a professional identity that's already run its course, out of fear of the gap between who you were and who's next. Underneath the clinging is often a fear that the transition period would cost more than staying in a role that no longer fits. You maintain a title or specialty well past the point it was actually serving your income or your interest. The clinging costs you the reinvention your career actually rewards, replaced by a slow decline in relevance.`,
+      invitation: `Ask yourself honestly what professional identity you're maintaining past its natural end. Release one completed professional identity today, deliberately, on your own terms. Name it as finished, out loud, before circumstances force the point. Notice that releasing it opens room for the reinvention your field actually rewards.`,
     },
 
     // ── 14 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '14_MON': {
       title: `14 in Wealth Potential — Temperance`,
       tagline: `A Design of the Marketable Blend`,
-      mastery: `Your income thrives when allowed to synthesize skills or fields other people keep siloed.`,
-      shadow: `You spread across so many skills that none develops enough depth to actually be paid for.`,
-      invitation: `Go deep today on one or two of your combined skills instead of staying broadly competent at everything.`,
+      mastery: `Your income thrives when allowed to synthesize skills or fields other people keep entirely separate. You see and build the connective tissue between disciplines that most specialists never combine. That synthesizing capacity is a real, rare financial asset, once it's actually developed to real depth rather than left broad. And you're capable of focusing that blend deliberately on one or two combinations, rather than spreading it thin across everything.`,
+      shadow: `You spread across so many skills that none develops enough depth to actually be paid for at a professional rate. Underneath the spreading is often a fear that narrowing the blend would mean losing the very versatility that makes you distinctive. You stay broadly competent everywhere instead of developing genuine expertise anywhere. The spreading costs you the income depth in even one or two combined skills would actually produce.`,
+      invitation: `Ask yourself honestly which one or two combined skills would actually be worth developing to real depth. Go deep today on one or two of your combined skills instead of staying broadly competent at everything. Choose the specific combination and invest there. Notice that narrowing the focus doesn't erase your broader versatility.`,
     },
 
     // ── 15 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '15_MON': {
       title: `15 in Wealth Potential — The Devil`,
       tagline: `A Design of Clean Leverage`,
-      mastery: `You thrive financially in roles that engage directly and honestly with material power.`,
-      shadow: `You use that understanding to grip control over colleagues or resources rather than serve a transaction.`,
-      invitation: `Use your honest read on material power today in service of one genuinely good deal.`,
+      mastery: `You thrive financially in roles that engage directly and honestly with material power and leverage, not around it. You read a negotiation or a power dynamic accurately, and that clarity is worth real money in the right context. That honest engagement with power is a real financial asset, distinct from manipulation. And you're capable of directing that clarity toward genuinely good deals, deals that serve both sides.`,
+      shadow: `You use that understanding to grip control over colleagues or resources rather than serve an actual mutually beneficial transaction. Underneath the gripping is often a fear that a fair deal would leave you with less leverage than you're used to holding. You wield your read on power to dominate a dynamic instead of navigating it honestly. The gripping costs you long-term trust and repeat business that fairer dealing would have earned instead.`,
+      invitation: `Ask yourself honestly whether you're currently serving a deal or just gripping leverage in it. Use your honest read on material power today in service of one genuinely good deal. Structure it so both sides actually benefit. Notice that a fair deal doesn't require surrendering your read on the leverage.`,
     },
 
     // ── 16 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '16_MON': {
       title: `16 in Wealth Potential — The Tower`,
       tagline: `A Design of Precise Disruption`,
-      mastery: `You thrive financially in roles that value the ability to see a failing structure clearly and reorganize fast.`,
-      shadow: `You generate unnecessary disruption to feel financially useful, provoking crises in stable systems.`,
-      invitation: `Save your clarity today for one structure that genuinely needs reorganizing.`,
+      mastery: `You thrive financially in roles that value the ability to see a failing structure clearly and reorganize it fast, before it fully collapses. You spot the actual weak point in a system others are still defending. That clarity about what's genuinely failing is a real financial asset, especially in crisis or turnaround work. And you're capable of aiming that clarity precisely at structures that actually need it, rather than everywhere at once.`,
+      shadow: `You generate unnecessary disruption to feel financially useful, provoking crises in systems that were actually stable. Underneath the provoking is often a fear that without a visible crisis to solve, your particular skill has nothing to offer. You find or manufacture failure in structures that didn't need reorganizing, just to have something to fix. The manufactured disruption costs you credibility and trust that precise, well-aimed clarity would have built instead.`,
+      invitation: `Ask yourself honestly whether this structure genuinely needs reorganizing or whether you're manufacturing the need. Save your clarity today for one structure that genuinely needs reorganizing. Leave stable systems alone, deliberately. Notice that restraint here doesn't diminish your value, it sharpens it.`,
     },
 
     // ── 18 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '18_MON': {
       title: `18 in Wealth Potential — The Moon`,
       tagline: `A Design of the Grounded Hunch`,
-      mastery: `Your income thrives in roles that draw on intuitive, emotionally attuned insight.`,
-      shadow: `You stay in unstable, ungrounded professional territory because the gift never gets paired with concrete structure.`,
-      invitation: `Pair your intuitive gift today with one concrete offering or defined process.`,
+      mastery: `Your income thrives in roles that draw on intuitive, emotionally attuned insight, reading what's beneath the surface of a situation or a client. You sense what's actually going on before it's stated outright. That intuitive gift is a real financial asset, especially once paired with a concrete structure that makes it deliverable. And you're capable of building that structure around the gift, rather than leaving it as an unstructured hunch.`,
+      shadow: `You stay in unstable, ungrounded professional territory because the gift never gets paired with a concrete offering or defined process. Underneath the ungrounded state is often a fear that structuring the intuitive gift would flatten or cheapen it. You let the insight stay fluid and undefined, which makes it hard for anyone to actually pay for consistently. The lack of structure costs you the stable income a well-packaged version of the same gift would produce.`,
+      invitation: `Ask yourself honestly what structure could actually make this gift deliverable and payable. Pair your intuitive gift today with one concrete offering or defined process. Give it a name, a format, a price. Notice that structuring it doesn't diminish the intuitive quality underneath.`,
     },
 
     // ── 19 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '19_MON': {
       title: `19 in Wealth Potential — The Sun`,
       tagline: `A Design of Priced Joy`,
-      mastery: `Your income thrives in work where your natural personality is actually the asset.`,
-      shadow: `You undervalue work that comes easily and joyfully, assuming real value requires more struggle.`,
-      invitation: `Price one piece of easy, joyful work today honestly, without discounting it.`,
+      mastery: `Your income thrives in work where your natural personality and warmth are actually the asset being paid for. You bring an ease and radiance to certain work that genuinely draws people and results. That natural quality is a real financial asset, not a lesser one just because it comes easily to you. And it can be priced at its full, honest value once you stop equating effort with worth.`,
+      shadow: `You undervalue work that comes easily and joyfully, quietly assuming real value has to require more visible struggle. Underneath the undervaluing is often a fear that charging full price for effortless work would expose you as not really working hard enough to deserve it. You discount the exact work you're naturally best at, while charging full rate for harder, less joyful tasks. The discounting costs you income for the work that's actually your strongest asset.`,
+      invitation: `Ask yourself honestly what easy, joyful work you've been pricing as though it were less legitimate. Price one piece of easy, joyful work today honestly, without discounting it. Charge the full rate specifically because it's your strength, not despite it. Notice that ease doesn't make the value any less real.`,
     },
 
     // ── 20 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '20_MON': {
       title: `20 in Wealth Potential — Judgement`,
       tagline: `A Design of the Answered Call`,
-      mastery: `You thrive financially once you actually answer a genuine vocational calling.`,
-      shadow: `You spend years preparing to answer it, staying in the adequate-but-outgrown role.`,
-      invitation: `Take one real step today toward the calling, before you feel fully ready.`,
+      mastery: `You thrive financially once you actually answer a genuine vocational calling, one that arrives with unusual clarity about what it's asking of you. You recognize the calling precisely, without needing to invent its shape. That clarity is a real financial asset once it's actually acted on, not just privately acknowledged. And you're capable of taking real steps toward it now, before every condition feels perfectly ready.`,
+      shadow: `You spend years preparing to answer it, staying in the adequate-but-outgrown role that no longer actually fits your capacity. Underneath the prolonged preparation is often a fear that answering the calling and having it not work out would cost more than staying safely underused. You describe the calling accurately to anyone who asks, and keep collecting more preparation instead of stepping toward it. The prolonged preparation costs you years of income the calling, actually answered, would have already produced.`,
+      invitation: `Ask yourself honestly what you're actually still preparing for that you're already capable of. Take one real step today toward the calling, before you feel fully ready. Do the concrete action, not another round of preparation. Notice that the step doesn't require full readiness to be worth taking.`,
     },
 
     // ── 21 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '21_MON': {
       title: `21 in Wealth Potential — The World`,
       tagline: `A Design of the Crossed Border`,
-      mastery: `Your wealth potential opens up specifically through global reach.`,
-      shadow: `You stay confined to a local or narrowly-scoped version of your field long after your capacity has outgrown it.`,
-      invitation: `Let one part of your work today deliberately cross a border — a client, a platform, a market.`,
+      mastery: `Your wealth potential opens up specifically through global reach, work or clients that cross a border rather than staying local. You have a genuine capacity to operate at a broader scope than most people attempt. That reach is a real financial asset once you actually build toward it. And you're capable of deliberately crossing one border in your work now, rather than waiting for the reach to arrive on its own.`,
+      shadow: `You stay confined to a local or narrowly-scoped version of your field long after your actual capacity has outgrown it. Underneath the confinement is often a fear that expanding the scope would expose you to a competition or complexity the local version protects you from. You operate at a scale that no longer matches what you're actually capable of. The confinement costs you the wealth your broader capacity is already built to earn.`,
+      invitation: `Ask yourself honestly what scope you've stayed within that your actual capacity has already outgrown. Let one part of your work today deliberately cross a border, a client, a platform, a market. Take the concrete step toward the wider scope. Notice that crossing it doesn't require abandoning the local foundation you've built.`,
     },
 
     // ── 22 in MONEY (Wealth Potential / Ideal Profession channel) ──────────
     '22_MON': {
       title: `22 in Wealth Potential — The Fool`,
       tagline: `A Design of the Reflected Leap`,
-      mastery: `You thrive financially in careers that reward genuine courage — starting without certainty.`,
-      shadow: `You repeat the same fresh professional start without absorbing what the last one taught you.`,
-      invitation: `Carry one concrete lesson today from your last leap into whatever comes next.`,
+      mastery: `You thrive financially in careers that reward genuine courage, starting a new venture without needing certainty first. You leap into professional risk that most people talk themselves out of, and that willingness genuinely pays off over time. That courage is a real financial asset, distinct from recklessness. And you're capable of carrying real, accumulated lessons into the next leap, rather than starting each one from zero.`,
+      shadow: `You repeat the same fresh professional start without absorbing what the last one actually taught you about what works. Underneath the repetition is often a fear that carrying a lesson forward would slow down the exciting momentum of starting something new. You leap again and again with genuine courage, but very little cumulative wisdom compounds underneath the leaps. The repetition costs you income that a lesson-informed version of the same courage would have already earned.`,
+      invitation: `Ask yourself honestly what your last professional leap actually taught you that you haven't applied yet. Carry one concrete lesson today from your last leap into whatever comes next. Name it specifically before you start the next venture. Notice that carrying the lesson forward doesn't slow down the courage, it sharpens it.`,
     },
 
     // ── 13 in PATERNAL SPIRITUAL (Ancestral Square, Age-10 anchor) ──────────
