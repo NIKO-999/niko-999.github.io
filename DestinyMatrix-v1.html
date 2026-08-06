@@ -5409,7 +5409,7 @@ const ARCANA_ESSENCE = {
     if (!q && window.DAboutContent) {
       const aboutRow = document.createElement('div');
       aboutRow.className = 'si-row';
-      aboutRow.innerHTML = `<span class="si-num" style="color:rgba(var(--accent-rgb),0.75)">?</span><span class="si-label">What Is a Destiny Matrix?</span>`;
+      aboutRow.innerHTML = `<span class="si-num" style="color:rgba(var(--accent-rgb),0.75)">?</span><span class="si-label">What Is Destiny Matrix?</span>`;
       aboutRow.addEventListener('click', () => {
         if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
         root.classList.remove('open');
@@ -5417,7 +5417,7 @@ const ARCANA_ESSENCE = {
         _tierProviders.openInfo({
           eyebrow: 'START HERE',
           sublabel: 'A plain-language primer',
-          heading: 'What Is a Destiny Matrix?',
+          heading: 'What Is Destiny Matrix?',
           html: window.DAboutContent.html(),
         });
       });
