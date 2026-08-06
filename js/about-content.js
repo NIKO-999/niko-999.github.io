@@ -44,8 +44,8 @@ window.DAboutContent = (function () {
       body: `Each number from 1 to 22 matches one of the 22 major tarot cards. No cards are shuffled or drawn here — they're used purely as a set of descriptions. Think of them as 22 well-known ways a person can be built. Each one comes with a full picture: how it looks when it's going well, how it goes wrong, and what usually sits underneath. They're borrowed because they're good, familiar descriptions of how people actually are.`,
     },
     {
-      label: 'THE CHAKRAS',
-      body: `Chakras are seven centres running up the body, from the base of the spine to the top of the head. Each one is linked to a different part of being human — feeling safe, creativity, confidence, love, speaking up, intuition, and meaning. In this app each centre gets its own numbers, so you can see what's flowing easily for you and what's stuck. It's another view of the same person, focused on how things feel in the body rather than how they play out in your life.`,
+      label: 'THE BODY CHAKRAS',
+      body: `Chakras are seven centres running up the body, from the base of the spine to the top of the head. Each one covers a different part of being human — feeling safe, creativity, confidence, love, speaking up, intuition, and meaning. Open the panel on the side of the screen and you'll see all seven, each with three numbers next to it. The first is how that centre shows up in practical, physical life. The second is how much energy you actually have available there. The third is how it feels day to day. Tap any centre to read what it looks like when it's flowing and when it's stuck, plus one thing you can do about it. It's the same person as the rest of the chart, looked at through the body instead of through your circumstances.`,
     },
     {
       label: 'WHY THE SAME NUMBER CAN MEAN TWO THINGS',
