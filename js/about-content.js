@@ -31,7 +31,7 @@ window.DAboutContent = (function () {
   const sections = [
     {
       label: 'THE SHORT VERSION',
-      body: `A Destiny Matrix is a map of your personality, drawn from your birth date, laid out as a diagram of connected points. Each point is a position — a specific area of life, like how you come across to other people, what you're here to work through, what you inherited from your father's side, how you relate to money. Each position holds a number from 1 to 22, and each of those numbers corresponds to one of the 22 major cards of the tarot. Put simply: the diagram tells you which archetype is sitting in which area of your life. Everything this app shows you is an expansion of that one idea.`,
+      body: `A Destiny Matrix is a map of your personality, drawn from your birth date, laid out as a diagram of connected points. Each point is a position — a specific area of life, like how you come across to other people, what you're here to work through, what you inherited through your generational line, how you relate to money. Each position holds a number from 1 to 22, and each of those numbers corresponds to one of the 22 major cards of the tarot. Put simply: the diagram tells you which archetype is sitting in which area of your life. Everything this app shows you is an expansion of that one idea.`,
     },
     {
       label: 'THE TAROT HALF',
