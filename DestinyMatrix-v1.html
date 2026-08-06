@@ -1008,6 +1008,7 @@
 <script src="js/compatibility-content.js"></script>
 <script src="js/most-prominent-content.js"></script>
 <script src="js/daily-reminder-content.js"></script>
+<script src="js/about-content.js"></script>
 <script src="js/native.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
@@ -3885,6 +3886,25 @@ const ARCANA_ESSENCE = {
   }
   _mPbClose.addEventListener('click', closeMicroBanner);
 
+  // Star-less informational card. Same banner chrome as every reading, but
+  // no scene position, no number, no fly-in — used for the "What Is a
+  // Destiny Matrix?" primer that opens the Star Index. Registered on the
+  // shared provider registry so the index IIFE below can call it without
+  // reaching into this closure.
+  _tierProviders.openInfo = function (opts) {
+    document.getElementById('pb-prog-name').textContent = opts.eyebrow || '';
+    document.getElementById('pb-prog-name').style.color = themedHex('#c9b6ff');
+    document.getElementById('pb-section-label').textContent = opts.sublabel || '';
+    document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
+    document.getElementById('pb-heading').textContent = opts.heading || '';
+    document.getElementById('pb-body').innerHTML = opts.html || '';
+
+    _mBanner.classList.add('open');
+    _mBanner.scrollTop = 0;
+    gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+    _bannerOpenMi = true;
+  };
+
   function restoreMicroStar(idx) {
     const d = MICRO[idx];
     d.sprite.visible = true;
@@ -5381,6 +5401,29 @@ const ARCANA_ESSENCE = {
     const q = search.value.trim().toLowerCase();
     listEl.innerHTML = '';
     let anyShown = false;
+
+    // Star-less primer, pinned above every group. Deliberately outside
+    // buildGroups() — it has no tier, no scene position and no number, so
+    // it isn't a "row" in the sense the rest of this index means. Hidden
+    // while searching, since it isn't a star anyone searches for.
+    if (!q && window.DAboutContent) {
+      const aboutRow = document.createElement('div');
+      aboutRow.className = 'si-row';
+      aboutRow.innerHTML = `<span class="si-num" style="color:rgba(var(--accent-rgb),0.75)">?</span><span class="si-label">What Is a Destiny Matrix?</span>`;
+      aboutRow.addEventListener('click', () => {
+        if (isFlying || activeIdx !== -1 || activeExtraStar !== null) return;
+        root.classList.remove('open');
+        search.value = '';
+        _tierProviders.openInfo({
+          eyebrow: 'START HERE',
+          sublabel: 'A plain-language primer',
+          heading: 'What Is a Destiny Matrix?',
+          html: window.DAboutContent.html(),
+        });
+      });
+      listEl.appendChild(aboutRow);
+      anyShown = true;
+    }
 
     buildGroups().forEach(g => {
       const rows = q ? g.rows.filter(r => (r.label + ' ' + r.num).toLowerCase().includes(q)) : g.rows;
