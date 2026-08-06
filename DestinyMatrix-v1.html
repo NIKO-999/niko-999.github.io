@@ -1008,6 +1008,7 @@
 <script src="js/compatibility-content.js"></script>
 <script src="js/most-prominent-content.js"></script>
 <script src="js/daily-reminder-content.js"></script>
+<script src="js/ideal-partner-content.js"></script>
 <script src="js/about-content.js"></script>
 <script src="js/native.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -3101,6 +3102,30 @@ const ARCANA_ESSENCE = {
     // point on it without needing to interleave a new angle between them.
     { key:'PROMINENT', num:_vals.atProminent, label:'Most Prominent',
       pos: new THREE.Vector3(-_R * 1.2687, _R * 0.4619, 0), color:0xFFD700, twk:{spd:0.60,off:2.2} },
+
+    // ── Ideal Partner Archetype (Love Channel) — DestinyMatrix-Sheet.
+    // extracted.md Page 14's full 22-row "Ideal Partner Alignment by Arcana"
+    // table, and one of the cheat sheet's own named positions. The source
+    // (337pages pp.146-148) places it at "point O" in the Prosperity Line's
+    // Relationship Zone; no formula for point O exists anywhere in the
+    // corpus, so this deliberately reuses the app's shipped Love Channel
+    // value (_vals.love) under its own star identity rather than inventing
+    // arithmetic — the same technique already used by CAREER/_vals.mon and
+    // Guardian Angel/NODES[1], and explicitly permitted by
+    // NON_NEGOTIABLE_RULES' Absolute System Isolation clause given its own
+    // dedicated star and its own freshly-written content. Full reasoning,
+    // including why matrix-engine's channels.I is NOT used: see
+    // research/11-Research-Updates/33 and js/ideal-partner-content.js's
+    // header.
+    //
+    // Placement: r=1.20R ring, θ=204° — the next 45° step around the same
+    // ring already carrying PP/SOP/SPP (294°/339°/24°) and Career (249°).
+    //
+    // Appended at the END of MICRO — index 45; matching Node 45 block in
+    // applyNewDate below. Appending (never inserting) is the documented
+    // convention here: an index shift broke Past Life Star's refresh once.
+    { key:'IDEALPARTNER', num:_vals.love, label:'Ideal Partner',
+      pos: new THREE.Vector3(-_R * 1.0963, -_R * 0.4881, 0), color:0xFF6FA5, twk:{spd:0.86,off:2.75} },
   ];
 
   // ── Three.js sprites ────────────────────────────────────────────────────
@@ -3732,6 +3757,50 @@ const ARCANA_ESSENCE = {
       return;
     }
 
+    // Ideal Partner Archetype — own content global (js/ideal-partner-
+    // content.js), not DMicroContent, and its own four-section shape
+    // (THE PARTNER / THE ATTRACTION / THE FRICTION / INVITATION) rather than
+    // the app-wide MASTERY/SHADOW/INVITATION, because the subject is a
+    // relationship dynamic rather than a trait of the reader alone. Four
+    // body sections is a hard cap here by explicit instruction.
+    if (data.key === 'IDEALPARTNER') {
+      const ip = window.DIdealPartnerContent ? window.DIdealPartnerContent.get(data.num) : null;
+
+      document.getElementById('pb-prog-name').textContent = data.label + '  ·  ' + data.num;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
+      document.getElementById('pb-section-label').textContent = (ip && ip.tagline) || 'Love Channel';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
+      document.getElementById('pb-heading').textContent = (ip && ip.title) || data.label;
+
+      document.getElementById('pb-body').innerHTML = ip ?
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE PARTNER</div>
+           <div class="pb-full-text">${ip.partner}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE ATTRACTION</div>
+           <div class="pb-full-text">${ip.attraction}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE FRICTION</div>
+           <div class="pb-full-text">${ip.friction}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">INVITATION</div>
+           <div class="pb-full-text">${ip.invitation}</div>
+         </div>` :
+        `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE FULL READING</div>
+           <div class="pb-full-text">The Ideal Partner reading for Arcana ${data.num} is still being written. The number above is real and already calculated correctly — only the prose is still to come.</div>
+         </div>`;
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
     // Name-based numerology — Expression, Soul Urge, Personality, Maturity,
     // Hidden Passion. Own content globals (js/name-numbers-content.js /
     // js/hidden-numbers-content.js), not DMicroContent — same WHY/SHADOW/
@@ -4175,6 +4244,11 @@ const ARCANA_ESSENCE = {
     MICRO[33].num = _vals.pinnacleActiveNum;
     _microTags[34].querySelector('.t-num').textContent = String(_vals.challengeActiveNum);
     MICRO[34].num = _vals.challengeActiveNum;
+
+    // Node 45: Ideal Partner — mirrors the live Love Channel value, same
+    // pattern as Node 28 (Career Paths mirroring MON).
+    _microTags[45].querySelector('.t-num').textContent = String(_vals.love);
+    MICRO[45].num = _vals.love;
 
     return true;
   };
@@ -5337,7 +5411,7 @@ const ARCANA_ESSENCE = {
   // own dedicated Numerology Index panel, and showing them here too just
   // duplicated the same rows across both panels.
   const MICRO_GROUPS = [
-    { title: 'Love & Money',        keys: ['LOVE', 'MON', 'RWM', 'MK', 'MEP', 'CAREER', 'GA'] },
+    { title: 'Love & Money',        keys: ['LOVE', 'IDEALPARTNER', 'MON', 'RWM', 'MK', 'MEP', 'CAREER', 'GA'] },
     { title: 'Ancestral Square',    keys: ['F', 'G', 'H', 'I'] },
     { title: 'Ancestral Tasks',     keys: ['F1', 'G1', 'H1', 'I1'] },
     { title: 'Karmic & Past',       keys: ['KARMA', 'SEXLINE', 'PASTLIFE'] },
