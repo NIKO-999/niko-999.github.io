@@ -4858,7 +4858,12 @@ const ARCANA_ESSENCE = {
 
 // ── TALENT STAR LINE ─────────────────────────────────────────────────────────
 ;(function () {
-  if (!window.DMEngine || !window.DTalentContent) return;
+  // NOTE: deliberately does NOT gate on window.DTalentContent. That module is
+  // lazy-loaded (see _contentReady()) and is undefined at definition time, so
+  // gating here silently killed this whole tier — no talent stars, and the
+  // Star Index's "Talent Star Line" group vanished with it. The content is
+  // only ever read inside openTalent(), which awaits _contentReady() first.
+  if (!window.DMEngine) return;
 
   // CORRECTED 2026-07-28 — the two stars here were previously labelled
   // "Ajna · Third Eye" and "Vishuddha · Throat" and placed at 2/3 and 1/3 down
@@ -4917,8 +4922,10 @@ const ARCANA_ESSENCE = {
     // archetype tier below it is now only a fallback for the two positions
     // this renders (pastLife/personal); should never actually trigger once
     // both are complete, kept for safety same as every other tier's fallback.
-    const content = (window.DTalentContent.getForPosition && DTalentContent.getForPosition(key, num))
-      || window.DTalentContent.get(icon);
+    // window-guarded: _contentReady() resolves even when a module's fetch
+    // failed, so this isn't guaranteed to exist by the time we get here.
+    const tc = window.DTalentContent;
+    const content = tc && ((tc.getForPosition && tc.getForPosition(key, num)) || tc.get(icon));
     if (!content) return;
 
     document.getElementById('pb-prog-name').textContent = TALENT_LABEL[key] + '  ·  ' + num;
@@ -5300,7 +5307,11 @@ const ARCANA_ESSENCE = {
 // #prog-banner, and the rail participates in the same activeExtraStar guard as
 // every other tier so it can't fight a star mid-transition.
 ;(function () {
-  if (!window.DMEngine || !window.DChakraContent) return;
+  // Same reasoning as the Talent tier above: DChakraContent is lazy-loaded and
+  // undefined at definition time, so gating on it here wiped out the entire
+  // chakra rail (0 dots, 0 rows). It's only read inside openChakra(), which
+  // awaits _contentReady() and window-guards the lookup.
+  if (!window.DMEngine) return;
 
   const rail   = document.getElementById('chakra-rail');
   const toggle = document.getElementById('cr-toggle');
