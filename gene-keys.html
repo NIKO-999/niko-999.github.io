@@ -303,10 +303,15 @@ body.reading #field { transform: translateX(-19vw); }
   font-family: var(--sans); font-size: 10px; letter-spacing: .30em;
   text-transform: uppercase; margin: 34px 0 12px;
 }
-.slabel.mastery { color: var(--lum); margin-top: 38px; }
+.slabel.essence { color: var(--ink-4); margin-top: 30px; }
+.slabel.mastery { color: var(--lum); margin-top: 30px; }
 .slabel.shadow  { color: var(--umbra); }
 .slabel.invite  { color: var(--gold); }
 
+#p-essence {
+  font-family: var(--sans); font-size: 12px; line-height: 1.8; letter-spacing: .02em;
+  color: var(--ink-3);
+}
 /* Mastery is the centrepiece: size + drop cap + whitespace + opacity */
 #p-mastery { font-size: 18px; line-height: 1.85; color: rgba(220,235,239,.94); }
 #p-mastery::first-letter {
@@ -357,6 +362,7 @@ body.reading #field { transform: translateX(-19vw); }
   }
   #p-name { font-size: 21px; }
   #p-mastery { font-size: 16.5px; line-height: 1.8; }
+  #p-essence { color: var(--ink-2); }
 }
 
 /* ── accessibility accommodations ───────────────────────────────────── */
@@ -410,6 +416,8 @@ body.reading #field { transform: translateX(-19vw); }
   <div id="p-role"></div>
   <div id="p-spectrum"></div>
   <div id="p-note"></div>
+  <div class="slabel essence" id="l-essence"></div>
+  <div id="p-essence"></div>
   <div class="slabel mastery" id="l-mastery"></div>
   <div id="p-mastery"></div>
   <div class="slabel shadow" id="l-shadow"></div>
@@ -824,6 +832,14 @@ function openKey(n) {
   document.getElementById('p-note').textContent = (k.gift === k.siddhi)
     ? 'In Key ' + n + ' the Gift and the Siddhi share one name — ' + k.gift + ' is both the practice and its flowering.'
     : '';
+
+  // Definitional framing lives here, never inside Mastery — Mastery is about
+  // the person. Hidden entirely when a key has no essence written yet.
+  const ess = c && c.essence ? c.essence : '';
+  document.getElementById('p-essence').textContent = ess;
+  document.getElementById('l-essence').textContent = ess ? 'What this gift is' : '';
+  document.getElementById('l-essence').style.display = ess ? '' : 'none';
+  document.getElementById('p-essence').style.display = ess ? '' : 'none';
 
   document.getElementById('l-mastery').textContent = 'Mastery · ' + k.gift;
   document.getElementById('l-shadow').textContent = 'The Shadow · ' + k.shadow;
