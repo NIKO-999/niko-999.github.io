@@ -230,25 +230,30 @@ body {
 }
 
 /* ── reading panel ──────────────────────────────────────────────────── */
+/* The reading lives INSIDE the transcription bubble — the space the two
+   backbones opened. Position is computed in JS from the bubble geometry, so
+   the text column literally sits between the separated strands. */
 #panel {
-  position: fixed; top: 0; right: 0; bottom: 0; z-index: 10;
-  width: min(600px, 44vw);
-  background: rgba(9,13,26,.93);
-  border-left: 1px solid rgba(95,235,215,.10);
-  transform: translateX(101%);
-  transition: transform 620ms var(--ease);
+  position: fixed; z-index: 10;
+  opacity: 0; pointer-events: none;
+  transition: opacity 420ms var(--ease);
   overflow-y: auto; overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
-  padding: 54px 46px 70px;
+  background: radial-gradient(ellipse at 50% 40%, rgba(5,7,15,.92) 0%, rgba(5,7,15,.72) 62%, rgba(5,7,15,0) 100%);
+  -webkit-mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 34px), transparent 100%);
+  mask-image: linear-gradient(180deg, transparent 0, #000 26px, #000 calc(100% - 34px), transparent 100%);
 }
-@supports (backdrop-filter: blur(4px)) {
-  #panel { background: rgba(9,13,26,.82); backdrop-filter: blur(20px) saturate(115%); -webkit-backdrop-filter: blur(20px) saturate(115%); }
-}
-body.reading #panel { transform: translateX(0); }
-body.reading #field { transform: translateX(-19vw); }
-#panel::before {
-  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+body.reading #panel { opacity: 1; pointer-events: auto; }
+#p-hex { display: flex; flex-direction: column-reverse; gap: 4px; margin-bottom: 22px; width: 52px; }
+#p-hex i {
+  display: block; height: 3px; border-radius: 1px;
   background: var(--axis, var(--steel));
+  opacity: 0; transform: scaleX(.2);
+  transition: opacity 340ms var(--ease), transform 460ms var(--ease);
+}
+body.reading #p-hex i { opacity: .9; transform: scaleX(1); }
+#p-hex i.yin {
+  background: linear-gradient(90deg, var(--axis, var(--steel)) 0 42%, transparent 42% 58%, var(--axis, var(--steel)) 58% 100%);
 }
 #p-close {
   position: absolute; top: 14px; right: 16px;
@@ -346,20 +351,9 @@ body.reading #field { transform: translateX(-19vw); }
   #disclaimer { display: none; }
   #datebar { left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); }
   #hint { left: 50%; transform: translateX(-50%); white-space: nowrap; bottom: calc(54px + env(safe-area-inset-bottom)); }
-  #panel {
-    top: auto; left: 0; right: 0; bottom: 0;
-    width: 100%; height: 88dvh; max-height: 88vh;
-    border-left: none; border-top: 1px solid rgba(95,235,215,.12);
-    border-radius: 20px 20px 0 0;
-    transform: translateY(101%);
-    padding: 34px 22px 60px;
-  }
-  body.reading #panel { transform: translateY(0); }
-  body.reading #field { transform: none; opacity: .32; }
-  #panel::after {
-    content: ''; position: absolute; top: 9px; left: 50%; margin-left: -21px;
-    width: 42px; height: 4px; border-radius: 2px; background: rgba(220,235,239,.22);
-  }
+  /* the bubble is narrower on a phone, so the column tightens rather than
+     becoming a sheet — the reading stays inside the opened strand */
+  #p-hex { margin-bottom: 14px; }
   #p-name { font-size: 21px; }
   #p-mastery { font-size: 16.5px; line-height: 1.8; }
   #p-essence { color: var(--ink-2); }
@@ -410,6 +404,7 @@ body.reading #field { transform: translateX(-19vw); }
 
 <aside id="panel" role="dialog" aria-modal="false" aria-labelledby="p-name">
   <button id="p-close" aria-label="Close reading">&times;</button>
+  <div id="p-hex" aria-hidden="true"></div>
   <div id="p-eyebrow"></div>
   <h2 id="p-name" tabindex="-1"></h2>
   <div id="p-tagline"></div>
@@ -428,6 +423,7 @@ body.reading #field { transform: translateX(-19vw); }
 </aside>
 
 <script src="js/gene-keys.js"></script>
+<script src="js/hexagrams.js"></script>
 <script src="js/gk-roles.js"></script>
 <script src="js/gene-keys-content.js" defer></script>
 <script src="js/gk-lifeswork.js" defer></script>
@@ -469,8 +465,64 @@ const gCur  = document.createElementNS(SVGNS, 'g');
 const gTeth = document.createElementNS(SVGNS, 'g');
 const gNode = document.createElementNS(SVGNS, 'g');
 gBack.appendChild(gBackL); gBack.appendChild(gBackR);
+// While the bubble is open the backbones are deformed, so the translate-only
+// trick no longer applies and they are rebuilt instead. Rotation freezes at
+// the same moment, so this runs during the transition and then holds still.
+const gOpen = document.createElementNS(SVGNS, 'g');
+const openL = document.createElementNS(SVGNS, 'path');
+const openR = document.createElementNS(SVGNS, 'path');
+for (const p of [openL, openR]) {
+  p.setAttribute('fill', 'none');
+  p.setAttribute('stroke', 'rgba(120,170,205,.55)');
+  p.setAttribute('stroke-width', '1.5');
+  p.setAttribute('stroke-linecap', 'round');
+  gOpen.appendChild(p);
+}
+gOpen.style.display = 'none';
+// The pair you broke to open the strand — two stubs left facing each other
+// across the gap, so the key being read still has a place on the helix.
+const gNub = document.createElementNS(SVGNS, 'g');
+const nubL = document.createElementNS(SVGNS, 'line');
+const nubR = document.createElementNS(SVGNS, 'line');
+for (const p of [nubL, nubR]) { p.setAttribute('stroke-width', '3'); p.setAttribute('stroke-linecap', 'round'); gNub.appendChild(p); }
+gNub.style.display = 'none';
+helix.appendChild(gOpen); helix.appendChild(gNub);
 helix.appendChild(gBack); helix.appendChild(gRung); helix.appendChild(gCur);
 helix.appendChild(gTeth); helix.appendChild(gNode);
+
+/* ── TRANSCRIPTION ──────────────────────────────────────────────────────
+   A gene is not read by moving closer to it. The double helix unzips: the
+   two backbones peel apart, the base pairs between them break, and the gene
+   is read from the opened gap. That is what this interaction is. The reading
+   is placed inside the bubble the strands opened — the separated backbones
+   become the left and right margins of the text.                          */
+// A real transcription bubble has a flat-open middle, not a lens — and the
+// reading has to sit inside that flat region, otherwise the closing curve
+// cuts through the text. PLATEAU is fully open; FALLOFF eases back into the
+// wound helix beyond it.
+// Phones have less width for the column, so they open a taller bubble to keep
+// the reading window a usable shape. Set in layout().
+let PLATEAU = 19, FALLOFF = 8, BUBBLE_HALF = 27;
+const BUBBLE_MS = 900;
+let bubbleIdx = -1, bubbleAmt = 0, bubbleFrom = 0, bubbleTo = 0, bubbleT0 = 0;
+let bubbleAnimating = false, gapHalf = 200, yShift = 0;
+
+// Takes a FRACTIONAL index so the backbone curve can use the same profile.
+function bulge(fi) {
+  if (bubbleAmt <= 0 || bubbleIdx < 0) return 0;
+  const d = Math.abs(fi - bubbleIdx);
+  if (d >= BUBBLE_HALF) return 0;
+  if (d <= PLATEAU) return bubbleAmt;
+  return 0.5 * (1 + Math.cos(Math.PI * (d - PLATEAU) / FALLOFF)) * bubbleAmt;
+}
+
+// The strand slides so the opened key sits mid-field — the bubble then always
+// has room for its full plateau even when the key is near either end.
+function updateShift() {
+  const top = insets().t;
+  yShift = bubbleIdx < 0 ? 0
+    : (top + H / 2 - (top + PAD_Y + bubbleIdx * pitch)) * bubbleAmt;
+}
 
 const rungs = [];        // 64 <line>, index 0..63
 const rungBucket = new Int8Array(N).fill(-1);
@@ -531,6 +583,10 @@ function layout() {
   pitch = (H - 2 * PAD_Y) / (N - 1);
   TURN_H = PERIOD * pitch;
   A = Math.min(Math.max(0.22 * W, 44), 0.44 * TURN_H);
+  PLATEAU = W < BREAKPOINT ? 25 : 19;
+  FALLOFF = W < BREAKPOINT ? 6 : 8;
+  BUBBLE_HALF = PLATEAU + FALLOFF;
+  gapHalf = Math.min(360, Math.max(140, W * 0.40));
   helix.setAttribute('viewBox', '0 0 ' + W + ' ' + (H + ins.t + ins.b));
   helix.style.setProperty('--top', ins.t + 'px');
   buildBackbones(ins.t);
@@ -575,6 +631,9 @@ function placeRungs(top) {
     for (let i = 0; i < N; i++) {
       const l = document.createElementNS(SVGNS, 'line');
       l.setAttribute('stroke-linecap', 'round');
+      // normalised so a dasharray can open a centred gap — the base pair
+      // breaking — without knowing the rung's actual length
+      l.setAttribute('pathLength', '100');
       gRung.appendChild(l); rungs.push(l);
     }
   }
@@ -592,22 +651,74 @@ function renderFrame(force) {
   for (let i = 0; i < N; i++) {
     const j = i % PERIOD, s = sinT[j];
     const el = rungs[i];
-    el.setAttribute('x1', (CX - A * s * 0.9).toFixed(2));
-    el.setAttribute('x2', (CX + A * s * 0.9).toFixed(2));
+    const u = bulge(i);
+    if (u > 0) {
+      // strands separate and untwist toward the centre of the bubble
+      el.setAttribute('x1', ((CX - A * s * 0.9) * (1 - u) + (CX - gapHalf) * u).toFixed(2));
+      el.setAttribute('x2', ((CX + A * s * 0.9) * (1 - u) + (CX + gapHalf) * u).toFixed(2));
+    } else {
+      el.setAttribute('x1', (CX - A * s * 0.9).toFixed(2));
+      el.setAttribute('x2', (CX + A * s * 0.9).toFixed(2));
+    }
+    if (yShift !== 0 || u > 0) {
+      const y = yOf(i, insets().t) + yShift;
+      el.setAttribute('y1', y.toFixed(1)); el.setAttribute('y2', y.toFixed(1));
+    }
     const t = (cosT[j] + 1) / 2;
     const b = Math.min(31, (t * 31) | 0);
-    if (force || rungBucket[i] !== b) {
-      rungBucket[i] = b;
-      const p = primeByIdx[i];
-      const L = p ? LUT[p.axis] : LUT.dim;
-      el.setAttribute('stroke', L[b].s);
-      el.setAttribute('stroke-opacity', L[b].o);
-      el.setAttribute('stroke-width', L[b].w);
+    const p = primeByIdx[i];
+    const L = p ? LUT[p.axis] : LUT.dim;
+    if (u > 0.004) {
+      // the base pair breaks: a gap opens at the centre of the rung and
+      // widens until the two halves have retracted to their own strand
+      const g = Math.min(99, 100 * Math.pow(u, 0.65));
+      el.setAttribute('stroke-dasharray', ((100 - g) / 2).toFixed(1) + ' ' + g.toFixed(1));
+      el.setAttribute('stroke-opacity', (L[b].o * (1 - u)).toFixed(3));
+      rungBucket[i] = -1;
+    } else {
+      if (rungBucket[i] === -1) el.removeAttribute('stroke-dasharray');
+      if (force || rungBucket[i] !== b) {
+        rungBucket[i] = b;
+        el.setAttribute('stroke', L[b].s);
+        el.setAttribute('stroke-opacity', L[b].o);
+        el.setAttribute('stroke-width', L[b].w);
+      }
     }
   }
-  // backbones: translate only
-  let dy = (-phi * pitch / K) % TURN_H; if (dy < 0) dy += TURN_H;
-  gBack.style.transform = 'translate3d(0,' + dy.toFixed(2) + 'px,0)';
+  if (bubbleAmt > 0) {
+    // deformed: rebuild both curves against the same bulge the rungs use
+    const top = insets().t, step = pitch / 3;
+    let dL = '', dR = '';
+    const span = Math.abs(yShift) + TURN_H;
+    for (let y = top + PAD_Y - span; y <= top + PAD_Y + (N - 1) * pitch + span; y += step) {
+      const fi = (y - top - PAD_Y) / pitch;
+      const th = fi * K + phi, u = bulge(fi);
+      const sx = Math.sin(th);
+      const xl = (CX - A * sx) * (1 - u) + (CX - gapHalf) * u;
+      const xr = (CX + A * sx) * (1 - u) + (CX + gapHalf) * u;
+      const yy = (y + yShift).toFixed(1);
+      dL += (dL ? 'L' : 'M') + xl.toFixed(1) + ',' + yy;
+      dR += (dR ? 'L' : 'M') + xr.toFixed(1) + ',' + yy;
+    }
+    openL.setAttribute('d', dL); openR.setAttribute('d', dR);
+    gOpen.style.display = ''; gBack.style.display = 'none';
+    const ny = yOf(bubbleIdx, top) + yShift, stub = 15 * bubbleAmt;
+    const col = primeByIdx[bubbleIdx]
+      ? (primeByIdx[bubbleIdx].axis === 'gold' ? '#F2C46B' : '#5FEBD7') : '#5B87A8';
+    nubL.setAttribute('x1', CX - gapHalf); nubL.setAttribute('x2', CX - gapHalf + stub);
+    nubR.setAttribute('x1', CX + gapHalf); nubR.setAttribute('x2', CX + gapHalf - stub);
+    for (const p of [nubL, nubR]) {
+      p.setAttribute('y1', ny.toFixed(1)); p.setAttribute('y2', ny.toFixed(1));
+      p.setAttribute('stroke', col);
+      p.setAttribute('stroke-opacity', (bubbleAmt * 0.95).toFixed(2));
+    }
+    gNub.style.display = '';
+  } else {
+    gOpen.style.display = 'none'; gNub.style.display = 'none'; gBack.style.display = '';
+    // wound: a sine phase shift IS a vertical translation, so translate only
+    let dy = (-phi * pitch / K) % TURN_H; if (dy < 0) dy += TURN_H;
+    gBack.style.transform = 'translate3d(0,' + dy.toFixed(2) + 'px,0)';
+  }
   // tethers follow the outer extent of their rung
   const top = insets().t;
   for (const th of tethEls) {
@@ -627,8 +738,17 @@ function loop(now) {
   rafId = requestAnimationFrame(loop);
   if (now - lastT < FRAME_MS) return;
   const dt = Math.min(100, now - lastT); lastT = now;
-  phi += (dt / ROT_MS) * Math.PI * 2 * speed;
-  for (const d of curDots) d.t += dt / 5000;
+  if (bubbleAnimating) {
+    const k = Math.min(1, (now - bubbleT0) / BUBBLE_MS);
+    const e = k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;  // easeInOutCubic
+    bubbleAmt = bubbleFrom + (bubbleTo - bubbleFrom) * e;
+    if (k >= 1) { bubbleAmt = bubbleTo; bubbleAnimating = false; if (bubbleAmt === 0) bubbleIdx = -1; }
+    positionSlate();
+  }
+  if (bubbleAmt === 0 && !bubbleAnimating) {
+    phi += (dt / ROT_MS) * Math.PI * 2 * speed;
+    for (const d of curDots) d.t += dt / 5000;
+  }
   renderFrame(false);
 }
 function start() {
@@ -813,6 +933,42 @@ function spectrumHTML(k) {
   wrap.appendChild(rail); wrap.appendChild(row);
 }
 
+// Places the reading in the gap the strands opened, and hides the furniture
+// that belongs to the wound helix (nodes, tethers, currents) while it is open.
+function positionSlate() {
+  updateShift();
+  const top = insets().t;
+  const pad = W < BREAKPOINT ? 16 : 34;
+  const lo = bubbleIdx - PLATEAU + 1;
+  const hi = bubbleIdx + PLATEAU - 1;
+  const left = CX - gapHalf + pad;
+  const width = Math.max(180, gapHalf * 2 - pad * 2);
+  panel.style.left = left + 'px';
+  panel.style.width = width + 'px';
+  panel.style.top = (yOf(lo, top) + yShift) + 'px';
+  panel.style.height = Math.max(160, (hi - lo) * pitch) + 'px';
+  panel.style.padding = (W < BREAKPOINT ? '16px 4px 26px' : '24px 10px 34px');
+  const wound = bubbleAmt < 0.06;
+  gNode.style.display = wound ? '' : 'none';
+  gTeth.style.display = wound ? '' : 'none';
+  gCur.style.display  = wound ? '' : 'none';
+  labels.style.opacity = wound ? '1' : '0';
+}
+
+function renderHexagram(n) {
+  const box = document.getElementById('p-hex');
+  box.textContent = '';
+  const lines = window.DHexagrams ? DHexagrams.lines(n) : null;
+  if (!lines) return;
+  // bottom line first — the column is reversed in CSS so it reads correctly
+  lines.forEach((v, k) => {
+    const i = document.createElement('i');
+    if (!v) i.className = 'yin';
+    i.style.transitionDelay = (k * 55) + 'ms';
+    box.appendChild(i);
+  });
+}
+
 function openKey(n) {
   const k = DGeneKeys.KEYS[n];
   if (!k || !primes) return;
@@ -865,20 +1021,31 @@ function openKey(n) {
 
   const mobile = window.innerWidth < BREAKPOINT;
   panel.setAttribute('aria-modal', mobile ? 'true' : 'false');
+
+  // unzip the strand at this key
+  renderHexagram(n);
+  gapHalf = Math.min(360, Math.max(140, W * 0.40));
+  bubbleIdx = INDEX_OF[n];
+  bubbleFrom = bubbleAmt; bubbleTo = 1; bubbleT0 = performance.now();
+  bubbleAnimating = !REDUCED.matches;
+  if (REDUCED.matches) { bubbleAmt = 1; bubbleAnimating = false; }
+  positionSlate();
   document.body.classList.add('reading');
   panel.scrollTop = 0;
+  start();
   document.getElementById('p-name').focus({ preventScroll: true });
   if (c) document.title = c.title + ' — Gene Keys';
   try { history.replaceState(null, '', location.pathname + '?dob=' + dobInput.value + '&key=' + n); } catch (_) {}
 
-  speed = mobile ? 0 : 0.18;
-  if (mobile) stop(); else start();
 }
 function closePanel() {
   if (!document.body.classList.contains('reading')) return;
   document.body.classList.remove('reading');
   openIdx = null;
   document.title = 'Gene Keys — The Living Strand';
+  bubbleFrom = bubbleAmt; bubbleTo = 0; bubbleT0 = performance.now();
+  bubbleAnimating = !REDUCED.matches;
+  if (REDUCED.matches) { bubbleAmt = 0; bubbleIdx = -1; positionSlate(); }
   speed = 1; start();
   strandEl.focus({ preventScroll: true });
   try { history.replaceState(null, '', location.pathname + '?dob=' + dobInput.value); } catch (_) {}
@@ -901,6 +1068,7 @@ function apply(firstRun) {
   ROLES.forEach((r, roleIdx) => {
     primeByIdx[INDEX_OF[primes[r[0]].key]] = { roleIdx: roleIdx, key: primes[r[0]].key, axis: roleIdx < 2 ? 'gold' : 'cyan' };
   });
+  gapHalf = Math.min(360, Math.max(140, W * 0.40));
   layout();
   if (!firstRun) {
     // an open reading belongs to the old date
