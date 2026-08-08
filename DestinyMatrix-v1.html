@@ -992,23 +992,23 @@
   <div class="ic-desc" id="ic-desc" style="display:none"></div>
 </div>
 
+<!-- Eager scripts only — everything here is needed before or during the first
+     paint, and together they're ~95KB rather than the ~1.8MB it used to be:
+       programs.js       — the PROGRAM STARS IIFE bails outright if
+                           window.DMPrograms is missing at definition time.
+       matrix-engine.js  — every value on the diagram comes from it.
+       about-content.js  — the Star Index checks window.DAboutContent
+                           synchronously when deciding to draw the primer row.
+       daily-reminder-*  — native.js reads it when scheduling notifications.
+       native.js         — the Capacitor wrapper hooks.
+     Every other content module is fetched on demand by _contentReady() in the
+     main script below (prefetched on idle, awaited by the card openers), which
+     is what keeps the initial payload small. Adding a new content module?
+     Register it in _LAZY_CONTENT rather than adding a tag here, unless it's
+     genuinely read during startup. -->
 <script src="js/programs.js"></script>
-<script src="js/micro-content.js"></script>
 <script src="js/matrix-engine.js"></script>
-<script src="js/talent-content.js"></script>
-<script src="js/karmic-debt-content.js"></script>
-<script src="js/past-life-content.js"></script>
-<script src="js/sexual-line-content.js"></script>
-<script src="js/career-paths-content.js"></script>
-<script src="js/purpose-content.js"></script>
-<script src="js/chakra-content.js"></script>
-<script src="js/pinnacles-challenges-content.js"></script>
-<script src="js/name-numbers-content.js"></script>
-<script src="js/hidden-numbers-content.js"></script>
-<script src="js/compatibility-content.js"></script>
-<script src="js/most-prominent-content.js"></script>
 <script src="js/daily-reminder-content.js"></script>
-<script src="js/ideal-partner-content.js"></script>
 <script src="js/about-content.js"></script>
 <script src="js/native.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -1016,6 +1016,67 @@
 <script>
 (function () {
 'use strict';
+
+// ── LAZY CONTENT LOADER ────────────────────────────────────────────────────
+// The written interpretations are ~1.7MB across 14 files — far more than any
+// reader opens in a session, and none of it is needed to draw the diagram
+// (every number on screen comes from matrix-engine.js). Loading it all up
+// front cost ~2.6s before the scene even started building.
+//
+// So: these modules are no longer <script> tags. They're fetched here, once,
+// and the card openers await _contentReady() before rendering. A prefetch
+// kicks off as soon as the browser is idle after first paint, so by the time
+// anyone actually clicks a star the content is almost always already in
+// memory and the await resolves instantly.
+//
+// Deliberately all-or-nothing rather than per-module: openMicroCard alone can
+// need any of half a dozen of these depending on which key was clicked, so
+// tracking per-key dependencies would be a bug farm for no real gain — the
+// prefetch means the distinction rarely costs a user anything anyway.
+const _LAZY_CONTENT = [
+  'micro-content', 'chakra-content', 'purpose-content', 'karmic-debt-content',
+  'hidden-numbers-content', 'talent-content', 'name-numbers-content',
+  'most-prominent-content', 'ideal-partner-content', 'career-paths-content',
+  'pinnacles-challenges-content', 'past-life-content', 'sexual-line-content',
+  'compatibility-content',
+];
+
+let _contentPromise = null;
+let _contentFailed  = false;
+
+function _loadScript(name) {
+  return new Promise((resolve, reject) => {
+    const s = document.createElement('script');
+    s.src = 'js/' + name + '.js';
+    s.async = false; // keep execution order stable; these are independent anyway
+    s.onload = () => resolve(name);
+    s.onerror = () => reject(new Error('content module failed to load: ' + name));
+    document.head.appendChild(s);
+  });
+}
+
+// Resolves once every interpretation module has executed. Safe to call as
+// often as you like — the work happens once and the same promise is reused.
+function _contentReady() {
+  if (!_contentPromise) {
+    _contentPromise = Promise.all(_LAZY_CONTENT.map(_loadScript)).catch((err) => {
+      // Never reject: a failed content fetch should degrade to the honest
+      // "still being written" placeholders each renderer already has, not
+      // wedge the card open behind an unhandled rejection.
+      _contentFailed = true;
+      console.error('[DM] content load failed — cards will show placeholders.', err);
+    });
+  }
+  return _contentPromise;
+}
+
+// Warm the cache once the main thread is free. requestIdleCallback isn't in
+// Safari, hence the timeout fallback.
+if (typeof requestIdleCallback === 'function') {
+  requestIdleCallback(() => _contentReady(), { timeout: 3000 });
+} else {
+  setTimeout(() => _contentReady(), 1200);
+}
 
 // ── NODE DATA ──────────────────────────────────────────────────────────────
 const NODES = [
@@ -1996,7 +2057,8 @@ function returnToMap(onDone) {
 const infoCard = document.getElementById('info-card');
 gsap.set(infoCard, { xPercent: -50, y: 24, opacity: 0, pointerEvents: 'none' });
 
-function showCard(idx) {
+async function showCard(idx) {
+  await _contentReady(); // see openMicroCard — lazy interpretation modules
   const d   = NODES[idx];
 
   const mc  = window.DMicroContent && DMicroContent.get(d.num, d.key);
@@ -3262,7 +3324,14 @@ const ARCANA_ESSENCE = {
   // superseded by the Chakra Map rail. See
   // research/11-Research-Updates/25-*.md.
 
-  function openMicroCard(idx) {
+  async function openMicroCard(idx) {
+    // Interpretation modules are lazy-loaded — see _contentReady() at the top
+    // of this script. Normally already resolved via the idle prefetch, so this
+    // is a no-op; on a cold, slow connection it's the only thing standing
+    // between a click and an empty card. Callers are gsap onComplete handlers
+    // that ignore the return value, so awaiting here is safe.
+    await _contentReady();
+
     const data = MICRO[idx];
     const hex  = '#' + new THREE.Color(data.color).getHexString();
 
@@ -4839,7 +4908,8 @@ const ARCANA_ESSENCE = {
   const banner  = document.getElementById('prog-banner');
   const pbClose = document.getElementById('pb-close');
 
-  function openTalent(key) {
+  async function openTalent(key) {
+    await _contentReady(); // see openMicroCard — lazy interpretation modules
     const num  = _talents[key];
     const icon = window.DMEngine.getIconType(num);
     const hex  = '#' + (ICON_COLOR_MAP[icon] || 0xAABBFF).toString(16).padStart(6, '0');
@@ -5274,11 +5344,15 @@ const ARCANA_ESSENCE = {
     return ARCANA_ESSENCE[n] ? ` — ${ARCANA_ESSENCE[n]}` : '';
   }
 
-  function openChakra(key) {
-    // Respect the shared guard — never open over a flying/active star.
+  async function openChakra(key) {
+    // Respect the shared guard — never open over a flying/active star. Checked
+    // before the await so the decision uses the state at click time.
     if (isFlying || activeIdx !== -1 || (activeExtraStar !== null && !_open)) return;
+    await _contentReady(); // see openMicroCard — lazy interpretation modules
     const row = _chakras.list.find(r => r.key === key);
-    const c   = DChakraContent.get(key);
+    // window-guarded rather than bare: _contentReady() resolves even when a
+    // fetch failed, so this module isn't guaranteed to exist.
+    const c   = window.DChakraContent ? window.DChakraContent.get(key) : null;
     if (!row || !c) return;
     const pc  = window.DChakraContent.getForArcana
       ? DChakraContent.getForArcana(key, row.emotional) : null;
