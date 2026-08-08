@@ -111,7 +111,46 @@
     margin: 14px 0 4px;
   }
   #detail .body .lbl:first-child { margin-top: 0; }
+  /* Mode toggle — Arcana tree vs Gene Keys wheel */
+  #mode-row { display: flex; gap: 0; border: 1px solid rgba(var(--accent-rgb), 0.3); border-radius: 3px; overflow: hidden; }
+  #mode-row button {
+    font-family: inherit; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: rgba(var(--fg-rgb), 0.55);
+    background: transparent; border: none;
+    padding: 7px 14px; cursor: pointer;
+  }
+  #mode-row button.active {
+    background: rgba(var(--accent-rgb), 0.14);
+    color: rgb(var(--fg-rgb));
+  }
   .tree-path { transition: stroke .35s, stroke-width .35s; }
+  /* River glow: an overlay stroke that flows along each lit path like a
+     current. Dashes travel from the higher sephira toward the lower one
+     (the Lightning Flash direction), so currents joining at a shared
+     sephira read as one continuous river. */
+  .river {
+    fill: none;
+    stroke-linecap: round;
+    pointer-events: none;
+    filter: drop-shadow(0 0 1.2px rgba(var(--accent-rgb), 0.9));
+  }
+  .river.tier1 {
+    stroke: rgba(var(--gold-rgb), 0.95);
+    stroke-width: 0.9;
+    stroke-dasharray: 3 6;
+    animation: riverflow 1.6s linear infinite;
+  }
+  .river.tier2 {
+    stroke: rgba(var(--accent-rgb), 0.8);
+    stroke-width: 0.6;
+    stroke-dasharray: 2 7;
+    animation: riverflow 2.8s linear infinite;
+  }
+  @keyframes riverflow { to { stroke-dashoffset: -9; } }
+  @media (prefers-reduced-motion: reduce) { .river { animation: none !important; } }
+  .gk-seg { cursor: pointer; transition: fill .35s; }
+  .gk-seg:hover { stroke: rgba(var(--accent-rgb),0.7) !important; }
+  .gk-num { font-family: Georgia, serif; }
   .tree-hit { cursor: pointer; }
   .seph-circle { cursor: pointer; transition: stroke .35s; }
   .seph-label { font-family: Georgia, serif; fill: rgba(var(--fg-rgb), 0.6); }
@@ -134,6 +173,10 @@
 <div id="dob-row">
   <label for="dob">Birthdate</label>
   <input type="date" id="dob" min="1900-01-01">
+  <div id="mode-row">
+    <button id="mode-arcana" class="active">Arcana · Tree</button>
+    <button id="mode-genekeys">Gene Keys · Wheel</button>
+  </div>
 </div>
 
 <div id="stage">
@@ -166,6 +209,8 @@
 
 <script src="js/matrix-engine.js"></script>
 <script src="js/tree-of-life-content.js"></script>
+<script src="js/tree-path-content.js"></script>
+<script src="js/gene-keys.js"></script>
 <script>
 'use strict';
 
@@ -189,6 +234,7 @@ const { SEPHIROTH, PATHS } = window.DTreeContent.get();
 const sephByKey = Object.fromEntries(SEPHIROTH.map(s => [s.key, s]));
 
 const pathEls = {};   // arcana → visible line
+const riverEls = {};  // arcana → animated flow overlay line
 const midEls  = {};   // arcana → midpoint label
 const sephEls = {};   // sephira key → circle
 const sephIncident = {}; // sephira key → [arcana…]
@@ -223,6 +269,7 @@ function buildSVG() {
   svg.setAttribute('viewBox', '0 0 100 132');
 
   const gPaths = document.createElementNS(SVGNS, 'g');
+  const gRiver = document.createElementNS(SVGNS, 'g');
   const gMid   = document.createElementNS(SVGNS, 'g');
   const gSeph  = document.createElementNS(SVGNS, 'g');
   const gHits  = document.createElementNS(SVGNS, 'g');
@@ -239,6 +286,19 @@ function buildSVG() {
     line.setAttribute('stroke-linecap', 'round');
     gPaths.appendChild(line);
     pathEls[p.arcana] = line;
+
+    // River overlay: dashes always animate toward negative offset, so draw
+    // the line from the HIGHER sephira (smaller y) to the lower one and the
+    // current flows downward — the Lightning Flash direction — letting
+    // flows that meet at a shared sephira read as one continuous river.
+    const hi = a.y <= b.y ? a : b, lo = a.y <= b.y ? b : a;
+    const river = document.createElementNS(SVGNS, 'line');
+    river.setAttribute('x1', hi.x); river.setAttribute('y1', hi.y);
+    river.setAttribute('x2', lo.x); river.setAttribute('y2', lo.y);
+    river.setAttribute('class', 'river');
+    river.style.display = 'none';
+    gRiver.appendChild(river);
+    riverEls[p.arcana] = river;
 
     // Fat invisible twin so taps land on mobile.
     const hit = document.createElementNS(SVGNS, 'line');
@@ -284,9 +344,11 @@ function buildSVG() {
   });
 
   svg.appendChild(gPaths);
+  svg.appendChild(gRiver);
   svg.appendChild(gMid);
   svg.appendChild(gSeph);
   svg.appendChild(gHits); // hit lines above everything
+  svg.id = 'tree-svg';
   document.getElementById('svg-slot').appendChild(svg);
 }
 
@@ -306,6 +368,11 @@ function refresh(iso) {
     }
     midEls[arc].style.display = hit ? '' : 'none';
     midEls[arc].setAttribute('opacity', hit && hit.tier === 1 ? '0.95' : '0.6');
+    // River glow flows through lit paths only; unwalked stays still.
+    const river = riverEls[arc];
+    river.style.display = hit ? '' : 'none';
+    river.classList.toggle('tier1', !!hit && hit.tier === 1);
+    river.classList.toggle('tier2', !!hit && hit.tier === 2);
   });
   Object.entries(sephEls).forEach(([key, el]) => {
     const tiers = (sephIncident[key] || []).map(a => litMap[a] && litMap[a].tier).filter(Boolean);
@@ -326,11 +393,18 @@ function setDetail(eyebrow, sub, heading, bodyHtml) {
 
 function openPath(p) {
   const hit = litMap[p.arcana];
-  const body = hit
+  let body = hit
     ? `<div class="lbl">Lit by</div>${hit.positions.join('<br>')}`
     : `<div class="lbl">Unwalked</div>This arcana does not appear in your matrix.
        On the Tree it is territory your chart has not walked — energy you meet
        in others rather than carry as your own.`;
+  const c = window.DTreePathContent ? DTreePathContent.get(p.arcana) : null;
+  if (c) {
+    body += `<div class="lbl">${c.tagline}</div>` +
+      `<div class="lbl">Mastery</div>${c.mastery}` +
+      `<div class="lbl">The Shadow</div>${c.shadow}` +
+      `<div class="lbl">Invitation</div>${c.invitation}`;
+  }
   setDetail(
     `Path ${p.gdNum} · ${p.letterName} ${p.hebrew}`,
     `${sephByKey[p.from].name} — ${sephByKey[p.to].name}`,
@@ -353,6 +427,179 @@ function openSephira(s) {
   );
 }
 
+// ── GENE KEYS WHEEL ───────────────────────────────────────────────────────
+// Second calculation system, second geometry: the 64-key zodiac wheel with
+// the four Prime Gifts lit and joined by a flowing cross. No invented
+// Tree↔Gene-Key correspondence — each system keeps its authentic shape.
+const gkSegEls = {};   // key number → segment path element
+const gkNumEls = {};   // key number → number label
+let gkPrimes = null;
+let gkCrossG = null;
+let gkSvg = null;
+
+const GK_CX = 50, GK_CY = 66, GK_R1 = 46, GK_R2 = 56;
+const polar = (r, deg) => {
+  // 0° Aries at the left (traditional wheel ascendant position), zodiac
+  // running counter-clockwise.
+  const a = (180 - deg) * Math.PI / 180;
+  return [GK_CX + r * Math.cos(a), GK_CY - r * Math.sin(a) * 0.98];
+};
+
+function gkSegPath(startDeg, endDeg) {
+  // Each segment spans only 5.625°, where a chord differs from the true arc
+  // by ~0.06 units at this radius — invisible — so a plain quad is used
+  // instead of SVG arc commands and their sweep-flag pitfalls.
+  const [x1, y1] = polar(GK_R1, startDeg);
+  const [x2, y2] = polar(GK_R2, startDeg);
+  const [x3, y3] = polar(GK_R2, endDeg);
+  const [x4, y4] = polar(GK_R1, endDeg);
+  return `M${x1},${y1} L${x2},${y2} L${x3},${y3} L${x4},${y4} Z`;
+}
+
+function buildWheel() {
+  gkSvg = document.createElementNS(SVGNS, 'svg');
+  gkSvg.setAttribute('viewBox', '0 0 100 132');
+  gkSvg.id = 'gk-svg';
+  gkSvg.style.display = 'none';
+
+  const gSegs = document.createElementNS(SVGNS, 'g');
+  const gNums = document.createElementNS(SVGNS, 'g');
+  gkCrossG = document.createElementNS(SVGNS, 'g');
+
+  for (let i = 0; i < 64; i++) {
+    const keyNum = DGeneKeys.WHEEL[i];
+    const start = DGeneKeys.WHEEL_OFFSET + i * DGeneKeys.SEGMENT;
+    const end = start + DGeneKeys.SEGMENT;
+    const seg = document.createElementNS(SVGNS, 'path');
+    seg.setAttribute('d', gkSegPath(start, end));
+    seg.setAttribute('class', 'gk-seg');
+    seg.addEventListener('click', () => openKey(keyNum));
+    gSegs.appendChild(seg);
+    gkSegEls[keyNum] = seg;
+
+    const mid = start + DGeneKeys.SEGMENT / 2;
+    const [tx, ty] = polar((GK_R1 + GK_R2) / 2, mid);
+    const t = document.createElementNS(SVGNS, 'text');
+    t.setAttribute('x', tx); t.setAttribute('y', ty + 1);
+    t.setAttribute('class', 'gk-num');
+    t.setAttribute('text-anchor', 'middle');
+    t.setAttribute('font-size', '2.6');
+    t.textContent = keyNum;
+    t.style.pointerEvents = 'none';
+    gNums.appendChild(t);
+    gkNumEls[keyNum] = t;
+  }
+
+  gkSvg.appendChild(gSegs);
+  gkSvg.appendChild(gkCrossG);
+  gkSvg.appendChild(gNums);
+  document.getElementById('svg-slot').appendChild(gkSvg);
+}
+
+function refreshWheel(iso) {
+  gkPrimes = DGeneKeys.primes(iso);
+  const primeOf = {}; // key number → prime label
+  const ORDER = [
+    ['lifesWork', "Life's Work"], ['evolution', 'Evolution'],
+    ['radiance', 'Radiance'], ['purpose', 'Purpose'],
+  ];
+  ORDER.forEach(([k, label]) => { primeOf[gkPrimes[k].key] = label; });
+
+  Object.entries(gkSegEls).forEach(([num, el]) => {
+    const prime = primeOf[num];
+    el.setAttribute('fill', prime
+      ? (prime === "Life's Work" ? 'rgba(var(--gold-rgb),0.75)' : 'rgba(var(--accent-rgb),0.55)')
+      : 'rgba(var(--fg-rgb),0.05)');
+    el.setAttribute('stroke', 'rgba(var(--fg-rgb),0.18)');
+    el.setAttribute('stroke-width', '0.15');
+    gkNumEls[num].setAttribute('fill', prime ? 'rgb(var(--fg-rgb))' : 'rgba(var(--fg-rgb),0.35)');
+    gkNumEls[num].setAttribute('font-weight', prime ? '700' : '400');
+  });
+
+  // The cross: the same river-current flowing between the four primes.
+  gkCrossG.innerHTML = '';
+  const mids = ORDER.map(([k]) => {
+    const lam = gkPrimes[k].lambda;
+    const segStart = Math.floor((((lam - DGeneKeys.WHEEL_OFFSET) % 360) + 360) % 360 / DGeneKeys.SEGMENT);
+    const midDeg = DGeneKeys.WHEEL_OFFSET + segStart * DGeneKeys.SEGMENT + DGeneKeys.SEGMENT / 2;
+    return polar(GK_R1 - 2, midDeg);
+  });
+  // lifesWork↔evolution and radiance↔purpose are exact oppositions — two
+  // chords through the center forming the profile's cross.
+  [[0, 1], [2, 3]].forEach(([a, b], i) => {
+    const line = document.createElementNS(SVGNS, 'line');
+    line.setAttribute('x1', mids[a][0]); line.setAttribute('y1', mids[a][1]);
+    line.setAttribute('x2', mids[b][0]); line.setAttribute('y2', mids[b][1]);
+    line.setAttribute('class', 'river ' + (i === 0 ? 'tier1' : 'tier2'));
+    gkCrossG.appendChild(line);
+  });
+}
+
+function openKey(n) {
+  const k = DGeneKeys.KEYS[n];
+  if (!k || !gkPrimes) return;
+  const primeName = Object.entries({
+    lifesWork: "Life's Work — how your genius wants to express itself",
+    evolution: 'Evolution — what your life is here to work through',
+    radiance:  'Radiance — what keeps you healthy and magnetic',
+    purpose:   'Purpose — the deep reason underneath it all',
+  }).find(([pk]) => gkPrimes[pk].key === n);
+  const roleHtml = primeName
+    ? `<div class="lbl">Your Prime Gift</div>${primeName[1]}`
+    : `<div class="lbl">In your profile</div>Not one of your four primes — an
+       energy you meet in the world rather than carry as a life theme.`;
+  setDetail(
+    `Gene Key ${n}`,
+    k.name,
+    `${k.shadow} → ${k.gift} → ${k.siddhi}`,
+    roleHtml +
+      `<div class="lbl">The Spectrum</div>Every Gene Key is read as a spectrum
+       of consciousness: its Shadow (${k.shadow.toLowerCase()}) is the fear
+       pattern, its Gift (${k.gift.toLowerCase()}) is what the same energy
+       becomes when accepted, and its Siddhi (${k.siddhi.toLowerCase()}) is
+       its full flowering. The full contemplations for all 64 keys are still
+       being written for this app.`
+  );
+}
+
+// ── mode switching ────────────────────────────────────────────────────────
+let mode = 'arcana';
+const btnArc = document.getElementById('mode-arcana');
+const btnGK  = document.getElementById('mode-genekeys');
+
+function setMode(m) {
+  mode = m;
+  btnArc.classList.toggle('active', m === 'arcana');
+  btnGK.classList.toggle('active', m === 'genekeys');
+  document.getElementById('tree-svg').style.display = m === 'arcana' ? '' : 'none';
+  gkSvg.style.display = m === 'genekeys' ? '' : 'none';
+  document.getElementById('legend').innerHTML = m === 'arcana'
+    ? `<span><span class="leg-swatch" style="background:rgba(var(--accent-rgb),1)"></span>Core</span>
+       <span><span class="leg-swatch" style="background:rgba(var(--accent-rgb),0.55)"></span>Secondary</span>
+       <span><span class="leg-swatch" style="background:rgba(var(--fg-rgb),0.15)"></span>Unwalked</span>`
+    : `<span><span class="leg-swatch" style="background:rgba(var(--gold-rgb),0.85)"></span>Life's Work</span>
+       <span><span class="leg-swatch" style="background:rgba(var(--accent-rgb),0.55)"></span>Other primes</span>
+       <span><span class="leg-swatch" style="background:rgba(var(--fg-rgb),0.15)"></span>The other 60 keys</span>`;
+  if (m === 'genekeys') {
+    const p = gkPrimes;
+    setDetail('Your four Prime Gifts', 'Sun position at birth · Gene Keys wheel',
+      p ? `${p.lifesWork.key} · ${p.evolution.key} · ${p.radiance.key} · ${p.purpose.key}` : '—',
+      p ? `<div class="lbl">Life's Work</div>Key ${p.lifesWork.key} — ${DGeneKeys.KEYS[p.lifesWork.key].name}
+           <div class="lbl">Evolution</div>Key ${p.evolution.key} — ${DGeneKeys.KEYS[p.evolution.key].name}
+           <div class="lbl">Radiance</div>Key ${p.radiance.key} — ${DGeneKeys.KEYS[p.radiance.key].name}
+           <div class="lbl">Purpose</div>Key ${p.purpose.key} — ${DGeneKeys.KEYS[p.purpose.key].name}
+           <div class="lbl">How to read it</div>Touch any lit segment for its
+           Shadow → Gift → Siddhi spectrum. The bright chord is your conscious
+           axis (Life's Work — Evolution); the softer chord is the deeper one
+           (Radiance — Purpose), calculated from the Sun 88° before your birth.` : '');
+  } else {
+    setDetail('Your tree', dobInput.value || '', 'Touch a path or sephira',
+      'Bright paths carry your core cross; softer ones appear elsewhere in your chart; faint paths are unwalked.');
+  }
+}
+btnArc.addEventListener('click', () => setMode('arcana'));
+btnGK.addEventListener('click', () => setMode('genekeys'));
+
 // ── boot ──────────────────────────────────────────────────────────────────
 const dobInput = document.getElementById('dob');
 dobInput.max = new Date().toISOString().slice(0, 10); // no future birthdates
@@ -366,13 +613,14 @@ function apply() {
   const iso = currentISO();
   if (!iso) return;
   refresh(iso);
-  // Any open path/sephira panel now describes the old chart — reset it.
-  setDetail('Your tree', iso, 'Touch a path or sephira',
-    'Bright paths carry your core cross; softer ones appear elsewhere in your chart; faint paths are unwalked.');
+  refreshWheel(iso);
+  // Any open panel now describes the old chart — reset per current mode.
+  setMode(mode);
 }
 dobInput.addEventListener('change', apply);
 
 buildSVG();
+buildWheel();
 // ?dob= deep link, else a neutral default so the tree never opens blank.
 const urlDob = new URLSearchParams(location.search).get('dob');
 dobInput.value = (urlDob && /^\d{4}-\d{2}-\d{2}$/.test(urlDob)) ? urlDob : '1990-01-01';
