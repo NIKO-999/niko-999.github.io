@@ -428,7 +428,12 @@ body.reading #field { transform: translateX(-19vw); }
 </aside>
 
 <script src="js/gene-keys.js"></script>
+<script src="js/gk-roles.js"></script>
 <script src="js/gene-keys-content.js" defer></script>
+<script src="js/gk-lifeswork.js" defer></script>
+<script src="js/gk-evolution.js" defer></script>
+<script src="js/gk-radiance.js" defer></script>
+<script src="js/gk-purpose.js" defer></script>
 <script>
 'use strict';
 /* ═══════════════════════════════════════════════════════════════════════
@@ -825,7 +830,7 @@ function openKey(n) {
   document.getElementById('p-name').textContent = k.name;
   document.getElementById('p-tagline').textContent = c ? c.tagline : '';
   document.getElementById('p-role').textContent = role
-    ? 'This key is ' + role[2] + '.'
+    ? 'Read as your ' + role[1] + ' — ' + role[2] + '.'
     : 'Not one of your four primes — an energy you meet in the world and in others rather than carry as a life theme.';
 
   spectrumHTML(k);
@@ -835,6 +840,11 @@ function openKey(n) {
 
   // Definitional framing lives here, never inside Mastery — Mastery is about
   // the person. Hidden entirely when a key has no essence written yet.
+  // Position-specific reading when this key is one of the four primes and
+  // that role's file has shipped; otherwise the universal archetype reading.
+  const pos = role ? (window.DGKRoles ? DGKRoles.get(role[0], n) : null) : null;
+  const prose = pos || c;
+
   const ess = c && c.essence ? c.essence : '';
   document.getElementById('p-essence').textContent = ess;
   document.getElementById('l-essence').textContent = ess ? 'What this gift is' : '';
@@ -846,10 +856,11 @@ function openKey(n) {
   document.getElementById('l-invite').textContent = 'Invitation · toward ' + k.siddhi;
 
   const pending = !c && document.readyState !== 'complete';
-  document.getElementById('p-mastery').textContent = c ? c.gift
+  document.getElementById('p-mastery').textContent = prose ? prose.gift
     : (pending ? 'Opening…' : 'The full contemplation for this key is still being written.');
-  document.getElementById('p-shadow').textContent = c ? c.shadow : '';
-  document.getElementById('p-invite').textContent = c ? c.invitation : '';
+  document.getElementById('p-shadow').textContent = prose ? prose.shadow : '';
+  document.getElementById('p-invite').textContent = prose ? prose.invitation : '';
+  panel.dataset.reading = pos ? 'position' : 'universal';
   if (pending) window.addEventListener('DOMContentLoaded', () => { if (openIdx === INDEX_OF[n]) openKey(n); }, { once: true });
 
   const mobile = window.innerWidth < BREAKPOINT;
