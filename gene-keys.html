@@ -3,392 +3,914 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>Gene Keys — Your Four Prime Gifts</title>
-<meta name="description" content="Enter your birthdate and receive your four Gene Keys Prime Gifts — Life's Work, Evolution, Radiance, Purpose — with full contemplations for every key.">
+<meta name="theme-color" content="#05070F">
+<title>Gene Keys — The Living Strand</title>
+<meta name="description" content="Your four Gene Keys Prime Gifts, read from the Sun at your birth, on a living strand of the sixty-four codons.">
+<link rel="preload" as="script" href="js/gene-keys-content.js">
 <style>
-  /* Standalone Gene Keys app — independent of every other page on this site.
-     Shares only the pure-math js/gene-keys.js and its content module. */
-  :root {
-    --bg: #f6f4f0;
-    --fg-rgb: 30, 26, 20;
-    --accent-rgb: 146, 94, 36;
-    --panel-rgb: 255, 253, 249;
-    --deep-rgb: 74, 58, 110;
+/* ═══════════════════════════════════════════════════════════════════════
+   THE LIVING STRAND — a bioluminescent double helix of the 64 Gene Keys.
+   Committed dark: the depth illusion is built on luminance against a dark
+   ground, so there is deliberately no light theme (see prefers-contrast
+   block at the end for the high-contrast accommodation).
+   ═══════════════════════════════════════════════════════════════════════ */
+:root {
+  color-scheme: dark;
+
+  --void:      #05070F;
+  --abyss:     #090D1A;
+  --indigo:    #101A35;
+
+  --lum:       #5FEBD7;
+  --lum-deep:  #1E8F8B;
+  --gold:      #F2C46B;
+  --gold-deep: #B98A34;
+  --umbra:     #7C7FA6;
+  --steel:     #5B87A8;
+
+  --ink:       #DCEBEF;
+  --ink-2:     rgba(220,235,239,.74);
+  --ink-3:     rgba(220,235,239,.46);
+  --ink-4:     rgba(220,235,239,.30);
+
+  --serif: Georgia, 'Iowan Old Style', 'Palatino Linotype', 'Times New Roman', serif;
+  --sans:  ui-sans-serif, -apple-system, 'SF Pro Text', 'Segoe UI', system-ui, sans-serif;
+  --mono:  ui-monospace, 'SF Mono', 'Roboto Mono', Menlo, monospace;
+
+  --ease: cubic-bezier(.2,.7,.2,1);
+}
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html, body { height: 100%; overflow: hidden; }
+body {
+  background: var(--void);
+  color: var(--ink);
+  font-family: var(--serif);
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── the scene ──────────────────────────────────────────────────────── */
+#field {
+  position: fixed; inset: 0;
+  transition: transform 700ms var(--ease), opacity 700ms var(--ease);
+  will-change: transform;
+}
+#helix { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+#labels { position: absolute; inset: 0; pointer-events: none; }
+
+/* ambient bloom — one element, compositor only */
+#bloom {
+  position: absolute; left: 50%; top: 50%;
+  width: 78vmin; height: 78vmin; margin: -39vmin 0 0 -39vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(30,143,139,.20) 0%, rgba(16,26,53,.10) 45%, transparent 72%);
+  pointer-events: none;
+  animation: breathe 11s ease-in-out infinite;
+  will-change: transform, opacity;
+}
+@keyframes breathe {
+  0%,100% { opacity: .70; transform: scale(1); }
+  50%     { opacity: 1;   transform: scale(1.07); }
+}
+
+/* motes — three CSS gradient layers, parallax by differing durations */
+.motes { position: absolute; inset: -12%; pointer-events: none; will-change: transform; }
+#m1 {
+  background-image:
+    radial-gradient(circle 1.6px at 12% 22%, rgba(95,235,215,.55) 0, transparent 100%),
+    radial-gradient(circle 1.2px at 78% 12%, rgba(220,235,239,.40) 0, transparent 100%),
+    radial-gradient(circle 1.9px at 33% 71%, rgba(95,235,215,.34) 0, transparent 100%),
+    radial-gradient(circle 1.3px at 64% 84%, rgba(242,196,107,.34) 0, transparent 100%),
+    radial-gradient(circle 1.5px at 90% 58%, rgba(95,235,215,.28) 0, transparent 100%),
+    radial-gradient(circle 1.1px at 47% 38%, rgba(220,235,239,.30) 0, transparent 100%);
+  animation: drift1 40s linear infinite;
+}
+#m2 {
+  background-image:
+    radial-gradient(circle 2.2px at 22% 62%, rgba(95,235,215,.24) 0, transparent 100%),
+    radial-gradient(circle 1.7px at 71% 33%, rgba(242,196,107,.22) 0, transparent 100%),
+    radial-gradient(circle 2.5px at 55% 78%, rgba(30,143,139,.30) 0, transparent 100%),
+    radial-gradient(circle 1.4px at 8% 88%, rgba(220,235,239,.20) 0, transparent 100%),
+    radial-gradient(circle 2px   at 86% 76%, rgba(95,235,215,.18) 0, transparent 100%);
+  animation: drift2 62s linear infinite;
+}
+#m3 {
+  background-image:
+    radial-gradient(circle 3.4px at 40% 15%, rgba(30,143,139,.16) 0, transparent 100%),
+    radial-gradient(circle 4px   at 82% 47%, rgba(95,235,215,.11) 0, transparent 100%),
+    radial-gradient(circle 3px   at 17% 45%, rgba(242,196,107,.11) 0, transparent 100%),
+    radial-gradient(circle 3.6px at 60% 92%, rgba(30,143,139,.13) 0, transparent 100%);
+  animation: drift3 91s linear infinite;
+}
+@keyframes drift1 { to { transform: translate3d(3%, -6%, 0); } }
+@keyframes drift2 { to { transform: translate3d(-4%, 5%, 0); } }
+@keyframes drift3 { to { transform: translate3d(2.5%, 4%, 0); } }
+
+/* prime nodes pulse in pure CSS — the rung midpoint is always exactly CX,
+   so these never need a per-frame write. */
+.node { transform-box: fill-box; transform-origin: center; will-change: transform, opacity; }
+.node.gold { filter: drop-shadow(0 0 3px rgba(242,196,107,.75)); animation: pulse 3.4s ease-in-out infinite; }
+.node.cyan { filter: drop-shadow(0 0 3px rgba(95,235,215,.75));  animation: pulse 3.4s ease-in-out infinite; }
+@keyframes pulse {
+  0%,100% { transform: scale(1);    opacity: .82; }
+  50%     { transform: scale(1.22); opacity: 1; }
+}
+
+/* ── tether labels (desktop) ────────────────────────────────────────── */
+.plabel {
+  position: absolute;
+  pointer-events: auto; cursor: pointer;
+  max-width: 190px;
+  transition: opacity .3s;
+}
+.plabel::before {
+  content: ''; position: absolute; inset: -9px -14px;
+  background: radial-gradient(ellipse, rgba(5,7,15,.78) 0%, rgba(5,7,15,.45) 55%, transparent 78%);
+  z-index: -1;
+}
+.plabel.left  { text-align: right; }
+.plabel.right { text-align: left; }
+.plabel .role {
+  font-family: var(--sans); font-size: 9.5px; letter-spacing: .28em;
+  text-transform: uppercase; display: block; white-space: nowrap;
+}
+.plabel .kk {
+  font-family: var(--mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--ink-2); display: block; margin-top: 3px;
+  font-variant-numeric: tabular-nums;
+}
+.plabel.gold .role { color: var(--gold); }
+.plabel.cyan .role { color: var(--lum); }
+.plabel:hover .kk { color: var(--ink); }
+
+/* ── prime chips (mobile) ───────────────────────────────────────────── */
+#chips {
+  position: fixed; top: 0; left: 0; right: 0;
+  display: none; gap: 6px; padding: 10px 10px 0;
+  justify-content: center; flex-wrap: wrap; z-index: 6;
+}
+.chip {
+  font-family: var(--mono); font-size: 10px; letter-spacing: .04em;
+  padding: 5px 9px; border-radius: 999px; cursor: pointer;
+  background: rgba(9,13,26,.72); border: 1px solid rgba(95,235,215,.18);
+  color: var(--ink-2); white-space: nowrap;
+  font-variant-numeric: tabular-nums;
+}
+.chip .r { display: block; font-family: var(--sans); font-size: 7.5px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 1px; }
+.chip.gold { border-color: rgba(242,196,107,.3); } .chip.gold .r { color: var(--gold); }
+.chip.cyan { border-color: rgba(95,235,215,.3); }  .chip.cyan .r { color: var(--lum); }
+
+/* ── chrome ─────────────────────────────────────────────────────────── */
+#brand {
+  position: fixed; top: 20px; left: 26px; z-index: 5;
+  font-family: var(--sans); font-size: 13px; letter-spacing: .42em;
+  text-transform: uppercase; color: var(--ink-3); pointer-events: none;
+}
+#brand small {
+  display: block; font-size: 8.5px; letter-spacing: .24em;
+  color: var(--ink-4); margin-top: 5px;
+}
+#datebar {
+  position: fixed; bottom: calc(18px + env(safe-area-inset-bottom)); left: 26px; z-index: 6;
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--sans); font-size: 9.5px; letter-spacing: .28em;
+  text-transform: uppercase; color: var(--ink-3);
+}
+#dob {
+  font-family: var(--mono); font-size: 16px; /* 16px floor: iOS zooms below it */
+  letter-spacing: .06em; color: var(--ink);
+  background: transparent; border: none;
+  border-bottom: 1px solid rgba(95,235,215,.35);
+  padding: 4px 2px; width: 148px;
+  -webkit-appearance: none; appearance: none;
+  transition: border-color .25s, box-shadow .25s;
+  font-variant-numeric: tabular-nums;
+}
+#dob:focus { outline: none; border-bottom-color: var(--lum); box-shadow: 0 4px 18px -6px rgba(95,235,215,.55); }
+#dob::-webkit-calendar-picker-indicator { filter: invert(1) opacity(.55); cursor: pointer; }
+#hint {
+  position: fixed; bottom: calc(58px + env(safe-area-inset-bottom)); left: 26px; z-index: 6;
+  font-family: var(--sans); font-size: 10px; letter-spacing: .12em;
+  color: var(--lum); opacity: 0; transition: opacity .6s;
+}
+#hint.show { opacity: .82; animation: hintpulse 3s ease-in-out 2; }
+@keyframes hintpulse { 0%,100% { opacity: .40; } 50% { opacity: .95; } }
+#disclaimer {
+  position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); right: 26px; z-index: 5;
+  max-width: 260px; text-align: right;
+  font-family: var(--sans); font-size: 9px; line-height: 1.7; letter-spacing: .09em;
+  color: var(--ink-4); pointer-events: none;
+}
+
+/* readout chip that follows the pointer */
+#readout {
+  position: fixed; z-index: 8; pointer-events: none;
+  font-family: var(--mono); font-size: 11.5px; letter-spacing: .03em;
+  color: var(--ink); background: rgba(5,7,15,.88);
+  border: 1px solid rgba(95,235,215,.22); border-radius: 3px;
+  padding: 5px 9px; white-space: nowrap; opacity: 0;
+  transition: opacity .18s; transform: translate(-50%, -50%);
+  font-variant-numeric: tabular-nums;
+}
+#readout.show { opacity: 1; }
+#readout b { color: var(--lum); font-weight: 400; }
+
+/* scanner sweep on date change */
+#scanner {
+  position: fixed; left: 0; right: 0; top: 0; height: 1px; z-index: 7;
+  background: linear-gradient(90deg, transparent, var(--lum), transparent);
+  opacity: 0; pointer-events: none;
+}
+#scanner.run { animation: sweep 700ms ease-in-out 1; }
+@keyframes sweep {
+  0%   { opacity: 0;   transform: translateY(0); }
+  12%  { opacity: .9; }
+  88%  { opacity: .9; }
+  100% { opacity: 0;   transform: translateY(100vh); }
+}
+
+/* ── reading panel ──────────────────────────────────────────────────── */
+#panel {
+  position: fixed; top: 0; right: 0; bottom: 0; z-index: 10;
+  width: min(600px, 44vw);
+  background: rgba(9,13,26,.93);
+  border-left: 1px solid rgba(95,235,215,.10);
+  transform: translateX(101%);
+  transition: transform 620ms var(--ease);
+  overflow-y: auto; overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+  padding: 54px 46px 70px;
+}
+@supports (backdrop-filter: blur(4px)) {
+  #panel { background: rgba(9,13,26,.82); backdrop-filter: blur(20px) saturate(115%); -webkit-backdrop-filter: blur(20px) saturate(115%); }
+}
+body.reading #panel { transform: translateX(0); }
+body.reading #field { transform: translateX(-19vw); }
+#panel::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+  background: var(--axis, var(--steel));
+}
+#p-close {
+  position: absolute; top: 14px; right: 16px;
+  width: 44px; height: 44px; border: none; background: transparent;
+  color: var(--ink-3); font-size: 22px; cursor: pointer; line-height: 1;
+  font-family: var(--sans); transition: color .2s;
+}
+#p-close:hover { color: var(--ink); }
+#p-eyebrow {
+  font-family: var(--sans); font-size: 10px; letter-spacing: .30em;
+  text-transform: uppercase; color: var(--axis, var(--steel));
+}
+#p-name { font-size: 26px; font-weight: 400; line-height: 1.25; margin-top: 10px; color: var(--ink); }
+#p-name:focus { outline: none; }
+#p-tagline { font-size: 12.5px; font-style: italic; letter-spacing: .06em; color: rgba(95,235,215,.8); margin-top: 6px; }
+#p-role {
+  font-family: var(--sans); font-size: 11.5px; line-height: 1.75; letter-spacing: .02em;
+  color: var(--ink-3); margin-top: 18px;
+}
+
+/* spectrum rail */
+#p-spectrum { margin: 26px 0 8px; }
+.rail { position: relative; height: 2px; background: linear-gradient(90deg, #4A4668 0%, var(--lum) 50%, var(--gold) 100%); }
+.rail i {
+  position: absolute; top: 50%; width: 7px; height: 7px; margin: -3.5px 0 0 -3.5px;
+  border-radius: 50%; background: var(--ink);
+}
+.rail i.n0 { left: 0;    background: #6E6A92; }
+.rail i.n1 { left: 50%;  background: var(--lum); box-shadow: 0 0 0 3px rgba(95,235,215,.18), 0 0 12px rgba(95,235,215,.6); }
+.rail i.n2 { left: 100%; background: var(--gold); }
+.specrow { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 12px; }
+.specrow div { text-align: center; }
+.specrow div:first-child { text-align: left; }
+.specrow div:last-child { text-align: right; }
+.specrow .w {
+  font-family: var(--sans); font-size: 10.5px; letter-spacing: .10em;
+  text-transform: uppercase; display: block; line-height: 1.45;
+}
+.specrow .c {
+  font-family: var(--sans); font-size: 8.5px; letter-spacing: .22em;
+  text-transform: uppercase; color: var(--ink-4); display: block; margin-top: 4px;
+}
+.specrow .s0 .w { color: var(--umbra); }
+.specrow .s1 .w { color: var(--lum); }
+.specrow .s2 .w { color: var(--gold); }
+#p-note {
+  font-family: var(--sans); font-size: 10.5px; line-height: 1.7; letter-spacing: .04em;
+  color: var(--ink-4); margin-top: 14px; font-style: normal;
+}
+
+.slabel {
+  font-family: var(--sans); font-size: 10px; letter-spacing: .30em;
+  text-transform: uppercase; margin: 34px 0 12px;
+}
+.slabel.mastery { color: var(--lum); margin-top: 38px; }
+.slabel.shadow  { color: var(--umbra); }
+.slabel.invite  { color: var(--gold); }
+
+/* Mastery is the centrepiece: size + drop cap + whitespace + opacity */
+#p-mastery { font-size: 18px; line-height: 1.85; color: rgba(220,235,239,.94); }
+#p-mastery::first-letter {
+  float: left; font-size: 3.1em; line-height: .82;
+  padding: 4px 10px 0 0; color: var(--lum);
+}
+#p-shadow { font-size: 14px; line-height: 1.72; color: var(--ink-2); }
+#p-invite {
+  font-size: 15px; line-height: 1.80; color: rgba(220,235,239,.84);
+  border-left: 1px solid rgba(242,196,107,.35); padding-left: 18px;
+}
+#p-foot {
+  margin-top: 42px; padding-top: 18px; border-top: 1px solid rgba(220,235,239,.08);
+  font-family: var(--sans); font-size: 9.5px; line-height: 1.75; letter-spacing: .08em;
+  color: var(--ink-4);
+}
+
+/* a11y mirror of the strand */
+#strand { position: absolute; inset: 0; pointer-events: none; }
+#strand:focus { outline: none; }
+#strand:focus-visible { outline: 1px solid rgba(95,235,215,.5); outline-offset: -3px; }
+#opts { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ── mobile ─────────────────────────────────────────────────────────── */
+@media (max-width: 899px) {
+  /* chips replace the tether labels entirely on mobile — the wordmark would
+     collide with them, and the tethers would point at nothing. */
+  #brand { display: none; }
+  #chips { display: flex; }
+  #labels { display: none; }
+  #helix > g:nth-of-type(4) { display: none; }
+  #disclaimer { display: none; }
+  #datebar { left: 50%; transform: translateX(-50%); bottom: calc(14px + env(safe-area-inset-bottom)); }
+  #hint { left: 50%; transform: translateX(-50%); white-space: nowrap; bottom: calc(54px + env(safe-area-inset-bottom)); }
+  #panel {
+    top: auto; left: 0; right: 0; bottom: 0;
+    width: 100%; height: 88dvh; max-height: 88vh;
+    border-left: none; border-top: 1px solid rgba(95,235,215,.12);
+    border-radius: 20px 20px 0 0;
+    transform: translateY(101%);
+    padding: 34px 22px 60px;
   }
-  @media (prefers-color-scheme: dark) {
-    :root {
-      --bg: #0c0a07;
-      --fg-rgb: 240, 234, 224;
-      --accent-rgb: 216, 172, 106;
-      --panel-rgb: 24, 20, 14;
-      --deep-rgb: 168, 148, 216;
-    }
+  body.reading #panel { transform: translateY(0); }
+  body.reading #field { transform: none; opacity: .32; }
+  #panel::after {
+    content: ''; position: absolute; top: 9px; left: 50%; margin-left: -21px;
+    width: 42px; height: 4px; border-radius: 2px; background: rgba(220,235,239,.22);
   }
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  html, body { height: 100%; }
-  body {
-    background: var(--bg);
-    color: rgb(var(--fg-rgb));
-    font-family: Georgia, 'Times New Roman', serif;
-    display: flex; flex-direction: column; align-items: center;
-    padding: 28px 16px 40px;
-    gap: 18px;
-  }
-  header { text-align: center; }
-  h1 {
-    font-size: 22px; font-weight: 400;
-    letter-spacing: 5px; text-transform: uppercase;
-    color: rgba(var(--fg-rgb), 0.85);
-  }
-  .subtitle {
-    margin-top: 6px;
-    font-size: 11.5px; letter-spacing: 2px; text-transform: uppercase;
-    color: rgba(var(--fg-rgb), 0.4);
-  }
-  #dob-row {
-    display: flex; align-items: center; gap: 10px;
-    font-size: 12px; letter-spacing: 1px;
-    color: rgba(var(--fg-rgb), 0.55);
-  }
-  #dob {
-    font-family: inherit; font-size: 13px;
-    color: rgb(var(--fg-rgb));
-    background: rgba(var(--panel-rgb), 0.9);
-    border: 1px solid rgba(var(--accent-rgb), 0.35);
-    border-radius: 3px;
-    padding: 6px 9px;
-  }
-  /* Four prime cards */
-  #primes {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 10px; width: 100%; max-width: 860px;
-  }
-  .prime-card {
-    flex: 1 1 180px; max-width: 210px;
-    background: rgba(var(--panel-rgb), 0.8);
-    border: 1px solid rgba(var(--accent-rgb), 0.2);
-    border-radius: 6px;
-    padding: 12px 14px;
-    cursor: pointer;
-    transition: border-color .25s, transform .15s;
-  }
-  .prime-card:hover { border-color: rgba(var(--accent-rgb), 0.6); transform: translateY(-1px); }
-  .prime-card.active { border-color: rgba(var(--accent-rgb), 0.85); }
-  .prime-card .role {
-    font-size: 9.5px; letter-spacing: 2px; text-transform: uppercase;
-    color: rgba(var(--accent-rgb), 0.95);
-  }
-  .prime-card .keynum {
-    font-size: 21px; margin-top: 4px;
-    color: rgba(var(--fg-rgb), 0.9);
-  }
-  .prime-card .keyname {
-    font-size: 10.5px; margin-top: 2px; line-height: 1.4;
-    color: rgba(var(--fg-rgb), 0.5);
-  }
-  #stage {
-    display: flex; flex-wrap: wrap; justify-content: center;
-    gap: 22px; width: 100%; max-width: 900px;
-  }
-  #wheel-wrap {
-    flex: 1 1 340px; max-width: 430px;
-    background: rgba(var(--panel-rgb), 0.75);
-    border: 1px solid rgba(var(--accent-rgb), 0.16);
-    border-radius: 6px;
-    padding: 14px 12px 8px;
-    align-self: flex-start;
-  }
-  #wheel-wrap svg { display: block; width: 100%; height: auto; }
-  #legend {
-    display: flex; justify-content: center; gap: 16px; flex-wrap: wrap;
-    padding: 8px 0 6px;
-    font-size: 9.5px; letter-spacing: 1.5px; text-transform: uppercase;
-    color: rgba(var(--fg-rgb), 0.45);
-  }
-  .leg-swatch {
-    display: inline-block; width: 14px; height: 3px;
-    border-radius: 2px; vertical-align: middle; margin-right: 5px;
-  }
-  #detail {
-    flex: 1 1 320px; max-width: 420px;
-    background: rgba(var(--panel-rgb), 0.75);
-    border: 1px solid rgba(var(--accent-rgb), 0.16);
-    border-radius: 6px;
-    padding: 20px 22px;
-    align-self: flex-start;
-    min-height: 220px;
-  }
-  #detail .eyebrow {
-    font-size: 10px; letter-spacing: 2.5px; text-transform: uppercase;
-    color: rgba(var(--accent-rgb), 0.95);
-  }
-  #detail .sub {
-    margin-top: 3px;
-    font-size: 11.5px; letter-spacing: 1px;
-    color: rgba(var(--fg-rgb), 0.45);
-  }
-  #detail h2 {
-    margin-top: 10px;
-    font-size: 16.5px; font-weight: 400; line-height: 1.4;
-    color: rgba(var(--fg-rgb), 0.9);
-  }
-  #detail .tagline {
-    margin-top: 4px;
-    font-size: 11px; letter-spacing: 1.5px; font-style: italic;
-    color: rgba(var(--deep-rgb), 0.85);
-  }
-  #detail .body { margin-top: 12px; font-size: 13.5px; line-height: 1.7; color: rgba(var(--fg-rgb), 0.72); }
-  #detail .body .lbl {
-    font-size: 9.5px; letter-spacing: 2.5px; text-transform: uppercase;
-    color: rgba(var(--accent-rgb), 0.95);
-    margin: 16px 0 5px;
-  }
-  #detail .body .lbl:first-child { margin-top: 0; }
-  #detail .body .lbl.deep { color: rgba(var(--deep-rgb), 0.9); }
-  .gk-seg { cursor: pointer; transition: fill .35s; }
-  .gk-seg:hover { stroke: rgba(var(--accent-rgb), 0.8) !important; }
-  .gk-num { font-family: Georgia, serif; pointer-events: none; }
-  /* The river: current flowing along the prime cross */
-  .river {
-    fill: none; stroke-linecap: round; pointer-events: none;
-    filter: drop-shadow(0 0 1.3px rgba(var(--accent-rgb), 0.9));
-  }
-  .river.bright {
-    stroke: rgba(var(--accent-rgb), 0.95);
-    stroke-width: 0.9; stroke-dasharray: 3 6;
-    animation: riverflow 1.6s linear infinite;
-  }
-  .river.deep {
-    stroke: rgba(var(--deep-rgb), 0.85);
-    stroke-width: 0.65; stroke-dasharray: 2 7;
-    animation: riverflow 2.6s linear infinite;
-  }
-  @keyframes riverflow { to { stroke-dashoffset: -9; } }
-  @media (prefers-reduced-motion: reduce) { .river { animation: none !important; } }
-  footer {
-    font-size: 10px; letter-spacing: 1px;
-    color: rgba(var(--fg-rgb), 0.32);
-    text-align: center; max-width: 540px; line-height: 1.7;
-  }
+  #p-name { font-size: 21px; }
+  #p-mastery { font-size: 16.5px; line-height: 1.8; }
+}
+
+/* ── accessibility accommodations ───────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  #bloom, .motes, .node, #scanner, #hint.show { animation: none !important; }
+  #field, #panel, #readout { transition: none !important; }
+}
+@media (prefers-contrast: more) {
+  .motes { display: none; }
+  #bloom { opacity: .4 !important; }
+  #p-shadow, #p-invite { color: rgba(220,235,239,.96); }
+  #p-role { color: var(--ink-2); }
+  .plabel::before { background: rgba(5,7,15,.94); }
+}
 </style>
 </head>
 <body>
 
-<header>
-  <h1>Gene Keys</h1>
-  <div class="subtitle">Your four Prime Gifts · from the Sun at your birth</div>
-</header>
+<div id="field">
+  <div id="bloom"></div>
+  <div class="motes" id="m3"></div>
+  <div class="motes" id="m2"></div>
+  <div class="motes" id="m1"></div>
+  <svg id="helix" aria-hidden="true"></svg>
+  <div id="labels"></div>
+</div>
 
-<div id="dob-row">
-  <label for="dob">Birthdate</label>
+<div id="strand" tabindex="0" role="listbox" aria-label="The sixty-four Gene Keys as a living strand">
+  <div id="opts"></div>
+</div>
+
+<div id="brand">Gene Keys<small>The Living Strand</small></div>
+<div id="chips"></div>
+
+<div id="hint">This is a default date. Set yours.</div>
+<div id="datebar">
+  <span>Born</span>
   <input type="date" id="dob" min="1900-01-01">
 </div>
 
-<div id="primes"></div>
+<div id="disclaimer">A symbolic, archetypal system offered for reflection — not a statement of fact. Your birthdate never leaves this page.</div>
 
-<div id="stage">
-  <div id="wheel-wrap">
-    <div id="svg-slot"></div>
-    <div id="legend">
-      <span><span class="leg-swatch" style="background:rgba(var(--accent-rgb),0.9)"></span>Life's Work — Evolution</span>
-      <span><span class="leg-swatch" style="background:rgba(var(--deep-rgb),0.8)"></span>Radiance — Purpose</span>
-    </div>
-  </div>
-  <div id="detail">
-    <div class="eyebrow" id="d-eyebrow">Welcome</div>
-    <div class="sub" id="d-sub">Sixty-four keys, four of them yours</div>
-    <h2 id="d-heading">Choose a date, then open a key</h2>
-    <div class="tagline" id="d-tagline"></div>
-    <div class="body" id="d-body">
-      Your four Prime Gifts are computed from the Sun’s actual position in the
-      sky on the day you were born: Life’s Work from the Sun itself, Evolution
-      from the point opposite it, Radiance from the Sun eighty-eight degrees
-      before your birth, and Purpose opposite that. Each key is read as a
-      spectrum — a Shadow pattern, the Gift it becomes when accepted, and the
-      Siddhi it opens into. Touch a card above or any segment of the wheel.
-    </div>
-  </div>
-</div>
+<div id="readout"></div>
+<div id="scanner"></div>
 
-<footer>
-  A symbolic, archetypal system offered for reflection — not a statement of
-  fact. Your birthdate never leaves this page.
-</footer>
+<aside id="panel" role="dialog" aria-modal="false" aria-labelledby="p-name">
+  <button id="p-close" aria-label="Close reading">&times;</button>
+  <div id="p-eyebrow"></div>
+  <h2 id="p-name" tabindex="-1"></h2>
+  <div id="p-tagline"></div>
+  <div id="p-role"></div>
+  <div id="p-spectrum"></div>
+  <div id="p-note"></div>
+  <div class="slabel mastery" id="l-mastery"></div>
+  <div id="p-mastery"></div>
+  <div class="slabel shadow" id="l-shadow"></div>
+  <div id="p-shadow"></div>
+  <div class="slabel invite" id="l-invite"></div>
+  <div id="p-invite"></div>
+  <div id="p-foot">A symbolic, archetypal system offered for reflection — not a statement of fact.</div>
+</aside>
 
 <script src="js/gene-keys.js"></script>
-<script src="js/gene-keys-content.js"></script>
+<script src="js/gene-keys-content.js" defer></script>
 <script>
 'use strict';
+/* ═══════════════════════════════════════════════════════════════════════
+   Boot runs during parse, before the deferred 200KB content module — the
+   strand is alive immediately and readings fill in once content lands.
+   ═══════════════════════════════════════════════════════════════════════ */
 
 const SVGNS = 'http://www.w3.org/2000/svg';
-const segEls = {}, numEls = {};
-let primes = null, crossG = null;
+const N = 64;
+const TURNS = 2;
+// 360*TURNS/N = 11.25°. Because exactly 32 rungs span a full turn, there are
+// only 32 distinct (x, depth) values at any instant — a free 2x trig saving.
+const K = Math.PI / 16;
+const PERIOD = N / TURNS;   // 32
+const ROT_MS = 56000;
+const FRAME_MS = 32;          // 30fps: max rung motion 0.30px/frame
+const BREAKPOINT = 900;
 
-const CX = 50, CY = 64, R1 = 45, R2 = 55;
-const polar = (r, deg) => {
-  const a = (180 - deg) * Math.PI / 180;
-  return [CX + r * Math.cos(a), CY - r * Math.sin(a) * 0.98];
-};
+const helix  = document.getElementById('helix');
+const labels = document.getElementById('labels');
+const fieldEl = document.getElementById('field');
+const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
 
-// Each segment spans 5.625°; a chord differs from the true arc by ~0.06
-// units at this radius, so plain quads replace SVG arc commands.
-function segPath(s, e) {
-  const [x1, y1] = polar(R1, s), [x2, y2] = polar(R2, s);
-  const [x3, y3] = polar(R2, e), [x4, y4] = polar(R1, e);
-  return `M${x1},${y1} L${x2},${y2} L${x3},${y3} L${x4},${y4} Z`;
+// ── geometry state ────────────────────────────────────────────────────
+let W = 0, H = 0, CX = 0, PAD_Y = 26, pitch = 10, TURN_H = 160, A = 80;
+let phi = 0, speed = 1, running = false, rafId = 0, lastT = 0;
+
+const gBack = document.createElementNS(SVGNS, 'g');
+const gBackL = document.createElementNS(SVGNS, 'g');
+const gBackR = document.createElementNS(SVGNS, 'g');
+const gRung = document.createElementNS(SVGNS, 'g');
+const gCur  = document.createElementNS(SVGNS, 'g');
+const gTeth = document.createElementNS(SVGNS, 'g');
+const gNode = document.createElementNS(SVGNS, 'g');
+gBack.appendChild(gBackL); gBack.appendChild(gBackR);
+helix.appendChild(gBack); helix.appendChild(gRung); helix.appendChild(gCur);
+helix.appendChild(gTeth); helix.appendChild(gNode);
+
+const rungs = [];        // 64 <line>, index 0..63
+const rungBucket = new Int8Array(N).fill(-1);
+const backL = [], backR = [];
+
+// key number -> rung index, built once. Removes the modular segment
+// arithmetic both pages previously duplicated.
+const INDEX_OF = {};
+DGeneKeys.WHEEL.forEach((k, i) => { INDEX_OF[k] = i; });
+
+// ── depth lookup: 32 buckets of ready-made style strings ──────────────
+function hex(h) { return [parseInt(h.slice(1,3),16), parseInt(h.slice(3,5),16), parseInt(h.slice(5,7),16)]; }
+function lerpC(a, b, t) {
+  const A1 = hex(a), B1 = hex(b);
+  return 'rgb(' + Math.round(A1[0]+(B1[0]-A1[0])*t) + ',' +
+                  Math.round(A1[1]+(B1[1]-A1[1])*t) + ',' +
+                  Math.round(A1[2]+(B1[2]-A1[2])*t) + ')';
+}
+const LUT = { dim: [], gold: [], cyan: [], back: [] };
+for (let b = 0; b < 32; b++) {
+  const t = b / 31;
+  LUT.dim[b]  = { s: lerpC('#16223F', '#5B87A8', Math.pow(t, .8)),
+                  o: (0.045 + 0.60 * Math.pow(t, 2.3)).toFixed(3),
+                  w: (0.5 + 1.7 * t).toFixed(2) };
+  LUT.back[b] = { s: lerpC('#131E38', '#4E769A', Math.pow(t, .8)),
+                  o: (0.10 + 0.52 * Math.pow(t, 1.9)).toFixed(3),
+                  w: (0.6 + 1.5 * t).toFixed(2) };
+  LUT.gold[b] = { s: lerpC('#6B5426', '#FFD98A', Math.pow(t, .8)),
+                  o: (0.5 + 0.5 * Math.pow(t, 1.2)).toFixed(3),
+                  w: (2.0 + 2.0 * t).toFixed(2) };
+  LUT.cyan[b] = { s: lerpC('#276E76', '#7FF5E2', Math.pow(t, .8)),
+                  o: (0.55 + 0.45 * Math.pow(t, 1.2)).toFixed(3),
+                  w: (1.8 + 1.8 * t).toFixed(2) };
 }
 
-function buildWheel() {
-  const svg = document.createElementNS(SVGNS, 'svg');
-  svg.setAttribute('viewBox', '0 0 100 128');
-  const gSegs = document.createElementNS(SVGNS, 'g');
-  const gNums = document.createElementNS(SVGNS, 'g');
-  crossG = document.createElementNS(SVGNS, 'g');
-
-  for (let i = 0; i < 64; i++) {
-    const keyNum = DGeneKeys.WHEEL[i];
-    const start = DGeneKeys.WHEEL_OFFSET + i * DGeneKeys.SEGMENT;
-    const seg = document.createElementNS(SVGNS, 'path');
-    seg.setAttribute('d', segPath(start, start + DGeneKeys.SEGMENT));
-    seg.setAttribute('class', 'gk-seg');
-    seg.addEventListener('click', () => openKey(keyNum));
-    gSegs.appendChild(seg);
-    segEls[keyNum] = seg;
-
-    const [tx, ty] = polar((R1 + R2) / 2, start + DGeneKeys.SEGMENT / 2);
-    const t = document.createElementNS(SVGNS, 'text');
-    t.setAttribute('x', tx); t.setAttribute('y', ty + 1);
-    t.setAttribute('class', 'gk-num');
-    t.setAttribute('text-anchor', 'middle');
-    t.setAttribute('font-size', '2.6');
-    t.textContent = keyNum;
-    gNums.appendChild(t);
-    numEls[keyNum] = t;
-  }
-
-  svg.appendChild(gSegs);
-  svg.appendChild(crossG);
-  svg.appendChild(gNums);
-  document.getElementById('svg-slot').appendChild(svg);
-}
-
+// ── primes ────────────────────────────────────────────────────────────
 const ROLES = [
   ['lifesWork', "Life's Work", 'how your genius wants to express itself in the world'],
   ['evolution', 'Evolution',   'what your life keeps asking you to work through'],
   ['radiance',  'Radiance',    'what keeps you physically and emotionally lit'],
   ['purpose',   'Purpose',     'the deep reason running underneath it all'],
 ];
+let primes = null;
+let primeByIdx = {};   // rung index -> { roleIdx, key, axis }
+let nodeEls = [], tethEls = [], labelEls = [], curDots = [];
 
-function refresh(iso) {
-  primes = DGeneKeys.primes(iso);
-  const primeOf = {};
-  ROLES.forEach(([k, label]) => { primeOf[primes[k].key] = label; });
+// ── layout ────────────────────────────────────────────────────────────
+function insets() {
+  const mobile = window.innerWidth < BREAKPOINT;
+  return mobile ? { t: 76, b: 84 } : { t: 56, b: 56 };
+}
+function layout() {
+  const ins = insets();
+  W = window.innerWidth;
+  H = Math.max(240, window.innerHeight - ins.t - ins.b);
+  CX = W / 2;
+  PAD_Y = H < 600 ? 16 : 26;
+  pitch = (H - 2 * PAD_Y) / (N - 1);
+  TURN_H = PERIOD * pitch;
+  A = Math.min(Math.max(0.22 * W, 44), 0.44 * TURN_H);
+  helix.setAttribute('viewBox', '0 0 ' + W + ' ' + (H + ins.t + ins.b));
+  helix.style.setProperty('--top', ins.t + 'px');
+  buildBackbones(ins.t);
+  placeRungs(ins.t);
+  placePrimes(ins.t);
+  renderFrame(true);
+}
+function yOf(i, top) { return top + PAD_Y + i * pitch; }
 
-  Object.entries(segEls).forEach(([num, el]) => {
-    const role = primeOf[num];
-    const axis1 = role === "Life's Work" || role === 'Evolution';
-    el.setAttribute('fill', role
-      ? (axis1 ? 'rgba(var(--accent-rgb),0.72)' : 'rgba(var(--deep-rgb),0.6)')
-      : 'rgba(var(--fg-rgb),0.05)');
-    el.setAttribute('stroke', 'rgba(var(--fg-rgb),0.16)');
-    el.setAttribute('stroke-width', '0.15');
-    numEls[num].setAttribute('fill', role ? 'rgb(var(--fg-rgb))' : 'rgba(var(--fg-rgb),0.35)');
-    numEls[num].setAttribute('font-weight', role ? '700' : '400');
+/* A sine phase shift IS a vertical translation, so each backbone is built
+   once (extended a full turn beyond both ends) with depth baked into
+   sub-paths, then only translated per frame. No path ever rebuilds. */
+function buildBackbones(top) {
+  gBackL.textContent = ''; gBackR.textContent = '';
+  backL.length = 0; backR.length = 0;
+  const step = pitch / 6, segH = TURN_H / 8;
+  const y0 = top + PAD_Y - TURN_H, y1 = top + PAD_Y + (N - 1) * pitch + TURN_H;
+  for (const [sign, g, arr] of [[-1, gBackL, backL], [1, gBackR, backR]]) {
+    for (let ys = y0; ys < y1; ys += segH) {
+      const ye = Math.min(ys + segH + step, y1);
+      let d = '';
+      for (let y = ys; y <= ye + 1e-9; y += step) {
+        const th = (y - top - PAD_Y) * K / pitch;
+        d += (d ? 'L' : 'M') + (CX + sign * A * Math.sin(th)).toFixed(2) + ',' + y.toFixed(2);
+      }
+      const midTh = (ys + segH / 2 - top - PAD_Y) * K / pitch;
+      const b = Math.min(31, Math.max(0, ((Math.cos(midTh) + 1) / 2 * 31) | 0));
+      const p = document.createElementNS(SVGNS, 'path');
+      p.setAttribute('d', d);
+      p.setAttribute('fill', 'none');
+      p.setAttribute('stroke-linecap', 'round');
+      p.setAttribute('stroke', LUT.back[b].s);
+      p.setAttribute('stroke-opacity', LUT.back[b].o);
+      p.setAttribute('stroke-width', LUT.back[b].w);
+      g.appendChild(p); arr.push(p);
+    }
+  }
+}
+
+function placeRungs(top) {
+  if (!rungs.length) {
+    for (let i = 0; i < N; i++) {
+      const l = document.createElementNS(SVGNS, 'line');
+      l.setAttribute('stroke-linecap', 'round');
+      gRung.appendChild(l); rungs.push(l);
+    }
+  }
+  for (let i = 0; i < N; i++) {
+    const y = yOf(i, top);
+    rungs[i].setAttribute('y1', y); rungs[i].setAttribute('y2', y);
+  }
+  rungBucket.fill(-1);
+}
+
+// ── the frame ─────────────────────────────────────────────────────────
+const sinT = new Float64Array(PERIOD), cosT = new Float64Array(PERIOD);
+function renderFrame(force) {
+  for (let j = 0; j < PERIOD; j++) { const th = j * K + phi; sinT[j] = Math.sin(th); cosT[j] = Math.cos(th); }
+  for (let i = 0; i < N; i++) {
+    const j = i % PERIOD, s = sinT[j];
+    const el = rungs[i];
+    el.setAttribute('x1', (CX - A * s * 0.9).toFixed(2));
+    el.setAttribute('x2', (CX + A * s * 0.9).toFixed(2));
+    const t = (cosT[j] + 1) / 2;
+    const b = Math.min(31, (t * 31) | 0);
+    if (force || rungBucket[i] !== b) {
+      rungBucket[i] = b;
+      const p = primeByIdx[i];
+      const L = p ? LUT[p.axis] : LUT.dim;
+      el.setAttribute('stroke', L[b].s);
+      el.setAttribute('stroke-opacity', L[b].o);
+      el.setAttribute('stroke-width', L[b].w);
+    }
+  }
+  // backbones: translate only
+  let dy = (-phi * pitch / K) % TURN_H; if (dy < 0) dy += TURN_H;
+  gBack.style.transform = 'translate3d(0,' + dy.toFixed(2) + 'px,0)';
+  // tethers follow the outer extent of their rung
+  const top = insets().t;
+  for (const th of tethEls) {
+    const s = Math.abs(sinT[th.idx % PERIOD]);
+    th.el.setAttribute(th.side < 0 ? 'x1' : 'x1', th.anchor);
+    th.el.setAttribute('x2', (CX + th.side * A * s).toFixed(2));
+  }
+  for (const d of curDots) {
+    const y = d.y0 + ((d.t) % 1) * d.span;
+    const th = (y - top - PAD_Y) * K / pitch;
+    d.el.setAttribute('cx', (CX + d.side * A * Math.sin(th)).toFixed(2));
+    d.el.setAttribute('cy', y.toFixed(2));
+  }
+}
+
+function loop(now) {
+  rafId = requestAnimationFrame(loop);
+  if (now - lastT < FRAME_MS) return;
+  const dt = Math.min(100, now - lastT); lastT = now;
+  phi += (dt / ROT_MS) * Math.PI * 2 * speed;
+  for (const d of curDots) d.t += dt / 5000;
+  renderFrame(false);
+}
+function start() {
+  if (running || REDUCED.matches) return;
+  running = true; lastT = performance.now(); rafId = requestAnimationFrame(loop);
+}
+function stop() { running = false; cancelAnimationFrame(rafId); }
+
+document.addEventListener('visibilitychange', () => { document.hidden ? stop() : start(); });
+REDUCED.addEventListener('change', () => {
+  if (REDUCED.matches) { stop(); phi = -K * 32; renderFrame(true); } else start();
+});
+
+// ── primes on the strand ──────────────────────────────────────────────
+function placePrimes(top) {
+  gNode.textContent = ''; gTeth.textContent = ''; gCur.textContent = '';
+  labels.textContent = '';
+  nodeEls = []; tethEls = []; labelEls = []; curDots = [];
+  if (!primes) return;
+  const chips = document.getElementById('chips');
+  chips.textContent = '';
+
+  ROLES.forEach((r, roleIdx) => {
+    const key = primes[r[0]].key;
+    const idx = INDEX_OF[key];
+    const axis = roleIdx < 2 ? 'gold' : 'cyan';   // index-based, never string equality
+    const side = roleIdx < 2 ? -1 : 1;
+    const y = yOf(idx, top);
+
+    const c = document.createElementNS(SVGNS, 'circle');
+    c.setAttribute('cx', CX); c.setAttribute('cy', y); c.setAttribute('r', 4.2);
+    c.setAttribute('fill', axis === 'gold' ? '#F2C46B' : '#5FEBD7');
+    c.setAttribute('class', 'node ' + axis);
+    c.style.animationDelay = (roleIdx * 0.85) + 's';
+    gNode.appendChild(c); nodeEls.push(c);
+
+    const anchor = side < 0 ? Math.max(10, CX - A - 26) : Math.min(W - 10, CX + A + 26);
+    const t = document.createElementNS(SVGNS, 'line');
+    t.setAttribute('y1', y); t.setAttribute('y2', y);
+    t.setAttribute('x1', anchor);
+    t.setAttribute('stroke', axis === 'gold' ? 'rgba(242,196,107,.4)' : 'rgba(95,235,215,.4)');
+    t.setAttribute('stroke-width', '0.7');
+    gTeth.appendChild(t);
+    tethEls.push({ el: t, idx: idx, side: side, anchor: anchor });
+
+    const lab = document.createElement('div');
+    lab.className = 'plabel ' + axis + ' ' + (side < 0 ? 'left' : 'right');
+    lab.innerHTML = '<span class="role"></span><span class="kk"></span>';
+    lab.querySelector('.role').textContent = r[1];
+    lab.querySelector('.kk').textContent = 'Key ' + key + ' · ' + DGeneKeys.KEYS[key].gift;
+    lab.style.top = (y - 16) + 'px';
+    if (side < 0) { lab.style.right = (W - anchor + 12) + 'px'; }
+    else { lab.style.left = (anchor + 12) + 'px'; }
+    lab.addEventListener('click', () => openKey(key));
+    labels.appendChild(lab); labelEls.push(lab);
+
+    const chip = document.createElement('div');
+    chip.className = 'chip ' + axis;
+    chip.innerHTML = '<span class="r"></span>';
+    chip.querySelector('.r').textContent = r[1];
+    chip.appendChild(document.createTextNode('Key ' + key));
+    chip.addEventListener('click', () => openKey(key));
+    chips.appendChild(chip);
   });
 
-  // The prime cross — two chords of flowing current through the center.
-  crossG.innerHTML = '';
-  const mid = k => {
-    const lam = primes[k].lambda;
-    const segStart = Math.floor((((lam - DGeneKeys.WHEEL_OFFSET) % 360) + 360) % 360 / DGeneKeys.SEGMENT);
-    return polar(R1 - 2, DGeneKeys.WHEEL_OFFSET + segStart * DGeneKeys.SEGMENT + DGeneKeys.SEGMENT / 2);
-  };
-  [[['lifesWork', 'evolution'], 'bright'], [['radiance', 'purpose'], 'deep']].forEach(([pair, cls]) => {
-    const [a, b] = pair.map(mid);
-    const line = document.createElementNS(SVGNS, 'line');
-    line.setAttribute('x1', a[0]); line.setAttribute('y1', a[1]);
-    line.setAttribute('x2', b[0]); line.setAttribute('y2', b[1]);
-    line.setAttribute('class', 'river ' + cls);
-    crossG.appendChild(line);
+  // currents: 8 dots per axis, mirrored onto opposite backbones so the two
+  // never overlap (the pairs sit at identical helical phase).
+  [['lifesWork', 'evolution', -1, 'rgba(242,196,107,.9)'],
+   ['radiance', 'purpose', 1, 'rgba(95,235,215,.9)']].forEach(([a, b, side, col]) => {
+    const ya = yOf(INDEX_OF[primes[a].key], top), yb = yOf(INDEX_OF[primes[b].key], top);
+    const y0 = Math.min(ya, yb), span = Math.abs(yb - ya) || 1;
+    for (let n = 0; n < 8; n++) {
+      const d = document.createElementNS(SVGNS, 'circle');
+      d.setAttribute('r', 1.5); d.setAttribute('fill', col);
+      gCur.appendChild(d);
+      curDots.push({ el: d, y0: y0, span: span, side: side, t: n / 8 });
+    }
   });
+}
 
-  // Prime cards
-  const cards = document.getElementById('primes');
-  cards.innerHTML = '';
-  ROLES.forEach(([k, label]) => {
-    const key = primes[k].key;
-    const card = document.createElement('div');
-    card.className = 'prime-card';
-    card.dataset.key = key;
-    card.innerHTML =
-      `<div class="role">${label}</div>` +
-      `<div class="keynum">Key ${key}</div>` +
-      `<div class="keyname">${DGeneKeys.KEYS[key].name}</div>`;
-    card.addEventListener('click', () => openKey(key));
-    cards.appendChild(card);
+// ── a11y mirror ───────────────────────────────────────────────────────
+const strandEl = document.getElementById('strand');
+const optsEl = document.getElementById('opts');
+let activeIdx = 0;
+function buildOpts() {
+  optsEl.textContent = '';
+  for (let i = 0; i < N; i++) {
+    const key = DGeneKeys.WHEEL[i], k = DGeneKeys.KEYS[key];
+    const o = document.createElement('div');
+    o.id = 'opt-' + key; o.setAttribute('role', 'option');
+    o.textContent = 'Gene Key ' + key + ', ' + k.shadow + ' to ' + k.gift + ' to ' + k.siddhi;
+    optsEl.appendChild(o);
+  }
+}
+function setActive(i) {
+  activeIdx = Math.max(0, Math.min(N - 1, i));
+  const key = DGeneKeys.WHEEL[activeIdx];
+  strandEl.setAttribute('aria-activedescendant', 'opt-' + key);
+  showReadout(key, CX, yOf(activeIdx, insets().t));
+}
+
+// ── pointer ───────────────────────────────────────────────────────────
+const readout = document.getElementById('readout');
+function idxAtY(clientY, offset) {
+  const pt = new DOMPoint(0, clientY - (offset || 0));
+  const m = helix.getScreenCTM();
+  if (!m) return 0;
+  const p = pt.matrixTransform(m.inverse());
+  return Math.max(0, Math.min(N - 1, Math.round((p.y - insets().t - PAD_Y) / pitch)));
+}
+function showReadout(key, x, y) {
+  const k = DGeneKeys.KEYS[key];
+  readout.innerHTML = '<b></b> ';
+  readout.querySelector('b').textContent = key;
+  readout.appendChild(document.createTextNode('· ' + k.shadow + ' → ' + k.gift + ' → ' + k.siddhi));
+  readout.style.left = Math.max(90, Math.min(window.innerWidth - 90, x)) + 'px';
+  readout.style.top = Math.max(30, y) + 'px';
+  readout.classList.add('show');
+}
+function hideReadout() { readout.classList.remove('show'); }
+
+let scrubbing = false;
+helix.addEventListener('pointermove', (e) => {
+  if (e.pointerType === 'touch' && !scrubbing) return;
+  const off = e.pointerType === 'touch' ? 52 : 0;
+  const i = idxAtY(e.clientY, off);
+  activeIdx = i;
+  showReadout(DGeneKeys.WHEEL[i], e.clientX, e.clientY - off - 26);
+}, { passive: true });
+helix.addEventListener('pointerdown', (e) => {
+  if (e.pointerType === 'touch') {
+    scrubbing = true; helix.setPointerCapture(e.pointerId);
+    const i = idxAtY(e.clientY, 52); activeIdx = i;
+    showReadout(DGeneKeys.WHEEL[i], e.clientX, e.clientY - 78);
+  }
+});
+helix.addEventListener('pointerup', (e) => {
+  const off = e.pointerType === 'touch' ? 52 : 0;
+  const i = idxAtY(e.clientY, off);
+  scrubbing = false; hideReadout();
+  strandEl.focus({ preventScroll: true });
+  openKey(DGeneKeys.WHEEL[i]);
+});
+helix.addEventListener('pointerleave', hideReadout);
+
+strandEl.addEventListener('keydown', (e) => {
+  const k = e.key;
+  if (k === 'ArrowDown') { setActive(activeIdx + 1); e.preventDefault(); }
+  else if (k === 'ArrowUp') { setActive(activeIdx - 1); e.preventDefault(); }
+  else if (k === 'PageDown') { setActive(activeIdx + 8); e.preventDefault(); }
+  else if (k === 'PageUp') { setActive(activeIdx - 8); e.preventDefault(); }
+  else if (k === 'Home') { setActive(0); e.preventDefault(); }
+  else if (k === 'End') { setActive(N - 1); e.preventDefault(); }
+  else if (k === 'p' || k === 'P') {
+    if (!primes) return;
+    const list = ROLES.map(r => INDEX_OF[primes[r[0]].key]).sort((a, b) => a - b);
+    setActive(list.find(i => i > activeIdx) ?? list[0]); e.preventDefault();
+  }
+  else if (k === 'Enter' || k === ' ') { openKey(DGeneKeys.WHEEL[activeIdx]); e.preventDefault(); }
+  else if (k === 'Escape') closePanel();
+});
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closePanel(); });
+
+// ── the reading ───────────────────────────────────────────────────────
+const panel = document.getElementById('panel');
+let openIdx = null;
+
+function spectrumHTML(k) {
+  const wrap = document.getElementById('p-spectrum');
+  wrap.textContent = '';
+  const rail = document.createElement('div');
+  rail.className = 'rail';
+  ['n0', 'n1', 'n2'].forEach(c => { const i = document.createElement('i'); i.className = c; rail.appendChild(i); });
+  const row = document.createElement('div');
+  row.className = 'specrow';
+  [['s0', k.shadow, 'Shadow'], ['s1', k.gift, 'Gift'], ['s2', k.siddhi, 'Siddhi']].forEach(([cls, word, cap]) => {
+    const d = document.createElement('div'); d.className = cls;
+    const w = document.createElement('span'); w.className = 'w'; w.textContent = word;
+    const c = document.createElement('span'); c.className = 'c'; c.textContent = cap;
+    d.appendChild(w); d.appendChild(c); row.appendChild(d);
   });
+  wrap.appendChild(rail); wrap.appendChild(row);
 }
 
 function openKey(n) {
   const k = DGeneKeys.KEYS[n];
   if (!k || !primes) return;
-  const role = ROLES.find(([rk]) => primes[rk].key === n);
+  const roleIdx = ROLES.findIndex(r => primes[r[0]].key === n);
+  const role = roleIdx >= 0 ? ROLES[roleIdx] : null;
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(n) : null;
 
-  document.querySelectorAll('.prime-card').forEach(el =>
-    el.classList.toggle('active', Number(el.dataset.key) === n));
+  openIdx = INDEX_OF[n];
+  activeIdx = openIdx;
+  const axis = role ? (roleIdx < 2 ? 'var(--gold)' : 'var(--lum)') : 'var(--steel)';
+  panel.style.setProperty('--axis', axis);
 
-  document.getElementById('d-eyebrow').textContent =
-    role ? `Gene Key ${n} · Your ${role[1]}` : `Gene Key ${n}`;
-  document.getElementById('d-sub').textContent = k.name;
-  document.getElementById('d-heading').textContent =
-    `${k.shadow} → ${k.gift} → ${k.siddhi}`;
-  document.getElementById('d-tagline').textContent = c ? c.tagline : '';
+  document.getElementById('p-eyebrow').textContent =
+    role ? 'Gene Key ' + n + ' · Your ' + role[1] : 'Gene Key ' + n;
+  document.getElementById('p-name').textContent = k.name;
+  document.getElementById('p-tagline').textContent = c ? c.tagline : '';
+  document.getElementById('p-role').textContent = role
+    ? 'This key is ' + role[2] + '.'
+    : 'Not one of your four primes — an energy you meet in the world and in others rather than carry as a life theme.';
 
-  let body = role
-    ? `<div class="lbl">In your profile</div>This key is ${role[2]}.`
-    : `<div class="lbl">In your profile</div>Not one of your four primes — an
-       energy you meet in the world and in others rather than carry as a life
-       theme.`;
-  if (c) {
-    body +=
-      `<div class="lbl">The Shadow · ${k.shadow}</div>${c.shadow}` +
-      `<div class="lbl">The Gift · ${k.gift}</div>${c.gift}` +
-      `<div class="lbl deep">Invitation · toward ${k.siddhi}</div>${c.invitation}`;
-  } else {
-    body += `<div class="lbl">Contemplation</div>The full contemplation for
-      this key is still being written.`;
-  }
-  document.getElementById('d-body').innerHTML = body;
+  spectrumHTML(k);
+  document.getElementById('p-note').textContent = (k.gift === k.siddhi)
+    ? 'In Key ' + n + ' the Gift and the Siddhi share one name — ' + k.gift + ' is both the practice and its flowering.'
+    : '';
+
+  document.getElementById('l-mastery').textContent = 'Mastery · ' + k.gift;
+  document.getElementById('l-shadow').textContent = 'The Shadow · ' + k.shadow;
+  document.getElementById('l-invite').textContent = 'Invitation · toward ' + k.siddhi;
+
+  const pending = !c && document.readyState !== 'complete';
+  document.getElementById('p-mastery').textContent = c ? c.gift
+    : (pending ? 'Opening…' : 'The full contemplation for this key is still being written.');
+  document.getElementById('p-shadow').textContent = c ? c.shadow : '';
+  document.getElementById('p-invite').textContent = c ? c.invitation : '';
+  if (pending) window.addEventListener('DOMContentLoaded', () => { if (openIdx === INDEX_OF[n]) openKey(n); }, { once: true });
+
+  const mobile = window.innerWidth < BREAKPOINT;
+  panel.setAttribute('aria-modal', mobile ? 'true' : 'false');
+  document.body.classList.add('reading');
+  panel.scrollTop = 0;
+  document.getElementById('p-name').focus({ preventScroll: true });
+  if (c) document.title = c.title + ' — Gene Keys';
+  try { history.replaceState(null, '', location.pathname + '?dob=' + dobInput.value + '&key=' + n); } catch (_) {}
+
+  speed = mobile ? 0 : 0.18;
+  if (mobile) stop(); else start();
 }
+function closePanel() {
+  if (!document.body.classList.contains('reading')) return;
+  document.body.classList.remove('reading');
+  openIdx = null;
+  document.title = 'Gene Keys — The Living Strand';
+  speed = 1; start();
+  strandEl.focus({ preventScroll: true });
+  try { history.replaceState(null, '', location.pathname + '?dob=' + dobInput.value); } catch (_) {}
+}
+document.getElementById('p-close').addEventListener('click', closePanel);
 
-// ── boot ──────────────────────────────────────────────────────────────────
+// ── date ──────────────────────────────────────────────────────────────
 const dobInput = document.getElementById('dob');
-dobInput.max = new Date().toISOString().slice(0, 10);
+dobInput.max = new Date().toISOString().slice(0, 10);   // no future birthdates
 
 function currentISO() {
   const [y, m, d] = (dobInput.value || '').split('-').map(Number);
-  return (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100)
-    ? dobInput.value : null;
+  return (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100) ? dobInput.value : null;
 }
-function apply() {
+function apply(firstRun) {
   const iso = currentISO();
   if (!iso) return;
-  refresh(iso);
-  // Reset the panel — an open reading now belongs to the old date.
-  document.getElementById('d-eyebrow').textContent = 'Your four Prime Gifts';
-  document.getElementById('d-sub').textContent = iso;
-  document.getElementById('d-heading').textContent = 'Open a key';
-  document.getElementById('d-tagline').textContent = '';
-  document.getElementById('d-body').innerHTML =
-    'Touch a card above, a lit segment, or any of the other sixty keys on the wheel.';
+  primes = DGeneKeys.primes(iso);
+  primeByIdx = {};
+  ROLES.forEach((r, roleIdx) => {
+    primeByIdx[INDEX_OF[primes[r[0]].key]] = { roleIdx: roleIdx, key: primes[r[0]].key, axis: roleIdx < 2 ? 'gold' : 'cyan' };
+  });
+  layout();
+  if (!firstRun) {
+    // an open reading belongs to the old date
+    closePanel();
+    const s = document.getElementById('scanner');
+    s.classList.remove('run'); void s.offsetWidth; s.classList.add('run');
+  }
 }
-dobInput.addEventListener('change', apply);
+dobInput.addEventListener('change', () => apply(false));
 
-buildWheel();
-const urlDob = new URLSearchParams(location.search).get('dob');
-dobInput.value = (urlDob && /^\d{4}-\d{2}-\d{2}$/.test(urlDob)) ? urlDob : '1990-01-01';
-apply();
+// ── boot ──────────────────────────────────────────────────────────────
+buildOpts();
+const params = new URLSearchParams(location.search);
+const urlDob = params.get('dob');
+const hasDob = urlDob && /^\d{4}-\d{2}-\d{2}$/.test(urlDob);
+dobInput.value = hasDob ? urlDob : '1990-01-01';
+apply(true);
+
+if (REDUCED.matches) { phi = -K * 32; renderFrame(true); } else start();
+
+if (!hasDob) {
+  const h = document.getElementById('hint');
+  setTimeout(() => h.classList.add('show'), 900);
+  setTimeout(() => h.classList.remove('show'), 9000);
+}
+const urlKey = Number(params.get('key'));
+if (urlKey >= 1 && urlKey <= 64) {
+  const openWhenReady = () => openKey(urlKey);
+  if (window.DGeneKeysContent) openWhenReady();
+  else window.addEventListener('DOMContentLoaded', openWhenReady, { once: true });
+}
+
+let rt = 0;
+function onResize() { clearTimeout(rt); rt = setTimeout(layout, 120); }
+window.addEventListener('resize', onResize);
+window.addEventListener('orientationchange', onResize);
+if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 </script>
 </body>
 </html>
