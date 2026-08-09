@@ -225,11 +225,11 @@ body.open #notes { opacity: 0; pointer-events: none; }
   <div class="n-fig">Fig. 1 — General arrangement</div>
   <p>The apparatus comprises sixty-four (64) plates carried upon a common spindle, in the order of the solar wheel.</p>
   <p>Four plates of increased diameter are fitted according to the subject's date of birth and are identified by callout: <b>Life's Work</b>, taken at the sun; <b>Evolution</b>, opposite; <b>Radiance</b>, taken 88° prior; and <b>Purpose</b>, opposite that.</p>
-  <p>Selecting any plate explodes the assembly along the spindle and withdraws that plate for inspection at Fig. 2.</p>
+  <p>Selecting the assembly separates it along the spindle; the fitted plates are then marked by pointer. Selecting a marked plate withdraws it for inspection at Fig. 2.</p>
   <p class="n-note">Plates not fitted to this assembly remain available for inspection and are described in general terms only.</p>
 </section>
 
-<div id="hint">Select a plate to explode the assembly</div>
+<div id="hint">Select the assembly to open it</div>
 
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
@@ -262,10 +262,16 @@ const ROLES = [
 ];
 
 let W = 0, H = 0, axisX = 0, midY = 0;
-let gapClosed = 2.7, gapOpen = 10, plateR = 58, primeR = 76;
+let gapClosed = 2.7, gapOpen = 10, gapDrawn = 23, plateR = 58, primeR = 76;
 let primes = null, roleOf = {};          // rung index -> role index
-let selIdx = -1, ex = 0, exAnimating = false, exDir = 1, exT0 = 0;
-const EX_MS = 820;
+/* Two stages, tweened independently.
+   ex — the assembly opening from a solid screw into a separated stack, all
+        sixty-four plates still on the sheet, the four fitted ones marked.
+   sx — a single plate then being drawn out of that stack for inspection.
+   Smoothing is exponential toward a target so a click part-way through an
+   animation redirects it instead of jumping.                              */
+let selIdx = -1, ex = 0, exT = 0, sx = 0, sxT = 0, raf = 0, lastT = 0;
+const SMOOTH_MS = 460;
 const plateEls = [], INDEX_OF = {};
 DGeneKeys.WHEEL.forEach((k, i) => { INDEX_OF[k] = i; });
 
@@ -297,7 +303,11 @@ function buildStack() {
       stroke: 'var(--ink)', 'stroke-width': '0.75' }, g);
     const rim = el('path', { fill: 'none', stroke: 'var(--ink-3)', 'stroke-width': '0.6' }, g);
     g.style.cursor = 'pointer';
-    g.addEventListener('click', (e) => { e.stopPropagation(); select(DGeneKeys.WHEEL[i]); });
+    g.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (exT < 0.5) openAssembly();          // closed screw: open it first
+      else select(DGeneKeys.WHEEL[i]);
+    });
     gStack.appendChild(g);
     plateEls.push({ g, face, rim });
   }
@@ -313,17 +323,21 @@ function layout() {
   plateR = mobile ? Math.min(30, W * 0.085) : Math.min(66, W * 0.068);
   primeR = plateR * 1.34;
   gapClosed = 2.6;
-  gapOpen = mobile ? 17 : 23;
+  gapOpen = mobile ? 8.5 : 10.5;        // stage 1: every plate on the sheet
+  gapDrawn = mobile ? 17 : 23;          // stage 2: spread around the selection
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
   positionSpec();
   render();
 }
 
+function gapNow() {
+  return gapClosed + (gapOpen - gapClosed) * ex + (gapDrawn - gapOpen) * sx;
+}
 function plateY(i) {
-  const gap = gapClosed + (gapOpen - gapClosed) * ex;
-  // the withdrawn plate holds the centre of the sheet as the stack spreads,
-  // so the separation is real and simply runs off the top and bottom edges
-  const shift = selIdx >= 0 ? -((selIdx - (N - 1) / 2) * gap) * ex : 0;
+  const gap = gapNow();
+  // once a plate is drawn out it holds the centre of the sheet, and the wider
+  // spread simply runs off the top and bottom edges
+  const shift = selIdx >= 0 ? -((selIdx - (N - 1) / 2) * gap) * sx : 0;
   return midY + (i - (N - 1) / 2) * gap + shift;
 }
 
@@ -339,15 +353,16 @@ function render() {
     const isPrime = roleOf[i] !== undefined;
     const isSel = i === selIdx;
     // the selected plate withdraws from the stack toward the detail view
-    const pull = isSel ? ex * (mobile ? W * 0.26 : W * 0.19) : 0;
-    const r = (isPrime ? primeR : plateR) * (1 + (isSel ? ex * 0.12 : 0));
-    const cx = axisX + pull, cy = plateY(i) - (isSel ? ex * 26 : 0);
+    const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
+    const r = (isPrime ? primeR : plateR) * (1 + (isSel ? sx * 0.12 : 0));
+    const cx = axisX + pull, cy = plateY(i) - (isSel ? sx * 26 : 0);
     const ry = r * 0.235;
     p.face.setAttribute('cx', cx); p.face.setAttribute('cy', cy);
     p.face.setAttribute('rx', r);  p.face.setAttribute('ry', ry);
     p.face.setAttribute('stroke', isSel ? 'var(--mark)' : 'var(--ink)');
     p.face.setAttribute('stroke-width', isSel ? 1.4 : (isPrime ? 0.95 : 0.6));
     p.face.setAttribute('fill-opacity', ex > 0.02 ? 0.9 : 0.98);
+    p.g.style.pointerEvents = ex > 0.35 ? 'auto' : 'none';
     // plate thickness: a second arc under the face, joined at the extremes
     const t = isPrime ? 3.4 : 2.2;
     p.rim.setAttribute('d',
@@ -367,7 +382,7 @@ const gDim = document.createElementNS(SVGNS, 'g');
 svg.insertBefore(gDim, gLeader);
 function drawDim() {
   gDim.textContent = '';
-  const o = 1 - ex;                       // only meaningful on the assembled view
+  const o = 1 - Math.max(ex, sx);         // only meaningful on the assembled view
   if (o < 0.05) return;
   const x = axisX + primeR + 40;
   const yA = plateY(0) - 4, yB = plateY(N - 1) + 8;
@@ -391,24 +406,40 @@ function drawCallouts() {
   calloutsEl.textContent = '';
   if (!primes) return;
   const mobile = W < BP;
+  // the pointers belong to the opened assembly — they fade in with it
+  const ptrO = Math.max(0, (ex - 0.3) / 0.7);
+  if (ptrO <= 0.01) return;
   ROLES.forEach((r, ri) => {
     const key = primes[r[0]].key, i = INDEX_OF[key];
     const isSel = i === selIdx;
-    const pull = isSel ? ex * (mobile ? W * 0.26 : W * 0.19) : 0;
-    const rr = primeR * (1 + (isSel ? ex * 0.12 : 0));
-    const y = plateY(i) - (isSel ? ex * 26 : 0);
+    const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
+    const rr = primeR * (1 + (isSel ? sx * 0.12 : 0));
+    const y = plateY(i) - (isSel ? sx * 26 : 0);
     // a spread stack runs off the sheet; don't leave leaders pointing at nothing
     if (y < 26 || y > H - 26) return;
     const x = axisX + pull - rr;
     const lx = Math.max(20, axisX - primeR - (mobile ? 14 : 58));
     // dogleg leader: horizontal run out to the label, dot at the part
-    el('path', { d: 'M' + x + ',' + y + ' L' + (lx + 26) + ',' + y,
-      stroke: isSel ? 'var(--mark)' : 'var(--ink-3)', 'stroke-width': '0.6',
-      fill: 'none', 'stroke-dasharray': '3 2.5' }, gLeader);
-    el('circle', { cx: x, cy: y, r: 1.9, fill: isSel ? 'var(--mark)' : 'var(--ink)' }, gLeader);
+    // A thin hard body, machined to a point at the plate and squared off at
+    // the label — solid geometry so which four are yours is unmistakable,
+    // rather than a dashed line that reads as annotation.
+    const tipX = x - 3, tailX = lx + 26, hw = 3.1;
+    el('path', {
+      d: 'M' + tipX + ',' + y +
+         ' L' + (tailX + 16) + ',' + (y - hw) +
+         ' L' + tailX + ',' + (y - hw) +
+         ' L' + tailX + ',' + (y + hw) +
+         ' L' + (tailX + 16) + ',' + (y + hw) + ' Z',
+      fill: isSel ? 'var(--mark)' : 'var(--ink)',
+      'fill-opacity': (isSel ? 1 : 0.86) * ptrO,
+      stroke: 'none'
+    }, gLeader);
+    el('circle', { cx: x, cy: y, r: 2.4, fill: isSel ? 'var(--mark)' : 'var(--ink)',
+      'fill-opacity': ptrO }, gLeader);
 
     const lab = document.createElement('div');
     lab.className = 'callout' + (isSel ? ' sel' : '');
+    lab.style.opacity = ptrO.toFixed(2);
     lab.style.left = '0px';
     lab.style.width = (lx + 20) + 'px';
     lab.style.textAlign = 'right';
@@ -424,9 +455,9 @@ function drawCallouts() {
 /* ── detail view: the withdrawn plate, in front elevation ─────────────── */
 function drawDetail() {
   gDetail.textContent = '';
-  if (selIdx < 0 || ex < 0.25) return;
+  if (selIdx < 0 || sx < 0.25) return;
   const mobile = W < BP;
-  const o = (ex - 0.25) / 0.75;
+  const o = (sx - 0.25) / 0.75;
   const R = mobile ? Math.min(52, W * 0.15) : Math.min(104, W * 0.085);
   const cx = mobile ? W * 0.66 : W * 0.455;
   const cy = mobile ? H * 0.30 : H * 0.29;
@@ -461,9 +492,9 @@ function drawDetail() {
     });
   }
   // leader from the detail back to its slot in the stack
-  const sy = plateY(selIdx) - ex * 26;
-  const sx = axisX + ex * (mobile ? W * 0.26 : W * 0.19);
-  el('path', { d: 'M' + sx + ',' + sy + ' L' + (cx - R - 10) + ',' + cy,
+  const sy = plateY(selIdx) - sx * 26;
+  const sxx = axisX + sx * (mobile ? W * 0.26 : W * 0.19);
+  el('path', { d: 'M' + sxx + ',' + sy + ' L' + (cx - R - 10) + ',' + cy,
     stroke: 'var(--mark-2)', 'stroke-width': '0.6', fill: 'none', 'stroke-dasharray': '5 4' }, g);
 }
 
@@ -533,39 +564,68 @@ function fillSpec(n) {
 }
 
 /* ── explode / assemble ───────────────────────────────────────────────── */
-function select(n) {
-  const i = INDEX_OF[n];
+const hintEl = document.getElementById('hint');
+function setTargets(e, x) {
+  exT = e; sxT = x;
+  if (REDUCED.matches) { ex = e; sx = x; render(); return; }
+  if (!raf) { lastT = performance.now(); raf = requestAnimationFrame(tick); }
+}
+// stage 1 — the screw opens; every plate on the sheet, yours marked
+function openAssembly() {
   if (!primes) return;
-  if (selIdx === i && ex > 0.5) return;
-  selIdx = i;
+  selIdx = -1;
+  document.body.classList.remove('open');
+  document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1A';
+  hintEl.textContent = 'Marked plates are yours — select one';
+  setTargets(1, 0);
+}
+// stage 2 — a plate is drawn out and its specification issued
+function select(n) {
+  if (!primes) return;
+  selIdx = INDEX_OF[n];
   fillSpec(n);
   document.body.classList.add('open');
-  exDir = 1;
-  if (REDUCED.matches) { ex = 1; render(); }
-  else { exAnimating = true; exT0 = performance.now(); requestAnimationFrame(tick); }
+  setTargets(1, 1);
   try { history.replaceState(null, '', location.pathname + '?dob=' + dob.value + '&key=' + n); } catch (_) {}
 }
-function assemble() {
-  if (!document.body.classList.contains('open')) return;
+// back to stage 1, keeping the assembly open so another plate can be chosen
+function deselect() {
   document.body.classList.remove('open');
   document.title = 'Gene Keys — Apparatus, Exploded View';
+  document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1A';
+  hintEl.textContent = 'Marked plates are yours — select one';
+  setTargets(1, 0);
+  try { history.replaceState(null, '', location.pathname + '?dob=' + dob.value); } catch (_) {}
+}
+// stage 0 — everything back down to a solid screw
+function assemble() {
+  document.body.classList.remove('open');
+  selIdx = -1;
+  document.title = 'Gene Keys — Apparatus, Exploded View';
   document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1';
-  exDir = -1;
-  if (REDUCED.matches) { ex = 0; selIdx = -1; render(); }
-  else { exAnimating = true; exT0 = performance.now(); requestAnimationFrame(tick); }
+  hintEl.textContent = 'Select the assembly to open it';
+  setTargets(0, 0);
   try { history.replaceState(null, '', location.pathname + '?dob=' + dob.value); } catch (_) {}
 }
 function tick(now) {
-  const k = Math.min(1, (now - exT0) / EX_MS);
-  const e = easeOut(k);
-  ex = exDir > 0 ? e : 1 - e;
+  const dt = Math.min(64, now - lastT); lastT = now;
+  const k = 1 - Math.pow(0.0015, dt / SMOOTH_MS);   // frame-rate independent
+  ex += (exT - ex) * k;
+  sx += (sxT - sx) * k;
+  if (Math.abs(exT - ex) < 0.001 && Math.abs(sxT - sx) < 0.001) {
+    ex = exT; sx = sxT; raf = 0;
+    if (sx === 0 && !document.body.classList.contains('open')) selIdx = ex === 0 ? -1 : selIdx;
+    render(); return;
+  }
   render();
-  if (k < 1) requestAnimationFrame(tick);
-  else { exAnimating = false; if (exDir < 0) { ex = 0; selIdx = -1; render(); } }
+  raf = requestAnimationFrame(tick);
 }
-document.getElementById('s-close').addEventListener('click', assemble);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') assemble(); });
-svg.addEventListener('click', () => assemble());
+document.getElementById('s-close').addEventListener('click', deselect);
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Escape') return;
+  if (sxT > 0.5) deselect(); else assemble();
+});
+svg.addEventListener('click', () => { if (sxT > 0.5) deselect(); else assemble(); });
 
 /* ── a11y list ────────────────────────────────────────────────────────── */
 const partsEl = document.getElementById('parts');
@@ -603,7 +663,10 @@ function apply() {
   primes = DGeneKeys.primes(iso);
   roleOf = {};
   ROLES.forEach((r, ri) => { roleOf[INDEX_OF[primes[r[0]].key]] = ri; });
-  assemble();
+  setTargets(0, 0); selIdx = -1;
+  document.body.classList.remove('open');
+  hintEl.textContent = 'Select the assembly to open it';
+  document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1';
   render();
 }
 dob.addEventListener('change', apply);
