@@ -75,8 +75,14 @@ function el(tag, attrs) {
 let R = 0, CX = 200, CY = 200, SZ = 0;
 const PANEL_W = 420;
 
+/* Below 900px the rim labels are gone (the legend strip replaces them), so
+   nothing needs clearance outside the mandala any more — it can fill far
+   more of a phone screen than the desktop 0.40-of-min-dimension rule gives
+   it. The decorative outer hex/dashed ring is allowed to bleed off the
+   edges; the nodes themselves stay well inside frame either way. */
+function isMobile() { return innerWidth <= 899; }
 function geometry() {
-  R = Math.min(innerWidth, innerHeight) * 0.40;
+  R = isMobile() ? innerWidth * 0.60 : Math.min(innerWidth, innerHeight) * 0.40;
   SZ = R * 2.15;
   svg.setAttribute('viewBox', '0 0 400 400');
   svg.setAttribute('width', SZ);
@@ -118,7 +124,12 @@ function ring(r, dash, op, w, rotSec) {
 const expandG = el('g', {});
 expandG.style.transformOrigin = CX + 'px ' + CY + 'px';
 expandG.style.transform = 'scale(0.001)';
-expandG.style.transition = 'transform 1.15s cubic-bezier(.16,.86,.2,1)';
+/* Mobile gets an actual zoom: the curve overshoots past 1 before settling,
+   so the mandala punches past its final size and pulls back — reads as a
+   camera push, not just a gentle unfold. Desktop keeps the calmer spread. */
+expandG.style.transition = isMobile()
+  ? 'transform .85s cubic-bezier(.28,1.65,.4,1)'
+  : 'transform 1.15s cubic-bezier(.16,.86,.2,1)';
 svg.appendChild(expandG);
 
 const outerG = el('g', {});
