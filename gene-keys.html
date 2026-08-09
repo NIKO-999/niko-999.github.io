@@ -3,302 +3,202 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<meta name="theme-color" content="#F2EFE6">
-<title>Gene Keys — Apparatus, Exploded View</title>
-<meta name="description" content="Your four Gene Keys Prime Gifts, drawn as a technical assembly: sixty-four plates on a common spindle, exploded for inspection.">
+<meta name="theme-color" content="#04050A">
+<title>Gene Keys — Hologenetic Profile</title>
+<meta name="description" content="Your Gene Keys Hologenetic Profile, drawn as a bioluminescent mandala: thirteen spheres glowing in your own colours, one for each sequence.">
 <link rel="preload" as="script" href="js/gene-keys-content.js">
 <style>
 /* ═══════════════════════════════════════════════════════════════════════
-   APPARATUS — the profile drawn as a patent filing.
-   Sixty-four plates on a common spindle. Selecting one explodes the
-   assembly along its axis and pulls that plate out to a detail view.
-   Hairline linework on paper: no glow, no gradients, no motion blur —
-   every mark is either a line, a dash, or hatching.
+   BIOLUMINESCENT MANDALA — deep water, one colour source per sequence,
+   nothing else in the frame competes with it. No categorical colour on
+   text or chrome; only the thirteen spheres and the reading panel's edge
+   ever carry a sequence colour.
    ═══════════════════════════════════════════════════════════════════════ */
 :root {
-  color-scheme: light;
-  --paper:  #F2EFE6;
-  --paper2: #E8E4D7;
-  --ink:    #16181F;
-  --ink-2:  rgba(22,24,31,.62);
-  --ink-3:  rgba(22,24,31,.38);
-  --ink-4:  rgba(22,24,31,.17);
-  --rule:   rgba(22,24,31,.30);
-  --mark:   #B23A1F;          /* the one accent: selected part, callouts */
-  --mark-2: rgba(178,58,31,.42);
-  --grid:   rgba(70,90,120,.10);
-
+  color-scheme: dark;
+  --ground: #04050A;
+  --ink: #DCEFFF;
+  --ink-2: #8C96AC;
+  --ink-3: #5C6478;
   --mono: ui-monospace, 'SF Mono', 'Roboto Mono', 'DM Mono', Menlo, monospace;
-  --serif: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
-  --ease: cubic-bezier(.22,.68,.24,1);
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
 body {
-  background: var(--paper);
+  background: var(--ground);
   color: var(--ink);
   font-family: var(--mono);
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
-
-/* faint drafting grid */
-#grid {
-  position: fixed; inset: 0; pointer-events: none;
-  background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px);
-  background-size: 26px 26px;
+#hdr {
+  position: fixed; left: 26px; top: 24px; z-index: 6;
+  font-size: 9px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3);
 }
-/* the drawing frame */
-#frame {
-  position: fixed; inset: 14px;
-  border: 1px solid var(--rule);
-  pointer-events: none;
+#hdr b { color: var(--ink-2); font-weight: 500; }
+
+#stage {
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  transition: transform .6s cubic-bezier(.16,.8,.24,1);
 }
-#frame::after {
-  content: ''; position: absolute; inset: 5px;
-  border: 1px solid var(--ink-4);
+svg { overflow: visible; }
+.lbl {
+  position: absolute; font: 500 11px var(--mono); color: var(--ink);
+  white-space: nowrap; cursor: pointer; padding: 4px 2px; transition: opacity .3s ease;
+  z-index: 4;
+}
+.sub { font: 400 9px var(--mono); opacity: .6; display: block; margin-top: 2px; }
+#coreLbl {
+  position: absolute; text-align: center; color: #CFEFFF;
+  font: 500 10px var(--mono); letter-spacing: .14em; pointer-events: none;
+  transition: color .4s ease; z-index: 3;
 }
 
-#drawing { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
+/* ── reading panel ─────────────────────────────────────────────────────── */
+#panel {
+  position: fixed; right: 0; top: 0; bottom: 0; width: 420px; z-index: 20;
+  padding: 58px 46px; overflow: auto;
+  background: linear-gradient(90deg, rgba(4,5,10,0) 0%, rgba(6,7,14,.90) 14%, rgba(5,6,12,.975) 100%);
+  border-left: 1px solid rgba(255,255,255,0.05);
+  opacity: 0; transform: translateX(28px); pointer-events: none;
+  transition: opacity .55s cubic-bezier(.16,.8,.24,1), transform .55s cubic-bezier(.16,.8,.24,1);
+}
+#panel.on { opacity: 1; transform: translateX(0); pointer-events: auto; }
+#panel .edge { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; z-index: 2; }
+#panel .edgeGlow {
+  position: absolute; left: 0; top: 0; bottom: 0; width: 80px;
+  pointer-events: none; mix-blend-mode: screen; opacity: 0;
+  transition: opacity .6s ease; transition-delay: .15s;
+}
+#panel.on .edgeGlow { opacity: 1; }
+#closeBtn {
+  position: absolute; top: 26px; right: 30px; width: 30px; height: 30px;
+  border: 1px solid rgba(255,255,255,0.12); border-radius: 50%; background: rgba(255,255,255,0.02);
+  display: flex; align-items: center; justify-content: center; cursor: pointer;
+  color: var(--ink-2); font: 400 15px var(--mono); line-height: 1;
+  transition: background .25s ease, color .25s ease, border-color .25s ease, transform .25s ease;
+  z-index: 3;
+}
+#closeBtn:hover { background: rgba(255,255,255,0.06); color: var(--ink); border-color: rgba(255,255,255,.28); transform: scale(1.06); }
+#closeBtn:active { transform: scale(0.94); }
+#panel .eyebrow {
+  font: 400 9px var(--mono); letter-spacing: .32em; text-transform: uppercase; margin-bottom: 16px;
+  opacity: 0; transform: translateY(6px); transition: opacity .5s ease, transform .5s ease;
+}
+#panel h2 {
+  margin: 0 0 6px; font: 500 27px var(--mono); letter-spacing: .02em; color: #F2F7FF;
+  opacity: 0; transform: translateY(8px); transition: opacity .55s ease, transform .55s ease;
+}
+#panel .key {
+  font: 400 10px var(--mono); letter-spacing: .20em; color: var(--ink-3); margin-bottom: 34px;
+  opacity: 0; transition: opacity .6s ease;
+}
+#panel .asRole {
+  font: 500 9px var(--mono); letter-spacing: .26em; text-transform: uppercase;
+  color: var(--ink-3); margin: 30px 0 6px; opacity: 0; transition: opacity .6s ease;
+}
+#panel.on .asRole { opacity: .75; }
+#panel section { margin-bottom: 22px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
+#panel h3 { margin: 0 0 9px; font: 500 9px var(--mono); letter-spacing: .24em; text-transform: uppercase; }
+#panel p { margin: 0; font: 400 13px/1.78 var(--mono); color: #AEB8CC; letter-spacing: .005em; }
+#panel.on .eyebrow { opacity: .85; transform: none; transition-delay: .10s; }
+#panel.on h2 { opacity: 1; transform: none; transition-delay: .16s; }
+#panel.on .key { opacity: 1; transition-delay: .22s; }
+#panel.on section { opacity: 1; transform: none; }
+#panel.on section:nth-of-type(1) { transition-delay: .28s; }
+#panel.on section:nth-of-type(2) { transition-delay: .36s; }
+#panel.on section:nth-of-type(3) { transition-delay: .44s; }
+#panel.on section:nth-of-type(4) { transition-delay: .52s; }
+#panel.on section:nth-of-type(5) { transition-delay: .58s; }
+#panel.on section:nth-of-type(n+6) { transition-delay: .62s; }
 
+#sweep { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+#sweep .band {
+  position: absolute; top: -20%; bottom: -20%; width: 38%;
+  background: linear-gradient(100deg, transparent 0%, rgba(255,255,255,0) 35%,
+    var(--sweep-col, rgba(200,230,255,.16)) 50%, rgba(255,255,255,0) 65%, transparent 100%);
+  transform: translateX(-160%) skewX(-12deg);
+  transition: transform .85s cubic-bezier(.22,.7,.2,1);
+}
+#panel.sweeping #sweep .band { transform: translateX(360%) skewX(-12deg); }
+#panel .card { padding: 14px 16px; margin: 0 -16px; border-radius: 10px; cursor: pointer; transition: background .35s ease; }
+#panel .card[data-noclick] { cursor: default; }
+#panel .card:hover { background: rgba(255,255,255,0.02); }
+#panel .card:active { background: rgba(255,255,255,0.045); }
 
-/* title block, bottom right, like a real sheet */
+/* ── title block: subject data, bottom-left, dark ─────────────────────── */
 #titleblock {
-  position: fixed; right: 22px; bottom: 22px; z-index: 4;
-  border: 1px solid var(--rule);
-  background: var(--paper);
+  position: fixed; left: 22px; bottom: 22px; z-index: 6;
+  border: 1px solid rgba(255,255,255,.08);
+  background: rgba(8,9,15,.7); backdrop-filter: blur(6px);
   font-size: 8.5px; letter-spacing: .14em; text-transform: uppercase;
-  color: var(--ink-3);
-  min-width: 268px;
+  color: var(--ink-3); min-width: 268px; border-radius: 4px; overflow: hidden;
 }
-#titleblock div { display: flex; border-bottom: 1px solid var(--ink-4); }
+#titleblock div { display: flex; border-bottom: 1px solid rgba(255,255,255,.06); }
 #titleblock div:last-child { border-bottom: none; }
 #titleblock span { padding: 5px 8px; }
-#titleblock .k { width: 96px; flex-shrink: 0; border-right: 1px solid var(--ink-4); }
+#titleblock .k { width: 96px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,.06); }
 #titleblock .v { color: var(--ink); letter-spacing: .1em; }
-#tb-today button {
-  font: inherit; letter-spacing: inherit; color: var(--ink);
-  background: none; border: 0; padding: 0; cursor: pointer;
-  border-bottom: 1px dotted var(--ink-3);
-}
-#tb-today button:hover { color: var(--mark); border-bottom-color: var(--mark); }
-#tb-today .hit { color: var(--mark); }
 #titleblock .v select {
   font: inherit; letter-spacing: .1em; color: var(--ink);
-  background: none; border: 0; padding: 0; margin: 0;
-  width: 100%; min-width: 140px; cursor: pointer;
+  background: none; border: 0; padding: 0; margin: 0; width: 100%; min-width: 140px; cursor: pointer;
 }
-#titleblock .v select:focus { outline: none; color: var(--mark); }
-#titleblock .v select optgroup { font-style: normal; letter-spacing: .1em; }
+#titleblock .v select:focus { outline: none; }
+#titleblock .v select option, #titleblock .v select optgroup { color: #16181F; }
 #titleblock .v input {
-  font: inherit; font-size: 11px; letter-spacing: .06em;
-  color: var(--ink); background: transparent; border: none;
-  padding: 0; width: 118px; text-transform: none;
+  font: inherit; font-size: 11px; letter-spacing: .06em; color: var(--ink);
+  background: transparent; border: none; padding: 0; width: 118px; text-transform: none;
+  color-scheme: dark;
 }
-#titleblock .v input:focus { outline: none; color: var(--mark); }
-#titleblock .v input::-webkit-calendar-picker-indicator { opacity: .45; cursor: pointer; }
+#titleblock .v input:focus { outline: none; }
 
-/* specification sheet — the reading */
-#spec {
-  position: fixed; z-index: 3;
-  overflow-y: auto; overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
-  opacity: 0; pointer-events: none;
-  transition: opacity 300ms var(--ease) 180ms;
-  padding-right: 6px;
-}
-body.open #spec { opacity: 1; pointer-events: auto; }
-body.open #unfitted {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
-  font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
-  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
-}
-body.unfitted #unfitted { opacity: 1; }
-body.unfitted #hint { opacity: 0; }
-#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
-
-#hint { opacity: 0; }
-#s-hex { display: none; flex-direction: column-reverse; gap: 3px; width: 46px; margin-bottom: 14px; }
-#s-hex i { display: block; height: 3px; background: var(--ink); }
-#s-hex i.yin { background: linear-gradient(90deg, var(--ink) 0 40%, transparent 40% 60%, var(--ink) 60% 100%); }
-#spec-head { border-bottom: 1.5px solid var(--ink); padding-bottom: 7px; margin: 30px 0 14px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
-#s-fig { font-size: 9px; letter-spacing: .26em; text-transform: uppercase; color: var(--mark); }
-#s-ref { font-size: 9px; letter-spacing: .18em; color: var(--ink-3); text-transform: uppercase; }
-#s-title { font-family: var(--serif); font-size: 25px; line-height: 1.2; letter-spacing: -.005em; }
-#s-sub { font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); margin-top: 7px; }
-#s-role {
-  margin-top: 14px; font-size: 10.5px; line-height: 1.75; letter-spacing: .05em;
-  color: var(--ink-2); border-left: 2px solid var(--mark-2); padding-left: 10px;
-}
-/* linkage schedule — the fixed relations a plate has regardless of the
-   subject: its programming partner, and the codon ring it belongs to */
-#s-link {
-  margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr;
-  gap: 0 14px; font-size: 10px; letter-spacing: .04em;
-}
-#s-link dt {
-  font-size: 8.5px; letter-spacing: .2em; text-transform: uppercase;
-  color: var(--ink-3); padding: 5px 0; white-space: nowrap;
-}
-#s-link dd {
-  margin: 0; padding: 5px 0; color: var(--ink-2);
-  border-bottom: 1px solid var(--ink-4);
-}
-#s-link dt { border-bottom: 1px solid var(--ink-4); }
-#s-link b { font-weight: 500; color: var(--ink); }
-#s-link button {
-  font: inherit; letter-spacing: inherit; color: var(--ink-2);
-  background: none; border: 0; padding: 0 1px; cursor: pointer;
-  border-bottom: 1px dotted var(--ink-3);
-}
-#s-link button:hover { color: var(--mark); border-bottom-color: var(--mark); }
-/* a plate that is one of the subject's own reads as marked, the way a fitted
-   part is marked on the drawing — the accent has to mean "yours", so plain
-   navigable plates must NOT carry it */
-#s-link button.own {
-  color: var(--mark); font-weight: 500;
-  border-bottom: 1px solid var(--mark);
-}
-
-.s-lab {
-  font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
-  color: var(--ink-3); margin: 22px 0 7px;
-  display: flex; align-items: center; gap: 9px;
-}
-.s-lab::after { content: ''; flex: 1; height: 1px; background: var(--ink-4); }
-.s-lab i { font-style: normal; color: var(--mark); }
-.s-body { font-family: var(--serif); font-size: 15px; line-height: 1.7; color: var(--ink); }
-.s-body.small { font-size: 13.5px; color: var(--ink-2); line-height: 1.68; }
-#s-foot {
-  margin-top: 26px; padding-top: 10px; border-top: 1px solid var(--ink-4);
-  font-size: 8px; letter-spacing: .12em; line-height: 1.7; color: var(--ink-3);
-  text-transform: uppercase;
-}
-#s-close {
-  position: absolute; top: 0; right: 0;
-  border: 1px solid var(--rule); background: var(--paper);
-  font: inherit; font-size: 9px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-2); padding: 5px 9px; cursor: pointer;
-}
-#s-close:hover { color: var(--mark); border-color: var(--mark-2); }
-
-#notes {
-  position: fixed; z-index: 3;
-  right: 46px; top: 22%; width: min(420px, 34vw);
-  transition: opacity 300ms var(--ease);
-}
-body.open #notes { opacity: 0; pointer-events: none; }
-#notes .n-fig {
-  font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
-  color: var(--mark); border-bottom: 1.5px solid var(--ink);
-  padding-bottom: 7px; margin-bottom: 13px;
-}
-#notes p {
-  font-family: var(--serif); font-size: 13.5px; line-height: 1.68;
-  color: var(--ink-2); margin-bottom: 11px;
-}
-#notes p b { color: var(--ink); font-weight: 600; }
-#notes .n-note {
-  font-family: var(--mono); font-size: 9px; letter-spacing: .1em;
-  text-transform: uppercase; line-height: 1.75; color: var(--ink-3);
-  border-top: 1px solid var(--ink-4); padding-top: 10px; margin-top: 14px;
-}
-@media (max-width: 899px) { #notes { display: none; } }
 #unfitted {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
+  position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%);
+  max-width: 320px; text-align: center; z-index: 5; pointer-events: none;
   font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
-  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
+  color: var(--ink-3); opacity: 0; transition: opacity .3s ease;
 }
 body.unfitted #unfitted { opacity: 1; }
-body.unfitted #hint { opacity: 0; }
-#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
-
-#hint {
-  position: fixed; left: 24px; bottom: 24px; z-index: 4;
-  transition: opacity .3s;
-  font-size: 9px; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3);
+#unfitted b { display: block; color: var(--ink); letter-spacing: .26em; margin-bottom: 6px; }
+body.unfitted #stage { opacity: .18; }
+#clockNote {
+  position: fixed; left: 26px; bottom: 128px; z-index: 5; max-width: 260px;
+  font-size: 9px; letter-spacing: .1em; line-height: 1.7; color: var(--ink-3);
+  text-transform: none;
 }
-
-/* a11y mirror */
-#parts { position: fixed; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
 @media (max-width: 899px) {
-  #titleblock { left: 22px; right: 22px; min-width: 0; bottom: 16px; }
-  #unfitted {
-  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
-  font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
-  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
-}
-body.unfitted #unfitted { opacity: 1; }
-body.unfitted #hint { opacity: 0; }
-#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
-
-#hint { display: none; }
-  #drawing { transition: opacity 300ms var(--ease); }
-  body.open #drawing { opacity: .16; }
-  #spec {
-    background: var(--paper);
-    border: 1px solid var(--rule);
-    padding: 14px 16px 20px;
-  }
-  #spec-head { margin-top: 26px; }
-  #s-hex { display: flex; }
+  #titleblock { left: 16px; right: 16px; min-width: 0; bottom: 14px; }
+  #panel { width: 100%; }
+  .lbl { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
-  #spec { transition: none; }
-}
-@media (prefers-contrast: more) {
-  :root { --ink-2: rgba(22,24,31,.85); --ink-3: rgba(22,24,31,.7); --rule: rgba(22,24,31,.6); }
+  #panel, #stage { transition: none; }
 }
 </style>
 </head>
 <body>
 
-<div id="grid"></div>
-<svg id="drawing" aria-hidden="true"></svg>
-<div id="frame"></div>
+<div id="hdr">Hologenetic Profile <b>·</b> click a sphere to open its reading</div>
 
-<div id="parts" role="listbox" tabindex="0" aria-label="Sixty-four plates of the apparatus"></div>
-
-<section id="spec" aria-live="polite">
-  <button id="s-close">Close</button>
-  <div id="s-hex" aria-hidden="true"></div>
-  <div id="spec-head"><span id="s-fig"></span><span id="s-ref"></span></div>
-  <h1 id="s-title"></h1>
-  <div id="s-sub"></div>
-  <div id="s-role"></div>
-  <dl id="s-link"></dl>
-  <div id="s-parts"></div>
-  <div id="s-foot">Symbolic apparatus — offered for reflection, not asserted as fact. Subject data is not transmitted.</div>
-</section>
+<div id="stage"></div>
+<div id="panel">
+  <div class="edgeGlow"></div>
+  <div class="edge"></div>
+  <div id="sweep"><div class="band"></div></div>
+  <div id="closeBtn" title="Close">&#10005;</div>
+  <div id="pcontent"></div>
+</div>
 
 <div id="unfitted"></div>
+<div id="clockNote"></div>
 
 <div id="titleblock">
-  <div><span class="k">Assembly</span><span class="v">Sixty-four plates</span></div>
   <div><span class="k">Subject d.o.b.</span><span class="v"><input type="date" id="dob" min="1900-01-01"></span></div>
   <div><span class="k">Time of birth</span><span class="v"><input type="time" id="tob"></span></div>
   <div><span class="k">Birthplace</span><span class="v"><select id="tz"></select></span></div>
-  <div><span class="k">Today</span><span class="v" id="tb-today"></span></div>
-  <div><span class="k">Sheet</span><span class="v" id="tb-sheet">1 of 1 · Fig. 1</span></div>
 </div>
-
-<section id="notes">
-  <div class="n-fig">Fig. 1 — General arrangement</div>
-  <p>The apparatus comprises sixty-four (64) plates carried upon a common spindle, in the order of the solar wheel.</p>
-  <p>Eleven plates of increased diameter are fitted according to the subject's date and time of birth, and are identified by callout. Four are taken from the sun: <b>Life's Work</b> at the sun itself; <b>Evolution</b> opposite it; <b>Radiance</b> 88° prior; and <b>Purpose</b> opposite that. The remaining seven are taken from the moon, Venus, Mars and Jupiter, at birth and at the same prenatal moment.</p>
-
-  <p>Two plates carry a double fitting. The plate holding <b>Life's Work</b> also serves as <b>Brand</b>, and the plate holding <b>Core</b> also serves as <b>Vocation</b> — one plate, read twice, to a different specification each time. Each fitted plate is further resolved to one of six lines, which only a birth time can determine. Longitudes are geocentric, so only the birthplace’s time zone is required — the coordinates themselves make no difference. Australian and New Zealand places are listed.</p>
-  <p>Selecting the assembly separates it along the spindle; the fitted plates are then marked by pointer. Selecting a marked plate withdraws it for inspection at Fig. 2.</p>
-  <p class="n-note">Plates not fitted to this assembly remain available for inspection and are described in general terms only.</p>
-</section>
-
-<div id="hint">Select the assembly to open it</div>
 
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
@@ -323,6 +223,6 @@ body.unfitted #hint { opacity: 0; }
 <script src="js/gk-vocation.js" defer></script>
 <script src="js/gk-core.js" defer></script>
 <script src="js/gk-lines.js" defer></script>
-<script src="js/gene-keys-page.js" defer></script>
+<script src="js/gk-mandala-page.js" defer></script>
 </body>
 </html>
