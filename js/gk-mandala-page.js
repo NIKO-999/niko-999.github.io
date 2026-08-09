@@ -110,8 +110,19 @@ function ring(r, dash, op, w, rotSec) {
   return g;
 }
 
+/* Everything except the core itself starts collapsed onto the core point.
+   Clicking the core zooms it out into the full mandala — the "spread" is
+   simply a CSS scale transition about the core's own coordinate, so every
+   rim node, the flower, and the hexagon all appear to fly outward from the
+   one point you clicked. Cheap: one transform, no per-node animation. */
+const expandG = el('g', {});
+expandG.style.transformOrigin = CX + 'px ' + CY + 'px';
+expandG.style.transform = 'scale(0.001)';
+expandG.style.transition = 'transform 1.15s cubic-bezier(.16,.86,.2,1)';
+svg.appendChild(expandG);
+
 const outerG = el('g', {});
-svg.appendChild(outerG);
+expandG.appendChild(outerG);
 outerG.appendChild(el('circle', { cx: CX, cy: CY, r: R * 0.42, fill: 'none', stroke: NEUTRAL,
   'stroke-width': 1, 'stroke-dasharray': '2 7', opacity: 0.22 }));
 
@@ -133,7 +144,7 @@ NODES.forEach((node, i) => {
 });
 
 const petalG = el('g', { opacity: 0.9 });
-svg.appendChild(petalG);
+expandG.appendChild(petalG);
 petalG.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate',
   from: '0 ' + CX + ' ' + CY, to: '-360 ' + CX + ' ' + CY, dur: '110s', repeatCount: 'indefinite' }));
 const petalSeq = ['Activation', 'Activation', 'Venus', 'Venus', 'Pearl', 'Pearl'];
@@ -150,14 +161,15 @@ function hexPoints(r, rot) {
 }
 const hex1G = el('g', {});
 hex1G.appendChild(el('polygon', { points: hexPoints(R * 0.66, 0), fill: 'none', stroke: NEUTRAL, 'stroke-width': 1, opacity: 0.30, filter: 'url(#glowSoft)' }));
-svg.appendChild(hex1G);
+expandG.appendChild(hex1G);
 hex1G.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate', from: '0 ' + CX + ' ' + CY, to: '360 ' + CX + ' ' + CY, dur: '50s', repeatCount: 'indefinite' }));
 const hex2G = el('g', {});
 hex2G.appendChild(el('polygon', { points: hexPoints(R * 0.66, Math.PI / 6), fill: 'none', stroke: NEUTRAL, 'stroke-width': 0.6, opacity: 0.18, filter: 'url(#glowSoft)' }));
-svg.appendChild(hex2G);
+expandG.appendChild(hex2G);
 hex2G.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate', from: '360 ' + CX + ' ' + CY, to: '0 ' + CX + ' ' + CY, dur: '70s', repeatCount: 'indefinite' }));
 
-ring(R * 0.98, '3 10', 0.22, 1, 90);
+const dashRingG = ring(R * 0.98, '3 10', 0.22, 1, 90);
+expandG.appendChild(dashRingG);
 const coreR = R * 0.135;
 
 let beamNode = null, chargeNode = null;
@@ -166,11 +178,11 @@ function makeBeam(mark) {
   clearBeam();
   const col = mark.col;
   beamNode = el('line', { x1: mark.px, y1: mark.py, x2: CX, y2: CY, stroke: col, 'stroke-width': 1, opacity: 0.35, filter: 'url(#glowSoft)' });
-  svg.insertBefore(beamNode, outerG);
+  expandG.insertBefore(beamNode, outerG);
   chargeNode = el('circle', { r: 3.2, fill: col, filter: 'url(#glowTight)' });
   chargeNode.appendChild(el('animateMotion', { path: 'M' + mark.px + ',' + mark.py + ' L' + CX + ',' + CY, dur: '0.9s', repeatCount: 'indefinite', keyPoints: '0;1', keyTimes: '0;1' }));
   chargeNode.appendChild(el('animate', { attributeName: 'opacity', values: '0;1;1;0', keyTimes: '0;0.15;0.8;1', dur: '0.9s', repeatCount: 'indefinite' }));
-  svg.insertBefore(chargeNode, outerG);
+  expandG.insertBefore(chargeNode, outerG);
 }
 
 const coreHalo = el('circle', { cx: CX, cy: CY, r: coreR * 1.9, fill: NEUTRAL, opacity: 0.10, filter: 'url(#glowWide)' });
@@ -179,9 +191,12 @@ const coreRing = el('circle', { cx: CX, cy: CY, r: coreR, fill: 'none', stroke: 
 svg.appendChild(coreRing);
 const coreDot = el('circle', { cx: CX, cy: CY, r: coreR * 0.4, fill: NEUTRAL, opacity: 0.95, filter: 'url(#glowTight)' });
 svg.appendChild(coreDot);
+const coreHit = el('circle', { cx: CX, cy: CY, r: coreR * 2.4, fill: 'transparent', id: 'coreHit' });
+coreHit.style.cursor = 'pointer';
+svg.appendChild(coreHit);
 const coreLbl = document.createElement('div');
 coreLbl.id = 'coreLbl';
-coreLbl.textContent = 'PROFILE';
+coreLbl.textContent = '';
 stageEl.appendChild(coreLbl);
 function placeCore() {
   const rect = svg.getBoundingClientRect();
@@ -279,7 +294,7 @@ function paintMarks() {
     m.ring2.setAttribute('opacity', on ? 0.6 : 0);
     m.labelEl.style.color = col;
     m.labelEl.style.textShadow = seq ? ('0 0 10px ' + seqRgb(seq, 0.55)) : 'none';
-    m.labelEl.style.opacity = on ? 1 : (dimmed ? 0.28 : (ready ? 1 : 0.4));
+    m.labelEl.style.opacity = revealed ? (on ? 1 : (dimmed ? 0.28 : (ready ? 1 : 0.4))) : 0;
     m.subEl.textContent = ready ? (seq + ' · line ' + line) : 'not yet fitted';
     m.hit.style.cursor = ready ? 'pointer' : 'default';
 
@@ -397,7 +412,7 @@ function closePanel() {
   currentSel = -1;
   paintMarks();
   stageEl.style.transform = 'translateX(0)';
-  coreLbl.style.color = NEUTRAL; coreLbl.textContent = 'PROFILE';
+  coreLbl.style.color = NEUTRAL; coreLbl.textContent = '';
   coreHalo.setAttribute('fill', NEUTRAL); coreHalo.setAttribute('opacity', 0.10);
   coreRing.setAttribute('stroke', NEUTRAL); coreDot.setAttribute('fill', NEUTRAL);
   clearBeam();
@@ -405,12 +420,36 @@ function closePanel() {
   writeURL(null);
 }
 
+/* ── the reveal: click the core, the whole mandala zooms out of it ─────
+   Everything (rim nodes, flower, hexagon) starts collapsed to a point on
+   the core via expandG's scale(0.001). One click scales it to 1 — since
+   the transform is about the core's own coordinate, every node appears to
+   fly outward from exactly where the click landed. After that the mandala
+   behaves exactly as before: click a sphere, it opens; click the core (now
+   just decoration) does nothing further. */
+let revealed = false;
+function revealMandala() {
+  if (revealed) return;
+  revealed = true;
+  expandG.style.transform = 'scale(1)';
+  legendEl.style.opacity = '1';
+  legendEl.style.pointerEvents = 'auto';
+  const hintEl = document.getElementById('hint');
+  if (hintEl) hintEl.innerHTML = 'Hologenetic Profile <b>·</b> click a sphere to open its reading';
+  paintMarks();
+}
+coreHit.addEventListener('click', e => { e.stopPropagation(); revealMandala(); });
+
 marks.forEach(m => {
   m.hit.addEventListener('click', () => selectSphere(m.i));
   m.labelEl.addEventListener('click', () => selectSphere(m.i));
 });
 document.getElementById('closeBtn').addEventListener('click', e => { e.stopPropagation(); closePanel(); });
 stageEl.addEventListener('click', e => { if (e.target === stageEl || e.target === svg) closePanel(); });
+
+legendEl.style.opacity = '0';
+legendEl.style.pointerEvents = 'none';
+legendEl.style.transition = 'opacity .6s ease';
 
 /* ═══════════════════════════════════════════════════════════════════════
    Subject data — identical contract to the previous controller: a birth
@@ -606,5 +645,5 @@ const BOOT_PARAMS = new URLSearchParams(location.search);
   }
   apply();
   const urlSel = Number(params.get('sel'));
-  if (primes && urlSel >= 0 && urlSel < N) selectSphere(urlSel);
+  if (primes && urlSel >= 0 && urlSel < N) { revealMandala(); selectSphere(urlSel); }
 })();
