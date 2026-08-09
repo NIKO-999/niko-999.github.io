@@ -416,7 +416,9 @@ function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
     '<div class="states">' +
     ['repressive', 'reactive', 'dilemma', 'victim'].map(k2 =>
       '<div class="state"><b>' + stateLabels[k2] + '</b><i>' + esc(states[k2]) + '</i></div>'
-    ).join('') + '</div></div></section>') : '';
+    ).join('') + '</div>' +
+    '<p class="statesNote">These four belong to Key ' + keyNum + ' itself, not to this line — if another sphere in your profile also carries Key ' + keyNum + ', its states will read the same. What differs between them is everything below.</p>' +
+    '</div></section>') : '';
 
   const masteryCard = once('gift:' + prose.gift,
     '<section><div class="card">' + hd(col, pfx + 'Mastery · ' + esc(k.gift)) +
