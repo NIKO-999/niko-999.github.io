@@ -379,7 +379,10 @@ function paintMarks() {
 }
 
 /* ── reading content: pulled from the same data every other page uses ──── */
-function roleSection(roleId, keyNum, line, seq, seen) {
+/* Card order within a role, top to bottom: the four states, this sphere's
+   own definition, Mastery, Shadow, Siddhi, Line, with Function/tagline
+   essence last of all (added by the caller after every role has run). */
+function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(keyNum) : null;
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
   const prose = (window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null) || c;
@@ -403,32 +406,46 @@ function roleSection(roleId, keyNum, line, seq, seen) {
   const sln = (line && window.DGKSphereLines) ? DGKSphereLines.get(roleId, line) : null;
   const ln = sln || ((line && window.DGKLines) ? DGKLines.get(keyNum, line) : null);
   const col = seqCol(seq);
-  let html = '';
-  if (ln) {
-    html += once('line:' + ln.keynote + '|' + ln.body,
-      '<section><div class="card" data-noclick="1">' +
-      '<h3 style="color:' + col + '">Line ' + line + ' · ' + esc(ln.keynote) + '</h3>' +
-      '<p>' + esc(ln.body) + '</p></div></section>');
-  }
-  html += once('gift:' + prose.gift,
-    '<section><div class="card"><h3 style="color:' + col + '">Mastery · ' + esc(k.gift) + '</h3>' +
-    '<p>' + esc(prose.gift) + '</p></div></section>');
+  const pfx = label ? esc(label) + ' · ' : '';
+
   const states = (seen && !seen.has('states:' + keyNum) && window.DGKShadowStates) ? DGKShadowStates.get(keyNum) : null;
   if (seen) seen.add('states:' + keyNum);
   const stateLabels = { repressive: 'Repressive', reactive: 'Reactive', dilemma: 'Dilemma', victim: 'Victim State' };
-  const statesHtml = states ? '<div class="states">' +
+  const statesCard = states ? once('states:' + keyNum + JSON.stringify(states),
+    '<section><div class="card" data-noclick="1">' + hd(col, pfx + 'States') +
+    '<div class="states">' +
     ['repressive', 'reactive', 'dilemma', 'victim'].map(k2 =>
       '<div class="state"><b>' + stateLabels[k2] + '</b><i>' + esc(states[k2]) + '</i></div>'
-    ).join('') + '</div>' : '';
-  html += once('shadow:' + prose.shadow + '|' + JSON.stringify(states),
-    '<section><div class="card"><h3 style="color:' + col + '">Shadow · ' + esc(k.shadow) + '</h3>' +
-    '<p>' + esc(prose.shadow) + '</p>' + statesHtml + '</div></section>');
-  html += once('invitation:' + prose.invitation,
-    '<section><div class="card"><h3 style="color:' + col + '">Siddhi · ' + esc(k.siddhi) + '</h3>' +
+    ).join('') + '</div></div></section>') : '';
+
+  const masteryCard = once('gift:' + prose.gift,
+    '<section><div class="card">' + hd(col, pfx + 'Mastery · ' + esc(k.gift)) +
+    '<p>' + esc(prose.gift) + '</p></div></section>');
+
+  const shadowCard = once('shadow:' + prose.shadow,
+    '<section><div class="card">' + hd(col, pfx + 'Shadow · ' + esc(k.shadow)) +
+    '<p>' + esc(prose.shadow) + '</p></div></section>');
+
+  const siddhiCard = once('invitation:' + prose.invitation,
+    '<section><div class="card">' + hd(col, pfx + 'Siddhi · ' + esc(k.siddhi)) +
     '<p>' + esc(prose.invitation) + '</p></div></section>');
-  return html;
+
+  const lineCard = ln ? once('line:' + ln.keynote + '|' + ln.body,
+    '<section><div class="card" data-noclick="1">' +
+    hd(col, pfx + 'Line ' + line + ' · ' + esc(ln.keynote)) +
+    '<p>' + esc(ln.body) + '</p></div></section>') : '';
+
+  return statesCard + (sphereDefHtml || '') + masteryCard + shadowCard + siddhiCard + lineCard;
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
+// Small mark before every card heading — three hexagram-style lines, the
+// broken middle line nodding to the fact every key is built from six of
+// these. Original glyph, not a copy of any third-party icon.
+function hglyph(col) {
+  return '<svg class="hglyph" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round" style="margin-right:7px;vertical-align:1px;flex:none">' +
+    '<line x1="2" y1="3" x2="12" y2="3"/><line x1="2" y1="7" x2="5.5" y2="7"/><line x1="8.5" y1="7" x2="12" y2="7"/><line x1="2" y1="11" x2="12" y2="11"/></svg>';
+}
+function hd(col, text) { return '<h3 style="color:' + col + '">' + hglyph(col) + text + '</h3>'; }
 
 function openPanelFor(i) {
   const mark = marks[i], node = mark.node;
@@ -452,14 +469,17 @@ function openPanelFor(i) {
   // everyone who carries that key here, whatever line they're on. Falls
   // back to the universal per-key essence everywhere else.
   const sphEssence = (tag && sp0.line && window.DGKSphereLines) ? DGKSphereLines.essence(primary, sp0.line) : null;
-  let body = '';
+  // Function/tagline essence is the one card that closes the panel, after
+  // every role's states/sphere/mastery/shadow/siddhi/line has run.
+  let functionCard = '';
   if (sphEssence) {
-    body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">My ' + esc(node.label) + ' · ' + esc(tag) + '</h3>' +
+    functionCard = '<section><div class="card" data-noclick="1">' + hd(col, 'My ' + esc(node.label) + ' · ' + esc(tag)) +
       '<p>' + esc(sphEssence) + '</p></div></section>';
   } else if (c0 && c0.essence) {
-    body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">Function</h3>' +
+    functionCard = '<section><div class="card" data-noclick="1">' + hd(col, esc(node.label) + ' · Function') +
       '<p>' + esc(c0.essence) + '</p></div></section>';
   }
+  let body = '';
   const seen = new Set();
   node.ids.forEach(id => {
     const sp = primes[id];
@@ -472,12 +492,12 @@ function openPanelFor(i) {
     // role. Core and Vocation get their own distinct definitions here
     // despite sharing a key, since the sphere concept itself differs.
     const def = window.DGKSphereDefs ? DGKSphereDefs.get(id) : null;
-    if (def) {
-      body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">My Sphere of ' + esc(def.title) + '</h3>' +
-        '<p>' + esc(def.body) + '</p></div></section>';
-    }
-    body += roleSection(id, sp.key, sp.line, sp.seq, seen);
+    const roleLabelFull = def ? def.title : (id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id);
+    const sphereDefHtml = def ? '<section><div class="card" data-noclick="1">' + hd(col, 'My Sphere of ' + esc(def.title)) +
+      '<p>' + esc(def.body) + '</p></div></section>' : '';
+    body += roleSection(id, sp.key, sp.line, sp.seq, seen, roleLabelFull, sphereDefHtml);
   });
+  body += functionCard;
 
   const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
   // The tagline already appears as the essence card's own header once a
