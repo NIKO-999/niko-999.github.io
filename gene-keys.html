@@ -85,8 +85,13 @@ body {
 }
 #tb-today button:hover { color: var(--mark); border-bottom-color: var(--mark); }
 #tb-today .hit { color: var(--mark); }
-#titleblock .v input#tz { width: 100%; min-width: 120px; }
-#titleblock .v input.bad { color: var(--mark); }
+#titleblock .v select {
+  font: inherit; letter-spacing: .1em; color: var(--ink);
+  background: none; border: 0; padding: 0; margin: 0;
+  width: 100%; min-width: 140px; cursor: pointer;
+}
+#titleblock .v select:focus { outline: none; color: var(--mark); }
+#titleblock .v select optgroup { font-style: normal; letter-spacing: .1em; }
 #titleblock .v input {
   font: inherit; font-size: 11px; letter-spacing: .06em;
   color: var(--ink); background: transparent; border: none;
@@ -278,7 +283,7 @@ body.unfitted #hint { opacity: 0; }
   <div><span class="k">Assembly</span><span class="v">Sixty-four plates</span></div>
   <div><span class="k">Subject d.o.b.</span><span class="v"><input type="date" id="dob" min="1900-01-01"></span></div>
   <div><span class="k">Time of birth</span><span class="v"><input type="time" id="tob"></span></div>
-  <div><span class="k">Zone</span><span class="v"><input type="text" id="tz" list="tzlist" spellcheck="false" autocapitalize="off" placeholder="Area/City"><datalist id="tzlist"></datalist></span></div>
+  <div><span class="k">Birthplace</span><span class="v"><select id="tz"></select></span></div>
   <div><span class="k">Today</span><span class="v" id="tb-today"></span></div>
   <div><span class="k">Sheet</span><span class="v" id="tb-sheet">1 of 1 · Fig. 1</span></div>
 </div>
@@ -288,7 +293,7 @@ body.unfitted #hint { opacity: 0; }
   <p>The apparatus comprises sixty-four (64) plates carried upon a common spindle, in the order of the solar wheel.</p>
   <p>Eleven plates of increased diameter are fitted according to the subject's date and time of birth, and are identified by callout. Four are taken from the sun: <b>Life's Work</b> at the sun itself; <b>Evolution</b> opposite it; <b>Radiance</b> 88° prior; and <b>Purpose</b> opposite that. The remaining seven are taken from the moon, Venus, Mars and Jupiter, at birth and at the same prenatal moment.</p>
 
-  <p>Two plates carry a double fitting. The plate holding <b>Life's Work</b> also serves as <b>Brand</b>, and the plate holding <b>Core</b> also serves as <b>Vocation</b> — one plate, read twice, to a different specification each time. Each fitted plate is further resolved to one of six lines, which only a birth time can determine. Longitudes are geocentric, so the zone is required and the place is not.</p>
+  <p>Two plates carry a double fitting. The plate holding <b>Life's Work</b> also serves as <b>Brand</b>, and the plate holding <b>Core</b> also serves as <b>Vocation</b> — one plate, read twice, to a different specification each time. Each fitted plate is further resolved to one of six lines, which only a birth time can determine. Longitudes are geocentric, so only the birthplace’s time zone is required — the coordinates themselves make no difference. Australian and New Zealand places are listed.</p>
   <p>Selecting the assembly separates it along the spindle; the fitted plates are then marked by pointer. Selecting a marked plate withdraws it for inspection at Fig. 2.</p>
   <p class="n-note">Plates not fitted to this assembly remain available for inspection and are described in general terms only.</p>
 </section>

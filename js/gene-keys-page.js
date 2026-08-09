@@ -722,22 +722,69 @@ const tzEl = document.getElementById('tz');
 const unfitted = document.getElementById('unfitted');
 dob.max = new Date().toISOString().slice(0, 10);
 
+/* Birthplaces, Australia and New Zealand only for now. A short list earns a
+   real dropdown: people know their city, not their IANA zone name, and every
+   distinct offset on this side of the world is represented — including the
+   two that catch naive code, Eucla at +08:45 and Chatham at +12:45, plus
+   Lord Howe, whose daylight saving steps by thirty minutes rather than an
+   hour. Zones are grouped by state so the list reads like a map. */
+const PLACES = [
+  ['New South Wales', [
+    ['Australia/Sydney', 'Sydney'],
+    ['Australia/Broken_Hill', 'Broken Hill'],
+    ['Australia/Lord_Howe', 'Lord Howe Island'],
+  ]],
+  ['Victoria', [['Australia/Melbourne', 'Melbourne']]],
+  ['Queensland', [
+    ['Australia/Brisbane', 'Brisbane'],
+    ['Australia/Lindeman', 'Lindeman Island'],
+  ]],
+  ['South Australia', [['Australia/Adelaide', 'Adelaide']]],
+  ['Western Australia', [
+    ['Australia/Perth', 'Perth'],
+    ['Australia/Eucla', 'Eucla'],
+  ]],
+  ['Tasmania', [
+    ['Australia/Hobart', 'Hobart'],
+    ['Antarctica/Macquarie', 'Macquarie Island'],
+  ]],
+  ['Northern Territory', [['Australia/Darwin', 'Darwin']]],
+  ['Australian Capital Territory', [['Australia/Sydney', 'Canberra']]],
+  ['External territories', [
+    ['Indian/Christmas', 'Christmas Island'],
+    ['Indian/Cocos', 'Cocos (Keeling) Islands'],
+  ]],
+  ['New Zealand', [
+    ['Pacific/Auckland', 'Auckland · Wellington · Christchurch'],
+    ['Pacific/Chatham', 'Chatham Islands'],
+  ]],
+];
+
+const PLACE_ZONES = [];
 (function fillZones() {
-  const dl = document.getElementById('tzlist');
-  if (!dl || !window.DAstroTime) return;
-  DAstroTime.zoneList().forEach(z => {
-    const o = document.createElement('option');
-    o.value = z;
-    dl.appendChild(o);
+  const sel = document.getElementById('tz');
+  if (!sel) return;
+  const blank = document.createElement('option');
+  blank.value = ''; blank.textContent = '— select —';
+  sel.appendChild(blank);
+  PLACES.forEach(([group, rows]) => {
+    const g = document.createElement('optgroup');
+    g.label = group;
+    rows.forEach(([zone, label]) => {
+      const o = document.createElement('option');
+      o.value = zone; o.textContent = label;
+      g.appendChild(o);
+      if (PLACE_ZONES.indexOf(zone) === -1) PLACE_ZONES.push(zone);
+    });
+    sel.appendChild(g);
   });
 })();
 
-// Intl is the authority, not the datalist. supportedValuesOf omits names it
-// still accepts — 'UTC' is absent from the list yet perfectly valid, and so
-// are aliases like Asia/Calcutta and Europe/Kiev that people genuinely have.
-// Requiring list membership rejected the browser's own resolved zone.
+// A zone must be one this picker offers AND one Intl actually accepts. The
+// second half is not redundant: a ?tz= from a link, or a platform with
+// trimmed tzdata, can still fail to construct.
 function validZone(z) {
-  if (!z) return false;
+  if (!z || PLACE_ZONES.indexOf(z) === -1) return false;
   try { new Intl.DateTimeFormat('en-US', { timeZone: z }); return true; }
   catch (e) { return false; }
 }
@@ -766,7 +813,6 @@ let profileData = null;
 function apply() {
   const d = currentDate(), t = currentTime(), z = (tzEl.value || '').trim();
   const zoneOK = validZone(z);
-  tzEl.classList.toggle('bad', !!z && !zoneOK);
 
   if (!d || !t || !zoneOK || !window.DGKProfile || !DGKProfile.VALID) {
     profileData = null; primes = null; roleOf = {};
@@ -779,7 +825,7 @@ function apply() {
     const missing = [];
     if (!d) missing.push('date of birth');
     if (!t) missing.push('time of birth');
-    if (!zoneOK) missing.push(z ? 'a recognised zone' : 'time zone');
+    if (!zoneOK) missing.push('birthplace');
     const list = missing.length > 1
       ? missing.slice(0, -1).join(', ') + ' and ' + missing[missing.length - 1]
       : missing[0];
@@ -853,7 +899,6 @@ function writeURL(key) {
 dob.addEventListener('change', apply);
 tob.addEventListener('change', apply);
 tzEl.addEventListener('change', apply);
-tzEl.addEventListener('input', apply);
 
 buildStack();
 buildParts();
@@ -876,8 +921,12 @@ const BOOT_PARAMS = new URLSearchParams(location.search);
   }
   const urlTz = params.get('tz');
   if (validZone(urlTz)) tzEl.value = urlTz;
-  else if (window.DAstroTime) {
-    try { tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* leave blank */ }
+  else {
+    // Preselect the viewer's own zone only when it is a place we offer —
+    // guessing Sydney for someone in London would be a silent wrong answer.
+    let here = '';
+    try { here = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* none */ }
+    tzEl.value = validZone(here) ? here : '';
   }
   apply();
 })();
