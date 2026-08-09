@@ -71,20 +71,38 @@
     return out;
   }
 
-  // Rudd's names for the amino-acid families. Membership above is derived; only
-  // these labels are transcribed, and an absent one is a display fallback.
+  /* Ring NAMES are the one part of this file that is transcribed rather than
+     derived, and transcription is exactly where it goes wrong: an early draft
+     had Gaia, Trials, Alchemy and No Return all attached to the wrong amino
+     acids, while the membership underneath them was right the whole time.
+
+     So only names confirmed against a source are asserted. The rest carry an
+     honest label built from the amino acid itself — true by construction,
+     since a codon ring IS its amino-acid family — and are flagged unverified
+     so they can be filled in later without anyone mistaking a guess for a
+     citation. Membership is never affected either way. */
+  const AMINO_NAMES = {
+    Ala: 'Alanine', Arg: 'Arginine', Asn: 'Asparagine', Asp: 'Aspartic Acid',
+    Cys: 'Cysteine', Gln: 'Glutamine', Glu: 'Glutamic Acid', Gly: 'Glycine',
+    His: 'Histidine', Ile: 'Isoleucine', Leu: 'Leucine', Lys: 'Lysine',
+    Met: 'Methionine', Phe: 'Phenylalanine', Pro: 'Proline', Ser: 'Serine',
+    Thr: 'Threonine', Trp: 'Tryptophan', Tyr: 'Tyrosine', Val: 'Valine',
+    Stop: 'the Stop Codon',
+  };
+
   const NAMES = {
-    Lys: 'The Ring of Fire',            Phe: 'The Ring of Water',
-    Leu: 'The Ring of Life and Death',  Arg: 'The Ring of Humanity',
-    Ser: 'The Ring of Seeking',         Ala: 'The Ring of Matter',
-    Val: 'The Ring of Union',           Thr: 'The Ring of Light',
-    Gly: 'The Ring of Gaia',            Pro: 'The Ring of Trials',
-    Stop: 'The Ring of Purification',   Ile: 'The Ring of Destiny',
-    Gln: 'The Ring of Alchemy',         Cys: 'The Ring of Prosperity',
-    Asp: 'The Ring of the Whirlwind',   Tyr: 'The Ring of Illuminati',
-    Asn: 'The Ring of No Return',       Glu: 'The Ring of Divinity',
-    His: 'The Ring of Secrets',         Trp: 'The Ring of Miracles',
-    Met: 'The Ring of Origin',
+    Lys:  'The Ring of Fire',            // 1, 14
+    Phe:  'The Ring of Water',           // 2, 8
+    Leu:  'The Ring of Life and Death',  // 3, 20, 23, 24, 27, 42
+    Arg:  'The Ring of Humanity',        // 10, 17, 21, 25, 38, 51
+    Ser:  'The Ring of Seeking',         // 15, 39, 52, 53, 54, 58
+    Ala:  'The Ring of Matter',          // 18, 46, 48, 57
+    Thr:  'The Ring of Light',           // 5, 9, 11, 26
+    Ile:  'The Ring of Gaia',            // 19, 60, 61
+    Stop: 'The Ring of Trials',          // 12, 33, 56
+    Gly:  'The Ring of Alchemy',         // 6, 40, 47, 64
+    Tyr:  'The Ring of No Return',       // 31, 62
+    Met:  'The Ring of Origin',          // 41 — the start codon
   };
 
   const byAmino = Object.create(null);
@@ -99,7 +117,8 @@
 
   const RINGS = Object.keys(byAmino).map(amino => ({
     amino,
-    name: NAMES[amino] || ('The ' + amino + ' Ring'),
+    name: NAMES[amino] || ('The Codon Ring of ' + (AMINO_NAMES[amino] || amino)),
+    named: !!NAMES[amino],
     keys: byAmino[amino].slice().sort((a, b) => a - b),
   }));
   RINGS.sort((a, b) => b.keys.length - a.keys.length || a.keys[0] - b.keys[0]);
@@ -119,10 +138,19 @@
   const sizes = RINGS.map(r => r.keys.length).sort((a, b) => a - b).join(',');
   if (sizes !== '1,1,2,2,2,2,2,2,2,2,2,3,3,4,4,4,4,4,6,6,6') WARNINGS.push('degeneracy:' + sizes);
 
+  // Every anchor is a ring whose membership AND name are independently
+  // sourced, so each one checks the derivation and the label together.
   const ANCHORS = [
     ['The Ring of Fire', [1, 14]],
     ['The Ring of Water', [2, 8]],
     ['The Ring of Life and Death', [3, 20, 23, 24, 27, 42]],
+    ['The Ring of Humanity', [10, 17, 21, 25, 38, 51]],
+    ['The Ring of Seeking', [15, 39, 52, 53, 54, 58]],
+    ['The Ring of Matter', [18, 46, 48, 57]],
+    ['The Ring of Gaia', [19, 60, 61]],
+    ['The Ring of Trials', [12, 33, 56]],
+    ['The Ring of Alchemy', [6, 40, 47, 64]],
+    ['The Ring of Origin', [41]],
   ];
   ANCHORS.forEach(([name, keys]) => {
     const r = RING_OF[keys[0]];
@@ -142,6 +170,7 @@
     VALID,
     WARNINGS,
     ringOf: n => RING_OF[n] || null,
+    NAMED_COUNT: RINGS.filter(r => r.named).length,
     codonOf: n => CODON_OF[n] || null,
     // rings that cover two or more of the given keys — the cross-links inside
     // one profile, which is the whole point of showing rings at all
