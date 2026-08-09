@@ -26,11 +26,25 @@ const BP = 900;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
 const svg = document.getElementById('drawing');
 
+/* The thirteen spheres, in the order the Golden Path reads them. Ordering
+   matters twice over: a plate carrying two spheres lists them in this order,
+   and it is the order the panel renders their readings in. Entries beyond the
+   Activation four resolve only once the planetary ephemeris has loaded; a
+   sphere with no computed key is simply absent, never guessed. */
 const ROLES = [
-  ['lifesWork', "Life's Work", 'how your genius wants to express itself in the world'],
-  ['evolution', 'Evolution',   'what your life keeps asking you to work through'],
-  ['radiance',  'Radiance',    'what keeps you physically and emotionally lit'],
-  ['purpose',   'Purpose',     'the deep reason running underneath it all'],
+  ['lifesWork',  "Life's Work", 'how your genius wants to express itself in the world'],
+  ['evolution',  'Evolution',   'what your life keeps asking you to work through'],
+  ['radiance',   'Radiance',    'what keeps you physically and emotionally lit'],
+  ['purpose',    'Purpose',     'the deep reason running underneath it all'],
+  ['attraction', 'Attraction',  'the field that draws certain people to you'],
+  ['iq',         'IQ',          'how your mind actually solves things'],
+  ['eq',         'EQ',          'how you meet feeling, your own and other people’s'],
+  ['sq',         'SQ',          'what you understand that was never taught to you'],
+  ['core',       'Core',        'the wound the rest of the pattern is built around'],
+  ['vocation',   'Vocation',    'the work your life keeps pointing back toward'],
+  ['culture',    'Culture',     'the people and setting you do your best work inside'],
+  ['brand',      'Brand',       'what others recognise you by before you speak'],
+  ['pearl',      'Pearl',       'where ease and prosperity actually come from'],
 ];
 
 let W = 0, H = 0, axisX = 0, midY = 0;
@@ -227,22 +241,42 @@ function drawCallouts() {
   // out to the right instead and the whole assembly mirrors.
   const dir = mobile ? 1 : -1;
 
-  // group by plate: two spheres on one key share a single card rather than
-  // stacking two identical cards at the same y
+  // One card per fitted PLATE, not per sphere: roleOf already merges the
+  // spheres that share a key.
   const cards = [];
-  ROLES.forEach((r, ri) => {
-    const key = primes[r[0]].key, i = INDEX_OF[key];
-    const hit = cards.find(c => c.i === i);
-    if (hit) hit.roles.push(ri); else cards.push({ i, key, roles: [ri] });
+  Object.keys(roleOf).forEach(k => {
+    const i = Number(k);
+    cards.push({ i, key: DGeneKeys.WHEEL[i], roles: roleOf[i].slice() });
   });
+  cards.sort((a, b) => a.i - b.i);
+
+  // Eleven plates can sit a few pixels apart while a card is ~28px tall, so
+  // the cards would overlap and become unreadable. Place each at its plate's
+  // height, then sweep down and back up pushing any pair that still overlaps
+  // apart. The pointer stays anchored to the plate, so a nudged card still
+  // points at the right one.
+  const chH = (mobile ? 24 : 28) + 3;
+  cards.forEach(c => {
+    const isSel = c.i === selIdx;
+    c.py = plateY(c.i) - (isSel ? sx * 26 : 0);
+    c.cy = c.py;
+  });
+  for (let i = 1; i < cards.length; i++) {
+    if (cards[i].cy - cards[i - 1].cy < chH) cards[i].cy = cards[i - 1].cy + chH;
+  }
+  for (let i = cards.length - 2; i >= 0; i--) {
+    if (cards[i + 1].cy - cards[i].cy < chH) cards[i].cy = cards[i + 1].cy - chH;
+  }
+
   cards.forEach(card => {
     const key = card.key, i = card.i;
     const isSel = i === selIdx;
     const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
     const rr = primeR * (1 + (isSel ? sx * 0.12 : 0));
-    const y = plateY(i) - (isSel ? sx * 26 : 0);
+    const y = card.py;                      // where the plate is
+    const ly = card.cy;                     // where the card sits after nudging
     // a spread stack runs off the sheet; don't leave pointers aiming at nothing
-    if (y < 30 || y > H - 30) return;
+    if (y < 30 || y > H - 30 || ly < 20 || ly > H - 20) return;
     // once a plate is withdrawn on mobile the other three cards would collide
     // with the detail view, and they are not what is being read anyway
     const fade = (mobile && !isSel) ? (1 - sx) : 1;
@@ -267,13 +301,15 @@ function drawCallouts() {
     const cardIn = cardOut - dir * cw;            // card edge nearest the plate
 
     const tipX = edge + dir * 3, tailX = cardIn, hw = 3.1;
-    const shoulder = tailX - dir * 0;             // squared off at the card
     const ink = isSel ? 'var(--mark)' : 'var(--ink)';
 
+    // The pointer is a solid taper from the plate to the card's near edge. It
+    // starts at the plate's own height and lands at the card's, so a card
+    // nudged clear of its neighbour still visibly belongs to its plate.
     el('path', {
       d: 'M' + tipX + ',' + y +
-         ' L' + (shoulder) + ',' + (y - hw) +
-         ' L' + (shoulder) + ',' + (y + hw) + ' Z',
+         ' L' + tailX + ',' + (ly - hw) +
+         ' L' + tailX + ',' + (ly + hw) + ' Z',
       fill: ink, 'fill-opacity': (isSel ? 1 : 0.86) * o, stroke: 'none'
     }, gLeader);
     el('circle', { cx: edge, cy: y, r: 2.4, fill: ink, 'fill-opacity': o }, gLeader);
@@ -285,25 +321,25 @@ function drawCallouts() {
     g.style.cursor = 'pointer';
     gLeader.appendChild(g);
 
-    el('rect', { x: cx0, y: y - ch / 2, width: cw, height: ch,
+    el('rect', { x: cx0, y: ly - ch / 2, width: cw, height: ch,
       fill: 'var(--paper)', stroke: ink,
       'stroke-width': isSel ? 1.3 : 1 }, g);
     // an inner rule, the way a real drawing tags a part
-    el('rect', { x: cx0 + 3, y: y - ch / 2 + 3, width: cw - 6, height: ch - 6,
+    el('rect', { x: cx0 + 3, y: ly - ch / 2 + 3, width: cw - 6, height: ch - 6,
       fill: 'none', stroke: ink, 'stroke-opacity': .28, 'stroke-width': .7 }, g);
     // the plate number sits in its own compartment at the plate end
     const numX = dir < 0 ? cx0 + cw - numW : cx0 + numW;
-    el('line', { x1: numX, y1: y - ch / 2 + 3, x2: numX, y2: y + ch / 2 - 3,
+    el('line', { x1: numX, y1: ly - ch / 2 + 3, x2: numX, y2: ly + ch / 2 - 3,
       stroke: ink, 'stroke-opacity': .28, 'stroke-width': .7 }, g);
 
     const num = el('text', { x: dir < 0 ? cx0 + cw - numW / 2 : numW / 2 + cx0,
-      y: y + 4, 'text-anchor': 'middle', 'font-size': mobile ? 11 : 12,
+      y: ly + 4, 'text-anchor': 'middle', 'font-size': mobile ? 11 : 12,
       fill: ink }, g);
     num.style.fontFamily = 'var(--mono)';
     num.textContent = key;
 
     const lab = el('text', { x: dir < 0 ? cx0 + 11 : cx0 + numW + 11,
-      y: y + 3.5, 'font-size': fs, fill: ink,
+      y: ly + 3.5, 'font-size': fs, fill: ink,
       'fill-opacity': isSel ? 1 : .82 }, g);
     lab.style.fontFamily = 'var(--mono)';
     lab.style.letterSpacing = tr;
@@ -313,7 +349,7 @@ function drawCallouts() {
     // above the plates, so if it is not the click target the click falls
     // through to the background handler and closes the assembly
     const hx = Math.min(tipX, cx0), hw2 = Math.max(cx0 + cw, tipX) - hx;
-    const hit = el('rect', { x: hx, y: y - Math.max(ch / 2, 15),
+    const hit = el('rect', { x: hx, y: ly - Math.max(ch / 2, 15),
       width: hw2, height: Math.max(ch, 30), fill: 'transparent' }, g);
     hit.style.cursor = 'pointer';
     g.addEventListener('click', (e) => { e.stopPropagation(); select(key); });
@@ -741,7 +777,9 @@ function apply() {
   primes = profileData.spheres;
   roleOf = {};
   ROLES.forEach((r, ri) => {
-    const i = INDEX_OF[primes[r[0]].key];
+    const sp = primes[r[0]];
+    if (!sp) return;                       // sphere not computed: not fitted
+    const i = INDEX_OF[sp.key];
     (roleOf[i] = roleOf[i] || []).push(ri);
   });
   refreshToday();
