@@ -379,7 +379,7 @@ function paintMarks() {
 }
 
 /* ── reading content: pulled from the same data every other page uses ──── */
-function roleSection(roleId, keyNum, line, seq) {
+function roleSection(roleId, keyNum, line, seq, seenStateKeys) {
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(keyNum) : null;
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
   const prose = (window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null) || c;
@@ -399,7 +399,14 @@ function roleSection(roleId, keyNum, line, seq) {
   }
   html += '<section><div class="card"><h3 style="color:' + col + '">Mastery · ' + esc(k.gift) + '</h3>' +
     '<p>' + esc(prose.gift) + '</p></div></section>';
-  const states = window.DGKShadowStates ? DGKShadowStates.get(keyNum) : null;
+  // A hinge sphere (Core/Vocation, Life's Work/Brand elsewhere in the app)
+  // shares one physical key across two role sections in the same panel —
+  // showing the identical Repressive/Reactive/Dilemma/Victim grid twice
+  // reads as a bug to anyone who doesn't know why, so it's only rendered
+  // once per key per panel.
+  const alreadyShown = seenStateKeys && seenStateKeys.has(keyNum);
+  if (seenStateKeys) seenStateKeys.add(keyNum);
+  const states = (!alreadyShown && window.DGKShadowStates) ? DGKShadowStates.get(keyNum) : null;
   const stateLabels = { repressive: 'Repressive', reactive: 'Reactive', dilemma: 'Dilemma', victim: 'Victim State' };
   const statesHtml = states ? '<div class="states">' +
     ['repressive', 'reactive', 'dilemma', 'victim'].map(k2 =>
@@ -433,6 +440,7 @@ function openPanelFor(i) {
     body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">Function</h3>' +
       '<p>' + esc(c0.essence) + '</p></div></section>';
   }
+  const seenStateKeys = new Set();
   node.ids.forEach(id => {
     const sp = primes[id];
     if (!sp) return;
@@ -440,7 +448,7 @@ function openPanelFor(i) {
       const roleLabel = id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id;
       body += '<div class="asRole">As ' + esc(roleLabel) + '</div>';
     }
-    body += roleSection(id, sp.key, sp.line, sp.seq);
+    body += roleSection(id, sp.key, sp.line, sp.seq, seenStateKeys);
   });
 
   const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
