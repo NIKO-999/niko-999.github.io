@@ -54,9 +54,32 @@
     if (!ok) { valid = false; break; }
   }
 
+  /* ── programming partners ───────────────────────────────────────────────
+     A key's programming partner is the hexagram with every line flipped —
+     its exact binary complement. The pair holds a single spectrum between
+     them, which is why 1/2, 25/46 and 41/31 read as counterweights rather
+     than as unrelated keys.
+
+     Two invariants are asserted: the complement of a real hexagram is always
+     another real hexagram (the table is closed under flipping), and pairing
+     is an involution — partner(partner(n)) === n, with nothing self-paired.  */
+  const BY_BITS = Object.create(null);
+  for (const n in HEX) BY_BITS[HEX[n]] = Number(n);
+  const PARTNERS = Object.create(null);
+  for (let n = 1; n <= 64; n++) {
+    const m = BY_BITS[comp(HEX[n])];
+    if (!m) { valid = false; break; }
+    PARTNERS[n] = m;
+  }
+  for (let n = 1; valid && n <= 64; n++) {
+    if (PARTNERS[PARTNERS[n]] !== n || PARTNERS[n] === n) { valid = false; break; }
+  }
+
   const api = {
     get: n => HEX[n] || null,
     lines: n => (HEX[n] ? HEX[n].split('').map(Number) : null),
+    partner: n => PARTNERS[n] || null,
+    PARTNERS,
     VALID: valid,
     HEX,
   };

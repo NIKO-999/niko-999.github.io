@@ -151,8 +151,12 @@ function render() {
     const ry = r * 0.235;
     p.face.setAttribute('cx', cx); p.face.setAttribute('cy', cy);
     p.face.setAttribute('rx', r);  p.face.setAttribute('ry', ry);
-    p.face.setAttribute('stroke', isSel ? 'var(--mark)' : 'var(--ink)');
-    p.face.setAttribute('stroke-width', isSel ? 1.4 : (isPrime ? 0.95 : 0.6));
+    // today's plate is marked only when it is not already yours — the accent
+    // means one thing at a time, and "fitted to you" always outranks "live now"
+    const isToday = !isPrime && !isSel && DGeneKeys.WHEEL[i] === todayKey;
+    p.face.setAttribute('stroke', isSel ? 'var(--mark)' : (isToday ? 'var(--mark-2)' : 'var(--ink)'));
+    p.face.setAttribute('stroke-width', isSel ? 1.4 : (isPrime ? 0.95 : (isToday ? 0.9 : 0.6)));
+    p.face.setAttribute('stroke-dasharray', isToday ? '3 2.5' : 'none');
     p.face.setAttribute('fill-opacity', ex > 0.02 ? 0.9 : 0.98);
     // plate thickness: a second arc under the face, joined at the extremes
     const t = isPrime ? 3.4 : 2.2;
@@ -391,6 +395,104 @@ function sect(label, mark, text, small) {
   return [l, b];
 }
 
+/* ── linkage: the relations a plate carries whatever the subject ──────────
+   The programming partner (its exact binary complement) and the codon ring
+   it shares with its amino-acid family. Neither depends on a birth date, and
+   both put more of the wheel on screen than four plates alone can. Ring-mates
+   that are the subject's own keys are marked, because a ring shared by two of
+   your four is a real cross-link in your chart rather than trivia. */
+/* ── today's transit ──────────────────────────────────────────────────────
+   The Sun keeps moving after you are born, so one plate is always live. This
+   costs no new astronomy — solarLongitude already accepts any date — and it
+   is the only thing on the sheet that changes on its own.
+
+   Precedence when a plate is several things at once: your own fitted plate
+   outranks a partner, which outranks a ring-mate, which outranks today. The
+   accent must never be ambiguous about which of those it is claiming. */
+let todayKey = null;
+
+function refreshToday() {
+  const iso = new Date().toISOString().slice(0, 10);
+  todayKey = DGeneKeys.keyAt(DGeneKeys.solarLongitude(iso));
+  const el = document.getElementById('tb-today');
+  if (!el) return;
+  el.textContent = '';
+  const k = DGeneKeys.KEYS[todayKey];
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.textContent = 'Plate ' + todayKey;
+  b.title = k ? k.name : '';
+  b.addEventListener('click', e => { e.stopPropagation(); select(todayKey); });
+  el.appendChild(b);
+
+  // say what today means for this subject, but only when it actually means
+  // something — an unconditional line would read as noise within a week
+  const mine = myKeys();
+  let note = '';
+  const ri = mine.indexOf(todayKey);
+  if (ri !== -1) note = ' · your ' + ROLES[ri][1];
+  else if (window.DHexagrams && DHexagrams.VALID &&
+           mine.indexOf(DHexagrams.partner(todayKey)) !== -1) note = ' · partners yours';
+  else if (window.DCodonRings && DCodonRings.VALID &&
+           DCodonRings.shared(mine.concat(todayKey))
+             .some(x => x.keys.indexOf(todayKey) !== -1)) note = ' · your ring';
+  if (note) {
+    const i = document.createElement('i');
+    i.className = 'hit'; i.style.fontStyle = 'normal'; i.textContent = note;
+    el.appendChild(i);
+  }
+}
+
+function myKeys() {
+  return primes ? ROLES.map(r => primes[r[0]].key) : [];
+}
+
+function fillLinkage(n) {
+  const dl = document.getElementById('s-link');
+  if (!dl) return;
+  dl.textContent = '';
+  const mine = myKeys();
+
+  const row = (label, build) => {
+    const dt = document.createElement('dt'); dt.textContent = label;
+    const dd = document.createElement('dd'); build(dd);
+    dl.appendChild(dt); dl.appendChild(dd);
+  };
+
+  const keyBtn = k => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.textContent = String(k);
+    b.title = DGeneKeys.KEYS[k] ? DGeneKeys.KEYS[k].name : ('Plate ' + k);
+    if (mine.indexOf(k) !== -1) b.className = 'own';
+    b.addEventListener('click', e => { e.stopPropagation(); select(k); });
+    return b;
+  };
+
+  const partner = window.DHexagrams && DHexagrams.VALID ? DHexagrams.partner(n) : null;
+  if (partner) row('Partner', dd => {
+    dd.appendChild(keyBtn(partner));
+    const k = DGeneKeys.KEYS[partner];
+    if (k) dd.appendChild(document.createTextNode(' — ' + k.name));
+  });
+
+  const ring = window.DCodonRings && DCodonRings.VALID ? DCodonRings.ringOf(n) : null;
+  if (ring) {
+    row('Ring', dd => {
+      const b = document.createElement('b'); b.textContent = ring.name;
+      dd.appendChild(b);
+      dd.appendChild(document.createTextNode(' · ' + ring.amino + ' · ' + DCodonRings.codonOf(n)));
+    });
+    const mates = ring.keys.filter(k => k !== n);
+    if (mates.length) row('Ring-mates', dd => {
+      mates.forEach((k, i) => {
+        if (i) dd.appendChild(document.createTextNode(' '));
+        dd.appendChild(keyBtn(k));
+      });
+    });
+  }
+}
+
 function fillSpec(n) {
   const k = DGeneKeys.KEYS[n];
   // every role fitted to this plate, not just the first one found
@@ -406,6 +508,8 @@ function fillSpec(n) {
     ? 'Fitted as ' + ris.map(ri => ROLES[ri][1] + ' — ' + ROLES[ri][2]).join('; and as ') + '.'
     : 'Not fitted to this assembly — a plate you meet in the world rather than carry.';
   document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 2';
+
+  fillLinkage(n);
 
   const box = document.getElementById('s-parts');
   box.textContent = '';
@@ -536,6 +640,7 @@ function apply() {
     const i = INDEX_OF[primes[r[0]].key];
     (roleOf[i] = roleOf[i] || []).push(ri);
   });
+  refreshToday();
   setTargets(0, 0); selIdx = -1;
   document.body.classList.remove('open');
   hintEl.textContent = 'Select the assembly to open it';

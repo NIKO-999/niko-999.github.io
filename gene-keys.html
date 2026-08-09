@@ -78,6 +78,13 @@ body {
 #titleblock span { padding: 5px 8px; }
 #titleblock .k { width: 96px; flex-shrink: 0; border-right: 1px solid var(--ink-4); }
 #titleblock .v { color: var(--ink); letter-spacing: .1em; }
+#tb-today button {
+  font: inherit; letter-spacing: inherit; color: var(--ink);
+  background: none; border: 0; padding: 0; cursor: pointer;
+  border-bottom: 1px dotted var(--ink-3);
+}
+#tb-today button:hover { color: var(--mark); border-bottom-color: var(--mark); }
+#tb-today .hit { color: var(--mark); }
 #titleblock .v input {
   font: inherit; font-size: 11px; letter-spacing: .06em;
   color: var(--ink); background: transparent; border: none;
@@ -109,6 +116,36 @@ body.open #hint { opacity: 0; }
   margin-top: 14px; font-size: 10.5px; line-height: 1.75; letter-spacing: .05em;
   color: var(--ink-2); border-left: 2px solid var(--mark-2); padding-left: 10px;
 }
+/* linkage schedule — the fixed relations a plate has regardless of the
+   subject: its programming partner, and the codon ring it belongs to */
+#s-link {
+  margin: 14px 0 0; display: grid; grid-template-columns: auto 1fr;
+  gap: 0 14px; font-size: 10px; letter-spacing: .04em;
+}
+#s-link dt {
+  font-size: 8.5px; letter-spacing: .2em; text-transform: uppercase;
+  color: var(--ink-3); padding: 5px 0; white-space: nowrap;
+}
+#s-link dd {
+  margin: 0; padding: 5px 0; color: var(--ink-2);
+  border-bottom: 1px solid var(--ink-4);
+}
+#s-link dt { border-bottom: 1px solid var(--ink-4); }
+#s-link b { font-weight: 500; color: var(--ink); }
+#s-link button {
+  font: inherit; letter-spacing: inherit; color: var(--ink-2);
+  background: none; border: 0; padding: 0 1px; cursor: pointer;
+  border-bottom: 1px dotted var(--ink-3);
+}
+#s-link button:hover { color: var(--mark); border-bottom-color: var(--mark); }
+/* a plate that is one of the subject's own reads as marked, the way a fitted
+   part is marked on the drawing — the accent has to mean "yours", so plain
+   navigable plates must NOT carry it */
+#s-link button.own {
+  color: var(--mark); font-weight: 500;
+  border-bottom: 1px solid var(--mark);
+}
+
 .s-lab {
   font-size: 9px; letter-spacing: .28em; text-transform: uppercase;
   color: var(--ink-3); margin: 22px 0 7px;
@@ -198,6 +235,7 @@ body.open #notes { opacity: 0; pointer-events: none; }
   <h1 id="s-title"></h1>
   <div id="s-sub"></div>
   <div id="s-role"></div>
+  <dl id="s-link"></dl>
   <div id="s-parts"></div>
   <div id="s-foot">Symbolic apparatus — offered for reflection, not asserted as fact. Subject data is not transmitted.</div>
 </section>
@@ -205,6 +243,7 @@ body.open #notes { opacity: 0; pointer-events: none; }
 <div id="titleblock">
   <div><span class="k">Assembly</span><span class="v">Sixty-four plates</span></div>
   <div><span class="k">Subject d.o.b.</span><span class="v"><input type="date" id="dob" min="1900-01-01"></span></div>
+  <div><span class="k">Today</span><span class="v" id="tb-today"></span></div>
   <div><span class="k">Sheet</span><span class="v" id="tb-sheet">1 of 1 · Fig. 1</span></div>
 </div>
 
@@ -220,6 +259,7 @@ body.open #notes { opacity: 0; pointer-events: none; }
 
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
+<script src="js/codon-rings.js"></script>
 <script src="js/gk-roles.js"></script>
 <script src="js/gene-keys-content.js" defer></script>
 <script src="js/gk-lifeswork.js" defer></script>
