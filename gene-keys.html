@@ -463,6 +463,11 @@ const gTeth = document.createElementNS(SVGNS, 'g');
 const gNode = document.createElementNS(SVGNS, 'g');
 gBack.appendChild(gBackL); gBack.appendChild(gBackR);
 const gMote = document.createElementNS(SVGNS, 'g');
+const shock = document.createElementNS(SVGNS, 'circle');
+shock.setAttribute('fill', 'none');
+shock.setAttribute('stroke', 'rgba(220,235,239,.55)');
+shock.setAttribute('stroke-width', '1.4');
+gMote.appendChild(shock);
 const ringGuide = document.createElementNS(SVGNS, 'ellipse');
 ringGuide.setAttribute('fill', 'none');
 ringGuide.setAttribute('stroke', 'rgba(95,235,215,.14)');
@@ -480,19 +485,30 @@ helix.appendChild(gTeth); helix.appendChild(gNode);
    quadratic Bézier from its place on the helix, out through a scatter point,
    in to its seat on the ring — so it bursts and converges in one motion
    instead of stopping in between.                                         */
-const SCATTER_MS = 1150;
-let scatterIdx = -1, scatterAmt = 0, scFrom = 0, scTo = 0, scT0 = 0;
+/* The tear front travels outward from the rung you struck, so the strand
+   comes apart in sequence rather than all at once — that sequencing is what
+   reads as ripping instead of dissolving. Each pair then flies on an
+   ease-out-quint: violent at the break, decelerating into its seat.        */
+const TEAR_STEP = 9;                     // ms the tear takes per rung
+const SHARD_MS = 640;                    // a single pair's flight
+const TEAR_TOTAL = 32 * TEAR_STEP + SHARD_MS;
+let scatterIdx = -1, scatterAmt = 0, scEl = 0, scDir = 1;
 let scAnimating = false, ringRX = 300, ringRY = 260;
-const moteEls = [];
 // deterministic per-mote burst direction and throw distance — stable across
 // frames and resizes, no RNG state to carry
-const burstA = new Float64Array(N), burstD = new Float64Array(N);
+const burstA = new Float64Array(N), burstD = new Float64Array(N), spin = new Float64Array(N);
 for (let i = 0; i < N; i++) {
   burstA[i] = i * 2.399963229728653;                       // golden angle, even spread
   const h = Math.sin(i * 12.9898) * 43758.5453;
   burstD[i] = 0.55 + 0.85 * (h - Math.floor(h));
+  const g = Math.sin(i * 78.233) * 21372.9137;
+  spin[i] = (g - Math.floor(g) - 0.5) * 900;               // degrees of tumble
 }
-const easeIO = k => (k < .5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2);
+const easeOutQuint = k => 1 - Math.pow(1 - k, 5);   // backbone recoil / shock
+const easeOutCubic = k => 1 - Math.pow(1 - k, 3);  // shard flight
+// per-pair progress: the front reaches rung i after |i - struck| * TEAR_STEP
+const shardP = i => Math.max(0, Math.min(1,
+  (scEl - Math.abs(i - scatterIdx) * TEAR_STEP) / SHARD_MS));
 
 const rungs = [];        // 64 <line>, index 0..63
 const rungBucket = new Int8Array(N).fill(-1);
@@ -592,16 +608,6 @@ function buildBackbones(top) {
   }
 }
 
-function buildMotes() {
-  if (moteEls.length) return;
-  for (let i = 0; i < N; i++) {
-    const c = document.createElementNS(SVGNS, 'circle');
-    c.setAttribute('r', '2');
-    gMote.appendChild(c);
-    moteEls.push(c);
-  }
-}
-
 function placeRungs(top) {
   if (!rungs.length) {
     for (let i = 0; i < N; i++) {
@@ -621,7 +627,7 @@ function placeRungs(top) {
 const sinT = new Float64Array(PERIOD), cosT = new Float64Array(PERIOD);
 function renderFrame(force) {
   for (let j = 0; j < PERIOD; j++) { const th = j * K + phi; sinT[j] = Math.sin(th); cosT[j] = Math.cos(th); }
-  for (let i = 0; i < N; i++) {
+  for (let i = 0; scatterAmt === 0 && i < N; i++) {
     const j = i % PERIOD, s = sinT[j];
     const el = rungs[i];
     el.setAttribute('x1', (CX - A * s * 0.9).toFixed(2));
@@ -641,7 +647,7 @@ function renderFrame(force) {
   let dy = (-phi * pitch / K) % TURN_H; if (dy < 0) dy += TURN_H;
   gBack.style.transform = 'translate3d(0,' + dy.toFixed(2) + 'px,0)';
 
-  if (scatterAmt > 0) renderMotes();
+  if (scatterAmt > 0) renderShards();
   // tethers follow the outer extent of their rung
   const top = insets().t;
   for (const th of tethEls) {
@@ -657,47 +663,69 @@ function renderFrame(force) {
   }
 }
 
-// Bézier from the helix, out through the burst point, in to the ring seat.
-function renderMotes() {
+/* The rungs themselves are the shards. Each keeps flying as a line — it
+   shortens, tumbles and travels a Bézier out through a burst waypoint into
+   its seat on the ring — so the strand visibly comes apart into its own
+   pieces rather than being swapped for a cloud of dots. */
+function renderShards() {
   const top = insets().t;
-  const t = scatterAmt, mt = 1 - t;
   const cx = CX, cy = top + H / 2;
-  // the strand recedes as the motes take over
-  gRung.style.opacity = gBack.style.opacity = (1 - t).toFixed(3);
+  const t = scatterAmt;
   gMote.style.display = '';
+
+  // the two backbones tear away from each other and recoil off-screen
+  const bt = easeOutQuint(Math.min(1, scEl / 300));
+  const throwX = (ringRX + W * 0.35) * bt;
+  gBackL.style.transform = 'translateX(' + (-throwX).toFixed(1) + 'px)';
+  gBackR.style.transform = 'translateX(' + throwX.toFixed(1) + 'px)';
+  gBack.style.opacity = (1 - bt).toFixed(3);
+
+  // shockwave off the struck rung
+  const sw = Math.min(1, scEl / 340);
+  shock.setAttribute('cx', cx);
+  shock.setAttribute('cy', yOf(scatterIdx, top).toFixed(1));
+  shock.setAttribute('r', (10 + 420 * easeOutQuint(sw)).toFixed(1));
+  shock.setAttribute('stroke-opacity', (0.5 * (1 - sw) * (scDir > 0 ? 1 : 0)).toFixed(3));
+
   let seat = 0;
   for (let i = 0; i < N; i++) {
-    const j = i % PERIOD;
-    const x0 = CX;                      // every rung's midpoint is exactly CX
-    const y0 = yOf(i, top);
-    let x2, y2, r, col, op;
+    const j = i % PERIOD, sn = sinT[j];
+    const el = rungs[i];
     const p = primeByIdx[i];
+    const k = easeOutCubic(shardP(i));
+    const y0 = yOf(i, top);
+    const halfStart = Math.abs(A * sn * 0.9);
+
+    let tx, ty, ang;
     if (i === scatterIdx) {
-      // the key you opened crowns the ring — the centre belongs to the reading
-      x2 = cx; y2 = cy - ringRY; r = 5.2;
-      col = p ? (p.axis === 'gold' ? '#F2C46B' : '#5FEBD7') : '#9FD4E6';
-      op = 1;
+      tx = cx; ty = cy - ringRY; ang = 0;                 // crowns the ring
     } else {
-      const ang = ((seat + 1) / N) * Math.PI * 2 - Math.PI / 2;
+      const a = ((seat + 1) / N) * Math.PI * 2 - Math.PI / 2;
       seat++;
-      x2 = cx + ringRX * Math.cos(ang);
-      y2 = cy + ringRY * Math.sin(ang);
-      r = p ? 3.4 : 2.5;
-      col = p ? (p.axis === 'gold' ? '#F2C46B' : '#5FEBD7') : '#89B4CE';
-      op = p ? 1 : 0.72;
+      tx = cx + ringRX * Math.cos(a);
+      ty = cy + ringRY * Math.sin(a);
+      ang = a;                                            // shards point outward
     }
-    // burst waypoint, thrown outward from the strand
-    const bx = x0 + Math.cos(burstA[i]) * ringRX * burstD[i] * 1.35;
-    const by = y0 + Math.sin(burstA[i]) * ringRY * burstD[i] * 1.15;
-    const x = mt * mt * x0 + 2 * mt * t * bx + t * t * x2;
-    const y = mt * mt * y0 + 2 * mt * t * by + t * t * y2;
-    const el = moteEls[i];
-    el.setAttribute('cx', x.toFixed(1));
-    el.setAttribute('cy', y.toFixed(1));
-    el.setAttribute('r', (1.4 + (r - 1.4) * t).toFixed(2));
-    el.setAttribute('fill', col);
-    el.setAttribute('fill-opacity', (op * Math.min(1, t * 3)).toFixed(3));
-    el.style.filter = (i === scatterIdx && t > .6) ? 'drop-shadow(0 0 5px ' + col + ')' : '';
+    const bx = CX + Math.cos(burstA[i]) * ringRX * burstD[i] * 1.5;
+    const by = y0 + Math.sin(burstA[i]) * ringRY * burstD[i] * 1.3;
+    const mk = 1 - k;
+    const px = mk * mk * CX + 2 * mk * k * bx + k * k * tx;
+    const py = mk * mk * y0 + 2 * mk * k * by + k * k * ty;
+
+    const half = halfStart + (7 - halfStart) * k;
+    const rot = (ang * 180 / Math.PI + spin[i] * (1 - k)) * Math.PI / 180;
+    const ca = Math.cos(rot), sa = Math.sin(rot);
+    el.setAttribute('x1', (px - half * ca).toFixed(1));
+    el.setAttribute('y1', (py - half * sa).toFixed(1));
+    el.setAttribute('x2', (px + half * ca).toFixed(1));
+    el.setAttribute('y2', (py + half * sa).toFixed(1));
+    el.setAttribute('stroke-width', (i === scatterIdx ? 3.4 : (p ? 2.6 : 1.9)).toFixed(1));
+    const col = (i === scatterIdx || p)
+      ? ((p ? p.axis : 'gold') === 'gold' ? '#F2C46B' : '#5FEBD7') : '#89B4CE';
+    el.setAttribute('stroke', col);
+    el.setAttribute('stroke-opacity', (p || i === scatterIdx ? 1 : 0.75).toFixed(2));
+    el.style.filter = (i === scatterIdx && k > .6) ? 'drop-shadow(0 0 6px ' + col + ')' : '';
+    rungBucket[i] = -1;
   }
   ringGuide.setAttribute('cx', cx); ringGuide.setAttribute('cy', cy);
   ringGuide.setAttribute('rx', ringRX); ringGuide.setAttribute('ry', ringRY);
@@ -709,14 +737,23 @@ function loop(now) {
   if (now - lastT < FRAME_MS) return;
   const dt = Math.min(100, now - lastT); lastT = now;
   if (scAnimating) {
-    const k = Math.min(1, (now - scT0) / SCATTER_MS);
-    scatterAmt = scFrom + (scTo - scFrom) * easeIO(k);
+    scEl = Math.max(0, Math.min(TEAR_TOTAL, scEl + dt * scDir));
+    scatterAmt = scEl / TEAR_TOTAL;
     positionSlate();
-    if (k >= 1) {
-      scatterAmt = scTo; scAnimating = false;
-      if (scatterAmt === 0) {
-        scatterIdx = -1; gMote.style.display = 'none';
-        gRung.style.opacity = gBack.style.opacity = '1';
+    if (scEl === 0 || scEl === TEAR_TOTAL) {
+      scAnimating = false;
+      if (scEl === 0) {
+        // strand whole again
+        scatterIdx = -1; scatterAmt = 0;
+        gMote.style.display = 'none';
+        gBack.style.opacity = '1';
+        gBackL.style.transform = gBackR.style.transform = '';
+        for (const el of rungs) { el.style.filter = ''; el.removeAttribute('stroke-opacity'); }
+        // shards tilt the rungs (y1 !== y2) and the wound pass only rewrites x,
+        // so the level y values have to be restored or the strand heals crooked
+        placeRungs(insets().t);
+        rungBucket.fill(-1);
+        renderFrame(true);
       }
     }
   }
@@ -997,12 +1034,10 @@ function openKey(n) {
   const mobile = window.innerWidth < BREAKPOINT;
   panel.setAttribute('aria-modal', mobile ? 'true' : 'false');
 
-  buildMotes();
   renderHexagram(n);
   scatterIdx = INDEX_OF[n];
-  scFrom = scatterAmt; scTo = 1; scT0 = performance.now();
-  scAnimating = !REDUCED.matches;
-  if (REDUCED.matches) { scatterAmt = 1; scAnimating = false; }
+  scDir = 1; scAnimating = !REDUCED.matches;
+  if (REDUCED.matches) { scEl = TEAR_TOTAL; scatterAmt = 1; scAnimating = false; }
   positionSlate();
   document.body.classList.add('reading');
   panel.scrollTop = 0;
@@ -1017,11 +1052,11 @@ function closePanel() {
   document.body.classList.remove('reading');
   openIdx = null;
   document.title = 'Gene Keys — The Living Strand';
-  scFrom = scatterAmt; scTo = 0; scT0 = performance.now();
-  scAnimating = !REDUCED.matches;
+  scDir = -1; scAnimating = !REDUCED.matches;
   if (REDUCED.matches) {
-    scatterAmt = 0; scatterIdx = -1; gMote.style.display = 'none';
-    gRung.style.opacity = gBack.style.opacity = '1'; positionSlate();
+    scEl = 0; scatterAmt = 0; scatterIdx = -1; gMote.style.display = 'none';
+    gBack.style.opacity = '1'; gBackL.style.transform = gBackR.style.transform = '';
+    rungBucket.fill(-1); positionSlate();
   }
   speed = 1; start();
   strandEl.focus({ preventScroll: true });
