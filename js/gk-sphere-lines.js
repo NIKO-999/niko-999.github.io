@@ -66,12 +66,57 @@ window.DGKSphereLines = (function () {
     purpose: 'what deeply fulfils me',
   };
 
+  /* The "My Radiance / My Life's Work / My Purpose / My Evolution" card
+     each carries its own reading, one per line — not the same generic
+     essence text repeated regardless of which line the gate falls on.
+     Original writing, six per sphere, tied to both the sphere's own theme
+     (what the tagline names) and the line's real archetype: 1 foundation,
+     2 natural/shy of an audience, 3 trial and error, 4 influence through
+     who you know, 5 projected and public, 6 the long view. */
+  const ESSENCE = {
+    radiance: {
+      1: "Your health is built alone, in the unglamorous maintenance nobody sees — sleep, food, the quiet hour you protect. Skip the foundation and the vitality has nothing to stand on.",
+      2: "Your health runs on a natural rhythm that gets thrown off the moment you perform wellness for an audience. Left alone to move at your own pace, your body finds its own correct tempo without being told.",
+      3: "Your health is a running experiment — you learn what actually sustains you by trying things that don't, more than by planning perfectly from the start. The body that gets tested this way ends up trusting itself.",
+      4: "Your health depends on who you spend your hours with more than on any regimen. The right company recharges you faster than rest alone does; the wrong company drains you no diet can fix.",
+      5: "Your vitality becomes visible to other people before you've noticed it yourself, and how you carry your health starts to influence how a whole room carries theirs. The responsibility is not to perform wellness, just to actually have it.",
+      6: "Your relationship to health changes in distinct chapters — what kept you well at twenty is not what keeps you well now, and holding onto an old regimen out of loyalty costs you the ease the new chapter is offering.",
+    },
+    lifesWork: {
+      1: "What you're here to do was decided in private, long before there was an audience for it — a skill built alone that only later turned out to be a vocation. The work that started as nobody's business became everybody's.",
+      2: "What you're here to do announces itself naturally, without much effort to be found, and gets ruined the moment you chase visibility for its own sake. Let alone, the right recognition arrives at its own pace.",
+      3: "What you're here to do gets found by doing the wrong version of it first, more than once. Every attempt that didn't work was still data your actual work needed before it could take its real shape.",
+      4: "What you're here to do only becomes real once it reaches people through people — a network carrying it further than you could alone. Work that never gets introduced to anyone stays a private hobby, not a life's work.",
+      5: "What you're here to do carries a public weight you didn't necessarily sign up for; competence in view of others becomes a kind of authority whether or not you wanted the position.",
+      6: "What you're here to do is only fully visible in retrospect — you spend long stretches doing the work without being able to see the shape of it, and the shape only resolves once enough of it exists to look back on.",
+    },
+    purpose: {
+      1: "What deeply fulfils you is checked at the level of the body, not decided by thinking about it. Purpose that stays theoretical never quite lands; purpose you can feel in your own skeleton does.",
+      2: "What deeply fulfils you shows up naturally when nobody's watching and disappears the moment you try to prove it to somebody. The fulfilment was never a performance, it was always private first.",
+      3: "What deeply fulfils you gets discovered through the meanings that didn't hold up, not by getting it right the first time. Each version that fell apart taught you something the next one needed.",
+      4: "What deeply fulfils you depends on being understood by the right few people, not by everyone. Meaning that never gets shared with anyone stays lonely even when it's genuinely felt.",
+      5: "What deeply fulfils you becomes something other people look to you for, whether or not you asked for the responsibility — your own sense of meaning starts anchoring other people's.",
+      6: "What deeply fulfils you is only recognisable across a long span of time, not in any single moment. The meaning of an earlier chapter often only becomes clear once you're standing in a much later one.",
+    },
+    evolution: {
+      1: "What you're here to learn gets learned alone first, in private trial, long before it's tested against anyone else's opinion of it. The lesson needs solitude to actually take.",
+      2: "What you're here to learn arrives naturally, in its own time, and resists being rushed by outside pressure to have already figured it out. Forced growth here doesn't hold; grown-into growth does.",
+      3: "What you're here to learn only comes through getting it wrong first — the lesson that arrives without a failed attempt behind it usually doesn't stick. Trial is the actual curriculum, not a detour from it.",
+      4: "What you're here to learn gets tested and confirmed through other people, not settled alone. An insight that never gets to influence anyone stays unproven, even to you.",
+      5: "What you're here to learn happens under some degree of scrutiny — your growth becomes visible to others before you feel finished with it, and their watching is part of what completes the lesson.",
+      6: "What you're here to learn resolves only over a long arc, not within any one crisis. What looked like the whole lesson at the time is often just the chapter that made the real one possible later.",
+    },
+  };
+
   return {
     get(sphereId, line) {
       return (D[sphereId] && D[sphereId][line]) || null;
     },
     tagline(sphereId) {
       return TAGLINE[sphereId] || null;
+    },
+    essence(sphereId, line) {
+      return (ESSENCE[sphereId] && ESSENCE[sphereId][line]) || null;
     },
   };
 })();

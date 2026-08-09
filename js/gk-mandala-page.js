@@ -424,7 +424,7 @@ function roleSection(roleId, keyNum, line, seq, seen) {
     '<section><div class="card"><h3 style="color:' + col + '">Shadow · ' + esc(k.shadow) + '</h3>' +
     '<p>' + esc(prose.shadow) + '</p>' + statesHtml + '</div></section>');
   html += once('invitation:' + prose.invitation,
-    '<section><div class="card"><h3 style="color:' + col + '">Invitation · ' + esc(k.siddhi) + '</h3>' +
+    '<section><div class="card"><h3 style="color:' + col + '">Siddhi · ' + esc(k.siddhi) + '</h3>' +
     '<p>' + esc(prose.invitation) + '</p></div></section>');
   return html;
 }
@@ -445,8 +445,18 @@ function openPanelFor(i) {
   const k0 = window.DGeneKeys ? DGeneKeys.KEYS[sp0.key] : null;
   const c0 = window.DGeneKeysContent ? DGeneKeysContent.get(sp0.key) : null;
 
+  const tag = window.DGKSphereLines ? DGKSphereLines.tagline(primary) : null;
+  // For the four spheres with a real "My Sphere · tagline" (confirmed
+  // against the official app) and a resolved line, the essence card is a
+  // genuine per-line reading — not the same generic per-key text shown to
+  // everyone who carries that key here, whatever line they're on. Falls
+  // back to the universal per-key essence everywhere else.
+  const sphEssence = (tag && sp0.line && window.DGKSphereLines) ? DGKSphereLines.essence(primary, sp0.line) : null;
   let body = '';
-  if (c0 && c0.essence) {
+  if (sphEssence) {
+    body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">My ' + esc(node.label) + ' · ' + esc(tag) + '</h3>' +
+      '<p>' + esc(sphEssence) + '</p></div></section>';
+  } else if (c0 && c0.essence) {
     body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">Function</h3>' +
       '<p>' + esc(c0.essence) + '</p></div></section>';
   }
@@ -462,11 +472,11 @@ function openPanelFor(i) {
   });
 
   const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
-  // "My [Sphere] · [tagline]" — real, confirmed against the official app,
-  // only shown for spheres with a source-verified tagline. Not every sphere
-  // has one yet, by design (see js/gk-sphere-lines.js).
-  const tag = window.DGKSphereLines ? DGKSphereLines.tagline(primary) : null;
-  const taglineHtml = tag ? '<div class="tagline">My ' + esc(node.label) + ' <span>·</span> ' + esc(tag) + '</div>' : '';
+  // The tagline already appears as the essence card's own header once a
+  // per-line reading exists for it — repeating it again as a subtitle
+  // would be exactly the kind of duplicate this page just got rid of.
+  // Only shown standalone when falling back to the generic Function card.
+  const taglineHtml = (tag && !sphEssence) ? '<div class="tagline">My ' + esc(node.label) + ' <span>·</span> ' + esc(tag) + '</div>' : '';
 
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">' + esc(sp0.seq) + ' sequence' + (node.ids.length > 1 ? ' · hinge' : '') + '</div>' +
