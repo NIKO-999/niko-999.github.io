@@ -379,11 +379,23 @@ function paintMarks() {
 }
 
 /* ── reading content: pulled from the same data every other page uses ──── */
-function roleSection(roleId, keyNum, line, seq, seenStateKeys) {
+function roleSection(roleId, keyNum, line, seq, seen) {
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(keyNum) : null;
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
   const prose = (window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null) || c;
   if (!prose || !k) return '';
+  // A hinge sphere (Core/Vocation; Life's Work/Brand elsewhere in the app,
+  // though never shown in the same panel) shares one physical key across
+  // two role sections. Any card whose header AND body would come out
+  // byte-identical to one already shown in this panel — not just the
+  // shadow-states grid, anything — reads as a bug to someone who doesn't
+  // know two roles can share a key, so it's suppressed the second time.
+  function once(sig, html) {
+    if (!seen) return html;
+    if (seen.has(sig)) return '';
+    seen.add(sig);
+    return html;
+  }
   // Sphere-specific line keynote (what line N means when it IS this sphere,
   // confirmed against real Golden Path material) takes priority; the
   // key-based one (js/gk-lines.js — what line N means for this key,
@@ -393,29 +405,27 @@ function roleSection(roleId, keyNum, line, seq, seenStateKeys) {
   const col = seqCol(seq);
   let html = '';
   if (ln) {
-    html += '<section><div class="card" data-noclick="1">' +
+    html += once('line:' + ln.keynote + '|' + ln.body,
+      '<section><div class="card" data-noclick="1">' +
       '<h3 style="color:' + col + '">Line ' + line + ' · ' + esc(ln.keynote) + '</h3>' +
-      '<p>' + esc(ln.body) + '</p></div></section>';
+      '<p>' + esc(ln.body) + '</p></div></section>');
   }
-  html += '<section><div class="card"><h3 style="color:' + col + '">Mastery · ' + esc(k.gift) + '</h3>' +
-    '<p>' + esc(prose.gift) + '</p></div></section>';
-  // A hinge sphere (Core/Vocation, Life's Work/Brand elsewhere in the app)
-  // shares one physical key across two role sections in the same panel —
-  // showing the identical Repressive/Reactive/Dilemma/Victim grid twice
-  // reads as a bug to anyone who doesn't know why, so it's only rendered
-  // once per key per panel.
-  const alreadyShown = seenStateKeys && seenStateKeys.has(keyNum);
-  if (seenStateKeys) seenStateKeys.add(keyNum);
-  const states = (!alreadyShown && window.DGKShadowStates) ? DGKShadowStates.get(keyNum) : null;
+  html += once('gift:' + prose.gift,
+    '<section><div class="card"><h3 style="color:' + col + '">Mastery · ' + esc(k.gift) + '</h3>' +
+    '<p>' + esc(prose.gift) + '</p></div></section>');
+  const states = (seen && !seen.has('states:' + keyNum) && window.DGKShadowStates) ? DGKShadowStates.get(keyNum) : null;
+  if (seen) seen.add('states:' + keyNum);
   const stateLabels = { repressive: 'Repressive', reactive: 'Reactive', dilemma: 'Dilemma', victim: 'Victim State' };
   const statesHtml = states ? '<div class="states">' +
     ['repressive', 'reactive', 'dilemma', 'victim'].map(k2 =>
       '<div class="state"><b>' + stateLabels[k2] + '</b><i>' + esc(states[k2]) + '</i></div>'
     ).join('') + '</div>' : '';
-  html += '<section><div class="card"><h3 style="color:' + col + '">Shadow · ' + esc(k.shadow) + '</h3>' +
-    '<p>' + esc(prose.shadow) + '</p>' + statesHtml + '</div></section>';
-  html += '<section><div class="card"><h3 style="color:' + col + '">Invitation · ' + esc(k.siddhi) + '</h3>' +
-    '<p>' + esc(prose.invitation) + '</p></div></section>';
+  html += once('shadow:' + prose.shadow + '|' + JSON.stringify(states),
+    '<section><div class="card"><h3 style="color:' + col + '">Shadow · ' + esc(k.shadow) + '</h3>' +
+    '<p>' + esc(prose.shadow) + '</p>' + statesHtml + '</div></section>');
+  html += once('invitation:' + prose.invitation,
+    '<section><div class="card"><h3 style="color:' + col + '">Invitation · ' + esc(k.siddhi) + '</h3>' +
+    '<p>' + esc(prose.invitation) + '</p></div></section>');
   return html;
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
@@ -440,7 +450,7 @@ function openPanelFor(i) {
     body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">Function</h3>' +
       '<p>' + esc(c0.essence) + '</p></div></section>';
   }
-  const seenStateKeys = new Set();
+  const seen = new Set();
   node.ids.forEach(id => {
     const sp = primes[id];
     if (!sp) return;
@@ -448,7 +458,7 @@ function openPanelFor(i) {
       const roleLabel = id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id;
       body += '<div class="asRole">As ' + esc(roleLabel) + '</div>';
     }
-    body += roleSection(id, sp.key, sp.line, sp.seq, seenStateKeys);
+    body += roleSection(id, sp.key, sp.line, sp.seq, seen);
   });
 
   const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
