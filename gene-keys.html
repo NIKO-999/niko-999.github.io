@@ -32,10 +32,43 @@ body {
   -webkit-tap-highlight-color: transparent;
 }
 #hdr {
-  position: fixed; left: 26px; top: 24px; z-index: 6;
+  position: fixed; left: 26px; top: 24px; z-index: 6; right: 26px;
   font-size: 9px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3);
+  display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap;
 }
 #hdr b { color: var(--ink-2); font-weight: 500; }
+#transit { color: var(--ink-3); white-space: nowrap; }
+#transit .own { color: #9FEFE0; }
+
+/* ── mobile rim legend ─────────────────────────────────────────────────
+   Replaces the radial labels below 900px, where twelve of them around a
+   narrow rim collide. A horizontally-scrolling strip of the same twelve
+   spheres, same colour and brightness rule, same tap target. */
+#legend {
+  display: none;
+  position: fixed; left: 0; right: 0; bottom: 108px; z-index: 6;
+  padding: 0 14px; gap: 8px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+}
+#legend::-webkit-scrollbar { display: none; }
+#legend .chip {
+  flex: 0 0 auto; display: flex; flex-direction: column; gap: 3px;
+  padding: 8px 12px; border-radius: 10px;
+  background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+  font: inherit; text-align: left; cursor: pointer;
+  transition: background .25s ease, border-color .25s ease;
+}
+#legend .chip b {
+  font: 500 10.5px var(--mono); color: var(--ink); white-space: nowrap;
+  border-left: 2px solid var(--chip-col, var(--ink-3)); padding-left: 7px;
+}
+#legend .chip i {
+  font: 400 8px var(--mono); font-style: normal; letter-spacing: .08em;
+  color: var(--chip-col, var(--ink-3)); padding-left: 9px; white-space: nowrap;
+}
+#legend .chip.on { background: rgba(255,255,255,0.09); border-color: var(--chip-col, rgba(255,255,255,.2)); }
+#legend .chip:disabled { cursor: default; }
 
 #stage {
   position: fixed; inset: 0; display: flex; flex-direction: column;
@@ -172,6 +205,9 @@ body.unfitted #stage { opacity: .18; }
   #titleblock { left: 16px; right: 16px; min-width: 0; bottom: 14px; }
   #panel { width: 100%; }
   .lbl { display: none; }
+  #legend { display: flex; }
+  #hdr { right: auto; }
+  #transit { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   #panel, #stage { transition: none; }
@@ -180,9 +216,10 @@ body.unfitted #stage { opacity: .18; }
 </head>
 <body>
 
-<div id="hdr">Hologenetic Profile <b>·</b> click a sphere to open its reading</div>
+<div id="hdr"><span>Hologenetic Profile <b>·</b> click a sphere to open its reading</span><span id="transit"></span></div>
 
 <div id="stage"></div>
+<div id="legend"></div>
 <div id="panel">
   <div class="edgeGlow"></div>
   <div class="edge"></div>

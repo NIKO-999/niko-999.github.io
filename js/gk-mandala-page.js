@@ -214,6 +214,25 @@ requestAnimationFrame(placeAll);
 let rt2 = 0;
 window.addEventListener('resize', () => { clearTimeout(rt2); rt2 = setTimeout(() => { geometry(); placeAll(); }, 120); });
 
+/* ── mobile rim legend ─────────────────────────────────────────────────
+   Twelve radial labels around a 390px-wide rim collide into unreadable
+   noise — that was the mobile gap in the first pass. Below that width the
+   labels stay hidden (CSS) and this scrollable strip of chips takes over:
+   the same twelve spheres, same colour/brightness rule, same tap target,
+   just laid out as a row instead of a ring so nothing overlaps. */
+const legendEl = document.getElementById('legend');
+marks.forEach(m => {
+  const chip = document.createElement('button');
+  chip.type = 'button';
+  chip.className = 'chip';
+  chip.innerHTML = '<b></b><i></i>';
+  chip.addEventListener('click', () => selectSphere(m.i));
+  legendEl.appendChild(chip);
+  m.chipEl = chip;
+  m.chipB = chip.querySelector('b');
+  m.chipI = chip.querySelector('i');
+});
+
 /* ═══════════════════════════════════════════════════════════════════════
    State: profile data, node visuals, and the reading panel.
    ═══════════════════════════════════════════════════════════════════════ */
@@ -263,6 +282,14 @@ function paintMarks() {
     m.labelEl.style.opacity = on ? 1 : (dimmed ? 0.28 : (ready ? 1 : 0.4));
     m.subEl.textContent = ready ? (seq + ' · line ' + line) : 'not yet fitted';
     m.hit.style.cursor = ready ? 'pointer' : 'default';
+
+    // mobile legend chip mirrors the same state, colour and brightness
+    m.chipEl.style.setProperty('--chip-col', col);
+    m.chipEl.style.opacity = on ? 1 : (dimmed ? 0.35 : (ready ? (0.55 + 0.45 * ((line || 3) / 6)) : 0.32));
+    m.chipEl.classList.toggle('on', on);
+    m.chipEl.disabled = !ready;
+    m.chipB.textContent = m.node.label;
+    m.chipI.textContent = ready ? (seq + ' · L' + line) : 'not fitted';
   });
 }
 
@@ -510,8 +537,38 @@ function apply() {
   if (noteEl) noteEl.textContent = clockNote(inst);
 
   paintMarks();
+  refreshTransit();
   writeURL(null);
 }
+
+/* ── yearly transit ────────────────────────────────────────────────────
+   The Sun keeps moving after birth — one key is always transiting, and it
+   cycles through all 64 over a year. Costs no new astronomy: solarLongitude
+   already takes any date. Refreshed once per load, which is often enough
+   for a page that isn't kept open across midnight. */
+function myKeys() {
+  if (!primes) return [];
+  const out = [];
+  NODES.forEach(n => n.ids.forEach(id => { if (primes[id]) out.push({ id, key: primes[id].key }); }));
+  return out;
+}
+function refreshTransit() {
+  const el = document.getElementById('transit');
+  if (!el || !window.DGeneKeys) return;
+  const iso = new Date().toISOString().slice(0, 10);
+  const todayKey = DGeneKeys.keyAt(DGeneKeys.solarLongitude(iso));
+  const k = DGeneKeys.KEYS[todayKey];
+  el.textContent = 'Transiting today · Key ' + todayKey + (k ? ' · ' + k.name : '');
+  const mine = myKeys().filter(m => m.key === todayKey);
+  if (mine.length) {
+    const roleLabels = mine.map(m => (m.id === 'core' ? 'Core' : m.id === 'vocation' ? 'Vocation' : (ROLE_BLURB[m.id] ? NODES.find(n => n.ids.indexOf(m.id) !== -1).label : m.id)));
+    const span = document.createElement('span');
+    span.className = 'own';
+    span.textContent = ' · your ' + [...new Set(roleLabels)].join(' & ');
+    el.appendChild(span);
+  }
+}
+refreshTransit();
 
 function writeURL(sel) {
   if (sel !== undefined) selectedKeyForURL = sel;
