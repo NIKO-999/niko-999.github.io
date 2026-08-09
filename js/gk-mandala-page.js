@@ -295,10 +295,10 @@ function showPreview(i) {
   const m = marks[i];
   if (!nodeReady(m)) return;
   previewIdx = i;
-  const seq = nodeSeq(m), line = nodeLine(m), col = seqCol(seq);
+  const seq = nodeSeq(m), line = nodeLine(m), key = nodeKey(m), col = seqCol(seq);
   previewCard.style.setProperty('--pc-col', col);
   previewCard.style.setProperty('--pc-glow', seqRgb(seq, 0.28));
-  previewCard.innerHTML = '<b>' + esc(m.node.label) + '</b><i>' + esc(seq) + ' · line ' + line + '</i><em>tap again to open</em>';
+  previewCard.innerHTML = '<b>' + esc(m.node.label) + '</b><i>Key ' + key + (line ? '.' + line : '') + ' · ' + esc(seq) + '</i><em>tap again to open</em>';
   const rect = svg.getBoundingClientRect();
   const scale = rect.width / 400;
   let x = rect.left + m.px * scale;
@@ -337,6 +337,10 @@ function nodeSeq(mark) {
 function nodeLine(mark) {
   const sp = primes && primes[mark.node.ids[0]];
   return sp ? sp.line : null;
+}
+function nodeKey(mark) {
+  const sp = primes && primes[mark.node.ids[0]];
+  return sp ? sp.key : null;
 }
 function nodeReady(mark) {
   return !!(primes && mark.node.ids.every(id => primes[id]));
