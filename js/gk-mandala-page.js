@@ -270,12 +270,52 @@ marks.forEach(m => {
   chip.type = 'button';
   chip.className = 'chip';
   chip.innerHTML = '<b></b><i></i>';
-  chip.addEventListener('click', () => selectSphere(m.i));
+  chip.addEventListener('click', () => tapNode(m.i));
   legendEl.appendChild(chip);
   m.chipEl = chip;
   m.chipB = chip.querySelector('b');
   m.chipI = chip.querySelector('i');
 });
+
+/* ── mobile: tap once for a preview, tap again to open ───────────────────
+   Revives the very first ask for this page — "click the screw, get a small
+   card of what it is, click THAT to open it." Desktop keeps a single click
+   opening the panel directly; only mobile gets the two-step. */
+const previewCard = document.getElementById('previewCard');
+let previewIdx = -1;
+
+function hidePreview() {
+  if (previewIdx < 0) return;
+  previewIdx = -1;
+  previewCard.classList.remove('on');
+}
+
+function showPreview(i) {
+  const m = marks[i];
+  if (!nodeReady(m)) return;
+  previewIdx = i;
+  const seq = nodeSeq(m), line = nodeLine(m), col = seqCol(seq);
+  previewCard.style.setProperty('--pc-col', col);
+  previewCard.style.setProperty('--pc-glow', seqRgb(seq, 0.28));
+  previewCard.innerHTML = '<b>' + esc(m.node.label) + '</b><i>' + esc(seq) + ' · line ' + line + '</i><em>tap again to open</em>';
+  const rect = svg.getBoundingClientRect();
+  const scale = rect.width / 400;
+  let x = rect.left + m.px * scale;
+  let y = rect.top + m.py * scale;
+  const pad = 16;
+  x = Math.max(pad + 90, Math.min(innerWidth - pad - 90, x));
+  y = Math.max(pad + 50, Math.min(innerHeight - pad - 120, y));
+  previewCard.style.left = x + 'px';
+  previewCard.style.top = y + 'px';
+  previewCard.classList.add('on');
+}
+
+function tapNode(i) {
+  if (!isMobile()) { selectSphere(i); return; }
+  if (previewIdx === i) { hidePreview(); selectSphere(i); return; }
+  showPreview(i);
+}
+previewCard.addEventListener('click', () => { if (previewIdx >= 0) { const i = previewIdx; hidePreview(); selectSphere(i); } });
 
 /* ═══════════════════════════════════════════════════════════════════════
    State: profile data, node visuals, and the reading panel.
@@ -417,6 +457,7 @@ function sweep() {
 
 function selectSphere(i) {
   if (!nodeReady(marks[i])) return;
+  hidePreview();
   if (currentSel === i) { closePanel(); return; }
   const wasOpen = panelOpen;
   currentSel = i; panelOpen = true;
@@ -436,6 +477,7 @@ function selectSphere(i) {
 }
 
 function closePanel() {
+  hidePreview();
   panelOpen = false;
   panel.classList.remove('on'); panel.classList.remove('sweeping');
   currentSel = -1;
@@ -471,11 +513,11 @@ function revealMandala() {
 coreHit.addEventListener('click', e => { e.stopPropagation(); revealMandala(); });
 
 marks.forEach(m => {
-  m.hit.addEventListener('click', () => selectSphere(m.i));
-  m.labelEl.addEventListener('click', () => selectSphere(m.i));
+  m.hit.addEventListener('click', () => tapNode(m.i));
+  m.labelEl.addEventListener('click', () => tapNode(m.i));
 });
 document.getElementById('closeBtn').addEventListener('click', e => { e.stopPropagation(); closePanel(); });
-stageEl.addEventListener('click', e => { if (e.target === stageEl || e.target === svg) closePanel(); });
+stageEl.addEventListener('click', e => { if (e.target === stageEl || e.target === svg) { hidePreview(); closePanel(); } });
 
 legendEl.style.opacity = '0';
 legendEl.style.pointerEvents = 'none';

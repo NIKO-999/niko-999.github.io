@@ -71,6 +71,33 @@ body {
 #legend .chip.on { background: rgba(255,255,255,0.09); border-color: var(--chip-col, rgba(255,255,255,.2)); }
 #legend .chip:disabled { cursor: default; }
 
+/* ── mobile preview card ───────────────────────────────────────────────
+   First tap on a sphere shows this — a small card of "what it is," not
+   the full reading — second tap (on the sphere again, or on the card
+   itself) opens the real panel. */
+#previewCard {
+  position: fixed; z-index: 15; left: 0; top: 0;
+  transform: translate(-50%, -50%) scale(.85); opacity: 0; pointer-events: none;
+  transition: opacity .25s ease, transform .25s cubic-bezier(.22,.9,.3,1.2);
+  background: rgba(9,10,17,.94); border: 1px solid rgba(255,255,255,.09);
+  border-left: 2px solid var(--pc-col, #CFEFFF); border-radius: 10px;
+  padding: 10px 14px; min-width: 168px; max-width: 240px;
+  box-shadow: 0 0 24px var(--pc-glow, rgba(207,239,255,.18)), 0 8px 24px rgba(0,0,0,.5);
+}
+#previewCard.on { opacity: 1; transform: translate(-50%, -50%) scale(1); pointer-events: auto; }
+#previewCard b {
+  display: block; font: 500 13px var(--mono); color: var(--ink); letter-spacing: .01em;
+}
+#previewCard i {
+  display: block; font: 400 9px var(--mono); font-style: normal; letter-spacing: .1em;
+  color: var(--pc-col, var(--ink-3)); margin-top: 3px;
+}
+#previewCard em {
+  display: block; font: 400 8px var(--mono); font-style: normal; letter-spacing: .16em;
+  text-transform: uppercase; color: var(--ink-3); margin-top: 7px;
+}
+@media (min-width: 900px) { #previewCard { display: none; } }
+
 #stage {
   position: fixed; inset: 0; display: flex; flex-direction: column;
   align-items: center; justify-content: center;
@@ -238,6 +265,7 @@ body.unfitted #stage { opacity: .18; }
 
 <div id="stage"></div>
 <div id="legend"></div>
+<div id="previewCard"></div>
 <div id="panel">
   <div class="edgeGlow"></div>
   <div class="edge"></div>
