@@ -110,8 +110,8 @@ window.DGKLines = (function () {
   },
   "4": {
     "1": {
-      "keynote": "Proven Answers",
-      "body": "You check an answer against the evidence before you let it out of your mouth, since a wrong conclusion sits badly with you for weeks. Intolerance in you is the noise a half-finished investigation makes when it speaks out loud. Understanding arrives when the logic holds from the bottom, and forgiveness follows the same route — slowly, and then completely."
+      "keynote": "Physicality (bones)",
+      "body": "You check an answer against the body before you trust it, not just against the evidence — a conclusion that doesn't sit right physically doesn't get to stand. Intolerance in you is what an ungrounded idea sounds like when it speaks anyway. Understanding arrives once the logic and the body agree, and forgiveness follows the same route, slowly, through what you can actually feel to be true."
     },
     "2": {
       "keynote": "Unearned Clarity",
@@ -286,8 +286,8 @@ window.DGKLines = (function () {
       "body": "You model a way of being that other people study without saying so, and they borrow your manner of moving through a day. Naturalness stops the instant you notice it is being watched, and self-obsession fills the space it leaves. The trap is subtle here — you begin behaving like the version of yourself that others find easy to be around."
     },
     "6": {
-      "keynote": "Late Ease",
-      "body": "You settle into yourself later than most, and the self-obsession of your younger years burned off through living rather than through effort. People notice that you are comfortable in a room without performing, and younger ones copy how you hold yourself before you say anything. The cost is the years you spent watching yourself from the outside before that stopped."
+      "keynote": "Disappointment/Innocence",
+      "body": "You carry a picture of how good things could be, and ordinary life keeps failing to match it, which is where the disappointment comes from — not from things going wrong, but from things merely going normally. The innocence underneath it is real: you still believe the perfect version is possible. The relief comes not from lowering the picture but from letting the ordinary version stand next to it unjudged."
     }
   },
   "11": {
@@ -572,8 +572,8 @@ window.DGKLines = (function () {
       "body": "You take charge when nobody else will, and people hand you authority they would resent in anyone else. That handover comes with a condition nobody states: stay useful, stay in front, keep delivering. Control is what the role becomes when you start defending the position instead of doing the job — and the same people who raised you up notice first."
     },
     "6": {
-      "keynote": "Authority Set Down",
-      "body": "You relinquish control in stages, and each time you have let go of a position, something larger came back to you. There was a period when you fought for command, a period when you refused it outright, and now people defer without being asked. The cost is that you no longer want the thing you spent years learning to hold."
+      "keynote": "Isolation/Care",
+      "body": "You end up carrying a cause largely alone, not because nobody agrees with you but because agreeing quietly and actually devoting your life to it are two different commitments. The isolation isn't rejection, it's the natural distance between someone who has taken responsibility and everyone who is still deciding whether to. What sustains you through it is care outlasting the loneliness of holding it."
     }
   },
   "22": {
@@ -928,16 +928,16 @@ window.DGKLines = (function () {
       "body": "You go after the new thing, exhaust it, and go after another. Half your history is dead ends walked all the way to the end — the scene that emptied out, the business that stalled, the trip that solved nothing. Hunger drives every one of them, and adventure for you is not romance — it is a long line of things you started and left unfinished."
     },
     "4": {
-      "keynote": "Doors Opened",
-      "body": "You travel through invitations, and the changes that rearrange your life arrive as an offer from somebody you already know. The job, the country, the project: each traces back to a conversation with a particular person rather than to a plan of yours. Hunger builds while you try to force the next opening, and movement starts again in the week you reconnect with people you dropped."
+      "keynote": "The Influential Mind (inflexible)",
+      "body": "Your mind moves other people almost by accident — an idea said in passing gets repeated back to you months later, changed, in a room you weren't in. The same conviction that makes you persuasive can calcify into a position you won't reconsider, especially once other people have started quoting it back at you. Influence stays alive only as long as the mind that carries it does too."
     },
     "5": {
       "keynote": "The Watched Leap",
       "body": "You change course in ways other people find thrilling to watch and impossible to copy, and they live vicariously through your adventures. Your life becomes a story told at other people’s dinner tables, edited down to the exciting parts. Hunger is what the audience never sees — the restlessness that starts the next leap before the last one has finished teaching you anything."
     },
     "6": {
-      "keynote": "Chapters Of Hunger",
-      "body": "You travel through your life in distinct chapters, each with its own hunger, and you close one completely before the next opens. People who knew you in an earlier chapter barely recognise the current one, and you stopped explaining the gaps. The cost is a restlessness that returns on schedule, no matter how good the thing you are leaving."
+      "keynote": "Reverence/Alienation",
+      "body": "You can see far enough ahead that the present moment sometimes looks small by comparison, and that distance can read to others as coldness rather than what it actually is — reverence for something larger than the room you're in. Alienation sets in when the vision stops including the people standing right next to you. The long view was only ever meant to widen the near one, not replace it."
     }
   },
   "36": {
@@ -1010,8 +1010,8 @@ window.DGKLines = (function () {
       "body": "You fight for people rather than for principles, and your perseverance holds as long as somebody you love is worth the effort. A cause with no face behind it drains you, while a friend in trouble gives you stamina you had no idea you had. Struggle turns pointless when you defend a relationship that stopped defending you, and honour asks who the fight is actually for."
     },
     "5": {
-      "keynote": "Other People’s Battles",
-      "body": "You fight other people’s battles, and they come to you with a cause because your perseverance outlasts everyone else’s. Being the one who keeps going makes you the standard others measure themselves against, and they resent the measurement. Struggle becomes identity in this position — without something to push against, the reputation has nothing to stand on, so a new fight appears."
+      "keynote": "Fixer",
+      "body": "Groups hand you the thing nobody else could get moving, not because you volunteered but because you were visibly capable of it. You inherit responsibility by being competent in the room, which is a different mechanism than being asked, and it costs you the choice of whether to take it on. The risk is carrying every group's unfinished business as if it were yours to finish alone."
     },
     "6": {
       "keynote": "The Long Fight",
@@ -1036,8 +1036,8 @@ window.DGKLines = (function () {
       "body": "You provoke the people close to you, and the pressure you apply frees them where the relationship is strong enough to hold it. Strangers experience you as difficult, and the ones who know you wait for the moment you say the thing nobody else says. Provocation without relationship costs you the connection and changes nothing, and you learn which friendships survive being told the truth."
     },
     "5": {
-      "keynote": "The Necessary Irritant",
-      "body": "You unsettle people on purpose, and groups that have gone stagnant improve measurably after you have been through them. Nobody thanks you at the time; the gratitude arrives years later, from people who no longer remember why, and the immediate response is that you are difficult. Provocation without aim is the failure mode — pushing because pushing is your role, rather than because something in the room is actually stuck."
+      "keynote": "Power and Projection",
+      "body": "What you resolve privately becomes, without your choosing it, something other people watch and measure themselves against. Your own reckoning gets projected outward into a kind of public authority you never applied for, and your voice starts carrying more weight than you expect. The work is staying honest about the private struggle even once it has been read as strength."
     },
     "6": {
       "keynote": "Provocation With Purpose",
@@ -1488,8 +1488,8 @@ window.DGKLines = (function () {
   },
   "57": {
     "1": {
-      "keynote": "Tested Hunches",
-      "body": "You distinguish a real signal from ordinary nerves by checking it against what happened last time. Unease is your intuition arriving before you have any language for it, and the not-knowing is the uncomfortable part. Intuition becomes trustworthy once you have kept score for years, and the clarity you reach is a conclusion with a long evidence trail behind it."
+      "keynote": "Solitude",
+      "body": "Your intuition speaks clearest when nobody else's voice is in the room, which is why time alone reads to you as necessity rather than withdrawal. Unease shows up first as noise, before you have any language for what it's telling you, and company can drown the signal before you've heard it. Skip the solitude for long enough and the clarity simply stops arriving."
     },
     "2": {
       "keynote": "The First Impression",

@@ -2,20 +2,26 @@
  * ═══════════════════════════════════════════════════════════════════════════
  *  GENE KEYS — SPHERE-SPECIFIC LINE KEYNOTES
  * ═══════════════════════════════════════════════════════════════════════════
- *  A different axis from js/gk-lines.js. That file is keyed by (KEY, line) —
- *  what line 5 means when it belongs to Key 38, regardless of which sphere
- *  Key 38 happens to occupy. This file is keyed by (SPHERE, line) — what
- *  line 5 means when it IS your Life's Work, regardless of which of the 64
- *  keys you carry there. Confirmed as the real system genekeys.com's own
- *  app displays: verified against two independent real Golden Path reports
- *  and Richard Rudd's "Pearl Articles" (Vocation = "The Six Fields of
- *  Talent", Culture = "The Six Links of Culture", Pearl = "The Six
- *  Motivators" — all six lines given by name for those three spheres).
+ *  A different axis from js/gk-lines.js, and a narrower one than an earlier
+ *  version of this file assumed. gk-lines.js is keyed by (KEY, line) — what
+ *  line 5 means when it belongs to Key 38, and that turns out to be the
+ *  universal system genekeys.com itself uses (confirmed: screenshots of
+ *  generic, non-personal keys — 21, 35, 10 — show the identical keynote
+ *  style with no sphere framing at all). The Life's Work/Radiance/Purpose/
+ *  etc. entries once here were really just (KEY, line) facts for whichever
+ *  key a specific example person happened to carry, wrongly filed as
+ *  sphere-specific — they've been moved into gk-lines.js as corrections.
  *
- *  Coverage is partial and stays partial on purpose: only sphere+line pairs
- *  with a keyword confirmed in real source material are here. A pair with
- *  no entry falls back to the key-based line card in gk-lines.js rather
- *  than inventing a keyword with no source.
+ *  What genuinely IS sphere-specific, in Rudd's own words: Vocation,
+ *  Culture and Pearl are the "4 stages of the Money Sequence," each with
+ *  its own named 6-line set regardless of which key occupies it — "stage 1
+ *  of YOUR money sequence is called Talent," from his "Pearl Articles."
+ *  That's what's left here: Vocation = "The Six Fields of Talent", Culture
+ *  = "The Six Links of Culture", Pearl = "The Six Motivators" — all six
+ *  lines given by name for exactly those three spheres, nowhere else.
+ *
+ *  A sphere+line pair with no entry falls back to the key-based line card
+ *  in gk-lines.js.
  *
  *  API:
  *    DGKSphereLines.get(sphereId, line) -> { keynote, body } | null
@@ -27,36 +33,6 @@ window.DGKSphereLines = (function () {
   'use strict';
 
   const D = {
-    lifesWork: {
-      5: { keynote: 'Fixer', body: "Groups hand you the thing nobody else could get moving, not because you volunteered but because you were visibly capable of it. You inherit responsibility by being competent in the room, which is a different mechanism than being asked. The risk is carrying every group's unfinished business as if it were yours to finish alone." },
-    },
-    evolution: {
-      5: { keynote: 'Power and Projection', body: "What you resolve privately becomes, without your choosing it, something other people watch and measure themselves against. Your own reckoning gets projected outward into a kind of public authority you never applied for. The work is staying honest about the private struggle even once it has been read as strength." },
-    },
-    radiance: {
-      1: { keynote: 'Solitude', body: "Your health runs on a private battery that group life can't recharge. Time alone isn't a withdrawal from your vitality, it's the source of it — skip it for long enough and the body starts billing you for the debt. What looks like isolation from outside is maintenance from inside." },
-    },
-    purpose: {
-      1: { keynote: 'The Anchor', body: "You hold a fixed point that everyone else's movement gets measured against, whether or not you asked for the job. People orient off you before they orient off circumstances, which means your steadiness costs you flexibility you don't always get to have. The anchor doesn't get to drift, even when it wants to." },
-    },
-    attraction: {
-      3: { keynote: 'Playfulness', body: "You draw people in through trial, error and a willingness to be a little reckless about how you find out what works. The relationships that last are the ones that survived being tested this way, not the ones that looked safest on the first date. Adventure is the actual filter, not a phase before the filter." },
-    },
-    iq: {
-      5: { keynote: 'The Practical Mind', body: "Your intelligence gets deployed defensively by default — solving the problem in front of you rather than the one underneath it. It's a genuinely useful reflex under real pressure, and a genuinely limiting one once the pressure has passed and you're still bracing. The mind that can only defend can't yet build." },
-    },
-    eq: {
-      1: { keynote: 'Self-Esteem', body: "Your emotional stability was built, or wasn't, in private, long before anyone else could see it happening. What looks like confidence to other people is really the residue of thousands of unwitnessed moments where you either backed yourself or didn't. The public version is only ever a report from that private ledger." },
-    },
-    sq: {
-      3: { keynote: 'Pleasure', body: "Your body learns what it knows through direct experience, not through being told — pleasure and its aftermath are how the lesson actually lands. Adventure isn't indulgence here, it's data collection the only way your particular intelligence can run it. What you understand, you understand because you were in it." },
-    },
-    core: {
-      1: { keynote: 'Honesty', body: "The wound gets managed in private long before it's ever named out loud, and the naming is the only thing that actually changes anything. Silence around it doesn't protect you from it, it just moves the cost somewhere less visible. Said plainly, once, it stops running the rest of the pattern." },
-    },
-    brand: {
-      5: { keynote: 'Wisdom', body: "What people recognise you by eventually stops being a look and starts being a track record of solutions. Reputation here isn't built by being seen, it's built by being the one who actually fixed the thing, repeatedly, until people stopped being surprised by it. The image just caught up to the fact." },
-    },
     vocation: {
       1: { keynote: 'Production', body: "Your calling starts as a solitary act — something made alone, on your own terms, before it has an audience or a business model. Waiting for permission or partnership before you start is how the calling stays theoretical. The work you make by yourself first is the only proof anyone else needs." },
       2: { keynote: 'Marketing', body: "Your calling finds its shape through a duet — you and one other person, testing whether the work travels beyond your own head. This isn't yet the wide world, it's a single trusted mirror telling you what's actually landing. Skip this stage and you find out too late that nobody else could follow what you meant." },
@@ -85,7 +61,9 @@ window.DGKSphereLines = (function () {
 
   const TAGLINE = {
     lifesWork: "what I'm here to do",
+    evolution: "what I'm here to learn",
     radiance: 'what keeps me healthy',
+    purpose: 'what deeply fulfils me',
   };
 
   return {
