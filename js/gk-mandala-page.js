@@ -487,7 +487,13 @@ function openPanelFor(i) {
   }
   let body = '';
   const seen = new Set();
-  node.ids.forEach(id => {
+  // A hinge (Core/Vocation) is one key, read two ways — but showing a full
+  // second Mastery/Shadow/Siddhi/Line reading for the second role is the
+  // same key twice, not new information. Only the primary role gets the
+  // full reading; every other role sharing the hinge only adds its own
+  // "My Sphere of X" definition, since that concept genuinely differs
+  // per role even though the key's prose does not repeat.
+  node.ids.forEach((id, idx) => {
     const sp = primes[id];
     if (!sp) return;
     if (node.ids.length > 1) {
@@ -501,7 +507,11 @@ function openPanelFor(i) {
     const roleLabelFull = def ? def.title : (id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id);
     const sphereDefHtml = def ? '<section><div class="card" data-noclick="1">' + hd(col, 'My Sphere of ' + esc(def.title)) +
       '<p>' + esc(def.body) + '</p></div></section>' : '';
-    body += roleSection(id, sp.key, sp.line, sp.seq, seen, roleLabelFull, sphereDefHtml);
+    if (idx === 0) {
+      body += roleSection(id, sp.key, sp.line, sp.seq, seen, roleLabelFull, sphereDefHtml);
+    } else {
+      body += sphereDefHtml;
+    }
   });
   body += functionCard;
 
