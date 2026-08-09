@@ -109,14 +109,49 @@
 
   /* ── the profile ──────────────────────────────────────────────────────── */
 
-  // The four Activation spheres. The rest arrive with the planetary ephemeris;
-  // this table is the part that needs only the Sun.
+  /* The Hologenetic Profile: 13 named spheres over 11 distinct keys. Vocation
+     shares Core's key and Brand shares Life's Work's — the same key read in a
+     different position, which is the whole premise of js/gk-roles.js.
+     'earth' is the point opposite the Sun, as Human Design and Gene Keys both
+     use the word. 'design' means the prenatal instant, 88° of solar arc back. */
   const SPHERES = [
-    { id: 'lifesWork', label: "Life's Work", chart: 'personality', body: 'sun' },
-    { id: 'evolution', label: 'Evolution', chart: 'personality', body: 'earth' },
-    { id: 'radiance', label: 'Radiance', chart: 'design', body: 'sun' },
-    { id: 'purpose', label: 'Purpose', chart: 'design', body: 'earth' },
+    { id: 'lifesWork', label: "Life's Work", seq: 'Activation', chart: 'personality', body: 'sun' },
+    { id: 'evolution', label: 'Evolution', seq: 'Activation', chart: 'personality', body: 'earth' },
+    { id: 'radiance', label: 'Radiance', seq: 'Activation', chart: 'design', body: 'sun' },
+    { id: 'purpose', label: 'Purpose', seq: 'Activation', chart: 'design', body: 'earth' },
+    { id: 'attraction', label: 'Attraction', seq: 'Venus', chart: 'design', body: 'moon' },
+    { id: 'iq', label: 'IQ', seq: 'Venus', chart: 'personality', body: 'venus' },
+    { id: 'eq', label: 'EQ', seq: 'Venus', chart: 'personality', body: 'mars' },
+    { id: 'sq', label: 'SQ', seq: 'Venus', chart: 'design', body: 'venus' },
+    { id: 'core', label: 'Core', seq: 'Venus', chart: 'design', body: 'mars' },
+    { id: 'vocation', label: 'Vocation', seq: 'Pearl', chart: 'design', body: 'mars' },
+    { id: 'culture', label: 'Culture', seq: 'Pearl', chart: 'design', body: 'jupiter' },
+    { id: 'brand', label: 'Brand', seq: 'Pearl', chart: 'personality', body: 'sun' },
+    { id: 'pearl', label: 'Pearl', seq: 'Pearl', chart: 'personality', body: 'jupiter' },
   ];
+
+  /* Bodies are looked up LAZILY, never at load. The planet file cross-checks
+     its Sun against this file's, so requiring it here would close a cycle.
+     A body whose file has not loaded simply yields null and its spheres are
+     absent — the four Activation spheres never depend on any of it. */
+  function bodyLongitude(body, ms) {
+    if (body === 'sun') return sunAt(ms);
+    if (body === 'earth') return norm(sunAt(ms) + 180);
+    const jde = AT.jdeFromMs(ms);
+    if (body === 'moon') {
+      const M = root.DEphMoon;
+      return (M && M.VALID) ? M.longitude(jde) : null;
+    }
+    const P = root.DEphPlanets;
+    return (P && P.VALID) ? P.longitude(body, jde) : null;
+  }
+
+  function bodyError(body) {
+    if (body === 'sun' || body === 'earth') return SUN_ERR;
+    if (body === 'moon') return 0.005;
+    const P = root.DEphPlanets;
+    return (P && P.ERROR_DEG[body]) || 0.2;
+  }
 
   function profile(input) {
     const notes = [];
@@ -144,22 +179,36 @@
       designSun = sunAt(designMs);
     }
 
-    const at = { sun, earth: norm(sun + 180) };
-    const dat = { sun: designSun, earth: norm(designSun + 180) };
     const spheres = Object.create(null);
+    const missing = [];
     SPHERES.forEach(s => {
-      const lam = (s.chart === 'design' ? dat : at)[s.body];
+      // The design Sun and Earth come from the arc even when the prenatal
+      // instant did not converge; every other design body needs the instant.
+      let lam;
+      if (s.chart === 'design' && s.body === 'sun') lam = designSun;
+      else if (s.chart === 'design' && s.body === 'earth') lam = norm(designSun + 180);
+      else if (s.chart === 'design') lam = designMs === null ? null : bodyLongitude(s.body, designMs);
+      else lam = bodyLongitude(s.body, personalityMs);
+
+      if (lam === null) { missing.push(s.label); return; }
       const kl = keyLine(lam);
+      const err = bodyError(s.body);
       spheres[s.id] = {
         key: kl.key,
-        line: precision === 'instant' ? kl.line : null,
+        // A line is only stated when a real instant was given AND the
+        // longitude sits clear of this body's own error bar. Jupiter's bar is
+        // wide enough that saying nothing is the honest answer near an edge.
+        line: (precision === 'instant' && kl.toBoundary >= err) ? kl.line : null,
         lambda: kl.lambda,
         toBoundary: kl.toBoundary,
-        // honest about the error bar rather than quietly confident
-        nearBoundary: kl.toBoundary < SUN_ERR,
-        label: s.label, chart: s.chart, body: s.body,
+        nearBoundary: kl.toBoundary < err,
+        errorDeg: err,
+        label: s.label, seq: s.seq, chart: s.chart, body: s.body,
       };
     });
+    if (missing.length) {
+      notes.push('Ephemeris unavailable for ' + missing.join(', ') + '.');
+    }
 
     return { precision, personalityMs, designMs, spheres, notes };
   }
