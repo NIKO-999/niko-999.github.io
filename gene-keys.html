@@ -235,6 +235,12 @@ svg { overflow: visible; }
 #panel .ovSeq b { display: block; font: 500 26px var(--serif); font-style: normal; margin-bottom: 4px; }
 #panel .ovSeq i { display: block; font: 500 9px var(--mono); font-style: normal; letter-spacing: .2em; text-transform: uppercase; color: var(--ink-3); }
 #panel .card p + p { margin-top: 14px; }
+#panel .ovLink {
+  background: none; border: none; padding: 0; margin: 0; cursor: pointer;
+  font: inherit; color: var(--ink); text-decoration: underline dotted; text-underline-offset: 3px;
+  text-decoration-color: rgba(255,255,255,.35);
+}
+#panel .ovLink:hover { text-decoration-color: currentColor; }
 
 /* ── title block: subject data, bottom-left, dark ─────────────────────── */
 #titleblock {

@@ -564,13 +564,23 @@ function openOverviewFor() {
 
   const ids = Object.keys(primes || {});
   const bySeq = {};
-  const keyToLabels = {};
+  const keyToIds = {};
   ids.forEach(id => {
     const sp = primes[id];
     if (!sp) return;
     (bySeq[sp.seq] = bySeq[sp.seq] || []).push(id);
-    (keyToLabels[sp.key] = keyToLabels[sp.key] || []).push(sphereLabel(id));
+    (keyToIds[sp.key] = keyToIds[sp.key] || []).push(id);
   });
+  // Every sphere id mentioned below becomes a real link back into its own
+  // reading — a static list of names with nothing to click was the whole
+  // complaint, and this is a genuine cross-reference, not decoration.
+  function sphereLinks(key) {
+    return (keyToIds[key] || []).map(id => {
+      const idx = markIndexForSphereId(id);
+      return idx === null ? esc(sphereLabel(id)) :
+        '<button class="ovLink" data-idx="' + idx + '">' + esc(sphereLabel(id)) + '</button>';
+    }).join(' / ');
+  }
   const seqOrder = ['Activation', 'Venus', 'Pearl'].filter(s => bySeq[s]);
   const seqCounts = seqOrder.map(s =>
     '<div class="ovSeq"><b style="color:' + seqCol(s) + '">' + bySeq[s].length + '</b><i>' + esc(s) + '</i></div>'
@@ -581,9 +591,9 @@ function openOverviewFor() {
 
   const ringLinks = (window.DCodonRings && DCodonRings.VALID) ? DCodonRings.shared(uniqueKeys) : [];
   const ringHtml = ringLinks.length ? ringLinks.map(({ ring, keys }) =>
-    '<p>' + keys.map(k => '<b>' + esc((keyToLabels[k] || []).join(' / ')) + '</b> (Key ' + k + ')').join(' and ') +
-    ' share the <b>Ring of ' + esc(ring.name || ring.amino) + '</b> — the same codon family, so these parts of your design run on related biochemical material.</p>'
-  ).join('') : '<p>None of your 13 keys land in the same codon ring this time — each is drawing on its own distinct biochemical family.</p>';
+    '<p>' + keys.map(k => sphereLinks(k) + ' (Key ' + k + ')').join(' and ') +
+    ' share the <b>Ring of ' + esc(ring.name || ring.amino) + '</b>. Keys in the same ring run on the same underlying material, so these two don\'t operate as separate storylines — one tends to intensify or echo the other, and the theme they share shows up doing double duty in your life rather than staying contained to either sphere alone.</p>'
+  ).join('') : '<p>None of your 13 keys land in the same codon ring this time — each is drawing on its own distinct family, running as thirteen genuinely separate storylines rather than a few amplified ones.</p>';
 
   const seenPairs = new Set();
   const partnerHtml = [];
@@ -593,11 +603,11 @@ function openOverviewFor() {
     const pairKey = [k, p].sort((a, b) => a - b).join('-');
     if (seenPairs.has(pairKey)) return;
     seenPairs.add(pairKey);
-    partnerHtml.push('<p><b>' + esc((keyToLabels[k] || []).join(' / ')) + '</b> (Key ' + k + ') and <b>' +
-      esc((keyToLabels[p] || []).join(' / ')) + '</b> (Key ' + p + ') are <b>programming partners</b> — exact binary opposites of each other, meaning these two parts of you were always going to show up together, each completing what the other leaves out.</p>');
+    partnerHtml.push('<p>' + sphereLinks(k) + ' (Key ' + k + ') and ' +
+      sphereLinks(p) + ' (Key ' + p + ') are programming partners — exact genetic opposites of each other. Whichever one you live consciously, the other is still running underneath as its necessary unconscious half; neither one fully makes sense read alone, and pressure in one of these spheres is often actually asking something of the other.</p>');
   });
   const partnersFinalHtml = partnerHtml.length ? partnerHtml.join('') :
-    '<p>None of your 13 keys pair off as programming partners this time — each is running its own independent process.</p>';
+    '<p>None of your 13 keys pair off as programming partners this time — each is running as its own independent process, with its complement living outside this particular profile.</p>';
 
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">whole profile</div>' +
@@ -609,6 +619,13 @@ function openOverviewFor() {
     '<section><div class="card" data-noclick="1">' + hd(col, 'Ring Connections') + ringHtml + '</div></section>' +
     '<section><div class="card" data-noclick="1">' + hd(col, 'Programming Partners') + partnersFinalHtml + '</div></section>';
 
+  content.querySelectorAll('.ovLink').forEach(btn => {
+    btn.addEventListener('click', e => {
+      e.stopPropagation();
+      selectSphere(Number(btn.dataset.idx));
+    });
+  });
+
   coreLbl.style.color = col;
   coreLbl.textContent = 'OVERVIEW';
   coreHalo.setAttribute('fill', col); coreHalo.setAttribute('opacity', 0.20);
@@ -618,6 +635,10 @@ function openOverviewFor() {
 function sphereLabel(id) {
   const m = marks.find(mk => mk.node.ids.indexOf(id) !== -1);
   return m ? m.node.label : id;
+}
+function markIndexForSphereId(id) {
+  const m = marks.find(mk => mk.node.ids.indexOf(id) !== -1);
+  return m ? m.i : null;
 }
 
 function selectSphere(i) {
