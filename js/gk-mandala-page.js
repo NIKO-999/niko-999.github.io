@@ -324,6 +324,7 @@ previewCard.addEventListener('click', () => { if (previewIdx >= 0) { const i = p
 const panel = document.getElementById('panel');
 const content = document.getElementById('pcontent');
 let currentSel = -1;
+const OVERVIEW_SEL = -2; // currentSel value meaning "the centre profile overview is open", not any sphere
 let panelOpen = false;
 let primes = null;   // profileData.spheres, keyed by sphere id
 
@@ -548,6 +549,77 @@ function sweep() {
   panel.classList.add('sweeping');
 }
 
+// The centre is the one place nothing was ever shown — a click there just
+// re-ran the reveal. This gives it a reason: the profile read as a whole,
+// which is real information no single sphere card can carry — how the
+// three sequences balance, and the codon-ring/programming-partner links
+// that only exist BETWEEN two of your own keys, not within one of them.
+function openOverviewFor() {
+  const col = NEUTRAL;
+  panel.querySelector('.edge').style.background = col;
+  panel.querySelector('.edge').style.boxShadow =
+    '0 0 8px ' + col + ', 0 0 22px ' + col + ', 0 0 46px rgba(207,239,255,0.85), 0 0 90px rgba(207,239,255,0.5)';
+  panel.querySelector('.edgeGlow').style.background =
+    'linear-gradient(90deg, rgba(207,239,255,0.55) 0%, rgba(207,239,255,0.16) 35%, transparent 100%)';
+
+  const ids = Object.keys(primes || {});
+  const bySeq = {};
+  const keyToLabels = {};
+  ids.forEach(id => {
+    const sp = primes[id];
+    if (!sp) return;
+    (bySeq[sp.seq] = bySeq[sp.seq] || []).push(id);
+    (keyToLabels[sp.key] = keyToLabels[sp.key] || []).push(sphereLabel(id));
+  });
+  const seqOrder = ['Activation', 'Venus', 'Pearl'].filter(s => bySeq[s]);
+  const seqCounts = seqOrder.map(s =>
+    '<div class="ovSeq"><b style="color:' + seqCol(s) + '">' + bySeq[s].length + '</b><i>' + esc(s) + '</i></div>'
+  ).join('');
+
+  const allKeys = ids.map(id => primes[id].key);
+  const uniqueKeys = [...new Set(allKeys)];
+
+  const ringLinks = (window.DCodonRings && DCodonRings.VALID) ? DCodonRings.shared(uniqueKeys) : [];
+  const ringHtml = ringLinks.length ? ringLinks.map(({ ring, keys }) =>
+    '<p>' + keys.map(k => '<b>' + esc((keyToLabels[k] || []).join(' / ')) + '</b> (Key ' + k + ')').join(' and ') +
+    ' share the <b>Ring of ' + esc(ring.name || ring.amino) + '</b> — the same codon family, so these parts of your design run on related biochemical material.</p>'
+  ).join('') : '<p>None of your 13 keys land in the same codon ring this time — each is drawing on its own distinct biochemical family.</p>';
+
+  const seenPairs = new Set();
+  const partnerHtml = [];
+  uniqueKeys.forEach(k => {
+    const p = window.DHexagrams && DHexagrams.VALID ? DHexagrams.partner(k) : null;
+    if (!p || uniqueKeys.indexOf(p) === -1) return;
+    const pairKey = [k, p].sort((a, b) => a - b).join('-');
+    if (seenPairs.has(pairKey)) return;
+    seenPairs.add(pairKey);
+    partnerHtml.push('<p><b>' + esc((keyToLabels[k] || []).join(' / ')) + '</b> (Key ' + k + ') and <b>' +
+      esc((keyToLabels[p] || []).join(' / ')) + '</b> (Key ' + p + ') are <b>programming partners</b> — exact binary opposites of each other, meaning these two parts of you were always going to show up together, each completing what the other leaves out.</p>');
+  });
+  const partnersFinalHtml = partnerHtml.length ? partnerHtml.join('') :
+    '<p>None of your 13 keys pair off as programming partners this time — each is running its own independent process.</p>';
+
+  content.innerHTML =
+    '<div class="eyebrow" style="color:' + col + '">whole profile</div>' +
+    '<h2>' + hglyph(col) + 'Profile Overview</h2>' +
+    '<div class="key">' + ids.length + ' spheres · ' + uniqueKeys.length + ' distinct keys</div>' +
+    '<section><div class="card" data-noclick="1">' + hd(col, 'Sequence Balance') +
+    '<div class="states" style="grid-template-columns:repeat(' + seqOrder.length + ',1fr)">' + seqCounts + '</div>' +
+    '</div></section>' +
+    '<section><div class="card" data-noclick="1">' + hd(col, 'Ring Connections') + ringHtml + '</div></section>' +
+    '<section><div class="card" data-noclick="1">' + hd(col, 'Programming Partners') + partnersFinalHtml + '</div></section>';
+
+  coreLbl.style.color = col;
+  coreLbl.textContent = 'OVERVIEW';
+  coreHalo.setAttribute('fill', col); coreHalo.setAttribute('opacity', 0.20);
+  coreRing.setAttribute('stroke', col); coreDot.setAttribute('fill', col);
+  clearBeam();
+}
+function sphereLabel(id) {
+  const m = marks.find(mk => mk.node.ids.indexOf(id) !== -1);
+  return m ? m.node.label : id;
+}
+
 function selectSphere(i) {
   if (!nodeReady(marks[i])) return;
   hidePreview();
@@ -576,7 +648,7 @@ function closePanel() {
   currentSel = -1;
   paintMarks();
   stageEl.style.transform = 'translateX(0)';
-  coreLbl.style.color = NEUTRAL; coreLbl.textContent = '';
+  coreLbl.style.color = NEUTRAL; coreLbl.textContent = primes ? 'OVERVIEW' : '';
   coreHalo.setAttribute('fill', NEUTRAL); coreHalo.setAttribute('opacity', 0.10);
   coreRing.setAttribute('stroke', NEUTRAL); coreDot.setAttribute('fill', NEUTRAL);
   clearBeam();
@@ -617,10 +689,31 @@ function revealMandala() {
   legendEl.style.opacity = '1';
   legendEl.style.pointerEvents = 'auto';
   const hintEl = document.getElementById('hint');
-  if (hintEl) hintEl.innerHTML = 'Hologenetic Profile <b>·</b> click a sphere to open its reading';
+  if (hintEl) hintEl.innerHTML = 'Hologenetic Profile <b>·</b> click a sphere, or the centre, to open a reading';
+  if (primes) { coreLbl.style.color = NEUTRAL; coreLbl.textContent = 'OVERVIEW'; }
   paintMarks();
 }
-coreHit.addEventListener('click', e => { e.stopPropagation(); revealMandala(); });
+coreHit.addEventListener('click', e => {
+  e.stopPropagation();
+  if (!revealed) { revealMandala(); return; }
+  if (!primes) return; // no profile fitted yet — nothing to overview
+  if (currentSel === OVERVIEW_SEL) { closePanel(); return; }
+  hidePreview();
+  const wasOpen = panelOpen;
+  currentSel = OVERVIEW_SEL; panelOpen = true;
+  paintMarks();
+  if (wasOpen) {
+    panel.classList.remove('on');
+    setTimeout(() => {
+      openOverviewFor();
+      requestAnimationFrame(() => { panel.classList.add('on'); sweep(); });
+    }, 260);
+  } else {
+    stageEl.style.transform = innerWidth > 900 ? 'translateX(-' + (PANEL_W / 2) + 'px)' : 'translateX(0)';
+    openOverviewFor();
+    requestAnimationFrame(() => { panel.classList.add('on'); sweep(); });
+  }
+});
 
 marks.forEach(m => {
   m.hit.addEventListener('click', () => tapNode(m.i));
@@ -757,6 +850,7 @@ function apply() {
   const noteEl = document.getElementById('clockNote');
   if (noteEl) noteEl.textContent = clockNote(inst);
 
+  if (revealed) { coreLbl.style.color = NEUTRAL; coreLbl.textContent = 'OVERVIEW'; }
   paintMarks();
   refreshTransit();
   writeURL(null);
