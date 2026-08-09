@@ -282,6 +282,14 @@ const gLeader = document.createElementNS(SVGNS, 'g');
 const gDetail = document.createElementNS(SVGNS, 'g');
 [gGuide, gStack, gLeader, gDetail].forEach(g => svg.appendChild(g));
 
+// Generous invisible target over the closed screw — the plates themselves are
+// clickable, but a thin stack is a small thing to hit with a thumb.
+const hitPad = document.createElementNS(SVGNS, 'rect');
+hitPad.setAttribute('fill', 'transparent');
+hitPad.style.cursor = 'pointer';
+hitPad.addEventListener('click', (e) => { e.stopPropagation(); if (exT < 0.5) openAssembly(); });
+gGuide.appendChild(hitPad);
+
 const spindle = document.createElementNS(SVGNS, 'line');
 spindle.setAttribute('stroke', 'var(--ink-3)');
 spindle.setAttribute('stroke-width', '0.75');
@@ -345,6 +353,12 @@ function render() {
   const mobile = W < BP;
   // spindle spans the stack plus overrun, per drawing convention
   const y0 = plateY(0) - 26, y1 = plateY(N - 1) + 26;
+  const padW = primeR * 2 + 40;
+  hitPad.setAttribute('x', axisX - padW / 2);
+  hitPad.setAttribute('y', y0);
+  hitPad.setAttribute('width', padW);
+  hitPad.setAttribute('height', Math.max(0, y1 - y0));
+  hitPad.style.display = ex < 0.5 ? '' : 'none';   // only while closed
   spindle.setAttribute('x1', axisX); spindle.setAttribute('y1', y0);
   spindle.setAttribute('x2', axisX); spindle.setAttribute('y2', y1);
 
@@ -362,7 +376,6 @@ function render() {
     p.face.setAttribute('stroke', isSel ? 'var(--mark)' : 'var(--ink)');
     p.face.setAttribute('stroke-width', isSel ? 1.4 : (isPrime ? 0.95 : 0.6));
     p.face.setAttribute('fill-opacity', ex > 0.02 ? 0.9 : 0.98);
-    p.g.style.pointerEvents = ex > 0.35 ? 'auto' : 'none';
     // plate thickness: a second arc under the face, joined at the extremes
     const t = isPrime ? 3.4 : 2.2;
     p.rim.setAttribute('d',
@@ -424,7 +437,7 @@ function drawCallouts() {
     // the label — solid geometry so which four are yours is unmistakable,
     // rather than a dashed line that reads as annotation.
     const tipX = x - 3, tailX = lx + 26, hw = 3.1;
-    el('path', {
+    const ptr = el('path', {
       d: 'M' + tipX + ',' + y +
          ' L' + (tailX + 16) + ',' + (y - hw) +
          ' L' + tailX + ',' + (y - hw) +
@@ -436,6 +449,15 @@ function drawCallouts() {
     }, gLeader);
     el('circle', { cx: x, cy: y, r: 2.4, fill: isSel ? 'var(--mark)' : 'var(--ink)',
       'fill-opacity': ptrO }, gLeader);
+    // The pointer sits over the plates, so it has to BE the target — left
+    // inert it swallowed the click and the background handler closed the
+    // assembly. A fat invisible band over it makes it a thumb-sized one.
+    const hit = el('rect', { x: tailX, y: y - 13, width: Math.max(10, tipX - tailX + 8),
+      height: 26, fill: 'transparent' }, gLeader);
+    [ptr, hit].forEach(n => {
+      n.style.cursor = 'pointer';
+      n.addEventListener('click', (e) => { e.stopPropagation(); select(key); });
+    });
 
     const lab = document.createElement('div');
     lab.className = 'callout' + (isSel ? ' sel' : '');
