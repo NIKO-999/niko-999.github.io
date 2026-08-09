@@ -365,7 +365,7 @@ function paintMarks() {
     m.labelEl.style.color = col;
     m.labelEl.style.textShadow = seq ? ('0 0 10px ' + seqRgb(seq, 0.55)) : 'none';
     m.labelEl.style.opacity = revealed ? (on ? 1 : (dimmed ? 0.28 : (ready ? 1 : 0.4))) : 0;
-    m.subEl.textContent = ready ? (seq + ' · line ' + line) : 'not yet fitted';
+    m.subEl.textContent = ready ? (seq + (line ? ' · line ' + line : '')) : 'not yet fitted';
     m.hit.style.cursor = ready ? 'pointer' : 'default';
 
     // mobile legend chip mirrors the same state, colour and brightness
@@ -374,7 +374,7 @@ function paintMarks() {
     m.chipEl.classList.toggle('on', on);
     m.chipEl.disabled = !ready;
     m.chipB.textContent = m.node.label;
-    m.chipI.textContent = ready ? (seq + ' · L' + line) : 'not fitted';
+    m.chipI.textContent = ready ? (seq + (line ? ' · L' + line : '')) : 'not fitted';
   });
 }
 
@@ -384,7 +384,12 @@ function roleSection(roleId, keyNum, line, seq) {
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
   const prose = (window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null) || c;
   if (!prose || !k) return '';
-  const ln = (line && window.DGKLines) ? DGKLines.get(keyNum, line) : null;
+  // Sphere-specific line keynote (what line N means when it IS this sphere,
+  // confirmed against real Golden Path material) takes priority; the
+  // key-based one (js/gk-lines.js — what line N means for this key,
+  // regardless of sphere) is the fallback when no sphere data exists yet.
+  const sln = (line && window.DGKSphereLines) ? DGKSphereLines.get(roleId, line) : null;
+  const ln = sln || ((line && window.DGKLines) ? DGKLines.get(keyNum, line) : null);
   const col = seqCol(seq);
   let html = '';
   if (ln) {
@@ -439,12 +444,18 @@ function openPanelFor(i) {
   });
 
   const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
+  // "My [Sphere] · [tagline]" — real, confirmed against the official app,
+  // only shown for spheres with a source-verified tagline. Not every sphere
+  // has one yet, by design (see js/gk-sphere-lines.js).
+  const tag = window.DGKSphereLines ? DGKSphereLines.tagline(primary) : null;
+  const taglineHtml = tag ? '<div class="tagline">My ' + esc(node.label) + ' <span>·</span> ' + esc(tag) + '</div>' : '';
 
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">' + esc(sp0.seq) + ' sequence' + (node.ids.length > 1 ? ' · hinge' : '') + '</div>' +
     '<h2>' + esc(node.label) + '</h2>' +
     '<div class="key">Key ' + sp0.key + (sp0.line ? '.' + sp0.line : '') + (k0 ? ' · ' + esc(k0.name) : '') + '</div>' +
     triad +
+    taglineHtml +
     body;
 
   content.querySelectorAll('.card').forEach(c => {
