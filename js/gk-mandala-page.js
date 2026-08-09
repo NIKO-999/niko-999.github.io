@@ -394,8 +394,14 @@ function roleSection(roleId, keyNum, line, seq) {
   }
   html += '<section><div class="card"><h3 style="color:' + col + '">Mastery · ' + esc(k.gift) + '</h3>' +
     '<p>' + esc(prose.gift) + '</p></div></section>';
+  const states = window.DGKShadowStates ? DGKShadowStates.get(keyNum) : null;
+  const stateLabels = { repressive: 'Repressive', reactive: 'Reactive', dilemma: 'Dilemma', victim: 'Victim State' };
+  const statesHtml = states ? '<div class="states">' +
+    ['repressive', 'reactive', 'dilemma', 'victim'].map(k2 =>
+      '<div class="state"><b>' + stateLabels[k2] + '</b><i>' + esc(states[k2]) + '</i></div>'
+    ).join('') + '</div>' : '';
   html += '<section><div class="card"><h3 style="color:' + col + '">Shadow · ' + esc(k.shadow) + '</h3>' +
-    '<p>' + esc(prose.shadow) + '</p></div></section>';
+    '<p>' + esc(prose.shadow) + '</p>' + statesHtml + '</div></section>';
   html += '<section><div class="card"><h3 style="color:' + col + '">Invitation · ' + esc(k.siddhi) + '</h3>' +
     '<p>' + esc(prose.invitation) + '</p></div></section>';
   return html;

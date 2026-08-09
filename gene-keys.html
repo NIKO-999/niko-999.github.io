@@ -208,6 +208,20 @@ svg { overflow: visible; }
 #panel .card:hover { background: rgba(255,255,255,0.02); }
 #panel .card:active { background: rgba(255,255,255,0.045); }
 
+/* the label-with-leader-line row, same rhythm as the old exploded-plate
+   sheet's .s-lab/.s-body pairs, restyled for this theme: a small caps
+   label with a hairline trailing off, the value beneath it in mono. */
+#panel .states {
+  margin-top: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px 20px;
+}
+#panel .state b {
+  display: flex; align-items: center; gap: 8px;
+  font: 500 8px var(--mono); letter-spacing: .22em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 4px;
+}
+#panel .state b::after { content: ''; flex: 1; height: 1px; background: rgba(255,255,255,.08); }
+#panel .state i { font: 400 12px var(--mono); font-style: normal; color: var(--ink); letter-spacing: .01em; }
+
 /* ── title block: subject data, bottom-left, dark ─────────────────────── */
 #titleblock {
   position: fixed; left: 22px; bottom: 22px; z-index: 6;
@@ -314,6 +328,7 @@ body.unfitted #stage { opacity: .18; }
 <script src="js/gk-vocation.js" defer></script>
 <script src="js/gk-core.js" defer></script>
 <script src="js/gk-lines.js" defer></script>
+<script src="js/gk-shadow-states.js" defer></script>
 <script src="js/gk-mandala-page.js" defer></script>
 </body>
 </html>
