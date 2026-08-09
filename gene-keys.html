@@ -212,6 +212,11 @@ body.unfitted #stage { opacity: .18; }
 @media (prefers-reduced-motion: reduce) {
   #panel, #stage { transition: none; }
 }
+/* Mobile's replacement for the continuous rotation: an opacity-only pulse,
+   which the browser can composite from an already-rasterised filtered layer
+   instead of recomputing the blur every frame the way a rotating transform
+   on a filtered element forces it to. */
+@keyframes breathe { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
 </style>
 </head>
 <body>

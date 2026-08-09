@@ -80,9 +80,14 @@ const PANEL_W = 420;
    more of a phone screen than the desktop 0.40-of-min-dimension rule gives
    it. The decorative outer hex/dashed ring is allowed to bleed off the
    edges; the nodes themselves stay well inside frame either way. */
+/* On-screen size scales with R^2, not R — the viewBox is fixed at 400 local
+   units while SZ (the actual pixel size) is R*2.15, so both the local
+   radius AND the local-to-pixel ratio grow with R. 0.60 of viewport width
+   put the hexagon well past the screen edge; 0.47 keeps it inside with a
+   little air, still a real gain over the original 0.40-of-min-dimension. */
 function isMobile() { return innerWidth <= 899; }
 function geometry() {
-  R = isMobile() ? innerWidth * 0.60 : Math.min(innerWidth, innerHeight) * 0.40;
+  R = isMobile() ? innerWidth * 0.47 : Math.min(innerWidth, innerHeight) * 0.40;
   SZ = R * 2.15;
   svg.setAttribute('viewBox', '0 0 400 400');
   svg.setAttribute('width', SZ);
@@ -104,32 +109,46 @@ function makeGlow(id, dev) {
 makeGlow('glowWide', 9); makeGlow('glowSoft', 4.5); makeGlow('glowTight', 2);
 svg.appendChild(defs);
 
-function ring(r, dash, op, w, rotSec) {
-  const c = el('circle', { cx: CX, cy: CY, r, fill: 'none', stroke: NEUTRAL, 'stroke-width': w || 1, opacity: op, filter: 'url(#glowSoft)' });
-  if (dash) c.setAttribute('stroke-dasharray', dash);
-  const g = el('g', {}); g.appendChild(c); svg.appendChild(g);
-  if (rotSec) {
+/* Continuous animateTransform rotation on a FILTERED element (every one of
+   these carries a feGaussianBlur) forces the browser to re-rasterise the
+   whole blurred layer every frame — cheap on a desktop GPU, a real cost on
+   a phone, and that cost was the mobile lag. A rotating g gets that
+   treatment; a g that only changes opacity does not, because the browser
+   can reuse the same rasterised filter output and just cross-fade it.
+   Mobile therefore gets a slow opacity breathe instead of a spin; desktop
+   keeps the spin, since it was never the laggy one. */
+function spinOrBreathe(g, rotSec, breatheSec, breatheDelay) {
+  if (isMobile()) {
+    g.style.animation = 'breathe ' + breatheSec + 's ease-in-out ' + (breatheDelay || 0) + 's infinite';
+  } else {
     g.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate',
       from: '0 ' + CX + ' ' + CY, to: (rotSec > 0 ? 360 : -360) + ' ' + CX + ' ' + CY,
       dur: Math.abs(rotSec) + 's', repeatCount: 'indefinite' }));
   }
+}
+
+function ring(r, dash, op, w, rotSec) {
+  const c = el('circle', { cx: CX, cy: CY, r, fill: 'none', stroke: NEUTRAL, 'stroke-width': w || 1, opacity: op, filter: 'url(#glowSoft)' });
+  if (dash) c.setAttribute('stroke-dasharray', dash);
+  const g = el('g', {}); g.appendChild(c); svg.appendChild(g);
+  if (rotSec) spinOrBreathe(g, rotSec, 9, 0.4);
   return g;
 }
 
-/* Everything except the core itself starts collapsed onto the core point.
-   Clicking the core zooms it out into the full mandala — the "spread" is
-   simply a CSS scale transition about the core's own coordinate, so every
-   rim node, the flower, and the hexagon all appear to fly outward from the
-   one point you clicked. Cheap: one transform, no per-node animation. */
+/* Everything except the core itself starts small and dim — "at a distance"
+   — rather than collapsed to nothing. Clicking the core zooms it in: a CSS
+   scale transition about the core's own coordinate, so the whole mandala
+   visibly grows toward you instead of appearing from a point. */
 const expandG = el('g', {});
 expandG.style.transformOrigin = CX + 'px ' + CY + 'px';
-expandG.style.transform = 'scale(0.001)';
+expandG.style.transform = 'scale(0.46)';
+expandG.style.opacity = '0.55';
 /* Mobile gets an actual zoom: the curve overshoots past 1 before settling,
    so the mandala punches past its final size and pulls back — reads as a
    camera push, not just a gentle unfold. Desktop keeps the calmer spread. */
 expandG.style.transition = isMobile()
-  ? 'transform .85s cubic-bezier(.28,1.65,.4,1)'
-  : 'transform 1.15s cubic-bezier(.16,.86,.2,1)';
+  ? 'transform .85s cubic-bezier(.28,1.65,.4,1), opacity .6s ease'
+  : 'transform 1.15s cubic-bezier(.16,.86,.2,1), opacity .8s ease';
 svg.appendChild(expandG);
 
 const outerG = el('g', {});
@@ -156,8 +175,7 @@ NODES.forEach((node, i) => {
 
 const petalG = el('g', { opacity: 0.9 });
 expandG.appendChild(petalG);
-petalG.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate',
-  from: '0 ' + CX + ' ' + CY, to: '-360 ' + CX + ' ' + CY, dur: '110s', repeatCount: 'indefinite' }));
+spinOrBreathe(petalG, -110, 7, 0);
 const petalSeq = ['Activation', 'Activation', 'Venus', 'Venus', 'Pearl', 'Pearl'];
 for (let i = 0; i < 6; i++) {
   const a = i * Math.PI / 3 - Math.PI / 2;
@@ -173,11 +191,11 @@ function hexPoints(r, rot) {
 const hex1G = el('g', {});
 hex1G.appendChild(el('polygon', { points: hexPoints(R * 0.66, 0), fill: 'none', stroke: NEUTRAL, 'stroke-width': 1, opacity: 0.30, filter: 'url(#glowSoft)' }));
 expandG.appendChild(hex1G);
-hex1G.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate', from: '0 ' + CX + ' ' + CY, to: '360 ' + CX + ' ' + CY, dur: '50s', repeatCount: 'indefinite' }));
+spinOrBreathe(hex1G, 50, 8, 0.8);
 const hex2G = el('g', {});
 hex2G.appendChild(el('polygon', { points: hexPoints(R * 0.66, Math.PI / 6), fill: 'none', stroke: NEUTRAL, 'stroke-width': 0.6, opacity: 0.18, filter: 'url(#glowSoft)' }));
 expandG.appendChild(hex2G);
-hex2G.appendChild(el('animateTransform', { attributeName: 'transform', type: 'rotate', from: '360 ' + CX + ' ' + CY, to: '0 ' + CX + ' ' + CY, dur: '70s', repeatCount: 'indefinite' }));
+spinOrBreathe(hex2G, -70, 10, 1.6);
 
 const dashRingG = ring(R * 0.98, '3 10', 0.22, 1, 90);
 expandG.appendChild(dashRingG);
@@ -443,6 +461,7 @@ function revealMandala() {
   if (revealed) return;
   revealed = true;
   expandG.style.transform = 'scale(1)';
+  expandG.style.opacity = '1';
   legendEl.style.opacity = '1';
   legendEl.style.pointerEvents = 'auto';
   const hintEl = document.getElementById('hint');
