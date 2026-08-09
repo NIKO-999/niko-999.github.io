@@ -85,6 +85,8 @@ body {
 }
 #tb-today button:hover { color: var(--mark); border-bottom-color: var(--mark); }
 #tb-today .hit { color: var(--mark); }
+#titleblock .v input#tz { width: 100%; min-width: 120px; }
+#titleblock .v input.bad { color: var(--mark); }
 #titleblock .v input {
   font: inherit; font-size: 11px; letter-spacing: .06em;
   color: var(--ink); background: transparent; border: none;
@@ -103,7 +105,17 @@ body {
   padding-right: 6px;
 }
 body.open #spec { opacity: 1; pointer-events: auto; }
-body.open #hint { opacity: 0; }
+body.open #unfitted {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
+  font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
+  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
+}
+body.unfitted #unfitted { opacity: 1; }
+body.unfitted #hint { opacity: 0; }
+#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
+
+#hint { opacity: 0; }
 #s-hex { display: none; flex-direction: column-reverse; gap: 3px; width: 46px; margin-bottom: 14px; }
 #s-hex i { display: block; height: 3px; background: var(--ink); }
 #s-hex i.yin { background: linear-gradient(90deg, var(--ink) 0 40%, transparent 40% 60%, var(--ink) 60% 100%); }
@@ -190,6 +202,16 @@ body.open #notes { opacity: 0; pointer-events: none; }
   border-top: 1px solid var(--ink-4); padding-top: 10px; margin-top: 14px;
 }
 @media (max-width: 899px) { #notes { display: none; } }
+#unfitted {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
+  font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
+  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
+}
+body.unfitted #unfitted { opacity: 1; }
+body.unfitted #hint { opacity: 0; }
+#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
+
 #hint {
   position: fixed; left: 24px; bottom: 24px; z-index: 4;
   transition: opacity .3s;
@@ -201,7 +223,17 @@ body.open #notes { opacity: 0; pointer-events: none; }
 
 @media (max-width: 899px) {
   #titleblock { left: 22px; right: 22px; min-width: 0; bottom: 16px; }
-  #hint { display: none; }
+  #unfitted {
+  position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
+  max-width: 320px; text-align: center; z-index: 3; pointer-events: none;
+  font-size: 10px; letter-spacing: .14em; line-height: 2; text-transform: uppercase;
+  color: var(--ink-3); opacity: 0; transition: opacity .3s var(--ease);
+}
+body.unfitted #unfitted { opacity: 1; }
+body.unfitted #hint { opacity: 0; }
+#unfitted b { display: block; color: var(--mark); letter-spacing: .26em; margin-bottom: 6px; }
+
+#hint { display: none; }
   #drawing { transition: opacity 300ms var(--ease); }
   body.open #drawing { opacity: .16; }
   #spec {
@@ -240,9 +272,13 @@ body.open #notes { opacity: 0; pointer-events: none; }
   <div id="s-foot">Symbolic apparatus — offered for reflection, not asserted as fact. Subject data is not transmitted.</div>
 </section>
 
+<div id="unfitted"></div>
+
 <div id="titleblock">
   <div><span class="k">Assembly</span><span class="v">Sixty-four plates</span></div>
   <div><span class="k">Subject d.o.b.</span><span class="v"><input type="date" id="dob" min="1900-01-01"></span></div>
+  <div><span class="k">Time of birth</span><span class="v"><input type="time" id="tob"></span></div>
+  <div><span class="k">Zone</span><span class="v"><input type="text" id="tz" list="tzlist" spellcheck="false" autocapitalize="off" placeholder="Area/City"><datalist id="tzlist"></datalist></span></div>
   <div><span class="k">Today</span><span class="v" id="tb-today"></span></div>
   <div><span class="k">Sheet</span><span class="v" id="tb-sheet">1 of 1 · Fig. 1</span></div>
 </div>
@@ -250,7 +286,7 @@ body.open #notes { opacity: 0; pointer-events: none; }
 <section id="notes">
   <div class="n-fig">Fig. 1 — General arrangement</div>
   <p>The apparatus comprises sixty-four (64) plates carried upon a common spindle, in the order of the solar wheel.</p>
-  <p>Four plates of increased diameter are fitted according to the subject's date of birth and are identified by callout: <b>Life's Work</b>, taken at the sun; <b>Evolution</b>, opposite; <b>Radiance</b>, taken 88° prior; and <b>Purpose</b>, opposite that.</p>
+  <p>Four plates of increased diameter are fitted according to the subject's date and time of birth and are identified by callout: <b>Life's Work</b>, taken at the sun; <b>Evolution</b>, opposite; <b>Radiance</b>, taken 88° prior; and <b>Purpose</b>, opposite that. Each fitted plate is further resolved to one of six lines, which only a birth time can determine. Longitudes are geocentric, so the zone is required and the place is not.</p>
   <p>Selecting the assembly separates it along the spindle; the fitted plates are then marked by pointer. Selecting a marked plate withdraws it for inspection at Fig. 2.</p>
   <p class="n-note">Plates not fitted to this assembly remain available for inspection and are described in general terms only.</p>
 </section>
@@ -260,6 +296,8 @@ body.open #notes { opacity: 0; pointer-events: none; }
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
 <script src="js/codon-rings.js"></script>
+<script src="js/astro-time.js"></script>
+<script src="js/gk-profile.js"></script>
 <script src="js/gk-roles.js"></script>
 <script src="js/gene-keys-content.js" defer></script>
 <script src="js/gk-lifeswork.js" defer></script>

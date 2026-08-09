@@ -444,7 +444,7 @@ function refreshToday() {
 }
 
 function myKeys() {
-  return primes ? ROLES.map(r => primes[r[0]].key) : [];
+  return primes ? ROLES.map(r => primes[r[0]] && primes[r[0]].key).filter(Boolean) : [];
 }
 
 function fillLinkage(n) {
@@ -468,6 +468,29 @@ function fillLinkage(n) {
     b.addEventListener('click', e => { e.stopPropagation(); select(k); });
     return b;
   };
+
+  // The line comes first: it is the part of the fitting that only a birth
+  // time can determine, and it is what makes two people with the same key
+  // read differently.
+  (roleOf[INDEX_OF[n]] || []).forEach(ri => {
+    const sp = primes[ROLES[ri][0]];
+    if (!sp || sp.line == null) return;
+    row(ROLES[ri][1], dd => {
+      const b = document.createElement('b');
+      b.textContent = 'Line ' + sp.line;
+      dd.appendChild(b);
+      dd.appendChild(document.createTextNode(' of 6'));
+      // Say so when the longitude sits inside the solar series' own error bar
+      // rather than presenting a coin-flip as a fact.
+      if (sp.nearBoundary) {
+        const i = document.createElement('i');
+        i.style.fontStyle = 'normal';
+        i.className = 'own';
+        i.textContent = ' · on the boundary, may be either side';
+        dd.appendChild(i);
+      }
+    });
+  });
 
   const partner = window.DHexagrams && DHexagrams.VALID ? DHexagrams.partner(n) : null;
   if (partner) row('Partner', dd => {
@@ -624,17 +647,98 @@ partsEl.addEventListener('keydown', e => {
   partsEl.setAttribute('aria-activedescendant', 'plate-' + DGeneKeys.WHEEL[activeI]);
 });
 
-/* ── subject data ─────────────────────────────────────────────────────── */
+/* ── subject data ─────────────────────────────────────────────────────────
+   A birth time is required. The Sun crosses a line in about 23 hours, so a
+   date alone cannot place one — and the design-side planets need a real
+   instant, not a date. Rather than guess a line and be wrong about half the
+   time, the assembly stays unfitted until date, time and zone are all given.
+
+   Legacy ?dob= links prefill the date and then ask for the rest. The keys
+   such a link used to produce are unchanged once a time is supplied at the
+   same nominal noon, and DGKProfile asserts that agreement at load. */
 const dob = document.getElementById('dob');
+const tob = document.getElementById('tob');
+const tzEl = document.getElementById('tz');
+const unfitted = document.getElementById('unfitted');
 dob.max = new Date().toISOString().slice(0, 10);
-function currentISO() {
-  const [y, m, d] = (dob.value || '').split('-').map(Number);
-  return (d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100) ? dob.value : null;
+
+(function fillZones() {
+  const dl = document.getElementById('tzlist');
+  if (!dl || !window.DAstroTime) return;
+  DAstroTime.zoneList().forEach(z => {
+    const o = document.createElement('option');
+    o.value = z;
+    dl.appendChild(o);
+  });
+})();
+
+// Intl is the authority, not the datalist. supportedValuesOf omits names it
+// still accepts — 'UTC' is absent from the list yet perfectly valid, and so
+// are aliases like Asia/Calcutta and Europe/Kiev that people genuinely have.
+// Requiring list membership rejected the browser's own resolved zone.
+function validZone(z) {
+  if (!z) return false;
+  try { new Intl.DateTimeFormat('en-US', { timeZone: z }); return true; }
+  catch (e) { return false; }
 }
+
+// A real calendar date, not merely a well-shaped string: Date.UTC silently
+// rolls 2001-02-31 forward into March, which the old check let through.
+function currentDate() {
+  const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dob.value || '');
+  if (!m) return null;
+  const y = +m[1], mo = +m[2], d = +m[3];
+  if (y < 1900 || y > 2100 || mo < 1 || mo > 12 || d < 1 || d > 31) return null;
+  const probe = new Date(Date.UTC(y, mo - 1, d));
+  if (probe.getUTCMonth() !== mo - 1 || probe.getUTCDate() !== d) return null;
+  return { y, mo, d };
+}
+
+function currentTime() {
+  const m = /^(\d{2}):(\d{2})/.exec(tob.value || '');
+  if (!m) return null;
+  const h = +m[1], mi = +m[2];
+  return (h < 24 && mi < 60) ? { h, mi } : null;
+}
+
+let profileData = null;
+
 function apply() {
-  const iso = currentISO();
-  if (!iso) return;
-  primes = DGeneKeys.primes(iso);
+  const d = currentDate(), t = currentTime(), z = (tzEl.value || '').trim();
+  const zoneOK = validZone(z);
+  tzEl.classList.toggle('bad', !!z && !zoneOK);
+
+  if (!d || !t || !zoneOK || !window.DGKProfile || !DGKProfile.VALID) {
+    profileData = null; primes = null; roleOf = {};
+    document.body.classList.add('unfitted');
+    document.body.classList.remove('open');
+    unfitted.textContent = '';
+    const b = document.createElement('b');
+    b.textContent = 'Assembly not fitted';
+    unfitted.appendChild(b);
+    const missing = [];
+    if (!d) missing.push('date of birth');
+    if (!t) missing.push('time of birth');
+    if (!zoneOK) missing.push(z ? 'a recognised zone' : 'time zone');
+    const list = missing.length > 1
+      ? missing.slice(0, -1).join(', ') + ' and ' + missing[missing.length - 1]
+      : missing[0];
+    unfitted.appendChild(document.createTextNode(
+      missing.length ? 'Enter ' + list + ' in the title block.'
+                     : 'Calculation unavailable.'));
+    setTargets(0, 0); selIdx = -1;
+    refreshToday();
+    render();
+    writeURL(d, t, zoneOK ? z : null);
+    return;
+  }
+
+  const inst = DAstroTime.localToInstant({ y: d.y, mo: d.mo, d: d.d, h: t.h, mi: t.mi, tz: z });
+  profileData = DGKProfile.profile({ ms: inst.ms });
+  profileData.instant = inst;
+
+  document.body.classList.remove('unfitted');
+  primes = profileData.spheres;
   roleOf = {};
   ROLES.forEach((r, ri) => {
     const i = INDEX_OF[primes[r[0]].key];
@@ -643,18 +747,64 @@ function apply() {
   refreshToday();
   setTargets(0, 0); selIdx = -1;
   document.body.classList.remove('open');
-  hintEl.textContent = 'Select the assembly to open it';
+  hintEl.textContent = clockNote(inst) || 'Select the assembly to open it';
   document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1';
+  writeURL(d, t, z);
   render();
 }
+
+// Say when a birth time is not the simple thing it looks like, rather than
+// resolving it silently — both of these are real clock readings people have.
+function clockNote(inst) {
+  if (inst.status === 'ambiguous') {
+    return 'Clocks went back that night — this reading happened twice. Taken as the first.';
+  }
+  if (inst.status === 'nonexistent') {
+    return 'Clocks went forward that night — this reading did not occur. Taken as the moment after.';
+  }
+  return '';
+}
+
+function writeURL(d, t, z) {
+  if (!d) return;
+  const p = new URLSearchParams();
+  const iso = dob.value;
+  if (t && z) {
+    p.set('b', iso + 'T' + String(t.h).padStart(2, '0') + ':' + String(t.mi).padStart(2, '0'));
+    p.set('tz', z);
+  } else {
+    p.set('dob', iso);
+  }
+  history.replaceState(null, '', location.pathname + '?' + p.toString());
+}
+
 dob.addEventListener('change', apply);
+tob.addEventListener('change', apply);
+tzEl.addEventListener('change', apply);
+tzEl.addEventListener('input', apply);
 
 buildStack();
 buildParts();
-const params = new URLSearchParams(location.search);
-const urlDob = params.get('dob');
-dob.value = (urlDob && /^\d{4}-\d{2}-\d{2}$/.test(urlDob)) ? urlDob : '1990-01-01';
-apply();
+
+(function boot() {
+  const params = new URLSearchParams(location.search);
+  const b = params.get('b') || '';
+  const bm = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})$/.exec(b);
+  const legacy = params.get('dob') || '';
+
+  if (bm) {
+    dob.value = bm[1];
+    tob.value = bm[2] + ':' + bm[3];
+  } else if (/^\d{4}-\d{2}-\d{2}$/.test(legacy)) {
+    dob.value = legacy;                      // date carries over; time is asked for
+  }
+  const urlTz = params.get('tz');
+  if (validZone(urlTz)) tzEl.value = urlTz;
+  else if (window.DAstroTime) {
+    try { tzEl.value = Intl.DateTimeFormat().resolvedOptions().timeZone || ''; } catch (e) { /* leave blank */ }
+  }
+  apply();
+})();
 layout();
 
 let rt = 0;
@@ -662,7 +812,7 @@ const onResize = () => { clearTimeout(rt); rt = setTimeout(layout, 120); };
 window.addEventListener('resize', onResize);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 
-const urlKey = Number(params.get('key'));
+const urlKey = Number(new URLSearchParams(location.search).get('key'));
 if (urlKey >= 1 && urlKey <= 64) {
   if (window.DGeneKeysContent) select(urlKey);
   else window.addEventListener('DOMContentLoaded', () => select(urlKey), { once: true });
