@@ -432,10 +432,13 @@ function openPanelFor(i) {
     body += roleSection(id, sp.key, sp.line, sp.seq);
   });
 
+  const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
+
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">' + esc(sp0.seq) + ' sequence' + (node.ids.length > 1 ? ' · hinge' : '') + '</div>' +
     '<h2>' + esc(node.label) + '</h2>' +
     '<div class="key">Key ' + sp0.key + (sp0.line ? '.' + sp0.line : '') + (k0 ? ' · ' + esc(k0.name) : '') + '</div>' +
+    triad +
     body;
 
   content.querySelectorAll('.card').forEach(c => {
