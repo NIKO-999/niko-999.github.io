@@ -482,7 +482,7 @@ function openPanelFor(i) {
     functionCard = '<section><div class="card" data-noclick="1">' + hd(col, 'My ' + esc(node.label) + ' · ' + esc(tag)) +
       '<p>' + esc(sphEssence) + '</p></div></section>';
   } else if (c0 && c0.essence) {
-    functionCard = '<section><div class="card" data-noclick="1">' + hd(col, esc(node.label) + ' · Function') +
+    functionCard = '<section><div class="card" data-noclick="1">' + hd(col, esc(node.label) + ' · ' + esc(k0 ? k0.name : 'Key ' + sp0.key)) +
       '<p>' + esc(c0.essence) + '</p></div></section>';
   }
   let body = '';
