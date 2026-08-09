@@ -89,15 +89,27 @@ svg { overflow: visible; }
 }
 
 /* ── reading panel ─────────────────────────────────────────────────────── */
+/* #panel is the fixed, non-scrolling frame — everything that must stay put
+   regardless of scroll (the edge glow, the close button, the sweep) is a
+   direct child of it. #panelScroll is a separate absolutely-positioned
+   layer INSIDE it that does the actual scrolling. Putting the glow inside
+   the scrolling element itself (position:absolute + top:0/bottom:0 on a
+   scrolling position:fixed ancestor) is exactly the combination that mobile
+   Safari mishandles — the decoration can detach and clip mid-scroll. Two
+   separate layers sidesteps the bug entirely rather than working around it. */
 #panel {
   position: fixed; right: 0; top: 0; bottom: 0; width: 420px; z-index: 20;
-  padding: 58px 46px; overflow: auto;
+  overflow: hidden;
   background: linear-gradient(90deg, rgba(4,5,10,0) 0%, rgba(6,7,14,.90) 14%, rgba(5,6,12,.975) 100%);
   border-left: 1px solid rgba(255,255,255,0.05);
   opacity: 0; transform: translateX(28px); pointer-events: none;
   transition: opacity .55s cubic-bezier(.16,.8,.24,1), transform .55s cubic-bezier(.16,.8,.24,1);
 }
 #panel.on { opacity: 1; transform: translateX(0); pointer-events: auto; }
+#panelScroll {
+  position: absolute; inset: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding: 58px 46px;
+}
 #panel .edge { position: absolute; left: 0; top: 0; bottom: 0; width: 2px; z-index: 2; }
 #panel .edgeGlow {
   position: absolute; left: 0; top: 0; bottom: 0; width: 80px;
@@ -230,7 +242,7 @@ body.unfitted #stage { opacity: .18; }
   <div class="edge"></div>
   <div id="sweep"><div class="band"></div></div>
   <div id="closeBtn" title="Close">&#10005;</div>
-  <div id="pcontent"></div>
+  <div id="panelScroll"><div id="pcontent"></div></div>
 </div>
 
 <div id="unfitted"></div>
