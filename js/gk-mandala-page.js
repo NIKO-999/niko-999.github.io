@@ -438,14 +438,14 @@ function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
   return statesCard + (sphereDefHtml || '') + masteryCard + shadowCard + siddhiCard + lineCard;
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
-// Small mark before every card heading — three hexagram-style lines, the
-// broken middle line nodding to the fact every key is built from six of
-// these. Original glyph, not a copy of any third-party icon.
+// Small mark before the panel's main title only — three hexagram-style
+// lines, the broken middle line nodding to the fact every key is built
+// from six of these. Original glyph, not a copy of any third-party icon.
 function hglyph(col) {
-  return '<svg class="hglyph" width="13" height="13" viewBox="0 0 14 14" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round" style="margin-right:7px;vertical-align:1px;flex:none">' +
+  return '<svg class="hglyph" width="15" height="15" viewBox="0 0 14 14" fill="none" stroke="' + col + '" stroke-width="1.6" stroke-linecap="round" style="margin-right:9px;vertical-align:-1px;flex:none">' +
     '<line x1="2" y1="3" x2="12" y2="3"/><line x1="2" y1="7" x2="5.5" y2="7"/><line x1="8.5" y1="7" x2="12" y2="7"/><line x1="2" y1="11" x2="12" y2="11"/></svg>';
 }
-function hd(col, text) { return '<h3 style="color:' + col + '">' + hglyph(col) + text + '</h3>'; }
+function hd(col, text) { return '<h3 style="color:' + col + '">' + text + '</h3>'; }
 
 function openPanelFor(i) {
   const mark = marks[i], node = mark.node;
@@ -508,7 +508,7 @@ function openPanelFor(i) {
 
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">' + esc(sp0.seq) + ' sequence' + (node.ids.length > 1 ? ' · hinge' : '') + '</div>' +
-    '<h2>' + esc(node.label) + '</h2>' +
+    '<h2>' + hglyph(col) + esc(node.label) + '</h2>' +
     '<div class="key">Key ' + sp0.key + (sp0.line ? '.' + sp0.line : '') + (k0 ? ' · ' + esc(k0.name) : '') + '</div>' +
     triad +
     taglineHtml +
