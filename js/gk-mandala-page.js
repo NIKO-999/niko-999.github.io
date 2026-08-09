@@ -603,8 +603,11 @@ function openOverviewFor() {
     const pairKey = [k, p].sort((a, b) => a - b).join('-');
     if (seenPairs.has(pairKey)) return;
     seenPairs.add(pairKey);
-    partnerHtml.push('<p>' + sphereLinks(k) + ' (Key ' + k + ') and ' +
-      sphereLinks(p) + ' (Key ' + p + ') are programming partners — exact genetic opposites of each other. Whichever one you live consciously, the other is still running underneath as its necessary unconscious half; neither one fully makes sense read alone, and pressure in one of these spheres is often actually asking something of the other.</p>');
+    const reading = window.DGKPartners ? DGKPartners.get(k) : null;
+    partnerHtml.push('<p><b>' + sphereLinks(k) + ' (Key ' + k + ')</b> and <b>' +
+      sphereLinks(p) + ' (Key ' + p + ')</b> are programming partners.</p>' +
+      (reading ? '<p>' + esc(reading) + '</p>' :
+        '<p>Whichever one you live consciously, the other is still running underneath as its necessary unconscious half.</p>'));
   });
   const partnersFinalHtml = partnerHtml.length ? partnerHtml.join('') :
     '<p>None of your 13 keys pair off as programming partners this time — each is running as its own independent process, with its complement living outside this particular profile.</p>';
