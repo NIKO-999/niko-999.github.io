@@ -643,7 +643,7 @@ function select(n) {
   fillSpec(n);
   document.body.classList.add('open');
   setTargets(1, 1);
-  try { history.replaceState(null, '', location.pathname + '?dob=' + dob.value + '&key=' + n); } catch (_) {}
+  writeURL(n);
 }
 // back to stage 1, keeping the assembly open so another plate can be chosen
 function deselect() {
@@ -789,7 +789,8 @@ function apply() {
     setTargets(0, 0); selIdx = -1;
     refreshToday();
     render();
-    writeURL(d, t, zoneOK ? z : null);
+    selectedKey = null;
+    writeURL();
     return;
   }
 
@@ -811,7 +812,8 @@ function apply() {
   document.body.classList.remove('open');
   hintEl.textContent = clockNote(inst) || 'Select the assembly to open it';
   document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 1';
-  writeURL(d, t, z);
+  selectedKey = null;
+  writeURL();
   render();
 }
 
@@ -827,17 +829,25 @@ function clockNote(inst) {
   return '';
 }
 
-function writeURL(d, t, z) {
+/* One place builds the URL, because there were two and they disagreed:
+   selecting a plate used to write the legacy ?dob= form, which silently threw
+   away the birth time and zone from a ?b= link the moment you opened
+   anything. It also overwrote ?key= before the deep link had been read. */
+let selectedKey = null;
+
+function writeURL(key) {
+  if (key !== undefined) selectedKey = key;
+  const d = currentDate(), t = currentTime(), z = (tzEl.value || '').trim();
   if (!d) return;
   const p = new URLSearchParams();
-  const iso = dob.value;
-  if (t && z) {
-    p.set('b', iso + 'T' + String(t.h).padStart(2, '0') + ':' + String(t.mi).padStart(2, '0'));
+  if (t && validZone(z)) {
+    p.set('b', dob.value + 'T' + String(t.h).padStart(2, '0') + ':' + String(t.mi).padStart(2, '0'));
     p.set('tz', z);
   } else {
-    p.set('dob', iso);
+    p.set('dob', dob.value);
   }
-  history.replaceState(null, '', location.pathname + '?' + p.toString());
+  if (selectedKey) p.set('key', selectedKey);
+  try { history.replaceState(null, '', location.pathname + '?' + p.toString()); } catch (_) {}
 }
 
 dob.addEventListener('change', apply);
@@ -848,8 +858,12 @@ tzEl.addEventListener('input', apply);
 buildStack();
 buildParts();
 
+// Captured before anything rewrites location.search — apply() calls writeURL()
+// on its first run, so reading ?key= later finds a URL we already replaced.
+const BOOT_PARAMS = new URLSearchParams(location.search);
+
 (function boot() {
-  const params = new URLSearchParams(location.search);
+  const params = BOOT_PARAMS;
   const b = params.get('b') || '';
   const bm = /^(\d{4}-\d{2}-\d{2})T(\d{2}):(\d{2})$/.exec(b);
   const legacy = params.get('dob') || '';
@@ -874,7 +888,7 @@ const onResize = () => { clearTimeout(rt); rt = setTimeout(layout, 120); };
 window.addEventListener('resize', onResize);
 if (window.visualViewport) window.visualViewport.addEventListener('resize', onResize);
 
-const urlKey = Number(new URLSearchParams(location.search).get('key'));
+const urlKey = Number(BOOT_PARAMS.get('key'));
 if (urlKey >= 1 && urlKey <= 64) {
   if (window.DGeneKeysContent) select(urlKey);
   else window.addEventListener('DOMContentLoaded', () => select(urlKey), { once: true });
