@@ -141,6 +141,7 @@ function ring(r, dash, op, w, rotSec) {
    visibly grows toward you instead of appearing from a point. */
 const expandG = el('g', {});
 expandG.style.transformOrigin = CX + 'px ' + CY + 'px';
+expandG.style.willChange = 'transform, opacity';
 expandG.style.transform = 'scale(0.46)';
 expandG.style.opacity = '0.55';
 /* Mobile gets an actual zoom: the curve overshoots past 1 before settling,
@@ -498,10 +499,27 @@ function closePanel() {
    fly outward from exactly where the click landed. After that the mandala
    behaves exactly as before: click a sphere, it opens; click the core (now
    just decoration) does nothing further. */
+/* Every rim halo/dot/ring, the hex polygons and the flower petals carry a
+   feGaussianBlur filter — around 45 filtered elements in expandG. Animating
+   a CSS transform across a subtree that size forces mobile browsers to
+   re-rasterise every one of those blurs on every frame of the transition,
+   which is the lag: exactly the same mechanism that made the continuous
+   rotation laggy, just triggered once instead of forever. The fix is the
+   same idea: remove the filters for the ~1s the transform is actually
+   moving, so the browser is just scaling flat shapes (cheap, GPU-composited)
+   and pays the blur cost only once, after the size has stopped changing. */
+function stripFiltersDuring(ms) {
+  const filtered = expandG.querySelectorAll('[filter]');
+  const saved = [];
+  filtered.forEach(elx => { saved.push([elx, elx.getAttribute('filter')]); elx.removeAttribute('filter'); });
+  setTimeout(() => { saved.forEach(([elx, f]) => elx.setAttribute('filter', f)); }, ms);
+}
+
 let revealed = false;
 function revealMandala() {
   if (revealed) return;
   revealed = true;
+  if (isMobile()) stripFiltersDuring(950);
   expandG.style.transform = 'scale(1)';
   expandG.style.opacity = '1';
   legendEl.style.opacity = '1';
