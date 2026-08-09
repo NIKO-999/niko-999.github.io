@@ -21,6 +21,7 @@
   --ink-2: #8C96AC;
   --ink-3: #5C6478;
   --mono: ui-monospace, 'SF Mono', 'Roboto Mono', 'DM Mono', Menlo, monospace;
+  --serif: 'Iowan Old Style', Georgia, 'Times New Roman', serif;
 }
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html, body { height: 100%; overflow: hidden; }
@@ -132,7 +133,7 @@ svg { overflow: visible; }
   opacity: 0; transform: translateY(6px); transition: opacity .5s ease, transform .5s ease;
 }
 #panel h2 {
-  margin: 0 0 6px; font: 500 27px var(--mono); letter-spacing: .02em; color: #F2F7FF;
+  margin: 0 0 6px; font: 500 30px var(--serif); letter-spacing: -.005em; color: #F2F7FF;
   opacity: 0; transform: translateY(8px); transition: opacity .55s ease, transform .55s ease;
 }
 #panel .key {
@@ -146,7 +147,7 @@ svg { overflow: visible; }
 #panel.on .asRole { opacity: .75; }
 #panel section { margin-bottom: 22px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
 #panel h3 { margin: 0 0 9px; font: 500 9px var(--mono); letter-spacing: .24em; text-transform: uppercase; }
-#panel p { margin: 0; font: 400 13px/1.78 var(--mono); color: #AEB8CC; letter-spacing: .005em; }
+#panel p { margin: 0; font: 400 15.5px/1.68 var(--serif); color: #B9C2D6; letter-spacing: .002em; }
 #panel.on .eyebrow { opacity: .85; transform: none; transition-delay: .10s; }
 #panel.on h2 { opacity: 1; transform: none; transition-delay: .16s; }
 #panel.on .key { opacity: 1; transition-delay: .22s; }
