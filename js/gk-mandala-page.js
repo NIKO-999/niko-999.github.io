@@ -468,6 +468,14 @@ function openPanelFor(i) {
       const roleLabel = id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id;
       body += '<div class="asRole">As ' + esc(roleLabel) + '</div>';
     }
+    // What this sphere IS, independent of key or line — shown once per
+    // role. Core and Vocation get their own distinct definitions here
+    // despite sharing a key, since the sphere concept itself differs.
+    const def = window.DGKSphereDefs ? DGKSphereDefs.get(id) : null;
+    if (def) {
+      body += '<section><div class="card" data-noclick="1"><h3 style="color:' + col + '">My Sphere of ' + esc(def.title) + '</h3>' +
+        '<p>' + esc(def.body) + '</p></div></section>';
+    }
     body += roleSection(id, sp.key, sp.line, sp.seq, seen);
   });
 
