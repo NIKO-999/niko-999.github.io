@@ -35,7 +35,11 @@ const ROLES = [
 
 let W = 0, H = 0, axisX = 0, midY = 0;
 let gapClosed = 2.7, gapOpen = 10, gapDrawn = 23, plateR = 58, primeR = 76;
-let primes = null, roleOf = {};          // rung index -> role index
+// rung index -> the role indices fitted to that plate. An ARRAY, not a single
+// index: two spheres can legitimately land on one key (in the full profile
+// Vocation always shares Core's key and Brand always shares Life's Work's),
+// and coincidental collisions happen too. A scalar here silently drops one.
+let primes = null, roleOf = {};
 /* Two stages, tweened independently.
    ex — the assembly opening from a solid screw into a separated stack, all
         sixty-four plates still on the sheet, the four fitted ones marked.
@@ -138,7 +142,7 @@ function render() {
 
   for (let i = 0; i < N; i++) {
     const p = plateEls[i];
-    const isPrime = roleOf[i] !== undefined;
+    const isPrime = !!roleOf[i];
     const isSel = i === selIdx;
     // the selected plate withdraws from the stack toward the detail view
     const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
@@ -219,8 +223,16 @@ function drawCallouts() {
   // out to the right instead and the whole assembly mirrors.
   const dir = mobile ? 1 : -1;
 
+  // group by plate: two spheres on one key share a single card rather than
+  // stacking two identical cards at the same y
+  const cards = [];
   ROLES.forEach((r, ri) => {
     const key = primes[r[0]].key, i = INDEX_OF[key];
+    const hit = cards.find(c => c.i === i);
+    if (hit) hit.roles.push(ri); else cards.push({ i, key, roles: [ri] });
+  });
+  cards.forEach(card => {
+    const key = card.key, i = card.i;
     const isSel = i === selIdx;
     const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
     const rr = primeR * (1 + (isSel ? sx * 0.12 : 0));
@@ -233,7 +245,7 @@ function drawCallouts() {
     if (fade <= 0.02) return;
     const o = ptrO * fade;
 
-    const title = r[1].toUpperCase();
+    const title = card.roles.map(ri => ROLES[ri][1]).join(' · ').toUpperCase();
     const fs = mobile ? 8.5 : 9.5, tr = mobile ? '.13em' : '.17em';
     const tw = cardWidth(title, fs, tr);
     const numW = mobile ? 20 : 24;
@@ -381,31 +393,37 @@ function sect(label, mark, text, small) {
 
 function fillSpec(n) {
   const k = DGeneKeys.KEYS[n];
-  const ri = ROLES.findIndex(r => primes[r[0]].key === n);
-  const role = ri >= 0 ? ROLES[ri] : null;
+  // every role fitted to this plate, not just the first one found
+  const ris = roleOf[INDEX_OF[n]] || [];
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(n) : null;
-  const pos = role && window.DGKRoles ? DGKRoles.get(role[0], n) : null;
-  const prose = pos || c;
+  const proseFor = ri => (window.DGKRoles ? DGKRoles.get(ROLES[ri][0], n) : null) || c;
 
   document.getElementById('s-fig').textContent = 'Fig. 2 — Detail A · Plate ' + n;
   document.getElementById('s-ref').textContent = k.shadow + ' → ' + k.gift + ' → ' + k.siddhi;
   document.getElementById('s-title').textContent = k.name;
   document.getElementById('s-sub').textContent = c ? c.tagline : '';
-  document.getElementById('s-role').textContent = role
-    ? 'Fitted as ' + role[1] + ' — ' + role[2] + '.'
+  document.getElementById('s-role').textContent = ris.length
+    ? 'Fitted as ' + ris.map(ri => ROLES[ri][1] + ' — ' + ROLES[ri][2]).join('; and as ') + '.'
     : 'Not fitted to this assembly — a plate you meet in the world rather than carry.';
   document.getElementById('tb-sheet').textContent = '1 of 1 · Fig. 2';
 
   const box = document.getElementById('s-parts');
   box.textContent = '';
   if (c && c.essence) box.append(...sect('Function', '', c.essence, true));
-  if (prose) {
+  // one plate can carry more than one sphere, and the same key read in two
+  // positions is two different readings — so render a full triad per role
+  const slots = ris.length ? ris : [-1];
+  let wrote = false;
+  slots.forEach(ri => {
+    const prose = ri >= 0 ? proseFor(ri) : c;
+    if (!prose) return;
+    wrote = true;
+    if (slots.length > 1) box.append(...sect('As ' + ROLES[ri][1], '', '', true).slice(0, 1));
     box.append(...sect('Mastery', k.gift, prose.gift));
     box.append(...sect('Shadow', k.shadow, prose.shadow, true));
     box.append(...sect('Invitation', k.siddhi, prose.invitation, true));
-  } else {
-    box.append(...sect('Note', '', 'Specification for this plate is still being drafted.', true));
-  }
+  });
+  if (!wrote) box.append(...sect('Note', '', 'Specification for this plate is still being drafted.', true));
   const hx = document.getElementById('s-hex');
   hx.textContent = '';
   const hl = window.DHexagrams ? DHexagrams.lines(n) : null;
@@ -514,7 +532,10 @@ function apply() {
   if (!iso) return;
   primes = DGeneKeys.primes(iso);
   roleOf = {};
-  ROLES.forEach((r, ri) => { roleOf[INDEX_OF[primes[r[0]].key]] = ri; });
+  ROLES.forEach((r, ri) => {
+    const i = INDEX_OF[primes[r[0]].key];
+    (roleOf[i] = roleOf[i] || []).push(ri);
+  });
   setTargets(0, 0); selIdx = -1;
   document.body.classList.remove('open');
   hintEl.textContent = 'Select the assembly to open it';
