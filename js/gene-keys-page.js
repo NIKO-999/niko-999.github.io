@@ -508,14 +508,24 @@ function fillLinkage(n) {
   // The line comes first: it is the part of the fitting that only a birth
   // time can determine, and it is what makes two people with the same key
   // read differently.
+  // Spheres sharing a plate share a longitude, so they share a line — list
+  // them on one row rather than repeating it. Two spheres can still land on
+  // the same key at different degrees, and those keep their own rows.
+  const byLine = new Map();
   (roleOf[INDEX_OF[n]] || []).forEach(ri => {
     const sp = primes[ROLES[ri][0]];
     if (!sp || sp.line == null) return;
-    row(ROLES[ri][1], dd => {
+    if (!byLine.has(sp.line)) byLine.set(sp.line, []);
+    byLine.get(sp.line).push(ri);
+  });
+  [...byLine.entries()].forEach(([line, ris]) => {
+    const sp = { line };
+    const ln = window.DGKLines ? DGKLines.get(n, line) : null;
+    row(ris.map(ri => ROLES[ri][1]).join(' · '), dd => {
       const b = document.createElement('b');
-      b.textContent = 'Line ' + sp.line;
+      b.textContent = 'Line ' + sp.line + (ln ? ' · ' + ln.keynote : '');
       dd.appendChild(b);
-      dd.appendChild(document.createTextNode(' of 6'));
+      if (!ln) dd.appendChild(document.createTextNode(' of 6'));
       // Say so when the longitude sits inside the solar series' own error bar
       // rather than presenting a coin-flip as a fact.
       if (sp.nearBoundary) {
@@ -576,12 +586,26 @@ function fillSpec(n) {
   // one plate can carry more than one sphere, and the same key read in two
   // positions is two different readings — so render a full triad per role
   const slots = ris.length ? ris : [-1];
+  // If every fitted sphere on this plate resolves to the same line — which is
+  // what a doubled plate always does — the line reading belongs once at the
+  // top, not repeated under each sphere.
+  const lineSet = new Set(ris.map(ri => primes[ROLES[ri][0]] && primes[ROLES[ri][0]].line).filter(Boolean));
+  const sharedLine = lineSet.size === 1 ? [...lineSet][0] : null;
+  if (sharedLine && window.DGKLines) {
+    const ln = DGKLines.get(n, sharedLine);
+    if (ln) box.append(...sect('Line ' + sharedLine, ln.keynote, ln.body, true));
+  }
   let wrote = false;
   slots.forEach(ri => {
     const prose = ri >= 0 ? proseFor(ri) : c;
     if (!prose) return;
     wrote = true;
     if (slots.length > 1) box.append(...sect('As ' + ROLES[ri][1], '', '', true).slice(0, 1));
+    // the line reading sits above the key's own, because it is what
+    // distinguishes this reader from everyone else holding the same key here
+    const sp = ri >= 0 && primes ? primes[ROLES[ri][0]] : null;
+    const ln = (!sharedLine && sp && sp.line && window.DGKLines) ? DGKLines.get(n, sp.line) : null;
+    if (ln) box.append(...sect('Line ' + sp.line, ln.keynote, ln.body, true));
     box.append(...sect('Mastery', k.gift, prose.gift));
     box.append(...sect('Shadow', k.shadow, prose.shadow, true));
     box.append(...sect('Invitation', k.siddhi, prose.invitation, true));
