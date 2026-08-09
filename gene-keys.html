@@ -62,18 +62,7 @@ body {
 }
 
 #drawing { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-#callouts { position: fixed; inset: 0; pointer-events: none; }
 
-.callout {
-  position: absolute; pointer-events: auto; cursor: pointer;
-  font-size: 9.5px; letter-spacing: .18em; text-transform: uppercase;
-  color: var(--ink-2); white-space: nowrap;
-  transition: color .18s;
-}
-.callout b { font-weight: 500; color: var(--ink); font-size: 11px; letter-spacing: .06em; }
-.callout:hover { color: var(--mark); }
-.callout.sel { color: var(--mark); }
-.callout.sel b { color: var(--mark); }
 
 /* title block, bottom right, like a real sheet */
 #titleblock {
@@ -176,7 +165,6 @@ body.open #notes { opacity: 0; pointer-events: none; }
 @media (max-width: 899px) {
   #titleblock { left: 22px; right: 22px; min-width: 0; bottom: 16px; }
   #hint { display: none; }
-  .callout { display: none; }
   #drawing { transition: opacity 300ms var(--ease); }
   body.open #drawing { opacity: .16; }
   #spec {
@@ -199,7 +187,6 @@ body.open #notes { opacity: 0; pointer-events: none; }
 
 <div id="grid"></div>
 <svg id="drawing" aria-hidden="true"></svg>
-<div id="callouts"></div>
 <div id="frame"></div>
 
 <div id="parts" role="listbox" tabindex="0" aria-label="Sixty-four plates of the apparatus"></div>
@@ -252,7 +239,6 @@ const N = 64;
 const BP = 900;
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)');
 const svg = document.getElementById('drawing');
-const calloutsEl = document.getElementById('callouts');
 
 const ROLES = [
   ['lifesWork', "Life's Work", 'how your genius wants to express itself in the world'],
@@ -326,12 +312,14 @@ const easeOut = k => 1 - Math.pow(1 - k, 3);
 function layout() {
   W = window.innerWidth; H = window.innerHeight;
   const mobile = W < BP;
-  axisX = mobile ? 46 : W * 0.235;
-  midY = H * 0.5;
+  axisX = mobile ? 54 : W * 0.235;
+  // on a phone the title block owns the bottom of the sheet, so the stack
+  // rides above it — otherwise the lowest tag card lands underneath it
+  midY = mobile ? H * 0.45 : H * 0.5;
   plateR = mobile ? Math.min(30, W * 0.085) : Math.min(66, W * 0.068);
   primeR = plateR * 1.34;
   gapClosed = 2.6;
-  gapOpen = mobile ? 8.5 : 10.5;        // stage 1: every plate on the sheet
+  gapOpen = mobile ? 8 : 10.5;        // stage 1: every plate on the sheet
   gapDrawn = mobile ? 17 : 23;          // stage 2: spread around the selection
   svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
   positionSpec();
@@ -413,64 +401,120 @@ function drawDim() {
   t.textContent = '64 PLTS';
 }
 
-/* ── callouts: leader lines to the four primes ────────────────────────── */
+/* ── callouts: a tag card on a hard pointer, one per fitted plate ─────── */
+// Each of the four fitted plates gets a small card — the role it was fitted
+// as, plus its plate number — carried on a solid tapered pointer back to the
+// plate itself. The card IS the label and the click target, drawn in SVG so
+// it exists identically on a phone; the old HTML labels were display:none
+// under 900px, which left mobile with pointers aimed at nothing.
+const CARD_W = Object.create(null);          // measured once per label
+function cardWidth(t, fs, tr) {
+  const k = t + '|' + fs;
+  if (CARD_W[k] == null) {
+    const probe = el('text', { x: -9999, y: -9999, 'font-size': fs }, svg);
+    probe.style.fontFamily = 'var(--mono)';
+    probe.style.letterSpacing = tr;
+    probe.textContent = t;
+    CARD_W[k] = probe.getComputedTextLength();
+    probe.remove();
+  }
+  return CARD_W[k];
+}
+
 function drawCallouts() {
   gLeader.textContent = '';
-  calloutsEl.textContent = '';
   if (!primes) return;
   const mobile = W < BP;
   // the pointers belong to the opened assembly — they fade in with it
   const ptrO = Math.max(0, (ex - 0.3) / 0.7);
   if (ptrO <= 0.01) return;
+
+  // On a phone there is no room to the left of the spindle, so the cards sit
+  // out to the right instead and the whole assembly mirrors.
+  const dir = mobile ? 1 : -1;
+
   ROLES.forEach((r, ri) => {
     const key = primes[r[0]].key, i = INDEX_OF[key];
     const isSel = i === selIdx;
     const pull = isSel ? sx * (mobile ? W * 0.26 : W * 0.19) : 0;
     const rr = primeR * (1 + (isSel ? sx * 0.12 : 0));
     const y = plateY(i) - (isSel ? sx * 26 : 0);
-    // a spread stack runs off the sheet; don't leave leaders pointing at nothing
-    if (y < 26 || y > H - 26) return;
-    const x = axisX + pull - rr;
-    const lx = Math.max(20, axisX - primeR - (mobile ? 14 : 58));
-    // dogleg leader: horizontal run out to the label, dot at the part
-    // A thin hard body, machined to a point at the plate and squared off at
-    // the label — solid geometry so which four are yours is unmistakable,
-    // rather than a dashed line that reads as annotation.
-    const tipX = x - 3, tailX = lx + 26, hw = 3.1;
-    const ptr = el('path', {
-      d: 'M' + tipX + ',' + y +
-         ' L' + (tailX + 16) + ',' + (y - hw) +
-         ' L' + tailX + ',' + (y - hw) +
-         ' L' + tailX + ',' + (y + hw) +
-         ' L' + (tailX + 16) + ',' + (y + hw) + ' Z',
-      fill: isSel ? 'var(--mark)' : 'var(--ink)',
-      'fill-opacity': (isSel ? 1 : 0.86) * ptrO,
-      stroke: 'none'
-    }, gLeader);
-    el('circle', { cx: x, cy: y, r: 2.4, fill: isSel ? 'var(--mark)' : 'var(--ink)',
-      'fill-opacity': ptrO }, gLeader);
-    // The pointer sits over the plates, so it has to BE the target — left
-    // inert it swallowed the click and the background handler closed the
-    // assembly. A fat invisible band over it makes it a thumb-sized one.
-    const hit = el('rect', { x: tailX, y: y - 13, width: Math.max(10, tipX - tailX + 8),
-      height: 26, fill: 'transparent' }, gLeader);
-    [ptr, hit].forEach(n => {
-      n.style.cursor = 'pointer';
-      n.addEventListener('click', (e) => { e.stopPropagation(); select(key); });
-    });
+    // a spread stack runs off the sheet; don't leave pointers aiming at nothing
+    if (y < 30 || y > H - 30) return;
+    // once a plate is withdrawn on mobile the other three cards would collide
+    // with the detail view, and they are not what is being read anyway
+    const fade = (mobile && !isSel) ? (1 - sx) : 1;
+    if (fade <= 0.02) return;
+    const o = ptrO * fade;
 
-    const lab = document.createElement('div');
-    lab.className = 'callout' + (isSel ? ' sel' : '');
-    lab.style.opacity = ptrO.toFixed(2);
-    lab.style.left = '0px';
-    lab.style.width = (lx + 20) + 'px';
-    lab.style.textAlign = 'right';
-    lab.style.top = (y - 17) + 'px';
-    lab.innerHTML = '<b></b><br>';
-    lab.querySelector('b').textContent = key;
-    lab.appendChild(document.createTextNode(r[1]));
-    lab.addEventListener('click', () => select(key));
-    calloutsEl.appendChild(lab);
+    const title = r[1].toUpperCase();
+    const fs = mobile ? 8.5 : 9.5, tr = mobile ? '.13em' : '.17em';
+    const tw = cardWidth(title, fs, tr);
+    const numW = mobile ? 20 : 24;
+    const cw = tw + numW + (mobile ? 22 : 28);
+    const ch = mobile ? 24 : 28;
+
+    // plate edge -> pointer -> card. Everything measures out from the edge.
+    const edge = axisX + pull + dir * rr;
+    const run = mobile ? 16 : 46;                 // length of the pointer body
+    let cardOut = edge + dir * (run + cw);        // far edge of the card
+    // keep the card on the sheet
+    const margin = 12;
+    if (dir < 0 && cardOut < margin) cardOut = margin;
+    if (dir > 0 && cardOut > W - margin) cardOut = W - margin;
+    const cardIn = cardOut - dir * cw;            // card edge nearest the plate
+
+    const tipX = edge + dir * 3, tailX = cardIn, hw = 3.1;
+    const shoulder = tailX - dir * 0;             // squared off at the card
+    const ink = isSel ? 'var(--mark)' : 'var(--ink)';
+
+    el('path', {
+      d: 'M' + tipX + ',' + y +
+         ' L' + (shoulder) + ',' + (y - hw) +
+         ' L' + (shoulder) + ',' + (y + hw) + ' Z',
+      fill: ink, 'fill-opacity': (isSel ? 1 : 0.86) * o, stroke: 'none'
+    }, gLeader);
+    el('circle', { cx: edge, cy: y, r: 2.4, fill: ink, 'fill-opacity': o }, gLeader);
+
+    // the card body
+    const cx0 = Math.min(cardIn, cardOut);
+    const g = document.createElementNS(SVGNS, 'g');
+    g.setAttribute('opacity', o.toFixed(2));
+    g.style.cursor = 'pointer';
+    gLeader.appendChild(g);
+
+    el('rect', { x: cx0, y: y - ch / 2, width: cw, height: ch,
+      fill: 'var(--paper)', stroke: ink,
+      'stroke-width': isSel ? 1.3 : 1 }, g);
+    // an inner rule, the way a real drawing tags a part
+    el('rect', { x: cx0 + 3, y: y - ch / 2 + 3, width: cw - 6, height: ch - 6,
+      fill: 'none', stroke: ink, 'stroke-opacity': .28, 'stroke-width': .7 }, g);
+    // the plate number sits in its own compartment at the plate end
+    const numX = dir < 0 ? cx0 + cw - numW : cx0 + numW;
+    el('line', { x1: numX, y1: y - ch / 2 + 3, x2: numX, y2: y + ch / 2 - 3,
+      stroke: ink, 'stroke-opacity': .28, 'stroke-width': .7 }, g);
+
+    const num = el('text', { x: dir < 0 ? cx0 + cw - numW / 2 : numW / 2 + cx0,
+      y: y + 4, 'text-anchor': 'middle', 'font-size': mobile ? 11 : 12,
+      fill: ink }, g);
+    num.style.fontFamily = 'var(--mono)';
+    num.textContent = key;
+
+    const lab = el('text', { x: dir < 0 ? cx0 + 11 : cx0 + numW + 11,
+      y: y + 3.5, 'font-size': fs, fill: ink,
+      'fill-opacity': isSel ? 1 : .82 }, g);
+    lab.style.fontFamily = 'var(--mono)';
+    lab.style.letterSpacing = tr;
+    lab.textContent = title;
+
+    // a thumb-sized invisible band over card AND pointer — the pointer draws
+    // above the plates, so if it is not the click target the click falls
+    // through to the background handler and closes the assembly
+    const hx = Math.min(tipX, cx0), hw2 = Math.max(cx0 + cw, tipX) - hx;
+    const hit = el('rect', { x: hx, y: y - Math.max(ch / 2, 15),
+      width: hw2, height: Math.max(ch, 30), fill: 'transparent' }, g);
+    hit.style.cursor = 'pointer';
+    g.addEventListener('click', (e) => { e.stopPropagation(); select(key); });
   });
 }
 
