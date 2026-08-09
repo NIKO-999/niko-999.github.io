@@ -648,7 +648,7 @@ function closePanel() {
   currentSel = -1;
   paintMarks();
   stageEl.style.transform = 'translateX(0)';
-  coreLbl.style.color = NEUTRAL; coreLbl.textContent = primes ? 'OVERVIEW' : '';
+  coreLbl.style.color = NEUTRAL; coreLbl.textContent = '';
   coreHalo.setAttribute('fill', NEUTRAL); coreHalo.setAttribute('opacity', 0.10);
   coreRing.setAttribute('stroke', NEUTRAL); coreDot.setAttribute('fill', NEUTRAL);
   clearBeam();
@@ -690,7 +690,6 @@ function revealMandala() {
   legendEl.style.pointerEvents = 'auto';
   const hintEl = document.getElementById('hint');
   if (hintEl) hintEl.innerHTML = 'Hologenetic Profile <b>·</b> click a sphere, or the centre, to open a reading';
-  if (primes) { coreLbl.style.color = NEUTRAL; coreLbl.textContent = 'OVERVIEW'; }
   paintMarks();
 }
 coreHit.addEventListener('click', e => {
@@ -850,7 +849,6 @@ function apply() {
   const noteEl = document.getElementById('clockNote');
   if (noteEl) noteEl.textContent = clockNote(inst);
 
-  if (revealed) { coreLbl.style.color = NEUTRAL; coreLbl.textContent = 'OVERVIEW'; }
   paintMarks();
   refreshTransit();
   writeURL(null);
