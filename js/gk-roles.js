@@ -23,7 +23,8 @@
  *
  *  API:
  *    DGKRoles.register(role, entriesByKeyNumber)
- *    DGKRoles.get(role, keyNum) -> { gift, shadow, invitation } | null
+ *    DGKRoles.get(role, keyNum) -> { wiring, root, defaultMode, blindSpot,
+ *                                    underusedStrength } | null
  *    DGKRoles.has(role)         -> boolean
  * ═══════════════════════════════════════════════════════════════════════════
  */

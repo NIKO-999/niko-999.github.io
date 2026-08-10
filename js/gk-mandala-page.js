@@ -411,8 +411,11 @@ function paintMarks() {
 
 /* ── reading content: pulled from the same data every other page uses ──── */
 /* Card order within a role, top to bottom: the four states, this sphere's
-   own definition, Mastery, Shadow, Siddhi, Line, with Function/tagline
-   essence last of all (added by the caller after every role has run). */
+   own definition, Wiring, Root, Default Mode, Blind Spot, Underused
+   Strength, Line, with Function/tagline essence last of all (added by the
+   caller after every role has run). Psychological framing (see
+   docs/GOLDEN-STANDARD-PSYCH.md) — not the old spiritual Mastery/Shadow/
+   Siddhi arc. */
 function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(keyNum) : null;
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
@@ -451,24 +454,32 @@ function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
     '<p class="statesNote">These four belong to Key ' + keyNum + ' itself, not to this line — if another sphere in your profile also carries Key ' + keyNum + ', its states will read the same. What differs between them is everything below.</p>' +
     '</div></section>') : '';
 
-  const masteryCard = once('gift:' + prose.gift,
-    '<section><div class="card">' + hd(col, pfx + 'Mastery · ' + esc(k.gift)) +
-    '<p>' + esc(prose.gift) + '</p></div></section>');
+  const wiringCard = once('wiring:' + prose.wiring,
+    '<section><div class="card">' + hd(col, pfx + 'Wiring') +
+    '<p>' + esc(prose.wiring) + '</p></div></section>');
 
-  const shadowCard = once('shadow:' + prose.shadow,
-    '<section><div class="card">' + hd(col, pfx + 'Shadow · ' + esc(k.shadow)) +
-    '<p>' + esc(prose.shadow) + '</p></div></section>');
+  const rootCard = once('root:' + prose.root,
+    '<section><div class="card">' + hd(col, pfx + 'Root') +
+    '<p>' + esc(prose.root) + '</p></div></section>');
 
-  const siddhiCard = once('invitation:' + prose.invitation,
-    '<section><div class="card">' + hd(col, pfx + 'Siddhi · ' + esc(k.siddhi)) +
-    '<p>' + esc(prose.invitation) + '</p></div></section>');
+  const defaultModeCard = once('defaultMode:' + prose.defaultMode,
+    '<section><div class="card">' + hd(col, pfx + 'Default Mode') +
+    '<p>' + esc(prose.defaultMode) + '</p></div></section>');
+
+  const blindSpotCard = once('blindSpot:' + prose.blindSpot,
+    '<section><div class="card">' + hd(col, pfx + 'Blind Spot') +
+    '<p>' + esc(prose.blindSpot) + '</p></div></section>');
+
+  const underusedStrengthCard = once('underusedStrength:' + prose.underusedStrength,
+    '<section><div class="card">' + hd(col, pfx + 'Underused Strength') +
+    '<p>' + esc(prose.underusedStrength) + '</p></div></section>');
 
   const lineCard = ln ? once('line:' + ln.keynote + '|' + ln.body,
     '<section><div class="card" data-noclick="1">' +
     hd(col, pfx + 'Line ' + line + ' · ' + esc(ln.keynote)) +
     '<p>' + esc(ln.body) + '</p></div></section>') : '';
 
-  return statesCard + (sphereDefHtml || '') + masteryCard + shadowCard + siddhiCard + lineCard;
+  return statesCard + (sphereDefHtml || '') + wiringCard + rootCard + defaultModeCard + blindSpotCard + underusedStrengthCard + lineCard;
 }
 function esc(s) { const d = document.createElement('div'); d.textContent = s == null ? '' : s; return d.innerHTML; }
 // Small mark before the panel's main title only — three hexagram-style
@@ -552,7 +563,6 @@ function openPanelFor(i) {
   });
   body += functionCard;
 
-  const triad = k0 ? '<div class="triad">' + esc(k0.shadow) + ' <span>&#8250;</span> ' + esc(k0.gift) + ' <span>&#8250;</span> ' + esc(k0.siddhi) + '</div>' : '';
   // The tagline already appears as the essence card's own header once a
   // per-line reading exists for it — repeating it again as a subtitle
   // would be exactly the kind of duplicate this page just got rid of.
@@ -563,7 +573,6 @@ function openPanelFor(i) {
     '<div class="eyebrow" style="color:' + col + '">' + esc(sp0.seq) + ' sequence' + (node.ids.length > 1 ? ' · hinge' : '') + '</div>' +
     '<h2>' + hglyph(col) + esc(node.label) + '</h2>' +
     '<div class="key">Key ' + sp0.key + (sp0.line ? '.' + sp0.line : '') + (k0 ? ' · ' + esc(k0.name) : '') + '</div>' +
-    triad +
     taglineHtml +
     body;
 
