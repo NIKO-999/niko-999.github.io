@@ -189,6 +189,17 @@ svg { overflow: visible; }
   color: var(--ink-3); margin: 30px 0 6px; opacity: 0; transition: opacity .6s ease;
 }
 #panel.on .asRole { opacity: .75; }
+#panel .pathway {
+  font: 500 9px var(--mono); letter-spacing: .2em; text-transform: uppercase;
+  margin: 6px 0 8px; opacity: 0; transition: opacity .6s ease;
+}
+#panel .pathway span { color: var(--ink-3); margin: 0 6px; text-transform: none; letter-spacing: normal; }
+#panel.on .pathway { opacity: .85; }
+#panel .pathwayText {
+  font: 400 13px/1.55 var(--serif); color: var(--ink-2); margin: 0 0 22px;
+  opacity: 0; transition: opacity .6s ease;
+}
+#panel.on .pathwayText { opacity: .9; }
 #panel section { margin-bottom: 22px; opacity: 0; transform: translateY(10px); transition: opacity .6s ease, transform .6s ease; }
 #panel h3 { margin: 0 0 9px; font: 500 9px var(--mono); letter-spacing: .24em; text-transform: uppercase; }
 #panel p { margin: 0; font: 400 15.5px/1.68 var(--serif); color: #B9C2D6; letter-spacing: .002em; }
@@ -352,6 +363,7 @@ body.unfitted #stage { opacity: .18; }
 <script src="js/gk-sphere-lines.js" defer></script>
 <script src="js/gk-sphere-defs.js" defer></script>
 <script src="js/gk-partners.js" defer></script>
+<script src="js/gk-pathways.js" defer></script>
 <script src="js/gk-mandala-page.js" defer></script>
 </body>
 </html>

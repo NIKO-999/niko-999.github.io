@@ -501,6 +501,16 @@ function openPanelFor(i) {
       const roleLabel = id === 'core' ? 'Core' : id === 'vocation' ? 'Vocation' : id;
       body += '<div class="asRole">As ' + esc(roleLabel) + '</div>';
     }
+    // The fixed Golden Path connector out of this sphere — same for every
+    // profile, since it links the POSITION, not whichever key sits in it.
+    const pw = window.DGKPathways ? DGKPathways.get(id) : null;
+    if (pw) {
+      const toIdx = markIndexForSphereId(pw.to);
+      const toLabel = esc(sphereLabel(pw.to));
+      const toLink = toIdx === null ? toLabel : '<button class="ovLink" data-idx="' + toIdx + '">' + toLabel + '</button>';
+      body += '<div class="pathway" style="color:' + col + '">Pathway of ' + esc(pw.name) + ' <span>&#8250;</span> ' + toLink + '</div>' +
+        '<p class="pathwayText">' + esc(pw.text) + '</p>';
+    }
     // What this sphere IS, independent of key or line — shown once per
     // role. Core and Vocation get their own distinct definitions here
     // despite sharing a key, since the sphere concept itself differs.
@@ -534,6 +544,9 @@ function openPanelFor(i) {
   content.querySelectorAll('.card').forEach(c => {
     if (c.dataset.noclick) return;
     c.addEventListener('click', e => { e.stopPropagation(); sweep(); });
+  });
+  content.querySelectorAll('.ovLink').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); selectSphere(Number(btn.dataset.idx)); });
   });
 
   coreLbl.style.color = col;
