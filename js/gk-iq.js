@@ -127,7 +127,7 @@ DGKRoles.register('iq', {
   "16": {
     "wiring": "You improvise a working solution from whatever happens to be available, and your hit rate doing it is far better than chance. Your mind runs on enthusiasm rather than method, entering a new domain in weeks that others take years to reach.",
     "root": "Carrying the underlying pattern of a discipline across, rather than only its vocabulary, got noticed and rewarded early as real skill, distinct from dabbling.",
-    "defaultMode": "Without enthusiasm your mind will not engage at all, and you sit in front of a problem you could easily solve, unable to make yourself care, which reads to everyone else as plain unreliability. Half-learned skills stack up, each abandoned right where mastery would have begun.",
+    "defaultMode": "Without enthusiasm your mind will not engage at all, and you sit in front of a problem you could easily solve, unable to make yourself care, which reads to everyone else as plain unreliability. Half-learned skills stack up, each abandoned right where real competence would have begun.",
     "blindSpot": "You cannot see the compounding you're missing — twenty shallow competences never adding up to the one deep capability that would have made the rest worth something.",
     "underusedStrength": "Improvising a working solution fast is a genuine, rare cognitive asset. Staying with one skill past the point the fun ran out is what converts shallow range into the deep capability that makes the range compound."
   },

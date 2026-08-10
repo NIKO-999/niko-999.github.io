@@ -16,8 +16,8 @@
  *  activation, and the charge of synchronicity in timing — never mechanism-
  *  explaining, since the surrounding UI already covers what a transit is.
  *
- *  Each entry is built from that key's real Shadow/Gift/Siddhi triad in
- *  js/gene-keys-content.js, 2-3 sentences, present tense, second person.
+ *  Each entry is built from that key's real wiring/root/defaultMode content
+ *  in js/gene-keys-content.js, 2-3 sentences, present tense, second person.
  *  Original writing throughout — not sourced from or paraphrasing
  *  genekeys.com's or Richard Rudd's published material.
  *

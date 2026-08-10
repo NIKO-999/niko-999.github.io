@@ -133,7 +133,7 @@ DGKRoles.register('core', {
     "wiring": "You drop things at the first sign of not being remarkable and call it losing interest. Depth requires an unglamorous middle stretch, and you exit right around where that middle begins.",
     "root": "Enthusiasm arrived once in a room with no interest in it, and that indifference left a mark. Delight came to feel embarrassing unless someone else confirmed it was worth having.",
     "defaultMode": "You abandon a new skill near the point it would have become genuinely yours, and move to the next thing that still has novelty attached. The pattern repeats with almost no memory of it repeating.",
-    "blindSpot": "You cannot see how consistently you leave right before mastery. Others notice the pattern of near-misses long before you connect them to each other.",
+    "blindSpot": "You cannot see how consistently you leave right before real competence sets in. Others notice the pattern of near-misses long before you connect them to each other.",
     "underusedStrength": "You get to the underlying principle of a new skill fast, genuinely fast, and your instincts are usually sound. Staying past the point of novelty, even once, is what turns that speed into something that compounds."
   },
   "17": {

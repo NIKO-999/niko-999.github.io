@@ -62,7 +62,7 @@ window.DGKSphereDefs = (function () {
     },
     culture: {
       title: 'Culture',
-      body: "This is the atmosphere your gifts were built to flourish inside — the scale, the people, the tone that lets you actually come alive rather than merely cope. You are allowed to choose your surroundings on purpose. Put yourself in the right room and everything else you carry starts working the way it was always meant to.",
+      body: "This is the atmosphere your gifts were built to flourish inside — the scale, the people, the tone that lets you actually come alive rather than merely cope. Choosing your surroundings on purpose changes what's possible for you. Put yourself in the right room and everything else you carry starts working the way it was always meant to.",
     },
     brand: {
       title: 'Brand',
