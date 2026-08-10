@@ -1047,7 +1047,7 @@ window.DGKLines = (function () {
   "40": {
     "1": {
       "keynote": "Counted Energy",
-      "body": "You guard your energy by knowing exactly how much of it exists, and vague demands on your time alarm you. Exhaustion arrives when you said yes without having counted the cost first. Resolve becomes solid once the boundary is based on real numbers instead of mood, and the divine will people sense in you moves through a body that is not depleted."
+      "body": "You guard your energy by knowing exactly how much of it exists, and vague demands on your time alarm you. Exhaustion arrives when you said yes without having counted the cost first. Resolve becomes solid once the boundary is based on real numbers instead of mood, and the steadiness people sense in you moves through a body that is not depleted."
     },
     "2": {
       "keynote": "The Bodily No",
@@ -1151,7 +1151,7 @@ window.DGKLines = (function () {
   "44": {
     "1": {
       "keynote": "Vetted Alliances",
-      "body": "You vet the people you work with, wanting to know their history before you hand them anything that matters. Interference is what you get from a team assembled in a hurry, and you saw the flaw at the start. Teamwork built on real knowledge of each person holds under pressure, and synarchy is what that becomes when everyone’s ground has been checked."
+      "body": "You vet the people you work with, wanting to know their history before you hand them anything that matters. Interference is what you get from a team assembled in a hurry, and you saw the flaw at the start. Teamwork built on real knowledge of each person holds under pressure, and that cohesion is what results when everyone’s ground has been checked."
     },
     "2": {
       "keynote": "Reading Character",
@@ -1177,7 +1177,7 @@ window.DGKLines = (function () {
   "45": {
     "1": {
       "keynote": "Open Ledger",
-      "body": "You know what is in the store before you offer it around, and promising from an unmeasured supply frightens you. Dominance is what leadership becomes when the numbers are hidden, and you refuse to run a group that way. Synergy grows from shared accounting — everyone sees the same ledger — and communion arrives in a circle where nothing about the ground is concealed."
+      "body": "You know what is in the store before you offer it around, and promising from an unmeasured supply frightens you. Dominance is what leadership becomes when the numbers are hidden, and you refuse to run a group that way. Synergy grows from shared accounting — everyone sees the same ledger — and real closeness arrives in a circle where nothing about the ground is concealed."
     },
     "2": {
       "keynote": "Gathering Without Trying",
