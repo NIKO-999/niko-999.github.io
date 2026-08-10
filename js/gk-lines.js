@@ -605,7 +605,7 @@ window.DGKLines = (function () {
   "23": {
     "1": {
       "keynote": "Reduced To Essentials",
-      "body": "You break a complicated thing down until only the necessary part is left, and you refuse to speak before that point. Complexity overwhelms you not from any lack of capacity but because you go the whole distance through it. Simplicity in you is the residue of that labour, and quintessence is what survives when everything unnecessary has been removed."
+      "body": "You break a complicated thing down until only the necessary part is left, and you refuse to speak before that point. Complexity overwhelms you not from any lack of capacity but because you go the whole distance through it. Simplicity in you is the residue of that labour — what survives is the essential core, once everything unnecessary has been stripped away."
     },
     "2": {
       "keynote": "The Plain Sentence",
@@ -657,7 +657,7 @@ window.DGKLines = (function () {
   "25": {
     "1": {
       "keynote": "Named Wound",
-      "body": "You face your own injury directly, wanting to know its exact shape instead of living around it. Constriction is the flinch that comes before that work, the small closing you notice in your chest when something touches the sore place. Acceptance arrives in you as understanding, never as surrender, and the universal love people feel from you rests on ground you dug yourself."
+      "body": "You face your own injury directly, wanting to know its exact shape instead of living around it. Constriction is the flinch that comes before that work, the small closing you notice in your chest when something touches the sore place. Acceptance arrives in you as understanding, never as surrender, and the open warmth people feel from you rests on ground you dug yourself."
     },
     "2": {
       "keynote": "Unguarded Warmth",
@@ -735,7 +735,7 @@ window.DGKLines = (function () {
   "28": {
     "1": {
       "keynote": "Meaning Sought",
-      "body": "You question the point of a thing before you commit your life to it, and hollow answers give you no rest. Purposelessness is not despair in you — it is the honest report of a mind that has not found bedrock yet. Totality arrives when you finally do, and everything you were withholding goes in at once, which is where immortality stops being an idea."
+      "body": "You question the point of a thing before you commit your life to it, and hollow answers give you no rest. Purposelessness is not despair in you — it is the honest report of a mind that has not found bedrock yet. Totality arrives when you finally do, and everything you were withholding goes in at once, which is where the fear of ending stops driving you."
     },
     "2": {
       "keynote": "All In Already",
@@ -787,7 +787,7 @@ window.DGKLines = (function () {
   "30": {
     "1": {
       "keynote": "Known Desire",
-      "body": "You watch your own wanting closely, learning which fires burn clean and which leave you wrecked. Desire is not the problem for you — desire you have not studied is, and the difference is written all over your past. Lightness comes from knowing your appetites well enough to stop fearing them, and rapture arrives on a night you were entirely ready for."
+      "body": "You watch your own wanting closely, learning which fires burn clean and which leave you wrecked. Desire is not the problem for you — desire you have not studied is, and the difference is written all over your past. Lightness comes from knowing your appetites well enough to stop fearing them, and the intensity you feel on a good night is one you were entirely ready for."
     },
     "2": {
       "keynote": "Native Lightness",
