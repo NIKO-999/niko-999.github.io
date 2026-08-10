@@ -171,6 +171,12 @@ NODES.forEach((node, i) => {
   const hit = el('circle', { cx: px, cy: py, r: 17, fill: 'transparent', id: 'node-' + i });
   hit.style.cursor = 'pointer';
   outerG.appendChild(hit);
+  // A short, bounded CSS transition on r/opacity — nothing like the
+  // continuous filtered rotation that caused the original mobile lag,
+  // which is why this is desktop-only (hover has no real meaning on touch
+  // before a tap anyway).
+  dot.style.transition = 'r .25s ease, opacity .25s ease';
+  halo.style.transition = 'r .25s ease, opacity .25s ease';
   marks.push({ a, px, py, node, i, halo, dot, ring2, hit, col: NEUTRAL, baseRad: 3 });
 });
 
@@ -762,6 +768,15 @@ coreHit.addEventListener('click', e => {
 marks.forEach(m => {
   m.hit.addEventListener('click', () => tapNode(m.i));
   m.labelEl.addEventListener('click', () => tapNode(m.i));
+  if (!isMobile()) {
+    m.hit.addEventListener('mouseenter', () => {
+      if (!nodeReady(m) || m.i === currentSel) return;
+      m.dot.setAttribute('r', m.baseRad * 1.5);
+      m.halo.setAttribute('r', m.baseRad * 6);
+      m.halo.setAttribute('opacity', 0.26);
+    });
+    m.hit.addEventListener('mouseleave', () => paintMarks());
+  }
 });
 document.getElementById('closeBtn').addEventListener('click', e => { e.stopPropagation(); closePanel(); });
 stageEl.addEventListener('click', e => { if (e.target === stageEl || e.target === svg) { hidePreview(); closePanel(); } });

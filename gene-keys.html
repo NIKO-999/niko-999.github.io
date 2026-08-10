@@ -32,6 +32,7 @@ body {
   touch-action: manipulation;
   -webkit-tap-highlight-color: transparent;
 }
+#ambient { position: fixed; inset: 0; z-index: 0; pointer-events: none; display: block; }
 #hdr {
   position: fixed; left: 26px; top: 24px; z-index: 6; right: 26px;
   font-size: 9px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3);
@@ -225,10 +226,11 @@ svg { overflow: visible; }
   transition: transform .85s cubic-bezier(.22,.7,.2,1);
 }
 #panel.sweeping #sweep .band { transform: translateX(360%) skewX(-12deg); }
-#panel .card { padding: 14px 16px; margin: 0 -16px; border-radius: 10px; cursor: pointer; transition: background .35s ease; }
+#panel .card { padding: 14px 16px; margin: 0 -16px; border-radius: 10px; cursor: pointer; transition: background .35s ease, transform .35s ease, box-shadow .35s ease; }
 #panel .card[data-noclick] { cursor: default; }
-#panel .card:hover { background: rgba(255,255,255,0.02); }
-#panel .card:active { background: rgba(255,255,255,0.045); }
+#panel .card:hover { background: rgba(255,255,255,0.03); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(0,0,0,.28); }
+#panel .card[data-noclick]:hover { transform: none; box-shadow: none; }
+#panel .card:active { background: rgba(255,255,255,0.045); transform: translateY(0); }
 
 /* the label-with-leader-line row, same rhythm as the old exploded-plate
    sheet's .s-lab/.s-body pairs, restyled for this theme: a small caps
@@ -324,6 +326,7 @@ body.unfitted #stage { opacity: .18; }
 </head>
 <body>
 
+<canvas id="ambient"></canvas>
 <div id="hdr"><span id="hint">Hologenetic Profile <b>·</b> click the centre to open your profile</span><span id="transit"></span></div>
 
 <div id="stage"></div>
@@ -346,6 +349,7 @@ body.unfitted #stage { opacity: .18; }
   <div><span class="k">Birthplace</span><span class="v"><select id="tz"></select></span></div>
 </div>
 
+<script src="js/gk-ambient.js" defer></script>
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
 <script src="js/codon-rings.js"></script>
