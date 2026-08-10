@@ -1,0 +1,983 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Conditions — 8 May 2002, Whangārei</title>
+<style>
+/* ═══ CONDITIONS — dark-committed, single theme, every color painted ═══ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:       #070810;
+  --bg2:      #0c0e1a;
+  --bg3:      #121527;
+  --border:   rgba(158,168,214,0.10);
+  --border2:  rgba(158,168,214,0.18);
+  --ink:      #e9eaf2;
+  --ink2:     #a9adc4;
+  --muted:    #71768f;
+  --faint:    #4a4e66;
+
+  /* axis hues — validated categorical set on --bg2 */
+  --gold:     #bd861a;   /* rhythm  */
+  --teal:     #1ea08f;   /* phase   */
+  --violet:   #8b6fe8;   /* standing */
+  --coral:    #e05a4c;   /* forecast */
+
+  /* light tints for small accent text on dark (contrast-safe) */
+  --gold-t:   #f0c060;
+  --teal-t:   #5cd6c4;
+  --violet-t: #b8a5f5;
+  --coral-t:  #f5937f;
+
+  --mono: ui-monospace, 'SF Mono', 'JetBrains Mono', Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --maxw: 880px;
+}
+
+html { scroll-behavior: smooth; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 16px;
+  line-height: 1.65;
+  padding-bottom: 84px; /* room for verdict bar */
+}
+
+.wrap { max-width: var(--maxw); margin: 0 auto; padding: 0 24px; }
+
+/* ── type scale ── */
+h1 { font-size: clamp(30px, 6vw, 52px); font-weight: 800; letter-spacing: -0.03em; line-height: 1.06; text-wrap: balance; }
+h2 { font-size: clamp(22px, 3.4vw, 30px); font-weight: 800; letter-spacing: -0.02em; line-height: 1.15; text-wrap: balance; }
+h3 { font-size: 17px; font-weight: 700; letter-spacing: -0.01em; }
+p  { max-width: 65ch; }
+.eyebrow {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--muted);
+}
+.lede { font-size: 18px; color: var(--ink2); }
+.num { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+
+/* ── hero ── */
+.hero { position: relative; padding: 64px 0 0; overflow: hidden; }
+.hero-inner { display: flex; flex-direction: column; gap: 18px; }
+.hero .eyebrow { color: var(--gold-t); }
+.hero-sub { color: var(--ink2); font-size: 17px; max-width: 58ch; }
+.hero-sub strong { color: var(--ink); font-weight: 600; }
+#skyCanvas {
+  display: block; width: 100%; height: auto;
+  margin-top: 34px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: #05060d;
+}
+.sky-caption {
+  font-family: var(--mono); font-size: 12px; color: var(--muted);
+  margin-top: 10px; letter-spacing: 0.02em;
+}
+.sky-caption em { color: var(--gold-t); font-style: normal; }
+
+/* ── arithmetic strip ── */
+.arith { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; margin-top: 46px; }
+.fact {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 14px 16px; display: flex; flex-direction: column; gap: 4px;
+}
+.fact .k { font-family: var(--mono); font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted); }
+.fact .v { font-family: var(--mono); font-size: 15px; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; }
+.fact .s { font-size: 12.5px; color: var(--ink2); line-height: 1.45; }
+.arith-note { font-family: var(--mono); font-size: 11.5px; color: var(--faint); margin-top: 10px; }
+
+/* ── sections ── */
+section.axis { margin-top: 84px; }
+.axis-head { display: flex; align-items: baseline; gap: 14px; margin-bottom: 6px; }
+.axis-chip {
+  font-family: var(--mono); font-size: 11px; font-weight: 700; letter-spacing: 0.2em;
+  padding: 4px 10px; border-radius: 999px; text-transform: uppercase;
+  border: 1px solid; background: transparent;
+}
+.axis-chip.gold   { color: var(--gold-t);   border-color: var(--gold); }
+.axis-chip.teal   { color: var(--teal-t);   border-color: var(--teal); }
+.axis-chip.violet { color: var(--violet-t); border-color: var(--violet); }
+.axis-chip.coral  { color: var(--coral-t);  border-color: var(--coral); }
+.axis-mech { font-family: var(--mono); font-size: 12px; color: var(--muted); margin-bottom: 22px; }
+.axis p.read { color: var(--ink2); margin-top: 14px; }
+.axis p.read strong { color: var(--ink); font-weight: 600; }
+
+/* ── charts ── */
+.chart-card {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 14px;
+  padding: 20px 20px 14px; margin: 26px 0;
+  overflow-x: auto;
+}
+.chart-title { font-size: 13.5px; font-weight: 700; color: var(--ink); margin-bottom: 2px; }
+.chart-sub { font-size: 12px; color: var(--muted); margin-bottom: 14px; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 10px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 11.5px; color: var(--ink2); }
+.legend i { width: 14px; height: 3px; border-radius: 2px; display: inline-block; }
+svg text { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.tooltip {
+  position: fixed; pointer-events: none; z-index: 50;
+  background: #171a2e; border: 1px solid var(--border2); border-radius: 8px;
+  padding: 8px 12px; font-family: var(--mono); font-size: 12px; color: var(--ink);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.5); display: none; line-height: 1.6;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── timeline scrubber ── */
+.scrub-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 14px; padding: 24px; margin-top: 26px; }
+.bands { position: relative; height: 34px; border-radius: 6px; overflow: hidden; background: var(--bg3); margin-bottom: 4px; }
+.band { position: absolute; top: 0; height: 16px; }
+.band.row2 { top: 18px; }
+.band-label { position: absolute; font-family: var(--mono); font-size: 9px; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(233,234,242,0.75); padding: 2px 6px; white-space: nowrap; }
+.evticks { position: relative; height: 10px; margin-bottom: 6px; }
+.evtick { position: absolute; top: 0; width: 2px; height: 10px; border-radius: 1px; opacity: 0.85; }
+input[type="range"].scrub {
+  width: 100%; appearance: none; -webkit-appearance: none; height: 26px; background: transparent; cursor: pointer;
+}
+input[type="range"].scrub::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: var(--bg3); }
+input[type="range"].scrub::-webkit-slider-thumb {
+  -webkit-appearance: none; width: 20px; height: 20px; border-radius: 50%;
+  background: var(--ink); border: 3px solid var(--bg); margin-top: -8px;
+  box-shadow: 0 0 0 2px var(--border2), 0 0 14px rgba(233,234,242,0.35);
+}
+input[type="range"].scrub::-moz-range-track { height: 4px; border-radius: 2px; background: var(--bg3); }
+input[type="range"].scrub::-moz-range-thumb {
+  width: 16px; height: 16px; border-radius: 50%; background: var(--ink); border: 3px solid var(--bg);
+  box-shadow: 0 0 0 2px var(--border2);
+}
+input[type="range"].scrub:focus-visible { outline: 2px solid var(--ink2); outline-offset: 4px; border-radius: 4px; }
+.scrub-read { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin-top: 18px; }
+.scrub-read .fact { background: var(--bg3); }
+.evlist { margin-top: 18px; display: flex; flex-direction: column; gap: 2px; max-height: 240px; overflow-y: auto; padding-right: 6px; }
+.evlist::-webkit-scrollbar { width: 4px; }
+.evlist::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+.ev {
+  display: grid; grid-template-columns: 92px 34px 1fr; gap: 12px; align-items: baseline;
+  font-size: 13px; padding: 6px 10px; border-radius: 7px; color: var(--muted);
+  cursor: pointer; border: 1px solid transparent; background: none; text-align: left; width: 100%;
+  font-family: inherit; transition: background .15s, color .15s;
+}
+.ev:hover { background: var(--bg3); color: var(--ink2); }
+.ev:focus-visible { outline: 2px solid var(--ink2); outline-offset: -2px; }
+.ev.near { background: var(--bg3); color: var(--ink); border-color: var(--border); }
+.ev .d { font-family: var(--mono); font-size: 11.5px; font-variant-numeric: tabular-nums; }
+.ev .a { font-family: var(--mono); font-size: 11.5px; text-align: right; font-variant-numeric: tabular-nums; }
+.ev .dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 8px; transform: translateY(-1px); }
+
+/* ── the fork ── */
+.fork {
+  border: 1px solid var(--violet); border-radius: 14px; padding: 24px; margin: 26px 0;
+  background: linear-gradient(180deg, rgba(139,111,232,0.07), rgba(139,111,232,0.02));
+}
+.fork h3 { color: var(--violet-t); margin-bottom: 6px; }
+.fork p { color: var(--ink2); font-size: 14.5px; }
+.fork-btns { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
+.fork-btn {
+  font-family: var(--mono); font-size: 13px; font-weight: 600; color: var(--ink);
+  background: var(--bg3); border: 1px solid var(--border2); border-radius: 10px;
+  padding: 12px 20px; cursor: pointer; transition: border-color .15s, background .15s;
+}
+.fork-btn:hover { border-color: var(--violet); }
+.fork-btn:focus-visible { outline: 2px solid var(--violet-t); outline-offset: 2px; }
+.fork-btn.on { border-color: var(--violet); background: rgba(139,111,232,0.14); color: var(--violet-t); }
+.fork-change { font-family: var(--mono); font-size: 11px; color: var(--muted); background: none; border: none; cursor: pointer; text-decoration: underline; margin-top: 10px; padding: 0; }
+.fork-change:hover { color: var(--ink2); }
+.track-read { display: none; margin-top: 18px; }
+.track-read.show { display: block; }
+
+/* ── propositions ── */
+.props { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.prop {
+  background: var(--bg2); border: 1px solid var(--border); border-radius: 12px;
+  padding: 18px 20px 16px; position: relative;
+  border-left-width: 3px;
+}
+.prop.gold   { border-left-color: var(--gold); }
+.prop.teal   { border-left-color: var(--teal); }
+.prop.violet { border-left-color: var(--violet); }
+.prop.coral  { border-left-color: var(--coral); }
+.prop.locked { opacity: 0.45; }
+.prop-top { display: flex; gap: 10px; align-items: center; margin-bottom: 8px; }
+.grade {
+  font-family: var(--mono); font-size: 9.5px; font-weight: 700; letter-spacing: 0.16em;
+  padding: 3px 8px; border-radius: 4px; text-transform: uppercase;
+}
+.grade.solid { color: #0c0e1a; background: var(--ink2); }
+.grade.moderate { color: var(--ink2); background: var(--bg3); border: 1px solid var(--border2); }
+.grade.spec { color: var(--muted); background: none; border: 1px dashed var(--border2); }
+.prop-id { font-family: var(--mono); font-size: 10px; color: var(--faint); letter-spacing: 0.14em; }
+.prop p { font-size: 14.5px; color: var(--ink2); }
+.prop p strong { color: var(--ink); font-weight: 600; }
+.vote { display: flex; gap: 8px; margin-top: 14px; }
+.vote button {
+  font-family: var(--mono); font-size: 11.5px; font-weight: 600; letter-spacing: 0.06em;
+  padding: 7px 14px; border-radius: 999px; cursor: pointer;
+  background: none; border: 1px solid var(--border2); color: var(--muted);
+  transition: all .15s;
+}
+.vote button:hover { color: var(--ink); border-color: var(--ink2); }
+.vote button:focus-visible { outline: 2px solid var(--ink2); outline-offset: 2px; }
+.vote button.on-y { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.vote button.on-p { background: var(--bg3); color: var(--ink); border-color: var(--ink2); }
+.vote button.on-n { background: none; color: var(--ink); border-color: var(--ink); text-decoration: line-through; }
+
+/* ── synthesis ── */
+.synth {
+  margin-top: 84px; border: 1px solid var(--border2); border-radius: 16px;
+  padding: 36px 32px;
+  background:
+    radial-gradient(ellipse 90% 120% at 15% -20%, rgba(189,134,26,0.10), transparent 55%),
+    radial-gradient(ellipse 90% 120% at 85% 120%, rgba(224,90,76,0.10), transparent 55%),
+    var(--bg2);
+}
+.synth h2 { margin-bottom: 14px; }
+.synth p { color: var(--ink2); }
+.synth p strong { color: var(--ink); }
+
+/* ── verdict bar ── */
+.verdict {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 40;
+  background: rgba(7,8,16,0.88); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border2);
+  padding: 12px 24px calc(12px + env(safe-area-inset-bottom));
+}
+.verdict-inner { max-width: var(--maxw); margin: 0 auto; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.tally { display: flex; gap: 8px; }
+.tally span {
+  font-family: var(--mono); font-size: 12px; font-weight: 700; font-variant-numeric: tabular-nums;
+  padding: 4px 11px; border-radius: 999px; border: 1px solid var(--border2); color: var(--muted);
+}
+.tally span.hot { color: var(--ink); border-color: var(--ink2); }
+.verdict-line { font-size: 13px; color: var(--ink2); flex: 1; min-width: 220px; }
+.verdict-line strong { color: var(--ink); }
+
+/* ── footer ── */
+footer { margin-top: 84px; padding: 36px 0 40px; border-top: 1px solid var(--border); }
+footer .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; }
+footer h4 { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+footer p, footer li { font-size: 13px; color: var(--ink2); }
+footer ul { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+
+@media (max-width: 620px) {
+  .ev { grid-template-columns: 78px 1fr; }
+  .ev .a { display: none; }
+  .verdict-line { display: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  * { animation: none !important; transition: none !important; }
+}
+</style>
+</head>
+<body data-palette="#bd861a,#1ea08f,#8b6fe8,#e05a4c">
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <div class="eyebrow">Conditions · a life path from date + place · no symbols</div>
+    <h1>8 May 2002 — Whangārei,<br>1:00 pm</h1>
+    <p class="hero-sub">A Wednesday. <strong>Ten hours, seventeen minutes</strong> of daylight, and shrinking.
+    The sun stood <strong>36° up in the northern sky</strong>, forty-one minutes past its peak.
+    Everything on this page is computed from those coordinates — the light you were assembled in, the clock you
+    were issued, the classroom the calendar sorted you into, and the decade that calibrated you.
+    None of it is mystical. All of it is checkable.</p>
+    <div>
+      <canvas id="skyCanvas" width="1600" height="560" aria-label="The sun's arc over Whangārei on 8 May 2002, with the birth moment marked at 1:00 pm"></canvas>
+      <div class="sky-caption">THE SKY THAT DAY — the sun rises east-northeast, arcs through the <em>north</em> — this is the southern hemisphere — and is marked where it stood at <em>1:00 pm</em>. Computed, not illustrated.</div>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div class="arith" id="arith"></div>
+  <div class="arith-note">// computed on this page from lat −35.73°, lon 174.32°E · solar geometry accurate to ±2 min · NZ daylight-saving rules 1990–2006 applied (NZDT ended 17 Mar 2002 — you were born on standard time)</div>
+</div>
+
+<!-- ═══ LIFE SCRUBBER ═══ -->
+<section class="wrap axis" id="timeline">
+  <div class="axis-head"><h2>The path, in order</h2></div>
+  <div class="axis-mech">// drag across your life · 8 may 2002 → today</div>
+  <div class="scrub-card">
+    <div class="bands" id="bands"></div>
+    <div class="evticks" id="evticks"></div>
+    <input type="range" class="scrub" id="scrub" min="0" max="100" value="0" step="1" aria-label="Scrub across the timeline of your life">
+    <div class="scrub-read">
+      <div class="fact"><span class="k">Date</span><span class="v" id="sr-date">—</span></div>
+      <div class="fact"><span class="k">Age</span><span class="v" id="sr-age">—</span></div>
+      <div class="fact"><span class="k">Stage</span><span class="v" id="sr-stage">—</span></div>
+      <div class="fact"><span class="k">Daylight that day</span><span class="v" id="sr-light">—</span></div>
+      <div class="fact"><span class="k">Solar noon (clock)</span><span class="v" id="sr-noon">—</span></div>
+    </div>
+    <div class="evlist" id="evlist"></div>
+  </div>
+</section>
+
+<!-- ═══ AXIS 1 · RHYTHM ═══ -->
+<section class="wrap axis" id="rhythm">
+  <div class="axis-head"><span class="axis-chip gold">Rhythm</span><h2>The flattest light in the country</h2></div>
+  <div class="axis-mech">// input: photoperiod at 35.7°S · annual swing 4 h 50 m · born 44 days before the trough</div>
+
+  <p class="read">Whangārei is the mildest light regime New Zealand has — a four-hour-fifty swing between midsummer
+  and midwinter, against seven hours in Invercargill. They call Northland the winterless north and mean it.
+  <strong>You grew up with seasons soft enough to ignore, so you ignore them.</strong> You plan the year as a flat
+  line, and you're nearly right — which is exactly why the dip, when it lands, gets read as a personal failure
+  instead of as late June.</p>
+
+  <p class="read">And note the direction you arrived in: born six weeks before the shortest day, your first
+  half-year ran a brief slide into the dark, then five straight months of climb. The first trend your nervous
+  system ever tracked was <strong>improving light</strong>.</p>
+
+  <div class="chart-card">
+    <div class="chart-title">Daylight across the year — hours per day</div>
+    <div class="chart-sub">Your latitude against the extremes available in NZ + Australia. Marker = 8 May.</div>
+    <div id="lightChart"></div>
+    <div class="legend">
+      <span><i style="background:#bd861a"></i>Whangārei 35.7°S</span>
+      <span><i style="background:#565b78"></i>Invercargill 46.4°S</span>
+      <span><i style="background:#565b78;opacity:.55"></i>Darwin 12.4°S</span>
+    </div>
+  </div>
+
+  <div class="props">
+    <div class="prop gold" data-id="R1">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">RHYTHM · 01</span></div>
+      <p>You treat a productivity slump in June–July as your fault, not the season's. You have never once
+      scheduled a lighter winter on purpose — a flat plan for a year that isn't quite flat.</p>
+      <div class="vote"></div>
+    </div>
+    <div class="prop gold" data-id="R2">
+      <div class="prop-top"><span class="grade spec">Speculative</span><span class="prop-id">RHYTHM · 02</span></div>
+      <p>Your year has a shape you've never named: <strong>you start things in spring.</strong> Check your own
+      record — projects, jobs, resets, moves. The starts cluster September to December.</p>
+      <div class="vote"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AXIS 2 · PHASE ═══ -->
+<section class="wrap axis" id="phase">
+  <div class="axis-head"><span class="axis-chip teal">Phase</span><h2>A life lived behind the sun</h2></div>
+  <div class="axis-mech">// input: 174.32°E vs the 180° meridian · solar noon ≈ 12:19–12:26 pm · +1 h in dst months</div>
+
+  <p class="read">Every New Zealander lives behind the sun — the whole country sits west of its own time meridian,
+  so solar noon lands after clock noon for every person in it. In Whangārei the gap is about
+  23 minutes; add daylight saving and your true midday spends half the year landing near <strong>1:20 pm</strong>.
+  Your 9 am has never been the sun's 9 am. It's mild — but it has been mild in the
+  <strong>same direction every day of your life</strong>.</p>
+
+  <p class="read">You were born at 1:00 pm on the clock. By the sun, it was 12:41 — you arrived at the top of the
+  day, just past its peak.</p>
+
+  <div class="chart-card">
+    <div class="chart-title">Minutes your clock runs ahead of your sun — NZ cities, standard time</div>
+    <div class="chart-sub">Whole country behind the sun; Whangārei sits mid-pack. Add ~60 min during daylight saving.</div>
+    <div id="phaseChart"></div>
+  </div>
+
+  <div class="props">
+    <div class="prop teal" data-id="P1">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">PHASE · 01</span></div>
+      <p>Your best hours run late-morning into the afternoon, and early starts cost you more than they cost the
+      people who schedule them. You say <strong>"not a morning person"</strong> like it's a personality. It is
+      partly a longitude.</p>
+      <div class="vote"></div>
+    </div>
+    <div class="prop teal" data-id="P2">
+      <div class="prop-top"><span class="grade spec">Speculative</span><span class="prop-id">PHASE · 02</span></div>
+      <p>Long summer evenings feel like a right, not a bonus. Your actual living happens after 5 pm, and any
+      structure that spends your evening — shifts, night classes, early bedtimes — breeds a resentment you
+      don't bother justifying.</p>
+      <div class="vote"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AXIS 3 · STANDING ═══ -->
+<section class="wrap axis" id="standing">
+  <div class="axis-head"><span class="axis-chip violet">Standing</span><h2>The classroom the calendar built</h2></div>
+  <div class="axis-mech">// input: nz rolling school entry · first day = 5th birthday = tue 8 may 2007, mid-term 2</div>
+
+  <p class="read">New Zealand does school entry like nowhere else: you start on your fifth birthday, whenever it
+  falls. So you walked into a classroom for the first time <strong>on your birthday</strong> — Tuesday 8 May 2007,
+  the middle of Term 2, the only new kid that day. Australia would have assigned you a cohort by decree; here, the
+  school decided. And a May birthday is the deep middle of the ambiguity zone: some schools ran you through to
+  Year 2 in 2008 — the young end of every room after that. Some held you the full year — the old end.</p>
+
+  <div class="fork" id="fork">
+    <h3>Only you know which one happened.</h3>
+    <p>The relative-age research is some of the best-evidenced material on this page, but it points in opposite
+    directions depending on a decision a primary school made about you in 2007. So the page asks:</p>
+    <div class="fork-btns">
+      <button class="fork-btn" data-track="A">I finished Year 13 in 2019</button>
+      <button class="fork-btn" data-track="B">I finished Year 13 in 2020</button>
+    </div>
+    <button class="fork-change" id="forkChange" style="display:none">change answer</button>
+
+    <div class="track-read" id="trackA">
+      <p class="read">Then you were up to ten months younger than the top of your class for thirteen years.
+      The literature is blunt about what that does: picked later, labelled less ready, outperformed by kids who
+      were simply older — and it forks. Either effort stopped feeling connected to outcomes, or
+      <strong>you built a real engine, because nothing arrived free</strong>. You'd know which. And you left
+      school straight into 2020: your first year of adult life was a closed country.</p>
+    </div>
+    <div class="track-read" id="trackB">
+      <p class="read">Then you were the old end of every room — picked early, labelled able, confidence
+      compounding on an eleven-month head start you didn't earn. The bill for that arrives in adulthood, the
+      first time a field goes age-flat and the edge quietly isn't there.
+      <strong>And your final school year was the COVID year</strong> — NCEA Level 3 through lockdowns, the
+      leaver rituals cancelled or masked.</p>
+    </div>
+  </div>
+
+  <div class="props">
+    <div class="prop violet locked" data-id="S1" id="propS1">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">STANDING · 01</span></div>
+      <p id="s1text">Answer the question above to unlock this one.</p>
+      <div class="vote"></div>
+    </div>
+    <div class="prop violet" data-id="S2">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">STANDING · 02</span></div>
+      <p>Whichever track: your school-to-adult transition happened inside a shut country. You either treat plans
+      as provisional by default, or you over-plan to compensate. <strong>Both are the same lesson wearing
+      different clothes.</strong></p>
+      <div class="vote"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ AXIS 4 · FORECAST ═══ -->
+<section class="wrap axis" id="forecast">
+  <div class="axis-head"><span class="axis-chip coral">Forecast</span><h2>What normal was set to</h2></div>
+  <div class="axis-mech">// input: calibration window, age 14–24 · may 2016 → may 2026 · closed three months ago</div>
+
+  <p class="read">Fourteen to twenty-four is the window where your sense of "normal" gets set — what the world
+  does, what it costs, whether it catches you. Yours: a mosque massacre at 16. A pandemic at 17. Your
+  <strong>18th birthday under Level 3</strong>, the takeaways freshly reopened. Borders shut until you were nearly
+  20. Then, at 20, the road home severed — Gabrielle closed the Brynderwyns and cut Northland off again. Someone
+  ten years older calibrated on the John Key years: smooth, dull, upward. You calibrated on a country that could
+  slam shut in 48 hours — <strong>and mostly caught you when it did</strong>.</p>
+
+  <p class="read">The window closed on your 24th birthday, in May. Whatever normal is to you now, it's set.</p>
+
+  <div class="props">
+    <div class="prop coral" data-id="F1">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">FORECAST · 01</span></div>
+      <p>You hold two defaults at once: high trust that collective action works — you watched five million people
+      eliminate a virus — and low trust that access lasts. Roads, borders, shelves:
+      <strong>you assume they can vanish, because yours did. Twice.</strong></p>
+      <div class="vote"></div>
+    </div>
+    <div class="prop coral" data-id="F2">
+      <div class="prop-top"><span class="grade moderate">Moderate</span><span class="prop-id">FORECAST · 02</span></div>
+      <p>You have never seen a housing market you could catch — prices rose ~45% while you were in Year 12 and 13.
+      You treat ownership as either a family event or a fiction, and you plan a life that doesn't depend on it.</p>
+      <div class="vote"></div>
+    </div>
+    <div class="prop coral" data-id="F3">
+      <div class="prop-top"><span class="grade spec">Speculative</span><span class="prop-id">FORECAST · 03</span></div>
+      <p>You're at your best inside a group with a mission and restless without one. <strong>"The team of five
+      million" was your civics lesson at 17</strong>, and part of you has been looking for the next team since.</p>
+      <div class="vote"></div>
+    </div>
+  </div>
+</section>
+
+<!-- ═══ SYNTHESIS ═══ -->
+<section class="wrap">
+  <div class="synth" id="synth">
+    <div class="eyebrow" style="margin-bottom:10px">The interaction · rhythm × phase × standing × forecast</div>
+    <h2>Steady ground, loud weather</h2>
+    <p class="read">Here is the shape of it. Your <strong>environment</strong> was the gentlest New Zealand
+    offers — the flattest light curve in the country, a modest clock offset, the winterless north. Your
+    <strong>era</strong> was the most disrupted decade in modern NZ history, and it landed precisely on your
+    calibration window. So you're built to expect the background to hold and the shocks to arrive as events.
+    You budget for disasters. You don't budget for seasons.</p>
+    <p class="read" style="margin-top:12px">The blind spot that falls out of that: <strong>slow, cyclical
+    erosion</strong> — the kind that never makes the news — is the one pattern your conditions never trained
+    you to see coming.</p>
+    <div class="props">
+      <div class="prop coral" data-id="X1" style="border-left-color: var(--gold)">
+        <div class="prop-top"><span class="grade spec">Speculative</span><span class="prop-id">SYNTHESIS · 01</span></div>
+        <p>You respond fast and well to acute crises, and drift in long flat stretches. Nothing in your first
+        24 years rewarded pacing.</p>
+        <div class="vote"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap grid">
+    <div>
+      <h4>Evidence grades</h4>
+      <ul>
+        <li><span class="grade solid" style="margin-right:8px">Solid</span>replicated findings (relative age effects)</li>
+        <li><span class="grade moderate" style="margin-right:8px">Moderate</span>real mechanism, modest effect size</li>
+        <li><span class="grade spec" style="margin-right:8px">Speculative</span>plausible, honestly untested</li>
+      </ul>
+    </div>
+    <div>
+      <h4>What this is</h4>
+      <p>A prior computed from a date and a place — photoperiod, solar geometry, school-entry rules, and a
+      national timeline. Nothing on this page knows you. The buttons are the data: what you confirm becomes the
+      profile, and the hit rate is reported honestly, whichever way it goes.</p>
+    </div>
+  </div>
+</footer>
+
+<div class="verdict" id="verdictBar">
+  <div class="verdict-inner">
+    <div class="tally">
+      <span id="t-y">0 landed</span>
+      <span id="t-p">0 partly</span>
+      <span id="t-n">0 didn't</span>
+    </div>
+    <div class="verdict-line" id="verdictLine"><strong>10 propositions on the table.</strong> The conditions are the prior — you're the evidence.</div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+'use strict';
+// ═══════════════════════════════════════════════
+// SOLAR GEOMETRY — computed live, nothing hardcoded
+// ═══════════════════════════════════════════════
+const LAT = -35.725, LON = 174.324, MERIDIAN = 180;
+const D2R = Math.PI / 180, R2D = 180 / Math.PI;
+const BIRTH = new Date(2002, 4, 8, 13, 0);
+const NOWISH = new Date(2026, 7, 10);
+
+function doy(d) { return Math.floor((d - new Date(d.getFullYear(), 0, 0)) / 864e5); }
+function decl(n) { return 23.44 * Math.sin(2 * Math.PI * (284 + n) / 365); }
+function eot(n) { const b = 2 * Math.PI * (n - 81) / 364; return 9.87 * Math.sin(2 * b) - 7.53 * Math.cos(b) - 1.5 * Math.sin(b); }
+function dayLen(latDeg, n) {
+  const x = -Math.tan(latDeg * D2R) * Math.tan(decl(n) * D2R);
+  return Math.acos(Math.min(1, Math.max(-1, x))) * 2 * R2D / 15;
+}
+// NZ DST: 1990–2006 first Sun Oct → third Sun Mar; 2007+ last Sun Sep → first Sun Apr
+function nthSunday(y, m, nth) { // nth>0: nth Sunday; nth<0: last
+  if (nth > 0) { const d = new Date(y, m, 1); const off = (7 - d.getDay()) % 7; return new Date(y, m, 1 + off + 7 * (nth - 1)); }
+  const d = new Date(y, m + 1, 0); return new Date(y, m + 1, -((d.getDay() + 7) % 7));
+}
+function isDST(d) {
+  const y = d.getFullYear();
+  const start = y >= 2007 ? nthSunday(y, 8, -1) : nthSunday(y, 9, 1);       // Sep last / Oct 1st
+  const end   = y >= 2007 ? nthSunday(y, 3, 1)  : nthSunday(y, 2, 3);       // Apr 1st / Mar 3rd
+  return d >= start || d < end; // southern-hemisphere DST spans new year
+}
+function solarNoonClock(d) { // minutes after midnight, clock time
+  const n = doy(d);
+  return 720 + (MERIDIAN - LON) * 4 - eot(n) + (isDST(d) ? 60 : 0);
+}
+function fmtHM(mins) {
+  let h = Math.floor(mins / 60), m = Math.round(mins % 60);
+  if (m === 60) { h++; m = 0; }
+  const ap = h >= 12 ? 'pm' : 'am'; const hh = ((h + 11) % 12) + 1;
+  return hh + ':' + String(m).padStart(2, '0') + ' ' + ap;
+}
+function fmtDur(hours) { const h = Math.floor(hours); const m = Math.round((hours - h) * 60); return h + 'h ' + String(m).padStart(2, '0') + 'm'; }
+function sunAlt(n, clockMins, dst) {
+  const solar = clockMins - (MERIDIAN - LON) * 4 + eot(n) - (dst ? 60 : 0);
+  const H = (solar / 60 - 12) * 15 * D2R;
+  const la = LAT * D2R, de = decl(n) * D2R;
+  return Math.asin(Math.sin(la) * Math.sin(de) + Math.cos(la) * Math.cos(de) * Math.cos(H)) * R2D;
+}
+
+// ── birth-day numbers ──
+const N0 = doy(BIRTH);                              // day of year 128
+const dl0 = dayLen(LAT, N0);
+const noon0 = solarNoonClock(BIRTH);                // standard time (DST over)
+const rise0 = noon0 - dl0 * 30, set0 = noon0 + dl0 * 30;
+const altBirth = sunAlt(N0, 13 * 60, false);
+const altMax = 90 - Math.abs(LAT - decl(N0));
+const swing = dayLen(LAT, 355) - dayLen(LAT, 172); // midsummer − midwinter
+const shrink = (dayLen(LAT, N0 - 1) - dayLen(LAT, N0 + 1)) * 30; // min/day
+
+// ═══════════════════════════════════════════════
+// ARITHMETIC STRIP
+// ═══════════════════════════════════════════════
+const facts = [
+  ['Coordinates', '35.73°S · 174.32°E', 'Whangārei — the northernmost city in the country'],
+  ['Daylight that day', fmtDur(dl0), 'and losing ~' + shrink.toFixed(1) + ' min every day, 44 days from the trough'],
+  ['Sun up / sun down', fmtHM(rise0) + ' → ' + fmtHM(set0), 'rose ENE, set WNW — arcing through the north'],
+  ['Solar noon', fmtHM(noon0), 'the clock ran ' + Math.round(noon0 - 720) + ' min ahead of the sun'],
+  ['At 1:00 pm', altBirth.toFixed(0) + '° up · due north', Math.round(13 * 60 - noon0) + ' min past the sun’s peak of ' + altMax.toFixed(0) + '°'],
+  ['Annual swing', fmtDur(dayLen(LAT, 355)) + ' ↔ ' + fmtDur(dayLen(LAT, 172)), 'a ' + fmtDur(swing) + ' range — the flattest light curve in NZ'],
+];
+document.getElementById('arith').innerHTML = facts.map(f =>
+  '<div class="fact"><span class="k">' + f[0] + '</span><span class="v">' + f[1] + '</span><span class="s">' + f[2] + '</span></div>'
+).join('');
+
+// ═══════════════════════════════════════════════
+// HERO CANVAS — the sky on 8 May 2002
+// ═══════════════════════════════════════════════
+(function hero() {
+  const cv = document.getElementById('skyCanvas'), ctx = cv.getContext('2d');
+  const W = cv.width, H = cv.height;
+  const T0 = 6, T1 = 18.6;                       // clock hours drawn
+  const horizonY = H * 0.78;
+  const x = t => ((t - T0) / (T1 - T0)) * (W - 120) + 60;
+  const y = alt => horizonY - (alt / 45) * (horizonY - 60);
+  const altAt = t => sunAlt(N0, t * 60, false);
+
+  // seeded stars
+  let seed = 128;
+  const rnd = () => { seed = (seed * 16807) % 2147483647; return seed / 2147483647; };
+  const stars = Array.from({ length: 130 }, () => ({ x: rnd() * W, y: rnd() * horizonY * 0.95, r: rnd() * 1.6 + 0.4, a: rnd() * 0.7 + 0.15 }));
+
+  function draw(prog) { // prog 0→1 animates sunrise→1pm
+    ctx.clearRect(0, 0, W, H);
+    const tNow = 7.18 + prog * (13 - 7.18);
+    const altNow = altAt(tNow);
+    const dayness = Math.min(1, Math.max(0, altNow / 25));
+
+    // sky
+    const sky = ctx.createLinearGradient(0, 0, 0, horizonY);
+    sky.addColorStop(0, '#05060d');
+    sky.addColorStop(1, 'rgba(189,134,26,' + (0.05 + dayness * 0.13) + ')');
+    ctx.fillStyle = sky; ctx.fillRect(0, 0, W, horizonY);
+
+    // stars fade with daylight
+    stars.forEach(s => {
+      ctx.globalAlpha = s.a * (1 - dayness * 0.92);
+      ctx.fillStyle = '#e9eaf2';
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.r, 0, 7); ctx.fill();
+    });
+    ctx.globalAlpha = 1;
+
+    // ground
+    ctx.fillStyle = '#0a0c16'; ctx.fillRect(0, horizonY, W, H - horizonY);
+    ctx.strokeStyle = 'rgba(158,168,214,0.25)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, horizonY); ctx.lineTo(W, horizonY); ctx.stroke();
+
+    // full arc, faint
+    ctx.strokeStyle = 'rgba(189,134,26,0.22)'; ctx.lineWidth = 2; ctx.setLineDash([2, 7]);
+    ctx.beginPath();
+    for (let t = 6.9; t <= 17.8; t += 0.05) { const p = [x(t), y(Math.max(-2, altAt(t)))]; t === 6.9 ? ctx.moveTo(...p) : ctx.lineTo(...p); }
+    ctx.stroke(); ctx.setLineDash([]);
+
+    // travelled arc, bright
+    ctx.strokeStyle = '#f0c060'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let t = 7.18; t <= tNow; t += 0.03) { const p = [x(t), y(Math.max(-2, altAt(t)))]; t === 7.18 ? ctx.moveTo(...p) : ctx.lineTo(...p); }
+    ctx.stroke();
+
+    // sun
+    const sx = x(tNow), sy = y(Math.max(-2, altNow));
+    const glow = ctx.createRadialGradient(sx, sy, 2, sx, sy, 46);
+    glow.addColorStop(0, 'rgba(240,192,96,0.9)'); glow.addColorStop(1, 'rgba(240,192,96,0)');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(sx, sy, 46, 0, 7); ctx.fill();
+    ctx.fillStyle = '#f5d488'; ctx.beginPath(); ctx.arc(sx, sy, 11, 0, 7); ctx.fill();
+
+    // annotations
+    ctx.font = '600 15px ui-monospace, Menlo, monospace';
+    ctx.fillStyle = 'rgba(169,173,196,0.9)';
+    ctx.fillText('E', x(6.6), horizonY + 26);
+    ctx.textAlign = 'center';
+    ctx.fillText('N — solar noon ' + fmtHM(noon0), x(noon0 / 60), horizonY + 26);
+    ctx.textAlign = 'right'; ctx.fillText('W', x(18.3), horizonY + 26);
+    ctx.textAlign = 'left';
+    ctx.fillStyle = 'rgba(113,118,143,0.9)';
+    ctx.fillText('↑ ' + fmtHM(rise0), x(7.18) - 26, horizonY - 14);
+    ctx.fillText('↓ ' + fmtHM(set0), x(17.45) - 60, horizonY - 14);
+
+    // birth marker once the sun reaches it
+    if (prog >= 0.999) {
+      ctx.strokeStyle = 'rgba(233,234,242,0.85)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(sx, sy, 19, 0, 7); ctx.stroke();
+      ctx.fillStyle = '#e9eaf2'; ctx.font = '700 16px ui-monospace, Menlo, monospace';
+      ctx.fillText('you · 1:00 pm · ' + altBirth.toFixed(0) + '° up', sx + 30, sy - 4);
+      ctx.fillStyle = 'rgba(169,173,196,0.85)'; ctx.font = '500 13px ui-monospace, Menlo, monospace';
+      ctx.fillText('in the northern sky', sx + 30, sy + 16);
+    }
+  }
+
+  const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (reduced) { draw(1); return; }
+  let start = null;
+  function frame(ts) {
+    if (!start) start = ts;
+    const p = Math.min(1, (ts - start) / 3200);
+    draw(p < 1 ? (1 - Math.pow(1 - p, 3)) : 1);   // ease-out
+    if (p < 1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+// ═══════════════════════════════════════════════
+// CHART HELPERS
+// ═══════════════════════════════════════════════
+const tooltip = document.getElementById('tooltip');
+function showTip(html, ev) {
+  tooltip.innerHTML = html; tooltip.style.display = 'block';
+  const pad = 14, tw = tooltip.offsetWidth;
+  let tx = ev.clientX + pad; if (tx + tw > innerWidth - 8) tx = ev.clientX - tw - pad;
+  tooltip.style.left = tx + 'px'; tooltip.style.top = (ev.clientY + pad) + 'px';
+}
+function hideTip() { tooltip.style.display = 'none'; }
+
+// ═══════════════════════════════════════════════
+// CHART 1 — daylight across the year (3 series)
+// ═══════════════════════════════════════════════
+(function lightChart() {
+  const Wc = 800, Hc = 300, mL = 46, mR = 96, mT = 14, mB = 30;
+  const pw = Wc - mL - mR, ph = Hc - mT - mB;
+  const yMin = 8, yMax = 16;
+  const X = n => mL + (n / 365) * pw;
+  const Y = h => mT + (1 - (h - yMin) / (yMax - yMin)) * ph;
+  const series = [
+    { name: 'Whangārei', lat: LAT, col: '#bd861a', w: 3 },
+    { name: 'Invercargill', lat: -46.41, col: '#565b78', w: 2 },
+    { name: 'Darwin', lat: -12.46, col: '#565b78', w: 2, op: 0.55 },
+  ];
+  const months = ['J','F','M','A','M','J','J','A','S','O','N','D'];
+  let s = '<svg viewBox="0 0 ' + Wc + ' ' + Hc + '" style="width:100%;min-width:560px;display:block" id="lcSvg">';
+  for (let h = yMin; h <= yMax; h += 2) {
+    s += '<line x1="' + mL + '" y1="' + Y(h) + '" x2="' + (Wc - mR) + '" y2="' + Y(h) + '" stroke="rgba(158,168,214,0.08)"/>';
+    s += '<text x="' + (mL - 9) + '" y="' + (Y(h) + 4) + '" text-anchor="end" font-size="11" fill="#71768f">' + h + 'h</text>';
+  }
+  months.forEach((m, i) => { s += '<text x="' + X(15 + i * 30.4) + '" y="' + (Hc - 8) + '" text-anchor="middle" font-size="11" fill="#71768f">' + m + '</text>'; });
+  series.forEach(sr => {
+    let d = '';
+    for (let n = 1; n <= 365; n += 3) d += (n === 1 ? 'M' : 'L') + X(n).toFixed(1) + ' ' + Y(dayLen(sr.lat, n)).toFixed(1);
+    s += '<path d="' + d + '" fill="none" stroke="' + sr.col + '" stroke-width="' + sr.w + '" opacity="' + (sr.op || 1) + '" stroke-linecap="round"/>';
+    s += '<text x="' + (Wc - mR + 8) + '" y="' + (Y(dayLen(sr.lat, 363)) + 4) + '" font-size="11.5" fill="' + (sr.col === '#bd861a' ? '#f0c060' : '#71768f') + '">' + sr.name + '</text>';
+  });
+  s += '<circle cx="' + X(N0) + '" cy="' + Y(dl0) + '" r="6" fill="#f0c060" stroke="#070810" stroke-width="2"/>';
+  s += '<text x="' + X(N0) + '" y="' + (Y(dl0) - 14) + '" text-anchor="middle" font-size="11.5" font-weight="700" fill="#f0c060">8 May · ' + fmtDur(dl0) + '</text>';
+  s += '<line id="lcCross" x1="0" y1="' + mT + '" x2="0" y2="' + (Hc - mB) + '" stroke="rgba(233,234,242,0.35)" stroke-width="1" style="display:none"/>';
+  s += '<rect x="' + mL + '" y="' + mT + '" width="' + pw + '" height="' + ph + '" fill="transparent" id="lcHit"/></svg>';
+  document.getElementById('lightChart').innerHTML = s;
+
+  const svg = document.getElementById('lcSvg'), cross = document.getElementById('lcCross');
+  const mNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  document.getElementById('lcHit').addEventListener('mousemove', ev => {
+    const r = svg.getBoundingClientRect();
+    const n = Math.round(((ev.clientX - r.left) / r.width * Wc - mL) / pw * 365);
+    if (n < 1 || n > 365) return;
+    cross.style.display = 'block'; cross.setAttribute('x1', X(n)); cross.setAttribute('x2', X(n));
+    const dd = new Date(2002, 0, n);
+    showTip('<strong>' + dd.getDate() + ' ' + mNames[dd.getMonth()] + '</strong><br>' +
+      series.map(sr => sr.name + ' · ' + fmtDur(dayLen(sr.lat, n))).join('<br>'), ev);
+  });
+  document.getElementById('lcHit').addEventListener('mouseleave', () => { cross.style.display = 'none'; hideTip(); });
+})();
+
+// ═══════════════════════════════════════════════
+// CHART 2 — minutes behind the sun, NZ cities
+// ═══════════════════════════════════════════════
+(function phaseChart() {
+  const cities = [
+    ['Gisborne', 178.02], ['Auckland', 174.76], ['Wellington', 174.78],
+    ['Whangārei', LON], ['Christchurch', 172.64], ['Dunedin', 170.50], ['Invercargill', 168.35],
+  ].map(c => ({ name: c[0], min: (MERIDIAN - c[1]) * 4 })).sort((a, b) => a.min - b.min);
+  const Wc = 800, rowH = 34, mL = 118, mR = 70, mT = 6;
+  const Hc = mT + cities.length * rowH + 8;
+  const maxV = 50;
+  const barW = v => (v / maxV) * (Wc - mL - mR);
+  let s = '<svg viewBox="0 0 ' + Wc + ' ' + Hc + '" style="width:100%;min-width:560px;display:block">';
+  cities.forEach((c, i) => {
+    const yy = mT + i * rowH, me = c.name === 'Whangārei';
+    s += '<text x="' + (mL - 10) + '" y="' + (yy + 21) + '" text-anchor="end" font-size="12.5" fill="' + (me ? '#e9eaf2' : '#71768f') + '" font-weight="' + (me ? 700 : 400) + '">' + c.name + '</text>';
+    s += '<g class="pbar" data-i="' + i + '"><rect x="' + mL + '" y="' + (yy + 7) + '" width="' + barW(c.min).toFixed(1) + '" height="18" rx="4" fill="' + (me ? '#1ea08f' : '#2a2e45') + '"/>';
+    s += '<text x="' + (mL + barW(c.min) + 9) + '" y="' + (yy + 21) + '" font-size="12" fill="' + (me ? '#5cd6c4' : '#71768f') + '" font-weight="' + (me ? 700 : 400) + '">+' + Math.round(c.min) + ' min</text></g>';
+  });
+  s += '</svg>';
+  document.getElementById('phaseChart').innerHTML = s;
+  document.querySelectorAll('.pbar').forEach(g => {
+    g.addEventListener('mousemove', ev => {
+      const c = cities[+g.dataset.i];
+      showTip('<strong>' + c.name + '</strong><br>solar noon ' + fmtHM(720 + c.min) + ' standard<br>' + fmtHM(780 + c.min) + ' in DST months', ev);
+    });
+    g.addEventListener('mouseleave', hideTip);
+  });
+})();
+
+// ═══════════════════════════════════════════════
+// LIFE SCRUBBER
+// ═══════════════════════════════════════════════
+const EVENTS = [
+  ['2002-05-08', 'Born — Whangārei, 1:00 pm', 'gold'],
+  ['2007-05-08', 'First day of school, on your 5th birthday', 'violet'],
+  ['2008-09-15', 'Global financial crisis — background noise at 6', 'coral'],
+  ['2011-02-22', 'Christchurch earthquake', 'coral'],
+  ['2016-05-08', 'Calibration window opens — 14', 'coral'],
+  ['2016-11-14', 'Kaikōura earthquake', 'coral'],
+  ['2017-10-26', 'Ardern government begins', 'coral'],
+  ['2019-03-15', 'Christchurch mosque attacks', 'coral'],
+  ['2019-12-09', 'Whakaari / White Island erupts', 'coral'],
+  ['2020-03-25', 'Level 4 — the country closes', 'coral'],
+  ['2020-05-08', '18th birthday, under Level 3', 'coral'],
+  ['2021-08-17', 'Delta — Auckland boundary cuts Northland off', 'coral'],
+  ['2022-07-31', 'Borders fully reopen', 'coral'],
+  ['2023-02-13', 'Cyclone Gabrielle — Brynderwyns close, Northland cut off', 'coral'],
+  ['2026-05-08', 'Window closes — 24. Whatever normal is, it’s set.', 'coral'],
+];
+const AXCOL = { gold: '#bd861a', teal: '#1ea08f', violet: '#8b6fe8', coral: '#e05a4c' };
+const TOTAL_DAYS = Math.round((NOWISH - BIRTH) / 864e5);
+const scrub = document.getElementById('scrub');
+scrub.max = TOTAL_DAYS;
+const frac = d => Math.max(0, Math.min(1, (d - BIRTH) / (NOWISH - BIRTH)));
+const pd = s => { const [y, m, dd] = s.split('-').map(Number); return new Date(y, m - 1, dd); };
+
+let track = null; // 'A' | 'B' | null
+
+function buildBands() {
+  const el = document.getElementById('bands');
+  const schoolEnd = pd(track === 'A' ? '2019-12-06' : '2020-12-04');
+  const segs = [
+    { from: BIRTH, to: pd('2007-05-08'), col: 'rgba(189,134,26,0.30)', lab: 'before school', row: 1 },
+    { from: pd('2007-05-08'), to: schoolEnd, col: 'rgba(139,111,232,0.30)', lab: 'school' + (track ? ' · Y1–Y13' : ''), row: 1 },
+    { from: schoolEnd, to: NOWISH, col: 'rgba(158,168,214,0.16)', lab: 'adult', row: 1 },
+    { from: pd('2016-05-08'), to: pd('2026-05-08'), col: 'rgba(224,90,76,0.32)', lab: 'calibration window 14–24', row: 2 },
+  ];
+  el.innerHTML = segs.map(sg => {
+    const l = frac(sg.from) * 100, w = (frac(sg.to) - frac(sg.from)) * 100;
+    return '<div class="band' + (sg.row === 2 ? ' row2' : '') + '" style="left:' + l + '%;width:' + w + '%;background:' + sg.col + '"></div>' +
+           '<div class="band-label" style="left:' + l + '%;top:' + (sg.row === 2 ? 17 : 0) + 'px">' + sg.lab + '</div>';
+  }).join('');
+  document.getElementById('evticks').innerHTML = EVENTS.map(e =>
+    '<div class="evtick" style="left:' + (frac(pd(e[0])) * 100) + '%;background:' + AXCOL[e[2]] + '"></div>'
+  ).join('');
+}
+
+function buildEvList() {
+  document.getElementById('evlist').innerHTML = EVENTS.map((e, i) => {
+    const d = pd(e[0]);
+    const ageY = Math.floor((d - BIRTH) / 864e5 / 365.25);
+    return '<button class="ev" data-i="' + i + '"><span class="d">' + e[0] + '</span><span class="a">' + (d <= BIRTH ? '·' : ageY) + '</span>' +
+      '<span><span class="dot" style="background:' + AXCOL[e[2]] + '"></span>' + e[1] + '</span></button>';
+  }).join('');
+  document.querySelectorAll('.ev').forEach(b => b.addEventListener('click', () => {
+    scrub.value = Math.round((pd(EVENTS[+b.dataset.i][0]) - BIRTH) / 864e5);
+    updateScrub();
+  }));
+}
+
+function stageAt(d) {
+  if (d < pd('2007-05-08')) return 'before school';
+  const schoolEnd = pd(track === 'A' ? '2019-12-06' : '2020-12-04');
+  if (d < schoolEnd) {
+    if (!track) return 'school';
+    const yr = d.getFullYear() - (track === 'A' ? 2006 : 2007);
+    const y2 = (d.getMonth() >= 4 || d.getFullYear() > 2007) ? Math.min(13, Math.max(1, yr)) : 1;
+    return 'school · Year ' + y2;
+  }
+  return d < pd('2026-05-08') ? 'adult · window open' : 'adult · window closed';
+}
+
+function updateScrub() {
+  const d = new Date(BIRTH.getTime() + (+scrub.value) * 864e5);
+  const n = doy(d);
+  const ms = d - BIRTH;
+  const ay = Math.floor(ms / 864e5 / 365.25);
+  const am = Math.floor((ms / 864e5 / 365.25 - ay) * 12);
+  document.getElementById('sr-date').textContent = d.toLocaleDateString('en-NZ', { day: 'numeric', month: 'short', year: 'numeric' });
+  document.getElementById('sr-age').textContent = ay + 'y ' + am + 'm';
+  document.getElementById('sr-stage').textContent = stageAt(d);
+  document.getElementById('sr-light').textContent = fmtDur(dayLen(LAT, n));
+  document.getElementById('sr-noon').textContent = fmtHM(solarNoonClock(d)) + (isDST(d) ? ' (DST)' : '');
+  document.querySelectorAll('.ev').forEach((b, i) => {
+    b.classList.toggle('near', Math.abs(pd(EVENTS[i][0]) - d) < 150 * 864e5);
+  });
+}
+scrub.addEventListener('input', updateScrub);
+
+// ═══════════════════════════════════════════════
+// THE FORK + PROPOSITIONS + VERDICT
+// ═══════════════════════════════════════════════
+const STORE_KEY = 'conditions_v1';
+let store = {};
+try { store = JSON.parse(localStorage.getItem(STORE_KEY) || '{}'); } catch (e) { store = {}; }
+function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(store)); } catch (e) {} }
+
+const S1TEXT = {
+  A: 'You spent thirteen years as one of the youngest in the room and learned to read <strong>"not ready yet" as a personal trait instead of a birthday</strong>. You still under-claim seniority you actually hold — you wait to be picked in rooms where you could simply speak.',
+  B: 'You were picked early and often, and some of your confidence is compounding interest on an <strong>eleven-month head start you didn’t earn</strong>. Watch what happens to your certainty the first time a field goes age-flat — that wobble is the head start expiring, not you failing.',
+};
+
+function setTrack(t, silent) {
+  track = t;
+  store.track = t; if (!silent) save();
+  document.querySelectorAll('.fork-btn').forEach(b => b.classList.toggle('on', b.dataset.track === t));
+  document.getElementById('trackA').classList.toggle('show', t === 'A');
+  document.getElementById('trackB').classList.toggle('show', t === 'B');
+  document.getElementById('forkChange').style.display = 'inline';
+  const s1 = document.getElementById('propS1');
+  s1.classList.remove('locked');
+  document.getElementById('s1text').innerHTML = S1TEXT[t];
+  buildBands(); updateScrub(); updateVerdict();
+}
+document.querySelectorAll('.fork-btn').forEach(b => b.addEventListener('click', () => setTrack(b.dataset.track)));
+document.getElementById('forkChange').addEventListener('click', () => {
+  track = null; delete store.track; save();
+  document.querySelectorAll('.fork-btn').forEach(b => b.classList.remove('on'));
+  document.getElementById('trackA').classList.remove('show');
+  document.getElementById('trackB').classList.remove('show');
+  document.getElementById('forkChange').style.display = 'none';
+  const s1 = document.getElementById('propS1'); s1.classList.add('locked');
+  document.getElementById('s1text').textContent = 'Answer the question above to unlock this one.';
+  buildBands(); updateScrub();
+});
+
+const VOTES = [['y', 'Lands'], ['p', 'Partly'], ['n', 'Doesn’t']];
+document.querySelectorAll('.prop').forEach(card => {
+  const id = card.dataset.id, voteEl = card.querySelector('.vote');
+  voteEl.innerHTML = VOTES.map(v => '<button data-v="' + v[0] + '">' + v[1] + '</button>').join('');
+  voteEl.querySelectorAll('button').forEach(btn => btn.addEventListener('click', () => {
+    if (card.classList.contains('locked')) return;
+    const v = btn.dataset.v;
+    if (store['p_' + id] === v) delete store['p_' + id]; else store['p_' + id] = v;
+    save(); paintVotes(); updateVerdict();
+  }));
+});
+function paintVotes() {
+  document.querySelectorAll('.prop').forEach(card => {
+    const cur = store['p_' + card.dataset.id];
+    card.querySelectorAll('.vote button').forEach(b => {
+      b.className = (cur === b.dataset.v) ? 'on-' + cur : '';
+    });
+  });
+}
+function updateVerdict() {
+  let y = 0, p = 0, n = 0;
+  document.querySelectorAll('.prop').forEach(card => {
+    const v = store['p_' + card.dataset.id];
+    if (v === 'y') y++; else if (v === 'p') p++; else if (v === 'n') n++;
+  });
+  const answered = y + p + n, total = document.querySelectorAll('.prop').length;
+  document.getElementById('t-y').textContent = y + ' landed';
+  document.getElementById('t-p').textContent = p + ' partly';
+  document.getElementById('t-n').textContent = n + ' didn’t';
+  document.getElementById('t-y').classList.toggle('hot', y > 0);
+  document.getElementById('t-p').classList.toggle('hot', p > 0);
+  document.getElementById('t-n').classList.toggle('hot', n > 0);
+  const line = document.getElementById('verdictLine');
+  if (!answered) {
+    line.innerHTML = '<strong>' + total + ' propositions on the table.</strong> The conditions are the prior — you’re the evidence.';
+  } else {
+    const rate = Math.round(((y + p * 0.5) / answered) * 100);
+    let flavor;
+    if (answered < 4) flavor = 'Keep going — ' + (total - answered) + ' still open.';
+    else if (rate >= 70) flavor = 'The conditions explain more than they should.';
+    else if (rate >= 40) flavor = 'A prior, not a verdict — this is what honest looks like.';
+    else flavor = 'The mechanisms are real; the person overrode them. Also worth knowing.';
+    line.innerHTML = '<strong>Hit rate ' + rate + '%</strong> across ' + answered + ' of ' + total + ' · ' + flavor;
+  }
+}
+
+// ═══════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════
+buildEvList();
+if (store.track === 'A' || store.track === 'B') setTrack(store.track, true);
+else buildBands();
+updateScrub();
+paintVotes();
+updateVerdict();
+</script>
+</body>
+</html>
