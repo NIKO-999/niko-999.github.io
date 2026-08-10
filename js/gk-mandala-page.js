@@ -206,6 +206,25 @@ spinOrBreathe(hex2G, -70, 10, 1.6);
 
 const dashRingG = ring(R * 0.98, '3 10', 0.22, 1, 90);
 expandG.appendChild(dashRingG);
+
+// A decorative ring that gives every selection a felt "click" — a one-time
+// eased rotation, not a continuous loop, so it costs nothing between clicks.
+// CSS transition on transform, same mechanism as the reveal zoom already
+// uses safely; stripFiltersDuring() is reused on mobile for the same reason
+// it's used there — a filtered element mid-transform is the expensive case,
+// a filtered element settled at rest is not.
+const clickRingG = el('g', {});
+clickRingG.style.transformOrigin = CX + 'px ' + CY + 'px';
+clickRingG.style.transition = 'transform 1.3s cubic-bezier(.16,.86,.2,1)';
+clickRingG.appendChild(el('circle', { cx: CX, cy: CY, r: R * 0.80, fill: 'none', stroke: NEUTRAL, 'stroke-width': 1, 'stroke-dasharray': '1 14', opacity: 0.28, filter: 'url(#glowSoft)' }));
+expandG.appendChild(clickRingG);
+let clickSpin = 0;
+function kickClickRing() {
+  clickSpin += 33;
+  if (isMobile()) stripFiltersDuring(1300);
+  clickRingG.style.transform = 'rotate(' + clickSpin + 'deg)';
+}
+
 const coreR = R * 0.135;
 
 let beamNode = null, chargeNode = null;
@@ -675,6 +694,7 @@ function selectSphere(i) {
   if (!nodeReady(marks[i])) return;
   hidePreview();
   if (currentSel === i) { closePanel(); return; }
+  kickClickRing();
   const wasOpen = panelOpen;
   currentSel = i; panelOpen = true;
   paintMarks();
@@ -749,6 +769,7 @@ coreHit.addEventListener('click', e => {
   if (!primes) return; // no profile fitted yet — nothing to overview
   if (currentSel === OVERVIEW_SEL) { closePanel(); return; }
   hidePreview();
+  kickClickRing();
   const wasOpen = panelOpen;
   currentSel = OVERVIEW_SEL; panelOpen = true;
   paintMarks();
