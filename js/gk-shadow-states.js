@@ -75,7 +75,7 @@ window.DGKShadowStates = (function () {
     55: { repressive: 'Complaining',     reactive: 'Blaming',         dilemma: 'External Validation', victim: 'Drama' },
     56: { repressive: 'Sullen',          reactive: 'Overstimulated',  dilemma: 'Pleasure/Pain',  victim: 'Distractions' },
     57: { repressive: 'Hesitant',        reactive: 'Impetuous',       dilemma: 'Trust',          victim: 'Indecision' },
-    58: { repressive: 'None',            reactive: 'Interfering',     dilemma: 'Rhythm',         victim: 'Ingratitude' },
+    58: { repressive: 'Joyless',         reactive: 'Interfering',     dilemma: 'Rhythm',         victim: 'Ingratitude' },
     59: { repressive: 'Excluded',        reactive: 'Intrusive',       dilemma: 'Emotional Processing', victim: 'Relationships' },
     60: { repressive: 'Unstructured',    reactive: 'Rigid',           dilemma: 'Balance',        victim: 'Structures' },
     61: { repressive: 'Disenchanted',    reactive: 'Fanatical',       dilemma: 'Knowledge',      victim: 'Obsessive Mind' },
