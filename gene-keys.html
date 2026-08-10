@@ -43,6 +43,12 @@ body {
 #transit .own { color: #9FEFE0; }
 #transit.clickable { cursor: pointer; }
 #transit.clickable:hover { color: var(--ink-2); }
+#compatToggle {
+  cursor: pointer; white-space: nowrap; color: var(--ink-3);
+  border: 1px solid rgba(255,255,255,.14); border-radius: 3px; padding: 3px 8px;
+  transition: color .3s ease, border-color .3s ease;
+}
+#compatToggle:hover { color: var(--ink); border-color: rgba(255,255,255,.3); }
 
 /* ── mobile rim legend ─────────────────────────────────────────────────
    Replaces the radial labels below 900px, where twelve of them around a
@@ -275,6 +281,83 @@ svg { overflow: visible; }
 }
 #titleblock .v input:focus { outline: none; }
 
+/* ── compatibility mode: its own screen, same visual language ─────────── */
+#compatView {
+  display: none; position: fixed; inset: 0; z-index: 10; overflow-y: auto;
+  background: var(--ground); padding: 90px 26px 60px;
+}
+body.compatMode #compatView { display: block; }
+body.compatMode #stage, body.compatMode #titleblock,
+body.compatMode #legend, body.compatMode #previewCard, body.compatMode #clockNote,
+body.compatMode #unfitted { display: none !important; }
+#compatHdr {
+  position: fixed; left: 26px; top: 24px; right: 26px; z-index: 11;
+  font-size: 9px; letter-spacing: .24em; text-transform: uppercase; color: var(--ink-3);
+  display: flex; justify-content: space-between; gap: 16px;
+}
+#compatHdr b { color: var(--ink-2); font-weight: 500; }
+#compatClose {
+  cursor: pointer; white-space: nowrap; color: var(--ink-3);
+  border: 1px solid rgba(255,255,255,.14); border-radius: 3px; padding: 3px 8px;
+  transition: color .3s ease, border-color .3s ease;
+}
+#compatClose:hover { color: var(--ink); border-color: rgba(255,255,255,.3); }
+#compatForms {
+  display: flex; gap: 20px; flex-wrap: wrap; max-width: 720px; margin: 0 auto 40px;
+}
+.compatPerson { flex: 1 1 320px; min-width: 260px; }
+.compatLabel {
+  font: 500 9px var(--mono); letter-spacing: .24em; text-transform: uppercase;
+  color: var(--ink-3); margin-bottom: 8px;
+}
+.compatBlock {
+  border: 1px solid rgba(255,255,255,.08); background: rgba(8,9,15,.7);
+  backdrop-filter: blur(6px); font-size: 8.5px; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-3); border-radius: 4px; overflow: hidden;
+}
+.compatBlock div { display: flex; border-bottom: 1px solid rgba(255,255,255,.06); }
+.compatBlock div:last-child { border-bottom: none; }
+.compatBlock span { padding: 5px 8px; }
+.compatBlock .k { width: 96px; flex-shrink: 0; border-right: 1px solid rgba(255,255,255,.06); }
+.compatBlock .v { color: var(--ink); letter-spacing: .1em; flex: 1; }
+.compatBlock .v select {
+  font: inherit; letter-spacing: .1em; color: var(--ink);
+  background: none; border: 0; padding: 0; margin: 0; width: 100%; cursor: pointer;
+}
+.compatBlock .v select:focus { outline: none; }
+.compatBlock .v select option, .compatBlock .v select optgroup { color: #16181F; }
+.compatBlock .v input {
+  font: inherit; font-size: 11px; letter-spacing: .06em; color: var(--ink);
+  background: transparent; border: none; padding: 0; width: 100%; text-transform: none;
+  color-scheme: dark;
+}
+.compatBlock .v input:focus { outline: none; }
+#compatResults { max-width: 720px; margin: 0 auto; }
+#compatResults .compatEmpty {
+  text-align: center; color: var(--ink-3); font-size: 11px; letter-spacing: .1em;
+  text-transform: uppercase; padding: 40px 0;
+}
+#compatResults h3 {
+  font: 500 9px var(--mono); letter-spacing: .24em; text-transform: uppercase;
+  color: var(--ink-3); margin: 28px 0 12px;
+}
+#compatResults h3:first-child { margin-top: 0; }
+.compatCard {
+  padding: 14px 16px; margin: 0 0 10px; border-radius: 10px; cursor: pointer;
+  background: rgba(255,255,255,0.02); transition: background .35s ease, transform .35s ease;
+}
+.compatCard:hover { background: rgba(255,255,255,0.04); transform: translateY(-2px); }
+.compatCard .compatWho {
+  font: 500 15px var(--serif); color: var(--ink); margin-bottom: 4px;
+}
+.compatCard .compatWhat {
+  font: 400 12px var(--mono); color: var(--ink-3); letter-spacing: .04em;
+}
+@media (max-width: 899px) {
+  #compatView { padding: 130px 16px 40px; }
+  #compatHdr { left: 16px; right: 16px; flex-wrap: wrap; gap: 8px; }
+}
+
 #unfitted {
   position: fixed; left: 50%; top: 42%; transform: translate(-50%, -50%);
   max-width: 320px; text-align: center; z-index: 5; pointer-events: none;
@@ -319,7 +402,7 @@ body.unfitted #stage { opacity: .18; }
 <body>
 
 <canvas id="ambient"></canvas>
-<div id="hdr"><span id="hint">Hologenetic Profile <b>·</b> click the centre to open your profile</span><span id="transit"></span></div>
+<div id="hdr"><span id="hint">Hologenetic Profile <b>·</b> click the centre to open your profile</span><span id="transit"></span><span id="compatToggle">Compatibility</span></div>
 
 <div id="stage"></div>
 <div id="legend"></div>
@@ -341,6 +424,32 @@ body.unfitted #stage { opacity: .18; }
   <div><span class="k">Birthplace</span><span class="v"><select id="tz"></select></span></div>
 </div>
 
+<div id="compatView">
+  <div id="compatHdr">
+    <span id="compatHint">Compatibility <b>·</b> two profiles, where your keys actually connect</span>
+    <span id="compatClose">&#10005; Close</span>
+  </div>
+  <div id="compatForms">
+    <div class="compatPerson">
+      <div class="compatLabel">Person A</div>
+      <div class="compatBlock">
+        <div><span class="k">D.O.B.</span><span class="v"><input type="date" id="dobA" min="1900-01-01"></span></div>
+        <div><span class="k">Time</span><span class="v"><input type="time" id="tobA"></span></div>
+        <div><span class="k">Birthplace</span><span class="v"><select id="tzA"></select></span></div>
+      </div>
+    </div>
+    <div class="compatPerson">
+      <div class="compatLabel">Person B</div>
+      <div class="compatBlock">
+        <div><span class="k">D.O.B.</span><span class="v"><input type="date" id="dobB" min="1900-01-01"></span></div>
+        <div><span class="k">Time</span><span class="v"><input type="time" id="tobB"></span></div>
+        <div><span class="k">Birthplace</span><span class="v"><select id="tzB"></select></span></div>
+      </div>
+    </div>
+  </div>
+  <div id="compatResults"></div>
+</div>
+
 <script src="js/gk-ambient.js" defer></script>
 <script src="js/gene-keys.js"></script>
 <script src="js/hexagrams.js"></script>
@@ -360,6 +469,9 @@ body.unfitted #stage { opacity: .18; }
 <script src="js/gk-pathways.js" defer></script>
 <script src="js/gk-transit-days.js" defer></script>
 <script src="js/gk-transit-rings.js" defer></script>
+<script src="js/gk-compat.js" defer></script>
+<script src="js/gk-compat-content.js" defer></script>
 <script src="js/gk-mandala-page.js" defer></script>
+<script src="js/gk-compat-page.js" defer></script>
 </body>
 </html>
