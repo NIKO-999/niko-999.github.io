@@ -307,7 +307,10 @@ body.unfitted #stage { opacity: .18; }
      the space, so .clickable (set in JS only when a connection exists)
      overrides this back to visible. */
   #transit { display: none; }
-  #transit.clickable { display: inline; }
+  #transit.clickable {
+    display: block; white-space: normal; word-break: break-word;
+    font-size: 8px; line-height: 1.5; max-width: 100%;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
   #panel, #stage { transition: none; }
@@ -372,6 +375,7 @@ body.unfitted #stage { opacity: .18; }
 <script src="js/gk-partners.js" defer></script>
 <script src="js/gk-pathways.js" defer></script>
 <script src="js/gk-transit-days.js" defer></script>
+<script src="js/gk-transit-rings.js" defer></script>
 <script src="js/gk-mandala-page.js" defer></script>
 </body>
 </html>

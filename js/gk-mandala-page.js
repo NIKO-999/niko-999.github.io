@@ -604,10 +604,12 @@ function openOverviewFor() {
   const uniqueKeys = [...new Set(allKeys)];
 
   const ringLinks = (window.DCodonRings && DCodonRings.VALID) ? DCodonRings.shared(uniqueKeys) : [];
-  const ringHtml = ringLinks.length ? ringLinks.map(({ ring, keys }) =>
-    '<p>' + keys.map(k => sphereLinks(k) + ' (Key ' + k + ')').join(' and ') +
-    ' share the <b>Ring of ' + esc(ring.name || ring.amino) + '</b>. Keys in the same ring run on the same underlying material, so these two don\'t operate as separate storylines — one tends to intensify or echo the other, and the theme they share shows up doing double duty in your life rather than staying contained to either sphere alone.</p>'
-  ).join('') : '<p>None of your 13 keys land in the same codon ring this time — each is drawing on its own distinct family, running as thirteen genuinely separate storylines rather than a few amplified ones.</p>';
+  const ringHtml = ringLinks.length ? ringLinks.map(({ ring, keys }) => {
+    const ringReading = window.DGKTransitRings ? DGKTransitRings.get(ring.amino) : null;
+    return '<p>' + keys.map(k => sphereLinks(k) + ' (Key ' + k + ')').join(' and ') +
+      ' share <b>' + esc(ringLabel(ring)) + '</b> — one doesn\'t operate as a separate storyline from the other; the theme they share shows up doing double duty in your life.</p>' +
+      (ringReading ? '<p>' + esc(ringReading) + '</p>' : '');
+  }).join('') : '<p>None of your 13 keys land in the same codon ring this time — each is drawing on its own distinct family, running as thirteen genuinely separate storylines rather than a few amplified ones.</p>';
 
   const seenPairs = new Set();
   const partnerHtml = [];
@@ -656,6 +658,11 @@ function sphereLabel(id) {
 function markIndexForSphereId(id) {
   const m = marks.find(mk => mk.node.ids.indexOf(id) !== -1);
   return m ? m.i : null;
+}
+// ring.name already reads "The Ring of Fire" / "The Codon Ring of Valine" —
+// it must never get a second "Ring of" prefixed onto it by the caller.
+function ringLabel(ring) {
+  return ring.name || ('the Ring of ' + (ring.amino || 'this codon'));
 }
 
 function selectSphere(i) {
@@ -1003,9 +1010,11 @@ function renderTransitContent() {
     const idx = markIndexForSphereId(conn.ids[0]);
     const label = esc(sphereLabel(conn.ids[0]));
     const link = idx === null ? label : '<button class="ovLink" data-idx="' + idx + '">' + label + '</button>';
+    const ringReading = window.DGKTransitRings ? DGKTransitRings.get(conn.ring.amino) : null;
     body = '<section><div class="card" data-noclick="1">' + hd(col, 'Today Shares a Ring With You') +
-      '<p>Key ' + todayKey + ' is transiting right now, and it shares the <b>Ring of ' + esc(conn.ring.name || conn.ring.amino) +
-      '</b> with your ' + link + ' (Key ' + conn.mineKey + '). Keys in the same ring run on the same underlying material, so today\'s theme isn\'t arriving from outside — it\'s echoing something already live in your own chart.</p></div></section>';
+      '<p>Key ' + todayKey + ' is transiting right now, sharing <b>' + esc(ringLabel(conn.ring)) +
+      '</b> with your ' + link + ' (Key ' + conn.mineKey + ').</p>' +
+      (ringReading ? '<p>' + esc(ringReading) + '</p>' : '') + '</div></section>';
   } else if (conn.type === 'partner') {
     const idx = markIndexForSphereId(conn.ids[0]);
     const label = esc(sphereLabel(conn.ids[0]));
