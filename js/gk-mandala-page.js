@@ -419,7 +419,14 @@ function paintMarks() {
 function roleSection(roleId, keyNum, line, seq, seen, label, sphereDefHtml) {
   const c = window.DGeneKeysContent ? DGeneKeysContent.get(keyNum) : null;
   const k = window.DGeneKeys ? DGeneKeys.KEYS[keyNum] : null;
-  const prose = (window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null) || c;
+  // A role file not yet migrated to the new psych schema (Phase B, still
+  // in progress across the 13 role files) still returns an old-shape
+  // {gift,shadow,invitation} object — using it here would render undefined
+  // for every new field. Only take the role-specific version once it
+  // actually has the new fields; otherwise fall back to the generic layer,
+  // which is already migrated.
+  const roleProse = window.DGKRoles ? DGKRoles.get(roleId, keyNum) : null;
+  const prose = (roleProse && roleProse.wiring) ? roleProse : c;
   if (!prose || !k) return '';
   // A hinge sphere (Core/Vocation; Life's Work/Brand elsewhere in the app,
   // though never shown in the same panel) shares one physical key across
