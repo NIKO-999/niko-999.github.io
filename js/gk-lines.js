@@ -33,361 +33,361 @@ window.DGKLines = (function () {
   "1": {
     "1": {
       "keynote": "Rooted Freshness",
-      "body": "You dig for the origin of an idea before you trust it, wanting the whole thing visible from the ground up. Entropy loosens the moment that base is solid, and your freshness arrives through preparation — the reading, the practice, the hours nobody sees. The cost is a long quiet before the first mark, and beauty that waits on your certainty."
+      "body": "You need the roots of an idea visible before you trust it, and you check the origin before you build on top of it. Preparation is what keeps the work fresh — the reading, the practice, the hours nobody watches. The tradeoff is a long quiet stretch before anything visible appears, and work that stays unfinished until you're certain of it."
     },
     "2": {
       "keynote": "Accidental Originality",
-      "body": "You make new things without noticing you have made anything. Something original comes out of you while you are doing something else entirely, and other people call it beautiful long before the word occurs to you. Asked to be creative on cue, you go flat — the entropy arrives the moment your own output becomes a task you are watching."
+      "body": "You produce original work without registering that you've made anything, because the best material comes out while your attention is somewhere else. Other people call it striking before the word occurs to you. Asked to perform originality on command, you go flat, because forcing your own output turns it into a task you're watching yourself do."
     },
     "3": {
       "keynote": "Ruined Drafts",
-      "body": "You arrive at freshness by ruining things first — the draft that dies, the idea that goes flat, the whole direction abandoned at the halfway mark. Entropy stops being a threat because you have already lived inside it and come out the other side making something. What looks to you like a graveyard of wasted attempts is the actual method, and the beauty in your work arrived no other way."
+      "body": "You get to fresh material by wrecking drafts first — the version that dies, the direction you scrap halfway through. Repeated failure stops rattling you because you've already produced good work out of exactly this process before. What looks like a pile of wasted attempts from outside is the actual method, and nothing you've made well arrived any other way."
     },
     "4": {
       "keynote": "Creative Company",
-      "body": "You create through the people who already know your work, and freshness reaches the world along those lines rather than through strangers. Your best ideas land when a friend asks the right question, or when somebody you trust hands you a room to try something in. A circle gone stale drags entropy back into everything you make, and the beauty returns the day one honest friendship changes."
+      "body": "You create through people who already know your work, and your best material moves through that circle rather than to strangers. A friend asking the right question, or handing you a room to try something in, is what gets your best ideas out. A stale circle flattens your output fast, and one honest friendship is enough to bring it back."
     },
     "5": {
       "keynote": "Borrowed Freshness",
-      "body": "You carry freshness that other people want to borrow, and they come to you when their own work has gone stale. Your ideas get taken up, credited elsewhere, repeated back to you as someone else’s. Entropy arrives when you start making things to be seen making them, and the beauty goes out of the work the moment the audience matters more than the making."
+      "body": "You produce material other people want to borrow, and they come to you once their own work has stalled. Your ideas get taken up, repeated back to you credited to someone else. The output goes flat the moment you start making things to be seen making them — once the audience matters more than the work, the freshness leaves it."
     },
     "6": {
       "keynote": "Weathered Freshness",
-      "body": "You live in long seasons, and the flat stretches of entropy in your life are not failures but the trough before the next wave of freshness. Friends your age burn out chasing novelty while you go quiet for a year and come back with something whole. The cost is the quiet stretch itself, where nothing appears to be happening and you doubt the pattern."
+      "body": "You run on long cycles, and the flat stretches in your life aren't failures — they're the trough before the next wave of output. People around you burn out chasing constant novelty while you go quiet for a year and come back with something whole. The cost is the quiet stretch itself, where nothing visible is happening and you start doubting the pattern is real."
     }
   },
   "2": {
     "1": {
       "keynote": "Known Direction",
-      "body": "You map your surroundings before you take a step, and dislocation is what a missing map feels like from the inside. Orientation comes to you through ground truth — where you sleep, what you eat, which way the room faces — rather than through belief. What it costs is looking stuck to other people while you are actually locating yourself, and unity that arrives only after the map is real."
+      "body": "You map your surroundings before you move, and losing direction is what happens when that map isn't built yet. You orient through concrete facts — where you sleep, what you eat, which way the room faces — not through belief. The cost is looking stuck to other people while you're actually locating yourself, and clear direction that only arrives once the map is accurate."
     },
     "2": {
       "keynote": "Unmapped Bearings",
-      "body": "You orient without checking a map, and the direction you choose keeps turning out to be the one that works. People follow you across unfamiliar ground and mention afterwards that you never once hesitated, which surprises you. Pressed to justify the route out loud, you lose the thread — dislocation enters through explanation, not through the dark itself."
+      "body": "You find direction without checking a map first, and the route you pick keeps turning out to be the right one. People follow you across unfamiliar territory and mention afterward that you never hesitated once, which surprises you when they say it. Pressed to explain the route out loud, you lose your thread — the disorientation shows up in the explaining, not in the dark itself."
     },
     "3": {
       "keynote": "Orientation by Detour",
-      "body": "You find your bearings by going wrong and noticing where you ended up. Dislocation is not theoretical for you — you have taken the job, the city, the relationship that faced the wrong direction, and the wrongness itself turned you. Each of those detours reads like lost years when you look back, and each one is exactly how orientation got into your body rather than your head."
+      "body": "You find your bearings by going the wrong way and noticing where it left you. The detour isn't theoretical — you've taken the job, the city, the relationship pointed in the wrong direction, and the wrongness itself is what turned you around. Each of those reads like a lost stretch when you look back, and each one is exactly how you learned direction in your body instead of your head."
     },
     "4": {
       "keynote": "Steadied By Others",
-      "body": "You orient by the company you are in, and your inner direction steadies among people who accept you without wanting an explanation. Dislocation arrives in a room of near-strangers, where nothing in you knows which way to face or where to stand. Loyalty to a group with no warmth in it costs you your bearings, and unity reaches you through a handful of people, never a crowd."
+      "body": "You orient through the company you keep, and your sense of direction settles among people who accept you without demanding an explanation. Losing direction shows up in a room of near-strangers, where nothing tells you which way to face or where to stand. Staying loyal to a group with no real warmth in it costs you your bearings, and clarity comes back through a small handful of people, never a crowd."
     },
     "5": {
       "keynote": "Orienting Others",
-      "body": "You hold direction for people who have lost theirs, and they arrive exactly when the ground under them stops making sense. Groups form around your sense of where to go next, then hold you responsible for the route. Your own dislocation stays hidden under that role — nobody asks the person holding the map whether they know where they are."
+      "body": "You hold direction for people who've lost theirs, and they show up right when the ground under them stops making sense. Groups form around your read on where to go next, then hold you responsible for the route once they've followed it. Your own disorientation stays hidden under that role, because nobody asks the person holding the map whether they know where they are."
     },
     "6": {
       "keynote": "The Slow Homecoming",
-      "body": "You orient by decades rather than by days, and the dislocation you felt young turns out to have been the first leg of a very long homecoming. People come to you for direction because you have been lost more thoroughly than they have. What costs you is the middle phase, when you are neither lost nor arrived and simply wait."
+      "body": "You orient over decades rather than days, and the disorientation you felt young turns out to be the first leg of a much longer process. People come to you for direction because you've been lost more thoroughly than they have. The cost is the middle stretch, when you're neither lost nor arrived and you just wait."
     }
   },
   "3": {
     "1": {
       "keynote": "Structured Beginnings",
-      "body": "You test a new thing in small pieces before letting it run, because chaos with nothing underneath it disturbs you. Innovation shows up as method — one variable changed, one result noted, then the next. The edge is that people call this slowness right until your version is the one that holds, and innocence returns when the ground is proven."
+      "body": "You test something new in small pieces before letting it run, because disorder with nothing underneath it unsettles you. Innovation shows up in you as method — change one variable, note the result, move to the next. Other people call this slow right up until your version is the one that holds, and things settle for you once the ground is proven."
     },
     "2": {
       "keynote": "Quiet Beginnings",
-      "body": "You begin things quietly and the new form arrives while nobody is watching, including you. Your best innovation shows up in the mess of something half-finished, and a friend names it before you register that anything happened. Left to your own timing you are fertile; hurried into producing a result, the chaos stops being creative and becomes noise."
+      "body": "You start things quietly, and the new form arrives while nobody's watching, including you. Your best innovation shows up in the mess of something half-finished, and a friend names it before you even register that anything happened. Left to your own timing you're productive; rushed into producing a result, the disorder stops being useful and turns into noise."
     },
     "3": {
       "keynote": "Productive Mess",
-      "body": "You innovate by making a mess and then reading it. Chaos is where you actually work — you start things without a plan, watch them tangle, and pull the one workable thread out of the wreckage. The cost is that other people see disorder and count it against you, while the innovations you are proudest of all came out of a period you would rather not describe."
+      "body": "You innovate by making a mess and then reading it. Disorder is where you actually work — you start without a plan, watch things tangle, and pull the one workable thread out of the wreckage. Other people see disorder and hold it against you, while the innovations you're proudest of all came directly out of a period you'd rather not describe."
     },
     "4": {
       "keynote": "Innovating Together",
-      "body": "You innovate in company, and the new thing takes its shape when somebody close catches the half-formed version and runs with it. Alone with chaos you stall for weeks; with two people who understand you, the order appears inside an afternoon. The cost is that your breakthroughs wait on other people’s timing, and innocence comes back each time a friendship makes the mess playful again."
+      "body": "You innovate in company, and the new thing takes shape once somebody close catches the half-formed version and runs with it. Alone with disorder you stall for weeks; with two people who understand you, order appears inside an afternoon. Your breakthroughs wait on other people's timing, and things click back into place each time a friendship makes the mess feel workable again."
     },
     "5": {
       "keynote": "Innovator On Call",
-      "body": "You turn other people’s chaos into something workable, and they bring you the mess because nothing about it frightens you. Your innovations get adopted fast, then attributed to whoever presented them upward. The reading of you swings both ways — a rescuer while the fix holds, a reckless amateur the week an experiment breaks down in front of an audience."
+      "body": "You turn other people's disorder into something workable, and they bring you the mess because none of it rattles you. Your innovations get adopted fast, then credited to whoever presented them upward. People read you two ways — a rescuer while the fix holds, reckless the week an experiment breaks down in front of an audience."
     },
     "6": {
       "keynote": "Late Innovation",
-      "body": "You move through chaos in stages, and each period of disorder in your life has ended in a jump nobody around you saw coming. Your innovations arrive late and land whole, because you let the mess run its full course instead of forcing an answer. The strain is waiting while people your age ship half-formed ideas and yours is still forming."
+      "body": "You move through disorder in stages, and every chaotic period in your life has ended in a jump nobody around you saw coming. Your innovations arrive late and land whole, because you let the mess run its full course instead of forcing an answer early. The strain is watching people your age ship half-formed ideas while yours is still forming."
     }
   },
   "4": {
     "1": {
       "keynote": "Physicality (bones)",
-      "body": "You check an answer against the body before you trust it, not just against the evidence — a conclusion that doesn't sit right physically doesn't get to stand. Intolerance in you is what an ungrounded idea sounds like when it speaks anyway. Understanding arrives once the logic and the body agree, and forgiveness follows the same route, slowly, through what you can actually feel to be true."
+      "body": "You check an answer against your body before you trust it, not just against the evidence — a conclusion that doesn't sit right physically doesn't get to stand. Impatience with a half-formed idea is what happens when it speaks before it's ready. Real understanding arrives once the logic and the gut agree, and letting go of an old position follows the same slow route."
     },
     "2": {
       "keynote": "Unearned Clarity",
-      "body": "You arrive at understanding without working for it, which makes it hard to trust as knowledge. Someone brings you a tangle they have been chewing for weeks and the answer is simply there, plain, already formed. Left alone your mind settles into that clarity; forced to defend it in argument, you harden, and intolerance is what defended understanding sounds like."
+      "body": "You arrive at understanding without working for it, which makes it hard to trust as real knowledge. Someone brings you a problem they've been chewing on for weeks and the answer is simply there, formed. Left alone your mind settles into that clarity; forced to defend it in argument, you harden, and defended understanding is what your impatience sounds like."
     },
     "3": {
       "keynote": "Answers Outgrown",
-      "body": "You reach understanding by holding an answer, defending it, and watching it fail in front of you. Your intolerance shows up as a certainty you argued hard for and later abandoned, which is why you go easy on people still gripping theirs. The rough edge is how long you stay attached before the collapse — forgiveness arrives late, and it arrives real."
+      "body": "You reach understanding by holding an answer, defending it, and watching it fail in front of you. Your impatience shows up as a certainty you argued hard for and later dropped, which is why you go easy on people still gripping theirs. You stay attached a long time before the collapse, and letting go arrives late but arrives real."
     },
     "4": {
       "keynote": "Friendship First",
-      "body": "You understand people a relationship at a time, and your answers make sense inside a friendship long before they make sense as theory. The mind that unlocks things for you belongs to somebody you already trust, asked over a meal rather than across a table in a meeting. Intolerance narrows the circle until nobody is left to think with, and forgiveness begins at the one connection you closed hardest."
+      "body": "You understand people a relationship at a time, and your answers make sense inside a friendship before they make sense as theory. The mind that unlocks things for you belongs to somebody you already trust, worked out over a meal rather than across a table in a meeting. Impatience narrows your circle until nobody's left to think with, and it eases at the one connection you closed hardest."
     },
     "5": {
       "keynote": "The Answer Seat",
-      "body": "You get asked for the answer, and your understanding of how a thing works is the reason people keep coming back with questions. Explanations land well when the situation is live and the person is genuinely stuck. Intolerance leaks out when you are asked the same question by someone who has not done the thinking — and they hear contempt, not correction."
+      "body": "You get asked for the answer, and your grasp of how a thing works is why people keep coming back with questions. Explanations land well when the situation is live and the person is genuinely stuck. Impatience leaks out when you're asked the same question by someone who hasn't done the thinking, and they hear contempt instead of correction."
     },
     "6": {
       "keynote": "Tested Understanding",
-      "body": "You outgrow your own certainties in waves, and the answers you defended hardest at twenty are the ones you dismantled at forty. Understanding reached you through being wrong in public and then living long enough to watch the correction arrive. The edge is a distance from people still fighting over positions you already held and abandoned."
+      "body": "You outgrow your own certainties in waves, and the answers you defended hardest at twenty are the ones you dismantled at forty. Understanding reached you by being wrong in public and living long enough to watch the correction land. You keep a distance from people still fighting over positions you already held and abandoned."
     }
   },
   "5": {
     "1": {
       "keynote": "Earned Rhythm",
-      "body": "You learn your own timing by watching it, tracking what happens when you rush and what happens when you hold. Impatience shows in your body first — the early start, the second cup, the checking. Patience settles in you as knowledge rather than virtue, and once you trust the rhythm you stop negotiating with it, which is where timelessness begins."
+      "body": "You learn your own timing by watching it, tracking what happens when you rush and what happens when you hold. Impatience shows up in your body first — the early start, the second cup, the checking. Patience settles in you as knowledge rather than virtue, and once you trust the rhythm, you stop negotiating with it."
     },
     "2": {
       "keynote": "Built-In Timing",
-      "body": "You keep a rhythm that was never taught to you, and it holds whether or not anyone approves of its speed. Other people notice that things ripen around you and put it down to luck rather than to your waiting. Someone else’s deadline disturbs that rhythm and impatience floods in — not from the world, but from the borrowed clock."
+      "body": "You keep a rhythm nobody taught you, and it holds whether or not anyone approves of its speed. Other people notice that things ripen around you and chalk it up to luck instead of your waiting. Someone else's deadline disrupts that rhythm and impatience floods in — not from the situation, but from the borrowed clock."
     },
     "3": {
       "keynote": "Early Moves",
-      "body": "You learn patience by jumping early and paying for it. The pattern is exact: you force a thing before its hour, it collapses, and the collapse teaches your body a rhythm no advice ever installed. Impatience does not leave you — it gets educated, and what other people take for calm is really a long list of moves you made too soon."
+      "body": "You learn patience by moving early and paying for it. The pattern repeats: you force something before its time, it collapses, and the collapse teaches your body a rhythm no advice ever installed. Impatience doesn't leave you — it gets educated, and what looks like calm from outside is really a long list of moves you made too soon."
     },
     "4": {
       "keynote": "Kept Time Together",
-      "body": "You wait alongside other people, and your own rhythm settles when the ones nearest you are steady enough to keep time with. Impatience rises in you at a companion who rushes, cancels and arrives late, far more than at any task in front of you. Your patience depends on the company you keep, and the distance between agitation and ease is the person sitting beside you."
+      "body": "You wait alongside other people, and your own rhythm settles when the ones nearest you are steady enough to keep pace with. Impatience rises in you around a companion who rushes, cancels, and arrives late, far more than it does around any task. Your patience tracks the company you keep, and the gap between agitation and ease is the person sitting beside you."
     },
     "5": {
       "keynote": "Timing For Others",
-      "body": "You set the pace for people who have no feel for timing, and your patience becomes the thing they lean on when they want to rush. Being the calm one in the room is a role you get handed rather than chosen. Impatience shows up privately, in the gap between how fast you see the answer and how long everyone else takes to arrive."
+      "body": "You set the pace for people who have no feel for timing, and your patience becomes what they lean on when they want to rush. Being the calm one in the room is a role handed to you rather than chosen. Impatience shows up privately, in the gap between how fast you see the answer and how long everyone else takes to arrive at it."
     },
     "6": {
       "keynote": "Generational Timing",
-      "body": "You keep a longer clock than everyone around you, and what reads as patience in you is a different unit of measurement. Whole years pass where you are not visibly doing anything, then a rhythm you set quietly a decade ago comes due. The cost is explaining yourself to people who measure a life in quarters and want progress reports."
+      "body": "You keep a longer clock than everyone around you, and what reads as patience in you is a different unit of measurement. Whole years pass where you're not visibly doing anything, then a rhythm you set quietly a decade ago comes due. The cost is explaining yourself to people who measure a life in quarters and want progress reports."
     }
   },
   "6": {
     "1": {
       "keynote": "Studied Boundaries",
-      "body": "You study a disagreement down to its root cause, unwilling to make peace over something you have not understood. Conflict frightens you less than a truce built on a misreading, so you ask questions long after other people are finished. Diplomacy in you rests on homework, not charm, and the peace you reach holds because you know exactly what it is made of."
+      "body": "You study a disagreement down to its root cause, unwilling to make peace over something you haven't actually understood. Conflict bothers you less than a truce built on a misreading, so you keep asking questions after everyone else is finished. Your diplomacy rests on homework, not charm, and the peace you reach holds because you know exactly what it's made of."
     },
     "2": {
       "keynote": "Unspoken Diplomacy",
-      "body": "You defuse things without meaning to, and the room settles a few minutes after you walk into it. You have watched an argument dissolve around you and assumed the parties simply ran out of steam, never crediting your own presence. That is the ordinary cost of this line — the diplomacy stays invisible until someone else says out loud what you did."
+      "body": "You defuse tension without meaning to, and a room settles a few minutes after you walk into it. You've watched an argument dissolve around you and assumed the parties simply ran out of steam, never crediting your own presence. The pattern stays invisible to you until someone else says out loud what you did."
     },
     "3": {
       "keynote": "Fights Survived",
-      "body": "You develop diplomacy inside actual fights, not around them. You have said the wrong thing at the worst moment, watched a relationship go up, and come back later knowing precisely which sentence did the damage. Conflict is your training ground, so your peace is not avoidance — it is a set of scars you have read carefully, and you keep entering rooms other people leave."
+      "body": "You develop diplomacy inside actual fights, not around them. You've said the wrong thing at the worst moment, watched a relationship blow up, and come back later knowing exactly which sentence did the damage. Conflict is where you trained, so your peace isn't avoidance — it's a set of scars you've read carefully, and you keep walking into rooms other people leave."
     },
     "4": {
       "keynote": "Peace Through Allies",
-      "body": "You negotiate through relationship rather than argument, and a conflict resolves because both sides already know you well enough to hold their fire. Strangers get your defences and friends get your diplomacy, and you feel that switch happen in your body before your mouth opens. When a friendship breaks, the fight runs on far longer than it deserves, and peace returns only after the personal tie is repaired."
+      "body": "You negotiate through relationship rather than argument, and a conflict resolves because both sides already know you well enough to hold their fire. Strangers get your defenses and friends get your diplomacy, and you feel that switch happen in your body before you open your mouth. When a friendship breaks, the fight runs on far longer than it deserves, and it settles only after the personal tie repairs."
     },
     "5": {
       "keynote": "The Called Diplomat",
-      "body": "You land in the middle of other people’s arguments because your diplomacy is visibly useful there, and both sides speak to you first. Each side reads you as sympathetic, then as traitorous the moment you make a point the other side likes. Conflict finds you last of all in your own life, where there is no third party to do for you what you do for everyone."
+      "body": "You land in the middle of other people's arguments because your diplomacy is visibly useful there, and both sides come to you first. Each side reads you as sympathetic, then as a traitor the moment you make a point the other side likes. Conflict finds you last of all in your own life, where there's no third party to do for you what you do for everyone else."
     },
     "6": {
       "keynote": "Peace By Example",
-      "body": "You withdraw from fights you would once have entered, and the retreat is not avoidance but the shift from combatant to example. There was a stretch when you were in every conflict, then a stretch of watching from a distance, and now people bring you their disputes. The difficulty is that stepping back looks like indifference to whoever is still bleeding."
+      "body": "You withdraw from fights you would once have entered, and the retreat isn't avoidance — it's the shift from combatant to example. There was a stretch when you were in every conflict, then a stretch of watching from a distance, and now people bring you their disputes instead. The difficulty is that stepping back reads as indifference to whoever's still in it."
     }
   },
   "7": {
     "1": {
       "keynote": "Prepared Guidance",
-      "body": "You read everything about a role before you accept it, and the thought of leading from half-knowledge keeps you awake. Division looks to you like a group nobody has bothered to understand properly. Your guidance carries weight because it comes with the reasoning attached, and virtue in you is simply the habit of having checked, which people feel long before they name it."
+      "body": "You read everything about a role before you accept it, and leading from half-knowledge keeps you up at night. A group nobody has bothered to understand properly looks fractured to you before anyone else notices. Your guidance carries weight because it comes with the reasoning attached, and people feel the difference long before they can name it."
     },
     "2": {
       "keynote": "Guidance Unasked",
-      "body": "You lead by being in the room rather than by taking charge of it, and the direction sets itself around you. Groups arrange themselves toward your view without a vote, which you notice long after the fact. Guidance you volunteer curdles into something people resist, while the same words offered once you are asked land as virtue rather than division."
+      "body": "You lead by being in the room rather than by taking charge of it, and direction sets itself around you. Groups arrange themselves toward your view without a vote, which you notice only after the fact. Guidance you volunteer gets resisted, while the same words offered once you're asked land as leadership instead of interference."
     },
     "3": {
       "keynote": "Led Badly Once",
-      "body": "You earn the right to guide by leading badly at least once. Somewhere behind you is a group you split instead of held — you pushed your view, the room divided, and you watched people walk. That failure is the reason your guidance now has weight, though you still flinch when a room goes quiet, reading it as the same thing happening again."
+      "body": "You earn the right to guide by leading badly at least once. Somewhere behind you is a group you split instead of held — you pushed your view, the room divided, and you watched people walk. That failure is why your guidance carries weight now, though you still flinch when a room goes quiet, reading it as the same thing happening again."
     },
     "4": {
       "keynote": "Leading Your Own",
-      "body": "You lead the people who already chose you, and your guidance carries weight in proportion to how well the group knows your character. In front of a room with no history with you, the same direction lands flat and division opens up in the ranks. Your influence lives on loyalty, and the moment somebody close stops believing you, everyone else feels it before a word is spoken."
+      "body": "You lead the people who already chose you, and your guidance carries weight in proportion to how well the group knows your character. In front of a room with no history with you, the same direction lands flat and the group fractures. Your influence runs on loyalty, and the moment somebody close stops believing you, everyone else feels it before a word is spoken."
     },
     "5": {
       "keynote": "Guidance On Demand",
-      "body": "You lead by giving people a direction they had not seen, and groups pull you into the front position whether or not you asked for it. Guidance works when the group already trusts you; the same words sound like manoeuvring to anyone who does not. Division follows the role — every leader collects a faction that wants them gone."
+      "body": "You lead by giving people a direction they hadn't seen, and groups pull you into the front position whether or not you asked for it. Guidance works when the group already trusts you; the same words sound like maneuvering to anyone who doesn't. Division follows the role — every leader collects a faction that wants them gone."
     },
     "6": {
       "keynote": "The Elder Guide",
-      "body": "You lead in seasons — years out in front, years off to the side, then a return with something the group actually needs. Division inside a team reads to you as a phase rather than a crisis, because you have watched three of them resolve. What that costs is impatience from people who want a decision now rather than a longer view."
+      "body": "You lead in seasons — years out in front, years off to the side, then a return with something the group actually needs. Division inside a team reads to you as a phase rather than a crisis, because you've watched three of them resolve already. What that costs you is impatience from people who want a decision now instead of a longer view."
     }
   },
   "8": {
     "1": {
       "keynote": "Practised Style",
-      "body": "You build your craft from the technical end, learning the rules thoroughly before you break a single one. Mediocrity in you appears when you present something you have not yet mastered, and you feel the gap immediately. Style arrives late and stays, because it grew out of competence instead of taste, and exquisiteness is what that patience finally looks like."
+      "body": "You build your craft from the technical end, learning the rules thoroughly before you break a single one. Presenting something you haven't mastered yet feels flat to you the moment it leaves your hands. Style arrives late and stays, because it grew out of competence instead of taste."
     },
     "2": {
       "keynote": "Unnoticed Style",
-      "body": "You carry a style that costs you nothing and reads to everyone else as deliberate. The way you put a sentence together, arrange a shelf, choose a shirt — it is simply how you do it, and compliments land as though aimed at someone standing behind you. Any borrowed version of good taste flattens it, and mediocrity arrives the moment you dress for approval."
+      "body": "You carry a style that costs you nothing and reads to everyone else as deliberate. The way you build a sentence, arrange a shelf, choose a shirt — it's simply how you do it, and compliments land as though aimed at someone standing behind you. Any borrowed version of good taste flattens it, and the work goes generic the moment you dress for approval."
     },
     "3": {
       "keynote": "Borrowed Looks",
-      "body": "You test styles by wearing them until they fall off. There is a stretch of your life you would rather not see photographed — the borrowed look, the copied voice, the phase that fit nobody. Every one of those was a legitimate experiment, and your own style exists because you tried mediocrity on directly instead of theorising about it from a safe distance."
+      "body": "You test styles by wearing them until they fall off. There's a stretch of your life you'd rather not see photographed — the borrowed look, the copied voice, the phase that fit nobody. Every one of those was a real experiment, and your own style exists because you tried the wrong version on directly instead of theorizing about it from a distance."
     },
     "4": {
       "keynote": "Style Passed On",
-      "body": "You express what is distinct in you where it is already seen, and the people who know you put your work in front of others. Nobody discovers you cold; a friend says your name in the right room and the opportunity arrives dressed up as luck. Mediocrity sets in among people who never notice what is particular about you, and you feel yourself dulling down to match them."
+      "body": "You express what's distinct in you where it's already seen, and the people who know you put your work in front of others. Nobody discovers you cold; a friend says your name in the right room and the opportunity arrives dressed up as luck. Around people who never notice what's particular about you, you feel yourself dulling down to match them."
     },
     "5": {
       "keynote": "Style Made Visible",
-      "body": "You wear your style where everyone sees it, and people copy the surface of what you do long before they understand it. Being imitated is flattering for about a month, then it starts to feel like theft. Mediocrity arrives through the audience — the moment you tune your work to what gets praised, the thing that made it yours quietly leaves."
+      "body": "You wear your style where everyone sees it, and people copy the surface of what you do long before they understand it. Being imitated is flattering for about a month, then it starts feeling like theft. The moment you tune your work to what gets praised, the thing that made it yours quietly leaves it."
     },
     "6": {
       "keynote": "Late Style",
-      "body": "You grow into your own style rather than arriving with it, and what looked like mediocrity in your twenties was a slow assembly. Your taste sits out of sync with your generation, either years early or simply unbothered, and it settles into something unmistakable. The price is the long stretch of looking unremarkable before anyone recognises the shape."
+      "body": "You grow into your own style rather than arriving with it, and what looked unremarkable in your twenties was actually a slow assembly. Your taste sits out of sync with your generation, either years early or simply unbothered, and it settles into something unmistakable. The price is the long stretch of looking ordinary before anyone recognizes the shape."
     }
   },
   "9": {
     "1": {
       "keynote": "Detail First",
-      "body": "You trace a large task back to its smallest workable piece and start there, because a vague plan stops you cold. Inertia in your case is not laziness — it is a mind refusing to move until the detail is clear. Determination arrives the second the first step is genuinely defined, and from there nothing shifts you, which is what invincibility feels like from inside."
+      "body": "You trace a large task back to its smallest workable piece and start there, because a vague plan stops you cold. Stalling out, for you, isn't laziness — it's a mind refusing to move until the detail is clear. Focus arrives the second the first step is genuinely defined, and from there almost nothing shifts you."
     },
     "2": {
       "keynote": "Unlabelled Discipline",
-      "body": "You return to the small thing again and again without calling it discipline. Others watch you put in the hundredth repetition on a detail they abandoned at the third, and they name it determination while you experience it as normal. Nobody assigns you that focus successfully — handed someone else’s tiny task, the same attention goes dead and inertia takes the whole day."
+      "body": "You return to the small thing again and again without calling it discipline. Others watch you put in the hundredth repetition on a detail they abandoned at the third, and they name it determination while you experience it as ordinary. Handed someone else's tiny task, the same attention goes dead and you stall for the rest of the day."
     },
     "3": {
       "keynote": "Restarted Habits",
-      "body": "You build determination out of small things you dropped and picked up again. The habit broke, the practice lapsed, the tiny daily thing stopped for months — and you restarted it, which is the whole muscle. Inertia visits you constantly, so what reads as discipline from outside is a long record of stopping and beginning again without treating the gap as proof of anything."
+      "body": "You build determination out of small things you dropped and picked back up. The habit broke, the practice lapsed, the daily thing stopped for months — and you restarted it, which is the whole muscle. You stall constantly, so what reads as discipline from outside is a long record of stopping and beginning again without treating the gap as proof of anything."
     },
     "4": {
       "keynote": "Sustained By Presence",
-      "body": "You focus beside other people, and detailed work that defeats you alone turns steady when somebody you like is busy in the same room. Your determination borrows its fuel from company: a partner in the next chair, a deadline shared, a person waiting on the result. Inertia arrives the week your people scatter, and you notice the task itself never changed, only who was around while you did it."
+      "body": "You focus beside other people, and detailed work that defeats you alone turns steady when somebody you like is busy in the same room. Your determination borrows its fuel from company — a partner in the next chair, a shared deadline, someone waiting on the result. You stall the week your people scatter, and the task itself never changed, only who was around while you did it."
     },
     "5": {
       "keynote": "The Detail Fixer",
-      "body": "You focus on the small detail everyone else skipped, and that determination is what people call you in for when a project has stalled. Your value shows in narrow work with real stakes, not in broad advice. Inertia hits when the audience grows — attention on the task keeps you moving, while attention on you turns the same task into a performance."
+      "body": "You focus on the small detail everyone else skipped, and that's what people call you in for when a project has stalled. Your value shows in narrow work with real stakes, not in broad advice. Attention on the task keeps you moving; attention on you turns the same task into a performance and you stall."
     },
     "6": {
       "keynote": "The Long Detail",
-      "body": "You sustain attention on small things across spans that exhaust other people, and the inertia phases in between are how you refuel. There have been years where you did nothing visible, followed by years of grinding away at one detail until it gave. The strain is being read as either lazy or obsessive, depending on which phase somebody catches."
+      "body": "You sustain attention on small things across spans that exhaust other people, and the stalled-out phases in between are how you refuel. There have been years where you did nothing visible, followed by years of grinding away at one detail until it gave. The strain is being read as either lazy or obsessive, depending on which phase somebody catches you in."
     }
   },
   "10": {
     "1": {
       "keynote": "Self Enquiry",
-      "body": "You examine your own behaviour the way other people examine a text, wanting to know why you do what you do. Self-Obsession is the trap at this depth — the enquiry loops and stops being about living. Naturalness comes when the questioning finishes and you simply act, and being is the ground you were digging toward the whole time."
+      "body": "You examine your own behavior the way other people examine a text, wanting to know why you do what you do. Watching yourself this closely is the trap — the examining loops and stops being about actually living. Ease comes when the questioning finishes and you simply act."
     },
     "2": {
       "keynote": "Already Yourself",
-      "body": "You behave like yourself with no technique behind it, and people relax near you for reasons neither of you puts into words. Your naturalness shows up most when you are unobserved and half-occupied, which is exactly when you fail to notice it. Watching yourself do it breaks it — self-obsession here is naturalness under surveillance, and the surveillance is your own."
+      "body": "You behave like yourself with no technique behind it, and people relax near you for reasons neither of you puts into words. It shows up most when you're unobserved and half-occupied, which is exactly when you fail to notice it happening. Watching yourself do it breaks it — self-consciousness here is ease under your own surveillance."
     },
     "3": {
       "keynote": "Performed Selves",
-      "body": "You get to naturalness by trying on versions of yourself that do not hold. Each one starts convincing and ends embarrassing — the confident persona, the humble one, the reinvention announced to friends. Self-obsession runs through all of it, and the ease you have now came from exhausting the performances one at a time rather than being told to stop performing."
+      "body": "You get to ease by trying on versions of yourself that don't hold. Each one starts convincing and ends embarrassing — the confident persona, the humble one, the reinvention announced to friends. The ease you have now came from exhausting the performances one at a time, not from being told to stop performing."
     },
     "4": {
       "keynote": "Ease Among Yours",
-      "body": "You relax into yourself around people who make no demands, and your naturalness is visible only where you feel safely known. Among acquaintances you watch yourself, adjust your voice and check your face; with two or three old friends all of that drops away. Self-obsession grows in rooms where you are performing, and the way back to ease is one person who lets you be boring."
+      "body": "You relax into yourself around people who make no demands, and it's visible only where you feel safely known. Among acquaintances you watch yourself, adjust your voice, check your face; with two or three old friends all of that drops away. Rooms where you're performing pull you back into self-monitoring, and the way out is one person who lets you be boring."
     },
     "5": {
       "keynote": "Ease Under Watch",
-      "body": "You model a way of being that other people study without saying so, and they borrow your manner of moving through a day. Naturalness stops the instant you notice it is being watched, and self-obsession fills the space it leaves. The trap is subtle here — you begin behaving like the version of yourself that others find easy to be around."
+      "body": "You model a way of being that other people study without saying so, and they borrow your manner of moving through a day. Ease stops the instant you notice you're being watched, and self-consciousness fills the space it leaves. The trap here is subtle — you start behaving like the version of yourself that others find easy to be around."
     },
     "6": {
       "keynote": "Disappointment/Innocence",
-      "body": "You carry a picture of how good things could be, and ordinary life keeps failing to match it, which is where the disappointment comes from — not from things going wrong, but from things merely going normally. The innocence underneath it is real: you still believe the perfect version is possible. The relief comes not from lowering the picture but from letting the ordinary version stand next to it unjudged."
+      "body": "You carry a picture of how good things could be, and ordinary life keeps failing to match it — not because things go wrong, but because they merely go normally. The belief that the better version is possible is real and doesn't go away. Relief comes not from lowering the picture but from letting the ordinary version stand next to it unjudged."
     }
   },
   "11": {
     "1": {
       "keynote": "Tested Ideals",
-      "body": "You gather proof for your ideas before you share them, since an ideal that collapses under questioning embarrasses you deeply. Obscurity for you is the fog of a beautiful notion with no structure holding it up. Idealism becomes useful once you have worked out the mechanics, and the light you carry lands on people because it arrives with something solid underneath."
+      "body": "You gather proof for your ideas before you share them, since an idea that collapses under questioning embarrasses you deeply. A beautiful notion with no structure holding it up just reads as fog to you. Your vision becomes usable once you've worked out the mechanics, and it lands on people because it arrives with something solid underneath."
     },
     "2": {
       "keynote": "Private Vision",
-      "body": "You hold whole worlds in private and assume everyone’s inner life looks the same. The images arrive unbidden while you are staring out of a window, and you rarely bring them out unless a person you trust asks a direct question. Explained too early to the wrong room, the idealism sounds like fantasy and slides back into obscurity where you keep it."
+      "body": "You hold whole worlds in private and assume everyone's inner life looks the same. The images arrive unbidden while you're staring out a window, and you rarely bring them out unless someone you trust asks a direct question. Explained too early to the wrong room, the vision sounds like fantasy and you file it away again."
     },
     "3": {
       "keynote": "Ideals Spent",
-      "body": "You put your ideals into the world and let reality hit them. The vision that carried you for two years met an actual budget, an actual person, an actual Tuesday — and what survived that is the part worth keeping. Obscurity comes when you protect an ideal from contact, so you keep spending them, and you keep grieving the ones that do not come through."
+      "body": "You put your ideas into the world and let reality hit them. The vision that carried you for two years met an actual budget, an actual person, an actual Tuesday, and what survived that contact is the part worth keeping. Protecting an idea from contact is what keeps it vague, so you keep spending them, and you keep grieving the ones that don't come through."
     },
     "4": {
       "keynote": "Ideas Made Real",
-      "body": "You dream out loud with people, and your ideals stay vague until somebody who loves you asks what you actually mean by them. Alone, the vision circles and never lands; in conversation it turns into something workable within the hour. The obscurity in you is not a shortage of light but a shortage of the right listener, and you know at once when that person appears."
+      "body": "You dream out loud with people, and your ideas stay vague until somebody who loves you asks what you actually mean by them. Alone, the vision circles and never lands; in conversation it turns workable within the hour. The gap in you isn't a shortage of ideas but a shortage of the right listener, and you know at once when that person shows up."
     },
     "5": {
       "keynote": "The Vision Supplier",
-      "body": "You paint the better version of a situation, and people who have gone flat come to you for exactly that lift. Your idealism is genuinely useful to them, and genuinely hard to deliver on once they expect you to build what you described. Obscurity is the backlash — dreamer becomes the word used about you the moment a vision goes unbuilt."
+      "body": "You paint the better version of a situation, and people who've gone flat come to you for exactly that lift. Your read on what's possible is genuinely useful to them, and genuinely hard to deliver on once they expect you to build what you described. The backlash lands the moment a vision goes unbuilt — dreamer becomes the word used about you."
     },
     "6": {
       "keynote": "The Long Vision",
-      "body": "You dream in timescales that outrun your own life, and your ideals sit far enough ahead that the present rarely catches up. There were years when you burned with a vision, years when you stopped mentioning it entirely, and then a return with something clearer. The edge is loneliness — your peers wanted things you found small, and you said so."
+      "body": "You dream in timescales that outrun your own life, and your ideas sit far enough ahead that the present rarely catches up. There were years when you burned with a vision, years when you stopped mentioning it entirely, then a return with something clearer. The edge is loneliness — your peers wanted things you found small, and you said so."
     }
   },
   "12": {
     "1": {
       "keynote": "Considered Speech",
-      "body": "You weigh a sentence before it leaves you, and silence is what you choose while the words are still unproven. Vanity here is talk that outruns its own substance, and you hear it in yourself instantly. Discrimination grows out of that pause, and your purity is not moral — it is the accuracy of someone who refuses to speak past what they actually know."
+      "body": "You weigh a sentence before it leaves you, and silence is what you choose while the words are still unproven. Talk that outruns its own substance is what you hear in yourself instantly and can't stand. Your judgment about what's worth saying grows out of that pause, not out of moral superiority — it's the accuracy of someone who refuses to speak past what they actually know."
     },
     "2": {
       "keynote": "Instinctive Taste",
-      "body": "You reject the false note before you have worked out what is wrong with it. A phrase, a product, a person’s tone — something in you says no, and you have spent years apologising for a judgement that turned out accurate. The discrimination works cleanly in silence; performed for an audience, it becomes vanity, and everybody hears the difference including you."
+      "body": "You reject the false note before you've worked out what's wrong with it. A phrase, a product, a tone of voice — something in you says no, and you've spent years apologizing for a judgment that turned out accurate. That instinct works cleanly in silence; performed for an audience, it turns into showing off, and everybody hears the difference, including you."
     },
     "3": {
       "keynote": "Words Misfired",
-      "body": "You sharpen discrimination by speaking badly and hearing the result. Something left your mouth at the wrong moment, landed hard, and rearranged how you use language — that single misfire taught you more than a decade of restraint would have. Vanity is what pushed the words out, and the pause you have now is built directly on top of the times you did not have one."
+      "body": "You sharpen your judgment by speaking badly and hearing the result. Something left your mouth at the wrong moment, landed hard, and rearranged how you use language — that single misfire taught you more than a decade of restraint would have. The impulse that pushed the words out is what built the pause you have now, directly on top of the times you didn't have one."
     },
     "4": {
       "keynote": "Chosen Company",
-      "body": "You choose your people carefully, and the quality of your speech, taste and work rises or falls with whoever is nearby. One hour with somebody real clears a week of noise, and one evening with the wrong crowd leaves you sounding exactly like them. Vanity creeps in when you stay for the status of a circle rather than the people in it, and you hear the compromise in your voice."
+      "body": "You choose your people carefully, and the quality of your speech, taste, and work rises or falls with whoever's nearby. One hour with somebody real clears a week of noise, and one evening with the wrong crowd leaves you sounding exactly like them. Staying for the status of a circle rather than the people in it is when you hear the compromise in your own voice."
     },
     "5": {
       "keynote": "The Weighted Word",
-      "body": "You speak and it carries further than you intended, because your discrimination about what is worth saying gives your words weight with other people. Silence from you reads as judgement; a single sentence reads as verdict. Vanity is the near enemy — the pleasure of being quoted starts shaping what you say, and purity of speech is the first thing lost."
+      "body": "You speak and it carries further than you intended, because your read on what's worth saying gives your words weight with other people. Silence from you reads as judgment; a single sentence reads as verdict. The pleasure of being quoted starts shaping what you say, and that's the first thing that costs you precision."
     },
     "6": {
       "keynote": "Words That Waited",
-      "body": "You speak in seasons, and the years you spent silent taught you more about what to say than the years you spent talking. Your discrimination about people and language sharpened through watching rather than arguing, and the few things you say now carry unasked-for weight. The difficulty is that silence from you gets read as judgement."
+      "body": "You speak in seasons, and the years you spent silent taught you more about what to say than the years you spent talking. Your read on people and language sharpened through watching rather than arguing, and the few things you say now carry unasked-for weight. The difficulty is that silence from you gets read as judgment."
     }
   },
   "13": {
     "1": {
       "keynote": "Listening Deep",
-      "body": "You listen for what sits underneath the words, and a conversation feels incomplete until you have found it. Discord reaches you as physical discomfort — a room where something unspoken is running the whole exchange. Discernment develops through repetition, thousands of conversations sorted and filed, and the empathy people receive from you is built on evidence rather than sentiment."
+      "body": "You listen for what sits underneath the words, and a conversation feels incomplete until you've found it. A room where something unspoken is running the whole exchange reaches you as physical discomfort. Your read on people develops through repetition, thousands of conversations sorted and filed, and what people get from you is built on evidence rather than sentiment."
     },
     "2": {
       "keynote": "Told Everything",
-      "body": "You hear what people are not saying and treat it as ordinary information. Strangers tell you things within ten minutes that their families have never been told, and you have stopped asking why it happens to you. The listening drains you when it is demanded rather than offered — discord arrives the day you start collecting confidences instead of receiving them."
+      "body": "You hear what people aren't saying and treat it as ordinary information. Strangers tell you things within ten minutes that their own families have never heard, and you've stopped asking why it happens to you. The listening drains you when it's demanded rather than offered, and the tension shows up the day you start collecting confidences instead of receiving them."
     },
     "3": {
       "keynote": "Trust Misplaced",
-      "body": "You discover discernment by trusting the wrong people and paying attention afterwards. Secrets were handed to someone who spread them, or you carried a story you had no business carrying, and discord followed you home. Now you hear things in a voice that nobody taught you to hear — and part of you still wonders whether the lesson was worth the friendships it cost."
+      "body": "You build discernment by trusting the wrong people and paying attention afterward. Secrets got handed to someone who spread them, or you carried a story you had no business carrying, and the fallout followed you home. Now you hear things in a register nobody taught you to hear, and part of you still wonders whether the lesson was worth the friendships it cost."
     },
     "4": {
       "keynote": "Trusted Listener",
-      "body": "You listen people into telling the truth, and the confidences that reach you arrive because you are known as safe, not because you asked. Your role in any group forms without discussion: the one who hears everybody, holds what is said and sees the pattern first. Carrying so much of other people’s private material drains you, and discord begins the day you repeat something given to you in trust."
+      "body": "You listen people into telling the truth, and the confidences that reach you arrive because you're known as safe, not because you asked. Your role in any group forms without discussion — the one who hears everybody, holds what's said, and sees the pattern first. Carrying that much of other people's private material drains you, and it costs you the day you repeat something given to you in trust."
     },
     "5": {
       "keynote": "The Confided In",
-      "body": "You hear what people are actually saying underneath the words, and they tell you things they have told nobody. Your discernment makes you the one everybody confides in, which fills you with secrets and leaves you without a confidant of your own. Discord comes from carrying too many versions of the same story — you know everyone’s side and belong to none of them."
+      "body": "You hear what people are actually saying underneath the words, and they tell you things they've told nobody else. That skill makes you the one everybody confides in, which fills you with secrets and leaves you without a confidant of your own. Carrying too many versions of the same story means you know everyone's side and belong to none of them."
     },
     "6": {
       "keynote": "The Long Listening",
-      "body": "You hold other people’s stories for decades, and what you heard at twenty-five makes sense at fifty in a way it did not then. Discord in a group registers early, and you step out of the room rather than argue, returning once the noise has burned down. The cost is carrying confidences with nowhere to set them down."
+      "body": "You hold other people's stories for decades, and what you heard at twenty-five makes sense at fifty in a way it didn't then. Discord in a group registers early for you, and you step out of the room rather than argue, returning once the noise has burned down. The cost is carrying confidences with nowhere to set them down."
     }
   },
   "14": {
     "1": {
       "keynote": "Skill First",
-      "body": "You master the work itself before you worry about what it pays, and shortcuts leave you uneasy. Compromise means taking a job you have not earned the ability to do well, and you feel the fraud of it. Competence built at this depth turns into bounteousness on its own — the money follows the skill, and the skill was never faked."
+      "body": "You master the work itself before you worry about what it pays, and shortcuts leave you uneasy. Taking a job you haven't earned the ability to do well feels like fraud to you, and you feel it immediately. Competence built at this depth pays for itself on its own — the money follows the skill, and the skill was never faked."
     },
     "2": {
       "keynote": "Easy Competence",
-      "body": "You produce more than the people around you while working at what feels to you like half speed. Tasks that exhaust others come apart in your hands, and you assume the work was easy rather than that you are good at it. Taking a job purely for the money kills that flow — compromise here shows up as competence spent on something you have no appetite for."
+      "body": "You produce more than the people around you while working at what feels to you like half speed. Tasks that exhaust others come apart in your hands, and you assume the work was easy rather than that you're good at it. Taking a job purely for the money kills that flow — your competence gets spent on something you have no appetite for."
     },
     "3": {
       "keynote": "Misspent Years",
-      "body": "You grow competence through work that turned out to be the wrong work. Years went into a role, a business, a direction that drained you — and the skill you took out of it is the skill you now use for something that pays in every sense. Compromise looks like the theme of your résumé, and it was actually an apprenticeship nobody named."
+      "body": "You grow competence through work that turned out to be the wrong work. Years went into a role, a business, a direction that drained you, and the skill you took out of it is the skill you now use for something that actually pays off. What looks like the theme of your résumé was actually an apprenticeship nobody named."
     },
     "4": {
       "keynote": "Work Through Trust",
-      "body": "You earn through the people who have seen your work, and money, projects and resources travel to you along existing lines of trust. Cold approaches go nowhere, while a recommendation from somebody who has worked beside you closes in a single conversation. The cost is compromise: staying inside an arrangement past its life because the relationship matters more to you than the terms do."
+      "body": "You earn through the people who've seen your work, and money, projects, and resources travel to you along existing lines of trust. Cold approaches go nowhere, while a recommendation from somebody who's worked beside you closes in a single conversation. The cost is staying inside an arrangement past its life because the relationship matters more to you than the terms do."
     },
     "5": {
       "keynote": "Competence Attracts Money",
-      "body": "You attract resources because your competence is visible, and people back you with money, time and access before you ask. That backing brings expectation: the funders want returns, and their picture of your work stops matching what you are actually doing. Compromise creeps in when you protect the reputation that brought the resources rather than the work that earned it."
+      "body": "You attract resources because your competence is visible, and people back you with money, time, and access before you ask. That backing brings expectation — the funders want returns, and their picture of your work stops matching what you're actually doing. Protecting the reputation that brought the resources, rather than the work that earned it, is where you start cutting corners."
     },
     "6": {
       "keynote": "Wealth In Waves",
@@ -397,53 +397,53 @@ window.DGKLines = (function () {
   "15": {
     "1": {
       "keynote": "Rooted Magnetism",
-      "body": "You keep to your own rhythms and your own ground, and being uprooted flattens you faster than anything else. Dullness arrives when you are living someone else’s pattern instead of the one your body knows. Magnetism returns the moment you are back in your element — the same garden, the same routine, the same soil — and florescence grows from exactly there."
+      "body": "You keep to your own rhythms and your own ground, and being pulled off them flattens you faster than anything else. Living someone else's pattern instead of the one your body knows is what drains you. Your presence returns the moment you're back in your element — the same routine, the same soil."
     },
     "2": {
       "keynote": "Unworked Magnetism",
-      "body": "You draw people without doing anything to attract them, and the pull works best when you have forgotten it exists. Someone describes the effect you have on a gathering and it sounds to you like a description of a stranger. The moment you turn it on deliberately it dies — dullness in your case is magnetism being managed rather than left alone."
+      "body": "You draw people without doing anything to attract them, and the pull works best when you've forgotten it exists. Someone describes the effect you have on a gathering and it sounds to you like a description of a stranger. The moment you turn it on deliberately it dies — managing your own presence is what flattens it."
     },
     "3": {
       "keynote": "Both Extremes",
-      "body": "You swing between extremes and learn your range from the edges. A stretch of flatness, then a period of too much — you have overdone the flowering and gone dead in the same year, more than once. Dullness scares you because you have lived in it, and your magnetism comes from having tested the whole spread instead of settling for a safe middle nobody remembers."
+      "body": "You swing between extremes and learn your range from the edges. A stretch of flatness, then a period of too much — you've overdone it and gone dead in the same year, more than once. You've lived inside the flat stretch enough that it doesn't scare you anymore, and your presence comes from having tested the whole spread instead of settling for a safe middle nobody remembers."
     },
     "4": {
       "keynote": "Magnetic Circle",
-      "body": "You attract people in clusters, and your magnetism works on the ones who spend real time near you rather than on any audience. Your extremes make sense to friends and unsettle acquaintances, so the closer somebody gets, the more human your strangeness looks. Dullness sets in when you flatten yourself for a group that tolerates only the average version, and the life goes out of your days."
+      "body": "You attract people in clusters, and your effect works on the ones who spend real time near you rather than on any audience. Your extremes make sense to friends and unsettle acquaintances, so the closer somebody gets, the more human your strangeness looks. Flattening yourself for a group that only tolerates the average version drains the life out of your days."
     },
     "5": {
       "keynote": "Magnetic To Strangers",
-      "body": "You draw people without doing anything to draw them, and strangers decide quickly that you are either wonderful or too much. Your magnetism is read as intent even when there was none, which makes ordinary friendliness get misconstrued. Dullness sets in when you flatten yourself to avoid the reaction — the extremes of your nature are exactly what makes the room warm."
+      "body": "You draw people without doing anything to draw them, and strangers decide quickly that you're either wonderful or too much. People read intent into your presence even when there was none, which makes ordinary friendliness get misread. Flattening yourself to avoid the reaction is what kills the room — the extremes of your nature are exactly what makes it warm."
     },
     "6": {
       "keynote": "Seasonal Magnetism",
-      "body": "You bloom on a schedule nobody else follows, disappearing for stretches and then drawing people in effortlessly when you resurface. The dull months are not depression but winter, and you stopped apologising for them somewhere along the way. What that costs is friends who only met you in one season and think they know which one you are."
+      "body": "You run on a schedule nobody else follows, disappearing for stretches and then drawing people in effortlessly when you resurface. The quiet months aren't decline, they're winter, and you stopped apologizing for them somewhere along the way. What that costs is friends who only met you in one season and think they know which one you are."
     }
   },
   "16": {
     "1": {
       "keynote": "Practised Range",
-      "body": "You practise a thing until the mechanics are boring, and only then does the enthusiasm arrive. Indifference in you is the flatness of a skill you never took far enough to enjoy, abandoned at the awkward stage. Versatility rests on those buried hours, and the mastery people admire in you is mostly repetition they never watched you do."
+      "body": "You practice a thing until the mechanics are boring, and only then does real enthusiasm arrive. Flatness in you is the residue of a skill you never took far enough to enjoy, abandoned at the awkward stage. The range people admire in you is mostly repetition they never watched you do."
     },
     "2": {
       "keynote": "Picked Up Fast",
-      "body": "You pick up skills at a rate that embarrasses you to mention. An instrument, a language, a piece of software — you were competent inside a week and concluded the thing was simple rather than that you have a talent. Versatility dries up under obligation, and indifference is what arrives when the enthusiasm was assigned to you instead of found."
+      "body": "You pick up skills at a rate that embarrasses you to mention. An instrument, a language, a piece of software — you were competent inside a week and concluded the thing was simple rather than that you have a talent for it. Your range dries up under obligation, and flatness is what shows up when the enthusiasm was assigned to you instead of found."
     },
     "3": {
       "keynote": "Abandoned Instruments",
-      "body": "You acquire versatility by picking things up, dropping them, and keeping what stuck to your hands. The guitar in the cupboard, the language half-learned, the six starts on the same project — each one deposited something even though you filed it as quitting. Mastery in you is assembled out of abandonment, and indifference only arrives when you stop letting yourself begin badly."
+      "body": "You build range by picking things up, dropping them, and keeping what stuck to your hands. The guitar in the cupboard, the language half-learned, the six starts on the same project — each one deposited something even though you filed it as quitting. What looks like mastery in you is assembled out of abandonment, and flatness only shows up once you stop letting yourself begin badly."
     },
     "4": {
       "keynote": "Enthusiasm Shared",
-      "body": "You light up around other people’s projects, and your skill develops fastest inside a team that keeps handing you things to try. Your excitement is contagious in a group and almost impossible to sustain alone at a desk with nobody watching. Indifference arrives when the people around you stop caring, and mastery in you is inseparable from having somebody worth being good for."
+      "body": "You light up around other people's projects, and your skill develops fastest inside a team that keeps handing you things to try. Your excitement is contagious in a group and almost impossible to sustain alone at a desk with nobody watching. Flatness arrives when the people around you stop caring, and your range is inseparable from having somebody worth being good for."
     },
     "5": {
       "keynote": "The Public Demonstration",
-      "body": "You demonstrate, and people learn from watching you do the thing rather than from anything you explain about it. Versatility puts you in front of audiences early, years before your skill has caught up with the enthusiasm around it. Indifference is the fall — once the crowd expects the trick, the practice underneath it stops being interesting, and the practice is where mastery lived."
+      "body": "You demonstrate, and people learn from watching you do the thing rather than from anything you explain about it. Your range puts you in front of audiences early, years before your skill has caught up with the enthusiasm around it. Once the crowd expects the trick, the practice underneath it stops being interesting, and the practice is where your skill actually lived."
     },
     "6": {
       "keynote": "Mastery By Phases",
-      "body": "You master things on an arc measured in decades, dropping a skill for years and picking it up transformed. Enthusiasm comes and goes in you, and the periods of indifference are where the material quietly reorganises itself. The difficulty is that people meet you in a fallow stretch and conclude you lost interest, when you went underground."
+      "body": "You master things on an arc measured in decades, dropping a skill for years and picking it up transformed. Enthusiasm comes and goes in you, and the flat periods are where the material quietly reorganizes itself. The difficulty is that people meet you in a fallow stretch and conclude you lost interest, when you'd actually gone underground."
     }
   },
   "17": {
