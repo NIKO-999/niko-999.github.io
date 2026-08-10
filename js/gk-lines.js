@@ -431,7 +431,7 @@ window.DGKLines = (function () {
     },
     "3": {
       "keynote": "Abandoned Instruments",
-      "body": "You build range by picking things up, dropping them, and keeping what stuck to your hands. The guitar in the cupboard, the language half-learned, the six starts on the same project — each one deposited something even though you filed it as quitting. What looks like mastery in you is assembled out of abandonment, and flatness only shows up once you stop letting yourself begin badly."
+      "body": "You build range by picking things up, dropping them, and keeping what stuck to your hands. The guitar in the cupboard, the language half-learned, the six starts on the same project — each one deposited something even though you filed it as quitting. What looks like skill in you is assembled out of abandonment, and flatness only shows up once you stop letting yourself begin badly."
     },
     "4": {
       "keynote": "Enthusiasm Shared",
@@ -442,8 +442,8 @@ window.DGKLines = (function () {
       "body": "You demonstrate, and people learn from watching you do the thing rather than from anything you explain about it. Your range puts you in front of audiences early, years before your skill has caught up with the enthusiasm around it. Once the crowd expects the trick, the practice underneath it stops being interesting, and the practice is where your skill actually lived."
     },
     "6": {
-      "keynote": "Mastery By Phases",
-      "body": "You master things on an arc measured in decades, dropping a skill for years and picking it up transformed. Enthusiasm comes and goes in you, and the flat periods are where the material quietly reorganizes itself. The difficulty is that people meet you in a fallow stretch and conclude you lost interest, when you'd actually gone underground."
+      "keynote": "Skill In Phases",
+      "body": "You build competence on an arc measured in decades, dropping a skill for years and picking it up transformed. Enthusiasm comes and goes in you, and the flat periods are where the material quietly reorganizes itself. The difficulty is that people meet you in a fallow stretch and conclude you lost interest, when you'd actually gone underground."
     }
   },
   "17": {
@@ -1333,7 +1333,7 @@ window.DGKLines = (function () {
   "51": {
     "1": {
       "keynote": "Explained Shock",
-      "body": "You steady yourself by understanding what hit you, and a shock you never explained keeps its power over you. Agitation is the state of a nervous system with no account of what just happened. Initiative returns once you have made sense of the blow, and the awakening in you is not the lightning itself but the ground it found waiting."
+      "body": "You steady yourself by understanding what hit you, and a shock you never explained keeps its power over you. Agitation is the state of a nervous system with no account of what just happened. Initiative returns once you have made sense of the blow, and the change in you is not the lightning itself but the ground it found waiting."
     },
     "2": {
       "keynote": "First Move",
@@ -1515,7 +1515,7 @@ window.DGKLines = (function () {
   "58": {
     "1": {
       "keynote": "Body First",
-      "body": "You tune your physical life first, having found that everything else runs badly when the basics are neglected. Dissatisfaction in you is a signal from the foundation — sleep, movement, food — and not a complaint about your circumstances. Vitality arrives once that base is properly maintained, and the bliss underneath turns out to be what a well-kept body does when nothing is wrong."
+      "body": "You tune your physical life first, having found that everything else runs badly when the basics are neglected. Dissatisfaction in you is a signal from the foundation — sleep, movement, food — and not a complaint about your circumstances. Vitality arrives once that base is properly maintained, and the ease underneath turns out to be what a well-kept body does when nothing is wrong."
     },
     "2": {
       "keynote": "Uncounted Energy",
@@ -1593,7 +1593,7 @@ window.DGKLines = (function () {
   "61": {
     "1": {
       "keynote": "Anchored Inspiration",
-      "body": "You anchor a revelation in something solid before you let it change your life, and untethered insight scares you. Psychosis is what waits when the mind runs ahead of any structure holding it. Inspiration lands safely in you because you built the vessel first, and sanctity is what an enormous idea becomes when it has somewhere sound to arrive."
+      "body": "You anchor a revelation in something solid before you let it change your life, and untethered insight scares you. Psychosis is what waits when the mind runs ahead of any structure holding it. Inspiration lands safely in you because you built the vessel first, and staying power is what an enormous idea gains when it has somewhere sound to arrive."
     },
     "2": {
       "keynote": "Alone With It",
@@ -1671,7 +1671,7 @@ window.DGKLines = (function () {
   "64": {
     "1": {
       "keynote": "Sorted Images",
-      "body": "You sort the mental noise into piles before you trust any of it, and an unfiltered head leaves you paralysed. Confusion is the raw material arriving faster than you file it, and the pressure is worst late in the day. Imagination works for you once the sorting is finished, and illumination comes as the moment the whole heap resolves into a single clear picture."
+      "body": "You sort the mental noise into piles before you trust any of it, and an unfiltered head leaves you paralysed. Confusion is the raw material arriving faster than you file it, and the pressure is worst late in the day. Imagination works for you once the sorting is finished, and clarity comes as the moment the whole heap resolves into a single clear picture."
     },
     "2": {
       "keynote": "Pictures Unbidden",
