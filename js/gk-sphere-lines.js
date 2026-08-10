@@ -55,7 +55,7 @@ window.DGKSphereLines = (function () {
       3: { keynote: 'Celebration', body: "Prosperity, for you, exists to be spent, shared and enjoyed in the light rather than banked in the dark. Money that just sits stops meaning anything to this line — it was only ever a way of buying more life to actually live, for you and for whoever's around you." },
       4: { keynote: 'Charity', body: "Prosperity, for you, only completes itself by moving back out again. Wanting more here isn't greed, it's the fourth line's particular logic — you need more specifically so there's more to give away. Holding onto it past the point of usefulness is the one way this line goes wrong." },
       5: { keynote: 'Power', body: "Prosperity, for you, arrives bundled with real responsibility and real influence over how resources move through other people's lives. You're built to carry that weight, and the test is wielding it with the same restraint you'd want from anyone holding power over you." },
-      6: { keynote: 'Nature', body: "Prosperity, for you, looks like never quite having to own or manage the resource yourself, and somehow always having what's needed anyway. This isn't luck, it's a transcendent relationship with provision itself. The irritation that seems to interrupt your life is usually the thing that was bringing this." },
+      6: { keynote: 'Nature', body: "Prosperity, for you, looks like never quite having to own or manage the resource yourself, and somehow always having what's needed anyway. This isn't luck, it's a pattern of provision you can actually track over time. The irritation that seems to interrupt your life is usually the thing that was bringing this." },
     },
   };
 
