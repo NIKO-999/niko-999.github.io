@@ -675,7 +675,7 @@ function selectSphere(i) {
     openPanelFor(i);
     requestAnimationFrame(() => { panel.classList.add('on'); sweep(); });
   }
-  writeURL(currentSel);
+  writeURL();
 }
 
 function closePanel() {
@@ -690,7 +690,7 @@ function closePanel() {
   coreRing.setAttribute('stroke', NEUTRAL); coreDot.setAttribute('fill', NEUTRAL);
   clearBeam();
   setTimeout(() => { content.innerHTML = ''; }, 560);
-  writeURL(null);
+  writeURL();
 }
 
 /* ── the reveal: click the core, the whole mandala zooms out of it ─────
@@ -849,7 +849,6 @@ function clockNote(inst) {
 }
 
 let profileData = null;
-let selectedKeyForURL = null;
 
 function apply() {
   const d = currentDate(), t = currentTime(), z = (tzEl.value || '').trim();
@@ -873,7 +872,7 @@ function apply() {
       : missing[0];
     unfitted.appendChild(document.createTextNode(missing.length ? 'Enter ' + list + ' below.' : 'Calculation unavailable.'));
     paintMarks();
-    writeURL(null);
+    writeURL();
     return;
   }
 
@@ -888,7 +887,7 @@ function apply() {
 
   paintMarks();
   refreshTransit();
-  writeURL(null);
+  writeURL();
 }
 
 /* ── yearly transit ────────────────────────────────────────────────────
@@ -920,8 +919,10 @@ function refreshTransit() {
 }
 refreshTransit();
 
-function writeURL(sel) {
-  if (sel !== undefined) selectedKeyForURL = sel;
+function writeURL() {
+  // The current sphere selection is deliberately NOT written here — a
+  // reload or a shared link should always land on the plain mandala, never
+  // reopen straight inside whatever card body was last open.
   const d = currentDate(), t = currentTime(), z = (tzEl.value || '').trim();
   if (!d) return;
   const p = new URLSearchParams();
@@ -931,7 +932,6 @@ function writeURL(sel) {
   } else {
     p.set('dob', dob.value);
   }
-  if (selectedKeyForURL !== null && selectedKeyForURL >= 0) p.set('sel', selectedKeyForURL);
   try { history.replaceState(null, '', location.pathname + '?' + p.toString()); } catch (e) { /* ignore */ }
 }
 
@@ -955,6 +955,7 @@ const BOOT_PARAMS = new URLSearchParams(location.search);
     tzEl.value = validZone(here) ? here : '';
   }
   apply();
-  const urlSel = Number(params.get('sel'));
-  if (primes && urlSel >= 0 && urlSel < N) { revealMandala(); selectSphere(urlSel); }
+  // Opening the app should always land on the plain mandala, never straight
+  // inside a card body — a sphere selection is a session action, not
+  // something a fresh load or a shared link should replay automatically.
 })();
