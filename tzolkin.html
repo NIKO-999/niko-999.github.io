@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Tzolk’in — The Sacred Count of Days</title>
+<meta name="description" content="Your Maya Tzolk’in birth kin, computed exactly (GMT correlation 584283) — day sign, tone, trecena, Haab, Long Count.">
+<style>
+  :root{
+    --ground:#050708;
+    --panel:#0B1210;
+    --panel-2:#0E1614;
+    --ink:#E9E2CF;
+    --dim:#8FA096;
+    --jade:#2BB68B;
+    --gold:#E8B84B;
+    --cinnabar:#D35445;
+    --line:rgba(43,182,139,.18);
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    background:var(--ground);color:var(--ink);
+    font:16px/1.65 var(--serif);
+    overflow-x:hidden;min-height:100vh;
+  }
+  /* ---------- scene canvas ---------- */
+  #scene{position:fixed;inset:0;width:100vw;height:100vh;display:block;z-index:0}
+  body.no-webgl #scene{display:none}
+  #static-wheel{display:none;margin:12vh auto 0;position:relative;z-index:1}
+  #static-wheel.show{display:block}
+
+  /* ---------- gate ---------- */
+  #gate{
+    position:fixed;inset:0;z-index:10;display:flex;align-items:center;justify-content:center;
+    background:radial-gradient(ellipse at 50% 40%, rgba(11,18,16,.7), rgba(5,7,8,.96) 70%);
+    transition:opacity 1.2s ease, visibility 1.2s;
+  }
+  #gate.gone{opacity:0;visibility:hidden;pointer-events:none}
+  .gate-card{max-width:420px;width:calc(100% - 48px);text-align:center;padding:40px 8px}
+  .gate-card .glyph-mark{
+    width:74px;height:74px;margin:0 auto 22px;border:1px solid var(--line);border-radius:50%;
+    display:flex;align-items:center;justify-content:center;color:var(--gold);
+    font:400 30px/1 var(--serif);box-shadow:0 0 42px rgba(232,184,75,.12) inset,0 0 26px rgba(43,182,139,.1);
+  }
+  h1{font-weight:400;font-size:30px;letter-spacing:.06em;margin-bottom:6px}
+  .gate-sub{color:var(--dim);font-size:14px;margin-bottom:30px;letter-spacing:.04em}
+  .field{margin-bottom:14px;text-align:left}
+  .field label{display:block;font:11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim);margin-bottom:7px}
+  .field input{
+    width:100%;padding:12px 14px;background:var(--panel);border:1px solid var(--line);border-radius:8px;
+    color:var(--ink);font:16px var(--serif);color-scheme:dark;
+  }
+  .field input:focus{outline:none;border-color:var(--jade)}
+  #gate button{
+    width:100%;margin-top:16px;padding:14px;cursor:pointer;border-radius:8px;
+    background:linear-gradient(160deg, rgba(43,182,139,.22), rgba(232,184,75,.14));
+    border:1px solid var(--jade);color:var(--ink);
+    font:15px var(--serif);letter-spacing:.14em;text-transform:uppercase;
+    transition:box-shadow .3s, transform .2s;
+  }
+  #gate button:hover{box-shadow:0 0 34px rgba(43,182,139,.25);transform:translateY(-1px)}
+  #math-status{margin-top:22px;font:11px/1.6 var(--mono);color:var(--dim);letter-spacing:.03em}
+  #math-status.bad{color:var(--cinnabar)}
+  .privacy{margin-top:8px;font:11px var(--mono);color:var(--dim);opacity:.8}
+
+  /* ---------- HUD + descend ---------- */
+  #hud{
+    position:fixed;top:calc(18px + env(safe-area-inset-top));left:50%;transform:translateX(-50%);
+    z-index:5;font:13px var(--mono);letter-spacing:.12em;color:var(--dim);
+    background:rgba(5,7,8,.55);border:1px solid var(--line);border-radius:99px;
+    padding:8px 18px;opacity:0;transition:opacity 1s;backdrop-filter:blur(6px);
+  }
+  #hud strong{color:var(--gold);font-weight:400}
+  #hud.show{opacity:1}
+  #descend{
+    position:fixed;bottom:calc(26px + env(safe-area-inset-bottom));left:50%;transform:translateX(-50%);
+    z-index:5;cursor:pointer;background:none;border:none;color:var(--jade);
+    font:12px var(--mono);letter-spacing:.22em;text-transform:uppercase;
+    opacity:0;transition:opacity 1s;padding:10px 18px;
+  }
+  #descend.show{opacity:.9}
+  #descend::after{content:"▾";display:block;text-align:center;margin-top:4px;animation:bob 2.2s ease-in-out infinite}
+  @keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(5px)}}
+  .spacer{height:100vh;position:relative;z-index:1;pointer-events:none}
+  body:not(.revealed) .spacer,body:not(.revealed) #panels,body:not(.revealed) footer{display:none}
+
+  /* ---------- panels ---------- */
+  #panels{
+    position:relative;z-index:2;max-width:780px;margin:0 auto;padding:60px 22px 90px;
+    background:linear-gradient(to bottom, transparent, rgba(5,7,8,.92) 120px, rgba(5,7,8,.97));
+  }
+  .card{
+    background:linear-gradient(170deg, var(--panel-2), var(--panel));
+    border:1px solid var(--line);border-radius:14px;padding:30px 30px 26px;margin-bottom:22px;
+    box-shadow:0 18px 50px rgba(0,0,0,.4);
+  }
+  .kicker{font:11px/1 var(--mono);letter-spacing:.22em;text-transform:uppercase;color:var(--jade);margin-bottom:10px}
+  h2{font-weight:400;font-size:34px;letter-spacing:.02em;color:var(--gold)}
+  h3{font-weight:400;font-size:22px;margin-bottom:10px}
+  .sub{color:var(--dim);font-size:14px;margin-top:4px}
+  .dim{opacity:.75}
+  p{margin-bottom:12px}
+  .tagline{font-style:italic;color:var(--gold);opacity:.9}
+  .invite{border-left:2px solid var(--jade);padding-left:14px;color:var(--ink);font-style:italic;margin-top:16px}
+  #r-kin-head{display:flex;gap:24px;align-items:center;flex-wrap:wrap}
+  #r-tone{display:flex;gap:22px;align-items:flex-start;flex-wrap:wrap}
+  .g-lg{width:96px;height:96px;flex:none;filter:drop-shadow(0 0 18px rgba(43,182,139,.35))}
+  .g-md{width:64px;height:64px;flex:none}
+  .g-sm{width:34px;height:34px;display:block;margin:0 auto 4px}
+  .gsrow{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:14px}
+  @media(max-width:560px){.gsrow{grid-template-columns:1fr}}
+  .lbl{font:10px/1 var(--mono);letter-spacing:.2em;text-transform:uppercase;padding:3px 8px;border-radius:4px;display:inline-block;margin-bottom:6px}
+  .lbl.gift{color:var(--jade);border:1px solid var(--jade)}
+  .lbl.shadow{color:var(--cinnabar);border:1px solid var(--cinnabar)}
+  .strip{display:flex;gap:6px;overflow-x:auto;padding:12px 2px 6px;-webkit-overflow-scrolling:touch}
+  .tday{
+    flex:none;width:66px;text-align:center;padding:9px 3px 7px;border:1px solid transparent;border-radius:9px;
+    font:10px/1.3 var(--mono);color:var(--dim);letter-spacing:.02em;
+  }
+  .tday.me{border-color:var(--gold);color:var(--gold);background:rgba(232,184,75,.06);box-shadow:0 0 18px rgba(232,184,75,.12)}
+  .fact{padding:14px 0;border-bottom:1px solid var(--line)}
+  .fact:last-child{border-bottom:none}
+  .fk{font:11px/1 var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--dim)}
+  .fv{font-size:20px;color:var(--gold);margin:5px 0 3px}
+  .fd{font-size:13px;color:var(--dim)}
+  #r-precision{font:12px/1.7 var(--mono);color:var(--dim)}
+  #r-today{text-align:center;font-size:15px;color:var(--dim);padding:8px 0 0}
+  #r-today strong{color:var(--jade);font-weight:400}
+  footer{position:relative;z-index:2;text-align:center;padding:0 22px 46px;font:11px var(--mono);color:var(--dim);opacity:.75;line-height:2}
+
+  /* ---------- modal ---------- */
+  #modal{position:fixed;inset:0;z-index:20;display:none;align-items:center;justify-content:center;background:rgba(3,5,6,.8);backdrop-filter:blur(4px)}
+  #modal.open{display:flex}
+  .modal-card{max-width:440px;width:calc(100% - 44px);background:var(--panel-2);border:1px solid var(--line);border-radius:14px;padding:30px;position:relative;text-align:center}
+  .modal-card .g-md{margin:0 auto 14px}
+  #modal-close{position:absolute;top:10px;right:14px;background:none;border:none;color:var(--dim);font-size:22px;cursor:pointer}
+
+  @media (prefers-reduced-motion: reduce){
+    html{scroll-behavior:auto}
+    #descend::after{animation:none}
+  }
+</style>
+</head>
+<body>
+
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="glyph-mark">☀</div>
+    <h1>Tzolk’in</h1>
+    <p class="gate-sub">The 260-day sacred count of the Maya.<br>Enter your birth to find your kin among the days.</p>
+    <form id="gate-form">
+      <div class="field">
+        <label for="dob">Date of birth</label>
+        <input type="date" id="dob" required>
+      </div>
+      <div class="field">
+        <label for="tob">Time of birth</label>
+        <input type="time" id="tob">
+      </div>
+      <button type="submit">Enter the Count</button>
+    </form>
+    <div id="math-status"></div>
+    <div class="privacy">Your birthdate never leaves this page.</div>
+  </div>
+</div>
+
+<div id="hud"></div>
+<button id="descend" type="button">Descend to your reading</button>
+
+<canvas id="static-wheel" aria-hidden="true"></canvas>
+<div class="spacer" aria-hidden="true"></div>
+
+<main id="panels">
+  <section class="card" id="r-kin-head"></section>
+  <section class="card" id="r-sign"></section>
+  <section class="card" id="r-tone"></section>
+  <section class="card" id="r-trecena"></section>
+  <section class="card" id="r-facts"></section>
+  <section class="card" id="r-precision"></section>
+  <div id="r-today"></div>
+</main>
+
+<div id="modal" role="dialog" aria-modal="true">
+  <div class="modal-card">
+    <button id="modal-close" aria-label="Close">×</button>
+    <div id="modal-body"></div>
+  </div>
+</div>
+
+<footer>
+  GMT correlation · JDN 584283 · Long Count epoch 4 Ajaw 8 Kumk’u<br>
+  Drag to spin the wheels · tap a glyph or tone to read it
+</footer>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+<script src="js/tzolkin.js"></script>
+<script src="js/tzolkin-content.js"></script>
+<script src="js/tzolkin-page.js"></script>
+</body>
+</html>
