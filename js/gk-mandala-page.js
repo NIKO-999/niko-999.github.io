@@ -974,15 +974,23 @@ function transitConnection(todayKey) {
   return null;
 }
 
-let todayConn = null, todayKeyNum = null;
+let todayConn = null, todayKeyNum = null, todayLineNum = null;
 function refreshTransit() {
   const el = document.getElementById('transit');
   if (!el || !window.DGeneKeys) return;
-  const iso = new Date().toISOString().slice(0, 10);
-  const todayKey = DGeneKeys.keyAt(DGeneKeys.solarLongitude(iso));
-  todayKeyNum = todayKey;
+  let todayKey, todayLine = null;
+  // The real instant, not the noon-UTC-pinned legacy date path — the whole
+  // point is that the line changes roughly every 22 hours, so "today" needs
+  // to actually mean right now, not just today's calendar date.
+  if (window.DGKProfile && DGKProfile.VALID) {
+    const kl = DGKProfile.keyLine(DGKProfile.sunAt(Date.now()));
+    todayKey = kl.key; todayLine = kl.line;
+  } else {
+    todayKey = DGeneKeys.keyAt(DGeneKeys.solarLongitude(new Date().toISOString().slice(0, 10)));
+  }
+  todayKeyNum = todayKey; todayLineNum = todayLine;
   const k = DGeneKeys.KEYS[todayKey];
-  el.textContent = 'Transiting today · Key ' + todayKey + (k ? ' · ' + k.name : '');
+  el.textContent = 'Transiting today · Key ' + todayKey + (todayLine ? '.' + todayLine : '') + (k ? ' · ' + k.name : '');
   todayConn = transitConnection(todayKey);
   el.classList.toggle('clickable', !!todayConn);
   if (todayConn && todayConn.type === 'exact') {
@@ -1039,9 +1047,16 @@ function renderTransitContent() {
       const label = esc(sphereLabel(id));
       return idx === null ? label : '<button class="ovLink" data-idx="' + idx + '">' + label + '</button>';
     }).join(' & ');
+    // The transit doesn't sit still inside a key for 5-6 days — it moves
+    // through a new line roughly every 22 hours. Pulling that line's real
+    // reading in is what keeps this from repeating the same card all week.
+    const lineData = (todayLineNum && window.DGKLines) ? DGKLines.get(todayKey, todayLineNum) : null;
+    const lineHtml = lineData ? '<section><div class="card" data-noclick="1">' +
+      hd(col, 'Line ' + todayLineNum + ' · ' + esc(lineData.keynote)) +
+      '<p>' + esc(lineData.body) + '</p></div></section>' : '';
     body = '<section><div class="card" data-noclick="1">' + hd(col, "Today's Activation") +
-      '<p>Key ' + todayKey + ' is transiting right now, and it\'s already yours — ' + links + '.</p>' +
-      (reading ? '<p>' + esc(reading) + '</p>' : '') + '</div></section>';
+      '<p>Key ' + todayKey + (todayLineNum ? '.' + todayLineNum : '') + ' is transiting right now, and it\'s already yours — ' + links + '.</p>' +
+      (reading ? '<p>' + esc(reading) + '</p>' : '') + '</div></section>' + lineHtml;
   } else if (conn.type === 'ring') {
     const idx = markIndexForSphereId(conn.ids[0]);
     const label = esc(sphereLabel(conn.ids[0]));
@@ -1064,7 +1079,7 @@ function renderTransitContent() {
   content.innerHTML =
     '<div class="eyebrow" style="color:' + col + '">today</div>' +
     '<h2>' + hglyph(col) + (k0 ? esc(k0.name) : 'Key ' + todayKey) + '</h2>' +
-    '<div class="key">Key ' + todayKey + '</div>' +
+    '<div class="key">Key ' + todayKey + (todayLineNum ? '.' + todayLineNum : '') + '</div>' +
     body;
 
   content.querySelectorAll('.ovLink').forEach(btn => {
