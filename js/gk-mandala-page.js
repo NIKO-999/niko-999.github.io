@@ -500,6 +500,19 @@ function hd(col, text) { return '<h3 style="color:' + col + '">' + text + '</h3>
 
 function openPanelFor(i) {
   const mark = marks[i], node = mark.node;
+  // Role files load on demand now. roleSection() already falls back to the
+  // universal reading (gene-keys-content.js) while a role is in flight, so
+  // this renders immediately either way — once the file lands, re-running
+  // openPanelFor for the same still-open sphere swaps in the real text.
+  if (window.DGKRoleLoader && window.DGKRoles) {
+    node.ids.forEach(id => {
+      if (!DGKRoles.has(id)) {
+        DGKRoleLoader.loadRole(id).then(() => {
+          if (currentSel === i) openPanelFor(i);
+        });
+      }
+    });
+  }
   const primary = node.ids[0];
   const sp0 = primes[primary];
   const col = seqCol(sp0.seq);
@@ -778,6 +791,7 @@ function revealMandala() {
   const hintEl = document.getElementById('hint');
   if (hintEl) hintEl.innerHTML = 'Hologenetic Profile <b>·</b> click a sphere, or the centre, to open a reading';
   paintMarks();
+  if (window.DGKRoleLoader) DGKRoleLoader.preloadIdle();
 }
 coreHit.addEventListener('click', e => {
   e.stopPropagation();
