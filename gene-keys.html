@@ -40,6 +40,8 @@ body {
 #hdr b { color: var(--ink-2); font-weight: 500; }
 #transit { color: var(--ink-3); white-space: nowrap; }
 #transit .own { color: #9FEFE0; }
+#transit.clickable { cursor: pointer; }
+#transit.clickable:hover { color: var(--ink-2); }
 
 /* ── mobile rim legend ─────────────────────────────────────────────────
    Replaces the radial labels below 900px, where twelve of them around a
@@ -300,7 +302,12 @@ body.unfitted #stage { opacity: .18; }
   .lbl { display: none; }
   #legend { display: flex; }
   #hdr { right: auto; }
+  /* Hidden by default to save header space on a phone — but when today's
+     transit genuinely connects to this visitor's own chart, that's worth
+     the space, so .clickable (set in JS only when a connection exists)
+     overrides this back to visible. */
   #transit { display: none; }
+  #transit.clickable { display: inline; }
 }
 @media (prefers-reduced-motion: reduce) {
   #panel, #stage { transition: none; }
@@ -364,6 +371,7 @@ body.unfitted #stage { opacity: .18; }
 <script src="js/gk-sphere-defs.js" defer></script>
 <script src="js/gk-partners.js" defer></script>
 <script src="js/gk-pathways.js" defer></script>
+<script src="js/gk-transit-days.js" defer></script>
 <script src="js/gk-mandala-page.js" defer></script>
 </body>
 </html>

@@ -325,6 +325,7 @@ const panel = document.getElementById('panel');
 const content = document.getElementById('pcontent');
 let currentSel = -1;
 const OVERVIEW_SEL = -2; // currentSel value meaning "the centre profile overview is open", not any sphere
+const TRANSIT_SEL = -3; // currentSel value meaning "today's transit reading is open", not any sphere
 let panelOpen = false;
 let primes = null;   // profileData.spheres, keyed by sphere id
 
@@ -901,23 +902,136 @@ function myKeys() {
   NODES.forEach(n => n.ids.forEach(id => { if (primes[id]) out.push({ id, key: primes[id].key }); }));
   return out;
 }
+// What today's transiting key actually has to do with THIS visitor's own
+// chart — exact match beats ring-sharing beats programming-partner, since
+// that's decreasing order of how directly it touches them. Returns null
+// when today's transit has no real connection to their profile at all,
+// which is the common case and should stay quiet rather than force one.
+function transitConnection(todayKey) {
+  const mine = myKeys();
+  if (!mine.length) return null;
+
+  const exact = mine.filter(m => m.key === todayKey);
+  if (exact.length) return { type: 'exact', ids: [...new Set(exact.map(m => m.id))] };
+
+  if (window.DCodonRings && DCodonRings.VALID) {
+    const todayRing = DCodonRings.ringOf(todayKey);
+    if (todayRing) {
+      const ringHit = mine.find(m => todayRing.keys.indexOf(m.key) !== -1);
+      if (ringHit) return { type: 'ring', ids: [ringHit.id], ring: todayRing, mineKey: ringHit.key };
+    }
+  }
+
+  if (window.DHexagrams && DHexagrams.VALID) {
+    const p = DHexagrams.partner(todayKey);
+    const partnerHit = mine.find(m => m.key === p);
+    if (partnerHit) return { type: 'partner', ids: [partnerHit.id], mineKey: p };
+  }
+
+  return null;
+}
+
+let todayConn = null, todayKeyNum = null;
 function refreshTransit() {
   const el = document.getElementById('transit');
   if (!el || !window.DGeneKeys) return;
   const iso = new Date().toISOString().slice(0, 10);
   const todayKey = DGeneKeys.keyAt(DGeneKeys.solarLongitude(iso));
+  todayKeyNum = todayKey;
   const k = DGeneKeys.KEYS[todayKey];
   el.textContent = 'Transiting today · Key ' + todayKey + (k ? ' · ' + k.name : '');
-  const mine = myKeys().filter(m => m.key === todayKey);
-  if (mine.length) {
-    const roleLabels = mine.map(m => (m.id === 'core' ? 'Core' : m.id === 'vocation' ? 'Vocation' : (ROLE_BLURB[m.id] ? NODES.find(n => n.ids.indexOf(m.id) !== -1).label : m.id)));
+  todayConn = transitConnection(todayKey);
+  el.classList.toggle('clickable', !!todayConn);
+  if (todayConn && todayConn.type === 'exact') {
+    const roleLabels = todayConn.ids.map(id => sphereLabel(id));
     const span = document.createElement('span');
     span.className = 'own';
     span.textContent = ' · your ' + [...new Set(roleLabels)].join(' & ');
     el.appendChild(span);
+  } else if (todayConn) {
+    const span = document.createElement('span');
+    span.className = 'own';
+    span.textContent = ' · connects to your ' + sphereLabel(todayConn.ids[0]);
+    el.appendChild(span);
   }
 }
 refreshTransit();
+document.getElementById('transit').addEventListener('click', () => { if (todayConn) selectTransit(); });
+
+function selectTransit() {
+  if (!todayConn || !todayKeyNum || !primes) return;
+  if (currentSel === TRANSIT_SEL) { closePanel(); return; }
+  hidePreview();
+  const wasOpen = panelOpen;
+  currentSel = TRANSIT_SEL; panelOpen = true;
+  paintMarks();
+  if (wasOpen) {
+    panel.classList.remove('on');
+    setTimeout(() => {
+      renderTransitContent();
+      requestAnimationFrame(() => { panel.classList.add('on'); sweep(); });
+    }, 260);
+  } else {
+    stageEl.style.transform = innerWidth > 900 ? 'translateX(-' + (PANEL_W / 2) + 'px)' : 'translateX(0)';
+    renderTransitContent();
+    requestAnimationFrame(() => { panel.classList.add('on'); sweep(); });
+  }
+}
+function renderTransitContent() {
+  const conn = todayConn, todayKey = todayKeyNum;
+  const k0 = window.DGeneKeys ? DGeneKeys.KEYS[todayKey] : null;
+  const col = NEUTRAL;
+
+  panel.querySelector('.edge').style.background = col;
+  panel.querySelector('.edge').style.boxShadow =
+    '0 0 8px ' + col + ', 0 0 22px ' + col + ', 0 0 46px rgba(207,239,255,0.85), 0 0 90px rgba(207,239,255,0.5)';
+  panel.querySelector('.edgeGlow').style.background =
+    'linear-gradient(90deg, rgba(207,239,255,0.55) 0%, rgba(207,239,255,0.16) 35%, transparent 100%)';
+
+  let body = '';
+  if (conn.type === 'exact') {
+    const reading = window.DGKTransitDays ? DGKTransitDays.get(todayKey) : null;
+    const links = conn.ids.map(id => {
+      const idx = markIndexForSphereId(id);
+      const label = esc(sphereLabel(id));
+      return idx === null ? label : '<button class="ovLink" data-idx="' + idx + '">' + label + '</button>';
+    }).join(' & ');
+    body = '<section><div class="card" data-noclick="1">' + hd(col, "Today's Activation") +
+      '<p>Key ' + todayKey + ' is transiting right now, and it\'s already yours — ' + links + '.</p>' +
+      (reading ? '<p>' + esc(reading) + '</p>' : '') + '</div></section>';
+  } else if (conn.type === 'ring') {
+    const idx = markIndexForSphereId(conn.ids[0]);
+    const label = esc(sphereLabel(conn.ids[0]));
+    const link = idx === null ? label : '<button class="ovLink" data-idx="' + idx + '">' + label + '</button>';
+    body = '<section><div class="card" data-noclick="1">' + hd(col, 'Today Shares a Ring With You') +
+      '<p>Key ' + todayKey + ' is transiting right now, and it shares the <b>Ring of ' + esc(conn.ring.name || conn.ring.amino) +
+      '</b> with your ' + link + ' (Key ' + conn.mineKey + '). Keys in the same ring run on the same underlying material, so today\'s theme isn\'t arriving from outside — it\'s echoing something already live in your own chart.</p></div></section>';
+  } else if (conn.type === 'partner') {
+    const idx = markIndexForSphereId(conn.ids[0]);
+    const label = esc(sphereLabel(conn.ids[0]));
+    const link = idx === null ? label : '<button class="ovLink" data-idx="' + idx + '">' + label + '</button>';
+    const reading = window.DGKPartners ? DGKPartners.get(todayKey) : null;
+    body = '<section><div class="card" data-noclick="1">' + hd(col, "Today's Partner is Active") +
+      '<p>Key ' + todayKey + ' is transiting right now, and it\'s the programming partner of your ' + link + ' (Key ' + conn.mineKey + ').</p>' +
+      (reading ? '<p>' + esc(reading) + '</p>' : '') + '</div></section>';
+  }
+
+  content.innerHTML =
+    '<div class="eyebrow" style="color:' + col + '">today</div>' +
+    '<h2>' + hglyph(col) + (k0 ? esc(k0.name) : 'Key ' + todayKey) + '</h2>' +
+    '<div class="key">Key ' + todayKey + '</div>' +
+    body;
+
+  content.querySelectorAll('.ovLink').forEach(btn => {
+    btn.addEventListener('click', e => { e.stopPropagation(); selectSphere(Number(btn.dataset.idx)); });
+  });
+
+  coreLbl.style.color = col;
+  coreLbl.textContent = 'TODAY';
+  coreHalo.setAttribute('fill', col); coreHalo.setAttribute('opacity', 0.20);
+  coreRing.setAttribute('stroke', col); coreDot.setAttribute('fill', col);
+  clearBeam();
+}
 
 function writeURL() {
   // The current sphere selection is deliberately NOT written here — a
