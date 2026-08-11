@@ -1,10 +1,5 @@
 <!DOCTYPE html>
-<!-- data-theme is set here, not left to JS, so the very first paint is already
-     dark: the entry flight always opens in deep space (see introFlight), and
-     booting on the bare :root light default would flash light before the
-     script could switch it. introFlight() resolves to the real theme on
-     landing. -->
-<html lang="en" data-theme="dark">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,7 +13,7 @@
   <meta property="og:url" content="https://niko-999.github.io/DestinyMatrix-v1.html">
   <meta name="twitter:card" content="summary">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#01030d">
+  <meta name="theme-color" content="#eef1f8">
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -1143,7 +1138,7 @@ const canvas   = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: window.devicePixelRatio < 2 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0x01030d, 1); // matches the dark first paint the entry flight opens on; applyTheme() owns it from boot onward
+renderer.setClearColor(0xeef1f8, 1); // light default — applyTheme(_theme) below corrects this synchronously if dark
 
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
@@ -1177,13 +1172,6 @@ camera.position.set(0, 0, 12);
 // Toggling to dark only lasts for the current viewing session; every fresh
 // load/reload boots back into light regardless of what was last toggled.
 let _theme = 'light';
-
-// Where the entry flight resolves to. The intro always plays dark, because
-// light mode hides every ambient object (see the _ambientOnlyObjects line in
-// applyTheme below) — there'd be no starfield to fly through otherwise. This
-// remembers the theme the page should actually settle into, and the theme
-// toggle keeps it in sync in case it's used before the flight lands.
-let _pendingTheme = _theme;
 
 function _rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
@@ -1938,7 +1926,11 @@ canvas.addEventListener('click', () => {
   }
 });
 
-document.getElementById('hud-back').addEventListener('click', returnToMap);
+// Wrapped, not passed directly: returnToMap's first parameter is an optional
+// onDone callback, and handing the listener the reference makes the click
+// Event that argument — truthy, so the `if (onDone)` guard passes and calling
+// it throws at the end of every return flight.
+document.getElementById('hud-back').addEventListener('click', () => returnToMap());
 
 // ── FLY TO NODE ───────────────────────────────────────────────────────────
 const veil = document.getElementById('veil');
@@ -2260,10 +2252,97 @@ canvas.addEventListener('click', e => {
 //      (same guard flyTo() uses), so the flag is held for the whole flight
 //      and released — along with camZoom/pan/parallax state — on landing, or
 //      the camera would snap back the instant the first tween ran.
-//   2. Light mode hides every ambient object, so there is no starfield to
-//      fly through. The intro therefore always plays dark and resolves to
-//      _pendingTheme partway through the settle, cross-faded behind #veil so
-//      the starfield doesn't visibly pop out of existence.
+//   2. Light mode hides every ambient object, so there is no existing field
+//      to fly through there. The flight brings its own (buildIntroStars),
+//      which carries a treatment for each theme and is disposed on landing.
+// Dedicated starfield for the entry only. The ambient starGroup can't serve
+// here: it's a hollow shell at r=65–110 that the camera sits inside, and its
+// shader pins gl_PointSize to a flat aSize, so nothing grows as you approach
+// and there's no sense of travel. This one fills a cylinder along the flight
+// path and attenuates point size by distance, so motes swell and sweep past
+// the camera. Built on entry, faded and disposed on landing.
+//
+// It carries its own light-mode treatment rather than being hidden like the
+// ambient decorations, so both themes get the flight: dark flies through
+// additive blue-white stars, light through ink-blue motes on the pale ground
+// (additive glow is invisible on a light background — see the THEME notes).
+function buildIntroStars(startZ, endZ) {
+  const dark = _theme === 'dark';
+  const N = 3200;
+  const pos = new Float32Array(N * 3);
+  const col = new Float32Array(N * 3);
+  const siz = new Float32Array(N);
+
+  for (let i = 0; i < N; i++) {
+    // sqrt keeps the distribution even across the disc instead of clumping
+    // on the axis; the floor keeps a few stars close enough to streak past.
+    const r  = 1.5 + Math.sqrt(Math.random()) * 46;
+    const th = Math.random() * Math.PI * 2;
+    pos[i*3]   = Math.cos(th) * r;
+    pos[i*3+1] = Math.sin(th) * r;
+    pos[i*3+2] = endZ - 40 + Math.random() * (startZ - endZ + 90);
+
+    const t = Math.random();
+    if (dark) {
+      // Blue-white majority / rare warm, matching the ambient field.
+      if (t < 0.65)      { col[i*3] = 0.82 + Math.random()*0.18; col[i*3+1] = 0.88 + Math.random()*0.12; col[i*3+2] = 1.0; }
+      else if (t < 0.88) { const v = 0.90 + Math.random()*0.10; col[i*3] = col[i*3+1] = col[i*3+2] = v; }
+      else               { col[i*3] = 1.0; col[i*3+1] = 0.90 + Math.random()*0.08; col[i*3+2] = 0.70 + Math.random()*0.12; }
+    } else {
+      // Deep inks drawn from the light palette's accent (30,64,140), with a
+      // rare warm ember so the field isn't monochrome.
+      if (t < 0.72)      { col[i*3] = 0.10 + Math.random()*0.06; col[i*3+1] = 0.22 + Math.random()*0.08; col[i*3+2] = 0.50 + Math.random()*0.14; }
+      else if (t < 0.92) { const v = 0.16 + Math.random()*0.10; col[i*3] = v; col[i*3+1] = v * 1.05; col[i*3+2] = v * 1.5; }
+      else               { col[i*3] = 0.48 + Math.random()*0.12; col[i*3+1] = 0.26 + Math.random()*0.08; col[i*3+2] = 0.14; }
+    }
+
+    siz[i] = Math.random() < 0.05 ? 26 : Math.random() < 0.2 ? 15 : 7 + Math.random() * 5;
+  }
+
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color',    new THREE.BufferAttribute(col, 3));
+  geo.setAttribute('aSize',    new THREE.BufferAttribute(siz, 1));
+
+  const mat = new THREE.ShaderMaterial({
+    uniforms: { uTex: { value: bgTex }, uOpacity: { value: 1 }, uDark: { value: dark ? 1 : 0 } },
+    vertexShader: `
+      attribute float aSize;
+      attribute vec3 color;
+      varying vec3 vColor;
+      void main() {
+        vColor = color;
+        vec4 mv = modelViewMatrix * vec4(position, 1.0);
+        gl_PointSize = aSize * (30.0 / max(-mv.z, 0.6));
+        gl_Position = projectionMatrix * mv;
+      }
+    `,
+    fragmentShader: `
+      uniform sampler2D uTex;
+      uniform float uOpacity;
+      uniform float uDark;
+      varying vec3 vColor;
+      void main() {
+        vec4 t = texture2D(uTex, gl_PointCoord);
+        float a = t.a * uOpacity;
+        // Dark: premultiplied by the texture's core so additive blending
+        // reads as glow. Light: a plain soft-edged disc, since additive
+        // would simply vanish against the pale ground.
+        gl_FragColor = (uDark > 0.5) ? vec4(vColor, a) * t.r : vec4(vColor, a * 0.85);
+        if (gl_FragColor.a < 0.01) discard;
+      }
+    `,
+    transparent: true,
+    depthWrite: false,
+    blending: dark ? THREE.AdditiveBlending : THREE.NormalBlending,
+  });
+
+  const pts = new THREE.Points(geo, mat);
+  pts.frustumCulled = false; // the cloud spans the whole flight; its bounding sphere isn't meaningful
+  scene.add(pts);
+  return pts;
+}
+
 function introFlight() {
   function land() {
     isFlying = false;
@@ -2273,53 +2352,44 @@ function introFlight() {
     tgtX = tgtY = 0;
   }
 
-  // Swap to the real theme behind a brief full-bleed wash of the destination
-  // background. #veil is already a fixed z-15 layer sitting over the canvas
-  // but under the HUD, which is exactly the coverage this needs.
-  function settleTheme() {
-    if (_pendingTheme === _theme) return;
-    const veil = document.getElementById('veil');
-    if (!veil) { applyTheme(_pendingTheme); return; }
-    veil.style.background = _pendingTheme === 'light' ? '#eef1f8' : '#01030d';
-    gsap.to(veil, {
-      opacity: 1, duration: 0.45, ease: 'power2.in',
-      onComplete: () => {
-        applyTheme(_pendingTheme);
-        gsap.to(veil, {
-          opacity: 0, duration: 0.9, ease: 'power2.out',
-          onComplete: () => { veil.style.background = ''; },
-        });
-      },
-    });
-  }
-
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     camera.position.set(0, 0, baseCamZ);
     camera.lookAt(0, 0, 0);
     land();
-    // Wait out the loader's own 1.2s fade below before switching: #loader is
-    // painted in var(--bg), so theming mid-fade pops its background from the
-    // dark boot colour to the light one in full view.
-    gsap.delayedCall(1.3, () => applyTheme(_pendingTheme));
     return;
   }
 
+  const START = baseCamZ * 15;
+  const stars = buildIntroStars(START, baseCamZ);
+
+  function clearStars() {
+    scene.remove(stars);
+    stars.geometry.dispose();
+    stars.material.dispose();
+  }
+
   isFlying = true;
-  camera.position.set(0, baseCamZ * 0.42, baseCamZ * 5.5);
+  camera.position.set(0, baseCamZ * 0.5, START);
   camera.lookAt(0, 0, 0);
 
   gsap.timeline({ onComplete: land })
+    // Long run inward through the field — most of the distance is covered
+    // here, so stars stream past before the diagram resolves.
     .to(camera.position, {
-      y: baseCamZ * 0.12, z: baseCamZ * 1.9,
-      duration: 2.4, ease: 'power2.in',
+      y: baseCamZ * 0.16, z: baseCamZ * 2.6,
+      duration: 3.4, ease: 'power1.inOut',
       onUpdate() { camera.lookAt(0, 0, 0); },
     })
-    .add(settleTheme)
+    // Settle onto the fitted distance, thinning the field out as the diagram
+    // takes over so the two never compete for attention.
+    .to(stars.material.uniforms.uOpacity, {
+      value: 0, duration: 1.5, ease: 'power2.in', onComplete: clearStars,
+    }, '>-0.2')
     .to(camera.position, {
       x: 0, y: 0, z: baseCamZ,
       duration: 1.9, ease: 'power3.out',
       onUpdate() { camera.lookAt(0, 0, 0); },
-    });
+    }, '<');
 }
 
 function revealScene() {
@@ -5339,7 +5409,6 @@ const ARCANA_ESSENCE = {
   btn.addEventListener('click', () => {
     if (window.DMNative) DMNative.haptic();
     applyTheme(_theme === 'light' ? 'dark' : 'light');
-    _pendingTheme = _theme; // so a toggle mid-flight isn't undone on landing
     btn.textContent = label();
   });
 })();
@@ -5892,12 +5961,9 @@ const ARCANA_ESSENCE = {
   render(); // pre-render once so the very first open has content immediately
 })();
 
-// Apply the theme now that every sprite/ambient object in every tier above
-// has been created and registered. The entry flight opens in dark regardless
-// of the chosen theme (it needs the starfield to fly through); introFlight()
-// resolves to _pendingTheme as the camera settles.
-_pendingTheme = _theme;
-applyTheme('dark');
+// Apply the persisted (or default) theme now that every sprite/ambient
+// object in every tier above has been created and registered.
+applyTheme(_theme);
 
 })();
 </script>
