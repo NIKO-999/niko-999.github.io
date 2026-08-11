@@ -32,19 +32,44 @@ const TYPE_MAP = {
   profileExam: 'londonReversal',
 };
 
-/** Consolidation + fake breakout for the chop-trap scenario (no ground truth needed — MCQ). */
+const r2 = (x) => Math.round(x * 100) / 100;
+
+/** Consolidation + fake breakout for the chop-trap scenario (no ground truth needed — MCQ).
+    The bait candle is scaled to the coil's own range (close ~7% above the high,
+    wick ~15% above) so the trap looks temptingly plausible — not like a data error. */
 function genChopTrap(seed) {
   const rng = mulberry32(seed);
   const candles = generateCandles({ seed, count: 48, tf: 15, start: 480, drift: 0, vol: 0.16 });
   let hi = -Infinity, lo = Infinity;
   for (let i = 4; i < 40; i++) { hi = Math.max(hi, candles[i].h); lo = Math.min(lo, candles[i].l); }
-  // Fake CISD poke out of the coil, then fade back inside.
+  const range = Math.max(hi - lo, 0.4);
+  // Walk price into the upper third of the coil so the poke starts close to it.
+  let price = candles[38].c;
+  const rampTarget = hi - range * 0.2;
+  for (let i = 39; i <= 40; i++) {
+    const c = candles[i];
+    c.o = r2(price);
+    c.c = r2(price + (rampTarget - price) * 0.55 + (rng() - 0.5) * range * 0.06);
+    c.h = r2(Math.max(c.o, c.c) + rng() * range * 0.05);
+    c.l = r2(Math.min(c.o, c.c) - rng() * range * 0.05);
+    price = c.c;
+  }
+  // The bait: closes a hair above the coil high with a realistic upper wick.
   const b = candles[41];
-  b.c = hi + 0.25; b.h = b.c + 0.1; b.l = Math.min(b.l, b.o - 0.05);
+  b.o = r2(price);
+  b.c = r2(hi + range * 0.07);
+  b.h = r2(hi + range * 0.15);
+  b.l = r2(Math.min(b.o, b.c) - range * 0.04);
+  price = b.c;
+  // Fade back inside the coil — the closure had no follow-through.
   for (let i = 42; i < 48; i++) {
     const c = candles[i];
-    const drift = (lo + (hi - lo) * 0.4 - c.o) * 0.35 + (rng() - 0.5) * 0.1;
-    c.c = c.o + drift; c.h = Math.max(c.o, c.c) + 0.08; c.l = Math.min(c.o, c.c) - 0.08;
+    c.o = r2(price);
+    const drift = (lo + range * 0.45 - c.o) * 0.32 + (rng() - 0.5) * range * 0.08;
+    c.c = r2(c.o + drift);
+    c.h = r2(Math.max(c.o, c.c) + rng() * range * 0.06);
+    c.l = r2(Math.min(c.o, c.c) - rng() * range * 0.06);
+    price = c.c;
   }
   return {
     candles,

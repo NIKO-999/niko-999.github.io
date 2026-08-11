@@ -360,6 +360,19 @@ export class ChartEngine {
     const range = this._priceRange(vis);
     this._labelRects = [];
 
+    // Reserve the live crosshair price pill's band up front so right-edge
+    // annotation pills (targets / stops / entries) get nudged clear of it by
+    // the collision pass instead of kissing the axis tag.
+    if (this.opts.crosshair && this._pointer) {
+      const { x, y } = this._pointer;
+      if (x >= L.x0 && x <= L.x1 && y >= L.y0 && y <= L.y1) {
+        this._labelRects.push({
+          x: L.x1 - 120, y: y - 10,
+          w: 120 + this.opts.paddingRight, h: 20,
+        });
+      }
+    }
+
     this._drawSessions(ctx, L);
     this._drawGrid(ctx, L, range);
     if (this.opts.fourHourTicks) this._drawFourHTicks(ctx, L);

@@ -392,6 +392,17 @@ p { overflow-wrap: break-word; }
 }
 .modal-close:hover { background: rgba(148,163,196,0.16); color: var(--text-hi); transform: rotate(90deg); }
 
+/* Modal action rows: right-aligned pair on desktop; full-width stacked column
+   on compact phones with the destructive action last. */
+.modal-actions {
+  display: flex; flex-wrap: wrap; gap: var(--sp-3);
+  justify-content: flex-end; margin-top: var(--sp-5);
+}
+@media (max-width: 479px) {
+  .modal-actions { flex-direction: column; }
+  .modal-actions .btn { width: 100%; }
+}
+
 /* ---------- Lightbox ---------- */
 .lightbox {
   position: fixed; inset: 0; z-index: 95;
@@ -488,8 +499,10 @@ p { overflow-wrap: break-word; }
 .stagger > *:nth-child(8) { animation-delay: 350ms; }
 
 /* ---------- Celebrations ---------- */
+/* Sits BELOW the modal backdrop (90) and toasts (100): confetti frames a
+   celebration modal instead of raining on its title and CTA. */
 .confetti-layer {
-  position: fixed; inset: 0; z-index: 110; pointer-events: none; overflow: hidden;
+  position: fixed; inset: 0; z-index: 80; pointer-events: none; overflow: hidden;
 }
 .confetti-piece {
   position: absolute; top: -12px; width: 9px; height: 14px;

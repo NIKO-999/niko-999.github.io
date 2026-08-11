@@ -104,12 +104,33 @@
 
 /* ---------- Home dashboard ---------- */
 .home-hero {
-  display: flex; flex-direction: column; align-items: center; text-align: center;
-  gap: var(--sp-4); padding: var(--sp-6) var(--sp-5);
+  display: flex; flex-direction: column; align-items: center;
+  gap: var(--sp-5); padding: var(--sp-6) var(--sp-5);
 }
-.home-hero .level-ring { margin-bottom: var(--sp-2); }
+.hero-main {
+  display: flex; flex-direction: column; align-items: center; text-align: center;
+  gap: var(--sp-4);
+}
+.hero-main .level-ring { margin-bottom: var(--sp-2); }
 .home-hero-xp { width: min(360px, 100%); }
 .home-hero-meta { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--sp-3); }
+
+/* Training-record cluster: real numbers that give the hero's width a job. */
+.hero-stats {
+  width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sp-3);
+  position: relative; z-index: 1;
+}
+.hero-stat {
+  padding: var(--sp-3) var(--sp-4); border-radius: var(--r-md); text-align: left;
+  background: rgba(148,163,196,0.05); border: 1px solid var(--glass-border);
+}
+.hero-stat-num { font-size: var(--fs-lg); font-weight: 700; margin-top: 2px; color: var(--text-hi); }
+.hero-next {
+  grid-column: 1 / -1; padding: var(--sp-3) var(--sp-4); text-align: left;
+  border-radius: var(--r-md); border: 1px solid rgba(56,189,248,0.22);
+  background: var(--grad-accent-soft);
+}
+.hero-next p.t-sm { color: var(--text-hi); font-weight: 600; }
 .home-daily {
   margin-top: var(--sp-5); padding: var(--sp-4) var(--sp-5);
   display: flex; align-items: center; gap: var(--sp-4);
@@ -262,8 +283,11 @@
 .round-dot.lost { background: var(--bear); }
 .round-dot.current { background: var(--accent-2); transform: scale(1.35); }
 .boss-stage { margin-top: var(--sp-4); }
-.boss-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-4); }
+.boss-grid { display: grid; grid-template-columns: 1fr; gap: var(--sp-4); align-items: stretch; }
 .boss-card { padding: var(--sp-5); display: flex; flex-direction: column; gap: var(--sp-3); align-items: flex-start; }
+/* Cards stretch to the row; the CTA pins to the bottom so every Challenge
+   button in a row sits on the same baseline regardless of lore length. */
+.boss-card > .btn { margin-top: auto; }
 /* Locked treatment fades the ARTWORK, never the copy — lore stays >= 4.5:1. */
 .boss-card.locked .boss-portrait { opacity: 0.45; filter: grayscale(1); box-shadow: none; }
 .boss-card.locked h3 { color: var(--text-mid); }
@@ -288,6 +312,13 @@
 .char-card.locked .badge { opacity: 0.75; }
 .char-perk { font-size: var(--fs-xs); color: var(--text-dim); line-height: 1.4; }
 .char-card.locked .char-perk { color: var(--text-dim); }
+/* Lore snippet on unlocked cards fills the card body so perk-only cards don't
+   sit with blank centers next to lore-heavy locked ones. */
+.char-lore {
+  font-size: var(--fs-xs); color: var(--text-faint); line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 
 /* ---------- Inventory ---------- */
 .inv-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); gap: var(--sp-4); }
@@ -347,11 +378,14 @@
   .nav-item.active { background: rgba(56,189,248,0.08); border-radius: var(--r-sm); }
   .app-main { padding: var(--sp-6) var(--sp-6) var(--sp-8); }
 
-  .home-hero { padding: var(--sp-6); gap: var(--sp-3); }
+  .home-hero { padding: var(--sp-6); gap: var(--sp-5); }
   .home-hero .level-ring { margin-bottom: 0; }
   .hud-xp { max-width: 420px; }
   .mode-grid { grid-template-columns: repeat(3, 1fr); }
   .mode-card { flex-direction: column; align-items: flex-start; gap: var(--sp-3); padding: var(--sp-5); }
+  /* Distribute the column: icon top, copy centered, arrow pinned bottom-right —
+     no floating empty band inside stretched cards. */
+  .mode-card .grow { flex: 0 1 auto; margin-top: auto; margin-bottom: auto; }
   .mode-card .mode-arrow { margin-left: 0; margin-top: auto; align-self: flex-end; }
 
   .scenario-layout { display: grid; grid-template-columns: minmax(0, 1fr) 360px; align-items: start; }
@@ -369,6 +403,17 @@
 
   .char-grid { grid-template-columns: repeat(4, 1fr); }
   .track-list { display: grid; grid-template-columns: repeat(3, 1fr); align-items: start; }
+}
+
+/* Wide desktop: the hero goes two-column — identity left, training record
+   right — so the full-width card has no empty flanks. */
+@media (min-width: 1024px) {
+  .home-hero {
+    flex-direction: row; align-items: center;
+    gap: var(--sp-8); padding: var(--sp-6) var(--sp-7);
+  }
+  .hero-main { flex: 0 0 360px; }
+  .hero-stats { flex: 1 1 auto; align-content: center; gap: var(--sp-4); }
 }
 
 @media (min-width: 1280px) {

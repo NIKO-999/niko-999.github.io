@@ -9,7 +9,10 @@
 import { quizbank } from '../data/quizbank.js';
 import { recordStat, hasItem } from './state.js';
 import { toast, confettiBurst, animateNumber } from './ui.js';
-import { awardXP, getEffects, hintsLeft, useHint, bumpDaily, grantAchievementChecked, checkItemDrops } from './meta.js';
+import {
+  awardXP, getEffects, hintsLeft, useHint, bumpDaily, grantAchievementChecked,
+  checkItemDrops, holdCelebrations, releaseCelebrations,
+} from './meta.js';
 
 const $ = (id) => document.getElementById(id);
 const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -188,6 +191,9 @@ function answer(oi) {
 
 function finishRun() {
   const { correct, xp, bestStreak } = run;
+  // Let the results panel land first: level-ups and unlock ceremonies queue
+  // until the player clicks onward (or navigates away).
+  holdCelebrations();
   $('quiz-progress').textContent = 'Run complete';
   $('quiz-timer').textContent = '—';
   $('quiz-timer').classList.remove('low');
@@ -217,7 +223,7 @@ function finishRun() {
   toast(`Gauntlet complete: ${correct}/${RUN_LENGTH} · +${res.amount} XP`, 'xp', 3600);
   bumpDaily('quiz');
   checkItemDrops();
-  $('quiz-again-btn').addEventListener('click', startRun);
+  $('quiz-again-btn').addEventListener('click', () => { releaseCelebrations(); startRun(); });
   run = null;
 }
 

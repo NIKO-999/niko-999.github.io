@@ -15,7 +15,7 @@ import { state, defeatBoss, recordStat } from './state.js';
 import { toast, openModal, confettiBurst } from './ui.js';
 import {
   awardXP, awardItem, unlockCharacterCeremony, grantAchievementChecked,
-  checkUnlocks, checkItemDrops,
+  checkUnlocks, checkItemDrops, holdCelebrations, releaseCelebrations,
 } from './meta.js';
 import { generateForScenario } from './scenarios.js';
 
@@ -109,6 +109,9 @@ function exitArena() {
   setArenaOpen(false);
   refreshBossGrid();
   window.scrollTo({ top: 0, behavior: 'auto' });
+  // Leaving the arena is the "collect" moment — any queued level-up / trader /
+  // relic ceremonies may now take the stage, one at a time.
+  releaseCelebrations();
 }
 
 function startBattle(boss) {
@@ -282,11 +285,14 @@ function endBattle(victory) {
 
   const firstKill = !state.bossesDefeated.includes(b.boss.id);
   const flawless = b.playerHp === b.boss.playerHp;
+  // The victory panel gets the screen to itself: every ceremony (level-up,
+  // trader, relic) queues until "Collect and return" is clicked.
+  holdCelebrations();
   defeatBoss(b.boss.id);
   confettiBurst({ count: 110 });
   const res = awardXP(firstKill ? b.boss.rewards.xp : Math.round(b.boss.rewards.xp * 0.3), ['boss']);
-  // Reward ceremonies queue behind any level-up modal; item first so stat-based
-  // drop checks below see it as already owned (no double award).
+  // Item first so stat-based drop checks below see it as already owned (no
+  // double award).
   if (firstKill && b.boss.rewards.itemId) awardItem(b.boss.rewards.itemId);
   if (firstKill && b.boss.rewards.characterId) unlockCharacterCeremony(b.boss.rewards.characterId);
 

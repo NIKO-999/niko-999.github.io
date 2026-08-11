@@ -7,9 +7,12 @@
 import { initRouter, setXpBar, setRing, toast, confettiBurst, openModal } from './ui.js';
 import {
   state, onChange, levelProgress, rankTitle, streakAlive, itemCount,
-  exportSave, importSave, resetState,
+  exportSave, importSave, resetState, RANKS,
 } from './state.js';
-import { initMeta, renderDailyCard, renderCharacters, renderInventory, renderAchievements, checkUnlocks, MODE_LOCKS } from './meta.js';
+import { initMeta, renderDailyCard, renderCharacters, renderInventory, renderAchievements, checkUnlocks, MODE_LOCKS, queueCelebration } from './meta.js';
+import { characters } from '../data/characters.js';
+import { bosses } from '../data/bosses.js';
+import { lessons } from '../data/lessons.js';
 import { initAcademy, refreshAcademy } from './academy.js';
 import { initQuiz } from './quiz.js';
 import { initScenarios } from './scenarios.js';
@@ -57,6 +60,42 @@ document.addEventListener('click', (e) => {
 /* HUD + home dashboard                                                */
 /* ------------------------------------------------------------------ */
 
+/** The nearest thing the player hasn't unlocked yet — gives the hero's stat
+    cluster a forward-looking hook. */
+function nextUnlockText() {
+  const lvl = state.level;
+  const cands = [];
+  for (const [nav, req] of Object.entries(MODE_LOCKS)) {
+    if (lvl < req) cands.push({ level: req, label: nav === 'bosses' ? 'Boss Battles' : 'Replay Trainer' });
+  }
+  for (const b of bosses) {
+    if (!state.bossesDefeated.includes(b.id) && lvl < b.unlockLevel) cands.push({ level: b.unlockLevel, label: b.name });
+  }
+  for (const ch of characters) {
+    if (!state.unlockedCharacters.includes(ch.id) && ch.unlock.type === 'level') cands.push({ level: ch.unlock.value, label: ch.name });
+  }
+  const nextRank = RANKS.find((r) => r.minLevel > lvl);
+  if (nextRank) cands.push({ level: nextRank.minLevel, label: `Rank — ${nextRank.title}` });
+  cands.sort((a, b) => a.level - b.level);
+  return cands.length
+    ? `${cands[0].label} at level ${cands[0].level}`
+    : 'Everything unlocked. Stay consistent.';
+}
+
+function renderHeroStats() {
+  const lessonsDone = lessons.filter((l) => state.lessonProgress[l.id]).length;
+  const el = (id) => $(id);
+  if (!el('home-stat-lessons')) return;
+  el('home-stat-lessons').textContent = `${lessonsDone} / ${lessons.length}`;
+  const played = state.stats.scenariosPlayed || 0;
+  const correct = state.stats.scenarioCorrect || 0;
+  el('home-stat-scen').textContent = played ? `${Math.min(100, Math.round((correct / played) * 100))}%` : '—';
+  el('home-stat-quiz').textContent = String(state.stats.quizCorrect || 0);
+  const r = (state.stats.replayRx100 || 0) / 100;
+  el('home-stat-replay').textContent = `${r >= 0 ? '+' : ''}${r.toFixed(2)}R`;
+  el('home-next-unlock-text').textContent = nextUnlockText();
+}
+
 function renderHUD() {
   const p = levelProgress(state.xp);
   const rank = rankTitle(state.level);
@@ -87,28 +126,34 @@ function renderHUD() {
   $('home-bosses-badge').textContent =
     `${state.bossesDefeated.length} boss${state.bossesDefeated.length === 1 ? '' : 'es'} defeated`;
 
+  renderHeroStats();
   applyModeLocks();
 }
 
+/* Level-up rides the shared celebration queue: it waits its turn behind any
+   open modal AND behind a held results/victory panel, so the payoff moment is
+   seen before the modal chain begins. Confetti fires when the modal opens. */
 function levelUpCelebration(level) {
-  confettiBurst({ count: 120 });
-  const ring = $('home-level-ring');
-  ring.classList.add('levelup-burst');
-  setTimeout(() => ring.classList.remove('levelup-burst'), 1200);
   const newRank = rankTitle(level);
   const rankChanged = rankTitle(level - 1) !== newRank;
   const body = document.createElement('div');
   body.className = 'levelup-modal';
   body.innerHTML = `
-    <p class="t-label">${rankChanged ? 'New rank attained' : 'Level up'}</p>
+    <p class="t-label">Level</p>
     <div class="lv-num t-grad pop-in">${level}</div>
     ${rankChanged
-      ? `<p class="lv-rank">${newRank}</p>`
+      ? `<p class="lv-rank">New rank: <span class="t-grad">${newRank}</span></p>`
       : `<p class="t-xs mt-2" style="color:var(--text-dim)">Rank: ${newRank}</p>`}
     <p class="t-sm mt-3" style="color:var(--text-mid)">The curve steepens from here. Keep the process tight.</p>
-    <button class="btn btn-primary btn-lg mt-5" id="levelup-close-btn">Onward</button>`;
-  const close = openModal({ title: rankChanged ? 'Rank advanced' : 'Level up', body });
-  body.querySelector('#levelup-close-btn').addEventListener('click', close);
+    <button class="btn btn-primary btn-lg mt-5" data-cere-close>Onward</button>`;
+  queueCelebration(rankChanged ? 'New rank attained' : 'Level up', body, () => {
+    confettiBurst({ count: 120 });
+    const ring = $('home-level-ring');
+    if (ring) {
+      ring.classList.add('levelup-burst');
+      setTimeout(() => ring.classList.remove('levelup-burst'), 1200);
+    }
+  });
 }
 
 /* ------------------------------------------------------------------ */
@@ -155,7 +200,7 @@ $('settings-reset-btn').addEventListener('click', () => {
   const body = document.createElement('div');
   body.innerHTML = `
     <p class="t-sm" style="color:var(--text-mid);line-height:1.6">All XP, unlocks, relics, streaks and lesson progress will be wiped. This cannot be undone.</p>
-    <div class="row wrap mt-5" style="gap:var(--sp-3);justify-content:flex-end">
+    <div class="modal-actions">
       <button class="btn btn-ghost" id="reset-cancel-btn">Keep my progress</button>
       <button class="btn btn-danger" id="reset-confirm-btn">Reset everything</button>
     </div>`;

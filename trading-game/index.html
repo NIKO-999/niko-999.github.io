@@ -142,26 +142,50 @@
   <!-- HOME -->
   <section class="screen active" id="screen-home" aria-label="Home dashboard">
     <div class="home-hero glass">
-      <div class="level-ring" id="home-level-ring">
-        <svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true">
-          <circle class="ring-track" cx="55" cy="55" r="48" fill="none" stroke-width="8"/>
-          <circle class="ring-fill" id="home-ring-fill" cx="55" cy="55" r="48" fill="none" stroke-width="8"
-                  stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
-        </svg>
-        <span class="ring-num" id="home-level" style="font-size:34px">1</span>
+      <div class="hero-main">
+        <div class="level-ring" id="home-level-ring">
+          <svg width="110" height="110" viewBox="0 0 110 110" aria-hidden="true">
+            <circle class="ring-track" cx="55" cy="55" r="48" fill="none" stroke-width="8"/>
+            <circle class="ring-fill" id="home-ring-fill" cx="55" cy="55" r="48" fill="none" stroke-width="8"
+                    stroke-dasharray="301.6" stroke-dashoffset="301.6"/>
+          </svg>
+          <span class="ring-num" id="home-level" style="font-size:34px">1</span>
+        </div>
+        <div>
+          <p class="t-label">Current rank</p>
+          <h1 class="t-h1 t-grad" id="home-rank-title">Novice</h1>
+        </div>
+        <div class="home-hero-xp">
+          <div class="bar bar-lg"><div class="bar-fill" id="home-xp-fill" style="width:0%"></div></div>
+          <p class="t-xs mt-2" id="home-xp-text">0 / 100 XP to next level</p>
+        </div>
+        <div class="home-hero-meta">
+          <span class="badge badge-warn" id="home-streak-badge">🔥 0-day streak</span>
+          <span class="badge" id="home-items-badge">0 items collected</span>
+          <span class="badge" id="home-bosses-badge">0 bosses defeated</span>
+        </div>
       </div>
-      <div>
-        <p class="t-label">Current rank</p>
-        <h1 class="t-h1 t-grad" id="home-rank-title">Novice</h1>
-      </div>
-      <div class="home-hero-xp">
-        <div class="bar bar-lg"><div class="bar-fill" id="home-xp-fill" style="width:0%"></div></div>
-        <p class="t-xs mt-2" id="home-xp-text">0 / 100 XP to next level</p>
-      </div>
-      <div class="home-hero-meta">
-        <span class="badge badge-warn" id="home-streak-badge">🔥 0-day streak</span>
-        <span class="badge" id="home-items-badge">0 items collected</span>
-        <span class="badge" id="home-bosses-badge">0 bosses defeated</span>
+      <div class="hero-stats" aria-label="Training record">
+        <div class="hero-stat">
+          <p class="t-label">Lessons done</p>
+          <p class="t-num hero-stat-num" id="home-stat-lessons">0 / 0</p>
+        </div>
+        <div class="hero-stat">
+          <p class="t-label">Scenario accuracy</p>
+          <p class="t-num hero-stat-num" id="home-stat-scen">—</p>
+        </div>
+        <div class="hero-stat">
+          <p class="t-label">Quiz answers correct</p>
+          <p class="t-num hero-stat-num" id="home-stat-quiz">0</p>
+        </div>
+        <div class="hero-stat">
+          <p class="t-label">Replay R banked</p>
+          <p class="t-num hero-stat-num" id="home-stat-replay">+0.00R</p>
+        </div>
+        <div class="hero-next">
+          <p class="t-label">Next unlock</p>
+          <p class="t-sm mt-2" id="home-next-unlock-text">Keep earning XP.</p>
+        </div>
       </div>
     </div>
 

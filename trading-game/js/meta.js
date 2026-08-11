@@ -233,27 +233,48 @@ export function renderDailyCard() {
 /* Ceremonies                                                          */
 /* ------------------------------------------------------------------ */
 
-/* Ceremony queue: stacked unlocks (boss rewards, level unlocks) present one
-   at a time instead of clobbering each other's modal. */
+/* Ceremony queue: stacked unlocks (level-ups, boss rewards, trader/item
+   ceremonies) present one at a time instead of clobbering each other's modal.
+   Modes that show their own payoff panel (boss victory, quiz results, replay
+   debrief) HOLD the queue so the panel gets its moment, then release it when
+   the player clicks through — the reward hierarchy is never buried. */
 const cereQueue = [];
 let cereOpen = false;
+let cereHeld = false;
 
-function pushCeremony(title, body) {
-  cereQueue.push({ title, body });
-  if (!cereOpen) nextCeremony();
+function pushCeremony(title, body, onOpen = null) {
+  cereQueue.push({ title, body, onOpen });
+  nextCeremony();
+}
+
+/** Pause queued celebrations while a results / victory panel owns the screen. */
+export function holdCelebrations() { cereHeld = true; }
+
+/** Resume the queue (no-op if it was never held). */
+export function releaseCelebrations() {
+  if (!cereHeld) return;
+  cereHeld = false;
+  nextCeremony();
+}
+
+/** Queue an arbitrary celebration modal (used by the level-up flow in app.js).
+    `onOpen` runs at the moment the modal actually opens (confetti, bursts). */
+export function queueCelebration(title, body, onOpen = null) {
+  pushCeremony(title, body, onOpen);
 }
 
 function nextCeremony() {
-  if (cereOpen) return; // a ceremony is on screen; its onClose chains the next
+  if (cereOpen || cereHeld) return; // on screen or held; onClose/release chains the next
   if (!cereQueue.length) return;
   const backdrop = document.getElementById('modal-backdrop');
   if (backdrop && backdrop.classList.contains('open')) {
-    // another modal (e.g. a level-up or session debrief) is up — wait for it
+    // another modal (e.g. a session debrief) is up — wait for it
     setTimeout(nextCeremony, 700);
     return;
   }
-  const { title, body } = cereQueue.shift();
+  const { title, body, onOpen } = cereQueue.shift();
   cereOpen = true;
+  if (onOpen) { try { onOpen(); } catch { /* cosmetic only */ } }
   const close = openModal({
     title, body,
     onClose: () => { cereOpen = false; setTimeout(nextCeremony, 180); },
@@ -261,6 +282,10 @@ function nextCeremony() {
   const btn = body.querySelector('[data-cere-close]');
   if (btn) btn.addEventListener('click', close);
 }
+
+/* Safety net: any navigation releases a held queue so celebrations can never
+   be stranded if the player leaves a results panel via the nav instead. */
+document.addEventListener('screenchange', () => releaseCelebrations());
 
 function ceremonyBody({ icon, rarityKey, name, kicker, flavor, perk, big = false }) {
   const r = rarities[rarityKey] || { label: 'Unlocked', color: '#38bdf8' };
@@ -284,11 +309,10 @@ export function awardItem(id) {
   grantItem(id);
   renderInventory();
   if (firstCopy) {
-    confettiBurst({ count: 60 });
     pushCeremony('New Relic', ceremonyBody({
       icon: it.icon, rarityKey: it.rarity, name: it.name,
       kicker: 'Relic acquired', flavor: it.flavor, perk: it.perk.desc,
-    }));
+    }), () => confettiBurst({ count: 60 }));
   } else {
     toast(`${it.name} — another copy added to your inventory`, 'info');
   }
@@ -299,11 +323,10 @@ export function unlockCharacterCeremony(id) {
   const ch = characters.find((c) => c.id === id);
   if (!ch || !unlockCharacter(id)) return false;
   renderCharacters();
-  confettiBurst({ count: 70 });
   pushCeremony('Trader Unlocked', ceremonyBody({
     icon: ch.avatar, rarityKey: 'epic', name: ch.name, big: true,
     kicker: ch.title, flavor: ch.lore, perk: ch.perk.desc,
-  }));
+  }), () => confettiBurst({ count: 70 }));
   return true;
 }
 
@@ -383,7 +406,7 @@ export function renderCharacters() {
       <h3 class="t-h3">${ch.name}</h3>
       <span class="badge mt-2">${ch.title}</span>
       <p class="char-perk">${unlocked ? ch.perk.desc : ch.lore}</p>
-      ${unlocked ? '' : `<p class="char-unlock-hint">Locked — ${ch.unlock.label}</p>`}`;
+      ${unlocked ? `<p class="char-lore">${ch.lore}</p>` : `<p class="char-unlock-hint">Locked — ${ch.unlock.label}</p>`}`;
     btn.addEventListener('click', () => {
       if (!unlocked) { toast(`Locked: ${ch.unlock.label}`, 'info'); return; }
       if (active) { showCharacterModal(ch); return; }

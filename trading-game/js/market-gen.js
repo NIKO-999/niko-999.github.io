@@ -81,6 +81,15 @@ function shape(candles, i, fn) {
 function hiOf(candles, a, b) { let m = -Infinity, idx = a; for (let i = a; i <= b; i++) if (candles[i].h > m) { m = candles[i].h; idx = i; } return { price: m, index: idx }; }
 function loOf(candles, a, b) { let m = Infinity, idx = a; for (let i = a; i <= b; i++) if (candles[i].l < m) { m = candles[i].l; idx = i; } return { price: m, index: idx }; }
 
+/** Median true range of candles[a..b] — scripted moves are sized relative to
+    this so no bar ever towers cartoonishly over its neighbours. */
+function medianTR(candles, a, b) {
+  const trs = [];
+  for (let i = a; i <= b; i++) trs.push(candles[i].h - candles[i].l);
+  trs.sort((x, y) => x - y);
+  return trs[(trs.length / 2) | 0] || 0.3;
+}
+
 /* mirror a candle array vertically around its mean (for bearish variants) */
 function mirror(candles) {
   let lo = Infinity, hi = -Infinity;
@@ -155,24 +164,35 @@ const GENERATORS = {
     return { candles, annotations, meta };
   },
 
-  /** CISD: run of opposing (bearish) close candles, then closure through their opens. */
+  /** CISD: run of opposing (bearish) close candles, then closure through their
+      opens. The reclaim is split across a press + a decisive closure candle so
+      the CISD bar stays within ~2x the field's true range. */
   cisd(rng, tf, dir) {
     const start = 840;
     let candles = buildWalk(rng, {
       start, tf, base: 100,
       segments: [
         { bars: 6, drift: 0.1, vol: 0.3 },
-        { bars: 5, drift: -0.3, vol: 0.25, wickBias: 0.2 }, // opposing bearish series
-        { bars: 1, drift: 0.9, vol: 0.2 },                  // CISD candle
-        { bars: 8, drift: 0.32, vol: 0.35, wickBias: -0.3 },
+        { bars: 4, drift: -0.2, vol: 0.2, wickBias: 0.2 }, // opposing bearish series
+        { bars: 2, drift: 0.35, vol: 0.18 },               // press + CISD closure
+        { bars: 8, drift: 0.3, vol: 0.34, wickBias: -0.3 },
       ],
     });
-    const seriesStart = 6, seriesEnd = 10, cisdIndex = 11;
+    const seriesStart = 6, seriesEnd = 9, cisdIndex = 11;
     for (let i = seriesStart; i <= seriesEnd; i++) {
-      shape(candles, i, (c) => { if (c.c >= c.o) { c.c = c.o - (0.15 + rng() * 0.25); c.l = Math.min(c.l, c.c - 0.1); } });
+      shape(candles, i, (c) => {
+        c.c = c.o - (0.1 + rng() * 0.15);       // controlled opposing closes
+        c.h = Math.min(c.h, c.o + 0.12);
+        c.l = Math.min(c.l, c.c - 0.03);
+      });
     }
     const cisdLevel = candles[seriesStart].o; // open of first opposing candle
-    shape(candles, cisdIndex, (c) => { c.c = cisdLevel + 0.4; c.h = c.c + 0.12; c.l = c.o - 0.1; });
+    // press back toward the level, then close decisively through it
+    shape(candles, cisdIndex - 1, (c) => {
+      c.c = Math.min(cisdLevel - 0.12, c.o + 0.4);
+      c.h = c.c + 0.08; c.l = c.o - 0.08;
+    });
+    shape(candles, cisdIndex, (c) => { c.c = cisdLevel + 0.18; c.h = c.c + 0.08; c.l = c.o - 0.07; });
     let annotations = [
       { type: 'levelLine', price: cisdLevel, i1: seriesStart, label: 'CISD level' },
       { type: 'textMarker', index: cisdIndex, price: candles[cisdIndex].h, text: 'CISD ✓', dir: 'up', color: '#2dd4a7' },
@@ -183,27 +203,29 @@ const GENERATORS = {
     return { candles, annotations, meta };
   },
 
-  /** FVG: impulsive candle leaving a gap between candle A high and candle C low. */
+  /** FVG: a 3-candle expansion leg — the middle candle displaces, leaving a gap
+      between candle A's high and candle C's low. The move is split across the
+      leg with proportional wicks so no single bar exceeds ~2x the field's true
+      range: impulsive, not broken. */
   fvg(rng, tf, dir) {
     const start = 840;
     let candles = buildWalk(rng, {
       start, tf, base: 100,
       segments: [
-        { bars: 9, drift: -0.12, vol: 0.3 },
-        { bars: 1, drift: 1.6, vol: 0.1 },  // displacement
-        { bars: 6, drift: 0.25, vol: 0.3, wickBias: -0.2 },
-        { bars: 5, drift: -0.18, vol: 0.25 }, // retrace toward FVG
+        { bars: 9, drift: -0.12, vol: 0.3 },                 // drift into the POI
+        { bars: 3, drift: 0.5, vol: 0.15, wickBias: -0.4 },  // expansion leg A-B-C
+        { bars: 4, drift: 0.22, vol: 0.28, wickBias: -0.2 }, // continuation
+        { bars: 5, drift: -0.16, vol: 0.24 },                // retrace toward FVG
       ],
     });
-    const a = 8, b = 9, cIdx = 10;
-    shape(candles, b, (c) => { c.c = c.o + 1.7; c.h = c.c + 0.15; c.l = c.o - 0.08; });
-    // ensure gap: candle c low above candle a high
-    const gapLo = candles[a].h;
-    shape(candles, cIdx, (c) => {
-      const need = gapLo + 0.5 - c.l;
-      if (need > 0) { c.o += need; c.c += need; c.h += need; c.l += need; }
-    });
-    const gapHi = candles[cIdx].l;
+    const a = 9, b = 10, cIdx = 11;
+    // Unit = the approach's own median true range: the leg reads ~2x the field.
+    const u = Math.max(0.25, Math.min(0.5, medianTR(candles, 0, 8)));
+    shape(candles, a, (c) => { c.c = c.o + 1.0 * u; c.h = c.c + 0.3 * u; c.l = c.o - 0.25 * u; });
+    shape(candles, b, (c) => { c.c = c.o + 1.6 * u; c.h = c.c + 0.25 * u; c.l = c.o - 0.12 * u; });
+    shape(candles, cIdx, (c) => { c.c = c.o + 1.1 * u; c.h = c.c + 0.3 * u; c.l = c.o - 0.45 * u; });
+    const gapLo = candles[a].h;    // candle A high
+    const gapHi = candles[cIdx].l; // candle C low — gap ≈ 0.85u by construction
     let annotations = [
       { type: 'fvg', i1: b, i2: candles.length - 1, p1: gapLo, p2: gapHi, label: 'FVG' },
     ];
@@ -225,9 +247,12 @@ const GENERATORS = {
       ],
     });
     const asiaLow = loOf(candles, 0, 15).price;
+    const asiaHi = hiOf(candles, 0, 15).price;
     const sweepIndex = 17; // second 2am-hour candle sweeps
+    // Sweep depth scales with Asia's own range — a convincing raid, not a spike.
+    const sweepDepth = Math.min(0.4, Math.max(0.15, (asiaHi - asiaLow) * 0.28));
     shape(candles, sweepIndex, (c) => {
-      c.l = asiaLow - 0.6; c.c = c.o + 0.1; c.h = Math.max(c.h, c.c + 0.1);
+      c.l = asiaLow - sweepDepth; c.c = c.o + 0.1; c.h = Math.max(c.h, c.c + 0.08);
     });
     const lod = loOf(candles, 0, candles.length - 1);
     let annotations = [
@@ -259,7 +284,9 @@ const GENERATORS = {
     });
     const revIndex = barsBefore; // first candle at reversal time
     const priorLo = loOf(candles, 0, revIndex - 1).price;
-    shape(candles, revIndex, (c) => { c.l = priorLo - 0.45; c.c = c.o + 0.35; c.h = c.c + 0.1; });
+    const mtr = medianTR(candles, 0, revIndex - 1);
+    const raid = Math.min(0.35, Math.max(0.12, mtr * 0.7));
+    shape(candles, revIndex, (c) => { c.l = priorLo - raid; c.c = c.o + Math.min(0.35, mtr * 0.9); c.h = c.c + 0.08; });
     const lod = loOf(candles, 0, candles.length - 1);
     let annotations = [
       { type: 'textMarker', index: revIndex, price: candles[revIndex].l, text: (at10 ? '10AM' : '6AM') + ' reversal', dir: 'down', color: '#f0b45a' },
@@ -315,10 +342,13 @@ const GENERATORS = {
       ],
     });
     const runIndex = 10;
+    // "Large" relative to the trend's own bars (~2.3x median TR): unmistakably
+    // outsized, still a candle a real chart could print.
+    const wick = Math.max(0.6, Math.min(1.1, medianTR(candles, 0, 9) * 2.3));
     shape(candles, runIndex, (c) => {
-      c.h = c.o + 1.4;  // opens, runs far up (large opposing wick for the coming bear leg)
+      c.h = c.o + wick; // opens, runs far up (large opposing wick for the coming bear leg)
       c.c = c.o + 0.05; // closes back near open — indecision
-      c.l = c.o - 0.2;
+      c.l = c.o - 0.15;
     });
     let annotations = [
       { type: 'textMarker', index: runIndex, price: candles[runIndex].h, text: 'Large opposing run', dir: 'up', color: '#f4506c' },

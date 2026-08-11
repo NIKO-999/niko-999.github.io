@@ -12,7 +12,10 @@ import { ChartEngine, minutesToClock } from './chart-engine.js';
 import { generatePattern } from './market-gen.js';
 import { recordStat, state } from './state.js';
 import { toast, openModal, animateNumber, confettiBurst } from './ui.js';
-import { awardXP, getEffects, bumpDaily, grantAchievementChecked, checkItemDrops } from './meta.js';
+import {
+  awardXP, getEffects, bumpDaily, grantAchievementChecked, checkItemDrops,
+  holdCelebrations, releaseCelebrations,
+} from './meta.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -254,6 +257,8 @@ function endSession() {
   setControls(false);
   for (const a of s.gen.annotations) engine.addAnnotation(a);
 
+  // The debrief modal owns the screen; level-ups / drops queue behind it.
+  holdCelebrations();
   const violations = s.trades.filter((t) => t.violation && !t.forgiven).length;
   const validWin = s.trades.some((t) => !t.violation && t.rawR > 0);
   let xp = 30 + Math.max(0, Math.round(s.totalR * 20)) + (violations === 0 ? 40 : 0) + (validWin ? 20 : 0);
@@ -293,7 +298,7 @@ function endSession() {
       </div>`).join('')}</div>
     ${violations ? `<div class="violation-callout">Rule violations score -1R even when the trade wins. The account you save is your own.</div>` : ''}
     <button class="btn btn-primary btn-block mt-5" id="replay-again-btn">Run another session</button>`;
-  const close = openModal({ title: 'Session debrief', body });
+  const close = openModal({ title: 'Session debrief', body, onClose: releaseCelebrations });
   body.querySelector('#replay-again-btn').addEventListener('click', () => { close(); newSession(); });
   setCoach('Session over. Start another to keep the reps coming.');
 }
