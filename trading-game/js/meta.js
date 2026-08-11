@@ -156,10 +156,19 @@ const DAILY_DEFS = [
   { id: 'replay', label: 'Complete one Replay session',  target: 1, nav: 'replay', cta: 'Start Replay' },
 ];
 
+/** Level required to enter each gated mode (single source of truth — app.js
+    imports this for its nav lock gate). */
+export const MODE_LOCKS = { replay: 2, bosses: 3 };
+
+/** Today's challenge — never points at a mode the player hasn't unlocked. */
 export function dailyChallenge() {
   const iso = todayISO();
   const hash = [...iso].reduce((a, c) => a + c.charCodeAt(0), 0);
-  return DAILY_DEFS[hash % DAILY_DEFS.length];
+  const pick = DAILY_DEFS[hash % DAILY_DEFS.length];
+  const unlocked = (d) => !MODE_LOCKS[d.nav] || state.level >= MODE_LOCKS[d.nav];
+  if (unlocked(pick)) return pick;
+  const pool = DAILY_DEFS.filter(unlocked);
+  return pool.length ? pool[hash % pool.length] : DAILY_DEFS[0];
 }
 
 export function dailyProgress() {
@@ -235,10 +244,11 @@ function pushCeremony(title, body) {
 }
 
 function nextCeremony() {
-  if (!cereQueue.length) { cereOpen = false; return; }
+  if (cereOpen) return; // a ceremony is on screen; its onClose chains the next
+  if (!cereQueue.length) return;
   const backdrop = document.getElementById('modal-backdrop');
-  if (!cereOpen && backdrop && backdrop.classList.contains('open')) {
-    // another modal (e.g. a session debrief) is up — wait for it
+  if (backdrop && backdrop.classList.contains('open')) {
+    // another modal (e.g. a level-up or session debrief) is up — wait for it
     setTimeout(nextCeremony, 700);
     return;
   }

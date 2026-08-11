@@ -9,7 +9,7 @@ import {
   state, onChange, levelProgress, rankTitle, streakAlive, itemCount,
   exportSave, importSave, resetState,
 } from './state.js';
-import { initMeta, renderDailyCard, renderCharacters, renderInventory, renderAchievements, checkUnlocks } from './meta.js';
+import { initMeta, renderDailyCard, renderCharacters, renderInventory, renderAchievements, checkUnlocks, MODE_LOCKS } from './meta.js';
 import { initAcademy, refreshAcademy } from './academy.js';
 import { initQuiz } from './quiz.js';
 import { initScenarios } from './scenarios.js';
@@ -21,8 +21,6 @@ const $ = (id) => document.getElementById(id);
 /* ------------------------------------------------------------------ */
 /* Mode gating                                                         */
 /* ------------------------------------------------------------------ */
-
-const MODE_LOCKS = { replay: 2, bosses: 3 };
 
 function applyModeLocks() {
   document.querySelectorAll('#home-mode-grid .mode-card').forEach((card) => {
@@ -76,6 +74,7 @@ function renderHUD() {
   streakEl.classList.toggle('streak-cold', !live);
   $('hud-streak-count').textContent = state.streak;
   $('hud-item-count').textContent = itemCount();
+  $('hud-boss-count').textContent = state.bossesDefeated.length;
 
   $('home-level').textContent = state.level;
   $('home-rank-title').textContent = rank;
@@ -96,15 +95,19 @@ function levelUpCelebration(level) {
   const ring = $('home-level-ring');
   ring.classList.add('levelup-burst');
   setTimeout(() => ring.classList.remove('levelup-burst'), 1200);
+  const newRank = rankTitle(level);
+  const rankChanged = rankTitle(level - 1) !== newRank;
   const body = document.createElement('div');
   body.className = 'levelup-modal';
   body.innerHTML = `
-    <p class="t-label">Level up</p>
+    <p class="t-label">${rankChanged ? 'New rank attained' : 'Level up'}</p>
     <div class="lv-num t-grad pop-in">${level}</div>
-    <p class="lv-rank">${rankTitle(level)}</p>
+    ${rankChanged
+      ? `<p class="lv-rank">${newRank}</p>`
+      : `<p class="t-xs mt-2" style="color:var(--text-dim)">Rank: ${newRank}</p>`}
     <p class="t-sm mt-3" style="color:var(--text-mid)">The curve steepens from here. Keep the process tight.</p>
     <button class="btn btn-primary btn-lg mt-5" id="levelup-close-btn">Onward</button>`;
-  const close = openModal({ title: 'Rank advanced', body });
+  const close = openModal({ title: rankChanged ? 'Rank advanced' : 'Level up', body });
   body.querySelector('#levelup-close-btn').addEventListener('click', close);
 }
 
@@ -152,7 +155,7 @@ $('settings-reset-btn').addEventListener('click', () => {
   const body = document.createElement('div');
   body.innerHTML = `
     <p class="t-sm" style="color:var(--text-mid);line-height:1.6">All XP, unlocks, relics, streaks and lesson progress will be wiped. This cannot be undone.</p>
-    <div class="row mt-5" style="gap:var(--sp-3);justify-content:flex-end">
+    <div class="row wrap mt-5" style="gap:var(--sp-3);justify-content:flex-end">
       <button class="btn btn-ghost" id="reset-cancel-btn">Keep my progress</button>
       <button class="btn btn-danger" id="reset-confirm-btn">Reset everything</button>
     </div>`;

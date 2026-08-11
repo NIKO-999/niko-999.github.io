@@ -55,20 +55,61 @@ export function showScreen(id, { push = true } = {}) {
   document.dispatchEvent(new CustomEvent('screenchange', { detail: { screen: id } }));
 }
 
+/** Screens that live behind the "More" sheet on compact phones. */
+const SHEET_SCREENS = ['replay', 'bosses', 'characters', 'inventory', 'settings'];
+
 function syncNav(id) {
-  document.querySelectorAll('.app-nav .nav-item').forEach((btn) => {
+  document.querySelectorAll('.app-nav .nav-item:not(.nav-more)').forEach((btn) => {
     const is = btn.dataset.nav === id;
     btn.classList.toggle('active', is);
     if (is) btn.setAttribute('aria-current', 'page');
     else btn.removeAttribute('aria-current');
   });
+  const more = document.getElementById('nav-more-btn');
+  if (more) more.classList.toggle('active', SHEET_SCREENS.includes(id));
+  document.querySelectorAll('.nav-sheet .sheet-item').forEach((btn) => {
+    btn.classList.toggle('active', btn.dataset.nav === id);
+  });
 }
+
+/* ------------------------------------------------------------------ */
+/* "More" nav sheet (compact phones)                                   */
+/* ------------------------------------------------------------------ */
+
+export function setNavSheet(open) {
+  const sheet = document.getElementById('nav-sheet');
+  const backdrop = document.getElementById('nav-sheet-backdrop');
+  const btn = document.getElementById('nav-more-btn');
+  if (!sheet) return;
+  sheet.classList.toggle('open', open);
+  if (backdrop) {
+    backdrop.classList.toggle('open', open);
+    backdrop.setAttribute('aria-hidden', String(!open));
+  }
+  if (btn) btn.setAttribute('aria-expanded', String(open));
+}
+
+export function closeNavSheet() { setNavSheet(false); }
+
+/* Close the sheet as soon as any navigation is chosen — capture phase so it
+   runs even when a lock-gate stops propagation further down the line. */
+document.addEventListener('click', (e) => {
+  if (e.target.closest?.('[data-nav]')) closeNavSheet();
+}, true);
 
 export function initRouter() {
   document.addEventListener('click', (e) => {
     const t = e.target.closest('[data-nav]');
     if (t) showScreen(t.dataset.nav);
   });
+  const moreBtn = document.getElementById('nav-more-btn');
+  if (moreBtn) {
+    moreBtn.addEventListener('click', () => {
+      setNavSheet(!document.getElementById('nav-sheet').classList.contains('open'));
+    });
+  }
+  const sheetBackdrop = document.getElementById('nav-sheet-backdrop');
+  if (sheetBackdrop) sheetBackdrop.addEventListener('click', closeNavSheet);
   const fromHash = () => showScreen((location.hash || '#home').slice(1), { push: false });
   window.addEventListener('popstate', fromHash);
   window.addEventListener('hashchange', fromHash);
@@ -254,5 +295,5 @@ document.addEventListener('click', (e) => {
   if (img && img.src) lightbox(img.src, img.alt);
 });
 document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape') { closeModal(); closeLightbox(); }
+  if (e.key === 'Escape') { closeModal(); closeLightbox(); closeNavSheet(); }
 });

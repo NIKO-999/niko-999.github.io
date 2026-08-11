@@ -94,6 +94,23 @@ function showIntro(boss) {
 /* Battle loop                                                         */
 /* ------------------------------------------------------------------ */
 
+/** Swap between the select grid and the arena so mid-battle the encounter is
+    the only thing on screen (mirrors the academy track-list/lesson pattern). */
+function setArenaOpen(open) {
+  $('boss-arena').classList.toggle('hidden', !open);
+  $('boss-select-grid').classList.toggle('hidden', open);
+  const head = document.querySelector('#screen-bosses .screen-head');
+  if (head) head.classList.toggle('hidden', open);
+}
+
+function exitArena() {
+  destroyStageEngine();
+  battle = null;
+  setArenaOpen(false);
+  refreshBossGrid();
+  window.scrollTo({ top: 0, behavior: 'auto' });
+}
+
 function startBattle(boss) {
   const perHit = Math.ceil(boss.hp / boss.rounds.length);
   battle = {
@@ -108,7 +125,7 @@ function startBattle(boss) {
     roundStart: 0,
   };
   const arena = $('boss-arena');
-  arena.classList.remove('hidden');
+  setArenaOpen(true);
   $('boss-portrait').innerHTML = boss.portrait;
   $('boss-name').textContent = boss.name;
   $('boss-tag').textContent = boss.epithet;
@@ -259,7 +276,7 @@ function endBattle(victory) {
         </div>
       </div>`;
     $('boss-retry-btn').addEventListener('click', () => startBattle(b.boss));
-    $('boss-flee-btn').addEventListener('click', () => { $('boss-arena').classList.add('hidden'); refreshBossGrid(); });
+    $('boss-flee-btn').addEventListener('click', exitArena);
     return;
   }
 
@@ -268,6 +285,10 @@ function endBattle(victory) {
   defeatBoss(b.boss.id);
   confettiBurst({ count: 110 });
   const res = awardXP(firstKill ? b.boss.rewards.xp : Math.round(b.boss.rewards.xp * 0.3), ['boss']);
+  // Reward ceremonies queue behind any level-up modal; item first so stat-based
+  // drop checks below see it as already owned (no double award).
+  if (firstKill && b.boss.rewards.itemId) awardItem(b.boss.rewards.itemId);
+  if (firstKill && b.boss.rewards.characterId) unlockCharacterCeremony(b.boss.rewards.characterId);
 
   stage.innerHTML = `
     <div class="boss-end">
@@ -284,14 +305,11 @@ function endBattle(victory) {
   if (flawless) grantAchievementChecked(`flawless-${b.boss.id}`);
   if (bosses.every((x) => state.bossesDefeated.includes(x.id))) grantAchievementChecked('all-bosses');
 
+  checkUnlocks();
+  checkItemDrops();
+
   $('boss-done-btn').addEventListener('click', () => {
-    // Reward ceremonies fire on first kill only
-    if (firstKill && b.boss.rewards.itemId) awardItem(b.boss.rewards.itemId);
-    if (firstKill && b.boss.rewards.characterId) unlockCharacterCeremony(b.boss.rewards.characterId);
-    checkUnlocks();
-    checkItemDrops();
-    $('boss-arena').classList.add('hidden');
-    refreshBossGrid();
+    exitArena();
     if (firstKill) toast(`${b.boss.name} defeated — the next demon awaits`, 'success', 3600);
   });
 }
@@ -302,10 +320,9 @@ function endBattle(victory) {
 
 export function initBoss() {
   refreshBossGrid();
+  $('boss-exit').addEventListener('click', exitArena);
   document.addEventListener('screenchange', (e) => {
-    if (e.detail.screen === 'bosses') refreshBossGrid();
-    else if (battle && !$('boss-arena').classList.contains('hidden')) {
-      // leaving mid-battle forfeits nothing; arena stays for return
-    }
+    if (e.detail.screen === 'bosses' && !battle) refreshBossGrid();
+    // leaving mid-battle forfeits nothing; arena stays for return
   });
 }

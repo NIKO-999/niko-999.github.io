@@ -57,7 +57,7 @@ function renderTracks() {
           ? '<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="3"><path d="M4 12.5 9.5 18 20 6" stroke-linecap="round" stroke-linejoin="round"/></svg>'
           : `<span class="t-xs t-num">${l.order}</span>`}</span>
         <span class="grow" style="text-align:left">${l.title}</span>
-        <span class="t-xs t-num" style="color:var(--text-dim)">${l.minutes} min</span>`;
+        <span class="t-xs t-num lesson-mins" style="color:var(--text-dim)">${l.minutes} min</span>`;
       row.addEventListener('click', () => openLesson(l.id));
       listEl.appendChild(row);
     }
@@ -91,6 +91,8 @@ function openLesson(id) {
   currentLesson = lesson;
   const track = tracks.find((t) => t.id === lesson.track);
   $('academy-track-list').classList.add('hidden');
+  const head = document.querySelector('#screen-academy .screen-head');
+  if (head) head.classList.add('hidden');
   const view = $('academy-lesson-view');
   view.classList.remove('hidden');
 
@@ -206,6 +208,8 @@ export function initAcademy() {
   $('academy-back').addEventListener('click', () => {
     $('academy-lesson-view').classList.add('hidden');
     $('academy-track-list').classList.remove('hidden');
+    const head = document.querySelector('#screen-academy .screen-head');
+    if (head) head.classList.remove('hidden');
     currentLesson = null;
     renderTracks();
   });

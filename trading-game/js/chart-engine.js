@@ -128,6 +128,7 @@ export class ChartEngine {
 
     this._pointer = null;       // {x, y} in css px
     this._hoverIndex = -1;
+    this._labelRects = [];      // occupied label boxes for the collision pass
     this._pulses = [];          // {index, verdict, start}
     this._appendAnim = null;    // {index, start, resolve}
     this._raf = 0;
@@ -219,9 +220,11 @@ export class ChartEngine {
 
   _resize() {
     const parent = this.canvas.parentElement || this.canvas;
+    // clientWidth/Height exclude the parent's border, so sizing the canvas to
+    // them can never feed back into the parent's own layout.
     const rect = parent.getBoundingClientRect();
-    const w = Math.max(120, rect.width);
-    const h = Math.max(120, rect.height || 360);
+    const w = Math.max(120, parent.clientWidth || rect.width);
+    const h = Math.max(120, parent.clientHeight || rect.height || 360);
     this._dpr = Math.max(1, window.devicePixelRatio || 1);
     this._w = w; this._h = h;
     this.canvas.width = Math.round(w * this._dpr);
@@ -233,7 +236,11 @@ export class ChartEngine {
 
   _layout() {
     const { paddingRight, paddingBottom, paddingTop } = this.opts;
-    const smtH = this.smtCandles ? Math.round(this._h * 0.26) : 0;
+    // The correlated-symbol pane needs real height to compare highs/lows:
+    // at least 120px, but never more than 42% of the panel.
+    const smtH = this.smtCandles
+      ? Math.min(Math.round(this._h * 0.42), Math.max(120, Math.round(this._h * 0.26)))
+      : 0;
     return {
       x0: 8,
       x1: this._w - paddingRight,
@@ -318,6 +325,27 @@ export class ChartEngine {
     this._raf = requestAnimationFrame(() => this._draw());
   }
 
+  /**
+   * Collision pass for text labels: reserve a box, shifting it vertically
+   * (dir -1 up, +1 down, 0 alternate) until it no longer intersects a box
+   * already drawn this frame. Returns the final box.
+   */
+  _reserveLabel(x, y, w, h, dir = 0) {
+    const hits = (r) => this._labelRects.some((o) =>
+      r.x < o.x + o.w + 2 && r.x + r.w + 2 > o.x &&
+      r.y < o.y + o.h + 2 && r.y + r.h + 2 > o.y);
+    let rect = { x, y, w, h };
+    const step = h + 4;
+    for (let t = 1; hits(rect) && t <= 6; t++) {
+      const delta = dir !== 0
+        ? dir * step * t
+        : (t % 2 ? -1 : 1) * step * Math.ceil(t / 2);
+      rect = { x, y: y + delta, w, h };
+    }
+    this._labelRects.push(rect);
+    return rect;
+  }
+
   _draw() {
     const ctx = this.ctx;
     const dpr = this._dpr;
@@ -330,6 +358,7 @@ export class ChartEngine {
     const L = this._layout();
     if (!vis.length) return;
     const range = this._priceRange(vis);
+    this._labelRects = [];
 
     this._drawSessions(ctx, L);
     this._drawGrid(ctx, L, range);
@@ -373,7 +402,9 @@ export class ChartEngine {
       ctx.fillStyle = this.colors[s.key];
       ctx.fillRect(xa, L.y0, xb - xa, L.y1 - L.y0);
       ctx.fillStyle = this.colors.sessionLabel;
-      ctx.fillText(s.name, xa + 6, L.y0 + 4);
+      const lx = Math.max(xa + 6, L.x0 + 4);
+      ctx.fillText(s.name, lx, L.y0 + 4);
+      this._labelRects.push({ x: lx, y: L.y0 + 4, w: ctx.measureText(s.name).width, h: 10 });
     }
   }
 
@@ -420,7 +451,6 @@ export class ChartEngine {
 
   _drawTimeAxis(ctx, L) {
     if (!this.candles.length) return;
-    const tf = this.opts.timeframeMinutes;
     const n = this.candles.length;
     // pick label every ~90px
     const slot = this._slotW(L);
@@ -429,9 +459,16 @@ export class ChartEngine {
     ctx.fillStyle = this.colors.axisTextDim;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'top';
+    let lastRight = -Infinity;
     for (let i = 0; i < n; i += every) {
-      const x = this._xForIndex(i, L);
-      ctx.fillText(minutesToClock(this.candles[i].t), x, this._h - this.opts.paddingBottom + 8);
+      const txt = minutesToClock(this.candles[i].t);
+      const tw = ctx.measureText(txt).width;
+      // inset first/last ticks so labels never clip at the plot edges
+      const x = Math.max(L.x0 + tw / 2 + 2,
+        Math.min(this._xForIndex(i, L), L.x1 - tw / 2 - 2));
+      if (x - tw / 2 < lastRight + 12) continue; // avoid tick-on-tick pileup
+      ctx.fillText(txt, x, this._h - this.opts.paddingBottom + 8);
+      lastRight = x + tw / 2;
     }
   }
 
@@ -491,10 +528,13 @@ export class ChartEngine {
         ctx.strokeRect(xa + 0.5, ya + 0.5, xb - xa - 1, yb - ya - 1);
         if (a.label) {
           ctx.font = `600 9.5px ${FONT}`;
+          const tw = ctx.measureText(a.label).width;
+          const lx = Math.max(L.x0 + 4, Math.min(xa + 4, L.x1 - tw - 4));
+          const rect = this._reserveLabel(lx, ya - 14, tw, 11, -1);
           ctx.fillStyle = border;
           ctx.textAlign = 'left';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(a.label, xa + 4, ya - 3);
+          ctx.textBaseline = 'top';
+          ctx.fillText(a.label, rect.x, rect.y);
         }
       }
     }
@@ -517,29 +557,45 @@ export class ChartEngine {
         ctx.stroke();
         ctx.setLineDash([]);
         if (a.label) {
+          // Price-tag pill at the RIGHT end of the line (next to the axis) —
+          // keeps labels off the candles and out of the session headers.
+          const col = a.color || this.colors.level;
           ctx.font = `600 10px ${FONT}`;
-          ctx.fillStyle = a.color || this.colors.level;
+          const tw = ctx.measureText(a.label).width;
+          const pw = tw + 12, ph = 16;
+          const lx = Math.max(L.x0 + 2, xb - pw - 4);
+          const rect = this._reserveLabel(lx, y - ph / 2, pw, ph, 0);
+          ctx.fillStyle = this.colors.chipBg;
+          this._roundRect(ctx, rect.x, rect.y, pw, ph, 4);
+          ctx.fill();
+          ctx.globalAlpha = 0.7;
+          ctx.strokeStyle = col;
+          ctx.lineWidth = 1;
+          this._roundRect(ctx, rect.x + 0.5, rect.y + 0.5, pw - 1, ph - 1, 4);
+          ctx.stroke();
+          ctx.globalAlpha = 1;
+          ctx.fillStyle = col;
           ctx.textAlign = 'left';
-          ctx.textBaseline = 'bottom';
-          ctx.fillText(a.label, xa + 4, y - 3);
+          ctx.textBaseline = 'middle';
+          ctx.fillText(a.label, rect.x + 6, rect.y + ph / 2 + 0.5);
         }
       } else if (a.type === 'swingLabel' || a.type === 'textMarker') {
         const x = this._xForIndex(a.index, L);
         const y = this._yForPrice(a.price, L, range);
         const above = a.dir !== 'down'; // 'up' swing labels above price
         ctx.font = `700 10.5px ${FONT}`;
-        ctx.textAlign = 'center';
-        const ty = above ? y - 8 : y + 8;
-        ctx.textBaseline = above ? 'bottom' : 'top';
-        // pill
         const tw = ctx.measureText(a.text).width;
+        const px = 5, ph = 17;
+        const pw = tw + px * 2;
+        const lx = Math.max(L.x0 + 2, Math.min(x - pw / 2, L.x1 - pw - 2));
+        const rect = this._reserveLabel(lx, above ? y - 9 - ph : y + 9, pw, ph, above ? -1 : 1);
         ctx.fillStyle = 'rgba(13,18,32,0.85)';
-        const px = 5, ph = 15;
-        const ry = above ? ty - ph : ty;
-        this._roundRect(ctx, x - tw / 2 - px, ry - 1, tw + px * 2, ph + 2, 4);
+        this._roundRect(ctx, rect.x, rect.y, pw, ph, 4);
         ctx.fill();
         ctx.fillStyle = a.color || this.colors.label;
-        ctx.fillText(a.text, x, ty);
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(a.text, rect.x + pw / 2, rect.y + ph / 2 + 0.5);
       } else if (a.type === 'smt') {
         const x = this._xForIndex(a.index, L);
         ctx.strokeStyle = this.colors.smt;
@@ -551,10 +607,14 @@ export class ChartEngine {
         ctx.stroke();
         ctx.setLineDash([]);
         ctx.font = `700 10px ${FONT}`;
+        const txt = a.text || 'SMT';
+        const tw = ctx.measureText(txt).width;
+        const lx = Math.max(L.x0 + 2, Math.min(x - tw / 2, L.x1 - tw - 2));
+        const rect = this._reserveLabel(lx, L.y0 + 2, tw, 11, 1);
         ctx.fillStyle = this.colors.smt;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'bottom';
-        ctx.fillText(a.text || 'SMT', x, L.y0 + 12);
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.fillText(txt, rect.x, rect.y);
       }
     }
   }
@@ -599,15 +659,34 @@ export class ChartEngine {
     for (const c of candles) { if (c.l < lo) lo = c.l; if (c.h > hi) hi = c.h; }
     const pad = (hi - lo) * 0.1 || 1;
     lo -= pad; hi += pad;
-    const yFor = (p) => L.smtY0 + 4 + (hi - p) / (hi - lo) * (L.smtY1 - L.smtY0 - 8);
+    const yFor = (p) => L.smtY0 + 6 + (hi - p) / (hi - lo) * (L.smtY1 - L.smtY0 - 12);
     const slot = this._slotW(L);
-    const bw = Math.max(1, Math.min(9, slot * 0.55));
+    const bw = Math.max(1.5, Math.min(12, slot * 0.62));
+
+    // Own price scale: gridline + label at the pane's mid, plus hi/lo tags,
+    // so highs and lows are actually comparable against the main pane.
+    const dec = hi - lo < 5 ? 2 : hi - lo < 50 ? 1 : 0;
+    ctx.font = `500 9.5px ${FONT}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    const mid = (hi + lo) / 2;
+    ctx.strokeStyle = this.colors.grid;
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(L.x0, Math.round(yFor(mid)) + 0.5);
+    ctx.lineTo(L.x1, Math.round(yFor(mid)) + 0.5);
+    ctx.stroke();
+    ctx.fillStyle = this.colors.axisTextDim;
+    ctx.fillText(mid.toFixed(dec), L.x1 + 8, yFor(mid));
+    ctx.fillText(hi.toFixed(dec), L.x1 + 8, Math.max(yFor(hi), L.smtY0 + 8));
+    ctx.fillText(lo.toFixed(dec), L.x1 + 8, Math.min(yFor(lo), L.smtY1 - 8));
+
     for (let i = 0; i < candles.length; i++) {
       const c = candles[i];
       const x = this._xForIndex(i, L);
       const up = c.c >= c.o;
       ctx.strokeStyle = up ? this.colors.upDim : this.colors.downDim;
-      ctx.lineWidth = 1;
+      ctx.lineWidth = Math.max(1, bw * 0.14);
       ctx.beginPath();
       ctx.moveTo(x, yFor(c.h));
       ctx.lineTo(x, yFor(c.l));
@@ -620,7 +699,7 @@ export class ChartEngine {
     ctx.fillStyle = this.colors.sessionLabel;
     ctx.textAlign = 'left';
     ctx.textBaseline = 'top';
-    ctx.fillText('CORRELATED SYMBOL', L.x0 + 6, L.smtY0 + 4);
+    ctx.fillText('CORRELATED SYMBOL', L.x0 + 6, L.smtY0 + 5);
   }
 
   _drawCrosshair(ctx, L, range, vis) {
@@ -632,7 +711,7 @@ export class ChartEngine {
     const i = this._hoverIndex;
     const cx = i >= 0 ? this._xForIndex(i, L) : x;
     ctx.beginPath();
-    ctx.moveTo(cx, L.y0); ctx.lineTo(cx, L.y1);
+    ctx.moveTo(cx, L.y0); ctx.lineTo(cx, this.smtCandles ? L.smtY1 : L.y1);
     ctx.moveTo(L.x0, y + 0.5); ctx.lineTo(L.x1, y + 0.5);
     ctx.stroke();
     ctx.setLineDash([]);
@@ -652,6 +731,27 @@ export class ChartEngine {
       ctx.textAlign = 'left';
       ctx.textBaseline = 'middle';
       ctx.fillText(txt, L.x1 + 9, y);
+    }
+
+    // time tag on the bottom axis
+    if (i >= 0 && vis[i]) {
+      const txt = minutesToClock(vis[i].t);
+      ctx.font = `600 10px ${FONT}`;
+      const tw = ctx.measureText(txt).width;
+      const pw = tw + 12, ph = 17;
+      const tx = Math.max(L.x0, Math.min(cx - pw / 2, L.x1 - pw));
+      const tyTop = this._h - this.opts.paddingBottom + 4;
+      ctx.fillStyle = this.colors.chipBg;
+      this._roundRect(ctx, tx, tyTop, pw, ph, 4);
+      ctx.fill();
+      ctx.strokeStyle = this.colors.chipBorder;
+      ctx.lineWidth = 1;
+      this._roundRect(ctx, tx + 0.5, tyTop + 0.5, pw - 1, ph - 1, 4);
+      ctx.stroke();
+      ctx.fillStyle = this.colors.chipText;
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(txt, tx + 6, tyTop + ph / 2 + 0.5);
     }
 
     // OHLC chip

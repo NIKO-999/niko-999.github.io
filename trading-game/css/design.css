@@ -99,7 +99,7 @@
 /* ---------- Reset ---------- */
 *, *::before, *::after { box-sizing: border-box; }
 * { margin: 0; }
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; overflow-x: hidden; }
 body {
   min-height: 100dvh;
   background:
@@ -256,7 +256,7 @@ p { overflow-wrap: break-word; }
 .badge-bull { background: var(--bull-dim); color: var(--bull); border-color: rgba(45,212,167,0.3); }
 .badge-bear { background: var(--bear-dim); color: var(--bear); border-color: rgba(244,80,108,0.3); }
 .badge-warn { background: var(--warn-dim); color: var(--warn); border-color: rgba(247,185,85,0.3); }
-.badge-locked { background: rgba(69,79,104,0.2); color: var(--text-faint); border-color: rgba(69,79,104,0.35); }
+.badge-locked { background: rgba(69,79,104,0.2); color: var(--text-dim); border-color: rgba(69,79,104,0.35); }
 
 /* Rarity badges + glows */
 .rarity-common    { --rarity: var(--rarity-common); }
@@ -377,7 +377,7 @@ p { overflow-wrap: break-word; }
 }
 .modal-backdrop.open { opacity: 1; pointer-events: auto; }
 .modal {
-  width: min(560px, 100%); max-height: min(84dvh, 720px);
+  width: min(560px, calc(100vw - 32px)); max-height: min(84dvh, 720px);
   overflow-y: auto; padding: var(--sp-6);
   transform: translateY(16px) scale(0.97); opacity: 0;
   transition: transform var(--dur-med) var(--ease-spring), opacity var(--dur-med) var(--ease-out);
@@ -410,13 +410,16 @@ p { overflow-wrap: break-word; }
 }
 .lightbox.open img { transform: scale(1); }
 
-/* Lesson images */
+/* Lesson images — the source diagrams are near-white; a warm-grey mat frame
+   cushions the luminance jump against the near-black theme. */
 .lesson-img {
-  border-radius: var(--r-md); border: 1px solid var(--glass-border);
-  cursor: zoom-in; box-shadow: var(--shadow-sm);
+  border-radius: var(--r-md); border: 1px solid var(--glass-border-bright);
+  padding: 8px; background: linear-gradient(180deg, #8d897e, #6f6c63);
+  cursor: zoom-in; box-shadow: var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,0.12);
   transition: transform var(--dur-med) var(--ease-out), box-shadow var(--dur-med) var(--ease-out), border-color var(--dur-med);
 }
 .lesson-img:hover { transform: scale(1.015); border-color: var(--glass-border-bright); box-shadow: var(--shadow-md); }
+.lightbox img { padding: 10px; background: linear-gradient(180deg, #8d897e, #6f6c63); }
 
 /* ---------- Toast ---------- */
 .toast-stack {
