@@ -1,5 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<!-- data-theme is set here, not left to JS, so the very first paint is already
+     dark: the entry flight always opens in deep space (see introFlight), and
+     booting on the bare :root light default would flash light before the
+     script could switch it. introFlight() resolves to the real theme on
+     landing. -->
+<html lang="en" data-theme="dark">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -13,7 +18,7 @@
   <meta property="og:url" content="https://niko-999.github.io/DestinyMatrix-v1.html">
   <meta name="twitter:card" content="summary">
   <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#eef1f8">
+  <meta name="theme-color" content="#01030d">
   <link rel="icon" href="icons/favicon-32.png" sizes="32x32">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
   <meta name="mobile-web-app-capable" content="yes">
@@ -1138,7 +1143,7 @@ const canvas   = document.getElementById('scene');
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: window.devicePixelRatio < 2 });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
 renderer.setSize(window.innerWidth, window.innerHeight);
-renderer.setClearColor(0xeef1f8, 1); // light default — applyTheme(_theme) below corrects this synchronously if dark
+renderer.setClearColor(0x01030d, 1); // matches the dark first paint the entry flight opens on; applyTheme() owns it from boot onward
 
 const scene  = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, window.innerWidth / window.innerHeight, 0.1, 500);
@@ -1172,6 +1177,13 @@ camera.position.set(0, 0, 12);
 // Toggling to dark only lasts for the current viewing session; every fresh
 // load/reload boots back into light regardless of what was last toggled.
 let _theme = 'light';
+
+// Where the entry flight resolves to. The intro always plays dark, because
+// light mode hides every ambient object (see the _ambientOnlyObjects line in
+// applyTheme below) — there'd be no starfield to fly through otherwise. This
+// remembers the theme the page should actually settle into, and the theme
+// toggle keeps it in sync in case it's used before the flight lands.
+let _pendingTheme = _theme;
 
 function _rgbToHsl(r, g, b) {
   r /= 255; g /= 255; b /= 255;
@@ -2241,7 +2253,77 @@ canvas.addEventListener('click', e => {
   if (_dobJustChanged) e.stopImmediatePropagation();
 }, true);
 
+// Cinematic entry: dolly the camera in from deep space onto the fitted map,
+// arriving as the loader fades. Two things shape it:
+//
+//   1. animate() rewrites camera.position every frame unless isFlying is set
+//      (same guard flyTo() uses), so the flag is held for the whole flight
+//      and released — along with camZoom/pan/parallax state — on landing, or
+//      the camera would snap back the instant the first tween ran.
+//   2. Light mode hides every ambient object, so there is no starfield to
+//      fly through. The intro therefore always plays dark and resolves to
+//      _pendingTheme partway through the settle, cross-faded behind #veil so
+//      the starfield doesn't visibly pop out of existence.
+function introFlight() {
+  function land() {
+    isFlying = false;
+    camZoom  = baseCamZ;
+    panX = panY = 0;
+    offX = offY = 0;
+    tgtX = tgtY = 0;
+  }
+
+  // Swap to the real theme behind a brief full-bleed wash of the destination
+  // background. #veil is already a fixed z-15 layer sitting over the canvas
+  // but under the HUD, which is exactly the coverage this needs.
+  function settleTheme() {
+    if (_pendingTheme === _theme) return;
+    const veil = document.getElementById('veil');
+    if (!veil) { applyTheme(_pendingTheme); return; }
+    veil.style.background = _pendingTheme === 'light' ? '#eef1f8' : '#01030d';
+    gsap.to(veil, {
+      opacity: 1, duration: 0.45, ease: 'power2.in',
+      onComplete: () => {
+        applyTheme(_pendingTheme);
+        gsap.to(veil, {
+          opacity: 0, duration: 0.9, ease: 'power2.out',
+          onComplete: () => { veil.style.background = ''; },
+        });
+      },
+    });
+  }
+
+  if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    camera.position.set(0, 0, baseCamZ);
+    camera.lookAt(0, 0, 0);
+    land();
+    // Wait out the loader's own 1.2s fade below before switching: #loader is
+    // painted in var(--bg), so theming mid-fade pops its background from the
+    // dark boot colour to the light one in full view.
+    gsap.delayedCall(1.3, () => applyTheme(_pendingTheme));
+    return;
+  }
+
+  isFlying = true;
+  camera.position.set(0, baseCamZ * 0.42, baseCamZ * 5.5);
+  camera.lookAt(0, 0, 0);
+
+  gsap.timeline({ onComplete: land })
+    .to(camera.position, {
+      y: baseCamZ * 0.12, z: baseCamZ * 1.9,
+      duration: 2.4, ease: 'power2.in',
+      onUpdate() { camera.lookAt(0, 0, 0); },
+    })
+    .add(settleTheme)
+    .to(camera.position, {
+      x: 0, y: 0, z: baseCamZ,
+      duration: 1.9, ease: 'power3.out',
+      onUpdate() { camera.lookAt(0, 0, 0); },
+    });
+}
+
 function revealScene() {
+  introFlight();
   gsap.to(loader, {
     opacity: 0, duration: 1.2,
     onComplete: () => { loader.style.display = 'none'; },
@@ -5257,6 +5339,7 @@ const ARCANA_ESSENCE = {
   btn.addEventListener('click', () => {
     if (window.DMNative) DMNative.haptic();
     applyTheme(_theme === 'light' ? 'dark' : 'light');
+    _pendingTheme = _theme; // so a toggle mid-flight isn't undone on landing
     btn.textContent = label();
   });
 })();
@@ -5809,9 +5892,12 @@ const ARCANA_ESSENCE = {
   render(); // pre-render once so the very first open has content immediately
 })();
 
-// Apply the persisted (or default) theme now that every sprite/ambient
-// object in every tier above has been created and registered.
-applyTheme(_theme);
+// Apply the theme now that every sprite/ambient object in every tier above
+// has been created and registered. The entry flight opens in dark regardless
+// of the chosen theme (it needs the starfield to fly through); introFlight()
+// resolves to _pendingTheme as the camera settles.
+_pendingTheme = _theme;
+applyTheme('dark');
 
 })();
 </script>
