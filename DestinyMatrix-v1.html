@@ -1258,7 +1258,30 @@ function registerThemedLine(material, dark, light) {
 const _dotThemeRegistry = [];
 function registerThemedDot(material, darkColorNum, lightColorNum) {
   _dotThemeRegistry.push({ material, darkColorNum, lightColorNum });
+  _revealBase.set(material, material.opacity); // applyTheme only recolours these
   return material;
+}
+
+// ── ENTRY REVEAL ──────────────────────────────────────────────────────────
+// The entry flight holds the diagram back to a faint ghost and brings it up
+// on arrival. Opacity here is written from three directions — four per-frame
+// twinkle loops (one per star tier), applyTheme(), and lineMat's permanent
+// breathe tween — so a plain tween on the materials loses to all of them.
+// Instead every writer multiplies through this one factor, which composes
+// with the twinkle and survives a theme change mid-reveal.
+let _revealK = 1;
+
+// Base (fully-revealed) opacity per material, for the non-sprite objects that
+// have no per-frame writer of their own: constellation lines, rings, orbit
+// paths, electron dots. Sprite tiers don't need an entry — their loops apply
+// _revealK directly. Line bases are re-noted by applyTheme, which owns the
+// resting value; dot bases are noted once at registration since applyTheme
+// only recolours them.
+const _revealBase = new Map();
+
+function applyReveal(k) {
+  _revealK = k;
+  _revealBase.forEach((base, material) => { material.opacity = base * k; });
 }
 
 function applyTheme(theme) {
@@ -1288,11 +1311,16 @@ function applyTheme(theme) {
     const c = _theme === 'light' ? light : dark;
     material.color.setHex(c.color);
     material.opacity = c.opacity;
+    _revealBase.set(material, c.opacity); // the theme owns the resting value
   });
 
   _dotThemeRegistry.forEach(({ material, darkColorNum, lightColorNum }) => {
     material.color.setHex(_theme === 'light' ? lightColorNum : darkColorNum);
   });
+
+  // Re-scale to wherever the entry reveal has got to, so a theme change
+  // mid-flight doesn't snap the diagram to full.
+  applyReveal(_revealK);
 }
 
 // ── TEXTURE BUILDERS ───────────────────────────────────────────────────────
@@ -1557,6 +1585,10 @@ _ambientOnlyObjects.push(starGroup); // background field + dust clouds — decor
   scene.add(pulseLine);
 
   function firePulse() {
+    // Hold off while the entry flight still has the diagram dimmed — the
+    // first pulse would otherwise fire ~1.5s in, mid-flight, as a bright
+    // ring expanding out of an otherwise invisible centre.
+    if (_revealK < 0.999) { gsap.delayedCall(1.0, firePulse); return; }
     gsap.set(pulseLine.scale, { x:0.5, y:0.5, z:1 });
     gsap.set(pulseMat, { opacity:0 });
     gsap.to(pulseLine.scale, { x:7, y:7, z:1, duration:2.8, ease:'power1.out' });
@@ -2127,7 +2159,16 @@ function toScreen(v3) {
 }
 
 // ── LINE OPACITY BREATHE ──────────────────────────────────────────────────
-gsap.to(lineMat, { opacity: 0.17, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+// Not started at load: the entry reveal scales lineMat through applyReveal()
+// and this infinite tween would overwrite it every frame. introFlight() calls
+// this once the diagram is fully up; the reduced-motion path calls it
+// immediately.
+let _breathing = false;
+function startLineBreathe() {
+  if (_breathing) return;
+  _breathing = true;
+  gsap.to(lineMat, { opacity: 0.17, duration: 4, yoyo: true, repeat: -1, ease: 'sine.inOut' });
+}
 
 // ── ANIMATION LOOP ────────────────────────────────────────────────────────
 const clock = new THREE.Clock();
@@ -2185,7 +2226,7 @@ function animate() {
     const tw = Math.sin(t * data.twk.spd + data.twk.off);
     // Don't overwrite opacity while GSAP is fading the star during fly-in
     if (data.sprite.visible && !(isFlying && i === activeIdx)) {
-      data.sprite.material.opacity = 0.78 + tw * 0.22;
+      data.sprite.material.opacity = (0.78 + tw * 0.22) * _revealK;
     }
 
     // Update HTML tag position (below the star)
@@ -2352,9 +2393,13 @@ function introFlight() {
     tgtX = tgtY = 0;
   }
 
+  const overlay = document.getElementById('overlay');
+
   if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
     camera.position.set(0, 0, baseCamZ);
     camera.lookAt(0, 0, 0);
+    applyReveal(1);
+    startLineBreathe();
     land();
     return;
   }
@@ -2367,6 +2412,13 @@ function introFlight() {
     stars.geometry.dispose();
     stars.material.dispose();
   }
+
+  // Hold the diagram back to a ghost: enough structure to fly toward, no
+  // detail. The numbers sit out the flight entirely and arrive last.
+  const GHOST = 0.05;
+  const reveal = { k: GHOST };
+  applyReveal(GHOST);
+  gsap.set(overlay, { opacity: 0 });
 
   isFlying = true;
   camera.position.set(0, baseCamZ * 0.5, START);
@@ -2389,7 +2441,15 @@ function introFlight() {
       x: 0, y: 0, z: baseCamZ,
       duration: 1.9, ease: 'power3.out',
       onUpdate() { camera.lookAt(0, 0, 0); },
-    }, '<');
+    }, '<')
+    // Structure, orbits and stars come up together as the camera settles.
+    .to(reveal, {
+      k: 1, duration: 2.2, ease: 'power2.out',
+      onUpdate() { applyReveal(reveal.k); },
+      onComplete: startLineBreathe,
+    }, '<')
+    // Numbers last, once there's a diagram for them to belong to.
+    .to(overlay, { opacity: 1, duration: 1.6, ease: 'power1.inOut' }, '>-0.4');
 }
 
 function revealScene() {
@@ -2398,10 +2458,13 @@ function revealScene() {
     opacity: 0, duration: 1.2,
     onComplete: () => { loader.style.display = 'none'; },
   });
-  gsap.from('#hud',  { opacity: 0, duration: 2.2, delay: 0.4 });
-  tagEls.forEach((el, i) => {
-    gsap.from(el, { opacity: 0, duration: 1.6, delay: 0.5 + i * 0.1 });
-  });
+  // The HUD chrome waits for the flight to land alongside the numbers —
+  // during the approach there's nothing on screen for it to caption. The
+  // per-tag stagger that used to live here is gone: introFlight() fades
+  // #overlay as a whole, so the tags inside it keep their resting opacity
+  // (which flyTo/returnToMap still drive individually).
+  const flying = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  gsap.from('#hud', { opacity: 0, duration: 1.8, delay: flying ? 4.8 : 0.4 });
 }
 
 // A link with ?dob= already carries a specific reading (the owner's own,
@@ -3434,7 +3497,7 @@ const ARCANA_ESSENCE = {
       // Color-tinted twinkle — wider range so color shines through
       if (_hovM !== i) {
         const tw = Math.sin(t * data.twk.spd + data.twk.off) * 0.5 + 0.5;
-        data.sprite.material.opacity = 0.18 + tw * 0.26;
+        data.sprite.material.opacity = (0.18 + tw * 0.26) * _revealK;
       }
     });
 
@@ -4946,8 +5009,8 @@ const ARCANA_ESSENCE = {
       // Pulse opacity
       const pulse = Math.sin(t * 0.9 + pi * 1.8) * 0.5 + 0.5;
       if (_activeProgStar !== pi) {
-        s.coreSp.material.opacity = 0.75 + pulse * 0.22;
-        s.haloSp.material.opacity = 0.10 + pulse * 0.14;
+        s.coreSp.material.opacity = (0.75 + pulse * 0.22) * _revealK;
+        s.haloSp.material.opacity = (0.10 + pulse * 0.14) * _revealK;
         const sc = 1.0 + pulse * 0.18;
         s.coreSp.scale.set(1.1 * sc, 1.1 * sc, 1);
       }
@@ -5285,8 +5348,8 @@ const ARCANA_ESSENCE = {
       const s = _tStars[key];
       if (_activeTalentStar !== key) {
         const pulse = Math.sin(t * 0.85 + i * 2.1) * 0.5 + 0.5;
-        s.coreSp.material.opacity = 0.65 + pulse * 0.2;
-        s.haloSp.material.opacity = 0.10 + pulse * 0.12;
+        s.coreSp.material.opacity = (0.65 + pulse * 0.2) * _revealK;
+        s.haloSp.material.opacity = (0.10 + pulse * 0.12) * _revealK;
         const sc = 1.0 + pulse * 0.15;
         s.coreSp.scale.set(0.55 * sc, 0.55 * sc, 1);
       }
