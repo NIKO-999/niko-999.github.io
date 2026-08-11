@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>4H Candle Profiling — Study Archive</title>
+<meta name="description" content="A reference archive of the 4H candle profiling framework: rule sets, diagram plates and full explanations, extracted from the three source documents." />
+<meta name="theme-color" content="#1A140E" />
+<link rel="stylesheet" href="fonts/fonts.css" />
+<link rel="stylesheet" href="css/app.css" />
+</head>
+<body>
+
+<!-- mobile bar -->
+<div class="mobile-bar">
+  <button class="menu-btn" id="menu-btn" aria-label="Open contents" aria-expanded="false" aria-controls="sidebar">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="mobile-title">4H Candle Profiling</div>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+
+  <!-- ============================ SIDEBAR ============================ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">Study Archive</div>
+      <div class="brand-title">4H Candle<br />Profiling</div>
+      <div class="brand-sub">Rule sets · Plates · Readings</div>
+    </div>
+
+    <div class="search-wrap">
+      <label class="visually-hidden" for="search" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Search the archive</label>
+      <input class="search" id="search" type="search" placeholder="Search rules, terms, sessions…" autocomplete="off" />
+    </div>
+
+    <nav id="nav" aria-label="Archive contents"></nav>
+  </aside>
+
+  <!-- ============================= MAIN ============================= -->
+  <main class="main">
+
+    <!-- HERO -->
+    <header class="hero">
+      <div class="hero-art" style="background-image:url('assets/hero.jpg')"></div>
+      <div class="hero-veil"></div>
+      <div class="hero-inner">
+        <div class="wrap">
+          <div class="eyebrow">A Study Archive · Three Source Documents</div>
+          <h1>4H Candle<br />Profiling <em>the mechanical way to read price action</em></h1>
+          <p class="hero-lede">
+            Every rule, diagram and explanation from the three source documents, extracted and set out in one place.
+            Each lesson gives you the rule set first, the original diagram second, and the full reading beneath it —
+            so you can see the mechanism, not just the shape.
+          </p>
+          <div class="hero-meta">
+            <span><b id="stat-lessons">—</b> Lessons</span>
+            <span><b id="stat-plates">—</b> Plates</span>
+            <span><b id="stat-rules">—</b> Rules</span>
+            <span><b id="stat-terms">—</b> Glossary terms</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- HOW TO READ THIS ARCHIVE -->
+    <section class="section" id="how-to-read">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="rule-line"></div>
+          <h2>How this archive is laid out</h2>
+          <p>
+            The three documents overlap and build on each other, so they are kept as three modules in the order they
+            were taught. Within every lesson the structure is always the same, so you always know where to look.
+          </p>
+        </div>
+
+        <div class="notice">
+          <h4>The shape of every lesson</h4>
+          <p><b style="color:var(--gold-hi)">1 · Rule set</b> — the mechanical, checkable conditions, sitting above the diagram. These are the framework's own rules, phrased so you can tick them off against a live chart.</p>
+          <p><b style="color:var(--gold-hi)">2 · Plate</b> — the original diagram from the source document, framed and enlargeable. Click any plate to open it full-screen.</p>
+          <p><b style="color:var(--gold-hi)">3 · Reading</b> — the explanation directly beneath the plate: what price is actually doing, why the rule exists, and what the diagram is showing you.</p>
+          <p><b style="color:var(--gold-hi)">4 · How to approach it</b> — the sequence to follow at the chart, then what invalidates the idea.</p>
+        </div>
+
+        <div class="notice">
+          <h4>Two things to keep straight</h4>
+          <p><b style="color:var(--gold-hi)">Indices and forex run on different clocks.</b> The session windows are not the same for the two instrument families, and the source documents state them separately. Wherever a time appears in this archive it is labelled with the instrument it belongs to. Never carry a time across from one to the other.</p>
+          <p><b style="color:var(--gold-hi)">Times are New York time.</b> The source documents give clock times without ever naming a timezone, but the sessions they describe — the 8:30 and 9:30 driver times, the 12:00 lunch, the NY open — only line up under New York time. That is the reading used throughout; it is an inference from context, not a statement the documents make.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- rendered content: approach · sessions · modules · glossary -->
+    <div id="content"></div>
+    <div class="wrap"><p class="no-results is-hidden" id="no-results">Nothing in the archive matches that search.</p></div>
+
+    <!-- SOURCES -->
+    <section class="section" id="sources">
+      <div class="wrap">
+        <div class="section-head">
+          <div class="rule-line"></div>
+          <h2>Sources &amp; notice</h2>
+        </div>
+
+        <div class="notice">
+          <h4>Source documents</h4>
+          <p>All content in this archive is extracted from three documents by <b style="color:var(--gold-hi)">Eleven_Trades</b>:</p>
+          <p>I · <em>Building a Trading Model/Strategy</em> — 16 pages<br />
+             II · <em>Profiling 4H Candles, Part Two</em> — 15 pages<br />
+             III · <em>4H Candle Profiling: The Mechanical Way to Read Price Action</em> — 10 pages</p>
+          <p>The diagram plates are rendered directly from those documents. The author credits ICT, MMXM Trader, TTrades, AM Trades, Sniper Trades and Garret for the underlying concepts and does not claim ownership of them.</p>
+        </div>
+
+        <div class="notice">
+          <h4>What this is, and what it is not</h4>
+          <p>This is a study reference — an organised restatement of what the source documents say, with the mechanisms explained. It is not financial advice, not a recommendation, and not a claim that this framework works. Any performance figure quoted here (such as the 8–12% win-rate improvement attributed to SMT divergence) is the original author's claim, reproduced as such, and has not been verified.</p>
+          <p>Where the source documents are ambiguous, silent, or internally inconsistent, this archive says so rather than papering over the gap.</p>
+        </div>
+
+        <footer class="site-foot">
+          <div>Compiled from the source PDFs · plates rendered at 200 dpi from the original vector artwork.</div>
+          <div class="foot-links">
+            <a href="#approach">How to approach it</a>
+            <a href="#sessions">Session clock</a>
+            <a href="#glossary">Glossary</a>
+            <a href="../">← Back to index</a>
+          </div>
+        </footer>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- LIGHTBOX -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged plate">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close">×</button>
+  <img id="lightbox-img" src="" alt="" />
+  <div class="lightbox-cap" id="lightbox-cap"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
