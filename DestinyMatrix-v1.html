@@ -1038,7 +1038,7 @@ const _LAZY_CONTENT = [
   'hidden-numbers-content', 'talent-content', 'name-numbers-content',
   'most-prominent-content', 'ideal-partner-content', 'career-paths-content',
   'pinnacles-challenges-content', 'past-life-content', 'sexual-line-content',
-  'compatibility-content',
+  'compatibility-content', 'archetype-content',
 ];
 
 let _contentPromise = null;
@@ -2910,6 +2910,16 @@ const ARCANA_ESSENCE = {
     _yeMeta = yeMeta;
     _prominentResult = prominentResult;
 
+    // Life Archetype — the chart's most weighted Arcana (above) routed
+    // through the engine's own ARCHETYPE_MAP via getArchetype(). Both halves
+    // already exist: the tiered whole-chart weighting, and the six-bucket
+    // Arcana grouping that until now only coloured individual Talent Star
+    // Line nodes. This composes them; it does not introduce a new formula
+    // (GOLDEN-STANDARD.md, Sourcing). Six buckets, so six possible readings
+    // — deliberately coarser than the per-position cards, because it answers
+    // the coarser question of what someone is overall.
+    _archetypeKey = (DMEngine && prominentV) ? DMEngine.getArchetype(prominentV) : null;
+
     // Three Life Purposes (research/01-Foundation/Destiny-Matrix-Calculation-
     // Guide.extracted.md, Page 11 — "Life Purpose: Personal, Social, and
     // Spiritual", one of the source's own top-level categories). These are
@@ -2968,6 +2978,24 @@ const ARCANA_ESSENCE = {
 
   let _yeMeta = null; // set by _calcVals(); read by the YE card's section body
   let _prominentResult = null; // set by _calcVals(); read by the PROMINENT card's section body
+  let _archetypeKey    = null; // set by _calcVals(); ARCHETYPE_MAP bucket, read by the ARCHETYPE card
+
+  // Human-readable names for mostProminentArcana()'s position keys. Shared by
+  // the PROMINENT and ARCHETYPE cards, both of which list where in the chart
+  // the dominant Arcana actually shows up. Note these are that function's own
+  // letter scheme, where F-I are the ancestral corners — not the main chart's
+  // money channel (see its header comment in js/matrix-engine.js).
+  const POSITION_NAMES = {
+    A:'Core Character', E:'Soul Center', PP:'Personal Purpose', SOP:'Social Purpose', SPP:'Spiritual Purpose',
+    B:'Sky Line', C:'Earth Line', D:'Karmic Tail',
+    MON:'Money', LOVE:'Relationship', RWM:'Relationship with Money',
+    F:'Paternal Spiritual', G:'Maternal Spiritual', H:'Paternal Material', I:'Maternal Material',
+    F1:'Paternal Masculine Line', F2:'Paternal Spiritual Talent',
+    G1:'Maternal Masculine Line', G2:'Maternal Spiritual Talent',
+    H1:'Paternal Feminine Line', H2:'Paternal Material Talent',
+    I1:'Maternal Feminine Line', I2:'Maternal Material Talent',
+    HZV:'Heart Zone · Spiritual Desire', HZH:'Heart Zone · Material Desire', MUL:'Muladhara · Root Chakra',
+  };
 
   let _vals = _calcVals();
 
@@ -3379,6 +3407,18 @@ const ARCANA_ESSENCE = {
     // point on it without needing to interleave a new angle between them.
     { key:'PROMINENT', num:_vals.atProminent, label:'Most Prominent',
       pos: new THREE.Vector3(-_R * 1.2687, _R * 0.4619, 0), color:0xFFD700, twk:{spd:0.60,off:2.2} },
+
+    // ── Life Archetype — the Most Prominent Arcana above, routed through
+    // the engine's own six-bucket ARCHETYPE_MAP (see _calcVals' comment,
+    // and js/archetype-content.js's header for what the buckets are and
+    // which parts of the naming are this app's rather than the source's).
+    // Shares PROMINENT's outer r=1.35R radius, placed at θ=226.5° — the
+    // centre of the widest angular gap on the outer rings (45°, between
+    // Wealth at 204° and Karmic Debt at 249°), leaving 0.52R to its nearest
+    // neighbour on either side. Deliberately NOT reusing PROMINENT's own
+    // coordinates: that star stays in HIDDEN_KEYS and may be unhidden later.
+    { key:'ARCHETYPE', num:_vals.atProminent, label:'Life Archetype',
+      pos: new THREE.Vector3(-_R * 0.9293, -_R * 0.9793, 0), color:0x7FE7D0, twk:{spd:0.56,off:3.1} },
 
     // ── Ideal Partner Archetype (Love Channel) — DestinyMatrix-Sheet.
     // extracted.md Page 14's full 22-row "Ideal Partner Alignment by Arcana"
@@ -3953,17 +3993,6 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (pc && (pc.title || pc.heading)) || `Arcana ${r.dominant} Defines Your Chart`;
 
-      const POSITION_NAMES = {
-        A:'Core Character', E:'Soul Center', PP:'Personal Purpose', SOP:'Social Purpose', SPP:'Spiritual Purpose',
-        B:'Sky Line', C:'Earth Line', D:'Karmic Tail',
-        MON:'Money', LOVE:'Relationship', RWM:'Relationship with Money',
-        F:'Paternal Spiritual', G:'Maternal Spiritual', H:'Paternal Material', I:'Maternal Material',
-        F1:'Paternal Masculine Line', F2:'Paternal Spiritual Talent',
-        G1:'Maternal Masculine Line', G2:'Maternal Spiritual Talent',
-        H1:'Paternal Feminine Line', H2:'Paternal Material Talent',
-        I1:'Maternal Feminine Line', I2:'Maternal Material Talent',
-        HZV:'Heart Zone · Spiritual Desire', HZH:'Heart Zone · Material Desire', MUL:'Muladhara · Root Chakra',
-      };
       const whereList = r.positions.map(k => POSITION_NAMES[k] || k).join(', ');
       const intensity = r.margin >= 0.20
         ? `unmistakably defines your chart, leading by a clear margin`
@@ -4033,6 +4062,56 @@ const ARCANA_ESSENCE = {
          </div>`;
 
       document.getElementById('pb-body').innerHTML = dominantHtml + reinforcementHtml + writtenHtml;
+
+      _mBanner.classList.add('open');
+      _mBanner.scrollTop = 0;
+      gsap.to(_mBanner, { y:'0%', duration:0.55, ease:'power3.out' });
+      _bannerOpenMi = true;
+      return;
+    }
+
+    // Life Archetype — the whole-chart dominant Arcana expressed as one of
+    // the engine's six ARCHETYPE_MAP buckets. The header below is generated
+    // live from the chart; the three written sections come from
+    // js/archetype-content.js, which carries its own section labels rather
+    // than the usual mastery/shadow/invitation trio.
+    if (data.key === 'ARCHETYPE' && _prominentResult) {
+      const r  = _prominentResult;
+      const ac = (window.DArchetypeContent && _archetypeKey) ? DArchetypeContent.get(_archetypeKey) : null;
+      const archName = ac ? ac.name : 'Your Archetype';
+
+      document.getElementById('pb-prog-name').textContent = data.label;
+      document.getElementById('pb-prog-name').style.color = themedHex(hex);
+      document.getElementById('pb-section-label').textContent = ac ? ac.tagline : 'Whole-Chart Archetype';
+      document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
+      document.getElementById('pb-heading').textContent = archName;
+
+      const arcName   = ARCANA_NAMES[r.dominant] || `Arcana ${r.dominant}`;
+      const whereList = r.positions.map(k => POSITION_NAMES[k] || k).join(', ');
+      const derivedHtml = `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHERE THIS COMES FROM</div>
+           <div class="pb-full-text">Of every Arcana in your chart, ${r.dominant} — ${arcName} — carries the most weight, showing up across ${r.positions.length} independent position${r.positions.length === 1 ? '' : 's'}: ${whereList}. Sorted by the family of energies it belongs to, that lands you here, as ${archName}. This is the widest lens in the app: every other card reads one position, and this one reads the whole blueprint at once.</div>
+         </div>`;
+
+      const writtenArch = ac ? `
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHAT IT MEANS TO BE ${archName.toUpperCase()}</div>
+           <div class="pb-full-text">${ac.meaning}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">WHERE IT TURNS AGAINST YOU</div>
+           <div class="pb-full-text">${ac.shadow}</div>
+         </div>
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE WORK OF THIS LIFETIME</div>
+           <div class="pb-full-text">${ac.invitation}</div>
+         </div>` : `
+         <div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">THE FULL READING</div>
+           <div class="pb-full-text">The written interpretation for this archetype is still being written. The Arcana above and everywhere it appears in your chart are both real and already calculated correctly — only the deeper prose is still to come.</div>
+         </div>`;
+
+      document.getElementById('pb-body').innerHTML = derivedHtml + writtenArch;
 
       _mBanner.classList.add('open');
       _mBanner.scrollTop = 0;
