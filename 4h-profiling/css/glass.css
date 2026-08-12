@@ -1,0 +1,146 @@
+/* ==========================================================================
+   GLASS — optional layer over app.css
+   A colour field behind the page, then translucent frosted surfaces on top.
+   Glass only reads when there is something behind it to blur, so the
+   background mesh is not decoration here: it is what makes the effect exist.
+   ========================================================================== */
+
+:root {
+  --glass:        rgba(255,255,255,0.045);
+  --glass-2:      rgba(255,255,255,0.065);
+  --glass-line:   rgba(255,255,255,0.11);
+  --glass-line-2: rgba(255,255,255,0.17);
+  --blur:         blur(22px) saturate(1.5);
+  --blur-sm:      blur(14px) saturate(1.35);
+}
+
+/* ---------- the colour field ---------- */
+body { background: #07080B; position: relative; }
+body::before {
+  content: '';
+  position: fixed; inset: -10%;
+  z-index: -2;
+  pointer-events: none;
+  background:
+    radial-gradient(38% 40% at 14% 12%, rgba(6,126,104,0.55), transparent 62%),
+    radial-gradient(34% 36% at 82% 8%,  rgba(74,47,176,0.50), transparent 64%),
+    radial-gradient(40% 42% at 88% 62%, rgba(20,80,158,0.42), transparent 62%),
+    radial-gradient(34% 34% at 26% 86%, rgba(150,89,16,0.34), transparent 62%),
+    radial-gradient(30% 30% at 56% 44%, rgba(156,30,82,0.24), transparent 64%);
+  filter: blur(24px);
+}
+/* a fine grain so the large gradients do not band on wide screens */
+body::after {
+  content: '';
+  position: fixed; inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.30;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+}
+
+/* ---------- chrome ---------- */
+.rail { background: transparent; }
+.rail::before {
+  background: var(--glass);
+  border-color: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.sidebar {
+  background: rgba(10,12,16,0.34);
+  border-right: 1px solid var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.brand { background: transparent; border-bottom-color: var(--glass-line); }
+.mobile-bar {
+  background: rgba(10,12,16,0.55);
+  border-bottom-color: var(--glass-line);
+  backdrop-filter: var(--blur);
+  -webkit-backdrop-filter: var(--blur);
+}
+.nav-link.is-active,
+.tree-item.is-active {
+  background: var(--glass-2);
+  box-shadow: inset 0 0 0 1px var(--glass-line-2);
+}
+.nav-link:hover { background: rgba(255,255,255,0.05); }
+.badge { background: var(--glass); border-color: var(--glass-line); }
+
+/* ---------- surfaces ---------- */
+.card,
+.tile,
+.gl-item,
+.ruleset,
+.table-scroll,
+.side-card,
+.pg,
+.banner,
+.field,
+.checks li,
+.seealso a,
+.posbar {
+  background-color: rgba(255,255,255,0.038);
+  border-color: var(--glass-line);
+  backdrop-filter: var(--blur-sm);
+  -webkit-backdrop-filter: var(--blur-sm);
+}
+
+/* the card keeps its colourway wash, now floating over the field */
+.card { background-color: rgba(12,14,18,0.30); }
+.card::before { opacity: 0.85; }
+.card:hover { background-color: rgba(12,14,18,0.24); border-color: var(--glass-line-2); }
+.card-foot { border-top-color: var(--glass-line); }
+
+.tile:hover { background-color: rgba(255,255,255,0.07); border-color: var(--glass-line-2); }
+.gl-item:hover { background-color: rgba(255,255,255,0.07); }
+
+/* banners keep the accent halo, gain frost */
+.banner {
+  background-image: linear-gradient(100deg, color-mix(in srgb, var(--c, var(--grey)) 20%, transparent) 0%, transparent 62%);
+  background-color: rgba(12,14,18,0.34);
+}
+
+/* toolbar controls */
+.field { background-color: rgba(255,255,255,0.05); }
+.seg.is-on { background: var(--glass-2); box-shadow: inset 0 0 0 1px var(--glass-line-2); }
+.cat { background-color: rgba(255,255,255,0.04); border-color: var(--glass-line); }
+.cat.is-on { background-color: var(--glass-2); border-color: var(--glass-line-2); }
+.pill, .tag, .chip, .keys kbd, .card-tag {
+  background-color: rgba(255,255,255,0.07);
+  border-color: var(--glass-line);
+}
+thead th { background-color: rgba(255,255,255,0.05); }
+tbody tr.key-row { background-color: rgba(43,212,176,0.07); }
+
+/* ---------- deliberately NOT glass ---------- */
+/* the plate is a chart: it needs an opaque, neutral backing to stay readable */
+.plate-frame { background: #0B0E12; backdrop-filter: none; -webkit-backdrop-filter: none; }
+.lightbox img { background: #0B0E12; }
+.lightbox { background: rgba(7,8,11,0.86); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+
+/* ---------- text lift ----------
+   Frosted surfaces sit lighter than the flat ground, so body copy needs a
+   little more weight to hold the same contrast it had on solid panels. */
+.reading p, .banner-body > p, .step-body p, .gl-def, tbody td { color: #C2C7CE; }
+.card-body p, .plate-caption, .checks li, .gl-seen { color: #A7ADB5; }
+.muted, .n, .group-meta, .card-meta { color: #A7ADB5; }
+
+/* ---------- cost control ----------
+   backdrop-filter is expensive per element. Below the tablet breakpoint the
+   card grid drops its blur and uses a flat translucent fill instead. */
+@media (max-width: 900px) {
+  .card, .gl-item, .checks li, .seealso a, .pg {
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    background-color: rgba(18,21,26,0.72);
+  }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body::before, body::after { display: none; }
+  .card, .tile, .gl-item, .ruleset, .table-scroll, .side-card, .pg, .banner,
+  .field, .checks li, .seealso a, .posbar, .sidebar, .mobile-bar, .rail::before {
+    backdrop-filter: none; -webkit-backdrop-filter: none;
+    background-color: #101216;
+  }
+}

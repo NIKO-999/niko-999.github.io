@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+<title>4H Candle Profiling — Glass preview</title>
+<meta name="description" content="A reference archive of the 4H candle profiling framework: rule sets, diagram plates and full explanations, extracted from the three source documents." />
+<meta name="theme-color" content="#0E0F11" />
+<link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
+<link rel="stylesheet" href="fonts/fonts.css" />
+<link rel="stylesheet" href="css/app.css" />
+<link rel="stylesheet" href="css/glass.css" />
+</head>
+<body>
+<a class="skip" href="#app">Skip to content</a>
+
+<!-- mobile bar -->
+<div class="mobile-bar">
+  <button class="menu-btn" id="menu-btn" aria-label="Open contents" aria-expanded="false" aria-controls="sidebar">
+    <span></span><span></span><span></span>
+  </button>
+  <a class="mobile-title" href="#/">4H Candle Profiling</a>
+</div>
+<div class="scrim" id="scrim"></div>
+
+<div class="shell">
+
+  <!-- icon rail -->
+  <nav class="rail" id="rail" aria-label="Jump to section"></nav>
+
+  <!-- sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <a class="brand" href="#/">
+      <span class="brand-logo">4H</span>
+      <span class="brand-text">
+        <span class="brand-title">Candle Profiling</span>
+        <span class="brand-sub">Study archive</span>
+      </span>
+      <span class="brand-chip">Indices</span>
+    </a>
+    <nav id="nav" aria-label="Archive contents"></nav>
+  </aside>
+
+  <!-- routed view -->
+  <main class="main" id="app" tabindex="-1"></main>
+</div>
+
+<!-- lightbox -->
+<div class="lightbox" id="lightbox" role="dialog" aria-modal="true" aria-label="Enlarged plate">
+  <button class="lightbox-close" id="lightbox-close" aria-label="Close">✕</button>
+  <img id="lightbox-img" src="" alt="" />
+  <div class="lightbox-cap" id="lightbox-cap"></div>
+</div>
+
+<script src="js/data.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
