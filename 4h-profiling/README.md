@@ -28,8 +28,8 @@ index.html          page shell and framing copy
 css/app.css         the whole theme
 js/data.js          ALL content, as window.CONTENT — generated, see below
 js/app.js           renders data.js; nav, search, scroll-spy, lightbox
-assets/             diagram plates (v1-p05.png …), hero image, favicon
-fonts/              self-hosted Cormorant Garamond, Spectral, Inter, JetBrains Mono
+assets/             diagram plates (v1-p05.png …), favicon
+fonts/              self-hosted Space Grotesk, Inter, JetBrains Mono
 tools/extract_pdf.py   PDF → text + cropped diagram plates
 ```
 
@@ -41,10 +41,17 @@ python3 tools/extract_pdf.py ~/Downloads/deck.pdf --prefix v4
 ```
 
 This writes `tools/out/v4-text.txt` (every page's text) and one cropped PNG per
-diagram page into `assets/`. It finds diagram pages by counting vector draw
-operations — these decks draw their charts as vectors rather than embedding
-images, so a page with many draw ops is a chart slide. If a page is misfiled,
-re-run with `--min-drawings`.
+diagram page into `assets/`. The plates ship with a light background, so run
+them through the dark-mode remap afterwards:
+
+```bash
+python3 tools/darken_plates.py assets/v4-p05.png
+```
+
+`extract_pdf.py` finds diagram pages by counting vector draw operations — these
+decks draw their charts as vectors rather than embedding images, so a page with
+many draw ops is a chart slide. If a page is misfiled, re-run with
+`--min-drawings`.
 
 Then add a module to `window.CONTENT.modules` in `js/data.js`:
 
