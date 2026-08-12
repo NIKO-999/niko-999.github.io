@@ -600,6 +600,8 @@
     else if (parts[0] === 'sources')        { html = viewSources(); }
     else                                    { html = viewMissing(); }
 
+    document.body.dataset.view =
+      parts[0] === 'l' ? 'lesson' : (parts[0] || 'home');
     app.innerHTML = html + footerHTML();
     app.scrollTop = 0;
     window.scrollTo(0, 0);

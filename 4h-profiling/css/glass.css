@@ -22,12 +22,12 @@ body::before {
   z-index: -2;
   pointer-events: none;
   background:
-    radial-gradient(38% 40% at 14% 12%, rgba(6,126,104,0.55), transparent 62%),
-    radial-gradient(34% 36% at 82% 8%,  rgba(74,47,176,0.50), transparent 64%),
-    radial-gradient(40% 42% at 88% 62%, rgba(20,80,158,0.42), transparent 62%),
-    radial-gradient(34% 34% at 26% 86%, rgba(150,89,16,0.34), transparent 62%),
-    radial-gradient(30% 30% at 56% 44%, rgba(156,30,82,0.24), transparent 64%);
-  filter: blur(24px);
+    radial-gradient(42% 44% at 16% 10%, rgba(44,111,214,0.52), transparent 64%),
+    radial-gradient(38% 40% at 84% 6%,  rgba(20,80,158,0.50), transparent 64%),
+    radial-gradient(44% 46% at 88% 64%, rgba(30,127,168,0.38), transparent 62%),
+    radial-gradient(38% 38% at 22% 88%, rgba(10,42,92,0.62), transparent 64%),
+    radial-gradient(32% 32% at 54% 46%, rgba(58,138,232,0.20), transparent 66%);
+  filter: blur(26px);
 }
 /* a fine grain so the large gradients do not band on wide screens */
 body::after {
@@ -53,7 +53,12 @@ body::after {
   backdrop-filter: var(--blur);
   -webkit-backdrop-filter: var(--blur);
 }
-.brand { background: transparent; border-bottom-color: var(--glass-line); }
+/* the brand is sticky, so it needs its own frosted backing or the tree
+   scrolls straight through it */
+.brand {
+  background: #0C0F14;
+  border-bottom-color: var(--glass-line);
+}
 .mobile-bar {
   background: rgba(10,12,16,0.55);
   border-bottom-color: var(--glass-line);
@@ -144,3 +149,29 @@ tbody tr.key-row { background-color: rgba(43,212,176,0.07); }
     background-color: #101216;
   }
 }
+
+
+/* ==========================================================================
+   LESSON VIEW — long-form reading, so the glass steps back
+   Glass earns its place on the browse surfaces. Behind a page you are actually
+   studying it is visual noise, so the field is dimmed and the panels go solid.
+   ========================================================================== */
+body[data-view="lesson"]::before { opacity: 0.28; }
+body[data-view="lesson"]::after  { opacity: 0.16; }
+
+body[data-view="lesson"] .ruleset,
+body[data-view="lesson"] .banner,
+body[data-view="lesson"] .pg,
+body[data-view="lesson"] .seealso a,
+body[data-view="lesson"] .posbar,
+body[data-view="lesson"] .table-scroll {
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+  background-color: #0F1114;
+  border-color: var(--line-2);
+}
+body[data-view="lesson"] .banner {
+  background-image: linear-gradient(100deg, color-mix(in srgb, var(--c, var(--grey)) 16%, transparent) 0%, transparent 62%);
+}
+body[data-view="lesson"] .reading p,
+body[data-view="lesson"] .banner-body > p { color: var(--text-2); }
