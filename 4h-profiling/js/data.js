@@ -29,7 +29,7 @@ window.CONTENT = {
    {
     "n": 3,
     "title": "Decide which 4H candle prints the day's high or low",
-    "body": "One daily candle contains six 4H candles, and the framework's central act is nominating which one of them forms the high or low of the day. That candle is the reversal candle: its wick is the daily extreme, and by the framework's logic it becomes the second candle of a swing point, after which the following candle is expected to expand. The source is blunt that the market cannot reverse without a swing point, and that once the second candle of the swing point is in, the third and fourth candles expand until some draw on liquidity is met. Practically this means you are watching the open of each 4H candle and asking whether the extreme it is setting is going to hold: the source says a 4H high or low established with a CISD or order block confirmation is more likely to hold. Nominating the candle by its open time — 18:00, 22:00, 2:00, 6:00, 10:00 on the indices clock, one hour earlier on forex — is what turns a vague directional opinion into a testable plan for the day.",
+    "body": "One daily candle contains six 4H candles, and the framework's central act is nominating which one of them forms the high or low of the day. That candle is the reversal candle: its wick is the daily extreme, and by the framework's logic it becomes the second candle of a swing point, after which the following candle is expected to expand. The source is blunt that the market cannot reverse without a swing point, and that once the second candle of the swing point is in, the third and fourth candles expand until some draw on liquidity is met. Practically this means you are watching the open of each 4H candle and asking whether the extreme it is setting is going to hold: the source says a 4H high or low established with a CISD or order block confirmation is more likely to hold. Nominating the candle by its open time — 18:00, 22:00, 2:00, 6:00, 10:00 — is what turns a vague directional opinion into a testable plan for the day.",
     "checks": [
      "Which 4H candle am I nominating as the reversal candle — can I name it by its open time?",
      "Has a 4H candle already set a high or low with CISD or order block confirmation behind it?",
@@ -40,9 +40,9 @@ window.CONTENT = {
    {
     "n": 4,
     "title": "Confirm against the session profile",
-    "body": "The nomination in step 3 is not free-form; the source supplies four session profiles that tell you which candle is the plausible one, and they run in sequence through the day. An Asia reversal (the 18:00 or 22:00 candle for indices, 17:00 or 21:00 for forex) typically follows the previous day hitting a key level, and hands London the expansion with NY continuing. A London reversal (the 2:00 candle for indices, 1:00 for forex) happens when Asia consolidates or protracts instead of reversing: London prints the wick and NY expands. If both Asia and London fail to reverse or manipulate, the NY candles take over — the 6:00 candle for indices (5:00 for forex) becomes the reversal into expansion, often during the news window, with the 10:00 candle continuing. And if the 6:00 candle itself fails to reverse, the source treats the 10:00 candle (9:00 for forex) as the last point for a proper reversal, noting that a small wick there supported by the daily logic is a strong entry point. Read these as a waterfall: each failed session pushes the reversal to the next candle rather than cancelling the day.",
+    "body": "The nomination in step 3 is not free-form; the source supplies four session profiles that tell you which candle is the plausible one, and they run in sequence through the day. An Asia reversal (the 18:00 or 22:00 candle) typically follows the previous day hitting a key level, and hands London the expansion with NY continuing. A London reversal (the 2:00 candle) happens when Asia consolidates or protracts instead of reversing: London prints the wick and NY expands. If both Asia and London fail to reverse or manipulate, the NY candles take over — the 6:00 candle becomes the reversal into expansion, often during the news window, with the 10:00 candle continuing. And if the 6:00 candle itself fails to reverse, the source treats the 10:00 candle as the last point for a proper reversal, noting that a small wick there supported by the daily logic is a strong entry point. Read these as a waterfall: each failed session pushes the reversal to the next candle rather than cancelling the day.",
     "checks": [
-     "Am I reading my instrument on the indices clock or the forex clock — and have I kept them separate?",
+     "Which of the four profiles does today match — Asia, London, the NY morning candle, or the late NY candle?",
      "Did Asia reverse, or did it consolidate or protract?",
      "If London did not print the wick, am I now waiting on the NY morning candle?",
      "If the NY morning candle failed to reverse, am I treating the late NY candle as the final reversal window?"
@@ -61,7 +61,7 @@ window.CONTENT = {
    {
     "n": 6,
     "title": "Drop to the entry timeframe and take the CISD",
-    "body": "Only now do you go down for the entry, and the pairing is fixed: a 4H reversal is entered on M15, a 1H reversal is entered on M5. In both cases the trigger is a CISD — a closure below or above a series of opposing close candles — and the source attaches strict qualifiers to it. The CISD should happen instantly; there must be no consolidation prior to it (on the 1H-to-M5 model, no consolidation on either M5 or 1H); and if the CISD is far above, the source directs you to take IFVG entries instead of chasing. Timing is part of the trigger: entries are taken after 8:00 AM, except when there is 8:30 news, in which case you wait for the reaction first. The 1H-to-M5 model adds its own geometry — four 1H candles make one 4H candle, so when the next 4H candle expands the four 1H candles inside it expand too, and you position within the first 1H candles of a new 4H expansion, waiting for the swing point to form and aiming to catch its second candle. For scalping, the source names a 4H to 1H to M5/M3 chain without elaborating on it.",
+    "body": "Only now do you go down for the entry, and the pairing is fixed: a 4H reversal is entered on M15, a 1H reversal is entered on M5. In both cases the trigger is a CISD — a closure below or above a series of opposing close candles — and the source attaches strict qualifiers to it. The CISD should happen instantly; there must be no consolidation prior to it (on the 1H-to-M5 model, no consolidation on either M5 or 1H); and if the CISD is far above, the source directs you to take IFVG entries instead of chasing. Timing is part of the trigger: entries are taken after 8:00 AM, except when there is 8:30 news, in which case you wait for the reaction first. The 1H-to-M5 model adds its own geometry — four 1H candles make one 4H candle, so when the next 4H candle expands the four 1H candles inside it expand too, and you position within the first 1H candles of a new 4H expansion, waiting for the swing point to form and aiming to catch its second candle. For scalping, the source names a 4H to 1H to M5/M3 chain and gives three cases for it, covered in Module II.8.",
     "checks": [
      "Did the CISD happen instantly, with no consolidation ahead of it?",
      "Is it past 8:00 AM — and if 8:30 news is scheduled, have I waited for the reaction?",
@@ -72,7 +72,7 @@ window.CONTENT = {
    {
     "n": 7,
     "title": "Manage inside the stated cautions",
-    "body": "The source's risk controls are a short list of prohibitions rather than a position-sizing scheme, and they are worth treating as absolute because they are the only management rules given. Order flow must align, and there are no counter-trend trades. There must be no contradictory swings on the chart — bullish and bearish swings cannot coexist in the same read, and if they do, the read is wrong rather than merely ambiguous. There are no trades after 11:00 AM. On the late candle, which for indices spans 10:00 AM to 2:00 PM and for forex 9:00 AM to 1:00 PM, the source advises closing trades before 12:00 PM New York lunch on indices, and on forex attaches the same 12:00 PM cutoff specifically to days carrying 10:00 AM news. And the SMT gate from step 5 remains in force at all times. Together these compress the framework's actual trading window into the morning: a reversal identified late in the sequence still has to be entered and exited inside those bounds, or it is not taken.",
+    "body": "The source's risk controls are a short list of prohibitions rather than a position-sizing scheme, and they are worth treating as absolute because they are the only management rules given. Order flow must align, and there are no counter-trend trades. There must be no contradictory swings on the chart — bullish and bearish swings cannot coexist in the same read, and if they do, the read is wrong rather than merely ambiguous. There are no trades after 11:00 AM. On the late candle, which spans 10:00 AM to 2:00 PM, the source advises closing trades before 12:00 PM New York lunch. And the SMT gate from step 5 remains in force at all times. Together these compress the framework's actual trading window into the morning: a reversal identified late in the sequence still has to be entered and exited inside those bounds, or it is not taken.",
     "checks": [
      "Is this trade with the prevailing order flow rather than against it?",
      "Do bullish and bearish swings coexist on my chart right now?",
@@ -95,49 +95,42 @@ window.CONTENT = {
  },
  "sessions": {
   "title": "The Six 4H Candles",
-  "note": "All times are read as New York time. The source documents never name a timezone — this is an inference from the sessions they describe (the 8:30 and 9:30 driver times, the 12:00 NY lunch) — but the clock hours themselves are exactly as the source states them. A 24-hour day divides into six 4H candles, and the source directs attention to only three of them — the London, NY morning and late NY candles — because those are where the day's high or low is expected to be set and expanded from, with the Asia candles watched only as an earlier reversal window. The indices clock and the forex clock are offset by one hour and must never be merged.",
+  "note": "All times are read as New York time. The source documents never name a timezone — this is an inference from the sessions they describe (the 8:30 and 9:30 driver times, the 12:00 NY lunch) — but the clock hours themselves are exactly as the source states them. A 24-hour day divides into six 4H candles, and the source directs attention to only three of them, because those are where the day's high or low is expected to be set and expanded from; the Asia candles are watched only as an earlier reversal window. These are the indices windows, which is what this archive is set to.",
   "columns": [
    "Candle",
-   "Indices",
-   "Forex",
+   "Window",
    "Role in the day"
   ],
   "rows": [
    [
     "Asia open",
     "18:00 - 22:00",
-    "17:00 - 21:00",
     "Asia reversal window (first of two). The source says a reversal here usually follows the previous day hitting a key level; if Asia reverses, expect London expansion and NY continuation."
    ],
    [
     "Asia late",
     "22:00 - 02:00",
-    "21:00 - 01:00",
     "Asia reversal window (second of two). Same profile as the 18:00 candle: reversal sets up in the overnight hours, and you wait for the reversal to end before trading the London or NY continuation."
    ],
    [
     "London — KEY",
     "02:00 - 06:00",
-    "01:00 - 05:00",
     "First of the three key candles. London reversal pattern: on a classic buy day London prints the wick and NY expands. Occurs when Asia consolidates or protracts. Engage by waiting for M15 reversal confirmation, then entering the next continuation candle."
    ],
    [
     "NY morning — KEY",
     "06:00 - 10:00",
-    "05:00 - 09:00",
     "Second of the three key candles. If both Asia and London fail to reverse or manipulate, this candle acts as the reversal into expansion — more common on news days, with driver times of 8:30 and 9:30 usually helping confirm the move. Entries are taken after 8:00 AM."
    ],
    [
     "Late NY — KEY",
     "10:00 - 14:00",
-    "09:00 - 13:00",
-    "Third of the three key candles, and the last chance. If the NY morning candle failed to reverse, or 10:00 news is involved, this becomes the final point for a proper reversal; a small wick supported by the daily logic is called a strong entry point. Close before 12:00 PM NY lunch on indices; on forex the same cutoff is stated for 10:00 AM news days."
+    "Third of the three key candles, and the last chance. If the NY morning candle failed to reverse, or 10:00 news is involved, this becomes the final point for a proper reversal; a small wick supported by the daily logic is called a strong entry point. Better to close trades before 12:00 PM New York lunch."
    ],
    [
     "Afternoon",
     "14:00 - 18:00",
-    "13:00 - 17:00",
-    "The sixth candle, and the only one the source never discusses. It falls outside both the three key candles and the Asia reversal windows, and by the framework's own cautions the trading day is already over — no trades after 11:00 AM, positions closed before 12:00 PM lunch."
+    "The sixth candle, and the only one the source never discusses in prose. It falls outside both the three key candles and the Asia reversal windows, and by the framework's own cautions the trading day is already over — no trades after 11:00 AM, positions closed before 12:00 PM lunch."
    ]
   ]
  },
@@ -278,7 +271,7 @@ window.CONTENT = {
      "plate": "assets/v1-p07.png",
      "plateCaption": "The three-candle swing point on the left with an ascending line drawn off the low of the sweeping wick, representing the correlated market's failure to make the same low; on the right, the same low in lower-timeframe detail, where price puts in a higher low against that line and then closes above the blue level before expanding away.",
      "reading": [
-      "SMT stands for smart money technique divergence, and the idea is comparative rather than absolute. Instead of judging a low from one chart alone, you place two correlated instruments side by side — two index futures, two currency pairs that normally move together — and check whether both made the same low at the same moment. When one makes a lower low and the other does not, the two have diverged. That disagreement is the signal.",
+      "The source assumes the reader already knows what SMT divergence is; it never explains the mechanics, giving only that it confirms reversals and is mandatory before trading reversal candles. As the term is conventionally used, SMT stands for smart money technique divergence, and the idea is comparative rather than absolute. Instead of judging a low from one chart alone, you place two correlated instruments side by side — two index futures, two currency pairs that normally move together — and check whether both made the same low at the same moment. When one makes a lower low and the other does not, the two have diverged. That disagreement is the signal.",
       "The mechanism is a failure of confirmation. Correlated markets that are genuinely being sold should both push through their prior lows together. If one reaches beneath its low and its partner refuses to follow, the move down is not being carried by both; it looks like a reach for liquidity in one instrument rather than a directional move across the complex. Applied to the swing point of the previous lesson, this is a check on C2 specifically — the candle whose job is to take out the prior extreme. The divergence tells you that the taking-out was a sweep, not a breakdown.",
       "The plate shows both scales of the same observation. On the left, the higher-timeframe swing point with a line rising away from the low of C2's wick: the correlated market's low sits higher, so the two are diverging. On the right, the same event resolved on a lower timeframe, where price registers a higher low against that same line and then closes above a marked short-term high before expanding. The comparison is made at the swing point's extreme, which is where the author specifies to look for it in the entry models that follow.",
       "The status the author gives this condition is unusually strong. It is not a confluence to be weighed against others — it is compulsory, mandatory before trading a reversal candle, and restated in the entry rules as an outright veto: no SMT, no trade. The quantitative claim attached to it, an 8–12% increase in win rate, is the author's own report and is presented here as such rather than as an established finding."
@@ -322,7 +315,7 @@ window.CONTENT = {
      "plateCaption": "Left, the 4H sequence: the second candle's wick sweeps the prior low with a purple SMT line marking the divergence beneath it, and the following candle expands away from the dotted 6:00 level. Right, the same event on the lower timeframe, where price bottoms around the vertical 8:00 marker, closes above the blue short-term highs, and expands past the 10:00 level.",
      "reading": [
       "The author calls these the bread and butter entries, and structurally they are the whole framework executed once. The higher timeframe supplies the swing point and the divergence; the M15 chart supplies the trigger. Nothing here is new — it is the previous four lessons arranged into a checklist with a clock attached.",
-      "The trigger itself is the CISD, or change in state of delivery. The author's definition is mechanical: a close below or above a series of opposing close candles. If price has been printing a run of candles closing lower and then a single candle closes above the open of that entire run, the market has stopped delivering downward and started delivering upward. That is the change of state. It is a close-based event, and it is the moment the entry becomes live. In the plate, the blue horizontal lines mark exactly these levels — the short-term highs whose breach on a close constitutes the CISD, after which price expands upward.",
+      "The trigger itself is the CISD, or change in state of delivery. The author's definition is mechanical: a close below or above a series of opposing close candles. If price has been printing a run of candles closing lower and then a single candle closes back through that entire run of opposing closes, the market has stopped delivering downward and started delivering upward. That is the change of state. It is a close-based event, and it is the moment the entry becomes live. In the plate, the blue horizontal lines mark exactly these levels — the short-term highs whose breach on a close constitutes the CISD, after which price expands upward.",
       "The qualifiers around the CISD are where most of the discipline sits. It should happen instantly — meaning promptly after the swing point extreme, not after price has been drifting. There must be no consolidation before it, because a consolidation ahead of the trigger means the market has already absorbed the move and the change of state is stale rather than sharp. If the CISD level sits far above the current price, chasing it costs too much, so the author substitutes an IFVG entry — an inverse fair value gap, meaning a fair value gap (an inefficiency left by a fast move) that price has traded through and which now acts in the opposite role, offering a closer entry with a tighter stop.",
       "The clock is defined at both ends. Entries are taken after 8:00 AM, with one carve-out: if there is news at 8:30 AM, wait for the reaction rather than positioning into it. Nothing is taken after 11:00 AM. The plate's labels trace exactly this window — the 6:00 level marking where the 4H expansion candle opens, the vertical 8:00 line marking where the lower-timeframe low forms and the trigger becomes available, and the 10:00 level above showing where the expansion has carried to. The remaining rules are exclusions rather than conditions: no counter-trend trades, no contradictory swings — a bullish swing and a bearish swing cannot both be valid on the same read — and, restated once more, no SMT means no trade."
      ],
@@ -505,7 +498,6 @@ window.CONTENT = {
      "title": "The Daily Profile and the Six 4H Candles",
      "source": "V2 · p.5",
      "rules": [
-      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "Treat one daily candle as six 4H candles.",
       "Identify which of the six will print the daily high or low — that candle carries the reversal.",
       "Trade away from the daily high/low (which becomes the wick) toward the draw on liquidity.",
@@ -611,6 +603,7 @@ window.CONTENT = {
      "plateCaption": "Left, 'Protected Swings': a stepwise advance in which successive swing lows are ringed and left untouched, blue lines mark reclaimed levels, and a shaded zone marks an opposing-candle block at a key level. Right, 'MMXM NDM/TTFM': a bearish candle, a second candle taking out its low, then a bullish reversal and two expanding candles, with grey lines marking prior candle highs and lows and dotted 50% levels drawn across candle midpoints.",
      "reading": [
       "The framework's structural claim is stated in one sentence: the market cannot reverse without a swing point. A swing point in this model is a three-candle formation — a first candle, a second candle that takes out the previous candle's high or low, and a third candle that reverses direction. The second candle is the one that does the work of the reversal; it runs the liquidity beyond the prior extreme and then fails to hold there. That failure is what the earlier lessons called the HRLR leg and the wick.",
+      "Note a tension in the source itself. V1 labels C3 as 'the third candle, which reverses direction', while V3 calls the candle that reverses 'the second candle of the swing point'. Read C2 as the candle that runs the extreme and C3 as the first candle of expansion — but the archive flags the discrepancy rather than resolving it, because the documents do not.",
       "Once that second candle is in place, the model gives a specific expectation for what follows. Following the 2nd candle of the swing point, the 3rd and 4th candles expand until a DOL is met. This is the body phase again, now expressed in candle counts: two candles of directional travel, ending not at a fixed distance but at a liquidity objective. The draw defines when the expansion is finished; the candle count only tells you where to expect it.",
       "MMXM Trader's Next Day Model and what the author pairs with it as TTFM supply the daily-profile scaffolding this sits inside. Their governing idea, carried through from the framework's earlier material, is that price expands in the direction of the DOL for as long as it keeps closing beyond the previous candle, until the draw is met. The right half of the plate shows exactly this: prior candle highs and lows marked as reference lines, and price closing through them. The plate also carries unlabelled 50% marks at the candle midpoints; the source never explains what they measure or how to use them, so this archive records their presence without supplying a meaning for them.",
       "The left half of the plate is the protected-swing idea in picture form. Each ringed swing low is left behind as the advance continues; none is revisited; the shaded opposing-candle block sits at the level that turned price. Put beside the NDM panel, the two halves describe the same day from two angles — where the reversal was defended, and how the expansion that followed was structured candle by candle."
@@ -635,7 +628,6 @@ window.CONTENT = {
      "title": "The 18:00 / 22:00 Overnight Reversal and the 2:00 London Reversal",
      "source": "V2 · p.9–10",
      "rules": [
-      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "18:00 / 22:00 reversal: expect it usually after the previous day has hit a key level.",
       "Let the reversal set up in the overnight hours, wait for it to end, then trade the London or New York continuation.",
       "2:00 reversal: expect it when Asia consolidates or protracts.",
@@ -671,7 +663,6 @@ window.CONTENT = {
      "title": "The 6:00 and 10:00 New York Reversals",
      "source": "V2 · p.11–12",
      "rules": [
-      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "6:00 reversal: expect New York to make the reversal after the early session protracts or consolidates.",
       "Use the 8:30 and 9:30 driver times to help confirm the 6:00 move.",
       "10:00 reversal: treat it as the last point for a proper reversal if the 6:00 candle failed to reverse, or if 10:00 news is involved.",
@@ -741,7 +732,7 @@ window.CONTENT = {
    "title": "The Mechanical Way to Read Price Action",
    "subtitle": "Reading the daily range as six 4H candles — deciding which one reverses and which one expands.",
    "sourceLabel": "Eleven_Trades · 4H Candle Profiling — The Mechanical Way to Read Price Action",
-   "overview": "This document is the framework's clearest statement: a daily range is six 4H candles, and the work of the day is to identify which of them prints the reversal and which of them carries the expansion. The logic is borrowed downward from weekly profiling — one candle's reversal implies the next candle's expansion — and applied inside the daily range. Three candles carry almost all of the tradable session, and their clock differs between indices and forex, so the times must be kept apart. Everything else in the document is a catalogue of where the reversal tends to land: Asia, London, or New York.",
+   "overview": "This document is the framework's clearest statement: a daily range is six 4H candles, and the work of the day is to identify which of them prints the reversal and which of them carries the expansion. The logic is borrowed downward from weekly profiling — one candle's reversal implies the next candle's expansion — and applied inside the daily range. Three candles carry almost all of the tradable session: 2:00 AM–6:00 AM, 6:00 AM–10:00 AM, and 10:00 AM–2:00 PM. Everything else in the document is a catalogue of where the reversal tends to land: Asia, London, or New York.",
    "lessons": [
     {
      "id": "fractal-thought-process",
@@ -787,32 +778,28 @@ window.CONTENT = {
      "rules": [
       "Treat one daily range as six 4H candles.",
       "Concentrate on three of those six candles, not all six.",
-      "Indices — key candles: 2:00 AM–6:00 AM, 6:00 AM–10:00 AM, 10:00 AM–2:00 PM.",
-      "Indices — on the 10:00 AM–2:00 PM candle it is better to close trades before 12:00 PM, the NY lunch hour.",
-      "Forex — key candles: 1:00 AM–5:00 AM, 5:00 AM–9:00 AM, 9:00 AM–1:00 PM.",
-      "Forex — on days with 10:00 AM news, close trades before 12:00 PM.",
-      "Never carry an indices time onto a forex chart, or the reverse; the two clocks are offset by one hour."
+      "Key candles: 2:00 AM–6:00 AM, 6:00 AM–10:00 AM, 10:00 AM–2:00 PM.",
+      "On the 10:00 AM–2:00 PM candle it is better to close trades before 12:00 PM, the NY lunch hour."
      ],
      "plate": null,
      "plateCaption": null,
      "reading": [
-      "Six 4H candles fill a twenty-four hour day, and the framework treats that count as the working unit. But the document immediately narrows the field: of the six, three carry the structure worth trading. For indices those are the 2:00 AM–6:00 AM candle, the 6:00 AM–10:00 AM candle, and the 10:00 AM–2:00 PM candle. For forex the same three windows sit one hour earlier — 1:00 AM–5:00 AM, 5:00 AM–9:00 AM, and 9:00 AM–1:00 PM. The offset is not cosmetic. A forex chart's candles simply open on a different hour, so an indices trader's 6:00 AM candle and a forex trader's 5:00 AM candle occupy the same structural position in the day, and confusing the two puts a reader half a candle out of phase with everything that follows.",
+      "Six 4H candles fill a twenty-four hour day, and the framework treats that count as the working unit. But the document immediately narrows the field: of the six, three carry the structure worth trading — the 2:00 AM–6:00 AM candle, the 6:00 AM–10:00 AM candle, and the 10:00 AM–2:00 PM candle. Everything the rest of the document says about reversals and expansions is said about those three windows, so the first work of the day is drawing their boundaries and knowing which one price is currently inside. A reader who loses track of that is half a candle out of phase with everything that follows.",
       "The three windows correspond to the shape of the session. The first is the London window: the candle in which Europe opens and, on many days, the daily high or low is printed. The second spans the pre-open and the New York cash open. The third covers the late-morning drive. Together they contain the reversal and the expansion the framework is looking for, which is why the remaining three candles of the day — the overnight and the late-afternoon ones — are treated as context rather than as the trading field.",
-      "Both instrument sets carry a closing instruction tied to noon New York. For indices, the third candle runs to 2:00 PM but the document prefers trades closed before 12:00 PM, the NY lunch hour, when participation thins and expansion tends to stall. For forex, the same 12:00 PM cutoff is attached specifically to days with 10:00 AM news — the days on which the 9:00 AM–1:00 PM candle is doing the day's work. In both cases the instruction is about the back half of the third candle, not about the candle as a whole."
+      "The third candle carries a closing instruction that its own boundaries do not. It runs to 2:00 PM, but the document prefers trades closed before 12:00 PM, the New York lunch hour. The source gives the instruction without a rationale. That preference is about the back half of the candle rather than about the candle as a whole: 10:00 AM to 2:00 PM is still where a late reversal and its expansion are expected to occur, but the portion of it the reader is meant to be holding through is the first two hours. And it is stated as a preference — better to close before noon — rather than as a prohibition."
      ],
      "approach": [
-      "Confirm which instrument you are on before reading any time in this framework — indices and forex use different candle opens.",
       "Draw the six 4H candle boundaries on your chart for the current day.",
-      "Highlight the three key candles: 2:00, 6:00 and 10:00 opens for indices; 1:00, 5:00 and 9:00 opens for forex.",
-      "Note whether the day carries 10:00 AM news, since that determines how the third candle is handled on forex.",
-      "Set your closing discipline before you enter: out before 12:00 PM NY on indices, and before 12:00 PM on forex 10:00 AM news days.",
-      "Treat the remaining three candles of the day as context for where the reversal may already have formed."
+      "Highlight the three key candles — the 2:00, 6:00 and 10:00 opens — and know which of them price is inside right now.",
+      "Treat the remaining three candles of the day as context for where the reversal may already have formed, not as the trading field.",
+      "Set your closing discipline before you enter: out before 12:00 PM, the New York lunch hour.",
+      "On the 10:00 AM candle in particular, check there is enough room left before noon for the trade to be worth taking."
      ],
      "watchouts": [
-      "Merging the two clocks — writing '2:00 AM London reversal' on a forex chart, where the corresponding candle opens at 1:00 AM.",
       "Trading all six candles; the framework deliberately reduces the day to three.",
-      "Holding through NY lunch on indices, against the document's stated preference.",
-      "Applying the forex 12:00 PM cutoff on days without 10:00 AM news, or ignoring it on days with it."
+      "Losing track of which of the three key candles is currently open, so that a reversal is read against the wrong window.",
+      "Holding through New York lunch, against the document's stated preference.",
+      "Hardening the noon instruction into a rule of the system — the source gives it as a preference on the late candle, not as a prohibition."
      ]
     },
     {
@@ -822,30 +809,29 @@ window.CONTENT = {
      "source": "V3 · p.4–5",
      "rules": [
       "If the Asia candles reverse, expect London to expand and New York to continue.",
-      "Indices — look for the reversal within the 18:00 or 22:00 candle.",
-      "Forex — look for the reversal within the 17:00 or 21:00 candle.",
+      "Look for the reversal within the 18:00 or 22:00 candle.",
       "Take the reversing Asia candle as the second candle of the swing point; the candles that follow it are continuation candles.",
-      "Read the resulting day as an OLHC (open-low-high-close) daily candle on a buy day — the low is made early and the close is at the far end of the range.",
+      "Read the resulting day as the source's 'Daily OLHC Candle' — the shape it labels on the diagram. The source does not expand the acronym.",
       "Once Asia has reversed, the source's expectation for the rest of the day is expansion and continuation; it says nothing about what happens if a later session reverses again."
      ],
      "plate": "assets/v3-p05.png",
      "plateCaption": "Two six-candle daily sequences with the daily candle each one produces: on the left, an Asia reversal in which the 22:00 candle drives down on a long lower wick and closes back up, and the 2:00, 6:00 and 10:00 candles expand upward in sequence; on the right, a London reversal in which the 2:00am candle makes the low on a long lower wick and the 6:00 and 10:00 candles carry the expansion — both sequences resolving into a bullish Daily OLHC candle with a long lower wick and the close near the high.",
      "reading": [
       "The Asia reversal is the earliest of the three profiles. Price reaches a level during the overnight hours, runs it, and fails; the resulting 4H candle carries a long wick and closes back against its own run. Because that candle is the second candle of the swing point, everything after it is continuation: London expands, and New York continues the same direction. The trader's day is therefore already framed before the London window opens.",
-      "The times split by instrument and must stay split. On indices the reversal is expected within the 18:00 or the 22:00 candle. On forex it is expected within the 17:00 or the 21:00 candle — the same two structural positions, one hour earlier on the clock. These are the two overnight candles that precede the first of the three key candles, which is why an Asia reversal hands a fully formed swing point to the session that follows.",
+      "The reversal is expected within the 18:00 or the 22:00 candle — the two overnight candles that sit ahead of the first of the three key candles. That position is what makes the profile distinctive: an Asia reversal hands a fully formed swing point to the session that follows, so the first key candle opens with the day's extreme already set behind it.",
       "The plate shows the sequence and its consequence side by side. In the left-hand panel the day's low is printed by the 22:00 candle, which pushes below the prior candles and closes back into their range on a pronounced lower wick; the three candles after it — 2:00, 6:00 and 10:00 — step upward one after another, and a small final candle closes out the day. Collapse those six candles into one and you have the Daily OLHC candle drawn beside them: open, then low, then high, then close, a bullish body with a long tail beneath it. OLHC is the shape a buy day takes when the low is made early; its mirror, OHLC (open-high-low-close), is the sell-day equivalent. Reading the day this way is what allows the framework to be mechanical — the trader is choosing between two known shapes rather than forecasting a path.",
       "The practical consequence is that an Asia reversal removes a question rather than adding one. Once the overnight candle has printed its wick and closed, the framework's stated expectation for London and New York is delivery — expansion and continuation. Note the limit of that claim: the source says what it expects, not what it forbids, and it gives no instruction for a day on which a later session reverses again."
      ],
      "approach": [
       "Note where the previous day finished relative to your key levels, since the overnight run is usually aimed at one of them.",
-      "Watch the correct overnight candles for your instrument: 18:00 and 22:00 on indices, 17:00 and 21:00 on forex.",
+      "Watch the two overnight candles: 18:00 and 22:00.",
       "Wait for one of them to close having run a level and reversed — the wick is the reversal, the close confirms it.",
       "Mark that candle as the second candle of the swing point and mark its extreme as the expected daily high or low.",
       "Carry the expectation into the London candle and treat the New York candles as continuation.",
       "Frame the day as an OLHC or OHLC daily candle and let that shape govern which side you are willing to take."
      ],
      "watchouts": [
-      "Using indices overnight times on a forex chart — 18:00/22:00 and 17:00/21:00 are not interchangeable.",
+      "Watching only one of the two overnight candles; the source names 18:00 and 22:00 together as the likely window.",
       "Calling a wick a reversal before the candle has closed back against its run.",
       "Treating the Asia reversal as a guarantee that no later session can reverse — the source states an expectation of continuation, not a prohibition.",
       "Confusing an overnight consolidation or protraction — a false push before the real move — with a completed reversal candle."
@@ -858,8 +844,7 @@ window.CONTENT = {
      "source": "V3 · p.4–5",
      "rules": [
       "On a classic buy day, expect London to reverse and New York to continue expanding.",
-      "Indices — the reversal occurs within the 2:00 AM–6:00 AM window; focus on the 2:00 AM 4H candle.",
-      "Forex — the reversal occurs within the 1:00 AM–5:00 AM window; focus on the 1:00 AM 4H candle.",
+      "The reversal occurs within the 2:00 AM–6:00 AM window; focus on the 2:00 AM 4H candle.",
       "Treat the London candle as the second candle of the swing point and the following New York candles as continuation.",
       "Expect the London candle's extreme to become the daily high or low.",
       "If London neither reverses nor manipulates, hand the reversal forward to the New York profiles."
@@ -868,20 +853,20 @@ window.CONTENT = {
      "plateCaption": null,
      "reading": [
       "The London reversal is the framework's default day, described in the source as the classic buy day: London prints the wick, New York expands. Structurally it is identical to the Asia case one candle later — the reversing candle is again the second candle of the swing point, and the candles after it are again continuation — but it lands inside the first of the three key candles rather than overnight, so it is watched live rather than inherited at the desk.",
-      "The window is the first key candle for each instrument. On indices that is 2:00 AM–6:00 AM, with attention on the 2:00 AM 4H candle itself. On forex it is 1:00 AM–5:00 AM, with attention on the 1:00 AM 4H candle. The distinction between the window and the candle matters: the reversal can develop anywhere inside the four hours, but it is the candle's completed shape at its close that confirms the swing point and hands the expectation to the next candle.",
+      "The window is the first of the three key candles, 2:00 AM–6:00 AM, with the attention on the 2:00 AM 4H candle itself. The distinction between the window and the candle matters: the reversal can develop anywhere inside the four hours, but it is the candle's completed shape at its close that confirms the swing point and hands the expectation to the next candle.",
       "The right-hand panel of the preceding plate shows this arrangement. Two overnight candles hold a narrow range; the 2:00am candle then pushes below them on a long lower wick and closes back inside, and the 6:00 and 10:00 candles expand upward from there. The resulting daily candle again carries the OLHC shape — the low made early in the session, the body running away from it, the close at the far end. What the two panels together demonstrate is that the daily candle looks much the same whether the reversal happened at 22:00 or at 2:00am; what changes is which 4H candle a trader must be watching, and therefore when the day's decision is made.",
-      "This is also where the phrase 'trade away from the reversal' becomes concrete. The London candle's extreme is treated as the day's protected end — the level the framework does not expect price to revisit — and the draw on liquidity (DOL, the pool of resting orders price is being delivered toward) sits at the other end. The New York candles are simply the delivery between those two points."
+      "This is also where the framework's instruction to trade away from protected swings becomes concrete. The London candle's extreme is the origin of the move, and the draw on liquidity (DOL, the pool of resting orders price is being delivered toward) sits at the other end. Note the precision the source asks for here: a swing counts as protected only if an order block or opposing candle formed into a key level at it — an extreme is not automatically protected simply because the reversal happened there. The New York candles are simply the delivery between those two points."
      ],
      "approach": [
       "Arrive with a daily bias already formed, so that 'classic buy day' or its sell-side mirror is a stated expectation rather than a reaction.",
-      "Open the correct first key candle: the 2:00 AM candle on indices, the 1:00 AM candle on forex.",
+      "Watch the first key candle from its open — the 2:00 AM candle.",
       "Track the run inside that window — the sweep of a prior level and the rejection back through it.",
       "Wait for that 4H candle to close before treating it as the second candle of the swing point.",
       "Mark its extreme as the presumed daily high or low, and identify the draw on liquidity at the opposite end.",
       "Take the following New York candles as the expansion phase and manage them as continuation, not as fresh reversals."
      ],
      "watchouts": [
-      "Focusing on the wrong candle for your instrument — the 2:00 AM candle is the indices reference, the 1:00 AM candle is the forex one.",
+      "Watching the 2:00 AM–6:00 AM window loosely instead of the 2:00 AM candle itself, which is where the source puts the focus.",
       "Treating a mid-window push as the reversal before the 4H candle closes.",
       "Expecting London to reverse on a day where the daily bias does not support it; the pattern is stated for a classic buy day and its mirror.",
       "Forcing a London reversal onto a session that only consolidated — that day belongs to the New York profiles instead."
@@ -895,32 +880,29 @@ window.CONTENT = {
      "rules": [
       "If both London and Asia fail to reverse or manipulate, expect the New York candles to handle both the reversal and the continuation.",
       "Treat this as the more common outcome on news days.",
-      "Indices — the 6:00 AM–10:00 AM candle acts as the reversal into expansion, with the reversal often occurring during news inside that window, followed by 10:00 AM continuation.",
-      "Indices — if the 6:00 AM 4H candle fails to reverse, expect the 10:00 AM candle to manipulate and initiate the expansion.",
-      "Forex — the 5:00 AM–9:00 AM candle acts as the reversal into expansion.",
-      "Forex — if the 5:00 AM–9:00 AM candle fails to reverse or manipulate, the 9:00 AM candle handles the reversal into expansion.",
-      "The 10:00 AM candle (indices) or 9:00 AM candle (forex) is the last window in which a proper reversal is expected."
+      "The 6:00 AM–10:00 AM candle acts as the reversal into expansion, with the reversal often occurring during news inside that window, followed by 10:00 AM continuation.",
+      "If the 6:00 AM 4H candle fails to reverse, expect the 10:00 AM candle to manipulate and initiate the expansion.",
+      "The 10:00 AM candle is the last window in which a proper reversal is expected."
      ],
      "plate": "assets/v3-p07.png",
      "plateCaption": "Two six-candle sequences and the daily candle each produces: on the left, the first three candles hold a tight range, the 6:00am candle drives down on a long lower wick and closes back up, and the 10:00 and 14:00 candles expand upward; on the right, four candles chop sideways before the 10:00am candle sweeps low and reverses hard into a long green body, with the final candle continuing — both resolving into a bullish Daily OLHC candle whose low sits far below an upper-range body.",
      "reading": [
       "This is the framework's fallback branch, and it is fully specified rather than left to judgment. If the overnight candles and the London candle pass without a reversal — no run of a level, no manipulation, only range — then the swing point has not been built, and the framework hands the job forward to New York. The document notes this is more common on news days, which makes sense: when a scheduled release is the day's catalyst, the market has a reason to hold a range until the release and to print its reversal on it.",
-      "The primary New York window is the second key candle. On indices that is 6:00 AM–10:00 AM, where the reversal often lands inside the news window, and the 10:00 AM candle then carries the continuation. On forex it is 5:00 AM–9:00 AM, acting the same way. The escalation rule is the important part and is stated explicitly for both instruments: if the 6:00 AM candle fails to reverse on indices, the 10:00 AM candle is expected to manipulate and initiate the expansion; if the 5:00 AM–9:00 AM candle fails on forex, the 9:00 AM candle handles the reversal into expansion. In other words the day is allowed exactly one deferral, and the third key candle is the last address at which a proper reversal is expected.",
+      "The primary New York window is the second key candle, 6:00 AM–10:00 AM, where the reversal often lands inside the news window and the 10:00 AM candle then carries the continuation. The escalation rule is the important part, and the source states it explicitly: if the 6:00 AM candle fails to reverse, the 10:00 AM candle is expected to manipulate and initiate the expansion. In other words the day is allowed exactly one deferral, and the third key candle is the last address at which a proper reversal is expected.",
       "The plate draws both branches. In the left-hand sequence the overnight and London candles are small and overlapping — the failure to reverse, rendered literally — and it is the 6:00am candle that finally pushes below them and closes back up on a long lower wick, after which the 10:00 candle prints a large body and the last candle extends it. In the right-hand sequence the failure runs one candle longer: four candles chop, and only the 10:00am candle sweeps the low and reverses into a long expansion body, leaving very little of the day for continuation. Both collapse into the same bullish Daily OLHC candle, which is the point — the daily shape is unchanged, only the hour at which it is decided has moved later.",
-      "The narrowing time is what makes the late branch demanding. A 10:00 AM reversal on indices leaves the expansion running into the 12:00 PM lunch cutoff the framework already prefers, so the window between the confirmed swing point and the point at which trades should be closed is short. The same compression applies to the forex 9:00 AM candle on 10:00 AM news days. Recognizing the branch early — that is, recognizing failure at 6:00 AM or 5:00 AM as it happens — is what leaves time to act on it."
+      "The narrowing time is what makes the late branch demanding. A 10:00 AM reversal leaves the expansion running into the 12:00 PM lunch cutoff the framework already prefers, so the gap between the confirmed swing point and the point at which trades should be closed is short. Recognizing the branch early — that is, recognizing the 6:00 AM failure as it happens rather than after it — is what leaves time to act on it."
      ],
      "approach": [
       "At the end of the London window, ask one question: did anything reverse or manipulate? If not, switch to the New York branch.",
       "Check the economic calendar; this branch is expected to be more common on news days.",
-      "Watch the second key candle for your instrument: 6:00 AM–10:00 AM on indices, 5:00 AM–9:00 AM on forex.",
+      "Watch the second key candle, 6:00 AM–10:00 AM.",
       "Let the news inside that window produce the run and the rejection, and wait for the candle to close before labelling it.",
-      "If that candle closes without reversing, move your attention to the third key candle — 10:00 AM on indices, 9:00 AM on forex — and expect it to manipulate and then expand.",
+      "If that candle closes without reversing, move your attention to the third key candle, the 10:00 AM one, and expect it to manipulate and then expand.",
       "Size the remaining session honestly: with a late reversal, plan the exit against the 12:00 PM cutoff before entering."
      ],
      "watchouts": [
       "Declaring 'London failed' before the London candle has actually closed.",
-      "Expecting a reversal after the third key candle; the framework's last proper reversal window is 10:00 AM on indices and 9:00 AM on forex.",
-      "Mismatching instruments — the 6:00/10:00 pairing is the indices form, the 5:00/9:00 pairing is the forex form.",
+      "Expecting a reversal after the third key candle; the framework's last proper reversal window is the 10:00 AM candle.",
       "Chasing the news spike itself rather than the completed reversal it produces inside the 4H candle.",
       "Taking a late 10:00 AM entry with no room left before the noon cutoff."
      ]
@@ -972,7 +954,7 @@ window.CONTENT = {
       "Take the primary goal as stated: avoid manipulation by lower-timeframe price action when no swing is established on the higher timeframe.",
       "Require a higher-timeframe swing before acting on any lower-timeframe signal.",
       "Keep trades within the OLHC / OHLC structure of the 4H candle.",
-      "Anchor lower-timeframe reading to the 4H opens — the 6:00 AM open and the 10:00 AM open on indices, the 5:00 AM and 9:00 AM opens on forex.",
+      "Anchor lower-timeframe reading to the 4H opens — the 6:00 AM open and the 10:00 AM open.",
       "Treat lower-timeframe movement that occurs before the 4H swing is established as unnecessary price action, not as signal."
      ],
      "plate": "assets/v3-p09.png",
@@ -986,7 +968,7 @@ window.CONTENT = {
      "approach": [
       "Establish the daily bias from your existing analysis before applying any of the 4H profiling.",
       "Confirm that a swing has been established on the 4H before you open a lower-timeframe chart at all.",
-      "Project the relevant 4H opens onto the M15 chart — 6:00am and 10:00am on indices, 5:00am and 9:00am on forex.",
+      "Project the 4H opens onto the M15 chart — the 6:00am open and the 10:00am open.",
       "Identify which leg of the OLHC or OHLC structure the current 4H candle is building, and only engage in the expansion leg.",
       "Use the M15 chart to time the entry within that leg, using CISD on a reversal candle or an order block on a continuation candle.",
       "When the lower timeframe is busy but the 4H shows no completed swing, record it as noise and take no action."
@@ -995,8 +977,7 @@ window.CONTENT = {
       "Running the framework without a daily bias — it selects candles, it does not supply direction.",
       "Dropping to the M15 chart before a 4H swing exists; that is the exact failure mode the document is written against.",
       "Entering during the search for the low on an OLHC candle instead of after it, which places the trade outside the structure.",
-      "Reading M15 chop around the 4H open as a signal, when on the 4H it is only wick.",
-      "Projecting the wrong opens for the instrument — the indices 6:00/10:00 opens correspond to the forex 5:00/9:00 opens."
+      "Reading M15 chop around the 4H open as a signal, when on the 4H it is only wick."
      ]
     }
    ]
@@ -1023,7 +1004,7 @@ window.CONTENT = {
   },
   {
    "term": "Driver times",
-   "full": "8:30 / 9:30 / 10:00 news windows",
+   "full": "8:30 / 9:30",
    "def": "The scheduled news and open times the source names as the moments that push a reversal into motion. 8:30 and 9:30 are said to usually help confirm the move on a 6:00 NY reversal; 10:00 news is one of the two conditions that can push the reversal into the late NY candle. They also gate entries: trades are taken after 8:00 AM, but if there is 8:30 news you wait for the reaction first. The source uses 'driver times' loosely and never gives a full list.",
    "seen": "Steps 4 and 6. The NY reversal profiles lean on them heavily; the 6:00 candle reversal is described as often occurring during news."
   },
@@ -1059,8 +1040,8 @@ window.CONTENT = {
   },
   {
    "term": "IFVG",
-   "full": "Inverted Fair Value Gap",
-   "def": "An FVG that has been traded through and now acts in the opposite role. In the source it appears solely as a fallback entry: if the CISD is far above, take IFVG entries. The mechanics of forming or trading one are never explained — it is offered as a way to get into a move whose trigger has already run away from you rather than chasing.",
+   "full": "Inverse Fair Value Gap",
+   "def": "An FVG that has been traded through and now acts in the opposite role. In the source it appears solely as a fallback entry: if the CISD is far above, take IFVG entries. The mechanics of forming or trading one are never explained — it is offered as a way to get into a move whose trigger has already run away from you rather than chasing. The source writes only 'IFVG entries' and never expands the acronym; both 'inverse' and 'inverted' are in common use.",
    "seen": "Step 6, in the rules and cautions of the 4H-to-M15 model."
   },
   {
