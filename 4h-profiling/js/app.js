@@ -80,7 +80,8 @@
       var cat = categorise(L);
       L._cat = L.cat || cat[1];
       L._way = WAY_FOR[L._cat] || cat[2];
-      L._thumb = L.plate ? L.plate.replace('.png', '-thumb.png') : null;
+      L._thumb = L.plate ? L.plate.replace('.png', '-thumb.png')
+                          : 'assets/art-' + L.id + '.png';
       var f = L.excerpt || (L.reading && L.reading[0]) || '';
       L._excerpt = f.length > 175 ? f.slice(0, 175).replace(/\s+\S*$/, '') + '…' : f;
       L._hay = [L.number, L.title, L.source, L.cat, L._excerpt,

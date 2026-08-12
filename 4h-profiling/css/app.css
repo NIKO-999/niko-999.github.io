@@ -1210,16 +1210,7 @@ h2.panel-label {
 .module-source, .group-meta, .banner .panel-label { font-size: 11px; }
 .n { color: var(--muted); }
 
-/* #1 plate-less cards get a motif so the art zone is never an empty colour void */
-.card-art:empty::after,
-.card-art:not(:has(.card-img))::after {
-  content: '';
-  position: absolute; inset: -10px -8px auto 0;
-  height: 170px;
-  background: url("../assets/motif-candles.svg") right top / auto 100% no-repeat;
-  opacity: 0.09;
-  pointer-events: none;
-}
+
 
 /* #10 the lesson column aligns with every other route instead of centring */
 .wrap.lesson-view { max-width: 1560px; }
