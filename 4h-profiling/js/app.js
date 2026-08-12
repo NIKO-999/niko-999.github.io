@@ -805,13 +805,13 @@
   var box = $('#lightbox'), lbImg = $('#lightbox-img'), lbCap = $('#lightbox-cap'), lastFocus = null;
   function lbOpen(src, cap) {
     lastFocus = document.activeElement;
-    lbImg.src = src; lbImg.alt = cap || ''; lbCap.textContent = cap || '';
+    lbImg.setAttribute('src', src); lbImg.alt = cap || ''; lbCap.textContent = cap || '';
     box.classList.add('is-open'); document.body.style.overflow = 'hidden';
     var sh = $('.shell'); if (sh) sh.inert = true;
     $('#lightbox-close').focus();
   }
   function lbClose() {
-    box.classList.remove('is-open'); document.body.style.overflow = ''; lbImg.src = '';
+    box.classList.remove('is-open'); document.body.style.overflow = ''; lbImg.removeAttribute('src');
     var sh2 = $('.shell'); if (sh2) sh2.inert = false;
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
