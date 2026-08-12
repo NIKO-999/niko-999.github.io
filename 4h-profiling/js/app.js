@@ -37,7 +37,9 @@
     back:    '<path d="M19 12H5"/><path d="m11 6-6 6 6 6"/>',
     next:    '<path d="M5 12h14"/><path d="m13 6 6 6-6 6"/>',
     expand:  '<path d="M9 3H3v6"/><path d="M15 21h6v-6"/><path d="M3 3l7 7"/><path d="M21 21l-7-7"/>',
-    check:   '<path d="M20 6 9 17l-5-5"/>'
+    check:   '<path d="M20 6 9 17l-5-5"/>',
+    chev:    '<path d="m6 9 6 6 6-6"/>',
+    link:    '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>'
   };
   function icon(n, cls) {
     return '<svg class="ic ' + (cls || '') + '" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
@@ -67,21 +69,37 @@
     return [null, 'Framework', 'teal'];
   }
 
+  var WAY_FOR = {
+    Reversal: 'teal', Continuation: 'amber', Entry: 'blue', Structure: 'violet',
+    Session: 'green', Confirmation: 'rose', Liquidity: 'rose', Bias: 'violet', Framework: 'teal'
+  };
   var ALL = [], BY_ID = {};
   (C.modules || []).forEach(function (M, mi) {
     (M.lessons || []).forEach(function (L, li) {
       L._module = M;
       var cat = categorise(L);
-      L._cat = cat[1];
-      L._way = cat[2];
+      L._cat = L.cat || cat[1];
+      L._way = WAY_FOR[L._cat] || cat[2];
       L._thumb = L.plate ? L.plate.replace('.png', '-thumb.png') : null;
-      var f = (L.reading && L.reading[0]) || '';
-      L._excerpt = f.length > 165 ? f.slice(0, 165).replace(/\s+\S*$/, '') + '…' : f;
+      var f = L.excerpt || (L.reading && L.reading[0]) || '';
+      L._excerpt = f.length > 175 ? f.slice(0, 175).replace(/\s+\S*$/, '') + '…' : f;
+      L._hay = [L.number, L.title, L.source, L.cat, L._excerpt,
+                (L.rules || []).join(' '), (L.reading || []).join(' '),
+                (L.approach || []).join(' '), (L.watchouts || []).join(' '),
+                (L.notes || []).join(' '), L.plateCaption || ''
+               ].join(' ').toLowerCase()
+               .replace(/(^|[^\d:])(\d{1,2})\s*am\b/g, '$1$2:00 am')
+               .replace(/(^|[^\d])0(\d):00/g, '$1$2:00');
       L._i = ALL.length;
       ALL.push(L);
       BY_ID[L.id] = L;
     });
   });
+  function plateMode() {
+    try { return localStorage.getItem('plateMode') || 'dark'; } catch (e) { return 'dark'; }
+  }
+  function setPlateMode(m) { try { localStorage.setItem('plateMode', m); } catch (e) {} }
+
   var CATCOUNT = {};
   ALL.forEach(function (L) { CATCOUNT[L._cat] = (CATCOUNT[L._cat] || 0) + 1; });
   var STATS = {
@@ -117,6 +135,22 @@
     return h.join('');
   }
 
+  /* link the first occurrence of each glossary term, once per lesson render */
+  var GTERMS = (C.glossary || []).slice().sort(function (a, b) { return b.term.length - a.term.length; });
+  function gloss(html, used) {
+    GTERMS.forEach(function (t) {
+      if (used[t.term]) return;
+      var word = t.term.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      var re = new RegExp('(^|[\\s(\u2014\u2013\\-])(' + word + ')(?=[\\s.,;:)\u2014\u2013?]|$)', 'i');
+      if (!re.test(html)) return;
+      used[t.term] = 1;
+      html = html.replace(re, function (m, pre, hit) {
+        return pre + '<a class="gl-link" href="#/glossary" title="' + esc(t.full ? t.full + ' — ' + t.def : t.def) + '">' + hit + '</a>';
+      });
+    });
+    return html;
+  }
+
   function banner(kind, label, inner) {
     return '<section class="banner banner-' + kind + '"><div class="banner-bar"></div><div class="banner-body">' +
            (label ? '<div class="panel-label"><span class="dot"></span>' + esc(label) + '</div>' : '') +
@@ -134,7 +168,12 @@
     h.push('<div class="eyebrow"><span class="dot"></span>Three source documents · indices</div>');
     h.push('<h1>4H Candle Profiling <em>the mechanical way to read price action</em></h1>');
     h.push('<p class="hero-lede">Every rule, diagram and explanation from the three source documents, in one place. ' +
-           'Each lesson gives you the rule set first, the diagram second, and the full reading beneath it.</p>');
+           'Each lesson gives you the rule set first, the diagram second, and the full reading beneath it.</p>' +
+           '<p class="hero-route">New to this? Read <a href="#/l/fractal-thought-process">III.1</a> and ' +
+           '<a href="#/l/daily-range-structure">III.2</a> for the idea, <a href="#/l/asia-reversal-pattern">III.3</a>–' +
+           '<a href="#/l/ny-reversal-patterns">III.5</a> for the three day-shapes, then ' +
+           '<a href="#/l/entry-ideas-cisd-and-orderblocks">III.6</a> and <a href="#/l/smt-divergence">I.4</a> for the ' +
+           'entry and the one condition that vetoes it. Modules I and II are the same framework in more depth.</p>');
     h.push('<div class="hero-meta">' +
       '<span><b>' + STATS.lessons + '</b> Lessons</span>' +
       '<span><b>' + STATS.plates + '</b> Plates</span>' +
@@ -146,7 +185,8 @@
     h.push('<div class="wrap"><div class="tiles">');
     [['#/approach', 'compass', C.approach ? C.approach.title : 'How to approach it', (C.approach ? C.approach.steps.length : 0) + ' steps, in order'],
      ['#/sessions', 'clock', C.sessions ? C.sessions.title : 'Session clock', 'Which 4H candle does what'],
-     ['#/glossary', 'book', 'Glossary', STATS.terms + ' terms defined']
+     ['#/glossary', 'book', 'Glossary', STATS.terms + ' terms defined'],
+     ['#/l/fractal-thought-process', 'candle', 'Start here', 'The five-lesson path through the idea']
     ].forEach(function (t) {
       h.push('<a class="tile" href="' + t[0] + '"><span class="tile-ic">' + icon(t[1]) + '</span>' +
              '<b>' + esc(t[2]) + '</b><span>' + esc(t[3]) + '</span>' + icon('next', 'tile-go') + '</a>');
@@ -154,11 +194,16 @@
     h.push('</div>');
 
     /* toolbar */
+    var withPlates = ALL.filter(function (L) { return L._thumb; });
     h.push('<div class="index-head"><div><h2>All lessons <span class="n">(' + ALL.length + ')</span></h2>' +
-           '<p>Pick a pattern to open it. Every card is a lesson.</p></div></div>');
+           '<p>Pick a pattern to open it. Every card is a lesson.</p></div>' +
+           '<div class="stack-wrap"><span class="stack-label">Diagram plates</span><span class="stack">' +
+           withPlates.slice(0, 5).map(function (L) {
+             return '<img src="' + esc(L._thumb) + '" alt="" loading="lazy">'; }).join('') +
+           '<span class="stack-more">+' + (withPlates.length - 5) + '</span></span></div></div>');
     h.push('<div class="toolbar">');
     h.push('<div class="field">' + icon('search') +
-           '<input id="q" type="search" placeholder="Search rules, patterns, terms…" autocomplete="off" aria-label="Search lessons">' +
+           '<input id="q" type="search" placeholder="Search every rule, reading and caution…" autocomplete="off" aria-label="Search lessons">' +
            '<span class="keys">' + (IS_MAC ? '<kbd>\u2318</kbd>' : '<kbd>Ctrl</kbd>') + '<kbd>K</kbd></span></div>');
     h.push('<div class="segmented" role="tablist" aria-label="Filter lessons">');
     h.push('<button class="seg is-on" data-filter="all" role="tab" aria-selected="true">All <span class="n">' + ALL.length + '</span></button>');
@@ -177,8 +222,11 @@
     /* grid grouped by module */
     (C.modules || []).forEach(function (M) {
       h.push('<div class="group" data-group="' + esc(M.moduleId) + '">');
+      var mp = M.lessons.filter(function (L) { return L.plate; }).length;
+      var mr = M.lessons.reduce(function (n, L) { return n + (L.rules || []).length; }, 0);
       h.push('<div class="group-head"><h3>' + esc(M.title) + ' <span class="n">(' + M.lessons.length + ')</span></h3>' +
-             '<span class="group-meta">Module ' + esc(M.numeral) + '</span></div>');
+             '<span class="group-meta">Module ' + esc(M.numeral) + ' · ' + mr + ' rules · ' + mp + ' plates</span></div>' +
+             (M.subtitle ? '<p class="group-sub">' + esc(M.subtitle) + '</p>' : ''));
       h.push('<div class="cards">');
       M.lessons.forEach(function (L) { h.push(cardHTML(L)); });
       h.push('</div></div>');
@@ -196,6 +244,7 @@
     if (!L) return viewMissing();
     var M = L._module;
     var prev = ALL[L._i - 1], next = ALL[L._i + 1];
+    var GU = {};
     var h = [];
 
     h.push('<div class="wrap lesson-view way-' + L._way + '">');
@@ -214,16 +263,22 @@
     if (L.rules && L.rules.length) {
       h.push('<section class="ruleset"><div class="panel-label"><span class="dot"></span>Rule set' +
              '<span class="count">' + L.rules.length + '</span></div><ol>');
-      L.rules.forEach(function (r) { h.push('<li>' + esc(r) + '</li>'); });
+      L.rules.forEach(function (r) { h.push('<li>' + gloss(esc(r), GU) + '</li>'); });
       h.push('</ol></section>');
     }
 
     /* 2 — PLATE */
     if (L.plate) {
+      h.push('<div class="plate-bar"><span class="plate-bar-label">' + icon('grid') + 'Diagram</span>' +
+             '<label class="toggle"><span>Original</span>' +
+             '<input type="checkbox" id="plate-mode"' + (plateMode() === 'dark' ? ' checked' : '') + '>' +
+             '<span class="track"><span class="knob"></span></span><span>Dark</span></label></div>');
       h.push('<figure class="plate"><div class="plate-frame" role="button" tabindex="0" ' +
              'data-full="' + esc(L.plate) + '" data-cap="' + esc(L.plateCaption || L.title) + '" ' +
              'aria-label="Enlarge plate">' +
-             '<img src="' + esc(L.plate) + '" alt="' + esc(L.plateCaption || L.title) + '" loading="lazy" decoding="async">' +
+             '<img id="plate-img" src="' + esc(plateMode() === 'dark' ? L.plate : L.plate.replace('.png', '-light.png')) +
+             '" data-dark="' + esc(L.plate) + '" data-light="' + esc(L.plate.replace('.png', '-light.png')) +
+             '" alt="' + esc(L.plateCaption || L.title) + '" loading="lazy" decoding="async">' +
              '<span class="plate-zoom">' + icon('expand') + 'Enlarge</span></div>');
       if (L.plateCaption) h.push('<figcaption class="plate-caption"><span class="pl">Plate</span><span>' + esc(L.plateCaption) + '</span></figcaption>');
       h.push('</figure>');
@@ -232,8 +287,14 @@
     /* 3 — READING, below the plate */
     if (L.reading && L.reading.length) {
       h.push('<div class="reading">');
-      L.reading.forEach(function (p) { h.push('<p>' + esc(p) + '</p>'); });
+      L.reading.forEach(function (p) { h.push('<p>' + gloss(esc(p), GU) + '</p>'); });
       h.push('</div>');
+    }
+
+    /* archive notes — the source's silences, kept out of the rule set */
+    if (L.notes && L.notes.length) {
+      h.push(banner('note', 'Archive note',
+        L.notes.map(function (x) { return '<p>' + esc(x) + '</p>'; }).join('')));
     }
 
     /* 4 — APPROACH */
@@ -246,6 +307,23 @@
       h.push(banner('warn', 'What invalidates it',
         '<ul class="x-list">' + L.watchouts.map(function (w) { return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>'));
     }
+
+    /* also covered in */
+    if (L.seeAlso && L.seeAlso.length) {
+      var rel = L.seeAlso.map(function (id) { return BY_ID[id]; }).filter(Boolean);
+      if (rel.length) {
+        h.push('<div class="seealso"><span class="seealso-label">Also covered in</span>' +
+          rel.map(function (r) {
+            return '<a href="#/l/' + esc(r.id) + '"><b>' + esc(r.number) + '</b>' + esc(r.title) + '</a>';
+          }).join('') + '</div>');
+      }
+    }
+
+    /* position in the archive */
+    var pct = Math.round((L._i + 1) / ALL.length * 100);
+    h.push('<div class="posbar"><div class="posbar-top"><span>Lesson <b>' + (L._i + 1) + '</b> of ' + ALL.length + '</span>' +
+           '<span class="posbar-pct">' + pct + '%</span></div>' +
+           '<div class="posbar-track"><span style="width:' + pct + '%"></span></div></div>');
 
     /* prev / next */
     h.push('<nav class="pager">');
@@ -300,11 +378,23 @@
         h.push('<ul class="checks">' + s.checks.map(function (c) {
           return '<li>' + esc(c) + '</li>'; }).join('') + '</ul>');
       }
+      var sl = BY_ID[STEP_LESSON[i]];
+      if (sl) h.push('<a class="row-link" href="#/l/' + esc(sl.id) + '">' + esc(sl.number) + ' · ' +
+                     esc(sl.title) + icon('next') + '</a>');
       h.push('</div></div>');
     });
     h.push('</div></div>');
     return h.join('');
   }
+
+  var ROW_LESSON = {
+    'Asia open': 'asia-reversal-pattern', 'Asia late': 'asia-reversal-pattern',
+    'London': 'london-reversal-pattern', 'NY morning': 'ny-reversal-patterns',
+    'Late NY': 'ny-reversal-patterns'
+  };
+  var STEP_LESSON = ['top-down-analysis', 'protected-and-failure-swings',
+    'daily-profile-and-the-six-4h-candles', 'overnight-and-london-reversals', 'smt-divergence',
+    '4h-m15-entries', '4h-m15-entries', 'continuation-entries-4h-m15'];
 
   function viewSessions() {
     var S = C.sessions; if (!S) return viewMissing();
@@ -318,11 +408,14 @@
     (S.rows || []).forEach(function (r) {
       var key = r.some(function (c) { return /\bkey\b/i.test(String(c)); });
       h.push('<tr' + (key ? ' class="key-row"' : '') + '>');
+      var label = String(r[0]).replace(/\s*—\s*KEY/i, '').trim();
       r.forEach(function (cell, i) {
         var v = String(cell);
         if (i === 0) {
-          v = esc(v.replace(/\s*—\s*KEY/i, '')) + (key ? ' <span class="chip">Key</span>' : '');
-          h.push('<td>' + v + '</td>');
+          h.push('<td>' + esc(label) + (key ? ' <span class="chip">Key</span>' : '') + '</td>');
+        } else if (i === r.length - 1 && ROW_LESSON[label] && BY_ID[ROW_LESSON[label]]) {
+          h.push('<td>' + esc(v) + '<a class="row-link" href="#/l/' + esc(ROW_LESSON[label]) + '">' +
+                 'Read the lesson' + icon('next') + '</a></td>');
         } else h.push('<td>' + esc(v) + '</td>');
       });
       h.push('</tr>');
@@ -357,9 +450,10 @@
     h.push('<header class="page-head"><h1>Sources &amp; notice</h1></header>');
     h.push(banner('note', 'Source documents',
       '<p>All content is extracted from three documents by Eleven_Trades:</p>' +
-      '<p>I · <em>Building a Trading Model/Strategy</em> — 16 pages<br>' +
-      'II · <em>Profiling 4H Candles, Part Two</em> — 15 pages<br>' +
-      'III · <em>4H Candle Profiling: The Mechanical Way to Read Price Action</em> — 10 pages</p>' +
+      '<p>Module <b>I</b> (cited as <b>V1</b>) · <em>Building a Trading Model/Strategy</em> — 16 pages<br>' +
+      'Module <b>II</b> (cited as <b>V2</b>) · <em>Profiling 4H Candles, Part Two</em> — 15 pages<br>' +
+      'Module <b>III</b> (cited as <b>V3</b>) · <em>4H Candle Profiling: The Mechanical Way to Read Price Action</em> — 10 pages</p>' +
+      '<p>The V-number on every card and lesson header refers to these documents, so "V3 · p.4–5" means pages 4 to 5 of the third document.</p>' +
       '<p>Plates are rendered from those documents and remapped for dark viewing. The author credits ICT, MMXM Trader, ' +
       'TTrades, AM Trades, Sniper Trades and Garret for the underlying concepts and does not claim ownership of them.</p>'));
     h.push(banner('ok', 'Set to indices',
@@ -380,12 +474,17 @@
       "original author's claim, reproduced as such, and has not been verified.</p>" +
       '<p>Where the source documents are ambiguous, silent, or internally inconsistent, this archive says so rather ' +
       'than papering over the gap.</p>'));
-    h.push('<footer class="site-foot"><div>Compiled from the source PDFs · plates rendered at 200 dpi from the ' +
-           'original vector artwork.</div><div class="foot-links"><a href="#/">All lessons</a>' +
-           '<a href="#/approach">How to approach it</a><a href="#/sessions">Session clock</a>' +
-           '<a href="#/glossary">Glossary</a><a href="../">← Back to site</a></div></footer>');
     h.push('</div>');
     return h.join('');
+  }
+
+  function footerHTML() {
+    return '<div class="wrap"><footer class="site-foot">' +
+      '<div>Compiled from three source documents by Eleven_Trades · plates rendered at 200 dpi from the ' +
+      'original vector artwork. A study reference, not financial advice.</div>' +
+      '<div class="foot-links"><a href="#/">All lessons</a><a href="#/approach">How to approach it</a>' +
+      '<a href="#/sessions">Session clock</a><a href="#/glossary">Glossary</a>' +
+      '<a href="#/sources">Sources &amp; notice</a><a href="../">← Back to site</a></div></footer></div>';
   }
 
   function viewMissing() {
@@ -423,9 +522,12 @@
 
     (C.modules || []).forEach(function (M) {
       h.push('<div class="nav-group"><div class="nav-label">Module ' + esc(M.numeral) + '</div>');
-      h.push('<a class="nav-link nav-major" href="#/m/' + esc(M.moduleId) + '" data-href="#/m/' + esc(M.moduleId) + '">' +
-             icon('layers') + '<span>' + esc(M.title) + '</span><span class="badge">' + M.lessons.length + '</span></a>');
-      h.push('<div class="tree">');
+      h.push('<div class="nav-row">' +
+             '<a class="nav-link nav-major" href="#/m/' + esc(M.moduleId) + '" data-href="#/m/' + esc(M.moduleId) + '">' +
+             icon('layers') + '<span>' + esc(M.title) + '</span><span class="badge">' + M.lessons.length + '</span></a>' +
+             '<button class="nav-toggle" data-mod="' + esc(M.moduleId) + '" aria-expanded="true" ' +
+             'aria-label="Collapse ' + esc(M.title) + '">' + icon('chev') + '</button></div>');
+      h.push('<div class="tree" data-tree="' + esc(M.moduleId) + '">');
       M.lessons.forEach(function (L) {
         h.push('<a class="nav-link tree-item" href="#/l/' + esc(L.id) + '" data-href="#/l/' + esc(L.id) + '">' +
                '<span class="n">' + esc(L.number) + '</span><span>' + esc(L.title) + '</span>' +
@@ -439,13 +541,42 @@
     h.push('<a class="nav-link" href="#/sources" data-href="#/sources">' + icon('shield') + '<span>Sources &amp; notice</span></a>');
     h.push('</div>');
 
-    h.push('<div class="side-card"><div class="side-card-top">' +
-           '<div class="ring" style="--pct:' + Math.round(STATS.plates / ALL.length * 100) + '"><span>' + STATS.plates + '</span></div>' +
-           '<div class="side-card-txt"><b>' + ALL.length + ' lessons</b><span>' + STATS.rules + ' rules · ' + STATS.plates + ' plates</span></div>' +
-           '</div><button class="btn-side" id="print-btn">' + icon('print') + 'Save as PDF</button></div>');
+    h.push('<div class="side-card"><div class="side-card-txt"><b>' + ALL.length + ' lessons</b>' +
+           '<span>' + STATS.rules + ' rules · ' + STATS.plates + ' plates · ' + STATS.terms + ' terms</span></div>' +
+           '<button class="btn-side" id="print-btn">' + icon('print') + 'Save as PDF</button></div>');
+    h.push('<a class="side-foot" href="#/sources">' + icon('shield') +
+           '<span><b>Eleven_Trades</b>Three source documents</span>' + icon('next') + '</a>');
 
     $('#nav').innerHTML = h.join('');
     $('#print-btn').addEventListener('click', function () { window.print(); });
+
+    /* collapsible module trees */
+    function collapsed() {
+      try { return JSON.parse(localStorage.getItem('collapsed') || '[]'); } catch (e) { return []; }
+    }
+    function setCollapsed(list) {
+      try { localStorage.setItem('collapsed', JSON.stringify(list)); } catch (e) {}
+    }
+    var shut = collapsed();
+    shut.forEach(function (id) {
+      var t = $('.tree[data-tree="' + id + '"]');
+      var b = $('.nav-toggle[data-mod="' + id + '"]');
+      if (t) t.classList.add('is-shut');
+      if (b) { b.classList.add('is-shut'); b.setAttribute('aria-expanded', 'false'); }
+    });
+    $$('.nav-toggle').forEach(function (b) {
+      b.addEventListener('click', function (e) {
+        e.preventDefault();
+        var id = b.dataset.mod;
+        var t = $('.tree[data-tree="' + id + '"]');
+        var now = t.classList.toggle('is-shut');
+        b.classList.toggle('is-shut', now);
+        b.setAttribute('aria-expanded', now ? 'false' : 'true');
+        var list = collapsed().filter(function (x) { return x !== id; });
+        if (now) list.push(id);
+        setCollapsed(list);
+      });
+    });
   }
 
   /* ----------------------------------------------------------------------
@@ -467,7 +598,7 @@
     else if (parts[0] === 'sources')        { html = viewSources(); }
     else                                    { html = viewMissing(); }
 
-    app.innerHTML = html;
+    app.innerHTML = html + footerHTML();
     app.scrollTop = 0;
     window.scrollTo(0, 0);
 
@@ -478,9 +609,18 @@
     $$('.rail-btn').forEach(function (a) {
       a.classList.toggle('is-active', a.dataset.href === key || a.dataset.href === modKey);
     });
-    var openTree = null;
-    if (L) openTree = $('#nav .nav-link[data-href="#/m/' + L._module.moduleId + '"]');
-    if (openTree) openTree.classList.add('is-parent');
+    if (L) {
+      var pm2 = $('#nav .nav-link[data-href="#/m/' + L._module.moduleId + '"]');
+      if (pm2) pm2.classList.add('is-parent');
+      var t2 = $('.tree[data-tree="' + L._module.moduleId + '"]');
+      var b2 = $('.nav-toggle[data-mod="' + L._module.moduleId + '"]');
+      if (t2 && t2.classList.contains('is-shut')) {
+        t2.classList.remove('is-shut');
+        if (b2) { b2.classList.remove('is-shut'); b2.setAttribute('aria-expanded', 'true'); }
+      }
+      var act = $('#nav .nav-link.is-active');
+      if (act && act.scrollIntoView) act.scrollIntoView({ block: 'nearest' });
+    }
 
     if (parts[0] !== 'l' && parts[0] !== 'm' && parts.length) document.title = '4H Candle Profiling — ' + parts[0];
     else if (L) document.title = L.title + ' — 4H Candle Profiling';
@@ -501,10 +641,15 @@
       var groups = $$('.group');
       var empty = $('#no-results');
       var filter = 'all', cat = null;
-      cards.forEach(function (c) { c.dataset.text = c.textContent.toLowerCase(); });
+      cards.forEach(function (c) {
+        var L = BY_ID[(c.getAttribute('href') || '').replace('#/l/', '')];
+        c.dataset.text = L ? L._hay : c.textContent.toLowerCase();
+      });
 
       var run = function () {
-        var v = (q.value || '').trim().toLowerCase();
+        var v = (q.value || '').trim().toLowerCase()
+                  .replace(/(^|[^\d:])(\d{1,2})\s*am\b/g, '$1$2:00 am')
+                  .replace(/(^|[^\d])0(\d):00/g, '$1$2:00');
         var hits = 0;
         cards.forEach(function (c) {
           var ok = (filter === 'all' ||
@@ -535,6 +680,19 @@
           if (on) { cat = null; } else { b.classList.add('is-on'); cat = b.dataset.cat; }
           run();
         });
+      });
+    }
+
+    /* plate light/dark toggle */
+    var pm = document.getElementById('plate-mode');
+    if (pm) {
+      pm.addEventListener('change', function () {
+        var img = document.getElementById('plate-img');
+        var mode = pm.checked ? 'dark' : 'light';
+        setPlateMode(mode);
+        if (img) img.src = mode === 'dark' ? img.dataset.dark : img.dataset.light;
+        var f = img && img.closest('.plate-frame');
+        if (f) f.dataset.full = mode === 'dark' ? img.dataset.dark : img.dataset.light;
       });
     }
 

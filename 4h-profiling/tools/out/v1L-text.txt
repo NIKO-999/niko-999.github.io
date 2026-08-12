@@ -1,0 +1,155 @@
+SOURCE: 7f05132c-4H_profile_V1.pdf  (16 pages)
+========================================================================
+
+[page 1]
+Eleven_Trades
+BUILDING A TRADING
+MODEL/STRATEGY
+
+[page 2]
+Introduction
+Eleven_Trades
+A trading model is a framework or edge that gives a trader a high probability of one outcome over another, as stated by
+Mark Douglas. This document will outline the process of building a structured trading model by integrating the teachings
+of various mentors and concepts.
+Acknowledgments
+Thank you to ICT, MMXM Trader, TTrades, AM Trades, Sniper Trades for their insights. I do not claim ownership over
+these concepts.
+
+[page 3]
+To trade the market effectively, we need to determine where the price is going and from where it is going. As an
+intraday trader, this means identifying the daily bias—the expected direction of the daily candle.
+To determine daily bias, we must build a narrative by:
+Understanding Order Flow.
+Defining Key Levels
+Where is it going? → DOL
+From where is it going? → Point of Interest
+Recognizing Price Action Phases
+IRL to ERL and ERL to IRL is a universal price behavior.
+Identifying swing points within POIs to refine trade entries.
+Step 1: Establishing Market Direction
+Eleven_Trades
+
+[page 4]
+Revisiting The MMXM’s Next Day Model/TTFM
+Eleven_Trades
+A swing point consists of three candles:
+C1: First candle.
+C2: Second candle, which takes out the previous candle’s high or low.
+C3: Third candle, which reverses direction.
+According to the Next Day Model, price expands in the direction of the DOL whenever it closes above/below the
+previous candle until the draw is met.
+
+[page 5]
+50%
+50%
+50%
+The MMXM’s Next Day Model/TTFM
+
+[page 6]
+Top-Down Analysis
+Eleven_Trades
+Daily Chart:
+Find the direction of the next daily candle to align intraday trades.
+Determine phase of price delivery and order flow.
+Use MMXM Next Day Model at relevant POIs (IRL & ERL).
+The draw would be external range liquidity.
+4H Chart:
+A single daily candle contains six 4H candles.
+Identify which 4H candle will form the high/low of the day.
+Use 4H order flow and IRL to ERL structure for bias confirmation.
+When the daily chart is unclear, use 4H chart analysis (except during consolidation).
+Bullish Order Flow: Look for higher highs (HH) and higher lows (HL) with bullish PD arrays being respected.
+
+[page 7]
+SMT Divergence (Compulsory for This Model)
+Eleven_Trades
+Increases win rate by 8-12%.
+Confirms reversals.
+Mandatory before trading reversal candles.
+
+[page 8]
+Eleven_Trades
+4H-M15 MODEL
+
+[page 9]
+4H to M15 Entries (Bread & Butter Entries)
+Eleven_Trades
+Entry Conditions:
+Order Flow must align.
+4H profiling & Swing point formation at relevant PD arrays.
+SMT Divergence at swing point/high/low.
+M15 CISD (Closure below/above a series of opposing close candles).
+Entries post 8:00 AM, unless news at 8:30 AM (wait for reaction).
+Rules & Cautions:
+CISD should happen instantly.
+No counter-trend trades.
+If CISD is far above, take IFVG entries.
+No consolidation prior to CISD.
+No contradictory swings (Bullish & Bearish swings cannot coexist).
+No trades post 11:00 AM.
+No SMT → No trade.
+
+[page 10]
+Continuation Entries (4H to M15)
+Eleven_Trades
+If reversal entry fails:
+Look for continuation entries meeting all previous criteria.
+Continuation Candle: Always the 3rd candle of the swing point.
+Entry Conditions:
+Small wick → Large body expected.
+Opposing move creates an OB → Enter expansion with small stop.
+Wait for opposing run before entering.
+Continuation Protocol 2: 
+If C2 has CISD but no entry, wait for an order block or propulsion block within C2.
+
+[page 11]
+6:00
+8:00
+SMT
+10:00
+
+[page 12]
+Eleven_Trades
+1H-M5 MODEL
+
+[page 13]
+1H to M5 Entries
+Eleven_Trades
+4 x 1H candles = 1- 4H candle → If the next 4H candle expands, the next four 1H candles expand too.
+Position within first 1H candles of a new 4H expansion.
+Wait for swing point formation.
+Catching the 2nd Candle of the Swing Point:
+SMT Divergence (Compulsory).
+M5 CISD.
+No consolidation on M5 or 1H prior to entry.
+Entry post 8:00 AM.
+POI for swing point:
+FVG, IRL to ERL.
+Old high or low.
+
+[page 14]
+Eleven_Trades
+Continuation Entries/TTFM logic (1H to M5)
+If reversal entry fails:
+Look for continuation entries meeting all previous criteria.
+Continuation Candle: Always the 3rd candle of the swing point.
+Entry Conditions:
+Small wick → Large body expected.
+Opposing move creates an OB → Enter expansion with small stop.
+
+[page 15]
+SMT
+6:00
+new hourly candle
+1H
+M5
+8:00am
+4H
+
+[page 16]
+Socials:
+https://discord.com/invite/dYDbCX5QaV
+https://x.com/Eleven_trades
+https://www.youtube.com/@Eleven_trades
+Eleven_Trades

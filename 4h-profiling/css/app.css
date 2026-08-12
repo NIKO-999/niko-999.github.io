@@ -904,3 +904,178 @@ tbody td:first-child, tbody td:nth-child(2) { font-family: var(--mono); font-siz
   p, li, td { color: #222 !important; }
   .plate-frame img { filter: invert(1) hue-rotate(180deg); }
 }
+
+/* ==========================================================================
+   ADDITIONS — components carried over from the reference set
+   ========================================================================== */
+
+/* ---- glass rail (ref: the floating nav rail) ---- */
+.rail { background: transparent; border-right: none; padding: 14px 0; justify-content: flex-start; }
+.rail::before {
+  content: '';
+  position: absolute; left: 10px; right: 10px; top: 14px; bottom: 14px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.075);
+  backdrop-filter: blur(14px) saturate(1.3);
+  -webkit-backdrop-filter: blur(14px) saturate(1.3);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.06), 0 20px 40px -24px rgba(0,0,0,0.9);
+  pointer-events: none;
+}
+.rail { position: sticky; }
+.rail-btn { z-index: 1; }
+.rail-btn.is-active {
+  background: rgba(255,255,255,0.10);
+  border-color: rgba(255,255,255,0.14);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+/* ---- collapsible module rows (ref: the tree menu's − affordance) ---- */
+.nav-row { display: flex; align-items: center; }
+.nav-row .nav-link { flex: 1; margin-right: 2px; }
+.nav-toggle {
+  width: 26px; height: 26px; flex: 0 0 26px;
+  margin-right: 12px;
+  display: grid; place-items: center;
+  background: none; border: none; cursor: pointer;
+  color: var(--muted-2); border-radius: 5px;
+  transition: color .15s, background .15s, transform .2s;
+}
+.nav-toggle:hover { color: var(--text); background: rgba(255,255,255,0.06); }
+.nav-toggle .ic { width: 15px; height: 15px; }
+.nav-toggle.is-shut { transform: rotate(-90deg); }
+.tree.is-shut { display: none; }
+
+/* ---- sidebar footer chip (ref: the user chip) ---- */
+.side-foot {
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px 14px 0;
+  padding: 11px 12px;
+  border-radius: var(--r);
+  border: 1px solid var(--line);
+  color: var(--muted);
+  transition: border-color .15s, background .15s;
+}
+.side-foot:hover { border-color: var(--line-2); background: rgba(255,255,255,0.03); }
+.side-foot span { display: flex; flex-direction: column; flex: 1; min-width: 0; font-size: 11.5px; line-height: 1.35; }
+.side-foot b { color: var(--text-2); font-size: 12.5px; font-weight: 600; }
+.side-foot > .ic:last-child { width: 14px; height: 14px; }
+
+/* ---- plate stack in the page header (ref: "Connected Integrations +6") ---- */
+.index-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; flex-wrap: wrap; }
+.stack-wrap { display: flex; align-items: center; gap: 12px; }
+.stack-label { font-size: 12px; color: var(--muted-2); }
+.stack { display: flex; align-items: center; }
+.stack img {
+  width: 40px; height: 28px; object-fit: cover;
+  border-radius: 5px;
+  border: 1px solid var(--line-2);
+  background: var(--surface);
+  margin-left: -10px;
+  transition: transform .18s;
+}
+.stack img:first-child { margin-left: 0; }
+.stack:hover img { transform: translateY(-2px); }
+.stack-more {
+  margin-left: -10px;
+  display: grid; place-items: center;
+  min-width: 32px; height: 28px; padding: 0 7px;
+  border-radius: 5px;
+  background: var(--raised);
+  border: 1px solid var(--line-2);
+  font-family: var(--mono); font-size: 10.5px; color: var(--muted);
+}
+
+/* ---- plate mode toggle (ref: the Connected switch) ---- */
+.plate-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+.plate-bar-label {
+  display: inline-flex; align-items: center; gap: 7px;
+  font-family: var(--mono); font-size: 10.5px; font-weight: 600;
+  letter-spacing: 0.18em; text-transform: uppercase; color: var(--muted);
+}
+.plate-bar-label .ic { width: 14px; height: 14px; }
+.toggle { display: inline-flex; align-items: center; gap: 9px; font-size: 12px; color: var(--muted-2); cursor: pointer; user-select: none; }
+.toggle input { position: absolute; opacity: 0; width: 0; height: 0; }
+.toggle .track {
+  position: relative;
+  width: 38px; height: 22px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--line-2);
+  transition: background .2s, border-color .2s;
+}
+.toggle .knob {
+  position: absolute; top: 2px; left: 2px;
+  width: 16px; height: 16px; border-radius: 50%;
+  background: var(--muted);
+  transition: transform .22s cubic-bezier(.2,.7,.3,1), background .2s;
+}
+.toggle input:checked + .track { background: rgba(43,212,176,0.18); border-color: rgba(43,212,176,0.45); }
+.toggle input:checked + .track .knob { transform: translateX(16px); background: var(--teal); }
+.toggle input:focus-visible + .track { outline: 2px solid var(--teal); outline-offset: 3px; }
+
+/* ---- position bar (ref: the project card's progress meter) ---- */
+.posbar { margin-top: 36px; padding-top: 20px; border-top: 1px solid var(--line); }
+.posbar-top { display: flex; align-items: baseline; justify-content: space-between; font-size: 12.5px; color: var(--muted); margin-bottom: 9px; }
+.posbar-top b { color: var(--text); font-weight: 600; }
+.posbar-pct { font-family: var(--mono); font-size: 11.5px; color: var(--way, var(--teal)); }
+.posbar-track { height: 4px; border-radius: 999px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.posbar-track span {
+  display: block; height: 100%; border-radius: 999px;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--way, var(--teal)) 55%, transparent), var(--way, var(--teal)));
+}
+
+@media (max-width: 1100px) { .rail::before { display: none; } }
+@media (max-width: 620px) {
+  .index-head { flex-direction: column; align-items: flex-start; gap: 14px; }
+  .plate-bar { gap: 10px; }
+}
+
+/* ---- glossary links inside lesson text ---- */
+.gl-link {
+  color: inherit;
+  border-bottom: 1px dashed rgba(43,212,176,0.45);
+  cursor: help;
+}
+.gl-link:hover { color: var(--teal); border-bottom-color: var(--teal); }
+
+/* ---- see also ---- */
+.seealso { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 30px; }
+.seealso-label {
+  font-family: var(--mono); font-size: 9.5px; letter-spacing: 0.18em;
+  text-transform: uppercase; color: var(--muted-2); margin-right: 4px;
+}
+.seealso a {
+  display: inline-flex; align-items: baseline; gap: 7px;
+  padding: 6px 11px; border-radius: 999px;
+  background: var(--surface); border: 1px solid var(--line-2);
+  font-size: 12.5px; color: var(--text-2);
+  transition: border-color .15s, color .15s;
+}
+.seealso a:hover { border-color: var(--line-3); color: var(--text); }
+.seealso a b { font-family: var(--mono); font-size: 10.5px; color: var(--way, var(--teal)); font-weight: 500; }
+
+/* ---- inline "read the lesson" links on reference pages ---- */
+.row-link {
+  display: inline-flex; align-items: center; gap: 6px;
+  margin-top: 10px;
+  font-size: 12.5px; color: var(--teal);
+}
+.row-link .ic { width: 13px; height: 13px; transition: transform .16s; }
+.row-link:hover .ic { transform: translateX(3px); }
+td .row-link { margin-top: 8px; }
+
+/* ---- hero route line ---- */
+.hero-route {
+  font-size: 14.5px; line-height: 1.7; color: var(--muted);
+  max-width: 68ch; margin: -18px 0 32px;
+  padding-left: 14px; border-left: 2px solid var(--line-2);
+}
+.hero-route a { color: var(--teal); }
+.hero-route a:hover { border-bottom: 1px solid var(--teal); }
+
+/* ---- module subtitle under a group head ---- */
+.group-sub { font-size: 13.5px; color: var(--muted); margin: -8px 0 14px; max-width: 70ch; }
+
+/* ---- sidebar card without the ring ---- */
+.side-card-txt { display: flex; flex-direction: column; margin-bottom: 12px; }

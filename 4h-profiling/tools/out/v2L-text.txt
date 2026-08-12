@@ -1,0 +1,130 @@
+SOURCE: 4912f851-4H_profiling_V2.pdf  (15 pages)
+========================================================================
+
+[page 1]
+Eleven_Trades
+PROFILING 4H CANDLES –
+PART TWO
+
+[page 2]
+Introduction
+Eleven_Trades
+This video is a follow-up to my previous one on 4H profiling. In this part, we’ll go deeper into how to profile 4H candles
+and give you a specific model/framework to work with.
+ Big shoutout to TTrades and Garret for some of the ideas I’ll be sharing.
+
+[page 3]
+A candle is made up of:
+Wick = Reversal
+Body = Expansion
+Price expands after reversal.
+The goal is simple: identify the reversal, and then trade the expansion.
+Phases of Price Delivery in a Candle
+Eleven_Trades
+
+[page 4]
+The Wick is the Reversal phase and the Body is Expansion
+
+[page 5]
+We’re basically trading away from the daily high/low (which becomes the wick), toward the Draw on Liquidity.
+A day has 6 × 4H candles.
+If reversal happens in the early candles (18:00 / 22:00 / 2:00), it’s an Overnight/London reversal, and NY session
+becomes the expansion phase.
+If the high/low isn’t formed until the NY session (6:00 / 10:00), then that’s your NY reversal.
+Price moves from:
+High Resistance Liquidity Runs (HRLR) → Low Resistance Liquidity Runs (LRLR)
+ In simple terms: manipulation → failure swing.
+Daily Profile & 4H Candle Relation
+Eleven_Trades
+HRLR → LRLR
+
+[page 6]
+HRLR
+LRLR
+
+[page 7]
+Protected Swing = OB/opposing candle into key level.
+Once formed, these aren’t revisited.
+ We want to trade away from protected swings toward unprotected ones or failure swings.
+London Reversal = daily candle prints wick in London, NY continues the expansion.
+NY Reversal = daily candle prints wick in NY, usually after London/Asia fails to form a high/low.
+The market Can’t reverse without a swing point.
+Follwoing the 2 candle of the swing point the 3 and 4 candle will expand until some DOL is met.
+nd
+rd
+th
+Protected Swings & Failure Swings
+Eleven_Trades
+Daily Profiles
+MMXM’s NDM/TTFM:
+
+[page 8]
+50%
+50%
+MMXM NDM/TTFM
+Protected Swings
+
+[page 9]
+18:00 / 22:00 Reversal (Overnight Session)
+Usually after the previous day hits a key level.
+Reversal sets up in the overnight hours.
+Wait for the reversal to end, then trade London continuation or NY continuation.
+2:00 Reversal (London Open)
+Happens when Asia consolidates or do protraction.
+London prints the wick, NY expands.
+How to engage:
+ Wait for M15 reversal confirmation, then enter next continuation candle.
+4H → M15 Positional Entries
+Eleven_Trades
+
+[page 10]
+18:00
+22:00
+2:00am
+18:00
+2:00am
+6:00am
+Overnight Reversal
+London Reversal
+
+[page 11]
+6:00 Reversal (NY Reversal)
+After early session protracts or consolidates, NY makes the reversal.
+Driver times like 8:30 and 9:30 usually help confirm the move.
+10:00 Reversal (Late NY Reversal)
+If 6:00 failed to reverse or news at 10:00 is involved, this becomes the last point for a proper reversal.
+If small wick + supported by daily logic, it’s a strong entry point.
+NY Reversal
+Eleven_Trades
+
+[page 12]
+6:00am
+10:00am
+NY Reversal within the 6:00 Candle
+NY Reversal within the 10:00 Candle
+
+[page 13]
+If the previous 4H candle has a reversal aligned with the daily profile and phases of price, then the new 4H candle will
+expand.
+How to Engage:
+Inside the 4H candle, if there is a 1H reversal candle established, then trade the continuation.
+If no swing point exists from the previous 4H candle, then wait for the new 4H candle to create that swing and
+continue.
+If the daily candle is still in the protraction phase, then wait for the new 4H candle to reverse and expand.
+You can use the classic MMXM entries or the TTFM model to enter these setups.
+Scalping Entries: 4H → 1H → M5/M3
+Eleven_Trades
+
+[page 14]
+6:00am
+8:00am
+9:30
+10:00am
+2:00am
+
+[page 15]
+Socials:
+https://discord.com/invite/dYDbCX5QaV
+https://x.com/Eleven_trades
+https://www.youtube.com/@Eleven_trades
+Eleven_Trades
