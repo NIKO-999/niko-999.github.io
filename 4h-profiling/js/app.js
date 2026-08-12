@@ -125,7 +125,7 @@
     h.push('</div>');
     h.push('<div class="card-body">');
     h.push('<div class="card-meta"><span class="card-num">' + esc(L.number) + '</span>' + esc(L.source || '') + '</div>');
-    h.push('<h4>' + esc(L.title) + '</h4>');
+    h.push('<h3>' + esc(L.title) + '</h3>');
     h.push('<p>' + esc(L._excerpt) + '</p>');
     h.push('</div>');
     h.push('<div class="card-foot"><span class="card-link">Open lesson' + icon('next') + '</span><span class="pills">');
@@ -153,7 +153,7 @@
 
   function banner(kind, label, inner) {
     return '<section class="banner banner-' + kind + '"><div class="banner-bar"></div><div class="banner-body">' +
-           (label ? '<div class="panel-label"><span class="dot"></span>' + esc(label) + '</div>' : '') +
+           (label ? '<h2 class="banner-lead">' + esc(label) + '</h2>' : '') +
            inner + '</div></section>';
   }
 
@@ -209,7 +209,7 @@
     h.push('<button class="seg is-on" data-filter="all" role="tab" aria-selected="true">All <span class="n">' + ALL.length + '</span></button>');
     (C.modules || []).forEach(function (M) {
       h.push('<button class="seg" data-filter="' + esc(M.moduleId) + '" role="tab" aria-selected="false">' +
-             esc(M.numeral) + ' <span class="n">' + M.lessons.length + '</span></button>');
+             'Module ' + esc(M.numeral) + ' <span class="n">' + M.lessons.length + '</span></button>');
     });
     h.push('<button class="seg" data-filter="plate" role="tab" aria-selected="false">With plates <span class="n">' + STATS.plates + '</span></button>');
     h.push('</div></div>');
@@ -224,7 +224,7 @@
       h.push('<div class="group" data-group="' + esc(M.moduleId) + '">');
       var mp = M.lessons.filter(function (L) { return L.plate; }).length;
       var mr = M.lessons.reduce(function (n, L) { return n + (L.rules || []).length; }, 0);
-      h.push('<div class="group-head"><h3>' + esc(M.title) + ' <span class="n">(' + M.lessons.length + ')</span></h3>' +
+      h.push('<div class="group-head"><h2>' + esc(M.title) + ' <span class="n">(' + M.lessons.length + ')</span></h2>' +
              '<span class="group-meta">Module ' + esc(M.numeral) + ' · ' + mr + ' rules · ' + mp + ' plates</span></div>' +
              (M.subtitle ? '<p class="group-sub">' + esc(M.subtitle) + '</p>' : ''));
       h.push('<div class="cards">');
@@ -261,18 +261,20 @@
 
     /* 1 — RULE SET, above the plate */
     if (L.rules && L.rules.length) {
-      h.push('<section class="ruleset"><div class="panel-label"><span class="dot"></span>Rule set' +
-             '<span class="count">' + L.rules.length + '</span></div><ol>');
+      h.push('<section class="ruleset"><h2 class="panel-label"><span class="dot"></span>Rule set' +
+             '<span class="count">' + L.rules.length + '</span></h2><ol>');
       L.rules.forEach(function (r) { h.push('<li>' + gloss(esc(r), GU) + '</li>'); });
       h.push('</ol></section>');
     }
 
     /* 2 — PLATE */
     if (L.plate) {
-      h.push('<div class="plate-bar"><span class="plate-bar-label">' + icon('grid') + 'Diagram</span>' +
-             '<label class="toggle"><span>Original</span>' +
-             '<input type="checkbox" id="plate-mode"' + (plateMode() === 'dark' ? ' checked' : '') + '>' +
-             '<span class="track"><span class="knob"></span></span><span>Dark</span></label></div>');
+      h.push('<div class="plate-bar"><h2 class="plate-bar-label">' + icon('grid') + 'Diagram</h2>' +
+             '<label class="toggle"><span class="lab lab-light' + (plateMode() === 'dark' ? '' : ' is-on') + '">Original</span>' +
+             '<input type="checkbox" id="plate-mode"' + (plateMode() === 'dark' ? ' checked' : '') +
+             ' aria-label="Show the diagram in dark mode">' +
+             '<span class="track"><span class="knob"></span></span>' +
+             '<span class="lab lab-dark' + (plateMode() === 'dark' ? ' is-on' : '') + '">Dark</span></label></div>');
       h.push('<figure class="plate"><div class="plate-frame" role="button" tabindex="0" ' +
              'data-full="' + esc(L.plate) + '" data-cap="' + esc(L.plateCaption || L.title) + '" ' +
              'aria-label="Enlarge plate">' +
@@ -372,7 +374,7 @@
       h.push('<div class="step" data-kind="step">');
       h.push('<div class="step-rail"><div class="step-n">' + esc(s.n) + '</div>' +
              (i < arr.length - 1 ? '<div class="step-line"></div>' : '') + '</div>');
-      h.push('<div class="step-body"><h3>' + esc(s.title) + '</h3>');
+      h.push('<div class="step-body"><h2>' + esc(s.title) + '</h2>');
       if (s.body) h.push('<p>' + esc(s.body) + '</p>');
       if (s.checks && s.checks.length) {
         h.push('<ul class="checks">' + s.checks.map(function (c) {
@@ -531,7 +533,7 @@
       M.lessons.forEach(function (L) {
         h.push('<a class="nav-link tree-item" href="#/l/' + esc(L.id) + '" data-href="#/l/' + esc(L.id) + '">' +
                '<span class="n">' + esc(L.number) + '</span><span>' + esc(L.title) + '</span>' +
-               (L.plate ? '<span class="dot-plate" title="Has a plate"></span>' : '') + '</a>');
+               (L.plate ? '<span class="dot-plate" title="Has a diagram plate" aria-label="Has a diagram plate"></span>' : '') + '</a>');
       });
       h.push('</div></div>');
     });
@@ -693,6 +695,9 @@
         if (img) img.src = mode === 'dark' ? img.dataset.dark : img.dataset.light;
         var f = img && img.closest('.plate-frame');
         if (f) f.dataset.full = mode === 'dark' ? img.dataset.dark : img.dataset.light;
+        var ld = document.querySelector('.lab-dark'), ll = document.querySelector('.lab-light');
+        if (ld) ld.classList.toggle('is-on', mode === 'dark');
+        if (ll) ll.classList.toggle('is-on', mode !== 'dark');
       });
     }
 
@@ -716,16 +721,28 @@
     lastFocus = document.activeElement;
     lbImg.src = src; lbImg.alt = cap || ''; lbCap.textContent = cap || '';
     box.classList.add('is-open'); document.body.style.overflow = 'hidden';
+    var sh = $('.shell'); if (sh) sh.inert = true;
     $('#lightbox-close').focus();
   }
   function lbClose() {
     box.classList.remove('is-open'); document.body.style.overflow = ''; lbImg.src = '';
+    var sh2 = $('.shell'); if (sh2) sh2.inert = false;
     if (lastFocus && lastFocus.focus) lastFocus.focus();
   }
   document.addEventListener('click', function (e) {
     var f = e.target.closest ? e.target.closest('.plate-frame') : null;
     if (f) { lbOpen(f.dataset.full, f.dataset.cap); return; }
     if (e.target.id === 'lightbox' || e.target.id === 'lightbox-img' || (e.target.closest && e.target.closest('#lightbox-close'))) lbClose();
+  });
+
+  box.addEventListener('keydown', function (e) {
+    if (e.key !== 'Tab') return;
+    var f = box.querySelectorAll('button, [href]');
+    if (!f.length) return;
+    var first = f[0], last = f[f.length - 1];
+    if (e.shiftKey ? document.activeElement === first : document.activeElement === last) {
+      e.preventDefault(); (e.shiftKey ? last : first).focus();
+    }
   });
 
   var side = $('.sidebar'), scrim = $('#scrim'), mbtn = $('#menu-btn');
@@ -758,6 +775,14 @@
   /* ----------------------------------------------------------------------
      GO
      ---------------------------------------------------------------------- */
+  /* the skip link must not drive the router */
+  var skip = document.querySelector('.skip');
+  if (skip) skip.addEventListener('click', function (e) {
+    e.preventDefault();
+    var m = document.getElementById('app');
+    if (m) { m.focus(); m.scrollIntoView(); }
+  });
+
   buildChrome();
   window.addEventListener('hashchange', route);
   route();
