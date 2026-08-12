@@ -861,8 +861,9 @@ tbody td:first-child, tbody td:nth-child(2) { font-family: var(--mono); font-siz
   .toolbar { flex-direction: column; align-items: stretch; }
   .segmented { overflow-x: auto; flex-wrap: nowrap; }
   .seg { white-space: nowrap; }
-  .hero-meta span { padding-right: 16px; margin-right: 16px; }
-  .hero-meta b { font-size: 19px; }
+  .hero-meta { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 0; }
+  .hero-meta span { border-right: none; padding-right: 0; margin-right: 0; }
+  .hero-meta b { font-size: 20px; }
   .pager { grid-template-columns: 1fr; }
   .pg-next { justify-content: flex-start; text-align: left; flex-direction: row-reverse; }
   .banner-body { padding: 15px 16px; }
