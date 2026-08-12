@@ -29,7 +29,7 @@ window.CONTENT = {
    {
     "n": 3,
     "title": "Decide which 4H candle prints the day's high or low",
-    "body": "One daily candle contains six 4H candles, and the framework's central act is nominating which one of them forms the high or low of the day. That candle is the reversal candle: its wick is the daily extreme, and by the framework's logic it becomes the second candle of a swing point, after which the following candle is expected to expand. The source is blunt that the market cannot reverse without a swing point, and that once the second candle of the swing point is in, the third and fourth candles expand until some draw on liquidity is met. Practically this means you are watching the open of each 4H candle and asking whether the extreme it is setting is going to hold: the source says a 4H high or low established with a CISD or order block confirmation is more likely to hold. Nominating the candle by its open time — 18:00, 22:00, 2:00, 6:00, 10:00 — is what turns a vague directional opinion into a testable plan for the day.",
+    "body": "One daily candle contains six 4H candles, and the framework's central act is nominating which one of them forms the high or low of the day. That candle is the reversal candle: its wick is the daily extreme, and by the framework's logic it becomes the second candle of a swing point, after which the following candle is expected to expand. The source is blunt that the market cannot reverse without a swing point, and that once the second candle of the swing point is in, the third and fourth candles expand until some draw on liquidity is met. Practically this means you are watching the open of each 4H candle and asking whether the extreme it is setting is going to hold: the source says a 4H high or low established with a CISD or order block confirmation is more likely to hold. Nominating the candle by its open time — 18:00, 22:00, 2:00, 6:00, 10:00 on the indices clock, one hour earlier on forex — is what turns a vague directional opinion into a testable plan for the day.",
     "checks": [
      "Which 4H candle am I nominating as the reversal candle — can I name it by its open time?",
      "Has a 4H candle already set a high or low with CISD or order block confirmation behind it?",
@@ -72,7 +72,7 @@ window.CONTENT = {
    {
     "n": 7,
     "title": "Manage inside the stated cautions",
-    "body": "The source's risk controls are a short list of prohibitions rather than a position-sizing scheme, and they are worth treating as absolute because they are the only management rules given. Order flow must align, and there are no counter-trend trades. There must be no contradictory swings on the chart — bullish and bearish swings cannot coexist in the same read, and if they do, the read is wrong rather than merely ambiguous. There are no trades after 11:00 AM. On the late candle, which for indices spans 10:00 AM to 2:00 PM and for forex 9:00 AM to 1:00 PM, the source repeatedly advises closing trades before 12:00 PM New York lunch. And the SMT gate from step 5 remains in force at all times. Together these compress the framework's actual trading window into the morning: a reversal identified late in the sequence still has to be entered and exited inside those bounds, or it is not taken.",
+    "body": "The source's risk controls are a short list of prohibitions rather than a position-sizing scheme, and they are worth treating as absolute because they are the only management rules given. Order flow must align, and there are no counter-trend trades. There must be no contradictory swings on the chart — bullish and bearish swings cannot coexist in the same read, and if they do, the read is wrong rather than merely ambiguous. There are no trades after 11:00 AM. On the late candle, which for indices spans 10:00 AM to 2:00 PM and for forex 9:00 AM to 1:00 PM, the source advises closing trades before 12:00 PM New York lunch on indices, and on forex attaches the same 12:00 PM cutoff specifically to days carrying 10:00 AM news. And the SMT gate from step 5 remains in force at all times. Together these compress the framework's actual trading window into the morning: a reversal identified late in the sequence still has to be entered and exited inside those bounds, or it is not taken.",
     "checks": [
      "Is this trade with the prevailing order flow rather than against it?",
      "Do bullish and bearish swings coexist on my chart right now?",
@@ -95,7 +95,7 @@ window.CONTENT = {
  },
  "sessions": {
   "title": "The Six 4H Candles",
-  "note": "All times are New York time, exactly as the source states them; a 24-hour day divides into six 4H candles, and the source directs attention to only three of them — the London, NY morning and late NY candles — because those are where the day's high or low is expected to be set and expanded from, with the Asia candles watched only as an earlier reversal window. The indices clock and the forex clock are offset by one hour and must never be merged.",
+  "note": "All times are read as New York time. The source documents never name a timezone — this is an inference from the sessions they describe (the 8:30 and 9:30 driver times, the 12:00 NY lunch) — but the clock hours themselves are exactly as the source states them. A 24-hour day divides into six 4H candles, and the source directs attention to only three of them — the London, NY morning and late NY candles — because those are where the day's high or low is expected to be set and expanded from, with the Asia candles watched only as an earlier reversal window. The indices clock and the forex clock are offset by one hour and must never be merged.",
   "columns": [
    "Candle",
    "Indices",
@@ -131,7 +131,7 @@ window.CONTENT = {
     "Late NY — KEY",
     "10:00 - 14:00",
     "09:00 - 13:00",
-    "Third of the three key candles, and the last chance. If the NY morning candle failed to reverse, or 10:00 news is involved, this becomes the final point for a proper reversal; a small wick supported by the daily logic is called a strong entry point. Close trades before 12:00 PM New York lunch."
+    "Third of the three key candles, and the last chance. If the NY morning candle failed to reverse, or 10:00 news is involved, this becomes the final point for a proper reversal; a small wick supported by the daily logic is called a strong entry point. Close before 12:00 PM NY lunch on indices; on forex the same cutoff is stated for 10:00 AM news days."
    ],
    [
     "Afternoon",
@@ -202,17 +202,16 @@ window.CONTENT = {
      "plate": "assets/v1-p05.png",
      "plateCaption": "Two renderings of the same three-candle swing point: on the left, a large bearish candle, a small second candle whose long lower wick sweeps beneath it, and a large bullish third candle that reverses upward, with a dotted 50% mark at the midpoint of that sweeping wick; on the right, the same sequence continues into two further bullish expansion candles, each stepping up from roughly the 50% level of the candle before it.",
      "reading": [
-      "This lesson borrows two named models the author credits to other teachers: the MMXM (market maker exchange model) Next Day Model, abbreviated NDM, and what the author calls TTFM — the three-fold model, so named because it reads price in threes. Both reduce to the same primitive: a turn in the market has a specific three-candle signature, and that signature is what you wait for.",
+      "This lesson borrows two named models the author credits to other teachers: MMXM Trader's Next Day Model, abbreviated NDM, and what the author calls TTFM. The source never expands either acronym — MMXM is the handle of one of the mentors it credits, and TTFM appears only as a label paired with the Next Day Model, never distinguished from it. Both reduce to the same primitive: a turn in the market has a specific three-candle signature, and that signature is what you wait for.",
       "The three candles have distinct jobs. C1 simply establishes a reference — a high and a low. C2 is the one that does the work: it takes out C1's high or low, pushing past the extreme where stops and resting orders sit. C3 then reverses, closing back in the opposite direction. Read as a sequence, the market reaches for liquidity beyond a prior extreme, fails to sustain the move, and turns. The wick left behind by C2 is the visible record of that failed reach. The plate shows this cleanly: the middle candle drives its wick below the prior candle, and the next candle is a full-bodied move the other way.",
       "The Next Day Model supplies the rule for what happens after the turn. Price expands in the direction of the draw on liquidity whenever it closes above or below the previous candle — and it keeps doing so until the draw is met. That closing condition is the whole mechanism: not a touch, not a wick through, but a close beyond the previous candle. Each such close is treated as confirmation that delivery is continuing in the same direction, which is what produces the stepped staircase on the right side of the plate, where each candle closes past the last and the sequence carries on.",
-      "The 50% marks in the plate are the author's reference points within that staircase. They sit at the midpoint of the preceding candle's range — the level that separates the discounted half from the premium half of that candle. In the illustration each new expansion candle begins from around that midpoint rather than from the extreme, which is why the sequence advances in steps rather than in one unbroken line. The practical use is that the 50% level gives you a place to look for entry within a move that has already begun, instead of chasing the close."
+      "The plate also carries 50% marks at the candle midpoints. The source never explains what they measure or how they are meant to be used — they appear only as bare labels on the diagram, with no accompanying rule text in any of the three documents. This archive records their presence and stops there rather than supplying a meaning the source does not give."
      ],
      "approach": [
       "Label the candles in front of you: find a C1, then wait for a C2 that takes out C1's high or low.",
       "Wait for C3 to close in the reversing direction — the swing point is not complete until it does.",
       "Confirm the reversal direction points toward your nominated draw on liquidity, not away from it.",
       "Once expansion begins, track it by closes: each close beyond the previous candle continues the sequence.",
-      "Use the 50% level of the preceding candle as the reference for a position within an expansion already under way.",
       "Hold the expectation of expansion only until the draw is met — that is where the model's projection ends."
      ],
      "watchouts": [
@@ -244,7 +243,7 @@ window.CONTENT = {
       "Top-down analysis is the procedure that connects the abstract narrative of the first lesson to a specific candle on a specific chart. It runs in a fixed order — daily first, then 4H — and the order matters, because the lower timeframe is being used to confirm and locate, not to originate. The daily chart answers what direction; the 4H chart answers when and where within that day.",
       "On the daily, three things are read together: the direction of the next daily candle, the phase of price delivery, and the order flow. The Next Day Model from the previous lesson is then applied at the relevant points of interest, and the author specifies that these can be either internal or external range liquidity — a swing point forming at an internal inefficiency counts just as a swing point forming at a range extreme does. The draw itself, however, is nominated as external range liquidity: the target is an edge, a prior high or low, not something in the middle of the range.",
       "The 4H layer rests on a simple arithmetic fact that recurs throughout the framework: a daily candle is made of six 4H candles. That decomposition is what makes the day tradeable. Rather than treating the daily candle as a single indivisible unit that resolves only at the close, you can ask which of its six segments will print the day's high or low — because that segment is where the reversal lives and every segment after it belongs to the expansion. The 4H chart is then checked for its own order flow and its own IRL-to-ERL structure to confirm the daily read.",
-      "The author gives one substitution rule and one exception. When the daily chart is unclear, 4H analysis may be used in its place — but not during consolidation, when the lower timeframe will produce structure that means nothing at the higher one. Finally, bullish order flow is defined concretely rather than by feel: higher highs and higher lows, with bullish PD arrays (premium and discount arrays — the specific zones such as order blocks and gaps at which the author expects price to be delivered) being respected rather than traded through. The bearish case is the mirror image."
+      "The author gives one substitution rule and one exception. When the daily chart is unclear, 4H analysis may be used in its place — but not during consolidation, when the lower timeframe will produce structure that means nothing at the higher one. Finally, bullish order flow is defined concretely rather than by feel: higher highs and higher lows, with bullish PD arrays being respected rather than traded through. The source uses the term PD array without defining it and gives no list of which arrays qualify. The bearish case is the mirror image."
      ],
      "approach": [
       "Open the daily chart first and form a view on the direction of the next daily candle.",
@@ -365,7 +364,7 @@ window.CONTENT = {
       "A failed reversal entry is not the end of the setup. If the higher-timeframe read was correct but the specific entry did not work, the author's response is to move one candle along and take the continuation instead — under exactly the same conditions. The phrase is precise: meeting all previous criteria. Order flow alignment, swing point at a PD array, SMT divergence and the timing window all still apply. This is a second attempt within the same thesis, not a looser version of it.",
       "The continuation candle is identified structurally rather than by judgement: it is always the third candle of the swing point, C3. That follows directly from the Next Day Model. C2 does the sweeping and the reversing, so C3 is the first candle whose entire job is expansion. Its expected shape is stated as a signature — a small wick leading to a large body. A small wick means little was given back before the move, and a large body means the delivery ran; the two together describe a candle that opens and goes.",
       "The entry mechanism inside that candle is an order block. An order block here is the last opposing candle before an expansion — the final push in the wrong direction that precedes the real move. The instruction is to wait for that opposing run rather than entering the moment the candle opens. When the opposing move prints and forms the block, you enter the expansion from it. Because the block is a narrow, well-defined area, the stop can sit just beyond it, which is the entire point: the author specifies a small stop, and the small stop is what the structure buys you.",
-      "The second protocol covers a common frustration. Sometimes C2 produces a valid CISD but no entry materialises — the move goes without you. Rather than chasing, the instruction is to wait for an order block or a propulsion block to form within C2 itself, and use that as the entry point instead. A propulsion block is the author's term for a block that forms off a previous block and carries price onward in the same direction; both give you a defined area inside the candle to work from rather than an arbitrary level."
+      "The second protocol covers a common frustration. Sometimes C2 produces a valid CISD but no entry materialises — the move goes without you. Rather than chasing, the instruction is to wait for an order block or a propulsion block to form within C2 itself, and use that as the entry point instead. The source names a propulsion block here but never defines it or distinguishes it from an order block; treat it as an alternative entry structure found inside C2, on the source's authority alone. Either way you get a defined area inside the candle to work from rather than an arbitrary level."
      ],
      "approach": [
       "Confirm that the original higher-timeframe read still holds after the reversal entry failed.",
@@ -439,7 +438,7 @@ window.CONTENT = {
      "plate": null,
      "plateCaption": null,
      "reading": [
-      "The continuation logic at the 1H to M5 scale is stated in the same terms as at the 4H to M15 scale, and deliberately so. The author labels it TTFM logic — the three-fold model — which is the point being made: the three-candle structure is scale-invariant. The same C1-C2-C3 reading that governs a daily candle's six 4H segments governs a 4H candle's four 1H segments. Nothing about the pattern changes as you descend; only the resolution does.",
+      "The continuation logic at the 1H to M5 scale is stated in the same terms as at the 4H to M15 scale, and deliberately so. The author labels it TTFM logic, using the same paired label as before, and the point being made is that the three-candle structure is scale-invariant. The same C1-C2-C3 reading that governs a daily candle's six 4H segments governs a 4H candle's four 1H segments. Nothing about the pattern changes as you descend; only the resolution does.",
       "The trigger for looking at continuation is the same: a failed reversal entry. The higher-timeframe thesis is unchanged, so rather than abandoning it you move one candle along. The continuation candle is again C3, identified structurally rather than by judgement, and its expected signature is again a small wick leading to a large body — little given back, then a full delivery.",
       "The entry mechanism is unchanged too. The opposing move within the continuation candle leaves an order block, and that block is where you enter the expansion, with the stop placed just beyond it. Because the timeframes involved are smaller, the block itself is smaller and the resulting stop is tighter — the same structure at a finer scale produces a proportionally finer risk definition.",
       "The one thing to hold onto is the qualifier carried over verbatim from the larger model: meeting all previous criteria. At this resolution that means everything from the 1H to M5 lesson still applies — SMT divergence, the M5 CISD, no consolidation on M5 or 1H, and the timing. The continuation is a second entry within a thesis that is still intact, and if any of those conditions has broken down, the thesis is not intact and there is nothing to continue."
@@ -506,6 +505,7 @@ window.CONTENT = {
      "title": "The Daily Profile and the Six 4H Candles",
      "source": "V2 · p.5",
      "rules": [
+      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "Treat one daily candle as six 4H candles.",
       "Identify which of the six will print the daily high or low — that candle carries the reversal.",
       "Trade away from the daily high/low (which becomes the wick) toward the draw on liquidity.",
@@ -605,15 +605,14 @@ window.CONTENT = {
      "rules": [
       "Accept that the market cannot reverse without a swing point.",
       "Following the 2nd candle of the swing point, expect the 3rd and 4th candles to expand until a DOL is met.",
-      "Use the MMXM Next Day Model / TTFM structure as the daily profile the 4H candles are read inside.",
-      "Reference the 50% level of the relevant candle when working the setup."
+      "Use the MMXM Next Day Model / TTFM structure as the daily profile the 4H candles are read inside."
      ],
      "plate": "assets/v2-p08.png",
      "plateCaption": "Left, 'Protected Swings': a stepwise advance in which successive swing lows are ringed and left untouched, blue lines mark reclaimed levels, and a shaded zone marks an opposing-candle block at a key level. Right, 'MMXM NDM/TTFM': a bearish candle, a second candle taking out its low, then a bullish reversal and two expanding candles, with grey lines marking prior candle highs and lows and dotted 50% levels drawn across candle midpoints.",
      "reading": [
       "The framework's structural claim is stated in one sentence: the market cannot reverse without a swing point. A swing point in this model is a three-candle formation — a first candle, a second candle that takes out the previous candle's high or low, and a third candle that reverses direction. The second candle is the one that does the work of the reversal; it runs the liquidity beyond the prior extreme and then fails to hold there. That failure is what the earlier lessons called the HRLR leg and the wick.",
       "Once that second candle is in place, the model gives a specific expectation for what follows. Following the 2nd candle of the swing point, the 3rd and 4th candles expand until a DOL is met. This is the body phase again, now expressed in candle counts: two candles of directional travel, ending not at a fixed distance but at a liquidity objective. The draw defines when the expansion is finished; the candle count only tells you where to expect it.",
-      "The MMXM Next Day Model — the market maker exchange model's next day model — and what the author pairs with it as TTFM supply the daily-profile scaffolding this sits inside. Their governing idea, carried through from the framework's earlier material, is that price expands in the direction of the DOL for as long as it keeps closing beyond the previous candle, until the draw is met. The right half of the plate shows exactly this: prior candle highs and lows marked as reference lines, price closing through them, and 50% levels drawn across the candle bodies as the retracement references used to work an entry rather than chase the expansion.",
+      "MMXM Trader's Next Day Model and what the author pairs with it as TTFM supply the daily-profile scaffolding this sits inside. Their governing idea, carried through from the framework's earlier material, is that price expands in the direction of the DOL for as long as it keeps closing beyond the previous candle, until the draw is met. The right half of the plate shows exactly this: prior candle highs and lows marked as reference lines, and price closing through them. The plate also carries unlabelled 50% marks at the candle midpoints; the source never explains what they measure or how to use them, so this archive records their presence without supplying a meaning for them.",
       "The left half of the plate is the protected-swing idea in picture form. Each ringed swing low is left behind as the advance continues; none is revisited; the shaded opposing-candle block sits at the level that turned price. Put beside the NDM panel, the two halves describe the same day from two angles — where the reversal was defended, and how the expansion that followed was structured candle by candle."
      ],
      "approach": [
@@ -636,11 +635,13 @@ window.CONTENT = {
      "title": "The 18:00 / 22:00 Overnight Reversal and the 2:00 London Reversal",
      "source": "V2 · p.9–10",
      "rules": [
+      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "18:00 / 22:00 reversal: expect it usually after the previous day has hit a key level.",
       "Let the reversal set up in the overnight hours, wait for it to end, then trade the London or New York continuation.",
       "2:00 reversal: expect it when Asia consolidates or protracts.",
       "On a 2:00 reversal, London prints the wick and New York expands.",
-      "To engage either profile, wait for M15 reversal confirmation and enter on the next continuation candle."
+      "On the 2:00 reversal, wait for M15 reversal confirmation and enter on the next continuation candle.",
+      "On the 18:00 / 22:00 profile, wait for the reversal to end, then trade the London or NY continuation."
      ],
      "plate": "assets/v2-p10.png",
      "plateCaption": "Two paired panels. 'Overnight Reversal': lower-timeframe price declines into a low around the 22:00 marker and rallies away past 2:00am, shown beside its 4H aggregation — a bearish 18:00 candle, a long-lower-wicked reversal candle, then a tall expansion candle. 'London Reversal': price ranges through 18:00, builds its low at the 2:00am marker, then expands from 6:00am onward, aggregating into two bearish candles, a wicked 2:00 reversal candle, and a large 6:00 expansion candle.",
@@ -648,7 +649,7 @@ window.CONTENT = {
       "These are the two early-reversal profiles. In the 18:00 / 22:00 case the day's extreme is built during the overnight session, and the source gives the usual precondition: it happens after the previous day has hit a key level. The prior day's move has already reached something that mattered, so the new day opens by turning rather than continuing. The reversal sets up in the overnight hours, and the instruction is to wait for it to end before doing anything — the trade is the London or New York continuation that follows, not the overnight turn itself.",
       "The 2:00 profile has a different precondition: it happens when Asia consolidates or protracts. Protraction is the false or stalling move that precedes the real reversal — price extends just far enough, or ranges just long enough, to look like something is happening, without committing. When Asia spends its hours that way, the extreme has not been built, and London takes the job. The source's summary is exact: London prints the wick, New York expands.",
       "The plate shows both as paired views, and the pairing is the lesson. In each case the granular chart shows what looks like a directional sell-off into the marked hour, while the 4H aggregation beside it shows the same span as a single reversal candle with a long lower wick, followed by a body. The 22:00 candle carries the wick in the overnight profile; the 2:00 candle carries it in the London profile. The 4H candle following the wick is where the tradable travel lives.",
-      "Engagement is the same in both cases and deliberately conservative: wait for M15 — 15-minute chart — reversal confirmation, then enter on the next continuation candle. You are not trying to catch the extreme. You are letting the reversal complete on a timeframe granular enough to show you it has completed, and then taking the candle after it."
+      "The two profiles are engaged differently, and the source is specific about which instruction belongs to which. For the 2:00 London reversal it gives an explicit trigger: wait for M15 — 15-minute chart — reversal confirmation, then enter on the next continuation candle. For the 18:00 / 22:00 overnight profile it says only to wait for the reversal to end and then trade the London or NY continuation, without naming a confirmation timeframe. Both share the same conservatism: you are not trying to catch the extreme, but letting the reversal complete before taking the candle after it."
      ],
      "approach": [
       "Check what the previous day did into the close: an overnight reversal is expected after a key level has been reached.",
@@ -670,6 +671,7 @@ window.CONTENT = {
      "title": "The 6:00 and 10:00 New York Reversals",
      "source": "V2 · p.11–12",
      "rules": [
+      "These are indices-clock times, stated as the source document gives them; the forex equivalents are one hour earlier (17:00 / 21:00, 1:00, 5:00, 9:00).",
       "6:00 reversal: expect New York to make the reversal after the early session protracts or consolidates.",
       "Use the 8:30 and 9:30 driver times to help confirm the 6:00 move.",
       "10:00 reversal: treat it as the last point for a proper reversal if the 6:00 candle failed to reverse, or if 10:00 news is involved.",
@@ -757,7 +759,7 @@ window.CONTENT = {
      "plate": null,
      "plateCaption": null,
      "reading": [
-      "The document opens with a disclaimer that is really a positioning statement. The author says explicitly that the framework is not based on CRT — candle range theory, the popular method of trading a higher-timeframe candle's range from its open — nor on any other conventional methodology. What it draws from instead is MMXM Trader's Next Day Model (MMXM = market maker exchange model; NDM = next day model, the idea that price expands in the direction of the draw once a candle closes beyond the prior candle's extreme) and TTrades' teachings. Naming the lineage matters here because the rest of the document is a set of time windows, and time windows borrowed from the wrong method produce the wrong expectations.",
+      "The document opens with a disclaimer that is really a positioning statement. The author says explicitly that the framework is not based on CRT — which the source names but never defines — nor on any other conventional methodology. What it draws from instead is MMXM Trader's Next Day Model (NDM: the idea that price expands in the direction of the draw once a candle closes beyond the prior candle's extreme) and TTrades' teachings. Naming the lineage matters here because the rest of the document is a set of time windows, and time windows borrowed from the wrong method produce the wrong expectations.",
       "The thought process itself is a single fractal claim. If weekly candles can be profiled — if within a week one day's reversal reliably sets up another day's expansion — then the same relationship should hold one degree lower, among the 4H candles that make up a single daily range. Nothing about the mechanism is specific to the weekly timeframe: a reversal is a rejection that leaves a wick and establishes a level, and the delivery that follows it has somewhere to go. Move the same observation down a timeframe and you get 4H profiling.",
       "The mechanical hinge is the swing point. In this body of work a swing point is a three-candle structure: a first candle, a second candle that takes out the prior candle's high or low, and a third candle that reverses direction. The 4H candle that reverses is therefore the second candle of that structure — the one that ran liquidity and failed. Once it exists, the framework's expectation is fixed and not discretionary: the following candle expands. This is what makes the approach mechanical. The trader is not asked to judge whether a move feels strong; the trader is asked whether a reversal candle has completed, and if so, which candle is next.",
       "The corollary is just as important. Where no swing point has formed on the 4H, the framework has nothing to say and offers no expansion to trade. That silence is deliberate — it is the mechanism that keeps the reader out of lower-timeframe noise, and it is restated at the end of the document as the framework's primary goal."
@@ -824,7 +826,7 @@ window.CONTENT = {
       "Forex — look for the reversal within the 17:00 or 21:00 candle.",
       "Take the reversing Asia candle as the second candle of the swing point; the candles that follow it are continuation candles.",
       "Read the resulting day as an OLHC (open-low-high-close) daily candle on a buy day — the low is made early and the close is at the far end of the range.",
-      "Do not expect a further reversal later in the day once the Asia reversal has been confirmed and London has expanded."
+      "Once Asia has reversed, the source's expectation for the rest of the day is expansion and continuation; it says nothing about what happens if a later session reverses again."
      ],
      "plate": "assets/v3-p05.png",
      "plateCaption": "Two six-candle daily sequences with the daily candle each one produces: on the left, an Asia reversal in which the 22:00 candle drives down on a long lower wick and closes back up, and the 2:00, 6:00 and 10:00 candles expand upward in sequence; on the right, a London reversal in which the 2:00am candle makes the low on a long lower wick and the 6:00 and 10:00 candles carry the expansion — both sequences resolving into a bullish Daily OLHC candle with a long lower wick and the close near the high.",
@@ -832,7 +834,7 @@ window.CONTENT = {
       "The Asia reversal is the earliest of the three profiles. Price reaches a level during the overnight hours, runs it, and fails; the resulting 4H candle carries a long wick and closes back against its own run. Because that candle is the second candle of the swing point, everything after it is continuation: London expands, and New York continues the same direction. The trader's day is therefore already framed before the London window opens.",
       "The times split by instrument and must stay split. On indices the reversal is expected within the 18:00 or the 22:00 candle. On forex it is expected within the 17:00 or the 21:00 candle — the same two structural positions, one hour earlier on the clock. These are the two overnight candles that precede the first of the three key candles, which is why an Asia reversal hands a fully formed swing point to the session that follows.",
       "The plate shows the sequence and its consequence side by side. In the left-hand panel the day's low is printed by the 22:00 candle, which pushes below the prior candles and closes back into their range on a pronounced lower wick; the three candles after it — 2:00, 6:00 and 10:00 — step upward one after another, and a small final candle closes out the day. Collapse those six candles into one and you have the Daily OLHC candle drawn beside them: open, then low, then high, then close, a bullish body with a long tail beneath it. OLHC is the shape a buy day takes when the low is made early; its mirror, OHLC (open-high-low-close), is the sell-day equivalent. Reading the day this way is what allows the framework to be mechanical — the trader is choosing between two known shapes rather than forecasting a path.",
-      "The practical consequence is that an Asia reversal removes a question rather than adding one. Once the overnight candle has printed its wick and closed, the framework does not expect London or New York to produce another reversal; it expects them to deliver. That expectation is what disqualifies counter-trend interest later in the day."
+      "The practical consequence is that an Asia reversal removes a question rather than adding one. Once the overnight candle has printed its wick and closed, the framework's stated expectation for London and New York is delivery — expansion and continuation. Note the limit of that claim: the source says what it expects, not what it forbids, and it gives no instruction for a day on which a later session reverses again."
      ],
      "approach": [
       "Note where the previous day finished relative to your key levels, since the overnight run is usually aimed at one of them.",
@@ -845,7 +847,7 @@ window.CONTENT = {
      "watchouts": [
       "Using indices overnight times on a forex chart — 18:00/22:00 and 17:00/21:00 are not interchangeable.",
       "Calling a wick a reversal before the candle has closed back against its run.",
-      "Looking for a second reversal in London or New York after the Asia reversal has already been confirmed.",
+      "Treating the Asia reversal as a guarantee that no later session can reverse — the source states an expectation of continuation, not a prohibition.",
       "Confusing an overnight consolidation or protraction — a false push before the real move — with a completed reversal candle."
      ]
     },
@@ -934,7 +936,8 @@ window.CONTENT = {
       "Continuation candle entry — use OB (order block) as the confluence.",
       "Observe the open of the 4H candle when trading within this framework.",
       "If a 4H candle establishes its high or low with a CISD or OB confirmation, treat that high or low as more likely to hold.",
-      "Do not apply a reversal entry method to a continuation candle, or the reverse — the confluence is assigned by the candle's role."
+      "The source assigns CISD to the reversal candle and the order block to the continuation candle; it does not forbid other combinations — Module I's Continuation Protocol 2 has a CISD on C2 resolved by an order block inside it.",
+      "V3 does not restate the SMT requirement, but Module I states it as compulsory before any reversal-candle entry; it is not waived here."
      ],
      "plate": null,
      "plateCaption": null,
@@ -953,7 +956,7 @@ window.CONTENT = {
       "Keep the entry method matched to the candle's role rather than applying whichever appears first."
      ],
      "watchouts": [
-      "Taking a CISD entry on a continuation candle or an OB entry on a reversal candle — the document assigns each to one role.",
+      "Reading the CISD/order block assignment as a prohibition — the source assigns each to a role but never rules out the other combination.",
       "Treating a high or low without CISD or OB confirmation as a durable level.",
       "Letting a lower-timeframe entry signal select the candle, instead of letting the profile select the candle and the signal time the entry.",
       "Losing the 4H open as a reference and judging a forming candle by its provisional high and low."
