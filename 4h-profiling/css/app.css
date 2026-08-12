@@ -1241,3 +1241,46 @@ h2.panel-label {
     0 0 10px color-mix(in srgb, var(--c, var(--grey)) 90%, transparent),
     0 0 22px color-mix(in srgb, var(--c, var(--grey)) 55%, transparent);
 }
+
+/* ==========================================================================
+   INVALIDATIONS — every failure condition in the archive, in one place
+   ========================================================================== */
+.inv-group { margin-bottom: 34px; }
+.inv {
+  border: 1px solid var(--line-2);
+  border-left: 3px solid color-mix(in srgb, var(--red) 55%, transparent);
+  border-radius: var(--r);
+  background: var(--surface);
+  padding: 4px 20px 14px;
+  margin-bottom: 10px;
+}
+.inv-head {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 0 8px;
+  color: var(--text);
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 6px;
+}
+.inv-num {
+  font-family: var(--mono); font-size: 10.5px;
+  color: var(--way, var(--teal));
+  border: 1px solid color-mix(in srgb, var(--way, var(--teal)) 40%, transparent);
+  background: color-mix(in srgb, var(--way, var(--teal)) 12%, transparent);
+  border-radius: 5px; padding: 2px 7px; flex: 0 0 auto;
+}
+.inv-title {
+  flex: 1; min-width: 0;
+  font-family: var(--display); font-size: 15px; font-weight: 600;
+  letter-spacing: -0.018em;
+}
+.inv-count {
+  font-family: var(--mono); font-size: 10px; color: var(--muted);
+  background: rgba(255,255,255,0.05); border: 1px solid var(--line);
+  border-radius: 999px; padding: 1px 7px; flex: 0 0 auto;
+}
+.inv-head .ic { width: 15px; height: 15px; color: var(--muted-2); transition: transform .16s, color .16s; }
+.inv-head:hover { color: var(--text); }
+.inv-head:hover .ic { color: var(--red); transform: translateX(3px); }
+.inv .x-list li::before { color: var(--red); }
+.src-note { font-size: 13px; color: var(--muted); margin-top: 12px; }
+.src-note a { color: var(--red); }

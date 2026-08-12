@@ -39,6 +39,7 @@
     expand:  '<path d="M9 3H3v6"/><path d="M15 21h6v-6"/><path d="M3 3l7 7"/><path d="M21 21l-7-7"/>',
     check:   '<path d="M20 6 9 17l-5-5"/>',
     chev:    '<path d="m6 9 6 6 6-6"/>',
+    alert:   '<path d="M12 4 2.5 20h19z"/><path d="M12 10v4"/><path d="M12 17.4h0"/>',
     link:    '<path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1"/>'
   };
   function icon(n, cls) {
@@ -187,6 +188,7 @@
     [['#/approach', 'compass', C.approach ? C.approach.title : 'How to approach it', (C.approach ? C.approach.steps.length : 0) + ' steps, in order'],
      ['#/sessions', 'clock', C.sessions ? C.sessions.title : 'Session clock', 'Which 4H candle does what'],
      ['#/glossary', 'book', 'Glossary', STATS.terms + ' terms defined'],
+     ['#/invalidations', 'alert', 'Invalidations', 'Everything that kills a read, in one place'],
      ['#/l/fractal-thought-process', 'candle', 'Start here', 'The five-lesson path through the idea']
     ].forEach(function (t) {
       h.push('<a class="tile" href="' + t[0] + '"><span class="tile-ic">' + icon(t[1]) + '</span>' +
@@ -490,6 +492,59 @@
       '<a href="#/sources">Sources &amp; notice</a><a href="../">← Back to site</a></div></footer></div>';
   }
 
+  function viewInvalidations() {
+    var total = ALL.reduce(function (n, L) { return n + (L.watchouts || []).length; }, 0);
+    var h = ['<div class="wrap">'];
+    h.push('<div class="crumbs"><a href="#/">All lessons</a><span>/</span><b>Invalidations</b></div>');
+    h.push('<header class="page-head"><h1>Invalidations <span class="n">(' + total + ')</span></h1>' +
+           '<p>Everything in the archive that kills a read or a trade, gathered from all ' + ALL.length +
+           ' lessons. Each item links back to the lesson it belongs to.</p></header>');
+
+    /* the standing prohibitions are the ones that apply to every setup, so they
+       lead — pulled from their own lesson rather than restated */
+    var gate = BY_ID['4h-m15-entries'];
+    if (gate) {
+      /* the absolutes, phrased several ways in the source: "Take no…",
+         "There must be no…", "No X, no trade" */
+      var hard = (gate.rules || []).filter(function (r) {
+        return /^(take no|no |there must be no)\b/i.test(r.trim());
+      });
+      if (hard.length) {
+        h.push(banner('warn', 'Standing prohibitions',
+          '<p>These are stated as absolutes rather than preferences, and they apply to every setup in the ' +
+          'framework, not only the lesson they appear in.</p>' +
+          '<ul class="x-list">' + hard.map(function (r) { return '<li>' + esc(r) + '</li>'; }).join('') + '</ul>' +
+          '<p class="src-note">From <a href="#/l/' + esc(gate.id) + '">' + esc(gate.number) + ' · ' +
+          esc(gate.title) + '</a>.</p>'));
+      }
+    }
+
+    h.push('<div class="field field-wide">' + icon('search') +
+           '<input id="iq" type="search" placeholder="Filter invalidations…" autocomplete="off" ' +
+           'aria-label="Filter invalidations"></div>');
+
+    (C.modules || []).forEach(function (M) {
+      var lessons = (M.lessons || []).filter(function (L) { return (L.watchouts || []).length; });
+      if (!lessons.length) return;
+      var n = lessons.reduce(function (a, L) { return a + L.watchouts.length; }, 0);
+      h.push('<div class="inv-group"><div class="group-head"><h2>' + esc(M.title) +
+             ' <span class="n">(' + n + ')</span></h2><span class="group-meta">Module ' + esc(M.numeral) + '</span></div>');
+      lessons.forEach(function (L) {
+        h.push('<section class="inv way-' + L._way + '" data-kind="inv">');
+        h.push('<a class="inv-head" href="#/l/' + esc(L.id) + '"><span class="inv-num">' + esc(L.number) + '</span>' +
+               '<span class="inv-title">' + esc(L.title) + '</span>' +
+               '<span class="inv-count">' + L.watchouts.length + '</span>' + icon('next') + '</a>');
+        h.push('<ul class="x-list">' + L.watchouts.map(function (w) {
+          return '<li>' + esc(w) + '</li>'; }).join('') + '</ul>');
+        h.push('</section>');
+      });
+      h.push('</div>');
+    });
+    h.push('<p class="no-results is-hidden" id="inv-empty">Nothing matches that filter.</p>');
+    h.push('</div>');
+    return h.join('');
+  }
+
   function viewMissing() {
     return '<div class="wrap"><header class="page-head"><h1>Not found</h1>' +
            '<p>That page does not exist. <a href="#/">Back to all lessons</a>.</p></header></div>';
@@ -507,6 +562,7 @@
     (C.modules || []).forEach(function (M) {
       rail.push({ href: '#/m/' + M.moduleId, txt: M.numeral, label: 'Module ' + M.numeral + ' — ' + M.title });
     });
+    rail.push({ href: '#/invalidations', ic: 'alert', label: 'Invalidations' });
     rail.push({ href: '#/glossary', ic: 'book', label: 'Glossary' });
     rail.push({ href: '#/sources', ic: 'shield', label: 'Sources & notice' });
     $('#rail').innerHTML = rail.map(function (r) {
@@ -521,6 +577,9 @@
     if (C.approach) h.push('<a class="nav-link" href="#/approach" data-href="#/approach">' + icon('compass') +
       '<span>' + esc(C.approach.title) + '</span><span class="badge">' + C.approach.steps.length + '</span></a>');
     if (C.sessions) h.push('<a class="nav-link" href="#/sessions" data-href="#/sessions">' + icon('clock') + '<span>Session clock</span></a>');
+    h.push('<a class="nav-link" href="#/invalidations" data-href="#/invalidations">' + icon('alert') +
+           '<span>Invalidations</span><span class="badge">' +
+           ALL.reduce(function (n, L) { return n + (L.watchouts || []).length; }, 0) + '</span></a>');
     h.push('</div>');
 
     (C.modules || []).forEach(function (M) {
@@ -599,6 +658,7 @@
     else if (parts[0] === 'sessions')       { html = viewSessions(); }
     else if (parts[0] === 'glossary')       { html = viewGlossary(); }
     else if (parts[0] === 'sources')        { html = viewSources(); }
+    else if (parts[0] === 'invalidations')  { html = viewInvalidations(); }
     else                                    { html = viewMissing(); }
 
     document.body.dataset.view =
@@ -701,6 +761,29 @@
         var ld = document.querySelector('.lab-dark'), ll = document.querySelector('.lab-light');
         if (ld) ld.classList.toggle('is-on', mode === 'dark');
         if (ll) ll.classList.toggle('is-on', mode !== 'dark');
+      });
+    }
+
+    /* invalidations filter */
+    var iq = $('#iq');
+    if (iq) {
+      var blocks = $$('[data-kind="inv"]');
+      var igroups = $$('.inv-group');
+      var iempty = $('#inv-empty');
+      blocks.forEach(function (x) { x.dataset.text = x.textContent.toLowerCase(); });
+      iq.addEventListener('input', function () {
+        var v = iq.value.trim().toLowerCase();
+        var hits = 0;
+        blocks.forEach(function (x) {
+          var ok = !v || x.dataset.text.indexOf(v) !== -1;
+          x.classList.toggle('is-hidden', !ok);
+          if (ok) hits++;
+        });
+        igroups.forEach(function (g) {
+          g.classList.toggle('is-hidden', !$$('[data-kind="inv"]', g).some(function (k) {
+            return !k.classList.contains('is-hidden'); }));
+        });
+        iempty.classList.toggle('is-hidden', hits > 0);
       });
     }
 
