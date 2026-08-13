@@ -462,7 +462,9 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   border: 1.5px solid var(--ember); box-shadow: 0 0 10px var(--ember-glow);
 }
 .essay-body {
-  margin: -16px 0 0 74px;
+  /* Clear of the elbow's circle, not butted against it — the marker
+     should read as a bullet, not as touching the first word. */
+  margin: -16px 0 0 90px;
   font-size: 13.5px; line-height: 1.62; color: var(--ink-soft); font-weight: 300;
 }
 
