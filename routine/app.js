@@ -270,9 +270,16 @@
     $('#remSub').textContent     = R.sub;
     $('#remFoot').textContent    = R.foot;
 
+    /* The horizon is a real date, not a slogan. */
+    const d = new Date();
+    d.setDate(d.getDate() + 180);
+    const months = ['January','February','March','April','May','June','July',
+                    'August','September','October','November','December'];
+    $('#remDate').textContent = d.getDate() + ' ' + months[d.getMonth()] + ' ' + d.getFullYear();
+
     /* Each domain carries whichever goal you set for it — the reminder
        is yours, not a stock quote. */
-    const order = ['mentally', 'financially', 'physically', 'spiritually'];
+    const order = ['mind', 'money', 'body', 'meaning'];
     $('#remDomains').innerHTML = order.map((k) => {
       const g = state.goals.find((x) => x.domain === k);
       return '<div>' +
@@ -327,11 +334,12 @@
 
   /* ── setup sheet ── */
   function openSetup() {
-    $('#inName').value  = state.profile.name;
-    $('#inWake').value  = state.profile.wake;
-    $('#inWs').value    = state.profile.workStart;
-    $('#inWe').value    = state.profile.workEnd;
-    $('#inSleep').value = state.profile.sleep;
+    $('#inName').value    = state.profile.name;
+    $('#inWake').value    = state.profile.wake;
+    $('#inWorkout').value = state.profile.workout;
+    $('#inWs').value      = state.profile.workStart;
+    $('#inWe').value      = state.profile.workEnd;
+    $('#inSleep').value   = state.profile.sleep;
     $('#scrim').classList.add('on');
   }
   const closeSetup = () => $('#scrim').classList.remove('on');
@@ -339,13 +347,15 @@
   function saveSetup() {
     const p = {
       name:      ($('#inName').value || '').trim().slice(0, 40) || 'you',
-      wake:      $('#inWake').value  || state.profile.wake,
-      workStart: $('#inWs').value    || state.profile.workStart,
-      workEnd:   $('#inWe').value    || state.profile.workEnd,
-      sleep:     $('#inSleep').value || state.profile.sleep,
+      wake:      $('#inWake').value    || state.profile.wake,
+      workout:   $('#inWorkout').value || state.profile.workout,
+      workStart: $('#inWs').value      || state.profile.workStart,
+      workEnd:   $('#inWe').value      || state.profile.workEnd,
+      sleep:     $('#inSleep').value   || state.profile.sleep,
     };
     if (D.toMin(p.workEnd) <= D.toMin(p.workStart)) { toast('Work end must be after work start'); return; }
     if (D.toMin(p.workStart) <= D.toMin(p.wake))    { toast('Wake up before work starts'); return; }
+    if (D.toMin(p.workout)  <  D.toMin(p.wake))     { toast('Workout can\'t be before you wake'); return; }
 
     state.profile = p;
     state.setupDone = true;

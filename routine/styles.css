@@ -31,11 +31,11 @@
   --edge:        rgba(255,255,255,0.09);
   --edge-soft:   rgba(255,255,255,0.05);
 
-  /* ── domains (image 5) ── */
-  --mentally:    #8fb3c9;
-  --financially: #cbab72;
-  --physically:  #c98878;
-  --spiritually: #a99ac4;
+  /* ── domains ── */
+  --mind:    #8fb3c9;
+  --money:   #cbab72;
+  --body:    #c98878;
+  --meaning: #a99ac4;
 
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
@@ -478,8 +478,12 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   font-size: 13px; font-weight: 600; letter-spacing: 0.19em;
   text-transform: uppercase; color: #ded2c8; white-space: nowrap;
 }
+.rem-date {
+  margin-top: 12px; font-family: var(--mono); font-size: 10px;
+  letter-spacing: 0.16em; text-transform: uppercase; color: rgba(214,200,190,0.42);
+}
 .rem-sub {
-  margin-top: 26px; font-size: 10px; font-weight: 300; letter-spacing: 0.2em;
+  margin-top: 22px; font-size: 10px; font-weight: 300; letter-spacing: 0.2em;
   text-transform: uppercase; color: rgba(214,200,190,0.6); line-height: 1.9;
 }
 .rem-domains { margin: 38px 0 0; display: flex; flex-direction: column; gap: 24px; }

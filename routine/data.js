@@ -4,75 +4,79 @@
  * RITUAL — default content + routine generation
  * ──────────────────────────────────────────────
  * Nothing personal is stored in this file. It holds the *shape* of a day
- * and neutral starting copy. Your real times, goals and history live in
- * localStorage on your own device (see app.js → STORE).
+ * and neutral starting copy. Real times, goals and history live in
+ * localStorage on the device (see app.js → STORE).
  *
- * buildRoutine(profile) is the actual routine builder: it takes four
- * anchors — wake, work start, work end, sleep — and lays the day out
- * around them, so the routine bends to your schedule instead of you
- * bending to a template.
+ * buildRoutine(profile) is the actual routine builder: it takes the day's
+ * anchors — wake, workout, work start, work end, sleep — and lays the day
+ * out around them, so the routine bends to the schedule instead of the
+ * other way round.
  */
 
 window.RITUAL_DATA = (function () {
 
-  /* ── the four domains (image 5) ── */
+  /* ── the four domains ── */
   const DOMAINS = {
-    mentally:    { label: 'Mentally',    color: 'var(--mentally)' },
-    financially: { label: 'Financially', color: 'var(--financially)' },
-    physically:  { label: 'Physically',  color: 'var(--physically)' },
-    spiritually: { label: 'Spiritually', color: 'var(--spiritually)' },
+    mind:    { label: 'Mind',    color: 'var(--mind)' },
+    money:   { label: 'Money',   color: 'var(--money)' },
+    body:    { label: 'Body',    color: 'var(--body)' },
+    meaning: { label: 'Meaning', color: 'var(--meaning)' },
   };
 
   /* ── starting profile — placeholder until setup is run ── */
   const PROFILE = {
     name:      'Niko',
     wake:      '05:30',
+    workout:   '06:00',
     workStart: '09:00',
     workEnd:   '17:30',
     sleep:     '22:00',
   };
 
+  const WORKOUT_LEN = 60;
+  const WALK_LEN    = 40;
+
   /* ── habits: the non-negotiables ──
-     `anchor` ties a habit to a block so the timeline can show what
-     each block is actually for. `needle` marks the ones that move
-     the needle most — those get weighted in the day score. */
+     `anchor` ties a habit to a block, so completing the block keeps the
+     habit. `needle` marks the ones that move the needle most. */
   const HABITS = [
-    { id: 'h-sun',   name: 'Sunlight + water',   domain: 'physically',  anchor: 'rise',  needle: false },
-    { id: 'h-still', name: 'Stillness / prayer', domain: 'spiritually', anchor: 'rise',  needle: true  },
-    { id: 'h-deep',  name: 'Deep work block',    domain: 'financially', anchor: 'deep',  needle: true  },
-    { id: 'h-train', name: 'Train',              domain: 'physically',  anchor: 'train', needle: true  },
-    { id: 'h-read',  name: 'Read 20 min',        domain: 'mentally',    anchor: 'wind',  needle: false },
-    { id: 'h-plan',  name: 'Plan tomorrow',      domain: 'mentally',    anchor: 'wind',  needle: true  },
+    { id: 'h-sun',   name: 'Sunlight + water', domain: 'body',    anchor: 'rise',  needle: false },
+    { id: 'h-train', name: 'Workout',          domain: 'body',    anchor: 'train', needle: true  },
+    { id: 'h-trade', name: 'Trading block',    domain: 'money',   anchor: 'deep',  needle: true  },
+    { id: 'h-walk',  name: 'Walk & reflect',   domain: 'meaning', anchor: 'walk',  needle: true  },
+    { id: 'h-read',  name: 'Read 20 min',      domain: 'mind',    anchor: 'wind',  needle: false },
+    { id: 'h-plan',  name: 'Plan tomorrow',    domain: 'mind',    anchor: 'wind',  needle: true  },
   ];
 
   /* ── goals: one per domain, six-month horizon ── */
   const GOALS = [
-    { id: 'g-1', domain: 'spiritually', name: 'A settled mind before the day starts',
-      why: 'Everything else is downstream of how the first hour goes.',
-      needle: true,  habits: ['h-still', 'h-sun'] },
-    { id: 'g-2', domain: 'financially', name: 'Ship the work that compounds',
-      why: 'One protected deep block a day, before the world gets a vote.',
-      needle: true,  habits: ['h-deep'] },
-    { id: 'g-3', domain: 'physically', name: 'Train without negotiating',
-      why: 'The body sets the ceiling for everything else.',
-      needle: true,  habits: ['h-train'] },
-    { id: 'g-4', domain: 'mentally', name: 'Close the day on purpose',
+    { id: 'g-1', domain: 'body', name: 'Train before the day can take it',
+      why: 'First hour, already done. Nothing later gets to negotiate with it.',
+      needle: true,  habits: ['h-train', 'h-sun'] },
+    { id: 'g-2', domain: 'money', name: 'Trade the plan, not the feeling',
+      why: 'The edge is in the repetition, not in any single position.',
+      needle: true,  habits: ['h-trade'] },
+    { id: 'g-3', domain: 'meaning', name: 'Walk it off and think straight',
+      why: 'The thinking happens while moving, away from a screen.',
+      needle: true,  habits: ['h-walk'] },
+    { id: 'g-4', domain: 'mind', name: 'Close the day on purpose',
       why: 'Reading and a plan beat scrolling into sleep.',
       needle: false, habits: ['h-read', 'h-plan'] },
   ];
 
-  /* ── reminder copy (images 4 & 5) ── */
+  /* ── reminder copy ── */
   const REMINDER = {
-    essayTitle: 'The Importance of a Morning Routine',
-    essayBody:  'Morning is an important time of day because how you spend your ' +
-                'morning can often tell you what kind of day you are going to have. ' +
-                'It can change your outlook on life, filling you with a sense of ' +
-                'possibility and motivation. Small, positive habits practiced daily ' +
-                'can accumulate into significant personal growth and achievements over time.',
-    vLabel:  'Daily reminder:',
-    head:    'Six months from now',
-    sub:     'You can be in a completely different space',
-    foot:    'Keep working and believe in yourself',
+    essayTitle: 'Whoever owns your first hour owns your day',
+    essayBody:  'Reach for the phone first and the day belongs to whoever is ' +
+                'loudest. Light, water, out the door — before anything is allowed ' +
+                'to ask you for something. The hour itself is not the point. The ' +
+                'point is proving, early and on the record, that you still do what ' +
+                'you said you would. Everything after runs easier from a promise ' +
+                'already kept.',
+    vLabel:  'The long game:',
+    head:    '180 days from today',
+    sub:     'Nothing moves in a week. Everything moves in a hundred and eighty.',
+    foot:    'It does not arrive at once. It arrives daily.',
   };
 
   /* ═══════════════════════════════════════════
@@ -86,71 +90,103 @@ window.RITUAL_DATA = (function () {
   };
 
   /**
-   * Lay the day out around the four anchors.
-   * Returns blocks sorted by start, each with phase, title, intent and
-   * the habit ids that belong to it.
+   * Lay the day out around the anchors. Returns blocks sorted by start,
+   * each with phase, title, intent and a key the habits anchor to.
    */
   function buildRoutine(profile) {
-    const wake  = toMin(profile.wake);
+    const wake   = toMin(profile.wake);
     const wStart = toMin(profile.workStart);
     const wEnd   = toMin(profile.workEnd);
     let   sleep  = toMin(profile.sleep);
-    if (sleep <= wEnd) sleep += 1440;          // sleep after midnight
+    if (sleep <= wEnd) sleep += 1440;             // sleep after midnight
+
+    let workout = toMin(profile.workout);
+    if (workout < wake) workout = wake;
 
     const blocks = [];
     const push = (key, phase, start, end, title, intent) => {
-      if (end - start < 10) return;             // don't render slivers
+      if (end - start < 10) return;                // don't render slivers
       blocks.push({ key, phase, start, end, title, intent });
     };
 
-    /* 1 — Rise. First 45 minutes belong to you, not to a screen. */
-    const riseEnd = Math.min(wake + 45, wStart);
-    push('rise', 'Rise', wake, riseEnd,
-         'Rise & ritual',
-         'Light, water, stillness. No phone until this is done.');
+    const morningWorkout = workout < wStart;
+    let deepPlaced = false;
 
-    /* 2 — Deep work, if there's real room before work starts.
-           This is the block that moves the needle, so it gets the
-           freshest hours available. If the morning is too tight it
-           does NOT get dropped — it moves to the evening below. */
-    const deepInMorning = (wStart - riseEnd) >= 50;
-    if (deepInMorning) {
-      push('deep', 'Deep work', riseEnd, wStart,
-           'Deep work',
-           'One thing that compounds. Phone in another room.');
+    if (morningWorkout) {
+      /* Wake → out the door. Short on purpose. */
+      push('rise', 'Rise', wake, Math.min(workout, wake + 40),
+           'Rise',
+           'Light, water, out the door. Nothing on the phone yet.');
+
+      const trainEnd = Math.min(workout + WORKOUT_LEN, wStart);
+      push('train', 'Train', workout, trainEnd,
+           'Workout',
+           'The first hour, already spent. Nothing later gets a vote on it.');
+
+      /* Trading takes whatever clear air is left before work. */
+      if (wStart - trainEnd >= 50) {
+        push('deep', 'Trading', trainEnd, wStart,
+             'Trading',
+             'The plan, not the feeling. One screen, nothing else open.');
+        deepPlaced = true;
+      }
+    } else {
+      /* Workout is later in the day, so the morning is the clear air. */
+      const riseEnd = Math.min(wake + 45, wStart);
+      push('rise', 'Rise', wake, riseEnd,
+           'Rise',
+           'Light, water, no phone. Slow start, on purpose.');
+
+      if (wStart - riseEnd >= 50) {
+        push('deep', 'Trading', riseEnd, wStart,
+             'Trading',
+             'The plan, not the feeling. One screen, nothing else open.');
+        deepPlaced = true;
+      }
     }
 
-    /* 3 — Work, split by a genuine reset at the midpoint. */
+    /* Work, split by a genuine reset at the midpoint. */
     const mid = Math.round((wStart + wEnd) / 2);
-    push('work', 'Work', wStart, mid, 'Work', 'Committed hours.');
+    push('work',  'Work', wStart, mid, 'Work', 'Committed hours.');
     push('reset', 'Work', mid, mid + 40,
          'Reset',
-         'Eat away from the desk. Walk. Nothing productive.');
+         'Eat away from the desk. Nothing productive.');
     push('work2', 'Work', mid + 40, wEnd, 'Work', 'Second half — finish the loop.');
 
-    /* 4 — Train, straight after work while momentum is still up. */
-    push('train', 'Train', wEnd + 15, wEnd + 90,
-         'Train',
-         'Non-negotiable. Show up even on the bad days.');
-
-    /* 5 — Evening. If the morning had no room for deep work, it lands
-           here rather than disappearing from the day altogether. */
+    /* After work. */
+    let cursor = wEnd + 15;
     const windStart = sleep - 75;
-    let eveningStart = wEnd + 90;
 
-    if (!deepInMorning) {
-      const deepEnd = Math.min(eveningStart + 60, windStart);
-      push('deep', 'Deep work', eveningStart, deepEnd,
-           'Deep work',
-           'No room this morning — so it happens tonight, before anything else.');
-      eveningStart = deepEnd;
+    if (!morningWorkout) {
+      const start = Math.max(workout, cursor);
+      const end   = Math.min(start + WORKOUT_LEN, windStart);
+      push('train', 'Train', start, end,
+           'Workout',
+           'Non-negotiable. Show up even on the bad days.');
+      cursor = end;
     }
 
-    push('evening', 'Evening', eveningStart, windStart,
+    /* The walk is where the thinking happens — it is not filler. */
+    const walkEnd = Math.min(cursor + WALK_LEN, windStart);
+    push('walk', 'Walk', cursor, walkEnd,
+         'Walk & reflect',
+         'Move, no headphones, no screen. Let the day sort itself out.');
+    cursor = walkEnd;
+
+    /* If the morning had no clear air, trading lands here rather than
+       vanishing from the day altogether. */
+    if (!deepPlaced) {
+      const deepEnd = Math.min(cursor + 60, windStart);
+      push('deep', 'Trading', cursor, deepEnd,
+           'Trading',
+           'No clear air this morning — so it happens tonight, before anything else.');
+      cursor = deepEnd;
+    }
+
+    push('evening', 'Evening', cursor, windStart,
          'Fuel & people',
          'Eat properly. Be present with whoever is in the room.');
 
-    /* 6 — Wind down. Last 75 minutes set up tomorrow morning. */
     push('wind', 'Wind down', windStart, sleep,
          'Wind down',
          'Screens off, read, write down tomorrow\'s one thing.');
