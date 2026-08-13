@@ -12,17 +12,105 @@
 <meta name="apple-mobile-web-app-capable" content="yes" />
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
 
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:ital,wght@0,300;0,600;0,700;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32" />
+<link rel="preload" as="font" type="font/woff2" href="fonts/Inter-400.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="fonts/Poppins-300.woff2" crossorigin />
+<link rel="stylesheet" href="fonts.css" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
 
-<div class="field" aria-hidden="true"></div>
-<div class="hearth" aria-hidden="true"></div>
-
 <div class="shell">
+
+  <!-- ── the scene ──
+       Mist, ridgelines and ember, drawn rather than loaded. Nothing here
+       is a photograph, so there is no asset to download and it stays sharp
+       at any size. -->
+  <div class="field" aria-hidden="true">
+    <svg class="scene" viewBox="0 0 400 320" preserveAspectRatio="xMidYMin slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="#c2ccc8"/>
+          <stop offset="0.30" stop-color="#93a29e"/>
+          <stop offset="0.62" stop-color="#5d6b69"/>
+          <stop offset="1"    stop-color="#333d3c"/>
+        </linearGradient>
+        <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="#fff" stop-opacity="1"/>
+          <stop offset="0.68" stop-color="#fff" stop-opacity="1"/>
+          <stop offset="0.88" stop-color="#fff" stop-opacity="0.45"/>
+          <stop offset="1"    stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <mask id="sceneMask"><rect width="400" height="320" fill="url(#fade)"/></mask>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="13"/>
+        </filter>
+        <filter id="softer" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="7"/>
+        </filter>
+        <!-- atmospheric perspective: the further back, the softer -->
+        <filter id="d1" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="5.5"/>
+        </filter>
+        <filter id="d2" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.6"/>
+        </filter>
+        <filter id="d3" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.1"/>
+        </filter>
+      </defs>
+
+      <g mask="url(#sceneMask)">
+        <rect width="400" height="320" fill="url(#sky)"/>
+
+        <!-- Ridgelines run past the edges so the blur never feathers a
+             gap at x=0 or x=400. Irregular by hand — even spacing reads
+             as a pattern, not a landscape. -->
+
+        <!-- far ridge — palest, softest, furthest back -->
+        <path d="M-20,158 C10,150 30,118 58,131 C86,144 102,101 126,108
+                 C152,116 160,86 186,99 C212,112 226,90 250,103
+                 C278,118 290,84 316,97 C342,110 360,122 420,102
+                 L420,320 L-20,320 Z"
+              fill="#75847f" opacity="0.6" filter="url(#d1)"/>
+        <ellipse cx="196" cy="150" rx="290" ry="26" fill="#e6ece7" opacity="0.5" filter="url(#soft)"/>
+
+        <!-- mid ridge -->
+        <path d="M-20,198 C14,192 44,162 78,175 C110,187 122,148 152,159
+                 C182,170 194,144 226,157 C256,169 270,142 300,155
+                 C330,168 352,180 420,158
+                 L420,320 L-20,320 Z"
+              fill="#333f3d" opacity="0.9" filter="url(#d2)"/>
+
+        <!-- treeline — irregular heights, clustered, not a row -->
+        <g fill="#1d2625" opacity="0.88" filter="url(#d2)">
+          <path d="M279,214 C283,206 284,190 286,181 C289,192 290,206 294,214 Z"/>
+          <path d="M298,216 C303,204 305,177 308,163 C312,180 314,204 319,216 Z"/>
+          <path d="M322,215 C325,207 327,192 329,184 C332,194 334,207 338,215 Z"/>
+          <path d="M340,217 C346,203 349,168 352,150 C356,170 359,203 365,217 Z"/>
+          <path d="M368,215 C372,205 374,186 376,176 C379,188 382,205 386,215 Z"/>
+          <path d="M388,217 C392,206 395,180 397,169 C400,182 403,206 407,217 Z"/>
+        </g>
+        <ellipse cx="130" cy="208" rx="270" ry="24" fill="#d6ded8" opacity="0.4" filter="url(#soft)"/>
+
+        <!-- near ridge — darkest, closest, sharpest -->
+        <path d="M-20,246 C18,242 52,216 90,229 C122,240 142,210 176,222
+                 C208,233 230,208 262,221 C294,234 318,244 352,231
+                 C376,222 394,234 420,229
+                 L420,320 L-20,320 Z"
+              fill="#131a19" opacity="0.97" filter="url(#d3)"/>
+        <ellipse cx="230" cy="256" rx="240" ry="15" fill="#b6c2bd" opacity="0.22" filter="url(#softer)"/>
+      </g>
+    </svg>
+
+    <div class="warm"></div>
+    <div class="veil"></div>
+    <div class="topfade"></div>
+    <div class="grain"></div>
+  </div>
+
+  <div class="hearth" aria-hidden="true"></div>
+
 
   <!-- ── top rail ── -->
   <header class="rail">
