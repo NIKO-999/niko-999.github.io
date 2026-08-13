@@ -75,7 +75,7 @@ window.RITUAL_DATA = (function () {
                 'possibility and motivation. Small, positive habits practiced daily ' +
                 'can accumulate into significant personal growth and achievements ' +
                 'over time.',
-    vLabel:  'The long game:',
+    vLabel:  'What compounds:',
     head:    '180 days from today',
     sub:     'Nothing moves in a week. Everything moves in a hundred and eighty.',
     foot:    'It does not arrive at once. It arrives daily.',
