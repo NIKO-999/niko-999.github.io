@@ -15,12 +15,14 @@
 
 window.RITUAL_DATA = (function () {
 
-  /* ── the four domains ── */
+  /* ── the four domains ──
+     Deliberately uncoloured. One accent in this app — the ember — and it
+     is reserved for what is live or kept, not for categories. */
   const DOMAINS = {
-    mind:    { label: 'Mind',    color: 'var(--mind)' },
-    money:   { label: 'Money',   color: 'var(--money)' },
-    body:    { label: 'Body',    color: 'var(--body)' },
-    meaning: { label: 'Meaning', color: 'var(--meaning)' },
+    mind:    { label: 'Mind' },
+    money:   { label: 'Money' },
+    body:    { label: 'Body' },
+    meaning: { label: 'Meaning' },
   };
 
   /* ── starting profile — placeholder until setup is run ── */
@@ -66,13 +68,13 @@ window.RITUAL_DATA = (function () {
 
   /* ── reminder copy ── */
   const REMINDER = {
-    essayTitle: 'Whoever owns your first hour owns your day',
-    essayBody:  'Reach for the phone first and the day belongs to whoever is ' +
-                'loudest. Light, water, out the door — before anything is allowed ' +
-                'to ask you for something. The hour itself is not the point. The ' +
-                'point is proving, early and on the record, that you still do what ' +
-                'you said you would. Everything after runs easier from a promise ' +
-                'already kept.',
+    essayTitle: 'The Importance of a Morning Routine',
+    essayBody:  'Morning is an important time of day because how you spend your ' +
+                'morning can often tell you what kind of day you are going to have. ' +
+                'It can change your outlook on life, filling you with a sense of ' +
+                'possibility and motivation. Small, positive habits practiced daily ' +
+                'can accumulate into significant personal growth and achievements ' +
+                'over time.',
     vLabel:  'The long game:',
     head:    '180 days from today',
     sub:     'Nothing moves in a week. Everything moves in a hundred and eighty.',

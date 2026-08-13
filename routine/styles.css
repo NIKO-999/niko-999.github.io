@@ -31,15 +31,9 @@
   --edge:        rgba(255,255,255,0.09);
   --edge-soft:   rgba(255,255,255,0.05);
 
-  /* ── domains ── */
-  --mind:    #8fb3c9;
-  --money:   #cbab72;
-  --body:    #c98878;
-  --meaning: #a99ac4;
-
   --mono: 'JetBrains Mono', ui-monospace, monospace;
   --sans: 'Inter', system-ui, -apple-system, sans-serif;
-  --disp: 'Poppins', 'Inter', system-ui, sans-serif;
+  --disp: 'Archivo', 'Inter', system-ui, sans-serif;
 
   --rail: 22px;                 /* horizontal page inset */
   --nav-h: 68px;
@@ -409,7 +403,7 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 .goal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
 .goal-domain {
   font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.22em;
-  text-transform: uppercase; margin-bottom: 7px;
+  text-transform: uppercase; margin-bottom: 7px; color: var(--ink-mute);
 }
 .goal-name { font-size: 14.5px; font-weight: 500; line-height: 1.35; letter-spacing: -0.01em; }
 .goal-why { margin-top: 7px; font-size: 11.5px; color: var(--ink-mute); line-height: 1.5; }
@@ -419,7 +413,10 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 }
 .goal-pct small { font-size: 11px; color: var(--ink-mute); }
 .goal-bar { margin-top: 13px; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.07); overflow: hidden; }
-.goal-bar-fill { height: 100%; border-radius: 2px; transition: width .6s cubic-bezier(.4,0,.2,1); }
+.goal-bar-fill {
+  height: 100%; border-radius: 2px; background: var(--ember);
+  transition: width .6s cubic-bezier(.4,0,.2,1);
+}
 .goal-foot { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
 
 .needle-flag {
@@ -450,10 +447,12 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 .slide-morning {
   background: linear-gradient(180deg, rgba(24,27,27,0.60), rgba(15,16,16,0.74));
 }
+/* Sized so the title breaks where the reference breaks it —
+   "The Importance / of a Morning / Routine". */
 .essay-title {
   font-family: var(--disp); font-style: italic; font-weight: 700;
-  font-size: clamp(27px, 8vw, 35px); line-height: 1.12;
-  letter-spacing: -0.02em; color: var(--ink);
+  font-size: clamp(30px, 9.4vw, 41px); line-height: 1.1;
+  letter-spacing: -0.022em; color: var(--ink);
 }
 .elbow { margin: 30px 0 0; display: flex; align-items: flex-end; height: 66px; }
 .elbow-v { width: 1px; height: 66px; background: linear-gradient(180deg, transparent, var(--ember-line)); }

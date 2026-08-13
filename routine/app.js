@@ -233,7 +233,7 @@
 
   function renderGoals() {
     $('#goals').innerHTML = state.goals.map((g) => {
-      const dom = D.DOMAINS[g.domain] || { label: g.domain, color: 'var(--ink-mute)' };
+      const dom = D.DOMAINS[g.domain] || { label: g.domain };
       const pct = goalPct(g);
       const linked = g.habits
         .map((id) => state.habits.find((h) => h.id === id))
@@ -242,13 +242,13 @@
       return '<div class="goal' + (g.needle ? ' needle' : '') + '">' +
         '<div class="goal-top">' +
           '<div>' +
-            '<div class="goal-domain" style="color:' + dom.color + '">' + escapeHtml(dom.label) + '</div>' +
+            '<div class="goal-domain">' + escapeHtml(dom.label) + '</div>' +
             '<div class="goal-name">' + escapeHtml(g.name) + '</div>' +
             '<div class="goal-why">' + escapeHtml(g.why) + '</div>' +
           '</div>' +
           '<div class="goal-pct">' + pct + '<small>%</small></div>' +
         '</div>' +
-        '<div class="goal-bar"><div class="goal-bar-fill" style="width:' + pct + '%;background:' + dom.color + '"></div></div>' +
+        '<div class="goal-bar"><div class="goal-bar-fill" style="width:' + pct + '%"></div></div>' +
         '<div class="goal-foot">' +
           (g.needle ? '<span class="needle-flag">◆ Needle mover</span>' : '') +
           linked.map((h) => '<span class="tag">' + escapeHtml(h.name) + '</span>').join('') +
@@ -283,7 +283,7 @@
     $('#remDomains').innerHTML = order.map((k) => {
       const g = state.goals.find((x) => x.domain === k);
       return '<div>' +
-        '<div class="rem-domain-l" style="color:' + D.DOMAINS[k].color + '">' +
+        '<div class="rem-domain-l">' +
           escapeHtml(D.DOMAINS[k].label) +
         '</div>' +
         (g ? '<div class="rem-domain-g">' + escapeHtml(g.name) + '</div>' : '') +
