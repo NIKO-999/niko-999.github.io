@@ -296,13 +296,23 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   transition: background .25s, border-color .25s, transform .18s, opacity .25s;
 }
 .block:active { transform: scale(0.988); }
+
+/* Only the block actually happening now gets full presence. Everything
+   else recedes — done, upcoming, or skipped alike — so there's one clear
+   answer to "what am I supposed to be doing." */
+.block:not(.now) { background: rgba(255,255,255,0.03); border-color: var(--edge-soft); }
+.block:not(.now) .block-title { color: var(--ink-soft); }
+
 .block.now {
-  border-color: var(--ember-line);
-  background: linear-gradient(180deg, rgba(224,151,90,0.11), rgba(255,255,255,0.04));
-  box-shadow: 0 8px 34px rgba(0,0,0,0.32), inset 0 1px 0 rgba(255,255,255,0.06);
+  border: 1.5px solid var(--ember);
+  background: linear-gradient(180deg, rgba(224,151,90,0.16), rgba(255,255,255,0.05));
+  box-shadow: 0 10px 36px rgba(0,0,0,0.36), 0 0 0 1px rgba(224,151,90,0.14), inset 0 1px 0 rgba(255,255,255,0.08);
 }
+.block.now .block-title { color: var(--ink); }
+
 .block.past { opacity: 0.44; }
 .block.done { border-color: rgba(224,151,90,0.2); }
+.block.now.done { border-color: var(--ember); }
 
 .block-time {
   flex-shrink: 0; width: 46px; padding-top: 1px;
