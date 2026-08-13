@@ -436,68 +436,76 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 
 .slides { display: flex; flex-direction: column; gap: 14px; padding: 8px var(--rail) 0; }
 
+/* Same material as every other panel in the app: smoked glass over the
+   landscape, hairline edge, light caught on the top lip. The reference
+   gave us the typography, not the surface. */
 .slide {
-  border-radius: 24px; border: 1px solid var(--edge-soft);
-  background: linear-gradient(180deg, rgba(0,0,0,0.36), rgba(0,0,0,0.2));
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-radius: 24px; border: 1px solid var(--edge);
+  backdrop-filter: blur(22px) saturate(135%); -webkit-backdrop-filter: blur(22px) saturate(135%);
   padding: 40px 26px 44px; position: relative; overflow: hidden;
+  box-shadow: 0 18px 50px rgba(0,0,0,0.34), inset 0 1px 0 rgba(255,255,255,0.07);
 }
 
-/* image 4 — the morning routine essay */
-.slide-morning { background: linear-gradient(180deg, #1b1b1b, #141414); }
+/* the morning piece — cool glass, ember rule */
+.slide-morning {
+  background: linear-gradient(180deg, rgba(24,27,27,0.60), rgba(15,16,16,0.74));
+}
 .essay-title {
   font-family: var(--disp); font-style: italic; font-weight: 700;
-  font-size: clamp(28px, 8.4vw, 36px); line-height: 1.12;
-  letter-spacing: -0.02em; color: #f2efea;
+  font-size: clamp(27px, 8vw, 35px); line-height: 1.12;
+  letter-spacing: -0.02em; color: var(--ink);
 }
 .elbow { margin: 30px 0 0; display: flex; align-items: flex-end; height: 66px; }
-.elbow-v { width: 1px; height: 66px; background: rgba(242,239,234,0.55); }
-.elbow-h { width: 62px; height: 1px; background: rgba(242,239,234,0.55); }
+.elbow-v { width: 1px; height: 66px; background: linear-gradient(180deg, transparent, var(--ember-line)); }
+.elbow-h { width: 62px; height: 1px; background: var(--ember-line); }
 .elbow-o {
   width: 9px; height: 9px; border-radius: 50%; margin-bottom: -4px; margin-left: -1px;
-  border: 1.5px solid rgba(242,239,234,0.8);
+  border: 1.5px solid var(--ember); box-shadow: 0 0 10px var(--ember-glow);
 }
 .essay-body {
   margin: -16px 0 0 74px;
-  font-size: 13.5px; line-height: 1.62; color: rgba(242,239,234,0.8); font-weight: 300;
+  font-size: 13.5px; line-height: 1.62; color: var(--ink-soft); font-weight: 300;
 }
 
-/* image 5 — the daily reminder */
-.slide-reminder { background: linear-gradient(180deg, #332b26, #2b2320); padding-left: 58px; }
+/* the long-game piece — the same glass, warmed by the hearth below */
+.slide-reminder {
+  background: linear-gradient(180deg, rgba(44,32,25,0.62), rgba(26,18,14,0.78));
+  padding-left: 58px;
+}
 .vrule {
-  position: absolute; left: 30px; top: 46px; bottom: 46px;
-  width: 1px; background: rgba(214,200,190,0.4);
+  position: absolute; left: 30px; top: 46px; bottom: 46px; width: 1px;
+  background: linear-gradient(180deg, transparent, var(--ember-line) 18%, var(--ember-line) 82%, transparent);
 }
 .vlabel {
   position: absolute; left: 22px; top: 46px;
   writing-mode: vertical-rl; transform: rotate(180deg);
   font-size: 9.5px; letter-spacing: 0.42em; text-transform: uppercase;
-  color: rgba(214,200,190,0.62); font-weight: 400;
+  color: var(--ember); font-weight: 500;
 }
 .rem-h {
   font-size: 13px; font-weight: 600; letter-spacing: 0.19em;
-  text-transform: uppercase; color: #ded2c8; white-space: nowrap;
+  text-transform: uppercase; color: var(--ink); white-space: nowrap;
 }
 .rem-date {
   margin-top: 12px; font-family: var(--mono); font-size: 10px;
-  letter-spacing: 0.16em; text-transform: uppercase; color: rgba(214,200,190,0.42);
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--ember);
 }
 .rem-sub {
   margin-top: 22px; font-size: 10px; font-weight: 300; letter-spacing: 0.2em;
-  text-transform: uppercase; color: rgba(214,200,190,0.6); line-height: 1.9;
+  text-transform: uppercase; color: var(--ink-soft); line-height: 1.9;
 }
 .rem-domains { margin: 38px 0 0; display: flex; flex-direction: column; gap: 24px; }
 .rem-domain-l {
   font-size: 13.5px; font-weight: 600; letter-spacing: 0.28em;
-  text-transform: uppercase; color: #e2d7cd;
+  text-transform: uppercase; color: var(--ink);
 }
 .rem-domain-g {
   margin-top: 7px; font-size: 11px; font-weight: 300; letter-spacing: 0.03em;
-  color: rgba(214,200,190,0.55); line-height: 1.5; text-transform: none;
+  color: var(--ink-mute); line-height: 1.5; text-transform: none;
 }
 .rem-foot {
   margin-top: 44px; font-size: 9.5px; font-weight: 300; letter-spacing: 0.2em;
-  text-transform: uppercase; color: rgba(214,200,190,0.5);
+  text-transform: uppercase; color: var(--ink-mute);
 }
 
 /* ───────────────────────────────────────────────

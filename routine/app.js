@@ -283,7 +283,9 @@
     $('#remDomains').innerHTML = order.map((k) => {
       const g = state.goals.find((x) => x.domain === k);
       return '<div>' +
-        '<div class="rem-domain-l">' + escapeHtml(D.DOMAINS[k].label) + '</div>' +
+        '<div class="rem-domain-l" style="color:' + D.DOMAINS[k].color + '">' +
+          escapeHtml(D.DOMAINS[k].label) +
+        '</div>' +
         (g ? '<div class="rem-domain-g">' + escapeHtml(g.name) + '</div>' : '') +
       '</div>';
     }).join('');
