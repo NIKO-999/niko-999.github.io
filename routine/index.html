@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#171a1a" />
+<meta name="description" content="A routine builder — build the day around your anchors, keep the habits that move the needle." />
+<title>Ritual — routine builder</title>
+
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Poppins:ital,wght@0,300;0,600;0,700;1,700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="field" aria-hidden="true"></div>
+<div class="hearth" aria-hidden="true"></div>
+
+<div class="shell">
+
+  <!-- ── top rail ── -->
+  <header class="rail">
+    <div class="rail-mark">Ritual</div>
+    <div class="rail-acts">
+      <button class="icon-btn" id="btnSetup" title="Your anchors" aria-label="Edit your anchors">◐</button>
+    </div>
+  </header>
+
+  <!-- ── stage ── -->
+  <main class="stage">
+
+    <!-- ══ TODAY ══ -->
+    <section class="view on" id="view-today" aria-label="Today">
+      <div class="hero">
+        <div class="hero-top">
+          <div class="overline" id="heroDate"></div>
+          <div class="hero-clock-t" id="heroClock"></div>
+        </div>
+
+        <h1 class="display" id="heroGreet"></h1>
+
+        <div class="hero-now">
+          <span class="overline">Now</span>
+          <span class="hero-now-t" id="heroNow"></span>
+        </div>
+
+        <div class="daybar">
+          <div class="daybar-track"><div class="daybar-fill" id="dayFill" style="width:0%"></div></div>
+          <div class="daybar-meta">
+            <span class="overline" id="dayPct"></span>
+            <span class="overline" id="dayLeft"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phases" id="phases"></div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-n" id="statBlocks">0</div>
+          <div class="overline stat-l">Blocks</div>
+        </div>
+        <div class="stat hot">
+          <div class="stat-n" id="statNeedle">0</div>
+          <div class="overline stat-l">Needle</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n" id="statStreak">0</div>
+          <div class="overline stat-l">Streak</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">The day</div>
+        <div class="section-note">tap to complete</div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ══ HABITS ══ -->
+    <section class="view" id="view-habits" aria-label="Habits">
+      <div class="hero">
+        <div class="overline hero-date">Non-negotiables</div>
+        <h1 class="display">The things<br><em>you don't skip</em></h1>
+      </div>
+      <div class="section-head">
+        <div class="section-title">Streaks</div>
+        <div class="section-note" id="habitsNote"></div>
+      </div>
+      <div class="habits" id="habits"></div>
+    </section>
+
+    <!-- ══ GOALS ══ -->
+    <section class="view" id="view-goals" aria-label="Goals">
+      <div class="hero">
+        <div class="overline hero-date">Six months out</div>
+        <h1 class="display">What the<br><em>routine serves</em></h1>
+      </div>
+      <div class="section-head">
+        <div class="section-title">Goals</div>
+        <div class="section-note">last 7 days</div>
+      </div>
+      <div class="goals" id="goals"></div>
+    </section>
+
+    <!-- ══ REMINDER ══ -->
+    <section class="view" id="view-reminder" aria-label="Daily reminder">
+      <div class="slides">
+
+        <!-- the morning routine screen -->
+        <article class="slide slide-morning">
+          <h2 class="essay-title" id="essayTitle"></h2>
+          <div class="elbow" aria-hidden="true">
+            <div class="elbow-v"></div>
+            <div class="elbow-h"></div>
+            <div class="elbow-o"></div>
+          </div>
+          <p class="essay-body" id="essayBody"></p>
+        </article>
+
+        <!-- the daily reminder screen -->
+        <article class="slide slide-reminder">
+          <div class="vrule" aria-hidden="true"></div>
+          <div class="vlabel" id="remLabel"></div>
+          <h2 class="rem-h" id="remHead"></h2>
+          <p class="rem-sub" id="remSub"></p>
+          <div class="rem-domains" id="remDomains"></div>
+          <p class="rem-foot" id="remFoot"></p>
+        </article>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── nav ── -->
+  <nav class="nav" aria-label="Sections">
+    <button class="nav-btn on" data-view="today">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+      <span>Today</span>
+    </button>
+    <button class="nav-btn" data-view="habits">
+      <svg viewBox="0 0 24 24"><path d="M4 17l4-4 4 3 8-8"/><path d="M4 21h16"/></svg>
+      <span>Habits</span>
+    </button>
+    <button class="nav-btn" data-view="goals">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>
+      <span>Goals</span>
+    </button>
+    <button class="nav-btn" data-view="reminder">
+      <svg viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M6 9l6-5 6 5"/></svg>
+      <span>Reminder</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ── setup sheet ── -->
+<div class="scrim" id="scrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Your anchors">
+    <div class="sheet-grab"></div>
+    <h2 class="sheet-title">Your anchors</h2>
+    <p class="sheet-note">
+      Four times, and the day builds itself around them. This stays in your
+      browser on this device — it is never sent anywhere.
+    </p>
+
+    <div class="fields">
+      <div>
+        <label class="overline field-l" for="inName">Name</label>
+        <input class="input" id="inName" type="text" autocomplete="given-name" placeholder="Niko" />
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="overline field-l" for="inWake">Wake</label>
+          <input class="input" id="inWake" type="time" />
+        </div>
+        <div>
+          <label class="overline field-l" for="inSleep">Sleep</label>
+          <input class="input" id="inSleep" type="time" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="overline field-l" for="inWs">Work starts</label>
+          <input class="input" id="inWs" type="time" />
+        </div>
+        <div>
+          <label class="overline field-l" for="inWe">Work ends</label>
+          <input class="input" id="inWe" type="time" />
+        </div>
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btnCancel">Cancel</button>
+      <button class="btn btn-hot" id="btnSave">Build my day</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
