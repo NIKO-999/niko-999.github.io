@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#171a1a" />
+<meta name="description" content="A routine builder — build the day around your anchors, keep the habits that move the needle." />
+<title>Ritual — routine builder</title>
+
+<link rel="manifest" href="manifest.json" />
+<link rel="apple-touch-icon" href="../icons/apple-touch-icon.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+
+<link rel="icon" href="../icons/favicon-32.png" sizes="32x32" />
+<link rel="preload" as="font" type="font/woff2" href="fonts/Inter-400.woff2" crossorigin />
+<link rel="preload" as="font" type="font/woff2" href="fonts/Archivo-300.woff2" crossorigin />
+<link rel="stylesheet" href="fonts.css" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── the scene ──
+       Mist, ridgelines and ember, drawn rather than loaded. Nothing here
+       is a photograph, so there is no asset to download and it stays sharp
+       at any size. -->
+  <div class="field" aria-hidden="true">
+    <svg class="scene" viewBox="0 0 400 320" preserveAspectRatio="xMidYMin slice">
+      <defs>
+        <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="#c2ccc8"/>
+          <stop offset="0.30" stop-color="#93a29e"/>
+          <stop offset="0.62" stop-color="#5d6b69"/>
+          <stop offset="1"    stop-color="#333d3c"/>
+        </linearGradient>
+        <linearGradient id="fade" x1="0" y1="0" x2="0" y2="1">
+          <stop offset="0"    stop-color="#fff" stop-opacity="1"/>
+          <stop offset="0.68" stop-color="#fff" stop-opacity="1"/>
+          <stop offset="0.88" stop-color="#fff" stop-opacity="0.45"/>
+          <stop offset="1"    stop-color="#fff" stop-opacity="0"/>
+        </linearGradient>
+        <mask id="sceneMask"><rect width="400" height="320" fill="url(#fade)"/></mask>
+        <filter id="soft" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="13"/>
+        </filter>
+        <filter id="softer" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur stdDeviation="7"/>
+        </filter>
+        <!-- atmospheric perspective: the further back, the softer -->
+        <filter id="d1" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="5.5"/>
+        </filter>
+        <filter id="d2" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="2.6"/>
+        </filter>
+        <filter id="d3" x="-20%" y="-20%" width="140%" height="140%">
+          <feGaussianBlur stdDeviation="1.1"/>
+        </filter>
+      </defs>
+
+      <g mask="url(#sceneMask)">
+        <rect width="400" height="320" fill="url(#sky)"/>
+
+        <!-- Ridgelines run past the edges so the blur never feathers a
+             gap at x=0 or x=400. Irregular by hand — even spacing reads
+             as a pattern, not a landscape. -->
+
+        <!-- far ridge — palest, softest, furthest back -->
+        <path d="M-20,158 C10,150 30,118 58,131 C86,144 102,101 126,108
+                 C152,116 160,86 186,99 C212,112 226,90 250,103
+                 C278,118 290,84 316,97 C342,110 360,122 420,102
+                 L420,320 L-20,320 Z"
+              fill="#75847f" opacity="0.6" filter="url(#d1)"/>
+        <ellipse cx="196" cy="150" rx="290" ry="26" fill="#e6ece7" opacity="0.5" filter="url(#soft)"/>
+
+        <!-- mid ridge -->
+        <path d="M-20,198 C14,192 44,162 78,175 C110,187 122,148 152,159
+                 C182,170 194,144 226,157 C256,169 270,142 300,155
+                 C330,168 352,180 420,158
+                 L420,320 L-20,320 Z"
+              fill="#333f3d" opacity="0.9" filter="url(#d2)"/>
+
+        <!-- treeline — irregular heights, clustered, not a row -->
+        <g fill="#1d2625" opacity="0.88" filter="url(#d2)">
+          <path d="M279,214 C283,206 284,190 286,181 C289,192 290,206 294,214 Z"/>
+          <path d="M298,216 C303,204 305,177 308,163 C312,180 314,204 319,216 Z"/>
+          <path d="M322,215 C325,207 327,192 329,184 C332,194 334,207 338,215 Z"/>
+          <path d="M340,217 C346,203 349,168 352,150 C356,170 359,203 365,217 Z"/>
+          <path d="M368,215 C372,205 374,186 376,176 C379,188 382,205 386,215 Z"/>
+          <path d="M388,217 C392,206 395,180 397,169 C400,182 403,206 407,217 Z"/>
+        </g>
+        <ellipse cx="130" cy="208" rx="270" ry="24" fill="#d6ded8" opacity="0.4" filter="url(#soft)"/>
+
+        <!-- near ridge — darkest, closest, sharpest -->
+        <path d="M-20,246 C18,242 52,216 90,229 C122,240 142,210 176,222
+                 C208,233 230,208 262,221 C294,234 318,244 352,231
+                 C376,222 394,234 420,229
+                 L420,320 L-20,320 Z"
+              fill="#131a19" opacity="0.97" filter="url(#d3)"/>
+        <ellipse cx="230" cy="256" rx="240" ry="15" fill="#b6c2bd" opacity="0.22" filter="url(#softer)"/>
+      </g>
+    </svg>
+
+    <div class="warm"></div>
+    <div class="veil"></div>
+    <div class="topfade"></div>
+    <div class="grain"></div>
+  </div>
+
+  <div class="hearth" aria-hidden="true"></div>
+
+
+  <!-- ── top rail ── -->
+  <header class="rail">
+    <div class="rail-mark">Ritual</div>
+    <div class="rail-acts">
+      <button class="icon-btn" id="btnSetup" title="Your anchors" aria-label="Edit your anchors">◐</button>
+    </div>
+  </header>
+
+  <!-- ── stage ── -->
+  <main class="stage">
+
+    <!-- ══ TODAY ══ -->
+    <section class="view on" id="view-today" aria-label="Today">
+      <div class="hero">
+        <div class="hero-top">
+          <div class="overline" id="heroDate"></div>
+          <div class="hero-clock-t" id="heroClock"></div>
+        </div>
+
+        <h1 class="display" id="heroGreet"></h1>
+
+        <div class="hero-now">
+          <span class="overline">Now</span>
+          <span class="hero-now-t" id="heroNow"></span>
+        </div>
+
+        <div class="daybar">
+          <div class="daybar-track"><div class="daybar-fill" id="dayFill" style="width:0%"></div></div>
+          <div class="daybar-meta">
+            <span class="overline" id="dayPct"></span>
+            <span class="overline" id="dayLeft"></span>
+          </div>
+        </div>
+      </div>
+
+      <div class="phases" id="phases"></div>
+
+      <div class="stats">
+        <div class="stat">
+          <div class="stat-n" id="statBlocks">0</div>
+          <div class="overline stat-l">Blocks</div>
+        </div>
+        <div class="stat hot">
+          <div class="stat-n" id="statNeedle">0</div>
+          <div class="overline stat-l">Needle</div>
+        </div>
+        <div class="stat">
+          <div class="stat-n" id="statStreak">0</div>
+          <div class="overline stat-l">Streak</div>
+        </div>
+      </div>
+
+      <!-- whoever owns the moment, with something useful to say about it -->
+      <button class="counsel" id="counsel" aria-label="Next block's advice">
+        <div class="counsel-art" id="counselArt" aria-hidden="true"></div>
+        <div class="counsel-bubble">
+          <div class="counsel-head">
+            <span class="overline" id="counselWho"></span>
+            <span class="counsel-next" aria-hidden="true">›</span>
+          </div>
+          <p class="counsel-line" id="counselLine"></p>
+          <div class="overline counsel-when" id="counselWhen"></div>
+        </div>
+      </button>
+
+      <div class="section-head">
+        <div class="section-title">The day</div>
+        <div class="section-note">tap to complete</div>
+      </div>
+      <div class="timeline" id="timeline"></div>
+    </section>
+
+    <!-- ══ HABITS ══ -->
+    <section class="view" id="view-habits" aria-label="Habits">
+      <div class="hero">
+        <div class="overline hero-date">Non-negotiables</div>
+        <h1 class="display">The things<br><em>you don't skip</em></h1>
+      </div>
+      <div class="section-head">
+        <div class="section-title">Streaks</div>
+        <div class="section-note" id="habitsNote"></div>
+      </div>
+      <div class="habits" id="habits"></div>
+    </section>
+
+    <!-- ══ GOALS ══ -->
+    <section class="view" id="view-goals" aria-label="Goals">
+      <div class="hero">
+        <div class="overline hero-date">Six months out</div>
+        <h1 class="display">What the<br><em>routine serves</em></h1>
+      </div>
+      <div class="section-head">
+        <div class="section-title">Goals</div>
+        <div class="section-note">last 7 days</div>
+      </div>
+      <div class="goals" id="goals"></div>
+    </section>
+
+    <!-- ══ REMINDER ══ -->
+    <section class="view" id="view-reminder" aria-label="Daily reminder">
+      <div class="slides">
+
+        <!-- the morning routine screen -->
+        <article class="slide slide-morning">
+          <h2 class="essay-title" id="essayTitle"></h2>
+          <div class="elbow" aria-hidden="true">
+            <div class="elbow-v"></div>
+            <div class="elbow-h"></div>
+            <div class="elbow-o"></div>
+          </div>
+          <p class="essay-body" id="essayBody"></p>
+        </article>
+
+        <!-- the daily reminder screen -->
+        <article class="slide slide-reminder">
+          <div class="vrule" aria-hidden="true"></div>
+          <div class="vlabel" id="remLabel"></div>
+          <h2 class="rem-h" id="remHead"></h2>
+          <p class="rem-date" id="remDate"></p>
+          <p class="rem-sub" id="remSub"></p>
+          <div class="rem-domains" id="remDomains"></div>
+          <p class="rem-foot" id="remFoot"></p>
+        </article>
+
+      </div>
+    </section>
+
+    <!-- ══ REWARD ══ -->
+    <section class="view" id="view-reward" aria-label="Reward">
+      <div class="hero">
+        <div class="overline hero-date">What you're feeding</div>
+        <h1 class="display">Four of them,<br><em>one of you</em></h1>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">The cast</div>
+        <div class="section-note">
+          <span id="rewardTotal">4</span> levels · weakest <span id="rewardWeakest">—</span>
+        </div>
+      </div>
+
+      <div class="creatures" id="creatures"></div>
+    </section>
+
+  </main>
+
+  <!-- ── nav ── -->
+  <nav class="nav" aria-label="Sections">
+    <button class="nav-btn on" data-view="today">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg>
+      <span>Today</span>
+    </button>
+    <button class="nav-btn" data-view="habits">
+      <svg viewBox="0 0 24 24"><path d="M4 17l4-4 4 3 8-8"/><path d="M4 21h16"/></svg>
+      <span>Habits</span>
+    </button>
+    <button class="nav-btn" data-view="goals">
+      <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3.4"/></svg>
+      <span>Goals</span>
+    </button>
+    <button class="nav-btn" data-view="reminder">
+      <svg viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M6 9l6-5 6 5"/></svg>
+      <span>Reminder</span>
+    </button>
+    <button class="nav-btn" data-view="reward">
+      <svg viewBox="0 0 24 24"><path d="M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9z"/><path d="M12 12c1.2 1.6 2 2.6 2 3.8a2 2 0 0 1-4 0c0-1.2.8-2.2 2-3.8z"/></svg>
+      <span>Reward</span>
+    </button>
+  </nav>
+
+</div>
+
+<!-- ── setup sheet ── -->
+<div class="scrim" id="scrim">
+  <div class="sheet" role="dialog" aria-modal="true" aria-label="Your anchors">
+    <div class="sheet-grab"></div>
+    <h2 class="sheet-title">Your anchors</h2>
+    <p class="sheet-note">
+      The morning is the same every day. The shift is not — so that part is
+      set per day, and today is the one you're editing. This stays in your
+      browser on this device; it is never sent anywhere.
+    </p>
+
+    <div class="fields">
+      <div>
+        <label class="overline field-l" for="inName">Name</label>
+        <input class="input" id="inName" type="text" autocomplete="given-name" placeholder="Niko" />
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="overline field-l" for="inWake">Wake</label>
+          <input class="input" id="inWake" type="time" />
+        </div>
+        <div>
+          <label class="overline field-l" for="inWorkout">Gym</label>
+          <input class="input" id="inWorkout" type="time" />
+        </div>
+      </div>
+      <div class="field-row">
+        <div>
+          <label class="overline field-l" for="inWs">Shift starts</label>
+          <input class="input" id="inWs" type="time" />
+        </div>
+        <div>
+          <label class="overline field-l" for="inWe">Shift ends</label>
+          <input class="input" id="inWe" type="time" />
+        </div>
+      </div>
+      <p class="field-hint"><span id="shiftDay">Today’s shift</span> — leave both
+        blank for a day off.</p>
+      <div>
+        <label class="overline field-l" for="inSleep">Sleep</label>
+        <input class="input" id="inSleep" type="time" />
+      </div>
+    </div>
+
+    <div class="btn-row">
+      <button class="btn" id="btnCancel">Cancel</button>
+      <button class="btn btn-hot" id="btnSave">Build my day</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── level-up moment ──
+     Fires when a character crosses a level. Deliberately pointer-events:none
+     so it can never swallow a tap or trap you behind it — any tap dismisses
+     it early and still reaches whatever was underneath. -->
+<div class="ascend" id="ascend" role="status" aria-live="polite">
+  <div class="ascend-inner">
+    <div class="ascend-art" id="ascendArt" aria-hidden="true"></div>
+    <div class="overline ascend-dom" id="ascendDom"></div>
+    <div class="ascend-name" id="ascendName"></div>
+    <div class="ascend-lvl" id="ascendLvl"></div>
+    <div class="overline ascend-tier" id="ascendTier"></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="data.js"></script>
+<script src="creatures.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
