@@ -656,6 +656,11 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   border-radius: 14px;
   border: 1px solid var(--edge-soft);
   background: rgba(255,255,255,0.045);
+  /* Inherited by the name, line and block-time below: a word wider than
+     the bubble must break rather than spill past the rounded border,
+     since the fonts here are self-hosted but the glyph metrics that
+     produce a given word's width are still engine-dependent. */
+  overflow-wrap: break-word; word-break: break-word;
 }
 .counsel-bubble::before {
   content: ''; position: absolute; left: -5px;
