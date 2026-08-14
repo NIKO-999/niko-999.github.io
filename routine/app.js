@@ -210,13 +210,39 @@
     return lines[hash % lines.length];
   }
 
-  function counselFor() {
-    const C = D.COUNSEL;
-    const cur = currentBlock();
-    const today = dayKey();
+  /* Which block the bubble is currently describing. Starts at the block
+     happening now and steps forward on tap. */
+  let counselIdx = -1;
+  let counselAnchor = '';   // the current block when the index was last reset
 
-    /* Whoever owns the moment; otherwise whoever is furthest behind. */
-    const owned = cur ? blockDomain(cur.key) : null;
+  function counselBlock() {
+    const cur = currentBlock();
+    const anchor = cur ? cur.key : '';
+
+    /* Reset only when the underlying moment actually moves on. renderToday
+       runs every 30 seconds; resetting on every render would snap the user
+       back mid-walk and feel broken. */
+    if (anchor !== counselAnchor) {
+      counselAnchor = anchor;
+      counselIdx = cur ? blocks.indexOf(cur) : 0;
+    }
+    if (counselIdx < 0 || counselIdx >= blocks.length) counselIdx = 0;
+    return blocks[counselIdx] || null;
+  }
+
+  function advanceCounsel() {
+    if (!blocks.length) return;
+    counselIdx = (counselIdx + 1) % blocks.length;
+    renderCounsel();
+  }
+
+  function counselFor(block) {
+    const C = D.COUNSEL;
+    const now = nowMin();
+    const today = dayKey();
+    if (!block) return null;
+
+    const owned = blockDomain(block.key);
     const domain = owned || weakestDomain();
     const lines = C.LINES[domain];
     if (!lines) return null;
@@ -226,30 +252,32 @@
     const best = habits.reduce((m, h) => Math.max(m, streak(h.id)), 0);
     const cold = daysSinceDomain(domain);
 
-    /* How far through the waking day we are. */
     const wake = D.toMin(state.profile.wake);
     let sleep = D.toMin(state.profile.sleep);
     if (sleep <= wake) sleep += 1440;
-    const through = Math.max(0, Math.min(1, (nowMin() - wake) / (sleep - wake)));
+    const through = Math.max(0, Math.min(1, (now - wake) / (sleep - wake)));
 
-    /* First true condition wins — the most urgent thing is what gets said. */
+    const done   = didBlock(block.key);
+    const ahead  = now < block.start;
+    const past   = now >= block.end;
+
+    /* Where the block sits relative to now decides what is worth saying.
+       Blocks nobody owns fall through to the domain-level lines. */
     let cond, n = 0;
-    if (owned && cur && !didBlock(cur.key)) {
-      cond = 'now';
-    } else if (cold >= C.COLD_AFTER) {
-      cond = 'cold'; n = cold;
-    } else if (C.MILESTONES.includes(best)) {
-      cond = 'streak'; n = best;
-    } else if (!anyDone && through >= C.LATE_AT) {
-      cond = 'late';
-    } else if (anyDone) {
-      cond = 'done';
-    } else {
-      cond = 'idle';
-    }
+    if (!owned) {
+      if (cold >= C.COLD_AFTER)                 { cond = 'cold'; n = cold; }
+      else if (C.MILESTONES.includes(best))     { cond = 'streak'; n = best; }
+      else if (!anyDone && through >= C.LATE_AT) cond = 'late';
+      else if (anyDone)                          cond = 'done';
+      else                                       cond = 'idle';
+    } else if (ahead)      cond = 'next';
+    else if (done)         cond = 'done';
+    else if (past)         cond = 'missed';
+    else                   cond = 'now';
 
-    const line = pickLine(lines[cond], domain + ':' + cond).replace('{n}', n);
-    return { domain, cond, line };
+    const line = pickLine(lines[cond], domain + ':' + block.key + ':' + cond)
+      .replace('{n}', n);
+    return { domain, cond, line, block, ahead, past, done };
   }
 
   /* The art is only replaced when the character or its tier actually
@@ -258,7 +286,7 @@
   let counselArtKey = '';
 
   function renderCounsel() {
-    const c = counselFor();
+    const c = counselFor(counselBlock());
     const host = $('#counsel');
     if (!c || !host) return;
 
@@ -274,6 +302,11 @@
     $('#counselWho').textContent =
       D.REWARD.CHARACTERS[c.domain].name + ' · ' + D.DOMAINS[c.domain].label;
     $('#counselLine').textContent = c.line;
+
+    const when = c.ahead ? 'Next' : c.past ? 'Earlier' : 'Now';
+    $('#counselWhen').textContent =
+      when + ' · ' + fmtTime(c.block.start) + ' ' + c.block.title;
+    host.classList.toggle('is-ahead', !!c.ahead);
   }
 
   /* ═══════════════════════════════════════════
@@ -651,6 +684,7 @@
     const habit = ev.target.closest('[data-habit]');
     if (habit) return toggleHabit(habit.dataset.habit);
 
+    if (ev.target.closest('#counsel')) return advanceCounsel();
     if (ev.target.closest('#btnSetup')) return openSetup();
     if (ev.target.closest('#btnSave'))  return saveSetup();
     if (ev.target.closest('#btnCancel')) return closeSetup();

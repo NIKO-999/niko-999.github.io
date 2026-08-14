@@ -165,13 +165,17 @@
       </div>
 
       <!-- whoever owns the moment, with something useful to say about it -->
-      <div class="counsel" id="counsel">
+      <button class="counsel" id="counsel" aria-label="Next block's advice">
         <div class="counsel-art" id="counselArt" aria-hidden="true"></div>
-        <div class="counsel-body">
-          <div class="overline" id="counselWho"></div>
+        <div class="counsel-bubble">
+          <div class="counsel-head">
+            <span class="overline" id="counselWho"></span>
+            <span class="counsel-next" aria-hidden="true">›</span>
+          </div>
           <p class="counsel-line" id="counselLine"></p>
+          <div class="overline counsel-when" id="counselWhen"></div>
         </div>
-      </div>
+      </button>
 
       <div class="section-head">
         <div class="section-title">The day</div>

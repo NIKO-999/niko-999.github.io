@@ -105,6 +105,10 @@ window.RITUAL_DATA = (function () {
 
     LINES: {
       body: {
+        next:  ['Coming up. Eat, hydrate, and stop negotiating with it.',
+                'Next. Lay the kit out now so there is nothing to decide later.'],
+        missed:['That one went by. It does not roll over.',
+                'Missed. Tomorrow is the same hour, same ask.'],
         now:   ['This is the hour. Nothing later gets a vote on it.',
                 'You already decided last night. Go.'],
         cold:  ['{n} days. The body forgets faster than you think.',
@@ -119,6 +123,10 @@ window.RITUAL_DATA = (function () {
                 'Strength is just attendance, repeated.'],
       },
       mind: {
+        next:  ['Coming up. Leave the phone in another room for it.',
+                'Next. Decide now what tomorrow\'s one thing is.'],
+        missed:['Gone by unwritten. Tomorrow starts improvised.',
+                'Missed. The morning will feel it.'],
         now:   ['Close the day deliberately. Read, then write tomorrow down.',
                 'One page and one plan. That is the whole ask.'],
         cold:  ['{n} days without a plan written down. It shows in the mornings.',
@@ -133,6 +141,10 @@ window.RITUAL_DATA = (function () {
                 'A plan written down is a plan you stop rehearsing.'],
       },
       money: {
+        next:  ['Coming up. Know your invalidation before the first candle.',
+                'Next. Write the plan before you open the chart.'],
+        missed:['Skipped. Not a loss, but not nothing either.',
+                'Gone by. The screen was open, the plan was not.'],
         now:   ['One screen, nothing else open. The plan, not the feeling.',
                 'If you are hunting for a setup, you have already left the plan.'],
         cold:  ['{n} days away from the charts. The edge decays quietly.',
@@ -147,6 +159,10 @@ window.RITUAL_DATA = (function () {
                 'Position size is the only thing you fully control.'],
       },
       meaning: {
+        next:  ['Coming up. Leave the headphones behind for it.',
+                'Next. No destination needed, just out the door.'],
+        missed:['No walk today. The noise stays where it was.',
+                'Gone by. It was the cheapest thing on the list.'],
         now:   ['Move. No headphones, no screen. Let the day sort itself out.',
                 'The thinking happens while walking, not at the desk.'],
         cold:  ['{n} days without stepping away. It gets loud in there.',

@@ -637,20 +637,43 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
    at 32 against a ceiling of 40, and this sits on every Today render. */
 .counsel {
   margin: 22px var(--rail) 0;
-  padding: 12px 15px 13px 8px;
-  border-radius: 18px;
-  border: 1px solid var(--edge-soft);
-  background: rgba(255,255,255,0.035);
-  display: flex; align-items: center; gap: 6px;
+  width: calc(100% - var(--rail) * 2);
+  padding: 0 2px 0 0;
+  display: flex; align-items: center; gap: 2px;
+  text-align: left;
+  transition: transform .18s;
 }
-.counsel-art { flex-shrink: 0; width: 74px; }
+.counsel:active { transform: scale(0.99); }
+.counsel-art { flex-shrink: 0; width: 78px; }
 .counsel-art svg { width: 100%; height: auto; display: block; overflow: visible; }
-.counsel-body { flex: 1; min-width: 0; }
+
+/* The bubble, with a tail pointing back at the character's head. The tail
+   is a rotated square sharing the bubble's own background and border, so
+   the two can never drift out of sync. */
+.counsel-bubble {
+  position: relative; flex: 1; min-width: 0;
+  padding: 11px 13px 10px;
+  border-radius: 14px;
+  border: 1px solid var(--edge-soft);
+  background: rgba(255,255,255,0.045);
+}
+.counsel-bubble::before {
+  content: ''; position: absolute; left: -5px; top: 30px;
+  width: 10px; height: 10px; transform: rotate(45deg);
+  background: rgba(255,255,255,0.045);
+  border-left: 1px solid var(--edge-soft);
+  border-bottom: 1px solid var(--edge-soft);
+}
+.counsel-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.counsel-next { color: var(--ink-mute); font-size: 15px; line-height: 1; flex-shrink: 0; }
 .counsel-line {
   margin-top: 6px;
   font-size: 12.5px; line-height: 1.5; color: var(--ink-soft);
   text-wrap: pretty;
 }
+.counsel-when { margin-top: 8px; font-size: 8.5px; }
+/* a block still ahead is dimmer than the one happening now */
+.counsel.is-ahead .counsel-when { color: var(--ember); }
 
 /* ── reward grid ── */
 .creatures {
