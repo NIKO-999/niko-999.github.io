@@ -55,6 +55,22 @@ body { overflow: hidden; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-color: transparent; }
 
+/* One themed focus ring, reused everywhere a keyboard or switch-control
+   user can land — the browser default would clash with this palette,
+   and several of these had no visible focus state at all. */
+.block:focus-visible,
+.habit:focus-visible,
+.nav-btn:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid var(--ember);
+  outline-offset: 2px;
+}
+/* The nav sits flush against the shell's own clipped edge, so a ring
+   drawn outside the button gets its far side cut off — inset it instead. */
+.nav-btn:focus-visible {
+  outline-offset: -3px;
+}
+
 /* ───────────────────────────────────────────────
    ATMOSPHERE
    The photographic feel is built, not loaded — layered
@@ -422,9 +438,12 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   letter-spacing: -0.03em; flex-shrink: 0; font-variant-numeric: tabular-nums;
 }
 .goal-pct small { font-size: 11px; color: var(--ink-mute); }
-.goal-bar { margin-top: 13px; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.07); overflow: hidden; }
+.goal-bar { margin-top: 13px; height: 2px; border-radius: 2px; background: rgba(255,255,255,0.1); overflow: hidden; }
 .goal-bar-fill {
-  height: 100%; border-radius: 2px; background: var(--ember);
+  /* min-width keeps a 0% goal reading as "a bar, at zero" rather than
+     nothing having rendered at all — the track alone was too faint to
+     tell those two states apart. */
+  height: 100%; min-width: 6px; border-radius: 2px; background: var(--ember);
   transition: width .6s cubic-bezier(.4,0,.2,1);
 }
 .goal-foot { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 5px; }
@@ -534,8 +553,9 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 }
 .nav-btn {
   display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 5px;
-  color: var(--ink-mute); transition: color .22s;
+  color: var(--ink-mute); transition: color .22s, transform .15s;
 }
+.nav-btn:active { transform: scale(0.92); }
 .nav-btn svg { width: 17px; height: 17px; stroke: currentColor; fill: none; stroke-width: 1.5; }
 .nav-btn span { font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.16em; text-transform: uppercase; }
 .nav-btn.on { color: var(--ember); }
