@@ -636,20 +636,20 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
    Flat background rather than glass: the backdrop-filter count is already
    at 32 against a ceiling of 40, and this sits on every Today render. */
 .counsel {
+  position: relative;
   margin: 22px var(--rail) 0;
   width: calc(100% - var(--rail) * 2);
   padding: 0 2px 0 0;
-  display: flex; align-items: center; gap: 2px;
+  display: flex; align-items: center; gap: 4px;
   text-align: left;
   transition: transform .18s;
 }
 .counsel:active { transform: scale(0.99); }
-.counsel-art { flex-shrink: 0; width: 78px; }
+.counsel-art { flex-shrink: 0; width: 112px; }
 .counsel-art svg { width: 100%; height: auto; display: block; overflow: visible; }
 
-/* The bubble, with a tail pointing back at the character's head. The tail
-   is a rotated square sharing the bubble's own background and border, so
-   the two can never drift out of sync. */
+/* The bubble, with a tail pointing at the character's mouth rather than
+   an arbitrary point on its head. */
 .counsel-bubble {
   position: relative; flex: 1; min-width: 0;
   padding: 11px 13px 10px;
@@ -658,7 +658,13 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   background: rgba(255,255,255,0.045);
 }
 .counsel-bubble::before {
-  content: ''; position: absolute; left: -5px; top: 30px;
+  content: ''; position: absolute; left: -5px;
+  /* Face void bottoms out at y≈58 in the shared 144x232 viewBox (x2 at
+     -22,-70) — 5.2% below the art's own vertical centre. With the row
+     centring art and bubble on the same axis, that puts the mouth at the
+     bubble's own 50% plus a fixed offset scaled from the art's rendered
+     height, independent of how tall the bubble itself grows with text. */
+  top: calc(50% + 4px);
   width: 10px; height: 10px; transform: rotate(45deg);
   background: rgba(255,255,255,0.045);
   border-left: 1px solid var(--edge-soft);
