@@ -832,4 +832,11 @@
   setInterval(() => { if ($('#view-today').classList.contains('on')) renderToday(); }, 30000);
   document.addEventListener('visibilitychange', () => { if (!document.hidden) renderAll(); });
 
+  /* Offline. Deferred so precaching the shell never competes with the
+     first paint, and silent on failure — an app that cannot register a
+     worker still works, it just needs the network. */
+  if ('serviceWorker' in navigator && location.protocol.indexOf('http') === 0) {
+    setTimeout(() => { navigator.serviceWorker.register('sw.js').catch(() => {}); }, 1200);
+  }
+
 })();
