@@ -19,7 +19,25 @@
      ═══════════════════════════════════════════ */
 
   let state = load();
-  let blocks = D.buildRoutine(state.profile);
+  let blocks = D.buildRoutine(state.profile, new Date().getDay());
+
+  /* The routine differs by weekday now, so a session left open across
+     midnight would otherwise keep yesterday's shift on screen. */
+  let blocksFor = todayKey();
+
+  function todayKey() {
+    const d = new Date();
+    return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate();
+  }
+
+  function rebuildIfNewDay() {
+    const k = todayKey();
+    if (k === blocksFor) return;
+    blocksFor = k;
+    blocks = D.buildRoutine(state.profile, new Date().getDay());
+    counselIdx = -1;          // indices point into a different day's array
+    counselAnchor = '';
+  }
 
   function load() {
     try {
@@ -319,6 +337,7 @@
   }
 
   function renderToday() {
+    rebuildIfNewDay();
     const now = nowMin();
     const cur = currentBlock();
     const d   = new Date();
@@ -698,37 +717,53 @@
   }
 
   /* ── setup sheet ── */
+  const DAY_NAMES = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+  /* The sheet edits the shift for *this weekday*. A shift pattern isn't one
+     time, and editing the day you're looking at is also how an occasional
+     extra shift gets added without a separate screen for it. */
   function openSetup() {
+    const wd = new Date().getDay();
+    const sh = D.shiftFor(state.profile, wd);
     $('#inName').value    = state.profile.name;
     $('#inWake').value    = state.profile.wake;
     $('#inWorkout').value = state.profile.workout;
-    $('#inWs').value      = state.profile.workStart;
-    $('#inWe').value      = state.profile.workEnd;
     $('#inSleep').value   = state.profile.sleep;
+    $('#inWs').value      = sh ? sh.start : '';
+    $('#inWe').value      = sh ? sh.end   : '';
+    $('#shiftDay').textContent = DAY_NAMES[wd] + '’s shift';
     $('#scrim').classList.add('on');
   }
   const closeSetup = () => $('#scrim').classList.remove('on');
 
   function saveSetup() {
+    const wd = new Date().getDay();
+    const ws = $('#inWs').value;
+    const we = $('#inWe').value;
+
+    if ((ws && !we) || (we && !ws)) { toast('Set both shift times, or neither for a day off'); return; }
+    if (ws && we && D.toMin(ws) === D.toMin(we)) { toast('That shift is zero hours long'); return; }
+
     const p = {
-      name:      ($('#inName').value || '').trim().slice(0, 40) || 'you',
-      wake:      $('#inWake').value    || state.profile.wake,
-      workout:   $('#inWorkout').value || state.profile.workout,
-      workStart: $('#inWs').value      || state.profile.workStart,
-      workEnd:   $('#inWe').value      || state.profile.workEnd,
-      sleep:     $('#inSleep').value   || state.profile.sleep,
+      name:    ($('#inName').value || '').trim().slice(0, 40) || 'you',
+      wake:    $('#inWake').value    || state.profile.wake,
+      workout: $('#inWorkout').value || state.profile.workout,
+      sleep:   $('#inSleep').value   || state.profile.sleep,
+      week:    Object.assign({}, state.profile.week),
     };
-    if (D.toMin(p.workEnd) <= D.toMin(p.workStart)) { toast('Work end must be after work start'); return; }
-    if (D.toMin(p.workStart) <= D.toMin(p.wake))    { toast('Wake up before work starts'); return; }
-    if (D.toMin(p.workout)  <  D.toMin(p.wake))     { toast('Workout can\'t be before you wake'); return; }
+    if (D.toMin(p.workout) < D.toMin(p.wake)) { toast('The gym can\'t be before you wake'); return; }
+
+    p.week[wd] = (ws && we) ? { start: ws, end: we } : null;
 
     state.profile = p;
     state.setupDone = true;
-    blocks = D.buildRoutine(p);
+    blocks = D.buildRoutine(p, wd);
+    blocksFor = todayKey();
+    counselIdx = -1; counselAnchor = '';
     save();
     closeSetup();
     renderAll();
-    toast('Routine rebuilt');
+    toast((ws && we) ? 'Day rebuilt' : 'Marked as a day off');
   }
 
   /* ── toast ── */

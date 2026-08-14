@@ -614,6 +614,9 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 .input:focus { border-color: var(--ember-line); background: rgba(0,0,0,0.4); }
 .input::-webkit-calendar-picker-indicator { filter: invert(0.7); cursor: pointer; }
 
+.field-hint { margin-top: -4px; font-size: 11px; line-height: 1.5; color: var(--ink-mute); }
+.field-hint span { color: var(--ink-soft); }
+
 .btn-row { margin-top: 26px; display: flex; gap: 9px; }
 .btn {
   flex: 1; padding: 14px; border-radius: 13px;

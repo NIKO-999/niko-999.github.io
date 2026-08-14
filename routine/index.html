@@ -290,8 +290,9 @@
     <div class="sheet-grab"></div>
     <h2 class="sheet-title">Your anchors</h2>
     <p class="sheet-note">
-      Four times, and the day builds itself around them. This stays in your
-      browser on this device — it is never sent anywhere.
+      The morning is the same every day. The shift is not — so that part is
+      set per day, and today is the one you're editing. This stays in your
+      browser on this device; it is never sent anywhere.
     </p>
 
     <div class="fields">
@@ -305,20 +306,22 @@
           <input class="input" id="inWake" type="time" />
         </div>
         <div>
-          <label class="overline field-l" for="inWorkout">Workout</label>
+          <label class="overline field-l" for="inWorkout">Gym</label>
           <input class="input" id="inWorkout" type="time" />
         </div>
       </div>
       <div class="field-row">
         <div>
-          <label class="overline field-l" for="inWs">Work starts</label>
+          <label class="overline field-l" for="inWs">Shift starts</label>
           <input class="input" id="inWs" type="time" />
         </div>
         <div>
-          <label class="overline field-l" for="inWe">Work ends</label>
+          <label class="overline field-l" for="inWe">Shift ends</label>
           <input class="input" id="inWe" type="time" />
         </div>
       </div>
+      <p class="field-hint"><span id="shiftDay">Today’s shift</span> — leave both
+        blank for a day off.</p>
       <div>
         <label class="overline field-l" for="inSleep">Sleep</label>
         <input class="input" id="inSleep" type="time" />

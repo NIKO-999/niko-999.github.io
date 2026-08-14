@@ -25,45 +25,62 @@ window.RITUAL_DATA = (function () {
     meaning: { label: 'Meaning' },
   };
 
-  /* ── starting profile — placeholder until setup is run ── */
+  /* ── starting profile ──
+     The morning is fixed and the shift is not, so they are stored
+     differently. Wake, gym and sleep are one value each; work is a
+     per-weekday window because a shift pattern is not a single time. */
   const PROFILE = {
-    name:      'Niko',
-    wake:      '05:30',
-    workout:   '06:00',
-    workStart: '09:00',
-    workEnd:   '17:30',
-    sleep:     '22:00',
+    name:    'Niko',
+    wake:    '05:45',
+    workout: '06:30',
+    sleep:   '22:45',
+    /* Indexed by Date.getDay() — 0 is Sunday. `null` means no shift that
+       day, and the day builds open around the fixed anchors instead. */
+    week: {
+      0: { start: '11:00', end: '17:00' },
+      1: { start: '13:00', end: '21:00' },
+      2: null,                              // occasional extra shift — set when it happens
+      3: null,                              // the open day
+      4: { start: '12:00', end: '22:00' },
+      5: { start: '10:00', end: '18:00' },
+      6: { start: '10:00', end: '18:00' },
+    },
   };
 
   const WORKOUT_LEN = 60;
-  const WALK_LEN    = 40;
+  const WALK_LEN    = 45;
+  const READ_LEN    = 30;
+
+  /* Today's shift, or null on an open day. */
+  const shiftFor = (profile, weekday) =>
+    (profile.week && profile.week[weekday]) || null;
 
   /* ── habits: the non-negotiables ──
      `anchor` ties a habit to a block, so completing the block keeps the
-     habit. `needle` marks the ones that move the needle most. */
+     habit. A habit with no anchor still counts and still earns — it just
+     isn't pinned to a time, which is the honest way to carry one that
+     moves around. `needle` marks the ones that move the needle most. */
   const HABITS = [
-    { id: 'h-sun',   name: 'Sunlight + water', domain: 'body',    anchor: 'rise',  needle: false },
-    { id: 'h-train', name: 'Workout',          domain: 'body',    anchor: 'train', needle: true  },
-    { id: 'h-trade', name: 'Trading block',    domain: 'money',   anchor: 'deep',  needle: true  },
-    { id: 'h-walk',  name: 'Walk & reflect',   domain: 'meaning', anchor: 'walk',  needle: true  },
-    { id: 'h-read',  name: 'Read 20 min',      domain: 'mind',    anchor: 'wind',  needle: false },
-    { id: 'h-plan',  name: 'Plan tomorrow',    domain: 'mind',    anchor: 'wind',  needle: true  },
+    { id: 'h-train', name: 'Gym',           domain: 'body',    anchor: 'train', needle: true  },
+    { id: 'h-walk',  name: 'Walk',          domain: 'meaning', anchor: 'walk',  needle: false },
+    { id: 'h-read',  name: 'Read 30 min',   domain: 'mind',    anchor: 'read',  needle: false },
+    { id: 'h-trade', name: 'Trading',       domain: 'money',   anchor: null,    needle: true  },
   ];
 
   /* ── goals: one per domain, six-month horizon ── */
   const GOALS = [
-    { id: 'g-1', domain: 'body', name: 'Train before the day can take it',
-      why: 'First hour, already done. Nothing later gets to negotiate with it.',
-      needle: true,  habits: ['h-train', 'h-sun'] },
+    { id: 'g-1', domain: 'body', name: 'Train before the shift can take it',
+      why: 'The gym happens before the day is anyone else\'s. Nothing later gets to negotiate with it.',
+      needle: true,  habits: ['h-train'] },
     { id: 'g-2', domain: 'money', name: 'Trade the plan, not the feeling',
-      why: 'The edge is in the repetition, not in any single position.',
+      why: 'The hours move around. The process does not.',
       needle: true,  habits: ['h-trade'] },
     { id: 'g-3', domain: 'meaning', name: 'Walk it off and think straight',
       why: 'The thinking happens while moving, away from a screen.',
-      needle: true,  habits: ['h-walk'] },
-    { id: 'g-4', domain: 'mind', name: 'Close the day on purpose',
-      why: 'Reading and a plan beat scrolling into sleep.',
-      needle: false, habits: ['h-read', 'h-plan'] },
+      needle: false, habits: ['h-walk'] },
+    { id: 'g-4', domain: 'mind', name: 'Read every day, however the shift lands',
+      why: 'Thirty minutes after work beats scrolling into sleep.',
+      needle: false, habits: ['h-read'] },
   ];
 
   /* ── reward: XP, tiers, and the four characters ──
@@ -124,21 +141,21 @@ window.RITUAL_DATA = (function () {
       },
       mind: {
         next:  ['Coming up. Leave the phone in another room for it.',
-                'Next. Decide now what tomorrow\'s one thing is.'],
-        missed:['Gone by unwritten. Tomorrow starts improvised.',
-                'Missed. The morning will feel it.'],
-        now:   ['Close the day deliberately. Read, then write tomorrow down.',
-                'One page and one plan. That is the whole ask.'],
-        cold:  ['{n} days without a plan written down. It shows in the mornings.',
+                'Next. Thirty minutes, however long the shift felt.'],
+        missed:['Gone by unread. A long shift is a reason, not an excuse.',
+                'Missed. It was thirty minutes.'],
+        now:   ['Thirty minutes, off the phone. That is the whole ask.',
+                'The shift is over. This part is yours.'],
+        cold:  ['{n} days without reading. Long shifts, and nothing put back.',
                 'The mind has been running unattended for {n} days.'],
-        streak:['{n} days of closing properly. Mornings are easier for it.',
-                '{n} nights planned. You are no longer improvising.'],
-        late:  ['The day is nearly gone and tomorrow is still unwritten.',
+        streak:['{n} days read, around every shift. That is the impressive part.',
+                '{n} in a row. The hours moved, this did not.'],
+        late:  ['The day is nearly gone and the book has not been opened.',
                 'Scrolling into sleep is a decision too. Make a better one.'],
-        done:  ['Tomorrow is already decided. Sleep on it.',
-                'Closed properly. Nothing left to carry.'],
+        done:  ['Read. Nothing left to carry into tomorrow.',
+                'Done, after everything else the day asked for.'],
         idle:  ['Reading is not the point. Thinking afterwards is.',
-                'A plan written down is a plan you stop rehearsing.'],
+                'Thirty minutes is small enough that no shift excuses it.'],
       },
       money: {
         next:  ['Coming up. Know your invalidation before the first candle.',
@@ -208,15 +225,19 @@ window.RITUAL_DATA = (function () {
    * Lay the day out around the anchors. Returns blocks sorted by start,
    * each with phase, title, intent and a key the habits anchor to.
    */
-  function buildRoutine(profile) {
-    const wake   = toMin(profile.wake);
-    const wStart = toMin(profile.workStart);
-    const wEnd   = toMin(profile.workEnd);
-    let   sleep  = toMin(profile.sleep);
-    if (sleep <= wEnd) sleep += 1440;             // sleep after midnight
+  function buildRoutine(profile, weekday) {
+    const wake  = toMin(profile.wake);
+    let   sleep = toMin(profile.sleep);
+    if (sleep <= wake) sleep += 1440;             // sleep after midnight
 
-    let workout = toMin(profile.workout);
-    if (workout < wake) workout = wake;
+    const workout  = Math.max(toMin(profile.workout), wake);
+    const trainEnd = workout + WORKOUT_LEN;
+    const walkEnd  = trainEnd + WALK_LEN;
+
+    const shift = shiftFor(profile, weekday);
+    const wStart = shift ? toMin(shift.start) : null;
+    let   wEnd   = shift ? toMin(shift.end)   : null;
+    if (shift && wEnd <= wStart) wEnd += 1440;    // a shift running past midnight
 
     const blocks = [];
     const push = (key, phase, start, end, title, intent) => {
@@ -224,90 +245,78 @@ window.RITUAL_DATA = (function () {
       blocks.push({ key, phase, start, end, title, intent });
     };
 
-    const morningWorkout = workout < wStart;
-    let deepPlaced = false;
+    /* The morning is the same every day — that is the whole point of it.
+       It runs before any shift, however late the shift starts. */
+    push('rise', 'Rise', wake, Math.min(workout, wake + 45),
+         'Rise',
+         'Light, water, out the door. Nothing on the phone yet.');
 
-    if (morningWorkout) {
-      /* Wake → out the door. Short on purpose. */
-      push('rise', 'Rise', wake, Math.min(workout, wake + 40),
-           'Rise',
-           'Light, water, out the door. Nothing on the phone yet.');
+    push('train', 'Train', workout, trainEnd,
+         'Gym',
+         'Before the day belongs to anyone else.');
 
-      const trainEnd = Math.min(workout + WORKOUT_LEN, wStart);
-      push('train', 'Train', workout, trainEnd,
-           'Workout',
-           'The first hour, already spent. Nothing later gets a vote on it.');
+    push('walk', 'Walk', trainEnd, walkEnd,
+         'Walk',
+         'Straight off the back of the gym. No headphones, no screen.');
 
-      /* Trading takes whatever clear air is left before work. */
-      if (wStart - trainEnd >= 50) {
-        push('deep', 'Trading', trainEnd, wStart,
-             'Trading',
-             'The plan, not the feeling. One screen, nothing else open.');
-        deepPlaced = true;
-      }
+    /* Reading is "after work, sometime" — so it is placed against the end
+       of the shift rather than at a fixed hour, and moves with it. */
+    let cursor = walkEnd;
+    let after;                 // when the day's committed hours are done
+
+    if (shift) {
+      /* Whatever sits between the walk and the shift is genuinely open. */
+      push('open', 'Open', cursor, wStart,
+           'Open',
+           'Yours until the shift. Trading fits here on most days.');
+
+      /* Work, split by a real break at the midpoint. */
+      const mid = Math.round((wStart + wEnd) / 2);
+      push('work',  'Work', wStart, mid, 'Work', 'Committed hours.');
+      push('reset', 'Work', mid, mid + 30,
+           'Break',
+           'Eat properly. Off your feet.');
+      push('work2', 'Work', mid + 30, wEnd, 'Work', 'Second half — finish the loop.');
+
+      after = wEnd + 20;
     } else {
-      /* Workout is later in the day, so the morning is the clear air. */
-      const riseEnd = Math.min(wake + 45, wStart);
-      push('rise', 'Rise', wake, riseEnd,
-           'Rise',
-           'Light, water, no phone. Slow start, on purpose.');
-
-      if (wStart - riseEnd >= 50) {
-        push('deep', 'Trading', riseEnd, wStart,
-             'Trading',
-             'The plan, not the feeling. One screen, nothing else open.');
-        deepPlaced = true;
-      }
+      /* No shift. The long middle of the day is the point of it — this is
+         the day there is actually room to move something. */
+      after = sleep - 195;
+      push('open', 'Open', cursor, after,
+           'Open',
+           'No shift today. This is the day something can actually move.');
     }
 
-    /* Work, split by a genuine reset at the midpoint. */
-    const mid = Math.round((wStart + wEnd) / 2);
-    push('work',  'Work', wStart, mid, 'Work', 'Committed hours.');
-    push('reset', 'Work', mid, mid + 40,
-         'Reset',
-         'Eat away from the desk. Nothing productive.');
-    push('work2', 'Work', mid + 40, wEnd, 'Work', 'Second half — finish the loop.');
+    /* Reading sits against the end of the day rather than at a fixed hour,
+       so "after work, sometime" holds however the shift landed. On a late
+       finish it compresses rather than disappearing — a 22:00 Thursday is
+       real, and the day should show that instead of inventing an evening. */
+    let windStart = sleep - 45;
+    let readAt = Math.max(after, windStart - READ_LEN);
+    if (readAt + READ_LEN > windStart) windStart = Math.min(readAt + READ_LEN, sleep - 15);
+    const readEnd = Math.min(readAt + READ_LEN, windStart);
 
-    /* After work. */
-    let cursor = wEnd + 15;
-    const windStart = sleep - 75;
-
-    if (!morningWorkout) {
-      const start = Math.max(workout, cursor);
-      const end   = Math.min(start + WORKOUT_LEN, windStart);
-      push('train', 'Train', start, end,
-           'Workout',
-           'Non-negotiable. Show up even on the bad days.');
-      cursor = end;
+    /* Whatever is left between clocking off and reading. Skipped outright
+       on a late finish rather than rendered as a token ten minutes. */
+    if (readAt - after >= 30) {
+      push('evening', 'Evening', after, readAt,
+           'Evening',
+           'Eat properly. Be present with whoever is in the room.');
     }
 
-    /* The walk is where the thinking happens — it is not filler. */
-    const walkEnd = Math.min(cursor + WALK_LEN, windStart);
-    push('walk', 'Walk', cursor, walkEnd,
-         'Walk & reflect',
-         'Move, no headphones, no screen. Let the day sort itself out.');
-    cursor = walkEnd;
-
-    /* If the morning had no clear air, trading lands here rather than
-       vanishing from the day altogether. */
-    if (!deepPlaced) {
-      const deepEnd = Math.min(cursor + 60, windStart);
-      push('deep', 'Trading', cursor, deepEnd,
-           'Trading',
-           'No clear air this morning — so it happens tonight, before anything else.');
-      cursor = deepEnd;
-    }
-
-    push('evening', 'Evening', cursor, windStart,
-         'Fuel & people',
-         'Eat properly. Be present with whoever is in the room.');
+    push('read', 'Read', readAt, readEnd,
+         'Read',
+         shift ? 'Thirty minutes, off the phone. However the shift landed.'
+               : 'Thirty minutes, off the phone. No excuse today of all days.');
 
     push('wind', 'Wind down', windStart, sleep,
          'Wind down',
-         'Screens off, read, write down tomorrow\'s one thing.');
+         'Screens off. Nothing left to carry into tomorrow.');
 
     return blocks.sort((a, b) => a.start - b.start);
   }
 
-  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, REWARD, COUNSEL, buildRoutine, toMin, toHHMM };
+  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, REWARD, COUNSEL,
+           buildRoutine, shiftFor, toMin, toHHMM };
 })();
