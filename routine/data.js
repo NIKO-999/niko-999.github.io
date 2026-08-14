@@ -94,6 +94,75 @@ window.RITUAL_DATA = (function () {
     },
   };
 
+  /* ── counsel: what the characters say on Today ──
+     Chosen from real state, not shuffled at random. Each character keeps
+     its own register: the Warrior is blunt, the Scholar precise, the
+     Keeper risk-aware, the Wanderer quiet. */
+  const COUNSEL = {
+    COLD_AFTER: 3,                    // days untouched before a domain is "cold"
+    MILESTONES: [7, 14, 30, 100],     // streaks worth remarking on
+    LATE_AT: 0.7,                     // how far through the day counts as "late"
+
+    LINES: {
+      body: {
+        now:   ['This is the hour. Nothing later gets a vote on it.',
+                'You already decided last night. Go.'],
+        cold:  ['{n} days. The body forgets faster than you think.',
+                'Nothing has been asked of you in {n} days. That shows.'],
+        streak:['{n} days straight. That is not motivation any more, it is who you are.',
+                '{n} in a row. Keep the chain boring.'],
+        late:  ['Still undone, and the day is nearly spent.',
+                'It gets no easier the later it gets.'],
+        done:  ['Done. The rest of the day is downhill from here.',
+                'Spent early, as it should be.'],
+        idle:  ['Show up on the bad days. Those are the ones that count.',
+                'Strength is just attendance, repeated.'],
+      },
+      mind: {
+        now:   ['Close the day deliberately. Read, then write tomorrow down.',
+                'One page and one plan. That is the whole ask.'],
+        cold:  ['{n} days without a plan written down. It shows in the mornings.',
+                'The mind has been running unattended for {n} days.'],
+        streak:['{n} days of closing properly. Mornings are easier for it.',
+                '{n} nights planned. You are no longer improvising.'],
+        late:  ['The day is nearly gone and tomorrow is still unwritten.',
+                'Scrolling into sleep is a decision too. Make a better one.'],
+        done:  ['Tomorrow is already decided. Sleep on it.',
+                'Closed properly. Nothing left to carry.'],
+        idle:  ['Reading is not the point. Thinking afterwards is.',
+                'A plan written down is a plan you stop rehearsing.'],
+      },
+      money: {
+        now:   ['One screen, nothing else open. The plan, not the feeling.',
+                'If you are hunting for a setup, you have already left the plan.'],
+        cold:  ['{n} days away from the charts. The edge decays quietly.',
+                '{n} days untouched. Skill is not stored, it is maintained.'],
+        streak:['{n} sessions kept. The edge lives in the repetition.',
+                '{n} days. Consistency is the only edge that compounds.'],
+        late:  ['The block is still open and the day is closing.',
+                'A missed session costs more than a bad one.'],
+        done:  ['Session kept. Whatever it paid today is not the point.',
+                'Done. Judge the process, not the number.'],
+        idle:  ['The market pays for patience, not for effort.',
+                'Position size is the only thing you fully control.'],
+      },
+      meaning: {
+        now:   ['Move. No headphones, no screen. Let the day sort itself out.',
+                'The thinking happens while walking, not at the desk.'],
+        cold:  ['{n} days without stepping away. It gets loud in there.',
+                'You have not been alone with a thought in {n} days.'],
+        streak:['{n} days of walking it off. It is doing more than you notice.',
+                '{n} days. The clearest thinking you get all day.'],
+        late:  ['Still no walk, and the light is going.',
+                'Ten minutes outside beats an hour of turning it over.'],
+        done:  ['Walked. Whatever was tangled is looser now.',
+                'Done. That is the quiet part handled.'],
+        idle:  ['Nothing gets solved staring at it. Go and move.',
+                'The walk is not a break from the work.'],
+      },
+    },
+  };
+
   /* ── reminder copy ── */
   const REMINDER = {
     essayTitle: 'The Importance of a Morning Routine',
@@ -224,5 +293,5 @@ window.RITUAL_DATA = (function () {
     return blocks.sort((a, b) => a.start - b.start);
   }
 
-  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, REWARD, buildRoutine, toMin, toHHMM };
+  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, REWARD, COUNSEL, buildRoutine, toMin, toHHMM };
 })();

@@ -161,6 +161,122 @@
   }
 
   /* ═══════════════════════════════════════════
+     COUNSEL — who speaks on Today, and what they say
+     ═══════════════════════════════════════════ */
+
+  /* How many days of history exist at all, so "never kept" can be reported
+     truthfully instead of as a meaningless large number. */
+  function logSpan() {
+    const keys = Object.keys(state.log);
+    if (!keys.length) return 0;
+    const oldest = keys.sort()[0];
+    const [y, m, d] = oldest.split('-').map(Number);
+    const days = Math.round((Date.now() - new Date(y, m - 1, d).getTime()) / 86400000);
+    return Math.max(0, Math.min(days, 400));
+  }
+
+  /* Days since any habit in this domain was last kept. A domain never kept
+     at all reports the age of the log rather than infinity — total neglect
+     is exactly the case the cold warning exists for, so it must not fall
+     through to a neutral line. */
+  function daysSinceDomain(domain) {
+    const ids = state.habits.filter((h) => h.domain === domain).map((h) => h.id);
+    if (!ids.length) return 0;
+    const span = logSpan();
+    for (let i = 0; i <= span; i++) {
+      const k = shiftDay(-i);
+      if (ids.some((id) => didHabit(id, k))) return i;
+    }
+    return span;
+  }
+
+  /* Which domain owns a block, via the habits anchored to it. Most of the
+     working day has no owner — work, reset and evening carry no habit — so
+     this returns null often and the caller falls back. */
+  function blockDomain(key) {
+    const h = state.habits.find((x) => x.anchor === key);
+    return h ? h.domain : null;
+  }
+
+  const weakestDomain = () => ORDER.reduce((lo, d) =>
+    domainLevel(d) < domainLevel(lo) ? d : lo, ORDER[0]);
+
+  /* Stable within a day, different across days — so the line doesn't
+     reshuffle on the 30-second tick and read as noise. */
+  function pickLine(lines, salt) {
+    const key = dayKey() + '|' + salt;
+    let hash = 0;
+    for (let i = 0; i < key.length; i++) hash = (hash * 31 + key.charCodeAt(i)) >>> 0;
+    return lines[hash % lines.length];
+  }
+
+  function counselFor() {
+    const C = D.COUNSEL;
+    const cur = currentBlock();
+    const today = dayKey();
+
+    /* Whoever owns the moment; otherwise whoever is furthest behind. */
+    const owned = cur ? blockDomain(cur.key) : null;
+    const domain = owned || weakestDomain();
+    const lines = C.LINES[domain];
+    if (!lines) return null;
+
+    const habits = state.habits.filter((h) => h.domain === domain);
+    const anyDone = habits.some((h) => didHabit(h.id, today));
+    const best = habits.reduce((m, h) => Math.max(m, streak(h.id)), 0);
+    const cold = daysSinceDomain(domain);
+
+    /* How far through the waking day we are. */
+    const wake = D.toMin(state.profile.wake);
+    let sleep = D.toMin(state.profile.sleep);
+    if (sleep <= wake) sleep += 1440;
+    const through = Math.max(0, Math.min(1, (nowMin() - wake) / (sleep - wake)));
+
+    /* First true condition wins — the most urgent thing is what gets said. */
+    let cond, n = 0;
+    if (owned && cur && !didBlock(cur.key)) {
+      cond = 'now';
+    } else if (cold >= C.COLD_AFTER) {
+      cond = 'cold'; n = cold;
+    } else if (C.MILESTONES.includes(best)) {
+      cond = 'streak'; n = best;
+    } else if (!anyDone && through >= C.LATE_AT) {
+      cond = 'late';
+    } else if (anyDone) {
+      cond = 'done';
+    } else {
+      cond = 'idle';
+    }
+
+    const line = pickLine(lines[cond], domain + ':' + cond).replace('{n}', n);
+    return { domain, cond, line };
+  }
+
+  /* The art is only replaced when the character or its tier actually
+     changes. renderToday() runs every 30 seconds; re-injecting the SVG on
+     each tick would restart every animation and make it visibly hitch. */
+  let counselArtKey = '';
+
+  function renderCounsel() {
+    const c = counselFor();
+    const host = $('#counsel');
+    if (!c || !host) return;
+
+    const level = domainLevel(c.domain);
+    const { index } = tierFor(level);
+    const artKey = c.domain + ':' + index;
+
+    if (artKey !== counselArtKey) {
+      $('#counselArt').innerHTML = window.RITUAL_CREATURES.svg(c.domain, index);
+      counselArtKey = artKey;
+    }
+
+    $('#counselWho').textContent =
+      D.REWARD.CHARACTERS[c.domain].name + ' · ' + D.DOMAINS[c.domain].label;
+    $('#counselLine').textContent = c.line;
+  }
+
+  /* ═══════════════════════════════════════════
      RENDER — TODAY
      ═══════════════════════════════════════════ */
 
@@ -248,6 +364,8 @@
     });
     if (!seamPlaced) html += seam();
     $('#timeline').innerHTML = html;
+
+    renderCounsel();
   }
 
   const seam = () =>

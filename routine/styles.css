@@ -632,6 +632,26 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 .empty-t { font-size: 14px; color: var(--ink-soft); }
 .empty-s { margin-top: 8px; font-size: 12px; color: var(--ink-mute); line-height: 1.6; }
 
+/* ── counsel card on Today ──
+   Flat background rather than glass: the backdrop-filter count is already
+   at 32 against a ceiling of 40, and this sits on every Today render. */
+.counsel {
+  margin: 22px var(--rail) 0;
+  padding: 12px 15px 13px 8px;
+  border-radius: 18px;
+  border: 1px solid var(--edge-soft);
+  background: rgba(255,255,255,0.035);
+  display: flex; align-items: center; gap: 6px;
+}
+.counsel-art { flex-shrink: 0; width: 74px; }
+.counsel-art svg { width: 100%; height: auto; display: block; overflow: visible; }
+.counsel-body { flex: 1; min-width: 0; }
+.counsel-line {
+  margin-top: 6px;
+  font-size: 12.5px; line-height: 1.5; color: var(--ink-soft);
+  text-wrap: pretty;
+}
+
 /* ── reward grid ── */
 .creatures {
   padding: 0 var(--rail);
