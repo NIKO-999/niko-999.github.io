@@ -66,6 +66,34 @@ window.RITUAL_DATA = (function () {
       needle: false, habits: ['h-read', 'h-plan'] },
   ];
 
+  /* ── reward: XP, tiers, and the four characters ──
+     XP is never stored. It is recomputed from the log on every render, the
+     same contract as goalPct() — so history already recorded counts
+     retroactively and there is nothing to migrate.
+
+     Each domain's level step is derived from that domain's own best day
+     rather than hardcoded, so a domain carrying one habit doesn't fall
+     permanently behind one carrying two. Change the habit list and the
+     pacing corrects itself. */
+  const REWARD = {
+    BASE_XP:        10,   // a habit kept
+    NEEDLE_XP:      20,   // a needle-mover kept
+    DAYS_PER_LEVEL:  4,   // perfect days per level, in every domain
+    TIERS: [
+      { level:  1, name: 'Full kit' },
+      { level:  5, name: 'Aura' },
+      { level: 12, name: 'Embers' },
+      { level: 25, name: 'Crown of flame' },
+      { level: 50, name: 'Ascended' },
+    ],
+    CHARACTERS: {
+      body:    { name: 'Warrior'  },
+      mind:    { name: 'Scholar'  },
+      money:   { name: 'Keeper'   },
+      meaning: { name: 'Wanderer' },
+    },
+  };
+
   /* ── reminder copy ── */
   const REMINDER = {
     essayTitle: 'The Importance of a Morning Routine',
@@ -196,5 +224,5 @@ window.RITUAL_DATA = (function () {
     return blocks.sort((a, b) => a.start - b.start);
   }
 
-  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, buildRoutine, toMin, toHHMM };
+  return { DOMAINS, PROFILE, HABITS, GOALS, REMINDER, REWARD, buildRoutine, toMin, toHHMM };
 })();

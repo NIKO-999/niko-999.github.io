@@ -103,6 +103,64 @@
   }
 
   /* ═══════════════════════════════════════════
+     XP — derived, never stored
+     ═══════════════════════════════════════════
+     Every value below is recomputed from state.log, the same contract as
+     goalPct(). Nothing is persisted, so there is no migration and any
+     history already logged counts retroactively. An id can appear at most
+     once per day in the log, so repeat-tapping can't farm XP. */
+
+  const xpFor = (habit) => habit.needle ? D.REWARD.NEEDLE_XP : D.REWARD.BASE_XP;
+
+  /* The most a domain can earn in one perfect day. */
+  function domainCeiling(domain) {
+    return state.habits
+      .filter((h) => h.domain === domain)
+      .reduce((sum, h) => sum + xpFor(h), 0);
+  }
+
+  /* Level cost scales with that ceiling, so a domain carrying one habit
+     levels at the same pace as one carrying three. */
+  function domainStep(domain) {
+    const ceiling = domainCeiling(domain);
+    return ceiling ? ceiling * D.REWARD.DAYS_PER_LEVEL : 0;
+  }
+
+  function domainXP(domain) {
+    let xp = 0;
+    for (const key in state.log) {
+      const ids = state.log[key].habits || [];
+      for (const id of ids) {
+        const h = state.habits.find((x) => x.id === id);
+        if (h && h.domain === domain) xp += xpFor(h);
+      }
+    }
+    return xp;
+  }
+
+  function domainLevel(domain) {
+    const step = domainStep(domain);
+    return step ? Math.floor(domainXP(domain) / step) + 1 : 1;
+  }
+
+  /* Progress through the current level, for the bar. */
+  function domainProgress(domain) {
+    const step = domainStep(domain);
+    if (!step) return { into: 0, step: 0, pct: 0 };
+    const into = domainXP(domain) % step;
+    return { into, step, pct: Math.round((into / step) * 100) };
+  }
+
+  /* Highest tier whose level threshold has been reached. */
+  function tierFor(level) {
+    let tier = D.REWARD.TIERS[0], index = 1;
+    D.REWARD.TIERS.forEach((t, i) => {
+      if (level >= t.level) { tier = t; index = i + 1; }
+    });
+    return { tier, index };
+  }
+
+  /* ═══════════════════════════════════════════
      RENDER — TODAY
      ═══════════════════════════════════════════ */
 
@@ -292,10 +350,83 @@
   }
 
   /* ═══════════════════════════════════════════
+     RENDER — REWARD
+     ═══════════════════════════════════════════ */
+
+  const ORDER = ['body', 'mind', 'money', 'meaning'];
+
+  function renderReward() {
+    const levels = ORDER.map(domainLevel);
+    $('#rewardTotal').textContent = levels.reduce((a, b) => a + b, 0);
+
+    /* Name the domain that is furthest behind — the whole point of
+       splitting them is to make neglect visible. With nothing behind,
+       say so rather than blaming whichever happens to sort first. */
+    const min = Math.min.apply(null, levels);
+    const max = Math.max.apply(null, levels);
+    const behind = ORDER.filter((_, i) => levels[i] === min);
+    $('#rewardWeakest').textContent = (min === max)
+      ? 'all even'
+      : behind.map((d) => D.DOMAINS[d].label).join(' & ');
+
+    $('#creatures').innerHTML = ORDER.map((dom) => {
+      const level = domainLevel(dom);
+      const { tier, index } = tierFor(level);
+      const prog = domainProgress(dom);
+      const char = D.REWARD.CHARACTERS[dom];
+
+      return '<div class="crt-cell" data-domain="' + dom + '">' +
+        '<div class="crt-art">' + window.RITUAL_CREATURES.svg(dom, index) + '</div>' +
+        '<div class="crt-meta">' +
+          '<div class="crt-top">' +
+            '<span class="crt-name">' + escapeHtml(char.name) + '</span>' +
+            '<span class="crt-lvl">' + level + '</span>' +
+          '</div>' +
+          '<div class="overline crt-dom">' + escapeHtml(D.DOMAINS[dom].label) + '</div>' +
+          '<div class="goal-bar"><div class="goal-bar-fill" style="width:' + prog.pct + '%"></div></div>' +
+          '<div class="overline crt-tier">' + escapeHtml(tier.name) + '</div>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+
+  /* ═══════════════════════════════════════════
      INTERACTION
      ═══════════════════════════════════════════ */
 
+  /* Levels before and after a change, so a crossing can be announced. */
+  const levelSnapshot = () => ORDER.map(domainLevel);
+
+  function announce(fallback, before, after) {
+    for (let i = 0; i < ORDER.length; i++) {
+      if (after[i] > before[i]) {
+        const dom = ORDER[i];
+        const name = D.REWARD.CHARACTERS[dom].name;
+        const { tier } = tierFor(after[i]);
+        const crossed = D.REWARD.TIERS.some((t) => t.level === after[i]);
+        toast(crossed
+          ? name + ' — ' + tier.name.toLowerCase()
+          : name + ' — level ' + after[i]);
+        pulseCreature(dom);
+        return;
+      }
+    }
+    if (fallback) toast(fallback);
+  }
+
+  /* Only worth animating if the tab is actually on screen. No badge, no
+     backlog — open Reward later and it is simply already there. */
+  function pulseCreature(domain) {
+    if (!$('#view-reward').classList.contains('on')) return;
+    const el = document.querySelector('.crt-cell[data-domain="' + domain + '"]');
+    if (!el) return;
+    el.classList.remove('leveled');
+    void el.offsetWidth;
+    el.classList.add('leveled');
+  }
+
   function toggleBlock(key) {
+    const before = levelSnapshot();
     const e = entry(dayKey());
     const i = e.blocks.indexOf(key);
     if (i > -1) e.blocks.splice(i, 1); else e.blocks.push(key);
@@ -310,16 +441,19 @@
     });
 
     save();
-    renderToday(); renderHabits(); renderGoals();
-    toast(i > -1 ? 'Unmarked' : 'Done');
+    renderToday(); renderHabits(); renderGoals(); renderReward();
+    announce(i > -1 ? 'Unmarked' : 'Done', before, levelSnapshot());
   }
 
   function toggleHabit(id) {
+    const before = levelSnapshot();
     const e = entry(dayKey());
     const i = e.habits.indexOf(id);
     if (i > -1) e.habits.splice(i, 1); else e.habits.push(id);
     save();
-    renderHabits(); renderToday(); renderGoals();
+    renderHabits(); renderToday(); renderGoals(); renderReward();
+    /* stays silent on an ordinary tap, speaks only on a level crossing */
+    announce('', before, levelSnapshot());
   }
 
   /* ── views ── */
@@ -383,7 +517,7 @@
       ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
   }
 
-  function renderAll() { renderToday(); renderHabits(); renderGoals(); renderReminder(); }
+  function renderAll() { renderToday(); renderHabits(); renderGoals(); renderReminder(); renderReward(); }
 
   /* ═══════════════════════════════════════════
      BOOT

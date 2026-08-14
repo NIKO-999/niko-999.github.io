@@ -226,6 +226,23 @@
       </div>
     </section>
 
+    <!-- ══ REWARD ══ -->
+    <section class="view" id="view-reward" aria-label="Reward">
+      <div class="hero">
+        <div class="overline hero-date">What you're feeding</div>
+        <h1 class="display">Four of them,<br><em>one of you</em></h1>
+      </div>
+
+      <div class="section-head">
+        <div class="section-title">The cast</div>
+        <div class="section-note">
+          <span id="rewardTotal">4</span> levels · weakest <span id="rewardWeakest">—</span>
+        </div>
+      </div>
+
+      <div class="creatures" id="creatures"></div>
+    </section>
+
   </main>
 
   <!-- ── nav ── -->
@@ -245,6 +262,10 @@
     <button class="nav-btn" data-view="reminder">
       <svg viewBox="0 0 24 24"><path d="M12 4v16"/><path d="M6 9l6-5 6 5"/></svg>
       <span>Reminder</span>
+    </button>
+    <button class="nav-btn" data-view="reward">
+      <svg viewBox="0 0 24 24"><path d="M12 3c3 4 5 6 5 9a5 5 0 0 1-10 0c0-3 2-5 5-9z"/><path d="M12 12c1.2 1.6 2 2.6 2 3.8a2 2 0 0 1-4 0c0-1.2.8-2.2 2-3.8z"/></svg>
+      <span>Reward</span>
     </button>
   </nav>
 
@@ -301,6 +322,7 @@
 <div class="toast" id="toast"></div>
 
 <script src="data.js"></script>
+<script src="creatures.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
