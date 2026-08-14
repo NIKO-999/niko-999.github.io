@@ -332,6 +332,20 @@
   </div>
 </div>
 
+<!-- ── level-up moment ──
+     Fires when a character crosses a level. Deliberately pointer-events:none
+     so it can never swallow a tap or trap you behind it — any tap dismisses
+     it early and still reaches whatever was underneath. -->
+<div class="ascend" id="ascend" role="status" aria-live="polite">
+  <div class="ascend-inner">
+    <div class="ascend-art" id="ascendArt" aria-hidden="true"></div>
+    <div class="overline ascend-dom" id="ascendDom"></div>
+    <div class="ascend-name" id="ascendName"></div>
+    <div class="ascend-lvl" id="ascendLvl"></div>
+    <div class="overline ascend-tier" id="ascendTier"></div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="data.js"></script>

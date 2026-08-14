@@ -420,9 +420,15 @@
     $('#habits').innerHTML = state.habits.map((h) => {
       const on = didHabit(h.id, today);
       const s  = streak(h.id);
-      return '<button class="habit' + (on ? ' done' : '') + '" data-habit="' + h.id + '" aria-pressed="' + on + '">' +
+      const dom = D.DOMAINS[h.domain] || { label: h.domain };
+      const lit = spotClass(h.domain);
+      return '<button class="habit' + (on ? ' done' : '') + lit + '" data-habit="' + h.id + '" ' +
+              'data-domain="' + h.domain + '" aria-pressed="' + on + '">' +
         '<div class="habit-top">' +
-          '<div class="habit-name">' + escapeHtml(h.name) + '</div>' +
+          '<div class="habit-id">' +
+            '<div class="habit-name">' + escapeHtml(h.name) + '</div>' +
+            '<div class="overline habit-dom">' + escapeHtml(dom.label) + '</div>' +
+          '</div>' +
           '<div class="habit-dot">✓</div>' +
         '</div>' +
         '<div class="habit-streak">' +
@@ -448,7 +454,11 @@
         .map((id) => state.habits.find((h) => h.id === id))
         .filter(Boolean);
 
-      return '<div class="goal' + (g.needle ? ' needle' : '') + '">' +
+      const char = D.REWARD.CHARACTERS[g.domain];
+      return '<button class="goal' + (g.needle ? ' needle' : '') + '" ' +
+              'data-go="reward:' + g.domain + '" ' +
+              'aria-label="' + escapeHtml(g.name) + ' — see ' +
+                escapeHtml(char ? char.name : dom.label) + '">' +
         '<div class="goal-top">' +
           '<div>' +
             '<div class="goal-domain">' + escapeHtml(dom.label) + '</div>' +
@@ -462,7 +472,7 @@
           (g.needle ? '<span class="needle-flag">◆ Needle mover</span>' : '') +
           linked.map((h) => '<span class="tag">' + escapeHtml(h.name) + '</span>').join('') +
         '</div>' +
-      '</div>';
+      '</button>';
     }).join('');
   }
 
@@ -526,7 +536,10 @@
       const prog = domainProgress(dom);
       const char = D.REWARD.CHARACTERS[dom];
 
-      return '<div class="crt-cell" data-domain="' + dom + '">' +
+      return '<button class="crt-cell' + spotClass(dom) + '" data-domain="' + dom + '" ' +
+              'data-go="habits:' + dom + '" ' +
+              'aria-label="' + escapeHtml(char.name) + ' — see the ' +
+                escapeHtml(D.DOMAINS[dom].label) + ' habits">' +
         '<div class="crt-art">' + window.RITUAL_CREATURES.svg(dom, index) + '</div>' +
         '<div class="crt-meta">' +
           '<div class="crt-top">' +
@@ -537,8 +550,41 @@
           '<div class="goal-bar"><div class="goal-bar-fill" style="width:' + prog.pct + '%"></div></div>' +
           '<div class="overline crt-tier">' + escapeHtml(tier.name) + '</div>' +
         '</div>' +
-      '</div>';
+      '</button>';
     }).join('');
+  }
+
+  /* ═══════════════════════════════════════════
+     CROSS-LINKS — one domain, followed across tabs
+     ═══════════════════════════════════════════
+     The four domains were split across three tabs with no way to get from
+     one view of a domain to another. A character now leads to the habits
+     feeding it, and a goal leads to the character it is building. */
+
+  let spotlight = null;    // domain arrived-at via a link, briefly highlighted
+  let spotlightT;
+
+  /* Applied while rendering, so a re-render mid-spotlight keeps it rather
+     than dropping the highlight halfway through. */
+  const spotClass = (domain) =>
+    !spotlight ? '' : domain === spotlight ? ' spot' : ' dim';
+
+  function clearSpotlight() {
+    clearTimeout(spotlightT);
+    spotlight = null;
+  }
+
+  function followDomain(view, domain) {
+    clearTimeout(spotlightT);
+    spotlight = domain;
+    show(view);
+    renderHabits(); renderReward();
+    /* Self-clearing: a highlight that stayed would read as a filter with
+       no visible way to switch it off. */
+    spotlightT = setTimeout(() => {
+      spotlight = null;
+      renderHabits(); renderReward();
+    }, 2800);
   }
 
   /* ═══════════════════════════════════════════
@@ -552,17 +598,47 @@
     for (let i = 0; i < ORDER.length; i++) {
       if (after[i] > before[i]) {
         const dom = ORDER[i];
-        const name = D.REWARD.CHARACTERS[dom].name;
-        const { tier } = tierFor(after[i]);
         const crossed = D.REWARD.TIERS.some((t) => t.level === after[i]);
-        toast(crossed
-          ? name + ' — ' + tier.name.toLowerCase()
-          : name + ' — level ' + after[i]);
+        showAscend(dom, after[i], crossed);
         pulseCreature(dom);
         return;
       }
     }
     if (fallback) toast(fallback);
+  }
+
+  /* ── the level-up moment ──
+     Levels are rare — four perfect days in a domain — so this earns the
+     screen. The overlay never takes pointer events, so it cannot swallow
+     a tap; any tap dismisses it early and still lands on what is under it. */
+  let ascendT;
+
+  function showAscend(domain, level, crossed) {
+    const host = $('#ascend');
+    const char = D.REWARD.CHARACTERS[domain];
+    const { tier, index } = tierFor(level);
+    if (!host || !char) { toast(char ? char.name + ' — level ' + level : 'Level up'); return; }
+
+    $('#ascendArt').innerHTML  = window.RITUAL_CREATURES.svg(domain, index);
+    $('#ascendDom').textContent  = D.DOMAINS[domain].label;
+    $('#ascendName').textContent = char.name;
+    $('#ascendLvl').textContent  = 'Level ' + level;
+    $('#ascendTier').textContent = crossed ? tier.name : '';
+
+    host.classList.toggle('crossed', !!crossed);
+    /* restart the entry animation even if one is still playing */
+    host.classList.remove('on');
+    void host.offsetWidth;
+    host.classList.add('on');
+
+    clearTimeout(ascendT);
+    ascendT = setTimeout(hideAscend, crossed ? 3600 : 2600);
+  }
+
+  function hideAscend() {
+    clearTimeout(ascendT);
+    const host = $('#ascend');
+    if (host) host.classList.remove('on');
   }
 
   /* Only worth animating if the tab is actually on screen. No badge, no
@@ -597,6 +673,8 @@
   }
 
   function toggleHabit(id) {
+    /* acting on a habit means you have arrived — drop the arrival highlight */
+    clearSpotlight();
     const before = levelSnapshot();
     const e = entry(dayKey());
     const i = e.habits.indexOf(id);
@@ -675,8 +753,24 @@
      ═══════════════════════════════════════════ */
 
   document.addEventListener('click', (ev) => {
+    /* Any tap clears the level-up overlay early — it takes no pointer
+       events, so this runs *and* the tap still reaches its real target. */
+    hideAscend();
+
     const nav = ev.target.closest('.nav-btn');
-    if (nav) return show(nav.dataset.view);
+    if (nav) {
+      /* only pay for a re-render if there is actually a highlight to drop —
+         renderReward re-injects four SVGs and this fires on every nav tap */
+      if (spotlight) { clearSpotlight(); renderHabits(); renderReward(); }
+      return show(nav.dataset.view);
+    }
+
+    /* a character → its habits, a goal → its character */
+    const go = ev.target.closest('[data-go]');
+    if (go) {
+      const [view, domain] = go.dataset.go.split(':');
+      return followDomain(view, domain);
+    }
 
     const block = ev.target.closest('[data-block]');
     if (block) return toggleBlock(block.dataset.block);

@@ -60,6 +60,8 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
    and several of these had no visible focus state at all. */
 .block:focus-visible,
 .habit:focus-visible,
+.goal:focus-visible,
+.crt-cell:focus-visible,
 .nav-btn:focus-visible,
 .btn:focus-visible {
   outline: 2px solid var(--ember);
@@ -390,7 +392,11 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   background: linear-gradient(180deg, rgba(224,151,90,0.12), rgba(255,255,255,0.035));
 }
 .habit-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
+/* min-width:0 so a long habit name wraps instead of shoving the tick out */
+.habit-id { min-width: 0; }
 .habit-name { font-size: 13px; font-weight: 500; line-height: 1.3; letter-spacing: -0.005em; }
+/* which character this feeds — the thread that ties the tabs together */
+.habit-dom { margin-top: 5px; font-size: 8px; letter-spacing: 0.2em; }
 .habit-dot {
   width: 20px; height: 20px; border-radius: 50%; flex-shrink: 0;
   border: 1px solid var(--edge); display: grid; place-items: center;
@@ -421,15 +427,24 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 
 .goals { padding: 0 var(--rail); display: flex; flex-direction: column; gap: 9px; }
 .goal {
+  width: 100%; text-align: left;
   padding: 17px 16px; border-radius: 18px;
   border: 1px solid var(--edge-soft); background: var(--glass);
   backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px);
+  transition: border-color .25s, transform .18s;
 }
+.goal:active { transform: scale(0.99); }
 .goal.needle { border-color: rgba(224,151,90,0.22); }
 .goal-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+/* the domain reads as the link, because that is what it is */
 .goal-domain {
+  display: inline-flex; align-items: center; gap: 5px;
   font-family: var(--mono); font-size: 8.5px; letter-spacing: 0.22em;
   text-transform: uppercase; margin-bottom: 7px; color: var(--ink-mute);
+}
+.goal-domain::after {
+  content: '›'; font-size: 12px; letter-spacing: 0; line-height: 1;
+  color: var(--ember); opacity: .8;
 }
 .goal-name { font-size: 14.5px; font-weight: 500; line-height: 1.35; letter-spacing: -0.01em; }
 .goal-why { margin-top: 7px; font-size: 11.5px; color: var(--ink-mute); line-height: 1.5; }
@@ -692,11 +707,13 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   display: grid; grid-template-columns: 1fr 1fr; gap: 9px;
 }
 .crt-cell {
+  width: 100%; text-align: left;
   border-radius: 18px; padding: 10px 12px 14px;
   border: 1px solid var(--edge-soft); background: rgba(255,255,255,0.03);
   display: flex; flex-direction: column; gap: 6px;
-  transition: border-color .3s, background .3s;
+  transition: border-color .3s, background .3s, opacity .3s, transform .18s;
 }
+.crt-cell:active { transform: scale(0.985); }
 .crt-art { display: grid; place-items: center; }
 .crt-art svg { width: 100%; height: auto; max-height: 150px; display: block; overflow: visible; }
 .crt-top { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
@@ -705,7 +722,12 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   font-family: var(--disp); font-size: 20px; font-weight: 300;
   letter-spacing: -.03em; color: var(--ember); font-variant-numeric: tabular-nums;
 }
-.crt-dom { font-size: 8.5px; }
+/* the domain doubles as the link to the habits that feed it */
+.crt-dom { font-size: 8.5px; display: inline-flex; align-items: center; gap: 5px; }
+.crt-dom::after {
+  content: '›'; font-size: 12px; letter-spacing: 0; line-height: 1;
+  color: var(--ember); opacity: .8;
+}
 .crt-cell .goal-bar { margin-top: 8px; }
 .crt-tier { margin-top: 7px; font-size: 8.5px; color: var(--ink-mute); }
 
@@ -716,6 +738,82 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   0%   { transform: scale(1); }
   35%  { transform: scale(1.09); }
   100% { transform: scale(1); }
+}
+
+/* ── spotlight ──
+   Arriving on a tab via a domain link, rather than by tapping the nav,
+   should say *why* you are here. The matching cards lift, the rest
+   recede, and it clears itself so nothing is left in a filtered state
+   with no visible way out. */
+.habit.spot, .crt-cell.spot {
+  border-color: var(--ember-line);
+  background: linear-gradient(180deg, rgba(224,151,90,0.13), rgba(255,255,255,0.035));
+}
+.habit.dim, .crt-cell.dim { opacity: 0.34; }
+@media (prefers-reduced-motion: no-preference) {
+  .habit.spot, .crt-cell.spot { animation: spotIn .5s ease-out; }
+}
+@keyframes spotIn {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(1.03); }
+  100% { transform: scale(1); }
+}
+
+/* ── the level-up moment ──
+   The payoff of the whole reward system, so it gets the screen rather
+   than a toast in the corner. pointer-events stays off at all times: it
+   must never swallow a tap or strand you behind it. */
+.ascend {
+  position: fixed; inset: 0; z-index: 70;
+  display: grid; place-items: center;
+  pointer-events: none;
+  padding: 0 var(--rail);
+  background: radial-gradient(circle at 50% 44%, rgba(224,151,90,0.17), rgba(6,7,7,0.88) 60%);
+  backdrop-filter: blur(7px); -webkit-backdrop-filter: blur(7px);
+  opacity: 0; visibility: hidden;
+  transition: opacity .36s, visibility .36s;
+}
+.ascend.on { opacity: 1; visibility: visible; }
+
+.ascend-inner { display: flex; flex-direction: column; align-items: center; text-align: center; }
+.ascend-art { width: 200px; max-width: 62vw; }
+.ascend-art svg { width: 100%; height: auto; display: block; overflow: visible; }
+.ascend-dom { margin-top: 18px; font-size: 9px; color: var(--ink-mute); }
+.ascend-name {
+  margin-top: 7px; font-family: var(--disp); font-weight: 300;
+  font-size: 31px; letter-spacing: -0.02em; color: var(--ink); line-height: 1.1;
+}
+.ascend-lvl {
+  margin-top: 11px; font-family: var(--mono); font-size: 11px;
+  letter-spacing: 0.22em; text-transform: uppercase; color: var(--ember);
+}
+.ascend-tier {
+  margin-top: 15px; font-size: 9.5px; color: var(--ink-soft);
+  padding: 7px 13px; border-radius: 100px;
+  background: var(--ember-soft); border: 1px solid var(--ember-line);
+}
+/* an ordinary level has no tier to announce — hide it rather than
+   leaving an empty pill floating under the name */
+.ascend:not(.crossed) .ascend-tier { display: none; }
+
+@media (prefers-reduced-motion: no-preference) {
+  .ascend.on .ascend-art  { animation: ascPop .85s cubic-bezier(.2,.85,.25,1); }
+  .ascend.on .ascend-dom,
+  .ascend.on .ascend-name,
+  .ascend.on .ascend-lvl,
+  .ascend.on .ascend-tier { animation: ascRise .6s ease-out backwards; }
+  .ascend.on .ascend-name { animation-delay: .10s; }
+  .ascend.on .ascend-lvl  { animation-delay: .18s; }
+  .ascend.on .ascend-tier { animation-delay: .26s; }
+}
+@keyframes ascPop {
+  0%   { transform: scale(.62); opacity: 0; }
+  55%  { transform: scale(1.06); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+@keyframes ascRise {
+  from { transform: translateY(9px); opacity: 0; }
+  to   { transform: translateY(0);   opacity: 1; }
 }
 
 /* ═══ REWARD — the four characters ═══
