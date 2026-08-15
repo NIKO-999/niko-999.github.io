@@ -761,11 +761,25 @@ body {
   border-right: 5px solid transparent;
   border-top: 8px solid var(--now);
 }
-.now-line {
+/* What is left of the Now line: a lit dot on the axis and a short stub
+   beneath it, so today's column can still be found in empty canvas. The
+   rest of the job moved into the bars themselves. */
+.now-dot {
   position: absolute;
-  top: 46px; bottom: 0;
-  width: 1px;
+  top: 30px;
+  transform: translateX(-50%);
+  width: 8px; height: 8px;
+  border-radius: 50%;
   background: var(--now);
+  box-shadow: 0 0 10px 2px color-mix(in srgb, var(--now) 45%, transparent);
+  z-index: 3;
+}
+.now-stub {
+  position: absolute;
+  top: 42px;
+  width: 1px; height: 26px;
+  transform: translateX(-50%);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--now) 70%, transparent), transparent);
   z-index: 1;
   pointer-events: none;
 }
@@ -778,6 +792,7 @@ body {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
+  overflow: hidden;
   height: var(--bar-h);
   display: flex;
   align-items: center;
@@ -808,7 +823,23 @@ body {
   width: var(--tap, 100%);
   height: 36px;
 }
-.bar .label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.bar .label { position: relative; z-index: 1; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+
+/* The duration is lived, not labelled: a bar fills to today, and the
+   leading edge of that fill IS the Now marker — which is why there is no
+   line down the canvas any more. A finished bar has no edge to draw
+   (it would sit on the bar's own end and read as a marker), so the
+   border only exists while the work is live. */
+.bar .done {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--through, 0%);
+  background: rgba(255, 255, 255, .17);
+  pointer-events: none;
+}
+.bar[data-tone="strong"] .done { background: rgba(0, 0, 0, .11); }
+.bar.live .done { border-right: 2px solid var(--now); }
+.bar[data-state="done"] .badge { opacity: .5; }
 .bar[aria-pressed="true"] { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 /* Every shape carries a faint keyline: the accent gradient's dark tail
@@ -828,19 +859,21 @@ body {
 /* The chip always inverts against its own bar, which makes it flip
    with the theme for free: a white bar carries a dark chip, a dark bar
    carries a light one. A fixed white chip was invisible on white bars. */
+/* No chip. A pill inside a pill was the reference's one piece of
+   furniture, and itcompetes with the bar it sits in. The duration is
+   set bare at the right edge, in tabular figures so the numerals line up
+   down the board rather than shifting with their own widths. */
 .badge {
   flex: none;
-  padding: 3px 7px;
-  border: 0;
-  border-radius: 5px;
+  position: relative;
+  z-index: 1;
   line-height: 1;
-  font-size: .63rem;
-  font-weight: 500;
-  letter-spacing: 0;
+  font-size: .68rem;
+  font-weight: 600;
+  letter-spacing: .005em;
+  opacity: .64;
+  font-variant-numeric: tabular-nums;
 }
-.bar[data-tone="strong"] .badge { background: var(--bar-strong-ink); color: var(--bar-strong); }
-.bar[data-tone="soft"]   .badge { background: var(--bar-soft-ink);   color: var(--bar-soft); }
-.bar[data-tone="accent"] .badge { background: #fff; color: var(--accent-c); }
 
 /* A bar too narrow for its own name puts the name outside — placed
    left or right depending on which side is actually free. */
@@ -862,7 +895,7 @@ body {
   pointer-events: none;
   z-index: 4;
 }
-.outside .badge { background: var(--bar-soft); color: var(--bar-soft-ink); }
+.outside .badge { opacity: .55; font-weight: 500; }
 
 .milestone {
   position: absolute;
@@ -1254,6 +1287,13 @@ const pct  = (date) => ((date - START) / DAY / SPAN) * 100;
 const days = (a, b) => Math.round((b - a) / DAY);
 const fmt  = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
+/* Under a week reads in days; beyond it, weeks carry the magnitude and
+   the remainder carries the precision — 45 days is hard to picture, six
+   and a half weeks is not. */
+const dur = (n) => n < 7 ? `${n} days`
+                 : n % 7 ? `${Math.floor(n / 7)}w ${n % 7}d`
+                         : `${n / 7}w`;
+
 const BARS = [
   { name: 'Research',          from: d(1,16), to: d(1,20), tone: 'strong', row: 0 },
   { name: 'Business Analysis', from: d(1,21), to: d(2,18), tone: 'soft',   row: 0 },
@@ -1287,10 +1327,10 @@ const say   = document.getElementById('say');
 const nowAt = pct(TODAY);
 
 /* ── axis ──
-   Ticks near the Now pill are dropped rather than drawn underneath it.
-   The pill previously covered "11 Mar" so completely that the visible
-   remnant read as "1 Mar" — a wrong date, not just a hidden one. */
-const PILL_CLEAR = 4.2;   // % of span either side of Now to keep clear
+   Ticks are dropped rather than drawn under the Now dot.
+   With the pill gone only the dot needs clearance, so the axis keeps
+   nearly all of its ticks. */
+const PILL_CLEAR = 1.8;   // % of span either side of the dot to keep clear
 
 for (let i = 0; i <= SPAN; i += 8) {
   const t = new Date(START.getTime() + i * DAY);
@@ -1309,19 +1349,17 @@ for (let i = 0; i <= SPAN; i += 8) {
   axis.appendChild(el);
 }
 
-for (const [cls, text] of [['now-caret', ''], ['now-pill', 'Now']]) {
+/* The pill and caret are gone with the line. Today is the lit dot and
+   the fills it leaves in the bars — a label saying "Now" on top of that
+   is the third time the same fact gets stated. */
+
+for (const cls of ['now-dot', 'now-stub']) {
   const el = document.createElement('span');
   el.className = cls;
   el.style.left = nowAt + '%';
-  el.textContent = text;
   el.setAttribute('aria-hidden', 'true');
-  axis.appendChild(el);
+  plot.appendChild(el);
 }
-
-const line = document.createElement('span');
-line.className = 'now-line';
-line.style.left = nowAt + '%';
-plot.appendChild(line);
 
 /* The chart is a picture. This is the sentence that replaces it. */
 plot.setAttribute('aria-label', 'Timeline');
@@ -1359,13 +1397,26 @@ const barEls = BARS.map((b) => {
   el.setAttribute('aria-pressed', 'false');
 
   const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
-  const status = TODAY < b.from ? 'not started yet'
-               : TODAY > b.to   ? 'finished'
+  const live = TODAY >= b.from && TODAY <= b.to;
+  const state = TODAY < b.from ? 'ahead' : TODAY > b.to ? 'done' : 'live';
+  const status = state === 'ahead' ? 'not started yet'
+               : state === 'done'  ? 'finished'
                : `day ${elapsed} of ${n}`;
+  /* The numeral says a different thing in each state: what is coming,
+     where you are inside it, and what it cost. */
+  const numeral = state === 'ahead' ? dur(n)
+                : state === 'done'  ? `✓ ${dur(n)}`
+                : `d${elapsed} / ${n}`;
+  const through = Math.round((elapsed / n) * 100);
+
+  el.dataset.state = state;
+  if (live) el.classList.add('live');
+  el.style.setProperty('--through', through + '%');
   el.setAttribute('aria-label',
-    `${b.name}. ${n} days, ${fmt(b.from)} to ${fmt(b.to)}. ${status}.`);
-  el.innerHTML = `<span class="label" aria-hidden="true">${b.name}</span>`
-               + `<span class="badge" aria-hidden="true">${n} days</span>`;
+    `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}.`);
+  el.innerHTML = `<span class="done" aria-hidden="true"></span>`
+               + `<span class="label" aria-hidden="true">${b.name}</span>`
+               + `<span class="badge" aria-hidden="true">${numeral}</span>`;
 
   /* Tapping a bar has to do something — a focusable button that does
      nothing is worse than a div, because the role promises an action. */
@@ -1475,11 +1526,11 @@ function layout(pass = 0) {
 
       it.el.classList.remove('tight');
       it.el.classList.add('narrow');           // nothing fits — caption goes outside
-      it.el.title = `${it.b.name} — ${days(it.b.from, it.b.to)} days`;
+      it.el.title = `${it.b.name} — ${dur(days(it.b.from, it.b.to))}`;
       const cap = document.createElement('span');
       cap.className = 'outside';
       cap.setAttribute('aria-hidden', 'true');
-      cap.innerHTML = `${it.b.name}<span class="badge">${days(it.b.from, it.b.to)} days</span>`;
+      cap.innerHTML = `${it.b.name}<span class="badge">${dur(days(it.b.from, it.b.to))}</span>`;
       host.appendChild(cap);
 
       const capW = cap.getBoundingClientRect().width;
@@ -1522,7 +1573,7 @@ const listEls = [...BARS].sort((a, b) => a.from - b.from).map((b) => {
   li.innerHTML =
     `<div class="list-top">
        <span class="list-name">${b.name}</span>
-       <span class="list-days">${n} days</span>
+       <span class="list-days">${dur(n)}</span>
      </div>
      <div class="list-dates">${fmt(b.from)} — ${fmt(b.to)}</div>
      <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
