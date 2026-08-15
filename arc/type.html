@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Arc lab — type</title>
+<style>
+/* Four type treatments on the real head + board, using only fonts already
+   self-hosted in this repo (Inter, JetBrains Mono, Archivo — all OFL). */
+@font-face{font-family:'Inter';font-weight:400;font-display:swap;src:url('fonts/Inter-400.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:500;font-display:swap;src:url('fonts/Inter-500.woff2') format('woff2')}
+@font-face{font-family:'Inter';font-weight:600;font-display:swap;src:url('fonts/Inter-600.woff2') format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:400;font-display:swap;src:url('fonts/JetBrainsMono-400.woff2') format('woff2')}
+@font-face{font-family:'JetBrains Mono';font-weight:500;font-display:swap;src:url('fonts/JetBrainsMono-500.woff2') format('woff2')}
+@font-face{font-family:'Archivo';font-weight:300;font-display:swap;src:url('fonts/Archivo-300.woff2') format('woff2')}
+
+:root{
+  --ink:#f2f1ef; --ink-2:#b0aca6; --ink-3:#9c9893; --tick:#c2beb7;
+  --panel:#1b1d1f; --rule:rgba(255,255,255,.035); --line:rgba(255,255,255,.05);
+  --soft:#27272a; --soft-ink:#f2f1ef; --strong:#fff; --strong-ink:#14130f;
+  --aa:#4d7384; --ab:#2d5160; --ac:#1b343e; --accent:#9fb4be; --now:#9fb4be;
+}
+*{box-sizing:border-box}
+body{margin:0;padding:26px 40px 70px;background:#0b0c0d;color:var(--ink);
+ font:400 16px/1.45 -apple-system,system-ui,sans-serif}
+h2{font-size:14px;font-weight:600;margin:34px 0 4px}
+h2 b{color:var(--accent)}
+p.note{margin:0 0 12px;font-size:12.5px;color:var(--ink-3);max-width:880px}
+.board{width:1080px;border:1px solid var(--line);border-radius:14px;background:var(--panel);
+ padding:0 0 22px;overflow:hidden}
+.head{display:flex;align-items:center;gap:22px;padding:16px 20px 12px}
+.head h1{margin:0;font-size:1.32rem;font-weight:600;letter-spacing:-.015em}
+.tabs{display:flex;align-items:center;gap:22px}
+.tab{display:flex;align-items:center;gap:7px;font-size:.84rem;font-weight:500;color:var(--ink-2)}
+.tab.on{color:var(--ink)}
+.mark{width:5px;height:5px;border-radius:50%;background:transparent}
+.tab.on .mark{background:var(--accent);box-shadow:0 0 7px color-mix(in srgb,var(--accent) 70%,transparent)}
+.cnt{font-size:.7rem;color:var(--ink-2)}
+.grow{flex:1}.meta{font-size:.8rem;color:var(--ink-2)}
+.plot{position:relative;padding:0 20px}
+.axis{position:relative;height:22px;margin-bottom:18px}
+.axis span{position:absolute;top:6px;transform:translateX(-50%);font-size:.69rem;color:var(--tick)}
+.dot{position:absolute;top:2px;transform:translateX(-50%);width:8px;height:8px;border-radius:50%;
+ background:var(--now);box-shadow:0 0 10px 2px color-mix(in srgb,var(--now) 45%,transparent)}
+.rows{position:relative}.row{position:relative;height:44px}
+.b{position:absolute;top:50%;transform:translateY(-50%);height:38px;display:flex;align-items:center;
+ gap:9px;padding:0 14px 0 17px;border-radius:9px;overflow:hidden;white-space:nowrap;
+ box-shadow:inset 0 0 0 1px rgba(242,241,239,.22)}
+.lb{position:relative;z-index:1;flex:1;overflow:hidden;text-overflow:ellipsis;
+ font-size:.81rem;font-weight:500;letter-spacing:-.012em}
+.n{position:relative;z-index:1;font-size:.68rem;font-weight:600;opacity:.64;font-variant-numeric:tabular-nums}
+.fill{position:absolute;inset:0 auto 0 0;background:rgba(255,255,255,.17)}
+.live .fill{border-right:2px solid var(--now)}
+.t-strong{background:var(--strong);color:var(--strong-ink)}
+.t-strong .fill{background:rgba(0,0,0,.11)}
+.t-soft{background:var(--soft);color:var(--soft-ink)}
+.t-accent{background:linear-gradient(90deg,var(--aa) 4%,var(--ab) 46%,var(--ac) 74%);color:#fff}
+.cap{position:absolute;top:50%;transform:translateY(-50%);font-size:.8rem;font-weight:500}
+.cap em{font-style:normal;opacity:.55;font-size:.72rem}
+
+/* ── 1. SYSTEM (today) — whatever the OS supplies ── */
+.v1{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif}
+
+/* ── 2. INTER — the stack already names it; now it actually loads ── */
+.v2{font-family:'Inter',system-ui,sans-serif}
+.v2 h1{letter-spacing:-.028em}
+.v2 .lb{letter-spacing:-.018em}
+
+/* ── 3. INTER + MONO FIGURES — every number in JetBrains Mono ── */
+.v3{font-family:'Inter',system-ui,sans-serif}
+.v3 h1{letter-spacing:-.028em}
+.v3 .lb{letter-spacing:-.018em}
+.v3 .n,.v3 .axis span,.v3 .cnt,.v3 .meta,.v3 .cap em{
+  font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.02em}
+.v3 .n{font-weight:500;font-size:.64rem}
+.v3 .axis span{font-size:.63rem}
+.v3 .cnt{font-size:.64rem}
+.v3 .meta{font-size:.72rem}
+
+/* ── 4. EDITORIAL — light Archivo title, Inter body, mono figures ── */
+.v4{font-family:'Inter',system-ui,sans-serif}
+.v4 h1{font-family:'Archivo',system-ui,sans-serif;font-weight:300;font-size:1.5rem;letter-spacing:-.005em}
+.v4 .lb{letter-spacing:-.014em}
+.v4 .n,.v4 .axis span,.v4 .cnt,.v4 .meta,.v4 .cap em{
+  font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:-.02em}
+.v4 .n{font-weight:500;font-size:.64rem}
+.v4 .axis span{font-size:.63rem;text-transform:uppercase;letter-spacing:.06em}
+.v4 .cnt{font-size:.64rem}
+.v4 .meta{font-size:.72rem;text-transform:uppercase;letter-spacing:.08em}
+</style>
+</head>
+<body><div id="mk"></div>
+<script>
+const START=new Date(2026,1,15),END=new Date(2026,3,30),TODAY=new Date(2026,2,7);
+const DAY=864e5,SPAN=(END-START)/DAY;
+const d=(m,x)=>new Date(2026,m,x),pct=t=>((t-START)/DAY/SPAN)*100;
+const days=(a,b)=>Math.round((b-a)/DAY);
+const fmt=t=>t.toLocaleDateString('en-GB',{day:'numeric',month:'short'});
+const dur=n=>n<7?`${n} days`:(n%7?`${Math.floor(n/7)}w ${n%7}d`:`${n/7}w`);
+const BARS=[
+ {n:'Business Analysis',f:d(1,21),t:d(2,18),tone:'soft',row:0},
+ {n:'Research',f:d(1,16),t:d(1,20),tone:'strong',row:1},
+ {n:'Wireframes, proto',f:d(1,25),t:d(2,9),tone:'strong',row:2},
+ {n:'UI design',f:d(2,10),t:d(2,25),tone:'soft',row:2},
+ {n:'Development',f:d(2,10),t:d(3,24),tone:'accent',row:3},
+];
+const axis=()=>{let h='';for(let i=0;i<=SPAN;i+=8){const t=new Date(+START+i*DAY);
+ if(Math.abs(pct(t)-pct(TODAY))<1.8)continue;h+=`<span style="left:${pct(t)}%">${fmt(t)}</span>`;}
+ return h+`<span class="dot" style="left:${pct(TODAY)}%"></span>`;};
+const build=()=>{const rows=[[],[],[],[]];
+ BARS.forEach(b=>{const L=pct(b.f),W=pct(b.t)-pct(b.f),n=days(b.f,b.t);
+  const el=Math.min(Math.max(days(b.f,TODAY),0),n);
+  const st=TODAY<b.f?'ahead':TODAY>b.t?'done':'live';
+  const num=st==='ahead'?dur(n):st==='done'?`✓ ${dur(n)}`:`d${el} / ${n}`;
+  const narrow=W<7.5;
+  rows[b.row].push(`<div class="b t-${b.tone} ${st==='live'?'live':''}" style="left:${L}%;width:${W}%">
+   <span class="fill" style="width:${(el/n*100).toFixed(1)}%"></span>
+   ${narrow?'':`<span class="lb">${b.n}</span><span class="n">${num}</span>`}</div>`
+   +(narrow?`<span class="cap" style="left:calc(${L+W}% + 10px)">${b.n} <em>${dur(n)}</em></span>`:''));});
+ return rows.map(r=>`<div class="row">${r.join('')}</div>`).join('');};
+const V=[
+ ['1','System — today','What is running now. The stack names Inter but never loads it, so every machine renders this differently: SF on a Mac, Segoe on Windows.'],
+ ['2','Inter','The same stack, actually loaded, with tracking tightened. Consistent on every machine, and noticeably more even in the label column.'],
+ ['3','Inter + mono figures','Every number moves to JetBrains Mono — durations, dates, tab counts, the span. Figures stop drifting, and the board starts reading as an instrument rather than a document. My pick.'],
+ ['4','Editorial','Adds a light Archivo title and sets the axis and span in small uppercase mono. More character, more voice — further from a tool, closer to a publication.'],
+];
+document.getElementById('mk').innerHTML=V.map(([v,name,note])=>`
+ <h2>${v} — <b>${name}</b></h2><p class="note">${note}</p>
+ <div class="board v${v}">
+   <div class="head"><h1>Workflow plan</h1>
+     <div class="tabs"><span class="tab on"><span class="mark"></span>Board<span class="cnt">8</span></span>
+     <span class="tab"><span class="mark"></span>List<span class="cnt">8</span></span></div>
+     <span class="grow"></span><span class="meta">2.5 months</span></div>
+   <div class="plot"><div class="axis">${axis()}</div><div class="rows">${build()}</div></div>
+ </div>`).join('');
+</script>
+</body></html>
