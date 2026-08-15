@@ -13,11 +13,11 @@
    ARC — visual prototype.
 
    Two references, split by job:
-     · the shell  — glass panel floating on a photograph, icon rail,
-       search, Board/List pills, white primary button
-     · the canvas — a time axis, a Now line, duration bars, milestones
+     · the shell  — a glass panel inset in a photograph, an icon rail,
+       a search field, Board/List pills, a white primary button
+     · the canvas — a date axis, a Now line, duration bars, milestones
 
-   Look only. The data is fixed and nothing is saved. This exists so
+   Look only: the data is fixed and nothing is saved. This exists so
    the design can be checked on a real phone before the app is built.
    ═══════════════════════════════════════════════════════════════ */
 
@@ -25,144 +25,178 @@
    Bars are named by ROLE, not colour. "Strong" pops off the surface,
    "soft" sits back into it. Which literal colour that means flips per
    theme — white pops on a dark panel, near-black pops on a light one.
-   Naming them --bar-white / --bar-dark would make light mode
-   impossible to express. */
+   Naming them --bar-white / --bar-dark would make the light theme
+   impossible to express.
+
+   The shell is warm and near-monochrome on purpose. The reference
+   panel measures ~5% median saturation at hue ~25°, and pairs that
+   with a COOL accent — near-complementary, which is why two pixels of
+   it register. A green accent on a green shell is the same hue
+   family, so it can only separate by shouting. Everything structural
+   here is warm grey; the teal is spent only on what is live. */
 :root {
   color-scheme: dark;
 
-  /* the photograph behind everything */
-  --sky-1:   #14181c;
-  --sky-2:   #1d2a2c;
-  --sky-3:   #2e4340;
-  --horizon: #5c7a6c;
-  --ground:  #0d1012;
-  --grain:   .05;
+  /* the photograph */
+  --sky-1:   #0e1113;
+  --sky-2:   #2b2b2c;
+  --sky-3:   #6d675f;
+  --horizon: #cfc4b6;
+  --ground:  #111112;
+  --grain:   .09;
 
-  /* glass */
-  --glass:      rgba(22, 26, 25, .62);
-  --glass-line: rgba(255, 255, 255, .11);
-  --glass-in:   rgba(255, 255, 255, .055);   /* insets: search, cards */
-  --glass-in-2: rgba(255, 255, 255, .085);   /* hover / raised */
+  /* glass. Insets RECESS with black rather than lifting with white —
+     measured, the reference's cards are ~30% darker than the glass
+     around them. Lifting made them read as cards stacked on a panel
+     instead of wells cut into one. */
+  --glass:      rgba(24, 23, 22, .56);
+  --glass-line: rgba(255, 255, 255, .05);
+  --rule:       rgba(255, 255, 255, .035);
+  --glass-in:   rgba(0, 0, 0, .28);
+  --glass-in-2: rgba(0, 0, 0, .42);
 
-  --ink:   #f0f3f1;
-  --ink-2: #a2aaa6;
-  --ink-3: #7d8682;
+  --ink:   #f2f1ef;
+  --ink-2: #b0aca6;
+  --ink-3: #9c9893;
+  --tick:  #a8a49e;
 
   --bar-strong:     #ffffff;
-  --bar-strong-ink: #101512;
-  --bar-soft:       rgba(255, 255, 255, .09);
-  --bar-soft-ink:   #f0f3f1;
-  --bar-soft-line:  rgba(255, 255, 255, .10);
+  --bar-strong-ink: #14130f;
+  --bar-soft:       #27272a;
+  --bar-soft-ink:   #f2f1ef;
 
-  --accent-a:    #0d5344;      /* labels sit over this end */
-  --accent-b:    #35b48c;
-  --accent-flat: #14705a;
-  --accent-ink:  #ffffff;
-  --accent:      #33c79a;
+  /* Gradient light → dark, as measured off the reference. The label is
+     pinned left, so it sits on --accent-a: #467A6C is 4.93:1 against
+     white. The reference's own left stop (#589483) is 3.5:1 — this is
+     a deliberate half-step darker to clear the floor. */
+  --accent-a: #467a6c;
+  --accent-b: #0d5348;
+  --accent-c: #06302b;
+  --accent:   #6ba593;
 
-  --now:          #35d3a0;
+  --now:          #6ba593;
   --now-pill:     #17715a;
   --now-pill-ink: #ffffff;
 
-  --badge:      #ffffff;
-  --badge-ink:  #14201b;
-  --badge-line: transparent;
-
   --btn:     #ffffff;
-  --btn-ink: #14201b;
+  --btn-ink: #14130f;
+  --seg-on:  rgba(0, 0, 0, .55);
 
-  --marker: rgba(255, 255, 255, .28);
-  --focus:  #4fe0b4;
+  --focus: #8fd3ba;
 
-  --bar-h:  38px;
-  --hit:    44px;
-  --r-panel: 16px;
-  --r-bar:   11px;
+  --bar-h: 38px;
+  --hit:   44px;
+  --r-panel: 14px;
+  --r-bar:   9px;
+  --nav-h:   57px;
 }
 
 :root[data-resolved="light"] {
   color-scheme: light;
 
-  --sky-1:   #f4ece2;
-  --sky-2:   #e9dccd;
-  --sky-3:   #d9c9b8;
-  --horizon: #c9b6a3;
-  --ground:  #b8a898;
-  --grain:   .035;
+  --sky-1:   #efe9e2;
+  --sky-2:   #e2dcd4;
+  --sky-3:   #cfc7bd;
+  --horizon: #bdb4a8;
+  --ground:  #a9a19a;
+  --grain:   .06;
 
-  --glass:      rgba(255, 255, 255, .60);
-  --glass-line: rgba(0, 0, 0, .10);
-  --glass-in:   rgba(255, 255, 255, .55);
-  --glass-in-2: rgba(255, 255, 255, .80);
+  --glass:      rgba(253, 251, 248, .66);
+  --glass-line: rgba(0, 0, 0, .07);
+  --rule:       rgba(0, 0, 0, .05);
+  --glass-in:   rgba(0, 0, 0, .05);
+  --glass-in-2: rgba(0, 0, 0, .09);
 
-  --ink:   #14181a;
-  --ink-2: #565f5b;
-  --ink-3: #6f7874;
+  --ink:   #1a1815;
+  --ink-2: #56534d;
+  --ink-3: #5c5852;
+  --tick:  #5c5952;
 
-  --bar-strong:     #16201c;
+  --bar-strong:     #1c1a17;
   --bar-strong-ink: #ffffff;
-  --bar-soft:       rgba(255, 255, 255, .72);
-  --bar-soft-ink:   #16201c;
-  --bar-soft-line:  rgba(0, 0, 0, .10);
+  --bar-soft:       #e7e3dc;
+  --bar-soft-ink:   #1c1a17;
 
-  --accent-a:    #07422f;
-  --accent-b:    #148c68;
-  --accent-flat: #0b6b52;
-  --accent-ink:  #ffffff;
-  --accent:      #0b6b52;
+  --accent-a: #3d6d60;
+  --accent-b: #0a4a3e;
+  --accent-c: #05372f;
+  --accent:   #0b6b52;
 
-  --now:          #0b6b52;
+  --now:          #4a8a76;
   --now-pill:     #0b6b52;
   --now-pill-ink: #ffffff;
 
-  --badge:      #ffffff;
-  --badge-ink:  #14201b;
-  --badge-line: rgba(0, 0, 0, .10);
-
-  --btn:     #16201c;
+  --btn:     #1c1a17;
   --btn-ink: #ffffff;
+  --seg-on:  rgba(0, 0, 0, .82);
 
-  --marker: rgba(0, 0, 0, .26);
-  --focus:  #0b6b52;
+  --focus: #0b6b52;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
-html { -webkit-text-size-adjust: 100%; }
+
+/* Any author rule that sets `display` outranks the UA's
+   `[hidden] { display: none }`, so hiding by property silently fails on
+   every flex/grid element here. One rule, rather than remembering to
+   pair a `[hidden]` override with each of them. */
+[hidden] { display: none !important; }
+
+/* No -webkit-text-size-adjust lock, and type is in rem, so a phone's
+   system text-size setting actually does something. */
+html { font-size: 100%; }
 
 body {
   margin: 0;
+  min-height: 100vh;
   min-height: 100dvh;
   color: var(--ink);
-  font: 400 16px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
+  font: 400 1rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
         system-ui, sans-serif;
-  letter-spacing: -0.01em;
   background: var(--ground);
 }
 
 /* ── the photograph ──
-   Built from gradients rather than a JPEG: nothing to load, nothing
-   to cache, works offline on first paint, and it is what the glass
-   has to blur against. A real image can be dropped in later — and on
-   the Vision board it should be your own. */
+   Gradients rather than a JPEG: nothing to fetch, works offline on
+   first paint, and it is what the glass has to blur against. A real
+   image drops straight in later — on the Vision board it should be
+   your own.
+
+   A photo has energy at every scale; gradients only have it at the
+   lowest. The two turbulence layers (one coarse, one fine) and the
+   vignette are what stop this reading as three overlapping radials. */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: -2;
   background:
-    radial-gradient(120% 70% at 78% 12%, color-mix(in srgb, var(--horizon) 55%, transparent), transparent 60%),
-    radial-gradient(90% 55% at 12% 82%,  color-mix(in srgb, var(--sky-3) 70%, transparent), transparent 65%),
-    linear-gradient(178deg, var(--sky-1) 0%, var(--sky-2) 38%, var(--sky-3) 62%, var(--ground) 100%);
+    radial-gradient(56% 32% at 73% 47%, color-mix(in srgb, var(--horizon) 46%, transparent), transparent 62%),
+    linear-gradient(180deg, transparent 44%,
+        color-mix(in srgb, var(--horizon) 26%, transparent) 49.5%, transparent 56%),
+    radial-gradient(72% 20% at 20% 33%, rgba(255,255,255,.07), transparent 72%),
+    radial-gradient(48% 16% at 87% 27%, rgba(255,255,255,.05), transparent 72%),
+    radial-gradient(92% 55% at 4% 106%, var(--ground), transparent 60%),
+    linear-gradient(178deg, var(--sky-1) 0%, var(--sky-2) 33%,
+                    var(--sky-3) 50%, var(--ground) 70%, var(--ground) 100%);
 }
-/* grain, so the blur has texture to chew on */
+.backdrop::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(125% 92% at 50% 44%, transparent 38%, rgba(0,0,0,.46) 100%);
+}
 .backdrop::after {
   content: '';
   position: absolute;
   inset: 0;
   opacity: var(--grain);
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+  mix-blend-mode: overlay;
+  background-size: 900px 900px, 140px 140px;
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.011' numOctaves='4'/></filter><rect width='900' height='900' filter='url(%23c)' opacity='.55'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
 }
 
-:where(a, button, input):focus-visible {
+:where(a, button, input, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: 2px;
   border-radius: 8px;
@@ -182,22 +216,32 @@ body {
   }
 }
 
-/* ═══ the glass panel ═══ */
+/* ═══ the glass panel ═══
+   Inset, not full-bleed. The reference panel covers ~76% of its photo,
+   and that visible margin is what makes the glass legible as glass —
+   with the panel edge-to-edge there is nothing behind it to see
+   through to, and every other glass property is wasted. */
 .app {
   position: relative;
   display: flex;
-  margin: calc(10px + env(safe-area-inset-top)) 10px
-          calc(10px + env(safe-area-inset-bottom));
+  margin: calc(10px + env(safe-area-inset-top))
+          calc(10px + env(safe-area-inset-right))
+          calc(10px + env(safe-area-inset-bottom))
+          calc(10px + env(safe-area-inset-left));
+  min-height: calc(100vh - 20px);
   min-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
   border: 1px solid var(--glass-line);
   border-radius: var(--r-panel);
   background: var(--glass);
-  -webkit-backdrop-filter: blur(34px) saturate(1.25);
-  backdrop-filter: blur(34px) saturate(1.25);
+  /* Measured: the reference cuts high-frequency energy 5.6× but leaves
+     the roofline legible as a form — that is ~20px, not 34px. And its
+     glass is DESATURATED against the photo, so saturate() goes below 1. */
+  -webkit-backdrop-filter: blur(20px) saturate(.9);
+          backdrop-filter: blur(20px) saturate(.9);
   overflow: hidden;
 }
 
-/* ── icon rail (wide screens only; the phone gets a bottom bar) ── */
+/* ── icon rail (wide screens; the phone gets a bottom bar) ── */
 .rail {
   display: none;
   flex-direction: column;
@@ -206,7 +250,7 @@ body {
   width: 52px;
   flex: none;
   padding: 12px 0;
-  border-right: 1px solid var(--glass-line);
+  border-right: 1px solid var(--rule);
 }
 .rail-mark {
   display: grid;
@@ -236,9 +280,8 @@ body {
   align-items: center;
   gap: 8px;
   padding: 10px;
-  border-bottom: 1px solid var(--glass-line);
+  border-bottom: 1px solid var(--rule);
 }
-
 .search {
   flex: 1;
   min-width: 0;
@@ -248,21 +291,18 @@ body {
   height: var(--hit);
   padding: 0 12px;
   border: 1px solid var(--glass-line);
-  border-radius: 10px;
+  border-radius: 8px;
   background: var(--glass-in);
   color: var(--ink-3);
 }
 .search input {
-  flex: 1;
-  min-width: 0;
-  border: 0;
-  background: none;
+  flex: 1; min-width: 0;
+  border: 0; background: none;
   color: var(--ink);
-  font: inherit;
-  font-size: 14px;
+  font: inherit; font-size: .875rem;
   outline: none;
 }
-.search input::placeholder { color: var(--ink-3); }
+.search input::placeholder { color: var(--ink-3); opacity: 1; }
 
 .btn {
   display: inline-flex;
@@ -272,19 +312,18 @@ body {
   padding: 0 13px;
   flex: none;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: 8px;
   background: none;
   color: var(--ink-2);
   font: inherit;
-  font-size: 13.5px;
+  font-size: .84rem;
   font-weight: 500;
-  letter-spacing: -0.01em;
   cursor: pointer;
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
 .btn-ghost { border-color: var(--glass-line); background: var(--glass-in); }
-.btn-primary { background: var(--btn); color: var(--btn-ink); font-weight: 600; }
+.btn-primary { background: var(--btn); color: var(--btn-ink); font-weight: 500; }
 .btn svg { width: 15px; height: 15px; flex: none; }
 
 /* ── section head ── */
@@ -296,38 +335,42 @@ body {
 }
 .head h1 {
   margin: 0;
-  font-size: 19px;
+  font-size: 1.32rem;
   font-weight: 600;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.015em;
 }
 .head .grow { flex: 1; }
-.span-meta { font-size: 13px; color: var(--ink-2); white-space: nowrap; }
+.span-meta { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
 
-.seg {
-  display: inline-flex;
-  padding: 3px;
-  border-radius: 10px;
-  background: var(--glass-in);
-  border: 1px solid var(--glass-line);
-}
+/* The reference's selected segment is a near-black pill on bare glass —
+   no enclosing track, and nothing white. A white pill here was the
+   second-loudest thing on the screen after the accent bar. */
+.seg { display: inline-flex; padding: 2px; border-radius: 9px; }
 .seg button {
-  min-height: 34px;
-  padding: 0 13px;
+  position: relative;
+  min-height: 28px;
+  padding: 0 11px;
   border: 0;
   border-radius: 7px;
   background: none;
   color: var(--ink-2);
   font: inherit;
-  font-size: 13px;
+  font-size: .78rem;
   font-weight: 500;
   cursor: pointer;
 }
-.seg button[aria-selected="true"] { background: var(--btn); color: var(--btn-ink); }
+/* Painted small to match the reference; the touch target is expanded
+   invisibly to 44px rather than inflating the control. */
+.seg button::after {
+  content: '';
+  position: absolute;
+  top: 50%; left: 0; right: 0;
+  transform: translateY(-50%);
+  height: var(--hit);
+}
+.seg button[aria-selected="true"] { background: var(--seg-on); color: var(--ink); }
 
-/* ═══ the canvas ═══
-   Scrolls horizontally inside its own box. The PAGE never scrolls
-   sideways — that is the difference between "swipe to explore the
-   timeline" and "the layout is broken". */
+/* ═══ the canvas ═══ */
 .scroller {
   flex: 1;
   overflow-x: auto;
@@ -338,30 +381,33 @@ body {
 }
 .scroller::-webkit-scrollbar { height: 0; width: 0; }
 
-.plot { position: relative; min-width: 620px; }
+.plot { position: relative; min-width: 900px; min-height: 100%; }
 
-.axis { position: relative; height: 30px; margin-bottom: 8px; }
+/* The reference leaves ~2.4 bar-heights of void under the axis. Ours
+   was 0.57 and read as a cramped table. */
+.axis { position: relative; height: 50px; margin-bottom: clamp(24px, 7vh, 64px); }
 .tick {
   position: absolute;
-  top: 13px;
+  top: 30px;
   transform: translateX(-50%);
-  font-size: 11px;
-  color: var(--ink-3);
+  font-size: .69rem;
+  color: var(--tick);
   white-space: nowrap;
 }
 .now-pill {
   position: absolute;
-  top: 9px;
+  top: 26px;
   transform: translateX(-50%);
   z-index: 3;
   padding: 3px 9px;
   border-radius: 7px;
   background: var(--now-pill);
   color: var(--now-pill-ink);
-  font-size: 11px;
+  font-size: .69rem;
   font-weight: 500;
-  letter-spacing: 0;
 }
+/* The caret floats clear of the pill in the reference — they fused
+   into one blob at a 1px gap. */
 .now-caret {
   position: absolute;
   top: 0;
@@ -369,19 +415,18 @@ body {
   width: 0; height: 0;
   border-left: 5px solid transparent;
   border-right: 5px solid transparent;
-  border-top: 6px solid var(--now);
+  border-top: 8px solid var(--now);
 }
 .now-line {
   position: absolute;
-  top: 0; bottom: 0;
+  top: 46px; bottom: 0;
   width: 1px;
   background: var(--now);
-  opacity: .8;
   z-index: 1;
   pointer-events: none;
 }
 
-.rows { position: relative; }
+.rows { position: relative; padding-bottom: 40px; }
 .row { position: relative; height: var(--hit); margin-bottom: 5px; }
 .row.gap { margin-top: 24px; }
 
@@ -393,11 +438,11 @@ body {
   display: flex;
   align-items: center;
   gap: 9px;
-  padding: 0 7px 0 12px;
-  border: 1px solid transparent;
+  padding: 0 14px 0 17px;
+  border: 0;
   border-radius: var(--r-bar);
   font: inherit;
-  font-size: 13px;
+  font-size: .81rem;
   font-weight: 500;
   letter-spacing: -0.012em;
   text-align: left;
@@ -406,44 +451,49 @@ body {
   z-index: 2;
   -webkit-tap-highlight-color: transparent;
 }
-/* The painted bar stays honest about its duration; the TOUCH target is
-   widened invisibly so a 2-day bar is still tappable. */
+/* The painted bar stays honest about its duration; the touch target is
+   widened invisibly. JS clamps the widening so neighbouring bars never
+   overlap — otherwise the later bar in DOM order silently eats the tap. */
 .bar::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
-  width: max(100%, var(--hit));
+  width: var(--tap, 100%);
   height: var(--hit);
 }
 .bar .label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.bar[aria-pressed="true"] { outline: 2px solid var(--focus); outline-offset: 2px; }
 
 .bar[data-tone="strong"] { background: var(--bar-strong); color: var(--bar-strong-ink); }
-.bar[data-tone="soft"] {
-  background: var(--bar-soft);
-  color: var(--bar-soft-ink);
-  border-color: var(--bar-soft-line);
+.bar[data-tone="soft"]   { background: var(--bar-soft);   color: var(--bar-soft-ink); }
+.bar[data-tone="accent"] {
+  background: linear-gradient(90deg, var(--accent-a) 4%, var(--accent-b) 46%,
+                              var(--accent-c) 70%, var(--accent-c) 100%);
+  color: #fff;
 }
-/* Gradient runs dark → light, and the label is pinned left, so text
-   always sits on the dark end and clears 4.5:1. Centring it would
-   quietly break contrast. */
-.bar[data-tone="accent"] { background: linear-gradient(90deg, var(--accent-a), var(--accent-b)); color: var(--accent-ink); }
-.bar[data-tone="accent-flat"] { background: var(--accent-flat); color: var(--accent-ink); }
 
+/* The chip always inverts against its own bar, which makes it flip
+   with the theme for free: a white bar carries a dark chip, a dark bar
+   carries a light one. A fixed white chip was invisible on white bars. */
 .badge {
   flex: none;
-  padding: 3px 6px;
-  border-radius: 6px;
-  background: var(--badge);
-  border: 1px solid var(--badge-line);
-  color: var(--badge-ink);
-  font-size: 10px;
+  padding: 3px 7px;
+  border: 0;
+  border-radius: 5px;
+  line-height: 1;
+  font-size: .63rem;
   font-weight: 500;
   letter-spacing: 0;
 }
+.bar[data-tone="strong"] .badge { background: var(--bar-strong-ink); color: var(--bar-strong); }
+.bar[data-tone="soft"]   .badge { background: var(--bar-soft-ink);   color: var(--bar-soft); }
+.bar[data-tone="accent"] .badge { background: #fff; color: var(--accent-c); }
 
-/* A bar too narrow for its own name puts the name outside instead of
-   clipping it — truthful width, readable either way. */
+/* A bar too narrow for its own name puts the name outside — placed
+   left or right depending on which side is actually free. */
+.bar.tight { padding: 0 11px; }
+.bar.tight .badge { display: none; }
 .bar.narrow { padding: 0; }
 .bar.narrow .label, .bar.narrow .badge { display: none; }
 .outside {
@@ -452,15 +502,15 @@ body {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 7px;
-  font-size: 12.5px;
+  gap: 8px;
+  font-size: .8rem;
   font-weight: 500;
   color: var(--ink);
   white-space: nowrap;
   pointer-events: none;
-  z-index: 2;
+  z-index: 4;
 }
-.outside em { font-style: normal; color: var(--ink-3); font-size: 11px; }
+.outside .badge { background: var(--bar-soft); color: var(--bar-soft-ink); }
 
 .milestone {
   position: absolute;
@@ -468,79 +518,83 @@ body {
   transform: translateY(-50%);
   display: flex;
   align-items: center;
-  gap: 11px;
+  gap: 14px;
   min-height: var(--hit);
   padding: 0;
   border: 0;
   background: none;
   font: inherit;
-  font-size: 13px;
+  font-size: .81rem;
   font-weight: 500;
   color: var(--ink);
   cursor: pointer;
   white-space: nowrap;
 }
+/* Markers read as miniature bars in the reference — same tone, same
+   height. Ours were a light grey that popped forward instead. */
 .diamond {
-  width: 15px; height: 15px;
+  width: 17px; height: 17px;
   flex: none;
-  border-radius: 3px;
-  background: var(--marker);
+  border-radius: 4px;
+  background: var(--bar-soft);
   transform: rotate(45deg);
 }
 .pin {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 11px; height: 36px;
-  border-radius: 6px;
-  background: var(--marker);
+  width: 15px; height: var(--bar-h);
+  border-radius: 8px;
+  background: var(--bar-soft);
 }
-.pin.on { background: var(--ink); }
+.pin.on { background: var(--bar-strong); }
 
 /* ── list view ──
    Not a fallback. A timeline is a picture: unreadable to a screen
-   reader, and cramped at 360px. Same data as rows, plus the drift
+   reader and cramped at 360px. Same data as rows, plus the drift
    number the chart cannot show. */
-.list { margin: 0; padding: 4px 14px 20px; list-style: none; overflow-y: auto; flex: 1; }
+.listwrap { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
+.list { margin: 0; padding: 0; list-style: none; }
 .list li {
   padding: 12px 13px;
   margin-bottom: 7px;
   border: 1px solid var(--glass-line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--glass-in);
 }
 .list-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
-.list-name { font-size: 14.5px; font-weight: 600; letter-spacing: -0.02em; }
-.list-days { font-size: 11.5px; color: var(--ink-2); white-space: nowrap; }
-.list-dates { font-size: 12px; color: var(--ink-2); margin-top: 2px; }
-.meter { margin-top: 9px; height: 4px; border-radius: 2px; background: var(--bar-soft); overflow: hidden; }
-.meter span { display: block; height: 100%; border-radius: 2px; background: var(--now); }
+.list-name { font-size: .9rem; font-weight: 600; letter-spacing: -0.015em; }
+.list-days { font-size: .72rem; color: var(--ink-2); white-space: nowrap; }
+.list-dates { font-size: .75rem; color: var(--ink-2); margin-top: 2px; }
+.meter { margin-top: 9px; height: 4px; border-radius: 2px; background: var(--glass-in-2); overflow: hidden; }
+.meter span { display: block; height: 100%; border-radius: 2px; background: var(--ink-2); }
 /* State is never colour alone — every state also carries a word. */
-.state { font-size: 11.5px; color: var(--ink-2); margin-top: 7px; }
+.state { font-size: .72rem; color: var(--ink-2); margin-top: 7px; }
 .state b { font-weight: 600; color: var(--ink); }
 
 /* ── floating action ──
-   Same slot as the reference's assistant button. On a timeline the
-   thing you always want is to get back to today. */
+   The reference's assistant button sits here, and its blue ring is the
+   one place it spends an accent. On a timeline the thing you always
+   want is to get back to today. */
 .fab {
   position: absolute;
   right: 14px;
-  bottom: calc(14px + var(--nav-h, 0px));
+  bottom: calc(14px + var(--nav-h));
   z-index: 6;
   display: inline-flex;
   align-items: center;
   gap: 7px;
   height: var(--hit);
   padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 60%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
   border-radius: 22px;
   background: var(--glass);
   -webkit-backdrop-filter: blur(20px);
-  backdrop-filter: blur(20px);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 16%, transparent);
+          backdrop-filter: blur(20px);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--ink);
   font: inherit;
-  font-size: 13.5px;
+  font-size: .84rem;
   font-weight: 600;
   cursor: pointer;
 }
@@ -551,7 +605,7 @@ body {
   display: flex;
   gap: 4px;
   padding: 6px 8px;
-  border-top: 1px solid var(--glass-line);
+  border-top: 1px solid var(--rule);
 }
 .nav button {
   flex: 1;
@@ -564,19 +618,12 @@ body {
   background: none;
   color: var(--ink-3);
   font: inherit;
-  font-size: 10.5px;
+  font-size: .66rem;
   font-weight: 500;
   cursor: pointer;
 }
 .nav button[aria-current="page"] { color: var(--ink); background: var(--glass-in); }
 .nav svg { width: 18px; height: 18px; }
-
-@media (min-width: 720px) {
-  .rail { display: flex; }
-  .nav  { display: none; }
-  .app  { margin: 16px; min-height: calc(100dvh - 32px); }
-  .plot { min-width: 0; }
-}
 
 .placeholder {
   flex: 1;
@@ -585,7 +632,30 @@ body {
   padding: 50px 24px;
   text-align: center;
   color: var(--ink-2);
-  font-size: 14px;
+  font-size: .875rem;
+}
+
+/* At phone width the title, the view toggle and the span will not share
+   a line — the title wrapped to two and the search lost its placeholder
+   to the two buttons beside it. Title takes its own row; the theme
+   button drops to its icon, which already carries the accessible name. */
+@media (max-width: 520px) {
+  .head { flex-wrap: wrap; row-gap: 8px; padding-bottom: 6px; }
+  .head h1 { flex: 1 0 100%; }
+  #themeLabel { display: none; }
+  .btn-ghost { padding: 0 11px; }
+}
+
+@media (min-width: 720px) {
+  .rail { display: flex; }
+  .nav  { display: none; }
+  :root, :root[data-resolved="light"] { --nav-h: 0px; }
+  .app {
+    margin: clamp(28px, 7vh, 84px) clamp(40px, 10vw, 170px);
+    min-height: 0;
+    height: calc(100dvh - 2 * clamp(28px, 7vh, 84px));
+  }
+  .plot { min-width: 0; }
 }
 </style>
 </head>
@@ -595,8 +665,7 @@ body {
 
 <div class="app">
 
-  <!-- ── icon rail ── -->
-  <nav class="rail" aria-label="Sections">
+  <nav class="rail" aria-label="Sections, sidebar">
     <span class="rail-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
            stroke-linecap="round" width="17" height="17">
@@ -611,26 +680,21 @@ body {
     </button>
     <button type="button" data-view="board" aria-current="page" aria-label="Board">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true">
-        <path d="M4 7h9M4 12h15M4 17h6" />
-      </svg>
+           stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M4 12h15M4 17h6" /></svg>
     </button>
     <button type="button" data-view="past" aria-label="Past">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true">
-        <path d="M4 5v14M9 5v14M14 5v14M19 5v14" />
-      </svg>
+           stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M9 5v14M14 5v14M19 5v14" /></svg>
     </button>
     <span class="spacer"></span>
     <button type="button" id="themeRail" aria-label="Theme: System">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true"><path d="" /></svg>
+           stroke-linecap="round" aria-hidden="true"></svg>
     </button>
   </nav>
 
   <div class="main">
 
-    <!-- ── top bar ── -->
     <div class="topbar">
       <div class="search">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
@@ -638,59 +702,64 @@ body {
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" />
         </svg>
         <label class="sr" for="q">Search projects</label>
-        <input id="q" type="search" placeholder="Search projects" />
+        <input id="q" type="search" placeholder="Search projects" autocomplete="off" />
       </div>
 
-      <button class="btn btn-ghost" type="button" id="themeBtn" aria-live="polite">
+      <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Theme: System">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
-             stroke-linecap="round" aria-hidden="true" id="themeIcon"><path d="" /></svg>
+             stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
         <span id="themeLabel">System</span>
       </button>
 
-      <button class="btn btn-primary" type="button">
+      <button class="btn btn-primary" type="button" id="newBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
              stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
         New
       </button>
     </div>
 
-    <!-- ── section head ── -->
-    <div class="head">
-      <h1>Workflow plan</h1>
-      <div class="seg" role="tablist" aria-label="How to show the plan">
-        <button type="button" role="tab" id="tabBoard" aria-selected="true"  aria-controls="board">Board</button>
-        <button type="button" role="tab" id="tabList"  aria-selected="false" aria-controls="list">List</button>
+    <main class="main" id="mainCol">
+      <div class="head">
+        <h1 id="planTitle">Workflow plan</h1>
+        <div class="seg" role="tablist" aria-label="How to show the plan">
+          <button type="button" role="tab" id="tabBoard" aria-selected="true"
+                  aria-controls="boardPanel">Board</button>
+          <button type="button" role="tab" id="tabList" aria-selected="false"
+                  tabindex="-1" aria-controls="listPanel">List</button>
+        </div>
+        <span class="grow"></span>
+        <span class="span-meta" id="span"></span>
       </div>
-      <span class="grow"></span>
-      <span class="span-meta" id="span">3,5 month</span>
-    </div>
 
-    <!-- ── board ── -->
-    <div class="scroller" id="board" role="tabpanel" aria-labelledby="tabBoard">
-      <div class="plot" id="plot">
-        <div class="axis" id="axis"></div>
-        <div class="rows" id="rows"></div>
+      <div class="scroller" id="boardPanel" role="tabpanel" aria-labelledby="tabBoard" tabindex="0">
+        <div class="plot" id="plot" role="group">
+          <p class="sr" id="chartAlt"></p>
+          <div class="axis" id="axis"></div>
+          <div class="rows" id="rows"></div>
+        </div>
       </div>
-    </div>
 
-    <!-- ── list ── -->
-    <ul class="list" id="list" role="tabpanel" aria-labelledby="tabList" hidden></ul>
+      <div class="listwrap" id="listPanel" role="tabpanel" aria-labelledby="tabList" tabindex="0" hidden>
+        <ul class="list" id="list"></ul>
+      </div>
 
-    <!-- ── phone nav ── -->
-    <nav class="nav" aria-label="Sections">
-      <button type="button">
+      <div class="placeholder" id="soon" hidden></div>
+    </main>
+
+    <nav class="nav" aria-label="Sections" id="bottomNav">
+      <button type="button" data-view="vision">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
           <rect x="3" y="3" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
           <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
         </svg>
         Vision
       </button>
-      <button type="button" aria-current="page">
+      <button type="button" data-view="board" aria-current="page">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
              stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M4 12h15M4 17h6" /></svg>
         Board
       </button>
-      <button type="button">
+      <button type="button" data-view="past">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
              stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M9 5v14M14 5v14M19 5v14" /></svg>
         Past
@@ -703,6 +772,8 @@ body {
          stroke-linecap="round" aria-hidden="true"><path d="M12 3v18M5 12h14" /></svg>
     Today
   </button>
+
+  <p class="sr" role="status" id="say"></p>
 </div>
 
 <script>
@@ -712,14 +783,15 @@ body {
    Fixed sample data. Real dates, deliberately.
 
    The timeline reference's bars do not match their own day counts —
-   a "4 days" bar there is as wide as 19% of three and a half months.
-   Positions here are computed from actual dates, so a 2-day bar
-   really is 2 days wide. Everything else about the look is kept.
+   a "4 days" bar there spans ~19% of three and a half months.
+   Positions here come from actual dates, so a 2-day bar is 2 days
+   wide. That is the one deliberate deviation; everything it costs
+   (labels that no longer fit inside short bars) is handled below.
    ═══════════════════════════════════════════════════════════════ */
 
-const START = new Date(2026, 1, 15);   // Feb 15
-const END   = new Date(2026, 3, 30);   // Apr 30
-const TODAY = new Date(2026, 2, 7);    // Mar 7 — fixed so the view is stable
+const START = new Date(2026, 1, 15);   // 15 Feb
+const END   = new Date(2026, 3, 30);   // 30 Apr
+const TODAY = new Date(2026, 2,  7);   //  7 Mar — fixed, so the view is stable
 
 const DAY  = 86400000;
 const SPAN = Math.round((END - START) / DAY);
@@ -730,42 +802,69 @@ const days = (a, b) => Math.round((b - a) / DAY);
 const fmt  = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
 
 const BARS = [
-  { name: 'Research',          from: d(1,16), to: d(1,20), tone: 'strong',      row: 0 },
-  { name: 'Business Analysis', from: d(1,21), to: d(2,18), tone: 'soft',        row: 0 },
-  { name: 'Wireframes, proto', from: d(1,25), to: d(2, 9), tone: 'strong',      row: 1 },
-  { name: 'UI design',         from: d(2,10), to: d(2,25), tone: 'soft',        row: 1 },
-  { name: 'Development',       from: d(2,10), to: d(3,24), tone: 'accent',      row: 2 },
-  { name: 'Sync',              from: d(2, 4), to: d(2, 6), tone: 'accent-flat', row: 3, gap: true },
-  { name: 'WF Testing',        from: d(1,28), to: d(2, 4), tone: 'strong',      row: 4 },
-  { name: 'Feedback',          from: d(3,20), to: d(3,22), tone: 'strong',      row: 4 },
+  { name: 'Research',          from: d(1,16), to: d(1,20), tone: 'strong', row: 0 },
+  { name: 'Business Analysis', from: d(1,21), to: d(2,18), tone: 'soft',   row: 0 },
+  { name: 'Wireframes, proto', from: d(1,25), to: d(2, 9), tone: 'strong', row: 1 },
+  { name: 'UI design',         from: d(2,10), to: d(2,25), tone: 'soft',   row: 1 },
+  { name: 'Development',       from: d(2,10), to: d(3,24), tone: 'accent', row: 2 },
+  { name: 'Sync',              from: d(2, 4), to: d(2, 6), tone: 'accent', row: 3, gap: true },
+  { name: 'WF Testing',        from: d(1,28), to: d(2, 4), tone: 'strong', row: 4 },
+  { name: 'Feedback',          from: d(3,20), to: d(3,22), tone: 'soft',   row: 4 },
 ];
 
 const MILESTONES = [{ name: 'Dev Start', on: d(2,10) }];
-const PINS = [{ on: d(1,24) }, { on: d(3,17) }, { on: d(3,21), solid: true }];
 
-const axis = document.getElementById('axis');
-const rows = document.getElementById('rows');
-const plot = document.getElementById('plot');
-
-/* ── axis ── */
-for (let i = 0; i <= SPAN; i += 8) {
-  const t = new Date(START.getTime() + i * DAY);
-  const el = document.createElement('span');
-  el.className = 'tick';
-  el.style.left = pct(t) + '%';
-  el.textContent = fmt(t);
-  axis.appendChild(el);
-}
+const axis  = document.getElementById('axis');
+const rows  = document.getElementById('rows');
+const plot  = document.getElementById('plot');
+const board = document.getElementById('boardPanel');
+const say   = document.getElementById('say');
 
 const nowAt = pct(TODAY);
+
+/* ── axis ──
+   Ticks near the Now pill are dropped rather than drawn underneath it.
+   The pill previously covered "11 Mar" so completely that the visible
+   remnant read as "1 Mar" — a wrong date, not just a hidden one. */
+const PILL_CLEAR = 4.2;   // % of span either side of Now to keep clear
+
+for (let i = 0; i <= SPAN; i += 8) {
+  const t = new Date(START.getTime() + i * DAY);
+  const at = pct(t);
+  if (Math.abs(at - nowAt) < PILL_CLEAR) continue;
+  const el = document.createElement('span');
+  el.className = 'tick';
+  el.style.left = at + '%';
+  /* Ticks are centred on their date, which clips the first and last
+     against the scroller edge — "15 Feb" was rendering as ".5 Feb".
+     The end ticks hang inward instead. */
+  if (at < 2)       el.style.transform = 'translateX(0)';
+  else if (at > 98) el.style.transform = 'translateX(-100%)';
+  el.textContent = fmt(t);
+  el.setAttribute('aria-hidden', 'true');   // ticks read as loose date fragments
+  axis.appendChild(el);
+}
 
 for (const [cls, text] of [['now-caret', ''], ['now-pill', 'Now']]) {
   const el = document.createElement('span');
   el.className = cls;
   el.style.left = nowAt + '%';
   el.textContent = text;
+  el.setAttribute('aria-hidden', 'true');
   axis.appendChild(el);
 }
+
+const line = document.createElement('span');
+line.className = 'now-line';
+line.style.left = nowAt + '%';
+plot.appendChild(line);
+
+/* The chart is a picture. This is the sentence that replaces it. */
+plot.setAttribute('aria-label', 'Timeline');
+document.getElementById('chartAlt').textContent =
+  `Timeline from ${fmt(START)} to ${fmt(END)} 2026. Today is ${fmt(TODAY)}. `
+  + `${BARS.length} phases. The List tab shows the same data as text.`;
+plot.setAttribute('aria-describedby', 'chartAlt');
 
 /* ── bars ── */
 const rowCount = Math.max(...BARS.map(b => b.row)) + 2;
@@ -777,7 +876,7 @@ for (let i = 0; i < rowCount; i++) {
   rowEls.push(r);
 }
 
-BARS.forEach((b) => {
+const barEls = BARS.map((b) => {
   const left  = pct(b.from);
   const width = pct(b.to) - left;
   const n     = days(b.from, b.to);
@@ -789,11 +888,11 @@ BARS.forEach((b) => {
   el.type = 'button';
   el.className = 'bar';
   el.dataset.tone = b.tone;
+  el.dataset.name = b.name.toLowerCase();
   el.style.left  = left + '%';
   el.style.width = width + '%';
+  el.setAttribute('aria-pressed', 'false');
 
-  /* One label a screen reader can use: what, how long, when, and
-     where it sits relative to today. */
   const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
   const status = TODAY < b.from ? 'not started yet'
                : TODAY > b.to   ? 'finished'
@@ -803,25 +902,19 @@ BARS.forEach((b) => {
   el.innerHTML = `<span class="label" aria-hidden="true">${b.name}</span>`
                + `<span class="badge" aria-hidden="true">${n} days</span>`;
 
-  host.appendChild(el);
-
-  /* Measured after layout: a bar too narrow to hold its own name
-     moves the name outside rather than clipping it. */
-  requestAnimationFrame(() => {
-    const w = el.getBoundingClientRect().width;
-    if (w < el.scrollWidth || w < 92) {
-      el.classList.add('narrow');
-      const out = document.createElement('span');
-      out.className = 'outside';
-      out.setAttribute('aria-hidden', 'true');
-      out.style.left = `calc(${left + width}% + 9px)`;
-      out.innerHTML = `${b.name} <em>${n}d</em>`;
-      host.appendChild(out);
-    }
+  /* Tapping a bar has to do something — a focusable button that does
+     nothing is worse than a div, because the role promises an action. */
+  el.addEventListener('click', () => {
+    barEls.forEach(o => o.setAttribute('aria-pressed', 'false'));
+    el.setAttribute('aria-pressed', 'true');
+    say.textContent = el.getAttribute('aria-label');
   });
+
+  host.appendChild(el);
+  return el;
 });
 
-/* ── milestones + pins ── */
+/* ── milestones ── */
 const last = rowEls[rowCount - 1];
 last.classList.add('gap');
 
@@ -830,31 +923,74 @@ MILESTONES.forEach((m) => {
   el.type = 'button';
   el.className = 'milestone';
   el.style.left = pct(m.on) + '%';
-  el.setAttribute('aria-label', `Milestone: ${m.name}, ${fmt(m.on)}`);
-  el.innerHTML = `<span class="diamond" aria-hidden="true"></span><span>${m.name}</span>`;
+  const label = `Milestone: ${m.name}, ${fmt(m.on)}`;
+  el.setAttribute('aria-label', label);
+  el.innerHTML = `<span class="diamond" aria-hidden="true"></span><span aria-hidden="true">${m.name}</span>`;
+  el.addEventListener('click', () => { say.textContent = label; });
   last.appendChild(el);
 });
 
-PINS.forEach((p) => {
-  const el = document.createElement('span');
-  el.className = 'pin' + (p.solid ? ' on' : '');
-  el.style.left = pct(p.on) + '%';
-  el.setAttribute('aria-hidden', 'true');
-  last.appendChild(el);
-});
+/* ── layout pass ──
+   Runs once per row, after all bars exist, because every decision here
+   depends on the neighbours: whether a caption fits, which side it goes,
+   and how far a tap target may spread before it eats the next bar. */
+function layout() {
+  rowEls.forEach((host, r) => {
+    host.querySelectorAll('.outside').forEach(n => n.remove());
 
-const line = document.createElement('span');
-line.className = 'now-line';
-line.style.left = nowAt + '%';
-plot.appendChild(line);
+    const W = host.getBoundingClientRect().width;
+    if (!W) return;
 
-document.getElementById('span').textContent =
-  (SPAN / 30).toFixed(1).replace('.', ',') + ' month';
+    const items = BARS.map((b, i) => ({ b, el: barEls[i] }))
+                      .filter(x => x.b.row === r && !x.el.hidden)
+                      .sort((p, q) => p.b.from - q.b.from);
+
+    items.forEach((it, i) => {
+      const L = pct(it.b.from) / 100 * W;
+      const R = pct(it.b.to)   / 100 * W;
+      const prevR = i > 0 ? pct(items[i-1].b.to) / 100 * W : 0;
+      const nextL = i + 1 < items.length ? pct(items[i+1].b.from) / 100 * W : W;
+
+      /* Tap target: grow toward 44px, but never past the midpoint of the
+         gap to a neighbour, so two short bars can't claim the same pixel. */
+      const room = Math.min(L - prevR, nextL - R);
+      const grow = Math.max(0, Math.min(44 - (R - L), Math.max(0, room)));
+      it.el.style.setProperty('--tap', ((R - L) + grow) + 'px');
+
+      /* Does the name fit inside the bar? Test the LABEL — the bar's own
+         scrollWidth never overflows, because .label clips itself.
+
+         Three steps down, not one. A 12-day bar has room for its name
+         but not for its name AND its day-count chip, and an all-or-
+         nothing test threw the name out of a bar it fitted in. */
+      const lab = it.el.querySelector('.label');
+      it.el.classList.remove('narrow', 'tight');
+      if (lab.scrollWidth <= lab.clientWidth) return;
+
+      it.el.classList.add('tight');            // drop the chip, keep the name
+      if (lab.scrollWidth <= lab.clientWidth) return;
+
+      it.el.classList.remove('tight');
+      it.el.classList.add('narrow');           // nothing fits — caption goes outside
+      it.el.title = `${it.b.name} — ${days(it.b.from, it.b.to)} days`;
+      const cap = document.createElement('span');
+      cap.className = 'outside';
+      cap.setAttribute('aria-hidden', 'true');
+      cap.innerHTML = `${it.b.name}<span class="badge">${days(it.b.from, it.b.to)} days</span>`;
+      host.appendChild(cap);
+
+      const capW = cap.getBoundingClientRect().width;
+      if      (R + 8 + capW <= nextL - 4) cap.style.left = (R + 8) + 'px';
+      else if (L - 8 - capW >= prevR + 4) cap.style.left = (L - 8 - capW) + 'px';
+      else cap.remove();          // no room either side — the List tab has the words
+    });
+  });
+}
 
 /* ── list view ── */
 const list = document.getElementById('list');
 
-[...BARS].sort((a, b) => a.from - b.from).forEach((b) => {
+const listEls = [...BARS].sort((a, b) => a.from - b.from).map((b) => {
   const n = days(b.from, b.to);
   const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
   const through = Math.round((elapsed / n) * 100);
@@ -863,6 +999,7 @@ const list = document.getElementById('list');
               : `Day <b>${elapsed}</b> of ${n} · ${n - elapsed} left`;
 
   const li = document.createElement('li');
+  li.dataset.name = b.name.toLowerCase();
   li.innerHTML =
     `<div class="list-top">
        <span class="list-name">${b.name}</span>
@@ -872,70 +1009,148 @@ const list = document.getElementById('list');
      <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
      <div class="state">${state}</div>`;
   list.appendChild(li);
+  return li;
 });
 
-/* ── tabs ── */
+/* ── search ── */
+document.getElementById('q').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  barEls .forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
+  listEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
+  layout();
+  say.textContent = q
+    ? `${barEls.filter(el => !el.hidden).length} of ${BARS.length} phases match ${q}.`
+    : 'Showing all phases.';
+});
+
+/* ── tabs ──
+   Roving tabindex plus arrow keys, per the APG tab pattern. Both panels
+   are focusable so the scroll regions are reachable without a mouse. */
 const tabBoard = document.getElementById('tabBoard');
 const tabList  = document.getElementById('tabList');
-const board    = document.getElementById('board');
+const listPanel = document.getElementById('listPanel');
+const todayBtn  = document.getElementById('todayBtn');
 
 function show(isBoard) {
   tabBoard.setAttribute('aria-selected', String(isBoard));
   tabList .setAttribute('aria-selected', String(!isBoard));
+  tabBoard.tabIndex = isBoard ? 0 : -1;
+  tabList .tabIndex = isBoard ? -1 : 0;
   board.hidden = !isBoard;
-  list.hidden  = isBoard;
-  document.getElementById('todayBtn').hidden = !isBoard;
+  listPanel.hidden = isBoard;
+  todayBtn.hidden = !isBoard;
+  if (isBoard) layout();
 }
 tabBoard.addEventListener('click', () => show(true));
 tabList .addEventListener('click', () => show(false));
 
+[tabBoard, tabList].forEach((t) => {
+  t.addEventListener('keydown', (e) => {
+    if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
+    e.preventDefault();
+    const next = (e.key === 'Home') ? tabBoard
+               : (e.key === 'End')  ? tabList
+               : (t === tabBoard ? tabList : tabBoard);
+    show(next === tabBoard);
+    next.focus();
+  });
+});
+
+/* ── sections ── */
+const soon = document.getElementById('soon');
+const COPY = {
+  vision: 'Vision — tiles for what you are building toward, no dates required. Not built yet.',
+  past:   'Past — finished projects as stripes, a year at a glance. Not built yet.',
+};
+
+function goto(view) {
+  const isBoard = view === 'board';
+  document.querySelectorAll('[data-view]').forEach((b) => {
+    if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+  document.querySelector('.head').hidden = !isBoard;
+  soon.hidden = isBoard;
+  soon.textContent = isBoard ? '' : COPY[view];
+  if (isBoard) show(tabBoard.getAttribute('aria-selected') === 'true');
+  else { board.hidden = true; listPanel.hidden = true; todayBtn.hidden = true; }
+  say.textContent = isBoard ? 'Board.' : COPY[view];
+}
+document.querySelectorAll('[data-view]').forEach((b) => {
+  b.addEventListener('click', () => goto(b.dataset.view));
+});
+
+document.getElementById('newBtn').addEventListener('click', () => {
+  say.textContent = 'Adding projects is not in this prototype yet.';
+});
+
 /* ── theme ──
-   Three states, not two: System follows the phone, and the two
-   explicit choices override it. Stored so it survives a reload. */
+   Three states, not two: System follows the phone, and the two explicit
+   choices override it. Stored so it survives a reload. */
 const KEY = 'arc.theme';
 const MODES = ['system', 'light', 'dark'];
 const LABEL = { system: 'System', light: 'Light', dark: 'Dark' };
-const SUN = 'M12 3v1.6M12 19.4V21M4.6 12H3M21 12h-1.6M6.3 6.3 5.2 5.2'
-          + 'M18.8 18.8l-1.1-1.1M17.7 6.3l1.1-1.1M5.2 18.8l1.1-1.1'
-          + 'M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z';
 const ICON = {
   system: 'M4 5.5h16v10H4zM9 20h6M12 15.5V20',
-  light:  SUN,
+  light:  'M12 3v1.6M12 19.4V21M4.6 12H3M21 12h-1.6M6.3 6.3 5.2 5.2M18.8 18.8l-1.1-1.1'
+        + 'M17.7 6.3l1.1-1.1M5.2 18.8l1.1-1.1M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z',
   dark:   'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
 };
 
 const media = window.matchMedia('(prefers-color-scheme: dark)');
+const themeBtn  = document.getElementById('themeBtn');
+const themeRail = document.getElementById('themeRail');
 let mode = localStorage.getItem(KEY) || 'system';
 
 function paint() {
   const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
   document.documentElement.dataset.resolved = resolved;
-  document.getElementById('themeLabel').textContent = LABEL[mode];
   const path = `<path d="${ICON[mode]}" />`;
+  document.getElementById('themeLabel').textContent = LABEL[mode];
   document.getElementById('themeIcon').innerHTML = path;
-  const rail = document.getElementById('themeRail');
-  rail.querySelector('svg').innerHTML = path;
-  rail.setAttribute('aria-label', `Theme: ${LABEL[mode]}`);
+  themeRail.querySelector('svg').innerHTML = path;
+  /* The visible label already says which mode it is; the button needs a
+     name that says WHAT it is. aria-live on the control itself made
+     screen readers announce the name change twice, or not at all. */
+  themeBtn .setAttribute('aria-label', `Theme: ${LABEL[mode]}`);
+  themeRail.setAttribute('aria-label', `Theme: ${LABEL[mode]}`);
 }
 
 function cycle() {
   mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
   localStorage.setItem(KEY, mode);
   paint();
+  say.textContent = `Theme: ${LABEL[mode]}.`;
 }
-document.getElementById('themeBtn').addEventListener('click', cycle);
-document.getElementById('themeRail').addEventListener('click', cycle);
+themeBtn .addEventListener('click', cycle);
+themeRail.addEventListener('click', cycle);
 media.addEventListener('change', () => { if (mode === 'system') paint(); });
 paint();
 
-/* ── today ── */
+/* ── today ──
+   The CSS scroll-behavior override does not govern the JS behavior
+   option, so reduced-motion has to be checked here too. */
+const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
 function toToday(smooth) {
   const x = (nowAt / 100) * plot.offsetWidth;
   board.scrollTo({ left: Math.max(0, x - board.clientWidth * 0.35),
-                   behavior: smooth ? 'smooth' : 'auto' });
+                   behavior: (smooth && !RM.matches) ? 'smooth' : 'auto' });
 }
-document.getElementById('todayBtn').addEventListener('click', () => toToday(true));
-requestAnimationFrame(() => toToday(false));
+todayBtn.addEventListener('click', () => { toToday(true); say.textContent = 'Scrolled to today.'; });
+
+/* ── span label ── */
+const months = SPAN / 30;
+document.getElementById('span').textContent =
+  `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
+
+/* ── go ── */
+const nav = document.getElementById('bottomNav');
+new ResizeObserver(() => {
+  document.documentElement.style.setProperty('--nav-h', (nav.offsetHeight || 0) + 'px');
+}).observe(nav);
+
+requestAnimationFrame(() => { layout(); toToday(false); });
+window.addEventListener('resize', layout);
 </script>
 </body>
 </html>
