@@ -11,6 +11,7 @@
 (function () {
 
   const D   = window.RITUAL_DATA;
+  const P   = window.RITUAL_PHOTOS;
   const KEY = 'ritual.v1';
   const $   = (s, r = document) => r.querySelector(s);
 
@@ -68,12 +69,35 @@
   };
   const shiftDay = (n) => { const d = new Date(); d.setDate(d.getDate() + n); return dayKey(d); };
 
+  /* Parse a YYYY-MM-DD key back to a local Date. Deliberately not
+     new Date(str) — that parses as UTC and lands on the wrong day west of
+     Greenwich, which is exactly where this is being used. */
+  function dateOf(key) {
+    const [y, m, d] = key.split('-').map(Number);
+    return new Date(y, m - 1, d);
+  }
+  function stepDay(key, n) {
+    const d = dateOf(key);
+    d.setDate(d.getDate() + n);
+    return dayKey(d);
+  }
+
+  /* ── which day is on screen ──
+     The log has always been keyed by date and has always held history;
+     there was simply never a way to look at any of it, and no way to fix a
+     day you forgot to tick. */
+  let viewDay = dayKey();
+  const isToday = () => viewDay === dayKey();
+
   function entry(key) {
     if (!state.log[key]) state.log[key] = { blocks: [], habits: [] };
     return state.log[key];
   }
   const didHabit = (id, key) => !!(state.log[key] && state.log[key].habits.includes(id));
-  const didBlock = (k)       => !!(state.log[dayKey()] && state.log[dayKey()].blocks.includes(k));
+  const didBlock = (k, day)  => {
+    const d = day || viewDay;
+    return !!(state.log[d] && state.log[d].blocks.includes(k));
+  };
 
   /* ── clock ──
      Minutes since midnight, pushed past 1440 in the small hours so a
@@ -336,67 +360,112 @@
     return blocks.find((b) => n >= b.start && n < b.end) || null;
   }
 
+  const DAY_LONG = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const MONTHS   = ['January','February','March','April','May','June','July',
+                    'August','September','October','November','December'];
+
+  const CAM_ICON =
+    '<svg viewBox="0 0 24 24" aria-hidden="true">' +
+      '<path d="M3 8.5h3.2l1.4-2h7.8l1.4 2H21v10H3z"/>' +
+      '<circle cx="12" cy="13" r="3.4"/>' +
+    '</svg>';
+
+  /* The timeline for the day being viewed. A past day is rebuilt from that
+     date's weekday, which the per-weekday shift work already supports. */
+  let pastBlocks = null, pastBlocksFor = '';
+  function dayBlocks() {
+    if (isToday()) return blocks;
+    if (pastBlocksFor !== viewDay) {
+      pastBlocksFor = viewDay;
+      pastBlocks = D.buildRoutine(state.profile, dateOf(viewDay).getDay());
+    }
+    return pastBlocks;
+  }
+
   function renderToday() {
     rebuildIfNewDay();
-    const now = nowMin();
-    const cur = currentBlock();
-    const d   = new Date();
-    const today = dayKey();
+    const live  = isToday();
+    const now   = nowMin();
+    const cur   = live ? currentBlock() : null;
+    const d     = dateOf(viewDay);
+    const bl    = dayBlocks();
 
-    /* header */
-    const days   = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    $('#heroDate').textContent = days[d.getDay()] + ' · ' + d.getDate() + ' ' + months[d.getMonth()];
+    $('#view-today').classList.toggle('viewing-past', !live);
 
-    const hr = d.getHours();
-    const greet = hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
-    $('#heroGreet').innerHTML = greet + ',<br><em>' + escapeHtml(state.profile.name || 'you') + '</em>';
-    $('#heroClock').textContent = fmtTime(d.getHours() * 60 + d.getMinutes());
-    $('#heroNow').textContent = cur ? cur.title : 'Open time';
+    /* header. Anything that only means something *now* — the clock, the
+       current block, the progress bar — is hidden on a past day rather than
+       shown with today's values against yesterday's timeline. */
+    $('#heroDate').textContent = DAY_LONG[d.getDay()] + ' · ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
 
-    /* day progress, wake → sleep */
-    const wake = D.toMin(state.profile.wake);
-    let sleep  = D.toMin(state.profile.sleep);
-    if (sleep <= wake) sleep += 1440;
-    const pct = Math.max(0, Math.min(100, ((now - wake) / (sleep - wake)) * 100));
-    $('#dayFill').style.width = pct.toFixed(1) + '%';
-    $('#dayPct').textContent  = Math.round(pct) + '% of the day';
-    const left = Math.max(0, sleep - now);
-    $('#dayLeft').textContent = left > 60
-      ? Math.floor(left / 60) + 'h ' + (left % 60) + 'm left'
-      : left + 'm left';
+    if (live) {
+      const hr = d.getHours();
+      const greet = hr < 5 ? 'Still up' : hr < 12 ? 'Good morning' : hr < 17 ? 'Good afternoon' : 'Good evening';
+      $('#heroGreet').innerHTML = greet + ',<br><em>' + escapeHtml(state.profile.name || 'you') + '</em>';
+      $('#heroClock').textContent = fmtTime(d.getHours() * 60 + d.getMinutes());
+      $('#heroNow').textContent = cur ? cur.title : 'Open time';
+
+      /* day progress, wake → sleep */
+      const wake = D.toMin(state.profile.wake);
+      let sleep  = D.toMin(state.profile.sleep);
+      if (sleep <= wake) sleep += 1440;
+      const pct = Math.max(0, Math.min(100, ((now - wake) / (sleep - wake)) * 100));
+      $('#dayFill').style.width = pct.toFixed(1) + '%';
+      $('#dayPct').textContent  = Math.round(pct) + '% of the day';
+      const left = Math.max(0, sleep - now);
+      $('#dayLeft').textContent = left > 60
+        ? Math.floor(left / 60) + 'h ' + (left % 60) + 'm left'
+        : left + 'm left';
+    } else {
+      $('#heroGreet').innerHTML =
+        DAY_LONG[d.getDay()] + ',<br><em>' + d.getDate() + ' ' + MONTHS[d.getMonth()] + '</em>';
+    }
+
+    $('#dayLabel').textContent = live ? 'tap to complete' : 'looking back';
+    $('#dayNext').disabled = live;
 
     /* phase pills */
     const phases = [];
-    blocks.forEach((b) => { if (!phases.includes(b.phase)) phases.push(b.phase); });
+    bl.forEach((b) => { if (!phases.includes(b.phase)) phases.push(b.phase); });
     $('#phases').innerHTML = phases.map((p) => {
-      const bs = blocks.filter((b) => b.phase === p);
-      const isNow  = cur && cur.phase === p;
-      const isPast = bs.every((b) => now >= b.end);
+      const bs = bl.filter((b) => b.phase === p);
+      const isNow  = live && cur && cur.phase === p;
+      const isPast = !live || bs.every((b) => now >= b.end);
       return '<div class="phase ' + (isNow ? 'now' : isPast ? 'done' : '') + '">' + escapeHtml(p) + '</div>';
     }).join('');
 
     /* stats */
-    const doneToday   = blocks.filter((b) => didBlock(b.key)).length;
+    const doneToday   = bl.filter((b) => didBlock(b.key)).length;
     const needleIds   = state.habits.filter((h) => h.needle).map((h) => h.id);
-    const needleDone  = needleIds.filter((id) => didHabit(id, today)).length;
+    const needleDone  = needleIds.filter((id) => didHabit(id, viewDay)).length;
     const best        = state.habits.reduce((m, h) => Math.max(m, streak(h.id)), 0);
-    $('#statBlocks').innerHTML = doneToday + '<small>/' + blocks.length + '</small>';
+    $('#statBlocks').innerHTML = doneToday + '<small>/' + bl.length + '</small>';
     $('#statNeedle').innerHTML = needleDone + '<small>/' + needleIds.length + '</small>';
     $('#statStreak').textContent = best;
 
     /* timeline */
     let html = '';
-    let seamPlaced = false;
-    blocks.forEach((b) => {
+    let seamPlaced = !live;                 // no "now" marker on a past day
+    bl.forEach((b) => {
       if (!seamPlaced && now < b.start) {
         html += seam();
         seamPlaced = true;
       }
-      const done = didBlock(b.key);
-      const isNow = cur && cur.key === b.key;
-      const past  = now >= b.end;
+      const done  = didBlock(b.key);
+      const isNow = live && cur && cur.key === b.key;
+      const past  = !live || now >= b.end;
       const tags  = state.habits.filter((h) => h.anchor === b.key);
+      const wants = tags.length > 0;        // a block carrying a habit wants proof
+      const shot  = wants ? P.url(viewDay, b.key) : null;
+
+      /* Three states, and they must stay tellable apart: proven, done but
+         unproven, and not done yet. */
+      const tail = shot
+        ? '<div class="block-check">✓</div>'
+        : done
+          ? '<div class="block-check' + (wants ? ' unverified' : '') + '">✓</div>'
+          : wants
+            ? '<div class="block-cam">' + CAM_ICON + '</div>'
+            : '<div class="block-check">✓</div>';
 
       html +=
         '<button class="block ' + (isNow ? 'now ' : '') + (past && !done ? 'past ' : '') + (done ? 'done' : '') + '" ' +
@@ -410,8 +479,9 @@
                   '<span class="tag' + (h.needle ? ' needle' : '') + '">' + escapeHtml(h.name) + '</span>').join('') +
                 '</div>'
               : '') +
+            (shot ? '<div class="block-shot"><img src="' + shot + '" alt="" /></div>' : '') +
           '</div>' +
-          '<div class="block-check">✓</div>' +
+          tail +
         '</button>';
     });
     if (!seamPlaced) html += seam();
@@ -441,7 +511,12 @@
       const s  = streak(h.id);
       const dom = D.DOMAINS[h.domain] || { label: h.domain };
       const lit = spotClass(h.domain);
-      return '<button class="habit' + (on ? ' done' : '') + lit + '" data-habit="' + h.id + '" ' +
+      /* The habit's own block, if it has one — trading does not, which is
+         exactly why the camera also lives here. */
+      const anchor = h.anchor || ('habit:' + h.id);
+      const shot   = P.has(today, anchor);
+      return '<div class="habit-cell">' +
+        '<button class="habit' + (on ? ' done' : '') + lit + '" data-habit="' + h.id + '" ' +
               'data-domain="' + h.domain + '" aria-pressed="' + on + '">' +
         '<div class="habit-top">' +
           '<div class="habit-id">' +
@@ -457,7 +532,12 @@
         '<div class="week">' + weekHits(h.id).map((w) =>
           '<div class="week-pip' + (w.hit ? ' hit' : '') + (w.today ? ' today' : '') + '"></div>').join('') +
         '</div>' +
-      '</button>';
+      '</button>' +
+      '<button class="habit-cam' + (shot ? ' shot' : '') + '" data-cam="' + escapeHtml(anchor) + '" ' +
+              'aria-label="' + (shot ? 'See the photo for ' : 'Photograph ') + escapeHtml(h.name) + '">' +
+        CAM_ICON +
+      '</button>' +
+      '</div>';
     }).join('');
   }
 
@@ -673,7 +753,7 @@
 
   function toggleBlock(key) {
     const before = levelSnapshot();
-    const e = entry(dayKey());
+    const e = entry(viewDay);
     const i = e.blocks.indexOf(key);
     if (i > -1) e.blocks.splice(i, 1); else e.blocks.push(key);
 
@@ -691,6 +771,21 @@
     announce(i > -1 ? 'Unmarked' : 'Done', before, levelSnapshot());
   }
 
+  /* Set a block done, rather than flipping it — a photo is evidence it
+     happened, so it can only ever mean done. */
+  function markBlockDone(key, day) {
+    const e = entry(day);
+    if (e.blocks.indexOf(key) === -1) e.blocks.push(key);
+    state.habits.filter((h) => h.anchor === key).forEach((h) => {
+      if (e.habits.indexOf(h.id) === -1) e.habits.push(h.id);
+    });
+  }
+
+  function markHabitDone(hid, day) {
+    const e = entry(day);
+    if (e.habits.indexOf(hid) === -1) e.habits.push(hid);
+  }
+
   function toggleHabit(id) {
     /* acting on a habit means you have arrived — drop the arrival highlight */
     clearSpotlight();
@@ -702,6 +797,133 @@
     renderHabits(); renderToday(); renderGoals(); renderReward();
     /* stays silent on an ordinary tap, speaks only on a level crossing */
     announce('', before, levelSnapshot());
+  }
+
+  /* ═══════════════════════════════════════════
+     PHOTO EVIDENCE
+     ═══════════════════════════════════════════
+     A photo is proof, so it can only ever mean "done" — it sets completion
+     rather than toggling it. Removing the photo is the inverse and clears
+     the completion with it. Ticking on the Habits tab still works and
+     records the same completion *without* proof, which the timeline then
+     shows as unverified; that is the escape hatch for the day you genuinely
+     trained and had no phone. */
+
+  const HABIT_PREFIX = 'habit:';
+
+  const blockTitle = (key) => {
+    const b = dayBlocks().find((x) => x.key === key);
+    return b ? b.title : key;
+  };
+
+  /* Which days must stay warm: the timeline's day, and today for the
+     Habits tab, which always shows today regardless of the timeline. */
+  const warmDays = () => [viewDay, dayKey()];
+
+  let shotFor = null;                 // { day, key } awaiting a file
+
+  function openCamera(day, key) {
+    if (!P.supported) { toast('Photos are not available here'); return; }
+    shotFor = { day: day, key: key };
+    const input = $('#shotInput');
+    input.value = '';                 // so re-taking the same shot still fires
+    input.click();
+  }
+
+  function onShotChosen(ev) {
+    const file = ev.target.files && ev.target.files[0];
+    ev.target.value = '';
+    if (!file || !shotFor) return;
+    const t = shotFor;
+    shotFor = null;
+
+    toast('Saving…');
+    P.put(t.day, t.key, file).then(() => {
+      const before = levelSnapshot();
+      if (t.key.indexOf(HABIT_PREFIX) === 0) markHabitDone(t.key.slice(HABIT_PREFIX.length), t.day);
+      else markBlockDone(t.key, t.day);
+      save();
+      renderToday(); renderHabits(); renderGoals(); renderReward();
+      announce('Logged', before, levelSnapshot());
+    }).catch((err) => {
+      /* Say which of the two it was — "something went wrong" is useless when
+         one is fixable by freeing space and the other never will be. */
+      toast(/unreadable|encode/.test(String(err && err.message))
+        ? 'That photo could not be read'
+        : 'Could not save — storage may be full');
+    });
+  }
+
+  /* ── viewer ── */
+  let viewing = null;
+
+  function openViewer(day, key) {
+    const url = P.url(day, key);
+    if (!url) return;
+    const row = P.peek(day, key);
+    viewing = { day: day, key: key };
+
+    $('#viewerImg').src = url;
+    $('#viewerTitle').textContent = key.indexOf(HABIT_PREFIX) === 0
+      ? habitName(key.slice(HABIT_PREFIX.length))
+      : blockTitle(key);
+
+    const d = dateOf(day);
+    const at = row && row.at ? new Date(row.at) : null;
+    /* abbreviated — the overline's letter-spacing wraps a full date onto two
+       lines and pushes the title off the bar */
+    $('#viewerWhen').textContent =
+      DAY_LONG[d.getDay()].slice(0, 3) + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()].slice(0, 3) +
+      (at ? ' · ' + fmtTime(at.getHours() * 60 + at.getMinutes()) : '');
+
+    $('#viewer').hidden = false;
+  }
+
+  function closeViewer() {
+    $('#viewer').hidden = true;
+    /* drop the decoded image rather than leaving it held by the element */
+    $('#viewerImg').removeAttribute('src');
+    viewing = null;
+  }
+
+  const habitName = (hid) => {
+    const h = state.habits.find((x) => x.id === hid);
+    return h ? h.name : 'Photo';
+  };
+
+  function removeShot() {
+    if (!viewing) return;
+    const t = viewing;
+    closeViewer();
+    P.del(t.day, t.key).then(() => {
+      const e = entry(t.day);
+      if (t.key.indexOf(HABIT_PREFIX) === 0) {
+        const hid = t.key.slice(HABIT_PREFIX.length);
+        const j = e.habits.indexOf(hid);
+        if (j > -1) e.habits.splice(j, 1);
+      } else {
+        const i = e.blocks.indexOf(t.key);
+        if (i > -1) e.blocks.splice(i, 1);
+        state.habits.filter((h) => h.anchor === t.key).forEach((h) => {
+          const j = e.habits.indexOf(h.id);
+          if (j > -1) e.habits.splice(j, 1);
+        });
+      }
+      save();
+      renderToday(); renderHabits(); renderGoals(); renderReward();
+      toast('Removed');
+    }).catch(() => toast('Could not remove that photo'));
+  }
+
+  /* ── the day pager ── */
+  function goDay(n) {
+    /* YYYY-MM-DD compares correctly as a string, and the future is not
+       something you can have done yet. */
+    const next = stepDay(viewDay, n);
+    if (next > dayKey()) return;
+    viewDay = next;
+    P.releaseExcept(warmDays());
+    P.warm(viewDay).then(() => { renderToday(); renderHabits(); });
   }
 
   /* ── views ── */
@@ -807,8 +1029,37 @@
       return followDomain(view, domain);
     }
 
+    /* the viewer sits over everything — resolve its buttons before anything
+       underneath gets a look at the tap */
+    if (ev.target.closest('#viewerClose'))  return closeViewer();
+    if (ev.target.closest('#viewerRemove')) return removeShot();
+    if (ev.target.closest('#viewerRetake')) {
+      const t = viewing; closeViewer();
+      if (t) openCamera(t.day, t.key);
+      return;
+    }
+
+    if (ev.target.closest('#dayPrev')) return goDay(-1);
+    if (ev.target.closest('#dayNext')) return goDay(1);
+
+    /* the camera on a habit card — a sibling of the card, never a child of
+       it, so this cannot also toggle the card underneath */
+    const cam = ev.target.closest('[data-cam]');
+    if (cam) {
+      const key = cam.dataset.cam;
+      const today = dayKey();
+      return P.has(today, key) ? openViewer(today, key) : openCamera(today, key);
+    }
+
     const block = ev.target.closest('[data-block]');
-    if (block) return toggleBlock(block.dataset.block);
+    if (block) {
+      const key = block.dataset.block;
+      /* a block carrying a habit wants proof; everything else just ticks */
+      if (state.habits.some((h) => h.anchor === key)) {
+        return P.has(viewDay, key) ? openViewer(viewDay, key) : openCamera(viewDay, key);
+      }
+      return toggleBlock(key);
+    }
 
     const habit = ev.target.closest('[data-habit]');
     if (habit) return toggleHabit(habit.dataset.habit);
@@ -821,8 +1072,17 @@
   });
 
   document.addEventListener('keydown', (ev) => {
-    if (ev.key === 'Escape') closeSetup();
+    if (ev.key !== 'Escape') return;
+    if (viewing) return closeViewer();
+    closeSetup();
   });
+
+  $('#shotInput').addEventListener('change', onShotChosen);
+
+  /* Photos are read once into memory up front, because renderToday() is
+     synchronous and runs on a timer while IndexedDB is not. */
+  P.persist();
+  P.warm(dayKey()).then(() => { renderToday(); renderHabits(); });
 
   renderAll();
   show('today');

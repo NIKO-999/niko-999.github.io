@@ -17,7 +17,7 @@
  * keeps being served.
  */
 
-const VERSION = 'ritual-v1';
+const VERSION = 'ritual-v2';
 
 /* Everything needed to draw the app with the network switched off. The
    icons live outside this worker's scope (../icons/) so they cannot be
@@ -30,6 +30,7 @@ const SHELL = [
   './fonts.css',
   './data.js',
   './creatures.js',
+  './photos.js',
   './app.js',
   './manifest.json',
   './fonts/Inter-300.woff2',

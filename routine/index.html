@@ -179,7 +179,12 @@
 
       <div class="section-head">
         <div class="section-title">The day</div>
-        <div class="section-note">tap to complete</div>
+        <!-- doubles as the day pager: ‹ steps back, › never goes past today -->
+        <div class="daynav">
+          <button class="daynav-b" id="dayPrev" aria-label="Previous day">‹</button>
+          <span class="section-note" id="dayLabel">tap to complete</span>
+          <button class="daynav-b" id="dayNext" aria-label="Next day">›</button>
+        </div>
       </div>
       <div class="timeline" id="timeline"></div>
     </section>
@@ -349,10 +354,35 @@
   </div>
 </div>
 
+<!-- ── camera ──
+     capture="environment" opens straight to the camera rather than the photo
+     library, which is the whole point: evidence has to be taken now, not
+     picked from something shot months ago. Kept out of the timeline markup
+     because a file input inside a <button> is not valid. -->
+<input type="file" id="shotInput" accept="image/*" capture="environment"
+       hidden aria-hidden="true" tabindex="-1" />
+
+<!-- ── photo viewer ── -->
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo" hidden>
+  <img class="viewer-img" id="viewerImg" alt="" />
+  <div class="viewer-bar">
+    <div class="viewer-meta">
+      <div class="overline" id="viewerWhen"></div>
+      <div class="viewer-title" id="viewerTitle"></div>
+    </div>
+    <div class="viewer-acts">
+      <button class="btn viewer-btn" id="viewerRetake">Retake</button>
+      <button class="btn viewer-btn" id="viewerRemove">Remove</button>
+      <button class="btn viewer-btn btn-hot" id="viewerClose">Done</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script src="data.js"></script>
 <script src="creatures.js"></script>
+<script src="photos.js"></script>
 <script src="app.js"></script>
 </body>
 </html>

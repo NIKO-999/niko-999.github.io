@@ -351,6 +351,49 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
 }
 .tag.needle { color: var(--ember); border-color: var(--ember-line); background: var(--ember-soft); }
 
+/* ── day pager ── */
+.daynav { display: flex; align-items: center; gap: 10px; }
+.daynav-b {
+  width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0;
+  border: 1px solid var(--edge-soft); color: var(--ink-mute);
+  display: grid; place-items: center; font-size: 15px; line-height: 1;
+  transition: color .2s, border-color .2s, opacity .2s;
+}
+.daynav-b:hover { color: var(--ink); border-color: var(--ember-line); }
+.daynav-b[disabled] { opacity: 0.22; pointer-events: none; }
+#dayLabel { min-width: 92px; text-align: center; }
+/* viewing anything but today should be unmistakable */
+.viewing-past #dayLabel { color: var(--ember); }
+
+/* Everything that only means something *right now* is hidden on a past day
+   rather than left showing today's values against another day's timeline:
+   the live clock, the current block, the progress bar, and the counsel —
+   advice about a block three days gone is just noise. */
+.viewing-past .hero-clock-t,
+.viewing-past .hero-now,
+.viewing-past .daybar,
+.viewing-past #counsel { display: none; }
+
+/* ── photo evidence on a block ── */
+.block-shot {
+  margin-top: 10px; border-radius: 11px; overflow: hidden;
+  border: 1px solid var(--ember-line);
+  aspect-ratio: 16 / 10; background: rgba(0,0,0,0.3);
+}
+.block-shot img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+/* done, but with nothing to show for it — visibly different from proven */
+.block-check.unverified {
+  background: none; border: 1px dashed var(--ember-line);
+  color: var(--ember); box-shadow: none;
+}
+.block-cam {
+  flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
+  border: 1px dashed var(--edge); display: grid; place-items: center;
+  align-self: center; color: var(--ink-mute); font-size: 11px;
+}
+.block.now .block-cam { border-color: var(--ember-line); color: var(--ember); }
+
 .block-check {
   flex-shrink: 0; width: 24px; height: 24px; border-radius: 50%;
   border: 1px solid var(--edge); display: grid; place-items: center;
@@ -379,6 +422,28 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
    ─────────────────────────────────────────────── */
 
 .habits { padding: 0 var(--rail); display: grid; grid-template-columns: 1fr 1fr; gap: 9px; }
+
+/* The camera has to be its own control, and a button cannot be nested inside
+   another button — so it sits as an absolutely-positioned sibling over the
+   card rather than inside it. The card's own tap target is untouched. */
+.habit-cell { position: relative; display: flex; }
+.habit-cell .habit { flex: 1; }
+.habit-cam {
+  position: absolute; right: 9px; bottom: 9px; z-index: 2;
+  width: 27px; height: 27px; border-radius: 50%;
+  border: 1px solid var(--edge); background: rgba(12,14,14,0.82);
+  display: grid; place-items: center; color: var(--ink-mute);
+  transition: color .2s, border-color .2s, background .2s, transform .18s;
+}
+.habit-cam svg { width: 13px; height: 13px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.habit-cam:active { transform: scale(0.9); }
+.habit-cam:hover { color: var(--ink); border-color: var(--ember-line); }
+.habit-cam.shot { color: var(--ember); border-color: var(--ember-line); background: var(--ember-soft); }
+/* the camera sits over the card's bottom-right corner, which is exactly
+   where the week strip ends — give the pips room rather than let the
+   button cover the last two days of the streak */
+.habit-cell .week { padding-right: 30px; }
+
 .habit {
   padding: 16px 14px; border-radius: 18px; text-align: left;
   border: 1px solid var(--edge-soft); background: var(--glass);
@@ -631,6 +696,30 @@ button { background: none; border: 0; cursor: pointer; -webkit-tap-highlight-col
   box-shadow: 0 6px 24px rgba(224,151,90,0.28);
 }
 .btn-hot:hover { filter: brightness(1.06); color: #1a1410; }
+
+/* ── photo viewer ──
+   Full bleed, because the photo is the point. No backdrop-filter here: the
+   image covers the screen anyway, and the blur budget is nearly spent. */
+.viewer {
+  position: fixed; inset: 0; z-index: 75;
+  background: #070808;
+  display: flex; flex-direction: column;
+}
+.viewer[hidden] { display: none; }
+.viewer-img {
+  flex: 1; min-height: 0; width: 100%;
+  object-fit: contain; display: block;
+}
+.viewer-bar {
+  flex-shrink: 0; display: flex; align-items: center; gap: 12px;
+  padding: 14px var(--rail) calc(16px + var(--safe-b));
+  border-top: 1px solid var(--edge-soft);
+  background: linear-gradient(180deg, #141717, #0d0f0f);
+}
+.viewer-meta { flex: 1; min-width: 0; }
+.viewer-title { margin-top: 4px; font-size: 13.5px; font-weight: 500; color: var(--ink); }
+.viewer-acts { display: flex; gap: 7px; flex-shrink: 0; }
+.viewer-btn { flex: none; padding: 9px 13px; font-size: 11.5px; border-radius: 10px; }
 
 /* ── toast ── */
 .toast {
