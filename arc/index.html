@@ -74,16 +74,23 @@
   --accent-a: #467a6c;
   --accent-b: #0d5348;
   --accent-c: #06302b;
-  --accent:   #6ba593;
+  --accent:   var(--sw-sage);
 
-  --now:          #6ba593;
+  --now:          var(--sw-sage);
   --now-pill:     #17715a;
   --now-pill-ink: #ffffff;
 
   --btn:     #ffffff;
   --btn-ink: #14130f;
   --seg-on:  rgba(0, 0, 0, .55);
+  --seg-on-ink: var(--ink);
 
+  /* Every scheme's signature colour, always defined, so the picker's
+     swatches can show the real value rather than a copied hex. */
+  --sw-sage: #6ba593; --sw-ice: #7fb4e0; --sw-ember: #e0a06b;
+  --sw-violet: #b096e0; --sw-mono: #b8b5b0;
+
+  --edge:  #a9e0cd;
   --focus: #8fd3ba;
 
   /* --row is layout rhythm, not a touch floor: 38px bar on a 44px row
@@ -123,7 +130,7 @@
   --accent-a: #3d6d60;
   --accent-b: #0a4a3e;
   --accent-c: #05372f;
-  --accent:   #0b6b52;
+  --accent:   var(--sw-sage);
 
   --now:          #4a8a76;
   --now-pill:     #0b6b52;
@@ -131,12 +138,114 @@
 
   --btn:     #1c1a17;
   --btn-ink: #ffffff;
+  /* The selected pill is near-black in BOTH themes, so its text cannot
+     follow --ink — in light mode that put dark ink on a dark pill. */
   --seg-on:  rgba(0, 0, 0, .82);
+  --seg-on-ink: #f7f5f2;
 
+  --sw-sage: #0b6b52; --sw-ice: #1d5580; --sw-ember: #7d451a;
+  --sw-violet: #4d3080; --sw-mono: #3d3d3d;
+
+  /* On a light panel a pale edge is invisible, so the light schemes use
+     the accent itself rather than a tint of it. */
+  --edge:  #0b6b52;
   --focus: #0b6b52;
 }
 
+/* ═══ palettes ═══
+   Only the hue-carrying tokens change. The shell — glass, insets, ink,
+   hairlines — is identical in every scheme, because the reference's
+   whole trick is a near-monochrome surface with one accent on it. A
+   palette that repainted the panel would undo that.
+
+   Each scheme is declared twice, dark then light, and both blocks come
+   AFTER the base light block so they win on source order at equal
+   specificity. Every accent-a is checked to clear 4.5:1 against white,
+   since that is where bar labels sit. */
+:root[data-palette="ice"] {
+  --accent-a: #3a6a9a; --accent-b: #123f66; --accent-c: #0a2440;
+  --accent: var(--sw-ice); --now: var(--sw-ice); --now-pill: #1d5580;
+  --edge: #a9cdf0; --focus: #9cc8ee;
+}
+:root[data-palette="ember"] {
+  --accent-a: #9a5a28; --accent-b: #6b3712; --accent-c: #3d1e08;
+  --accent: var(--sw-ember); --now: var(--sw-ember); --now-pill: #7d451a;
+  --edge: #f0c9a0; --focus: #eeb98c;
+}
+:root[data-palette="violet"] {
+  --accent-a: #6a4a9a; --accent-b: #402a66; --accent-c: #241540;
+  --accent: var(--sw-violet); --now: var(--sw-violet); --now-pill: #4d3080;
+  --edge: #cfbaf0; --focus: #c3a9ec;
+}
+:root[data-palette="mono"] {
+  --accent-a: #4a4a4a; --accent-b: #2e2e2e; --accent-c: #1a1a1a;
+  --accent: var(--sw-mono); --now: var(--sw-mono); --now-pill: #3d3d3d;
+  --edge: #e6e3de; --focus: #d6d3ce;
+}
+
+:root[data-resolved="light"][data-palette="sage"] {
+  --accent-a: #3d6d60; --accent-b: #0a4a3e; --accent-c: #05372f;
+  --accent: var(--sw-sage); --now: #4a8a76; --now-pill: #0b6b52;
+  --edge: #0b6b52; --focus: #0b6b52;
+}
+:root[data-resolved="light"][data-palette="ice"] {
+  --accent-a: #2e5678; --accent-b: #123f66; --accent-c: #0a2440;
+  --accent: var(--sw-ice); --now: #4a7ba0; --now-pill: #1d5580;
+  --edge: #1d5580; --focus: #1d5580;
+}
+:root[data-resolved="light"][data-palette="ember"] {
+  --accent-a: #7a4a22; --accent-b: #5a3312; --accent-c: #3d1e08;
+  --accent: var(--sw-ember); --now: #a5764a; --now-pill: #7d451a;
+  --edge: #7d451a; --focus: #7d451a;
+}
+:root[data-resolved="light"][data-palette="violet"] {
+  --accent-a: #533a7a; --accent-b: #3a2660; --accent-c: #241540;
+  --accent: var(--sw-violet); --now: #7a62a5; --now-pill: #4d3080;
+  --edge: #4d3080; --focus: #4d3080;
+}
+:root[data-resolved="light"][data-palette="mono"] {
+  --accent-a: #3a3a3a; --accent-b: #262626; --accent-c: #1a1a1a;
+  --accent: var(--sw-mono); --now: #6e6b66; --now-pill: #3d3d3d;
+  --edge: #3d3d3d; --focus: #3d3d3d;
+}
+
 *, *::before, *::after { box-sizing: border-box; }
+
+/* ═══ the luminous edge ═══
+   A hairline that catches light at one corner and dies away around the
+   rest of the shape, with the bloom outside following the same falloff.
+
+   It is one pseudo-element, not two. The ring is a gradient clipped to
+   a 1px frame by masking the fill out of it (mask-composite: exclude);
+   the outer glow is then a drop-shadow OF that ring, so the bloom is
+   automatically brightest exactly where the ring is brightest and
+   absent where it has faded. A box-shadow could not do that — it would
+   halo the whole shape evenly.
+
+   Only chrome buttons take it. Timeline bars and marks are data, and
+   ringing every one of them would turn the board into a light show. */
+.btn, .rail button, .seg button, .fab, .swatch { position: relative; }
+.btn::before, .rail button::before, .seg button::before,
+.fab::before, .swatch::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+      var(--edge-from, 215deg),
+      color-mix(in srgb, var(--edge) 92%, transparent) 0%,
+      color-mix(in srgb, var(--edge) 30%, transparent) 34%,
+      color-mix(in srgb, var(--edge) 8%,  transparent) 58%,
+      transparent 76%);
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+          mask-composite: exclude;
+  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--edge) 40%, transparent));
+  pointer-events: none;
+  z-index: 1;
+}
 
 /* Any author rule that sets `display` outranks the UA's
    `[hidden] { display: none }`, so hiding by property silently fails on
@@ -320,9 +429,64 @@ body {
   white-space: nowrap;
   -webkit-tap-highlight-color: transparent;
 }
-.btn-ghost { border-color: var(--glass-line); background: var(--glass-in); }
+.btn-ghost { border-color: transparent; background: var(--glass-in); }
 .btn-primary { background: var(--btn); color: var(--btn-ink); font-weight: 500; }
 .btn svg { width: 15px; height: 15px; flex: none; }
+
+/* ── palette picker ──
+   A radiogroup, not a cycling button: picking a scheme is a choice among
+   named options, and cycling five of them to get back to the one you
+   wanted is a worse control than showing all five. */
+.pal { position: relative; flex: none; }
+.dot {
+  width: 13px; height: 13px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.pal-menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 5px;
+  min-width: 152px;
+  border: 1px solid var(--glass-line);
+  border-radius: 11px;
+  background: var(--glass);
+  -webkit-backdrop-filter: blur(24px) saturate(.9);
+          backdrop-filter: blur(24px) saturate(.9);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .38);
+}
+.swatch {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .8rem;
+  font-weight: 500;
+  text-align: left;
+  cursor: pointer;
+}
+.swatch[aria-checked="true"] { background: var(--glass-in); color: var(--ink); }
+.swatch .dot { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
+.dot[data-swatch="sage"]   { background: var(--sw-sage); }
+.dot[data-swatch="ice"]    { background: var(--sw-ice); }
+.dot[data-swatch="ember"]  { background: var(--sw-ember); }
+.dot[data-swatch="violet"] { background: var(--sw-violet); }
+.dot[data-swatch="mono"]   { background: var(--sw-mono); }
+.swatch .tick-mark { margin-left: auto; opacity: 0; }
+.swatch[aria-checked="true"] .tick-mark { opacity: 1; }
 
 /* ── section head ── */
 .head {
@@ -357,16 +521,7 @@ body {
   font-weight: 500;
   cursor: pointer;
 }
-/* Painted small to match the reference; the touch target is expanded
-   invisibly to 44px rather than inflating the control. */
-.seg button::after {
-  content: '';
-  position: absolute;
-  top: 50%; left: 0; right: 0;
-  transform: translateY(-50%);
-  height: 36px;
-}
-.seg button[aria-selected="true"] { background: var(--seg-on); color: var(--ink); }
+.seg button[aria-selected="true"] { background: var(--seg-on); color: var(--seg-on-ink); }
 
 /* ═══ the canvas ═══ */
 .scroller {
@@ -589,12 +744,11 @@ body {
   gap: 7px;
   height: 36px;
   padding: 0 16px;
-  border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
+  border: 0;
   border-radius: 22px;
   background: var(--glass);
   -webkit-backdrop-filter: blur(20px);
           backdrop-filter: blur(20px);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
   color: var(--ink);
   font: inherit;
   font-size: .84rem;
@@ -798,6 +952,15 @@ body {
              stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
         <span id="themeLabel">System</span>
       </button>
+
+      <div class="pal">
+        <button class="btn btn-ghost" type="button" id="palBtn"
+                aria-expanded="false" aria-haspopup="true" aria-label="Colour scheme: Sage">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="palLabel">Sage</span>
+        </button>
+        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Colour scheme" hidden></div>
+      </div>
 
       <button class="btn btn-primary" type="button" id="newBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
@@ -1338,6 +1501,88 @@ function cycle() {
   paint();
   say.textContent = `Theme: ${LABEL[mode]}.`;
 }
+
+/* ── colour schemes ──
+   Orthogonal to light/dark: every scheme has both, so the two controls
+   never fight. The swatch dot reads its colour from the live token
+   rather than a hard-coded hex, so a scheme can never drift out of sync
+   with the swatch that claims to show it. */
+const PKEY = 'arc.palette';
+const PALETTES = [
+  ['sage',   'Sage'],
+  ['ice',    'Ice'],
+  ['ember',  'Ember'],
+  ['violet', 'Violet'],
+  ['mono',   'Mono'],
+];
+
+const palBtn   = document.getElementById('palBtn');
+const palMenu  = document.getElementById('palMenu');
+const palLabel = document.getElementById('palLabel');
+let palette = localStorage.getItem(PKEY) || 'sage';
+
+PALETTES.forEach(([id, name]) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'swatch';
+  b.setAttribute('role', 'radio');
+  b.dataset.palette = id;
+  /* The dot paints from that scheme's own --sw-* token, so it always
+     shows the real value rather than a copy that can drift. */
+  b.innerHTML =
+    `<span class="dot" data-swatch="${id}" aria-hidden="true"></span>${name}`
+    + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
+            stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+            stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
+  b.addEventListener('click', () => { setPalette(id); closePal(true); });
+  palMenu.appendChild(b);
+});
+
+function setPalette(id) {
+  palette = id;
+  localStorage.setItem(PKEY, id);
+  document.documentElement.dataset.palette = id;
+  const name = (PALETTES.find(p => p[0] === id) || [])[1] || id;
+  palLabel.textContent = name;
+  palBtn.setAttribute('aria-label', `Colour scheme: ${name}`);
+  palMenu.querySelectorAll('.swatch').forEach((s) => {
+    s.setAttribute('aria-checked', String(s.dataset.palette === id));
+  });
+  say.textContent = `Colour scheme: ${name}.`;
+}
+
+function openPal() {
+  palMenu.hidden = false;
+  palBtn.setAttribute('aria-expanded', 'true');
+  (palMenu.querySelector('[aria-checked="true"]') || palMenu.firstElementChild).focus();
+}
+/* Focus goes back to the trigger on close, or a keyboard user is dumped
+   at the top of the document every time they pick a scheme. */
+function closePal(refocus) {
+  palMenu.hidden = true;
+  palBtn.setAttribute('aria-expanded', 'false');
+  if (refocus) palBtn.focus();
+}
+
+palBtn.addEventListener('click', () => {
+  palMenu.hidden ? openPal() : closePal(true);
+});
+palMenu.addEventListener('keydown', (e) => {
+  const items = [...palMenu.querySelectorAll('.swatch')];
+  const i = items.indexOf(document.activeElement);
+  if (e.key === 'Escape') { e.preventDefault(); closePal(true); }
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    const next = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
+    items[next].focus();
+    setPalette(items[next].dataset.palette);   // radiogroups select on arrow
+  }
+});
+document.addEventListener('pointerdown', (e) => {
+  if (!palMenu.hidden && !e.target.closest('.pal')) closePal(false);
+});
+
+setPalette(palette);
 themeBtn .addEventListener('click', cycle);
 themeRail.addEventListener('click', cycle);
 media.addEventListener('change', () => { if (mode === 'system') paint(); });
