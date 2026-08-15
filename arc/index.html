@@ -1095,8 +1095,20 @@ body {
   border-radius: 10px;
   background: var(--glass-in);
 }
-/* Stands in for a photograph. On a real tile this is your own image. */
+/* The image slot. Empty it is a gradient; filled it is your photograph,
+   held on this machine and never uploaded. It is a button as well as a
+   drop target, so it can be reached without a mouse — and it is only
+   the art that is interactive, leaving the tile itself free for opening
+   the project later. */
 .tile-art {
+  position: relative;
+  display: block;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  cursor: pointer;
+  background-size: cover;
+  background-position: center;
   height: 58px;
   --a: 150deg;
   --l: 30%;
@@ -1129,6 +1141,30 @@ body {
    never by opacity — a faded name is still a name that has to be read. */
 .band.far .tile { background: none; border-style: dashed; }
 .band.far .tile-art { height: 32px; filter: grayscale(.55) brightness(.8); }
+/* A real photograph earns more room than a placeholder, even out here. */
+.band.far .tile-art.has { height: 46px; }
+
+/* The hint only appears on approach, so an empty board is not covered in
+   instructions — and it never covers a photograph that is already set. */
+.tile-art::after {
+  content: 'Add image';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: .58rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink);
+  background: rgba(0, 0, 0, .55);
+  opacity: 0;
+}
+.tile-art.has::after { content: 'Replace'; }
+@media (hover: hover) { .tile-art:hover::after { opacity: 1; } }
+.tile-art:focus-visible::after { opacity: 1; }
+.tile.dropping { border-color: var(--accent); }
+.tile.dropping .tile-art::after { content: 'Drop to set'; opacity: 1; }
 .band.far .tile-name { color: var(--ink-2); font-weight: 500; }
 
 /* ── past ──
@@ -1727,6 +1763,97 @@ tabList .addEventListener('click', () => show(false));
   });
 });
 
+/* ═══ pictures ═══
+   Your own photographs, held in IndexedDB on this machine and never
+   uploaded — the same choice routine/photos.js documents, and for the
+   same reasons. localStorage is capped around 5–10MB per ORIGIN and this
+   origin already carries several apps; IndexedDB gets its own far larger
+   allowance and takes Blobs directly, with none of base64's 33% inflation.
+
+   Images are compressed BEFORE they are stored, never after. A camera
+   hands over 2–5MB; what gets kept is nearer 60KB, because the largest a
+   tile is ever painted is a few hundred pixels. */
+const PIX = (function () {
+  const DB = 'arc-pictures', STORE = 'tiles', MAX_EDGE = 900;
+  const cache = new Map();   // id → blob
+  const urls  = new Map();   // id → object URL
+
+  function open() {
+    return new Promise((res, rej) => {
+      let r;
+      try { r = indexedDB.open(DB, 1); } catch (e) { return rej(e); }
+      r.onupgradeneeded = () => {
+        if (!r.result.objectStoreNames.contains(STORE)) r.result.createObjectStore(STORE);
+      };
+      r.onsuccess = () => res(r.result);
+      r.onerror = () => rej(r.error);
+    });
+  }
+
+  function tx(mode, fn) {
+    return open().then(db => new Promise((res, rej) => {
+      const t = db.transaction(STORE, mode);
+      const out = fn(t.objectStore(STORE));
+      t.oncomplete = () => res(out && out.result !== undefined ? out.result : out);
+      t.onerror = () => rej(t.error);
+    }));
+  }
+
+  /* Draw it down to something a tile can use, then re-encode. WebP where
+     the canvas will give it, JPEG otherwise. */
+  function shrink(file) {
+    return new Promise((res, rej) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('unreadable')); };
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        const scale = Math.min(1, MAX_EDGE / Math.max(img.width, img.height));
+        const c = document.createElement('canvas');
+        c.width  = Math.max(1, Math.round(img.width  * scale));
+        c.height = Math.max(1, Math.round(img.height * scale));
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        c.toBlob(b => b ? res(b) : rej(new Error('encode failed')), 'image/webp', 0.72);
+      };
+      img.src = url;
+    });
+  }
+
+  return {
+    /* Best-effort: a browser with IndexedDB blocked still gets a working
+       board, just without pictures. */
+    warm() {
+      return tx('readonly', st => {
+        const req = st.openCursor();
+        req.onsuccess = () => {
+          const c = req.result;
+          if (!c) return;
+          cache.set(c.key, c.value);
+          c.continue();
+        };
+        return req;
+      }).catch(() => {});
+    },
+    async put(id, file) {
+      const blob = await shrink(file);
+      await tx('readwrite', st => st.put(blob, id));
+      cache.set(id, blob);
+      if (urls.has(id)) { URL.revokeObjectURL(urls.get(id)); urls.delete(id); }
+      return true;
+    },
+    has: id => cache.has(id),
+    /* Object URLs are minted once and revoked on replace, or a board that
+       is edited a few times leaks a blob per edit. */
+    url(id) {
+      if (urls.has(id)) return urls.get(id);
+      if (!cache.has(id)) return null;
+      const u = URL.createObjectURL(cache.get(id));
+      urls.set(id, u);
+      return u;
+    },
+  };
+})();
+
 /* ═══ vision ═══
    Every aim carries a horizon and nothing else decides where it sits.
    Finished work is not here — it is in Past — so this list only ever
@@ -1777,19 +1904,75 @@ HORIZONS.forEach(([id, label, sub, far], bi) => {
     /* Varying the light per tile, so eight image slots do not read as
        one photograph repeated eight times. */
     li.innerHTML =
-      `<div class="tile-art" aria-hidden="true"
+      `<button type="button" class="tile-art"
             style="--a:${118 + (bi * 3 + i) * 17}deg;--l:${18 + (bi * 3 + i) * 9}%;
-                   filter:brightness(${(0.78 + (bi * 3 + i) * 0.05).toFixed(2)})"></div>
+                   filter:brightness(${(0.78 + (bi * 3 + i) * 0.05).toFixed(2)})"></button>
        <div class="tile-body">
          <span class="tile-name">${t.name}</span>
          <span class="tile-when">${t.when}</span>
        </div>`;
+    const art = li.querySelector('.tile-art');
+    art.dataset.id = t.name;
+    art.setAttribute('aria-label', `Add an image for ${t.name}`);
+    art.addEventListener('click', () => pick(t.name));
+
+    /* Drag and drop is the natural desktop gesture, so the whole tile
+       accepts a file even though only the art is clickable. */
+    li.addEventListener('dragover', (e) => { e.preventDefault(); li.classList.add('dropping'); });
+    li.addEventListener('dragleave', () => li.classList.remove('dropping'));
+    li.addEventListener('drop', (e) => {
+      e.preventDefault();
+      li.classList.remove('dropping');
+      const f = e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f) setPicture(t.name, f);
+    });
+
     row.appendChild(li);
     tileEls.push(li);
   });
   band.appendChild(row);
   tiles.appendChild(band);
 });
+
+/* One input, reused, rather than one per tile. */
+const filePicker = document.createElement('input');
+filePicker.type = 'file';
+filePicker.accept = 'image/*';
+filePicker.className = 'sr';
+document.body.appendChild(filePicker);
+let pickingFor = null;
+function pick(id) { pickingFor = id; filePicker.value = ''; filePicker.click(); }
+filePicker.addEventListener('change', () => {
+  if (pickingFor && filePicker.files[0]) setPicture(pickingFor, filePicker.files[0]);
+});
+
+/* paintTile, not paint: the theme system already owns a paint(), and a
+   second declaration in the same scope silently replaced it — the images
+   stored and persisted correctly and never appeared. */
+function paintTile(id) {
+  const art = tiles.querySelector(`.tile-art[data-id="${CSS.escape(id)}"]`);
+  if (!art) return;
+  const u = PIX.url(id);
+  if (!u) return;
+  art.style.backgroundImage = `url("${u}")`;
+  art.classList.add('has');
+  art.setAttribute('aria-label', `Replace the image for ${id}`);
+}
+
+async function setPicture(id, file) {
+  if (!file.type.startsWith('image/')) { say.textContent = 'That is not an image.'; return; }
+  try {
+    await PIX.put(id, file);
+    paintTile(id);
+    say.textContent = `Image set for ${id}.`;
+  } catch (e) {
+    /* Quota, a private-mode block, or a file the decoder will not take —
+       the board keeps working, it just keeps its gradient. */
+    say.textContent = `Could not save that image for ${id}.`;
+  }
+}
+
+PIX.warm().then(() => TILES.forEach(t => { if (PIX.has(t.name)) paintTile(t.name); }));
 
 document.getElementById('visionMeta').textContent =
   `${TILES.filter(t => t.horizon === 'now').length} now · `
