@@ -1,0 +1,714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<title>Ledger — trading</title>
+
+<script>
+/* Inline, and before the stylesheet, so the first paint is already
+   themed and the photograph starts downloading immediately. Identical
+   to Arc's, because it is the same shell. */
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  var p = read('arc.palette') || 'grotto';
+  if (p === 'salt') p = 'grotto';
+  var m = read('arc.theme') || 'system';
+  d.dataset.palette = p;
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  var l = document.createElement('link');
+  l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+  l.fetchPriority = 'high';
+  document.head.appendChild(l);
+  ['../arc/fonts/Inter-500.woff2', '../arc/fonts/JetBrainsMono-500.woff2'].forEach(function (f) {
+    var k = document.createElement('link');
+    k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+    k.href = f; k.crossOrigin = 'anonymous';
+    document.head.appendChild(k);
+  });
+})();
+</script>
+
+<link rel="stylesheet" href="../shell.css" />
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   LEDGER — live-capital trading analytics.
+
+   The shell is Arc's, read from the same shell.css, so the two apps
+   cannot drift apart. Everything below is this app's canvas.
+
+   The one idea the whole thing rests on: CAPITAL FLOWS ARE NOT
+   PERFORMANCE. A deposit raises equity without being a gain, and if
+   the two share a series then the equity curve flatters you, drawdown
+   vanishes, and return is meaningless. So the ledger keeps flows and
+   realised PnL apart, and every performance figure is computed from
+   trades alone. Return is time-weighted — chained across segments cut
+   at each cash flow — which is the only way a percentage means your
+   trading rather than your funding.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* Up and down are the one place this app spends colour the shell does
+   not. They are carried by a fill and a hard left edge — NOT by the
+   figure itself, which stays --ink.
+
+   Coloured text on a coloured cell put two variables in motion at once
+   across ten backdrops, and it could not be tuned into compliance: the
+   PnL figure measured 2.13:1 on one of them. So the number is always
+   ink, and the direction is carried by the edge, the tint and the sign
+   in front of the amount — three cues, none of them colour alone. */
+:root {
+  --up:   #7fb9a2;
+  --down: #c98f8f;
+  --up-fill:   rgba(127, 185, 162, .16);
+  --down-fill: rgba(201, 143, 143, .16);
+}
+:root[data-resolved="light"] {
+  --up:   #2f6b52;
+  --down: #8f3f3f;
+  --up-fill:   rgba(47, 107, 82, .13);
+  --down-fill: rgba(143, 63, 63, .13);
+}
+
+.pane { flex: 1; overflow-y: auto; padding: 4px 16px 22px; }
+
+/* ── the number that matters, and its parts ── */
+.summary { display: flex; gap: 26px; align-items: flex-start; padding: 2px 2px 18px; flex-wrap: wrap; }
+.stat { min-width: 104px; }
+.stat b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.32rem;
+  font-weight: 500;
+  letter-spacing: -.03em;
+}
+.stat span {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: .6rem;
+  text-transform: uppercase;
+  letter-spacing: .09em;
+  color: var(--ink-2);
+}
+.stat.up b { color: var(--up); }
+.stat.down b { color: var(--down); }
+
+/* ── calendar ── */
+.cal-head { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
+.cal-head h2 {
+  margin: 0;
+  font-family: var(--mono);
+  font-size: .72rem;
+  font-weight: 400;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-2);
+}
+.cal-head .grow { flex: 1; }
+.step {
+  width: 28px; height: 28px;
+  display: grid; place-items: center;
+  border: 1px solid var(--glass-line);
+  border-radius: 8px;
+  background: var(--glass-in);
+  color: var(--ink-2);
+  cursor: pointer;
+  font: inherit;
+}
+.dow {
+  display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
+  margin-bottom: 5px;
+}
+.dow span {
+  font-family: var(--mono);
+  font-size: .58rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-2);
+  text-align: center;
+}
+.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.day {
+  position: relative;
+  min-height: 62px;
+  padding: 6px 7px;
+  border: 1px solid var(--glass-line);
+  border-radius: 8px;
+  background: var(--glass-in);
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+}
+.day.blank { border-color: transparent; background: none; cursor: default; }
+.day .d {
+  font-family: var(--mono);
+  font-size: .58rem;
+  color: var(--ink-3);
+}
+.day .v {
+  position: absolute;
+  left: 7px; right: 7px; bottom: 6px;
+  font-family: var(--mono);
+  font-size: .68rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+}
+.day .n {
+  position: absolute;
+  right: 7px; top: 5px;
+  font-family: var(--mono);
+  font-size: .54rem;
+  color: var(--ink-3);
+}
+.day.up   { background: var(--up-fill);   box-shadow: inset 3px 0 0 var(--up); }
+.day.down { background: var(--down-fill); box-shadow: inset 3px 0 0 var(--down); }
+.day .v { color: var(--ink); }
+.day.today { box-shadow: inset 0 0 0 1px var(--accent); }
+
+/* ── equity curve ── */
+.curve { margin-top: 20px; }
+.curve svg { display: block; width: 100%; height: 170px; overflow: visible; }
+.axis-l { font-family: var(--mono); font-size: 9px; fill: var(--ink-3); }
+.gridline { stroke: var(--rule); stroke-width: 1; }
+.equity { fill: none; stroke: var(--ink); stroke-width: 1.6; }
+/* The flat line is what you put in. The gap to the equity line is what
+   the trading actually did — the single most honest thing on screen. */
+.basis { fill: none; stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.flow { stroke: var(--accent); stroke-width: 1; opacity: .5; }
+.flow-dot { fill: var(--accent); }
+.legend { display: flex; gap: 16px; margin-top: 8px; }
+.legend span {
+  display: flex; align-items: center; gap: 6px;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
+}
+.legend i { width: 14px; height: 0; border-top: 2px solid currentColor; }
+.legend i.dash { border-top-style: dashed; border-width: 1px; }
+
+/* ── metrics ── */
+.metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+.metric {
+  padding: 12px 13px;
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  background: var(--glass-in);
+}
+.metric b {
+  display: block;
+  font-family: var(--mono);
+  font-size: 1.06rem;
+  font-weight: 500;
+  letter-spacing: -.025em;
+}
+.metric span {
+  display: block; margin-top: 4px;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+}
+.metric em {
+  display: block; margin-top: 6px; font-style: normal;
+  font-size: .68rem; color: var(--ink-2); line-height: 1.4;
+}
+
+/* ── settings + ledger ── */
+.form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+}
+.field input, .field select {
+  height: 36px; padding: 0 10px;
+  border: 1px solid var(--glass-line); border-radius: 8px;
+  background: var(--glass-in); color: var(--ink);
+  font: inherit; font-family: var(--mono); font-size: .78rem;
+  outline: none;
+}
+.field input:focus-visible, .field select:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
+.ledger { margin: 0; padding: 0; list-style: none; }
+.ledger li {
+  display: flex; align-items: baseline; gap: 12px;
+  padding: 9px 2px;
+  border-bottom: 1px solid var(--rule);
+}
+.ledger li:last-child { border-bottom: 0; }
+.led-d { font-family: var(--mono); font-size: .64rem; color: var(--ink-3); width: 76px; flex: none; }
+.led-k {
+  font-family: var(--mono); font-size: .56rem; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--ink-2); width: 82px; flex: none;
+}
+.led-n { flex: 1; font-size: .8rem; color: var(--ink-2); min-width: 0;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.led-v { font-family: var(--mono); font-size: .76rem; font-weight: 500; letter-spacing: -.02em; }
+.led-v.up { color: var(--up); }
+.led-v.down { color: var(--down); }
+.drop { border: 0; background: none; color: var(--ink-3); cursor: pointer; font: inherit; padding: 0 2px; }
+
+.empty {
+  padding: 34px 20px; text-align: center;
+  font-family: var(--mono); font-size: .64rem;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+}
+@media (hover: hover) {
+  .day:not(.blank):hover, .step:hover { background: var(--glass-in-2); }
+  .drop:hover { color: var(--down); }
+}
+</style>
+</head>
+
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<div class="fx" aria-hidden="true"></div>
+
+<div class="app">
+
+  <nav class="rail" aria-label="Sections">
+    <span class="rail-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           stroke-linecap="round" width="17" height="17">
+        <path d="M4 18l5-6 4 3 6-8" /><path d="M15 7h4v4" />
+      </svg>
+    </span>
+    <button type="button" data-view="calendar" aria-current="page" aria-label="Calendar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
+        <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
+      </svg>
+    </button>
+    <button type="button" data-view="metrics" aria-label="Metrics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" aria-hidden="true"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2" /></svg>
+    </button>
+    <button type="button" data-view="settings" aria-label="Capital">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" aria-hidden="true">
+        <path d="M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6" /></svg>
+    </button>
+    <span class="spacer"></span>
+    <button type="button" id="themeRail" aria-label="Appearance: System">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" aria-hidden="true"></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" width="15" height="15" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" />
+        </svg>
+        <label class="sr" for="q">Search trades</label>
+        <input id="q" type="search" placeholder="Search trades" autocomplete="off" />
+      </div>
+
+      <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Appearance: System">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
+        <span id="themeLabel">System</span>
+      </button>
+
+      <div class="pal">
+        <button class="btn btn-ghost" type="button" id="palBtn"
+                aria-expanded="false" aria-controls="palMenu" aria-label="Backdrop: Grotto">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="palLabel">Grotto</span>
+        </button>
+        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
+      </div>
+
+      <button class="btn btn-primary" type="button" id="newTrade">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
+             stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        Trade
+      </button>
+    </div>
+
+    <!-- ── calendar ── -->
+    <main class="main" id="calendarSection">
+      <div class="head">
+        <h1>Ledger</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="calMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="summary" id="summary"></div>
+        <div class="cal-head">
+          <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
+          <h2 id="monthLabel"></h2>
+          <button class="step" type="button" id="nextM" aria-label="Next month">›</button>
+          <span class="grow"></span>
+          <span class="span-meta" id="monthPnl"></span>
+        </div>
+        <div class="dow" aria-hidden="true">
+          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span>
+          <span>Fri</span><span>Sat</span><span>Sun</span>
+        </div>
+        <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
+      </div>
+    </main>
+
+    <!-- ── metrics ── -->
+    <main class="main" id="metricsSection" hidden>
+      <div class="head">
+        <h1>Metrics</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="metMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="metrics" id="metrics"></div>
+        <div class="curve">
+          <div class="cal-head"><h2>Equity</h2></div>
+          <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
+          <p class="sr" id="curveAlt"></p>
+          <div class="legend" aria-hidden="true">
+            <span style="color:var(--ink)"><i></i>Equity</span>
+            <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
+            <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
+          </div>
+        </div>
+      </div>
+    </main>
+
+    <!-- ── capital ── -->
+    <main class="main" id="settingsSection" hidden>
+      <div class="head">
+        <h1>Capital</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="capMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <form class="form" id="flowForm">
+          <div class="field">
+            <label for="fKind">Movement</label>
+            <select id="fKind">
+              <option value="deposit">Deposit</option>
+              <option value="withdraw">Withdraw</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="fAmt">Amount</label>
+            <input id="fAmt" type="number" step="0.01" min="0" required placeholder="0.00" />
+          </div>
+          <div class="field">
+            <label for="fDate">Date</label>
+            <input id="fDate" type="date" required />
+          </div>
+          <div class="field">
+            <label for="fNote">Note</label>
+            <input id="fNote" type="text" placeholder="optional" />
+          </div>
+          <button class="btn btn-primary" type="submit">Record</button>
+        </form>
+        <div class="cal-head"><h2>Every movement</h2><span class="grow"></span>
+          <span class="span-meta" id="ledgerMeta"></span></div>
+        <ul class="ledger" id="ledger"></ul>
+      </div>
+    </main>
+  </div>
+
+  <p class="sr" role="status" id="say"></p>
+</div>
+
+<script src="../shell.js" defer></script>
+<script>
+'use strict';
+
+/* ═══════════════════════════════════════════════════════════════
+   The ledger is one ordered list of events. A deposit and a trade are
+   both events, but they are never the same KIND of event, and no
+   performance figure is ever computed from a flow.
+   ═══════════════════════════════════════════════════════════════ */
+
+const KEY = 'ledger.v1';
+const money = (n, sign) => (sign && n > 0 ? '+' : n < 0 ? '−' : '')
+  + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const iso = (d) => d.toISOString().slice(0, 10);
+
+function readStore() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
+function writeStore(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+
+/* Sample events, so the shape is visible before any real capital is
+   entered. Cleared the moment you record anything of your own. */
+const SAMPLE = {
+  events: [
+    { id: 1, k: 'deposit',  date: '2026-02-02', amt: 5000, note: 'Opening capital' },
+    { id: 2, k: 'trade', date: '2026-02-05', amt:  180, sym: 'ES',  setup: 'CISD' },
+    { id: 3, k: 'trade', date: '2026-02-06', amt: -95,  sym: 'NQ',  setup: 'SMT' },
+    { id: 4, k: 'trade', date: '2026-02-06', amt:  240, sym: 'ES',  setup: 'CISD' },
+    { id: 5, k: 'trade', date: '2026-02-11', amt: -140, sym: 'GC',  setup: 'Sweep' },
+    { id: 6, k: 'trade', date: '2026-02-13', amt:  410, sym: 'NQ',  setup: 'CISD' },
+    { id: 7, k: 'deposit',  date: '2026-02-16', amt: 2500, note: 'Added capital' },
+    { id: 8, k: 'trade', date: '2026-02-18', amt: -260, sym: 'ES',  setup: 'Sweep' },
+    { id: 9, k: 'trade', date: '2026-02-20', amt:  520, sym: 'NQ',  setup: 'CISD' },
+    { id:10, k: 'trade', date: '2026-02-24', amt:  145, sym: 'GC',  setup: 'SMT' },
+    { id:11, k: 'trade', date: '2026-02-26', amt: -310, sym: 'NQ',  setup: 'Sweep' },
+    { id:12, k: 'trade', date: '2026-03-02', amt:  680, sym: 'ES',  setup: 'CISD' },
+    { id:13, k: 'withdraw', date: '2026-03-04', amt: 1000, note: 'Rent' },
+    { id:14, k: 'trade', date: '2026-03-05', amt:  225, sym: 'NQ',  setup: 'SMT' },
+    { id:15, k: 'trade', date: '2026-03-06', amt: -180, sym: 'ES',  setup: 'Sweep' },
+  ],
+};
+
+let state = readStore() || SAMPLE;
+const events = () => [...state.events].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+const trades = () => events().filter(e => e.k === 'trade');
+const flows  = () => events().filter(e => e.k !== 'trade');
+const signed = (e) => e.k === 'withdraw' ? -e.amt : e.amt;
+
+/* ── the arithmetic ──
+   equity   — everything, because that is genuinely what is in the account
+   capital  — flows only, the money you put in
+   profit   — equity minus capital, which is what the trading did
+   TWR      — chained segment returns, cut at every flow, so a deposit
+              cannot be mistaken for a good week */
+function totals() {
+  const all = events();
+  const equity = all.reduce((s, e) => s + signed(e), 0);
+  const capital = flows().reduce((s, e) => s + signed(e), 0);
+  const t = trades();
+  const wins = t.filter(e => e.amt > 0), losses = t.filter(e => e.amt < 0);
+  const grossWin = wins.reduce((s, e) => s + e.amt, 0);
+  const grossLoss = Math.abs(losses.reduce((s, e) => s + e.amt, 0));
+
+  let eq = 0, segStart = null, twr = 1;
+  for (const e of all) {
+    if (e.k === 'trade') { eq += e.amt; continue; }
+    if (segStart !== null && segStart > 0) twr *= eq / segStart;
+    eq += signed(e);
+    segStart = eq;
+  }
+  if (segStart !== null && segStart > 0) twr *= eq / segStart;
+
+  /* Drawdown walks the TRADES only. Including flows made a withdrawal
+     look like a loss — the sample's worst drawdown was reported as
+     exactly the size of a rent payment. Taking money out is not losing
+     it, and this is the same mistake as counting a deposit as a gain,
+     just pointing the other way. */
+  let peak = 0, run = 0, dd = 0;
+  for (const e of t) { run += e.amt; peak = Math.max(peak, run); dd = Math.max(dd, peak - run); }
+
+  return {
+    equity, capital, profit: equity - capital,
+    twr: (twr - 1) * 100,
+    n: t.length,
+    winRate: t.length ? (wins.length / t.length) * 100 : 0,
+    avgWin: wins.length ? grossWin / wins.length : 0,
+    avgLoss: losses.length ? grossLoss / losses.length : 0,
+    pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
+    expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
+    dd,
+  };
+}
+
+const byDay = () => {
+  const m = new Map();
+  trades().forEach(e => {
+    const cur = m.get(e.date) || { pnl: 0, n: 0 };
+    cur.pnl += e.amt; cur.n += 1;
+    m.set(e.date, cur);
+  });
+  return m;
+};
+
+/* ── summary ── */
+function renderSummary() {
+  const t = totals();
+  const el = document.getElementById('summary');
+  el.innerHTML = [
+    ['Equity', money(t.equity), ''],
+    ['Capital in', money(t.capital), ''],
+    ['Profit', money(t.profit, true), t.profit > 0 ? 'up' : t.profit < 0 ? 'down' : ''],
+    ['Return', (t.twr >= 0 ? '+' : '−') + Math.abs(t.twr).toFixed(1) + '%',
+      t.twr > 0 ? 'up' : t.twr < 0 ? 'down' : ''],
+  ].map(([l, v, cls]) => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`).join('');
+  document.getElementById('calMeta').textContent = `${t.n} trades`;
+  document.getElementById('capMeta').textContent = money(t.capital) + ' in';
+  document.getElementById('metMeta').textContent = `${t.n} trades`;
+}
+
+/* ── calendar ── */
+let cursor = new Date(2026, 2, 1);
+const MONTHS = ['January','February','March','April','May','June',
+                'July','August','September','October','November','December'];
+
+function renderCalendar() {
+  const y = cursor.getFullYear(), m = cursor.getMonth();
+  document.getElementById('monthLabel').textContent = `${MONTHS[m]} ${y}`;
+  const days = byDay();
+  const first = new Date(y, m, 1);
+  const lead = (first.getDay() + 6) % 7;          // weeks start Monday
+  const len = new Date(y, m + 1, 0).getDate();
+  const todayIso = iso(new Date());
+
+  let monthPnl = 0, cells = '';
+  for (let i = 0; i < lead; i++) cells += '<div class="day blank" aria-hidden="true"></div>';
+  for (let d = 1; d <= len; d++) {
+    const key = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const hit = days.get(key);
+    const cls = hit ? (hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : '') : '';
+    if (hit) monthPnl += hit.pnl;
+    /* The figure is always present, so the colour is reinforcement and
+       never the only thing carrying the result. */
+    cells += `<button class="day ${cls} ${key === todayIso ? 'today' : ''}" type="button"
+        aria-label="${d} ${MONTHS[m]}${hit ? `, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n > 1 ? 's' : ''}` : ', no trades'}">
+      <span class="d" aria-hidden="true">${d}</span>
+      ${hit ? `<span class="n" aria-hidden="true">${hit.n}</span>
+               <span class="v" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
+    </button>`;
+  }
+  document.getElementById('grid').innerHTML = cells;
+  const mp = document.getElementById('monthPnl');
+  mp.textContent = monthPnl ? money(monthPnl, true) : 'no trades';
+  mp.style.color = monthPnl > 0 ? 'var(--up)' : monthPnl < 0 ? 'var(--down)' : '';
+}
+
+document.getElementById('prevM').addEventListener('click', () => {
+  cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1); renderCalendar();
+});
+document.getElementById('nextM').addEventListener('click', () => {
+  cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1); renderCalendar();
+});
+
+/* ── metrics ── */
+function renderMetrics() {
+  const t = totals();
+  const pf = t.pf === Infinity ? '∞' : t.pf.toFixed(2);
+  document.getElementById('metrics').innerHTML = [
+    [money(t.profit, true), 'Realised profit', 'Trades only. Deposits are never counted here.',
+      t.profit > 0 ? 'up' : 'down'],
+    [(t.twr >= 0 ? '+' : '−') + Math.abs(t.twr).toFixed(1) + '%', 'Time-weighted return',
+      'Chained across every deposit and withdrawal, so it measures the trading.',
+      t.twr > 0 ? 'up' : 'down'],
+    [t.winRate.toFixed(0) + '%', 'Win rate', `${t.n} trades`, ''],
+    [pf, 'Profit factor', 'Gross won ÷ gross lost. Under 1 and the edge is negative.', ''],
+    [money(t.expectancy, true), 'Expectancy', 'What an average trade is worth to you.',
+      t.expectancy > 0 ? 'up' : 'down'],
+    [money(t.avgWin), 'Average win', '', ''],
+    [money(t.avgLoss), 'Average loss', '', ''],
+    [money(t.dd), 'Max drawdown', 'Largest fall from a peak in the account.', ''],
+  ].map(([v, l, note, cls]) =>
+    `<div class="metric"><b class="${cls ? 'stat ' + cls : ''}" style="${cls === 'up' ? 'color:var(--up)' : cls === 'down' ? 'color:var(--down)' : ''}">${v}</b>
+     <span>${l}</span>${note ? `<em>${note}</em>` : ''}</div>`).join('');
+  renderCurve();
+}
+
+function renderCurve() {
+  const all = events();
+  const svg = document.getElementById('curve');
+  if (!all.length) { svg.innerHTML = ''; return; }
+  const W = 900, H = 170, PAD = 26;
+
+  let eq = 0, cap = 0;
+  const pts = all.map((e, i) => {
+    eq += signed(e);
+    if (e.k !== 'trade') cap += signed(e);
+    return { i, eq, cap, flow: e.k !== 'trade', date: e.date };
+  });
+  const maxV = Math.max(...pts.map(p => Math.max(p.eq, p.cap))) * 1.08 || 1;
+  const x = i => PAD + (i / Math.max(1, pts.length - 1)) * (W - PAD * 2);
+  const y = v => H - PAD - (v / maxV) * (H - PAD * 2);
+
+  const line = key => pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join('');
+  const marks = pts.filter(p => p.flow).map(p =>
+    `<line class="flow" x1="${x(p.i).toFixed(1)}" y1="${PAD - 8}" x2="${x(p.i).toFixed(1)}" y2="${H - PAD}"/>
+     <circle class="flow-dot" cx="${x(p.i).toFixed(1)}" cy="${y(p.eq).toFixed(1)}" r="2.6"/>`).join('');
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML =
+    `<line class="gridline" x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}"/>
+     <line class="gridline" x1="${PAD}" y1="${PAD - 8}" x2="${W - PAD}" y2="${PAD - 8}"/>
+     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${money(maxV).replace('.00','')}</text>
+     <text class="axis-l" x="${PAD}" y="${H - PAD + 13}">$0</text>
+     ${marks}
+     <path class="basis" d="${line('cap')}"/>
+     <path class="equity" d="${line('eq')}"/>`;
+
+  const t = totals();
+  document.getElementById('curveAlt').textContent =
+    `Equity ended at ${money(t.equity)} against ${money(t.capital)} of capital put in, `
+    + `a realised profit of ${money(t.profit)}. Vertical marks are deposits and withdrawals.`;
+}
+
+/* ── capital ── */
+function renderLedger() {
+  const all = events().reverse();
+  const ul = document.getElementById('ledger');
+  document.getElementById('ledgerMeta').textContent = `${all.length} events`;
+  if (!all.length) { ul.innerHTML = '<li class="empty">Nothing recorded yet</li>'; return; }
+  ul.innerHTML = all.map(e => {
+    const v = signed(e);
+    const label = e.k === 'trade' ? `${e.sym || 'Trade'}${e.setup ? ' · ' + e.setup : ''}` : (e.note || '');
+    return `<li>
+      <span class="led-d">${e.date}</span>
+      <span class="led-k">${e.k}</span>
+      <span class="led-n">${label}</span>
+      <span class="led-v ${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${money(v, true)}</span>
+      <button class="drop" type="button" data-id="${e.id}" aria-label="Remove ${e.k} of ${money(Math.abs(v))} on ${e.date}">✕</button>
+    </li>`;
+  }).join('');
+}
+
+document.getElementById('ledger').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.drop');
+  if (!b) return;
+  state.events = state.events.filter(e => String(e.id) !== b.dataset.id);
+  commit(`Removed one event.`);
+});
+
+document.getElementById('flowForm').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const k = document.getElementById('fKind').value;
+  const amt = parseFloat(document.getElementById('fAmt').value);
+  const date = document.getElementById('fDate').value;
+  if (!(amt > 0) || !date) return;
+  /* The sample vanishes the moment real capital is recorded — mixing
+     demonstration numbers into live figures would be worse than useless. */
+  if (state === SAMPLE) state = { events: [] };
+  state.events.push({ id: Date.now(), k, date, amt,
+    note: document.getElementById('fNote').value.trim() });
+  ev.target.reset();
+  document.getElementById('fDate').value = iso(new Date());
+  commit(`${k === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${money(amt)} recorded.`);
+});
+
+document.getElementById('newTrade').addEventListener('click', () => {
+  document.getElementById('say').textContent = 'Recording trades is not in this build yet.';
+});
+
+function commit(msg) {
+  writeStore(state);
+  renderAll();
+  document.getElementById('say').textContent = msg;
+}
+function renderAll() { renderSummary(); renderCalendar(); renderMetrics(); renderLedger(); }
+
+/* ── sections ── */
+const SECTIONS = {
+  calendar: document.getElementById('calendarSection'),
+  metrics:  document.getElementById('metricsSection'),
+  settings: document.getElementById('settingsSection'),
+};
+function goto(view) {
+  document.querySelectorAll('[data-view]').forEach(b => {
+    if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+  Object.entries(SECTIONS).forEach(([k, el]) => { el.hidden = k !== view; });
+  document.getElementById('say').textContent = view;
+}
+document.querySelectorAll('[data-view]').forEach(b =>
+  b.addEventListener('click', () => goto(b.dataset.view)));
+
+document.getElementById('fDate').value = iso(new Date());
+renderAll();
+</script>
+</body>
+</html>
