@@ -6,6 +6,29 @@
 <meta name="color-scheme" content="dark light" />
 <title>Arc — Board</title>
 
+<script>
+/* Runs before the stylesheet so the first paint is already themed and the
+   photograph starts downloading immediately — set at the end of the app
+   script, --photo stayed invalid until everything else had built, so the
+   JPEG queued behind the whole page. localStorage is guarded: private
+   browsing throws on access, and that must not take the theme system down. */
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  var p = read('arc.palette') || 'grotto';
+  if (p === 'salt') p = 'grotto';
+  var m = read('arc.theme') || 'system';
+  d.dataset.palette = p;
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  var l = document.createElement('link');
+  l.rel = 'preload'; l.as = 'image'; l.href = 'bg/' + p + '.jpg';
+  l.fetchPriority = 'high';
+  document.head.appendChild(l);
+})();
+</script>
+
 <style>
 /* ═══════════════════════════════════════════════════════════════
    ARC — visual prototype. Desktop only.
@@ -70,6 +93,7 @@
   --glass-line: rgba(255, 255, 255, .05);
   --rule:       rgba(255, 255, 255, .035);
   --glass-in:   rgba(0, 0, 0, .34);
+  --menu:       rgba(22, 21, 20, .96);
   --glass-in-2: rgba(0, 0, 0, .42);
 
   --ink:   #f2f1ef;
@@ -89,16 +113,15 @@
   --accent-a: #467a6c;
   --accent-b: #0d5348;
   --accent-c: #06302b;
-  --accent:   var(--sw-sage);
+  --accent:   #9fb4be;
 
-  --now:          var(--sw-sage);
+  --now:          #9fb4be;
   --now-pill:     #17715a;
   --now-pill-ink: #ffffff;
 
   --btn:     #ffffff;
   --btn-ink: #14130f;
   --seg-on:  rgba(0, 0, 0, .55);
-  --seg-on-ink: var(--ink);
   --seg-on-ink: var(--ink);
 
   /* Every theme's signature colour, always defined, so the picker's
@@ -131,6 +154,7 @@
   --glass-line: rgba(0, 0, 0, .07);
   --rule:       rgba(0, 0, 0, .05);
   --glass-in:   rgba(0, 0, 0, .11);
+  --menu:       rgba(250, 248, 245, .97);
   --glass-in-2: rgba(0, 0, 0, .17);
 
   --ink:   #1a1815;
@@ -146,9 +170,9 @@
   --accent-a: #3d6d60;
   --accent-b: #0a4a3e;
   --accent-c: #05372f;
-  --accent:   var(--sw-sage);
+  --accent:   #365e70;
 
-  --now:          #4a8a76;
+  --now:          #365e70;
   --now-pill:     #0b6b52;
   --now-pill-ink: #ffffff;
 
@@ -156,10 +180,7 @@
   --btn-ink: #ffffff;
   /* The selected pill is near-black in BOTH themes, so its text cannot
      follow --ink — in light mode that put dark ink on a dark pill. */
-  /* The selected pill is near-black in BOTH themes, so its text cannot
-     follow --ink — in light mode that put dark ink on a dark pill. */
   --seg-on:  rgba(0, 0, 0, .82);
-  --seg-on-ink: #f7f5f2;
   --seg-on-ink: #f7f5f2;
 
   --sw-grotto: #365e70; --sw-dune: #884833; --sw-fjord: #336246; --sw-shore: #844561; --sw-lagoon: #226262;
@@ -202,7 +223,7 @@
 }
 :root[data-palette="fjord"] {
   --photo: url("bg/fjord.jpg");
-  --glass: rgba(20, 19, 18, .58); --glass-bright: .54;
+  --glass: rgba(20, 19, 18, .40); --glass-bright: .74;
   --accent-a: #4a775c; --accent-b: #2a543b; --accent-c: #1a3625;
   --accent: #9bb8a6; --now: #9bb8a6; --now-pill: #2a543b;
   --sw-fjord: #9bb8a6;
@@ -210,7 +231,7 @@
 }
 :root[data-palette="shore"] {
   --photo: url("bg/shore.jpg");
-  --glass: rgba(20, 19, 18, .60); --glass-bright: .48;
+  --glass: rgba(20, 19, 18, .46); --glass-bright: .60;
   --accent-a: #955c76; --accent-b: #733a53; --accent-c: #4c2336;
   --accent: #c9a8b7; --now: #c9a8b7; --now-pill: #733a53;
   --sw-shore: #c9a8b7;
@@ -225,7 +246,7 @@
   --edge: #c8dfdf; --focus: #c8dfdf;
 }
 :root[data-resolved="light"][data-palette="grotto"] {
-  --glass: rgba(252, 250, 247, .58); --glass-bright: 1.34;
+  --glass: rgba(252, 250, 247, .60); --glass-bright: 1.34;
   --accent-a: #3b6475; --accent-b: #274957; --accent-c: #18323c;
   --accent: #365e70; --now: #365e70; --now-pill: #274957;
   --sw-grotto: #365e70;
@@ -253,7 +274,7 @@
   --edge: #844561; --focus: #844561;
 }
 :root[data-resolved="light"][data-palette="lagoon"] {
-  --glass: rgba(252, 250, 247, .60); --glass-bright: 1.42;
+  --glass: rgba(252, 250, 247, .64); --glass-bright: 1.40;
   --accent-a: #266767; --accent-b: #174b4b; --accent-c: #0e3434;
   --accent: #226262; --now: #226262; --now-pill: #174b4b;
   --sw-lagoon: #226262;
@@ -275,28 +296,33 @@
 
    Only chrome buttons take it. Timeline bars and marks are data, and
    ringing every one of them would turn the board into a light show. */
-.btn, .rail button, .seg button, .fab, .swatch { position: relative; }
+.btn, .rail button, .seg button, .fab { position: relative; }
+/* Not on .swatch: five stacked rings inside a 152px menu read as five
+   text inputs, and they fight the one row that is selected. */
 .btn::before, .rail button::before, .seg button::before,
-.fab::before, .swatch::before {
+.fab::before {
   content: '';
   position: absolute;
   inset: 0;
   border-radius: inherit;
   padding: 1px;
   background: linear-gradient(
-      var(--edge-from, 215deg),
+      215deg,
       color-mix(in srgb, var(--edge) 92%, transparent) 0%,
       color-mix(in srgb, var(--edge) 30%, transparent) 34%,
       color-mix(in srgb, var(--edge) 8%,  transparent) 58%,
       transparent 76%);
+  z-index: 0;             /* under the label — the bloom was grazing text */
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
           mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
           mask-composite: exclude;
   filter: drop-shadow(0 0 5px color-mix(in srgb, var(--edge) 40%, transparent));
   pointer-events: none;
-  z-index: 1;
 }
+/* A pale ring on the white primary button is invisible; ring it with its
+   own ink so the edge always contrasts with the surface it wraps. */
+.btn-primary { --edge: var(--btn-ink); }
 
 /* Any author rule that sets `display` outranks the UA's
    `[hidden] { display: none }`, so hiding by property silently fails on
@@ -373,89 +399,97 @@ body {
   z-index: -1;
   pointer-events: none;
   overflow: hidden;
+  contain: strict;
 }
+.backdrop { contain: strict; }
 .fx::before, .fx::after { content: ''; position: absolute; inset: -10%; }
+
+/* White weather ink through a light panel's brightness() lift clips to
+   pure white; the layer dims as a whole rather than re-inking each effect. */
+:root[data-resolved="light"] .fx { opacity: .5; }
 
 /* grotto — a still pool: reflected light wobbling on the rock, and a
    slow cool breath rising from the water. The wobble oscillates rather
    than scrolls — reflections sway, they do not travel. */
 [data-palette="grotto"] .fx::before {
+  inset: auto -60px -4% -60px;
+  height: 60%;
   background: repeating-linear-gradient(176deg,
       rgba(235, 246, 250, .10) 0 2px, transparent 2px 30px);
-  background-size: 100% 58%;
-  background-position: 0 100%;
-  background-repeat: no-repeat;
+  -webkit-mask-image: linear-gradient(transparent, #000 32%);
+          mask-image: linear-gradient(transparent, #000 32%);
+  will-change: transform;
   animation: fx-mirror 21s ease-in-out infinite alternate;
 }
 [data-palette="grotto"] .fx::after {
   background: radial-gradient(52% 30% at 50% 82%, rgba(178, 216, 228, .14), transparent 74%);
   animation: fx-breathe 15s ease-in-out infinite alternate;
 }
-@keyframes fx-mirror { from { background-position: 0 100%; opacity: .5; }
-                       to   { background-position: 26px 96%; opacity: 1; } }
+@keyframes fx-mirror { from { transform: translate3d(0, 0, 0); opacity: .5; }
+                       to   { transform: translate3d(26px, -14px, 0); opacity: 1; } }
 
 /* dune — the rim light breathing, under a turning starfield */
+[data-palette="dune"] .backdrop { background-position: 50% 0%; }
 [data-palette="dune"] .fx::before {
-  background: radial-gradient(44% 24% at 44% 60%, rgba(255, 168, 74, .17), transparent 72%);
+  background: radial-gradient(44% 24% at 30% 74%, rgba(255, 168, 74, .17), transparent 72%);
   animation: fx-breathe 13s ease-in-out infinite alternate;
 }
-[data-palette="dune"] .fx::after {
-  background-image:
-    radial-gradient(circle at 50% 50%, rgba(255,255,255,.7) 0 .8px, transparent 1.6px),
-    radial-gradient(circle at 50% 50%, rgba(255,236,210,.5) 0 .6px, transparent 1.3px);
-  background-size: 230px 230px, 137px 137px;
-  opacity: .22;
-  animation: fx-twinkle 7s ease-in-out infinite alternate;
-}
 @keyframes fx-breathe { from { opacity: .55; } to { opacity: 1; } }
-@keyframes fx-twinkle { from { opacity: .1; } to { opacity: .28; } }
 
 /* fjord — two sheets of rain at different speeds, so it has depth */
+[data-palette="fjord"] .fx::before,
+[data-palette="fjord"] .fx::after {
+  inset: -360px -10% auto;
+  height: calc(100% + 720px);
+  will-change: transform;
+}
 [data-palette="fjord"] .fx::before {
   background-image: repeating-linear-gradient(100deg,
-      rgba(255,255,255,.20) 0 1px, transparent 1px 6px);
-  background-size: 100% 300px;
-  opacity: .40;
-  animation: fx-rain-near 1.05s linear infinite;
+      rgba(255,255,255,.20) 0 1px, transparent 1px 9px);
+  opacity: .26;
+  animation: fx-rain-near 2.2s linear infinite;
 }
 [data-palette="fjord"] .fx::after {
   background-image: repeating-linear-gradient(97deg,
       rgba(255,255,255,.13) 0 1px, transparent 1px 11px);
-  background-size: 100% 300px;
-  opacity: .30;
-  animation: fx-rain-far 2.1s linear infinite;
+  opacity: .20;
+  animation: fx-rain-far 4.4s linear infinite;
 }
-@keyframes fx-rain-near { to { background-position: -62px 300px; } }
-@keyframes fx-rain-far  { to { background-position: -34px 300px; } }
+/* The loop offsets are exact stripe periods along each gradient's normal
+   (310.3 x sin(10deg) = 6 stripes at 9px; 295.1 x sin(7deg) = 3 at 12px),
+   so the sheet lands on itself and never stutters. */
+@keyframes fx-rain-near { to { transform: translate3d(0, 310.3px, 0); } }
+@keyframes fx-rain-far  { to { transform: translate3d(0, 295.1px, 0); } }
 
 /* shore — cloud colour drifting across the sky */
 [data-palette="shore"] .fx::before {
+  inset: -10% -18%;
   background:
-    radial-gradient(58% 32% at 26% 26%, rgba(255, 186, 214, .15), transparent 72%),
-    radial-gradient(48% 26% at 74% 20%, rgba(255, 214, 170, .11), transparent 74%);
-  background-size: 190% 100%, 160% 100%;
+    radial-gradient(58% 32% at 26% 26%, rgba(255, 186, 214, .24), transparent 72%),
+    radial-gradient(48% 26% at 74% 20%, rgba(255, 214, 170, .18), transparent 74%);
+  will-change: transform;
   animation: fx-drift 60s ease-in-out infinite alternate;
 }
 [data-palette="shore"] .fx::after {
-  background: linear-gradient(180deg, transparent 52%, rgba(255, 226, 236, .07) 68%, transparent 82%);
+  background: linear-gradient(180deg, transparent 52%, rgba(255, 226, 236, .10) 68%, transparent 82%);
   animation: fx-breathe 17s ease-in-out infinite alternate;
 }
-@keyframes fx-drift { to { background-position: 42% 0, -32% 0; } }
+@keyframes fx-drift { to { transform: translate3d(4%, 0, 0); } }
 
 /* lagoon — caustics: two turbulence sheets crossing at different rates */
 [data-palette="lagoon"] .fx::before,
 [data-palette="lagoon"] .fx::after {
   background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'600\' height=\'600\'><filter id=\'w\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.006 .013\' numOctaves=\'2\' stitchTiles=\'stitch\'/><feColorMatrix values=\'0 0 0 0 .82 0 0 0 0 .96 0 0 0 0 .93 0 0 0 -1.7 1.05\'/></filter><rect width=\'600\' height=\'600\' filter=\'url(%23w)\'/></svg>");
-  /* stitchTiles, or the turbulence tile edges show as a hard rectangular
-     seam wherever the pattern wraps. */
+    url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'760\' height=\'760\'><filter id=\'w\' x=\'0\' y=\'0\' width=\'100%\' height=\'100%\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.006 .013\' numOctaves=\'2\' stitchTiles=\'stitch\'/><feColorMatrix values=\'0 0 0 0 .82 0 0 0 0 .96 0 0 0 0 .93 0 0 0 -1.7 1.05\'/></filter><rect width=\'760\' height=\'760\' filter=\'url(%23w)\'/></svg>");
   background-size: 760px 760px;
-  mix-blend-mode: soft-light;
+  inset: -800px;
+  will-change: transform;
 }
-[data-palette="lagoon"] .fx::before { opacity: .55; animation: fx-caustic-a 29s linear infinite; }
-[data-palette="lagoon"] .fx::after  { opacity: .38; animation: fx-caustic-b 41s linear infinite reverse; }
-@keyframes fx-caustic-a { to { background-position: 760px -300px; } }
-@keyframes fx-caustic-b { to { background-position: -520px 400px; } }
+[data-palette="lagoon"] .fx::before { opacity: .30; animation: fx-caustic-a 46s linear infinite; }
+[data-palette="lagoon"] .fx::after  { opacity: .20; animation: fx-caustic-b 58s linear infinite reverse; }
+/* Whole tiles per loop, so the pattern lands on itself. */
+@keyframes fx-caustic-a { to { transform: translate3d(760px, -760px, 0); } }
+@keyframes fx-caustic-b { to { transform: translate3d(-760px, 760px, 0); } }
 
 :where(a, button, input, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
@@ -475,6 +509,10 @@ body {
     transition-duration: .001ms !important;
     scroll-behavior: auto !important;
   }
+  /* Frozen weather is not a photograph: the rain freezes into a full-
+     screen 1px hatch and the mirror parks mid-wobble. It is decoration,
+     so under reduced motion it is simply absent. */
+  .fx { display: none; }
 }
 
 /* ═══ the glass panel ═══
@@ -504,7 +542,7 @@ body {
   flex-direction: column;
   align-items: center;
   gap: 4px;
-  width: 52px;
+  width: 56px;
   flex: none;
   padding: 12px 0;
   border-right: 1px solid var(--rule);
@@ -607,9 +645,12 @@ body {
   min-width: 152px;
   border: 1px solid var(--glass-line);
   border-radius: 11px;
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(24px) saturate(.9) brightness(var(--glass-bright));
-          backdrop-filter: blur(24px) saturate(.9) brightness(var(--glass-bright));
+  /* No backdrop-filter: the menu sits INSIDE the panel's backdrop root,
+     where a nested filter re-applies brightness() — squaring it — and has
+     nothing behind it to blur but the panel's own flat fill. An overlay
+     that shows the content it covers reads as broken, so it is simply
+     opaque enough not to. */
+  background: var(--menu);
   box-shadow: 0 14px 40px rgba(0, 0, 0, .38);
 }
 .swatch {
@@ -770,6 +811,12 @@ body {
 .bar .label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
 .bar[aria-pressed="true"] { outline: 2px solid var(--focus); outline-offset: 2px; }
 
+/* Every shape carries a faint keyline: the accent gradient's dark tail
+   and the soft pins were separating from the panel by as little as
+   1.16:1, so the end of the Development bar had no findable edge. */
+.bar, .pin, .diamond {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
 .bar[data-tone="strong"] { background: var(--bar-strong); color: var(--bar-strong-ink); }
 .bar[data-tone="soft"]   { background: var(--bar-soft);   color: var(--bar-soft-ink); }
 .bar[data-tone="accent"] {
@@ -896,9 +943,9 @@ body {
   padding: 0 16px;
   border: 0;
   border-radius: 22px;
-  background: var(--glass);
-  -webkit-backdrop-filter: blur(20px) brightness(var(--glass-bright));
-          backdrop-filter: blur(20px) brightness(var(--glass-bright));
+  /* Same reasoning as .pal-menu: it floats inside the glass, so it takes
+     an inset surface rather than compounding the panel's own filter. */
+  background: var(--glass-in-2);
   color: var(--ink);
   font: inherit;
   font-size: .84rem;
@@ -1080,7 +1127,7 @@ body {
            stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M9 5v14M14 5v14M19 5v14" /></svg>
     </button>
     <span class="spacer"></span>
-    <button type="button" id="themeRail" aria-label="Theme: System">
+    <button type="button" id="themeRail" aria-label="Appearance: System">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"></svg>
     </button>
@@ -1098,7 +1145,7 @@ body {
         <input id="q" type="search" placeholder="Search projects" autocomplete="off" />
       </div>
 
-      <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Theme: System">
+      <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Appearance: System">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
              stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
         <span id="themeLabel">System</span>
@@ -1106,11 +1153,11 @@ body {
 
       <div class="pal">
         <button class="btn btn-ghost" type="button" id="palBtn"
-                aria-expanded="false" aria-haspopup="true" aria-label="Theme: Grotto">
+                aria-expanded="false" aria-controls="palMenu" aria-label="Backdrop: Grotto">
           <span class="dot" aria-hidden="true"></span>
           <span id="palLabel">Grotto</span>
         </button>
-        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Theme" hidden></div>
+        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
       </div>
 
       <button class="btn btn-primary" type="button" id="newBtn">
@@ -1289,6 +1336,7 @@ const rowEls = [];
 for (let i = 0; i < rowCount; i++) {
   const r = document.createElement('div');
   r.className = 'row';
+  r.dataset.home = i;
   rows.appendChild(r);
   rowEls.push(r);
 }
@@ -1374,7 +1422,22 @@ MARKS.forEach((m) => {
 function layout(pass = 0) {
   let moved = false;
 
-  rowEls.forEach((host, r) => {
+  /* Spill is undone before it is redone: bars return to their authored
+     rows and empty spill rows are removed, so narrowing then widening the
+     window does not leave the board permanently taller. */
+  if (pass === 0) {
+    barEls.forEach((el, i) => {
+      /* By data-home, not rowEls index — spill rows from the previous
+         pass are still in that array and shift every index after them. */
+      const home = rows.querySelector(`.row[data-home="${BARS[i].row}"]`);
+      if (el.parentElement !== home) home.appendChild(el);
+    });
+    document.querySelectorAll('#rows .row.spill').forEach((r) => r.remove());
+    rowEls.length = 0;
+    document.querySelectorAll('#rows .row').forEach((r) => rowEls.push(r));
+  }
+
+  [...rowEls].forEach((host, r) => {
     host.querySelectorAll('.outside').forEach(n => n.remove());
 
     const W = host.getBoundingClientRect().width;
@@ -1437,7 +1500,7 @@ function layout(pass = 0) {
    stays near where the cascade put it instead of falling to the bottom. */
 function spill(host, el) {
   const row = document.createElement('div');
-  row.className = 'row';
+  row.className = 'row spill';
   host.after(row);
   row.appendChild(el);
   rowEls.splice(rowEls.indexOf(host) + 1, 0, row);
@@ -1617,6 +1680,12 @@ document.getElementById('newBtn').addEventListener('click', () => {
 /* ── theme ──
    Three states, not two: System follows the phone, and the two explicit
    choices override it. Stored so it survives a reload. */
+/* localStorage can throw on ACCESS (private browsing, sandboxed frames).
+   Reading it bare at the top of this block would take out everything
+   below — palette, picker, layout — and leave a black page. */
+function readStore(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+function writeStore(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+
 const KEY = 'arc.theme';
 const MODES = ['system', 'light', 'dark'];
 const LABEL = { system: 'System', light: 'Light', dark: 'Dark' };
@@ -1630,7 +1699,7 @@ const ICON = {
 const media = window.matchMedia('(prefers-color-scheme: dark)');
 const themeBtn  = document.getElementById('themeBtn');
 const themeRail = document.getElementById('themeRail');
-let mode = localStorage.getItem(KEY) || 'system';
+let mode = readStore(KEY) || 'system';
 
 function paint() {
   const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
@@ -1642,15 +1711,15 @@ function paint() {
   /* The visible label already says which mode it is; the button needs a
      name that says WHAT it is. aria-live on the control itself made
      screen readers announce the name change twice, or not at all. */
-  themeBtn .setAttribute('aria-label', `Theme: ${LABEL[mode]}`);
-  themeRail.setAttribute('aria-label', `Theme: ${LABEL[mode]}`);
+  themeBtn .setAttribute('aria-label', `Appearance: ${LABEL[mode]}`);
+  themeRail.setAttribute('aria-label', `Appearance: ${LABEL[mode]}`);
 }
 
 function cycle() {
   mode = MODES[(MODES.indexOf(mode) + 1) % MODES.length];
-  localStorage.setItem(KEY, mode);
+  writeStore(KEY, mode);
   paint();
-  say.textContent = `Theme: ${LABEL[mode]}.`;
+  say.textContent = `Appearance: ${LABEL[mode]}.`;
 }
 
 /* ── colour schemes ──
@@ -1670,7 +1739,7 @@ const PALETTES = [
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
 const palLabel = document.getElementById('palLabel');
-let palette = localStorage.getItem(PKEY) || 'grotto';
+let palette = readStore(PKEY) || 'grotto';
 /* salt was replaced by grotto; a stored 'salt' would otherwise select a
    theme with no CSS block and therefore no photograph. */
 if (palette === 'salt') palette = 'grotto';
@@ -1680,6 +1749,7 @@ PALETTES.forEach(([id, name, desc]) => {
   b.type = 'button';
   b.className = 'swatch';
   b.setAttribute('role', 'radio');
+  b.tabIndex = -1;
   b.dataset.palette = id;
   /* The dot paints from that scheme's own --sw-* token, so it always
      shows the real value rather than a copy that can drift. */
@@ -1696,15 +1766,20 @@ PALETTES.forEach(([id, name, desc]) => {
 
 function setPalette(id) {
   palette = id;
-  localStorage.setItem(PKEY, id);
+  writeStore(PKEY, id);
   document.documentElement.dataset.palette = id;
   const name = (PALETTES.find(p => p[0] === id) || [])[1] || id;
   palLabel.textContent = name;
-  palBtn.setAttribute('aria-label', `Theme: ${name}`);
+  palBtn.setAttribute('aria-label', `Backdrop: ${name}`);
+  /* Roving tabindex: exactly one radio is tabbable — the checked one —
+     so Tab lands on the group once and arrows move within it. Without
+     this, five tab stops and Tab walked OUT of the open menu. */
   palMenu.querySelectorAll('.swatch').forEach((s) => {
-    s.setAttribute('aria-checked', String(s.dataset.palette === id));
+    const on = s.dataset.palette === id;
+    s.setAttribute('aria-checked', String(on));
+    s.tabIndex = on ? 0 : -1;
   });
-  say.textContent = `Theme: ${name}.`;
+  say.textContent = `Backdrop: ${name}.`;
 }
 
 function openPal() {
@@ -1726,19 +1801,37 @@ palBtn.addEventListener('click', () => {
 palMenu.addEventListener('keydown', (e) => {
   const items = [...palMenu.querySelectorAll('.swatch')];
   const i = items.indexOf(document.activeElement);
-  if (e.key === 'Escape') { e.preventDefault(); closePal(true); }
-  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
-    e.preventDefault();
-    const next = (i + (e.key === 'ArrowDown' ? 1 : -1) + items.length) % items.length;
-    items[next].focus();
-    setPalette(items[next].dataset.palette);   // radiogroups select on arrow
-  }
+  const fwd  = e.key === 'ArrowDown' || e.key === 'ArrowRight';
+  const back = e.key === 'ArrowUp'   || e.key === 'ArrowLeft';
+  if (e.key === 'Escape') { e.preventDefault(); closePal(true); return; }
+  let next = -1;
+  if (e.key === 'Home') next = 0;
+  else if (e.key === 'End') next = items.length - 1;
+  else if (fwd || back) {
+    if (i < 0) return;
+    next = (i + (fwd ? 1 : -1) + items.length) % items.length;
+  } else return;
+  e.preventDefault();
+  items[next].focus();
+  setPalette(items[next].dataset.palette);   // radiogroups select on arrow
+});
+/* Focus leaving the widget closes it — otherwise Tab out of the open
+   menu left it floating with Escape dead, since Escape was bound inside. */
+document.querySelector('.pal').addEventListener('focusout', (e) => {
+  if (!palMenu.hidden && !(e.relatedTarget && e.relatedTarget.closest('.pal'))) closePal(false);
 });
 document.addEventListener('pointerdown', (e) => {
   if (!palMenu.hidden && !e.target.closest('.pal')) closePal(false);
 });
 
 setPalette(palette);
+
+/* Arrow-keying through the picker swaps data-palette per press, and each
+   never-fetched photograph would flash flat --ground while it loaded.
+   Warm the other four after first paint, at idle priority. */
+const warm = () => PALETTES.forEach(([id]) => { new Image().src = `bg/${id}.jpg`; });
+if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
+else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);
 themeRail.addEventListener('click', cycle);
 media.addEventListener('change', () => { if (mode === 'system') paint(); });
@@ -1762,7 +1855,15 @@ document.getElementById('span').textContent =
 
 /* ── go ── */
 requestAnimationFrame(() => { layout(); toToday(false); });
-window.addEventListener('resize', layout);
+
+/* layout() forces synchronous reflow per bar; raw resize events fire in
+   bursts. One pass per frame is enough. */
+let layoutQueued = false;
+window.addEventListener('resize', () => {
+  if (layoutQueued) return;
+  layoutQueued = true;
+  requestAnimationFrame(() => { layoutQueued = false; layout(); });
+});
 </script>
 </body>
 </html>
