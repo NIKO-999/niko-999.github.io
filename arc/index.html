@@ -129,8 +129,8 @@
   --glass-in-2: rgba(0, 0, 0, .42);
 
   --ink:   #f2f1ef;
-  --ink-2: #b0aca6;
-  --ink-3: #9c9893;
+  --ink-2: #bab6b0;
+  --ink-3: #a5a19c;
   --tick:  #c2beb7;
 
   --bar-strong:     #ffffff;
@@ -157,6 +157,8 @@
   /* Every theme's signature colour, always defined, so the picker's
      swatches show the real value rather than a copied hex. */
   --sw-grotto: #9fb4be; --sw-dune: #cfa89c; --sw-fjord: #9bb8a6; --sw-shore: #c9a8b7; --sw-lagoon: #88bbbb;
+
+  --art-1: #6d675f; --art-2: #0e1113; --art-glint: rgba(255,255,255,.10);
 
   --edge:  #a9e0cd;
   --focus: #8fd3ba;
@@ -192,8 +194,8 @@
   --glass-in-2: rgba(0, 0, 0, .17);
 
   --ink:   #1a1815;
-  --ink-2: #423f39;
-  --ink-3: #4f4b46;
+  --ink-2: #3e3b35;
+  --ink-3: #454139;
   --tick:  #4f4b46;
 
   --bar-strong:     #1c1a17;
@@ -217,6 +219,8 @@
 
   /* On a light panel a pale edge is invisible, so the light schemes use
      the accent itself rather than a tint of it. */
+  --art-1: #a89d8e; --art-2: #d9d2c8; --art-glint: rgba(0,0,0,.06);
+
   --edge:  #0b6b52;
   --focus: #0b6b52;
 }
@@ -1051,65 +1055,81 @@ body {
 .fab svg { width: 15px; height: 15px; color: var(--accent); }
 
 /* ── vision ──
-   The far end of the same data. Tiles carry no dates; a tile becomes a
-   bar on the Board when you commit to it, which is the one gesture that
-   ties the three sections into a lifecycle rather than three features. */
+   Banded by how far away a thing is, not gridded. A grid gave a someday
+   aim and live work identical weight, which is the exact failure Vision
+   exists to avoid — on the Board that same thing would look permanently
+   late, and in a grid it looks equally urgent.
+
+   The band IS the state, so the tiles carry no status chip. That also
+   retires the loudest element on the old Vision: a "Done" pill in pure
+   white, which drew the eye to finished work before live work. Finished
+   projects are not here at all now — they belong to Past. someday →
+   live → done is one lifecycle across three sections, and each thing
+   sits in exactly one of them. */
 .tilewrap { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
-.tiles {
-  margin: 0; padding: 0; list-style: none;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
-}
-.tile {
+.band { margin-bottom: 20px; }
+.band:last-child { margin-bottom: 0; }
+.band-h {
   display: flex;
-  flex-direction: column;
+  align-items: baseline;
+  gap: 10px;
+  margin: 0 0 9px;
+  font-weight: 400;
+}
+.band-h span {
+  font-family: var(--mono);
+  font-size: .66rem;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-2);
+}
+.band-h i { flex: 1; height: 1px; background: var(--rule); }
+.band-h em { font-family: var(--mono); font-size: .62rem; font-style: normal; color: var(--ink-3); }
+
+.band-row { display: flex; gap: 10px; margin: 0; padding: 0; list-style: none; }
+.tile {
+  flex: 1;
+  min-width: 0;
   overflow: hidden;
   border: 1px solid var(--glass-line);
-  border-radius: 12px;
+  border-radius: 10px;
   background: var(--glass-in);
 }
-/* Stands in for a photograph. On a real tile this is your own image —
-   the same slot the backdrop uses, and the reason the shell is glass. */
+/* Stands in for a photograph. On a real tile this is your own image. */
 .tile-art {
-  height: 96px;
+  height: 58px;
   --a: 150deg;
   --l: 30%;
   background:
-    radial-gradient(80% 60% at var(--l) 20%, rgba(255,255,255,.10), transparent 70%),
-    linear-gradient(var(--a), var(--sky-3), var(--sky-1));
+    radial-gradient(80% 60% at var(--l) 20%, var(--art-glint), transparent 70%),
+    linear-gradient(var(--a), var(--art-1), var(--art-2));
   border-bottom: 1px solid var(--rule);
 }
-/* Eight identical rectangles read as a broken image grid rather than a
-   board. Varying the light gives each tile its own weather until real
-   photographs replace them. */
-.tile:nth-child(3n)   .tile-art { --a: 118deg; --l: 72%; }
-.tile:nth-child(3n+1) .tile-art { --a: 165deg; --l: 22%; }
-.tile:nth-child(4n)   .tile-art { --a: 200deg; --l: 55%; }
-.tile-body { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
-.tile-name { font-size: .9rem; font-weight: 600; letter-spacing: -0.015em; }
-.tile-intent {
-  font-size: .76rem;
-  color: var(--ink-2);
-  line-height: 1.4;
-  flex: 1;
-  /* One line of intent, not a journal. */
-  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+.tile-body { padding: 8px 10px 10px; }
+.tile-name {
+  display: block;
+  font-size: .82rem;
+  font-weight: 600;
+  letter-spacing: -.015em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
-.tile-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 3px; }
+.tile-when {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--mono);
+  font-size: .6rem;
+  letter-spacing: -.02em;
+  color: var(--ink-3);
+}
 
-/* State never rides on colour alone — the chip always carries the word. */
-.chip {
-  padding: 3px 8px;
-  border-radius: 6px;
-  font-size: .66rem;
-  font-weight: 500;
-  background: var(--glass-in-2);
-  color: var(--ink-2);
-}
-.chip[data-state="live"]  { background: var(--accent-b); color: #fff; }
-.chip[data-state="done"]  { background: var(--bar-strong); color: var(--bar-strong-ink); }
-.tile-when { font-family: var(--mono); font-size: .64rem; letter-spacing: -.02em; color: var(--ink-3); }
+/* The far band recedes: outline instead of fill, a thinner strip of
+   image, and the name steps down one ink. It dims by changing colour,
+   never by opacity — a faded name is still a name that has to be read. */
+.band.far .tile { background: none; border-style: dashed; }
+.band.far .tile-art { height: 32px; filter: grayscale(.55) brightness(.8); }
+.band.far .tile-name { color: var(--ink-2); font-weight: 500; }
 
 /* ── past ──
    Planned as a ghost, actual as a solid, so the gap between what you
@@ -1300,9 +1320,7 @@ body {
         <span class="grow"></span>
         <span class="span-meta" id="visionMeta"></span>
       </div>
-      <div class="tilewrap" tabindex="0">
-        <ul class="tiles" id="tiles" aria-label="Vision tiles"></ul>
-      </div>
+      <div class="tilewrap" id="tiles" tabindex="0"></div>
     </main>
 
     <!-- ── past ── -->
@@ -1666,6 +1684,11 @@ document.getElementById('q').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   barEls .forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
   listEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
+  tileEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
+  /* A band with nothing left in it is noise, not a finding. */
+  document.querySelectorAll('.band').forEach((b) => {
+    b.hidden = ![...b.querySelectorAll('.tile')].some(t => !t.hidden);
+  });
   layout();
   const n = tally();
   say.textContent = q ? `${n} of ${BARS.length} phases match ${q}.` : 'Showing all phases.';
@@ -1705,41 +1728,72 @@ tabList .addEventListener('click', () => show(false));
 });
 
 /* ═══ vision ═══
-   No dates. A tile is an aim; it becomes a bar when you commit to one.
-   "someday" is a legitimate resting state — a tile can sit here for a
-   year without that being a failure, which is exactly why it is not on
-   the Board, where the same thing would look permanently late. */
-const TILES = [
-  { name: 'Trading game',  intent: 'Ship the simulator with a real strategy engine.', state: 'live',    when: 'Day 12 of 45' },
-  { name: 'Gene Keys',     intent: 'Finish the contemplation sequence and the pearl.', state: 'live',    when: 'Day 30 of 90' },
-  { name: 'Arc',           intent: 'This — the plan for the plans.',                   state: 'live',    when: 'Day 3 of 21' },
-  { name: 'Learn piano',   intent: 'Sight-read one page without stopping.',            state: 'someday', when: 'No date' },
-  { name: 'Long walk',     intent: 'Three weeks on foot, no laptop.',                  state: 'someday', when: 'No date' },
-  { name: 'Rebuild site',  intent: 'One shell, every app inside it.',                  state: 'someday', when: 'No date' },
-  { name: 'Destiny Matrix',intent: 'The chart, finished and offline.',                 state: 'done',    when: 'Nov 2025' },
-  { name: 'Routine',       intent: 'A day that bends to the week.',                    state: 'done',    when: 'Feb 2026' },
+   Every aim carries a horizon and nothing else decides where it sits.
+   Finished work is not here — it is in Past — so this list only ever
+   holds what is ahead of you. */
+const HORIZONS = [
+  ['now',     'Now',       'live, dated',             false],
+  ['year',    'This year', 'chosen, not started',     false],
+  ['someday', 'Someday',   'no date, and that is fine', true],
 ];
-const STATE_WORD = { live: 'Live', someday: 'Someday', done: 'Done' };
+
+const TILES = [
+  { name: 'Trading game',   horizon: 'now',     when: 'Day 12 of 45' },
+  { name: 'Gene Keys',      horizon: 'now',     when: 'Day 30 of 90' },
+  { name: 'Arc',            horizon: 'now',     when: 'Day 3 of 21'  },
+  { name: 'Rebuild site',   horizon: 'year',    when: 'This year'    },
+  { name: 'Learn piano',    horizon: 'year',    when: 'This year'    },
+  { name: 'Long walk',      horizon: 'someday', when: 'No date'      },
+  { name: 'Sabbatical',     horizon: 'someday', when: 'No date'      },
+  { name: 'Sub-3 marathon', horizon: 'someday', when: 'No date'      },
+];
 
 const tiles = document.getElementById('tiles');
-TILES.forEach((t) => {
-  const li = document.createElement('li');
-  li.className = 'tile';
-  li.innerHTML =
-    `<div class="tile-art" aria-hidden="true"></div>
-     <div class="tile-body">
-       <span class="tile-name">${t.name}</span>
-       <span class="tile-intent">${t.intent}</span>
-       <span class="tile-foot">
-         <span class="chip" data-state="${t.state}">${STATE_WORD[t.state]}</span>
+let tileEls = [];
+
+HORIZONS.forEach(([id, label, sub, far], bi) => {
+  const items = TILES.filter(t => t.horizon === id);
+  if (!items.length) return;
+
+  const band = document.createElement('section');
+  band.className = 'band' + (far ? ' far' : '');
+  band.setAttribute('aria-label', `${label} — ${sub}`);
+
+  const h = document.createElement('h2');
+  h.className = 'band-h';
+  /* The rule and the tally are decoration; the heading a screen reader
+     hears is the band name and how many are in it. */
+  h.innerHTML = `<span>${label}</span><i aria-hidden="true"></i>`
+              + `<em aria-hidden="true">${items.length}</em>`
+              + `<span class="sr">, ${items.length} ${items.length === 1 ? 'aim' : 'aims'}</span>`;
+  band.appendChild(h);
+
+  const row = document.createElement('ul');
+  row.className = 'band-row';
+  items.forEach((t, i) => {
+    const li = document.createElement('li');
+    li.className = 'tile';
+    li.dataset.name = t.name.toLowerCase();
+    /* Varying the light per tile, so eight image slots do not read as
+       one photograph repeated eight times. */
+    li.innerHTML =
+      `<div class="tile-art" aria-hidden="true"
+            style="--a:${118 + (bi * 3 + i) * 17}deg;--l:${18 + (bi * 3 + i) * 9}%;
+                   filter:brightness(${(0.78 + (bi * 3 + i) * 0.05).toFixed(2)})"></div>
+       <div class="tile-body">
+         <span class="tile-name">${t.name}</span>
          <span class="tile-when">${t.when}</span>
-       </span>
-     </div>`;
-  tiles.appendChild(li);
+       </div>`;
+    row.appendChild(li);
+    tileEls.push(li);
+  });
+  band.appendChild(row);
+  tiles.appendChild(band);
 });
+
 document.getElementById('visionMeta').textContent =
-  `${TILES.filter(t => t.state === 'live').length} live · `
-  + `${TILES.filter(t => t.state === 'someday').length} someday`;
+  `${TILES.filter(t => t.horizon === 'now').length} now · `
+  + `${TILES.filter(t => t.horizon !== 'now').length} ahead`;
 
 /* ═══ past ═══
    Planned as a dashed ghost, actual as a solid. The gap between the two
