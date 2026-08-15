@@ -2,23 +2,25 @@
 <html lang="en">
 <head>
 <meta charset="utf-8" />
-<!-- No user-scalable=no. Pinch-zoom stays available; disabling it is an
-     accessibility failure and this is meant to be read on a phone. -->
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark light" />
 <title>Arc — Board</title>
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   ARC — visual prototype.
+   ARC — visual prototype. Desktop only.
 
    Two references, split by job:
      · the shell  — a glass panel inset in a photograph, an icon rail,
        a search field, Board/List pills, a white primary button
      · the canvas — a date axis, a Now line, duration bars, milestones
 
-   Look only: the data is fixed and nothing is saved. This exists so
-   the design can be checked on a real phone before the app is built.
+   Desktop-only means a pointer and a keyboard, so there are hover
+   states and no touch-target floor. It does NOT mean less accessible:
+   keyboard reachability and contrast still hold, and both matter more
+   here, not less — a mouse is not the only way people drive a desktop.
+
+   Look only: the data is fixed and nothing is saved.
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── tokens ──
@@ -84,11 +86,12 @@
 
   --focus: #8fd3ba;
 
+  /* --row is layout rhythm, not a touch floor: 38px bar on a 44px row
+     gives the reference's 47px pitch. */
   --bar-h: 38px;
-  --hit:   44px;
+  --row:   44px;
   --r-panel: 14px;
   --r-bar:   9px;
-  --nav-h:   57px;
 }
 
 :root[data-resolved="light"] {
@@ -141,14 +144,13 @@
    pair a `[hidden]` override with each of them. */
 [hidden] { display: none !important; }
 
-/* No -webkit-text-size-adjust lock, and type is in rem, so a phone's
-   system text-size setting actually does something. */
+/* Type is in rem and the root size is not pinned, so the browser's own
+   font-size setting still scales the whole app. */
 html { font-size: 100%; }
 
 body {
   margin: 0;
   min-height: 100vh;
-  min-height: 100dvh;
   color: var(--ink);
   font: 400 1rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
         system-ui, sans-serif;
@@ -224,12 +226,8 @@ body {
 .app {
   position: relative;
   display: flex;
-  margin: calc(10px + env(safe-area-inset-top))
-          calc(10px + env(safe-area-inset-right))
-          calc(10px + env(safe-area-inset-bottom))
-          calc(10px + env(safe-area-inset-left));
-  min-height: calc(100vh - 20px);
-  min-height: calc(100dvh - 20px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+  margin: clamp(28px, 7vh, 84px) clamp(40px, 10vw, 170px);
+  height: calc(100vh - 2 * clamp(28px, 7vh, 84px));
   border: 1px solid var(--glass-line);
   border-radius: var(--r-panel);
   background: var(--glass);
@@ -243,7 +241,7 @@ body {
 
 /* ── icon rail (wide screens; the phone gets a bottom bar) ── */
 .rail {
-  display: none;
+  display: flex;
   flex-direction: column;
   align-items: center;
   gap: 4px;
@@ -262,7 +260,7 @@ body {
   color: var(--btn-ink);
 }
 .rail button {
-  width: var(--hit); height: var(--hit);
+  width: 38px; height: 38px;
   display: grid; place-items: center;
   border: 0; border-radius: 10px;
   background: none;
@@ -288,7 +286,7 @@ body {
   display: flex;
   align-items: center;
   gap: 8px;
-  height: var(--hit);
+  height: 36px;
   padding: 0 12px;
   border: 1px solid var(--glass-line);
   border-radius: 8px;
@@ -308,7 +306,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: var(--hit);
+  height: 36px;
   padding: 0 13px;
   flex: none;
   border: 1px solid transparent;
@@ -366,7 +364,7 @@ body {
   position: absolute;
   top: 50%; left: 0; right: 0;
   transform: translateY(-50%);
-  height: var(--hit);
+  height: 36px;
 }
 .seg button[aria-selected="true"] { background: var(--seg-on); color: var(--ink); }
 
@@ -381,7 +379,7 @@ body {
 }
 .scroller::-webkit-scrollbar { height: 0; width: 0; }
 
-.plot { position: relative; min-width: 900px; min-height: 100%; }
+.plot { position: relative; min-height: 100%; }
 
 /* The reference leaves ~2.4 bar-heights of void under the axis. Ours
    was 0.57 and read as a cramped table. */
@@ -427,7 +425,7 @@ body {
 }
 
 .rows { position: relative; padding-bottom: 40px; }
-.row { position: relative; height: var(--hit); margin-bottom: 5px; }
+.row { position: relative; height: var(--row); margin-bottom: 5px; }
 .row.gap { margin-top: 24px; }
 
 .bar {
@@ -451,16 +449,18 @@ body {
   z-index: 2;
   -webkit-tap-highlight-color: transparent;
 }
-/* The painted bar stays honest about its duration; the touch target is
-   widened invisibly. JS clamps the widening so neighbouring bars never
-   overlap — otherwise the later bar in DOM order silently eats the tap. */
+/* The painted bar stays honest about its duration; the click target is
+   widened invisibly to the WCAG 2.5.8 minimum, no further — a pointer is
+   precise, and more slop than that means clicking blank canvas beside a
+   2-day bar selects it. JS clamps the widening at the midpoint of the gap
+   so neighbouring bars can never claim the same pixel. */
 .bar::after {
   content: '';
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%, -50%);
   width: var(--tap, 100%);
-  height: var(--hit);
+  height: 36px;
 }
 .bar .label { flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
 .bar[aria-pressed="true"] { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -519,7 +519,7 @@ body {
   display: flex;
   align-items: center;
   gap: 14px;
-  min-height: var(--hit);
+  min-height: 36px;
   padding: 0;
   border: 0;
   background: none;
@@ -579,12 +579,12 @@ body {
 .fab {
   position: absolute;
   right: 14px;
-  bottom: calc(14px + var(--nav-h));
+  bottom: 16px;
   z-index: 6;
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  height: var(--hit);
+  height: 36px;
   padding: 0 16px;
   border: 1px solid color-mix(in srgb, var(--accent) 65%, transparent);
   border-radius: 22px;
@@ -600,31 +600,6 @@ body {
 }
 .fab svg { width: 15px; height: 15px; color: var(--accent); }
 
-/* ── bottom nav (phone) ── */
-.nav {
-  display: flex;
-  gap: 4px;
-  padding: 6px 8px;
-  border-top: 1px solid var(--rule);
-}
-.nav button {
-  flex: 1;
-  min-height: var(--hit);
-  display: grid;
-  gap: 2px;
-  place-items: center;
-  border: 0;
-  border-radius: 11px;
-  background: none;
-  color: var(--ink-3);
-  font: inherit;
-  font-size: .66rem;
-  font-weight: 500;
-  cursor: pointer;
-}
-.nav button[aria-current="page"] { color: var(--ink); background: var(--glass-in); }
-.nav svg { width: 18px; height: 18px; }
-
 .placeholder {
   flex: 1;
   display: grid;
@@ -635,27 +610,31 @@ body {
   font-size: .875rem;
 }
 
-/* At phone width the title, the view toggle and the span will not share
-   a line — the title wrapped to two and the search lost its placeholder
-   to the two buttons beside it. Title takes its own row; the theme
-   button drops to its icon, which already carries the accessible name. */
-@media (max-width: 520px) {
+/* ── hover ──
+   A pointer is assumed now, so the shell can answer it. Kept to the
+   quietest thing that still registers: insets lift a step, bars lift
+   at the edge. Guarded on (hover: hover) so a trackpad tap on a
+   hybrid machine does not leave a stuck highlight. */
+@media (hover: hover) {
+  .rail button:hover,
+  .seg  button:not([aria-selected="true"]):hover { background: var(--glass-in); color: var(--ink); }
+  .btn-ghost:hover { background: var(--glass-in-2); color: var(--ink); }
+  .btn-primary:hover { filter: brightness(1.12); }
+  .search:hover { border-color: var(--glass-line); background: var(--glass-in-2); }
+  .bar:hover, .milestone:hover { filter: brightness(1.1); }
+  .list li:hover { background: var(--glass-in-2); }
+  .fab:hover { box-shadow: 0 0 0 4px color-mix(in srgb, var(--accent) 22%, transparent); }
+}
+
+/* A desktop window still gets dragged narrow. Below this the timeline
+   scrolls rather than crushing the bars, and the head stacks. */
+@media (max-width: 860px) {
+  .app { margin: 20px; height: calc(100vh - 40px); }
   .head { flex-wrap: wrap; row-gap: 8px; padding-bottom: 6px; }
   .head h1 { flex: 1 0 100%; }
   #themeLabel { display: none; }
   .btn-ghost { padding: 0 11px; }
-}
-
-@media (min-width: 720px) {
-  .rail { display: flex; }
-  .nav  { display: none; }
-  :root, :root[data-resolved="light"] { --nav-h: 0px; }
-  .app {
-    margin: clamp(28px, 7vh, 84px) clamp(40px, 10vw, 170px);
-    min-height: 0;
-    height: calc(100dvh - 2 * clamp(28px, 7vh, 84px));
-  }
-  .plot { min-width: 0; }
+  .plot { min-width: 720px; }
 }
 </style>
 </head>
@@ -665,7 +644,7 @@ body {
 
 <div class="app">
 
-  <nav class="rail" aria-label="Sections, sidebar">
+  <nav class="rail" aria-label="Sections">
     <span class="rail-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
            stroke-linecap="round" width="17" height="17">
@@ -746,25 +725,6 @@ body {
       <div class="placeholder" id="soon" hidden></div>
     </main>
 
-    <nav class="nav" aria-label="Sections" id="bottomNav">
-      <button type="button" data-view="vision">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-          <rect x="3" y="3" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
-          <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
-        </svg>
-        Vision
-      </button>
-      <button type="button" data-view="board" aria-current="page">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-             stroke-linecap="round" aria-hidden="true"><path d="M4 7h9M4 12h15M4 17h6" /></svg>
-        Board
-      </button>
-      <button type="button" data-view="past">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-             stroke-linecap="round" aria-hidden="true"><path d="M4 5v14M9 5v14M14 5v14M19 5v14" /></svg>
-        Past
-      </button>
-    </nav>
   </div>
 
   <button class="fab" type="button" id="todayBtn">
@@ -951,10 +911,11 @@ function layout() {
       const prevR = i > 0 ? pct(items[i-1].b.to) / 100 * W : 0;
       const nextL = i + 1 < items.length ? pct(items[i+1].b.from) / 100 * W : W;
 
-      /* Tap target: grow toward 44px, but never past the midpoint of the
-         gap to a neighbour, so two short bars can't claim the same pixel. */
+      /* Click target: grow toward 24px, but never past the midpoint of
+         the gap to a neighbour, so two short bars can't claim the same
+         pixel. See the note on .bar::after for why it is not larger. */
       const room = Math.min(L - prevR, nextL - R);
-      const grow = Math.max(0, Math.min(44 - (R - L), Math.max(0, room)));
+      const grow = Math.max(0, Math.min(24 - (R - L), Math.max(0, room)));
       it.el.style.setProperty('--tap', ((R - L) + grow) + 'px');
 
       /* Does the name fit inside the bar? Test the LABEL — the bar's own
@@ -1144,11 +1105,6 @@ document.getElementById('span').textContent =
   `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
 
 /* ── go ── */
-const nav = document.getElementById('bottomNav');
-new ResizeObserver(() => {
-  document.documentElement.style.setProperty('--nav-h', (nav.offsetHeight || 0) + 'px');
-}).observe(nav);
-
 requestAnimationFrame(() => { layout(); toToday(false); });
 window.addEventListener('resize', layout);
 </script>
