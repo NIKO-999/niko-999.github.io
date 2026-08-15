@@ -121,8 +121,6 @@
 
   --btn:     #ffffff;
   --btn-ink: #14130f;
-  --seg-on:  rgba(0, 0, 0, .55);
-  --seg-on-ink: var(--ink);
 
   /* Every theme's signature colour, always defined, so the picker's
      swatches show the real value rather than a copied hex. */
@@ -178,10 +176,6 @@
 
   --btn:     #1c1a17;
   --btn-ink: #ffffff;
-  /* The selected pill is near-black in BOTH themes, so its text cannot
-     follow --ink — in light mode that put dark ink on a dark pill. */
-  --seg-on:  rgba(0, 0, 0, .82);
-  --seg-on-ink: #f7f5f2;
 
   --sw-grotto: #365e70; --sw-dune: #884833; --sw-fjord: #336246; --sw-shore: #844561; --sw-lagoon: #226262;
 
@@ -296,11 +290,11 @@
 
    Only chrome buttons take it. Timeline bars and marks are data, and
    ringing every one of them would turn the board into a light show. */
-.btn, .rail button, .seg button, .fab { position: relative; }
-/* Not on .swatch: five stacked rings inside a 152px menu read as five
-   text inputs, and they fight the one row that is selected. */
-.btn::before, .rail button::before, .seg button::before,
-.fab::before {
+.btn, .rail button, .fab { position: relative; }
+/* Not on .swatch or .seg: a ring drawn around bare text reads as a text
+   input, not a selection. Five stacked in the picker menu, or two in the
+   head row, fight the very thing they are meant to mark. */
+.btn::before, .rail button::before, .fab::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -695,24 +689,45 @@ body {
 .head .grow { flex: 1; }
 .span-meta { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
 
-/* The reference's selected segment is a near-black pill on bare glass —
-   no enclosing track, and nothing white. A white pill here was the
-   second-loudest thing on the screen after the accent bar. */
-.seg { display: inline-flex; padding: 2px; border-radius: 9px; }
+/* Tabs carry what they hold, and selection is a lit dot rather than a
+   container. The head row loses its last box: title, tabs and span now
+   sit on bare glass, which is what the reference's own head does.
+
+   Both tabs show the same number, because they are one set of phases
+   shown two ways — and that is exactly why the number is worth having.
+   It goes live the moment search narrows the board. */
+.seg { display: flex; align-items: center; gap: 22px; }
 .seg button {
-  position: relative;
-  min-height: 28px;
-  padding: 0 11px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 1px;
   border: 0;
-  border-radius: 7px;
   background: none;
   color: var(--ink-2);
   font: inherit;
-  font-size: .78rem;
+  font-size: .84rem;
   font-weight: 500;
   cursor: pointer;
 }
-.seg button[aria-selected="true"] { background: var(--seg-on); color: var(--seg-on-ink); }
+.seg .mark {
+  width: 5px; height: 5px;
+  flex: none;
+  border-radius: 50%;
+  background: transparent;
+}
+.seg .n {
+  font-size: .7rem;
+  /* --ink-3 is too dim here: fjord and shore run the thinnest panels of
+     the five, and 11px at that weight fell to 3.7:1 on them. */
+  color: var(--ink-2);
+  font-variant-numeric: tabular-nums;
+}
+.seg button[aria-selected="true"] { color: var(--ink); }
+.seg button[aria-selected="true"] .mark {
+  background: var(--accent);
+  box-shadow: 0 0 7px color-mix(in srgb, var(--accent) 70%, transparent);
+}
 
 /* ═══ the canvas ═══ */
 .scroller {
@@ -1205,9 +1220,13 @@ body {
         <h1 id="planTitle">Workflow plan</h1>
         <div class="seg" role="tablist" aria-label="How to show the plan">
           <button type="button" role="tab" id="tabBoard" aria-selected="true"
-                  aria-controls="boardPanel">Board</button>
+                  aria-controls="boardPanel">
+            <span class="mark" aria-hidden="true"></span>Board<span class="n" id="nBoard"></span>
+          </button>
           <button type="button" role="tab" id="tabList" aria-selected="false"
-                  tabindex="-1" aria-controls="listPanel">List</button>
+                  tabindex="-1" aria-controls="listPanel">
+            <span class="mark" aria-hidden="true"></span>List<span class="n" id="nList"></span>
+          </button>
         </div>
         <span class="grow"></span>
         <span class="span-meta" id="span"></span>
@@ -1583,14 +1602,25 @@ const listEls = [...BARS].sort((a, b) => a.from - b.from).map((b) => {
 });
 
 /* ── search ── */
+/* The tab counts are the search result: one number, two places, live. */
+function tally() {
+  const n = barEls.filter(el => !el.hidden).length;
+  document.getElementById('nBoard').textContent = n;
+  document.getElementById('nList').textContent = n;
+  /* The tabs are decorative-count only; the spoken name stays a plain
+     word plus its number, not "Board 8 Board 8". */
+  tabBoard.setAttribute('aria-label', `Board, ${n} phases`);
+  tabList .setAttribute('aria-label', `List, ${n} phases`);
+  return n;
+}
+
 document.getElementById('q').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   barEls .forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
   listEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
   layout();
-  say.textContent = q
-    ? `${barEls.filter(el => !el.hidden).length} of ${BARS.length} phases match ${q}.`
-    : 'Showing all phases.';
+  const n = tally();
+  say.textContent = q ? `${n} of ${BARS.length} phases match ${q}.` : 'Showing all phases.';
 });
 
 /* ── tabs ──
@@ -1905,6 +1935,7 @@ document.getElementById('span').textContent =
   `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
 
 /* ── go ── */
+tally();
 requestAnimationFrame(() => { layout(); toToday(false); });
 
 /* layout() forces synchronous reflow per bar; raw resize events fire in
