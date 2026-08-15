@@ -544,8 +544,11 @@ body {
   top: 50%;
   transform: translateY(-50%);
   width: 15px; height: var(--bar-h);
+  padding: 0;
+  border: 0;
   border-radius: 8px;
   background: var(--bar-soft);
+  cursor: pointer;
 }
 .pin.on { background: var(--bar-strong); }
 
@@ -600,15 +603,121 @@ body {
 }
 .fab svg { width: 15px; height: 15px; color: var(--accent); }
 
-.placeholder {
-  flex: 1;
+/* ── vision ──
+   The far end of the same data. Tiles carry no dates; a tile becomes a
+   bar on the Board when you commit to it, which is the one gesture that
+   ties the three sections into a lifecycle rather than three features. */
+.tilewrap { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
+.tiles {
+  margin: 0; padding: 0; list-style: none;
   display: grid;
-  place-items: center;
-  padding: 50px 24px;
-  text-align: center;
-  color: var(--ink-2);
-  font-size: .875rem;
+  gap: 12px;
+  grid-template-columns: repeat(auto-fill, minmax(212px, 1fr));
 }
+.tile {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: var(--glass-in);
+}
+/* Stands in for a photograph. On a real tile this is your own image —
+   the same slot the backdrop uses, and the reason the shell is glass. */
+.tile-art {
+  height: 96px;
+  --a: 150deg;
+  --l: 30%;
+  background:
+    radial-gradient(80% 60% at var(--l) 20%, rgba(255,255,255,.10), transparent 70%),
+    linear-gradient(var(--a), var(--sky-3), var(--sky-1));
+  border-bottom: 1px solid var(--rule);
+}
+/* Eight identical rectangles read as a broken image grid rather than a
+   board. Varying the light gives each tile its own weather until real
+   photographs replace them. */
+.tile:nth-child(3n)   .tile-art { --a: 118deg; --l: 72%; }
+.tile:nth-child(3n+1) .tile-art { --a: 165deg; --l: 22%; }
+.tile:nth-child(4n)   .tile-art { --a: 200deg; --l: 55%; }
+.tile-body { padding: 11px 13px 13px; display: flex; flex-direction: column; gap: 5px; flex: 1; }
+.tile-name { font-size: .9rem; font-weight: 600; letter-spacing: -0.015em; }
+.tile-intent {
+  font-size: .76rem;
+  color: var(--ink-2);
+  line-height: 1.4;
+  flex: 1;
+  /* One line of intent, not a journal. */
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;
+}
+.tile-foot { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-top: 3px; }
+
+/* State never rides on colour alone — the chip always carries the word. */
+.chip {
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: .66rem;
+  font-weight: 500;
+  background: var(--glass-in-2);
+  color: var(--ink-2);
+}
+.chip[data-state="live"]  { background: var(--accent-b); color: #fff; }
+.chip[data-state="done"]  { background: var(--bar-strong); color: var(--bar-strong-ink); }
+.tile-when { font-size: .7rem; color: var(--ink-3); }
+
+/* ── past ──
+   Planned as a ghost, actual as a solid, so the gap between what you
+   said and what happened is the thing you actually look at. */
+.pastwrap { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
+.calib {
+  margin: 0 0 14px;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  background: var(--glass-in);
+  font-size: .8rem;
+  color: var(--ink-2);
+  line-height: 1.5;
+}
+.calib b { color: var(--ink); font-weight: 600; }
+.stripes { margin: 0; padding: 0; list-style: none; }
+.stripes li { padding: 9px 0; border-bottom: 1px solid var(--rule); }
+.stripes li:last-child { border-bottom: 0; }
+.stripe-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
+.stripe-name { font-size: .82rem; font-weight: 500; }
+.stripe-num { font-size: .72rem; color: var(--ink-2); white-space: nowrap; }
+.stripe-num b { color: var(--ink); font-weight: 600; }
+.track { position: relative; height: 18px; }
+/* The plan is a dashed outline the actual bar runs through and past.
+   At --glass-line it was invisible under the solid bar, which lost the
+   entire comparison — the only ghost you could see was the one project
+   that came in under. It needs real contrast to do its job. */
+.ghost {
+  position: absolute; top: 50%; left: 0;
+  transform: translateY(-50%);
+  height: 18px;
+  border: 1px dashed color-mix(in srgb, var(--ink-3) 60%, transparent);
+  border-radius: 5px;
+  background: none;
+}
+/* A hard stop where the plan ended, so overrun is a distance you can
+   see rather than two numbers you have to subtract. */
+.ghost::after {
+  content: '';
+  position: absolute;
+  right: -1px; top: -3px; bottom: -3px;
+  width: 2px;
+  border-radius: 1px;
+  background: var(--ink-3);
+}
+.actual {
+  position: absolute; top: 50%; left: 0;
+  transform: translateY(-50%);
+  height: 10px;
+  border-radius: 5px;
+  background: var(--bar-strong);
+}
+.actual.over { background: var(--accent-b); }
+
 
 /* ── hover ──
    A pointer is assumed now, so the shell can answer it. Kept to the
@@ -721,8 +830,31 @@ body {
       <div class="listwrap" id="listPanel" role="tabpanel" aria-labelledby="tabList" tabindex="0" hidden>
         <ul class="list" id="list"></ul>
       </div>
+    </main>
 
-      <div class="placeholder" id="soon" hidden></div>
+    <!-- ── vision ── -->
+    <main class="main" id="visionSection" hidden>
+      <div class="head">
+        <h1>Vision</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="visionMeta"></span>
+      </div>
+      <div class="tilewrap" tabindex="0">
+        <ul class="tiles" id="tiles" aria-label="Vision tiles"></ul>
+      </div>
+    </main>
+
+    <!-- ── past ── -->
+    <main class="main" id="pastSection" hidden>
+      <div class="head">
+        <h1>Past</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="pastMeta"></span>
+      </div>
+      <div class="pastwrap" tabindex="0">
+        <p class="calib" id="calib"></p>
+        <ul class="stripes" id="stripes" aria-label="Finished projects"></ul>
+      </div>
     </main>
 
   </div>
@@ -773,6 +905,17 @@ const BARS = [
 ];
 
 const MILESTONES = [{ name: 'Dev Start', on: d(2,10) }];
+
+/* Marks — a date you stamped, with a note on it. The reference draws
+   these as small unlabelled pills, and they stay unlabelled on screen;
+   the note is what you get on hover or from a screen reader. This is the
+   "I can mark it and see it" part, and the reason they are buttons and
+   not decoration. */
+const MARKS = [
+  { on: d(1,24), note: 'Scope locked' },
+  { on: d(3,17), note: 'Second review' },
+  { on: d(3,21), note: 'Ship', solid: true },
+];
 
 const axis  = document.getElementById('axis');
 const rows  = document.getElementById('rows');
@@ -890,20 +1033,42 @@ MILESTONES.forEach((m) => {
   last.appendChild(el);
 });
 
+MARKS.forEach((m) => {
+  const el = document.createElement('button');
+  el.type = 'button';
+  el.className = 'pin' + (m.solid ? ' on' : '');
+  el.style.left = pct(m.on) + '%';
+  const label = `Mark: ${m.note}, ${fmt(m.on)}`;
+  el.setAttribute('aria-label', label);
+  el.title = `${m.note} — ${fmt(m.on)}`;
+  el.addEventListener('click', () => { say.textContent = label; });
+  last.appendChild(el);
+});
+
 /* ── layout pass ──
-   Runs once per row, after all bars exist, because every decision here
+   Runs per row, after all bars exist, because every decision here
    depends on the neighbours: whether a caption fits, which side it goes,
-   and how far a tap target may spread before it eats the next bar. */
-function layout() {
+   and how far a click target may spread before it eats the next bar.
+
+   The authored rows are the reference's staggered cascade, and they are
+   kept wherever they work. But honest widths mean a 4-day bar next to a
+   25-day one starting the next day has nowhere to put its name — no room
+   inside, none either side. Rather than leave it a blank block, it drops
+   to a row of its own and the pass runs again. So the cascade is a
+   preference, not a promise, and every bar ends up labelled at any
+   window width. */
+function layout(pass = 0) {
+  let moved = false;
+
   rowEls.forEach((host, r) => {
     host.querySelectorAll('.outside').forEach(n => n.remove());
 
     const W = host.getBoundingClientRect().width;
     if (!W) return;
 
-    const items = BARS.map((b, i) => ({ b, el: barEls[i] }))
-                      .filter(x => x.b.row === r && !x.el.hidden)
-                      .sort((p, q) => p.b.from - q.b.from);
+    const items = barEls.map((el, i) => ({ b: BARS[i], el }))
+                        .filter(x => x.el.parentElement === host && !x.el.hidden)
+                        .sort((p, q) => p.b.from - q.b.from);
 
     items.forEach((it, i) => {
       const L = pct(it.b.from) / 100 * W;
@@ -943,9 +1108,25 @@ function layout() {
       const capW = cap.getBoundingClientRect().width;
       if      (R + 8 + capW <= nextL - 4) cap.style.left = (R + 8) + 'px';
       else if (L - 8 - capW >= prevR + 4) cap.style.left = (L - 8 - capW) + 'px';
-      else cap.remove();          // no room either side — the List tab has the words
+      else {
+        /* Nowhere to put it on this row. Give the bar its own. */
+        cap.remove();
+        if (items.length > 1) { spill(host, it.el); moved = true; }
+      }
     });
   });
+
+  if (moved && pass < 4) layout(pass + 1);
+}
+
+/* Moves a bar onto a fresh row directly beneath its current one, so it
+   stays near where the cascade put it instead of falling to the bottom. */
+function spill(host, el) {
+  const row = document.createElement('div');
+  row.className = 'row';
+  host.after(row);
+  row.appendChild(el);
+  rowEls.splice(rowEls.indexOf(host) + 1, 0, row);
 }
 
 /* ── list view ── */
@@ -1017,11 +1198,87 @@ tabList .addEventListener('click', () => show(false));
   });
 });
 
+/* ═══ vision ═══
+   No dates. A tile is an aim; it becomes a bar when you commit to one.
+   "someday" is a legitimate resting state — a tile can sit here for a
+   year without that being a failure, which is exactly why it is not on
+   the Board, where the same thing would look permanently late. */
+const TILES = [
+  { name: 'Trading game',  intent: 'Ship the simulator with a real strategy engine.', state: 'live',    when: 'Day 12 of 45' },
+  { name: 'Gene Keys',     intent: 'Finish the contemplation sequence and the pearl.', state: 'live',    when: 'Day 30 of 90' },
+  { name: 'Arc',           intent: 'This — the plan for the plans.',                   state: 'live',    when: 'Day 3 of 21' },
+  { name: 'Learn piano',   intent: 'Sight-read one page without stopping.',            state: 'someday', when: 'No date' },
+  { name: 'Long walk',     intent: 'Three weeks on foot, no laptop.',                  state: 'someday', when: 'No date' },
+  { name: 'Rebuild site',  intent: 'One shell, every app inside it.',                  state: 'someday', when: 'No date' },
+  { name: 'Destiny Matrix',intent: 'The chart, finished and offline.',                 state: 'done',    when: 'Nov 2025' },
+  { name: 'Routine',       intent: 'A day that bends to the week.',                    state: 'done',    when: 'Feb 2026' },
+];
+const STATE_WORD = { live: 'Live', someday: 'Someday', done: 'Done' };
+
+const tiles = document.getElementById('tiles');
+TILES.forEach((t) => {
+  const li = document.createElement('li');
+  li.className = 'tile';
+  li.innerHTML =
+    `<div class="tile-art" aria-hidden="true"></div>
+     <div class="tile-body">
+       <span class="tile-name">${t.name}</span>
+       <span class="tile-intent">${t.intent}</span>
+       <span class="tile-foot">
+         <span class="chip" data-state="${t.state}">${STATE_WORD[t.state]}</span>
+         <span class="tile-when">${t.when}</span>
+       </span>
+     </div>`;
+  tiles.appendChild(li);
+});
+document.getElementById('visionMeta').textContent =
+  `${TILES.filter(t => t.state === 'live').length} live · `
+  + `${TILES.filter(t => t.state === 'someday').length} someday`;
+
+/* ═══ past ═══
+   Planned as a dashed ghost, actual as a solid. The gap between the two
+   is the only honest estimate you will ever have of your own estimates,
+   which is why the multiplier is computed rather than typed. */
+const DONE = [
+  { name: 'Destiny Matrix',  planned: 30, actual: 47 },
+  { name: 'Tree of Life',    planned: 14, actual: 19 },
+  { name: 'Tzolkin',         planned:  7, actual:  6 },
+  { name: '4h profiling',    planned: 21, actual: 38 },
+  { name: 'Routine',         planned: 45, actual: 62 },
+  { name: 'Photo evidence',  planned:  5, actual:  9 },
+];
+
+const stripes = document.getElementById('stripes');
+const longest = Math.max(...DONE.map(p => Math.max(p.planned, p.actual)));
+
+DONE.forEach((p) => {
+  const over = p.actual > p.planned;
+  const ratio = (p.actual / p.planned);
+  const li = document.createElement('li');
+  li.innerHTML =
+    `<div class="stripe-top">
+       <span class="stripe-name">${p.name}</span>
+       <span class="stripe-num">planned ${p.planned}d · took <b>${p.actual}d</b> · ${ratio.toFixed(1)}×</span>
+     </div>
+     <div class="track" role="img"
+          aria-label="${p.name}: planned ${p.planned} days, took ${p.actual} days, ${ratio.toFixed(1)} times the estimate">
+       <span class="ghost"  style="width:${(p.planned / longest) * 100}%"></span>
+       <span class="actual${over ? ' over' : ''}" style="width:${(p.actual / longest) * 100}%"></span>
+     </div>`;
+  stripes.appendChild(li);
+});
+
+const mult = DONE.reduce((s, p) => s + p.actual / p.planned, 0) / DONE.length;
+document.getElementById('calib').innerHTML =
+  `Across ${DONE.length} finished projects you take <b>${mult.toFixed(1)}×</b> as long as you plan for. `
+  + `A six-week estimate is really <b>${Math.round(6 * mult)}</b> weeks.`;
+document.getElementById('pastMeta').textContent = `${DONE.length} finished`;
+
 /* ── sections ── */
-const soon = document.getElementById('soon');
-const COPY = {
-  vision: 'Vision — tiles for what you are building toward, no dates required. Not built yet.',
-  past:   'Past — finished projects as stripes, a year at a glance. Not built yet.',
+const SECTIONS = {
+  board:  document.getElementById('mainCol'),
+  vision: document.getElementById('visionSection'),
+  past:   document.getElementById('pastSection'),
 };
 
 function goto(view) {
@@ -1030,12 +1287,10 @@ function goto(view) {
     if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
   });
-  document.querySelector('.head').hidden = !isBoard;
-  soon.hidden = isBoard;
-  soon.textContent = isBoard ? '' : COPY[view];
+  Object.entries(SECTIONS).forEach(([k, el]) => { el.hidden = k !== view; });
+  todayBtn.hidden = !isBoard;
   if (isBoard) show(tabBoard.getAttribute('aria-selected') === 'true');
-  else { board.hidden = true; listPanel.hidden = true; todayBtn.hidden = true; }
-  say.textContent = isBoard ? 'Board.' : COPY[view];
+  say.textContent = { board: 'Board.', vision: 'Vision.', past: 'Past.' }[view];
 }
 document.querySelectorAll('[data-view]').forEach((b) => {
   b.addEventListener('click', () => goto(b.dataset.view));
