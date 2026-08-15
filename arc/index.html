@@ -50,17 +50,32 @@
   /* glass. Insets RECESS with black rather than lifting with white —
      measured, the reference's cards are ~30% darker than the glass
      around them. Lifting made them read as cards stacked on a panel
-     instead of wells cut into one. */
-  --glass:      rgba(24, 23, 22, .56);
+     instead of wells cut into one.
+
+     The reference's measured ~.46 fill was correct over ITS photograph,
+     which is low-contrast haze. These five are not: a starfield and a
+     sunlit lagoon put wildly different luminance behind the same axis
+     label, and at .56 the ticks fell to 2.4:1 on four of five themes.
+
+     Raising opacity fixes that and kills the effect — at .74 the panel
+     read as frosted plastic, and the soft bars lost their ground in
+     light mode. So the fill stays low and --glass-bright does the work
+     instead: backdrop-filter brightness pulls whatever is behind the
+     panel toward one end before the fill goes over it. The composite
+     becomes predictable enough to measure while the glass stays
+     genuinely transparent — you can still read the photograph through
+     it, which was the entire point. */
+  --glass:      rgba(20, 19, 18, .40);
+  --glass-bright: .46;
   --glass-line: rgba(255, 255, 255, .05);
   --rule:       rgba(255, 255, 255, .035);
-  --glass-in:   rgba(0, 0, 0, .28);
+  --glass-in:   rgba(0, 0, 0, .34);
   --glass-in-2: rgba(0, 0, 0, .42);
 
   --ink:   #f2f1ef;
   --ink-2: #b0aca6;
   --ink-3: #9c9893;
-  --tick:  #a8a49e;
+  --tick:  #c2beb7;
 
   --bar-strong:     #ffffff;
   --bar-strong-ink: #14130f;
@@ -84,11 +99,11 @@
   --btn-ink: #14130f;
   --seg-on:  rgba(0, 0, 0, .55);
   --seg-on-ink: var(--ink);
+  --seg-on-ink: var(--ink);
 
-  /* Every scheme's signature colour, always defined, so the picker's
-     swatches can show the real value rather than a copied hex. */
-  --sw-sage: #6ba593; --sw-ice: #7fb4e0; --sw-ember: #e0a06b;
-  --sw-violet: #b096e0; --sw-mono: #b8b5b0;
+  /* Every theme's signature colour, always defined, so the picker's
+     swatches show the real value rather than a copied hex. */
+  --sw-salt: #a1b3c0; --sw-dune: #cfa89c; --sw-fjord: #9bb8a6; --sw-shore: #c9a8b7; --sw-lagoon: #88bbbb;
 
   --edge:  #a9e0cd;
   --focus: #8fd3ba;
@@ -111,20 +126,21 @@
   --ground:  #a9a19a;
   --grain:   .06;
 
-  --glass:      rgba(253, 251, 248, .66);
+  --glass:      rgba(252, 250, 247, .52);
+  --glass-bright: 1.75;
   --glass-line: rgba(0, 0, 0, .07);
   --rule:       rgba(0, 0, 0, .05);
-  --glass-in:   rgba(0, 0, 0, .05);
-  --glass-in-2: rgba(0, 0, 0, .09);
+  --glass-in:   rgba(0, 0, 0, .11);
+  --glass-in-2: rgba(0, 0, 0, .17);
 
   --ink:   #1a1815;
-  --ink-2: #56534d;
-  --ink-3: #5c5852;
-  --tick:  #5c5952;
+  --ink-2: #423f39;
+  --ink-3: #4f4b46;
+  --tick:  #4f4b46;
 
   --bar-strong:     #1c1a17;
   --bar-strong-ink: #ffffff;
-  --bar-soft:       #e7e3dc;
+  --bar-soft:       #dbd5ca;
   --bar-soft-ink:   #1c1a17;
 
   --accent-a: #3d6d60;
@@ -140,11 +156,13 @@
   --btn-ink: #ffffff;
   /* The selected pill is near-black in BOTH themes, so its text cannot
      follow --ink — in light mode that put dark ink on a dark pill. */
+  /* The selected pill is near-black in BOTH themes, so its text cannot
+     follow --ink — in light mode that put dark ink on a dark pill. */
   --seg-on:  rgba(0, 0, 0, .82);
   --seg-on-ink: #f7f5f2;
+  --seg-on-ink: #f7f5f2;
 
-  --sw-sage: #0b6b52; --sw-ice: #1d5580; --sw-ember: #7d451a;
-  --sw-violet: #4d3080; --sw-mono: #3d3d3d;
+  --sw-salt: #3c5d73; --sw-dune: #884833; --sw-fjord: #336246; --sw-shore: #844561; --sw-lagoon: #226262;
 
   /* On a light panel a pale edge is invisible, so the light schemes use
      the accent itself rather than a tint of it. */
@@ -152,61 +170,92 @@
   --focus: #0b6b52;
 }
 
-/* ═══ palettes ═══
-   Only the hue-carrying tokens change. The shell — glass, insets, ink,
-   hairlines — is identical in every scheme, because the reference's
-   whole trick is a near-monochrome surface with one accent on it. A
-   palette that repainted the panel would undo that.
+/* ═══ themes ═══
+   Five photographs, and an accent taken FROM each photograph rather than
+   chosen beside it — the hue is measured off the image, then driven to a
+   luminance that clears 4.5:1 against white, because that is where bar
+   labels sit. Two hues are named instead of measured: on the shore and
+   the lagoon the detector kept picking the sand, and the colour anyone
+   remembers is the sky in one and the water in the other.
 
-   Each scheme is declared twice, dark then light, and both blocks come
-   AFTER the base light block so they win on source order at equal
-   specificity. Every accent-a is checked to clear 4.5:1 against white,
-   since that is where bar labels sit. */
-:root[data-palette="ice"] {
-  --accent-a: #3a6a9a; --accent-b: #123f66; --accent-c: #0a2440;
-  --accent: var(--sw-ice); --now: var(--sw-ice); --now-pill: #1d5580;
-  --edge: #a9cdf0; --focus: #9cc8ee;
+   Only hue-carrying tokens change. Glass, insets, ink and hairlines are
+   identical in all five, so the photograph moves and the interface does
+   not. Each theme is declared for dark and light separately, so the
+   scheme and the theme stay orthogonal. */
+:root[data-palette="salt"] {
+  --photo: url("bg/salt.jpg");
+  --glass: rgba(20, 19, 18, .56); --glass-bright: .50;
+  --accent-a: #537187; --accent-b: #325064; --accent-c: #1e3241;
+  --accent: #a1b3c0; --now: #a1b3c0; --now-pill: #325064;
+  --sw-salt: #a1b3c0;
+  --edge: #d1dbe3; --focus: #d1dbe3;
 }
-:root[data-palette="ember"] {
-  --accent-a: #9a5a28; --accent-b: #6b3712; --accent-c: #3d1e08;
-  --accent: var(--sw-ember); --now: var(--sw-ember); --now-pill: #7d451a;
-  --edge: #f0c9a0; --focus: #eeb98c;
+:root[data-palette="dune"] {
+  --photo: url("bg/dune.jpg");
+  --glass: rgba(20, 19, 18, .52); --glass-bright: .62;
+  --accent-a: #9c5e4a; --accent-b: #753c2a; --accent-c: #4d2619;
+  --accent: #cfa89c; --now: #cfa89c; --now-pill: #753c2a;
+  --sw-dune: #cfa89c;
+  --edge: #e5d7d3; --focus: #e5d7d3;
 }
-:root[data-palette="violet"] {
-  --accent-a: #6a4a9a; --accent-b: #402a66; --accent-c: #241540;
-  --accent: var(--sw-violet); --now: var(--sw-violet); --now-pill: #4d3080;
-  --edge: #cfbaf0; --focus: #c3a9ec;
+:root[data-palette="fjord"] {
+  --photo: url("bg/fjord.jpg");
+  --glass: rgba(20, 19, 18, .58); --glass-bright: .54;
+  --accent-a: #4a775c; --accent-b: #2a543b; --accent-c: #1a3625;
+  --accent: #9bb8a6; --now: #9bb8a6; --now-pill: #2a543b;
+  --sw-fjord: #9bb8a6;
+  --edge: #cddfd4; --focus: #cddfd4;
 }
-:root[data-palette="mono"] {
-  --accent-a: #4a4a4a; --accent-b: #2e2e2e; --accent-c: #1a1a1a;
-  --accent: var(--sw-mono); --now: var(--sw-mono); --now-pill: #3d3d3d;
-  --edge: #e6e3de; --focus: #d6d3ce;
+:root[data-palette="shore"] {
+  --photo: url("bg/shore.jpg");
+  --glass: rgba(20, 19, 18, .60); --glass-bright: .48;
+  --accent-a: #955c76; --accent-b: #733a53; --accent-c: #4c2336;
+  --accent: #c9a8b7; --now: #c9a8b7; --now-pill: #733a53;
+  --sw-shore: #c9a8b7;
+  --edge: #e8d5dd; --focus: #e8d5dd;
 }
-
-:root[data-resolved="light"][data-palette="sage"] {
-  --accent-a: #3d6d60; --accent-b: #0a4a3e; --accent-c: #05372f;
-  --accent: var(--sw-sage); --now: #4a8a76; --now-pill: #0b6b52;
-  --edge: #0b6b52; --focus: #0b6b52;
+:root[data-palette="lagoon"] {
+  --photo: url("bg/lagoon.jpg");
+  --glass: rgba(20, 19, 18, .34); --glass-bright: .40;
+  --accent-a: #367777; --accent-b: #1c5353; --accent-c: #103535;
+  --accent: #88bbbb; --now: #88bbbb; --now-pill: #1c5353;
+  --sw-lagoon: #88bbbb;
+  --edge: #c8dfdf; --focus: #c8dfdf;
 }
-:root[data-resolved="light"][data-palette="ice"] {
-  --accent-a: #2e5678; --accent-b: #123f66; --accent-c: #0a2440;
-  --accent: var(--sw-ice); --now: #4a7ba0; --now-pill: #1d5580;
-  --edge: #1d5580; --focus: #1d5580;
+:root[data-resolved="light"][data-palette="salt"] {
+  --glass: rgba(252, 250, 247, .80); --glass-bright: 1.62;
+  --accent-a: #416278; --accent-b: #2c475b; --accent-c: #1c313f;
+  --accent: #3c5d73; --now: #3c5d73; --now-pill: #2c475b;
+  --sw-salt: #3c5d73;
+  --edge: #3c5d73; --focus: #3c5d73;
 }
-:root[data-resolved="light"][data-palette="ember"] {
-  --accent-a: #7a4a22; --accent-b: #5a3312; --accent-c: #3d1e08;
-  --accent: var(--sw-ember); --now: #a5764a; --now-pill: #7d451a;
-  --edge: #7d451a; --focus: #7d451a;
+:root[data-resolved="light"][data-palette="dune"] {
+  --glass: rgba(252, 250, 247, .86); --glass-bright: 1.90;
+  --accent-a: #8e4c38; --accent-b: #6b3524; --accent-c: #4c2316;
+  --accent: #884833; --now: #884833; --now-pill: #6b3524;
+  --sw-dune: #884833;
+  --edge: #884833; --focus: #884833;
 }
-:root[data-resolved="light"][data-palette="violet"] {
-  --accent-a: #533a7a; --accent-b: #3a2660; --accent-c: #241540;
-  --accent: var(--sw-violet); --now: #7a62a5; --now-pill: #4d3080;
-  --edge: #4d3080; --focus: #4d3080;
+:root[data-resolved="light"][data-palette="fjord"] {
+  --glass: rgba(252, 250, 247, .76); --glass-bright: 1.60;
+  --accent-a: #38674b; --accent-b: #254c34; --accent-c: #173423;
+  --accent: #336246; --now: #336246; --now-pill: #254c34;
+  --sw-fjord: #336246;
+  --edge: #336246; --focus: #336246;
 }
-:root[data-resolved="light"][data-palette="mono"] {
-  --accent-a: #3a3a3a; --accent-b: #262626; --accent-c: #1a1a1a;
-  --accent: var(--sw-mono); --now: #6e6b66; --now-pill: #3d3d3d;
-  --edge: #3d3d3d; --focus: #3d3d3d;
+:root[data-resolved="light"][data-palette="shore"] {
+  --glass: rgba(252, 250, 247, .74); --glass-bright: 1.52;
+  --accent-a: #8a4a67; --accent-b: #69324b; --accent-c: #4a2134;
+  --accent: #844561; --now: #844561; --now-pill: #69324b;
+  --sw-shore: #844561;
+  --edge: #844561; --focus: #844561;
+}
+:root[data-resolved="light"][data-palette="lagoon"] {
+  --glass: rgba(252, 250, 247, .60); --glass-bright: 1.42;
+  --accent-a: #266767; --accent-b: #174b4b; --accent-c: #0e3434;
+  --accent: #226262; --now: #226262; --now-pill: #174b4b;
+  --sw-lagoon: #226262;
+  --edge: #226262; --focus: #226262;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -267,33 +316,29 @@ body {
 }
 
 /* ── the photograph ──
-   Gradients rather than a JPEG: nothing to fetch, works offline on
-   first paint, and it is what the glass has to blur against. A real
-   image drops straight in later — on the Vision board it should be
-   your own.
+   A real image now, one per theme, and the reason the panel is glass:
+   it is what the blur has something to blur. Only the active theme's
+   file is ever requested, because each url() lives inside its own
+   :root[data-palette] rule.
 
-   A photo has energy at every scale; gradients only have it at the
-   lowest. The two turbulence layers (one coarse, one fine) and the
-   vignette are what stop this reading as three overlapping radials. */
+   --ground paints underneath so the page is never white while the
+   photograph decodes. The vignette and the grain stay — they are what
+   sit the panel into the image rather than on top of it. */
 .backdrop {
   position: fixed;
   inset: 0;
   z-index: -2;
-  background:
-    radial-gradient(56% 32% at 73% 47%, color-mix(in srgb, var(--horizon) 46%, transparent), transparent 62%),
-    linear-gradient(180deg, transparent 44%,
-        color-mix(in srgb, var(--horizon) 26%, transparent) 49.5%, transparent 56%),
-    radial-gradient(72% 20% at 20% 33%, rgba(255,255,255,.07), transparent 72%),
-    radial-gradient(48% 16% at 87% 27%, rgba(255,255,255,.05), transparent 72%),
-    radial-gradient(92% 55% at 4% 106%, var(--ground), transparent 60%),
-    linear-gradient(178deg, var(--sky-1) 0%, var(--sky-2) 33%,
-                    var(--sky-3) 50%, var(--ground) 70%, var(--ground) 100%);
+  background-color: var(--ground);
+  background-image: var(--photo);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
 .backdrop::before {
   content: '';
   position: absolute;
   inset: 0;
-  background: radial-gradient(125% 92% at 50% 44%, transparent 38%, rgba(0,0,0,.46) 100%);
+  background: radial-gradient(125% 92% at 50% 44%, transparent 34%, rgba(0,0,0,.52) 100%);
 }
 .backdrop::after {
   content: '';
@@ -303,9 +348,110 @@ body {
   mix-blend-mode: overlay;
   background-size: 900px 900px, 140px 140px;
   background-image:
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='900' height='900'><filter id='c'><feTurbulence type='fractalNoise' baseFrequency='.011' numOctaves='4'/></filter><rect width='900' height='900' filter='url(%23c)' opacity='.55'/></svg>"),
-    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.75' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)'/></svg>");
+    url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'900\' height=\'900\'><filter id=\'c\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.011\' numOctaves=\'4\' stitchTiles=\'stitch\'/></filter><rect width=\'900\' height=\'900\' filter=\'url(%23c)\' opacity=\'.55\'/></svg>"),
+    url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'140\' height=\'140\'><filter id=\'n\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.75\' numOctaves=\'3\' stitchTiles=\'stitch\'/></filter><rect width=\'140\' height=\'140\' filter=\'url(%23n)\'/></svg>");
 }
+
+/* ── weather ──
+   One ambient effect per photograph: rain falls on the fjord, light
+   crawls across the salt flat, caustics move on the lagoon. It sits
+   between the photograph and the panel, so the glass blurs it too.
+
+   Everything animates transform, opacity or background-position only,
+   and every layer is a gradient — no canvas, no JS, no per-frame work.
+   Opacities are deliberately low: this is weather seen through a
+   window, and it must never compete with a bar label.
+
+   prefers-reduced-motion stops all of it. The global rule collapses
+   animation-duration, which freezes each effect at a still frame that
+   still reads correctly — static rain is just rain in a photograph. */
+.fx {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  overflow: hidden;
+}
+.fx::before, .fx::after { content: ''; position: absolute; inset: -10%; }
+
+/* salt — a slow specular crawl along the ribbon of light */
+[data-palette="salt"] .fx::before {
+  background: linear-gradient(102deg, transparent 40%,
+              rgba(214, 232, 246, .13) 49%, transparent 58%);
+  background-size: 280% 100%;
+  animation: fx-sweep 34s linear infinite;
+}
+[data-palette="salt"] .fx::after {
+  background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,.5) 0 .7px, transparent 1.4px);
+  background-size: 190px 190px;
+  opacity: .16;
+  animation: fx-glint 9s ease-in-out infinite alternate;
+}
+@keyframes fx-sweep { from { background-position: 130% 0; } to { background-position: -70% 0; } }
+@keyframes fx-glint { from { opacity: .07; } to { opacity: .2; } }
+
+/* dune — the rim light breathing, under a turning starfield */
+[data-palette="dune"] .fx::before {
+  background: radial-gradient(44% 24% at 44% 60%, rgba(255, 168, 74, .17), transparent 72%);
+  animation: fx-breathe 13s ease-in-out infinite alternate;
+}
+[data-palette="dune"] .fx::after {
+  background-image:
+    radial-gradient(circle at 50% 50%, rgba(255,255,255,.7) 0 .8px, transparent 1.6px),
+    radial-gradient(circle at 50% 50%, rgba(255,236,210,.5) 0 .6px, transparent 1.3px);
+  background-size: 230px 230px, 137px 137px;
+  opacity: .22;
+  animation: fx-twinkle 7s ease-in-out infinite alternate;
+}
+@keyframes fx-breathe { from { opacity: .55; } to { opacity: 1; } }
+@keyframes fx-twinkle { from { opacity: .1; } to { opacity: .28; } }
+
+/* fjord — two sheets of rain at different speeds, so it has depth */
+[data-palette="fjord"] .fx::before {
+  background-image: repeating-linear-gradient(100deg,
+      rgba(255,255,255,.20) 0 1px, transparent 1px 6px);
+  background-size: 100% 300px;
+  opacity: .40;
+  animation: fx-rain-near 1.05s linear infinite;
+}
+[data-palette="fjord"] .fx::after {
+  background-image: repeating-linear-gradient(97deg,
+      rgba(255,255,255,.13) 0 1px, transparent 1px 11px);
+  background-size: 100% 300px;
+  opacity: .30;
+  animation: fx-rain-far 2.1s linear infinite;
+}
+@keyframes fx-rain-near { to { background-position: -62px 300px; } }
+@keyframes fx-rain-far  { to { background-position: -34px 300px; } }
+
+/* shore — cloud colour drifting across the sky */
+[data-palette="shore"] .fx::before {
+  background:
+    radial-gradient(58% 32% at 26% 26%, rgba(255, 186, 214, .15), transparent 72%),
+    radial-gradient(48% 26% at 74% 20%, rgba(255, 214, 170, .11), transparent 74%);
+  background-size: 190% 100%, 160% 100%;
+  animation: fx-drift 60s ease-in-out infinite alternate;
+}
+[data-palette="shore"] .fx::after {
+  background: linear-gradient(180deg, transparent 52%, rgba(255, 226, 236, .07) 68%, transparent 82%);
+  animation: fx-breathe 17s ease-in-out infinite alternate;
+}
+@keyframes fx-drift { to { background-position: 42% 0, -32% 0; } }
+
+/* lagoon — caustics: two turbulence sheets crossing at different rates */
+[data-palette="lagoon"] .fx::before,
+[data-palette="lagoon"] .fx::after {
+  background-image:
+    url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'600\' height=\'600\'><filter id=\'w\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.006 .013\' numOctaves=\'2\' stitchTiles=\'stitch\'/><feColorMatrix values=\'0 0 0 0 .82 0 0 0 0 .96 0 0 0 0 .93 0 0 0 -1.7 1.05\'/></filter><rect width=\'600\' height=\'600\' filter=\'url(%23w)\'/></svg>");
+  /* stitchTiles, or the turbulence tile edges show as a hard rectangular
+     seam wherever the pattern wraps. */
+  background-size: 760px 760px;
+  mix-blend-mode: soft-light;
+}
+[data-palette="lagoon"] .fx::before { opacity: .55; animation: fx-caustic-a 29s linear infinite; }
+[data-palette="lagoon"] .fx::after  { opacity: .38; animation: fx-caustic-b 41s linear infinite reverse; }
+@keyframes fx-caustic-a { to { background-position: 760px -300px; } }
+@keyframes fx-caustic-b { to { background-position: -520px 400px; } }
 
 :where(a, button, input, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
@@ -343,8 +489,8 @@ body {
   /* Measured: the reference cuts high-frequency energy 5.6× but leaves
      the roofline legible as a form — that is ~20px, not 34px. And its
      glass is DESATURATED against the photo, so saturate() goes below 1. */
-  -webkit-backdrop-filter: blur(20px) saturate(.9);
-          backdrop-filter: blur(20px) saturate(.9);
+  -webkit-backdrop-filter: blur(20px) saturate(.9) brightness(var(--glass-bright));
+          backdrop-filter: blur(20px) saturate(.9) brightness(var(--glass-bright));
   overflow: hidden;
 }
 
@@ -458,8 +604,8 @@ body {
   border: 1px solid var(--glass-line);
   border-radius: 11px;
   background: var(--glass);
-  -webkit-backdrop-filter: blur(24px) saturate(.9);
-          backdrop-filter: blur(24px) saturate(.9);
+  -webkit-backdrop-filter: blur(24px) saturate(.9) brightness(var(--glass-bright));
+          backdrop-filter: blur(24px) saturate(.9) brightness(var(--glass-bright));
   box-shadow: 0 14px 40px rgba(0, 0, 0, .38);
 }
 .swatch {
@@ -480,11 +626,11 @@ body {
 }
 .swatch[aria-checked="true"] { background: var(--glass-in); color: var(--ink); }
 .swatch .dot { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
-.dot[data-swatch="sage"]   { background: var(--sw-sage); }
-.dot[data-swatch="ice"]    { background: var(--sw-ice); }
-.dot[data-swatch="ember"]  { background: var(--sw-ember); }
-.dot[data-swatch="violet"] { background: var(--sw-violet); }
-.dot[data-swatch="mono"]   { background: var(--sw-mono); }
+.dot[data-swatch="salt"] { background: var(--sw-salt); }
+.dot[data-swatch="dune"] { background: var(--sw-dune); }
+.dot[data-swatch="fjord"] { background: var(--sw-fjord); }
+.dot[data-swatch="shore"] { background: var(--sw-shore); }
+.dot[data-swatch="lagoon"] { background: var(--sw-lagoon); }
 .swatch .tick-mark { margin-left: auto; opacity: 0; }
 .swatch[aria-checked="true"] .tick-mark { opacity: 1; }
 
@@ -747,8 +893,8 @@ body {
   border: 0;
   border-radius: 22px;
   background: var(--glass);
-  -webkit-backdrop-filter: blur(20px);
-          backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px) brightness(var(--glass-bright));
+          backdrop-filter: blur(20px) brightness(var(--glass-bright));
   color: var(--ink);
   font: inherit;
   font-size: .84rem;
@@ -904,6 +1050,7 @@ body {
 
 <body>
 <div class="backdrop" aria-hidden="true"></div>
+<div class="fx" aria-hidden="true"></div>
 
 <div class="app">
 
@@ -955,11 +1102,11 @@ body {
 
       <div class="pal">
         <button class="btn btn-ghost" type="button" id="palBtn"
-                aria-expanded="false" aria-haspopup="true" aria-label="Colour scheme: Sage">
+                aria-expanded="false" aria-haspopup="true" aria-label="Theme: Salt">
           <span class="dot" aria-hidden="true"></span>
-          <span id="palLabel">Sage</span>
+          <span id="palLabel">Salt</span>
         </button>
-        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Colour scheme" hidden></div>
+        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Theme" hidden></div>
       </div>
 
       <button class="btn btn-primary" type="button" id="newBtn">
@@ -1509,19 +1656,19 @@ function cycle() {
    with the swatch that claims to show it. */
 const PKEY = 'arc.palette';
 const PALETTES = [
-  ['sage',   'Sage'],
-  ['ice',    'Ice'],
-  ['ember',  'Ember'],
-  ['violet', 'Violet'],
-  ['mono',   'Mono'],
+  ['salt',   'Salt',   'A ribbon of light across dark sand'],
+  ['dune',   'Dune',   'A dune rim-lit under a starfield'],
+  ['fjord',  'Fjord',  'Rain on a green fjord'],
+  ['shore',  'Shore',  'A sunset shore, pink over turquoise'],
+  ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above'],
 ];
 
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
 const palLabel = document.getElementById('palLabel');
-let palette = localStorage.getItem(PKEY) || 'sage';
+let palette = localStorage.getItem(PKEY) || 'salt';
 
-PALETTES.forEach(([id, name]) => {
+PALETTES.forEach(([id, name, desc]) => {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'swatch';
@@ -1534,6 +1681,8 @@ PALETTES.forEach(([id, name]) => {
     + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
             stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
             stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
+  b.title = desc;
+  b.setAttribute('aria-label', `${name} — ${desc}`);
   b.addEventListener('click', () => { setPalette(id); closePal(true); });
   palMenu.appendChild(b);
 });
@@ -1544,11 +1693,11 @@ function setPalette(id) {
   document.documentElement.dataset.palette = id;
   const name = (PALETTES.find(p => p[0] === id) || [])[1] || id;
   palLabel.textContent = name;
-  palBtn.setAttribute('aria-label', `Colour scheme: ${name}`);
+  palBtn.setAttribute('aria-label', `Theme: ${name}`);
   palMenu.querySelectorAll('.swatch').forEach((s) => {
     s.setAttribute('aria-checked', String(s.dataset.palette === id));
   });
-  say.textContent = `Colour scheme: ${name}.`;
+  say.textContent = `Theme: ${name}.`;
 }
 
 function openPal() {
