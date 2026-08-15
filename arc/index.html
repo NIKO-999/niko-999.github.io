@@ -26,10 +26,42 @@
   l.rel = 'preload'; l.as = 'image'; l.href = 'bg/' + p + '.jpg';
   l.fetchPriority = 'high';
   document.head.appendChild(l);
+  /* font-display: swap means the first paint uses a fallback and then
+     reflows; preloading the two faces the board is mostly set in keeps
+     that swap to a flicker rather than a visible re-layout. */
+  ['fonts/Inter-500.woff2', 'fonts/JetBrainsMono-500.woff2'].forEach(function (f) {
+    var k = document.createElement('link');
+    k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+    k.href = f; k.crossOrigin = 'anonymous';
+    document.head.appendChild(k);
+  });
 })();
 </script>
 
 <style>
+/* ── type ──
+   Self-hosted so the app never blocks on a CDN and still works offline.
+   Inter, JetBrains Mono and Archivo are all SIL OFL 1.1, latin subset,
+   and were already in this repo under routine/fonts.
+
+   Three faces doing three jobs: Archivo carries the title, Inter carries
+   language, and every FIGURE is JetBrains Mono. That last split is the
+   point — names are words, durations and dates are measurements, and
+   monospaced figures stop the numerals shifting the layout as they
+   change (d14 / 25 becoming d9 / 25 no longer moves anything). */
+@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
+  src: url('fonts/Inter-400.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap;
+  src: url('fonts/Inter-500.woff2') format('woff2'); }
+@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap;
+  src: url('fonts/Inter-600.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 400; font-display: swap;
+  src: url('fonts/JetBrainsMono-400.woff2') format('woff2'); }
+@font-face { font-family: 'JetBrains Mono'; font-weight: 500; font-display: swap;
+  src: url('fonts/JetBrainsMono-500.woff2') format('woff2'); }
+@font-face { font-family: 'Archivo'; font-weight: 300; font-display: swap;
+  src: url('fonts/Archivo-300.woff2') format('woff2'); }
+
 /* ═══════════════════════════════════════════════════════════════
    ARC — visual prototype. Desktop only.
 
@@ -135,6 +167,10 @@
   --row:   44px;
   --r-panel: 14px;
   --r-bar:   9px;
+
+  --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --display: 'Archivo', 'Inter', system-ui, sans-serif;
 }
 
 :root[data-resolved="light"] {
@@ -332,8 +368,7 @@ body {
   margin: 0;
   min-height: 100vh;
   color: var(--ink);
-  font: 400 1rem/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", Inter,
-        system-ui, sans-serif;
+  font: 400 1rem/1.45 var(--sans);
   background: var(--ground);
 }
 
@@ -682,12 +717,23 @@ body {
 }
 .head h1 {
   margin: 0;
-  font-size: 1.32rem;
-  font-weight: 600;
-  letter-spacing: -0.015em;
+  font-family: var(--display);
+  font-size: 1.5rem;
+  font-weight: 300;
+  letter-spacing: -0.005em;
 }
 .head .grow { flex: 1; }
-.span-meta { font-size: .8rem; color: var(--ink-2); white-space: nowrap; }
+/* The axis and the span are set as small uppercase mono: they are
+   coordinates, not prose, and the caps keep them from reading as
+   another label competing with the bar names. */
+.span-meta {
+  font-family: var(--mono);
+  font-size: .72rem;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
 
 /* Tabs carry what they hold, and selection is a lit dot rather than a
    container. The head row loses its last box: title, tabs and span now
@@ -717,7 +763,8 @@ body {
   background: transparent;
 }
 .seg .n {
-  font-size: .7rem;
+  font-family: var(--mono);
+  font-size: .64rem;
   /* --ink-3 is too dim here: fjord and shore run the thinnest panels of
      the five, and 11px at that weight fell to 3.7:1 on them. */
   color: var(--ink-2);
@@ -749,7 +796,10 @@ body {
   position: absolute;
   top: 30px;
   transform: translateX(-50%);
-  font-size: .69rem;
+  font-family: var(--mono);
+  font-size: .63rem;
+  text-transform: uppercase;
+  letter-spacing: .06em;
   color: var(--tick);
   white-space: nowrap;
 }
@@ -838,7 +888,8 @@ body {
   width: var(--tap, 100%);
   height: 36px;
 }
-.bar .label { position: relative; z-index: 1; flex: 1 1 auto; overflow: hidden; text-overflow: ellipsis; }
+.bar .label { position: relative; z-index: 1; flex: 1 1 auto; overflow: hidden;
+  text-overflow: ellipsis; letter-spacing: -.014em; }
 
 /* The duration is lived, not labelled: a bar fills to today, and the
    leading edge of that fill IS the Now marker — which is why there is no
@@ -880,11 +931,11 @@ body {
   position: relative;
   z-index: 1;
   line-height: 1;
-  font-size: .68rem;
-  font-weight: 600;
-  letter-spacing: .005em;
-  opacity: .64;
-  font-variant-numeric: tabular-nums;
+  font-family: var(--mono);
+  font-size: .64rem;
+  font-weight: 500;
+  letter-spacing: -.02em;
+  opacity: .68;
 }
 
 /* A bar too narrow for its own name puts the name outside — placed
@@ -907,7 +958,7 @@ body {
   pointer-events: none;
   z-index: 4;
 }
-.outside .badge { opacity: .55; font-weight: 500; }
+.outside .badge { opacity: .58; font-weight: 400; }
 
 .milestone {
   position: absolute;
@@ -964,8 +1015,8 @@ body {
 }
 .list-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; }
 .list-name { font-size: .9rem; font-weight: 600; letter-spacing: -0.015em; }
-.list-days { font-size: .72rem; color: var(--ink-2); white-space: nowrap; }
-.list-dates { font-size: .75rem; color: var(--ink-2); margin-top: 2px; }
+.list-days { font-family: var(--mono); font-size: .66rem; letter-spacing: -.02em; color: var(--ink-2); white-space: nowrap; }
+.list-dates { font-family: var(--mono); font-size: .68rem; letter-spacing: -.02em; color: var(--ink-2); margin-top: 2px; }
 .meter { margin-top: 9px; height: 4px; border-radius: 2px; background: var(--glass-in-2); overflow: hidden; }
 .meter span { display: block; height: 100%; border-radius: 2px; background: var(--ink-2); }
 /* State is never colour alone — every state also carries a word. */
@@ -1058,7 +1109,7 @@ body {
 }
 .chip[data-state="live"]  { background: var(--accent-b); color: #fff; }
 .chip[data-state="done"]  { background: var(--bar-strong); color: var(--bar-strong-ink); }
-.tile-when { font-size: .7rem; color: var(--ink-3); }
+.tile-when { font-family: var(--mono); font-size: .64rem; letter-spacing: -.02em; color: var(--ink-3); }
 
 /* ── past ──
    Planned as a ghost, actual as a solid, so the gap between what you
@@ -1080,7 +1131,7 @@ body {
 .stripes li:last-child { border-bottom: 0; }
 .stripe-top { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 7px; }
 .stripe-name { font-size: .82rem; font-weight: 500; }
-.stripe-num { font-size: .72rem; color: var(--ink-2); white-space: nowrap; }
+.stripe-num { font-family: var(--mono); font-size: .66rem; letter-spacing: -.02em; color: var(--ink-2); white-space: nowrap; }
 .stripe-num b { color: var(--ink); font-weight: 600; }
 .track { position: relative; height: 18px; }
 /* The plan is a dashed outline the actual bar runs through and past.
