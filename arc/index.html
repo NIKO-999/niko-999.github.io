@@ -329,6 +329,9 @@
 .tile {
   flex: 1;
   min-width: 0;
+  /* The remove button is absolute against this, not against whatever
+     positioned ancestor it would otherwise find up the tree. */
+  position: relative;
   overflow: hidden;
   border: 1px solid var(--glass-line);
   border-radius: 10px;
@@ -402,6 +405,18 @@
 .tile-art.has::after { content: 'Replace'; }
 @media (hover: hover) { .tile-art:hover::after { opacity: 1; } }
 .tile-art:focus-visible::after { opacity: 1; }
+/* Sits over the art's top-right corner, and appears on the same gesture
+   the Replace overlay does — hovering the tile, or tabbing to it. */
+.tile-cut {
+  position: absolute; top: 6px; right: 6px; z-index: 1;
+  display: grid; place-items: center; width: 21px; height: 21px;
+  padding: 0; border: 0; border-radius: 6px;
+  background: rgba(0, 0, 0, .55); color: #fff;
+  cursor: pointer; opacity: 0;
+}
+.tile-cut:hover { background: rgba(0, 0, 0, .78); }
+.tile-cut:focus-visible { opacity: 1; outline: 2px solid var(--focus); outline-offset: 1px; }
+@media (hover: hover) { .tile:hover .tile-cut { opacity: 1; } }
 .tile.dropping { border-color: var(--accent); }
 .tile.dropping .tile-art::after { content: 'Drop to set'; opacity: 1; }
 .band.far .tile-name { color: var(--ink-2); font-weight: 500; }
@@ -493,6 +508,15 @@
   font-family: var(--mono); font-size: .58rem;
   text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
 }
+/* The textarea takes the same treatment as the fields above it, minus
+   the fixed height — a reason is as long as it needs to be. */
+.ed-f textarea {
+  padding: 9px 10px; resize: vertical; min-height: 62px;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass-in); color: var(--ink);
+  font: inherit; font-size: .82rem; line-height: 1.5;
+}
+.ed-f textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .ed-f input[type="text"], .ed-f input[type="date"], .ed-f select {
   height: 36px; padding: 0 10px;
   border: 1px solid var(--glass-line); border-radius: 9px;
@@ -534,6 +558,16 @@
 
 /* The list rows became buttons when they became editable; the button
    must not repaint the row it replaced. */
+/* Kept to three lines. A reason you wrote at length is still worth
+   having, but the list is a thing you scan — past three lines it stops
+   being a list. The whole note is in the editor and in the backup. */
+.list-note {
+  margin: 7px 0 0;
+  font-size: .76rem; line-height: 1.5; color: var(--ink-3);
+  white-space: pre-wrap;
+  display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .list-open {
   display: block; width: 100%; margin: 0; padding: 0;
   border: 0; background: none; color: inherit; font: inherit;
@@ -748,6 +782,12 @@
         <label class="ed-f" id="edDoneOnF" hidden>
           <span>Finished on</span>
           <input id="edDoneOn" type="date" />
+        </label>
+
+        <label class="ed-f ed-wide">
+          <span>Why this one</span>
+          <textarea id="edNote" rows="3" maxlength="600"
+                    placeholder="What it is really for, what done looks like, what you decided"></textarea>
         </label>
 
         <p class="ed-note" id="edHint"></p>
@@ -1087,6 +1127,7 @@ function renderBoard() {
     el.style.setProperty('--through', Math.round((elapsed / n) * 100) + '%');
     el.setAttribute('aria-label',
       `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}. Opens the editor.`);
+    if (b.note) el.title = `${b.name} — ${b.note}`;
     el.innerHTML = `<span class="done" aria-hidden="true"></span>`
                  + `<span class="label" aria-hidden="true">${esc(b.name)}</span>`
                  + `<span class="badge" aria-hidden="true">${numeral}</span>`;
@@ -1284,6 +1325,7 @@ function renderList() {
          <div class="list-dates">${dates}</div>
          <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
          <div class="state">${state}</div>
+         ${g.note ? `<p class="list-note">${esc(g.note)}</p>` : ''}
        </button>`;
     const btn = li.querySelector('.list-open');
     btn.setAttribute('aria-label', `${g.name}. ${dates}. Opens the editor.`);
@@ -1526,11 +1568,29 @@ function renderVision() {
          <button type="button" class="tile-body">
            <span class="tile-name">${esc(g.name)}</span>
            <span class="tile-when">${whenText(g)}</span>
+         </button>
+         <button type="button" class="tile-cut" hidden>
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1"
+                stroke-linecap="round" width="12" height="12" aria-hidden="true">
+             <path d="m6 6 12 12M18 6 6 18" /></svg>
          </button>`;
       const art = li.querySelector('.tile-art');
       art.dataset.id = g.id;
+      art.dataset.goal = g.name;
       art.setAttribute('aria-label', `Add an image for ${g.name}`);
       art.addEventListener('click', () => pick(g.id));
+
+      /* Only when there is something to take off. An always-present
+         remove button on an empty slot is a control that does nothing,
+         and it would sit on top of the one that does. */
+      const cut = li.querySelector('.tile-cut');
+      cut.setAttribute('aria-label', `Remove the image for ${g.name}`);
+      cut.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        await PIX.drop(g.id);
+        clearTile(g.id, g.name);
+        say.textContent = `Image removed from ${g.name}.`;
+      });
 
       /* The picture and the goal are two different things to change, so
          they are two different targets: the art takes an image, the body
@@ -1593,7 +1653,23 @@ function paintTile(id) {
   if (!u) return;
   art.style.backgroundImage = `url("${u}")`;
   art.classList.add('has');
-  art.setAttribute('aria-label', `Replace the image for ${id}`);
+  /* The goal's NAME, not its id. These used to be the same string; once
+     ids became opaque this read "Replace the image for a3f91c2b". */
+  art.setAttribute('aria-label', `Replace the image for ${art.dataset.goal || 'this goal'}`);
+  const cut = art.parentElement.querySelector('.tile-cut');
+  if (cut) cut.hidden = false;
+}
+
+/* Back to the generated gradient it had before a photograph was set —
+   the tile is never blank, it just stops being yours. */
+function clearTile(id, name) {
+  const art = tiles.querySelector(`.tile-art[data-id="${CSS.escape(id)}"]`);
+  if (!art) return;
+  art.style.backgroundImage = '';
+  art.classList.remove('has');
+  art.setAttribute('aria-label', `Add an image for ${name || art.dataset.goal || 'this goal'}`);
+  const cut = art.parentElement.querySelector('.tile-cut');
+  if (cut) cut.hidden = true;
 }
 
 async function setPicture(id, file) {
@@ -1727,6 +1803,7 @@ function edOpen(goal) {
   edEl('edFrom').value = goal && goal.from ? goal.from : '';
   edEl('edTo').value   = goal && goal.to   ? goal.to   : '';
   edEl('edHorizon').value = (goal && goal.horizon) || 'now';
+  edEl('edNote').value = (goal && goal.note) || '';
   edEl('edDone').checked = !!(goal && goal.done);
   edEl('edDoneOn').value = (goal && goal.doneOn) || iso(TODAY);
   edEl('edDoneOnF').hidden = !edEl('edDone').checked;
@@ -1785,6 +1862,7 @@ document.getElementById('edForm').addEventListener('submit', (e) => {
     horizon: edEl('edHorizon').value,
     done,
     doneOn: done ? (edEl('edDoneOn').value || iso(TODAY)) : null,
+    note: edEl('edNote').value.trim(),
   };
 
   const existing = goals().find(x => x.id === editing);
