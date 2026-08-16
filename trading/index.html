@@ -265,11 +265,15 @@
   color: var(--ink-2);
   padding-left: 2px;
 }
-/* Cells size to their own contents rather than stretching to the busiest
-   day in the row — one three-trade Friday was inflating four empty days
-   to match it, and the month read as mostly heavy boxes. */
-.grid { grid-auto-rows: minmax(94px, auto); align-items: start; }
-.day { min-height: 94px; }
+/* The calendar is the whole page here, so it takes the whole page: the
+   pane is a column, the grid grows into what is left, and the rows split
+   that height between them. Sizing rows to their contents instead left a
+   short month floating in the top third with dead space under it, and
+   letting one busy day set the row height left gaps beside it. */
+#calendarSection .pane { display: flex; flex-direction: column; }
+#calendarSection .grid { flex: 1; min-height: 0; }
+.grid { grid-auto-rows: minmax(72px, 1fr); }
+.day { min-height: 0; overflow: hidden; }
 /* A day with nothing on it is a record too, but it is not news. */
 .day.empty { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
   border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
@@ -303,28 +307,31 @@
 .day.out { opacity: .45; }
 
 /* ── a trade, as a card ── */
+/* One line, not two. At two lines a three-trade day stood 300px tall and
+   dragged its whole row with it; at one, the same day fits a normal
+   row and the month reads as a month. */
 .tcard {
-  display: block; width: 100%;
-  padding: 6px 7px 7px;
+  display: flex; align-items: center; gap: 7px; width: 100%;
+  padding: 4px 6px;
   border: 1px solid var(--glass-line);
-  border-radius: 7px;
+  border-radius: 6px;
   background: var(--glass-in-2);
   text-align: left; font: inherit; color: inherit; cursor: pointer;
 }
 .tcard:hover { background: var(--glass-in);
   border-color: color-mix(in srgb, var(--edge) 40%, transparent); }
 .tcard:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
-.tcard-h { display: flex; align-items: center; gap: 6px; }
+.tcard-h { display: contents; }
 .tsym {
   flex: 1; min-width: 0;
-  font-size: .72rem; font-weight: 600; letter-spacing: -.01em;
+  font-family: var(--mono); font-size: .64rem; font-weight: 500; letter-spacing: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
 /* The outcome is a word first. The tint behind it is reinforcement, and
    the amount below carries its own sign, so nothing rests on colour. */
 .tchip {
-  flex: none;
-  padding: 2px 5px;
+  flex: none; order: 3;
+  padding: 1px 4px;
   border-radius: 4px;
   font-family: var(--mono);
   font-size: .52rem;
@@ -336,8 +343,8 @@
 .tchip.win  { background: var(--up-fill);   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--up) 45%, transparent); }
 .tchip.loss { background: var(--down-fill); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--down) 45%, transparent); }
 .tamt {
-  display: block; margin-top: 4px;
-  font-family: var(--mono); font-size: .68rem; font-weight: 500;
+  flex: none;
+  font-family: var(--mono); font-size: .64rem; font-weight: 500;
   letter-spacing: -.02em; color: var(--ink);
 }
 .tcard.missed .tamt { color: var(--ink-3); }
@@ -601,7 +608,10 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   font-family: var(--mono); font-size: .56rem; text-transform: uppercase;
   letter-spacing: .09em; color: var(--ink-2); width: 82px; flex: none;
 }
-.led-n { flex: 1; font-size: .8rem; color: var(--ink-2); min-width: 0;
+/* Every other cell in this row is mono; this one was Inter, which read
+   as a different kind of thing rather than the same row continuing. */
+.led-n { flex: 1; font-family: var(--mono); font-size: .68rem; color: var(--ink-2);
+  letter-spacing: -.01em; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .led-v { font-family: var(--mono); font-size: .76rem; font-weight: 500; letter-spacing: -.02em; }
 .led-v.up { color: var(--up); }
