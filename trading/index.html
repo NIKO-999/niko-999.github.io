@@ -273,7 +273,8 @@
 #calendarSection .pane { display: flex; flex-direction: column; }
 #calendarSection .grid { flex: 1; min-height: 0; }
 .grid { grid-auto-rows: minmax(72px, 1fr); }
-.day { min-height: 0; overflow: hidden; }
+.day { min-height: 0; overflow-y: auto; }
+.day.empty .day-new { flex: 1; }
 /* A day with nothing on it is a record too, but it is not news. */
 .day.empty { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
   border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
@@ -308,9 +309,15 @@
 
 /* ── a trade, as a card ── */
 /* One line, not two. At two lines a three-trade day stood 300px tall and
-   dragged its whole row with it; at one, the same day fits a normal
-   row and the month reads as a month. */
+   dragged its whole row with it; at one, the same day fits a normal row
+   and the month reads as a month.
+
+   Cards then SHARE the cell rather than stacking at their natural height
+   with dead space under them: one trade fills the day, two split it, three
+   take a third each. The cell is the same size either way, so the month
+   keeps its shape however the day went. */
 .tcard {
+  flex: 1 1 0; min-height: 20px;
   display: flex; align-items: center; gap: 7px; width: 100%;
   padding: 4px 6px;
   border: 1px solid var(--glass-line);
@@ -349,10 +356,11 @@
 }
 .tcard.missed .tamt { color: var(--ink-3); }
 
-/* The empty space under the cards is the "add" target, so a day with room
-   left on it stays a one-click entry surface. */
+/* On an empty day the add target is the whole cell. On a day that has
+   trades on it the cards own the height, and this is the sliver under
+   them — still clickable, no longer competing for space. */
 .day-new {
-  flex: 1; min-height: 16px; margin: 0; padding: 3px 1px;
+  flex: none; min-height: 13px; margin: 0; padding: 2px 1px;
   border: 0; border-radius: 6px; background: none;
   text-align: left; cursor: pointer;
   font-family: var(--mono); font-size: .54rem;
