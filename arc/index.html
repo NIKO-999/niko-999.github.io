@@ -526,6 +526,27 @@
 .ed-f input:focus-visible, .ed-f select:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 1px;
 }
+/* Steps are rows rather than a textarea, because each one carries a
+   completion date that has to survive its neighbours being edited.
+   Matching done-state back to lines of free text is the same trap the
+   checklist rules would have fallen into. */
+.ed-opt { font-style: normal; text-transform: none; letter-spacing: normal;
+  color: var(--ink-3); opacity: .8; }
+.ed-step { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+.ed-step input { flex: 1; min-width: 0; }
+.ed-step .cut {
+  display: grid; place-items: center; width: 30px; height: 30px; flex: none;
+  border: 0; border-radius: 8px; background: none; color: var(--ink-3); cursor: pointer;
+}
+.ed-step .cut:hover { background: var(--glass-in); color: var(--down); }
+.ed-step .tick { font-size: .6rem; color: var(--ink-3); white-space: nowrap; }
+.ed-add {
+  align-self: flex-start; height: 30px; padding: 0 11px;
+  border: 0; border-radius: 8px; background: var(--glass-in);
+  color: var(--ink-2); font: inherit; font-size: .74rem; cursor: pointer;
+}
+.ed-add:hover { background: var(--glass-in-2); color: var(--ink); }
+
 .ed-check { flex-direction: row; align-items: center; gap: 9px; }
 .ed-check input { width: 16px; height: 16px; flex: none; accent-color: var(--accent); }
 .ed-check > span {
@@ -561,6 +582,35 @@
 /* Kept to three lines. A reason you wrote at length is still worth
    having, but the list is a thing you scan — past three lines it stops
    being a list. The whole note is in the editor and in the backup. */
+/* Outside .list-open, not inside it. A button cannot contain buttons,
+   and the steps have to be clickable in their own right. */
+.steps { padding: 0 0 2px; }
+.step {
+  display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 6px 2px; border: 0; border-top: 1px solid var(--rule);
+  background: none; color: inherit; font: inherit; font-size: .78rem;
+  text-align: left; cursor: pointer;
+}
+.step:hover { background: color-mix(in srgb, var(--glass-in) 55%, transparent); }
+.step:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.step .box {
+  width: 14px; height: 14px; flex: none; border-radius: 4px;
+  border: 1px solid var(--glass-line); background: var(--glass-in);
+}
+.step[aria-pressed="true"] .box { background: var(--accent); border-color: var(--accent); }
+.step[aria-pressed="true"] .nm { color: var(--ink-3); text-decoration: line-through; }
+.step .nm { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.step .on { margin-left: auto; font-size: .66rem; color: var(--ink-3); white-space: nowrap; }
+.step-h {
+  display: flex; align-items: baseline; gap: 9px; margin-top: 9px;
+  font-size: .76rem; color: var(--ink-2);
+}
+.step-h b { font-weight: 500; }
+/* The whole point of the feature in one line: work done against time
+   spent. Coloured only when the two have come apart. */
+.step-h em { margin-left: auto; font-style: normal; font-size: .72rem; color: var(--ink-3); }
+.step-h em.behind { color: var(--down); }
+
 .list-note {
   margin: 7px 0 0;
   font-size: .76rem; line-height: 1.5; color: var(--ink-3);
@@ -784,6 +834,12 @@
           <input id="edDoneOn" type="date" />
         </label>
 
+        <div class="ed-f ed-wide">
+          <span>Steps <em class="ed-opt">optional — what has to happen inside it</em></span>
+          <div id="edSteps"></div>
+          <button class="ed-add" type="button" id="edAddStep">Add a step</button>
+        </div>
+
         <label class="ed-f ed-wide">
           <span>Why this one</span>
           <textarea id="edNote" rows="3" maxlength="600"
@@ -945,6 +1001,11 @@ const uid = () => (crypto.randomUUID ? crypto.randomUUID().slice(0, 8)
   : Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
 
 const goals = () => state.goals;
+/* A step is a name, an order, and the day you ticked it. No due date of
+   its own — that would double the dates you have to keep straight for a
+   thing whose job is to say what is left, not when. */
+const stepsOf = (g) => Array.isArray(g.steps) ? g.steps : [];
+const stepsDone = (g) => stepsOf(g).filter(x => x.doneOn).length;
 const live  = () => goals().filter(g => !g.done);
 /* A goal earns a place on the timeline by having a date on it. */
 const dated = () => live().filter(g => g.from);
@@ -1111,6 +1172,13 @@ function renderBoard() {
     el.setAttribute('aria-pressed', 'false');
 
     const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
+    /* THE change. The fill used to be elapsed/n — a clock wearing a
+       progress bar's clothes, identical at 80% whether you had done
+       everything or nothing. With steps on the goal it measures work,
+       and the gap between the fill and the now-line becomes the status.
+       Without steps there is nothing to count, so it stays a clock. */
+    const st_n = stepsOf(b).length, st_d = stepsDone(b);
+    const fill = st_n ? st_d / st_n : elapsed / n;
     const liveNow = TODAY >= b.from && TODAY <= b.to;
     const st = TODAY < b.from ? 'ahead' : TODAY > b.to ? 'done' : 'live';
     const status = st === 'ahead' ? 'not started yet'
@@ -1118,15 +1186,17 @@ function renderBoard() {
                  : `day ${elapsed} of ${n}`;
     /* The numeral says a different thing in each state: what is coming,
        where you are inside it, and what it cost. */
-    const numeral = st === 'ahead' ? dur(n)
+    const numeral = st_n ? `${st_d} / ${st_n}`
+                  : st === 'ahead' ? dur(n)
                   : st === 'done'  ? `✓ ${dur(n)}`
                   : `d${elapsed} / ${n}`;
 
     el.dataset.state = st;
     if (liveNow) el.classList.add('live');
-    el.style.setProperty('--through', Math.round((elapsed / n) * 100) + '%');
+    el.style.setProperty('--through', Math.round(fill * 100) + '%');
     el.setAttribute('aria-label',
-      `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}. Opens the editor.`);
+      `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}.`
+      + (st_n ? ` ${st_d} of ${st_n} steps done.` : '') + ' Opens the editor.');
     if (b.note) el.title = `${b.name} — ${b.note}`;
     el.innerHTML = `<span class="done" aria-hidden="true"></span>`
                  + `<span class="label" aria-hidden="true">${esc(b.name)}</span>`
@@ -1316,6 +1386,34 @@ function renderList() {
       state = 'Undated — living on the vision board';
     }
 
+    const sN = stepsOf(g).length, sD = stepsDone(g);
+    /* Work against time, side by side. It is only coloured when the two
+       have come apart — a goal on pace does not need to be told. */
+    let stepHtml = '';
+    if (sN) {
+      const workPct = Math.round((sD / sN) * 100);
+      let cmp = '';
+      if (g.from && g.to && g.kind !== 'mark') {
+        const from = parseISO(g.from), to = parseISO(g.to);
+        const nDays = Math.max(1, days(from, to));
+        const el = Math.min(Math.max(days(from, TODAY), 0), nDays);
+        const timePct = Math.round((el / nDays) * 100);
+        cmp = `<em class="${workPct + 8 < timePct ? 'behind' : ''}">`
+            + `${workPct}% of the work, ${el} days in of ${nDays}</em>`;
+      }
+      stepHtml =
+        `<div class="step-h"><b>${sD} of ${sN} done</b>${cmp}</div>
+         <div class="steps">`
+        + stepsOf(g).map((x, i) =>
+            `<button class="step" type="button" data-goal="${esc(g.id)}" data-step="${i}"
+                aria-pressed="${x.doneOn ? 'true' : 'false'}">
+               <span class="box" aria-hidden="true"></span>
+               <span class="nm">${esc(x.name)}</span>
+               ${x.doneOn ? `<span class="on">done ${fmt(parseISO(x.doneOn))}</span>` : ''}
+             </button>`).join('')
+        + `</div>`;
+    }
+
     li.innerHTML =
       `<button type="button" class="list-open">
          <div class="list-top">
@@ -1326,7 +1424,7 @@ function renderList() {
          <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
          <div class="state">${state}</div>
          ${g.note ? `<p class="list-note">${esc(g.note)}</p>` : ''}
-       </button>`;
+       </button>${stepHtml}`;
     const btn = li.querySelector('.list-open');
     btn.setAttribute('aria-label', `${g.name}. ${dates}. Opens the editor.`);
     btn.addEventListener('click', () => edit(g.id));
@@ -1334,6 +1432,20 @@ function renderList() {
     return li;
   });
 }
+
+/* Ticking a step stamps the day you did it, and un-ticking clears it.
+   The date is what Past will one day measure against, so it is recorded
+   rather than inferred. */
+list.addEventListener('click', (ev) => {
+  const b = ev.target.closest('.step');
+  if (!b) return;
+  const gid = b.dataset.goal, i = +b.dataset.step;
+  commit(false, (st) => {
+    const g = st.goals.find(x => x.id === gid);
+    if (!g || !Array.isArray(g.steps) || !g.steps[i]) return;
+    g.steps[i].doneOn = g.steps[i].doneOn ? null : iso(TODAY);
+  });
+});
 
 /* ── search ── */
 /* The tab counts are the search result: one number, two places, live. */
@@ -1796,6 +1908,30 @@ function setKind(k) {
   : 'With no date it waits on the vision board. Add dates whenever you are ready to commit to them.';
 }
 
+/* The rows carry their own doneOn, so reordering or renaming a
+   neighbour cannot move a completion date onto the wrong step. */
+function edStepRow(name, doneOn) {
+  const row = document.createElement('div');
+  row.className = 'ed-step';
+  row.dataset.done = doneOn || '';
+  row.innerHTML =
+    `<input type="text" maxlength="90" placeholder="What has to happen" />
+     ${doneOn ? `<span class="tick">done ${fmt(parseISO(doneOn))}</span>` : ''}
+     <button class="cut" type="button" aria-label="Remove this step">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+            stroke-linecap="round" width="14" height="14" aria-hidden="true">
+         <path d="m6 6 12 12M18 6 6 18" /></svg>
+     </button>`;
+  row.querySelector('input').value = name || '';
+  row.querySelector('.cut').addEventListener('click', () => row.remove());
+  return row;
+}
+function edReadSteps() {
+  return [...edEl('edSteps').querySelectorAll('.ed-step')]
+    .map(r => ({ name: r.querySelector('input').value.trim(), doneOn: r.dataset.done || null }))
+    .filter(x => x.name);
+}
+
 function edOpen(goal) {
   editing = goal ? goal.id : null;
   edEl('edTitle').textContent = goal ? 'Edit goal' : 'New goal';
@@ -1804,6 +1940,10 @@ function edOpen(goal) {
   edEl('edTo').value   = goal && goal.to   ? goal.to   : '';
   edEl('edHorizon').value = (goal && goal.horizon) || 'now';
   edEl('edNote').value = (goal && goal.note) || '';
+  const sw = edEl('edSteps');
+  sw.textContent = '';
+  (goal && Array.isArray(goal.steps) ? goal.steps : [])
+    .forEach(x => sw.appendChild(edStepRow(x.name, x.doneOn)));
   edEl('edDone').checked = !!(goal && goal.done);
   edEl('edDoneOn').value = (goal && goal.doneOn) || iso(TODAY);
   edEl('edDoneOnF').hidden = !edEl('edDone').checked;
@@ -1817,6 +1957,12 @@ function edit(id) {
   const g = goals().find(x => x.id === id);
   if (g) edOpen(g);
 }
+
+edEl('edAddStep').addEventListener('click', () => {
+  const row = edStepRow('', null);
+  edEl('edSteps').appendChild(row);
+  row.querySelector('input').focus();
+});
 
 edEl('edDone').addEventListener('change', (e) => {
   edEl('edDoneOnF').hidden = !e.target.checked;
@@ -1863,6 +2009,7 @@ document.getElementById('edForm').addEventListener('submit', (e) => {
     done,
     doneOn: done ? (edEl('edDoneOn').value || iso(TODAY)) : null,
     note: edEl('edNote').value.trim(),
+    steps: edReadSteps(),
   };
 
   const existing = goals().find(x => x.id === editing);
