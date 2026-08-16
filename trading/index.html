@@ -24,7 +24,7 @@
   l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
   l.fetchPriority = 'high';
   document.head.appendChild(l);
-  ['../arc/fonts/Inter-500.woff2', '../arc/fonts/JetBrainsMono-500.woff2'].forEach(function (f) {
+  ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
     var k = document.createElement('link');
     k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
     k.href = f; k.crossOrigin = 'anonymous';
@@ -74,10 +74,14 @@
   --down-fill: rgba(143, 63, 63, .13);
 }
 
-.pane { flex: 1; overflow-y: auto; padding: 4px 16px 22px; }
+/* 14px, not 16 — the shared .head above it pads to 14, so at 16 every
+   section title and its count sat two pixels outside the content they
+   belong to, on both sides. Arc already agreed with the head; this is
+   the one file that did not. */
+.pane { flex: 1; overflow-y: auto; padding: 4px 14px 22px; }
 
 /* ── the number that matters, and its parts ── */
-.summary { display: flex; gap: 26px; align-items: flex-start; padding: 2px 2px 18px; flex-wrap: wrap; }
+.summary { display: flex; gap: 26px; align-items: flex-start; padding: 2px 0 18px; flex-wrap: wrap; }
 .stat { min-width: 104px; }
 .stat b {
   display: block;
@@ -164,6 +168,13 @@
 }
 .cp-h { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
 .cp-h .grow { flex: 1; }
+/* Six items on one line need ~410px. Narrower than that the clock and
+   the countdown drop to their own row rather than running off the
+   panel — the spacer collapses so they start at the same edge. */
+@media (max-width: 640px) {
+  .cp-h { flex-wrap: wrap; row-gap: 7px; }
+  .cp-h .grow { flex-basis: 100%; height: 0; }
+}
 .cp-in {
   display: inline-flex; align-items: center; gap: 5px;
   padding: 3px 7px; border-radius: 6px;
@@ -267,7 +278,10 @@
   text-transform: uppercase;
   letter-spacing: .1em;
   color: var(--ink-2);
-  padding-left: 2px;
+  /* Matches the cell's 7px padding plus its 1px border, so MON starts on
+     the same pixel as the date under it. At 2px the header sat six
+     pixels left of its own column and the whole week read as loose. */
+  padding-left: 8px;
 }
 /* The calendar is the whole page here, so it takes the whole page: the
    pane is a column, the grid grows into what is left, and the rows split
@@ -276,8 +290,22 @@
    letting one busy day set the row height left gaps beside it. */
 #calendarSection .pane { display: flex; flex-direction: column; }
 #calendarSection .grid { flex: 1; min-height: 0; }
-.grid { grid-auto-rows: minmax(72px, 1fr); }
-.day { min-height: 0; overflow-y: auto; }
+/* min-content, not a fixed floor: rows take an equal share of the pane
+   and fill it, EXCEPT a row holding a day that genuinely needs more —
+   three trades share a cell at 20px each and want ~104. That one row
+   grows to its content and the month scrolls the difference, so a quiet
+   month still fills the page and a busy one is never cut off. */
+.grid { grid-auto-rows: minmax(min-content, 1fr); }
+/* Seven columns have a floor. Below it the month scrolls sideways
+   rather than crushing each day to a width its own date will not fit —
+   the same trade the timeline makes in the shell at this width. */
+@media (max-width: 700px) {
+  #calendarSection .pane { overflow-x: auto; }
+  #calendarSection .grid, #calendarSection .dow { min-width: 620px; }
+}
+/* No inner scroller. A cell that scrolls hides trades behind a gesture
+   nobody makes on a month view — the row grows instead, below. */
+.day { min-height: 0; }
 .day.empty .day-new { flex: 1; }
 /* A day with nothing on it is a record too, but it is not news. */
 .day.empty { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
@@ -341,22 +369,35 @@
 .tcard.solo {
   flex-direction: column; align-items: stretch; justify-content: center;
   gap: 6px; padding: 9px 11px;
+  /* Not the 20px floor the compact cards use. A flex item's explicit
+     min-height replaces its automatic minimum, so at 20px the solo card
+     told the cell it needed 20 while actually wanting 81 — the row sized
+     itself to the lie and the card overflowed its own padding. */
+  min-height: min-content;
 }
 .tcard.solo .tcard-h { display: flex; align-items: center; gap: 7px; }
 .tcard.solo .tval { display: flex; align-items: baseline; gap: 9px; }
 .tcard.solo .tsym { font-size: .72rem; }
 .tcard.solo .tamt { flex: 1; font-size: .92rem; letter-spacing: -.03em; }
-.tcard.solo .trr {
-  display: block; flex: none;
-  font-family: var(--mono); font-size: .68rem; font-weight: 500;
-  letter-spacing: -.02em; color: var(--accent);
-}
+/* The R rides the meta line rather than the amount's. Beside the amount
+   it needed ~141px of card and a seven-column month gives ~111 at 1280
+   and ~137 at 1512, so the one figure the card exists to add was the
+   first thing dropped. On the meta line it leads, it keeps the accent,
+   and the line ellipsises from the tail — the least important end. */
+.tcard.solo .tmeta .trr { display: inline; font-weight: 500; color: var(--accent); }
+/* flex: none on all three. tmeta clips its own overflow, so its
+   min-content height is zero — as a shrinkable flex item it was
+   squeezed to nothing whenever the card was a pixel short, and it took
+   the row's min-content with it, so the row never grew to make room.
+   Unshrinkable, the card states its real height and the row honours it. */
+.tcard.solo .tcard-h, .tcard.solo .tval, .tcard.solo .tmeta { flex: none; }
 .tcard.solo .tmeta {
   display: block;
   font-family: var(--mono); font-size: .58rem; letter-spacing: .04em;
   color: var(--ink-3);
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
+
 .tsym {
   flex: 1; min-width: 0;
   font-family: var(--mono); font-size: .64rem; font-weight: 500; letter-spacing: 0;
@@ -398,6 +439,19 @@
 }
 @media (hover: hover) { .day:hover .day-new { opacity: 1; } }
 .day-new:focus-visible { opacity: 1; outline: 2px solid var(--focus); outline-offset: 1px; }
+/* On a day that already has trades this strip is invisible until you
+   hover it, and it was charging every such cell 18px of layout for the
+   privilege — which is exactly the height a third card needed. Float it
+   over the foot of the cell instead: an empty day still gets it as a
+   full-cell target, a busy day gets its height back, and a three-trade
+   day now fits the row it is given rather than being cut off by it. */
+.day:not(.empty) .day-new {
+  position: absolute; left: 6px; right: 6px; bottom: 6px;
+  min-height: 0; height: 15px; padding: 0 4px;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--glass-in-2) 88%, var(--ink));
+  backdrop-filter: blur(3px);
+}
 
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
@@ -426,6 +480,8 @@
    did standing on its own. */
 .metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 @media (max-width: 1180px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* Below this a half-width tile is narrower than the figure inside it. */
+@media (max-width: 540px)  { .metrics { grid-template-columns: minmax(0, 1fr); } }
 .metric {
   padding: 15px 17px 16px;
   border: 1px solid var(--glass-line);
@@ -588,13 +644,21 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    the curve is wide and takes what is left. */
 .charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
 @media (max-width: 1180px) { .charts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 780px)  { .charts { grid-template-columns: 1fr; } }
+@media (max-width: 780px)  { .charts { grid-template-columns: minmax(0, 1fr); } }
 .chartbox.span { grid-column: 1 / -1; }
 .chartbox {
   padding: 14px 16px 15px;
   border: 1px solid var(--glass-line); border-radius: 12px; background: var(--glass-in);
 }
-.chartbox .cal-head { margin: 0 0 6px; }
+/* A card head has a third of a section head's width, and its meta is
+   nowrap, so side by side the two set a min-content wider than the grid
+   track — the card pushed itself past its own column and the meta ran
+   out of the box. Stacked, the title and the meta share a left edge,
+   every card head is the same two lines tall, and the charts under them
+   still line up across the row. */
+.chartbox .cal-head { display: block; margin: 0 0 8px; }
+.chartbox .cal-head .grow { display: none; }
+.chartbox .cal-head .span-meta { display: block; margin-top: 3px; white-space: normal; }
 .radar { display: block; width: 100%; max-width: 330px; height: auto; margin: 2px auto 0; }
 .radar .rgrid { fill: none; stroke: var(--glass-line); stroke-width: 1; }
 .radar .rspoke { stroke: var(--glass-line); stroke-width: 1; }
@@ -635,7 +699,11 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .ledger { margin: 0; padding: 0; list-style: none; }
 .ledger li {
   display: flex; align-items: baseline; gap: 12px;
-  padding: 9px 2px;
+  /* No horizontal padding. The 2px it used to carry put every date in
+     the list two pixels right of the "Every movement" heading above it
+     and of the form labels above that — a rag running the length of the
+     section for no reason anyone could have named. */
+  padding: 9px 0;
   border-bottom: 1px solid var(--rule);
 }
 .ledger li:last-child { border-bottom: 0; }
@@ -1400,9 +1468,9 @@ function renderCalendar() {
         </span>
         <span class="tval" aria-hidden="true">
           <span class="tamt">${amt}</span>
-          ${rr ? `<span class="trr">${rr}</span>` : ''}
         </span>
-        ${solo && meta ? `<span class="tmeta" aria-hidden="true">${esc(meta)}</span>` : ''}
+        ${solo && (rr || meta) ? `<span class="tmeta" aria-hidden="true">`
+          + `${rr ? `<b class="trr">${rr}</b>` : ''}${rr && meta ? ' · ' : ''}${esc(meta)}</span>` : ''}
       </button>`;
     }).join('') : '';
 
@@ -1679,11 +1747,23 @@ function renderRadar(id, metaId, altId, rows, noun) {
 function renderCurve() {
   const svg = document.getElementById('curve');
   const g = trades().filter(e => e.risk > 0);
-  const W = 900, H = 170, PAD = 26;
+  /* The card is full width and the box is a fixed 170 tall, so a fixed
+     900-unit viewBox only matched at one window size. Anywhere else the
+     drawing scaled down to fit and letterboxed itself inside its own
+     frame — the curve pulled away from the box that holds it as the
+     window narrowed. Measuring makes one user unit one pixel at every
+     width; 0 means the section is hidden, and the observer below
+     re-runs this the moment it is not. */
+  const W = Math.round(svg.getBoundingClientRect().width) || 900;
+  const H = 170, PAD = 26;
 
   if (g.length < 2) {
-    svg.setAttribute('viewBox', `0 0 ${W} 70`);
-    svg.innerHTML = `<text class="axis-l" x="${W / 2}" y="40" text-anchor="middle">`
+    /* The box is a fixed 170 tall either way. A 70-tall viewBox inside it
+       letterboxes the message into the middle third and drifts off centre
+       as the card changes width, so the empty state keeps the drawn
+       state's own frame and just centres the line in it. */
+    svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+    svg.innerHTML = `<text class="axis-l" x="${W / 2}" y="${H / 2 + 3}" text-anchor="middle">`
       + `${g.length ? 'One graded trade in — no curve yet.'
                     : 'Record what you risked and the curve starts here.'}</text>`;
     document.getElementById('ddMeta').textContent = '';
@@ -1727,6 +1807,18 @@ function renderCurve() {
     `Cumulative R across ${g.length} graded trades. Now ${sR(run)}, peak ${sR(hi)}, `
     + `worst run from a high −${Math.abs(worst).toFixed(1)}R.`;
 }
+/* Redraw when the box changes width — a window drag, or the metrics
+   section being shown for the first time after loading hidden. Redrawing
+   only changes the viewBox and the paths inside a box whose size is set
+   by CSS, so this cannot feed itself. */
+(() => {
+  const svg = document.getElementById('curve');
+  let last = -1;
+  new ResizeObserver(() => {
+    const w = Math.round(svg.getBoundingClientRect().width);
+    if (w && w !== last) { last = w; renderCurve(); }
+  }).observe(svg);
+})();
 
 /* ── capital ── */
 function renderLedger() {

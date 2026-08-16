@@ -13,26 +13,25 @@
 
 /* ── type ──
    Self-hosted so the app never blocks on a CDN and still works offline.
-   Inter, JetBrains Mono and Archivo are all SIL OFL 1.1, latin subset,
-   and were already in this repo under routine/fonts.
+   Inter is SIL OFL 1.1, latin subset, and was already in this repo.
 
-   Three faces doing three jobs: Archivo carries the title, Inter carries
-   language, and every FIGURE is JetBrains Mono. That last split is the
-   point — names are words, durations and dates are measurements, and
-   monospaced figures stop the numerals shifting the layout as they
-   change (d14 / 25 becoming d9 / 25 no longer moves anything). */
+   ONE face, doing every job. This used to be three — Archivo on titles,
+   Inter on language, JetBrains Mono on every figure — on the argument
+   that names are words and durations are measurements. On the page that
+   argument lost: "02:00 London" is one phrase and it was set in two
+   typefaces, so a single line of a single panel read as two. Whatever a
+   mixed setting buys, it does not survive being seen.
+
+   The figures keep the property the mono was there for. tabular-nums
+   below fixes every digit to one advance width, so a countdown ticking
+   from 1:52 to 1:51 still does not move anything beside it — the
+   alignment was never about the typeface, only about the metric. */
 @font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
   src: url('arc/fonts/Inter-400.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 500; font-display: swap;
   src: url('arc/fonts/Inter-500.woff2') format('woff2'); }
 @font-face { font-family: 'Inter'; font-weight: 600; font-display: swap;
   src: url('arc/fonts/Inter-600.woff2') format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-weight: 400; font-display: swap;
-  src: url('arc/fonts/JetBrainsMono-400.woff2') format('woff2'); }
-@font-face { font-family: 'JetBrains Mono'; font-weight: 500; font-display: swap;
-  src: url('arc/fonts/JetBrainsMono-500.woff2') format('woff2'); }
-@font-face { font-family: 'Archivo'; font-weight: 300; font-display: swap;
-  src: url('arc/fonts/Archivo-300.woff2') format('woff2'); }
 
 /* ═══════════════════════════════════════════════════════════════
    ARC — visual prototype. Desktop only.
@@ -143,8 +142,11 @@
   --r-bar:   9px;
 
   --sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
-  --display: 'Archivo', 'Inter', system-ui, sans-serif;
+  /* Both alias the one face. Kept as separate names because ~50 call
+     sites still say which JOB the text is doing — figure, or title —
+     and that is worth reading even when the answer is the same face. */
+  --mono: var(--sans);
+  --display: var(--sans);
 }
 
 :root[data-resolved="light"] {
@@ -349,6 +351,10 @@ body {
   min-height: 100vh;
   color: var(--ink);
   font: 400 1rem/1.45 var(--sans);
+  /* Every digit on one advance width. This is what the monospaced face
+     used to be for, and it inherits, so a figure anywhere in either app
+     holds its column as it changes. */
+  font-variant-numeric: tabular-nums;
   background: var(--ground);
 }
 
@@ -825,4 +831,18 @@ body {
   #themeLabel { display: none; }
   .btn-ghost { padding: 0 11px; }
   .plot { min-width: 720px; }
+}
+
+/* Phone width. The bar's own contents need ~490px laid out in a row, so
+   below this they wrap instead: the field takes a line, anything the app
+   parks in the middle (the candle clock) takes the next, and the
+   controls close it out. Wrapping rather than shrinking keeps the field
+   usable — squeezed onto one row it collapsed to 26px, which is a
+   search box you cannot read what you typed into. */
+@media (max-width: 640px) {
+  .app { margin: 10px; height: calc(100vh - 20px); border-radius: 14px; }
+  .topbar { flex-wrap: wrap; row-gap: 8px; }
+  .topbar .search { flex: 1 0 100%; }
+  .topbar > .candle { flex: 1 0 100%; }
+  .topbar > .btn-primary { margin-left: auto; }
 }

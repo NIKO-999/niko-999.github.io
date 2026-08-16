@@ -31,7 +31,7 @@
   /* font-display: swap means the first paint uses a fallback and then
      reflows; preloading the two faces the board is mostly set in keeps
      that swap to a flicker rather than a visible re-layout. */
-  ['../arc/fonts/Inter-500.woff2', '../arc/fonts/JetBrainsMono-500.woff2'].forEach(function (f) {
+  ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
     var k = document.createElement('link');
     k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
     k.href = f; k.crossOrigin = 'anonymous';
