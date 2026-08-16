@@ -115,6 +115,33 @@
   color: var(--ink-2);
 }
 .cal-head .grow { flex: 1; }
+/* ── candle clock ──
+   The 4H opens are the whole premise, so the time left to act inside one
+   belongs in the chrome, not on a page you have to navigate to. */
+.candle {
+  position: relative; flex: none;
+  display: flex; align-items: center; gap: 9px;
+  height: 34px; padding: 0 12px;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass-in);
+  font-family: var(--mono); font-size: .64rem;
+  letter-spacing: .06em; color: var(--ink-2);
+  overflow: hidden;
+}
+.candle-k { display: flex; align-items: center; gap: 6px; }
+.candle-k .ic { display: inline-flex; color: var(--ink-3); }
+.candle-k b { font-weight: 500; color: var(--ink); }
+.candle-t { font-variant-numeric: tabular-nums; color: var(--ink); }
+.candle-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: color-mix(in srgb, var(--ink-3) 22%, transparent); }
+.candle-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+/* The last stretch of a candle is not the same trade as the first. */
+.candle.late .candle-t { color: var(--down); }
+.candle.late .candle-bar i { background: var(--down); }
+/* 14:00 is not a candle you trade, so the clock stops offering it. */
+.candle.off { opacity: .5; }
+.candle.off .candle-bar i { background: var(--ink-3); }
+
 .step {
   width: 28px; height: 28px;
   display: grid; place-items: center;
@@ -334,6 +361,9 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .side button.w[aria-pressed="true"] { background: var(--up-fill);   box-shadow: inset 0 -2px 0 var(--up); }
 .side button.l[aria-pressed="true"] { background: var(--down-fill); box-shadow: inset 0 -2px 0 var(--down); }
 .side button.m[aria-pressed="true"] { background: var(--glass-in-2); box-shadow: inset 0 -2px 0 var(--ink-3); }
+/* Type is not an outcome, so it does not borrow the win/loss colours —
+   a reversal is not a loss. */
+.side.two button[aria-pressed="true"] { background: var(--glass-in-2); box-shadow: inset 0 -2px 0 var(--accent); }
 
 /* Labels carry a shape as well as a word. */
 .field label { display: flex; align-items: center; gap: 6px; }
@@ -515,6 +545,13 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <input id="q" type="search" placeholder="Search trades" autocomplete="off" />
       </div>
 
+      <!-- How much of the current 4H candle is left to act in. -->
+      <div class="candle" id="candle" role="status" aria-live="off">
+        <span class="candle-k"><span class="ic" id="icCandle"></span><b id="candleOpen">—</b></span>
+        <span class="candle-t" id="candleLeft">—</span>
+        <span class="candle-bar" aria-hidden="true"><i id="candleFill"></i></span>
+      </div>
+
       <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Appearance: System">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
              stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
@@ -678,6 +715,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
 
       <div class="field wide">
+        <label id="modeLbl"><span class="ic" id="icMode"></span>Type</label>
+        <div class="side two" role="group" aria-labelledby="modeLbl">
+          <button type="button" class="c" id="modeCont" aria-pressed="true">Continuation</button>
+          <button type="button" class="r" id="modeRev"  aria-pressed="false">Reversal</button>
+        </div>
+      </div>
+
+      <div class="field wide">
         <label id="checkLbl"><span class="ic" id="icCheck"></span>Checklist
           <span class="tally" id="checkTally"></span></label>
         <ul class="checks" id="checks" aria-labelledby="checkLbl"></ul>
@@ -730,6 +775,7 @@ const ICO = {
   tag:   'M20 12.5 12.5 20 3 10.5V3h7.5L20 12.5ZM7 7h.01',
   check: 'M4 7h10M4 12h10M4 17h6M17 15l2 2 4-4',
   tick:  'M4 12l5 5L20 6',
+  mode:  'M4 9h14l-4-4M20 15H6l4 4',
   image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
   note:  'M4 20h4L20 8l-4-4L4 16v4ZM14 6l4 4',
   calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
@@ -739,31 +785,48 @@ const icon = (n, size) =>
         stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
         stroke-linejoin="round" aria-hidden="true"><path d="${ICO[n]}"/></svg>`;
 
-/* ── the checklist ──
-   Deliberately one constant. The whole point of a strategy checklist is
-   that it is the SAME list every time — a list that drifts cannot tell
-   you which rule you skipped on the days you lost. Replace these lines
-   with your own and nothing else has to change. */
-const CHECKLIST = [
-  'Higher-timeframe bias agreed',
-  'Liquidity swept',
-  'CISD confirmed',
-  'Entry at a discount / premium',
-  'Risk fixed before entry',
-  'No news inside the window',
-];
+/* ── the checklists ──
+   Two fixed lists, because a continuation and a reversal are not the
+   same trade and should not answer the same questions. Within a type the
+   list never drifts: a list that changes cannot tell you which rule you
+   skipped on the days you lost.
 
-/* Sessions rather than a clock. Time of day only matters here as the
-   window you were trading, and a window is what you can later break
-   performance down by. */
-const SESSIONS = [
-  'Asia',
-  'London open',
-  'London',
-  'NY AM',
-  'NY PM',
-  'Other',
-];
+   PROVISIONAL — drafted from the setups already in this ledger (CISD,
+   SMT, Sweep) and pending a read of the trading-dashboard repo. Replace
+   the lines; keep the two keys. */
+const CHECKLISTS = {
+  continuation: [
+    '4H bias unchanged — no HTF SMT against me',
+    'Liquidity taken in the direction of bias',
+    'CISD on the entry timeframe',
+    'Entry from discount (long) / premium (short)',
+    'Risk fixed before entry',
+  ],
+  reversal: [
+    'HTF SMT confirmed',
+    'Opposing liquidity swept',
+    'CISD against the prior leg',
+    'Displacement left an imbalance to enter from',
+    'Risk fixed before entry',
+  ],
+};
+const MODES = { continuation: 'modeCont', reversal: 'modeRev' };
+
+/* ── the 4H candles ──
+   Opens in New York time, which is where the profiling is anchored. The
+   clock is computed in that zone explicitly rather than from the local
+   one, so the labels mean the same thing whichever machine this is open
+   on and whether or not the US has shifted for daylight saving yet.
+
+   14:00 is a real candle and the clock names it, but it is deliberately
+   absent from SESSIONS: it is not one you take, so it should not be
+   offerable as an answer to "which candle was this".
+
+   Listed from the 18:00 open, because that is where the trading day
+   starts — not from midnight, which is the middle of one. */
+const NO_TRADE = 14;
+const hhmm = (h) => String(h).padStart(2, '0') + ':00';
+const SESSIONS = [18, 22, 2, 6, 10].map(hhmm);
 
 /* Symbols, setups and notes are typed by hand and then written into
    innerHTML and into attributes. A single quote mark in a setup name is
@@ -1268,11 +1331,13 @@ const SIDES = { win: 'sideWin', loss: 'sideLoss', missed: 'sideMiss' };
 let side = 'win';
 let editing = null;      // id of the trade the sheet is showing, null when new
 let ticked = new Set();  // the checklist lines confirmed on the open sheet
+let mode = 'continuation';
 
 /* Every label wears its icon, painted once at load. */
 [['icOut', 'out'], ['icPair', 'pair'], ['icTime', 'clock'], ['icRisk', 'risk'],
- ['icMoney', 'money'], ['icTag', 'tag'], ['icCheck', 'check'], ['icImage', 'image'],
- ['icNote', 'note']].forEach(([id, n]) => { document.getElementById(id).innerHTML = icon(n); });
+ ['icMoney', 'money'], ['icTag', 'tag'], ['icMode', 'mode'], ['icCheck', 'check'],
+ ['icImage', 'image'], ['icNote', 'note']]
+  .forEach(([id, n]) => { document.getElementById(id).innerHTML = icon(n); });
 
 document.getElementById('tTime').innerHTML = '<option value="">—</option>'
   + SESSIONS.map(s => `<option>${esc(s)}</option>`).join('');
@@ -1282,12 +1347,29 @@ document.getElementById('tTime').innerHTML = '<option value="">—</option>'
    edited as a strategy matures, and indices would silently re-map every
    entry already written — a trade recorded as "liquidity swept" would
    later claim you had checked something else entirely. */
+const rules = () => CHECKLISTS[mode];
+
 function renderChecks() {
-  document.getElementById('checks').innerHTML = CHECKLIST.map(line =>
+  const list = rules();
+  document.getElementById('checks').innerHTML = list.map(line =>
     `<li><button type="button" data-line="${esc(line)}" aria-pressed="${ticked.has(line)}">
       <span class="box" aria-hidden="true">${icon('tick', 11)}</span>${esc(line)}</button></li>`).join('');
-  document.getElementById('checkTally').textContent = `${ticked.size}/${CHECKLIST.length}`;
+  document.getElementById('checkTally').textContent = `${ticked.size}/${list.length}`;
 }
+
+/* Switching type drops any tick that the new list does not contain.
+   Carrying an invisible tick into the save would have the record claim
+   you confirmed something the sheet never showed you. */
+function setMode(v) {
+  mode = v;
+  Object.entries(MODES).forEach(([k, id]) =>
+    document.getElementById(id).setAttribute('aria-pressed', String(k === v)));
+  const keep = new Set(rules());
+  ticked = new Set([...ticked].filter(l => keep.has(l)));
+  renderChecks();
+}
+Object.entries(MODES).forEach(([k, id]) =>
+  document.getElementById(id).addEventListener('click', () => setMode(k)));
 document.getElementById('checks').addEventListener('click', (ev) => {
   const b = ev.target.closest('button');
   if (!b) return;
@@ -1452,12 +1534,18 @@ function openTrade(date, id) {
   document.getElementById('tSym').value = (e && e.sym) || '';
   document.getElementById('tSetup').value = (e && e.setup) || '';
   document.getElementById('tNote').value = (e && e.note) || '';
-  document.getElementById('tTime').value = (e && e.sess) || '';
+  /* A new trade logged on today's date almost always belongs to the
+     candle you are standing in, so the dropdown starts there. Not for a
+     past day, where guessing would put a wrong answer in the record. */
+  const live = hhmm(candle().open);
+  const onToday = (e ? e.date : (date || iso(new Date()))) === iso(new Date());
+  document.getElementById('tTime').value = e ? (e.sess || '')
+    : (onToday && SESSIONS.includes(live) ? live : '');
   document.getElementById('tRisk').value = e && e.risk != null ? e.risk : '';
   document.getElementById('tAmt').value = e && e.out !== 'missed' ? Math.abs(e.amt) : '';
 
   ticked = new Set(e && Array.isArray(e.checks) ? e.checks : []);
-  renderChecks();
+  setMode((e && e.mode) || 'continuation');   // renders the checklist too
 
   setShot(null);
   shotDirty = false;
@@ -1521,6 +1609,7 @@ document.getElementById('tradeForm').addEventListener('submit', (ev) => {
     setup: val('tSetup'),
     sess: val('tTime') || undefined,
     risk: risk > 0 ? risk : undefined,
+    mode,
     checks: ticked.size ? [...ticked] : undefined,
     note: val('tNote'),
     shot: shotBlob ? true : undefined,
@@ -1573,6 +1662,54 @@ function commit(msg) {
 function renderAll() {
   renderSummary(); renderCalendar(); renderMetrics(); renderBreakdowns(); renderLedger();
 }
+
+/* ── the candle clock ──
+   "How long have I still got to take this" is a question you ask before
+   you open the journal, not after, so it lives in the chrome and ticks
+   whether or not the calendar is the visible page. */
+const NY = new Intl.DateTimeFormat('en-US', { timeZone: 'America/New_York',
+  hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' });
+
+function nowNY() {
+  const p = {};
+  for (const x of NY.formatToParts(new Date())) p[x.type] = x.value;
+  return { h: +p.hour % 24, m: +p.minute, s: +p.second };   // 24 formats midnight as "24"
+}
+
+/* Candles open every four hours from 02:00, so shifting the clock back
+   two hours makes the arithmetic a plain division. */
+function candle() {
+  const { h, m, s } = nowNY();
+  const k = (h - 2 + 24) % 24;
+  const open = (Math.floor(k / 4) * 4 + 2) % 24;
+  const into = (k % 4) * 3600 + m * 60 + s;
+  return { open, into, left: 14400 - into };
+}
+
+const clock = (n) => `${Math.floor(n / 3600)}:`
+  + `${String(Math.floor(n / 60) % 60).padStart(2, '0')}:`
+  + `${String(n % 60).padStart(2, '0')}`;
+
+const candleEl = document.getElementById('candle');
+document.getElementById('icCandle').innerHTML = icon('clock', 12);
+
+function tickCandle() {
+  const c = candle();
+  const off = c.open === NO_TRADE;
+  document.getElementById('candleOpen').textContent = hhmm(c.open);
+  document.getElementById('candleLeft').textContent = off ? 'no trade' : clock(c.left) + ' left';
+  document.getElementById('candleFill').style.width = (c.into / 14400 * 100).toFixed(2) + '%';
+  candleEl.classList.toggle('off', off);
+  /* The last half hour is a different proposition from the first — the
+     move has mostly happened and there is little room left to be wrong
+     in. Worth colouring, not worth blocking. */
+  candleEl.classList.toggle('late', !off && c.left <= 1800);
+  candleEl.title = off
+    ? `${hhmm(c.open)} candle — outside the profile, not traded`
+    : `${hhmm(c.open)} candle, New York — ${clock(c.left)} until it closes`;
+}
+tickCandle();
+setInterval(tickCandle, 1000);
 
 /* ── sections ── */
 const SECTIONS = {
