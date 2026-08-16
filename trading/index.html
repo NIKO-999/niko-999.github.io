@@ -777,7 +777,11 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
               <span class="span-meta" id="heatMeta"></span></div>
             <svg class="radar" id="heat" role="img" aria-labelledby="heatAlt"></svg>
             <p class="sr" id="heatAlt"></p>
-            <div class="rlg" aria-hidden="true"><span>oldest week</span><span>→</span><span>most recent</span></div>
+            <div class="rlg" aria-hidden="true">
+              <span><i style="background:color-mix(in srgb,var(--ink-3) 52%,transparent)"></i>down</span>
+              <span><i style="background:color-mix(in srgb,var(--accent) 78%,transparent)"></i>up</span>
+              <span>inner = oldest</span>
+            </div>
           </section>
           <section class="chartbox span">
             <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
@@ -1509,9 +1513,15 @@ function renderHeat() {
       const v = cell[k + '|' + w];
       /* Outer ring = most recent, so the week index counts inward. */
       const r0 = R0 + (WEEKS - 1 - w) * step, r1 = r0 + step - 1.6;
-      const fill = v === undefined ? 'rgba(128,128,128,.07)'
-        : `color-mix(in srgb, var(--${v > 0 ? 'up' : 'down'}) `
-          + `${(14 + Math.abs(v) / scale * 70).toFixed(0)}%, transparent)`;
+      /* Theme accent for a winning week, neutral ink for a losing one —
+         the palette carries the chart rather than a stoplight sitting on
+         top of it. Sign is warm-versus-cool, magnitude is opacity, and
+         an untraded week is fainter than either so "nothing here" never
+         reads as "a small loss". */
+      const fill = v === undefined ? 'color-mix(in srgb, var(--ink-3) 7%, transparent)'
+        : v > 0
+          ? `color-mix(in srgb, var(--accent) ${(20 + Math.abs(v) / scale * 72).toFixed(0)}%, transparent)`
+          : `color-mix(in srgb, var(--ink-3) ${(16 + Math.abs(v) / scale * 52).toFixed(0)}%, transparent)`;
       out += `<path d="${wedge(r0, r1, i * 72 - 34, i * 72 + 34)}" fill="${fill}"/>`;
     }
     const [x, y] = pol(OUT, i * 72);
