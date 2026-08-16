@@ -633,14 +633,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <path d="M4 18l5-6 4 3 6-8" /><path d="M15 7h4v4" />
       </svg>
     </span>
-    <button type="button" data-view="calendar" aria-current="page" aria-label="Calendar">
+    <button type="button" data-view="metrics" aria-current="page" aria-label="Metrics">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
+    </button>
+    <button type="button" data-view="calendar" aria-label="Calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
         <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
       </svg>
-    </button>
-    <button type="button" data-view="metrics" aria-label="Metrics">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
     </button>
     <button type="button" data-view="settings" aria-label="Capital">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -703,11 +703,32 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     </div>
 
     <!-- ── calendar ── -->
-    <main class="main" id="calendarSection">
+    <main class="main" id="calendarSection" hidden>
       <div class="head">
-        <h1>Account balance</h1>
+        <h1>Calendar</h1>
         <span class="grow"></span>
         <span class="span-meta" id="calMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="cal-head">
+          <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
+          <h2 id="monthLabel"></h2>
+          <button class="step" type="button" id="nextM" aria-label="Next month">›</button>
+          <button class="step wide" type="button" id="todayM">Today</button>
+          <span class="grow"></span>
+          <span class="span-meta" id="monthPnl"></span>
+        </div>
+        <div class="dow" id="dow" aria-hidden="true"></div>
+        <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
+      </div>
+    </main>
+
+    <!-- ── metrics ── -->
+    <main class="main" id="metricsSection">
+      <div class="head">
+        <h1>Metrics</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="metMeta"></span>
       </div>
       <div class="pane" tabindex="0">
         <!-- Which candle you are standing in, how long is left of it, and
@@ -730,29 +751,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
           <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
         </section>
 
-        <div class="summary" id="summary"></div>
-        <div id="recover" hidden></div>
-        <div class="cal-head">
-          <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
-          <h2 id="monthLabel"></h2>
-          <button class="step" type="button" id="nextM" aria-label="Next month">›</button>
-          <button class="step wide" type="button" id="todayM">Today</button>
-          <span class="grow"></span>
-          <span class="span-meta" id="monthPnl"></span>
-        </div>
-        <div class="dow" id="dow" aria-hidden="true"></div>
-        <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
-      </div>
-    </main>
-
-    <!-- ── metrics ── -->
-    <main class="main" id="metricsSection" hidden>
-      <div class="head">
-        <h1>Metrics</h1>
-        <span class="grow"></span>
-        <span class="span-meta" id="metMeta"></span>
-      </div>
-      <div class="pane" tabindex="0">
         <div class="metrics" id="metrics"></div>
         <!-- The radar is square, so it gets a box of its own rather than a
              band of empty panel either side of it. -->
@@ -809,6 +807,9 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <span class="span-meta" id="capMeta"></span>
       </div>
       <div class="pane" tabindex="0">
+        <div class="summary" id="summary"></div>
+        <div id="recover" hidden></div>
+
         <form class="form" id="flowForm">
           <div class="field">
             <label for="fKind"><span class="ic" id="icWallet"></span>Movement</label>
@@ -1270,7 +1271,7 @@ function renderSummary() {
   ].map(([l, v, cls, sub]) => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span>`
     + `${sub ? `<em>${sub}</em>` : ''}</div>`).join('');
   document.getElementById('calMeta').textContent = `${t.n} trades`;
-  document.getElementById('capMeta').textContent = money(t.capital) + ' in';
+  document.getElementById('capMeta').textContent = `${flows().length} movements`;
   document.getElementById('metMeta').textContent = `${t.n} trades`;
   renderRecover(t);
 }
@@ -2188,6 +2189,10 @@ document.querySelectorAll('[data-view]').forEach(b =>
 
 document.getElementById('fDate').value = iso(new Date());
 renderAll();
+/* Metrics is the landing view: the clock tells you what to do next and
+   the figures tell you whether it has been working. The calendar is
+   where you go to write a trade down, which is a later step. */
+goto('metrics');
 </script>
 </body>
 </html>
