@@ -4,7 +4,7 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark light" />
-<title>Ledger — trading</title>
+<title>Account Balance — trading</title>
 
 <script>
 /* Inline, and before the stylesheet, so the first paint is already
@@ -37,7 +37,7 @@
 
 <style>
 /* ═══════════════════════════════════════════════════════════════
-   LEDGER — live-capital trading analytics.
+   ACCOUNT BALANCE — live-capital trading analytics.
 
    The shell is Arc's, read from the same shell.css, so the two apps
    cannot drift apart. Everything below is this app's canvas.
@@ -125,6 +125,12 @@
   cursor: pointer;
   font: inherit;
 }
+.step.wide {
+  width: auto; padding: 0 10px;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.step:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .dow, .grid {
   display: grid;
   grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
@@ -139,7 +145,14 @@
   color: var(--ink-2);
   padding-left: 2px;
 }
-.grid { grid-auto-rows: minmax(94px, auto); }
+/* Cells size to their own contents rather than stretching to the busiest
+   day in the row — one three-trade Friday was inflating four empty days
+   to match it, and the month read as mostly heavy boxes. */
+.grid { grid-auto-rows: minmax(94px, auto); align-items: start; }
+.day { min-height: 94px; }
+/* A day with nothing on it is a record too, but it is not news. */
+.day.empty { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
+  border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
 
 .day {
   position: relative;
@@ -153,9 +166,11 @@
   text-align: left;
   font: inherit;
   color: inherit;
-  cursor: pointer;
 }
-.day.blank { border-color: transparent; background: none; cursor: default; }
+/* The cell is a container, not a control. Its targets are the trades
+   inside it and the strip of empty space beneath them, so an existing
+   trade can be opened instead of a second one being started on top. */
+.day.blank { border-color: transparent; background: none; }
 .day-h { display: flex; align-items: baseline; gap: 6px; }
 .day-h .d { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
 .day-h .grow { flex: 1; }
@@ -169,11 +184,16 @@
 
 /* ── a trade, as a card ── */
 .tcard {
+  display: block; width: 100%;
   padding: 6px 7px 7px;
   border: 1px solid var(--glass-line);
   border-radius: 7px;
   background: var(--glass-in-2);
+  text-align: left; font: inherit; color: inherit; cursor: pointer;
 }
+.tcard:hover { background: var(--glass-in);
+  border-color: color-mix(in srgb, var(--edge) 40%, transparent); }
+.tcard:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .tcard-h { display: flex; align-items: center; gap: 6px; }
 .tsym {
   flex: 1; min-width: 0;
@@ -202,15 +222,19 @@
 }
 .tcard.missed .tamt { color: var(--ink-3); }
 
-.add-hint {
-  margin-top: auto;
+/* The empty space under the cards is the "add" target, so a day with room
+   left on it stays a one-click entry surface. */
+.day-new {
+  flex: 1; min-height: 16px; margin: 0; padding: 3px 1px;
+  border: 0; border-radius: 6px; background: none;
+  text-align: left; cursor: pointer;
   font-family: var(--mono); font-size: .54rem;
   text-transform: uppercase; letter-spacing: .08em;
   color: var(--ink-3);
   opacity: 0;
 }
-@media (hover: hover) { .day:not(.blank):hover .add-hint { opacity: 1; } }
-.day:focus-visible .add-hint { opacity: 1; }
+@media (hover: hover) { .day:hover .day-new { opacity: 1; } }
+.day-new:focus-visible { opacity: 1; outline: 2px solid var(--focus); outline-offset: 1px; }
 
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
@@ -261,15 +285,22 @@
    A journal dies on the entry path, not on the metrics. This is six
    fields, opens with the amount already focused, submits on Enter, and
    can be reached from the calendar so the date is filled in for you. */
+/* The journal is a tall form. The header and the save row stay put and
+   the fields scroll between them, so Save is never below the fold on a
+   laptop — a sheet you have to scroll to submit is a sheet that loses
+   entries. */
 dialog.sheet {
   width: min(520px, calc(100vw - 40px));
+  max-height: min(860px, calc(100vh - 40px));
   padding: 0;
   border: 1px solid var(--glass-line);
   border-radius: 14px;
   background: var(--menu);
   color: var(--ink);
   box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+  overflow: hidden;
 }
+dialog.sheet form { display: flex; flex-direction: column; max-height: inherit; }
 dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3px); }
 .sheet-h {
   display: flex; align-items: center; gap: 12px;
@@ -280,7 +311,9 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   font-size: 1.2rem; letter-spacing: -.005em;
 }
 .sheet-h .grow { flex: 1; }
-.sheet-b { padding: 16px 18px; display: grid; gap: 11px; grid-template-columns: 1fr 1fr; }
+.sheet-h, .sheet-f { flex: none; }
+.sheet-b { padding: 16px 18px; display: grid; gap: 11px; grid-template-columns: 1fr 1fr;
+  overflow-y: auto; }
 .sheet-b .wide { grid-column: 1 / -1; }
 .sheet-f {
   display: flex; align-items: center; gap: 9px;
@@ -301,6 +334,69 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .side button.w[aria-pressed="true"] { background: var(--up-fill);   box-shadow: inset 0 -2px 0 var(--up); }
 .side button.l[aria-pressed="true"] { background: var(--down-fill); box-shadow: inset 0 -2px 0 var(--down); }
 .side button.m[aria-pressed="true"] { background: var(--glass-in-2); box-shadow: inset 0 -2px 0 var(--ink-3); }
+
+/* Labels carry a shape as well as a word. */
+.field label { display: flex; align-items: center; gap: 6px; }
+.field label .ic { display: inline-flex; color: var(--ink-3); }
+.field textarea {
+  padding: 8px 10px; min-height: 62px; resize: vertical;
+  border: 1px solid var(--glass-line); border-radius: 8px;
+  background: var(--glass-in); color: var(--ink);
+  font: inherit; font-size: .8rem; line-height: 1.45; outline: none;
+}
+.field textarea:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+/* The date is a real input, not a caption. You reach the sheet by clicking
+   a day, so it is nearly always already right — but a trade logged the
+   morning after still has to be movable without leaving the sheet. */
+.sheet-date {
+  font-family: var(--mono); font-size: .64rem; letter-spacing: .06em;
+  color: var(--ink-3); background: none; border: 1px solid transparent;
+  border-radius: 6px; padding: 3px 5px; width: auto; cursor: pointer;
+}
+.sheet-date:hover { color: var(--ink-2); border-color: var(--glass-line); }
+.sheet-date:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.tally { margin-left: auto; font-family: var(--mono); font-size: .58rem; color: var(--ink-3); }
+
+/* ── checklist ──
+   The same rules every time, so the days you lost can be read against
+   the rules you skipped. */
+.checks { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.checks li { display: block; }
+.checks button {
+  display: flex; align-items: center; gap: 8px; width: 100%;
+  padding: 6px 8px; border: 1px solid transparent; border-radius: 7px;
+  background: none; color: var(--ink-2); font: inherit; font-size: .76rem;
+  text-align: left; cursor: pointer;
+}
+.checks button:hover { background: var(--glass-in); }
+.checks .box {
+  flex: none; width: 15px; height: 15px; border-radius: 4px;
+  border: 1px solid var(--glass-line); background: var(--glass-in);
+  display: grid; place-items: center; color: transparent;
+}
+.checks button[aria-pressed="true"] { color: var(--ink); }
+.checks button[aria-pressed="true"] .box {
+  background: var(--up-fill); border-color: color-mix(in srgb, var(--up) 55%, transparent);
+  color: var(--up);
+}
+
+/* ── chart image ── */
+.shot {
+  position: relative; display: block; width: 100%; height: 128px;
+  padding: 0; overflow: hidden;
+  border: 1px dashed var(--glass-line); border-radius: 9px;
+  background: var(--glass-in) center / cover no-repeat;
+  color: var(--ink-3); font: inherit; cursor: pointer;
+}
+.shot-empty {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.shot.has { border-style: solid; }
+.shot.has .shot-empty { opacity: 0; background: rgba(0,0,0,.55); color: var(--ink); }
+.shot.has:hover .shot-empty, .shot:focus-visible .shot-empty { opacity: 1; }
+.shot.dropping { border-color: var(--accent); }
 
 /* ── breakdowns ── */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
@@ -444,7 +540,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     <!-- ── calendar ── -->
     <main class="main" id="calendarSection">
       <div class="head">
-        <h1>Ledger</h1>
+        <h1>Account balance</h1>
         <span class="grow"></span>
         <span class="span-meta" id="calMeta"></span>
       </div>
@@ -454,6 +550,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
           <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
           <h2 id="monthLabel"></h2>
           <button class="step" type="button" id="nextM" aria-label="Next month">›</button>
+          <button class="step wide" type="button" id="todayM">Today</button>
           <span class="grow"></span>
           <span class="span-meta" id="monthPnl"></span>
         </div>
@@ -541,43 +638,68 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     <div class="sheet-h">
       <h2 id="sheetTitle">Record a trade</h2>
       <span class="grow"></span>
+      <input class="sheet-date" id="tDate" type="date" aria-label="Date of trade" required />
       <button class="step" type="button" id="sheetX" aria-label="Close">✕</button>
     </div>
+
     <div class="sheet-b">
       <div class="field wide">
-        <label id="sideLbl">Result</label>
+        <label id="sideLbl"><span class="ic" id="icOut"></span>Outcome</label>
         <div class="side" role="group" aria-labelledby="sideLbl">
           <button type="button" class="w" id="sideWin"  aria-pressed="true">Win</button>
           <button type="button" class="l" id="sideLoss" aria-pressed="false">Loss</button>
           <button type="button" class="m" id="sideMiss" aria-pressed="false">Missed</button>
         </div>
       </div>
+
       <div class="field">
-        <label for="tAmt">Amount</label>
-        <input id="tAmt" type="number" step="0.01" min="0" required placeholder="0.00" />
-      </div>
-      <div class="field">
-        <label for="tDate">Date</label>
-        <input id="tDate" type="date" required />
-      </div>
-      <div class="field">
-        <label for="tSym">Symbol</label>
-        <input id="tSym" type="text" list="syms" placeholder="ES" autocomplete="off" />
+        <label for="tSym"><span class="ic" id="icPair"></span>Pair</label>
+        <input id="tSym" type="text" list="syms" placeholder="GBPUSD" autocomplete="off" />
         <datalist id="syms"></datalist>
       </div>
       <div class="field">
-        <label for="tSetup">Setup</label>
+        <label for="tTime"><span class="ic" id="icTime"></span>Session</label>
+        <select id="tTime"></select>
+      </div>
+
+      <div class="field">
+        <label for="tRisk"><span class="ic" id="icRisk"></span>Risked</label>
+        <input id="tRisk" type="number" step="0.01" min="0" placeholder="0.00" />
+      </div>
+      <div class="field">
+        <label for="tAmt"><span class="ic" id="icMoney"></span>Profit</label>
+        <input id="tAmt" type="number" step="0.01" min="0" required placeholder="0.00" />
+      </div>
+
+      <div class="field wide">
+        <label for="tSetup"><span class="ic" id="icTag"></span>Setup</label>
         <input id="tSetup" type="text" list="setups" placeholder="CISD" autocomplete="off" />
         <datalist id="setups"></datalist>
       </div>
+
       <div class="field wide">
-        <label for="tNote">Note</label>
-        <input id="tNote" type="text" placeholder="optional" />
+        <label id="checkLbl"><span class="ic" id="icCheck"></span>Checklist
+          <span class="tally" id="checkTally"></span></label>
+        <ul class="checks" id="checks" aria-labelledby="checkLbl"></ul>
+      </div>
+
+      <div class="field wide">
+        <label for="tShot"><span class="ic" id="icImage"></span>Chart</label>
+        <button type="button" class="shot" id="tShot">
+          <span class="shot-empty">Click or drop an image</span>
+        </button>
+      </div>
+
+      <div class="field wide">
+        <label for="tNote"><span class="ic" id="icNote"></span>Notes</label>
+        <textarea id="tNote" rows="3" placeholder="What happened, and what you would do again"></textarea>
       </div>
     </div>
+
     <div class="sheet-f">
-      <span class="hint">Enter to save · Esc to close</span>
+      <span class="hint" id="rHint"></span>
       <span class="grow"></span>
+      <button class="btn btn-ghost" type="button" id="tradeDelete" hidden>Delete</button>
       <button class="btn btn-primary" type="submit" id="tradeSave">Save trade</button>
     </div>
   </form>
@@ -594,12 +716,98 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    ═══════════════════════════════════════════════════════════════ */
 
 const KEY = 'ledger.v1';
+
+/* ── icons ──
+   One sprite, drawn inline at label size. Every field carries one, so a
+   glance down the form is a glance down a column of shapes rather than
+   a column of words. */
+const ICO = {
+  out:   'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 16a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z',
+  pair:  'M3 17l5-6 4 3 6-8M17 6h4v4',
+  clock: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18ZM12 7v5l3 2',
+  risk:  'M12 3l7 3v5c0 4.4-2.9 8.3-7 9.5C7.9 19.3 5 15.4 5 11V6l7-3Z',
+  money: 'M12 2v20M17 6H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6',
+  tag:   'M20 12.5 12.5 20 3 10.5V3h7.5L20 12.5ZM7 7h.01',
+  check: 'M4 7h10M4 12h10M4 17h6M17 15l2 2 4-4',
+  tick:  'M4 12l5 5L20 6',
+  image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
+  note:  'M4 20h4L20 8l-4-4L4 16v4ZM14 6l4 4',
+  calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
+};
+const icon = (n, size) =>
+  `<svg viewBox="0 0 24 24" width="${size || 13}" height="${size || 13}" fill="none"
+        stroke="currentColor" stroke-width="1.7" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true"><path d="${ICO[n]}"/></svg>`;
+
+/* ── the checklist ──
+   Deliberately one constant. The whole point of a strategy checklist is
+   that it is the SAME list every time — a list that drifts cannot tell
+   you which rule you skipped on the days you lost. Replace these lines
+   with your own and nothing else has to change. */
+const CHECKLIST = [
+  'Higher-timeframe bias agreed',
+  'Liquidity swept',
+  'CISD confirmed',
+  'Entry at a discount / premium',
+  'Risk fixed before entry',
+  'No news inside the window',
+];
+
+/* Sessions rather than a clock. Time of day only matters here as the
+   window you were trading, and a window is what you can later break
+   performance down by. */
+const SESSIONS = [
+  'Asia',
+  'London open',
+  'London',
+  'NY AM',
+  'NY PM',
+  'Other',
+];
+
+/* Symbols, setups and notes are typed by hand and then written into
+   innerHTML and into attributes. A single quote mark in a setup name is
+   enough to break a cell without this. */
+const esc = (s) => String(s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
 const money = (n, sign) => (sign && n > 0 ? '+' : n < 0 ? '−' : '')
   + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-const iso = (d) => d.toISOString().slice(0, 10);
+/* Local, deliberately. toISOString() is UTC, so an evening trade in the
+   Americas would prefill tomorrow and land in tomorrow's calendar cell —
+   and be counted on the wrong weekday in the breakdowns. */
+const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+  + `-${String(d.getDate()).padStart(2, '0')}`;
 
-function readStore() { try { return JSON.parse(localStorage.getItem(KEY)) || null; } catch (e) { return null; } }
-function writeStore(v) { try { localStorage.setItem(KEY, JSON.stringify(v)); } catch (e) {} }
+/* Ids must be unique, not merely usually unique. Delete matches by value,
+   so two events sharing a millisecond would be deleted together while the
+   app reported removing one. */
+const uid = () => (crypto.randomUUID ? crypto.randomUUID()
+  : Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 10));
+
+function readStore() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { return null; }
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw);
+    if (!v || !Array.isArray(v.events)) throw new Error('shape');
+    return v;
+  } catch (e) {
+    /* Never fall back to the sample here. Showing demonstration numbers
+       after a failed read is how a person mistakes fake money for a
+       recovered account — and the next trade they record overwrites the
+       damaged original. Keep the wreckage, say so, start empty. */
+    try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    setTimeout(() => alert('Your saved ledger could not be read. A copy has been kept under '
+      + KEY + '.corrupt — export it before recording anything new.'), 0);
+    return { events: [] };
+  }
+}
+/* Deliberately not wrapped. A swallowed write is the worst failure this
+   file can have: the trade appears on screen, the app says "recorded",
+   and it is gone on reload. commit() catches and tells the truth. */
+function writeStore(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
 
 /* Sample events, so the shape is visible before any real capital is
    entered. Cleared the moment you record anything of your own. */
@@ -631,7 +839,23 @@ const SAMPLE = {
 };
 
 let state = readStore() || SAMPLE;
-const events = () => [...state.events].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
+
+/* Everything that mutates goes through here first. While the sample is on
+   screen `state` IS the SAMPLE object, so any edit would otherwise write
+   demonstration capital into a live ledger — permanently, because after
+   one save readStore() succeeds and this guard never fires again. There
+   is no partial exit: the sample leaves whole or not at all. */
+const isDemo = () => state === SAMPLE;
+function liven() { if (isDemo()) state = { events: [] }; }
+/* Dates are day-resolution, so same-day order needs a rule rather than a
+   coincidence. The convention is the standard one for daily-valued
+   series: a flow settles at the START of its day, ahead of that day's
+   trades. Without it, typing a deposit before or after a trade you made
+   the same day changed the reported return by a factor of ten. */
+const events = () => [...state.events].sort((a, b) =>
+  a.date.localeCompare(b.date)
+  || (a.k === 'trade' ? 1 : 0) - (b.k === 'trade' ? 1 : 0)
+  || (a.seq || 0) - (b.seq || 0));
 /* A missed setup is logged, shown on the calendar, and counted in NO
    performance figure. It was not a trade you took: folding it in as a
    zero would drag expectancy toward nothing and inflate the trade count
@@ -657,14 +881,32 @@ function totals() {
   const grossWin = wins.reduce((s, e) => s + e.amt, 0);
   const grossLoss = Math.abs(losses.reduce((s, e) => s + e.amt, 0));
 
-  let eq = 0, segStart = null, twr = 1;
+  /* Time-weighted return, chained at every flow so a deposit cannot pass
+     for a good week. Three situations have no honest number and return
+     null rather than a comforting 0.0%:
+       · profit earned before any capital was recorded — there is no basis
+         to divide by, and folding it into the first deposit would silently
+         reclassify a win as capital;
+       · no flows at all, same reason;
+       · equity at or below zero — the account is wiped, the chain ends.
+     Without the last one a WINNING segment after a negative balance moves
+     the headline further negative, which is worse than saying nothing. */
+  let eq = 0, segStart = null, twr = 1, defined = true, wiped = false;
+  const chain = () => {
+    if (segStart === null) { if (eq !== 0) defined = false; return; }
+    if (segStart <= 0) { defined = false; return; }   // no base to divide by
+    if (eq <= 0) { wiped = true; return; }            // the account is gone
+    twr *= eq / segStart;
+  };
   for (const e of all) {
     if (e.k === 'trade') { eq += e.amt; continue; }
-    if (segStart !== null && segStart > 0) twr *= eq / segStart;
+    chain();
+    if (wiped) break;
     eq += signed(e);
     segStart = eq;
   }
-  if (segStart !== null && segStart > 0) twr *= eq / segStart;
+  if (!wiped) chain();
+  const twrPct = !defined || segStart === null ? null : wiped ? -100 : (twr - 1) * 100;
 
   /* Drawdown walks the TRADES only. Including flows made a withdrawal
      look like a loss — the sample's worst drawdown was reported as
@@ -676,7 +918,7 @@ function totals() {
 
   return {
     equity, capital, profit: equity - capital,
-    twr: (twr - 1) * 100,
+    twr: twrPct, wiped,
     n: t.length,
     winRate: t.length ? (wins.length / t.length) * 100 : 0,
     avgWin: wins.length ? grossWin / wins.length : 0,
@@ -702,9 +944,22 @@ function streaks(t) {
   return { streak: cur, bestWin: bestW, worstLoss: Math.abs(bestL) };
 }
 
+/* The search filters what the calendar and the capital list SHOW. It
+   deliberately does not touch the metrics — a win rate that quietly
+   answered a different question than the one on its label would be worse
+   than no search at all. The month total does follow the filter, because
+   "what did CISD make me in March" is the question worth asking. */
+let query = '';
+const hits = (e) => !query || [e.sym, e.setup, e.note, e.sess, e.k]
+  .some(v => v && String(v).toLowerCase().includes(query));
+document.getElementById('q').addEventListener('input', (ev) => {
+  query = ev.target.value.trim().toLowerCase();
+  renderCalendar(); renderLedger();
+});
+
 const byDay = () => {
   const m = new Map();
-  logged().forEach(e => {
+  logged().filter(hits).forEach(e => {
     const cur = m.get(e.date) || { pnl: 0, n: 0, items: [] };
     if (e.out !== 'missed') { cur.pnl += e.amt; cur.n += 1; }
     cur.items.push(e);
@@ -712,6 +967,10 @@ const byDay = () => {
   });
   return m;
 };
+
+/* A return with no basis behind it prints as a dash. A percentage is a
+   claim; "—" is the absence of one, and the two must not look alike. */
+const pct = (v) => v === null ? '—' : (v >= 0 ? '+' : '−') + Math.abs(v).toFixed(1) + '%';
 
 /* ── summary ── */
 function renderSummary() {
@@ -721,8 +980,7 @@ function renderSummary() {
     ['Equity', money(t.equity), ''],
     ['Capital in', money(t.capital), ''],
     ['Profit', money(t.profit, true), t.profit > 0 ? 'up' : t.profit < 0 ? 'down' : ''],
-    ['Return', (t.twr >= 0 ? '+' : '−') + Math.abs(t.twr).toFixed(1) + '%',
-      t.twr > 0 ? 'up' : t.twr < 0 ? 'down' : ''],
+    ['Return', pct(t.twr), t.twr > 0 ? 'up' : t.twr < 0 ? 'down' : ''],
   ].map(([l, v, cls]) => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`).join('');
   document.getElementById('calMeta').textContent = `${t.n} trades`;
   document.getElementById('capMeta').textContent = money(t.capital) + ' in';
@@ -730,7 +988,7 @@ function renderSummary() {
 }
 
 /* ── calendar ── */
-let cursor = new Date(2026, 2, 1);
+let cursor = (() => { const n = new Date(); return new Date(n.getFullYear(), n.getMonth(), 1); })();
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
 const DOW_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
@@ -749,12 +1007,16 @@ function renderCalendar() {
      appears rather than the trade being hidden. */
   let cols = 5;
   for (let d = 1; d <= len; d++) if (idx(d) > 4 && days.has(key(d))) { cols = 7; break; }
+  const dow = document.getElementById('dow');
   document.getElementById('grid').style.setProperty('--cols', cols);
-  document.getElementById('dow').innerHTML =
-    DOW_SHORT.slice(0, cols).map(n => `<span>${n}</span>`).join('');
+  dow.style.setProperty('--cols', cols);   // the header is a sibling, not a child
+  dow.innerHTML = DOW_SHORT.slice(0, cols).map(n => `<span>${n}</span>`).join('');
 
   let monthPnl = 0, cells = '';
-  const lead = Math.min(idx(1), cols - 1);
+  /* A month opening on a weekend starts in column 0, not clamped to the
+     last column — clamping emitted phantom blanks and shifted every date
+     of the month four columns right, under the wrong weekday. */
+  const lead = idx(1) >= cols ? 0 : idx(1);
   for (let i = 0; i < lead; i++) cells += '<div class="day blank" aria-hidden="true"></div>';
 
   for (let d = 1; d <= len; d++) {
@@ -764,36 +1026,45 @@ function renderCalendar() {
     if (hit) monthPnl += hit.pnl;
 
     const cards = hit ? hit.items.map(e => {
-      const out = e.out === 'missed' ? 'missed' : e.amt >= 0 ? 'win' : 'loss';
-      const word = out === 'missed' ? 'Missed' : out === 'win' ? 'Win' : 'Loss';
-      return `<span class="tcard ${out === 'missed' ? 'missed' : ''}">
-        <span class="tcard-h">
-          <span class="tsym">${e.sym || 'Trade'}</span>
+      /* A zero-amount trade you actually took is neither a win nor a
+         loss, and calling it a win here while the metrics count it as
+         neither would have three code paths disagreeing about one row. */
+      const out = e.out === 'missed' ? 'missed' : e.amt > 0 ? 'win' : e.amt < 0 ? 'loss' : 'flat';
+      const word = { missed: 'Missed', win: 'Win', loss: 'Loss', flat: 'Flat' }[out];
+      /* The card carries its own label rather than being swallowed by one
+         on the cell — everything drawn here should be readable aloud. */
+      return `<button class="tcard ${out === 'missed' ? 'missed' : ''}" type="button"
+          data-id="${esc(String(e.id))}" data-date="${k}"
+          aria-label="${esc(word)}${e.sym ? ', ' + esc(e.sym) : ''}${e.setup ? ', ' + esc(e.setup) : ''}, `
+        + `${out === 'missed' ? 'not taken' : money(e.amt, true)}. Open.">
+        <span class="tcard-h" aria-hidden="true">
+          <span class="tsym">${esc(e.sym || 'Trade')}</span>
           <span class="tchip ${out}">${word}</span>
         </span>
-        <span class="tamt">${out === 'missed' ? '—' : money(e.amt, true)}</span>
-      </span>`;
+        <span class="tamt" aria-hidden="true">${out === 'missed' ? 'not taken' : money(e.amt, true)}</span>
+      </button>`;
     }).join('') : '';
 
     const netCls = !hit || !hit.n ? '' : hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : '';
-    const label = hit
-      ? `${d} ${MONTHS[m]}, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n === 1 ? '' : 's'}`
-        + (hit.items.length > hit.n ? `, ${hit.items.length - hit.n} missed` : '')
-      : `${d} ${MONTHS[m]}, no trades`;
+    const sum = hit && hit.n
+      ? `${money(hit.pnl, true)} from ${hit.n} trade${hit.n === 1 ? '' : 's'}` : 'no trades';
 
-    cells += `<button class="day ${k === todayIso ? 'today' : ''}" type="button"
-        data-date="${k}" aria-label="${label}. Record a trade.">
+    cells += `<div class="day ${hit ? '' : 'empty'} ${k === todayIso ? 'today' : ''}" data-date="${k}"
+        role="group" aria-label="${d} ${MONTHS[m]}, ${sum}">
       <span class="day-h">
         <span class="d" aria-hidden="true">${d}</span>
         <span class="grow"></span>
         ${hit && hit.n ? `<span class="net ${netCls}" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
       </span>
       ${cards}
-      ${hit ? '' : '<span class="add-hint" aria-hidden="true">+ trade</span>'}
-    </button>`;
+      <button class="day-new" type="button" data-date="${k}"
+        aria-label="Record a trade on ${d} ${MONTHS[m]}">+ trade</button>
+    </div>`;
   }
 
   document.getElementById('grid').innerHTML = cells;
+  document.getElementById('calMeta').textContent =
+    query ? `showing “${query}”` : `${trades().length} trades`;
   const mp = document.getElementById('monthPnl');
   mp.textContent = monthPnl ? money(monthPnl, true) : 'no trades';
   mp.style.color = monthPnl > 0 ? 'var(--up)' : monthPnl < 0 ? 'var(--down)' : '';
@@ -805,21 +1076,36 @@ document.getElementById('prevM').addEventListener('click', () => {
 document.getElementById('nextM').addEventListener('click', () => {
   cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1); renderCalendar();
 });
+document.getElementById('todayM').addEventListener('click', () => {
+  const n = new Date();
+  cursor = new Date(n.getFullYear(), n.getMonth(), 1); renderCalendar();
+});
 
 /* ── metrics ── */
 function renderMetrics() {
   const t = totals();
-  const pf = t.pf === Infinity ? '∞' : t.pf.toFixed(2);
+  /* Three-way, everywhere. A two-way ternary paints a flat or empty
+     ledger entirely red — someone who has recorded nothing should not
+     open a losing dashboard. */
+  const dir = v => v > 0 ? 'up' : v < 0 ? 'down' : '';
+  /* A profit factor of ∞ after three wins and no losses is the most
+     flattering number available at the moment of least evidence, and
+     0.00 on an empty ledger reads as a catastrophic edge. Both are — . */
+  const pf = !t.n ? ['—', 'no trades yet']
+    : t.pf === Infinity ? ['—', 'no losses yet — needs one to be defined']
+    : [t.pf.toFixed(2), 'Gross won ÷ gross lost. Under 1 and the edge is negative.'];
+  const twrNote = t.twr === null
+    ? 'Undefined until an opening deposit is recorded.'
+    : t.wiped ? 'The account reached zero; return is not chained past that point.'
+    : 'Chained across every deposit and withdrawal, so it measures the trading.';
   document.getElementById('metrics').innerHTML = [
     [money(t.profit, true), 'Realised profit', 'Trades only. Deposits are never counted here.',
-      t.profit > 0 ? 'up' : 'down'],
-    [(t.twr >= 0 ? '+' : '−') + Math.abs(t.twr).toFixed(1) + '%', 'Time-weighted return',
-      'Chained across every deposit and withdrawal, so it measures the trading.',
-      t.twr > 0 ? 'up' : 'down'],
-    [t.winRate.toFixed(0) + '%', 'Win rate', `${t.n} trades`, ''],
-    [pf, 'Profit factor', 'Gross won ÷ gross lost. Under 1 and the edge is negative.', ''],
+      dir(t.profit)],
+    [pct(t.twr), 'Time-weighted return', twrNote, dir(t.twr)],
+    [t.n ? t.winRate.toFixed(0) + '%' : '—', 'Win rate', `${t.n} trades`, ''],
+    [pf[0], 'Profit factor', pf[1], ''],
     [money(t.expectancy, true), 'Expectancy', 'What an average trade is worth to you.',
-      t.expectancy > 0 ? 'up' : 'down'],
+      dir(t.expectancy)],
     [money(t.avgWin), 'Average win', '', ''],
     [money(t.avgLoss), 'Average loss', '', ''],
     [money(t.dd), 'Max drawdown', 'Trades only — a withdrawal is not a loss.', ''],
@@ -857,7 +1143,7 @@ function renderRows(el, rows, valueOf, meta) {
     const v = valueOf(r);
     const w = (Math.abs(v) / max) * 50;
     return `<li>
-      <span class="rt-n">${r.label}</span>
+      <span class="rt-n">${esc(r.label)}</span>
       <span class="rt-v ${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${money(v, true)}</span>
       <span class="rt-m">${meta(r)}</span>
       <span class="bar-wrap" aria-hidden="true"><i></i>
@@ -892,9 +1178,16 @@ function renderCurve() {
     if (e.k !== 'trade') cap += signed(e);
     return { i, eq, cap, flow: e.k !== 'trade', date: e.date };
   });
-  const maxV = Math.max(...pts.map(p => Math.max(p.eq, p.cap))) * 1.08 || 1;
+  /* The domain has to cover both signs. Dividing by a single max put a
+     negative equity ABOVE the zero line — a loss drawn as a gain — and a
+     ledger of pure losses fell to the `|| 1` fallback and drew the line
+     thousands of pixels off canvas. */
+  const lo = Math.min(0, ...pts.map(p => Math.min(p.eq, p.cap)));
+  const hi = Math.max(0, ...pts.map(p => Math.max(p.eq, p.cap)));
+  const top = hi > 0 ? hi * 1.08 : 0, bot = lo < 0 ? lo * 1.08 : 0;
+  const span = (top - bot) || 1;
   const x = i => PAD + (i / Math.max(1, pts.length - 1)) * (W - PAD * 2);
-  const y = v => H - PAD - (v / maxV) * (H - PAD * 2);
+  const y = v => H - PAD - ((v - bot) / span) * (H - PAD * 2);
 
   const line = key => pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join('');
   const marks = pts.filter(p => p.flow).map(p =>
@@ -903,10 +1196,10 @@ function renderCurve() {
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML =
-    `<line class="gridline" x1="${PAD}" y1="${H - PAD}" x2="${W - PAD}" y2="${H - PAD}"/>
+    `<line class="gridline" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>
      <line class="gridline" x1="${PAD}" y1="${PAD - 8}" x2="${W - PAD}" y2="${PAD - 8}"/>
-     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${money(maxV).replace('.00','')}</text>
-     <text class="axis-l" x="${PAD}" y="${H - PAD + 13}">$0</text>
+     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${money(top).replace('.00','')}</text>
+     <text class="axis-l" x="${PAD}" y="${(y(0) + 13).toFixed(1)}">$0</text>
      ${marks}
      <path class="basis" d="${line('cap')}"/>
      <path class="equity" d="${line('eq')}"/>`;
@@ -919,21 +1212,22 @@ function renderCurve() {
 
 /* ── capital ── */
 function renderLedger() {
-  const all = events().reverse();
+  const all = events().filter(hits).reverse();
   const ul = document.getElementById('ledger');
   document.getElementById('ledgerMeta').textContent = `${all.length} events`;
   if (!all.length) { ul.innerHTML = '<li class="empty">Nothing recorded yet</li>'; return; }
   ul.innerHTML = all.map(e => {
     const v = signed(e);
     const label = e.k === 'trade'
-      ? `${e.sym || 'Trade'}${e.setup ? ' · ' + e.setup : ''}${e.out === 'missed' ? ' · missed' : ''}`
+      ? `${e.sym || 'Trade'}${e.setup ? ' · ' + e.setup : ''}${e.sess ? ' · ' + e.sess : ''}`
+        + `${e.out === 'missed' ? ' · missed' : ''}`
       : (e.note || '');
     return `<li>
       <span class="led-d">${e.date}</span>
       <span class="led-k">${e.k}</span>
-      <span class="led-n">${label}</span>
+      <span class="led-n">${esc(label)}</span>
       <span class="led-v ${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${money(v, true)}</span>
-      <button class="drop" type="button" data-id="${e.id}" aria-label="Remove ${e.k} of ${money(Math.abs(v))} on ${e.date}">✕</button>
+      <button class="drop" type="button" data-id="${esc(String(e.id))}" aria-label="Remove ${e.k} of ${money(Math.abs(v))} on ${e.date}">✕</button>
     </li>`;
   }).join('');
 }
@@ -941,8 +1235,12 @@ function renderLedger() {
 document.getElementById('ledger').addEventListener('click', (ev) => {
   const b = ev.target.closest('.drop');
   if (!b) return;
-  state.events = state.events.filter(e => String(e.id) !== b.dataset.id);
-  commit(`Removed one event.`);
+  const demo = isDemo();
+  if (demo && !confirm('This is sample data. Deleting clears the whole sample and starts you empty.')) return;
+  liven();
+  if (!demo) state.events = state.events.filter(e => String(e.id) !== b.dataset.id);
+  SHOTS.del(b.dataset.id).catch(() => {});
+  commit(demo ? 'Sample ledger cleared.' : 'Removed one event.');
 });
 
 document.getElementById('flowForm').addEventListener('submit', (ev) => {
@@ -953,19 +1251,154 @@ document.getElementById('flowForm').addEventListener('submit', (ev) => {
   if (!(amt > 0) || !date) return;
   /* The sample vanishes the moment real capital is recorded — mixing
      demonstration numbers into live figures would be worse than useless. */
-  if (state === SAMPLE) state = { events: [] };
-  state.events.push({ id: Date.now(), k, date, amt,
+  liven();
+  state.events.push({ id: uid(), seq: nextSeq(), k, date, amt,
     note: document.getElementById('fNote').value.trim() });
   ev.target.reset();
   document.getElementById('fDate').value = iso(new Date());
   commit(`${k === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${money(amt)} recorded.`);
 });
 
-/* ── entry ── */
+/* ── the journal ──
+   One day, one click, one sheet. Everything the trade was: what you took,
+   when, what you risked, which of your own rules you actually followed,
+   the chart, and what you would do again. */
 const sheet = document.getElementById('sheet');
 const SIDES = { win: 'sideWin', loss: 'sideLoss', missed: 'sideMiss' };
 let side = 'win';
+let editing = null;      // id of the trade the sheet is showing, null when new
+let ticked = new Set();  // the checklist lines confirmed on the open sheet
 
+/* Every label wears its icon, painted once at load. */
+[['icOut', 'out'], ['icPair', 'pair'], ['icTime', 'clock'], ['icRisk', 'risk'],
+ ['icMoney', 'money'], ['icTag', 'tag'], ['icCheck', 'check'], ['icImage', 'image'],
+ ['icNote', 'note']].forEach(([id, n]) => { document.getElementById(id).innerHTML = icon(n); });
+
+document.getElementById('tTime').innerHTML = '<option value="">—</option>'
+  + SESSIONS.map(s => `<option>${esc(s)}</option>`).join('');
+
+/* ── the checklist ──
+   Stored as the RULE TEXT, not its position. The list is meant to be
+   edited as a strategy matures, and indices would silently re-map every
+   entry already written — a trade recorded as "liquidity swept" would
+   later claim you had checked something else entirely. */
+function renderChecks() {
+  document.getElementById('checks').innerHTML = CHECKLIST.map(line =>
+    `<li><button type="button" data-line="${esc(line)}" aria-pressed="${ticked.has(line)}">
+      <span class="box" aria-hidden="true">${icon('tick', 11)}</span>${esc(line)}</button></li>`).join('');
+  document.getElementById('checkTally').textContent = `${ticked.size}/${CHECKLIST.length}`;
+}
+document.getElementById('checks').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  const line = b.dataset.line;
+  ticked.has(line) ? ticked.delete(line) : ticked.add(line);
+  renderChecks();
+});
+
+/* ── the chart image ──
+   Blobs live in IndexedDB keyed by trade id, never in localStorage — a
+   couple of screenshots would blow the 5MB quota and take the ledger with
+   them. The ledger record keeps a flag; the picture keeps itself. */
+const SHOTS = (() => {
+  const NAME = 'ledger-shots', STORE = 'shots';
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open(NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  }));
+  const run = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(STORE, mode), req = fn(t.objectStore(STORE));
+      t.oncomplete = () => res(req ? req.result : undefined);
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error);
+    });
+  };
+  return {
+    get: id => run('readonly',  s => s.get(String(id))),
+    put: (id, b) => run('readwrite', s => s.put(b, String(id))),
+    del: id => run('readwrite', s => s.delete(String(id))),
+  };
+})();
+
+/* Charts are screenshots, so they arrive far larger than they need to be.
+   Down to 1400px and JPEG before anything is stored. */
+function compress(file) {
+  return new Promise((res) => {
+    const url = URL.createObjectURL(file);
+    const img = new Image();
+    img.onload = () => {
+      const sc = Math.min(1, 1400 / img.naturalWidth);
+      const c = document.createElement('canvas');
+      c.width = Math.max(1, Math.round(img.naturalWidth * sc));
+      c.height = Math.max(1, Math.round(img.naturalHeight * sc));
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => res(b || file), 'image/jpeg', 0.82);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); res(file); };
+    img.src = url;
+  });
+}
+
+const shotBtn = document.getElementById('tShot');
+let shotBlob = null, shotUrl = null, shotDirty = false;
+
+/* Minted once per picture and revoked on replace. An object URL that is
+   never released holds the whole blob in memory for the life of the tab. */
+function setShot(blob) {
+  if (shotUrl) { URL.revokeObjectURL(shotUrl); shotUrl = null; }
+  shotBlob = blob || null;
+  const cap = shotBtn.querySelector('.shot-empty');
+  if (!shotBlob) {
+    shotBtn.classList.remove('has');
+    shotBtn.style.backgroundImage = '';
+    cap.textContent = 'Click, paste or drop an image';
+    return;
+  }
+  shotUrl = URL.createObjectURL(shotBlob);
+  shotBtn.classList.add('has');
+  shotBtn.style.backgroundImage = `url("${shotUrl}")`;
+  cap.textContent = 'Replace · shift-click to remove';
+}
+async function takeShot(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  setShot(await compress(file));
+  shotDirty = true;
+}
+
+const picker = Object.assign(document.createElement('input'),
+  { type: 'file', accept: 'image/*', hidden: true });
+document.body.appendChild(picker);
+picker.addEventListener('change', () => { takeShot(picker.files[0]); picker.value = ''; });
+
+shotBtn.addEventListener('click', (ev) => {
+  if (ev.shiftKey && shotBlob) { setShot(null); shotDirty = true; return; }
+  picker.click();
+});
+['dragenter', 'dragover'].forEach(t => shotBtn.addEventListener(t, (ev) => {
+  ev.preventDefault(); shotBtn.classList.add('dropping');
+}));
+['dragleave', 'drop'].forEach(t => shotBtn.addEventListener(t, () =>
+  shotBtn.classList.remove('dropping')));
+shotBtn.addEventListener('drop', (ev) => {
+  ev.preventDefault();
+  takeShot(ev.dataTransfer.files && ev.dataTransfer.files[0]);
+});
+/* A trader screenshots and pastes. Anywhere in the sheet is close enough. */
+sheet.addEventListener('paste', (ev) => {
+  const it = [...(ev.clipboardData ? ev.clipboardData.items : [])]
+    .find(i => i.kind === 'file' && /^image\//.test(i.type));
+  if (!it) return;
+  ev.preventDefault();
+  takeShot(it.getAsFile());
+});
+
+/* ── outcome ── */
 function setSide(v) {
   side = v;
   Object.entries(SIDES).forEach(([k, id]) =>
@@ -975,62 +1408,165 @@ function setSide(v) {
   amt.disabled = v === 'missed';
   amt.required = v !== 'missed';
   if (v === 'missed') amt.value = '';
+  rHint();
 }
 Object.entries(SIDES).forEach(([k, id]) =>
   document.getElementById(id).addEventListener('click', () => setSide(k)));
+
+/* Risk and result together are an R multiple, which is the one number
+   that compares a trade on a $50 stop to a trade on a $500 one. Both
+   fields are already being asked for, so it costs nothing to show. */
+function rHint() {
+  const risk = parseFloat(document.getElementById('tRisk').value);
+  const amt = parseFloat(document.getElementById('tAmt').value);
+  const el = document.getElementById('rHint');
+  if (side === 'missed' || !(risk > 0) || !(amt > 0)) { el.textContent = ''; return; }
+  const r = (amt / risk) * (side === 'loss' ? -1 : 1);
+  el.textContent = `${r >= 0 ? '+' : '−'}${Math.abs(r).toFixed(2)}R`;
+}
+['tRisk', 'tAmt'].forEach(id => document.getElementById(id).addEventListener('input', rHint));
 
 /* Symbols and setups you have used before, offered back, so the second
    trade on a setup takes two keystrokes instead of eight. */
 function refreshLists() {
   const uniq = k => [...new Set(trades().map(e => e[k]).filter(Boolean))].sort();
   document.getElementById('syms').innerHTML =
-    uniq('sym').map(v => `<option value="${v}"></option>`).join('');
+    uniq('sym').map(v => `<option value="${esc(v)}"></option>`).join('');
   document.getElementById('setups').innerHTML =
-    uniq('setup').map(v => `<option value="${v}"></option>`).join('');
+    uniq('setup').map(v => `<option value="${esc(v)}"></option>`).join('');
 }
 
-function openTrade(date) {
+const val = (id) => document.getElementById(id).value.trim();
+const nextSeq = () => state.events.reduce((m, e) => Math.max(m, e.seq || 0), 0) + 1;
+
+/* Opens empty for a new trade on `date`, or filled for the trade `id`.
+   The same sheet does both, because a journal you can only write to and
+   never re-read is a diary you never open. */
+function openTrade(date, id) {
   refreshLists();
-  setSide('win');
-  document.getElementById('tDate').value = date || iso(new Date());
-  ['tAmt', 'tSym', 'tSetup', 'tNote'].forEach(id => { document.getElementById(id).value = ''; });
+  const e = id ? state.events.find(x => String(x.id) === String(id)) : null;
+  editing = e ? e.id : null;
+
+  setSide(e ? (e.out === 'missed' ? 'missed' : e.amt < 0 ? 'loss' : 'win') : 'win');
+  document.getElementById('tDate').value = e ? e.date : (date || iso(new Date()));
+  document.getElementById('tSym').value = (e && e.sym) || '';
+  document.getElementById('tSetup').value = (e && e.setup) || '';
+  document.getElementById('tNote').value = (e && e.note) || '';
+  document.getElementById('tTime').value = (e && e.sess) || '';
+  document.getElementById('tRisk').value = e && e.risk != null ? e.risk : '';
+  document.getElementById('tAmt').value = e && e.out !== 'missed' ? Math.abs(e.amt) : '';
+
+  ticked = new Set(e && Array.isArray(e.checks) ? e.checks : []);
+  renderChecks();
+
+  setShot(null);
+  shotDirty = false;
+  /* Fetched async, so guard on `editing` — a fast second click must not
+     have the first trade's chart land in the second trade's sheet. */
+  if (e && e.shot) {
+    const want = e.id;
+    SHOTS.get(want).then(b => { if (b && editing === want) setShot(b); }).catch(() => {});
+  }
+
+  document.getElementById('sheetTitle').textContent = e ? 'Edit trade' : 'Record a trade';
+  document.getElementById('tradeSave').textContent = e ? 'Save changes' : 'Save trade';
+  document.getElementById('tradeDelete').hidden = !e;
+  rHint();
   sheet.showModal();
-  document.getElementById('tAmt').focus();
+  document.getElementById(e ? 'tSym' : 'tAmt').focus();
 }
 
 document.getElementById('newTrade').addEventListener('click', () => openTrade());
 document.getElementById('sheetX').addEventListener('click', () => sheet.close());
+/* Esc closes the dialog without a submit event, so the picture is
+   released here rather than in the save path. */
+sheet.addEventListener('close', () => { setShot(null); shotDirty = false; editing = null; });
 
-/* The calendar is an entry surface too: a day you click is a date you
-   do not have to type. */
+/* The calendar is both the record and the way in: a card opens the trade
+   it draws, the space beneath starts a new one on that day. */
 document.getElementById('grid').addEventListener('click', (ev) => {
-  const cell = ev.target.closest('.day');
-  if (!cell || cell.classList.contains('blank')) return;
-  openTrade(cell.dataset.date);
+  const card = ev.target.closest('.tcard');
+  if (card) { openTrade(card.dataset.date, card.dataset.id); return; }
+  const add = ev.target.closest('.day-new');
+  if (add) openTrade(add.dataset.date);
 });
 
-document.getElementById('tradeForm').addEventListener('submit', () => {
+document.getElementById('tradeForm').addEventListener('submit', (ev) => {
   const raw = parseFloat(document.getElementById('tAmt').value);
-  if (side !== 'missed' && !(raw > 0)) return;
-  if (state === SAMPLE) state = { events: [] };
+  if (side !== 'missed' && !(raw > 0)) {
+    /* The form is method="dialog", so returning early would close the
+       sheet and silently drop everything typed into it. */
+    ev.preventDefault();
+    const a = document.getElementById('tAmt');
+    a.setCustomValidity('Enter the amount won or lost.');
+    a.reportValidity();
+    setTimeout(() => a.setCustomValidity(''), 0);
+    return;
+  }
+  const risk = parseFloat(document.getElementById('tRisk').value);
+  const prior = editing ? state.events.find(x => String(x.id) === String(editing)) : null;
+  const demo = isDemo();
+  liven();
+
+  const id = prior && !demo ? prior.id : uid();
   /* Stored signed, so nothing downstream has to remember which way a
      loss points. The form asks for a magnitude and a direction. */
-  state.events.push({
-    id: Date.now(),
-    k: 'trade',
+  const rec = {
+    id, k: 'trade',
+    seq: prior && !demo ? (prior.seq || nextSeq()) : nextSeq(),
     date: document.getElementById('tDate').value,
     amt: side === 'missed' ? 0 : side === 'win' ? raw : -raw,
     out: side === 'missed' ? 'missed' : undefined,
-    sym: document.getElementById('tSym').value.trim(),
-    setup: document.getElementById('tSetup').value.trim(),
-    note: document.getElementById('tNote').value.trim(),
-  });
-  commit(side === 'missed' ? 'Missed setup recorded.'
-    : `${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)} recorded.`);
+    sym: val('tSym'),
+    setup: val('tSetup'),
+    sess: val('tTime') || undefined,
+    risk: risk > 0 ? risk : undefined,
+    checks: ticked.size ? [...ticked] : undefined,
+    note: val('tNote'),
+    shot: shotBlob ? true : undefined,
+  };
+
+  if (shotDirty) {
+    if (shotBlob) SHOTS.put(id, shotBlob).catch(() => {});
+    else SHOTS.del(id).catch(() => {});
+  }
+
+  const at = state.events.findIndex(x => String(x.id) === String(id));
+  if (at >= 0) state.events[at] = rec; else state.events.push(rec);
+
+  const what = side === 'missed' ? 'Missed setup'
+    : `${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)}`;
+  editing = null;
+  commit(`${what} ${at >= 0 ? 'updated' : 'recorded'}.`
+    + (demo ? ' Sample data cleared.' : ''));
 });
 
+document.getElementById('tradeDelete').addEventListener('click', () => {
+  if (editing === null) return;
+  const demo = isDemo();
+  if (!confirm(demo
+    ? 'This is sample data. Deleting clears the whole sample and starts you empty.'
+    : 'Delete this trade? This cannot be undone.')) return;
+  const id = editing;
+  liven();
+  if (!demo) state.events = state.events.filter(x => String(x.id) !== String(id));
+  SHOTS.del(id).catch(() => {});
+  editing = null;
+  sheet.close();
+  commit(demo ? 'Sample ledger cleared.' : 'Trade deleted.');
+});
+
+/* A save that fails must never read as a save that worked. This is the
+   one place the app could lie about real money already banked. */
 function commit(msg) {
-  writeStore(state);
+  try { writeStore(state); }
+  catch (e) {
+    renderAll();
+    document.getElementById('say').textContent = 'NOT SAVED — storage unavailable.';
+    alert('This browser refused to save — storage is full or disabled.\n\n'
+      + 'What you entered is on screen but will be lost when you reload. Write it down.');
+    return;
+  }
   renderAll();
   document.getElementById('say').textContent = msg;
 }

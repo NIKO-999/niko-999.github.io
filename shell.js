@@ -10,6 +10,14 @@
 (function () {
 const say = document.getElementById('say') || { textContent: '' };
 
+/* Photographs are resolved against THIS FILE, not against the page that
+   included it. A bare `bg/…` looked for /trading/bg/ and 404'd all five,
+   so a second app got no backdrop at all — the one thing the shell
+   exists to keep identical. Captured now: currentScript is null by the
+   time the idle callback runs. */
+const HERE = (document.currentScript && document.currentScript.src) || location.href;
+const asset = (p) => new URL(p, HERE).href;
+
 /* ── theme ──
    Three states, not two: System follows the phone, and the two explicit
    choices override it. Stored so it survives a reload. */
@@ -162,7 +170,7 @@ setPalette(palette);
 /* Arrow-keying through the picker swaps data-palette per press, and each
    never-fetched photograph would flash flat --ground while it loaded.
    Warm the other four after first paint, at idle priority. */
-const warm = () => PALETTES.forEach(([id]) => { new Image().src = `bg/${id}.jpg`; });
+const warm = () => PALETTES.forEach(([id]) => { new Image().src = asset(`arc/bg/${id}.jpg`); });
 if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
 else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);
