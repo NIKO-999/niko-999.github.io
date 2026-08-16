@@ -538,6 +538,23 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .shot.has:hover .shot-empty, .shot:focus-visible .shot-empty { opacity: 1; }
 .shot.dropping { border-color: var(--accent); }
 
+/* ── candle radar ──
+   Five windows as one shape. A balanced pentagon means the edge is
+   spread; a spike means one window is carrying the account and the rest
+   are leaking. Read in about a second, which no table manages. */
+.radar { display: block; width: 100%; max-width: 470px; margin: 6px auto 2px; height: auto; }
+.radar .rgrid { fill: none; stroke: var(--glass-line); stroke-width: 1; }
+.radar .rspoke { stroke: var(--glass-line); stroke-width: 1; }
+.radar .rzero { fill: none; stroke: var(--ink-3); stroke-width: 1;
+  stroke-dasharray: 3 4; opacity: .6; }
+.radar .rshape { fill: color-mix(in srgb, var(--accent) 24%, transparent);
+  stroke: var(--accent); stroke-width: 1.8; stroke-linejoin: round; }
+.radar .rdot { fill: var(--accent); }
+.radar .rk { font-family: var(--mono); font-size: 10px; fill: var(--ink-2); letter-spacing: .04em; }
+.radar .rv { font-family: var(--mono); font-size: 9px; letter-spacing: .03em; }
+.radar .rn { font-family: var(--mono); font-size: 8px; fill: var(--ink-3); }
+.radar .rempty { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+
 /* ── breakdowns ── */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
 @media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
@@ -737,6 +754,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
       <div class="pane" tabindex="0">
         <div class="metrics" id="metrics"></div>
+        <div class="curve">
+          <div class="cal-head"><h2>By candle</h2><span class="grow"></span>
+            <span class="span-meta" id="radarMeta"></span></div>
+          <svg class="radar" id="radar" role="img" aria-labelledby="radarAlt"></svg>
+          <p class="sr" id="radarAlt"></p>
+        </div>
         <div class="curve">
           <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
             <span class="span-meta" id="ddMeta"></span></div>
@@ -1393,6 +1416,7 @@ function renderMetrics() {
      the curve that shows it happening. */
   document.getElementById('ddMeta').textContent = t.n
     ? `worst drawdown ${round(t.dd)}` : '';
+  renderRadar();
   renderCurve();
 }
 
@@ -1441,6 +1465,76 @@ function renderBreakdowns() {
     .sort((a, b) => ((a.key + 6) % 7) - ((b.key + 6) % 7));
   renderRows(document.getElementById('byDow'), dows.map(r => ({ ...r, label: DOW[r.key] })),
     r => r.pnl, r => `${r.n} trades · ${r.wr.toFixed(0)}% won`);
+}
+
+/* ── the candle radar ──
+   Graded trades only, in R. Counting an ungraded trade as 0R would pull
+   a window toward the middle for no reason other than that you forgot to
+   write the risk down — the shape has to mean what it looks like. */
+function renderRadar() {
+  const svg = document.getElementById('radar');
+  /* The viewBox is sized to the shape plus its labels and nothing more —
+     slack inside it just scales the radar down inside its own panel. */
+  const W = 336, H = 306, cx = 168, cy = 150, RAD = 100, ZERO = RAD * 0.38;
+  const OUT = RAD + 28;
+
+  const rows = SESSIONS.map(k => {
+    const g = trades().filter(e => e.sess === k && e.risk > 0);
+    return { k, n: g.length, R: g.reduce((s, e) => s + e.amt / e.risk, 0) };
+  });
+  const graded = rows.reduce((s, r) => s + r.n, 0);
+  document.getElementById('radarMeta').textContent =
+    graded ? `net R · ${graded} graded` : 'needs a risk on each trade';
+
+  if (!graded) {
+    svg.setAttribute('viewBox', `0 0 ${W} 90`);
+    svg.innerHTML = `<text class="rempty" x="${cx}" y="48" text-anchor="middle">`
+      + `Record what you risked and each candle earns its own corner.</text>`;
+    document.getElementById('radarAlt').textContent =
+      'No graded trades yet. Record the risk on a trade to see performance by candle.';
+    return;
+  }
+
+  /* Anchored at a zero ring rather than at the centre, so a losing window
+     pinches inward and is visibly negative instead of merely small. */
+  const scale = Math.max(...rows.map(r => Math.abs(r.R))) || 1;
+  const rad = (v) => v >= 0
+    ? ZERO + (v / scale) * (RAD - ZERO)
+    : ZERO - (Math.abs(v) / scale) * ZERO * 0.88;
+  const at = (i, r) => {
+    const a = (-90 + i * (360 / rows.length)) * Math.PI / 180;
+    return [cx + Math.cos(a) * r, cy + Math.sin(a) * r];
+  };
+  const poly = (r) => rows.map((_, i) => at(i, typeof r === 'function' ? r(i) : r)
+    .map(n => n.toFixed(1)).join(',')).join(' ');
+
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML =
+    [0.55, 0.78, 1].map(f => `<polygon class="rgrid" points="${poly(RAD * f)}"/>`).join('')
+    + rows.map((_, i) => {
+        const [x, y] = at(i, RAD);
+        return `<line class="rspoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+      }).join('')
+    + `<polygon class="rzero" points="${poly(ZERO)}"/>`
+    + `<polygon class="rshape" points="${poly(i => rad(rows[i].R))}"/>`
+    + rows.map((r, i) => {
+        const [x, y] = at(i, rad(r.R));
+        return `<circle class="rdot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/>`;
+      }).join('')
+    + rows.map((r, i) => {
+        const [x, y] = at(i, OUT);
+        const col = r.R > 0 ? 'var(--up)' : r.R < 0 ? 'var(--down)' : 'var(--ink-3)';
+        return `<text class="rk" x="${x.toFixed(1)}" y="${(y - 4).toFixed(1)}" text-anchor="middle">${r.k}</text>`
+          + `<text class="rv" x="${x.toFixed(1)}" y="${(y + 8).toFixed(1)}" text-anchor="middle" fill="${col}">`
+          + `${r.n ? (r.R >= 0 ? '+' : '−') + Math.abs(r.R).toFixed(1) + 'R' : '—'}</text>`
+          + `<text class="rn" x="${x.toFixed(1)}" y="${(y + 19).toFixed(1)}" text-anchor="middle">`
+          + `${r.n} trade${r.n === 1 ? '' : 's'}</text>`;
+      }).join('');
+
+  const best = rows.filter(r => r.n).sort((a, b) => b.R - a.R)[0];
+  document.getElementById('radarAlt').textContent = 'Net R by candle. '
+    + rows.filter(r => r.n).map(r => `${r.k} ${(r.R >= 0 ? '+' : '−')}${Math.abs(r.R).toFixed(1)}R from ${r.n}`).join(', ')
+    + (best ? `. Best window ${best.k}.` : '');
 }
 
 function renderCurve() {
