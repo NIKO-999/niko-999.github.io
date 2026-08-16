@@ -837,6 +837,19 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    often, and the links, which accumulate. The approach sits on top
    because it is what you check before a trade; the links are what you
    go back to on a quiet afternoon. */
+/* The topic rail. Pills rather than the segmented control, because the
+   list grows with every model you write up and a shared track cannot
+   wrap without coming apart. */
+.tp { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin: 12px 0 4px; }
+.tp button {
+  height: 30px; padding: 0 13px; border: 0; border-radius: 8px;
+  background: var(--glass-in); color: var(--ink-3);
+  font: inherit; font-size: .76rem; cursor: pointer; white-space: nowrap;
+}
+.tp button:hover { color: var(--ink-2); }
+.tp button[aria-selected="true"] { background: var(--glass-in-2); color: var(--ink); }
+.tp .sep { width: 1px; height: 18px; background: var(--rule); margin: 0 2px; }
+
 .ap { margin: 12px 0 6px; }
 .ap-lede { margin: 8px 0 16px; max-width: 74ch;
   font-size: .84rem; line-height: 1.65; color: var(--ink-2); }
@@ -1295,99 +1308,15 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
       <div class="pane" tabindex="0">
 
-        <section class="ap" aria-labelledby="apH">
-          <div class="cal-head"><h2 id="apH">The approach</h2><span class="grow"></span>
-            <span class="span-meta">1H / 30M alignment to a 4H profile</span></div>
-
-          <p class="ap-lede">
-            The 4H profile says which candle should print the wick and which should
-            expand. This is the rule for entering inside it: the alignment is taken
-            on the 1H and the 30M, one or two timeframes down from the profile, and
-            never lower. Nothing below is a new setup — it is the condition under
-            which the setups you already have are allowed to be taken.
-          </p>
-
-          <div class="ap-grid">
-            <article class="ap-s">
-              <h3><i>01</i>Reversal in C2</h3>
-              <p>C1 ran the key level and C2 turns it. The wick of the day, if the
-                 profile says the wick belongs here.</p>
-              <ul>
-                <li>The key level is reached — the profile supports a turn here</li>
-                <li>A small wick on C2. A large one has already spent the move</li>
-                <li>Two-stage SMT, first stage on the 1H or above</li>
-                <li>Over an hour left in the candle</li>
-              </ul>
-            </article>
-
-            <article class="ap-s">
-              <h3><i>02</i>Continuation in C3</h3>
-              <p>C2 reversed off C1 and closed back inside the range. C3 carries it,
-                 and it enters off what C2 left behind.</p>
-              <ul>
-                <li>C3's wick is forming in the upper half of C2's wick</li>
-                <li>There is a gap in there — and price has traded into it</li>
-                <li>SMT on the gap tap, on the 1H or the 30M</li>
-                <li>A clear draw on liquidity to aim at</li>
-              </ul>
-            </article>
-
-            <article class="ap-s">
-              <h3><i>03</i>No gaps anywhere</h3>
-              <p>C2's wick is clean. There is nothing inside it to trade back into,
-                 so there is no continuation to find.</p>
-              <ul>
-                <li>The only trade is inside C2 itself</li>
-                <li>Do not go hunting an entry outside it to have one</li>
-                <li>No gap and no C2 entry is a day you sit out</li>
-              </ul>
-            </article>
-
-            <article class="ap-s">
-              <h3><i>04</i>A new open, or a driver</h3>
-              <p>The 1H and the 4H open together and price expands immediately off
-                 it — or 09:30 supplies the expansion.</p>
-              <ul>
-                <li>The expansion is immediate off the open, not after a build</li>
-                <li>A driver coming is what makes it worth taking late</li>
-                <li>This is the one case the hour-left rule does not apply</li>
-              </ul>
-            </article>
-          </div>
-
-          <ol class="ap-rules">
-            <li><b>SMT comes in two stages.</b><span>First stage on the 1H or above,
-              after the key level has been reached. Second stage on the 1H or 30M —
-              a PSP if you can get one, otherwise SMT against the previous candle.
-              One stage is confirmation of nothing.</span></li>
-            <li><b>A small wick, or no trade.</b><span>Size the wick before anything
-              else. A large wick on C2 has already spent the move and will not expand
-              behind you.</span></li>
-            <li><b>More than an hour left.</b><span>A continuation inside C2 needs
-              over an hour of the candle remaining. Under that there is not enough
-              time left in it to expand, however good the entry looks.</span></li>
-            <li><b>09:30 is the exception to that.</b><span>With a driver coming, a
-              new 1H and 4H open with immediate expansion is takeable regardless of
-              the time left — the driver is what supplies the move.</span></li>
-            <li><b>No gaps, no continuation.</b><span>If the wick has no gap in it,
-              do not reach outside C2 for an entry. Trade inside C2 or do not
-              trade.</span></li>
-            <li><b>Regular swings, with one exception.</b><span>The 90-minute
-              cracking correlation is the only place a swing that is not a regular
-              one is allowed to be the reference.</span></li>
-            <li><b>Never the 15-minute.</b><span>The alignment lives on the 1H and
-              the 30M. The 15 will always give you an entry — one the 4H profile
-              never asked for.</span></li>
-          </ol>
-
-          <div class="ap-lists" id="apLists"></div>
-          <p class="ap-foot">Those two lists are the same ones you tick when you
-            record a trade — printed from one place, so the page and the sheet
-            cannot drift apart.</p>
-        </section>
+        <!-- One note per model. The rail picks which is on screen; the
+             note itself is a record in NOTES, so a new video is a new
+             entry rather than a new block of markup. -->
+        <div class="tp" id="tpRail" role="tablist" aria-label="Topics"></div>
+        <div id="apWrap"></div>
 
         <div class="cal-head" style="margin-top:26px">
-          <h2>Saved</h2><span class="grow"></span>
+          <h2 id="resHead">Saved</h2><span class="grow"></span>
+          <span class="span-meta" id="resCount"></span>
           <button class="btn btn-ghost" type="button" id="resAdd">Add a link</button>
         </div>
         <div id="resList"></div>
@@ -1458,6 +1387,10 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <div class="field">
           <label for="rsLen">Length</label>
           <input id="rsLen" type="text" placeholder="26:54, or 11 min read" />
+        </div>
+        <div class="field wide">
+          <label for="rsNote">Files under</label>
+          <select id="rsNote"></select>
         </div>
         <div class="field wide">
           <label for="rsSum">How you use it</label>
@@ -3168,6 +3101,7 @@ const RKEY = 'ledger.res.v1';
 const SEED = [{
   id: 'seed-4h-align',
   kind: 'video',
+  note: 'align-4h',
   art: 'c3',
   title: '1H / 30M alignment to a 4H profile',
   url: 'https://youtu.be/nMAL3VXTr8M',
@@ -3275,18 +3209,158 @@ const DIAG = {
 
 let resUrls = [];
 
-function renderRes() {
-  /* The checklists, printed from the constant the sheet ticks. */
-  document.getElementById('apLists').innerHTML =
-    [['Reversal — C2', CHECKLISTS.reversal],
-     ['Continuation — C3', CHECKLISTS.continuation]]
-    .map(([h, list]) => `<div class="ap-list"><h3>${esc(h)}</h3><ol>`
-      + list.map(x => `<li>${esc(x)}</li>`).join('') + `</ol></div>`).join('');
 
-  const all = resAll();
-  const marks = all.reduce((n, r) => n + (r.marks || []).length, 0);
+/* ═══ the notes ═══
+   One record per model you have written up. Each carries its own lede,
+   its situations, its rules, and — for the model you are actually
+   trading — the two checklists the trade sheet ticks.
+
+   ADDING ONE. Append an object here and file the links under it with
+   `note: '<id>'`. Nothing else needs touching: the rail, the panel, the
+   grouping and the editor's dropdown all read from this array.
+
+     id     stable, referenced by resources. Never renamed.
+     title  what the rail says
+     sub    the one-line subject, shown top-right
+     lede   what the model IS, in a paragraph
+     sit    the situations you can be in. n / h / p / li
+     rules  [heading, why] — the things that are not negotiable
+     lists  true on the ONE note whose checklists the sheet ticks
+*/
+const NOTES = [
+  {
+    id: 'align-4h',
+    title: 'The approach',
+    sub: '1H / 30M alignment to a 4H profile',
+    lists: true,
+    lede: 'The 4H profile says which candle should print the wick and which '
+        + 'should expand. This is the rule for entering inside it: the alignment '
+        + 'is taken on the 1H and the 30M, one or two timeframes down from the '
+        + 'profile, and never lower. Nothing below is a new setup — it is the '
+        + 'condition under which the setups you already have are allowed to be taken.',
+    sit: [
+      { n: '01', h: 'Reversal in C2',
+        p: 'C1 ran the key level and C2 turns it. The wick of the day, if the profile says the wick belongs here.',
+        li: ['The key level is reached — the profile supports a turn here',
+             'A small wick on C2. A large one has already spent the move',
+             'Two-stage SMT, first stage on the 1H or above',
+             'Over an hour left in the candle'] },
+      { n: '02', h: 'Continuation in C3',
+        p: 'C2 reversed off C1 and closed back inside the range. C3 carries it, and it enters off what C2 left behind.',
+        li: ["C3's wick is forming in the upper half of C2's wick",
+             'There is a gap in there — and price has traded into it',
+             'SMT on the gap tap, on the 1H or the 30M',
+             'A clear draw on liquidity to aim at'] },
+      { n: '03', h: 'No gaps anywhere',
+        p: "C2's wick is clean. There is nothing inside it to trade back into, so there is no continuation to find.",
+        li: ['The only trade is inside C2 itself',
+             'Do not go hunting an entry outside it to have one',
+             'No gap and no C2 entry is a day you sit out'] },
+      { n: '04', h: 'A new open, or a driver',
+        p: 'The 1H and the 4H open together and price expands immediately off it — or 09:30 supplies the expansion.',
+        li: ['The expansion is immediate off the open, not after a build',
+             'A driver coming is what makes it worth taking late',
+             'This is the one case the hour-left rule does not apply'] },
+    ],
+    rules: [
+      ['SMT comes in two stages.',
+       'First stage on the 1H or above, after the key level has been reached. '
+       + 'Second stage on the 1H or 30M — a PSP if you can get one, otherwise SMT '
+       + 'against the previous candle. One stage is confirmation of nothing.'],
+      ['A small wick, or no trade.',
+       'Size the wick before anything else. A large wick on C2 has already spent '
+       + 'the move and will not expand behind you.'],
+      ['More than an hour left.',
+       'A continuation inside C2 needs over an hour of the candle remaining. Under '
+       + 'that there is not enough time left in it to expand, however good the entry looks.'],
+      ['09:30 is the exception to that.',
+       'With a driver coming, a new 1H and 4H open with immediate expansion is '
+       + 'takeable regardless of the time left — the driver is what supplies the move.'],
+      ['No gaps, no continuation.',
+       'If the wick has no gap in it, do not reach outside C2 for an entry. Trade '
+       + 'inside C2 or do not trade.'],
+      ['Regular swings, with one exception.',
+       'The 90-minute cracking correlation is the only place a swing that is not a '
+       + 'regular one is allowed to be the reference.'],
+      ['Never the 15-minute.',
+       'The alignment lives on the 1H and the 30M. The 15 will always give you an '
+       + 'entry — one the 4H profile never asked for.'],
+    ],
+  },
+];
+const noteOf = (id) => NOTES.find(n => n.id === id) || null;
+/* The rail remembers where you were between reloads, because the note
+   you are studying this week is the one you want on opening the page. */
+const TKEY = 'ledger.topic.v1';
+let TOPIC = (() => {
+  let v = null;
+  try { v = localStorage.getItem(TKEY); } catch (e) {}
+  return v === 'all' || noteOf(v) ? v : (NOTES[0] ? NOTES[0].id : 'all');
+})();
+
+function renderRail() {
+  const rail = document.getElementById('tpRail');
+  rail.innerHTML = NOTES.map(n =>
+    `<button type="button" role="tab" data-topic="${esc(n.id)}"
+       aria-selected="${TOPIC === n.id}">${esc(n.title)}</button>`).join('')
+    + (NOTES.length ? `<span class="sep" aria-hidden="true"></span>` : '')
+    + `<button type="button" role="tab" data-topic="all"
+        aria-selected="${TOPIC === 'all'}">All links</button>`;
+}
+
+function renderNote() {
+  const wrap = document.getElementById('apWrap');
+  const n = noteOf(TOPIC);
+  if (!n) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `
+    <section class="ap" aria-labelledby="apH">
+      <div class="cal-head"><h2 id="apH">${esc(n.title)}</h2><span class="grow"></span>
+        <span class="span-meta">${esc(n.sub)}</span></div>
+      <p class="ap-lede">${esc(n.lede)}</p>
+      <div class="ap-grid">${n.sit.map(x => `
+        <article class="ap-s">
+          <h3><i>${esc(x.n)}</i>${esc(x.h)}</h3>
+          <p>${esc(x.p)}</p>
+          <ul>${x.li.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+        </article>`).join('')}</div>
+      <ol class="ap-rules">${n.rules.map(([h, why]) =>
+        `<li><b>${esc(h)}</b><span>${esc(why)}</span></li>`).join('')}</ol>
+      ${n.lists ? `<div class="ap-lists">`
+        + [['Reversal — C2', CHECKLISTS.reversal],
+           ['Continuation — C3', CHECKLISTS.continuation]]
+          .map(([h, list]) => `<div class="ap-list"><h3>${esc(h)}</h3><ol>`
+            + list.map(x => `<li>${esc(x)}</li>`).join('') + `</ol></div>`).join('')
+        + `</div>
+        <p class="ap-foot">Those two lists are the same ones you tick when you
+          record a trade — printed from one place, so the page and the sheet
+          cannot drift apart.</p>` : ''}
+    </section>`;
+}
+
+document.getElementById('tpRail').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-topic]');
+  if (!b || b.dataset.topic === TOPIC) return;
+  TOPIC = b.dataset.topic;
+  try { localStorage.setItem(TKEY, TOPIC); } catch (e) {}
+  renderRes();
+});
+
+function renderRes() {
+  renderRail();
+  renderNote();
+
+  const every = resAll();
+  /* Filed under the topic on screen, plus anything with no topic at all —
+     a link is never hidden by the rail, only grouped by it. */
+  const all = TOPIC === 'all' ? every
+            : every.filter(r => (r.note || '') === TOPIC || !noteOf(r.note || ''));
+  const marks = every.reduce((n, r) => n + (r.marks || []).length, 0);
   document.getElementById('resMeta').textContent =
-    `${all.length} saved · ${marks} ${marks === 1 ? 'mark' : 'marks'}`;
+    `${every.length} saved · ${marks} ${marks === 1 ? 'mark' : 'marks'}`;
+  document.getElementById('resHead').textContent =
+    TOPIC === 'all' ? 'Every link' : 'What it came from';
+  document.getElementById('resCount').textContent =
+    all.length === every.length ? '' : `${all.length} of ${every.length}`;
 
   /* Minted per render and released on the next one, same as the log's
      thumbnails — an app left open all week would otherwise hold every
@@ -3296,8 +3370,10 @@ function renderRes() {
 
   const wrap = document.getElementById('resList');
   if (!all.length) {
-    wrap.innerHTML = `<p class="rs-none">Nothing saved. A link, a line on when you would
-      open it again, and the timestamps worth going straight to.</p>`;
+    wrap.innerHTML = `<p class="rs-none">${every.length
+      ? 'Nothing filed under this one yet.'
+      : `Nothing saved. A link, a line on when you would open it again, and the
+         timestamps worth going straight to.`}</p>`;
     return;
   }
   wrap.innerHTML = all.map(r => {
@@ -3383,6 +3459,11 @@ function openRes(id) {
   rsF('rsLen').value  = r ? (r.len || '') : '';
   rsF('rsSum').value  = r ? (r.sum || '') : '';
   rsF('rsTags').value = r ? (r.tags || []).join(', ') : '';
+  /* Defaults to the topic you are looking at, which is nearly always the
+     one you are filing under. */
+  rsF('rsNote').innerHTML = `<option value="">Nothing in particular</option>`
+    + NOTES.map(n => `<option value="${esc(n.id)}">${esc(n.title)}</option>`).join('');
+  rsF('rsNote').value = r ? (r.note || '') : (noteOf(TOPIC) ? TOPIC : '');
   rsF('rsMarks').value = r
     ? (r.marks || []).map(m => `${stamp(m.t)}  ${m.s}`).join('\n') : '';
   rsF('rsDelete').hidden = !r;
@@ -3480,6 +3561,7 @@ document.getElementById('rsForm').addEventListener('submit', (ev) => {
     kind: rsF('rsKind').value,
     len: rsF('rsLen').value.trim(),
     sum: rsF('rsSum').value.trim(),
+    note: rsF('rsNote').value,
     marks: readMarks(rsF('rsMarks').value),
     tags: rsF('rsTags').value.split(',').map(x => x.trim()).filter(Boolean),
   };
