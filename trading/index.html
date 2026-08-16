@@ -186,7 +186,6 @@
   border: 1px solid var(--glass-line); background: var(--glass-in-2);
   color: var(--ink-2);
 }
-.cp-line { margin: 0 0 11px; font-size: .88rem; color: var(--ink); letter-spacing: -.005em; }
 
 /* The time band. Its whole job is to answer "is there still room in this
    candle", so it carries the theme accent rather than a stoplight green —
@@ -774,7 +773,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
       <div class="pane" tabindex="0">
         <!-- Which candle you are standing in, how long is left of it, and
-             what the profile says happens next. -->
+             what to do if the window passes. -->
         <section class="cp" id="cp" aria-label="Current 4H candle">
           <div class="cp-h">
             <span class="cp-in"><span class="ic" id="cpIcon"></span><span id="cpIn">In</span></span>
@@ -784,7 +783,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
             <span class="cp-ny" id="cpNY"></span>
             <span class="cp-next" id="cpNext"></span>
           </div>
-          <p class="cp-line" id="cpLine"></p>
           <div class="cp-band" id="cpBand">
             <span class="ic" id="cpBandIcon"></span>
             <span><b id="cpBandT"></b><em id="cpBandS"></em></span>
@@ -1060,22 +1058,16 @@ const SESSIONS = [18, 22, 2, 6, 10].map(hhmm);
    and reading that at 06:00 is more use than reading it in hindsight. */
 const PROFILE = {
   18: { name: 'Asia',
-        line: 'Reversal. 22:00, 02:00 and 06:00 then continue it in turn, internal liquidity out to external.',
         miss: '22:00 can still print the wick, and 02:00 after it. If 18:00 gave no reversal candle AND no divergence, look for a gap inside its wick on the 1H or 30M and take the continuation off that.' },
   22: { name: 'Overnight',
-        line: 'Reversal. 02:00, 06:00 and 10:00 then continue it in turn, internal liquidity out to external.',
         miss: '02:00 continues it, then 06:00 and 10:00 carry it further toward the draw. If 22:00 gave no reversal candle AND no divergence at all, wait for 02:00 to engulf the prior range and close beyond the bodies — that close becomes your confirmation.' },
    2: { name: 'London',
-        line: 'Reversal. 06:00 and 10:00 then continue it in turn, internal liquidity out to external.',
         miss: '06:00 continues it, then 10:00 carries it to the draw. If 02:00 gave no reversal candle AND no divergence, look for a gap inside its wick on the 1H or 30M and take the continuation off that.' },
    6: { name: 'New York',
-        line: 'Reversal into expansion. 08:30 and 09:30 confirm it, and 10:00 carries it to the draw.',
         miss: 'If 06:00 never reverses, 10:00 manipulates and starts the expansion itself. Take the continuation off that instead of forcing this one.' },
   10: { name: 'Late New York',
-        line: 'Last reversal of the day. A small wick with the daily behind it is the strongest entry left.',
         miss: 'Nothing continues this one. No entries past 11:00 — be flat before 12:00 and let the 18:00 open start it again.' },
   14: { name: 'NY lunch',
-        line: 'Not traded. The day’s reversal has already happened, or it has not.',
         miss: 'The next reversal window is the 18:00 open.' },
 };
 
@@ -2212,7 +2204,6 @@ function tickCandle() {
   put('cpNY', `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} NY`);
   put('cpNext', soon ? `opens in ${hm(c.left)}`
     : off ? `then ${hhmm(next)}` : `${hm(c.left)} left · then ${hhmm(next)}`);
-  put('cpLine', p.line);
   put('cpBandT', head);
   put('cpBandS', sub);
   put('cpMiss', p.miss);
