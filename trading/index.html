@@ -358,7 +358,7 @@
 
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
-.curve svg { display: block; width: 100%; height: 170px; overflow: visible; }
+#curve { display: block; width: 100%; height: 170px; overflow: visible; }
 .axis-l { font-family: var(--mono); font-size: 9px; fill: var(--ink-3); }
 .gridline { stroke: var(--rule); stroke-width: 1; }
 .equity { fill: none; stroke: var(--ink); stroke-width: 1.6; }
@@ -542,7 +542,17 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    Five windows as one shape. A balanced pentagon means the edge is
    spread; a spike means one window is carrying the account and the rest
    are leaking. Read in about a second, which no table manages. */
-.radar { display: block; width: 100%; max-width: 470px; margin: 6px auto 2px; height: auto; }
+/* Two charts side by side: the radar is square and wants a small box,
+   the curve is wide and takes what is left. */
+.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
+@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+.chartbox.span { grid-column: 1 / -1; }
+.chartbox {
+  padding: 14px 16px 15px;
+  border: 1px solid var(--glass-line); border-radius: 12px; background: var(--glass-in);
+}
+.chartbox .cal-head { margin: 0 0 6px; }
+.radar { display: block; width: 100%; max-width: 330px; height: auto; margin: 2px auto 0; }
 .radar .rgrid { fill: none; stroke: var(--glass-line); stroke-width: 1; }
 .radar .rspoke { stroke: var(--glass-line); stroke-width: 1; }
 .radar .rzero { fill: none; stroke: var(--ink-3); stroke-width: 1;
@@ -554,30 +564,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .radar .rv { font-family: var(--mono); font-size: 9px; letter-spacing: .03em; }
 .radar .rn { font-family: var(--mono); font-size: 8px; fill: var(--ink-3); }
 .radar .rempty { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
-
-/* ── breakdowns ── */
-.split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
-@media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
-.rows-t { margin: 0; padding: 0; list-style: none; }
-.rows-t li {
-  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px;
-  padding: 9px 0; border-bottom: 1px solid var(--rule);
-}
-.rows-t li:last-child { border-bottom: 0; }
-.rt-n { font-size: .82rem; font-weight: 500; }
-.rt-v { font-family: var(--mono); font-size: .78rem; font-weight: 500; letter-spacing: -.02em; }
-.rt-v.up { color: var(--up); }
-.rt-v.down { color: var(--down); }
-.rt-m { font-family: var(--mono); font-size: .6rem; color: var(--ink-2); letter-spacing: -.01em; }
-/* The bar is signed: it grows from a centre line, so losers point the
-   other way instead of just being a shorter winner. */
-.bar-wrap { grid-column: 1 / -1; position: relative; height: 5px; margin-top: 3px;
-  background: var(--glass-in); border-radius: 3px; }
-.bar-wrap i { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
-  background: var(--rule); }
-.bar-wrap b { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
-.bar-wrap b.up   { background: var(--up); }
-.bar-wrap b.down { background: var(--down); }
 
 /* ── settings + ledger ── */
 .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
@@ -754,34 +740,32 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
       <div class="pane" tabindex="0">
         <div class="metrics" id="metrics"></div>
-        <div class="curve">
-          <div class="cal-head"><h2>By candle</h2><span class="grow"></span>
-            <span class="span-meta" id="radarMeta"></span></div>
-          <svg class="radar" id="radar" role="img" aria-labelledby="radarAlt"></svg>
-          <p class="sr" id="radarAlt"></p>
-        </div>
-        <div class="curve">
-          <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
-            <span class="span-meta" id="ddMeta"></span></div>
-          <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
-          <p class="sr" id="curveAlt"></p>
-          <div class="legend" aria-hidden="true">
-            <span style="color:var(--ink)"><i></i>Equity</span>
-            <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
-            <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
-          </div>
-        </div>
-        <div class="split">
-          <div>
-            <div class="cal-head"><h2>By setup</h2><span class="grow"></span>
-              <span class="span-meta">expectancy</span></div>
-            <ul class="rows-t" id="bySetup"></ul>
-          </div>
-          <div>
-            <div class="cal-head"><h2>By weekday</h2><span class="grow"></span>
-              <span class="span-meta">net</span></div>
-            <ul class="rows-t" id="byDow"></ul>
-          </div>
+        <!-- The radar is square, so it gets a box of its own rather than a
+             band of empty panel either side of it. -->
+        <div class="charts">
+          <section class="chartbox">
+            <div class="cal-head"><h2>By candle</h2><span class="grow"></span>
+              <span class="span-meta" id="radarMeta"></span></div>
+            <svg class="radar" id="radar" role="img" aria-labelledby="radarAlt"></svg>
+            <p class="sr" id="radarAlt"></p>
+          </section>
+          <section class="chartbox">
+            <div class="cal-head"><h2>By day</h2><span class="grow"></span>
+              <span class="span-meta" id="dayMeta"></span></div>
+            <svg class="radar" id="dayRadar" role="img" aria-labelledby="dayAlt"></svg>
+            <p class="sr" id="dayAlt"></p>
+          </section>
+          <section class="chartbox span">
+            <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
+              <span class="span-meta" id="ddMeta"></span></div>
+            <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
+            <p class="sr" id="curveAlt"></p>
+            <div class="legend" aria-hidden="true">
+              <span style="color:var(--ink)"><i></i>Equity</span>
+              <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
+              <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
+            </div>
+          </section>
         </div>
       </div>
     </main>
@@ -1416,82 +1400,48 @@ function renderMetrics() {
      the curve that shows it happening. */
   document.getElementById('ddMeta').textContent = t.n
     ? `worst drawdown ${round(t.dd)}` : '';
-  renderRadar();
+  renderRadars();
   renderCurve();
 }
 
-/* Grouped stats. Both of these answer the same question from different
-   sides: where does the edge actually come from — and where does it go. */
-function group(keyFn, label) {
-  const m = new Map();
-  trades().forEach(e => {
-    const k = keyFn(e);
-    if (k === null) return;
-    const cur = m.get(k) || { n: 0, pnl: 0, wins: 0 };
-    cur.n += 1; cur.pnl += e.amt; if (e.amt > 0) cur.wins += 1;
-    m.set(k, cur);
-  });
-  return [...m.entries()].map(([k, v]) => ({
-    key: k, label: label ? label(k) : k, ...v,
-    exp: v.pnl / v.n, wr: (v.wins / v.n) * 100,
-  }));
-}
-
-function renderRows(el, rows, valueOf, meta) {
-  if (!rows.length) { el.innerHTML = '<li class="empty">No trades yet</li>'; return; }
-  const max = Math.max(...rows.map(r => Math.abs(valueOf(r)))) || 1;
-  el.innerHTML = rows.map(r => {
-    const v = valueOf(r);
-    const w = (Math.abs(v) / max) * 50;
-    return `<li>
-      <span class="rt-n">${esc(r.label)}</span>
-      <span class="rt-v ${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${money(v, true)}</span>
-      <span class="rt-m">${meta(r)}</span>
-      <span class="bar-wrap" aria-hidden="true"><i></i>
-        <b class="${v >= 0 ? 'up' : 'down'}"
-           style="${v >= 0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%`}"></b></span>
-    </li>`;
-  }).join('');
-}
-
-const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-
-function renderBreakdowns() {
-  const setups = group(e => e.setup || 'Untagged').sort((a, b) => b.exp - a.exp);
-  renderRows(document.getElementById('bySetup'), setups, r => r.exp,
-    r => `${r.n} trades · ${r.wr.toFixed(0)}% won · ${money(r.pnl, true)} total`);
-
-  const dows = group(e => new Date(e.date + 'T00:00:00').getDay())
-    .sort((a, b) => ((a.key + 6) % 7) - ((b.key + 6) % 7));
-  renderRows(document.getElementById('byDow'), dows.map(r => ({ ...r, label: DOW[r.key] })),
-    r => r.pnl, r => `${r.n} trades · ${r.wr.toFixed(0)}% won`);
-}
-
-/* ── the candle radar ──
+/* ── the radars ──
    Graded trades only, in R. Counting an ungraded trade as 0R would pull
-   a window toward the middle for no reason other than that you forgot to
-   write the risk down — the shape has to mean what it looks like. */
-function renderRadar() {
-  const svg = document.getElementById('radar');
+   its corner toward the middle for no reason other than that you forgot
+   to write the risk down — the shape has to mean what it looks like. */
+const dowOf = (e) => DOW_SHORT[(new Date(e.date + 'T00:00:00').getDay() + 6) % 7];
+
+const radarRows = (keys, keyOf) => keys.map(k => {
+  const g = trades().filter(e => e.risk > 0 && keyOf(e) === k);
+  return { k, n: g.length, R: g.reduce((s, e) => s + e.amt / e.risk, 0) };
+});
+
+function renderRadars() {
+  renderRadar('radar', 'radarMeta', 'radarAlt', radarRows(SESSIONS, e => e.sess), 'candle');
+  /* Monday to Friday, unless something actually landed on a weekend —
+     five axes is the same pentagon as the candles, which is why the two
+     read as a pair. */
+  const wknd = trades().some(e => e.risk > 0 && ['Sat', 'Sun'].includes(dowOf(e)));
+  renderRadar('dayRadar', 'dayMeta', 'dayAlt',
+    radarRows(DOW_SHORT.slice(0, wknd ? 7 : 5), dowOf), 'day');
+}
+
+function renderRadar(id, metaId, altId, rows, noun) {
+  const svg = document.getElementById(id);
   /* The viewBox is sized to the shape plus its labels and nothing more —
-     slack inside it just scales the radar down inside its own panel. */
+     slack inside it just scales the radar down inside its own box. */
   const W = 336, H = 306, cx = 168, cy = 150, RAD = 100, ZERO = RAD * 0.38;
   const OUT = RAD + 28;
 
-  const rows = SESSIONS.map(k => {
-    const g = trades().filter(e => e.sess === k && e.risk > 0);
-    return { k, n: g.length, R: g.reduce((s, e) => s + e.amt / e.risk, 0) };
-  });
   const graded = rows.reduce((s, r) => s + r.n, 0);
-  document.getElementById('radarMeta').textContent =
+  document.getElementById(metaId).textContent =
     graded ? `net R · ${graded} graded` : 'needs a risk on each trade';
 
   if (!graded) {
     svg.setAttribute('viewBox', `0 0 ${W} 90`);
     svg.innerHTML = `<text class="rempty" x="${cx}" y="48" text-anchor="middle">`
-      + `Record what you risked and each candle earns its own corner.</text>`;
-    document.getElementById('radarAlt').textContent =
-      'No graded trades yet. Record the risk on a trade to see performance by candle.';
+      + `Record what you risked and each ${noun} earns its own corner.</text>`;
+    document.getElementById(altId).textContent =
+      `No graded trades yet. Record the risk on a trade to see performance by ${noun}.`;
     return;
   }
 
@@ -1532,9 +1482,9 @@ function renderRadar() {
       }).join('');
 
   const best = rows.filter(r => r.n).sort((a, b) => b.R - a.R)[0];
-  document.getElementById('radarAlt').textContent = 'Net R by candle. '
+  document.getElementById(altId).textContent = `Net R by ${noun}. `
     + rows.filter(r => r.n).map(r => `${r.k} ${(r.R >= 0 ? '+' : '−')}${Math.abs(r.R).toFixed(1)}R from ${r.n}`).join(', ')
-    + (best ? `. Best window ${best.k}.` : '');
+    + (best ? `. Best ${noun} ${best.k}.` : '');
 }
 
 function renderCurve() {
@@ -1972,7 +1922,7 @@ function commit(msg) {
   document.getElementById('say').textContent = msg;
 }
 function renderAll() {
-  renderSummary(); renderCalendar(); renderMetrics(); renderBreakdowns(); renderLedger();
+  renderSummary(); renderCalendar(); renderMetrics(); renderLedger();
 }
 
 /* ── the candle clock ──
