@@ -747,6 +747,78 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .rlg span { display: flex; align-items: center; gap: 5px; }
 .rlg i { display: block; width: 9px; height: 9px; border-radius: 2px; }
 
+/* ── the log ──
+   A reading view, so it is set as prose: one column of text at a
+   readable measure, with the facts about each trade around it rather
+   than through it. */
+.lg-filters { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; flex-wrap: wrap; }
+.lg-filters .side { flex: none; }
+.lg-filters .side button { flex: none; height: 32px; padding: 0 13px;
+  font-family: var(--sans); font-size: .76rem; text-transform: none; letter-spacing: normal; }
+.lg-filters .side button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
+.lg-filters select {
+  height: 32px; padding: 0 9px; border: 1px solid var(--glass-line); border-radius: 8px;
+  background: var(--glass-in); color: var(--ink-2); font: inherit; font-size: .76rem;
+}
+.lg-filters .grow { flex: 1; }
+.lg-only {
+  height: 32px; padding: 0 11px; border: 0; border-radius: 8px;
+  background: var(--glass-in); color: var(--ink-3);
+  font: inherit; font-size: .68rem; cursor: pointer;
+}
+.lg-only[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink-2); }
+
+.lg-month { display: flex; align-items: center; gap: 11px; margin: 24px 0 2px; }
+.lg-month:first-child { margin-top: 12px; }
+.lg-month b { font-size: .72rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink-2); }
+.lg-month i { flex: 1; height: 1px; background: var(--rule); }
+.lg-month em { font-style: normal; font-size: .66rem; color: var(--ink-3); }
+
+.lg {
+  display: grid; grid-template-columns: 92px minmax(0, 1fr) 104px; gap: 14px;
+  width: 100%; padding: 13px 0 15px;
+  border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; font: inherit; color: inherit; cursor: pointer;
+}
+.lg:last-child { border-bottom: 0; }
+.lg:hover { background: color-mix(in srgb, var(--glass-in) 55%, transparent); }
+.lg:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.lg-when { font-size: .66rem; line-height: 1.6; color: var(--ink-3); }
+.lg-when b { display: block; font-size: .78rem; font-weight: 500;
+  color: var(--ink-2); letter-spacing: -.01em; }
+.lg-main { min-width: 0; }
+.lg-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 7px; }
+.lg-sym { font-size: .84rem; font-weight: 500; color: var(--ink); }
+.lg-chip { padding: 2px 7px; border-radius: 5px; background: var(--glass-in-2);
+  font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
+.lg-chip.win  { background: var(--up-fill);   color: var(--up); }
+.lg-chip.loss { background: var(--down-fill); color: var(--down); }
+.lg-r { margin-left: auto; font-size: .84rem; font-weight: 500; letter-spacing: -.02em;
+  color: var(--ink-2); }
+.lg-r.up { color: var(--up); } .lg-r.down { color: var(--down); }
+/* pre-wrap, so a note written as two thoughts stays two thoughts. */
+.lg-note { margin: 0; font-size: .82rem; line-height: 1.6; color: var(--ink-2);
+  white-space: pre-wrap; overflow-wrap: anywhere; }
+.lg-note.none { color: var(--ink-3); font-style: italic; }
+.lg-rules { margin-top: 8px; display: flex; align-items: center; gap: 6px;
+  font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
+.lg-pips { display: flex; gap: 3px; }
+.lg-pips i { width: 12px; height: 3px; border-radius: 2px; background: var(--glass-in-2); }
+.lg-pips i.on { background: var(--accent); }
+.lg-shot { width: 104px; height: 66px; border-radius: 7px; border: 1px solid var(--glass-line);
+  background: var(--glass-in) center/cover no-repeat; }
+/* Holds the column open without drawing a frame around nothing. */
+.lg-noshot { display: block; }
+.lg-empty { margin: 26px 0; font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
+@media (max-width: 720px) {
+  .lg { grid-template-columns: minmax(0, 1fr); }
+  .lg-when { display: flex; gap: 8px; align-items: baseline; }
+  .lg-when b { display: inline; }
+  .lg-shot { width: 100%; height: 120px; }
+  .lg-noshot { display: none; }
+}
+
 /* ── settings + ledger ── */
 .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
 .field { display: flex; flex-direction: column; gap: 5px; }
@@ -821,6 +893,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     <button type="button" data-view="calendar" aria-label="Calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
         <rect x="3" y="5" width="18" height="16" rx="2" /><path d="M3 10h18M8 3v4M16 3v4" />
+      </svg>
+    </button>
+    <button type="button" data-view="log" aria-label="Log">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5ZM4 17h15M8 8h7M8 11.5h5" />
       </svg>
     </button>
     <button type="button" data-view="settings" aria-label="Capital">
@@ -908,6 +986,41 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         </div>
         <div class="dow" id="dow" aria-hidden="true"></div>
         <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
+      </div>
+    </main>
+
+    <!-- ── log ──
+         The notes, in order. Everything here is already on a trade; the
+         only new thing is being able to read it back. -->
+    <main class="main" id="logSection" hidden>
+      <div class="head">
+        <h1>Log</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="logMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="lg-filters">
+          <div class="side" id="logOut" role="group" aria-label="Outcome">
+            <button type="button" data-out="all"    aria-pressed="true">All</button>
+            <button type="button" data-out="win"    aria-pressed="false">Wins</button>
+            <button type="button" data-out="loss"   aria-pressed="false">Losses</button>
+            <button type="button" data-out="missed" aria-pressed="false">Missed</button>
+          </div>
+          <label class="sr" for="logSetup">Setup</label>
+          <select id="logSetup"><option value="">Any setup</option></select>
+          <label class="sr" for="logMode">Type</label>
+          <select id="logMode">
+            <option value="">Any type</option>
+            <option value="reversal">Reversal</option>
+            <option value="continuation">Continuation</option>
+          </select>
+          <label class="sr" for="logSess">Candle</label>
+          <select id="logSess"><option value="">Any candle</option></select>
+          <span class="grow"></span>
+          <button class="lg-only" type="button" id="logOnly" aria-pressed="true">
+            Only trades with a note</button>
+        </div>
+        <div id="logList"></div>
       </div>
     </main>
 
@@ -1456,7 +1569,7 @@ const hits = (e) => !query || [e.sym, e.setup, e.note, e.sess, e.k]
   .some(v => v && String(v).toLowerCase().includes(query));
 document.getElementById('q').addEventListener('input', (ev) => {
   query = ev.target.value.trim().toLowerCase();
-  renderCalendar(); renderLedger();
+  renderCalendar(); renderLedger(); renderLog();
 });
 
 const byDay = () => {
@@ -1955,6 +2068,173 @@ function renderCurve() {
   }).observe(svg);
 })();
 
+/* ═══ the log ═══
+   Every trade already carries when it was, what it was, which rules you
+   ticked and what you wrote. None of it was ever readable in order —
+   the calendar shows a month of amounts and the sheet shows one trade
+   at a time, so a note written in March was effectively gone by April.
+   This is the same records, read as a sequence. */
+const LOG = { out: 'all', setup: '', mode: '', sess: '', notesOnly: true };
+/* Local midnight, matching dowOf. A bare 'YYYY-MM-DD' is parsed as UTC
+   and would file a trade under the previous day west of Greenwich. */
+const logDate = (v) => new Date(v + 'T00:00:00');
+/* Object URLs are minted per render and revoked on the next one. A log
+   of 300 trades left to accumulate them would hold every thumbnail's
+   blob alive for the life of the tab. */
+let logUrls = [];
+
+function logRows() {
+  /* logged(), not trades(): trades() drops missed entries because they
+     cannot be scored, but a setup you saw and let go is exactly the
+     kind of thing you write a note about. */
+  return logged()
+    .filter(hits)
+    .filter(e => {
+      if (LOG.notesOnly && !(e.note || '').trim()) return false;
+      if (LOG.setup && e.setup !== LOG.setup) return false;
+      if (LOG.mode && e.mode !== LOG.mode) return false;
+      if (LOG.sess && e.sess !== LOG.sess) return false;
+      if (LOG.out === 'win')    return e.out !== 'missed' && e.amt > 0;
+      if (LOG.out === 'loss')   return e.out !== 'missed' && e.amt < 0;
+      if (LOG.out === 'missed') return e.out === 'missed';
+      return true;
+    })
+    /* Newest first, and within a day the later sequence first, so two
+       trades on one date read in the order you took them, reversed. */
+    .sort((a, b) => b.date.localeCompare(a.date) || (b.seq || 0) - (a.seq || 0));
+}
+
+function renderLog() {
+  const wrap = document.getElementById('logList');
+  logUrls.forEach(URL.revokeObjectURL);
+  logUrls = [];
+
+  /* The dropdowns offer what you have actually used, not a fixed list —
+     a setup you have never traded is not a filter, it is noise. */
+  const setups = [...new Set(logged().map(e => e.setup).filter(Boolean))].sort();
+  const sel = (id, opts, cur, blank) => {
+    const el = document.getElementById(id);
+    el.innerHTML = `<option value="">${blank}</option>`
+      + opts.map(o => `<option value="${esc(o)}"${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('');
+  };
+  sel('logSetup', setups, LOG.setup, 'Any setup');
+  sel('logSess', SESSIONS, LOG.sess, 'Any candle');
+  document.getElementById('logMode').value = LOG.mode;
+  document.getElementById('logOnly').setAttribute('aria-pressed', String(LOG.notesOnly));
+  document.querySelectorAll('#logOut button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.out === LOG.out)));
+
+  const rows = logRows();
+  const total = logged().length;
+  document.getElementById('logMeta').textContent =
+    rows.length === total ? `${total} ${total === 1 ? 'entry' : 'entries'}`
+                          : `${rows.length} of ${total}`;
+
+  if (!rows.length) {
+    wrap.innerHTML = `<p class="lg-empty">${
+      total ? 'Nothing matches those filters.'
+            : 'Nothing written up yet. Every trade takes a note, and this is where they are read back.'}</p>`;
+    return;
+  }
+
+  let html = '', month = '';
+  for (const e of rows) {
+    const d = logDate(e.date);
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if (key !== month) {
+      month = key;
+      /* The month's own figures, over the rows shown — a filtered month
+         summarising the unfiltered one would be a lie in small type. */
+      const same = rows.filter(x => {
+        const t = logDate(x.date);
+        return `${t.getFullYear()}-${t.getMonth()}` === key;
+      });
+      const graded = same.filter(x => x.risk > 0 && x.out !== 'missed');
+      const r = graded.reduce((a, x) => a + x.amt / x.risk, 0);
+      html += `<div class="lg-month"><b>${d.toLocaleDateString('en-GB',
+        { month: 'long', year: 'numeric' })}</b><i></i><em>`
+        + (graded.length ? `${r >= 0 ? '+' : '−'}${Math.abs(r).toFixed(1)}R across ${same.length}`
+                         : `${same.length} ${same.length === 1 ? 'entry' : 'entries'}`)
+        + `</em></div>`;
+    }
+
+    const out = e.out === 'missed' ? 'missed' : e.amt > 0 ? 'win' : e.amt < 0 ? 'loss' : 'flat';
+    const word = { missed: 'Missed', win: 'Win', loss: 'Loss', flat: 'Flat' }[out];
+    const r = e.risk > 0 && e.out !== 'missed' ? e.amt / e.risk : null;
+    /* Not $0.00 — that is what a scratch looks like, and a setup you
+       watched go without you is a different thing from one you broke
+       even on. The calendar card says the same words. */
+    const rTxt = out === 'missed' ? 'not taken'
+      : r === null ? money(e.amt, true)
+      : `${r >= 0 ? '+' : '−'}${Math.abs(r).toFixed(2)}R`;
+    const rCls = out === 'win' ? 'up' : out === 'loss' ? 'down' : '';
+    const hour = e.sess ? +e.sess.slice(0, 2) : null;
+    const ticks = Array.isArray(e.checks) ? e.checks.length : 0;
+    const of = e.mode && CHECKLISTS[e.mode] ? CHECKLISTS[e.mode].length : 5;
+    const note = (e.note || '').trim();
+
+    html += `<button class="lg" type="button" data-id="${esc(String(e.id))}" data-date="${esc(e.date)}"
+        aria-label="${esc(word)}, ${esc(e.sym || 'trade')}, ${d.toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'long', year: 'numeric' })}. Opens the trade.">
+      <span class="lg-when">
+        <b>${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</b>
+        ${e.sess ? esc(e.sess) : '—'}${hour !== null && PROFILE[hour] ? `<br>${PROFILE[hour].name}` : ''}
+      </span>
+      <span class="lg-main">
+        <span class="lg-top">
+          <span class="lg-sym">${esc(e.sym || 'Trade')}</span>
+          ${e.setup ? `<span class="lg-chip">${esc(e.setup)}</span>` : ''}
+          ${e.mode ? `<span class="lg-chip">${esc(e.mode)}</span>` : ''}
+          <span class="lg-chip ${out}">${word}</span>
+          <span class="lg-r ${rCls}">${rTxt}</span>
+        </span>
+        <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : 'No note on this one.'}</p>
+        ${ticks ? `<span class="lg-rules"><span class="lg-pips">`
+          + Array.from({ length: of }, (_, i) => `<i class="${i < ticks ? 'on' : ''}"></i>`).join('')
+          + `</span>${ticks} of ${of}</span>` : ''}
+      </span>
+      ${e.shot ? `<span class="lg-shot" data-shot="${esc(String(e.id))}"></span>`
+               : `<span class="lg-noshot"></span>`}
+    </button>`;
+  }
+  wrap.innerHTML = html;
+
+  /* Thumbnails come from IndexedDB, so they arrive after the text. The
+     rows are already laid out at their final height — the image drops
+     into a box that is the right size whether it loads or not. */
+  wrap.querySelectorAll('.lg-shot[data-shot]:not([data-shot=""])').forEach((box) => {
+    SHOTS.get(box.dataset.shot).then((b) => {
+      if (!b || !box.isConnected) return;
+      const u = URL.createObjectURL(b);
+      logUrls.push(u);
+      box.style.backgroundImage = `url("${u}")`;
+    }).catch(() => {});
+  });
+}
+
+document.getElementById('logList').addEventListener('click', (ev) => {
+  const row = ev.target.closest('.lg');
+  /* openTrade takes (date, id), not the record — the same call the
+     calendar's cards make. Handed the record it opened a blank sheet. */
+  if (row) openTrade(row.dataset.date, row.dataset.id);
+});
+document.getElementById('logOut').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  LOG.out = b.dataset.out;
+  renderLog();
+});
+['logSetup', 'logMode', 'logSess'].forEach((id) => {
+  document.getElementById(id).addEventListener('change', (ev) => {
+    LOG[id === 'logSetup' ? 'setup' : id === 'logMode' ? 'mode' : 'sess'] = ev.target.value;
+    renderLog();
+  });
+});
+document.getElementById('logOnly').addEventListener('click', () => {
+  LOG.notesOnly = !LOG.notesOnly;
+  renderLog();
+});
+
 /* ── capital ── */
 function renderLedger() {
   const all = events().filter(hits).reverse();
@@ -2343,7 +2623,7 @@ function commit(msg) {
   document.getElementById('say').textContent = msg;
 }
 function renderAll() {
-  renderSummary(); renderCalendar(); renderMetrics(); renderLedger();
+  renderSummary(); renderCalendar(); renderMetrics(); renderLedger(); renderLog();
 }
 
 /* ── the candle clock ──
@@ -2514,6 +2794,7 @@ bkFile.addEventListener('change', async () => {
 /* ── sections ── */
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
+  log:      document.getElementById('logSection'),
   metrics:  document.getElementById('metricsSection'),
   settings: document.getElementById('settingsSection'),
 };
