@@ -216,6 +216,74 @@
   font-size: .68rem; color: var(--ink-2); line-height: 1.4;
 }
 
+/* ── trade entry ──
+   A journal dies on the entry path, not on the metrics. This is six
+   fields, opens with the amount already focused, submits on Enter, and
+   can be reached from the calendar so the date is filled in for you. */
+dialog.sheet {
+  width: min(520px, calc(100vw - 40px));
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 14px;
+  background: var(--menu);
+  color: var(--ink);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+}
+dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3px); }
+.sheet-h {
+  display: flex; align-items: center; gap: 12px;
+  padding: 15px 18px 12px; border-bottom: 1px solid var(--rule);
+}
+.sheet-h h2 {
+  margin: 0; font-family: var(--display); font-weight: 300;
+  font-size: 1.2rem; letter-spacing: -.005em;
+}
+.sheet-h .grow { flex: 1; }
+.sheet-b { padding: 16px 18px; display: grid; gap: 11px; grid-template-columns: 1fr 1fr; }
+.sheet-b .wide { grid-column: 1 / -1; }
+.sheet-f {
+  display: flex; align-items: center; gap: 9px;
+  padding: 12px 18px 15px; border-top: 1px solid var(--rule);
+}
+.sheet-f .grow { flex: 1; }
+.hint { font-family: var(--mono); font-size: .58rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); }
+
+/* Direction is a choice, not a minus sign to remember. */
+.side { display: flex; gap: 0; border: 1px solid var(--glass-line); border-radius: 8px; overflow: hidden; }
+.side button {
+  flex: 1; height: 36px; border: 0; background: var(--glass-in);
+  color: var(--ink-2); font: inherit; font-family: var(--mono);
+  font-size: .68rem; text-transform: uppercase; letter-spacing: .08em; cursor: pointer;
+}
+.side button[aria-pressed="true"] { color: var(--ink); }
+.side button.w[aria-pressed="true"] { background: var(--up-fill);   box-shadow: inset 0 -2px 0 var(--up); }
+.side button.l[aria-pressed="true"] { background: var(--down-fill); box-shadow: inset 0 -2px 0 var(--down); }
+
+/* ── breakdowns ── */
+.split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
+@media (max-width: 1080px) { .split { grid-template-columns: 1fr; } }
+.rows-t { margin: 0; padding: 0; list-style: none; }
+.rows-t li {
+  display: grid; grid-template-columns: 1fr auto; gap: 4px 12px;
+  padding: 9px 0; border-bottom: 1px solid var(--rule);
+}
+.rows-t li:last-child { border-bottom: 0; }
+.rt-n { font-size: .82rem; font-weight: 500; }
+.rt-v { font-family: var(--mono); font-size: .78rem; font-weight: 500; letter-spacing: -.02em; }
+.rt-v.up { color: var(--up); }
+.rt-v.down { color: var(--down); }
+.rt-m { font-family: var(--mono); font-size: .6rem; color: var(--ink-2); letter-spacing: -.01em; }
+/* The bar is signed: it grows from a centre line, so losers point the
+   other way instead of just being a shorter winner. */
+.bar-wrap { grid-column: 1 / -1; position: relative; height: 5px; margin-top: 3px;
+  background: var(--glass-in); border-radius: 3px; }
+.bar-wrap i { position: absolute; top: 0; bottom: 0; left: 50%; width: 1px;
+  background: var(--rule); }
+.bar-wrap b { position: absolute; top: 0; bottom: 0; border-radius: 3px; }
+.bar-wrap b.up   { background: var(--up); }
+.bar-wrap b.down { background: var(--down); }
+
 /* ── settings + ledger ── */
 .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
 .field { display: flex; flex-direction: column; gap: 5px; }
@@ -364,6 +432,18 @@
       </div>
       <div class="pane" tabindex="0">
         <div class="metrics" id="metrics"></div>
+        <div class="split">
+          <div>
+            <div class="cal-head"><h2>By setup</h2><span class="grow"></span>
+              <span class="span-meta">expectancy</span></div>
+            <ul class="rows-t" id="bySetup"></ul>
+          </div>
+          <div>
+            <div class="cal-head"><h2>By weekday</h2><span class="grow"></span>
+              <span class="span-meta">net</span></div>
+            <ul class="rows-t" id="byDow"></ul>
+          </div>
+        </div>
         <div class="curve">
           <div class="cal-head"><h2>Equity</h2></div>
           <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
@@ -416,6 +496,52 @@
 
   <p class="sr" role="status" id="say"></p>
 </div>
+
+<dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
+  <form method="dialog" id="tradeForm">
+    <div class="sheet-h">
+      <h2 id="sheetTitle">Record a trade</h2>
+      <span class="grow"></span>
+      <button class="step" type="button" id="sheetX" aria-label="Close">✕</button>
+    </div>
+    <div class="sheet-b">
+      <div class="field wide">
+        <label id="sideLbl">Result</label>
+        <div class="side" role="group" aria-labelledby="sideLbl">
+          <button type="button" class="w" id="sideWin"  aria-pressed="true">Win</button>
+          <button type="button" class="l" id="sideLoss" aria-pressed="false">Loss</button>
+        </div>
+      </div>
+      <div class="field">
+        <label for="tAmt">Amount</label>
+        <input id="tAmt" type="number" step="0.01" min="0" required placeholder="0.00" />
+      </div>
+      <div class="field">
+        <label for="tDate">Date</label>
+        <input id="tDate" type="date" required />
+      </div>
+      <div class="field">
+        <label for="tSym">Symbol</label>
+        <input id="tSym" type="text" list="syms" placeholder="ES" autocomplete="off" />
+        <datalist id="syms"></datalist>
+      </div>
+      <div class="field">
+        <label for="tSetup">Setup</label>
+        <input id="tSetup" type="text" list="setups" placeholder="CISD" autocomplete="off" />
+        <datalist id="setups"></datalist>
+      </div>
+      <div class="field wide">
+        <label for="tNote">Note</label>
+        <input id="tNote" type="text" placeholder="optional" />
+      </div>
+    </div>
+    <div class="sheet-f">
+      <span class="hint">Enter to save · Esc to close</span>
+      <span class="grow"></span>
+      <button class="btn btn-primary" type="submit" id="tradeSave">Save trade</button>
+    </div>
+  </form>
+</dialog>
 
 <script src="../shell.js" defer></script>
 <script>
@@ -505,7 +631,22 @@ function totals() {
     pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
     expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
     dd,
+    ...streaks(t),
   };
+}
+
+/* Run lengths, in trade order. The current run is the one that tells you
+   what state you are in right now; the worst is the one you size for. */
+function streaks(t) {
+  let cur = 0, bestW = 0, bestL = 0;
+  for (const e of t) {
+    if (e.amt > 0) cur = cur > 0 ? cur + 1 : 1;
+    else if (e.amt < 0) cur = cur < 0 ? cur - 1 : -1;
+    else continue;
+    bestW = Math.max(bestW, cur);
+    bestL = Math.min(bestL, cur);
+  }
+  return { streak: cur, bestWin: bestW, worstLoss: Math.abs(bestL) };
 }
 
 const byDay = () => {
@@ -558,7 +699,8 @@ function renderCalendar() {
     /* The figure is always present, so the colour is reinforcement and
        never the only thing carrying the result. */
     cells += `<button class="day ${cls} ${key === todayIso ? 'today' : ''}" type="button"
-        aria-label="${d} ${MONTHS[m]}${hit ? `, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n > 1 ? 's' : ''}` : ', no trades'}">
+        data-date="${key}"
+        aria-label="${d} ${MONTHS[m]}${hit ? `, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n > 1 ? 's' : ''}` : ', no trades'}. Record a trade.">
       <span class="d" aria-hidden="true">${d}</span>
       ${hit ? `<span class="n" aria-hidden="true">${hit.n}</span>
                <span class="v" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
@@ -593,11 +735,62 @@ function renderMetrics() {
       t.expectancy > 0 ? 'up' : 'down'],
     [money(t.avgWin), 'Average win', '', ''],
     [money(t.avgLoss), 'Average loss', '', ''],
-    [money(t.dd), 'Max drawdown', 'Largest fall from a peak in the account.', ''],
+    [money(t.dd), 'Max drawdown', 'Trades only — a withdrawal is not a loss.', ''],
+    [(t.streak > 0 ? '+' : '') + t.streak, 'Current run',
+      t.streak > 0 ? 'consecutive wins' : t.streak < 0 ? 'consecutive losses' : 'flat',
+      t.streak > 0 ? 'up' : t.streak < 0 ? 'down' : ''],
+    [String(t.worstLoss), 'Longest losing run', 'The one to size for.', ''],
   ].map(([v, l, note, cls]) =>
     `<div class="metric"><b class="${cls ? 'stat ' + cls : ''}" style="${cls === 'up' ? 'color:var(--up)' : cls === 'down' ? 'color:var(--down)' : ''}">${v}</b>
      <span>${l}</span>${note ? `<em>${note}</em>` : ''}</div>`).join('');
   renderCurve();
+}
+
+/* Grouped stats. Both of these answer the same question from different
+   sides: where does the edge actually come from — and where does it go. */
+function group(keyFn, label) {
+  const m = new Map();
+  trades().forEach(e => {
+    const k = keyFn(e);
+    if (k === null) return;
+    const cur = m.get(k) || { n: 0, pnl: 0, wins: 0 };
+    cur.n += 1; cur.pnl += e.amt; if (e.amt > 0) cur.wins += 1;
+    m.set(k, cur);
+  });
+  return [...m.entries()].map(([k, v]) => ({
+    key: k, label: label ? label(k) : k, ...v,
+    exp: v.pnl / v.n, wr: (v.wins / v.n) * 100,
+  }));
+}
+
+function renderRows(el, rows, valueOf, meta) {
+  if (!rows.length) { el.innerHTML = '<li class="empty">No trades yet</li>'; return; }
+  const max = Math.max(...rows.map(r => Math.abs(valueOf(r)))) || 1;
+  el.innerHTML = rows.map(r => {
+    const v = valueOf(r);
+    const w = (Math.abs(v) / max) * 50;
+    return `<li>
+      <span class="rt-n">${r.label}</span>
+      <span class="rt-v ${v > 0 ? 'up' : v < 0 ? 'down' : ''}">${money(v, true)}</span>
+      <span class="rt-m">${meta(r)}</span>
+      <span class="bar-wrap" aria-hidden="true"><i></i>
+        <b class="${v >= 0 ? 'up' : 'down'}"
+           style="${v >= 0 ? `left:50%;width:${w}%` : `right:50%;width:${w}%`}"></b></span>
+    </li>`;
+  }).join('');
+}
+
+const DOW = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function renderBreakdowns() {
+  const setups = group(e => e.setup || 'Untagged').sort((a, b) => b.exp - a.exp);
+  renderRows(document.getElementById('bySetup'), setups, r => r.exp,
+    r => `${r.n} trades · ${r.wr.toFixed(0)}% won · ${money(r.pnl, true)} total`);
+
+  const dows = group(e => new Date(e.date + 'T00:00:00').getDay())
+    .sort((a, b) => ((a.key + 6) % 7) - ((b.key + 6) % 7));
+  renderRows(document.getElementById('byDow'), dows.map(r => ({ ...r, label: DOW[r.key] })),
+    r => r.pnl, r => `${r.n} trades · ${r.wr.toFixed(0)}% won`);
 }
 
 function renderCurve() {
@@ -679,8 +872,65 @@ document.getElementById('flowForm').addEventListener('submit', (ev) => {
   commit(`${k === 'deposit' ? 'Deposit' : 'Withdrawal'} of ${money(amt)} recorded.`);
 });
 
-document.getElementById('newTrade').addEventListener('click', () => {
-  document.getElementById('say').textContent = 'Recording trades is not in this build yet.';
+/* ── entry ── */
+const sheet = document.getElementById('sheet');
+const sideWin = document.getElementById('sideWin'), sideLoss = document.getElementById('sideLoss');
+let side = 'win';
+
+function setSide(v) {
+  side = v;
+  sideWin .setAttribute('aria-pressed', String(v === 'win'));
+  sideLoss.setAttribute('aria-pressed', String(v === 'loss'));
+}
+sideWin .addEventListener('click', () => setSide('win'));
+sideLoss.addEventListener('click', () => setSide('loss'));
+
+/* Symbols and setups you have used before, offered back, so the second
+   trade on a setup takes two keystrokes instead of eight. */
+function refreshLists() {
+  const uniq = k => [...new Set(trades().map(e => e[k]).filter(Boolean))].sort();
+  document.getElementById('syms').innerHTML =
+    uniq('sym').map(v => `<option value="${v}"></option>`).join('');
+  document.getElementById('setups').innerHTML =
+    uniq('setup').map(v => `<option value="${v}"></option>`).join('');
+}
+
+function openTrade(date) {
+  refreshLists();
+  setSide('win');
+  document.getElementById('tDate').value = date || iso(new Date());
+  ['tAmt', 'tSym', 'tSetup', 'tNote'].forEach(id => { document.getElementById(id).value = ''; });
+  sheet.showModal();
+  document.getElementById('tAmt').focus();
+}
+
+document.getElementById('newTrade').addEventListener('click', () => openTrade());
+document.getElementById('sheetX').addEventListener('click', () => sheet.close());
+
+/* The calendar is an entry surface too: a day you click is a date you
+   do not have to type. */
+document.getElementById('grid').addEventListener('click', (ev) => {
+  const cell = ev.target.closest('.day');
+  if (!cell || cell.classList.contains('blank')) return;
+  openTrade(cell.dataset.date);
+});
+
+document.getElementById('tradeForm').addEventListener('submit', () => {
+  const raw = parseFloat(document.getElementById('tAmt').value);
+  if (!(raw > 0)) return;
+  if (state === SAMPLE) state = { events: [] };
+  /* Stored signed, so nothing downstream has to remember which way a
+     loss points. The form asks for a magnitude and a direction. */
+  state.events.push({
+    id: Date.now(),
+    k: 'trade',
+    date: document.getElementById('tDate').value,
+    amt: side === 'win' ? raw : -raw,
+    sym: document.getElementById('tSym').value.trim(),
+    setup: document.getElementById('tSetup').value.trim(),
+    note: document.getElementById('tNote').value.trim(),
+  });
+  commit(`${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)} recorded.`);
 });
 
 function commit(msg) {
@@ -688,7 +938,9 @@ function commit(msg) {
   renderAll();
   document.getElementById('say').textContent = msg;
 }
-function renderAll() { renderSummary(); renderCalendar(); renderMetrics(); renderLedger(); }
+function renderAll() {
+  renderSummary(); renderCalendar(); renderMetrics(); renderBreakdowns(); renderLedger();
+}
 
 /* ── sections ── */
 const SECTIONS = {
