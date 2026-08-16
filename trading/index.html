@@ -190,15 +190,20 @@
 /* The time band. Its whole job is to answer "is there still room in this
    candle", so it carries the theme accent rather than a stoplight green —
    this is not a win, it is a window. */
+/* Full-bleed rather than a card inside a card: an inset box with its own
+   padding pushed its two lines 34px past every other line in the panel,
+   so the panel had two left edges. Bleeding it to the panel's inner walls
+   puts the band, the badge above it and the note below it on one rag, and
+   the tint still reads as a distinct stripe. */
 .cp-band {
-  display: flex; align-items: flex-start; gap: 9px;
-  padding: 9px 11px; border-radius: 9px;
-  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  margin: 0 -15px; padding: 9px 15px;
+  border-block: 1px solid color-mix(in srgb, var(--accent) 26%, transparent);
   background: color-mix(in srgb, var(--accent) 9%, transparent);
 }
-.cp-band .ic { display: inline-flex; flex: none; margin-top: 1px; color: var(--accent); }
+.cp-band .ic { display: inline-flex; vertical-align: -2px; margin-right: 7px;
+  color: var(--accent); }
 .cp-band b { display: block; font-size: .78rem; font-weight: 500; color: var(--ink); }
-.cp-band em { display: block; margin-top: 2px; font-style: normal;
+.cp-band em { display: block; margin-top: 3px; font-style: normal;
   font-size: .72rem; color: var(--ink-3); }
 /* Past halfway the accent drops out — there is nothing to encourage. */
 .cp-band.mid { border-color: var(--glass-line); background: var(--glass-in-2); }
@@ -207,9 +212,9 @@
 .cp-band.late .ic, .cp-band.off .ic { color: var(--ink-3); }
 .cp-band.late b, .cp-band.off b { color: var(--ink-2); }
 
+/* The band's own bottom border already separates this from it. */
 .cp-miss {
-  margin: 11px 0 0; padding-top: 10px;
-  border-top: 1px solid var(--rule);
+  margin: 10px 0 0;
   font-size: .76rem; line-height: 1.5; color: var(--ink-3);
 }
 .cp-miss b { font-weight: 500; color: var(--ink-2); }
@@ -784,8 +789,8 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
             <span class="cp-next" id="cpNext"></span>
           </div>
           <div class="cp-band" id="cpBand">
-            <span class="ic" id="cpBandIcon"></span>
-            <span><b id="cpBandT"></b><em id="cpBandS"></em></span>
+            <b><span class="ic" id="cpBandIcon"></span><span id="cpBandT"></span></b>
+            <em id="cpBandS"></em>
           </div>
           <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
           <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
