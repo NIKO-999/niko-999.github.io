@@ -30,11 +30,14 @@ function writeStore(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 const KEY = 'arc.theme';
 const MODES = ['system', 'light', 'dark'];
 const LABEL = { system: 'System', light: 'Light', dark: 'Dark' };
+/* All three drawn to the same 18-unit ink box as every other rail glyph,
+   centred on 12,12 — otherwise the appearance control reads a size
+   smaller than the tabs above it. */
 const ICON = {
-  system: 'M4 5.5h16v10H4zM9 20h6M12 15.5V20',
-  light:  'M12 3v1.6M12 19.4V21M4.6 12H3M21 12h-1.6M6.3 6.3 5.2 5.2M18.8 18.8l-1.1-1.1'
-        + 'M17.7 6.3l1.1-1.1M5.2 18.8l1.1-1.1M12 8.2a3.8 3.8 0 1 0 0 7.6 3.8 3.8 0 0 0 0-7.6Z',
-  dark:   'M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8Z',
+  system: 'M3 4.5h18v11H3zM8.5 20.5h7M12 15.5v5',
+  light:  'M12 3v2M12 19v2M5 12H3M21 12h-2M6.9 6.9 5.5 5.5M18.5 18.5l-1.4-1.4'
+        + 'M17.1 6.9l1.4-1.4M5.5 18.5l1.4-1.4M12 7.6a4.4 4.4 0 1 0 0 8.8 4.4 4.4 0 0 0 0-8.8Z',
+  dark:   'M21 13.2A9.4 9.4 0 1 1 10.8 3a7.3 7.3 0 0 0 10.2 10.2Z',
 };
 
 const media = window.matchMedia('(prefers-color-scheme: dark)');

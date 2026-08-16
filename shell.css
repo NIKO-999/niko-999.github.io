@@ -569,6 +569,10 @@ body {
   color: var(--ink-3);
   cursor: pointer;
 }
+/* Pinned, because an <svg> with only a viewBox takes its size from its
+   parent — the <a> crossings were rendering at 38px against 26px for
+   every button beside them, half again as large. */
+.rail button > svg, .rail a > svg { width: 26px; height: 26px; }
 .rail button[aria-current="page"] { color: var(--ink); background: var(--glass-in); }
 .rail a:focus-visible, .rail button:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 2px;
