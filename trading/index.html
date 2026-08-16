@@ -794,20 +794,20 @@ const icon = (n, size) =>
    Distilled from the 4H profiling docs (Eleven_Trades, V1–V3). The
    reversal is the wick — trade it only where the daily profile says a
    wick belongs, and never without SMT. The continuation is the body —
-   the 3rd candle of an existing swing point, entered on the orderblock
-   the opposing run leaves behind. */
+   the 3rd candle of an existing swing point. Both enter on the V-shape
+   CISD, nothing else. */
 const CHECKLISTS = {
   continuation: [
     'Daily bias and order flow aligned',
     '3rd candle — swing point already formed',
     'SMT confirmed at the swing high/low',
     'Small wick — body expanding, no consolidation',
-    'Opposing run made the OB — entering the expansion',
+    'V-shape CISD — entering the expansion',
   ],
   reversal: [
     'Key level reached — profile supports the turn',
     'HTF SMT divergence — no SMT, no trade',
-    'CISD instant — no consolidation before it',
+    'V-shape CISD — no consolidation before it',
     'Right candle for the reversal window',
     'No contradictory swing on the chart',
   ],
