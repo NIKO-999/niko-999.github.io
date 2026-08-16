@@ -332,6 +332,14 @@
    own ink so the edge always contrasts with the surface it wraps. */
 .btn-primary { --edge: var(--btn-ink); }
 
+/* Not inside a dialog. The bloom is a property of CHROME — the top bar,
+   the rail, the floating Today — where the app's frame catches light
+   against the photograph behind it. A dialog is a flat panel with
+   nothing behind it to catch, so the same ring stops reading as a
+   highlight and starts reading as an outline somebody drew around a
+   button. The fill alone is enough there. */
+dialog .btn::before, dialog .fab::before { content: none; }
+
 /* Any author rule that sets `display` outranks the UA's
    `[hidden] { display: none }`, so hiding by property silently fails on
    every flex/grid element here. One rule, rather than remembering to
