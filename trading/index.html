@@ -98,7 +98,12 @@
 .stat.up b { color: var(--up); }
 .stat.down b { color: var(--down); }
 
-/* ── calendar ── */
+/* ── calendar ──
+   Every trade shows as its own card, not a daily total. A day that made
+   money on one setup and gave it back on another is a different day from
+   one that quietly won once, and a single net figure cannot tell them
+   apart. The net is still there, in the corner, but it is the summary
+   rather than the whole story. */
 .cal-head { display: flex; align-items: center; gap: 12px; margin: 6px 0 10px; }
 .cal-head h2 {
   margin: 0;
@@ -120,25 +125,30 @@
   cursor: pointer;
   font: inherit;
 }
-.dow {
-  display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px;
-  margin-bottom: 5px;
+.dow, .grid {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 5), minmax(0, 1fr));
+  gap: 6px;
 }
+.dow { margin-bottom: 6px; }
 .dow span {
   font-family: var(--mono);
   font-size: .58rem;
   text-transform: uppercase;
   letter-spacing: .1em;
   color: var(--ink-2);
-  text-align: center;
+  padding-left: 2px;
 }
-.grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.grid { grid-auto-rows: minmax(94px, auto); }
+
 .day {
   position: relative;
-  min-height: 62px;
-  padding: 6px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  padding: 7px 7px 8px;
   border: 1px solid var(--glass-line);
-  border-radius: 8px;
+  border-radius: 9px;
   background: var(--glass-in);
   text-align: left;
   font: inherit;
@@ -146,30 +156,61 @@
   cursor: pointer;
 }
 .day.blank { border-color: transparent; background: none; cursor: default; }
-.day .d {
-  font-family: var(--mono);
-  font-size: .58rem;
-  color: var(--ink-3);
-}
-.day .v {
-  position: absolute;
-  left: 7px; right: 7px; bottom: 6px;
-  font-family: var(--mono);
-  font-size: .68rem;
-  font-weight: 500;
-  letter-spacing: -.02em;
-}
-.day .n {
-  position: absolute;
-  right: 7px; top: 5px;
-  font-family: var(--mono);
-  font-size: .54rem;
-  color: var(--ink-3);
-}
-.day.up   { background: var(--up-fill);   box-shadow: inset 3px 0 0 var(--up); }
-.day.down { background: var(--down-fill); box-shadow: inset 3px 0 0 var(--down); }
-.day .v { color: var(--ink); }
+.day-h { display: flex; align-items: baseline; gap: 6px; }
+.day-h .d { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
+.day-h .grow { flex: 1; }
+/* The net keeps the direction colour, because it is the one figure on
+   the cell that is a judgement rather than a record. */
+.day-h .net { font-family: var(--mono); font-size: .6rem; font-weight: 500; letter-spacing: -.02em; }
+.day-h .net.up { color: var(--up); }
+.day-h .net.down { color: var(--down); }
 .day.today { box-shadow: inset 0 0 0 1px var(--accent); }
+.day.out { opacity: .45; }
+
+/* ── a trade, as a card ── */
+.tcard {
+  padding: 6px 7px 7px;
+  border: 1px solid var(--glass-line);
+  border-radius: 7px;
+  background: var(--glass-in-2);
+}
+.tcard-h { display: flex; align-items: center; gap: 6px; }
+.tsym {
+  flex: 1; min-width: 0;
+  font-size: .72rem; font-weight: 600; letter-spacing: -.01em;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+/* The outcome is a word first. The tint behind it is reinforcement, and
+   the amount below carries its own sign, so nothing rests on colour. */
+.tchip {
+  flex: none;
+  padding: 2px 5px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  font-size: .52rem;
+  text-transform: uppercase;
+  letter-spacing: .07em;
+  color: var(--ink);
+  background: var(--glass-in);
+}
+.tchip.win  { background: var(--up-fill);   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--up) 45%, transparent); }
+.tchip.loss { background: var(--down-fill); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--down) 45%, transparent); }
+.tamt {
+  display: block; margin-top: 4px;
+  font-family: var(--mono); font-size: .68rem; font-weight: 500;
+  letter-spacing: -.02em; color: var(--ink);
+}
+.tcard.missed .tamt { color: var(--ink-3); }
+
+.add-hint {
+  margin-top: auto;
+  font-family: var(--mono); font-size: .54rem;
+  text-transform: uppercase; letter-spacing: .08em;
+  color: var(--ink-3);
+  opacity: 0;
+}
+@media (hover: hover) { .day:not(.blank):hover .add-hint { opacity: 1; } }
+.day:focus-visible .add-hint { opacity: 1; }
 
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
@@ -259,6 +300,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .side button[aria-pressed="true"] { color: var(--ink); }
 .side button.w[aria-pressed="true"] { background: var(--up-fill);   box-shadow: inset 0 -2px 0 var(--up); }
 .side button.l[aria-pressed="true"] { background: var(--down-fill); box-shadow: inset 0 -2px 0 var(--down); }
+.side button.m[aria-pressed="true"] { background: var(--glass-in-2); box-shadow: inset 0 -2px 0 var(--ink-3); }
 
 /* ── breakdowns ── */
 .split { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 22px; }
@@ -415,10 +457,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
           <span class="grow"></span>
           <span class="span-meta" id="monthPnl"></span>
         </div>
-        <div class="dow" aria-hidden="true">
-          <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span>
-          <span>Fri</span><span>Sat</span><span>Sun</span>
-        </div>
+        <div class="dow" id="dow" aria-hidden="true"></div>
         <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
       </div>
     </main>
@@ -510,6 +549,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <div class="side" role="group" aria-labelledby="sideLbl">
           <button type="button" class="w" id="sideWin"  aria-pressed="true">Win</button>
           <button type="button" class="l" id="sideLoss" aria-pressed="false">Loss</button>
+          <button type="button" class="m" id="sideMiss" aria-pressed="false">Missed</button>
         </div>
       </div>
       <div class="field">
@@ -580,12 +620,25 @@ const SAMPLE = {
     { id:13, k: 'withdraw', date: '2026-03-04', amt: 1000, note: 'Rent' },
     { id:14, k: 'trade', date: '2026-03-05', amt:  225, sym: 'NQ',  setup: 'SMT' },
     { id:15, k: 'trade', date: '2026-03-06', amt: -180, sym: 'ES',  setup: 'Sweep' },
+    { id:16, k: 'trade', date: '2026-03-06', amt:  310, sym: 'GBPUSD', setup: 'CISD' },
+    { id:17, k: 'trade', date: '2026-03-06', amt:    0, sym: 'GBPCAD', setup: 'Sweep', out: 'missed' },
+    { id:18, k: 'trade', date: '2026-03-11', amt:  980, sym: 'XAU', setup: 'CISD' },
+    { id:19, k: 'trade', date: '2026-03-11', amt: -420, sym: 'EURAUD', setup: 'SMT' },
+    { id:20, k: 'trade', date: '2026-03-12', amt:  240, sym: 'US500', setup: 'CISD' },
+    { id:21, k: 'trade', date: '2026-03-13', amt:    0, sym: 'GBPJPY', setup: 'SMT', out: 'missed' },
+    { id:22, k: 'trade', date: '2026-03-18', amt:  615, sym: 'GBPUSD', setup: 'CISD' },
   ],
 };
 
 let state = readStore() || SAMPLE;
 const events = () => [...state.events].sort((a, b) => a.date.localeCompare(b.date) || a.id - b.id);
-const trades = () => events().filter(e => e.k === 'trade');
+/* A missed setup is logged, shown on the calendar, and counted in NO
+   performance figure. It was not a trade you took: folding it in as a
+   zero would drag expectancy toward nothing and inflate the trade count
+   with things you never risked money on. Same principle as keeping
+   deposits out of profit — record everything, measure only what applies. */
+const logged = () => events().filter(e => e.k === 'trade');
+const trades = () => logged().filter(e => e.out !== 'missed');
 const flows  = () => events().filter(e => e.k !== 'trade');
 const signed = (e) => e.k === 'withdraw' ? -e.amt : e.amt;
 
@@ -651,9 +704,10 @@ function streaks(t) {
 
 const byDay = () => {
   const m = new Map();
-  trades().forEach(e => {
-    const cur = m.get(e.date) || { pnl: 0, n: 0 };
-    cur.pnl += e.amt; cur.n += 1;
+  logged().forEach(e => {
+    const cur = m.get(e.date) || { pnl: 0, n: 0, items: [] };
+    if (e.out !== 'missed') { cur.pnl += e.amt; cur.n += 1; }
+    cur.items.push(e);
     m.set(e.date, cur);
   });
   return m;
@@ -679,33 +733,66 @@ function renderSummary() {
 let cursor = new Date(2026, 2, 1);
 const MONTHS = ['January','February','March','April','May','June',
                 'July','August','September','October','November','December'];
+const DOW_SHORT = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
 
 function renderCalendar() {
   const y = cursor.getFullYear(), m = cursor.getMonth();
   document.getElementById('monthLabel').textContent = `${MONTHS[m]} ${y}`;
   const days = byDay();
-  const first = new Date(y, m, 1);
-  const lead = (first.getDay() + 6) % 7;          // weeks start Monday
   const len = new Date(y, m + 1, 0).getDate();
   const todayIso = iso(new Date());
+  const key = d => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const idx = d => (new Date(y, m, d).getDay() + 6) % 7;   // Mon = 0
+
+  /* The market week is five days, so the grid is five columns — until a
+     trade actually lands on a weekend, at which point the weekend
+     appears rather than the trade being hidden. */
+  let cols = 5;
+  for (let d = 1; d <= len; d++) if (idx(d) > 4 && days.has(key(d))) { cols = 7; break; }
+  document.getElementById('grid').style.setProperty('--cols', cols);
+  document.getElementById('dow').innerHTML =
+    DOW_SHORT.slice(0, cols).map(n => `<span>${n}</span>`).join('');
 
   let monthPnl = 0, cells = '';
+  const lead = Math.min(idx(1), cols - 1);
   for (let i = 0; i < lead; i++) cells += '<div class="day blank" aria-hidden="true"></div>';
+
   for (let d = 1; d <= len; d++) {
-    const key = `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const hit = days.get(key);
-    const cls = hit ? (hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : '') : '';
+    if (idx(d) >= cols) continue;                      // weekend, and nothing on it
+    const k = key(d);
+    const hit = days.get(k);
     if (hit) monthPnl += hit.pnl;
-    /* The figure is always present, so the colour is reinforcement and
-       never the only thing carrying the result. */
-    cells += `<button class="day ${cls} ${key === todayIso ? 'today' : ''}" type="button"
-        data-date="${key}"
-        aria-label="${d} ${MONTHS[m]}${hit ? `, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n > 1 ? 's' : ''}` : ', no trades'}. Record a trade.">
-      <span class="d" aria-hidden="true">${d}</span>
-      ${hit ? `<span class="n" aria-hidden="true">${hit.n}</span>
-               <span class="v" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
+
+    const cards = hit ? hit.items.map(e => {
+      const out = e.out === 'missed' ? 'missed' : e.amt >= 0 ? 'win' : 'loss';
+      const word = out === 'missed' ? 'Missed' : out === 'win' ? 'Win' : 'Loss';
+      return `<span class="tcard ${out === 'missed' ? 'missed' : ''}">
+        <span class="tcard-h">
+          <span class="tsym">${e.sym || 'Trade'}</span>
+          <span class="tchip ${out}">${word}</span>
+        </span>
+        <span class="tamt">${out === 'missed' ? '—' : money(e.amt, true)}</span>
+      </span>`;
+    }).join('') : '';
+
+    const netCls = !hit || !hit.n ? '' : hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : '';
+    const label = hit
+      ? `${d} ${MONTHS[m]}, ${money(hit.pnl, true)} from ${hit.n} trade${hit.n === 1 ? '' : 's'}`
+        + (hit.items.length > hit.n ? `, ${hit.items.length - hit.n} missed` : '')
+      : `${d} ${MONTHS[m]}, no trades`;
+
+    cells += `<button class="day ${k === todayIso ? 'today' : ''}" type="button"
+        data-date="${k}" aria-label="${label}. Record a trade.">
+      <span class="day-h">
+        <span class="d" aria-hidden="true">${d}</span>
+        <span class="grow"></span>
+        ${hit && hit.n ? `<span class="net ${netCls}" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
+      </span>
+      ${cards}
+      ${hit ? '' : '<span class="add-hint" aria-hidden="true">+ trade</span>'}
     </button>`;
   }
+
   document.getElementById('grid').innerHTML = cells;
   const mp = document.getElementById('monthPnl');
   mp.textContent = monthPnl ? money(monthPnl, true) : 'no trades';
@@ -838,7 +925,9 @@ function renderLedger() {
   if (!all.length) { ul.innerHTML = '<li class="empty">Nothing recorded yet</li>'; return; }
   ul.innerHTML = all.map(e => {
     const v = signed(e);
-    const label = e.k === 'trade' ? `${e.sym || 'Trade'}${e.setup ? ' · ' + e.setup : ''}` : (e.note || '');
+    const label = e.k === 'trade'
+      ? `${e.sym || 'Trade'}${e.setup ? ' · ' + e.setup : ''}${e.out === 'missed' ? ' · missed' : ''}`
+      : (e.note || '');
     return `<li>
       <span class="led-d">${e.date}</span>
       <span class="led-k">${e.k}</span>
@@ -874,16 +963,21 @@ document.getElementById('flowForm').addEventListener('submit', (ev) => {
 
 /* ── entry ── */
 const sheet = document.getElementById('sheet');
-const sideWin = document.getElementById('sideWin'), sideLoss = document.getElementById('sideLoss');
+const SIDES = { win: 'sideWin', loss: 'sideLoss', missed: 'sideMiss' };
 let side = 'win';
 
 function setSide(v) {
   side = v;
-  sideWin .setAttribute('aria-pressed', String(v === 'win'));
-  sideLoss.setAttribute('aria-pressed', String(v === 'loss'));
+  Object.entries(SIDES).forEach(([k, id]) =>
+    document.getElementById(id).setAttribute('aria-pressed', String(k === v)));
+  /* A missed setup has no amount to give, so the field stops asking. */
+  const amt = document.getElementById('tAmt');
+  amt.disabled = v === 'missed';
+  amt.required = v !== 'missed';
+  if (v === 'missed') amt.value = '';
 }
-sideWin .addEventListener('click', () => setSide('win'));
-sideLoss.addEventListener('click', () => setSide('loss'));
+Object.entries(SIDES).forEach(([k, id]) =>
+  document.getElementById(id).addEventListener('click', () => setSide(k)));
 
 /* Symbols and setups you have used before, offered back, so the second
    trade on a setup takes two keystrokes instead of eight. */
@@ -917,7 +1011,7 @@ document.getElementById('grid').addEventListener('click', (ev) => {
 
 document.getElementById('tradeForm').addEventListener('submit', () => {
   const raw = parseFloat(document.getElementById('tAmt').value);
-  if (!(raw > 0)) return;
+  if (side !== 'missed' && !(raw > 0)) return;
   if (state === SAMPLE) state = { events: [] };
   /* Stored signed, so nothing downstream has to remember which way a
      loss points. The form asks for a magnitude and a direction. */
@@ -925,12 +1019,14 @@ document.getElementById('tradeForm').addEventListener('submit', () => {
     id: Date.now(),
     k: 'trade',
     date: document.getElementById('tDate').value,
-    amt: side === 'win' ? raw : -raw,
+    amt: side === 'missed' ? 0 : side === 'win' ? raw : -raw,
+    out: side === 'missed' ? 'missed' : undefined,
     sym: document.getElementById('tSym').value.trim(),
     setup: document.getElementById('tSetup').value.trim(),
     note: document.getElementById('tNote').value.trim(),
   });
-  commit(`${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)} recorded.`);
+  commit(side === 'missed' ? 'Missed setup recorded.'
+    : `${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)} recorded.`);
 });
 
 function commit(msg) {
