@@ -644,8 +644,8 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     </button>
     <button type="button" data-view="settings" aria-label="Capital">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true">
-        <path d="M12 3v18M8 7h6a3 3 0 0 1 0 6h-4a3 3 0 0 0 0 6h6" /></svg>
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5h16v14H4zM8 12a4 4 0 1 0 8 0 4 4 0 0 0-8 0ZM12 9.5v-2M12 16.5v-2M14.5 12h2M7.5 12h2" /></svg>
     </button>
     <span class="cross" aria-hidden="true"></span>
     <a href="../arc/" aria-label="Arc — projects" title="Arc — projects">
@@ -811,22 +811,22 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       <div class="pane" tabindex="0">
         <form class="form" id="flowForm">
           <div class="field">
-            <label for="fKind">Movement</label>
+            <label for="fKind"><span class="ic" id="icWallet"></span>Movement</label>
             <select id="fKind">
               <option value="deposit">Deposit</option>
               <option value="withdraw">Withdraw</option>
             </select>
           </div>
           <div class="field">
-            <label for="fAmt">Amount</label>
+            <label for="fAmt"><span class="ic" id="icAmt"></span>Amount</label>
             <input id="fAmt" type="number" step="0.01" min="0" required placeholder="0.00" />
           </div>
           <div class="field">
-            <label for="fDate">Date</label>
+            <label for="fDate"><span class="ic" id="icDate"></span>Date</label>
             <input id="fDate" type="date" required />
           </div>
           <div class="field">
-            <label for="fNote">Note</label>
+            <label for="fNote"><span class="ic" id="icFNote"></span>Note</label>
             <input id="fNote" type="text" placeholder="optional" />
           </div>
           <button class="btn btn-primary" type="submit">Record</button>
@@ -953,6 +953,10 @@ const ICO = {
   image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
   note:  'M4 20h4L20 8l-4-4L4 16v4ZM14 6l4 4',
   calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
+  /* The balance is a wallet, not a symbol — you are moving what is in
+     the account, not naming a currency. */
+  wallet: 'M3 8a2 2 0 0 1 2-2h12v2M3 8v9a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-3'
+        + 'M3 8h16a2 2 0 0 1 2 2v1h-4a2 2 0 0 0 0 4H21',
 };
 const icon = (n, size) =>
   `<svg viewBox="0 0 24 24" width="${size || 13}" height="${size || 13}" fill="none"
@@ -1734,7 +1738,8 @@ let mode = 'continuation';
 /* Every label wears its icon, painted once at load. */
 [['icOut', 'out'], ['icPair', 'pair'], ['icTime', 'clock'], ['icRisk', 'risk'],
  ['icMoney', 'money'], ['icTag', 'tag'], ['icMode', 'mode'], ['icCheck', 'check'],
- ['icImage', 'image'], ['icNote', 'note']]
+ ['icImage', 'image'], ['icNote', 'note'],
+ ['icWallet', 'wallet'], ['icAmt', 'money'], ['icDate', 'calendar'], ['icFNote', 'note']]
   .forEach(([id, n]) => { document.getElementById(id).innerHTML = icon(n); });
 
 document.getElementById('tTime').innerHTML = '<option value="">—</option>'
