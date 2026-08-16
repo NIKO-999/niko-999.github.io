@@ -561,7 +561,7 @@ body {
   background: var(--btn);
   color: var(--btn-ink);
 }
-.rail button {
+.rail button, .rail a {
   width: 38px; height: 38px;
   display: grid; place-items: center;
   border: 0; border-radius: 10px;
@@ -570,6 +570,15 @@ body {
   cursor: pointer;
 }
 .rail button[aria-current="page"] { color: var(--ink); background: var(--glass-in); }
+.rail a:focus-visible, .rail button:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 2px;
+}
+/* The apps are separate pages, so a jump between them is marked as a
+   crossing rather than dressed up as another view of the same data. */
+.rail .cross {
+  width: 20px; height: 0; margin: 8px 0;
+  border-top: 1px solid var(--rule);
+}
 .rail .spacer { flex: 1; }
 
 .main { flex: 1; min-width: 0; display: flex; flex-direction: column; }
