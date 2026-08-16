@@ -621,7 +621,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   text-transform: uppercase; color: var(--ink-3); }
 
 /* Direction is a choice, not a minus sign to remember. */
-.side { display: flex; gap: 0; border: 1px solid var(--glass-line); border-radius: 8px; overflow: hidden; }
+/* No ring. Every button on the main screen is a filled shape with no
+   outline, and a bordered box around a group of them was the one place
+   the app drew an outline instead — it read as a different kit. The
+   segments still hold together, because they share one track. */
+.side { display: flex; gap: 0; border-radius: 8px; overflow: hidden;
+  background: var(--glass-in); }
 .side button {
   flex: 1; height: 36px; border: 0; background: var(--glass-in);
   color: var(--ink-2); font: inherit; font-family: var(--mono);

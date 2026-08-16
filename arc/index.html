@@ -509,13 +509,15 @@
   letter-spacing: normal; color: var(--ink-2);
 }
 /* The three shapes are one choice, so they are one control. */
-.ed-kind .side { display: flex; gap: 0; border: 1px solid var(--glass-line);
-  border-radius: 9px; overflow: hidden; }
+/* Same as the ledger's: a filled track rather than an outlined box,
+   so this reads as the same kit as the buttons around it. */
+.ed-kind .side { display: flex; gap: 0; border-radius: 9px; overflow: hidden;
+  background: var(--glass-in); }
 .ed-kind .side button {
   flex: 1; height: 34px; border: 0; background: none; color: var(--ink-3);
   font: inherit; font-size: .76rem; cursor: pointer;
 }
-.ed-kind .side button + button { border-left: 1px solid var(--glass-line); }
+.ed-kind .side button + button { border-left: 1px solid var(--rule); }
 .ed-kind .side button[aria-checked="true"] { background: var(--glass-in-2); color: var(--ink); }
 .ed-note {
   grid-column: 1 / -1; margin: 0;
