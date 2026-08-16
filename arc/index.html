@@ -458,6 +458,88 @@
 .actual.over { background: var(--accent-b); }
 
 
+/* ── the editor ──
+   A dialog rather than a panel: it is a decision with an end to it, and
+   everything behind it should stop being clickable while you make it. */
+.ed {
+  width: min(560px, calc(100vw - 40px));
+  padding: 0; border: 1px solid var(--glass-line); border-radius: 14px;
+  background: var(--glass-solid, var(--ground)); color: var(--ink);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+}
+.ed::backdrop { background: rgba(0, 0, 0, .48); backdrop-filter: blur(2px); }
+.ed form { display: flex; flex-direction: column; max-height: min(84vh, 720px); }
+.ed-h { display: flex; align-items: center; gap: 10px; padding: 15px 16px 11px; }
+.ed-h h2 { margin: 0; font-size: 1rem; font-weight: 500; letter-spacing: -.01em; }
+.ed-x {
+  display: grid; place-items: center; width: 28px; height: 28px;
+  border: 0; border-radius: 8px; background: none; color: var(--ink-3); cursor: pointer;
+}
+.ed-x:hover { background: var(--glass-in); color: var(--ink); }
+.ed-b {
+  flex: 1; min-height: 0; overflow-y: auto;
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px;
+  padding: 4px 16px 16px;
+  border-top: 1px solid var(--rule);
+  padding-top: 15px;
+}
+.ed-wide { grid-column: 1 / -1; }
+.ed-f { display: flex; flex-direction: column; gap: 6px; min-width: 0; margin: 0; border: 0; padding: 0; }
+.ed-f > span, .ed-f > legend {
+  padding: 0;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+}
+.ed-f input[type="text"], .ed-f input[type="date"], .ed-f select {
+  height: 36px; padding: 0 10px;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass-in); color: var(--ink);
+  font: inherit; font-size: .84rem;
+}
+.ed-f input:focus-visible, .ed-f select:focus-visible {
+  outline: 2px solid var(--focus); outline-offset: 1px;
+}
+.ed-check { flex-direction: row; align-items: center; gap: 9px; }
+.ed-check input { width: 16px; height: 16px; flex: none; accent-color: var(--accent); }
+.ed-check > span {
+  font-family: var(--sans); font-size: .78rem; text-transform: none;
+  letter-spacing: normal; color: var(--ink-2);
+}
+/* The three shapes are one choice, so they are one control. */
+.ed-kind .side { display: flex; gap: 0; border: 1px solid var(--glass-line);
+  border-radius: 9px; overflow: hidden; }
+.ed-kind .side button {
+  flex: 1; height: 34px; border: 0; background: none; color: var(--ink-3);
+  font: inherit; font-size: .76rem; cursor: pointer;
+}
+.ed-kind .side button + button { border-left: 1px solid var(--glass-line); }
+.ed-kind .side button[aria-checked="true"] { background: var(--glass-in-2); color: var(--ink); }
+.ed-note {
+  grid-column: 1 / -1; margin: 0;
+  font-size: .74rem; line-height: 1.5; color: var(--ink-3);
+}
+.ed-foot {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px 14px; border-top: 1px solid var(--rule);
+}
+.ed-foot .grow { flex: 1; }
+.ed-del { color: var(--down); }
+
+.bk-acts { display: flex; gap: 9px; flex-wrap: wrap; }
+
+/* The list rows became buttons when they became editable; the button
+   must not repaint the row it replaced. */
+.list-open {
+  display: block; width: 100%; margin: 0; padding: 0;
+  border: 0; background: none; color: inherit; font: inherit;
+  text-align: left; cursor: pointer;
+}
+.tile-body {
+  display: flex; flex-direction: column; gap: 2px; width: 100%;
+  margin: 0; padding: 0; border: 0; background: none; color: inherit;
+  font: inherit; text-align: left; cursor: pointer;
+}
+
 </style>
 <script src="../shell.js" defer></script>
 </head>
@@ -510,8 +592,8 @@
              stroke-linecap="round" width="15" height="15" aria-hidden="true">
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" />
         </svg>
-        <label class="sr" for="q">Search projects</label>
-        <input id="q" type="search" placeholder="Search projects" autocomplete="off" />
+        <label class="sr" for="q">Search goals</label>
+        <input id="q" type="search" placeholder="Search goals" autocomplete="off" />
       </div>
 
       <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Appearance: System">
@@ -528,6 +610,13 @@
         </button>
         <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
       </div>
+
+      <button class="btn btn-ghost" type="button" id="backupBtn" aria-label="Backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v11M12 14l-4-4M12 14l4-4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" /></svg>
+        <span>Backup</span>
+      </button>
 
       <button class="btn btn-primary" type="button" id="newBtn">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
@@ -597,6 +686,111 @@
     Today
   </button>
 
+  <!-- ── the editor ──
+       One dialog for every way in: the New button, a bar, a moment, a
+       list row, a tile. A goal is edited where you found it. -->
+  <dialog class="ed" id="ed" aria-labelledby="edTitle">
+    <form method="dialog" id="edForm">
+      <div class="ed-h">
+        <h2 id="edTitle">New goal</h2>
+        <span class="grow"></span>
+        <button class="ed-x" type="button" id="edClose" aria-label="Close">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+               stroke-linecap="round" width="15" height="15" aria-hidden="true">
+            <path d="m6 6 12 12M18 6 6 18" /></svg>
+        </button>
+      </div>
+
+      <div class="ed-b">
+        <label class="ed-f ed-wide">
+          <span>Goal</span>
+          <input id="edName" type="text" required maxlength="80"
+                 placeholder="What are you aiming at" autocomplete="off" />
+        </label>
+
+        <fieldset class="ed-f ed-wide ed-kind">
+          <legend>Shape</legend>
+          <div class="side" role="radiogroup" aria-label="Shape">
+            <button type="button" id="edSpan"   role="radio" aria-checked="true">Over a period</button>
+            <button type="button" id="edMoment" role="radio" aria-checked="false">A single date</button>
+            <button type="button" id="edNone"   role="radio" aria-checked="false">No date yet</button>
+          </div>
+        </fieldset>
+
+        <label class="ed-f" id="edFromF">
+          <span id="edFromL">Starts</span>
+          <input id="edFrom" type="date" />
+        </label>
+        <label class="ed-f" id="edToF">
+          <span>Ends</span>
+          <input id="edTo" type="date" />
+        </label>
+
+        <label class="ed-f ed-wide" id="edHorizonF">
+          <span>Horizon — where it sits on the vision board</span>
+          <select id="edHorizon">
+            <option value="now">Now — live, being worked on</option>
+            <option value="year">This year — chosen, not started</option>
+            <option value="someday">Someday — no date, and that is fine</option>
+          </select>
+        </label>
+
+        <label class="ed-f ed-wide ed-check">
+          <input id="edDone" type="checkbox" />
+          <span>Finished — move it to Past and measure it against the estimate</span>
+        </label>
+
+        <label class="ed-f" id="edDoneOnF" hidden>
+          <span>Finished on</span>
+          <input id="edDoneOn" type="date" />
+        </label>
+
+        <p class="ed-note" id="edHint"></p>
+      </div>
+
+      <div class="ed-foot">
+        <button class="btn btn-ghost ed-del" type="button" id="edDelete" hidden>Delete</button>
+        <span class="grow"></span>
+        <button class="btn btn-ghost" type="button" id="edCancel">Cancel</button>
+        <button class="btn btn-primary" type="submit" id="edSave">Save</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog class="ed" id="bk" aria-labelledby="bkTitle">
+    <div class="ed-h">
+      <h2 id="bkTitle">Backup</h2>
+      <span class="grow"></span>
+      <button class="ed-x" type="button" id="bkClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" width="15" height="15" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <div class="ed-b">
+      <p class="ed-note ed-wide">
+        Your goals live in this browser on this machine and are never uploaded
+        anywhere. That is the point — but it also means clearing your browsing
+        data deletes them, and another computer will not have them. A copy is
+        a plain JSON file you can keep anywhere and read yourself.
+      </p>
+      <p class="ed-note ed-wide" id="bkCount"></p>
+      <div class="ed-wide bk-acts">
+        <button class="btn btn-primary" type="button" id="bkSave">Save a copy</button>
+        <button class="btn btn-ghost" type="button" id="bkLoad">Restore from a copy</button>
+      </div>
+      <p class="ed-note ed-wide">
+        <b>Photographs are not in the copy.</b> They are held separately, and
+        can be several megabytes each — a backup file you cannot email is one
+        you will not keep. The goals are what is irreplaceable.
+      </p>
+    </div>
+    <div class="ed-foot">
+      <span class="grow"></span>
+      <button class="btn btn-ghost" type="button" id="bkDone">Close</button>
+    </div>
+  </dialog>
+
   <p class="sr" role="status" id="say"></p>
 </div>
 
@@ -613,48 +807,187 @@
    (labels that no longer fit inside short bars) is handled below.
    ═══════════════════════════════════════════════════════════════ */
 
-const START = new Date(2026, 1, 15);   // 15 Feb
-const END   = new Date(2026, 3, 30);   // 30 Apr
-const TODAY = new Date(2026, 2,  7);   //  7 Mar — fixed, so the view is stable
+/* ═══ the store ═══
+   One goal, one record, and every view is a reading of the same list.
+   A goal with two dates is a span on the timeline; one with a single
+   date is a moment; one with no dates is still a goal — it just lives
+   on the vision board until you commit to when.
 
-const DAY  = 86400000;
-const SPAN = Math.round((END - START) / DAY);
+   localStorage, not IndexedDB: the whole list is a few KB of text, and
+   it has to be readable synchronously at first paint or the timeline
+   would render empty and then jump. The photographs are the opposite
+   shape — megabytes, and fine to arrive late — so they stay in IDB. */
+const KEY = 'arc.v1';
 
-const d    = (m, day) => new Date(2026, m, day);
+/* Goal names are typed by a person and go into innerHTML in five places.
+   Without this, a goal called <img src=x onerror=…> would run. */
+const esc = (v) => String(v).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+function readStore() {
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { return null; }
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw);
+    if (!v || !Array.isArray(v.goals)) throw new Error('shape');
+    return v;
+  } catch (e) {
+    /* Same rule the ledger follows: keep the wreckage, say so, start
+       empty. Silently replacing a damaged file with examples is how
+       someone loses a year of planning and does not find out for weeks. */
+    try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    setTimeout(() => alert('Your saved goals could not be read. A copy has been kept '
+      + 'under ' + KEY + '.corrupt — export it before entering anything new.'), 0);
+    return { goals: [] };
+  }
+}
+function writeStore(v) { localStorage.setItem(KEY, JSON.stringify(v)); }
+
+const DAY = 86400000;
+const pad2 = (n) => String(n).padStart(2, '0');
+const iso  = (dt) => `${dt.getFullYear()}-${pad2(dt.getMonth() + 1)}-${pad2(dt.getDate())}`;
+/* Parsed as LOCAL midnight. new Date('2026-09-01') is parsed as UTC and
+   lands on 31 August for anyone west of Greenwich, which would shift
+   every bar by a day for half the world. */
+const parseISO = (v) => { const [y, m, d] = String(v).split('-').map(Number);
+  return new Date(y, (m || 1) - 1, d || 1); };
+const midnight = (dt) => new Date(dt.getFullYear(), dt.getMonth(), dt.getDate());
+const shift = (dt, n) => midnight(new Date(+dt + n * DAY));
+
+/* Today is read from the clock, not pinned. The prototype fixed it at
+   7 March so screenshots stayed stable; a planner whose "now" is a
+   constant is a picture of a planner. Re-read on every render, so a
+   window left open overnight is correct in the morning. */
+let TODAY = midnight(new Date());
+
+/* Examples, positioned RELATIVE to today so they always read sensibly —
+   a starter set with hardcoded 2026 dates would be months stale by the
+   time anyone opened it. Shown only while you have nothing of your own,
+   and the first goal you add clears them. */
+const rel = (n) => iso(shift(TODAY, n));
+const SAMPLE = { goals: [
+  { id: 's1', name: 'Trading journal, daily',  from: rel(-24), to: rel(21),  horizon: 'now',     kind: 'span', tone: 'accent' },
+  { id: 's2', name: 'Arc',                     from: rel(-9),  to: rel(12),  horizon: 'now',     kind: 'span', tone: 'strong' },
+  { id: 's3', name: 'Gene Keys, 90 days',      from: rel(-30), to: rel(60),  horizon: 'now',     kind: 'span', tone: 'soft'   },
+  { id: 's4', name: 'Rebuild the site',        from: rel(35),  to: rel(120), horizon: 'year',    kind: 'span', tone: 'strong' },
+  { id: 's5', name: 'Learn piano',             from: rel(60),  to: rel(300), horizon: 'year',    kind: 'span', tone: 'soft'   },
+  { id: 's6', name: 'First funded account',    from: rel(150), to: null,     horizon: 'year',    kind: 'mark', tone: 'accent' },
+  { id: 's7', name: 'Sabbatical',              from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'soft'   },
+  { id: 's8', name: 'Sub-3 marathon',          from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'soft'   },
+] };
+
+let state = readStore() || SAMPLE;
+const isDemo = () => state === SAMPLE;
+
+/* Adopting copies the examples in so an edit to one does not delete the
+   other seven; starting fresh throws them away, because someone adding
+   their first real goal did not ask for eight of mine underneath it. */
+function ownData(fresh) {
+  if (!isDemo()) return;
+  state = fresh ? { goals: [] } : JSON.parse(JSON.stringify(SAMPLE));
+}
+function commit(fresh, fn) {
+  ownData(fresh);
+  fn(state);
+  try { writeStore(state); }
+  catch (e) { say.textContent = 'Could not save — your browser refused the write.'; return false; }
+  renderAll();
+  return true;
+}
+
+const uid = () => (crypto.randomUUID ? crypto.randomUUID().slice(0, 8)
+  : Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
+
+const goals = () => state.goals;
+const live  = () => goals().filter(g => !g.done);
+/* A goal earns a place on the timeline by having a date on it. */
+const dated = () => live().filter(g => g.from);
+const spans = () => dated().filter(g => g.kind !== 'mark' && g.to);
+const marks = () => dated().filter(g => g.kind === 'mark' || !g.to);
+
+/* ── the window ──
+   Nothing is fixed. The axis runs from your earliest date to your last
+   one, with today always inside it, so a three-week push and a five-year
+   arc both fill the same board without anyone choosing a scale. */
+let START, END, SPAN, nowAt;
+
+function fitWindow() {
+  TODAY = midnight(new Date());
+  const ds = [+TODAY];
+  dated().forEach(g => { ds.push(+parseISO(g.from)); if (g.to) ds.push(+parseISO(g.to)); });
+  let lo = Math.min(...ds), hi = Math.max(...ds);
+  /* A floor, or one two-day goal would put the whole axis inside a week
+     and every tick would land on the same pixel. */
+  const raw = (hi - lo) / DAY;
+  if (raw < 56) { const g = ((56 - raw) / 2) * DAY; lo -= g; hi += g; }
+  const air = Math.max(3, ((hi - lo) / DAY) * 0.06) * DAY;
+  START = midnight(new Date(lo - air));
+  END   = midnight(new Date(hi + air));
+  SPAN  = Math.max(1, Math.round((END - START) / DAY));
+  nowAt = pct(TODAY);
+}
+
 const pct  = (date) => ((date - START) / DAY / SPAN) * 100;
 const days = (a, b) => Math.round((b - a) / DAY);
 const fmt  = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+const fmtY = (date) => date.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' });
 
 /* Under a week reads in days; beyond it, weeks carry the magnitude and
    the remainder carries the precision — 45 days is hard to picture, six
-   and a half weeks is not. */
-const dur = (n) => n < 7 ? `${n} days`
-                 : n % 7 ? `${Math.floor(n / 7)}w ${n % 7}d`
-                         : `${n / 7}w`;
+   and a half weeks is not. Past a year, years do the same job again. */
+const dur = (n) => n < 7 ? `${n} ${n === 1 ? 'day' : 'days'}`
+                 : n < 70 ? (n % 7 ? `${Math.floor(n / 7)}w ${n % 7}d` : `${n / 7}w`)
+                 : n < 365 ? `${Math.round(n / 30.4)} months`
+                 : `${(n / 365).toFixed(n % 365 < 30 ? 0 : 1)}y`;
 
-const BARS = [
-  { name: 'Research',          from: d(1,16), to: d(1,20), tone: 'strong', row: 0 },
-  { name: 'Business Analysis', from: d(1,21), to: d(2,18), tone: 'soft',   row: 0 },
-  { name: 'Wireframes, proto', from: d(1,25), to: d(2, 9), tone: 'strong', row: 1 },
-  { name: 'UI design',         from: d(2,10), to: d(2,25), tone: 'soft',   row: 1 },
-  { name: 'Development',       from: d(2,10), to: d(3,24), tone: 'accent', row: 2 },
-  { name: 'Sync',              from: d(2, 4), to: d(2, 6), tone: 'accent', row: 3, gap: true },
-  { name: 'WF Testing',        from: d(1,28), to: d(2, 4), tone: 'strong', row: 4 },
-  { name: 'Feedback',          from: d(3,20), to: d(3,22), tone: 'soft',   row: 4 },
-];
+/* ── ticks ──
+   The label has to survive the scale it is drawn at. Four bands, chosen
+   so ticks never fall closer than ~55px: days and weeks up close,
+   months for a year, quarters for a few, then years. */
+function tickDates() {
+  const out = [];
+  const push = (dt) => { if (dt >= START && dt <= END) out.push(dt); };
+  if (SPAN <= 130) {
+    for (let i = 0; i <= SPAN; i += SPAN <= 45 ? 3 : 7) push(shift(START, i));
+  } else if (SPAN <= 430) {
+    const c = new Date(START.getFullYear(), START.getMonth(), 1);
+    while (c <= END) { push(new Date(c)); c.setMonth(c.getMonth() + 1); }
+  } else if (SPAN <= 1500) {
+    const c = new Date(START.getFullYear(), Math.floor(START.getMonth() / 3) * 3, 1);
+    while (c <= END) { push(new Date(c)); c.setMonth(c.getMonth() + 3); }
+  } else {
+    const c = new Date(START.getFullYear(), 0, 1);
+    while (c <= END) { push(new Date(c)); c.setFullYear(c.getFullYear() + 1); }
+  }
+  return out;
+}
+function tickLabel(dt, prev) {
+  if (SPAN <= 130) return fmt(dt);
+  if (SPAN > 1500) return String(dt.getFullYear());
+  const m = dt.toLocaleDateString('en-GB', { month: 'short' });
+  /* The year is stated once, where it turns over — repeating it on every
+     tick is twelve copies of a fact that changes annually. */
+  return (!prev || prev.getFullYear() !== dt.getFullYear())
+    ? `${m} ${String(dt.getFullYear()).slice(2)}` : m;
+}
 
-const MILESTONES = [{ name: 'Dev Start', on: d(2,10) }];
-
-/* Marks — a date you stamped, with a note on it. The reference draws
-   these as small unlabelled pills, and they stay unlabelled on screen;
-   the note is what you get on hover or from a screen reader. This is the
-   "I can mark it and see it" part, and the reason they are buttons and
-   not decoration. */
-const MARKS = [
-  { on: d(1,24), note: 'Scope locked' },
-  { on: d(3,17), note: 'Second review' },
-  { on: d(3,21), note: 'Ship', solid: true },
-];
+/* ── rows ──
+   The prototype authored a staggered cascade by hand. Real goals arrive
+   in whatever order you think of them, so rows are packed here: earliest
+   first, each goal taking the topmost row where it does not touch its
+   neighbours. layout() still spills a bar that cannot fit its caption. */
+function packRows(list) {
+  const ends = [];
+  const gutter = SPAN * 0.02;
+  return list.map((g) => {
+    const from = parseISO(g.from), to = parseISO(g.to);
+    let r = 0;
+    while (ends[r] !== undefined && from - ends[r] < gutter * DAY) r++;
+    ends[r] = +to;
+    return { ...g, from, to, row: r };
+  });
+}
 
 const axis  = document.getElementById('axis');
 const rows  = document.getElementById('rows');
@@ -662,139 +995,141 @@ const plot  = document.getElementById('plot');
 const board = document.getElementById('boardPanel');
 const say   = document.getElementById('say');
 
-const nowAt = pct(TODAY);
+/* ═══ the board ═══
+   Rebuilt from the store on every change rather than patched in place.
+   The whole timeline is a few hundred nodes; a diff would be more code
+   than the render and one more thing to get subtly wrong. */
+const PILL_CLEAR = 1.8;   // % of span either side of the Now dot to keep clear
 
-/* ── axis ──
-   Ticks are dropped rather than drawn under the Now dot.
-   With the pill gone only the dot needs clearance, so the axis keeps
-   nearly all of its ticks. */
-const PILL_CLEAR = 1.8;   // % of span either side of the dot to keep clear
+let BARS = [], barEls = [], rowEls = [];
 
-for (let i = 0; i <= SPAN; i += 8) {
-  const t = new Date(START.getTime() + i * DAY);
-  const at = pct(t);
-  if (Math.abs(at - nowAt) < PILL_CLEAR) continue;
-  const el = document.createElement('span');
-  el.className = 'tick';
-  el.style.left = at + '%';
-  /* Ticks are centred on their date, which clips the first and last
-     against the scroller edge — "15 Feb" was rendering as ".5 Feb".
-     The end ticks hang inward instead. */
-  if (at < 2)       el.style.transform = 'translateX(0)';
-  else if (at > 98) el.style.transform = 'translateX(-100%)';
-  el.textContent = fmt(t);
-  el.setAttribute('aria-hidden', 'true');   // ticks read as loose date fragments
-  axis.appendChild(el);
-}
+function renderBoard() {
+  fitWindow();
+  axis.textContent = '';
+  rows.textContent = '';
+  plot.querySelectorAll('.now-dot, .now-stub').forEach(n => n.remove());
+  BARS = []; barEls = []; rowEls = [];
 
-/* The pill and caret are gone with the line. Today is the lit dot and
-   the fills it leaves in the bars — a label saying "Now" on top of that
-   is the third time the same fact gets stated. */
+  /* ── axis ── */
+  let prev = null;
+  for (const t of tickDates()) {
+    const at = pct(t);
+    const label = tickLabel(t, prev);
+    prev = t;
+    if (Math.abs(at - nowAt) < PILL_CLEAR) continue;
+    const el = document.createElement('span');
+    el.className = 'tick';
+    el.style.left = at + '%';
+    /* Ticks are centred on their date, which clips the first and last
+       against the scroller edge — "15 Feb" rendered as ".5 Feb". The
+       end ticks hang inward instead. */
+    if (at < 2)       el.style.transform = 'translateX(0)';
+    else if (at > 98) el.style.transform = 'translateX(-100%)';
+    el.textContent = label;
+    el.setAttribute('aria-hidden', 'true');   // ticks read as loose date fragments
+    axis.appendChild(el);
+  }
 
-for (const cls of ['now-dot', 'now-stub']) {
-  const el = document.createElement('span');
-  el.className = cls;
-  el.style.left = nowAt + '%';
-  el.setAttribute('aria-hidden', 'true');
-  plot.appendChild(el);
-}
+  for (const cls of ['now-dot', 'now-stub']) {
+    const el = document.createElement('span');
+    el.className = cls;
+    el.style.left = nowAt + '%';
+    el.setAttribute('aria-hidden', 'true');
+    plot.appendChild(el);
+  }
 
-/* The chart is a picture. This is the sentence that replaces it. */
-plot.setAttribute('aria-label', 'Timeline');
-document.getElementById('chartAlt').textContent =
-  `Timeline from ${fmt(START)} to ${fmt(END)} 2026. Today is ${fmt(TODAY)}. `
-  + `${BARS.length} phases. The List tab shows the same data as text.`;
-plot.setAttribute('aria-describedby', 'chartAlt');
+  /* ── rows and bars ── */
+  BARS = packRows([...spans()].sort((x, y) => parseISO(x.from) - parseISO(y.from)));
+  const rowCount = (BARS.length ? Math.max(...BARS.map(b => b.row)) + 1 : 0) + 1;
+  for (let i = 0; i < rowCount; i++) {
+    const r = document.createElement('div');
+    r.className = 'row';
+    r.dataset.home = i;
+    rows.appendChild(r);
+    rowEls.push(r);
+  }
 
-/* ── bars ── */
-const rowCount = Math.max(...BARS.map(b => b.row)) + 2;
-const rowEls = [];
-for (let i = 0; i < rowCount; i++) {
-  const r = document.createElement('div');
-  r.className = 'row';
-  r.dataset.home = i;
-  rows.appendChild(r);
-  rowEls.push(r);
-}
+  barEls = BARS.map((b) => {
+    const left  = pct(b.from);
+    const width = Math.max(0.25, pct(b.to) - left);
+    const n     = Math.max(1, days(b.from, b.to));
+    const host  = rowEls[b.row];
 
-const barEls = BARS.map((b) => {
-  const left  = pct(b.from);
-  const width = pct(b.to) - left;
-  const n     = days(b.from, b.to);
-  const host  = rowEls[b.row];
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'bar';
+    el.dataset.tone = b.tone || 'strong';
+    el.dataset.name = b.name.toLowerCase();
+    el.dataset.id = b.id;
+    el.style.left  = left + '%';
+    el.style.width = width + '%';
+    el.setAttribute('aria-pressed', 'false');
 
-  if (b.gap) host.classList.add('gap');
+    const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
+    const liveNow = TODAY >= b.from && TODAY <= b.to;
+    const st = TODAY < b.from ? 'ahead' : TODAY > b.to ? 'done' : 'live';
+    const status = st === 'ahead' ? 'not started yet'
+                 : st === 'done'  ? 'past its end date'
+                 : `day ${elapsed} of ${n}`;
+    /* The numeral says a different thing in each state: what is coming,
+       where you are inside it, and what it cost. */
+    const numeral = st === 'ahead' ? dur(n)
+                  : st === 'done'  ? `✓ ${dur(n)}`
+                  : `d${elapsed} / ${n}`;
 
-  const el = document.createElement('button');
-  el.type = 'button';
-  el.className = 'bar';
-  el.dataset.tone = b.tone;
-  el.dataset.name = b.name.toLowerCase();
-  el.style.left  = left + '%';
-  el.style.width = width + '%';
-  el.setAttribute('aria-pressed', 'false');
+    el.dataset.state = st;
+    if (liveNow) el.classList.add('live');
+    el.style.setProperty('--through', Math.round((elapsed / n) * 100) + '%');
+    el.setAttribute('aria-label',
+      `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}. Opens the editor.`);
+    el.innerHTML = `<span class="done" aria-hidden="true"></span>`
+                 + `<span class="label" aria-hidden="true">${esc(b.name)}</span>`
+                 + `<span class="badge" aria-hidden="true">${numeral}</span>`;
 
-  const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
-  const live = TODAY >= b.from && TODAY <= b.to;
-  const state = TODAY < b.from ? 'ahead' : TODAY > b.to ? 'done' : 'live';
-  const status = state === 'ahead' ? 'not started yet'
-               : state === 'done'  ? 'finished'
-               : `day ${elapsed} of ${n}`;
-  /* The numeral says a different thing in each state: what is coming,
-     where you are inside it, and what it cost. */
-  const numeral = state === 'ahead' ? dur(n)
-                : state === 'done'  ? `✓ ${dur(n)}`
-                : `d${elapsed} / ${n}`;
-  const through = Math.round((elapsed / n) * 100);
-
-  el.dataset.state = state;
-  if (live) el.classList.add('live');
-  el.style.setProperty('--through', through + '%');
-  el.setAttribute('aria-label',
-    `${b.name}. ${dur(n)}, ${fmt(b.from)} to ${fmt(b.to)}. ${status}.`);
-  el.innerHTML = `<span class="done" aria-hidden="true"></span>`
-               + `<span class="label" aria-hidden="true">${b.name}</span>`
-               + `<span class="badge" aria-hidden="true">${numeral}</span>`;
-
-  /* Tapping a bar has to do something — a focusable button that does
-     nothing is worse than a div, because the role promises an action. */
-  el.addEventListener('click', () => {
-    barEls.forEach(o => o.setAttribute('aria-pressed', 'false'));
-    el.setAttribute('aria-pressed', 'true');
-    say.textContent = el.getAttribute('aria-label');
+    /* A focusable button that only announces itself is worse than a div,
+       because the role promises an action. Now it opens the goal. */
+    el.addEventListener('click', () => edit(b.id));
+    host.appendChild(el);
+    return el;
   });
 
-  host.appendChild(el);
-  return el;
-});
+  /* ── moments ──
+     A goal with one date is a point, not a span: the thing you are
+     aiming AT rather than the work leading to it. */
+  const lastRow = rowEls[rowCount - 1];
+  lastRow.classList.add('gap');
+  marks().forEach((m) => {
+    const on = parseISO(m.from);
+    const el = document.createElement('button');
+    el.type = 'button';
+    el.className = 'milestone';
+    el.dataset.name = m.name.toLowerCase();
+    el.dataset.id = m.id;
+    el.style.left = pct(on) + '%';
+    el.setAttribute('aria-label', `Moment: ${m.name}, ${fmtY(on)}. Opens the editor.`);
+    el.innerHTML = `<span class="diamond" aria-hidden="true"></span>`
+                 + `<span aria-hidden="true">${esc(m.name)}</span>`;
+    el.addEventListener('click', () => edit(m.id));
+    lastRow.appendChild(el);
+  });
 
-/* ── milestones ── */
-const last = rowEls[rowCount - 1];
-last.classList.add('gap');
+  /* The chart is a picture. This is the sentence that replaces it. */
+  plot.setAttribute('aria-label', 'Timeline');
+  document.getElementById('chartAlt').textContent = BARS.length || marks().length
+    ? `Timeline from ${fmtY(START)} to ${fmtY(END)}. Today is ${fmtY(TODAY)}. `
+      + `${BARS.length} over a period, ${marks().length} single ${marks().length === 1 ? 'date' : 'dates'}. `
+      + `The List tab shows the same data as text.`
+    : 'No dated goals yet. Use New to add one.';
+  plot.setAttribute('aria-describedby', 'chartAlt');
 
-MILESTONES.forEach((m) => {
-  const el = document.createElement('button');
-  el.type = 'button';
-  el.className = 'milestone';
-  el.style.left = pct(m.on) + '%';
-  const label = `Milestone: ${m.name}, ${fmt(m.on)}`;
-  el.setAttribute('aria-label', label);
-  el.innerHTML = `<span class="diamond" aria-hidden="true"></span><span aria-hidden="true">${m.name}</span>`;
-  el.addEventListener('click', () => { say.textContent = label; });
-  last.appendChild(el);
-});
+  const months = SPAN / 30.4;
+  document.getElementById('span').textContent = SPAN >= 400
+    ? `${(SPAN / 365).toFixed(1)} years`
+    : `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
 
-MARKS.forEach((m) => {
-  const el = document.createElement('button');
-  el.type = 'button';
-  el.className = 'pin' + (m.solid ? ' on' : '');
-  el.style.left = pct(m.on) + '%';
-  const label = `Mark: ${m.note}, ${fmt(m.on)}`;
-  el.setAttribute('aria-label', label);
-  el.title = `${m.note} — ${fmt(m.on)}`;
-  el.addEventListener('click', () => { say.textContent = label; });
-  last.appendChild(el);
-});
+  document.getElementById('planTitle').textContent =
+    isDemo() ? 'Example plan' : 'Long-term plan';
+}
 
 /* ── layout pass ──
    Runs per row, after all bars exist, because every decision here
@@ -897,45 +1232,84 @@ function spill(host, el) {
 
 /* ── list view ── */
 const list = document.getElementById('list');
+let listEls = [];
 
-const listEls = [...BARS].sort((a, b) => a.from - b.from).map((b) => {
-  const n = days(b.from, b.to);
-  const elapsed = Math.min(Math.max(days(b.from, TODAY), 0), n);
-  const through = Math.round((elapsed / n) * 100);
-  const state = TODAY < b.from ? 'Not started'
-              : TODAY > b.to   ? 'Finished'
-              : `Day <b>${elapsed}</b> of ${n} · ${n - elapsed} left`;
+function renderList() {
+  list.textContent = '';
+  const all = [...live()].sort((x, y) => {
+    if (!x.from) return 1;
+    if (!y.from) return -1;
+    return parseISO(x.from) - parseISO(y.from);
+  });
+  listEls = all.map((g) => {
+    const li = document.createElement('li');
+    li.dataset.name = g.name.toLowerCase();
+    li.dataset.id = g.id;
 
-  const li = document.createElement('li');
-  li.dataset.name = b.name.toLowerCase();
-  li.innerHTML =
-    `<div class="list-top">
-       <span class="list-name">${b.name}</span>
-       <span class="list-days">${dur(n)}</span>
-     </div>
-     <div class="list-dates">${fmt(b.from)} — ${fmt(b.to)}</div>
-     <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
-     <div class="state">${state}</div>`;
-  list.appendChild(li);
-  return li;
-});
+    let dates, state, through = 0, span = '';
+    if (g.from && g.to && g.kind !== 'mark') {
+      const from = parseISO(g.from), to = parseISO(g.to);
+      const n = Math.max(1, days(from, to));
+      const elapsed = Math.min(Math.max(days(from, TODAY), 0), n);
+      through = Math.round((elapsed / n) * 100);
+      dates = `${fmtY(from)} — ${fmtY(to)}`;
+      span = dur(n);
+      state = TODAY < from ? `Starts in ${dur(days(TODAY, from))}`
+            : TODAY > to   ? `<b>${dur(days(to, TODAY))}</b> past its end date`
+            : `Day <b>${elapsed}</b> of ${n} · ${n - elapsed} left`;
+    } else if (g.from) {
+      const on = parseISO(g.from);
+      const n = days(TODAY, on);
+      dates = fmtY(on);
+      span = 'a date';
+      through = n <= 0 ? 100 : 0;
+      state = n > 0 ? `In <b>${dur(n)}</b>` : n === 0 ? '<b>Today</b>' : `${dur(-n)} ago`;
+    } else {
+      dates = 'No date yet';
+      span = HORIZON_LABEL[g.horizon] || 'Someday';
+      state = 'Undated — living on the vision board';
+    }
+
+    li.innerHTML =
+      `<button type="button" class="list-open">
+         <div class="list-top">
+           <span class="list-name">${esc(g.name)}</span>
+           <span class="list-days">${span}</span>
+         </div>
+         <div class="list-dates">${dates}</div>
+         <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
+         <div class="state">${state}</div>
+       </button>`;
+    const btn = li.querySelector('.list-open');
+    btn.setAttribute('aria-label', `${g.name}. ${dates}. Opens the editor.`);
+    btn.addEventListener('click', () => edit(g.id));
+    list.appendChild(li);
+    return li;
+  });
+}
 
 /* ── search ── */
 /* The tab counts are the search result: one number, two places, live. */
 function tally() {
-  const n = barEls.filter(el => !el.hidden).length;
+  /* Counted off the list, not the bars: a moment has no bar and an
+     undated goal has neither, but all three are goals and all three
+     are things a search should be able to find. */
+  const n = listEls.filter(el => !el.hidden).length;
   document.getElementById('nBoard').textContent = n;
   document.getElementById('nList').textContent = n;
   /* The tabs are decorative-count only; the spoken name stays a plain
      word plus its number, not "Board 8 Board 8". */
-  tabBoard.setAttribute('aria-label', `Board, ${n} phases`);
-  tabList .setAttribute('aria-label', `List, ${n} phases`);
+  tabBoard.setAttribute('aria-label', `Board, ${n} goals`);
+  tabList .setAttribute('aria-label', `List, ${n} goals`);
   return n;
 }
 
 document.getElementById('q').addEventListener('input', (e) => {
   const q = e.target.value.trim().toLowerCase();
   barEls .forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
+  document.querySelectorAll('#rows .milestone').forEach((el) => {
+    el.hidden = !!q && !el.dataset.name.includes(q);
+  });
   listEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
   tileEls.forEach(el => { el.hidden = !!q && !el.dataset.name.includes(q); });
   /* A band with nothing left in it is noise, not a finding. */
@@ -944,7 +1318,7 @@ document.getElementById('q').addEventListener('input', (e) => {
   });
   layout();
   const n = tally();
-  say.textContent = q ? `${n} of ${BARS.length} phases match ${q}.` : 'Showing all phases.';
+  say.textContent = q ? `${n} of ${live().length} goals match ${q}.` : 'Showing everything.';
 });
 
 /* ── tabs ──
@@ -1058,6 +1432,13 @@ const PIX = (function () {
       if (urls.has(id)) { URL.revokeObjectURL(urls.get(id)); urls.delete(id); }
       return true;
     },
+    /* A deleted goal must not leave its photograph occupying quota
+       forever, keyed to an id nothing will ask for again. */
+    async drop(id) {
+      try { await tx('readwrite', st => st.delete(id)); } catch (e) {}
+      cache.delete(id);
+      if (urls.has(id)) { URL.revokeObjectURL(urls.get(id)); urls.delete(id); }
+    },
     has: id => cache.has(id),
     /* Object URLs are minted once and revoked on replace, or a board that
        is edited a few times leaks a blob per edit. */
@@ -1081,75 +1462,109 @@ const HORIZONS = [
   ['someday', 'Someday',   'no date, and that is fine', true],
 ];
 
-const TILES = [
-  { name: 'Trading game',   horizon: 'now',     when: 'Day 12 of 45' },
-  { name: 'Gene Keys',      horizon: 'now',     when: 'Day 30 of 90' },
-  { name: 'Arc',            horizon: 'now',     when: 'Day 3 of 21'  },
-  { name: 'Rebuild site',   horizon: 'year',    when: 'This year'    },
-  { name: 'Learn piano',    horizon: 'year',    when: 'This year'    },
-  { name: 'Long walk',      horizon: 'someday', when: 'No date'      },
-  { name: 'Sabbatical',     horizon: 'someday', when: 'No date'      },
-  { name: 'Sub-3 marathon', horizon: 'someday', when: 'No date'      },
-];
+const HORIZON_LABEL = { now: 'Now', year: 'This year', someday: 'Someday' };
 
 const tiles = document.getElementById('tiles');
 let tileEls = [];
 
-HORIZONS.forEach(([id, label, sub, far], bi) => {
-  const items = TILES.filter(t => t.horizon === id);
-  if (!items.length) return;
+/* What a tile says about its own timing, read off the dates rather than
+   typed — "Day 12 of 45" that does not move is a screenshot, not a
+   status. */
+function whenText(g) {
+  if (g.from && g.to && g.kind !== 'mark') {
+    const from = parseISO(g.from), to = parseISO(g.to);
+    const n = Math.max(1, days(from, to));
+    if (TODAY < from) return `Starts ${fmt(from)}`;
+    if (TODAY > to)   return `Ended ${fmt(to)}`;
+    return `Day ${Math.max(1, days(from, TODAY))} of ${n}`;
+  }
+  if (g.from) {
+    const on = parseISO(g.from), n = days(TODAY, on);
+    return n > 0 ? `In ${dur(n)}` : n === 0 ? 'Today' : `${dur(-n)} ago`;
+  }
+  return 'No date';
+}
 
-  const band = document.createElement('section');
-  band.className = 'band' + (far ? ' far' : '');
-  band.setAttribute('aria-label', `${label} — ${sub}`);
+function renderVision() {
+  tiles.textContent = '';
+  tileEls = [];
 
-  const h = document.createElement('h2');
-  h.className = 'band-h';
-  /* The rule and the tally are decoration; the heading a screen reader
-     hears is the band name and how many are in it. */
-  h.innerHTML = `<span>${label}</span><i aria-hidden="true"></i>`
-              + `<em aria-hidden="true">${items.length}</em>`
-              + `<span class="sr">, ${items.length} ${items.length === 1 ? 'aim' : 'aims'}</span>`;
-  band.appendChild(h);
+  HORIZONS.forEach(([id, label, sub, far], bi) => {
+    const items = live().filter(g => (g.horizon || 'someday') === id);
+    if (!items.length) return;
 
-  const row = document.createElement('ul');
-  row.className = 'band-row';
-  items.forEach((t, i) => {
-    const li = document.createElement('li');
-    li.className = 'tile';
-    li.dataset.name = t.name.toLowerCase();
-    /* Varying the light per tile, so eight image slots do not read as
-       one photograph repeated eight times. */
-    li.innerHTML =
-      `<button type="button" class="tile-art"
-            style="--a:${118 + (bi * 3 + i) * 17}deg;--l:${18 + (bi * 3 + i) * 9}%;
-                   filter:brightness(${(0.78 + (bi * 3 + i) * 0.05).toFixed(2)})"></button>
-       <div class="tile-body">
-         <span class="tile-name">${t.name}</span>
-         <span class="tile-when">${t.when}</span>
-       </div>`;
-    const art = li.querySelector('.tile-art');
-    art.dataset.id = t.name;
-    art.setAttribute('aria-label', `Add an image for ${t.name}`);
-    art.addEventListener('click', () => pick(t.name));
+    const band = document.createElement('section');
+    band.className = 'band' + (far ? ' far' : '');
+    band.setAttribute('aria-label', `${label} — ${sub}`);
 
-    /* Drag and drop is the natural desktop gesture, so the whole tile
-       accepts a file even though only the art is clickable. */
-    li.addEventListener('dragover', (e) => { e.preventDefault(); li.classList.add('dropping'); });
-    li.addEventListener('dragleave', () => li.classList.remove('dropping'));
-    li.addEventListener('drop', (e) => {
-      e.preventDefault();
-      li.classList.remove('dropping');
-      const f = e.dataTransfer.files && e.dataTransfer.files[0];
-      if (f) setPicture(t.name, f);
+    const h = document.createElement('h2');
+    h.className = 'band-h';
+    /* The rule and the tally are decoration; the heading a screen reader
+       hears is the band name and how many are in it. */
+    h.innerHTML = `<span>${label}</span><i aria-hidden="true"></i>`
+                + `<em aria-hidden="true">${items.length}</em>`
+                + `<span class="sr">, ${items.length} ${items.length === 1 ? 'aim' : 'aims'}</span>`;
+    band.appendChild(h);
+
+    const row = document.createElement('ul');
+    row.className = 'band-row';
+    items.forEach((g, i) => {
+      const li = document.createElement('li');
+      li.className = 'tile';
+      li.dataset.name = g.name.toLowerCase();
+      /* Varying the light per tile, so eight image slots do not read as
+         one photograph repeated eight times. */
+      li.innerHTML =
+        `<button type="button" class="tile-art"
+              style="--a:${118 + (bi * 3 + i) * 17}deg;--l:${18 + (bi * 3 + i) * 9}%;
+                     filter:brightness(${(0.78 + (bi * 3 + i) * 0.05).toFixed(2)})"></button>
+         <button type="button" class="tile-body">
+           <span class="tile-name">${esc(g.name)}</span>
+           <span class="tile-when">${whenText(g)}</span>
+         </button>`;
+      const art = li.querySelector('.tile-art');
+      art.dataset.id = g.id;
+      art.setAttribute('aria-label', `Add an image for ${g.name}`);
+      art.addEventListener('click', () => pick(g.id));
+
+      /* The picture and the goal are two different things to change, so
+         they are two different targets: the art takes an image, the body
+         opens the editor. */
+      const body = li.querySelector('.tile-body');
+      body.setAttribute('aria-label', `${g.name}, ${whenText(g)}. Opens the editor.`);
+      body.addEventListener('click', () => edit(g.id));
+
+      /* Drag and drop is the natural desktop gesture, so the whole tile
+         accepts a file even though only the art is clickable. */
+      li.addEventListener('dragover', (e) => { e.preventDefault(); li.classList.add('dropping'); });
+      li.addEventListener('dragleave', () => li.classList.remove('dropping'));
+      li.addEventListener('drop', (e) => {
+        e.preventDefault();
+        li.classList.remove('dropping');
+        const f = e.dataTransfer.files && e.dataTransfer.files[0];
+        if (f) setPicture(g.id, f);
+      });
+
+      row.appendChild(li);
+      tileEls.push(li);
+      if (PIX.has(g.id)) paintTile(g.id);
     });
-
-    row.appendChild(li);
-    tileEls.push(li);
+    band.appendChild(row);
+    tiles.appendChild(band);
   });
-  band.appendChild(row);
-  tiles.appendChild(band);
-});
+
+  if (!live().length) {
+    const p = document.createElement('p');
+    p.className = 'calib';
+    p.innerHTML = 'Nothing here yet. <b>New</b> adds your first goal — '
+                + 'give it dates and it appears on the timeline too.';
+    tiles.appendChild(p);
+  }
+
+  document.getElementById('visionMeta').textContent =
+    `${live().filter(g => g.horizon === 'now').length} now · `
+    + `${live().filter(g => g.horizon !== 'now').length} ahead`;
+}
 
 /* One input, reused, rather than one per tile. */
 const filePicker = document.createElement('input');
@@ -1189,50 +1604,73 @@ async function setPicture(id, file) {
   }
 }
 
-PIX.warm().then(() => TILES.forEach(t => { if (PIX.has(t.name)) paintTile(t.name); }));
-
-document.getElementById('visionMeta').textContent =
-  `${TILES.filter(t => t.horizon === 'now').length} now · `
-  + `${TILES.filter(t => t.horizon !== 'now').length} ahead`;
+/* Pictures arrive from IndexedDB after first paint, so the board is
+   repainted once they are in hand rather than blocking on them. */
+PIX.warm().then(() => live().forEach(g => { if (PIX.has(g.id)) paintTile(g.id); }));
 
 /* ═══ past ═══
    Planned as a dashed ghost, actual as a solid. The gap between the two
    is the only honest estimate you will ever have of your own estimates,
    which is why the multiplier is computed rather than typed. */
-const DONE = [
-  { name: 'Destiny Matrix',  planned: 30, actual: 47 },
-  { name: 'Tree of Life',    planned: 14, actual: 19 },
-  { name: 'Tzolkin',         planned:  7, actual:  6 },
-  { name: '4h profiling',    planned: 21, actual: 38 },
-  { name: 'Routine',         planned: 45, actual: 62 },
-  { name: 'Photo evidence',  planned:  5, actual:  9 },
-];
-
 const stripes = document.getElementById('stripes');
-const longest = Math.max(...DONE.map(p => Math.max(p.planned, p.actual)));
 
-DONE.forEach((p) => {
-  const over = p.actual > p.planned;
-  const ratio = (p.actual / p.planned);
-  const li = document.createElement('li');
-  li.innerHTML =
-    `<div class="stripe-top">
-       <span class="stripe-name">${p.name}</span>
-       <span class="stripe-num">planned ${p.planned}d · took <b>${p.actual}d</b> · ${ratio.toFixed(1)}×</span>
-     </div>
-     <div class="track" role="img"
-          aria-label="${p.name}: planned ${p.planned} days, took ${p.actual} days, ${ratio.toFixed(1)} times the estimate">
-       <span class="ghost"  style="width:${(p.planned / longest) * 100}%"></span>
-       <span class="actual${over ? ' over' : ''}" style="width:${(p.actual / longest) * 100}%"></span>
-     </div>`;
-  stripes.appendChild(li);
-});
+function renderPast() {
+  stripes.textContent = '';
+  /* Planned is what you said it would take; actual is what the clock
+     says it took. Both are read off the record, so the multiplier below
+     cannot be flattered by typing a kinder number into it. */
+  const DONE = goals().filter(g => g.done && g.from && g.doneOn).map((g) => {
+    const from = parseISO(g.from);
+    const planned = g.to ? Math.max(1, days(from, parseISO(g.to))) : null;
+    const actual  = Math.max(1, days(from, parseISO(g.doneOn)));
+    return { name: g.name, planned, actual, id: g.id };
+  });
+  const rated = DONE.filter(p => p.planned);
 
-const mult = DONE.reduce((s, p) => s + p.actual / p.planned, 0) / DONE.length;
-document.getElementById('calib').innerHTML =
-  `Across ${DONE.length} finished projects you take <b>${mult.toFixed(1)}×</b> as long as you plan for. `
-  + `A six-week estimate is really <b>${Math.round(6 * mult)}</b> weeks.`;
-document.getElementById('pastMeta').textContent = `${DONE.length} finished`;
+  document.getElementById('pastMeta').textContent =
+    `${goals().filter(g => g.done).length} finished`;
+
+  if (!DONE.length) {
+    document.getElementById('calib').innerHTML = goals().some(g => g.done)
+      ? 'Finished goals need a start date and a finish date before they can '
+        + 'be measured against their estimate.'
+      : 'Nothing finished yet. Tick <b>Finished</b> on a goal and it moves here, '
+        + 'and the gap between what you planned and what it took starts to add up.';
+    return;
+  }
+
+  const longest = Math.max(...DONE.map(p => Math.max(p.planned || 0, p.actual)));
+  DONE.forEach((p) => {
+    const over = p.planned && p.actual > p.planned;
+    const ratio = p.planned ? p.actual / p.planned : null;
+    const li = document.createElement('li');
+    li.innerHTML =
+      `<div class="stripe-top">
+         <span class="stripe-name">${esc(p.name)}</span>
+         <span class="stripe-num">${p.planned ? `planned ${p.planned}d · ` : ''}`
+         + `took <b>${p.actual}d</b>${ratio ? ` · ${ratio.toFixed(1)}×` : ''}</span>
+       </div>
+       <div class="track" role="img"
+            aria-label="${esc(p.name)}: ${p.planned ? `planned ${p.planned} days, ` : ''}`
+         + `took ${p.actual} days${ratio ? `, ${ratio.toFixed(1)} times the estimate` : ''}">
+         <span class="ghost"  style="width:${((p.planned || 0) / longest) * 100}%"></span>
+         <span class="actual${over ? ' over' : ''}" style="width:${(p.actual / longest) * 100}%"></span>
+       </div>`;
+    stripes.appendChild(li);
+  });
+
+  const calib = document.getElementById('calib');
+  if (!rated.length) {
+    calib.innerHTML = 'None of these carried an end date, so there is no estimate '
+      + 'to measure them against yet.';
+    return;
+  }
+  const mult = rated.reduce((s, p) => s + p.actual / p.planned, 0) / rated.length;
+  calib.innerHTML =
+    `Across ${rated.length} finished ${rated.length === 1 ? 'goal' : 'goals'} you take `
+    + `<b>${mult.toFixed(1)}×</b> as long as you plan for. `
+    + `A six-week estimate is really <b>${Math.round(6 * mult)}</b> weeks.`;
+}
 
 /* ── sections ── */
 const SECTIONS = {
@@ -1256,8 +1694,169 @@ document.querySelectorAll('[data-view]').forEach((b) => {
   b.addEventListener('click', () => goto(b.dataset.view));
 });
 
-document.getElementById('newBtn').addEventListener('click', () => {
-  say.textContent = 'Adding projects is not in this prototype yet.';
+/* ═══ the editor ═══ */
+const ed = document.getElementById('ed');
+const edEl = (id) => document.getElementById(id);
+let editing = null;          // goal id, or null for a new one
+let edKind = 'span';         // 'span' | 'mark' | 'none'
+
+const KIND_BTN = { span: 'edSpan', mark: 'edMoment', none: 'edNone' };
+
+function setKind(k) {
+  edKind = k;
+  Object.entries(KIND_BTN).forEach(([id, btn]) =>
+    edEl(btn).setAttribute('aria-checked', String(id === k)));
+  edEl('edFromF').hidden = k === 'none';
+  edEl('edToF').hidden   = k !== 'span';
+  edEl('edFromL').textContent = k === 'mark' ? 'On' : 'Starts';
+  edEl('edHint').textContent =
+    k === 'span' ? 'A span draws a bar on the timeline and can be measured against its estimate when you finish it.'
+  : k === 'mark' ? 'A single date draws a diamond on the timeline — the thing you are aiming at, rather than the work.'
+  : 'With no date it waits on the vision board. Add dates whenever you are ready to commit to them.';
+}
+
+function edOpen(goal) {
+  editing = goal ? goal.id : null;
+  edEl('edTitle').textContent = goal ? 'Edit goal' : 'New goal';
+  edEl('edName').value = goal ? goal.name : '';
+  edEl('edFrom').value = goal && goal.from ? goal.from : '';
+  edEl('edTo').value   = goal && goal.to   ? goal.to   : '';
+  edEl('edHorizon').value = (goal && goal.horizon) || 'now';
+  edEl('edDone').checked = !!(goal && goal.done);
+  edEl('edDoneOn').value = (goal && goal.doneOn) || iso(TODAY);
+  edEl('edDoneOnF').hidden = !edEl('edDone').checked;
+  edEl('edDelete').hidden = !goal;
+  setKind(!goal ? 'span' : !goal.from ? 'none' : (goal.kind === 'mark' || !goal.to) ? 'mark' : 'span');
+  ed.showModal();
+  edEl('edName').focus();
+}
+
+function edit(id) {
+  const g = goals().find(x => x.id === id);
+  if (g) edOpen(g);
+}
+
+edEl('edDone').addEventListener('change', (e) => {
+  edEl('edDoneOnF').hidden = !e.target.checked;
+});
+Object.entries(KIND_BTN).forEach(([id, btn]) =>
+  edEl(btn).addEventListener('click', () => setKind(id)));
+
+edEl('edClose') .addEventListener('click', () => ed.close());
+edEl('edCancel').addEventListener('click', () => ed.close());
+
+edEl('edDelete').addEventListener('click', () => {
+  const g = goals().find(x => x.id === editing);
+  if (!g) return;
+  if (!confirm(`Delete “${g.name}”? This cannot be undone.`)) return;
+  const name = g.name;
+  commit(false, (st) => { st.goals = st.goals.filter(x => x.id !== editing); });
+  PIX.drop(editing);
+  ed.close();
+  say.textContent = `Deleted ${name}.`;
+});
+
+document.getElementById('edForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = edEl('edName').value.trim();
+  if (!name) { edEl('edName').focus(); return; }
+
+  const from = edKind === 'none' ? null : (edEl('edFrom').value || null);
+  let to = edKind === 'span' ? (edEl('edTo').value || null) : null;
+  /* An end before its start is a typo, not an intention. Rather than
+     refuse the save and lose the rest of what was typed, the two swap. */
+  let swapped = false;
+  if (from && to && parseISO(to) < parseISO(from)) { const t = to; to = from; swapped = true;
+    edEl('edFrom').value = t; }
+  const start = swapped ? edEl('edFrom').value : from;
+
+  const done = edEl('edDone').checked;
+  const rec = {
+    id: editing || uid(),
+    name,
+    from: start,
+    to,
+    kind: edKind === 'mark' ? 'mark' : 'span',
+    horizon: edEl('edHorizon').value,
+    done,
+    doneOn: done ? (edEl('edDoneOn').value || iso(TODAY)) : null,
+  };
+
+  const existing = goals().find(x => x.id === editing);
+  const ok = commit(!editing && isDemo(), (st) => {
+    const i = st.goals.findIndex(x => x.id === rec.id);
+    /* Tone is a look, not data you should have to choose. New goals take
+       the accent when they are live and something quieter when they are
+       not, so the board has a focus without anyone picking one. */
+    rec.tone = (existing && existing.tone)
+      || (rec.horizon === 'now' ? 'accent' : rec.horizon === 'year' ? 'strong' : 'soft');
+    if (i >= 0) st.goals[i] = { ...st.goals[i], ...rec };
+    else st.goals.push(rec);
+  });
+  if (!ok) return;
+  ed.close();
+  say.textContent = `${existing ? 'Updated' : 'Added'} ${name}${swapped ? ' — the dates were the wrong way round, so they were swapped.' : ''}.`;
+});
+
+document.getElementById('newBtn').addEventListener('click', () => edOpen(null));
+
+/* ═══ backup ═══
+   The store's own corruption message told you to "export it before
+   recording anything new" while nothing in the app could export. This
+   is that promise, kept. */
+const bk = document.getElementById('bk');
+document.getElementById('backupBtn').addEventListener('click', () => {
+  const n = goals().length;
+  document.getElementById('bkCount').textContent = isDemo()
+    ? 'You are still looking at the examples — there is nothing of your own to save yet.'
+    : `${n} ${n === 1 ? 'goal' : 'goals'} held here, ${goals().filter(g => g.done).length} of them finished.`;
+  bk.showModal();
+});
+document.getElementById('bkClose').addEventListener('click', () => bk.close());
+document.getElementById('bkDone') .addEventListener('click', () => bk.close());
+
+document.getElementById('bkSave').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ app: 'arc', v: 1, saved: new Date().toISOString(),
+    goals: goals() }, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `arc-goals-${iso(midnight(new Date()))}.json`;
+  a.click();
+  /* Revoked on the next frame, not immediately — Safari has not started
+     reading the blob by the time click() returns. */
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
+  say.textContent = 'Copy saved.';
+});
+
+const bkFile = document.createElement('input');
+bkFile.type = 'file';
+bkFile.accept = 'application/json,.json';
+bkFile.className = 'sr';
+document.body.appendChild(bkFile);
+document.getElementById('bkLoad').addEventListener('click', () => { bkFile.value = ''; bkFile.click(); });
+bkFile.addEventListener('change', async () => {
+  const f = bkFile.files[0];
+  if (!f) return;
+  let parsed;
+  try { parsed = JSON.parse(await f.text()); } catch (e) { parsed = null; }
+  if (!parsed || !Array.isArray(parsed.goals)) {
+    say.textContent = 'That file is not an Arc backup.';
+    alert('That file is not an Arc backup — it has no goals in it. Nothing was changed.');
+    return;
+  }
+  /* Restoring REPLACES. Merging two lists with overlapping ids silently
+     picks a winner per goal, and the loser is gone with no way to see
+     which. Replacing is the only outcome someone can predict. */
+  if (!isDemo() && goals().length
+      && !confirm(`Replace the ${goals().length} goals in this browser with the `
+        + `${parsed.goals.length} in that file? This cannot be undone — save a copy first if you are unsure.`))
+    return;
+  state = { goals: parsed.goals };
+  try { writeStore(state); } catch (e) { say.textContent = 'Could not save the restored goals.'; return; }
+  renderAll();
+  bk.close();
+  say.textContent = `Restored ${parsed.goals.length} goals.`;
 });
 
 /* ── today ──
@@ -1265,20 +1864,33 @@ document.getElementById('newBtn').addEventListener('click', () => {
    option, so reduced-motion has to be checked here too. */
 const RM = window.matchMedia('(prefers-reduced-motion: reduce)');
 function toToday(smooth) {
+  /* nowAt is recomputed by fitWindow on every render — reading the live
+     value, not one captured when the page loaded. */
   const x = (nowAt / 100) * plot.offsetWidth;
   board.scrollTo({ left: Math.max(0, x - board.clientWidth * 0.35),
                    behavior: (smooth && !RM.matches) ? 'smooth' : 'auto' });
 }
 todayBtn.addEventListener('click', () => { toToday(true); say.textContent = 'Scrolled to today.'; });
 
-/* ── span label ── */
-const months = SPAN / 30;
-document.getElementById('span').textContent =
-  `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
-
 /* ── go ── */
-tally();
+function renderAll() {
+  renderBoard();
+  renderList();
+  renderVision();
+  renderPast();
+  tally();
+  requestAnimationFrame(() => layout());
+}
+renderAll();
 requestAnimationFrame(() => { layout(); toToday(false); });
+
+/* A board left open across midnight is showing yesterday. Re-render on
+   the hour rather than on a timer per second — nothing here changes
+   faster than a day. */
+setInterval(() => {
+  const d = midnight(new Date());
+  if (+d !== +TODAY) renderAll();
+}, 600000);
 
 /* layout() forces synchronous reflow per bar; raw resize events fire in
    bursts. One pass per frame is enough. */
