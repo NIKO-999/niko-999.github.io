@@ -95,6 +95,13 @@
   letter-spacing: .09em;
   color: var(--ink-2);
 }
+/* R under the dollars. The dollar figure is the fact; the R figure is
+   the one that compares to any other stretch of your own trading. */
+.stat em {
+  display: block; margin-top: 3px; font-style: normal;
+  font-family: var(--mono); font-size: .58rem; letter-spacing: .04em;
+  color: var(--ink-3);
+}
 .stat.up b { color: var(--up); }
 .stat.down b { color: var(--down); }
 
@@ -131,6 +138,10 @@
 .candle-k { display: flex; align-items: center; gap: 6px; }
 .candle-k .ic { display: inline-flex; color: var(--ink-3); }
 .candle-k b { font-weight: 500; color: var(--ink); }
+/* The session the candle belongs to, sat next to its open — the open
+   alone is a number, the name is what you actually call it. */
+.candle-s { color: var(--ink-3); text-transform: none; letter-spacing: .02em;
+  white-space: nowrap; }
 .candle-t { font-variant-numeric: tabular-nums; color: var(--ink); }
 .candle-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
   background: color-mix(in srgb, var(--ink-3) 22%, transparent); }
@@ -141,6 +152,87 @@
 /* 14:00 is not a candle you trade, so the clock stops offering it. */
 .candle.off { opacity: .5; }
 .candle.off .candle-bar i { background: var(--ink-3); }
+
+/* ── the candle panel ──
+   The profile is the whole edge, so the page opens with what the current
+   candle is FOR rather than with a scoreboard. */
+.cp {
+  position: relative; overflow: hidden;
+  margin: 0 0 16px; padding: 13px 15px 15px;
+  border: 1px solid var(--glass-line); border-radius: 11px;
+  background: var(--glass-in);
+}
+.cp-h { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
+.cp-h .grow { flex: 1; }
+.cp-in {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 3px 7px; border-radius: 6px;
+  border: 1px solid var(--glass-line); background: var(--glass-in-2);
+  font-family: var(--mono); font-size: .54rem;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
+}
+.cp-in .ic { display: inline-flex; }
+.cp-open {
+  font-family: var(--mono); font-size: 1.32rem; font-weight: 500;
+  letter-spacing: -.02em; color: var(--ink);
+}
+.cp-name { font-size: .8rem; color: var(--ink-2); }
+.cp-ny, .cp-next {
+  font-family: var(--mono); font-size: .58rem; letter-spacing: .06em;
+  color: var(--ink-3); white-space: nowrap;
+}
+.cp-ny {
+  padding: 3px 6px; border-radius: 5px;
+  border: 1px solid var(--glass-line); background: var(--glass-in-2);
+  color: var(--ink-2);
+}
+.cp-line { margin: 0 0 11px; font-size: .88rem; color: var(--ink); letter-spacing: -.005em; }
+
+/* The time band. Its whole job is to answer "is there still room in this
+   candle", so it carries the theme accent rather than a stoplight green —
+   this is not a win, it is a window. */
+.cp-band {
+  display: flex; align-items: flex-start; gap: 9px;
+  padding: 9px 11px; border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+}
+.cp-band .ic { display: inline-flex; flex: none; margin-top: 1px; color: var(--accent); }
+.cp-band b { display: block; font-size: .78rem; font-weight: 500; color: var(--ink); }
+.cp-band em { display: block; margin-top: 2px; font-style: normal;
+  font-size: .72rem; color: var(--ink-3); }
+/* Past halfway the accent drops out — there is nothing to encourage. */
+.cp-band.mid { border-color: var(--glass-line); background: var(--glass-in-2); }
+.cp-band.mid .ic { color: var(--ink-3); }
+.cp-band.late, .cp-band.off { border-color: var(--glass-line); background: none; }
+.cp-band.late .ic, .cp-band.off .ic { color: var(--ink-3); }
+.cp-band.late b, .cp-band.off b { color: var(--ink-2); }
+
+.cp-miss {
+  margin: 11px 0 0; padding-top: 10px;
+  border-top: 1px solid var(--rule);
+  font-size: .76rem; line-height: 1.5; color: var(--ink-3);
+}
+.cp-miss b { font-weight: 500; color: var(--ink-2); }
+.cp-bar { position: absolute; left: 0; right: 0; bottom: 0; height: 2px;
+  background: color-mix(in srgb, var(--ink-3) 18%, transparent); }
+.cp-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
+.cp.off .cp-bar i, .cp.late .cp-bar i { background: color-mix(in srgb, var(--ink-3) 55%, transparent); }
+
+/* ── the way back ──
+   Shown only when you are down. A loss in dollars is a number; a loss in
+   R is a number of trades, which is the only form of it you can act on. */
+.recover {
+  display: flex; align-items: center; gap: 8px;
+  margin: -4px 0 16px; padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  font-size: .78rem; color: var(--ink-2);
+}
+.recover .ic { display: inline-flex; flex: none; color: var(--accent); }
+.recover b { font-family: var(--mono); font-weight: 500; color: var(--ink);
+  font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
 
 .step {
   width: 28px; height: 28px;
@@ -548,6 +640,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       <!-- How much of the current 4H candle is left to act in. -->
       <div class="candle" id="candle" role="status" aria-live="off">
         <span class="candle-k"><span class="ic" id="icCandle"></span><b id="candleOpen">—</b></span>
+        <span class="candle-s" id="candleName"></span>
         <span class="candle-t" id="candleLeft">—</span>
         <span class="candle-bar" aria-hidden="true"><i id="candleFill"></i></span>
       </div>
@@ -582,7 +675,28 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <span class="span-meta" id="calMeta"></span>
       </div>
       <div class="pane" tabindex="0">
+        <!-- Which candle you are standing in, how long is left of it, and
+             what the profile says happens next. -->
+        <section class="cp" id="cp" aria-label="Current 4H candle">
+          <div class="cp-h">
+            <span class="cp-in"><span class="ic" id="cpIcon"></span>IN</span>
+            <b class="cp-open" id="cpOpen">—</b>
+            <span class="cp-name" id="cpName"></span>
+            <span class="grow"></span>
+            <span class="cp-ny" id="cpNY"></span>
+            <span class="cp-next" id="cpNext"></span>
+          </div>
+          <p class="cp-line" id="cpLine"></p>
+          <div class="cp-band" id="cpBand">
+            <span class="ic" id="cpBandIcon"></span>
+            <span><b id="cpBandT"></b><em id="cpBandS"></em></span>
+          </div>
+          <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
+          <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
+        </section>
+
         <div class="summary" id="summary"></div>
+        <p class="recover" id="recover" hidden></p>
         <div class="cal-head">
           <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
           <h2 id="monthLabel"></h2>
@@ -830,6 +944,34 @@ const NO_TRADE = 14;
 const hhmm = (h) => String(h).padStart(2, '0') + ':00';
 const SESSIONS = [18, 22, 2, 6, 10].map(hhmm);
 
+/* What each candle is for, straight out of the profiling model: the wick
+   is the reversal and the body is the expansion, and which candle prints
+   the wick decides what the rest of the day does.
+
+   `miss` is the part worth having on screen. A window you did not take
+   is not a day lost — the model already says where the move goes next,
+   and reading that at 06:00 is more use than reading it in hindsight. */
+const PROFILE = {
+  18: { name: 'Asia reversal',
+        line: 'Reversal window. Turn here and London expands, NY continues.',
+        miss: '22:00 can still print the wick, and 02:00 after it. Otherwise look for a gap inside 18:00’s wick on the 1H or 30M and take the continuation there.' },
+  22: { name: 'Overnight reversal',
+        line: 'Reversal window. Last of the overnight before London takes it.',
+        miss: '02:00 takes the reversal, then 06:00 and 10:00 expand toward the draw.' },
+   2: { name: 'London reversal',
+        line: 'Reversal window. 06:00 and 10:00 carry it toward the draw.',
+        miss: '06:00 continues it, then 10:00. Look for a gap inside 02:00’s wick on the 1H or 30M and take the continuation there.' },
+   6: { name: 'NY reversal',
+        line: 'Reversal into expansion. 08:30 and 09:30 usually confirm it.',
+        miss: 'If 06:00 never reverses, 10:00 manipulates and starts the expansion. Take the continuation there.' },
+  10: { name: 'Late NY reversal',
+        line: 'Last reversal of the day. Small wick with daily logic behind it is a strong entry.',
+        miss: 'Nothing after this one. No entries past 11:00 — be flat before 12:00.' },
+  14: { name: 'NY lunch',
+        line: 'Not traded. The day’s reversal has already happened or it has not.',
+        miss: 'The next reversal window is the 18:00 open.' },
+};
+
 /* Symbols, setups and notes are typed by hand and then written into
    innerHTML and into attributes. A single quote mark in a setup name is
    enough to break a cell without this. */
@@ -981,6 +1123,14 @@ function totals() {
   let peak = 0, run = 0, dd = 0;
   for (const e of t) { run += e.amt; peak = Math.max(peak, run); dd = Math.max(dd, peak - run); }
 
+  /* R only means anything on trades where the risk was actually written
+     down, so those are counted separately rather than averaged against
+     trades that never recorded one — a hidden zero would quietly halve
+     the average risk and flatter every recovery figure built on it. */
+  const g = t.filter(e => e.risk > 0);
+  const rTotal = g.reduce((s, e) => s + e.amt / e.risk, 0);
+  const avgRisk = g.length ? g.reduce((s, e) => s + e.risk, 0) / g.length : 0;
+
   return {
     equity, capital, profit: equity - capital,
     twr: twrPct, wiped,
@@ -990,7 +1140,7 @@ function totals() {
     avgLoss: losses.length ? grossLoss / losses.length : 0,
     pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
     expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
-    dd,
+    dd, rTotal, avgRisk, graded: g.length,
     ...streaks(t),
   };
 }
@@ -1044,12 +1194,32 @@ function renderSummary() {
   el.innerHTML = [
     ['Equity', money(t.equity), ''],
     ['Capital in', money(t.capital), ''],
-    ['Profit', money(t.profit, true), t.profit > 0 ? 'up' : t.profit < 0 ? 'down' : ''],
+    ['Profit', money(t.profit, true), t.profit > 0 ? 'up' : t.profit < 0 ? 'down' : '',
+      t.graded ? `${t.rTotal >= 0 ? '+' : '−'}${Math.abs(t.rTotal).toFixed(2)}R `
+        + `across ${t.graded} graded trade${t.graded === 1 ? '' : 's'}` : ''],
     ['Return', pct(t.twr), t.twr > 0 ? 'up' : t.twr < 0 ? 'down' : ''],
-  ].map(([l, v, cls]) => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span></div>`).join('');
+  ].map(([l, v, cls, sub]) => `<div class="stat ${cls}"><b>${v}</b><span>${l}</span>`
+    + `${sub ? `<em>${sub}</em>` : ''}</div>`).join('');
   document.getElementById('calMeta').textContent = `${t.n} trades`;
   document.getElementById('capMeta').textContent = money(t.capital) + ' in';
   document.getElementById('metMeta').textContent = `${t.n} trades`;
+  renderRecover(t);
+}
+
+/* The way back, in trades rather than dollars. Being down $652 tells you
+   nothing you can act on; being down 4.2R tells you it is five ordinary
+   trades, which is a week — not a catastrophe and not a reason to size
+   up. Only shown when you are actually down, and only when enough risk
+   has been recorded for the average to mean something. */
+function renderRecover(t) {
+  const el = document.getElementById('recover');
+  if (t.profit >= 0 || !t.graded) { el.hidden = true; return; }
+  const after = t.profit + 3 * t.avgRisk;
+  const need = -t.profit / t.avgRisk;
+  el.hidden = false;
+  el.innerHTML = `<span class="ic">${icon('pair', 13)}</span>`
+    + `One trade at 3R puts you <b>${money(after, true)}</b> — `
+    + `<b>${need.toFixed(1)}R</b> gets you back to flat, off <b>${money(t.avgRisk)}</b> risk.`;
 }
 
 /* ── calendar ── */
@@ -1692,15 +1862,41 @@ const clock = (n) => `${Math.floor(n / 3600)}:`
   + `${String(Math.floor(n / 60) % 60).padStart(2, '0')}:`
   + `${String(n % 60).padStart(2, '0')}`;
 
+/* "3h 55m" reads as an amount of room. "3:55:12" reads as a stopwatch,
+   which is not the decision being made. */
+const hm = (n) => n >= 3600 ? `${Math.floor(n / 3600)}h ${Math.floor(n / 60) % 60}m`
+                            : `${Math.max(1, Math.ceil(n / 60))}m`;
+
 const candleEl = document.getElementById('candle');
+const cpEl = document.getElementById('cp');
+const put = (id, v) => { document.getElementById(id).textContent = v; };
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
+document.getElementById('cpIcon').innerHTML = icon('clock', 11);
+
+/* Room left to work in, in three states. The point is not a countdown —
+   it is whether there is still time for a setup to form and be taken. */
+function room(left, off, next) {
+  if (off) return ['off', 'Not a candle you trade',
+    `Nothing here. The next reversal window is ${hhmm(next)}.`];
+  if (left > 5400) return ['ok', `${hm(left)} left — enough to position inside this candle`,
+    'Room for the setup to develop before the close.'];
+  if (left > 1800) return ['mid', `${hm(left)} left — past halfway`,
+    'Enough for a continuation, not for a reversal to build.'];
+  return ['late', `${hm(left)} left — too late to position`,
+    `The move has mostly happened. Wait for the ${hhmm(next)} open.`];
+}
 
 function tickCandle() {
   const c = candle();
   const off = c.open === NO_TRADE;
-  document.getElementById('candleOpen').textContent = hhmm(c.open);
-  document.getElementById('candleLeft').textContent = off ? 'no trade' : clock(c.left) + ' left';
-  document.getElementById('candleFill').style.width = (c.into / 14400 * 100).toFixed(2) + '%';
+  const next = (c.open + 4) % 24;
+  const p = PROFILE[c.open];
+  const pctDone = (c.into / 14400 * 100).toFixed(2) + '%';
+
+  put('candleOpen', hhmm(c.open));
+  put('candleName', p.name);
+  put('candleLeft', off ? 'no trade' : clock(c.left) + ' left');
+  document.getElementById('candleFill').style.width = pctDone;
   candleEl.classList.toggle('off', off);
   /* The last half hour is a different proposition from the first — the
      move has mostly happened and there is little room left to be wrong
@@ -1709,6 +1905,22 @@ function tickCandle() {
   candleEl.title = off
     ? `${hhmm(c.open)} candle — outside the profile, not traded`
     : `${hhmm(c.open)} candle, New York — ${clock(c.left)} until it closes`;
+
+  const { h, m } = nowNY();
+  const [state, head, sub] = room(c.left, off, next);
+  put('cpOpen', hhmm(c.open));
+  put('cpName', p.name);
+  put('cpNY', `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} NY`);
+  put('cpNext', off ? `then ${hhmm(next)}` : `${hm(c.left)} left · then ${hhmm(next)}`);
+  put('cpLine', p.line);
+  put('cpBandT', head);
+  put('cpBandS', sub);
+  put('cpMiss', p.miss);
+  document.getElementById('cpBandIcon').innerHTML = icon(off ? 'out' : 'clock', 13);
+  document.getElementById('cpBand').className = 'cp-band ' + state;
+  document.getElementById('cpFill').style.width = pctDone;
+  cpEl.classList.toggle('off', off);
+  cpEl.classList.toggle('late', state === 'late');
 }
 tickCandle();
 setInterval(tickCandle, 1000);
