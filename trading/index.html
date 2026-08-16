@@ -359,14 +359,13 @@
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
 #curve { display: block; width: 100%; height: 170px; overflow: visible; }
+/* Water, drawn downward from a zero pinned to the top. */
+.uw-fill { fill: color-mix(in srgb, var(--ink-3) 40%, transparent); }
+.uw-line { fill: none; stroke: var(--ink-2); stroke-width: 1.6; stroke-linejoin: round; }
+.uw-mark { stroke: var(--accent); stroke-width: 1; stroke-dasharray: 2 3; opacity: .75; }
+.uw-dot  { fill: var(--accent); }
 .axis-l { font-family: var(--mono); font-size: 9px; fill: var(--ink-3); }
 .gridline { stroke: var(--rule); stroke-width: 1; }
-.equity { fill: none; stroke: var(--ink); stroke-width: 1.6; }
-/* The flat line is what you put in. The gap to the equity line is what
-   the trading actually did — the single most honest thing on screen. */
-.basis { fill: none; stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 3 3; }
-.flow { stroke: var(--accent); stroke-width: 1; opacity: .5; }
-.flow-dot { fill: var(--accent); }
 .legend { display: flex; gap: 16px; margin-top: 8px; }
 .legend span {
   display: flex; align-items: center; gap: 6px;
@@ -375,8 +374,8 @@
 }
 .legend i { width: 14px; height: 0; border-top: 2px solid currentColor; }
 .legend i.dash { border-top-style: dashed; border-width: 1px; }
+.legend span:only-child { text-transform: none; letter-spacing: .02em; font-size: .62rem; }
 
-/* ── metrics ── */
 /* ── metrics ──
    Label first, then the figure, then one line of context. Five cards,
    not ten: everything that was its own tile — average win, average loss,
@@ -784,14 +783,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
             </div>
           </section>
           <section class="chartbox span">
-            <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
+            <div class="cal-head"><h2>Underwater</h2><span class="grow"></span>
               <span class="span-meta" id="ddMeta"></span></div>
             <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
             <p class="sr" id="curveAlt"></p>
             <div class="legend" aria-hidden="true">
-              <span style="color:var(--ink)"><i></i>Equity</span>
-              <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
-              <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
+              <span style="color:var(--ink-3)">Depth is how far below your best · width is how long it took back</span>
             </div>
           </section>
         </div>
@@ -1607,52 +1604,65 @@ function renderRadar(id, metaId, altId, rows, noun) {
     + (best ? `. Best ${noun} ${best.k}.` : '');
 }
 
+/* ── underwater ──
+   How far below your best the account is, and for how long. Everything
+   else on this page shows what you made; this shows what it cost to get
+   there — the depth of each hole and, in its width, how many trades it
+   took to climb out.
+
+   Walked on TRADES ONLY, exactly like the max-drawdown figure beside it.
+   Running equity would let a deposit lift the line back to zero and
+   declare a drawdown recovered when nothing had been recovered — you
+   would just have posted more money against the same hole. */
 function renderCurve() {
-  const all = events();
   const svg = document.getElementById('curve');
-  if (!all.length) { svg.innerHTML = ''; return; }
+  const t = trades();
   const W = 900, H = 170, PAD = 26;
 
-  let eq = 0, cap = 0;
-  const pts = all.map((e, i) => {
-    eq += signed(e);
-    if (e.k !== 'trade') cap += signed(e);
-    return { i, eq, cap, flow: e.k !== 'trade', date: e.date };
-  });
-  /* The domain is the data, not zero-to-max. Forcing $0 in flattened a
-     $10,000 account moving $700 into a straight line — the one thing the
-     chart exists to show. Deriving it from both series instead also
-     keeps a negative equity below the zero line rather than above it,
-     and keeps a ledger of pure losses on the canvas. */
-  const lo = Math.min(...pts.map(p => Math.min(p.eq, p.cap)));
-  const hi = Math.max(...pts.map(p => Math.max(p.eq, p.cap)));
-  const pad = (hi - lo) * 0.14 || Math.max(1, Math.abs(hi) * 0.1);
-  const bot = lo - pad, top = hi + pad;
-  const span = (top - bot) || 1;
-  const x = i => PAD + (i / Math.max(1, pts.length - 1)) * (W - PAD * 2);
-  const y = v => H - PAD - ((v - bot) / span) * (H - PAD * 2);
-  const zeroIn = bot <= 0 && 0 <= top;   // only draw a line that is on the canvas
+  if (t.length < 2) {
+    svg.setAttribute('viewBox', `0 0 ${W} 70`);
+    svg.innerHTML = `<text class="axis-l" x="${W / 2}" y="40" text-anchor="middle">`
+      + `${t.length ? 'One trade in — no drawdown to draw yet.' : 'No trades recorded yet.'}</text>`;
+    document.getElementById('curveAlt').textContent = 'Not enough trades to show a drawdown yet.';
+    return;
+  }
 
-  const line = key => pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join('');
-  const marks = pts.filter(p => p.flow).map(p =>
-    `<line class="flow" x1="${x(p.i).toFixed(1)}" y1="${PAD - 8}" x2="${x(p.i).toFixed(1)}" y2="${H - PAD}"/>
-     <circle class="flow-dot" cx="${x(p.i).toFixed(1)}" cy="${y(p.eq).toFixed(1)}" r="2.6"/>`).join('');
+  let run = 0, peak = 0;
+  const pts = t.map(e => { run += e.amt; peak = Math.max(peak, run); return run - peak; });
+  pts.unshift(0);                                   // start level with the high-water mark
+  const worst = Math.min(...pts);
+
+  const x = i => PAD + (i / (pts.length - 1)) * (W - PAD * 2);
+  /* Zero pinned to the top: at a new high you are ON the surface, and
+     every mark below it is water. A floating zero would lose that. */
+  const y = v => PAD + (v / (worst || -1)) * (H - PAD * 2);
+
+  const d = pts.map((v, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join('');
+  const wi = pts.indexOf(worst);
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML =
-    `<line class="gridline" x1="${PAD}" y1="${(H - PAD).toFixed(1)}" x2="${W - PAD}" y2="${(H - PAD).toFixed(1)}"/>
-     <line class="gridline" x1="${PAD}" y1="${PAD - 8}" x2="${W - PAD}" y2="${PAD - 8}"/>
-     ${zeroIn ? `<line class="gridline" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>` : ''}
-     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${round(top)}</text>
-     <text class="axis-l" x="${PAD}" y="${H - PAD + 13}">${round(bot)}</text>
-     ${marks}
-     <path class="basis" d="${line('cap')}"/>
-     <path class="equity" d="${line('eq')}"/>`;
+    `<path class="uw-fill" d="M${x(0).toFixed(1)},${PAD}${d.replace(/^M/, 'L')}L${x(pts.length - 1).toFixed(1)},${PAD}Z"/>
+     <line class="gridline" x1="${PAD}" y1="${PAD}" x2="${W - PAD}" y2="${PAD}"/>
+     <path class="uw-line" d="${d}"/>
+     ${worst < 0 ? `<line class="uw-mark" x1="${x(wi).toFixed(1)}" y1="${PAD}"
+        x2="${x(wi).toFixed(1)}" y2="${y(worst).toFixed(1)}"/>
+       <circle class="uw-dot" cx="${x(wi).toFixed(1)}" cy="${y(worst).toFixed(1)}" r="3"/>` : ''}
+     <text class="axis-l" x="${PAD}" y="${PAD - 8}">at a new high</text>
+     <text class="axis-l" x="${W - PAD}" y="${PAD - 8}" text-anchor="end">now ${round(pts[pts.length - 1])}</text>
+     ${worst < 0 ? `<text class="axis-l" x="${Math.min(W - PAD, x(wi) + 8).toFixed(1)}"
+        y="${(y(worst) - 6).toFixed(1)}">${round(worst)}</text>` : ''}`;
 
-  const t = totals();
-  document.getElementById('curveAlt').textContent =
-    `Equity ended at ${money(t.equity)} against ${money(t.capital)} of capital put in, `
-    + `a realised profit of ${money(t.profit)}. Vertical marks are deposits and withdrawals.`;
+  /* How long the worst hole took to fill — the number the shape is
+     really showing, said out loud for anyone not reading the picture. */
+  let back = null;
+  for (let i = wi + 1; i < pts.length; i++) if (pts[i] === 0) { back = i - wi; break; }
+  document.getElementById('curveAlt').textContent = worst < 0
+    ? `Drawdown from the running high, trades only. Worst was ${round(worst)} after `
+      + `${wi} trade${wi === 1 ? '' : 's'}, `
+      + (back === null ? 'not yet recovered.' : `recovered ${back} trade${back === 1 ? '' : 's'} later.`)
+      + ` Currently ${pts[pts.length - 1] === 0 ? 'at a new high.' : round(pts[pts.length - 1]) + ' below it.'}`
+    : 'No drawdown yet — every trade has left the account at a new high.';
 }
 
 /* ── capital ── */
