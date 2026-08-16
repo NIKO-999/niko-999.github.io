@@ -328,7 +328,31 @@
 .tcard:hover { background: var(--glass-in);
   border-color: color-mix(in srgb, var(--edge) 40%, transparent); }
 .tcard:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+/* Compact: everything on one flex row. Solo: a column with room to
+   breathe. Both share the same markup, so a day gaining a second trade
+   only changes a class. */
 .tcard-h { display: contents; }
+.tval { display: contents; }
+.trr, .tmeta { display: none; }
+.tcard.solo {
+  flex-direction: column; align-items: stretch; justify-content: center;
+  gap: 6px; padding: 9px 11px;
+}
+.tcard.solo .tcard-h { display: flex; align-items: center; gap: 7px; }
+.tcard.solo .tval { display: flex; align-items: baseline; gap: 9px; }
+.tcard.solo .tsym { font-size: .72rem; }
+.tcard.solo .tamt { flex: 1; font-size: .92rem; letter-spacing: -.03em; }
+.tcard.solo .trr {
+  display: block; flex: none;
+  font-family: var(--mono); font-size: .68rem; font-weight: 500;
+  letter-spacing: -.02em; color: var(--accent);
+}
+.tcard.solo .tmeta {
+  display: block;
+  font-family: var(--mono); font-size: .58rem; letter-spacing: .04em;
+  color: var(--ink-3);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
 .tsym {
   flex: 1; min-width: 0;
   font-family: var(--mono); font-size: .64rem; font-weight: 500; letter-spacing: 0;
@@ -1352,6 +1376,7 @@ function renderCalendar() {
     const hit = days.get(k);
     if (hit) monthPnl += hit.pnl;
 
+    const solo = hit && hit.items.length === 1;
     const cards = hit ? hit.items.map(e => {
       /* A zero-amount trade you actually took is neither a win nor a
          loss, and calling it a win here while the metrics count it as
@@ -1360,15 +1385,27 @@ function renderCalendar() {
       const word = { missed: 'Missed', win: 'Win', loss: 'Loss', flat: 'Flat' }[out];
       /* The card carries its own label rather than being swallowed by one
          on the cell — everything drawn here should be readable aloud. */
-      return `<button class="tcard ${out === 'missed' ? 'missed' : ''}" type="button"
+      /* A day with one trade on it has room for the rest of the story, so
+         it tells it. The moment a second trade arrives that room is
+         gone and every card drops back to a single line — the layout
+         follows the space rather than the other way round. */
+      const r = e.risk > 0 && e.out !== 'missed' ? e.amt / e.risk : null;
+      const rr = r === null ? '' : `${r >= 0 ? '+' : '−'}${Math.abs(r).toFixed(2)}R`;
+      const meta = [e.sess, e.setup, e.mode].filter(Boolean).join(' · ');
+      const amt = out === 'missed' ? 'not taken' : money(e.amt, true);
+      return `<button class="tcard ${solo ? 'solo' : ''} ${out === 'missed' ? 'missed' : ''}" type="button"
           data-id="${esc(String(e.id))}" data-date="${k}"
           aria-label="${esc(word)}${e.sym ? ', ' + esc(e.sym) : ''}${e.setup ? ', ' + esc(e.setup) : ''}, `
-        + `${out === 'missed' ? 'not taken' : money(e.amt, true)}. Open.">
+        + `${amt}${rr ? ', ' + rr : ''}. Open.">
         <span class="tcard-h" aria-hidden="true">
           <span class="tsym">${esc(e.sym || 'Trade')}</span>
           <span class="tchip ${out}">${word}</span>
         </span>
-        <span class="tamt" aria-hidden="true">${out === 'missed' ? 'not taken' : money(e.amt, true)}</span>
+        <span class="tval" aria-hidden="true">
+          <span class="tamt">${amt}</span>
+          ${rr ? `<span class="trr">${rr}</span>` : ''}
+        </span>
+        ${solo && meta ? `<span class="tmeta" aria-hidden="true">${esc(meta)}</span>` : ''}
       </button>`;
     }).join('') : '';
 
