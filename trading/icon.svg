@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- The rail mark, at tab size. A favicon cannot inherit currentColor
+       and cannot rely on a media query surviving every browser's icon
+       cache, so the stroke is a mid-tone chosen to hold against a light
+       tab strip and a dark one alike. -->
+  <rect width="24" height="24" rx="5.5" fill="#1b2b33"/>
+  <g fill="none" stroke="#9fd8e6" stroke-width="2.1"
+     stroke-linecap="round" stroke-linejoin="round">
+    <path d="M4.5 17.5l4.6-5.5 3.7 2.7 5.5-7.3"/>
+    <path d="M14.9 7.4h3.7v3.7"/>
+  </g>
+</svg>

@@ -4,6 +4,9 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta name="color-scheme" content="dark light" />
+<!-- Without this the browser asks for /favicon.ico on every load and
+     takes a 404 for it. The mark is the same glyph as the rail. -->
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
 <title>Account Balance — trading</title>
 
 <script>
@@ -247,6 +250,31 @@
   background: color-mix(in srgb, var(--ink-3) 18%, transparent); }
 .cp-bar i { display: block; height: 100%; width: 0; background: var(--accent); }
 .cp.off .cp-bar i, .cp.late .cp-bar i { background: color-mix(in srgb, var(--ink-3) 55%, transparent); }
+
+.bk {
+  width: min(560px, calc(100vw - 40px));
+  padding: 0; border: 1px solid var(--glass-line); border-radius: 14px;
+  background: var(--ground); color: var(--ink);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .5);
+}
+.bk::backdrop { background: rgba(0, 0, 0, .48); backdrop-filter: blur(2px); }
+.bk-h { display: flex; align-items: center; gap: 10px; padding: 15px 16px 11px; }
+.bk-h h2 { margin: 0; font-size: 1rem; font-weight: 500; letter-spacing: -.01em; }
+.bk-h .grow { flex: 1; }
+.bk-x { display: grid; place-items: center; width: 28px; height: 28px;
+  border: 0; border-radius: 8px; background: none; color: var(--ink-3); cursor: pointer; }
+.bk-x:hover { background: var(--glass-in); color: var(--ink); }
+.bk-b { display: flex; flex-direction: column; gap: 13px;
+  padding: 15px 16px 16px; border-top: 1px solid var(--rule); }
+.bk-note { margin: 0; font-size: .78rem; line-height: 1.55; color: var(--ink-3); }
+.bk-note b { font-weight: 500; color: var(--ink-2); }
+.bk-acts { display: flex; gap: 9px; flex-wrap: wrap; }
+.bk-foot { display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px 14px; border-top: 1px solid var(--rule); }
+.bk-foot .grow { flex: 1; }
+/* The topbar already carries the clock; below this the word goes and the
+   icon speaks for itself rather than the search box being crushed. */
+@media (max-width: 1180px) { .bk-word { display: none; } }
 
 /* ── the way back ──
    Shown only when you are down. A loss in dollars is a number; a loss in
@@ -843,6 +871,13 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
       </div>
 
+      <button class="btn btn-ghost" type="button" id="backupBtn" aria-label="Backup">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M12 3v11M12 14l-4-4M12 14l4-4M4 16v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" /></svg>
+        <span class="bk-word">Backup</span>
+      </button>
+
       <button class="btn btn-primary" type="button" id="newTrade">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"
              stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
@@ -985,6 +1020,42 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
     </main>
   </div>
+
+  <dialog class="bk" id="bk" aria-labelledby="bkTitle">
+    <div class="bk-h">
+      <h2 id="bkTitle">Backup</h2>
+      <span class="grow"></span>
+      <button class="bk-x" type="button" id="bkClose" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" width="15" height="15" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
+    </div>
+    <div class="bk-b">
+      <p class="bk-note">
+        Every trade and every movement of capital lives in this browser on this
+        machine, and is never uploaded anywhere. That is deliberate — but it
+        also means clearing your browsing data deletes your whole record, and
+        another computer will not have it. A copy is a plain JSON file you can
+        keep anywhere and read yourself.
+      </p>
+      <p class="bk-note" id="bkCount"></p>
+      <div class="bk-acts">
+        <button class="btn btn-primary" type="button" id="bkSave">Save a copy</button>
+        <button class="btn btn-ghost" type="button" id="bkLoad">Restore from a copy</button>
+      </div>
+      <p class="bk-note">
+        <b>Chart screenshots are not in the copy.</b> They are held separately
+        and run to megabytes each; a backup you cannot email is one you will
+        not keep. The trades, the risk on each one and your capital history are
+        what cannot be reconstructed.
+      </p>
+    </div>
+    <div class="bk-foot">
+      <span class="grow"></span>
+      <button class="btn btn-ghost" type="button" id="bkDone">Close</button>
+    </div>
+  </dialog>
 
   <p class="sr" role="status" id="say"></p>
 </div>
@@ -2371,6 +2442,69 @@ function tickCandle() {
 }
 tickCandle();
 setInterval(tickCandle, 1000);
+
+/* ═══ backup ═══
+   readStore() tells you to "export it before recording anything new"
+   when it finds a damaged file. Until now nothing in the app could. */
+const bk = document.getElementById('bk');
+document.getElementById('backupBtn').addEventListener('click', () => {
+  const t = state.events.filter(e => e.k === 'trade').length;
+  const f = state.events.length - t;
+  document.getElementById('bkCount').textContent = isDemo()
+    ? 'You are still looking at the sample ledger — there is nothing of your own to save yet.'
+    : `${t} ${t === 1 ? 'trade' : 'trades'} and ${f} capital ${f === 1 ? 'movement' : 'movements'} held here.`;
+  bk.showModal();
+});
+document.getElementById('bkClose').addEventListener('click', () => bk.close());
+document.getElementById('bkDone') .addEventListener('click', () => bk.close());
+
+document.getElementById('bkSave').addEventListener('click', () => {
+  const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
+    saved: new Date().toISOString(), events: state.events }, null, 2)],
+    { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  const d = new Date();
+  a.href = url;
+  a.download = `trading-ledger-${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+             + `-${String(d.getDate()).padStart(2, '0')}.json`;
+  a.click();
+  /* Revoked next frame, not immediately — Safari has not begun reading
+     the blob by the time click() returns. */
+  requestAnimationFrame(() => URL.revokeObjectURL(url));
+  say.textContent = 'Copy saved.';
+});
+
+const bkFile = document.createElement('input');
+bkFile.type = 'file';
+bkFile.accept = 'application/json,.json';
+bkFile.className = 'sr';
+document.body.appendChild(bkFile);
+document.getElementById('bkLoad').addEventListener('click', () => { bkFile.value = ''; bkFile.click(); });
+bkFile.addEventListener('change', async () => {
+  const f = bkFile.files[0];
+  if (!f) return;
+  let parsed;
+  try { parsed = JSON.parse(await f.text()); } catch (e) { parsed = null; }
+  if (!parsed || !Array.isArray(parsed.events)) {
+    say.textContent = 'That file is not a ledger backup.';
+    alert('That file is not a ledger backup — there are no events in it. Nothing was changed.');
+    return;
+  }
+  /* Restoring REPLACES. Merging two ledgers on id would silently pick a
+     winner per trade, and a P/L that is quietly wrong is worse than one
+     that is obviously missing. */
+  const n = state.events.length;
+  if (!isDemo() && n && !confirm(`Replace the ${n} records in this browser with the `
+      + `${parsed.events.length} in that file? This cannot be undone — save a copy first `
+      + `if you are unsure.`)) return;
+  state = { events: parsed.events };
+  try { writeStore(state); }
+  catch (e) { say.textContent = 'Could not save the restored ledger.'; return; }
+  renderAll();
+  bk.close();
+  say.textContent = `Restored ${parsed.events.length} records.`;
+});
 
 /* ── sections ── */
 const SECTIONS = {

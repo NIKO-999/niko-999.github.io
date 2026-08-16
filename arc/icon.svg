@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <!-- The horizon, not the rail's crossing-arrows mark. That glyph is
+       four strokes that intersect, and at the 16px a browser tab
+       actually paints it collapses into a blob. Two strokes survive the
+       size, and the horizon is the mark chosen to stand for Arc from
+       the trading side anyway. -->
+  <rect width="24" height="24" rx="5.5" fill="#20262b"/>
+  <g fill="none" stroke="#e2d8c9" stroke-width="2.1" stroke-linecap="round">
+    <path d="M3.6 16.8h16.8"/>
+    <path d="M6.4 16.8a5.6 5.6 0 0 1 11.2 0"/>
+  </g>
+</svg>
