@@ -900,6 +900,28 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     color-mix(in srgb, var(--accent) 26%, transparent),
     color-mix(in srgb, var(--accent) 6%, transparent) 62%, transparent); }
 .rs-art:disabled { cursor: default; opacity: .72; }
+/* A picture replaces the drawing rather than sitting behind it. */
+.rs-art.has { background: var(--glass-in) center/cover no-repeat; }
+.rs-art.has > svg { display: none; }
+/* The continuation profile, drawn rather than screenshotted: it tracks
+   the theme, stays sharp at any scale, and costs no bytes. */
+.rs-diag { width: 100%; height: 100%; }
+.rs-diag .bd { fill: var(--ink-2); stroke: var(--ink-2); stroke-width: 1.4; }
+.rs-diag .hl { fill: none; stroke: var(--ink-2); stroke-width: 1.4; }
+.rs-diag .wk { stroke: var(--ink-2); stroke-width: 1.4; stroke-linecap: round; }
+.rs-diag .gp { stroke: var(--accent); stroke-width: 1.3; }
+.rs-diag .mk { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: var(--accent); stroke-width: 1.2; }
+
+/* Same idea as the trade sheet's chart: click, paste or drop. */
+.rs-thumb {
+  display: grid; place-items: center; height: 78px; padding: 0;
+  border: 1px dashed var(--glass-line); border-radius: 9px;
+  background: var(--glass-in) center/cover no-repeat;
+  color: var(--ink-3); font: inherit; font-size: .7rem; cursor: pointer;
+}
+.rs-thumb.has { border-style: solid; }
+.rs-thumb.has span { padding: 2px 7px; border-radius: 5px; background: rgba(0,0,0,.6); color: #fff; }
+.rs-thumb.dropping { border-color: var(--accent); }
 .rs-art .len { position: absolute; right: 6px; bottom: 6px; padding: 1px 5px;
   border-radius: 4px; background: var(--glass-in-2); color: var(--ink-3);
   font-size: .58rem; letter-spacing: .03em; }
@@ -1448,6 +1470,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <div class="field wide">
           <label for="rsTags">Tags</label>
           <input id="rsTags" type="text" placeholder="reversal, SMT, gaps" />
+        </div>
+        <div class="field wide">
+          <label for="rsThumb">Thumbnail</label>
+          <button class="rs-thumb" type="button" id="rsThumb">
+            <span>Click, paste or drop an image</span>
+          </button>
         </div>
       </div>
       <div class="sheet-f">
@@ -3140,27 +3168,21 @@ const RKEY = 'ledger.res.v1';
 const SEED = [{
   id: 'seed-4h-align',
   kind: 'video',
+  art: 'c3',
   title: '1H / 30M alignment to a 4H profile',
-  url: '',
+  url: 'https://youtu.be/nMAL3VXTr8M',
   len: '26:54',
-  sum: 'Where the rules above came from. Worth reopening when an entry looked '
-     + 'right and lost — it is nearly always the second SMT stage or the time '
-     + 'left in the candle that was missing.',
+  sum: 'Where the rules above came from — they are the whole of it, so this is '
+     + 'for the chart work rather than the theory. Worth reopening when an entry '
+     + 'looked right and lost.',
+  /* Only the worked examples. Marking every point he makes would be the
+     rules above written a second time in a worse order — what the video
+     has that the text cannot is somebody doing it on a live chart. */
   marks: [
-    [52,   "C3's wick in the upper portion of C2's wick, with a gap in it"],
-    [152,  'C2 needs SMT and a small wick before it is takeable'],
-    [184,  'Two-stage SMT — first stage on the 1H or above'],
-    [301,  'Continuation in C2 only with more than an hour left'],
-    [427,  'The 09:30 driver exception to the time-left rule'],
-    [447,  'A new 1H and 4H open, with immediate expansion off it'],
-    [559,  'No gaps in the wick — then the only trade is inside C2'],
-    [681,  'The 90-minute cracking correlation, the one non-regular swing'],
-    [752,  'First worked example, start to finish'],
-    [986,  'C3 opens and immediately expands off the EQ'],
-    [1125, 'Two-stage SMT again — the 30M PSP as the strength switch'],
-    [1256, 'A driver example'],
-    [1484, 'Final continuation example'],
-    [1577, 'Do not use the 15-minute'],
+    [752,  'First one, start to finish'],
+    [986,  'C3 opens and expands off the EQ'],
+    [1256, 'A driver'],
+    [1484, 'A continuation'],
   ].map(([t, s]) => ({ t, s })),
   tags: ['reversal', 'continuation', 'SMT', 'gaps'],
   added: null,
@@ -3234,6 +3256,25 @@ const ago = (v) => {
   return n <= 0 ? 'opened today' : n === 1 ? 'opened yesterday' : `opened ${n} days ago`;
 };
 
+/* One built-in drawing, named on the record. The continuation profile is
+   the shape the whole approach turns on — C1 down, C2 turning with a long
+   wick, C3 carrying it, and the gap left in C2's wick that you enter on. */
+const DIAG = {
+  c3: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="gp" d="M26 60H112" />
+    <line class="wk" x1="38" y1="10" x2="38" y2="54" />
+    <rect class="bd" x="31" y="18" width="15" height="30" rx="1.5" />
+    <line class="wk" x1="66" y1="36" x2="66" y2="74" />
+    <rect class="bd" x="59" y="44" width="15" height="13" rx="1.5" />
+    <line class="wk" x1="94" y1="8"  x2="94" y2="15" />
+    <line class="wk" x1="94" y1="57" x2="94" y2="64" />
+    <rect class="hl" x="86" y="15" width="16" height="42" rx="1.5" />
+    <circle class="mk" cx="94" cy="60" r="5" />
+  </svg>`,
+};
+
+let resUrls = [];
+
 function renderRes() {
   /* The checklists, printed from the constant the sheet ticks. */
   document.getElementById('apLists').innerHTML =
@@ -3246,6 +3287,12 @@ function renderRes() {
   const marks = all.reduce((n, r) => n + (r.marks || []).length, 0);
   document.getElementById('resMeta').textContent =
     `${all.length} saved · ${marks} ${marks === 1 ? 'mark' : 'marks'}`;
+
+  /* Minted per render and released on the next one, same as the log's
+     thumbnails — an app left open all week would otherwise hold every
+     picture it had ever drawn. */
+  resUrls.forEach(URL.revokeObjectURL);
+  resUrls = [];
 
   const wrap = document.getElementById('resList');
   if (!all.length) {
@@ -3260,11 +3307,11 @@ function renderRes() {
     return `<article class="rs">
       <button class="rs-art" type="button" data-open="${esc(r.id)}"${linked ? '' : ' disabled'}
               aria-label="${linked ? 'Open ' + esc(r.title) : esc(r.title) + ' — no link saved'}">
-        ${r.kind === 'video'
+        ${DIAG[r.art] || (r.kind === 'video'
           ? `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>`
           : `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
                stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-               <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5ZM8 8h7M8 12h7M8 16h4"/></svg>`}
+               <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5ZM8 8h7M8 12h7M8 16h4"/></svg>`)}
         ${r.len ? `<span class="len">${esc(r.len)}</span>` : ''}
       </button>
       <div class="rs-main">
@@ -3286,6 +3333,21 @@ function renderRes() {
       </div>
     </article>`;
   }).join('');
+
+  /* Pictures arrive after the row is on screen. They are held in
+     IndexedDB beside the chart screenshots, not in localStorage — one
+     image would take the whole ledger past the quota with it. */
+  for (const r of all) {
+    SHOTS.get('res:' + r.id).then(blob => {
+      if (!blob) return;
+      const el = wrap.querySelector(`.rs-art[data-open="${CSS.escape(r.id)}"]`);
+      if (!el) return;
+      const u = URL.createObjectURL(blob);
+      resUrls.push(u);
+      el.classList.add('has');
+      el.style.backgroundImage = `url("${u}")`;
+    }).catch(() => {});
+  }
 }
 
 /* Opening stamps the day, which is the whole basis of "opened 40 days
@@ -3324,6 +3386,9 @@ function openRes(id) {
   rsF('rsMarks').value = r
     ? (r.marks || []).map(m => `${stamp(m.t)}  ${m.s}`).join('\n') : '';
   rsF('rsDelete').hidden = !r;
+  setRsThumb(null);
+  rsThumbDirty = false;
+  if (r) SHOTS.get('res:' + r.id).then(b => { if (b) setRsThumb(b); }).catch(() => {});
   rs.showModal();
   rsF('rsName').focus();
 }
@@ -3340,12 +3405,64 @@ function readMarks(text) {
   }).filter(Boolean).sort((a, b) => a.t - b.t);
 }
 
+/* Thumbnails are optional and local. Nothing is fetched from the video's
+   host: the one outbound request this app would ever make is not worth
+   telling somebody else which videos you study and when you opened them. */
+const rsThumb = document.getElementById('rsThumb');
+let rsBlob = null, rsBlobUrl = null, rsThumbDirty = false;
+
+function setRsThumb(blob) {
+  if (rsBlobUrl) { URL.revokeObjectURL(rsBlobUrl); rsBlobUrl = null; }
+  rsBlob = blob || null;
+  const cap = rsThumb.querySelector('span');
+  if (!rsBlob) {
+    rsThumb.classList.remove('has');
+    rsThumb.style.backgroundImage = '';
+    cap.textContent = 'Click, paste or drop an image';
+    return;
+  }
+  rsBlobUrl = URL.createObjectURL(rsBlob);
+  rsThumb.classList.add('has');
+  rsThumb.style.backgroundImage = `url("${rsBlobUrl}")`;
+  cap.textContent = 'Replace · shift-click to remove';
+}
+async function takeRsThumb(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  setRsThumb(await compress(file));
+  rsThumbDirty = true;
+}
+const rsPick = Object.assign(document.createElement('input'),
+  { type: 'file', accept: 'image/*', hidden: true });
+document.body.appendChild(rsPick);
+rsPick.addEventListener('change', () => { takeRsThumb(rsPick.files[0]); rsPick.value = ''; });
+rsThumb.addEventListener('click', (ev) => {
+  if (ev.shiftKey && rsBlob) { setRsThumb(null); rsThumbDirty = true; return; }
+  rsPick.click();
+});
+['dragenter', 'dragover'].forEach(t => rsThumb.addEventListener(t, (ev) => {
+  ev.preventDefault(); rsThumb.classList.add('dropping');
+}));
+['dragleave', 'drop'].forEach(t => rsThumb.addEventListener(t, () =>
+  rsThumb.classList.remove('dropping')));
+rsThumb.addEventListener('drop', (ev) => {
+  ev.preventDefault();
+  takeRsThumb(ev.dataTransfer.files && ev.dataTransfer.files[0]);
+});
+rs.addEventListener('paste', (ev) => {
+  const it = [...(ev.clipboardData ? ev.clipboardData.items : [])]
+    .find(i => i.kind === 'file' && /^image\//.test(i.type));
+  if (!it) return;
+  ev.preventDefault();
+  takeRsThumb(it.getAsFile());
+});
+
 document.getElementById('resAdd').addEventListener('click', () => openRes(null));
 rsF('rsX').addEventListener('click', () => rs.close());
 rsF('rsCancel').addEventListener('click', () => rs.close());
 rsF('rsDelete').addEventListener('click', () => {
   const r = resAll().find(x => x.id === rsEditing);
   if (!r || !confirm(`Remove “${r.title}”?`)) return;
+  SHOTS.del('res:' + rsEditing).catch(() => {});
   resCommit(list => {
     const i = list.findIndex(x => x.id === rsEditing);
     if (i >= 0) list.splice(i, 1);
@@ -3366,11 +3483,18 @@ document.getElementById('rsForm').addEventListener('submit', (ev) => {
     marks: readMarks(rsF('rsMarks').value),
     tags: rsF('rsTags').value.split(',').map(x => x.trim()).filter(Boolean),
   };
+  /* Minted here rather than when the sheet opened, because the picture
+     is keyed on it and a cancelled sheet should leave nothing behind. */
+  const id = rsEditing || uid();
   resCommit(list => {
-    const cur = list.find(x => x.id === rsEditing);
+    const cur = list.find(x => x.id === id);
     if (cur) Object.assign(cur, patch);
-    else list.unshift(Object.assign({ id: uid(), added: iso(new Date()), opened: null }, patch));
+    else list.unshift(Object.assign({ id, added: iso(new Date()), opened: null }, patch));
   }, rsEditing ? 'saved' : 'added');
+  if (rsThumbDirty) {
+    (rsBlob ? SHOTS.put('res:' + id, rsBlob) : SHOTS.del('res:' + id))
+      .then(renderRes).catch(() => {});
+  }
   rs.close();
 });
 
