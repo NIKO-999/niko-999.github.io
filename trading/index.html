@@ -832,6 +832,110 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 
 /* ── settings + ledger ── */
 .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
+/* ── resources ──
+   Two things share this page: the approach, which is fixed and read
+   often, and the links, which accumulate. The approach sits on top
+   because it is what you check before a trade; the links are what you
+   go back to on a quiet afternoon. */
+.ap { margin: 12px 0 6px; }
+.ap-lede { margin: 8px 0 16px; max-width: 74ch;
+  font-size: .84rem; line-height: 1.65; color: var(--ink-2); }
+.ap-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr));
+  margin-bottom: 20px; }
+.ap-s { padding: 13px 15px 14px; border-radius: var(--r-panel);
+  background: var(--glass-in); border: 1px solid var(--glass-line); }
+.ap-s h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 5px;
+  font-size: .86rem; font-weight: 500; letter-spacing: -.01em; color: var(--ink); }
+.ap-s h3 i { font-style: normal; font-size: .62rem; letter-spacing: .06em;
+  color: var(--accent); }
+.ap-s p { margin: 0 0 8px; font-size: .78rem; line-height: 1.55; color: var(--ink-3); }
+.ap-s ul { margin: 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+.ap-s li { display: flex; gap: 7px; font-size: .79rem; line-height: 1.5; color: var(--ink-2); }
+.ap-s li::before { content: ''; flex: none; width: 4px; height: 4px; margin-top: 8px;
+  border-radius: 50%; background: color-mix(in srgb, var(--accent) 70%, transparent); }
+
+/* The rules are numbered because you refer to them by number when a
+   trade goes wrong — "I took it on one stage" is rule 1. */
+.ap-rules { margin: 0 0 20px; padding: 0; list-style: none; counter-reset: r; }
+/* Column gap only. A single `gap` also opens eleven pixels between the
+   rule and its own explanation, which reads as two separate lines rather
+   than one rule. */
+.ap-rules li { display: grid; grid-template-columns: 26px minmax(0, 1fr);
+  column-gap: 11px; row-gap: 1px;
+  padding: 11px 0; border-bottom: 1px solid var(--rule); counter-increment: r; }
+.ap-rules li:last-child { border-bottom: 0; }
+.ap-rules li::before { content: counter(r); font-size: .72rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; padding-top: 1px; }
+/* Both explicitly in the second column. The ::before counter is a grid
+   item too, so without this the rule text is auto-placed into the 26px
+   number column and wraps one word at a time. */
+.ap-rules b { grid-column: 2; display: block; font-size: .82rem; font-weight: 500;
+  color: var(--ink); letter-spacing: -.01em; margin-bottom: 2px; }
+.ap-rules span { grid-column: 2; font-size: .79rem; line-height: 1.6; color: var(--ink-2); }
+
+/* The checklists are printed from the same constant the trade sheet
+   ticks, so the page and the form cannot drift apart. */
+.ap-lists { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.ap-list { padding: 13px 15px 14px; border-radius: var(--r-panel);
+  background: var(--glass-in); border: 1px solid var(--glass-line); }
+.ap-list h3 { margin: 0 0 8px; font-size: .82rem; font-weight: 500;
+  letter-spacing: -.01em; color: var(--ink); }
+.ap-list ol { margin: 0; padding: 0; list-style: none; counter-reset: c; display: grid; gap: 5px; }
+.ap-list li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px;
+  counter-increment: c; font-size: .79rem; line-height: 1.5; color: var(--ink-2); }
+.ap-list li::before { content: counter(c); font-size: .66rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; padding-top: 2px; }
+.ap-foot { margin: 10px 0 0; font-size: .72rem; line-height: 1.6; color: var(--ink-3); }
+
+/* A saved link. No remote thumbnail: every other byte in this app comes
+   off your own disk, and one image would tell Google which videos you
+   study and when you opened them. The tile is drawn here instead. */
+.rs { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 16px;
+  padding: 16px 0 17px; border-bottom: 1px solid var(--rule); }
+.rs:last-child { border-bottom: 0; }
+.rs-art { position: relative; display: grid; place-items: center; font: inherit;
+  width: 150px; height: 85px; border-radius: 9px; padding: 0; cursor: pointer;
+  border: 1px solid var(--glass-line); color: var(--ink-2);
+  background: linear-gradient(140deg,
+    color-mix(in srgb, var(--accent) 26%, transparent),
+    color-mix(in srgb, var(--accent) 6%, transparent) 62%, transparent); }
+.rs-art:disabled { cursor: default; opacity: .72; }
+.rs-art .len { position: absolute; right: 6px; bottom: 6px; padding: 1px 5px;
+  border-radius: 4px; background: var(--glass-in-2); color: var(--ink-3);
+  font-size: .58rem; letter-spacing: .03em; }
+.rs-main { min-width: 0; }
+.rs-top { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 5px; }
+.rs-title { font-size: .92rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em;
+  border: 0; background: none; padding: 0; font-family: inherit; cursor: pointer; text-align: left; }
+.rs-title:disabled { cursor: default; }
+.rs-src { font-size: .68rem; color: var(--ink-3); }
+.rs-open { margin-left: auto; font-size: .66rem; color: var(--ink-3); }
+.rs-sum { margin: 0 0 10px; font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 78ch; }
+.rs-marks { display: flex; flex-direction: column; gap: 1px; margin-bottom: 10px; }
+/* No left padding, so the times line up with the summary above and the
+   tags below. Hanging the row into the gutter instead would have made
+   every box from here to the pane seven pixels wider than its content. */
+.rs-mark { display: flex; align-items: baseline; gap: 11px; width: 100%;
+  padding: 5px 8px 5px 0;
+  border: 0; border-radius: 6px; background: none; color: inherit; font: inherit;
+  font-size: .78rem; text-align: left; cursor: pointer; }
+.rs-mark:disabled { cursor: default; }
+.rs-mark b { flex: none; width: 46px; font-weight: 500; color: var(--accent);
+  letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.rs-mark span { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+.rs-tag { padding: 2px 8px; border-radius: 5px; background: var(--glass-in-2);
+  font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
+.rs-edit { margin-left: auto; border: 0; background: none; color: var(--ink-3);
+  font: inherit; font-size: .68rem; cursor: pointer; padding: 2px 4px; border-radius: 5px; }
+.rs-edit:hover { background: var(--glass-in); color: var(--ink-2); }
+.rs-none { margin: 22px 0; font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
+.rs-hint { margin: 0 0 10px; font-size: .72rem; color: var(--ink-3); }
+
+@media (max-width: 1080px) {
+  .ap-grid, .ap-lists { grid-template-columns: minmax(0, 1fr); }
+}
+
 .field { display: flex; flex-direction: column; gap: 5px; }
 .field label {
   font-family: var(--mono); font-size: .58rem;
@@ -916,6 +1020,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 3.6c5 0 9 1.5 9 3.4s-4 3.4-9 3.4-9-1.5-9-3.4 4-3.4 9-3.4ZM3 7v5c0 1.9 4 3.4 9 3.4s9-1.5 9-3.4V7M3 12v5c0 1.9 4 3.4 9 3.4s9-1.5 9-3.4v-5" /></svg>
+    </button>
+    <button type="button" data-view="resources" aria-label="Resources">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5ZM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12M15 9.5l3.4 2.2-3.4 2.2z" />
+      </svg>
     </button>
     <span class="cross" aria-hidden="true"></span>
     <a href="../arc/" aria-label="Arc — projects" title="Arc — projects">
@@ -1149,6 +1259,118 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <ul class="ledger" id="ledger"></ul>
       </div>
     </main>
+
+    <!-- ── resources ──
+         The approach, written down once, and the links it came from.
+         The rules are here rather than in a note somewhere because the
+         question they answer — am I allowed to take this — is asked in
+         front of a chart, not in a text editor. -->
+    <main class="main" id="resourcesSection" hidden>
+      <div class="head">
+        <h1>Resources</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="resMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+
+        <section class="ap" aria-labelledby="apH">
+          <div class="cal-head"><h2 id="apH">The approach</h2><span class="grow"></span>
+            <span class="span-meta">1H / 30M alignment to a 4H profile</span></div>
+
+          <p class="ap-lede">
+            The 4H profile says which candle should print the wick and which should
+            expand. This is the rule for entering inside it: the alignment is taken
+            on the 1H and the 30M, one or two timeframes down from the profile, and
+            never lower. Nothing below is a new setup — it is the condition under
+            which the setups you already have are allowed to be taken.
+          </p>
+
+          <div class="ap-grid">
+            <article class="ap-s">
+              <h3><i>01</i>Reversal in C2</h3>
+              <p>C1 ran the key level and C2 turns it. The wick of the day, if the
+                 profile says the wick belongs here.</p>
+              <ul>
+                <li>The key level is reached — the profile supports a turn here</li>
+                <li>A small wick on C2. A large one has already spent the move</li>
+                <li>Two-stage SMT, first stage on the 1H or above</li>
+                <li>Over an hour left in the candle</li>
+              </ul>
+            </article>
+
+            <article class="ap-s">
+              <h3><i>02</i>Continuation in C3</h3>
+              <p>C2 reversed off C1 and closed back inside the range. C3 carries it,
+                 and it enters off what C2 left behind.</p>
+              <ul>
+                <li>C3's wick is forming in the upper half of C2's wick</li>
+                <li>There is a gap in there — and price has traded into it</li>
+                <li>SMT on the gap tap, on the 1H or the 30M</li>
+                <li>A clear draw on liquidity to aim at</li>
+              </ul>
+            </article>
+
+            <article class="ap-s">
+              <h3><i>03</i>No gaps anywhere</h3>
+              <p>C2's wick is clean. There is nothing inside it to trade back into,
+                 so there is no continuation to find.</p>
+              <ul>
+                <li>The only trade is inside C2 itself</li>
+                <li>Do not go hunting an entry outside it to have one</li>
+                <li>No gap and no C2 entry is a day you sit out</li>
+              </ul>
+            </article>
+
+            <article class="ap-s">
+              <h3><i>04</i>A new open, or a driver</h3>
+              <p>The 1H and the 4H open together and price expands immediately off
+                 it — or 09:30 supplies the expansion.</p>
+              <ul>
+                <li>The expansion is immediate off the open, not after a build</li>
+                <li>A driver coming is what makes it worth taking late</li>
+                <li>This is the one case the hour-left rule does not apply</li>
+              </ul>
+            </article>
+          </div>
+
+          <ol class="ap-rules">
+            <li><b>SMT comes in two stages.</b><span>First stage on the 1H or above,
+              after the key level has been reached. Second stage on the 1H or 30M —
+              a PSP if you can get one, otherwise SMT against the previous candle.
+              One stage is confirmation of nothing.</span></li>
+            <li><b>A small wick, or no trade.</b><span>Size the wick before anything
+              else. A large wick on C2 has already spent the move and will not expand
+              behind you.</span></li>
+            <li><b>More than an hour left.</b><span>A continuation inside C2 needs
+              over an hour of the candle remaining. Under that there is not enough
+              time left in it to expand, however good the entry looks.</span></li>
+            <li><b>09:30 is the exception to that.</b><span>With a driver coming, a
+              new 1H and 4H open with immediate expansion is takeable regardless of
+              the time left — the driver is what supplies the move.</span></li>
+            <li><b>No gaps, no continuation.</b><span>If the wick has no gap in it,
+              do not reach outside C2 for an entry. Trade inside C2 or do not
+              trade.</span></li>
+            <li><b>Regular swings, with one exception.</b><span>The 90-minute
+              cracking correlation is the only place a swing that is not a regular
+              one is allowed to be the reference.</span></li>
+            <li><b>Never the 15-minute.</b><span>The alignment lives on the 1H and
+              the 30M. The 15 will always give you an entry — one the 4H profile
+              never asked for.</span></li>
+          </ol>
+
+          <div class="ap-lists" id="apLists"></div>
+          <p class="ap-foot">Those two lists are the same ones you tick when you
+            record a trade — printed from one place, so the page and the sheet
+            cannot drift apart.</p>
+        </section>
+
+        <div class="cal-head" style="margin-top:26px">
+          <h2>Saved</h2><span class="grow"></span>
+          <button class="btn btn-ghost" type="button" id="resAdd">Add a link</button>
+        </div>
+        <div id="resList"></div>
+      </div>
+    </main>
   </div>
 
   <dialog class="bk" id="bk" aria-labelledby="bkTitle">
@@ -1185,6 +1407,56 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       <span class="grow"></span>
       <button class="btn btn-ghost" type="button" id="bkDone">Close</button>
     </div>
+  </dialog>
+
+
+  <dialog class="sheet" id="rs" aria-labelledby="rsTitle">
+    <form method="dialog" id="rsForm">
+      <div class="sheet-h">
+        <h2 id="rsTitle">Save a link</h2>
+        <span class="grow"></span>
+        <button class="step" type="button" id="rsX" aria-label="Close">&#10005;</button>
+      </div>
+      <div class="sheet-b">
+        <div class="field wide">
+          <label for="rsName">Title</label>
+          <input id="rsName" type="text" required placeholder="What it is" />
+        </div>
+        <div class="field wide">
+          <label for="rsUrl">Link</label>
+          <input id="rsUrl" type="url" placeholder="https://" />
+        </div>
+        <div class="field">
+          <label for="rsKind">Kind</label>
+          <select id="rsKind">
+            <option value="video">Video</option>
+            <option value="read">Reading</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="rsLen">Length</label>
+          <input id="rsLen" type="text" placeholder="26:54, or 11 min read" />
+        </div>
+        <div class="field wide">
+          <label for="rsSum">How you use it</label>
+          <textarea id="rsSum" placeholder="Not what is in it — when you would open it again."></textarea>
+        </div>
+        <div class="field wide">
+          <label for="rsMarks">Marks — one a line, time then note</label>
+          <textarea id="rsMarks" placeholder="3:04  two-stage SMT, first stage on the 1H"></textarea>
+        </div>
+        <div class="field wide">
+          <label for="rsTags">Tags</label>
+          <input id="rsTags" type="text" placeholder="reversal, SMT, gaps" />
+        </div>
+      </div>
+      <div class="sheet-f">
+        <button class="btn btn-ghost" type="button" id="rsDelete" hidden>Remove</button>
+        <span class="grow"></span>
+        <button class="btn btn-ghost" type="button" id="rsCancel">Cancel</button>
+        <button class="btn btn-primary" type="submit">Save</button>
+      </div>
+    </form>
   </dialog>
 
   <p class="sr" role="status" id="say"></p>
@@ -1318,25 +1590,26 @@ const icon = (n, size) =>
    list never drifts: a list that changes cannot tell you which rule you
    skipped on the days you lost.
 
-   Distilled from the 4H profiling docs (Eleven_Trades, V1–V3). The
-   reversal is the wick — trade it only where the daily profile says a
-   wick belongs, and never without SMT. The continuation is the body —
-   the 3rd candle of an existing swing point. Both enter on the V-shape
-   CISD, nothing else. */
+   These are the 1H/30M alignment rules, in the order you can actually
+   check them at the chart: the thing that must already have happened
+   first, then what the candle looks like, then the confirmation, then
+   whether there is time and somewhere to go. Written out in full on the
+   Resources page, which prints them from this same constant so the two
+   cannot come apart. */
 const CHECKLISTS = {
   continuation: [
-    'Daily bias and order flow aligned',
-    '3rd candle — swing point already formed',
-    'SMT confirmed at the swing high/low',
-    'Small wick — body expanding, no consolidation',
-    'V-shape CISD — entering the expansion',
+    'C2 reversed off C1 and closed back inside',
+    "C3's wick forming in the upper half of C2's wick",
+    'A gap in there — and price has traded into it',
+    'SMT on the gap tap, on the 1H or 30M',
+    'A clear draw on liquidity to target',
   ],
   reversal: [
-    'Key level reached — profile supports the turn',
-    'HTF SMT divergence — no SMT, no trade',
-    'V-shape CISD — no consolidation before it',
-    'Right candle for the reversal window',
-    'No contradictory swing on the chart',
+    'Key level reached — the profile supports the turn',
+    'Small wick — a large one will not expand',
+    'First-stage SMT on the 1H or above, after the level',
+    'Second stage on the 1H/30M — PSP, or SMT on the prior candle',
+    'Over an hour left in the candle, or a driver coming',
   ],
 };
 const MODES = { continuation: 'modeCont', reversal: 'modeRev' };
@@ -2665,7 +2938,7 @@ function commit(msg) {
   document.getElementById('say').textContent = msg;
 }
 function renderAll() {
-  renderSummary(); renderCalendar(); renderMetrics(); renderLedger(); renderLog();
+  renderSummary(); renderCalendar(); renderMetrics(); renderLedger(); renderLog(); renderRes();
 }
 
 /* ── the candle clock ──
@@ -2780,17 +3053,22 @@ const bk = document.getElementById('bk');
 document.getElementById('backupBtn').addEventListener('click', () => {
   const t = state.events.filter(e => e.k === 'trade').length;
   const f = state.events.length - t;
+  const r = resAll().length;
+  const links = `${r} saved ${r === 1 ? 'link' : 'links'} go with it.`;
   document.getElementById('bkCount').textContent = isDemo()
-    ? 'You are still looking at the sample ledger — there is nothing of your own to save yet.'
-    : `${t} ${t === 1 ? 'trade' : 'trades'} and ${f} capital ${f === 1 ? 'movement' : 'movements'} held here.`;
+    ? 'You are still looking at the sample ledger — there is nothing of your own to save yet. ' + links
+    : `${t} ${t === 1 ? 'trade' : 'trades'} and ${f} capital ${f === 1 ? 'movement' : 'movements'} held here. ` + links;
   bk.showModal();
 });
 document.getElementById('bkClose').addEventListener('click', () => bk.close());
 document.getElementById('bkDone') .addEventListener('click', () => bk.close());
 
 document.getElementById('bkSave').addEventListener('click', () => {
+  /* Resources ride along in the same file. They are kept under their own
+     key at rest, but a person saving "a copy" means a copy of everything
+     they typed — two files to keep is one file to lose. */
   const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
-    saved: new Date().toISOString(), events: state.events }, null, 2)],
+    saved: new Date().toISOString(), events: state.events, res: resAll() }, null, 2)],
     { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -2831,9 +3109,269 @@ bkFile.addEventListener('change', async () => {
   state = { events: parsed.events };
   try { writeStore(state); }
   catch (e) { say.textContent = 'Could not save the restored ledger.'; return; }
+  /* Absent rather than empty means an older backup, written before links
+     existed. Leave what is here alone in that case — a file that never
+     carried them should not be able to wipe them. */
+  let extra = '';
+  if (Array.isArray(parsed.res)) {
+    try {
+      localStorage.setItem(RKEY, JSON.stringify(parsed.res));
+      resState = parsed.res;
+      extra = ` and ${parsed.res.length} ${parsed.res.length === 1 ? 'link' : 'links'}`;
+    } catch (e) { extra = ' — the links could not be saved'; }
+  }
   renderAll();
   bk.close();
-  say.textContent = `Restored ${parsed.events.length} records.`;
+  say.textContent = `Restored ${parsed.events.length} records${extra}.`;
+});
+
+/* ═══ resources ═══
+   Links kept under their own key rather than in state.events. Two
+   reasons, both load-bearing. The money arithmetic walks every event and
+   sums e.amt, so a record with no amount would turn equity into NaN the
+   moment one was saved. And the demo guard means state IS the sample
+   object until you record something real — saving a link into it would
+   write twenty-two invented trades to disk as though they were yours. */
+const RKEY = 'ledger.res.v1';
+
+/* Seeded, not stored. It sits there as a default until you edit or
+   remove it, at which point it becomes an ordinary saved link. Nothing
+   is written to disk on first open. */
+const SEED = [{
+  id: 'seed-4h-align',
+  kind: 'video',
+  title: '1H / 30M alignment to a 4H profile',
+  url: '',
+  len: '26:54',
+  sum: 'Where the rules above came from. Worth reopening when an entry looked '
+     + 'right and lost — it is nearly always the second SMT stage or the time '
+     + 'left in the candle that was missing.',
+  marks: [
+    [52,   "C3's wick in the upper portion of C2's wick, with a gap in it"],
+    [152,  'C2 needs SMT and a small wick before it is takeable'],
+    [184,  'Two-stage SMT — first stage on the 1H or above'],
+    [301,  'Continuation in C2 only with more than an hour left'],
+    [427,  'The 09:30 driver exception to the time-left rule'],
+    [447,  'A new 1H and 4H open, with immediate expansion off it'],
+    [559,  'No gaps in the wick — then the only trade is inside C2'],
+    [681,  'The 90-minute cracking correlation, the one non-regular swing'],
+    [752,  'First worked example, start to finish'],
+    [986,  'C3 opens and immediately expands off the EQ'],
+    [1125, 'Two-stage SMT again — the 30M PSP as the strength switch'],
+    [1256, 'A driver example'],
+    [1484, 'Final continuation example'],
+    [1577, 'Do not use the 15-minute'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['reversal', 'continuation', 'SMT', 'gaps'],
+  added: null,
+  opened: null,
+}];
+
+function readRes() {
+  let raw = null;
+  try { raw = localStorage.getItem(RKEY); } catch (e) { return null; }
+  if (!raw) return null;
+  try {
+    const v = JSON.parse(raw);
+    if (!Array.isArray(v)) throw new Error('shape');
+    return v;
+  } catch (e) {
+    /* Same rule as the ledger: keep the wreckage, say so, do not
+       silently replace it with the seed. */
+    try { localStorage.setItem(RKEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    setTimeout(() => alert('Your saved links could not be read. A copy has been kept under '
+      + RKEY + '.corrupt.'), 0);
+    return [];
+  }
+}
+let resState = readRes();
+const resAll = () => resState || SEED;
+/* Every write materialises the seed first, so removing the seeded video
+   removes it for good rather than having it reappear on reload. */
+function resCommit(fn, msg) {
+  const next = JSON.parse(JSON.stringify(resAll()));
+  fn(next);
+  try { localStorage.setItem(RKEY, JSON.stringify(next)); }
+  catch (e) {
+    alert('This browser refused to save — storage is full or disabled.');
+    return;
+  }
+  resState = next;
+  renderRes();
+  document.getElementById('say').textContent = msg;
+}
+
+/* A time is stored as seconds and shown as a clock, so the link can be
+   built by arithmetic rather than by re-parsing what was typed. */
+const stamp = (n) => {
+  const h = Math.floor(n / 3600), m = Math.floor(n / 60) % 60, sec = n % 60;
+  return (h ? h + ':' + String(m).padStart(2, '0') : String(m))
+    + ':' + String(sec).padStart(2, '0');
+};
+const secs = (str) => {
+  const parts = str.split(':').map(x => parseInt(x, 10));
+  if (parts.some(x => !Number.isFinite(x))) return null;
+  return parts.reduce((a, x) => a * 60 + x, 0);
+};
+/* Only YouTube gets deep links, because only YouTube has a documented
+   ?t= that lands where you asked. Anything else opens at the top and the
+   marks stay a table of contents. */
+function ytid(url) {
+  const m = String(url || '').match(
+    /(?:youtube\.com\/(?:watch\?(?:.*&)?v=|embed\/|live\/|shorts\/)|youtu\.be\/)([\w-]{11})/);
+  return m ? m[1] : null;
+}
+const resAt = (r, t) => {
+  const id = ytid(r.url);
+  return id ? `https://www.youtube.com/watch?v=${id}&t=${t}s` : (r.url || '');
+};
+function host(url) {
+  try { return new URL(url).hostname.replace(/^www\./, ''); } catch (e) { return ''; }
+}
+const ago = (v) => {
+  if (!v) return '';
+  const n = Math.round((new Date(iso(new Date()) + 'T00:00:00') - logDate(v)) / 86400000);
+  return n <= 0 ? 'opened today' : n === 1 ? 'opened yesterday' : `opened ${n} days ago`;
+};
+
+function renderRes() {
+  /* The checklists, printed from the constant the sheet ticks. */
+  document.getElementById('apLists').innerHTML =
+    [['Reversal — C2', CHECKLISTS.reversal],
+     ['Continuation — C3', CHECKLISTS.continuation]]
+    .map(([h, list]) => `<div class="ap-list"><h3>${esc(h)}</h3><ol>`
+      + list.map(x => `<li>${esc(x)}</li>`).join('') + `</ol></div>`).join('');
+
+  const all = resAll();
+  const marks = all.reduce((n, r) => n + (r.marks || []).length, 0);
+  document.getElementById('resMeta').textContent =
+    `${all.length} saved · ${marks} ${marks === 1 ? 'mark' : 'marks'}`;
+
+  const wrap = document.getElementById('resList');
+  if (!all.length) {
+    wrap.innerHTML = `<p class="rs-none">Nothing saved. A link, a line on when you would
+      open it again, and the timestamps worth going straight to.</p>`;
+    return;
+  }
+  wrap.innerHTML = all.map(r => {
+    const linked = !!r.url;
+    const deep = linked && !!ytid(r.url);
+    const src = [r.kind === 'video' ? 'video' : 'reading', host(r.url)].filter(Boolean).join(' · ');
+    return `<article class="rs">
+      <button class="rs-art" type="button" data-open="${esc(r.id)}"${linked ? '' : ' disabled'}
+              aria-label="${linked ? 'Open ' + esc(r.title) : esc(r.title) + ' — no link saved'}">
+        ${r.kind === 'video'
+          ? `<svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg>`
+          : `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor"
+               stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+               <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5ZM8 8h7M8 12h7M8 16h4"/></svg>`}
+        ${r.len ? `<span class="len">${esc(r.len)}</span>` : ''}
+      </button>
+      <div class="rs-main">
+        <div class="rs-top">
+          <button class="rs-title" type="button" data-open="${esc(r.id)}"${linked ? '' : ' disabled'}>${esc(r.title)}</button>
+          <span class="rs-src">${esc(src)}</span>
+          ${r.opened ? `<span class="rs-open">${esc(ago(r.opened))}</span>` : ''}
+        </div>
+        ${r.sum ? `<p class="rs-sum">${esc(r.sum)}</p>` : ''}
+        ${linked ? '' : `<p class="rs-hint">No link saved yet — Edit to paste it, and the
+          marks below become clickable.</p>`}
+        ${(r.marks || []).length ? `<div class="rs-marks">` + r.marks.map((m, i) =>
+          `<button class="rs-mark" type="button" data-open="${esc(r.id)}" data-mark="${i}"${deep ? '' : ' disabled'}>
+             <b>${stamp(m.t)}</b><span>${esc(m.s)}</span></button>`).join('') + `</div>` : ''}
+        <div class="rs-tags">
+          ${(r.tags || []).map(t => `<span class="rs-tag">${esc(t)}</span>`).join('')}
+          <button class="rs-edit" type="button" data-edit="${esc(r.id)}">Edit</button>
+        </div>
+      </div>
+    </article>`;
+  }).join('');
+}
+
+/* Opening stamps the day, which is the whole basis of "opened 40 days
+   ago" — the one figure on the card that tells you something you did
+   not already know. */
+document.getElementById('resList').addEventListener('click', (ev) => {
+  const t = ev.target.closest('[data-open], [data-edit]');
+  if (!t) return;
+  if (t.dataset.edit) { openRes(t.dataset.edit); return; }
+  const r = resAll().find(x => x.id === t.dataset.open);
+  if (!r || !r.url) return;
+  const href = t.dataset.mark !== undefined
+    ? resAt(r, r.marks[+t.dataset.mark].t) : r.url;
+  window.open(href, '_blank', 'noopener');
+  resCommit(list => {
+    const x = list.find(y => y.id === r.id);
+    if (x) x.opened = iso(new Date());
+  }, 'opened');
+});
+
+/* ── the editor ── */
+const rs = document.getElementById('rs');
+let rsEditing = null;
+const rsF = (id) => document.getElementById(id);
+
+function openRes(id) {
+  const r = id ? resAll().find(x => x.id === id) : null;
+  rsEditing = r ? r.id : null;
+  document.getElementById('rsTitle').textContent = r ? 'Edit link' : 'Save a link';
+  rsF('rsName').value = r ? r.title : '';
+  rsF('rsUrl').value  = r ? (r.url || '') : '';
+  rsF('rsKind').value = r ? (r.kind || 'video') : 'video';
+  rsF('rsLen').value  = r ? (r.len || '') : '';
+  rsF('rsSum').value  = r ? (r.sum || '') : '';
+  rsF('rsTags').value = r ? (r.tags || []).join(', ') : '';
+  rsF('rsMarks').value = r
+    ? (r.marks || []).map(m => `${stamp(m.t)}  ${m.s}`).join('\n') : '';
+  rsF('rsDelete').hidden = !r;
+  rs.showModal();
+  rsF('rsName').focus();
+}
+
+/* One a line: a time, whitespace, then the note. A line without a
+   readable time is dropped rather than saved as a mark at zero — a
+   timestamp that goes to the wrong place is worse than none. */
+function readMarks(text) {
+  return text.split('\n').map(line => {
+    const m = line.trim().match(/^(\d{1,2}(?::\d{1,2}){1,2})\s*[-—·:]?\s*(.*)$/);
+    if (!m) return null;
+    const t = secs(m[1]);
+    return t === null ? null : { t, s: m[2].trim() };
+  }).filter(Boolean).sort((a, b) => a.t - b.t);
+}
+
+document.getElementById('resAdd').addEventListener('click', () => openRes(null));
+rsF('rsX').addEventListener('click', () => rs.close());
+rsF('rsCancel').addEventListener('click', () => rs.close());
+rsF('rsDelete').addEventListener('click', () => {
+  const r = resAll().find(x => x.id === rsEditing);
+  if (!r || !confirm(`Remove “${r.title}”?`)) return;
+  resCommit(list => {
+    const i = list.findIndex(x => x.id === rsEditing);
+    if (i >= 0) list.splice(i, 1);
+  }, 'removed');
+  rs.close();
+});
+
+document.getElementById('rsForm').addEventListener('submit', (ev) => {
+  ev.preventDefault();
+  const title = rsF('rsName').value.trim();
+  if (!title) return;
+  const patch = {
+    title,
+    url: rsF('rsUrl').value.trim(),
+    kind: rsF('rsKind').value,
+    len: rsF('rsLen').value.trim(),
+    sum: rsF('rsSum').value.trim(),
+    marks: readMarks(rsF('rsMarks').value),
+    tags: rsF('rsTags').value.split(',').map(x => x.trim()).filter(Boolean),
+  };
+  resCommit(list => {
+    const cur = list.find(x => x.id === rsEditing);
+    if (cur) Object.assign(cur, patch);
+    else list.unshift(Object.assign({ id: uid(), added: iso(new Date()), opened: null }, patch));
+  }, rsEditing ? 'saved' : 'added');
+  rs.close();
 });
 
 /* ── sections ── */
@@ -2842,6 +3380,7 @@ const SECTIONS = {
   log:      document.getElementById('logSection'),
   metrics:  document.getElementById('metricsSection'),
   settings: document.getElementById('settingsSection'),
+  resources: document.getElementById('resourcesSection'),
 };
 function goto(view) {
   document.querySelectorAll('[data-view]').forEach(b => {
