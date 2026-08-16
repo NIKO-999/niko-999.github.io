@@ -205,6 +205,17 @@
   letter-spacing: -.02em; color: var(--ink);
 }
 .cp-name { font-size: .8rem; color: var(--ink-2); }
+/* Earned, not decorative — see bestCandle(). It sits in the header
+   rather than on a line of its own because it is a property OF this
+   candle, and because a panel you read before every entry should not
+   grow a row that is empty most of the time. */
+.cp-best {
+  padding: 3px 8px; border-radius: 6px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, transparent);
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  font-size: .6rem; letter-spacing: .05em; white-space: nowrap;
+  color: color-mix(in srgb, var(--accent) 86%, var(--ink));
+}
 .cp-ny, .cp-next {
   font-family: var(--mono); font-size: .58rem; letter-spacing: .06em;
   color: var(--ink-3); white-space: nowrap;
@@ -1039,6 +1050,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
             <span class="cp-in"><span class="ic" id="cpIcon"></span><span id="cpIn">In</span></span>
             <b class="cp-open" id="cpOpen">—</b>
             <span class="cp-name" id="cpName"></span>
+            <span class="cp-best" id="cpBest" hidden>your best candle</span>
             <span class="grow"></span>
             <span class="cp-ny" id="cpNY"></span>
             <span class="cp-next" id="cpNext"></span>
@@ -2068,6 +2080,36 @@ function renderCurve() {
   }).observe(svg);
 })();
 
+/* ── your best candle ──
+   The panel is a plan; this is the one place it answers back with your
+   own record. It is a label and not a figure on purpose — a win rate on
+   the screen you read before entering is an argument for entering.
+
+   Three conditions, because a badge that appears easily is worth
+   nothing. The candle must have at least SIX graded trades in it, must
+   be your highest net R, and must be a clear R ahead of the next one.
+   Best-by-a-hair off four trades is noise wearing a rosette, and it
+   would push you into a session you would otherwise have skipped. */
+const BEST_MIN = 6, BEST_EDGE = 1;
+
+function bestCandle() {
+  const by = new Map();
+  for (const e of trades()) {
+    if (!(e.risk > 0) || !e.sess) continue;
+    const cur = by.get(e.sess) || { n: 0, r: 0 };
+    cur.n++; cur.r += e.amt / e.risk;
+    by.set(e.sess, cur);
+  }
+  let best = null;
+  for (const [k, v] of by) if (!best || v.r > best.r) best = { k, n: v.n, r: v.r };
+  if (!best || best.n < BEST_MIN || best.r <= 0) return null;
+  const rest = [...by.entries()].filter(([k]) => k !== best.k).map(([, v]) => v.r);
+  /* Strictly more than an R ahead. At exactly BEST_EDGE the comment
+     above says "clear" and the arithmetic said "tied at the line". */
+  if (rest.length && best.r - Math.max(...rest) <= BEST_EDGE) return null;
+  return best.k;
+}
+
 /* ═══ the log ═══
    Every trade already carries when it was, what it was, which rules you
    ticked and what you wrote. None of it was ever readable in order —
@@ -2713,6 +2755,9 @@ function tickCandle() {
   put('cpIn', soon ? 'Approaching' : 'In');
   put('cpOpen', hhmm(show));
   put('cpName', p.name);
+  /* Against the candle SHOWN, which past the half-hour is the next one
+     rather than the current one — the badge has to follow the panel. */
+  document.getElementById('cpBest').hidden = bestCandle() !== hhmm(show);
   put('cpNY', `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} NY`);
   put('cpNext', soon ? `opens in ${hm(c.left)}`
     : off ? `then ${hhmm(next)}` : `${hm(c.left)} left · then ${hhmm(next)}`);
