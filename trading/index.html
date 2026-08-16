@@ -544,8 +544,9 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    are leaking. Read in about a second, which no table manages. */
 /* Two charts side by side: the radar is square and wants a small box,
    the curve is wide and takes what is left. */
-.charts { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 20px; }
-@media (max-width: 900px) { .charts { grid-template-columns: 1fr; } }
+.charts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin-top: 20px; }
+@media (max-width: 1180px) { .charts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 780px)  { .charts { grid-template-columns: 1fr; } }
 .chartbox.span { grid-column: 1 / -1; }
 .chartbox {
   padding: 14px 16px 15px;
@@ -564,6 +565,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .radar .rv { font-family: var(--mono); font-size: 9px; letter-spacing: .03em; }
 .radar .rn { font-family: var(--mono); font-size: 8px; fill: var(--ink-3); }
 .radar .rempty { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+/* The continuation shape is dashed and unfilled so the two never fight:
+   solid reads as the subject, dashed as the thing it is measured against. */
+.radar .rshape-2 { fill: color-mix(in srgb, var(--ink-3) 16%, transparent);
+  stroke: var(--ink-3); stroke-width: 1.4; stroke-dasharray: 4 3; stroke-linejoin: round; }
+.rlg { display: flex; gap: 12px; justify-content: center; margin-top: 9px;
+  font-family: var(--mono); font-size: .54rem; letter-spacing: .06em; color: var(--ink-3); }
+.rlg span { display: flex; align-items: center; gap: 5px; }
+.rlg i { display: block; width: 9px; height: 9px; border-radius: 2px; }
 
 /* ── settings + ledger ── */
 .form { display: flex; flex-wrap: wrap; gap: 8px; align-items: flex-end; margin-bottom: 16px; }
@@ -748,12 +757,27 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
               <span class="span-meta" id="radarMeta"></span></div>
             <svg class="radar" id="radar" role="img" aria-labelledby="radarAlt"></svg>
             <p class="sr" id="radarAlt"></p>
+            <div class="rlg" aria-hidden="true">
+              <span><i style="background:color-mix(in srgb,var(--accent) 62%,transparent)"></i>reversal</span>
+              <span><i style="background:color-mix(in srgb,var(--ink-3) 42%,transparent)"></i>continuation</span>
+            </div>
           </section>
           <section class="chartbox">
             <div class="cal-head"><h2>By day</h2><span class="grow"></span>
               <span class="span-meta" id="dayMeta"></span></div>
             <svg class="radar" id="dayRadar" role="img" aria-labelledby="dayAlt"></svg>
             <p class="sr" id="dayAlt"></p>
+            <div class="rlg" aria-hidden="true">
+              <span><i style="background:color-mix(in srgb,var(--accent) 62%,transparent)"></i>reversal</span>
+              <span><i style="background:color-mix(in srgb,var(--ink-3) 42%,transparent)"></i>continuation</span>
+            </div>
+          </section>
+          <section class="chartbox">
+            <div class="cal-head"><h2>Over time</h2><span class="grow"></span>
+              <span class="span-meta" id="heatMeta"></span></div>
+            <svg class="radar" id="heat" role="img" aria-labelledby="heatAlt"></svg>
+            <p class="sr" id="heatAlt"></p>
+            <div class="rlg" aria-hidden="true"><span>oldest week</span><span>→</span><span>most recent</span></div>
           </section>
           <section class="chartbox span">
             <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
@@ -1410,9 +1434,13 @@ function renderMetrics() {
    to write the risk down — the shape has to mean what it looks like. */
 const dowOf = (e) => DOW_SHORT[(new Date(e.date + 'T00:00:00').getDay() + 6) % 7];
 
+const rOf = (e) => e.amt / e.risk;
 const radarRows = (keys, keyOf) => keys.map(k => {
   const g = trades().filter(e => e.risk > 0 && keyOf(e) === k);
-  return { k, n: g.length, R: g.reduce((s, e) => s + e.amt / e.risk, 0) };
+  const of = (m) => g.filter(e => (e.mode || 'continuation') === m)
+                     .reduce((s, e) => s + rOf(e), 0);
+  return { k, n: g.length, R: g.reduce((s, e) => s + rOf(e), 0),
+           rev: of('reversal'), con: of('continuation') };
 });
 
 function renderRadars() {
@@ -1423,6 +1451,81 @@ function renderRadars() {
   const wknd = trades().some(e => e.risk > 0 && ['Sat', 'Sun'].includes(dowOf(e)));
   renderRadar('dayRadar', 'dayMeta', 'dayAlt',
     radarRows(DOW_SHORT.slice(0, wknd ? 7 : 5), dowOf), 'day');
+  renderHeat();
+}
+
+/* ── circular heatmap ──
+   The same five wedges as the radar, but each ring is a week: inner is
+   the oldest, outer the most recent. The radars say where the edge is;
+   this says whether it is still there. A window that paid for a month
+   and quietly stopped looks identical to a good window on a radar, and
+   completely different here. */
+const WEEKS = 8;
+function renderHeat() {
+  const svg = document.getElementById('heat');
+  const W = 336, H = 306, cx = 168, cy = 150, R0 = 30, R1 = 104, OUT = 128;
+  const g = trades().filter(e => e.risk > 0);
+  document.getElementById('heatMeta').textContent =
+    g.length ? `net R · ${WEEKS} weeks` : 'needs a risk on each trade';
+
+  if (!g.length) {
+    svg.setAttribute('viewBox', `0 0 ${W} 90`);
+    svg.innerHTML = `<text class="rempty" x="${cx}" y="48" text-anchor="middle">`
+      + `Record what you risked and the weeks start filling in.</text>`;
+    document.getElementById('heatAlt').textContent =
+      'No graded trades yet. Record the risk on a trade to see performance over time.';
+    return;
+  }
+
+  /* Weeks counted back from today, so the outer ring is always the week
+     you are in — not the last week that happened to have a trade in it. */
+  const day = 864e5;
+  const now = new Date(); now.setHours(0, 0, 0, 0);
+  const wkOf = (d) => Math.floor((now - new Date(d + 'T00:00:00')) / (7 * day));
+  const cell = {};
+  g.forEach(e => {
+    const w = wkOf(e.date);
+    if (w < 0 || w >= WEEKS) return;
+    const key = e.sess + '|' + w;
+    cell[key] = (cell[key] || 0) + rOf(e);
+  });
+  const vals = Object.values(cell);
+  const scale = Math.max(...vals.map(Math.abs), 1);
+  const step = (R1 - R0) / WEEKS;
+
+  const pol = (r, d) => { const a = (d - 90) * Math.PI / 180;
+    return [cx + r * Math.cos(a), cy + r * Math.sin(a)]; };
+  const pt = (a) => a.map(n => n.toFixed(1)).join(',');
+  const wedge = (r0, r1, a0, a1) => {
+    const [x0, y0] = pol(r1, a0), [x1, y1] = pol(r1, a1);
+    const [x2, y2] = pol(r0, a1), [x3, y3] = pol(r0, a0);
+    return `M${pt([x0, y0])}A${r1},${r1} 0 0 1 ${pt([x1, y1])}`
+      + `L${pt([x2, y2])}A${r0},${r0} 0 0 0 ${pt([x3, y3])}Z`;
+  };
+
+  let out = '';
+  SESSIONS.forEach((k, i) => {
+    for (let w = 0; w < WEEKS; w++) {
+      const v = cell[k + '|' + w];
+      /* Outer ring = most recent, so the week index counts inward. */
+      const r0 = R0 + (WEEKS - 1 - w) * step, r1 = r0 + step - 1.6;
+      const fill = v === undefined ? 'rgba(128,128,128,.07)'
+        : `color-mix(in srgb, var(--${v > 0 ? 'up' : 'down'}) `
+          + `${(14 + Math.abs(v) / scale * 70).toFixed(0)}%, transparent)`;
+      out += `<path d="${wedge(r0, r1, i * 72 - 34, i * 72 + 34)}" fill="${fill}"/>`;
+    }
+    const [x, y] = pol(OUT, i * 72);
+    out += `<text class="rk" x="${x.toFixed(1)}" y="${(y + 3).toFixed(1)}" text-anchor="middle">${k}</text>`;
+  });
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+  svg.innerHTML = out;
+
+  const recent = SESSIONS.map(k => [k, cell[k + '|0']])
+    .filter(([, v]) => v !== undefined)
+    .map(([k, v]) => `${k} ${(v >= 0 ? '+' : '−')}${Math.abs(v).toFixed(1)}R`);
+  document.getElementById('heatAlt').textContent =
+    `Net R by candle over the last ${WEEKS} weeks, oldest ring inward. `
+    + (recent.length ? `This week: ${recent.join(', ')}.` : 'Nothing recorded this week.');
 }
 
 function renderRadar(id, metaId, altId, rows, noun) {
@@ -1446,8 +1549,10 @@ function renderRadar(id, metaId, altId, rows, noun) {
   }
 
   /* Anchored at a zero ring rather than at the centre, so a losing window
-     pinches inward and is visibly negative instead of merely small. */
-  const scale = Math.max(...rows.map(r => Math.abs(r.R))) || 1;
+     pinches inward and is visibly negative instead of merely small.
+     Scaled against the largest of ALL three series, so the reversal and
+     continuation shapes stay comparable to each other and to the total. */
+  const scale = Math.max(...rows.flatMap(r => [r.R, r.rev, r.con].map(Math.abs))) || 1;
   const rad = (v) => v >= 0
     ? ZERO + (v / scale) * (RAD - ZERO)
     : ZERO - (Math.abs(v) / scale) * ZERO * 0.88;
@@ -1466,10 +1571,13 @@ function renderRadar(id, metaId, altId, rows, noun) {
         return `<line class="rspoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
       }).join('')
     + `<polygon class="rzero" points="${poly(ZERO)}"/>`
-    + `<polygon class="rshape" points="${poly(i => rad(rows[i].R))}"/>`
+    /* Continuation first so the reversal shape sits on top of it — the
+       reversal is the trade the model is really about. */
+    + `<polygon class="rshape-2" points="${poly(i => rad(rows[i].con))}"/>`
+    + `<polygon class="rshape" points="${poly(i => rad(rows[i].rev))}"/>`
     + rows.map((r, i) => {
-        const [x, y] = at(i, rad(r.R));
-        return `<circle class="rdot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="3"/>`;
+        const [x, y] = at(i, rad(r.rev));
+        return `<circle class="rdot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.6"/>`;
       }).join('')
     + rows.map((r, i) => {
         const [x, y] = at(i, OUT);
@@ -1482,8 +1590,10 @@ function renderRadar(id, metaId, altId, rows, noun) {
       }).join('');
 
   const best = rows.filter(r => r.n).sort((a, b) => b.R - a.R)[0];
-  document.getElementById(altId).textContent = `Net R by ${noun}. `
-    + rows.filter(r => r.n).map(r => `${r.k} ${(r.R >= 0 ? '+' : '−')}${Math.abs(r.R).toFixed(1)}R from ${r.n}`).join(', ')
+  const sR = v => `${v >= 0 ? '+' : '−'}${Math.abs(v).toFixed(1)}R`;
+  document.getElementById(altId).textContent = `Net R by ${noun}, split into reversal and continuation. `
+    + rows.filter(r => r.n).map(r =>
+        `${r.k} ${sR(r.R)} total, ${sR(r.rev)} reversal, ${sR(r.con)} continuation`).join('; ')
     + (best ? `. Best ${noun} ${best.k}.` : '');
 }
 
