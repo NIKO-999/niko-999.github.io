@@ -230,6 +230,7 @@
   background: color-mix(in srgb, var(--accent) 9%, transparent);
   font-size: .78rem; color: var(--ink-2);
 }
+.metric .recover { margin: 13px 0 0; }
 .recover .ic { display: inline-flex; flex: none; color: var(--accent); }
 .recover b { font-family: var(--mono); font-weight: 500; color: var(--ink);
   font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
@@ -376,29 +377,46 @@
 .legend i.dash { border-top-style: dashed; border-width: 1px; }
 
 /* ── metrics ── */
-.metrics { display: grid; grid-template-columns: repeat(auto-fill, minmax(178px, 1fr)); gap: 10px; }
+/* ── metrics ──
+   Label first, then the figure, then one line of context. Five cards,
+   not ten: everything that was its own tile — average win, average loss,
+   the streaks — says more sitting under the number it explains than it
+   did standing on its own. */
+.metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1180px) { .metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 .metric {
-  padding: 12px 13px;
+  padding: 15px 17px 16px;
   border: 1px solid var(--glass-line);
-  border-radius: 10px;
+  border-radius: 12px;
   background: var(--glass-in);
 }
-.metric b {
-  display: block;
-  font-family: var(--mono);
-  font-size: 1.06rem;
-  font-weight: 500;
-  letter-spacing: -.025em;
-}
-.metric span {
-  display: block; margin-top: 4px;
+.metric.wide { grid-column: 1 / -1; }
+.metric > span {
+  display: flex; align-items: center; gap: 6px;
   font-family: var(--mono); font-size: .58rem;
-  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+  text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
+}
+.metric > span .ic { display: inline-flex; }
+/* Direct child only. The recovery line lives inside this card and has
+   its own <b>s — inheriting the display size blew them up to 2.1rem. */
+.metric > b {
+  display: block; margin: 9px 0 0;
+  font-family: var(--display); font-weight: 300;
+  font-size: 2.1rem; line-height: 1.05; letter-spacing: -.03em;
+  color: var(--ink);
 }
 .metric em {
-  display: block; margin-top: 6px; font-style: normal;
-  font-size: .68rem; color: var(--ink-2); line-height: 1.4;
+  display: block; margin-top: 7px; font-style: normal;
+  font-size: .74rem; color: var(--ink-3); line-height: 1.45;
 }
+.metric.up > b { color: var(--up); }
+.metric.down > b { color: var(--down); }
+/* A win rate is a proportion, so it gets drawn as one. */
+.mbar { display: block; height: 4px; margin-top: 11px; border-radius: 2px;
+  background: color-mix(in srgb, var(--ink-3) 20%, transparent); overflow: hidden; }
+.mbar i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
+.mbar i.up { background: var(--up); }
+.mbar i.down { background: var(--down); }
 
 /* ── trade entry ──
    A journal dies on the entry path, not on the metrics. This is six
@@ -679,7 +697,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
              what the profile says happens next. -->
         <section class="cp" id="cp" aria-label="Current 4H candle">
           <div class="cp-h">
-            <span class="cp-in"><span class="ic" id="cpIcon"></span>IN</span>
+            <span class="cp-in"><span class="ic" id="cpIcon"></span><span id="cpIn">In</span></span>
             <b class="cp-open" id="cpOpen">—</b>
             <span class="cp-name" id="cpName"></span>
             <span class="grow"></span>
@@ -696,7 +714,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         </section>
 
         <div class="summary" id="summary"></div>
-        <p class="recover" id="recover" hidden></p>
+        <div id="recover" hidden></div>
         <div class="cal-head">
           <button class="step" type="button" id="prevM" aria-label="Previous month">‹</button>
           <h2 id="monthLabel"></h2>
@@ -719,6 +737,17 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </div>
       <div class="pane" tabindex="0">
         <div class="metrics" id="metrics"></div>
+        <div class="curve">
+          <div class="cal-head"><h2>Equity</h2><span class="grow"></span>
+            <span class="span-meta" id="ddMeta"></span></div>
+          <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
+          <p class="sr" id="curveAlt"></p>
+          <div class="legend" aria-hidden="true">
+            <span style="color:var(--ink)"><i></i>Equity</span>
+            <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
+            <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
+          </div>
+        </div>
         <div class="split">
           <div>
             <div class="cal-head"><h2>By setup</h2><span class="grow"></span>
@@ -729,16 +758,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
             <div class="cal-head"><h2>By weekday</h2><span class="grow"></span>
               <span class="span-meta">net</span></div>
             <ul class="rows-t" id="byDow"></ul>
-          </div>
-        </div>
-        <div class="curve">
-          <div class="cal-head"><h2>Equity</h2></div>
-          <svg id="curve" role="img" aria-labelledby="curveAlt"></svg>
-          <p class="sr" id="curveAlt"></p>
-          <div class="legend" aria-hidden="true">
-            <span style="color:var(--ink)"><i></i>Equity</span>
-            <span style="color:var(--ink-3)"><i class="dash"></i>Capital in</span>
-            <span style="color:var(--accent)"><i></i>Deposit / withdrawal</span>
           </div>
         </div>
       </div>
@@ -890,6 +909,9 @@ const ICO = {
   check: 'M4 7h10M4 12h10M4 17h6M17 15l2 2 4-4',
   tick:  'M4 12l5 5L20 6',
   mode:  'M4 9h14l-4-4M20 15H6l4 4',
+  pulse: 'M2 12h4l3-8 4 16 3-8h6',
+  pct:   'M19 5 5 19M7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
+  bars:  'M4 19V9M10 19V5M16 19v-7M22 19H2',
   image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
   note:  'M4 20h4L20 8l-4-4L4 16v4ZM14 6l4 4',
   calendar: 'M3 5h18v16H3zM3 10h18M8 3v4M16 3v4',
@@ -952,23 +974,23 @@ const SESSIONS = [18, 22, 2, 6, 10].map(hhmm);
    is not a day lost — the model already says where the move goes next,
    and reading that at 06:00 is more use than reading it in hindsight. */
 const PROFILE = {
-  18: { name: 'Asia reversal',
-        line: 'Reversal window. Turn here and London expands, NY continues.',
-        miss: '22:00 can still print the wick, and 02:00 after it. Otherwise look for a gap inside 18:00’s wick on the 1H or 30M and take the continuation there.' },
-  22: { name: 'Overnight reversal',
-        line: 'Reversal window. Last of the overnight before London takes it.',
-        miss: '02:00 takes the reversal, then 06:00 and 10:00 expand toward the draw.' },
-   2: { name: 'London reversal',
-        line: 'Reversal window. 06:00 and 10:00 carry it toward the draw.',
-        miss: '06:00 continues it, then 10:00. Look for a gap inside 02:00’s wick on the 1H or 30M and take the continuation there.' },
-   6: { name: 'NY reversal',
-        line: 'Reversal into expansion. 08:30 and 09:30 usually confirm it.',
-        miss: 'If 06:00 never reverses, 10:00 manipulates and starts the expansion. Take the continuation there.' },
-  10: { name: 'Late NY reversal',
-        line: 'Last reversal of the day. Small wick with daily logic behind it is a strong entry.',
-        miss: 'Nothing after this one. No entries past 11:00 — be flat before 12:00.' },
+  18: { name: 'Asia',
+        line: 'Reversal. 22:00, 02:00 and 06:00 then continue it in turn, internal liquidity out to external.',
+        miss: '22:00 can still print the wick, and 02:00 after it. If 18:00 gave no reversal candle AND no divergence, look for a gap inside its wick on the 1H or 30M and take the continuation off that.' },
+  22: { name: 'Overnight',
+        line: 'Reversal. 02:00, 06:00 and 10:00 then continue it in turn, internal liquidity out to external.',
+        miss: '02:00 continues it, then 06:00 and 10:00 carry it further toward the draw. If 22:00 gave no reversal candle AND no divergence at all, wait for 02:00 to engulf the prior range and close beyond the bodies — that close becomes your confirmation.' },
+   2: { name: 'London',
+        line: 'Reversal. 06:00 and 10:00 then continue it in turn, internal liquidity out to external.',
+        miss: '06:00 continues it, then 10:00 carries it to the draw. If 02:00 gave no reversal candle AND no divergence, look for a gap inside its wick on the 1H or 30M and take the continuation off that.' },
+   6: { name: 'New York',
+        line: 'Reversal into expansion. 08:30 and 09:30 confirm it, and 10:00 carries it to the draw.',
+        miss: 'If 06:00 never reverses, 10:00 manipulates and starts the expansion itself. Take the continuation off that instead of forcing this one.' },
+  10: { name: 'Late New York',
+        line: 'Last reversal of the day. A small wick with the daily behind it is the strongest entry left.',
+        miss: 'Nothing continues this one. No entries past 11:00 — be flat before 12:00 and let the 18:00 open start it again.' },
   14: { name: 'NY lunch',
-        line: 'Not traded. The day’s reversal has already happened or it has not.',
+        line: 'Not traded. The day’s reversal has already happened, or it has not.',
         miss: 'The next reversal window is the 18:00 open.' },
 };
 
@@ -977,6 +999,10 @@ const PROFILE = {
    enough to break a cell without this. */
 const esc = (s) => String(s).replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* Cents belong on the figure being claimed, not on a supporting clause.
+   "Avg win $0.00 · avg loss $163.00" is four digits of noise. */
+const round = (n) => (n < 0 ? '−' : '') + '$' + Math.round(Math.abs(n)).toLocaleString('en-US');
 
 const money = (n, sign) => (sign && n > 0 ? '+' : n < 0 ? '−' : '')
   + '$' + Math.abs(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1141,6 +1167,7 @@ function totals() {
     pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
     expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
     dd, rTotal, avgRisk, graded: g.length,
+    wins: wins.length, losses: losses.length,
     ...streaks(t),
   };
 }
@@ -1207,19 +1234,23 @@ function renderSummary() {
 }
 
 /* The way back, in trades rather than dollars. Being down $652 tells you
-   nothing you can act on; being down 4.2R tells you it is five ordinary
-   trades, which is a week — not a catastrophe and not a reason to size
-   up. Only shown when you are actually down, and only when enough risk
-   has been recorded for the average to mean something. */
-function renderRecover(t) {
-  const el = document.getElementById('recover');
-  if (t.profit >= 0 || !t.graded) { el.hidden = true; return; }
+   nothing you can act on; being down 4.2R tells you it is four ordinary
+   trades — not a catastrophe, and not a reason to size up. Only shown
+   when you are actually down, and only when enough risk has been
+   recorded for the average to mean anything. */
+function recoverHTML(t) {
+  if (t.profit >= 0 || !t.graded || !t.avgRisk) return '';
   const after = t.profit + 3 * t.avgRisk;
   const need = -t.profit / t.avgRisk;
-  el.hidden = false;
-  el.innerHTML = `<span class="ic">${icon('pair', 13)}</span>`
+  return `<p class="recover"><span class="ic">${icon('pair', 13)}</span>`
     + `One trade at 3R puts you <b>${money(after, true)}</b> — `
-    + `<b>${need.toFixed(1)}R</b> gets you back to flat, off <b>${money(t.avgRisk)}</b> risk.`;
+    + `<b>${need.toFixed(1)}R</b> gets you back to flat, off <b>${money(t.avgRisk)}</b> risk.</p>`;
+}
+function renderRecover(t) {
+  const el = document.getElementById('recover');
+  const html = recoverHTML(t);
+  el.hidden = !html;
+  el.innerHTML = html;
 }
 
 /* ── calendar ── */
@@ -1326,31 +1357,42 @@ function renderMetrics() {
   /* A profit factor of ∞ after three wins and no losses is the most
      flattering number available at the moment of least evidence, and
      0.00 on an empty ledger reads as a catastrophic edge. Both are — . */
-  const pf = !t.n ? ['—', 'no trades yet']
-    : t.pf === Infinity ? ['—', 'no losses yet — needs one to be defined']
-    : [t.pf.toFixed(2), 'Gross won ÷ gross lost. Under 1 and the edge is negative.'];
-  const twrNote = t.twr === null
-    ? 'Undefined until an opening deposit is recorded.'
-    : t.wiped ? 'The account reached zero; return is not chained past that point.'
-    : 'Chained across every deposit and withdrawal, so it measures the trading.';
-  document.getElementById('metrics').innerHTML = [
-    [money(t.profit, true), 'Realised profit', 'Trades only. Deposits are never counted here.',
-      dir(t.profit)],
-    [pct(t.twr), 'Time-weighted return', twrNote, dir(t.twr)],
-    [t.n ? t.winRate.toFixed(0) + '%' : '—', 'Win rate', `${t.n} trades`, ''],
-    [pf[0], 'Profit factor', pf[1], ''],
-    [money(t.expectancy, true), 'Expectancy', 'What an average trade is worth to you.',
-      dir(t.expectancy)],
-    [money(t.avgWin), 'Average win', '', ''],
-    [money(t.avgLoss), 'Average loss', '', ''],
-    [money(t.dd), 'Max drawdown', 'Trades only — a withdrawal is not a loss.', ''],
-    [(t.streak > 0 ? '+' : '') + t.streak, 'Current run',
-      t.streak > 0 ? 'consecutive wins' : t.streak < 0 ? 'consecutive losses' : 'flat',
-      t.streak > 0 ? 'up' : t.streak < 0 ? 'down' : ''],
-    [String(t.worstLoss), 'Longest losing run', 'The one to size for.', ''],
-  ].map(([v, l, note, cls]) =>
-    `<div class="metric"><b class="${cls ? 'stat ' + cls : ''}" style="${cls === 'up' ? 'color:var(--up)' : cls === 'down' ? 'color:var(--down)' : ''}">${v}</b>
-     <span>${l}</span>${note ? `<em>${note}</em>` : ''}</div>`).join('');
+  const pf = !t.n ? ['—', 'No trades yet']
+    : t.pf === Infinity ? ['—', 'No losses yet — needs one to be defined']
+    : [t.pf.toFixed(2), `Avg win ${round(t.avgWin)} · avg loss ${round(t.avgLoss)}`];
+  const avgR = t.graded ? t.rTotal / t.graded : null;
+
+  const CARDS = [
+    { k: 'pulse', l: 'Net P/L', v: money(t.profit, true), cls: dir(t.profit), wide: true,
+      sub: t.graded
+        ? `${t.rTotal >= 0 ? '+' : '−'}${Math.abs(t.rTotal).toFixed(2)}R across ${t.graded} graded trade${t.graded === 1 ? '' : 's'}`
+        : 'Trades only — deposits are never counted here',
+      extra: recoverHTML(t) },
+    { k: 'pct', l: 'Win rate', v: t.n ? t.winRate.toFixed(0) + '%' : '—',
+      sub: t.n ? `${t.wins}W · ${t.losses}L` : 'No trades yet',
+      bar: t.n ? [t.winRate, t.winRate >= 50 ? 'up' : 'down'] : null },
+    { k: 'out', l: 'Average R', v: avgR === null ? '—' : `${avgR >= 0 ? '+' : '−'}${Math.abs(avgR).toFixed(2)}R`,
+      cls: avgR === null ? '' : dir(avgR),
+      sub: t.n ? `Best streak ${t.bestWin}W · worst ${t.worstLoss}L`
+               : 'Record a risk on a trade to grade it' },
+    { k: 'bars', l: 'Profit factor', v: pf[0], sub: pf[1] },
+    { k: 'pair', l: 'Expectancy', v: money(t.expectancy, true), cls: dir(t.expectancy),
+      sub: 'Expected value per trade' },
+  ];
+
+  document.getElementById('metrics').innerHTML = CARDS.map(c =>
+    `<div class="metric ${c.cls || ''} ${c.wide ? 'wide' : ''}">
+       <span>${icon(c.k, 11)}${c.l}</span>
+       <b>${c.v}</b>
+       <em>${c.sub}</em>
+       ${c.bar ? `<span class="mbar"><i class="${c.bar[1]}" style="width:${c.bar[0].toFixed(1)}%"></i></span>` : ''}
+       ${c.extra || ''}
+     </div>`).join('');
+
+  /* Max drawdown loses its own tile but not its place — it belongs beside
+     the curve that shows it happening. */
+  document.getElementById('ddMeta').textContent = t.n
+    ? `worst drawdown ${round(t.dd)}` : '';
   renderCurve();
 }
 
@@ -1413,16 +1455,19 @@ function renderCurve() {
     if (e.k !== 'trade') cap += signed(e);
     return { i, eq, cap, flow: e.k !== 'trade', date: e.date };
   });
-  /* The domain has to cover both signs. Dividing by a single max put a
-     negative equity ABOVE the zero line — a loss drawn as a gain — and a
-     ledger of pure losses fell to the `|| 1` fallback and drew the line
-     thousands of pixels off canvas. */
-  const lo = Math.min(0, ...pts.map(p => Math.min(p.eq, p.cap)));
-  const hi = Math.max(0, ...pts.map(p => Math.max(p.eq, p.cap)));
-  const top = hi > 0 ? hi * 1.08 : 0, bot = lo < 0 ? lo * 1.08 : 0;
+  /* The domain is the data, not zero-to-max. Forcing $0 in flattened a
+     $10,000 account moving $700 into a straight line — the one thing the
+     chart exists to show. Deriving it from both series instead also
+     keeps a negative equity below the zero line rather than above it,
+     and keeps a ledger of pure losses on the canvas. */
+  const lo = Math.min(...pts.map(p => Math.min(p.eq, p.cap)));
+  const hi = Math.max(...pts.map(p => Math.max(p.eq, p.cap)));
+  const pad = (hi - lo) * 0.14 || Math.max(1, Math.abs(hi) * 0.1);
+  const bot = lo - pad, top = hi + pad;
   const span = (top - bot) || 1;
   const x = i => PAD + (i / Math.max(1, pts.length - 1)) * (W - PAD * 2);
   const y = v => H - PAD - ((v - bot) / span) * (H - PAD * 2);
+  const zeroIn = bot <= 0 && 0 <= top;   // only draw a line that is on the canvas
 
   const line = key => pts.map((p, i) => `${i ? 'L' : 'M'}${x(i).toFixed(1)},${y(p[key]).toFixed(1)}`).join('');
   const marks = pts.filter(p => p.flow).map(p =>
@@ -1431,10 +1476,11 @@ function renderCurve() {
 
   svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
   svg.innerHTML =
-    `<line class="gridline" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>
+    `<line class="gridline" x1="${PAD}" y1="${(H - PAD).toFixed(1)}" x2="${W - PAD}" y2="${(H - PAD).toFixed(1)}"/>
      <line class="gridline" x1="${PAD}" y1="${PAD - 8}" x2="${W - PAD}" y2="${PAD - 8}"/>
-     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${money(top).replace('.00','')}</text>
-     <text class="axis-l" x="${PAD}" y="${(y(0) + 13).toFixed(1)}">$0</text>
+     ${zeroIn ? `<line class="gridline" x1="${PAD}" y1="${y(0).toFixed(1)}" x2="${W - PAD}" y2="${y(0).toFixed(1)}"/>` : ''}
+     <text class="axis-l" x="${PAD}" y="${PAD - 13}">${round(top)}</text>
+     <text class="axis-l" x="${PAD}" y="${H - PAD + 13}">${round(bot)}</text>
      ${marks}
      <path class="basis" d="${line('cap')}"/>
      <path class="equity" d="${line('eq')}"/>`;
@@ -1873,28 +1919,28 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
 document.getElementById('cpIcon').innerHTML = icon('clock', 11);
 
-/* Room left to work in, in three states. The point is not a countdown —
-   it is whether there is still time for a setup to form and be taken. */
+/* Room left to work in. The point is not a countdown — it is whether
+   there is still time for a setup to form and be taken. */
 function room(left, off, next) {
   if (off) return ['off', 'Not a candle you trade',
     `Nothing here. The next reversal window is ${hhmm(next)}.`];
   if (left > 5400) return ['ok', `${hm(left)} left — enough to position inside this candle`,
     'Room for the setup to develop before the close.'];
   if (left > 1800) return ['mid', `${hm(left)} left — past halfway`,
-    'Enough for a continuation, not for a reversal to build.'];
-  return ['late', `${hm(left)} left — too late to position`,
-    `The move has mostly happened. Wait for the ${hhmm(next)} open.`];
+    'Enough for a continuation off an existing swing, not for a reversal to build.'];
+  return ['late', `${hm(left)} left — wait for the next candle`,
+    'Too little time to force an entry in here. Let it close, let the next candle form its own wick, and take the continuation off that.'];
 }
 
 function tickCandle() {
   const c = candle();
   const off = c.open === NO_TRADE;
   const next = (c.open + 4) % 24;
-  const p = PROFILE[c.open];
   const pctDone = (c.into / 14400 * 100).toFixed(2) + '%';
+  const [state, head, sub] = room(c.left, off, next);
 
   put('candleOpen', hhmm(c.open));
-  put('candleName', p.name);
+  put('candleName', PROFILE[c.open].name);
   put('candleLeft', off ? 'no trade' : clock(c.left) + ' left');
   document.getElementById('candleFill').style.width = pctDone;
   candleEl.classList.toggle('off', off);
@@ -1906,12 +1952,21 @@ function tickCandle() {
     ? `${hhmm(c.open)} candle — outside the profile, not traded`
     : `${hhmm(c.open)} candle, New York — ${clock(c.left)} until it closes`;
 
+  /* Once this candle is nearly done the useful subject is the NEXT one.
+     Reading 22:00's profile at 21:44 is preparation; reading it at 22:05
+     is catching up. So the panel flips to the candle that is about to
+     open while the band goes on describing the one you are still in. */
+  const soon = !off && c.left <= 1800;
+  const show = soon ? next : c.open;
+  const p = PROFILE[show];
   const { h, m } = nowNY();
-  const [state, head, sub] = room(c.left, off, next);
-  put('cpOpen', hhmm(c.open));
+
+  put('cpIn', soon ? 'Approaching' : 'In');
+  put('cpOpen', hhmm(show));
   put('cpName', p.name);
   put('cpNY', `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')} NY`);
-  put('cpNext', off ? `then ${hhmm(next)}` : `${hm(c.left)} left · then ${hhmm(next)}`);
+  put('cpNext', soon ? `opens in ${hm(c.left)}`
+    : off ? `then ${hhmm(next)}` : `${hm(c.left)} left · then ${hhmm(next)}`);
   put('cpLine', p.line);
   put('cpBandT', head);
   put('cpBandS', sub);
