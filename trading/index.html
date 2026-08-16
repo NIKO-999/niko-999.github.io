@@ -79,6 +79,20 @@
    belong to, on both sides. Arc already agreed with the head; this is
    the one file that did not. */
 .pane { flex: 1; overflow-y: auto; padding: 4px 14px 22px; }
+/* The calendar pane holds one object that wants every pixel of it, so it
+   keeps a tighter footer than the scrolling views do — 22px of padding
+   under a month grid is 22px the last row does not get. */
+#calendarSection .pane { padding-bottom: 8px; }
+/* A month taller than the pane has to scroll, and a hard panel edge
+   through the middle of a card reads as a bug rather than as more
+   month below. The mask fades the last few pixels of whatever is
+   under the cut, so it reads as continuing. Applied only while there
+   IS something below — see paneCue() — so a month that fits is never
+   softened for no reason. */
+#calendarSection .pane.more {
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 24px), transparent);
+}
 
 /* ── the number that matters, and its parts ── */
 .summary { display: flex; gap: 26px; align-items: flex-start; padding: 2px 0 18px; flex-wrap: wrap; }
@@ -290,12 +304,17 @@
    letting one busy day set the row height left gaps beside it. */
 #calendarSection .pane { display: flex; flex-direction: column; }
 #calendarSection .grid { flex: 1; min-height: 0; }
-/* min-content, not a fixed floor: rows take an equal share of the pane
-   and fill it, EXCEPT a row holding a day that genuinely needs more —
-   three trades share a cell at 20px each and want ~104. That one row
-   grows to its content and the month scrolls the difference, so a quiet
-   month still fills the page and a busy one is never cut off. */
-.grid { grid-auto-rows: minmax(min-content, 1fr); }
+#calendarSection .cal-head { margin: 0 0 8px; }
+#calendarSection .dow { margin-bottom: 2px; }
+/* Rows share the pane and fill it. They do NOT grow to their content:
+   letting them do that pushed the grid past the pane, so the month
+   scrolled and the panel edge sliced the bottom row through the middle
+   of a card — clipping moved from inside the cells to the foot of the
+   calendar rather than going away. The floor below is what a cell
+   measures out to with its header and three cards at their real line
+   heights, so a window 900px tall or more shows a whole month with
+   nothing cut anywhere. */
+.grid { grid-auto-rows: minmax(102px, 1fr); }
 /* Seven columns have a floor. Below it the month scrolls sideways
    rather than crushing each day to a width its own date will not fit —
    the same trade the timeline makes in the shell at this width. */
@@ -303,8 +322,9 @@
   #calendarSection .pane { overflow-x: auto; }
   #calendarSection .grid, #calendarSection .dow { min-width: 620px; }
 }
-/* No inner scroller. A cell that scrolls hides trades behind a gesture
-   nobody makes on a month view — the row grows instead, below. */
+/* No inner scroller: a cell that scrolls hides trades behind a gesture
+   nobody makes on a month view. Nothing overflows it either — the cards
+   share whatever height the row has, and the render caps at three. */
 .day { min-height: 0; }
 .day.empty .day-new { flex: 1; }
 /* A day with nothing on it is a record too, but it is not news. */
@@ -315,8 +335,8 @@
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  padding: 7px 7px 8px;
+  gap: 4px;
+  padding: 6px 7px 5px;
   border: 1px solid var(--glass-line);
   border-radius: 9px;
   background: var(--glass-in);
@@ -328,8 +348,13 @@
    inside it and the strip of empty space beneath them, so an existing
    trade can be opened instead of a second one being started on top. */
 .day.blank { border-color: transparent; background: none; }
-.day-h { display: flex; align-items: baseline; gap: 6px; }
+.day-h { display: flex; align-items: baseline; gap: 6px; line-height: 1.25; }
 .day-h .d { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
+.day-h .more {
+  padding: 0 4px; border-radius: 4px;
+  background: color-mix(in srgb, var(--ink-3) 20%, transparent);
+  font-family: var(--mono); font-size: .54rem; color: var(--ink-2);
+}
 .day-h .grow { flex: 1; }
 /* The net keeps the direction colour, because it is the one figure on
    the cell that is a judgement rather than a record. */
@@ -349,9 +374,18 @@
    take a third each. The cell is the same size either way, so the month
    keeps its shape however the day went. */
 .tcard {
-  flex: 1 1 0; min-height: 20px;
+  /* min-height: 0, not 20px. An explicit minimum on a flex item replaces
+     its automatic one, so at 20px three cards demanded 60 from a cell
+     that might only have 55 and spilled over the edge. At 0 they divide
+     whatever the row gives them and the division always adds up. */
+  flex: 1 1 0; min-height: 0;
   display: flex; align-items: center; gap: 7px; width: 100%;
-  padding: 4px 6px;
+  overflow: hidden;
+  padding: 3px 6px;
+  /* 1.45 is leading for paragraphs. Each card here is one line, and the
+     four spare pixels it bought were the difference between three cards
+     fitting a cell and being cut off inside it. */
+  line-height: 1.25;
   border: 1px solid var(--glass-line);
   border-radius: 6px;
   background: var(--glass-in-2);
@@ -368,12 +402,8 @@
 .trr, .tmeta { display: none; }
 .tcard.solo {
   flex-direction: column; align-items: stretch; justify-content: center;
-  gap: 6px; padding: 9px 11px;
-  /* Not the 20px floor the compact cards use. A flex item's explicit
-     min-height replaces its automatic minimum, so at 20px the solo card
-     told the cell it needed 20 while actually wanting 81 — the row sized
-     itself to the lie and the card overflowed its own padding. */
-  min-height: min-content;
+  gap: 3px; padding: 7px 10px;
+  min-height: 0;
 }
 .tcard.solo .tcard-h { display: flex; align-items: center; gap: 7px; }
 .tcard.solo .tval { display: flex; align-items: baseline; gap: 9px; }
@@ -390,7 +420,11 @@
    squeezed to nothing whenever the card was a pixel short, and it took
    the row's min-content with it, so the row never grew to make room.
    Unshrinkable, the card states its real height and the row honours it. */
-.tcard.solo .tcard-h, .tcard.solo .tval, .tcard.solo .tmeta { flex: none; }
+/* The symbol row and the amount are the card; they never shrink. The
+   meta line is the one that yields, so a short window loses the R and
+   the session rather than pushing the amount out of its own card. */
+.tcard.solo .tcard-h, .tcard.solo .tval { flex: none; }
+.tcard.solo .tmeta { flex: 0 1 auto; min-height: 0; }
 .tcard.solo .tmeta {
   display: block;
   font-family: var(--mono); font-size: .58rem; letter-spacing: .04em;
@@ -446,7 +480,7 @@
    full-cell target, a busy day gets its height back, and a three-trade
    day now fits the row it is given rather than being cut off by it. */
 .day:not(.empty) .day-new {
-  position: absolute; left: 6px; right: 6px; bottom: 6px;
+  position: absolute; left: 6px; right: 6px; bottom: 4px;
   min-height: 0; height: 15px; padding: 0 4px;
   border-radius: 5px;
   background: color-mix(in srgb, var(--glass-in-2) 88%, var(--ink));
@@ -1441,8 +1475,14 @@ function renderCalendar() {
     const hit = days.get(k);
     if (hit) monthPnl += hit.pnl;
 
-    const solo = hit && hit.items.length === 1;
-    const cards = hit ? hit.items.map(e => {
+    /* Three is the cap you set for yourself, and it is also what a cell
+       can show without shrinking a card past one readable line. A fourth
+       is not hidden — it is counted in the header and still reachable
+       from Capital — but it does not get to crush the other three. */
+    const shown = hit ? hit.items.slice(0, 3) : [];
+    const over = hit ? hit.items.length - shown.length : 0;
+    const solo = shown.length === 1;
+    const cards = hit ? shown.map(e => {
       /* A zero-amount trade you actually took is neither a win nor a
          loss, and calling it a win here while the metrics count it as
          neither would have three code paths disagreeing about one row. */
@@ -1476,12 +1516,14 @@ function renderCalendar() {
 
     const netCls = !hit || !hit.n ? '' : hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : '';
     const sum = hit && hit.n
-      ? `${money(hit.pnl, true)} from ${hit.n} trade${hit.n === 1 ? '' : 's'}` : 'no trades';
+      ? `${money(hit.pnl, true)} from ${hit.n} trade${hit.n === 1 ? '' : 's'}`
+        + (over ? `, ${over} not shown` : '') : 'no trades';
 
     cells += `<div class="day ${hit ? '' : 'empty'} ${k === todayIso ? 'today' : ''}" data-date="${k}"
         role="group" aria-label="${d} ${MONTHS[m]}, ${sum}">
       <span class="day-h">
         <span class="d" aria-hidden="true">${d}</span>
+        ${over ? `<span class="more" aria-hidden="true">+${over}</span>` : ''}
         <span class="grow"></span>
         ${hit && hit.n ? `<span class="net ${netCls}" aria-hidden="true">${money(hit.pnl, true)}</span>` : ''}
       </span>
@@ -1497,7 +1539,24 @@ function renderCalendar() {
   const mp = document.getElementById('monthPnl');
   mp.textContent = monthPnl ? money(monthPnl, true) : 'no trades';
   mp.style.color = monthPnl > 0 ? 'var(--up)' : monthPnl < 0 ? 'var(--down)' : '';
+  paneCue();
 }
+
+/* Whether there is month below the fold. Six-week months with three
+   trades on a day want about 700px of pane and a 900-tall window gives
+   656, so on shorter screens this cannot be designed away — it can only
+   be made to look like what it is. */
+function paneCue() {
+  const pane = document.querySelector('#calendarSection .pane');
+  if (!pane) return;
+  const more = pane.scrollHeight - pane.clientHeight - pane.scrollTop > 2;
+  pane.classList.toggle('more', more);
+}
+(() => {
+  const pane = document.querySelector('#calendarSection .pane');
+  pane.addEventListener('scroll', paneCue, { passive: true });
+  new ResizeObserver(paneCue).observe(pane);
+})();
 
 document.getElementById('prevM').addEventListener('click', () => {
   cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1); renderCalendar();
