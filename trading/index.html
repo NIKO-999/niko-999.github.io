@@ -791,23 +791,25 @@ const icon = (n, size) =>
    list never drifts: a list that changes cannot tell you which rule you
    skipped on the days you lost.
 
-   PROVISIONAL — drafted from the setups already in this ledger (CISD,
-   SMT, Sweep) and pending a read of the trading-dashboard repo. Replace
-   the lines; keep the two keys. */
+   Distilled from the 4H profiling docs (Eleven_Trades, V1–V3). The
+   reversal is the wick — trade it only where the daily profile says a
+   wick belongs, and never without SMT. The continuation is the body —
+   the 3rd candle of an existing swing point, entered on the orderblock
+   the opposing run leaves behind. */
 const CHECKLISTS = {
   continuation: [
-    '4H bias unchanged — no HTF SMT against me',
-    'Liquidity taken in the direction of bias',
-    'CISD on the entry timeframe',
-    'Entry from discount (long) / premium (short)',
-    'Risk fixed before entry',
+    'Daily bias and order flow aligned',
+    '3rd candle — swing point already formed',
+    'SMT confirmed at the swing high/low',
+    'Small wick — body expanding, no consolidation',
+    'Opposing run made the OB — entering the expansion',
   ],
   reversal: [
-    'HTF SMT confirmed',
-    'Opposing liquidity swept',
-    'CISD against the prior leg',
-    'Displacement left an imbalance to enter from',
-    'Risk fixed before entry',
+    'Key level reached — profile supports the turn',
+    'HTF SMT divergence — no SMT, no trade',
+    'CISD instant — no consolidation before it',
+    'Right candle for the reversal window',
+    'No contradictory swing on the chart',
   ],
 };
 const MODES = { continuation: 'modeCont', reversal: 'modeRev' };
