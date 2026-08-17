@@ -1041,25 +1041,91 @@ const _LAZY_CONTENT = [
   'compatibility-content',
 ];
 
+// ── CONTENT GENERATIONS ────────────────────────────────────────────────────
+// The written interpretations get rewritten wholesale from time to time, and a
+// rewrite that large needs to be reversible without restoring anything. So the
+// original writing stays put in js/ and never moves; a new generation lives in
+// js/<set>/ under the SAME filenames, wrapping the SAME window.D* globals.
+//
+// CONTENT_SET picks which generation everyone gets. '' means the originals in
+// js/. Changing this one string swaps every reading in the app and is the whole
+// rollback procedure.
+//
+// A generation file is an OVERLAY, not a replacement. The original loads first,
+// then the overlay executes and wraps whatever global the original defined:
+//
+//   const prev = window.DFooContent;
+//   window.DFooContent = { get(n) { return mine[n] || (prev && prev.get(n)); } };
+//
+// That granularity is per RECORD, not per file, which is what makes a rewrite
+// of this size survivable: a single reading can be rewritten and shipped while
+// the other 1,112 keep reading exactly as they do today. Nothing is ever half
+// broken, and no file has to be finished before any of it goes live.
+//
+// Once a module is fully rewritten there is no reason to keep paying for the
+// original's bytes — list it in CONTENT_SET_COMPLETE and the base file stops
+// loading for it. micro-content.js alone is 783KB, so this matters.
+//
+// Currently '' because js/v2/ holds no content yet, and pointing at an empty
+// generation would cost 14 pointless 404s per session for no benefit. Flip it
+// to 'v2' the moment the first real file lands there. Until then, ?content=v2
+// still previews the new generation without changing what anyone else sees.
+const CONTENT_SET = '';
+
+// Modules whose overlay is COMPLETE — every record rewritten, nothing left to
+// fall through to. The original is skipped entirely for these. Add a name here
+// only when the overlay genuinely covers every entry; being wrong here means
+// missing readings rather than stale ones.
+const CONTENT_SET_COMPLETE = [];
+
+// Per-visit override: ?content=v1 forces the originals, ?content=v2 the new set.
+// Read once, here, because applyNewDate rewrites location.search later. Nothing
+// about this renders on screen — readers never see a version switch.
+const _CONTENT_PARAM   = new URLSearchParams(location.search).get('content');
+const _CONTENT_SET_ACTIVE = _CONTENT_PARAM === null
+  ? CONTENT_SET
+  : (_CONTENT_PARAM === 'v1' ? '' : _CONTENT_PARAM);
+
 let _contentPromise = null;
 let _contentFailed  = false;
 
-function _loadScript(name) {
+function _contentPath(name, dir) {
+  return dir ? 'js/' + dir + '/' + name + '.js' : 'js/' + name + '.js';
+}
+
+function _loadScript(src, name) {
   return new Promise((resolve, reject) => {
     const s = document.createElement('script');
-    s.src = 'js/' + name + '.js';
+    s.src = src;
     s.async = false; // keep execution order stable; these are independent anyway
     s.onload = () => resolve(name);
-    s.onerror = () => reject(new Error('content module failed to load: ' + name));
+    s.onerror = () => reject(new Error('content module failed to load: ' + src));
     document.head.appendChild(s);
   });
+}
+
+// Original first, overlay second — order matters, because the overlay closes
+// over the global the original defined. A missing overlay 404s and is swallowed
+// on purpose: that's simply a module this generation hasn't touched yet.
+function _loadContent(name) {
+  const set = _CONTENT_SET_ACTIVE;
+  if (!set) return _loadScript(_contentPath(name, ''), name);
+
+  // A complete overlay stands alone, so the original's bytes are skipped.
+  if (CONTENT_SET_COMPLETE.indexOf(name) !== -1) {
+    return _loadScript(_contentPath(name, set), name)
+      .catch(() => _loadScript(_contentPath(name, ''), name));
+  }
+
+  return _loadScript(_contentPath(name, ''), name)
+    .then(() => _loadScript(_contentPath(name, set), name).catch(() => name));
 }
 
 // Resolves once every interpretation module has executed. Safe to call as
 // often as you like — the work happens once and the same promise is reused.
 function _contentReady() {
   if (!_contentPromise) {
-    _contentPromise = Promise.all(_LAZY_CONTENT.map(_loadScript)).catch((err) => {
+    _contentPromise = Promise.all(_LAZY_CONTENT.map(_loadContent)).catch((err) => {
       // Never reject: a failed content fetch should degrade to the honest
       // "still being written" placeholders each renderer already has, not
       // wedge the card open behind an unhandled rejection.
@@ -1225,6 +1291,29 @@ function themedHex(hexStr) {
   if (Number.isNaN(n)) return hexStr;
   const [r, g, b] = _lightModeRgb((n >> 16) & 255, (n >> 8) & 255, n & 255);
   return '#' + ((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1);
+}
+
+// ── SELF-LABELLING RECORDS ─────────────────────────────────────────────────
+// Older content records carry fixed field names (mastery / shadow / invitation,
+// or the legacy why / positive / negative) and every renderer below hardcodes
+// the matching headings. Newer records instead carry their own:
+//
+//   { title, tagline, fields: [ { label, text }, … ] }
+//
+// so a reading's subheadings belong to the reading rather than to the template
+// — which is the whole point of writing them per position. hasFields() is the
+// schema sniff, in the same spirit as the older `isNewVoice` checks; the two
+// shapes coexist happily, and which one appears depends only on which content
+// generation CONTENT_SET loaded.
+function hasFields(rec) {
+  return !!(rec && Array.isArray(rec.fields) && rec.fields.length);
+}
+function renderFields(rec, hex) {
+  return rec.fields.map(f => `
+       <div class="pb-full-section">
+         <div class="pb-full-label" style="color:${themedHex(hex)}">${f.label}</div>
+         <div class="pb-full-text">${f.text}</div>
+       </div>`).join('');
 }
 
 // Every informational star sprite registers itself here at creation time so
@@ -2102,7 +2191,24 @@ async function showCard(idx) {
   document.getElementById('ic-arcana').textContent = `Arcana · ${d.arcana}`;
   document.getElementById('ic-name').textContent   = d.label;
 
-  if (mc && mc.mastery) {
+  if (hasFields(mc)) {
+    // Self-labelling record: the reading brings its own three subheadings, so
+    // the card's fixed slots are filled from the fields array in order rather
+    // than from named properties. Slots beyond what the record supplies are
+    // hidden, which is what lets a position ship two fields or four.
+    const f = mc.fields;
+    document.getElementById('ic-heading').textContent = mc.title || mc.heading || d.label;
+    document.getElementById('ic-lbl-why').textContent = f[0] ? f[0].label : '';
+    document.getElementById('ic-why').textContent     = f[0] ? f[0].text  : '';
+    document.getElementById('ic-lbl-shadow').textContent = f[1] ? f[1].label : '';
+    document.getElementById('ic-shadow').textContent     = f[1] ? f[1].text  : '';
+    document.getElementById('ic-lbl-positive').textContent = f[2] ? f[2].label : '';
+    document.getElementById('ic-positive').textContent     = f[2] ? f[2].text  : '';
+    document.getElementById('ic-sec-path').style.display     = 'none';
+    document.getElementById('ic-sec-shadow').style.display   = f[1] ? '' : 'none';
+    document.getElementById('ic-sec-positive').style.display = f[2] ? '' : 'none';
+    document.getElementById('ic-sec-negative').style.display = 'none';
+  } else if (mc && mc.mastery) {
     // New Mastery/Shadow/Invitation voice
     document.getElementById('ic-heading').textContent  = mc.title || mc.heading;
     document.getElementById('ic-lbl-why').textContent    = 'Mastery';
@@ -3597,7 +3703,7 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').textContent = SECTION_LABEL[data.key];
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (pc && (pc.title || pc.heading)) || data.label;
-      document.getElementById('pb-body').innerHTML = feedHtml + (pc ?
+      document.getElementById('pb-body').innerHTML = feedHtml + (hasFields(pc) ? renderFields(pc, hex) : pc ?
         (isNewVoice ?
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE SYNTHESIS</div>
@@ -3663,7 +3769,8 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').textContent = isNamedSeed ? 'Named Karmic Seed' : 'Karmic Debt';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (kc && (kc.title || kc.heading)) || data.label;
-      document.getElementById('pb-body').innerHTML = kc ?
+      document.getElementById('pb-body').innerHTML = hasFields(kc) ? renderFields(kc, hex) :
+      kc ?
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${kc.mastery || ''}</div>
@@ -3703,7 +3810,8 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').textContent = 'Sexual Line';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (sc && (sc.title || sc.heading)) || data.label;
-      document.getElementById('pb-body').innerHTML = sc ?
+      document.getElementById('pb-body').innerHTML = hasFields(sc) ? renderFields(sc, hex) :
+      sc ?
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${sc.mastery || sc.pattern || ''}</div>
@@ -3738,7 +3846,8 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').textContent = 'Past Life Star';
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (pl && (pl.title || pl.heading)) || data.label;
-      document.getElementById('pb-body').innerHTML = pl ?
+      document.getElementById('pb-body').innerHTML = hasFields(pl) ? renderFields(pl, hex) :
+      pl ?
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${pl.mastery || pl.expressions || ''}</div>
@@ -4010,7 +4119,7 @@ const ARCANA_ESSENCE = {
            <div class="pb-full-text">${reinforcementText}</div>
          </div>`;
 
-      const writtenHtml = pc ? `
+      const writtenHtml = hasFields(pc) ? renderFields(pc, hex) : pc ? `
          <div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">MASTERY</div>
            <div class="pb-full-text">${pc.mastery || pc.why || ''}</div>
@@ -4056,7 +4165,8 @@ const ARCANA_ESSENCE = {
       document.getElementById('pb-section-label').style.color = 'rgba(var(--fg-rgb),0.35)';
       document.getElementById('pb-heading').textContent = (ip && ip.title) || data.label;
 
-      document.getElementById('pb-body').innerHTML = ip ?
+      document.getElementById('pb-body').innerHTML = hasFields(ip) ? renderFields(ip, hex) :
+      ip ?
         `<div class="pb-full-section">
            <div class="pb-full-label" style="color:${themedHex(hex)}">THE PARTNER</div>
            <div class="pb-full-text">${ip.partner}</div>
@@ -4172,7 +4282,17 @@ const ARCANA_ESSENCE = {
     const shadowLabel = 'THE SHADOW';
 
     document.getElementById('pb-heading').textContent = (mc && (mc.title || mc.heading)) || data.label;
-    document.getElementById('pb-body').innerHTML = mc ?
+    document.getElementById('pb-body').innerHTML = hasFields(mc) ?
+      renderFields(mc, hex) + `
+       ${data.key === 'MEP' && window.DCareerPathsContent ? (() => {
+         const cp = DCareerPathsContent.get(data.num);
+         return cp ? `<div class="pb-full-section">
+           <div class="pb-full-label" style="color:${themedHex(hex)}">CAREER PATHS</div>
+           <div class="pb-full-text"><em>${cp.heading}</em></div>
+           <div class="pb-full-text" style="margin-top:8px">${cp.text}</div>
+         </div>` : '';
+       })() : ''}` :
+      mc ?
       `<div class="pb-full-section">
          <div class="pb-full-label" style="color:${themedHex(hex)}">${whyLabel}</div>
          <div class="pb-full-text">${(isNewVoice ? mc.mastery : mc.why) || ''}</div>
@@ -5419,7 +5539,12 @@ const ARCANA_ESSENCE = {
     const ok = _prevShare(dateStr);
     if (!ok) return false;
     const iso = `${_dob.yearFull}-${String(_dob.month).padStart(2,'0')}-${String(_dob.day).padStart(2,'0')}`;
-    history.replaceState(null, '', `${location.pathname}?dob=${iso}`);
+    // Rebuild from the current query rather than replacing it, so ?content=
+    // (the content-generation override) survives a date change instead of
+    // being wiped on the first reading.
+    const params = new URLSearchParams(location.search);
+    params.set('dob', iso);
+    history.replaceState(null, '', `${location.pathname}?${params}`);
     return true;
   };
 
