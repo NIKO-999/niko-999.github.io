@@ -784,21 +784,22 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .pb-verdict.down b { color: var(--down); }
 .pb-none { margin: 6px 0 0; font-size: .76rem; line-height: 1.6; color: var(--ink-3); }
 
-/* The ranking. Rows are buttons because they go somewhere — the card for
-   that setup, further down the same page. */
-.pb-rank { margin: 14px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
-.pb-rank button {
-  display: grid; grid-template-columns: minmax(90px, 1.1fr) minmax(0, 2fr) 74px 78px;
-  align-items: center; gap: 12px; width: 100%;
-  padding: 10px 8px; border: 0; border-radius: 8px;
-  background: none; font: inherit; color: inherit; text-align: left; cursor: pointer;
-}
-.pb-rank button:hover { background: var(--glass-in); }
+/* Three across, for the three cuts that fit on one line: candle, day,
+   mode. Narrower than that and a four-column bar row inside a third of a
+   panel is unreadable, so they stack. */
+.charts.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .charts.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px)  { .charts.three { grid-template-columns: minmax(0, 1fr); } }
 
 .pb-bars { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
+/* The name takes what is left rather than a fixed share: these rows sit
+   three to a line on a wide window and one to a line on a narrow one, and
+   a fixed name column ellipsised "10:00 Late New York" down to "10:00
+   Late ..." in the first case while leaving half the row empty in the
+   second. */
 .pb-bars li {
-  display: grid; grid-template-columns: minmax(72px, 1fr) minmax(0, 1.6fr) 58px 26px;
-  align-items: center; gap: 10px; padding: 5px 0;
+  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(18px, 1fr) 52px 20px;
+  align-items: center; gap: 8px; padding: 5px 0;
 }
 .pb-k { font-size: .78rem; color: var(--ink-2); overflow: hidden;
   text-overflow: ellipsis; white-space: nowrap; }
@@ -814,17 +815,22 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .pb-v.down { color: var(--down); }
 .pb-n { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); text-align: right; }
 @media (max-width: 620px) {
-  .pb-rank button { grid-template-columns: minmax(70px, 1fr) 64px 66px; }
-  .pb-rank .pb-track { display: none; }
+  .pb-bars li { grid-template-columns: minmax(64px, 1fr) 54px 24px; }
+  .pb-bars .pb-track { display: none; }
 }
 
-/* Where the outcomes land. A fixed viewBox scaled by CSS, like the
-   radars — seven bars do not need one unit to be one pixel, and a fixed
-   box draws correctly while the section is still hidden. */
+/* Where the outcomes land — one dot per graded trade on an R axis.
+   Filled rather than outlined, and translucent, so two trades that
+   landed on nearly the same R read as denser ink instead of as one
+   trade. A fixed viewBox scaled by CSS, like the radars, so it draws
+   correctly while the section is still hidden. */
 .pb-hist { display: block; width: 100%; max-width: 560px; height: auto; margin: 2px auto 0; }
-.pb-hist .hb.up { fill: color-mix(in srgb, var(--up) 62%, transparent); }
-.pb-hist .hb.down { fill: color-mix(in srgb, var(--down) 62%, transparent); }
-.pb-hist .hn { font-family: var(--mono); font-size: 9px; fill: var(--ink-2); }
+.pb-hist .hd { fill: color-mix(in srgb, var(--ink-3) 55%, transparent); }
+.pb-hist .hd.up { fill: color-mix(in srgb, var(--up) 70%, transparent); }
+.pb-hist .hd.down { fill: color-mix(in srgb, var(--down) 70%, transparent); }
+/* The mean, drawn in the accent because it is the one line here that is
+   a claim rather than a record of something that happened. */
+.pb-hist .hmean { stroke: var(--accent); stroke-width: 1.4; opacity: .75; }
 .pb-hist .hk { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-3); letter-spacing: .03em; }
 
 /* One rule per row: what it says, how often you ticked it, and what
@@ -2614,50 +2620,71 @@ const pbNeed = (have, need, noun) =>
 /* Seven fixed buckets, not quantiles. R has a real zero and a real unit,
    so the edges can be constants; quantile edges move as you trade, and
    two months of trading could never be compared with each other. */
-const PB_BINS = [[-Infinity, -2, '≤−2'], [-2, -1, '−2 to −1'], [-1, 0, '−1 to 0'],
-                 [0, 1, '0 to 1'], [1, 2, '1 to 2'], [2, 3, '2 to 3'], [3, Infinity, '3+']];
-function pbBins(items) {
-  const rs = items.filter(e => e.risk > 0).map(rOf);
-  return PB_BINS.map(([lo, hi, label]) =>
-    ({ label, lo, hi, n: rs.filter(v => v > lo && v <= hi).length }));
-}
+/* One dot per graded trade on an R axis, not a histogram of buckets.
 
-/* Fixed viewBox scaled by CSS, like the radars rather than the curve.
-   The curve measures because it plots hundreds of points and needed one
-   user unit to be one pixel; seven bars do not. The fixed box is also
-   what lets this draw correctly while the section is still hidden, so
-   the Playbook needs no resize observer of its own to stay in step. */
-function pbHist(items, id) {
-  const bins = pbBins(items);
-  const total = bins.reduce((s, b) => s + b.n, 0);
-  const W = 560, H = 150, PAD = 22, BASE = H - 30;
-  if (!total) {
+   Buckets were the wrong instrument at this sample size. Seven fixed
+   edges over a dozen trades drew two bars and five gaps, and the gaps
+   read as information — as though nothing ever landed there, rather than
+   as though there had never been enough trades for it to. This plots the
+   trades themselves: twelve trades is twelve dots, the axis is only as
+   wide as your actual results, and the shape you see is the spread
+   rather than a choice of edges I made for you.
+
+   Dots that would overlap stack upward instead of hiding each other, so
+   the count is always readable off the picture. Deterministic: no
+   jitter, so the same trades draw the same picture every time.
+
+   Fixed viewBox scaled by CSS, like the radars rather than the curve —
+   which is what lets this draw correctly while the section is still
+   hidden, so the Playbook needs no resize observer of its own. */
+function pbStrip(items) {
+  const rs = items.filter(e => e.risk > 0).map(rOf).sort((a, b) => a - b);
+  const W = 560, PAD = 26;
+  if (!rs.length) {
     return { vb: `0 0 ${W} 56`,
       svg: `<text class="rempty" x="${W / 2}" y="32" text-anchor="middle">`
          + `Nothing graded yet — a spread of R needs the risk written down</text>`,
       alt: 'No graded trades here, so there is no spread of outcomes to describe.' };
   }
-  const max = Math.max(...bins.map(b => b.n));
-  const bw = (W - PAD * 2) / bins.length;
-  const zero = PAD + 3 * bw;
-  const body = bins.map((b, i) => {
-    const x = PAD + i * bw + 5, w = bw - 10;
-    const h = b.n ? Math.max(3, (b.n / max) * (BASE - 26)) : 0;
-    const y = BASE - h;
-    return (b.n ? `<rect class="hb ${b.hi <= 0 ? 'down' : 'up'}" x="${x.toFixed(1)}"`
-      + ` y="${y.toFixed(1)}" width="${w.toFixed(1)}" height="${h.toFixed(1)}" rx="3"/>`
-      + `<text class="hn" x="${(x + w / 2).toFixed(1)}" y="${(y - 5).toFixed(1)}"`
-      + ` text-anchor="middle">${b.n}</text>` : '')
-      + `<text class="hk" x="${(x + w / 2).toFixed(1)}" y="${BASE + 16}"`
-      + ` text-anchor="middle">${b.label}</text>`;
-  }).join('');
-  const alt = `${total} graded ${total === 1 ? 'trade' : 'trades'}, by result: `
-    + bins.filter(b => b.n).map(b => `${b.n} between ${b.label.replace('≤−2', 'minus two and worse')
-        .replace('3+', 'three and above').replace(/−/g, 'minus ')}R`).join(', ') + '.';
+  /* The axis always contains −1R and +1R even when your results do not,
+     because a strip running −0.2 to +0.3 makes a flat fortnight look like
+     a wild one. Half-R steps outward from there. */
+  const lo = Math.min(-1, Math.floor(rs[0] * 2) / 2);
+  const hi = Math.max(1, Math.ceil(rs[rs.length - 1] * 2) / 2);
+  const x = (v) => PAD + ((v - lo) / (hi - lo)) * (W - PAD * 2);
+  const RAD = 4.6, STEP = RAD * 2 + 1.6;
+
+  const placed = [];
+  const dots = rs.map((v) => {
+    const px = x(v);
+    let row = 0;
+    while (placed.some(p => p.row === row && Math.abs(p.px - px) < STEP)) row++;
+    placed.push({ px, row });
+    return { v, px, row };
+  });
+  const rows = Math.max(...dots.map(d => d.row)) + 1;
+  const BASE = 30 + rows * STEP;
+  const H = BASE + 26;
+  const cy = (row) => BASE - RAD - row * STEP;
+
+  const mean = rs.reduce((s, v) => s + v, 0) / rs.length;
+  const tick = (v, label) =>
+    `<text class="hk" x="${x(v).toFixed(1)}" y="${BASE + 17}" text-anchor="middle">${label}</text>`;
+
   return { vb: `0 0 ${W} ${H}`,
-    svg: `<line class="r-zero" x1="${zero.toFixed(1)}" y1="14" x2="${zero.toFixed(1)}"`
-       + ` y2="${BASE}" /><line class="r-zero" x1="${PAD}" y1="${BASE}" x2="${W - PAD}"`
-       + ` y2="${BASE}" />${body}`, alt };
+    svg: `<line class="r-zero" x1="${x(0).toFixed(1)}" y1="10" x2="${x(0).toFixed(1)}"`
+       + ` y2="${BASE}" /><line class="r-zero" x1="${PAD}" y1="${BASE}"`
+       + ` x2="${W - PAD}" y2="${BASE}" />`
+       /* The mean is the figure the Per trade tile prints. Drawn on the
+          same axis so the tile and the picture are visibly one claim. */
+       + `<line class="hmean" x1="${x(mean).toFixed(1)}" y1="14"`
+       + ` x2="${x(mean).toFixed(1)}" y2="${BASE}" />`
+       + dots.map(d => `<circle class="hd ${d.v > 0 ? 'up' : d.v < 0 ? 'down' : ''}"`
+          + ` cx="${d.px.toFixed(1)}" cy="${cy(d.row).toFixed(1)}" r="${RAD}" />`).join('')
+       + tick(lo, pbR(lo)) + tick(0, '0R') + tick(hi, pbR(hi)),
+    alt: `${rs.length} graded ${rs.length === 1 ? 'trade' : 'trades'}, from `
+       + `${pbR(rs[0], 2)} to ${pbR(rs[rs.length - 1], 2)}, averaging ${pbR(mean, 2)}. `
+       + `${rs.filter(v => v > 0).length} above zero, ${rs.filter(v => v < 0).length} below.` };
 }
 
 /* A cut inside a cut — this setup by candle, this setup by weekday.
@@ -2712,7 +2739,7 @@ function pbVerdict(r) {
 function pbCard(r, i, totalR) {
   const share = totalR > 0 && r.R > 0 ? `${Math.round((r.R / totalR) * 100)}% of your net R · ` : '';
   const altId = `pbAlt${i}`;
-  const h = pbHist(r.taken, altId);
+  const h = pbStrip(r.taken);
   const wr = r.winRate === null;
   return `
   <section class="pb" aria-labelledby="pbH${i}">
@@ -2739,11 +2766,13 @@ function pbCard(r, i, totalR) {
     <div class="charts two">
       <section class="chartbox span">
         <div class="cal-head"><h2>Where they land</h2><span class="grow"></span>
-          <span class="span-meta">by R</span></div>
+          <span class="span-meta">one dot per graded trade · the line is the mean</span></div>
         <svg class="pb-hist" viewBox="${h.vb}" role="img" aria-labelledby="${altId}"
              preserveAspectRatio="xMidYMid meet">${h.svg}</svg>
         <p class="sr" id="${altId}">${esc(h.alt)}</p>
       </section>
+    </div>
+    <div class="charts three">
       <section class="chartbox">
         <div class="cal-head"><h2>By candle</h2></div>
         ${pbBars(r.taken, SESSIONS, e => e.sess, pbSess)}
@@ -2752,13 +2781,31 @@ function pbCard(r, i, totalR) {
         <div class="cal-head"><h2>By day</h2></div>
         ${pbBars(r.taken, DOW_SHORT.slice(0, 5), dowOf)}
       </section>
+      <!-- The one thing that genuinely varies trade to trade: which of the
+           two you took. A trade with no mode recorded reads as the
+           continuation the sheet defaults to, which is how radarRows has
+           always split it. -->
+      <section class="chartbox">
+        <div class="cal-head"><h2>By mode</h2></div>
+        ${pbBars(r.taken, ['reversal', 'continuation'],
+                 e => e.mode || 'continuation',
+                 (k) => k === 'reversal' ? 'Reversal' : 'Continuation')}
+      </section>
     </div>
   </section>`;
 }
 
-/* Ranked by net R, because that is the figure the account is actually
+/* Ordered by net R, because that is the figure the account is actually
    made of. Anything with no graded trade sorts to the bottom rather than
-   to the middle — it has no R at all, which is not the same as zero. */
+   to the middle — it has no R at all, which is not the same as zero.
+
+   There was a ranking table above these cards and it has been removed.
+   Every figure in it — the name, the net R, the number taken — is printed
+   again in the card immediately below it, so on a ledger with two or
+   three names it made you read the same numbers twice on one screen. An
+   index earns its space by being shorter than the thing it indexes; this
+   one was the thing it indexed, in a smaller font. The order it conveyed
+   is still here, as the order the cards are in. */
 function pbRanked(keyOf, noun) {
   const all = logged();
   const rows = pbGroup(all, keyOf);
@@ -2772,22 +2819,13 @@ function pbRanked(keyOf, noun) {
   rows.sort((a, b) => (b.graded ? b.R : -Infinity) - (a.graded ? a.R : -Infinity)
                       || b.taken.length - a.taken.length);
   const totalR = totals().rTotal;
-  const max = Math.max(...rows.map(r => Math.abs(r.R)), 0.001);
-  const rank = `<ol class="pb-rank">` + rows.map(r =>
-    `<li><button type="button" data-jump="pbH${rows.indexOf(r)}">
-       <span class="pb-k">${esc(r.label)}</span>
-       <span class="pb-track"><i class="${r.R === null ? '' : r.R >= 0 ? 'up' : 'down'}"
-         style="width:${((Math.abs(r.R || 0) / max) * 100).toFixed(1)}%"></i></span>
-       <span class="pb-v ${r.R > 0 ? 'up' : r.R < 0 ? 'down' : ''}">${pbR(r.R)}</span>
-       <span class="pb-n">${r.taken.length} taken</span>
-     </button></li>`).join('') + `</ol>`;
   /* Named rather than folded into an "other" row. A trade with no setup
      on it is not a setup called nothing — it is a gap in the record, and
-     rolling it into the ranking would give that gap an edge. */
+     rolling it in would give that gap an edge. */
   const foot = bare ? `<p class="pb-none">${bare} logged
     ${bare === 1 ? 'trade carries' : 'trades carry'} no ${noun}, so
     ${bare === 1 ? 'it is' : 'they are'} in none of this.</p>` : '';
-  return rank + foot + rows.map((r, i) => pbCard(r, i, totalR)).join('');
+  return foot + rows.map((r, i) => pbCard(r, i, totalR)).join('');
 }
 
 /* The cut nothing in this app could do before. `checks` has been written
@@ -4451,9 +4489,9 @@ function goto(view) {
 document.querySelectorAll('[data-view]').forEach(b =>
   b.addEventListener('click', () => goto(b.dataset.view)));
 
-/* The cut rail, and the ranking rows that jump to a card. Delegated,
-   because both are rewritten by their own renderer on every pick and a
-   listener bound to a button would be gone one click later. */
+/* The cut rail. Delegated, because the rail is rewritten by its own
+   renderer on every pick and a listener bound to a button would be gone
+   one click later. */
 document.getElementById('pbRail').addEventListener('click', (ev) => {
   const b = ev.target.closest('[data-cut]');
   if (!b || b.dataset.cut === PB) return;
@@ -4477,17 +4515,6 @@ document.getElementById('pbRail').addEventListener('keydown', (ev) => {
   ev.preventDefault();
   tabs[to].click();
   document.getElementById('pbRail').querySelector('[aria-selected="true"]').focus();
-});
-
-/* A rank row is a way into the card below it, so it scrolls rather than
-   navigates — the card is already on the page and reloading the page to
-   reach it would lose the reader's place in the ranking. */
-document.getElementById('pbWrap').addEventListener('click', (ev) => {
-  const b = ev.target.closest('[data-jump]');
-  if (!b) return;
-  const h = document.getElementById(b.dataset.jump);
-  if (h) h.scrollIntoView({ block: 'start',
-    behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
 });
 
 document.getElementById('fDate').value = iso(new Date());
