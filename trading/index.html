@@ -1198,6 +1198,14 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .tp .sep { width: 1px; height: 18px; background: var(--rule); margin: 0 2px; }
 
 .ap { margin: 12px 0 6px; }
+/* A term inside a sentence, so it takes the colour and a little weight
+   and nothing else. A tint behind it would turn a paragraph into a row of
+   labels, and these have to still read as prose. */
+.k { color: var(--accent); font-weight: 600; }
+/* The text of a bullet, a situation heading or a checklist line is wrapped
+   so that a marked term inside it stays part of one sentence instead of
+   becoming another item in the row. */
+.ap-s h3 > span, .ap-s li > span, .ap-list li > span { min-width: 0; }
 .ap-lede { margin: 8px 0 16px; max-width: 74ch;
   font-size: .84rem; line-height: 1.65; color: var(--ink-2); }
 .ap-grid { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1236,10 +1244,17 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 /* Both explicitly in the second column. The ::before counter is a grid
    item too, so without this the rule text is auto-placed into the 26px
    number column and wraps one word at a time. */
-/* The rule, which is the line you came to the page for. Its
-   explanation underneath stays ink — you read that once. */
-.ap-rules b { grid-column: 2; display: block; font-size: .82rem; font-weight: 600;
-  color: var(--accent); letter-spacing: -.01em; margin-bottom: 2px; }
+/* The rule, which is the line you came to the page for. It stands out by
+   weight rather than by colour: a heading is already found by its
+   position, and colouring it competed with the marked terms inside the
+   sentence underneath — which is where the colour is doing work.
+
+   Direct child only. This used to be `.ap-rules b`, which also matched
+   every marked term inside the explanation and gave each one
+   display:block and its own grid column — so a sentence mentioning three
+   timeframes came out as seven separate lines. */
+.ap-rules li > b { grid-column: 2; display: block; font-size: .82rem; font-weight: 600;
+  color: var(--ink); letter-spacing: -.01em; margin-bottom: 2px; }
 .ap-rules span { grid-column: 2; font-size: .79rem; line-height: 1.6; color: var(--ink-2); }
 
 /* The checklists are printed from the same constant the trade sheet
@@ -1247,7 +1262,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .ap-lists { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ap-list { padding: 13px 15px 14px; border-radius: var(--r-panel);
   background: var(--glass-in); border: 1px solid var(--glass-line); }
-.ap-list h3 { color: var(--accent); margin: 0 0 8px; font-size: .82rem; font-weight: 600;
+.ap-list h3 { margin: 0 0 8px; font-size: .82rem; font-weight: 600;
   letter-spacing: -.01em; color: var(--ink); }
 .ap-list ol { margin: 0; padding: 0; list-style: none; counter-reset: c; display: grid; gap: 5px; }
 .ap-list li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px;
@@ -2138,6 +2153,25 @@ matchMedia('(max-width: 700px)').addEventListener('change', (ev) => {
 
 const esc = (s) => String(s).replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ── the vocabulary ──
+   This model is written in a small set of tokens: which candle you mean,
+   which timeframe you mean it on, and the handful of named
+   confirmations. Those are what you scan a note FOR, so they are marked
+   wherever they appear in the prose rather than only where they happen to
+   be a heading.
+
+   Deliberately not every meaningful word. "Wick", "gap" and "draw" are in
+   almost every sentence on that page — colouring them would colour the
+   page, and a page that is all highlight has none. What is left is the
+   set you would underline by hand.
+
+   Applied AFTER esc(), so the markup it inserts is the only markup in the
+   string: a setup or a note containing a real angle bracket still cannot
+   put a tag into the page. None of the tokens can occur inside the
+   entities esc() produces, so it cannot cut one in half either. */
+const KEYS = /\b(C1|C2|C3|SMT|PSP|CISD|EQ|HOD|LOD|4H|1H|30M|15M|5M|3M|09:30|18:00|22:00|02:00|06:00|10:00)\b/g;
+const mark = (t) => esc(t).replace(KEYS, '<b class="k">$1</b>');
 
 /* Cents belong on the figure being claimed, not on a supporting clause.
    "Avg win $0.00 · avg loss $163.00" is four digits of noise. */
@@ -5026,20 +5060,20 @@ function renderNote() {
     <section class="ap" aria-labelledby="apH">
       <div class="cal-head"><h2 id="apH">${esc(n.title)}</h2><span class="grow"></span>
         <span class="span-meta">${esc(n.sub)}</span></div>
-      <p class="ap-lede">${esc(n.lede)}</p>
+      <p class="ap-lede">${mark(n.lede)}</p>
       <div class="ap-grid">${n.sit.map(x => `
         <article class="ap-s">
-          <h3><i>${esc(x.n)}</i>${esc(x.h)}</h3>
-          <p>${esc(x.p)}</p>
-          <ul>${x.li.map(l => `<li>${esc(l)}</li>`).join('')}</ul>
+          <h3><i>${esc(x.n)}</i><span>${esc(x.h)}</span></h3>
+          <p>${mark(x.p)}</p>
+          <ul>${x.li.map(l => `<li><span>${mark(l)}</span></li>`).join('')}</ul>
         </article>`).join('')}</div>
       <ol class="ap-rules">${n.rules.map(([h, why]) =>
-        `<li><b>${esc(h)}</b><span>${esc(why)}</span></li>`).join('')}</ol>
+        `<li><b>${esc(h)}</b><span>${mark(why)}</span></li>`).join('')}</ol>
       ${n.lists ? `<div class="ap-lists">`
         + [['Reversal — C2', CHECKLISTS.reversal],
            ['Continuation — C3', CHECKLISTS.continuation]]
           .map(([h, list]) => `<div class="ap-list"><h3>${esc(h)}</h3><ol>`
-            + list.map(x => `<li>${esc(x)}</li>`).join('') + `</ol></div>`).join('')
+            + list.map(x => `<li><span>${mark(x)}</span></li>`).join('') + `</ol></div>`).join('')
         + `</div>
         <p class="ap-foot">Those two lists are the same ones you tick when you
           record a trade — printed from one place, so the page and the sheet
@@ -5106,12 +5140,12 @@ function renderRes() {
           <span class="rs-src">${esc(src)}</span>
           ${r.opened ? `<span class="rs-open">${esc(ago(r.opened))}</span>` : ''}
         </div>
-        ${r.sum ? `<p class="rs-sum">${esc(r.sum)}</p>` : ''}
+        ${r.sum ? `<p class="rs-sum">${mark(r.sum)}</p>` : ''}
         ${linked ? '' : `<p class="rs-hint">No link saved yet — Edit to paste it, and the
           marks below become clickable.</p>`}
         ${(r.marks || []).length ? `<div class="rs-marks">` + r.marks.map((m, i) =>
           `<button class="rs-mark" type="button" data-open="${esc(r.id)}" data-mark="${i}"${deep ? '' : ' disabled'}>
-             <b>${stamp(m.t)}</b><span>${esc(m.s)}</span></button>`).join('') + `</div>` : ''}
+             <b>${stamp(m.t)}</b><span>${mark(m.s)}</span></button>`).join('') + `</div>` : ''}
         <div class="rs-tags">
           ${(r.tags || []).map(t => `<span class="rs-tag">${esc(t)}</span>`).join('')}
           <button class="rs-edit" type="button" data-edit="${esc(r.id)}">Edit</button>
