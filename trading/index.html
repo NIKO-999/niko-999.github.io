@@ -1008,6 +1008,74 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .pb-cmp em.up { color: var(--up); }
 .pb-cmp em.down { color: var(--down); }
 
+/* ── the risk ladder ── */
+.rk-top { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
+.rk-bal { display: flex; align-items: baseline; gap: 8px;
+  height: 44px; padding: 0 14px; border-radius: 10px; background: var(--glass-in); }
+.rk-bal label { font-family: var(--mono); font-size: .58rem; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink-3); }
+.rk-cur { color: var(--ink-3); font-size: .9rem; }
+/* Wide enough for a seven-figure account, because a field that clips the
+   number you typed is a field you cannot check. */
+.rk-bal input {
+  width: 150px; border: 0; background: none; color: var(--ink);
+  font: inherit; font-size: 1.05rem; outline: none;
+}
+/* No stepper. A balance is typed or pasted, never nudged a cent at a
+   time, and the arrows sat on the largest figure on the screen. */
+.rk-bal input::-webkit-outer-spin-button,
+.rk-bal input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.rk-bal input { -moz-appearance: textfield; appearance: textfield; }
+/* Two answers, so they share one track — this IS a choice between two
+   things, which is what the segmented shape is for. */
+.rk-pcts { display: flex; gap: 3px; padding: 3px; border-radius: 11px;
+  background: var(--glass-in); }
+.rk-pcts button {
+  height: 38px; padding: 0 20px; border: 0; border-radius: 8px;
+  background: none; color: var(--ink-3);
+  font: inherit; font-size: .86rem; cursor: pointer;
+}
+.rk-pcts button:hover { color: var(--ink-2); }
+.rk-pcts button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 18%, var(--glass-in-2));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
+.rk-use { height: 38px; }
+.rk-per { margin-top: 12px; grid-template-columns: minmax(0, 1fr) !important; }
+.rk-per .metric > span { min-height: 0; }
+.rk-per .metric > b { color: var(--accent); }
+
+/* A matrix, so it is a table: the row and column headers are what make a
+   figure in the middle of it mean anything, and a grid of divs would
+   leave a screen reader with thirty numbers and no labels. */
+.rk-grid { width: 100%; border-collapse: collapse; margin-top: 4px; }
+.rk-grid th, .rk-grid td { padding: 11px 12px; text-align: right;
+  border-bottom: 1px solid var(--rule); }
+.rk-grid tr:last-child td, .rk-grid tr:last-child th { border-bottom: 0; }
+.rk-grid th[scope="col"] { font-family: var(--mono); font-size: .62rem; font-weight: 400;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); }
+.rk-grid th[scope="row"] { width: 64px; text-align: left;
+  font-size: .9rem; font-weight: 500; color: var(--ink-2); }
+.rk-grid td b { display: block; font-family: var(--mono); font-size: .95rem;
+  font-weight: 500; color: var(--ink); }
+.rk-grid td em { display: block; margin-top: 2px; font-style: normal;
+  font-family: var(--mono); font-size: .64rem; color: var(--up); }
+/* The last row is the one you came to look at. */
+.rk-grid tr:last-child td b { color: var(--accent); }
+@media (max-width: 780px) {
+  .rk-grid th, .rk-grid td { padding: 9px 6px; }
+  .rk-grid td b { font-size: .82rem; }
+}
+
+.rk-down {
+  margin: 20px 0 0; padding: 13px 15px; max-width: 78ch;
+  border: 1px solid var(--glass-line); border-radius: var(--r-panel);
+  background: var(--glass-in);
+  font-size: .82rem; line-height: 1.6; color: var(--ink-3);
+}
+.rk-down b { font-weight: 500; color: var(--down); }
+
 /* ═══ the phone ═══
    A reading view. Everything that writes is gone from it — not disabled
    in place, which reads as broken, but absent, so the screen only offers
@@ -1016,6 +1084,10 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
    The month grid goes with them. Seven columns have a floor of about
    520px and a phone does not have it, so the same month is drawn as a
    list instead of being left to scroll sideways. */
+/* The ladder is a desktop tool. It is a thing you type into while
+   deciding a size, which is not what the phone is for — and the phone
+   only reads. */
+[data-phone="on"] [data-view="risk"],
 [data-phone="on"] #newTrade,
 [data-phone="on"] #backupBtn,
 [data-phone="on"] #resAdd,
@@ -1436,6 +1508,13 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 3l7 3v5c0 4.4-2.9 8.3-7 9.5C7.9 19.3 5 15.4 5 11V6l7-3ZM9 11.5l2 2 4-4" /></svg>
     </button>
+    <!-- Beside the gate, because both are things you use before a trade
+         rather than after one. Scales: what the size is worth. -->
+    <button type="button" data-view="risk" aria-label="Risk">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 4v16M5 8h14M5 8l-2.5 5h5L5 8ZM19 8l-2.5 5h5L19 8ZM8 20h8" /></svg>
+    </button>
     <button type="button" data-view="metrics" aria-current="page" aria-label="Metrics">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
@@ -1682,6 +1761,53 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
           <span aria-hidden="true">·</span>
           <button type="button" id="gPass">Saw it, let it go</button>
         </p>
+      </div>
+    </main>
+
+    <!-- ── the risk ladder ──
+         Arithmetic about a decision not yet made, so it reads nothing
+         from the ledger's history except the balance. -->
+    <main class="main" id="riskSection" hidden>
+      <div class="head">
+        <h1>Risk</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="rkMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+
+        <div class="rk-top">
+          <span class="rk-bal">
+            <label for="rkBal">Balance</label>
+            <span class="rk-cur" aria-hidden="true">$</span>
+            <input id="rkBal" type="number" step="0.01" min="0" inputmode="decimal" />
+          </span>
+          <span class="rk-pcts" role="group" aria-label="Risk per trade">
+            <button type="button" id="rk5" aria-pressed="true">5%</button>
+            <button type="button" id="rk10" aria-pressed="false">10%</button>
+          </span>
+          <button class="btn btn-ghost rk-use" type="button" id="rkUse" hidden></button>
+        </div>
+
+        <div class="metrics rk-per">
+          <div class="metric">
+            <span><span class="ic" id="rkPerIc"></span>Per trade</span>
+            <b id="rkPer">—</b>
+            <em id="rkPerSub"></em>
+          </div>
+        </div>
+
+        <div class="cal-head" style="margin-top:22px">
+          <h2>Wins in a row</h2><span class="grow"></span>
+          <span class="span-meta">compounding · each step risks the same % of the new balance</span>
+        </div>
+        <table class="rk-grid">
+          <caption class="sr">The balance after a run of winning trades, by how many
+            in a row and how many times the risk each returned. Each step risks the
+            same percentage of the balance at that point, so the figures compound.</caption>
+          <tbody id="rkGrid"></tbody>
+        </table>
+
+        <p class="rk-down" id="rkDown"></p>
       </div>
     </main>
 
@@ -3435,6 +3561,112 @@ function renderPlaybook() {
     :                   pbMissedPage();
 }
 
+/* ═══ the risk ladder ═══
+   What a run of wins is actually worth at the size you take, and what a
+   run of losses costs at the same size. Nothing here reads the ledger's
+   history — it is arithmetic about a decision you have not made yet,
+   which is why it lives on its own screen rather than among the metrics.
+
+   Two percentages and nothing else, because those are the two you use.
+   Three columns, because you take between 1R and 3R and a column for 4R
+   would be a column about someone else's trading.
+
+   It COMPOUNDS. Each step risks the chosen percentage of the balance at
+   that point, not of the balance you started with — which is what
+   actually happens when you size off the account, and the difference is
+   not small: five wins at 5% and 3R is 20,114 compounded against 17,500
+   if you keep sizing off the opening balance. A ladder that ignored it
+   would understate every row on the page. */
+const RISK_KEY = 'ledger.risk.v1';
+const RISK_PCTS = [5, 10];
+const RISK_RR = [1, 2, 3];
+const RISK_RUN = 5;
+
+let riskPct = 5;
+/* null means "whatever the ledger says the account is". A typed figure
+   sticks, because the question is often about an account this app is not
+   keeping — a prop payout, a size you are considering. */
+let riskBal = null;
+(() => {
+  try {
+    const v = JSON.parse(localStorage.getItem(RISK_KEY) || 'null');
+    if (v && RISK_PCTS.includes(v.pct)) riskPct = v.pct;
+    if (v && typeof v.bal === 'number' && v.bal > 0) riskBal = v.bal;
+  } catch (e) {}
+})();
+const riskSave = () => {
+  try { localStorage.setItem(RISK_KEY, JSON.stringify({ pct: riskPct, bal: riskBal })); }
+  catch (e) {}
+};
+
+/* Compounded, n steps of a win worth m times the risk. */
+const riskGrow = (bal, pct, m, n) => bal * Math.pow(1 + (pct / 100) * m, n);
+/* And the same arithmetic pointed the other way: a loss is 1R, always. */
+const riskFall = (bal, pct, n) => bal * Math.pow(1 - pct / 100, n);
+
+function renderRisk() {
+  const equity = totals().equity;
+  const bal = riskBal != null ? riskBal : equity;
+  const per = bal * (riskPct / 100);
+
+  RISK_PCTS.forEach(p => document.getElementById('rk' + p)
+    .setAttribute('aria-pressed', String(p === riskPct)));
+  const input = document.getElementById('rkBal');
+  if (document.activeElement !== input) input.value = bal > 0 ? bal.toFixed(2) : '';
+
+  /* Offered only when the two have actually come apart, so it is never a
+     button that does nothing. */
+  const useLedger = document.getElementById('rkUse');
+  const differs = riskBal != null && Math.abs(riskBal - equity) > 0.005;
+  useLedger.hidden = !differs;
+  useLedger.textContent = `Use the ledger — ${money(equity)}`;
+
+  put('rkMeta', `${riskPct}% of ${round(bal)}`);
+  put('rkPer', money(per));
+  put('rkPerSub', `${riskPct}% of ${money(bal)}`);
+
+  const head = `<tr><th scope="col">Wins</th>`
+    + RISK_RR.map(m => `<th scope="col">${m}R</th>`).join('') + `</tr>`;
+  const body = Array.from({ length: RISK_RUN }, (_, i) => {
+    const n = i + 1;
+    return `<tr><th scope="row">${n}</th>`
+      + RISK_RR.map((m) => {
+          const to = riskGrow(bal, riskPct, m, n);
+          const up = to - bal;
+          return `<td><b>${money(to)}</b><em>+${money(up)} · +${((up / bal) * 100).toFixed(1)}%</em></td>`;
+        }).join('') + `</tr>`;
+  }).join('');
+  document.getElementById('rkGrid').innerHTML = head + body;
+
+  /* The mirror, and it is not decoration. A ladder that only counts
+     upwards is a ladder that makes 10% look like a rate of return rather
+     than the size of the hole five bad reads puts you in. */
+  const down = riskFall(bal, riskPct, RISK_RUN);
+  document.getElementById('rkDown').innerHTML =
+    `<b>${RISK_RUN} losses in a row</b> at ${riskPct}% leaves `
+    + `<b>${money(down)}</b> — down ${money(bal - down)}, or `
+    + `${(((bal - down) / bal) * 100).toFixed(1)}%. `
+    + `Getting back to ${money(bal)} from there takes `
+    + `<b>${Math.ceil(Math.log(bal / down) / Math.log(1 + (riskPct / 100) * 2))}</b> wins at 2R.`;
+}
+
+RISK_PCTS.forEach(p => document.getElementById('rk' + p).addEventListener('click', () => {
+  riskPct = p; riskSave(); renderRisk();
+  document.getElementById('say').textContent = `${p} percent risk.`;
+}));
+
+document.getElementById('rkBal').addEventListener('input', (ev) => {
+  const v = parseFloat(ev.target.value);
+  riskBal = v > 0 ? v : null;
+  riskSave();
+  renderRisk();
+});
+
+document.getElementById('rkUse').addEventListener('click', () => {
+  riskBal = null; riskSave(); renderRisk();
+  document.getElementById('rkBal').focus();
+});
+
 /* ═══ the log ═══
    Every trade already carries when it was, what it was, which rules you
    ticked and what you wrote. None of it was ever readable in order —
@@ -4029,7 +4261,7 @@ function commit(msg) {
 }
 function renderAll() {
   renderSummary(); renderCalendar(); renderAgenda(); renderMetrics(); renderPlaybook();
-  renderLedger(); renderLog(); renderRes(); renderGate(); renderLive();
+  renderLedger(); renderLog(); renderRes(); renderGate(); renderLive(); renderRisk();
 }
 
 /* ── the candle clock ──
@@ -4074,6 +4306,7 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
 /* 15, the size this file gives a topbar button — the strip is a band
    across the top and the mark has to carry from across the desk. The
    gate's own rows use 13, which is the size beside a label. */
+document.getElementById('rkPerIc').innerHTML = icon('risk', 13);
 document.getElementById('liveIc').innerHTML = icon('radar', 15);
 document.getElementById('gRiskIc').innerHTML = icon('risk', 13);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
@@ -5341,12 +5574,16 @@ const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
   gate:     document.getElementById('gateSection'),
+  risk:     document.getElementById('riskSection'),
   metrics:  document.getElementById('metricsSection'),
   playbook: document.getElementById('playbookSection'),
   settings: document.getElementById('settingsSection'),
   resources: document.getElementById('resourcesSection'),
 };
 function goto(view) {
+  /* The ladder does not exist on a phone, so a stored or stale route to
+     it lands on the metrics instead of on a blank screen. */
+  if (phone() && view === 'risk') view = 'metrics';
   document.querySelectorAll('[data-view]').forEach(b => {
     if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
