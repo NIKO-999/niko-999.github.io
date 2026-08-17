@@ -72,13 +72,19 @@ function cycle() {
    rather than a hard-coded hex, so a scheme can never drift out of sync
    with the swatch that claims to show it. */
 const PKEY = 'arc.palette';
+/* id, name, description, section.
+
+   The section is what the menu groups by, and the order here is the
+   order it reads in. A section with no members is not drawn, so adding
+   one is adding rows rather than editing the picker. */
 const PALETTES = [
-  ['grotto', 'Grotto', 'A marble grotto over a still pool'],
-  ['dune',   'Dune',   'A dune rim-lit under a starfield'],
-  ['fjord',  'Fjord',  'Rain on a green fjord'],
-  ['shore',  'Shore',  'A sunset shore, pink over turquoise'],
-  ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above'],
+  ['grotto', 'Grotto', 'A marble grotto over a still pool',   'Nature'],
+  ['dune',   'Dune',   'A dune rim-lit under a starfield',    'Nature'],
+  ['fjord',  'Fjord',  'Rain on a green fjord',               'Nature'],
+  ['shore',  'Shore',  'A sunset shore, pink over turquoise', 'Nature'],
+  ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above','Nature'],
 ];
+const SECTIONS_ORDER = ['Nature', 'Abstract'];
 
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
@@ -88,24 +94,41 @@ let palette = readStore(PKEY) || 'grotto';
    theme with no CSS block and therefore no photograph. */
 if (palette === 'salt') palette = 'grotto';
 
-PALETTES.forEach(([id, name, desc]) => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'swatch';
-  b.setAttribute('role', 'radio');
-  b.tabIndex = -1;
-  b.dataset.palette = id;
-  /* The dot paints from that scheme's own --sw-* token, so it always
-     shows the real value rather than a copy that can drift. */
-  b.innerHTML =
-    `<span class="dot" data-swatch="${id}" aria-hidden="true"></span>${name}`
-    + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
-            stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
-            stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
-  b.title = desc;
-  b.setAttribute('aria-label', `${name} — ${desc}`);
-  b.addEventListener('click', () => { setPalette(id); closePal(true); });
-  palMenu.appendChild(b);
+/* Grouped, but still ONE radiogroup. Splitting it into two would mean
+   two tab stops and two arrow-key loops for what is one choice; putting
+   headings inside a radiogroup as real elements would put non-radios
+   among its options. So the headings are decoration the screen reader
+   skips, and the section name is folded into each swatch's own name
+   instead — "Dune, nature. A dune rim-lit under a starfield." */
+SECTIONS_ORDER.forEach((section) => {
+  const members = PALETTES.filter(p => (p[3] || 'Nature') === section);
+  if (!members.length) return;
+
+  const h = document.createElement('span');
+  h.className = 'pal-sect';
+  h.setAttribute('aria-hidden', 'true');
+  h.textContent = section;
+  palMenu.appendChild(h);
+
+  members.forEach(([id, name, desc]) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'swatch';
+    b.setAttribute('role', 'radio');
+    b.tabIndex = -1;
+    b.dataset.palette = id;
+    /* The dot paints from that scheme's own --sw-* token, so it always
+       shows the real value rather than a copy that can drift. */
+    b.innerHTML =
+      `<span class="dot" data-swatch="${id}" aria-hidden="true"></span>${name}`
+      + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
+              stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
+    b.title = desc;
+    b.setAttribute('aria-label', `${name}, ${section.toLowerCase()} — ${desc}`);
+    b.addEventListener('click', () => { setPalette(id); closePal(true); });
+    palMenu.appendChild(b);
+  });
 });
 
 function setPalette(id) {

@@ -716,6 +716,15 @@ body {
 .dot[data-swatch="fjord"] { background: var(--sw-fjord); }
 .dot[data-swatch="shore"] { background: var(--sw-shore); }
 .dot[data-swatch="lagoon"] { background: var(--sw-lagoon); }
+/* A heading the reader skips — the section name lives in each swatch's
+   own accessible name, so this is purely a visual grouping. */
+.pal-sect {
+  padding: 8px 10px 3px;
+  font-size: .58rem; text-transform: uppercase; letter-spacing: .1em;
+  color: var(--ink-3);
+}
+.pal-sect:first-child { padding-top: 3px; }
+
 .swatch .tick-mark { margin-left: auto; opacity: 0; }
 .swatch[aria-checked="true"] .tick-mark { opacity: 1; }
 
