@@ -642,16 +642,10 @@
   <nav class="rail" aria-label="Sections">
     <span class="rail-mark" aria-hidden="true">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
-           stroke-linecap="round" width="17" height="17">
+           stroke-linecap="round" width="15" height="15">
         <path d="M5 8h9M10 16h9M14 4l-4 4 4 4M10 12l4 4-4 4" />
       </svg>
     </span>
-    <button type="button" data-view="vision" aria-label="Vision">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
-        <rect x="3" y="3" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="3" width="7.5" height="7.5" rx="2" />
-        <rect x="3" y="13.5" width="7.5" height="7.5" rx="2" /><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="2" />
-      </svg>
-    </button>
     <button type="button" data-view="board" aria-current="page" aria-label="Board">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"><path d="M3 6h10M3 12h18M3 18h7" /></svg>
@@ -726,6 +720,13 @@
                   tabindex="-1" aria-controls="listPanel">
             <span class="mark" aria-hidden="true"></span>List<span class="n" id="nList"></span>
           </button>
+          <!-- Vision was its own place on the rail, which made the picture
+               of where you are going a detour from the plan of how. It is
+               the same goals seen a third way, so it belongs here. -->
+          <button type="button" role="tab" id="tabVision" aria-selected="false"
+                  tabindex="-1" aria-controls="visionPanel">
+            <span class="mark" aria-hidden="true"></span>Vision<span class="n" id="nVision"></span>
+          </button>
         </div>
         <span class="grow"></span>
         <span class="span-meta" id="span"></span>
@@ -742,16 +743,11 @@
       <div class="listwrap" id="listPanel" role="tabpanel" aria-labelledby="tabList" tabindex="0" hidden>
         <ul class="list" id="list"></ul>
       </div>
-    </main>
 
-    <!-- ── vision ── -->
-    <main class="main" id="visionSection" hidden>
-      <div class="head">
-        <h1>Vision</h1>
-        <span class="grow"></span>
-        <span class="span-meta" id="visionMeta"></span>
+      <div class="tilewrap" id="visionPanel" role="tabpanel" aria-labelledby="tabVision"
+           tabindex="0" hidden>
+        <div id="tiles"></div>
       </div>
-      <div class="tilewrap" id="tiles" tabindex="0"></div>
     </main>
 
     <!-- ── past ── -->
@@ -1099,6 +1095,9 @@ const axis  = document.getElementById('axis');
 const rows  = document.getElementById('rows');
 const plot  = document.getElementById('plot');
 const board = document.getElementById('boardPanel');
+/* The plan and Vision share one head, so each keeps its own figure for
+   it and show() puts the right one up. */
+let spanMeta = '', visionMeta = '';
 const say   = document.getElementById('say');
 
 /* ═══ the board ═══
@@ -1238,10 +1237,13 @@ function renderBoard() {
     : 'No dated goals yet. Use New to add one.';
   plot.setAttribute('aria-describedby', 'chartAlt');
 
+  /* Held as well as written, because the head is shared with Vision now
+     and switching back has to restore this rather than recompute it. */
   const months = SPAN / 30.4;
-  document.getElementById('span').textContent = SPAN >= 400
+  spanMeta = SPAN >= 400
     ? `${(SPAN / 365).toFixed(1)} years`
     : `${months.toFixed(1)} ${months < 1.05 ? 'month' : 'months'}`;
+  if (tab !== 'vision') document.getElementById('span').textContent = spanMeta;
 
   document.getElementById('planTitle').textContent =
     isDemo() ? 'Example plan' : 'Long-term plan';
@@ -1456,10 +1458,15 @@ function tally() {
   const n = listEls.filter(el => !el.hidden).length;
   document.getElementById('nBoard').textContent = n;
   document.getElementById('nList').textContent = n;
+  /* Vision counts the goals with a picture, not the search result — the
+     search does not reach the tiles, so showing it the filtered number
+     would be a count of something else entirely. */
+  document.getElementById('nVision').textContent = live().length;
   /* The tabs are decorative-count only; the spoken name stays a plain
      word plus its number, not "Board 8 Board 8". */
-  tabBoard.setAttribute('aria-label', `Board, ${n} goals`);
-  tabList .setAttribute('aria-label', `List, ${n} goals`);
+  tabBoard .setAttribute('aria-label', `Board, ${n} goals`);
+  tabList  .setAttribute('aria-label', `List, ${n} goals`);
+  tabVision.setAttribute('aria-label', `Vision, ${live().length} goals`);
   return n;
 }
 
@@ -1483,33 +1490,48 @@ document.getElementById('q').addEventListener('input', (e) => {
 /* ── tabs ──
    Roving tabindex plus arrow keys, per the APG tab pattern. Both panels
    are focusable so the scroll regions are reachable without a mouse. */
-const tabBoard = document.getElementById('tabBoard');
-const tabList  = document.getElementById('tabList');
+const tabBoard  = document.getElementById('tabBoard');
+const tabList   = document.getElementById('tabList');
+const tabVision = document.getElementById('tabVision');
 const listPanel = document.getElementById('listPanel');
+const visionPanel = document.getElementById('visionPanel');
 const todayBtn  = document.getElementById('todayBtn');
 
-function show(isBoard) {
-  tabBoard.setAttribute('aria-selected', String(isBoard));
-  tabList .setAttribute('aria-selected', String(!isBoard));
-  tabBoard.tabIndex = isBoard ? 0 : -1;
-  tabList .tabIndex = isBoard ? -1 : 0;
-  board.hidden = !isBoard;
-  listPanel.hidden = isBoard;
-  todayBtn.hidden = !isBoard;
-  if (isBoard) layout();
-}
-tabBoard.addEventListener('click', () => show(true));
-tabList .addEventListener('click', () => show(false));
+/* Three ways of looking at the same goals: when they run, what is left
+   in them, and what they look like. Named rather than a boolean, which
+   stopped scaling the moment there was a third. */
+const TABS = [['board', tabBoard], ['list', tabList], ['vision', tabVision]];
+let tab = 'board';
 
-[tabBoard, tabList].forEach((t) => {
+function show(which) {
+  /* Old callers passed a boolean for "is it the board". */
+  if (typeof which === 'boolean') which = which ? 'board' : 'list';
+  tab = which;
+  TABS.forEach(([k, t]) => {
+    const on = k === which;
+    t.setAttribute('aria-selected', String(on));
+    t.tabIndex = on ? 0 : -1;
+  });
+  board.hidden       = which !== 'board';
+  listPanel.hidden   = which !== 'list';
+  visionPanel.hidden = which !== 'vision';
+  /* Today scrolls the timeline to now, so it means nothing anywhere
+     else. */
+  todayBtn.hidden = which !== 'board';
+  document.getElementById('span').textContent = which === 'vision' ? visionMeta : spanMeta;
+  if (which === 'board') layout();
+}
+TABS.forEach(([k, t]) => t.addEventListener('click', () => show(k)));
+
+TABS.forEach(([, t], i) => {
   t.addEventListener('keydown', (e) => {
     if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight' && e.key !== 'Home' && e.key !== 'End') return;
     e.preventDefault();
-    const next = (e.key === 'Home') ? tabBoard
-               : (e.key === 'End')  ? tabList
-               : (t === tabBoard ? tabList : tabBoard);
-    show(next === tabBoard);
-    next.focus();
+    const j = e.key === 'Home' ? 0
+            : e.key === 'End'  ? TABS.length - 1
+            : (i + (e.key === 'ArrowRight' ? 1 : TABS.length - 1)) % TABS.length;
+    show(TABS[j][0]);
+    TABS[j][1].focus();
   });
 });
 
@@ -1738,9 +1760,11 @@ function renderVision() {
     tiles.appendChild(p);
   }
 
-  document.getElementById('visionMeta').textContent =
-    `${live().filter(g => g.horizon === 'now').length} now · `
+  /* The panel shares the plan's head now, so its own figure has to go
+     where that head puts one. */
+  visionMeta = `${live().filter(g => g.horizon === 'now').length} now · `
     + `${live().filter(g => g.horizon !== 'now').length} ahead`;
+  if (tab === 'vision') document.getElementById('span').textContent = visionMeta;
 }
 
 /* One input, reused, rather than one per tile. */
@@ -1868,7 +1892,6 @@ function renderPast() {
 /* ── sections ── */
 const SECTIONS = {
   board:  document.getElementById('mainCol'),
-  vision: document.getElementById('visionSection'),
   past:   document.getElementById('pastSection'),
 };
 
@@ -1880,8 +1903,8 @@ function goto(view) {
   });
   Object.entries(SECTIONS).forEach(([k, el]) => { el.hidden = k !== view; });
   todayBtn.hidden = !isBoard;
-  if (isBoard) show(tabBoard.getAttribute('aria-selected') === 'true');
-  say.textContent = { board: 'Board.', vision: 'Vision.', past: 'Past.' }[view];
+  if (isBoard) show(tab);
+  say.textContent = { board: 'Plan.', past: 'Past.' }[view];
 }
 document.querySelectorAll('[data-view]').forEach((b) => {
   b.addEventListener('click', () => goto(b.dataset.view));

@@ -305,10 +305,15 @@
    Only chrome buttons take it. Timeline bars and marks are data, and
    ringing every one of them would turn the board into a light show. */
 .btn, .rail button, .fab { position: relative; }
-/* Not on .swatch or .seg: a ring drawn around bare text reads as a text
-   input, not a selection. Five stacked in the picker menu, or two in the
-   head row, fight the very thing they are meant to mark. */
-.btn::before, .rail button::before, .fab::before {
+/* ONE button wears it: the primary action at the top right — Trade, and
+   New in Arc. The ring was a way of saying "this is the frame, and it is
+   catching light"; on twelve controls at once it stopped saying anything
+   and just drew twelve outlines. On the single button you actually press
+   to do the thing, it reads as emphasis again.
+
+   The rail, the ghost buttons, the swatches and the floating Today keep
+   their fills and lose their edges. */
+.topbar > .btn-primary::before {
   content: '';
   position: absolute;
   inset: 0;
@@ -331,14 +336,6 @@
 /* A pale ring on the white primary button is invisible; ring it with its
    own ink so the edge always contrasts with the surface it wraps. */
 .btn-primary { --edge: var(--btn-ink); }
-
-/* Not inside a dialog. The bloom is a property of CHROME — the top bar,
-   the rail, the floating Today — where the app's frame catches light
-   against the photograph behind it. A dialog is a flat panel with
-   nothing behind it to catch, so the same ring stops reading as a
-   highlight and starts reading as an outline somebody drew around a
-   button. The fill alone is enough there. */
-dialog .btn::before, dialog .fab::before { content: none; }
 
 /* Any author rule that sets `display` outranks the UA's
    `[hidden] { display: none }`, so hiding by property silently fails on
@@ -560,29 +557,32 @@ body {
 }
 
 /* ── icon rail (wide screens; the phone gets a bottom bar) ── */
+/* Narrower than it was. The rail is a place you glance at, not one you
+   read, and at 56px with 38px targets it was taking a column of the
+   window to say five words nobody needs spelled out. */
 .rail {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
-  width: 56px;
+  gap: 2px;
+  width: 46px;
   flex: none;
-  padding: 12px 0;
+  padding: 10px 0;
   border-right: 1px solid var(--rule);
 }
 .rail-mark {
   display: grid;
   place-items: center;
-  width: 30px; height: 30px;
-  margin-bottom: 12px;
-  border-radius: 8px;
+  width: 26px; height: 26px;
+  margin-bottom: 10px;
+  border-radius: 7px;
   background: var(--btn);
   color: var(--btn-ink);
 }
 .rail button, .rail a {
-  width: 38px; height: 38px;
+  width: 32px; height: 32px;
   display: grid; place-items: center;
-  border: 0; border-radius: 10px;
+  border: 0; border-radius: 9px;
   background: none;
   color: var(--ink-3);
   cursor: pointer;
@@ -590,7 +590,7 @@ body {
 /* Pinned, because an <svg> with only a viewBox takes its size from its
    parent — the <a> crossings were rendering at 38px against 26px for
    every button beside them, half again as large. */
-.rail button > svg, .rail a > svg { width: 26px; height: 26px; }
+.rail button > svg, .rail a > svg { width: 20px; height: 20px; }
 .rail button[aria-current="page"] { color: var(--ink); background: var(--glass-in); }
 .rail a:focus-visible, .rail button:focus-visible {
   outline: 2px solid var(--focus); outline-offset: 2px;
@@ -598,7 +598,7 @@ body {
 /* The apps are separate pages, so a jump between them is marked as a
    crossing rather than dressed up as another view of the same data. */
 .rail .cross {
-  width: 20px; height: 0; margin: 8px 0;
+  width: 16px; height: 0; margin: 6px 0;
   border-top: 1px solid var(--rule);
 }
 .rail .spacer { flex: 1; }
