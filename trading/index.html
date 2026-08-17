@@ -1180,7 +1180,21 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   font: inherit; font-size: .76rem; cursor: pointer; white-space: nowrap;
 }
 .tp button:hover { color: var(--ink-2); }
-.tp button[aria-selected="true"] { background: var(--glass-in-2); color: var(--ink); }
+/* ── highlighting, in the palette's own colour ──
+   Every accent below is var(--accent), which is defined per backdrop —
+   so this follows the theme rather than pinning the page to one hue, and
+   changing the backdrop restyles the highlights with it.
+
+   Spent on STRUCTURE, not on prose: the numbers, the markers, the
+   headings you scan for, the tab you are on. Body copy stays ink,
+   because a paragraph in the accent is a paragraph you read more slowly,
+   and the point of the colour here is to let you skip past what you have
+   already read to the line you were looking for. */
+.tp button[aria-selected="true"] {
+  background: color-mix(in srgb, var(--accent) 16%, var(--glass-in-2));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
+}
 .tp .sep { width: 1px; height: 18px; background: var(--rule); margin: 0 2px; }
 
 .ap { margin: 12px 0 6px; }
@@ -1190,6 +1204,13 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   margin-bottom: 20px; }
 .ap-s { padding: 13px 15px 14px; border-radius: var(--r-panel);
   background: var(--glass-in); border: 1px solid var(--glass-line); }
+.ap-s { position: relative; }
+/* The four situations are the thing you are matching a live chart
+   against, so each one is marked down its own edge. */
+.ap-s::before {
+  content: ''; position: absolute; left: 0; top: 12px; bottom: 12px; width: 2px;
+  border-radius: 2px; background: color-mix(in srgb, var(--accent) 55%, transparent);
+}
 .ap-s h3 { display: flex; align-items: baseline; gap: 8px; margin: 0 0 5px;
   font-size: .86rem; font-weight: 500; letter-spacing: -.01em; color: var(--ink); }
 .ap-s h3 i { font-style: normal; font-size: .62rem; letter-spacing: .06em;
@@ -1210,13 +1231,15 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   column-gap: 11px; row-gap: 1px;
   padding: 11px 0; border-bottom: 1px solid var(--rule); counter-increment: r; }
 .ap-rules li:last-child { border-bottom: 0; }
-.ap-rules li::before { content: counter(r); font-size: .72rem; color: var(--ink-3);
+.ap-rules li::before { content: counter(r); font-size: .72rem; color: var(--accent);
   font-variant-numeric: tabular-nums; padding-top: 1px; }
 /* Both explicitly in the second column. The ::before counter is a grid
    item too, so without this the rule text is auto-placed into the 26px
    number column and wraps one word at a time. */
-.ap-rules b { grid-column: 2; display: block; font-size: .82rem; font-weight: 500;
-  color: var(--ink); letter-spacing: -.01em; margin-bottom: 2px; }
+/* The rule, which is the line you came to the page for. Its
+   explanation underneath stays ink — you read that once. */
+.ap-rules b { grid-column: 2; display: block; font-size: .82rem; font-weight: 600;
+  color: var(--accent); letter-spacing: -.01em; margin-bottom: 2px; }
 .ap-rules span { grid-column: 2; font-size: .79rem; line-height: 1.6; color: var(--ink-2); }
 
 /* The checklists are printed from the same constant the trade sheet
@@ -1224,12 +1247,12 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .ap-lists { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .ap-list { padding: 13px 15px 14px; border-radius: var(--r-panel);
   background: var(--glass-in); border: 1px solid var(--glass-line); }
-.ap-list h3 { margin: 0 0 8px; font-size: .82rem; font-weight: 500;
+.ap-list h3 { color: var(--accent); margin: 0 0 8px; font-size: .82rem; font-weight: 600;
   letter-spacing: -.01em; color: var(--ink); }
 .ap-list ol { margin: 0; padding: 0; list-style: none; counter-reset: c; display: grid; gap: 5px; }
 .ap-list li { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: 8px;
   counter-increment: c; font-size: .79rem; line-height: 1.5; color: var(--ink-2); }
-.ap-list li::before { content: counter(c); font-size: .66rem; color: var(--ink-3);
+.ap-list li::before { content: counter(c); font-size: .66rem; color: var(--accent);
   font-variant-numeric: tabular-nums; padding-top: 2px; }
 .ap-foot { margin: 10px 0 0; font-size: .72rem; line-height: 1.6; color: var(--ink-3); }
 
@@ -1280,7 +1303,9 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   font-size: .58rem; letter-spacing: .03em; }
 .rs-main { min-width: 0; }
 .rs-top { display: flex; align-items: baseline; gap: 9px; flex-wrap: wrap; margin-bottom: 5px; }
-.rs-title { font-size: .92rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em;
+/* The title IS the link — it opens the video — so the accent is saying
+   what the control does as well as making it findable. */
+.rs-title { font-size: .92rem; font-weight: 600; color: var(--accent); letter-spacing: -.01em;
   border: 0; background: none; padding: 0; font-family: inherit; cursor: pointer; text-align: left; }
 .rs-title:disabled { cursor: default; }
 .rs-src { font-size: .68rem; color: var(--ink-3); }
@@ -1299,7 +1324,8 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
 .rs-mark span { color: var(--ink-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rs-tags { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-.rs-tag { padding: 2px 8px; border-radius: 5px; background: var(--glass-in-2);
+.rs-tag { padding: 2px 8px; border-radius: 5px;
+  background: color-mix(in srgb, var(--accent) 14%, var(--glass-in-2));
   font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
 .rs-edit { margin-left: auto; border: 0; background: none; color: var(--ink-3);
   font: inherit; font-size: .68rem; cursor: pointer; padding: 2px 4px; border-radius: 5px; }
