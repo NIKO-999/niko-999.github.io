@@ -926,6 +926,10 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .rs-diag .mk { fill: color-mix(in srgb, var(--accent) 30%, transparent); stroke: var(--accent); stroke-width: 1.2; }
 .rs-diag .tf { fill: color-mix(in srgb, var(--ink-2) 42%, transparent); }
 .rs-diag .tf.on { fill: var(--accent); }
+.rs-diag .lv { fill: none; stroke-width: 1.3; stroke-dasharray: 3.5 3.5;
+  stroke: color-mix(in srgb, var(--ink-2) 60%, transparent); }
+.rs-diag .mv { fill: none; stroke: var(--ink-2); stroke-width: 1.5;
+  stroke-linejoin: round; stroke-linecap: round; }
 
 /* Same idea as the trade sheet's chart: click, paste or drop. */
 .rs-thumb {
@@ -3149,6 +3153,27 @@ const SEED = [{
   tags: ['daily', 'key level', 'profile', 'CISD'],
   added: null,
   opened: null,
+}, {
+  id: 'seed-hod-lod',
+  kind: 'video',
+  note: 'hod-lod',
+  art: 'hod',
+  title: 'High and low of day confirmations',
+  url: 'https://youtu.be/xWZ8VQE-Oaw',
+  len: '17:37',
+  sum: 'The four kinds of evidence are above. These five are the ones where '
+     + 'the answer was not obvious — including one where the two-stage was '
+     + 'there on paper and the extreme still had not printed.',
+  marks: [
+    [467, 'A two-stage that was not one — no reversal signature at the level'],
+    [601, 'The 90M two-stage, confirmed a timeframe above the hourly'],
+    [728, 'A first stage that waited until the London open to complete'],
+    [820, 'No two-stage at all — the chain of gaps confirming it instead'],
+    [932, 'No gaps either. The change in delivery on its own'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['two-stage SMT', 'gaps', 'CISD', 'drivers'],
+  added: null,
+  opened: null,
 }];
 
 function readRes() {
@@ -3240,6 +3265,14 @@ const DIAG = {
     <rect class="tf" x="42" y="30" width="66" height="9" rx="2.5" />
     <rect class="tf" x="50" y="45" width="50" height="9" rx="2.5" />
     <rect class="tf on" x="58" y="60" width="34" height="9" rx="2.5" />
+  </svg>`,
+  /* The level, taken twice, then left behind. Two marks for the two
+     stages and the expansion away from them. */
+  hod: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="lv" d="M24 57H126" />
+    <path class="mv" d="M32 28 52 63 63 47 77 67 98 33 120 17" />
+    <circle class="mk" cx="52" cy="63" r="4.5" />
+    <circle class="mk" cx="77" cy="67" r="4.5" />
   </svg>`,
 };
 
@@ -3390,6 +3423,75 @@ const NOTES = [
       ['The entry is a CISD or a propulsion block.',
        'On the 3M or the 5M, after everything above. A close through the up-close '
        + 'candles that traded into the level. Anything else is an entry you invented.'],
+    ],
+  },
+  {
+    id: 'hod-lod',
+    title: 'High and low of day',
+    sub: 'confirming the extreme is in',
+    lede: 'Four ways to say the day has already made its high or its low, so '
+        + 'that everything after it can be traded as continuation away from that '
+        + 'point. They are not four setups — they are four kinds of evidence, '
+        + 'and any one of them is enough. The order below is roughly how much '
+        + 'they ask of you: the two-stage is the strongest and the rarest, the '
+        + 'change in delivery is the plainest and always available.',
+    sit: [
+      { n: '01', h: 'Two-stage SMT on the 4H',
+        p: 'The strongest of the four. Works before New York and inside it — the mechanism is the same, only the candles it lands in change.',
+        li: ['First stage: the previous day high or low is swept',
+             'Second stage: a 4H PSP, or SMT against the previous candle',
+             'Before New York this is what you want — 4H, or daily',
+             'Inside New York it can land in one candle and continue in the next'] },
+      { n: '02', h: 'Two-stage, confirmed lower down',
+        p: 'The first stage is on the 4H, but no PSP closes there. The confirmation comes one or two timeframes down instead.',
+        li: ['Second stage as a 1H or 30M PSP, or SMT on the prior candle',
+             'The 90M counts — it is above the hourly, so a two-stage there is valid',
+             'Fine for Asia and London, but stay on the 1H for those',
+             'The 15M only at the 09:30 driver, or at 10:00'] },
+      { n: '03', h: 'Gaps away from it',
+        p: 'No SMT needed at all. The extreme takes a key level and then displaces away, leaving gaps behind it.',
+        li: ['The extreme has to have hit something — not a random high',
+             'Displacement away, leaving a gap in the move',
+             'Tag that gap, create another: the chain is the confirmation',
+             'Each gap is then a level to take the continuation from'] },
+      { n: '04', h: 'A change in the state of delivery',
+        p: 'The plainest one, and the fallback when the rest are absent. A V-shape reversal away from the level, read a timeframe or two up.',
+        li: ['Small wick, the sweep, then the close back through it',
+             'On the 1H when the daily candle is what you are trading',
+             'The same shape you would take as an entry on the 3M or 5M',
+             'Works for a daily C2, C3 or C4 — it is only timeframe alignment'] },
+    ],
+    rules: [
+      ['Two stages, or it is not a two-stage.',
+       'The first stage is the sweep of the key level. The second is the '
+       + 'confirmation — a PSP, or SMT against the previous candle. One stage on '
+       + 'its own has confirmed nothing and never has.'],
+      ['A two-stage with no reversal signature is not the extreme.',
+       'If the level was hit and the lower timeframe shows only consolidation — no '
+       + 'V-shape, no close back through — the real high or low has not printed '
+       + 'yet, whatever the higher timeframe closed. Go and look before you commit.'],
+      ['The earlier the session, the higher the timeframe.',
+       'Asia and London are confirmed on the 4H, or the 1H if you must. Dropping to '
+       + 'the 30M for those sessions is asking a timeframe to tell you something it '
+       + 'does not know yet.'],
+      ['Never the 15-minute — except at 09:30 or 10:00.',
+       'It will always show you a PSP. The driver is the one place that PSP means '
+       + 'anything, because the volatility is what put the extreme in.'],
+      ['The 90-minute is allowed.',
+       'It is thirty minutes above the hourly, so a two-stage closing there is real '
+       + 'confirmation, and the next candle is the one you trade.'],
+      ['Gaps only count away from a key level.',
+       'Displacement away from a level that was reached is confirmation. The same '
+       + 'displacement away from a random high is just a move, and trading it is '
+       + 'guessing with extra steps.'],
+      ['Gaps confirm by repeating.',
+       'Tag the gap, create another, tag that one, create another. The chain is the '
+       + 'tell that the extreme is holding — and every link in it is somewhere to '
+       + 'enter from.'],
+      ['The change in delivery is enough on its own.',
+       'When the two-stage and the gaps are both absent, a valid V-shape away from '
+       + 'the level is a high or low of day. It is the simplest of the four and it '
+       + 'is not a lesser one.'],
     ],
   },
 ];
