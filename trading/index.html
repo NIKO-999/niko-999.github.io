@@ -930,6 +930,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   stroke: color-mix(in srgb, var(--ink-2) 60%, transparent); }
 .rs-diag .mv { fill: none; stroke: var(--ink-2); stroke-width: 1.5;
   stroke-linejoin: round; stroke-linecap: round; }
+.rs-diag .rg { fill: none; stroke: var(--accent); stroke-width: 1.3; }
 
 /* Same idea as the trade sheet's chart: click, paste or drop. */
 .rs-thumb {
@@ -3174,6 +3175,27 @@ const SEED = [{
   tags: ['two-stage SMT', 'gaps', 'CISD', 'drivers'],
   added: null,
   opened: null,
+}, {
+  id: 'seed-phases',
+  kind: 'video',
+  note: 'phases',
+  art: 'phz',
+  title: 'Phases of price — reversals',
+  url: 'https://youtu.be/RGOCu9pjQdQ',
+  len: '19:31',
+  sum: 'The rules above are the whole model. These five are worth watching for '
+     + 'the speed of the legs, which is the one thing that does not survive '
+     + 'being written down — including the one he takes and loses.',
+  marks: [
+    [191, 'A daily gap: retrace, manipulate, then the reversal'],
+    [359, 'A relevant low, SMT as the manipulation, the phases repeating up'],
+    [597, 'A 4H gap read on the 15M — two protected lows in a row'],
+    [731, 'A clean signature that lost'],
+    [993, 'Market open, down to the 1M — and the failure-swing trap'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['reversal', 'expansion', 'protected low', 'failure swings'],
+  added: null,
+  opened: null,
 }];
 
 function readRes() {
@@ -3273,6 +3295,14 @@ const DIAG = {
     <path class="mv" d="M32 28 52 63 63 47 77 67 98 33 120 17" />
     <circle class="mk" cx="52" cy="63" r="4.5" />
     <circle class="mk" cx="77" cy="67" r="4.5" />
+  </svg>`,
+  /* Down fast, up fast, and the close back through the range it came
+     from. Both legs the same steepness, which is the whole point. */
+  phz: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="lv" d="M24 66H126" />
+    <path class="rg" d="M40 33H104" />
+    <path class="mv" d="M32 13 68 67 108 15" />
+    <circle class="mk" cx="68" cy="67" r="4.5" />
   </svg>`,
 };
 
@@ -3492,6 +3522,78 @@ const NOTES = [
        'When the two-stage and the gaps are both absent, a valid V-shape away from '
        + 'the level is a high or low of day. It is the simplest of the four and it '
        + 'is not a lesser one.'],
+    ],
+  },
+  {
+    id: 'phases',
+    title: 'Phases of price',
+    sub: 'reading a reversal from expansion',
+    lede: 'A reversal is expansion met with expansion: a fast move into a key '
+        + 'level, and a fast move back into the range. That is the whole '
+        + 'signature. Anything slower on the way back is a retracement, and a '
+        + 'retracement is not a reversal — it is the market telling you the '
+        + 'manipulation has not happened yet. Read the two legs against each '
+        + 'other and the rest of the read follows.',
+    sit: [
+      { n: '01', h: 'A key level, first',
+        p: 'Nothing before this counts. Without a level there is no reversal to frame, however good the shape looks.',
+        li: ['A higher-timeframe gap, or an old high or low',
+             'A low is relevant when the distance to the last one is wide',
+             'Expansion away from a random extreme is a move, not a reversal',
+             'Ask what happens after the level: continue, consolidate, or turn'] },
+      { n: '02', h: 'Expansion met with expansion',
+        p: 'The reversal. Into the level, then straight back into the range — that is the change in delivery.',
+        li: ['Both legs fast. Compare their speed before calling it',
+             'The close back inside the range is the signature, not the wick',
+             'SMT at the extreme is the manipulation that sets it up',
+             'Then the objective is the highs or lows to the left'] },
+      { n: '03', h: 'Expansion met with retracement',
+        p: 'Not a reversal. The move back is slow, so nothing has turned — the level was reached and then drifted away from.',
+        li: ['A slow leg back is a retracement, whatever it looks like',
+             'You now want a manipulation — a run of the low or high',
+             'Only after that run can a reversal be framed',
+             'Expansion, retracement, expansion is the ordinary rhythm'] },
+      { n: '04', h: 'The protected extreme',
+        p: 'Once the signature prints, that low or high should hold the whole way to the objective. It holding is the trade staying valid.',
+        li: ['Every leg up repeats it: retrace, run a short-term low, V-shape',
+             'Each of those is another change in delivery to add from',
+             'Equal highs forming above are engineered liquidity, not a wall',
+             'If the extreme goes, the read was wrong — not early'] },
+    ],
+    rules: [
+      ['A key level first, or there is nothing to frame.',
+       'A higher-timeframe gap or an old high or low. Expansion away from an '
+       + 'extreme that reached nothing is a move you have decided to like, and it '
+       + 'is the most expensive kind of trade there is.'],
+      ['Expansion met with expansion is the entire signature.',
+       'Fast into the level, fast back into the range. The close back inside is '
+       + 'the change in delivery. Nothing else needs to be present for it to be a '
+       + 'reversal, and nothing substitutes for it.'],
+      ['Judge the legs by speed, not by shape.',
+       'The same two points can be a reversal or a retracement depending on how '
+       + 'fast the second leg is. Compare it against the first before you name it. '
+       + 'A slow move back is a retracement every time.'],
+      ['A retracement means wait for the manipulation.',
+       'Expansion into the level met with a slow drift back is not a failure — it '
+       + 'is an unfinished sequence. You want the run of the low or the high first, '
+       + 'and then you look for the reversal again.'],
+      ['The extreme stays protected, or the read was wrong.',
+       'Once the signature has printed, that low or high should hold all the way to '
+       + 'the objective. Its holding is the trade staying valid; its going is the '
+       + 'invalidation, not a reason to move the stop.'],
+      ['Never trade into failure swings.',
+       'A stack of equal highs or lows sitting between you and the target is what '
+       + 'stops the move, not liquidity you are collecting. The only thing that '
+       + 'overrides it is the higher timeframe printing gaps your way.'],
+      ['Scale down when the session is volatile.',
+       'At the open and through New York the signature prints on a lower timeframe '
+       + 'than usual — the 3M, or the 1M at the open. That is not lowering your '
+       + 'standard, it is reading the same shape where it is legible.'],
+      ['A clean signature can still lose.',
+       'Key level, SMT, V-shape, order block on the continuation — and it fails '
+       + 'anyway. That is the cost of taking the ones that work, not evidence you '
+       + 'read it wrong. Do not go looking for the extra confirmation that would '
+       + 'have saved it.'],
     ],
   },
 ];
