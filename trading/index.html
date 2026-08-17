@@ -1009,6 +1009,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .pb-cmp em.down { color: var(--down); }
 
 /* ── the risk ladder ── */
+/* Sat beside the percentage in the head, because it qualifies it: this is
+   5% of an account that was last written to on such a day. Red only when
+   there is genuinely something to fix — an unfinished trade, or a week of
+   silence — so the ordinary state is quiet. */
+.rk-stale { color: var(--ink-3); }
+.rk-stale::before { content: '·'; margin-right: 7px; color: var(--ink-3); }
+.rk-stale.warn { color: var(--down); }
+
 .rk-top { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
 /* Two answers, so they share one track — this IS a choice between two
    things, which is what the segmented shape is for. */
@@ -1757,6 +1765,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <h1>Risk</h1>
         <span class="grow"></span>
         <span class="span-meta" id="rkMeta"></span>
+        <span class="span-meta rk-stale" id="rkStale"></span>
       </div>
       <div class="pane" tabindex="0">
 
@@ -3582,6 +3591,36 @@ const riskSave = () => {
   try { localStorage.setItem(RISK_KEY, JSON.stringify({ pct: riskPct })); } catch (e) {}
 };
 
+/* ── how current the basis is ──
+   The balance is not printed on this screen, which means nothing on it
+   would catch a ledger that has fallen behind: every figure would be
+   confidently wrong and look exactly like a figure that was right. So the
+   head says how fresh the account is instead of how large it is.
+
+   Two things can put it out. An open position's result is not in the
+   equity yet, by design — this app keeps an unfinished trade out of every
+   figure — so while one is open the balance is knowingly short. And a
+   ledger nobody has written to for a week is a ledger that has probably
+   stopped matching the broker. Neither is an error, and neither is
+   guessed at: both are things the record itself can say. */
+const RISK_STALE_DAYS = 7;
+
+function riskBasis() {
+  const open = openPos.length;
+  const all = events();
+  const last = all.length ? all[all.length - 1].date : null;
+  const days = last
+    ? Math.max(0, Math.round((logDate(iso(new Date())) - logDate(last)) / 86400000))
+    : null;
+  const age = days === null ? 'nothing recorded'
+            : days === 0 ? 'recorded today'
+            : days === 1 ? 'last recorded yesterday'
+            : `last recorded ${days} days ago`;
+  const bits = [age];
+  if (open) bits.push(`${open} still open, not counted`);
+  return { text: bits.join(' · '), warn: open > 0 || (days !== null && days >= RISK_STALE_DAYS) };
+}
+
 /* Compounded, n steps of a win worth m times the risk. */
 const riskGrow = (bal, pct, m, n) => bal * Math.pow(1 + (pct / 100) * m, n);
 /* And the same arithmetic pointed the other way: a loss is 1R, always. */
@@ -3599,6 +3638,9 @@ function renderRisk() {
      figure is on Capital, and repeating it here three times said nothing
      the first row of the table does not already say. */
   put('rkMeta', `${riskPct}% per trade`);
+  const basis = riskBasis();
+  put('rkStale', basis.text);
+  document.getElementById('rkStale').classList.toggle('warn', basis.warn);
   put('rkPer', money(per));
   put('rkPerSub', `${riskPct}% of the account`);
 
