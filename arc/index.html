@@ -27,10 +27,20 @@
   d.dataset.palette = p;
   d.dataset.resolved = m === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
-  var l = document.createElement('link');
-  l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
-  l.fetchPriority = 'high';
-  document.head.appendChild(l);
+  /* Set here rather than in shell.js, which is deferred and therefore
+     runs AFTER each app's own script — the flag has to exist before
+     anything reads it, and being set pre-stylesheet means the first
+     paint is already the right shape with no flash of the wide layout. */
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  /* No photograph on a phone, so no request for one. The panel covers
+     the viewport there and the image would be invisible behind it. */
+  if (!phone) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
   /* font-display: swap means the first paint uses a fallback and then
      reflows; preloading the two faces the board is mostly set in keeps
      that swap to a flicker rather than a visible re-layout. */
@@ -297,6 +307,25 @@
    as an alarm about a goal that is merely running long. */
 .lands { font-size: .72rem; color: var(--ink-3); margin-top: 4px; }
 .lands b { font-weight: 600; color: var(--now); }
+
+/* ═══ the phone ═══
+   A reading view. What writes is absent rather than disabled, so the
+   screen only offers what it can do — and the Board tab goes with them,
+   because the plot has a 720px floor and the List already says the same
+   things in words. */
+[data-phone="on"] #newBtn,
+[data-phone="on"] #backupBtn,
+[data-phone="on"] #tabBoard,
+[data-phone="on"] .fab,
+[data-phone="on"] .tile-art::after,
+[data-phone="on"] .tile-cut { display: none !important; }
+/* Steps still read as done or not done; they simply stop being switches. */
+[data-phone="on"] .step { cursor: default; }
+[data-phone="on"] .list-open { cursor: default; }
+/* The list is the whole view here, so it gets the measure of a page
+   rather than the measure of a panel beside a chart. */
+[data-phone="on"] .list li { padding: 14px 4px; }
+[data-phone="on"] .list-name { font-size: .95rem; }
 
 /* ── vision ──
    Banded by how far away a thing is, not gridded. A grid gave a someday
@@ -1026,6 +1055,18 @@ function commit(fresh, fn) {
 const uid = () => (crypto.randomUUID ? crypto.randomUUID().slice(0, 8)
   : Date.now().toString(36) + Math.random().toString(36).slice(2, 6));
 
+/* ── the phone is a reading view ──
+   Set in the head before the stylesheet, so the first paint is already
+   the right shape. A phone shows the plan and changes nothing in it: the
+   editor is a tall form and a step is a one-tap toggle, and both of those
+   are things a pocket does by accident. */
+const phone = () => document.documentElement.dataset.phone === 'on';
+matchMedia('(max-width: 700px)').addEventListener('change', (ev) => {
+  document.documentElement.dataset.phone = ev.matches ? 'on' : 'off';
+  renderAll();
+  show(phone() && tab === 'board' ? 'list' : tab);
+});
+
 const goals = () => state.goals;
 /* A step is a name, an order, and the day you ticked it. No due date of
    its own — that would double the dates you have to keep straight for a
@@ -1653,6 +1694,7 @@ function renderList() {
    The date is what Past will one day measure against, so it is recorded
    rather than inferred. */
 list.addEventListener('click', (ev) => {
+  if (phone()) return;
   const b = ev.target.closest('.step');
   if (!b) return;
   const gid = b.dataset.goal, i = +b.dataset.step;
@@ -1729,6 +1771,14 @@ function show(which) {
     t.setAttribute('aria-selected', String(on));
     t.tabIndex = on ? 0 : -1;
   });
+  /* The plot has a 720px floor — seven months of bars cannot be read at
+     390px, and a picture you have to drag sideways is not a picture. So
+     on a phone the Board is not offered at all and the List, which says
+     the same things in words, takes its place. Nothing is lost: the
+     forecast read above it is prose either way. */
+  if (phone() && which === 'board') { which = 'list'; tab = 'list';
+    TABS.forEach(([k, t]) => { const on = k === 'list';
+      t.setAttribute('aria-selected', String(on)); t.tabIndex = on ? 0 : -1; }); }
   board.hidden       = which !== 'board';
   listPanel.hidden   = which !== 'list';
   visionPanel.hidden = which !== 'vision';
@@ -1933,7 +1983,7 @@ function renderVision() {
       art.dataset.id = g.id;
       art.dataset.goal = g.name;
       art.setAttribute('aria-label', `Add an image for ${g.name}`);
-      art.addEventListener('click', () => pick(g.id));
+      art.addEventListener('click', () => { if (!phone()) pick(g.id); });
 
       /* Only when there is something to take off. An always-present
          remove button on an empty slot is a control that does nothing,
@@ -1942,6 +1992,7 @@ function renderVision() {
       cut.setAttribute('aria-label', `Remove the image for ${g.name}`);
       cut.addEventListener('click', async (e) => {
         e.stopPropagation();
+        if (phone()) return;
         await PIX.drop(g.id);
         clearTile(g.id, g.name);
         say.textContent = `Image removed from ${g.name}.`;
@@ -2180,6 +2231,7 @@ function edReadSteps() {
 }
 
 function edOpen(goal) {
+  if (phone()) return;
   editing = goal ? goal.id : null;
   edEl('edTitle').textContent = goal ? 'Edit goal' : 'New goal';
   edEl('edName').value = goal ? goal.name : '';
@@ -2201,6 +2253,7 @@ function edOpen(goal) {
 }
 
 function edit(id) {
+  if (phone()) return;
   const g = goals().find(x => x.id === id);
   if (g) edOpen(g);
 }
@@ -2361,6 +2414,9 @@ function renderAll() {
   requestAnimationFrame(() => layout());
 }
 renderAll();
+/* A phone is not offered the Board, so it opens on the view it has. Set
+   after the first render, because show() reads the counts tally() writes. */
+if (phone()) show('list');
 requestAnimationFrame(() => { layout(); toToday(false); });
 
 /* A board left open across midnight is showing yesterday. Re-render on

@@ -23,10 +23,20 @@
   d.dataset.palette = p;
   d.dataset.resolved = m === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
-  var l = document.createElement('link');
-  l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
-  l.fetchPriority = 'high';
-  document.head.appendChild(l);
+  /* Set here rather than in shell.js, which is deferred and therefore
+     runs AFTER each app's own script — the flag has to exist before
+     anything reads it, and being set pre-stylesheet means the first
+     paint is already the right shape with no flash of the wide layout. */
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  /* No photograph on a phone, so no request for one. The panel covers
+     the viewport there and the image would be invisible behind it. */
+  if (!phone) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
   ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
     var k = document.createElement('link');
     k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
@@ -998,6 +1008,89 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .pb-cmp em.up { color: var(--up); }
 .pb-cmp em.down { color: var(--down); }
 
+/* ═══ the phone ═══
+   A reading view. Everything that writes is gone from it — not disabled
+   in place, which reads as broken, but absent, so the screen only offers
+   what it can actually do.
+
+   The month grid goes with them. Seven columns have a floor of about
+   520px and a phone does not have it, so the same month is drawn as a
+   list instead of being left to scroll sideways. */
+[data-phone="on"] #newTrade,
+[data-phone="on"] #backupBtn,
+[data-phone="on"] #resAdd,
+[data-phone="on"] #flowForm,
+[data-phone="on"] #liveClose,
+[data-phone="on"] .gate-act,
+[data-phone="on"] .gate-alt,
+[data-phone="on"] .gate-open .btn,
+[data-phone="on"] #ledger button { display: none !important; }
+/* The rules stay on screen because reading them is the point; they simply
+   stop being switches. The tally still says how many you had ticked when
+   you were at a desk. */
+[data-phone="on"] .gate-list button,
+[data-phone="on"] .gate-modes button { cursor: default; }
+[data-phone="on"] .gate-modes button:hover,
+[data-phone="on"] .gate-list button:hover { background: var(--glass-in); }
+[data-phone="on"] .gate-modes button:hover { background: none; }
+[data-phone="on"] .gate-modes button[aria-pressed="true"]:hover { background: var(--glass-in-2); }
+
+[data-phone="on"] #dow,
+[data-phone="on"] #grid { display: none; }
+/* "August 2026" broke over two lines between the arrows. It is the label
+   for everything below it, so it holds one line and the month total wraps
+   underneath instead. */
+[data-phone="on"] .cal-head h2 { white-space: nowrap; }
+[data-phone="off"] .agenda { display: none; }
+
+/* The sheet, read-only: the fields are the record, so they stay and stop
+   taking input. Everything that would change one is gone. */
+dialog.sheet.ro #tradeSave,
+dialog.sheet.ro #tradeDelete,
+dialog.sheet.ro .shot-empty { display: none; }
+dialog.sheet.ro input:disabled,
+dialog.sheet.ro select:disabled,
+dialog.sheet.ro textarea:disabled { color: var(--ink); opacity: 1; }
+dialog.sheet.ro .checks button:disabled,
+dialog.sheet.ro .side button:disabled,
+dialog.sheet.ro .modes button:disabled { opacity: 1; }
+
+/* ── the month as a list ── */
+.agenda { display: grid; gap: 18px; padding: 10px 0 4px; }
+.ag-day { display: grid; gap: 6px; }
+.ag-h { display: flex; align-items: baseline; gap: 10px;
+  padding-bottom: 5px; border-bottom: 1px solid var(--rule); }
+.ag-h .grow { flex: 1; }
+.ag-h b { font-size: .82rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--ink-2); }
+.ag-day.today .ag-h b { color: var(--accent); }
+.ag-net { font-family: var(--mono); font-size: .78rem; color: var(--ink-2); }
+.ag-net.up { color: var(--up); }
+.ag-net.down { color: var(--down); }
+.ag-r { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); }
+
+/* One trade, as a block of text rather than a row of columns. A phone has
+   one column and pretending otherwise is what made the grid unreadable. */
+.ag-t {
+  display: grid; grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 4px 10px; width: 100%; padding: 11px 12px;
+  border: 0; border-left: 2px solid var(--ink-3); border-radius: 0 9px 9px 0;
+  background: var(--glass-in); color: inherit; font: inherit; text-align: left;
+  cursor: pointer;
+}
+.ag-t.win { border-left-color: var(--up); }
+.ag-t.loss { border-left-color: var(--down); }
+.ag-t.missed { border-left-color: color-mix(in srgb, var(--ink-3) 50%, transparent); }
+.ag-sym { font-size: .86rem; font-weight: 500; color: var(--ink); }
+.ag-amt { font-family: var(--mono); font-size: .82rem; color: var(--ink-2); }
+.ag-t.win .ag-amt { color: var(--up); }
+.ag-t.loss .ag-amt { color: var(--down); }
+.ag-t.missed .ag-amt { font-family: var(--sans); font-size: .76rem; color: var(--ink-3); }
+.ag-tr { font-family: var(--mono); font-size: .68rem; color: var(--ink-3); }
+.ag-meta { grid-column: 1 / -1; font-size: .74rem; color: var(--ink-3); }
+.ag-note { grid-column: 1 / -1; margin-top: 2px;
+  font-size: .78rem; line-height: 1.5; color: var(--ink-2); white-space: pre-wrap; }
+
 /* ── the log ──
    A reading view, so it is set as prose: one column of text at a
    readable measure, with the facts about each trade around it rather
@@ -1418,6 +1511,12 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         </div>
         <div class="dow" id="dow" aria-hidden="true"></div>
         <div class="grid" id="grid" role="group" aria-label="Daily profit and loss"></div>
+        <!-- The same month, read down instead of across. Seven columns
+             have a floor of about 520px and a phone does not have it, so
+             on a phone the grid is replaced rather than scrolled
+             sideways: a month you have to drag is a month you do not
+             read. -->
+        <div class="agenda" id="agenda" role="group" aria-label="The month, day by day"></div>
       </div>
     </main>
 
@@ -1995,6 +2094,22 @@ const PROFILE = {
 /* Symbols, setups and notes are typed by hand and then written into
    innerHTML and into attributes. A single quote mark in a setup name is
    enough to break a cell without this. */
+/* ── the phone is a reading view ──
+   The flag is set in the head, before the stylesheet, so the first paint
+   is already the right shape. Read here rather than re-tested, so the
+   layout and the behaviour cannot disagree about what a phone is.
+
+   A phone shows the record and changes nothing in it. That is not a
+   limitation dressed up as a decision: everything on a small screen is
+   read one-handed, often mid-session, and a form that can be half-filled
+   by a mis-tap on the way past is how a ledger acquires a trade that
+   never happened. The desktop writes; the phone reads. */
+const phone = () => document.documentElement.dataset.phone === 'on';
+matchMedia('(max-width: 700px)').addEventListener('change', (ev) => {
+  document.documentElement.dataset.phone = ev.matches ? 'on' : 'off';
+  renderAll();
+});
+
 const esc = (s) => String(s).replace(/[&<>"']/g,
   c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 
@@ -2227,7 +2342,7 @@ const hits = (e) => !query || [e.sym, e.setup, e.note, e.sess, e.k]
   .some(v => v && String(v).toLowerCase().includes(query));
 document.getElementById('q').addEventListener('input', (ev) => {
   query = ev.target.value.trim().toLowerCase();
-  renderCalendar(); renderLedger(); renderLog();
+  renderCalendar(); renderAgenda(); renderLedger(); renderLog();
 });
 
 const byDay = () => {
@@ -2389,6 +2504,64 @@ function renderCalendar() {
   paneCue();
 }
 
+/* ── the month, read downwards ──
+   Newest day first, matching the Log, because on a phone the thing you
+   came to check is nearly always the last thing that happened.
+
+   Built off byDay(), so it is filtered by the search box exactly as the
+   grid is and the two can never show different months of the same
+   ledger. Days with nothing on them are left out entirely: a blank cell
+   in a grid is a shape holding the week together, but a blank row in a
+   list is just a row. */
+function renderAgenda() {
+  const wrap = document.getElementById('agenda');
+  if (!phone()) { wrap.textContent = ''; return; }
+  const y = cursor.getFullYear(), m = cursor.getMonth();
+  const days = byDay();
+  const len = new Date(y, m + 1, 0).getDate();
+  const key = (d) => `${y}-${String(m + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+  const todayIso = iso(new Date());
+
+  let out = '';
+  for (let d = len; d >= 1; d--) {
+    const k = key(d);
+    const hit = days.get(k);
+    if (!hit) continue;
+    const graded = hit.items.filter(e => e.out !== 'missed' && e.risk > 0);
+    const r = graded.reduce((sum, e) => sum + rOf(e), 0);
+    const when = new Date(y, m, d);
+    out += `<section class="ag-day${k === todayIso ? ' today' : ''}">
+      <div class="ag-h">
+        <b>${DOW_SHORT[(when.getDay() + 6) % 7]} ${d}</b>
+        <span class="grow"></span>
+        <span class="ag-net ${hit.pnl > 0 ? 'up' : hit.pnl < 0 ? 'down' : ''}">${money(hit.pnl, true)}</span>
+        ${graded.length ? `<span class="ag-r">${pbR(r)}</span>` : ''}
+      </div>
+      ${hit.items.map(e => {
+        const missed = e.out === 'missed';
+        const cls = missed ? 'missed' : e.amt > 0 ? 'win' : e.amt < 0 ? 'loss' : 'flat';
+        const meta = [e.sess ? pbSess(e.sess) : '', e.setup || '',
+                      e.mode ? (e.mode === 'reversal' ? 'C2' : 'C3') : '']
+                      .filter(Boolean).map(esc).join(' · ');
+        return `<button class="ag-t ${cls}" type="button" data-id="${esc(e.id)}" data-date="${esc(e.date)}">
+          <span class="ag-sym">${esc(e.sym || '—')}</span>
+          <span class="ag-amt">${missed ? 'not taken' : money(e.amt, true)}</span>
+          ${e.risk > 0 && !missed ? `<span class="ag-tr">${pbR(rOf(e), 2)}</span>` : ''}
+          ${meta ? `<span class="ag-meta">${meta}</span>` : ''}
+          ${e.note ? `<span class="ag-note">${esc(e.note)}</span>` : ''}
+        </button>`;
+      }).join('')}
+    </section>`;
+  }
+  wrap.innerHTML = out || `<p class="pb-none">Nothing recorded in ${MONTHS[m]}.</p>`;
+}
+
+/* A row opens the trade to be read, the same way a log row does. */
+document.getElementById('agenda').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-id]');
+  if (b) openTrade(b.dataset.date, b.dataset.id);
+});
+
 /* Whether there is month below the fold. Six-week months with three
    trades on a day want about 700px of pane and a 900-tall window gives
    656, so on shorter screens this cannot be designed away — it can only
@@ -2406,14 +2579,17 @@ function paneCue() {
 })();
 
 document.getElementById('prevM').addEventListener('click', () => {
-  cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1); renderCalendar();
+  cursor = new Date(cursor.getFullYear(), cursor.getMonth() - 1, 1);
+  renderCalendar(); renderAgenda();
 });
 document.getElementById('nextM').addEventListener('click', () => {
-  cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1); renderCalendar();
+  cursor = new Date(cursor.getFullYear(), cursor.getMonth() + 1, 1);
+  renderCalendar(); renderAgenda();
 });
 document.getElementById('todayM').addEventListener('click', () => {
   const n = new Date();
-  cursor = new Date(n.getFullYear(), n.getMonth(), 1); renderCalendar();
+  cursor = new Date(n.getFullYear(), n.getMonth(), 1);
+  renderCalendar(); renderAgenda();
 });
 
 /* ── metrics ── */
@@ -3389,6 +3565,7 @@ document.getElementById('ledger').addEventListener('click', (ev) => {
 });
 
 document.getElementById('flowForm').addEventListener('submit', (ev) => {
+  if (phone()) { ev.preventDefault(); return; }
   ev.preventDefault();
   const k = document.getElementById('fKind').value;
   const amt = parseFloat(document.getElementById('fAmt').value);
@@ -3613,6 +3790,11 @@ const nextSeq = () => state.events.reduce((m, e) => Math.max(m, e.seq || 0), 0) 
    win, or opening an old trade from the log would overwrite what it says
    with what you happen to be looking at now. */
 function openTrade(date, id, pre) {
+  /* On a phone an existing trade opens to be READ — the note and the
+     chart are the reason you tapped it — and a new one does not open at
+     all, because there is nothing on this screen to write with. */
+  const ro = phone();
+  if (ro && !id) return;
   refreshLists();
   const e = id ? state.events.find(x => String(x.id) === String(id)) : null;
   editing = e ? e.id : null;
@@ -3652,8 +3834,17 @@ function openTrade(date, id, pre) {
   document.getElementById('tradeSave').textContent = e ? 'Save changes' : 'Save trade';
   document.getElementById('tradeDelete').hidden = !e;
   rHint();
+  /* Disabled, not hidden. The values ARE the record — a field you cannot
+     see is not a trade you can read — so they stay on screen and stop
+     accepting input. */
+  sheet.classList.toggle('ro', ro);
+  sheet.querySelectorAll('input, select, textarea, button').forEach((el) => {
+    if (el.id === 'sheetX') return;                 // the way out is never disabled
+    el.disabled = ro;
+  });
+  if (ro) document.getElementById('sheetTitle').textContent = 'Trade';
   sheet.showModal();
-  document.getElementById(e ? 'tSym' : 'tAmt').focus();
+  document.getElementById(ro ? 'sheetX' : e ? 'tSym' : 'tAmt').focus();
 }
 
 document.getElementById('newTrade').addEventListener('click', () => openTrade());
@@ -3766,7 +3957,7 @@ function commit(msg) {
   document.getElementById('say').textContent = msg;
 }
 function renderAll() {
-  renderSummary(); renderCalendar(); renderMetrics(); renderPlaybook();
+  renderSummary(); renderCalendar(); renderAgenda(); renderMetrics(); renderPlaybook();
   renderLedger(); renderLog(); renderRes(); renderGate(); renderLive();
 }
 
@@ -4107,6 +4298,7 @@ function gateTick(c) {
 }
 
 document.getElementById('gModes').addEventListener('click', (ev) => {
+  if (phone()) return;
   const b = ev.target.closest('[data-mode]');
   if (!b || b.dataset.mode === gateMode) return;
   gateMode = b.dataset.mode;
@@ -4122,6 +4314,7 @@ document.getElementById('gModes').addEventListener('click', (ev) => {
 });
 
 document.getElementById('gList').addEventListener('click', (ev) => {
+  if (phone()) return;
   const b = ev.target.closest('[data-line]');
   if (!b) return;
   const l = b.dataset.line;
@@ -4141,6 +4334,7 @@ document.getElementById('gList').addEventListener('click', (ev) => {
    it; leaving it empty costs nothing, because the sheet asks again when
    the trade closes. */
 document.getElementById('gIn').addEventListener('click', () => {
+  if (phone()) return;
   const c = candle();
   const sess = hhmm(c.open);
   const r = parseFloat(document.getElementById('gRisk').value);
@@ -4940,6 +5134,7 @@ let rsEditing = null;
 const rsF = (id) => document.getElementById(id);
 
 function openRes(id) {
+  if (phone()) return;
   const r = id ? resAll().find(x => x.id === id) : null;
   rsEditing = r ? r.id : null;
   document.getElementById('rsTitle').textContent = r ? 'Edit link' : 'Save a link';

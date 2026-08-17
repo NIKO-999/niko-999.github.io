@@ -864,3 +864,89 @@ body {
   .topbar > .candle { flex: 1 0 100%; }
   .topbar > .btn-primary { margin-left: auto; }
 }
+/* ═══════════════════════════════════════════════════════════════
+   THE PHONE
+   A different object, not the desktop layout squeezed into a column.
+
+   Full bleed, one column, the rail moved to the bottom where a thumb
+   actually reaches, and the type a size up. Everything in here is set in
+   rem, so the whole scale is one declaration rather than forty.
+
+   The photograph goes. Full bleed means the panel covers the entire
+   viewport, so the image sits behind an opaque sheet where it cannot be
+   seen at all — up to 1.3MB and a viewport-sized blur to render
+   something invisible. What replaces it is contrast, which is what a
+   reading view actually wanted from it in the first place.
+
+   100dvh, not 100vh. On iOS the dynamic unit is the one that accounts
+   for the browser's own chrome; with 100vh the bottom rail sits under
+   the toolbar and cannot be tapped.
+   ═══════════════════════════════════════════════════════════════ */
+@media (max-width: 700px) {
+  /* One line, and every type size in both apps follows it. */
+  :root { font-size: 17px; }
+
+  .backdrop, .fx { display: none; }
+
+  .app {
+    margin: 0;
+    height: 100dvh;
+    border: 0;
+    border-radius: 0;
+    flex-direction: column;
+    background: var(--ground);
+    -webkit-backdrop-filter: none;
+            backdrop-filter: none;
+  }
+
+  .main { order: 1; }
+
+  /* Under the thumb, and clear of the home indicator. The logo, the
+     crossing rule and the flexible spacer are all furniture for a
+     vertical column and say nothing in a row. */
+  .rail {
+    order: 2;
+    flex-direction: row;
+    /* Evenly, not space-between. Arc puts three things down here and
+       trading eight; space-between pins three to the two extremes and
+       leaves a hole in the middle. */
+    justify-content: space-evenly;
+    align-items: center;
+    width: auto;
+    gap: 2px;
+    padding: 5px 8px calc(5px + env(safe-area-inset-bottom));
+    border-right: 0;
+    border-top: 1px solid var(--rule);
+    background: var(--glass-in);
+  }
+  .rail-mark, .rail .cross, .rail .spacer { display: none; }
+  /* Sharing the width rather than taking a fixed slice: the trading app
+     puts eight things down here and the arc app four, and one rule has
+     to hold both without the eighth falling off a 390px screen. */
+  .rail button, .rail a {
+    flex: 1 1 0; min-width: 0; max-width: 60px;
+    width: auto; height: 42px; border-radius: 10px;
+  }
+  .rail button > svg, .rail a > svg { width: 21px; height: 21px; }
+  /* The theme toggle is in the topbar as well, and one of the two has to
+     give up its place to keep the tab targets full width. */
+  #themeRail { display: none; }
+
+  .topbar { padding-top: env(safe-area-inset-top); }
+  /* The 640px rule gives the field a line of its own, which left the
+     theme button orphaned on a row by itself. A small flex-basis and
+     min-width:0 let the field shrink instead of claiming its content
+     width, so the two share the first row; only the candle clock, which
+     genuinely needs the width, still gets a line to itself. */
+  .topbar .search { flex: 1 1 120px; min-width: 0; }
+  .topbar { row-gap: 6px; }
+  /* The clock sits between the field and the controls in the markup, so
+     on a wrapping bar it split them across three rows. Sent to the end,
+     it takes the second row whole and the first row holds the field and
+     the controls together — two rows of chrome instead of three, which on
+     a phone is most of a card's worth of screen back. */
+  .topbar > .candle { order: 3; flex: 1 0 100%; }
+  /* The backdrop picker has nothing left to change here — the photograph
+     is not drawn on a phone. */
+  .pal { display: none; }
+}
