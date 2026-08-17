@@ -87,6 +87,11 @@ URL. Nothing about it renders on screen — readers never see a switch.
 `js/` is the base layer and the backup at the same time. Because no original
 file is moved or modified, reverting cannot fail and needs no restoration step.
 
+The last commit before any of this landed — the state of the writing as it stood
+when the second generation began — is **`30116aa`** ("Remove extraction scratch
+output from the repo"). Recorded here rather than as a git tag because tag
+pushes are refused by the environment this was built in.
+
 ## The voice
 
 Plain English. No metaphors, no images to decode, everyday words only, nothing
