@@ -727,16 +727,16 @@
                   aria-controls="boardPanel">
             <span class="mark" aria-hidden="true"></span>Board<span class="n" id="nBoard"></span>
           </button>
-          <button type="button" role="tab" id="tabList" aria-selected="false"
-                  tabindex="-1" aria-controls="listPanel">
-            <span class="mark" aria-hidden="true"></span>List<span class="n" id="nList"></span>
-          </button>
           <!-- Vision was its own place on the rail, which made the picture
                of where you are going a detour from the plan of how. It is
                the same goals seen a third way, so it belongs here. -->
           <button type="button" role="tab" id="tabVision" aria-selected="false"
                   tabindex="-1" aria-controls="visionPanel">
             <span class="mark" aria-hidden="true"></span>Vision<span class="n" id="nVision"></span>
+          </button>
+          <button type="button" role="tab" id="tabList" aria-selected="false"
+                  tabindex="-1" aria-controls="listPanel">
+            <span class="mark" aria-hidden="true"></span>List<span class="n" id="nList"></span>
           </button>
         </div>
         <span class="grow"></span>
@@ -1511,7 +1511,10 @@ const todayBtn  = document.getElementById('todayBtn');
 /* Three ways of looking at the same goals: when they run, what is left
    in them, and what they look like. Named rather than a boolean, which
    stopped scaling the moment there was a third. */
-const TABS = [['board', tabBoard], ['list', tabList], ['vision', tabVision]];
+/* In DOM order — arrow keys and Home/End read this array, so a tab
+   row that looked one way and keyed another would be worse than
+   either. */
+const TABS = [['board', tabBoard], ['vision', tabVision], ['list', tabList]];
 let tab = 'board';
 
 function show(which) {

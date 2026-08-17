@@ -181,6 +181,12 @@ async function paintOwn(id) {
     /* Inline, so it beats the :root[data-palette] rule without either
        knowing about the other. Removing it hands the photograph back. */
     document.documentElement.style.setProperty('--photo', `url("${ownUrl}")`);
+    /* A photograph saved before thumbnails existed has a file but no
+       flag, so the head script cannot know to skip the preload and
+       paints the shipped photograph first — the exact flash this is all
+       meant to stop. Make the thumbnail now, from the file we are
+       holding, and the next load is clean. */
+    if (!tiny) { const t = await tinyOf(blob); if (t) ownSet(id, t); }
   } else {
     /* No blob means nothing of yours here — including the case where the
        thumbnail outlived the file it stood for. */
@@ -352,6 +358,22 @@ setPalette(palette);
 /* Arrow-keying through the picker swaps data-palette per press, and each
    never-fetched photograph would flash flat --ground while it loaded.
    Warm the other four after first paint, at idle priority. */
+/* Reconcile all five, not just the one on screen: IndexedDB holds the
+   files and localStorage holds the flags, and the two can disagree —
+   after an upgrade, or if one store was cleared and the other was not.
+   A file with no flag flashes on load; a flag with no file skips a
+   preload for a photograph that is not there. Both get healed here, so
+   one visit fixes every palette rather than one palette per visit. */
+async function reconcile() {
+  const mine = ownAll();
+  for (const [id] of PALETTES) {
+    let blob = null;
+    try { blob = await BG.get('bg:' + id); } catch (e) { return; }
+    if (blob && !mine[id]) { const t = await tinyOf(blob); if (t) ownSet(id, t); }
+    else if (!blob && mine[id]) ownSet(id, null);
+  }
+}
+
 const warm = () => {
   /* Skip the ones standing in for a photograph of your own — fetching a
      file that will never be shown is the one thing worse than a flash. */
@@ -359,6 +381,7 @@ const warm = () => {
   PALETTES.forEach(([id]) => {
     if (!mine[id]) new Image().src = asset(`arc/bg/${id}.jpg`);
   });
+  reconcile();
 };
 if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
 else setTimeout(warm, 1200);
