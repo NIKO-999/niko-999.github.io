@@ -1035,6 +1035,17 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 [data-phone="on"] .gate-modes button:hover { background: none; }
 [data-phone="on"] .gate-modes button[aria-pressed="true"]:hover { background: var(--glass-in-2); }
 
+/* The note's own title, and "Saved" beneath it. Bold, because on this
+   page they are the two things that tell you where you are — everywhere
+   else in the app this same heading labels a chart inside a card, where
+   400 is right and 600 would shout.
+
+   Scoped to the section rather than applied to .cal-head h2, which is
+   eighteen headings across five views. The topic rail is deliberately
+   untouched: a tab is a control, and bolding the one you are on would
+   say the same thing its own highlight already says. */
+#resourcesSection .cal-head h2 { font-weight: 600; }
+
 [data-phone="on"] #dow,
 [data-phone="on"] #grid { display: none; }
 /* "August 2026" broke over two lines between the arrows. It is the label

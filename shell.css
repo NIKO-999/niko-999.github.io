@@ -949,4 +949,13 @@ body {
   /* The backdrop picker has nothing left to change here — the photograph
      is not drawn on a phone. */
   .pal { display: none; }
+
+  /* A card head is a title, a spacer and a subtitle laid out in a row.
+     There is no room for the row on a phone, and .span-meta is nowrap, so
+     the subtitle was running off the edge and being clipped mid-word —
+     "1H / 30M ALIGNMENT TO A 4H PROF". It wraps to its own line instead,
+     which is the whole reason a card head has a spacer in it. */
+  .cal-head { flex-wrap: wrap; }
+  .cal-head .span-meta { white-space: normal; }
+  .head .span-meta { white-space: normal; }
 }
