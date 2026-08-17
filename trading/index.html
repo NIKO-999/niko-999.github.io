@@ -1739,6 +1739,44 @@ const trades = () => logged().filter(e => e.out !== 'missed');
 const flows  = () => events().filter(e => e.k !== 'trade');
 const signed = (e) => e.k === 'withdraw' ? -e.amt : e.amt;
 
+/* ── the arithmetic, over whatever set of trades you hand it ──
+   Metrics asks for this over everything. The Playbook asks for it one
+   setup at a time, then one symbol at a time. It is written once because
+   a second copy is exactly how a per-setup win rate ends up disagreeing
+   with the headline it sits underneath: two pieces of code computing the
+   same figure, and nothing anywhere to notice they have come apart.
+
+   Drawdown is deliberately NOT in here. It walks the account in trade
+   order, and one setup's trades are interleaved with every other
+   setup's, so "this setup's drawdown" would describe a sequence of
+   events that never happened. It stays in totals(), where the sequence
+   is real. */
+function perf(t) {
+  const wins = t.filter(e => e.amt > 0), losses = t.filter(e => e.amt < 0);
+  const grossWin = wins.reduce((s, e) => s + e.amt, 0);
+  const grossLoss = Math.abs(losses.reduce((s, e) => s + e.amt, 0));
+
+  /* R only means anything on trades where the risk was actually written
+     down, so those are counted separately rather than averaged against
+     trades that never recorded one — a hidden zero would quietly halve
+     the average risk and flatter every recovery figure built on it. */
+  const g = t.filter(e => e.risk > 0);
+  const rTotal = g.reduce((s, e) => s + e.amt / e.risk, 0);
+  const avgRisk = g.length ? g.reduce((s, e) => s + e.risk, 0) / g.length : 0;
+
+  return {
+    n: t.length,
+    winRate: t.length ? (wins.length / t.length) * 100 : 0,
+    avgWin: wins.length ? grossWin / wins.length : 0,
+    avgLoss: losses.length ? grossLoss / losses.length : 0,
+    pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
+    expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
+    rTotal, avgRisk, graded: g.length,
+    wins: wins.length, losses: losses.length,
+    ...streaks(t),
+  };
+}
+
 /* ── the arithmetic ──
    equity   — everything, because that is genuinely what is in the account
    capital  — flows only, the money you put in
@@ -1750,9 +1788,6 @@ function totals() {
   const equity = all.reduce((s, e) => s + signed(e), 0);
   const capital = flows().reduce((s, e) => s + signed(e), 0);
   const t = trades();
-  const wins = t.filter(e => e.amt > 0), losses = t.filter(e => e.amt < 0);
-  const grossWin = wins.reduce((s, e) => s + e.amt, 0);
-  const grossLoss = Math.abs(losses.reduce((s, e) => s + e.amt, 0));
 
   /* Time-weighted return, chained at every flow so a deposit cannot pass
      for a good week. Three situations have no honest number and return
@@ -1789,26 +1824,10 @@ function totals() {
   let peak = 0, run = 0, dd = 0;
   for (const e of t) { run += e.amt; peak = Math.max(peak, run); dd = Math.max(dd, peak - run); }
 
-  /* R only means anything on trades where the risk was actually written
-     down, so those are counted separately rather than averaged against
-     trades that never recorded one — a hidden zero would quietly halve
-     the average risk and flatter every recovery figure built on it. */
-  const g = t.filter(e => e.risk > 0);
-  const rTotal = g.reduce((s, e) => s + e.amt / e.risk, 0);
-  const avgRisk = g.length ? g.reduce((s, e) => s + e.risk, 0) / g.length : 0;
-
   return {
     equity, capital, profit: equity - capital,
-    twr: twrPct, wiped,
-    n: t.length,
-    winRate: t.length ? (wins.length / t.length) * 100 : 0,
-    avgWin: wins.length ? grossWin / wins.length : 0,
-    avgLoss: losses.length ? grossLoss / losses.length : 0,
-    pf: grossLoss ? grossWin / grossLoss : (grossWin ? Infinity : 0),
-    expectancy: t.length ? (grossWin - grossLoss) / t.length : 0,
-    dd, rTotal, avgRisk, graded: g.length,
-    wins: wins.length, losses: losses.length,
-    ...streaks(t),
+    twr: twrPct, wiped, dd,
+    ...perf(t),
   };
 }
 
@@ -2082,8 +2101,13 @@ function renderMetrics() {
 const dowOf = (e) => DOW_SHORT[(new Date(e.date + 'T00:00:00').getDay() + 6) % 7];
 
 const rOf = (e) => e.amt / e.risk;
-const radarRows = (keys, keyOf) => keys.map(k => {
-  const g = trades().filter(e => e.risk > 0 && keyOf(e) === k);
+/* `list` defaults to every trade, which is what the radars want. The
+   Playbook passes one setup's trades instead, so "which candle does this
+   setup work on" is answered by the same code that answers it for the
+   account — a separate per-setup version would be a second definition of
+   the same question. */
+const radarRows = (keys, keyOf, list) => keys.map(k => {
+  const g = (list || trades()).filter(e => e.risk > 0 && keyOf(e) === k);
   const of = (m) => g.filter(e => (e.mode || 'continuation') === m)
                      .reduce((s, e) => s + rOf(e), 0);
   return { k, n: g.length, R: g.reduce((s, e) => s + rOf(e), 0),
