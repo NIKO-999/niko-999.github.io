@@ -775,17 +775,21 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .live b { font-weight: 500; color: var(--ink); }
 .live #liveWhen { font-family: var(--mono); font-size: .68rem; color: var(--ink-3); }
 .live .btn { height: 28px; padding: 0 12px; font-size: .74rem; }
-.live-dot {
-  flex: none; width: 7px; height: 7px; border-radius: 50%;
-  background: var(--accent);
+/* A radar rather than a plain dot: the strip is saying it is watching
+   something on your behalf, which is a different claim from a status
+   light. It carries the pulse, so the one moving thing on the page is
+   also the thing that names why it is moving. */
+.live-ic {
+  flex: none; display: inline-flex; color: var(--accent);
   animation: live-pulse 2.4s ease-in-out infinite;
 }
-@keyframes live-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
-/* Opened in a candle that has since closed. The accent is withdrawn —
-   it is no longer a live decision, it is an outstanding one. */
+@keyframes live-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .4 } }
+/* Opened in a candle that has since closed. The accent is withdrawn and
+   the pulse stops — it is no longer a live decision, it is an
+   outstanding one, and a thing still blinking would say otherwise. */
 .live.stale { background: color-mix(in srgb, var(--ink-3) 10%, transparent); }
-.live.stale .live-dot { background: var(--ink-3); animation: none; }
-@media (prefers-reduced-motion: reduce) { .live-dot { animation: none } }
+.live.stale .live-ic { color: var(--ink-3); animation: none; }
+@media (prefers-reduced-motion: reduce) { .live-ic { animation: none } }
 
 /* ── the gate ──
    A decision screen, so it is set larger than a reading screen. Every
@@ -867,7 +871,10 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   background: var(--glass-in);
 }
 .gate-open .grow { flex: 1; }
-.gate-open .go-what { font-size: .84rem; color: var(--ink-2); }
+.gate-open .go-what { display: inline-flex; align-items: center; gap: 8px;
+  font-size: .84rem; color: var(--ink-2); }
+.gate-open .go-ic { display: inline-flex; color: var(--accent); }
+.gate-open li.stale .go-ic { color: var(--ink-3); }
 .gate-open .go-what b { font-weight: 500; color: var(--ink); }
 .gate-open .go-when { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); }
 .gate-open .btn { height: 32px; padding: 0 13px; font-size: .76rem; }
@@ -1386,7 +1393,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
          else on the page. -->
     <div class="live" id="live" role="status" aria-live="off"
          aria-label="The position you are in" hidden>
-      <span class="live-dot" aria-hidden="true"></span>
+      <span class="live-ic" id="liveIc" aria-hidden="true"></span>
       <b id="liveWhat"></b>
       <span id="liveWhen"></span>
       <span class="grow"></span>
@@ -1892,6 +1899,10 @@ const ICO = {
   tick:  'M4 12l5 5L20 6',
   mode:  'M4 9h14l-4-4M20 15H6l4 4',
   pulse: 'M2 12h4l3-8 4 16 3-8h6',
+  /* A radar: the same two rings as `out`, plus the sweep arm that makes
+     it read as watching something rather than aiming at it. */
+  radar: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9'
+       + 'M12 12l6.4-6.4',
   pct:   'M19 5 5 19M7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
   bars:  'M4 19V9M10 19V5M16 19v-7M22 19H2',
   image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
@@ -3798,6 +3809,10 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
    buttons, 13 beside a form label, 12 inside a small mono badge, 11 on a
    caption. These two are the same badge in two places, so they are the
    same size — they were 12 and 11. */
+/* 15, the size this file gives a topbar button — the strip is a band
+   across the top and the mark has to carry from across the desk. The
+   gate's own rows use 13, which is the size beside a label. */
+document.getElementById('liveIc').innerHTML = icon('radar', 15);
 document.getElementById('gRiskIc').innerHTML = icon('risk', 13);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
 document.getElementById('cpIcon').innerHTML = icon('clock', 12);
@@ -4028,7 +4043,8 @@ function renderGate() {
   document.getElementById('gOpenWrap').hidden = !openPos.length;
   document.getElementById('gOpenList').innerHTML = openPos.map(p =>
     `<li${posStale(p) ? ' class="stale"' : ''}>
-       <span class="go-what"><b>${posName(p)}</b>${p.sess ? ` on the ${esc(p.sess)}` : ''}</span>
+       <span class="go-what"><span class="go-ic" aria-hidden="true">${icon('radar', 13)}</span>
+         <b>${posName(p)}</b>${p.sess ? ` on the ${esc(p.sess)}` : ''}</span>
        <span class="go-when">${hm(posFor(p))} in${posStale(p) ? ' · that candle has closed' : ''}
          ${p.risk > 0 ? ` · risk ${round(p.risk)}` : ''}</span>
        <span class="grow"></span>
