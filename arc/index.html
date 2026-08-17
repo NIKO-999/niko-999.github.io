@@ -292,6 +292,11 @@
 /* State is never colour alone — every state also carries a word. */
 .state { font-size: .72rem; color: var(--ink-2); margin-top: 7px; }
 .state b { font-weight: 600; color: var(--ink); }
+/* Quieter than .state, because it is an estimate sitting under a fact.
+   Only the date takes the warning colour — a whole line in it would read
+   as an alarm about a goal that is merely running long. */
+.lands { font-size: .72rem; color: var(--ink-3); margin-top: 4px; }
+.lands b { font-weight: 600; color: var(--now); }
 
 /* ── vision ──
    Banded by how far away a thing is, not gridded. A grid gave a someday
@@ -436,6 +441,24 @@
   line-height: 1.5;
 }
 .calib b { color: var(--ink); font-weight: 600; }
+
+/* ── the read ──
+   Deliberately the same object as .calib. Past states the measurement
+   and the board states what follows from it, and giving them one shape
+   is what says they are one thing said twice rather than two unrelated
+   notices that happen to mention a multiplier. */
+.fcast {
+  margin: 12px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 10px;
+  background: var(--glass-in);
+  font-size: .8rem;
+  color: var(--ink-2);
+  line-height: 1.55;
+  max-width: 96ch;
+}
+.fcast b { color: var(--ink); font-weight: 600; }
 .stripes { margin: 0; padding: 0; list-style: none; }
 .stripes li { padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .stripes li:last-child { border-bottom: 0; }
@@ -732,6 +755,13 @@
         <span class="span-meta" id="span"></span>
       </div>
 
+      <!-- ── forecast ──
+           What Past measures, said once in words on the page where the
+           plan lives. It sits outside the scroller so it does not slide
+           away sideways with the timeline, and inside #mainCol so the
+           rail's Past view hides it along with everything else. -->
+      <p class="fcast" id="fcast" hidden></p>
+
       <div class="scroller" id="boardPanel" role="tabpanel" aria-labelledby="tabBoard" tabindex="0">
         <div class="plot" id="plot" role="group">
           <p class="sr" id="chartAlt"></p>
@@ -1008,6 +1038,103 @@ const dated = () => live().filter(g => g.from);
 const spans = () => dated().filter(g => g.kind !== 'mark' && g.to);
 const marks = () => dated().filter(g => g.kind === 'mark' || !g.to);
 
+/* ── calibration ──
+   The only honest estimate of your estimates: what finished goals
+   actually took, over what they said they would take.
+
+   Past prints this as a measurement and the board reads it as a
+   forecast, from one call. A board projecting 1.8× while Past printed
+   1.4× would be two views of one record arguing inside one window, and
+   nothing on either screen would tell you which to believe.
+
+   Three finished goals, not one. A single overrun is an anecdote, and an
+   anecdote here would push every live goal out by one bad month. Under
+   1.15× nothing is projected at all: a 1.04 multiplier makes a 90-day
+   goal three days late, which is a precision this data does not have.
+   That floor catches the other direction too — a multiplier under 1
+   would have the app telling you to relax on the strength of four
+   goals. */
+const CAL_MIN = 3, CAL_EDGE = 0.15;
+
+/* Computed once per render and read by the board, the list and the
+   caption. Every path that changes a goal goes through commit() →
+   renderAll(), which reassigns this before anything reads it, so it can
+   never be stale — and the three views cannot be looking at three
+   different multipliers within one paint. */
+let CAL = { n: 0, mult: null, ok: false };
+
+function calibration() {
+  const rated = goals()
+    .filter(g => g.done && g.from && g.to && g.doneOn)
+    .map(g => ({
+      planned: Math.max(1, days(parseISO(g.from), parseISO(g.to))),
+      actual:  Math.max(1, days(parseISO(g.from), parseISO(g.doneOn))),
+    }));
+  const n = rated.length;
+  const mult = n ? rated.reduce((s, p) => s + p.actual / p.planned, 0) / n : null;
+  return { n, mult, ok: n >= CAL_MIN && mult >= 1 + CAL_EDGE };
+}
+
+/* Eight points, not zero. A goal ticked in chunks is always a little
+   ahead of or behind the clock, and flagging every gap would mark the
+   whole board on the first day of every goal.
+
+   The List has drawn this comparison since it shipped. The board must
+   not be able to contradict it, so both ask this one function rather
+   than each doing the subtraction for itself. */
+const BEHIND_PTS = 8;
+
+function pace(g) {
+  const sN = stepsOf(g).length;
+  if (!sN || !g.from || !g.to || g.kind === 'mark') return null;
+  const from = parseISO(g.from), to = parseISO(g.to);
+  const n = Math.max(1, days(from, to));
+  const el = Math.min(Math.max(days(from, TODAY), 0), n);
+  const sD = stepsDone(g);
+  const work = Math.round((sD / sN) * 100);
+  const time = Math.round((el / n) * 100);
+  return { sN, sD, n, el, work, time, behind: work + BEHIND_PTS < time };
+}
+
+/* Where a goal lands, on evidence rather than on hope. Two estimators,
+   and the goal's own evidence wins whenever it exists:
+
+   pace   — the steps you have actually ticked. Steps are already what
+            the bar fills by, so this is the measure of work the app
+            already trusts, read forwards. Two ticks minimum: off one
+            tick the whole estimate rests on a single day's work.
+   record — otherwise the multiplier, applied to the plan.
+
+   Neither, and it returns null rather than a number. A goal with no
+   steps ticked and no finished goals behind it has nothing to forecast
+   from, and inventing something would be the app guessing in your
+   favour — which is the one direction a plan does not need help in.
+
+   Lateness is decided by whichever basis produced the projection, so a
+   pace-based one is late exactly when the List says behind. The two
+   cannot disagree because it is the same comparison. */
+const PACE_MIN = 2;
+
+function forecast(g, cal) {
+  if (g.done || !g.from || !g.to || g.kind === 'mark') return null;
+  const from = parseISO(g.from), to = parseISO(g.to);
+  const planned = Math.max(1, days(from, to));
+  const p = pace(g);
+  let projected = null, basis = null;
+  if (p && p.sD >= PACE_MIN && p.el > 0) {
+    projected = Math.max(p.el, Math.round(p.el / (p.sD / p.sN)));
+    basis = 'pace';
+  } else if (cal.ok) {
+    projected = Math.round(planned * cal.mult);
+    basis = 'record';
+  }
+  if (projected === null) return null;
+  const finish = shift(from, projected);
+  return { planned, projected, finish, basis, p,
+           over: projected - planned,
+           late: basis === 'pace' ? p.behind : finish > to };
+}
+
 /* ── the window ──
    Nothing is fixed. The axis runs from your earliest date to your last
    one, with today always inside it, so a three-week push and a five-year
@@ -1230,9 +1357,23 @@ function renderBoard() {
 
   /* The chart is a picture. This is the sentence that replaces it. */
   plot.setAttribute('aria-label', 'Timeline');
+  /* The projections belong in here as well as in the read above. The
+     read is a paragraph a screen reader meets before the chart; this is
+     the chart's own replacement, and leaving them out would make the
+     text version the only place on the page that does not know where
+     these goals actually land. */
+  const proj = live().map(g => forecast(g, CAL) && { g, f: forecast(g, CAL) })
+                     .filter(x => x && x.f.late)
+                     .sort((a, b) => b.f.over - a.f.over);
   document.getElementById('chartAlt').textContent = BARS.length || marks().length
     ? `Timeline from ${fmtY(START)} to ${fmtY(END)}. Today is ${fmtY(TODAY)}. `
       + `${BARS.length} over a period, ${marks().length} single ${marks().length === 1 ? 'date' : 'dates'}. `
+      + (proj.length
+          ? `Projected past their end date: `
+            + proj.slice(0, 3).map(x =>
+                `${x.g.name} lands ${fmtY(x.f.finish)}, ${dur(x.f.over)} past`).join('; ')
+            + `${proj.length > 3 ? `; and ${proj.length - 3} more` : ''}. `
+          : '')
       + `The List tab shows the same data as text.`
     : 'No dated goals yet. Use New to add one.';
   plot.setAttribute('aria-describedby', 'chartAlt');
@@ -1247,6 +1388,67 @@ function renderBoard() {
 
   document.getElementById('planTitle').textContent =
     isDemo() ? 'Example plan' : 'Long-term plan';
+
+  renderRead();
+}
+
+/* ── the read ──
+   The forecast, in words, on the page where the plan lives.
+
+   Deliberately not a second set of bars. A projected bar competes with
+   the real one for the same glance, and the plan is the thing you
+   actually decided — an estimate drawn in the same language would end up
+   read as the plan by anyone who looked quickly, which is everyone. A
+   sentence cannot be mistaken for a date you chose.
+
+   Three sentences at most, and each one is dropped rather than padded
+   when it has nothing to say. "0 of 6 behind" is not a reassurance, it
+   is a line of furniture. */
+function renderRead() {
+  const el = document.getElementById('fcast');
+  const late = live().map(g => ({ g, f: forecast(g, CAL) }))
+                     .filter(x => x.f && x.f.late)
+                     .sort((a, b) => b.f.over - a.f.over);
+  const paced = live().map(g => ({ g, p: pace(g) })).filter(x => x.p);
+  const behind = paced.filter(x => x.p.behind);
+  const out = [];
+
+  if (CAL.ok) {
+    out.push(`Your finished goals ran <b>${CAL.mult.toFixed(1)}×</b> their estimate.`);
+  } else if (CAL.n >= CAL_MIN) {
+    /* Calibrated, and the answer was "your estimates are fine". Saying so
+       is the point — silence here would read as not enough data. */
+    out.push(`Across ${CAL.n} finished goals your estimates hold up, at `
+      + `<b>${CAL.mult.toFixed(1)}×</b>.`);
+  } else if (CAL.n) {
+    const need = CAL_MIN - CAL.n;
+    out.push(`<b>${need}</b> more finished ${need === 1 ? 'goal' : 'goals'} with both `
+      + `dates on ${need === 1 ? 'it' : 'them'} and the plan can be measured against `
+      + `your own record.`);
+  }
+
+  if (late.length) {
+    const name = (x) => `<b>${esc(x.g.name)}</b> lands ${fmt(x.f.finish)}, `
+      + `${dur(x.f.over)} past`;
+    const shown = late.slice(0, 2).map(name).join('; ');
+    out.push(`${late.length} ${late.length === 1 ? 'goal projects' : 'goals project'} `
+      + `past ${late.length === 1 ? 'its' : 'their'} end date — ${shown}`
+      + `${late.length > 2 ? `; and ${late.length - 2} more` : ''}.`);
+  } else if (CAL.ok || paced.length) {
+    out.push('Nothing projects past its end date.');
+  }
+
+  if (behind.length) {
+    out.push(`Behind ${behind.length === 1 ? 'its' : 'their'} own step count: `
+      + behind.slice(0, 3).map(x => esc(x.g.name)).join(', ')
+      + `${behind.length > 3 ? `, and ${behind.length - 3} more` : ''}.`);
+  }
+
+  el.innerHTML = out.join(' ');
+  /* Hidden rather than empty, so an empty paragraph never takes the
+     margin above the plot on a board that has nothing to say. */
+  el.hidden = !out.length || tab !== 'board';
+  return out.length;
 }
 
 /* ── layout pass ──
@@ -1388,6 +1590,16 @@ function renderList() {
       state = 'Undated — living on the vision board';
     }
 
+    /* Where this one lands, and only when it lands LATE. A projection
+       shorter than the plan is the app inventing good news, which is the
+       one direction a plan has never needed help in. */
+    const fc = forecast(g, CAL);
+    const lands = fc && fc.late
+      ? `<div class="lands">${fc.basis === 'pace'
+            ? 'At the pace you are ticking' : 'On your own record'}`
+        + `, this lands <b>${fmt(fc.finish)}</b> — ${dur(fc.over)} past.</div>`
+      : '';
+
     const sN = stepsOf(g).length, sD = stepsDone(g);
     /* Work against time, side by side. It is only coloured when the two
        have come apart — a goal on pace does not need to be told. */
@@ -1395,13 +1607,14 @@ function renderList() {
     if (sN) {
       const workPct = Math.round((sD / sN) * 100);
       let cmp = '';
-      if (g.from && g.to && g.kind !== 'mark') {
-        const from = parseISO(g.from), to = parseISO(g.to);
-        const nDays = Math.max(1, days(from, to));
-        const el = Math.min(Math.max(days(from, TODAY), 0), nDays);
-        const timePct = Math.round((el / nDays) * 100);
-        cmp = `<em class="${workPct + 8 < timePct ? 'behind' : ''}">`
-            + `${workPct}% of the work, ${el} days in of ${nDays}</em>`;
+      /* The same call the board's read uses. It was the same arithmetic
+         written out here, and two copies of one comparison is how one
+         view ends up calling a goal behind while the other calls it
+         fine. */
+      const pc = pace(g);
+      if (pc) {
+        cmp = `<em class="${pc.behind ? 'behind' : ''}">`
+            + `${workPct}% of the work, ${pc.el} days in of ${pc.n}</em>`;
       }
       stepHtml =
         `<div class="step-h"><b>${sD} of ${sN} done</b>${cmp}</div>
@@ -1425,6 +1638,7 @@ function renderList() {
          <div class="list-dates">${dates}</div>
          <div class="meter" aria-hidden="true"><span style="width:${through}%"></span></div>
          <div class="state">${state}</div>
+         ${lands}
          ${g.note ? `<p class="list-note">${esc(g.note)}</p>` : ''}
        </button>${stepHtml}`;
     const btn = li.querySelector('.list-open');
@@ -1521,6 +1735,10 @@ function show(which) {
   /* Today scrolls the timeline to now, so it means nothing anywhere
      else. */
   todayBtn.hidden = which !== 'board';
+  /* The read belongs to the plan, and it sits outside the panel that the
+     tabs swap — so it has to be told, the same way Today is. */
+  const fc = document.getElementById('fcast');
+  fc.hidden = which !== 'board' || !fc.innerHTML;
   document.getElementById('span').textContent = which === 'vision' ? visionMeta : spanMeta;
   if (which === 'board') layout();
 }
@@ -1879,17 +2097,20 @@ function renderPast() {
     stripes.appendChild(li);
   });
 
-  const calib = document.getElementById('calib');
-  if (!rated.length) {
-    calib.innerHTML = 'None of these carried an end date, so there is no estimate '
+  const calibEl = document.getElementById('calib');
+  /* The same call the board forecasts from, so this sentence and the
+     projection on the plan are one number rather than two that agree
+     until someone edits one of them. */
+  const cal = calibration();
+  if (!cal.n) {
+    calibEl.innerHTML = 'None of these carried an end date, so there is no estimate '
       + 'to measure them against yet.';
     return;
   }
-  const mult = rated.reduce((s, p) => s + p.actual / p.planned, 0) / rated.length;
-  calib.innerHTML =
-    `Across ${rated.length} finished ${rated.length === 1 ? 'goal' : 'goals'} you take `
-    + `<b>${mult.toFixed(1)}×</b> as long as you plan for. `
-    + `A six-week estimate is really <b>${Math.round(6 * mult)}</b> weeks.`;
+  calibEl.innerHTML =
+    `Across ${cal.n} finished ${cal.n === 1 ? 'goal' : 'goals'} you take `
+    + `<b>${cal.mult.toFixed(1)}×</b> as long as you plan for. `
+    + `A six-week estimate is really <b>${Math.round(6 * cal.mult)}</b> weeks.`;
 }
 
 /* ── sections ── */
@@ -2130,6 +2351,8 @@ todayBtn.addEventListener('click', () => { toToday(true); say.textContent = 'Scr
 
 /* ── go ── */
 function renderAll() {
+  /* First, because every view below reads it. */
+  CAL = calibration();
   renderBoard();
   renderList();
   renderVision();
