@@ -295,7 +295,7 @@
   margin: -4px 0 16px; padding: 8px 12px;
   border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
   border-radius: 9px;
-  background: color-mix(in srgb, var(--accent) 9%, transparent);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
   font-size: .78rem; color: var(--ink-2);
 }
 .metric .recover { margin: 13px 0 0; }
@@ -758,6 +758,35 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .rlg span { display: flex; align-items: center; gap: 5px; }
 .rlg i { display: block; width: 9px; height: 9px; border-radius: 2px; }
 
+/* ── the position you are in ──
+   A band under the topbar, present in every view, because the thing you
+   most need reminding of is the trade you are still in. It takes the
+   accent as an edge and a pulse rather than a fill: it has to be
+   impossible to miss and still not be the loudest thing on a page that
+   is mostly figures. */
+.live {
+  display: flex; align-items: center; gap: 10px;
+  padding: 9px 14px;
+  border-bottom: 1px solid var(--glass-line);
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  font-size: .78rem; color: var(--ink-2);
+}
+.live .grow { flex: 1; }
+.live b { font-weight: 500; color: var(--ink); }
+.live #liveWhen { font-family: var(--mono); font-size: .68rem; color: var(--ink-3); }
+.live .btn { height: 28px; padding: 0 12px; font-size: .74rem; }
+.live-dot {
+  flex: none; width: 7px; height: 7px; border-radius: 50%;
+  background: var(--accent);
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+@keyframes live-pulse { 0%, 100% { opacity: 1 } 50% { opacity: .35 } }
+/* Opened in a candle that has since closed. The accent is withdrawn —
+   it is no longer a live decision, it is an outstanding one. */
+.live.stale { background: color-mix(in srgb, var(--ink-3) 10%, transparent); }
+.live.stale .live-dot { background: var(--ink-3); animation: none; }
+@media (prefers-reduced-motion: reduce) { .live-dot { animation: none } }
+
 /* ── the gate ──
    A decision screen, so it is set larger than a reading screen. Every
    target here gets pressed once, in a hurry, often on a phone with one
@@ -823,6 +852,44 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
 .gate-v b { font-weight: 500; color: var(--ink-2); }
 .gate-v.all b { color: var(--up); }
+
+/* What you are in, on the screen where you deal with it. Bordered in the
+   accent so it is plainly the live thing on the page. */
+.gate-open { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
+.gate-open li {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  padding: 11px 13px; border-radius: var(--r-panel);
+  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+.gate-open li.stale {
+  border-color: var(--glass-line);
+  background: var(--glass-in);
+}
+.gate-open .grow { flex: 1; }
+.gate-open .go-what { font-size: .84rem; color: var(--ink-2); }
+.gate-open .go-what b { font-weight: 500; color: var(--ink); }
+.gate-open .go-when { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); }
+.gate-open .btn { height: 32px; padding: 0 13px; font-size: .76rem; }
+
+/* The risk box sits against the primary action rather than up among the
+   rules, because it is the only thing on this screen you type. */
+.gate-risk { display: flex; align-items: center; gap: 8px;
+  height: 36px; padding: 0 12px; border-radius: 8px; background: var(--glass-in); }
+.gate-risk .ic { display: inline-flex; color: var(--ink-3); }
+.gate-risk input {
+  width: 130px; border: 0; background: none; color: var(--ink);
+  font: inherit; font-size: .8rem; outline: none;
+}
+.gate-alt { display: flex; align-items: center; gap: 9px; margin: 12px 0 0;
+  flex-wrap: wrap; font-size: .76rem; color: var(--ink-3); }
+.gate-alt button {
+  border: 0; padding: 0; background: none; color: var(--ink-3);
+  font: inherit; font-size: .76rem; text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink-3) 45%, transparent);
+  text-underline-offset: 3px; cursor: pointer;
+}
+.gate-alt button:hover { color: var(--ink-2); }
 
 .gate-act { display: flex; align-items: center; gap: 10px; margin-top: 16px;
   flex-wrap: wrap; }
@@ -1312,6 +1379,20 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
       </button>
     </div>
 
+    <!-- ── the position you are in ──
+         Outside every section, so it is on screen whichever view you are
+         reading. aria-live is off deliberately: the elapsed figure moves
+         every second, and announcing that would talk over everything
+         else on the page. -->
+    <div class="live" id="live" role="status" aria-live="off"
+         aria-label="The position you are in" hidden>
+      <span class="live-dot" aria-hidden="true"></span>
+      <b id="liveWhat"></b>
+      <span id="liveWhen"></span>
+      <span class="grow"></span>
+      <button class="btn btn-ghost" type="button" id="liveClose">Close it</button>
+    </div>
+
     <!-- ── calendar ── -->
     <main class="main" id="calendarSection" hidden>
       <div class="head">
@@ -1402,6 +1483,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
           <span class="cp-bar" aria-hidden="true"><i id="gFill"></i></span>
         </section>
 
+        <!-- What you are already in. Above the question of what to take
+             next, because closing something you are in is more urgent
+             than opening something you are not. -->
+        <div id="gOpenWrap" hidden>
+          <div class="gate-h"><h2>You are in</h2></div>
+          <ul class="gate-open" id="gOpenList"></ul>
+        </div>
+
         <div class="gate-h">
           <h2>Which trade is it</h2><span class="grow"></span>
           <span class="span-meta" id="gTally"></span>
@@ -1419,9 +1508,22 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <p class="gate-v" id="gVerdict"></p>
 
         <div class="gate-act">
-          <button class="btn btn-primary" type="button" id="gTake">Log this trade</button>
-          <button class="btn btn-ghost" type="button" id="gPass">Saw it, let it go</button>
+          <button class="btn btn-primary" type="button" id="gIn">I'm in</button>
+          <span class="gate-risk">
+            <label class="sr" for="gRisk">Risk in dollars, optional</label>
+            <span class="ic" id="gRiskIc" aria-hidden="true"></span>
+            <input id="gRisk" type="number" step="0.01" min="0" inputmode="decimal"
+                   placeholder="Risk — optional" />
+          </span>
         </div>
+        <!-- The two quieter paths. Set as text rather than buttons of
+             equal weight: there is one thing this screen is for, and it
+             is the one above. -->
+        <p class="gate-alt">
+          <button type="button" id="gTake">It is already finished — log it</button>
+          <span aria-hidden="true">·</span>
+          <button type="button" id="gPass">Saw it, let it go</button>
+        </p>
       </div>
     </main>
 
@@ -3518,7 +3620,8 @@ function openTrade(date, id, pre) {
   document.getElementById('tTime').value = e ? (e.sess || '')
     : pre && pre.sess ? pre.sess
     : (onToday && SESSIONS.includes(live) ? live : '');
-  document.getElementById('tRisk').value = e && e.risk != null ? e.risk : '';
+  document.getElementById('tRisk').value = e && e.risk != null ? e.risk
+    : (pre && pre.risk != null ? pre.risk : '');
   document.getElementById('tAmt').value = e && e.out !== 'missed' ? Math.abs(e.amt) : '';
 
   ticked = new Set(e && Array.isArray(e.checks) ? e.checks
@@ -3546,7 +3649,12 @@ document.getElementById('newTrade').addEventListener('click', () => openTrade())
 document.getElementById('sheetX').addEventListener('click', () => sheet.close());
 /* Esc closes the dialog without a submit event, so the picture is
    released here rather than in the save path. */
-sheet.addEventListener('close', () => { setShot(null); shotDirty = false; editing = null; });
+sheet.addEventListener('close', () => {
+  setShot(null); shotDirty = false; editing = null;
+  /* Only the intent to finish it is dropped. The position itself is left
+     alone, because an Esc on the way to typing a result is not an exit. */
+  closingOpen = null;
+});
 
 /* The calendar is both the record and the way in: a card opens the trade
    it draws, the space beneath starts a new one on that day. */
@@ -3601,6 +3709,15 @@ document.getElementById('tradeForm').addEventListener('submit', (ev) => {
   const at = state.events.findIndex(x => String(x.id) === String(id));
   if (at >= 0) state.events[at] = rec; else state.events.push(rec);
 
+  /* The position stops existing at the moment it becomes an event, and
+     only then. Dropping it when the sheet OPENED would lose the trade
+     entirely if the sheet were dismissed, and you would still be in it. */
+  if (closingOpen) {
+    openPos = openPos.filter(x => x.id !== closingOpen);
+    saveOpen();
+    closingOpen = null;
+  }
+
   const what = side === 'missed' ? 'Missed setup'
     : `${side === 'win' ? 'Win' : 'Loss'} of ${money(raw)}`;
   editing = null;
@@ -3639,7 +3756,7 @@ function commit(msg) {
 }
 function renderAll() {
   renderSummary(); renderCalendar(); renderMetrics(); renderPlaybook();
-  renderLedger(); renderLog(); renderRes(); renderGate();
+  renderLedger(); renderLog(); renderRes(); renderGate(); renderLive();
 }
 
 /* ── the candle clock ──
@@ -3681,6 +3798,7 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
    buttons, 13 beside a form label, 12 inside a small mono badge, 11 on a
    caption. These two are the same badge in two places, so they are the
    same size — they were 12 and 11. */
+document.getElementById('gRiskIc').innerHTML = icon('risk', 13);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
 document.getElementById('cpIcon').innerHTML = icon('clock', 12);
 
@@ -3748,6 +3866,7 @@ function tickCandle() {
      second interval, so the two screens can never disagree about which
      candle you are standing in. */
   gateTick(c);
+  liveWhen();
 }
 /* ═══ the gate ═══
    Every other surface in this app is a record: what happened, what it
@@ -3767,6 +3886,96 @@ function tickCandle() {
    confirmed on the 18:00 candle say nothing about the 22:00 one, and
    carrying them across would quietly manufacture a compliant trade out
    of a stale screen. Same for a new day at the same hour. */
+/* ── the position you are in ──
+   Deliberately NOT in the ledger. `ledger.v1` is a record of trades that
+   have happened, and every figure in this app is computed straight off
+   it — an entry with no result yet would arrive inside perf(), the
+   calendar's day total and the streak counter as a NaN wearing a trade's
+   clothes. So an open position lives in its own key and becomes a real
+   event only when you tell it what it did.
+
+   It also has no value while it is open, and the strip says nothing
+   about one. There is no price feed in this app, so unrealised P&L is
+   not a number it could produce — and a running figure that was actually
+   a guess is worse here than no figure at all.
+
+   A list rather than a single slot. Two positions at once is a thing
+   that happens, and a single slot would answer it by silently
+   overwriting the first one. */
+const OKEY = 'ledger.open.v1';
+let openPos = (() => {
+  try {
+    const v = JSON.parse(localStorage.getItem(OKEY) || 'null');
+    return v && Array.isArray(v.positions) ? v.positions : [];
+  } catch (e) { return []; }
+})();
+function saveOpen() {
+  try { localStorage.setItem(OKEY, JSON.stringify({ positions: openPos })); } catch (e) {}
+}
+/* Which open position the sheet is currently finishing. Cleared without
+   removing anything if the sheet is dismissed — an Esc on the way to
+   entering a result must leave you still in the trade. */
+let closingOpen = null;
+
+const posName = (p) => p.mode === 'reversal' ? 'C2' : 'C3';
+/* Opened in a candle that has since closed, or on an earlier day. Not an
+   error and not cleaned up automatically — you were in something and the
+   app has no business deciding you are out of it. Said out loud instead,
+   because a position you forgot is the one this whole strip is for. */
+const posStale = (p) => p.open !== candle().open || p.date !== iso(new Date());
+const posFor = (p) => Math.max(0, Math.round((Date.now() - p.at) / 1000));
+
+function renderLive() {
+  const el = document.getElementById('live');
+  el.hidden = !openPos.length;
+  if (!openPos.length) return;
+  const p = openPos[0];
+  el.classList.toggle('stale', posStale(p));
+  put('liveWhat', `In a ${posName(p)}${p.sess ? ` on the ${p.sess}` : ''}`
+    + (openPos.length > 1 ? ` · +${openPos.length - 1} more` : ''));
+  liveWhen();
+}
+
+/* Split from renderLive so the clock can move the elapsed figure every
+   second without rebuilding the button beside it. */
+function liveWhen() {
+  if (!openPos.length) return;
+  const p = openPos[0];
+  put('liveWhen', `${hm(posFor(p))} in`
+    + (posStale(p) ? ` · the ${p.sess || 'entry'} candle has closed` : ''));
+}
+
+/* The result is entered on the same sheet every other trade uses, with
+   everything the gate already knew filled in. The DATE is the day you
+   entered, not the day you closed: the session names the candle the
+   trade belongs to, and filing an overnight position under tomorrow
+   would put it in the wrong month's total. */
+function closePos(id) {
+  const p = openPos.find(x => x.id === id);
+  if (!p) return;
+  closingOpen = id;
+  openTrade(p.date, null, {
+    mode: p.mode, ticks: p.checks || [], sess: p.sess || '',
+    risk: p.risk, side: 'win',
+  });
+}
+
+function dropPos(id) {
+  const p = openPos.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm(`Discard the ${posName(p)} you opened ${hm(posFor(p))} ago? `
+    + 'Nothing is written to the ledger — use this when it never actually filled.')) return;
+  openPos = openPos.filter(x => x.id !== id);
+  saveOpen();
+  renderLive();
+  renderGate();
+  document.getElementById('say').textContent = 'Position discarded. Nothing was recorded.';
+}
+
+document.getElementById('liveClose').addEventListener('click', () => {
+  if (openPos.length) closePos(openPos[0].id);
+});
+
 const GKEY = 'ledger.gate.v1';
 let gateMode = 'continuation';
 let gateTicks = new Set();
@@ -3812,6 +4021,20 @@ function renderGate() {
      right now, and showing the next candle's rules would be answering a
      different question than the one being asked. */
   gateFace(c, off);
+
+  /* What you are already in, above the question of what to take next.
+     Listed rather than summarised, because the strip at the top only has
+     room for the first one and this is where you deal with the rest. */
+  document.getElementById('gOpenWrap').hidden = !openPos.length;
+  document.getElementById('gOpenList').innerHTML = openPos.map(p =>
+    `<li${posStale(p) ? ' class="stale"' : ''}>
+       <span class="go-what"><b>${posName(p)}</b>${p.sess ? ` on the ${esc(p.sess)}` : ''}</span>
+       <span class="go-when">${hm(posFor(p))} in${posStale(p) ? ' · that candle has closed' : ''}
+         ${p.risk > 0 ? ` · risk ${round(p.risk)}` : ''}</span>
+       <span class="grow"></span>
+       <button class="btn btn-primary" type="button" data-close="${esc(p.id)}">Close it</button>
+       <button class="btn btn-ghost" type="button" data-drop="${esc(p.id)}">Never filled</button>
+     </li>`).join('');
 
   ['reversal', 'continuation'].forEach(k =>
     document.getElementById(k === 'reversal' ? 'gRev' : 'gCont')
@@ -3891,10 +4114,52 @@ document.getElementById('gList').addEventListener('click', (ev) => {
   renderGate();
 });
 
-/* Both buttons open the sheet rather than writing straight through. The
-   amount is not known yet on the way in and the reason is not known yet
-   on the way past, and a record saved without either is a row you will
-   not be able to read in March.
+/* One tap and you are in, with no dialog in the way. That is the whole
+   point of it: the moment you actually click is the moment you have the
+   least attention to spare, and a form standing between you and the
+   chart is a form you fill in afterwards from memory — which is the
+   failure this screen exists to fix.
+
+   Risk is the one field offered here, and it is optional. It is genuinely
+   known at entry and genuinely misremembered later, so there is a box for
+   it; leaving it empty costs nothing, because the sheet asks again when
+   the trade closes. */
+document.getElementById('gIn').addEventListener('click', () => {
+  const c = candle();
+  const sess = hhmm(c.open);
+  const r = parseFloat(document.getElementById('gRisk').value);
+  openPos.push({
+    id: uid(),
+    at: Date.now(),
+    date: iso(new Date()),
+    open: c.open,
+    sess: SESSIONS.includes(sess) ? sess : undefined,
+    mode: gateMode,
+    /* A copy, taken now. The gate's own ticks are cleared when the candle
+       turns, and the position has to keep what was true when you entered
+       rather than follow a screen that moves on without it. */
+    checks: [...gateTicks],
+    risk: r > 0 ? r : undefined,
+  });
+  saveOpen();
+  document.getElementById('gRisk').value = '';
+  renderLive();
+  renderGate();
+  document.getElementById('say').textContent =
+    `In a ${gateMode === 'reversal' ? 'C2' : 'C3'} on the ${sess}. Close it when it is done.`;
+});
+
+document.getElementById('gOpenList').addEventListener('click', (ev) => {
+  const c = ev.target.closest('[data-close]');
+  if (c) { closePos(c.dataset.close); return; }
+  const d = ev.target.closest('[data-drop]');
+  if (d) dropPos(d.dataset.drop);
+});
+
+/* The two quiet paths, both of which open the sheet rather than writing
+   straight through: the amount is not known yet on a trade that is
+   already over until you type it, and the reason is not known on one you
+   passed on. A row saved without either is one you cannot read in March.
 
    Nothing here is disabled at 14:00. The band already says it is not a
    candle you trade, and this file's position on that is settled: worth
