@@ -1010,14 +1010,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 
 /* ── the risk ladder ── */
 .rk-top { display: flex; align-items: center; gap: 12px; margin: 12px 0 0; flex-wrap: wrap; }
-/* Stated, not typed. It is the account's own figure, and saying where it
-   came from is the whole reason there is no field here. */
-.rk-bal { display: flex; align-items: baseline; gap: 9px;
-  height: 44px; padding: 0 15px; border-radius: 10px; background: var(--glass-in); }
-.rk-lbl { font-family: var(--mono); font-size: .58rem; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink-3); }
-.rk-bal b { font-family: var(--mono); font-size: 1.05rem; font-weight: 500; color: var(--ink); }
-.rk-src { font-size: .68rem; color: var(--ink-3); }
 /* Two answers, so they share one track — this IS a choice between two
    things, which is what the segmented shape is for. */
 .rk-pcts { display: flex; gap: 3px; padding: 3px; border-radius: 11px;
@@ -1769,11 +1761,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <div class="pane" tabindex="0">
 
         <div class="rk-top">
-          <span class="rk-bal">
-            <span class="rk-lbl">Balance</span>
-            <b id="rkBalOut">—</b>
-            <span class="rk-src">from your ledger</span>
-          </span>
           <span class="rk-pcts" role="group" aria-label="Risk per trade">
             <button type="button" id="rk5" aria-pressed="true">5%</button>
             <button type="button" id="rk10" aria-pressed="false">10%</button>
@@ -3607,10 +3594,13 @@ function renderRisk() {
   RISK_PCTS.forEach(p => document.getElementById('rk' + p)
     .setAttribute('aria-pressed', String(p === riskPct)));
 
-  put('rkBalOut', money(bal));
-  put('rkMeta', `${riskPct}% of ${round(bal)}`);
+  /* The balance is taken off the ledger and never printed. This screen is
+     about the risk and what a run of it is worth — the account's own
+     figure is on Capital, and repeating it here three times said nothing
+     the first row of the table does not already say. */
+  put('rkMeta', `${riskPct}% per trade`);
   put('rkPer', money(per));
-  put('rkPerSub', `${riskPct}% of ${money(bal)}`);
+  put('rkPerSub', `${riskPct}% of the account`);
 
   /* Nothing in the account, nothing to size off. The ladder would draw a
      column of zeros, which looks like an answer. */
@@ -3640,7 +3630,7 @@ function renderRisk() {
     `<b>${RISK_RUN} losses in a row</b> at ${riskPct}% leaves `
     + `<b>${money(down)}</b> — down ${money(bal - down)}, or `
     + `${(((bal - down) / bal) * 100).toFixed(1)}%. `
-    + `Getting back to ${money(bal)} from there takes `
+    + `Getting back to where you started takes `
     + `<b>${Math.ceil(Math.log(bal / down) / Math.log(1 + (riskPct / 100) * 2))}</b> wins at 2R.`;
 }
 
