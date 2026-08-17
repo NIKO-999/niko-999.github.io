@@ -1553,26 +1553,32 @@ const icon = (n, size) =>
    list never drifts: a list that changes cannot tell you which rule you
    skipped on the days you lost.
 
-   These are the 1H/30M alignment rules, in the order you can actually
-   check them at the chart: the thing that must already have happened
-   first, then what the candle looks like, then the confirmation, then
-   whether there is time and somewhere to go. Written out in full on the
-   Resources page, which prints them from this same constant so the two
-   cannot come apart. */
+   The daily checklist, made specific to the trade in front of you. Both
+   lists walk the same funnel in the same order — daily, then the level
+   and the profile, then the alignment, then the entry — because that is
+   the order the chart is read in, and a list you tick out of order is a
+   list you are filling in after the fact.
+
+   They diverge at steps three and four, which is the only place the two
+   trades genuinely differ: C2 turns and needs SMT, C3 carries and needs
+   the close back inside plus the timeframes opening with it.
+
+   Written out in full on the Resources page, which prints them from this
+   same constant so the two cannot come apart. */
 const CHECKLISTS = {
-  continuation: [
-    'C2 reversed off C1 and closed back inside',
-    "C3's wick forming in the upper half of C2's wick",
-    'A gap in there — and price has traded into it',
-    'SMT on the gap tap, on the 1H or 30M',
-    'A clear draw on liquidity to target',
-  ],
   reversal: [
-    'Key level reached — the profile supports the turn',
-    'Small wick — a large one will not expand',
-    'First-stage SMT on the 1H or above, after the level',
-    'Second stage on the 1H/30M — PSP, or SMT on the prior candle',
-    'Over an hour left in the candle, or a driver coming',
+    'Daily candle named — a level hit, or none needed',
+    'Something to trade away from, and a draw to trade to',
+    'The 4H profile says this candle turns — small wick',
+    'SMT on the 1H or 30M. C2 does not go without it',
+    '3M or 5M CISD or propulsion block, V-shape away',
+  ],
+  continuation: [
+    'Daily candle named — a level hit, or none needed',
+    'Something to trade away from, and a draw to trade to',
+    "The 4H profile says this candle carries — wick in the previous EQ",
+    'Closed back inside C2, with the 30M and 1H opening C3 too',
+    '3M or 5M CISD or propulsion block, V-shape away',
   ],
 };
 const MODES = { continuation: 'modeCont', reversal: 'modeRev' };
@@ -3262,7 +3268,6 @@ const NOTES = [
     id: 'align-4h',
     title: 'The approach',
     sub: '1H / 30M alignment to a 4H profile',
-    lists: true,
     lede: 'The 4H profile says which candle should print the wick and which '
         + 'should expand. This is the rule for entering inside it: the alignment '
         + 'is taken on the 1H and the 30M, one or two timeframes down from the '
@@ -3321,6 +3326,7 @@ const NOTES = [
     id: 'checklist-4h',
     title: 'The daily checklist',
     sub: 'daily → 4H → 1H/30M → entry',
+    lists: true,
     lede: 'The order the chart gets read in, every day, before anything is '
         + 'risked. Each step narrows the one below it: the daily says what kind '
         + 'of day it is, the key level says where you are trading from and to, '
