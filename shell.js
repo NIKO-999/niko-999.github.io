@@ -116,6 +116,46 @@ const BG = (() => {
   };
 })();
 
+/* IndexedDB cannot be read before the first paint, and the photograph
+   it holds is megabytes besides. So a thumbnail of each one — 32px wide,
+   a few hundred bytes — lives in localStorage, which CAN be read
+   synchronously, and is painted immediately while the real file loads.
+
+   It doubles as the flag that says a palette has been replaced at all,
+   which is what lets the head script skip preloading the original. That
+   preload was the bug: the shipped photograph was being fetched at high
+   priority and painted before anything could override it, so replacing
+   a backdrop meant watching the old one appear first, every load. */
+const OWN = 'arc.bg.own';
+const ownAll = () => { try { return JSON.parse(readStore(OWN) || '{}') || {}; } catch (e) { return {}; } };
+const ownSet = (id, tiny) => {
+  const m = ownAll();
+  if (tiny) m[id] = tiny; else delete m[id];
+  writeStore(OWN, JSON.stringify(m));
+};
+/* Small enough to sit in localStorage beside a theme preference, big
+   enough to carry the photograph's colours. Upscaled to fill the window
+   it is a soft wash of the right hues, which is what you want behind a
+   panel for the fifty milliseconds before the real thing arrives. */
+function tinyOf(file) {
+  return new Promise((res) => {
+    const url = URL.createObjectURL(file);
+    const im = new Image();
+    im.onload = () => {
+      const w = 32, h = Math.max(1, Math.round(32 * im.naturalHeight / im.naturalWidth));
+      const c = document.createElement('canvas');
+      c.width = w; c.height = h;
+      c.getContext('2d').drawImage(im, 0, 0, w, h);
+      URL.revokeObjectURL(url);
+      let out = null;
+      try { out = c.toDataURL('image/jpeg', 0.5); } catch (e) {}
+      res(out);
+    };
+    im.onerror = () => { URL.revokeObjectURL(url); res(null); };
+    im.src = url;
+  });
+}
+
 /* One URL alive at a time. An object URL that is never revoked holds
    the whole photograph in memory for the life of the tab, and swapping
    through five themes would hold five. */
@@ -127,6 +167,11 @@ let ownHas = false;
 let ownRow = null, dropRow = null;
 
 async function paintOwn(id) {
+  /* Synchronous, so switching palette never shows the shipped photograph
+     of one you have replaced — not even for a frame. */
+  const tiny = ownAll()[id];
+  if (tiny) document.documentElement.style.setProperty('--photo', `url("${tiny}")`);
+
   let blob = null;
   try { blob = await BG.get('bg:' + id); } catch (e) {}
   if (ownUrl) { URL.revokeObjectURL(ownUrl); ownUrl = null; }
@@ -137,6 +182,9 @@ async function paintOwn(id) {
        knowing about the other. Removing it hands the photograph back. */
     document.documentElement.style.setProperty('--photo', `url("${ownUrl}")`);
   } else {
+    /* No blob means nothing of yours here — including the case where the
+       thumbnail outlived the file it stood for. */
+    if (tiny) ownSet(id, null);
     document.documentElement.style.removeProperty('--photo');
   }
   if (ownRow) syncOwn();
@@ -229,6 +277,7 @@ bgPick.addEventListener('change', async () => {
   if (!f || !/^image\//.test(f.type)) return;
   try {
     await BG.put('bg:' + palette, f);
+    ownSet(palette, await tinyOf(f));
   } catch (e) {
     say.textContent = 'That image could not be saved.';
     alert('This browser refused to store the image. It may be too large, '
@@ -250,6 +299,7 @@ bgPick.addEventListener('change', async () => {
 ownRow.addEventListener('click', () => { bgPick.click(); closePal(true); });
 dropRow.addEventListener('click', async () => {
   try { await BG.del('bg:' + palette); } catch (e) {}
+  ownSet(palette, null);
   await paintOwn(palette);
   say.textContent = 'Backdrop: the original photograph.';
   closePal(true);
@@ -302,12 +352,14 @@ setPalette(palette);
 /* Arrow-keying through the picker swaps data-palette per press, and each
    never-fetched photograph would flash flat --ground while it loaded.
    Warm the other four after first paint, at idle priority. */
-const warm = () => PALETTES.forEach(([id]) => {
+const warm = () => {
   /* Skip the ones standing in for a photograph of your own — fetching a
      file that will never be shown is the one thing worse than a flash. */
-  BG.get('bg:' + id).then(b => { if (!b) new Image().src = asset(`arc/bg/${id}.jpg`); })
-    .catch(() => { new Image().src = asset(`arc/bg/${id}.jpg`); });
-});
+  const mine = ownAll();
+  PALETTES.forEach(([id]) => {
+    if (!mine[id]) new Image().src = asset(`arc/bg/${id}.jpg`);
+  });
+};
 if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
 else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);

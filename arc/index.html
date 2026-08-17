@@ -27,10 +27,21 @@
   d.dataset.palette = p;
   d.dataset.resolved = m === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
-  var l = document.createElement('link');
-  l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
-  l.fetchPriority = 'high';
-  document.head.appendChild(l);
+  /* A backdrop you have replaced must not fetch the one it replaced.
+     The thumbnail kept beside the flag paints the right colours on the
+     first frame; shell.js swaps the real file in when IndexedDB answers.
+     Without this the shipped photograph was preloaded at high priority
+     and shown first, every single load. */
+  var own = {};
+  try { own = JSON.parse(read('arc.bg.own') || '{}') || {}; } catch (e) {}
+  if (own[p]) {
+    d.style.setProperty('--photo', 'url("' + own[p] + '")');
+  } else {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
   /* font-display: swap means the first paint uses a fallback and then
      reflows; preloading the two faces the board is mostly set in keeps
      that swap to a flicker rather than a visible re-layout. */
