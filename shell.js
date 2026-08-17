@@ -80,122 +80,6 @@ const PALETTES = [
   ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above'],
 ];
 
-/* ── your own photograph ──
-   Per palette, not global: the colour tokens still come from the theme
-   you picked, so a photograph swapped into Shore keeps Shore's pinks.
-   That also means five slots rather than one, which is the difference
-   between replacing a backdrop and losing the set.
-
-   IndexedDB, because these are megabytes — localStorage would throw at
-   the first 4K photograph and take the theme preference down with it.
-   Stored as the file you chose, untouched: the entire point is that it
-   is sharper than what ships here, and a re-encode would spend some of
-   that on nothing. */
-const BG = (() => {
-  const NAME = 'shell-bg', STORE = 'bg';
-  let dbp = null;
-  const open = () => dbp || (dbp = new Promise((res, rej) => {
-    const r = indexedDB.open(NAME, 1);
-    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
-    r.onsuccess = () => res(r.result);
-    r.onerror = () => rej(r.error);
-  }));
-  const run = async (mode, fn) => {
-    const db = await open();
-    return new Promise((res, rej) => {
-      const t = db.transaction(STORE, mode), q = fn(t.objectStore(STORE));
-      t.oncomplete = () => res(q ? q.result : undefined);
-      t.onerror = () => rej(t.error);
-      t.onabort = () => rej(t.error);
-    });
-  };
-  return {
-    get: id => run('readonly',  s => s.get(String(id))),
-    put: (id, b) => run('readwrite', s => s.put(b, String(id))),
-    del: id => run('readwrite', s => s.delete(String(id))),
-  };
-})();
-
-/* IndexedDB cannot be read before the first paint, and the photograph
-   it holds is megabytes besides. So a thumbnail of each one — 32px wide,
-   a few hundred bytes — lives in localStorage, which CAN be read
-   synchronously, and is painted immediately while the real file loads.
-
-   It doubles as the flag that says a palette has been replaced at all,
-   which is what lets the head script skip preloading the original. That
-   preload was the bug: the shipped photograph was being fetched at high
-   priority and painted before anything could override it, so replacing
-   a backdrop meant watching the old one appear first, every load. */
-const OWN = 'arc.bg.own';
-const ownAll = () => { try { return JSON.parse(readStore(OWN) || '{}') || {}; } catch (e) { return {}; } };
-const ownSet = (id, tiny) => {
-  const m = ownAll();
-  if (tiny) m[id] = tiny; else delete m[id];
-  writeStore(OWN, JSON.stringify(m));
-};
-/* Small enough to sit in localStorage beside a theme preference, big
-   enough to carry the photograph's colours. Upscaled to fill the window
-   it is a soft wash of the right hues, which is what you want behind a
-   panel for the fifty milliseconds before the real thing arrives. */
-function tinyOf(file) {
-  return new Promise((res) => {
-    const url = URL.createObjectURL(file);
-    const im = new Image();
-    im.onload = () => {
-      const w = 32, h = Math.max(1, Math.round(32 * im.naturalHeight / im.naturalWidth));
-      const c = document.createElement('canvas');
-      c.width = w; c.height = h;
-      c.getContext('2d').drawImage(im, 0, 0, w, h);
-      URL.revokeObjectURL(url);
-      let out = null;
-      try { out = c.toDataURL('image/jpeg', 0.5); } catch (e) {}
-      res(out);
-    };
-    im.onerror = () => { URL.revokeObjectURL(url); res(null); };
-    im.src = url;
-  });
-}
-
-/* One URL alive at a time. An object URL that is never revoked holds
-   the whole photograph in memory for the life of the tab, and swapping
-   through five themes would hold five. */
-let ownUrl = null;
-let ownHas = false;
-/* Declared here rather than where they are built, so paintOwn can check
-   for them. `typeof` does not protect against a const's dead zone — it
-   throws like any other read — so these are lets seeded with null. */
-let ownRow = null, dropRow = null;
-
-async function paintOwn(id) {
-  /* Synchronous, so switching palette never shows the shipped photograph
-     of one you have replaced — not even for a frame. */
-  const tiny = ownAll()[id];
-  if (tiny) document.documentElement.style.setProperty('--photo', `url("${tiny}")`);
-
-  let blob = null;
-  try { blob = await BG.get('bg:' + id); } catch (e) {}
-  if (ownUrl) { URL.revokeObjectURL(ownUrl); ownUrl = null; }
-  ownHas = !!blob;
-  if (blob) {
-    ownUrl = URL.createObjectURL(blob);
-    /* Inline, so it beats the :root[data-palette] rule without either
-       knowing about the other. Removing it hands the photograph back. */
-    document.documentElement.style.setProperty('--photo', `url("${ownUrl}")`);
-    /* A photograph saved before thumbnails existed has a file but no
-       flag, so the head script cannot know to skip the preload and
-       paints the shipped photograph first — the exact flash this is all
-       meant to stop. Make the thumbnail now, from the file we are
-       holding, and the next load is clean. */
-    if (!tiny) { const t = await tinyOf(blob); if (t) ownSet(id, t); }
-  } else {
-    /* No blob means nothing of yours here — including the case where the
-       thumbnail outlived the file it stood for. */
-    if (tiny) ownSet(id, null);
-    document.documentElement.style.removeProperty('--photo');
-  }
-  if (ownRow) syncOwn();
-}
-
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
 const palLabel = document.getElementById('palLabel');
@@ -239,77 +123,8 @@ function setPalette(id) {
     s.setAttribute('aria-checked', String(on));
     s.tabIndex = on ? 0 : -1;
   });
-  paintOwn(id);
   say.textContent = `Backdrop: ${name}.`;
 }
-
-/* Below a rule, because they act on the selected theme rather than
-   being another theme to select — and they are buttons, not radios, so
-   the roving tabindex above does not reach them. */
-const palRule = document.createElement('span');
-palRule.className = 'pal-rule';
-palRule.setAttribute('aria-hidden', 'true');
-palMenu.appendChild(palRule);
-
-const mkRow = (label, glyph) => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'swatch pal-act';
-  b.innerHTML = `<span class="pal-ic" aria-hidden="true">${glyph}</span>${label}`;
-  palMenu.appendChild(b);
-  return b;
-};
-ownRow = mkRow('Use my own photo',
-  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
-     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-     <path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>`);
-dropRow = mkRow('Restore the original',
-  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
-     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
-     <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>`);
-
-function syncOwn() {
-  dropRow.hidden = !ownHas;
-  ownRow.lastChild.textContent = ownHas ? 'Replace my photo' : 'Use my own photo';
-}
-
-const bgPick = Object.assign(document.createElement('input'),
-  { type: 'file', accept: 'image/*', hidden: true });
-document.body.appendChild(bgPick);
-
-bgPick.addEventListener('change', async () => {
-  const f = bgPick.files[0];
-  bgPick.value = '';
-  if (!f || !/^image\//.test(f.type)) return;
-  try {
-    await BG.put('bg:' + palette, f);
-    ownSet(palette, await tinyOf(f));
-  } catch (e) {
-    say.textContent = 'That image could not be saved.';
-    alert('This browser refused to store the image. It may be too large, '
-        + 'or storage may be disabled.');
-    return;
-  }
-  await paintOwn(palette);
-  /* Say the size back, because "is it actually sharper" is the only
-     question worth answering here and the file knows. */
-  const im = new Image();
-  im.onload = () => {
-    const px = `${im.naturalWidth} x ${im.naturalHeight}`;
-    say.textContent = `Backdrop: your own photograph, ${px}.`;
-    URL.revokeObjectURL(im.src);
-  };
-  im.src = URL.createObjectURL(f);
-});
-
-ownRow.addEventListener('click', () => { bgPick.click(); closePal(true); });
-dropRow.addEventListener('click', async () => {
-  try { await BG.del('bg:' + palette); } catch (e) {}
-  ownSet(palette, null);
-  await paintOwn(palette);
-  say.textContent = 'Backdrop: the original photograph.';
-  closePal(true);
-});
 
 function openPal() {
   palMenu.hidden = false;
@@ -355,34 +170,27 @@ document.addEventListener('pointerdown', (e) => {
 
 setPalette(palette);
 
+/* The backdrop picker is gone, and so is what it stored: a 4K photograph
+   left in IndexedDB would sit there for good, unreachable and costing
+   real disk. Nothing is lost — the file it copied is still wherever you
+   chose it from. */
+(function () {
+  try {
+    if (localStorage.getItem('arc.bg.own') !== null) localStorage.removeItem('arc.bg.own');
+    if (indexedDB.databases) {
+      indexedDB.databases().then(ds => {
+        if (ds.some(d => d.name === 'shell-bg')) indexedDB.deleteDatabase('shell-bg');
+      }).catch(() => {});
+    } else {
+      indexedDB.deleteDatabase('shell-bg');
+    }
+  } catch (e) {}
+})();
+
 /* Arrow-keying through the picker swaps data-palette per press, and each
    never-fetched photograph would flash flat --ground while it loaded.
    Warm the other four after first paint, at idle priority. */
-/* Reconcile all five, not just the one on screen: IndexedDB holds the
-   files and localStorage holds the flags, and the two can disagree —
-   after an upgrade, or if one store was cleared and the other was not.
-   A file with no flag flashes on load; a flag with no file skips a
-   preload for a photograph that is not there. Both get healed here, so
-   one visit fixes every palette rather than one palette per visit. */
-async function reconcile() {
-  const mine = ownAll();
-  for (const [id] of PALETTES) {
-    let blob = null;
-    try { blob = await BG.get('bg:' + id); } catch (e) { return; }
-    if (blob && !mine[id]) { const t = await tinyOf(blob); if (t) ownSet(id, t); }
-    else if (!blob && mine[id]) ownSet(id, null);
-  }
-}
-
-const warm = () => {
-  /* Skip the ones standing in for a photograph of your own — fetching a
-     file that will never be shown is the one thing worse than a flash. */
-  const mine = ownAll();
-  PALETTES.forEach(([id]) => {
-    if (!mine[id]) new Image().src = asset(`arc/bg/${id}.jpg`);
-  });
-  reconcile();
-};
+const warm = () => PALETTES.forEach(([id]) => { new Image().src = asset(`arc/bg/${id}.jpg`); });
 if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
 else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);

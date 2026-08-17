@@ -23,21 +23,10 @@
   d.dataset.palette = p;
   d.dataset.resolved = m === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
-  /* A backdrop you have replaced must not fetch the one it replaced.
-     The thumbnail kept beside the flag paints the right colours on the
-     first frame; shell.js swaps the real file in when IndexedDB answers.
-     Without this the shipped photograph was preloaded at high priority
-     and shown first, every single load. */
-  var own = {};
-  try { own = JSON.parse(read('arc.bg.own') || '{}') || {}; } catch (e) {}
-  if (own[p]) {
-    d.style.setProperty('--photo', 'url("' + own[p] + '")');
-  } else {
-    var l = document.createElement('link');
-    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
-    l.fetchPriority = 'high';
-    document.head.appendChild(l);
-  }
+  var l = document.createElement('link');
+  l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+  l.fetchPriority = 'high';
+  document.head.appendChild(l);
   ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
     var k = document.createElement('link');
     k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';

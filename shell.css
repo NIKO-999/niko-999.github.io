@@ -719,15 +719,6 @@ body {
 .swatch .tick-mark { margin-left: auto; opacity: 0; }
 .swatch[aria-checked="true"] .tick-mark { opacity: 1; }
 
-/* The two actions below the rule act ON the selected backdrop rather
-   than being another one to select, so they are quieter than a swatch
-   and carry a glyph where a swatch carries its colour. */
-.pal-rule { height: 1px; margin: 4px 6px; background: var(--rule); }
-/* nowrap, because the menu's min-width was sized for one-word theme
-   names and "Use my own photo" wrapped onto a second line inside it. */
-.pal-act { color: var(--ink-3); font-weight: 400; white-space: nowrap; }
-.pal-act:hover { background: var(--glass-in); color: var(--ink-2); }
-.pal-ic { display: inline-flex; width: 13px; justify-content: center; flex: none; }
 
 /* ── section head ── */
 .head {
