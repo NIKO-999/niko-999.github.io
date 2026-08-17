@@ -758,6 +758,81 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .rlg span { display: flex; align-items: center; gap: 5px; }
 .rlg i { display: block; width: 9px; height: 9px; border-radius: 2px; }
 
+/* ── the gate ──
+   A decision screen, so it is set larger than a reading screen. Every
+   target here gets pressed once, in a hurry, often on a phone with one
+   hand — so the rules are 52px tall rather than the 30px the sheet uses,
+   where you are filling a form at rest with the trade already over. */
+.gate-h { display: flex; align-items: baseline; gap: 10px; margin: 20px 0 8px; }
+.gate-h h2 { margin: 0; font-size: .82rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink-2); }
+.gate-h .grow { flex: 1; }
+
+/* Two answers, side by side and equally weighted. A segmented control
+   would make one of them look like the default, and continuation is not
+   a safer answer than reversal — it is a different chart. */
+.gate-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 560px) { .gate-modes { grid-template-columns: minmax(0, 1fr); } }
+/* Unchosen is an empty outline and chosen is a filled shape with an
+   accent edge. Both were filled at first and differed only by a border
+   tint, which over a photograph was no difference at all — you could not
+   tell from across the desk which trade you had said this was. */
+.gate-modes button {
+  display: block; padding: 12px 14px 13px; text-align: left;
+  border: 1px solid var(--glass-line); border-radius: var(--r-panel);
+  background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.gate-modes button:hover { background: var(--glass-in); }
+.gate-modes b { display: block; font-size: .84rem; font-weight: 500;
+  letter-spacing: -.01em; color: var(--ink-3); }
+.gate-modes em { display: block; margin-top: 3px; font-style: normal;
+  font-size: .74rem; line-height: 1.45; color: var(--ink-3); opacity: .8; }
+.gate-modes button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
+  background: var(--glass-in-2);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
+}
+.gate-modes button[aria-pressed="true"] b { color: var(--ink); }
+.gate-modes button[aria-pressed="true"] em { color: var(--ink-2); opacity: 1; }
+
+.gate-list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.gate-list button {
+  display: grid; grid-template-columns: 22px 16px minmax(0, 1fr);
+  align-items: center; gap: 12px; width: 100%; min-height: 52px;
+  padding: 8px 12px; border: 1px solid transparent; border-radius: 10px;
+  background: var(--glass-in); color: inherit; font: inherit; text-align: left;
+  cursor: pointer;
+}
+.gate-list button:hover { background: var(--glass-in-2); }
+.g-box {
+  display: grid; place-items: center; width: 22px; height: 22px;
+  border: 1px solid color-mix(in srgb, var(--ink-3) 45%, transparent);
+  border-radius: 6px; color: transparent;
+}
+.g-n { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); }
+.g-t { font-size: .82rem; line-height: 1.4; color: var(--ink-2); }
+.gate-list button[aria-pressed="true"] {
+  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+.gate-list button[aria-pressed="true"] .g-box {
+  border-color: transparent; background: var(--accent); color: var(--btn-ink);
+}
+.gate-list button[aria-pressed="true"] .g-t { color: var(--ink); }
+
+.gate-v { margin: 14px 0 0; max-width: 74ch;
+  font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
+.gate-v b { font-weight: 500; color: var(--ink-2); }
+.gate-v.all b { color: var(--up); }
+
+.gate-act { display: flex; align-items: center; gap: 10px; margin-top: 16px;
+  flex-wrap: wrap; }
+/* Full width on a phone, because these are the two things the screen is
+   for and a 36px pill floating in a column reads as an afterthought. */
+@media (max-width: 560px) {
+  .gate-act { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .gate-act .btn { width: 100%; justify-content: center; height: 44px; }
+}
+
 /* ── the playbook ──
    The same furniture as the metrics — the tiles, the chart boxes, the
    topic rail — pointed at a subset. Reusing the components is the point:
@@ -1134,6 +1209,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
         <path d="M4 18l5-6 4 3 6-8" /><path d="M15 7h4v4" />
       </svg>
     </span>
+    <!-- First on the rail, because it is the only thing here you use
+         before a trade rather than after one. A shield: the question it
+         answers is whether this one gets through. -->
+    <button type="button" data-view="gate" aria-label="The gate">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 3l7 3v5c0 4.4-2.9 8.3-7 9.5C7.9 19.3 5 15.4 5 11V6l7-3ZM9 11.5l2 2 4-4" /></svg>
+    </button>
     <button type="button" data-view="metrics" aria-current="page" aria-label="Metrics">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
@@ -1286,6 +1369,62 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
     </main>
 
     <!-- ── metrics ── -->
+    <!-- ── the gate ──
+         The only screen in this app that runs BEFORE the click. Room left
+         in the candle, which trade you think it is, and the five rules —
+         ticked while the answer is still unknown, which is the only state
+         in which a checklist means anything. -->
+    <main class="main" id="gateSection" hidden>
+      <div class="head">
+        <h1>The gate</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="gMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+
+        <!-- Same object as the panel on Metrics, so it is the same class.
+             One definition of what a candle window looks like. -->
+        <section class="cp" id="gCp" aria-label="The candle you are in">
+          <div class="cp-h">
+            <span class="cp-in"><span class="ic" id="gIcon"></span>In</span>
+            <b class="cp-open" id="gOpen">—</b>
+            <span class="cp-name" id="gName"></span>
+            <span class="cp-best" id="gBest" hidden>your best candle</span>
+            <span class="grow"></span>
+            <span class="cp-next" id="gLeft"></span>
+          </div>
+          <div class="cp-band" id="gBand">
+            <b><span class="ic" id="gBandIcon"></span><span id="gBandT"></span></b>
+            <em id="gBandS"></em>
+          </div>
+          <p class="cp-miss" id="gMiss" hidden><b>This window has gone</b>
+            <span id="gMissT"></span></p>
+          <span class="cp-bar" aria-hidden="true"><i id="gFill"></i></span>
+        </section>
+
+        <div class="gate-h">
+          <h2>Which trade is it</h2><span class="grow"></span>
+          <span class="span-meta" id="gTally"></span>
+        </div>
+        <div class="gate-modes" id="gModes" role="group" aria-label="Which trade this is">
+          <button type="button" data-mode="reversal" id="gRev" aria-pressed="false">
+            <b>Reversal — C2</b><em>This candle turns. Small wick, and SMT is not optional.</em>
+          </button>
+          <button type="button" data-mode="continuation" id="gCont" aria-pressed="true">
+            <b>Continuation — C3</b><em>This candle carries. Wick in the previous EQ.</em>
+          </button>
+        </div>
+
+        <ol class="gate-list" id="gList"></ol>
+        <p class="gate-v" id="gVerdict"></p>
+
+        <div class="gate-act">
+          <button class="btn btn-primary" type="button" id="gTake">Log this trade</button>
+          <button class="btn btn-ghost" type="button" id="gPass">Saw it, let it go</button>
+        </div>
+      </div>
+    </main>
+
     <main class="main" id="metricsSection">
       <div class="head">
         <h1>Metrics</h1>
@@ -3355,12 +3494,18 @@ const nextSeq = () => state.events.reduce((m, e) => Math.max(m, e.seq || 0), 0) 
 /* Opens empty for a new trade on `date`, or filled for the trade `id`.
    The same sheet does both, because a journal you can only write to and
    never re-read is a diary you never open. */
-function openTrade(date, id) {
+/* `pre` is the gate handing over: which trade it is, the rules already
+   confirmed in the window, and the candle they were confirmed in. Only
+   consulted for a NEW trade — an existing record's own answers always
+   win, or opening an old trade from the log would overwrite what it says
+   with what you happen to be looking at now. */
+function openTrade(date, id, pre) {
   refreshLists();
   const e = id ? state.events.find(x => String(x.id) === String(id)) : null;
   editing = e ? e.id : null;
 
-  setSide(e ? (e.out === 'missed' ? 'missed' : e.amt < 0 ? 'loss' : 'win') : 'win');
+  setSide(e ? (e.out === 'missed' ? 'missed' : e.amt < 0 ? 'loss' : 'win')
+            : (pre && pre.side) || 'win');
   document.getElementById('tDate').value = e ? e.date : (date || iso(new Date()));
   document.getElementById('tSym').value = (e && e.sym) || '';
   document.getElementById('tSetup').value = (e && e.setup) || '';
@@ -3371,12 +3516,14 @@ function openTrade(date, id) {
   const live = hhmm(candle().open);
   const onToday = (e ? e.date : (date || iso(new Date()))) === iso(new Date());
   document.getElementById('tTime').value = e ? (e.sess || '')
+    : pre && pre.sess ? pre.sess
     : (onToday && SESSIONS.includes(live) ? live : '');
   document.getElementById('tRisk').value = e && e.risk != null ? e.risk : '';
   document.getElementById('tAmt').value = e && e.out !== 'missed' ? Math.abs(e.amt) : '';
 
-  ticked = new Set(e && Array.isArray(e.checks) ? e.checks : []);
-  setMode((e && e.mode) || 'continuation');   // renders the checklist too
+  ticked = new Set(e && Array.isArray(e.checks) ? e.checks
+                 : (pre && pre.ticks) || []);
+  setMode((e && e.mode) || (pre && pre.mode) || 'continuation');   // renders the checklist too
 
   setShot(null);
   shotDirty = false;
@@ -3492,7 +3639,7 @@ function commit(msg) {
 }
 function renderAll() {
   renderSummary(); renderCalendar(); renderMetrics(); renderPlaybook();
-  renderLedger(); renderLog(); renderRes();
+  renderLedger(); renderLog(); renderRes(); renderGate();
 }
 
 /* ── the candle clock ──
@@ -3596,7 +3743,180 @@ function tickCandle() {
   document.getElementById('cpFill').style.width = pctDone;
   cpEl.classList.toggle('off', off);
   cpEl.classList.toggle('late', state === 'late');
+
+  /* The gate reads the same clock. Fed from here rather than running a
+     second interval, so the two screens can never disagree about which
+     candle you are standing in. */
+  gateTick(c);
 }
+/* ═══ the gate ═══
+   Every other surface in this app is a record: what happened, what it
+   returned, what it adds up to. This is the only one that exists to
+   change what happens next, so it holds the three things the decision
+   actually needs and nothing else — how much room is left in the candle,
+   what the profile says that candle is for, and the rules for the trade
+   you think you are looking at.
+
+   The checklist used to be reachable only from the trade sheet, which
+   opens AFTER a trade is taken. Ticking five rules with the outcome
+   already on screen is not a checklist, it is a recollection — and the
+   Playbook's compliance cut is only worth reading if the ticks were made
+   while the answer was still unknown. This is where they get made.
+
+   Ticks belong to one window and are thrown away with it. Rules
+   confirmed on the 18:00 candle say nothing about the 22:00 one, and
+   carrying them across would quietly manufacture a compliant trade out
+   of a stale screen. Same for a new day at the same hour. */
+const GKEY = 'ledger.gate.v1';
+let gateMode = 'continuation';
+let gateTicks = new Set();
+let gateOpen = null, gateDay = null;
+
+/* Kept across a reload, because the window outlives the tab: you read
+   the chart, close the phone, come back twenty minutes later still in
+   the same candle. Anything belonging to a different candle or a
+   different day is dropped rather than shown. */
+function gateLoad(c) {
+  const today = iso(new Date());
+  let v = null;
+  try { v = JSON.parse(localStorage.getItem(GKEY) || 'null'); } catch (e) {}
+  if (v && v.open === c.open && v.day === today && CHECKLISTS[v.mode]) {
+    gateMode = v.mode;
+    gateTicks = new Set((Array.isArray(v.ticks) ? v.ticks : [])
+      .filter(l => CHECKLISTS[gateMode].includes(l)));
+  } else {
+    gateMode = 'continuation';
+    gateTicks = new Set();
+  }
+  gateOpen = c.open;
+  gateDay = today;
+}
+
+function gateSave() {
+  try {
+    localStorage.setItem(GKEY, JSON.stringify(
+      { open: gateOpen, day: gateDay, mode: gateMode, ticks: [...gateTicks] }));
+  } catch (e) {}
+}
+
+function renderGate() {
+  const c = candle();
+  if (gateOpen !== c.open || gateDay !== iso(new Date())) gateLoad(c);
+  const off = c.open === NO_TRADE;
+  const list = CHECKLISTS[gateMode];
+  const done = list.filter(l => gateTicks.has(l)).length;
+
+  /* The current candle, never the next one. The panel on Metrics flips to
+     the candle about to open, because reading a profile at 21:44 is
+     preparation. Here you are deciding about a chart in front of you
+     right now, and showing the next candle's rules would be answering a
+     different question than the one being asked. */
+  gateFace(c, off);
+
+  ['reversal', 'continuation'].forEach(k =>
+    document.getElementById(k === 'reversal' ? 'gRev' : 'gCont')
+      .setAttribute('aria-pressed', String(gateMode === k)));
+
+  document.getElementById('gList').innerHTML = list.map((line, i) =>
+    `<li><button type="button" data-line="${esc(line)}" aria-pressed="${gateTicks.has(line)}">
+       <span class="g-box" aria-hidden="true">${icon('tick', 13)}</span>
+       <span class="g-n" aria-hidden="true">${i + 1}</span>
+       <span class="g-t">${esc(line)}</span>
+     </button></li>`).join('');
+
+  put('gTally', `${done}/${list.length}`);
+  const v = document.getElementById('gVerdict');
+  v.className = 'gate-v' + (done === list.length ? ' all' : '');
+  /* Named, not scored. "3/5" is a mark out of five; the useful sentence
+     is which way that cuts and what it costs you later. */
+  v.innerHTML = done === list.length
+    ? `<b>All ${list.length}.</b> This is the trade you came for.`
+    : `<b>${done} of ${list.length}.</b> ${list.length - done}
+       ${list.length - done === 1 ? 'rule is' : 'rules are'} still open — and the ones
+       you skip are the ones the Playbook will hand back to you later.`;
+}
+
+/* Only the figures that move, so the rule buttons are not rebuilt under
+   a finger or a focus ring once a second. */
+function gateFace(c, off) {
+  const p = PROFILE[c.open];
+  const next = (c.open + 4) % 24;
+  const [cls, head, sub] = room(c.left, off, next);
+  put('gMeta', off ? 'no trade' : `${hhmm(c.open)} ${p.name} · ${hm(c.left)} left`);
+  put('gOpen', hhmm(c.open));
+  put('gName', p.name);
+  put('gLeft', off ? 'not a candle you trade' : `${hm(c.left)} left · then ${hhmm(next)}`);
+  document.getElementById('gFill').style.width = (c.into / 14400 * 100).toFixed(2) + '%';
+  document.getElementById('gBand').className = 'cp-band ' + cls;
+  document.getElementById('gBandT').textContent = head;
+  document.getElementById('gBandS').textContent = sub;
+  document.getElementById('gBest').hidden = bestCandle() !== hhmm(c.open);
+  /* The miss advice only once the window has actually gone. On Metrics it
+     is always up because that panel is a briefing; here, above the rules
+     for a trade you are still considering, it would be answering a
+     question you have not reached yet. */
+  document.getElementById('gMiss').hidden = !(cls === 'late' || off);
+  put('gMissT', p.miss);
+  const el = document.getElementById('gCp');
+  el.classList.toggle('off', off);
+  el.classList.toggle('late', cls === 'late');
+}
+
+function gateTick(c) {
+  if (gateOpen !== c.open || gateDay !== iso(new Date())) { renderGate(); return; }
+  gateFace(c, c.open === NO_TRADE);
+}
+
+document.getElementById('gModes').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-mode]');
+  if (!b || b.dataset.mode === gateMode) return;
+  gateMode = b.dataset.mode;
+  /* The same rule the sheet follows: a tick the new list does not
+     contain is dropped rather than carried invisibly, because the record
+     must never claim you confirmed something you were never shown. */
+  const keep = new Set(CHECKLISTS[gateMode]);
+  gateTicks = new Set([...gateTicks].filter(l => keep.has(l)));
+  gateSave();
+  renderGate();
+  document.getElementById('say').textContent =
+    gateMode === 'reversal' ? 'Reversal, C2' : 'Continuation, C3';
+});
+
+document.getElementById('gList').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-line]');
+  if (!b) return;
+  const l = b.dataset.line;
+  gateTicks.has(l) ? gateTicks.delete(l) : gateTicks.add(l);
+  gateSave();
+  renderGate();
+});
+
+/* Both buttons open the sheet rather than writing straight through. The
+   amount is not known yet on the way in and the reason is not known yet
+   on the way past, and a record saved without either is a row you will
+   not be able to read in March.
+
+   Nothing here is disabled at 14:00. The band already says it is not a
+   candle you trade, and this file's position on that is settled: worth
+   colouring, not worth blocking. */
+const gateHand = (side) => () => {
+  const c = candle();
+  const sess = hhmm(c.open);
+  openTrade(iso(new Date()), null, {
+    mode: gateMode,
+    ticks: [...gateTicks],
+    sess: SESSIONS.includes(sess) ? sess : '',
+    side,
+  });
+};
+document.getElementById('gTake').addEventListener('click', gateHand('win'));
+document.getElementById('gPass').addEventListener('click', gateHand('missed'));
+
+/* Started here rather than beside tickCandle, because tickCandle now
+   feeds the gate and the gate's state is declared above with `let` —
+   running the clock before those bindings exist threw on first paint and
+   took the rest of this script with it, which is a blank app rather than
+   a broken panel. */
 tickCandle();
 setInterval(tickCandle, 1000);
 
@@ -4473,6 +4793,7 @@ document.getElementById('rsForm').addEventListener('submit', (ev) => {
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
+  gate:     document.getElementById('gateSection'),
   metrics:  document.getElementById('metricsSection'),
   playbook: document.getElementById('playbookSection'),
   settings: document.getElementById('settingsSection'),
