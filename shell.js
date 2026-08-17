@@ -80,6 +80,68 @@ const PALETTES = [
   ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above'],
 ];
 
+/* ── your own photograph ──
+   Per palette, not global: the colour tokens still come from the theme
+   you picked, so a photograph swapped into Shore keeps Shore's pinks.
+   That also means five slots rather than one, which is the difference
+   between replacing a backdrop and losing the set.
+
+   IndexedDB, because these are megabytes — localStorage would throw at
+   the first 4K photograph and take the theme preference down with it.
+   Stored as the file you chose, untouched: the entire point is that it
+   is sharper than what ships here, and a re-encode would spend some of
+   that on nothing. */
+const BG = (() => {
+  const NAME = 'shell-bg', STORE = 'bg';
+  let dbp = null;
+  const open = () => dbp || (dbp = new Promise((res, rej) => {
+    const r = indexedDB.open(NAME, 1);
+    r.onupgradeneeded = () => r.result.createObjectStore(STORE);
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  }));
+  const run = async (mode, fn) => {
+    const db = await open();
+    return new Promise((res, rej) => {
+      const t = db.transaction(STORE, mode), q = fn(t.objectStore(STORE));
+      t.oncomplete = () => res(q ? q.result : undefined);
+      t.onerror = () => rej(t.error);
+      t.onabort = () => rej(t.error);
+    });
+  };
+  return {
+    get: id => run('readonly',  s => s.get(String(id))),
+    put: (id, b) => run('readwrite', s => s.put(b, String(id))),
+    del: id => run('readwrite', s => s.delete(String(id))),
+  };
+})();
+
+/* One URL alive at a time. An object URL that is never revoked holds
+   the whole photograph in memory for the life of the tab, and swapping
+   through five themes would hold five. */
+let ownUrl = null;
+let ownHas = false;
+/* Declared here rather than where they are built, so paintOwn can check
+   for them. `typeof` does not protect against a const's dead zone — it
+   throws like any other read — so these are lets seeded with null. */
+let ownRow = null, dropRow = null;
+
+async function paintOwn(id) {
+  let blob = null;
+  try { blob = await BG.get('bg:' + id); } catch (e) {}
+  if (ownUrl) { URL.revokeObjectURL(ownUrl); ownUrl = null; }
+  ownHas = !!blob;
+  if (blob) {
+    ownUrl = URL.createObjectURL(blob);
+    /* Inline, so it beats the :root[data-palette] rule without either
+       knowing about the other. Removing it hands the photograph back. */
+    document.documentElement.style.setProperty('--photo', `url("${ownUrl}")`);
+  } else {
+    document.documentElement.style.removeProperty('--photo');
+  }
+  if (ownRow) syncOwn();
+}
+
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
 const palLabel = document.getElementById('palLabel');
@@ -123,8 +185,75 @@ function setPalette(id) {
     s.setAttribute('aria-checked', String(on));
     s.tabIndex = on ? 0 : -1;
   });
+  paintOwn(id);
   say.textContent = `Backdrop: ${name}.`;
 }
+
+/* Below a rule, because they act on the selected theme rather than
+   being another theme to select — and they are buttons, not radios, so
+   the roving tabindex above does not reach them. */
+const palRule = document.createElement('span');
+palRule.className = 'pal-rule';
+palRule.setAttribute('aria-hidden', 'true');
+palMenu.appendChild(palRule);
+
+const mkRow = (label, glyph) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'swatch pal-act';
+  b.innerHTML = `<span class="pal-ic" aria-hidden="true">${glyph}</span>${label}`;
+  palMenu.appendChild(b);
+  return b;
+};
+ownRow = mkRow('Use my own photo',
+  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+     <path d="M12 16V4M8 8l4-4 4 4M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3"/></svg>`);
+dropRow = mkRow('Restore the original',
+  `<svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor"
+     stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round">
+     <path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5"/></svg>`);
+
+function syncOwn() {
+  dropRow.hidden = !ownHas;
+  ownRow.lastChild.textContent = ownHas ? 'Replace my photo' : 'Use my own photo';
+}
+
+const bgPick = Object.assign(document.createElement('input'),
+  { type: 'file', accept: 'image/*', hidden: true });
+document.body.appendChild(bgPick);
+
+bgPick.addEventListener('change', async () => {
+  const f = bgPick.files[0];
+  bgPick.value = '';
+  if (!f || !/^image\//.test(f.type)) return;
+  try {
+    await BG.put('bg:' + palette, f);
+  } catch (e) {
+    say.textContent = 'That image could not be saved.';
+    alert('This browser refused to store the image. It may be too large, '
+        + 'or storage may be disabled.');
+    return;
+  }
+  await paintOwn(palette);
+  /* Say the size back, because "is it actually sharper" is the only
+     question worth answering here and the file knows. */
+  const im = new Image();
+  im.onload = () => {
+    const px = `${im.naturalWidth} x ${im.naturalHeight}`;
+    say.textContent = `Backdrop: your own photograph, ${px}.`;
+    URL.revokeObjectURL(im.src);
+  };
+  im.src = URL.createObjectURL(f);
+});
+
+ownRow.addEventListener('click', () => { bgPick.click(); closePal(true); });
+dropRow.addEventListener('click', async () => {
+  try { await BG.del('bg:' + palette); } catch (e) {}
+  await paintOwn(palette);
+  say.textContent = 'Backdrop: the original photograph.';
+  closePal(true);
+});
 
 function openPal() {
   palMenu.hidden = false;
@@ -173,7 +302,12 @@ setPalette(palette);
 /* Arrow-keying through the picker swaps data-palette per press, and each
    never-fetched photograph would flash flat --ground while it loaded.
    Warm the other four after first paint, at idle priority. */
-const warm = () => PALETTES.forEach(([id]) => { new Image().src = asset(`arc/bg/${id}.jpg`); });
+const warm = () => PALETTES.forEach(([id]) => {
+  /* Skip the ones standing in for a photograph of your own — fetching a
+     file that will never be shown is the one thing worse than a flash. */
+  BG.get('bg:' + id).then(b => { if (!b) new Image().src = asset(`arc/bg/${id}.jpg`); })
+    .catch(() => { new Image().src = asset(`arc/bg/${id}.jpg`); });
+});
 if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
 else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);
