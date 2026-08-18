@@ -247,6 +247,11 @@
   opacity: .68;
 }
 
+/* Square ends and a slimmer bar. The tap target is a fixed 36px either
+   way — see .bar::after — so a slim bar is no harder to hit. */
+.bar[data-edge="square"] { border-radius: 3px; }
+.bar[data-size="slim"] { height: 22px; }
+
 /* A bar too narrow for its own name puts the name outside — placed
    left or right depending on which side is actually free. */
 .bar.tight { padding: 0 11px; }
@@ -301,6 +306,19 @@
 .diamond[data-tone="muted"] { background: var(--bar-muted); }
 .diamond[data-tone="accent"] {
   background: linear-gradient(135deg, var(--accent-a), var(--accent-c));
+}
+/* The other three are drawn upright: a rotated square IS the diamond, so
+   rotating a circle or a pennant as well would only make them wobble.
+   15px rather than 17, because an unrotated shape reads larger than a
+   rotated one of the same measure. */
+.diamond[data-mark="circle"],
+.diamond[data-mark="square"],
+.diamond[data-mark="flag"] { width: 15px; height: 15px; transform: none; }
+.diamond[data-mark="circle"] { border-radius: 50%; }
+.diamond[data-mark="square"] { border-radius: 3px; }
+.diamond[data-mark="flag"] {
+  border-radius: 2px;
+  clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%);
 }
 .pin {
   position: absolute;
@@ -523,6 +541,24 @@
   max-width: 96ch;
 }
 .fcast b { color: var(--ink); font-weight: 600; }
+/* A year is a heading and a rule, not a card. The point of the screen is
+   the run of them down the page — boxing each one would break the very
+   continuity it exists to show. */
+.yr + .yr { margin-top: 26px; }
+.yr-h {
+  display: flex; align-items: baseline; gap: 12px;
+  margin: 0 0 4px;
+  font-family: var(--display); font-weight: 400;
+  font-size: 1.1rem; letter-spacing: -.01em;
+}
+.yr-h span {
+  font-family: var(--mono); font-size: .6rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+}
+/* An unfinished goal has no actual to draw, so it says so rather than
+   drawing a bar of zero and reading as a project that took no time. */
+.stripe-open .stripe-num { color: var(--ink-3); }
+.stripe-open .track { opacity: .55; }
 .stripes { margin: 0; padding: 0; list-style: none; }
 .stripes li { padding: 9px 0; border-bottom: 1px solid var(--rule); }
 .stripes li:last-child { border-bottom: 0; }
@@ -651,6 +687,32 @@
 }
 .ed-kind .side button + button { border-left: 1px solid var(--rule); }
 .ed-kind .side button[aria-checked="true"] { background: var(--glass-in-2); color: var(--ink); }
+/* Three small segmented controls on one line. They are all one idea —
+   what this goal looks like — so they share a row rather than each
+   taking a labelled block of its own. */
+.look-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.look-row .side { display: flex; border-radius: 9px; overflow: hidden;
+  background: var(--glass-in); }
+.look-row .side button {
+  flex: 1; height: 30px; border: 0; background: none; color: var(--ink-3);
+  font: inherit; font-size: .7rem; cursor: pointer;
+}
+.look-row .side button + button { border-left: 1px solid var(--rule); }
+.look-row .side button[aria-checked="true"] { background: var(--glass-in-2); color: var(--ink); }
+.look-row .side button:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* The marker swatches show the shape itself, for the same reason the
+   colour ones show the colour. */
+.marks .mk {
+  display: block; width: 15px; height: 15px; margin: 1px auto;
+  background: var(--ink-2);
+}
+.marks .mk-diamond { width: 13px; height: 13px; border-radius: 3px; transform: rotate(45deg); }
+.marks .mk-circle { border-radius: 50%; }
+.marks .mk-square { border-radius: 3px; }
+.marks .mk-flag { border-radius: 2px; clip-path: polygon(0 0, 100% 0, 100% 60%, 50% 100%, 0 60%); }
+.marks button[aria-checked="true"] .mk { background: var(--accent); }
+
 /* Swatches, not words with a tick. The choice IS the colour, so the
    control shows the colour and lets the word be the caption. */
 .tones { display: flex; gap: 8px; }
@@ -877,7 +939,7 @@
       </div>
       <div class="pastwrap" tabindex="0">
         <p class="calib" id="calib"></p>
-        <ul class="stripes" id="stripes" aria-label="Finished projects"></ul>
+        <div id="stripes" aria-label="Past goals, by year"></div>
       </div>
     </main>
 
@@ -922,6 +984,38 @@
               aria-label="Dark"><i></i><span>Dark</span></button>
             <button type="button" role="radio" data-tone="muted" aria-checked="false"
               aria-label="Muted"><i></i><span>Muted</span></button>
+          </div>
+        </fieldset>
+
+        <fieldset class="ed-f ed-wide ed-tone" id="edLookSpan">
+          <legend>Bar</legend>
+          <div class="look-row">
+            <div class="side" role="radiogroup" aria-label="Corners" id="edEdge">
+              <button type="button" role="radio" data-edge="round" aria-checked="true">Rounded</button>
+              <button type="button" role="radio" data-edge="square" aria-checked="false">Square</button>
+            </div>
+            <div class="side" role="radiogroup" aria-label="Height" id="edSize">
+              <button type="button" role="radio" data-size="normal" aria-checked="true">Normal</button>
+              <button type="button" role="radio" data-size="slim" aria-checked="false">Slim</button>
+            </div>
+            <div class="side" role="radiogroup" aria-label="Name" id="edLabel">
+              <button type="button" role="radio" data-label="auto" aria-checked="true">Name inside</button>
+              <button type="button" role="radio" data-label="out" aria-checked="false">Outside</button>
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="ed-f ed-wide ed-tone" id="edLookMark" hidden>
+          <legend>Marker</legend>
+          <div class="tones marks" role="radiogroup" aria-label="Marker" id="edMarks">
+            <button type="button" role="radio" data-mark="diamond" aria-checked="true"
+              aria-label="Diamond"><i class="mk mk-diamond"></i><span>Diamond</span></button>
+            <button type="button" role="radio" data-mark="circle" aria-checked="false"
+              aria-label="Circle"><i class="mk mk-circle"></i><span>Circle</span></button>
+            <button type="button" role="radio" data-mark="square" aria-checked="false"
+              aria-label="Square"><i class="mk mk-square"></i><span>Square</span></button>
+            <button type="button" role="radio" data-mark="flag" aria-checked="false"
+              aria-label="Flag"><i class="mk mk-flag"></i><span>Flag</span></button>
           </div>
         </fieldset>
 
@@ -1405,6 +1499,9 @@ function renderBoard() {
     el.type = 'button';
     el.className = 'bar';
     el.dataset.tone = toneOf(b.tone);
+    el.dataset.edge = EDGES.includes(b.edge) ? b.edge : 'round';
+    el.dataset.size = SIZES.includes(b.size) ? b.size : 'normal';
+    el.dataset.label = LABELS.includes(b.label) ? b.label : 'auto';
     el.dataset.name = b.name.toLowerCase();
     el.dataset.id = b.id;
     el.style.left  = left + '%';
@@ -1463,7 +1560,8 @@ function renderBoard() {
     el.dataset.id = m.id;
     el.style.left = pct(on) + '%';
     el.setAttribute('aria-label', `Moment: ${m.name}, ${fmtY(on)}. Opens the editor.`);
-    el.innerHTML = `<span class="diamond" data-tone="${toneOf(m.tone)}" aria-hidden="true"></span>`
+    el.innerHTML = `<span class="diamond" data-tone="${toneOf(m.tone)}"`
+                 + ` data-mark="${MARKS.includes(m.mark) ? m.mark : 'diamond'}" aria-hidden="true"></span>`
                  + `<span aria-hidden="true">${esc(m.name)}</span>`;
     el.addEventListener('click', () => edit(m.id));
     lastRow.appendChild(el);
@@ -1626,10 +1724,15 @@ function layout(pass = 0) {
          nothing test threw the name out of a bar it fitted in. */
       const lab = it.el.querySelector('.label');
       it.el.classList.remove('narrow', 'tight');
-      if (lab.scrollWidth <= lab.clientWidth) return;
+      /* Asked for, rather than forced by the width: skip straight past
+         the fit test to the branch that puts the caption on the canvas. */
+      const forced = it.el.dataset.label === 'out';
+      if (!forced) {
+        if (lab.scrollWidth <= lab.clientWidth) return;
 
-      it.el.classList.add('tight');            // drop the chip, keep the name
-      if (lab.scrollWidth <= lab.clientWidth) return;
+        it.el.classList.add('tight');          // drop the chip, keep the name
+        if (lab.scrollWidth <= lab.clientWidth) return;
+      }
 
       it.el.classList.remove('tight');
       it.el.classList.add('narrow');           // nothing fits — caption goes outside
@@ -2176,49 +2279,87 @@ PIX.warm().then(() => live().forEach(g => { if (PIX.has(g.id)) paintTile(g.id); 
    which is why the multiplier is computed rather than typed. */
 const stripes = document.getElementById('stripes');
 
+/* Behind you: ticked off, or simply past the day it was due. The second
+   kind used to be nowhere — a goal that ran out of road and was never
+   ticked stayed on the board and appeared in no record at all. */
+const endedOn = (g) => g.done ? (g.doneOn || g.to || g.from) : g.to;
+const isPast = (g) => g.done
+  ? !!(g.doneOn || g.to || g.from)
+  : !!(g.to && parseISO(g.to) < TODAY);
+
 function renderPast() {
   stripes.textContent = '';
   /* Planned is what you said it would take; actual is what the clock
      says it took. Both are read off the record, so the multiplier below
-     cannot be flattered by typing a kinder number into it. */
-  const DONE = goals().filter(g => g.done && g.from && g.doneOn).map((g) => {
-    const from = parseISO(g.from);
-    const planned = g.to ? Math.max(1, days(from, parseISO(g.to))) : null;
-    const actual  = Math.max(1, days(from, parseISO(g.doneOn)));
-    return { name: g.name, planned, actual, id: g.id };
-  });
-  const rated = DONE.filter(p => p.planned);
+     cannot be flattered by typing a kinder number into it. An unfinished
+     one has no actual — the clock is still running — so it carries a
+     plan and nothing else. */
+  const ROWS = goals().filter(isPast).map((g) => {
+    const from = g.from ? parseISO(g.from) : null;
+    const planned = from && g.to ? Math.max(1, days(from, parseISO(g.to))) : null;
+    const actual = g.done && from && g.doneOn
+      ? Math.max(1, days(from, parseISO(g.doneOn))) : null;
+    return { id: g.id, name: g.name, done: !!g.done, planned, actual,
+             on: endedOn(g), year: String(endedOn(g) || '').slice(0, 4) };
+  }).filter(r => r.year);
 
-  document.getElementById('pastMeta').textContent =
-    `${goals().filter(g => g.done).length} finished`;
+  const nDone = ROWS.filter(r => r.done).length;
+  const years = [...new Set(ROWS.map(r => r.year))].sort().reverse();
+  document.getElementById('pastMeta').textContent = !ROWS.length ? ''
+    : `${ROWS.length} behind you · ${nDone} finished`
+      + (years.length > 1 ? ` · ${years.length} years` : '');
 
-  if (!DONE.length) {
-    document.getElementById('calib').innerHTML = goals().some(g => g.done)
-      ? 'Finished goals need a start date and a finish date before they can '
-        + 'be measured against their estimate.'
-      : 'Nothing finished yet. Tick <b>Finished</b> on a goal and it moves here, '
-        + 'and the gap between what you planned and what it took starts to add up.';
+  if (!ROWS.length) {
+    document.getElementById('calib').innerHTML =
+      'Nothing behind you yet. A goal arrives here when you tick <b>Finished</b>, '
+      + 'or on its own once its end date has passed — and the gap between what you '
+      + 'planned and what it took starts to add up.';
     return;
   }
 
-  const longest = Math.max(...DONE.map(p => Math.max(p.planned || 0, p.actual)));
-  DONE.forEach((p) => {
-    const over = p.planned && p.actual > p.planned;
-    const ratio = p.planned ? p.actual / p.planned : null;
-    const li = document.createElement('li');
-    li.innerHTML =
-      `<div class="stripe-top">
-         <span class="stripe-name">${esc(p.name)}</span>
-         <span class="stripe-num">${p.planned ? `planned ${p.planned}d · ` : ''}`
-         + `took <b>${p.actual}d</b>${ratio ? ` · ${ratio.toFixed(1)}×` : ''}</span>
-       </div>
-       <div class="track" role="img"
-            aria-label="${esc(p.name)}: ${p.planned ? `planned ${p.planned} days, ` : ''}`
-         + `took ${p.actual} days${ratio ? `, ${ratio.toFixed(1)} times the estimate` : ''}">
-         <span class="ghost"  style="width:${((p.planned || 0) / longest) * 100}%"></span>
-         <span class="actual${over ? ' over' : ''}" style="width:${(p.actual / longest) * 100}%"></span>
-       </div>`;
-    stripes.appendChild(li);
+  /* One scale for every year, so a bar in 2024 is comparable with a bar
+     in 2026 — which is most of the reason to look at them together. */
+  const longest = Math.max(1, ...ROWS.map(r => Math.max(r.planned || 0, r.actual || 0)));
+
+  years.forEach((y) => {
+    const rows = ROWS.filter(r => r.year === y).sort((a, b) => (a.on < b.on ? 1 : -1));
+    const fin = rows.filter(r => r.done).length;
+    const sec = document.createElement('section');
+    sec.className = 'yr';
+    sec.innerHTML = `<h2 class="yr-h">${esc(y)}`
+      + `<span>${rows.length} goal${rows.length === 1 ? '' : 's'} · ${fin} finished</span></h2>`;
+    const ul = document.createElement('ul');
+    ul.className = 'stripes';
+
+    rows.forEach((p) => {
+      const over = p.planned && p.actual && p.actual > p.planned;
+      const ratio = p.planned && p.actual ? p.actual / p.planned : null;
+      const num = p.actual
+        ? `${p.planned ? `planned ${p.planned}d · ` : ''}took <b>${p.actual}d</b>`
+          + `${ratio ? ` · ${ratio.toFixed(1)}×` : ''}`
+        : `${p.planned ? `planned ${p.planned}d · ` : ''}ended ${fmt(parseISO(p.on))}`
+          + ` · not ticked off`;
+      const alt = p.actual
+        ? `${p.name}: ${p.planned ? `planned ${p.planned} days, ` : ''}took ${p.actual} days`
+          + `${ratio ? `, ${ratio.toFixed(1)} times the estimate` : ''}`
+        : `${p.name}: ${p.planned ? `planned ${p.planned} days, ` : ''}`
+          + `ended ${fmt(parseISO(p.on))}, not marked finished`;
+      const li = document.createElement('li');
+      if (!p.done) li.className = 'stripe-open';
+      li.innerHTML =
+        `<div class="stripe-top">
+           <span class="stripe-name">${esc(p.name)}</span>
+           <span class="stripe-num">${num}</span>
+         </div>
+         <div class="track" role="img" aria-label="${esc(alt)}">
+           <span class="ghost"  style="width:${((p.planned || 0) / longest) * 100}%"></span>
+           ${p.actual ? `<span class="actual${over ? ' over' : ''}"`
+             + ` style="width:${(p.actual / longest) * 100}%"></span>` : ''}
+         </div>`;
+      ul.appendChild(li);
+    });
+    sec.appendChild(ul);
+    stripes.appendChild(sec);
   });
 
   const calibEl = document.getElementById('calib');
@@ -2227,8 +2368,11 @@ function renderPast() {
      until someone edits one of them. */
   const cal = calibration();
   if (!cal.n) {
-    calibEl.innerHTML = 'None of these carried an end date, so there is no estimate '
-      + 'to measure them against yet.';
+    calibEl.innerHTML = nDone
+      ? 'None of the finished ones carried both dates, so there is no estimate '
+        + 'to measure them against yet.'
+      : 'Nothing here has been ticked <b>Finished</b> yet, so there is nothing to '
+        + 'measure against an estimate — only a record of what each year held.';
     return;
   }
   calibEl.innerHTML =
@@ -2277,6 +2421,41 @@ const toneOf = (t) => t === 'strong' ? 'dark'
                     : t === 'soft'   ? 'muted'
                     : TONES.includes(t) ? t : 'muted';
 
+/* Four of these now, all the same contract: a row of radios keyed by one
+   data attribute, one of which is always checked. Written once, because
+   four copies of the same twelve lines is how the fourth one ends up
+   with a different keyboard behaviour from the other three. */
+function pick(id, attr, list, fallback) {
+  const el = edEl(id);
+  let now = fallback;
+  const set = (v) => {
+    now = list.includes(v) ? v : fallback;
+    el.querySelectorAll(`[data-${attr}]`).forEach(b =>
+      b.setAttribute('aria-checked', String(b.dataset[attr] === now)));
+  };
+  el.addEventListener('click', (ev) => {
+    const b = ev.target.closest(`[data-${attr}]`);
+    if (b) set(b.dataset[attr]);
+  });
+  el.addEventListener('keydown', (ev) => {
+    if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) return;
+    ev.preventDefault();
+    const at = list.indexOf(now);
+    set(list[ev.key === 'Home' ? 0 : ev.key === 'End' ? list.length - 1
+      : (at + (ev.key === 'ArrowRight' ? 1 : list.length - 1)) % list.length]);
+    el.querySelector('[aria-checked="true"]').focus();
+  });
+  set(fallback);
+  return { set, get: () => now };
+}
+
+const EDGES = ['round', 'square'], SIZES = ['normal', 'slim'];
+const LABELS = ['auto', 'out'], MARKS = ['diamond', 'circle', 'square', 'flag'];
+const edEdge  = pick('edEdge',  'edge',  EDGES,  'round');
+const edSize  = pick('edSize',  'size',  SIZES,  'normal');
+const edLabel = pick('edLabel', 'label', LABELS, 'auto');
+const edMark  = pick('edMarks', 'mark',  MARKS,  'diamond');
+
 let edTone = 'accent';
 function setTone(t) {
   edTone = toneOf(t);
@@ -2305,6 +2484,10 @@ function setKind(k) {
     edEl(btn).setAttribute('aria-checked', String(id === k)));
   edEl('edFromF').hidden = k === 'none';
   edEl('edToF').hidden   = k !== 'span';
+  /* A bar's ends mean nothing to a diamond, and a marker shape means
+     nothing to a bar. Only the one that applies is on screen. */
+  edEl('edLookSpan').hidden = k === 'mark';
+  edEl('edLookMark').hidden = k !== 'mark';
   edEl('edFromL').textContent = k === 'mark' ? 'On' : 'Starts';
   edEl('edHint').textContent =
     k === 'span' ? 'A span draws a bar on the timeline and can be measured against its estimate when you finish it.'
@@ -2359,6 +2542,12 @@ function edOpen(goal) {
   setTone(goal ? toneOf(goal.tone)
         : (edEl('edHorizon').value === 'now' ? 'accent'
          : edEl('edHorizon').value === 'year' ? 'dark' : 'muted'));
+  /* Every one of these defaults to what the app was choosing on its own,
+     so a goal nobody has styled comes back looking untouched. */
+  edEdge.set((goal && goal.edge) || 'round');
+  edSize.set((goal && goal.size) || 'normal');
+  edLabel.set((goal && goal.label) || 'auto');
+  edMark.set((goal && goal.mark) || 'diamond');
   ed.showModal();
   edEl('edName').focus();
 }
@@ -2430,6 +2619,10 @@ document.getElementById('edForm').addEventListener('submit', (e) => {
        goal would have been given anyway, so leaving them alone is the
        same as never having been asked. */
     rec.tone = edTone;
+    rec.edge = edEdge.get();
+    rec.size = edSize.get();
+    rec.label = edLabel.get();
+    rec.mark = edMark.get();
     if (i >= 0) st.goals[i] = { ...st.goals[i], ...rec };
     else st.goals.push(rec);
   });
