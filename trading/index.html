@@ -333,10 +333,21 @@
   --pitch: 21px;
   margin-top: 9px;
   display: flex; align-items: flex-start; justify-content: space-between;
-  gap: 24px; flex-wrap: wrap;
+  /* Wide, because the two halves are separate answers and a narrow gap
+     reads them as one wrapped paragraph. It is also the minimum: when
+     there is less room than this the pair stacks instead of squeezing. */
+  gap: 56px; flex-wrap: wrap;
 }
+/* The conditions give up width first; the table cannot — five rows of
+   four characters have no smaller version of themselves, and squeezing
+   them is what pushed "Confirms on" off the right edge. */
+/* Shrinks to 28ch, grows no further than the longest line it holds —
+   left to fill the row its heading rule ran the whole width of the
+   panel, which is a long line drawn under four short ones. */
+.cp-psp { flex: 1 1 28ch; min-width: 0; max-width: 52ch; }
+.cp-align-box table { flex: 0 0 auto; }
 .cp-align table { border-collapse: collapse; font-family: var(--mono); font-size: .68rem; }
-.cp-psp { max-width: 46ch; }
+
 /* The two headings are the same type at the same size, so the blocks
    start on one line rather than a few pixels apart — which is the kind
    of gap you cannot name but can always see. */
