@@ -2036,24 +2036,16 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 
         <div class="bt-charts">
           <section class="bt-chart" aria-labelledby="btRadarH">
-            <div class="bt-ch">
-              <h3 id="btRadarH"><button type="button" id="btRadarT" aria-expanded="false" aria-controls="btRadarB">
-                <span class="ic" aria-hidden="true"></span>Which candle</button></h3>
+            <div class="bt-ch"><h3 id="btRadarH">Which candle</h3>
               <span class="grow"></span><span class="bt-n" id="btRadarN"></span></div>
-            <div class="bt-body" id="btRadarB" hidden>
-              <p class="bt-sub">Every run logged, by the candle it was in. The short arm is the one you never rehearse.</p>
+            <p class="bt-sub">Every run logged, by the candle it was in. The short arm is the one you never rehearse.</p>
             <div class="bt-fig" id="btRadar"></div>
-            </div>
           </section>
           <section class="bt-chart" aria-labelledby="btRingH">
-            <div class="bt-ch">
-              <h3 id="btRingH"><button type="button" id="btRingT" aria-expanded="false" aria-controls="btRingB">
-                <span class="ic" aria-hidden="true"></span>Showing up</button></h3>
+            <div class="bt-ch"><h3 id="btRingH">Showing up</h3>
               <span class="grow"></span><span class="bt-n" id="btRingN"></span></div>
-            <div class="bt-body" id="btRingB" hidden>
-              <p class="bt-sub">Eight weeks, newest on the outside. One ring a week, one wedge a day.</p>
+            <p class="bt-sub">Eight weeks, newest on the outside. One ring a week, one wedge a day.</p>
             <div class="bt-fig" id="btRing"></div>
-            </div>
           </section>
         </div>
 
@@ -7206,16 +7198,17 @@ function renderBtLog() {
   });
 }
 
-/* Shut on a machine that has never opened them. Four panels of analysis
-   between the week and the runs is four panels you scroll past to reach
-   the thing you came for — and a reference you cannot put away stops
-   being a reference and becomes furniture. */
+/* The two lists fold; the radar and the ring do not. A shape you read in
+   a second is not worth a click, but a ranked list of eight lines is
+   something you go and look at — and a reference you cannot put away
+   stops being a reference and becomes furniture. Shut on a machine that
+   has never opened them. */
 const BFKEY = 'backtest.folds.v1';
 const BTFOLD = (() => {
   try { return Object.assign({}, JSON.parse(localStorage.getItem(BFKEY) || '{}')); }
   catch (e) { return {}; }
 })();
-['btRadar', 'btRing', 'btLines', 'btVs'].forEach((k) => {
+['btLines', 'btVs'].forEach((k) => {
   const btn = document.getElementById(k + 'T');
   const body = document.getElementById(k + 'B');
   btn.innerHTML = `<span class="ic" aria-hidden="true">${icon('chev', 12)}</span>`
