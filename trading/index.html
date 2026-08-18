@@ -734,6 +734,64 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .shot.has { border-style: solid; }
 .shot.has .shot-empty { opacity: 0; background: rgba(0,0,0,.55); color: var(--ink); }
 .shot.has:hover .shot-empty, .shot:focus-visible .shot-empty { opacity: 1; }
+/* Replace and Remove used to be a caption telling you to shift-click,
+   which is a thing you have to be told once and then remember forever.
+   They are buttons now, below the slot, and only there when there is
+   something to act on. */
+.shot-acts { display: flex; gap: 6px; margin-top: 6px; }
+.shot-act {
+  border: 1px solid var(--glass-line); border-radius: 7px;
+  background: var(--glass-in); color: var(--ink-2);
+  padding: 3px 9px; cursor: pointer;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.shot-act:hover { color: var(--ink); border-color: var(--edge); }
+dialog.sheet.ro .shot-acts { display: none; }
+
+/* ── the chart, full size ──
+   A screenshot is stored at 1400px wide and drawn in a 128px slot: that
+   is enough to know a chart is there and nowhere near enough to read
+   one. So the slot opens it — fitted to the window first, and 1:1 on a
+   second click, because a fitted 1400px chart is a picture of a chart
+   and a 1:1 one is the chart. */
+dialog.lens {
+  border: 0; padding: 0; margin: 0;
+  width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh;
+  background: none; overflow: hidden;
+}
+dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6px); }
+.lens-pane {
+  width: 100%; height: 100%; padding: 30px;
+  overflow: auto; overscroll-behavior: contain;
+  display: flex; align-items: center; justify-content: center;
+}
+.lens-pane img {
+  display: block; max-width: 100%; max-height: 100%;
+  border-radius: 10px; box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
+  cursor: zoom-in;
+}
+/* Block rather than flex, or the image cannot overflow its own scroller
+   — a centred flex item refuses to scroll past its start edge. */
+.lens.zoom .lens-pane { display: block; }
+.lens.zoom .lens-pane img {
+  max-width: none; max-height: none; margin: auto; cursor: zoom-out;
+}
+.lens-x {
+  position: fixed; top: 18px; right: 20px;
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass); backdrop-filter: blur(10px);
+  color: var(--ink); cursor: pointer;
+}
+.lens-hint {
+  position: fixed; left: 0; right: 0; bottom: 18px;
+  text-align: center; pointer-events: none;
+  font-family: var(--mono); font-size: .58rem;
+  text-transform: uppercase; letter-spacing: .09em;
+  color: rgba(255, 255, 255, .6);
+}
+
 .shot.dropping {
   border-color: var(--accent);
   background-color: color-mix(in srgb, var(--accent) 14%, transparent);
@@ -1952,6 +2010,21 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   <p class="sr" role="status" id="say"></p>
 </div>
 
+<!-- ── the chart, full size ──
+     Its own dialog rather than a panel inside the sheet, so Esc closes
+     the picture and leaves the half-typed trade underneath alone. -->
+<dialog class="lens" id="lens" aria-label="Chart">
+  <div class="lens-pane" id="lensPane">
+    <img id="lensImg" alt="The chart on this trade" />
+  </div>
+  <button class="lens-x" type="button" id="lensX" aria-label="Close the chart">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+         stroke-linecap="round" width="15" height="15" aria-hidden="true">
+      <path d="m6 6 12 12M18 6 6 18" /></svg>
+  </button>
+  <span class="lens-hint" id="lensHint"></span>
+</dialog>
+
 <dialog class="sheet" id="sheet" aria-labelledby="sheetTitle">
   <form method="dialog" id="tradeForm">
     <div class="sheet-h">
@@ -2015,6 +2088,10 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <button type="button" class="shot" id="tShot">
           <span class="shot-empty">Click, paste or drop an image</span>
         </button>
+        <div class="shot-acts" id="shotActs" hidden>
+          <button class="shot-act" type="button" id="shotSwap">Replace</button>
+          <button class="shot-act" type="button" id="shotDrop">Remove</button>
+        </div>
       </div>
 
       <div class="field wide">
@@ -3903,6 +3980,10 @@ function setShot(blob) {
   if (shotUrl) { URL.revokeObjectURL(shotUrl); shotUrl = null; }
   shotBlob = blob || null;
   const cap = shotBtn.querySelector('.shot-empty');
+  document.getElementById('shotActs').hidden = !shotBlob;
+  /* The picture the viewer is showing is the one being replaced, and its
+     URL is about to be revoked. */
+  if (lens.open) lens.close();
   if (!shotBlob) {
     shotBtn.classList.remove('has');
     shotBtn.style.backgroundImage = '';
@@ -3912,7 +3993,7 @@ function setShot(blob) {
   shotUrl = URL.createObjectURL(shotBlob);
   shotBtn.classList.add('has');
   shotBtn.style.backgroundImage = `url("${shotUrl}")`;
-  cap.textContent = 'Replace · shift-click to remove';
+  cap.textContent = 'Click to open';
 }
 async function takeShot(file) {
   if (!file || !/^image\//.test(file.type)) return;
@@ -3925,9 +4006,58 @@ const picker = Object.assign(document.createElement('input'),
 document.body.appendChild(picker);
 picker.addEventListener('change', () => { takeShot(picker.files[0]); picker.value = ''; });
 
-shotBtn.addEventListener('click', (ev) => {
-  if (ev.shiftKey && shotBlob) { setShot(null); shotDirty = true; return; }
+/* A slot with a chart in it opens the chart. Going to the file browser
+   was the old behaviour and it was wrong: once there IS a picture, the
+   thing you want from clicking it is to see it, not to go looking for
+   another one. Replacing is its own button now — which is also how the
+   shift-click that used to remove one stopped being a thing you had to
+   be told about and then remember. */
+shotBtn.addEventListener('click', () => {
+  if (shotBlob) { openLens(); return; }
+  /* Reading a trade can open its chart; it cannot go looking for one. */
+  if (sheet.classList.contains('ro')) return;
   picker.click();
+});
+document.getElementById('shotSwap').addEventListener('click', () => picker.click());
+document.getElementById('shotDrop').addEventListener('click', () => {
+  setShot(null);
+  shotDirty = true;
+  shotBtn.focus();
+});
+
+/* ── the chart, full size ── */
+const lens = document.getElementById('lens');
+const lensImg = document.getElementById('lensImg');
+function openLens() {
+  if (!shotUrl) return;
+  lens.classList.remove('zoom');
+  lensImg.src = shotUrl;
+  lens.showModal();
+  /* Read after showModal, when the image has been laid out against the
+     window it is actually in. */
+  const fitted = lensImg.naturalWidth > lensImg.clientWidth + 1;
+  document.getElementById('lensHint').textContent =
+    fitted ? 'Click the chart for full size · Esc to close' : 'Esc to close';
+  document.getElementById('lensX').focus();
+}
+document.getElementById('lensPane').addEventListener('click', (ev) => {
+  /* The picture toggles its own size; the dark around it is the way out,
+     which is the behaviour every other viewer has. */
+  if (ev.target === lensImg) {
+    lens.classList.toggle('zoom');
+    document.getElementById('lensHint').textContent =
+      lens.classList.contains('zoom') ? 'Click again to fit · Esc to close'
+                                      : 'Click the chart for full size · Esc to close';
+    return;
+  }
+  lens.close();
+});
+document.getElementById('lensX').addEventListener('click', () => lens.close());
+lens.addEventListener('close', () => {
+  /* Dropped rather than left pointing at a URL that setShot may revoke
+     the moment the picture is replaced. */
+  lensImg.removeAttribute('src');
+  lens.classList.remove('zoom');
 });
 /* A trader screenshots and pastes. Anywhere in the sheet is close enough. */
 sheet.addEventListener('paste', (ev) => {
@@ -4081,7 +4211,10 @@ function openTrade(date, id, pre) {
      accepting input. */
   sheet.classList.toggle('ro', ro);
   sheet.querySelectorAll('input, select, textarea, button').forEach((el) => {
-    if (el.id === 'sheetX') return;                 // the way out is never disabled
+    /* The way out is never disabled, and neither is the chart: on a
+       phone the sheet opens to be READ, and the picture is most of what
+       there is to read. It refuses to go picking files on its own. */
+    if (el.id === 'sheetX' || el.id === 'tShot') return;
     el.disabled = ro;
   });
   if (ro) document.getElementById('sheetTitle').textContent = 'Trade';
@@ -4094,6 +4227,7 @@ document.getElementById('sheetX').addEventListener('click', () => sheet.close())
 /* Esc closes the dialog without a submit event, so the picture is
    released here rather than in the save path. */
 sheet.addEventListener('close', () => {
+  if (lens.open) lens.close();
   setShot(null); shotDirty = false; editing = null;
   /* Only the intent to finish it is dropped. The position itself is left
      alone, because an Esc on the way to typing a result is not an exit. */
