@@ -386,19 +386,37 @@
 .cp-align thead th {
   text-align: left; padding-bottom: 5px; border-bottom: 1px solid var(--rule);
 }
-.cp-align thead th:first-child { text-align: right; padding-right: 26px; }
+/* ── the arrow ──
+   Drawn, not typed. The face carries no arrow at any length — not even
+   U+2192 — so a glyph here is whichever fallback font the machine
+   reaches for, at whatever weight and proportion that font happens to
+   use. A rule and a head built from borders are the same ink as
+   everything around them and are exactly as long as they are told to be.
+
+   Short. It is a connector between two words, not a diagram: long enough
+   that the five stack into one line and the pairing is read sideways,
+   short enough that it stays punctuation. */
+.cp-align { --arrow: 18px; }
+.cp-align thead th:first-child { text-align: right; padding-right: calc(var(--arrow) + 22px); }
 .cp-align tbody th {
-  text-align: right; padding-right: 26px;
+  position: relative;
+  text-align: right; padding-right: calc(var(--arrow) + 22px);
   font-weight: 400; color: var(--ink-2);
 }
-.cp-align tbody td { font-weight: 500; color: var(--accent); }
-/* The arrow sits in the padding the header already reserved, so it lines
-   up under the gap between the two column names rather than beside it. */
-.cp-align tbody td::before {
-  content: '→';
-  display: inline-block; width: 18px; margin-left: -22px;
-  color: var(--ink-3); font-weight: 400;
+.cp-align tbody th::before,
+.cp-align tbody th::after { content: ''; position: absolute; top: 50%; }
+/* the shaft */
+.cp-align tbody th::before {
+  right: 12px; width: var(--arrow); height: 1px;
+  background: var(--ink-3); transform: translateY(-50%);
 }
+/* and the head, a corner turned through 45 */
+.cp-align tbody th::after {
+  right: 12px; width: 3.5px; height: 3.5px;
+  border-top: 1px solid var(--ink-3); border-right: 1px solid var(--ink-3);
+  transform: translateY(-50%) rotate(45deg);
+}
+.cp-align tbody td { font-weight: 500; color: var(--accent); }
 /* Both halves open the same distance below their heading. */
 .cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
 
