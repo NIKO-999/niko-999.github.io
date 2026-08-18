@@ -1,30 +1,34 @@
 """Upscale the backdrops whose ORIGINAL is smaller than the screen.
 
-   Ten of the fourteen originals are 5–9K and are simply re-encoded at
-   native size by encode-backdrops.py. Four are not, and two of those are
-   short enough that a 16" panel has to stretch them:
+   Twelve of the fourteen originals are 3840–9200 wide and are simply
+   re-encoded at native size by encode-backdrops.py. Two are not:
 
-     canyon  3072×2048  — 1.13× short of a 16" MBP, 1.67× of a Studio
-     silk    2160×2700  — 1.60× short of a 16" MBP
+     canyon  3072×2048  — 1.13× short of a 16" panel, 1.67× of a Studio
+     silk    2160×2700  — 1.60× short of a 16" panel
 
    Nothing can invent detail that was never photographed, but a Lanczos
    upscale with a halo-clamped unsharp mask puts the edges back where the
    browser's own bilinear scaler smears them, which is most of what
    "blurry" actually means at these sizes. Measured on this set it buys
-   ~26% acutance against the browser's own scale-up.
+   ~26% acutance against letting the browser scale up.
 
    The clamp is what allows percent=340: a strong mask is run, then every
    pixel is clipped back inside the min/max its own neighbourhood already
    held, widened by a tenth of that range. A pixel can never take a value
    the picture did not already contain nearby — which is exactly what a
    halo is.
+
+   The originals are not in the repo; tools/backdrops.json records which
+   photograph each backdrop came from and what was done to it.
+
+   Usage:  python3 tools/upscale-short.py <dir-of-originals>
 """
 import os
+import sys
 import numpy as np
 from PIL import Image, ImageFilter
 
-BG = '/home/user/niko-999.github.io/arc/bg'
-SRC = os.path.join(BG, 'Themes')
+BG = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), 'arc', 'bg')
 
 # name -> (original file, target width)
 #
@@ -85,7 +89,13 @@ def process(src, dst, target_w):
 
 
 if __name__ == '__main__':
+    if len(sys.argv) < 2:
+        sys.exit(__doc__.strip().splitlines()[-1].strip())
+    src_dir = sys.argv[1]
     for name, (fn, tw) in JOBS.items():
-        size, q, n = process(os.path.join(SRC, fn),
-                             os.path.join(BG, name + '.jpg'), tw)
+        src = os.path.join(src_dir, fn)
+        if not os.path.exists(src):
+            sys.exit(f'missing original: {src}\n'
+                     f'see tools/backdrops.json for which photograph this is')
+        size, q, n = process(src, os.path.join(BG, name + '.jpg'), tw)
         print(f'  {name:8} {size[0]}×{size[1]}  q{q}  {n/1024:.0f} KB')

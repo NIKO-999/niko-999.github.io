@@ -530,6 +530,10 @@
 }
 @media (hover: hover) { .day:hover .day-new { opacity: 1; } }
 .day-new:focus-visible { opacity: 1; outline: 2px solid var(--focus); outline-offset: 1px; }
+/* Today is the day you are nearly always writing about — and now the day
+   entering a trade drops you on — so its way in does not hide behind a
+   hover. Every other day still has to be pointed at. */
+.day.today .day-new { opacity: 1; }
 /* On a day that already has trades this strip is invisible until you
    hover it, and it was charging every such cell 18px of layout for the
    privilege — which is exactly the height a third card needed. Float it
@@ -730,7 +734,14 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .shot.has { border-style: solid; }
 .shot.has .shot-empty { opacity: 0; background: rgba(0,0,0,.55); color: var(--ink); }
 .shot.has:hover .shot-empty, .shot:focus-visible .shot-empty { opacity: 1; }
-.shot.dropping { border-color: var(--accent); }
+.shot.dropping {
+  border-color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+/* Drop is taken by the whole sheet, so the whole sheet has to look like
+   it will take one — otherwise the only lit thing is a box you were not
+   aiming at, and it reads as a miss rather than a catch. */
+dialog.sheet.dropping { outline: 2px dashed var(--accent); outline-offset: -6px; }
 
 /* ── candle radar ──
    Five windows as one shape. A balanced pentagon means the edge is
@@ -2002,7 +2013,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <div class="field wide">
         <label for="tShot"><span class="ic" id="icImage"></span>Chart</label>
         <button type="button" class="shot" id="tShot">
-          <span class="shot-empty">Click or drop an image</span>
+          <span class="shot-empty">Click, paste or drop an image</span>
         </button>
       </div>
 
@@ -3918,15 +3929,6 @@ shotBtn.addEventListener('click', (ev) => {
   if (ev.shiftKey && shotBlob) { setShot(null); shotDirty = true; return; }
   picker.click();
 });
-['dragenter', 'dragover'].forEach(t => shotBtn.addEventListener(t, (ev) => {
-  ev.preventDefault(); shotBtn.classList.add('dropping');
-}));
-['dragleave', 'drop'].forEach(t => shotBtn.addEventListener(t, () =>
-  shotBtn.classList.remove('dropping')));
-shotBtn.addEventListener('drop', (ev) => {
-  ev.preventDefault();
-  takeShot(ev.dataTransfer.files && ev.dataTransfer.files[0]);
-});
 /* A trader screenshots and pastes. Anywhere in the sheet is close enough. */
 sheet.addEventListener('paste', (ev) => {
   const it = [...(ev.clipboardData ? ev.clipboardData.items : [])]
@@ -3935,6 +3937,50 @@ sheet.addEventListener('paste', (ev) => {
   ev.preventDefault();
   takeShot(it.getAsFile());
 });
+
+/* And a drop goes the same way, for the same reason. Dragging is aimed
+   badly by definition — the file is under the cursor, the cursor is over
+   whatever it is over, and the chart slot is a 128px box partway down a
+   form that scrolls. So the whole sheet takes the drop and the slot
+   lights up to say where it will land, which is the honest version of
+   "drop it anywhere".
+
+   The types list is the only thing readable mid-drag: a browser will not
+   hand over the file until the pointer is released, so a drag carrying
+   text rather than a file is refused by not calling preventDefault, and
+   the cursor says no on its own. */
+const dragFile = (dt) => !!dt && [...(dt.types || [])].includes('Files');
+let dragIn = 0;
+function dropCue(on) {
+  sheet.classList.toggle('dropping', on);
+  shotBtn.classList.toggle('dropping', on);
+}
+sheet.addEventListener('dragenter', (ev) => {
+  if (sheet.classList.contains('ro') || !dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  /* dragenter and dragleave both fire for every child the pointer
+     crosses, so this counts rather than flags — a flag turns the cue off
+     the moment you pass over a label on the way down. */
+  if (dragIn++ === 0) dropCue(true);
+});
+sheet.addEventListener('dragover', (ev) => {
+  if (sheet.classList.contains('ro') || !dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'copy';
+});
+sheet.addEventListener('dragleave', () => {
+  if (dragIn > 0 && --dragIn === 0) dropCue(false);
+});
+sheet.addEventListener('drop', (ev) => {
+  if (sheet.classList.contains('ro') || !dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  dragIn = 0; dropCue(false);
+  takeShot(ev.dataTransfer.files && ev.dataTransfer.files[0]);
+});
+/* A file dropped a few pixels outside the sheet would otherwise be
+   opened by the browser, replacing the page and the half-typed trade
+   with a JPEG. */
+sheet.addEventListener('close', () => { dragIn = 0; dropCue(false); });
 
 /* ── outcome ── */
 function setSide(v) {
@@ -4525,8 +4571,25 @@ document.getElementById('gIn').addEventListener('click', () => {
   gateFold(false);
   renderLive();
   renderGate();
+  /* The gate's job ended the moment you clicked it, and the calendar is
+     where the trade gets written down — so that is where you land, with
+     today already in front of you. Nothing is lost by moving: the
+     position rides in the strip, which sits outside every section, so
+     "Close it" is still one click from here.
+
+     The month is reset first because the cursor may be parked on
+     February from a browse an hour ago, and a calendar that opens on the
+     wrong month is worse than not opening at all. */
+  const now = new Date();
+  cursor = new Date(now.getFullYear(), now.getMonth(), 1);
+  renderCalendar();
+  goto('calendar');
+  const cell = document.querySelector('#grid .day.today');
+  if (cell) cell.scrollIntoView({ block: 'nearest' });
+  /* After goto, which writes the view's own name there. */
   document.getElementById('say').textContent =
-    `In a ${gateMode === 'reversal' ? 'C2' : 'C3'} on the ${sess}. Close it when it is done.`;
+    `In a ${gateMode === 'reversal' ? 'C2' : 'C3'} on the ${sess}. `
+    + `Close it when it is done.`;
 });
 
 /* Opens the sheet rather than writing straight through: the reason you
