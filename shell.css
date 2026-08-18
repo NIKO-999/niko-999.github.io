@@ -189,7 +189,7 @@
   --btn:     #1c1a17;
   --btn-ink: #ffffff;
 
-  --sw-ember: #79432f; --sw-cyan: #2b676e; --sw-slate: #475262; --sw-vellum: #3c5567; --sw-cobalt: #2a4884; --sw-umber: #60523e; --sw-violet: #41327b; --sw-jade: #32673b;
+  --sw-ember: #703e2c; --sw-cyan: #225257; --sw-slate: #414c5a; --sw-vellum: #374e5e; --sw-cobalt: #2a4884; --sw-umber: #564937; --sw-violet: #41327b; --sw-jade: #295431;
 
   /* On a light panel a pale edge is invisible, so the light schemes use
      the accent itself rather than a tint of it. */
@@ -200,10 +200,16 @@
 }
 
 /* ═══ themes ═══
-   Five photographs, and an accent taken FROM each photograph rather than
-   chosen beside it — the hue is measured off the image, then driven to a
-   luminance that clears 4.5:1 against white, because that is where bar
-   labels sit. Two hues are named instead of measured: on the shore and
+   An accent taken FROM each photograph rather than chosen beside it —
+   the hue is measured off the image, then driven to a luminance that
+   clears 4.5:1 against the surface the text ACTUALLY lands on.
+
+   Which is not white. Measured on the page, a light-scheme accent chip
+   sits on about rgb(172,189,202): the panel, then the inset card, then
+   the chip's own 13% tint of the accent itself, each one dragging the
+   background further from paper. Tuned against white the same tokens
+   read 6.4:1 there and looked washed out, worst on the cyan four
+   backdrops share. Two hues are named instead of measured: on the shore and
    the lagoon the detector kept picking the sand, and the colour anyone
    remembers is the sky in one and the water in the other.
 
@@ -254,23 +260,23 @@
 }
 :root[data-resolved="light"][data-palette="ember"] {
   --accent-a: #804028; --accent-b: #5d2e1d; --accent-c: #3e1f14;
-  --accent: #79432f; --now: #79432f; --now-pill: #5d2e1d;
-  --edge: #79432f; --focus: #79432f;
+  --accent: #703e2c; --now: #703e2c; --now-pill: #5d2e1d;
+  --edge: #703e2c; --focus: #703e2c;
 }
 :root[data-resolved="light"][data-palette="cyan"] {
   --accent-a: #287780; --accent-b: #1d575d; --accent-c: #143a3e;
-  --accent: #2b676e; --now: #2b676e; --now-pill: #1d575d;
-  --edge: #2b676e; --focus: #2b676e;
+  --accent: #225257; --now: #225257; --now-pill: #1d575d;
+  --edge: #225257; --focus: #225257;
 }
 :root[data-resolved="light"][data-palette="slate"] {
   --accent-a: #405168; --accent-b: #2f3b4c; --accent-c: #1f2733;
-  --accent: #475262; --now: #475262; --now-pill: #2f3b4c;
-  --edge: #475262; --focus: #475262;
+  --accent: #414c5a; --now: #414c5a; --now-pill: #2f3b4c;
+  --edge: #414c5a; --focus: #414c5a;
 }
 :root[data-resolved="light"][data-palette="vellum"] {
   --accent-a: #385971; --accent-b: #284152; --accent-c: #1b2b37;
-  --accent: #3c5567; --now: #3c5567; --now-pill: #284152;
-  --edge: #3c5567; --focus: #3c5567;
+  --accent: #374e5e; --now: #374e5e; --now-pill: #284152;
+  --edge: #374e5e; --focus: #374e5e;
 }
 :root[data-resolved="light"][data-palette="cobalt"] {
   --accent-a: #224387; --accent-b: #183162; --accent-c: #102141;
@@ -279,8 +285,8 @@
 }
 :root[data-resolved="light"][data-palette="umber"] {
   --accent-a: #6d583b; --accent-b: #50402b; --accent-c: #352b1d;
-  --accent: #60523e; --now: #60523e; --now-pill: #50402b;
-  --edge: #60523e; --focus: #60523e;
+  --accent: #564937; --now: #564937; --now-pill: #50402b;
+  --edge: #564937; --focus: #564937;
 }
 :root[data-resolved="light"][data-palette="violet"] {
   --accent-a: #3b2a7e; --accent-b: #2b1f5c; --accent-c: #1d143d;
@@ -289,8 +295,8 @@
 }
 :root[data-resolved="light"][data-palette="jade"] {
   --accent-a: #31773d; --accent-b: #23572c; --accent-c: #183a1d;
-  --accent: #32673b; --now: #32673b; --now-pill: #23572c;
-  --edge: #32673b; --focus: #32673b;
+  --accent: #295431; --now: #295431; --now-pill: #23572c;
+  --edge: #295431; --focus: #295431;
 }
 
 /* ── the backdrops ── */
@@ -342,9 +348,13 @@
   --photo: url("arc/bg/abyss.jpg");
   --glass: rgba(20, 19, 18, .37); --glass-bright: .71;
 }
+/* Tuned by hand rather than by its file's mean: iris measures dark
+   overall but the part that sits BEHIND the panel is the bright petal,
+   so the formula under-darkened it and it was the only dark-scheme
+   combination with any text under 4.5. */
 :root[data-bg="iris"] {
   --photo: url("arc/bg/iris.jpg");
-  --glass: rgba(20, 19, 18, .41); --glass-bright: .65;
+  --glass: rgba(20, 19, 18, .52); --glass-bright: .44;
 }
 :root[data-bg="silk"] {
   --photo: url("arc/bg/silk.jpg");
@@ -395,51 +405,20 @@
 
 *, *::before, *::after { box-sizing: border-box; }
 
-/* ═══ the luminous edge ═══
-   A hairline that catches light at one corner and dies away around the
-   rest of the shape, with the bloom outside following the same falloff.
+/* The luminous edge is gone.
 
-   It is one pseudo-element, not two. The ring is a gradient clipped to
-   a 1px frame by masking the fill out of it (mask-composite: exclude);
-   the outer glow is then a drop-shadow OF that ring, so the bloom is
-   automatically brightest exactly where the ring is brightest and
-   absent where it has faded. A box-shadow could not do that — it would
-   halo the whole shape evenly.
+   It was a hairline catching light at one corner with a bloom following
+   the same falloff — one pseudo-element, the ring masked out of a
+   gradient and the glow a drop-shadow of the ring, so the two could
+   never disagree. Nice mechanism. It ended up on every chrome button,
+   which said nothing twelve times over; scoped down to the single
+   primary action it read as emphasis, and scoped down to nothing it
+   turns out to read best of all. Every control is a filled shape now,
+   and the fill is doing the work.
 
-   Only chrome buttons take it. Timeline bars and marks are data, and
-   ringing every one of them would turn the board into a light show. */
+   `position: relative` stays: the ring is not the only thing that ever
+   needs to sit inside one of these. */
 .btn, .rail button, .fab { position: relative; }
-/* ONE button wears it: the primary action at the top right — Trade, and
-   New in Arc. The ring was a way of saying "this is the frame, and it is
-   catching light"; on twelve controls at once it stopped saying anything
-   and just drew twelve outlines. On the single button you actually press
-   to do the thing, it reads as emphasis again.
-
-   The rail, the ghost buttons, the swatches and the floating Today keep
-   their fills and lose their edges. */
-.topbar > .btn-primary::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-      215deg,
-      color-mix(in srgb, var(--edge) 92%, transparent) 0%,
-      color-mix(in srgb, var(--edge) 30%, transparent) 34%,
-      color-mix(in srgb, var(--edge) 8%,  transparent) 58%,
-      transparent 76%);
-  z-index: 0;             /* under the label — the bloom was grazing text */
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-          mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-          mask-composite: exclude;
-  filter: drop-shadow(0 0 5px color-mix(in srgb, var(--edge) 40%, transparent));
-  pointer-events: none;
-}
-/* A pale ring on the white primary button is invisible; ring it with its
-   own ink so the edge always contrasts with the surface it wraps. */
-.btn-primary { --edge: var(--btn-ink); }
 
 /* Any author rule that sets `display` outranks the UA's
    `[hidden] { display: none }`, so hiding by property silently fails on
