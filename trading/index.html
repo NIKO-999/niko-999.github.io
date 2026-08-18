@@ -757,7 +757,11 @@ dialog.sheet.ro .shot-acts { display: none; }
    and a 1:1 one is the chart. */
 dialog.lens {
   border: 0; padding: 0; margin: 0;
-  width: 100vw; max-width: 100vw; height: 100vh; max-height: 100vh;
+  width: 100vw; max-width: 100vw;
+  /* dvh, not vh. On iOS the static unit is measured through the
+     browser's own toolbar, which would put the caption underneath it. */
+  height: 100vh; max-height: 100vh;
+  height: 100dvh; max-height: 100dvh;
   background: none; overflow: hidden;
 }
 dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6px); }
@@ -811,6 +815,24 @@ dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6p
   border: 1px solid var(--glass-line); border-radius: 9px;
   background: var(--glass); backdrop-filter: blur(10px);
   color: var(--ink); cursor: pointer;
+}
+/* 60px of padding out of 390 is 15% of a phone screen spent on nothing.
+   The picture is the point of the screen; give it the room. */
+@media (max-width: 700px) {
+  .lens-pane { padding: 14px; }
+  .lens-note { font-size: .9rem; }
+}
+/* A finger is not a cursor. 44px is the smallest thing worth aiming at,
+   and this is the one control the screen has. */
+@media (hover: none) {
+  .lens-x { width: 44px; height: 44px; top: 12px; right: 12px; }
+  /* Nothing hovers, so the caption that says the picture opens would
+     never be seen at all. On a touch screen it simply stays on — over
+     the chart on a read-only sheet too, where every other caption is
+     suppressed because nothing there can be edited. This one is not an
+     edit; it is the way in. */
+  .shot.has .shot-empty { opacity: 1; }
+  dialog.sheet.ro .shot.has .shot-empty { display: grid; }
 }
 .lens-hint {
   position: fixed; left: 0; right: 0; bottom: 18px;
@@ -3642,7 +3664,7 @@ function setShot(blob) {
   shotUrl = URL.createObjectURL(shotBlob);
   shotBtn.classList.add('has');
   shotBtn.style.backgroundImage = `url("${shotUrl}")`;
-  cap.textContent = 'Click to open';
+  cap.textContent = (tapping() ? 'Tap' : 'Click') + ' to open';
 }
 async function takeShot(file) {
   if (!file || !/^image\//.test(file.type)) return;
@@ -3688,6 +3710,11 @@ const lensImg = document.getElementById('lensImg');
    So both limits are computed in device pixels. A picture smaller than
    the window is shown smaller than the window, because a blown-up blur
    is never worth more than a small sharp thing. */
+/* A phone has no cursor and no Esc key, so it is not offered either.
+   Asked of the pointer rather than the width: what matters is whether
+   there is something to hover with, not how wide the window is. */
+const tapping = () => window.matchMedia('(hover: none)').matches;
+
 function fitLens() {
   const w = lensImg.naturalWidth, h = lensImg.naturalHeight;
   if (!w) return;
@@ -3729,10 +3756,13 @@ function fitLens() {
     st.maxWidth = Math.max(1, Math.min(availW, cw)) + 'px';
     st.maxHeight = Math.max(1, Math.min(availH, ch)) + 'px';
   }
+  const tap = tapping();
+  const out = tap ? 'tap outside to close' : 'Esc to close';
+  const act = tap ? 'Tap' : 'Click';
   document.getElementById('lensHint').textContent =
-    !room ? 'Every pixel of it · Esc to close'
-    : lens.classList.contains('zoom') ? 'Click again to fit · Esc to close'
-    : 'Click the chart for full size · Esc to close';
+    !room ? `Every pixel of it · ${out}`
+    : lens.classList.contains('zoom') ? `${act} again to fit · ${out}`
+    : `${act} the chart for full size · ${out}`;
 }
 
 async function openLens() {
