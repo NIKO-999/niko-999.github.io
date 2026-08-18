@@ -767,16 +767,21 @@ dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6p
   display: flex; align-items: center; justify-content: center;
 }
 .lens-pane img {
-  display: block; max-width: 100%; max-height: 100%;
+  display: block;
+  /* The two maxes are set inline by fitLens(), because the honest limit
+     is the picture's own pixel count and only JS knows that. These are
+     the floor under it for the moment before it runs. */
+  max-width: 100%; max-height: 100%;
   border-radius: 10px; box-shadow: 0 30px 90px rgba(0, 0, 0, .55);
   cursor: zoom-in;
 }
 /* Block rather than flex, or the image cannot overflow its own scroller
    — a centred flex item refuses to scroll past its start edge. */
 .lens.zoom .lens-pane { display: block; }
-.lens.zoom .lens-pane img {
-  max-width: none; max-height: none; margin: auto; cursor: zoom-out;
-}
+.lens.zoom .lens-pane img { margin: auto; cursor: zoom-out; }
+/* A chart already showing every pixel it has cannot get bigger, so it
+   does not offer to. */
+.lens.max .lens-pane img { cursor: default; }
 .lens-x {
   position: fixed; top: 18px; right: 20px;
   width: 34px; height: 34px; display: grid; place-items: center;
@@ -3645,26 +3650,69 @@ document.getElementById('shotDrop').addEventListener('click', () => {
 /* ── the chart, full size ── */
 const lens = document.getElementById('lens');
 const lensImg = document.getElementById('lensImg');
-function openLens() {
+/* ── never bigger than its own pixels ──
+   This is where the blur was. A CSS length is CSS pixels, and on a
+   Retina display one of those is two device pixels — so `max-width:
+   100%` in a 1400px pane asks for 2800 device pixels, and a 2880px
+   chart in a wider window than that gets STRETCHED to fill it. The
+   "full size" mode was worse: it drew the image at naturalWidth in CSS
+   px, which on a 2x display is a flat 2× upscale of every chart.
+
+   So both limits are computed in device pixels. A picture smaller than
+   the window is shown smaller than the window, because a blown-up blur
+   is never worth more than a small sharp thing. */
+function fitLens() {
+  const w = lensImg.naturalWidth, h = lensImg.naturalHeight;
+  if (!w) return;
+  const dpr = window.devicePixelRatio || 1;
+  const cw = w / dpr, ch = h / dpr;        // its own pixels, in CSS units
+  /* Whether "full size" would be a different picture — asked of the
+     PANE, not of the image. Asked of the image it answers itself: in
+     zoom mode the picture is already 1:1, so measuring it would always
+     report that there is nothing more to see. */
+  const pane = document.getElementById('lensPane');
+  const cs = getComputedStyle(pane);
+  const availW = pane.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+  const availH = pane.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  const room = Math.min(availW / cw, availH / ch) < 0.999;
+  lens.classList.toggle('max', !room);
+  if (!room) lens.classList.remove('zoom');
+
+  const st = lensImg.style;
+  if (lens.classList.contains('zoom')) {
+    st.width = cw + 'px'; st.height = ch + 'px';
+    st.maxWidth = st.maxHeight = 'none';
+  } else {
+    st.width = st.height = 'auto';
+    st.maxWidth = `min(100%, ${cw}px)`;
+    st.maxHeight = `min(100%, ${ch}px)`;
+  }
+  document.getElementById('lensHint').textContent =
+    !room ? 'Every pixel of it · Esc to close'
+    : lens.classList.contains('zoom') ? 'Click again to fit · Esc to close'
+    : 'Click the chart for full size · Esc to close';
+}
+
+async function openLens() {
   if (!shotUrl) return;
-  lens.classList.remove('zoom');
+  lens.classList.remove('zoom', 'max');
   lensImg.src = shotUrl;
   lens.showModal();
-  /* Read after showModal, when the image has been laid out against the
-     window it is actually in. */
-  const fitted = lensImg.naturalWidth > lensImg.clientWidth + 1;
-  document.getElementById('lensHint').textContent =
-    fitted ? 'Click the chart for full size · Esc to close' : 'Esc to close';
+  /* naturalWidth is 0 until it decodes, and every size below is computed
+     from it. */
+  try { await lensImg.decode(); } catch (e) {}
+  fitLens();
   document.getElementById('lensX').focus();
 }
+/* Dragging the window to a display with a different pixel ratio changes
+   what 1:1 means, and Chrome reports that as a resize. */
+window.addEventListener('resize', () => { if (lens.open) fitLens(); });
 document.getElementById('lensPane').addEventListener('click', (ev) => {
   /* The picture toggles its own size; the dark around it is the way out,
      which is the behaviour every other viewer has. */
   if (ev.target === lensImg) {
-    lens.classList.toggle('zoom');
-    document.getElementById('lensHint').textContent =
-      lens.classList.contains('zoom') ? 'Click again to fit · Esc to close'
-                                      : 'Click the chart for full size · Esc to close';
+    /* Nothing to zoom into when the whole thing is already on screen. */
+    if (!lens.classList.contains('max')) { lens.classList.toggle('zoom'); fitLens(); }
     return;
   }
   lens.close();
@@ -3674,7 +3722,8 @@ lens.addEventListener('close', () => {
   /* Dropped rather than left pointing at a URL that setShot may revoke
      the moment the picture is replaced. */
   lensImg.removeAttribute('src');
-  lens.classList.remove('zoom');
+  lens.classList.remove('zoom', 'max');
+  lensImg.style.cssText = '';
 });
 /* A trader screenshots and pastes. Anywhere in the sheet is close enough. */
 sheet.addEventListener('paste', (ev) => {
