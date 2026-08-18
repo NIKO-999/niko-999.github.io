@@ -1413,6 +1413,8 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 /* The checklists are printed from the same constant the trade sheet
    ticks, so the page and the form cannot drift apart. */
 .ap-lists { display: grid; gap: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+/* A single list in a two-column grid is a list and a hole beside it. */
+.ap-lists.one { grid-template-columns: minmax(0, 1fr); max-width: 62ch; }
 .ap-list { padding: 13px 15px 14px; border-radius: var(--r-panel);
   background: var(--glass-in); border: 1px solid var(--glass-line); }
 .ap-list h3 { margin: 0 0 8px; font-size: .82rem; font-weight: 600;
@@ -2296,6 +2298,7 @@ const CHECKLISTS = {
     'The 4H profile says this candle turns — small wick',
     'SMT on the 1H or 30M. C2 does not go without it',
     '3M or 5M CISD or propulsion block, V-shape away',
+    'The swing is protected — aligned timeframe, close beyond the body',
   ],
   continuation: [
     'Daily candle named — a level hit, or none needed',
@@ -2303,6 +2306,7 @@ const CHECKLISTS = {
     "The 4H profile says this candle carries — wick in the previous EQ",
     'Closed back inside C2, with the 30M and 1H opening C3 too',
     '3M or 5M CISD or propulsion block, V-shape away',
+    'The swing is protected — aligned timeframe, close beyond the body',
   ],
 };
 const MODES = { continuation: 'modeCont', reversal: 'modeRev' };
@@ -2469,6 +2473,19 @@ const SAMPLE = {
 };
 
 let state = readStore() || SAMPLE;
+/* ── the checklist was five items long until the protected-swing line ──
+   A trade stores how many there were to tick, so adding a line does not
+   rewrite what older trades were judged against. Anything recorded
+   BEFORE that field existed has ticks and no figure, and the list had
+   been five items for the whole life of the app — so five is not a
+   guess, it is the only value it can have been. Without this, every
+   trade already in the ledger would start reading 5 of 6. */
+const CHECKS_WERE = 5;
+state.events.forEach((e) => {
+  if (e.k === 'trade' && Array.isArray(e.checks) && e.checks.length && !e.of) {
+    e.of = CHECKS_WERE;
+  }
+});
 
 /* Everything that mutates goes through here first. While the sample is on
    screen `state` IS the SAMPLE object, so any edit would otherwise write
@@ -3446,7 +3463,9 @@ function renderLog() {
     const rCls = out === 'win' ? 'up' : out === 'loss' ? 'down' : '';
     const hour = e.sess ? +e.sess.slice(0, 2) : null;
     const ticks = Array.isArray(e.checks) ? e.checks.length : 0;
-    const of = e.mode && CHECKLISTS[e.mode] ? CHECKLISTS[e.mode].length : 5;
+    /* The trade's own figure first — the list it was judged against,
+       not the one in front of you now. */
+    const of = e.of || (e.mode && CHECKLISTS[e.mode] ? CHECKLISTS[e.mode].length : 5);
     const note = (e.note || '').trim();
 
     html += `<button class="lg" type="button" data-id="${esc(String(e.id))}" data-date="${esc(e.date)}"
@@ -4114,6 +4133,10 @@ document.getElementById('tradeForm').addEventListener('submit', (ev) => {
     risk: risk > 0 ? risk : undefined,
     mode,
     checks: ticked.size ? [...ticked] : undefined,
+    /* How many there were to tick AT THE TIME. Without it, adding a line
+       to the checklist rewrites history: a trade that ticked all five
+       starts reading 5/6, as though something had been skipped. */
+    of: (CHECKLISTS[mode] || []).length || undefined,
     note: val('tNote'),
     shot: shotBlob ? true : undefined,
   };
@@ -5200,6 +5223,7 @@ let resUrls = [];
      lede   what the model IS, in a paragraph
      sit    the situations you can be in. n / h / p / li
      rules  [heading, why] — the things that are not negotiable
+     check  optional { h, li } — a short run-it-now list, in order
      lists  true on the ONE note whose checklists the sheet ticks
 */
 const NOTES = [
@@ -5558,6 +5582,19 @@ const NOTES = [
        + 'extreme. A large one has already spent the move, and aiming at the far '
        + 'side after it is aiming at something the day has already paid for.'],
     ],
+    /* Five, in order, and the order matters — each is only worth asking
+       if the one above it was yes. Anything longer stops being a thing
+       you run at the hard edge of a candle and becomes the rules again. */
+    check: {
+      h: 'Confirming a swing',
+      li: [
+        'A key level is reached, or an SMT prints at the extreme',
+        'A candle turns against it on the higher timeframe',
+        'You are on the aligned timeframe — and only that one',
+        'Expansion in, met with expansion back out',
+        'The close clears the body of the candle that turned',
+      ],
+    },
   },
 ];
 const noteOf = (id) => NOTES.find(n => n.id === id) || null;
@@ -5597,6 +5634,13 @@ function renderNote() {
         </article>`).join('')}</div>
       <ol class="ap-rules">${n.rules.map(([h, why]) =>
         `<li><b>${esc(h)}</b><span>${mark(why)}</span></li>`).join('')}</ol>
+      ${n.check ? `<div class="ap-lists one">
+        <div class="ap-list"><h3>${esc(n.check.h)}</h3><ol>`
+        + n.check.li.map(x => `<li><span>${mark(x)}</span></li>`).join('')
+        + `</ol></div></div>
+        <p class="ap-foot">All five, in order — a no anywhere is a wait, and the
+          ones below it stop meaning anything. This is how you answer the last
+          line of the entry checklist, which does not go without it.</p>` : ''}
       ${n.lists ? `<div class="ap-lists">`
         + [['Reversal — C2', CHECKLISTS.reversal],
            ['Continuation — C3', CHECKLISTS.continuation]]
