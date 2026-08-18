@@ -143,8 +143,10 @@ function drawSections() {
     /* The section's dot shows the palette of whatever is selected inside
        it, or of its first member — so the row carries a colour rather
        than being a word with a grey circle. */
-    const shown = (here ? bgOf(palette) : members[0])[4];
-    b.querySelector('.dot').style.setProperty('--sw', `var(--sw-${shown})`);
+    /* The section's dot shows whichever backdrop is selected inside it,
+       or its first, so the row carries a picture rather than a word and
+       a grey circle. */
+    b.querySelector('.dot').dataset.bg = (here ? bgOf(palette) : members[0])[0];
     b.setAttribute('aria-label', `${name}, ${members.length} backdrops`);
     b.addEventListener('click', () => drawSection(name));
     palMenu.appendChild(b);
@@ -184,9 +186,8 @@ function drawSection(name) {
       + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
               stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
-    /* Indirection rather than a hex copied into JS: the dot still reads
-       the palette's own token, so the two cannot drift. */
-    b.querySelector('.dot').style.setProperty('--sw', `var(--sw-${pal})`);
+    /* The picture, not the palette — see .dot[data-bg] in shell.css. */
+    b.querySelector('.dot').dataset.bg = id;
     b.title = desc;
     b.setAttribute('aria-label', `${label}, ${sect.toLowerCase()} — ${desc}`);
     b.addEventListener('click', () => { setPalette(id); closePal(true); });
