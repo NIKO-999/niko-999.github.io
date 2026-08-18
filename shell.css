@@ -25,13 +25,18 @@
    The figures keep the property the mono was there for. tabular-nums
    below fixes every digit to one advance width, so a countdown ticking
    from 1:52 to 1:51 still does not move anything beside it — the
-   alignment was never about the typeface, only about the metric. */
-@font-face { font-family: 'Inter'; font-weight: 400; font-display: swap;
-  src: url('arc/fonts/Inter-400.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 500; font-display: swap;
-  src: url('arc/fonts/Inter-500.woff2') format('woff2'); }
-@font-face { font-family: 'Inter'; font-weight: 600; font-display: swap;
-  src: url('arc/fonts/Inter-600.woff2') format('woff2'); }
+   alignment was never about the typeface, only about the metric.
+
+   ONE @font-face, not three. The file is a variable font with a 100–900
+   weight axis, and it was declared three times — as 400, as 500 and as
+   600 — pointing at three URLs holding byte-for-byte identical data. So
+   the browser fetched 48 KB three times AND pinned the axis to a single
+   value in each rule, which threw the axis away: 400, 500 and 600 all
+   rendered the same, and `font-weight: 300` on a figure quietly did
+   nothing. Declared as a range, every weight between 100 and 900 is a
+   real weight again. */
+@font-face { font-family: 'Inter'; font-weight: 100 900; font-display: swap;
+  src: url('arc/fonts/Inter.woff2') format('woff2'); }
 
 /* ═══════════════════════════════════════════════════════════════
    ARC — visual prototype. Desktop only.
@@ -737,7 +742,10 @@ body {
   margin: 0;
   font-family: var(--display);
   font-size: 1.5rem;
-  font-weight: 300;
+  /* 400, not the 300 this used to ask for. It was never getting 300 —
+     the axis was pinned — so 400 is what has always been on screen, and
+     a heading is the one thing here that is not being made lighter. */
+  font-weight: 400;
   letter-spacing: -0.005em;
 }
 .head .grow { flex: 1; }

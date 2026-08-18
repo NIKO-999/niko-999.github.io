@@ -52,12 +52,13 @@
   /* font-display: swap means the first paint uses a fallback and then
      reflows; preloading the two faces the board is mostly set in keeps
      that swap to a flicker rather than a visible re-layout. */
-  ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
-    var k = document.createElement('link');
-    k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
-    k.href = f; k.crossOrigin = 'anonymous';
-    document.head.appendChild(k);
-  });
+  /* One file, not two. It is a variable font covering 100–900, so the
+     three weights this used to fetch separately were three copies of the
+     same bytes. */
+  var k = document.createElement('link');
+  k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+  k.href = '../arc/fonts/Inter.woff2'; k.crossOrigin = 'anonymous';
+  document.head.appendChild(k);
 })();
 </script>
 

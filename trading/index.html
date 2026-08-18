@@ -45,12 +45,13 @@
     l.fetchPriority = 'high';
     document.head.appendChild(l);
   }
-  ['../arc/fonts/Inter-400.woff2', '../arc/fonts/Inter-500.woff2'].forEach(function (f) {
-    var k = document.createElement('link');
-    k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
-    k.href = f; k.crossOrigin = 'anonymous';
-    document.head.appendChild(k);
-  });
+  /* One file, not two. It is a variable font covering 100–900, so the
+     three weights this used to fetch separately were three copies of the
+     same bytes. */
+  var k = document.createElement('link');
+  k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+  k.href = '../arc/fonts/Inter.woff2'; k.crossOrigin = 'anonymous';
+  document.head.appendChild(k);
 })();
 </script>
 
@@ -122,7 +123,7 @@
   display: block;
   font-family: var(--mono);
   font-size: 1.32rem;
-  font-weight: 500;
+  font-weight: 300;
   letter-spacing: -.03em;
 }
 .stat span {
@@ -218,8 +219,14 @@
   text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
 }
 .cp-in .ic { display: inline-flex; }
+/* ── how the figures are weighted ──
+   Every number in this app is set BELOW the weight of the label above
+   it. A figure is large already; making it bold as well is saying the
+   same thing twice, and thirty of them on one screen is what makes a
+   dashboard look shouty. The labels carry the structure at 500, the
+   figures carry the reading at 300. */
 .cp-open {
-  font-family: var(--mono); font-size: 1.32rem; font-weight: 500;
+  font-family: var(--mono); font-size: 1.32rem; font-weight: 300;
   letter-spacing: -.02em; color: var(--ink);
 }
 .cp-name { font-size: .8rem; color: var(--ink-2); }
@@ -318,7 +325,7 @@
 }
 .metric .recover { margin: 13px 0 0; }
 .recover .ic { display: inline-flex; flex: none; color: var(--accent); }
-.recover b { font-family: var(--mono); font-weight: 500; color: var(--ink);
+.recover b { font-family: var(--mono); font-weight: 400; color: var(--ink);
   font-variant-numeric: tabular-nums; letter-spacing: -.015em; }
 
 .step {
@@ -383,7 +390,7 @@
    nobody makes on a month view. Nothing overflows it either — the cards
    share whatever height the row has, and the render caps at three. */
 .day { min-height: 0; }
-.day.empty .day-new { flex: 1; }
+
 /* A day with nothing on it is a record too, but it is not news. */
 .day.empty { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
   border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
@@ -415,7 +422,7 @@
 .day-h .grow { flex: 1; }
 /* The net keeps the direction colour, because it is the one figure on
    the cell that is a judgement rather than a record. */
-.day-h .net { font-family: var(--mono); font-size: .6rem; font-weight: 500; letter-spacing: -.02em; }
+.day-h .net { font-family: var(--mono); font-size: .6rem; font-weight: 400; letter-spacing: -.02em; }
 .day-h .net.up { color: var(--up); }
 .day-h .net.down { color: var(--down); }
 .day.today { box-shadow: inset 0 0 0 1px var(--accent); }
@@ -511,42 +518,33 @@
 .tchip.loss { background: var(--down-fill); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--down) 45%, transparent); }
 .tamt {
   flex: none;
-  font-family: var(--mono); font-size: .64rem; font-weight: 500;
+  font-family: var(--mono); font-size: .64rem; font-weight: 400;
   letter-spacing: -.02em; color: var(--ink);
 }
 .tcard.missed .tamt { color: var(--ink-3); }
 
-/* On an empty day the add target is the whole cell. On a day that has
-   trades on it the cards own the height, and this is the sliver under
-   them — still clickable, no longer competing for space. */
+/* The add target, on every day: the whole cell, under the cards. */
 .day-new {
   flex: none; min-height: 13px; margin: 0; padding: 2px 1px;
   border: 0; border-radius: 6px; background: none;
   text-align: left; cursor: pointer;
-  font-family: var(--mono); font-size: .54rem;
-  text-transform: uppercase; letter-spacing: .08em;
-  color: var(--ink-3);
-  opacity: 0;
+  position: absolute; inset: 0; z-index: 0;
+  border-radius: inherit;
 }
-@media (hover: hover) { .day:hover .day-new { opacity: 1; } }
-.day-new:focus-visible { opacity: 1; outline: 2px solid var(--focus); outline-offset: 1px; }
-/* Today is the day you are nearly always writing about — and now the day
-   entering a trade drops you on — so its way in does not hide behind a
-   hover. Every other day still has to be pointed at. */
-.day.today .day-new { opacity: 1; }
-/* On a day that already has trades this strip is invisible until you
-   hover it, and it was charging every such cell 18px of layout for the
-   privilege — which is exactly the height a third card needed. Float it
-   over the foot of the cell instead: an empty day still gets it as a
-   full-cell target, a busy day gets its height back, and a three-trade
-   day now fits the row it is given rather than being cut off by it. */
-.day:not(.empty) .day-new {
-  position: absolute; left: 6px; right: 6px; bottom: 4px;
-  min-height: 0; height: 15px; padding: 0 4px;
-  border-radius: 5px;
-  background: color-mix(in srgb, var(--glass-in-2) 88%, var(--ink));
-  backdrop-filter: blur(3px);
-}
+/* Above the target, so a card opens its own trade rather than starting
+   a new one on the same day. */
+.tcard { position: relative; z-index: 1; }
+.day-h { position: relative; z-index: 1; pointer-events: none; }
+/* Nothing to see. The cell already looks like something you can click,
+   and a strip saying "+ TRADE" underneath it was a caption for that —
+   one more line of type on a screen made of thirty of them.
+
+   It stays a real button rather than becoming a click handler on the
+   div, because that is what a keyboard tabs to and what a screen reader
+   reads out. It just covers the whole cell now and paints nothing, so
+   the empty part of any day is the target and the trade cards sit on
+   top of it. */
+.day-new:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
 
 /* ── equity curve ── */
 .curve { margin-top: 20px; }
@@ -586,7 +584,7 @@
 .metric.wide { grid-column: 1 / -1; }
 .metric > span {
   display: flex; align-items: center; gap: 6px;
-  font-family: var(--mono); font-size: .58rem;
+  font-family: var(--mono); font-size: .58rem; font-weight: 500;
   text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
 }
 .metric > span .ic { display: inline-flex; }
@@ -594,6 +592,8 @@
    its own <b>s — inheriting the display size blew them up to 2.1rem. */
 .metric > b {
   display: block; margin: 9px 0 0;
+  /* 300 for real now. It has always said 300 and always rendered 400 —
+     see the @font-face note in shell.css. */
   font-family: var(--display); font-weight: 300;
   font-size: 2.1rem; line-height: 1.05; letter-spacing: -.03em;
   color: var(--ink);
@@ -637,7 +637,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   padding: 15px 18px 12px; border-bottom: 1px solid var(--rule);
 }
 .sheet-h h2 {
-  margin: 0; font-family: var(--display); font-weight: 300;
+  margin: 0; font-family: var(--display); font-weight: 400;
   font-size: 1.2rem; letter-spacing: -.005em;
 }
 .sheet-h .grow { flex: 1; }
@@ -835,7 +835,7 @@ dialog.sheet.dropping { outline: 2px dashed var(--accent); outline-offset: -6px;
 .radar .rk { font-family: var(--mono); font-size: 10px; fill: var(--ink-2); letter-spacing: .04em; }
 .radar .rv { font-family: var(--mono); font-size: 9px; letter-spacing: .03em; }
 .radar .rn { font-family: var(--mono); font-size: 8px; fill: var(--ink-3); }
-.radar .rempty, .pb-hist .rempty { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
+.radar .rempty { font-family: var(--mono); font-size: 10px; fill: var(--ink-3); }
 /* The continuation shape is dashed and unfilled so the two never fight:
    solid reads as the subject, dashed as the thing it is measured against. */
 .radar .rshape-2 { fill: color-mix(in srgb, var(--ink-3) 16%, transparent);
@@ -910,7 +910,7 @@ dialog.sheet.dropping { outline: 2px dashed var(--accent); outline-offset: -6px;
 }
 .cp-more:hover { background: var(--glass-in); color: var(--ink-2); }
 .cp-more[aria-expanded="true"] { background: var(--glass-in); color: var(--ink-2); }
-.cp-more b { font-family: var(--mono); font-size: .7rem; font-weight: 500; color: var(--ink-2); }
+.cp-more b { font-family: var(--mono); font-size: .7rem; font-weight: 400; color: var(--ink-2); }
 /* Full marks is the one state worth colouring — it is the only one that
    says go. */
 .cp-more b.all { color: var(--accent); }
@@ -1025,7 +1025,7 @@ dialog.sheet.dropping { outline: 2px dashed var(--accent); outline-offset: -6px;
 .rk-grid th[scope="row"] { width: 64px; text-align: left;
   font-size: .9rem; font-weight: 500; color: var(--ink-2); }
 .rk-grid td b { display: block; font-family: var(--mono); font-size: .95rem;
-  font-weight: 500; color: var(--ink); }
+  font-weight: 300; color: var(--ink); }
 .rk-grid td em { display: block; margin-top: 2px; font-style: normal;
   font-family: var(--mono); font-size: .64rem; color: var(--up); }
 /* The last row is the one you came to look at. */
@@ -1195,7 +1195,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
 .lg-chip.win  { background: var(--up-fill);   color: var(--up); }
 .lg-chip.loss { background: var(--down-fill); color: var(--down); }
-.lg-r { margin-left: auto; font-size: .84rem; font-weight: 500; letter-spacing: -.02em;
+.lg-r { margin-left: auto; font-size: .84rem; font-weight: 400; letter-spacing: -.02em;
   color: var(--ink-2); }
 .lg-r.up { color: var(--up); } .lg-r.down { color: var(--down); }
 /* pre-wrap, so a note written as two thoughts stays two thoughts. */
@@ -1444,7 +1444,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .led-n { flex: 1; font-family: var(--mono); font-size: .68rem; color: var(--ink-2);
   letter-spacing: -.01em; min-width: 0;
   overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.led-v { font-family: var(--mono); font-size: .76rem; font-weight: 500; letter-spacing: -.02em; }
+.led-v { font-family: var(--mono); font-size: .76rem; font-weight: 400; letter-spacing: -.02em; }
 .led-v.up { color: var(--up); }
 .led-v.down { color: var(--down); }
 .drop { border: 0; background: none; color: var(--ink-3); cursor: pointer; font: inherit; padding: 0 2px; }
@@ -1476,13 +1476,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
     <button type="button" data-view="metrics" aria-current="page" aria-label="Metrics">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
-    </button>
-    <!-- A descending ranking, which is what the page is. Deliberately not
-         another book: the log and the resources rails already spend two
-         glyphs on that shape. -->
-    <button type="button" data-view="playbook" aria-label="Playbook">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" aria-hidden="true"><path d="M4 6h16M4 12h11M4 18h6" /></svg>
     </button>
     <button type="button" data-view="calendar" aria-label="Calendar">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true">
@@ -1824,22 +1817,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             </div>
           </section>
         </div>
-      </div>
-    </main>
-
-    <!-- ── playbook ──
-         The metrics say whether the account is working. This says which of
-         the things you do is doing it. Nothing here restates a figure the
-         metrics already show; the value is entirely in the cut. -->
-    <main class="main" id="playbookSection" hidden>
-      <div class="head">
-        <h1>Playbook</h1>
-        <span class="grow"></span>
-        <span class="span-meta" id="pbMeta"></span>
-      </div>
-      <div class="pane" tabindex="0">
-        <div class="tp" id="pbRail" role="tablist" aria-label="Cuts"></div>
-        <div id="pbWrap"></div>
       </div>
     </main>
 
@@ -2379,9 +2356,9 @@ const flows  = () => events().filter(e => e.k !== 'trade');
 const signed = (e) => e.k === 'withdraw' ? -e.amt : e.amt;
 
 /* ── the arithmetic, over whatever set of trades you hand it ──
-   Metrics asks for this over everything. The Playbook asks for it one
-   setup at a time, then one symbol at a time. It is written once because
-   a second copy is exactly how a per-setup win rate ends up disagreeing
+   Metrics asks for this over everything, and the parameter is kept for
+   the next thing that wants a subset. It is written once because a
+   second copy is exactly how a filtered win rate ends up disagreeing
    with the headline it sits underneath: two pieces of code computing the
    same figure, and nothing anywhere to notice they have come apart.
 
@@ -2488,13 +2465,7 @@ function streaks(t) {
    deliberately does not touch the metrics — a win rate that quietly
    answered a different question than the one on its label would be worse
    than no search at all. The month total does follow the filter, because
-   "what did CISD make me in March" is the question worth asking.
-
-   The Playbook is left out for the same reason, and the omission below
-   is a decision rather than an oversight: that page is nothing BUT rates
-   and verdicts, and it already answers "what did CISD do" by naming the
-   cut on screen. A search quietly narrowing it underneath would leave
-   every heading claiming one thing and every figure meaning another. */
+   "what did CISD make me in March" is the question worth asking. */
 let query = '';
 const hits = (e) => !query || [e.sym, e.setup, e.note, e.sess, e.k]
   .some(v => v && String(v).toLowerCase().includes(query));
@@ -2649,7 +2620,7 @@ function renderCalendar() {
       </span>
       ${cards}
       <button class="day-new" type="button" data-date="${k}"
-        aria-label="Record a trade on ${d} ${MONTHS[m]}">+ trade</button>
+        aria-label="Record a trade on ${d} ${MONTHS[m]}"></button>
     </div>`;
   }
 
@@ -2807,11 +2778,10 @@ function renderMetrics() {
 const dowOf = (e) => DOW_SHORT[(new Date(e.date + 'T00:00:00').getDay() + 6) % 7];
 
 const rOf = (e) => e.amt / e.risk;
-/* `list` defaults to every trade, which is what the radars want. The
-   Playbook passes one setup's trades instead, so "which candle does this
-   setup work on" is answered by the same code that answers it for the
-   account — a separate per-setup version would be a second definition of
-   the same question. */
+/* `list` defaults to every trade, which is what the radars want. It
+   takes a subset rather than reading the ledger itself so that "which
+   candle does this work on" can be asked of any slice without a second
+   definition of the same question appearing to answer it. */
 const radarRows = (keys, keyOf, list) => keys.map(k => {
   const g = (list || trades()).filter(e => e.risk > 0 && keyOf(e) === k);
   const of = (m) => g.filter(e => (e.mode || 'continuation') === m)
@@ -3095,432 +3065,16 @@ function bestCandle() {
   return best.k;
 }
 
-/* ═══ the playbook ═══
-   The metrics say whether the account is working. This says which of the
-   things you do is doing it, and where each one works — the same trades,
-   cut by the names you gave them at the time.
+/* An R multiple, and a candle's name. Both were written for the
+   Playbook and both outlived it — the calendar's trade cards print an R
+   and a session on every card they draw.
 
-   Four cuts, because the ledger already holds four different answers to
-   "why did that work": the setup you called it, the pair you took it on,
-   the rules you actually ticked, and the ones you saw and let go. Three
-   of those four have been recorded since the sheet shipped and never
-   read back once.
-
-   Two tiers of figure, and the line between them is the difference
-   between a description and a claim. A count and a net R are what the
-   record says, and print at any size. A RATE — a win rate, an average R,
-   "this is where it works" — is a prediction, and a prediction off four
-   trades is the most confident number available at the moment of least
-   evidence. That is the same trap the profit factor tile already prints
-   a dash for.
-
-   PB_MIN is BEST_MIN rather than a second opinion. This file has one
-   answer to "how many is enough" and the best-candle badge already set
-   it; two answers would mean the badge and the page could disagree about
-   the same six trades. */
-const PB_MIN = BEST_MIN;
-/* A sub-cut — one setup inside one candle — needs a lower bar than a
-   headline, or nothing would ever print for anyone under a few hundred
-   trades and the panel would ship permanently empty. Three is enough to
-   describe rather than predict, and every line built on it prints its
-   own n, so the reader is never handed a rate without its denominator. */
-const PB_CUT = 3;
-
-const PBKEY = 'ledger.play.v1';
-const PB_CUTS = [['setup', 'Setups'], ['sym', 'Symbols'],
-                 ['rules', 'Checklist'], ['missed', 'Missed']];
-/* The rail remembers where you were, for the same reason the topics rail
-   does: the cut you are picking apart this week is the one you want on
-   opening the page. A stored value that is no longer a cut falls back
-   rather than rendering nothing. */
-let PB = (() => { try { return localStorage.getItem(PBKEY) || 'setup'; }
-                  catch (e) { return 'setup'; } })();
-if (!PB_CUTS.some(([k]) => k === PB)) PB = 'setup';
-
-/* Setups and symbols are typed by hand into a free field with a datalist
-   behind it, so "CISD", "cisd" and "CISD " are three strings and one
-   idea. Folded to key them; two rows for one setup would halve every
-   figure on both of them, and neither row would be wrong on its own. */
-const pbKey = (s) => String(s || '').trim().toLowerCase();
-
-/* One pass, so a long ledger is walked once rather than once per group.
-   The spelling printed is the one used most often — the rail should say
-   CISD, not the cisd you typed once at two in the morning. */
-function pbGroup(list, keyOf) {
-  const by = new Map();
-  for (const e of list) {
-    const k = pbKey(keyOf(e));
-    if (!k) continue;
-    let g = by.get(k);
-    if (!g) { g = { key: k, items: [], spell: new Map() }; by.set(k, g); }
-    g.items.push(e);
-    const raw = String(keyOf(e)).trim();
-    g.spell.set(raw, (g.spell.get(raw) || 0) + 1);
-  }
-  return [...by.values()].map((g) => {
-    let label = g.key, top = 0;
-    for (const [raw, n] of g.spell) if (n > top) { top = n; label = raw; }
-    return pbRow(label, g.key, g.items);
-  });
-}
-
-/* Everything one group can honestly answer, and nothing the metrics
-   already answer for the account. `logged` is what you saw and `taken`
-   is what you acted on — the gap between them is the entire reason a
-   missed setup was worth recording. */
-function pbRow(label, key, items) {
-  const taken = items.filter(e => e.out !== 'missed');
-  const p = perf(taken);
-  const rs = taken.filter(e => e.risk > 0).map(rOf);
-  return {
-    key, label, items, taken,
-    logged: items.length, missed: items.length - taken.length,
-    /* null, not 0, when nothing in the group recorded its risk. A sum
-       over no graded trades is 0 in arithmetic and "no answer" in fact,
-       and printing 0.0R would sit a group that broke even next to a
-       group that never wrote its risk down and make them look alike. */
-    n: p.n, graded: p.graded, R: p.graded ? p.rTotal : null,
-    pnl: taken.reduce((s, e) => s + e.amt, 0),
-    wins: p.wins, losses: p.losses,
-    winRate: p.n >= PB_MIN ? p.winRate : null,
-    avgR: p.graded >= PB_MIN ? p.rTotal / p.graded : null,
-    best: rs.length ? Math.max(...rs) : null,
-    worst: rs.length ? Math.min(...rs) : null,
-    first: items.length ? items[0].date : null,
-    last: items.length ? items[items.length - 1].date : null,
-  };
-}
-
-/* A dash rather than 0.0R when nothing in the group was graded. No risk
-   written down is not the same as a flat result, and printing 0.0R would
-   sit an honest zero next to a missing one and make them look alike. */
+   A dash rather than 0.0R when nothing was graded: no risk written down
+   is not the same as a flat result, and printing 0.0R would sit an
+   honest zero next to a missing one and make them look alike. */
 const pbR = (v, d) => v === null || v === undefined || !isFinite(v) ? '—'
   : (v > 0 ? '+' : v < 0 ? '−' : '') + Math.abs(v).toFixed(d === undefined ? 1 : d) + 'R';
-const pbPc = (v) => v === null || v === undefined ? '—' : Math.round(v) + '%';
-/* The sentence that stands in for a rate there is not enough evidence
-   for. It names the bar and where you are against it, because a bare
-   dash reads as a bug rather than as a decision. */
-const pbNeed = (have, need, noun) =>
-  `${need} ${noun} before this means anything — you have ${have}.`;
-
-/* Seven fixed buckets, not quantiles. R has a real zero and a real unit,
-   so the edges can be constants; quantile edges move as you trade, and
-   two months of trading could never be compared with each other. */
-/* One dot per graded trade on an R axis, not a histogram of buckets.
-
-   Buckets were the wrong instrument at this sample size. Seven fixed
-   edges over a dozen trades drew two bars and five gaps, and the gaps
-   read as information — as though nothing ever landed there, rather than
-   as though there had never been enough trades for it to. This plots the
-   trades themselves: twelve trades is twelve dots, the axis is only as
-   wide as your actual results, and the shape you see is the spread
-   rather than a choice of edges I made for you.
-
-   Dots that would overlap stack upward instead of hiding each other, so
-   the count is always readable off the picture. Deterministic: no
-   jitter, so the same trades draw the same picture every time.
-
-   Fixed viewBox scaled by CSS, like the radars rather than the curve —
-   which is what lets this draw correctly while the section is still
-   hidden, so the Playbook needs no resize observer of its own. */
-function pbStrip(items) {
-  const rs = items.filter(e => e.risk > 0).map(rOf).sort((a, b) => a - b);
-  const W = 560, PAD = 26;
-  if (!rs.length) {
-    return { vb: `0 0 ${W} 56`,
-      svg: `<text class="rempty" x="${W / 2}" y="32" text-anchor="middle">`
-         + `Nothing graded yet — a spread of R needs the risk written down</text>`,
-      alt: 'No graded trades here, so there is no spread of outcomes to describe.' };
-  }
-  /* The axis always contains −1R and +1R even when your results do not,
-     because a strip running −0.2 to +0.3 makes a flat fortnight look like
-     a wild one. Half-R steps outward from there. */
-  const lo = Math.min(-1, Math.floor(rs[0] * 2) / 2);
-  const hi = Math.max(1, Math.ceil(rs[rs.length - 1] * 2) / 2);
-  const x = (v) => PAD + ((v - lo) / (hi - lo)) * (W - PAD * 2);
-  const RAD = 4.6, STEP = RAD * 2 + 1.6;
-
-  const placed = [];
-  const dots = rs.map((v) => {
-    const px = x(v);
-    let row = 0;
-    while (placed.some(p => p.row === row && Math.abs(p.px - px) < STEP)) row++;
-    placed.push({ px, row });
-    return { v, px, row };
-  });
-  const rows = Math.max(...dots.map(d => d.row)) + 1;
-  const BASE = 30 + rows * STEP;
-  const H = BASE + 26;
-  const cy = (row) => BASE - RAD - row * STEP;
-
-  const mean = rs.reduce((s, v) => s + v, 0) / rs.length;
-  const tick = (v, label) =>
-    `<text class="hk" x="${x(v).toFixed(1)}" y="${BASE + 17}" text-anchor="middle">${label}</text>`;
-
-  return { vb: `0 0 ${W} ${H}`,
-    svg: `<line class="r-zero" x1="${x(0).toFixed(1)}" y1="10" x2="${x(0).toFixed(1)}"`
-       + ` y2="${BASE}" /><line class="r-zero" x1="${PAD}" y1="${BASE}"`
-       + ` x2="${W - PAD}" y2="${BASE}" />`
-       /* The mean is the figure the Per trade tile prints. Drawn on the
-          same axis so the tile and the picture are visibly one claim. */
-       + `<line class="hmean" x1="${x(mean).toFixed(1)}" y1="14"`
-       + ` x2="${x(mean).toFixed(1)}" y2="${BASE}" />`
-       + dots.map(d => `<circle class="hd ${d.v > 0 ? 'up' : d.v < 0 ? 'down' : ''}"`
-          + ` cx="${d.px.toFixed(1)}" cy="${cy(d.row).toFixed(1)}" r="${RAD}" />`).join('')
-       + tick(lo, pbR(lo)) + tick(0, '0R') + tick(hi, pbR(hi)),
-    alt: `${rs.length} graded ${rs.length === 1 ? 'trade' : 'trades'}, from `
-       + `${pbR(rs[0], 2)} to ${pbR(rs[rs.length - 1], 2)}, averaging ${pbR(mean, 2)}. `
-       + `${rs.filter(v => v > 0).length} above zero, ${rs.filter(v => v < 0).length} below.` };
-}
-
-/* A cut inside a cut — this setup by candle, this setup by weekday.
-   Drawn as bars rather than a second radar: a radar per setup would be
-   fifteen pentagons on one page, and the question here is an ordering,
-   which a row of bars answers and a shape does not. */
-function pbBars(items, keys, keyOf, nameOf) {
-  const rows = radarRows(keys, keyOf, items).filter(r => r.n);
-  if (!rows.length) return '<p class="pb-none">Nothing here carries a graded trade yet.</p>';
-  const max = Math.max(...rows.map(r => Math.abs(r.R)), 0.001);
-  return '<ul class="pb-bars">' + rows.map(r =>
-    `<li><span class="pb-k">${esc(nameOf ? nameOf(r.k) : r.k)}</span>`
-    + `<span class="pb-track"><i class="${r.R >= 0 ? 'up' : 'down'}"`
-    + ` style="width:${((Math.abs(r.R) / max) * 100).toFixed(1)}%"></i></span>`
-    + `<span class="pb-v ${r.R >= 0 ? 'up' : 'down'}">${pbR(r.R)}</span>`
-    + `<span class="pb-n">${r.n}</span></li>`).join('') + '</ul>';
-}
-
-/* Counts, not R. Every list on the Missed page describes trades that
-   were never taken, so there is no result to average — a zero here would
-   be read as a break-even rather than as an absence. */
-function pbCounts(items, keys, keyOf, nameOf) {
-  const rows = keys.map(k => ({ k, n: items.filter(e => keyOf(e) === k).length }))
-                   .filter(r => r.n);
-  if (!rows.length) return '<p class="pb-none">None of these recorded which one it was.</p>';
-  const max = Math.max(...rows.map(r => r.n));
-  return '<ul class="pb-bars">' + rows.map(r =>
-    `<li><span class="pb-k">${esc(nameOf ? nameOf(r.k) : r.k)}</span>`
-    + `<span class="pb-track"><i style="width:${((r.n / max) * 100).toFixed(1)}%"></i></span>`
-    + `<span class="pb-v">${r.n}</span><span class="pb-n"></span></li>`).join('') + '</ul>';
-}
-
 const pbSess = (k) => `${k} ${PROFILE[parseInt(k, 10)] ? PROFILE[parseInt(k, 10)].name : ''}`.trim();
-const pbDay = (d) => `${MONTHS[+d.slice(5, 7) - 1].slice(0, 3)} ${+d.slice(8, 10)}`;
-
-/* One sentence saying what this group is, before any tile is read. The
-   figure it leads with changes with the evidence: with enough graded
-   trades it leads with the rate, and without them it leads with the
-   count and says plainly what is missing. */
-function pbVerdict(r) {
-  if (r.avgR !== null) {
-    const dir = r.avgR > 0 ? 'up' : r.avgR < 0 ? 'down' : '';
-    return `<p class="pb-verdict ${dir}"><b>${pbR(r.avgR, 2)}</b> per graded trade, `
-      + `across ${r.graded} of them. Best <b>${pbR(r.best, 2)}</b>, `
-      + `worst <b>${pbR(r.worst, 2)}</b>.</p>`;
-  }
-  return `<p class="pb-verdict">${r.taken.length} taken, `
-    + `${r.graded ? `<b>${pbR(r.R)}</b> net` : 'none with the risk written down'}. `
-    + `${pbNeed(r.graded, PB_MIN, 'graded trades')}</p>`;
-}
-
-function pbCard(r, i, totalR) {
-  const share = totalR > 0 && r.R > 0 ? `${Math.round((r.R / totalR) * 100)}% of your net R · ` : '';
-  const altId = `pbAlt${i}`;
-  const h = pbStrip(r.taken);
-  const wr = r.winRate === null;
-  return `
-  <section class="pb" aria-labelledby="pbH${i}">
-    <div class="cal-head"><h2 id="pbH${i}">${esc(r.label)}</h2><span class="grow"></span>
-      <span class="span-meta">${r.first ? `${pbDay(r.first)} to ${pbDay(r.last)}` : ''}</span></div>
-    ${pbVerdict(r)}
-    <div class="metrics">
-      <div class="metric ${r.R > 0 ? 'up' : r.R < 0 ? 'down' : ''}">
-        <span>${icon('pulse')}Net R</span><b>${pbR(r.R)}</b>
-        <em>${share}${r.graded} graded · ${money(r.pnl, true)}</em></div>
-      <div class="metric">
-        <span>${icon('bars')}Per trade</span><b>${pbR(r.avgR, 2)}</b>
-        <em>${r.avgR === null ? pbNeed(r.graded, PB_MIN, 'graded trades')
-                              : `mean R across ${r.graded} graded`}</em></div>
-      <div class="metric">
-        <span>${icon('pct')}Win rate</span><b>${pbPc(r.winRate)}</b>
-        <em>${wr ? pbNeed(r.n, PB_MIN, 'taken trades') : `${r.wins}W · ${r.losses}L`}</em>
-        ${wr ? '' : `<span class="mbar"><i class="${r.winRate >= 50 ? 'up' : 'down'}"
-          style="width:${Math.round(r.winRate)}%"></i></span>`}</div>
-      <div class="metric">
-        <span>${icon('check')}Taken</span><b>${r.taken.length} of ${r.logged}</b>
-        <em>${r.missed ? `${r.missed} seen and let go` : 'you took every one you logged'}</em></div>
-    </div>
-    <div class="charts two">
-      <section class="chartbox span">
-        <div class="cal-head"><h2>Where they land</h2><span class="grow"></span>
-          <span class="span-meta">one dot per graded trade · the line is the mean</span></div>
-        <svg class="pb-hist" viewBox="${h.vb}" role="img" aria-labelledby="${altId}"
-             preserveAspectRatio="xMidYMid meet">${h.svg}</svg>
-        <p class="sr" id="${altId}">${esc(h.alt)}</p>
-      </section>
-    </div>
-    <div class="charts three">
-      <section class="chartbox">
-        <div class="cal-head"><h2>By candle</h2></div>
-        ${pbBars(r.taken, SESSIONS, e => e.sess, pbSess)}
-      </section>
-      <section class="chartbox">
-        <div class="cal-head"><h2>By day</h2></div>
-        ${pbBars(r.taken, DOW_SHORT.slice(0, 5), dowOf)}
-      </section>
-      <!-- The one thing that genuinely varies trade to trade: which of the
-           two you took. A trade with no mode recorded reads as the
-           continuation the sheet defaults to, which is how radarRows has
-           always split it. -->
-      <section class="chartbox">
-        <div class="cal-head"><h2>By mode</h2></div>
-        ${pbBars(r.taken, ['reversal', 'continuation'],
-                 e => e.mode || 'continuation',
-                 (k) => k === 'reversal' ? 'Reversal' : 'Continuation')}
-      </section>
-    </div>
-  </section>`;
-}
-
-/* Ordered by net R, because that is the figure the account is actually
-   made of. Anything with no graded trade sorts to the bottom rather than
-   to the middle — it has no R at all, which is not the same as zero.
-
-   There was a ranking table above these cards and it has been removed.
-   Every figure in it — the name, the net R, the number taken — is printed
-   again in the card immediately below it, so on a ledger with two or
-   three names it made you read the same numbers twice on one screen. An
-   index earns its space by being shorter than the thing it indexes; this
-   one was the thing it indexed, in a smaller font. The order it conveyed
-   is still here, as the order the cards are in. */
-function pbRanked(keyOf, noun) {
-  const all = logged();
-  const rows = pbGroup(all, keyOf);
-  const bare = all.filter(e => !pbKey(keyOf(e))).length;
-  if (!rows.length) {
-    return `<p class="pb-verdict">Nothing carries a ${noun} yet. Name one when you
-      record a trade and this page starts filling in — ${bare
-        ? `${bare} logged ${bare === 1 ? 'trade has' : 'trades have'} none.`
-        : 'nothing is logged yet.'}</p>`;
-  }
-  rows.sort((a, b) => (b.graded ? b.R : -Infinity) - (a.graded ? a.R : -Infinity)
-                      || b.taken.length - a.taken.length);
-  const totalR = totals().rTotal;
-  /* Named rather than folded into an "other" row. A trade with no setup
-     on it is not a setup called nothing — it is a gap in the record, and
-     rolling it in would give that gap an edge. */
-  const foot = bare ? `<p class="pb-none">${bare} logged
-    ${bare === 1 ? 'trade carries' : 'trades carry'} no ${noun}, so
-    ${bare === 1 ? 'it is' : 'they are'} in none of this.</p>` : '';
-  return foot + rows.map((r, i) => pbCard(r, i, totalR)).join('');
-}
-
-/* The cut nothing in this app could do before. `checks` has been written
-   on every trade since the sheet shipped and only ever counted.
-
-   Only trades that recorded a checklist take part. A trade saved before
-   the list existed has not ticked nothing — it recorded nothing, and
-   counting it as a skipped rule would invent a losing cohort out of this
-   app's own history. Mode is required for the same reason: with no mode
-   there is no list to match the ticks against. */
-function pbRulesPage() {
-  const set = trades().filter(e => Array.isArray(e.checks) && e.mode && CHECKLISTS[e.mode]);
-  if (!set.length) {
-    return `<p class="pb-verdict">No trade has recorded which rules it met yet.
-      Tick them as you record a trade and this page will tell you which one you
-      skip on the days you lose — it is the only question here your ledger
-      cannot already answer.</p>`;
-  }
-  const avg = (a) => a.length ? a.reduce((s, e) => s + rOf(e), 0) / a.length : null;
-  const body = Object.keys(CHECKLISTS).map((mode) => {
-    const rows = set.filter(e => e.mode === mode);
-    const list = CHECKLISTS[mode];
-    if (!rows.length) {
-      return `<section class="chartbox span"><div class="cal-head">
-        <h2>${mode === 'reversal' ? 'Reversal — C2' : 'Continuation — C3'}</h2></div>
-        <p class="pb-none">No ${mode} trade has recorded its checklist yet.</p></section>`;
-    }
-    const lines = list.map((line) => {
-      const on = rows.filter(e => e.checks.includes(line));
-      const off = rows.filter(e => !e.checks.includes(line));
-      const onG = on.filter(e => e.risk > 0), offG = off.filter(e => e.risk > 0);
-      const cmp = onG.length >= PB_CUT && offG.length >= PB_CUT;
-      const onR = cmp ? avg(onG) : null, offR = cmp ? avg(offG) : null;
-      return `<li>
-        <b>${esc(line)}</b>
-        <span class="pb-hit">ticked ${on.length} of ${rows.length}</span>
-        <span class="pb-cmp">${cmp
-          ? `<em class="${onR >= 0 ? 'up' : 'down'}">${pbR(onR, 2)}</em> with it ·
-             <em class="${offR >= 0 ? 'up' : 'down'}">${pbR(offR, 2)}</em> without`
-          : off.length === 0 ? 'never skipped — nothing to compare against'
-          : `${PB_CUT} graded trades either side before the two can be compared`}</span>
-      </li>`;
-    }).join('');
-    return `<section class="chartbox span">
-      <div class="cal-head"><h2>${mode === 'reversal' ? 'Reversal — C2' : 'Continuation — C3'}</h2>
-        <span class="grow"></span>
-        <span class="span-meta">${rows.length} recorded</span></div>
-      <ol class="pb-rules">${lines}</ol></section>`;
-  }).join('');
-
-  const full = set.filter(e => e.checks.length >= CHECKLISTS[e.mode].length);
-  const part = set.filter(e => e.checks.length < CHECKLISTS[e.mode].length);
-  const fG = full.filter(e => e.risk > 0), pG = part.filter(e => e.risk > 0);
-  const cmp = fG.length >= PB_CUT && pG.length >= PB_CUT;
-  /* A tie takes no colour. Painting equal cohorts red said the checklist
-     cost you money, off two numbers that were the same number. */
-  const head = cmp
-    ? `<p class="pb-verdict ${avg(fG) > avg(pG) ? 'up' : avg(fG) < avg(pG) ? 'down' : ''}">The full list ticked:
-       <b>${pbR(avg(fG), 2)}</b> per graded trade across ${fG.length}. Anything less:
-       <b>${pbR(avg(pG), 2)}</b> across ${pG.length}.</p>`
-    : `<p class="pb-verdict">${set.length} ${set.length === 1 ? 'trade has' : 'trades have'}
-       recorded a checklist — ${full.length} with every rule ticked.
-       ${pbNeed(Math.min(fG.length, pG.length), PB_CUT, 'graded trades either side')}</p>`;
-  return head + `<div class="charts two">${body}</div>`;
-}
-
-/* A setup you did not take has no result, so there is not one R figure
-   on this page. It is counts and only counts — an average of nothing is
-   still nothing, and a 0.0R here would read as a break-even. */
-function pbMissedPage() {
-  const all = logged();
-  const missed = all.filter(e => e.out === 'missed');
-  if (!missed.length) {
-    return `<p class="pb-verdict">Nothing logged as missed. When you see a setup and
-      let it go, record it as <b>not taken</b> — it costs one line and it is the only
-      way the record ever shows what you passed on.</p>`;
-  }
-  const share = Math.round((missed.length / all.length) * 100);
-  const setups = pbGroup(missed, e => e.setup)
-    .sort((a, b) => b.logged - a.logged);
-  return `<p class="pb-verdict"><b>${missed.length}</b> of ${all.length} logged
-    ${all.length === 1 ? 'setup was' : 'setups were'} seen and let go — ${share}%.
-    None of them carries a result, so nothing on this page is an R.</p>
-    <div class="charts two">
-      <section class="chartbox"><div class="cal-head"><h2>By candle</h2></div>
-        ${pbCounts(missed, SESSIONS, e => e.sess, pbSess)}</section>
-      <section class="chartbox"><div class="cal-head"><h2>By day</h2></div>
-        ${pbCounts(missed, DOW_SHORT.slice(0, 5), dowOf)}</section>
-      <section class="chartbox span"><div class="cal-head"><h2>By setup</h2></div>
-        ${setups.length
-          ? pbCounts(missed, setups.map(s => s.key), e => pbKey(e.setup),
-                     (k) => (setups.find(s => s.key === k) || { label: k }).label)
-          : '<p class="pb-none">None of these recorded which setup it was.</p>'}</section>
-    </div>`;
-}
-
-function renderPlaybook() {
-  document.getElementById('pbRail').innerHTML = PB_CUTS.map(([k, label]) =>
-    `<button type="button" role="tab" data-cut="${k}" aria-selected="${PB === k}"
-       tabindex="${PB === k ? 0 : -1}">${esc(label)}</button>`).join('');
-  const all = logged();
-  document.getElementById('pbMeta').textContent =
-    `${all.length} logged · ${trades().length} taken`;
-  document.getElementById('pbWrap').innerHTML =
-      PB === 'setup'  ? pbRanked(e => e.setup, 'setup')
-    : PB === 'sym'    ? pbRanked(e => e.sym, 'symbol')
-    : PB === 'rules'  ? pbRulesPage()
-    :                   pbMissedPage();
-}
 
 /* ═══ the risk ladder ═══
    What a run of wins is actually worth at the size you take, and what a
@@ -3951,24 +3505,87 @@ const SHOTS = (() => {
   };
 })();
 
-/* Charts are screenshots, so they arrive far larger than they need to be.
-   Down to 1400px and JPEG before anything is stored. */
-function compress(file) {
-  return new Promise((res) => {
-    const url = URL.createObjectURL(file);
-    const img = new Image();
-    img.onload = () => {
-      const sc = Math.min(1, 1400 / img.naturalWidth);
-      const c = document.createElement('canvas');
-      c.width = Math.max(1, Math.round(img.naturalWidth * sc));
-      c.height = Math.max(1, Math.round(img.naturalHeight * sc));
-      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
-      URL.revokeObjectURL(url);
-      c.toBlob(b => res(b || file), 'image/jpeg', 0.82);
-    };
-    img.onerror = () => { URL.revokeObjectURL(url); res(file); };
-    img.src = url;
-  });
+/* ── keeping a chart readable ──
+   A chart screenshot is text, hairlines and flat colour, which is the
+   worst possible input for a JPEG — and this used to crush every one to
+   1400px and encode it at quality 0.82 before storing it. A Retina
+   display then drew that back at 2x, so 1400px of picture had to cover
+   2440 device pixels. That was the blur, and no amount of viewer would
+   have fixed it.
+
+   Three things now.
+
+   The cap is 3200px, which is 1:1 on any display this runs on with room
+   to spare. A file that ALREADY fits is stored exactly as it arrived —
+   re-encoding a screenshot that was small enough in the first place can
+   only take detail away. And when one genuinely has to be re-encoded it
+   goes to WebP, which holds hairlines and text at sizes where JPEG's
+   chroma subsampling smears them into grey; JPEG stays as the fallback
+   for anything that cannot produce one. */
+const SHOT_MAX = 3200;
+const SHOT_BYTES = 4_000_000;
+/* Formats that keep every pixel they were given. Anything else — a HEIC
+   from a phone, a GIF — is worth converting even when it is small. */
+const SHOT_KEEP = /^image\/(png|jpe?g|webp)$/;
+
+const toBlob = (c, type, q) => new Promise(r => c.toBlob(r, type, q));
+
+async function compress(file, max) {
+  const cap = max || SHOT_MAX;
+  let bmp = null;
+  try { bmp = await createImageBitmap(file, { imageOrientation: 'from-image' }); }
+  catch (e) { return file; }
+  const w = bmp.width, h = bmp.height;
+
+  if (w <= cap && file.size <= SHOT_BYTES && SHOT_KEEP.test(file.type)) {
+    bmp.close();
+    return file;
+  }
+
+  const tw = Math.min(w, cap);
+  const th = Math.max(1, Math.round(h * tw / w));
+
+  /* Halved repeatedly before the last step down. Asking drawImage to go
+     from 3× straight to 1× is a box filter in most browsers, which drops
+     whole rows — and a candle wick is one pixel wide. */
+  let src = bmp, sw = w, sh = h;
+  while (sw > tw * 2) {
+    const half = document.createElement('canvas');
+    half.width = (sw = Math.max(tw, Math.round(sw / 2)));
+    half.height = (sh = Math.max(1, Math.round(sh / 2)));
+    const hg = half.getContext('2d');
+    hg.imageSmoothingQuality = 'high';
+    hg.drawImage(src, 0, 0, sw, sh);
+    src = half;
+  }
+  const c = document.createElement('canvas');
+  c.width = tw; c.height = th;
+  const g = c.getContext('2d');
+  g.imageSmoothingEnabled = true;
+  g.imageSmoothingQuality = 'high';
+  g.drawImage(src, 0, 0, tw, th);
+  bmp.close();
+
+  /* toBlob quietly returns a PNG when it cannot make the type asked for,
+     and a PNG of a chart is enormous — so the type that came back is
+     what decides, not the type that was requested. */
+  let out = await toBlob(c, 'image/webp', 0.94);
+  if (!out || out.type !== 'image/webp') out = await toBlob(c, 'image/jpeg', 0.94);
+  if (!out) return file;
+
+  /* Quality only, and only if it must. The pixel count is already the
+     smallest one that stays sharp; spending the budget there instead
+     would put the blur straight back. */
+  let q = 0.94;
+  while (out.size > SHOT_BYTES && q > 0.6) {
+    q -= 0.08;
+    const next = await toBlob(c, out.type, q);
+    if (!next) break;
+    out = next;
+  }
+  /* A re-encode that came out BIGGER than a file which needed no resize
+     is a worse copy of the same picture. */
+  return (w <= cap && out.size >= file.size) ? file : out;
 }
 
 const shotBtn = document.getElementById('tShot');
@@ -4235,12 +3852,14 @@ sheet.addEventListener('close', () => {
 });
 
 /* The calendar is both the record and the way in: a card opens the trade
-   it draws, the space beneath starts a new one on that day. */
+   it draws, and anywhere else on a day starts a new one on that day. */
 document.getElementById('grid').addEventListener('click', (ev) => {
   const card = ev.target.closest('.tcard');
   if (card) { openTrade(card.dataset.date, card.dataset.id); return; }
-  const add = ev.target.closest('.day-new');
-  if (add) openTrade(add.dataset.date);
+  /* The full-cell button catches most of this on its own; closest() on
+     the day covers the few pixels of padding outside it. */
+  const day = ev.target.closest('.day');
+  if (day) openTrade(day.dataset.date);
 });
 
 document.getElementById('tradeForm').addEventListener('submit', (ev) => {
@@ -4333,7 +3952,7 @@ function commit(msg) {
   document.getElementById('say').textContent = msg;
 }
 function renderAll() {
-  renderSummary(); renderCalendar(); renderAgenda(); renderMetrics(); renderPlaybook();
+  renderSummary(); renderCalendar(); renderAgenda(); renderMetrics();
   renderLedger(); renderLog(); renderRes(); renderGate(); renderLive(); renderRisk();
 }
 
@@ -4460,9 +4079,9 @@ function tickCandle() {
 
    The checklist used to be reachable only from the trade sheet, which
    opens AFTER a trade is taken. Ticking five rules with the outcome
-   already on screen is not a checklist, it is a recollection — and the
-   Playbook's compliance cut is only worth reading if the ticks were made
-   while the answer was still unknown. This is where they get made.
+   already on screen is not a checklist, it is a recollection, and a tick
+   is only worth anything if it was made while the answer was still
+   unknown. This is where they get made.
 
    Ticks belong to one window and are thrown away with it. Rules
    confirmed on the 18:00 candle say nothing about the 22:00 one, and
@@ -5557,7 +5176,9 @@ function setRsThumb(blob) {
 }
 async function takeRsThumb(file) {
   if (!file || !/^image\//.test(file.type)) return;
-  setRsThumb(await compress(file));
+  /* A card thumbnail is drawn at 150×85, so it does not get the chart's
+     budget — 1200 is already generous for a picture that never opens. */
+  setRsThumb(await compress(file, 1200));
   rsThumbDirty = true;
 }
 const rsPick = Object.assign(document.createElement('input'),
@@ -5634,7 +5255,6 @@ const SECTIONS = {
   log:      document.getElementById('logSection'),
   risk:     document.getElementById('riskSection'),
   metrics:  document.getElementById('metricsSection'),
-  playbook: document.getElementById('playbookSection'),
   settings: document.getElementById('settingsSection'),
   resources: document.getElementById('resourcesSection'),
 };
@@ -5642,9 +5262,10 @@ function goto(view) {
   /* The ladder does not exist on a phone, so a stored or stale route to
      it lands on the metrics instead of on a blank screen. */
   if (phone() && view === 'risk') view = 'metrics';
-  /* The gate used to be a view of its own. Anything still pointing at it
-     lands on the dashboard, which is where it went. */
-  if (view === 'gate') view = 'metrics';
+  /* The gate used to be a view of its own, and so was the playbook.
+     Anything still pointing at either — a stored route, an old link —
+     lands on the dashboard rather than on a blank screen. */
+  if (view === 'gate' || view === 'playbook') view = 'metrics';
   document.querySelectorAll('[data-view]').forEach(b => {
     if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
@@ -5654,34 +5275,6 @@ function goto(view) {
 }
 document.querySelectorAll('[data-view]').forEach(b =>
   b.addEventListener('click', () => goto(b.dataset.view)));
-
-/* The cut rail. Delegated, because the rail is rewritten by its own
-   renderer on every pick and a listener bound to a button would be gone
-   one click later. */
-document.getElementById('pbRail').addEventListener('click', (ev) => {
-  const b = ev.target.closest('[data-cut]');
-  if (!b || b.dataset.cut === PB) return;
-  PB = b.dataset.cut;
-  try { localStorage.setItem(PBKEY, PB); } catch (e) {}
-  renderPlaybook();
-  document.getElementById('say').textContent =
-    (PB_CUTS.find(([k]) => k === PB) || [, PB])[1];
-});
-
-/* Arrow keys across the cuts, and the roving tabindex that makes the
-   whole rail one tab stop. The topics rail on Resources declares the
-   same role and does neither, which is a gap worth not copying. */
-document.getElementById('pbRail').addEventListener('keydown', (ev) => {
-  const keys = ['ArrowLeft', 'ArrowRight', 'Home', 'End'];
-  if (!keys.includes(ev.key)) return;
-  const tabs = [...document.getElementById('pbRail').querySelectorAll('[role="tab"]')];
-  const at = tabs.findIndex(t => t.dataset.cut === PB);
-  const to = ev.key === 'Home' ? 0 : ev.key === 'End' ? tabs.length - 1
-           : (at + (ev.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
-  ev.preventDefault();
-  tabs[to].click();
-  document.getElementById('pbRail').querySelector('[aria-selected="true"]').focus();
-});
 
 document.getElementById('fDate').value = iso(new Date());
 renderAll();

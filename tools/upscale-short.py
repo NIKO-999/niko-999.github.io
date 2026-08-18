@@ -37,8 +37,16 @@ BG = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), '
 # 1.6× on a wide viewport, so 2× is the honest ceiling — past that the
 # extra rows are cropped away and only cost bytes.
 JOBS = {
-    'canyon': ('ashim-d-silva-iHJOHaUD8RY-unsplash.jpg', 5120),
-    'silk':   ('yuvraj-singh-parmar-0LlEmIpkIUo-unsplash.jpg', 4320),
+    'canyon':    ('ashim-d-silva-iHJOHaUD8RY-unsplash.jpg', 5120),
+    'silk':      ('yuvraj-singh-parmar-0LlEmIpkIUo-unsplash.jpg', 4320),
+    # These three are 4K originals, which is short of a 5K display — and
+    # a starfield is the worst thing to upscale in a browser, because
+    # every star is a two-pixel highlight that a bilinear scaler turns
+    # into a smudge. Native pixels beat guessed ones up to 4K; past that
+    # the guess is being made either way, and it is better made here.
+    'nightfall': ('mark-basarab-1OtUkD_8svc-unsplash.jpg', 5120),
+    'turtle':    ('philip-oroni-ZQBnQAxjxlk-unsplash.jpg', 5120),
+    'iris':      ('anna-wangler-_GqwoiT7QY8-unsplash.jpg', 5120),
 }
 MAX_BYTES = 2_600_000
 Q_HI, Q_LO = 90, 70
