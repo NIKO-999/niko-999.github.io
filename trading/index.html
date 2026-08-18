@@ -766,6 +766,26 @@ dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6p
   overflow: auto; overscroll-behavior: contain;
   display: flex; align-items: center; justify-content: center;
 }
+.lens-fig { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+/* Over the dimmed backdrop rather than over the page, so it does not
+   borrow the panel's glass — this is a caption on a photograph. */
+.lens-note {
+  max-width: 78ch;
+  padding: 11px 15px;
+  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 10px;
+  background: rgba(0, 0, 0, .5);
+  backdrop-filter: blur(8px);
+  color: rgba(255, 255, 255, .88);
+  font-size: .86rem; line-height: 1.6;
+  /* pre-wrap, so a note written as two thoughts stays two thoughts —
+     the same reason the log renders them that way. */
+  white-space: pre-wrap; overflow-wrap: anywhere;
+  text-align: left;
+  /* Selectable. The pane closes on click and this does not, so the
+     words can be picked up and read rather than only looked at. */
+  cursor: text;
+}
 .lens-pane img {
   display: block;
   /* The two maxes are set inline by fitLens(), because the honest limit
@@ -778,7 +798,10 @@ dialog.lens::backdrop { background: rgba(0, 0, 0, .82); backdrop-filter: blur(6p
 /* Block rather than flex, or the image cannot overflow its own scroller
    — a centred flex item refuses to scroll past its start edge. */
 .lens.zoom .lens-pane { display: block; }
-.lens.zoom .lens-pane img { margin: auto; cursor: zoom-out; }
+/* max-content, or a centred flex column narrower than the picture inside
+   it overflows both ways and the left half becomes unreachable. */
+.lens.zoom .lens-fig { width: max-content; align-items: flex-start; margin: auto; }
+.lens.zoom .lens-pane img { cursor: zoom-out; }
 /* A chart already showing every pixel it has cannot get bigger, so it
    does not offer to. */
 .lens.max .lens-pane img { cursor: default; }
@@ -1493,12 +1516,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H19v16H5.5A1.5 1.5 0 0 1 4 18.5ZM4 17h15M8 8h7M8 11.5h5" />
       </svg>
     </button>
-    <button type="button" data-view="resources" aria-label="Resources">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5ZM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12M15 9.5l3.4 2.2-3.4 2.2z" />
-      </svg>
-    </button>
     <button type="button" data-view="settings" aria-label="Capital">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -1512,13 +1529,20 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
     </a>
     <span class="spacer"></span>
     <!-- At the foot, above appearance. Everything above the spacer is a
-         view of the record; this is a tool that reads none of it, so it
-         sits with the other things that are not the ledger. Scales: what
-         the size is worth. -->
+         view of the record; these two read none of it, so they sit with
+         the other things that are not the ledger. Scales: what the size
+         is worth. Then the reading, which the ledger did not produce and
+         which produces nothing for it. -->
     <button type="button" data-view="risk" aria-label="Risk">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 4v16M5 8h14M5 8l-2.5 5h5L5 8ZM19 8l-2.5 5h5L19 8ZM8 20h8" /></svg>
+    </button>
+    <button type="button" data-view="resources" aria-label="Resources">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5ZM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12M15 9.5l3.4 2.2-3.4 2.2z" />
+      </svg>
     </button>
     <button type="button" id="themeRail" aria-label="Appearance: System">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -1997,7 +2021,10 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
      the picture and leaves the half-typed trade underneath alone. -->
 <dialog class="lens" id="lens" aria-label="Chart">
   <div class="lens-pane" id="lensPane">
-    <img id="lensImg" alt="The chart on this trade" />
+    <figure class="lens-fig" id="lensFig">
+      <img id="lensImg" alt="The chart on this trade" />
+      <figcaption class="lens-note" id="lensNote" hidden></figcaption>
+    </figure>
   </div>
   <button class="lens-x" type="button" id="lensX" aria-label="Close the chart">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -3673,7 +3700,20 @@ function fitLens() {
   const pane = document.getElementById('lensPane');
   const cs = getComputedStyle(pane);
   const availW = pane.clientWidth - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
-  const availH = pane.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
+  /* The note is laid out first and its height comes off the top of what
+     the picture may have. A caption clipped by the picture above it is
+     no use, and a picture 40px shorter is no loss.
+
+     Measured rather than assumed, because its height depends on how much
+     you wrote and how wide the window is. Two passes: the first gives it
+     a width to wrap into, the second reads the result. */
+  const note = document.getElementById('lensNote');
+  const gap = note.hidden ? 0
+    : note.getBoundingClientRect().height + parseFloat(getComputedStyle(
+        document.getElementById('lensFig')).rowGap || 14);
+  const availH = pane.clientHeight - parseFloat(cs.paddingTop)
+    - parseFloat(cs.paddingBottom) - gap;
+
   const room = Math.min(availW / cw, availH / ch) < 0.999;
   lens.classList.toggle('max', !room);
   if (!room) lens.classList.remove('zoom');
@@ -3684,8 +3724,10 @@ function fitLens() {
     st.maxWidth = st.maxHeight = 'none';
   } else {
     st.width = st.height = 'auto';
-    st.maxWidth = `min(100%, ${cw}px)`;
-    st.maxHeight = `min(100%, ${ch}px)`;
+    /* Explicit pixels rather than a percentage: the percentage would
+       resolve against the figure, which is sized by this very image. */
+    st.maxWidth = Math.max(1, Math.min(availW, cw)) + 'px';
+    st.maxHeight = Math.max(1, Math.min(availH, ch)) + 'px';
   }
   document.getElementById('lensHint').textContent =
     !room ? 'Every pixel of it · Esc to close'
@@ -3696,17 +3738,29 @@ function fitLens() {
 async function openLens() {
   if (!shotUrl) return;
   lens.classList.remove('zoom', 'max');
+  /* Whatever is in the box right now, not what was saved — if you are
+     mid-sentence about this chart, that sentence is the one you want
+     beside it. */
+  const note = document.getElementById('lensNote');
+  const text = document.getElementById('tNote').value.trim();
+  note.textContent = text;
+  note.hidden = !text;
   lensImg.src = shotUrl;
   lens.showModal();
   /* naturalWidth is 0 until it decodes, and every size below is computed
      from it. */
   try { await lensImg.decode(); } catch (e) {}
+  /* Twice: the first pass gives the note a width to wrap into, the
+     second sizes the picture around the height that wrapping produced. */
+  fitLens();
   fitLens();
   document.getElementById('lensX').focus();
 }
 /* Dragging the window to a display with a different pixel ratio changes
    what 1:1 means, and Chrome reports that as a resize. */
 window.addEventListener('resize', () => { if (lens.open) fitLens(); });
+/* The note is for reading, so a click in it selects rather than closes. */
+document.getElementById('lensNote').addEventListener('click', (ev) => ev.stopPropagation());
 document.getElementById('lensPane').addEventListener('click', (ev) => {
   /* The picture toggles its own size; the dark around it is the way out,
      which is the behaviour every other viewer has. */
