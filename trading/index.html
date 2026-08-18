@@ -302,6 +302,37 @@
 .bk-x:hover { background: var(--glass-in); color: var(--ink); }
 .bk-b { display: flex; flex-direction: column; gap: 13px;
   padding: 15px 16px 16px; border-top: 1px solid var(--rule); }
+/* ── aligned timeframes ──
+   A reference, not a control: it sits at the foot of the gate, quiet
+   until asked for, and the app remembers that you put it away. */
+.cp-align { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--rule); }
+.cp-align > button {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font-family: var(--mono); font-size: .58rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
+}
+.cp-align > button:hover { color: var(--ink-2); }
+.cp-align > button .ic { display: inline-flex; transition: transform .16s; }
+/* 180, not 90 — the shared chevron points DOWN, so a quarter turn lays
+   it on its side. The gate's own caret above does the same thing, and
+   two carets in one panel disagreeing about which way is open is worse
+   than either choice. */
+.cp-align > button[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.cp-align table {
+  margin-top: 9px; border-collapse: collapse;
+  font-family: var(--mono); font-size: .68rem;
+}
+.cp-align th, .cp-align td { text-align: left; padding: 4px 22px 4px 0; }
+.cp-align thead th {
+  font-size: .54rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .09em; color: var(--ink-3);
+  padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+}
+.cp-align tbody th { font-weight: 400; color: var(--ink-2); }
+.cp-align tbody td { font-weight: 500; color: var(--accent); }
+.cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
+
 /* ── the bin ──
    Only ever on screen when it holds something, so it costs nothing on
    the days nothing has gone wrong. */
@@ -1876,6 +1907,22 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
               <button type="button" class="cp-let" id="gPass">let it go</button>
             </div>
             <ol class="cp-list" id="gList"></ol>
+
+            <!-- The last line of the checklist asks which timeframe is
+                 allowed to confirm the swing. This answers it, folded by
+                 default once you have put it away. -->
+            <div class="cp-align">
+              <button type="button" id="alToggle" aria-expanded="false" aria-controls="alTable">
+                <span class="ic" id="alCaret" aria-hidden="true"></span>Aligned timeframes
+              </button>
+              <table id="alTable" hidden>
+                <caption class="sr">Which timeframe confirms a swing, by the level or SMT that set it up</caption>
+                <thead>
+                  <tr><th scope="col">Level/SMT tapped</th><th scope="col">Confirms on</th></tr>
+                </thead>
+                <tbody id="alBody"></tbody>
+              </table>
+            </div>
           </div>
 
           <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
@@ -4183,6 +4230,45 @@ document.getElementById('tradeDelete').addEventListener('click', () => {
   commit(demo ? 'Sample ledger cleared.' : 'Trade deleted — recover it from the bin.');
 });
 
+/* ═══ aligned timeframes ═══
+   One table, one source. The Resources note prints the same pairing in
+   prose; this is the one you read at the hard edge of a candle, so it
+   lives beside the button you are about to press.
+
+   Ordered from the slowest level down, because that is the order you
+   work in — the daily says what today is, and you descend from it. */
+const ALIGN = [
+  ['Daily', '1H'],
+  ['4H',    '15M'],
+  ['1H',    '5M'],
+  ['30M',   '3M'],
+  ['15M',   '1M'],
+];
+const AKEY = 'ledger.align.v1';
+
+(() => {
+  const btn = document.getElementById('alToggle');
+  const tbl = document.getElementById('alTable');
+  document.getElementById('alBody').innerHTML = ALIGN.map(([lv, on]) =>
+    `<tr><th scope="row">${esc(lv)}</th><td>${esc(on)}</td></tr>`).join('');
+
+  /* Folded unless you last left it open. Defaulting to open would put a
+     five-row table under the checklist every time the gate is unfolded,
+     for the rest of the account's life. */
+  const open = (() => {
+    try { return localStorage.getItem(AKEY) === 'open'; } catch (e) { return false; }
+  })();
+
+  function fold(on) {
+    btn.setAttribute('aria-expanded', String(on));
+    tbl.hidden = !on;
+    try { localStorage.setItem(AKEY, on ? 'open' : 'shut'); } catch (e) {}
+  }
+  btn.addEventListener('click', () =>
+    fold(btn.getAttribute('aria-expanded') !== 'true'));
+  fold(open);
+})();
+
 /* ═══ recently deleted ═══
    A deleted record is moved here rather than dropped, and its chart is
    left in the database beside it — restoring a trade whose picture had
@@ -4509,6 +4595,7 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
    in and the strip that says you are in are visibly the same thing. */
 document.getElementById('gInIc').innerHTML = icon('radar', 14);
 document.getElementById('gCaret').innerHTML = icon('chev', 13);
+document.getElementById('alCaret').innerHTML = icon('chev', 11);
 document.getElementById('rkPerIc').innerHTML = icon('risk', 13);
 document.getElementById('liveIc').innerHTML = icon('radar', 15);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
@@ -5508,7 +5595,7 @@ const NOTES = [
         + 'swing tradeable.',
     sit: [
       { n: '01', h: 'Align the timeframe first',
-        p: 'The level you tapped decides which chart is allowed to confirm it. The pairing is fixed, and nothing below it counts.',
+        p: 'The level or SMT you tapped decides which chart is allowed to confirm it. The pairing is fixed, and nothing below it counts.',
         li: ['A daily level is confirmed on the 1H',
              'A 4H level on the 15M, a 1H level on the 5M',
              'A 30M level on the 3M, a 15M level on the 1M',
