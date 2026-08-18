@@ -17,10 +17,18 @@
   var d = document.documentElement, g = null;
   try { g = window.localStorage; } catch (e) {}
   var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
-  var p = read('arc.palette') || 'grotto';
-  if (p === 'salt') p = 'grotto';
+  /* Backdrop and palette are separate now, and this runs before any
+     script that knows the list — so the mapping is repeated here, small
+     and flat. Fourteen backdrops, eight palettes. */
+  var PAL = { turtle:'slate', canyon:'ember', desert:'ember', nightfall:'cyan',
+              iceberg:'cyan', delta:'cyan', curve:'vellum', cobalt:'cobalt',
+              abyss:'cyan', jade:'jade', violet:'violet', iris:'violet',
+              umber:'umber', silk:'slate' };
+  var p = read('arc.palette') || 'nightfall';
+  if (!PAL[p]) p = 'nightfall';          /* the old five no longer exist */
   var m = read('arc.theme') || 'system';
-  d.dataset.palette = p;
+  d.dataset.bg = p;
+  d.dataset.palette = PAL[p];
   d.dataset.resolved = m === 'system'
     ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
   /* Set here rather than in shell.js, which is deferred and therefore

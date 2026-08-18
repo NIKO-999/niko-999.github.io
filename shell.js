@@ -72,87 +72,162 @@ function cycle() {
    rather than a hard-coded hex, so a scheme can never drift out of sync
    with the swatch that claims to show it. */
 const PKEY = 'arc.palette';
-/* id, name, description, section.
+/* A backdrop and a palette are no longer the same thing. Fourteen
+   photographs share eight palettes between them — the two canyons take
+   the same warm accent, the four waters take the same cyan — so the
+   colour is named separately and pointed at.
 
-   The section is what the menu groups by, and the order here is the
-   order it reads in. A section with no members is not drawn, so adding
-   one is adding rows rather than editing the picker. */
-const PALETTES = [
-  ['grotto', 'Grotto', 'A marble grotto over a still pool',   'Nature'],
-  ['dune',   'Dune',   'A dune rim-lit under a starfield',    'Nature'],
-  ['fjord',  'Fjord',  'Rain on a green fjord',               'Nature'],
-  ['shore',  'Shore',  'A sunset shore, pink over turquoise', 'Nature'],
-  ['lagoon', 'Lagoon', 'Palm shadows on a lagoon, from above','Nature'],
+   id, name, description, section, palette. */
+const BACKDROPS = [
+  ['turtle',    'Turtle',    'A sea turtle in near-black water',      'Nature',   'slate'],
+  ['canyon',    'Canyon',    'Slot canyon walls, lit orange',         'Nature',   'ember'],
+  ['desert',    'Desert',    'Red sand under a dusk sky',             'Nature',   'ember'],
+  ['nightfall', 'Nightfall', 'A canyon opening onto a starfield',     'Nature',   'cyan'],
+  ['iceberg',   'Iceberg',   'Turquoise ice over still water',        'Nature',   'cyan'],
+  ['delta',     'Delta',     'A river delta from orbit',              'Nature',   'cyan'],
+  ['curve',     'Curve',     'A pale curve under a warm light',       'Abstract', 'vellum'],
+  ['cobalt',    'Cobalt',    'Folded blue forms',                     'Abstract', 'cobalt'],
+  ['abyss',     'Abyss',     'Teal waves in the dark',                'Abstract', 'cyan'],
+  ['jade',      'Jade',      'A green ribbon, almost black',          'Abstract', 'jade'],
+  ['violet',    'Violet',    'Deep violet, one fold of light',        'Abstract', 'violet'],
+  ['iris',      'Iris',      'Pale petals against black',             'Abstract', 'violet'],
+  ['umber',     'Umber',     'Warm brown, a single highlight',        'Abstract', 'umber'],
+  ['silk',      'Silk',      'Grey silk, folded and lit',             'Abstract', 'slate'],
 ];
 const SECTIONS_ORDER = ['Nature', 'Abstract'];
+const bgOf = (id) => BACKDROPS.find(b => b[0] === id);
 
 const palBtn   = document.getElementById('palBtn');
 const palMenu  = document.getElementById('palMenu');
 const palLabel = document.getElementById('palLabel');
-let palette = readStore(PKEY) || 'grotto';
-/* salt was replaced by grotto; a stored 'salt' would otherwise select a
-   theme with no CSS block and therefore no photograph. */
-if (palette === 'salt') palette = 'grotto';
+let palette = readStore(PKEY) || 'nightfall';
+/* The old five are gone. Anything stored from them names a backdrop
+   that no longer exists, which would leave the page with no photograph
+   at all, so it falls back rather than failing. */
+if (!bgOf(palette)) palette = 'nightfall';
 
-/* Grouped, but still ONE radiogroup. Splitting it into two would mean
-   two tab stops and two arrow-key loops for what is one choice; putting
-   headings inside a radiogroup as real elements would put non-radios
-   among its options. So the headings are decoration the screen reader
-   skips, and the section name is folded into each swatch's own name
-   instead — "Dune, nature. A dune rim-lit under a starfield." */
-SECTIONS_ORDER.forEach((section) => {
-  const members = PALETTES.filter(p => (p[3] || 'Nature') === section);
-  if (!members.length) return;
+/* ── the menu, in two levels ──
+   Fourteen in one list is a scroll and a hunt. So the first level is the
+   two sections and the second is the backdrops inside one of them, with
+   a way back. The radiogroup lives on the second level only — the
+   sections are a route to the choice, not the choice.
 
-  const h = document.createElement('span');
-  h.className = 'pal-sect';
-  h.setAttribute('aria-hidden', 'true');
-  h.textContent = section;
-  palMenu.appendChild(h);
+   Which means #palMenu cannot itself be the radiogroup any more; it is
+   a container, and the group is built inside it. */
+palMenu.removeAttribute('role');
+palMenu.removeAttribute('aria-label');
 
-  members.forEach(([id, name, desc]) => {
+let level = null;          // null = the section list, else a section name
+
+function sectionMembers(name) {
+  return BACKDROPS.filter(b => (b[3] || 'Nature') === name);
+}
+
+function drawSections() {
+  level = null;
+  palMenu.innerHTML = '';
+  palMenu.className = 'pal-menu';
+  SECTIONS_ORDER.forEach((name) => {
+    const members = sectionMembers(name);
+    if (!members.length) return;
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'pal-cat';
+    b.dataset.section = name;
+    const here = members.some(m => m[0] === palette);
+    b.innerHTML = `<span class="dot" aria-hidden="true"></span>${name}`
+      + `<span class="pal-n">${members.length}</span>`
+      + `<svg class="pal-chev" viewBox="0 0 24 24" width="13" height="13" fill="none"
+              stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+              stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg>`;
+    /* The section's dot shows the palette of whatever is selected inside
+       it, or of its first member — so the row carries a colour rather
+       than being a word with a grey circle. */
+    const shown = (here ? bgOf(palette) : members[0])[4];
+    b.querySelector('.dot').style.setProperty('--sw', `var(--sw-${shown})`);
+    b.setAttribute('aria-label', `${name}, ${members.length} backdrops`);
+    b.addEventListener('click', () => drawSection(name));
+    palMenu.appendChild(b);
+  });
+  const first = palMenu.querySelector('.pal-cat');
+  if (first) first.focus();
+}
+
+function drawSection(name) {
+  level = name;
+  palMenu.innerHTML = '';
+  palMenu.className = 'pal-menu pal-deep';
+
+  const back = document.createElement('button');
+  back.type = 'button';
+  back.className = 'pal-back';
+  back.innerHTML = `<svg viewBox="0 0 24 24" width="13" height="13" fill="none"
+      stroke="currentColor" stroke-width="2.2" stroke-linecap="round"
+      stroke-linejoin="round" aria-hidden="true"><path d="m15 5-7 7 7 7"/></svg>${name}`;
+  back.setAttribute('aria-label', 'Back to sections');
+  back.addEventListener('click', () => drawSections());
+  palMenu.appendChild(back);
+
+  const group = document.createElement('div');
+  group.className = 'pal-group';
+  group.setAttribute('role', 'radiogroup');
+  group.setAttribute('aria-label', `${name} backdrops`);
+  sectionMembers(name).forEach(([id, label, desc, sect, pal]) => {
     const b = document.createElement('button');
     b.type = 'button';
     b.className = 'swatch';
     b.setAttribute('role', 'radio');
     b.tabIndex = -1;
     b.dataset.palette = id;
-    /* The dot paints from that scheme's own --sw-* token, so it always
-       shows the real value rather than a copy that can drift. */
     b.innerHTML =
-      `<span class="dot" data-swatch="${id}" aria-hidden="true"></span>${name}`
+      `<span class="dot" aria-hidden="true"></span>${label}`
       + `<svg class="tick-mark" viewBox="0 0 24 24" width="13" height="13" fill="none"
               stroke="currentColor" stroke-width="2.6" stroke-linecap="round"
               stroke-linejoin="round" aria-hidden="true"><path d="m5 13 4 4L19 7"/></svg>`;
+    /* Indirection rather than a hex copied into JS: the dot still reads
+       the palette's own token, so the two cannot drift. */
+    b.querySelector('.dot').style.setProperty('--sw', `var(--sw-${pal})`);
     b.title = desc;
-    b.setAttribute('aria-label', `${name}, ${section.toLowerCase()} — ${desc}`);
+    b.setAttribute('aria-label', `${label}, ${sect.toLowerCase()} — ${desc}`);
     b.addEventListener('click', () => { setPalette(id); closePal(true); });
-    palMenu.appendChild(b);
+    group.appendChild(b);
   });
-});
+  palMenu.appendChild(group);
+  markChecked();
+  (group.querySelector('[aria-checked="true"]') || group.firstElementChild).focus();
+  /* Only what is on screen gets fetched. Warming all fourteen would pull
+     seven megabytes to show one. */
+  sectionMembers(name).forEach(([id]) => { new Image().src = asset(`arc/bg/${id}.jpg`); });
+}
+
+function markChecked() {
+  palMenu.querySelectorAll('.swatch').forEach((sw) => {
+    const on = sw.dataset.palette === palette;
+    sw.setAttribute('aria-checked', String(on));
+    sw.tabIndex = on ? 0 : -1;
+  });
+}
 
 function setPalette(id) {
-  palette = id;
-  writeStore(PKEY, id);
-  document.documentElement.dataset.palette = id;
-  const name = (PALETTES.find(p => p[0] === id) || [])[1] || id;
-  palLabel.textContent = name;
-  palBtn.setAttribute('aria-label', `Backdrop: ${name}`);
-  /* Roving tabindex: exactly one radio is tabbable — the checked one —
-     so Tab lands on the group once and arrows move within it. Without
-     this, five tab stops and Tab walked OUT of the open menu. */
-  palMenu.querySelectorAll('.swatch').forEach((s) => {
-    const on = s.dataset.palette === id;
-    s.setAttribute('aria-checked', String(on));
-    s.tabIndex = on ? 0 : -1;
-  });
-  say.textContent = `Backdrop: ${name}.`;
+  const row = bgOf(id) || bgOf('nightfall');
+  palette = row[0];
+  writeStore(PKEY, palette);
+  /* Two attributes now: one chooses the photograph and the glass behind
+     the panel, the other chooses the colour. */
+  document.documentElement.dataset.bg = palette;
+  document.documentElement.dataset.palette = row[4];
+  palLabel.textContent = row[1];
+  palBtn.setAttribute('aria-label', `Backdrop: ${row[1]}`);
+  markChecked();
+  say.textContent = `Backdrop: ${row[1]}.`;
 }
 
 function openPal() {
   palMenu.hidden = false;
   palBtn.setAttribute('aria-expanded', 'true');
-  (palMenu.querySelector('[aria-checked="true"]') || palMenu.firstElementChild).focus();
+  /* Open where you are: the section holding the current backdrop, so the
+     tick is on screen rather than two clicks away. */
+  drawSection((bgOf(palette) || [])[3] || SECTIONS_ORDER[0]);
 }
 /* Focus goes back to the trigger on close, or a keyboard user is dumped
    at the top of the document every time they pick a scheme. */
@@ -166,11 +241,18 @@ palBtn.addEventListener('click', () => {
   palMenu.hidden ? openPal() : closePal(true);
 });
 palMenu.addEventListener('keydown', (e) => {
-  const items = [...palMenu.querySelectorAll('.swatch')];
+  if (e.key === 'Escape') {
+    e.preventDefault();
+    /* Escape steps back out of a section first, and only closes from the
+       top — otherwise the way in has no matching way out. */
+    if (level) drawSections(); else closePal(true);
+    return;
+  }
+  const items = [...palMenu.querySelectorAll('.swatch, .pal-cat')];
+  if (!items.length) return;
   const i = items.indexOf(document.activeElement);
   const fwd  = e.key === 'ArrowDown' || e.key === 'ArrowRight';
   const back = e.key === 'ArrowUp'   || e.key === 'ArrowLeft';
-  if (e.key === 'Escape') { e.preventDefault(); closePal(true); return; }
   let next = -1;
   if (e.key === 'Home') next = 0;
   else if (e.key === 'End') next = items.length - 1;
@@ -180,12 +262,23 @@ palMenu.addEventListener('keydown', (e) => {
   } else return;
   e.preventDefault();
   items[next].focus();
-  setPalette(items[next].dataset.palette);   // radiogroups select on arrow
+  /* A radiogroup selects on arrow; the section list only moves focus. */
+  if (items[next].classList.contains('swatch')) setPalette(items[next].dataset.palette);
 });
 /* Focus leaving the widget closes it — otherwise Tab out of the open
-   menu left it floating with Escape dead, since Escape was bound inside. */
-document.querySelector('.pal').addEventListener('focusout', (e) => {
-  if (!palMenu.hidden && !(e.relatedTarget && e.relatedTarget.closest('.pal'))) closePal(false);
+   menu left it floating with Escape dead, since Escape was bound inside.
+
+   Checked a tick later, and against where focus actually ENDED UP rather
+   than against relatedTarget. Stepping between the two levels empties
+   the menu, which drops focus to <body> with a null relatedTarget — read
+   literally that is indistinguishable from tabbing away, so Back closed
+   the picker instead of going back. A frame later the redraw has put
+   focus inside again and the difference is obvious. */
+const pal = document.querySelector('.pal');
+pal.addEventListener('focusout', () => {
+  setTimeout(() => {
+    if (!palMenu.hidden && !pal.contains(document.activeElement)) closePal(false);
+  }, 0);
 });
 document.addEventListener('pointerdown', (e) => {
   if (!palMenu.hidden && !e.target.closest('.pal')) closePal(false);
@@ -210,12 +303,6 @@ setPalette(palette);
   } catch (e) {}
 })();
 
-/* Arrow-keying through the picker swaps data-palette per press, and each
-   never-fetched photograph would flash flat --ground while it loaded.
-   Warm the other four after first paint, at idle priority. */
-const warm = () => PALETTES.forEach(([id]) => { new Image().src = asset(`arc/bg/${id}.jpg`); });
-if ('requestIdleCallback' in window) requestIdleCallback(warm, { timeout: 3000 });
-else setTimeout(warm, 1200);
 themeBtn .addEventListener('click', cycle);
 themeRail.addEventListener('click', cycle);
 media.addEventListener('change', () => { if (mode === 'system') paint(); });

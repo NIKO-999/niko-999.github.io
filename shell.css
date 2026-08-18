@@ -127,7 +127,7 @@
 
   /* Every theme's signature colour, always defined, so the picker's
      swatches show the real value rather than a copied hex. */
-  --sw-grotto: #9fb4be; --sw-dune: #cfa89c; --sw-fjord: #9bb8a6; --sw-shore: #c9a8b7; --sw-lagoon: #88bbbb;
+  --sw-ember: #d0ac9f; --sw-cyan: #98c7cd; --sw-slate: #b0b7bf; --sw-vellum: #afbfca; --sw-cobalt: #8fa7d6; --sw-umber: #c7beb2; --sw-violet: #a99fd0; --sw-jade: #a5caab;
 
   --art-1: #6d675f; --art-2: #0e1113; --art-glint: rgba(255,255,255,.10);
 
@@ -189,7 +189,7 @@
   --btn:     #1c1a17;
   --btn-ink: #ffffff;
 
-  --sw-grotto: #365e70; --sw-dune: #884833; --sw-fjord: #336246; --sw-shore: #844561; --sw-lagoon: #226262;
+  --sw-ember: #79432f; --sw-cyan: #2b676e; --sw-slate: #475262; --sw-vellum: #3c5567; --sw-cobalt: #2a4884; --sw-umber: #60523e; --sw-violet: #41327b; --sw-jade: #32673b;
 
   /* On a light panel a pale edge is invisible, so the light schemes use
      the accent itself rather than a tint of it. */
@@ -211,82 +211,186 @@
    identical in all five, so the photograph moves and the interface does
    not. Each theme is declared for dark and light separately, so the
    scheme and the theme stay orthogonal. */
-:root[data-palette="grotto"] {
-  --photo: url("arc/bg/grotto.jpg");
-  /* The brightest photograph of the five, so the dark panel leans on
-     brightness() harder than fill — same trick as lagoon. */
-  --glass: rgba(20, 19, 18, .42); --glass-bright: .42;
-  --accent-a: #4d7384; --accent-b: #2d5160; --accent-c: #1b343e;
-  --accent: #9fb4be; --now: #9fb4be; --now-pill: #2d5160;
-  --sw-grotto: #9fb4be;
-  --edge: #cfdce2; --focus: #cfdce2;
+/* ── the palettes ── */
+:root[data-palette="ember"] {
+  --accent-a: #9a553c; --accent-b: #673928; --accent-c: #42241a;
+  --accent: #d0ac9f; --now: #d0ac9f; --now-pill: #673928;
+  --edge: #d0ac9f; --focus: #d0ac9f;
 }
-:root[data-palette="dune"] {
-  --photo: url("arc/bg/dune.jpg");
-  --glass: rgba(20, 19, 18, .52); --glass-bright: .62;
-  --accent-a: #9c5e4a; --accent-b: #753c2a; --accent-c: #4d2619;
-  --accent: #cfa89c; --now: #cfa89c; --now-pill: #753c2a;
-  --sw-dune: #cfa89c;
-  --edge: #e5d7d3; --focus: #e5d7d3;
+:root[data-palette="cyan"] {
+  --accent-a: #3c919a; --accent-b: #286167; --accent-c: #1a3e42;
+  --accent: #98c7cd; --now: #98c7cd; --now-pill: #286167;
+  --edge: #98c7cd; --focus: #98c7cd;
 }
-:root[data-palette="fjord"] {
-  --photo: url("arc/bg/fjord.jpg");
-  --glass: rgba(20, 19, 18, .40); --glass-bright: .74;
-  --accent-a: #4a775c; --accent-b: #2a543b; --accent-c: #1a3625;
-  --accent: #9bb8a6; --now: #9bb8a6; --now-pill: #2a543b;
-  --sw-fjord: #9bb8a6;
-  --edge: #cddfd4; --focus: #cddfd4;
+:root[data-palette="slate"] {
+  --accent-a: #566881; --accent-b: #394556; --accent-c: #252d37;
+  --accent: #b0b7bf; --now: #b0b7bf; --now-pill: #394556;
+  --edge: #b0b7bf; --focus: #b0b7bf;
 }
-:root[data-palette="shore"] {
-  --photo: url("arc/bg/shore.jpg");
-  --glass: rgba(20, 19, 18, .46); --glass-bright: .60;
-  --accent-a: #955c76; --accent-b: #733a53; --accent-c: #4c2336;
-  --accent: #c9a8b7; --now: #c9a8b7; --now-pill: #733a53;
-  --sw-shore: #c9a8b7;
-  --edge: #e8d5dd; --focus: #e8d5dd;
+:root[data-palette="vellum"] {
+  --accent-a: #4b708b; --accent-b: #324b5d; --accent-c: #20303c;
+  --accent: #afbfca; --now: #afbfca; --now-pill: #324b5d;
+  --edge: #afbfca; --focus: #afbfca;
 }
-:root[data-palette="lagoon"] {
-  --photo: url("arc/bg/lagoon.jpg");
-  --glass: rgba(20, 19, 18, .34); --glass-bright: .40;
-  --accent-a: #367777; --accent-b: #1c5353; --accent-c: #103535;
-  --accent: #88bbbb; --now: #88bbbb; --now-pill: #1c5353;
-  --sw-lagoon: #88bbbb;
-  --edge: #c8dfdf; --focus: #c8dfdf;
+:root[data-palette="cobalt"] {
+  --accent-a: #2f57a7; --accent-b: #1f3a6f; --accent-c: #142548;
+  --accent: #8fa7d6; --now: #8fa7d6; --now-pill: #1f3a6f;
+  --edge: #8fa7d6; --focus: #8fa7d6;
 }
-:root[data-resolved="light"][data-palette="grotto"] {
-  --glass: rgba(252, 250, 247, .60); --glass-bright: 1.34;
-  --accent-a: #3b6475; --accent-b: #274957; --accent-c: #18323c;
-  --accent: #365e70; --now: #365e70; --now-pill: #274957;
-  --sw-grotto: #365e70;
-  --edge: #365e70; --focus: #365e70;
+:root[data-palette="umber"] {
+  --accent-a: #87704f; --accent-b: #5a4a35; --accent-c: #3a3022;
+  --accent: #c7beb2; --now: #c7beb2; --now-pill: #5a4a35;
+  --edge: #c7beb2; --focus: #c7beb2;
 }
-:root[data-resolved="light"][data-palette="dune"] {
-  --glass: rgba(252, 250, 247, .86); --glass-bright: 1.90;
-  --accent-a: #8e4c38; --accent-b: #6b3524; --accent-c: #4c2316;
-  --accent: #884833; --now: #884833; --now-pill: #6b3524;
-  --sw-dune: #884833;
-  --edge: #884833; --focus: #884833;
+:root[data-palette="violet"] {
+  --accent-a: #4f3c9a; --accent-b: #352867; --accent-c: #221a42;
+  --accent: #a99fd0; --now: #a99fd0; --now-pill: #352867;
+  --edge: #a99fd0; --focus: #a99fd0;
 }
-:root[data-resolved="light"][data-palette="fjord"] {
-  --glass: rgba(252, 250, 247, .76); --glass-bright: 1.60;
-  --accent-a: #38674b; --accent-b: #254c34; --accent-c: #173423;
-  --accent: #336246; --now: #336246; --now-pill: #254c34;
-  --sw-fjord: #336246;
-  --edge: #336246; --focus: #336246;
+:root[data-palette="jade"] {
+  --accent-a: #459251; --accent-b: #2e6136; --accent-c: #1d3e23;
+  --accent: #a5caab; --now: #a5caab; --now-pill: #2e6136;
+  --edge: #a5caab; --focus: #a5caab;
 }
-:root[data-resolved="light"][data-palette="shore"] {
-  --glass: rgba(252, 250, 247, .74); --glass-bright: 1.52;
-  --accent-a: #8a4a67; --accent-b: #69324b; --accent-c: #4a2134;
-  --accent: #844561; --now: #844561; --now-pill: #69324b;
-  --sw-shore: #844561;
-  --edge: #844561; --focus: #844561;
+:root[data-resolved="light"][data-palette="ember"] {
+  --accent-a: #804028; --accent-b: #5d2e1d; --accent-c: #3e1f14;
+  --accent: #79432f; --now: #79432f; --now-pill: #5d2e1d;
+  --edge: #79432f; --focus: #79432f;
 }
-:root[data-resolved="light"][data-palette="lagoon"] {
-  --glass: rgba(252, 250, 247, .64); --glass-bright: 1.40;
-  --accent-a: #266767; --accent-b: #174b4b; --accent-c: #0e3434;
-  --accent: #226262; --now: #226262; --now-pill: #174b4b;
-  --sw-lagoon: #226262;
-  --edge: #226262; --focus: #226262;
+:root[data-resolved="light"][data-palette="cyan"] {
+  --accent-a: #287780; --accent-b: #1d575d; --accent-c: #143a3e;
+  --accent: #2b676e; --now: #2b676e; --now-pill: #1d575d;
+  --edge: #2b676e; --focus: #2b676e;
+}
+:root[data-resolved="light"][data-palette="slate"] {
+  --accent-a: #405168; --accent-b: #2f3b4c; --accent-c: #1f2733;
+  --accent: #475262; --now: #475262; --now-pill: #2f3b4c;
+  --edge: #475262; --focus: #475262;
+}
+:root[data-resolved="light"][data-palette="vellum"] {
+  --accent-a: #385971; --accent-b: #284152; --accent-c: #1b2b37;
+  --accent: #3c5567; --now: #3c5567; --now-pill: #284152;
+  --edge: #3c5567; --focus: #3c5567;
+}
+:root[data-resolved="light"][data-palette="cobalt"] {
+  --accent-a: #224387; --accent-b: #183162; --accent-c: #102141;
+  --accent: #2a4884; --now: #2a4884; --now-pill: #183162;
+  --edge: #2a4884; --focus: #2a4884;
+}
+:root[data-resolved="light"][data-palette="umber"] {
+  --accent-a: #6d583b; --accent-b: #50402b; --accent-c: #352b1d;
+  --accent: #60523e; --now: #60523e; --now-pill: #50402b;
+  --edge: #60523e; --focus: #60523e;
+}
+:root[data-resolved="light"][data-palette="violet"] {
+  --accent-a: #3b2a7e; --accent-b: #2b1f5c; --accent-c: #1d143d;
+  --accent: #41327b; --now: #41327b; --now-pill: #2b1f5c;
+  --edge: #41327b; --focus: #41327b;
+}
+:root[data-resolved="light"][data-palette="jade"] {
+  --accent-a: #31773d; --accent-b: #23572c; --accent-c: #183a1d;
+  --accent: #32673b; --now: #32673b; --now-pill: #23572c;
+  --edge: #32673b; --focus: #32673b;
+}
+
+/* ── the backdrops ── */
+:root[data-bg="turtle"] {
+  --photo: url("arc/bg/turtle.jpg");
+  --glass: rgba(20, 19, 18, .38); --glass-bright: .7;
+}
+:root[data-bg="canyon"] {
+  --photo: url("arc/bg/canyon.jpg");
+  --glass: rgba(20, 19, 18, .43); --glass-bright: .6;
+}
+:root[data-bg="desert"] {
+  --photo: url("arc/bg/desert.jpg");
+  --glass: rgba(20, 19, 18, .47); --glass-bright: .53;
+}
+:root[data-bg="curve"] {
+  --photo: url("arc/bg/curve.jpg");
+  --glass: rgba(20, 19, 18, .54); --glass-bright: .39;
+}
+:root[data-bg="iceberg"] {
+  --photo: url("arc/bg/iceberg.jpg");
+  --glass: rgba(20, 19, 18, .53); --glass-bright: .42;
+}
+:root[data-bg="nightfall"] {
+  --photo: url("arc/bg/nightfall.jpg");
+  --glass: rgba(20, 19, 18, .37); --glass-bright: .73;
+}
+:root[data-bg="cobalt"] {
+  --photo: url("arc/bg/cobalt.jpg");
+  --glass: rgba(20, 19, 18, .44); --glass-bright: .59;
+}
+:root[data-bg="umber"] {
+  --photo: url("arc/bg/umber.jpg");
+  --glass: rgba(20, 19, 18, .39); --glass-bright: .68;
+}
+:root[data-bg="violet"] {
+  --photo: url("arc/bg/violet.jpg");
+  --glass: rgba(20, 19, 18, .36); --glass-bright: .74;
+}
+:root[data-bg="delta"] {
+  --photo: url("arc/bg/delta.jpg");
+  --glass: rgba(20, 19, 18, .5); --glass-bright: .47;
+}
+:root[data-bg="jade"] {
+  --photo: url("arc/bg/jade.jpg");
+  --glass: rgba(20, 19, 18, .37); --glass-bright: .72;
+}
+:root[data-bg="abyss"] {
+  --photo: url("arc/bg/abyss.jpg");
+  --glass: rgba(20, 19, 18, .37); --glass-bright: .71;
+}
+:root[data-bg="iris"] {
+  --photo: url("arc/bg/iris.jpg");
+  --glass: rgba(20, 19, 18, .41); --glass-bright: .65;
+}
+:root[data-bg="silk"] {
+  --photo: url("arc/bg/silk.jpg");
+  --glass: rgba(20, 19, 18, .42); --glass-bright: .63;
+}
+:root[data-resolved="light"][data-bg="turtle"] {
+  --glass: rgba(252, 250, 247, .87); --glass-bright: 1.99;
+}
+:root[data-resolved="light"][data-bg="canyon"] {
+  --glass: rgba(252, 250, 247, .81); --glass-bright: 1.79;
+}
+:root[data-resolved="light"][data-bg="desert"] {
+  --glass: rgba(252, 250, 247, .77); --glass-bright: 1.64;
+}
+:root[data-resolved="light"][data-bg="curve"] {
+  --glass: rgba(252, 250, 247, .69); --glass-bright: 1.37;
+}
+:root[data-resolved="light"][data-bg="iceberg"] {
+  --glass: rgba(252, 250, 247, .7); --glass-bright: 1.43;
+}
+:root[data-resolved="light"][data-bg="nightfall"] {
+  --glass: rgba(252, 250, 247, .89); --glass-bright: 2.05;
+}
+:root[data-resolved="light"][data-bg="cobalt"] {
+  --glass: rgba(252, 250, 247, .81); --glass-bright: 1.77;
+}
+:root[data-resolved="light"][data-bg="umber"] {
+  --glass: rgba(252, 250, 247, .86); --glass-bright: 1.95;
+}
+:root[data-resolved="light"][data-bg="violet"] {
+  --glass: rgba(252, 250, 247, .9); --glass-bright: 2.08;
+}
+:root[data-resolved="light"][data-bg="delta"] {
+  --glass: rgba(252, 250, 247, .73); --glass-bright: 1.53;
+}
+:root[data-resolved="light"][data-bg="jade"] {
+  --glass: rgba(252, 250, 247, .88); --glass-bright: 2.03;
+}
+:root[data-resolved="light"][data-bg="abyss"] {
+  --glass: rgba(252, 250, 247, .88); --glass-bright: 2.02;
+}
+:root[data-resolved="light"][data-bg="iris"] {
+  --glass: rgba(252, 250, 247, .84); --glass-bright: 1.89;
+}
+:root[data-resolved="light"][data-bg="silk"] {
+  --glass: rgba(252, 250, 247, .83); --glass-bright: 1.84;
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -428,10 +532,14 @@ body {
    pure white; the layer dims as a whole rather than re-inking each effect. */
 :root[data-resolved="light"] .fx { opacity: .5; }
 
-/* grotto — a still pool: reflected light wobbling on the rock, and a
-   slow cool breath rising from the water. The wobble oscillates rather
-   than scrolls — reflections sway, they do not travel. */
-[data-palette="grotto"] .fx::before {
+/* Weather belongs to a PLACE, so only the photographs carry it — the
+   renders in Abstract are surfaces, not skies, and drifting cloud over
+   one would be a lie about what you are looking at.
+
+   canyon and nightfall — light reflected off rock, wobbling. It
+   oscillates rather than scrolls: reflections sway, they do not
+   travel. */
+[data-bg="canyon"] .fx::before, [data-bg="nightfall"] .fx::before {
   inset: auto -60px -4% -60px;
   height: 60%;
   background: repeating-linear-gradient(176deg,
@@ -441,72 +549,37 @@ body {
   will-change: transform;
   animation: fx-mirror 21s ease-in-out infinite alternate;
 }
-[data-palette="grotto"] .fx::after {
+[data-bg="canyon"] .fx::after, [data-bg="nightfall"] .fx::after {
   background: radial-gradient(52% 30% at 50% 82%, rgba(178, 216, 228, .14), transparent 74%);
   animation: fx-breathe 15s ease-in-out infinite alternate;
 }
 @keyframes fx-mirror { from { transform: translate3d(0, 0, 0); opacity: .5; }
                        to   { transform: translate3d(26px, -14px, 0); opacity: 1; } }
 
-/* dune — the rim light breathing, under a turning starfield */
-[data-palette="dune"] .backdrop { background-position: 50% 0%; }
-[data-palette="dune"] .fx::before {
+/* desert — the rim light breathing, under a turning starfield */
+[data-bg="desert"] .backdrop { background-position: 50% 0%; }
+[data-bg="desert"] .fx::before {
   background: radial-gradient(44% 24% at 30% 74%, rgba(255, 168, 74, .17), transparent 72%);
   animation: fx-breathe 13s ease-in-out infinite alternate;
 }
 @keyframes fx-breathe { from { opacity: .55; } to { opacity: 1; } }
 
 /* fjord — two sheets of rain at different speeds, so it has depth */
-[data-palette="fjord"] .fx::before,
-[data-palette="fjord"] .fx::after {
-  inset: -360px -10% auto;
-  height: calc(100% + 720px);
-  will-change: transform;
-}
-[data-palette="fjord"] .fx::before {
-  background-image: repeating-linear-gradient(100deg,
-      rgba(255,255,255,.20) 0 1px, transparent 1px 9px);
-  opacity: .26;
-  animation: fx-rain-near 2.2s linear infinite;
-}
-[data-palette="fjord"] .fx::after {
-  background-image: repeating-linear-gradient(97deg,
-      rgba(255,255,255,.13) 0 1px, transparent 1px 11px);
-  opacity: .20;
-  animation: fx-rain-far 4.4s linear infinite;
-}
-/* The loop offsets are exact stripe periods along each gradient's normal
-   (310.3 x sin(10deg) = 6 stripes at 9px; 295.1 x sin(7deg) = 3 at 12px),
-   so the sheet lands on itself and never stutters. */
-@keyframes fx-rain-near { to { transform: translate3d(0, 310.3px, 0); } }
-@keyframes fx-rain-far  { to { transform: translate3d(0, 295.1px, 0); } }
 
 /* shore — cloud colour drifting across the sky */
-[data-palette="shore"] .fx::before {
-  inset: -10% -18%;
-  background:
-    radial-gradient(58% 32% at 26% 26%, rgba(255, 186, 214, .24), transparent 72%),
-    radial-gradient(48% 26% at 74% 20%, rgba(255, 214, 170, .18), transparent 74%);
-  will-change: transform;
-  animation: fx-drift 60s ease-in-out infinite alternate;
-}
-[data-palette="shore"] .fx::after {
-  background: linear-gradient(180deg, transparent 52%, rgba(255, 226, 236, .10) 68%, transparent 82%);
-  animation: fx-breathe 17s ease-in-out infinite alternate;
-}
-@keyframes fx-drift { to { transform: translate3d(4%, 0, 0); } }
 
-/* lagoon — caustics: two turbulence sheets crossing at different rates */
-[data-palette="lagoon"] .fx::before,
-[data-palette="lagoon"] .fx::after {
+/* iceberg, delta and turtle — caustics: two turbulence sheets crossing
+   at different rates. All three are water seen through water. */
+[data-bg="iceberg"] .fx::before, [data-bg="delta"] .fx::before, [data-bg="turtle"] .fx::before,
+[data-bg="iceberg"] .fx::after, [data-bg="delta"] .fx::after, [data-bg="turtle"] .fx::after {
   background-image:
     url("data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'760\' height=\'760\'><filter id=\'w\' x=\'0\' y=\'0\' width=\'100%\' height=\'100%\'><feTurbulence type=\'fractalNoise\' baseFrequency=\'.006 .013\' numOctaves=\'2\' stitchTiles=\'stitch\'/><feColorMatrix values=\'0 0 0 0 .82 0 0 0 0 .96 0 0 0 0 .93 0 0 0 -1.7 1.05\'/></filter><rect width=\'760\' height=\'760\' filter=\'url(%23w)\'/></svg>");
   background-size: 760px 760px;
   inset: -800px;
   will-change: transform;
 }
-[data-palette="lagoon"] .fx::before { opacity: .30; animation: fx-caustic-a 46s linear infinite; }
-[data-palette="lagoon"] .fx::after  { opacity: .20; animation: fx-caustic-b 58s linear infinite reverse; }
+[data-bg="iceberg"] .fx::before, [data-bg="delta"] .fx::before, [data-bg="turtle"] .fx::before { opacity: .30; animation: fx-caustic-a 46s linear infinite; }
+[data-bg="iceberg"] .fx::after, [data-bg="delta"] .fx::after, [data-bg="turtle"] .fx::after  { opacity: .20; animation: fx-caustic-b 58s linear infinite reverse; }
 /* Whole tiles per loop, so the pattern lands on itself. */
 @keyframes fx-caustic-a { to { transform: translate3d(760px, -760px, 0); } }
 @keyframes fx-caustic-b { to { transform: translate3d(-760px, 760px, 0); } }
@@ -711,19 +784,37 @@ body {
 }
 .swatch[aria-checked="true"] { background: var(--glass-in); color: var(--ink); }
 .swatch .dot { box-shadow: inset 0 0 0 1px rgba(255, 255, 255, .22); }
-.dot[data-swatch="grotto"] { background: var(--sw-grotto); }
-.dot[data-swatch="dune"] { background: var(--sw-dune); }
-.dot[data-swatch="fjord"] { background: var(--sw-fjord); }
-.dot[data-swatch="shore"] { background: var(--sw-shore); }
-.dot[data-swatch="lagoon"] { background: var(--sw-lagoon); }
-/* A heading the reader skips — the section name lives in each swatch's
-   own accessible name, so this is purely a visual grouping. */
-.pal-sect {
-  padding: 8px 10px 3px;
-  font-size: .58rem; text-transform: uppercase; letter-spacing: .1em;
-  color: var(--ink-3);
+/* One rule for every palette there will ever be. The swatch is handed
+   `--sw: var(--sw-<palette>)` inline, so the colour still comes from the
+   palette's own token — a copy in JS could drift, and fourteen hand-
+   written rules would be fourteen chances to forget one. */
+.dot { background: var(--sw, var(--accent)); }
+/* ── the two levels ──
+   The section rows and the backdrop rows share the swatch's shape, so
+   stepping in and out does not feel like arriving somewhere else. What
+   differs is the chevron, and that the second level is the radiogroup. */
+.pal-cat, .pal-back {
+  display: flex; align-items: center; gap: 9px;
+  width: 100%; min-height: 32px; padding: 0 10px;
+  border: 0; border-radius: 7px; background: none;
+  color: var(--ink-2); font: inherit; font-size: .8rem; font-weight: 500;
+  text-align: left; cursor: pointer;
 }
-.pal-sect:first-child { padding-top: 3px; }
+.pal-cat .pal-n {
+  margin-left: auto; font-weight: 400; font-size: .68rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+.pal-cat .pal-chev { color: var(--ink-3); flex: none; }
+.pal-back {
+  min-height: 28px; margin-bottom: 2px; color: var(--ink-3);
+  font-size: .72rem; font-weight: 400;
+}
+.pal-back svg { flex: none; }
+.pal-back:hover { color: var(--ink-2); }
+/* Fourteen will not fit a window at every height, so the deep level
+   scrolls rather than running off the screen. */
+.pal-group { display: flex; flex-direction: column; gap: 2px;
+  max-height: min(52vh, 420px); overflow-y: auto; }
 
 .swatch .tick-mark { margin-left: auto; opacity: 0; }
 .swatch[aria-checked="true"] .tick-mark { opacity: 1; }
