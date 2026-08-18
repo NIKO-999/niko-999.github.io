@@ -468,7 +468,10 @@
 .bt-sub { margin: 5px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
 .bt-fig { display: grid; place-items: center; padding: 6px 0 10px; }
 .bt-fig svg { width: 100%; max-width: 260px; height: auto; }
-.bt-fig .grid { fill: none; stroke: var(--rule); stroke-width: 1; }
+/* Scoped, and named so it cannot be reached from outside. `.grid` was
+   the calendar's, which is the sort of overlap that costs an afternoon
+   the day somebody gives the calendar's grid a border. */
+.bt-fig .ax { fill: none; stroke: var(--rule); stroke-width: 1; }
 .bt-fig .spoke { stroke: var(--rule); stroke-width: 1; }
 .bt-fig .area { fill: color-mix(in srgb, var(--accent) 22%, transparent);
   stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; }
@@ -479,6 +482,46 @@
 .bt-fig .cell { stroke: none; }
 .bt-fig .none { fill: color-mix(in srgb, var(--ink-3) 14%, transparent); }
 .bt-empty { margin: 18px 0; font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
+
+/* ── the lines you skip ──
+   Worst first, so the top row is the answer. The bar is how often it was
+   ticked, and the figure beside it is the sample — a line ticked 1 of 1
+   times must not read as the same fact as one ticked 40 of 40. */
+.bt-lines { display: grid; gap: 9px; margin-top: 4px; }
+.bt-line { display: grid; gap: 4px; }
+.bt-line-t { display: flex; align-items: baseline; gap: 8px; font-size: .74rem;
+  line-height: 1.4; color: var(--ink-2); }
+.bt-line-t .grow { flex: 1; }
+.bt-line-t em { font-style: normal; font-family: var(--mono); font-size: .6rem;
+  color: var(--ink-3); white-space: nowrap; }
+.bt-line-t .only { padding: 1px 5px; border-radius: 4px; background: var(--glass-in-2);
+  font-family: var(--mono); font-size: .52rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); }
+.bt-bar { height: 5px; border-radius: 3px; background: var(--glass-in-2); overflow: hidden; }
+.bt-bar i { display: block; height: 100%; border-radius: 3px; background: var(--accent); }
+/* Under half the time is not a line you sometimes forget, it is one you
+   do not run. It says so. */
+.bt-line[data-weak] .bt-bar i { background: var(--down); }
+.bt-line[data-weak] .bt-line-t em { color: var(--down); }
+
+/* ── rehearsed and traded ──
+   Two bars on one scale, so the gap between them is the reading. The
+   drilled one takes the accent because this is the backtesting screen;
+   the taken one is drawn in ink so neither is mistaken for the other. */
+.bt-vs { display: grid; gap: 10px; margin-top: 4px; }
+.bt-vs-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 10px; }
+.bt-vs-row b { grid-column: 1; font-size: .74rem; font-weight: 500; color: var(--ink-2); }
+.bt-vs-row em { grid-column: 2; grid-row: 1; font-style: normal; font-family: var(--mono);
+  font-size: .6rem; color: var(--ink-3); white-space: nowrap; }
+.bt-vs-bars { grid-column: 1 / -1; display: grid; gap: 3px; }
+.bt-vs-bars i { display: block; height: 5px; border-radius: 3px; background: var(--accent); }
+.bt-vs-bars i.bt-taken { background: color-mix(in srgb, var(--ink-2) 55%, transparent); }
+.bt-key { display: flex; gap: 14px; margin: 10px 0 0; font-family: var(--mono);
+  font-size: .54rem; letter-spacing: .07em; text-transform: uppercase; color: var(--ink-3); }
+.bt-key span { display: inline-flex; align-items: center; gap: 5px; }
+.bt-key s { width: 12px; height: 4px; border-radius: 2px; background: var(--accent);
+  text-decoration: none; }
+.bt-key s.bt-taken { background: color-mix(in srgb, var(--ink-2) 55%, transparent); }
 
 /* ── the bin ──
    Only ever on screen when it holds something, so it costs nothing on
@@ -1987,10 +2030,45 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
           </section>
         </div>
 
+        <div class="bt-charts">
+          <section class="bt-chart" aria-labelledby="btLinesH">
+            <div class="bt-ch"><h3 id="btLinesH">The lines you skip</h3>
+              <span class="grow"></span><span class="bt-n" id="btLinesN"></span></div>
+            <p class="bt-sub">How often each line was ticked, over the runs that offered it.
+              Worst first — that is the one costing you money live.</p>
+            <div id="btLines"></div>
+          </section>
+          <section class="bt-chart" aria-labelledby="btVsH">
+            <div class="bt-ch"><h3 id="btVsH">Rehearsed and traded</h3>
+              <span class="grow"></span><span class="bt-n" id="btVsN"></span></div>
+            <p class="bt-sub">Each setup, drilled against taken. One you drill and never take
+              is worth a look — so is one you take and never drill.</p>
+            <div id="btVs"></div>
+          </section>
+        </div>
+
         <div class="cal-head" style="margin-top:26px">
           <h2>Runs</h2><span class="grow"></span>
           <span class="span-meta" id="btLogMeta"></span>
           <button class="btn btn-ghost" type="button" id="btAdd">Log a backtest</button>
+        </div>
+        <div class="lg-filters">
+          <label class="sr" for="btfSetup">Setup</label>
+          <select id="btfSetup"><option value="">Any setup</option></select>
+          <label class="sr" for="btfMode">Type</label>
+          <select id="btfMode">
+            <option value="">Any type</option>
+            <option value="continuation">Continuation</option>
+            <option value="reversal">Reversal</option>
+          </select>
+          <label class="sr" for="btfSess">Candle</label>
+          <select id="btfSess"><option value="">Any candle</option></select>
+          <span class="grow"></span>
+          <!-- Off by default, unlike the trade log's. There the note IS
+               the record; here the count is, and hiding the runs you did
+               not write up would hide most of what this screen is for. -->
+          <button class="lg-only" type="button" id="btfKept" aria-pressed="false">
+            Only the ones I wrote up</button>
         </div>
         <div id="btList"></div>
       </div>
@@ -2364,6 +2442,14 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   <div class="sheet-b">
     <p class="bk-note" id="binNote"></p>
     <ul class="bin-list" id="binList"></ul>
+    <!-- Kept apart from the ledger's own rows, because restoring one
+         puts it back somewhere else entirely — and because a run and a
+         trade being confusable is exactly what the separate store
+         exists to prevent. -->
+    <div id="btBinWrap" hidden>
+      <h3 class="bin-h">Backtest runs</h3>
+      <ul class="bin-list" id="btBinList"></ul>
+    </div>
     <!-- The other kind of loss: not a record removed, but a ledger that
          is no longer the one you had. -->
     <div id="snapWrap" hidden>
@@ -2508,6 +2594,15 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
           <button type="button" class="c" id="btModeCont" aria-pressed="true">Continuation</button>
           <button type="button" class="r" id="btModeRev"  aria-pressed="false">Reversal</button>
         </div>
+      </div>
+
+      <!-- The whole reason to rehearse: running the list on a chart
+           where being wrong costs nothing. Same list as the gate, so
+           the line you skip here is the line you skip live. -->
+      <div class="field wide">
+        <label id="btCheckLbl"><span class="ic" id="btIcCheck"></span>Checklist
+          <span class="tally" id="btTally"></span></label>
+        <ul class="checks" id="btChecks" aria-labelledby="btCheckLbl"></ul>
       </div>
 
       <!-- Only on the ones you write up. A run you did not journal has no
@@ -4638,20 +4733,24 @@ const binSheet = document.getElementById('bin');
 
 function renderBin() {
   const rows = bin();
-  /* On screen if there is anything to recover of EITHER kind — a bin
-     that hides the rollback points is a safety net with a hole in it. */
+  const runs = btBin();
+  /* On screen if there is anything to recover of ANY kind — a bin that
+     hides the rollback points, or the runs, is a safety net with a hole
+     in it. */
   const snaps = snapAll().filter(r => r.day !== iso(new Date())).length;
-  binBtn.hidden = !rows.length && !snaps;
-  document.getElementById('binN').textContent = rows.length || '';
+  const n = rows.length + runs.length;
+  binBtn.hidden = !n && !snaps;
+  document.getElementById('binN').textContent = n || '';
   binBtn.setAttribute('aria-label',
-    `Recently deleted, ${rows.length} ${rows.length === 1 ? 'record' : 'records'}`);
+    `Recently deleted, ${n} ${n === 1 ? 'record' : 'records'}`);
   if (!binSheet.open) return;
 
-  document.getElementById('binNote').textContent = rows.length
+  drawBtBin();
+  document.getElementById('binNote').textContent = n
     ? `Kept for ${BIN_DAYS} days, then removed for good. Restoring puts the record `
       + `back where it was, with its chart.`
     : 'Nothing deleted in the last ' + BIN_DAYS + ' days.';
-  document.getElementById('binEmpty').hidden = !rows.length;
+  document.getElementById('binEmpty').hidden = !n;
   /* Before the early return. An empty bin is exactly the case where the
      rollback points are the only thing on this screen worth having. */
   drawSnaps();
@@ -4682,6 +4781,58 @@ function renderBin() {
   });
 }
 let binUrls = [];
+
+/* Its own section and its own list. Restoring a run puts it back on the
+   backtesting screen, which is nowhere near where a restored trade
+   goes — so the two must not read as one list. */
+function drawBtBin() {
+  const runs = btBin();
+  document.getElementById('btBinWrap').hidden = !runs.length;
+  if (!runs.length) { document.getElementById('btBinList').innerHTML = ''; return; }
+  document.getElementById('btBinList').innerHTML = [...runs].reverse().map(r => `
+    <li class="bin-row">
+      ${r.shot ? `<span class="bin-thumb" data-shot="bt-${esc(String(r.id))}"></span>` : ''}
+      <span class="bin-what">
+        <b>${esc(btBinWhat(r))}</b>
+        <span class="bin-when">${esc(r.date || '')} · deleted ${esc(binAgo(r.delAt || 0))}</span>
+      </span>
+      <button class="btn btn-ghost" type="button" data-btback="${esc(String(r.id))}">Restore</button>
+      <button class="drop" type="button" data-btforget="${esc(String(r.id))}"
+        aria-label="Remove ${esc(btBinWhat(r))} for good">✕</button>
+    </li>`).join('');
+
+  document.getElementById('btBinList').querySelectorAll('.bin-thumb[data-shot]').forEach((box) => {
+    SHOTS.get(box.dataset.shot).then((b) => {
+      if (!b) return;
+      const u = URL.createObjectURL(b);
+      box.style.backgroundImage = `url("${u}")`;
+      binUrls.push(u);
+    }).catch(() => {});
+  });
+}
+
+document.getElementById('btBinList').addEventListener('click', (ev) => {
+  const back = ev.target.closest('[data-btback]');
+  if (back) {
+    const r = btBinRestore(back.dataset.btback);
+    if (!r || !btWrite()) return;
+    renderBt();
+    renderBin();
+    document.getElementById('say').textContent = `Restored ${btBinWhat(r).toLowerCase()}.`;
+    if (!bin().length && !btBin().length) binSheet.close();
+    return;
+  }
+  const forget = ev.target.closest('[data-btforget]');
+  if (!forget) return;
+  const r = btBin().find(x => String(x.id) === String(forget.dataset.btforget));
+  if (!confirm(`Remove ${r ? btBinWhat(r).toLowerCase() : 'this run'} for good? `
+    + `This one cannot be recovered.`)) return;
+  btBinDrop(forget.dataset.btforget);
+  btWrite();
+  renderBin();
+  document.getElementById('say').textContent = 'Removed for good.';
+  if (!bin().length && !btBin().length) binSheet.close();
+});
 
 function drawSnaps() {
   const all = snapAll().filter(r => r.day !== iso(new Date()));
@@ -4750,10 +4901,12 @@ document.getElementById('binList').addEventListener('click', (ev) => {
 });
 
 document.getElementById('binEmpty').addEventListener('click', () => {
-  const n = bin().length;
+  const n = bin().length + btBin().length;
   if (!n || !confirm(`Remove all ${n} deleted ${n === 1 ? 'record' : 'records'} for good? `
     + `None of them can be recovered afterwards.`)) return;
   state.bin.splice(0).forEach(r => SHOTS.del(r.id).catch(() => {}));
+  btState.bin.splice(0).forEach(r => SHOTS.del('bt-' + r.id).catch(() => {}));
+  btWrite();
   commit(`Bin emptied — ${n} ${n === 1 ? 'record' : 'records'} gone for good.`);
   renderBin();
   binSheet.close();
@@ -5281,7 +5434,7 @@ document.getElementById('bkSave').addEventListener('click', () => {
      they typed — two files to keep is one file to lose. */
   const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
     saved: new Date().toISOString(), events: state.events,
-    bin: bin(), res: resAll(), bt: btRuns() }, null, 2)],
+    bin: bin(), res: resAll(), bt: btRuns(), btBin: btBin() }, null, 2)],
     { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5330,7 +5483,7 @@ bkFile.addEventListener('change', async () => {
   /* Same rule as the links: absent means an older file, and an older
      file must not be able to wipe a record it never carried. */
   if (Array.isArray(parsed.bt)) {
-    btState = { runs: parsed.bt };
+    btState = { runs: parsed.bt, bin: Array.isArray(parsed.btBin) ? parsed.btBin : [] };
     btWrite();
   }
   let extra = '';
@@ -6586,6 +6739,56 @@ let btState = (() => {
   }
 })();
 const btRuns = () => btState.runs;
+/* Its own bin, for the same reason it has its own store: a run and a
+   trade restore to different places, and the one thing worse than losing
+   a record is putting it back in the wrong ledger. Same thirty days and
+   same fifty-record ceiling as the ledger's, because the mistake this
+   catches is noticed on the same timescale. */
+const btBin = () => (btState.bin = Array.isArray(btState.bin) ? btState.bin : []);
+function btBinSweep() {
+  const cut = Date.now() - BIN_DAYS * 86400000;
+  const keep = btBin().filter(r => (r.delAt || 0) > cut);
+  const over = keep.length - BIN_MAX;
+  const gone = btBin().filter(r => !keep.includes(r))
+    .concat(over > 0 ? keep.splice(0, over) : []);
+  gone.forEach(r => SHOTS.del('bt-' + r.id).catch(() => {}));
+  if (gone.length) { btState.bin = keep; btWrite(); }
+}
+/* The one way out. Nothing deletes a run except through here. */
+function btBinPut(id) {
+  const i = btRuns().findIndex(r => String(r.id) === String(id));
+  if (i < 0) return null;
+  const [r] = btState.runs.splice(i, 1);
+  btBin().push(Object.assign({}, r, { delAt: Date.now() }));
+  const over = btBin().length - BIN_MAX;
+  if (over > 0) btState.bin.splice(0, over).forEach(x => SHOTS.del('bt-' + x.id).catch(() => {}));
+  return r;
+}
+function btBinRestore(id) {
+  const i = btBin().findIndex(r => String(r.id) === String(id));
+  if (i < 0) return null;
+  const back = Object.assign({}, btState.bin.splice(i, 1)[0]);
+  delete back.delAt;
+  /* An id that came back while something else held it would put two runs
+     on one key, and a row would open whichever it found first. */
+  if (btRuns().some(r => String(r.id) === String(back.id))) {
+    const was = back.id;
+    back.id = uid();
+    SHOTS.get('bt-' + was).then(b => { if (b) SHOTS.put('bt-' + back.id, b); }).catch(() => {});
+  }
+  btState.runs.push(back);
+  return back;
+}
+function btBinDrop(id) {
+  const i = btBin().findIndex(r => String(r.id) === String(id));
+  if (i < 0) return false;
+  const [r] = btState.bin.splice(i, 1);
+  SHOTS.del('bt-' + r.id).catch(() => {});
+  return true;
+}
+const btBinWhat = (r) => `${r.setup || 'Backtest'}`
+  + `${r.mode ? ' · ' + r.mode : ''}${r.sess ? ' · ' + r.sess : ''}`
+  + `${(r.note || '').trim() ? ' · written up' : ''}`;
 function btWrite() {
   try { localStorage.setItem(BKEY, JSON.stringify(btState)); return true; }
   catch (e) {
@@ -6658,6 +6861,17 @@ function btBand(cx, cy, r0, r1, a0, a1) {
 }
 
 let btUrls = [];
+/* Not notes-only by default, unlike the trade log. There the note is the
+   record; here the count is, and starting filtered would hide most of
+   what this screen exists to show. */
+const BTF = { setup: '', mode: '', sess: '', keptOnly: false };
+function btFiltered() {
+  return btRuns().filter(r =>
+    (!BTF.setup || r.setup === BTF.setup)
+    && (!BTF.mode || r.mode === BTF.mode)
+    && (!BTF.sess || r.sess === BTF.sess)
+    && (!BTF.keptOnly || btKept(r)));
+}
 
 function renderBtStrip() {
   const days = btDays(btWeek);
@@ -6712,7 +6926,7 @@ function renderBtRadar() {
     .map(v => v.toFixed(1)).join(',')).join(' ');
 
   let g = [0.25, 0.5, 0.75, 1]
-    .map(k => `<polygon class="grid" points="${poly(() => R * k)}" />`).join('');
+    .map(k => `<polygon class="ax" points="${poly(() => R * k)}" />`).join('');
   g += SESSIONS.map((_, i) => {
     const [x, y] = btPt(cx, cy, R, i * 360 / n);
     return `<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" />`;
@@ -6781,6 +6995,88 @@ function renderBtRing() {
   document.getElementById('btRingN').textContent = of ? `${hit} of ${of} days` : '';
 }
 
+/* Every distinct line across both checklists, keyed by its text. The
+   denominator is the runs that were OFFERED that line — the two lists
+   share four of their six, so a shared line has a bigger sample than a
+   type-specific one and the figure has to say so. */
+function renderBtLines() {
+  const ran = btRuns().filter(r => Array.isArray(r.checks) && r.of);
+  const seen = new Map();
+  for (const [kind, list] of Object.entries(CHECKLISTS)) {
+    list.forEach((line) => {
+      const rec = seen.get(line) || { line, of: 0, hit: 0, kinds: new Set() };
+      rec.kinds.add(kind);
+      seen.set(line, rec);
+    });
+  }
+  ran.forEach((r) => {
+    (CHECKLISTS[r.mode] || []).forEach((line) => {
+      const rec = seen.get(line);
+      if (!rec) return;
+      rec.of++;
+      if (r.checks.includes(line)) rec.hit++;
+    });
+  });
+  const rows = [...seen.values()].filter(x => x.of)
+    .sort((a, b) => (a.hit / a.of) - (b.hit / b.of));
+
+  const wrap = document.getElementById('btLines');
+  document.getElementById('btLinesN').textContent = ran.length
+    ? `${ran.length} ${ran.length === 1 ? 'run' : 'runs'}` : '';
+  if (!rows.length) {
+    wrap.innerHTML = `<p class="bt-empty">Run the checklist on a backtest and this fills in.
+      It is the only place that can tell you which line you skip when nothing is at stake.</p>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="bt-lines">` + rows.map((x) => {
+    const pc = x.hit / x.of;
+    /* C2 and C3, not a four-letter truncation — those are the words the
+       gate's own buttons use for the same two things. */
+    const only = x.kinds.size === 1 ? (x.kinds.has('reversal') ? 'C2' : 'C3') : '';
+    return `<div class="bt-line"${pc < 0.5 ? ' data-weak="1"' : ''}>
+      <span class="bt-line-t">
+        <span>${mark(x.line)}</span>
+        ${only ? `<span class="only">${esc(only)}</span>` : ''}
+        <span class="grow"></span>
+        <em>${x.hit} of ${x.of}</em>
+      </span>
+      <span class="bt-bar"><i style="width:${(pc * 100).toFixed(1)}%"></i></span>
+    </div>`;
+  }).join('') + `</div>`;
+}
+
+/* Reads the ledger, writes nothing to it. The interesting rows are the
+   lopsided ones, so they sort to the top. */
+function renderBtVs() {
+  const drill = new Map(), live = new Map();
+  const bump = (m, k) => { if (k) m.set(k, (m.get(k) || 0) + 1); };
+  btRuns().forEach(r => bump(drill, r.setup));
+  logged().forEach(e => bump(live, e.setup));
+  const keys = [...new Set([...drill.keys(), ...live.keys()])];
+  const peak = Math.max(1, ...keys.map(k => Math.max(drill.get(k) || 0, live.get(k) || 0)));
+  const rows = keys.map(k => ({ k, d: drill.get(k) || 0, t: live.get(k) || 0 }))
+    .sort((a, b) => (Math.abs(b.d - b.t) - Math.abs(a.d - a.t)) || ((b.d + b.t) - (a.d + a.t)));
+
+  const wrap = document.getElementById('btVs');
+  document.getElementById('btVsN').textContent = rows.length
+    ? `${rows.length} ${rows.length === 1 ? 'setup' : 'setups'}` : '';
+  if (!rows.length) {
+    wrap.innerHTML = `<p class="bt-empty">Name the setup on a run or a trade and both sides
+      appear here.</p>`;
+    return;
+  }
+  wrap.innerHTML = `<div class="bt-vs">` + rows.map(x => `
+    <div class="bt-vs-row">
+      <b>${esc(x.k)}</b>
+      <em>${x.d} drilled · ${x.t} taken</em>
+      <span class="bt-vs-bars">
+        <i style="width:${(x.d / peak * 100).toFixed(1)}%"></i>
+        <i class="bt-taken" style="width:${(x.t / peak * 100).toFixed(1)}%"></i>
+      </span>
+    </div>`).join('') + `</div>`
+    + `<p class="bt-key"><span><s></s>drilled</span><span><s class="bt-taken"></s>taken</span></p>`;
+}
+
 function renderBtLog() {
   const wrap = document.getElementById('btList');
   btUrls.forEach(URL.revokeObjectURL);
@@ -6793,15 +7089,30 @@ function renderBtLog() {
   document.getElementById('btSetups').innerHTML =
     setups.map(x => `<option value="${esc(x)}"></option>`).join('');
 
-  const rows = btRuns().slice().sort((a, b) =>
+  /* The filters offer what you have actually run, not a fixed list. */
+  const opt = (id, list, cur, blank) => {
+    document.getElementById(id).innerHTML = `<option value="">${blank}</option>`
+      + list.map(o => `<option value="${esc(o)}"${o === cur ? ' selected' : ''}>${esc(o)}</option>`).join('');
+  };
+  opt('btfSetup', [...new Set(btRuns().map(r => r.setup).filter(Boolean))].sort(), BTF.setup, 'Any setup');
+  opt('btfSess', SESSIONS, BTF.sess, 'Any candle');
+  document.getElementById('btfMode').value = BTF.mode;
+  document.getElementById('btfKept').setAttribute('aria-pressed', String(BTF.keptOnly));
+
+  const total = btRuns().length;
+  const rows = btFiltered().sort((a, b) =>
     a.date === b.date ? (b.at || 0) - (a.at || 0) : (a.date < b.date ? 1 : -1));
   const j = rows.filter(btKept).length;
-  document.getElementById('btLogMeta').textContent = rows.length
-    ? `${rows.length} ${rows.length === 1 ? 'run' : 'runs'} · ${j} journalled` : '';
+  document.getElementById('btLogMeta').textContent = !total ? ''
+    : rows.length === total
+      ? `${total} ${total === 1 ? 'run' : 'runs'} · ${j} journalled`
+      : `${rows.length} of ${total} · ${j} journalled`;
 
   if (!rows.length) {
-    wrap.innerHTML = `<p class="bt-empty">Nothing logged yet. A run is one setup, read back on a
-      chart you have already seen — press a day above, or the button, and write down what it did.</p>`;
+    wrap.innerHTML = `<p class="bt-empty">${total
+      ? 'Nothing matches those filters.'
+      : 'Nothing logged yet. A run is one setup, read back on a chart you have already seen — '
+        + 'press a day above, or the button, and write down what it did.'}</p>`;
     return;
   }
 
@@ -6811,7 +7122,7 @@ function renderBtLog() {
     const key = `${d.getFullYear()}-${d.getMonth()}`;
     if (key !== month) {
       month = key;
-      const same = rows.filter(x => x.date.slice(0, 7) === r.date.slice(0, 7));
+      const same = rows.filter(x => x.date.slice(0, 7) === r.date.slice(0, 7));  // of the rows SHOWN
       const sj = same.filter(btKept).length;
       html += `<div class="lg-month"><b>${d.toLocaleDateString('en-GB',
         { month: 'long', year: 'numeric' })}</b><i></i>`
@@ -6820,6 +7131,10 @@ function renderBtLog() {
     const hour = r.sess ? +r.sess.slice(0, 2) : null;
     const note = (r.note || '').trim();
     const hasR = typeof r.r === 'number' && isFinite(r.r);
+    const ticks = Array.isArray(r.checks) ? r.checks.length : 0;
+    /* The run's own figure — the list it was run against, not the one in
+       front of you now. */
+    const of = r.of || (CHECKLISTS[r.mode] || []).length || 6;
     html += `<button class="lg" type="button" data-id="${esc(String(r.id))}"
         aria-label="${esc(r.setup || 'Backtest')}, ${d.toLocaleDateString('en-GB',
           { day: 'numeric', month: 'long', year: 'numeric' })}. Opens the run.">
@@ -6836,6 +7151,9 @@ function renderBtLog() {
             r.r >= 0 ? '+' : '−'}${Math.abs(r.r).toFixed(1)}R</span>` : ''}
         </span>
         <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : 'No note on this one.'}</p>
+        ${ticks ? `<span class="lg-rules"><span class="lg-pips">`
+          + Array.from({ length: of }, (_, i) => `<i class="${i < ticks ? 'on' : ''}"></i>`).join('')
+          + `</span>${ticks} of ${of}</span>` : ''}
       </span>
       ${r.shot ? `<span class="lg-shot" data-shot="bt-${esc(String(r.id))}"></span>`
                : '<span class="lg-noshot"></span>'}
@@ -6857,6 +7175,8 @@ function renderBt() {
   renderBtStrip();
   renderBtRadar();
   renderBtRing();
+  renderBtLines();
+  renderBtVs();
   renderBtLog();
   const n = btRuns().length, st = btStreak(), best = btBest();
   /* The streak leads. The total only ever climbs, so it says nothing
@@ -6869,20 +7189,44 @@ function renderBt() {
 }
 
 /* ── the sheet ── */
-[['btIcTime', 'clock'], ['btIcTag', 'tag'], ['btIcMode', 'mode'],
+[['btIcTime', 'clock'], ['btIcTag', 'tag'], ['btIcMode', 'mode'], ['btIcCheck', 'check'],
  ['btIcRisk', 'pulse'], ['btIcImage', 'image'], ['btIcNote', 'note']]
   .forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.innerHTML = icon(k); });
 
 document.getElementById('btSess').innerHTML = SESSIONS.map(x =>
   `<option value="${esc(x)}">${esc(x)}${PROFILE[+x.slice(0, 2)] ? ' · ' + PROFILE[+x.slice(0, 2)].name : ''}</option>`).join('');
 
-let btEditing = null, btMode = 'continuation';
+let btEditing = null, btMode = 'continuation', btTicked = new Set();
 let btShotBlob = null, btShotUrl = null, btShotDirty = false;
+
+/* Stored as the rule TEXT, exactly as the trade sheet stores it, and for
+   the identical reason: the lists are meant to be edited as the strategy
+   matures, and an index would silently re-point every run already
+   written. It also means a run and a trade that ticked the same line
+   agree on what that line was. */
+function renderBtChecks() {
+  const list = CHECKLISTS[btMode] || [];
+  document.getElementById('btChecks').innerHTML = list.map(line =>
+    `<li><button type="button" data-line="${esc(line)}" aria-pressed="${btTicked.has(line)}">
+      <span class="box" aria-hidden="true">${icon('tick', 11)}</span>${esc(line)}</button></li>`).join('');
+  document.getElementById('btTally').textContent = `${btTicked.size}/${list.length}`;
+}
+document.getElementById('btChecks').addEventListener('click', (ev) => {
+  const b = ev.target.closest('button');
+  if (!b) return;
+  btTicked.has(b.dataset.line) ? btTicked.delete(b.dataset.line) : btTicked.add(b.dataset.line);
+  renderBtChecks();
+});
 
 function btSetMode(v) {
   btMode = v;
   document.getElementById('btModeCont').setAttribute('aria-pressed', String(v === 'continuation'));
   document.getElementById('btModeRev').setAttribute('aria-pressed', String(v === 'reversal'));
+  /* Switching type drops any tick the new list does not carry — the
+     record must not claim you confirmed something never shown to you. */
+  const keep = new Set(CHECKLISTS[v] || []);
+  btTicked = new Set([...btTicked].filter(l => keep.has(l)));
+  renderBtChecks();
 }
 document.getElementById('btModeCont').addEventListener('click', () => btSetMode('continuation'));
 document.getElementById('btModeRev').addEventListener('click', () => btSetMode('reversal'));
@@ -6969,6 +7313,10 @@ function btOpen(date, id) {
   document.getElementById('btNote').value = run ? (run.note || '') : '';
   document.getElementById('btDelete').hidden = !run;
   document.getElementById('btSave').textContent = run ? 'Save changes' : 'Save run';
+  /* Before setMode, which prunes anything the chosen list does not
+     carry — set after it and the ticks would survive a type they do not
+     belong to. */
+  btTicked = new Set(run && Array.isArray(run.checks) ? run.checks : []);
   btSetMode(run ? (run.mode || 'continuation') : 'continuation');
   btSetShot(null);
   btShotDirty = false;
@@ -6998,6 +7346,8 @@ document.getElementById('btForm').addEventListener('submit', async (ev) => {
     setup: document.getElementById('btSetup').value.trim(),
     mode: btMode,
     note: document.getElementById('btNote').value.trim(),
+    checks: [...btTicked],
+    of: (CHECKLISTS[btMode] || []).length,
     at: Date.now(),
   };
   if (r !== null) rec.r = r;
@@ -7023,15 +7373,16 @@ document.getElementById('btForm').addEventListener('submit', async (ev) => {
 });
 
 document.getElementById('btDelete').addEventListener('click', () => {
-  const run = btRuns().find(x => x.id === btEditing);
+  /* Into the bin, not gone. Nothing here asks first, because there is a
+     way back — the asking happens at the one delete that is final, which
+     is emptying the bin. */
+  const run = btBinPut(btEditing);
   if (!run) return;
-  if (btKept(run) && !confirm('Delete this run? What you wrote about it goes with it.')) return;
-  btState.runs = btRuns().filter(x => x.id !== btEditing);
   if (!btWrite()) return;
-  SHOTS.del('bt-' + run.id).catch(() => {});
   btSheet.close();
   renderBt();
-  document.getElementById('say').textContent = 'Run deleted.';
+  renderBin();
+  document.getElementById('say').textContent = 'Run deleted — recoverable for 30 days.';
 });
 
 document.getElementById('btX').addEventListener('click', () => btSheet.close());
@@ -7050,6 +7401,16 @@ document.getElementById('btAdd').addEventListener('click', () => btOpen(iso(new 
 document.getElementById('btStrip').addEventListener('click', (ev) => {
   const cell = ev.target.closest('.bt-day');
   if (cell) btOpen(cell.dataset.date);
+});
+['btfSetup', 'btfMode', 'btfSess'].forEach((id) => {
+  document.getElementById(id).addEventListener('change', (ev) => {
+    BTF[id === 'btfSetup' ? 'setup' : id === 'btfMode' ? 'mode' : 'sess'] = ev.target.value;
+    renderBtLog();
+  });
+});
+document.getElementById('btfKept').addEventListener('click', () => {
+  BTF.keptOnly = !BTF.keptOnly;
+  renderBtLog();
 });
 document.getElementById('btList').addEventListener('click', (ev) => {
   const row = ev.target.closest('.lg');
@@ -7087,6 +7448,7 @@ document.getElementById('fDate').value = iso(new Date());
 /* Before the first render, so anything that timed out overnight is gone
    from the count rather than shown and then quietly vanishing. */
 binSweep();
+btBinSweep();
 renderAll();
 /* Metrics is the landing view: the clock tells you what to do next and
    the figures tell you whether it has been working. The calendar is
