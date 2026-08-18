@@ -319,18 +319,76 @@
    two carets in one panel disagreeing about which way is open is worse
    than either choice. */
 .cp-align > button[aria-expanded="true"] .ic { transform: rotate(180deg); }
-.cp-align table {
-  margin-top: 9px; border-collapse: collapse;
-  font-family: var(--mono); font-size: .68rem;
+/* Conditions one end, the table the other: what has to happen, then
+   which chart it has to happen on. Swapped in the DOM rather than with
+   flex order, so a screen reader reads them in the order they appear —
+   order: would have put them on screen one way and spoken them the
+   other. The gap between the two is the point rather than wasted room. */
+/* One row pitch for both halves. Left to themselves a list of sentences
+   and a table of two-character cells settle at different line heights,
+   and the two columns drift apart by half a pixel a row — invisible at
+   the top, three pixels out by the bottom. Naming the pitch once and
+   holding both to it is the only way they stay level. */
+.cp-align-box {
+  --pitch: 21px;
+  margin-top: 9px;
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 24px; flex-wrap: wrap;
 }
-.cp-align th, .cp-align td { text-align: left; padding: 4px 22px 4px 0; }
+.cp-align table { border-collapse: collapse; font-family: var(--mono); font-size: .68rem; }
+.cp-psp { max-width: 46ch; }
+/* The two headings are the same type at the same size, so the blocks
+   start on one line rather than a few pixels apart — which is the kind
+   of gap you cannot name but can always see. */
+.cp-psp h4, .cp-align thead th {
+  font-family: var(--mono); font-size: .54rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .09em; color: var(--ink-3);
+  line-height: 1.4;
+}
+/* The same heading rhythm as the table beside it — a rule under the
+   name and the same space below it — so the two blocks read as one pair
+   of columns rather than two things that happen to be side by side.
+   Without it the conditions sat five pixels high of the pairings. */
+/* A rule under the name, and the same space below it as the table's own
+   header — so the two blocks read as one pair of columns rather than two
+   things that happen to be beside each other. */
+.cp-psp h4 { margin: 0; padding-bottom: 5px; border-bottom: 1px solid var(--rule); }
+.cp-psp ol { margin-top: 0; padding-top: 7px; }
+.cp-psp ol {
+  margin: 0; padding: 0; list-style: none; counter-reset: p; display: grid;
+}
+.cp-psp li {
+  display: grid; grid-template-columns: 14px minmax(0, 1fr); gap: 8px;
+  align-items: center; min-height: var(--pitch);
+  counter-increment: p; font-size: .74rem; line-height: 1.35; color: var(--ink-2);
+}
+.cp-psp li::before {
+  content: counter(p);
+  font-family: var(--mono); font-size: .6rem; color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+/* The level is right-aligned and the arrow leads the answer, so all five
+   arrows stack into one vertical line. That line IS the reading: the eye
+   lands on it and the pairing is read sideways without being parsed. */
+.cp-align th, .cp-align td { padding: 0; }
+.cp-align tbody th, .cp-align tbody td { height: var(--pitch); line-height: 1.35; }
 .cp-align thead th {
-  font-size: .54rem; font-weight: 500; text-transform: uppercase;
-  letter-spacing: .09em; color: var(--ink-3);
-  padding-bottom: 6px; border-bottom: 1px solid var(--rule);
+  text-align: left; padding-bottom: 5px; border-bottom: 1px solid var(--rule);
 }
-.cp-align tbody th { font-weight: 400; color: var(--ink-2); }
+.cp-align thead th:first-child { text-align: right; padding-right: 26px; }
+.cp-align tbody th {
+  text-align: right; padding-right: 26px;
+  font-weight: 400; color: var(--ink-2);
+}
 .cp-align tbody td { font-weight: 500; color: var(--accent); }
+/* The arrow sits in the padding the header already reserved, so it lines
+   up under the gap between the two column names rather than beside it. */
+.cp-align tbody td::before {
+  content: '→';
+  display: inline-block; width: 18px; margin-left: -22px;
+  color: var(--ink-3); font-weight: 400;
+}
+/* Both halves open the same distance below their heading. */
 .cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
 
 /* ── the bin ──
@@ -1908,20 +1966,27 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             </div>
             <ol class="cp-list" id="gList"></ol>
 
-            <!-- The last line of the checklist asks which timeframe is
-                 allowed to confirm the swing. This answers it, folded by
-                 default once you have put it away. -->
+            <!-- The last line of the checklist asks whether the swing is
+                 protected. Two things answer it: WHICH chart is allowed
+                 to confirm it, and WHAT has to happen on that chart. One
+                 fold, because they are one answer. -->
             <div class="cp-align">
-              <button type="button" id="alToggle" aria-expanded="false" aria-controls="alTable">
-                <span class="ic" id="alCaret" aria-hidden="true"></span>Aligned timeframes
+              <button type="button" id="alToggle" aria-expanded="false" aria-controls="alBox">
+                <span class="ic" id="alCaret" aria-hidden="true"></span>Confirming a swing
               </button>
-              <table id="alTable" hidden>
-                <caption class="sr">Which timeframe confirms a swing, by the level or SMT that set it up</caption>
-                <thead>
-                  <tr><th scope="col">Level/SMT tapped</th><th scope="col">Confirms on</th></tr>
-                </thead>
-                <tbody id="alBody"></tbody>
-              </table>
+              <div class="cp-align-box" id="alBox" hidden>
+                <div class="cp-psp">
+                  <h4>What makes it protected</h4>
+                  <ol id="pspList"></ol>
+                </div>
+                <table>
+                  <caption class="sr">Which timeframe confirms a swing, by the level or SMT that set it up</caption>
+                  <thead>
+                    <tr><th scope="col">Level/SMT tapped</th><th scope="col">Confirms on</th></tr>
+                  </thead>
+                  <tbody id="alBody"></tbody>
+                </table>
+              </div>
             </div>
           </div>
 
@@ -4244,13 +4309,23 @@ const ALIGN = [
   ['30M',   '3M'],
   ['15M',   '1M'],
 ];
+/* The other half of the answer. Four, because the fifth thing you could
+   say here is already a line of the checklist above it. */
+const PROTECTS = [
+  'A level or SMT is reached',
+  'A candle turns against it on the higher timeframe',
+  'On the aligned chart: expansion in, met with expansion out',
+  'The close clears the body — below it for a high, above it for a low',
+];
 const AKEY = 'ledger.align.v1';
 
 (() => {
   const btn = document.getElementById('alToggle');
-  const tbl = document.getElementById('alTable');
+  const tbl = document.getElementById('alBox');
   document.getElementById('alBody').innerHTML = ALIGN.map(([lv, on]) =>
     `<tr><th scope="row">${esc(lv)}</th><td>${esc(on)}</td></tr>`).join('');
+  document.getElementById('pspList').innerHTML =
+    PROTECTS.map(x => `<li><span>${mark(x)}</span></li>`).join('');
 
   /* Folded unless you last left it open. Defaulting to open would put a
      five-row table under the checklist every time the gate is unfolded,
