@@ -458,12 +458,31 @@
 .bt-charts {
   margin-top: 26px; display: grid; gap: 18px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  /* Each card takes its own height. Stretched, a folded panel beside an
+     open one is a title bar sitting on 300px of nothing. */
+  align-items: start;
 }
 .bt-chart { border: 1px solid var(--glass-line); border-radius: 12px;
   background: var(--glass-in); padding: 14px 16px 6px; }
 .bt-ch { display: flex; align-items: baseline; gap: 10px; }
 .bt-ch .grow { flex: 1; }
+/* The heading IS the control. A button inside the h3 rather than an h3
+   inside a button — the second is invalid, and a screen reader that
+   loses the heading loses the only way to skim four panels. */
 .bt-chart h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.bt-chart h3 button {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; color: var(--ink);
+}
+.bt-chart h3 button:hover { color: var(--accent); }
+.bt-chart h3 button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.bt-chart h3 .ic { display: inline-flex; color: var(--ink-3); transition: transform .16s; }
+/* 180, not 90 — the shared chevron points DOWN, and the gate's carets
+   turn the same way. A quarter turn lays it on its side. */
+.bt-chart h3 button[aria-expanded="true"] .ic { transform: rotate(180deg); }
+/* Shut, the panel is its own title bar and nothing else. */
+.bt-chart:has(> .bt-ch > h3 > button[aria-expanded="false"]) { padding-bottom: 14px; }
 .bt-n { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
 .bt-sub { margin: 5px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
 .bt-fig { display: grid; place-items: center; padding: 6px 0 10px; }
@@ -2017,33 +2036,49 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 
         <div class="bt-charts">
           <section class="bt-chart" aria-labelledby="btRadarH">
-            <div class="bt-ch"><h3 id="btRadarH">Which candle</h3>
+            <div class="bt-ch">
+              <h3 id="btRadarH"><button type="button" id="btRadarT" aria-expanded="false" aria-controls="btRadarB">
+                <span class="ic" aria-hidden="true"></span>Which candle</button></h3>
               <span class="grow"></span><span class="bt-n" id="btRadarN"></span></div>
-            <p class="bt-sub">Every run logged, by the candle it was in. The short arm is the one you never rehearse.</p>
+            <div class="bt-body" id="btRadarB" hidden>
+              <p class="bt-sub">Every run logged, by the candle it was in. The short arm is the one you never rehearse.</p>
             <div class="bt-fig" id="btRadar"></div>
+            </div>
           </section>
           <section class="bt-chart" aria-labelledby="btRingH">
-            <div class="bt-ch"><h3 id="btRingH">Showing up</h3>
+            <div class="bt-ch">
+              <h3 id="btRingH"><button type="button" id="btRingT" aria-expanded="false" aria-controls="btRingB">
+                <span class="ic" aria-hidden="true"></span>Showing up</button></h3>
               <span class="grow"></span><span class="bt-n" id="btRingN"></span></div>
-            <p class="bt-sub">Eight weeks, newest on the outside. One ring a week, one wedge a day.</p>
+            <div class="bt-body" id="btRingB" hidden>
+              <p class="bt-sub">Eight weeks, newest on the outside. One ring a week, one wedge a day.</p>
             <div class="bt-fig" id="btRing"></div>
+            </div>
           </section>
         </div>
 
         <div class="bt-charts">
           <section class="bt-chart" aria-labelledby="btLinesH">
-            <div class="bt-ch"><h3 id="btLinesH">The lines you skip</h3>
+            <div class="bt-ch">
+              <h3 id="btLinesH"><button type="button" id="btLinesT" aria-expanded="false" aria-controls="btLinesB">
+                <span class="ic" aria-hidden="true"></span>The lines you skip</button></h3>
               <span class="grow"></span><span class="bt-n" id="btLinesN"></span></div>
-            <p class="bt-sub">How often each line was ticked, over the runs that offered it.
+            <div class="bt-body" id="btLinesB" hidden>
+              <p class="bt-sub">How often each line was ticked, over the runs that offered it.
               Worst first — that is the one costing you money live.</p>
             <div id="btLines"></div>
+            </div>
           </section>
           <section class="bt-chart" aria-labelledby="btVsH">
-            <div class="bt-ch"><h3 id="btVsH">Rehearsed and traded</h3>
+            <div class="bt-ch">
+              <h3 id="btVsH"><button type="button" id="btVsT" aria-expanded="false" aria-controls="btVsB">
+                <span class="ic" aria-hidden="true"></span>Rehearsed and traded</button></h3>
               <span class="grow"></span><span class="bt-n" id="btVsN"></span></div>
-            <p class="bt-sub">Each setup, drilled against taken. One you drill and never take
+            <div class="bt-body" id="btVsB" hidden>
+              <p class="bt-sub">Each setup, drilled against taken. One you drill and never take
               is worth a look — so is one you take and never drill.</p>
             <div id="btVs"></div>
+            </div>
           </section>
         </div>
 
@@ -7170,6 +7205,30 @@ function renderBtLog() {
     }).catch(() => {});
   });
 }
+
+/* Shut on a machine that has never opened them. Four panels of analysis
+   between the week and the runs is four panels you scroll past to reach
+   the thing you came for — and a reference you cannot put away stops
+   being a reference and becomes furniture. */
+const BFKEY = 'backtest.folds.v1';
+const BTFOLD = (() => {
+  try { return Object.assign({}, JSON.parse(localStorage.getItem(BFKEY) || '{}')); }
+  catch (e) { return {}; }
+})();
+['btRadar', 'btRing', 'btLines', 'btVs'].forEach((k) => {
+  const btn = document.getElementById(k + 'T');
+  const body = document.getElementById(k + 'B');
+  btn.innerHTML = `<span class="ic" aria-hidden="true">${icon('chev', 12)}</span>`
+    + btn.textContent.trim();
+  const fold = (on) => {
+    btn.setAttribute('aria-expanded', String(on));
+    body.hidden = !on;
+    BTFOLD[k] = on;
+    try { localStorage.setItem(BFKEY, JSON.stringify(BTFOLD)); } catch (e) {}
+  };
+  btn.addEventListener('click', () => fold(btn.getAttribute('aria-expanded') !== 'true'));
+  fold(BTFOLD[k] === true);
+});
 
 function renderBt() {
   renderBtStrip();
