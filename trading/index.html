@@ -5277,6 +5277,48 @@ const SEED = [{
   tags: ['swings', 'CISD', 'alignment', 'SMT', 'gaps'],
   added: null,
   opened: null,
+}, {
+  id: 'seed-continuation',
+  kind: 'video',
+  note: 'continuation',
+  art: 'cont',
+  title: 'The continuation model',
+  url: 'https://youtu.be/7Fq5CZorvFA',
+  len: '34:18',
+  sum: 'The framework is written out above. These five are for the alignment '
+     + 'itself — the same day read down four charts, five times over — and the '
+     + 'last one is a loss, which is the only one of them you can learn the V from.',
+  marks: [
+    [614,  'The textbook one, daily down to the entry'],
+    [888,  'The entry missed, and the one taken instead'],
+    [1160, 'Gaps give continuation — the trade came from the gap'],
+    [1500, 'No gap at all, so a lower-timeframe SMT instead'],
+    [1938, 'The loss: everything there except the V'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['continuation', 'gaps', 'CISD', 'SMT'],
+  added: null,
+  opened: null,
+}, {
+  id: 'seed-reversal',
+  kind: 'video',
+  note: 'reversal',
+  art: 'rev',
+  title: 'The reversal model',
+  url: 'https://youtu.be/n8xNJJzy5Ic',
+  len: '36:58',
+  sum: 'The two-stage rule and its five shapes are above. Watch these for the '
+     + 'part that does not write down — deciding, live, that a second stage has '
+     + 'actually arrived rather than that one is about to.',
+  marks: [
+    [833,  'A reversal inside a continuation day'],
+    [1025, 'A full reversal day, two stages then the CISD'],
+    [1422, 'Nothing by 10:00 — confirmed on the lower timeframe'],
+    [1645, 'No gap to trade from. The change in delivery is the whole entry'],
+    [1818, 'A stop that came within a hair and held'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['reversal', 'two-stage SMT', 'PSP', 'HOD'],
+  added: null,
+  opened: null,
 }];
 
 function readRes() {
@@ -5385,6 +5427,23 @@ const DIAG = {
     <path class="mv" d="M30 20 58 71 84 38 101 53 122 12" />
     <circle class="mk" cx="58" cy="71" r="5" />
     <circle class="mk" cx="101" cy="53" r="4" />
+  </svg>`,
+  /* A gap tapped in passing, and the leg carrying on through it. One
+     mark, because there is one decision in the whole trade. */
+  cont: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="gp" d="M68 52H98" />
+    <path class="mv" d="M26 70 60 34 84 52 122 14" />
+    <circle class="mk" cx="84" cy="52" r="5" />
+  </svg>`,
+  /* Two pokes below the level — the two stages — and only then the
+     candle that expands away. Nothing turns on the first one alone. */
+  rev: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="lv" d="M20 54H128" />
+    <path class="mv" d="M24 20 46 68 62 46 84 66 104 62" />
+    <circle class="mk" cx="46" cy="68" r="4.5" />
+    <circle class="mk" cx="84" cy="66" r="4.5" />
+    <line class="wk" x1="104" y1="6" x2="104" y2="62" />
+    <rect class="hl" x="96" y="12" width="16" height="32" rx="1.5" />
   </svg>`,
   /* Down fast, up fast, and the close back through the range it came
      from. Both legs the same steepness, which is the whole point. */
@@ -5784,6 +5843,219 @@ const NOTES = [
         'You are on the aligned timeframe — and only that one',
         'Expansion in, met with expansion back out',
         'The close clears the body of the candle that turned',
+      ],
+    },
+  },
+  {
+    id: 'continuation',
+    title: 'The continuation',
+    sub: 'one stage of SMT, aligned down',
+    lede: 'The continuation is the trade AFTER the turn has already printed. '
+        + 'The daily has reversed somewhere; every chart below it then gets '
+        + 'lined up with a move that is already underway. It asks for less than '
+        + 'the reversal does — ONE SMT, anywhere in the sequence — because the '
+        + 'hard part, calling the turn, happened in front of you rather than '
+        + 'having to be predicted.',
+    sit: [
+      { n: '01', h: 'The daily framework',
+        p: 'Three shapes, and the day is one of them. Each one names the draw, and the continuation is the leg that goes to collect it.',
+        li: ['A range: the high is purged, a reversal closes, the days after go for the range low',
+             'External to internal: a key level is met, and the discounted gap below is the draw',
+             'Internal to external: the gap is filled, a reversal closes, the draw is the high above',
+             'None of the three means there is no continuation — only price'] },
+      { n: '02', h: 'One stage is enough',
+        p: 'The reversal model needs two. This one needs one, anywhere in the sequence. You are not being asked to call anything.',
+        li: ['One SMT somewhere in price, and that is the whole requirement',
+             'A PSP counts — it is an SMT in candle form',
+             'Do not stand there waiting for a second stage. This is not that trade',
+             'No SMT anywhere is the one thing that stops it'] },
+      { n: '03', h: 'The 4H hands you the level',
+        p: 'Four ways it can do it. Take the first one the chart actually gives you rather than the one you wanted.',
+        li: ['A gap: the next candle taps it and carries on',
+             'Or an SMT on the gap — then it needs no tap at all',
+             'Or a PSP closing as a reversal: hunt inside the candle that follows',
+             'Or just a swing point, and an SMT from the 1H, 30M or 15M inside the wick'] },
+      { n: '04', h: 'The 1H and 30M carry the leg',
+        p: 'These are the candles a 4H expansion is made of. They expand out of gaps, and the gaps are where the entries are.',
+        li: ['The new hour or half-hour opens, taps a gap, puts in a swing',
+             'Hunt inside that wick and the candle after it — nowhere else',
+             'Missed it? Wait for a NEW swing with its own SMT and hunt that one',
+             'Once it is expanding away, it is gone. Stop hunting'] },
+      { n: '05', h: 'Align down and wait for the V',
+        p: 'From the 1H or 30M you go to the 5M or the 3M. Expansion into the gap met with expansion back out — that V is the change in delivery, and that is what makes the low protected.',
+        li: ['Enter on the change in delivery, or on the CISD as the gap is tapped back',
+             'No gap on the lower chart? Wait for a swing to be made, then purged',
+             'A close beyond the bodies with no level behind it is not a CISD',
+             'Miss the change in delivery and there is nearly always a CISD behind it'] },
+      { n: '06', h: 'Nothing has turned yet',
+        p: 'The gap is tapped and no reversal candle has closed on the 15M, 30M or 1H. That is a not yet rather than a no.',
+        li: ['Wait for the candle to CLOSE beyond the body',
+             'That close is the CISD forming',
+             'Then hunt entries inside the candle after it',
+             'Entering before the close is entering a setup that has not printed'] },
+    ],
+    rules: [
+      ['The continuation is the half you did not have to call.',
+       'The turn has already happened on the daily. The work is lining every '
+       + 'chart below it up with a move that is underway — not being early to '
+       + 'one that is not. That is why it is the easier of the two models and '
+       + 'why it is the one to learn first.'],
+      ['One stage of SMT, and one is enough.',
+       'The reversal needs two because it is calling a turn that has not '
+       + 'happened. Here the turn is behind you, so one SMT anywhere in the '
+       + 'sequence is the whole confirmation. Waiting for a second stage costs '
+       + 'you the entry and buys you nothing.'],
+      ['Gaps give continuation.',
+       'First thing to look for on every chart: a gap tapped and expanded away '
+       + 'from. An SMT sitting on the gap is better still — then the tap is '
+       + 'optional and the candle can simply open and go.'],
+      ['A PSP is an SMT.',
+       'One asset closes up while the correlated one closes down. If the 4H has '
+       + 'handed you that, your one stage is already in and there is nothing '
+       + 'further to find.'],
+      ['Align the 1H or 30M to the 5M or the 3M.',
+       'That is the pairing. During the New York session the 15M rarely gives an '
+       + 'entry at all, so dropping to the 5M or 3M is the working version — '
+       + 'going lower than that to find one the aligned chart refuses is the '
+       + 'same mistake as in every other model.'],
+      ['The V is the confirmation.',
+       'Expansion into the gap met with expansion back out, closing beyond the '
+       + 'bodies. Without the V it is a tap, and a tap is not a protected low.'],
+      ['No gap means wait for a swing to be purged.',
+       'A swing forms, price leaves it, comes back and takes it, and expands '
+       + 'away. That purge and the close after it is the entry. A close that '
+       + 'took no swing and touched no level is not one.'],
+      ['Missed entries are not chased.',
+       'Once the leg is expanding you missed it in the wick and you missed it in '
+       + 'the candle after. Wait for a fresh swing with a fresh SMT. There is '
+       + 'usually a CISD continuation still to come — take that or take nothing.'],
+      ['At least 2R, partial there, let the rest run.',
+       'If the draw is not 2R away then the trade does not exist. Partial at 2R '
+       + 'and leave the remainder for 3R or the draw itself. The target is a '
+       + 'level, not a number that sounded right.'],
+      ['The one that lost had no V.',
+       'The range was there, the SMT was there, the gap was there, and the change '
+       + 'in delivery eventually came. But it came slowly, and the gap was taken '
+       + 'as reason enough to be in before it did. A correct setup can still lose '
+       + '— that one had a tell.'],
+    ],
+    check: {
+      h: 'Before a continuation',
+      li: [
+        'The daily is in one of the three frameworks',
+        'One SMT somewhere in the sequence — one is enough',
+        'A gap, a PSP or a swing point on the 4H',
+        'The 1H or 30M swing is in, and you are on the 5M or 3M',
+        'Expansion in, expansion out, closed beyond the bodies',
+      ],
+    },
+  },
+  {
+    id: 'reversal',
+    title: 'The reversal',
+    sub: 'two stages, at the extreme',
+    lede: 'The reversal catches the extreme itself — the wick of the daily '
+        + 'candle, before the day has told anybody which way it is going. What '
+        + 'buys you that is a TWO-stage SMT. One stage is a candidate; two is a '
+        + 'confirmed high or low of day. Without the second there is no trade '
+        + 'here at all — you let the reversal finish forming and take the '
+        + 'continuation off the back of it instead.',
+    sit: [
+      { n: '01', h: 'The level comes first',
+        p: 'The day has to reach something before it can turn away from it. No relevant level, no reversal — the daily simply carries on.',
+        li: ['An old high or low, a previous day high or low, or a gap',
+             'If the nearest level is a long way off in price, it is not today',
+             'The level is what you turn away from — the SMT is what says it turned',
+             'Reaching it is step one of two, not the setup'] },
+      { n: '02', h: 'Two stages, always',
+        p: 'One SMT is a candidate. Two is a confirmed high or low of day. That is the entire difference between this and the continuation.',
+        li: ['First stage: an SMT at the level',
+             'Second stage: a divergence, PSP or strength switch confirming it',
+             'No second stage, no reversal trade — wait and take the continuation',
+             'A one-stage extreme gets rerun. The second stage is what stops that'] },
+      { n: '03', h: 'Five shapes, one confirmation',
+        p: 'The second stage arrives in one of five ways. Which one depends on what the day has already done, not on which you prefer.',
+        li: ['An SMT at the level, then a PSP on the previous candle',
+             'An SMT at the level, then a further divergence — a strength switch, no PSP',
+             'An SMT with a swing low or high, then a PSP closing against it',
+             'An SMT with the previous day level, then a strength switch on the 4H',
+             'Or none of those before 10:00 — then the 30M or 15M confirms it'] },
+      { n: '04', h: 'The 10:00 confirmation',
+        p: 'Nothing confirmed and you still expect the reversal? Drop to the 30M or 15M. Holding out for the 2 p.m. close is waiting until the move is over.',
+        li: ['No two-stage on the 4H or 1H before 10:00',
+             'The 10:00 candle takes the previous low on the correlated asset, not on yours',
+             'That close is the PSP, and the second stage is in',
+             'Confirmed lower is still confirmed. Confirmed late is not'] },
+      { n: '05', h: 'Never anticipate the PSP',
+        p: 'A candle that is going to close bullish has not closed bullish. Wicks flip, and this is the most expensive place on the chart to be early.',
+        li: ['Wait for the candle to CLOSE before calling it a PSP',
+             'A long wick flips and reruns the low you just bought',
+             'Until it closes you hold one stage — and one stage gets taken',
+             'If you are anticipating a PSP, you do not have one'] },
+      { n: '06', h: 'The reversal inside the day',
+        p: 'Every day has a reversal in it somewhere, continuation days included. Trading the wick of one asks for exactly the same two stages.',
+        li: ['A daily key level is met and the reversal candle closes',
+             'You want the turn inside it, before the day is obvious to anybody',
+             'First stage, then second stage, then the aligned timeframe',
+             'A continuation day does not lower the requirement'] },
+    ],
+    rules: [
+      ['Two stages, or it is not this trade.',
+       'One SMT at a level is a candidate for a high or low of day. Two is a '
+       + 'confirmation. If the second never comes the reversal still happens '
+       + 'without you — let it form and take the continuation off the other side.'],
+      ['The level is a precondition, not a signal.',
+       'A relevant high, low or gap has to be reached first. With price nowhere '
+       + 'near one there is nothing for the day to reverse against, and the SMT '
+       + 'you go and find will be noise.'],
+      ['Wait for the close. Always.',
+       'A PSP is a closed candle, never a candle that looks like it will close '
+       + 'that way. The wick flips, the low gets rerun, and you were long the '
+       + 'exact extreme that was about to be taken. Anticipating a PSP is the '
+       + 'single most expensive habit in this model.'],
+      ['A close near the extreme usually takes it.',
+       'When a candle closes bullish and closes near its high, that high tends '
+       + 'to go on the next one. When the correlated asset takes it and yours '
+       + 'does not, that is the divergence arriving on schedule — it is the '
+       + 'clearest way to see a second stage coming before it prints.'],
+      ['By 10:00, confirm lower.',
+       'If the higher timeframes have not given you a two-stage by then, the 30M '
+       + 'or the 15M will. Holding out for a 4H or 1H confirmation means the '
+       + 'reversal completes while you watch it. The move does not wait for the '
+       + 'candle you would rather read it on.'],
+      ['Risk off the protected extreme.',
+       'The low that got taken and closed back above is the protected low, and '
+       + 'that is where the stop belongs. On a volatile day that stop can be very '
+       + 'wide; risking off the bodies instead is allowed, and the price of it is '
+       + 'knowing you are close to being taken out.'],
+      ['The entries are the continuation entries.',
+       'A CISD — the low taken or diverged, then a close above the down-close '
+       + 'candles. Or the continuation entry — displacement, a tap back into the '
+       + 'gap, then the close beyond the candle that tapped it. There is no '
+       + 'separate reversal entry to learn.'],
+      ['Partial at 2R, every time.',
+       'Then let the rest run: the internal range liquidity, the previous day '
+       + 'level, the far side of the range. The reversal is the trade that can '
+       + 'carry a week, and it only does that if some of it is still on.'],
+      ['A stop that came close and held is the read working.',
+       'When the sequence is right — level, SMT, PSP, change in delivery — an '
+       + 'extreme that comes within a few ticks and does not take you out is the '
+       + 'model doing its job. Moving the stop because it got close is how a '
+       + 'correct trade is turned into a loss.'],
+      ['Take the one with the range in it.',
+       'When both correlated assets are set to go the same way, the one worth '
+       + 'trading is the one that gives you the room. Starting from the clearly '
+       + 'weaker or clearly stronger of the two is the simpler habit — but the '
+       + 'range is what pays.'],
+    ],
+    check: {
+      h: 'Before a reversal',
+      li: [
+        'A relevant level has been reached',
+        'First stage: an SMT at that level',
+        'Second stage: a PSP or strength switch, on a CLOSED candle',
+        'The change in delivery on the aligned timeframe',
+        'Risk off the protected extreme, and the draw at least 2R away',
       ],
     },
   },
