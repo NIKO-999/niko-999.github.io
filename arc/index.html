@@ -192,7 +192,10 @@
   background: rgba(255, 255, 255, .17);
   pointer-events: none;
 }
-.bar[data-tone="strong"] .done { background: rgba(0, 0, 0, .11); }
+/* The fill has to darken a pale bar and lighten a dark one, or a bar in
+   the wrong tone shows no progress at all. */
+.bar[data-tone="light"] .done, .bar[data-tone="muted"] .done { background: rgba(0, 0, 0, .11); }
+:root[data-resolved="dark"] .bar[data-tone="muted"] .done { background: rgba(255, 255, 255, .13); }
 .bar.live .done { border-right: 2px solid var(--now); }
 .bar[data-state="done"] .badge { opacity: .5; }
 .bar[aria-pressed="true"] { outline: 2px solid var(--focus); outline-offset: 2px; }
@@ -203,8 +206,25 @@
 .bar, .pin, .diamond {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
 }
-.bar[data-tone="strong"] { background: var(--bar-strong); color: var(--bar-strong-ink); }
-.bar[data-tone="soft"]   { background: var(--bar-soft);   color: var(--bar-soft-ink); }
+.bar[data-tone="light"] { background: var(--bar-light); color: var(--bar-light-ink); }
+.bar[data-tone="dark"]  { background: var(--bar-dark);  color: var(--bar-dark-ink); }
+.bar[data-tone="muted"] { background: var(--bar-muted); color: var(--bar-muted-ink); }
+/* Some of these sit almost exactly on the panel's own luminance — a
+   white bar on the light panel measures 1.02:1 on fill alone, and the
+   muted one 1.19:1. Those bars are found by their keyline, not their
+   colour, so where that is the case the keyline is given enough to do
+   the job on its own. It is only raised on the pairs that need it; the
+   accent and the opposing solid carry themselves. */
+:root[data-resolved="light"] .bar[data-tone="light"],
+:root[data-resolved="light"] .bar[data-tone="muted"],
+:root[data-resolved="light"] .diamond[data-tone="light"],
+:root[data-resolved="light"] .diamond[data-tone="muted"],
+:root[data-resolved="dark"] .bar[data-tone="dark"],
+:root[data-resolved="dark"] .bar[data-tone="muted"],
+:root[data-resolved="dark"] .diamond[data-tone="dark"],
+:root[data-resolved="dark"] .diamond[data-tone="muted"] {
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 52%, transparent);
+}
 .bar[data-tone="accent"] {
   background: linear-gradient(90deg, var(--accent-a) 4%, var(--accent-b) 46%,
                               var(--accent-c) 70%, var(--accent-c) 100%);
@@ -273,8 +293,14 @@
   width: 17px; height: 17px;
   flex: none;
   border-radius: 4px;
-  background: var(--bar-soft);
+  background: var(--bar-muted);
   transform: rotate(45deg);
+}
+.diamond[data-tone="light"] { background: var(--bar-light); }
+.diamond[data-tone="dark"]  { background: var(--bar-dark); }
+.diamond[data-tone="muted"] { background: var(--bar-muted); }
+.diamond[data-tone="accent"] {
+  background: linear-gradient(135deg, var(--accent-a), var(--accent-c));
 }
 .pin {
   position: absolute;
@@ -625,6 +651,31 @@
 }
 .ed-kind .side button + button { border-left: 1px solid var(--rule); }
 .ed-kind .side button[aria-checked="true"] { background: var(--glass-in-2); color: var(--ink); }
+/* Swatches, not words with a tick. The choice IS the colour, so the
+   control shows the colour and lets the word be the caption. */
+.tones { display: flex; gap: 8px; }
+.ed-tone .tones button {
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 8px 4px 7px;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass-in); color: var(--ink-3);
+  font: inherit; font-size: .68rem; cursor: pointer;
+}
+.ed-tone .tones button i {
+  display: block; width: 100%; height: 17px; border-radius: 5px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.ed-tone .tones button[data-tone="light"] i { background: var(--bar-light); }
+.ed-tone .tones button[data-tone="dark"]  i { background: var(--bar-dark); }
+.ed-tone .tones button[data-tone="muted"] i { background: var(--bar-muted); }
+.ed-tone .tones button[data-tone="accent"] i {
+  background: linear-gradient(90deg, var(--accent-a) 4%, var(--accent-b) 46%,
+                              var(--accent-c) 70%, var(--accent-c) 100%);
+}
+.ed-tone .tones button[aria-checked="true"] {
+  background: var(--glass-in-2); color: var(--ink); border-color: var(--edge);
+}
+.ed-tone .tones button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 .ed-note {
   grid-column: 1 / -1; margin: 0;
   font-size: .74rem; line-height: 1.5; color: var(--ink-3);
@@ -860,6 +911,20 @@
                  placeholder="What are you aiming at" autocomplete="off" />
         </label>
 
+        <fieldset class="ed-f ed-wide ed-tone">
+          <legend>Colour</legend>
+          <div class="tones" role="radiogroup" aria-label="Colour" id="edTones">
+            <button type="button" role="radio" data-tone="accent" aria-checked="true"
+              aria-label="Accent"><i></i><span>Accent</span></button>
+            <button type="button" role="radio" data-tone="light" aria-checked="false"
+              aria-label="Light"><i></i><span>Light</span></button>
+            <button type="button" role="radio" data-tone="dark" aria-checked="false"
+              aria-label="Dark"><i></i><span>Dark</span></button>
+            <button type="button" role="radio" data-tone="muted" aria-checked="false"
+              aria-label="Muted"><i></i><span>Muted</span></button>
+          </div>
+        </fieldset>
+
         <fieldset class="ed-f ed-wide ed-kind">
           <legend>Shape</legend>
           <div class="side" role="radiogroup" aria-label="Shape">
@@ -1032,13 +1097,13 @@ let TODAY = midnight(new Date());
 const rel = (n) => iso(shift(TODAY, n));
 const SAMPLE = { goals: [
   { id: 's1', name: 'Trading journal, daily',  from: rel(-24), to: rel(21),  horizon: 'now',     kind: 'span', tone: 'accent' },
-  { id: 's2', name: 'Arc',                     from: rel(-9),  to: rel(12),  horizon: 'now',     kind: 'span', tone: 'strong' },
-  { id: 's3', name: 'Gene Keys, 90 days',      from: rel(-30), to: rel(60),  horizon: 'now',     kind: 'span', tone: 'soft'   },
-  { id: 's4', name: 'Rebuild the site',        from: rel(35),  to: rel(120), horizon: 'year',    kind: 'span', tone: 'strong' },
-  { id: 's5', name: 'Learn piano',             from: rel(60),  to: rel(300), horizon: 'year',    kind: 'span', tone: 'soft'   },
+  { id: 's2', name: 'Arc',                     from: rel(-9),  to: rel(12),  horizon: 'now',     kind: 'span', tone: 'dark' },
+  { id: 's3', name: 'Gene Keys, 90 days',      from: rel(-30), to: rel(60),  horizon: 'now',     kind: 'span', tone: 'muted'  },
+  { id: 's4', name: 'Rebuild the site',        from: rel(35),  to: rel(120), horizon: 'year',    kind: 'span', tone: 'dark' },
+  { id: 's5', name: 'Learn piano',             from: rel(60),  to: rel(300), horizon: 'year',    kind: 'span', tone: 'muted'  },
   { id: 's6', name: 'First funded account',    from: rel(150), to: null,     horizon: 'year',    kind: 'mark', tone: 'accent' },
-  { id: 's7', name: 'Sabbatical',              from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'soft'   },
-  { id: 's8', name: 'Sub-3 marathon',          from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'soft'   },
+  { id: 's7', name: 'Sabbatical',              from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'muted'  },
+  { id: 's8', name: 'Sub-3 marathon',          from: null,     to: null,     horizon: 'someday', kind: 'span', tone: 'muted'  },
 ] };
 
 let state = readStore() || SAMPLE;
@@ -1339,7 +1404,7 @@ function renderBoard() {
     const el = document.createElement('button');
     el.type = 'button';
     el.className = 'bar';
-    el.dataset.tone = b.tone || 'strong';
+    el.dataset.tone = toneOf(b.tone);
     el.dataset.name = b.name.toLowerCase();
     el.dataset.id = b.id;
     el.style.left  = left + '%';
@@ -1398,7 +1463,7 @@ function renderBoard() {
     el.dataset.id = m.id;
     el.style.left = pct(on) + '%';
     el.setAttribute('aria-label', `Moment: ${m.name}, ${fmtY(on)}. Opens the editor.`);
-    el.innerHTML = `<span class="diamond" aria-hidden="true"></span>`
+    el.innerHTML = `<span class="diamond" data-tone="${toneOf(m.tone)}" aria-hidden="true"></span>`
                  + `<span aria-hidden="true">${esc(m.name)}</span>`;
     el.addEventListener('click', () => edit(m.id));
     lastRow.appendChild(el);
@@ -2201,6 +2266,39 @@ let edKind = 'span';         // 'span' | 'mark' | 'none'
 
 const KIND_BTN = { span: 'edSpan', mark: 'edMoment', none: 'edNone' };
 
+/* ── colour ──
+   strong meant "whichever of black and white contrasts with the theme",
+   which is the right rule for a look nobody chose and the wrong one for
+   a look somebody did. It resolves to dark, because that is what it has
+   always drawn on the light panel these were built on; anything set the
+   other way is two clicks from being set back. */
+const TONES = ['accent', 'light', 'dark', 'muted'];
+const toneOf = (t) => t === 'strong' ? 'dark'
+                    : t === 'soft'   ? 'muted'
+                    : TONES.includes(t) ? t : 'muted';
+
+let edTone = 'accent';
+function setTone(t) {
+  edTone = toneOf(t);
+  edEl('edTones').querySelectorAll('[data-tone]').forEach(b =>
+    b.setAttribute('aria-checked', String(b.dataset.tone === edTone)));
+}
+edEl('edTones').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-tone]');
+  if (b) setTone(b.dataset.tone);
+});
+/* Arrow keys across the swatches, and the roving tabindex that makes the
+   row one tab stop — the same contract the Shape control declares. */
+edEl('edTones').addEventListener('keydown', (ev) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(ev.key)) return;
+  ev.preventDefault();
+  const at = TONES.indexOf(edTone);
+  const to = ev.key === 'Home' ? 0 : ev.key === 'End' ? TONES.length - 1
+           : (at + (ev.key === 'ArrowRight' ? 1 : TONES.length - 1)) % TONES.length;
+  setTone(TONES[to]);
+  edEl('edTones').querySelector('[aria-checked="true"]').focus();
+});
+
 function setKind(k) {
   edKind = k;
   Object.entries(KIND_BTN).forEach(([id, btn]) =>
@@ -2256,6 +2354,11 @@ function edOpen(goal) {
   edEl('edDoneOnF').hidden = !edEl('edDone').checked;
   edEl('edDelete').hidden = !goal;
   setKind(!goal ? 'span' : !goal.from ? 'none' : (goal.kind === 'mark' || !goal.to) ? 'mark' : 'span');
+  /* A new goal opens on what it would have been given automatically, so
+     nobody who does not care about the colour has to make a decision. */
+  setTone(goal ? toneOf(goal.tone)
+        : (edEl('edHorizon').value === 'now' ? 'accent'
+         : edEl('edHorizon').value === 'year' ? 'dark' : 'muted'));
   ed.showModal();
   edEl('edName').focus();
 }
@@ -2323,11 +2426,10 @@ document.getElementById('edForm').addEventListener('submit', (e) => {
   const existing = goals().find(x => x.id === editing);
   const ok = commit(!editing && isDemo(), (st) => {
     const i = st.goals.findIndex(x => x.id === rec.id);
-    /* Tone is a look, not data you should have to choose. New goals take
-       the accent when they are live and something quieter when they are
-       not, so the board has a focus without anyone picking one. */
-    rec.tone = (existing && existing.tone)
-      || (rec.horizon === 'now' ? 'accent' : rec.horizon === 'year' ? 'strong' : 'soft');
+    /* Whatever the swatches say. The editor opened them on the tone this
+       goal would have been given anyway, so leaving them alone is the
+       same as never having been asked. */
+    rec.tone = edTone;
     if (i >= 0) st.goals[i] = { ...st.goals[i], ...rec };
     else st.goals.push(rec);
   });

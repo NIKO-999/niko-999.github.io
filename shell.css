@@ -108,10 +108,21 @@
   --ink-3: #a5a19c;
   --tick:  #c2beb7;
 
-  --bar-strong:     #ffffff;
-  --bar-strong-ink: #14130f;
-  --bar-soft:       #27272a;
-  --bar-soft-ink:   #f2f1ef;
+  /* A goal's colour is picked by hand now, so it is absolute: black
+     stays black when the scheme changes. Only the exact value moves
+     between schemes, and only far enough to stay legible against the
+     panel it sits on — a bar is furniture on glass, not on paper. */
+  --bar-light:      #ffffff;
+  --bar-light-ink:  #14130f;
+  --bar-dark:       #131215;
+  --bar-dark-ink:   #eceae6;
+  --bar-muted:      #3a3a3f;
+  --bar-muted-ink:  #f2f1ef;
+  /* The old names, for the pins and diamonds that were built on them. */
+  --bar-strong:     var(--bar-light);
+  --bar-strong-ink: var(--bar-light-ink);
+  --bar-soft:       var(--bar-muted);
+  --bar-soft-ink:   var(--bar-muted-ink);
 
   /* Gradient light → dark, as measured off the reference. The label is
      pinned left, so it sits on --accent-a: #467A6C is 4.93:1 against
@@ -175,10 +186,16 @@
   --ink-3: #454139;
   --tick:  #4f4b46;
 
-  --bar-strong:     #1c1a17;
-  --bar-strong-ink: #ffffff;
-  --bar-soft:       #dbd5ca;
-  --bar-soft-ink:   #1c1a17;
+  --bar-light:      #ffffff;
+  --bar-light-ink:  #14130f;
+  --bar-dark:       #1c1a17;
+  --bar-dark-ink:   #ffffff;
+  --bar-muted:      #dbd5ca;
+  --bar-muted-ink:  #1c1a17;
+  --bar-strong:     var(--bar-dark);
+  --bar-strong-ink: var(--bar-dark-ink);
+  --bar-soft:       var(--bar-muted);
+  --bar-soft-ink:   var(--bar-muted-ink);
 
   --accent-a: #3d6d60;
   --accent-b: #0a4a3e;
