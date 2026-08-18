@@ -801,212 +801,95 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .live.stale .live-ic { color: var(--ink-3); animation: none; }
 @media (prefers-reduced-motion: reduce) { .live-ic { animation: none } }
 
-/* ── the gate ──
-   A decision screen, so it is set larger than a reading screen. Every
-   target here gets pressed once, in a hurry, often on a phone with one
-   hand — so the rules are 52px tall rather than the 30px the sheet uses,
-   where you are filling a form at rest with the trade already over. */
-.gate-h { display: flex; align-items: baseline; gap: 10px; margin: 20px 0 8px; }
-.gate-h h2 { margin: 0; font-size: .82rem; font-weight: 500; text-transform: uppercase;
-  letter-spacing: .1em; color: var(--ink-2); }
-.gate-h .grow { flex: 1; }
+/* ── the gate, folded into the candle panel ──
+   It had a screen of its own. The panel above it already said which
+   candle you were in and whether there was room in it, which was two
+   thirds of that screen, so what is left is one line: which of the two
+   trades this is, how much of the checklist is done, and the way in.
 
-/* Two answers, side by side and equally weighted. A segmented control
-   would make one of them look like the default, and continuation is not
-   a safer answer than reversal — it is a different chart. */
-.gate-modes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
-@media (max-width: 560px) { .gate-modes { grid-template-columns: minmax(0, 1fr); } }
-/* Unchosen is an empty outline and chosen is a filled shape with an
-   accent edge. Both were filled at first and differed only by a border
-   tint, which over a photograph was no difference at all — you could not
-   tell from across the desk which trade you had said this was. */
-.gate-modes button {
-  display: block; padding: 12px 14px 13px; text-align: left;
-  border: 1px solid var(--glass-line); border-radius: var(--r-panel);
-  background: none; color: inherit; font: inherit; cursor: pointer;
+   The rules themselves are folded away. Most of the time the tally is the
+   entire state — you open the list to tick something or to see which one
+   is missing, and the rest of the session it is one word and two digits. */
+.cp-gate {
+  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
+  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule);
 }
-.gate-modes button:hover { background: var(--glass-in); }
-.gate-modes b { display: block; font-size: .84rem; font-weight: 500;
-  letter-spacing: -.01em; color: var(--ink-3); }
-.gate-modes em { display: block; margin-top: 3px; font-style: normal;
-  font-size: .74rem; line-height: 1.45; color: var(--ink-3); opacity: .8; }
-.gate-modes button[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--accent) 70%, transparent);
-  background: var(--glass-in-2);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 22%, transparent);
-}
-.gate-modes button[aria-pressed="true"] b { color: var(--ink); }
-.gate-modes button[aria-pressed="true"] em { color: var(--ink-2); opacity: 1; }
+.cp-gate .grow { flex: 1; }
 
-.gate-list { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 4px; }
-.gate-list button {
-  display: grid; grid-template-columns: 22px 16px minmax(0, 1fr);
-  align-items: center; gap: 12px; width: 100%; min-height: 52px;
-  padding: 8px 12px; border: 1px solid transparent; border-radius: 10px;
-  background: var(--glass-in); color: inherit; font: inherit; text-align: left;
-  cursor: pointer;
+/* C2 or C3, at the size of the badges beside them rather than the size of
+   a decision — this is one tap you make once and then forget. */
+.cp-modes { display: flex; gap: 2px; padding: 2px; border-radius: 8px;
+  background: var(--glass-in); }
+.cp-modes button {
+  height: 26px; padding: 0 11px; border: 0; border-radius: 6px;
+  background: none; color: var(--ink-3);
+  font: inherit; font-family: var(--mono); font-size: .68rem; cursor: pointer;
 }
-.gate-list button:hover { background: var(--glass-in-2); }
-.g-box {
-  display: grid; place-items: center; width: 22px; height: 22px;
-  border: 1px solid color-mix(in srgb, var(--ink-3) 45%, transparent);
-  border-radius: 6px; color: transparent;
+.cp-modes button:hover { color: var(--ink-2); }
+.cp-modes button[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--accent) 20%, var(--glass-in-2));
+  color: var(--ink);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
 }
-.g-n { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); }
-.g-t { font-size: .82rem; line-height: 1.4; color: var(--ink-2); }
-.gate-list button[aria-pressed="true"] {
-  border-color: color-mix(in srgb, var(--accent) 40%, transparent);
-}
-.gate-list button[aria-pressed="true"] .g-box {
-  border-color: transparent; background: var(--accent); color: var(--btn-ink);
-}
-.gate-list button[aria-pressed="true"] .g-t { color: var(--ink); }
 
-.gate-v { margin: 14px 0 0; max-width: 74ch;
-  font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
-.gate-v b { font-weight: 500; color: var(--ink-2); }
-.gate-v.all b { color: var(--up); }
+.cp-checks {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 30px; padding: 0 11px; border: 0; border-radius: 8px;
+  background: none; color: var(--ink-3);
+  font: inherit; font-size: .74rem; cursor: pointer;
+}
+.cp-checks:hover { background: var(--glass-in); color: var(--ink-2); }
+.cp-checks .ic { display: inline-flex; }
+.cp-checks b { font-family: var(--mono); font-size: .7rem; font-weight: 500; color: var(--ink-2); }
+/* Full marks is the one state worth colouring — it is the only one that
+   says go. */
+.cp-checks b.all { color: var(--accent); }
+.cp-checks[aria-expanded="true"] { background: var(--glass-in); color: var(--ink-2); }
 
-/* What you are in, on the screen where you deal with it. Bordered in the
-   accent so it is plainly the live thing on the page. */
-.gate-open { margin: 0; padding: 0; list-style: none; display: grid; gap: 8px; }
-.gate-open li {
-  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-  padding: 11px 13px; border-radius: var(--r-panel);
-  border: 1px solid color-mix(in srgb, var(--accent) 55%, transparent);
-  background: color-mix(in srgb, var(--accent) 12%, transparent);
+.cp-risk { display: flex; align-items: center;
+  height: 30px; padding: 0 10px; border-radius: 8px; background: var(--glass-in); }
+.cp-risk input {
+  width: 72px; border: 0; background: none; color: var(--ink);
+  font: inherit; font-size: .76rem; outline: none;
 }
-.gate-open li.stale {
-  border-color: var(--glass-line);
-  background: var(--glass-in);
-}
-.gate-open .grow { flex: 1; }
-.gate-open .go-what { display: inline-flex; align-items: center; gap: 8px;
-  font-size: .84rem; color: var(--ink-2); }
-.gate-open .go-ic { display: inline-flex; color: var(--accent); }
-.gate-open li.stale .go-ic { color: var(--ink-3); }
-.gate-open .go-what b { font-weight: 500; color: var(--ink); }
-.gate-open .go-when { font-family: var(--mono); font-size: .66rem; color: var(--ink-3); }
-.gate-open .btn { height: 32px; padding: 0 13px; font-size: .76rem; }
+.cp-risk input::-webkit-outer-spin-button,
+.cp-risk input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.cp-risk input { -moz-appearance: textfield; appearance: textfield; }
 
-/* The risk box sits against the primary action rather than up among the
-   rules, because it is the only thing on this screen you type. */
-.gate-risk { display: flex; align-items: center; gap: 8px;
-  height: 36px; padding: 0 12px; border-radius: 8px; background: var(--glass-in); }
-.gate-risk .ic { display: inline-flex; color: var(--ink-3); }
-.gate-risk input {
-  width: 130px; border: 0; background: none; color: var(--ink);
-  font: inherit; font-size: .8rem; outline: none;
-}
-.gate-alt { display: flex; align-items: center; gap: 9px; margin: 12px 0 0;
-  flex-wrap: wrap; font-size: .76rem; color: var(--ink-3); }
-.gate-alt button {
-  border: 0; padding: 0; background: none; color: var(--ink-3);
-  font: inherit; font-size: .76rem; text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--ink-3) 45%, transparent);
+.cp-go { height: 30px; padding: 0 14px; font-size: .78rem; }
+.cp-let {
+  border: 0; padding: 0 4px; background: none; color: var(--ink-3);
+  font: inherit; font-size: .72rem; text-decoration: underline;
+  text-decoration-color: color-mix(in srgb, var(--ink-3) 40%, transparent);
   text-underline-offset: 3px; cursor: pointer;
 }
-.gate-alt button:hover { color: var(--ink-2); }
+.cp-let:hover { color: var(--ink-2); }
 
-.gate-act { display: flex; align-items: center; gap: 10px; margin-top: 16px;
-  flex-wrap: wrap; }
-/* Full width on a phone, because these are the two things the screen is
-   for and a 36px pill floating in a column reads as an afterthought. */
-@media (max-width: 560px) {
-  .gate-act { display: grid; grid-template-columns: minmax(0, 1fr); }
-  .gate-act .btn { width: 100%; justify-content: center; height: 44px; }
+/* The list, when you open it. Compact rows — this sits inside a panel on a
+   dashboard, not on a screen of its own, so it cannot take 52px a line. */
+.cp-list { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.cp-list button {
+  display: grid; grid-template-columns: 18px 14px minmax(0, 1fr);
+  align-items: center; gap: 10px; width: 100%; min-height: 34px;
+  padding: 5px 9px; border: 1px solid transparent; border-radius: 8px;
+  background: none; color: inherit; font: inherit; text-align: left; cursor: pointer;
 }
-
-/* ── the playbook ──
-   The same furniture as the metrics — the tiles, the chart boxes, the
-   topic rail — pointed at a subset. Reusing the components is the point:
-   an identical card making a visibly different cut is what makes "this
-   is the same question, one level down" legible without a word of
-   explanation. Only the parts that have no equivalent are new. */
-.charts.two { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-@media (max-width: 780px) { .charts.two { grid-template-columns: minmax(0, 1fr); } }
-
-.pb { margin: 26px 0 0; }
-.pb:first-child { margin-top: 12px; }
-.pb .metrics { margin-top: 12px; }
-
-/* The sentence the page exists for, so it is set at reading size rather
-   than as a caption. The figures inside it take the colour; the prose
-   around them stays quiet, because a whole line in the loss colour reads
-   as an alarm rather than as a number. */
-.pb-verdict {
-  margin: 12px 0 0; max-width: 74ch;
-  font-size: .84rem; line-height: 1.65; color: var(--ink-2);
+.cp-list button:hover { background: var(--glass-in); }
+.g-box {
+  display: grid; place-items: center; width: 18px; height: 18px;
+  border: 1px solid color-mix(in srgb, var(--ink-3) 45%, transparent);
+  border-radius: 5px; color: transparent;
 }
-.pb-verdict b { font-weight: 500; color: var(--ink); }
-.pb-verdict.up b { color: var(--up); }
-.pb-verdict.down b { color: var(--down); }
-.pb-none { margin: 6px 0 0; font-size: .76rem; line-height: 1.6; color: var(--ink-3); }
-
-/* Three across, for the three cuts that fit on one line: candle, day,
-   mode. Narrower than that and a four-column bar row inside a third of a
-   panel is unreadable, so they stack. */
-.charts.three { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-@media (max-width: 1000px) { .charts.three { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 700px)  { .charts.three { grid-template-columns: minmax(0, 1fr); } }
-
-.pb-bars { margin: 4px 0 0; padding: 0; list-style: none; display: grid; gap: 3px; }
-/* The name takes what is left rather than a fixed share: these rows sit
-   three to a line on a wide window and one to a line on a narrow one, and
-   a fixed name column ellipsised "10:00 Late New York" down to "10:00
-   Late ..." in the first case while leaving half the row empty in the
-   second. */
-.pb-bars li {
-  display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(18px, 1fr) 52px 20px;
-  align-items: center; gap: 8px; padding: 5px 0;
+.g-n { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
+.g-t { font-size: .78rem; line-height: 1.4; color: var(--ink-3); }
+.cp-list button[aria-pressed="true"] .g-box {
+  border-color: transparent; background: var(--accent); color: var(--btn-ink);
 }
-.pb-k { font-size: .78rem; color: var(--ink-2); overflow: hidden;
-  text-overflow: ellipsis; white-space: nowrap; }
-/* The same 4px proportional bar the win rate uses, so a proportion looks
-   like a proportion everywhere in this app. */
-.pb-track { display: block; height: 4px; border-radius: 2px;
-  background: color-mix(in srgb, var(--ink-3) 18%, transparent); overflow: hidden; }
-.pb-track i { display: block; height: 100%; border-radius: 2px; background: var(--accent); }
-.pb-track i.up { background: var(--up); }
-.pb-track i.down { background: var(--down); }
-.pb-v { font-family: var(--mono); font-size: .74rem; color: var(--ink-2); text-align: right; }
-.pb-v.up { color: var(--up); }
-.pb-v.down { color: var(--down); }
-.pb-n { font-family: var(--mono); font-size: .62rem; color: var(--ink-3); text-align: right; }
+.cp-list button[aria-pressed="true"] .g-t { color: var(--ink-2); }
+
 @media (max-width: 620px) {
-  .pb-bars li { grid-template-columns: minmax(64px, 1fr) 54px 24px; }
-  .pb-bars .pb-track { display: none; }
+  .cp-risk, .cp-let { display: none; }
 }
-
-/* Where the outcomes land — one dot per graded trade on an R axis.
-   Filled rather than outlined, and translucent, so two trades that
-   landed on nearly the same R read as denser ink instead of as one
-   trade. A fixed viewBox scaled by CSS, like the radars, so it draws
-   correctly while the section is still hidden. */
-.pb-hist { display: block; width: 100%; max-width: 560px; height: auto; margin: 2px auto 0; }
-.pb-hist .hd { fill: color-mix(in srgb, var(--ink-3) 55%, transparent); }
-.pb-hist .hd.up { fill: color-mix(in srgb, var(--up) 70%, transparent); }
-.pb-hist .hd.down { fill: color-mix(in srgb, var(--down) 70%, transparent); }
-/* The mean, drawn in the accent because it is the one line here that is
-   a claim rather than a record of something that happened. */
-.pb-hist .hmean { stroke: var(--accent); stroke-width: 1.4; opacity: .75; }
-.pb-hist .hk { font-family: var(--mono); font-size: 8.5px; fill: var(--ink-3); letter-spacing: .03em; }
-
-/* One rule per row: what it says, how often you ticked it, and what
-   happened when you did not. Deliberately not .ap-rules — that list is
-   numbered because you refer to those rules by number, and numbering
-   these would imply the same fixed order matters here. */
-.pb-rules { margin: 4px 0 0; padding: 0; list-style: none; }
-.pb-rules li { padding: 10px 0; border-bottom: 1px solid var(--rule); }
-.pb-rules li:last-child { border-bottom: 0; }
-.pb-rules b { display: block; font-size: .8rem; font-weight: 500;
-  color: var(--ink); letter-spacing: -.01em; margin-bottom: 3px; }
-.pb-hit { display: inline-block; margin-right: 10px;
-  font-family: var(--mono); font-size: .62rem; color: var(--ink-3); }
-.pb-cmp { font-size: .72rem; color: var(--ink-3); }
-.pb-cmp em { font-style: normal; font-family: var(--mono); color: var(--ink-2); }
-.pb-cmp em.up { color: var(--up); }
-.pb-cmp em.down { color: var(--down); }
 
 /* ── the risk ladder ── */
 /* Sat beside the percentage in the head, because it qualifies it: this is
@@ -1083,20 +966,22 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 [data-phone="on"] #backupBtn,
 [data-phone="on"] #resAdd,
 [data-phone="on"] #flowForm,
+[data-phone="on"] .cp-risk,
+[data-phone="on"] .cp-go,
+[data-phone="on"] .cp-let,
 [data-phone="on"] #liveClose,
-[data-phone="on"] .gate-act,
-[data-phone="on"] .gate-alt,
-[data-phone="on"] .gate-open .btn,
+[data-phone="on"] #liveDrop,
 [data-phone="on"] #ledger button { display: none !important; }
-/* The rules stay on screen because reading them is the point; they simply
-   stop being switches. The tally still says how many you had ticked when
-   you were at a desk. */
-[data-phone="on"] .gate-list button,
-[data-phone="on"] .gate-modes button { cursor: default; }
-[data-phone="on"] .gate-modes button:hover,
-[data-phone="on"] .gate-list button:hover { background: var(--glass-in); }
-[data-phone="on"] .gate-modes button:hover { background: none; }
-[data-phone="on"] .gate-modes button[aria-pressed="true"]:hover { background: var(--glass-in-2); }
+/* The rules stay readable — opening the list is not a change — but the
+   mode and the ticks stop being switches, and the ways into a trade are
+   gone entirely. The tally still says how many you had ticked at a desk. */
+[data-phone="on"] .cp-list button,
+[data-phone="on"] .cp-modes button { cursor: default; }
+[data-phone="on"] .cp-list button:hover,
+[data-phone="on"] .cp-modes button:hover { background: none; }
+[data-phone="on"] .cp-modes button[aria-pressed="true"]:hover {
+  background: color-mix(in srgb, var(--accent) 20%, var(--glass-in-2));
+}
 
 /* The note's own title, and "Saved" beneath it. Bold, because on this
    page they are the two things that tell you where you are — everywhere
@@ -1491,14 +1376,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <path d="M4 18l5-6 4 3 6-8" /><path d="M15 7h4v4" />
       </svg>
     </span>
-    <!-- First on the rail, because it is the only thing here you use
-         before a trade rather than after one. A shield: the question it
-         answers is whether this one gets through. -->
-    <button type="button" data-view="gate" aria-label="The gate">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M12 3l7 3v5c0 4.4-2.9 8.3-7 9.5C7.9 19.3 5 15.4 5 11V6l7-3ZM9 11.5l2 2 4-4" /></svg>
-    </button>
     <button type="button" data-view="metrics" aria-current="page" aria-label="Metrics">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"><path d="M5.5 19v-9M11 19v-13M16.5 19v-6M21 19H3" /></svg>
@@ -1615,6 +1492,14 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <span id="liveWhen"></span>
       <span class="grow"></span>
       <button class="btn btn-ghost" type="button" id="liveClose">Close it</button>
+      <!-- The gate screen used to carry this. With that gone the strip is
+           the only place a position exists, so the way to throw one away
+           has to be here or it is nowhere. -->
+      <button class="live-x" type="button" id="liveDrop" aria-label="It never filled">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+             stroke-linecap="round" width="13" height="13" aria-hidden="true">
+          <path d="m6 6 12 12M18 6 6 18" /></svg>
+      </button>
     </div>
 
     <!-- ── calendar ── -->
@@ -1680,83 +1565,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
     </main>
 
     <!-- ── metrics ── -->
-    <!-- ── the gate ──
-         The only screen in this app that runs BEFORE the click. Room left
-         in the candle, which trade you think it is, and the five rules —
-         ticked while the answer is still unknown, which is the only state
-         in which a checklist means anything. -->
-    <main class="main" id="gateSection" hidden>
-      <div class="head">
-        <h1>The gate</h1>
-        <span class="grow"></span>
-        <span class="span-meta" id="gMeta"></span>
-      </div>
-      <div class="pane" tabindex="0">
-
-        <!-- Same object as the panel on Metrics, so it is the same class.
-             One definition of what a candle window looks like. -->
-        <section class="cp" id="gCp" aria-label="The candle you are in">
-          <div class="cp-h">
-            <span class="cp-in"><span class="ic" id="gIcon"></span>In</span>
-            <b class="cp-open" id="gOpen">—</b>
-            <span class="cp-name" id="gName"></span>
-            <span class="cp-best" id="gBest" hidden>your best candle</span>
-            <span class="grow"></span>
-            <span class="cp-next" id="gLeft"></span>
-          </div>
-          <div class="cp-band" id="gBand">
-            <b><span class="ic" id="gBandIcon"></span><span id="gBandT"></span></b>
-            <em id="gBandS"></em>
-          </div>
-          <p class="cp-miss" id="gMiss" hidden><b>This window has gone</b>
-            <span id="gMissT"></span></p>
-          <span class="cp-bar" aria-hidden="true"><i id="gFill"></i></span>
-        </section>
-
-        <!-- What you are already in. Above the question of what to take
-             next, because closing something you are in is more urgent
-             than opening something you are not. -->
-        <div id="gOpenWrap" hidden>
-          <div class="gate-h"><h2>You are in</h2></div>
-          <ul class="gate-open" id="gOpenList"></ul>
-        </div>
-
-        <div class="gate-h">
-          <h2>Which trade is it</h2><span class="grow"></span>
-          <span class="span-meta" id="gTally"></span>
-        </div>
-        <div class="gate-modes" id="gModes" role="group" aria-label="Which trade this is">
-          <button type="button" data-mode="reversal" id="gRev" aria-pressed="false">
-            <b>Reversal — C2</b><em>This candle turns. Small wick, and SMT is not optional.</em>
-          </button>
-          <button type="button" data-mode="continuation" id="gCont" aria-pressed="true">
-            <b>Continuation — C3</b><em>This candle carries. Wick in the previous EQ.</em>
-          </button>
-        </div>
-
-        <ol class="gate-list" id="gList"></ol>
-        <p class="gate-v" id="gVerdict"></p>
-
-        <div class="gate-act">
-          <button class="btn btn-primary" type="button" id="gIn">I'm in</button>
-          <span class="gate-risk">
-            <label class="sr" for="gRisk">Risk in dollars, optional</label>
-            <span class="ic" id="gRiskIc" aria-hidden="true"></span>
-            <input id="gRisk" type="number" step="0.01" min="0" inputmode="decimal"
-                   placeholder="Risk — optional" />
-          </span>
-        </div>
-        <!-- The two quieter paths. Set as text rather than buttons of
-             equal weight: there is one thing this screen is for, and it
-             is the one above. -->
-        <p class="gate-alt">
-          <button type="button" id="gTake">It is already finished — log it</button>
-          <span aria-hidden="true">·</span>
-          <button type="button" id="gPass">Saw it, let it go</button>
-        </p>
-      </div>
-    </main>
-
     <!-- ── the risk ladder ──
          Arithmetic about a decision not yet made, so it reads nothing
          from the ledger's history except the balance. -->
@@ -1829,6 +1637,35 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             <em id="cpBandS"></em>
           </div>
           <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
+
+          <!-- ── the gate ──
+               It had a screen of its own and did not earn one: the panel
+               above already says which candle you are in and whether there
+               is room in it, which was two thirds of that screen. What was
+               actually missing is the part below — which of the two trades
+               this is, the rules, and the way in — and it fits on one line
+               with the rules folded away until you want them. -->
+          <div class="cp-gate" id="cpGate">
+            <span class="cp-modes" id="gModes" role="group" aria-label="Which trade this is">
+              <button type="button" data-mode="reversal" id="gRev" aria-pressed="false">C2</button>
+              <button type="button" data-mode="continuation" id="gCont" aria-pressed="true">C3</button>
+            </span>
+            <button type="button" class="cp-checks" id="gToggle"
+                    aria-expanded="false" aria-controls="gList">
+              <span class="ic" id="gCheckIc" aria-hidden="true"></span>Checklist
+              <b id="gTally">0/5</b>
+            </button>
+            <span class="grow"></span>
+            <span class="cp-risk">
+              <label class="sr" for="gRisk">Risk in dollars, optional</label>
+              <input id="gRisk" type="number" step="0.01" min="0" inputmode="decimal"
+                     placeholder="Risk" />
+            </span>
+            <button class="btn btn-primary cp-go" type="button" id="gIn">I'm in</button>
+            <button type="button" class="cp-let" id="gPass">let it go</button>
+          </div>
+          <ol class="cp-list" id="gList" hidden></ol>
+
           <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
         </section>
 
@@ -4318,11 +4155,11 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
    caption. These two are the same badge in two places, so they are the
    same size — they were 12 and 11. */
 /* 15, the size this file gives a topbar button — the strip is a band
-   across the top and the mark has to carry from across the desk. The
-   gate's own rows use 13, which is the size beside a label. */
+   across the top and the mark has to carry from across the desk.
+   Everything beside a label is 13. */
+document.getElementById('gCheckIc').innerHTML = icon('check', 13);
 document.getElementById('rkPerIc').innerHTML = icon('risk', 13);
 document.getElementById('liveIc').innerHTML = icon('radar', 15);
-document.getElementById('gRiskIc').innerHTML = icon('risk', 13);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
 document.getElementById('cpIcon').innerHTML = icon('clock', 12);
 
@@ -4386,10 +4223,6 @@ function tickCandle() {
   cpEl.classList.toggle('off', off);
   cpEl.classList.toggle('late', state === 'late');
 
-  /* The gate reads the same clock. Fed from here rather than running a
-     second interval, so the two screens can never disagree about which
-     candle you are standing in. */
-  gateTick(c);
   liveWhen();
 }
 /* ═══ the gate ═══
@@ -4499,6 +4332,9 @@ function dropPos(id) {
 document.getElementById('liveClose').addEventListener('click', () => {
   if (openPos.length) closePos(openPos[0].id);
 });
+document.getElementById('liveDrop').addEventListener('click', () => {
+  if (openPos.length) dropPos(openPos[0].id);
+});
 
 const GKEY = 'ledger.gate.v1';
 let gateMode = 'continuation';
@@ -4533,87 +4369,39 @@ function gateSave() {
 }
 
 function renderGate() {
-  const c = candle();
-  if (gateOpen !== c.open || gateDay !== iso(new Date())) gateLoad(c);
-  const off = c.open === NO_TRADE;
+  const cur = candle();
+  if (gateOpen !== cur.open || gateDay !== iso(new Date())) gateLoad(cur);
   const list = CHECKLISTS[gateMode];
   const done = list.filter(l => gateTicks.has(l)).length;
-
-  /* The current candle, never the next one. The panel on Metrics flips to
-     the candle about to open, because reading a profile at 21:44 is
-     preparation. Here you are deciding about a chart in front of you
-     right now, and showing the next candle's rules would be answering a
-     different question than the one being asked. */
-  gateFace(c, off);
-
-  /* What you are already in, above the question of what to take next.
-     Listed rather than summarised, because the strip at the top only has
-     room for the first one and this is where you deal with the rest. */
-  document.getElementById('gOpenWrap').hidden = !openPos.length;
-  document.getElementById('gOpenList').innerHTML = openPos.map(p =>
-    `<li${posStale(p) ? ' class="stale"' : ''}>
-       <span class="go-what"><span class="go-ic" aria-hidden="true">${icon('radar', 13)}</span>
-         <b>${posName(p)}</b>${p.sess ? ` on the ${esc(p.sess)}` : ''}</span>
-       <span class="go-when">${hm(posFor(p))} in${posStale(p) ? ' · that candle has closed' : ''}
-         ${p.risk > 0 ? ` · risk ${round(p.risk)}` : ''}</span>
-       <span class="grow"></span>
-       <button class="btn btn-primary" type="button" data-close="${esc(p.id)}">Close it</button>
-       <button class="btn btn-ghost" type="button" data-drop="${esc(p.id)}">Never filled</button>
-     </li>`).join('');
 
   ['reversal', 'continuation'].forEach(k =>
     document.getElementById(k === 'reversal' ? 'gRev' : 'gCont')
       .setAttribute('aria-pressed', String(gateMode === k)));
 
+  put('gTally', `${done}/${list.length}`);
+  document.getElementById('gTally').classList.toggle('all', done === list.length);
+  /* Folded away by default. The tally is the whole state most of the time
+     — you open the list to tick something or to check which one is
+     missing, and the rest of the session it is one word and two digits. */
   document.getElementById('gList').innerHTML = list.map((line, i) =>
     `<li><button type="button" data-line="${esc(line)}" aria-pressed="${gateTicks.has(line)}">
-       <span class="g-box" aria-hidden="true">${icon('tick', 13)}</span>
+       <span class="g-box" aria-hidden="true">${icon('tick', 11)}</span>
        <span class="g-n" aria-hidden="true">${i + 1}</span>
        <span class="g-t">${esc(line)}</span>
      </button></li>`).join('');
 
-  put('gTally', `${done}/${list.length}`);
-  const v = document.getElementById('gVerdict');
-  v.className = 'gate-v' + (done === list.length ? ' all' : '');
-  /* Named, not scored. "3/5" is a mark out of five; the useful sentence
-     is which way that cuts and what it costs you later. */
-  v.innerHTML = done === list.length
-    ? `<b>All ${list.length}.</b> This is the trade you came for.`
-    : `<b>${done} of ${list.length}.</b> ${list.length - done}
-       ${list.length - done === 1 ? 'rule is' : 'rules are'} still open — and the ones
-       you skip are the ones the Playbook will hand back to you later.`;
+  /* The panel above flips to the NEXT candle in the last half hour, while
+     these ticks still belong to the one you are standing in — which is
+     correct, because that is the trade you are still deciding. They are
+     thrown away the moment it actually turns. */
 }
 
-/* Only the figures that move, so the rule buttons are not rebuilt under
-   a finger or a focus ring once a second. */
-function gateFace(c, off) {
-  const p = PROFILE[c.open];
-  const next = (c.open + 4) % 24;
-  const [cls, head, sub] = room(c.left, off, next);
-  put('gMeta', off ? 'no trade' : `${hhmm(c.open)} ${p.name} · ${hm(c.left)} left`);
-  put('gOpen', hhmm(c.open));
-  put('gName', p.name);
-  put('gLeft', off ? 'not a candle you trade' : `${hm(c.left)} left · then ${hhmm(next)}`);
-  document.getElementById('gFill').style.width = (c.into / 14400 * 100).toFixed(2) + '%';
-  document.getElementById('gBand').className = 'cp-band ' + cls;
-  document.getElementById('gBandT').textContent = head;
-  document.getElementById('gBandS').textContent = sub;
-  document.getElementById('gBest').hidden = bestCandle() !== hhmm(c.open);
-  /* The miss advice only once the window has actually gone. On Metrics it
-     is always up because that panel is a briefing; here, above the rules
-     for a trade you are still considering, it would be answering a
-     question you have not reached yet. */
-  document.getElementById('gMiss').hidden = !(cls === 'late' || off);
-  put('gMissT', p.miss);
-  const el = document.getElementById('gCp');
-  el.classList.toggle('off', off);
-  el.classList.toggle('late', cls === 'late');
-}
-
-function gateTick(c) {
-  if (gateOpen !== c.open || gateDay !== iso(new Date())) { renderGate(); return; }
-  gateFace(c, c.open === NO_TRADE);
-}
+document.getElementById('gToggle').addEventListener('click', (ev) => {
+  const b = ev.currentTarget;
+  const open = b.getAttribute('aria-expanded') === 'true';
+  b.setAttribute('aria-expanded', String(!open));
+  document.getElementById('gList').hidden = open;
+});
 
 document.getElementById('gModes').addEventListener('click', (ev) => {
   if (phone()) return;
@@ -4677,17 +4465,9 @@ document.getElementById('gIn').addEventListener('click', () => {
     `In a ${gateMode === 'reversal' ? 'C2' : 'C3'} on the ${sess}. Close it when it is done.`;
 });
 
-document.getElementById('gOpenList').addEventListener('click', (ev) => {
-  const c = ev.target.closest('[data-close]');
-  if (c) { closePos(c.dataset.close); return; }
-  const d = ev.target.closest('[data-drop]');
-  if (d) dropPos(d.dataset.drop);
-});
-
-/* The two quiet paths, both of which open the sheet rather than writing
-   straight through: the amount is not known yet on a trade that is
-   already over until you type it, and the reason is not known on one you
-   passed on. A row saved without either is one you cannot read in March.
+/* Opens the sheet rather than writing straight through: the reason you
+   passed is not known until you type it, and a row saved without one is a
+   row you cannot read in March.
 
    Nothing here is disabled at 14:00. The band already says it is not a
    candle you trade, and this file's position on that is settled: worth
@@ -4702,7 +4482,9 @@ const gateHand = (side) => () => {
     side,
   });
 };
-document.getElementById('gTake').addEventListener('click', gateHand('win'));
+/* Only the missed path is kept here. A trade that is already finished has
+   a button for it in the topbar and always did; a setup you passed on has
+   nowhere else to be recorded, and it is what the Missed cut is made of. */
 document.getElementById('gPass').addEventListener('click', gateHand('missed'));
 
 /* Started here rather than beside tickCandle, because tickCandle now
@@ -5587,7 +5369,6 @@ document.getElementById('rsForm').addEventListener('submit', (ev) => {
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
-  gate:     document.getElementById('gateSection'),
   risk:     document.getElementById('riskSection'),
   metrics:  document.getElementById('metricsSection'),
   playbook: document.getElementById('playbookSection'),
@@ -5598,6 +5379,9 @@ function goto(view) {
   /* The ladder does not exist on a phone, so a stored or stale route to
      it lands on the metrics instead of on a blank screen. */
   if (phone() && view === 'risk') view = 'metrics';
+  /* The gate used to be a view of its own. Anything still pointing at it
+     lands on the dashboard, which is where it went. */
+  if (view === 'gate') view = 'metrics';
   document.querySelectorAll('[data-view]').forEach(b => {
     if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
     else b.removeAttribute('aria-current');
