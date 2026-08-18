@@ -302,6 +302,52 @@
 .bk-x:hover { background: var(--glass-in); color: var(--ink); }
 .bk-b { display: flex; flex-direction: column; gap: 13px;
   padding: 15px 16px 16px; border-top: 1px solid var(--rule); }
+/* ── the bin ──
+   Only ever on screen when it holds something, so it costs nothing on
+   the days nothing has gone wrong. */
+#binBtn { position: relative; }
+/* One column and a little wider than a form. The trade sheet's body is a
+   two-column grid because it is a form; this is a list, and a list in
+   half a column wraps every row into four lines. */
+#bin { width: min(600px, calc(100vw - 40px)); }
+#bin .sheet-b { display: block; }
+#bin .bk-note { margin-bottom: 12px; }
+.bin-n {
+  font-family: var(--mono); font-size: .6rem; font-weight: 400;
+  letter-spacing: .04em; color: var(--ink-2);
+}
+.bin-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.bin-row {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid var(--glass-line); border-radius: 10px;
+  background: var(--glass-in);
+}
+.bin-what { flex: 1; min-width: 0; }
+.bin-what b {
+  display: block; font-size: .86rem; font-weight: 400;
+  letter-spacing: -.01em; color: var(--ink);
+  /* One line. A restored trade is identified by its name, and a name
+     that wraps to four lines identifies nothing faster. */
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.bin-row .btn, .bin-row .drop { flex: none; }
+.bin-when {
+  display: block; margin-top: 2px;
+  font-family: var(--mono); font-size: .6rem;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3);
+}
+.bin-thumb {
+  flex: none; width: 62px; height: 40px; border-radius: 6px;
+  border: 1px solid var(--glass-line);
+  background: var(--glass-in-2) center / cover no-repeat;
+}
+.bin-none { margin: 0; font-size: .84rem; color: var(--ink-3); }
+.bin-h {
+  margin: 20px 0 6px; padding-top: 16px; border-top: 1px solid var(--rule);
+  font-family: var(--mono); font-size: .58rem; font-weight: 500;
+  text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3);
+}
 .bk-note { margin: 0; font-size: .78rem; line-height: 1.55; color: var(--ink-3); }
 .bk-note b { font-weight: 500; color: var(--ink-2); }
 .bk-acts { display: flex; gap: 9px; flex-wrap: wrap; }
@@ -1607,6 +1653,16 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
       </div>
 
+      <!-- Hidden until it holds something. A permanent bin icon on a
+           screen where nothing has been deleted is a permanent reminder
+           of a thing that has not happened. -->
+      <button class="btn btn-ghost" type="button" id="binBtn" aria-label="Recently deleted" hidden>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M20 11a8 8 0 1 0-2.3 6M20 5v6h-6" /></svg>
+        <span class="bin-n" id="binN"></span>
+      </button>
+
       <button class="btn btn-ghost" type="button" id="backupBtn" aria-label="Backup">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
              stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
@@ -2038,6 +2094,34 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   <p class="sr" role="status" id="say"></p>
 </div>
 
+<!-- ── recently deleted ──
+     A list rather than a single undo: the mistake is often noticed a
+     screen or two later, not in the second after it happened. -->
+<dialog class="sheet" id="bin" aria-labelledby="binTitle">
+  <div class="sheet-h">
+    <h2 id="binTitle">Recently deleted</h2>
+    <span class="grow"></span>
+    <button class="btn btn-ghost" type="button" id="binX" aria-label="Close">✕</button>
+  </div>
+  <div class="sheet-b">
+    <p class="bk-note" id="binNote"></p>
+    <ul class="bin-list" id="binList"></ul>
+    <!-- The other kind of loss: not a record removed, but a ledger that
+         is no longer the one you had. -->
+    <div id="snapWrap" hidden>
+      <h3 class="bin-h">Earlier versions</h3>
+      <p class="bk-note">How the ledger stood at the start of each day. Restoring one
+        replaces everything — today's is saved first, so it can be undone.</p>
+      <ul class="bin-list" id="snapList"></ul>
+    </div>
+  </div>
+  <div class="sheet-f">
+    <button class="btn btn-ghost" type="button" id="binEmpty">Empty the bin</button>
+    <span class="grow"></span>
+    <button class="btn btn-ghost" type="button" id="binDone">Done</button>
+  </div>
+</dialog>
+
 <!-- ── the chart, full size ──
      Its own dialog rather than a panel inside the sheet, so Esc closes
      the picture and leaves the half-typed trade underneath alone. -->
@@ -2335,6 +2419,9 @@ function readStore() {
   try {
     const v = JSON.parse(raw);
     if (!v || !Array.isArray(v.events)) throw new Error('shape');
+    /* Absent in anything written before the bin existed. An empty one is
+       the correct reading of a ledger that never had one. */
+    if (!Array.isArray(v.bin)) v.bin = [];
     return v;
   } catch (e) {
     /* Never fall back to the sample here. Showing demonstration numbers
@@ -2389,7 +2476,8 @@ let state = readStore() || SAMPLE;
    one save readStore() succeeds and this guard never fires again. There
    is no partial exit: the sample leaves whole or not at all. */
 const isDemo = () => state === SAMPLE;
-function liven() { if (isDemo()) state = { events: [] }; }
+function liven() { if (isDemo()) state = { events: [], bin: [] }; }
+const bin = () => (state.bin = Array.isArray(state.bin) ? state.bin : []);
 /* Dates are day-resolution, so same-day order needs a rule rather than a
    coincidence. The convention is the standard one for daily-valued
    series: a flow settles at the START of its day, ahead of that day's
@@ -3451,9 +3539,8 @@ document.getElementById('ledger').addEventListener('click', (ev) => {
   const demo = isDemo();
   if (demo && !confirm('This is sample data. Deleting clears the whole sample and starts you empty.')) return;
   liven();
-  if (!demo) state.events = state.events.filter(e => String(e.id) !== b.dataset.id);
-  SHOTS.del(b.dataset.id).catch(() => {});
-  commit(demo ? 'Sample ledger cleared.' : 'Removed one event.');
+  if (!demo) binPut([b.dataset.id]);
+  commit(demo ? 'Sample ledger cleared.' : 'Removed — recover it from the bin.');
 });
 
 document.getElementById('flowForm').addEventListener('submit', (ev) => {
@@ -4058,21 +4145,284 @@ document.getElementById('tradeForm').addEventListener('submit', (ev) => {
 document.getElementById('tradeDelete').addEventListener('click', () => {
   if (editing === null) return;
   const demo = isDemo();
-  if (!confirm(demo
-    ? 'This is sample data. Deleting clears the whole sample and starts you empty.'
-    : 'Delete this trade? This cannot be undone.')) return;
+  /* No confirm on a real trade any more. It said "this cannot be undone"
+     and that is no longer true, and a warning you click through daily
+     protects nothing — the bin does. */
+  if (demo && !confirm(
+    'This is sample data. Deleting clears the whole sample and starts you empty.')) return;
   const id = editing;
   liven();
-  if (!demo) state.events = state.events.filter(x => String(x.id) !== String(id));
-  SHOTS.del(id).catch(() => {});
+  /* The chart stays in the database. It is what makes the record worth
+     restoring. */
+  if (!demo) binPut([id]);
   editing = null;
   sheet.close();
-  commit(demo ? 'Sample ledger cleared.' : 'Trade deleted.');
+  commit(demo ? 'Sample ledger cleared.' : 'Trade deleted — recover it from the bin.');
+});
+
+/* ═══ recently deleted ═══
+   A deleted record is moved here rather than dropped, and its chart is
+   left in the database beside it — restoring a trade whose picture had
+   already been thrown away would hand back half of it.
+
+   Thirty days, because the mistake this exists for is noticed when you
+   go looking for the trade, which can be a month later when you are
+   reading back a losing stretch. Fifty records, so a bin cannot quietly
+   grow until it is the thing filling up localStorage. */
+const BIN_DAYS = 30, BIN_MAX = 50;
+
+/* Called on load. Anything past its time goes for good, and its chart
+   goes with it — a blob nothing can reach is just occupied space. */
+function binSweep() {
+  const cut = Date.now() - BIN_DAYS * 86400000;
+  const keep = bin().filter(r => (r.delAt || 0) > cut);
+  const over = keep.length - BIN_MAX;
+  const gone = bin().filter(r => !keep.includes(r))
+    .concat(over > 0 ? keep.splice(0, over) : []);
+  gone.forEach(r => SHOTS.del(r.id).catch(() => {}));
+  if (gone.length) { state.bin = keep; try { writeStore(state); } catch (e) {} }
+}
+
+/* The one way out of the ledger. Everything that removes a record goes
+   through here, so there is no path that deletes without a way back. */
+function binPut(ids) {
+  const want = new Set(ids.map(String));
+  const now = Date.now();
+  const taken = state.events.filter(e => want.has(String(e.id)));
+  state.events = state.events.filter(e => !want.has(String(e.id)));
+  taken.forEach(e => bin().push(Object.assign({}, e, { delAt: now })));
+  const over = bin().length - BIN_MAX;
+  if (over > 0) state.bin.splice(0, over).forEach(r => SHOTS.del(r.id).catch(() => {}));
+  return taken.length;
+}
+
+function binRestore(id) {
+  const i = bin().findIndex(r => String(r.id) === String(id));
+  if (i < 0) return null;
+  const r = state.bin.splice(i, 1)[0];
+  const back = Object.assign({}, r);
+  delete back.delAt;
+  /* An id that came back while something else was using it would put two
+     records on one key, and the log would open whichever it found
+     first. */
+  if (state.events.some(e => String(e.id) === String(back.id))) {
+    const was = back.id;
+    back.id = uid();
+    SHOTS.get(was).then(b => { if (b) SHOTS.put(back.id, b); }).catch(() => {});
+  }
+  state.events.push(back);
+  return back;
+}
+
+function binDrop(id) {
+  const i = bin().findIndex(r => String(r.id) === String(id));
+  if (i < 0) return false;
+  const [r] = state.bin.splice(i, 1);
+  SHOTS.del(r.id).catch(() => {});
+  return true;
+}
+
+const binWhat = (r) => r.k === 'trade'
+  ? `${r.out === 'missed' ? 'Missed' : r.amt < 0 ? 'Loss' : 'Win'}`
+    + `${r.sym ? ' · ' + r.sym : ''}${r.setup ? ' · ' + r.setup : ''}`
+    + `${r.out === 'missed' ? '' : ' · ' + money(r.amt, true)}`
+  : `${r.k === 'withdraw' ? 'Withdrawal' : 'Deposit'} · ${money(Math.abs(r.amt))}`;
+
+/* "3 days ago" rather than a date: what you need to know is whether this
+   is the thing you deleted a minute ago. */
+function binAgo(ms) {
+  const d = Math.floor((Date.now() - ms) / 86400000);
+  if (d >= 1) return `${d} day${d === 1 ? '' : 's'} ago`;
+  const h = Math.floor((Date.now() - ms) / 3600000);
+  if (h >= 1) return `${h} hour${h === 1 ? '' : 's'} ago`;
+  const m = Math.floor((Date.now() - ms) / 60000);
+  return m >= 1 ? `${m} minute${m === 1 ? '' : 's'} ago` : 'just now';
+}
+
+const binBtn = document.getElementById('binBtn');
+const binSheet = document.getElementById('bin');
+
+function renderBin() {
+  const rows = bin();
+  /* On screen if there is anything to recover of EITHER kind — a bin
+     that hides the rollback points is a safety net with a hole in it. */
+  const snaps = snapAll().filter(r => r.day !== iso(new Date())).length;
+  binBtn.hidden = !rows.length && !snaps;
+  document.getElementById('binN').textContent = rows.length || '';
+  binBtn.setAttribute('aria-label',
+    `Recently deleted, ${rows.length} ${rows.length === 1 ? 'record' : 'records'}`);
+  if (!binSheet.open) return;
+
+  document.getElementById('binNote').textContent = rows.length
+    ? `Kept for ${BIN_DAYS} days, then removed for good. Restoring puts the record `
+      + `back where it was, with its chart.`
+    : 'Nothing deleted in the last ' + BIN_DAYS + ' days.';
+  document.getElementById('binEmpty').hidden = !rows.length;
+  /* Before the early return. An empty bin is exactly the case where the
+     rollback points are the only thing on this screen worth having. */
+  drawSnaps();
+  const list = document.getElementById('binList');
+  if (!rows.length) { list.innerHTML = ''; return; }
+  /* Newest first: the one you came here for is the one you just lost. */
+  list.innerHTML = [...rows].reverse().map(r => `
+    <li class="bin-row">
+      ${r.shot ? `<span class="bin-thumb" data-shot="${esc(String(r.id))}"></span>` : ''}
+      <span class="bin-what">
+        <b>${esc(binWhat(r))}</b>
+        <span class="bin-when">${esc(r.date || '')} · deleted ${esc(binAgo(r.delAt || 0))}</span>
+      </span>
+      <button class="btn btn-ghost" type="button" data-back="${esc(String(r.id))}">Restore</button>
+      <button class="drop" type="button" data-forget="${esc(String(r.id))}"
+        aria-label="Remove ${esc(binWhat(r))} for good">✕</button>
+    </li>`).join('');
+
+  list.querySelectorAll('.bin-thumb[data-shot]').forEach((box) => {
+    SHOTS.get(box.dataset.shot).then((b) => {
+      if (!b) return;
+      const u = URL.createObjectURL(b);
+      box.style.backgroundImage = `url("${u}")`;
+      /* Revoked when the sheet shuts, not here — the picture has to
+         outlive this callback to be drawn at all. */
+      binUrls.push(u);
+    }).catch(() => {});
+  });
+}
+let binUrls = [];
+
+function drawSnaps() {
+  const all = snapAll().filter(r => r.day !== iso(new Date()));
+  document.getElementById('snapWrap').hidden = !all.length;
+  if (!all.length) return;
+  document.getElementById('snapList').innerHTML = [...all].reverse().map((r) => {
+    let n = 0;
+    try { n = (JSON.parse(r.raw).events || []).length; } catch (e) {}
+    return `<li class="bin-row">
+      <span class="bin-what">
+        <b>${esc(r.day)}</b>
+        <span class="bin-when">${n} record${n === 1 ? '' : 's'} · ${esc(binAgo(r.at || 0))}</span>
+      </span>
+      <button class="btn btn-ghost" type="button" data-day="${esc(r.day)}">Restore</button>
+    </li>`;
+  }).join('');
+}
+
+document.getElementById('snapList').addEventListener('click', (ev) => {
+  const b = ev.target.closest('[data-day]');
+  if (!b) return;
+  const n = state.events.length;
+  if (!confirm(`Replace the ${n} record${n === 1 ? '' : 's'} in this browser with the ledger `
+    + `as it stood on ${b.dataset.day}? Today's is saved first, so this can be undone.`)) return;
+  const got = snapRestore(b.dataset.day);
+  if (got === null) { document.getElementById('say').textContent = 'That version could not be read.'; return; }
+  renderAll();
+  document.getElementById('say').textContent =
+    `Rolled back to ${b.dataset.day} — ${got} record${got === 1 ? '' : 's'}.`;
+  binSheet.close();
+});
+
+function openBin() {
+  binSheet.showModal();
+  renderBin();
+  document.getElementById('binDone').focus();
+}
+binBtn.addEventListener('click', openBin);
+document.getElementById('binX').addEventListener('click', () => binSheet.close());
+document.getElementById('binDone').addEventListener('click', () => binSheet.close());
+binSheet.addEventListener('close', () => {
+  binUrls.splice(0).forEach(u => URL.revokeObjectURL(u));
+});
+
+document.getElementById('binList').addEventListener('click', (ev) => {
+  const back = ev.target.closest('[data-back]');
+  if (back) {
+    const r = binRestore(back.dataset.back);
+    if (!r) return;
+    commit(`Restored ${binWhat(r).toLowerCase()}.`);
+    renderBin();
+    if (!bin().length) binSheet.close();
+    return;
+  }
+  const forget = ev.target.closest('[data-forget]');
+  if (!forget) return;
+  /* The bin is the safety net. Cutting a hole in it is the one delete
+     that genuinely cannot be undone, so it is the one that asks. */
+  const r = bin().find(x => String(x.id) === String(forget.dataset.forget));
+  if (!confirm(`Remove ${r ? binWhat(r).toLowerCase() : 'this record'} for good? `
+    + `This one cannot be recovered.`)) return;
+  binDrop(forget.dataset.forget);
+  commit('Removed for good.');
+  renderBin();
+  if (!bin().length) binSheet.close();
+});
+
+document.getElementById('binEmpty').addEventListener('click', () => {
+  const n = bin().length;
+  if (!n || !confirm(`Remove all ${n} deleted ${n === 1 ? 'record' : 'records'} for good? `
+    + `None of them can be recovered afterwards.`)) return;
+  state.bin.splice(0).forEach(r => SHOTS.del(r.id).catch(() => {}));
+  commit(`Bin emptied — ${n} ${n === 1 ? 'record' : 'records'} gone for good.`);
+  renderBin();
+  binSheet.close();
 });
 
 /* A save that fails must never read as a save that worked. This is the
    one place the app could lie about real money already banked. */
+/* ═══ rollback points ═══
+   The bin catches a deletion. This catches everything else — the edit
+   that went into the wrong record, the import that replaced the wrong
+   ledger, the tidy-up that went too far. All of those end the same way:
+   yesterday's ledger was fine and nobody has a copy of it.
+
+   Written from the ledger as it stands BEFORE the save, on the first
+   save of each day, so a snapshot is always a whole day behind the
+   damage rather than a copy of it. */
+const SKEY = 'ledger.snap.v1';
+const SNAP_DAYS = 7;
+
+const snapAll = () => {
+  try {
+    const v = JSON.parse(localStorage.getItem(SKEY) || '[]');
+    return Array.isArray(v) ? v : [];
+  } catch (e) { return []; }
+};
+
+function snapTake() {
+  const day = iso(new Date());
+  const all = snapAll();
+  if (all.some(r => r.day === day)) return;          // one a day is the point
+  /* What is on disk right now, not what is about to be written. */
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { return; }
+  if (!raw) return;
+  all.push({ day, at: Date.now(), raw });
+  while (all.length > SNAP_DAYS) all.shift();
+  try { localStorage.setItem(SKEY, JSON.stringify(all)); }
+  catch (e) {
+    /* A full disk must never stop a trade being saved. Drop the oldest
+       and try once; if it still will not fit, go without. */
+    all.shift();
+    try { localStorage.setItem(SKEY, JSON.stringify(all)); } catch (_) {}
+  }
+}
+
+/* Restoring one is itself a change worth being able to undo, so the
+   ledger as it stands is stashed under today before it is replaced. */
+function snapRestore(day) {
+  const r = snapAll().find(x => x.day === day);
+  if (!r) return null;
+  let v = null;
+  try { v = JSON.parse(r.raw); } catch (e) { return null; }
+  if (!v || !Array.isArray(v.events)) return null;
+  snapTake();
+  state = { events: v.events, bin: Array.isArray(v.bin) ? v.bin : [] };
+  try { writeStore(state); } catch (e) { return null; }
+  return state.events.length;
+}
+
 function commit(msg) {
+  /* Before the write, so the copy is of the ledger this save is about to
+     change rather than of the result. */
+  snapTake();
   try { writeStore(state); }
   catch (e) {
     renderAll();
@@ -4087,6 +4437,7 @@ function commit(msg) {
 function renderAll() {
   renderSummary(); renderCalendar(); renderAgenda(); renderMetrics();
   renderLedger(); renderLog(); renderRes(); renderGate(); renderLive(); renderRisk();
+  renderBin();
 }
 
 /* ── the candle clock ──
@@ -4532,7 +4883,8 @@ document.getElementById('bkSave').addEventListener('click', () => {
      key at rest, but a person saving "a copy" means a copy of everything
      they typed — two files to keep is one file to lose. */
   const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
-    saved: new Date().toISOString(), events: state.events, res: resAll() }, null, 2)],
+    saved: new Date().toISOString(), events: state.events,
+    bin: bin(), res: resAll() }, null, 2)],
     { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -4570,7 +4922,9 @@ bkFile.addEventListener('change', async () => {
   if (!isDemo() && n && !confirm(`Replace the ${n} records in this browser with the `
       + `${parsed.events.length} in that file? This cannot be undone — save a copy first `
       + `if you are unsure.`)) return;
-  state = { events: parsed.events };
+  /* Absent rather than empty means a backup written before the bin
+     existed; an empty bin is the right reading of one. */
+  state = { events: parsed.events, bin: Array.isArray(parsed.bin) ? parsed.bin : [] };
   try { writeStore(state); }
   catch (e) { say.textContent = 'Could not save the restored ledger.'; return; }
   /* Absent rather than empty means an older backup, written before links
@@ -5410,6 +5764,9 @@ document.querySelectorAll('[data-view]').forEach(b =>
   b.addEventListener('click', () => goto(b.dataset.view)));
 
 document.getElementById('fDate').value = iso(new Date());
+/* Before the first render, so anything that timed out overnight is gone
+   from the count rather than shown and then quietly vanishing. */
+binSweep();
 renderAll();
 /* Metrics is the landing view: the clock tells you what to do next and
    the figures tell you whether it has been working. The calendar is
