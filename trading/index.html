@@ -2009,7 +2009,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
                   <ol id="pspList"></ol>
                 </div>
                 <table>
-                  <caption class="sr">Which timeframe confirms a swing, by the level or SMT that set it up</caption>
+                  <caption class="sr">Which timeframe confirms a swing, by the level that set it up</caption>
                   <thead>
                     <tr><th scope="col">Level/SMT tapped</th><th scope="col">Confirms on</th></tr>
                   </thead>
@@ -4341,7 +4341,7 @@ const ALIGN = [
 /* The other half of the answer. Four, because the fifth thing you could
    say here is already a line of the checklist above it. */
 const PROTECTS = [
-  'A level or SMT is reached',
+  'A key level reached, with an SMT on it',
   'A candle turns against it on the higher timeframe',
   'On the aligned chart: expansion in, met with expansion out',
   'The close clears the body — below it for a high, above it for a low',
@@ -5699,15 +5699,15 @@ const NOTES = [
         + 'swing tradeable.',
     sit: [
       { n: '01', h: 'Align the timeframe first',
-        p: 'The level or SMT you tapped decides which chart is allowed to confirm it. The pairing is fixed, and nothing below it counts.',
+        p: 'The level you tapped decides which chart is allowed to confirm it. The pairing is fixed, and nothing below it counts.',
         li: ['A daily level is confirmed on the 1H',
              'A 4H level on the 15M, a 1H level on the 5M',
              'A 30M level on the 3M, a 15M level on the 1M',
              'Below the aligned timeframe is noise, not confirmation'] },
       { n: '02', h: 'The higher timeframe sets it up',
-        p: 'A key level is reached or an SMT forms, and a candle turns against it. That is a candidate — not yet a swing.',
+        p: 'A key level is reached AND an SMT prints on it, and a candle turns against it. That is a candidate — not yet a swing.',
         li: ['An old high or low is reached, or a gap is traded into',
-             'Or an SMT prints at the extreme instead',
+             'And an SMT at that extreme — the level alone is not a setup',
              'A reversal candle closes against the level',
              'Nothing is protected until the aligned timeframe agrees'] },
       { n: '03', h: 'The confirmation is a V',
@@ -5779,7 +5779,7 @@ const NOTES = [
     check: {
       h: 'Confirming a swing',
       li: [
-        'A key level is reached, or an SMT prints at the extreme',
+        'A key level is reached, with an SMT on it',
         'A candle turns against it on the higher timeframe',
         'You are on the aligned timeframe — and only that one',
         'Expansion in, met with expansion back out',
