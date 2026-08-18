@@ -801,23 +801,54 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .live.stale .live-ic { color: var(--ink-3); animation: none; }
 @media (prefers-reduced-motion: reduce) { .live-ic { animation: none } }
 
-/* ── the gate, folded into the candle panel ──
-   It had a screen of its own. The panel above it already said which
-   candle you were in and whether there was room in it, which was two
-   thirds of that screen, so what is left is one line: which of the two
-   trades this is, how much of the checklist is done, and the way in.
+/* ── the gate ──
+   It had a screen of its own, then a row of its own. What is left is one
+   control at the end of the note above it — the way in, and a caret for
+   everything behind it. They are drawn as a single object because they
+   are one decision: the caret is not a second action, it is the same one
+   with its reasons showing.
 
-   The rules themselves are folded away. Most of the time the tally is the
-   entire state — you open the list to tick something or to see which one
-   is missing, and the rest of the session it is one word and two digits. */
-.cp-gate {
-  display: flex; align-items: center; gap: 9px; flex-wrap: wrap;
-  margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule);
+   The tally is the only state that stays out. It is three characters and
+   it is the whole point of the thing — a gate that hides how much of its
+   own checklist is done has stopped being a gate. */
+.cp-foot { display: flex; align-items: flex-start; gap: 16px; margin-top: 10px; }
+/* The note keeps the width it had; the control takes the ragged end of
+   its second line. Below ~560px of note there is no ragged end left, so
+   the control drops under it instead of squeezing the sentence. */
+.cp-foot .cp-miss { flex: 1 1 300px; margin: 0; }
+.cp-split { display: inline-flex; align-items: stretch; flex: none; margin-left: auto; }
+
+.cp-go {
+  height: 32px; padding: 0 13px; gap: 7px; font-size: .78rem;
+  border-top-right-radius: 0; border-bottom-right-radius: 0;
 }
-.cp-gate .grow { flex: 1; }
+.cp-go .ic { display: inline-flex; }
+.cp-go svg { width: 14px; height: 14px; }
+.cp-more {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 32px; padding: 0 8px 0 9px;
+  border: 1px solid var(--glass-line); border-left: 0; border-radius: 0 8px 8px 0;
+  background: var(--glass-in-2); color: var(--ink-3);
+  font: inherit; cursor: pointer;
+}
+.cp-more:hover { background: var(--glass-in); color: var(--ink-2); }
+.cp-more[aria-expanded="true"] { background: var(--glass-in); color: var(--ink-2); }
+.cp-more b { font-family: var(--mono); font-size: .7rem; font-weight: 500; color: var(--ink-2); }
+/* Full marks is the one state worth colouring — it is the only one that
+   says go. */
+.cp-more b.all { color: var(--accent); }
+.cp-more .ic { display: inline-flex; transition: transform .16s ease; }
+.cp-more[aria-expanded="true"] .ic { transform: rotate(180deg); }
 
-/* C2 or C3, at the size of the badges beside them rather than the size of
-   a decision — this is one tap you make once and then forget. */
+/* What the caret opens. In flow rather than floating over the panel: the
+   panel clips its own overflow so the band and the progress bar keep the
+   rounded corners, and a floating menu would be cut in half by it. */
+.cp-menu { margin-top: 11px; padding-top: 11px; border-top: 1px solid var(--rule); }
+.cp-menu-h { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.cp-menu-h .grow { flex: 1; }
+
+/* C2 or C3, at the size of the badges elsewhere in the panel rather than
+   the size of a decision — this is one tap you make once and then forget. */
 .cp-modes { display: flex; gap: 2px; padding: 2px; border-radius: 8px;
   background: var(--glass-in); }
 .cp-modes button {
@@ -832,20 +863,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
-.cp-checks {
-  display: inline-flex; align-items: center; gap: 7px;
-  height: 30px; padding: 0 11px; border: 0; border-radius: 8px;
-  background: none; color: var(--ink-3);
-  font: inherit; font-size: .74rem; cursor: pointer;
-}
-.cp-checks:hover { background: var(--glass-in); color: var(--ink-2); }
-.cp-checks .ic { display: inline-flex; }
-.cp-checks b { font-family: var(--mono); font-size: .7rem; font-weight: 500; color: var(--ink-2); }
-/* Full marks is the one state worth colouring — it is the only one that
-   says go. */
-.cp-checks b.all { color: var(--accent); }
-.cp-checks[aria-expanded="true"] { background: var(--glass-in); color: var(--ink-2); }
-
 .cp-risk { display: flex; align-items: center;
   height: 30px; padding: 0 10px; border-radius: 8px; background: var(--glass-in); }
 .cp-risk input {
@@ -856,7 +873,6 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 .cp-risk input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
 .cp-risk input { -moz-appearance: textfield; appearance: textfield; }
 
-.cp-go { height: 30px; padding: 0 14px; font-size: .78rem; }
 .cp-let {
   border: 0; padding: 0 4px; background: none; color: var(--ink-3);
   font: inherit; font-size: .72rem; text-decoration: underline;
@@ -867,7 +883,7 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 
 /* The list, when you open it. Compact rows — this sits inside a panel on a
    dashboard, not on a screen of its own, so it cannot take 52px a line. */
-.cp-list { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
+.cp-list { margin: 9px 0 0; padding: 0; list-style: none; display: grid; gap: 2px; }
 .cp-list button {
   display: grid; grid-template-columns: 18px 14px minmax(0, 1fr);
   align-items: center; gap: 10px; width: 100%; min-height: 34px;
@@ -981,6 +997,11 @@ dialog.sheet::backdrop { background: rgba(0, 0, 0, .5); backdrop-filter: blur(3p
 [data-phone="on"] .cp-modes button:hover { background: none; }
 [data-phone="on"] .cp-modes button[aria-pressed="true"]:hover {
   background: color-mix(in srgb, var(--accent) 20%, var(--glass-in-2));
+}
+/* With the way in gone, the caret is no longer half of a split control —
+   it closes its own left edge and stands on its own. */
+[data-phone="on"] .cp-more {
+  border-left: 1px solid var(--glass-line); border-radius: 8px; padding: 0 10px;
 }
 
 /* The note's own title, and "Saved" beneath it. Bold, because on this
@@ -1636,35 +1657,48 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             <b><span class="ic" id="cpBandIcon"></span><span id="cpBandT"></span></b>
             <em id="cpBandS"></em>
           </div>
-          <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
-
           <!-- ── the gate ──
-               It had a screen of its own and did not earn one: the panel
-               above already says which candle you are in and whether there
-               is room in it, which was two thirds of that screen. What was
-               actually missing is the part below — which of the two trades
-               this is, the rules, and the way in — and it fits on one line
-               with the rules folded away until you want them. -->
-          <div class="cp-gate" id="cpGate">
-            <span class="cp-modes" id="gModes" role="group" aria-label="Which trade this is">
-              <button type="button" data-mode="reversal" id="gRev" aria-pressed="false">C2</button>
-              <button type="button" data-mode="continuation" id="gCont" aria-pressed="true">C3</button>
+               It had a screen of its own, then a row of its own, and it
+               did not earn either. Standing beside the note rather than
+               under it, it costs no line at all: the note wraps to two
+               lines at any width worth reading this panel on, and the
+               control sits in the space those two lines were already
+               leaving on the right.
+
+               What is left showing is the one thing you press. Which
+               trade this is, the rules, the risk and the way to log a
+               miss all sit behind the caret, because none of them is
+               something you look at — they are things you answer once,
+               and then the tally speaks for all of them. -->
+          <div class="cp-foot">
+            <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
+            <span class="cp-split" id="cpGate">
+              <button class="btn btn-primary cp-go" type="button" id="gIn">
+                <span class="ic" id="gInIc" aria-hidden="true"></span>I&rsquo;m in
+              </button>
+              <button type="button" class="cp-more" id="gToggle"
+                      aria-expanded="false" aria-controls="gMenu"
+                      aria-label="The gate — which trade this is, and the checklist">
+                <b id="gTally">0/5</b><span class="ic" id="gCaret" aria-hidden="true"></span>
+              </button>
             </span>
-            <button type="button" class="cp-checks" id="gToggle"
-                    aria-expanded="false" aria-controls="gList">
-              <span class="ic" id="gCheckIc" aria-hidden="true"></span>Checklist
-              <b id="gTally">0/5</b>
-            </button>
-            <span class="grow"></span>
-            <span class="cp-risk">
-              <label class="sr" for="gRisk">Risk in dollars, optional</label>
-              <input id="gRisk" type="number" step="0.01" min="0" inputmode="decimal"
-                     placeholder="Risk" />
-            </span>
-            <button class="btn btn-primary cp-go" type="button" id="gIn">I'm in</button>
-            <button type="button" class="cp-let" id="gPass">let it go</button>
           </div>
-          <ol class="cp-list" id="gList" hidden></ol>
+          <div class="cp-menu" id="gMenu" hidden>
+            <div class="cp-menu-h">
+              <span class="cp-modes" id="gModes" role="group" aria-label="Which trade this is">
+                <button type="button" data-mode="reversal" id="gRev" aria-pressed="false">C2</button>
+                <button type="button" data-mode="continuation" id="gCont" aria-pressed="true">C3</button>
+              </span>
+              <span class="grow"></span>
+              <span class="cp-risk">
+                <label class="sr" for="gRisk">Risk in dollars, optional</label>
+                <input id="gRisk" type="number" step="0.01" min="0" inputmode="decimal"
+                       placeholder="Risk" />
+              </span>
+              <button type="button" class="cp-let" id="gPass">let it go</button>
+            </div>
+            <ol class="cp-list" id="gList"></ol>
+          </div>
 
           <span class="cp-bar" aria-hidden="true"><i id="cpFill"></i></span>
         </section>
@@ -2011,6 +2045,7 @@ const ICO = {
      it read as watching something rather than aiming at it. */
   radar: 'M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18M12 16.5a4.5 4.5 0 1 0 0-9 4.5 4.5 0 0 0 0 9'
        + 'M12 12l6.4-6.4',
+  chev:  'M6 9.5 12 15.5 18 9.5',
   pct:   'M19 5 5 19M7 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM17 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z',
   bars:  'M4 19V9M10 19V5M16 19v-7M22 19H2',
   image: 'M3 5h18v14H3zM3 15l5-5 4 4 3-3 6 6M8.5 9.5h.01',
@@ -4157,7 +4192,10 @@ const put = (id, v) => { document.getElementById(id).textContent = v; };
 /* 15, the size this file gives a topbar button — the strip is a band
    across the top and the mark has to carry from across the desk.
    Everything beside a label is 13. */
-document.getElementById('gCheckIc').innerHTML = icon('check', 13);
+/* The same radar the position strip wears, so the button you press to go
+   in and the strip that says you are in are visibly the same thing. */
+document.getElementById('gInIc').innerHTML = icon('radar', 14);
+document.getElementById('gCaret').innerHTML = icon('chev', 13);
 document.getElementById('rkPerIc').innerHTML = icon('risk', 13);
 document.getElementById('liveIc').innerHTML = icon('radar', 15);
 document.getElementById('icCandle').innerHTML = icon('clock', 12);
@@ -4378,11 +4416,17 @@ function renderGate() {
     document.getElementById(k === 'reversal' ? 'gRev' : 'gCont')
       .setAttribute('aria-pressed', String(gateMode === k)));
 
-  put('gTally', `${done}/${list.length}`);
+  /* The mode is only worth printing when it is not the one you are on by
+     default. Every session opens on C3, and a control that spends its
+     day announcing its own default has spent that space on nothing. */
+  put('gTally', (gateMode === 'reversal' ? 'C2 ' : '') + `${done}/${list.length}`);
   document.getElementById('gTally').classList.toggle('all', done === list.length);
-  /* Folded away by default. The tally is the whole state most of the time
-     — you open the list to tick something or to check which one is
-     missing, and the rest of the session it is one word and two digits. */
+  /* Said in full to a screen reader, which gets "0/5" out of the button
+     otherwise — and 0/5 of what, on which of the two trades, is exactly
+     the part the sighted version is getting from its surroundings. */
+  document.getElementById('gToggle').setAttribute('aria-label',
+    `The gate — ${gateMode === 'reversal' ? 'reversal, C2' : 'continuation, C3'}, `
+    + `${done} of ${list.length} checks ticked`);
   document.getElementById('gList').innerHTML = list.map((line, i) =>
     `<li><button type="button" data-line="${esc(line)}" aria-pressed="${gateTicks.has(line)}">
        <span class="g-box" aria-hidden="true">${icon('tick', 11)}</span>
@@ -4396,11 +4440,23 @@ function renderGate() {
      thrown away the moment it actually turns. */
 }
 
+/* Everything except the way in lives behind this. Closed after you act,
+   because a menu left standing open under a dashboard is the row this
+   change was made to get rid of. */
+function gateFold(open) {
+  document.getElementById('gToggle').setAttribute('aria-expanded', String(open));
+  document.getElementById('gMenu').hidden = !open;
+}
 document.getElementById('gToggle').addEventListener('click', (ev) => {
-  const b = ev.currentTarget;
-  const open = b.getAttribute('aria-expanded') === 'true';
-  b.setAttribute('aria-expanded', String(!open));
-  document.getElementById('gList').hidden = open;
+  gateFold(ev.currentTarget.getAttribute('aria-expanded') !== 'true');
+});
+/* Esc closes it, as it closes the sheet and the backup dialog. It is not
+   trapping focus and it is not covering anything, so that is the whole
+   of what Esc has to do here. */
+document.getElementById('gMenu').addEventListener('keydown', (ev) => {
+  if (ev.key !== 'Escape') return;
+  gateFold(false);
+  document.getElementById('gToggle').focus();
 });
 
 document.getElementById('gModes').addEventListener('click', (ev) => {
@@ -4459,6 +4515,7 @@ document.getElementById('gIn').addEventListener('click', () => {
   });
   saveOpen();
   document.getElementById('gRisk').value = '';
+  gateFold(false);
   renderLive();
   renderGate();
   document.getElementById('say').textContent =
@@ -4473,8 +4530,10 @@ document.getElementById('gIn').addEventListener('click', () => {
    candle you trade, and this file's position on that is settled: worth
    colouring, not worth blocking. */
 const gateHand = (side) => () => {
+  if (phone()) return;
   const c = candle();
   const sess = hhmm(c.open);
+  gateFold(false);
   openTrade(iso(new Date()), null, {
     mode: gateMode,
     ticks: [...gateTicks],
