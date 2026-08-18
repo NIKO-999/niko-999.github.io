@@ -420,6 +420,66 @@
 /* Both halves open the same distance below their heading. */
 .cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
 
+/* ── backtesting ──
+   Seven cells across, the calendar's cell shape, and a fill that is a
+   count rather than a direction: nothing here is a win or a loss, so
+   nothing here is green or red. */
+.bt-strip { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+.bt-day {
+  position: relative;
+  display: flex; flex-direction: column; gap: 3px;
+  min-height: 76px; padding: 7px 8px 8px;
+  border: 1px solid var(--glass-line); border-radius: 9px;
+  background: var(--glass-in);
+  text-align: left; font: inherit; color: inherit; cursor: pointer;
+}
+.bt-day:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-line)); }
+.bt-day:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.bt-day .wd { font-family: var(--mono); font-size: .56rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); }
+.bt-day .dn { font-size: .92rem; font-weight: 400; letter-spacing: -.02em; color: var(--ink-2); }
+.bt-day .grow { flex: 1; }
+/* The count is the whole cell. A day with nothing on it says nothing
+   rather than saying zero — a nought in every empty box reads as data. */
+.bt-day .n { font-family: var(--mono); font-size: .74rem; color: var(--accent); }
+.bt-day .j {
+  position: absolute; right: 7px; top: 7px; width: 5px; height: 5px;
+  border-radius: 50%; background: var(--accent);
+}
+.bt-day[data-lvl="0"] { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
+  border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
+.bt-day[data-lvl="1"] { background: color-mix(in srgb, var(--accent) 9%,  var(--glass-in)); }
+.bt-day[data-lvl="2"] { background: color-mix(in srgb, var(--accent) 17%, var(--glass-in)); }
+.bt-day[data-lvl="3"] { background: color-mix(in srgb, var(--accent) 26%, var(--glass-in)); }
+.bt-day[data-lvl="4"] { background: color-mix(in srgb, var(--accent) 36%, var(--glass-in)); }
+.bt-day[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
+.bt-day[data-out] { opacity: .5; }
+
+.bt-charts {
+  margin-top: 26px; display: grid; gap: 18px;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+}
+.bt-chart { border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 14px 16px 6px; }
+.bt-ch { display: flex; align-items: baseline; gap: 10px; }
+.bt-ch .grow { flex: 1; }
+.bt-chart h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.bt-n { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
+.bt-sub { margin: 5px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
+.bt-fig { display: grid; place-items: center; padding: 6px 0 10px; }
+.bt-fig svg { width: 100%; max-width: 260px; height: auto; }
+.bt-fig .grid { fill: none; stroke: var(--rule); stroke-width: 1; }
+.bt-fig .spoke { stroke: var(--rule); stroke-width: 1; }
+.bt-fig .area { fill: color-mix(in srgb, var(--accent) 22%, transparent);
+  stroke: var(--accent); stroke-width: 1.6; stroke-linejoin: round; }
+.bt-fig .dot { fill: var(--accent); }
+.bt-fig .lab { fill: var(--ink-3); font-family: var(--mono); font-size: 9px;
+  text-anchor: middle; dominant-baseline: middle; }
+.bt-fig .lab.on { fill: var(--ink-2); }
+.bt-fig .cell { stroke: none; }
+.bt-fig .none { fill: color-mix(in srgb, var(--ink-3) 14%, transparent); }
+.bt-empty { margin: 18px 0; font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
+
 /* ── the bin ──
    Only ever on screen when it holds something, so it costs nothing on
    the days nothing has gone wrong. */
@@ -1721,14 +1781,20 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
     </a>
     <span class="spacer"></span>
     <!-- At the foot, above appearance. Everything above the spacer is a
-         view of the record; these two read none of it, so they sit with
-         the other things that are not the ledger. Scales: what the size
-         is worth. Then the reading, which the ledger did not produce and
-         which produces nothing for it. -->
+         view of the record; these three read none of it, so they sit
+         with the other things that are not the ledger. Scales: what the
+         size is worth. Then rehearsal, which costs nothing and is never
+         counted as capital. Then the reading, which the ledger did not
+         produce and which produces nothing for it. -->
     <button type="button" data-view="risk" aria-label="Risk">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M12 4v16M5 8h14M5 8l-2.5 5h5L5 8ZM19 8l-2.5 5h5L19 8ZM8 20h8" /></svg>
+    </button>
+    <button type="button" data-view="backtest" aria-label="Backtesting">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 21a9 9 0 1 0-9-9M3 4v5h5M12 7.5V12l3 2" /></svg>
     </button>
     <button type="button" data-view="resources" aria-label="Resources">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
@@ -1882,6 +1948,51 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             Only trades with a note</button>
         </div>
         <div id="logList"></div>
+      </div>
+    </main>
+
+    <!-- ── backtesting ──
+         The week reads like the calendar because it IS the calendar's
+         question asked at a different scale: seven cells, the same nav,
+         the same cell shape. What it counts is runs rather than money. -->
+    <main class="main" id="backtestSection" hidden>
+      <div class="head">
+        <h1>Backtesting</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="btMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="cal-head">
+          <button class="step" type="button" id="btPrev" aria-label="The week before">&lsaquo;</button>
+          <h2 id="btLabel"></h2>
+          <button class="step" type="button" id="btNext" aria-label="The week after">&rsaquo;</button>
+          <button class="step wide" type="button" id="btNow">This week</button>
+          <span class="grow"></span>
+          <span class="span-meta" id="btSum"></span>
+        </div>
+        <div class="bt-strip" id="btStrip" role="group" aria-label="The week, day by day"></div>
+
+        <div class="bt-charts">
+          <section class="bt-chart" aria-labelledby="btRadarH">
+            <div class="bt-ch"><h3 id="btRadarH">Which candle</h3>
+              <span class="grow"></span><span class="bt-n" id="btRadarN"></span></div>
+            <p class="bt-sub">Every run logged, by the candle it was in. The short arm is the one you never rehearse.</p>
+            <div class="bt-fig" id="btRadar"></div>
+          </section>
+          <section class="bt-chart" aria-labelledby="btRingH">
+            <div class="bt-ch"><h3 id="btRingH">Showing up</h3>
+              <span class="grow"></span><span class="bt-n" id="btRingN"></span></div>
+            <p class="bt-sub">Eight weeks, newest on the outside. One ring a week, one wedge a day.</p>
+            <div class="bt-fig" id="btRing"></div>
+          </section>
+        </div>
+
+        <div class="cal-head" style="margin-top:26px">
+          <h2>Runs</h2><span class="grow"></span>
+          <span class="span-meta" id="btLogMeta"></span>
+          <button class="btn btn-ghost" type="button" id="btAdd">Log a backtest</button>
+        </div>
+        <div id="btList"></div>
       </div>
     </main>
 
@@ -2367,6 +2478,69 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <span class="grow"></span>
       <button class="btn btn-ghost" type="button" id="tradeDelete" hidden>Delete</button>
       <button class="btn btn-primary" type="submit" id="tradeSave">Save trade</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog class="sheet" id="btSheet" aria-labelledby="btTitle">
+  <form method="dialog" id="btForm">
+    <div class="sheet-h">
+      <h2 id="btTitle">Log a backtest</h2>
+      <span class="grow"></span>
+      <input class="sheet-date" id="btDate" type="date" aria-label="Date of the run" required />
+      <button class="step" type="button" id="btX" aria-label="Close">&#10005;</button>
+    </div>
+
+    <div class="sheet-b">
+      <div class="field">
+        <label for="btSess"><span class="ic" id="btIcTime"></span>Candle</label>
+        <select id="btSess"></select>
+      </div>
+      <div class="field">
+        <label for="btSetup"><span class="ic" id="btIcTag"></span>Setup</label>
+        <input id="btSetup" type="text" list="btSetups" placeholder="CISD" autocomplete="off" />
+        <datalist id="btSetups"></datalist>
+      </div>
+
+      <div class="field wide">
+        <label id="btModeLbl"><span class="ic" id="btIcMode"></span>Type</label>
+        <div class="side two" role="group" aria-labelledby="btModeLbl">
+          <button type="button" class="c" id="btModeCont" aria-pressed="true">Continuation</button>
+          <button type="button" class="r" id="btModeRev"  aria-pressed="false">Reversal</button>
+        </div>
+      </div>
+
+      <!-- Only on the ones you write up. A run you did not journal has no
+           result worth keeping — you were rehearsing the read, not the
+           outcome — and there is no money in a backtest to put here. -->
+      <div class="field wide">
+        <label for="btR"><span class="ic" id="btIcRisk"></span>Result, in R &mdash; optional</label>
+        <input id="btR" type="number" step="0.1" inputmode="decimal" placeholder="2.0" />
+      </div>
+
+      <div class="field wide">
+        <label for="btShot"><span class="ic" id="btIcImage"></span>Chart</label>
+        <button type="button" class="shot" id="btShot">
+          <span class="shot-empty">Click, paste or drop an image</span>
+        </button>
+        <div class="shot-acts" id="btShotActs" hidden>
+          <button class="shot-act" type="button" id="btShotSwap">Replace</button>
+          <button class="shot-act" type="button" id="btShotDrop">Remove</button>
+        </div>
+      </div>
+
+      <div class="field wide">
+        <label for="btNote"><span class="ic" id="btIcNote"></span>Notes</label>
+        <textarea id="btNote" rows="3"
+          placeholder="What you were testing, and what the chart actually did"></textarea>
+      </div>
+    </div>
+
+    <div class="sheet-f">
+      <span class="hint" id="btHint"></span>
+      <span class="grow"></span>
+      <button class="btn btn-ghost" type="button" id="btDelete" hidden>Delete</button>
+      <button class="btn btn-primary" type="submit" id="btSave">Save run</button>
     </div>
   </form>
 </dialog>
@@ -4016,17 +4190,20 @@ function fitLens() {
     : `${act} the chart for full size · ${out}`;
 }
 
-async function openLens() {
-  if (!shotUrl) return;
+/* Called bare by the trade sheet, and with its own picture and note by
+   anything else that keeps a chart — the viewer does not care whose. */
+async function openLens(url, text) {
+  const src = url || shotUrl;
+  if (!src) return;
   lens.classList.remove('zoom', 'max');
   /* Whatever is in the box right now, not what was saved — if you are
      mid-sentence about this chart, that sentence is the one you want
      beside it. */
   const note = document.getElementById('lensNote');
-  const text = document.getElementById('tNote').value.trim();
-  note.textContent = text;
-  note.hidden = !text;
-  lensImg.src = shotUrl;
+  const words = (text !== undefined ? text : document.getElementById('tNote').value).trim();
+  note.textContent = words;
+  note.hidden = !words;
+  lensImg.src = src;
   lens.showModal();
   /* naturalWidth is 0 until it decodes, and every size below is computed
      from it. */
@@ -4654,7 +4831,7 @@ function commit(msg) {
 function renderAll() {
   renderSummary(); renderCalendar(); renderAgenda(); renderMetrics();
   renderLedger(); renderLog(); renderRes(); renderGate(); renderLive(); renderRisk();
-  renderBin();
+  renderBin(); renderBt();
 }
 
 /* ── the candle clock ──
@@ -5087,7 +5264,9 @@ document.getElementById('backupBtn').addEventListener('click', () => {
   const t = state.events.filter(e => e.k === 'trade').length;
   const f = state.events.length - t;
   const r = resAll().length;
-  const links = `${r} saved ${r === 1 ? 'link' : 'links'} go with it.`;
+  const bt = btRuns().length;
+  const links = `${r} saved ${r === 1 ? 'link' : 'links'}`
+    + (bt ? ` and ${bt} ${bt === 1 ? 'backtest' : 'backtests'}` : '') + ' go with it.';
   document.getElementById('bkCount').textContent = isDemo()
     ? 'You are still looking at the sample ledger — there is nothing of your own to save yet. ' + links
     : `${t} ${t === 1 ? 'trade' : 'trades'} and ${f} capital ${f === 1 ? 'movement' : 'movements'} held here. ` + links;
@@ -5102,7 +5281,7 @@ document.getElementById('bkSave').addEventListener('click', () => {
      they typed — two files to keep is one file to lose. */
   const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
     saved: new Date().toISOString(), events: state.events,
-    bin: bin(), res: resAll() }, null, 2)],
+    bin: bin(), res: resAll(), bt: btRuns() }, null, 2)],
     { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5148,6 +5327,12 @@ bkFile.addEventListener('change', async () => {
   /* Absent rather than empty means an older backup, written before links
      existed. Leave what is here alone in that case — a file that never
      carried them should not be able to wipe them. */
+  /* Same rule as the links: absent means an older file, and an older
+     file must not be able to wipe a record it never carried. */
+  if (Array.isArray(parsed.bt)) {
+    btState = { runs: parsed.bt };
+    btWrite();
+  }
   let extra = '';
   if (Array.isArray(parsed.res)) {
     try {
@@ -6368,6 +6553,509 @@ document.getElementById('rsForm').addEventListener('submit', (ev) => {
 });
 
 /* ── sections ── */
+/* ═══════════════════════════════════════════════════════════════
+   BACKTESTING
+
+   Its own key, deliberately. A backtest risked nothing and returned
+   nothing, so it must never reach the equity curve, the win rate, the
+   capital or the drawdown — and the surest way to guarantee that is for
+   the money arithmetic to be unable to see it at all. state.events is
+   walked and summed; nothing here is in it.
+
+   What is counted is runs. R is allowed on a run you wrote up, because
+   a rehearsed trade does have a result and recording it is most of the
+   point of writing one up — but it is one figure on one row and nothing
+   adds it together. The question this screen answers is how often, not
+   how well.
+   ═══════════════════════════════════════════════════════════════ */
+const BKEY = 'backtest.v1';
+const BT_WEEKS = 8;
+
+let btState = (() => {
+  let raw = null;
+  try { raw = localStorage.getItem(BKEY); } catch (e) { return { runs: [] }; }
+  if (!raw) return { runs: [] };
+  try {
+    const v = JSON.parse(raw);
+    return v && Array.isArray(v.runs) ? v : { runs: [] };
+  } catch (e) {
+    /* Same rule as the ledger: keep the wreckage, start empty, never
+       silently substitute something that looks like a record. */
+    try { localStorage.setItem(BKEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    return { runs: [] };
+  }
+})();
+const btRuns = () => btState.runs;
+function btWrite() {
+  try { localStorage.setItem(BKEY, JSON.stringify(btState)); return true; }
+  catch (e) {
+    document.getElementById('say').textContent = 'NOT SAVED — storage unavailable.';
+    alert('This browser refused to save the backtest — storage is full or disabled.');
+    return false;
+  }
+}
+
+/* A run is journalled when it has been WRITTEN UP. A chart on its own is
+   not a journal entry: the picture is what you looked at, the sentence
+   is what you concluded, and only one of those is worth coming back to. */
+const btKept = (r) => !!(r.note || '').trim();
+
+/* ── weeks ──
+   Monday-first, local, and normalised to midnight so two dates in the
+   same week always produce the identical key. */
+function btMon(d) {
+  const x = new Date(d);
+  x.setHours(0, 0, 0, 0);
+  x.setDate(x.getDate() - ((x.getDay() + 6) % 7));
+  return x;
+}
+let btWeek = btMon(new Date());
+const btDays = (mon) => Array.from({ length: 7 }, (_, i) => {
+  const d = new Date(mon); d.setDate(d.getDate() + i); return d;
+});
+const btOn = (k) => btRuns().filter(r => r.date === k);
+
+/* ── momentum ──
+   Days in a row, counted back from today — or from yesterday if nothing
+   is logged today yet. A streak that breaks at midnight, before the day
+   it is judging has been lived, would be counting the clock rather than
+   the habit. Nothing here is a target: it is the number of consecutive
+   days that already happened. */
+function btStreak() {
+  const seen = new Set(btRuns().map(r => r.date));
+  if (!seen.size) return 0;
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  if (!seen.has(iso(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (seen.has(iso(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function btBest() {
+  const days = [...new Set(btRuns().map(r => r.date))].sort();
+  let best = 0, run = 0, prev = null;
+  for (const k of days) {
+    const d = new Date(k + 'T00:00:00');
+    run = (prev && (d - prev) === 86400000) ? run + 1 : 1;
+    if (run > best) best = run;
+    prev = d;
+  }
+  return best;
+}
+
+/* ── drawing ── */
+const btPt = (cx, cy, r, deg) => {
+  const a = (deg - 90) * Math.PI / 180;
+  return [cx + r * Math.cos(a), cy + r * Math.sin(a)];
+};
+const btXY = (a) => a.map(v => v.toFixed(1)).join(' ');
+/* One cell of the ring: the slice of an annulus between two radii and
+   two angles. Two arcs and two straight edges, the second arc swept the
+   other way so the shape closes on itself. */
+function btBand(cx, cy, r0, r1, a0, a1) {
+  const A = btPt(cx, cy, r1, a0), B = btPt(cx, cy, r1, a1);
+  const C = btPt(cx, cy, r0, a1), D = btPt(cx, cy, r0, a0);
+  return `M${btXY(A)} A${r1} ${r1} 0 0 1 ${btXY(B)} L${btXY(C)} A${r0} ${r0} 0 0 0 ${btXY(D)} Z`;
+}
+
+let btUrls = [];
+
+function renderBtStrip() {
+  const days = btDays(btWeek);
+  const today = iso(new Date());
+  const counts = days.map(d => btOn(iso(d)).length);
+  const peak = Math.max(1, ...counts);
+  const ahead = (d) => iso(d) > today;
+
+  document.getElementById('btStrip').innerHTML = days.map((d, i) => {
+    const k = iso(d), n = counts[i];
+    const j = btOn(k).some(btKept);
+    /* Four steps, scaled to the busiest day of the week shown. An
+       absolute scale would make a normal week look like a blank one for
+       the rest of the year after a single heavy Saturday. */
+    const lvl = n ? Math.min(4, Math.ceil(n / peak * 4)) : 0;
+    const long = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    return `<button class="bt-day" type="button" data-date="${k}" data-lvl="${lvl}"
+        ${k === today ? 'data-today="1"' : ''}${ahead(d) ? ' data-out="1"' : ''}
+        aria-label="${esc(long)}: ${n} ${n === 1 ? 'run' : 'runs'}${j ? ', one written up' : ''}. Logs another.">
+      <span class="wd">${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span>
+      <span class="dn">${d.getDate()}</span>
+      <span class="grow"></span>
+      <span class="n">${n || ''}</span>
+      ${j ? '<span class="j" aria-hidden="true"></span>' : ''}
+    </button>`;
+  }).join('');
+
+  const a = days[0], b = days[6];
+  const sameM = a.getMonth() === b.getMonth();
+  document.getElementById('btLabel').textContent = sameM
+    ? `${a.getDate()}–${b.getDate()} ${b.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })}`
+    : `${a.getDate()} ${a.toLocaleDateString('en-GB', { month: 'short' })} – `
+      + `${b.getDate()} ${b.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`;
+  document.getElementById('btNow').hidden = +btWeek === +btMon(new Date());
+
+  const n = counts.reduce((x, y) => x + y, 0);
+  const j = days.reduce((x, d) => x + btOn(iso(d)).filter(btKept).length, 0);
+  document.getElementById('btSum').textContent = n
+    ? `${n} ${n === 1 ? 'backtest' : 'backtests'} · ${j} journalled`
+    : 'nothing logged this week';
+}
+
+/* The radar asks a different question from the strip: not whether you
+   turned up, but what you turned up FOR. A pentagon with one arm at the
+   centre is the candle you have never once rehearsed. */
+function renderBtRadar() {
+  const runs = btRuns();
+  const vals = SESSIONS.map(x => runs.filter(r => r.sess === x).length);
+  const peak = Math.max(1, ...vals), total = vals.reduce((a, b) => a + b, 0);
+  const n = SESSIONS.length, R = 58, cx = 100, cy = 92;
+  const poly = (f) => SESSIONS.map((_, i) => btPt(cx, cy, f(i), i * 360 / n)
+    .map(v => v.toFixed(1)).join(',')).join(' ');
+
+  let g = [0.25, 0.5, 0.75, 1]
+    .map(k => `<polygon class="grid" points="${poly(() => R * k)}" />`).join('');
+  g += SESSIONS.map((_, i) => {
+    const [x, y] = btPt(cx, cy, R, i * 360 / n);
+    return `<line class="spoke" x1="${cx}" y1="${cy}" x2="${x.toFixed(1)}" y2="${y.toFixed(1)}" />`;
+  }).join('');
+  if (total) {
+    /* A floor of 3px, so a candle with one run is a visible dent rather
+       than an invisible one — the shape has to be readable at 260px. */
+    g += `<polygon class="area" points="${poly(i => vals[i] ? Math.max(4, R * vals[i] / peak) : 0)}" />`;
+    g += SESSIONS.map((_, i) => {
+      if (!vals[i]) return '';
+      const [x, y] = btPt(cx, cy, Math.max(4, R * vals[i] / peak), i * 360 / n);
+      return `<circle class="dot" cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="2.4" />`;
+    }).join('');
+  }
+  g += SESSIONS.map((x, i) => {
+    const [px, py] = btPt(cx, cy, R + 17, i * 360 / n);
+    return `<text class="lab${vals[i] ? ' on' : ''}" x="${px.toFixed(1)}" y="${py.toFixed(1)}">${esc(x)}</text>`;
+  }).join('');
+
+  const worst = SESSIONS[vals.indexOf(Math.min(...vals))];
+  document.getElementById('btRadar').innerHTML =
+    `<svg viewBox="0 0 200 178" role="img" aria-label="${
+      SESSIONS.map((x, i) => `${x}: ${vals[i]}`).join(', ')}">${g}</svg>`;
+  document.getElementById('btRadarN').textContent =
+    total ? (Math.min(...vals) === 0 ? `never ${esc(worst)}` : `${total} runs`) : '';
+}
+
+/* Eight weeks by weekday, newest ring outermost. The gaps are the point
+   — a column of holes down one wedge is a day of the week you do not
+   sit down, which no total will ever tell you. */
+function renderBtRing() {
+  const IN = 24, OUT = 78, cx = 100, cy = 100;
+  const step = (OUT - IN) / BT_WEEKS, wedge = 360 / 7, pad = 1.6;
+  /* Half a wedge back, so Monday is centred on twelve o'clock rather
+     than starting there — otherwise the seam between Sunday and Monday
+     sits at the top and the week appears to begin in two places. */
+  const turn = -wedge / 2;
+  const mon0 = btMon(new Date());
+  const rows = [];
+  let peak = 1, hit = 0, of = 0;
+  const today = iso(new Date());
+  for (let k = 0; k < BT_WEEKS; k++) {
+    const m = new Date(mon0);
+    m.setDate(m.getDate() - (BT_WEEKS - 1 - k) * 7);
+    const row = btDays(m).map((d) => ({ n: btOn(iso(d)).length, out: iso(d) > today }));
+    row.forEach((c) => { if (c.n > peak) peak = c.n; if (!c.out) { of++; if (c.n) hit++; } });
+    rows.push(row);
+  }
+  let g = '';
+  rows.forEach((row, k) => {
+    const r0 = IN + k * step + 0.7, r1 = IN + (k + 1) * step - 0.7;
+    row.forEach((c, w) => {
+      const d = btBand(cx, cy, r0, r1, turn + w * wedge + pad, turn + (w + 1) * wedge - pad);
+      g += c.n
+        ? `<path class="cell" d="${d}" fill="var(--accent)" fill-opacity="${(0.22 + 0.72 * c.n / peak).toFixed(2)}" />`
+        : `<path class="cell none${c.out ? ' ahead' : ''}" d="${d}" />`;
+    });
+  });
+  g += ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((t, w) => {
+    const [x, y] = btPt(cx, cy, OUT + 11, w * wedge);
+    return `<text class="lab" x="${x.toFixed(1)}" y="${y.toFixed(1)}">${t}</text>`;
+  }).join('');
+
+  document.getElementById('btRing').innerHTML =
+    `<svg viewBox="0 0 200 200" role="img" aria-label="${hit} of the last ${of} days have a run on them">${g}</svg>`;
+  document.getElementById('btRingN').textContent = of ? `${hit} of ${of} days` : '';
+}
+
+function renderBtLog() {
+  const wrap = document.getElementById('btList');
+  btUrls.forEach(URL.revokeObjectURL);
+  btUrls = [];
+
+  /* Setups you have actually typed, on either side of the app — a
+     rehearsal and a trade are the same vocabulary. */
+  const setups = [...new Set([...logged().map(e => e.setup), ...btRuns().map(r => r.setup)]
+    .filter(Boolean))].sort();
+  document.getElementById('btSetups').innerHTML =
+    setups.map(x => `<option value="${esc(x)}"></option>`).join('');
+
+  const rows = btRuns().slice().sort((a, b) =>
+    a.date === b.date ? (b.at || 0) - (a.at || 0) : (a.date < b.date ? 1 : -1));
+  const j = rows.filter(btKept).length;
+  document.getElementById('btLogMeta').textContent = rows.length
+    ? `${rows.length} ${rows.length === 1 ? 'run' : 'runs'} · ${j} journalled` : '';
+
+  if (!rows.length) {
+    wrap.innerHTML = `<p class="bt-empty">Nothing logged yet. A run is one setup, read back on a
+      chart you have already seen — press a day above, or the button, and write down what it did.</p>`;
+    return;
+  }
+
+  let html = '', month = '';
+  for (const r of rows) {
+    const d = new Date(r.date + 'T00:00:00');
+    const key = `${d.getFullYear()}-${d.getMonth()}`;
+    if (key !== month) {
+      month = key;
+      const same = rows.filter(x => x.date.slice(0, 7) === r.date.slice(0, 7));
+      const sj = same.filter(btKept).length;
+      html += `<div class="lg-month"><b>${d.toLocaleDateString('en-GB',
+        { month: 'long', year: 'numeric' })}</b><i></i>`
+        + `<em>${same.length} ${same.length === 1 ? 'run' : 'runs'} · ${sj} journalled</em></div>`;
+    }
+    const hour = r.sess ? +r.sess.slice(0, 2) : null;
+    const note = (r.note || '').trim();
+    const hasR = typeof r.r === 'number' && isFinite(r.r);
+    html += `<button class="lg" type="button" data-id="${esc(String(r.id))}"
+        aria-label="${esc(r.setup || 'Backtest')}, ${d.toLocaleDateString('en-GB',
+          { day: 'numeric', month: 'long', year: 'numeric' })}. Opens the run.">
+      <span class="lg-when">
+        <b>${d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</b>
+        ${r.sess ? esc(r.sess) : '—'}${hour !== null && PROFILE[hour] ? `<br>${PROFILE[hour].name}` : ''}
+      </span>
+      <span class="lg-main">
+        <span class="lg-top">
+          <span class="lg-sym">${esc(r.setup || 'Backtest')}</span>
+          ${r.mode ? `<span class="lg-chip">${esc(r.mode)}</span>` : ''}
+          ${note ? '' : '<span class="lg-chip">not written up</span>'}
+          ${hasR ? `<span class="lg-r ${r.r > 0 ? 'up' : r.r < 0 ? 'down' : ''}">${
+            r.r >= 0 ? '+' : '−'}${Math.abs(r.r).toFixed(1)}R</span>` : ''}
+        </span>
+        <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : 'No note on this one.'}</p>
+      </span>
+      ${r.shot ? `<span class="lg-shot" data-shot="bt-${esc(String(r.id))}"></span>`
+               : '<span class="lg-noshot"></span>'}
+    </button>`;
+  }
+  wrap.innerHTML = html;
+
+  wrap.querySelectorAll('.lg-shot[data-shot]').forEach((box) => {
+    SHOTS.get(box.dataset.shot).then((b) => {
+      if (!b || !box.isConnected) return;
+      const u = URL.createObjectURL(b);
+      btUrls.push(u);
+      box.style.backgroundImage = `url("${u}")`;
+    }).catch(() => {});
+  });
+}
+
+function renderBt() {
+  renderBtStrip();
+  renderBtRadar();
+  renderBtRing();
+  renderBtLog();
+  const n = btRuns().length, st = btStreak(), best = btBest();
+  /* The streak leads. The total only ever climbs, so it says nothing
+     about this week; the run of days is the figure that can be lost and
+     therefore the only one on this screen worth defending. */
+  document.getElementById('btMeta').textContent = !n ? 'nothing logged yet'
+    : `${st} ${st === 1 ? 'day' : 'days'} in a row`
+      + (best > st ? ` · best ${best}` : '')
+      + ` · ${n} ${n === 1 ? 'run' : 'runs'}`;
+}
+
+/* ── the sheet ── */
+[['btIcTime', 'clock'], ['btIcTag', 'tag'], ['btIcMode', 'mode'],
+ ['btIcRisk', 'pulse'], ['btIcImage', 'image'], ['btIcNote', 'note']]
+  .forEach(([id, k]) => { const el = document.getElementById(id); if (el) el.innerHTML = icon(k); });
+
+document.getElementById('btSess').innerHTML = SESSIONS.map(x =>
+  `<option value="${esc(x)}">${esc(x)}${PROFILE[+x.slice(0, 2)] ? ' · ' + PROFILE[+x.slice(0, 2)].name : ''}</option>`).join('');
+
+let btEditing = null, btMode = 'continuation';
+let btShotBlob = null, btShotUrl = null, btShotDirty = false;
+
+function btSetMode(v) {
+  btMode = v;
+  document.getElementById('btModeCont').setAttribute('aria-pressed', String(v === 'continuation'));
+  document.getElementById('btModeRev').setAttribute('aria-pressed', String(v === 'reversal'));
+}
+document.getElementById('btModeCont').addEventListener('click', () => btSetMode('continuation'));
+document.getElementById('btModeRev').addEventListener('click', () => btSetMode('reversal'));
+
+function btSetShot(blob) {
+  if (btShotUrl) { URL.revokeObjectURL(btShotUrl); btShotUrl = null; }
+  btShotBlob = blob || null;
+  const box = document.getElementById('btShot');
+  const cap = box.querySelector('.shot-empty');
+  document.getElementById('btShotActs').hidden = !btShotBlob;
+  if (lens.open) lens.close();
+  if (!btShotBlob) {
+    box.classList.remove('has');
+    box.style.backgroundImage = '';
+    cap.textContent = 'Click, paste or drop an image';
+    return;
+  }
+  btShotUrl = URL.createObjectURL(btShotBlob);
+  box.classList.add('has');
+  box.style.backgroundImage = `url("${btShotUrl}")`;
+  cap.textContent = (tapping() ? 'Tap' : 'Click') + ' to open';
+}
+async function btTakeShot(file) {
+  if (!file || !/^image\//.test(file.type)) return;
+  btSetShot(await compress(file));
+  btShotDirty = true;
+}
+const btPicker = Object.assign(document.createElement('input'),
+  { type: 'file', accept: 'image/*', hidden: true });
+document.body.appendChild(btPicker);
+btPicker.addEventListener('change', () => { btTakeShot(btPicker.files[0]); btPicker.value = ''; });
+
+document.getElementById('btShot').addEventListener('click', () => {
+  if (btShotBlob) { openLens(btShotUrl, document.getElementById('btNote').value); return; }
+  btPicker.click();
+});
+document.getElementById('btShotSwap').addEventListener('click', () => btPicker.click());
+document.getElementById('btShotDrop').addEventListener('click', () => {
+  btSetShot(null); btShotDirty = true; document.getElementById('btShot').focus();
+});
+
+/* Same reasoning as the trade sheet: the whole dialog takes the drop,
+   because a 128px slot partway down a scrolling form is not something a
+   drag can be aimed at. */
+btSheet.addEventListener('paste', (ev) => {
+  const it = [...(ev.clipboardData ? ev.clipboardData.items : [])]
+    .find(i => i.kind === 'file' && /^image\//.test(i.type));
+  if (!it) return;
+  ev.preventDefault();
+  btTakeShot(it.getAsFile());
+});
+let btDragIn = 0;
+const btCue = (on) => {
+  btSheet.classList.toggle('dropping', on);
+  document.getElementById('btShot').classList.toggle('dropping', on);
+};
+btSheet.addEventListener('dragenter', (ev) => {
+  if (!dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  if (btDragIn++ === 0) btCue(true);
+});
+btSheet.addEventListener('dragover', (ev) => {
+  if (!dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  ev.dataTransfer.dropEffect = 'copy';
+});
+btSheet.addEventListener('dragleave', () => { if (btDragIn > 0 && --btDragIn === 0) btCue(false); });
+btSheet.addEventListener('drop', (ev) => {
+  if (!dragFile(ev.dataTransfer)) return;
+  ev.preventDefault();
+  btDragIn = 0; btCue(false);
+  btTakeShot(ev.dataTransfer.files && ev.dataTransfer.files[0]);
+});
+btSheet.addEventListener('close', () => { btDragIn = 0; btCue(false); });
+
+function btOpen(date, id) {
+  const run = id ? btRuns().find(r => String(r.id) === String(id)) : null;
+  btEditing = run ? run.id : null;
+  document.getElementById('btTitle').textContent = run ? 'The run' : 'Log a backtest';
+  document.getElementById('btDate').value = run ? run.date : (date || iso(new Date()));
+  document.getElementById('btSess').value = run ? (run.sess || SESSIONS[0]) : nowSession();
+  document.getElementById('btSetup').value = run ? (run.setup || '') : '';
+  document.getElementById('btR').value = run && typeof run.r === 'number' ? run.r : '';
+  document.getElementById('btNote').value = run ? (run.note || '') : '';
+  document.getElementById('btDelete').hidden = !run;
+  document.getElementById('btSave').textContent = run ? 'Save changes' : 'Save run';
+  btSetMode(run ? (run.mode || 'continuation') : 'continuation');
+  btSetShot(null);
+  btShotDirty = false;
+  if (run && run.shot) {
+    const want = 'bt-' + run.id;
+    SHOTS.get(want).then(b => { if (b && btEditing === run.id) btSetShot(b); }).catch(() => {});
+  }
+  btSheet.showModal();
+}
+/* Which candle is open right now, so logging a run mid-session does not
+   start by asking a question the clock already knows. */
+function nowSession() {
+  const open = candle().open;
+  const k = hhmm(open);
+  return SESSIONS.includes(k) ? k : SESSIONS[0];
+}
+
+document.getElementById('btForm').addEventListener('submit', async (ev) => {
+  ev.preventDefault();
+  const raw = document.getElementById('btR').value.trim();
+  const r = raw === '' ? null : Number(raw);
+  if (raw !== '' && !isFinite(r)) return;
+  const rec = {
+    id: btEditing || uid(),
+    date: document.getElementById('btDate').value || iso(new Date()),
+    sess: document.getElementById('btSess').value,
+    setup: document.getElementById('btSetup').value.trim(),
+    mode: btMode,
+    note: document.getElementById('btNote').value.trim(),
+    at: Date.now(),
+  };
+  if (r !== null) rec.r = r;
+
+  if (btShotDirty) {
+    const key = 'bt-' + rec.id;
+    try {
+      if (btShotBlob) { await SHOTS.put(key, btShotBlob); rec.shot = true; }
+      else await SHOTS.del(key);
+    } catch (e) { /* the run still saves; the picture is the optional half */ }
+  } else if (btEditing) {
+    const was = btRuns().find(x => x.id === btEditing);
+    if (was && was.shot) rec.shot = true;
+  }
+
+  const i = btRuns().findIndex(x => String(x.id) === String(rec.id));
+  if (i >= 0) btState.runs[i] = rec; else btState.runs.push(rec);
+  if (!btWrite()) return;
+  btWeek = btMon(new Date(rec.date + 'T00:00:00'));
+  btSheet.close();
+  renderBt();
+  document.getElementById('say').textContent = i >= 0 ? 'Run updated.' : 'Run logged.';
+});
+
+document.getElementById('btDelete').addEventListener('click', () => {
+  const run = btRuns().find(x => x.id === btEditing);
+  if (!run) return;
+  if (btKept(run) && !confirm('Delete this run? What you wrote about it goes with it.')) return;
+  btState.runs = btRuns().filter(x => x.id !== btEditing);
+  if (!btWrite()) return;
+  SHOTS.del('bt-' + run.id).catch(() => {});
+  btSheet.close();
+  renderBt();
+  document.getElementById('say').textContent = 'Run deleted.';
+});
+
+document.getElementById('btX').addEventListener('click', () => btSheet.close());
+btSheet.addEventListener('close', () => { btSetShot(null); btShotDirty = false; btEditing = null; });
+
+document.getElementById('btPrev').addEventListener('click', () => {
+  btWeek.setDate(btWeek.getDate() - 7); renderBt();
+});
+document.getElementById('btNext').addEventListener('click', () => {
+  btWeek.setDate(btWeek.getDate() + 7); renderBt();
+});
+document.getElementById('btNow').addEventListener('click', () => {
+  btWeek = btMon(new Date()); renderBt();
+});
+document.getElementById('btAdd').addEventListener('click', () => btOpen(iso(new Date())));
+document.getElementById('btStrip').addEventListener('click', (ev) => {
+  const cell = ev.target.closest('.bt-day');
+  if (cell) btOpen(cell.dataset.date);
+});
+document.getElementById('btList').addEventListener('click', (ev) => {
+  const row = ev.target.closest('.lg');
+  if (row) btOpen(null, row.dataset.id);
+});
+
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
@@ -6375,6 +7063,7 @@ const SECTIONS = {
   metrics:  document.getElementById('metricsSection'),
   settings: document.getElementById('settingsSection'),
   resources: document.getElementById('resourcesSection'),
+  backtest: document.getElementById('backtestSection'),
 };
 function goto(view) {
   /* The ladder does not exist on a phone, so a stored or stale route to
