@@ -2424,8 +2424,13 @@ const toneOf = (t) => t === 'strong' ? 'dark'
 /* Four of these now, all the same contract: a row of radios keyed by one
    data attribute, one of which is always checked. Written once, because
    four copies of the same twelve lines is how the fourth one ends up
-   with a different keyboard behaviour from the other three. */
-function pick(id, attr, list, fallback) {
+   with a different keyboard behaviour from the other three.
+
+   NOT called pick(). That name is already the vision tile's image
+   chooser further up, and a second one silently replaced it — the tiles
+   stopped opening a file dialog and started handing a goal id to this
+   function instead. Nothing threw until somebody clicked a tile. */
+function radios(id, attr, list, fallback) {
   const el = edEl(id);
   let now = fallback;
   const set = (v) => {
@@ -2451,10 +2456,10 @@ function pick(id, attr, list, fallback) {
 
 const EDGES = ['round', 'square'], SIZES = ['normal', 'slim'];
 const LABELS = ['auto', 'out'], MARKS = ['diamond', 'circle', 'square', 'flag'];
-const edEdge  = pick('edEdge',  'edge',  EDGES,  'round');
-const edSize  = pick('edSize',  'size',  SIZES,  'normal');
-const edLabel = pick('edLabel', 'label', LABELS, 'auto');
-const edMark  = pick('edMarks', 'mark',  MARKS,  'diamond');
+const edEdge  = radios('edEdge',  'edge',  EDGES,  'round');
+const edSize  = radios('edSize',  'size',  SIZES,  'normal');
+const edLabel = radios('edLabel', 'label', LABELS, 'auto');
+const edMark  = radios('edMarks', 'mark',  MARKS,  'diamond');
 
 let edTone = 'accent';
 function setTone(t) {

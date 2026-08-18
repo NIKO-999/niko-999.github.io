@@ -5040,6 +5040,29 @@ const SEED = [{
   tags: ['reversal', 'expansion', 'protected low', 'failure swings'],
   added: null,
   opened: null,
+}, {
+  id: 'seed-psp',
+  kind: 'video',
+  note: 'swings',
+  art: 'psp',
+  title: 'Protected swing points and CISD',
+  url: 'https://youtu.be/wwgtY4ChXgU',
+  len: '22:40',
+  sum: 'The alignment table and the V-shape rule are written out above, so this '
+     + 'is for the four worked examples — the same confirmation found at four '
+     + 'different scales, including one that fails and has to wait for a stop run.',
+  /* The chart work only. The model itself is the note above; what the
+     video has that the text cannot is somebody deciding, on a live
+     chart, which candles are bulky enough to close through. */
+  marks: [
+    [384,  'First one, drawn out on the chart'],
+    [651,  'Working down to confirm a swing two timeframes up'],
+    [955,  'A gap tap that fails, twice, before the CISD'],
+    [1173, 'A slow, choppy sequence — and what is still tradeable in it'],
+  ].map(([t, s]) => ({ t, s })),
+  tags: ['swings', 'CISD', 'alignment', 'SMT', 'gaps'],
+  added: null,
+  opened: null,
 }];
 
 function readRes() {
@@ -5139,6 +5162,15 @@ const DIAG = {
     <path class="mv" d="M32 28 52 63 63 47 77 67 98 33 120 17" />
     <circle class="mk" cx="52" cy="63" r="4.5" />
     <circle class="mk" cx="77" cy="67" r="4.5" />
+  </svg>`,
+  /* The level, the V that protects the low against it, and the smaller
+     one inside the move that carries it. Two marks: the swing and the
+     internal swing, which is the whole shape of this note. */
+  psp: `<svg class="rs-diag" viewBox="0 0 150 85" aria-hidden="true">
+    <path class="lv" d="M24 64H126" />
+    <path class="mv" d="M30 20 58 71 84 38 101 53 122 12" />
+    <circle class="mk" cx="58" cy="71" r="5" />
+    <circle class="mk" cx="101" cy="53" r="4" />
   </svg>`,
   /* Down fast, up fast, and the close back through the range it came
      from. Both legs the same steepness, which is the whole point. */
@@ -5434,10 +5466,97 @@ const NOTES = [
        + 'than usual — the 3M, or the 1M at the open. That is not lowering your '
        + 'standard, it is reading the same shape where it is legible.'],
       ['A clean signature can still lose.',
-       'Key level, SMT, V-shape, order block on the continuation — and it fails '
+       'Key level, SMT, V-shape, CISD on the continuation — and it fails '
        + 'anyway. That is the cost of taking the ones that work, not evidence you '
        + 'read it wrong. Do not go looking for the extra confirmation that would '
        + 'have saved it.'],
+    ],
+  },
+  {
+    id: 'swings',
+    title: 'Protected swing points',
+    sub: 'CISD and internal structure',
+    lede: 'A low or a high is only PROTECTED once a change in delivery has '
+        + 'confirmed it on the aligned timeframe. Until then it is just an '
+        + 'extreme, and extremes get taken. This is the rule for telling which '
+        + 'of them will hold — and it is the same rule at every scale, which is '
+        + 'what lets a confirmation two timeframes down make a higher-timeframe '
+        + 'swing tradeable.',
+    sit: [
+      { n: '01', h: 'Align the timeframe first',
+        p: 'The level you tapped decides which chart is allowed to confirm it. The pairing is fixed, and nothing below it counts.',
+        li: ['A daily level is confirmed on the 1H',
+             'A 4H level on the 15M, a 1H level on the 5M',
+             'A 30M level on the 3M, a 15M level on the 1M',
+             'Below the aligned timeframe is noise, not confirmation'] },
+      { n: '02', h: 'The higher timeframe sets it up',
+        p: 'A key level is reached or an SMT forms, and a candle turns against it. That is a candidate — not yet a swing.',
+        li: ['An old high or low is reached, or a gap is traded into',
+             'Or an SMT prints at the extreme instead',
+             'A reversal candle closes against the level',
+             'Nothing is protected until the aligned timeframe agrees'] },
+      { n: '03', h: 'The confirmation is a V',
+        p: 'Expansion into the level met with expansion back out, closing beyond the body of the candle that turned. That close is the change in delivery.',
+        li: ['Above the body to protect a low, below it to protect a high',
+             'Both legs fast — a slow return is a retracement, not a turn',
+             'One close protects the extreme on BOTH timeframes at once',
+             'No V-shape, no protected swing. Wait rather than assume'] },
+      { n: '04', h: 'Internal swings carry it',
+        p: 'Once the higher-timeframe swing is confirmed, the continuations come from inside the move. Each is a fresh extreme to add from.',
+        li: ['Price trades into a gap',
+             'And closes beyond the opposing-close candles',
+             'That high or low is protected from there on',
+             'Only ever AFTER the higher-timeframe swing is confirmed'] },
+      { n: '05', h: 'The tap that does not close',
+        p: 'Into the gap, and no close beyond the bodies. The sequence is unfinished rather than wrong — what it wants next is a stop run.',
+        li: ['Tap the gap, fail to close through the bodies',
+             'Wait for a run of the short-term low or high',
+             'Then the close through gives the CISD',
+             'That is the protected swing — not the tap that failed'] },
+      { n: '06', h: 'Once the draw is met',
+        p: 'Protected swings stop being protected when the objective is reached. From that point they are what the market comes to take.',
+        li: ['The extremes you were adding from become the liquidity',
+             'They get run for reversals rather than held',
+             'Do not re-enter the same direction off them',
+             'The trade was over when the draw was met'] },
+    ],
+    rules: [
+      ['Confirm on the aligned timeframe, and never lower.',
+       'The level sets the chart: daily to the 1H, 4H to the 15M, 1H to the 5M, '
+       + '30M to the 3M, 15M to the 1M. Dropping below the alignment to find a '
+       + 'confirmation is how you talk yourself into one that is not there.'],
+      ['The V-shape is the confirmation, not the reversal candle.',
+       'A candle turning against a level is a candidate. It becomes a protected '
+       + 'swing when the aligned timeframe expands out as fast as it expanded in, '
+       + 'and not a moment earlier.'],
+      ['The close has to clear the body.',
+       'Above the body of the candle that turned to protect a low, below it to '
+       + 'protect a high. A close inside the body is the same price action having '
+       + 'not finished — it is not a smaller version of the signal.'],
+      ['Bulky candles only.',
+       'The candles you close through have to be worth closing through. A run of '
+       + 'tiny bodies gives a close that means nothing, and it is the easiest way '
+       + 'to manufacture a swing point that was never there.'],
+      ['A failed gap tap is unfinished, not invalid.',
+       'Into the gap with no close through the bodies means wait, not leave. What '
+       + 'comes next is a stop run and then the close — and that is where the '
+       + 'CISD is. Taking the failed tap is taking the setup one leg early.'],
+      ['When the change in delivery is far away, use the internal one.',
+       'If the aligned timeframe only changes hands a long way from the level, '
+       + 'look for a purge of a short-term extreme and the change that comes off '
+       + 'it. Same swing confirmed, closer entry, same invalidation.'],
+      ['Confirming down confirms up.',
+       'A 3M change confirms the 30M swing, and the 30M swing confirms the 1H one. '
+       + 'That chain is the whole reason to work down — it is how choppy price '
+       + 'action still tells you which extremes are holding.'],
+      ['A protected swing that breaks means the read was wrong.',
+       'It is the invalidation, not a reason to move the stop or to find a lower '
+       + 'timeframe that still agrees with you. The extreme holding is the trade '
+       + 'staying valid.'],
+      ['Read the wick before committing to the target.',
+       'A small wick on the higher timeframe supports running to the opposite '
+       + 'extreme. A large one has already spent the move, and aiming at the far '
+       + 'side after it is aiming at something the day has already paid for.'],
     ],
   },
 ];
