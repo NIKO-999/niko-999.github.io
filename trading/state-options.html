@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>State — four treatments</title>
+
+<script>
+/* Same bootstrap as the app, so this page is themed identically and a
+   judgement made here holds when the winner is moved across. */
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  var PAL = { turtle:'slate', canyon:'ember', desert:'ember', nightfall:'cyan',
+              iceberg:'cyan', delta:'cyan', curve:'vellum', cobalt:'cobalt',
+              abyss:'cyan', jade:'jade', violet:'violet', iris:'violet',
+              umber:'umber', silk:'slate' };
+  var p = read('arc.palette') || 'nightfall';
+  if (!PAL[p]) p = 'nightfall';
+  var m = read('arc.theme') || 'system';
+  d.dataset.bg = p;
+  d.dataset.palette = PAL[p];
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  if (!phone) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
+  var k = document.createElement('link');
+  k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+  k.href = '../arc/fonts/Inter.woff2'; k.crossOrigin = 'anonymous';
+  document.head.appendChild(k);
+})();
+</script>
+
+<link rel="stylesheet" href="../shell.css" />
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   STATE — four treatments of one screen.
+
+   TEMPORARY. This page exists to be looked at and then deleted. The
+   winner moves into #stateSection in the app; nothing here is saved
+   and nothing here reaches the ledger.
+
+   The check-in itself is unchanged in all four: one pad, four corners
+   named after the four ways this account loses money, four facts, an
+   optional line. Only the arrangement differs.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --up:   #7fb9a2;
+  --down: #c98f8f;
+}
+:root[data-resolved="light"] {
+  --up:   #2f6b52;
+  --down: #8f3f3f;
+}
+.pane { flex: 1; overflow-y: auto; padding: 4px 14px 40px; }
+
+.opt { margin: 0 0 34px; }
+.opt-h { display: flex; align-items: baseline; gap: 10px; padding: 0 0 3px; }
+.opt-h h2 { margin: 0; font-size: .96rem; font-weight: 500; color: var(--ink); }
+.opt-h b {
+  font-family: var(--mono); font-size: .58rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2);
+  border-radius: 4px; padding: 2px 6px;
+}
+.opt-h span { font-size: .78rem; color: var(--ink-3); }
+.opt > p.why { margin: 0 0 12px; font-size: .8rem; line-height: 1.55;
+  color: var(--ink-3); max-width: 74ch; }
+
+/* the shared pad ink — identical in every variant */
+.pd svg { touch-action: none; cursor: crosshair; display: block; }
+.pd .fld { fill: color-mix(in srgb, var(--ink-3) 7%, transparent);
+  stroke: var(--rule); stroke-width: 1; }
+.pd .ax { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 3; }
+.pd .quad { fill: var(--ink-3); font-family: var(--mono); font-size: 8px;
+  letter-spacing: .09em; text-anchor: middle; opacity: .75; }
+.pd .edge { fill: var(--ink-3); font-family: var(--mono); font-size: 7.5px;
+  letter-spacing: .08em; text-anchor: middle; opacity: .55; }
+.pd .me { fill: var(--ink); stroke: var(--bg); stroke-width: 2; }
+.pd .me-ring { fill: none; stroke: var(--ink-2); stroke-width: 1.2; opacity: .5; }
+.pd .was { stroke: none; }
+.pd .was.up { fill: color-mix(in srgb, var(--up) 62%, transparent); }
+.pd .was.down { fill: color-mix(in srgb, var(--down) 62%, transparent); }
+.pd .was.flat { fill: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+
+/* ── A · one column ──────────────────────────────────────────── */
+.vA {
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 20px 18px 16px;
+  max-width: 520px; display: flex; flex-direction: column; align-items: center;
+}
+.vA .pd { width: 100%; max-width: 320px; }
+.vA .pd svg { width: 100%; height: auto; }
+.vA .said {
+  margin: 12px 0 0; font-size: .84rem; color: var(--ink-2); text-align: center;
+  min-height: 1.3em;
+}
+.vA .said b { color: var(--ink); font-weight: 500; }
+.vA .rowpills { display: flex; flex-wrap: wrap; justify-content: center;
+  gap: 6px; margin: 16px 0 0; }
+.vA .rowpills button {
+  border: 1px solid var(--glass-line); background: none; border-radius: 999px;
+  padding: 6px 12px; font: inherit; font-size: .76rem; color: var(--ink-3);
+  cursor: pointer;
+}
+.vA .rowpills button:hover { color: var(--ink-2); }
+.vA .rowpills button[aria-pressed="true"] {
+  color: var(--ink); border-color: var(--ink-2); background: var(--glass-in-2);
+}
+.vA .foot { display: flex; gap: 10px; width: 100%; margin-top: 18px; }
+.vA .foot input {
+  flex: 1; min-width: 0; height: 34px; padding: 0 11px; font: inherit;
+  font-size: .82rem; color: var(--ink); background: var(--glass-in-2);
+  border: 1px solid var(--glass-line); border-radius: 8px;
+}
+.vA .foot input::placeholder { color: var(--ink-3); }
+
+/* ── B · the pad is the screen ────────────────────────────────── */
+.vB { display: flex; flex-direction: column; align-items: center; padding: 4px 0 0; }
+.vB .pd { width: 100%; max-width: 420px; }
+.vB .pd svg { width: 100%; height: auto; }
+.vB .said {
+  font-family: var(--mono); font-size: .6rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); margin: 14px 0 0; min-height: 1em;
+}
+.vB .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 18px;
+  margin: 14px 0 0; }
+.vB .chips button {
+  border: 0; background: none; padding: 0; font: inherit; cursor: pointer;
+  font-size: .74rem; color: var(--ink-3);
+  display: inline-flex; align-items: center; gap: 7px;
+}
+.vB .chips i {
+  width: 6px; height: 6px; border-radius: 50%; flex: none;
+  border: 1px solid var(--ink-3);
+}
+.vB .chips button[aria-pressed="true"] { color: var(--ink); }
+.vB .chips button[aria-pressed="true"] i { background: var(--ink); border-color: var(--ink); }
+.vB .go {
+  margin-top: 20px; border: 0; background: none; font: inherit; cursor: pointer;
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .14em;
+  text-transform: uppercase; color: var(--ink-2);
+  border-bottom: 1px solid var(--glass-line); padding: 0 2px 4px;
+}
+.vB .go:hover { color: var(--ink); border-color: var(--ink-2); }
+
+/* ── C · the dial ─────────────────────────────────────────────── */
+.vC {
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 18px; max-width: 520px;
+  display: flex; flex-direction: column; align-items: center;
+}
+.vC .pd { width: 100%; max-width: 320px; }
+.vC .pd svg { width: 100%; height: auto; cursor: crosshair; }
+.vC .dial-r { fill: none; stroke: var(--rule); stroke-width: 1; }
+.vC .dial-o { fill: color-mix(in srgb, var(--ink-3) 6%, transparent);
+  stroke: var(--rule); stroke-width: 1; }
+.vC .said { margin: 12px 0 0; font-size: .84rem; color: var(--ink-2);
+  text-align: center; min-height: 1.3em; }
+.vC .said b { color: var(--ink); font-weight: 500; }
+.vC .cells { display: grid; grid-template-columns: 1fr 1fr; grid-auto-rows: 1fr;
+  gap: 6px; width: 100%; margin-top: 16px; }
+.vC .cells button {
+  display: flex; align-items: center; gap: 9px; padding: 9px 10px;
+  border: 1px solid var(--glass-line); border-radius: 8px; background: none;
+  font: inherit; font-size: .78rem; color: var(--ink-3); text-align: left;
+  cursor: pointer;
+}
+.vC .cells button:hover { background: var(--glass-in-2); }
+.vC .cells s { width: 15px; height: 15px; border-radius: 4px; flex: none;
+  border: 1px solid var(--glass-line); text-decoration: none;
+  display: grid; place-items: center; color: transparent; }
+.vC .cells button[aria-pressed="true"] { color: var(--ink); }
+.vC .cells button[aria-pressed="true"] s { background: var(--ink-2);
+  border-color: var(--ink-2); color: var(--bg); }
+.vC .foot { display: flex; width: 100%; margin-top: 14px; }
+.vC .foot .grow { flex: 1; }
+
+/* ── D · the band ─────────────────────────────────────────────── */
+.vD {
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 12px 14px;
+  display: flex; align-items: center; gap: 18px; flex-wrap: wrap;
+}
+.vD .pd { flex: none; width: 156px; }
+.vD .pd svg { width: 156px; height: 156px; }
+.vD .mid { flex: 1; min-width: 260px; display: grid;
+  grid-template-columns: 1fr 1fr; gap: 4px 10px; }
+.vD .mid button {
+  display: flex; align-items: center; gap: 8px; padding: 6px 6px;
+  border: 0; background: none; font: inherit; font-size: .76rem;
+  color: var(--ink-3); text-align: left; cursor: pointer; border-radius: 6px;
+}
+.vD .mid button:hover { background: var(--glass-in-2); }
+.vD .mid s { width: 14px; height: 14px; border-radius: 4px; flex: none;
+  border: 1px solid var(--glass-line); text-decoration: none;
+  display: grid; place-items: center; color: transparent; }
+.vD .mid button[aria-pressed="true"] { color: var(--ink); }
+.vD .mid button[aria-pressed="true"] s { background: var(--ink-2);
+  border-color: var(--ink-2); color: var(--bg); }
+.vD .end { flex: none; display: flex; flex-direction: column;
+  align-items: flex-end; gap: 8px; }
+.vD .said { font-family: var(--mono); font-size: .58rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); min-height: 1em; }
+
+.key { display: flex; flex-wrap: wrap; gap: 14px; margin: 10px 0 0;
+  font-family: var(--mono); font-size: .54rem; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3); }
+.key span { display: inline-flex; align-items: center; gap: 5px; }
+.key s { width: 9px; height: 9px; border-radius: 50%; text-decoration: none; }
+.key s.up { background: color-mix(in srgb, var(--up) 62%, transparent); }
+.key s.down { background: color-mix(in srgb, var(--down) 62%, transparent); }
+.key s.flat { background: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+
+.note-top {
+  border: 1px solid var(--glass-line); border-radius: 10px;
+  background: var(--glass-in); padding: 12px 14px; margin: 2px 0 26px;
+  font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 78ch;
+}
+.note-top b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+
+<div class="app">
+  <main class="main">
+    <div class="head">
+      <h1>State</h1>
+      <span class="grow"></span>
+      <span class="span-meta">four treatments · nothing here is saved</span>
+    </div>
+
+    <div class="pane" tabindex="0">
+      <p class="note-top">
+        The check-in is the same in all four &mdash; <b>one pad, four corners, four facts,
+        one optional line</b>. The corners, the block on the gate, the lock once you
+        have traded and the history coloured by what the ledger did are unchanged.
+        Only the arrangement differs. Every one below is live: place a dot, tick
+        things, resize the window.
+      </p>
+
+      <section class="opt">
+        <div class="opt-h"><b>A</b><h2>One column</h2><span>no headings, no split</span></div>
+        <p class="why">The two cards collapse into one. The pad leads, the sentence under it
+          tells you where you landed, the four facts become a row you scan in one pass, and
+          the note and the button share the last line. Nothing is titled, because a pad with
+          four named corners does not need a label telling you it is a pad.</p>
+        <div class="vA" data-v="A">
+          <div class="pd"></div>
+          <p class="said"></p>
+          <div class="rowpills"></div>
+          <div class="foot">
+            <input type="text" placeholder="Anything on your mind &mdash; optional" />
+            <button class="btn btn-primary" type="button">Check in</button>
+          </div>
+        </div>
+        <p class="key"><span><s class="up"></s>a green day</span>
+          <span><s class="down"></s>a red day</span>
+          <span><s class="flat"></s>nothing traded</span></p>
+      </section>
+
+      <section class="opt">
+        <div class="opt-h"><b>B</b><h2>The pad is the screen</h2><span>no card at all</span></div>
+        <p class="why">No border, no panel, no button that looks like a button. The pad is
+          large and sits on the glass directly; the facts are four quiet marks under it and
+          the confirm is a line of type. The least form-like of the four &mdash; it reads as a
+          thing you touch once rather than something you fill in.</p>
+        <div class="vB" data-v="B">
+          <div class="pd"></div>
+          <p class="said"></p>
+          <div class="chips"></div>
+          <button class="go" type="button">Check in</button>
+        </div>
+      </section>
+
+      <section class="opt">
+        <div class="opt-h"><b>C</b><h2>The dial</h2><span>round, like the backtesting ring</span></div>
+        <p class="why">The same two axes bent into a circle. The centre is the middle of
+          everything and the rim is the extreme, so how far out you place the dot is how
+          strongly you feel it &mdash; a square gives you no way to say &ldquo;a bit tilted&rdquo;.
+          It also rhymes with the ring on the backtesting screen, which is the only other
+          round object in the app.</p>
+        <div class="vC" data-v="C">
+          <div class="pd"></div>
+          <p class="said"></p>
+          <div class="cells"></div>
+          <div class="foot"><span class="grow"></span>
+            <button class="btn btn-primary" type="button">Check in</button></div>
+        </div>
+      </section>
+
+      <section class="opt">
+        <div class="opt-h"><b>D</b><h2>The band</h2><span>one row, above everything else</span></div>
+        <p class="why">The whole check-in as a single strip you could put at the top of any
+          screen. Small pad, four ticks, done. It gives up the history behind you &mdash; the
+          pad is too small to read it, and the outer labels with it &mdash; only the four
+          corners survive, and the line beside the pad says where you landed. Fastest to
+          answer, least to look at.</p>
+        <div class="vD" data-v="D">
+          <div class="pd"></div>
+          <div class="mid"></div>
+          <div class="end">
+            <span class="said"></span>
+            <button class="btn btn-primary" type="button">Check in</button>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* Look only. The data below is invented so the history reads as a real
+   few months; nothing is written and nothing is read from the ledger. */
+const ASKS = [
+  'Slept enough',
+  'Nothing heavy outside trading',
+  'Yesterday is closed',
+  'I know what I am looking for today',
+];
+const QUAD = (x, y) => y >= 0.5
+  ? (x < 0.5 ? 'Sharp' : 'Tilted')
+  : (x < 0.5 ? 'Idle' : 'Rattled');
+const SAYS = {
+  Sharp:   'calm and charged — the one you want',
+  Tilted:  'agitated and charged — the revenge corner',
+  Idle:    'calm and flat — you will force something out of boredom',
+  Rattled: 'agitated and flat — small, early, and out too soon',
+};
+const TICK = '<svg viewBox="0 0 24 24" width="11" height="11" fill="none" stroke="currentColor" '
+  + 'stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
+  + '<path d="M4 12l5 5L20 6" /></svg>';
+
+/* A deterministic scatter — a seeded walk, so the picture is the same
+   every time you open the page and two variants cannot be compared
+   against two different histories. */
+const PAST = (() => {
+  let s = 7, out = [];
+  const r = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
+  for (let i = 88; i > 0; i--) {
+    if (r() < 0.22) continue;
+    const x = Math.min(0.97, Math.max(0.03, 0.42 + (r() - 0.5) * 0.8));
+    const y = Math.min(0.97, Math.max(0.03, 0.55 + (r() - 0.5) * 0.8));
+    const q = QUAD(x, y);
+    /* Sharp days are green more often than Tilted ones — that lean is
+       the entire reason the history is on the pad. */
+    const p = r();
+    const pnl = q === 'Sharp' ? (p < 0.62 ? 'up' : p < 0.82 ? 'down' : 'flat')
+      : q === 'Tilted' ? (p < 0.24 ? 'up' : p < 0.86 ? 'down' : 'flat')
+      : (p < 0.36 ? 'up' : p < 0.7 ? 'down' : 'flat');
+    out.push({ age: i, x, y, pnl });
+  }
+  return out;
+})();
+
+/* ── the square pad ─────────────────────────────────────────────── */
+function drawPad(v, o) {
+  /* Three scales, because they do not want to move together. k sets the
+     padding, so a small pad can give the field more of its box. lab sets
+     the label type, which has a floor below which it stops being words.
+     mk sets the marks, which have to stay findable at any size. */
+  const k = o.k || 1, mk = o.mk || o.k || 1, lab = o.lab || o.k || 1;
+  const edges = o.edges !== false;
+  const P = 26 * k, S = 200, M = 9 * k;
+  const px = (n) => P + M + n * (S - 2 * P - 2 * M);
+  const py = (n) => P + M + (1 - n) * (S - 2 * P - 2 * M);
+  const span = 88;
+
+  let g = `<rect class="fld" x="${P}" y="${P}" width="${S - 2 * P}" height="${S - 2 * P}" rx="10" />`
+    + `<line class="ax" x1="${S / 2}" y1="${P}" x2="${S / 2}" y2="${S - P}" />`
+    + `<line class="ax" x1="${P}" y1="${S / 2}" x2="${S - P}" y2="${S / 2}" />`;
+  const fq = 8 * lab, fe = 7.5 * lab;
+  const q = (t, x, y) => `<text class="quad" x="${x}" y="${y}" font-size="${fq.toFixed(1)}">${t}</text>`;
+  g += q('SHARP', P + (S - 2 * P) * 0.25, P + fq + 4 * k)
+     + q('TILTED', P + (S - 2 * P) * 0.75, P + fq + 4 * k)
+     + q('IDLE', P + (S - 2 * P) * 0.25, S - P - 5 * k)
+     + q('RATTLED', P + (S - 2 * P) * 0.75, S - P - 5 * k);
+  /* The band drops these four. Its pad is 150px, so the four corners are
+     already at the floor for type — a second, outer ring of words there
+     is a grey texture, not a label. */
+  if (edges) {
+    const e = (t, x, y, r) => `<text class="edge" font-size="${fe.toFixed(1)}" x="${x}" y="${y}"`
+      + `${r ? ` transform="rotate(${r} ${x} ${y})"` : ''}>${t}</text>`;
+    g += e('CHARGED', S / 2, P - 6 * k)
+       + e('FLAT', S / 2, S - P + fe + 4 * k)
+       + e('CALM', P - 8 * k, S / 2, -90)
+       + e('AGITATED', S - P + 8 * k, S / 2, 90);
+  }
+
+  if (v.hist) for (const d of PAST) {
+    const a = (0.28 + 0.72 * (1 - d.age / span)).toFixed(2);
+    g += `<circle class="was ${d.pnl}" cx="${px(d.x).toFixed(1)}" cy="${py(d.y).toFixed(1)}" `
+       + `r="${(3.6 * mk).toFixed(2)}" opacity="${a}" />`;
+  }
+  if (v.placed) {
+    g += `<circle class="me-ring" cx="${px(v.x).toFixed(1)}" cy="${py(v.y).toFixed(1)}" r="${(8.5 * mk).toFixed(2)}" />`
+       + `<circle class="me" cx="${px(v.x).toFixed(1)}" cy="${py(v.y).toFixed(1)}" r="${(5 * mk).toFixed(2)}" stroke-width="${(2 * mk).toFixed(2)}" />`;
+  }
+  return { svg: `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="${v.placed
+    ? 'You are in ' + QUAD(v.x, v.y) : 'Nothing placed yet'}">${g}</svg>`,
+    /* click → value, inverse of px/py above */
+    from: (fx, fy) => ({
+      x: Math.min(1, Math.max(0, (fx * S - P - M) / (S - 2 * P - 2 * M))),
+      y: Math.min(1, Math.max(0, 1 - (fy * S - P - M) / (S - 2 * P - 2 * M))),
+    }) };
+}
+
+/* ── the dial ───────────────────────────────────────────────────
+   Same x and y underneath, so the corners, the sentence and the
+   history are identical — only the shape you place them on changes.
+   Angle carries which corner, distance from the centre carries how
+   much, which is the one thing the square cannot express. */
+function drawDial(v, o) {
+  const S = 200, C = 100, R = 74, M = 6;
+  const at = (x, y) => {
+    /* the square's unit box mapped onto the disc */
+    const dx = (x - 0.5) * 2, dy = (y - 0.5) * 2;
+    const k = Math.min(1, Math.hypot(dx, dy));
+    const a = Math.atan2(dy, dx) || 0;
+    const r = k * (R - M);
+    return [C + Math.cos(a) * r, C - Math.sin(a) * r];
+  };
+  let g = `<circle class="dial-o" cx="${C}" cy="${C}" r="${R}" />`
+    + [0.34, 0.67].map(f => `<circle class="dial-r" cx="${C}" cy="${C}" r="${(R * f).toFixed(1)}" />`).join('')
+    + `<line class="ax" x1="${C}" y1="${C - R}" x2="${C}" y2="${C + R}" />`
+    + `<line class="ax" x1="${C - R}" y1="${C}" x2="${C + R}" y2="${C}" />`;
+
+  const d = (R + 13) * 0.72;
+  const lab = (t, sx, sy, dy) =>
+    `<text class="quad" x="${(C + sx * d).toFixed(1)}" y="${(C + sy * d + dy).toFixed(1)}">${t}</text>`;
+  g += lab('SHARP', -1, -1, -4) + lab('TILTED', 1, -1, -4)
+     + lab('IDLE', -1, 1, 9) + lab('RATTLED', 1, 1, 9);
+  g += `<text class="edge" x="${C}" y="10">CHARGED</text>`
+     + `<text class="edge" x="${C}" y="${S - 3}">FLAT</text>`
+     + `<text class="edge" x="10" y="${C}" transform="rotate(-90 10 ${C})">CALM</text>`
+     + `<text class="edge" x="${S - 8}" y="${C}" transform="rotate(90 ${S - 8} ${C})">AGITATED</text>`;
+
+  for (const p of PAST) {
+    const [cx, cy] = at(p.x, p.y);
+    const o = (0.28 + 0.72 * (1 - p.age / 88)).toFixed(2);
+    g += `<circle class="was ${p.pnl}" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="3.4" opacity="${o}" />`;
+  }
+  if (v.placed) {
+    const [cx, cy] = at(v.x, v.y);
+    g += `<circle class="me-ring" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="8.5" />`
+       + `<circle class="me" cx="${cx.toFixed(1)}" cy="${cy.toFixed(1)}" r="5" />`;
+  }
+  return { svg: `<svg viewBox="0 0 ${S} ${S}" role="img" aria-label="${v.placed
+    ? 'You are in ' + QUAD(v.x, v.y) : 'Nothing placed yet'}">${g}</svg>`,
+    from: (fx, fy) => {
+      const dx = fx * S - C, dy = C - fy * S;
+      const k = Math.min(1, Math.hypot(dx, dy) / (R - M));
+      const a = Math.atan2(dy, dx);
+      return { x: 0.5 + Math.cos(a) * k / 2, y: 0.5 + Math.sin(a) * k / 2 };
+    } };
+}
+
+/* ── wiring, one per variant ────────────────────────────────────── */
+function build(root, opt) {
+  const v = { x: 0.34, y: 0.72, placed: true, hist: opt.hist !== false };
+  const flags = new Set(['Slept enough', 'Yesterday is closed']);
+  const pad = root.querySelector('.pd');
+  const said = root.querySelector('.said');
+  const list = root.querySelector(opt.listSel);
+  let hit = null;
+
+  function paint() {
+    const d = (opt.dial ? drawDial : drawPad)(v, opt);
+    hit = d.from;
+    pad.innerHTML = d.svg;
+    const q = QUAD(v.x, v.y);
+    if (said) said.innerHTML = opt.terse
+      ? q + ' — ' + SAYS[q].split(' — ')[0]
+      : '<b>' + q + '</b> — ' + SAYS[q].split(' — ')[1];
+    if (list) list.innerHTML = ASKS.map((a, i) => opt.tmpl(a, i, flags.has(a))).join('');
+  }
+
+  pad.addEventListener('pointerdown', (e) => {
+    const svg = pad.querySelector('svg');
+    if (!svg) return;
+    svg.setPointerCapture(e.pointerId);
+    const move = (ev) => {
+      const b = svg.getBoundingClientRect();
+      Object.assign(v, hit((ev.clientX - b.left) / b.width, (ev.clientY - b.top) / b.height));
+      v.placed = true;
+      paint();
+    };
+    move(e);
+    const up = () => { svg.removeEventListener('pointermove', move);
+      svg.removeEventListener('pointerup', up); };
+    svg.addEventListener('pointermove', move);
+    svg.addEventListener('pointerup', up);
+  });
+
+  if (list) list.addEventListener('click', (e) => {
+    const b = e.target.closest('[data-ask]');
+    if (!b) return;
+    const a = b.dataset.ask;
+    flags.has(a) ? flags.delete(a) : flags.add(a);
+    paint();
+  });
+
+  paint();
+}
+
+build(document.querySelector('.vA'), {
+  listSel: '.rowpills',
+  tmpl: (a, i, on) => `<button type="button" data-ask="${a}" aria-pressed="${on}">${a}</button>`,
+});
+build(document.querySelector('.vB'), {
+  listSel: '.chips', terse: true, k: 0.72, lab: 0.66,
+  tmpl: (a, i, on) => `<button type="button" data-ask="${a}" aria-pressed="${on}">`
+    + `<i aria-hidden="true"></i>${a}</button>`,
+});
+build(document.querySelector('.vC'), {
+  listSel: '.cells', dial: true,
+  tmpl: (a, i, on) => `<button type="button" data-ask="${a}" aria-pressed="${on}">`
+    + `<s aria-hidden="true">${TICK}</s>${a}</button>`,
+});
+build(document.querySelector('.vD'), {
+  listSel: '.mid', hist: false, k: 0.55, lab: 0.72, mk: 1.35, edges: false,
+  tmpl: (a, i, on) => `<button type="button" data-ask="${a}" aria-pressed="${on}">`
+    + `<s aria-hidden="true">${TICK}</s>${a}</button>`,
+});
+</script>
+</body>
+</html>
