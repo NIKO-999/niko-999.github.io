@@ -334,6 +334,59 @@
 .evenq button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink);
   border-color: var(--ink-3); }
 
+/* ══ round four — the field itself ══════════════════════════════ */
+
+/* N · the sweep. Each day fades in as the line reaches its angle, so
+   the reveal reads as the line UNCOVERING them rather than as a list
+   appearing behind a decoration that happens to be spinning. */
+@keyframes sweepspin { to { transform: rotate(360deg); } }
+@keyframes pop { from { opacity: 0; } }
+.sweep { transform-origin: 100px 100px; animation: sweepspin 1.7s linear 1 both; }
+.sweep line { stroke: var(--ink-2); stroke-width: 1; opacity: .35; }
+.sweep .fan { fill: url(#fanGrad); opacity: .16; }
+.v4-n .was { animation: pop .45s ease-out both; }
+
+/* O · contours. The dots become the shape they make. */
+.cont { fill: none; stroke: var(--ink-3); stroke-linecap: round; }
+.cont.c1 { stroke-width: .7; opacity: .3; }
+.cont.c2 { stroke-width: .9; opacity: .45; }
+.cont.c3 { stroke-width: 1.1; opacity: .62; }
+@keyframes contdraw { from { opacity: 0; } }
+.cont { animation: contdraw .8s ease-out both; }
+.cont.c2 { animation-delay: .12s; }
+.cont.c3 { animation-delay: .24s; }
+
+/* P · focus. Near is sharp, far is out of focus — the eye does this
+   anyway and the pad may as well agree with it. */
+.was.far  { filter: url(#soft2); opacity: .34 !important; }
+.was.mid  { filter: url(#soft1); }
+
+/* Q · parallax. The card tilts to the pointer; the days sit on a plane
+   in front of the field, so the two separate as you move. */
+.tiltwrap { perspective: 760px; width: 100%; max-width: 320px; }
+.tiltwrap .pd { transform-style: preserve-3d; transition: transform .12s ease-out; will-change: transform; }
+.v4-q .lift { transition: transform .12s ease-out; }
+
+/* R · the watermark. The corner's name behind everything, big, and
+   gone before you have finished reading it. */
+.markwrap { position: relative; width: 100%; max-width: 320px; }
+.mark {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  pointer-events: none; overflow: hidden; border-radius: 12px;
+}
+.mark span {
+  font-family: var(--mono); font-size: 3.1rem; letter-spacing: .1em;
+  color: var(--ink); opacity: 0; transform: scale(.92);
+  transition: opacity .5s ease-out, transform .7s cubic-bezier(.2,.8,.3,1);
+}
+.mark span.on { opacity: .085; transform: scale(1); }
+
+@media (prefers-reduced-motion: reduce) {
+  .sweep, .v4-n .was, .cont { animation: none; }
+  .sweep { display: none; }
+  .tiltwrap .pd, .v4-q .lift, .mark span { transition: none; }
+}
+
 .note-top {
   border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 26px;
@@ -596,6 +649,76 @@
           <p class="tell"></p>
         </div>
       </section>
+      <div class="opt-h" style="margin-top:38px;padding-bottom:8px">
+        <b>Round four</b><h2>The field itself</h2><span>not motion on a dot</span></div>
+      <p class="note-top">
+        Round two moved <b>a thing</b> — a ring, a line, a pulse. These change what the
+        <b>field</b> is. Two of them draw the same data differently rather than decorating it,
+        which is the only reason an effect earns the frame rate. Reload the page to see the
+        ones that play on arrival; drag for the rest.
+      </p>
+
+      <!-- ══ N ══ -->
+      <section class="opt">
+        <div class="opt-h"><b>N</b><h2>The sweep</h2><span>the pad uncovers itself</span></div>
+        <p class="why">A line goes round once and every past day fades in as it passes over,
+          so the history arrives rather than being already there. It rhymes with the two radars
+          on Metrics and the ring on Backtesting &mdash; this app already has a house style for
+          round things that scan, and this is it applied to the pad. Costs one second, once,
+          and then it is a normal pad forever.</p>
+        <div class="v2 v4-n" data-v="N"><div class="pd"></div><p class="said"></p></div>
+      </section>
+
+      <!-- ══ O ══ -->
+      <section class="opt">
+        <div class="opt-h"><b>O</b><h2>Contours</h2><span>the dots become the shape they make</span></div>
+        <p class="why">Sixty scattered dots is sixty facts. The same sixty as <b>contour lines</b>
+          is one fact: this is where you live. Tight rings mean most mornings land in one place;
+          two separate hills mean there are two of you. The picture answers a question the dots
+          only hold the evidence for &mdash; and it gets better, not messier, as the year fills
+          up.</p>
+        <div class="v2" data-v="O"><div class="pd"></div><p class="said"></p><p class="tell"></p></div>
+      </section>
+
+      <!-- ══ P ══ -->
+      <section class="opt">
+        <div class="opt-h"><b>P</b><h2>Focus</h2><span>near is sharp, far goes soft</span></div>
+        <p class="why">Days close to where you have put the dot are sharp; the rest fall out of
+          focus. Your eye was going to do this anyway, so the pad may as well agree with it
+          &mdash; and the effect is doing the counting for you: a spot with a dozen crisp days
+          around it looks completely different from one with none. Drag slowly and the field
+          pulls in and out.</p>
+        <div class="v2" data-v="P"><div class="pd"></div><p class="said"></p><p class="tell"></p></div>
+      </section>
+
+      <!-- ══ Q ══ -->
+      <section class="opt">
+        <div class="opt-h"><b>Q</b><h2>Parallax</h2><span>the card tilts to you</span></div>
+        <p class="why">Move the pointer over it and the whole thing tilts, with the days
+          floating on a plane in front of the field so the two separate. Pure surface &mdash; it
+          tells you nothing &mdash; but it is the one that makes the screen feel like an object
+          rather than a form, and it costs nothing to carry. Works on a mouse; a phone gets the
+          flat version.</p>
+        <div class="v2" data-v="Q">
+          <div class="tiltwrap"><div class="pd"></div></div>
+          <p class="said"></p>
+        </div>
+      </section>
+
+      <!-- ══ R ══ -->
+      <section class="opt">
+        <div class="opt-h"><b>R</b><h2>The watermark</h2><span>the corner says its own name</span></div>
+        <p class="why">Cross into a corner and its name blooms huge behind the field, then
+          settles back to almost nothing. You get told where you are <b>without a label
+          appearing anywhere</b>, and because it fades rather than sticks it never becomes a
+          sign you stop seeing. Drag between corners &mdash; it only fires on a change, so
+          nudging around inside one corner stays quiet.</p>
+        <div class="v2" data-v="R">
+          <div class="markwrap"><div class="pd"></div>
+            <div class="mark" aria-hidden="true"><span></span></div></div>
+          <p class="said"></p>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -826,7 +949,10 @@ const WEEK = (() => {
 })();
 
 function build2(root, opt) {
-  const v = { x: 0.34, y: 0.72, placed: true, hist: true };
+  /* hideDots is read HERE, not inside paint — drawPad runs first and had
+     already drawn all sixty by the time paint got round to clearing the
+     flag. */
+  const v = { x: 0.34, y: 0.72, placed: true, hist: !opt.hideDots };
   const pad = root.querySelector('.pd');
   const said = root.querySelector('.said');
   const tell = root.querySelector('.tell');
@@ -845,6 +971,8 @@ function build2(root, opt) {
     said.innerHTML = '<b>' + q + '</b> — ' + SAYS[q].split(' — ')[1];
     if (tell) tell.innerHTML = opt.tell(v);
     if (slot && opt.slot) slot.innerHTML = opt.slot(v);
+    /* After the paint, because these reach into the elements it made. */
+    if (opt.after) opt.after(pad, v);
   }
 
   pad.addEventListener('pointerdown', (e) => {
@@ -1083,6 +1211,164 @@ const WORDS = ['Sharp', 'Ready', 'Wired', 'Angry', 'Flat', 'Bored', 'Shaken', 'T
       : 'logged · <b>7 of 11</b> — the ones you miss are the ones worth reading back';
   });
   tell.innerHTML = 'thirty seconds, once a day, and it is the only score here you can move';
+})();
+
+/* ══ round four ══════════════════════════════════════════════════ */
+
+/* The filters and the gradient every variant below borrows. Declared
+   once, in a hidden svg, because a <defs> inside a pad is wiped on the
+   next repaint and every filter reference goes dead with it. */
+document.body.insertAdjacentHTML('beforeend',
+  `<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+     <filter id="soft1"><feGaussianBlur stdDeviation="0.9" /></filter>
+     <filter id="soft2"><feGaussianBlur stdDeviation="2.2" /></filter>
+     <linearGradient id="fanGrad" x1="0" y1="0" x2="1" y2="0">
+       <stop offset="0" stop-color="currentColor" stop-opacity="0" />
+       <stop offset="1" stop-color="currentColor" stop-opacity="1" />
+     </linearGradient>
+   </defs></svg>`);
+
+/* N · the sweep.
+   The delay per day is its ANGLE from the centre, so the line and the
+   fade are the same event seen twice. Getting this wrong — a stagger by
+   index, say — reads immediately as fake, because the eye is tracking
+   the line and not the list. */
+build2(document.querySelector('[data-v="N"]'), {
+  over: () => `<g class="sweep" style="color:var(--ink-2)">`
+    + `<path class="fan" d="M100,100 L100,18 A82,82 0 0,1 158,42 Z" />`
+    + `<line x1="100" y1="100" x2="100" y2="18" /></g>`,
+  tell: () => '',
+  after: (root) => {
+    root.querySelectorAll('.was').forEach((c) => {
+      const a = (Math.atan2(+c.getAttribute('cy') - 100, +c.getAttribute('cx') - 100)
+        * 180 / Math.PI + 90 + 360) % 360;
+      c.style.animationDelay = (a / 360 * 1.7).toFixed(2) + 's';
+    });
+  },
+});
+
+/* O · contours.
+   Marching squares over a coarse density grid. Three thresholds, drawn
+   thinnest first, so the innermost ring is the one that reads.
+
+   The kernel is wide on purpose: at a tight sigma every day becomes its
+   own little island and the picture is the scatter again with extra
+   steps. */
+const GRID = 30, SIG = 0.115;
+function density(x, y) {
+  let n = 0;
+  for (const d of PAST) {
+    const q = ((d.x - x) ** 2 + (d.y - y) ** 2) / (2 * SIG * SIG);
+    if (q < 9) n += Math.exp(-q);
+  }
+  return n;
+}
+const FIELD = (() => {
+  const g = [];
+  let max = 0;
+  for (let j = 0; j <= GRID; j++) {
+    g[j] = [];
+    for (let i = 0; i <= GRID; i++) {
+      const v = density(i / GRID, 1 - j / GRID);
+      g[j][i] = v;
+      if (v > max) max = v;
+    }
+  }
+  return { g, max };
+})();
+function isoline(t) {
+  /* One <path> of disconnected segments rather than traced loops: the
+     loops would be tidier and are not worth the tracing code at this
+     line weight — at 1px the joins are invisible either way. */
+  const { g } = FIELD;
+  const seg = [];
+  const px = (i) => PX(i / GRID), py = (j) => PY(1 - j / GRID);
+  const lerp = (a, b, va, vb) => a + (b - a) * ((t - va) / (vb - va || 1e-9));
+  for (let j = 0; j < GRID; j++) for (let i = 0; i < GRID; i++) {
+    const v = [g[j][i], g[j][i + 1], g[j + 1][i + 1], g[j + 1][i]];
+    const k = (v[0] > t ? 1 : 0) | (v[1] > t ? 2 : 0) | (v[2] > t ? 4 : 0) | (v[3] > t ? 8 : 0);
+    if (k === 0 || k === 15) continue;
+    const E = [
+      [lerp(px(i), px(i + 1), v[0], v[1]), py(j)],                 // top
+      [px(i + 1), lerp(py(j), py(j + 1), v[1], v[2])],             // right
+      [lerp(px(i), px(i + 1), v[3], v[2]), py(j + 1)],             // bottom
+      [px(i), lerp(py(j), py(j + 1), v[0], v[3])],                 // left
+    ];
+    const P = { 1:[0,3], 2:[0,1], 3:[1,3], 4:[1,2], 6:[0,2], 7:[2,3],
+                8:[2,3], 9:[0,2], 11:[1,2], 12:[1,3], 13:[0,1], 14:[0,3] };
+    const pair = P[k] || (k === 5 ? [0,1] : [2,3]);
+    const [a, b] = pair;
+    seg.push(`M${E[a][0].toFixed(1)},${E[a][1].toFixed(1)}L${E[b][0].toFixed(1)},${E[b][1].toFixed(1)}`);
+  }
+  return seg.join('');
+}
+const CONTOURS = [0.28, 0.5, 0.74].map((f, i) =>
+  `<path class="cont c${i + 1}" d="${isoline(FIELD.max * f)}" />`).join('');
+build2(document.querySelector('[data-v="O"]'), {
+  hideDots: true,
+  over: () => CONTOURS,
+  tell: () => `${PAST.length} mornings · the rings are where they cluster`,
+});
+
+/* P · focus. Three bands, because a continuous blur per dot is sixty
+   filter instances and the frame rate goes with them. */
+build2(document.querySelector('[data-v="P"]'), {
+  over: () => '',
+  tell: (v) => {
+    const k = near(v);
+    return k.n ? `<b>${k.n}</b> in focus` : 'nothing near here';
+  },
+  after: (root, v) => {
+    root.querySelectorAll('.was').forEach((c) => {
+      const dx = (+c.getAttribute('cx') - PX(v.x)) / 148;
+      const dy = (+c.getAttribute('cy') - PY(v.y)) / 148;
+      const d = Math.hypot(dx, dy);
+      c.classList.add(d < 0.16 ? 'sharp' : d < 0.36 ? 'mid' : 'far');
+    });
+  },
+});
+
+/* Q · parallax. */
+build2(document.querySelector('[data-v="Q"]'), { over: () => '', tell: () => '' });
+(function () {
+  const root = document.querySelector('[data-v="Q"]');
+  const wrap = root.querySelector('.tiltwrap');
+  const pad = root.querySelector('.pd');
+  /* Pointer only. A touch drag is placing the dot, and tilting under
+     the finger that is placing it is nauseating. */
+  if (!matchMedia('(hover: hover)').matches) return;
+  wrap.addEventListener('pointermove', (e) => {
+    const b = wrap.getBoundingClientRect();
+    const rx = ((e.clientY - b.top) / b.height - 0.5) * -9;
+    const ry = ((e.clientX - b.left) / b.width - 0.5) * 12;
+    pad.style.transform = `rotateX(${rx.toFixed(2)}deg) rotateY(${ry.toFixed(2)}deg)`;
+    pad.querySelectorAll('.was, .me, .me-ring').forEach((el) => {
+      el.style.transform = `translate(${(ry * 0.22).toFixed(2)}px, ${(-rx * 0.22).toFixed(2)}px)`;
+    });
+  });
+  wrap.addEventListener('pointerleave', () => { pad.style.transform = ''; });
+})();
+
+/* R · the watermark. Fires on a CHANGE of corner only — a bloom that
+   re-fires while you nudge around inside one corner is a strobe. */
+(function () {
+  const root = document.querySelector('[data-v="R"]');
+  const word = root.querySelector('.mark span');
+  let last = null, t = null;
+  build2(root, {
+    over: () => '', tell: () => '',
+    after: (r, v) => {
+      const q = QUAD(v.x, v.y);
+      if (q === last) return;
+      last = q;
+      word.textContent = q.toUpperCase();
+      word.classList.remove('on');
+      void word.offsetWidth;                 // restart, or the second one never plays
+      word.classList.add('on');
+      clearTimeout(t);
+      t = setTimeout(() => word.classList.remove('on'), 900);
+    },
+  });
 })();
 
 build(document.querySelector('.vA'), {
