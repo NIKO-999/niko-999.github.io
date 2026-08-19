@@ -108,7 +108,7 @@ const ok = (name, cond, extra) => {
     return !c.hasAttribute('data-none') && /Sharp/.test(c.textContent);
   }));
 
-  // ── the days behind you carry the ledger's colour ──────────────
+  // ── the days behind you carry the ledger, as SHAPE ─────────────
   await p.evaluate(() => {
     const dates = [...new Set(state.events.filter(e => e.k === 'trade').map(e => e.date))];
     let s = 5; const rnd = () => (s = (s * 1103515245 + 12345) % 2147483648) / 2147483648;
@@ -124,6 +124,49 @@ const ok = (name, cond, extra) => {
     return c;
   });
   ok('past days are drawn, and in both directions', dots.up > 0 && dots.down > 0, dots);
+
+  /* Shape, not colour. A year of mornings is mostly red and this is the
+     screen whose job is to settle you down, so the pad says the same
+     thing with a fill and a ring instead. Sampled off the composited
+     style rather than read out of the stylesheet. */
+  const ink = await p.evaluate(() => {
+    const one = (sel) => {
+      const el = document.querySelector('#ckSvg .was.' + sel);
+      if (!el) return null;
+      const st = getComputedStyle(el);
+      return { fill: st.fill, stroke: st.stroke, r: +el.getAttribute('r') };
+    };
+    return { up: one('up'), down: one('down'), flat: one('flat') };
+  });
+  ok('a day that worked is solid', ink.up && ink.up.fill !== 'none' && ink.up.stroke === 'none', ink.up);
+  ok('a day that did not is hollow', ink.down && ink.down.fill === 'none'
+     && ink.down.stroke !== 'none', ink.down);
+  ok('and the two are the same size, so only the fill differs',
+     ink.up && ink.down && Math.abs(ink.up.r - ink.down.r) < 0.3, [ink.up, ink.down]);
+  ok('a day you did not trade is a speck', !ink.flat || ink.flat.r < ink.up.r / 1.8,
+     [ink.flat, ink.up]);
+  /* The rule this screen is built on: no red and no green anywhere on
+     the pad, in the key, or in the words. */
+  const hot = await p.evaluate(() => {
+    const bad = [];
+    const look = (el) => {
+      const st = getComputedStyle(el);
+      for (const c of [st.fill, st.stroke, st.color, st.backgroundColor, st.borderTopColor]) {
+        const m = String(c).match(/rgba?\(([\d.]+),\s*([\d.]+),\s*([\d.]+)(?:,\s*([\d.]+))?/);
+        if (!m) continue;
+        if (m[4] !== undefined && +m[4] < 0.06) continue;      // transparent does not count
+        const [r, g, b] = [+m[1], +m[2], +m[3]];
+        if ((r > g + 20 && r > b + 20) || (g > r + 20 && g > b + 20))
+          bad.push({ el: el.tagName + '.' + el.getAttribute('class'), c });
+      }
+    };
+    document.querySelectorAll('#ckSvg *, .ck-key, .ck-key *').forEach(look);
+    return bad;
+  });
+  ok('no red and no green on the pad or in its key', hot.length === 0, hot.slice(0, 4));
+  ok('and the key does not name a colour either', await p.evaluate(() =>
+    !/green|red/i.test(document.querySelector('.ck-key').textContent)),
+    await p.locator('.ck-key').textContent());
   ok('each dot matches what the ledger did that day', await p.evaluate(() => {
     const today = iso(new Date());
     return ckDays().filter(d => d.date < today).every((d) => {

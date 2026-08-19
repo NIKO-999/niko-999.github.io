@@ -452,22 +452,31 @@
 /* Today's answer. Ink, not accent — nothing on this pad is a score. */
 .ck-pad .me { fill: var(--ink); stroke: var(--bg); stroke-width: 2; }
 .ck-pad .me-ring { fill: none; stroke: var(--ink-2); stroke-width: 1.2; opacity: .5; }
-/* And the days behind you, which DO carry the ledger's colour — that is
-   the only place a judgement belongs, and it is the market's, not the
-   form's. */
-.ck-pad .was { stroke: none; }
-.ck-pad .was.up { fill: color-mix(in srgb, var(--up) 62%, transparent); }
-.ck-pad .was.down { fill: color-mix(in srgb, var(--down) 62%, transparent); }
-.ck-pad .was.flat { fill: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+/* And the days behind you, which DO carry what the ledger did — that is
+   the only judgement on this screen that is not self-reported, and
+   without it the pad is a mood diary.
+
+   SHAPE, NOT COLOUR. A year of mornings is mostly red, and as colour
+   that is a field of losses greeting you before you have done anything,
+   on the one screen whose job is to settle you down. Solid worked,
+   hollow did not, a speck is a day you did not trade: the same fact,
+   none of the alarm — and it survives being colour-blind, printed, or
+   looked at in sun, which the colour never did. */
+.ck-pad .was { fill: var(--ink-2); stroke: none; }
+.ck-pad .was.down { fill: none; stroke: var(--ink-2); stroke-width: 1; }
+.ck-pad .was.flat { fill: var(--ink-3); }
 
 .ck-key { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 0;
   font-family: var(--mono); font-size: .54rem; letter-spacing: .07em;
   text-transform: uppercase; color: var(--ink-3); }
 .ck-key span { display: inline-flex; align-items: center; gap: 5px; }
-.ck-key s { width: 9px; height: 9px; border-radius: 50%; text-decoration: none; }
-.ck-key s.up { background: color-mix(in srgb, var(--up) 62%, transparent); }
-.ck-key s.down { background: color-mix(in srgb, var(--down) 62%, transparent); }
-.ck-key s.flat { background: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+/* The key draws the marks rather than describing them, at the size they
+   are drawn on the pad — a legend that is a different shape from the
+   thing it explains is one more thing to decode. */
+.ck-key s { width: 9px; height: 9px; border-radius: 50%; text-decoration: none;
+  box-sizing: border-box; background: var(--ink-2); }
+.ck-key s.down { background: none; border: 1px solid var(--ink-2); }
+.ck-key s.flat { width: 4px; height: 4px; margin: 0 2.5px; background: var(--ink-3); }
 
 .ck-asks { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
 .ck-asks button {
@@ -2240,11 +2249,11 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             <div class="bt-ch"><h3 id="ckPadH">Where are you</h3>
               <span class="grow"></span><span class="bt-n" id="ckPadN"></span></div>
             <p class="bt-sub">One tap. Across is calm to agitated, up is flat to charged.
-              Past days stay on the pad, coloured by what the ledger did.</p>
+              Past days stay on the pad, marked with what the ledger did.</p>
             <div class="ck-pad" id="ckPad"></div>
             <p class="ck-key">
-              <span><s class="up"></s>a green day</span>
-              <span><s class="down"></s>a red day</span>
+              <span><s class="up"></s>it worked</span>
+              <span><s class="down"></s>it did not</span>
               <span><s class="flat"></s>nothing traded</span>
             </p>
           </section>
@@ -7990,8 +7999,14 @@ function renderCkPad() {
   for (const d of past) {
     const age = (new Date(today + 'T00:00:00') - new Date(d.date + 'T00:00:00')) / 86400000;
     const o = (0.28 + 0.72 * (1 - Math.min(1, age / span))).toFixed(2);
-    g += `<circle class="was ${ckPnl(d.date)}" cx="${px(d.x).toFixed(1)}" `
-       + `cy="${py(d.y).toFixed(1)}" r="3.6" opacity="${o}" />`;
+    /* Set here rather than in CSS. `r` as a CSS property is well
+       supported now, but the radius differs PER STATE and the state is
+       already in hand at this line — routing it back out through a
+       class to be looked up again is two places to keep in step. */
+    const k = ckPnl(d.date);
+    g += `<circle class="was ${k}" cx="${px(d.x).toFixed(1)}" cy="${py(d.y).toFixed(1)}" `
+       + `r="${k === 'flat' ? '1.5' : k === 'down' ? '3.4' : '3.5'}" `
+       + `opacity="${k === 'flat' ? (o * 0.7).toFixed(2) : o}" />`;
   }
 
   if (ckPlaced) {
@@ -8038,7 +8053,7 @@ function renderCkLog() {
         <span class="lg-top">
           <span class="lg-sym">${esc(quad)}</span>
           <span class="lg-chip">${n} of ${CK_ASKS.length}</span>
-          ${p !== 'flat' ? `<span class="lg-r ${p}">${p === 'up' ? 'green day' : 'red day'}</span>`
+          ${p !== 'flat' ? `<span class="lg-r ${p}">${p === 'up' ? 'it worked' : 'it did not'}</span>`
                          : '<span class="lg-r">nothing traded</span>'}
         </span>
         <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : esc(CK_SAYS[quad])}</p>
