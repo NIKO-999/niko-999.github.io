@@ -434,11 +434,42 @@
   text-align: left; font: inherit; color: inherit; cursor: pointer;
 }
 .bt-day:hover { border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-line)); }
+/* The colour eases whenever it changes, so paging across weeks is a
+   settle rather than a flash of red. */
+.bt-day { transition: background-color .28s ease, border-color .28s ease; }
 .bt-day:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 .bt-day .wd { font-family: var(--mono); font-size: .56rem; letter-spacing: .08em;
   text-transform: uppercase; color: var(--ink-3); }
 .bt-day .dn { font-size: .92rem; font-weight: 400; letter-spacing: -.02em; color: var(--ink-2); }
 .bt-day .grow { flex: 1; }
+/* ── turning a day over ──
+   The only animation in the app, and it fires on one event: a day going
+   from not-done to done. Not on a redraw, not on paging, not on load —
+   a reward you get for scrolling past something is not a reward.
+
+   The overshoot is what makes it feel landed rather than merely
+   changed. The tick draws along its own path instead of fading in,
+   because a mark that appears reads as one that was always there. */
+@keyframes bt-turn {
+  0%   { transform: scale(1); }
+  45%  { transform: scale(1.055); }
+  100% { transform: scale(1); }
+}
+@keyframes bt-draw { to { stroke-dashoffset: 0; } }
+.bt-day[data-flip] { animation: bt-turn .4s cubic-bezier(.34, 1.36, .5, 1); z-index: 1; }
+.bt-day[data-flip] .mk svg path {
+  /* 24 clears the tick's own length — 22.6 units across its two legs. */
+  stroke-dasharray: 24; stroke-dashoffset: 24;
+  animation: bt-draw .34s .06s ease-out forwards;
+}
+/* Somebody who has asked the operating system for less of this gets the
+   colour and none of the movement. */
+@media (prefers-reduced-motion: reduce) {
+  .bt-day { transition: none; }
+  .bt-day[data-flip] { animation: none; }
+  .bt-day[data-flip] .mk svg path { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
+}
+
 /* Two states carry a colour, because there are two answers to "did you
    journal one today". The other three are colourless on purpose: a day
    still running is not a miss, and a day that has not happened yet has
@@ -6940,6 +6971,11 @@ function btFiltered() {
     && (!BTF.keptOnly || btKept(r)));
 }
 
+/* Set by the save that turned a day over, read once by the next render
+   and cleared there. One day at a time, because one save can only ever
+   flip the day it was saved on. */
+let btJustDone = null;
+
 const BT_SAID = {
   done: 'written up',
   ran: 'logged, but not written up',
@@ -6956,7 +6992,7 @@ function renderBtStrip() {
     const k = iso(d), st = btDay(k);
     const long = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     return `<button class="bt-day" type="button" data-date="${k}" data-state="${st}"
-        ${k === today ? 'data-today="1"' : ''}
+        ${k === btJustDone ? 'data-flip="1"' : ''}${k === today ? 'data-today="1"' : ''}
         aria-label="${esc(long)}: ${BT_SAID[st]}. Logs a backtest.">
       <span class="wd">${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span>
       <span class="dn">${d.getDate()}</span>
@@ -6964,6 +7000,7 @@ function renderBtStrip() {
       <span class="mk" aria-hidden="true">${st === 'done' ? icon('tick', 13) : ''}</span>
     </button>`;
   }).join('');
+  btJustDone = null;
 
   const a = days[0], b = days[6];
   const sameM = a.getMonth() === b.getMonth();
@@ -7470,9 +7507,16 @@ document.getElementById('btForm').addEventListener('submit', async (ev) => {
     if (was && was.shot) rec.shot = true;
   }
 
+  /* Before the store changes, so "was this day already done" is asked of
+     the day as it stood rather than of the record being saved into it. */
+  const wasDone = btHit(rec.date);
+
   const i = btRuns().findIndex(x => String(x.id) === String(rec.id));
   if (i >= 0) btState.runs[i] = rec; else btState.runs.push(rec);
   if (!btWrite()) return;
+  /* A day only turns over once. Writing a second run on a day already
+     done, or editing one, changes nothing about the day. */
+  if (!wasDone && btHit(rec.date)) btJustDone = rec.date;
   btWeek = btMon(new Date(rec.date + 'T00:00:00'));
   btSheet.close();
   renderBt();
