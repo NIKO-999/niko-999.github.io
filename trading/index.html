@@ -439,21 +439,33 @@
   text-transform: uppercase; color: var(--ink-3); }
 .bt-day .dn { font-size: .92rem; font-weight: 400; letter-spacing: -.02em; color: var(--ink-2); }
 .bt-day .grow { flex: 1; }
-/* The count is the whole cell. A day with nothing on it says nothing
-   rather than saying zero — a nought in every empty box reads as data. */
-.bt-day .n { font-family: var(--mono); font-size: .74rem; color: var(--accent); }
-.bt-day .j {
-  position: absolute; right: 7px; top: 7px; width: 5px; height: 5px;
-  border-radius: 50%; background: var(--accent);
+/* Two states carry a colour, because there are two answers to "did you
+   journal one today". The other three are colourless on purpose: a day
+   still running is not a miss, and a day that has not happened yet has
+   nothing to say about you. */
+.bt-day .mk { display: flex; align-items: center; height: 15px; color: var(--accent); }
+.bt-day[data-state="done"] {
+  background: color-mix(in srgb, var(--accent) 22%, var(--glass-in));
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--glass-line));
 }
-.bt-day[data-lvl="0"] { background: color-mix(in srgb, var(--glass-in) 45%, transparent);
-  border-color: color-mix(in srgb, var(--glass-line) 55%, transparent); }
-.bt-day[data-lvl="1"] { background: color-mix(in srgb, var(--accent) 9%,  var(--glass-in)); }
-.bt-day[data-lvl="2"] { background: color-mix(in srgb, var(--accent) 17%, var(--glass-in)); }
-.bt-day[data-lvl="3"] { background: color-mix(in srgb, var(--accent) 26%, var(--glass-in)); }
-.bt-day[data-lvl="4"] { background: color-mix(in srgb, var(--accent) 36%, var(--glass-in)); }
+.bt-day[data-state="done"] .dn { color: var(--ink); }
+.bt-day[data-state="miss"], .bt-day[data-state="ran"] {
+  background: color-mix(in srgb, var(--down) 15%, var(--glass-in));
+  border-color: color-mix(in srgb, var(--down) 38%, var(--glass-line));
+}
+/* Logged and not written up is still a miss — the rule is journal one,
+   not open one — but it is not the same as a day you did nothing, and
+   the hollow ring is that difference. */
+.bt-day[data-state="ran"] .mk::before {
+  content: ''; width: 9px; height: 9px; border-radius: 50%;
+  border: 1.5px solid color-mix(in srgb, var(--down) 70%, transparent);
+}
+.bt-day[data-state="open"], .bt-day[data-state="ahead"] {
+  background: color-mix(in srgb, var(--glass-in) 45%, transparent);
+  border-color: color-mix(in srgb, var(--glass-line) 55%, transparent);
+}
+.bt-day[data-state="ahead"] { opacity: .5; }
 .bt-day[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
-.bt-day[data-out] { opacity: .5; }
 
 .bt-charts {
   margin-top: 26px; display: grid; gap: 18px;
@@ -6840,6 +6852,24 @@ function btWrite() {
    is what you concluded, and only one of those is worth coming back to. */
 const btKept = (r) => !!(r.note || '').trim();
 
+/* The whole rule, in one function: journal one, every day.
+     done   at least one run that day was written up
+     ran    runs were logged but none written up — still a miss
+     open   today, nothing yet. Not a miss until the day is over
+     ahead  hasn't happened
+     miss   the day went by
+   Nothing counts the number of runs any more. Two on a Tuesday does not
+   buy Wednesday, and the scale that implied it has gone. */
+function btDay(k) {
+  const runs = btOn(k);
+  const today = iso(new Date());
+  if (runs.some(btKept)) return 'done';
+  if (k > today) return 'ahead';
+  if (k === today) return 'open';
+  return runs.length ? 'ran' : 'miss';
+}
+const btHit = (k) => btDay(k) === 'done';
+
 /* ── weeks ──
    Monday-first, local, and normalised to midnight so two dates in the
    same week always produce the identical key. */
@@ -6862,7 +6892,7 @@ const btOn = (k) => btRuns().filter(r => r.date === k);
    the habit. Nothing here is a target: it is the number of consecutive
    days that already happened. */
 function btStreak() {
-  const seen = new Set(btRuns().map(r => r.date));
+  const seen = new Set(btRuns().filter(btKept).map(r => r.date));
   if (!seen.size) return 0;
   const d = new Date(); d.setHours(0, 0, 0, 0);
   if (!seen.has(iso(d))) d.setDate(d.getDate() - 1);
@@ -6871,7 +6901,7 @@ function btStreak() {
   return n;
 }
 function btBest() {
-  const days = [...new Set(btRuns().map(r => r.date))].sort();
+  const days = [...new Set(btRuns().filter(btKept).map(r => r.date))].sort();
   let best = 0, run = 0, prev = null;
   for (const k of days) {
     const d = new Date(k + 'T00:00:00');
@@ -6910,29 +6940,28 @@ function btFiltered() {
     && (!BTF.keptOnly || btKept(r)));
 }
 
+const BT_SAID = {
+  done: 'written up',
+  ran: 'logged, but not written up',
+  open: 'nothing yet today',
+  ahead: 'still to come',
+  miss: 'missed',
+};
+
 function renderBtStrip() {
   const days = btDays(btWeek);
   const today = iso(new Date());
-  const counts = days.map(d => btOn(iso(d)).length);
-  const peak = Math.max(1, ...counts);
-  const ahead = (d) => iso(d) > today;
 
-  document.getElementById('btStrip').innerHTML = days.map((d, i) => {
-    const k = iso(d), n = counts[i];
-    const j = btOn(k).some(btKept);
-    /* Four steps, scaled to the busiest day of the week shown. An
-       absolute scale would make a normal week look like a blank one for
-       the rest of the year after a single heavy Saturday. */
-    const lvl = n ? Math.min(4, Math.ceil(n / peak * 4)) : 0;
+  document.getElementById('btStrip').innerHTML = days.map((d) => {
+    const k = iso(d), st = btDay(k);
     const long = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    return `<button class="bt-day" type="button" data-date="${k}" data-lvl="${lvl}"
-        ${k === today ? 'data-today="1"' : ''}${ahead(d) ? ' data-out="1"' : ''}
-        aria-label="${esc(long)}: ${n} ${n === 1 ? 'run' : 'runs'}${j ? ', one written up' : ''}. Logs another.">
+    return `<button class="bt-day" type="button" data-date="${k}" data-state="${st}"
+        ${k === today ? 'data-today="1"' : ''}
+        aria-label="${esc(long)}: ${BT_SAID[st]}. Logs a backtest.">
       <span class="wd">${d.toLocaleDateString('en-GB', { weekday: 'short' })}</span>
       <span class="dn">${d.getDate()}</span>
       <span class="grow"></span>
-      <span class="n">${n || ''}</span>
-      ${j ? '<span class="j" aria-hidden="true"></span>' : ''}
+      <span class="mk" aria-hidden="true">${st === 'done' ? icon('tick', 13) : ''}</span>
     </button>`;
   }).join('');
 
@@ -6944,11 +6973,13 @@ function renderBtStrip() {
       + `${b.getDate()} ${b.toLocaleDateString('en-GB', { month: 'short', year: 'numeric' })}`;
   document.getElementById('btNow').hidden = +btWeek === +btMon(new Date());
 
-  const n = counts.reduce((x, y) => x + y, 0);
-  const j = days.reduce((x, d) => x + btOn(iso(d)).filter(btKept).length, 0);
-  document.getElementById('btSum').textContent = n
-    ? `${n} ${n === 1 ? 'backtest' : 'backtests'} · ${j} journalled`
-    : 'nothing logged this week';
+  /* Days, not backtests. The week is out of the days that have actually
+     happened — a Monday cannot be three-sevenths of the way through. */
+  const due = days.filter(d => iso(d) <= today).length;
+  const got = days.filter(d => btHit(iso(d))).length;
+  document.getElementById('btSum').textContent = !due
+    ? 'the week has not started'
+    : `${got} of ${due} ${due === 1 ? 'day' : 'days'}`;
 }
 
 /* The radar asks a different question from the strip: not whether you
@@ -7008,24 +7039,29 @@ function renderBtRing() {
      sits at the top and the week appears to begin in two places. */
   const turn = -wedge / 2;
   const mon0 = btMon(new Date());
+  /* Binary, like the week above it: a day is a day you wrote one up or
+     it is not. There is no intensity left to encode, which is what makes
+     eight weeks of it readable at 260px — the good days simply light up
+     and the gaps are the gaps. */
   const rows = [];
-  let peak = 1, hit = 0, of = 0;
-  const today = iso(new Date());
+  let hit = 0, of = 0;
   for (let k = 0; k < BT_WEEKS; k++) {
     const m = new Date(mon0);
     m.setDate(m.getDate() - (BT_WEEKS - 1 - k) * 7);
-    const row = btDays(m).map((d) => ({ n: btOn(iso(d)).length, out: iso(d) > today }));
-    row.forEach((c) => { if (c.n > peak) peak = c.n; if (!c.out) { of++; if (c.n) hit++; } });
+    const row = btDays(m).map(d => btDay(iso(d)));
+    row.forEach((st) => { if (st !== 'ahead') { of++; if (st === 'done') hit++; } });
     rows.push(row);
   }
   let g = '';
   rows.forEach((row, k) => {
     const r0 = IN + k * step + 0.7, r1 = IN + (k + 1) * step - 0.7;
-    row.forEach((c, w) => {
+    row.forEach((st, w) => {
       const d = btBand(cx, cy, r0, r1, turn + w * wedge + pad, turn + (w + 1) * wedge - pad);
-      g += c.n
-        ? `<path class="cell" d="${d}" fill="var(--accent)" fill-opacity="${(0.22 + 0.72 * c.n / peak).toFixed(2)}" />`
-        : `<path class="cell none${c.out ? ' ahead' : ''}" d="${d}" />`;
+      g += st === 'done'
+        ? `<path class="cell" d="${d}" fill="var(--accent)" fill-opacity="0.88" />`
+        : st === 'miss' || st === 'ran'
+          ? `<path class="cell" d="${d}" fill="var(--down)" fill-opacity="${st === 'ran' ? '0.2' : '0.32'}" />`
+          : `<path class="cell none" d="${d}" />`;
     });
   });
   g += ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'].map((t, w) => {
@@ -7034,7 +7070,7 @@ function renderBtRing() {
   }).join('');
 
   document.getElementById('btRing').innerHTML =
-    `<svg viewBox="0 0 200 200" role="img" aria-label="${hit} of the last ${of} days have a run on them">${g}</svg>`;
+    `<svg viewBox="0 0 200 200" role="img" aria-label="${hit} of the last ${of} days were written up">${g}</svg>`;
   document.getElementById('btRingN').textContent = of ? `${hit} of ${of} days` : '';
 }
 
@@ -7246,14 +7282,14 @@ function renderBt() {
   renderBtLines();
   renderBtVs();
   renderBtLog();
-  const n = btRuns().length, st = btStreak(), best = btBest();
+  const n = btRuns().filter(btKept).length, st = btStreak(), best = btBest();
   /* The streak leads. The total only ever climbs, so it says nothing
      about this week; the run of days is the figure that can be lost and
      therefore the only one on this screen worth defending. */
-  document.getElementById('btMeta').textContent = !n ? 'nothing logged yet'
+  document.getElementById('btMeta').textContent = !n ? 'journal one a day'
     : `${st} ${st === 1 ? 'day' : 'days'} in a row`
       + (best > st ? ` · best ${best}` : '')
-      + ` · ${n} ${n === 1 ? 'run' : 'runs'}`;
+      + ` · ${n} journalled`;
 }
 
 /* ── the sheet ── */
@@ -7322,8 +7358,11 @@ async function btTakeShot(file) {
   btSetShot(await compress(file));
   btShotDirty = true;
 }
+/* Named. There are four file inputs on this page and they are all
+   hidden, so without one a test reaches for "the image picker" and gets
+   the trade sheet's. */
 const btPicker = Object.assign(document.createElement('input'),
-  { type: 'file', accept: 'image/*', hidden: true });
+  { type: 'file', accept: 'image/*', hidden: true, id: 'btPick' });
 document.body.appendChild(btPicker);
 btPicker.addEventListener('change', () => { btTakeShot(btPicker.files[0]); btPicker.value = ''; });
 
