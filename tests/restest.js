@@ -24,9 +24,12 @@ const ok = (name, cond, extra) => {
   /* Relative order, not the whole list — the rail keeps gaining views,
      and pinning every one of them here just breaks on each addition
      without ever catching the thing this cares about. */
-  ok('Resources sits at the very foot of the rail, below the scales', await p.evaluate(() => {
+  /* Relative, not absolute — the rail keeps gaining views at its foot,
+     and pinning this one to the last slot broke the day State arrived. */
+  ok('Resources sits low on the rail, below the scales', await p.evaluate(() => {
     const v = [...document.querySelectorAll('.rail [data-view]')].map(b => b.dataset.view);
-    return v.indexOf('resources') === v.length - 1 && v.indexOf('resources') > v.indexOf('risk');
+    return v.indexOf('resources') > v.indexOf('risk')
+        && v.indexOf('resources') > v.indexOf('metrics');
   }));
 
   await p.click('.rail [data-view="resources"]');

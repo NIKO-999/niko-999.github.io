@@ -1,6 +1,15 @@
 /* The protected swing is a condition of entry now — on the gate, on the
    sheet, and without rewriting what older trades were judged against. */
 const { chrome, BASE } = require('./lib');
+
+/* The gate does not open without a check-in. Do what a person would. */
+async function checkIn(pg) {
+  await pg.evaluate(() => {
+    ckX = 0.3; ckY = 0.7; ckPlaced = true;
+    document.getElementById('ckSave').click();
+  });
+  await pg.waitForTimeout(200);
+}
 const { chromium } = require('playwright-core');
 const D = '/tmp/claude-0/-home-user-niko-999-github-io/0c50b2a3-74bc-5684-9821-f4c805b5d78d/scratchpad';
 let pass = 0, fail = 0;
@@ -40,6 +49,7 @@ const LINE = 'The swing is protected — aligned timeframe, close beyond the bod
   }, LINE);
   await pg.waitForTimeout(200);
   ok(await pg.evaluate((l) => gateTicks.has(l), LINE), 'ticking it registers');
+  await checkIn(pg);
   await pg.click('#gIn');
   await pg.waitForTimeout(400);
   ok(await pg.evaluate((l) => openPos[0].checks.includes(l), LINE),

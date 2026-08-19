@@ -420,6 +420,96 @@
 /* Both halves open the same distance below their heading. */
 .cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
 
+/* ── state: the check-in ──
+   Two panels, and the rule from the layout section applies: same row,
+   same box. The pad is square, so the card round it takes its height
+   from the pad and the facts beside it stretch to match. */
+.ck-wrap {
+  display: grid; gap: 18px; align-items: stretch;
+  grid-template-columns: minmax(280px, 380px) minmax(280px, 1fr);
+}
+@media (max-width: 860px) { .ck-wrap { grid-template-columns: 1fr; } }
+.ck-pad-card, .ck-side {
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 14px 16px 12px;
+  display: flex; flex-direction: column;
+}
+.ck-pad { flex: 1; display: grid; place-items: center; padding: 10px 0 6px; }
+.ck-pad svg { width: 100%; max-width: 300px; height: auto; touch-action: none; cursor: crosshair; }
+.ck-pad .fld { fill: color-mix(in srgb, var(--ink-3) 7%, transparent);
+  stroke: var(--rule); stroke-width: 1; }
+.ck-pad .ax { stroke: var(--rule); stroke-width: 1; stroke-dasharray: 3 3; }
+/* The quadrant names are the whole point of this being a pad and not a
+   slider: they are trading failures, not feelings. */
+.ck-pad .quad { fill: var(--ink-3); font-family: var(--mono); font-size: 8px;
+  letter-spacing: .09em; text-anchor: middle; opacity: .75; }
+.ck-pad .edge { fill: var(--ink-3); font-family: var(--mono); font-size: 7.5px;
+  letter-spacing: .08em; text-anchor: middle; opacity: .55; }
+/* Today's answer. Ink, not accent — nothing on this pad is a score. */
+.ck-pad .me { fill: var(--ink); stroke: var(--bg); stroke-width: 2; }
+.ck-pad .me-ring { fill: none; stroke: var(--ink-2); stroke-width: 1.2; opacity: .5; }
+/* And the days behind you, which DO carry the ledger's colour — that is
+   the only place a judgement belongs, and it is the market's, not the
+   form's. */
+.ck-pad .was { stroke: none; }
+.ck-pad .was.up { fill: color-mix(in srgb, var(--up) 62%, transparent); }
+.ck-pad .was.down { fill: color-mix(in srgb, var(--down) 62%, transparent); }
+.ck-pad .was.flat { fill: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+
+.ck-key { display: flex; flex-wrap: wrap; gap: 12px; margin: 6px 0 0;
+  font-family: var(--mono); font-size: .54rem; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3); }
+.ck-key span { display: inline-flex; align-items: center; gap: 5px; }
+.ck-key s { width: 9px; height: 9px; border-radius: 50%; text-decoration: none; }
+.ck-key s.up { background: color-mix(in srgb, var(--up) 62%, transparent); }
+.ck-key s.down { background: color-mix(in srgb, var(--down) 62%, transparent); }
+.ck-key s.flat { background: color-mix(in srgb, var(--ink-3) 34%, transparent); }
+
+.ck-asks { list-style: none; margin: 4px 0 0; padding: 0; display: grid; gap: 4px; }
+.ck-asks button {
+  width: 100%; display: flex; align-items: center; gap: 10px;
+  padding: 9px 10px; border: 1px solid transparent; border-radius: 8px;
+  background: none; font: inherit; font-size: .82rem; color: var(--ink-2);
+  text-align: left; cursor: pointer;
+}
+.ck-asks button:hover { background: var(--glass-in-2); }
+.ck-asks button:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+.ck-asks .box {
+  flex: none; width: 17px; height: 17px; border-radius: 5px;
+  border: 1px solid var(--glass-line); display: grid; place-items: center;
+  color: transparent;
+}
+/* Ticked is ink, not green. "Slept enough" being true is a fact about
+   last night, not a mark out of ten. */
+.ck-asks button[aria-pressed="true"] { color: var(--ink); }
+.ck-asks button[aria-pressed="true"] .box {
+  background: var(--ink-2); border-color: var(--ink-2); color: var(--bg);
+}
+.ck-note { margin-top: 12px; }
+.ck-acts { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
+.ck-acts .grow { flex: 1; }
+.ck-said { font-family: var(--mono); font-size: .62rem; letter-spacing: .06em;
+  text-transform: uppercase; color: var(--ink-3); }
+.ck-locked { margin: 8px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
+
+/* ── the chip at the gate ──
+   Small, and it changes rather than vanishing: once you have checked in
+   it is still telling you at 10:00 what you said about yourself at 6. */
+.ck-chip {
+  flex: none; align-self: center; display: inline-flex; align-items: center; gap: 7px;
+  height: 28px; padding: 0 11px; border-radius: 8px; cursor: pointer;
+  border: 1px solid var(--glass-line); background: var(--glass-in);
+  font: inherit; font-family: var(--mono); font-size: .58rem;
+  letter-spacing: .09em; text-transform: uppercase; color: var(--ink-3);
+}
+.ck-chip:hover { color: var(--ink-2); border-color: color-mix(in srgb, var(--accent) 45%, var(--glass-line)); }
+.ck-chip:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.ck-chip i { width: 7px; height: 7px; border-radius: 50%; background: var(--ink-2); }
+.ck-chip[data-none] { color: var(--down); border-color: color-mix(in srgb, var(--down) 40%, var(--glass-line)); }
+.ck-chip[data-none] i { background: var(--down); }
+/* A gate that will not open says why, rather than looking broken. */
+.cp-go:disabled { opacity: .45; cursor: not-allowed; }
+
 /* ── backtesting ──
    Seven cells across, the calendar's cell shape, and a fill that is a
    count rather than a direction: nothing here is a win or a loss, so
@@ -1917,6 +2007,13 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <path d="M4 5.5A1.5 1.5 0 0 1 5.5 4H12v16H5.5A1.5 1.5 0 0 1 4 18.5ZM12 4h6.5A1.5 1.5 0 0 1 20 5.5v13a1.5 1.5 0 0 1-1.5 1.5H12M15 9.5l3.4 2.2-3.4 2.2z" />
       </svg>
     </button>
+    <button type="button" data-view="state" aria-label="State — the check-in">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="17" height="17" rx="3" />
+        <path d="M3.5 12h17M12 3.5v17" /><circle cx="8.4" cy="8.4" r="2.1" fill="currentColor" stroke="none" />
+      </svg>
+    </button>
     <button type="button" id="themeRail" aria-label="Appearance: System">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
            stroke-linecap="round" aria-hidden="true"></svg>
@@ -2063,6 +2160,58 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             Only trades with a note</button>
         </div>
         <div id="logList"></div>
+      </div>
+    </main>
+
+    <!-- ── state ──
+         The check-in. One pad and four facts, under twenty seconds,
+         which is the only reason it will still be happening in March. -->
+    <main class="main" id="stateSection" hidden>
+      <div class="head">
+        <h1>State</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="ckMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <div class="ck-wrap">
+          <section class="ck-pad-card" aria-labelledby="ckPadH">
+            <div class="bt-ch"><h3 id="ckPadH">Where are you</h3>
+              <span class="grow"></span><span class="bt-n" id="ckPadN"></span></div>
+            <p class="bt-sub">One tap. Across is calm to agitated, up is flat to charged.
+              Past days stay on the pad, coloured by what the ledger did.</p>
+            <div class="ck-pad" id="ckPad"></div>
+            <p class="ck-key">
+              <span><s class="up"></s>a green day</span>
+              <span><s class="down"></s>a red day</span>
+              <span><s class="flat"></s>nothing traded</span>
+            </p>
+          </section>
+
+          <section class="ck-side" aria-labelledby="ckAskH">
+            <div class="bt-ch"><h3 id="ckAskH">And four facts</h3></div>
+            <p class="bt-sub">Nothing here is scored. It is a record, not a test.</p>
+            <ul class="ck-asks" id="ckAsks"></ul>
+
+            <div class="field wide ck-note">
+              <label for="ckNote">Anything on your mind &mdash; optional</label>
+              <textarea id="ckNote" rows="2"
+                placeholder="The thing you would still be thinking about at 10:00"></textarea>
+            </div>
+
+            <div class="ck-acts">
+              <span class="ck-said" id="ckSaid"></span>
+              <span class="grow"></span>
+              <button class="btn btn-primary" type="button" id="ckSave">Check in</button>
+            </div>
+            <p class="ck-locked" id="ckLocked" hidden></p>
+          </section>
+        </div>
+
+        <div class="cal-head" style="margin-top:26px">
+          <h2>Lately</h2><span class="grow"></span>
+          <span class="span-meta" id="ckLogMeta"></span>
+        </div>
+        <div id="ckList"></div>
       </div>
     </main>
 
@@ -2241,6 +2390,10 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
                and then the tally speaks for all of them. -->
           <div class="cp-foot">
             <p class="cp-miss"><b>If you miss it</b> <span id="cpMiss"></span></p>
+            <!-- Changes rather than disappears: before the check-in it
+                 asks for one, after it says what you said about yourself
+                 this morning, which is the more useful half. -->
+            <button class="ck-chip" type="button" id="ckChip"></button>
             <span class="cp-split" id="cpGate">
               <button class="btn btn-primary cp-go" type="button" id="gIn">
                 <span class="ic" id="gInIc" aria-hidden="true"></span>I&rsquo;m in
@@ -5064,7 +5217,7 @@ function commit(msg) {
 function renderAll() {
   renderSummary(); renderCalendar(); renderAgenda(); renderMetrics();
   renderLedger(); renderLog(); renderRes(); renderGate(); renderLive(); renderRisk();
-  renderBin(); renderBt();
+  renderBin(); renderBt(); renderCk();
 }
 
 /* ── the candle clock ──
@@ -5415,6 +5568,14 @@ document.getElementById('gList').addEventListener('click', (ev) => {
    the trade closes. */
 document.getElementById('gIn').addEventListener('click', () => {
   if (phone()) return;
+  /* Belt as well as braces: the button is disabled without a check-in,
+     and the handler refuses anyway. A disabled button is a hint, not a
+     guarantee — anything that re-renders the panel could clear it. */
+  if (!ckToday()) {
+    document.getElementById('say').textContent = 'Check in first.';
+    goto('state');
+    return;
+  }
   const c = candle();
   const sess = hhmm(c.open);
   const r = parseFloat(document.getElementById('gRisk').value);
@@ -7568,6 +7729,284 @@ document.getElementById('btList').addEventListener('click', (ev) => {
   if (row) btOpen(null, row.dataset.id);
 });
 
+/* ═══════════════════════════════════════════════════════════════
+   STATE — the check-in before the gate.
+
+   The gate asks whether the setup is good. This asks whether you are in
+   a condition to judge that, which is the question a perfect setup taken
+   at the wrong moment still fails.
+
+   Its own key, like the backtests, and for a plainer reason: it is not
+   money and must never be summed as though it were.
+
+   NOTHING HERE IS SCORED. No answer is green and none is red. The moment
+   a form implies a correct answer you start giving it one and the record
+   stops being worth keeping. The only colour on this screen is on the
+   days BEHIND you, and it comes from the ledger rather than from the
+   form — which is the one judgement that is not self-reported.
+   ═══════════════════════════════════════════════════════════════ */
+const CKEY = 'checkin.v1';
+
+/* Four corners, named after the four ways this account loses money
+   rather than after feelings. x: calm → agitated. y: flat → charged. */
+const CK_QUAD = (x, y) => y >= 0.5
+  ? (x < 0.5 ? 'Sharp' : 'Tilted')
+  : (x < 0.5 ? 'Idle' : 'Rattled');
+const CK_SAYS = {
+  Sharp:   'calm and charged — the one you want',
+  Tilted:  'agitated and charged — the revenge corner',
+  Idle:    'calm and flat — you will force something out of boredom',
+  Rattled: 'agitated and flat — small, early, and out too soon',
+};
+
+/* Four facts, not four feelings. Each is answerable in under a second
+   and none of them is a judgement about you. */
+const CK_ASKS = [
+  'Slept enough',
+  'Nothing heavy outside trading',
+  'Yesterday is closed',
+  'I know what I am looking for today',
+];
+
+let ckState = (() => {
+  let raw = null;
+  try { raw = localStorage.getItem(CKEY); } catch (e) { return { days: [] }; }
+  if (!raw) return { days: [] };
+  try {
+    const v = JSON.parse(raw);
+    return v && Array.isArray(v.days) ? v : { days: [] };
+  } catch (e) {
+    try { localStorage.setItem(CKEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    return { days: [] };
+  }
+})();
+const ckDays = () => ckState.days;
+const ckOn = (k) => ckDays().find(d => d.date === k) || null;
+const ckToday = () => ckOn(iso(new Date()));
+function ckWrite() {
+  try { localStorage.setItem(CKEY, JSON.stringify(ckState)); return true; }
+  catch (e) {
+    document.getElementById('say').textContent = 'NOT SAVED — storage unavailable.';
+    return false;
+  }
+}
+
+/* Locked once the day has a trade on it. You can check in, and you can
+   change your mind before the first trade — after that it is a record
+   rather than something you can quietly revise into "well, I was fine". */
+const ckTraded = (k) => events().some(e => e.k === 'trade' && e.date === k);
+const ckLocked = () => ckTraded(iso(new Date()));
+
+/* What the ledger did that day, for colouring the days behind you.
+   Deliberately not byDay(), which follows the search box — a history
+   that changed shape when you typed in the search field would be a
+   different history. */
+function ckPnl(k) {
+  let n = 0, sum = 0;
+  for (const e of events())
+    if (e.k === 'trade' && e.date === k && e.out !== 'missed') { n++; sum += e.amt; }
+  return n ? (sum > 0 ? 'up' : sum < 0 ? 'down' : 'flat') : 'flat';
+}
+
+/* ── the pad ── */
+let ckX = 0.5, ckY = 0.5, ckFlags = new Set(), ckPlaced = false;
+
+function renderCkPad() {
+  const P = 26, S = 200;                       // padding, and the square
+  /* The plot is inset from the drawn field by the biggest mark's radius,
+     so an answer at an extreme is a dot INSIDE the corner rather than a
+     dot sitting on the line. */
+  const M = 9;
+  const px = (v) => P + M + v * (S - 2 * P - 2 * M);
+  const py = (v) => P + M + (1 - v) * (S - 2 * P - 2 * M);
+
+  /* Everything before today, faded with age so the recent weeks read
+     louder than last spring without ever disappearing. */
+  const today = iso(new Date());
+  const past = ckDays().filter(d => d.date < today).slice(-120);
+  const oldest = past.length ? new Date(past[0].date + 'T00:00:00') : new Date();
+  const span = Math.max(1, (new Date(today + 'T00:00:00') - oldest) / 86400000);
+
+  let g = `<rect class="fld" x="${P}" y="${P}" width="${S - 2 * P}" height="${S - 2 * P}" rx="10" />`
+    + `<line class="ax" x1="${S / 2}" y1="${P}" x2="${S / 2}" y2="${S - P}" />`
+    + `<line class="ax" x1="${P}" y1="${S / 2}" x2="${S - P}" y2="${S / 2}" />`;
+
+  const q = (t, x, y) => `<text class="quad" x="${x}" y="${y}">${t}</text>`;
+  g += q('SHARP', P + (S - 2 * P) * 0.25, P + 14)
+     + q('TILTED', P + (S - 2 * P) * 0.75, P + 14)
+     + q('IDLE', P + (S - 2 * P) * 0.25, S - P - 7)
+     + q('RATTLED', P + (S - 2 * P) * 0.75, S - P - 7);
+  g += `<text class="edge" x="${S / 2}" y="11">CHARGED</text>`
+     + `<text class="edge" x="${S / 2}" y="${S - 2}">FLAT</text>`
+     + `<text class="edge" x="12" y="${S / 2}" transform="rotate(-90 12 ${S / 2})">CALM</text>`
+     + `<text class="edge" x="${S - 10}" y="${S / 2}" transform="rotate(90 ${S - 10} ${S / 2})">AGITATED</text>`;
+
+  for (const d of past) {
+    const age = (new Date(today + 'T00:00:00') - new Date(d.date + 'T00:00:00')) / 86400000;
+    const o = (0.28 + 0.72 * (1 - Math.min(1, age / span))).toFixed(2);
+    g += `<circle class="was ${ckPnl(d.date)}" cx="${px(d.x).toFixed(1)}" `
+       + `cy="${py(d.y).toFixed(1)}" r="3.6" opacity="${o}" />`;
+  }
+
+  if (ckPlaced) {
+    g += `<circle class="me-ring" cx="${px(ckX).toFixed(1)}" cy="${py(ckY).toFixed(1)}" r="8.5" />`
+       + `<circle class="me" cx="${px(ckX).toFixed(1)}" cy="${py(ckY).toFixed(1)}" r="5" />`;
+  }
+
+  document.getElementById('ckPad').innerHTML =
+    `<svg viewBox="0 0 ${S} ${S}" id="ckSvg" role="img"
+       aria-label="${ckPlaced ? 'You are in ' + CK_QUAD(ckX, ckY) : 'Nothing placed yet'}. `
+    + `${past.length} earlier ${past.length === 1 ? 'day' : 'days'} shown.">${g}</svg>`;
+  document.getElementById('ckPadN').textContent =
+    past.length ? `${past.length} ${past.length === 1 ? 'day' : 'days'} behind you` : '';
+}
+
+function renderCkAsks() {
+  document.getElementById('ckAsks').innerHTML = CK_ASKS.map(a =>
+    `<li><button type="button" data-ask="${esc(a)}" aria-pressed="${ckFlags.has(a)}">
+      <span class="box" aria-hidden="true">${icon('tick', 11)}</span>${esc(a)}</button></li>`).join('');
+}
+
+function renderCkLog() {
+  const rows = ckDays().slice().sort((a, b) => a.date < b.date ? 1 : -1).slice(0, 40);
+  document.getElementById('ckLogMeta').textContent =
+    rows.length ? `${ckDays().length} checked in` : '';
+  const wrap = document.getElementById('ckList');
+  if (!rows.length) {
+    wrap.innerHTML = `<p class="bt-empty">Nothing yet. Place a dot, answer four things, and
+      the days start collecting on the pad above.</p>`;
+    return;
+  }
+  wrap.innerHTML = rows.map((d) => {
+    const dt = new Date(d.date + 'T00:00:00');
+    const quad = CK_QUAD(d.x, d.y);
+    const p = ckPnl(d.date);
+    const note = (d.note || '').trim();
+    const n = (d.flags || []).length;
+    return `<div class="lg" role="group">
+      <span class="lg-when">
+        <b>${dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</b>
+        ${dt.toLocaleDateString('en-GB', { month: 'short' })}
+      </span>
+      <span class="lg-main">
+        <span class="lg-top">
+          <span class="lg-sym">${esc(quad)}</span>
+          <span class="lg-chip">${n} of ${CK_ASKS.length}</span>
+          ${p !== 'flat' ? `<span class="lg-r ${p}">${p === 'up' ? 'green day' : 'red day'}</span>`
+                         : '<span class="lg-r">nothing traded</span>'}
+        </span>
+        <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : esc(CK_SAYS[quad])}</p>
+      </span>
+      <span class="lg-noshot"></span>
+    </div>`;
+  }).join('');
+}
+
+/* The chip at the gate, and whether the gate opens at all. */
+function renderCkChip() {
+  const chip = document.getElementById('ckChip');
+  const t = ckToday();
+  const gIn = document.getElementById('gIn');
+  if (t) {
+    const quad = CK_QUAD(t.x, t.y);
+    chip.removeAttribute('data-none');
+    chip.innerHTML = `<i aria-hidden="true"></i>${esc(quad)}`;
+    chip.setAttribute('aria-label', `Checked in: ${quad}. Opens the check-in.`);
+    gIn.disabled = false;
+    gIn.removeAttribute('title');
+  } else {
+    chip.setAttribute('data-none', '1');
+    chip.innerHTML = `<i aria-hidden="true"></i>not checked in`;
+    chip.setAttribute('aria-label', 'Not checked in yet. Opens the check-in.');
+    gIn.disabled = true;
+    gIn.title = 'Check in first — the gate does not open without it.';
+  }
+}
+
+function renderCk() {
+  const t = ckToday();
+  if (t && !ckPlaced) {
+    ckX = t.x; ckY = t.y; ckPlaced = true;
+    ckFlags = new Set(t.flags || []);
+    document.getElementById('ckNote').value = t.note || '';
+  }
+  renderCkPad();
+  renderCkAsks();
+  renderCkLog();
+  renderCkChip();
+
+  const locked = ckLocked() && !!t;
+  ['ckNote', 'ckSave'].forEach(id => { document.getElementById(id).disabled = locked; });
+  document.getElementById('ckLocked').hidden = !locked;
+  document.getElementById('ckLocked').textContent = locked
+    ? 'Locked — you have traded today. What you wrote this morning stays as it was written; '
+      + 'a check-in you can revise after the result is not a record of anything.'
+    : '';
+  document.getElementById('ckSave').textContent = t ? 'Update' : 'Check in';
+  document.getElementById('ckSaid').textContent = ckPlaced ? CK_SAYS[CK_QUAD(ckX, ckY)] : 'place a dot';
+
+  const n = ckDays().length;
+  document.getElementById('ckMeta').textContent = !n ? 'not checked in yet'
+    : (ckToday() ? `checked in · ${CK_QUAD(ckToday().x, ckToday().y).toLowerCase()}`
+                 : 'not checked in today') + ` · ${n} ${n === 1 ? 'day' : 'days'} kept`;
+}
+
+/* Placing the dot. Pointer rather than click, so it can be dragged into
+   place on a phone as easily as tapped. */
+(() => {
+  const pad = document.getElementById('ckPad');
+  let down = false;
+  const place = (ev) => {
+    const svg = document.getElementById('ckSvg');
+    if (!svg) return;
+    const r = svg.getBoundingClientRect();
+    /* Same inset as the drawing, so where you press is where the dot
+       lands — the two used to disagree by the mark's radius. */
+    const P = 35 / 200, span = 1 - 2 * P;
+    const nx = ((ev.clientX - r.left) / r.width - P) / span;
+    const ny = 1 - ((ev.clientY - r.top) / r.height - P) / span;
+    ckX = Math.min(1, Math.max(0, nx));
+    ckY = Math.min(1, Math.max(0, ny));
+    ckPlaced = true;
+    renderCkPad();
+    document.getElementById('ckSaid').textContent = CK_SAYS[CK_QUAD(ckX, ckY)];
+  };
+  pad.addEventListener('pointerdown', (ev) => {
+    if (ckLocked() && ckToday()) return;
+    down = true; pad.setPointerCapture(ev.pointerId); place(ev);
+  });
+  pad.addEventListener('pointermove', (ev) => { if (down) place(ev); });
+  pad.addEventListener('pointerup', () => { down = false; });
+  pad.addEventListener('pointercancel', () => { down = false; });
+})();
+
+document.getElementById('ckAsks').addEventListener('click', (ev) => {
+  if (ckLocked() && ckToday()) return;
+  const b = ev.target.closest('button');
+  if (!b) return;
+  ckFlags.has(b.dataset.ask) ? ckFlags.delete(b.dataset.ask) : ckFlags.add(b.dataset.ask);
+  renderCkAsks();
+});
+
+document.getElementById('ckSave').addEventListener('click', () => {
+  if (!ckPlaced) {
+    document.getElementById('say').textContent = 'Place a dot on the pad first.';
+    return;
+  }
+  const k = iso(new Date());
+  if (ckLocked() && ckOn(k)) return;
+  const rec = { date: k, x: +ckX.toFixed(4), y: +ckY.toFixed(4),
+                flags: [...ckFlags], note: document.getElementById('ckNote').value.trim(),
+                at: Date.now() };
+  const i = ckDays().findIndex(d => d.date === k);
+  if (i >= 0) ckState.days[i] = rec; else ckState.days.push(rec);
+  if (!ckWrite()) return;
+  renderCk();
+  document.getElementById('say').textContent = `Checked in — ${CK_QUAD(ckX, ckY).toLowerCase()}.`;
+});
+
+document.getElementById('ckChip').addEventListener('click', () => goto('state'));
+
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
@@ -7576,6 +8015,7 @@ const SECTIONS = {
   settings: document.getElementById('settingsSection'),
   resources: document.getElementById('resourcesSection'),
   backtest: document.getElementById('backtestSection'),
+  state:    document.getElementById('stateSection'),
 };
 function goto(view) {
   /* The ladder does not exist on a phone, so a stored or stale route to

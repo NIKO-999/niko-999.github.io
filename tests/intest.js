@@ -2,6 +2,15 @@
    sheet should take a dropped chart anywhere on it — not only on the
    128px box you have to aim at while holding a file. */
 const { chrome, BASE } = require('./lib');
+
+/* The gate does not open without a check-in. Do what a person would. */
+async function checkIn(pg) {
+  await pg.evaluate(() => {
+    ckX = 0.3; ckY = 0.7; ckPlaced = true;
+    document.getElementById('ckSave').click();
+  });
+  await pg.waitForTimeout(200);
+}
 const { chromium } = require('playwright-core');
 const U = `${BASE}/trading/`;
 let pass = 0, fail = 0;
@@ -25,6 +34,7 @@ const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); c ? pass++ : 
 
   ok(await pg.isHidden('#calendarSection'), 'the calendar starts hidden');
 
+  await checkIn(pg);
   await pg.click('#gIn');
 
   ok(await pg.isVisible('#calendarSection'), 'clicking I’m in shows the calendar');
