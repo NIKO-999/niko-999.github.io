@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>The four figures — four ways to hide them</title>
+
+<script>
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  var PAL = { turtle:'slate', canyon:'ember', desert:'ember', nightfall:'cyan',
+              iceberg:'cyan', delta:'cyan', curve:'vellum', cobalt:'cobalt',
+              abyss:'cyan', jade:'jade', violet:'violet', iris:'violet',
+              umber:'umber', silk:'slate' };
+  var p = read('arc.palette') || 'nightfall';
+  if (!PAL[p]) p = 'nightfall';
+  var m = read('arc.theme') || 'system';
+  d.dataset.bg = p;
+  d.dataset.palette = PAL[p];
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  if (!phone) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
+  var k = document.createElement('link');
+  k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+  k.href = '../arc/fonts/Inter.woff2'; k.crossOrigin = 'anonymous';
+  document.head.appendChild(k);
+})();
+</script>
+
+<link rel="stylesheet" href="../shell.css" />
+
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   THE FOUR FIGURES — four ways to keep them out of your way.
+
+   TEMPORARY. Look, choose, and this page is deleted.
+
+   Win rate, average R, profit factor and expectancy are already off the
+   metrics screen and onto the log, which is the screen you open on
+   purpose. The remaining problem is that four cards is still an
+   announcement. All four treatments below are SHUT when the page loads
+   and none of them is a card.
+
+   Each one is shown in place — the log's real head, filters and rows
+   around it — because "barely visible" is a claim about a context, not
+   about a component.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --up:   #7fb9a2;
+  --down: #c98f8f;
+  --up-fill:   rgba(127, 185, 162, .16);
+  --down-fill: rgba(201, 143, 143, .16);
+}
+:root[data-resolved="light"] {
+  --up:   #2f6b52;
+  --down: #8f3f3f;
+  --up-fill:   rgba(47, 107, 82, .13);
+  --down-fill: rgba(143, 63, 63, .13);
+}
+.pane { flex: 1; overflow-y: auto; padding: 4px 14px 40px; }
+
+/* ── the log, lifted verbatim so the mock is the real thing ────── */
+.lg-filters { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; flex-wrap: wrap; }
+.lg-filters .side { flex: none; }
+.lg-filters .side button { flex: none; height: 32px; padding: 0 13px;
+  font-family: var(--sans); font-size: .76rem; text-transform: none; letter-spacing: normal; }
+.lg-filters .side button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
+.lg-filters select {
+  height: 32px; padding: 0 9px; border: 1px solid var(--glass-line); border-radius: 8px;
+  background: var(--glass-in); color: var(--ink-2); font: inherit; font-size: .76rem;
+}
+.lg-filters .grow { flex: 1; }
+.lg-only { height: 32px; padding: 0 11px; border: 0; border-radius: 8px;
+  background: var(--glass-in); color: var(--ink-3); font: inherit; font-size: .68rem; cursor: pointer; }
+.lg-month { display: flex; align-items: center; gap: 11px; margin: 20px 0 2px; }
+.lg-month b { font-size: .72rem; font-weight: 500; text-transform: uppercase;
+  letter-spacing: .1em; color: var(--ink-2); }
+.lg-month i { flex: 1; height: 1px; background: var(--rule); }
+.lg-month em { font-style: normal; font-size: .66rem; color: var(--ink-3); }
+.lg { display: grid; grid-template-columns: 92px minmax(0, 1fr) 104px; gap: 14px;
+  width: 100%; padding: 13px 0 15px; border: 0; border-bottom: 1px solid var(--rule);
+  background: none; text-align: left; font: inherit; color: inherit; }
+.lg:last-child { border-bottom: 0; }
+.lg-when { font-size: .66rem; line-height: 1.6; color: var(--ink-3); }
+.lg-when b { display: block; font-size: .78rem; font-weight: 500;
+  color: var(--ink-2); letter-spacing: -.01em; }
+.lg-main { min-width: 0; }
+.lg-top { display: flex; align-items: center; gap: 7px; flex-wrap: wrap; margin-bottom: 7px; }
+.lg-sym { font-size: .84rem; font-weight: 500; color: var(--ink); }
+.lg-chip { padding: 2px 7px; border-radius: 5px; background: var(--glass-in-2);
+  font-size: .6rem; letter-spacing: .04em; color: var(--ink-3); }
+.lg-chip.win  { background: var(--up-fill);   color: var(--up); }
+.lg-chip.loss { background: var(--down-fill); color: var(--down); }
+.lg-r { margin-left: auto; font-size: .84rem; letter-spacing: -.02em; color: var(--ink-2); }
+.lg-r.up { color: var(--up); } .lg-r.down { color: var(--down); }
+.lg-note { margin: 0; font-size: .82rem; line-height: 1.6; color: var(--ink-2); }
+.lg-noshot { display: block; }
+@media (max-width: 720px) {
+  .lg { grid-template-columns: minmax(0, 1fr); }
+  .lg-noshot { display: none; }
+}
+
+/* ── the page's own scaffolding ─────────────────────────────────── */
+.opt { margin: 0 0 30px; }
+.opt-h { display: flex; align-items: baseline; gap: 10px; padding: 0 0 3px; }
+.opt-h h2 { margin: 0; font-size: .96rem; font-weight: 500; color: var(--ink); }
+.opt-h b { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2);
+  border-radius: 4px; padding: 2px 6px; }
+.opt-h span { font-size: .78rem; color: var(--ink-3); }
+.opt > p.why { margin: 0 0 10px; font-size: .8rem; line-height: 1.55;
+  color: var(--ink-3); max-width: 76ch; }
+/* The frame is this page's, not the app's — it marks where the log
+   would start so you can see how loud the treatment is against it. */
+.mock { border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 4px 16px 12px; }
+.mock .head { padding: 12px 0 8px; }
+.mock .head h1 { font-size: 1.15rem; }
+
+/* ══ the four figures, in every treatment ══
+   One line, mono, tabular. No cards, no bars, no sub-lines, and NO
+   colour on any of the four — a red profit factor is the whole reason
+   they came off the metrics screen. */
+.fg { display: flex; flex-wrap: wrap; gap: 4px 20px;
+  font-family: var(--mono); font-size: .7rem; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; }
+.fg span { display: inline-flex; align-items: baseline; gap: 6px; }
+.fg i { font-style: normal; font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); }
+.fg-note { margin: 8px 0 0; font-size: .7rem; line-height: 1.55; color: var(--ink-3);
+  max-width: 68ch; }
+.fg-body[hidden] { display: none; }
+
+/* ── A · the hairline ──
+   Shut, it is a rule. There is no title, no chevron sitting in space
+   and nothing that says "figures" — the affordance is that the rule
+   thickens under the pointer. */
+.hl { width: 100%; border: 0; background: none; padding: 9px 0; margin: 2px 0 0;
+  cursor: pointer; display: block; }
+.hl-line { display: block; height: 1px; background: var(--rule); position: relative; }
+.hl:hover .hl-line { background: var(--glass-line); }
+.hl:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.hl-line::after {
+  content: ''; position: absolute; left: 50%; top: -3px; width: 7px; height: 7px;
+  margin-left: -3.5px; border-right: 1px solid var(--ink-3); border-bottom: 1px solid var(--ink-3);
+  transform: rotate(45deg); opacity: .32; transition: transform .18s, opacity .18s;
+}
+.hl:hover .hl-line::after { opacity: .7; }
+.hl[aria-expanded="true"] .hl-line::after { transform: rotate(225deg); top: -1px; }
+.vA .fg-body { padding: 12px 0 2px; }
+
+/* ── B · one word ──────────────────────────────────────────────── */
+.wd-row { display: flex; margin: 6px 0 0; }
+.wd-row .grow { flex: 1; }
+.wd {
+  border: 0; background: none; padding: 2px 0; cursor: pointer;
+  font: inherit; font-family: var(--mono); font-size: .58rem;
+  letter-spacing: .14em; text-transform: uppercase; color: var(--ink-3);
+  opacity: .55;
+}
+.wd:hover { opacity: 1; color: var(--ink-2); }
+.wd:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.vB .fg-body { padding: 10px 0 2px; }
+.vB .fg { justify-content: flex-end; }
+.vB .fg-note { margin-left: auto; text-align: right; }
+
+/* ── C · in the head ───────────────────────────────────────────── */
+.meta-btn {
+  border: 0; background: none; padding: 0; cursor: pointer; font: inherit;
+  font-family: var(--mono); font-size: .62rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3);
+  border-bottom: 1px dashed transparent;
+}
+.meta-btn:hover { color: var(--ink-2); border-bottom-color: var(--glass-line); }
+.meta-btn:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ── D · bare digits ───────────────────────────────────────────── */
+.dg { display: flex; margin: 8px 0 0; }
+.dg .grow { flex: 1; }
+.dg button {
+  border: 0; background: none; padding: 2px 0; cursor: pointer; font: inherit;
+  font-family: var(--mono); font-size: .66rem; letter-spacing: .06em;
+  color: var(--ink-3); opacity: .5; font-variant-numeric: tabular-nums;
+  display: inline-flex; gap: 16px;
+}
+.dg button:hover { opacity: 1; color: var(--ink-2); }
+.dg button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.vD .fg-body { padding: 8px 0 2px; display: flex; flex-direction: column; align-items: flex-end; }
+.vD .fg { justify-content: flex-end; }
+.vD .fg-note { text-align: right; }
+
+.note-top {
+  border: 1px solid var(--glass-line); border-radius: 10px;
+  background: var(--glass-in); padding: 12px 14px; margin: 2px 0 26px;
+  font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 78ch; }
+.note-top b { color: var(--ink); font-weight: 500; }
+</style>
+</head>
+
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+
+<div class="app">
+  <main class="main">
+    <div class="head">
+      <h1>The four figures</h1>
+      <span class="grow"></span>
+      <span class="span-meta">four ways to hide them · nothing here is saved</span>
+    </div>
+
+    <div class="pane" tabindex="0">
+      <p class="note-top">
+        Win rate, average R, profit factor and expectancy, on the log. <b>All four
+        treatments below start shut</b> and none of them is a card. Open one and you get
+        the same thing every time: one line, one typeface, tabular figures, <b>no colour
+        on any of the four</b> &mdash; a red profit factor is the reason they left the
+        metrics screen in the first place. Whichever you pick remembers whether it was
+        open, like every other folding panel in the app.
+      </p>
+
+      <!-- ══ A ══ -->
+      <section class="opt vA">
+        <div class="opt-h"><b>A</b><h2>The hairline</h2><span>shut, it is a divider</span></div>
+        <p class="why">No title, no word, nothing sitting in space. Shut it is a rule between
+          the head and the filters &mdash; something you would read as spacing rather than as a
+          control. The only tell is a small caret on the line, at a third opacity until you
+          come near it. The quietest of the four, and the easiest to never find again.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <button class="hl" type="button" aria-expanded="false" aria-controls="fgA"
+            aria-label="The four figures"><span class="hl-line"></span></button>
+          <div class="fg-body" id="fgA" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ B ══ -->
+      <section class="opt vB">
+        <div class="opt-h"><b>B</b><h2>One word</h2><span>&ldquo;figures&rdquo;, at half opacity</span></div>
+        <p class="why">One word in the smallest type the app owns, greyed to half, sitting
+          on the right where nothing else is. It is findable without being addressed to you.
+          Open, the four sit under it right-aligned, so the whole thing stays in that corner
+          and never crosses the page.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <div class="wd-row"><span class="grow"></span>
+            <button class="wd" type="button" aria-expanded="false" aria-controls="fgB">figures</button></div>
+          <div class="fg-body" id="fgB" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ C ══ -->
+      <section class="opt vC">
+        <div class="opt-h"><b>C</b><h2>Behind the count</h2><span>nothing in the page at all</span></div>
+        <p class="why">The log's head already says how many trades there are. Make that line
+          the control: click it and it becomes the four figures, click again and it is the
+          count. Nothing is ever added to the page &mdash; no rule, no word, no row &mdash;
+          and the four occupy a slot that was already spent. The most hidden of the four, and
+          the only one with nothing new on screen.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <button class="meta-btn" type="button" aria-live="polite">184 trades</button></div>
+          <p class="fg-note" id="fgCnote" hidden></p>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ D ══ -->
+      <section class="opt vD">
+        <div class="opt-h"><b>D</b><h2>Bare digits</h2><span>there, but unlabelled</span></div>
+        <p class="why">Shut is not empty here &mdash; it is the four numbers with every word
+          stripped off, at half opacity in the corner. You can glance at them without being
+          told what they mean, which is the difference between checking and being judged.
+          Click and the labels and the sample caveat appear. The only one that shows you
+          anything before you ask.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <div class="dg"><span class="grow"></span>
+            <button type="button" aria-expanded="false" aria-controls="fgD"
+              aria-label="The four figures, named"></button></div>
+          <div class="fg-body" id="fgD" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+    </div>
+  </main>
+</div>
+
+<script>
+/* Look only. Invented figures, chosen to sit where a real account sits
+   for most of its first year — a win rate under half, an edge that is
+   real but small, and a sample that is not yet worth much. */
+const F = { pct: '46%', r: '+0.14R', pf: '1.18', exp: '+£11', n: 184 };
+const CAVEAT = `${F.n} trades — enough to read, though a single month still moves them.`;
+
+const LINE = `<div class="fg">`
+  + `<span><i>win rate</i>${F.pct}</span>`
+  + `<span><i>average R</i>${F.r}</span>`
+  + `<span><i>profit factor</i>${F.pf}</span>`
+  + `<span><i>expectancy</i>${F.exp}</span>`
+  + `</div><p class="fg-note">${CAVEAT}</p>`;
+
+/* Two rows of the log underneath each treatment, so the thing being
+   judged is how loud it is against what it sits on. */
+const ROWS = [
+  { d: 'Thu 14', s: 'Second hour', sym: 'Trade', setup: 'CISD', mode: 'reversal',
+    out: 'win', word: 'Win', r: '+1.8R', up: 'up',
+    note: 'Waited for the sweep and took the close back through. Held to the first draw.' },
+  { d: 'Wed 13', s: 'First hour', sym: 'Trade', setup: 'CISD', mode: 'continuation',
+    out: 'loss', word: 'Loss', r: '−1.0R', up: 'down',
+    note: 'Entered before the reclaim. Nothing wrong with the level, wrong with the timing.' },
+];
+const logHTML = `<div class="lg-filters">
+    <div class="side" role="group" aria-label="Outcome">
+      <button type="button" aria-pressed="true">All</button>
+      <button type="button" aria-pressed="false">Wins</button>
+      <button type="button" aria-pressed="false">Losses</button>
+    </div>
+    <select><option>Any setup</option></select>
+    <select><option>Any type</option></select>
+    <span class="grow"></span>
+    <button class="lg-only" type="button">Only trades with a note</button>
+  </div>
+  <div class="lg-month"><b>August</b><i></i><em>12 trades</em></div>`
+  + ROWS.map(e => `<div class="lg">
+      <span class="lg-when"><b>${e.d}</b>${e.s}</span>
+      <span class="lg-main">
+        <span class="lg-top">
+          <span class="lg-sym">${e.sym}</span>
+          <span class="lg-chip">${e.setup}</span>
+          <span class="lg-chip">${e.mode}</span>
+          <span class="lg-chip ${e.out}">${e.word}</span>
+          <span class="lg-r ${e.up}">${e.r}</span>
+        </span>
+        <p class="lg-note">${e.note}</p>
+      </span>
+      <span class="lg-noshot"></span>
+    </div>`).join('');
+
+document.querySelectorAll('.mock-log').forEach(el => { el.innerHTML = logHTML; });
+document.querySelectorAll('#fgA, #fgB, #fgD').forEach(el => { el.innerHTML = LINE; });
+
+/* A · the hairline, and B · the word — same shape, one handler. */
+document.querySelectorAll('.hl, .wd').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    document.getElementById(btn.getAttribute('aria-controls')).hidden = open;
+  });
+});
+
+/* C · the head's own line, swapped. Nothing is added to the page, so
+   there is nothing to hide and nothing to show — only two states of
+   one string. Separated by middots because it has to survive being
+   read at a glance in a slot sized for "184 trades". */
+const cBtn = document.querySelector('.vC .meta-btn');
+const cNote = document.getElementById('fgCnote');
+let cOn = false;
+cBtn.addEventListener('click', () => {
+  cOn = !cOn;
+  cBtn.textContent = cOn
+    ? `${F.pct} · ${F.r} · ${F.pf} · ${F.exp}`
+    : `${F.n} trades`;
+  cNote.hidden = !cOn;
+  cNote.textContent = CAVEAT;
+});
+
+/* D · digits with the words taken off.
+   Opening REPLACES the digits rather than sitting above them — two
+   copies of the same four numbers is worse than either — so closing has
+   to bring them back, and focus goes with them. */
+const dBtn = document.querySelector('.vD .dg button');
+const dBody = document.getElementById('fgD');
+dBtn.innerHTML = [F.pct, F.r, F.pf, F.exp].map(v => `<span>${v}</span>`).join('');
+dBody.insertAdjacentHTML('beforeend',
+  '<button class="wd" type="button" data-shut style="margin-top:8px">less</button>');
+const dFold = (on) => {
+  dBtn.setAttribute('aria-expanded', String(on));
+  dBody.hidden = !on;
+  dBtn.hidden = on;
+};
+dBtn.addEventListener('click', () => dFold(true));
+dBody.querySelector('[data-shut]').addEventListener('click', () => { dFold(false); dBtn.focus(); });
+</script>
+</body>
+</html>

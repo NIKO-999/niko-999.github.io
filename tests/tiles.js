@@ -7,7 +7,9 @@
    read as six done, it reads as four missed.
 
    The four verdicts moved to the Log, which is somewhere you go on
-   purpose to read back. */
+   purpose to read back — and on the Log they are behind a hairline that
+   is SHUT until you open it. Available is not the same as handed to you
+   on the way past, and shut has to be the default or it is neither. */
 const { chrome, BASE } = require('./lib');
 const { chromium } = require('playwright-core');
 
@@ -29,6 +31,12 @@ const ok = (name, cond, extra) => {
 
   const labels = (sel) => p.evaluate((s) =>
     [...document.querySelectorAll(s + ' .metric')].map(m => m.querySelector('span').textContent.trim()), sel);
+  /* The four are a line of type now, not cards: <span><i>label</i>figure</span> */
+  const figures = () => p.evaluate(() =>
+    [...document.querySelectorAll('#logStats > span')].map(x => ({
+      l: x.querySelector('i').textContent.trim(),
+      v: x.textContent.replace(x.querySelector('i').textContent, '').trim(),
+    })));
 
   // ── metrics carries one figure ─────────────────────────────────
   const top = await labels('#metrics');
@@ -53,16 +61,73 @@ const ok = (name, cond, extra) => {
   // ── and the Log carries the four ───────────────────────────────
   await p.evaluate(() => goto('log'));
   await p.waitForTimeout(350);
-  const onLog = await labels('#logStats');
-  ok('all four are on the Log', JUDGES.every(j => onLog.includes(j)), onLog);
+  /* ── shut, and shut is a rule ──
+     No title, no word, no chevron in space. If anything visible sits in
+     the button, the panel is announcing itself and the whole point of
+     moving these off Metrics is lost. */
+  ok('the four start shut', await p.locator('#logFigB').isHidden());
+  ok('and the button agrees', await p.getAttribute('#logFigT', 'aria-expanded') === 'false');
+  ok('shut, there is nothing to read', await p.evaluate(() => {
+    const sr = document.querySelector('#logFigT .sr').getBoundingClientRect();
+    return sr.width <= 1 && sr.height <= 1;         // the label is for a reader, not the eye
+  }));
+  ok('shut, it is a one-pixel rule', await p.evaluate(() => {
+    const b = document.querySelector('#logFigT .lg-fg-line').getBoundingClientRect();
+    return Math.round(b.height) === 1 && b.width > 400;
+  }), await p.evaluate(() => {
+    const b = document.querySelector('#logFigT .lg-fg-line').getBoundingClientRect();
+    return [Math.round(b.width), Math.round(b.height)];
+  }));
+  /* A heading, carrying a button — not a button carrying a heading.
+     The gate's alignment table, and the only reason a screen reader can
+     still find this panel at all. */
+  ok('the button is inside the heading', await p.evaluate(() =>
+    document.getElementById('logFigT').closest('h3') !== null
+    && !document.getElementById('logFigT').querySelector('h3')));
+
+  const shut = await p.evaluate(() =>
+    document.querySelector('#logSection .lg-filters').getBoundingClientRect().top);
+  await p.click('#logFigT');
+  await p.waitForTimeout(300);
+  ok('opens', await p.locator('#logFigB').isVisible());
+
+  const onLog = await figures();
+  ok('all four are there', JUDGES.every(j => onLog.some(f => f.l === j)), onLog);
+  ok('as one line, not four cards', await p.evaluate(() => {
+    const r = document.getElementById('logStats');
+    const tops = [...r.children].map(c => Math.round(c.getBoundingClientRect().top));
+    return r.children.length === 4 && new Set(tops).size === 1;
+  }));
+  ok('no cards survived the move', await p.locator('#logStats .metric').count() === 0);
+  /* NO COLOUR. A red profit factor is what put these behind a rule; a
+     small red profit factor is the same verdict in a quieter voice. */
+  ok('and none of the four is coloured', await p.evaluate(() => {
+    const base = getComputedStyle(document.getElementById('logStats')).color;
+    return [...document.querySelectorAll('#logStats > span')]
+      .every(x => getComputedStyle(x).color === base);
+  }));
   ok('above the filters, not buried under them', await p.evaluate(() => {
     const s = document.getElementById('logStats').getBoundingClientRect();
     const f = document.querySelector('#logSection .lg-filters').getBoundingClientRect();
     return s.top < f.top;
   }));
-  ok('open, not folded — reading them here is deliberate', await p.evaluate(() =>
-    !document.getElementById('logStats').hidden
-    && document.getElementById('logStats').offsetHeight > 40));
+  ok('and opening pushed the log down rather than covering it', await p.evaluate((was) =>
+    document.querySelector('#logSection .lg-filters').getBoundingClientRect().top > was + 20, shut));
+
+  /* Shut is the default, but a choice has to survive the reload or it is
+     not a choice — every other fold in the app remembers. */
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.evaluate(() => goto('log'));
+  await p.waitForTimeout(350);
+  ok('an opened panel is still open next time', await p.locator('#logFigB').isVisible());
+  await p.click('#logFigT');
+  await p.waitForTimeout(250);
+  ok('and shutting it sticks too', await p.evaluate(async () => {
+    const v = localStorage.getItem('log.figures.v1');
+    return v === '0';
+  }), await p.evaluate(() => localStorage.getItem('log.figures.v1')));
+  await p.click('#logFigT');
+  await p.waitForTimeout(250);
 
   // ── the sample is stated honestly, wherever they live ──────────
   ok('a small sample says so', await p.evaluate(() => {
@@ -81,17 +146,15 @@ const ok = (name, cond, extra) => {
   ok('a bigger one stops apologising', await p.evaluate(() =>
     /enough to read/.test(document.getElementById('logSample').textContent)),
     await p.locator('#logSample').textContent());
-  ok('and the figures updated with it', await p.evaluate(() => {
-    const m = [...document.querySelectorAll('#logStats .metric')]
-      .find(x => x.querySelector('span').textContent.trim() === 'Win rate');
-    return /\d+%/.test(m.querySelector('b').textContent);
-  }));
+  ok('and the figures updated with it',
+     /^\d+%$/.test(((await figures()).find(f => f.l === 'Win rate') || {}).v || ''),
+     await figures());
 
   // ── an empty ledger says nothing rather than 0.00 ──────────────
   await p.evaluate(() => { state = { events: [], bin: [] }; commit('empty'); });
   await p.waitForTimeout(350);
-  ok('an empty ledger does not open a losing dashboard', await p.evaluate(() =>
-    ![...document.querySelectorAll('#logStats .metric')].some(m => m.classList.contains('down'))));
+  ok('an empty ledger shows dashes rather than zeros',
+     (await figures()).filter(f => f.v === '—').length >= 2, await figures());
   ok('and says so rather than showing zeros', await p.evaluate(() =>
     /Nothing recorded yet/.test(document.getElementById('logSample').textContent)));
 

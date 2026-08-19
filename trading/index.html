@@ -1635,6 +1635,38 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
    A reading view, so it is set as prose: one column of text at a
    readable measure, with the facts about each trade around it rather
    than through it. */
+/* ── the four figures ──
+   A rule you can open. Shut it reads as the gap between the head and
+   the filters, which is the point: the numbers are available without
+   being addressed to you. The caret lives ON the line rather than beside
+   a title, because a title would be the announcement all over again. */
+.lg-fg-h { margin: 0; }
+.lg-fg { display: block; width: 100%; padding: 9px 0; margin: 2px 0 0;
+  border: 0; background: none; cursor: pointer; }
+.lg-fg-line { display: block; height: 1px; background: var(--rule); position: relative; }
+.lg-fg:hover .lg-fg-line { background: var(--glass-line); }
+.lg-fg:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.lg-fg-line::after {
+  content: ''; position: absolute; left: 50%; top: -3px; width: 7px; height: 7px;
+  margin-left: -3.5px; border-right: 1px solid var(--ink-3);
+  border-bottom: 1px solid var(--ink-3); transform: rotate(45deg);
+  opacity: .32; transition: transform .18s, opacity .18s;
+}
+.lg-fg:hover .lg-fg-line::after { opacity: .7; }
+.lg-fg[aria-expanded="true"] .lg-fg-line::after { transform: rotate(225deg); top: -1px; }
+@media (prefers-reduced-motion: reduce) { .lg-fg-line::after { transition: none; } }
+
+/* One line, one typeface, tabular. NO colour on any of the four — the
+   red profit factor is what put them on this screen in the first place,
+   and a verdict does not become kinder for being small. */
+#logFigB { padding: 12px 0 2px; }
+.lg-fg-row { display: flex; flex-wrap: wrap; gap: 4px 20px;
+  font-family: var(--mono); font-size: .7rem; color: var(--ink-2);
+  font-variant-numeric: tabular-nums; }
+.lg-fg-row span { display: inline-flex; align-items: baseline; gap: 6px; }
+.lg-fg-row i { font-style: normal; font-size: .58rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); }
+
 .lg-filters { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; flex-wrap: wrap; }
 .lg-filters .side { flex: none; }
 .lg-filters .side button { flex: none; height: 32px; padding: 0 13px;
@@ -2144,9 +2176,22 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <div class="pane" tabindex="0">
         <!-- The four that judge you live here rather than on the screen
              you open before trading. Reading them is a deliberate act;
-             being handed them on the way past is not. -->
-        <div class="metrics" id="logStats"></div>
-        <p class="mt-note" id="logSample"></p>
+             being handed them on the way past is not — which is also why
+             this is shut, and why shut looks like spacing.
+
+             The heading is real and carries the button, per the gate's
+             alignment table; it just has nothing visible to say. -->
+        <h3 class="lg-fg-h">
+          <button class="lg-fg" type="button" id="logFigT"
+                  aria-expanded="false" aria-controls="logFigB">
+            <span class="sr">The four figures</span>
+            <span class="lg-fg-line" aria-hidden="true"></span>
+          </button>
+        </h3>
+        <div id="logFigB" hidden>
+          <div class="lg-fg-row" id="logStats"></div>
+          <p class="mt-note" id="logSample"></p>
+        </div>
 
         <div class="lg-filters">
           <div class="side" id="logOut" role="group" aria-label="Outcome">
@@ -3566,18 +3611,17 @@ function renderMetrics() {
 
   /* The four that judge you. Rendered here because this is where totals()
      already is, but written into the LOG — the screen you open on purpose
-     to read back, rather than the one you pass on the way to trade. */
+     to read back, rather than the one you pass on the way to trade.
+
+     The sub-lines are gone with the cards. "5W · 3L" under a win rate is
+     the same fact twice, and "worst 4L" under an average is a second
+     verdict wearing a caption. The figure and its name is the whole
+     line. */
   const OUT = [
-    { k: 'pct', l: 'Win rate', v: t.n ? t.winRate.toFixed(0) + '%' : '—',
-      sub: t.n ? `${t.wins}W · ${t.losses}L` : 'No trades yet',
-      bar: t.n ? [t.winRate, t.winRate >= 50 ? 'up' : 'down'] : null },
-    { k: 'out', l: 'Average R', v: avgR === null ? '—' : `${avgR >= 0 ? '+' : '−'}${Math.abs(avgR).toFixed(2)}R`,
-      cls: avgR === null ? '' : dir(avgR),
-      sub: t.n ? `Best streak ${t.bestWin}W · worst ${t.worstLoss}L`
-               : 'Record a risk on a trade to grade it' },
-    { k: 'bars', l: 'Profit factor', v: pf[0], sub: pf[1] },
-    { k: 'pair', l: 'Expectancy', v: money(t.expectancy, true), cls: dir(t.expectancy),
-      sub: 'Expected value per trade' },
+    { l: 'Win rate', v: t.n ? t.winRate.toFixed(0) + '%' : '—' },
+    { l: 'Average R', v: avgR === null ? '—' : `${avgR >= 0 ? '+' : '−'}${Math.abs(avgR).toFixed(2)}R` },
+    { l: 'Profit factor', v: pf[0] },
+    { l: 'Expectancy', v: money(t.expectancy, true) },
   ];
 
   const card = (c) =>
@@ -3590,7 +3634,10 @@ function renderMetrics() {
      </div>`;
 
   document.getElementById('metrics').innerHTML = CARDS.map(card).join('');
-  document.getElementById('logStats').innerHTML = OUT.map(card).join('');
+  /* Not card(). These four are a line of type now: label, figure, and
+     nothing else — no icon, no sub-line, no bar, no direction class. */
+  document.getElementById('logStats').innerHTML =
+    OUT.map(c => `<span><i>${c.l}</i>${c.v}</span>`).join('');
 
   /* Say what the sample is worth. Below about thirty graded trades these
      four are mostly variance, and a red number posing as a judgement
@@ -7526,6 +7573,25 @@ function renderBtLog() {
    something you go and look at — and a reference you cannot put away
    stops being a reference and becomes furniture. Shut on a machine that
    has never opened them. */
+/* The log's figures fold on the same terms, and default shut for the
+   same reason — with one difference: this panel has no title bar to
+   leave behind, so shut is a rule and not a heading with nothing under
+   it. Its own key, because it is not a backtesting panel. */
+(function () {
+  const K = 'log.figures.v1';
+  const btn = document.getElementById('logFigT');
+  const body = document.getElementById('logFigB');
+  const fold = (on) => {
+    btn.setAttribute('aria-expanded', String(on));
+    body.hidden = !on;
+    try { localStorage.setItem(K, on ? '1' : '0'); } catch (e) {}
+  };
+  btn.addEventListener('click', () => fold(btn.getAttribute('aria-expanded') !== 'true'));
+  let was = null;
+  try { was = localStorage.getItem(K); } catch (e) {}
+  fold(was === '1');
+})();
+
 const BFKEY = 'backtest.folds.v1';
 const BTFOLD = (() => {
   try { return Object.assign({}, JSON.parse(localStorage.getItem(BFKEY) || '{}')); }
