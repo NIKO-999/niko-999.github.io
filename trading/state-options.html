@@ -387,6 +387,26 @@
   .tiltwrap .pd, .v4-q .lift, .mark span { transition: none; }
 }
 
+/* ══ the colour ═════════════════════════════════════════════════ */
+.swatches { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 14px; align-items: stretch; }
+@media (max-width: 900px) { .swatches { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .swatches { grid-template-columns: minmax(0, 1fr); } }
+.sw { border: 1px solid var(--glass-line); border-radius: 11px; background: var(--glass-in);
+  padding: 12px; display: flex; flex-direction: column; }
+.sw h4 { margin: 0 0 2px; font-size: .8rem; font-weight: 500; color: var(--ink); }
+.sw p { margin: 0 0 9px; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
+/* The figure absorbs whatever height the row settles on, so a caption
+   wrapping to three lines in one card cannot push its picture out of
+   line with the others. */
+.sw .fig { flex: 1; display: grid; place-items: center; }
+.sw svg { width: 100%; height: auto; display: block; }
+.sw .key { margin: 8px 0 0; display: flex; flex-wrap: wrap; gap: 5px 11px;
+  font-family: var(--mono); font-size: .52rem; letter-spacing: .07em;
+  text-transform: uppercase; color: var(--ink-3); }
+.sw .key span { display: inline-flex; align-items: center; gap: 4px; }
+.sw .key svg { width: 11px; height: 11px; flex: none; }
+
 .note-top {
   border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 26px;
@@ -415,6 +435,22 @@
         Only the arrangement differs. Every one below is live: place a dot, tick
         things, resize the window.
       </p>
+
+      <div class="opt-h" style="padding-bottom:8px">
+        <b>First</b><h2>The colour</h2><span>this decides itself before any of the rest</span></div>
+      <p class="note-top">
+        Every option below marks the days behind you with <b>what the ledger did</b> &mdash; and
+        it does that in green and red. That is the only judgement on this screen that is not
+        self-reported, which is why it was worth colour. But a year of mornings is mostly red,
+        so the pad greets you with a field of losses before you have done anything.
+        <b>Four ways to keep the fact and drop the alarm.</b> Whichever you pick applies to
+        every option on this page.
+      </p>
+      <div class="swatches" id="swatches"></div>
+      <p class="why" style="margin:12px 0 30px">Note that this is the pad only. The ledger, the
+        R figures and the calendar keep their green and red &mdash; there a colour is attached
+        to one number you went looking for, not smeared across a background you are trying to
+        think in front of. Say if you want those changed too and that is a separate job.</p>
 
       <section class="opt">
         <div class="opt-h"><b>A</b><h2>One column</h2><span>no headings, no split</span></div>
@@ -1211,6 +1247,88 @@ const WORDS = ['Sharp', 'Ready', 'Wired', 'Angry', 'Flat', 'Bored', 'Shaken', 'T
       : 'logged · <b>7 of 11</b> — the ones you miss are the ones worth reading back';
   });
   tell.innerHTML = 'thirty seconds, once a day, and it is the only score here you can move';
+})();
+
+/* ══ the colour ═════════════════════════════════════════════════
+   Four encodings of one fact, drawn from the same history so the only
+   thing you are judging is the encoding. Each returns the mark for a
+   day and the key that explains it.
+
+   All four hold one rule the current pad does not: NOTHING IS RED. A
+   losing day is still legible in every one of them — it is just not
+   shouting. */
+const MARKS = {
+  ink: {
+    name: 'Filled or hollow',
+    why: 'Shape, not colour. A day that worked is solid; one that did not is a ring. '
+       + 'Reads at a glance and survives being colour-blind, printed, or looked at in sun.',
+    day: (d, x, y, o) => d.pnl === 'up'
+      ? `<circle cx="${x}" cy="${y}" r="3.5" fill="var(--ink-2)" opacity="${o}" />`
+      : d.pnl === 'down'
+        ? `<circle cx="${x}" cy="${y}" r="3.4" fill="none" stroke="var(--ink-2)" stroke-width="1" opacity="${o}" />`
+        : `<circle cx="${x}" cy="${y}" r="1.5" fill="var(--ink-3)" opacity="${(o * 0.7).toFixed(2)}" />`,
+    key: [['<circle cx="5.5" cy="5.5" r="3.5" fill="var(--ink-2)" />', 'worked'],
+          ['<circle cx="5.5" cy="5.5" r="3.4" fill="none" stroke="var(--ink-2)" stroke-width="1" />', 'did not'],
+          ['<circle cx="5.5" cy="5.5" r="1.5" fill="var(--ink-3)" />', 'no trade']],
+  },
+  accent: {
+    name: 'One accent',
+    why: "The app's own accent for a day that worked, plain grey for everything else. "
+       + 'Nothing on the pad is ever marked as bad — the good ones are simply lit.',
+    day: (d, x, y, o) => d.pnl === 'up'
+      ? `<circle cx="${x}" cy="${y}" r="3.6" fill="var(--accent)" opacity="${o}" />`
+      : `<circle cx="${x}" cy="${y}" r="3.2" fill="var(--ink-3)" opacity="${(o * 0.5).toFixed(2)}" />`,
+    key: [['<circle cx="5.5" cy="5.5" r="3.6" fill="var(--accent)" />', 'worked'],
+          ['<circle cx="5.5" cy="5.5" r="3.2" fill="var(--ink-3)" opacity=".5" />', 'everything else']],
+  },
+  grey: {
+    name: 'Two greys',
+    why: 'Value only. Bright for a day that worked, dim for one that did not. '
+       + 'The quietest of the four, and the hardest to read at a glance.',
+    day: (d, x, y, o) => {
+      const f = d.pnl === 'up' ? ['var(--ink)', 0.9] : d.pnl === 'down' ? ['var(--ink-3)', 0.5] : ['var(--ink-3)', 0.24];
+      return `<circle cx="${x}" cy="${y}" r="3.5" fill="${f[0]}" opacity="${(o * f[1]).toFixed(2)}" />`;
+    },
+    key: [['<circle cx="5.5" cy="5.5" r="3.5" fill="var(--ink)" />', 'worked'],
+          ['<circle cx="5.5" cy="5.5" r="3.5" fill="var(--ink-3)" opacity=".5" />', 'did not'],
+          ['<circle cx="5.5" cy="5.5" r="3.5" fill="var(--ink-3)" opacity=".24" />', 'no trade']],
+  },
+  none: {
+    name: 'Not on the pad at all',
+    why: 'Every morning identical. The outcome moves off the picture and into the line you '
+       + 'get when you place the dot — a word you read once, not a wash you sit in front of.',
+    day: (d, x, y, o) => `<circle cx="${x}" cy="${y}" r="3.4" fill="var(--ink-3)" opacity="${(o * 0.62).toFixed(2)}" />`,
+    key: [['<circle cx="5.5" cy="5.5" r="3.4" fill="var(--ink-3)" opacity=".62" />', 'a morning']],
+  },
+};
+
+(function () {
+  const wrap = document.getElementById('swatches');
+  const P = 20, S = 200, M = 8;
+  const px = (n) => P + M + n * (S - 2 * P - 2 * M);
+  const py = (n) => P + M + (1 - n) * (S - 2 * P - 2 * M);
+  const here = { x: 0.34, y: 0.72 };
+
+  wrap.innerHTML = Object.entries(MARKS).map(([k, m]) => {
+    let g = `<rect x="${P}" y="${P}" width="${S - 2 * P}" height="${S - 2 * P}" rx="9"
+        fill="color-mix(in srgb, var(--ink-3) 7%, transparent)" stroke="var(--rule)" />`
+      + `<line x1="${S / 2}" y1="${P}" x2="${S / 2}" y2="${S - P}" stroke="var(--rule)" stroke-dasharray="3 3" />`
+      + `<line x1="${P}" y1="${S / 2}" x2="${S - P}" y2="${S / 2}" stroke="var(--rule)" stroke-dasharray="3 3" />`;
+    for (const d of PAST) {
+      const o = (0.34 + 0.66 * (1 - d.age / 88)).toFixed(2);
+      g += m.day(d, px(d.x).toFixed(1), py(d.y).toFixed(1), o);
+    }
+    g += `<circle cx="${px(here.x).toFixed(1)}" cy="${py(here.y).toFixed(1)}" r="8"
+        fill="none" stroke="var(--ink-2)" stroke-width="1.1" opacity=".5" />`
+      + `<circle cx="${px(here.x).toFixed(1)}" cy="${py(here.y).toFixed(1)}" r="4.6"
+        fill="var(--ink)" stroke="var(--bg)" stroke-width="2" />`;
+    const key = m.key.map(([mark, word]) =>
+      `<span><svg viewBox="0 0 11 11" aria-hidden="true">${mark}</svg>${word}</span>`).join('');
+    return `<div class="sw"><h4>${m.name}</h4><p>${m.why}</p>`
+      + `<div class="fig"><svg viewBox="0 0 ${S} ${S}" role="img"
+           aria-label="${m.name}: the same history, encoded without red">${g}</svg></div>`
+      + `<div class="key">${key}</div></div>`;
+  }).join('');
 })();
 
 /* ══ round four ══════════════════════════════════════════════════ */
