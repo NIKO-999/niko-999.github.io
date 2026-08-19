@@ -116,8 +116,21 @@ const PUT = (w = 1400, h = 780) => `(async () => {
   await pg.click('#tShot');
   await pg.evaluate(() => sheet.close());
   /* close is queued as a task rather than dispatched inline, so the
-     handler has not run at the moment close() returns. */
-  await pg.waitForTimeout(120);
+     handler has not run at the moment close() returns. WAIT for it
+     rather than guessing at 120ms — the guess held when this file ran
+     alone and lost the race once inside the full suite, which is the
+     worst way for a check to fail: not on the thing it tests. */
+  /* Both conditions, because dialog.close() flips .open synchronously
+     but fires its `close` event as a task — and the src is dropped in
+     that handler. Waiting on .open alone let the assertion read the
+     src one tick too early, which is why it only ever lost the race
+     inside the full suite. Bounded, so a regression times out and both
+     checks below still fail rather than hanging. */
+  await pg.waitForFunction(() => {
+    const l = document.getElementById('lens');
+    return (l.hidden || !l.open || getComputedStyle(l).display === 'none')
+      && !document.getElementById('lensImg').getAttribute('src');
+  }, null, { timeout: 5000 }).catch(() => {});
   ok(await pg.isHidden('#lens'), 'and closing the sheet closes it too');
   ok(await pg.isHidden('#sheet'), 'the sheet is closed');
   ok(await pg.evaluate(() => !document.getElementById('lensImg').getAttribute('src')),

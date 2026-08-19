@@ -7,9 +7,13 @@
    read as six done, it reads as four missed.
 
    The four verdicts moved to the Log, which is somewhere you go on
-   purpose to read back — and on the Log they are behind a hairline that
-   is SHUT until you open it. Available is not the same as handed to you
-   on the way past, and shut has to be the default or it is neither. */
+   purpose to read back — and on the Log they are the FIGURES WITHOUT
+   THE WORDS, half opacity, in the corner. Shut is not empty here; what
+   is folded away is the labels and the sample caveat.
+
+   A figure with no label cannot judge you: "46%" is a number until
+   something calls it a win rate. That is the whole design, so the
+   checks below care most about what is NOT on screen when it is shut. */
 const { chrome, BASE } = require('./lib');
 const { chromium } = require('playwright-core');
 
@@ -61,23 +65,41 @@ const ok = (name, cond, extra) => {
   // ── and the Log carries the four ───────────────────────────────
   await p.evaluate(() => goto('log'));
   await p.waitForTimeout(350);
-  /* ── shut, and shut is a rule ──
-     No title, no word, no chevron in space. If anything visible sits in
-     the button, the panel is announcing itself and the whole point of
-     moving these off Metrics is lost. */
-  ok('the four start shut', await p.locator('#logFigB').isHidden());
+  /* ── shut: digits, and not one word ──
+     The four values are on screen; every label is off it. If a label
+     survives, the row is a scoreboard again. */
+  ok('the words start folded away', await p.locator('#logFigB').isHidden());
   ok('and the button agrees', await p.getAttribute('#logFigT', 'aria-expanded') === 'false');
-  ok('shut, there is nothing to read', await p.evaluate(() => {
+  ok('but the figures themselves are on screen', await p.locator('#logStats').isVisible());
+  ok('shut, not one label is rendered', await p.evaluate(() =>
+    [...document.querySelectorAll('#logStats i')]
+      .every(i => getComputedStyle(i).display === 'none')));
+  ok('shut, no label text is in the log at all', await p.evaluate((j) => {
+    const t = document.getElementById('logSection').innerText.toLowerCase();
+    return !j.some(x => t.includes(x.toLowerCase()));
+  }, JUDGES));
+  ok('shut, there is still nothing visible saying what it is', await p.evaluate(() => {
     const sr = document.querySelector('#logFigT .sr').getBoundingClientRect();
-    return sr.width <= 1 && sr.height <= 1;         // the label is for a reader, not the eye
+    return sr.width <= 1 && sr.height <= 1;         // the name is for a reader, not the eye
   }));
-  ok('shut, it is a one-pixel rule', await p.evaluate(() => {
-    const b = document.querySelector('#logFigT .lg-fg-line').getBoundingClientRect();
-    return Math.round(b.height) === 1 && b.width > 400;
-  }), await p.evaluate(() => {
-    const b = document.querySelector('#logFigT .lg-fg-line').getBoundingClientRect();
-    return [Math.round(b.width), Math.round(b.height)];
-  }));
+  /* Quiet, and measurably so — the whole point is that you can ignore
+     it. Opening is what brings it up to full. */
+  ok('shut, it is faded back', await p.evaluate(() =>
+    parseFloat(getComputedStyle(document.getElementById('logFigT')).opacity) < 0.8),
+    await p.evaluate(() => getComputedStyle(document.getElementById('logFigT')).opacity));
+  /* Measure the INK, not the box. The row is a full-width flex
+     container that pushes its children right — its own left edge is the
+     pane's and says nothing about where the figures ended up. */
+  const ink = () => p.evaluate(() => {
+    const kids = [...document.querySelectorAll('#logStats > span')].map(x => x.getBoundingClientRect());
+    const f = document.querySelector('#logSection .lg-filters').getBoundingClientRect();
+    return { l: Math.round(Math.min(...kids.map(k => k.left))),
+             r: Math.round(Math.max(...kids.map(k => k.right))),
+             fl: Math.round(f.left), fr: Math.round(f.right) };
+  });
+  const box = await ink();
+  ok('and it sits in the corner, not across the page',
+     Math.abs(box.r - box.fr) < 2 && box.l > box.fl + 200, box);
   /* A heading, carrying a button — not a button carrying a heading.
      The gate's alignment table, and the only reason a screen reader can
      still find this panel at all. */
@@ -90,6 +112,17 @@ const ok = (name, cond, extra) => {
   await p.click('#logFigT');
   await p.waitForTimeout(300);
   ok('opens', await p.locator('#logFigB').isVisible());
+  ok('and the labels arrive with it', await p.evaluate(() =>
+    [...document.querySelectorAll('#logStats i')]
+      .every(i => getComputedStyle(i).display !== 'none')));
+  ok('open, it comes up to full', await p.evaluate(() =>
+    parseFloat(getComputedStyle(document.getElementById('logFigT')).opacity) > 0.95));
+  /* One control, not two. The button is never swapped out from under
+     the pointer, so there is no second control to find on the way back
+     and no focus to hand anywhere. */
+  ok('the same button closes it again', await p.evaluate(() =>
+    !document.getElementById('logFigT').hidden
+    && document.activeElement === document.getElementById('logFigT')));
 
   const onLog = await figures();
   ok('all four are there', JUDGES.every(j => onLog.some(f => f.l === j)), onLog);
@@ -112,7 +145,7 @@ const ok = (name, cond, extra) => {
     return s.top < f.top;
   }));
   ok('and opening pushed the log down rather than covering it', await p.evaluate((was) =>
-    document.querySelector('#logSection .lg-filters').getBoundingClientRect().top > was + 20, shut));
+    document.querySelector('#logSection .lg-filters').getBoundingClientRect().top > was + 8, shut));
 
   /* Shut is the default, but a choice has to survive the reload or it is
      not a choice — every other fold in the app remembers. */
@@ -155,6 +188,11 @@ const ok = (name, cond, extra) => {
   await p.waitForTimeout(350);
   ok('an empty ledger shows dashes rather than zeros',
      (await figures()).filter(f => f.v === '—').length >= 2, await figures());
+  /* An empty ledger must not put four bare zeros in the corner either.
+     "0%  0.00R  0.00  £0" reads as a verdict on somebody who has not
+     traded yet, which is the one account it cannot be a verdict on. */
+  ok('and never four bare zeros', (await figures()).every(f => !/^[£$€]?[-+]?0(\.00)?R?%?$/.test(f.v)),
+     await figures());
   ok('and says so rather than showing zeros', await p.evaluate(() =>
     /Nothing recorded yet/.test(document.getElementById('logSample').textContent)));
 

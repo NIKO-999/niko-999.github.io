@@ -1636,36 +1636,43 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
    readable measure, with the facts about each trade around it rather
    than through it. */
 /* ── the four figures ──
-   A rule you can open. Shut it reads as the gap between the head and
-   the filters, which is the point: the numbers are available without
-   being addressed to you. The caret lives ON the line rather than beside
-   a title, because a title would be the announcement all over again. */
+   Shut is not empty: it is the four numbers with every word taken off,
+   at half opacity in the corner. You can glance at them without being
+   told what they mean, which is the difference between checking and
+   being judged — and it is why they are not behind a control you have
+   to remember exists.
+
+   Click and the labels arrive. ONE control does both: the row gains its
+   words rather than being swapped for a different row, so nothing is
+   ever pulled out from under the pointer and there is no way back to
+   find. The whole thing is right-aligned because the corner is the one
+   place on this screen nothing else is using. */
 .lg-fg-h { margin: 0; }
-.lg-fg { display: block; width: 100%; padding: 9px 0; margin: 2px 0 0;
-  border: 0; background: none; cursor: pointer; }
-.lg-fg-line { display: block; height: 1px; background: var(--rule); position: relative; }
-.lg-fg:hover .lg-fg-line { background: var(--glass-line); }
-.lg-fg:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
-.lg-fg-line::after {
-  content: ''; position: absolute; left: 50%; top: -3px; width: 7px; height: 7px;
-  margin-left: -3.5px; border-right: 1px solid var(--ink-3);
-  border-bottom: 1px solid var(--ink-3); transform: rotate(45deg);
-  opacity: .32; transition: transform .18s, opacity .18s;
+.lg-fg {
+  display: block; width: 100%; margin: 6px 0 0; padding: 2px 0;
+  border: 0; background: none; cursor: pointer;
+  opacity: .5; transition: opacity .18s;
 }
-.lg-fg:hover .lg-fg-line::after { opacity: .7; }
-.lg-fg[aria-expanded="true"] .lg-fg-line::after { transform: rotate(225deg); top: -1px; }
-@media (prefers-reduced-motion: reduce) { .lg-fg-line::after { transition: none; } }
+.lg-fg:hover, .lg-fg[aria-expanded="true"] { opacity: 1; }
+.lg-fg:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 5px; }
+@media (prefers-reduced-motion: reduce) { .lg-fg { transition: none; } }
 
 /* One line, one typeface, tabular. NO colour on any of the four — the
    red profit factor is what put them on this screen in the first place,
    and a verdict does not become kinder for being small. */
-#logFigB { padding: 12px 0 2px; }
-.lg-fg-row { display: flex; flex-wrap: wrap; gap: 4px 20px;
-  font-family: var(--mono); font-size: .7rem; color: var(--ink-2);
-  font-variant-numeric: tabular-nums; }
+.lg-fg-row { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 4px 20px;
+  font-family: var(--mono); font-size: .68rem; color: var(--ink-3);
+  font-variant-numeric: tabular-nums; letter-spacing: .04em; }
+.lg-fg[aria-expanded="true"] .lg-fg-row { color: var(--ink-2); }
 .lg-fg-row span { display: inline-flex; align-items: baseline; gap: 6px; }
 .lg-fg-row i { font-style: normal; font-size: .58rem; letter-spacing: .1em;
   text-transform: uppercase; color: var(--ink-3); }
+/* Shut, the words are gone from the page AND from the accessibility
+   tree — "46%" on its own is not a fact, so the button keeps its own
+   name in .sr and a reader gets that either way. */
+.lg-fg[aria-expanded="false"] .lg-fg-row i { display: none; }
+#logFigB { padding: 8px 0 2px; }
+#logFigB .mt-note { margin: 0; text-align: right; margin-left: auto; }
 
 .lg-filters { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; flex-wrap: wrap; }
 .lg-filters .side { flex: none; }
@@ -2176,20 +2183,20 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
       <div class="pane" tabindex="0">
         <!-- The four that judge you live here rather than on the screen
              you open before trading. Reading them is a deliberate act;
-             being handed them on the way past is not — which is also why
-             this is shut, and why shut looks like spacing.
+             being handed them on the way past is not — so the words come
+             off and only the figures stay, quiet, in the corner.
 
              The heading is real and carries the button, per the gate's
-             alignment table; it just has nothing visible to say. -->
+             alignment table. Its visible content is the figures; .sr
+             gives it a name, because four numbers are not one. -->
         <h3 class="lg-fg-h">
           <button class="lg-fg" type="button" id="logFigT"
                   aria-expanded="false" aria-controls="logFigB">
             <span class="sr">The four figures</span>
-            <span class="lg-fg-line" aria-hidden="true"></span>
+            <span class="lg-fg-row" id="logStats"></span>
           </button>
         </h3>
         <div id="logFigB" hidden>
-          <div class="lg-fg-row" id="logStats"></div>
           <p class="mt-note" id="logSample"></p>
         </div>
 
@@ -7573,10 +7580,10 @@ function renderBtLog() {
    something you go and look at — and a reference you cannot put away
    stops being a reference and becomes furniture. Shut on a machine that
    has never opened them. */
-/* The log's figures fold on the same terms, and default shut for the
-   same reason — with one difference: this panel has no title bar to
-   leave behind, so shut is a rule and not a heading with nothing under
-   it. Its own key, because it is not a backtesting panel. */
+/* The log's figures fold on the same terms and default shut for the
+   same reason — with one difference: shut still SHOWS something here,
+   so what folds is the words and the caveat rather than the panel. Its
+   own key, because it is not a backtesting panel. */
 (function () {
   const K = 'log.figures.v1';
   const btn = document.getElementById('logFigT');
