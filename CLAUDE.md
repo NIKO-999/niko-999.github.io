@@ -97,15 +97,40 @@ what it is for, not what was built.
 
 ## Verifying
 
-There is a Playwright harness in the session scratchpad — `bt.js`,
-`journal.js`, `restest.js`, `aligntest.js`, `gauntlet.js` and friends.
-Run the whole suite before deploying, and add to it rather than checking
-by eye. Measure the composited box, sample real pixels, read values back
-out of the page. "Looks fine" has been wrong about the font axis, an
-upscaling image viewer, a 1.02:1 contrast ratio and two class
-collisions.
+    npm install     # once
+    npm test        # everything, ~4 minutes
+    npm test bt     # one file
 
-Local server: `python3 -m http.server 8901 --directory <repo>`.
+`tests/run.js` owns the server: it finds a free port, serves the repo,
+waits for it, runs every file and tears it down. It used to be a server
+you started by hand in another terminal, and the failure mode was ugly —
+the server dies, thirteen files report connection refused, and the output
+is indistinguishable from thirteen regressions.
+
+`tests/lib.js` finds a browser. Prefer it over hardcoding a path:
+playwright-core resolves Chromium by the build number it was compiled
+against, so asking the disk what is actually installed is what makes the
+suite survive a different machine. Override with `CHROME=/path npm test`.
+
+Add to the suite rather than checking by eye. Measure the composited box,
+sample real pixels, read values back out of the page. "Looks fine" has
+been wrong about the font axis, an upscaling image viewer, a 1.02:1
+contrast ratio and two class collisions.
+
+`tests/names.js` runs first and needs no browser: duplicate top-level
+declarations, duplicate ids, ids the script fetches that are not in the
+markup, and the IIFE wrapper in `shell.js` that is the only thing
+stopping its `KEY` / `readStore` / `mode` from colliding with both apps.
+
+`tests/gauntlet.js` reports faults rather than passes, and runs last.
+When it names something, either fix the layout or narrow the check —
+but only narrow it when the thing it compared genuinely cannot be
+ragged, and prove the narrowing by breaking something on purpose and
+watching it still bite.
+
+**The apps have no dependencies.** `package.json` exists for the test
+suite alone. No build step, no framework, no CDN; both apps are still
+plain static files you can open off the disk.
 
 ## Git
 

@@ -395,7 +395,11 @@
 .tilewrap { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
 .band { margin-bottom: 20px; }
 .band:last-child { margin-bottom: 0; }
+/* A tile's 1px border pushes everything written inside it one pixel
+   right of the tile's own edge. The label matches the TEXT, since that
+   is the column a reader actually follows down the page. */
 .band-h {
+  padding-left: 1px;
   display: flex;
   align-items: baseline;
   gap: 10px;

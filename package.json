@@ -1,0 +1,13 @@
+{
+  "name": "niko-999.github.io",
+  "private": true,
+  "description": "Two single-file apps. These dependencies are for the TEST SUITE only — the apps themselves have none, use no build step, no framework and no CDN, and are served as plain static files.",
+  "scripts": {
+    "test": "node tests/run.js",
+    "serve": "python3 -m http.server 8901"
+  },
+  "devDependencies": {
+    "playwright-core": "^1.62.1",
+    "pngjs": "^7.0.0"
+  }
+}

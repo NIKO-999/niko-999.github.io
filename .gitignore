@@ -1,0 +1,6 @@
+node_modules/
+
+# Test artefacts. The suite writes screenshots while it measures; they are
+# evidence for one run, not something to keep.
+tests/*.png
+tests/out/
