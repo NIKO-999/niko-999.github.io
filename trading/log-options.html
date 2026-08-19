@@ -200,6 +200,68 @@
 .vD .fg { justify-content: flex-end; }
 .vD .fg-note { text-align: right; }
 
+/* ── E · the signature ──
+   Four arms from one point, each as long as one figure. It is a shape,
+   not a scoreboard: you cannot read a verdict off it, only whether it
+   is bigger or smaller than the one you remember from last month. */
+.sig { border: 0; background: none; padding: 0 0 0 10px; cursor: pointer;
+  line-height: 0; opacity: .45; }
+.sig:hover { opacity: 1; }
+.sig:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 4px; }
+.sig svg { width: 22px; height: 22px; overflow: visible; }
+.sig .web { fill: none; stroke: var(--rule); stroke-width: .7; }
+.sig .kite { fill: color-mix(in srgb, var(--ink-2) 26%, transparent);
+  stroke: var(--ink-3); stroke-width: 1; stroke-linejoin: round; }
+.vE .fg-body { padding: 10px 0 2px; }
+
+/* ── F · the rule IS the win rate ──
+   The divider is already there and already one pixel. A fraction of it
+   is brighter, and that fraction is how often you are right. No new ink
+   on the page at all — the ink that was there means something now. */
+.rl { width: 100%; border: 0; background: none; padding: 10px 0; margin: 2px 0 0;
+  cursor: pointer; display: block; }
+.rl-line { display: block; height: 1px; background: var(--rule); }
+.rl-line i { display: block; height: 1px; background: var(--ink-3); opacity: .42;
+  transition: opacity .18s; }
+.rl:hover .rl-line i { opacity: .85; }
+.rl:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.vF .fg-body { padding: 12px 0 2px; }
+
+/* ── G · a sentence ──
+   The four written out in the app's own voice. Prose cannot be a
+   scoreboard: there is no cell to go red and no figure to rank. */
+.snt { display: block; width: 100%; text-align: left; border: 0; background: none;
+  padding: 12px 0 4px; margin: 0; cursor: pointer;
+  font: inherit; font-size: .82rem; line-height: 1.65; color: var(--ink-3);
+  max-width: 72ch; }
+.snt:hover { color: var(--ink-2); }
+.snt:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 6px; }
+.snt b { font-weight: 500; color: var(--ink-2); }
+.snt:hover b { color: var(--ink); }
+.vG .fg-body { padding: 4px 0 2px; }
+
+/* ── H · the edge ──
+   Off the page proper and into the margin. Four segments down the right
+   rule of the pane, each as long as one figure. Ambient — you see it
+   without looking at it, which is the only way a number gets to live in
+   front of you all day. */
+.edge-wrap { position: relative; padding-right: 22px; }
+.edge {
+  position: absolute; top: 14px; right: 0; bottom: 14px; width: 22px;
+  border: 0; background: none; cursor: pointer; padding: 0;
+  display: flex; flex-direction: column; align-items: flex-end; gap: 5px;
+  justify-content: center;
+}
+.edge::before {
+  content: ''; position: absolute; right: 6px; top: 0; bottom: 0;
+  width: 1px; background: var(--rule);
+}
+.edge s { display: block; width: 3px; border-radius: 2px; text-decoration: none;
+  background: var(--ink-3); opacity: .5; transition: opacity .18s; margin-right: 5px; }
+.edge:hover s { opacity: 1; }
+.edge:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: 4px; }
+.vH .fg-body { padding: 10px 0 2px; }
+
 .note-top {
   border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 26px;
@@ -297,6 +359,86 @@
           <div class="mock-log"></div>
         </div>
       </section>
+      <div class="lg-month" style="margin:34px 0 18px"><b>Round two</b><i></i>
+        <em>not a panel at all</em></div>
+      <p class="note-top">
+        A to D are one idea at four volumes: press a thing, four figures appear. These
+        four each do something a folding panel cannot &mdash; the numbers live in a
+        <b>shape</b>, in a <b>rule that was already on the page</b>, in a <b>sentence</b>,
+        or in the <b>margin</b>. All still open to the same plain line if you want the
+        actual figures.
+      </p>
+
+      <!-- ══ E ══ -->
+      <section class="opt vE">
+        <div class="opt-h"><b>E</b><h2>The signature</h2><span>a shape, not a score</span></div>
+        <p class="why">Four arms from one point, each as long as one of the figures, drawn at
+          22 pixels beside the trade count. You cannot read a verdict off it &mdash; there is no
+          number and no scale &mdash; only whether it is fatter or thinner than the one you
+          remember. Which is the only comparison that was ever any use. Click it for the
+          figures themselves.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span>
+            <button class="sig" type="button" aria-expanded="false" aria-controls="fgE"
+              aria-label="The four figures"></button></div>
+          <div class="fg-body" id="fgE" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ F ══ -->
+      <section class="opt vF">
+        <div class="opt-h"><b>F</b><h2>The rule is the win rate</h2><span>no new ink on the page</span></div>
+        <p class="why">There is already a hairline between the head and the filters. Make part
+          of it brighter, and make that part the fraction of trades that work &mdash; so the
+          divider you were ignoring is the figure. Nothing is added: the ink that was there
+          means something now. You would not know unless someone told you, and after that
+          you cannot unsee it.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <button class="rl" type="button" aria-expanded="false" aria-controls="fgF"
+            aria-label="The four figures"><span class="rl-line"><i></i></span></button>
+          <div class="fg-body" id="fgF" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ G ══ -->
+      <section class="opt vG">
+        <div class="opt-h"><b>G</b><h2>A sentence</h2><span>the figures, written out</span></div>
+        <p class="why">Prose cannot be a scoreboard. There is no cell to go red, nothing ranked
+          against anything, and no percentage sitting on its own looking like a mark out of a
+          hundred &mdash; the same four facts, said in the app's voice, in one line you read
+          rather than check. Click it and the raw figures appear underneath for when you
+          actually want them.</p>
+        <div class="mock">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <button class="snt" type="button" aria-expanded="false" aria-controls="fgG"></button>
+          <div class="fg-body" id="fgG" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
+
+      <!-- ══ H ══ -->
+      <section class="opt vH">
+        <div class="opt-h"><b>H</b><h2>The margin</h2><span>off the page, into the edge</span></div>
+        <p class="why">Four short strokes down the right-hand margin, each as long as one
+          figure, at a third opacity. It is not in the reading column at all, so it never
+          interrupts a note &mdash; you see it the way you see the length of a scrollbar, which
+          is the only way a number gets to sit in front of you all day without becoming a
+          verdict. Click the margin for the figures.</p>
+        <div class="mock edge-wrap">
+          <div class="head"><h1>Log</h1><span class="grow"></span>
+            <span class="span-meta">184 trades</span></div>
+          <button class="edge" type="button" aria-expanded="false" aria-controls="fgH"
+            aria-label="The four figures"></button>
+          <div class="fg-body" id="fgH" hidden></div>
+          <div class="mock-log"></div>
+        </div>
+      </section>
     </div>
   </main>
 </div>
@@ -378,6 +520,77 @@ cBtn.addEventListener('click', () => {
     : `${F.n} trades`;
   cNote.hidden = !cOn;
   cNote.textContent = CAVEAT;
+});
+
+/* ═══ round two ═══════════════════════════════════════════════════
+   Each of these carries the figures in something that is not a panel.
+   They share one scale: every figure is mapped to 0–1 against a value
+   that reads as "fine", so the shapes are comparable to each other and
+   to the same shape last month. The scale is deliberately generous —
+   a mark that pins at the top on a mediocre account teaches you
+   nothing. */
+const NORM = {
+  pct: Math.min(1, 46 / 65),          // 65% would be a very high win rate
+  r:   Math.min(1, (0.14 + 0.5) / 1.5),
+  pf:  Math.min(1, 1.18 / 2.5),       // 2.5 is exceptional
+  exp: Math.min(1, (11 + 40) / 120),
+};
+
+/* E · the signature.
+   A kite through four arms. Drawn from the centre out, with a faint web
+   behind it so a short arm reads as short rather than as missing. */
+(function () {
+  const btn = document.querySelector('.vE .sig');
+  const C = 11, R = 10, MIN = 1.6;
+  const arm = (i, k) => {
+    const a = (i * 90 - 90) * Math.PI / 180;
+    const r = MIN + k * (R - MIN);
+    return [C + Math.cos(a) * r, C + Math.sin(a) * r];
+  };
+  const order = [NORM.pct, NORM.pf, NORM.exp, NORM.r];   // up, right, down, left
+  const pts = order.map((k, i) => arm(i, k).map(n => n.toFixed(1)).join(',')).join(' ');
+  const web = order.map((_, i) => arm(i, 1).map(n => n.toFixed(1)).join(',')).join(' ');
+  btn.innerHTML = `<svg viewBox="0 0 22 22" aria-hidden="true">`
+    + `<polygon class="web" points="${web}" />`
+    + `<polygon class="kite" points="${pts}" /></svg>`;
+})();
+
+/* F · the rule. The bright fraction is the win rate, and nothing else
+   on the line moves — a second figure sharing one pixel of height would
+   be two facts in the same stroke and neither would be readable. */
+document.querySelector('.vF .rl-line i').style.width = F.pct;
+
+/* G · the sentence.
+   Written from the figures rather than around them, so it cannot drift
+   out of step with what the ledger says. Second person, declarative,
+   and it names the small number as small — a sentence that flatters is
+   worse than a red cell, because you cannot tell it is doing it. */
+(function () {
+  const btn = document.querySelector('.vG .snt');
+  const pct = parseInt(F.pct, 10), pf = parseFloat(F.pf);
+  const how = pct >= 50 ? 'More than half' : pct >= 40 ? 'Fewer than half' : 'About a third';
+  btn.innerHTML = `${how} of what you take works, and the ones that do pay `
+    + `<b>${pf.toFixed(2)} times</b> what the ones that don't cost. `
+    + `That comes to about <b>${F.exp}</b> a trade, over ${F.n} of them. `
+    + `It is an edge, and it is a small one.`;
+})();
+
+/* H · the margin. Four strokes, longest at the top, so the column has a
+   shape you recognise from across the room rather than four lengths you
+   have to compare. */
+(function () {
+  const btn = document.querySelector('.vH .edge');
+  btn.innerHTML = [NORM.pct, NORM.r, NORM.pf, NORM.exp]
+    .map(k => `<s style="height:${(14 + k * 46).toFixed(0)}px"></s>`).join('');
+})();
+
+document.querySelectorAll('#fgE, #fgF, #fgG, #fgH').forEach(el => { el.innerHTML = LINE; });
+document.querySelectorAll('.sig, .rl, .snt, .edge').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const open = btn.getAttribute('aria-expanded') === 'true';
+    btn.setAttribute('aria-expanded', String(!open));
+    document.getElementById(btn.getAttribute('aria-controls')).hidden = open;
+  });
 });
 
 /* D · digits with the words taken off.
