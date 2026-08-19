@@ -458,12 +458,19 @@
 .bt-charts {
   margin-top: 26px; display: grid; gap: 18px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  /* Each card takes its own height. Stretched, a folded panel beside an
-     open one is a title bar sitting on 300px of nothing. */
-  align-items: start;
+  /* Side by side means the same box. Two panels of the same kind on one
+     row that are different heights read as a mistake, because they are
+     one. */
+  align-items: stretch;
 }
+/* The one exception, and the reason it is an exception: a FOLDED panel
+   is a title bar. Stretching it to its open neighbour's height leaves a
+   title bar sitting on 300px of nothing, which is worse than the
+   mismatch. It opts out; everything else matches. */
+.bt-chart:has(> .bt-ch > h3 > button[aria-expanded="false"]) { align-self: start; }
 .bt-chart { border: 1px solid var(--glass-line); border-radius: 12px;
-  background: var(--glass-in); padding: 14px 16px 6px; }
+  background: var(--glass-in); padding: 14px 16px 6px;
+  display: flex; flex-direction: column; }
 .bt-ch { display: flex; align-items: baseline; gap: 10px; }
 .bt-ch .grow { flex: 1; }
 /* The heading IS the control. A button inside the h3 rather than an h3
@@ -485,7 +492,10 @@
 .bt-chart:has(> .bt-ch > h3 > button[aria-expanded="false"]) { padding-bottom: 14px; }
 .bt-n { font-family: var(--mono); font-size: .6rem; color: var(--ink-3); }
 .bt-sub { margin: 5px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
-.bt-fig { display: grid; place-items: center; padding: 6px 0 10px; }
+/* Grows into whatever height the row settles on and centres in it, so a
+   caption that wraps on one card and not the other cannot push the two
+   shapes out of line. */
+.bt-fig { flex: 1; display: grid; place-items: center; padding: 6px 0 10px; }
 .bt-fig svg { width: 100%; max-width: 260px; height: auto; }
 /* Scoped, and named so it cannot be reached from outside. `.grid` was
    the calendar's, which is the sort of overlap that costs an afternoon
@@ -2034,7 +2044,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         </div>
         <div class="bt-strip" id="btStrip" role="group" aria-label="The week, day by day"></div>
 
-        <div class="bt-charts">
+        <div class="bt-charts even">
           <section class="bt-chart" aria-labelledby="btRadarH">
             <div class="bt-ch"><h3 id="btRadarH">Which candle</h3>
               <span class="grow"></span><span class="bt-n" id="btRadarN"></span></div>
@@ -6948,7 +6958,13 @@ function renderBtRadar() {
   const runs = btRuns();
   const vals = SESSIONS.map(x => runs.filter(r => r.sess === x).length);
   const peak = Math.max(1, ...vals), total = vals.reduce((a, b) => a + b, 0);
-  const n = SESSIONS.length, R = 58, cx = 100, cy = 92;
+  /* 200 square, same as the ring, so at equal width they draw at equal
+     size. cy is 107 rather than the geometric middle: the pentagon puts
+     one label above the centre and two well below it, so centring the
+     SHAPE would leave the drawing sitting high in its box. R is sized so
+     the label band reaches about as far as the ring's does — a matching
+     box around a visibly smaller drawing still reads as mismatched. */
+  const n = SESSIONS.length, R = 68, cx = 100, cy = 108;
   const poly = (f) => SESSIONS.map((_, i) => btPt(cx, cy, f(i), i * 360 / n)
     .map(v => v.toFixed(1)).join(',')).join(' ');
 
@@ -6975,7 +6991,7 @@ function renderBtRadar() {
 
   const worst = SESSIONS[vals.indexOf(Math.min(...vals))];
   document.getElementById('btRadar').innerHTML =
-    `<svg viewBox="0 0 200 178" role="img" aria-label="${
+    `<svg viewBox="0 0 200 200" role="img" aria-label="${
       SESSIONS.map((x, i) => `${x}: ${vals[i]}`).join(', ')}">${g}</svg>`;
   document.getElementById('btRadarN').textContent =
     total ? (Math.min(...vals) === 0 ? `never ${esc(worst)}` : `${total} runs`) : '';
