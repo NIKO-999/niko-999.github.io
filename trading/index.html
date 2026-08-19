@@ -420,6 +420,24 @@
 /* Both halves open the same distance below their heading. */
 .cp-align tbody tr:first-child th, .cp-align tbody tr:first-child td { padding-top: 7px; }
 
+/* ── the results fold ──
+   Same shape as every other fold here: a button inside the heading, the
+   shared chevron turned 180 when open, the state remembered. */
+.mt-fold { display: flex; flex-wrap: wrap; align-items: baseline; gap: 10px; margin-top: 18px; }
+.mt-fold .grow { flex: 1; }
+.mt-fold h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.mt-fold h3 button {
+  display: flex; align-items: center; gap: 7px;
+  padding: 0; border: 0; background: none; cursor: pointer;
+  font: inherit; color: var(--ink);
+}
+.mt-fold h3 button:hover { color: var(--accent); }
+.mt-fold h3 button:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; border-radius: 3px; }
+.mt-fold h3 .ic { display: inline-flex; color: var(--ink-3); transition: transform .16s; }
+.mt-fold h3 button[aria-expanded="true"] .ic { transform: rotate(180deg); }
+.mt-body { flex: 1 0 100%; margin-top: 10px; }
+.mt-note { margin: 0 0 10px; font-size: .76rem; line-height: 1.55; color: var(--ink-3); max-width: 68ch; }
+
 /* ── state: the check-in ──
    Two panels, and the rule from the layout section applies: same row,
    same box. The pad is square, so the card round it takes its height
@@ -2449,6 +2467,19 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         </section>
 
         <div class="metrics" id="metrics"></div>
+
+        <!-- The four that judge you, folded. Not hidden — one press, and
+             the app remembers you opened it. -->
+        <section class="mt-fold">
+          <h3><button type="button" id="mtToggle" aria-expanded="false" aria-controls="mtBody">
+            <span class="ic" aria-hidden="true"></span>Results</button></h3>
+          <span class="grow"></span>
+          <span class="bt-n" id="mtN"></span>
+          <div class="mt-body" id="mtBody" hidden>
+            <p class="mt-note" id="mtSample"></p>
+            <div class="metrics" id="mtOut"></div>
+          </div>
+        </section>
         <!-- The radar is square, so it gets a box of its own rather than a
              band of empty panel either side of it. -->
         <div class="charts">
@@ -3528,6 +3559,34 @@ document.getElementById('todayM').addEventListener('click', () => {
 });
 
 /* ── metrics ── */
+/* ── what you did, as opposed to what happened ──
+   Over the last ten recorded trades, because ten is recent enough to be
+   about this week and long enough not to swing on one entry. Streaks are
+   all-time, because a streak that reset every ten days would not be one. */
+const MT_WINDOW = 10;
+
+/* Consecutive days with a check-in, counted back from today — or from
+   yesterday if today has none yet, on the same reasoning as the backtest
+   streak: a run should not break at midnight for a day not yet lived. */
+function ckStreak() {
+  const seen = new Set(ckDays().map(d => d.date));
+  if (!seen.size) return 0;
+  const d = new Date(); d.setHours(0, 0, 0, 0);
+  if (!seen.has(iso(d))) d.setDate(d.getDate() - 1);
+  let n = 0;
+  while (seen.has(iso(d))) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+
+function doing() {
+  const recent = trades().slice(-MT_WINDOW);
+  const gradeable = recent.filter(e => Array.isArray(e.checks) && e.of);
+  const full = gradeable.filter(e => e.checks.length >= e.of).length;
+  const noted = recent.filter(e => (e.note || '').trim()).length;
+  return { n: recent.length, gradeable: gradeable.length, full, noted,
+           rehearsed: btStreak(), checked: ckStreak() };
+}
+
 function renderMetrics() {
   const t = totals();
   /* Three-way, everywhere. A two-way ternary paints a flat or empty
@@ -3542,12 +3601,38 @@ function renderMetrics() {
     : [t.pf.toFixed(2), `Avg win ${round(t.avgWin)} · avg loss ${round(t.avgLoss)}`];
   const avgR = t.graded ? t.rTotal / t.graded : null;
 
+  /* The top of the screen is the half you can act on. Nothing here is
+     ever drawn in the down colour, because none of it is a verdict — a
+     low figure is a thing to go and do, not a thing to feel. */
+  const d = doing();
   const CARDS = [
     { k: 'pulse', l: 'Net P/L', v: money(t.profit, true), cls: dir(t.profit), wide: true,
       sub: t.graded
         ? `${t.rTotal >= 0 ? '+' : '−'}${Math.abs(t.rTotal).toFixed(2)}R across ${t.graded} graded trade${t.graded === 1 ? '' : 's'}`
         : 'Trades only — deposits are never counted here',
       extra: recoverHTML(t) },
+    { k: 'check', l: 'Plan followed',
+      v: d.gradeable ? `${d.full}/${d.gradeable}` : '—',
+      sub: d.gradeable ? `full checklist, last ${d.gradeable === 1 ? 'trade' : d.gradeable + ' trades'}`
+                       : 'Tick a checklist on a trade and it counts here',
+      bar: d.gradeable ? [d.full / d.gradeable * 100, 'up'] : null },
+    { k: 'note', l: 'Written up',
+      v: d.n ? `${d.noted}/${d.n}` : '—',
+      sub: d.n ? `have a note, last ${d.n === 1 ? 'trade' : d.n + ' trades'}`
+               : 'No trades yet',
+      bar: d.n ? [d.noted / d.n * 100, 'up'] : null },
+    { k: 'mode', l: 'Rehearsed',
+      v: d.rehearsed ? `${d.rehearsed}` : '—',
+      sub: d.rehearsed ? `day${d.rehearsed === 1 ? '' : 's'} in a row with a backtest written up`
+                       : 'Journal a backtest to start a run' },
+    { k: 'out', l: 'Checked in',
+      v: d.checked ? `${d.checked}` : '—',
+      sub: d.checked ? `day${d.checked === 1 ? '' : 's'} in a row`
+                     : 'Check in before the gate will open' },
+  ];
+
+  /* And the four that judge you, behind the fold. */
+  const OUT = [
     { k: 'pct', l: 'Win rate', v: t.n ? t.winRate.toFixed(0) + '%' : '—',
       sub: t.n ? `${t.wins}W · ${t.losses}L` : 'No trades yet',
       bar: t.n ? [t.winRate, t.winRate >= 50 ? 'up' : 'down'] : null },
@@ -3560,14 +3645,33 @@ function renderMetrics() {
       sub: 'Expected value per trade' },
   ];
 
-  document.getElementById('metrics').innerHTML = CARDS.map(c =>
+  const card = (c) =>
     `<div class="metric ${c.cls || ''} ${c.wide ? 'wide' : ''}">
        <span>${icon(c.k, 11)}${c.l}</span>
        <b>${c.v}</b>
        <em>${c.sub}</em>
        ${c.bar ? `<span class="mbar"><i class="${c.bar[1]}" style="width:${c.bar[0].toFixed(1)}%"></i></span>` : ''}
        ${c.extra || ''}
-     </div>`).join('');
+     </div>`;
+
+  document.getElementById('metrics').innerHTML = CARDS.map(card).join('');
+  document.getElementById('mtOut').innerHTML = OUT.map(card).join('');
+
+  /* Say what the sample is worth. Below about thirty graded trades these
+     four are mostly variance, and a red number posing as a judgement
+     when it is noise is worse than no number — this is accuracy, not
+     comfort. */
+  const SAMPLE_MIN = 30;
+  document.getElementById('mtN').textContent = t.n
+    ? `${t.n} trade${t.n === 1 ? '' : 's'}` : '';
+  const note = document.getElementById('mtSample');
+  note.textContent = !t.n
+    ? 'Nothing recorded yet, so none of these mean anything.'
+    : t.n < SAMPLE_MIN
+      ? `${t.n} trade${t.n === 1 ? '' : 's'} is too few for these to separate skill from luck. `
+        + `At this sample a run of losses and a run of wins are both what one edge looks like. `
+        + `They start being worth reading somewhere past ${SAMPLE_MIN}.`
+      : `${t.n} trades — enough to read, though a single month still moves them.`;
 
   /* Max drawdown loses its own tile but not its place — it belongs beside
      the curve that shows it happening. */
@@ -8042,6 +8146,25 @@ document.getElementById('ckSave').addEventListener('click', () => {
 });
 
 document.getElementById('ckChip').addEventListener('click', () => goto('state'));
+
+/* The results fold. Shut on a machine that has never opened it: the four
+   inside are the ones you asked for deliberately or not at all. */
+(() => {
+  const KEY = 'metrics.results.v1';
+  const btn = document.getElementById('mtToggle');
+  const body = document.getElementById('mtBody');
+  btn.innerHTML = `<span class="ic" aria-hidden="true">${icon('chev', 12)}</span>`
+    + btn.textContent.trim();
+  const fold = (on) => {
+    btn.setAttribute('aria-expanded', String(on));
+    body.hidden = !on;
+    try { localStorage.setItem(KEY, on ? 'open' : 'shut'); } catch (e) {}
+  };
+  btn.addEventListener('click', () => fold(btn.getAttribute('aria-expanded') !== 'true'));
+  let was = 'shut';
+  try { was = localStorage.getItem(KEY) || 'shut'; } catch (e) {}
+  fold(was === 'open');
+})();
 
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
