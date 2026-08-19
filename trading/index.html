@@ -8053,7 +8053,7 @@ function renderCkLog() {
         <span class="lg-top">
           <span class="lg-sym">${esc(quad)}</span>
           <span class="lg-chip">${n} of ${CK_ASKS.length}</span>
-          ${p !== 'flat' ? `<span class="lg-r ${p}">${p === 'up' ? 'it worked' : 'it did not'}</span>`
+          ${p !== 'flat' ? `<span class="lg-r">${p === 'up' ? 'it worked' : 'it did not'}</span>`
                          : '<span class="lg-r">nothing traded</span>'}
         </span>
         <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : esc(CK_SAYS[quad])}</p>

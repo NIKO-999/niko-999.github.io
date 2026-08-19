@@ -164,6 +164,33 @@ const ok = (name, cond, extra) => {
     return bad;
   });
   ok('no red and no green on the pad or in its key', hot.length === 0, hot.slice(0, 4));
+  /* And not four inches lower either. The rows under the pad were still
+     saying "it did not" in red about the same day the pad had just
+     drawn as a hollow ring — which left the wash of losses exactly
+     where it was, one scroll down. */
+  ok('nor anywhere else on this screen', await p.evaluate(() => {
+    const bad = [];
+    document.querySelectorAll('#stateSection *').forEach((el) => {
+      if (el.children.length) return;
+      const m = getComputedStyle(el).color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return;
+      const [r, g, b] = [+m[1], +m[2], +m[3]];
+      if ((r > g + 20 && r > b + 20) || (g > r + 20 && g > b + 20))
+        bad.push(el.textContent.trim().slice(0, 20) + ' · ' + el.className);
+    });
+    return bad;
+  }).then(x => x.length === 0), await p.evaluate(() => {
+    const bad = [];
+    document.querySelectorAll('#stateSection *').forEach((el) => {
+      if (el.children.length) return;
+      const m = getComputedStyle(el).color.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+      if (!m) return;
+      const [r, g, b] = [+m[1], +m[2], +m[3]];
+      if ((r > g + 20 && r > b + 20) || (g > r + 20 && g > b + 20))
+        bad.push(el.textContent.trim().slice(0, 20) + ' · ' + el.className);
+    });
+    return bad.slice(0, 4);
+  }));
   ok('and the key does not name a colour either', await p.evaluate(() =>
     !/green|red/i.test(document.querySelector('.ck-key').textContent)),
     await p.locator('.ck-key').textContent());
