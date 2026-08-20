@@ -651,8 +651,24 @@ svg { display: block; }
    calendar. It pages on its own arrows without leaving this screen —
    glancing at next month is not the same as going there. */
 
+/* The month takes whatever the list leaves above the reminders. It used
+   to be a fixed block with the column empty under it, and a panel that
+   stops two thirds of the way down reads as something missing rather
+   than as space. */
 .jm {
-  flex: 0 0 auto;
+  /* Grows into spare height, and when there is not enough to go round it
+     is the FIRST thing to give way — hence the shrink factor of 8
+     against the list's 1. The list is what the panel is for; a month
+     with tighter rows still reads. But it does not shrink past its own
+     six weeks: squeezed further it was CLIPPED, and a month missing its
+     last week is worse than a list that scrolls by one row — the list
+     has a fade and a scrollbar's worth of affordance, the month has
+     none. overflow is hidden as a guard, not as the plan. */
+  flex: 1 0 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
   padding: 12px;
   /* Under what is due, not over it. The month is for looking back; the
      list above it is the thing you opened the app to do. */
@@ -702,8 +718,14 @@ svg { display: block; }
 }
 
 .jm-grid {
+  flex: 1 1 auto;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
+  /* The weekday strip keeps its 20px; the six week rows share what is
+     left. The cap lives on the CELL, not the row: capping the row made
+     the track a fixed 64px, so a squeezed month was clipped — the last
+     week of it disappeared — instead of compacting. */
+  grid-template-rows: 20px repeat(6, minmax(30px, 1fr));
   gap: 2px;
 }
 .jm-w {
@@ -721,7 +743,13 @@ svg { display: block; }
    these smaller; a calendar you miss by 3px is not a calendar. */
 .jm-d {
   position: relative;
-  height: 32px;
+  min-height: 30px;
+  /* height:100% is what makes it fill its row; align-self:center alone
+     stopped it stretching and left every cell at its 30px floor even in
+     a row that had grown to 66. */
+  height: 100%;
+  max-height: 64px;
+  align-self: center;
   display: grid;
   place-items: center;
   border: 0;
@@ -748,9 +776,13 @@ svg { display: block; }
    with something on it, accent for a day where everything due was kept.
    Nothing marks a day you missed: a month grid stippled with failures
    is the thing that makes a person stop opening the app. */
+/* Hung off the middle rather than the floor: in a row that has grown to
+   64px, a dot pinned to the bottom drifts away from the number it
+   belongs to. */
 .jm-dot {
   position: absolute;
-  bottom: 3px;
+  top: 50%;
+  margin-top: 8px;
   width: 4px;
   height: 4px;
   border-radius: var(--r-pill);
@@ -771,8 +803,219 @@ svg { display: block; }
 
 /* Full width on a phone the grid would be seven 50px cells and a lot of
    air. It keeps the rail's reading width and centres. */
+/* Stacked, the panel has no height to give away, so the month goes back
+   to its own size and the rows to theirs. */
 @media (max-width: 1080px) {
-  .jm { max-width: 380px; margin: 0 auto; width: 100%; }
+  .jm {
+    flex: 0 0 auto;
+    max-width: 380px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .jm-grid { grid-template-rows: 20px repeat(6, 32px); }
+}
+
+/* ══ REMINDERS ════════════════════════════════════════════════════
+   The foot of the panel. Three at a time, snapping, no scrollbar — the
+   same box the thoughts list in the hero uses, because it is the same
+   idea and a second idea would be a second thing to learn. */
+
+.jr {
+  flex: 0 0 auto;
+  display: flex;
+  flex-direction: column;
+  border-top: 1px solid var(--line);
+}
+
+.jr-h {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding: 11px 12px 7px;
+}
+.jr-h span {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.jr-h b {
+  font-family: var(--mono);
+  font-size: .62rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* ── writing one ── */
+.jr-add {
+  flex: 0 0 auto;
+  position: relative;
+  display: flex;
+  padding: 0 12px 10px;
+}
+.jr-plus {
+  position: absolute;
+  left: 23px;
+  top: 11px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  color: var(--ink-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  transition: color .12s ease;
+}
+.jr-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px 0 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  /* Darker than the panel it sits in. A field lifted off its surface
+     reads as a button, and this one is somewhere to type. */
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: .76rem;
+}
+.jr-in::placeholder { color: var(--ink-3); }
+.jr-in:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.jr-in:focus + .jr-plus,
+.jr-add:focus-within .jr-plus { color: var(--accent); }
+
+/* ── the five seconds after a tick ──
+   It stands where the field stands, so ticking one does not change the
+   height of the section under it. */
+.jr-undo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  margin: 0 12px 10px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.jr-undo p {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  color: var(--ink-2);
+}
+.jr-undo p b { font-weight: 500; color: var(--ink); }
+.jr-undo button {
+  flex: none;
+  height: 24px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-in);
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.jr-undo button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ── the list ── */
+.jr-scr {
+  flex: 0 0 auto;
+  height: calc(3 * 46px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.jr-scr::-webkit-scrollbar { width: 0; height: 0; }
+
+.jr-row {
+  height: 46px;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-top: 1px solid var(--line);
+}
+.jr-av {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  /* One accent for all of them. A reminder has no identity of its own
+     the way a habit does, and eight colours here would say there were
+     eight kinds. */
+  background: var(--accent);
+  color: var(--accent-in);
+}
+.jr-av svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jr-t {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .78rem;
+  color: var(--ink-2);
+}
+.jr-at {
+  flex: none;
+  font-family: var(--mono);
+  font-size: .58rem;
+  color: var(--ink-3);
+}
+.jr-tk {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  background: none;
+  cursor: pointer;
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.jr-tk:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .jr-tk:hover { background: var(--accent); border-color: var(--accent); }
+}
+
+.jr-none {
+  margin: 0;
+  padding: 14px 12px;
+  font-size: .74rem;
+  color: var(--ink-3);
+}
+
+@media (max-width: 700px) {
+  .jr-in, .jr-undo { height: 44px; }
+  .jr-plus { top: 16px; }
+  .jr-undo button { height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jr-tk { transition: none; }
 }
 
 /* ══ TODAY ═══════════════════════════════════════════════════════
@@ -1700,6 +1943,22 @@ svg { display: block; }
       </div>
       <div class="jm-grid" id="jmGrid"></div>
     </div>
+
+    <!-- Reminders. Their own key and their own rules: ticking one takes
+         it away, and the five seconds after that are the undo. -->
+    <section class="jr" aria-label="Reminders">
+      <div class="jr-h"><span>Reminders</span><b id="remCount">0</b></div>
+      <form class="jr-add" id="remForm" autocomplete="off">
+        <input class="jr-in" id="remIn" type="text" maxlength="120"
+               placeholder="Something to remember" aria-label="Something to remember" />
+        <svg class="jr-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.6v8.8M3.6 8h8.8"/></svg>
+      </form>
+      <div class="jr-undo" id="remUndo" hidden>
+        <p>Removed <b id="remGone"></b></p>
+        <button type="button" id="remUndoBtn">Undo</button>
+      </div>
+      <div class="jr-scr" id="remList"></div>
+    </section>
   </aside>
 
   <main class="main" data-screen="today">
@@ -2310,6 +2569,173 @@ function jmBind() {
   });
 }
 
+/* ══ REMINDERS ════════════════════════════════════════════════════
+   Their own key, deliberately. A habit is a shape you are keeping and
+   a reminder is one thing that stops existing once it has happened —
+   the two should not share an object, so that repairing one can never
+   reach the other. */
+
+const REMKEY = 'jade.reminders.v1';
+
+/* A reminder ticked off is not deleted at once: it is stamped, hidden,
+   and swept five seconds later. That window is the undo, and stamping
+   rather than holding it in a variable means the undo survives a
+   reload — a mis-tap followed by a panicked refresh still gets it
+   back. Anything stamped longer ago than the window is swept on load,
+   so the store never accumulates the dead. */
+const REM_UNDO = 5000;
+
+let rems = remLoad();
+let remPending = null;      /* the id currently inside its undo window */
+let remTimer = null;
+
+function remLoad() {
+  let raw = null;
+  try { raw = localStorage.getItem(REMKEY); } catch (e) { return []; }
+  if (!raw) return [];
+  let o = null;
+  try { o = JSON.parse(raw); } catch (e) { return []; }
+  return remRepair(o);
+}
+
+/* Repaired, never discarded. One malformed row must not cost the rest
+   of the list. */
+function remRepair(o) {
+  const list = o && Array.isArray(o.list) ? o.list : [];
+  const out = [];
+  for (const r of list) {
+    if (!r || typeof r !== 'object') continue;
+    const t = typeof r.t === 'string' ? r.t.trim().slice(0, 120) : '';
+    if (!t) continue;
+    const done = typeof r.done === 'number' && isFinite(r.done) ? r.done : null;
+    if (done !== null && Date.now() - done > REM_UNDO) continue;   /* swept */
+    out.push({
+      id: typeof r.id === 'string' && r.id ? r.id : remId(),
+      t: t,
+      made: typeof r.made === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.made) ? r.made : todayKey(),
+      done: done
+    });
+  }
+  return out;
+}
+
+function remId() {
+  /* Enough to be unique within one list. Not a UUID: nothing outside
+     this browser ever sees it. */
+  return 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+}
+
+function remSave() {
+  try { localStorage.setItem(REMKEY, JSON.stringify({ v: 1, list: rems })); } catch (e) {}
+}
+
+function remAdd(text) {
+  const t = String(text == null ? '' : text).trim().slice(0, 120);
+  if (!t) return false;
+  rems.unshift({ id: remId(), t: t, made: todayKey(), done: null });
+  remSave();
+  return true;
+}
+
+/* Sweeping first: a second tick commits the first one rather than
+   queueing two undos, which would leave the strip lying about which
+   reminder it is offering back. */
+function remDone(id) {
+  remSweep();
+  const r = rems.find(function (x) { return x.id === id; });
+  if (!r) return;
+  r.done = Date.now();
+  remPending = id;
+  remSave();
+  jrRender();
+  clearTimeout(remTimer);
+  remTimer = setTimeout(function () { remSweep(); jrRender(); }, REM_UNDO);
+}
+
+function remUndo() {
+  const r = rems.find(function (x) { return x.id === remPending; });
+  if (r) r.done = null;
+  remPending = null;
+  clearTimeout(remTimer);
+  remSave();
+  jrRender();
+}
+
+/* Commit: anything stamped is now gone for good. */
+function remSweep() {
+  rems = rems.filter(function (r) { return r.done === null; });
+  remPending = null;
+  clearTimeout(remTimer);
+  remSave();
+}
+
+function jrRender() {
+  const live = rems.filter(function (r) { return r.done === null; });
+  document.getElementById('remCount').textContent = live.length;
+
+  const gone = remPending && rems.find(function (r) { return r.id === remPending; });
+  const undo = document.getElementById('remUndo');
+  const form = document.getElementById('remForm');
+  /* The strip stands in the field's place rather than above it, so the
+     section does not change height when one is ticked. */
+  undo.hidden = !gone;
+  form.hidden = !!gone;
+  if (gone) document.getElementById('remGone').textContent = gone.t;
+
+  document.getElementById('remList').innerHTML = live.length
+    ? live.map(function (r) {
+      return '<div class="jr-row" data-id="' + r.id + '">' +
+        '<span class="jr-av" aria-hidden="true"><svg viewBox="0 0 16 16">' + REM_BELL + '</svg></span>' +
+        '<span class="jr-t" title="' + esc(r.t) + '">' + esc(r.t) + '</span>' +
+        '<span class="jr-at">' + esc(remWhen(r.made)) + '</span>' +
+        '<button type="button" class="jr-tk" data-done="' + r.id + '"' +
+          ' aria-label="Done with ' + esc(r.t) + '"></button>' +
+        '</div>';
+    }).join('')
+    : '<p class="jr-none">nothing to remember</p>';
+}
+
+const REM_BELL = '<path d="M4.2 11.2V7.6a3.8 3.8 0 0 1 7.6 0v3.6"/>'
+  + '<path d="M2.9 11.2h10.2"/><path d="M6.8 13.1a1.3 1.3 0 0 0 2.4 0"/>';
+
+/* When it was written, not when it is due — there is no date control on
+   the field, and a column that showed a due date nothing can set would
+   be a promise the app does not keep. */
+function remWhen(k) {
+  const t = todayKey();
+  if (k === t) return 'today';
+  if (k === dayKey(shift(fromKey(t), -1))) return 'yesterday';
+  const d = fromKey(k);
+  return WDAYS[(d.getDay() + 6) % 7] + ' ' + d.getDate();
+}
+
+/* A stamp still inside its window at load means the tab was closed or
+   refreshed mid-undo. Pick the window back up rather than leaving a
+   reminder hidden with no way to get it back — and restart the timer on
+   what is LEFT of the five seconds, not a fresh five. */
+function remResume() {
+  const r = rems.find(function (x) { return x.done !== null; });
+  if (!r) return;
+  remPending = r.id;
+  clearTimeout(remTimer);
+  remTimer = setTimeout(function () { remSweep(); jrRender(); },
+    Math.max(0, REM_UNDO - (Date.now() - r.done)));
+}
+
+function jrBind() {
+  remResume();
+  document.getElementById('remForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const inp = document.getElementById('remIn');
+    if (remAdd(inp.value)) { inp.value = ''; jrRender(); }
+  });
+  document.getElementById('remList').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-done]');
+    if (b) remDone(b.dataset.done);
+  });
+  document.getElementById('remUndoBtn').addEventListener('click', remUndo);
+}
+
 /* ══ TODAY ═══════════════════════════════════════════════════════
    Three readings of one day: the strip is how it is going, the grid
    is what it is made of, and the rail is what is next. All three go
@@ -2876,9 +3302,11 @@ function boot() {
   jtBind();
   jcBind();
   jmBind();
+  jrBind();
   subscribe(() => { jtRender(); jmRender(); if (view === 'calendar') jcRender(); });
   jtRender();
   jmRender();
+  jrRender();
   showView('today');
 
   /* Left open overnight, every reading on the screen is about the wrong
