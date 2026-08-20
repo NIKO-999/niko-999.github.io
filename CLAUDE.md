@@ -1,11 +1,14 @@
 # Working on this repo
 
-Two single-file apps that share a design system:
+Three single-file apps that share a design system:
 
 - `trading/index.html` — the ledger, calendar, log, metrics, risk,
-  backtesting, resources, the check-in, habits and reminders
+  backtesting, resources and the check-in
 - `arc/index.html` — the vision board and long-term timeline
-- `shell.css` + `shell.js` at the root — the shared shell both consume
+- `days/index.html` — habits and reminders
+- `shell.css` + `shell.js` at the root — the shared shell all three
+  consume. A rule that only two of them need belongs in the two, not
+  in the file every one of them loads.
 
 No build step, no framework, no CDN. Vanilla JS, everything inline, one
 file per app.
@@ -65,12 +68,33 @@ Everything lives in this browser and is never uploaded. `ledger.v1`
 holds trades and capital; `backtest.v1`, `ledger.res.v1` and the rest
 keep to their own keys.
 
-**Habits never reach the money either.** `habits.v1` holds its own
-definitions and its own days, and the screen reads nothing from the
-ledger and writes nothing to it. Its whole script is wrapped in an IIFE
-and exposes one name, `renderHabits` — everything inside wants a name
-this file already has (`due`, `rate`, `chain`, `state`, `renderAll`),
-and a collision here replaces rather than throws.
+**Habits never reach the money either** — which is why they are not in
+that app any more. `habits.v1` holds only its own days, and `days/`
+reads no ledger key at all. Both screens keep their IIFE wrappers:
+`renderHabits` and `renderReminders` are the only names that escape,
+and the two would otherwise collide with each other over `due`,
+`rate`, `chain` and `state`.
+
+**The check-in did NOT go with them.** It reads the ledger in three
+places — it locks once the day has a trade on it, and it colours both
+the pad and its log by what that day made. It is a trading instrument
+that happens to ask about you, so it stays with the thing it reads.
+
+**The habit list is code, not data.** Only the days are saved. It used
+to be written alongside them and read back in preference to the file,
+so any browser that had ever ticked a box kept whatever the list was
+when it first saved: reordering did nothing and a new habit never
+arrived at all. Nothing in the app can edit it, so there was never
+anything to preserve — and the one array in `DEFAULT` decides the rows,
+the pips in every cell, and the arms of the radar, in that order.
+
+**Colour on that screen says WHICH, never whether.** The screen had
+none on purpose: a wash of red across a week you missed is a judgement
+about you, and that is what makes you stop opening it. A habit's colour
+is an identity, so a kept mark takes it and a missed one stays hollow.
+The six are never an accent (the accent moves with the palette) and
+stay ΔE ≥ 12 from the four split colours, which are on the same screen.
+`tests/days.js` measures this in Lab rather than comparing hex.
 
 A damaged stored shape is **repaired, not discarded**. Rejecting the
 whole object because the definitions list is broken throws a year of
@@ -149,8 +173,21 @@ not running and looks like it is.
 
 `tests/names.js` runs first and needs no browser: duplicate top-level
 declarations, duplicate ids, ids the script fetches that are not in the
-markup, and the IIFE wrapper in `shell.js` that is the only thing
-stopping its `KEY` / `readStore` / `mode` from colliding with both apps.
+markup, `var(--token)` where the token is defined nowhere, and the IIFE
+wrapper in `shell.js` that is the only thing stopping its `KEY` /
+`readStore` / `mode` from colliding with the apps.
+
+**Add a new app to that file's list the day you create it.** `days/`
+shipped with a `var(--ink-on)` whose token it had not brought across —
+an invalid declaration does not fall back, it inherits, so the chip ran
+at 1.74:1 and looked deliberate. The static check would have found it
+in a tenth of a second; a browser test found it four minutes later.
+
+**A check only sees what is on screen.** The habits "nothing is red"
+scan ran at a point where the month was up, so the week strip was empty
+and its marks were never looked at — painting every missed pip in the
+week red passed it cleanly. It now drives the scale switch itself and
+scans both. If a screen has two renderers, visit both.
 
 `tests/gauntlet.js` reports faults rather than passes, and runs last.
 When it names something, either fix the layout or narrow the check —

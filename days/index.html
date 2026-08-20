@@ -126,6 +126,16 @@
    screen you dread opening on a bad day is a screen you stop opening.
    ══════════════════════════════════════════════════════════════ */
 
+/* Ink for something sitting ON a block of ink — the month on a
+   reminder's date chip. It came across with the chip and its
+   definition did not: on this page --ink-on was undefined, which does
+   not fall back, it makes the whole declaration invalid and lets the
+   colour INHERIT. The chip ran at 1.74:1 and looked deliberate. Same
+   failure the ledger had three of, found the same way, by measuring a
+   real pixel rather than by reading the rule. */
+:root { --ink-on: #14130f; }
+:root[data-resolved="light"] { --ink-on: #f4f2ef; }
+
 /* ── a colour each ──
    The colour says WHICH habit, never whether you kept it. That
    distinction is the whole licence for having any here: this screen
@@ -790,7 +800,7 @@ const renderHabits = (() => {
            right, so the dot was the third place saying it — and the one
            place that made teal mean "push" in a column where teal
            already meant "walk". */
-        return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
+        return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
           <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
           <span class="hb-nm"><b>${esc(h.name)}</b></span>
           <span class="hb-say">${say}</span>
@@ -816,7 +826,7 @@ const renderHabits = (() => {
             : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
         }
       }
-      return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
+      return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
         <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
         <span class="hb-nm"><b>${esc(h.name)}</b>${h.is ? `<em>${esc(h.is)}</em>` : ''}</span>
         <span class="hb-say">${say}</span>

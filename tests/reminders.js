@@ -24,7 +24,7 @@ const ok = (name, cond, extra) => {
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await p.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+  await p.goto(`${BASE}/days/`, { waitUntil: 'networkidle' });
   await p.waitForTimeout(400);
 
   ok('the rail carries it', await p.locator('[data-view="reminders"]').count() === 1);
@@ -138,7 +138,7 @@ const ok = (name, cond, extra) => {
   const both = [];
   for (const scheme of ['light', 'dark']) {
     const q = await b.newPage({ colorScheme: scheme, viewport: { width: 1200, height: 800 } });
-    await q.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+    await q.goto(`${BASE}/days/`, { waitUntil: 'networkidle' });
     both.push(await q.evaluate(`(${measure.toString()})()`));
     await q.close();
   }
@@ -161,7 +161,7 @@ const ok = (name, cond, extra) => {
   const ratios = [];
   for (const scheme of ['light', 'dark']) {
     const q = await b.newPage({ colorScheme: scheme, viewport: { width: 1200, height: 800 } });
-    await q.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+    await q.goto(`${BASE}/days/`, { waitUntil: 'networkidle' });
     await q.evaluate(() => {
       const j = (d) => { const x = new Date(); x.setDate(x.getDate() + d);
         x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
@@ -246,43 +246,40 @@ const ok = (name, cond, extra) => {
     !('reminders' in JSON.parse(localStorage.getItem('habits.v1')))));
 
   /* ── the topbar on this screen ──
-     The search field filters the calendar, the agenda, the ledger and
-     the log — every trade view and nothing else. On Reminders it is
-     inert, so at full width it is the widest thing on the bar doing the
-     least. */
-  await p.evaluate(() => goto('metrics'));
-  await p.waitForTimeout(200);
-  const wide = await p.evaluate(() =>
-    document.querySelector('.topbar .search').getBoundingClientRect().width);
-  await p.evaluate(() => goto('reminders'));
-  await p.waitForTimeout(400);
-  const narrow = await p.evaluate(() =>
-    document.querySelector('.topbar .search').getBoundingClientRect().width);
-  ok('the search collapses to its icon here', narrow < 45 && wide > 200, [wide, narrow]);
-  ok('and its icon survives the collapse', await p.evaluate(() =>
-    document.querySelector('.topbar .search svg').getBoundingClientRect().width > 10));
-  /* It still opens. A control that refuses to is worse than one that is
-     merely narrow. */
-  await p.click('.topbar .search');
-  await p.waitForTimeout(400);
-  ok('clicking it opens it again', await p.evaluate(() =>
-    document.querySelector('.topbar .search').getBoundingClientRect().width > 200));
-  ok('and focus lands in the field', await p.evaluate(() =>
-    document.activeElement === document.getElementById('q')));
-  /* Leaving puts it back rather than remembering it shut — it is only
-     collapsed because it is useless HERE. */
-  await p.evaluate(() => goto('log'));
-  await p.waitForTimeout(400);
-  ok('leaving the screen gives the field back', await p.evaluate(() =>
-    document.querySelector('.topbar .search').getBoundingClientRect().width > 200));
-  ok('and nothing collapses on any other view', await p.evaluate(() => {
-    for (const v of ['metrics', 'calendar', 'log', 'habits', 'state', 'backtest']) {
-      goto(v);
-      if (document.querySelector('.topbar .search').getBoundingClientRect().width < 100) return v;
-    }
-    goto('reminders');
-    return null;
-  }).then(x => x === null));
+     There is no search field to collapse any more, because there is no
+     ledger here to search. This used to be a trading screen wearing a
+     trading bar; the whole point of the move is that the bar carries
+     what THIS app has and nothing else. */
+  const bar = await p.evaluate(() => {
+    const q = (sel) => document.querySelector(sel);
+    return {
+      search:  !!q('.topbar .search'),
+      candle:  !!q('.topbar .candle') || !!q('#candle'),
+      bin:     !!q('#binBtn'),
+      backup:  !!q('#backupBtn'),
+      add:     !!q('.topbar .btn-primary'),
+      theme:   !!q('#themeBtn'),
+      palette: !!q('#palBtn'),
+    };
+  });
+  ok('no search field on the bar', bar.search === false);
+  ok('no candle clock', bar.candle === false);
+  ok('no bin', bar.bin === false);
+  ok('no backup', bar.backup === false);
+  ok('nothing to add from the bar', bar.add === false, bar);
+  ok('appearance is what it does carry', bar.theme && bar.palette);
+  /* The Add button that IS here is the one on the screen, beside the
+     list it joins — and it stays solid, because it ends a form. */
+  ok('the reminder Add is on the screen, not the bar', await p.evaluate(() =>
+    !!document.querySelector('.hr-add .btn-primary')));
+
+  /* ── and no way back into the ledger except a link ── */
+  ok('the rail links out to the ledger', await p.evaluate(() =>
+    !!document.querySelector('.rail a[href="../trading/"]')));
+  ok('and to Arc', await p.evaluate(() =>
+    !!document.querySelector('.rail a[href="../arc/"]')));
+  ok('two views here and no more', await p.evaluate(() =>
+    document.querySelectorAll('.rail [data-view]').length === 2));
 
   ok('the ledger is untouched by any of it', await p.evaluate(() =>
     localStorage.getItem('ledger.v1') === null));

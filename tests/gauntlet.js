@@ -32,9 +32,9 @@ const VIEWS = [
   ['trade/resources@1080', `${BASE}/trading/`, 'resources', null, { width: 1080, height: 950 }],
   ['trade/state',      `${BASE}/trading/`, 'state'],
   ['trade/state@800',  `${BASE}/trading/`, 'state', null, { width: 800, height: 900 }],
-  ['trade/habits',     `${BASE}/trading/`, 'habits'],
-  ['trade/habits@800', `${BASE}/trading/`, 'habits', null, { width: 800, height: 900 }],
-  ['trade/reminders', `${BASE}/trading/`, 'reminders'],
+  ['days/habits',     `${BASE}/days/`, 'habits'],
+  ['days/habits@800', `${BASE}/days/`, 'habits', null, { width: 800, height: 900 }],
+  ['days/reminders',  `${BASE}/days/`, 'reminders'],
   ['trade/backtest',   `${BASE}/trading/`, 'backtest'],
   ['trade/backtest@800', `${BASE}/trading/`, 'backtest', null, { width: 800, height: 900 }],
   ['trade/log',        `${BASE}/trading/`, 'log', async (p) => {

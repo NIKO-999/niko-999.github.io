@@ -29,16 +29,18 @@ const ok = (name, cond, extra) => {
   const errs = [];
   p.on('pageerror', e => errs.push(String(e)));
   p.on('console', m => { if (m.type() === 'error') errs.push(m.text()); });
-  await p.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+  await p.goto(`${BASE}/days/`, { waitUntil: 'networkidle' });
   await p.waitForTimeout(400);
 
-  // ── it is reachable, and it is under Arc ───────────────────────
+  // ── it is its own app now, and it leads ────────────────────────
   ok('the rail carries it', await p.locator('[data-view="habits"]').count() === 1);
-  ok('directly under Arc', await p.evaluate(() => {
-    const rail = [...document.querySelectorAll('.rail > *')];
-    return rail.indexOf(document.querySelector('[data-view="habits"]'))
-         - rail.indexOf(document.querySelector('.rail a[href="../arc/"]')) === 1;
+  ok('and it is the first view', await p.evaluate(() => {
+    const views = [...document.querySelectorAll('.rail [data-view]')];
+    return views[0].dataset.view === 'habits';
   }));
+  ok('the ledger is a link out, not a view', await p.evaluate(() =>
+    !!document.querySelector('.rail a[href="../trading/"]')
+    && document.querySelector('[data-view="metrics"]') === null));
   await p.click('[data-view="habits"]');
   await p.waitForTimeout(300);
   ok('and it opens', await p.locator('#habitsSection').isVisible());
@@ -51,9 +53,12 @@ const ok = (name, cond, extra) => {
     typeof renderHabits === 'function'
     && typeof due === 'undefined' && typeof dueOn === 'undefined'
     && typeof keptOn === 'undefined' && typeof chain === 'undefined'));
-  ok('and the ledger still owns its own names', await p.evaluate(() =>
-    typeof state === 'object' && Array.isArray(state.events)
-    && typeof renderAll === 'function' && typeof totals === 'function'));
+  /* The ledger's names are not merely un-clobbered here, they are
+     ABSENT — this page has no ledger in it to collide with. The
+     wrapper stays anyway: renderReminders shares this file. */
+  ok('and the ledger is not on this page at all', await p.evaluate(() =>
+    typeof state === 'undefined' && typeof renderAll === 'undefined'
+    && typeof totals === 'undefined' && typeof events === 'undefined'));
 
   // ── an untouched machine says nothing rather than zero ─────────
   ok('nothing kept yet, not "0 days"', await p.evaluate(() =>
@@ -63,12 +68,12 @@ const ok = (name, cond, extra) => {
     localStorage.getItem('habits.v1') === null));
 
   // ── the shape of the screen ────────────────────────────────────
-  ok('five habits', await p.locator('.hb-item').count() === 5);
+  ok('six habits', await p.locator('.hb-item').count() === 6);
   ok('one ring, and it leads', await p.evaluate(() => {
     const n = document.getElementById('hbNow');
     return n.firstElementChild.classList.contains('hb-dial')
       && n.lastElementChild.classList.contains('hb-list')
-      && n.querySelectorAll('.hb-list > .hb-item').length === 5;
+      && n.querySelectorAll('.hb-list > .hb-item').length === 6;
   }));
   ok('the ring counts, it does not score', await p.evaluate(() =>
     !/%/.test(document.querySelector('.hb-dial').textContent)));
@@ -81,7 +86,7 @@ const ok = (name, cond, extra) => {
     return Math.abs(a.width - c.width) < 1 && Math.abs(a.height - c.height) < 1
       && Math.abs(a.top - c.top) < 1;
   }));
-  ok('four are a plain tick', await p.locator('.hb-item .hb-act button.tick').count() === 4);
+  ok('five are a plain tick', await p.locator('.hb-item .hb-act button.tick').count() === 5);
   ok('and the workout is a four-way picker', await p.locator('.hb-split button').count() === 4);
 
   /* ── one calendar at two scales ──
@@ -138,7 +143,7 @@ const ok = (name, cond, extra) => {
   await p.waitForTimeout(400);
   /* A damaged definitions list must not take a year of days with it —
      the days are what you cannot get back. */
-  ok('a bad stored shape falls back rather than breaking', await p.locator('.hb-item').count() === 5);
+  ok('a bad stored shape falls back rather than breaking', await p.locator('.hb-item').count() === 6);
   ok('and the days survive the repair', await p.evaluate(() =>
     Object.keys(JSON.parse(localStorage.getItem('habits.v1')).days).length > 50),
     await p.evaluate(() => Object.keys(JSON.parse(localStorage.getItem('habits.v1')).days).length));
@@ -192,31 +197,53 @@ const ok = (name, cond, extra) => {
   const dens = (txt.match(/\b[\d.]+\s*\w{0,6}\s*(of|\/)\s*(your\s*)?[\d.]+\b/gi) || [])
     .filter(x => !/of the/i.test(x));
   ok('no denominator anywhere on the screen', dens.length === 0, dens);
-  ok('and nothing on it is red', await p.evaluate(() => {
+  /* BOTH SCALES. This used to scan whatever happened to be on screen,
+     which at this point in the file is the month — so the week strip
+     was empty and its marks were never looked at. Painting the week's
+     missed pips red passed this check cleanly. Anything drawn by
+     either renderer has to be visited, so the scan drives the switch
+     itself and puts it back. */
+  ok('and nothing on it is red', await p.evaluate(async () => {
     const bad = [];
+    const was = document.querySelector('#hbScale [aria-pressed="true"]').dataset.scale;
+    const scan = [];
     const cs = getComputedStyle(document.documentElement);
     /* The four split colours are deliberate. Read them off the tokens
        rather than hardcoding, so a palette change cannot quietly widen
        the exemption. */
-    const allow = ['push', 'pull', 'legs', 'rest']
-      .map(x => cs.getPropertyValue('--sp-' + x).trim().toLowerCase());
+    /* The four split colours and the six habit colours are deliberate:
+       they say WHICH thing, never whether you kept it. Read off the
+       tokens rather than hardcoded, so a palette change cannot quietly
+       widen the exemption — and everything else on the screen is still
+       forbidden from being red, which is what this check is for. */
+    const allow = [
+      ...['push', 'pull', 'legs', 'rest'].map(x => cs.getPropertyValue('--sp-' + x)),
+      ...['wake', 'workout', 'abs', 'walk', 'water', 'read'].map(x => cs.getPropertyValue('--h-' + x)),
+    ].map(x => x.trim().toLowerCase());
     const hex = (c) => {
       const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
       return m ? '#' + [1, 2, 3].map(i => (+m[i]).toString(16).padStart(2, '0')).join('') : '';
     };
-    document.querySelectorAll('#habitsSection *').forEach((el) => {
-      for (const c of [getComputedStyle(el).backgroundColor, getComputedStyle(el).color,
-                       getComputedStyle(el).stroke]) {
-        const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
-        if (!m) continue;
-        if (m[4] !== undefined && +m[4] < 0.06) continue;
-        if (allow.includes(hex(c))) continue;
-        const [r, g, bl] = [+m[1], +m[2], +m[3]];
-        if (r > g + 20 && r > bl + 20) bad.push(el.className + ' ' + c);
-      }
-    });
-    return bad;
-  }).then(x => x.length === 0));
+    for (const sc of ['week', 'month']) {
+      document.querySelector(`#hbScale [data-scale="${sc}"]`).click();
+      await new Promise((r) => setTimeout(r, 120));
+      scan.push(sc);
+      document.querySelectorAll('#habitsSection *').forEach((el) => {
+        for (const c of [getComputedStyle(el).backgroundColor, getComputedStyle(el).color,
+                         getComputedStyle(el).stroke]) {
+          const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
+          if (!m) continue;
+          if (m[4] !== undefined && +m[4] < 0.06) continue;
+          if (allow.includes(hex(c))) continue;
+          const [r, g, bl] = [+m[1], +m[2], +m[3]];
+          if (r > g + 20 && r > bl + 20) bad.push(sc + ': ' + el.className + ' ' + c);
+        }
+      });
+    }
+    document.querySelector(`#hbScale [data-scale="${was}"]`).click();
+    await new Promise((r) => setTimeout(r, 120));
+    return { bad, scan };
+  }).then((x) => x.scan.length === 2 && x.bad.length === 0));
 
   /* ── the split ──
      Distinct from every accent by HUE at the app's own muted level, not
@@ -268,16 +295,18 @@ const ok = (name, cond, extra) => {
   // ── it records, and the recording sticks ───────────────────────
   await p.click('[data-tick="water"]');
   await p.waitForTimeout(250);
-  ok('ticking marks it done', /done today/.test(await p.locator('.hb-item').first().innerText()),
-     await p.locator('.hb-item').first().innerText());
+  ok('ticking marks it done',
+     /done today/.test(await p.locator('.hb-item[data-h="water"]').innerText()),
+     await p.locator('.hb-item[data-h="water"]').innerText());
   const ring = await p.evaluate(() => document.querySelector('.hb-dial .mid').textContent);
   await p.click('[data-split="legs"]');
   await p.waitForTimeout(250);
   ok('the split logs', await p.evaluate(() =>
     document.querySelector('[data-split="legs"]').getAttribute('aria-pressed') === 'true'));
   ok('and the row names what it was', await p.evaluate(() =>
-    /Legs/.test([...document.querySelectorAll('.hb-item')].pop().innerText)),
-    await p.evaluate(() => [...document.querySelectorAll('.hb-item')].pop().innerText.replace(/\n/g, ' | ')));
+    /Legs/.test(document.querySelector('.hb-item[data-h="workout"]').innerText)),
+    await p.evaluate(() =>
+      document.querySelector('.hb-item[data-h="workout"]').innerText.replace(/\n/g, ' | ')));
   /* Each colour has to name its own split and no other. */
   /* Each colour names its OWN split. Collecting the three and
      asserting the collection is non-empty was the first version of this
@@ -286,7 +315,7 @@ const ok = (name, cond, extra) => {
     const out = [];
     for (const id of ['push', 'pull', 'legs']) {
       document.querySelector(`[data-split="${id}"]`).click();
-      out.push([...document.querySelectorAll('.hb-item')].pop()
+      out.push(document.querySelector('.hb-item[data-h="workout"]')
         .querySelector('.hb-say').textContent.trim());
     }
     return out;
@@ -294,7 +323,7 @@ const ok = (name, cond, extra) => {
   ok('and each colour names its own', named.join() === 'Push,Pull,Legs', named);
   ok('rest says it differently', await p.evaluate(() => {
     document.querySelector('[data-split="rest"]').click();
-    return /rest day/i.test([...document.querySelectorAll('.hb-item')].pop().innerText);
+    return /rest day/i.test(document.querySelector('.hb-item[data-h="workout"]').innerText);
   }));
   await p.click('[data-split="legs"]');
   await p.waitForTimeout(200);
@@ -318,7 +347,9 @@ const ok = (name, cond, extra) => {
   await p.reload({ waitUntil: 'networkidle' });
   await p.click('[data-view="habits"]');
   await p.waitForTimeout(350);
-  ok('and it all survives a reload', /done today/.test(await p.locator('.hb-item').first().innerText()));
+  ok('and it all survives a reload',
+     /done today/.test(await p.locator('.hb-item[data-h="water"]').innerText()),
+     await p.locator('.hb-item[data-h="water"]').innerText());
   ok('and the chosen scale too', await p.locator('#hbMon').isVisible());
 
   // ── one pair of arrows, moving whichever scale is up ───────────
