@@ -210,7 +210,10 @@ svg { display: block; }
   flex: 1 1 0;
   min-width: 0;
   display: flex;
-  align-items: baseline;
+  /* Centred rather than baseline now that a control shares the row.
+     A 32px button on a text baseline sits a third of its height too
+     low, and the 1px the sub-label gives up is the cheaper of the two. */
+  align-items: center;
   gap: 7px;
   font-size: 1rem;
   font-weight: 600;
@@ -386,6 +389,35 @@ svg { display: block; }
   max-width: 1180px;
   margin-inline: auto;
 }
+
+/* The panel toggle. Far left, where a sidebar control belongs, and
+   INSIDE .brand so the bar's two flex:1 halves stay equal and the nav
+   keeps the true centre of the header rather than the centre of what is
+   left after a button. */
+.panel {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color .12s ease, background .12s ease;
+}
+.panel[aria-expanded="false"] { background: none; color: var(--ink-3); }
+@media (hover: hover) {
+  .panel:hover { background: var(--card-2); color: var(--ink); }
+}
+.panel:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Shut is display:none, not a width transition. Collapsing a flex child
+   to zero animates on the wide layout and does nothing on the stacked
+   one, so half the app would slide and half would blink — and the pane
+   beside it reflows either way. */
+[data-rail="shut"] .rail { display: none; }
 
 /* ── rail ── */
 
@@ -1602,7 +1634,13 @@ svg { display: block; }
      querySelector on that container — never getElementById, which
      tests/names.js checks against this markup and would fail. -->
 <header class="top">
-  <div class="brand">Jade<span>habits</span></div>
+  <div class="brand">
+    <button class="panel" type="button" id="railBtn" aria-controls="rail"
+            aria-expanded="true" aria-label="Hide the panel">
+      <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><rect x="2.2" y="3.2" width="11.6" height="9.6" rx="2"/><path d="M6.6 3.2v9.6"/></svg>
+    </button>
+    Jade<span>habits</span>
+  </div>
 
   <nav class="nav" aria-label="Screens">
     <button class="nav-i" type="button" data-view="today" aria-current="page">
@@ -1627,7 +1665,7 @@ svg { display: block; }
 </header>
 
 <div class="body">
-  <aside class="rail" aria-label="Today at a glance">
+  <aside class="rail" id="rail" aria-label="Today at a glance">
     <div class="jm">
       <div class="jm-head">
         <button class="jm-arw" type="button" id="jmPrev" aria-label="Previous month">
@@ -2736,6 +2774,20 @@ function jcBind() {
 
 let view = 'today';
 
+/* The panel's state is not a record, so it lives in its own key. Nothing
+   about the days should share an object with a preference: losing this
+   costs nothing and losing those costs a year, and a repair that has to
+   consider both is a repair that can get it wrong. */
+const UIKEY = 'jade.ui.v1';
+
+function setRail(shut, remember) {
+  document.documentElement.dataset.rail = shut ? 'shut' : 'open';
+  const b = document.getElementById('railBtn');
+  b.setAttribute('aria-expanded', String(!shut));
+  b.setAttribute('aria-label', shut ? 'Show the panel' : 'Hide the panel');
+  if (remember) { try { localStorage.setItem(UIKEY, shut ? 'shut' : 'open'); } catch (e) {} }
+}
+
 function showView(v) {
   if (v !== 'today' && v !== 'calendar') return;
   view = v;
@@ -2751,6 +2803,14 @@ function showView(v) {
 }
 
 function boot() {
+  /* Read before the first render so a shut panel is never painted open
+     and then taken away. */
+  let shut = false;
+  try { shut = localStorage.getItem(UIKEY) === 'shut'; } catch (e) {}
+  setRail(shut, false);
+  document.getElementById('railBtn').addEventListener('click',
+    () => setRail(document.documentElement.dataset.rail !== 'shut', true));
+
   document.querySelector('.nav').addEventListener('click', (e) => {
     const b = e.target.closest('.nav-i');
     if (b) showView(b.dataset.view);
