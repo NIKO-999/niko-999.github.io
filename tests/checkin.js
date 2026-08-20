@@ -164,6 +164,32 @@ const ok = (name, cond, extra) => {
     return bad;
   });
   ok('no red and no green on the pad or in its key', hot.length === 0, hot.slice(0, 4));
+
+  /* ── ink that goes ON ink ──
+     Both of these asked for `var(--bg)`, which shell.css does not
+     define. An invalid custom property makes the whole declaration
+     invalid at computed-value time rather than falling back, so the
+     tick inherited --ink and ran at 1.59:1 on its own background, and
+     the placed dot's halo was never drawn at all. A colour that is
+     WRONG rather than absent, which is why looking at it never found
+     it. */
+  const onInk = await p.evaluate(() => {
+    ckFlags.add(CK_ASKS[0]); ckX = 0.35; ckY = 0.7; ckPlaced = true;
+    renderCkPad(); renderCkAsks();
+    const px = (c) => (String(c).match(/\d+/g) || []).slice(0, 3).map(Number);
+    const rel = (c) => { const f = (v) => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+      const [r, g, b] = c.map(x => f(x / 255)); return .2126 * r + .7152 * g + .0722 * b; };
+    const box = document.querySelector('.ck-asks button[aria-pressed="true"] .box');
+    const la = rel(px(getComputedStyle(box).color)), lb = rel(px(getComputedStyle(box).backgroundColor));
+    return {
+      tick: +((Math.max(la, lb) + .05) / (Math.min(la, lb) + .05)).toFixed(2),
+      halo: getComputedStyle(document.querySelector('#ckSvg .me')).stroke,
+    };
+  });
+  ok('the tick is readable on its own box', onInk.tick >= 4.5, onInk);
+  /* The halo is what lifts today's dot off the days behind it. Without
+     it the mark is the same shape as the history it sits in. */
+  ok('and the placed dot keeps its halo', onInk.halo !== 'none' && onInk.halo !== '', onInk);
   /* And not four inches lower either. The rows under the pad were still
      saying "it did not" in red about the same day the pad had just
      drawn as a hollow ring — which left the wash of losses exactly

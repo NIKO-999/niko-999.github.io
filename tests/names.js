@@ -126,5 +126,37 @@ for (const file of APPS) {
      missing.map(id => `#${id}`).join(', '));
 }
 
+
+/* ── every var() points at a token that exists ──
+   Three declarations in trading/index.html asked for `var(--bg)`, which
+   no stylesheet defines. An invalid custom property does not fall back
+   to the previous declaration — it makes the whole declaration invalid
+   at COMPUTED-VALUE time — so each one silently inherited something
+   plausible instead: a tick at 1.59:1, a chip's month at 1.74:1, and a
+   halo that was never drawn. A colour that is wrong rather than absent
+   is the hardest kind to see, so it gets a static check rather than an
+   eye. */
+{
+  const SRC = ['shell.css', 'trading/index.html', 'arc/index.html'];
+  const text = SRC.map(f => read(f)).join('\n');
+  /* Defined anywhere: a stylesheet, an inline style attribute, or a
+     template literal that sets one. All three are legitimate. */
+  const defined = new Set([...text.matchAll(/(--[\w-]+)\s*:/g)].map(m => m[1]));
+  /* var(--x, fallback) is fine by construction — the fallback is what
+     the declaration uses when --x is missing. */
+  const used = new Map();
+  for (const f of SRC) {
+    /* Comments out first. This file's own note ABOUT the bug mentions
+       the dead token, and a check that fails on the explanation of a
+       fix is a check nobody will keep. */
+    const body = read(f).replace(/\/\*[\s\S]*?\*\//g, ' ').replace(/<!--[\s\S]*?-->/g, ' ');
+    for (const m of body.matchAll(/var\(\s*(--[\w-]+)\s*\)/g)) {
+      if (!defined.has(m[1])) used.set(m[1], (used.get(m[1]) || new Set()).add(f));
+    }
+  }
+  const bad = [...used.entries()].map(([k, v]) => `${k} (${[...v].join(', ')})`);
+  ok('every var() points at a token something defines', bad.length === 0, bad.join('; '));
+}
+
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail ? 1 : 0);

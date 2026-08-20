@@ -150,6 +150,45 @@ const ok = (name, cond, extra) => {
      both.every(h => h.sat.every(x => x < 0.55)), both);
   ok('and the two themes really were different pages',
      both[0].theme !== both[1].theme, both.map(h => h.theme));
+
+  /* ── the ink ON the bands ──
+     `color: var(--bg)` was the first attempt and shell.css has no --bg.
+     An invalid custom property does not fall back to the previous
+     declaration, it makes the whole declaration invalid at
+     computed-value time — so the month inherited --ink and ran at
+     1.74:1 in the light theme. A wrong colour rather than a missing
+     one, which is exactly why looking at it did not find it. */
+  const ratios = [];
+  for (const scheme of ['light', 'dark']) {
+    const q = await b.newPage({ colorScheme: scheme, viewport: { width: 1200, height: 800 } });
+    await q.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+    await q.evaluate(() => {
+      const j = (d) => { const x = new Date(); x.setDate(x.getDate() + d);
+        x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
+        return x.toISOString().slice(0, 10); };
+      localStorage.setItem('reminders.v1', JSON.stringify([
+        { id: 'a', text: 'late', due: j(-2) }, { id: 'b', text: 'soon', due: j(1) },
+        { id: 'c', text: 'clear', due: j(9) }, { id: 'd', text: 'none', due: '' }]));
+    });
+    await q.reload({ waitUntil: 'networkidle' });
+    await q.evaluate(() => goto('reminders'));
+    await q.waitForTimeout(300);
+    ratios.push(...await q.evaluate(() => {
+      const px = (c) => (String(c).match(/\d+/g) || []).slice(0, 3).map(Number);
+      const rel = (c) => { const f = (v) => v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4;
+        const [r, g, b2] = c.map(x => f(x / 255)); return .2126 * r + .7152 * g + .0722 * b2; };
+      return [...document.querySelectorAll('.hr-chip s')].map((el) => {
+        const st = getComputedStyle(el);
+        const la = rel(px(st.color)), lb = rel(px(st.backgroundColor));
+        return +((Math.max(la, lb) + .05) / (Math.min(la, lb) + .05)).toFixed(2);
+      });
+    }));
+    await q.close();
+  }
+  /* Small uppercase mono at .46rem. 4.5 is the floor for text this
+     size, and every band in both themes has to clear it. */
+  ok('the month on every band is readable, in both themes',
+     ratios.length === 8 && ratios.every(r => r >= 4.5), ratios);
   /* Only one loud row. Colour is earned by urgency and never appears on
      a reminder that is merely not done yet. */
   ok('only the overdue one carries the late colour', await p.evaluate(() => {

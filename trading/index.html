@@ -83,13 +83,28 @@
    PnL figure measured 2.13:1 on one of them. So the number is always
    ink, and the direction is carried by the edge, the tint and the sign
    in front of the amount — three cues, none of them colour alone. */
+/* ── ink that goes ON ink ──
+   Every fill in this file that is made of --ink or --ink-2 needs a text
+   or stroke colour that survives on top of it, and that colour is the
+   INVERSE of the page's rather than a shade of it.
+
+   Three places asked for `var(--bg)` instead, and shell.css does not
+   define one. An invalid custom property does not fall back to the
+   previous declaration — it makes the whole declaration invalid at
+   computed-value time — so each of them quietly inherited --ink and got
+   a colour that was WRONG rather than absent. Which is exactly why none
+   of them was ever spotted: the reminder chip ran at 1.74:1, the
+   check-in's ticked box at 1.59, and the pad's placed dot lost its halo
+   entirely (stroke: none). */
 :root {
+  --ink-on: #14130f;
   --up:   #7fb9a2;
   --down: #c98f8f;
   --up-fill:   rgba(127, 185, 162, .16);
   --down-fill: rgba(201, 143, 143, .16);
 }
 :root[data-resolved="light"] {
+  --ink-on: #f4f2ef;
   --up:   #2f6b52;
   --down: #8f3f3f;
   --up-fill:   rgba(47, 107, 82, .13);
@@ -450,7 +465,7 @@
 .ck-pad .edge { fill: var(--ink-3); font-family: var(--mono); font-size: 7.5px;
   letter-spacing: .08em; text-anchor: middle; opacity: .55; }
 /* Today's answer. Ink, not accent — nothing on this pad is a score. */
-.ck-pad .me { fill: var(--ink); stroke: var(--bg); stroke-width: 2; }
+.ck-pad .me { fill: var(--ink); stroke: var(--ink-on); stroke-width: 2; }
 .ck-pad .me-ring { fill: none; stroke: var(--ink-2); stroke-width: 1.2; opacity: .5; }
 /* And the days behind you, which DO carry what the ledger did — that is
    the only judgement on this screen that is not self-reported, and
@@ -496,7 +511,7 @@
    last night, not a mark out of ten. */
 .ck-asks button[aria-pressed="true"] { color: var(--ink); }
 .ck-asks button[aria-pressed="true"] .box {
-  background: var(--ink-2); border-color: var(--ink-2); color: var(--bg);
+  background: var(--ink-2); border-color: var(--ink-2); color: var(--ink-on);
 }
 .ck-note { margin-top: 12px; }
 .ck-acts { display: flex; align-items: center; gap: 12px; margin-top: 12px; }
@@ -1877,7 +1892,7 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   border: 1px solid var(--glass-line); }
 .hr-chip s { display: block; text-decoration: none; font-family: var(--mono);
   font-size: .46rem; letter-spacing: .1em; text-transform: uppercase;
-  padding: 2px 0 1px; color: var(--bg); background: var(--u); }
+  padding: 2px 0 1px; color: var(--ink-on); background: var(--u); }
 .hr-chip b { display: block; font-size: .82rem; font-weight: 400; color: var(--ink-2);
   padding: 2px 0 3px; }
 .hr-row[data-late] .hr-chip b { color: var(--ink); }
