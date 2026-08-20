@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>Reminders — options</title>
+<script>
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  var PAL = { turtle:'slate', canyon:'ember', desert:'ember', nightfall:'cyan',
+              iceberg:'cyan', delta:'cyan', curve:'vellum', cobalt:'cobalt',
+              abyss:'cyan', jade:'jade', violet:'violet', iris:'violet',
+              umber:'umber', silk:'slate' };
+  var p = read('arc.palette') || 'nightfall';
+  if (!PAL[p]) p = 'nightfall';
+  var m = read('arc.theme') || 'system';
+  d.dataset.bg = p; d.dataset.palette = PAL[p];
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  if (!phone) { var l = document.createElement('link');
+    l.rel='preload'; l.as='image'; l.href='../arc/bg/'+p+'.jpg'; l.fetchPriority='high';
+    document.head.appendChild(l); }
+  var k = document.createElement('link');
+  k.rel='preload'; k.as='font'; k.type='font/woff2';
+  k.href='../arc/fonts/Inter.woff2'; k.crossOrigin='anonymous';
+  document.head.appendChild(k);
+})();
+</script>
+<link rel="stylesheet" href="../shell.css" />
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   REMINDERS — options, and the lit marks. Look only; nothing is saved
+   and nothing on this page touches the app.
+
+   THE TENSION, stated up front: everything else in these two screens
+   had its colour taken OFF, because a losing day is a judgement about
+   you and a wash of red is what makes you stop opening the app. A
+   reminder is not that. It is a task with a date, the date is a fact,
+   and being told the dentist was Tuesday is information rather than a
+   verdict. So colour is allowed here — but it is earned by URGENCY, it
+   never appears on a reminder that is simply not done yet, and there is only
+   ever one loud row on the screen.
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+  --sp-push: #4ca9a3; --sp-pull: #c46e8e; --sp-legs: #ad9b52; --sp-rest: #918e88;
+  /* Urgency, at the same muted level as the split colours and chosen
+     the same way — outside the accent family by hue, not by shouting. */
+  --u-late:  #c2607a;
+  --u-soon:  #c2a154;
+  --u-clear: #5fa08c;
+}
+:root[data-resolved="light"] {
+  --sp-push: #2f7570; --sp-pull: #9c4467; --sp-legs: #756a2e; --sp-rest: #77746e;
+  --u-late:  #9a3550;
+  --u-soon:  #7d6420;
+  --u-clear: #35705c;
+}
+.pane { flex: 1; overflow-y: auto; padding: 4px 14px 40px; }
+.note-top { border: 1px solid var(--glass-line); border-radius: 10px;
+  background: var(--glass-in); padding: 12px 14px; margin: 2px 0 22px;
+  font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 82ch; }
+.note-top b { color: var(--ink); font-weight: 500; }
+.opt { margin: 0 0 30px; }
+.opt-h { display: flex; align-items: baseline; gap: 10px; padding: 0 0 3px; }
+.opt-h h2 { margin: 0; font-size: .92rem; font-weight: 500; color: var(--ink); }
+.opt-h b { font-family: var(--mono); font-size: .56rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
+  padding: 2px 6px; }
+.opt-h span { font-size: .76rem; color: var(--ink-3); }
+.opt > p.why { margin: 0 0 12px; font-size: .78rem; line-height: 1.55;
+  color: var(--ink-3); max-width: 80ch; }
+.frame { border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 6px 16px 12px; }
+
+/* ── shared row furniture ─────────────────────────────────────── */
+.r { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px;
+  align-items: center; padding: 11px 0 12px; border-bottom: 1px solid var(--rule); }
+.r:last-child { border-bottom: 0; }
+.r p { margin: 0; font-size: .84rem; line-height: 1.5; color: var(--ink-2); }
+.when { font-family: var(--mono); font-size: .6rem; letter-spacing: .05em;
+  color: var(--ink-3); white-space: nowrap; }
+.x { width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--glass-line); border-radius: 7px; background: none;
+  color: var(--ink-3); cursor: pointer; font-size: .74rem; line-height: 1; }
+.x:hover { background: var(--glass-in-2); color: var(--ink); }
+
+/* ── A · as it ships ─────────────────────────────────────────── */
+.vA .r[data-u="late"] .when, .vA .r[data-u="late"] p { color: var(--ink); }
+
+/* ── B · a lit dot per row ───────────────────────────────────── */
+.vB .r { grid-template-columns: 13px minmax(0, 1fr) auto auto; }
+.lamp { width: 10px; height: 10px; border-radius: 50%;
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--u) 55%, white), var(--u) 62%,
+    color-mix(in srgb, var(--u) 80%, black));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--u) 40%, transparent),
+              0 0 7px color-mix(in srgb, var(--u) 55%, transparent),
+              0 0 15px color-mix(in srgb, var(--u) 26%, transparent); }
+.lamp[data-off] { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
+
+/* ── C · the edge ────────────────────────────────────────────── */
+.vC .r { position: relative; padding-left: 15px; }
+.vC .r::before { content: ''; position: absolute; left: 0; top: 9px; bottom: 10px;
+  width: 3px; border-radius: 2px; background: var(--u); }
+.vC .r[data-u="none"]::before { background: var(--glass-line); }
+
+/* ── D · grouped, with a date chip ───────────────────────────── */
+.grp { display: flex; align-items: center; gap: 11px; margin: 18px 0 2px; }
+.grp:first-child { margin-top: 6px; }
+.grp b { font-family: var(--mono); font-size: .56rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-3); }
+.grp i { flex: 1; height: 1px; background: var(--rule); }
+.grp em { font-style: normal; font-family: var(--mono); font-size: .56rem; color: var(--ink-3); }
+.vD .r { grid-template-columns: 40px minmax(0, 1fr) auto; }
+.chip { width: 40px; border-radius: 8px; overflow: hidden; text-align: center;
+  border: 1px solid var(--glass-line); }
+.chip s { display: block; text-decoration: none; font-family: var(--mono);
+  font-size: .46rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 0 1px; color: var(--bg); background: var(--u); }
+.chip b { display: block; font-size: .82rem; font-weight: 400; color: var(--ink-2);
+  padding: 2px 0 3px; }
+.chip[data-u="none"] s { background: var(--ink-3); }
+
+/* ── E · a countdown ring ────────────────────────────────────── */
+.vE .r { grid-template-columns: 26px minmax(0, 1fr) auto auto; }
+.ring { width: 22px; height: 22px; }
+.ring .tr { fill: none; stroke: var(--glass-in-2); stroke-width: 3.2; }
+.ring .fl { fill: none; stroke: var(--u); stroke-width: 3.2; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%; }
+.ring .dot { fill: var(--u); }
+
+/* ── the lit marks, for the habits picker ────────────────────── */
+.lamps { display: flex; gap: 26px; flex-wrap: wrap; align-items: center; }
+.lamps > div { display: flex; align-items: center; gap: 10px; }
+.lamps span { font-family: var(--mono); font-size: .54rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); }
+.pick { display: flex; gap: 4px; }
+.pick button { width: 26px; height: 26px; padding: 0; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--glass-line); background: none; display: grid; place-items: center; }
+.pick button i { width: 10px; height: 10px; border-radius: 50%; opacity: .45; }
+.pick button[aria-pressed="true"] { border-color: var(--c); }
+.pick button[aria-pressed="true"] i { opacity: 1; }
+/* flat — what ships */
+.flat i { background: var(--c); }
+/* lit — a surface, and a bloom on the chosen one only */
+.lit i { background: radial-gradient(circle at 34% 30%,
+  color-mix(in srgb, var(--c) 55%, white), var(--c) 62%,
+  color-mix(in srgb, var(--c) 78%, black)); }
+.lit button[aria-pressed="true"] i {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent),
+              0 0 7px color-mix(in srgb, var(--c) 62%, transparent),
+              0 0 14px color-mix(in srgb, var(--c) 30%, transparent); }
+/* louder — twice the bloom, for comparison */
+.loud i { background: radial-gradient(circle at 34% 30%,
+  color-mix(in srgb, var(--c) 70%, white), var(--c) 58%,
+  color-mix(in srgb, var(--c) 72%, black)); }
+.loud button[aria-pressed="true"] i {
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 60%, transparent),
+              0 0 10px color-mix(in srgb, var(--c) 85%, transparent),
+              0 0 22px color-mix(in srgb, var(--c) 45%, transparent); }
+.cal-head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
+.cal-head h2 { margin: 0; font-size: .96rem; font-weight: 500; color: var(--ink); }
+.cal-head .grow { flex: 1; }
+</style>
+</head>
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+<div class="app">
+  <main class="main">
+    <div class="head"><h1>Reminders</h1><span class="grow"></span>
+      <span class="span-meta">options · nothing here is saved</span></div>
+    <div class="pane" tabindex="0">
+      <p class="note-top">
+        Same four reminders in every one. The tension worth naming: colour came <b>off</b>
+        the habits and the check-in because a losing day is a judgement about you. A reminder
+        is not that &mdash; it is a task with a date, and being told the dentist was Tuesday is
+        information rather than a verdict. So colour is allowed here, but it is earned by
+        <b>urgency</b>, never appears on one that is simply not done yet, and there is only
+        ever one loud row on the screen.
+      </p>
+      <div id="opts"></div>
+
+      <div class="cal-head" style="margin-top:34px"><h2>And the little circles</h2>
+        <span class="grow"></span><span class="span-meta">the habits picker</span></div>
+      <p class="why" style="margin:0 0 14px;font-size:.78rem;line-height:1.55;color:var(--ink-3);max-width:80ch">
+        Flat is what ships. Lit gives the disc a surface &mdash; a top and a side rather than a
+        circle of paint &mdash; and blooms only the one you chose, because four glowing dots is
+        a string of fairy lights and then none of them is chosen. Loud is the same idea with
+        twice the bloom, for comparison.
+      </p>
+      <div class="frame"><div class="lamps" id="lamps"></div></div>
+    </div>
+  </main>
+</div>
+<script src="rem-options.js"></script>
+</body>
+</html>
