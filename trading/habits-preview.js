@@ -12,15 +12,23 @@
      every: 2   due when it has been that long since you last did it
      perWeek    never due on a given DAY — it owes the week a number
 
-   And two kinds of doing: a tick, or a target you fill. A checkbox is
-   the wrong control for three litres — at two litres by four o'clock
-   you want to see two litres, not an unticked box. */
+   One kind of doing: a tick. An earlier draft had counters for the two
+   habits with a number in them, on the argument that at two litres by
+   four o'clock you want to see two litres. Wrong: thirty minutes of
+   reading happens in one sitting and the water gets ticked at the end
+   of the day, so the counter was asking for bookkeeping the day had
+   already done.
+
+   The numbers do not disappear, they change job. Three litres and
+   thirty minutes stop being a total to reach and become part of what
+   the habit IS, printed beside its name — so the tick means what it
+   says rather than standing in for a measurement nobody took. */
 const HABITS = [
-  { id: 'water',   name: 'Water',        short: 'water',   unit: 'L',   target: 3,  every: 1, step: 0.25 },
-  { id: 'walk',    name: 'Morning walk', short: 'walk',                              every: 1 },
-  { id: 'read',    name: 'Reading',      short: 'reading', unit: 'min', target: 30, every: 1, step: 10 },
-  { id: 'abs',     name: 'Abs',          short: 'abs',                               every: 2 },
-  { id: 'workout', name: 'Workout',      short: 'workout',                           perWeek: 4 },
+  { id: 'water',   name: 'Water',        short: 'water',   is: '3 litres',   every: 1 },
+  { id: 'walk',    name: 'Morning walk', short: 'walk',                      every: 1 },
+  { id: 'read',    name: 'Reading',      short: 'reading', is: '30 minutes', every: 1 },
+  { id: 'abs',     name: 'Abs',          short: 'abs',                       every: 2 },
+  { id: 'workout', name: 'Workout',      short: 'workout',                   perWeek: 4 },
 ];
 const BY_ID = Object.fromEntries(HABITS.map(h => [h.id, h]));
 
@@ -48,14 +56,12 @@ const DAYS = (() => {
     const d = addDays(new Date(), -i);
     const k = iso(d), dow = d.getDay();
     const sat = dow === 6, sun = dow === 0;
-    const rec = { date: k, done: {}, amt: {}, note: '' };
+    const rec = { date: k, done: {}, note: '' };
     const keep = (p) => r() < (sat ? p - 0.3 : sun ? p - 0.12 : p);
 
-    rec.amt.water = Math.min(3.5, Math.max(0, (keep(0.86) ? 3 : 1.5 + r() * 1.2)));
-    rec.done.water = rec.amt.water >= 3;
+    rec.done.water = keep(0.86);
     rec.done.walk = keep(0.74);
-    rec.amt.read = keep(0.55) ? 30 + Math.floor(r() * 20) : Math.floor(r() * 22);
-    rec.done.read = rec.amt.read >= 30;
+    rec.done.read = keep(0.55);
     /* Abs is only offered on days it was due, which is the whole point
        of the cadence — a day it was not due is not a day it was missed. */
     if (i <= lastAbs - 2 || lastAbs === -99) {
@@ -72,11 +78,11 @@ const DAYS = (() => {
     ][Math.floor(r() * 4)];
     out[k] = rec;
   }
-  /* Today, part-finished, so the gap clocks have something to show. */
+  /* Today, part-finished, so the list has something of each state. */
   const t = out[TODAY];
-  t.amt.water = 1.75; t.done.water = false;
+  t.done.water = false;
   t.done.walk = true;
-  t.amt.read = 0; t.done.read = false;
+  t.done.read = false;
   t.due_abs = true; t.done.abs = false;
   return out;
 })();
@@ -184,59 +190,45 @@ function sinceLast(id) {
    before you have read a word, and a face you know from across the
    room.
 
-   The partial does not disappear with the bars. A target habit's DOT
-   fills bottom up like a glass; a tick habit's is solid or hollow, the
-   same shape language the check-in pad uses. */
+   Everything is a tick. The dot is solid or hollow, the same shape
+   language the check-in pad uses, and there is no partial to draw:
+   thirty minutes of reading happens in one sitting and the water is
+   ticked at the end of the day. */
 function renderNow() {
   const t = DAYS[TODAY];
 
   const items = HABITS.map((h) => {
-    let say = '', act = '', dot = '', on = false;
-
-    if (h.target) {
-      const a = t.amt[h.id] || 0, f = Math.min(1, a / h.target);
-      on = a >= h.target;
-      /* Counts UP, and never says what is missing — the dot already
-         shows the gap, and saying it twice turns a task into a
-         shortfall. Past the target it keeps counting rather than
-         pinning: four litres is four, not "full". */
-      say = on ? `<b>${(+a.toFixed(2))}${h.unit}</b> · done`
-               : `<b>${(+a.toFixed(2))}${h.unit}</b> today`;
-      dot = on ? `<s class="hb-dot" data-on="1"></s>`
-               : `<s class="hb-dot" data-part="1" style="--p:${(f * 100).toFixed(0)}%"></s>`;
-      act = `<button type="button" data-add="${h.id}" data-by="${-h.step}"
-               aria-label="Less ${h.name}">&minus;</button>`
-          + `<button type="button" data-add="${h.id}" data-by="${h.step}"
-               aria-label="More ${h.name}">+</button>`;
+    const on = !!t.done[h.id];
+    let say;
+    if (h.perWeek) {
+      const wk = weekOf(new Date()).map(iso).filter(k => k <= TODAY);
+      const n = wk.filter(k => DAYS[k] && DAYS[k].done[h.id]).length;
+      const left = 7 - wk.length;
+      say = `<b>${n}</b> this week · ${left} ${left === 1 ? 'day' : 'days'} left`;
+    } else if (on) {
+      say = '<b>done</b> today';
+    } else if (h.every === 1) {
+      say = 'not yet today';
     } else {
-      on = !!t.done[h.id];
-      if (h.perWeek) {
-        const wk = weekOf(new Date()).map(iso).filter(k => k <= TODAY);
-        const n = wk.filter(k => DAYS[k] && DAYS[k].done[h.id]).length;
-        const left = 7 - wk.length;
-        say = `<b>${n}</b> this week · ${left} ${left === 1 ? 'day' : 'days'} left`;
-      } else if (on) {
-        say = '<b>done</b> today';
-      } else if (h.every === 1) {
-        say = 'not yet today';
-      } else {
-        const n = sinceLast(h.id);
-        if (n === null) say = 'never yet';
-        else {
-          const over = n - h.every;
-          say = over >= 0
-            ? (over === 0 ? '<b>due today</b>'
-                          : `<b>due</b> · ${over} ${over === 1 ? 'day' : 'days'} over`)
-            : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
-        }
+      /* The gap clock survives the counters, because it is about
+         CADENCE rather than about an amount — how long since is the one
+         thing a tick cannot tell you. */
+      const n = sinceLast(h.id);
+      if (n === null) say = 'never yet';
+      else {
+        const over = n - h.every;
+        say = over >= 0
+          ? (over === 0 ? '<b>due today</b>'
+                        : `<b>due</b> · ${over} ${over === 1 ? 'day' : 'days'} over`)
+          : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
       }
-      dot = `<s class="hb-dot"${on ? ' data-on="1"' : ''}></s>`;
-      act = `<button type="button" class="tick ${on ? 'on' : ''}" data-tick="${h.id}"
-               aria-pressed="${on}" aria-label="${h.name} today">${TICK}</button>`;
     }
     return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
-      ${dot}<b>${h.name}</b><span class="hb-say">${say}</span>
-      <span class="hb-act">${act}</span>
+      <s class="hb-dot"${on ? ' data-on="1"' : ''}></s>
+      <span class="hb-nm"><b>${h.name}</b>${h.is ? `<em>${h.is}</em>` : ''}</span>
+      <span class="hb-say">${say}</span>
+      <span class="hb-act"><button type="button" class="tick ${on ? 'on' : ''}"
+        data-tick="${h.id}" aria-pressed="${on}" aria-label="${h.name} today">${TICK}</button></span>
     </div>`;
   }).join('');
 
@@ -426,7 +418,7 @@ function renderLog() {
         <span class="lg-top">
           <span class="lg-sym">${kept.length ? `${kept.length} kept` : 'nothing kept'}</span>
           ${kept.map(id => `<span class="lg-chip">${BY_ID[id].short}</span>`).join('')}
-          <span class="lg-r">${(DAYS[k].amt.water || 0).toFixed(1)}L · ${DAYS[k].amt.read || 0}min</span>
+          <span class="lg-r">${dueOn(k).length === kept.length ? 'all of them' : ''}</span>
         </span>
         ${note ? `<p class="lg-note">${note}</p>` : ''}
       </span>
@@ -455,14 +447,6 @@ renderAll();
 
 /* ── the controls ── */
 document.getElementById('hbNow').addEventListener('click', (e) => {
-  const add = e.target.closest('[data-add]');
-  if (add) {
-    const h = BY_ID[add.dataset.add], t = DAYS[TODAY];
-    t.amt[h.id] = Math.max(0, +((t.amt[h.id] || 0) + +add.dataset.by).toFixed(2));
-    t.done[h.id] = t.amt[h.id] >= h.target;
-    renderAll();
-    return;
-  }
   const tick = e.target.closest('[data-tick]');
   if (!tick) return;
   const id = tick.dataset.tick;

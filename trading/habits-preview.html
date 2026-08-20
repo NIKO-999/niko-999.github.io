@@ -101,17 +101,20 @@
   background: var(--glass-line); border-radius: 9px; overflow: hidden; }
 .hb-item { display: grid; grid-template-columns: 13px minmax(0, 1fr) auto auto;
   gap: 12px; align-items: center; background: var(--glass-in); padding: 9px 12px; }
-/* The dot carries the partial. A target habit's fills bottom up like a
-   glass, so half a day's water is visible without putting a bar back on
-   the row; a tick habit's is solid or hollow, the same shape language
-   the check-in pad uses. */
+/* Solid or hollow, the same shape language the check-in pad uses. There
+   is no partial: everything here is a tick, because reading thirty
+   minutes happens in one sitting and the water gets ticked at the end
+   of the day. */
 .hb-dot { width: 11px; height: 11px; border-radius: 50%; box-sizing: border-box;
   box-shadow: inset 0 0 0 1px var(--glass-line); }
 .hb-dot[data-on] { background: var(--accent); box-shadow: none; }
-.hb-dot[data-part] { background: linear-gradient(to top,
-  var(--accent) var(--p), transparent var(--p)); }
-.hb-item b { font-size: .82rem; font-weight: 400; color: var(--ink-3); min-width: 0; }
-.hb-item[data-on] b { color: var(--ink); font-weight: 500; }
+.hb-nm { min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.hb-nm b { font-size: .82rem; font-weight: 400; color: var(--ink-3); }
+.hb-item[data-on] .hb-nm b { color: var(--ink); font-weight: 500; }
+/* The target stopped being a number to reach and became part of what
+   the habit IS, so it sits with the name rather than in a counter. */
+.hb-nm em { font-style: normal; font-family: var(--mono); font-size: .54rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); }
 .hb-say { font-family: var(--mono); font-size: .58rem; letter-spacing: .05em;
   color: var(--ink-3); white-space: nowrap; }
 .hb-say b { color: var(--ink-2); font-weight: 500; font-size: .58rem; }
@@ -363,23 +366,9 @@
       </div>
       <div class="hb-strip" id="hbStrip"></div>
 
-      <div class="hb-charts">
-        <section class="hb-chart" aria-labelledby="hbByH">
-          <div class="hb-ch"><h3 id="hbByH">Which habit</h3>
-            <span class="grow"></span><span class="hb-n" id="hbByN"></span></div>
-          <p class="hb-sub">Every habit, over the days it was due. The short arm is the one
-            quietly dying.</p>
-          <div class="hb-fig" id="hbBy"></div>
-        </section>
-        <section class="hb-chart" aria-labelledby="hbDowH">
-          <div class="hb-ch"><h3 id="hbDowH">Which day</h3>
-            <span class="grow"></span><span class="hb-n" id="hbDowN"></span></div>
-          <p class="hb-sub">The same days by weekday. Habits do not fail evenly — they fail on
-            one particular day.</p>
-          <div class="hb-fig" id="hbDow"></div>
-        </section>
-      </div>
-
+      <!-- Showing up and the gaps answer "am I keeping this at all";
+           the radars answer "where is it going wrong". First question
+           first. -->
       <div class="hb-charts">
         <section class="hb-chart" aria-labelledby="hbRingH">
           <div class="hb-ch"><h3 id="hbRingH">Showing up</h3>
@@ -394,6 +383,23 @@
           <p class="hb-sub">The worst run each habit has had, and the best. A streak you can
             lose is the only figure worth defending.</p>
           <div class="hb-fig" id="hbGap" style="align-self:stretch"></div>
+        </section>
+      </div>
+
+      <div class="hb-charts">
+        <section class="hb-chart" aria-labelledby="hbByH">
+          <div class="hb-ch"><h3 id="hbByH">Which habit</h3>
+            <span class="grow"></span><span class="hb-n" id="hbByN"></span></div>
+          <p class="hb-sub">Every habit, over the days it was due. The short arm is the one
+            quietly dying.</p>
+          <div class="hb-fig" id="hbBy"></div>
+        </section>
+        <section class="hb-chart" aria-labelledby="hbDowH">
+          <div class="hb-ch"><h3 id="hbDowH">Which day</h3>
+            <span class="grow"></span><span class="hb-n" id="hbDowN"></span></div>
+          <p class="hb-sub">The same days by weekday. Habits do not fail evenly — they fail on
+            one particular day.</p>
+          <div class="hb-fig" id="hbDow"></div>
         </section>
       </div>
 
