@@ -53,10 +53,16 @@ const ok = (name, cond, extra) => {
   await p.click('#hrAdd button[type="submit"]');
   await p.waitForTimeout(250);
   ok('one can be added', await p.locator('.hr-row').count() === 1);
-  /* A distance, not a date. You know what today is. */
-  ok('the date reads as a distance', await p.evaluate(() =>
-    /in \d+ days/.test(document.querySelector('.hr-when').textContent)),
-    await p.locator('.hr-when').textContent());
+  /* A torn calendar page: one object carrying the date and the urgency
+     together, rather than a colour somewhere and a date somewhere
+     else. */
+  ok('it gets a date chip', await p.evaluate(() => {
+    const c = document.querySelector('.hr-chip');
+    return c && /^[A-Z][a-z]{2}$/.test(c.querySelector('s').textContent)
+      && /^\d{1,2}$/.test(c.querySelector('b').textContent);
+  }), await p.evaluate(() => document.querySelector('.hr-chip')
+      ? document.querySelector('.hr-chip').innerText.replace(/\n/g, ' ') : null));
+  ok('and it lands under a heading', await p.locator('.hr-grp').count() === 1);
   ok('the form clears itself', await p.evaluate(() =>
     document.getElementById('hrText').value === ''
     && document.getElementById('hrDate').value === ''));
@@ -75,33 +81,92 @@ const ok = (name, cond, extra) => {
   await p.fill('#hrDate', '2020-01-01');
   await p.click('#hrAdd button[type="submit"]');
   await p.waitForTimeout(250);
-  ok('the undated one sits at the bottom', await p.evaluate(() =>
-    [...document.querySelectorAll('.hr-when')].map(x => x.textContent).pop() === 'no date'),
-    await p.evaluate(() => [...document.querySelectorAll('.hr-when')].map(x => x.textContent)));
-  ok('and the overdue one leads', await p.evaluate(() =>
+  /* Grouped: overdue, this week, later, someday. A flat list of four is
+     fine and a flat list of twenty is a wall. */
+  ok('the list is grouped', await p.evaluate(() =>
+    [...document.querySelectorAll('.hr-grp b')].map(x => x.textContent).join()
+      === 'Overdue,Later,Someday'),
+    await p.evaluate(() => [...document.querySelectorAll('.hr-grp b')].map(x => x.textContent)));
+  ok('an empty heading is never printed', await p.evaluate(() =>
+    ![...document.querySelectorAll('.hr-grp em')].some(x => x.textContent === '0')));
+  ok('overdue leads', await p.evaluate(() =>
     document.querySelector('.hr-row').hasAttribute('data-late')));
-  /* Overdue is STATED, not shouted — the same decision the habits
-     screen makes about a day you missed. */
-  ok('overdue is not red', await p.evaluate(() => {
-    const c = getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color;
-    const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    const [r, g, bl] = [+m[1], +m[2], +m[3]];
-    return !(r > g + 20 && r > bl + 20);
-  }), await p.evaluate(() =>
-    getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color));
-  ok('nothing on the screen is red at all', await p.evaluate(() => {
-    const bad = [];
-    document.querySelectorAll('#remindersSection *').forEach((el) => {
-      for (const c of [getComputedStyle(el).color, getComputedStyle(el).backgroundColor]) {
-        const m = String(c).match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?/);
-        if (!m) continue;
-        if (m[4] !== undefined && +m[4] < 0.06) continue;
-        const [r, g, bl] = [+m[1], +m[2], +m[3]];
-        if (r > g + 20 && r > bl + 20) bad.push(el.className + ' ' + c);
-      }
-    });
-    return bad;
-  }).then(x => x.length === 0));
+  /* An undated one is not urgent by definition, so it waits under
+     Someday rather than being sorted in among the dated ones. */
+  ok('and the undated one waits under Someday', await p.evaluate(() => {
+    const g = [...document.querySelectorAll('.hr-grp')].pop();
+    return g.querySelector('b').textContent === 'Someday'
+      && g.nextElementSibling.innerText.includes('Find that book');
+  }));
+
+  /* ── the one screen that spends colour ──
+     It came off the habits and the check-in because a losing day is a
+     judgement about you. A reminder is a task with a date, and the date
+     is a fact — so colour is allowed, but only for URGENCY. */
+  /* BOTH THEMES. The first version of this ran on whichever scheme the
+     browser happened to open with, and the one colour that was too loud
+     was too loud only in the LIGHT theme — it was caught by luck. A
+     token check that runs in one theme is half a check. */
+  const measure = () => {
+    const px = (h) => [1, 3, 5].map(i => parseInt(h.slice(i, i + 2), 16));
+    const lab = (c) => {
+      let [r, g, b] = c.map(x => x / 255);
+      const f = (v) => v <= 0.04045 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4;
+      [r, g, b] = [f(r), f(g), f(b)];
+      const x = (r * .4124 + g * .3576 + b * .1805) / .95047,
+            y = r * .2126 + g * .7152 + b * .0722,
+            z = (r * .0193 + g * .1192 + b * .9505) / 1.08883;
+      const q = (t) => t > .008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116;
+      return [116 * q(y) - 16, 500 * (q(x) - q(y)), 200 * (q(y) - q(z))];
+    };
+    const de = (a, c) => Math.hypot(...lab(a).map((v, i) => v - lab(c)[i]));
+    const cs = getComputedStyle(document.documentElement);
+    const mine = ['late', 'soon', 'clear'].map(x => px(cs.getPropertyValue('--u-' + x).trim()));
+    const ACC = ['#9fb4be','#365e70','#d0ac9f','#98c7cd','#b0b7bf','#afbfca','#8fa7d6','#c7beb2',
+                 '#a99fd0','#a5caab','#703e2c','#225257','#414c5a','#374e5e','#2a4884','#564937',
+                 '#41327b','#295431'].map(px);
+    const sat = (c) => { const [r, g, b] = c.map(x => x / 255);
+      const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2;
+      return mx === mn ? 0 : (mx - mn) / (l > .5 ? 2 - mx - mn : mx + mn); };
+    return {
+      theme: document.documentElement.dataset.resolved,
+      nearest: Math.min(...mine.flatMap(c => ACC.map(a => de(c, a)))),
+      apart: Math.min(de(mine[0], mine[1]), de(mine[0], mine[2]), de(mine[1], mine[2])),
+      sat: mine.map(c => +sat(c).toFixed(2)),
+    };
+  };
+  const both = [];
+  for (const scheme of ['light', 'dark']) {
+    const q = await b.newPage({ colorScheme: scheme, viewport: { width: 1200, height: 800 } });
+    await q.goto(`${BASE}/trading/`, { waitUntil: 'networkidle' });
+    both.push(await q.evaluate(`(${measure.toString()})()`));
+    await q.close();
+  }
+  ok('the urgency colours cannot be mistaken for an accent, in either theme',
+     both.every(h => h.nearest > 12), both);
+  ok('the three states are clearly apart, in either theme',
+     both.every(h => h.apart > 25), both);
+  ok('and they are muted rather than loud, in either theme',
+     both.every(h => h.sat.every(x => x < 0.55)), both);
+  ok('and the two themes really were different pages',
+     both[0].theme !== both[1].theme, both.map(h => h.theme));
+  /* Only one loud row. Colour is earned by urgency and never appears on
+     a reminder that is merely not done yet. */
+  ok('only the overdue one carries the late colour', await p.evaluate(() => {
+    const late = [...document.querySelectorAll('.hr-row')]
+      .filter(r => r.dataset.u === 'late');
+    return late.length === 1 && late[0].hasAttribute('data-late');
+  }), await p.evaluate(() => [...document.querySelectorAll('.hr-row')].map(r => r.dataset.u)));
+  ok('an undated one carries no colour at all', await p.evaluate(() => {
+    const c = [...document.querySelectorAll('.hr-row')].find(r => r.dataset.u === 'none');
+    const band = getComputedStyle(c.querySelector('.hr-chip s')).backgroundColor;
+    const m = band.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const [r, g, b] = [+m[1], +m[2], +m[3]];
+    return Math.max(r, g, b) - Math.min(r, g, b) < 26;    // grey
+  }), await p.evaluate(() => {
+    const c = [...document.querySelectorAll('.hr-row')].find(r => r.dataset.u === 'none');
+    return getComputedStyle(c.querySelector('.hr-chip s')).backgroundColor;
+  }));
   ok('the count says how many and how many are late', await p.evaluate(() =>
     /3 open · 1 past due/.test(document.getElementById('hrMeta').textContent)),
     await p.locator('#hrMeta').textContent());

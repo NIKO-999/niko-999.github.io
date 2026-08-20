@@ -1717,7 +1717,13 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 /* Solid or hollow, the same shape language the check-in pad uses. */
 .hb-dot { width: 11px; height: 11px; border-radius: 50%; box-sizing: border-box;
   box-shadow: inset 0 0 0 1px var(--glass-line); }
-.hb-dot[data-on] { background: var(--accent); box-shadow: none; }
+.hb-dot[data-on] {
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--lit, var(--accent)) 55%, white),
+    var(--lit, var(--accent)) 62%,
+    color-mix(in srgb, var(--lit, var(--accent)) 80%, black));
+  box-shadow: 0 0 6px color-mix(in srgb, var(--lit, var(--accent)) 45%, transparent);
+}
 .hb-nm { min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .hb-nm b { font-size: .82rem; font-weight: 400; color: var(--ink-3); }
 .hb-item[data-on] .hb-nm b { color: var(--ink); font-weight: 500; }
@@ -1743,11 +1749,26 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .hb-split button { width: 26px; height: 26px; padding: 0; border-radius: 7px;
   cursor: pointer; border: 1px solid var(--glass-line); background: none;
   display: grid; place-items: center; }
-.hb-split button i { width: 10px; height: 10px; border-radius: 50%;
-  background: var(--c); opacity: .45; }
-.hb-split button:hover i { opacity: .8; }
+.hb-split button i {
+  width: 10px; height: 10px; border-radius: 50%; opacity: .45;
+  /* Off-centre, so the disc has a top and a side rather than being a
+     flat circle of paint. */
+  background: radial-gradient(circle at 34% 30%,
+    color-mix(in srgb, var(--c) 55%, white), var(--c) 62%,
+    color-mix(in srgb, var(--c) 78%, black));
+  transition: opacity .16s, box-shadow .2s;
+}
+.hb-split button:hover i { opacity: .82; }
 .hb-split button[aria-pressed="true"] { border-color: var(--c); }
-.hb-split button[aria-pressed="true"] i { opacity: 1; }
+/* Only the chosen one blooms. Four glowing dots is a string of fairy
+   lights, and then none of them is chosen. */
+.hb-split button[aria-pressed="true"] i {
+  opacity: 1;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent),
+              0 0 7px color-mix(in srgb, var(--c) 62%, transparent),
+              0 0 14px color-mix(in srgb, var(--c) 30%, transparent);
+}
+@media (prefers-reduced-motion: reduce) { .hb-split button i { transition: none; } }
 .hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 @media (max-width: 620px) {
   .hb-now { gap: 18px; }
@@ -1802,7 +1823,29 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 /* ── reminders ──
    A habit is a shape you are keeping; a reminder is one thing on one
    date that stops existing once it has happened. Different lifetimes,
-   so a different list. */
+   so a different list.
+
+   AND THE ONE SCREEN THAT SPENDS COLOUR. It was taken off the habits
+   and the check-in because a losing day is a judgement about you and a
+   wash of red is what makes you stop opening the app. A reminder is not
+   that — it is a task with a date, and being told the dentist was
+   Tuesday is information rather than a verdict.
+
+   So: earned by URGENCY, never on one that is merely not done yet, and
+   only ever one loud row. Three states rather than a gradient, because
+   a gradient has to be read and three states are recognised. Picked the
+   same way the split colours were — outside the accent family by hue at
+   the app's own muted level, not by shouting. */
+:root {
+  --u-late:  #c2607a;
+  --u-soon:  #c2a154;
+  --u-clear: #5fa08c;
+}
+:root[data-resolved="light"] {
+  --u-late:  #9a3550;
+  --u-soon:  #7d6931;
+  --u-clear: #35705c;
+}
 .hr-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 4px; }
 .hr-add input[type="text"] { flex: 1; min-width: 200px; height: 34px; padding: 0 11px;
   font: inherit; font-size: .82rem; color: var(--ink); background: var(--glass-in);
@@ -1812,18 +1855,32 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
   border-radius: 8px; }
 .hr-add input::placeholder { color: var(--ink-3); }
 .hr-add input:focus-visible { outline: 2px solid var(--focus); outline-offset: -1px; }
-.hr-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px;
+/* The heading carries as much of the urgency as the colour does, which
+   is what lets the colour stay quiet. */
+.hr-grp { display: flex; align-items: center; gap: 11px; margin: 20px 0 2px; }
+.hr-grp:first-child { margin-top: 8px; }
+.hr-grp b { font-family: var(--mono); font-size: .58rem; letter-spacing: .12em;
+  text-transform: uppercase; color: var(--ink-3); font-weight: 400; }
+.hr-grp i { flex: 1; height: 1px; background: var(--rule); }
+.hr-grp em { font-style: normal; font-family: var(--mono); font-size: .58rem; color: var(--ink-3); }
+
+.hr-row { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px;
   align-items: center; padding: 11px 0 12px; border-bottom: 1px solid var(--rule); }
 .hr-row:last-child { border-bottom: 0; }
 .hr-row p { margin: 0; font-size: .84rem; line-height: 1.5; color: var(--ink-2);
   overflow-wrap: anywhere; }
-.hr-when { font-family: var(--mono); font-size: .6rem; letter-spacing: .05em;
-  color: var(--ink-3); white-space: nowrap; }
-/* An overdue reminder is stated, not shouted. It goes to full ink
-   instead of turning red — the same decision the rest of this screen
-   makes about a day you missed. */
-.hr-row[data-late] .hr-when { color: var(--ink); }
 .hr-row[data-late] p { color: var(--ink); }
+/* A torn calendar page: the month on the coloured band, the day under
+   it. One object carrying the date and the urgency, rather than a
+   colour somewhere and a date somewhere else. */
+.hr-chip { width: 40px; border-radius: 8px; overflow: hidden; text-align: center;
+  border: 1px solid var(--glass-line); }
+.hr-chip s { display: block; text-decoration: none; font-family: var(--mono);
+  font-size: .46rem; letter-spacing: .1em; text-transform: uppercase;
+  padding: 2px 0 1px; color: var(--bg); background: var(--u); }
+.hr-chip b { display: block; font-size: .82rem; font-weight: 400; color: var(--ink-2);
+  padding: 2px 0 3px; }
+.hr-row[data-late] .hr-chip b { color: var(--ink); }
 .hr-x { width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
   border: 1px solid var(--glass-line); border-radius: 7px; background: none;
   color: var(--ink-3); cursor: pointer; }
@@ -8662,7 +8719,9 @@ const renderHabits = (() => {
           const sp = SPLITS.find(x => x.id === d.split);
           say = d.split === 'rest' ? '<b>rest day</b>' : `<b>${sp.name}</b>`;
         }
-        const dotc = d.split ? ` style="background:var(--sp-${d.split});box-shadow:none"` : '';
+        /* Through a variable rather than an inline background, so the
+           one lit-dot rule covers the accent and all four splits. */
+        const dotc = d.split ? ` style="--lit:var(--sp-${d.split})"` : '';
         return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
           <s class="hb-dot"${d.split ? ' data-on="1"' : ''}${dotc}></s>
           <span class="hb-nm"><b>${esc(h.name)}</b></span>
@@ -8984,6 +9043,23 @@ const renderReminders = (() => {
     }
   }
 
+  /* How many days from now, or null for one with no date. */
+  const days = (r, t) => r.due
+    ? Math.round((new Date(r.due + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000)
+    : null;
+  /* Three states rather than a gradient: a gradient has to be read and
+     three states are recognised. */
+  const urg = (n) => n === null ? 'none' : n < 0 ? 'late' : n <= 2 ? 'soon' : 'clear';
+  /* Overdue, this week, later, someday. The heading carries as much of
+     the urgency as the colour does, which is what lets the colour stay
+     quiet. */
+  const GROUPS = [
+    ['Overdue',   (n) => n !== null && n < 0],
+    ['This week', (n) => n !== null && n >= 0 && n <= 7],
+    ['Later',     (n) => n !== null && n > 7],
+    ['Someday',   (n) => n === null],
+  ];
+
   function paint() {
     const t = iso(new Date());
     /* Soonest first, and anything undated LAST: a reminder with no date
@@ -8994,26 +9070,33 @@ const renderReminders = (() => {
     const wrap = document.getElementById('hrList');
     if (!rows.length) {
       wrap.innerHTML = `<p class="hr-empty">Nothing to remember. The date is optional &mdash;
-        without one it simply sits at the bottom until you deal with it.</p>`;
+        without one it simply waits under Someday until you deal with it.</p>`;
       document.getElementById('hrMeta').textContent = '';
       return;
     }
-    wrap.innerHTML = rows.map((r) => {
-      /* A distance, not a date. You know what today is. */
-      let when = 'no date', late = false;
-      if (r.due) {
-        const n = Math.round((new Date(r.due + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000);
-        late = n < 0;
-        when = n === 0 ? 'today' : n === 1 ? 'tomorrow' : n === -1 ? 'yesterday'
-          : n > 0 ? `in ${n} days` : `${-n} days ago`;
-      }
-      return `<div class="hr-row"${late ? ' data-late="1"' : ''}>
-        <p>${esc(r.text)}</p>
-        <span class="hr-when">${when}</span>
+
+    const one = (r) => {
+      const n = days(r, t), u = urg(n);
+      /* A torn calendar page: the month on the band, the day under it.
+         One object carrying the date and the urgency together. */
+      const d = r.due ? new Date(r.due + 'T00:00:00') : null;
+      const chip = `<span class="hr-chip" style="--u:${u === 'none' ? 'var(--ink-3)' : `var(--u-${u})`}">
+        <s>${d ? esc(d.toLocaleDateString('en-GB', { month: 'short' })) : '—'}</s>
+        <b>${d ? d.getDate() : '—'}</b></span>`;
+      return `<div class="hr-row"${n !== null && n < 0 ? ' data-late="1"' : ''} data-u="${u}">
+        ${chip}<p>${esc(r.text)}</p>
         <button class="hr-x" type="button" data-rem="${esc(String(r.id))}"
           aria-label="Delete: ${esc(r.text)}">✕</button>
       </div>`;
+    };
+
+    wrap.innerHTML = GROUPS.map(([name, test]) => {
+      const rs = rows.filter(r => test(days(r, t)));
+      if (!rs.length) return '';                 // an empty heading is noise
+      return `<div class="hr-grp"><b>${name}</b><i></i><em>${rs.length}</em></div>`
+        + rs.map(one).join('');
     }).join('');
+
     const late = rows.filter(r => r.due && r.due < t).length;
     document.getElementById('hrMeta').textContent =
       `${rows.length} open${late ? ` · ${late} past due` : ''}`;
