@@ -397,10 +397,33 @@ function renderGaps() {
   document.getElementById('hbGapN').textContent = `${chain()} day chain`;
 }
 
-/* ── the log ── */
-function renderLog() {
-  const rows = dayList.filter(k => k <= TODAY).slice(-40).reverse();
-  document.getElementById('hbLogMeta').textContent = `${rows.length} days`;
+/* ── the log, five ways ──
+   All five read the same window so the only thing being judged is the
+   shape. Twenty-eight days: four clean weeks, which is what makes the
+   grid and the month legible and is about as far back as any of this is
+   worth looking. */
+const WINDOW = 28;
+const recent = () => dayList.filter(k => k <= TODAY).slice(-WINDOW);
+/* Three states, and the third one is the whole reason the grid works:
+     on    due and done, or done anyway
+     miss  due and not done
+     na    nothing was asked of you — drawn BLANK rather than empty,
+           because a gap you can see through is not a miss
+
+   A perWeek habit is never due on a particular DAY, so without a case
+   for it the whole workout row came out blank: due() said no for all
+   twenty-eight, and the days it was actually done vanished with them. It
+   owes the week, so a day is either one it happened on or one nothing
+   was asked. */
+const state = (id, k) => {
+  const h = BY_ID[id];
+  if (h.perWeek) return DAYS[k] && DAYS[k].done[id] ? 'on' : 'na';
+  return !due(id, k) ? 'na' : (DAYS[k].done[id] ? 'on' : 'miss');
+};
+
+/* A · rows, as they stand. */
+function logRows() {
+  const rows = recent().slice().reverse();
   let html = '', month = '';
   for (const k of rows) {
     const d = new Date(k + 'T00:00:00');
@@ -425,7 +448,133 @@ function renderLog() {
       <span class="lg-noshot"></span>
     </div>`;
   }
-  document.getElementById('hbLog').innerHTML = html;
+  return html;
+}
+
+/* B · the grid. Habits down, days across — the shape every paper habit
+   tracker has had for a century, and still the densest way to hold
+   "which thing, which day" in one picture. A day a habit was not due is
+   BLANK rather than empty: a gap you can see through is not a miss. */
+function logGrid() {
+  const days = recent();
+  const cols = `grid-template-columns:repeat(${days.length}, minmax(0, 1fr))`;
+  return HABITS.map(h => `<div class="grid-h"><span>${h.short}</span>
+      <span class="grid-c" style="${cols}">${days.map(k =>
+        `<i class="${state(h.id, k)}" title="${k}"></i>`).join('')}</span></div>`).join('')
+    + `<div class="grid-h"><span></span><span class="grid-days" style="${cols}">${
+        days.map(k => {
+          const d = new Date(k + 'T00:00:00');
+          return `<em>${d.getDay() === 1 ? d.getDate() : ''}</em>`;
+        }).join('')}</span></div>`;
+}
+
+/* C · the month. The calendar's own shape, so a habit month and a
+   trading month are read the same way and neither has to be learned
+   twice. */
+function logMonth() {
+  const days = recent();
+  const first = new Date(days[0] + 'T00:00:00');
+  const pad = (first.getDay() + 6) % 7;            // Monday-first
+  const head = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
+    .map(d => `<span class="hd">${d}</span>`).join('');
+  const cells = Array.from({ length: pad }, () => '<div class="cell pad"></div>')
+    .concat(days.map((k) => {
+      const d = new Date(k + 'T00:00:00');
+      /* Due OR done — dueOn alone drops the workout, which is never due
+         on a given day and so would never appear on any of them. */
+      const pips = HABITS.filter(h => due(h.id, k) || DAYS[k].done[h.id])
+        .map(h => `<i class="${DAYS[k].done[h.id] ? '' : 'off'}"></i>`).join('');
+      return `<div class="cell"><b>${d.getDate()}</b><span class="pips">${pips}</span></div>`;
+    })).join('');
+  return `<div class="mon">${head}${cells}</div>`;
+}
+
+/* D · the chains. Runs rather than days: not WHICH mornings but how
+   long you have kept each thing going without a break. The only one of
+   the five that answers "am I on a run" at a glance. */
+function logChains() {
+  const days = recent();
+  const N = days.length, WK = Math.floor(N / 7);
+  return HABITS.map((h) => {
+    /* A perWeek habit has no daily run to measure — its unit is the
+       week, so its chain is weeks that met the number. Same track, same
+       geometry, different tick; the caption says which. */
+    const perWeek = !!h.perWeek;
+    const units = perWeek ? WK : N;
+    const hit = perWeek
+      ? Array.from({ length: WK }, (_, w) =>
+          days.slice(w * 7, w * 7 + 7).filter(k => DAYS[k].done[h.id]).length >= h.perWeek)
+      : days.map(k => state(h.id, k));
+
+    const runs = [];
+    let start = null;
+    for (let i = 0; i < units; i++) {
+      const on = perWeek ? hit[i] : hit[i] === 'on';
+      const breaks = perWeek ? !hit[i] : hit[i] === 'miss';
+      if (on) { if (start === null) start = i; }
+      else if (breaks && start !== null) { runs.push([start, i]); start = null; }
+    }
+    if (start !== null) runs.push([start, units]);
+    const best = runs.reduce((a, r) => Math.max(a, r[1] - r[0]), 0);
+    const now = runs.length && runs[runs.length - 1][1] === units
+      ? units - runs[runs.length - 1][0] : 0;
+    const word = perWeek ? (best === 1 ? 'week' : 'weeks') : (best === 1 ? 'day' : 'days');
+    return `<div class="chain-h"><span>${h.short}</span>
+      <span class="chain-t">${runs.map(([a, b]) =>
+        `<i style="left:${(a / units * 100).toFixed(1)}%;width:${
+          ((b - a) / units * 100).toFixed(1)}%"></i>`).join('')}</span>
+      <em>${now ? `on ${now}` : 'broken'} · best ${best} ${word}</em></div>`;
+  }).join('');
+}
+
+/* E · only what is notable.
+   Twenty-eight rows of "three kept" is twenty-eight rows you scroll
+   past. This keeps the days that say something — everything kept, a run
+   ending, or a note — and counts the rest rather than printing them. */
+function logNotable() {
+  const days = recent().slice().reverse();
+  const out = [];
+  let quiet = 0;
+  for (const k of days) {
+    const d = new Date(k + 'T00:00:00');
+    const when = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+    const dd = dueOn(k), kept = didOn(k);
+    const broke = HABITS.filter(h => state(h.id, k) === 'miss'
+      && state(h.id, dayList[dayList.indexOf(k) - 1] || k) === 'on');
+    let what = null;
+    if (DAYS[k].note) what = `<em>note</em>${DAYS[k].note}`;
+    else if (dd.length && kept.length >= dd.length) what = '<em>all of them</em>';
+    else if (broke.length) what = `<em>run ended</em>${broke.map(h => h.short).join(', ')}`;
+    if (!what) { quiet++; continue; }
+    out.push(`<div><b>${when}</b><span class="what">${what}</span></div>`);
+  }
+  return `<div class="notable">${out.join('')}</div>`
+    + `<p class="rest">${quiet} other ${quiet === 1 ? 'day' : 'days'} — nothing to say about them</p>`;
+}
+
+const LOGS = [
+  ['A', 'Rows', 'One a day, with what you kept named. Reads like the trading log, which is '
+    + 'its whole argument — but twenty-eight of them is a lot of scrolling for a screen whose '
+    + 'question is usually "what does the pattern look like".', logRows],
+  ['B', 'The grid', 'Habits down, days across. The shape every paper habit tracker has had '
+    + 'for a century, and still the densest way to hold "which thing, which day" in one '
+    + 'picture. A day a habit was not due is blank rather than empty — a gap you can see '
+    + 'through is not a miss.', logGrid],
+  ['C', 'The month', 'The calendar\'s own shape, so a habit month and a trading month are '
+    + 'read the same way and neither has to be learned twice. Gives every day room for a note '
+    + 'later; costs the most height of the five.', logMonth],
+  ['D', 'The chains', 'Runs rather than days. Not which mornings, but how long you have kept '
+    + 'each thing going without a break — the only one of the five that answers "am I on a '
+    + 'run" from across the room.', logChains],
+  ['E', 'Only what is notable', 'Twenty-eight rows of "three kept" is twenty-eight rows you '
+    + 'scroll past. This keeps the days that say something — everything kept, a run ending, or '
+    + 'a note — and counts the rest instead of printing them.', logNotable],
+];
+
+function renderLog() {
+  document.getElementById('hbLogs').innerHTML = LOGS.map(([k, name, why, fn]) =>
+    `<section class="logopt"><h3><b>${k}</b>${name}</h3><p>${why}</p>
+       <div class="logbody">${fn()}</div></section>`).join('');
 }
 
 /* ── paint ── */

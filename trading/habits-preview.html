@@ -303,6 +303,74 @@
 .hub li .grow { flex: 1; }
 .hub li em { font-style: normal; font-family: var(--mono); font-size: .56rem; color: var(--ink-3); }
 
+/* ══ the log, five ways ════════════════════════════════════════ */
+.logs { display: grid; gap: 16px; }
+.logopt { border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 14px 16px 16px; }
+.logopt h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.logopt h3 b { font-family: var(--mono); font-size: .56rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
+  padding: 2px 5px; margin-right: 7px; }
+.logopt > p { margin: 5px 0 12px; font-size: .72rem; line-height: 1.5;
+  color: var(--ink-3); max-width: 84ch; }
+
+/* B · the grid. Habits down, days across — the shape every paper habit
+   tracker has had for a hundred years, and it is still the densest way
+   to hold "which thing, which day" in one picture. */
+.grid-h { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px;
+  align-items: center; }
+.grid-h + .grid-h { margin-top: 5px; }
+.grid-h span { font-size: .72rem; color: var(--ink-3); text-align: right; }
+.grid-c { display: grid; gap: 2px; }
+.grid-c i { aspect-ratio: 1; border-radius: 2px; background: none;
+  box-shadow: inset 0 0 0 1px var(--glass-line); }
+.grid-c i.on { background: var(--accent); box-shadow: none; }
+.grid-c i.na { box-shadow: none; }
+[data-miss="red"] .grid-c i.miss { background: color-mix(in srgb, var(--down) 40%, transparent);
+  box-shadow: none; }
+.grid-days { display: grid; gap: 2px; margin-top: 5px; }
+.grid-days em { font-style: normal; font-family: var(--mono); font-size: .46rem;
+  color: var(--ink-3); text-align: center; opacity: .6; }
+
+/* C · the month. The calendar's own shape, so a habit month and a
+   trading month are read the same way. */
+.mon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+.mon .hd { font-family: var(--mono); font-size: .5rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); text-align: center; padding-bottom: 2px; }
+.mon .cell { border: 1px solid var(--glass-line); border-radius: 7px; min-height: 52px;
+  padding: 5px 5px 6px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.mon .cell.pad { border-color: transparent; }
+.mon .cell b { font-size: .68rem; font-weight: 400; color: var(--ink-3); }
+.mon .pips { display: flex; gap: 2px; }
+.mon .pips i { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.mon .pips i.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
+[data-miss="red"] .mon .pips i.off { background: color-mix(in srgb, var(--down) 40%, transparent);
+  box-shadow: none; }
+
+/* D · the chains. Runs rather than days: how LONG you have kept each
+   thing going, drawn as unbroken length. */
+.chain-h { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 10px;
+  align-items: center; font-size: .72rem; color: var(--ink-3); }
+.chain-h + .chain-h { margin-top: 8px; }
+.chain-t { height: 9px; border-radius: 5px; background: var(--glass-in-2);
+  position: relative; overflow: hidden; }
+.chain-t i { position: absolute; top: 0; height: 9px; border-radius: 5px;
+  background: var(--accent); }
+.chain-h em { font-style: normal; font-family: var(--mono); font-size: .56rem;
+  color: var(--ink-3); white-space: nowrap; }
+
+/* E · only what is notable. */
+.notable { display: grid; gap: 1px; background: var(--glass-line);
+  border-radius: 9px; overflow: hidden; }
+.notable > div { background: var(--glass-in); padding: 10px 13px; display: grid;
+  grid-template-columns: 78px minmax(0, 1fr); gap: 12px; align-items: baseline; }
+.notable b { font-size: .74rem; font-weight: 400; color: var(--ink-3); }
+.notable .what { font-size: .8rem; color: var(--ink-2); }
+.notable .what em { font-style: normal; font-family: var(--mono); font-size: .54rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-right: 8px; }
+.notable .rest { background: none; padding: 9px 2px 0; display: block;
+  font-family: var(--mono); font-size: .56rem; letter-spacing: .06em; color: var(--ink-3); }
+
 .note-top { border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 20px;
   font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 80ch; }
@@ -403,9 +471,14 @@
         </section>
       </div>
 
-      <div class="cal-head" style="margin-top:26px"><h2>Lately</h2><span class="grow"></span>
-        <span class="span-meta" id="hbLogMeta"></span></div>
-      <div id="hbLog"></div>
+      <div class="cal-head" style="margin-top:30px"><h2>Lately &mdash; five ways</h2>
+        <span class="grow"></span>
+        <span class="span-meta">the same days in each</span></div>
+      <p class="hb-sub" style="margin:0 0 14px;max-width:84ch">The log answers a different
+        question from everything above it: the ring says how today is going and the radars say
+        where it goes wrong, but this is where you come to find <b>a particular day</b>, or to
+        see a pattern nothing has named yet. Density matters more here than anywhere else.</p>
+      <div class="logs" id="hbLogs"></div>
     </div>
   </main>
 </div>
