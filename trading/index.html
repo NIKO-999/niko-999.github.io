@@ -2256,6 +2256,11 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M4 12.5 8 16.5 20 5M4 19h9" /><circle cx="18" cy="17" r="3" /></svg>
     </button>
+    <button type="button" data-view="reminders" aria-label="Reminders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 9a6 6 0 0 1 12 0c0 5 2 6 2 6H4s2-1 2-6M10 19a2 2 0 0 0 4 0" /></svg>
+    </button>
     <span class="spacer"></span>
     <!-- At the foot, above appearance. Everything above the spacer is a
          view of the record; these three read none of it, so they sit
@@ -2543,22 +2548,6 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
         <div class="hb-strip" id="hbStrip" role="group" aria-label="The week, day by day"></div>
         <div id="hbMon" hidden></div>
 
-        <!-- ── reminders ──
-             Not habits. A habit is a shape you are keeping; a reminder
-             is one thing on one date that stops existing once it has
-             happened. They share a screen because they share a part of
-             life, and nothing else. -->
-        <div class="cal-head" style="margin-top:30px"><h2>Reminders</h2>
-          <span class="grow"></span><span class="span-meta" id="hrMeta"></span></div>
-        <form class="hr-add" id="hrAdd">
-          <label class="sr" for="hrText">What to remember</label>
-          <input id="hrText" type="text" maxlength="120" autocomplete="off"
-                 placeholder="The thing you keep meaning to do" />
-          <label class="sr" for="hrDate">Due by</label>
-          <input id="hrDate" type="date" />
-          <button class="btn btn-primary" type="submit">Add</button>
-        </form>
-        <div id="hrList"></div>
 
         <div class="hb-charts">
           <section class="hb-chart" aria-labelledby="hbByH">
@@ -2576,6 +2565,30 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
             <div class="hb-fig" id="hbDow"></div>
           </section>
         </div>
+      </div>
+    </main>
+
+    <!-- ── reminders ──
+         Not habits, and no longer sharing their screen. A habit is a
+         shape you are keeping and a reminder is one thing on one date
+         that stops existing once it has happened; they share a part of
+         life and nothing else, which is not enough to share a page. -->
+    <main class="main" id="remindersSection" hidden>
+      <div class="head">
+        <h1>Reminders</h1>
+        <span class="grow"></span>
+        <span class="span-meta" id="hrMeta"></span>
+      </div>
+      <div class="pane" tabindex="0">
+        <form class="hr-add" id="hrAdd">
+          <label class="sr" for="hrText">What to remember</label>
+          <input id="hrText" type="text" maxlength="120" autocomplete="off"
+                 placeholder="The thing you keep meaning to do" />
+          <label class="sr" for="hrDate">Due by</label>
+          <input id="hrDate" type="date" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <div id="hrList"></div>
       </div>
     </main>
 
@@ -8528,11 +8541,11 @@ const renderHabits = (() => {
      be added or reworded later without a migration. */
   let st = (() => {
     let raw = null;
-    try { raw = localStorage.getItem(KEY); } catch (e) { return { habits: DEFAULT, days: {}, reminders: [] }; }
-    if (!raw) return { habits: DEFAULT, days: {}, reminders: [] };
+    try { raw = localStorage.getItem(KEY); } catch (e) { return { habits: DEFAULT, days: {} }; }
+    if (!raw) return { habits: DEFAULT, days: {} };
     try {
       const v = JSON.parse(raw);
-      if (!v || typeof v !== 'object') return { habits: DEFAULT, days: {}, reminders: [] };
+      if (!v || typeof v !== 'object') return { habits: DEFAULT, days: {} };
       /* REPAIRED, not discarded. Rejecting the whole object because the
          definitions list is damaged throws a year of days away with it —
          and the two are independent: the days are what you cannot get
@@ -8540,11 +8553,10 @@ const renderHabits = (() => {
       return {
         habits: Array.isArray(v.habits) && v.habits.length ? v.habits : DEFAULT,
         days: v.days && typeof v.days === 'object' ? v.days : {},
-        reminders: Array.isArray(v.reminders) ? v.reminders : [],
       };
     } catch (e) {
       try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
-      return { habits: DEFAULT, days: {}, reminders: [] };
+      return { habits: DEFAULT, days: {} };
     }
   })();
   const list = () => st.habits;
@@ -8643,7 +8655,13 @@ const renderHabits = (() => {
         const n = wk.filter(x => isDone(x, h.id)).length;
         const left = 7 - wk.length;
         say = `<b>${n}</b> this week · ${left} ${left === 1 ? 'day' : 'days'} left`;
-        if (d.split) say = d.split === 'rest' ? '<b>rest day</b>' : '<b>worked out</b>';
+        /* The row names it. Everywhere else — the week, the month — it
+           stays a colour, which is the whole point of having one: you
+           are tracking the split, not carrying it around. */
+        if (d.split) {
+          const sp = SPLITS.find(x => x.id === d.split);
+          say = d.split === 'rest' ? '<b>rest day</b>' : `<b>${sp.name}</b>`;
+        }
         const dotc = d.split ? ` style="background:var(--sp-${d.split});box-shadow:none"` : '';
         return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
           <s class="hb-dot"${d.split ? ' data-on="1"' : ''}${dotc}></s>
@@ -8794,68 +8812,6 @@ const renderHabits = (() => {
             : `${kept} kept this week`;
   }
 
-  /* ── reminders ──
-     A habit is a shape you are keeping; a reminder is one thing on one
-     date that stops existing once it has happened. Different lifetimes,
-     so a different list — and the one place in this app where DELETE IS
-     FINAL and has no bin behind it. That is deliberate: a bin exists to
-     protect a record you cannot rebuild, and a reminder you have dealt
-     with is not a record of anything. */
-  const rems = () => (st.reminders = st.reminders || []);
-  function renderRems() {
-    const t = today();
-    /* Soonest first, and anything undated last: a reminder with no date
-       is not urgent by definition, and sorting it in among the dated
-       ones would make it look like it was. */
-    const rows = rems().slice().sort((a, b) =>
-      (a.due || '9999') < (b.due || '9999') ? -1 : (a.due || '9999') > (b.due || '9999') ? 1 : 0);
-    const wrap = document.getElementById('hrList');
-    if (!rows.length) {
-      wrap.innerHTML = `<p class="hr-empty">Nothing to remember. The date is optional &mdash;
-        without one it simply sits at the bottom until you deal with it.</p>`;
-      document.getElementById('hrMeta').textContent = '';
-      return;
-    }
-    wrap.innerHTML = rows.map((r) => {
-      let when = 'no date', late = false;
-      if (r.due) {
-        const n = Math.round((new Date(r.due + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000);
-        late = n < 0;
-        when = n === 0 ? 'today' : n === 1 ? 'tomorrow' : n === -1 ? 'yesterday'
-          : n > 0 ? `in ${n} days` : `${-n} days ago`;
-      }
-      return `<div class="hr-row"${late ? ' data-late="1"' : ''}>
-        <p>${esc(r.text)}</p>
-        <span class="hr-when">${when}</span>
-        <button class="hr-x" type="button" data-rem="${esc(String(r.id))}"
-          aria-label="Delete: ${esc(r.text)}">✕</button>
-      </div>`;
-    }).join('');
-    const late = rows.filter(r => r.due && r.due < t).length;
-    document.getElementById('hrMeta').textContent =
-      `${rows.length} open${late ? ` · ${late} past due` : ''}`;
-  }
-
-  document.getElementById('hrAdd').addEventListener('submit', (ev) => {
-    ev.preventDefault();
-    const text = document.getElementById('hrText').value.trim();
-    if (!text) return;
-    rems().push({ id: uid(), text, due: document.getElementById('hrDate').value || '' });
-    if (!write()) return;
-    document.getElementById('hrText').value = '';
-    document.getElementById('hrDate').value = '';
-    renderRems();
-    document.getElementById('say').textContent = 'Reminder added.';
-    document.getElementById('hrText').focus();
-  });
-
-  document.getElementById('hrList').addEventListener('click', (ev) => {
-    const b = ev.target.closest('[data-rem]');
-    if (!b) return;
-    st.reminders = rems().filter(r => String(r.id) !== b.dataset.rem);
-    if (write()) renderRems();
-  });
-
   /* ── the two radars ──
      Same viewBox, same R, same cy, so at equal width they draw at equal
      size — a matching card around a visibly smaller picture still reads
@@ -8913,7 +8869,7 @@ const renderHabits = (() => {
   }
 
   function paint() {
-    renderNow(); renderCal(); renderRems(); renderRadars();
+    renderNow(); renderCal(); renderRadars();
     /* The chain leads. A total only ever climbs, so it says nothing
        about now; the chain is the figure that can be LOST and is
        therefore the only one worth defending. */
@@ -8975,6 +8931,117 @@ const renderHabits = (() => {
   return paint;
 })();
 
+/* ══════════════════════════════════════════════════════════════
+   REMINDERS
+
+   Not habits. A habit is a shape you are keeping; a reminder is one
+   thing on one date that stops existing once it has happened. Different
+   lifetimes, so a different key and a different screen — sharing a part
+   of life is not enough to share a page.
+
+   THE ONE PLACE DELETE IS FINAL. Everything else in this app removes
+   through a bin, because a bin protects a record you cannot rebuild. A
+   reminder you have dealt with is not a record of anything.
+
+   Wrapped, like the habits screen, and for the same reason: `rows`,
+   `write`, `render` are all names this file already uses.
+   ══════════════════════════════════════════════════════════════ */
+const renderReminders = (() => {
+  const KEY = 'reminders.v1';
+  let all = (() => {
+    let raw = null;
+    try { raw = localStorage.getItem(KEY); } catch (e) { return []; }
+    if (raw) {
+      try {
+        const v = JSON.parse(raw);
+        if (Array.isArray(v)) return v;
+      } catch (e) {
+        try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+      }
+      return [];
+    }
+    /* Reminders shipped inside habits.v1 for a day before they got a
+       screen of their own. Anything written in that day is carried
+       across rather than stranded — a key changing shape is not the
+       user's problem. */
+    try {
+      const h = JSON.parse(localStorage.getItem('habits.v1') || 'null');
+      if (h && Array.isArray(h.reminders) && h.reminders.length) {
+        localStorage.setItem(KEY, JSON.stringify(h.reminders));
+        delete h.reminders;
+        localStorage.setItem('habits.v1', JSON.stringify(h));
+        return JSON.parse(localStorage.getItem(KEY));
+      }
+    } catch (e) {}
+    return [];
+  })();
+
+  function write() {
+    try { localStorage.setItem(KEY, JSON.stringify(all)); return true; }
+    catch (e) {
+      document.getElementById('say').textContent = 'NOT SAVED — storage unavailable.';
+      return false;
+    }
+  }
+
+  function paint() {
+    const t = iso(new Date());
+    /* Soonest first, and anything undated LAST: a reminder with no date
+       is not urgent by definition, and sorting it in among the dated
+       ones would make it look as though it were. */
+    const rows = all.slice().sort((a, b) =>
+      (a.due || '9999') < (b.due || '9999') ? -1 : (a.due || '9999') > (b.due || '9999') ? 1 : 0);
+    const wrap = document.getElementById('hrList');
+    if (!rows.length) {
+      wrap.innerHTML = `<p class="hr-empty">Nothing to remember. The date is optional &mdash;
+        without one it simply sits at the bottom until you deal with it.</p>`;
+      document.getElementById('hrMeta').textContent = '';
+      return;
+    }
+    wrap.innerHTML = rows.map((r) => {
+      /* A distance, not a date. You know what today is. */
+      let when = 'no date', late = false;
+      if (r.due) {
+        const n = Math.round((new Date(r.due + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000);
+        late = n < 0;
+        when = n === 0 ? 'today' : n === 1 ? 'tomorrow' : n === -1 ? 'yesterday'
+          : n > 0 ? `in ${n} days` : `${-n} days ago`;
+      }
+      return `<div class="hr-row"${late ? ' data-late="1"' : ''}>
+        <p>${esc(r.text)}</p>
+        <span class="hr-when">${when}</span>
+        <button class="hr-x" type="button" data-rem="${esc(String(r.id))}"
+          aria-label="Delete: ${esc(r.text)}">✕</button>
+      </div>`;
+    }).join('');
+    const late = rows.filter(r => r.due && r.due < t).length;
+    document.getElementById('hrMeta').textContent =
+      `${rows.length} open${late ? ` · ${late} past due` : ''}`;
+  }
+
+  document.getElementById('hrAdd').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const text = document.getElementById('hrText').value.trim();
+    if (!text) return;
+    all.push({ id: uid(), text, due: document.getElementById('hrDate').value || '' });
+    if (!write()) return;
+    document.getElementById('hrText').value = '';
+    document.getElementById('hrDate').value = '';
+    paint();
+    document.getElementById('say').textContent = 'Reminder added.';
+    document.getElementById('hrText').focus();
+  });
+
+  document.getElementById('hrList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-rem]');
+    if (!b) return;
+    all = all.filter(r => String(r.id) !== b.dataset.rem);
+    if (write()) paint();
+  });
+
+  return paint;
+})();
+
 const SECTIONS = {
   calendar: document.getElementById('calendarSection'),
   log:      document.getElementById('logSection'),
@@ -8985,6 +9052,7 @@ const SECTIONS = {
   backtest: document.getElementById('backtestSection'),
   state:    document.getElementById('stateSection'),
   habits:   document.getElementById('habitsSection'),
+  reminders: document.getElementById('remindersSection'),
 };
 function goto(view) {
   /* The ladder does not exist on a phone, so a stored or stale route to
@@ -9003,6 +9071,7 @@ function goto(view) {
      while the tab is open, and a "due today" left from yesterday is
      worse than no answer. */
   if (view === 'habits') renderHabits();
+  if (view === 'reminders') renderReminders();
   document.getElementById('say').textContent = view;
 }
 document.querySelectorAll('[data-view]').forEach(b =>
@@ -9015,6 +9084,7 @@ binSweep();
 btBinSweep();
 renderAll();
 renderHabits();
+renderReminders();
 /* Metrics is the landing view: the clock tells you what to do next and
    the figures tell you whether it has been working. The calendar is
    where you go to write a trade down, which is a later step. */

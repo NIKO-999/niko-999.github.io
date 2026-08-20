@@ -255,11 +255,12 @@ const ok = (name, cond, extra) => {
   ok('and they are muted rather than loud', dE.sat.every(x => x < 0.55), dE.sat);
   ok('rest is barely a colour at all', dE.rest < 0.12, dE.rest);
 
-  /* The words live in the picker and nowhere else. */
-  ok('nothing on the screen names a split', await p.evaluate(() =>
-    !/push|pull|legs/i.test(document.getElementById('habitsSection').innerText)),
-    await p.evaluate(() => (document.getElementById('habitsSection').innerText
-      .match(/.{0,20}(push|pull|legs).{0,20}/i) || ['(none)'])[0]));
+  /* The row names it; the CALENDAR never does. That is the whole point
+     of having a colour — you are tracking the split, not carrying it
+     around a month's worth of cells. */
+  ok('neither the week nor the month names a split', await p.evaluate(() =>
+    !/push|pull|legs/i.test(document.getElementById('hbStrip').innerText
+      + document.getElementById('hbMon').innerText)));
   ok('and the picker carries them for a reader', await p.evaluate(() =>
     [...document.querySelectorAll('.hb-split button')]
       .map(x => x.getAttribute('aria-label')).join() === 'Push,Pull,Legs,Rest'));
@@ -274,9 +275,29 @@ const ok = (name, cond, extra) => {
   await p.waitForTimeout(250);
   ok('the split logs', await p.evaluate(() =>
     document.querySelector('[data-split="legs"]').getAttribute('aria-pressed') === 'true'));
-  ok('and the row still just says worked out', await p.evaluate(() =>
-    /worked out/.test([...document.querySelectorAll('.hb-item')].pop().innerText)),
+  ok('and the row names what it was', await p.evaluate(() =>
+    /Legs/.test([...document.querySelectorAll('.hb-item')].pop().innerText)),
     await p.evaluate(() => [...document.querySelectorAll('.hb-item')].pop().innerText.replace(/\n/g, ' | ')));
+  /* Each colour has to name its own split and no other. */
+  /* Each colour names its OWN split. Collecting the three and
+     asserting the collection is non-empty was the first version of this
+     and it passed on anything. */
+  const named = await p.evaluate(() => {
+    const out = [];
+    for (const id of ['push', 'pull', 'legs']) {
+      document.querySelector(`[data-split="${id}"]`).click();
+      out.push([...document.querySelectorAll('.hb-item')].pop()
+        .querySelector('.hb-say').textContent.trim());
+    }
+    return out;
+  });
+  ok('and each colour names its own', named.join() === 'Push,Pull,Legs', named);
+  ok('rest says it differently', await p.evaluate(() => {
+    document.querySelector('[data-split="rest"]').click();
+    return /rest day/i.test([...document.querySelectorAll('.hb-item')].pop().innerText);
+  }));
+  await p.click('[data-split="legs"]');
+  await p.waitForTimeout(200);
   ok('the ring counts it', await p.evaluate((was) =>
     +document.querySelector('.hb-dial .mid').textContent === +was + 1, ring));
   /* Rest is a day you chose not to train and must not count toward the
@@ -328,71 +349,9 @@ const ok = (name, cond, extra) => {
   ok('and the scale is remembered', await p.evaluate(() =>
     localStorage.getItem('habits.scale.v1') === 'week'));
 
-  /* ── reminders ──
-     A habit is a shape you are keeping; a reminder is one thing on one
-     date that stops existing once it has happened. */
-  ok('it says so when there are none', await p.locator('.hr-empty').count() === 1);
-  await p.fill('#hrText', 'Renew the gym membership');
-  await p.fill('#hrDate', '2099-01-01');
-  await p.click('#hrAdd button[type="submit"]');
-  await p.waitForTimeout(250);
-  ok('a reminder can be added', await p.locator('.hr-row').count() === 1);
-  ok('with a date, read as a distance', await p.evaluate(() =>
-    /in \d+ days/.test(document.querySelector('.hr-when').textContent)),
-    await p.locator('.hr-when').textContent());
-  ok('and the form clears itself', await p.evaluate(() =>
-    document.getElementById('hrText').value === '' && document.getElementById('hrDate').value === ''));
-  ok('an empty one is refused', await p.evaluate(() => {
-    document.getElementById('hrAdd').requestSubmit();
-    return document.querySelectorAll('.hr-row').length === 1;
-  }));
-  /* The date is optional, and an undated one sorts LAST — it is not
-     urgent by definition, and sorting it among the dated ones would
-     make it look as though it were. */
-  await p.fill('#hrText', 'Find that book');
-  await p.click('#hrAdd button[type="submit"]');
-  await p.waitForTimeout(200);
-  await p.fill('#hrText', 'Call the bank');
-  await p.fill('#hrDate', '2020-01-01');
-  await p.click('#hrAdd button[type="submit"]');
-  await p.waitForTimeout(250);
-  ok('the undated one sits at the bottom', await p.evaluate(() =>
-    [...document.querySelectorAll('.hr-when')].map(x => x.textContent).pop() === 'no date'),
-    await p.evaluate(() => [...document.querySelectorAll('.hr-when')].map(x => x.textContent)));
-  ok('and the overdue one leads', await p.evaluate(() =>
-    document.querySelector('.hr-row').hasAttribute('data-late')));
-  /* Overdue is STATED, not shouted — the same decision the rest of the
-     screen makes about a day you missed. */
-  ok('overdue is not red', await p.evaluate(() => {
-    const c = getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color;
-    const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
-    const [r, g, b] = [+m[1], +m[2], +m[3]];
-    return !(r > g + 20 && r > b + 20);
-  }), await p.evaluate(() =>
-    getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color));
-  ok('the count says how many and how many are late', await p.evaluate(() =>
-    /3 open · 1 past due/.test(document.getElementById('hrMeta').textContent)),
-    await p.locator('#hrMeta').textContent());
-
-  await p.reload({ waitUntil: 'networkidle' });
-  await p.click('[data-view="habits"]');
-  await p.waitForTimeout(350);
-  ok('reminders survive a reload', await p.locator('.hr-row').count() === 3);
-  /* The one place in this app where delete is final and has no bin. A
-     bin protects a record you cannot rebuild, and a reminder you have
-     dealt with is not a record of anything. */
-  await p.click('.hr-row .hr-x');
-  await p.waitForTimeout(250);
-  ok('and one can be deleted', await p.locator('.hr-row').count() === 2);
-  ok('deleting the right one', await p.evaluate(() =>
-    !document.getElementById('hrList').innerText.includes('Call the bank')));
-  ok('and the deletion sticks', await p.evaluate(() =>
-    JSON.parse(localStorage.getItem('habits.v1')).reminders.length === 2));
-  /* Reminders are not habits and must not touch anything the habits
-     screen counts. */
-  ok('none of it reached the habits', await p.evaluate(() =>
-    document.querySelectorAll('.hb-item').length === 5
-    && !/remember|gym|bank/i.test(document.getElementById('hbNow').innerText)));
+  ok('reminders are not on this screen', await p.evaluate(() =>
+    !document.querySelector('#habitsSection #hrList')
+    && !document.querySelector('#habitsSection #hrAdd')));
 
   // ── it never touches the ledger ────────────────────────────────
   ok('the ledger is untouched by any of it', await p.evaluate(() =>

@@ -3,7 +3,7 @@
 Two single-file apps that share a design system:
 
 - `trading/index.html` — the ledger, calendar, log, metrics, risk,
-  backtesting, resources, the check-in, and habits
+  backtesting, resources, the check-in, habits and reminders
 - `arc/index.html` — the vision board and long-term timeline
 - `shell.css` + `shell.js` at the root — the shared shell both consume
 
@@ -82,10 +82,15 @@ and drawdown are summed by walking `state.events`, so a rehearsal that
 risked nothing must not be in it. R is allowed on a run you wrote up —
 it is one figure on one row and nothing aggregates it.
 
-**Reminders are the one exception to the rule below.** Delete is final
-there and there is no bin, deliberately: a bin protects a record you
-cannot rebuild, and a reminder you have dealt with is not a record of
-anything. Everything else keeps its bin.
+**Reminders are their own screen and their own key** (`reminders.v1`),
+not part of habits: a habit is a shape you are keeping, a reminder is
+one thing on one date that stops existing once it has happened, and
+sharing a part of life is not enough to share a page.
+
+They are also the one exception to the rule below. Delete is final there
+and there is no bin, deliberately: a bin protects a record you cannot
+rebuild, and a reminder you have dealt with is not a record of anything.
+Everything else keeps its bin.
 
 **Nothing deletes without a way back.** Removals go through a bin: 30
 days, 50 records, the chart blob swept with the record. The one delete
