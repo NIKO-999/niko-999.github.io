@@ -141,21 +141,30 @@
 
    They also have to stay clear of the four split colours, which are on
    this same screen — so no teal, no rose and no brass among them. */
+/* Measured, not chosen by eye. Every one of these is at least ΔE 12
+   from all four split colours and from the other five, in BOTH themes
+   — checked in tests/days.js. Three of them moved to get there:
+   reading was ΔE 6 from the rest-day grey, which is the same colour at
+   a glance; the wake-up was 11 from the legs brass; and the workout
+   was 10 from the pull rose. All three were warm neutrals fighting
+   over the same corner of the space. */
 :root {
-  --h-wake:    #d8b96b;   /* first light */
-  --h-workout: #c4645c;   /* the effort  */
-  --h-abs:     #a04e66;   /* the same effort, deeper */
-  --h-walk:    #63b2c9;   /* morning air */
-  --h-water:   #4d84c8;   /* the obvious one */
-  --h-read:    #9d9382;   /* paper */
+  --h-wake:    #dcc084;   /* first light */
+  --h-workout: #c8756c;   /* the effort */
+  --h-abs:     #96566b;   /* the same effort, deeper */
+  --h-walk:    #7aa9b8;   /* morning air */
+  --h-water:   #6b8fc4;   /* the obvious one */
+  --h-read:    #c6bfb0;   /* paper */
 }
+/* Darkened rather than reused. The same six on a pale panel are six
+   pastels on white — legible as decoration and not as which habit. */
 :root[data-resolved="light"] {
-  --h-wake:    #8a6a1e;
-  --h-workout: #a6382f;
-  --h-abs:     #832c46;
-  --h-walk:    #1d6b82;
-  --h-water:   #2a5698;
-  --h-read:    #6a6152;
+  --h-wake:    #8a6a1c;
+  --h-workout: #9c4034;
+  --h-abs:     #6e3247;
+  --h-walk:    #3a6d7d;
+  --h-water:   #3a5a92;
+  --h-read:    #4c4432;
 }
 
 /* ── what you trained ──
@@ -241,18 +250,24 @@
 .hb-split button { width: 26px; height: 26px; padding: 0; border-radius: 7px;
   cursor: pointer; border: 1px solid var(--glass-line); background: none;
   display: grid; place-items: center; }
+/* All four the same. The chosen one used to come up to full while the
+   others sat back at .45, which made it the brightest object on the
+   row for a fact the row already states in words — and put a fifth
+   bright dot in a column of six that now carry colours of their own.
+   The ring says which; the dots only say which four there are. */
 .hb-split button i {
-  width: 10px; height: 10px; border-radius: 50%; opacity: .45;
+  width: 10px; height: 10px; border-radius: 50%; opacity: .62;
   background: var(--c);
   transition: opacity .16s;
 }
-.hb-split button:hover i { opacity: .82; }
-.hb-split button[aria-pressed="true"] { border-color: var(--c); }
-/* The chosen one comes up to full and takes the ring; the other three
-   sit back. Opacity and a border do the whole job — the bloom that used
-   to do it made four small dots into four small lamps. */
-.hb-split button[aria-pressed="true"] i { opacity: 1; }
+.hb-split button:hover i { opacity: .85; }
 @media (prefers-reduced-motion: reduce) { .hb-split button i { transition: none; } }
+/* Two rings rather than one, so the chosen button is legible as chosen
+   without anything inside it changing. */
+.hb-split button[aria-pressed="true"] {
+  border-color: var(--c);
+  box-shadow: inset 0 0 0 1px var(--c);
+}
 .hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 @media (max-width: 620px) {
   .hb-now { gap: 18px; }
