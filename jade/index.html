@@ -148,17 +148,15 @@ svg { display: block; }
 
 /* The default scrollbar is a light-mode object and it lands on the one
    dark panel it crosses. */
-.pane, .rail-list, .rail-log, .body {
+.pane, .rail-list, .body {
   scrollbar-width: thin;
   scrollbar-color: var(--line-2) transparent;
 }
 .pane::-webkit-scrollbar,
 .rail-list::-webkit-scrollbar,
-.rail-log::-webkit-scrollbar,
 .body::-webkit-scrollbar { width: 9px; height: 9px; }
 .pane::-webkit-scrollbar-thumb,
 .rail-list::-webkit-scrollbar-thumb,
-.rail-log::-webkit-scrollbar-thumb,
 .body::-webkit-scrollbar-thumb {
   background: var(--line-2);
   border: 2px solid transparent;
@@ -167,7 +165,6 @@ svg { display: block; }
 }
 .pane::-webkit-scrollbar-track,
 .rail-list::-webkit-scrollbar-track,
-.rail-log::-webkit-scrollbar-track,
 .body::-webkit-scrollbar-track { background: transparent; }
 
 /* Visually gone, still read aloud. 2px rather than the usual 1px:
@@ -462,7 +459,11 @@ svg { display: block; }
    is actually longer than the space — which is the only time it is
    saying anything. */
 .rail-list {
-  flex: 1 1 auto;
+  /* Takes what it needs and no more. It used to grow, which was right
+     when a third section sat under it — with only the month there now,
+     growing left a hole between the two and pinned the month to the
+     floor. Shrinking is still allowed, so a long list still scrolls. */
+  flex: 0 1 auto;
   min-height: 0;
   overflow-y: auto;
   mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
@@ -470,34 +471,6 @@ svg { display: block; }
   flex-direction: column;
   gap: 6px;
   padding: 10px 12px;
-}
-
-.rail-sub {
-  flex: 0 0 auto;
-  display: flex;
-  align-items: baseline;
-  gap: 8px;
-  padding: 12px 14px 6px;
-  border-top: 1px solid var(--line);
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-
-/* The log gives way to the list rather than the other way round: what
-   is still due is the reason the rail is there, and what is done is
-   the receipt. */
-.rail-log {
-  flex: 0 1 auto;
-  min-height: 0;
-  max-height: 38%;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  padding: 0 14px 12px;
 }
 
 /* ── controls ──
@@ -607,7 +580,7 @@ svg { display: block; }
     border-right: 0;
     border-top: 1px solid var(--line);
   }
-  .rail-list, .rail-log {
+  .rail-list {
     overflow: visible;
     max-height: none;
   }
@@ -647,8 +620,6 @@ svg { display: block; }
   .pane { padding: 12px 12px 22px; }
   .rail-head { padding: 0 12px; }
   .rail-list { padding: 10px 10px; }
-  .rail-sub { padding-left: 12px; padding-right: 12px; }
-  .rail-log { padding: 0 12px 12px; }
 }
 
 /* Under about 430px the bar cannot hold the name as well as the nav,
@@ -852,39 +823,58 @@ svg { display: block; }
   font-size: .88rem;
   color: var(--ink-3);
 }
-
-/* The three figures are a LIST, not a row of tiles. A tile the same
-   shape as the day's would put us straight back to four of the same
-   thing. The value column is a fixed width so the three labels share
-   one left edge — at their own widths they would land 3 and 5px apart,
-   which reads as a miss rather than a decision. */
-.jt-figs {
-  flex: none;
-  width: 290px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  border-top: 1px solid var(--line);
-}
-.jt-figs li {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 11px 2px;
-  border-bottom: 1px solid var(--line);
-}
-.jt-figs b {
-  width: 62px;
-  flex: none;
-  font-size: 1.12rem;
+/* The number is the fact and the word is the label, so only one of the
+   two is lit. */
+.jt-dayt span em {
+  font-style: normal;
   font-weight: 600;
-  font-variant-numeric: tabular-nums;
   color: var(--ink);
 }
-.jt-figs span {
-  font-size: .76rem;
-  color: var(--ink-3);
+
+/* The column the three figures used to hold. 380px rather than the 290
+   they had: with the figures gone the date was left alone against 500px
+   of nothing, and the writing wants the width more than the numbers
+   ever did. */
+.jt-th-col {
+  flex: none;
+  width: 380px;
 }
+.jt-th-h {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  padding-bottom: 7px;
+  border-bottom: 1px solid var(--line);
+}
+.jt-th-h span {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.jt-th-h b {
+  font-family: var(--mono);
+  font-size: .62rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* Exactly three rows tall, every row exactly the same height, and it
+   snaps — so it can never come to rest showing half of one. No
+   scrollbar: at this width the track is wider than the thing it would
+   be describing. The height is stated as 3 x the row so the two cannot
+   drift apart in a later edit. */
+.jt-th-scr {
+  height: calc(3 * 62px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.jt-th-scr::-webkit-scrollbar { width: 0; height: 0; }
 
 /* ── rings ──
    One geometry, two sizes, and the dash pattern is the whole trick:
@@ -1172,18 +1162,26 @@ svg { display: block; }
    send button: a pill and a round button is a chat composer, which is
    exactly what it was being read as. Under it, every line before it. */
 
+.jt-thw,
+.jt-th {
+  height: 62px;
+  scroll-snap-align: start;
+  padding-left: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* ── today's row ── */
 .jt-thw {
-  flex: 0 0 auto;
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
+  align-content: center;
   gap: 3px 8px;
-  padding: 9px 14px 11px 12px;
   box-shadow: inset 2px 0 0 var(--accent);
 }
 .jt-thw:focus-within { background: var(--card); }
-/* The input carries no ring of its own, so the row wears it — an
-   outline on a borderless field inside a panel reads as a box that
-   appeared from nowhere. */
+/* The input carries no ring of its own, so the row wears it — an outline
+   on a borderless field inside a panel reads as a box that appeared
+   from nowhere. */
 .jt-thw:focus-within { outline: 2px solid var(--focus); outline-offset: -2px; }
 .jt-thw-k {
   font-family: var(--mono);
@@ -1193,6 +1191,8 @@ svg { display: block; }
   color: var(--accent);
 }
 .jt-saved {
+  grid-column: 2;
+  grid-row: 1;
   font-family: var(--mono);
   font-size: .52rem;
   letter-spacing: .08em;
@@ -1216,11 +1216,14 @@ svg { display: block; }
 .jt-thi::placeholder { color: var(--ink-3); }
 .jt-thi:focus { outline: none; }
 
-.jt-thoughts { gap: 0; }
-.jt-th { padding: 9px 0 10px; border-top: 1px solid var(--line); }
+/* ── a day before it ── */
+.jt-th {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 3px;
+}
 .jt-th b {
-  display: block;
-  margin-bottom: 3px;
   font-family: var(--mono);
   font-size: .52rem;
   font-weight: 400;
@@ -1228,17 +1231,18 @@ svg { display: block; }
   text-transform: uppercase;
   color: var(--ink-3);
 }
+/* Two lines and then an ellipsis. A row that grew with its thought would
+   break the one thing the box promises — three, always whole. The full
+   text is on the title, so nothing is unreachable. */
 .jt-th p {
   margin: 0;
-  font-size: .8rem;
-  line-height: 1.35;
+  font-size: .78rem;
+  line-height: 1.3;
   color: var(--ink-2);
-}
-
-.jt-none {
-  padding: 6px 2px;
-  font-size: .72rem;
-  color: var(--ink-3);
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
 }
 
 /* ── narrow ── */
@@ -1252,7 +1256,7 @@ svg { display: block; }
      which stay on one line together — the day is still the headline at
      any width. */
   .jt-strip { flex-wrap: wrap; gap: 20px; }
-  .jt-figs { width: 100%; }
+  .jt-th-col { width: 100%; }
 }
 
 /* A finger is not a cursor. */
@@ -1696,18 +1700,6 @@ svg { display: block; }
       </div>
       <div class="jm-grid" id="jmGrid"></div>
     </div>
-    <!-- The line about today is the first row of the lines before it.
-         It used to be a pill and a send button pinned to the foot — a
-         chat composer, and a line you wrote could only be read again by
-         navigating to that exact day in the calendar. Write-only. -->
-    <div class="rail-sub">Daily thoughts<b class="rail-n" id="thoughtCount">0</b></div>
-    <form class="jt-thw" id="thoughtForm" autocomplete="off">
-      <label class="jt-thw-k" for="thoughtIn">Today</label>
-      <span class="jt-saved" id="thoughtSaved" role="status"></span>
-      <input class="jt-thi" id="thoughtIn" type="text" maxlength="140"
-             placeholder="A thought about today" aria-label="A thought about today" />
-    </form>
-    <div class="rail-log jt-thoughts" id="thoughtList"></div>
   </aside>
 
   <main class="main" data-screen="today">
@@ -1727,14 +1719,27 @@ svg { display: block; }
           <b id="dayDate">Today</b>
           <span id="dayCap">nothing due</span>
         </div>
-        <ul class="jt-figs">
-          <!-- The two streak figures read as a pair, so they sit as one:
-               the run you are on, then the longest you have managed.
-               The week is a different question and goes last. -->
-          <li><b id="statStreak">0</b><span>day streak</span></li>
-          <li><b id="statBest">0</b><span>best run</span></li>
-          <li><b id="statWeek">0%</b><span>of the week kept</span></li>
-        </ul>
+          <!-- Three figures used to sit here. The week percentage was the
+             ring saying 4/7 a second time, and the other two are one
+             clause of the caption rather than two panels. What the
+             column is for now is the writing. -->
+        <div class="jt-th-col">
+          <div class="jt-th-h">
+            <span>Daily thoughts</span>
+            <b id="thoughtCount">0</b>
+          </div>
+          <!-- Three rows tall, every row the same height, snapping: it
+               can never come to rest showing half of one. -->
+          <div class="jt-th-scr" id="thoughtScroll">
+            <form class="jt-thw" id="thoughtForm" autocomplete="off">
+              <label class="jt-thw-k" for="thoughtIn">Today</label>
+              <span class="jt-saved" id="thoughtSaved" role="status"></span>
+              <input class="jt-thi" id="thoughtIn" type="text" maxlength="140"
+                     placeholder="A thought about today" aria-label="A thought about today" />
+            </form>
+            <div id="thoughtList"></div>
+          </div>
+        </div>
       </section>
 
       <section class="jt-grid" id="jtGrid"></section>
@@ -2319,6 +2324,7 @@ function jtRender() {
   jtStrip();
   jtCards();
   jtRail();
+  jtThoughts();
 }
 
 /* ── the strip ─────────────────────────────────────────────────── */
@@ -2333,10 +2339,13 @@ function jtStrip() {
   jtRing.set(document.getElementById('dayRing').closest('.jt-ring'), s.kept, s.due);
 
   document.getElementById('dayDate').textContent = fmtLong(new Date());
-  document.getElementById('dayCap').textContent = jtSay(s.kept, s.due);
-  document.getElementById('statStreak').textContent = streak();
-  document.getElementById('statWeek').textContent = weekPct() + '%';
-  document.getElementById('statBest').textContent = best();
+  /* The caption carries the two streak figures now. They were panels
+     the same size as the day's own, which made three answers look like
+     three questions — as one clause they are what they are: an aside
+     about the day the headline already named. */
+  document.getElementById('dayCap').innerHTML = esc(jtSay(s.kept, s.due))
+    + ' &nbsp;\u00b7&nbsp; <em>' + streak() + '</em> day streak'
+    + ' &nbsp;\u00b7&nbsp; <em>' + best() + '</em> best';
 
   /* The line under the name in the top bar is this same reading. Left
      to the markup's placeholder it would go on saying "nothing kept
@@ -2516,7 +2525,6 @@ function jtRail() {
   const inp = document.getElementById('thoughtIn');
   if (inp !== document.activeElement) inp.value = noteOn(k);
 
-  jtThoughts();
 }
 
 function jtRailRow(h) {
