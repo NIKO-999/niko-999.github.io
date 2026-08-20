@@ -113,13 +113,11 @@ const DAYS = (() => {
 const dayList = Object.keys(DAYS).sort();
 
 /* ── cadence ──
-   The one decision on the page. Rolling asks "has it been two days
-   since you last did it"; fixed asks "is this an even day". Rolling
-   means a late day never cascades into being permanently late; fixed
-   keeps the schedule honest and charges you twice for one slip. */
-let ANCHOR = 'roll';
-const ANCHOR_0 = dayList[0];
-
+   "Every two days" means DO NOT GO MORE THAN TWO DAYS WITHOUT, so it
+   counts from the last time you did it. The alternative — a fixed
+   Monday/Wednesday/Friday grid — charges you twice for one slip: late
+   on the day you missed, and still due on the next scheduled one.
+   It was a toggle for a while and did not deserve to be. */
 function lastDoneBefore(id, k) {
   for (let i = dayList.indexOf(k) - 1; i >= 0; i--)
     if (DAYS[dayList[i]].done[id]) return dayList[i];
@@ -129,10 +127,6 @@ function due(id, k) {
   const h = BY_ID[id];
   if (h.perWeek) return false;                 // owes the week, not the day
   if (h.every === 1) return true;
-  if (ANCHOR === 'fixed') {
-    const n = Math.round((new Date(k) - new Date(ANCHOR_0)) / 86400000);
-    return n % h.every === 0;
-  }
   const last = lastDoneBefore(id, k);
   if (!last) return true;
   return Math.round((new Date(k) - new Date(last)) / 86400000) >= h.every;
@@ -482,21 +476,12 @@ function renderLog() {
 /* ── paint ── */
 function renderAll() {
   renderNow(); renderStrip(); renderRadars(); renderLog();
-  /* All six share one state, so a click on any of them has to repaint
-     the other five or they disagree with the screen and with each
-     other. */
-  if (document.getElementById('hbDecs').children.length) renderDecs();
   const c = chain();
   /* The chain leads. A total only ever climbs, so it says nothing about
      now; the chain is the figure that can be lost and is therefore the
      only one worth defending. */
   document.getElementById('hbMeta').textContent =
     `${c} ${c === 1 ? 'day' : 'days'} unbroken · five in seven keeps it`;
-  /* Rolling and fixed agree across most single weeks, so the strip alone
-     makes the toggle look broken. This is where the difference lives. */
-  const n = dayList.filter(k => due('abs', k)).length;
-  document.getElementById('decAnchorN').textContent =
-    `abs came due ${n} times in these ten weeks`;
 }
 renderAll();
 
@@ -536,94 +521,3 @@ document.getElementById('hbNow').addEventListener('click', (e) => {
   try { was = localStorage.getItem(K); } catch (e) {}
   fold(was === '1');
 })();
-
-/* ══ the two decisions, asked six ways ═══════════════════════════
-   The pair of buttons is the app's `.side` group and it is everywhere,
-   so this is a house pattern being chosen rather than preview
-   furniture. All six share ONE state — click any and the screen moves
-   and the other five agree, because a control you can only look at
-   tells you nothing about whether you would use it. */
-const DECS = [
-  { k: 'anchor', q: 'Every 2 days counts from',
-    a: [{ v: 'roll',  t: 'Last time you did it',
-          why: 'A late day never cascades into being permanently late.',
-          pic: ['','gap','','gap','gap','','gap',''] },
-        { v: 'fixed', t: 'A fixed grid',
-          why: 'The schedule stays honest and one slip costs you twice.',
-          pic: ['','gap','','gap','','gap','','gap'] }] },
-  { k: 'miss', q: 'A missed day is',
-    a: [{ v: 'none', t: 'An absence',
-          why: 'Nothing is drawn. A gap you can see through is not a mark.',
-          pic: ['','o','','','o','','o',''] },
-        { v: 'red',  t: 'Marked red',
-          why: 'You are told. Harder to ignore, harder to look at daily.',
-          pic: ['','r','','','r','','r',''] }] },
-];
-const DEC = { anchor: 'roll', miss: 'none' };
-const pic = (cls) => `<span class="t-pic">${cls.map(c =>
-  `<i class="${c}"></i>`).join('')}</span>`;
-const cur = (d) => d.a.find(x => x.v === DEC[d.k]);
-const other = (d) => d.a.find(x => x.v !== DEC[d.k]);
-
-const TREATS = [
-  ['A', 'The segmented pair', 'What is on the screen now, and in the log’s filters. '
-    + 'Compact, and the pressed one is a fill you have to look for.',
-   (d) => `<span class="t-seg" role="group" aria-label="${d.q}">${d.a.map(x =>
-     `<button type="button" data-k="${d.k}" data-v="${x.v}"
-        aria-pressed="${DEC[d.k] === x.v}">${x.t}</button>`).join('')}</span>`],
-
-  ['B', 'A sliding thumb', 'One track, and the answer is where the thumb IS rather than '
-    + 'which half is shaded. Movement reads faster than a fill.',
-   (d) => {
-     const i = d.a.findIndex(x => x.v === DEC[d.k]);
-     return `<span class="t-slide" role="group" aria-label="${d.q}">
-       <i style="left:${i ? '50%' : '3px'};width:calc(50% - 3px)"></i>${d.a.map(x =>
-       `<button type="button" data-k="${d.k}" data-v="${x.v}"
-          aria-pressed="${DEC[d.k] === x.v}">${x.t}</button>`).join('')}</span>`;
-   }],
-
-  ['C', 'A switch', 'The two answers either side of it, both clickable. Familiar to the point '
-    + 'of invisible — and the weakest of the six when neither answer is the "on" one.',
-   (d) => `<span class="t-sw">${
-     `<span class="${DEC[d.k] === d.a[0].v ? 'on' : ''}" data-k="${d.k}" data-v="${d.a[0].v}">${d.a[0].t}</span>`
-     }<button type="button" role="switch" data-k="${d.k}" data-v="${
-       DEC[d.k] === d.a[0].v ? d.a[1].v : d.a[0].v}"
-       aria-checked="${DEC[d.k] === d.a[1].v}" aria-label="${d.q}"><i></i></button>${
-     `<span class="${DEC[d.k] === d.a[1].v ? 'on' : ''}" data-k="${d.k}" data-v="${d.a[1].v}">${d.a[1].t}</span>`
-     }</span>`],
-
-  ['D', 'Two rows', 'Full width, one dot each, and room to say what the answer MEANS. '
-    + 'Costs the most height and is the only one that explains itself.',
-   (d) => `<span class="t-rows" role="group" aria-label="${d.q}">${d.a.map(x =>
-     `<button type="button" data-k="${d.k}" data-v="${x.v}" aria-pressed="${DEC[d.k] === x.v}">
-        <s aria-hidden="true"></s><span><b>${x.t}</b><em>${x.why}</em></span></button>`).join('')}</span>`],
-
-  ['E', 'A sentence', 'The setting reads as prose and the choice is the only emphasised part. '
-    + 'The quietest, and the one that stops looking like a form.',
-   (d) => `<span class="t-say">${d.q.replace(/^E/, 'e')} <b>${cur(d).t.toLowerCase()}</b>.
-     <button type="button" data-k="${d.k}" data-v="${other(d).v}">use ${
-       other(d).t.toLowerCase()}</button></span>`],
-
-  ['F', 'Two pictures', 'Each answer shows what it DOES. Both of these decisions are about how '
-    + 'something looks, and a picture of the answer beats naming it.',
-   (d) => `<span class="t-cards" role="group" aria-label="${d.q}">${d.a.map(x =>
-     `<button type="button" data-k="${d.k}" data-v="${x.v}" aria-pressed="${DEC[d.k] === x.v}">
-        ${pic(x.pic)}<b>${x.t}</b></button>`).join('')}</span>`],
-];
-
-function renderDecs() {
-  document.getElementById('hbDecs').innerHTML = TREATS.map(([k, name, why, fn]) =>
-    `<section class="dc"><h4><b>${k}</b>${name}</h4><p>${why}</p>
-       <div class="body">${DECS.map(d =>
-         `<div><span class="q">${d.q}</span>${fn(d)}</div>`).join('')}</div></section>`).join('');
-}
-
-document.getElementById('hbDecs').addEventListener('click', (e) => {
-  const b = e.target.closest('[data-k][data-v]');
-  if (!b) return;
-  DEC[b.dataset.k] = b.dataset.v;
-  ANCHOR = DEC.anchor;
-  document.documentElement.dataset.miss = DEC.miss;
-  renderAll();
-});
-renderDecs();

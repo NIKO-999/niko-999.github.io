@@ -58,12 +58,6 @@
    picture carries the shortfall and the words count up. A screen you
    dread opening on a bad day is a screen you stop opening.
    ═══════════════════════════════════════════════════════════════ */
-/* The app's two direction tokens. Here because the red option below
-   needs one — without it color-mix() is invalid, the browser drops that
-   single declaration and keeps the rest of the rule, and the option
-   renders as nothing. */
-:root { --up: #7fb9a2; --down: #c98f8f; }
-:root[data-resolved="light"] { --up: #2f6b52; --down: #8f3f3f; }
 
 /* ── what you trained ──
    Four, and none of them can ever be mistaken for the accent. That is
@@ -195,8 +189,6 @@
   background: var(--accent); }
 /* Missed: an ABSENCE by default. The alternative is on the toggle. */
 .hb-pips s.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
-[data-miss="red"] .hb-pips s.off { background: color-mix(in srgb, var(--down) 45%, transparent);
-  box-shadow: none; }
 .hb-day .n { font-family: var(--mono); font-size: .54rem; color: var(--ink-3); margin-top: auto; }
 
 /* ── the figures ──────────────────────────────────────────────── */
@@ -350,37 +342,9 @@
 .hub li .grow { flex: 1; }
 .hub li em { font-style: normal; font-family: var(--mono); font-size: .56rem; color: var(--ink-3); }
 
-/* ══ the log, five ways ════════════════════════════════════════ */
-.logs { display: grid; gap: 16px; }
-.logopt { border: 1px solid var(--glass-line); border-radius: 12px;
-  background: var(--glass-in); padding: 14px 16px 16px; }
-.logopt h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
-.logopt h3 b { font-family: var(--mono); font-size: .56rem; letter-spacing: .12em;
-  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
-  padding: 2px 5px; margin-right: 7px; }
-.logopt > p { margin: 5px 0 12px; font-size: .72rem; line-height: 1.5;
-  color: var(--ink-3); max-width: 84ch; }
-
-/* B · the grid. Habits down, days across — the shape every paper habit
-   tracker has had for a hundred years, and it is still the densest way
-   to hold "which thing, which day" in one picture. */
-.grid-h { display: grid; grid-template-columns: 74px minmax(0, 1fr); gap: 10px;
-  align-items: center; }
-.grid-h + .grid-h { margin-top: 5px; }
-.grid-h span { font-size: .72rem; color: var(--ink-3); text-align: right; }
-.grid-c { display: grid; gap: 2px; }
-.grid-c i { aspect-ratio: 1; border-radius: 2px; background: none;
-  box-shadow: inset 0 0 0 1px var(--glass-line); }
-.grid-c i.on { background: var(--accent); box-shadow: none; }
-.grid-c i.na { box-shadow: none; }
-[data-miss="red"] .grid-c i.miss { background: color-mix(in srgb, var(--down) 40%, transparent);
-  box-shadow: none; }
-.grid-days { display: grid; gap: 2px; margin-top: 5px; }
-.grid-days em { font-style: normal; font-family: var(--mono); font-size: .46rem;
-  color: var(--ink-3); text-align: center; opacity: .6; }
-
-/* C · the month. The calendar's own shape, so a habit month and a
-   trading month are read the same way. */
+/* ── the month ──
+   The calendar's own shape, so a habit month and a trading month are
+   read the same way and neither has to be learned twice. */
 .mon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
 .mon .hd { font-family: var(--mono); font-size: .5rem; letter-spacing: .08em;
   text-transform: uppercase; color: var(--ink-3); text-align: center; padding-bottom: 2px; }
@@ -397,121 +361,6 @@
 .mon .cell { justify-content: flex-start; }
 .mon .sp { margin-top: auto; width: 18px; height: 3px; border-radius: 2px; background: none; }
 .mon .cell[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
-[data-miss="red"] .mon .pips i.off { background: color-mix(in srgb, var(--down) 40%, transparent);
-  box-shadow: none; }
-
-/* D · the chains. Runs rather than days: how LONG you have kept each
-   thing going, drawn as unbroken length. */
-.chain-h { display: grid; grid-template-columns: 74px minmax(0, 1fr) auto; gap: 10px;
-  align-items: center; font-size: .72rem; color: var(--ink-3); }
-.chain-h + .chain-h { margin-top: 8px; }
-.chain-t { height: 9px; border-radius: 5px; background: var(--glass-in-2);
-  position: relative; overflow: hidden; }
-.chain-t i { position: absolute; top: 0; height: 9px; border-radius: 5px;
-  background: var(--accent); }
-.chain-h em { font-style: normal; font-family: var(--mono); font-size: .56rem;
-  color: var(--ink-3); white-space: nowrap; }
-
-/* E · only what is notable. */
-.notable { display: grid; gap: 1px; background: var(--glass-line);
-  border-radius: 9px; overflow: hidden; }
-.notable > div { background: var(--glass-in); padding: 10px 13px; display: grid;
-  grid-template-columns: 78px minmax(0, 1fr); gap: 12px; align-items: baseline; }
-.notable b { font-size: .74rem; font-weight: 400; color: var(--ink-3); }
-.notable .what { font-size: .8rem; color: var(--ink-2); }
-.notable .what em { font-style: normal; font-family: var(--mono); font-size: .54rem;
-  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3); margin-right: 8px; }
-.notable .rest { background: none; padding: 9px 2px 0; display: block;
-  font-family: var(--mono); font-size: .56rem; letter-spacing: .06em; color: var(--ink-3); }
-
-/* ══ six ways to ask a two-way question ════════════════════════ */
-.decs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
-  align-items: stretch; margin: 2px 0 24px; }
-@media (max-width: 1000px) { .decs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px)  { .decs { grid-template-columns: minmax(0, 1fr); } }
-.dc { border: 1px solid var(--glass-line); border-radius: 12px; background: var(--glass-in);
-  padding: 13px 15px 15px; display: flex; flex-direction: column; }
-.dc h4 { margin: 0; font-size: .8rem; font-weight: 500; color: var(--ink); }
-.dc h4 b { font-family: var(--mono); font-size: .54rem; letter-spacing: .12em;
-  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
-  padding: 2px 5px; margin-right: 7px; }
-.dc > p { margin: 4px 0 0; font-size: .7rem; line-height: 1.5; color: var(--ink-3); }
-.dc .body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
-  gap: 14px; margin-top: 13px; }
-.dc .q { font-family: var(--mono); font-size: .52rem; letter-spacing: .1em;
-  text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; display: block; }
-
-/* A · the segmented pair, as it stands */
-.t-seg { display: inline-flex; border: 1px solid var(--glass-line); border-radius: 9px;
-  overflow: hidden; }
-.t-seg button { height: 30px; padding: 0 12px; border: 0; background: none; cursor: pointer;
-  font: inherit; font-size: .74rem; color: var(--ink-3); }
-.t-seg button + button { border-left: 1px solid var(--glass-line); }
-.t-seg button:hover { color: var(--ink-2); }
-.t-seg button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
-
-/* B · one track, a thumb that slides. The movement IS the feedback —
-   nothing lights up, something moves. */
-.t-slide { position: relative; display: inline-flex; padding: 3px; border-radius: 999px;
-  background: var(--glass-in-2); border: 1px solid var(--glass-line); }
-.t-slide i { position: absolute; top: 3px; bottom: 3px; border-radius: 999px;
-  background: var(--glass-line); transition: left .22s cubic-bezier(.3,.8,.3,1), width .22s; }
-.t-slide button { position: relative; height: 26px; padding: 0 14px; border: 0;
-  background: none; cursor: pointer; font: inherit; font-size: .74rem; color: var(--ink-3); }
-.t-slide button[aria-pressed="true"] { color: var(--ink); }
-@media (prefers-reduced-motion: reduce) { .t-slide i { transition: none; } }
-
-/* C · a switch, with the two answers either side of it. */
-.t-sw { display: flex; align-items: center; gap: 11px; }
-.t-sw span { font-size: .74rem; color: var(--ink-3); cursor: pointer; }
-.t-sw span.on { color: var(--ink); }
-.t-sw button { width: 42px; height: 24px; border-radius: 999px; padding: 0;
-  border: 1px solid var(--glass-line); background: var(--glass-in-2); cursor: pointer;
-  position: relative; flex: none; }
-.t-sw button i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
-  border-radius: 50%; background: var(--ink-3); transition: transform .2s cubic-bezier(.3,.8,.3,1); }
-.t-sw button[aria-checked="true"] i { transform: translateX(18px); background: var(--ink-2); }
-@media (prefers-reduced-motion: reduce) { .t-sw button i { transition: none; } }
-
-/* D · two rows, one dot each, and room for what the answer MEANS. */
-.t-rows { display: grid; gap: 5px; }
-.t-rows button { display: grid; grid-template-columns: 13px minmax(0, 1fr); gap: 10px;
-  align-items: start; text-align: left; padding: 9px 11px; border-radius: 9px;
-  border: 1px solid var(--glass-line); background: none; cursor: pointer; font: inherit; }
-.t-rows button:hover { background: var(--glass-in-2); }
-.t-rows s { width: 11px; height: 11px; border-radius: 50%; margin-top: 3px;
-  text-decoration: none; box-sizing: border-box; box-shadow: inset 0 0 0 1px var(--glass-line); }
-.t-rows button[aria-pressed="true"] { border-color: var(--ink-3); background: var(--glass-in-2); }
-.t-rows button[aria-pressed="true"] s { background: var(--accent); box-shadow: none; }
-.t-rows b { font-size: .76rem; font-weight: 400; color: var(--ink-2); }
-.t-rows button[aria-pressed="true"] b { color: var(--ink); font-weight: 500; }
-.t-rows em { display: block; font-style: normal; font-size: .66rem; line-height: 1.45;
-  color: var(--ink-3); margin-top: 2px; }
-
-/* E · a sentence. The setting reads as prose and the choice is the only
-   part that is emphasised; the alternative sits beside it, quiet. */
-.t-say { font-size: .82rem; line-height: 1.7; color: var(--ink-3); }
-.t-say b { color: var(--ink); font-weight: 500; }
-.t-say button { border: 0; background: none; padding: 0 0 1px; margin-left: 9px;
-  font: inherit; font-size: .72rem; color: var(--ink-3); cursor: pointer;
-  border-bottom: 1px dashed var(--glass-line); }
-.t-say button:hover { color: var(--ink-2); border-bottom-color: var(--ink-3); }
-
-/* F · two cards, each showing what it DOES. These decisions are about
-   how something looks, so a picture of the answer beats naming it. */
-.t-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.t-cards button { display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
-  padding: 10px; border-radius: 10px; border: 1px solid var(--glass-line);
-  background: none; cursor: pointer; font: inherit; text-align: left; }
-.t-cards button:hover { background: var(--glass-in-2); }
-.t-cards button[aria-pressed="true"] { border-color: var(--ink-3); background: var(--glass-in-2); }
-.t-cards b { font-size: .74rem; font-weight: 400; color: var(--ink-3); }
-.t-cards button[aria-pressed="true"] b { color: var(--ink); font-weight: 500; }
-.t-pic { display: flex; gap: 3px; align-items: center; height: 14px; }
-.t-pic i { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
-.t-pic i.o { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
-.t-pic i.r { background: color-mix(in srgb, var(--down) 45%, transparent); box-shadow: none; }
-.t-pic i.gap { background: none; box-shadow: none; }
 
 .note-top { border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 20px;
@@ -536,18 +385,9 @@
         A preview. Nothing is saved and the history is invented. The whole screen rests on
         one thing: <b>cadence is part of the habit</b> — abs every two days is not abs 3.5
         times a week, so a day is <b>due</b> or it is not, and the chain, the calendar and both
-        radars are computed from what was due. The two open decisions are on the strip below;
-        flip them and watch.
+        radars are computed from what was due &mdash; so a day abs was not due is not a day you
+        missed it.
       </p>
-
-      <div class="cal-head"><h2>The two decisions &mdash; six ways to ask</h2>
-        <span class="grow"></span><span class="span-meta" id="decAnchorN"></span></div>
-      <p class="hb-sub" style="margin:0 0 13px;max-width:84ch">This is the app's segmented
-        pair, and it is <b>everywhere</b> &mdash; the log's outcome filter, the backtest
-        filter, the settings. So whatever wins here is a house pattern, and these two
-        questions are just what it gets tested on. All six are live and share one state:
-        click any of them and the screen below moves, and the other five agree.</p>
-      <div class="decs" id="hbDecs"></div>
 
       <div class="cal-head"><h2>Today</h2><span class="grow"></span>
         <span class="span-meta" id="hbToday"></span></div>
