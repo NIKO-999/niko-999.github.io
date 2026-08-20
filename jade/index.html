@@ -846,81 +846,78 @@ svg { display: block; }
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── the strip ──
-   Four boxes, one row, one height. Side by side means the same box:
-   the container stretches its children rather than letting each take
-   its own height, so a caption that wraps on the third pill cannot
-   leave the first three short. */
+   HERO. The ring is the biggest thing on the screen and carries no
+   card at all — a border around it would make it a tile like the rest,
+   and the whole point is that this one is not.
+
+   The row deliberately breaks the same-box rule the grid keeps: a
+   ring, a headline and a list are three different kinds of thing and
+   stacking them into three equal panels is exactly what made the old
+   strip unreadable. See SPEC section 7 — this is the one carve-out,
+   the way a folded panel is the carve-out in the house rules. */
 
 .jt-strip {
   display: flex;
-  align-items: stretch;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.jt-day,
-.jt-stat {
-  min-width: 0;
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-card);
-  background: var(--card);
-}
-
-.jt-day {
-  flex: 2 1 0;
-  display: flex;
   align-items: center;
-  /* 18px, not 16. Below 860 the strip wraps and the three stat pills
-     land under this one: at 16 the date started 6px off the middle
-     pill's label, which reads as a miss rather than a decision — and
-     the geometry audit calls anything 1–7px apart exactly that. */
-  gap: 18px;
+  gap: 30px;
+  padding: 4px 2px 22px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--line);
 }
 
 /* Both lines are block children of a flex column, so both are the full
-   width of the block: one left edge and one right edge for the pair,
-   whatever the date is that day. */
+   width of the block: one left edge for the pair, whatever the date is
+   that day. */
 .jt-dayt {
   flex: 1 1 auto;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 .jt-dayt b {
-  font-size: .94rem;
+  font-size: 1.5rem;
   font-weight: 600;
-  color: var(--ink);
-}
-.jt-dayt span {
-  font-size: .78rem;
-  color: var(--ink-2);
-}
-
-.jt-stat {
-  flex: 1 1 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  gap: 2px;
-}
-.jt-k {
-  font-family: var(--mono);
-  font-size: .62rem;
-  letter-spacing: .1em;
-  text-transform: uppercase;
-  color: var(--ink-2);
-}
-.jt-stat b {
-  font-size: 1.6rem;
-  font-weight: 600;
+  letter-spacing: -.015em;
   line-height: 1.15;
   color: var(--ink);
 }
-.jt-u {
-  font-size: .66rem;
-  color: var(--ink-2);
+.jt-dayt span {
+  font-size: .88rem;
+  color: var(--ink-3);
+}
+
+/* The three figures are a LIST, not a row of tiles. A tile the same
+   shape as the day's would put us straight back to four of the same
+   thing. The value column is a fixed width so the three labels share
+   one left edge — at their own widths they would land 3 and 5px apart,
+   which reads as a miss rather than a decision. */
+.jt-figs {
+  flex: none;
+  width: 290px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--line);
+}
+.jt-figs li {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 11px 2px;
+  border-bottom: 1px solid var(--line);
+}
+.jt-figs b {
+  width: 62px;
+  flex: none;
+  font-size: 1.12rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.jt-figs span {
+  font-size: .76rem;
+  color: var(--ink-3);
 }
 
 /* ── rings ──
@@ -976,13 +973,13 @@ svg { display: block; }
 }
 .jt-tk { color: var(--jt-c, var(--accent)); }
 
-.jt-ring-lg { width: 116px; height: 116px; }
-/* 9 device px. The viewBox is 120 units drawn at 116, so a user unit
-   is 116/120 of a pixel and a stroke has to be written in the units
+.jt-ring-lg { width: 132px; height: 132px; }
+/* 10 device px. The viewBox is 120 units drawn at 132, so a user unit
+   is 132/120 of a pixel and a stroke has to be written in the units
    the path it belongs to is drawn in. */
 .jt-ring-lg .jt-track,
-.jt-ring-lg .jt-prog { stroke-width: 9.31; }
-.jt-ring-lg .jt-ringn { font-size: 1.25rem; }
+.jt-ring-lg .jt-prog { stroke-width: 9.09; }
+.jt-ring-lg .jt-ringn { font-size: 1.32rem; }
 
 /* ── the grid ──
    auto-fill rather than auto-fit: eight cards on a wide screen keep a
@@ -1238,8 +1235,11 @@ svg { display: block; }
    of a phone, and the three figures beside it are single numbers that
    do. */
 @media (max-width: 860px) {
-  .jt-strip { flex-wrap: wrap; }
-  .jt-day { flex: 1 1 100%; }
+  /* The list goes full width and falls under the ring and the date,
+     which stay on one line together — the day is still the headline at
+     any width. */
+  .jt-strip { flex-wrap: wrap; gap: 20px; }
+  .jt-figs { width: 100%; }
 }
 
 /* A finger is not a cursor. */
@@ -1696,35 +1696,26 @@ svg { display: block; }
 
   <main class="main" data-screen="today">
     <div class="pane">
+      <!-- The day is the headline and it sits ON the page. Four
+           identical boxes was the first version and that was the
+           problem: nothing led, so the eye had nowhere to enter. -->
       <section class="jt-strip">
-        <div class="jt-day">
-          <div class="jt-ring jt-ring-lg">
-            <svg viewBox="0 0 120 120" aria-hidden="true">
-              <circle class="jt-track" cx="60" cy="60" r="51"/>
-              <circle class="jt-prog" id="dayRing" cx="60" cy="60" r="51"/>
-            </svg>
-            <span class="jt-ringn" id="dayRingTxt">0/0</span>
-          </div>
-          <div class="jt-dayt">
-            <b id="dayDate">Today</b>
-            <span id="dayCap">nothing due</span>
-          </div>
+        <div class="jt-ring jt-ring-lg">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <circle class="jt-track" cx="60" cy="60" r="51"/>
+            <circle class="jt-prog" id="dayRing" cx="60" cy="60" r="51"/>
+          </svg>
+          <span class="jt-ringn" id="dayRingTxt">0/0</span>
         </div>
-        <div class="jt-stat">
-          <span class="jt-k">Streak</span>
-          <b id="statStreak">0</b>
-          <span class="jt-u">days clean</span>
+        <div class="jt-dayt">
+          <b id="dayDate">Today</b>
+          <span id="dayCap">nothing due</span>
         </div>
-        <div class="jt-stat">
-          <span class="jt-k">This week</span>
-          <b id="statWeek">0%</b>
-          <span class="jt-u">of what was due</span>
-        </div>
-        <div class="jt-stat">
-          <span class="jt-k">Best</span>
-          <b id="statBest">0</b>
-          <span class="jt-u">days in a row</span>
-        </div>
+        <ul class="jt-figs">
+          <li><b id="statStreak">0</b><span>day streak</span></li>
+          <li><b id="statWeek">0%</b><span>of the week kept</span></li>
+          <li><b id="statBest">0</b><span>best run</span></li>
+        </ul>
       </section>
 
       <section class="jt-grid" id="jtGrid"></section>
