@@ -200,6 +200,13 @@
 .hb-day .n { font-family: var(--mono); font-size: .54rem; color: var(--ink-3); margin-top: auto; }
 
 /* ── the figures ──────────────────────────────────────────────── */
+#hbMoreT { display: inline-flex; align-items: center; gap: 7px; }
+#hbMoreT .ic { display: inline-flex; color: var(--ink-3); transition: transform .16s; }
+/* 180, not 90 — the shared chevron points DOWN and every other fold in
+   the app turns it the same way. A quarter turn lays it on its side. */
+#hbMoreT[aria-expanded="true"] .ic { transform: rotate(180deg); }
+@media (prefers-reduced-motion: reduce) { #hbMoreT .ic { transition: none; } }
+
 .hb-charts { margin-top: 26px; display: grid; gap: 18px;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); align-items: stretch; }
 .hb-chart { border: 1px solid var(--glass-line); border-radius: 12px;
@@ -219,8 +226,6 @@
 .hb-fig .lab { fill: var(--ink-3); font-family: var(--mono); font-size: 9px;
   text-anchor: middle; dominant-baseline: middle; }
 .hb-fig .lab.on { fill: var(--ink-2); }
-.hb-fig .cell { stroke: none; }
-.hb-fig .none { fill: color-mix(in srgb, var(--ink-3) 14%, transparent); }
 
 /* ── the log ──────────────────────────────────────────────────── */
 .hb-month { display: flex; align-items: center; gap: 11px; margin: 22px 0 2px; }
@@ -441,7 +446,7 @@
       <p class="note-top">
         A preview. Nothing is saved and the history is invented. The whole screen rests on
         one thing: <b>cadence is part of the habit</b> — abs every two days is not abs 3.5
-        times a week, so a day is <b>due</b> or it is not, and the streak, the rings and both
+        times a week, so a day is <b>due</b> or it is not, and the chain, the calendar and both
         radars are computed from what was due. The two open decisions are on the strip below;
         flip them and watch.
       </p>
@@ -479,27 +484,21 @@
         <button class="step" type="button" disabled aria-label="The week after">&rsaquo;</button>
         <span class="grow"></span>
         <span class="span-meta" id="hbWeekSum"></span>
+        <!-- The week and the month answer one question at two scales, so
+             with both on screen the month was always the thing you
+             scrolled past. The week is what you act on; the month is
+             what you go and look at. -->
+        <button class="step wide" type="button" id="hbMoreT"
+                aria-expanded="false" aria-controls="hbMoreB">
+          <span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" width="12" height="12"
+            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+            stroke-linejoin="round"><path d="M6 9l6 6 6-6" /></svg></span>The month</button>
       </div>
       <div class="hb-strip" id="hbStrip"></div>
-
-      <!-- Showing up and the gaps answer "am I keeping this at all";
-           the radars answer "where is it going wrong". First question
-           first. -->
-      <div class="hb-charts">
-        <section class="hb-chart" aria-labelledby="hbRingH">
-          <div class="hb-ch"><h3 id="hbRingH">Showing up</h3>
-            <span class="grow"></span><span class="hb-n" id="hbRingN"></span></div>
-          <p class="hb-sub">Ten weeks, newest on the outside. One ring a week, one wedge a day,
-            filled to how much of that day you kept.</p>
-          <div class="hb-fig" id="hbRing"></div>
-        </section>
-        <section class="hb-chart" aria-labelledby="hbGapH">
-          <div class="hb-ch"><h3 id="hbGapH">The longest gaps</h3>
-            <span class="grow"></span><span class="hb-n" id="hbGapN"></span></div>
-          <p class="hb-sub">The worst run each habit has had, and the best. A streak you can
-            lose is the only figure worth defending.</p>
-          <div class="hb-fig" id="hbGap" style="align-self:stretch"></div>
-        </section>
+      <div id="hbMoreB" hidden>
+        <div class="cal-head" style="margin-top:20px"><h2>Lately</h2><span class="grow"></span>
+          <span class="span-meta" id="hbLogMeta"></span></div>
+        <div id="hbLogs"></div>
       </div>
 
       <div class="hb-charts">
@@ -519,10 +518,7 @@
         </section>
       </div>
 
-      <div class="cal-head" style="margin-top:30px"><h2>Lately</h2>
-        <span class="grow"></span>
-        <span class="span-meta" id="hbLogMeta"></span></div>
-      <div id="hbLogs"></div>
+
     </div>
   </main>
 </div>

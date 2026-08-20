@@ -189,30 +189,6 @@ function chain() {
   }
   return n;
 }
-/* Runs, over whatever unit the habit is measured in. A perWeek habit is
-   never due on a given DAY, so walking the days found nothing for it and
-   the workout row read "best 0 · worst gap 0" — a habit that had been
-   kept most weeks reported as never kept at all. Its unit is the week,
-   so that is what gets walked. */
-function runsFor(id) {
-  const h = BY_ID[id];
-  let best = 0, worst = 0, cur = 0, gap = 0;
-  const step = (on) => {
-    if (on) { cur++; gap = 0; if (cur > best) best = cur; }
-    else { gap++; cur = 0; if (gap > worst) worst = gap; }
-  };
-  if (h.perWeek) {
-    for (let i = 0; i + 7 <= dayList.length; i += 7)
-      step(dayList.slice(i, i + 7).filter(k => DAYS[k].done[id]).length >= h.perWeek);
-    return { best, worst, unit: 'week' };
-  }
-  for (const k of dayList) {
-    if (!due(id, k)) continue;
-    step(!!DAYS[k].done[id]);
-  }
-  return { best, worst, unit: 'day' };
-}
-
 /* ── today ── */
 const TICK = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"'
   + ' stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'
@@ -411,73 +387,6 @@ function renderRadars() {
     DOW, byDow, `${DOW[byDow.indexOf(Math.min(...byDow))]} is the day that goes`);
 }
 
-/* ── the ring ── */
-function band(cx, cy, r0, r1, a0, a1) {
-  const [x0, y0] = pol(cx, cy, r1, a0), [x1, y1] = pol(cx, cy, r1, a1);
-  const [x2, y2] = pol(cx, cy, r0, a1), [x3, y3] = pol(cx, cy, r0, a0);
-  const big = a1 - a0 > 180 ? 1 : 0;
-  return `M${x0.toFixed(1)},${y0.toFixed(1)}A${r1},${r1} 0 ${big} 1 ${x1.toFixed(1)},${y1.toFixed(1)}`
-       + `L${x2.toFixed(1)},${y2.toFixed(1)}A${r0},${r0} 0 ${big} 0 ${x3.toFixed(1)},${y3.toFixed(1)}Z`;
-}
-function renderRing() {
-  const WEEKS = 10, IN = 22, OUT = 80, cx = 100, cy = 100;
-  const step = (OUT - IN) / WEEKS, wedge = 360 / 7, pad = 1.6;
-  const mon0 = weekOf(new Date())[0];
-  let g = '', kept = 0, of = 0;
-  for (let w = 0; w < WEEKS; w++) {
-    const m = addDays(mon0, -(WEEKS - 1 - w) * 7);
-    weekOf(m).forEach((d, i) => {
-      const k = iso(d);
-      const r0 = IN + w * step + 0.7, r1 = IN + (w + 1) * step - 0.7;
-      const path = band(cx, cy, r0, r1, i * wedge + pad, (i + 1) * wedge - pad);
-      const v = DAYS[k] && k <= TODAY ? rate(k) : null;
-      if (v === null) { g += `<path class="cell none" d="${path}" />`; return; }
-      of++; if (v >= 0.999) kept++;
-      /* Graded, unlike the backtesting ring: five things a day has real
-         middles that one-a-day does not. */
-      /* The fill still means how much of the day you kept; the EDGE
-         means what you trained. Two facts, two channels — putting the
-         split in the fill would have cost the ring the only thing it
-         was for. */
-      g += `<path class="cell" d="${path}" fill="var(--accent)"
-              fill-opacity="${(0.14 + 0.74 * v).toFixed(2)}" />`;
-      /* NO SPLIT HERE, and it was tried twice.
-         An outline round each cell buried the ring — seventy coloured
-         outlines ten rings deep read as stained glass. A short arc on
-         each wedge's outer edge was quieter and still lost, because
-         roughly seven days in ten carry a split and at that density any
-         per-cell colour becomes the picture.
-
-         The ring's fill is the one thing it exists to say. The calendar
-         below has a whole row per day to give the split and reads it at
-         a glance, so this figure keeps its job and gives that one up. */
-    });
-  }
-  document.getElementById('hbRing').innerHTML =
-    `<svg viewBox="0 0 200 200" role="img" aria-label="${kept} whole days in the last ${of}">${g}</svg>`;
-  document.getElementById('hbRingN').textContent = of ? `${kept} whole days` : '';
-}
-
-/* ── the gaps ── */
-function renderGaps() {
-  const rows = HABITS.map(h => ({ h, ...runsFor(h.id) }))
-    .sort((a, b) => b.worst - a.worst);
-  const peak = Math.max(1, ...rows.map(r => Math.max(r.best, r.worst)));
-  document.getElementById('hbGap').innerHTML =
-    `<div style="width:100%;display:grid;gap:9px;padding:2px 0 8px">`
-    + rows.map(r => `<div style="display:grid;grid-template-columns:78px 1fr auto;
-        gap:10px;align-items:center;font-size:.72rem;color:var(--ink-3)">
-        <span style="color:var(--ink-2)">${r.h.short}</span>
-        <span style="height:4px;border-radius:3px;background:var(--glass-in-2);position:relative">
-          <i style="position:absolute;left:0;top:0;height:4px;border-radius:3px;
-             width:${(r.best / peak * 100).toFixed(0)}%;background:var(--accent)"></i>
-        </span>
-        <span style="font-family:var(--mono);font-size:.6rem">best ${r.best} ${
-          r.unit === 'week' ? (r.best === 1 ? 'week' : 'weeks') : ''} · worst gap ${r.worst}</span>
-      </div>`).join('') + `</div>`;
-  document.getElementById('hbGapN').textContent = `${chain()} day chain`;
-}
-
 /* ── the log, five ways ──
    All five read the same window so the only thing being judged is the
    shape. Twenty-eight days: four clean weeks, which is what makes the
@@ -572,7 +481,7 @@ function renderLog() {
 
 /* ── paint ── */
 function renderAll() {
-  renderNow(); renderStrip(); renderRadars(); renderRing(); renderGaps(); renderLog();
+  renderNow(); renderStrip(); renderRadars(); renderLog();
   const c = chain();
   /* The chain leads. A total only ever climbs, so it says nothing about
      now; the chain is the figure that can be lost and is therefore the
@@ -605,6 +514,24 @@ document.getElementById('hbNow').addEventListener('click', (e) => {
   DAYS[TODAY].done[id] = !DAYS[TODAY].done[id];
   renderAll();
 });
+
+/* The month, folded. Shut on a machine that has never opened it, and
+   remembered after that — the same terms as every other fold in the
+   app, because a control that forgets is a control you stop using. */
+(function () {
+  const K = 'habits.month.v1';
+  const btn = document.getElementById('hbMoreT');
+  const body = document.getElementById('hbMoreB');
+  const fold = (on) => {
+    btn.setAttribute('aria-expanded', String(on));
+    body.hidden = !on;
+    try { localStorage.setItem(K, on ? '1' : '0'); } catch (e) {}
+  };
+  btn.addEventListener('click', () => fold(btn.getAttribute('aria-expanded') !== 'true'));
+  let was = null;
+  try { was = localStorage.getItem(K); } catch (e) {}
+  fold(was === '1');
+})();
 
 document.getElementById('decAnchor').addEventListener('click', (e) => {
   const b = e.target.closest('[data-anchor]');
