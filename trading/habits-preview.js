@@ -108,7 +108,20 @@ function due(id, k) {
   return Math.round((new Date(k) - new Date(last)) / 86400000) >= h.every;
 }
 const dueOn = (k) => HABITS.filter(h => due(h.id, k)).map(h => h.id);
+/* Two different questions, and conflating them undercounts you.
+
+   keptOn  what was DUE and got done — the rate, the ring's arc, the
+           radars, the chain. Anything that measures whether you are
+           keeping up has to divide by what was actually asked of you.
+   didOn   what you did, due or not. Abs a day early is still abs, and
+           a screen that answers "one kept" when you did two is wrong
+           in the direction that makes people stop using it.
+
+   So the count in the middle of the ring is didOn and the arc is
+   keptOn. Do more than was due and the arc fills while the number
+   keeps climbing, which is the right shape for that day. */
 const keptOn = (k) => dueOn(k).filter(id => DAYS[k] && DAYS[k].done[id]);
+const didOn = (k) => HABITS.filter(h => DAYS[k] && DAYS[k].done[h.id]).map(h => h.id);
 
 /* Kept as a fraction of what was due, for the ring and the radars. A
    day with nothing due is not a day you failed — it returns null and is
@@ -160,59 +173,94 @@ function sinceLast(id) {
   return Math.round((new Date(TODAY) - new Date(last)) / 86400000);
 }
 
+/* ── today ──
+   One ring, then the list. The ring answers "am I on track" and the
+   list answers "with what", in that order — the first is what you open
+   the screen for, the second is what you act on.
+
+   The five bars go with it, and that trade is worth naming: five bars
+   let you compare five habits against one another at a glance and one
+   ring does not. What it buys is a screen that has told you something
+   before you have read a word, and a face you know from across the
+   room.
+
+   The partial does not disappear with the bars. A target habit's DOT
+   fills bottom up like a glass; a tick habit's is solid or hollow, the
+   same shape language the check-in pad uses. */
 function renderNow() {
   const t = DAYS[TODAY];
-  document.getElementById('hbNow').innerHTML = HABITS.map((h) => {
-    let fill = 0, say = '', act = '', tag = '';
+
+  const items = HABITS.map((h) => {
+    let say = '', act = '', dot = '', on = false;
+
     if (h.target) {
-      const a = t.amt[h.id] || 0;
-      fill = Math.min(1, a / h.target);
-      tag = `every day · ${h.target}${h.unit}`;
-      /* Counts UP. The bar already shows what is left; saying it twice
-         turns a task into a shortfall. */
-      say = a >= h.target ? `<b>done</b> · ${(+a.toFixed(2))}${h.unit}`
-                          : `<b>${(+a.toFixed(2))}${h.unit}</b> today`;
+      const a = t.amt[h.id] || 0, f = Math.min(1, a / h.target);
+      on = a >= h.target;
+      /* Counts UP, and never says what is missing — the dot already
+         shows the gap, and saying it twice turns a task into a
+         shortfall. Past the target it keeps counting rather than
+         pinning: four litres is four, not "full". */
+      say = on ? `<b>${(+a.toFixed(2))}${h.unit}</b> · done`
+               : `<b>${(+a.toFixed(2))}${h.unit}</b> today`;
+      dot = on ? `<s class="hb-dot" data-on="1"></s>`
+               : `<s class="hb-dot" data-part="1" style="--p:${(f * 100).toFixed(0)}%"></s>`;
       act = `<button type="button" data-add="${h.id}" data-by="${-h.step}"
                aria-label="Less ${h.name}">&minus;</button>`
           + `<button type="button" data-add="${h.id}" data-by="${h.step}"
                aria-label="More ${h.name}">+</button>`;
-    } else if (h.perWeek) {
-      const wk = weekOf(new Date()).map(iso).filter(k => k <= TODAY);
-      const n = wk.filter(k => DAYS[k] && DAYS[k].done[h.id]).length;
-      const left = 7 - wk.length;
-      fill = Math.min(1, n / h.perWeek);
-      tag = `${h.perWeek} a week`;
-      say = `<b>${n}</b> this week · ${left} ${left === 1 ? 'day' : 'days'} left`;
-      act = `<button type="button" class="tick ${t.done[h.id] ? 'on' : ''}" data-tick="${h.id}"
-               aria-pressed="${!!t.done[h.id]}" aria-label="${h.name} today">${TICK}</button>`;
     } else {
-      const n = sinceLast(h.id);
-      tag = `every ${h.every === 1 ? 'day' : h.every + ' days'}`;
-      if (t.done[h.id]) { fill = 1; say = '<b>done</b> today'; }
-      else if (h.every === 1) { fill = 0; say = 'not yet today'; }
-      else if (n === null) { fill = 1; say = 'never yet'; }
-      else {
-        fill = Math.min(1, n / h.every);
-        const over = n - h.every;
-        say = over >= 0
-          ? (over === 0 ? '<b>due today</b>' : `<b>due</b> · ${over} ${over === 1 ? 'day' : 'days'} over`)
-          : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
+      on = !!t.done[h.id];
+      if (h.perWeek) {
+        const wk = weekOf(new Date()).map(iso).filter(k => k <= TODAY);
+        const n = wk.filter(k => DAYS[k] && DAYS[k].done[h.id]).length;
+        const left = 7 - wk.length;
+        say = `<b>${n}</b> this week · ${left} ${left === 1 ? 'day' : 'days'} left`;
+      } else if (on) {
+        say = '<b>done</b> today';
+      } else if (h.every === 1) {
+        say = 'not yet today';
+      } else {
+        const n = sinceLast(h.id);
+        if (n === null) say = 'never yet';
+        else {
+          const over = n - h.every;
+          say = over >= 0
+            ? (over === 0 ? '<b>due today</b>'
+                          : `<b>due</b> · ${over} ${over === 1 ? 'day' : 'days'} over`)
+            : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
+        }
       }
-      act = `<button type="button" class="tick ${t.done[h.id] ? 'on' : ''}" data-tick="${h.id}"
-               aria-pressed="${!!t.done[h.id]}" aria-label="${h.name} today">${TICK}</button>`;
+      dot = `<s class="hb-dot"${on ? ' data-on="1"' : ''}></s>`;
+      act = `<button type="button" class="tick ${on ? 'on' : ''}" data-tick="${h.id}"
+               aria-pressed="${on}" aria-label="${h.name} today">${TICK}</button>`;
     }
-    const over = !h.target && !h.perWeek && h.every > 1 && !t.done[h.id]
-      && sinceLast(h.id) !== null && sinceLast(h.id) > h.every;
-    return `<div class="hb-row">
-      <span class="hb-name"><b>${h.name}</b><em>${tag}</em></span>
-      <span class="hb-bar${over ? ' over' : ''}"><i style="width:${(fill * 100).toFixed(0)}%"></i></span>
-      <span class="hb-act"><span class="hb-say">${say}</span>${act}</span>
+    return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
+      ${dot}<b>${h.name}</b><span class="hb-say">${say}</span>
+      <span class="hb-act">${act}</span>
     </div>`;
   }).join('');
 
-  const kept = keptOn(TODAY).length;
+  /* The ring, then the list, written in ONE string. Splicing an opening
+     <div> in with insertAdjacentHTML and closing it in a second call
+     does not work: the parser closes the tag at the end of the first
+     fragment, so the list ends up beside its wrapper rather than in it.
+     It looks almost right, which is the worst kind of almost. */
+  const did = didOn(TODAY).length, kept = keptOn(TODAY).length, of = dueOn(TODAY).length;
+  const p = of ? Math.min(1, kept / of) : (did ? 1 : 0);
+  const C = 2 * Math.PI * 44;
+  document.getElementById('hbNow').innerHTML =
+    `<div class="hb-dial"><svg viewBox="0 0 100 100" role="img"
+       aria-label="${did} done so far today">
+       <circle class="tr" cx="50" cy="50" r="44" />
+       <circle class="fl" cx="50" cy="50" r="44"
+         stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}" />
+       <text class="mid" x="50" y="52">${did}</text>
+       <text class="sub" x="50" y="64">DONE TODAY</text>
+     </svg></div>
+     <div class="hb-list">${items}</div>`;
+
   document.getElementById('hbToday').textContent =
-    kept ? `${kept} so far today` : 'nothing yet today';
+    of ? `${of} due today` : 'nothing due today';
 }
 
 /* ── the week ── */
@@ -233,7 +281,7 @@ function renderStrip() {
     const dd = dueOn(k);
     const pips = ahead || !DAYS[k] ? ''
       : dd.map(id => `<s class="${DAYS[k].done[id] ? '' : 'off'}" title="${BY_ID[id].name}"></s>`).join('');
-    const n = ahead || !DAYS[k] ? '' : keptOn(k).length;
+    const n = ahead || !DAYS[k] ? '' : didOn(k).length;
     return `<div class="hb-day"${k === TODAY ? ' data-today="1"' : ''}${ahead ? ' data-ahead="1"' : ''}
         role="group" aria-label="${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric' })}${
           ahead ? ', still to come' : `, ${n} kept`}">
@@ -244,7 +292,7 @@ function renderStrip() {
     </div>`;
   }).join('');
 
-  const done = days.filter(d => iso(d) <= TODAY).reduce((a, d) => a + keptOn(iso(d)).length, 0);
+  const done = days.filter(d => iso(d) <= TODAY).reduce((a, d) => a + didOn(iso(d)).length, 0);
   document.getElementById('hbWeekSum').textContent = done ? `${done} kept this week` : '';
 }
 
@@ -366,7 +414,7 @@ function renderLog() {
     const d = new Date(k + 'T00:00:00');
     const m = d.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' });
     if (m !== month) { month = m; html += `<div class="hb-month"><b>${m}</b><i></i></div>`; }
-    const kept = keptOn(k);
+    const kept = didOn(k);
     const note = DAYS[k].note;
     /* Names what was kept. Never a denominator — the strip and the ring
        carry the shortfall, and a row that says "2 of 5" is a mark out
@@ -437,131 +485,3 @@ document.getElementById('decMiss').addEventListener('click', (e) => {
   document.querySelectorAll('#decMiss button').forEach(x =>
     x.setAttribute('aria-pressed', String(x === b)));
 });
-
-/* ═══════════════════════════════════════════════════════════════
-   THE OPTIONS — six progress treatments and two layouts.
-
-   Preview furniture. It goes when one is chosen.
-
-   Every option is drawn against the SAME three rows, because the bar on
-   this screen carries three different meanings and a treatment that
-   only reads well for one of them is no good:
-
-     water    an amount you are filling      2 of 3 litres
-     abs      a gap you are running down     1 day into 2
-     workout  a week you are part way into   1 into 4
-
-   Each row therefore hands the treatment a fraction, a caption, and —
-   for the segmented and dotted ones — how many units it is out of.
-   ═══════════════════════════════════════════════════════════════ */
-const OPT_ROWS = [
-  { n: 'water',   p: 2 / 3,  say: '2L today',        units: 3,  filled: 2 },
-  { n: 'abs',     p: 1 / 2,  say: 'due tomorrow',    units: 2,  filled: 1 },
-  { n: 'workout', p: 1 / 4,  say: '1 this week',     units: 4,  filled: 1 },
-];
-
-const ringSVG = (p, r, w) => {
-  const C = 2 * Math.PI * r;
-  return `<svg viewBox="0 0 ${(r + w) * 2} ${(r + w) * 2}" aria-hidden="true">
-    <circle class="tr" cx="${r + w}" cy="${r + w}" r="${r}" />
-    <circle class="fl" cx="${r + w}" cy="${r + w}" r="${r}"
-      stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}" /></svg>`;
-};
-
-const TREAT = [
-  { k: 'bar', name: 'The bar', cls: 'o-bar',
-    why: 'What is on the screen now. One length, reads instantly, and the only one that '
-       + 'says nothing about what the units are.',
-    t: (r) => `<span class="t"><i style="width:${(r.p * 100).toFixed(0)}%"></i></span>` },
-  { k: 'seg', name: 'Segments', cls: 'o-seg',
-    why: 'Three litres is three things, not sixty-six per cent. A countable target gets a '
-       + 'countable bar, and a part-filled segment shows the one you are on.',
-    t: (r) => `<span class="t">${Array.from({ length: r.units }, (_, i) =>
-        `<i class="${i < r.filled ? 'on' : ''}"></i>`).join('')}</span>` },
-  { k: 'ring', name: 'A ring each', cls: 'o-ring',
-    why: 'Rhymes with the radars and the heat map, which is this app’s whole language for '
-       + '"how much". Costs the row height a bar does not.',
-    t: (r) => `<span class="t">${ringSVG(r.p, 10, 3)}</span>` },
-  { k: 'fill', name: 'The row fills', cls: 'o-fill',
-    why: 'No bar at all — the row itself is the measure. Strongest for glancing across five '
-       + 'at once, weakest for reading an exact amount off.',
-    t: () => '' },
-  { k: 'dot', name: 'A ladder of dots', cls: 'o-dot',
-    why: 'The same pip the log and the week already use, so nothing new is introduced. '
-       + 'Falls apart above about eight units.',
-    t: (r) => `<span class="t">${Array.from({ length: r.units }, (_, i) =>
-        `<i class="${i < r.filled ? 'on' : ''}"></i>`).join('')}</span>` },
-  { k: 'mark', name: 'Track and marker', cls: 'o-mark',
-    why: 'A notch at the target and a dot where you are. The only one that can show being '
-       + 'PAST the target — four litres reads as four rather than as pinned at full.',
-    t: (r) => {
-      /* The track runs to 1.35 of target so there is somewhere to be
-         past it. Pinning at full is the failure the notch exists to
-         fix. */
-      const s = Math.min(1, r.p / 1.35);
-      return `<span class="t"><i class="run" style="width:${(s * 100).toFixed(0)}%"></i>`
-        + `<i class="notch" style="left:${(100 / 1.35).toFixed(0)}%"></i>`
-        + `<i class="me" style="left:${(s * 100).toFixed(0)}%"></i></span>`;
-    } },
-];
-
-document.getElementById('hbOpts').innerHTML = TREAT.map((o, i) =>
-  `<section class="opt ${o.cls}">
-     <h3><b>${String.fromCharCode(65 + i)}</b>${o.name}</h3>
-     <p>${o.why}</p>
-     <div class="demo">${OPT_ROWS.map(r =>
-       `<div class="r" style="--p:${(r.p * 100).toFixed(0)}%">
-          <span class="rn">${r.n}</span>${o.t(r)}<span class="rs">${r.say}</span>
-        </div>`).join('')}</div>
-   </section>`).join('');
-
-/* ── two layouts ──
-   Rows are what is below. These are the two that are genuinely
-   different rather than a rearrangement of the same row. */
-(function () {
-  const tiles = HABITS.map((h) => {
-    const t = DAYS[TODAY];
-    const p = h.target ? Math.min(1, (t.amt[h.id] || 0) / h.target)
-      : h.perWeek ? 0.25 : (t.done[h.id] ? 1 : 0.5);
-    const say = h.target ? `${(+(t.amt[h.id] || 0).toFixed(2))}${h.unit}`
-      : h.perWeek ? '1 this week' : (t.done[h.id] ? 'done' : 'due today');
-    return `<div class="tile"><b>${h.short}</b><em>${h.target ? h.target + h.unit
-      : h.perWeek ? h.perWeek + ' a week' : 'every ' + (h.every === 1 ? 'day' : h.every + ' days')}</em>
-      <span class="grow"></span><span class="t"><i style="width:${(p * 100).toFixed(0)}%"></i></span>
-      <em>${say}</em></div>`;
-  }).join('');
-
-  const kept = keptOn(TODAY).length, dueN = dueOn(TODAY).length;
-  const p = dueN ? kept / dueN : 0;
-  const list = HABITS.map((h) => {
-    const on = DAYS[TODAY].done[h.id];
-    return `<li class="${on ? 'on' : ''}"><s></s>${h.name}<span class="grow"></span>
-      <em>${on ? 'done' : h.target ? `${(+(DAYS[TODAY].amt[h.id] || 0).toFixed(2))}${h.unit}` : ''}</em></li>`;
-  }).join('');
-
-  document.getElementById('hbLay').innerHTML =
-    `<section class="opt">
-       <h3><b>1</b>Tiles</h3>
-       <p>One card each rather than one row each. Five things read as five objects, and it
-          takes the height a phone has and the width a desktop has. Loses the shared bar
-          length that makes rows comparable at a glance.</p>
-       <div class="demo"><div class="tiles">${tiles}</div></div>
-     </section>
-     <section class="opt">
-       <h3><b>2</b>One ring, then the list</h3>
-       <p>The day as a single figure first, the five underneath as plain ticks. Answers
-          &ldquo;am I on track&rdquo; before it answers &ldquo;with what&rdquo; &mdash; and it is the
-          only layout here that gives the screen a face you would recognise from across the
-          room.</p>
-       <div class="demo"><div class="hub">
-         <svg viewBox="0 0 100 100" aria-hidden="true">
-           <circle class="tr" cx="50" cy="50" r="40" />
-           <circle class="fl" cx="50" cy="50" r="40"
-             stroke-dasharray="${(2 * Math.PI * 40 * p).toFixed(1)} ${(2 * Math.PI * 40).toFixed(1)}" />
-           <text class="mid" x="50" y="50">${kept}</text>
-           <text class="sub" x="50" y="62">KEPT TODAY</text>
-         </svg>
-         <ul>${list}</ul>
-       </div></div>
-     </section>`;
-})();
