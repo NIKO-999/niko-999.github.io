@@ -84,16 +84,26 @@ const ok = (name, cond, extra) => {
   ok('four are a plain tick', await p.locator('.hb-item .hb-act button.tick').count() === 4);
   ok('and the workout is a four-way picker', await p.locator('.hb-split button').count() === 4);
 
-  // ── the month is folded under the week ─────────────────────────
-  ok('the month starts shut', await p.locator('#hbMoreB').isHidden());
-  ok('the week does not', await p.locator('#hbStrip').isVisible());
-  await p.click('#hbMoreT');
-  await p.waitForTimeout(250);
-  ok('it opens', await p.locator('#hbMoreB').isVisible());
-  ok('to a month of cells', await p.locator('#hbLogs .hb-mon .cell').count() >= 28);
-  ok('below the week, not beside it', await p.evaluate(() =>
-    document.getElementById('hbLogs').getBoundingClientRect().top
-      > document.getElementById('hbStrip').getBoundingClientRect().bottom));
+  /* ── one calendar at two scales ──
+     The control SWAPS them rather than stacking them: both on screen at
+     once answered the same question twice and the month was always the
+     thing you scrolled past. */
+  ok('the week is up first', await p.locator('#hbStrip').isVisible()
+     && await p.locator('#hbMon').isHidden());
+  ok('and the arrows say what they move', await p.evaluate(() =>
+    /week/i.test(document.getElementById('hbPrev').getAttribute('aria-label'))
+    && document.getElementById('hbNow2').textContent === 'This week'));
+  await p.click('[data-scale="month"]');
+  await p.waitForTimeout(300);
+  ok('the month REPLACES the week', await p.locator('#hbMon').isVisible()
+     && await p.locator('#hbStrip').isHidden());
+  ok('and it is a real month, not a rolling window', await p.evaluate(() => {
+    const n = document.querySelectorAll('#hbMon .cell:not(.pad)').length;
+    return n === 28 || n === 29 || n === 30 || n === 31;
+  }), await p.locator('#hbMon .cell:not(.pad)').count());
+  ok('the arrows and the way home follow the scale', await p.evaluate(() =>
+    /month/i.test(document.getElementById('hbPrev').getAttribute('aria-label'))
+    && document.getElementById('hbNow2').textContent === 'This month'));
 
   /* ── cadence, which is the whole idea ──
      Ten weeks of a real rotation, written straight into the key. */
@@ -142,16 +152,21 @@ const ok = (name, cond, extra) => {
     !/\b0 days?\b/.test(document.getElementById('hbMeta').textContent)),
     await p.locator('#hbMeta').textContent());
 
+  /* The cadence checks read the month, so it has to be the one on
+     screen. */
+  await p.click('[data-scale="month"]');
+  await p.waitForTimeout(300);
+
   /* ── cadence, measured on the month rather than the week ──
      One week is too small a window: if abs happens to be overdue right
      now it is due on all seven, and a check that reads seven cells
      calls that "cadence is not applied". Twenty-eight days always
      contains days it was due and days it was not. */
   ok('a day nothing was due of is not a day you missed', await p.evaluate(() => {
-    const n = [...document.querySelectorAll('#hbLogs .hb-mon .cell:not(.pad)')]
+    const n = [...document.querySelectorAll('#hbMon .hb-mon .cell:not(.pad)')]
       .map(c => c.querySelectorAll('.pips i').length);
     return new Set(n).size > 1;
-  }), await p.evaluate(() => [...document.querySelectorAll('#hbLogs .hb-mon .cell:not(.pad)')]
+  }), await p.evaluate(() => [...document.querySelectorAll('#hbMon .hb-mon .cell:not(.pad)')]
       .map(c => c.querySelectorAll('.pips i').length)));
   /* Rolling, not a grid: a fixed grid falls due the day after one was
      done, which rolling can never do. */
@@ -161,15 +176,15 @@ const ok = (name, cond, extra) => {
      mark appear on the day after one was kept? Under a fixed grid it
      eventually would; under rolling it never can. */
   ok('abs is never due the day after it was done', await p.evaluate(() => {
-    const cells = [...document.querySelectorAll('#hbLogs .hb-mon .cell:not(.pad)')];
+    const cells = [...document.querySelectorAll('#hbMon .hb-mon .cell:not(.pad)')];
     const has = cells.map(c => !!c.querySelector('.pips i[data-h="abs"]'));
     const kept = cells.map(c => !!c.querySelector('.pips i[data-h="abs"]:not(.off)'));
     return kept.every((k, i) => !k || i + 1 >= cells.length || !has[i + 1]);
-  }), await p.evaluate(() => [...document.querySelectorAll('#hbLogs .hb-mon .cell:not(.pad)')]
+  }), await p.evaluate(() => [...document.querySelectorAll('#hbMon .hb-mon .cell:not(.pad)')]
       .map(c => c.querySelector('.pips i[data-h="abs"]')
         ? (c.querySelector('.pips i[data-h="abs"].off') ? 'due' : 'kept') : '-')));
   ok('and the month names each mark for a reader', await p.evaluate(() =>
-    [...document.querySelectorAll('#hbLogs .hb-mon .pips i')]
+    [...document.querySelectorAll('#hbMon .hb-mon .pips i')]
       .every(i => (i.getAttribute('title') || '').length > 2)));
 
   // ── no report card ─────────────────────────────────────────────
@@ -283,18 +298,101 @@ const ok = (name, cond, extra) => {
   await p.click('[data-view="habits"]');
   await p.waitForTimeout(350);
   ok('and it all survives a reload', /done today/.test(await p.locator('.hb-item').first().innerText()));
-  ok('the opened month too', await p.locator('#hbMoreB').isVisible());
+  ok('and the chosen scale too', await p.locator('#hbMon').isVisible());
 
-  // ── the week navigates ─────────────────────────────────────────
-  const label = await p.locator('#hbWeekLabel').textContent();
+  // ── one pair of arrows, moving whichever scale is up ───────────
+  await p.click('[data-scale="week"]');
+  await p.waitForTimeout(250);
+  const label = await p.locator('#hbCalLabel').textContent();
   await p.click('#hbPrev');
   await p.waitForTimeout(250);
-  ok('the week goes back', (await p.locator('#hbWeekLabel').textContent()) !== label);
-  ok('and the month follows it', await p.evaluate(() =>
-    document.querySelectorAll('#hbLogs .hb-mon .cell').length >= 28));
+  ok('the week goes back', (await p.locator('#hbCalLabel').textContent()) !== label);
+  /* Swapping scale lands on the period containing the one you were
+     looking at, not on today — you were looking at last week for a
+     reason. */
+  await p.click('[data-scale="month"]');
+  await p.waitForTimeout(300);
+  const back = await p.locator('#hbCalLabel').textContent();
+  await p.click('#hbPrev');
+  await p.waitForTimeout(250);
+  ok('and the month moves by a month', await p.evaluate((was) =>
+    document.getElementById('hbCalLabel').textContent !== was, back));
   await p.click('#hbNow2');
   await p.waitForTimeout(250);
-  ok('and This week comes home', (await p.locator('#hbWeekLabel').textContent()) === label);
+  ok('This month comes home', await p.evaluate(() =>
+    document.getElementById('hbCalLabel').textContent
+      === new Date().toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })),
+    await p.locator('#hbCalLabel').textContent());
+  await p.click('[data-scale="week"]');
+  await p.waitForTimeout(250);
+  ok('and the scale is remembered', await p.evaluate(() =>
+    localStorage.getItem('habits.scale.v1') === 'week'));
+
+  /* ── reminders ──
+     A habit is a shape you are keeping; a reminder is one thing on one
+     date that stops existing once it has happened. */
+  ok('it says so when there are none', await p.locator('.hr-empty').count() === 1);
+  await p.fill('#hrText', 'Renew the gym membership');
+  await p.fill('#hrDate', '2099-01-01');
+  await p.click('#hrAdd button[type="submit"]');
+  await p.waitForTimeout(250);
+  ok('a reminder can be added', await p.locator('.hr-row').count() === 1);
+  ok('with a date, read as a distance', await p.evaluate(() =>
+    /in \d+ days/.test(document.querySelector('.hr-when').textContent)),
+    await p.locator('.hr-when').textContent());
+  ok('and the form clears itself', await p.evaluate(() =>
+    document.getElementById('hrText').value === '' && document.getElementById('hrDate').value === ''));
+  ok('an empty one is refused', await p.evaluate(() => {
+    document.getElementById('hrAdd').requestSubmit();
+    return document.querySelectorAll('.hr-row').length === 1;
+  }));
+  /* The date is optional, and an undated one sorts LAST — it is not
+     urgent by definition, and sorting it among the dated ones would
+     make it look as though it were. */
+  await p.fill('#hrText', 'Find that book');
+  await p.click('#hrAdd button[type="submit"]');
+  await p.waitForTimeout(200);
+  await p.fill('#hrText', 'Call the bank');
+  await p.fill('#hrDate', '2020-01-01');
+  await p.click('#hrAdd button[type="submit"]');
+  await p.waitForTimeout(250);
+  ok('the undated one sits at the bottom', await p.evaluate(() =>
+    [...document.querySelectorAll('.hr-when')].map(x => x.textContent).pop() === 'no date'),
+    await p.evaluate(() => [...document.querySelectorAll('.hr-when')].map(x => x.textContent)));
+  ok('and the overdue one leads', await p.evaluate(() =>
+    document.querySelector('.hr-row').hasAttribute('data-late')));
+  /* Overdue is STATED, not shouted — the same decision the rest of the
+     screen makes about a day you missed. */
+  ok('overdue is not red', await p.evaluate(() => {
+    const c = getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color;
+    const m = c.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)/);
+    const [r, g, b] = [+m[1], +m[2], +m[3]];
+    return !(r > g + 20 && r > b + 20);
+  }), await p.evaluate(() =>
+    getComputedStyle(document.querySelector('.hr-row[data-late] .hr-when')).color));
+  ok('the count says how many and how many are late', await p.evaluate(() =>
+    /3 open · 1 past due/.test(document.getElementById('hrMeta').textContent)),
+    await p.locator('#hrMeta').textContent());
+
+  await p.reload({ waitUntil: 'networkidle' });
+  await p.click('[data-view="habits"]');
+  await p.waitForTimeout(350);
+  ok('reminders survive a reload', await p.locator('.hr-row').count() === 3);
+  /* The one place in this app where delete is final and has no bin. A
+     bin protects a record you cannot rebuild, and a reminder you have
+     dealt with is not a record of anything. */
+  await p.click('.hr-row .hr-x');
+  await p.waitForTimeout(250);
+  ok('and one can be deleted', await p.locator('.hr-row').count() === 2);
+  ok('deleting the right one', await p.evaluate(() =>
+    !document.getElementById('hrList').innerText.includes('Call the bank')));
+  ok('and the deletion sticks', await p.evaluate(() =>
+    JSON.parse(localStorage.getItem('habits.v1')).reminders.length === 2));
+  /* Reminders are not habits and must not touch anything the habits
+     screen counts. */
+  ok('none of it reached the habits', await p.evaluate(() =>
+    document.querySelectorAll('.hb-item').length === 5
+    && !/remember|gym|bank/i.test(document.getElementById('hbNow').innerText)));
 
   // ── it never touches the ledger ────────────────────────────────
   ok('the ledger is untouched by any of it', await p.evaluate(() =>

@@ -1774,14 +1774,14 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .hb-pips s.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
 .hb-day .n { font-family: var(--mono); font-size: .54rem; color: var(--ink-3); margin-top: auto; }
 
-/* ── the month, folded under the week ──
-   The two answer one question at two scales, so with both on screen the
-   month is always the thing you scroll past. The week is what you act
-   on; the month is what you go and look at. */
-#hbMoreT { display: inline-flex; align-items: center; gap: 7px; }
-#hbMoreT .ic { display: inline-flex; color: var(--ink-3); transition: transform .16s; }
-#hbMoreT[aria-expanded="true"] .ic { transform: rotate(180deg); }
-@media (prefers-reduced-motion: reduce) { #hbMoreT .ic { transition: none; } }
+/* ── the month, in place of the week ──
+   The two answer one question at two scales. Stacked, the month was
+   always the thing you scrolled past; swapped, each one gets the whole
+   width and the arrows mean whatever you are looking at. */
+#hbScale { flex: none; }
+#hbScale button { height: 30px; padding: 0 13px; font-family: var(--sans);
+  font-size: .74rem; text-transform: none; letter-spacing: normal; }
+#hbScale button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
 .hb-mon { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
 .hb-mon .hd { font-family: var(--mono); font-size: .5rem; letter-spacing: .08em;
   text-transform: uppercase; color: var(--ink-3); text-align: center; padding-bottom: 2px; }
@@ -1798,6 +1798,39 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
    it is a different KIND of fact from "did you keep this", and side by
    side the two would be read as one. */
 .hb-mon .sp { margin-top: auto; width: 18px; height: 3px; border-radius: 2px; background: none; }
+
+/* ── reminders ──
+   A habit is a shape you are keeping; a reminder is one thing on one
+   date that stops existing once it has happened. Different lifetimes,
+   so a different list. */
+.hr-add { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 0 0 4px; }
+.hr-add input[type="text"] { flex: 1; min-width: 200px; height: 34px; padding: 0 11px;
+  font: inherit; font-size: .82rem; color: var(--ink); background: var(--glass-in);
+  border: 1px solid var(--glass-line); border-radius: 8px; }
+.hr-add input[type="date"] { height: 34px; padding: 0 9px; font: inherit; font-size: .78rem;
+  color: var(--ink-2); background: var(--glass-in); border: 1px solid var(--glass-line);
+  border-radius: 8px; }
+.hr-add input::placeholder { color: var(--ink-3); }
+.hr-add input:focus-visible { outline: 2px solid var(--focus); outline-offset: -1px; }
+.hr-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 14px;
+  align-items: center; padding: 11px 0 12px; border-bottom: 1px solid var(--rule); }
+.hr-row:last-child { border-bottom: 0; }
+.hr-row p { margin: 0; font-size: .84rem; line-height: 1.5; color: var(--ink-2);
+  overflow-wrap: anywhere; }
+.hr-when { font-family: var(--mono); font-size: .6rem; letter-spacing: .05em;
+  color: var(--ink-3); white-space: nowrap; }
+/* An overdue reminder is stated, not shouted. It goes to full ink
+   instead of turning red — the same decision the rest of this screen
+   makes about a day you missed. */
+.hr-row[data-late] .hr-when { color: var(--ink); }
+.hr-row[data-late] p { color: var(--ink); }
+.hr-x { width: 28px; height: 28px; display: grid; place-items: center; padding: 0;
+  border: 1px solid var(--glass-line); border-radius: 7px; background: none;
+  color: var(--ink-3); cursor: pointer; }
+.hr-x:hover { background: var(--glass-in-2); color: var(--ink); }
+.hr-x:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.hr-x { font-size: .74rem; line-height: 1; }
+.hr-empty { margin: 16px 0; font-size: .82rem; line-height: 1.6; color: var(--ink-3); }
 
 /* ── the two radars ── */
 .hb-charts { margin-top: 26px; display: grid; gap: 18px;
@@ -2491,23 +2524,41 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
           <span class="span-meta" id="hbToday"></span></div>
         <div class="hb-now" id="hbNow"></div>
 
+        <!-- One calendar at two scales, and the control SWAPS them
+             rather than stacking them. Both on screen at once answered
+             the same question twice and the month was always the thing
+             you scrolled past. -->
         <div class="cal-head" style="margin-top:26px">
-          <button class="step" type="button" id="hbPrev" aria-label="The week before">&lsaquo;</button>
-          <h2 id="hbWeekLabel"></h2>
-          <button class="step" type="button" id="hbNext" aria-label="The week after">&rsaquo;</button>
-          <button class="step wide" type="button" id="hbNow2">This week</button>
+          <button class="step" type="button" id="hbPrev"></button>
+          <h2 id="hbCalLabel"></h2>
+          <button class="step" type="button" id="hbNext"></button>
+          <button class="step wide" type="button" id="hbNow2"></button>
           <span class="grow"></span>
-          <span class="span-meta" id="hbWeekSum"></span>
-          <button class="step wide" type="button" id="hbMoreT"
-                  aria-expanded="false" aria-controls="hbMoreB">
-            <span class="ic" aria-hidden="true"></span>The month</button>
+          <span class="span-meta" id="hbSum"></span>
+          <div class="side" id="hbScale" role="group" aria-label="Week or month">
+            <button type="button" data-scale="week" aria-pressed="true">Week</button>
+            <button type="button" data-scale="month" aria-pressed="false">Month</button>
+          </div>
         </div>
         <div class="hb-strip" id="hbStrip" role="group" aria-label="The week, day by day"></div>
-        <div id="hbMoreB" hidden>
-          <div class="cal-head" style="margin-top:20px"><h2>Lately</h2><span class="grow"></span>
-            <span class="span-meta" id="hbLogMeta"></span></div>
-          <div id="hbLogs"></div>
-        </div>
+        <div id="hbMon" hidden></div>
+
+        <!-- ── reminders ──
+             Not habits. A habit is a shape you are keeping; a reminder
+             is one thing on one date that stops existing once it has
+             happened. They share a screen because they share a part of
+             life, and nothing else. -->
+        <div class="cal-head" style="margin-top:30px"><h2>Reminders</h2>
+          <span class="grow"></span><span class="span-meta" id="hrMeta"></span></div>
+        <form class="hr-add" id="hrAdd">
+          <label class="sr" for="hrText">What to remember</label>
+          <input id="hrText" type="text" maxlength="120" autocomplete="off"
+                 placeholder="The thing you keep meaning to do" />
+          <label class="sr" for="hrDate">Due by</label>
+          <input id="hrDate" type="date" />
+          <button class="btn btn-primary" type="submit">Add</button>
+        </form>
+        <div id="hrList"></div>
 
         <div class="hb-charts">
           <section class="hb-chart" aria-labelledby="hbByH">
@@ -8477,11 +8528,11 @@ const renderHabits = (() => {
      be added or reworded later without a migration. */
   let st = (() => {
     let raw = null;
-    try { raw = localStorage.getItem(KEY); } catch (e) { return { habits: DEFAULT, days: {} }; }
-    if (!raw) return { habits: DEFAULT, days: {} };
+    try { raw = localStorage.getItem(KEY); } catch (e) { return { habits: DEFAULT, days: {}, reminders: [] }; }
+    if (!raw) return { habits: DEFAULT, days: {}, reminders: [] };
     try {
       const v = JSON.parse(raw);
-      if (!v || typeof v !== 'object') return { habits: DEFAULT, days: {} };
+      if (!v || typeof v !== 'object') return { habits: DEFAULT, days: {}, reminders: [] };
       /* REPAIRED, not discarded. Rejecting the whole object because the
          definitions list is damaged throws a year of days away with it —
          and the two are independent: the days are what you cannot get
@@ -8489,10 +8540,11 @@ const renderHabits = (() => {
       return {
         habits: Array.isArray(v.habits) && v.habits.length ? v.habits : DEFAULT,
         days: v.days && typeof v.days === 'object' ? v.days : {},
+        reminders: Array.isArray(v.reminders) ? v.reminders : [],
       };
     } catch (e) {
       try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
-      return { habits: DEFAULT, days: {} };
+      return { habits: DEFAULT, days: {}, reminders: [] };
     }
   })();
   const list = () => st.habits;
@@ -8649,13 +8701,21 @@ const renderHabits = (() => {
       of ? `${of} due today` : 'nothing due today';
   }
 
-  /* ── the week ── */
+  /* ── the calendar, at one of two scales ──
+     The week is what you act on and the month is what you go and look
+     at, and they answer the same question — so the control SWAPS them
+     rather than stacking them, and the arrows mean whichever one is up.
+     Stacked, the month was always the thing you scrolled past. */
+  const SKEY = 'habits.scale.v1';
+  let scale = (() => {
+    try { return localStorage.getItem(SKEY) === 'month' ? 'month' : 'week'; }
+    catch (e) { return 'week'; }
+  })();
   let week = monday(new Date());
+  let mon = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+
   function renderStrip() {
     const days = seven(week), t = today();
-    document.getElementById('hbWeekLabel').textContent =
-      `${days[0].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — `
-      + `${days[6].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
     document.getElementById('hbStrip').innerHTML = days.map((d) => {
       const k = iso(d), ahead = k > t, rec = day(k);
       const pips = ahead ? '' : dueOn(k).map(id =>
@@ -8673,38 +8733,128 @@ const renderHabits = (() => {
         <span class="n">${n}</span>
       </div>`;
     }).join('');
-    const done = days.filter(d => iso(d) <= t).reduce((a, d) => a + didOn(iso(d)).length, 0);
-    document.getElementById('hbWeekSum').textContent = done ? `${done} kept this week` : '';
   }
 
-  /* ── the month, under the week ──
-     Twenty-eight days ending on the week you are looking at, so the two
-     move together. */
   function renderMonth() {
-    const end = seven(week)[6], t = today();
-    const days = Array.from({ length: 28 }, (_, i) => iso(shift(end, i - 27)));
-    const first = new Date(days[0] + 'T00:00:00');
+    const t = today();
+    const y = mon.getFullYear(), m = mon.getMonth();
+    const len = new Date(y, m + 1, 0).getDate();
+    const pad = (new Date(y, m, 1).getDay() + 6) % 7;          // Monday first
     const head = ['M', 'T', 'W', 'T', 'F', 'S', 'S']
       .map(x => `<span class="hd">${x}</span>`).join('');
-    const cells = Array.from({ length: (first.getDay() + 6) % 7 },
-      () => '<div class="cell pad"></div>').concat(days.map((k) => {
-      const d = new Date(k + 'T00:00:00'), rec = day(k);
-      if (k > t) return `<div class="cell pad"></div>`;
-      /* Due OR done — dueOn alone drops the workout, which is never due
-         on a given day and so would never appear on any of them. */
-      const pips = list().filter(h => !h.perWeek && (due(h.id, k) || isDone(k, h.id)))
-        .map(h => `<i class="${isDone(k, h.id) ? '' : 'off'}" data-h="${h.id}"
-          title="${esc(h.name)}"></i>`).join('');
-      const sp = rec && rec.split;
-      return `<div class="cell"${k === t ? ' data-today="1"' : ''}>
-        <b>${d.getDate()}</b><span class="pips">${pips}</span>
-        <span class="sp"${sp ? ` style="background:var(--sp-${sp})"` : ''}></span></div>`;
-    })).join('');
-    document.getElementById('hbLogs').innerHTML = `<div class="hb-mon">${head}${cells}</div>`;
-    const n = days.filter(k => k <= t && day(k) && day(k).split && day(k).split !== 'rest').length;
-    document.getElementById('hbLogMeta').textContent =
-      `28 days · ${n} ${n === 1 ? 'session' : 'sessions'}`;
+    const cells = Array.from({ length: pad }, () => '<div class="cell pad"></div>')
+      .concat(Array.from({ length: len }, (_, i) => {
+        const k = iso(new Date(y, m, i + 1)), rec = day(k), ahead = k > t;
+        /* Due OR done — dueOn alone drops the workout, which is never
+           due on a given day and so would never appear on any of them. */
+        const pips = ahead ? '' : list().filter(h => !h.perWeek && (due(h.id, k) || isDone(k, h.id)))
+          .map(h => `<i class="${isDone(k, h.id) ? '' : 'off'}" data-h="${h.id}"
+            title="${esc(h.name)}"></i>`).join('');
+        const sp = rec && rec.split;
+        return `<div class="cell"${k === t ? ' data-today="1"' : ''}${ahead ? ' data-ahead="1"' : ''}>
+          <b>${i + 1}</b><span class="pips">${pips}</span>
+          <span class="sp"${sp && !ahead ? ` style="background:var(--sp-${sp})"` : ''}></span></div>`;
+      })).join('');
+    document.getElementById('hbMon').innerHTML = `<div class="hb-mon">${head}${cells}</div>`;
   }
+
+  function renderCal() {
+    const t = today(), isM = scale === 'month';
+    document.getElementById('hbStrip').hidden = isM;
+    document.getElementById('hbMon').hidden = !isM;
+    document.querySelectorAll('#hbScale button').forEach(b =>
+      b.setAttribute('aria-pressed', String(b.dataset.scale === scale)));
+
+    if (isM) renderMonth(); else renderStrip();
+
+    const days = isM
+      ? Array.from({ length: new Date(mon.getFullYear(), mon.getMonth() + 1, 0).getDate() },
+          (_, i) => iso(new Date(mon.getFullYear(), mon.getMonth(), i + 1)))
+      : seven(week).map(iso);
+    const past = days.filter(k => k <= t);
+
+    document.getElementById('hbCalLabel').textContent = isM
+      ? mon.toLocaleDateString('en-GB', { month: 'long', year: 'numeric' })
+      : `${seven(week)[0].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })} — `
+        + `${seven(week)[6].toLocaleDateString('en-GB', { day: 'numeric', month: 'short' })}`;
+    /* The arrows and the way home say which scale they move, so the
+       control never has to be guessed at. */
+    document.getElementById('hbPrev').textContent = '‹';
+    document.getElementById('hbNext').textContent = '›';
+    document.getElementById('hbPrev').setAttribute('aria-label',
+      isM ? 'The month before' : 'The week before');
+    document.getElementById('hbNext').setAttribute('aria-label',
+      isM ? 'The month after' : 'The week after');
+    document.getElementById('hbNow2').textContent = isM ? 'This month' : 'This week';
+
+    const kept = past.reduce((a, k) => a + didOn(k).length, 0);
+    const sess = past.filter(k => day(k) && day(k).split && day(k).split !== 'rest').length;
+    document.getElementById('hbSum').textContent = !kept ? ''
+      : isM ? `${kept} kept · ${sess} ${sess === 1 ? 'session' : 'sessions'}`
+            : `${kept} kept this week`;
+  }
+
+  /* ── reminders ──
+     A habit is a shape you are keeping; a reminder is one thing on one
+     date that stops existing once it has happened. Different lifetimes,
+     so a different list — and the one place in this app where DELETE IS
+     FINAL and has no bin behind it. That is deliberate: a bin exists to
+     protect a record you cannot rebuild, and a reminder you have dealt
+     with is not a record of anything. */
+  const rems = () => (st.reminders = st.reminders || []);
+  function renderRems() {
+    const t = today();
+    /* Soonest first, and anything undated last: a reminder with no date
+       is not urgent by definition, and sorting it in among the dated
+       ones would make it look like it was. */
+    const rows = rems().slice().sort((a, b) =>
+      (a.due || '9999') < (b.due || '9999') ? -1 : (a.due || '9999') > (b.due || '9999') ? 1 : 0);
+    const wrap = document.getElementById('hrList');
+    if (!rows.length) {
+      wrap.innerHTML = `<p class="hr-empty">Nothing to remember. The date is optional &mdash;
+        without one it simply sits at the bottom until you deal with it.</p>`;
+      document.getElementById('hrMeta').textContent = '';
+      return;
+    }
+    wrap.innerHTML = rows.map((r) => {
+      let when = 'no date', late = false;
+      if (r.due) {
+        const n = Math.round((new Date(r.due + 'T00:00:00') - new Date(t + 'T00:00:00')) / 86400000);
+        late = n < 0;
+        when = n === 0 ? 'today' : n === 1 ? 'tomorrow' : n === -1 ? 'yesterday'
+          : n > 0 ? `in ${n} days` : `${-n} days ago`;
+      }
+      return `<div class="hr-row"${late ? ' data-late="1"' : ''}>
+        <p>${esc(r.text)}</p>
+        <span class="hr-when">${when}</span>
+        <button class="hr-x" type="button" data-rem="${esc(String(r.id))}"
+          aria-label="Delete: ${esc(r.text)}">✕</button>
+      </div>`;
+    }).join('');
+    const late = rows.filter(r => r.due && r.due < t).length;
+    document.getElementById('hrMeta').textContent =
+      `${rows.length} open${late ? ` · ${late} past due` : ''}`;
+  }
+
+  document.getElementById('hrAdd').addEventListener('submit', (ev) => {
+    ev.preventDefault();
+    const text = document.getElementById('hrText').value.trim();
+    if (!text) return;
+    rems().push({ id: uid(), text, due: document.getElementById('hrDate').value || '' });
+    if (!write()) return;
+    document.getElementById('hrText').value = '';
+    document.getElementById('hrDate').value = '';
+    renderRems();
+    document.getElementById('say').textContent = 'Reminder added.';
+    document.getElementById('hrText').focus();
+  });
+
+  document.getElementById('hrList').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-rem]');
+    if (!b) return;
+    st.reminders = rems().filter(r => String(r.id) !== b.dataset.rem);
+    if (write()) renderRems();
+  });
 
   /* ── the two radars ──
      Same viewBox, same R, same cy, so at equal width they draw at equal
@@ -8763,7 +8913,7 @@ const renderHabits = (() => {
   }
 
   function paint() {
-    renderNow(); renderStrip(); renderMonth(); renderRadars();
+    renderNow(); renderCal(); renderRems(); renderRadars();
     /* The chain leads. A total only ever climbs, so it says nothing
        about now; the chain is the figure that can be LOST and is
        therefore the only one worth defending. */
@@ -8796,33 +8946,31 @@ const renderHabits = (() => {
     if (write()) paint();
   });
 
-  document.getElementById('hbPrev').addEventListener('click', () => {
-    week = shift(week, -7); paint();
-  });
-  document.getElementById('hbNext').addEventListener('click', () => {
-    week = shift(week, 7); paint();
-  });
+  /* One pair of arrows, moving whichever scale is up. */
+  const step = (n) => {
+    if (scale === 'month') mon = new Date(mon.getFullYear(), mon.getMonth() + n, 1);
+    else week = shift(week, n * 7);
+    renderCal();
+  };
+  document.getElementById('hbPrev').addEventListener('click', () => step(-1));
+  document.getElementById('hbNext').addEventListener('click', () => step(1));
   document.getElementById('hbNow2').addEventListener('click', () => {
-    week = monday(new Date()); paint();
+    week = monday(new Date());
+    mon = new Date(new Date().getFullYear(), new Date().getMonth(), 1);
+    renderCal();
   });
-
-  /* The month folds on the same terms as every other panel in the app:
-     shut on a machine that has never opened it, remembered after. */
-  (function () {
-    const FK = 'habits.month.v1';
-    const btn = document.getElementById('hbMoreT');
-    const body = document.getElementById('hbMoreB');
-    btn.querySelector('.ic').innerHTML = icon('chev', 12);
-    const fold = (on) => {
-      btn.setAttribute('aria-expanded', String(on));
-      body.hidden = !on;
-      try { localStorage.setItem(FK, on ? '1' : '0'); } catch (e) {}
-    };
-    btn.addEventListener('click', () => fold(btn.getAttribute('aria-expanded') !== 'true'));
-    let was = null;
-    try { was = localStorage.getItem(FK); } catch (e) {}
-    fold(was === '1');
-  })();
+  document.getElementById('hbScale').addEventListener('click', (ev) => {
+    const b = ev.target.closest('[data-scale]');
+    if (!b || b.dataset.scale === scale) return;
+    scale = b.dataset.scale;
+    /* Swapping scale lands you on the period containing the one you
+       were looking at, not on today — you were looking at March for a
+       reason. */
+    if (scale === 'month') mon = new Date(week.getFullYear(), week.getMonth(), 1);
+    else week = monday(new Date(mon.getFullYear(), mon.getMonth(), 1));
+    try { localStorage.setItem(SKEY, scale); } catch (e) {}
+    renderCal();
+  });
 
   return paint;
 })();
