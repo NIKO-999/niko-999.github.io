@@ -456,10 +456,16 @@ svg { display: block; }
   color: var(--ink);
 }
 
+/* A row sliced in half by the panel below it reads as broken rather
+   than as "there is more". The fade sits over the container's own
+   bottom padding when the list fits, so it costs nothing until the list
+   is actually longer than the space — which is the only time it is
+   saying anything. */
 .rail-list {
   flex: 1 1 auto;
   min-height: 0;
   overflow-y: auto;
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 20px), transparent);
   display: flex;
   flex-direction: column;
   gap: 6px;
@@ -468,6 +474,9 @@ svg { display: block; }
 
 .rail-sub {
   flex: 0 0 auto;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
   padding: 12px 14px 6px;
   border-top: 1px solid var(--line);
   font-family: var(--mono);
@@ -490,49 +499,6 @@ svg { display: block; }
   gap: 4px;
   padding: 0 14px 12px;
 }
-
-.rail-foot {
-  flex: 0 0 auto;
-  margin-top: auto;            /* holds the bottom even when the list is empty */
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-top: 1px solid var(--line);
-}
-.rail-in {
-  flex: 1 1 auto;
-  min-width: 0;
-  height: 34px;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-radius: var(--r-pill);
-  /* Darker than the rail it sits in. An input lifted off its panel
-     reads as a button, and this one is a field you type a line into. */
-  background: var(--bg);
-  color: var(--ink);
-  font-size: .78rem;
-}
-.rail-in::placeholder { color: var(--ink-3); }
-.rail-in:focus { border-color: var(--line-2); }
-
-.send {
-  width: 34px;
-  height: 34px;
-  flex: none;
-  display: grid;
-  place-items: center;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: var(--accent);
-  color: var(--accent-in);
-  cursor: pointer;
-  transition: filter .12s ease;
-}
-@media (hover: hover) {
-  .send:hover { filter: brightness(1.08); }
-}
-.send:active { filter: brightness(.94); }
 
 /* ── controls ──
    One height, 34px, for everything you can press outside a card, so a
@@ -645,7 +611,6 @@ svg { display: block; }
     overflow: visible;
     max-height: none;
   }
-  .rail-foot { margin-top: 0; }
 }
 
 @media (max-width: 700px) {
@@ -675,15 +640,14 @@ svg { display: block; }
   .top-r { flex: 0 0 auto; }
 
   /* A finger is not a cursor. */
-  .add, .send, .step { width: 44px; height: 44px; }
+  .add, .step { width: 44px; height: 44px; }
   .step.wide { width: auto; min-width: 44px; padding: 0 14px; }
   .seg button { height: 44px; min-width: 60px; }
-  .rail-in { height: 44px; }
 
   .pane { padding: 12px 12px 22px; }
   .rail-head { padding: 0 12px; }
   .rail-list { padding: 10px 10px; }
-  .rail-sub, .rail-foot { padding-left: 12px; padding-right: 12px; }
+  .rail-sub { padding-left: 12px; padding-right: 12px; }
   .rail-log { padding: 0 12px 12px; }
 }
 
@@ -719,7 +683,9 @@ svg { display: block; }
 .jm {
   flex: 0 0 auto;
   padding: 12px;
-  border-bottom: 1px solid var(--line);
+  /* Under what is due, not over it. The month is for looking back; the
+     list above it is the thing you opened the app to do. */
+  border-top: 1px solid var(--line);
 }
 
 /* The head is one rounded bar with the arrows inside it rather than
@@ -1177,49 +1143,72 @@ svg { display: block; }
   }
 }
 
-/* ── the log ──
-   A receipt, so it is quieter than the list above it: a dot, a name,
-   the time it belongs to. Still a button — undoing a tick you did not
-   mean is the one thing you come back here to do. */
+/* ── lines ──
+   Today's line is a labelled field on an accent rule, not a pill with a
+   send button: a pill and a round button is a chat composer, which is
+   exactly what it was being read as. Under it, every line before it. */
 
-.jt-l {
+.jt-linew {
+  flex: 0 0 auto;
   display: grid;
-  grid-template-columns: 8px minmax(0, 1fr) auto;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  min-height: 32px;
-  padding: 4px 6px;
-  border: 0;
-  border-radius: var(--r-pill);
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  transition: background-color .14s ease;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 3px 8px;
+  padding: 9px 14px 11px 12px;
+  box-shadow: inset 2px 0 0 var(--accent);
 }
-.jt-l-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: var(--r-pill);
-  background: var(--jt-c);
-}
-.jt-l-nm {
-  min-width: 0;
-  font-size: .72rem;
-  color: var(--ink-2);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.jt-l-at {
+.jt-linew:focus-within { background: var(--card); }
+/* The input carries no ring of its own, so the row wears it — an
+   outline on a borderless field inside a panel reads as a box that
+   appeared from nowhere. */
+.jt-linew:focus-within { outline: 2px solid var(--focus); outline-offset: -2px; }
+.jt-linew-k {
   font-family: var(--mono);
-  font-size: .62rem;
-  color: var(--ink-3);
-  white-space: nowrap;
+  font-size: .52rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--accent);
 }
-@media (hover: hover) {
-  .jt-l:hover { background: var(--card); }
-  .jt-l:hover .jt-l-nm { color: var(--ink); }
+.jt-saved {
+  font-family: var(--mono);
+  font-size: .52rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity .18s ease;
+}
+.jt-saved.on { opacity: 1; }
+.jt-linei {
+  grid-column: 1 / -1;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: .82rem;
+}
+.jt-linei::placeholder { color: var(--ink-3); }
+.jt-linei:focus { outline: none; }
+
+.jt-lines { gap: 0; }
+.jt-ln { padding: 9px 0 10px; border-top: 1px solid var(--line); }
+.jt-ln b {
+  display: block;
+  margin-bottom: 3px;
+  font-family: var(--mono);
+  font-size: .52rem;
+  font-weight: 400;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.jt-ln p {
+  margin: 0;
+  font-size: .8rem;
+  line-height: 1.35;
+  color: var(--ink-2);
 }
 
 .jt-none {
@@ -1245,7 +1234,6 @@ svg { display: block; }
 /* A finger is not a cursor. */
 @media (max-width: 700px) {
   .jt-r { min-height: 44px; }
-  .jt-l { min-height: 44px; }
 }
 
 /* One column wide, a ring with the name stacked under it leaves half
@@ -1272,7 +1260,7 @@ svg { display: block; }
   .jt-prog,
   .jt-card,
   .jt-r,
-  .jt-l { transition: none; }
+  .jt-saved { transition: none; }
 }
 
 /* ══ THE CALENDAR ═════════════════════════════════════════════════
@@ -1666,6 +1654,12 @@ svg { display: block; }
 
 <div class="body">
   <aside class="rail" id="rail" aria-label="Today at a glance">
+    <div class="rail-head">
+      <span class="rail-t">Due today</span>
+      <span class="rail-n" id="railCount">0/0</span>
+    </div>
+    <div class="rail-list" id="railList"></div>
+
     <div class="jm">
       <div class="jm-head">
         <button class="jm-arw" type="button" id="jmPrev" aria-label="Previous month">
@@ -1678,20 +1672,18 @@ svg { display: block; }
       </div>
       <div class="jm-grid" id="jmGrid"></div>
     </div>
-
-    <div class="rail-head">
-      <span class="rail-t">Due today</span>
-      <span class="rail-n" id="railCount">0/0</span>
-    </div>
-    <div class="rail-list" id="railList"></div>
-    <div class="rail-sub">Logged</div>
-    <div class="rail-log" id="railLog"></div>
-    <form class="rail-foot" id="noteForm" autocomplete="off">
-      <input class="rail-in" id="noteIn" type="text" maxlength="140" placeholder="A line about today" aria-label="A line about today" />
-      <button class="send" type="submit" id="noteSend" aria-label="Save the line">
-        <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.6V3.8M4.2 7.4 8 3.6l3.8 3.8"/></svg>
-      </button>
+    <!-- The line about today is the first row of the lines before it.
+         It used to be a pill and a send button pinned to the foot — a
+         chat composer, and a line you wrote could only be read again by
+         navigating to that exact day in the calendar. Write-only. -->
+    <div class="rail-sub">Lines<b class="rail-n" id="lineCount">0</b></div>
+    <form class="jt-linew" id="noteForm" autocomplete="off">
+      <label class="jt-linew-k" for="noteIn">Today</label>
+      <span class="jt-saved" id="noteSaved" role="status"></span>
+      <input class="jt-linei" id="noteIn" type="text" maxlength="140"
+             placeholder="A line about today" aria-label="A line about today" />
     </form>
+    <div class="rail-log jt-lines" id="lineList"></div>
   </aside>
 
   <main class="main" data-screen="today">
@@ -2464,7 +2456,7 @@ function jtRail() {
   const inp = document.getElementById('noteIn');
   if (inp !== document.activeElement) inp.value = noteOn(k);
 
-  jtLog();
+  jtLines();
 }
 
 function jtRailRow(h) {
@@ -2481,31 +2473,30 @@ function jtRailRow(h) {
     '</button>';
 }
 
-function jtLog() {
+function jtLines() {
   const k = todayKey();
-  /* state.days keeps the order things were ticked in, so the log reads
-     off the end of it. Nothing here stamps a clock time — the time on
-     a row is the time the habit belongs to, which is the one the rail
-     above it is sorted by. */
-  const on = (state.days[k] || []).slice().reverse();
-  document.getElementById('railLog').innerHTML = on.length
-    ? on.map(function (id) {
-      const h = HAB[id];
-      return '<button type="button" class="jt-l" data-id="' + h.id + '"' +
-          ' style="--jt-c:var(' + h.col + ')" aria-pressed="true">' +
-          '<span class="jt-l-dot" aria-hidden="true"></span>' +
-          '<span class="jt-l-nm">' + esc(h.name) + '</span>' +
-          '<span class="jt-l-at">' + fmtTime(h.at) + '</span>' +
-        '</button>';
+  const all = Object.keys(state.notes);
+  /* Today is the field above this list, not a row in it — one line can
+     be in one place. Everything else, newest first. */
+  const past = all.filter(function (x) { return x !== k; }).sort().reverse();
+
+  document.getElementById('lineCount').textContent = all.length;
+  document.getElementById('lineList').innerHTML = past.length
+    ? past.map(function (x) {
+      const d = fromKey(x);
+      /* Weekday, date AND month on every row. "Wed 19" alone is a
+         different day depending on which month you have scrolled to,
+         and this list goes back years. */
+      const when = WDAYS[(d.getDay() + 6) % 7] + ' ' + d.getDate()
+        + ' ' + MONTHS[d.getMonth()].slice(0, 3);
+      return '<div class="jt-ln"><b>' + esc(when) + '</b><p>'
+        + esc(state.notes[x]) + '</p></div>';
     }).join('')
-    : '<p class="jt-none">nothing logged yet</p>';
+    : '<p class="jt-none">nothing written yet</p>';
 }
 
-/* ── wiring ────────────────────────────────────────────────────── */
+let jtSaidFor = null;
 
-/* Once, from the containers, never per render. Four handlers on one
-   click is what re-binding on every render buys you, and the fourth
-   one toggles the tick back off. */
 function jtBind() {
   if (jtBind.done) return;
   jtBind.done = true;
@@ -2524,9 +2515,6 @@ function jtBind() {
     .addEventListener('click', tick('.jt-card'));
   document.getElementById('railList')
     .addEventListener('click', tick('.jt-r'));
-  document.getElementById('railLog')
-    .addEventListener('click', tick('.jt-l'));
-
   document.getElementById('addBtn').addEventListener('click', function () {
     const k = todayKey();
     /* Marks what is left and stops there. Nothing left to mark is not
@@ -2547,6 +2535,13 @@ function jtBind() {
        re-render leaves a focused field alone, so this is the only
        place that line can land. */
     inp.value = noteOn(todayKey());
+    /* Sent and unsent used to look identical, so the only way to know a
+       line had been kept was to reload the page. */
+    const said = document.getElementById('noteSaved');
+    said.textContent = inp.value ? 'saved' : 'cleared';
+    said.classList.add('on');
+    clearTimeout(jtSaidFor);
+    jtSaidFor = setTimeout(function () { said.classList.remove('on'); }, 1600);
   });
 }
 
