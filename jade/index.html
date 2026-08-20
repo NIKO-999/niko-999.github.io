@@ -44,10 +44,15 @@
   /* One warm accent, and it is spent only on what is live, what is
      yours, and what you press. A second accent would make both of them
      mean nothing. */
-  --accent:    #FF7A2E;
-  --accent-in: #FFFFFF;
+  --accent:    #FF6FA5;   /* soft hot pink */
+  /* NOT white. White on this pink measures 2.60:1, and it measured the
+     same on the orange this replaced — the solid rail row, the + and the
+     send arrow were all under the floor and looked deliberate. A near
+     black warmed toward the accent reads as belonging to it and comes
+     out at 7.01:1. */
+  --accent-in: #1A1220;
   --track:     #2C3140;   /* the unfilled part of a ring or a bar */
-  --focus:     #FF7A2E;
+  --focus:     #FF6FA5;
 
   /* BUBBLE GEOMETRY. Everything that holds text is round: a panel is a
      22px bubble, anything that holds one line — a chip, a rail row, a
@@ -68,7 +73,11 @@
      you stop opening the screen. */
   --h-steps:    #3DE8A6;
   --h-walk:     #A8ED5B;
-  --h-strength: #FF6EC7;
+  /* Strength takes the orange the accent vacated. Two pinks on one
+     screen — an accent that means "this is you, press this" and a habit
+     identity that means "strength training" — is a collision the ΔE
+     floor would pass and the eye would not. */
+  --h-strength: #FFA33D;
   --h-abs:      #C08BFF;
   --h-water:    #45DDF2;
   --h-sleep:    #7FA6FF;

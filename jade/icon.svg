@@ -3,7 +3,7 @@
   <circle cx="16" cy="16" r="9" fill="none" stroke="#2C3140" stroke-width="4"/>
   <!-- Three quarters, starting at twelve o'clock, the same geometry the
        cards use. The mark is the ring because the ring is the app. -->
-  <circle cx="16" cy="16" r="9" fill="none" stroke="#FF7A2E" stroke-width="4"
+  <circle cx="16" cy="16" r="9" fill="none" stroke="#FF6FA5" stroke-width="4"
           stroke-linecap="round" stroke-dasharray="42.4 56.5"
           transform="rotate(-90 16 16)"/>
 </svg>
