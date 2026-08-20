@@ -424,6 +424,95 @@
 .notable .rest { background: none; padding: 9px 2px 0; display: block;
   font-family: var(--mono); font-size: .56rem; letter-spacing: .06em; color: var(--ink-3); }
 
+/* ══ six ways to ask a two-way question ════════════════════════ */
+.decs { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px;
+  align-items: stretch; margin: 2px 0 24px; }
+@media (max-width: 1000px) { .decs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px)  { .decs { grid-template-columns: minmax(0, 1fr); } }
+.dc { border: 1px solid var(--glass-line); border-radius: 12px; background: var(--glass-in);
+  padding: 13px 15px 15px; display: flex; flex-direction: column; }
+.dc h4 { margin: 0; font-size: .8rem; font-weight: 500; color: var(--ink); }
+.dc h4 b { font-family: var(--mono); font-size: .54rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
+  padding: 2px 5px; margin-right: 7px; }
+.dc > p { margin: 4px 0 0; font-size: .7rem; line-height: 1.5; color: var(--ink-3); }
+.dc .body { flex: 1; display: flex; flex-direction: column; justify-content: flex-start;
+  gap: 14px; margin-top: 13px; }
+.dc .q { font-family: var(--mono); font-size: .52rem; letter-spacing: .1em;
+  text-transform: uppercase; color: var(--ink-3); margin-bottom: 6px; display: block; }
+
+/* A · the segmented pair, as it stands */
+.t-seg { display: inline-flex; border: 1px solid var(--glass-line); border-radius: 9px;
+  overflow: hidden; }
+.t-seg button { height: 30px; padding: 0 12px; border: 0; background: none; cursor: pointer;
+  font: inherit; font-size: .74rem; color: var(--ink-3); }
+.t-seg button + button { border-left: 1px solid var(--glass-line); }
+.t-seg button:hover { color: var(--ink-2); }
+.t-seg button[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
+
+/* B · one track, a thumb that slides. The movement IS the feedback —
+   nothing lights up, something moves. */
+.t-slide { position: relative; display: inline-flex; padding: 3px; border-radius: 999px;
+  background: var(--glass-in-2); border: 1px solid var(--glass-line); }
+.t-slide i { position: absolute; top: 3px; bottom: 3px; border-radius: 999px;
+  background: var(--glass-line); transition: left .22s cubic-bezier(.3,.8,.3,1), width .22s; }
+.t-slide button { position: relative; height: 26px; padding: 0 14px; border: 0;
+  background: none; cursor: pointer; font: inherit; font-size: .74rem; color: var(--ink-3); }
+.t-slide button[aria-pressed="true"] { color: var(--ink); }
+@media (prefers-reduced-motion: reduce) { .t-slide i { transition: none; } }
+
+/* C · a switch, with the two answers either side of it. */
+.t-sw { display: flex; align-items: center; gap: 11px; }
+.t-sw span { font-size: .74rem; color: var(--ink-3); cursor: pointer; }
+.t-sw span.on { color: var(--ink); }
+.t-sw button { width: 42px; height: 24px; border-radius: 999px; padding: 0;
+  border: 1px solid var(--glass-line); background: var(--glass-in-2); cursor: pointer;
+  position: relative; flex: none; }
+.t-sw button i { position: absolute; top: 3px; left: 3px; width: 16px; height: 16px;
+  border-radius: 50%; background: var(--ink-3); transition: transform .2s cubic-bezier(.3,.8,.3,1); }
+.t-sw button[aria-checked="true"] i { transform: translateX(18px); background: var(--ink-2); }
+@media (prefers-reduced-motion: reduce) { .t-sw button i { transition: none; } }
+
+/* D · two rows, one dot each, and room for what the answer MEANS. */
+.t-rows { display: grid; gap: 5px; }
+.t-rows button { display: grid; grid-template-columns: 13px minmax(0, 1fr); gap: 10px;
+  align-items: start; text-align: left; padding: 9px 11px; border-radius: 9px;
+  border: 1px solid var(--glass-line); background: none; cursor: pointer; font: inherit; }
+.t-rows button:hover { background: var(--glass-in-2); }
+.t-rows s { width: 11px; height: 11px; border-radius: 50%; margin-top: 3px;
+  text-decoration: none; box-sizing: border-box; box-shadow: inset 0 0 0 1px var(--glass-line); }
+.t-rows button[aria-pressed="true"] { border-color: var(--ink-3); background: var(--glass-in-2); }
+.t-rows button[aria-pressed="true"] s { background: var(--accent); box-shadow: none; }
+.t-rows b { font-size: .76rem; font-weight: 400; color: var(--ink-2); }
+.t-rows button[aria-pressed="true"] b { color: var(--ink); font-weight: 500; }
+.t-rows em { display: block; font-style: normal; font-size: .66rem; line-height: 1.45;
+  color: var(--ink-3); margin-top: 2px; }
+
+/* E · a sentence. The setting reads as prose and the choice is the only
+   part that is emphasised; the alternative sits beside it, quiet. */
+.t-say { font-size: .82rem; line-height: 1.7; color: var(--ink-3); }
+.t-say b { color: var(--ink); font-weight: 500; }
+.t-say button { border: 0; background: none; padding: 0 0 1px; margin-left: 9px;
+  font: inherit; font-size: .72rem; color: var(--ink-3); cursor: pointer;
+  border-bottom: 1px dashed var(--glass-line); }
+.t-say button:hover { color: var(--ink-2); border-bottom-color: var(--ink-3); }
+
+/* F · two cards, each showing what it DOES. These decisions are about
+   how something looks, so a picture of the answer beats naming it. */
+.t-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.t-cards button { display: flex; flex-direction: column; gap: 8px; align-items: flex-start;
+  padding: 10px; border-radius: 10px; border: 1px solid var(--glass-line);
+  background: none; cursor: pointer; font: inherit; text-align: left; }
+.t-cards button:hover { background: var(--glass-in-2); }
+.t-cards button[aria-pressed="true"] { border-color: var(--ink-3); background: var(--glass-in-2); }
+.t-cards b { font-size: .74rem; font-weight: 400; color: var(--ink-3); }
+.t-cards button[aria-pressed="true"] b { color: var(--ink); font-weight: 500; }
+.t-pic { display: flex; gap: 3px; align-items: center; height: 14px; }
+.t-pic i { width: 8px; height: 8px; border-radius: 2px; background: var(--accent); }
+.t-pic i.o { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
+.t-pic i.r { background: color-mix(in srgb, var(--down) 45%, transparent); box-shadow: none; }
+.t-pic i.gap { background: none; box-shadow: none; }
+
 .note-top { border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 20px;
   font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 80ch; }
@@ -451,28 +540,14 @@
         flip them and watch.
       </p>
 
-      <div class="dec">
-        <b>Two decisions</b>
-        <p>Everything else I would build as shown. These two change how the screen feels, so
-          they are yours.</p>
-        <span>
-          <label for="decAnchor">Every-2-days counts from</label>
-          <span class="side" id="decAnchor" role="group">
-            <button type="button" data-anchor="roll" aria-pressed="true">Last time you did it</button>
-            <button type="button" data-anchor="fixed" aria-pressed="false">A fixed grid</button>
-          </span>
-          <!-- The two settings often agree across any single week, so
-               without a figure the toggle looks broken. -->
-          <em class="dec-n" id="decAnchorN"></em>
-        </span>
-        <span>
-          <label for="decMiss">A missed day is</label>
-          <span class="side" id="decMiss" role="group">
-            <button type="button" data-miss="none" aria-pressed="true">An absence</button>
-            <button type="button" data-miss="red" aria-pressed="false">Marked red</button>
-          </span>
-        </span>
-      </div>
+      <div class="cal-head"><h2>The two decisions &mdash; six ways to ask</h2>
+        <span class="grow"></span><span class="span-meta" id="decAnchorN"></span></div>
+      <p class="hb-sub" style="margin:0 0 13px;max-width:84ch">This is the app's segmented
+        pair, and it is <b>everywhere</b> &mdash; the log's outcome filter, the backtest
+        filter, the settings. So whatever wins here is a house pattern, and these two
+        questions are just what it gets tested on. All six are live and share one state:
+        click any of them and the screen below moves, and the other five agree.</p>
+      <div class="decs" id="hbDecs"></div>
 
       <div class="cal-head"><h2>Today</h2><span class="grow"></span>
         <span class="span-meta" id="hbToday"></span></div>
