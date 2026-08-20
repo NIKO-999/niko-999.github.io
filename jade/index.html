@@ -1234,8 +1234,356 @@ svg { display: block; }
   .jt-l { transition: none; }
 }
 
-/* placeholder — the calendar region is still being written */
-.jc-soon { padding: 40px; color: var(--ink-2); font-family: var(--mono); }
+/* ══ THE CALENDAR ═════════════════════════════════════════════════
+   Month, week and day. The week is the real thing — an hour grid with
+   the habits sitting on it at the time they happen — because "read at
+   nine" is a different commitment from "read at some point", and a
+   tracker that only knows the day cannot tell you which one you keep. */
+
+/* The calendar's pane is a column and does not scroll itself: the grid
+   fills it and the scrolling happens inside .jc-body, so paging a month
+   cannot move the page under you. Scoped with :has rather than by
+   restyling .pane, which the today screen also uses as a plain
+   scroller. */
+.pane:has(> .jc-head) {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+/* .pane > * carries margin-inline:auto for the 1180px reading width.
+   In a flex column an auto cross-axis margin shrinks the item to its
+   content, which collapsed the header onto its own buttons — so the
+   width is stated and the auto margins resolve to nothing. */
+.pane:has(> .jc-head) > * { width: 100%; }
+
+.jc-head {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 0 12px;
+}
+.jc-title {
+  margin: 0 0 0 6px;
+  font-size: .96rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.jc-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  border: 1px solid var(--line);
+  border-radius: var(--r-card);
+  background: var(--card);
+}
+
+/* ── month ───────────────────────────────────────────────────────
+   Six rows always, even in a month that fits in five. A grid that
+   changes height as you page through the year makes every click feel
+   like it moved something. */
+.jc-month {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  grid-template-rows: auto repeat(6, minmax(84px, 1fr));
+  min-height: 100%;
+}
+.jc-wd {
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border-bottom: 1px solid var(--line);
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.jc-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  min-width: 0;
+  padding: 6px 7px 8px;
+  border: 0;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: none;
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.jc-cell:nth-child(7n + 7) { border-right: 0; }
+.jc-cell.out { opacity: .4; }
+.jc-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  width: 100%;
+}
+.jc-num {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 6px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-2);
+}
+.jc-cell.now .jc-num {
+  background: var(--accent);
+  color: var(--accent-in);
+  font-weight: 600;
+}
+.jc-sc {
+  font-family: var(--mono);
+  font-size: .56rem;
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* One pip per habit that was kept or was due. Filled took it, hollow
+   did not — and hollow keeps the habit's own colour rather than turning
+   into a warning, because the colour says WHICH, never whether. */
+.jc-dots { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; }
+.jc-pip {
+  width: 11px;
+  height: 11px;
+  border: 1px solid var(--jc-c);
+  border-radius: var(--r-pill);
+  opacity: .5;
+}
+.jc-pip.on { background: var(--jc-c); opacity: 1; }
+
+/* A chip is one habit in the all-day band. Filled means kept, a border
+   means due and not kept, and there is no third state that means missed
+   — hollow already says it without saying it about you. */
+.jc-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  height: 20px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .62rem;
+  text-align: left;
+  cursor: pointer;
+}
+.jc-chip .jc-dot {
+  flex: none;
+  width: 6px;
+  height: 6px;
+  border-radius: var(--r-pill);
+  background: var(--jc-c);
+}
+.jc-chip span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.jc-chip.on {
+  background: color-mix(in srgb, var(--jc-c) 18%, transparent);
+  color: var(--jc-c);
+}
+.jc-chip.due { border-color: var(--line-2); }
+
+/* ── week and day ────────────────────────────────────────────────
+   One grid: a gutter, then n day columns. Three rows — the day heads,
+   the all-day band, and the hours. */
+.jc-grid {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  min-width: 100%;
+}
+.jc-dh {
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  height: 46px;
+  display: grid;
+  place-items: center;
+  gap: 1px;
+  border-bottom: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  background: var(--card);
+}
+.jc-dh:last-child { border-right: 0; }
+.jc-dh b { font-size: .82rem; font-weight: 600; color: var(--ink); }
+.jc-dh span {
+  font-family: var(--mono);
+  font-size: .54rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.jc-dh.now b, .jc-dh.now span { color: var(--accent); }
+
+/* The gutter is sticky sideways so the hours stay readable when a week
+   is wider than the pane and you scroll it. */
+.jc-gut {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  border-right: 1px solid var(--line);
+  background: var(--card);
+}
+.jc-corner {
+  position: sticky;
+  left: 0;
+  top: 0;
+  z-index: 5;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+}
+.jc-adl {
+  position: sticky;
+  left: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center end;
+  padding-right: 8px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: var(--card);
+  font-family: var(--mono);
+  font-size: .52rem;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.jc-ad {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+  padding: 4px;
+  border-right: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+.jc-ad:last-child { border-right: 0; }
+
+.jc-hr {
+  height: 44px;
+  padding-right: 8px;
+  text-align: right;
+  font-family: var(--mono);
+  font-size: .56rem;
+  color: var(--ink-3);
+  /* Lifted half a line so the label sits ON its rule rather than in the
+     box under it, which is where an hour label means the hour. */
+  transform: translateY(-6px);
+}
+.jc-col {
+  position: relative;
+  min-width: 0;
+  border-right: 1px solid var(--line);
+  background: repeating-linear-gradient(
+    to bottom,
+    var(--line) 0 1px,
+    transparent 1px 44px);
+}
+.jc-col:last-child { border-right: 0; }
+
+.jc-ev {
+  position: absolute;
+  left: 3px;
+  right: 3px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 1px;
+  overflow: hidden;
+  padding: 2px 7px 2px 9px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .64rem;
+  text-align: left;
+  cursor: pointer;
+}
+.jc-ev b { font-weight: 600; font-size: .66rem; }
+.jc-ev span { font-family: var(--mono); font-size: .54rem; color: var(--ink-3); }
+.jc-ev.on {
+  background: color-mix(in srgb, var(--jc-c) 22%, transparent);
+  color: var(--jc-c);
+  /* The full-strength colour lives in a 3px bar rather than the whole
+     fill: eight saturated blocks on one screen is a paint chart. */
+  box-shadow: inset 3px 0 0 var(--jc-c);
+}
+.jc-ev.on b { color: var(--jc-c); }
+.jc-ev.on span { color: color-mix(in srgb, var(--jc-c) 70%, var(--ink-3)); }
+.jc-ev.due { border-color: var(--line-2); }
+.jc-ev.off { border: 1px dashed var(--line); opacity: .7; }
+/* A day that has not happened cannot be a record of anything, so it is
+   shown and not touchable. */
+.jc-ev.ahead, .jc-chip.ahead { opacity: .45; cursor: default; }
+
+.jc-now {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  z-index: 2;
+  background: var(--accent);
+  pointer-events: none;
+}
+.jc-now::before {
+  content: '';
+  position: absolute;
+  left: -4px;
+  top: -3px;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+}
+
+.jc-note {
+  grid-column: 1 / -1;
+  padding: 12px 14px;
+  border-top: 1px solid var(--line);
+  color: var(--ink-2);
+  font-size: .78rem;
+}
+.jc-note b {
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--mono);
+  font-size: .56rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  font-weight: 400;
+}
+
+@media (hover: hover) {
+  .jc-cell:hover { background: var(--card-2); }
+  .jc-chip:not(.ahead):hover, .jc-ev:not(.ahead):hover { filter: brightness(1.25); }
+}
+.jc-cell:focus-visible,
+.jc-chip:focus-visible,
+.jc-ev:focus-visible { outline: 2px solid var(--focus); outline-offset: -2px; }
+
+/* Narrow: the chips lose their labels before the cells lose their
+   shape. A dot still says which habit — that is what the colour is for. */
+@media (max-width: 560px) {
+  .jc-ad .jc-chip span { display: none; }
+  .jc-ad { flex-direction: row; }
+  .jc-chip { width: 22px; padding: 0; justify-content: center; }
+}
 </style>
 </head>
 <body>
@@ -2164,14 +2512,214 @@ function jtBind() {
   });
 }
 
-/* placeholder — the calendar region is still being written */
+/* ══ THE CALENDAR ═════════════════════════════════════════════════
+   Month, week, day. Its own reference date, moved by the header, the
+   keys, or the mini month in the rail. */
+
 let jcRef = new Date();
 let jcScale = 'month';
-function jcRender() {
-  document.getElementById('calBody').innerHTML = '<div class="jc-soon">calendar</div>';
+let jcTick = null;                    /* the now-line timer, cleared on the way out */
+
+const JC_H0 = 5;                      /* the grid starts at 05:00 and ends at 24:00 */
+const JC_HR = 44;                     /* one hour, in px — the row height in cal.css */
+
+function jcGoto(d, scale) {
+  jcRef = d;
+  if (scale) jcScale = scale;
+  jcRender();
 }
-function jcGoto(d, scale) { jcRef = d; jcScale = scale; jcRender(); }
-function jcBind() {}
+
+function jcTitle() {
+  if (jcScale === 'month') return MONTHS[jcRef.getMonth()] + ' ' + jcRef.getFullYear();
+  if (jcScale === 'day') return fmtLong(jcRef);
+  const a = weekStart(jcRef), b = shift(a, 6);
+  /* "17 – 23 August" when one month holds the week, both names when it
+     does not. A week that straddles a month is the case that reads
+     wrong if you only ever test the middle of one. */
+  return a.getMonth() === b.getMonth()
+    ? `${a.getDate()} – ${b.getDate()} ${MONTHS[b.getMonth()]} ${b.getFullYear()}`
+    : `${a.getDate()} ${MONTHS[a.getMonth()]} – ${b.getDate()} ${MONTHS[b.getMonth()]} ${b.getFullYear()}`;
+}
+
+/* What shows on a day, and why each one is there.
+
+   In month view, space is the constraint: only what was kept or is due
+   earns a chip. In week and day view every habit gets its slot, kept or
+   not — otherwise there is no way to log a session on a Tuesday it was
+   not asked of you, and doing more than you promised is not an error. */
+function jcEvents(k, all) {
+  const out = [];
+  for (const h of HABITS) {
+    const on = keptOn(k, h.id);
+    const due = dueOn(h.id, k);
+    if (!all && !on && !due) continue;
+    out.push({ h, on, due });
+  }
+  return out.sort((a, b) => (a.h.at === null ? -1 : b.h.at === null ? 1 : a.h.at - b.h.at));
+}
+
+function jcChip(k, e, ahead) {
+  const cls = ['jc-chip', e.on ? 'on' : e.due ? 'due' : '', ahead ? 'ahead' : ''];
+  return `<button type="button" class="${cls.join(' ').trim()}" style="--jc-c: var(${e.h.col})"`
+    + ` data-k="${k}" data-id="${e.h.id}"${ahead ? ' aria-disabled="true"' : ''}`
+    + ` aria-pressed="${e.on}"><i class="jc-dot"></i><span>${esc(e.h.name)}</span></button>`;
+}
+
+function jcMonth() {
+  const y = jcRef.getFullYear(), m = jcRef.getMonth(), now = todayKey();
+  const lead = (new Date(y, m, 1).getDay() + 6) % 7;
+  const out = WDAYS.map(d => `<div class="jc-wd">${d}</div>`);
+
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(y, m, 1 - lead + i);
+    const k = dayKey(d);
+    const ev = jcEvents(k, false);
+
+    /* Named chips were the first thing tried here and they were wrong.
+       The same eight habits recur every day, so three names and a
+       "+5 more" appeared identically in all 42 cells and said nothing
+       about any of them. A pip per habit — filled for kept, hollow for
+       due and not kept — fits the whole day in one line and is read at
+       a glance, which is the only thing a month grid is for. */
+    /* Nothing ahead of today. A future week rendered as eight hollow
+       rings a day is a wall of things you have not done yet, which is
+       indistinguishable from a wall of things you failed. */
+    const pips = isFuture(k) ? '' : ev.map(e => `<i class="jc-pip${e.on ? ' on' : ''}"`
+      + ` style="--jc-c: var(${e.h.col})"></i>`).join('');
+
+    const st = dayStat(k);
+    /* No score on a day that has not happened: 0/7 against tomorrow is
+       not a fact about anything. */
+    const score = !isFuture(k) && st.due > 0
+      ? `<span class="jc-sc">${st.kept}/${st.due}</span>` : '';
+    const cls = ['jc-cell', d.getMonth() !== m ? 'out' : '', k === now ? 'now' : ''];
+    const said = st.due > 0 && !isFuture(k) ? `, ${st.kept} of ${st.due} kept` : '';
+
+    /* The whole cell opens the day, and the pips inside it are not
+       controls. Eight 11px targets in a 140px box is a tap you miss;
+       the day and week grids are where a mark is made. */
+    out.push(`<button type="button" class="${cls.join(' ').trim()}" data-open="${k}"`
+      + ` aria-label="${esc(fmtLong(d))}${said}">`
+      + `<span class="jc-top"><span class="jc-num">${d.getDate()}</span>${score}</span>`
+      + `<span class="jc-dots">${pips}</span></button>`);
+  }
+  return `<div class="jc-month">${out.join('')}</div>`;
+}
+
+function jcGrid(days) {
+  const now = todayKey();
+  const start = days === 7 ? weekStart(jcRef) : jcRef;
+  const cols = [];
+  for (let i = 0; i < days; i++) cols.push(shift(start, i));
+
+  const head = cols.map(d => `<div class="jc-dh${dayKey(d) === now ? ' now' : ''}">`
+    + `<b>${d.getDate()}</b><span>${WDAYS[(d.getDay() + 6) % 7]}</span></div>`).join('');
+
+  const allday = cols.map((d) => {
+    const k = dayKey(d), ahead = isFuture(k);
+    const ev = jcEvents(k, true).filter(e => e.h.at === null);
+    return `<div class="jc-ad">${ev.map(e => jcChip(k, e, ahead)).join('')}</div>`;
+  }).join('');
+
+  const hours = [];
+  for (let h = JC_H0; h < 24; h++) hours.push(`<div class="jc-hr">${String(h).padStart(2, '0')}:00</div>`);
+
+  const body = cols.map((d) => {
+    const k = dayKey(d), ahead = isFuture(k);
+    const ev = jcEvents(k, true).filter(e => e.h.at !== null).map((e) => {
+      const top = (e.h.at - JC_H0 * 60) * (JC_HR / 60);
+      /* Twenty minutes is 14px, which is a line of text with nowhere to
+         sit. Short blocks get a floor and overlap nothing, because none
+         of these habits share a slot. */
+      const hgt = Math.max(e.h.mins * (JC_HR / 60), 26);
+      const cls = ['jc-ev', e.on ? 'on' : e.due ? 'due' : 'off', ahead ? 'ahead' : ''];
+      return `<button type="button" class="${cls.join(' ').trim()}"`
+        + ` style="--jc-c: var(${e.h.col}); top:${top}px; height:${hgt}px"`
+        + ` data-k="${k}" data-id="${e.h.id}"${ahead ? ' aria-disabled="true"' : ''}`
+        + ` aria-pressed="${e.on}"><b>${esc(e.h.name)}</b>`
+        + `<span>${fmtTime(e.h.at)}</span></button>`;
+    }).join('');
+    return `<div class="jc-col" data-k="${k}">${ev}</div>`;
+  }).join('');
+
+  const note = days === 1 && noteOn(dayKey(jcRef))
+    ? `<div class="jc-note"><b>The line about that day</b>${esc(noteOn(dayKey(jcRef)))}</div>` : '';
+
+  return `<div class="jc-grid" style="grid-template-columns: 58px repeat(${days}, minmax(104px, 1fr))">`
+    + `<div class="jc-corner"></div>${head}`
+    + `<div class="jc-adl">All day</div>${allday}`
+    + `<div class="jc-gut">${hours.join('')}</div>${body}${note}</div>`;
+}
+
+function jcWeek() { return jcGrid(7); }
+function jcDay() { return jcGrid(1); }
+
+/* The now line is drawn after the grid rather than rendered into it: it
+   moves once a minute and the grid does not. */
+function jcNow() {
+  if (jcTick) { clearInterval(jcTick); jcTick = null; }
+  if (jcScale === 'month') return;
+  const draw = () => {
+    for (const el of document.querySelectorAll('.jc-now')) el.remove();
+    const col = document.querySelector(`.jc-col[data-k="${todayKey()}"]`);
+    if (!col) return;
+    const d = new Date();
+    const mins = d.getHours() * 60 + d.getMinutes() - JC_H0 * 60;
+    if (mins < 0 || mins > (24 - JC_H0) * 60) return;
+    const line = document.createElement('div');
+    line.className = 'jc-now';
+    line.style.top = (mins * (JC_HR / 60)) + 'px';
+    col.appendChild(line);
+  };
+  draw();
+  jcTick = setInterval(draw, 60000);
+}
+
+function jcRender() {
+  document.getElementById('calTitle').textContent = jcTitle();
+  for (const b of document.querySelectorAll('#calSeg button'))
+    b.setAttribute('aria-pressed', String(b.dataset.cal === jcScale));
+  document.getElementById('calBody').innerHTML =
+    jcScale === 'month' ? jcMonth() : jcScale === 'day' ? jcDay() : jcWeek();
+  jcNow();
+}
+
+function jcBind() {
+  const step = (n) => {
+    if (jcScale === 'month') jcRef = new Date(jcRef.getFullYear(), jcRef.getMonth() + n, 1);
+    else jcRef = shift(jcRef, n * (jcScale === 'week' ? 7 : 1));
+    jcRender();
+  };
+  document.getElementById('calPrev').addEventListener('click', () => step(-1));
+  document.getElementById('calNext').addEventListener('click', () => step(1));
+  document.getElementById('calToday').addEventListener('click', () => { jcRef = new Date(); jcRender(); });
+  document.getElementById('calSeg').addEventListener('click', (e) => {
+    const b = e.target.closest('button');
+    if (b) { jcScale = b.dataset.cal; jcRender(); }
+  });
+
+  document.getElementById('calBody').addEventListener('click', (e) => {
+    const open = e.target.closest('[data-open]');
+    if (open) { jcRef = fromKey(open.dataset.open); jcScale = 'day'; jcRender(); return; }
+    const hit = e.target.closest('[data-id]');
+    if (!hit || hit.getAttribute('aria-disabled') === 'true') return;
+    toggle(hit.dataset.k, hit.dataset.id);
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (view !== 'calendar') return;
+    const t = e.target;
+    if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+    if (e.metaKey || e.ctrlKey || e.altKey) return;
+    if (e.key === 'ArrowLeft') { step(-1); e.preventDefault(); }
+    else if (e.key === 'ArrowRight') { step(1); e.preventDefault(); }
+    else if (e.key === 't') { jcRef = new Date(); jcRender(); }
+    else if (e.key === 'm' || e.key === 'w' || e.key === 'd') {
+      jcScale = { m: 'month', w: 'week', d: 'day' }[e.key];
+      jcRender();
+    }
+  });
+}
 
 /* ══ THE APP ══════════════════════════════════════════════════════
    Two screens, one rail. The rail stays up on both: what is due today
