@@ -854,6 +854,8 @@ svg { display: block; }
   flex: 0 0 auto;
   position: relative;
   display: flex;
+  align-items: center;
+  gap: 8px;
   padding: 0 12px 10px;
 }
 .jr-plus {
@@ -886,8 +888,47 @@ svg { display: block; }
 }
 .jr-in::placeholder { color: var(--ink-3); }
 .jr-in:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
-.jr-in:focus + .jr-plus,
 .jr-add:focus-within .jr-plus { color: var(--accent); }
+
+/* :placeholder-shown IS the empty test — no script has to keep a class
+   in step with what has been typed. The field wears the accent and the
+   send appears the moment there is something to send, and there is
+   nothing to press before then. */
+/* Not while it is focused: the focus ring is already an accent ring, and
+   the two together drew two concentric pink outlines around one field,
+   which reads as a mistake. Unfocused with text still in it, the border
+   is the only thing left saying "this has not been sent". */
+.jr-in:not(:placeholder-shown):not(:focus) {
+  border-color: var(--accent);
+}
+.jr-in:not(:placeholder-shown) ~ .jr-plus { color: var(--accent); }
+.jr-in:placeholder-shown ~ .jr-send { display: none; }
+
+.jr-send {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent);
+  color: var(--accent-in);
+  cursor: pointer;
+  transition: filter .12s ease;
+}
+.jr-send svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jr-send:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (hover: hover) { .jr-send:hover { filter: brightness(1.08); } }
+.jr-send:active { filter: brightness(.94); }
 
 /* ── the five seconds after a tick ──
    It stands where the field stands, so ticking one does not change the
@@ -1012,10 +1053,11 @@ svg { display: block; }
 @media (max-width: 700px) {
   .jr-in, .jr-undo { height: 44px; }
   .jr-plus { top: 16px; }
+  .jr-send { width: 44px; height: 44px; }
   .jr-undo button { height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .jr-tk { transition: none; }
+  .jr-tk, .jr-send { transition: none; }
 }
 
 /* ══ TODAY ═══════════════════════════════════════════════════════
@@ -1952,6 +1994,9 @@ svg { display: block; }
         <input class="jr-in" id="remIn" type="text" maxlength="120"
                placeholder="Something to remember" aria-label="Something to remember" />
         <svg class="jr-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.6v8.8M3.6 8h8.8"/></svg>
+        <button class="jr-send" type="submit" id="remSend" aria-label="Add the reminder">
+          <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.6V3.8M4.2 7.4 8 3.6l3.8 3.8"/></svg>
+        </button>
       </form>
       <div class="jr-undo" id="remUndo" hidden>
         <p>Removed <b id="remGone"></b></p>
