@@ -126,6 +126,38 @@
    screen you dread opening on a bad day is a screen you stop opening.
    ══════════════════════════════════════════════════════════════ */
 
+/* ── a colour each ──
+   The colour says WHICH habit, never whether you kept it. That
+   distinction is the whole licence for having any here: this screen
+   had no colour on purpose, because a wash of red across a week you
+   missed is a judgement about you and is what makes you stop opening
+   the app. Identity is not a judgement. So a kept mark takes its
+   habit's colour and a missed one stays hollow — the same filled-or-
+   hollow language as before, with the fill now saying what it is.
+
+   Never an accent, like the splits: the accent moves with the palette
+   and a habit that changes colour when you change the backdrop is not
+   a habit you can recognise at four pixels.
+
+   They also have to stay clear of the four split colours, which are on
+   this same screen — so no teal, no rose and no brass among them. */
+:root {
+  --h-wake:    #d8b96b;   /* first light */
+  --h-workout: #c4645c;   /* the effort  */
+  --h-abs:     #a04e66;   /* the same effort, deeper */
+  --h-walk:    #63b2c9;   /* morning air */
+  --h-water:   #4d84c8;   /* the obvious one */
+  --h-read:    #9d9382;   /* paper */
+}
+:root[data-resolved="light"] {
+  --h-wake:    #8a6a1e;
+  --h-workout: #a6382f;
+  --h-abs:     #832c46;
+  --h-walk:    #1d6b82;
+  --h-water:   #2a5698;
+  --h-read:    #6a6152;
+}
+
 /* ── what you trained ──
    Four, and none can be mistaken for the accent.
 
@@ -179,13 +211,11 @@
 /* Solid or hollow, the same shape language the check-in pad uses. */
 .hb-dot { width: 11px; height: 11px; border-radius: 50%; box-sizing: border-box;
   box-shadow: inset 0 0 0 1px var(--glass-line); }
-.hb-dot[data-on] {
-  background: radial-gradient(circle at 34% 30%,
-    color-mix(in srgb, var(--lit, var(--accent)) 55%, white),
-    var(--lit, var(--accent)) 62%,
-    color-mix(in srgb, var(--lit, var(--accent)) 80%, black));
-  box-shadow: 0 0 6px color-mix(in srgb, var(--lit, var(--accent)) 45%, transparent);
-}
+/* Flat. The disc was a lit sphere with a bloom around it, which made a
+   ticked habit the brightest thing in the row and pulled the eye off
+   the name it belongs to. A mark that says "done" does not need to
+   glow to say it. */
+.hb-dot[data-on] { background: var(--lit, var(--accent)); }
 .hb-nm { min-width: 0; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
 .hb-nm b { font-size: .82rem; font-weight: 400; color: var(--ink-3); }
 .hb-item[data-on] .hb-nm b { color: var(--ink); font-weight: 500; }
@@ -213,23 +243,15 @@
   display: grid; place-items: center; }
 .hb-split button i {
   width: 10px; height: 10px; border-radius: 50%; opacity: .45;
-  /* Off-centre, so the disc has a top and a side rather than being a
-     flat circle of paint. */
-  background: radial-gradient(circle at 34% 30%,
-    color-mix(in srgb, var(--c) 55%, white), var(--c) 62%,
-    color-mix(in srgb, var(--c) 78%, black));
-  transition: opacity .16s, box-shadow .2s;
+  background: var(--c);
+  transition: opacity .16s;
 }
 .hb-split button:hover i { opacity: .82; }
 .hb-split button[aria-pressed="true"] { border-color: var(--c); }
-/* Only the chosen one blooms. Four glowing dots is a string of fairy
-   lights, and then none of them is chosen. */
-.hb-split button[aria-pressed="true"] i {
-  opacity: 1;
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--c) 45%, transparent),
-              0 0 7px color-mix(in srgb, var(--c) 62%, transparent),
-              0 0 14px color-mix(in srgb, var(--c) 30%, transparent);
-}
+/* The chosen one comes up to full and takes the ring; the other three
+   sit back. Opacity and a border do the whole job — the bloom that used
+   to do it made four small dots into four small lamps. */
+.hb-split button[aria-pressed="true"] i { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .hb-split button i { transition: none; } }
 .hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 @media (max-width: 620px) {
@@ -251,7 +273,7 @@
 .hb-day[data-ahead] { opacity: .45; }
 .hb-pips { display: flex; flex-direction: column; gap: 3px; align-items: center; margin-top: 2px; }
 .hb-pips s { width: 16px; height: 3px; border-radius: 2px; text-decoration: none;
-  background: var(--accent); }
+  background: var(--lit, var(--accent)); }
 /* A missed day is an ABSENCE. Nothing is drawn in it; a gap you can see
    through is not a mark against you. */
 .hb-pips s.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
@@ -275,7 +297,8 @@
 .hb-mon .cell[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
 .hb-mon .cell b { font-size: .68rem; font-weight: 400; color: var(--ink-3); }
 .hb-mon .pips { display: flex; gap: 2px; }
-.hb-mon .pips i { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
+.hb-mon .pips i { width: 4px; height: 4px; border-radius: 50%;
+  background: var(--lit, var(--accent)); }
 .hb-mon .pips i.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
 /* The split gets its own row at the foot of the cell. Not a sixth pip:
    it is a different KIND of fact from "did you keep this", and side by
@@ -595,12 +618,26 @@ const renderHabits = (() => {
        every: 2   due when it has been that long since you last did it
        perWeek    never due on a DAY — it owes the week a number
      And one kind of doing: a tick. */
+  /* The order of the day, not the order they were thought of. This one
+     array decides three things at once — the rows top to bottom, the
+     pips in every week and month cell, and the arms of the left-hand
+     radar clockwise from the top — so it is the only place the order
+     is written down.
+
+     THE LIST IS CODE, NOT DATA. It used to be saved alongside the days
+     and read back in preference to this, which meant a browser that had
+     ever ticked anything kept whatever the list was on the day it first
+     saved: reordering it here changed nothing, and a habit added here
+     never arrived at all. Nothing in this app can edit the list, so
+     there was never anything to preserve. Only the days are saved now,
+     and the days are the part you cannot get back. */
   const DEFAULT = [
-    { id: 'water',   name: 'Water',        short: 'water',   is: '3 litres',   every: 1 },
-    { id: 'walk',    name: 'Morning walk', short: 'walk',                      every: 1 },
-    { id: 'read',    name: 'Reading',      short: 'reading', is: '30 minutes', every: 1 },
-    { id: 'abs',     name: 'Abs',          short: 'abs',                       every: 2 },
+    { id: 'wake',    name: 'Wake up',      short: 'wake',    is: '6am',        every: 1 },
     { id: 'workout', name: 'Workout',      short: 'workout',                   perWeek: 4 },
+    { id: 'abs',     name: 'Abs',          short: 'abs',                       every: 2 },
+    { id: 'walk',    name: 'Morning walk', short: 'walk',                      every: 1 },
+    { id: 'water',   name: 'Water',        short: 'water',   is: '3 litres',   every: 1 },
+    { id: 'read',    name: 'Reading',      short: 'reading', is: '30 minutes', every: 1 },
   ];
   /* Rest is in the list and is NOT a workout: it is a day you decided
      not to train, worth recording, and it must not count toward four a
@@ -614,31 +651,29 @@ const renderHabits = (() => {
      be added or reworded later without a migration. */
   let st = (() => {
     let raw = null;
-    try { raw = localStorage.getItem(KEY); } catch (e) { return { habits: DEFAULT, days: {} }; }
-    if (!raw) return { habits: DEFAULT, days: {} };
+    try { raw = localStorage.getItem(KEY); } catch (e) { return { days: {} }; }
+    if (!raw) return { days: {} };
     try {
       const v = JSON.parse(raw);
-      if (!v || typeof v !== 'object') return { habits: DEFAULT, days: {} };
-      /* REPAIRED, not discarded. Rejecting the whole object because the
-         definitions list is damaged throws a year of days away with it —
-         and the two are independent: the days are what you cannot get
-         back, the definitions are five lines this file already has. */
-      return {
-        habits: Array.isArray(v.habits) && v.habits.length ? v.habits : DEFAULT,
-        days: v.days && typeof v.days === 'object' ? v.days : {},
-      };
+      if (!v || typeof v !== 'object') return { days: {} };
+      /* The days are all that is read back, and a damaged blob loses
+         only what is actually damaged: an unreadable days object gives
+         an empty one, it does not throw the file away. */
+      /* v.habits is ignored on purpose — see DEFAULT. Old blobs still
+         carry one; it is dropped on the next write. */
+      return { days: v.days && typeof v.days === 'object' ? v.days : {} };
     } catch (e) {
       try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
-      return { habits: DEFAULT, days: {} };
+      return { days: {} };
     }
   })();
-  const list = () => st.habits;
+  const list = () => DEFAULT;
   const byId = (id) => list().find(h => h.id === id);
   const day = (k) => st.days[k] || null;
   const dayOf = (k) => (st.days[k] = st.days[k] || { done: {}, split: null });
   const isDone = (k, id) => !!(day(k) && day(k).done[id]);
   function write() {
-    try { localStorage.setItem(KEY, JSON.stringify(st)); return true; }
+    try { localStorage.setItem(KEY, JSON.stringify({ days: st.days })); return true; }
     catch (e) {
       document.getElementById('say').textContent = 'NOT SAVED — storage unavailable.';
       return false;
@@ -735,11 +770,13 @@ const renderHabits = (() => {
           const sp = SPLITS.find(x => x.id === d.split);
           say = d.split === 'rest' ? '<b>rest day</b>' : `<b>${sp.name}</b>`;
         }
-        /* Through a variable rather than an inline background, so the
-           one lit-dot rule covers the accent and all four splits. */
-        const dotc = d.split ? ` style="--lit:var(--sp-${d.split})"` : '';
+        /* Its own colour like the rest of them. The split it was showing
+           is named in the row and lit in the picker two columns to the
+           right, so the dot was the third place saying it — and the one
+           place that made teal mean "push" in a column where teal
+           already meant "walk". */
         return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
-          <s class="hb-dot"${d.split ? ' data-on="1"' : ''}${dotc}></s>
+          <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
           <span class="hb-nm"><b>${esc(h.name)}</b></span>
           <span class="hb-say">${say}</span>
           <span class="hb-act"><span class="hb-split">${SPLITS.map(sp =>
@@ -765,7 +802,7 @@ const renderHabits = (() => {
         }
       }
       return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
-        <s class="hb-dot"${on ? ' data-on="1"' : ''}></s>
+        <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
         <span class="hb-nm"><b>${esc(h.name)}</b>${h.is ? `<em>${esc(h.is)}</em>` : ''}</span>
         <span class="hb-say">${say}</span>
         <span class="hb-act"><button type="button" class="tick ${on ? 'on' : ''}"
@@ -812,7 +849,8 @@ const renderHabits = (() => {
     document.getElementById('hbStrip').innerHTML = days.map((d) => {
       const k = iso(d), ahead = k > t, rec = day(k);
       const pips = ahead ? '' : dueOn(k).map(id =>
-        `<s class="${isDone(k, id) ? '' : 'off'}" title="${esc(byId(id).name)}"></s>`).join('')
+        `<s class="${isDone(k, id) ? '' : 'off'}" style="--lit:var(--h-${id})"
+            title="${esc(byId(id).name)}"></s>`).join('')
         /* The split rides on its own mark: the workout is never due on a
            given day, so it has no pip of its own to colour. */
         + (rec && rec.split ? `<s style="background:var(--sp-${rec.split})"></s>` : '');
@@ -842,7 +880,7 @@ const renderHabits = (() => {
            due on a given day and so would never appear on any of them. */
         const pips = ahead ? '' : list().filter(h => !h.perWeek && (due(h.id, k) || isDone(k, h.id)))
           .map(h => `<i class="${isDone(k, h.id) ? '' : 'off'}" data-h="${h.id}"
-            title="${esc(h.name)}"></i>`).join('');
+            style="--lit:var(--h-${h.id})" title="${esc(h.name)}"></i>`).join('');
         const sp = rec && rec.split;
         return `<div class="cell"${k === t ? ' data-today="1"' : ''}${ahead ? ' data-ahead="1"' : ''}>
           <b>${i + 1}</b><span class="pips">${pips}</span>
