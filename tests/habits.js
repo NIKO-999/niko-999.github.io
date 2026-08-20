@@ -71,12 +71,28 @@ const ok = (name, cond, extra) => {
   ok('six habits', await p.locator('.hb-item').count() === 6);
   ok('one ring, and it leads', await p.evaluate(() => {
     const n = document.getElementById('hbNow');
-    return n.firstElementChild.classList.contains('hb-dial')
+    return n.firstElementChild.classList.contains('hb-top')
       && n.lastElementChild.classList.contains('hb-list')
       && n.querySelectorAll('.hb-list > .hb-item').length === 6;
   }));
-  ok('the ring counts, it does not score', await p.evaluate(() =>
-    !/%/.test(document.querySelector('.hb-dial').textContent)));
+  ok('the tally counts, it does not score', await p.evaluate(() =>
+    !/%/.test(document.querySelector('.hb-top').textContent)));
+  /* One block per habit, in the same order as the rows, so the strip
+     reads left to right as the list reads top to bottom. */
+  ok('one block per habit', await p.locator('.hb-blocks i').count() === 6);
+  ok('and they are in list order', await p.evaluate(() => {
+    const rows = [...document.querySelectorAll('.hb-item')].map(r => r.dataset.h);
+    const blocks = [...document.querySelectorAll('.hb-blocks i')].map(b => b.title);
+    const names = rows.map(id => document.querySelector(`.hb-item[data-h="${id}"] .hb-nm b`).textContent);
+    return blocks.join('|') === names.join('|');
+  }));
+  /* A missed block is the same block at low opacity — an absence, not a
+     mark against you. Never a different colour, and never red. */
+  ok('a missed block is an absence, not a colour', await p.evaluate(() => {
+    const off = [...document.querySelectorAll('.hb-blocks i:not([data-on])')];
+    if (!off.length) return true;
+    return off.every(i => +getComputedStyle(i).opacity < 0.3);
+  }));
   ok('seven days in the week', await p.locator('.hb-day').count() === 7);
   ok('two radars', await p.locator('.hb-fig svg').count() === 2);
   /* Side by side means the same box. */
@@ -377,10 +393,10 @@ const ok = (name, cond, extra) => {
     /rest day/i.test(document.querySelector('.hb-item[data-h="workout"]').innerText)));
   /* Taken next to the thing it measures. A rest day is not a workout,
      so the ring is one lower here; training moves it back up. */
-  const ring = await p.evaluate(() => document.querySelector('.hb-dial .mid').textContent);
+  const ring = await p.evaluate(() => document.querySelector('.hb-count').textContent);
   await choose('legs');
   ok('the ring counts it', await p.evaluate((was) =>
-    +document.querySelector('.hb-dial .mid').textContent === +was + 1, ring));
+    +document.querySelector('.hb-count').textContent === +was + 1, ring));
   /* Rest is a day you chose not to train and must not count toward the
      week, or the number lies in the flattering direction. */
   await choose('rest');

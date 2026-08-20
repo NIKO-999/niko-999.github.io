@@ -215,27 +215,35 @@
   --sp-rest: #77746e;
 }
 
-/* ── today: one ring, then the list ──
-   The ring answers "am I on track" and the list answers "with what", in
-   that order — the first is what you open the screen for, the second is
-   what you act on. Five bars would let you compare five habits against
-   one another at a glance and one ring does not; what it buys is a
-   screen that has said something before you have read a word. */
-.hb-now { display: flex; align-items: center; gap: 30px; flex-wrap: wrap;
-  border: 1px solid var(--glass-line); border-radius: 12px;
-  background: var(--glass-in); padding: 20px 22px; }
-.hb-dial { flex: none; }
-.hb-dial svg { width: 148px; height: 148px; display: block; }
-.hb-dial .tr { fill: none; stroke: var(--glass-in-2); stroke-width: 7; }
-.hb-dial .fl { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round;
-  transform: rotate(-90deg); transform-origin: 50% 50%;
-  transition: stroke-dasharray .45s cubic-bezier(.22,.75,.3,1); }
-.hb-dial .mid { font-family: var(--mono); font-size: 22px; fill: var(--ink); text-anchor: middle; }
-.hb-dial .sub { font-family: var(--mono); font-size: 6px; fill: var(--ink-3);
-  text-anchor: middle; letter-spacing: .12em; }
-@media (prefers-reduced-motion: reduce) { .hb-dial .fl { transition: none; } }
+/* ── today: the tally, then the list ──
+   A ring in the accent for 148 square pixels answered ONE question —
+   how many — and answered it in the only colour on the panel that does
+   not belong to a habit. Six blocks in the habits' own colours answer
+   which as well, in a seventh of the height, and the list gets the
+   whole width back.
 
-.hb-list { flex: 1; min-width: 270px; display: grid; gap: 1px;
+   It also fixed the phone, where it was not a preference: ring plus six
+   rows came to 617 of an 844px screen and the week strip started at
+   890, so everything under Today was off the bottom. */
+.hb-now { display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 18px 20px; }
+.hb-top { display: flex; align-items: center; gap: 14px; }
+/* .hb-n is the radar cards' — this needed its own name. */
+.hb-count { font-family: var(--mono); font-size: 1.5rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--ink); }
+.hb-cl { font-family: var(--mono); font-size: .55rem; line-height: 1.25;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.hb-blocks { flex: 1; display: flex; gap: 5px; }
+/* Kept takes the habit's colour, missed stays the same block at a
+   fourteenth of it — an absence, not a mark against you. */
+.hb-blocks i { flex: 1; height: 7px; border-radius: 3px;
+  background: var(--lit, var(--accent)); opacity: .14;
+  transition: opacity .2s; }
+.hb-blocks i[data-on] { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hb-blocks i { transition: none; } }
+
+.hb-list { flex: 1; min-width: 0; display: grid; gap: 1px;
   background: var(--glass-line); border-radius: 9px; overflow: hidden; }
 .hb-item { display: grid; grid-template-columns: 13px minmax(0, 1fr) auto auto;
   gap: 12px; align-items: center; background: var(--glass-in); padding: 9px 12px; }
@@ -292,8 +300,7 @@
 }
 .hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 @media (max-width: 620px) {
-  .hb-now { gap: 18px; }
-  .hb-dial { margin: 0 auto; }
+  .hb-now { gap: 12px; }
   .hb-item { grid-template-columns: 13px minmax(0, 1fr) auto; gap: 9px; }
   .hb-item .hb-say { grid-column: 2 / -1; grid-row: 2; }
 }
@@ -870,18 +877,21 @@ const renderHabits = (() => {
        already carries the fraction and a number out of a hundred is a
        mark out of a hundred. Do more than was due and the arc fills
        while the number keeps climbing. */
-    const did = didOn(k).length, kept = keptOn(k).length, of = dueOn(k).length;
-    const p = of ? Math.min(1, kept / of) : (did ? 1 : 0);
-    const C = 2 * Math.PI * 44;
+    const did = didOn(k).length, of = dueOn(k).length;
+    /* One block per habit, in list order, so the strip reads left to
+       right as the rows read top to bottom. The figure is the COUNT,
+       never a percentage: the blocks already carry the fraction and a
+       number out of a hundred is a mark out of a hundred. */
+    const blocks = list().map(h =>
+      `<i style="--lit:var(--h-${h.id})"${d.done[h.id] ? ' data-on=""' : ''}
+          title="${esc(h.name)}"></i>`).join('');
     document.getElementById('hbNow').innerHTML =
-      `<div class="hb-dial"><svg viewBox="0 0 100 100" role="img"
-         aria-label="${did} done so far today">
-         <circle class="tr" cx="50" cy="50" r="44" />
-         <circle class="fl" cx="50" cy="50" r="44"
-           stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}" />
-         <text class="mid" x="50" y="52">${did}</text>
-         <text class="sub" x="50" y="64">DONE TODAY</text>
-       </svg></div><div class="hb-list">${items}</div>`;
+      `<div class="hb-top">
+         <span class="hb-count">${did}</span>
+         <span class="hb-cl">done<br />today</span>
+         <span class="hb-blocks" role="img"
+           aria-label="${did} done so far today">${blocks}</span>
+       </div><div class="hb-list">${items}</div>`;
     document.getElementById('hbToday').textContent =
       of ? `${of} due today` : 'nothing due today';
   }
