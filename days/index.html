@@ -787,6 +787,11 @@ const renderHabits = (() => {
 
   /* ── today ── */
   const EMPTY = { done: {}, split: null };
+  /* Open only while you are answering it. Not stored: a picker left
+     open across a reload is a question the screen is asking about a
+     day you have stopped thinking about. */
+  let picking = false;
+
   function renderNow() {
     /* Read, not dayOf — opening the screen must not create a record.
        It did, and an untouched machine then reported "0 days unbroken"
@@ -807,19 +812,32 @@ const renderHabits = (() => {
           const sp = SPLITS.find(x => x.id === d.split);
           say = d.split === 'rest' ? '<b>rest day</b>' : `<b>${sp.name}</b>`;
         }
-        /* Its own colour like the rest of them. The split it was showing
-           is named in the row and lit in the picker two columns to the
-           right, so the dot was the third place saying it — and the one
-           place that made teal mean "push" in a column where teal
-           already meant "walk". */
+        /* A TICK LIKE THE OTHER FIVE, and the colours only when you
+           press it. Four permanent dots on one row of six made that row
+           the loudest thing in the list for a question nobody had asked
+           yet — and the answer they give is already in the row's own
+           words. Press the tick, pick what it was, and it is a tick
+           again. */
+        if (picking) {
+          say = 'which was it?';
+          return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
+            <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
+            <span class="hb-nm"><b>${esc(h.name)}</b></span>
+            <span class="hb-say">${say}</span>
+            <span class="hb-act"><span class="hb-split" role="group"
+              aria-label="What you trained">${SPLITS.map(sp =>
+              `<button type="button" data-split="${sp.id}" aria-pressed="${d.split === sp.id}"
+                 style="--c:var(--sp-${sp.id})" title="${sp.name}" aria-label="${sp.name}">
+                 <i aria-hidden="true"></i></button>`).join('')}</span></span>
+          </div>`;
+        }
         return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
           <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
           <span class="hb-nm"><b>${esc(h.name)}</b></span>
           <span class="hb-say">${say}</span>
-          <span class="hb-act"><span class="hb-split">${SPLITS.map(sp =>
-            `<button type="button" data-split="${sp.id}" aria-pressed="${d.split === sp.id}"
-               style="--c:var(--sp-${sp.id})" title="${sp.name}" aria-label="${sp.name}">
-               <i aria-hidden="true"></i></button>`).join('')}</span></span>
+          <span class="hb-act"><button type="button" class="tick ${d.split ? 'on' : ''}"
+            data-pick="1" aria-pressed="${!!d.split}"
+            aria-label="${esc(h.name)} today">${icon('tick', 13)}</button></span>
         </div>`;
       }
       if (on) say = '<b>done</b> today';
@@ -1039,17 +1057,47 @@ const renderHabits = (() => {
     const sp = e.target.closest('[data-split]');
     if (sp) {
       /* Pressing the one already chosen clears it — a four-way control
-         with no way back is a trap. */
+         with no way back is a trap. Either way the picker shuts: it
+         opened to ask one question and it has an answer. */
       d.split = d.split === sp.dataset.split ? null : sp.dataset.split;
       const w = list().find(h => h.perWeek);
       if (w) d.done[w.id] = !!d.split && d.split !== 'rest';
+      picking = false;
       if (write()) paint();
+      return;
+    }
+    /* The workout's tick opens the colours instead of setting anything,
+       whether or not one is already down. Making a set tick CLEAR on
+       press — which is what the other five do — read as consistent and
+       was not: it left no way to change Push to Pull except to clear
+       first and start again, and no way to see which was chosen at all.
+       Reopening does both, because pressing the one already lit is the
+       clear. */
+    const pick = e.target.closest('[data-pick]');
+    if (pick) {
+      picking = true;
+      paint();
+      const lit = document.querySelector('.hb-split [aria-pressed="true"]')
+               || document.querySelector('.hb-split button');
+      if (lit) lit.focus();
       return;
     }
     const tick = e.target.closest('[data-tick]');
     if (!tick) return;
     d.done[tick.dataset.tick] = !d.done[tick.dataset.tick];
     if (write()) paint();
+  });
+
+  /* Opened by mistake is not an answer. Escape shuts it, and so does
+     a click anywhere that is not the picker — otherwise the only way
+     out of a question you did not mean to ask is to answer it. */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && picking) { picking = false; paint(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!picking) return;
+    if (e.target.closest('.hb-split') || e.target.closest('[data-pick]')) return;
+    picking = false; paint();
   });
 
   /* One pair of arrows, moving whichever scale is up. */

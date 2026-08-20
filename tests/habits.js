@@ -86,8 +86,25 @@ const ok = (name, cond, extra) => {
     return Math.abs(a.width - c.width) < 1 && Math.abs(a.height - c.height) < 1
       && Math.abs(a.top - c.top) < 1;
   }));
-  ok('five are a plain tick', await p.locator('.hb-item .hb-act button.tick').count() === 5);
-  ok('and the workout is a four-way picker', await p.locator('.hb-split button').count() === 4);
+  /* All six rows are one tick. The workout used to wear four permanent
+     colour dots, which made one row of six the loudest thing in the
+     list for a question nobody had asked yet. */
+  ok('every row is a plain tick', await p.locator('.hb-item .hb-act button.tick').count() === 6);
+  ok('and no colours until you ask for them',
+     await p.locator('.hb-split button').count() === 0);
+  await p.click('[data-pick]');
+  await p.waitForTimeout(200);
+  ok('pressing the workout tick opens four', await p.locator('.hb-split button').count() === 4);
+  ok('and it says what it is asking', /which was it/i.test(
+     await p.locator('.hb-item[data-h="workout"] .hb-say').innerText()));
+  /* Opened by mistake is not an answer. */
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(200);
+  ok('escape shuts it without answering', await p.locator('.hb-split button').count() === 0
+     && await p.evaluate(() => !JSON.parse(localStorage.getItem('habits.v1') || '{"days":{}}')
+       .days[Object.keys(JSON.parse(localStorage.getItem('habits.v1') || '{"days":{}}').days)[0]]?.split));
+  await p.click('[data-pick]');
+  await p.waitForTimeout(200);
 
   /* ── one calendar at two scales ──
      The control SWAPS them rather than stacking them: both on screen at
@@ -288,9 +305,43 @@ const ok = (name, cond, extra) => {
   ok('neither the week nor the month names a split', await p.evaluate(() =>
     !/push|pull|legs/i.test(document.getElementById('hbStrip').innerText
       + document.getElementById('hbMon').innerText)));
+  await p.click('[data-pick]');
+  await p.waitForTimeout(200);
   ok('and the picker carries them for a reader', await p.evaluate(() =>
     [...document.querySelectorAll('.hb-split button')]
       .map(x => x.getAttribute('aria-label')).join() === 'Push,Pull,Legs,Rest'));
+  /* Choosing shuts it again — that is the whole shape of the control:
+     a tick, one question, a tick. */
+  await p.click('[data-split="push"]');
+  await p.waitForTimeout(250);
+  ok('choosing puts it back to a tick', await p.locator('.hb-split button').count() === 0);
+  ok('and the tick is now on', await p.evaluate(() =>
+    document.querySelector('[data-pick]').classList.contains('on')));
+  ok('and the row names what it was', /Push/.test(
+     await p.locator('.hb-item[data-h="workout"] .hb-say').innerText()));
+  /* Reopening is how you CHANGE it. Clearing on press read as
+     consistent with the other five and left no way to go Push -> Pull
+     except to clear first. */
+  await p.click('[data-pick]');
+  await p.waitForTimeout(200);
+  ok('pressing it again reopens rather than clearing', await p.evaluate(() =>
+    document.querySelectorAll('.hb-split button').length === 4
+    && document.querySelector('.hb-split [aria-pressed="true"]').dataset.split === 'push'));
+
+  /* The picker shuts on every answer, so anything that touches a split
+     opens it first. Before, the four dots were always there and a test
+     could click one whenever it liked. */
+  const openPick = async () => {
+    if (await p.locator('.hb-split button').count() === 0) {
+      await p.click('[data-pick]');
+      await p.waitForTimeout(160);
+    }
+  };
+  const choose = async (id) => {
+    await openPick();
+    await p.click(`[data-split="${id}"]`);
+    await p.waitForTimeout(220);
+  };
 
   // ── it records, and the recording sticks ───────────────────────
   await p.click('[data-tick="water"]');
@@ -298,11 +349,14 @@ const ok = (name, cond, extra) => {
   ok('ticking marks it done',
      /done today/.test(await p.locator('.hb-item[data-h="water"]').innerText()),
      await p.locator('.hb-item[data-h="water"]').innerText());
-  const ring = await p.evaluate(() => document.querySelector('.hb-dial .mid').textContent);
-  await p.click('[data-split="legs"]');
-  await p.waitForTimeout(250);
+  await choose('legs');
+  await openPick();
   ok('the split logs', await p.evaluate(() =>
     document.querySelector('[data-split="legs"]').getAttribute('aria-pressed') === 'true'));
+  /* Shut again before reading the row: while the picker is open the row
+     is asking the question rather than answering it. */
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(180);
   ok('and the row names what it was', await p.evaluate(() =>
     /Legs/.test(document.querySelector('.hb-item[data-h="workout"]').innerText)),
     await p.evaluate(() =>
@@ -311,38 +365,39 @@ const ok = (name, cond, extra) => {
   /* Each colour names its OWN split. Collecting the three and
      asserting the collection is non-empty was the first version of this
      and it passed on anything. */
-  const named = await p.evaluate(() => {
-    const out = [];
-    for (const id of ['push', 'pull', 'legs']) {
-      document.querySelector(`[data-split="${id}"]`).click();
-      out.push(document.querySelector('.hb-item[data-h="workout"]')
-        .querySelector('.hb-say').textContent.trim());
-    }
-    return out;
-  });
+  const named = [];
+  for (const id of ['push', 'pull', 'legs']) {
+    await choose(id);
+    named.push(await p.evaluate(() =>
+      document.querySelector('.hb-item[data-h="workout"] .hb-say').textContent.trim()));
+  }
   ok('and each colour names its own', named.join() === 'Push,Pull,Legs', named);
-  ok('rest says it differently', await p.evaluate(() => {
-    document.querySelector('[data-split="rest"]').click();
-    return /rest day/i.test(document.querySelector('.hb-item[data-h="workout"]').innerText);
-  }));
-  await p.click('[data-split="legs"]');
-  await p.waitForTimeout(200);
+  await choose('rest');
+  ok('rest says it differently', await p.evaluate(() =>
+    /rest day/i.test(document.querySelector('.hb-item[data-h="workout"]').innerText)));
+  /* Taken next to the thing it measures. A rest day is not a workout,
+     so the ring is one lower here; training moves it back up. */
+  const ring = await p.evaluate(() => document.querySelector('.hb-dial .mid').textContent);
+  await choose('legs');
   ok('the ring counts it', await p.evaluate((was) =>
     +document.querySelector('.hb-dial .mid').textContent === +was + 1, ring));
   /* Rest is a day you chose not to train and must not count toward the
      week, or the number lies in the flattering direction. */
-  await p.click('[data-split="rest"]');
-  await p.waitForTimeout(250);
+  await choose('rest');
   ok('a rest day is not a workout', await p.evaluate(() => {
     const st = JSON.parse(localStorage.getItem('habits.v1'));
     const k = new Date(); k.setMinutes(k.getMinutes() - k.getTimezoneOffset());
     const d = st.days[k.toISOString().slice(0, 10)];
     return d.split === 'rest' && d.done.workout === false;
   }));
-  await p.click('[data-split="rest"]');
-  await p.waitForTimeout(200);
+  /* Pressing the one already lit is how you clear it — the picker has
+     no other way back, and a four-way control with none is a trap. */
+  await choose('rest');
+  await openPick();
   ok('pressing it again clears it', await p.evaluate(() =>
     document.querySelector('[data-split="rest"]').getAttribute('aria-pressed') === 'false'));
+  await p.keyboard.press('Escape');
+  await p.waitForTimeout(180);
 
   await p.reload({ waitUntil: 'networkidle' });
   await p.click('[data-view="habits"]');

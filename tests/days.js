@@ -129,6 +129,16 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
   const outer = dot.shadow.split(/,(?![^(]*\))/).filter((l) => !/inset/.test(l));
   ok('and it does not bloom', outer.length === 0, dot.shadow);
 
+  /* The colours only exist while the question is open. */
+  ok('no colours on the row until you ask', await page.$$eval('.hb-split button', (b) => b.length) === 0);
+  await page.click('[data-pick]');
+  await page.waitForTimeout(200);
+  /* Off the control before measuring it. The click leaves the pointer
+     sitting on one of the four, and :hover lifts that one to .85 — the
+     first run of this read ["0.62","0.85"] and looked like the lit dot
+     had come back. */
+  await page.mouse.move(0, 0);
+  await page.waitForTimeout(220);
   const picker = await page.$$eval('.hb-split button', (bs) => bs.map((b) => ({
     pressed: b.getAttribute('aria-pressed') === 'true',
     opacity: getComputedStyle(b.querySelector('i')).opacity,
@@ -143,6 +153,12 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
   ok('exactly one is chosen', picker.filter((x) => x.pressed).length === 1);
   ok('and the ring is what says so',
     chosen.ring !== picker.find((x) => !x.pressed).ring, [chosen.ring]);
+  /* Answer it and it is a tick again — that is the whole control. */
+  await page.click('[data-split="pull"]');
+  await page.waitForTimeout(220);
+  ok('answering puts it back to a tick',
+    await page.$$eval('.hb-split button', (b) => b.length) === 0
+    && await page.$$eval('[data-pick]', (b) => b.length) === 1);
 
   /* ── the list is code, not data ──
      It used to be saved and read back in preference to the file, so a
