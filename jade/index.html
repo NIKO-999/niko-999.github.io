@@ -670,6 +670,133 @@ svg { display: block; }
   }
 }
 
+/* ══ THE MINI MONTH ═══════════════════════════════════════════════
+   A month at a glance at the top of the rail, and a way into the real
+   calendar. It pages on its own arrows without leaving this screen —
+   glancing at next month is not the same as going there. */
+
+.jm {
+  flex: 0 0 auto;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+/* The head is one rounded bar with the arrows inside it rather than
+   three separate controls: at this size three pills in a row read as a
+   toolbar, and this is a label you can nudge. */
+.jm-head {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  height: 34px;
+  padding: 0 3px;
+  margin-bottom: 6px;
+  background: var(--card);
+  border-radius: var(--r-pill);
+}
+.jm-t {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 28px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink);
+  font: inherit;
+  font-size: .78rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.jm-arw {
+  flex: none;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+
+.jm-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.jm-w {
+  height: 20px;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: .54rem;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+/* 32px, which is the floor for anything you press. The reference draws
+   these smaller; a calendar you miss by 3px is not a calendar. */
+.jm-d {
+  position: relative;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .72rem;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  transition: background .12s ease, color .12s ease;
+}
+/* Dimmed, not hidden. A month that starts mid-row with four blanks in
+   front of it is harder to read than one that shows the days either
+   side. */
+.jm-d.out { opacity: .38; }
+.jm-d.now {
+  background: var(--accent);
+  color: var(--accent-in);
+  font-weight: 600;
+}
+
+/* The only mark on this grid says A RECORD EXISTS HERE — dim for a day
+   with something on it, accent for a day where everything due was kept.
+   Nothing marks a day you missed: a month grid stippled with failures
+   is the thing that makes a person stop opening the app. */
+.jm-dot {
+  position: absolute;
+  bottom: 3px;
+  width: 4px;
+  height: 4px;
+  border-radius: var(--r-pill);
+  background: var(--ink-3);
+}
+.jm-dot.full { background: var(--accent); }
+.jm-d.now .jm-dot { background: var(--accent-in); }
+
+@media (hover: hover) {
+  .jm-arw:hover { color: var(--ink); background: var(--card-2); }
+  .jm-t:hover { background: var(--card-2); }
+  .jm-d:hover { background: var(--card-2); color: var(--ink); }
+  .jm-d.now:hover { background: var(--accent); color: var(--accent-in); }
+}
+.jm-d:focus-visible,
+.jm-t:focus-visible,
+.jm-arw:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* Full width on a phone the grid would be seven 50px cells and a lot of
+   air. It keeps the rail's reading width and centres. */
+@media (max-width: 1080px) {
+  .jm { max-width: 380px; margin: 0 auto; width: 100%; }
+}
+
 /* ══ TODAY ═══════════════════════════════════════════════════════
    The strip says how the day is going, the grid says what it is made
    of, and the rail says what is next. Every class here carries the
@@ -1144,6 +1271,19 @@ svg { display: block; }
 
 <div class="body">
   <aside class="rail" aria-label="Today at a glance">
+    <div class="jm">
+      <div class="jm-head">
+        <button class="jm-arw" type="button" id="jmPrev" aria-label="Previous month">
+          <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M9.8 3.6 5.4 8l4.4 4.4"/></svg>
+        </button>
+        <button class="jm-t" type="button" id="jmTitle">—</button>
+        <button class="jm-arw" type="button" id="jmNext" aria-label="Next month">
+          <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M6.2 3.6 10.6 8l-4.4 4.4"/></svg>
+        </button>
+      </div>
+      <div class="jm-grid" id="jmGrid"></div>
+    </div>
+
     <div class="rail-head">
       <span class="rail-t">Due today</span>
       <span class="rail-n" id="railCount">0/0</span>
@@ -1664,6 +1804,72 @@ window.JADE = {
   esc: esc, clamp: clamp
 };
 
+/* ══ THE MINI MONTH ═══════════════════════════════════════════════
+   Its own reference date, deliberately. Paging it does not move the
+   real calendar and the real calendar does not move it: one is for
+   looking, the other is where you are. */
+
+let jmRef = new Date();
+
+function jmRender() {
+  const grid = document.getElementById('jmGrid');
+  const now = todayKey();
+  const y = jmRef.getFullYear(), m = jmRef.getMonth();
+  document.getElementById('jmTitle').textContent = MONTHS[m] + ' ' + y;
+
+  /* Monday first, matching the week the whole app counts in. The
+     reference starts on Sunday; a mini month that disagreed with the
+     week view two clicks away would be worse than unfamiliar. */
+  const out = WDAYS.map(d => `<span class="jm-w">${d[0]}</span>`);
+
+  const lead = (new Date(y, m, 1).getDay() + 6) % 7;   /* Sun=0 -> Mon=0 */
+
+  for (let i = 0; i < 42; i++) {
+    const d = new Date(y, m, 1 - lead + i);
+    const k = dayKey(d);
+    const cls = ['jm-d'];
+    if (d.getMonth() !== m) cls.push('out');
+    if (k === now) cls.push('now');
+
+    /* A dot means there is a record, not a verdict. Future days have
+       none by construction, so they simply carry no mark. */
+    const st = dayStat(k);
+    const dot = st.kept > 0
+      ? `<i class="jm-dot${st.due > 0 && st.kept >= st.due ? ' full' : ''}"></i>`
+      : '';
+    const said = st.kept > 0 ? `, ${st.kept} of ${st.due} kept` : '';
+
+    out.push(`<button type="button" class="${cls.join(' ')}" data-k="${k}"`
+      + ` aria-label="${esc(fmtLong(d))}${said}"><span>${d.getDate()}</span>${dot}</button>`);
+  }
+  grid.innerHTML = out.join('');
+}
+
+function jmBind() {
+  const step = (n) => {
+    jmRef = new Date(jmRef.getFullYear(), jmRef.getMonth() + n, 1);
+    jmRender();
+  };
+  document.getElementById('jmPrev').addEventListener('click', () => step(-1));
+  document.getElementById('jmNext').addEventListener('click', () => step(1));
+
+  /* The title is the way to the month; a day is the way to that day.
+     Both land on the real calendar, which is the point of having this
+     one at all. */
+  document.getElementById('jmTitle').addEventListener('click', () => {
+    jcGoto(new Date(jmRef.getFullYear(), jmRef.getMonth(), 1), 'month');
+    showView('calendar');
+  });
+  document.getElementById('jmGrid').addEventListener('click', (e) => {
+    const b = e.target.closest('.jm-d');
+    if (!b) return;
+    jmRef = fromKey(b.dataset.k);
+    jmRender();
+    jcGoto(fromKey(b.dataset.k), 'day');
+    showView('calendar');
+  });
+}
+
 /* ══ TODAY ═══════════════════════════════════════════════════════
    Three readings of one day: the strip is how it is going, the grid
    is what it is made of, and the rail is what is next. All three go
@@ -1964,6 +2170,7 @@ let jcScale = 'month';
 function jcRender() {
   document.getElementById('calBody').innerHTML = '<div class="jc-soon">calendar</div>';
 }
+function jcGoto(d, scale) { jcRef = d; jcScale = scale; jcRender(); }
 function jcBind() {}
 
 /* ══ THE APP ══════════════════════════════════════════════════════
@@ -1994,8 +2201,10 @@ function boot() {
 
   jtBind();
   jcBind();
-  subscribe(() => { jtRender(); if (view === 'calendar') jcRender(); });
+  jmBind();
+  subscribe(() => { jtRender(); jmRender(); if (view === 'calendar') jcRender(); });
   jtRender();
+  jmRender();
   showView('today');
 
   /* Left open overnight, every reading on the screen is about the wrong
@@ -2007,6 +2216,7 @@ function boot() {
     if (now === stamp) return;
     stamp = now;
     jtRender();
+    jmRender();
     if (view === 'calendar') jcRender();
   }, 30000);
 }
