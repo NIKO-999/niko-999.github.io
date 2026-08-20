@@ -49,6 +49,15 @@
   --track:     #2C3140;   /* the unfilled part of a ring or a bar */
   --focus:     #FF7A2E;
 
+  /* BUBBLE GEOMETRY. Everything that holds text is round: a panel is a
+     22px bubble, anything that holds one line — a chip, a rail row, a
+     log entry, a control — is a full pill. Tokens rather than numbers
+     because a card and the box beside it drifting apart by 2px is the
+     kind of thing nobody sees and everybody feels. */
+  --r-card: 22px;
+  --r-in:   16px;
+  --r-pill: 999px;
+
   --font: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --mono: ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 
@@ -145,7 +154,7 @@ svg { display: block; }
   background: var(--line-2);
   border: 2px solid transparent;
   background-clip: content-box;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
 }
 .pane::-webkit-scrollbar-track,
 .rail-list::-webkit-scrollbar-track,
@@ -292,7 +301,7 @@ svg { display: block; }
   flex: none;
   display: grid;
   place-items: center;
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
   font-size: .78rem;
@@ -326,7 +335,7 @@ svg { display: block; }
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: var(--accent);
   color: var(--accent-in);
   cursor: pointer;
@@ -378,7 +387,9 @@ svg { display: block; }
   flex-direction: column;
   min-height: 0;
   background: var(--surface);
-  border-left: 1px solid var(--line);
+  /* On the LEFT. What is due today is the thing you came to do, so it
+     sits where reading starts rather than in the margin. */
+  border-right: 1px solid var(--line);
 }
 
 .rail-head {
@@ -454,7 +465,7 @@ svg { display: block; }
   height: 34px;
   padding: 0 14px;
   border: 1px solid var(--line);
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   /* Darker than the rail it sits in. An input lifted off its panel
      reads as a button, and this one is a field you type a line into. */
   background: var(--bg);
@@ -471,7 +482,7 @@ svg { display: block; }
   display: grid;
   place-items: center;
   border: 0;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--accent);
   color: var(--accent-in);
   cursor: pointer;
@@ -493,7 +504,7 @@ svg { display: block; }
   display: grid;
   place-items: center;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: var(--card);
   color: var(--ink-2);
   cursor: pointer;
@@ -519,7 +530,7 @@ svg { display: block; }
   position: relative;
   display: flex;
   align-items: stretch;
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: var(--card);
 }
 /* The group's hairline is drawn OVER the members rather than as a
@@ -534,7 +545,7 @@ svg { display: block; }
   position: absolute;
   inset: 0;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   pointer-events: none;
 }
 .seg button {
@@ -550,8 +561,8 @@ svg { display: block; }
   cursor: pointer;
   transition: background .12s ease, color .12s ease;
 }
-.seg button:first-child { border-radius: 10px 0 0 10px; }
-.seg button:last-child  { border-radius: 0 10px 10px 0; }
+.seg button:first-child { border-radius: var(--r-pill) 0 0 var(--r-pill); }
+.seg button:last-child  { border-radius: 0 var(--r-pill) var(--r-pill) 0; }
 .seg button[aria-pressed="true"] {
   background: var(--card-2);
   color: var(--ink);
@@ -580,9 +591,13 @@ svg { display: block; }
   .main { flex: 0 0 auto; }
   .pane { overflow: visible; }
   .rail {
+    /* Stacked, it goes back UNDER the cards. First in the DOM is right
+       on a wide screen and wrong on a narrow one: a phone would make
+       you scroll past the whole list to reach the grid it summarises. */
+    order: 1;
     flex: 0 0 auto;
     width: auto;
-    border-left: 0;
+    border-right: 0;
     border-top: 1px solid var(--line);
   }
   .rail-list, .rail-log {
@@ -680,7 +695,7 @@ svg { display: block; }
   min-width: 0;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--r-card);
   background: var(--card);
 }
 
@@ -820,7 +835,7 @@ svg { display: block; }
   gap: 10px;
   padding: 14px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--r-card);
   background: var(--card);
   color: var(--ink);
   text-align: left;
@@ -844,8 +859,8 @@ svg { display: block; }
      pane it sits in, and the pane would grow a horizontal bar the
      first time anything was ticked. A shadow is ink only. */
   box-shadow:
-    0 8px 30px -10px color-mix(in srgb, var(--jt-c) 46%, transparent),
-    0 0 0 1px color-mix(in srgb, var(--jt-c) 10%, transparent);
+    0 6px 30px -6px color-mix(in srgb, var(--jt-c) 40%, transparent),
+    0 0 0 1px color-mix(in srgb, var(--jt-c) 12%, transparent);
 }
 
 @media (hover: hover) {
@@ -873,6 +888,7 @@ svg { display: block; }
 
 .jt-chip {
   align-self: flex-start;
+  justify-self: start;        /* the grid layout below; ignored in flex */
   /* Pinned to the bottom of the card, so a name that wraps to two
      lines on one card cannot push its chip off the line every other
      chip on the row sits on. */
@@ -885,7 +901,7 @@ svg { display: block; }
      18px chip draws the same pill — and a child rounder than the 12px
      card it sits inside is a fault the geometry audit reports. */
   border: 1px solid var(--jt-c);
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: none;
   font-family: var(--mono);
   font-size: .58rem;
@@ -910,7 +926,7 @@ svg { display: block; }
   min-height: 40px;
   padding: 8px 10px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: var(--card);
   color: var(--ink);
   text-align: left;
@@ -926,7 +942,7 @@ svg { display: block; }
   height: 22px;
   display: grid;
   place-items: center;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--jt-c);
   color: var(--bg);
   font-size: .62rem;
@@ -941,11 +957,14 @@ svg { display: block; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+/* --ink-2, not the --ink-3 a time usually takes: the rail is sorted by
+   this figure and it is half of what a row says. Quiet is not the same
+   as unreadable. */
 .jt-r-at {
   font-family: var(--mono);
   font-size: .62rem;
   letter-spacing: .06em;
-  color: var(--ink-3);
+  color: var(--ink-2);
   white-space: nowrap;
 }
 
@@ -955,7 +974,7 @@ svg { display: block; }
   display: grid;
   place-items: center;
   border: 1px solid var(--line-2);
-  border-radius: 6px;
+  border-radius: var(--r-pill);
   color: var(--bg);
 }
 .jt-r[aria-pressed="true"] .jt-r-tk {
@@ -1007,7 +1026,7 @@ svg { display: block; }
   min-height: 32px;
   padding: 4px 6px;
   border: 0;
-  border-radius: 10px;
+  border-radius: var(--r-pill);
   background: none;
   text-align: left;
   cursor: pointer;
@@ -1016,7 +1035,7 @@ svg { display: block; }
 .jt-l-dot {
   width: 8px;
   height: 8px;
-  border-radius: 999px;
+  border-radius: var(--r-pill);
   background: var(--jt-c);
 }
 .jt-l-nm {
@@ -1059,6 +1078,22 @@ svg { display: block; }
 @media (max-width: 700px) {
   .jt-r { min-height: 44px; }
   .jt-l { min-height: 44px; }
+}
+
+/* One column wide, a ring with the name stacked under it leaves half
+   of every card empty and puts eight of them two screens apart. The
+   same three parts, laid across instead of down: the ring keeps its
+   size, and the name and the chip share the column beside it. */
+@media (max-width: 520px) {
+  .jt-card {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: center;
+    column-gap: 12px;
+    row-gap: 6px;
+  }
+  .jt-ring { grid-row: 1 / span 2; }
+  .jt-chip { margin-top: 0; }
 }
 
 /* The ring filling is decoration, and it is the one animation here
@@ -1108,6 +1143,22 @@ svg { display: block; }
 </header>
 
 <div class="body">
+  <aside class="rail" aria-label="Today at a glance">
+    <div class="rail-head">
+      <span class="rail-t">Due today</span>
+      <span class="rail-n" id="railCount">0/0</span>
+    </div>
+    <div class="rail-list" id="railList"></div>
+    <div class="rail-sub">Logged</div>
+    <div class="rail-log" id="railLog"></div>
+    <form class="rail-foot" id="noteForm" autocomplete="off">
+      <input class="rail-in" id="noteIn" type="text" maxlength="140" placeholder="A line about today" aria-label="A line about today" />
+      <button class="send" type="submit" id="noteSend" aria-label="Save the line">
+        <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.6V3.8M4.2 7.4 8 3.6l3.8 3.8"/></svg>
+      </button>
+    </form>
+  </aside>
+
   <main class="main" data-screen="today">
     <div class="pane">
       <section class="jt-strip">
@@ -1167,21 +1218,6 @@ svg { display: block; }
     </div>
   </main>
 
-  <aside class="rail" aria-label="Today at a glance">
-    <div class="rail-head">
-      <span class="rail-t">Due today</span>
-      <span class="rail-n" id="railCount">0/0</span>
-    </div>
-    <div class="rail-list" id="railList"></div>
-    <div class="rail-sub">Logged</div>
-    <div class="rail-log" id="railLog"></div>
-    <form class="rail-foot" id="noteForm" autocomplete="off">
-      <input class="rail-in" id="noteIn" type="text" maxlength="140" placeholder="A line about today" aria-label="A line about today" />
-      <button class="send" type="submit" id="noteSend" aria-label="Save the line">
-        <svg class="ic" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.6V3.8M4.2 7.4 8 3.6l3.8 3.8"/></svg>
-      </button>
-    </form>
-  </aside>
 </div>
 
 <script>
