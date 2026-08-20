@@ -33,6 +33,28 @@ const ok = (name, cond, extra) => {
   await p.waitForTimeout(400);
   ok('no page errors on load', errs.length === 0, errs);
 
+  /* ── the topbar's primary button ──
+     Outlined, and ONLY the one in the topbar. .btn-primary is on eleven
+     buttons across the two apps and most of them end a form you have
+     just filled in, which is the one place a solid fill is doing real
+     work. A slab of pure white in the topbar was the brightest object
+     in the app — brighter than the figure telling you what you made. */
+  const bar = await p.evaluate(() => {
+    const px = (c) => (String(c).match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const n = getComputedStyle(document.getElementById('newTrade'));
+    const s2 = getComputedStyle(document.getElementById('tradeSave'));
+    return { addBg: px(n.backgroundColor), addAlpha: (n.backgroundColor.match(/[\d.]+\)$/) || ['1)'])[0],
+             addBorder: n.borderTopWidth, saveBg: px(s2.backgroundColor) };
+  });
+  ok('the topbar Add has no fill', bar.addAlpha === '0)', bar);
+  ok('but it does have an edge', parseFloat(bar.addBorder) >= 1, bar);
+  /* Every other primary button keeps its fill. */
+  ok('and the sheet\'s Save is still solid', await p.evaluate(() => {
+    const c = getComputedStyle(document.getElementById('tradeSave')).backgroundColor;
+    const m = c.match(/[\d.]+\)$/);
+    return !m || m[0] !== '0)';
+  }), bar);
+
   const labels = (sel) => p.evaluate((s) =>
     [...document.querySelectorAll(s + ' .metric')].map(m => m.querySelector('span').textContent.trim()), sel);
   /* The four are a line of type now, not cards: <span><i>label</i>figure</span> */

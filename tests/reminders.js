@@ -245,6 +245,45 @@ const ok = (name, cond, extra) => {
   ok('and out of the old one', await p.evaluate(() =>
     !('reminders' in JSON.parse(localStorage.getItem('habits.v1')))));
 
+  /* ── the topbar on this screen ──
+     The search field filters the calendar, the agenda, the ledger and
+     the log — every trade view and nothing else. On Reminders it is
+     inert, so at full width it is the widest thing on the bar doing the
+     least. */
+  await p.evaluate(() => goto('metrics'));
+  await p.waitForTimeout(200);
+  const wide = await p.evaluate(() =>
+    document.querySelector('.topbar .search').getBoundingClientRect().width);
+  await p.evaluate(() => goto('reminders'));
+  await p.waitForTimeout(400);
+  const narrow = await p.evaluate(() =>
+    document.querySelector('.topbar .search').getBoundingClientRect().width);
+  ok('the search collapses to its icon here', narrow < 45 && wide > 200, [wide, narrow]);
+  ok('and its icon survives the collapse', await p.evaluate(() =>
+    document.querySelector('.topbar .search svg').getBoundingClientRect().width > 10));
+  /* It still opens. A control that refuses to is worse than one that is
+     merely narrow. */
+  await p.click('.topbar .search');
+  await p.waitForTimeout(400);
+  ok('clicking it opens it again', await p.evaluate(() =>
+    document.querySelector('.topbar .search').getBoundingClientRect().width > 200));
+  ok('and focus lands in the field', await p.evaluate(() =>
+    document.activeElement === document.getElementById('q')));
+  /* Leaving puts it back rather than remembering it shut — it is only
+     collapsed because it is useless HERE. */
+  await p.evaluate(() => goto('log'));
+  await p.waitForTimeout(400);
+  ok('leaving the screen gives the field back', await p.evaluate(() =>
+    document.querySelector('.topbar .search').getBoundingClientRect().width > 200));
+  ok('and nothing collapses on any other view', await p.evaluate(() => {
+    for (const v of ['metrics', 'calendar', 'log', 'habits', 'state', 'backtest']) {
+      goto(v);
+      if (document.querySelector('.topbar .search').getBoundingClientRect().width < 100) return v;
+    }
+    goto('reminders');
+    return null;
+  }).then(x => x === null));
+
   ok('the ledger is untouched by any of it', await p.evaluate(() =>
     localStorage.getItem('ledger.v1') === null));
   ok('no page errors through any of it', errs.length === 0, errs);

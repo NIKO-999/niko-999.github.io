@@ -1657,6 +1657,29 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
 .ag-note { grid-column: 1 / -1; margin-top: 2px;
   font-size: .78rem; line-height: 1.5; color: var(--ink-2); white-space: pre-wrap; }
 
+/* ── the search field on Reminders ──
+   It filters the calendar, the agenda, the ledger and the log — every
+   trade view and nothing else. On Reminders it is inert, so at full
+   width it is the widest thing on the bar doing the least. Collapsed to
+   its icon there, and it still opens on a click exactly as it does
+   everywhere else.
+
+   Keyed off data-screen rather than data-view: the rail's buttons carry
+   data-view and the script walks `[data-view]` to set aria-current, so
+   putting one on <html> would quietly enrol the document in that
+   loop. */
+[data-screen="reminders"] .topbar .search {
+  flex: none; width: 36px; padding: 0; justify-content: center;
+  transition: width .22s cubic-bezier(.3, .8, .3, 1);
+}
+[data-screen="reminders"] .topbar .search input { width: 0; flex: none; padding: 0; }
+[data-screen="reminders"] .topbar .search.open { flex: 1; width: auto; padding: 0 12px;
+  justify-content: flex-start; }
+[data-screen="reminders"] .topbar .search.open input { width: auto; flex: 1; }
+@media (prefers-reduced-motion: reduce) {
+  [data-screen="reminders"] .topbar .search { transition: none; }
+}
+
 /* ══ habits ══════════════════════════════════════════════════════
    The other life, and it shares nothing with the ledger but the shell.
    Its own key, its own screen, and a rail slot under Arc, because
@@ -9170,10 +9193,31 @@ function goto(view) {
      worse than no answer. */
   if (view === 'habits') renderHabits();
   if (view === 'reminders') renderReminders();
+  /* data-screen, not data-view: the rail's buttons carry data-view and
+     the loop above walks `[data-view]`, so putting one on <html> would
+     quietly enrol the document in it. */
+  document.documentElement.dataset.screen = view;
+  /* Leaving the view puts the field back rather than remembering it
+     shut — it is only collapsed because it is useless HERE. */
+  if (view !== 'reminders') document.querySelector('.topbar .search').classList.remove('open');
   document.getElementById('say').textContent = view;
 }
 document.querySelectorAll('[data-view]').forEach(b =>
   b.addEventListener('click', () => goto(b.dataset.view)));
+
+/* Collapsed, the whole field is the button. It shuts again on blur only
+   if you did not type anything — closing a box with a query still in it
+   would hide the reason the list looks the way it does. */
+(() => {
+  const box = document.querySelector('.topbar .search');
+  const input = document.getElementById('q');
+  box.addEventListener('click', () => {
+    if (document.documentElement.dataset.screen !== 'reminders') return;
+    box.classList.add('open');
+    input.focus();
+  });
+  input.addEventListener('blur', () => { if (!input.value) box.classList.remove('open'); });
+})();
 
 document.getElementById('fDate').value = iso(new Date());
 /* Before the first render, so anything that timed out overnight is gone

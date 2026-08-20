@@ -636,6 +636,19 @@ body {
 }
 .btn-ghost { border-color: transparent; background: var(--glass-in); }
 .btn-primary { background: var(--btn); color: var(--btn-ink); font-weight: 500; }
+/* The one in the TOPBAR is an outline. Not all of them: .btn-primary is
+   on eleven buttons across the two apps and most of them end a form you
+   have just filled in, which is the one place a solid fill is doing
+   real work. This is the button that STARTS something, and it sits in a
+   bar where nothing else is filled — a slab of pure white there was the
+   brightest object in the app, brighter than the figure telling you
+   what you had made. */
+.topbar > .btn-primary {
+  background: none;
+  border-color: color-mix(in srgb, var(--accent) 55%, var(--glass-line));
+  color: var(--ink);
+}
+.topbar > .btn-primary svg { color: var(--accent); }
 .btn svg { width: 15px; height: 15px; flex: none; }
 
 /* ── palette picker ──
@@ -856,6 +869,13 @@ body {
   .seg  button:not([aria-selected="true"]):hover { background: var(--glass-in); color: var(--ink); }
   .btn-ghost:hover { background: var(--glass-in-2); color: var(--ink); }
   .btn-primary:hover { filter: brightness(1.12); }
+  /* An outline has no fill to brighten, so hover fills it faintly and
+     brings the edge up rather than doing nothing at all. */
+  .topbar > .btn-primary:hover {
+    filter: none;
+    background: color-mix(in srgb, var(--accent) 14%, transparent);
+    border-color: color-mix(in srgb, var(--accent) 80%, transparent);
+  }
   .search:hover { border-color: var(--glass-line); background: var(--glass-in-2); }
   .bar:hover, .milestone:hover { filter: brightness(1.1); }
   .list li:hover { background: var(--glass-in-2); }
