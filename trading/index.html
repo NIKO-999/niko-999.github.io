@@ -503,6 +503,8 @@
 .ck-acts .grow { flex: 1; }
 .ck-said { font-family: var(--mono); font-size: .62rem; letter-spacing: .06em;
   text-transform: uppercase; color: var(--ink-3); }
+.ck-why { margin: 9px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
+.ck-why:empty { display: none; }
 .ck-locked { margin: 8px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
 
 /* ── the chip at the gate ──
@@ -2274,6 +2276,10 @@ dialog.sheet.ro .modes button:disabled { opacity: 1; }
               <span class="grow"></span>
               <button class="btn btn-primary" type="button" id="ckSave">Check in</button>
             </div>
+            <!-- The screen enforces a rule and never mentioned it, so
+                 the only way to meet it was to be refused at the gate —
+                 which reads as a fault rather than as a rule. -->
+            <p class="ck-why" id="ckWhy"></p>
             <p class="ck-locked" id="ckLocked" hidden></p>
           </section>
         </div>
@@ -7922,6 +7928,17 @@ const CK_ASKS = [
   'Yesterday is closed',
   'I know what I am looking for today',
 ];
+/* Short forms for reading back. Keyed by the full text because THAT is
+   what a saved day stores — a day written in March holds the sentence,
+   not an index, so the list can be rewritten without stranding it. A
+   fact that is later reworded simply stops having a short form and
+   falls back to its own text, which is ugly and correct. */
+const CK_SHORT = {
+  'Slept enough': 'slept',
+  'Nothing heavy outside trading': 'clear outside',
+  'Yesterday is closed': 'yesterday closed',
+  'I know what I am looking for today': 'knew the setup',
+};
 
 let ckState = (() => {
   let raw = null;
@@ -8043,20 +8060,31 @@ function renderCkLog() {
     const quad = CK_QUAD(d.x, d.y);
     const p = ckPnl(d.date);
     const note = (d.note || '').trim();
-    const n = (d.flags || []).length;
+    /* What was TRUE that morning, named. Not "1 of 4": a denominator is
+       a scoreboard however it is worded, and this screen is the one
+       that is not allowed one. Nothing ticked prints nothing at all —
+       "0 of 4" is the same sentence with the volume up. */
+    const said = (d.flags || []).map(f => CK_SHORT[f] || f);
+    /* And when. A morning with nothing written used to print the
+       corner's definition, which the column to the left already names;
+       the time is a fact about that morning instead of a fact about the
+       word. Older days predate the stamp and simply do not get one. */
+    const at = d.at ? new Date(d.at) : null;
+    const when = at && at.toDateString() === dt.toDateString()
+      ? at.toLocaleTimeString('en-GB', { hour: '2-digit', minute: '2-digit' }) : '';
     return `<div class="lg" role="group">
       <span class="lg-when">
         <b>${dt.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric' })}</b>
-        ${dt.toLocaleDateString('en-GB', { month: 'short' })}
+        ${dt.toLocaleDateString('en-GB', { month: 'short' })}${when ? `<br>${when}` : ''}
       </span>
       <span class="lg-main">
         <span class="lg-top">
           <span class="lg-sym">${esc(quad)}</span>
-          <span class="lg-chip">${n} of ${CK_ASKS.length}</span>
+          ${said.map(t => `<span class="lg-chip">${esc(t)}</span>`).join('')}
           ${p !== 'flat' ? `<span class="lg-r">${p === 'up' ? 'it worked' : 'it did not'}</span>`
                          : '<span class="lg-r">nothing traded</span>'}
         </span>
-        <p class="lg-note${note ? '' : ' none'}">${note ? esc(note) : esc(CK_SAYS[quad])}</p>
+        ${note ? `<p class="lg-note">${esc(note)}</p>` : ''}
       </span>
       <span class="lg-noshot"></span>
     </div>`;
@@ -8104,6 +8132,12 @@ function renderCk() {
       + 'a check-in you can revise after the result is not a record of anything.'
     : '';
   document.getElementById('ckSave').textContent = t ? 'Update' : 'Check in';
+  /* Stated before it bites, and it keeps stating it afterwards in the
+     past tense — a rule that disappears once you have satisfied it is
+     one you have to rediscover every time you have not. */
+  document.getElementById('ckWhy').textContent = locked ? ''
+    : t ? 'The gate is open. Change any of this until the first trade.'
+        : 'The gate stays shut until this is done. That is the whole point of it.';
   document.getElementById('ckSaid').textContent = ckPlaced ? CK_SAYS[CK_QUAD(ckX, ckY)] : 'place a dot';
 
   const n = ckDays().length;

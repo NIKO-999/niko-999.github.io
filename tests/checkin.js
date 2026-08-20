@@ -168,6 +168,64 @@ const ok = (name, cond, extra) => {
      saying "it did not" in red about the same day the pad had just
      drawn as a hollow ring — which left the wash of losses exactly
      where it was, one scroll down. */
+  /* ── no denominator, no dictionary, and the rule stated ───────
+     Three things this screen was still getting wrong after everything
+     else on it had been fixed. */
+  await p.evaluate(() => {
+    const today = iso(new Date());
+    const mk = (back, flags, note) => {
+      const d = new Date(); d.setDate(d.getDate() - back);
+      const k = iso(d);
+      return { date: k, x: 0.3, y: 0.7, flags, note,
+               at: new Date(k + 'T07:41:00').getTime() };
+    };
+    ckState = { days: [mk(3, ['Slept enough', 'Yesterday is closed'], ''),
+                       mk(4, [], ''),
+                       mk(5, ['Slept enough'], 'Did not want to be at the screen at all.')] };
+    ckWrite(); renderCk();
+  });
+  await p.waitForTimeout(300);
+
+  const rowText = await p.locator('#ckList').innerText();
+  ok('no row carries a denominator', !/\b\d+\s*(of|\/)\s*\d+\b/.test(rowText),
+     rowText.slice(0, 160));
+  ok('a row names the facts that were true instead', await p.evaluate(() => {
+    const c = [...document.querySelectorAll('#ckList .lg')][0].querySelectorAll('.lg-chip');
+    return [...c].map(x => x.textContent.trim()).join(',');
+  }).then(t => t === 'slept,yesterday closed'), await p.evaluate(() =>
+    [...document.querySelectorAll('#ckList .lg')][0].innerText.replace(/\n/g, ' | ')));
+  ok('a morning with nothing ticked prints nothing, not "0 of 4"', await p.evaluate(() =>
+    [...document.querySelectorAll('#ckList .lg')][1].querySelectorAll('.lg-chip').length === 0));
+
+  /* The corner's own definition is not a note. A week of Sharp mornings
+     used to print the same sentence seven times, next to a column that
+     already said "Sharp". */
+  ok('no row repeats the corner definition as a note', await p.evaluate((says) => {
+    const t = document.getElementById('ckList').innerText;
+    return !Object.values(says).some(v => t.includes(v));
+  }, await p.evaluate(() => CK_SAYS)));
+  ok('a morning with nothing written carries no note line at all', await p.evaluate(() =>
+    [...document.querySelectorAll('#ckList .lg')][0].querySelectorAll('.lg-note').length === 0));
+  ok('and one with something written keeps it', await p.evaluate(() =>
+    [...document.querySelectorAll('#ckList .lg')][2].querySelector('.lg-note').textContent
+      .includes('Did not want to be at the screen')));
+  ok('the row says when you checked in', /07:41/.test(rowText), rowText.slice(0, 120));
+
+  /* The rule the screen enforces, stated on the screen that enforces
+     it — in both directions, because a rule that vanishes once you have
+     satisfied it has to be rediscovered every time you have not. */
+  ok('the screen says it holds the gate shut', await p.evaluate(() =>
+    /gate stays shut/i.test(document.getElementById('ckWhy').textContent)),
+    await p.locator('#ckWhy').textContent());
+  await p.evaluate(() => { ckX = 0.3; ckY = 0.7; ckPlaced = true;
+    document.getElementById('ckSave').click(); });
+  await p.waitForTimeout(300);
+  ok('and says so in the past tense once you have', await p.evaluate(() =>
+    /gate is open/i.test(document.getElementById('ckWhy').textContent)),
+    await p.locator('#ckWhy').textContent());
+  ok('which is still true at the gate itself', await p.evaluate(() =>
+    !document.getElementById('gIn').disabled));
+
   ok('nor anywhere else on this screen', await p.evaluate(() => {
     const bad = [];
     document.querySelectorAll('#stateSection *').forEach((el) => {
