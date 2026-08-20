@@ -32,6 +32,22 @@ const HABITS = [
 ];
 const BY_ID = Object.fromEntries(HABITS.map(h => [h.id, h]));
 
+/* What a workout WAS. Stored on the day rather than on the habit,
+   because it is a property of that morning and not of the rule.
+
+   Rest is in the list and is not a workout: it is a day you decided not
+   to train, which is worth recording and must not count toward four a
+   week. Anything else would have the number lie to you in the
+   flattering direction. */
+const SPLITS = [
+  { id: 'push', name: 'Push' },
+  { id: 'pull', name: 'Pull' },
+  { id: 'legs', name: 'Legs' },
+  { id: 'rest', name: 'Rest' },
+];
+const trained = (k) => DAYS[k] && DAYS[k].split && DAYS[k].split !== 'rest';
+const splitVar = (id) => `var(--sp-${id})`;
+
 const iso = (d) => {
   const x = new Date(d);
   x.setMinutes(x.getMinutes() - x.getTimezoneOffset());
@@ -69,7 +85,14 @@ const DAYS = (() => {
       rec.done.abs = keep(0.7);
       if (rec.done.abs) lastAbs = i;
     }
-    rec.done.workout = !sun && r() < 0.42;
+    /* A push-pull-legs rotation with rest days in it, so the calendar
+       has a pattern rather than a scatter. */
+    if (!sun && r() < 0.52) {
+      rec.split = ['push', 'pull', 'legs'][Math.floor(r() * 3)];
+    } else if (r() < 0.5) {
+      rec.split = 'rest';
+    }
+    rec.done.workout = !!rec.split && rec.split !== 'rest';
     if (i < 66 && r() < 0.18) rec.note = [
       'Legs still going from yesterday. Walk instead.',
       'Read in the morning for once and it stuck.',
@@ -84,6 +107,7 @@ const DAYS = (() => {
   t.done.walk = true;
   t.done.read = false;
   t.due_abs = true; t.done.abs = false;
+  t.split = null; t.done.workout = false;
   return out;
 })();
 const dayList = Object.keys(DAYS).sort();
@@ -144,28 +168,49 @@ function rate(k) {
    in seven keeps it — survives real life, so you keep it, so the habit
    survives too. Perfect-or-nothing is a machine for quitting in
    February. */
-const TOLERANCE = 5 / 7;
+/* A day counts as KEPT when you did most of what was due on it. Not
+   all: an all-or-nothing day makes the chain an all-or-nothing chain,
+   which is the thing the tolerance exists to avoid. */
+const KEPT_DAY = 0.6;
+const TOLERANCE = 5;                            // ...of the last seven
+const wasKept = (k) => { const r = rate(k); return r !== null && r >= KEPT_DAY; };
 function chain() {
   let n = 0;
   for (let i = dayList.length - 1; i >= 0; i--) {
     const k = dayList[i];
     if (k === TODAY) continue;                 // today is not over
     const win = dayList.slice(Math.max(0, i - 6), i + 1);
-    const rs = win.map(rate).filter(x => x !== null);
-    if (!rs.length) break;
-    if (rs.reduce((a, b) => a + b, 0) / rs.length < TOLERANCE) break;
+    /* An average of the rates was the first attempt and it was the
+       wrong shape: it read "five days in seven" as "71% of everything,
+       every day", which nobody keeps for a week. This counts DAYS, the
+       way the sentence beside it does. */
+    if (win.filter(wasKept).length < Math.min(TOLERANCE, win.length)) break;
     n++;
   }
   return n;
 }
+/* Runs, over whatever unit the habit is measured in. A perWeek habit is
+   never due on a given DAY, so walking the days found nothing for it and
+   the workout row read "best 0 · worst gap 0" — a habit that had been
+   kept most weeks reported as never kept at all. Its unit is the week,
+   so that is what gets walked. */
 function runsFor(id) {
+  const h = BY_ID[id];
   let best = 0, worst = 0, cur = 0, gap = 0;
+  const step = (on) => {
+    if (on) { cur++; gap = 0; if (cur > best) best = cur; }
+    else { gap++; cur = 0; if (gap > worst) worst = gap; }
+  };
+  if (h.perWeek) {
+    for (let i = 0; i + 7 <= dayList.length; i += 7)
+      step(dayList.slice(i, i + 7).filter(k => DAYS[k].done[id]).length >= h.perWeek);
+    return { best, worst, unit: 'week' };
+  }
   for (const k of dayList) {
     if (!due(id, k)) continue;
-    if (DAYS[k].done[id]) { cur++; gap = 0; if (cur > best) best = cur; }
-    else { gap++; cur = 0; if (gap > worst) worst = gap; }
+    step(!!DAYS[k].done[id]);
   }
-  return { best, worst };
+  return { best, worst, unit: 'day' };
 }
 
 /* ── today ── */
@@ -223,6 +268,23 @@ function renderNow() {
           : `${n} ${n === 1 ? 'day' : 'days'} since · due in ${h.every - n}`;
       }
     }
+    /* The workout is the one row that is not a plain tick, because
+       there are four answers rather than two. The words live HERE and
+       nowhere else — every other place it appears is a colour. */
+    if (h.perWeek) {
+      const cur = t.split || null;
+      if (cur) say = cur === 'rest' ? '<b>rest day</b>' : '<b>worked out</b>';
+      const dotc = cur ? ` style="background:${splitVar(cur)};box-shadow:none"` : '';
+      return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
+        <s class="hb-dot"${cur ? ' data-on="1"' : ''}${dotc}></s>
+        <span class="hb-nm"><b>${h.name}</b></span>
+        <span class="hb-say">${say}</span>
+        <span class="hb-act"><span class="hb-split">${SPLITS.map(sp =>
+          `<button type="button" data-split="${sp.id}" aria-pressed="${cur === sp.id}"
+             style="--c:${splitVar(sp.id)}" title="${sp.name}" aria-label="${sp.name}">
+             <i aria-hidden="true"></i></button>`).join('')}</span></span>
+      </div>`;
+    }
     return `<div class="hb-item"${on ? ' data-on="1"' : ''}>
       <s class="hb-dot"${on ? ' data-on="1"' : ''}></s>
       <span class="hb-nm"><b>${h.name}</b>${h.is ? `<em>${h.is}</em>` : ''}</span>
@@ -272,7 +334,11 @@ function renderStrip() {
     const ahead = k > TODAY;
     const dd = dueOn(k);
     const pips = ahead || !DAYS[k] ? ''
-      : dd.map(id => `<s class="${DAYS[k].done[id] ? '' : 'off'}" title="${BY_ID[id].name}"></s>`).join('');
+      : dd.map(id => `<s class="${DAYS[k].done[id] ? '' : 'off'}" title="${BY_ID[id].name}"></s>`).join('')
+        /* The split rides along on its own mark rather than replacing a
+           habit's — the workout is never due on a given day, so it has
+           no pip of its own to colour. */
+        + (DAYS[k].split ? `<s style="background:${splitVar(DAYS[k].split)}"></s>` : '');
     const n = ahead || !DAYS[k] ? '' : didOn(k).length;
     return `<div class="hb-day"${k === TODAY ? ' data-today="1"' : ''}${ahead ? ' data-ahead="1"' : ''}
         role="group" aria-label="${d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric' })}${
@@ -369,8 +435,22 @@ function renderRing() {
       of++; if (v >= 0.999) kept++;
       /* Graded, unlike the backtesting ring: five things a day has real
          middles that one-a-day does not. */
+      /* The fill still means how much of the day you kept; the EDGE
+         means what you trained. Two facts, two channels — putting the
+         split in the fill would have cost the ring the only thing it
+         was for. */
       g += `<path class="cell" d="${path}" fill="var(--accent)"
               fill-opacity="${(0.14 + 0.74 * v).toFixed(2)}" />`;
+      /* NO SPLIT HERE, and it was tried twice.
+         An outline round each cell buried the ring — seventy coloured
+         outlines ten rings deep read as stained glass. A short arc on
+         each wedge's outer edge was quieter and still lost, because
+         roughly seven days in ten carry a split and at that density any
+         per-cell colour becomes the picture.
+
+         The ring's fill is the one thing it exists to say. The calendar
+         below has a whole row per day to give the split and reads it at
+         a glance, so this figure keeps its job and gives that one up. */
     });
   }
   document.getElementById('hbRing').innerHTML =
@@ -392,7 +472,8 @@ function renderGaps() {
           <i style="position:absolute;left:0;top:0;height:4px;border-radius:3px;
              width:${(r.best / peak * 100).toFixed(0)}%;background:var(--accent)"></i>
         </span>
-        <span style="font-family:var(--mono);font-size:.6rem">best ${r.best} · worst gap ${r.worst}</span>
+        <span style="font-family:var(--mono);font-size:.6rem">best ${r.best} ${
+          r.unit === 'week' ? (r.best === 1 ? 'week' : 'weeks') : ''} · worst gap ${r.worst}</span>
       </div>`).join('') + `</div>`;
   document.getElementById('hbGapN').textContent = `${chain()} day chain`;
 }
@@ -451,26 +532,12 @@ function logRows() {
   return html;
 }
 
-/* B · the grid. Habits down, days across — the shape every paper habit
-   tracker has had for a century, and still the densest way to hold
-   "which thing, which day" in one picture. A day a habit was not due is
-   BLANK rather than empty: a gap you can see through is not a miss. */
-function logGrid() {
-  const days = recent();
-  const cols = `grid-template-columns:repeat(${days.length}, minmax(0, 1fr))`;
-  return HABITS.map(h => `<div class="grid-h"><span>${h.short}</span>
-      <span class="grid-c" style="${cols}">${days.map(k =>
-        `<i class="${state(h.id, k)}" title="${k}"></i>`).join('')}</span></div>`).join('')
-    + `<div class="grid-h"><span></span><span class="grid-days" style="${cols}">${
-        days.map(k => {
-          const d = new Date(k + 'T00:00:00');
-          return `<em>${d.getDay() === 1 ? d.getDate() : ''}</em>`;
-        }).join('')}</span></div>`;
-}
+/* The month, and only the month. The calendar's own shape, so a habit
+   month and a trading month are read the same way and neither has to be
+   learned twice.
 
-/* C · the month. The calendar's own shape, so a habit month and a
-   trading month are read the same way and neither has to be learned
-   twice. */
+   The other four treatments are in the history if they are ever wanted:
+   a grid, a chain per habit, rows, and a notable-only filter. */
 function logMonth() {
   const days = recent();
   const first = new Date(days[0] + 'T00:00:00');
@@ -482,99 +549,25 @@ function logMonth() {
       const d = new Date(k + 'T00:00:00');
       /* Due OR done — dueOn alone drops the workout, which is never due
          on a given day and so would never appear on any of them. */
-      const pips = HABITS.filter(h => due(h.id, k) || DAYS[k].done[h.id])
+      const pips = HABITS.filter(h => !h.perWeek && (due(h.id, k) || DAYS[k].done[h.id]))
         .map(h => `<i class="${DAYS[k].done[h.id] ? '' : 'off'}"></i>`).join('');
-      return `<div class="cell"><b>${d.getDate()}</b><span class="pips">${pips}</span></div>`;
+      /* And the split, as a bar across the foot of the cell. Its own
+         row rather than a sixth pip: it is a different KIND of fact
+         from "did you keep this", and the two would be read as one. */
+      const sp = DAYS[k].split;
+      return `<div class="cell"${k === TODAY ? ' data-today="1"' : ''}>
+        <b>${d.getDate()}</b><span class="pips">${pips}</span>
+        <span class="sp"${sp ? ` style="background:${splitVar(sp)}"` : ''}></span></div>`;
     })).join('');
   return `<div class="mon">${head}${cells}</div>`;
 }
 
-/* D · the chains. Runs rather than days: not WHICH mornings but how
-   long you have kept each thing going without a break. The only one of
-   the five that answers "am I on a run" at a glance. */
-function logChains() {
-  const days = recent();
-  const N = days.length, WK = Math.floor(N / 7);
-  return HABITS.map((h) => {
-    /* A perWeek habit has no daily run to measure — its unit is the
-       week, so its chain is weeks that met the number. Same track, same
-       geometry, different tick; the caption says which. */
-    const perWeek = !!h.perWeek;
-    const units = perWeek ? WK : N;
-    const hit = perWeek
-      ? Array.from({ length: WK }, (_, w) =>
-          days.slice(w * 7, w * 7 + 7).filter(k => DAYS[k].done[h.id]).length >= h.perWeek)
-      : days.map(k => state(h.id, k));
-
-    const runs = [];
-    let start = null;
-    for (let i = 0; i < units; i++) {
-      const on = perWeek ? hit[i] : hit[i] === 'on';
-      const breaks = perWeek ? !hit[i] : hit[i] === 'miss';
-      if (on) { if (start === null) start = i; }
-      else if (breaks && start !== null) { runs.push([start, i]); start = null; }
-    }
-    if (start !== null) runs.push([start, units]);
-    const best = runs.reduce((a, r) => Math.max(a, r[1] - r[0]), 0);
-    const now = runs.length && runs[runs.length - 1][1] === units
-      ? units - runs[runs.length - 1][0] : 0;
-    const word = perWeek ? (best === 1 ? 'week' : 'weeks') : (best === 1 ? 'day' : 'days');
-    return `<div class="chain-h"><span>${h.short}</span>
-      <span class="chain-t">${runs.map(([a, b]) =>
-        `<i style="left:${(a / units * 100).toFixed(1)}%;width:${
-          ((b - a) / units * 100).toFixed(1)}%"></i>`).join('')}</span>
-      <em>${now ? `on ${now}` : 'broken'} · best ${best} ${word}</em></div>`;
-  }).join('');
-}
-
-/* E · only what is notable.
-   Twenty-eight rows of "three kept" is twenty-eight rows you scroll
-   past. This keeps the days that say something — everything kept, a run
-   ending, or a note — and counts the rest rather than printing them. */
-function logNotable() {
-  const days = recent().slice().reverse();
-  const out = [];
-  let quiet = 0;
-  for (const k of days) {
-    const d = new Date(k + 'T00:00:00');
-    const when = d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
-    const dd = dueOn(k), kept = didOn(k);
-    const broke = HABITS.filter(h => state(h.id, k) === 'miss'
-      && state(h.id, dayList[dayList.indexOf(k) - 1] || k) === 'on');
-    let what = null;
-    if (DAYS[k].note) what = `<em>note</em>${DAYS[k].note}`;
-    else if (dd.length && kept.length >= dd.length) what = '<em>all of them</em>';
-    else if (broke.length) what = `<em>run ended</em>${broke.map(h => h.short).join(', ')}`;
-    if (!what) { quiet++; continue; }
-    out.push(`<div><b>${when}</b><span class="what">${what}</span></div>`);
-  }
-  return `<div class="notable">${out.join('')}</div>`
-    + `<p class="rest">${quiet} other ${quiet === 1 ? 'day' : 'days'} — nothing to say about them</p>`;
-}
-
-const LOGS = [
-  ['A', 'Rows', 'One a day, with what you kept named. Reads like the trading log, which is '
-    + 'its whole argument — but twenty-eight of them is a lot of scrolling for a screen whose '
-    + 'question is usually "what does the pattern look like".', logRows],
-  ['B', 'The grid', 'Habits down, days across. The shape every paper habit tracker has had '
-    + 'for a century, and still the densest way to hold "which thing, which day" in one '
-    + 'picture. A day a habit was not due is blank rather than empty — a gap you can see '
-    + 'through is not a miss.', logGrid],
-  ['C', 'The month', 'The calendar\'s own shape, so a habit month and a trading month are '
-    + 'read the same way and neither has to be learned twice. Gives every day room for a note '
-    + 'later; costs the most height of the five.', logMonth],
-  ['D', 'The chains', 'Runs rather than days. Not which mornings, but how long you have kept '
-    + 'each thing going without a break — the only one of the five that answers "am I on a '
-    + 'run" from across the room.', logChains],
-  ['E', 'Only what is notable', 'Twenty-eight rows of "three kept" is twenty-eight rows you '
-    + 'scroll past. This keeps the days that say something — everything kept, a run ending, or '
-    + 'a note — and counts the rest instead of printing them.', logNotable],
-];
-
 function renderLog() {
-  document.getElementById('hbLogs').innerHTML = LOGS.map(([k, name, why, fn]) =>
-    `<section class="logopt"><h3><b>${k}</b>${name}</h3><p>${why}</p>
-       <div class="logbody">${fn()}</div></section>`).join('');
+  document.getElementById('hbLogs').innerHTML = logMonth();
+  const days = recent();
+  const n = days.filter(k => DAYS[k].split && DAYS[k].split !== 'rest').length;
+  document.getElementById('hbLogMeta').textContent =
+    `${days.length} days · ${n} ${n === 1 ? 'session' : 'sessions'}`;
 }
 
 /* ── paint ── */
@@ -596,6 +589,16 @@ renderAll();
 
 /* ── the controls ── */
 document.getElementById('hbNow').addEventListener('click', (e) => {
+  const sp = e.target.closest('[data-split]');
+  if (sp) {
+    const id = sp.dataset.split;
+    /* Pressing the one already chosen clears it — otherwise a mistaken
+       tap on a four-way control has no way back. */
+    DAYS[TODAY].split = DAYS[TODAY].split === id ? null : id;
+    DAYS[TODAY].done.workout = !!DAYS[TODAY].split && DAYS[TODAY].split !== 'rest';
+    renderAll();
+    return;
+  }
   const tick = e.target.closest('[data-tick]');
   if (!tick) return;
   const id = tick.dataset.tick;

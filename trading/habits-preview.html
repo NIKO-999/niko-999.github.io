@@ -65,6 +65,48 @@
 :root { --up: #7fb9a2; --down: #c98f8f; }
 :root[data-resolved="light"] { --up: #2f6b52; --down: #8f3f3f; }
 
+/* ── what you trained ──
+   Four, and none of them can ever be mistaken for the accent. That is
+   not a hue choice: the accent family already covers orange, blue,
+   green, violet and grey across fourteen backdrops. It is a SATURATION
+   choice — every accent in the app measures 52% or less and most are
+   under 35%, so these sit at 55–78% and read as a different kind of
+   colour rather than as a near miss.
+
+   Rest is the exception and is deliberately the opposite: 4%, so a rest
+   day reads as an absence of colour rather than as a fourth kind of
+   training. */
+:root {
+  --sp-push: #e68937;
+  --sp-pull: #cb79d8;
+  --sp-legs: #31b97a;
+  --sp-rest: #918e88;
+}
+:root[data-resolved="light"] {
+  --sp-push: #bc6124;
+  --sp-pull: #a540b5;
+  --sp-legs: #26825c;
+  --sp-rest: #77746e;
+}
+/* The picker is the ONLY place the words appear. Everywhere else the
+   colour carries it, which is the point — you are tracking the split,
+   not announcing it. */
+.hb-split { display: flex; gap: 4px; align-items: center; }
+.hb-split button {
+  width: 26px; height: 26px; padding: 0; border-radius: 7px; cursor: pointer;
+  border: 1px solid var(--glass-line); background: none;
+  display: grid; place-items: center;
+}
+.hb-split button i { width: 10px; height: 10px; border-radius: 50%;
+  background: var(--c); opacity: .45; }
+.hb-split button:hover i { opacity: .8; }
+.hb-split button[aria-pressed="true"] { border-color: var(--c); }
+.hb-split button[aria-pressed="true"] i { opacity: 1; }
+.hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+.hb-split em { font-style: normal; font-family: var(--mono); font-size: .5rem;
+  letter-spacing: .08em; text-transform: uppercase; color: var(--ink-3);
+  margin-right: 3px; }
+
 .pane { flex: 1; overflow-y: auto; padding: 4px 14px 40px; }
 
 /* ── this page's own chrome, not the app's ────────────────────── */
@@ -344,6 +386,12 @@
 .mon .pips { display: flex; gap: 2px; }
 .mon .pips i { width: 4px; height: 4px; border-radius: 50%; background: var(--accent); }
 .mon .pips i.off { background: none; box-shadow: inset 0 0 0 1px var(--glass-line); }
+/* The split sits on its own row at the foot of the cell. Not a sixth
+   pip: it is a different KIND of fact from "did you keep this", and
+   side by side the two would be read as one. */
+.mon .cell { justify-content: flex-start; }
+.mon .sp { margin-top: auto; width: 18px; height: 3px; border-radius: 2px; background: none; }
+.mon .cell[data-today] { box-shadow: inset 0 0 0 1px var(--accent); }
 [data-miss="red"] .mon .pips i.off { background: color-mix(in srgb, var(--down) 40%, transparent);
   box-shadow: none; }
 
@@ -471,14 +519,10 @@
         </section>
       </div>
 
-      <div class="cal-head" style="margin-top:30px"><h2>Lately &mdash; five ways</h2>
+      <div class="cal-head" style="margin-top:30px"><h2>Lately</h2>
         <span class="grow"></span>
-        <span class="span-meta">the same days in each</span></div>
-      <p class="hb-sub" style="margin:0 0 14px;max-width:84ch">The log answers a different
-        question from everything above it: the ring says how today is going and the radars say
-        where it goes wrong, but this is where you come to find <b>a particular day</b>, or to
-        see a pattern nothing has named yet. Density matters more here than anywhere else.</p>
-      <div class="logs" id="hbLogs"></div>
+        <span class="span-meta" id="hbLogMeta"></span></div>
+      <div id="hbLogs"></div>
     </div>
   </main>
 </div>
