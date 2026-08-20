@@ -178,28 +178,40 @@
 }
 
 /* ── what you trained ──
-   Four, and none can be mistaken for the accent.
+   Jade, garnet, sapphire — and none can be mistaken for the accent or
+   for any of the six habits.
 
-   Not by saturation: the first set got its distinctness by sitting at
-   55–78% against an accent family that never exceeds 52%, and that is
-   exactly what made it shout. By HUE. Every accent in the app sits at
-   16, 34, 130, 186–220 or 252, which leaves wide bands nobody is using,
-   so a colour in one of them stays at the app's own muted level and
-   still cannot be confused. These are 36–42% saturated and the nearest
-   accent to any of them is ΔE 20 away.
+   Not distinct by saturation: the first set of all got its distinctness
+   by sitting at 55–78% against an accent family that never exceeds 52%,
+   and that is exactly what made it shout. These sit at 53% and are told
+   apart by HUE and depth instead.
+
+   THE ROOM FOR THEM IS NEARLY GONE, and it is worth writing down why.
+   Six habit colours, eighteen accents across the palettes, four splits
+   and a saturation ceiling is more colours than this space holds. A
+   search told to maximise separation returned magenta and olive every
+   single time, at every register tried — those are the only wide gaps
+   the habits and accents leave. So these three were CHOSEN as a set and
+   then tuned until they measured, rather than measured first and
+   accepted whatever came back: hue bands fixed at green, red and blue,
+   and only lightness and saturation searched inside them.
+
+   Result: every one is ≥ ΔE 17 from all six habits, from the other
+   splits and from all eighteen accents, in both themes, at 53%
+   saturation. tests/habits.js holds the thresholds.
 
    Rest is deliberately the opposite, at 4%: an absence of colour rather
    than a fourth kind of training. */
 :root {
-  --sp-push: #4ca9a3;      /* teal  */
-  --sp-pull: #c46e8e;      /* rose  */
-  --sp-legs: #ad9b52;      /* brass */
-  --sp-rest: #918e88;      /* grey  */
+  --sp-push: #54b496;      /* jade     */
+  --sp-pull: #aa3a51;      /* garnet   */
+  --sp-legs: #3c65bc;      /* sapphire */
+  --sp-rest: #918e88;      /* grey     */
 }
 :root[data-resolved="light"] {
-  --sp-push: #2f7570;
-  --sp-pull: #9c4467;
-  --sp-legs: #756a2e;
+  --sp-push: #2e8469;
+  --sp-pull: #892a3d;
+  --sp-legs: #223356;
   --sp-rest: #77746e;
 }
 
