@@ -437,3 +437,131 @@ document.getElementById('decMiss').addEventListener('click', (e) => {
   document.querySelectorAll('#decMiss button').forEach(x =>
     x.setAttribute('aria-pressed', String(x === b)));
 });
+
+/* ═══════════════════════════════════════════════════════════════
+   THE OPTIONS — six progress treatments and two layouts.
+
+   Preview furniture. It goes when one is chosen.
+
+   Every option is drawn against the SAME three rows, because the bar on
+   this screen carries three different meanings and a treatment that
+   only reads well for one of them is no good:
+
+     water    an amount you are filling      2 of 3 litres
+     abs      a gap you are running down     1 day into 2
+     workout  a week you are part way into   1 into 4
+
+   Each row therefore hands the treatment a fraction, a caption, and —
+   for the segmented and dotted ones — how many units it is out of.
+   ═══════════════════════════════════════════════════════════════ */
+const OPT_ROWS = [
+  { n: 'water',   p: 2 / 3,  say: '2L today',        units: 3,  filled: 2 },
+  { n: 'abs',     p: 1 / 2,  say: 'due tomorrow',    units: 2,  filled: 1 },
+  { n: 'workout', p: 1 / 4,  say: '1 this week',     units: 4,  filled: 1 },
+];
+
+const ringSVG = (p, r, w) => {
+  const C = 2 * Math.PI * r;
+  return `<svg viewBox="0 0 ${(r + w) * 2} ${(r + w) * 2}" aria-hidden="true">
+    <circle class="tr" cx="${r + w}" cy="${r + w}" r="${r}" />
+    <circle class="fl" cx="${r + w}" cy="${r + w}" r="${r}"
+      stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}" /></svg>`;
+};
+
+const TREAT = [
+  { k: 'bar', name: 'The bar', cls: 'o-bar',
+    why: 'What is on the screen now. One length, reads instantly, and the only one that '
+       + 'says nothing about what the units are.',
+    t: (r) => `<span class="t"><i style="width:${(r.p * 100).toFixed(0)}%"></i></span>` },
+  { k: 'seg', name: 'Segments', cls: 'o-seg',
+    why: 'Three litres is three things, not sixty-six per cent. A countable target gets a '
+       + 'countable bar, and a part-filled segment shows the one you are on.',
+    t: (r) => `<span class="t">${Array.from({ length: r.units }, (_, i) =>
+        `<i class="${i < r.filled ? 'on' : ''}"></i>`).join('')}</span>` },
+  { k: 'ring', name: 'A ring each', cls: 'o-ring',
+    why: 'Rhymes with the radars and the heat map, which is this app’s whole language for '
+       + '"how much". Costs the row height a bar does not.',
+    t: (r) => `<span class="t">${ringSVG(r.p, 10, 3)}</span>` },
+  { k: 'fill', name: 'The row fills', cls: 'o-fill',
+    why: 'No bar at all — the row itself is the measure. Strongest for glancing across five '
+       + 'at once, weakest for reading an exact amount off.',
+    t: () => '' },
+  { k: 'dot', name: 'A ladder of dots', cls: 'o-dot',
+    why: 'The same pip the log and the week already use, so nothing new is introduced. '
+       + 'Falls apart above about eight units.',
+    t: (r) => `<span class="t">${Array.from({ length: r.units }, (_, i) =>
+        `<i class="${i < r.filled ? 'on' : ''}"></i>`).join('')}</span>` },
+  { k: 'mark', name: 'Track and marker', cls: 'o-mark',
+    why: 'A notch at the target and a dot where you are. The only one that can show being '
+       + 'PAST the target — four litres reads as four rather than as pinned at full.',
+    t: (r) => {
+      /* The track runs to 1.35 of target so there is somewhere to be
+         past it. Pinning at full is the failure the notch exists to
+         fix. */
+      const s = Math.min(1, r.p / 1.35);
+      return `<span class="t"><i class="run" style="width:${(s * 100).toFixed(0)}%"></i>`
+        + `<i class="notch" style="left:${(100 / 1.35).toFixed(0)}%"></i>`
+        + `<i class="me" style="left:${(s * 100).toFixed(0)}%"></i></span>`;
+    } },
+];
+
+document.getElementById('hbOpts').innerHTML = TREAT.map((o, i) =>
+  `<section class="opt ${o.cls}">
+     <h3><b>${String.fromCharCode(65 + i)}</b>${o.name}</h3>
+     <p>${o.why}</p>
+     <div class="demo">${OPT_ROWS.map(r =>
+       `<div class="r" style="--p:${(r.p * 100).toFixed(0)}%">
+          <span class="rn">${r.n}</span>${o.t(r)}<span class="rs">${r.say}</span>
+        </div>`).join('')}</div>
+   </section>`).join('');
+
+/* ── two layouts ──
+   Rows are what is below. These are the two that are genuinely
+   different rather than a rearrangement of the same row. */
+(function () {
+  const tiles = HABITS.map((h) => {
+    const t = DAYS[TODAY];
+    const p = h.target ? Math.min(1, (t.amt[h.id] || 0) / h.target)
+      : h.perWeek ? 0.25 : (t.done[h.id] ? 1 : 0.5);
+    const say = h.target ? `${(+(t.amt[h.id] || 0).toFixed(2))}${h.unit}`
+      : h.perWeek ? '1 this week' : (t.done[h.id] ? 'done' : 'due today');
+    return `<div class="tile"><b>${h.short}</b><em>${h.target ? h.target + h.unit
+      : h.perWeek ? h.perWeek + ' a week' : 'every ' + (h.every === 1 ? 'day' : h.every + ' days')}</em>
+      <span class="grow"></span><span class="t"><i style="width:${(p * 100).toFixed(0)}%"></i></span>
+      <em>${say}</em></div>`;
+  }).join('');
+
+  const kept = keptOn(TODAY).length, dueN = dueOn(TODAY).length;
+  const p = dueN ? kept / dueN : 0;
+  const list = HABITS.map((h) => {
+    const on = DAYS[TODAY].done[h.id];
+    return `<li class="${on ? 'on' : ''}"><s></s>${h.name}<span class="grow"></span>
+      <em>${on ? 'done' : h.target ? `${(+(DAYS[TODAY].amt[h.id] || 0).toFixed(2))}${h.unit}` : ''}</em></li>`;
+  }).join('');
+
+  document.getElementById('hbLay').innerHTML =
+    `<section class="opt">
+       <h3><b>1</b>Tiles</h3>
+       <p>One card each rather than one row each. Five things read as five objects, and it
+          takes the height a phone has and the width a desktop has. Loses the shared bar
+          length that makes rows comparable at a glance.</p>
+       <div class="demo"><div class="tiles">${tiles}</div></div>
+     </section>
+     <section class="opt">
+       <h3><b>2</b>One ring, then the list</h3>
+       <p>The day as a single figure first, the five underneath as plain ticks. Answers
+          &ldquo;am I on track&rdquo; before it answers &ldquo;with what&rdquo; &mdash; and it is the
+          only layout here that gives the screen a face you would recognise from across the
+          room.</p>
+       <div class="demo"><div class="hub">
+         <svg viewBox="0 0 100 100" aria-hidden="true">
+           <circle class="tr" cx="50" cy="50" r="40" />
+           <circle class="fl" cx="50" cy="50" r="40"
+             stroke-dasharray="${(2 * Math.PI * 40 * p).toFixed(1)} ${(2 * Math.PI * 40).toFixed(1)}" />
+           <text class="mid" x="50" y="50">${kept}</text>
+           <text class="sub" x="50" y="62">KEPT TODAY</text>
+         </svg>
+         <ul>${list}</ul>
+       </div></div>
+     </section>`;
+})();

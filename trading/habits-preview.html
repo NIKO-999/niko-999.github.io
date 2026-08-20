@@ -181,6 +181,104 @@
 .cal-head { display: flex; align-items: center; gap: 8px; margin: 0 0 10px; }
 .cal-head h2 { margin: 0; font-size: .96rem; font-weight: 500; color: var(--ink); }
 .cal-head .grow { flex: 1; }
+/* ══ the options ═══════════════════════════════════════════════ */
+.opts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px; align-items: stretch; margin-bottom: 26px; }
+@media (max-width: 1080px) { .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 700px)  { .opts { grid-template-columns: minmax(0, 1fr); } }
+.opt { border: 1px solid var(--glass-line); border-radius: 12px; background: var(--glass-in);
+  padding: 13px 15px 15px; display: flex; flex-direction: column; }
+.opt h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.opt h3 b { font-family: var(--mono); font-size: .56rem; letter-spacing: .12em;
+  font-weight: 500; color: var(--bg); background: var(--ink-2); border-radius: 4px;
+  padding: 2px 5px; margin-right: 7px; }
+.opt > p { margin: 5px 0 0; font-size: .72rem; line-height: 1.5; color: var(--ink-3); }
+/* The demo grows into whatever height the row settles on, so a caption
+   that wraps on one card cannot push its picture out of line. */
+.opt .demo { flex: 1; display: flex; flex-direction: column; justify-content: center;
+  gap: 12px; margin-top: 13px; }
+.opt .r { display: grid; grid-template-columns: 62px minmax(0, 1fr) auto; gap: 11px;
+  align-items: center; }
+.opt .rn { font-size: .76rem; color: var(--ink-2); }
+.opt .rs { font-family: var(--mono); font-size: .56rem; letter-spacing: .05em;
+  color: var(--ink-3); white-space: nowrap; }
+
+/* A · the bar, as it stands */
+.o-bar .t { height: 4px; border-radius: 3px; background: var(--glass-in-2); overflow: hidden; }
+.o-bar .t i { display: block; height: 4px; border-radius: 3px; background: var(--accent); }
+
+/* B · segments. Three litres is three things, not 66 per cent — a
+   countable target deserves a countable bar. */
+.o-seg .t { display: flex; gap: 3px; }
+.o-seg .t i { flex: 1; height: 6px; border-radius: 2px; background: var(--glass-in-2); }
+.o-seg .t i.on { background: var(--accent); }
+.o-seg .t i.part { background: linear-gradient(to right, var(--accent) var(--p), var(--glass-in-2) 0); }
+
+/* C · a ring per row. Rhymes with the two radars and the heat map,
+   which is the app's whole visual language for "how much". */
+.o-ring .t { display: flex; justify-content: flex-start; }
+.o-ring svg { width: 26px; height: 26px; }
+.o-ring .tr { fill: none; stroke: var(--glass-in-2); stroke-width: 3.4; }
+.o-ring .fl { fill: none; stroke: var(--accent); stroke-width: 3.4; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%; }
+
+/* D · the row itself fills. No bar at all — the strongest one for
+   glancing, the weakest for reading an exact amount. */
+.o-fill .r { position: relative; padding: 9px 11px; border-radius: 8px;
+  background: var(--glass-in-2); overflow: hidden; grid-template-columns: 62px minmax(0,1fr) auto; }
+.o-fill .r::before { content: ''; position: absolute; inset: 0; width: var(--p);
+  background: color-mix(in srgb, var(--accent) 20%, transparent); }
+.o-fill .rn, .o-fill .rs, .o-fill .t { position: relative; }
+
+/* E · a ladder of dots. The same pip the log already uses. */
+.o-dot .t { display: flex; gap: 4px; align-items: center; }
+.o-dot .t i { width: 7px; height: 7px; border-radius: 50%; background: none;
+  box-shadow: inset 0 0 0 1px var(--glass-line); }
+.o-dot .t i.on { background: var(--accent); box-shadow: none; }
+
+/* F · a track with a marker and a notch at the target. The only one
+   that can show being PAST the target rather than pinned at full. */
+.o-mark .t { position: relative; height: 12px; }
+.o-mark .t::before { content: ''; position: absolute; left: 0; right: 0; top: 5px;
+  height: 2px; border-radius: 2px; background: var(--glass-in-2); }
+.o-mark .t .notch { position: absolute; top: 1px; width: 1px; height: 10px;
+  background: var(--ink-3); opacity: .5; }
+.o-mark .t .me { position: absolute; top: 2px; width: 8px; height: 8px; margin-left: -4px;
+  border-radius: 50%; background: var(--accent); }
+.o-mark .t .run { position: absolute; left: 0; top: 5px; height: 2px; border-radius: 2px;
+  background: var(--accent); }
+
+/* ── two layouts ── */
+.lay { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px;
+  align-items: stretch; margin-bottom: 26px; }
+@media (max-width: 860px) { .lay { grid-template-columns: minmax(0, 1fr); } }
+.tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 9px; }
+.tile { border: 1px solid var(--glass-line); border-radius: 10px; background: var(--glass-in-2);
+  padding: 11px 11px 12px; display: flex; flex-direction: column; gap: 7px; min-height: 92px; }
+.tile b { font-size: .78rem; font-weight: 500; color: var(--ink); }
+.tile em { font-style: normal; font-family: var(--mono); font-size: .52rem; letter-spacing: .08em;
+  text-transform: uppercase; color: var(--ink-3); }
+.tile .grow { flex: 1; }
+.tile .t { height: 4px; border-radius: 3px; background: var(--glass-in); overflow: hidden; }
+.tile .t i { display: block; height: 4px; border-radius: 3px; background: var(--accent); }
+.hub { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+.hub svg { width: 132px; height: 132px; flex: none; }
+.hub .tr { fill: none; stroke: var(--glass-in-2); stroke-width: 7; }
+.hub .fl { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round;
+  transform: rotate(-90deg); transform-origin: 50% 50%; }
+.hub .mid { font-family: var(--mono); font-size: 15px; fill: var(--ink); text-anchor: middle; }
+.hub .sub { font-family: var(--mono); font-size: 6.5px; fill: var(--ink-3); text-anchor: middle;
+  letter-spacing: .1em; }
+.hub ul { list-style: none; margin: 0; padding: 0; flex: 1; min-width: 150px;
+  display: grid; gap: 6px; }
+.hub li { display: flex; align-items: center; gap: 9px; font-size: .78rem; color: var(--ink-3); }
+.hub li s { width: 7px; height: 7px; border-radius: 50%; text-decoration: none;
+  background: none; box-shadow: inset 0 0 0 1px var(--glass-line); flex: none; }
+.hub li.on { color: var(--ink-2); }
+.hub li.on s { background: var(--accent); box-shadow: none; }
+.hub li .grow { flex: 1; }
+.hub li em { font-style: normal; font-family: var(--mono); font-size: .56rem; color: var(--ink-3); }
+
 .note-top { border: 1px solid var(--glass-line); border-radius: 10px;
   background: var(--glass-in); padding: 12px 14px; margin: 2px 0 20px;
   font-size: .82rem; line-height: 1.6; color: var(--ink-2); max-width: 80ch; }
@@ -231,7 +329,20 @@
         </span>
       </div>
 
-      <div class="cal-head"><h2>Today</h2><span class="grow"></span>
+      <div class="cal-head"><h2>The progress bar &mdash; six ways</h2><span class="grow"></span>
+        <span class="span-meta">same three habits in each</span></div>
+      <p class="hb-sub" style="margin:0 0 13px;max-width:80ch">The bar carries <b>three
+        different meanings</b> on this screen &mdash; an amount you are filling, a gap you are
+        running down, and a week you are part way through. Anything that only reads well for
+        one of the three is no good, so each option shows all three: water at two litres of
+        three, abs a day into its two, and the workout one into its week.</p>
+      <div class="opts" id="hbOpts"></div>
+
+      <div class="cal-head"><h2>And two layouts</h2><span class="grow"></span>
+        <span class="span-meta">against the rows below</span></div>
+      <div class="lay" id="hbLay"></div>
+
+      <div class="cal-head" style="margin-top:26px"><h2>Today</h2><span class="grow"></span>
         <span class="span-meta" id="hbToday"></span></div>
       <div class="hb-now" id="hbNow"></div>
 
