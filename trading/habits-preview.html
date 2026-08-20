@@ -60,26 +60,32 @@
    ═══════════════════════════════════════════════════════════════ */
 
 /* ── what you trained ──
-   Four, and none of them can ever be mistaken for the accent. That is
-   not a hue choice: the accent family already covers orange, blue,
-   green, violet and grey across fourteen backdrops. It is a SATURATION
-   choice — every accent in the app measures 52% or less and most are
-   under 35%, so these sit at 55–78% and read as a different kind of
-   colour rather than as a near miss.
+   Four, and none of them can be mistaken for the accent.
+
+   The first set got there by SATURATION — 55 to 78%, against an accent
+   family that never exceeds 52% — and that is exactly what made them
+   shout. Loud is not the same as distinct.
+
+   HUE is the better lever. Every accent in the app sits at 16, 34, 130,
+   186–220 or 252, which leaves wide bands nobody is using; a colour in
+   one of them can stay at the app's own muted level and still never be
+   confused. These are 38–44% saturated, the same register as the glass
+   they sit on, and the nearest accent to any of them is ΔE 20 away —
+   clearly a different colour, quietly.
 
    Rest is the exception and is deliberately the opposite: 4%, so a rest
-   day reads as an absence of colour rather than as a fourth kind of
+   day reads as an absence of colour rather than a fourth kind of
    training. */
 :root {
-  --sp-push: #e68937;
-  --sp-pull: #cb79d8;
-  --sp-legs: #31b97a;
-  --sp-rest: #918e88;
+  --sp-push: #c46e8e;      /* rose  */
+  --sp-pull: #4ca9a3;      /* teal  */
+  --sp-legs: #ad9b52;      /* brass */
+  --sp-rest: #918e88;      /* grey  */
 }
 :root[data-resolved="light"] {
-  --sp-push: #bc6124;
-  --sp-pull: #a540b5;
-  --sp-legs: #26825c;
+  --sp-push: #9c4467;
+  --sp-pull: #2f7570;
+  --sp-legs: #756a2e;
   --sp-rest: #77746e;
 }
 /* The picker is the ONLY place the words appear. Everywhere else the
