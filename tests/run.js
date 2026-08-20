@@ -28,10 +28,30 @@ const SUITE = [
   'bt', 'models', 'restest', 'swingtest', 'psptest', 'aligntest',
   'logtest', 'journal', 'bintest', 'snaptest', 'daytest', 'intest',
   'lenstest', 'notes', 'stepstest', 'besttest', 'scratch', 'tiles',
-  'checkin',
+  'checkin', 'habits',
   'arc', 'sects', 'pasttest', 'shapetest', 'tonetest',
   'gauntlet',
 ];
+
+/* The list above is ordered on purpose, so it cannot be a directory
+   scan — but a hardcoded list SILENTLY SKIPS anything not in it, and it
+   did: a new file was added, the suite reported "all green", and none
+   of its assertions had run. Nothing is more expensive than a test that
+   is not running and looks like it is. So the list is checked against
+   the directory, and anything on disk that is not named here stops the
+   run rather than being ignored. */
+const HELPERS = new Set(['run', 'lib', 'seed']);
+{
+  const disk = fs.readdirSync(__dirname)
+    .filter(f => f.endsWith('.js')).map(f => f.slice(0, -3))
+    .filter(n => !HELPERS.has(n));
+  const missing = disk.filter(n => !SUITE.includes(n));
+  if (missing.length) {
+    console.error(`\n  tests/ holds ${missing.join(', ')}, which the suite does not run.`);
+    console.error('  Add it to SUITE in tests/run.js — where in the order is a decision.\n');
+    process.exit(2);
+  }
+}
 
 const want = process.argv.slice(2).filter(a => !a.startsWith('-'));
 const files = (want.length ? want : SUITE).filter((n) => {

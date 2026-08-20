@@ -2,7 +2,8 @@
 
 Two single-file apps that share a design system:
 
-- `trading/index.html` — the ledger, calendar, log, metrics, risk, backtesting, resources
+- `trading/index.html` — the ledger, calendar, log, metrics, risk,
+  backtesting, resources, the check-in, and habits
 - `arc/index.html` — the vision board and long-term timeline
 - `shell.css` + `shell.js` at the root — the shared shell both consume
 
@@ -64,6 +65,18 @@ Everything lives in this browser and is never uploaded. `ledger.v1`
 holds trades and capital; `backtest.v1`, `ledger.res.v1` and the rest
 keep to their own keys.
 
+**Habits never reach the money either.** `habits.v1` holds its own
+definitions and its own days, and the screen reads nothing from the
+ledger and writes nothing to it. Its whole script is wrapped in an IIFE
+and exposes one name, `renderHabits` — everything inside wants a name
+this file already has (`due`, `rate`, `chain`, `state`, `renderAll`),
+and a collision here replaces rather than throws.
+
+A damaged stored shape is **repaired, not discarded**. Rejecting the
+whole object because the definitions list is broken throws a year of
+days away with it, and the two are independent: the days are what you
+cannot get back.
+
 **Backtests never reach the money.** The equity curve, win rate, capital
 and drawdown are summed by walking `state.events`, so a rehearsal that
 risked nothing must not be in it. R is allowed on a run you wrote up —
@@ -116,6 +129,13 @@ Add to the suite rather than checking by eye. Measure the composited box,
 sample real pixels, read values back out of the page. "Looks fine" has
 been wrong about the font axis, an upscaling image viewer, a 1.02:1
 contrast ratio and two class collisions.
+
+`tests/run.js` also refuses to run if `tests/` holds a file the SUITE
+list does not name. The list is ordered on purpose so it cannot be a
+directory scan — but a hardcoded list silently skips what is not in it,
+and it did: a new file was added, the suite reported all green, and none
+of its assertions had run. Nothing is more expensive than a test that is
+not running and looks like it is.
 
 `tests/names.js` runs first and needs no browser: duplicate top-level
 declarations, duplicate ids, ids the script fetches that are not in the
