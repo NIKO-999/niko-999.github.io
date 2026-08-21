@@ -160,6 +160,68 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
     await page.$$eval('.hb-split button', (b) => b.length) === 0
     && await page.$$eval('[data-pick]', (b) => b.length) === 1);
 
+  /* ── every one of them marked ──
+     The six stop being six and become one ramp. The bloom fires on the
+     day it TURNS complete and never on a repaint: arriving at the
+     screen is not an achievement. */
+  console.log('\n── a finished day ──');
+  const strip = () => page.evaluate(() => {
+    const b = document.querySelector('.hb-blocks');
+    return { all: b.hasAttribute('data-all'), bloom: b.classList.contains('hb-bloom'),
+             gap: getComputedStyle(b).gap,
+             bar: +getComputedStyle(b, '::before').opacity };
+  });
+  await page.evaluate(() => localStorage.removeItem('habits.v1'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  for (const id of ['wake', 'abs', 'walk', 'water', 'read']) {
+    await page.click(`[data-tick="${id}"]`);
+    await page.waitForTimeout(70);
+  }
+  let sN = await strip();
+  ok('five of six is still six blocks', sN.all === false && sN.bar === 0, sN);
+  await page.click('[data-pick]');
+  await page.waitForTimeout(150);
+  await page.click('[data-split="push"]');
+  await page.waitForTimeout(250);
+  sN = await strip();
+  ok('the sixth merges them into one bar', sN.all === true && sN.gap === '0px' && sN.bar === 1, sN);
+  ok('and it blooms as it lands', sN.bloom === true);
+  /* The ramp is brighter than any of the six, not their average — that
+     average is #ad9c9c and the rest-day grey is #918e88, so a perfect
+     day would have looked like a day of nothing. */
+  const ultra = await page.evaluate(() => {
+    const d = document.createElement('div');
+    d.style.backgroundImage = getComputedStyle(document.documentElement)
+      .getPropertyValue('--ultra').trim();
+    document.body.appendChild(d);
+    const v = getComputedStyle(d).backgroundImage; d.remove(); return v;
+  });
+  ok('the merged bar is a ramp, not one colour', /gradient/.test(ultra) &&
+    (ultra.match(/rgb\(/g) || []).length >= 6, ultra.slice(0, 60));
+  ok('and it is not the rest-day grey', !/173,\s*156,\s*156|145,\s*142,\s*136/.test(ultra));
+
+  /* A REPAINT IS NOT AN ACHIEVEMENT. */
+  await page.click('[data-view="reminders"]');
+  await page.waitForTimeout(220);
+  await page.click('[data-view="habits"]');
+  await page.waitForTimeout(320);
+  sN = await strip();
+  ok('coming back does not celebrate again', sN.all === true && sN.bloom === false, sN);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(400);
+  sN = await strip();
+  ok('nor does a reload', sN.all === true && sN.bloom === false, sN);
+  /* But undoing and redoing it should. */
+  await page.click('[data-tick="read"]');
+  await page.waitForTimeout(200);
+  sN = await strip();
+  ok('taking one away unmerges it', sN.all === false && sN.bar === 0);
+  await page.click('[data-tick="read"]');
+  await page.waitForTimeout(220);
+  sN = await strip();
+  ok('and putting it back blooms again', sN.all === true && sN.bloom === true);
+
   /* ── the list is code, not data ──
      It used to be saved and read back in preference to the file, so a
      browser that had ever ticked anything kept whatever the list was

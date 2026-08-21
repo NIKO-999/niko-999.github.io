@@ -159,6 +159,11 @@
    was 10 from the pull rose. All three were warm neutrals fighting
    over the same corner of the space. */
 :root {
+  /* Brighter than any of the six on their own. NOT their average —
+     that is #ad9c9c, and the rest-day grey is #918e88, so a perfect day
+     would have looked like a day you did nothing. Mixing many colours
+     converges on mud; this goes the other way. */
+  --ultra: linear-gradient(90deg, #f2d68f, #e8836e, #c05f83, #7fc9e0, #7ba4ee, #e6dcc6);
   --h-wake:    #dcc084;   /* first light */
   --h-workout: #c8756c;   /* the effort */
   --h-abs:     #96566b;   /* the same effort, deeper */
@@ -169,6 +174,7 @@
 /* Darkened rather than reused. The same six on a pale panel are six
    pastels on white — legible as decoration and not as which habit. */
 :root[data-resolved="light"] {
+  --ultra: linear-gradient(90deg, #a8811f, #bd4a3c, #8b3a58, #3d8296, #3f6cb4, #6b6046);
   --h-wake:    #8a6a1c;
   --h-workout: #9c4034;
   --h-abs:     #6e3247;
@@ -234,7 +240,44 @@
   letter-spacing: -.02em; color: var(--ink); }
 .hb-cl { font-family: var(--mono); font-size: .55rem; line-height: 1.25;
   letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
-.hb-blocks { flex: 1; display: flex; gap: 5px; }
+.hb-blocks { flex: 1; display: flex; gap: 5px; position: relative;
+  transition: gap .55s cubic-bezier(.5, 0, .2, 1); }
+/* ── every one of them marked ──
+   The six stop being six. The gaps close, the blocks fade out and one
+   continuous ramp takes their place — every colour that earned it still
+   in there, no longer being counted separately.
+
+   ::before is the merged bar, ::after the light it throws. Both are
+   painted whether or not the day is complete and revealed by opacity,
+   so the change is a fade rather than a layout. */
+.hb-blocks::before, .hb-blocks::after {
+  content: ""; position: absolute; opacity: 0; pointer-events: none;
+  background: var(--ultra);
+}
+.hb-blocks::before { inset: 0; border-radius: 3px; transition: opacity .5s ease-out .15s; }
+.hb-blocks::after { left: 0; right: 0; top: 1px; height: 9px;
+  filter: blur(14px); transition: opacity .8s ease-out .3s; }
+.hb-blocks[data-all] { gap: 0; }
+.hb-blocks[data-all] i { opacity: 0; }
+.hb-blocks[data-all]::before { opacity: 1; }
+.hb-blocks[data-all]::after { opacity: .75; }
+/* Only on the day it TURNS complete. The panel is rebuilt on every
+   repaint — arriving at the screen, switching week to month — and an
+   arrival is not an achievement. The class is added for that one
+   render and never again. */
+.hb-blocks.hb-bloom::before { animation: hb-lands 1.8s ease-out; }
+.hb-blocks.hb-bloom::after  { animation: hb-halo  1.8s ease-out forwards; }
+@keyframes hb-lands {
+  0% { filter: none; } 18% { filter: brightness(1.5); } 100% { filter: none; }
+}
+@keyframes hb-halo {
+  0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: .75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hb-blocks { transition: none; }
+  .hb-blocks::before, .hb-blocks::after { transition: none; }
+  .hb-blocks.hb-bloom::before, .hb-blocks.hb-bloom::after { animation: none; }
+}
 /* Kept takes the habit's colour, missed stays the same block at a
    fourteenth of it — an absence, not a mark against you. */
 .hb-blocks i { flex: 1; height: 7px; border-radius: 3px;
@@ -799,6 +842,12 @@ const renderHabits = (() => {
      day you have stopped thinking about. */
   let picking = false;
 
+  /* Was the day complete last time this painted? Only a NO -> YES
+     crosses the line, and only that gets the bloom. Starts null so the
+     first paint of an already-finished day settles into the merged
+     state without celebrating a day you finished hours ago. */
+  let wasAll = null;
+
   function renderNow() {
     /* Read, not dayOf — opening the screen must not create a record.
        It did, and an untouched machine then reported "0 days unbroken"
@@ -885,12 +934,20 @@ const renderHabits = (() => {
     const blocks = list().map(h =>
       `<i style="--lit:var(--h-${h.id})"${d.done[h.id] ? ' data-on=""' : ''}
           title="${esc(h.name)}"></i>`).join('');
+    /* What the STRIP shows, not what was due — the effect belongs to the
+       blocks, so it fires when every block is lit and not a moment
+       before. A rest day therefore cannot complete one: the workout is
+       not done on a day you chose not to train, and the block says so. */
+    const all = list().every(h => d.done[h.id]);
+    const lands = all && wasAll === false;
+    wasAll = all;
     document.getElementById('hbNow').innerHTML =
       `<div class="hb-top">
          <span class="hb-count">${did}</span>
          <span class="hb-cl">done<br />today</span>
-         <span class="hb-blocks" role="img"
-           aria-label="${did} done so far today">${blocks}</span>
+         <span class="hb-blocks${lands ? ' hb-bloom' : ''}"${all ? ' data-all=""' : ''}
+           role="img" aria-label="${all ? `all ${did} done today`
+             : `${did} done so far today`}">${blocks}</span>
        </div><div class="hb-list">${items}</div>`;
     document.getElementById('hbToday').textContent =
       of ? `${of} due today` : 'nothing due today';
