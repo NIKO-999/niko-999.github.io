@@ -136,9 +136,22 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
   /* Off the control before measuring it. The click leaves the pointer
      sitting on one of the four, and :hover lifts that one to .85 — the
      first run of this read ["0.62","0.85"] and looked like the lit dot
-     had come back. */
+     had come back.
+
+     Then wait for the fade OUT itself, not a fixed margin past it. A
+     220ms sleep against a .16s transition looks like enough and is
+     still a race: under the load of the full suite the hover-out was
+     registered late and one dot was measured mid-flight at 0.620497
+     against the others' 0.62 — which reads exactly like a lit dot that
+     had not gone out. One frame for the hover to register, then the
+     animations' own finished promises. Waiting on the transition, not
+     on the thing being asserted: all four still have to AGREE, and
+     this check can still say so if they ever do not. */
   await page.mouse.move(0, 0);
-  await page.waitForTimeout(220);
+  await page.evaluate(() => new Promise((r) => requestAnimationFrame(() => r())));
+  await page.evaluate(() => Promise.all(
+    [...document.querySelectorAll('.hb-split button i')]
+      .flatMap((n) => n.getAnimations()).map((a) => a.finished)));
   const picker = await page.$$eval('.hb-split button', (bs) => bs.map((b) => ({
     pressed: b.getAttribute('aria-pressed') === 'true',
     opacity: getComputedStyle(b.querySelector('i')).opacity,
