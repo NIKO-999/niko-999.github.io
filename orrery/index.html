@@ -2201,11 +2201,11 @@ const SIM = {
      sitting a ring apart, or the sectors bloom and the poster stops
      being a diagram. Measured: mean drift from the slot stays inside a
      node's own diameter. */
-  charge: 380,
-  spring: .03,
+  charge: 300,
+  spring: .022,
   rest: 24,
   restDeg: 7,
-  home: .085,
+  home: .16,
   /* A hub is held an order harder than a note. The sectors are the
      structure; a sector that drifts is a diagram that stopped being
      one. */
@@ -2500,7 +2500,15 @@ function orSim() {
   orSim.raf = 0;
   orTick();
   const done = state.alpha < SIM.floor;
-  orSim.draw(done && !orSim.quiet);
+  /* On a big field the browser spends five times longer rasterising
+     seventeen thousand SVG elements than the tick spends computing
+     them — measured: 4.8ms to think, 114ms to show. A frame per tick
+     there is a settle you watch for a quarter of a minute. So draw one
+     tick in `every`, taken from the node count. The tick sequence is
+     untouched; only how often you are shown it changes, and the last
+     tick always draws. */
+  if (done || (orSim.ticks % orSim.every) === 0)
+    orSim.draw(done && !orSim.quiet);
   if (!done && typeof requestAnimationFrame === 'function')
     orSim.raf = requestAnimationFrame(orSim);
 }
@@ -2510,6 +2518,7 @@ orSim.pairs = 0;
 orSim.move = 0;
 orSim.n = 0;
 orSim.ne = 0;
+orSim.every = 1;          /* draw one tick in this many                */
 orSim.quiet = false;      /* a drag is in hand: skip the chip pass     */
 orSim.painting = false;   /* inside orPaint: the caller will draw      */
 orSim.sig = null;         /* the node set, last seen                   */
@@ -2589,6 +2598,7 @@ orSim.seed = () => {
   }
   S.ne = ne;
   S.ids = ids; S.n = n; S.ix = ix; S.arr = arr; S.varr = varr;
+  S.every = Math.max(1, Math.ceil(n / 700));
   state.xy = xy; state.vel = vel;
 
   /* Two signatures, two kinds of change. A node arriving or leaving is
@@ -2692,7 +2702,20 @@ orSim.draw = (final) => {
    and the picture is identical. That is deliberate: filtering must not
    make the map wander while you read it. */
 function orHeat(a, settle) {
-  state.alpha = Math.max(state.alpha, a == null ? SIM.alpha0 : a);
+  const want = a == null ? SIM.alpha0 : a;
+  /* A STIR is the level a filter, an isolate or a resize asks for. It
+     keeps a field that is still settling on its feet, and it does
+     nothing at all to one that has stopped — because energy into a
+     converged field is energy into nothing. The forces balance, so a
+     hundred more ticks arrive back where they started having moved
+     every node a fraction of a pixel on the way, and the map wanders
+     under somebody who is only reading it. Those three narrows dim
+     rather than remove precisely so the map holds still; a reheat that
+     nudged it would give the dimming back with the other hand.
+     Anything above a stir has had something actually change, and always
+     runs. */
+  if (want <= SIM.stir && state.alpha < SIM.floor && orSim.ticks) return;
+  state.alpha = Math.max(state.alpha, want);
   if (!orSim.n) { state.alpha = 0; return; }
   const draw = () => { if (!orSim.painting) orSim.draw(!orSim.quiet); };
   if (orSim.reduce() || typeof requestAnimationFrame !== 'function') {
@@ -2912,8 +2935,9 @@ function orPaintLinks() {
        drops back, and it drops rather than disappears, so the shape of
        the map survives the search. */
     const dim = !sel && !orPaint.match(note[a]) && !orPaint.match(note[b]);
-    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d: orPaintLinks.d(pa, pb) });
-    out.push(`<path d="${orPaintLinks.d(pa, pb)}" fill="none"`
+    const d = orPaintLinks.d(pa, pb);
+    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d });
+    out.push(`<path d="${d}" fill="none"`
       + ` stroke="var(--or-cat-${esc(catOf[a] || 'other')})"`
       + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
