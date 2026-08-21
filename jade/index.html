@@ -742,7 +742,7 @@ svg { display: block; }
   display: flex;
   align-items: center;
   gap: 2px;
-  height: 34px;
+  height: 38px;
   padding: 0 3px;
   margin-bottom: 6px;
   background: var(--card);
@@ -751,7 +751,9 @@ svg { display: block; }
 .jm-t {
   flex: 1 1 auto;
   min-width: 0;
-  height: 28px;
+  /* 32, not 28: it is a button, and the floor for a button is the floor
+     for a button even when it is only a label you can nudge. */
+  height: 32px;
   border: 0;
   border-radius: var(--r-pill);
   background: none;
@@ -766,8 +768,9 @@ svg { display: block; }
 }
 .jm-arw {
   flex: none;
-  width: 28px;
-  height: 28px;
+  /* The floor for a button, same as everything else you can press. */
+  width: 32px;
+  height: 32px;
   display: grid;
   place-items: center;
   border: 0;
@@ -785,7 +788,7 @@ svg { display: block; }
      left. The cap lives on the CELL, not the row: capping the row made
      the track a fixed 64px, so a squeezed month was clipped — the last
      week of it disappeared — instead of compacting. */
-  grid-template-rows: 20px repeat(6, minmax(30px, 1fr));
+  grid-template-rows: 20px repeat(6, minmax(32px, 1fr));
   gap: 2px;
 }
 .jm-w {
@@ -800,7 +803,10 @@ svg { display: block; }
 }
 
 /* 32px, which is the floor for anything you press. The reference draws
-   these smaller; a calendar you miss by 3px is not a calendar. */
+   these smaller; a calendar you miss by 3px is not a calendar. It was
+   briefly 30 to buy the month room to compact, and 30 is still under
+   the floor — the two pixels come out of the list instead, which
+   scrolls and can spare them. */
 .jm-d {
   position: relative;
   min-height: 30px;
@@ -861,8 +867,6 @@ svg { display: block; }
 .jm-t:focus-visible,
 .jm-arw:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 
-/* Full width on a phone the grid would be seven 50px cells and a lot of
-   air. It keeps the rail's reading width and centres. */
 /* Stacked, the panel has no height to give away, so the month goes back
    to its own size and the rows to theirs. */
 @media (max-width: 1080px) {
@@ -1089,18 +1093,30 @@ svg { display: block; }
   color: var(--ink-3);
 }
 .jr-tk {
-  width: 22px;
-  height: 22px;
+  /* 32px of button around a 22px ring. The ring is the right size to
+     look at and the wrong size to hit, and the thing you are hitting is
+     the one that deletes a reminder. */
+  width: 32px;
+  height: 32px;
   flex: none;
-  border: 1px solid var(--line-2);
+  display: grid;
+  place-items: center;
+  border: 0;
   border-radius: var(--r-pill);
   background: none;
   cursor: pointer;
+}
+.jr-tk::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
   transition: background-color .12s ease, border-color .12s ease;
 }
 .jr-tk:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (hover: hover) {
-  .jr-tk:hover { background: var(--accent); border-color: var(--accent); }
+  .jr-tk:hover::before { background: var(--accent); border-color: var(--accent); }
 }
 
 .jr-none {
@@ -1117,7 +1133,7 @@ svg { display: block; }
   .jr-undo button { height: 32px; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .jr-tk, .jr-send { transition: none; }
+  .jr-tk::before, .jr-send { transition: none; }
 }
 
 /* ══ TODAY ═══════════════════════════════════════════════════════

@@ -31,7 +31,8 @@ const ok = (name, cond, extra) => {
 };
 
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
-const APPS = ['trading/index.html', 'arc/index.html', 'days/index.html'];
+const APPS = ['trading/index.html', 'arc/index.html', 'days/index.html',
+              'jade/index.html'];
 
 /* The inline <script> only, so markup containing the word "function" is
    not mistaken for code. */
@@ -141,7 +142,12 @@ for (const file of APPS) {
      undefined --ink-on that this check would have caught in 0.1s and
      a browser test caught four minutes later. A third app is a third
      place for a token to go missing. */
-  const SRC = ['shell.css', 'trading/index.html', 'arc/index.html', 'days/index.html'];
+  /* jade/index.html defines every token it uses in its own :root — it
+     loads no shell.css — so it is checked against itself and the union
+     is harmless. A fourth app is a fourth place for a token to go
+     missing. */
+  const SRC = ['shell.css', 'trading/index.html', 'arc/index.html', 'days/index.html',
+               'jade/index.html'];
   const text = SRC.map(f => read(f)).join('\n');
   /* Defined anywhere: a stylesheet, an inline style attribute, or a
      template literal that sets one. All three are legitimate. */
