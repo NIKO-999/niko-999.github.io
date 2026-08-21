@@ -73,6 +73,7 @@ async function seed(page, store) {
   await page.waitForTimeout(320);
 }
 const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, notes: notes || {} });
+const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
 
 (async () => {
 
@@ -335,19 +336,22 @@ const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, note
   await browser.close();
 }
 
-/* ══ 7. THE BOX THAT PROMISES THREE ═══════════════════════════════
-   Daily thoughts says "three, always whole". The height is stated as
+/* ══ 7. THE BOXES THAT PROMISE THREE ══════════════════════════════
+   Both scrollers say "three, always whole". The height is stated as
    three times the row so the two cannot drift apart, and this is what
-   notices if they ever do. Reminders used to be measured here too, by
-   the same loop — it is still a loop so that a second scroller is one
-   line to add back rather than a rewrite. */
+   notices if they ever do. Reminders needs eight to overflow now
+   rather than four: it is two columns wide under the cards, so three
+   rows holds six. */
 {
   const { browser, page, errs } = await open();
   await seed(page, {
     'jade.v1': jadeStore({ [TODAY]: ['steps'] },
       { [TODAY]: 'a', [AGO(1)]: 'b', [AGO(2)]: 'c', [AGO(3)]: 'd', [AGO(4)]: 'e' }),
+    'jade.reminders.v1': remStore([1, 2, 3, 4, 5, 6, 7, 8].map(i =>
+      ({ id: 'r' + i, t: 'reminder ' + i, made: TODAY, done: null }))),
   });
-  for (const [what, box, row] of [['daily thoughts', '#thoughtScroll', '.jt-thw, .jt-th']]) {
+  for (const [what, box, row] of [['daily thoughts', '#thoughtScroll', '.jt-thw, .jt-th'],
+    ['reminders', '.jr-scr', '.jr-row']]) {
     const m = await page.evaluate(([b, r]) => {
       const sc = document.querySelector(b);
       const rows = [...sc.querySelectorAll(r)];
@@ -374,6 +378,116 @@ const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, note
   await browser.close();
 }
 
+/* ══ 8. REMINDERS, AND THE FIVE SECONDS AFTER ═════════════════════ */
+{
+  const { browser, page, errs } = await open();
+  await seed(page, { 'jade.v1': jadeStore({}), 'jade.reminders.v1': remStore([]) });
+  const live = () => page.$$eval('.jr-row .jr-t', ns => ns.map(x => x.textContent));
+  const list = () => page.evaluate(() => JSON.parse(localStorage.getItem('jade.reminders.v1')).list);
+
+  ok('the send is not there until there is something to send',
+    !(await page.isVisible('#remSend')));
+  await page.fill('#remIn', 'Book the physio');
+  await page.waitForTimeout(150);
+  ok('and it is there once there is', await page.isVisible('#remSend'));
+  await page.click('#remSend');
+  await page.waitForTimeout(250);
+  ok('writing one puts it at the top', (await live())[0] === 'Book the physio');
+  ok('and empties the field', (await page.inputValue('#remIn')) === '');
+
+  await page.fill('#remIn', 'Ring mum back');
+  await page.keyboard.press('Enter');
+  await page.waitForTimeout(200);
+
+  await page.click('.jr-row:first-child .jr-tk');
+  await page.waitForTimeout(250);
+  ok('ticking one takes it off the list', !(await live()).includes('Ring mum back'));
+  ok('and offers it back', await page.isVisible('#remUndo'));
+  ok('the field steps aside rather than the section changing height',
+    await page.isHidden('#remForm'));
+  ok('it is stamped, not yet gone', (await list()).length === 2);
+
+  /* The comment on remResume promises the window survives a refresh.
+     It did not, until this noticed. */
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+  ok('the undo survives a reload', await page.isVisible('#remUndo'));
+  await page.click('#remUndoBtn');
+  await page.waitForTimeout(250);
+  ok('undo puts it back', (await live()).includes('Ring mum back'));
+  ok('and unstamps it', (await list()).every(r => r.done === null));
+
+  await page.click('.jr-row:first-child .jr-tk');
+  await page.waitForTimeout(5400);
+  ok('left alone, the window closes and it is gone for good',
+    (await list()).length === 1 && !(await page.isVisible('#remUndo')));
+  ok('no errors', errs.length === 0, errs);
+  await browser.close();
+}
+
+/* ══ 8b. AND IT IS UNDER THE CARDS, NOT IN THE PANEL ══════════════
+   Where it lives is the whole point of the move, and a stray rule
+   putting it back in the rail would look like nothing on a screenshot
+   of the panel alone. */
+{
+  const { browser, page, errs } = await open({ viewport: { width: 1512, height: 1050 } });
+  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }),
+    'jade.reminders.v1': remStore([{ id: 'r1', t: 'one', made: TODAY, done: null }]) });
+  const where = await page.evaluate(() => {
+    const jr = document.querySelector('.jr');
+    const grid = document.getElementById('jtGrid');
+    return { inRail: !!jr.closest('.rail'), onToday: !!jr.closest('[data-screen="today"]'),
+      belowCards: Math.round(jr.getBoundingClientRect().top - grid.getBoundingClientRect().bottom),
+      cols: getComputedStyle(document.querySelector('.jr-scr')).gridTemplateColumns.split(' ').length };
+  });
+  ok('the strip is on the Today screen', where.onToday && !where.inRail, where);
+  ok('and it sits under the cards', where.belowCards > 0, where);
+  ok('two columns where there is room for two', where.cols === 2, where);
+
+  /* ── and it folds ──
+     Open by default, where every other folding panel in the platform
+     is shut: this one holds the thing she asked to be reminded of. */
+  const fold = () => page.evaluate(() => ({
+    state: document.querySelector('.jr').dataset.fold,
+    expanded: document.getElementById('remFold').getAttribute('aria-expanded'),
+    bodyShown: !!document.getElementById('remBody').getClientRects().length,
+    count: document.getElementById('remCount').textContent,
+    countShown: !!document.getElementById('remCount').getClientRects().length,
+    turn: getComputedStyle(document.querySelector('.jr-chev')).transform
+  }));
+  let f = await fold();
+  ok('it starts open', f.state === 'open' && f.expanded === 'true' && f.bodyShown, f);
+  /* 180deg is matrix(-1, 0, 0, -1, 0, 0). A quarter turn would read
+     0,1,-1,0 — the house rule is 180, and this is what tells them apart. */
+  ok('the chevron is turned a half turn, not a quarter', /matrix\(-1,\s*0,\s*0,\s*-1/.test(f.turn), f.turn);
+
+  await page.click('#remFold');
+  await page.waitForTimeout(350);
+  f = await fold();
+  ok('clicking the heading folds it away', f.state === 'shut' && !f.bodyShown, f);
+  ok('and says so', f.expanded === 'false', f);
+  /* Shut, the count is the only thing left, and it is the one thing
+     you need from a list you cannot see. */
+  ok('the count is still there when it is shut', f.countShown && f.count === '1', f);
+
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(320);
+  f = await fold();
+  ok('and it is still folded tomorrow', f.state === 'shut' && !f.bodyShown, f);
+  ok('remembered beside the panel and the theme, not in a key of its own',
+    await page.evaluate(() => {
+      const ui = JSON.parse(localStorage.getItem('jade.ui.v1'));
+      return ui.rem === 'shut' && Object.keys(localStorage).filter(k => k.startsWith('jade.')).length === 3;
+    }));
+
+  await page.click('#remFold');
+  await page.waitForTimeout(350);
+  ok('and it opens again', (await fold()).bodyShown);
+
+  ok('no errors', errs.length === 0, errs);
+  await browser.close();
+}
+
 /* ══ 9. COLOUR ════════════════════════════════════════════════════
    In both themes. The light palette is a different set of eight, not
    the dark one lightened, so it has to be measured separately or the
@@ -391,7 +505,7 @@ const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, note
       const out = {};
       for (const n of names) out[n] = s.getPropertyValue('--' + n).trim();
       return out;
-    }, HUES.map(h => 'h-' + h).concat(['accent', 'card', 'ink-2', 'accent-in']));
+    }, HUES.map(h => 'h-' + h).concat(['accent', 'card', 'ink-2', 'accent-in', 'accent-on-wash']));
 
     const hex = (v) => { const m = /^#([0-9a-f]{6})$/i.exec(v);
       return m ? [0, 2, 4].map(i => parseInt(m[1].slice(i, i + 2), 16)) : null; };
@@ -441,7 +555,14 @@ const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, note
        only thing left for it to mean is that you failed. The first
        version of this check tested "is it reddish" and duly failed on
        two habits doing exactly what they are supposed to. */
-    const legit = HUES.map(n => hue(n)).concat([hex(tok.accent)]);
+    /* --accent-on-wash is on the list because it IS the accent — the
+       deep form of it, for ink on a washed ground. On light that is a
+       crimson, and the moment reminders moved out of the panel and
+       onto this screen their bells and their send button started
+       reading as eight reds for a miss. The check is about a colour
+       that means "you failed", and the accent has never meant that. */
+    const legit = HUES.map(n => hue(n))
+      .concat([hex(tok.accent), hex(tok['accent-on-wash'])]);
     const reds = async (where) => page.evaluate(([w, allowed]) => {
       const near = (c) => allowed.some(a =>
         Math.abs(a[0] - c[0]) < 12 && Math.abs(a[1] - c[1]) < 12 && Math.abs(a[2] - c[2]) < 12);
@@ -560,7 +681,8 @@ const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, note
 /* ══ 12. EVERY CONTROL IS PRESSABLE ═══════════════════════════════ */
 {
   const { browser, page, errs } = await open({ viewport: { width: 1280, height: 900 } });
-  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }) });
+  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }),
+    'jade.reminders.v1': remStore([{ id: 'r1', t: 'one', made: TODAY, done: null }]) });
   const small = await page.$$eval('button', ns => ns.filter(b => {
     const r = b.getBoundingClientRect();
     if (!r.width || !r.height) return false;                 /* hidden ones are not controls */

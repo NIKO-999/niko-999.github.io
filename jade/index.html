@@ -903,6 +903,338 @@ svg { display: block; }
 /* Today's pill. It is still the only tinted cell in the month, so it
    still reads as today without being a solid stamp. */
 
+/* ══ REMINDERS ════════════════════════════════════════════════════
+   The floor of the Today screen, under the cards. It lived in the side
+   panel and made three sections of it, which was two more visual
+   languages than 320px could carry; here it is the only thing in the
+   space under the eight cards, which was empty.
+
+   Two columns because the room is there — a 320px list stretched to
+   1100 is a line of text with half a screen of nothing after it.
+   Still three rows tall, still snapping, still no scrollbar: the same
+   box the thoughts list in the hero uses, because it is the same idea
+   and a second idea would be a second thing to learn. */
+
+.jr {
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line);
+}
+
+/* Flush with the pane's edge, like the hero's own headings: the panel
+   version carried 12px of its own because it sat inside a rail.
+
+   A button inside the heading, never a heading inside a button — the
+   second is invalid and loses the heading for a screen reader. */
+.jr-h { margin: 0; }
+.jr-fold {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  width: 100%;
+  /* 32px of button, not the 20px the label wants: the whole row is the
+     target and a target you can miss is worse than no target. */
+  min-height: 32px;
+  padding: 0 0 9px;
+  border: 0;
+  background: none;
+  text-align: left;
+  cursor: pointer;
+}
+.jr-fold:focus-visible { outline: 2px solid var(--focus); outline-offset: 3px; }
+@media (hover: hover) {
+  .jr-fold:hover span, .jr-fold:hover .jr-chev { color: var(--ink); }
+}
+.jr-chev {
+  align-self: center;
+  width: 13px;
+  height: 13px;
+  flex: none;
+  color: var(--ink-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  /* 180, not 90: a quarter turn lays it on its side, which reads as a
+     third state rather than as the same arrow pointing back. */
+  transition: transform .18s ease, color .12s ease;
+}
+.jr-fold[aria-expanded="true"] .jr-chev { transform: rotate(180deg); }
+
+/* Shut, the section is its own title bar and nothing else — the count
+   still shows, because the one thing you need from a shut list is
+   whether there is anything in it.
+
+   Open by default, where the folding panels in the other apps are shut
+   by default. Those hold reference you go looking for; this holds the
+   thing you asked to be reminded of, and a reminder that has to be
+   unfolded to remind you is not one. */
+.jr[data-fold="shut"] .jr-body { display: none; }
+.jr[data-fold="shut"] .jr-fold { padding-bottom: 0; }
+
+.jr-h span {
+  flex: 1 1 auto;
+  font-family: var(--mono);
+  font-size: .58rem;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.jr-h b {
+  font-family: var(--mono);
+  font-size: .62rem;
+  font-weight: 400;
+  color: var(--ink);
+}
+
+/* ── writing one ──
+   Capped rather than full width. A single-line field stretched across
+   1100px reads as a search bar for the page, not as somewhere to put
+   one short sentence. */
+.jr-add {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 420px;
+  padding: 10px 0 14px;
+}
+.jr-plus {
+  position: absolute;
+  left: 11px;
+  top: 21px;
+  width: 13px;
+  height: 13px;
+  pointer-events: none;
+  color: var(--ink-3);
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  transition: color .12s ease;
+}
+.jr-in {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  padding: 0 12px 0 32px;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  /* Darker than the panel it sits in. A field lifted off its surface
+     reads as a button, and this one is somewhere to type. */
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-size: .76rem;
+}
+.jr-in::placeholder { color: var(--ink-3); }
+.jr-in:focus { outline: 2px solid var(--focus); outline-offset: 1px; }
+.jr-add:focus-within .jr-plus { color: var(--accent); }
+
+/* :placeholder-shown IS the empty test — no script has to keep a class
+   in step with what has been typed. The field wears the accent and the
+   send appears the moment there is something to send, and there is
+   nothing to press before then. */
+/* Not while it is focused: the focus ring is already an accent ring, and
+   the two together drew two concentric pink outlines around one field,
+   which reads as a mistake. Unfocused with text still in it, the border
+   is the only thing left saying "this has not been sent". */
+.jr-in:not(:placeholder-shown):not(:focus) {
+  border-color: var(--accent);
+}
+.jr-in:not(:placeholder-shown) ~ .jr-plus { color: var(--accent); }
+.jr-in:placeholder-shown ~ .jr-send { display: none; }
+
+.jr-send {
+  width: 30px;
+  height: 30px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--accent-edge);
+  border-radius: var(--r-pill);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
+  cursor: pointer;
+  transition: background-color .12s ease;
+}
+.jr-send svg {
+  width: 13px;
+  height: 13px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.jr-send:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (hover: hover) { .jr-send:hover { filter: brightness(1.08); } }
+.jr-send:active { background: var(--accent-edge); }
+
+/* ── the five seconds after a tick ──
+   It stands where the field stands, so ticking one does not change the
+   height of the section under it. */
+.jr-undo {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 34px;
+  max-width: 420px;
+  margin: 10px 0 14px;
+  padding: 0 6px 0 12px;
+  border-radius: var(--r-pill);
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
+}
+.jr-undo p {
+  flex: 1 1 auto;
+  min-width: 0;
+  margin: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .72rem;
+  color: var(--ink-2);
+}
+.jr-undo p b { font-weight: 500; color: var(--ink); }
+.jr-undo button {
+  flex: none;
+  height: 24px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: var(--accent-wash-2);
+  color: var(--accent-on-wash);
+  font: inherit;
+  font-size: .66rem;
+  font-weight: 500;
+  cursor: pointer;
+}
+.jr-undo button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* ── the list ──
+   A grid, so a row's height is the row's height and the two columns
+   cannot come out of step. Reading order is across then down, which is
+   what the DOM order gives for free — newest first, top left. */
+.jr-scr {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 30px;
+  align-content: start;
+  height: calc(3 * 56px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-snap-type: y mandatory;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.jr-scr::-webkit-scrollbar { width: 0; height: 0; }
+
+.jr-row {
+  height: 56px;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-top: 1px solid var(--line);
+}
+.jr-av {
+  width: 22px;
+  height: 22px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-pill);
+  /* One accent for all of them. A reminder has no identity of its own
+     the way a habit does, and eight colours here would say there were
+     eight kinds. */
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
+}
+.jr-av svg {
+  width: 12px;
+  height: 12px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* Full ink, not the --ink-2 it wore in the panel. It was in the margin
+   there and quiet was right; here it is the only writing in its half of
+   the screen and quiet reads as disabled. */
+.jr-t {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: .82rem;
+  color: var(--ink);
+}
+.jr-at {
+  flex: none;
+  font-family: var(--mono);
+  font-size: .58rem;
+  color: var(--ink-3);
+}
+.jr-tk {
+  /* 32px of button around a 22px ring. The ring is the right size to
+     look at and the wrong size to hit, and the thing you are hitting is
+     the one that deletes a reminder. */
+  width: 32px;
+  height: 32px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: var(--r-pill);
+  background: none;
+  cursor: pointer;
+}
+.jr-tk::before {
+  content: '';
+  width: 22px;
+  height: 22px;
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-pill);
+  transition: background-color .12s ease, border-color .12s ease;
+}
+.jr-tk:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+@media (hover: hover) {
+  .jr-tk:hover::before { background: var(--accent-wash-2); border-color: var(--accent-edge); }
+}
+
+.jr-none {
+  margin: 0;
+  padding: 14px 12px;
+  font-size: .74rem;
+  color: var(--ink-3);
+}
+
+@media (max-width: 700px) {
+  .jr-in, .jr-undo { height: 44px; }
+  .jr-plus { top: 16px; }
+  .jr-send { width: 44px; height: 44px; }
+  .jr-undo button { height: 32px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .jr-tk::before, .jr-send, .jr-chev { transition: none; }
+}
+
+/* The bell, the send and the undo, all washed. The bell is the one that
+   matters most: five solid pink discs down the side of a white panel
+   was the loudest thing on the screen and it is the quietest section
+   on it. */
+
+/* One column once two would each be narrower than the sentence they
+   hold. The height follows: three rows is three rows either way, so
+   the box stays the size it promises. */
+@media (max-width: 1080px) {
+  .jr-scr { grid-template-columns: minmax(0, 1fr); }
+}
+
 /* ══ TODAY ═══════════════════════════════════════════════════════
    The strip says how the day is going, the grid says what it is made
    of, and the rail says what is next. Every class here carries the
@@ -1941,11 +2273,6 @@ svg { display: block; }
       <div class="jm-grid" id="jmGrid"></div>
     </div>
 
-    <!-- Reminders lived here, between the list and the month, and are
-         gone for now: three sections in a 320px column was two more
-         visual languages than the panel needed. jade.reminders.v1 is
-         deliberately NOT cleared — anything already written is still in
-         the browser if they come back. -->
     </section>
   </aside>
 
@@ -1995,6 +2322,38 @@ svg { display: block; }
       </section>
 
       <section class="jt-grid" id="jtGrid"></section>
+
+      <!-- Reminders. Their own key and their own rules: ticking one
+           takes it away, and the five seconds after that are the undo.
+           Under the cards rather than in the panel — a reminder is one
+           thing on one date and it belongs where you are looking, and
+           the panel could not hold a third section without becoming a
+           list of lists. -->
+      <section class="jr" aria-label="Reminders">
+        <h3 class="jr-h">
+          <button class="jr-fold" type="button" id="remFold"
+                  aria-expanded="true" aria-controls="remBody">
+            <span>Reminders</span>
+            <b id="remCount">0</b>
+            <svg class="jr-chev" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.6 6.2 8 10.6l4.4-4.4"/></svg>
+          </button>
+        </h3>
+        <div class="jr-body" id="remBody">
+        <form class="jr-add" id="remForm" autocomplete="off">
+          <input class="jr-in" id="remIn" type="text" maxlength="120"
+                 placeholder="Something to remember" aria-label="Something to remember" />
+          <svg class="jr-plus" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 3.6v8.8M3.6 8h8.8"/></svg>
+          <button class="jr-send" type="submit" id="remSend" aria-label="Add the reminder">
+            <svg viewBox="0 0 16 16" aria-hidden="true"><path d="M8 12.6V3.8M4.2 7.4 8 3.6l3.8 3.8"/></svg>
+          </button>
+        </form>
+        <div class="jr-undo" id="remUndo" hidden>
+          <p>Removed <b id="remGone"></b></p>
+          <button type="button" id="remUndoBtn">Undo</button>
+        </div>
+        <div class="jr-scr" id="remList"></div>
+        </div>
+      </section>
     </div>
   </main>
 
@@ -2571,6 +2930,186 @@ function jmBind() {
     jcGoto(fromKey(b.dataset.k), 'day');
     showView('calendar');
   });
+}
+
+/* ══ REMINDERS ════════════════════════════════════════════════════
+   Their own key, deliberately. A habit is a shape you are keeping and
+   a reminder is one thing that stops existing once it has happened —
+   the two should not share an object, so that repairing one can never
+   reach the other. */
+
+const REMKEY = 'jade.reminders.v1';
+
+/* A reminder ticked off is not deleted at once: it is stamped, hidden,
+   and swept five seconds later. That window is the undo, and stamping
+   rather than holding it in a variable means the undo survives a
+   reload — a mis-tap followed by a panicked refresh still gets it
+   back. Anything stamped longer ago than the window is swept on load,
+   so the store never accumulates the dead. */
+const REM_UNDO = 5000;
+
+let rems = remLoad();
+let remPending = null;      /* the id currently inside its undo window */
+let remTimer = null;
+
+function remLoad() {
+  let raw = null;
+  try { raw = localStorage.getItem(REMKEY); } catch (e) { return []; }
+  if (!raw) return [];
+  let o = null;
+  try { o = JSON.parse(raw); } catch (e) { return []; }
+  return remRepair(o);
+}
+
+/* Repaired, never discarded. One malformed row must not cost the rest
+   of the list. */
+function remRepair(o) {
+  const list = o && Array.isArray(o.list) ? o.list : [];
+  const out = [];
+  for (const r of list) {
+    if (!r || typeof r !== 'object') continue;
+    const t = typeof r.t === 'string' ? r.t.trim().slice(0, 120) : '';
+    if (!t) continue;
+    const done = typeof r.done === 'number' && isFinite(r.done) ? r.done : null;
+    if (done !== null && Date.now() - done > REM_UNDO) continue;   /* swept */
+    out.push({
+      id: typeof r.id === 'string' && r.id ? r.id : remId(),
+      t: t,
+      made: typeof r.made === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(r.made) ? r.made : todayKey(),
+      done: done
+    });
+  }
+  return out;
+}
+
+function remId() {
+  /* Enough to be unique within one list. Not a UUID: nothing outside
+     this browser ever sees it. */
+  return 'r' + Date.now().toString(36) + Math.floor(Math.random() * 1e6).toString(36);
+}
+
+function remSave() {
+  try { localStorage.setItem(REMKEY, JSON.stringify({ v: 1, list: rems })); } catch (e) {}
+}
+
+function remAdd(text) {
+  const t = String(text == null ? '' : text).trim().slice(0, 120);
+  if (!t) return false;
+  rems.unshift({ id: remId(), t: t, made: todayKey(), done: null });
+  remSave();
+  return true;
+}
+
+/* Sweeping first: a second tick commits the first one rather than
+   queueing two undos, which would leave the strip lying about which
+   reminder it is offering back. */
+function remDone(id) {
+  remSweep();
+  const r = rems.find(function (x) { return x.id === id; });
+  if (!r) return;
+  r.done = Date.now();
+  remPending = id;
+  remSave();
+  jrRender();
+  clearTimeout(remTimer);
+  remTimer = setTimeout(function () { remSweep(); jrRender(); }, REM_UNDO);
+}
+
+function remUndo() {
+  const r = rems.find(function (x) { return x.id === remPending; });
+  if (r) r.done = null;
+  remPending = null;
+  clearTimeout(remTimer);
+  remSave();
+  jrRender();
+}
+
+/* Commit: anything stamped is now gone for good. */
+function remSweep() {
+  rems = rems.filter(function (r) { return r.done === null; });
+  remPending = null;
+  clearTimeout(remTimer);
+  remSave();
+}
+
+function jrRender() {
+  const live = rems.filter(function (r) { return r.done === null; });
+  document.getElementById('remCount').textContent = live.length;
+
+  const gone = remPending && rems.find(function (r) { return r.id === remPending; });
+  const undo = document.getElementById('remUndo');
+  const form = document.getElementById('remForm');
+  /* The strip stands in the field's place rather than above it, so the
+     section does not change height when one is ticked. */
+  undo.hidden = !gone;
+  form.hidden = !!gone;
+  if (gone) document.getElementById('remGone').textContent = gone.t;
+
+  document.getElementById('remList').innerHTML = live.length
+    ? live.map(function (r) {
+      return '<div class="jr-row" data-id="' + r.id + '">' +
+        '<span class="jr-av" aria-hidden="true"><svg viewBox="0 0 16 16">' + REM_BELL + '</svg></span>' +
+        '<span class="jr-t" title="' + esc(r.t) + '">' + esc(r.t) + '</span>' +
+        '<span class="jr-at">' + esc(remWhen(r.made)) + '</span>' +
+        '<button type="button" class="jr-tk" data-done="' + r.id + '"' +
+          ' aria-label="Done with ' + esc(r.t) + '"></button>' +
+        '</div>';
+    }).join('')
+    : '<p class="jr-none">nothing to remember</p>';
+}
+
+const REM_BELL = '<path d="M4.2 11.2V7.6a3.8 3.8 0 0 1 7.6 0v3.6"/>'
+  + '<path d="M2.9 11.2h10.2"/><path d="M6.8 13.1a1.3 1.3 0 0 0 2.4 0"/>';
+
+/* When it was written, not when it is due — there is no date control on
+   the field, and a column that showed a due date nothing can set would
+   be a promise the app does not keep. */
+function remWhen(k) {
+  const t = todayKey();
+  if (k === t) return 'today';
+  if (k === dayKey(shift(fromKey(t), -1))) return 'yesterday';
+  const d = fromKey(k);
+  return WDAYS[(d.getDay() + 6) % 7] + ' ' + d.getDate();
+}
+
+/* A stamp still inside its window at load means the tab was closed or
+   refreshed mid-undo. Pick the window back up rather than leaving a
+   reminder hidden with no way to get it back — and restart the timer on
+   what is LEFT of the five seconds, not a fresh five. */
+function remResume() {
+  const r = rems.find(function (x) { return x.done !== null; });
+  if (!r) return;
+  remPending = r.id;
+  clearTimeout(remTimer);
+  remTimer = setTimeout(function () { remSweep(); jrRender(); },
+    Math.max(0, REM_UNDO - (Date.now() - r.done)));
+}
+
+/* Remembered in jade.ui.v1 beside the panel and the theme rather than
+   in a key of its own: it is the same kind of fact — how she left the
+   window — and three keys for three switches is three things to repair
+   when one of them is damaged. */
+function setRemFold(shut, remember) {
+  document.querySelector('.jr').dataset.fold = shut ? 'shut' : 'open';
+  document.getElementById('remFold').setAttribute('aria-expanded', String(!shut));
+  if (remember) writeUI({ rem: shut ? 'shut' : 'open' });
+}
+
+function jrBind() {
+  document.getElementById('remFold').addEventListener('click', function () {
+    setRemFold(document.querySelector('.jr').dataset.fold !== 'shut', true);
+  });
+  remResume();
+  document.getElementById('remForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    const inp = document.getElementById('remIn');
+    if (remAdd(inp.value)) { inp.value = ''; jrRender(); }
+  });
+  document.getElementById('remList').addEventListener('click', function (e) {
+    const b = e.target.closest('[data-done]');
+    if (b) remDone(b.dataset.done);
+  });
+  document.getElementById('remUndoBtn').addEventListener('click', remUndo);
 }
 
 /* ══ TODAY ═══════════════════════════════════════════════════════
@@ -3223,6 +3762,7 @@ function boot() {
      runs before paint, so there is no window in which it could. */
   const ui = readUI();
   setRail(ui.rail === 'shut', false);
+  setRemFold(ui.rem === 'shut', false);
   setTheme(
     ui.theme === 'light' || ui.theme === 'dark' ? ui.theme
       /* No choice made yet, so the machine's is the better guess than
@@ -3244,9 +3784,11 @@ function boot() {
   jtBind();
   jcBind();
   jmBind();
+  jrBind();
   subscribe(() => { jtRender(); jmRender(); if (view === 'calendar') jcRender(); });
   jtRender();
   jmRender();
+  jrRender();
   showView('today');
 
   /* Left open overnight, every reading on the screen is about the wrong
