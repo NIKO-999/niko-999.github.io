@@ -3,11 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<!-- Dark only, and that is a decision rather than an omission. The whole
-     palette is one warm accent against a near-black frame; a light mode
-     would need a second set of eight habit colours that still clear the
-     contrast floor, and half of them would not. -->
-<meta name="color-scheme" content="dark" />
+<!-- Both, and the second set of eight habit colours was drawn rather
+     than derived: see the light block in the stylesheet. -->
+<meta name="color-scheme" content="dark light" />
 <meta name="theme-color" content="#15171E" />
 <!-- Without this the browser asks for /favicon.ico on every load and takes
      a 404 for it. -->
@@ -53,6 +51,7 @@
   --accent-in: #1A1220;
   --track:     #2C3140;   /* the unfilled part of a ring or a bar */
   --focus:     #FF6FA5;
+  color-scheme: dark;
 
   /* BUBBLE GEOMETRY. Everything that holds text is round: a panel is a
      22px bubble, anything that holds one line — a chip, a rail row, a
@@ -84,6 +83,44 @@
   --h-read:     #F2E45C;
   --h-audible:  #FF6B6B;
 }
+
+/* ══ LIGHT ════════════════════════════════════════════════════════
+   Not the dark palette lightened. The eight habit hues are chosen
+   again from scratch, because a neon that reads on near-black is 1.6:1
+   on white — and a yellow dark enough to pass as TEXT on white has
+   turned brown and collided with the orange. So on light the colour is
+   a MARK and never a label: the chips take ink for their text and the
+   hue for their border. Everything here was measured, not eyeballed —
+   every hue clears 3:1 as a mark on the card and carries white at 3:1,
+   pairwise deltaE floors at 23.7, and the nearest hue to the accent is
+   36.2 away. */
+:root[data-theme="light"] {
+  color-scheme: light;
+
+  --bg:        #EEF0F6;
+  --surface:   #FFFFFF;
+  --card:      #FFFFFF;
+  --card-2:    #F1F3F9;
+  --line:      #DFE3EC;
+  --line-2:    #C6CDDB;
+  --ink:       #161A23;
+  --ink-2:     #5A6376;
+  --ink-3:     #7B8496;
+  --accent:    #D6336C;
+  --accent-in: #FFFFFF;
+  --track:     #E4E8F0;
+  --focus:     #D6336C;
+
+  --h-steps:    #0CA678;
+  --h-walk:     #5C940D;
+  --h-strength: #E8590C;
+  --h-abs:      #7048E8;
+  --h-water:    #0B7285;
+  --h-sleep:    #3B5BDB;
+  --h-read:     #9C7A00;
+  --h-audible:  #E03131;
+}
+
 
 /* ── reset ── */
 
@@ -409,6 +446,29 @@ svg { display: block; }
   .panel:hover { background: var(--card-2); color: var(--ink); }
 }
 .panel:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+
+/* The theme switch. Same box as the panel toggle at the other end of
+   the bar, because they are the same kind of thing: a control that
+   changes the frame rather than the day. */
+.glyph {
+  flex: none;
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--line);
+  border-radius: var(--r-pill);
+  background: var(--card);
+  color: var(--ink-2);
+  cursor: pointer;
+  transition: color .12s ease, background .12s ease;
+}
+@media (hover: hover) { .glyph:hover { background: var(--card-2); color: var(--ink); } }
+.glyph:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+/* One button, two marks: the one showing is the one you are going TO. */
+.glyph .sun { display: none; }
+:root[data-theme="light"] .glyph .sun { display: block; }
+:root[data-theme="light"] .glyph .moon { display: none; }
 
 /* Shut is display:none, not a width transition. Collapsing a flex child
    to zero animates on the wide layout and does nothing on the stacked
@@ -1584,6 +1644,29 @@ svg { display: block; }
   .jt-saved { transition: none; }
 }
 
+
+/* ══ LIGHT ════════════════════════════════════════════════════════
+   Three things on this screen were built for a dark ground. */
+:root[data-theme="light"] {
+  /* 1. The chip's TEXT cannot be its habit's colour here: four of the
+        eight land between 3.1 and 4.0:1 on white, and a chip is 0.58rem
+        of type. Ink for the word, the hue for the ring around it. */
+  --jt-chip-ink: var(--ink-2);
+}
+:root[data-theme="light"] .jt-chip { color: var(--jt-chip-ink); }
+
+/* 2. A coloured glow behind a card is a dark-room effect; on white it
+      is a smudge. The kept card takes a tint of its own colour
+      instead, which says the same thing in the same hue. */
+:root[data-theme="light"] .jt-card[aria-pressed="true"] {
+  box-shadow: none;
+  background: color-mix(in srgb, var(--jt-c) 7%, var(--card));
+}
+
+/* 3. The avatar's glyph sits on a mid-tone hue now rather than a neon,
+      so it goes white rather than taking the page colour. */
+:root[data-theme="light"] .jt-r-av { color: #FFFFFF; }
+
 /* ══ THE CALENDAR ═════════════════════════════════════════════════
    Month, week and day. The week is the real thing — an hour grid with
    the habits sitting on it at the time they happen — because "read at
@@ -1945,6 +2028,22 @@ svg { display: block; }
   .jc-ad { flex-direction: row; }
   .jc-chip { width: 22px; padding: 0; justify-content: center; }
 }
+
+
+/* ══ LIGHT ════════════════════════════════════════════════════════
+   Same rule as the habit chips: the hue is the mark, never the label.
+   A kept event keeps its 3px bar and its tint and gives its text back
+   to the ink. */
+:root[data-theme="light"] .jc-chip.on,
+:root[data-theme="light"] .jc-ev.on,
+:root[data-theme="light"] .jc-ev.on b { color: var(--ink); }
+:root[data-theme="light"] .jc-ev.on span { color: var(--ink-2); }
+:root[data-theme="light"] .jc-chip.on {
+  background: color-mix(in srgb, var(--jc-c) 18%, var(--card));
+}
+:root[data-theme="light"] .jc-ev.on {
+  background: color-mix(in srgb, var(--jc-c) 16%, var(--card));
+}
 </style>
 </head>
 <body>
@@ -1974,6 +2073,11 @@ svg { display: block; }
   </nav>
 
   <div class="top-r">
+    <button class="glyph" type="button" id="themeBtn" aria-label="Switch to light">
+      <svg class="ic moon" viewBox="0 0 16 16" aria-hidden="true"><path d="M12.9 9.7A5.3 5.3 0 0 1 6.1 2.9a5.5 5.5 0 1 0 6.8 6.8Z"/></svg>
+      <svg class="ic sun" viewBox="0 0 16 16" aria-hidden="true"><circle cx="8" cy="8" r="3.1"/><path d="M8 1.6v1.7M8 12.7v1.7M1.6 8h1.7M12.7 8h1.7M3.5 3.5l1.2 1.2M11.3 11.3l1.2 1.2M12.5 3.5l-1.2 1.2M4.7 11.3l-1.2 1.2"/></svg>
+    </button>
+
     <div class="who">
       <div class="who-av" aria-hidden="true">J</div>
       <div class="who-t"><b id="whoName">Jade</b><span id="whoSub">nothing kept yet</span></div>
@@ -3321,18 +3425,45 @@ function jcBind() {
 
 let view = 'today';
 
-/* The panel's state is not a record, so it lives in its own key. Nothing
-   about the days should share an object with a preference: losing this
-   costs nothing and losing those costs a year, and a repair that has to
-   consider both is a repair that can get it wrong. */
+/* Preferences, not records. Nothing about the days shares an object with
+   these: losing this costs nothing and losing those costs a year, and a
+   repair that has to consider both is a repair that can get it wrong. */
 const UIKEY = 'jade.ui.v1';
+
+/* It used to hold the bare string 'open' or 'shut'. Read back rather
+   than thrown away — the panel state is a small thing to lose, but
+   there is no reason to lose it. */
+function readUI() {
+  let raw = null;
+  try { raw = localStorage.getItem(UIKEY); } catch (e) { return {}; }
+  if (!raw) return {};
+  if (raw === 'open' || raw === 'shut') return { rail: raw };
+  try {
+    const o = JSON.parse(raw);
+    return o && typeof o === 'object' && !Array.isArray(o) ? o : {};
+  } catch (e) { return {}; }
+}
+
+function writeUI(patch) {
+  const o = readUI();
+  for (const k in patch) o[k] = patch[k];
+  try { localStorage.setItem(UIKEY, JSON.stringify(o)); } catch (e) {}
+}
 
 function setRail(shut, remember) {
   document.documentElement.dataset.rail = shut ? 'shut' : 'open';
   const b = document.getElementById('railBtn');
   b.setAttribute('aria-expanded', String(!shut));
   b.setAttribute('aria-label', shut ? 'Show the panel' : 'Hide the panel');
-  if (remember) { try { localStorage.setItem(UIKEY, shut ? 'shut' : 'open'); } catch (e) {} }
+  if (remember) writeUI({ rail: shut ? 'shut' : 'open' });
+}
+
+function setTheme(t, remember) {
+  const light = t === 'light';
+  document.documentElement.dataset.theme = light ? 'light' : 'dark';
+  document.getElementById('themeBtn')
+    .setAttribute('aria-label', light ? 'Switch to dark' : 'Switch to light');
+  if (remember) writeUI({ theme: light ? 'light' : 'dark' });
 }
 
 function showView(v) {
@@ -3350,13 +3481,24 @@ function showView(v) {
 }
 
 function boot() {
-  /* Read before the first render so a shut panel is never painted open
-     and then taken away. */
-  let shut = false;
-  try { shut = localStorage.getItem(UIKEY) === 'shut'; } catch (e) {}
-  setRail(shut, false);
+  /* Both read before the first render: a shut panel must never be
+     painted open and then taken away, and a light theme must never
+     flash dark first. This script is the last thing in the body and
+     runs before paint, so there is no window in which it could. */
+  const ui = readUI();
+  setRail(ui.rail === 'shut', false);
+  setTheme(
+    ui.theme === 'light' || ui.theme === 'dark' ? ui.theme
+      /* No choice made yet, so the machine's is the better guess than
+         ours. Once she picks one it is hers and the system stops
+         being asked. */
+      : (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark'),
+    false);
+
   document.getElementById('railBtn').addEventListener('click',
     () => setRail(document.documentElement.dataset.rail !== 'shut', true));
+  document.getElementById('themeBtn').addEventListener('click',
+    () => setTheme(document.documentElement.dataset.theme === 'light' ? 'dark' : 'light', true));
 
   document.querySelector('.nav').addEventListener('click', (e) => {
     const b = e.target.closest('.nav-i');
