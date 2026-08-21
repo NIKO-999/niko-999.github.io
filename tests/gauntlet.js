@@ -45,6 +45,16 @@ const VIEWS = [
   ['trade/log',        `${BASE}/trading/`, 'log', async (p) => {
       await p.evaluate(() => document.getElementById('logOnly').click());   // show every trade
       await p.waitForTimeout(300); } ],
+  ['orrery/map',       `${BASE}/orrery/`, 'map'],
+  ['orrery/map@800',   `${BASE}/orrery/`, 'map', null, { width: 800, height: 900 }],
+  ['orrery/map@420',   `${BASE}/orrery/`, 'map', null, { width: 420, height: 860 }],
+  ['orrery/vault',     `${BASE}/orrery/`, 'vault'],
+  /* The reading view carries the strictest layout contract on the
+     screen — nothing overlaps the text, one row, no horizontal cut —
+     so the audit must actually see it open. */
+  ['orrery/note',      `${BASE}/orrery/`, 'map', async (p) => {
+      await p.evaluate(() => orOpen('trading/models/cisd'));
+      await p.waitForTimeout(450); } ],
 ];
 
 const AUDIT = () => {
@@ -294,14 +304,23 @@ const AUDIT = () => {
   }
 
   /* ── D2. svg aspect ──
-     A viewBox stretched to a different aspect scales x and y by
-     different factors, so strokes that were one weight come out two. */
+     preserveAspectRatio="none" scales x and y by different factors, so
+     strokes that were one weight come out two. And by spec it is the
+     ONLY value that can: every meet/slice keyword — including the
+     default, xMidYMid meet — scales both axes by one factor and
+     letterboxes the difference. This check used to read the other way
+     round, exempting "none" and faulting everything else whose element
+     box disagreed with its viewBox — which reported a full-bleed map
+     svg three times for the crime of sitting in a non-square panel,
+     while a genuinely stretched svg walked. Narrowing proven the house
+     way: preserveAspectRatio="none" was set on that map on purpose,
+     and this check named it. */
   for (const s2 of [...scope.querySelectorAll('svg[viewBox]')].filter(vis)) {
     const vb = s2.getAttribute('viewBox').trim().split(/[\s,]+/).map(Number);
     const r = s2.getBoundingClientRect();
     if (!vb[2] || !vb[3]) continue;
     const par = (s2.getAttribute('preserveAspectRatio') || '').trim();
-    if (par === 'none') continue;                      // stretched on purpose
+    if (par !== 'none') continue;             // uniform by spec — cannot distort
     const want = vb[2] / vb[3], got = r.width / r.height;
     if (Math.abs(want - got) / want > 0.02)
       out.aspect = (out.aspect || []).concat([{ el: sel(s2), vb: vb.join(' '),

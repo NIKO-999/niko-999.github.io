@@ -1,0 +1,4095 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="color-scheme" content="dark light" />
+<!-- Without this the browser asks for /favicon.ico on every load and
+     takes a 404 for it. The mark is the same glyph as the rail. -->
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<title>Orrery — Second Brain</title>
+<script>
+/* Inline, and before the stylesheet, so the first paint is already
+   themed and the photograph starts downloading immediately. Identical
+   to Arc's, because it is the same shell. */
+(function () {
+  var d = document.documentElement, g = null;
+  try { g = window.localStorage; } catch (e) {}
+  var read = function (k) { try { return g && g.getItem(k); } catch (e) { return null; } };
+  /* Backdrop and palette are separate now, and this runs before any
+     script that knows the list — so the mapping is repeated here, small
+     and flat. Fourteen backdrops, eight palettes. */
+  var PAL = { turtle:'slate', canyon:'ember', desert:'ember', nightfall:'cyan',
+              iceberg:'cyan', delta:'cyan', curve:'vellum', cobalt:'cobalt',
+              abyss:'cyan', jade:'jade', violet:'violet', iris:'violet',
+              umber:'umber', silk:'slate' };
+  var p = read('arc.palette') || 'nightfall';
+  if (!PAL[p]) p = 'nightfall';          /* the old five no longer exist */
+  var m = read('arc.theme') || 'system';
+  d.dataset.bg = p;
+  d.dataset.palette = PAL[p];
+  d.dataset.resolved = m === 'system'
+    ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : m;
+  /* Set here rather than in shell.js, which is deferred and therefore
+     runs AFTER each app's own script — the flag has to exist before
+     anything reads it, and being set pre-stylesheet means the first
+     paint is already the right shape with no flash of the wide layout. */
+  var phone = matchMedia('(max-width: 700px)').matches;
+  d.dataset.phone = phone ? 'on' : 'off';
+  /* No photograph on a phone, so no request for one. The panel covers
+     the viewport there and the image would be invisible behind it. */
+  if (!phone) {
+    var l = document.createElement('link');
+    l.rel = 'preload'; l.as = 'image'; l.href = '../arc/bg/' + p + '.jpg';
+    l.fetchPriority = 'high';
+    document.head.appendChild(l);
+  }
+  /* One file, not two. It is a variable font covering 100–900, so the
+     three weights this used to fetch separately were three copies of the
+     same bytes. */
+  var k = document.createElement('link');
+  k.rel = 'preload'; k.as = 'font'; k.type = 'font/woff2';
+  k.href = '../arc/fonts/Inter.woff2'; k.crossOrigin = 'anonymous';
+  document.head.appendChild(k);
+})();
+</script>
+
+<link rel="stylesheet" href="../shell.css" />
+<style>
+/* ═══════════════════════════════════════════════════════════════
+   ORRERY — everything the shell does not already give it.
+
+   Two kinds of surface, split on purpose. The map's furniture — the
+   rings, the ticks, the rim type, the leader lines — is inked inline
+   by the paint code, because those numbers are the poster and belong
+   with the geometry. What lives here is what CSS is FOR: state
+   (hover, focus, selected, folded, hot) and the boxes around the ink.
+
+   Every class is or-, every token --or-. Five apps read shell.css,
+   and a bare .chip or .legend three screens away would not throw —
+   it would quietly replace.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── tokens ──
+   Category colours are ABSOLUTE. A category is an identity and the
+   accent is not: pick a violet backdrop and the accent moves with it,
+   but what is filed under Trading stays the colour it was filed as.
+   Both themes live here because an invalid custom property does not
+   fall back — it inherits — and that shipped a 1.74:1 chip in this
+   repo once already. */
+:root {
+  --or-cat-trading: #e8a33d;
+  --or-cat-growth:  #a98cf0;
+  --or-cat-body:    #57c99a;
+  --or-cat-craft:   #5ec6d8;
+  --or-cat-mind:    #ef8fa8;
+  --or-cat-world:   #8fa7d6;
+  --or-cat-other:   #b9b2a8;
+
+  /* The poster's ink. Riding --ink keeps every hairline, tick and rim
+     letter in step with the theme with no second copy to drift. */
+  --or-hair: var(--ink);
+
+  /* The bright core inside a hexagon. Warm white in BOTH themes: the
+     hexagons go dark in light mode and a core that flipped with them
+     would vanish into its own node. The one place that bites — the
+     selection ring over light glass — is re-inked below. */
+  --or-core: #fff6e8;
+
+  /* Chip and card fills are the shell's opaque menu surface, aliased
+     rather than copied: text on them must not depend on which corner
+     of fourteen photographs happens to sit behind the glass. */
+  --or-chip:      var(--menu);
+  --or-chip-line: var(--glass-line);
+
+  /* One width for the two cards on the stage's left edge. Side by
+     side means the same box; stacked above each other does too. */
+  --or-card: 208px;
+}
+:root[data-resolved="light"] {
+  --or-cat-trading: #8a5a12;
+  --or-cat-growth:  #553aa8;
+  --or-cat-body:    #1f6f4e;
+  --or-cat-craft:   #1d5f6d;
+  --or-cat-mind:    #963050;
+  --or-cat-world:   #2f4a86;
+  --or-cat-other:   #4a453e;
+  /* --or-hair, --or-chip and --or-chip-line re-resolve through the
+     shell tokens they alias; --or-core stays warm white — see above. */
+}
+
+/* ═══ the row ═══
+   #orNote then #orStage, note FIRST — text left, structure right,
+   like the reference. The section itself is the row: one flex line,
+   align-items stretch, same height always — the container stretches,
+   no child takes its own. The note opts in and out with the hidden
+   attribute, which the shell already resolves. */
+#orMapSection {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: stretch;
+}
+
+/* ═══ the stage ═══
+   The SVG is absolute inside it so the stage's height comes from the
+   row, never from the drawing — a viewBox'd svg otherwise sizes from
+   its parent AND pushes back on it, and the two argue. */
+#orStage {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+}
+#orSvg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* The pointer is a tool here — drag, pan, wheel-zoom — and the
+     browser's own pan/select gestures would eat it first. */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  cursor: grab;
+}
+#orSvg:active { cursor: grabbing; }
+
+/* ── nodes ── */
+.or-node { cursor: pointer; }
+.or-node .or-halo { transition: opacity .18s; }
+/* Hover and focus are one state: ×1.4 on the halo the paint set —
+   .7 → .98 on hubs and majors, .35 → .49 on minors. A CSS rule
+   outranks the presentation attribute, so no repaint is needed. */
+.or-node:is(:hover, :focus-visible) .or-halo { opacity: .98; }
+.or-node.or-minor:is(:hover, :focus-visible) .or-halo { opacity: .49; }
+/* The shell's focus rule already matches [tabindex], but that is a
+   :where() aimed at HTML controls — the map's keyboard reachability
+   is not something to leave to a selector's generosity. */
+.or-node:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+/* The paint strokes the selected ring var(--or-core) inline. Warm
+   white over light glass is invisible, so light mode re-inks the
+   SELECTION ring only — selection is a state, not a category, so no
+   identity moves. */
+:root[data-resolved="light"] .or-node.or-sel .or-ringc { stroke: var(--ink); }
+
+/* ── label chips ──
+   Geometry and type are inline; the fill rides the tokens so the
+   surface has one owner. */
+.or-chipbg { fill: var(--or-chip); stroke: var(--or-chip-line); }
+
+/* ═══ legend and stats ═══
+   Filter chrome, floated on the map's quiet corner. Opaque menu
+   surface, not glass-on-glass: these sit over the drawing and their
+   text carries its own contrast. The fade for reading time is set
+   inline by the pane code; the transition here is what makes it a
+   fade rather than a cut. */
+#orLegend, #orStats {
+  position: absolute;
+  left: 14px;
+  width: var(--or-card);
+  z-index: 5;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: var(--menu);
+  transition: opacity .25s;
+}
+#orLegend { top: 14px; max-height: min(46%, 320px); overflow-y: auto; }
+#orStats  { bottom: 14px; }
+
+.or-card-h {
+  margin: 0 0 8px;
+  font-family: var(--mono);
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+#orLegRows { display: flex; flex-direction: column; gap: 2px; }
+/* A legend row is a control — click isolates the category — so it is
+   a button, and its dot says WHICH in the category's own colour. */
+.or-leg {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink-2);
+  font: inherit;
+  font-size: .72rem;
+  text-align: left;
+  cursor: pointer;
+}
+.or-leg[aria-pressed="true"] { background: var(--glass-in-2); color: var(--ink); }
+.or-leg-dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
+/* The label gives way, never the count: a long category name inside a
+   208px card must not push its own figure off the row. */
+.or-leg-lb {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.or-leg-n {
+  font-style: normal;
+  font-size: .64rem;
+  color: var(--ink-3);
+}
+.or-stat {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  min-height: 24px;
+  font-size: .7rem;
+  color: var(--ink-2);
+}
+.or-stat-v { margin-left: auto; font-size: .78rem; font-weight: 400; color: var(--ink); }
+
+/* ── zoom ──
+   Bottom right, opposite the stats, and it does NOT fade with them:
+   the map is still driveable while you read. */
+.or-zoom {
+  position: absolute;
+  right: 14px;
+  bottom: 14px;
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.or-zoom button {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--glass-line);
+  border-radius: 9px;
+  background: var(--menu);
+  color: var(--ink-2);
+  font: inherit;
+  cursor: pointer;
+}
+.or-zoom button svg { width: 15px; height: 15px; }
+
+/* ── empty state ──
+   Centred in the stage, and it must not eat the pan gesture around
+   its own words: the overlay ignores the pointer, its controls do
+   not. */
+#orEmpty {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-content: center;
+  justify-items: center;
+  gap: 12px;
+  padding: 30px;
+  text-align: center;
+  pointer-events: none;
+}
+#orEmpty p {
+  margin: 0;
+  max-width: 38ch;
+  font-size: .78rem;
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+#orEmpty button, #orEmpty a { pointer-events: auto; }
+
+/* ═══ the reading view ═══
+   No card. No background, no border, no radius, no shadow: the panel
+   glass already carries --ink at floor contrast, and a box here would
+   turn the reference's open field back into furniture. Space is what
+   frames it. */
+#orNote {
+  position: relative;
+  width: clamp(380px, 42%, 620px);
+  flex: none;
+  padding: 44px 40px 64px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  scroll-behavior: smooth;
+  /* The bar is furniture, the scrolling is not. Wheel, keys and
+     PageUp/Down all still work; only the reminder that this is a
+     scrollbox is gone. */
+  scrollbar-width: none;
+  /* Lines enter and leave through a soft edge instead of being
+     guillotined at the padding line. The mask sits on the border box,
+     so it holds still while the content moves under it. */
+  -webkit-mask-image: linear-gradient(180deg,
+    transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+          mask-image: linear-gradient(180deg,
+    transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
+}
+#orNote::-webkit-scrollbar { display: none; }
+/* Opening hands the pane programmatic focus (tabindex -1) so a
+   keyboard open reads from the top. A ring around the whole column
+   would box the one view built on having no box — and nothing can
+   Tab here, so nothing is being hidden from the keyboard. */
+#orNote:focus { outline: none; }
+/* Positioning context for the close, and a size container so the
+   title can answer to the COLUMN's width rather than the viewport's. */
+#orNote { position: relative; container-type: inline-size; }
+/* display:none cannot animate, so arrival is a keyframe: the column
+   settles in from the left as the map slides right. The shell zeroes
+   it under reduced motion. */
+@keyframes or-slide { from { opacity: 0; transform: translateX(-14px); } }
+#orNote:not([hidden]) { animation: or-slide .28s ease; }
+
+/* The close pins to the column's top right corner. Not a float: a
+   float only pushes FLOW neighbours aside, and everything beside it
+   here is flex — the old layout merely happened to miss. The eyebrow
+   reserves the corner instead. Escape closes too — this is the
+   visible way out, not the only one. */
+#orNoteClose { position: absolute; top: 36px; right: 30px; }
+.or-eyebrow { padding-right: 44px; }
+
+/* The ramp, top to bottom. The eyebrow's padding matches the ruled
+   block below it — border and padding, 27px — so the whole column
+   shares one left edge. */
+.or-eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  min-width: 0;
+  padding-left: 27px;
+  font-size: .62rem;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+#orNotePath {
+  flex: 1;
+  /* A floor, not zero: the path is the one honest address on the
+     screen and it must never be squeezed to a sliver by the control
+     beside it. */
+  min-width: 96px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  letter-spacing: .06em;
+  text-transform: none;   /* a path is a path, not a heading */
+  color: var(--ink-3);
+}
+/* The re-file control lives on the eyebrow line and dresses down to
+   it: no chrome, a dashed underline as the only invitation. Covers
+   the select itself and a wrapper holding one — the pane code accepts
+   either shape — and the :has guard stops the two underlining twice. */
+#orNoteRefile, .or-refile {
+  /* Never the widest option: a select sizes itself to 'Personal
+     Development' and its dashed underline runs a hand-span past the
+     word it shows, starving the path beside it to nothing. The boot
+     sizes it to the CURRENT word; this is the ceiling if that fails. */
+  max-width: 11em;
+  padding: 0;
+  border: 0;
+  background: none;
+  appearance: none;
+  -webkit-appearance: none;
+  color: var(--ink-3);
+  font: inherit;
+  font-size: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink-3) 55%, transparent);
+  cursor: pointer;
+}
+#orNoteRefile:has(select) { border-bottom: 0; }
+
+/* The reference's one piece of furniture: a single vertical hairline
+   from the title to the end of the content. A border on the flow
+   wrapper, not an absolute stripe — an absolute child of a scroller
+   spans the viewport, not the content, and shears off as you scroll. */
+.or-note-in {
+  border-left: 1px solid color-mix(in srgb, var(--or-hair) 25%, transparent);
+  padding-left: 26px;
+}
+
+/* The one loud thing on the screen. The words are the thing you
+   clicked — the note's own title, or the folder's label. */
+#orNoteTitle {
+  margin: .35em 0 .8em;
+  /* 4vw of a wide viewport is wider than this column: at 1280px the
+     longest folder label broke mid-word. cqw asks the column itself,
+     so the biggest size is the biggest that still fits the words. */
+  font-size: clamp(2.1rem, min(4vw, 9.4cqw), 3.3rem);
+  font-weight: 200;
+  line-height: 1.04;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+  color: var(--ink);
+  overflow-wrap: break-word;
+}
+
+#orNoteBody {
+  max-width: 34em;
+  font-size: .78rem;
+  line-height: 1.75;
+  color: var(--ink-2);
+  /* The column contract: nothing cuts the text horizontally, ever.
+     Long tokens break; wide blocks scroll inside their own box. */
+  overflow-wrap: break-word;
+}
+#orNoteBody > :first-child { margin-top: 0; }
+#orNoteBody p { margin: .9em 0; }
+#orNoteBody strong { color: var(--ink); font-weight: 600; }
+
+/* ── the markdown ──
+   The renderer emits classed elements, so these are its classes, not
+   bare tags a later app could collide with. A vault's own headings
+   stay a size below the display title: this is a page you are
+   reading, not a page shouting back. */
+.or-bh1, .or-bh2, .or-bh3 {
+  margin: 1.6em 0 .5em;
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--ink);
+}
+.or-bh1 { font-size: 1rem; }
+.or-bh2 { font-size: .9rem; }
+.or-bh3 { font-size: .8rem; }
+.or-ul, .or-ol { margin: .9em 0; padding-left: 1.35em; }
+.or-ul li, .or-ol li { margin: .3em 0; }
+/* var(--mono) on purpose, knowing it aliases the sans: one face does
+   every job here, and the UA's own monospace is the one face this
+   page must never show. */
+.or-cd {
+  padding: .1em .4em;
+  border-radius: 5px;
+  background: var(--glass-in-2);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: .92em;
+}
+.or-code {
+  margin: 1.1em 0;
+  padding: 12px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 9px;
+  background: var(--glass-in-2);
+  overflow-x: auto;   /* wide code scrolls its own box, not the column */
+  font-family: var(--mono);
+  font-size: .72rem;
+  line-height: 1.6;
+  color: var(--ink);
+}
+.or-code code { font-family: inherit; }
+.or-quote {
+  margin: 1.1em 0;
+  padding: 2px 0 2px 14px;
+  border-left: 2px solid color-mix(in srgb, var(--or-hair) 22%, transparent);
+}
+.or-quote p { margin: .5em 0; }
+.or-hr {
+  margin: 1.6em 0;
+  border: 0;
+  border-top: 1px solid var(--rule);
+}
+
+/* A wikilink is a button dressed as a link: it navigates the map, not
+   the browser. */
+.or-wl {
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--accent);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+  overflow-wrap: break-word;
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+}
+/* The dead one is a loose end — it goes nowhere, and it says so by
+   refusing the pointer's invitation. */
+.or-loose {
+  color: var(--ink-3);
+  border-bottom: 1px dashed color-mix(in srgb, var(--ink-3) 55%, transparent);
+}
+/* Links and Backlinks: stacked open lists under labels set like the
+   eyebrow. No boxes — the same-box row rule governs boxes, and there
+   are none here. */
+#orNoteOutH, #orNoteInH {
+  margin: 2.4em 0 .7em;
+  font-size: .62rem;
+  font-weight: 500;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+/* Filled with bare wikilink buttons, no list markup — the column IS
+   the list. flex-start keeps each underline the width of its own
+   words rather than the column's. */
+#orNoteOut, #orNoteIn, .or-idx {
+  /* All three are ULs. The reset lives here, not inline in the
+     markup: one owner, and the UA's bullets and indent have no place
+     in an open column. */
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: .78rem;
+  line-height: 1.6;
+}
+/* A folder reads as an index, so its rows breathe a little wider. */
+.or-idx { gap: 11px; font-size: .85rem; }
+
+/* ═══ the vault view ═══
+   The section is the scroll pane, like every other screen's. */
+#orVaultSection {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 4px 18px 26px;
+}
+/* One reading-width column. The panel can be very wide on a desktop,
+   and a dashed target the width of a barn door is not a target. */
+.or-vault { max-width: 680px; }
+
+#orDrop {
+  display: grid;
+  justify-items: center;
+  align-content: center;
+  gap: 10px;
+  min-height: 150px;
+  margin-top: 6px;
+  padding: 34px 22px;
+  border: 1.5px dashed color-mix(in srgb, var(--ink) 30%, transparent);
+  border-radius: 12px;
+  color: var(--ink-2);
+  font-size: .8rem;
+  text-align: center;
+  transition: border-color .15s, background-color .15s;
+}
+#orDrop p { margin: 0; max-width: 46ch; line-height: 1.6; }
+/* data-hot is the ingest code's word for "a folder is over me". */
+#orDrop[data-hot] {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  color: var(--ink);
+}
+/* The directory input is a mechanism, not a control — the Choose
+   button clicks it. Display, not [hidden]: it must stay clickable
+   from script. */
+#orInput { display: none; }
+
+.or-hint {
+  margin: 12px 0 0;
+  max-width: 62ch;
+  font-size: .74rem;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+
+.or-vault-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 6px 18px;
+  margin: 18px 0 4px;
+  font-size: .72rem;
+  color: var(--ink-3);
+}
+#orVaultName { color: var(--ink); font-weight: 500; font-size: .82rem; }
+
+/* The ingest log: an inset well of plain lines. Hidden while empty so
+   a fresh page is not headed by a labelled hole — which needs the
+   element written with NOTHING inside the tags, whitespace included. */
+#orLog {
+  margin-top: 14px;
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 10px 14px;
+  border-radius: 10px;
+  background: var(--glass-in);
+  font-size: .72rem;
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+#orLog:empty { display: none; }
+#orLog p { margin: 3px 0; }
+/* The line still counting is the one you are watching. */
+#orLog p[data-live] { color: var(--ink-2); }
+
+/* ── the mapping table ──
+   Categories on the left, each behind its own dot; the folder names
+   that reach them on the right, quiet. */
+.or-map {
+  width: 100%;
+  margin-top: 8px;
+  border-collapse: collapse;
+  font-size: .74rem;
+}
+.or-map th {
+  padding: 0 12px 7px 0;
+  border-bottom: 1px solid var(--glass-line);
+  font-family: var(--mono);
+  font-size: .6rem;
+  font-weight: 500;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  text-align: left;
+  color: var(--ink-2);
+}
+.or-map td {
+  padding: 8px 12px 8px 0;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: baseline;
+  line-height: 1.5;
+  color: var(--ink-2);
+}
+.or-map td:first-child { color: var(--ink); white-space: nowrap; }
+.or-catdot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 9px;
+  border-radius: 50%;
+  vertical-align: 0;
+}
+
+/* ── the folding panel ──
+   The heading IS the control: a button inside the h3, never an h3
+   inside a button — the second is invalid, and a screen reader that
+   loses the heading loses the way to skim the page. */
+.or-fold {
+  margin-top: 26px;
+  padding: 12px 16px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: var(--glass-in);
+}
+.or-fold h3 { margin: 0; font-size: .82rem; font-weight: 500; color: var(--ink); }
+.or-fold h3 button {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  width: 100%;
+  padding: 0;
+  border: 0;
+  background: none;
+  font: inherit;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.or-ic { display: inline-flex; color: var(--ink-3); transition: transform .16s; }
+/* 180, not 90 — the shared chevron points DOWN, and a quarter turn
+   lays it on its side. */
+.or-fold h3 button[aria-expanded="true"] .or-ic { transform: rotate(180deg); }
+/* Folded, the panel is a title bar, and a title bar stretched to an
+   open neighbour's height is a bar on a field of nothing. The one
+   sanctioned opt-out from the same-box rule. */
+.or-fold:has(h3 button[aria-expanded="false"]) { align-self: start; }
+#orHowB { padding-top: 10px; font-size: .76rem; line-height: 1.65; color: var(--ink-2); }
+#orHowB p { margin: .55em 0; }
+
+/* ── hover, behind the shell's own guard ──
+   So a trackpad tap on a hybrid machine cannot leave a stuck
+   highlight. */
+@media (hover: hover) {
+  .or-leg:hover { background: var(--glass-in-2); color: var(--ink); }
+  .or-zoom button:hover { background: var(--glass-in-2); color: var(--ink); }
+  .or-wl:hover { color: var(--ink); border-bottom-color: var(--accent); }
+  .or-fold h3 button:hover { color: var(--accent); }
+  #orNoteRefile:hover, .or-refile:hover { color: var(--ink); }
+}
+
+/* ═══ narrow ═══
+   Below 800 the row stacks: reading column above, full width, map
+   below. The same-height rule has nothing to bite on in a column,
+   and the stage takes whatever the note leaves. */
+@media (max-width: 800px) {
+  #orMapSection { flex-direction: column; }
+  #orNote {
+    width: 100%;
+    flex: 0 1 auto;
+    max-height: 56%;
+    padding: 30px 22px 44px;
+  }
+  #orStage { min-height: 220px; }
+}
+/* Phone-narrow. The type ramp already clamps; what has to give is
+   the padding around it. */
+@media (max-width: 520px) {
+  #orNote { padding: 24px 16px 38px; }
+  .or-note-in { padding-left: 18px; }
+  .or-eyebrow { padding-left: 19px; }
+  #orVaultSection { padding: 4px 14px 22px; }
+}
+</style>
+</head>
+
+<body>
+<div class="backdrop" aria-hidden="true"></div>
+
+<div class="app">
+
+  <nav class="rail" aria-label="Sections">
+    <!-- The orbit: a ring, a centre, one satellite. The same three
+         shapes every other app draws this one with, so the mark you
+         leave from is the mark you arrive at. -->
+    <span class="rail-mark" aria-hidden="true">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           width="15" height="15">
+        <circle cx="12" cy="12" r="8.2" />
+        <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+        <circle cx="18.4" cy="7.6" r="1.9" fill="currentColor" stroke="none" />
+      </svg>
+    </span>
+    <button type="button" data-view="map" aria-current="page" aria-label="Map">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <circle cx="12" cy="12" r="8.2" />
+        <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+        <circle cx="18.4" cy="7.6" r="1.9" fill="currentColor" stroke="none" /></svg>
+    </button>
+    <button type="button" data-view="vault" aria-label="Vault">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3.6 18.4V6.4a1 1 0 0 1 1-1h4l2.2 2.6h8.6a1 1 0 0 1 1 1v9.4a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1Z" /></svg>
+    </button>
+    <span class="cross" aria-hidden="true"></span>
+    <!-- The other three. Below the rule, because they are not views of
+         this — they are somewhere else. Glyphs copied verbatim from the
+         neighbouring apps so the weights cannot drift. -->
+    <a href="../trading/" aria-label="Account balance" title="Account balance">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M6 19v-4M11 19v-8M16 19v-11M21 19v-14M3 19h18" /></svg>
+    </a>
+    <a href="../arc/" aria-label="Arc — projects" title="Arc — projects">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M3 17.5h18M5.5 17.5a6.5 6.5 0 0 1 13 0M12 6v2.2M18.5 10.2l1.4-1.4M5.5 10.2 4.1 8.8" /></svg>
+    </a>
+    <a href="../days/" aria-label="Days — habits and reminders" title="Days — habits and reminders">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+           aria-hidden="true">
+        <circle cx="5" cy="12" r="2.4" fill="currentColor" stroke="none" />
+        <circle cx="12" cy="12" r="2.4" fill="currentColor" stroke="none" />
+        <circle cx="19" cy="12" r="2.4" />
+      </svg>
+    </a>
+    <span class="spacer"></span>
+    <button type="button" id="themeRail" aria-label="Appearance: System">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
+           stroke-linecap="round" aria-hidden="true"></svg>
+    </button>
+  </nav>
+
+  <div class="main">
+
+    <div class="topbar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"
+             stroke-linecap="round" width="15" height="15" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" />
+        </svg>
+        <label class="sr" for="orSearch">Search your notes</label>
+        <input id="orSearch" type="search" placeholder="Search your notes" autocomplete="off" />
+      </div>
+
+      <!-- The one control that costs you your arrangement, so its title
+           says the price before you pay it. -->
+      <button class="btn btn-ghost" type="button" id="orFit"
+              title="Forgets every node you dragged and lays the field out afresh">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="8.2" />
+          <circle cx="12" cy="12" r="4.6" />
+          <circle cx="12" cy="12" r="1.3" fill="currentColor" stroke="none" /></svg>
+        <span>Reset layout</span>
+      </button>
+
+      <button class="btn btn-primary" type="button" id="orAttach"
+              title="Reconnects the folder you picked before, or asks for one">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M3.6 18.4V6.4a1 1 0 0 1 1-1h4l2.2 2.6h8.6a1 1 0 0 1 1 1v9.4a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1Z" /></svg>
+        <span>Attach vault</span>
+      </button>
+
+      <button class="btn btn-ghost" type="button" id="themeBtn" aria-label="Appearance: System">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+             stroke-linecap="round" aria-hidden="true" id="themeIcon"></svg>
+        <span id="themeLabel">System</span>
+      </button>
+
+      <div class="pal">
+        <button class="btn btn-ghost" type="button" id="palBtn"
+                aria-expanded="false" aria-controls="palMenu" aria-label="Backdrop: Grotto">
+          <span class="dot" aria-hidden="true"></span>
+          <span id="palLabel">Grotto</span>
+        </button>
+        <div class="pal-menu" id="palMenu" role="radiogroup" aria-label="Backdrop" hidden></div>
+      </div>
+    </div>
+
+    <!-- Read, not seen: the map wears its own title on the rim, and a
+         visible heading over a poster would be furniture. The document
+         still gets its h1. -->
+    <h1 class="sr">Orrery &mdash; the second brain</h1>
+
+    <!-- ── the map ──
+         The section IS the row: note first, stage second, so when a
+         note opens the text reads on the left and the structure sits to
+         its right. No .head inside — a third box on this row would
+         break the two that matter. -->
+    <main id="orMapSection" aria-label="The map">
+
+      <aside id="orNote" role="complementary" aria-labelledby="orNoteTitle"
+             tabindex="-1" hidden>
+        <button class="btn btn-ghost" type="button" id="orNoteClose" aria-label="Close the note">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
+               stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+               aria-hidden="true"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5" /></svg>
+        </button>
+        <div class="or-eyebrow">
+          <span id="orNoteCat"></span>
+          <span id="orNotePath"></span>
+          <select id="orNoteRefile" class="or-refile" aria-label="File this note under"></select>
+        </div>
+        <!-- One hairline from the title to the end of the content — the
+             reference's single piece of furniture. A flow wrapper, not
+             a card: no fill, no border box, nothing that frames. -->
+        <div class="or-note-in">
+          <h2 id="orNoteTitle"></h2>
+          <div id="orNoteBody"></div>
+          <h3 id="orNoteOutH">Links</h3>
+          <ul id="orNoteOut"></ul>
+          <h3 id="orNoteInH">Backlinks</h3>
+          <ul id="orNoteIn"></ul>
+        </div>
+      </aside>
+
+      <div id="orStage">
+        <svg id="orSvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
+          <defs></defs>
+          <g id="orView">
+            <g id="orRings"></g>
+            <g id="orLinks"></g>
+            <g id="orLeads"></g>
+            <g id="orNodes"></g>
+            <g id="orLabels"></g>
+          </g>
+        </svg>
+
+        <div id="orLegend">
+          <h2 class="or-card-h">Categories</h2>
+          <div id="orLegRows"></div>
+        </div>
+
+        <div id="orStats">
+          <h2 class="or-card-h">The field</h2>
+          <div class="or-stat">Notes<span class="or-stat-v" id="orStatNodes"></span></div>
+          <div class="or-stat">Links<span class="or-stat-v" id="orStatLinks"></span></div>
+          <div class="or-stat">Categories<span class="or-stat-v" id="orStatCats"></span></div>
+          <div class="or-stat">Loose ends<span class="or-stat-v" id="orStatLoose"></span></div>
+        </div>
+
+        <div class="or-zoom" role="group" aria-label="Camera">
+          <button type="button" id="orZoomIn" aria-label="Zoom in">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" aria-hidden="true"><path d="M12 5.5v13M5.5 12h13" /></svg>
+          </button>
+          <button type="button" id="orZoomOut" aria-label="Zoom out">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" aria-hidden="true"><path d="M5.5 12h13" /></svg>
+          </button>
+          <button type="button" id="orZoomFit" aria-label="Back to the whole map">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" aria-hidden="true">
+              <path d="M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM12 15.4a3.4 3.4 0 1 0 0-6.8a3.4 3.4 0 0 0 0 6.8ZM12 1.5v1.8M12 20.7v1.8M1.5 12h1.8M20.7 12h1.8" /></svg>
+          </button>
+        </div>
+
+        <!-- Only ever on screen when the seed itself is gone, so it
+             points at the one control that refills the sky. -->
+        <div id="orEmpty" hidden>
+          <p>Nothing is in orbit. Attach vault, above, reads your folder of
+            notes onto the map &mdash; read-only, and never off this machine.</p>
+        </div>
+      </div>
+
+    </main>
+
+    <!-- ── the vault ──
+         Where the notes come from, and the honest mechanics of getting
+         them: pick, drop, or reconnect. Never a typed path — there is
+         no browser API a typed path could reach. -->
+    <main id="orVaultSection" aria-label="The vault" hidden>
+      <div class="or-vault">
+
+        <div id="orDrop">
+          <p>Drop your vault folder here &mdash; the folder itself, not the
+            files in it.</p>
+          <button class="btn btn-primary" type="button" id="orPick">Pick the folder</button>
+          <p>Top-level folders become categories. Only .md files are read.</p>
+          <input id="orInput" type="file" webkitdirectory multiple />
+        </div>
+
+        <p class="or-hint">There is no path to type because there is nothing a
+          typed path could do &mdash; a browser cannot open a folder from a
+          string. You pick the folder once; after that, Attach reconnects it.
+          Everything is read in place and stays in this browser: nothing
+          uploads, and nothing is ever written back.</p>
+
+        <div class="or-vault-meta">
+          <span id="orVaultName">No vault attached</span>
+          <span id="orVaultN"></span>
+          <span id="orVaultAt"></span>
+          <button class="btn btn-ghost" type="button" id="orForget" hidden
+                  title="Drops the cached copy only. The files on your disk are untouched.">
+            Forget this vault</button>
+        </div>
+
+        <!-- Truly empty, whitespace included: the stylesheet hides the
+             log by :empty until the first line arrives. -->
+        <div id="orLog" role="log"></div>
+
+        <h2 class="or-card-h" style="margin:26px 0 0">Where a note lands</h2>
+        <!-- Written out rather than generated: the aliases are code in
+             the seed, and a table the ingest cannot edit has nothing to
+             fall out of step with. -->
+        <table class="or-map">
+          <thead>
+            <tr><th scope="col">Category</th><th scope="col">Folder names that file there</th></tr>
+          </thead>
+          <tbody id="orMapRows">
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-trading)" aria-hidden="true"></i>Trading</td>
+              <td>trading, trade, trades, markets, ledger, execution</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-growth)" aria-hidden="true"></i>Personal Development</td>
+              <td>growth, personal, personal development, self, development, journal</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-body)" aria-hidden="true"></i>Body</td>
+              <td>body, health, fitness, training, sleep, food</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-craft)" aria-hidden="true"></i>Craft</td>
+              <td>craft, skill, skills, work, building, code, projects</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-mind)" aria-hidden="true"></i>Mind</td>
+              <td>mind, philosophy, thinking, psychology, reading</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-world)" aria-hidden="true"></i>Resources</td>
+              <td>resources, reference, sources, inbox, clippings, library, links</td></tr>
+            <tr><td><i class="or-catdot" style="background:var(--or-cat-other)" aria-hidden="true"></i>Unfiled</td>
+              <td>everything else</td></tr>
+          </tbody>
+        </table>
+        <p class="or-hint">The top folder files the note. A category line in
+          the note&rsquo;s own frontmatter outranks the folder, and re-filing by
+          hand on the map outranks both.</p>
+
+        <section class="or-fold" aria-labelledby="orHowH">
+          <h3 id="orHowH">
+            <button type="button" id="orHowT" aria-expanded="false" aria-controls="orHowB">
+              <span class="or-ic" aria-hidden="true">
+                <svg viewBox="0 0 24 24" width="12" height="12" fill="none"
+                     stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+                     stroke-linejoin="round" aria-hidden="true"><path d="M6 9.5 12 15.5 18 9.5" /></svg>
+              </span>How this reads your vault</button>
+          </h3>
+          <div id="orHowB" hidden>
+            <p>You pick the folder once. Where the browser can remember a
+              folder, Attach reconnects it after a permission prompt; where it
+              cannot, you pick it again &mdash; that is the browser&rsquo;s trade,
+              not a fault here.</p>
+            <p>Every .md file inside is read where it sits. Dot-folders &mdash;
+              settings, trash &mdash; are skipped. It stops at 4,000 notes and
+              says so in the log rather than pretending it read everything.</p>
+            <p>[[Links]] resolve by exact path, then by filename, then by
+              filename ignoring case. One that lands nowhere is a loose end,
+              and the map counts them: a gap you can see is a note you meant
+              to write.</p>
+            <p>Read-only, always. Nothing uploads and nothing is written back.
+              The parsed copy is cached in this browser so the map opens
+              before you reconnect; Forget drops that copy and touches nothing
+              on your disk.</p>
+          </div>
+        </section>
+
+      </div>
+    </main>
+
+  </div>
+</div>
+
+<p class="sr" role="status" id="say"></p>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════
+   ORRERY — a mechanical model of what you know, and how it moves.
+
+   A radial map of your notes. It wears the same shell as the rest of
+   the rail and shares nothing else with it: its own key, its own store,
+   and it reads no ledger, habit, reminder or backtest key, ever. What
+   you know and what you earned are not the same subject, and the one
+   thing that would make this app dangerous is it having an opinion
+   about your money.
+
+   It never writes to the vault on disk either. The folder you point it
+   at is READ, once, and cached here; the files come back exactly as
+   they were. Everything below is a view of a copy.
+
+   Five sections, in dependency order: the seed corpus, the preamble,
+   the map, the vault, the reading pane with the boot at its end.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ─── 1 · SEED ─── First: the preamble validates stored category ids
+   against CATS the moment it loads, and the map needs a corpus before
+   any vault arrives. */
+
+/* ── seed ──
+   What the map shows before a vault arrives. Real notes, not filler:
+   the first open is the pitch, and the suite measures this corpus —
+   links agreeing with bodies, every category populated, the loose
+   ends the stats count. Four wikilinks point at notes that do not
+   exist, on purpose: market-structure, breathwork, antifragility,
+   the-daily-note. A second brain with no loose ends is finished, and
+   a finished one is fiction. */
+
+/* The seven, in order. Colour is an identity, never an accent — the
+   tokens are absolute, defined in this app's :root for both themes.
+   Trading and Personal Development are the poles: they hold the
+   legend even at zero notes. */
+const CATS = [
+  { id: 'trading', label: 'Trading',              token: '--or-cat-trading' },
+  { id: 'growth',  label: 'Personal Development', token: '--or-cat-growth'  },
+  { id: 'body',    label: 'Body',                 token: '--or-cat-body'    },
+  { id: 'craft',   label: 'Craft',                token: '--or-cat-craft'   },
+  { id: 'mind',    label: 'Mind',                 token: '--or-cat-mind'    },
+  { id: 'world',   label: 'Resources',            token: '--or-cat-world'   },
+  { id: 'other',   label: 'Unfiled',              token: '--or-cat-other'   },
+];
+
+/* Folder and frontmatter aliases, lowercased. Matched on the vault's
+   top folder first and a `category:` frontmatter key second —
+   frontmatter wins. `other` has no alias here because it is the
+   fallback, not a name anybody files under. */
+const CAT_ALIAS = {
+  trading: 'trading', trade: 'trading', trades: 'trading',
+  markets: 'trading', ledger: 'trading', execution: 'trading',
+  growth: 'growth', personal: 'growth', 'personal development': 'growth',
+  self: 'growth', development: 'growth', journal: 'growth',
+  body: 'body', health: 'body', fitness: 'body', training: 'body',
+  sleep: 'body', food: 'body',
+  craft: 'craft', skill: 'craft', skills: 'craft', work: 'craft',
+  building: 'craft', code: 'craft', projects: 'craft',
+  mind: 'mind', philosophy: 'mind', thinking: 'mind',
+  psychology: 'mind', reading: 'mind',
+  resources: 'world', reference: 'world', sources: 'world',
+  inbox: 'world', clippings: 'world', library: 'world', links: 'world',
+};
+
+const SEED = [
+
+  /* ── trading ── the models and the process. No instrument names:
+     the models are the point, not what anybody traded them on. */
+
+  { id: 'trading/models/cisd', title: 'CISD', cat: 'trading',
+    tags: ['model', 'structure'],
+    links: ['trading/models/displacement', 'trading/models/liquidity-sweep',
+            'trading/process/invalidation'],
+    body: `The change in the state of delivery. Price is being delivered one way — a series of candles respecting one side — and then a candle closes through the opposing series. That close is the change. Everything before it was one regime; everything after it is another.
+
+You do not trade the level, you trade the change. A level alone is a line on a chart; a CISD is an event with a before and an after. [[displacement]] confirms the move had intent, and the [[liquidity-sweep]] that usually precedes it tells you whose stops paid for it.
+
+The candle that closes the change is your marker. Price accepted back through it and holding is the thesis gone — [[invalidation]] names the rule.`,
+    words: 122, mtime: 0 },
+
+  { id: 'trading/models/liquidity-sweep', title: 'Liquidity sweep', cat: 'trading',
+    tags: ['model', 'liquidity'],
+    links: ['trading/models/cisd', 'trading/models/draw-on-liquidity',
+            'trading/process/sitting-out'],
+    body: `Stops cluster where everyone can see them — above an equal high, under an obvious low. Price reaches through, takes them, and comes back. The sweep is not the trade; it is the fuel gauge. A move that starts without one has to generate its own orders, and those moves die young.
+
+Watch what happens after the reach. A true sweep rejects fast and closes back inside; acceptance beyond the level is a different fact, and the honest reading is that the level failed. The sweep is the cause and the [[cisd]] is the confirmation, with [[draw-on-liquidity]] saying where the move is owed. Until the close prints, the right response is [[sitting-out]].`,
+    words: 112, mtime: 0 },
+
+  { id: 'trading/models/displacement', title: 'Displacement', cat: 'trading',
+    tags: ['model'],
+    links: ['trading/models/cisd', 'trading/models/premium-discount',
+            'trading/models/liquidity-sweep'],
+    body: `## Energy, not direction
+
+Any candle points somewhere. Displacement is the candle that leaves — a body that dwarfs its neighbours, closing near its extreme, a gap in the deliveries behind it. It is the difference between a market drifting and a market deciding.
+
+You use it as a filter on the [[cisd]]: a change in delivery that happens slowly is a change you should doubt. And you use it for context — displacement out of a [[premium-discount]] extreme carries further than displacement in the middle of a range. If the [[liquidity-sweep]] behind it was shallow, expect the move to be shallow too.`,
+    words: 103, mtime: 0 },
+
+  { id: 'trading/models/draw-on-liquidity', title: 'Draw on liquidity', cat: 'trading',
+    tags: ['model', 'liquidity'],
+    links: ['trading/models/liquidity-sweep', 'trading/models/session-model',
+            'mind/second-order'],
+    body: `Where price is going, not where it is. Every resting pool of orders — an old high, an untraded gap, a clean level everyone has marked — is a magnet, and the market moves from one to the next. The draw is your target-side thesis.
+
+Name it before the session or you will invent one on the fly, and an invented draw always sits wherever your position needs it to. Write it down, then ask what has to happen on the way there: a [[liquidity-sweep]] against the draw first is normal, not a failure, and the [[session-model]] says when the run at it tends to start. This is [[second-order]] thinking applied to price — not what the level is, but what the level makes people do.`,
+    words: 126, mtime: 0 },
+
+  { id: 'trading/models/premium-discount', title: 'Premium and discount', cat: 'trading',
+    tags: ['model'],
+    links: ['trading/models/draw-on-liquidity', 'trading/models/displacement',
+            'trading/models/session-model'],
+    body: `Halve the range that matters and you have the only context that is free. Above the midpoint you are paying premium; below it you are buying at discount. That is all it is, and it is enough to keep you from the one thing that bleeds accounts: buying the top of the leg because the leg is exciting.
+
+You do not buy in premium or sell in discount, whatever the candle looks like. The [[draw-on-liquidity]] gives the destination and this gives permission. When both line up with [[displacement]] out of the extreme you have a trade — the [[session-model]] says when to expect it.`,
+    words: 104, mtime: 0 },
+
+  { id: 'trading/models/session-model', title: 'The session model', cat: 'trading',
+    tags: ['model', 'time'],
+    links: ['trading/process/the-plan', 'trading/models/cisd',
+            'trading/models/premium-discount'],
+    body: `The day has a shape. There is a stretch that builds the range, a stretch that runs it, and a long tail that chops anyone still at the desk. You trade the middle and leave the rest alone.
+
+- Before: mark the levels, name the draw, write [[the-plan]].
+- During: wait for the sweep, wait for the [[cisd]], take the one entry the plan allows.
+- After: flat, whatever happened.
+
+Time of day is the filter that costs nothing and saves the most. An entry pattern in dead hours is a pattern in a market with nobody in it. The old [[market-structure]] note covers the ranges this repeats inside, and [[premium-discount]] tells you which half of the day's range you are standing in.`,
+    words: 123, mtime: 0 },
+
+  { id: 'trading/process/risk-per-idea', title: 'Risk per idea', cat: 'trading',
+    tags: ['process', 'risk'],
+    links: ['trading/process/losing-well', 'trading/process/one-good-trade',
+            'trading/process/the-plan'],
+    body: `One idea, one unit of risk. Not per entry — per idea. If the thesis needs two attempts, both come out of the same unit, because the market does not owe you a fresh allowance for re-trying the thing it already rejected once.
+
+Fix the unit as a fraction of capital and stop tuning it. The number you can hold while [[losing-well]] is smaller than the number that looks right on a winning week, and sizing by conviction is sizing by mood. The whole point of [[one-good-trade]] is that the idea was defined before the money touched it — [[the-plan]] is where the unit gets written down.`,
+    words: 107, mtime: 0 },
+
+  { id: 'trading/process/the-plan', title: 'The plan', cat: 'trading',
+    tags: ['process'],
+    links: ['trading/models/session-model', 'trading/process/sitting-out',
+            'trading/process/invalidation'],
+    body: `Written before the session or it is not a plan, it is a caption on whatever you end up doing.
+
+- The draw, and the level that says you are wrong about it.
+- The one setup you will take, from the [[session-model]].
+- The unit of risk, already decided.
+- The condition for [[sitting-out]] — named now, while it is cheap.
+
+Three lines is enough. The plan is not a forecast; it is a filter you build while calm, for the person you become when price starts moving. Anything not in it does not get traded, and [[invalidation]] is part of the setup, never an afterthought.`,
+    words: 107, mtime: 0 },
+
+  { id: 'trading/process/invalidation', title: 'Invalidation', cat: 'trading',
+    tags: ['process', 'risk'],
+    links: ['trading/models/cisd', 'mind/inversion', 'trading/process/the-plan'],
+    body: `A thesis you cannot kill is not a thesis. Before the entry, write the fact that would prove it wrong — a close back through the [[cisd]] candle, the draw traded into from the wrong side, the time window expiring with nothing in it. A price level is the bluntest of these and still better than none.
+
+The skill is [[inversion]]: do not ask what confirms the idea, ask what buries it, then watch for that. If the burying fact prints, you are out — not smaller, out. Moving the stop is editing the past. [[the-plan]] holds the invalidation precisely so the person watching the trade does not get a vote.`,
+    words: 111, mtime: 0 },
+
+  { id: 'trading/process/the-review', title: 'The review', cat: 'trading',
+    tags: ['process', 'review'],
+    links: ['trading/process/the-log', 'trading/process/losing-well',
+            'growth/weekly-review'],
+    body: `The session is not over when you go flat. It is over when it is written up.
+
+Grade the process, never the outcome. A planned trade that lost is a pass; an unplanned trade that paid is a fail, and the review says so in those words. Pull the entry from [[the-log]], mark it against the plan, and note the one thing you would repeat and the one you would not.
+
+Do it the same day. Memory is generous by morning, and it flatters you in exactly the places [[losing-well]] needs you honest. The [[weekly-review]] then reads seven of these instead of asking you to remember a week.`,
+    words: 108, mtime: 0 },
+
+  { id: 'trading/process/one-good-trade', title: 'One good trade', cat: 'trading',
+    tags: ['process'],
+    links: ['trading/process/the-plan', 'trading/process/sitting-out',
+            'trading/process/risk-per-idea'],
+    body: `The day's ambition, whole. One idea, planned, executed, reviewed — that is a finished day, and a second trade needs a second thesis, not a leftover feeling from the first.
+
+Most damage is not one bad decision; it is the third unplanned entry taken to repair the first. The cap is not a limit on opportunity, it is a limit on tilt. If the market gives nothing that matches [[the-plan]], then [[sitting-out]] was the good trade, and it counts.
+
+**Done is a number of decisions, not a number of tickets.** Size and frequency both answer to [[risk-per-idea]].`,
+    words: 97, mtime: 0 },
+
+  { id: 'trading/process/sitting-out', title: 'Sitting out', cat: 'trading',
+    tags: ['process', 'discipline'],
+    links: ['growth/boredom', 'trading/process/the-plan'],
+    body: `Flat is a position. Most sessions do not offer the setup, and the work on those days is to watch the whole thing happen without you.
+
+The urge to act is not information. It is [[boredom]] wearing a costume, and it shows up loudest exactly when the range is thinnest. You do not need a reason to stay out; you need a reason to get in, and the reason has to be in [[the-plan]] before the session opens. A day out of the market costs nothing. It only feels expensive because nothing is the one result you cannot screenshot.`,
+    words: 99, mtime: 0 },
+
+  { id: 'trading/process/the-log', title: 'The log', cat: 'trading',
+    tags: ['process', 'review'],
+    links: ['craft/plain-text', 'trading/process/the-review'],
+    body: `Every trade, the day it happened: date, setup, unit, result, and one honest sentence. The sentence is the part that appreciates — the numbers say what happened, the sentence says who you were while it did.
+
+Keep it in [[plain-text]], one file per day, named \`YYYY-MM-DD\`. A log you can search at year-end is a dataset; a log inside an app you abandon is a diary you lost. Feed it into [[the-review]] the same evening, while the sentence is still true.`,
+    words: 81, mtime: 0 },
+
+  { id: 'trading/process/losing-well', title: 'Losing well', cat: 'trading',
+    tags: ['process', 'risk'],
+    links: ['trading/process/risk-per-idea', 'trading/process/the-review'],
+    body: `A loss is inventory, not a verdict. The plan defines where you are wrong; the loss is the fee for finding out, priced in advance by [[risk-per-idea]]. Taken at the planned level, at the planned size, a loss is the system working.
+
+What you are guarding against is not the loss but the response to it — the revenge entry, the doubled size, the stop that migrates. The tell is speed: an honest loss leaves you slow and unhurried, a tilted one makes the next click urgent. Write every one into [[the-review]] the same day. A loss you have written down stops arguing with you.`,
+    words: 105, mtime: 0 },
+
+  /* ── growth ── the other pole. The standard, the chain, and the
+     places attention actually goes. */
+
+  { id: 'growth/the-standard', title: 'The standard', cat: 'growth',
+    tags: ['principle'],
+    links: ['growth/identity-votes', 'growth/discipline', 'growth/weekly-review'],
+    body: `The standard is what you do when nobody is auditing. Not the peak week — the floor. You raise a floor by refusing once, in the moment it costs something, and then again.
+
+> You do not rise to the occasion. You fall to the level of the floor you kept.
+
+Keep the floor small enough to hold on the worst day you can foresee. A standard with exceptions is a preference, and a preference bends exactly when it matters. Every held floor is one of the [[identity-votes]]; checking that it held is [[discipline]]'s job daily and the [[weekly-review]]'s job on the seventh.`,
+    words: 103, mtime: 0 },
+
+  { id: 'growth/the-avoided-thing', title: 'The avoided thing', cat: 'growth',
+    tags: ['principle'],
+    links: ['growth/the-standard', 'growth/saying-no', 'growth/boredom'],
+    body: `There is one task you have moved to tomorrow four times. It is never the biggest one; it is the one with a feeling attached — a conversation, an admission, a start you might fumble.
+
+The avoidance costs more than the task. It sits in the background taxing everything else you do, and the tax compounds daily. So the rule: the avoided thing goes first, before the day gets a say. Not finished — started, ten honest minutes.
+
+Naming it is most of the work. [[the-standard]] holds the floor, [[saying-no]] clears the room, and what is left in the room staring at you is usually it. The discomfort is [[boredom]]'s louder cousin, and it fades the same way: by staying.`,
+    words: 120, mtime: 0 },
+
+  { id: 'growth/attention', title: 'Attention', cat: 'growth',
+    tags: ['principle', 'focus'],
+    links: ['growth/environment-design', 'growth/saying-no', 'growth/boredom'],
+    body: `Attention is the budget everything else is paid from. Not time — you had time all along; you spent the attention elsewhere and called it busyness.
+
+Treat it as a stock that depletes. It is highest early, and every switch levies a toll on what remains. Guard it structurally, not heroically — the phone in another room beats the phone resisted, which is the whole argument of [[environment-design]], and [[saying-no]] is attention spent once, saved daily.
+
+The taste for it grows in silence. Sit with one thing past the first urge to leave and the urge weakens; that is [[boredom]] doing its work.`,
+    words: 103, mtime: 0 },
+
+  { id: 'growth/sleep-is-an-input', title: 'Sleep is an input', cat: 'growth',
+    tags: ['principle', 'sleep'],
+    links: ['body/sleep-debt', 'growth/the-chain', 'growth/attention'],
+    body: `Sleep is an input, not a reward. You do not earn it by finishing; you spend it in advance, on tomorrow's judgement, mood and restraint. Treated as the thing you trim when the day runs long, it quietly trims you back — the running bill is [[sleep-debt]].
+
+The lever is the bedtime, not the alarm. The alarm is where the night is settled; the bedtime is where it is decided. Fix it, defend it like an appointment, and the mornings fix themselves — which is why a kept bedtime extends [[the-chain]] more reliably than any morning habit, and why a defended evening is the cheapest [[attention]] you will buy all week.`,
+    words: 111, mtime: 0 },
+
+  { id: 'growth/goal-vs-direction', title: 'A goal and a direction', cat: 'growth',
+    tags: ['principle'],
+    links: ['growth/identity-votes', 'growth/the-chain'],
+    body: `A goal is a place; a direction is a bearing. The place either arrives or it does not, and both outcomes end the journey — one in a pause that feels like completion, the other in a quit that feels like verdict.
+
+A direction cannot be finished, only kept or left. Stronger than last month outlives any number by summer. So set the direction first, use goals only as milestones along it, and never let a missed milestone argue that the bearing was wrong.
+
+Progress along a direction is counted in [[identity-votes]], and its outward sign is [[the-chain]] — unbroken not because you never miss, but because the bearing survives the miss.`,
+    words: 112, mtime: 0 },
+
+  { id: 'growth/the-chain', title: 'The chain', cat: 'growth',
+    tags: ['habit'],
+    links: ['growth/discipline', 'growth/goal-vs-direction'],
+    body: `Do not break the chain — but define breaking honestly. A chain that dies on one missed day gets abandoned the first time life happens; a chain that tolerates the honest miss survives the year.
+
+The chain measures showing up, never output. Two minutes counts. The point is that tomorrow's decision is pre-made — you are someone who does this, so the question of whether you will today never opens for bidding. That pre-decision is what [[discipline]] mostly is on the good days, and it is aimed by [[goal-vs-direction]]: the chain is how a bearing looks up close.`,
+    words: 98, mtime: 0 },
+
+  { id: 'growth/environment-design', title: 'Environment design', cat: 'growth',
+    tags: ['habit'],
+    links: ['growth/attention', 'growth/the-avoided-thing'],
+    body: `You do not fight the environment; you lose to it slowly and blame yourself. So change the fight to one you can win before it starts: shape the room.
+
+- Make the kept thing the near thing — the book on the pillow, the shoes at the door.
+- Make the dropped thing expensive — the app logged out, the phone in another room.
+- One clear surface for the work; a surface that holds one thing asks for that thing.
+
+Willpower is what you spend when the room is against you. [[attention]] is the resource being defended, and half of [[the-avoided-thing]]'s power evaporates when its opposite is the path of least resistance.`,
+    words: 113, mtime: 0 },
+
+  { id: 'growth/weekly-review', title: 'The weekly review', cat: 'growth',
+    tags: ['review'],
+    links: ['growth/goal-vs-direction', 'someday', 'growth/the-standard'],
+    body: `Seven days, one sitting, three questions. What moved. What stalled. What gets dropped.
+
+The review is navigation, not a report card. You are checking the bearing against [[goal-vs-direction]], not grading the week out of ten — a bad week on the right bearing beats a good week on the wrong one.
+
+Empty the [[someday]] list while you are there: promote at most one thing, delete one thing you no longer mean. Then set the single priority for the week ahead and let the rest queue. Held weekly, it keeps [[the-standard]] honest, because nothing erodes a floor faster than not looking at it.`,
+    words: 102, mtime: 0 },
+
+  { id: 'growth/discipline', title: 'Discipline', cat: 'growth',
+    tags: ['principle', 'discipline'],
+    links: ['growth/environment-design', 'trading/process/sitting-out',
+            'growth/the-standard'],
+    body: `Discipline is not intensity. It is remembering what you wanted, at the exact moment something cheaper is available.
+
+Most of it can be outsourced: [[environment-design]] removes the choice, routine removes the negotiation, and what remains — the genuinely hard moment — is rare enough to win. Spending willpower where structure would do is bad engineering.
+
+It compounds sideways, too. Kept in one place it gets cheaper everywhere else, which is why [[sitting-out]] at the desk and the rest day under the bar are the same skill in different clothes. The reference is [[the-standard]]. Not perfection — the floor, held.`,
+    words: 99, mtime: 0 },
+
+  { id: 'growth/boredom', title: 'Boredom', cat: 'growth',
+    tags: ['principle', 'focus'],
+    links: ['growth/attention', 'growth/the-chain'],
+    body: `Boredom is a withdrawal symptom, and the drug is novelty. Every feed you scroll retrains the threshold, until a quiet hour reads as an emergency.
+
+Do not treat it as a problem; it is the doorway. On the other side of the first ten minutes of an unstimulated task is the deep engagement everything worthwhile requires — the [[attention]] you keep trying to summon on demand lives there. So schedule some: a walk without audio, a queue without the phone.
+
+The tolerance rebuilds faster than you expect, and [[the-chain]] gets easier to keep once the alternative has lost its glow.`,
+    words: 100, mtime: 0 },
+
+  { id: 'growth/identity-votes', title: 'Identity votes', cat: 'growth',
+    tags: ['habit', 'principle'],
+    links: ['growth/the-standard', 'growth/the-chain'],
+    body: `Every action is a vote for the kind of person you are becoming, and no single vote decides the election. That cuts both ways: the missed day does not disqualify you, and the kept day does not crown you. Volume decides.
+
+So aim at the identity, not the outcome — someone who trains outlasts any target, because outcomes end and identities compound. Cast the small vote on the bad day; it counts double, because it was cast against the wind.
+
+[[the-standard]] defines the ballot. [[the-chain]] is the tally, kept where you can see it.`,
+    words: 94, mtime: 0 },
+
+  { id: 'growth/saying-no', title: 'Saying no', cat: 'growth',
+    tags: ['principle', 'focus'],
+    links: ['growth/attention', 'mind/via-negativa', 'growth/the-avoided-thing'],
+    body: `Every yes is a purchase, and the currency is [[attention]]. A yes to the good is a no to the best, silently, which is how a diary fills with things you would not choose again.
+
+The default has to be no — polite, fast, unexplained. Explanations are openings for negotiation, and a negotiated no is a slow yes. Keep a shortlist of what gets the automatic yes; everything else earns its place or is declined.
+
+The refusals are where the shape comes from — [[via-negativa]], applied to a calendar. And the hardest no is to the appealing distraction that lets you keep avoiding [[the-avoided-thing]].`,
+    words: 104, mtime: 0 },
+
+  /* ── body ── training, sleep, food. The inputs. */
+
+  { id: 'body/the-split', title: 'The split', cat: 'body',
+    tags: ['training'],
+    links: ['body/deload', 'body/food-rules'],
+    body: `Push, pull, legs, rest — the rotation, and rest is inside it, not a lapse of it. A day you chose not to train is a decision worth recording; a day you failed to train is a different fact, and the split keeps you honest about which one happened.
+
+The order matters less than the rotation completing. Miss a day and the split slides forward — you do not skip the day, you delay it. Progression stays boring: small additions, held form. When the additions stall for two weeks running, the answer is rarely more; it is the [[deload]], and a look at what the [[food-rules]] were doing that fortnight.`,
+    words: 110, mtime: 0 },
+
+  { id: 'body/sleep-debt', title: 'Sleep debt', cat: 'body',
+    tags: ['sleep'],
+    links: ['body/deload', 'body/morning-walk'],
+    body: `Sleep debt is real debt: it accrues interest, and it does not forgive itself over a weekend. Two short nights cost you the third day — reaction, mood, appetite, all quietly worse while you self-report as fine. The mis-report is the dangerous part.
+
+You cannot bank sleep in advance, but you can stop borrowing, and the repayment schedule is boring: the same bedtime, kept, for as long as it takes.
+
+Debt shows in training before it shows anywhere else. The stalled lift argues for a [[deload]] when the honest fix is a fortnight of full nights — the [[morning-walk]] is where you find out which, because a tired walk does not lie.`,
+    words: 112, mtime: 0 },
+
+  { id: 'body/morning-walk', title: 'The morning walk', cat: 'body',
+    tags: ['training', 'routine'],
+    links: ['body/sleep-debt', 'body/hydration'],
+    body: `Out the door before the phone gets a vote. Twenty minutes, no audio.
+
+The walk is three tools in one coat: light in the eyes to set the day's clock, easy movement to spend the night's stiffness, and a stretch of quiet before anything starts asking. Pace does not matter. Missing the point does — a walk with a podcast is exercise; a walk without one is maintenance for the head.
+
+Do it before deciding whether to. The [[breathwork]] note pairs with it on the rough mornings, and after a short night it is the [[sleep-debt]] collection notice you actually read. The [[hydration]] rule starts here too: the first glass is before the door, not after the coffee.`,
+    words: 118, mtime: 0 },
+
+  { id: 'body/hydration', title: 'Water', cat: 'body',
+    tags: ['routine'],
+    links: ['body/food-rules', 'body/morning-walk'],
+    body: `Three litres, counted at the end of the day, not managed through it. The habit is a tick, not a spreadsheet.
+
+Front-load it. The first litre before midday does more than the third after dinner, and the late catch-up mostly buys you a broken night. Thirst is a lagging signal — by the time it speaks you are already paying in focus, and in appetite, where it impersonates hunger convincingly enough to beat the [[food-rules]] from inside.
+
+Start on the [[morning-walk]] rule: a glass before the door. After that the day mostly keeps itself, provided the water is where you are — carry it, or you will drink whatever was nearer.`,
+    words: 111, mtime: 0 },
+
+  { id: 'body/deload', title: 'The deload', cat: 'body',
+    tags: ['training'],
+    links: ['body/the-split', 'mind/via-negativa', 'body/sleep-debt'],
+    body: `Every sixth week or so: the same movements, half the load, on purpose. The deload is training — adaptation happens in recovery, and recovery needs a week where the stress stops arriving faster than it is absorbed.
+
+It is the hardest week to take, precisely because nothing hurts yet. You feel strong, the numbers are moving, and pulling back reads as waste. That read is wrong the way skipping sleep is wrong: the bill has not arrived yet. Plan it into [[the-split]] in advance so it never depends on how you feel.
+
+Doing less, deliberately, as a method — [[via-negativa]] under a barbell. If you cannot face it, check [[sleep-debt]]; the resistance is usually fatigue talking.`,
+    words: 116, mtime: 0 },
+
+  { id: 'body/food-rules', title: 'Food rules', cat: 'body',
+    tags: ['routine', 'food'],
+    links: ['growth/environment-design', 'body/hydration', 'body/the-split'],
+    body: `Rules, not tracking. Counting every meal is a part-time job you will quit; a short list of rules is a shape you can hold indefinitely.
+
+- Protein anchors every plate.
+- Nothing sweet before the day's work is done.
+- The default meal is boring, repeated, and decided once.
+
+The last one is [[environment-design]] on a plate: what is in the house is what gets eaten, so the shopping list is where the diet is actually decided. Appetite lies twice a day and [[hydration]] catches one of the lies. Training days get fed properly — see [[the-split]]; under-eating on a heavy day is not discipline, it is a slower way to stall.`,
+    words: 112, mtime: 0 },
+
+  /* ── craft ── how the work gets built. */
+
+  { id: 'craft/small-tools', title: 'Small tools', cat: 'craft',
+    tags: ['tools'],
+    links: ['craft/plain-text', 'craft/one-file', 'craft/naming'],
+    body: `Prefer the tool you can hold in your head. A small tool does one thing, tells you what it did, and still works in ten years, because there is nothing in it to rot.
+
+Big tools promise everything and bill you in migrations, updates and lock-in — the price is never on the label. Before adopting anything, ask what it replaces and what it will cost to leave. A tool you cannot leave owns you.
+
+Chain small ones instead: [[plain-text]] between them is the joint that never seizes. The same instinct scales down to [[one-file]] projects, and down again to [[naming]] — the craft is mostly choosing what to leave out.`,
+    words: 111, mtime: 0 },
+
+  { id: 'craft/plain-text', title: 'Plain text', cat: 'craft',
+    tags: ['tools'],
+    links: ['craft/small-tools', 'trading/process/the-log'],
+    body: `Plain text is the only format with a fifty-year track record and no owner. Everything else you write in is a bet on a company's roadmap, and their roadmap does not know you exist.
+
+Notes, logs, plans, all of it: files you can read on anything, search with \`grep\`, diff, back up by copying. The friction you save is not typing — it is never again migrating a decade of thinking out of a dying app.
+
+This is why [[small-tools]] compose: they all speak text. The [[the-log|log]] lives this way for the same reason. The day you want to ask a year of entries one question is the day the format decides whether you can.`,
+    words: 115, mtime: 0 },
+
+  { id: 'craft/naming', title: 'Naming', cat: 'craft',
+    tags: ['practice'],
+    links: ['craft/plain-text', 'craft/one-file'],
+    body: `A name is a claim about what a thing is, and a bad one is a small lie you re-read every day. Name things for what they are, not for what they were or how they work — the second kind expires, and an expired name misleads with a straight face.
+
+If you cannot name it, you do not understand it yet. The struggle is diagnostic, not clerical. And where two things share a name, one quietly eats the other — a folder of [[plain-text]] notes lives or dies on this.
+
+Small scope earns a short name; wide scope has to pay for a longer, truer one. The same economy as [[one-file]]: what you save in ceremony, spend on clarity.`,
+    words: 120, mtime: 0 },
+
+  { id: 'craft/one-file', title: 'One file', cat: 'craft',
+    tags: ['practice', 'tools'],
+    links: ['craft/small-tools', 'craft/finish-things'],
+    body: `One file, if it fits. A project in a single file has no build, no broken import on a new machine, no directory to excavate — you open it and you are everywhere.
+
+The limit is real. Past a few thousand lines the file needs discipline the folder used to impose for free: order matters more, names carry more, every section has to announce itself. Those costs are visible, which is the point — a folder hides its mess in a tree; a file makes you scroll past yours.
+
+Start with one, split when it hurts, not before. [[small-tools]] applies to structure too, and [[finish-things]] is easier when there is only one thing to finish.`,
+    words: 115, mtime: 0 },
+
+  { id: 'craft/finish-things', title: 'Finishing', cat: 'craft',
+    tags: ['practice'],
+    links: ['craft/deliberate-practice', 'craft/one-file'],
+    body: `Ninety percent done is zero percent shipped. The unfinished project pays nothing, teaches half of what it could, and charges rent in the back of your head for as long as it stays open.
+
+Finishing is its own skill, distinct from starting and harder to practise, because every project ends exactly once. So make more endings: cut scope until the end is near, then hit it. The last stretch — the tests, the notes, the cleanup — is where [[deliberate-practice]] actually lives, since it is the part you always avoid.
+
+A [[one-file]] project helps by making done visible: one thing, shipped or not. Abandoning deliberately is fine. Drifting away is not — write the line that closes it either way.`,
+    words: 120, mtime: 0 },
+
+  { id: 'craft/deliberate-practice', title: 'Deliberate practice', cat: 'craft',
+    tags: ['practice'],
+    links: ['growth/boredom', 'craft/finish-things'],
+    body: `Repetition is not practice. Practice is repetition at the edge — the rep you might fail, attended to, the miss examined afterwards. Everything inside the comfortable range is performance, and performance builds nothing; it spends what practice built.
+
+The recipe is unglamorous: isolate one weakness, design the rep that stresses it, keep the feedback loop shorter than your excuse-making. It will feel bad on schedule — the edge is uncomfortable by definition, and [[boredom]] arrives right before the improvement does.
+
+Keep it small and daily rather than heroic and rare. Then [[finish-things]] with it: practice that never feeds a finished thing curdles into a hobby of preparation.`,
+    words: 107, mtime: 0 },
+
+  /* ── mind ── the thinking tools everything else borrows. */
+
+  { id: 'mind/first-principles', title: 'First principles', cat: 'mind',
+    tags: ['thinking'],
+    links: ['mind/inversion', 'mind/beginners-mind'],
+    body: `Reason from what is true, not from what is done. Most of what you inherit — habits, prices, workflows, opinions — is a cached answer to a question someone else asked, in circumstances that no longer hold. The cache is stale and nobody flags it.
+
+To rebuild: list what you actually know to be true, discard the rest, and reconstruct upward from the short list. It is expensive, which is why you reserve it for what matters and copy convention everywhere else — rebuilding everything from scratch is not rigour, it is procrastination in a lab coat.
+
+[[inversion]] is the cheap first pass. [[beginners-mind]] is the posture that lets you see the cached answer at all.`,
+    words: 116, mtime: 0 },
+
+  { id: 'mind/inversion', title: 'Inversion', cat: 'mind',
+    tags: ['thinking'],
+    links: ['mind/first-principles', 'mind/via-negativa'],
+    body: `Solve it backwards. Instead of asking how to succeed, ask what would guarantee failure — then stop doing the items on that list. The failure list is always easier to write, because failure has fewer moving parts than success and you have personally tested more of them.
+
+Avoiding stupidity beats seeking brilliance, and beats it on reliability: brilliance needs conditions, while not-stupid works every day. Before any plan, run it once through the mirror — what would make this a disaster — and patch those holes first.
+
+It is [[first-principles]]' scrappy sibling, and one of the removals catalogued in [[via-negativa]]: improvement by subtraction, the kind that never overshoots.`,
+    words: 108, mtime: 0 },
+
+  { id: 'mind/second-order', title: 'Second-order effects', cat: 'mind',
+    tags: ['thinking'],
+    links: ['mind/first-principles', 'mind/inversion'],
+    body: `And then what? The first-order effect is the one everybody prices; the second is where the outcome actually lives. The discount makes demand, the demand makes shortage, the shortage makes a queue you did not model.
+
+Ask the question twice more than feels natural. Most bad decisions are first-order good — that is exactly why they get made — and most good ones are first-order costly, which is why they go unclaimed long enough for you to have them.
+
+The habit is mechanical, not clever: for each consequence, write the consequence of that. It composes with [[first-principles]] — derive what is true, then trace where it leads — and with [[inversion]], when you walk the chain backwards from the disaster instead.`,
+    words: 121, mtime: 0 },
+
+  { id: 'mind/via-negativa', title: 'Via negativa', cat: 'mind',
+    tags: ['thinking'],
+    links: ['mind/inversion'],
+    body: `Improvement by removal. The body gets healthier faster by subtracting the harmful than by adding the optimal; the schedule, the portfolio and the sentence obey the same law. Addition has a failure mode — more surface, more to maintain, more to go wrong — that subtraction structurally lacks.
+
+So when something underperforms, look for what to remove before shopping for what to add. The removed thing cannot break, cannot distract, and cannot lie to you; robustness built this way approaches [[antifragility]] from the cheap side.
+
+Knowing what to leave out is the expensive knowledge, and every craft's best converge on it. [[inversion]] finds the candidates: list what does the damage, then delete from the top.`,
+    words: 115, mtime: 0 },
+
+  { id: 'mind/circle-of-competence', title: 'The circle of competence', cat: 'mind',
+    tags: ['thinking'],
+    links: ['trading/process/sitting-out', 'mind/beginners-mind'],
+    body: `Know the boundary. Inside it your judgement is data; outside it your judgement is mood with a vocabulary, and the two feel identical from the inside — confidence does not flag the border on the way past.
+
+The size of the circle matters less than the honesty of its edge. A small circle precisely known beats a large one with a disputed frontier, because every disaster lives in the overestimate. Real competence includes a map of where it stops.
+
+So act inside, study outside, and never bet on the boundary itself. When a decision falls beyond the edge, the expert move is [[sitting-out]] — declining is a verdict, not the absence of one. The edge moves slowly; [[beginners-mind]] keeps the map current.`,
+    words: 122, mtime: 0 },
+
+  { id: 'mind/memento-mori', title: 'Memento mori', cat: 'mind',
+    tags: ['thinking'],
+    links: ['growth/goal-vs-direction', 'mind/via-negativa'],
+    body: `You will die, and the calendar will not say when. This is not morbid; it is the only fact that prices the others correctly.
+
+> You could leave life right now. Let that determine what you do and say and think.
+
+Held daily, it is a filter. The grudge shrinks, the feed loses its grip, the deferred conversation stops deferring. Nothing clarifies a list like a deadline nobody can move.
+
+It is the closing argument for [[goal-vs-direction]] — you may not get the arrival, so the bearing has to be worth walking today — and the companion of [[via-negativa]]: with finite days, everything you remove returns time, and time is the one budget with no top-up.`,
+    words: 116, mtime: 0 },
+
+  { id: 'mind/beginners-mind', title: "Beginner's mind", cat: 'mind',
+    tags: ['thinking'],
+    links: ['mind/first-principles', 'mind/circle-of-competence'],
+    body: `In the beginner's mind there are many possibilities; in the expert's there are few. Expertise is compression, and compression discards — usually the noise, sometimes the signal that would have told you the game changed.
+
+So hold both: the expert's standards, the beginner's questions. Ask the obvious question on purpose, especially when you are the senior person in the room and the question feels beneath you. That feeling is the tell.
+
+The practice is small. Explain the basics from scratch now and then, and notice where the explanation leans on obviously — every obviously is a cached step, and [[first-principles]] names the cache. The [[circle-of-competence]] stays honestly mapped only if the interior gets re-surveyed too.`,
+    words: 115, mtime: 0 },
+
+  /* ── world ── reference. Each of these exists to serve a note in
+     another category, which is why almost every link here crosses. */
+
+  { id: 'resources/expectancy', title: 'Expectancy', cat: 'world',
+    tags: ['reference', 'risk'],
+    links: ['resources/bet-sizing', 'trading/process/risk-per-idea'],
+    body: `The one number that says whether a method makes money: win rate times average win, minus loss rate times average loss. Per attempt, in units of risk.
+
+What it mostly teaches is that win rate is a vanity metric. A method that wins a third of the time pays handsomely if the winners are large, and a method that wins nine in ten can still bleed. The pair moves together; you cannot tune one without paying in the other.
+
+It needs a sample — twenty attempts is a rumour, a hundred starts to be a fact. It is the ground [[bet-sizing]] builds on, and the reason [[risk-per-idea]] holds the unit constant: expectancy in units only means something if the unit does.`,
+    words: 121, mtime: 0 },
+
+  { id: 'resources/spaced-repetition', title: 'Spaced repetition', cat: 'world',
+    tags: ['reference', 'learning'],
+    links: ['craft/deliberate-practice', 'resources/habit-loops'],
+    body: `Memory decays on a curve, and the curve is exploitable: review a thing just before you would have forgotten it and the next forgetting takes longer. Space the reviews out — a day, three, a week, a month — and a fact moves into storage that holds for years, at a cost of minutes.
+
+Cramming feels better and works worse. The difficulty of a barely-successful recall is the active ingredient, not a sign of failure — the brain consolidates whatever it is made to retrieve.
+
+The same law is why [[deliberate-practice]] revisits a weakness on a schedule instead of once, and why [[habit-loops]] deepen with repetition: behaviour is retrieved too.`,
+    words: 110, mtime: 0 },
+
+  { id: 'resources/circadian-light', title: 'Light and the clock', cat: 'world',
+    tags: ['reference', 'sleep'],
+    links: ['growth/sleep-is-an-input', 'body/morning-walk'],
+    body: `The clock in your head is set by light, and it is set every day whether you choose the settings or not.
+
+Morning light — outdoors, inside an hour of waking — anchors the whole cycle: alertness now, the sleep signal on schedule fourteen-odd hours later. Indoor light is a rounding error; even an overcast sky is many times brighter than a lit room. Evening screens run the same experiment in reverse, telling the clock it is noon at midnight.
+
+This is the mechanism under [[sleep-is-an-input]], and the unglamorous reason the [[morning-walk]] earns its slot: the walk is a light dose wearing exercise clothes.`,
+    words: 104, mtime: 0 },
+
+  { id: 'resources/bet-sizing', title: 'Bet sizing', cat: 'world',
+    tags: ['reference', 'risk'],
+    links: ['trading/process/risk-per-idea', 'resources/expectancy'],
+    body: `Given an edge, how much? Too small and the edge is wasted; too big and variance kills you before the average arrives — with a real edge and oversized bets, ruin is not unlucky, it is scheduled.
+
+The optimal fraction grows with the edge and shrinks with the variance, and it is always startlingly smaller than instinct suggests. The practical rule: estimate the edge conservatively, then take half of what the arithmetic allows, because your estimate is the shakiest input in it.
+
+Sizing is decided before the attempt, in cold blood. [[risk-per-idea]] is this note operationalised, and [[expectancy]] supplies the edge it needs as input.`,
+    words: 105, mtime: 0 },
+
+  { id: 'resources/habit-loops', title: 'Habit loops', cat: 'world',
+    tags: ['reference', 'learning'],
+    links: ['resources/spaced-repetition', 'growth/the-chain'],
+    body: `## Cue, routine, reward
+
+The loop every habit runs on, kept or unwanted alike. The cue fires, the routine executes, the reward teaches the brain to fire the cue again. None of it consults your intentions.
+
+To build one: make the cue unmissable and the first step trivial. To break one: do not fight the routine — starve the cue, or keep the cue and swap the routine under it. Willpower attacks the middle of the loop, which is its strongest link; design attacks the ends.
+
+Repetition consolidates the wiring the same way [[spaced-repetition]] consolidates recall. This is the machinery [[the-chain]] rides on — the chain is a reward acting on a cue you can see.`,
+    words: 116, mtime: 0 },
+
+  /* ── other ── two notes that refuse a folder, so Unfiled is a fact
+     on the map rather than a theory in the legend. */
+
+  { id: 'someday', title: 'Someday', cat: 'other',
+    tags: [],
+    links: ['growth/weekly-review', 'loose-thread', 'craft/finish-things'],
+    body: `The list of things you are not doing. A parked idea stops circling the head the moment it has a place to land, and this is the place: no dates, no order, no commitment — parking is the whole feature.
+
+- The reading queue past the third book.
+- The project after the current one.
+- The trip, the tool, the redesign.
+
+Review it during the [[weekly-review]]: promote at most one thing, delete anything you no longer mean, because a someday list that only grows is a guilt list. Whatever resists filing goes to [[loose-thread]] first, and a thing promoted off this list deserves an ending — [[finish-things]] — or it boomerangs back on. An idea for [[the-daily-note]] has sat here longer than most, which is either a verdict or a queue.`,
+    words: 132, mtime: 0 },
+
+  { id: 'loose-thread', title: 'Loose thread', cat: 'other',
+    tags: [],
+    links: ['someday', 'craft/naming'],
+    body: `A note with no home yet, kept deliberately homeless. Filing pressure is real: give everything a category on arrival and the awkward ideas — the ones spanning two boxes, or fitting none — get forced somewhere wrong and lost to the wrong-shaped drawer.
+
+So this is the airlock. A thought sits here until it earns a place or admits it belongs on [[someday]]. Most reveal themselves within a week; the ones that do not are usually two thoughts sharing a sentence, and splitting them is the filing.
+
+The test for readiness is [[naming]]: when you can name it truly, you know what it is, and what it is tells you where it lives.`,
+    words: 113, mtime: 0 },
+
+];
+
+/* ─── 2 · PREAMBLE ─── After the seed it validates against, before
+   everything that reads state. */
+
+const KEY = 'orrery.v1';
+
+/* The parsed vault goes to IndexedDB, not to localStorage. A real vault
+   is megabytes of markdown and localStorage has five to give the WHOLE
+   ORIGIN — the ledger lives on that origin too, so an index written
+   here would not merely fail to save, it would take the money down with
+   it on the way. Only the handful of small decisions below share a key
+   with anything. */
+const IDB = 'ORRERY';
+
+/* ── the stored shape ──
+   { v, pos, cat, fold, sel, only, view, vault }
+
+   REPAIRED FIELD BY FIELD, NEVER DISCARDED, and the reason is that the
+   fields are independent. A fold map that came back as a string is one
+   panel opening on the wrong side; throwing the whole object out over
+   it costs you every node you have ever dragged into place. Positions
+   are the part that cannot be recomputed — the layout can always draw
+   a fresh map, but it cannot know where you decided a note belongs.
+
+   The repair goes a level deeper than the field for `pos`, because one
+   entry saved as [NaN, 12] is one node, not the map.
+
+   Category ids ARE checked against CATS, and dropped when unknown. The
+   seven are code, not data — nothing in this app can write an eighth —
+   so an unrecognised id is damage, not a filing. And it is damage that
+   spreads: an unknown id becomes `var(--or-cat-x)` and `url(#orGlow-x)`
+   downstream, and an invalid custom property does not fall back, it
+   inherits. Dropping the entry costs one click to re-file; keeping it
+   costs a colour that lies.
+
+   localStorage throws on ACCESS in private browsing and in a sandboxed
+   frame — on the property, before any read. Touching it bare would take
+   the page down, so every touch of it in this file is wrapped and the
+   failure is a default shape rather than a black screen. */
+function orRead() {
+  const out = { v: 1, pos: {}, cat: {}, fold: {}, sel: null, only: null,
+                view: 'map', vault: null };
+  let raw = null;
+  try { raw = localStorage.getItem(KEY); } catch (e) { return out; }
+  if (!raw) return out;
+
+  let v = null;
+  try { v = JSON.parse(raw); } catch (e) {
+    /* Nothing left to repair — the string is not JSON. Keep the wreckage
+       under its own key so it can be read out by hand later, and carry
+       on with a clean shape rather than refusing to start. */
+    try { localStorage.setItem(KEY + '.corrupt.' + Date.now(), raw); } catch (_) {}
+    return out;
+  }
+  if (!v || typeof v !== 'object') return out;
+
+  const map = (o) => (o && typeof o === 'object' && !Array.isArray(o)) ? o : {};
+  const str = (s) => (typeof s === 'string' && s) ? s : null;
+  /* Seed owns the shape of CATS; this only needs the ids. */
+  const cats = new Set(Array.isArray(CATS) ? CATS.map(c => c && c.id)
+                                           : Object.keys(CATS));
+
+  const pos = map(v.pos);
+  for (const id in pos) {
+    const p = pos[id];
+    if (Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]))
+      out.pos[id] = [p[0], p[1]];
+  }
+  const cat = map(v.cat);
+  for (const id in cat) if (cats.has(cat[id])) out.cat[id] = cat[id];
+
+  /* Only `true` is worth storing: the panels default shut, so a missing
+     entry and a false one mean the same thing and one of them is noise. */
+  const fold = map(v.fold);
+  for (const id in fold) if (fold[id] === true) out.fold[id] = true;
+
+  /* `sel` is a note id and notes are not knowable here — whoever opens
+     it has to survive a note that no longer exists anyway. `only` is
+     ours to check, and an isolate on a category that does not exist is
+     an empty map with no visible reason. */
+  out.sel  = str(v.sel);
+  out.only = cats.has(v.only) ? v.only : null;
+  if (v.view === 'vault') out.view = 'vault';
+
+  if (v.vault && typeof v.vault === 'object' && !Array.isArray(v.vault)) {
+    out.vault = {
+      name: str(v.vault.name) || 'Vault',
+      at: Number.isFinite(v.vault.at) ? v.vault.at : 0,
+      n:  Number.isFinite(v.vault.n) ? Math.max(0, Math.round(v.vault.n)) : 0,
+    };
+  }
+  return out;
+}
+
+/* Shallow-merge onto a FRESH read rather than onto a cached copy. Two
+   writes from opposite corners of the app — a drag saving `pos` and the
+   legend saving `only` — cannot then clobber each other's field, and a
+   damaged field is repaired on the way past instead of being written
+   straight back out damaged.
+
+   A full quota is swallowed and reported by the return value. Nothing
+   stored here is worth taking the page down for: the map on screen is
+   still correct, it just will not survive the reload, and the caller
+   that cares can say so. */
+function orWrite(patch) {
+  const next = orRead();
+  for (const k in patch) next[k] = patch[k];
+  next.v = 1;
+  try { localStorage.setItem(KEY, JSON.stringify(next)); return true; }
+  catch (e) { return false; }
+}
+
+/* ── the one mutable object ──
+   `notes` and `edges` are rebuilt from the cached index every time the
+   vault is read, so they are never stored. `pos`, `sel`, `only` and
+   `view` come back from storage, so the map you left is the map you
+   return to.
+
+   Zoom, pan and the query deliberately do NOT persist. A map that
+   reopens at 4× somewhere off in the dark, or filtered by a word you
+   typed last week and cannot see, is a map that looks broken — and the
+   thing you reach for then is the one control that throws your layout
+   away. */
+const state = (() => {
+  const s = orRead();
+  return {
+    notes: [], edges: [],
+    pos: s.pos, sel: s.sel, only: s.only, view: s.view,
+    zoom: 1, panX: 0, panY: 0, q: '',
+  };
+})();
+
+const byId = (id) => document.getElementById(id);
+
+/* Everything that comes out of a vault is untrusted text. `<img src=x
+   onerror=…>.md` is a perfectly legal filename, a heading, a tag and a
+   frontmatter title, and this function is the only thing standing
+   between any of them and the DOM.
+
+   So it goes on EVERY interpolation — titles, paths, tags, aria-labels,
+   the lot — and not on "the ones that look risky". The set that looks
+   risky is the set somebody has already thought about; the one that
+   ships is the one they had not. */
+const esc = (s) => String(s).replace(/[&<>"']/g,
+  c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* The other half of the same defence. Markup built as a string goes to
+   innerHTML with every vault string through esc(); markup built as
+   elements takes its text through textContent here, which is never
+   parsed as HTML at all. Two paths, neither trusting the vault. */
+const el = (tag, cls, txt) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (txt != null) n.textContent = txt;
+  return n;
+};
+
+/* ── icons ──
+   One sprite, drawn inline at label size, on the same 24-box with the
+   same round caps and joins as every other glyph on the rail. An icon
+   half a stroke heavier than its neighbours reads as a different app
+   bolted on, which is exactly what this must not look like.
+
+   The table is closed over rather than declared beside them: a bare
+   `ICO` at the left margin of this file is a name the ledger already
+   uses at the left margin of its own, and the habit of scoping it is
+   what keeps the pattern safe to copy between the apps.
+
+   An unknown name draws nothing. A path with `undefined` in its `d` is
+   a smear across the middle of a button; an absent glyph is a button
+   with its label still on it. */
+const icon = (() => {
+  const ICO = {
+    /* Rotated 180° when its panel is open, never 90° — a chevron on its
+       side is an arrow pointing somewhere, not a state. */
+    chev:   'M6 9.5 12 15.5 18 9.5',
+    close:  'M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5',
+    search: 'M10.5 4a6.5 6.5 0 1 0 0 13 6.5 6.5 0 0 0 0-13ZM15.2 15.2 20 20',
+    folder: 'M3.6 18.4V6.4a1 1 0 0 1 1-1h4l2.2 2.6h8.6a1 1 0 0 1 1 1v9.4'
+          + 'a1 1 0 0 1-1 1H4.6a1 1 0 0 1-1-1Z',
+    /* Two rings and four ticks: the map coming back to centre. Not a
+       magnifier — that is the search box, and the two controls sit a
+       thumb apart in the topbar. */
+    target: 'M12 20a8 8 0 1 0 0-16 8 8 0 0 0 0 16ZM12 15.4a3.4 3.4 0 1 0 0-6.8'
+          + 'a3.4 3.4 0 0 0 0 6.8ZM12 1.5v1.8M12 20.7v1.8M1.5 12h1.8M20.7 12h1.8',
+    plus:   'M12 5.5v13M5.5 12h13',
+    minus:  'M5.5 12h13',
+    /* Two links of a chain. A wikilink is the whole subject of the app,
+       so it gets the literal glyph rather than an arrow. */
+    link:   'M9.5 14.5 14.5 9.5M10.6 7.4 13 5a4.6 4.6 0 0 1 6.5 6.5l-2.4 2.4'
+          + 'M13.4 16.6 11 19a4.6 4.6 0 0 1-6.5-6.5L6.9 10.1',
+    note:   'M13.5 3.5H6.5a1.6 1.6 0 0 0-1.6 1.6v13.8a1.6 1.6 0 0 0 1.6 1.6h11'
+          + 'a1.6 1.6 0 0 0 1.6-1.6V9.2ZM13.5 3.5V9.2h5.6M8.4 13h7.2M8.4 16.4h4.8',
+    tag:    'M20.5 12.4 12.4 20.5a1.6 1.6 0 0 1-2.3 0l-6.6-6.6a1.6 1.6 0 0 1-.5-1.1V4.6'
+          + 'A1.6 1.6 0 0 1 4.6 3h8.2c.4 0 .8.2 1.1.5l6.6 6.6a1.6 1.6 0 0 1 0 2.3Z'
+          + 'M7.4 7.4h.01',
+  };
+  return (name, size) => {
+    const d = ICO[name];
+    if (!d) return '';
+    const s = size || 13;
+    return `<svg viewBox="0 0 24 24" width="${s}" height="${s}" fill="none"
+        stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+        stroke-linejoin="round" aria-hidden="true"><path d="${d}"/></svg>`;
+  };
+})();
+
+/* ─── 3 · MAP ─── Declarations only — nothing here boots. The reading
+   pane's boot, last in the file, makes the first orPaint() call once
+   every name exists. */
+
+/* ═══════════════════════════════════════════════════════════════
+   THE MAP — layout, paint, and everything that moves.
+
+   Two references at once. The poster supplies the furniture: hairline
+   rings, a tick rim, two heavy arcs, curved rim type, leader lines out
+   to two-digit indices — an ink ladder from .04 to .9 with almost all
+   of it below .2, so the field is barely there and the nodes are what
+   you see. The node study supplies the nodes: a glow, a thin ring, a
+   solid hexagon, a brighter core. Hubs and majors get the hexagon;
+   minors and leaves stay plain circles, because four hundred glowing
+   hexagons is a wall and the study knew it.
+
+   Layout is DETERMINISTIC. The browser's own dice are never rolled —
+   every jitter comes from a PRNG seeded off the note's own id, so the
+   same vault lays out identically on every machine and a test can
+   assert a position.
+
+   This fragment never boots itself. note.js calls orPaint() when the
+   page is ready and after every change of sel / only / q — by then
+   every name below and every name it calls back into exists.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* One square view, centre (500, 500). Pan and zoom ride a transform on
+   #orView INSIDE the svg — never on the svg element — so the rim type
+   and the tick rim scale with everything else. */
+const VIEWBOX = 1000;
+
+/* Tier → drawn radius. Shape is decided by tier too: hub and major are
+   hexagons, minor and leaf plain circles. */
+const TIERS = { hub: 13, major: 8, minor: 5, leaf: 3.2 };
+
+/* Member orbits by link-distance from the hub: 1, 2, 3-or-more. */
+const RINGS = [190, 245, 296];
+
+/* Transient runtime state. Assigned onto the one mutable object rather
+   than declared, because graph.js owns no free top-level names beyond
+   its reserved list — and none of this survives a reload on purpose. */
+state.xy = {};        /* id → [x, y], every node, recomputed each paint */
+state.hover = null;   /* the node under the pointer or holding focus   */
+state.drag = null;    /* live drag context, null between gestures      */
+
+/* ── the dice, loaded ──
+   mulberry32 seeded off an FNV hash of the id. Cheap, well-distributed
+   enough for jitter, and above all REPEATABLE: the same id gives the
+   same sequence forever, which is what makes the layout testable. */
+function orRng(seed) {
+  const s = String(seed);
+  let h = 2166136261 >>> 0;
+  for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); }
+  let a = h >>> 0;
+  return () => {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+/* Flat-top hexagon around (0,0) — vertices at 0°, 60°, … puts an edge,
+   not a point, across the top, which is the study's silhouette. */
+function orHex(r) {
+  const p = [];
+  for (let i = 0; i < 6; i++) {
+    const a = i * Math.PI / 3;
+    p.push(`${Math.round(r * Math.cos(a) * 100) / 100},${Math.round(r * Math.sin(a) * 100) / 100}`);
+  }
+  return p.join(' ');
+}
+
+/* ── layout ──
+   Recomputed on every paint from the same inputs, so it is idempotent:
+   a node you have moved keeps its saved place, everything else lands
+   exactly where it landed last time. */
+function orLayout() {
+  const notes = state.notes || [];
+  const cats = orLayout.cats();
+  const known = new Set(cats.map(c => c.id));
+  const label = {}; cats.forEach(c => { label[c.id] = c.label; });
+  orLayout.label = label;
+
+  const note = {}; notes.forEach(n => { note[n.id] = n; });
+  orLayout.note = note;
+
+  /* A note filed under a category this build does not know goes to
+     Unfiled rather than painting var(--or-cat-nothing), which would not
+     fall back — it would inherit, and lie in colour. */
+  const catOf = {};
+  notes.forEach(n => { catOf[n.id] = known.has(n.cat) ? n.cat : 'other'; });
+  orLayout.catOf = catOf;
+
+  /* Edges, deduped: A→B and B→A are one line. The FIRST writer stays in
+     slot 0 — the edge is stroked in its source's colour. The pair key
+     joins on a newline: an id is a path, and a path can hold a space
+     but never a line break, so the join cannot collide. */
+  const seen = new Set(), edges = [];
+  for (const n of notes) for (const t of (n.links || [])) {
+    if (t === n.id || !note[t]) continue;
+    const k = n.id < t ? n.id + '\n' + t : t + '\n' + n.id;
+    if (seen.has(k)) continue;
+    seen.add(k);
+    edges.push([n.id, t]);
+  }
+  state.edges = edges;
+
+  const deg = {};
+  edges.forEach(e => { deg[e[0]] = (deg[e[0]] || 0) + 1; deg[e[1]] = (deg[e[1]] || 0) + 1; });
+  orLayout.deg = deg;
+
+  const tier = {};
+  notes.forEach(n => {
+    const d = deg[n.id] || 0;
+    tier[n.id] = d >= 3 ? 'major' : d ? 'minor' : 'leaf';
+  });
+
+  /* Members per category, in a sorted order so every later loop over
+     them is deterministic. */
+  const mem = {};
+  cats.forEach(c => { mem[c.id] = []; });
+  notes.forEach(n => mem[catOf[n.id]].push(n.id));
+  for (const c in mem) mem[c].sort();
+  orLayout.mem = mem;
+
+  /* Sectors. Trading and Personal Development are the poles and take
+     the first two regardless of size — the map is recognisably yours
+     before a single file arrives — the rest rank by weight. Width goes
+     with sqrt(count) so a category twice the size does not shout twice
+     as loud, floored at 28° so nothing collapses to a sliver. */
+  let list = cats.filter(c => mem[c.id].length || c.id === 'trading' || c.id === 'growth');
+  const pin = ['trading', 'growth'];
+  list = pin.map(id => list.find(c => c.id === id)).filter(Boolean)
+    .concat(list.filter(c => !pin.includes(c.id))
+      .sort((a, b) => mem[b.id].length - mem[a.id].length || (a.id < b.id ? -1 : 1)));
+
+  const k = list.length;
+  const avail = 360 - 6 * k;
+  const raw = list.map(c => Math.sqrt(mem[c.id].length));
+  const sum = raw.reduce((t, v) => t + v, 0);
+  const share = raw.map(v => (sum ? v / sum * avail : avail / k));
+  /* Lift the small ones to the floor and take the lift back from the
+     big ones, proportionally, until nothing sits below it. Converges in
+     one or two passes; eight is a hard stop, not an expectation. */
+  for (let p = 0; p < 8; p++) {
+    const low = [], hi = [];
+    share.forEach((v, i) => (v < 28 ? low : hi).push(i));
+    if (!low.length) break;
+    const lift = low.reduce((t, i) => t + 28 - share[i], 0);
+    low.forEach(i => { share[i] = 28; });
+    const room = hi.reduce((t, i) => t + share[i] - 28, 0);
+    if (room <= 0) break;
+    hi.forEach(i => { share[i] -= (share[i] - 28) / room * lift; });
+  }
+
+  const sec = [];
+  let a0 = -90;                              /* trading opens at the top */
+  list.forEach((c, i) => {
+    sec.push({ id: c.id, label: c.label, a0, a1: a0 + share[i],
+               mid: a0 + share[i] / 2, n: mem[c.id].length, idx: i, rings: [false, false, false] });
+    a0 += share[i] + 6;
+  });
+  orLayout.sec = sec;
+
+  /* Intra-category adjacency for the ring walk. Cross-category links
+     still paint — they just do not decide which orbit you sit on. */
+  const adj = {};
+  edges.forEach(([p, q]) => {
+    if (catOf[p] === catOf[q]) {
+      (adj[p] = adj[p] || []).push(q);
+      (adj[q] = adj[q] || []).push(p);
+    }
+  });
+
+  const xy = {};
+  sec.forEach(s => {
+    const hid = 'hub:' + s.id;
+    tier[hid] = 'hub';
+    xy[hid] = state.pos[hid] ? state.pos[hid].slice()
+                             : orLayout.polar(120, s.mid);
+    const ids = mem[s.id];
+    if (!ids.length) return;
+
+    /* The hub is synthetic, so "link-distance from the hub" needs an
+       anchor: the category's most-linked note stands in for it at
+       distance 1, its neighbours at 2, and everything the walk cannot
+       reach sits on the outermost ring — the loose notes drift to the
+       edge, which is where you want to notice them. */
+    const anchor = ids.slice()
+      .sort((x, y) => (deg[y] || 0) - (deg[x] || 0) || (x < y ? -1 : 1))[0];
+    const depth = { [anchor]: 1 };
+    const queue = [anchor];
+    while (queue.length) {
+      const c = queue.shift();
+      for (const m of (adj[c] || [])) {
+        if (catOf[m] === s.id && !(m in depth)) { depth[m] = depth[c] + 1; queue.push(m); }
+      }
+    }
+
+    const rows = [[], [], []];
+    ids.forEach(id => rows[Math.min(depth[id] || 3, 3) - 1].push(id));
+    const w = s.a1 - s.a0;
+    const pad = Math.min(10, w * .14);
+    rows.forEach((row, ri) => {
+      s.rings[ri] = row.length > 0;
+      row.sort();
+      row.forEach((id, j) => {
+        if (state.pos[id]) { xy[id] = state.pos[id].slice(); return; }
+        const rng = orRng(id);
+        const ang = s.a0 + pad + (j + .5) * (w - 2 * pad) / row.length + (rng() * 2 - 1) * 7;
+        xy[id] = orLayout.polar(RINGS[ri] + (rng() * 2 - 1) * 14, ang);
+      });
+    });
+  });
+  orLayout.tier = tier;
+
+  /* Eight relaxation passes. Only computed nodes move: a place you
+     chose by hand is a decision, not an overlap to be tidied, and the
+     hubs are pinned to their orbit for the same reason. Iteration order
+     is the sorted id list, so the passes are as repeatable as the
+     jitter. */
+  const ids = Object.keys(xy).sort();
+  const rOf = id => TIERS[tier[id]] || 5;
+  const held = id => !!state.pos[id] || tier[id] === 'hub';
+  for (let p = 0; p < 8; p++) {
+    for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
+      const A = ids[i], B = ids[j];
+      const pa = xy[A], pb = xy[B];
+      let dx = pb[0] - pa[0], dy = pb[1] - pa[1];
+      let d = Math.hypot(dx, dy);
+      const min = rOf(A) + rOf(B) + 10;
+      if (d >= min) continue;
+      /* Two nodes on the exact same point have no direction to part
+         in, so the tie-break is the id order — anything but a random
+         shove, which would unmake the whole determinism. */
+      if (!d) { dx = A < B ? 1 : -1; dy = .5; d = Math.hypot(dx, dy); }
+      const push = (min - d) / d;
+      const ma = !held(A), mb = !held(B);
+      if (ma && mb) {
+        pa[0] -= dx * push / 2; pa[1] -= dy * push / 2;
+        pb[0] += dx * push / 2; pb[1] += dy * push / 2;
+      } else if (ma) { pa[0] -= dx * push; pa[1] -= dy * push; }
+      else if (mb)   { pb[0] += dx * push; pb[1] += dy * push; }
+    }
+  }
+  state.xy = xy;
+}
+/* Hung on orLayout because graph.js has no free top-level names to
+   give them — the reserved list is the whole budget. */
+orLayout.N = v => Math.round(v * 100) / 100;
+/* 0° at three o'clock, growing clockwise on screen (y runs down). */
+orLayout.polar = (r, a) => {
+  const t = a * Math.PI / 180;
+  return [500 + r * Math.cos(t), 500 + r * Math.sin(t)];
+};
+/* seed.js owns the shape of CATS; only ids and labels are needed here. */
+orLayout.cats = () => Array.isArray(CATS)
+  ? CATS.map(c => ({ id: c.id, label: c.label || c.id }))
+  : Object.keys(CATS).map(id => ({
+      id, label: (CATS[id] && CATS[id].label) ? CATS[id].label : id }));
+
+/* ── the furniture ──
+   Every number in here is the contract's. The ladder: atmosphere .05
+   to .10, spokes .07, ticks .18, dotted .30, rim type .45, the two
+   heavy arcs .55 — the only bold strokes in the field, and the thing
+   that stops it reading as a wireframe. */
+function orPaintRings() {
+  const g = byId('orRings'), leads = byId('orLeads'), svg = byId('orSvg');
+  if (!g || !svg) return;
+  const N = orLayout.N, P = orLayout.polar;
+  const sec = orLayout.sec || [];
+
+  /* One glow gradient per category, built once per paint in <defs>.
+     stop-color rides a custom property so the glow flips with the
+     theme without anyone repainting it. */
+  let defs = svg.querySelector('defs');
+  if (!defs) {
+    defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+    svg.insertBefore(defs, svg.firstChild);
+  }
+  defs.innerHTML = orLayout.cats().map(c =>
+    `<radialGradient id="orGlow-${esc(c.id)}">`
+    + `<stop offset="0" style="stop-color:var(--or-cat-${esc(c.id)})" stop-opacity=".55"/>`
+    + `<stop offset="1" style="stop-color:var(--or-cat-${esc(c.id)})" stop-opacity="0"/>`
+    + `</radialGradient>`).join('');
+
+  const out = [];
+
+  /* atmosphere */
+  [[470, .10], [452, .08], [430, .06], [405, .05]].forEach(([r, o]) => out.push(
+    `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`));
+
+  /* tick rim — 180 ticks, one path, one stroke. */
+  const ticks = [];
+  for (let i = 0; i < 180; i++) {
+    const a = i * 2;
+    const [x1, y1] = P(392, a);
+    const [x2, y2] = P(i % 5 ? 398 : 402, a);
+    ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
+  }
+  out.push(`<path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/>`);
+
+  /* dotted ring */
+  out.push(`<circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/>`);
+
+  /* the two heavy arcs */
+  const arc = (r, a, b) => {
+    const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
+    return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(b - a) > 180 ? 1 : 0} 1 ${N(x2)} ${N(y2)}`;
+  };
+  out.push(`<path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/>`);
+
+  /* thin ring */
+  out.push(`<circle cx="500" cy="500" r="330" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".18"/>`);
+
+  /* rim type, on an invisible circle. The path starts at the top and
+     sweeps clockwise so the sentence reads left to right where the eye
+     enters the map. */
+  out.push(`<path id="orRimPath" d="M500 156A344 344 0 1 1 500 844A344 344 0 1 1 500 156" fill="none"/>`
+    + `<text font-size="8" fill="var(--or-hair)" opacity=".45"`
+    + ` style="font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase">`
+    + `<textPath href="#orRimPath">A mechanical model of what you know, and how it moves</textPath></text>`);
+
+  /* orbit rings. The hub orbit is one shared circle — every hub rides
+     r 120, so seven copies of it would be one line drawn seven times.
+     Each category then gets an arc across its own sector at each member
+     ring it actually occupies: its orbits, and only its. */
+  out.push(`<circle cx="500" cy="500" r="120" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".1"/>`);
+  sec.forEach(s => s.rings.forEach((on, ri) => {
+    if (on) out.push(`<path d="${arc(RINGS[ri], s.a0, s.a1)}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".1"/>`);
+  }));
+
+  /* sector spokes */
+  sec.forEach(s => [s.a0, s.a1].forEach(a => {
+    const [x1, y1] = P(60, a), [x2, y2] = P(330, a);
+    out.push(`<line x1="${N(x1)}" y1="${N(y1)}" x2="${N(x2)}" y2="${N(y2)}" stroke="var(--or-hair)" stroke-width=".7" opacity=".07"/>`);
+  }));
+
+  g.innerHTML = out.join('');
+
+  /* leader lines — the poster's signature. A straight line from the
+     hub out past the rim, a filled dot, a two-digit index in wide
+     letter-spacing. The line crosses the member rings on its way out;
+     the poster's do exactly that, and at .16 it reads as furniture
+     rather than as an edge. */
+  if (!leads) return;
+  const L = [];
+  sec.forEach(s => {
+    const [x1, y1] = P(120 + TIERS.hub + 6, s.mid);
+    const [x2, y2] = P(414, s.mid);
+    const [tx, ty] = P(428, s.mid);
+    const c = Math.cos(s.mid * Math.PI / 180);
+    const anchor = c > .25 ? 'start' : c < -.25 ? 'end' : 'middle';
+    L.push(`<line x1="${N(x1)}" y1="${N(y1)}" x2="${N(x2)}" y2="${N(y2)}" stroke="var(--or-hair)" stroke-width=".7" opacity=".16"/>`);
+    L.push(`<circle cx="${N(x2)}" cy="${N(y2)}" r="1.7" fill="var(--or-hair)" opacity=".5"/>`);
+    L.push(`<text x="${N(tx)}" y="${N(ty)}" font-size="7" fill="var(--or-hair)" opacity=".55"`
+      + ` text-anchor="${anchor}" dominant-baseline="middle"`
+      + ` style="font-family:var(--mono);letter-spacing:.18em">${String(s.idx + 1).padStart(2, '0')}</text>`);
+  });
+  leads.innerHTML = L.join('');
+}
+
+/* ── edges ──
+   Quadratics with the control point pulled 12% toward the centre, so
+   every line sags inward and the field reads as orbital rather than as
+   a mesh. Stroked in the SOURCE note's colour: an edge is a claim the
+   writer made, and the colour says who made it. */
+function orPaintLinks() {
+  const g = byId('orLinks');
+  if (!g) return;
+  const note = orLayout.note || {}, catOf = orLayout.catOf || {};
+  const out = [];
+  for (const [a, b] of state.edges) {
+    const pa = state.xy[a], pb = state.xy[b];
+    if (!pa || !pb) continue;
+    const sel = state.sel === a || state.sel === b;
+    /* An edge with a live end stays at full weight — it is how you read
+       a neighbourhood. Only an edge whose BOTH ends fail the filter
+       drops back, and it drops rather than disappears, so the shape of
+       the map survives the search. */
+    const dim = !sel && !orPaint.match(note[a]) && !orPaint.match(note[b]);
+    out.push(`<path d="${orPaintLinks.d(pa, pb)}" fill="none"`
+      + ` stroke="var(--or-cat-${esc(catOf[a] || 'other')})"`
+      + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
+      + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
+  }
+  g.innerHTML = out.join('');
+}
+orPaintLinks.d = (pa, pb) => {
+  const N = orLayout.N;
+  const mx = (pa[0] + pb[0]) / 2, my = (pa[1] + pb[1]) / 2;
+  const cx = mx + (500 - mx) * .12, cy = my + (500 - my) * .12;
+  return `M${N(pa[0])} ${N(pa[1])}Q${N(cx)} ${N(cy)} ${N(pb[0])} ${N(pb[1])}`;
+};
+
+/* ── nodes ──
+   One <g> per note plus one synthetic hub per category, id "hub:cat" —
+   orOpen reads that prefix as "the folder itself". Every node is a
+   button the keyboard can reach; the aria-label carries what the glow
+   and the hexagon carry for everyone else. */
+function orPaintNodes() {
+  const g = byId('orNodes');
+  if (!g) return;
+  const N = orLayout.N;
+  const sec = orLayout.sec || [], tier = orLayout.tier || {};
+  const deg = orLayout.deg || {}, catOf = orLayout.catOf || {}, label = orLayout.label || {};
+
+  const items = [];
+  sec.forEach(s => items.push({
+    id: 'hub:' + s.id, cat: s.id, t: 'hub', title: s.label,
+    aria: `${s.label} — folder — ${s.n} ${s.n === 1 ? 'note' : 'notes'}`,
+    match: orPaint.hubMatch(s),
+  }));
+  (state.notes || []).forEach(n => {
+    const d = deg[n.id] || 0;
+    items.push({
+      id: n.id, cat: catOf[n.id] || 'other', t: tier[n.id] || 'leaf', title: n.title,
+      aria: `${n.title} — ${label[catOf[n.id]] || 'Unfiled'} — ${d} ${d === 1 ? 'link' : 'links'}`,
+      match: orPaint.match(n),
+    });
+  });
+  /* Paint order is stacking order: leaves under minors under majors
+     under hubs, so a glow is never buried by a dot. Ties break on id —
+     nothing about this list may depend on arrival order. */
+  const rank = { leaf: 0, minor: 1, major: 2, hub: 3 };
+  items.sort((a, b) => rank[a.t] - rank[b.t] || (a.id < b.id ? -1 : 1));
+
+  const out = items.map(it => {
+    const p = state.xy[it.id];
+    if (!p) return '';
+    const r = TIERS[it.t];
+    const sel = state.sel === it.id;
+    const cat = esc(it.cat);
+    const parts = [];
+    if (it.t === 'hub' || it.t === 'major')
+      parts.push(`<circle class="or-halo" r="${N(r * 2.8)}" fill="url(#orGlow-${cat})" opacity=".7"/>`);
+    else if (it.t === 'minor')
+      parts.push(`<circle class="or-halo" r="${N(r * 2.8)}" fill="url(#orGlow-${cat})" opacity=".35"/>`);
+    /* The thin ring is the hub's by right and the selection's on any
+       tier: selected, it takes --or-core at .9 and 1.6 wide. */
+    if (it.t === 'hub' || sel)
+      parts.push(`<circle class="or-ringc" r="${N(r * 1.6)}" fill="none"`
+        + ` stroke="${sel ? 'var(--or-core)' : `var(--or-cat-${cat})`}"`
+        + ` stroke-width="${sel ? 1.6 : .7}" opacity="${sel ? .9 : .5}"/>`);
+    if (it.t === 'hub' || it.t === 'major') {
+      parts.push(`<polygon class="or-hex" points="${orHex(r)}" fill="var(--or-cat-${cat})"/>`);
+      parts.push(`<polygon class="or-corep" points="${orHex(r * .46)}" fill="var(--or-core)" opacity=".8"/>`);
+    } else {
+      parts.push(`<circle class="or-dotc" r="${r}" fill="var(--or-cat-${cat})"/>`);
+    }
+    const cls = 'or-node or-' + it.t + (sel ? ' or-sel' : '') + (it.match ? '' : ' or-dim');
+    /* Dimming is an opacity, never a removal: a node that fails the
+       filter drops to .12 and holds its place, so the map does not
+       jump and you do not lose yours. */
+    return `<g class="${cls}" data-id="${esc(it.id)}" data-cat="${cat}" tabindex="0" role="button"`
+      + ` aria-label="${esc(it.aria)}"${it.match ? '' : ' opacity=".12"'}`
+      + ` transform="translate(${N(p[0])} ${N(p[1])})">${parts.join('')}</g>`;
+  });
+  g.innerHTML = out.join('');
+}
+
+/* ── label chips ──
+   Hubs, majors, and whatever is selected or under the pointer. Built
+   as strings, inserted, then MEASURED — getComputedTextLength on the
+   real glyphs sizes the rect, because a hardcoded width is wrong the
+   first time somebody has a long title. A chip that would cross the
+   right edge flips to the node's left instead. */
+function orPaintLabels() {
+  const g = byId('orLabels');
+  if (!g) return;
+  const N = orLayout.N;
+  const sec = orLayout.sec || [], tier = orLayout.tier || {};
+  const catOf = orLayout.catOf || {}, label = orLayout.label || {}, note = orLayout.note || {};
+
+  const hubOk = orPaint.hubMatch;
+  const want = [];
+  const taken = new Set();
+  const add = (id, title, sub, cat) => {
+    if (taken.has(id)) return;
+    taken.add(id);
+    want.push({ id, title, sub, cat });
+  };
+  sec.forEach(s => { if (hubOk(s)) add('hub:' + s.id, s.label, `${s.n} ${s.n === 1 ? 'note' : 'notes'}`, s.id); });
+  (state.notes || []).forEach(n => {
+    if ((tier[n.id] === 'major' || state.sel === n.id || state.hover === n.id) && orPaint.match(n))
+      add(n.id, n.title, label[catOf[n.id]] || 'Unfiled', catOf[n.id] || 'other');
+  });
+  const hv = state.hover;
+  if (hv && hv.indexOf('hub:') === 0) {
+    const s = sec.find(x => 'hub:' + x.id === hv);
+    if (s && hubOk(s)) add(hv, s.label, `${s.n} notes`, s.id);
+  }
+
+  /* The rect fill is the shell's own opaque menu surface: contrast on
+     a chip must not depend on what corner of the photograph it happens
+     to float over. */
+  g.innerHTML = want.map(w => {
+    if (!state.xy[w.id]) return '';
+    return `<g class="or-chip" data-for="${esc(w.id)}">`
+      + `<rect class="or-chipbg" x="0" y="-12" width="34" height="24" rx="5"`
+      + ` fill="var(--menu)" stroke="var(--glass-line)"/>`
+      + `<text class="or-t1" x="8" y="-2" font-size="8" fill="var(--ink)"`
+      + ` style="font-family:var(--sans)">${esc(w.title)}</text>`
+      + `<text class="or-t2" x="8" y="8" font-size="7" fill="var(--or-cat-${esc(w.cat)})"`
+      + ` style="font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase">${esc(w.sub)}</text>`
+      + `</g>`;
+  }).join('');
+
+  /* Second pass: measure, size, place — and resolve. The right edge
+     is where the VIEWPORT ends in user units, not where the viewBox
+     does: a chip can cross x=1000 happily when you have panned past
+     it.
+
+     A chip that would bury another is not placed at any cost. The
+     study's chips never touch, and a dense sector piling label on
+     label reads as graph-library clutter — the exact thing this
+     screen exists not to be. So placement is a claim: hubs, the
+     selection and the hovered node claim first and always survive
+     (nudged if they must be); a major tries its right side, its left,
+     then a short vertical slide, and a major that still cannot fit
+     DROPS to hover-only. Fewer chips is degradation; illegible chips
+     are a fault. */
+  const right = (VIEWBOX - state.panX) / state.zoom;
+  const order = { hub: 0, sel: 1, hover: 2, major: 3 };
+  const rankOf = (id) =>
+    id.indexOf('hub:') === 0 ? 'hub'
+      : id === state.sel ? 'sel'
+      : id === state.hover ? 'hover' : 'major';
+  const chips = [...g.querySelectorAll('.or-chip')].map(ch => {
+    const id = ch.getAttribute('data-for');
+    const p = state.xy[id];
+    if (!p) return null;
+    const t1 = ch.querySelector('.or-t1'), t2 = ch.querySelector('.or-t2');
+    let w = 0;
+    try { w = Math.max(t1.getComputedTextLength(), t2 ? t2.getComputedTextLength() : 0); }
+    catch (e) { /* not rendered yet — the next paint on a visible map fixes it */ }
+    w = Math.max(34, Math.ceil(w) + 16);
+    return { ch, id, p, w, rank: rankOf(id) };
+  }).filter(Boolean).sort((a, b) => order[a.rank] - order[b.rank] || a.p[1] - b.p[1]);
+  const kept = [];
+  const hits = (x, y, w) => kept.some(k =>
+    x < k.x + k.w + 2 && k.x < x + w + 2 && y - 12 < k.y + 14 && k.y - 12 < y + 14);
+  for (const c of chips) {
+    const r = TIERS[tier[c.id]] || 5;
+    const rx = c.p[0] + r + 9, lx = c.p[0] - r - 9 - c.w;
+    const sides = rx + c.w > right ? [lx, rx] : [rx, lx];
+    let x = sides[0], y = c.p[1], ok = false;
+    for (const dy of [0, 14, -14, 26, -26]) {
+      for (const sx of sides) {
+        if (!hits(sx, c.p[1] + dy, c.w)) { x = sx; y = c.p[1] + dy; ok = true; break; }
+      }
+      if (ok) break;
+    }
+    if (!ok && c.rank === 'major') { c.ch.remove(); continue; }
+    kept.push({ x, y, w: c.w });
+    c.ch.setAttribute('transform', `translate(${N(x)} ${N(y)})`);
+    c.ch.querySelector('.or-chipbg').setAttribute('width', c.w);
+  }
+}
+
+/* ── the one entry point ──
+   Redraws everything from state, cheap enough to call on every filter
+   keystroke: each layer is one string build and one innerHTML set.
+   Legend and stats repaint with it so their counts can never drift
+   from what the map shows. */
+function orPaint() {
+  if (!byId('orSvg')) return;
+  orLayout();
+  orPaintRings();
+  orPaintLinks();
+  orPaintNodes();
+  orPaintLabels();
+  orPan(0, 0);
+  const em = byId('orEmpty');
+  if (em) em.hidden = (state.notes || []).length > 0;
+  orLegend();
+  orStats();
+}
+/* One matcher for links, nodes and labels, so "matches the filter"
+   cannot mean three different things on one screen. Both narrows dim
+   rather than remove — see orPaintNodes. */
+orPaint.match = n => {
+  if (!n) return true;
+  const cat = (orLayout.catOf && orLayout.catOf[n.id]) || n.cat;
+  if (state.only && cat !== state.only) return false;
+  const q = (state.q || '').trim().toLowerCase();
+  if (!q) return true;
+  return String(n.title || '').toLowerCase().includes(q)
+    || String(n.id).toLowerCase().includes(q)
+    || (n.tags || []).some(t => String(t).toLowerCase().includes(q));
+};
+/* A hub matches when its label does OR any member does: the hub is how
+   you see WHERE the matches live, and dimming it while its notes are
+   lit would orphan them on the map. */
+orPaint.hubMatch = s => {
+  if (state.only && state.only !== s.id) return false;
+  const q = (state.q || '').trim().toLowerCase();
+  if (!q) return true;
+  if (s.label.toLowerCase().includes(q)) return true;
+  const mem = (orLayout.mem || {})[s.id] || [];
+  const note = orLayout.note || {};
+  return mem.some(id => orPaint.match(note[id]));
+};
+
+/* Throw the saved positions away and lay out fresh. Destructive by
+   contract and says so out loud — it is the one control that costs you
+   your arrangement, and it is what you reach for when the map is a
+   knot, so it also brings the camera home. */
+function orFit() {
+  state.pos = {};
+  state.zoom = 1; state.panX = 0; state.panY = 0;
+  orWrite({ pos: {} });
+  orPaint();
+  orSay('Layout reset. Every node is back on its ring.');
+}
+
+/* Hit-test in user units — the tests' way in, since the pointer path
+   goes through the DOM. Nearest node whose radius (plus a little slop)
+   covers the point wins. */
+function orNodeAt(x, y) {
+  let best = null, bd = Infinity;
+  for (const id in state.xy) {
+    const p = state.xy[id];
+    const r = (TIERS[(orLayout.tier || {})[id]] || 5) + 6;
+    const d = Math.hypot(x - p[0], y - p[1]);
+    if (d <= r && d < bd) { bd = d; best = id; }
+  }
+  return best;
+}
+
+/* Client pixels → user units, through the live matrix. Never by
+   dividing by a guessed scale: the guess is wrong the moment anybody
+   zooms, and this is the function every gesture stands on. */
+function orToUser(cx, cy) {
+  const v = byId('orView');
+  const m = v && v.getScreenCTM();
+  if (!m) return [0, 0];
+  const p = new DOMPoint(cx, cy).matrixTransform(m.inverse());
+  return [p.x, p.y];
+}
+
+/* Pan by a delta in viewBox units and re-apply the transform.
+   orPan(0, 0) is the canonical "sync the transform" call. */
+function orPan(dx, dy) {
+  state.panX += dx;
+  state.panY += dy;
+  const v = byId('orView');
+  if (v) v.setAttribute('transform',
+    `translate(${orLayout.N(state.panX)} ${orLayout.N(state.panY)}) scale(${orLayout.N(state.zoom)})`);
+}
+
+/* Zoom by a factor about a viewBox point — the point under the cursor
+   stays under the cursor. orZoom(0) is the reset. Clamped 0.35–4:
+   below that the map is a coin, above it a single hexagon is a wall. */
+function orZoom(f, px, py) {
+  if (f === 0) {
+    state.zoom = 1; state.panX = 0; state.panY = 0;
+  } else {
+    const z0 = state.zoom;
+    const z1 = Math.min(4, Math.max(.35, z0 * f));
+    if (px == null) { px = 500; py = 500; }
+    state.panX = px - (px - state.panX) / z0 * z1;
+    state.panY = py - (py - state.panY) / z0 * z1;
+    state.zoom = z1;
+  }
+  orPan(0, 0);
+  /* Labels flip against the viewport edge, so a zoom moves their
+     answer — but re-measuring text on every wheel tick would jank.
+     One deferred pass after the gesture settles. */
+  if (orZoom.raf) cancelAnimationFrame(orZoom.raf);
+  orZoom.raf = requestAnimationFrame(() => { orZoom.raf = 0; orPaintLabels(); });
+}
+orZoom.raf = 0;
+
+/* ── drag ──
+   Capture goes to the SVG, not the node: a paint replaces every node
+   element, and capture on an element that is about to be replaced is a
+   drag that silently dies. The svg outlives every repaint. */
+function orDragStart(e) {
+  if (e.button != null && e.button !== 0) return;
+  const svg = byId('orSvg');
+  if (!svg) return;
+  const g = e.target.closest ? e.target.closest('.or-node') : null;
+  const [ux, uy] = orToUser(e.clientX, e.clientY);
+  if (g) {
+    const id = g.getAttribute('data-id');
+    const at = state.xy[id] || [ux, uy];
+    state.drag = { id, el: g, dx: at[0] - ux, dy: at[1] - uy,
+                   sx: e.clientX, sy: e.clientY, moved: false };
+    /* preventDefault below also prevents the focus a click would have
+       given, so hand it over by hand — a drag should leave the node
+       where the keyboard can pick it up. */
+    try { g.focus({ preventScroll: true }); } catch (_) {}
+  } else {
+    state.drag = { id: null, cx: e.clientX, cy: e.clientY };
+  }
+  try { svg.setPointerCapture(e.pointerId); } catch (_) {}
+  e.preventDefault();
+}
+
+function orDragMove(e) {
+  const d = state.drag;
+  if (!d) return;
+  if (d.id == null) {
+    /* Background pan. Deltas convert through the ROOT matrix — the one
+       without #orView's transform — because pan is expressed in viewBox
+       units, on top of whatever zoom is in force. */
+    const svg = byId('orSvg');
+    const m = svg && svg.getScreenCTM();
+    if (!m) return;
+    const inv = m.inverse();
+    const p1 = new DOMPoint(e.clientX, e.clientY).matrixTransform(inv);
+    const p0 = new DOMPoint(d.cx, d.cy).matrixTransform(inv);
+    d.cx = e.clientX; d.cy = e.clientY;
+    orPan(p1.x - p0.x, p1.y - p0.y);
+    return;
+  }
+  /* Under 3px it is still a click. Fingers wobble; a tap that files a
+     one-pixel move as a drag steals the open. */
+  if (!d.moved) {
+    if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 3) return;
+    d.moved = true;
+    /* The chip would need re-measuring on every move; it fades for the
+       ride and the drop's full paint puts it back, placed and flipped
+       correctly for wherever the node landed. */
+    const lg = byId('orLabels');
+    const ch = lg && lg.querySelector(`.or-chip[data-for="${CSS.escape(d.id)}"]`);
+    if (ch) ch.setAttribute('opacity', '0');
+  }
+  const [ux, uy] = orToUser(e.clientX, e.clientY);
+  const x = ux + d.dx, y = uy + d.dy;
+  state.xy[d.id] = [x, y];
+  /* No repaint mid-drag — that would replace the node under the
+     pointer. Move the element and its own edges directly; everything
+     else holds still. */
+  d.el.setAttribute('transform', `translate(${orLayout.N(x)} ${orLayout.N(y)})`);
+  const lk = byId('orLinks');
+  if (lk) {
+    const css = CSS.escape(d.id);
+    lk.querySelectorAll(`path[data-a="${css}"], path[data-b="${css}"]`).forEach(pth => {
+      const pa = state.xy[pth.getAttribute('data-a')];
+      const pb = state.xy[pth.getAttribute('data-b')];
+      if (pa && pb) pth.setAttribute('d', orPaintLinks.d(pa, pb));
+    });
+  }
+}
+
+function orDragEnd(e) {
+  const d = state.drag;
+  state.drag = null;
+  const svg = byId('orSvg');
+  if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }
+  if (!d || d.id == null) return;
+  if (!d.moved) { orOpen(d.id); return; }
+  const p = state.xy[d.id];
+  state.pos[d.id] = [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10];
+  if (!orWrite({ pos: state.pos })) orSay('Not saved — storage unavailable.');
+  orPaint();
+}
+
+/* ── keyboard ──
+   Delegated from the svg: the focused node's keydown bubbles here.
+   Arrows nudge 4px, 16 with Shift, and every move saves — a keyboard
+   arrangement is as much yours as a dragged one. Enter and Space open. */
+function orKeyNode(e) {
+  const g = e.target.closest ? e.target.closest('.or-node') : null;
+  if (!g) return;
+  const id = g.getAttribute('data-id');
+  if (e.key === 'Enter' || e.key === ' ') {
+    e.preventDefault();
+    orOpen(id);
+    return;
+  }
+  const step = e.shiftKey ? 16 : 4;
+  const mv = { ArrowLeft: [-step, 0], ArrowRight: [step, 0],
+               ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+  if (!mv) return;
+  e.preventDefault();
+  const p = state.xy[id] || [500, 500];
+  const next = [Math.round((p[0] + mv[0]) * 10) / 10, Math.round((p[1] + mv[1]) * 10) / 10];
+  state.xy[id] = next;
+  state.pos[id] = next.slice();
+  if (!orWrite({ pos: state.pos })) orSay('Not saved — storage unavailable.');
+  orPaint();
+  /* The paint just replaced the element that held focus. Put focus
+     back on the new one, or the next arrow press goes nowhere. */
+  const ng = byId('orNodes');
+  const g2 = ng && ng.querySelector(`[data-id="${CSS.escape(id)}"]`);
+  if (g2) { try { g2.focus({ preventScroll: true }); } catch (_) {} }
+}
+
+/* ── wiring ──
+   An IIFE, so it claims no name. Everything is guarded on the svg
+   existing: the fragment must load clean even if the markup is not
+   there, because tests eval fragments alone. */
+(function () {
+  const svg = byId('orSvg');
+  if (!svg) return;
+
+  /* Furniture takes no pointer and says nothing to a screen reader —
+     the nodes carry both jobs. This also makes every non-node press a
+     background press, which is what makes pan feel right. */
+  ['orRings', 'orLinks', 'orLeads', 'orLabels'].forEach(id => {
+    const l = byId(id);
+    if (l) { l.setAttribute('pointer-events', 'none'); l.setAttribute('aria-hidden', 'true'); }
+  });
+
+  svg.addEventListener('pointerdown', orDragStart);
+  svg.addEventListener('pointermove', orDragMove);
+  svg.addEventListener('pointerup', orDragEnd);
+  svg.addEventListener('pointercancel', orDragEnd);
+  svg.addEventListener('keydown', orKeyNode);
+
+  /* Wheel zooms about the pointer: the spot you are studying is the
+     spot that should grow. */
+  svg.addEventListener('wheel', e => {
+    e.preventDefault();
+    const m = svg.getScreenCTM();
+    if (!m) return;
+    const p = new DOMPoint(e.clientX, e.clientY).matrixTransform(m.inverse());
+    orZoom(e.deltaY < 0 ? 1.16 : 1 / 1.16, p.x, p.y);
+  }, { passive: false });
+
+  /* Hover and focus are one state for the labels: either one earns a
+     node its chip. Repaint is labels-only — cheap, and it cannot
+     disturb a node mid-hover. */
+  const over = id => {
+    if (id !== state.hover) { state.hover = id; if (!state.drag) orPaintLabels(); }
+  };
+  svg.addEventListener('pointerover', e => {
+    const g = e.target.closest ? e.target.closest('.or-node') : null;
+    over(g ? g.getAttribute('data-id') : null);
+  });
+  svg.addEventListener('pointerleave', () => over(null));
+  svg.addEventListener('focusin', e => {
+    const g = e.target.closest ? e.target.closest('.or-node') : null;
+    if (g) over(g.getAttribute('data-id'));
+  });
+  svg.addEventListener('focusout', e => {
+    const g = e.relatedTarget && e.relatedTarget.closest
+      ? e.relatedTarget.closest('.or-node') : null;
+    if (!g) over(null);
+  });
+
+  /* +, −, 0 — but never while you are typing. The search box is in the
+     same viewport, and a query with a zero in it is not a camera cue. */
+  document.addEventListener('keydown', e => {
+    if (state.view !== 'map') return;
+    const t = e.target;
+    if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+    if (e.key === '+' || e.key === '=') orZoom(1.25, 500, 500);
+    else if (e.key === '-' || e.key === '_') orZoom(1 / 1.25, 500, 500);
+    else if (e.key === '0') orZoom(0);
+    else return;
+    e.preventDefault();
+  });
+
+  const wire = (id, fn) => { const b = byId(id); if (b) b.addEventListener('click', fn); };
+  wire('orFit', orFit);
+  wire('orZoomIn', () => orZoom(1.25, 500, 500));
+  wire('orZoomOut', () => orZoom(1 / 1.25, 500, 500));
+  wire('orZoomFit', () => orZoom(0));
+})();
+
+/* ─── 4 · VAULT ─── Everything async in it resolves after the whole
+   script has evaluated, so the painters it calls back into exist. */
+
+/* ═══════════════════════════════════════════════════════════════
+   VAULT — getting an Obsidian folder into the note shape, and
+   keeping it.
+
+   Read-only, always. The folder you point this at is walked, parsed
+   and cached; not one byte goes back. Three routes in, one array of
+   {path, text} out, one parser after that — however a file arrives,
+   it becomes the same note.
+
+   Nothing in this fragment touches innerHTML. Every vault string that
+   reaches the DOM here goes through el() and textContent, which is
+   never parsed as HTML at all — the stronger form of the esc() rule,
+   not an exemption from it. The reading pane renders titles and
+   bodies; escaping them there is its job, and it knows it.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── the cache ──
+   One database, two stores. `idx` holds the parsed vault so a reload
+   shows the map instantly instead of an empty field waiting on a
+   permission prompt. It cannot live in localStorage: a real vault is
+   megabytes, the quota is five for the whole origin, and the ledger
+   shares that origin — the index would not merely fail to save, it
+   would take the positions down with it. `dir` holds the directory
+   handle so tomorrow is a permission prompt, not a re-pick. */
+const orIdbOpen = (() => {
+  let p = null;
+  return () => p || (p = new Promise((res, rej) => {
+    if (!('indexedDB' in window)) { rej(new Error('no idb')); return; }
+    const r = indexedDB.open(IDB, 1);
+    r.onupgradeneeded = () => {
+      const db = r.result;
+      if (!db.objectStoreNames.contains('idx')) db.createObjectStore('idx');
+      if (!db.objectStoreNames.contains('dir')) db.createObjectStore('dir');
+    };
+    r.onsuccess = () => res(r.result);
+    r.onerror = () => rej(r.error);
+  }));
+})();
+
+async function orIdbGet(store, key) {
+  const db = await orIdbOpen();
+  return new Promise((res, rej) => {
+    const t = db.transaction(store, 'readonly');
+    const q = t.objectStore(store).get(key);
+    t.oncomplete = () => res(q.result);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error);
+  });
+}
+
+async function orIdbPut(store, key, val) {
+  const db = await orIdbOpen();
+  return new Promise((res, rej) => {
+    const t = db.transaction(store, 'readwrite');
+    t.objectStore(store).put(val, key);
+    t.oncomplete = () => res(true);
+    t.onerror = () => rej(t.error);
+    t.onabort = () => rej(t.error);
+  });
+}
+
+/* ── the log ──
+   Plain lines, textContent only — a filename is untrusted text and
+   this is one of the two places it reaches the DOM from this
+   fragment. Capped so a morning of reconnects cannot grow a scroll of
+   its own. */
+function orLog(msg) {
+  const box = byId('orLog');
+  if (!box) return;
+  box.appendChild(el('p', null, msg));
+  while (box.children.length > 60) box.removeChild(box.firstChild);
+  box.scrollTop = box.scrollHeight;
+}
+
+/* One line, updated in place — sixty copies of "Reading n of m" would
+   be the log burying itself. When the count completes, the marker
+   comes off and the final figure stays as history. */
+function orProgress(done, total, verb) {
+  const box = byId('orLog');
+  if (!box) return;
+  let line = box.querySelector('p[data-live]');
+  if (!line) {
+    line = el('p');
+    line.setAttribute('data-live', '');
+    box.appendChild(line);
+  }
+  line.textContent = `${verb || 'Reading'} ${done.toLocaleString('en-GB')} of `
+    + `${total.toLocaleString('en-GB')}…`;
+  if (done >= total) line.removeAttribute('data-live');
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ── frontmatter ──
+   Not a YAML engine, on purpose. Four keys come out of a vault's
+   frontmatter — title, tags, category, aliases — and a full parser
+   for the rest is surface area for somebody else's file to break the
+   page with. Scalars, inline lists and dash lists cover what Obsidian
+   actually writes; anything cleverer stays in the body. */
+function orFrontmatter(text) {
+  const meta = { title: null, tags: [], category: null, aliases: [] };
+  const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/.exec(text);
+  if (!m) return { meta, body: text };
+  const strip = (s) => String(s).trim().replace(/^["']+|["']+$/g, '').trim();
+  const LIST = { tags: 'tags', tag: 'tags', aliases: 'aliases', alias: 'aliases' };
+  let open = null;                     /* the list a bare "- item" belongs to */
+  for (const line of m[1].split(/\r?\n/)) {
+    const item = /^\s*-\s+(.+)$/.exec(line);
+    if (item) { if (open) meta[open].push(strip(item[1])); continue; }
+    const kv = /^([A-Za-z_][A-Za-z0-9_-]*)\s*:(.*)$/.exec(line);
+    if (!kv) continue;
+    open = null;
+    const key = kv[1].toLowerCase();
+    const val = kv[2].trim();
+    if (key === 'title') { if (val) meta.title = strip(val); }
+    else if (key === 'category') { if (val) meta.category = strip(val); }
+    else if (LIST[key]) {
+      const into = LIST[key];
+      if (!val) { open = into; continue; }
+      const inner = val[0] === '[' ? val.replace(/^\[|\]$/g, '') : val;
+      /* Tags split on spaces too — the old Obsidian form. Aliases only
+         on commas: "Liquidity Sweep" is one alias, not two. */
+      (into === 'tags' ? inner.split(/[,\s]+/) : inner.split(','))
+        .map(strip).filter(Boolean).forEach((v) => meta[into].push(v));
+    }
+  }
+  return { meta, body: text.slice(m[0].length) };
+}
+
+/* ── wikilinks ──
+   Every [[wikilink]], embeds included — ![[x]] is a link wearing a
+   picture of itself. `|alias`, `#heading` and `^block` all resolve on
+   the target. Fenced code is skipped: a link inside a code block is a
+   quotation, not a claim. Attachment embeds are dropped — an image is
+   not a note you meant to write, and counting one as a loose end
+   would bury the real ones under a folder of screenshots. */
+function orWiki(text) {
+  const out = [];
+  const seen = new Set();
+  const t = String(text).replace(/```[\s\S]*?```/g, ' ');
+  const re = /!?\[\[([^\]]+?)\]\]/g;
+  let m;
+  while ((m = re.exec(t))) {
+    let tgt = m[1].split('|')[0].split(/[#^]/)[0].trim();
+    if (!tgt) continue;                          /* [[#heading]] — the note itself */
+    if (/\.md$/i.test(tgt)) tgt = tgt.slice(0, -3);
+    else if (/\.(png|jpe?g|gif|bmp|svg|webp|avif|heic|pdf|mp3|wav|m4a|ogg|flac|mp4|mov|mkv|webm|zip|excalidraw|canvas|base)$/i.test(tgt)) continue;
+    const k = tgt.toLowerCase();
+    if (!seen.has(k)) { seen.add(k); out.push(tgt); }
+  }
+  return out;
+}
+
+/* ── which category ──
+   The person looking at the map outranks the folder: a re-file stored
+   under `cat` wins over everything the file says about itself. Then
+   the frontmatter, then the top folder, then Unfiled. Callers in a
+   loop pass the re-file map once — reading localStorage four thousand
+   times is a JSON parse per note for a value that cannot change
+   mid-loop. */
+function orCatOf(id, fmcat, manual) {
+  const filed = manual || state.cat || orRead().cat;
+  if (filed && filed[id]) return filed[id];
+  const named = (v) => {
+    if (!v) return null;
+    const k = String(v).trim().toLowerCase();
+    return CAT_ALIAS[k] || (CATS.some((c) => c.id === k) ? k : null);
+  };
+  const top = id.indexOf('/') > 0 ? id.slice(0, id.indexOf('/')) : null;
+  return named(fmcat) || named(top) || 'other';
+}
+
+/* ── one file, one note ──
+   The same parser whatever route the file arrived by. Fences come out
+   before the tag scan for the same reason orWiki takes them out of
+   its own: a #include in a code block is code. */
+function orParse(path, text, mtime, manual) {
+  const id = path.replace(/\.md$/i, '');
+  const { meta, body } = orFrontmatter(text);
+  const scan = body.replace(/```[\s\S]*?```/g, ' ');
+  const tags = [];
+  const seen = new Set();
+  const take = (t) => {
+    t = String(t).replace(/^#/, '').trim().toLowerCase();
+    if (t && !seen.has(t)) { seen.add(t); tags.push(t); }
+  };
+  meta.tags.forEach(take);
+  /* At least one non-digit, never straight after a word or a # — a
+     heading's marks and a colour code are not tags. */
+  const re = /(^|[^\w#&])#([A-Za-z0-9/_-]*[A-Za-z/_-][A-Za-z0-9/_-]*)/g;
+  let m;
+  while ((m = re.exec(scan))) take(m[2]);
+  return {
+    id,
+    title: meta.title || id.split('/').pop(),
+    cat: orCatOf(id, meta.category, manual),
+    tags,
+    /* Raw targets for now. orResolve rewrites them to ids once every
+       file is in — a wikilink can point forward. */
+    links: orWiki(body),
+    aliases: meta.aliases,
+    body,
+    words: body.split(/\s+/).filter(Boolean).length,
+    mtime: mtime || 0,
+  };
+}
+
+/* ── resolution ──
+   Runs AFTER every file is read, because a wikilink can point at a
+   note that arrives later. Exact id, then basename, then
+   case-insensitive basename, then a frontmatter alias, then
+   unresolved — and unresolved is COUNTED, never silently dropped.
+   That count is the loose-ends stat and it is the most useful number
+   on the screen: it is the list of notes you meant to write.
+
+   It rescans the bodies rather than trusting note.links, so the seed
+   and a real vault go through one code path and their loose ends are
+   counted the same way. Returns the unresolved names, sorted; the
+   caller keeps the length. */
+function orResolve(notes) {
+  const ids = new Map();
+  const base = new Map();
+  const baseCi = new Map();
+  const alias = new Map();
+  for (const n of notes) {
+    ids.set(n.id, n.id);
+    const b = n.id.split('/').pop();
+    if (!base.has(b)) base.set(b, n.id);
+    const bl = b.toLowerCase();
+    if (!baseCi.has(bl)) baseCi.set(bl, n.id);
+    for (const a of (n.aliases || [])) {
+      const al = String(a).trim().toLowerCase();
+      if (al && !alias.has(al)) alias.set(al, n.id);
+    }
+  }
+  const loose = new Map();             /* lowercased → the name as written */
+  for (const n of notes) {
+    const done = [];
+    const seen = new Set();
+    for (const t of orWiki(n.body)) {
+      const hit = ids.get(t) || base.get(t) || baseCi.get(t.toLowerCase())
+        || alias.get(t.toLowerCase()) || null;
+      if (!hit) {
+        const k = t.toLowerCase();
+        if (!loose.has(k)) loose.set(k, t);
+        continue;
+      }
+      if (hit === n.id) continue;      /* a link to itself is a zero-length edge */
+      if (!seen.has(hit)) { seen.add(hit); done.push(hit); }
+    }
+    n.links = done;
+  }
+  return [...loose.values()].sort();
+}
+
+/* ── the picker's walk ──
+   `.obsidian`, `.trash`, `.git` — any dot-folder is the tool's
+   machinery, not your notes, and nothing that is not .md is a note.
+   Paths come back vault-relative, which is what makes the top folder
+   readable as a category. */
+async function orReadDir(handle, sub) {
+  const out = [];
+  const path = sub || '';
+  for await (const entry of handle.values()) {
+    if (entry.name[0] === '.') continue;
+    if (entry.kind === 'file') {
+      if (!/\.md$/i.test(entry.name)) continue;
+      try { out.push({ path: path + entry.name, file: await entry.getFile() }); }
+      catch (e) { /* one unreadable file is one note, not the vault */ }
+    } else if (entry.kind === 'directory') {
+      out.push(...await orReadDir(entry, path + entry.name + '/'));
+    }
+  }
+  return out;
+}
+
+/* ── reading the texts ──
+   All three routes land here: bare File objects from the directory
+   input, {path, file} pairs from the picker's walk and the drop
+   zone's. Yields to the event loop every 40 files and reports as it
+   goes — a 5,000-note vault read in one gulp freezes the page with no
+   explanation, and a frozen page reads as a dead one. */
+async function orReadFiles(items) {
+  const CAP = 4000;
+  const list = [];
+  for (const it of items) {
+    const f = it instanceof File ? it : it.file;
+    let p = it instanceof File ? (it.webkitRelativePath || it.name) : it.path;
+    /* The input's paths carry the picked folder as their first
+       segment; ids are vault-relative, so it comes off. */
+    if (it instanceof File && p.includes('/')) p = p.slice(p.indexOf('/') + 1);
+    if (!f || !/\.md$/i.test(p)) continue;
+    if (p.split('/').some((s) => s[0] === '.')) continue;
+    list.push({ path: p, file: f });
+  }
+  /* Code-unit order, not localeCompare: read order decides which note
+     wins a basename collision and where the layout seeds, and it has
+     to be the same on every machine. */
+  list.sort((a, b) => (a.path < b.path ? -1 : a.path > b.path ? 1 : 0));
+  const capped = list.length > CAP;
+  const take = capped ? list.slice(0, CAP) : list;
+  const files = [];
+  for (let i = 0; i < take.length; i++) {
+    if (i % 40 === 0) {
+      orProgress(i, take.length, 'Reading');
+      await new Promise((r) => setTimeout(r));
+    }
+    const it = take[i];
+    try {
+      files.push({ path: it.path, text: await it.file.text(),
+                   mtime: it.file.lastModified || 0 });
+    } catch (e) { /* skip the one, keep the vault */ }
+  }
+  if (take.length) orProgress(take.length, take.length, 'Reading');
+  return { files, capped, total: list.length };
+}
+
+/* ── attach, pick, forget ──
+   One closure, three names out: they share the ingest tail, the busy
+   flag and the boot, and the contract gives this fragment no fourth
+   name to put those under. Everything async in here runs after the
+   whole script has evaluated, so the painters the tail calls are
+   defined by the time they are wanted. */
+const { orAttach, orPickDir, orForget } = (() => {
+
+  let busy = false;
+
+  const say = (s) => {
+    if (typeof orSay === 'function') { orSay(s); return; }
+    const p = byId('say');
+    if (p) p.textContent = s;
+  };
+
+  /* The painters live in other fragments; typeof keeps this closure
+     honest about it rather than dependent on file order. */
+  const repaint = () => {
+    if (typeof orLayout === 'function') orLayout();
+    if (typeof orPaint === 'function') orPaint();
+    if (typeof orLegend === 'function') orLegend();
+    if (typeof orStats === 'function') orStats();
+  };
+
+  /* The vault view's three labels, and Forget only offered when there
+     is something to forget. */
+  const meta = () => {
+    const v = orRead().vault;
+    const put = (id, s) => { const n = byId(id); if (n) n.textContent = s; };
+    put('orVaultName', v ? v.name : 'No vault attached');
+    put('orVaultN', v ? `${v.n.toLocaleString('en-GB')} ${v.n === 1 ? 'note' : 'notes'}` : '');
+    put('orVaultAt', v && v.at ? 'read ' + new Date(v.at).toLocaleString('en-GB',
+      { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '');
+    const fg = byId('orForget');
+    if (fg) fg.hidden = !v;
+  };
+
+  /* The tail every route converges on: read, parse, resolve, cache,
+     paint, and say what happened — the cap OUT LOUD, because a silent
+     cap reads as "read everything" when it did not. */
+  const ingest = async (items, name) => {
+    if (busy) { orLog('Already reading — give it a moment.'); return; }
+    busy = true;
+    try {
+      const got = await orReadFiles(items);
+      if (got.capped)
+        orLog(`Stopped at 4,000 of ${got.total.toLocaleString('en-GB')} notes — `
+          + 'the rest were NOT read. Point it at a smaller folder to see them.');
+      if (!got.files.length) {
+        orLog('No notes found — nothing in that folder ends in .md.');
+        return;
+      }
+      const manual = orRead().cat;
+      const notes = [];
+      for (let i = 0; i < got.files.length; i++) {
+        if (i && i % 40 === 0) {
+          orProgress(i, got.files.length, 'Parsing');
+          await new Promise((r) => setTimeout(r));
+        }
+        const f = got.files[i];
+        notes.push(orParse(f.path, f.text, f.mtime, manual));
+      }
+      orProgress(got.files.length, got.files.length, 'Parsing');
+      const loose = orResolve(notes);
+      state.notes = notes;
+      state.loose = loose.length;
+      if (state.sel && !notes.some((n) => n.id === state.sel)) state.sel = null;
+      orIdbPut('idx', 'index', { k: 'index', notes, loose: loose.length })
+        .catch(() => {});
+      orWrite({ vault: { name, at: Date.now(), n: notes.length } });
+      meta();
+      repaint();
+      orLog(`${name} — ${notes.length.toLocaleString('en-GB')} notes, `
+        + `${loose.length} loose ${loose.length === 1 ? 'end' : 'ends'}.`);
+      if (loose.length)
+        orLog(`Meant to write: ${loose.slice(0, 8).join(', ')}`
+          + `${loose.length > 8 ? ` and ${loose.length - 8} more` : ''}.`);
+      say(`Vault attached — ${notes.length} notes on the map.`);
+    } finally { busy = false; }
+  };
+
+  /* You cannot attach a folder from a typed path: no browser API opens
+     one from a string, and a text field that silently does nothing is
+     worse than saying so. Three real routes converge here instead —
+     the directory picker, the directory input, the drop zone — and a
+     handle remembered from a previous visit is re-permissioned rather
+     than picked again every morning. */
+  const orAttach = async () => {
+    let h = null;
+    try { h = await orIdbGet('dir', 'vault'); } catch (e) {}
+    if (h && h.queryPermission) {
+      let p = await h.queryPermission({ mode: 'read' }).catch(() => 'denied');
+      if (p === 'prompt') p = await h.requestPermission({ mode: 'read' }).catch(() => 'denied');
+      if (p === 'granted') {
+        try { await ingest(await orReadDir(h), h.name || 'Vault'); return; }
+        catch (e) { orLog('The remembered folder would not read — pick it again.'); }
+      }
+      /* Stale handle: the folder moved, or permission is gone for
+         good. Fall through to a fresh pick. */
+    }
+    await orPickDir();
+  };
+
+  /* A fresh pick, always — Attach is the one that prefers the
+     remembered handle. The picker only exists on a secure context in
+     Chromium; everywhere else, including file://, the directory input
+     does the same job through webkitRelativePath, with no way to
+     reconnect on reload — that is the trade, not a bug. */
+  const orPickDir = async () => {
+    if (window.showDirectoryPicker && window.isSecureContext) {
+      let h = null;
+      try { h = await showDirectoryPicker({ mode: 'read' }); }
+      catch (e) { return; }                    /* the picker was cancelled */
+      try { await orIdbPut('dir', 'vault', h); } catch (e) {}
+      try { await ingest(await orReadDir(h), h.name || 'Vault'); }
+      catch (e) { orLog('Could not read that folder.'); }
+      return;
+    }
+    const inp = byId('orInput');
+    if (inp) inp.click();
+  };
+
+  /* The ONE delete in this app with no bin behind it, and it is
+     allowed: what it forgets is a CACHE of files that are still
+     sitting on the disk you picked them from. There is nothing to
+     restore, so there is nothing to keep a bin for. Positions and
+     re-filings stay — attach the same vault again and your map comes
+     back as you left it. */
+  const orForget = async () => {
+    try {
+      const db = await orIdbOpen();
+      await new Promise((res, rej) => {
+        const t = db.transaction(['idx', 'dir'], 'readwrite');
+        t.objectStore('idx').delete('index');
+        t.objectStore('dir').delete('vault');
+        t.oncomplete = res;
+        t.onerror = () => rej(t.error);
+        t.onabort = () => rej(t.error);
+      });
+    } catch (e) {}
+    orWrite({ vault: null });
+    /* Copies, not SEED itself — the resolver writes links back. */
+    state.notes = SEED.map((n) =>
+      Object.assign({}, n, { tags: n.tags.slice(), links: n.links.slice() }));
+    state.loose = orResolve(state.notes).length;
+    state.sel = null;
+    meta();
+    repaint();
+    orLog('Vault forgotten. The files are untouched on your disk.');
+    say('Vault forgotten — the seed is back on the map.');
+  };
+
+  /* ── the drop zone's walk ──
+     readEntries hands back at most a hundred entries and must be
+     asked again — one call reads one page of the folder, not the
+     folder. `root` strips the dropped folder's own name so ids stay
+     vault-relative. */
+  const walkEntry = (entry, path, out, root) => new Promise((res) => {
+    if (entry.isFile) {
+      if (!/\.md$/i.test(entry.name)) return res();
+      entry.file((f) => { out.push({ path: path + entry.name, file: f }); res(); },
+        () => res());
+      return;
+    }
+    if (!entry.isDirectory || (!root && entry.name[0] === '.')) return res();
+    const sub = root ? '' : path + entry.name + '/';
+    const rd = entry.createReader();
+    const got = [];
+    const more = () => rd.readEntries(async (batch) => {
+      if (batch.length) { got.push(...batch); more(); return; }
+      for (const e of got) await walkEntry(e, sub, out, false);
+      res();
+    }, () => res());
+    more();
+  });
+
+  /* ── wiring and boot ── */
+  const wire = (id, ev, fn) => { const n = byId(id); if (n) n.addEventListener(ev, fn); };
+
+  wire('orAttach', 'click', () => { orAttach(); });
+  wire('orPick', 'click', () => { orPickDir(); });
+  wire('orForget', 'click', () => { orForget(); });
+
+  wire('orInput', 'change', (e) => {
+    const fs = e.target.files;
+    if (!fs || !fs.length) return;
+    const root = (fs[0].webkitRelativePath || '').split('/')[0] || 'Vault';
+    /* A handle from an earlier picker attach would otherwise
+       reconnect the WRONG folder tomorrow morning. */
+    orIdbPut('dir', 'vault', null).catch(() => {});
+    ingest([...fs], root);
+    e.target.value = '';
+  });
+
+  const drop = byId('orDrop');
+  if (drop) {
+    drop.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = 'copy';
+      drop.setAttribute('data-hot', '');
+    });
+    drop.addEventListener('dragleave', () => drop.removeAttribute('data-hot'));
+    drop.addEventListener('drop', async (e) => {
+      e.preventDefault();
+      drop.removeAttribute('data-hot');
+      const entries = [...(e.dataTransfer.items || [])]
+        .map((it) => it.webkitGetAsEntry && it.webkitGetAsEntry())
+        .filter(Boolean);
+      const out = [];
+      let root = null;
+      /* One folder dropped is the vault — its name comes off the
+         paths. Several dropped at once are top folders, and their
+         names are the categories, so they stay. */
+      const lone = entries.length === 1 && entries[0].isDirectory;
+      for (const en of entries) {
+        if (en.isDirectory) { root = root || en.name; await walkEntry(en, '', out, lone); }
+        else await walkEntry(en, '', out, false);
+      }
+      if (!out.length) {
+        orLog('Nothing readable in that drop — drop the vault folder itself.');
+        return;
+      }
+      orIdbPut('dir', 'vault', null).catch(() => {});
+      ingest(out, lone ? root : 'Vault');
+    });
+  }
+
+  /* Boot: the cache first, so a reload shows the map instantly rather
+     than an empty field waiting on a permission prompt. Then the
+     handle — if permission survived the reload the folder rereads
+     silently and the map freshens; if it wants asking again, that
+     needs a click, so the log says which click. */
+  (async () => {
+    let rec = null;
+    try { rec = await orIdbGet('idx', 'index'); } catch (e) {}
+    if (rec && Array.isArray(rec.notes) && rec.notes.length) {
+      /* The stored re-filings go on before anything paints. Two boot
+         loaders read this cache — this one and the reading pane's —
+         and if this one wins the race, a note repainted in its
+         folder's colour would undo a filing you chose by hand. orRead
+         has already dropped category ids the build does not know. */
+      const filed = orRead().cat;
+      for (const n of rec.notes) if (filed[n.id]) n.cat = filed[n.id];
+      state.notes = rec.notes;
+      state.loose = Number.isFinite(rec.loose) ? rec.loose
+        : orResolve(rec.notes).length;
+      if (state.sel && !state.notes.some((n) => n.id === state.sel)) state.sel = null;
+      repaint();
+      const v = orRead().vault;
+      orLog(`${v ? v.name : 'Vault'} — ${state.notes.length.toLocaleString('en-GB')} `
+        + 'notes from the cache.');
+    } else if (state.notes.length && state.loose == null) {
+      /* The seed goes through the same resolver, so its loose ends
+         are counted the same way a vault's are. */
+      state.loose = orResolve(state.notes).length;
+      if (typeof orStats === 'function') orStats();
+    }
+    meta();
+    let h = null;
+    try { h = await orIdbGet('dir', 'vault'); } catch (e) {}
+    if (h && h.queryPermission) {
+      const p = await h.queryPermission({ mode: 'read' }).catch(() => 'denied');
+      if (p === 'granted') {
+        try { ingest(await orReadDir(h), h.name || 'Vault'); }
+        catch (e) { orLog('The remembered folder would not read — attach it again.'); }
+      } else if (p === 'prompt') {
+        orLog('Vault remembered — Attach reconnects it without picking again.');
+      }
+    }
+  })();
+
+  return { orAttach, orPickDir, orForget };
+})();
+
+/* ─── 5 · READING PANE AND BOOT ─── Concatenated last on purpose: the
+   boot at its end is the first code that runs against the finished
+   page. */
+
+/* ═══════════════════════════════════════════════════════════════
+   THE READING PANE, THE TWO CARDS, AND THE BOOT.
+
+   Clicking a node does not open a card. The map slides right and the
+   note reads on the left, out in the open, straight on the glass — no
+   box, no border, no fill. Space is what frames it. The legend and
+   stats fade while a note is open: they are filter chrome, and this
+   is reading time.
+
+   Everything that comes out of a vault is untrusted text, and this
+   fragment is where that text meets the DOM. The rule, everywhere in
+   it: escape first, render second. The markdown renderer escapes the
+   WHOLE source before it interprets a single mark, so no bracket,
+   quote or tag from a file on disk ever reaches the page live.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── say ──
+   One live region, one sentence per meaningful change — a note opened,
+   a category isolated, the layout reset, a vault attached. The map is
+   drawn; without this line none of it exists for a screen reader. */
+function orSay(msg) {
+  const s = byId('say');
+  if (s) s.textContent = msg;
+}
+
+/* ── markdown ──
+   Headings, lists, bold, italic, code, quotes, rules, paragraphs, and
+   [[wikilinks]] — the one construct the whole app is about. Small on
+   purpose: a renderer that handles everything is a renderer nobody can
+   audit, and this one is the only thing standing between a vault note
+   and script injection. */
+function orMd(src) {
+  /* ESCAPE FIRST, RENDER SECOND — never the other way round. The whole
+     source goes through esc() before any mark is read, so from here
+     down the text is inert and the renderer only ever ADDS markup of
+     its own. The NULs are stripped because they are the placeholder
+     alphabet below, and a file is allowed to contain anything. */
+  const t = esc(String(src == null ? '' : src)).replace(/\u0000/g, '');
+  const lines = t.replace(/\r\n?/g, '\n').split('\n');
+  const out = [];
+  let i = 0, para = [], list = null;
+
+  const flushP = () => {
+    if (para.length) { out.push(`<p>${orMd.inline(para.join(' '))}</p>`); para = []; }
+  };
+  const flushL = () => {
+    if (list) {
+      out.push(`<${list.t} class="or-${list.t}">`
+        + list.items.map(x => `<li>${orMd.inline(x)}</li>`).join('') + `</${list.t}>`);
+      list = null;
+    }
+  };
+  const flush = () => { flushP(); flushL(); };
+
+  while (i < lines.length) {
+    const ln = lines[i];
+
+    if (/^```/.test(ln)) {
+      flush();
+      const buf = [];
+      i++;
+      while (i < lines.length && !/^```/.test(lines[i])) { buf.push(lines[i]); i++; }
+      i++;                    /* an unclosed fence swallows the rest — that is what the author wrote */
+      out.push(`<pre class="or-code"><code>${buf.join('\n')}</code></pre>`);
+      continue;
+    }
+    const h = ln.match(/^(#{1,6})\s+(.*)$/);
+    if (h) {
+      flush();
+      /* The pane's own display title is the loud thing on this screen;
+         a vault heading starts two rungs below it and stops at three. */
+      const lv = Math.min(h[1].length, 3);
+      out.push(`<h${lv + 2} class="or-bh${lv}">${orMd.inline(h[2])}</h${lv + 2}>`);
+      i++; continue;
+    }
+    if (/^\s*(?:-{3,}|\*{3,}|_{3,})\s*$/.test(ln)) {
+      flush(); out.push('<hr class="or-hr">'); i++; continue;
+    }
+    /* The source is already escaped, so a quote line opens with the
+       entity, not the character — matching `>` here would miss every
+       one of them. */
+    const q = ln.match(/^&gt;\s?(.*)$/);
+    if (q) {
+      flush();
+      const buf = [q[1]];
+      i++;
+      while (i < lines.length && /^&gt;\s?/.test(lines[i])) {
+        buf.push(lines[i].replace(/^&gt;\s?/, '')); i++;
+      }
+      const ps = buf.join('\n').split(/\n\s*\n/).map(s => s.trim()).filter(Boolean);
+      out.push(`<blockquote class="or-quote">${
+        ps.map(p => `<p>${orMd.inline(p.replace(/\n/g, ' '))}</p>`).join('')}</blockquote>`);
+      continue;
+    }
+    const ul = ln.match(/^\s*[-*+]\s+(.*)$/);
+    if (ul) {
+      flushP();
+      if (!list || list.t !== 'ul') { flushL(); list = { t: 'ul', items: [] }; }
+      list.items.push(ul[1]); i++; continue;
+    }
+    const ol = ln.match(/^\s*\d+[.)]\s+(.*)$/);
+    if (ol) {
+      flushP();
+      if (!list || list.t !== 'ol') { flushL(); list = { t: 'ol', items: [] }; }
+      list.items.push(ol[1]); i++; continue;
+    }
+    if (!ln.trim()) { flush(); i++; continue; }
+    flushL();
+    para.push(ln.trim());
+    i++;
+  }
+  flush();
+  return out.join('');
+}
+
+/* Inline marks, on text that esc() has already been through. Code
+   spans and wikilinks are lifted out into placeholders FIRST, so the
+   bold and italic passes can never reach inside a code span or inside
+   the markup this function itself just built. */
+orMd.inline = (t) => {
+  const hold = [];
+  const keep = (html) => { hold.push(html); return '\u0000' + (hold.length - 1) + '\u0000'; };
+
+  t = t.replace(/`([^`\n]+)`/g, (_, c) => keep(`<code class="or-cd">${c}</code>`));
+
+  /* [[target]], [[target|alias]], [[target#heading]], [[target^block]]
+     — and ![[embed]] is a link too. A link that lands is a button that
+     opens the note; one that does not is a LOOSE END and renders dead,
+     because a dead end you can see is the point of keeping count. */
+  t = t.replace(/!?\[\[([^[\]\n]+?)\]\]/g, (_, inner) => {
+    /* Unescaped for RESOLUTION only — the id key is the raw string.
+       Nothing from it reaches the DOM except back through esc(). */
+    const raw = orMd.un(inner);
+    const bar = raw.indexOf('|');
+    const alias = bar >= 0 ? raw.slice(bar + 1).trim() : '';
+    const target = (bar >= 0 ? raw.slice(0, bar) : raw).replace(/[#^].*$/, '').trim();
+    const label = alias || target;
+    const to = orMd.resolve(target);
+    /* Two names on the dead span: or-dead is what the stylesheet
+       dresses, or-loose is what the counts and the checks grep for. */
+    return keep(to
+      ? `<button type="button" class="or-wl" data-go="${esc(to)}">${esc(label)}</button>`
+      : `<span class="or-loose or-dead" title="A loose end — no note by this name yet">${esc(label)}</span>`);
+  });
+
+  /* Bold before italic, or ** reads as two italics back to back. */
+  t = t.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
+  t = t.replace(/(^|[^\w*])\*([^*\n]+)\*(?=[^\w*]|$)/g, '$1<em>$2</em>');
+  t = t.replace(/(^|[^\w_])_([^_\n]+)_(?=[^\w_]|$)/g, '$1<em>$2</em>');
+
+  return t.replace(/\u0000(\d+)\u0000/g, (_, k) => hold[+k]);
+};
+
+/* The five entities esc() makes, undone — for resolving a captured
+   target against raw note ids, never for output. */
+orMd.un = (s) => String(s).replace(/&(?:amp|lt|gt|quot|#39);/g,
+  m => ({ '&amp;': '&', '&lt;': '<', '&gt;': '>', '&quot;': '"', '&#39;': "'" }[m]));
+
+/* One wikilink pattern for the renderer and the stats, so a "loose
+   end" cannot mean two different things on one screen. */
+orMd.WIKI = /!?\[\[([^[\]\n]+?)\]\]/g;
+
+/* Lookup maps, rebuilt only when the notes array itself is replaced —
+   a vault is megabytes, and the filter repaints on every keystroke.
+   Built over the notes in sorted-id order so a basename shared by two
+   files resolves to the same one on every machine. */
+orMd.index = () => {
+  const notes = state.notes || [];
+  if (orMd.src === notes && orMd.ix) return orMd.ix;
+  const id = new Map(), base = new Map(), lc = new Map(), note = new Map(),
+        al = new Map();
+  notes.slice().sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0)).forEach(n => {
+    id.set(n.id, n.id);
+    note.set(n.id, n);
+    const b = n.id.indexOf('/') >= 0 ? n.id.slice(n.id.lastIndexOf('/') + 1) : n.id;
+    if (!base.has(b)) base.set(b, n.id);
+    const l = b.toLowerCase();
+    if (!lc.has(l)) lc.set(l, n.id);
+    /* Frontmatter aliases resolve here too: the ingest honours them,
+       and a link the Links section lists must not render dead in the
+       body two inches above it. */
+    for (const a of (n.aliases || [])) {
+      const k = String(a).trim().toLowerCase();
+      if (k && !al.has(k)) al.set(k, n.id);
+    }
+  });
+  orMd.src = notes;
+  orMd.ix = { id, base, lc, note, al };
+  return orMd.ix;
+};
+
+/* Resolution order, matching orResolve: exact id, then basename, then
+   case-insensitive basename, then a frontmatter alias, then nothing. */
+orMd.resolve = (target) => {
+  const t = String(target || '').split('|')[0].replace(/[#^].*$/, '').trim();
+  if (!t) return null;
+  const ix = orMd.index();
+  if (ix.id.has(t)) return t;
+  const b = t.indexOf('/') >= 0 ? t.slice(t.lastIndexOf('/') + 1) : t;
+  if (ix.base.has(b)) return ix.base.get(b);
+  const l = b.toLowerCase();
+  if (ix.lc.has(l)) return ix.lc.get(l);
+  return ix.al.get(t.toLowerCase()) || null;
+};
+
+/* ── backlinks ──
+   Every note whose links contain this one. The half of a second brain
+   that makes it worth keeping — you wrote the outgoing links, but the
+   incoming ones are the ones you forgot you had. */
+function orBacklinks(id) {
+  return (state.notes || [])
+    .filter(n => n.id !== id && (n.links || []).indexOf(id) >= 0)
+    .sort((a, b) => (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
+}
+
+/* ── the reading pane ──
+   No card and no box, and that is the whole design: the glass panel
+   already carries the shell's own headings, so it carries this. The
+   eyebrow, the one loud title, the body, then Links and Backlinks as
+   open stacked sections — backlinks get equal billing, not a footnote.
+   A hub opens as the folder itself: same ramp, and the body is the
+   category's notes, most-linked first, the way a folder note reads. */
+function orOpen(id) {
+  const got = orOpen.fill(id);
+  if (!got) { orSay('That note is not on the map any more.'); return; }
+  state.sel = String(id);
+  orWrite({ sel: state.sel });
+  const pane = byId('orNote');
+  if (pane) { pane.hidden = false; pane.scrollTop = 0; }
+  orOpen.chrome(true);
+  /* Repaint AFTER the reveal: the stage just narrowed, and the paint
+     is what re-rings the selected node and relights its edges. */
+  orPaint();
+  orOpen.reveal(state.sel);
+  /* Focus lands on the pane itself, so a keyboard open reads from the
+     top of the note rather than stranding you on the map. */
+  if (pane) { try { pane.focus({ preventScroll: true }); } catch (e) {} }
+  orSay(got.hub
+    ? `${got.label} — ${got.n} ${got.n === 1 ? 'note' : 'notes'}.`
+    : `${got.title} — ${got.label}.`);
+}
+
+/* Effective category: the manual re-file is applied to the note
+   itself, so this only has to survive an id the build does not know —
+   which files under Unfiled rather than painting a token nothing
+   defines. An invalid custom property does not fall back, it inherits. */
+orOpen.cat = (n) => {
+  const m = orLayout.catOf;
+  if (m && m[n.id]) return m[n.id];
+  return orLayout.cats().some(c => c.id === n.cat) ? n.cat : 'other';
+};
+
+/* Fill the pane's slots for one id. DOM only — no camera, no focus, no
+   announcement — so the boot can restore a pane you left open without
+   stealing anything, and a re-file can refresh the eyebrow in place.
+   Returns what the caller needs for its sentence, or null. */
+orOpen.fill = (id) => {
+  const pane = byId('orNote');
+  if (!pane) return null;
+  id = String(id);
+  const cats = orLayout.cats();
+  const T = byId('orNoteTitle'), C = byId('orNoteCat'), P = byId('orNotePath');
+  const B = byId('orNoteBody'), RF = byId('orNoteRefile');
+  const secs = ['orNoteOutH', 'orNoteOut', 'orNoteInH', 'orNoteIn'].map(byId);
+  /* List items, not bare buttons: the stylesheet lays #orNoteOut,
+     #orNoteIn and .or-idx out as flex columns, and a bare inline
+     button outside one strings onto a single line — the "open stacked
+     list" is neither. */
+  const btn = (m) =>
+    `<li><button type="button" class="or-wl" data-go="${esc(m.id)}">${esc(m.title)}</button></li>`;
+
+  if (id.indexOf('hub:') === 0) {
+    const cid = id.slice(4);
+    const cat = cats.filter(c => c.id === cid)[0];
+    if (!cat) return null;
+    const deg = orLayout.deg || {};
+    const mem = (state.notes || []).filter(n => orOpen.cat(n) === cid)
+      .sort((a, b) => (deg[b.id] || 0) - (deg[a.id] || 0)
+        || (a.title < b.title ? -1 : a.title > b.title ? 1 : 0));
+    if (C) { C.textContent = 'Folder'; C.style.color = `var(--or-cat-${cid})`; }
+    if (P) { P.hidden = true; P.textContent = ''; }
+    if (RF) RF.hidden = true;                /* a folder is not a thing you re-file */
+    if (T) T.textContent = cat.label;
+    if (B) B.innerHTML = mem.length
+      ? `<ul class="or-idx">${mem.map(btn).join('')}</ul>`
+      : `<p class="or-hint">Nothing filed here yet.</p>`;
+    /* A folder has members, not links — the two sections would count
+       the hub's synthetic edges, which are not claims anybody wrote. */
+    secs.forEach(e => { if (e) e.hidden = true; });
+    return { hub: true, label: cat.label, n: mem.length };
+  }
+
+  const n = (state.notes || []).filter(x => x.id === id)[0];
+  if (!n) return null;
+  const cid = orOpen.cat(n);
+  const cat = cats.filter(c => c.id === cid)[0] || { label: 'Unfiled' };
+  if (C) { C.textContent = cat.label; C.style.color = `var(--or-cat-${cid})`; }
+  if (P) { P.hidden = false; P.textContent = n.id; }
+  if (RF) RF.hidden = false;
+  if (orRefile.sel) { orRefile.sel.value = cid; if (orRefile.fit) orRefile.fit(); }
+  if (T) T.textContent = n.title;
+  if (B) B.innerHTML = orMd(n.body || '');
+
+  const ix = orMd.index();
+  const seen = new Set();
+  const outs = (n.links || []).filter(l => {
+    if (seen.has(l)) return false;
+    seen.add(l);
+    return ix.note.has(l);
+  }).map(l => ix.note.get(l));
+  const ins = orBacklinks(id);
+  secs.forEach(e => { if (e) e.hidden = false; });
+  if (secs[0]) secs[0].textContent = outs.length ? `Links · ${outs.length}` : 'Links';
+  if (secs[1]) secs[1].innerHTML = outs.length ? outs.map(btn).join('')
+    : `<li class="or-hint">Points at nothing.</li>`;
+  if (secs[2]) secs[2].textContent = ins.length ? `Backlinks · ${ins.length}` : 'Backlinks';
+  if (secs[3]) secs[3].innerHTML = ins.length ? ins.map(btn).join('')
+    : `<li class="or-hint">Nothing points here yet.</li>`;
+  return { hub: false, title: n.title, label: cat.label };
+};
+
+/* The cards fade for reading time and come back after. The stylesheet
+   keys the visual fade on the pane's own hidden attribute, so this
+   only has to finish the job the paint cannot: inert and aria-hidden
+   go with the fade, because an invisible button that still takes the
+   keyboard is a trap, not chrome. The inline opacity doubles the CSS
+   so the behaviour survives a stylesheet that has not caught up. */
+orOpen.chrome = (reading) => {
+  ['orLegend', 'orStats'].forEach(cid => {
+    const c = byId(cid);
+    if (!c) return;
+    c.style.opacity = reading ? '0' : '';
+    c.style.pointerEvents = reading ? 'none' : '';
+    c.setAttribute('aria-hidden', String(reading));
+    try { c.inert = reading; } catch (e) {}
+  });
+};
+
+/* The narrowed stage still shows the whole viewBox — meet guarantees
+   that — so the only way the node you clicked is off screen is that
+   you panned or zoomed it there. Nudge the pan just far enough to
+   bring it back inside a margin; never touch the zoom, which is yours. */
+orOpen.reveal = (id) => {
+  const p = state.xy[id];
+  if (!p) return;
+  const vx = state.panX + state.zoom * p[0];
+  const vy = state.panY + state.zoom * p[1];
+  const M = 90;
+  let dx = 0, dy = 0;
+  if (vx < M) dx = M - vx; else if (vx > VIEWBOX - M) dx = VIEWBOX - M - vx;
+  if (vy < M) dy = M - vy; else if (vy > VIEWBOX - M) dy = VIEWBOX - M - vy;
+  if (dx || dy) orPan(dx, dy);
+};
+
+/* Close puts everything back: the cards return, the map widens, and
+   focus goes to the node you were reading — the paint just replaced
+   the element that had it, so it is found again by id. */
+function orClose() {
+  const pane = byId('orNote');
+  if (!pane || pane.hidden) return;
+  const was = state.sel;
+  pane.hidden = true;
+  orOpen.chrome(false);
+  state.sel = null;
+  orWrite({ sel: null });
+  orPaint();
+  if (was) {
+    const wrap = byId('orNodes');
+    const g = wrap ? wrap.querySelector(`[data-id="${CSS.escape(was)}"]`) : null;
+    if (g) { try { g.focus({ preventScroll: true }); } catch (e) {} }
+  }
+  orSay('Note closed.');
+}
+
+/* ── the legend card ──
+   One row per category: dot, label, count. Click isolates, click again
+   clears — a real button with aria-pressed, because a filter you
+   cannot see the state of is a filter you forget you set. Trading and
+   Personal Development hold their rows even at zero: the two were
+   asked for by name, and a map that hides them until a file arrives is
+   not recognisably yours. */
+function orLegend() {
+  const box = byId('orLegRows');
+  if (!box) return;
+  const count = {};
+  (state.notes || []).forEach(n => {
+    const c = orOpen.cat(n);
+    count[c] = (count[c] || 0) + 1;
+  });
+  box.innerHTML = orLayout.cats()
+    .filter(c => count[c.id] || c.id === 'trading' || c.id === 'growth')
+    .map(c => {
+      const k = count[c.id] || 0;
+      const on = state.only === c.id;
+      return `<button type="button" class="or-leg" data-cat="${esc(c.id)}" aria-pressed="${on}"`
+        + ` aria-label="${esc(c.label)} — ${k} ${k === 1 ? 'note' : 'notes'}${on ? ', isolated' : ''}">`
+        + `<i class="or-leg-dot" style="background:var(--or-cat-${esc(c.id)})" aria-hidden="true"></i>`
+        + `<span class="or-leg-lb">${esc(c.label)}</span>`
+        + `<em class="or-leg-n">${k}</em></button>`;
+    }).join('');
+}
+
+/* Isolate one category, or clear the isolate by asking for it twice.
+   Dimming, never removal — orPaint owns that distinction. */
+function orOnly(cat) {
+  const c = orLayout.cats().filter(x => x.id === cat)[0];
+  state.only = (!c || state.only === cat) ? null : cat;
+  orWrite({ only: state.only });
+  orPaint();
+  orSay(state.only ? `Only ${c.label}.` : 'Every category.');
+}
+
+/* ── the stats card ──
+   Nodes, links, categories, loose ends — four rows, the node study's
+   insights card. Categories counts the drawn sectors, so the figure
+   can never disagree with the map beside it. */
+function orStats() {
+  const notes = state.notes || [];
+  const put = (id, v) => { const e = byId(id); if (e) e.textContent = String(v); };
+  put('orStatNodes', notes.length);
+  put('orStatLinks', (state.edges || []).length);
+  let k = (orLayout.sec || []).length;
+  if (!k) {
+    const s = new Set(['trading', 'growth']);
+    notes.forEach(n => s.add(orOpen.cat(n)));
+    k = s.size;
+  }
+  put('orStatCats', k);
+  /* The ingest resolves frontmatter aliases and leaves its count on
+     state; the recount from the bodies is the floor for the seed and
+     a cold cache. Two counters would otherwise mean two numbers. */
+  put('orStatLoose', Number.isFinite(state.loose) ? state.loose : orStats.loose());
+}
+
+/* Loose ends: DISTINCT wikilink targets that resolve to nothing, over
+   every body. Distinct, because five mentions of one missing note are
+   one gap in the brain, not five. Cached against the notes array —
+   this walks megabytes, and orStats repaints on every filter key. */
+orStats.loose = () => {
+  const notes = state.notes || [];
+  if (orStats.src === notes && orStats.n != null) return orStats.n;
+  const missed = new Set();
+  for (const n of notes) {
+    const b = String(n.body || '');
+    orMd.WIKI.lastIndex = 0;
+    let m;
+    while ((m = orMd.WIKI.exec(b))) {
+      const target = m[1].split('|')[0].replace(/[#^].*$/, '').trim();
+      if (target && !orMd.resolve(target)) missed.add(target.toLowerCase());
+    }
+  }
+  orStats.src = notes;
+  orStats.n = missed.size;
+  return orStats.n;
+};
+
+/* ── search ──
+   Filters as you type, debounced: the paint relays a whole vault, and
+   a keystroke every 40ms would spend it all on layouts nobody sees.
+   Dimming rather than removing is orPaint's rule; this only carries
+   the query and, once settled, says what it found — the dimming is
+   invisible to a screen reader. */
+function orSearch() {
+  clearTimeout(orSearch.t);
+  orSearch.t = setTimeout(() => {
+    const box = byId('orSearch');
+    state.q = box ? box.value : '';
+    orPaint();
+    const q = state.q.trim();
+    if (q) {
+      const k = (state.notes || []).filter(orPaint.match).length;
+      orSay(`${k} ${k === 1 ? 'note matches' : 'notes match'}.`);
+    } else if (orSearch.had) {
+      orSay('Filter cleared.');
+    }
+    orSearch.had = !!q;
+  }, 140);
+}
+orSearch.t = 0;
+orSearch.had = false;
+
+/* ── the rail switch ──
+   Two views, mirroring days/: aria-current on the rail button, hidden
+   on the sections, the choice remembered. The map repaints when it
+   comes BACK — label chips measure real glyphs, and glyphs in a hidden
+   section measure zero, so a map that merely reappears wears every
+   chip at minimum width. */
+function orShow(view) {
+  const views = { map: byId('orMapSection'), vault: byId('orVaultSection') };
+  if (!views[view]) view = 'map';
+  document.querySelectorAll('.rail [data-view]').forEach(b => {
+    if (b.dataset.view === view) b.setAttribute('aria-current', 'page');
+    else b.removeAttribute('aria-current');
+  });
+  const back = views[view] && views[view].hidden;
+  for (const k in views) if (views[k]) views[k].hidden = k !== view;
+  state.view = view;
+  orWrite({ view });
+  document.documentElement.dataset.screen = view;
+  if (view === 'map' && back) orPaint();
+  orSay(view === 'map' ? 'The map.' : 'The vault.');
+}
+
+/* ── folding panels ──
+   The house shape: a button inside the h3, aria-expanded, the shared
+   chevron rotated 180 degrees when open, the state per panel under the
+   app's own key. Default shut — a reference you cannot put away stops
+   being a reference and becomes furniture. */
+function orFold(id) {
+  const btn = byId(id + 'T');
+  if (!btn) return;
+  const body = byId(btn.getAttribute('aria-controls') || id + 'B');
+  const on = btn.getAttribute('aria-expanded') !== 'true';
+  btn.setAttribute('aria-expanded', String(on));
+  if (body) body.hidden = !on;
+  /* Only `true` is stored: the panels default shut, so a false entry
+     and a missing one mean the same thing and one of them is noise. */
+  const s = orRead();
+  if (on) s.fold[id] = true; else delete s.fold[id];
+  orWrite({ fold: s.fold });
+}
+
+/* ── re-file ──
+   Move a note by hand. The override outlives the vault: it is applied
+   onto the notes every time the index is read back, because a filing
+   you chose is a decision, not a cache. */
+function orRefile(id, cat) {
+  const c = orLayout.cats().filter(x => x.id === cat)[0];
+  const n = (state.notes || []).filter(x => x.id === id)[0];
+  if (!c || !n || n.cat === c.id) return;
+  n.cat = c.id;
+  const s = orRead();
+  s.cat[id] = c.id;
+  const ok = orWrite({ cat: s.cat });
+  orPaint();
+  orOpen.fill(id);           /* the eyebrow just changed colour */
+  orSay(ok ? `Filed under ${c.label}.`
+           : `Filed under ${c.label} — not saved, storage unavailable.`);
+}
+
+/* Lay the stored overrides onto a freshly loaded set of notes. The
+   boot calls it, and any re-ingest must too, or a hand filing dies the
+   next time the vault is read. orRead has already dropped ids the
+   build does not know, so what arrives here is safe to apply. */
+orRefile.apply = (notes) => {
+  const s = orRead();
+  for (const n of notes) if (s.cat[n.id]) n.cat = s.cat[n.id];
+  return notes;
+};
+
+/* ═══════════════════════════════════════════════════════════════
+   BOOT — concatenated last, so every name above and in every other
+   fragment exists. Each step is guarded on its own: one broken wire
+   must not cut the rest, and a failure anywhere still leaves a page
+   with a map on it.
+   ═══════════════════════════════════════════════════════════════ */
+(function () {
+  const step = (fn) => { try { fn(); } catch (e) { /* the next step still runs */ } };
+
+  /* The pane: focusable for the open handoff, complementary for the
+     reader, and one delegated listener for every wikilink button it
+     will ever hold — the body is rewritten per note, a listener per
+     link would leak one per open. */
+  step(() => {
+    const pane = byId('orNote');
+    if (!pane) return;
+    if (!pane.hasAttribute('tabindex')) pane.setAttribute('tabindex', '-1');
+    if (!pane.getAttribute('role')) pane.setAttribute('role', 'complementary');
+    if (!pane.getAttribute('aria-labelledby') && byId('orNoteTitle'))
+      pane.setAttribute('aria-labelledby', 'orNoteTitle');
+    pane.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('[data-go]') : null;
+      if (b) orOpen(b.getAttribute('data-go'));
+    });
+  });
+
+  step(() => {
+    const x = byId('orNoteClose');
+    if (!x) return;
+    if (!x.querySelector('svg') && !x.textContent.trim()) x.innerHTML = icon('close', 14);
+    if (!x.getAttribute('aria-label')) x.setAttribute('aria-label', 'Close the note');
+    x.addEventListener('click', orClose);
+  });
+
+  /* The re-file control. The markup owns the element; whichever shape
+     it chose — a select, or a container to put one in — both end at
+     the same select, remembered for orOpen.fill to set. */
+  step(() => {
+    const rf = byId('orNoteRefile');
+    if (!rf) return;
+    let sel = rf.tagName === 'SELECT' ? rf : rf.querySelector('select');
+    if (!sel) {
+      rf.insertAdjacentHTML('beforeend', '<select class="or-refile"></select>');
+      sel = rf.querySelector('select');
+    }
+    sel.innerHTML = orLayout.cats().map(c =>
+      `<option value="${esc(c.id)}">${esc(c.label)}</option>`).join('');
+    if (!sel.getAttribute('aria-label')) sel.setAttribute('aria-label', 'File this note under');
+    /* Width from the word it SHOWS, not the widest it could: measured
+       on a throwaway span in the same type, plus room for the caret.
+       Run at populate, on change, and whenever fill() sets the value. */
+    orRefile.fit = () => {
+      const opt = sel.selectedOptions && sel.selectedOptions[0];
+      if (!opt) return;
+      const m = document.createElement('span');
+      m.style.cssText = 'position:absolute;visibility:hidden;white-space:pre';
+      const cs = getComputedStyle(sel);
+      m.style.font = cs.font;
+      m.style.letterSpacing = cs.letterSpacing;
+      m.style.textTransform = cs.textTransform;
+      m.textContent = opt.textContent;
+      document.body.appendChild(m);
+      sel.style.width = Math.ceil(m.getBoundingClientRect().width) + 6 + 'px';
+      m.remove();
+    };
+    sel.addEventListener('change', () => {
+      orRefile.fit();
+      if (state.sel && state.sel.indexOf('hub:') !== 0) orRefile(state.sel, sel.value);
+    });
+    orRefile.sel = sel;
+    orRefile.fit();
+  });
+
+  step(() => {
+    const lr = byId('orLegRows');
+    if (lr) lr.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('[data-cat]') : null;
+      if (b) orOnly(b.getAttribute('data-cat'));
+    });
+  });
+
+  step(() => {
+    const box = byId('orSearch');
+    if (!box) return;
+    /* The long placeholder clips mid-glyph at 420px. The phone flag
+       is set pre-stylesheet, so it is already true here. */
+    if (document.documentElement.dataset.phone === 'on') box.placeholder = 'Search';
+    box.addEventListener('input', orSearch);
+    /* Escape in the box clears the box — and does not fall through to
+       close the note you are reading, which is a different Escape. */
+    box.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || !box.value) return;
+      box.value = '';
+      state.q = '';
+      orPaint();
+      orSay('Filter cleared.');
+      orSearch.had = false;
+    });
+  });
+
+  step(() => {
+    document.querySelectorAll('.rail [data-view]').forEach(b =>
+      b.addEventListener('click', () => orShow(b.dataset.view)));
+  });
+
+  /* Every folding panel in the markup, found by the shape the house
+     rules mandate — a button inside an h3 with aria-controls — so a
+     panel added later gets its fold, its chevron and its memory for
+     free. The trailing T is the toggle convention; stripping it names
+     the panel in the stored fold map. */
+  step(() => {
+    const fold = orRead().fold;
+    document.querySelectorAll('h3 > button[aria-controls]').forEach(btn => {
+      if (!btn.id || btn.id.slice(-1) !== 'T') return;
+      const body = byId(btn.getAttribute('aria-controls'));
+      if (!body) return;
+      const id = btn.id.slice(0, -1);
+      if (!btn.querySelector('svg'))
+        btn.insertAdjacentHTML('afterbegin',
+          `<span class="or-ic" aria-hidden="true">${icon('chev', 12)}</span>`);
+      const open = fold[id] === true;
+      btn.setAttribute('aria-expanded', String(open));
+      body.hidden = !open;
+      btn.addEventListener('click', () => orFold(id));
+    });
+  });
+
+  step(() => {
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape') return;
+      const t = e.target;
+      if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+      if (state.view !== 'map') return;
+      orClose();
+    });
+  });
+
+  /* The vault view's header, from the stored meta — the cached index
+     loads below, and a screen that says nothing about whose notes
+     these are reads as somebody else's app. */
+  step(() => {
+    const v = orRead().vault;
+    if (!v) return;
+    const nm = byId('orVaultName'), nn = byId('orVaultN'), at = byId('orVaultAt');
+    if (nm) nm.textContent = v.name;
+    if (nn) nn.textContent = `${v.n} ${v.n === 1 ? 'note' : 'notes'}`;
+    if (at) at.textContent = v.at ? new Date(v.at).toLocaleDateString('en-GB',
+      { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+  });
+
+  /* Repair on the way in, field by field — the cache is IndexedDB and
+     a torn write there must cost one note, not the map. Everything is
+     cloned, so the seed corpus and the cache are never mutated by a
+     re-file. */
+  const clean = (list) => {
+    const out = [], seen = new Set();
+    for (const n of (Array.isArray(list) ? list : [])) {
+      if (!n || typeof n !== 'object' || typeof n.id !== 'string' || !n.id) continue;
+      if (seen.has(n.id)) continue;
+      seen.add(n.id);
+      out.push({
+        id: n.id,
+        title: (typeof n.title === 'string' && n.title)
+          ? n.title : (n.id.split('/').pop() || n.id),
+        cat: typeof n.cat === 'string' ? n.cat : 'other',
+        tags: Array.isArray(n.tags) ? n.tags.filter(t => typeof t === 'string') : [],
+        links: Array.isArray(n.links) ? n.links.filter(t => typeof t === 'string') : [],
+        aliases: Array.isArray(n.aliases) ? n.aliases.filter(t => typeof t === 'string') : [],
+        body: typeof n.body === 'string' ? n.body : '',
+        words: Number.isFinite(n.words) ? n.words : 0,
+        mtime: Number.isFinite(n.mtime) ? n.mtime : 0,
+      });
+    }
+    return out;
+  };
+
+  const load = async () => {
+    /* The cached vault first, the seed as the floor. The race is for
+       the one ugly IndexedDB failure — a database blocked by another
+       tab never rejects, it just never answers, and a page that waits
+       on it forever is a black screen with no error. */
+    let notes = null;
+    try {
+      if (typeof orIdbGet === 'function') {
+        const rec = await Promise.race([
+          orIdbGet('idx', 'index'),
+          new Promise(r => setTimeout(() => r(null), 1500)),
+        ]);
+        const got = rec && Array.isArray(rec.notes) ? rec.notes
+          : (Array.isArray(rec) ? rec : null);
+        if (got && got.length) notes = got;
+      }
+    } catch (e) { /* a broken cache is not a broken page */ }
+    if (!notes && typeof SEED !== 'undefined' && Array.isArray(SEED)) notes = SEED;
+
+    state.notes = orRefile.apply(clean(notes || []));
+
+    /* A selection from a previous life may name a note the cache no
+       longer holds. Dropped quietly — opening it would be a blank pane
+       with a title from nowhere. */
+    if (state.sel) {
+      const ok = state.sel.indexOf('hub:') === 0
+        ? orLayout.cats().some(c => 'hub:' + c.id === state.sel)
+        : state.notes.some(n => n.id === state.sel);
+      if (!ok) { state.sel = null; orWrite({ sel: null }); }
+    }
+
+    orPaint();
+
+    /* The pane you left open is open again — no focus steal and no
+       sentence: nothing changed, you just came back. */
+    if (state.sel && orOpen.fill(state.sel)) {
+      const pane = byId('orNote');
+      if (pane) pane.hidden = false;
+      orOpen.chrome(true);
+      orOpen.reveal(state.sel);
+    }
+
+    orShow(state.view);
+    orSay(`${state.notes.length} ${state.notes.length === 1 ? 'note' : 'notes'} on the map.`);
+  };
+
+  load().catch(() => {
+    /* Even the loader failing leaves a page: the seed corpus needs
+       nothing async, so paint whatever made it into state. */
+    step(() => {
+      if (!Array.isArray(state.notes)) state.notes = [];
+      orPaint();
+      orShow(state.view);
+    });
+  });
+})();
+</script>
+<script src="../shell.js" defer></script>
+</body>
+</html>

@@ -32,7 +32,7 @@ const ok = (name, cond, extra) => {
 
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
 const APPS = ['trading/index.html', 'arc/index.html', 'days/index.html',
-              'jade/index.html'];
+              'jade/index.html', 'orrery/index.html'];
 
 /* The inline <script> only, so markup containing the word "function" is
    not mistaken for code. */
@@ -147,7 +147,7 @@ for (const file of APPS) {
      is harmless. A fourth app is a fourth place for a token to go
      missing. */
   const SRC = ['shell.css', 'trading/index.html', 'arc/index.html', 'days/index.html',
-               'jade/index.html'];
+               'jade/index.html', 'orrery/index.html'];
   const text = SRC.map(f => read(f)).join('\n');
   /* Defined anywhere: a stylesheet, an inline style attribute, or a
      template literal that sets one. All three are legitimate. */
