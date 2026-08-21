@@ -89,6 +89,24 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
   ok('names only its own storage keys', keys.every(k => k.startsWith('jade.')), keys);
 }
 
+/* ══ 1b. EVERY CLASS THE SCRIPT WRITES HAS A RULE ═════════════════
+   .jt-none had none. It is the empty state for two lists, so it only
+   shows when there is nothing to show, and it rendered at the browser's
+   default size and colour hard against the left edge — which reads as a
+   bug rather than a state, and is exactly the sort of thing nobody
+   screenshots. names.js catches a missing token and a missing id; this
+   is the third way to reference something that is not there. */
+{
+  const style = SRC.slice(SRC.indexOf('<style>'), SRC.indexOf('</style>'));
+  const script = SRC.slice(SRC.indexOf('<script>'), SRC.lastIndexOf('</script>'));
+  const written = new Set();
+  for (const m of script.matchAll(/class="([^"$]+)"/g))
+    for (const c of m[1].split(/\s+/)) if (c && !c.includes('+')) written.add(c);
+  const styled = new Set([...style.matchAll(/\.([a-zA-Z][\w-]*)/g)].map(m => m[1]));
+  const orphans = [...written].filter(c => !styled.has(c));
+  ok('every class the script writes is styled somewhere', orphans.length === 0, orphans);
+}
+
 /* ══ 2. IT LOADS, AND IT KEEPS LOADING ════════════════════════════ */
 {
   for (const scheme of ['dark', 'light']) {

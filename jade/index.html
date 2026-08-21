@@ -119,6 +119,23 @@
   --h-sleep:    #3B5BDB;
   --h-read:     #9C7A00;
   --h-audible:  #E03131;
+
+  /* A WASH, NOT A FILL. On near-black a solid accent is a highlight; on
+     white it is a slab, and eight of them across one screen is a lot of
+     shouting for a habit tracker. The same pink at 14% of the card
+     reads as a tint, and what sits on it goes accent rather than white
+     — which is also the only way it stays readable, since white on a
+     14% pink is 1.2:1. Surfaces take these; lines and marks — the nav
+     underline, the now line, the focus ring — stay solid, because a
+     1px rule washed to 14% is not a rule. */
+  --accent-wash:   color-mix(in srgb, var(--accent) 14%, var(--card));
+  --accent-wash-2: color-mix(in srgb, var(--accent) 22%, var(--card));
+  --accent-edge:   color-mix(in srgb, var(--accent) 34%, var(--card));
+  /* And a deeper pink for whatever sits ON the wash. The accent itself
+     measures 3.76:1 against its own 14% tint, which is under the floor
+     for text — so the word gets a darker relative of the same colour
+     rather than the colour it is sitting on. */
+  --accent-deep:   #A61E4D;
 }
 
 
@@ -469,6 +486,18 @@ svg { display: block; }
 .glyph .sun { display: none; }
 :root[data-theme="light"] .glyph .sun { display: block; }
 :root[data-theme="light"] .glyph .moon { display: none; }
+
+/* The one filled control in the header, washed on light. */
+:root[data-theme="light"] .add {
+  /* The heavier wash, not the light one. It is the only "do the thing"
+     button in the header and at 14% it had faded into the bar. */
+  background: var(--accent-wash-2);
+  border: 1px solid var(--accent-edge);
+  color: var(--accent-deep);
+}
+@media (hover: hover) {
+  :root[data-theme="light"] .add:hover { background: var(--accent-wash-2); filter: none; }
+}
 
 /* Shut is display:none, not a width transition. Collapsing a flex child
    to zero animates on the wide layout and does nothing on the stacked
@@ -879,6 +908,20 @@ svg { display: block; }
   .jm-grid { grid-template-rows: 20px repeat(6, 32px); }
 }
 
+/* Today's pill. It is still the only tinted cell in the month, so it
+   still reads as today without being a solid stamp. */
+:root[data-theme="light"] .jm-d.now {
+  background: var(--accent-wash);
+  color: var(--accent-deep);
+}
+:root[data-theme="light"] .jm-d.now .jm-dot { background: var(--accent-deep); }
+@media (hover: hover) {
+  :root[data-theme="light"] .jm-d.now:hover {
+    background: var(--accent-wash-2);
+    color: var(--accent-deep);
+  }
+}
+
 /* ══ REMINDERS ════════════════════════════════════════════════════
    The foot of the panel. Three at a time, snapping, no scrollbar — the
    same box the thoughts list in the hero uses, because it is the same
@@ -1134,6 +1177,31 @@ svg { display: block; }
 }
 @media (prefers-reduced-motion: reduce) {
   .jr-tk::before, .jr-send { transition: none; }
+}
+
+/* The bell, the send and the undo, all washed. The bell is the one that
+   matters most: five solid pink discs down the side of a white panel
+   was the loudest thing on the screen and it is the quietest section
+   on it. */
+:root[data-theme="light"] .jr-av {
+  background: var(--accent-wash);
+  color: var(--accent-deep);
+}
+:root[data-theme="light"] .jr-send {
+  background: var(--accent-wash);
+  border: 1px solid var(--accent-edge);
+  color: var(--accent-deep);
+}
+:root[data-theme="light"] .jr-undo button {
+  background: var(--accent-wash-2);
+  color: var(--accent-deep);
+}
+@media (hover: hover) {
+  :root[data-theme="light"] .jr-send:hover { background: var(--accent-wash-2); filter: none; }
+  :root[data-theme="light"] .jr-tk:hover::before {
+    background: var(--accent-wash-2);
+    border-color: var(--accent-edge);
+  }
 }
 
 /* ══ TODAY ═══════════════════════════════════════════════════════
@@ -1415,6 +1483,17 @@ svg { display: block; }
   white-space: nowrap;
 }
 
+/* Both empty states — the rail with nothing due, the thoughts box with
+   nothing written. This had NO RULE AT ALL: the text rendered at the
+   browser's default size and colour, hard against the left edge, which
+   is how an empty state comes to look like a bug rather than a state. */
+.jt-none {
+  margin: 0;
+  padding: 14px 12px;
+  font-size: .76rem;
+  color: var(--ink-3);
+}
+
 /* ── rail rows ──
    The rail is chrome. What goes in it belongs to this screen, so the
    rows are jt-. Each row is one button: a tick control nested inside
@@ -1682,6 +1761,24 @@ svg { display: block; }
 /* 3. The avatar's glyph sits on a mid-tone hue now rather than a neon,
       so it goes white rather than taking the page colour. */
 :root[data-theme="light"] .jt-r-av { color: #FFFFFF; }
+
+/* The one row in the rail that says "this one next". Washed rather than
+   filled, and its words take the accent instead of the page colour. */
+:root[data-theme="light"] .jt-r[data-next] {
+  background: var(--accent-wash);
+  border-color: var(--accent-edge);
+  color: var(--accent-deep);
+}
+:root[data-theme="light"] .jt-r[data-next] .jt-r-nm,
+:root[data-theme="light"] .jt-r[data-next] .jt-r-at { color: var(--accent-deep); }
+:root[data-theme="light"] .jt-r[data-next] .jt-r-tk { border-color: var(--accent-edge); }
+@media (hover: hover) {
+  :root[data-theme="light"] .jt-r[data-next]:hover {
+    background: var(--accent-wash-2);
+    border-color: var(--accent-edge);
+    filter: none;
+  }
+}
 
 /* ══ THE CALENDAR ═════════════════════════════════════════════════
    Month, week and day. The week is the real thing — an hour grid with
@@ -2065,6 +2162,11 @@ svg { display: block; }
 }
 :root[data-theme="light"] .jc-ev.on {
   background: color-mix(in srgb, var(--jc-c) 16%, var(--card));
+}
+
+:root[data-theme="light"] .jc-cell.now .jc-num {
+  background: var(--accent-wash);
+  color: var(--accent-deep);
 }
 </style>
 </head>
