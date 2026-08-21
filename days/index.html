@@ -159,6 +159,11 @@
    was 10 from the pull rose. All three were warm neutrals fighting
    over the same corner of the space. */
 :root {
+  /* Brighter than any of the six on their own. NOT their average —
+     that is #ad9c9c, and the rest-day grey is #918e88, so a perfect day
+     would have looked like a day you did nothing. Mixing many colours
+     converges on mud; this goes the other way. */
+  --ultra: linear-gradient(90deg, #f2d68f, #e8836e, #c05f83, #7fc9e0, #7ba4ee, #e6dcc6);
   --h-wake:    #dcc084;   /* first light */
   --h-workout: #c8756c;   /* the effort */
   --h-abs:     #96566b;   /* the same effort, deeper */
@@ -169,6 +174,7 @@
 /* Darkened rather than reused. The same six on a pale panel are six
    pastels on white — legible as decoration and not as which habit. */
 :root[data-resolved="light"] {
+  --ultra: linear-gradient(90deg, #a8811f, #bd4a3c, #8b3a58, #3d8296, #3f6cb4, #6b6046);
   --h-wake:    #8a6a1c;
   --h-workout: #9c4034;
   --h-abs:     #6e3247;
@@ -178,52 +184,126 @@
 }
 
 /* ── what you trained ──
-   Four, and none can be mistaken for the accent.
+   Jade, garnet, sapphire — and none can be mistaken for the accent or
+   for any of the six habits.
 
-   Not by saturation: the first set got its distinctness by sitting at
-   55–78% against an accent family that never exceeds 52%, and that is
-   exactly what made it shout. By HUE. Every accent in the app sits at
-   16, 34, 130, 186–220 or 252, which leaves wide bands nobody is using,
-   so a colour in one of them stays at the app's own muted level and
-   still cannot be confused. These are 36–42% saturated and the nearest
-   accent to any of them is ΔE 20 away.
+   Not distinct by saturation: the first set of all got its distinctness
+   by sitting at 55–78% against an accent family that never exceeds 52%,
+   and that is exactly what made it shout. These sit at 53% and are told
+   apart by HUE and depth instead.
+
+   THE ROOM FOR THEM IS NEARLY GONE, and it is worth writing down why.
+   Six habit colours, eighteen accents across the palettes, four splits
+   and a saturation ceiling is more colours than this space holds. A
+   search told to maximise separation returned magenta and olive every
+   single time, at every register tried — those are the only wide gaps
+   the habits and accents leave. So these three were CHOSEN as a set and
+   then tuned until they measured, rather than measured first and
+   accepted whatever came back: hue bands fixed at green, red and blue,
+   and only lightness and saturation searched inside them.
+
+   Result: every one is ≥ ΔE 17 from all six habits, from the other
+   splits and from all eighteen accents, in both themes, at 53%
+   saturation. tests/habits.js holds the thresholds.
 
    Rest is deliberately the opposite, at 4%: an absence of colour rather
    than a fourth kind of training. */
 :root {
-  --sp-push: #4ca9a3;      /* teal  */
-  --sp-pull: #c46e8e;      /* rose  */
-  --sp-legs: #ad9b52;      /* brass */
-  --sp-rest: #918e88;      /* grey  */
+  --sp-push: #54b496;      /* jade     */
+  --sp-pull: #aa3a51;      /* garnet   */
+  --sp-legs: #3c65bc;      /* sapphire */
+  --sp-rest: #918e88;      /* grey     */
 }
 :root[data-resolved="light"] {
-  --sp-push: #2f7570;
-  --sp-pull: #9c4467;
-  --sp-legs: #756a2e;
+  --sp-push: #2e8469;
+  --sp-pull: #892a3d;
+  --sp-legs: #223356;
   --sp-rest: #77746e;
 }
 
-/* ── today: one ring, then the list ──
-   The ring answers "am I on track" and the list answers "with what", in
-   that order — the first is what you open the screen for, the second is
-   what you act on. Five bars would let you compare five habits against
-   one another at a glance and one ring does not; what it buys is a
-   screen that has said something before you have read a word. */
-.hb-now { display: flex; align-items: center; gap: 30px; flex-wrap: wrap;
-  border: 1px solid var(--glass-line); border-radius: 12px;
-  background: var(--glass-in); padding: 20px 22px; }
-.hb-dial { flex: none; }
-.hb-dial svg { width: 148px; height: 148px; display: block; }
-.hb-dial .tr { fill: none; stroke: var(--glass-in-2); stroke-width: 7; }
-.hb-dial .fl { fill: none; stroke: var(--accent); stroke-width: 7; stroke-linecap: round;
-  transform: rotate(-90deg); transform-origin: 50% 50%;
-  transition: stroke-dasharray .45s cubic-bezier(.22,.75,.3,1); }
-.hb-dial .mid { font-family: var(--mono); font-size: 22px; fill: var(--ink); text-anchor: middle; }
-.hb-dial .sub { font-family: var(--mono); font-size: 6px; fill: var(--ink-3);
-  text-anchor: middle; letter-spacing: .12em; }
-@media (prefers-reduced-motion: reduce) { .hb-dial .fl { transition: none; } }
+/* ── today: the tally, then the list ──
+   A ring in the accent for 148 square pixels answered ONE question —
+   how many — and answered it in the only colour on the panel that does
+   not belong to a habit. Six blocks in the habits' own colours answer
+   which as well, in a seventh of the height, and the list gets the
+   whole width back.
 
-.hb-list { flex: 1; min-width: 270px; display: grid; gap: 1px;
+   It also fixed the phone, where it was not a preference: ring plus six
+   rows came to 617 of an 844px screen and the week strip started at
+   890, so everything under Today was off the bottom. */
+.hb-now { display: flex; flex-direction: column; align-items: stretch; gap: 14px;
+  border: 1px solid var(--glass-line); border-radius: 12px;
+  background: var(--glass-in); padding: 18px 20px; }
+.hb-top { display: flex; align-items: center; gap: 14px; }
+/* .hb-n is the radar cards' — this needed its own name. */
+.hb-count { font-family: var(--mono); font-size: 1.5rem; line-height: 1;
+  letter-spacing: -.02em; color: var(--ink); }
+.hb-cl { font-family: var(--mono); font-size: .55rem; line-height: 1.25;
+  letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
+.hb-blocks { flex: 1; display: flex; gap: 0; position: relative; }
+/* ── every one of them marked ──
+   The shape does not change — it is the same line it was at one of six.
+   What changes is that the hard edges dissolve into one ramp and it
+   lights up. Same object, finished.
+
+   ::before is the merged ramp, ::after the light it throws. Both are
+   painted whether or not the day is complete and revealed by opacity,
+   so the change is a fade and never a layout. */
+.hb-blocks::before, .hb-blocks::after {
+  content: ""; position: absolute; opacity: 0; pointer-events: none;
+  background: var(--ultra);
+}
+.hb-blocks::before { inset: 0; border-radius: 3px; transition: opacity .5s ease-out .15s; }
+.hb-blocks::after { left: 0; right: 0; top: 1px; height: 9px;
+  filter: blur(14px); transition: opacity .8s ease-out .3s; }
+/* Both selectors, and not by accident. `.hb-blocks i[data-on]` and
+   `.hb-blocks[data-all] i` weigh exactly the same (0,2,1), and the
+   [data-on] rule is written further down — so it won, and the six
+   blocks never faded at all. They sat at full opacity UNDERNEATH the
+   ramp, invisible only because the ramp happens to be opaque, which is
+   a thing that looks correct until the day something above it is not.
+   Naming [data-on] here outweighs it instead of relying on which rule
+   came last. */
+.hb-blocks[data-all] i,
+.hb-blocks[data-all] i[data-on] { opacity: 0; }
+.hb-blocks[data-all]::before { opacity: 1; }
+.hb-blocks[data-all]::after { opacity: .75; }
+/* Only on the day it TURNS complete. The panel is rebuilt on every
+   repaint — arriving at the screen, switching week to month — and an
+   arrival is not an achievement. The class is added for that one
+   render and never again. */
+.hb-blocks.hb-bloom::before { animation: hb-lands 1.8s ease-out; }
+.hb-blocks.hb-bloom::after  { animation: hb-halo  1.8s ease-out forwards; }
+@keyframes hb-lands {
+  0% { filter: none; } 18% { filter: brightness(1.5); } 100% { filter: none; }
+}
+@keyframes hb-halo {
+  0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: .75; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hb-blocks i { transition: none; }
+  .hb-blocks::before, .hb-blocks::after { transition: none; }
+  .hb-blocks.hb-bloom::before, .hb-blocks.hb-bloom::after { animation: none; }
+}
+/* ONE LINE, ALWAYS. The six used to sit apart with 5px between them and
+   only close up when the day was finished, so a part-done day and a
+   finished one were two different shapes. They are one shape now and
+   the only thing that changes is the light in it: the bar is always
+   continuous, and a kept habit lights its length of it.
+
+   Kept takes the habit's colour, missed is the same colour at a
+   fourteenth — an absence, not a mark against you. Hard edges between
+   them on purpose: a smooth blend here would say WHICH nothing, and
+   which is the whole reason these have colours. */
+.hb-blocks i { flex: 1; height: 7px; border-radius: 0;
+  background: var(--lit, var(--accent)); opacity: .14;
+  transition: opacity .35s ease-out; }
+.hb-blocks i:first-child { border-radius: 3px 0 0 3px; }
+.hb-blocks i:last-child  { border-radius: 0 3px 3px 0; }
+.hb-blocks i[data-on] { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hb-blocks i { transition: none; } }
+
+.hb-list { flex: 1; min-width: 0; display: grid; gap: 1px;
   background: var(--glass-line); border-radius: 9px; overflow: hidden; }
 .hb-item { display: grid; grid-template-columns: 13px minmax(0, 1fr) auto auto;
   gap: 12px; align-items: center; background: var(--glass-in); padding: 9px 12px; }
@@ -280,8 +360,7 @@
 }
 .hb-split button:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
 @media (max-width: 620px) {
-  .hb-now { gap: 18px; }
-  .hb-dial { margin: 0 auto; }
+  .hb-now { gap: 12px; }
   .hb-item { grid-template-columns: 13px minmax(0, 1fr) auto; gap: 9px; }
   .hb-item .hb-say { grid-column: 2 / -1; grid-row: 2; }
 }
@@ -775,6 +854,17 @@ const renderHabits = (() => {
 
   /* ── today ── */
   const EMPTY = { done: {}, split: null };
+  /* Open only while you are answering it. Not stored: a picker left
+     open across a reload is a question the screen is asking about a
+     day you have stopped thinking about. */
+  let picking = false;
+
+  /* Was the day complete last time this painted? Only a NO -> YES
+     crosses the line, and only that gets the bloom. Starts null so the
+     first paint of an already-finished day settles into the merged
+     state without celebrating a day you finished hours ago. */
+  let wasAll = null;
+
   function renderNow() {
     /* Read, not dayOf — opening the screen must not create a record.
        It did, and an untouched machine then reported "0 days unbroken"
@@ -795,19 +885,32 @@ const renderHabits = (() => {
           const sp = SPLITS.find(x => x.id === d.split);
           say = d.split === 'rest' ? '<b>rest day</b>' : `<b>${sp.name}</b>`;
         }
-        /* Its own colour like the rest of them. The split it was showing
-           is named in the row and lit in the picker two columns to the
-           right, so the dot was the third place saying it — and the one
-           place that made teal mean "push" in a column where teal
-           already meant "walk". */
+        /* A TICK LIKE THE OTHER FIVE, and the colours only when you
+           press it. Four permanent dots on one row of six made that row
+           the loudest thing in the list for a question nobody had asked
+           yet — and the answer they give is already in the row's own
+           words. Press the tick, pick what it was, and it is a tick
+           again. */
+        if (picking) {
+          say = 'which was it?';
+          return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
+            <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
+            <span class="hb-nm"><b>${esc(h.name)}</b></span>
+            <span class="hb-say">${say}</span>
+            <span class="hb-act"><span class="hb-split" role="group"
+              aria-label="What you trained">${SPLITS.map(sp =>
+              `<button type="button" data-split="${sp.id}" aria-pressed="${d.split === sp.id}"
+                 style="--c:var(--sp-${sp.id})" title="${sp.name}" aria-label="${sp.name}">
+                 <i aria-hidden="true"></i></button>`).join('')}</span></span>
+          </div>`;
+        }
         return `<div class="hb-item" data-h="${h.id}"${on ? ' data-on="1"' : ''}>
           <s class="hb-dot"${on ? ' data-on="1"' : ''} style="--lit:var(--h-${h.id})"></s>
           <span class="hb-nm"><b>${esc(h.name)}</b></span>
           <span class="hb-say">${say}</span>
-          <span class="hb-act"><span class="hb-split">${SPLITS.map(sp =>
-            `<button type="button" data-split="${sp.id}" aria-pressed="${d.split === sp.id}"
-               style="--c:var(--sp-${sp.id})" title="${sp.name}" aria-label="${sp.name}">
-               <i aria-hidden="true"></i></button>`).join('')}</span></span>
+          <span class="hb-act"><button type="button" class="tick ${d.split ? 'on' : ''}"
+            data-pick="1" aria-pressed="${!!d.split}"
+            aria-label="${esc(h.name)} today">${icon('tick', 13)}</button></span>
         </div>`;
       }
       if (on) say = '<b>done</b> today';
@@ -840,18 +943,29 @@ const renderHabits = (() => {
        already carries the fraction and a number out of a hundred is a
        mark out of a hundred. Do more than was due and the arc fills
        while the number keeps climbing. */
-    const did = didOn(k).length, kept = keptOn(k).length, of = dueOn(k).length;
-    const p = of ? Math.min(1, kept / of) : (did ? 1 : 0);
-    const C = 2 * Math.PI * 44;
+    const did = didOn(k).length, of = dueOn(k).length;
+    /* One block per habit, in list order, so the strip reads left to
+       right as the rows read top to bottom. The figure is the COUNT,
+       never a percentage: the blocks already carry the fraction and a
+       number out of a hundred is a mark out of a hundred. */
+    const blocks = list().map(h =>
+      `<i style="--lit:var(--h-${h.id})"${d.done[h.id] ? ' data-on=""' : ''}
+          title="${esc(h.name)}"></i>`).join('');
+    /* What the STRIP shows, not what was due — the effect belongs to the
+       blocks, so it fires when every block is lit and not a moment
+       before. A rest day therefore cannot complete one: the workout is
+       not done on a day you chose not to train, and the block says so. */
+    const all = list().every(h => d.done[h.id]);
+    const lands = all && wasAll === false;
+    wasAll = all;
     document.getElementById('hbNow').innerHTML =
-      `<div class="hb-dial"><svg viewBox="0 0 100 100" role="img"
-         aria-label="${did} done so far today">
-         <circle class="tr" cx="50" cy="50" r="44" />
-         <circle class="fl" cx="50" cy="50" r="44"
-           stroke-dasharray="${(C * p).toFixed(1)} ${C.toFixed(1)}" />
-         <text class="mid" x="50" y="52">${did}</text>
-         <text class="sub" x="50" y="64">DONE TODAY</text>
-       </svg></div><div class="hb-list">${items}</div>`;
+      `<div class="hb-top">
+         <span class="hb-count">${did}</span>
+         <span class="hb-cl">done<br />today</span>
+         <span class="hb-blocks${lands ? ' hb-bloom' : ''}"${all ? ' data-all=""' : ''}
+           role="img" aria-label="${all ? `all ${did} done today`
+             : `${did} done so far today`}">${blocks}</span>
+       </div><div class="hb-list">${items}</div>`;
     document.getElementById('hbToday').textContent =
       of ? `${of} due today` : 'nothing due today';
   }
@@ -1027,17 +1141,47 @@ const renderHabits = (() => {
     const sp = e.target.closest('[data-split]');
     if (sp) {
       /* Pressing the one already chosen clears it — a four-way control
-         with no way back is a trap. */
+         with no way back is a trap. Either way the picker shuts: it
+         opened to ask one question and it has an answer. */
       d.split = d.split === sp.dataset.split ? null : sp.dataset.split;
       const w = list().find(h => h.perWeek);
       if (w) d.done[w.id] = !!d.split && d.split !== 'rest';
+      picking = false;
       if (write()) paint();
+      return;
+    }
+    /* The workout's tick opens the colours instead of setting anything,
+       whether or not one is already down. Making a set tick CLEAR on
+       press — which is what the other five do — read as consistent and
+       was not: it left no way to change Push to Pull except to clear
+       first and start again, and no way to see which was chosen at all.
+       Reopening does both, because pressing the one already lit is the
+       clear. */
+    const pick = e.target.closest('[data-pick]');
+    if (pick) {
+      picking = true;
+      paint();
+      const lit = document.querySelector('.hb-split [aria-pressed="true"]')
+               || document.querySelector('.hb-split button');
+      if (lit) lit.focus();
       return;
     }
     const tick = e.target.closest('[data-tick]');
     if (!tick) return;
     d.done[tick.dataset.tick] = !d.done[tick.dataset.tick];
     if (write()) paint();
+  });
+
+  /* Opened by mistake is not an answer. Escape shuts it, and so does
+     a click anywhere that is not the picker — otherwise the only way
+     out of a question you did not mean to ask is to answer it. */
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && picking) { picking = false; paint(); }
+  });
+  document.addEventListener('click', (e) => {
+    if (!picking) return;
+    if (e.target.closest('.hb-split') || e.target.closest('[data-pick]')) return;
+    picking = false; paint();
   });
 
   /* One pair of arrows, moving whichever scale is up. */
