@@ -177,6 +177,26 @@
    identity moves. */
 :root[data-resolved="light"] .or-node.or-sel .or-ringc { stroke: var(--ink); }
 
+/* ── the pin ──
+   A locked node wears a dotted hairline ring OUTSIDE itself, so the
+   state is legible without a legend and without touching the node's
+   own colour — a pin is something you did, not something the note is.
+   Dotted rather than solid because solid is already the selection, and
+   the two can be true at once. Same ink as the selection ring, and the
+   same reason for the light-mode swap: warm white dies on glass. */
+.or-pinr { stroke: var(--or-core); }
+:root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
+
+/* ── hover drift ──
+   The hovered node and everything one link away lift; the rest dims.
+   EMPHASIS ONLY — opacity, never a force and never a position. A hover
+   that nudged the field would move the map while you were reading it.
+   The lift is the same halo the :hover rule above uses, one step down,
+   so a neighbourhood reads as one thing at two strengths. */
+.or-node.or-kin .or-halo { opacity: .88; }
+.or-node.or-kin.or-minor .or-halo { opacity: .45; }
+.or-node, #orLinks path { transition: opacity .16s; }
+
 /* ── label chips ──
    Geometry and type are inline; the fill rides the tokens so the
    surface has one owner. */
@@ -1652,17 +1672,26 @@ const KEY = 'orrery.v1';
 const IDB = 'ORRERY';
 
 /* ── the stored shape ──
-   { v, pos, cat, fold, sel, only, view, vault }
+   { v, pin, cat, fold, sel, only, view, vault }
 
    REPAIRED FIELD BY FIELD, NEVER DISCARDED, and the reason is that the
    fields are independent. A fold map that came back as a string is one
    panel opening on the wrong side; throwing the whole object out over
-   it costs you every node you have ever dragged into place. Positions
-   are the part that cannot be recomputed — the layout can always draw
-   a fresh map, but it cannot know where you decided a note belongs.
+   it costs you every node you have ever pinned into place. Pins are the
+   part that cannot be recomputed — the layout can always draw a fresh
+   map, but it cannot know where you decided a note belongs.
 
-   The repair goes a level deeper than the field for `pos`, because one
+   The repair goes a level deeper than the field for `pin`, because one
    entry saved as [NaN, 12] is one node, not the map.
+
+   `pos` IS MIGRATED, NOT DROPPED. The field used to hold every node you
+   had dragged, because a drag was how a placement was made permanent.
+   The field is live now: a drag is a shove the springs answer, and a
+   PIN is what holds. So every old `pos` entry becomes a pin, and the
+   arrangement somebody built under the previous build survives the
+   upgrade exactly as they left it. Reading a field you no longer write
+   costs four lines; losing a year of somebody's arrangement because the
+   name changed is not a thing this repo does.
 
    Category ids ARE checked against CATS, and dropped when unknown. The
    seven are code, not data — nothing in this app can write an eighth —
@@ -1677,7 +1706,7 @@ const IDB = 'ORRERY';
    the page down, so every touch of it in this file is wrapped and the
    failure is a default shape rather than a black screen. */
 function orRead() {
-  const out = { v: 1, pos: {}, cat: {}, fold: {}, sel: null, only: null,
+  const out = { v: 1, pin: {}, cat: {}, fold: {}, sel: null, only: null,
                 view: 'map', vault: null };
   let raw = null;
   try { raw = localStorage.getItem(KEY); } catch (e) { return out; }
@@ -1699,12 +1728,15 @@ function orRead() {
   const cats = new Set(Array.isArray(CATS) ? CATS.map(c => c && c.id)
                                            : Object.keys(CATS));
 
+  const xy = (p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]);
+  const pin = map(v.pin);
+  for (const id in pin) if (xy(pin[id])) out.pin[id] = [pin[id][0], pin[id][1]];
+  /* The migration. A live pin always wins — somebody who has already
+     upgraded and re-pinned is not overruled by the old field. */
   const pos = map(v.pos);
-  for (const id in pos) {
-    const p = pos[id];
-    if (Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]))
-      out.pos[id] = [p[0], p[1]];
-  }
+  for (const id in pos) if (xy(pos[id]) && !(id in out.pin))
+    out.pin[id] = [pos[id][0], pos[id][1]];
+
   const cat = map(v.cat);
   for (const id in cat) if (cats.has(cat[id])) out.cat[id] = cat[id];
 
@@ -1751,7 +1783,7 @@ function orWrite(patch) {
 
 /* ── the one mutable object ──
    `notes` and `edges` are rebuilt from the cached index every time the
-   vault is read, so they are never stored. `pos`, `sel`, `only` and
+   vault is read, so they are never stored. `pin`, `sel`, `only` and
    `view` come back from storage, so the map you left is the map you
    return to.
 
@@ -1764,7 +1796,7 @@ const state = (() => {
   const s = orRead();
   return {
     notes: [], edges: [],
-    pos: s.pos, sel: s.sel, only: s.only, view: s.view,
+    pin: s.pin, sel: s.sel, only: s.only, view: s.view,
     zoom: 1, panX: 0, panY: 0, q: '',
   };
 })();
@@ -1885,7 +1917,9 @@ const RINGS = [190, 245, 296];
 /* Transient runtime state. Assigned onto the one mutable object rather
    than declared, because graph.js owns no free top-level names beyond
    its reserved list — and none of this survives a reload on purpose. */
-state.xy = {};        /* id → [x, y], every node, recomputed each paint */
+state.xy = {};        /* id → [x, y], LIVE — the sim mutates these in place */
+state.vel = {};       /* id → [vx, vy], carried between ticks              */
+state.alpha = 0;      /* the sim's remaining energy; below SIM.floor it stops */
 state.hover = null;   /* the node under the pointer or holding focus   */
 state.drag = null;    /* live drag context, null between gestures      */
 
@@ -1918,9 +1952,15 @@ function orHex(r) {
 }
 
 /* ── layout ──
-   Recomputed on every paint from the same inputs, so it is idempotent:
-   a node you have moved keeps its saved place, everything else lands
-   exactly where it landed last time. */
+   Recomputed on every paint from the same inputs, so it is idempotent.
+   What it produces is no longer where a node IS — it is where a node
+   BELONGS: `orLayout.home`, the orbital slot the physics pulls at. The
+   sectors and the rings are therefore the equilibrium the field relaxes
+   into rather than a picture the field replaces, which is the whole
+   difference between an orrery and a hairball on a nice background.
+
+   A pinned node's slot is its pin: it is held there, and everything
+   else arranges itself around it. */
 function orLayout() {
   const notes = state.notes || [];
   const cats = orLayout.cats();
@@ -2023,7 +2063,7 @@ function orLayout() {
   sec.forEach(s => {
     const hid = 'hub:' + s.id;
     tier[hid] = 'hub';
-    xy[hid] = state.pos[hid] ? state.pos[hid].slice()
+    xy[hid] = state.pin[hid] ? state.pin[hid].slice()
                              : orLayout.polar(120, s.mid);
     const ids = mem[s.id];
     if (!ids.length) return;
@@ -2052,7 +2092,7 @@ function orLayout() {
       s.rings[ri] = row.length > 0;
       row.sort();
       row.forEach((id, j) => {
-        if (state.pos[id]) { xy[id] = state.pos[id].slice(); return; }
+        if (state.pin[id]) { xy[id] = state.pin[id].slice(); return; }
         const rng = orRng(id);
         const ang = s.a0 + pad + (j + .5) * (w - 2 * pad) / row.length + (rng() * 2 - 1) * 7;
         xy[id] = orLayout.polar(RINGS[ri] + (rng() * 2 - 1) * 14, ang);
@@ -2065,11 +2105,22 @@ function orLayout() {
      chose by hand is a decision, not an overlap to be tidied, and the
      hubs are pinned to their orbit for the same reason. Iteration order
      is the sorted id list, so the passes are as repeatable as the
-     jitter. */
+     jitter.
+
+     This tidies the SLOTS, not the field. Repulsion resolves whatever
+     is left; handing the sim a set of homes that already stand apart
+     just means it has less to argue with on the first tick. */
   const ids = Object.keys(xy).sort();
   const rOf = id => TIERS[tier[id]] || 5;
-  const held = id => !!state.pos[id] || tier[id] === 'hub';
-  for (let p = 0; p < 8; p++) {
+  const held = id => !!state.pin[id] || tier[id] === 'hub';
+  /* And only while it is affordable. This is every pair against every
+     other, eight times, and orLayout runs on every paint — a search
+     keystroke on a four-thousand-note vault would spend three seconds
+     tidying slots the field is about to relax anyway. Repulsion IS
+     this pass, done properly and through a tree; above the cut the
+     slots go out untidied and the sim earns its keep. */
+  const passes = ids.length <= 500 ? 8 : 0;
+  for (let p = 0; p < passes; p++) {
     for (let i = 0; i < ids.length; i++) for (let j = i + 1; j < ids.length; j++) {
       const A = ids[i], B = ids[j];
       const pa = xy[A], pb = xy[B];
@@ -2090,7 +2141,11 @@ function orLayout() {
       else if (mb)   { pb[0] += dx * push; pb[1] += dy * push; }
     }
   }
-  state.xy = xy;
+  orLayout.home = xy;
+  /* Hand the new slots to the field. seed() keeps every live position
+     it recognises, so a repaint — a filter keystroke, a re-file, a
+     re-open — never teleports a node that is already in flight. */
+  orSim.seed();
 }
 /* Hung on orLayout because graph.js has no free top-level names to
    give them — the reserved list is the whole budget. */
@@ -2105,6 +2160,637 @@ orLayout.cats = () => Array.isArray(CATS)
   ? CATS.map(c => ({ id: c.id, label: c.label || c.id }))
   : Object.keys(CATS).map(id => ({
       id, label: (CATS[id] && CATS[id].label) ? CATS[id].label : id }));
+
+/* ═══════════════════════════════════════════════════════════════
+   THE FIELD — four forces, a quadtree, and a clock that stops.
+
+   The map is a simulation, not a drawing. Four forces, named because a
+   reader has to be able to reason about which one is winning:
+
+   REPULSION  every node pushes every other, inverse-square, scaled by
+              tier — a hub has more to hold clear than a leaf. Through
+              a Barnes–Hut quadtree, because 4,000 notes is sixteen
+              million pairs a tick and the page dies.
+   SPRINGS    one per resolved link, rest length rising with the degree
+              of the pair. What turns "these notes are related" into
+              something the eye reads as a cluster.
+   HOME       the orrery's own gravity, and the whole design. NOT a
+              pull toward the middle — that dissolves the sectors and
+              leaves a generic hairball on a very nice background.
+              Every node is pulled toward the orbital slot orLayout
+              computes for it, so the poster's structure IS the
+              equilibrium and the springs only get to bend it. A weak
+              true-centre pull rides underneath for orphans, so a note
+              that links to nothing drifts home instead of being pushed
+              to infinity by repulsion alone.
+   DAMPING    velocity carries between ticks and decays, so a shove
+              bleeds off instead of ringing forever.
+
+   Integration is velocity Verlet at a FIXED timestep. Never a delta
+   measured off the clock: that makes the layout a function of the
+   machine's frame rate, and two loads of the same vault then disagree
+   about where it lives.
+   ═══════════════════════════════════════════════════════════════ */
+const SIM = {
+  dt: 1,
+  /* Barnes–Hut opening angle. Above ~1 the field visibly lies about
+     distant clusters; below ~.6 the tree stops paying for itself. */
+  theta: .9,
+  /* Tuned against the home spring, not in the abstract. Repulsion has
+     to lose to home at about five units of offset for a pair of notes
+     sitting a ring apart, or the sectors bloom and the poster stops
+     being a diagram. Measured: mean drift from the slot stays inside a
+     node's own diameter. */
+  charge: 380,
+  spring: .03,
+  rest: 24,
+  restDeg: 7,
+  home: .085,
+  /* A hub is held an order harder than a note. The sectors are the
+     structure; a sector that drifts is a diagram that stopped being
+     one. */
+  hubHome: 3.4,
+  centre: .0018,
+  damp: .82,
+  maxV: 14,
+  /* A fixed timestep has no way to notice that a step was too big, so
+     the step is what gets bounded. Two nodes seeded on the same point
+     produce a force in the thousands; unclamped, the first tick throws
+     them past the edge of the double and the field never comes back.
+     Ask a big vault to lay out without this and you get NaN. */
+  maxA: 12,
+  /* Alpha: the clock, not a force. alpha0 for a new field, warm for a
+     rearrangement, stir for a nudge, hold while a pointer is down. */
+  alpha0: 1,
+  warm: .5,
+  stir: .15,
+  hold: .45,
+  decay: .04,
+  floor: .005,
+  /* Settled is settled. Holding the clock open to burn sixty frames on
+     a field that has stopped moving is the exact cost alpha exists to
+     avoid — and it is what makes a reheat on an already-quiet field a
+     no-op rather than a wobble.
+
+     Measured on VELOCITY as well as on displacement, because the first
+     tick of a Verlet integrator moves nothing by construction — it has
+     no acceleration behind it yet — and a field that stopped on tick
+     one would be a static layout wearing a simulation's clothes. */
+  still: .0025,
+  /* The synchronous head start, in NODE-ticks. A small vault settles
+     inside one frame and arrives already at rest; a big one takes what
+     it can afford and animates the remainder. Same tick sequence
+     either way — this decides where the hand-off is, never what the
+     field does. */
+  budget: 40000,
+  /* Hover drift dims what is unrelated to this fraction of whatever
+     opacity the filter already gave it. */
+  dim: .3,
+  q: { hub: 3.4, major: 1.6, minor: 1, leaf: .7 },
+  m: { hub: 4.5, major: 1.8, minor: 1.15, leaf: 1 },
+};
+
+/* ── the quadtree ──
+   Flat typed arrays, reused between ticks. Sixty tree builds a second
+   allocating four thousand little objects each is a garbage collector
+   with a full-time job, and it shows as a stutter every second or so.
+
+   Cells are inserted in the order the caller supplies, which is the
+   SORTED id list — the tree is therefore identical for identical
+   input, which is what lets a settle be asserted.
+
+   A cell may hold BOTH a list of points and children: coincident
+   points can never be separated by subdividing, and a depth limit
+   stops two of them recursing to the bottom of the double. The
+   traversal opens any cell it cannot approximate and walks whatever it
+   finds there, so the two cases need no distinction.
+
+   The traversal itself lives in orTick rather than behind a callback
+   here. A callback would be forty closure calls per node per tick —
+   seven million a second on a real vault — and this is the one loop in
+   the app where that is the difference between running and not. */
+function orQuad(X, Y, Q, n) {
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+  for (let i = 0; i < n; i++) {
+    const x = X[i], y = Y[i];
+    if (x < x0) x0 = x;
+    if (x > x1) x1 = x;
+    if (y < y0) y0 = y;
+    if (y > y1) y1 = y;
+  }
+  if (!(x0 <= x1) || !(y0 <= y1)) { x0 = 0; y0 = 0; x1 = 1; y1 = 1; }
+  /* A hair over the true extent, so the point on the far edge lands
+     inside the root rather than in a quadrant that does not exist. */
+  const size = Math.max(x1 - x0, y1 - y0, 1) * 1.001;
+
+  const cap = Math.max(256, n * 8 + 64);
+  let T = orQuad.mem;
+  if (!T || T.cap < cap) {
+    T = orQuad.mem = {
+      cap,
+      kid: new Int32Array(cap * 4),
+      head: new Int32Array(cap),
+      leaf: new Uint8Array(cap),
+      mx: new Float64Array(cap), my: new Float64Array(cap), m: new Float64Array(cap),
+      bx: new Float64Array(cap), by: new Float64Array(cap), w: new Float64Array(cap),
+      nxt: new Int32Array(0),
+      stack: new Int32Array(8 * orQuad.DEPTH + 64),
+    };
+  }
+  if (T.nxt.length < n) T.nxt = new Int32Array(Math.max(256, n * 2));
+  const kid = T.kid, head = T.head, leaf = T.leaf, nxt = T.nxt;
+  const mx = T.mx, my = T.my, m = T.m, bx = T.bx, by = T.by, w = T.w;
+
+  let used = 1;
+  const cell = (c, ox, oy, ow) => {
+    const b = c * 4;
+    kid[b] = kid[b + 1] = kid[b + 2] = kid[b + 3] = -1;
+    head[c] = -1; leaf[c] = 1;
+    mx[c] = 0; my[c] = 0; m[c] = 0;
+    bx[c] = ox; by[c] = oy; w[c] = ow;
+  };
+  cell(0, x0, y0, size);
+
+  for (let i = 0; i < n; i++) {
+    const px = X[i], py = Y[i], q = Q[i];
+    let c = 0, depth = 0;
+    for (;;) {
+      /* Mass accumulates on the way down, so the centre of mass of
+         every cell on the path is finished the moment the last point
+         lands. No second pass over the tree. */
+      m[c] += q; mx[c] += q * px; my[c] += q * py;
+      if (leaf[c]) {
+        const h = head[c];
+        if (h < 0) { head[c] = i; nxt[i] = -1; break; }
+        if (depth >= orQuad.DEPTH || used + 8 >= T.cap
+            || (X[h] === px && Y[h] === py)) {
+          nxt[i] = h; head[c] = i; break;
+        }
+        /* Split: the residents drop one level, then this point carries
+           on down the same path. Every resident of a list is
+           coincident with the others, so they all land in one child
+           and the list stays honest. */
+        leaf[c] = 0; head[c] = -1;
+        const hw = w[c] / 2;
+        for (let p = h, nx = -1; p >= 0; p = nx) {
+          nx = nxt[p];
+          const rx = X[p] >= bx[c] + hw ? 1 : 0, ry = Y[p] >= by[c] + hw ? 1 : 0;
+          const b = c * 4 + ry * 2 + rx;
+          let ch = kid[b];
+          if (ch < 0) { ch = used++; cell(ch, bx[c] + rx * hw, by[c] + ry * hw, hw); kid[b] = ch; }
+          m[ch] += Q[p]; mx[ch] += Q[p] * X[p]; my[ch] += Q[p] * Y[p];
+          nxt[p] = head[ch]; head[ch] = p;
+        }
+      }
+      const hw = w[c] / 2;
+      const rx = px >= bx[c] + hw ? 1 : 0, ry = py >= by[c] + hw ? 1 : 0;
+      const b = c * 4 + ry * 2 + rx;
+      let ch = kid[b];
+      if (ch < 0) {
+        /* Out of pool. Park the point on this cell instead of growing
+           mid-build: the traversal reads a list on an internal cell
+           the same way it reads one on a leaf, so the answer stays
+           right and only the approximation gets coarser. */
+        if (used >= T.cap) { nxt[i] = head[c]; head[c] = i; break; }
+        ch = used++; cell(ch, bx[c] + rx * hw, by[c] + ry * hw, hw); kid[b] = ch;
+      }
+      c = ch; depth++;
+    }
+  }
+  T.used = used;
+  return T;
+}
+orQuad.DEPTH = 22;
+orQuad.mem = null;
+
+/* ── one tick ──
+   Velocity Verlet: positions from the last tick's acceleration, then
+   the new acceleration, then the velocity from the mean of the two.
+   Damped, clamped, written back into the arrays every reader of
+   state.xy already holds. */
+function orTick() {
+  const S = orSim, n = S.n;
+  if (!n) { state.alpha = 0; return; }
+  const dt = SIM.dt, half = .5 * dt * dt;
+  const X = S.X, Y = S.Y, VX = S.VX, VY = S.VY, AX = S.AX, AY = S.AY;
+  const NX = S.NX, NY = S.NY, Q = S.Q, M = S.M;
+  const HX = S.HX, HY = S.HY, HK = S.HK, FIX = S.FIX;
+
+  for (let i = 0; i < n; i++) {
+    NX[i] = 0; NY[i] = 0;
+    if (FIX[i]) continue;
+    X[i] += VX[i] * dt + AX[i] * half;
+    Y[i] += VY[i] * dt + AY[i] * half;
+  }
+
+  /* repulsion, through the tree */
+  const T = orQuad(X, Y, Q, n);
+  const st = T.stack, kid = T.kid, head = T.head, nxt = T.nxt;
+  const tm = T.m, tmx = T.mx, tmy = T.my, tw = T.w;
+  const th2 = SIM.theta * SIM.theta, K = SIM.charge;
+  let pairs = 0;
+  for (let i = 0; i < n; i++) {
+    const px = X[i], py = Y[i], qi = Q[i];
+    let fx = 0, fy = 0, sp = 0;
+    st[sp++] = 0;
+    while (sp) {
+      const c = st[--sp];
+      const mc = tm[c];
+      if (mc === 0) continue;
+      const dx = px - tmx[c] / mc, dy = py - tmy[c] / mc;
+      const d2 = dx * dx + dy * dy;
+      const wc = tw[c];
+      /* Width over distance below theta: the whole cell is one mass at
+         its centre. This branch is the reason the app survives a real
+         vault. */
+      if (wc * wc < th2 * d2) {
+        const f = K * qi * mc / (d2 * Math.sqrt(d2));
+        fx += dx * f; fy += dy * f;
+        pairs++;
+        continue;
+      }
+      for (let p = head[c]; p >= 0; p = nxt[p]) {
+        if (p === i) continue;
+        let ex = px - X[p], ey = py - Y[p];
+        let e2 = ex * ex + ey * ey;
+        /* Two nodes on the same point have no direction to part in, so
+           the tie-break is index order — anything random here would
+           unmake the determinism the whole layout rests on. */
+        if (e2 < 1) { ex = i < p ? -1 : 1; ey = .5; e2 = 1.25; }
+        const f = K * qi * Q[p] / (e2 * Math.sqrt(e2));
+        fx += ex * f; fy += ey * f;
+        pairs++;
+      }
+      const b = c * 4;
+      for (let k = 0; k < 4; k++) { const ch = kid[b + k]; if (ch >= 0) st[sp++] = ch; }
+    }
+    NX[i] += fx; NY[i] += fy;
+  }
+  S.pairs = pairs;
+
+  /* springs */
+  const EA = S.EA, EB = S.EB, ER = S.ER, ne = S.ne, ks = SIM.spring;
+  for (let e = 0; e < ne; e++) {
+    const a = EA[e], b = EB[e];
+    let dx = X[b] - X[a], dy = Y[b] - Y[a];
+    let d = Math.sqrt(dx * dx + dy * dy);
+    if (d < 1e-6) { dx = a < b ? 1 : -1; dy = .5; d = Math.sqrt(1.25); }
+    const f = ks * (d - ER[e]) / d;
+    NX[a] += dx * f; NY[a] += dy * f;
+    NX[b] -= dx * f; NY[b] -= dy * f;
+  }
+
+  /* home, and the weak true centre underneath it */
+  const kc = SIM.centre;
+  for (let i = 0; i < n; i++) {
+    const mi = M[i];
+    NX[i] += (HX[i] - X[i]) * HK[i] * mi + (500 - X[i]) * kc * mi;
+    NY[i] += (HY[i] - Y[i]) * HK[i] * mi + (500 - Y[i]) * kc * mi;
+  }
+
+  const dp = SIM.damp, vmax = SIM.maxV, amax = SIM.maxA;
+  let fast = 0;
+  for (let i = 0; i < n; i++) {
+    if (FIX[i]) {
+      /* A held node keeps whatever velocity the pointer gave it and
+         bleeds it off if the pointer stops, so a release hands the
+         springs a live throw rather than a stale one. */
+      VX[i] *= dp; VY[i] *= dp; AX[i] = 0; AY[i] = 0;
+      continue;
+    }
+    let ax = NX[i] / M[i], ay = NY[i] / M[i];
+    const am = Math.sqrt(ax * ax + ay * ay);
+    if (am > amax) { ax = ax / am * amax; ay = ay / am * amax; }
+    let vx = (VX[i] + (AX[i] + ax) * .5 * dt) * dp;
+    let vy = (VY[i] + (AY[i] + ay) * .5 * dt) * dp;
+    const v2 = vx * vx + vy * vy;
+    if (v2 > vmax * vmax) {
+      const v = Math.sqrt(v2);
+      vx = vx / v * vmax; vy = vy / v * vmax;
+    }
+    if (v2 > fast) fast = v2;
+    VX[i] = vx; VY[i] = vy; AX[i] = ax; AY[i] = ay;
+  }
+
+  /* Write back into the very arrays state.xy hands out, so every
+     reader — paint, hit test, reveal, drag — sees the new frame
+     without a copy and without a rebuild. */
+  const arr = S.arr, varr = S.varr;
+  let move = 0;
+  for (let i = 0; i < n; i++) {
+    const a = arr[i];
+    const dx = X[i] - a[0], dy = Y[i] - a[1];
+    const d = dx * dx + dy * dy;
+    if (d > move) move = d;
+    a[0] = X[i]; a[1] = Y[i];
+    const v = varr[i]; v[0] = VX[i]; v[1] = VY[i];
+  }
+  S.move = Math.sqrt(move);
+  S.fast = Math.sqrt(fast);
+  S.ticks++;
+  state.alpha *= 1 - SIM.decay;
+  if (S.move < SIM.still && S.fast < SIM.still) state.alpha = 0;
+}
+
+/* ── the loop ──
+   ONE tick per animation frame. Never two, and never a tick sized by
+   however long the last frame took: the number of ticks it takes to
+   settle has to be a property of the graph, not of the machine. */
+function orSim() {
+  orSim.raf = 0;
+  orTick();
+  const done = state.alpha < SIM.floor;
+  orSim.draw(done && !orSim.quiet);
+  if (!done && typeof requestAnimationFrame === 'function')
+    orSim.raf = requestAnimationFrame(orSim);
+}
+orSim.raf = 0;
+orSim.ticks = 0;
+orSim.pairs = 0;
+orSim.move = 0;
+orSim.n = 0;
+orSim.ne = 0;
+orSim.quiet = false;      /* a drag is in hand: skip the chip pass     */
+orSim.painting = false;   /* inside orPaint: the caller will draw      */
+orSim.sig = null;         /* the node set, last seen                   */
+orSim.hsig = null;        /* the home slots, last seen                 */
+
+/* Motion is the accessibility cost here, and settling instantly is the
+   same layout without it. Read live rather than cached: the setting
+   can change under a running page. */
+orSim.reduce = () => {
+  try { return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches); }
+  catch (e) { return false; }
+};
+
+/* Take the slots orLayout just computed and re-seed the field on them.
+   Every live position it recognises is KEPT — a repaint from a filter
+   keystroke, a re-file or a re-open must never teleport a node that is
+   already in flight — and only a node it has never seen starts at its
+   slot. */
+orSim.seed = () => {
+  const S = orSim;
+  const home = orLayout.home || {};
+  const ids = Object.keys(home).sort();
+  const n = ids.length;
+  if (!S.X || S.X.length < n) {
+    const c = Math.max(128, n * 2);
+    S.X = new Float64Array(c); S.Y = new Float64Array(c);
+    S.VX = new Float64Array(c); S.VY = new Float64Array(c);
+    S.AX = new Float64Array(c); S.AY = new Float64Array(c);
+    S.NX = new Float64Array(c); S.NY = new Float64Array(c);
+    S.HX = new Float64Array(c); S.HY = new Float64Array(c);
+    S.Q = new Float64Array(c); S.M = new Float64Array(c);
+    S.HK = new Float64Array(c); S.FIX = new Uint8Array(c);
+  }
+  const tier = orLayout.tier || {};
+  const xy = {}, vel = {}, arr = new Array(n), varr = new Array(n), ix = new Map();
+  const hs = new Array(n);
+  for (let i = 0; i < n; i++) {
+    const id = ids[i];
+    ix.set(id, i);
+    const h = home[id];
+    const pin = state.pin[id];
+    const p = pin || state.xy[id] || h;
+    const ov = state.vel[id];
+    const a = [p[0], p[1]];
+    const v = (pin || !ov) ? [0, 0] : [ov[0], ov[1]];
+    arr[i] = a; varr[i] = v; xy[id] = a; vel[id] = v;
+    S.X[i] = a[0]; S.Y[i] = a[1];
+    S.VX[i] = v[0]; S.VY[i] = v[1];
+    S.AX[i] = 0; S.AY[i] = 0;
+    S.HX[i] = h[0]; S.HY[i] = h[1];
+    const t = tier[id] || 'leaf';
+    S.Q[i] = SIM.q[t] || SIM.q.leaf;
+    S.M[i] = SIM.m[t] || SIM.m.leaf;
+    S.HK[i] = SIM.home * (t === 'hub' ? SIM.hubHome : 1);
+    S.FIX[i] = pin ? 1 : 0;
+    hs[i] = ((h[0] * 8) | 0) + ',' + ((h[1] * 8) | 0);
+  }
+
+  const ed = state.edges || [];
+  if (!S.EA || S.EA.length < ed.length) {
+    const c = Math.max(128, ed.length * 2);
+    S.EA = new Int32Array(c); S.EB = new Int32Array(c); S.ER = new Float64Array(c);
+  }
+  const deg = orLayout.deg || {};
+  let ne = 0;
+  for (const pair of ed) {
+    const ia = ix.get(pair[0]), ib = ix.get(pair[1]);
+    if (ia === undefined || ib === undefined) continue;
+    S.EA[ne] = ia; S.EB[ne] = ib;
+    /* Rest length rises with the degree of the pair — two hubs of a
+       neighbourhood need room between them, two leaves do not. Square
+       root, so a note with forty links does not shove its one
+       correspondent off the map. */
+    S.ER[ne] = SIM.rest + SIM.restDeg
+      * Math.sqrt((deg[pair[0]] || 0) + (deg[pair[1]] || 0));
+    ne++;
+  }
+  S.ne = ne;
+  S.ids = ids; S.n = n; S.ix = ix; S.arr = arr; S.varr = varr;
+  state.xy = xy; state.vel = vel;
+
+  /* Two signatures, two kinds of change. A node arriving or leaving is
+     a NEW FIELD and earns the full cold settle. A slot that merely
+     moved — a re-file, a pin, a release — is a shove, and animating it
+     is how you see what moved. Neither fires when nothing changed,
+     which is what keeps a filter keystroke free. */
+  /* Separators written as escapes, never as raw bytes. A literal NUL
+     in a string literal is invisible in every editor, makes the whole
+     file grep as binary, and cost this build a round already. A newline
+     and a tab cannot appear in a path id, so they cannot collide. */
+  const sig = n + '\n' + ids.join('\t');
+  const hsig = hs.join(';');
+  const cold = sig !== S.sig, moved = hsig !== S.hsig;
+  S.sig = sig; S.hsig = hsig;
+  if (cold) orHeat(SIM.alpha0, true);
+  else if (moved) orHeat(SIM.warm);
+};
+
+/* Run the clock down now instead of over the next two seconds. The
+   budget is NODE-ticks, so the hand-off scales with the vault rather
+   than with a guess. */
+orSim.settle = (budget) => {
+  const n = Math.max(1, orSim.n);
+  let left = Number.isFinite(budget) ? Math.max(1, Math.round(budget / n)) : 6000;
+  while (state.alpha >= SIM.floor && left-- > 0) orTick();
+};
+
+/* Fix a node where it is — a pin, or a pointer holding it. */
+orSim.hold = (id, on) => {
+  const i = orSim.ix ? orSim.ix.get(id) : undefined;
+  if (i === undefined) return;
+  orSim.FIX[i] = on ? 1 : 0;
+  if (on) { orSim.AX[i] = 0; orSim.AY[i] = 0; }
+};
+
+/* Put a node somewhere, and record the velocity that took it there so
+   a release hands the springs the throw the hand actually made. `quiet`
+   is the keyboard's way in: a nudge places, it does not throw. */
+orSim.put = (id, x, y, quiet) => {
+  const S = orSim;
+  const i = S.ix ? S.ix.get(id) : undefined;
+  if (i === undefined) { state.xy[id] = [x, y]; return; }
+  const vx = quiet ? 0 : Math.max(-SIM.maxV, Math.min(SIM.maxV, x - S.X[i]));
+  const vy = quiet ? 0 : Math.max(-SIM.maxV, Math.min(SIM.maxV, y - S.Y[i]));
+  S.X[i] = x; S.Y[i] = y; S.VX[i] = vx; S.VY[i] = vy;
+  const a = S.arr[i]; a[0] = x; a[1] = y;
+  const v = S.varr[i]; v[0] = vx; v[1] = vy;
+};
+
+/* ── the cheap frame ──
+   MOVE ONLY WHAT MOVES. Every layer is a string build and an innerHTML
+   set; doing that sixty times a second is a screen that crawls. Nodes
+   get a transform, edges get a d, and the chips ride the offset they
+   were placed at.
+
+   The chip pass measures real glyphs and resolves every chip against
+   every other. It runs on the LAST frame of a settle, where it decides
+   something, and never in between. */
+orSim.draw = (final) => {
+  const N = orLayout.N, xy = state.xy;
+  /* Skip whatever did not move at drawn precision. Near the end of a
+     settle most of the field has stopped and only a corner is still
+     arguing; writing nine thousand identical attributes to say so is
+     the difference between a big vault animating and a big vault
+     stuttering. */
+  const els = orSim.el;
+  if (els) for (let i = 0; i < els.length; i++) {
+    const e = els[i], p = xy[e.id];
+    if (!p) continue;
+    const x = N(p[0]), y = N(p[1]);
+    if (x === e.x && y === e.y) continue;
+    e.x = x; e.y = y;
+    e.g.setAttribute('transform', `translate(${x} ${y})`);
+  }
+  const ls = orSim.lines;
+  if (ls) for (let i = 0; i < ls.length; i++) {
+    const L = ls[i], pa = xy[L.a], pb = xy[L.b];
+    if (!pa || !pb) continue;
+    const d = orPaintLinks.d(pa, pb);
+    if (d === L.d) continue;
+    L.d = d;
+    L.el.setAttribute('d', d);
+  }
+  if (final) { orPaintLabels(); return; }
+  const cs = orSim.chips;
+  if (cs) for (let i = 0; i < cs.length; i++) {
+    const c = cs[i], p = xy[c.id];
+    if (p) c.el.setAttribute('transform', `translate(${N(p[0] + c.ox)} ${N(p[1] + c.oy)})`);
+  }
+};
+
+/* ── energy in ──
+   Anything that adds energy calls this: a drag, a pin, an attached
+   vault, a resize, a re-file. It raises alpha and starts the loop; the
+   loop stops itself at the floor, because an always-running rAF burns
+   a core to hold a picture that stopped moving.
+
+   A reheat on a field that has already converged is a no-op by
+   construction — the first tick moves nothing, orTick zeroes alpha,
+   and the picture is identical. That is deliberate: filtering must not
+   make the map wander while you read it. */
+function orHeat(a, settle) {
+  state.alpha = Math.max(state.alpha, a == null ? SIM.alpha0 : a);
+  if (!orSim.n) { state.alpha = 0; return; }
+  const draw = () => { if (!orSim.painting) orSim.draw(!orSim.quiet); };
+  if (orSim.reduce() || typeof requestAnimationFrame !== 'function') {
+    orSim.settle(Infinity);
+    draw();
+    return;
+  }
+  if (settle) orSim.settle(SIM.budget);
+  if (state.alpha < SIM.floor) { draw(); return; }
+  if (!orSim.raf) orSim.raf = requestAnimationFrame(orSim);
+}
+
+/* ── the pin ──
+   Physics off for one node, everything else still reacting around it.
+   This is how a placement is made permanent now: a drag is a shove the
+   springs answer, a pin is a decision. Double-click toggles it, the
+   ring says so without a legend, and it survives the reload. */
+function orPin(id) {
+  if (!id || !orLayout.home || !(id in orLayout.home)) return;
+  const on = !state.pin[id];
+  if (on) {
+    const p = state.xy[id] || orLayout.home[id];
+    state.pin[id] = [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10];
+  } else {
+    delete state.pin[id];
+  }
+  const saved = orWrite({ pin: state.pin });
+  orSim.hold(id, on);
+  orPaint();
+  orHeat(SIM.warm);
+  orSay(`${orPin.name(id)} ${on ? 'pinned' : 'released'}.`
+    + (saved ? '' : ' Not saved — storage unavailable.'));
+}
+orPin.t = 0;              /* the pending open, cancelled by a second press */
+orPin.last = null;
+orPin.name = (id) => {
+  if (id.indexOf('hub:') === 0) return (orLayout.label || {})[id.slice(4)] || 'Folder';
+  const n = (orLayout.note || {})[id];
+  return (n && n.title) || id;
+};
+
+/* Everything one link away, plus the folder it lives in — hovering a
+   note should light the neighbourhood it belongs to, not a lone dot. A
+   hub's kin is its members: the hub carries no edges of its own, and
+   without this a hover on a folder would dim the folder's own notes. */
+function orKin(id) {
+  const k = new Set();
+  if (!id) return k;
+  k.add(id);
+  if (id.indexOf('hub:') === 0) {
+    ((orLayout.mem || {})[id.slice(4)] || []).forEach(m => k.add(m));
+    return k;
+  }
+  for (const e of (state.edges || [])) {
+    if (e[0] === id) k.add(e[1]);
+    else if (e[1] === id) k.add(e[0]);
+  }
+  const c = (orLayout.catOf || {})[id];
+  if (c) k.add('hub:' + c);
+  return k;
+}
+
+/* ── hover drift ──
+   Lifts a node and its immediate neighbours and dims everything
+   unrelated. EMPHASIS ONLY: no force, no position, no alpha, no
+   layout. A hover that perturbed the field would move the graph while
+   you were only trying to read it, and the one thing worse than a map
+   you cannot read is a map that moves when you look at it. */
+function orHover(id) {
+  if (id === state.hover) return;
+  state.hover = id;
+  orHover.paint();
+  /* The hovered node earns a chip, so the SET changed and the chip
+     pass has something to decide. This is the only repaint a hover
+     causes, and it touches the label layer alone. */
+  orPaintLabels();
+}
+orHover.paint = () => {
+  const hv = state.hover;
+  const kin = hv ? orKin(hv) : null;
+  const N = orLayout.N;
+  const els = orSim.el || [];
+  for (let i = 0; i < els.length; i++) {
+    const e = els[i];
+    const lit = !kin || kin.has(e.id);
+    e.g.setAttribute('opacity', String(lit ? e.op : N(e.op * SIM.dim)));
+    if (e.g.classList) e.g.classList.toggle('or-kin', !!kin && lit && e.id !== hv);
+  }
+  const ls = orSim.lines || [];
+  for (let i = 0; i < ls.length; i++) {
+    const L = ls[i];
+    /* A link is related when it TOUCHES the hovered node — not when
+       both ends happen to be neighbours of it, which would light the
+       mesh between them and bury the thing you pointed at. */
+    const lit = !kin || L.a === hv || L.b === hv;
+    L.el.setAttribute('opacity', String(lit ? L.op : N(L.op * SIM.dim)));
+  }
+};
 
 /* ── the furniture ──
    Every number in here is the contract's. The ladder: atmosphere .05
@@ -2216,7 +2902,7 @@ function orPaintLinks() {
   const g = byId('orLinks');
   if (!g) return;
   const note = orLayout.note || {}, catOf = orLayout.catOf || {};
-  const out = [];
+  const out = [], keep = [];
   for (const [a, b] of state.edges) {
     const pa = state.xy[a], pb = state.xy[b];
     if (!pa || !pb) continue;
@@ -2226,12 +2912,21 @@ function orPaintLinks() {
        drops back, and it drops rather than disappears, so the shape of
        the map survives the search. */
     const dim = !sel && !orPaint.match(note[a]) && !orPaint.match(note[b]);
+    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d: orPaintLinks.d(pa, pb) });
     out.push(`<path d="${orPaintLinks.d(pa, pb)}" fill="none"`
       + ` stroke="var(--or-cat-${esc(catOf[a] || 'other')})"`
       + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
   }
   g.innerHTML = out.join('');
+  /* The sim moves these sixty times a second and must not pay a query
+     per edge per frame. Cache the elements alongside the opacity the
+     filter gave them, so hover drift has a base to dim FROM. */
+  const els = g.childNodes;
+  const lines = new Array(keep.length);
+  for (let i = 0; i < keep.length; i++)
+    lines[i] = { el: els[i], a: keep[i].a, b: keep[i].b, op: keep[i].op, d: keep[i].d };
+  orSim.lines = lines;
 }
 orPaintLinks.d = (pa, pb) => {
   const N = orLayout.N;
@@ -2266,6 +2961,9 @@ function orPaintNodes() {
       match: orPaint.match(n),
     });
   });
+  /* Pinned reads in the label too: the dotted ring says it to the eye,
+     and this says it to everybody else. */
+  items.forEach(it => { if (state.pin[it.id]) it.aria += ' — pinned'; });
   /* Paint order is stacking order: leaves under minors under majors
      under hubs, so a glow is never buried by a dot. Ties break on id —
      nothing about this list may depend on arrival order. */
@@ -2295,6 +2993,12 @@ function orPaintNodes() {
     } else {
       parts.push(`<circle class="or-dotc" r="${r}" fill="var(--or-cat-${cat})"/>`);
     }
+    /* The pin: a dotted hairline ring OUTSIDE the node, so "locked" is
+       legible without a legend and without touching the node's own
+       colour. Drawn last of the rings so nothing sits on it. */
+    if (state.pin[it.id])
+      parts.push(`<circle class="or-pinr" r="${N(r * 2.1 + 3)}" fill="none"`
+        + ` stroke-width=".9" stroke-dasharray="1.6 3" opacity=".8"/>`);
     const cls = 'or-node or-' + it.t + (sel ? ' or-sel' : '') + (it.match ? '' : ' or-dim');
     /* Dimming is an opacity, never a removal: a node that fails the
        filter drops to .12 and holds its place, so the map does not
@@ -2304,6 +3008,21 @@ function orPaintNodes() {
       + ` transform="translate(${N(p[0])} ${N(p[1])})">${parts.join('')}</g>`;
   });
   g.innerHTML = out.join('');
+
+  /* The tick moves these by transform alone and cannot afford a query
+     per node per frame. Cache them in paint order with the opacity the
+     filter gave them — hover drift dims FROM that, so the two narrows
+     compose instead of overwriting one another. */
+  const drawn = items.filter(it => state.xy[it.id]);
+  const kids = g.childNodes;
+  const cache = new Array(drawn.length);
+  for (let i = 0; i < drawn.length; i++) {
+    const p = state.xy[drawn[i].id];
+    cache[i] = { id: drawn[i].id, g: kids[i], op: drawn[i].match ? 1 : .12,
+                 x: N(p[0]), y: N(p[1]) };
+  }
+  orSim.el = cache;
+  orHover.paint();
 }
 
 /* ── label chips ──
@@ -2384,7 +3103,7 @@ function orPaintLabels() {
     w = Math.max(34, Math.ceil(w) + 16);
     return { ch, id, p, w, rank: rankOf(id) };
   }).filter(Boolean).sort((a, b) => order[a.rank] - order[b.rank] || a.p[1] - b.p[1]);
-  const kept = [];
+  const kept = [], place = [];
   const hits = (x, y, w) => kept.some(k =>
     x < k.x + k.w + 2 && k.x < x + w + 2 && y - 12 < k.y + 14 && k.y - 12 < y + 14);
   for (const c of chips) {
@@ -2402,7 +3121,14 @@ function orPaintLabels() {
     kept.push({ x, y, w: c.w });
     c.ch.setAttribute('transform', `translate(${N(x)} ${N(y)})`);
     c.ch.querySelector('.or-chipbg').setAttribute('width', c.w);
+    /* The offset this chip was PLACED at. While the field is settling
+       the chip rides it — measuring glyphs and re-resolving every chip
+       against every other, sixty times a second, is the one thing that
+       would make this crawl. The last frame runs this pass again, and
+       that is the frame where the answer matters. */
+    place.push({ el: c.ch, id: c.id, ox: x - c.p[0], oy: y - c.p[1] });
   }
+  orSim.chips = place;
 }
 
 /* ── the one entry point ──
@@ -2412,7 +3138,12 @@ function orPaintLabels() {
    from what the map shows. */
 function orPaint() {
   if (!byId('orSvg')) return;
-  orLayout();
+  /* orLayout re-seeds the field, and a new field reheats — which under
+     reduced motion settles on the spot. The flag says "the caller is
+     already about to draw everything", so a settle inside a paint does
+     not draw a frame from half-built layers. */
+  orSim.painting = true;
+  try { orLayout(); } finally { orSim.painting = false; }
   orPaintRings();
   orPaintLinks();
   orPaintNodes();
@@ -2449,16 +3180,23 @@ orPaint.hubMatch = s => {
   return mem.some(id => orPaint.match(note[id]));
 };
 
-/* Throw the saved positions away and lay out fresh. Destructive by
+/* Throw the pins away and settle the field fresh. Destructive by
    contract and says so out loud — it is the one control that costs you
    your arrangement, and it is what you reach for when the map is a
-   knot, so it also brings the camera home. */
+   knot, so it also brings the camera home.
+
+   Positions and velocities go too, not just the pins: a reset that
+   relaxed from wherever the field happened to be would land somewhere
+   slightly different every time. Cleared, it runs the identical tick
+   sequence a cold load runs, and lands where a cold load lands. */
 function orFit() {
-  state.pos = {};
+  state.pin = {};
+  state.xy = {}; state.vel = {};
   state.zoom = 1; state.panX = 0; state.panY = 0;
-  orWrite({ pos: {} });
+  orWrite({ pin: {} });
+  orSim.sig = null;
   orPaint();
-  orSay('Layout reset. Every node is back on its ring.');
+  orSay('Layout reset. Every node is back on its ring, and no pin holds.');
 }
 
 /* Hit-test in user units — the tests' way in, since the pointer path
@@ -2534,6 +3272,11 @@ function orDragStart(e) {
     const at = state.xy[id] || [ux, uy];
     state.drag = { id, el: g, dx: at[0] - ux, dy: at[1] - uy,
                    sx: e.clientX, sy: e.clientY, moved: false };
+    /* Held: physics off for this one node while the pointer owns it,
+       and the sim keeps running around it — the neighbours come along
+       on their springs. The graph is a fabric, not a set of stickers. */
+    orSim.hold(id, true);
+    orSim.quiet = true;
     /* preventDefault below also prevents the focus a click would have
        given, so hand it over by hand — a drag should leave the node
        where the keyboard can pick it up. */
@@ -2567,55 +3310,80 @@ function orDragMove(e) {
   if (!d.moved) {
     if (Math.hypot(e.clientX - d.sx, e.clientY - d.sy) < 3) return;
     d.moved = true;
+    /* A press that turned into a drag is not a click any more, so the
+       open it had queued never happens. */
+    clearTimeout(orPin.t); orPin.t = 0; orPin.last = null;
     /* The chip would need re-measuring on every move; it fades for the
-       ride and the drop's full paint puts it back, placed and flipped
-       correctly for wherever the node landed. */
+       ride and the settle's last frame puts it back, placed and
+       flipped correctly for wherever the node landed. */
     const lg = byId('orLabels');
     const ch = lg && lg.querySelector(`.or-chip[data-for="${CSS.escape(d.id)}"]`);
     if (ch) ch.setAttribute('opacity', '0');
   }
   const [ux, uy] = orToUser(e.clientX, e.clientY);
-  const x = ux + d.dx, y = uy + d.dy;
-  state.xy[d.id] = [x, y];
   /* No repaint mid-drag — that would replace the node under the
-     pointer. Move the element and its own edges directly; everything
-     else holds still. */
-  d.el.setAttribute('transform', `translate(${orLayout.N(x)} ${orLayout.N(y)})`);
-  const lk = byId('orLinks');
-  if (lk) {
-    const css = CSS.escape(d.id);
-    lk.querySelectorAll(`path[data-a="${css}"], path[data-b="${css}"]`).forEach(pth => {
-      const pa = state.xy[pth.getAttribute('data-a')];
-      const pb = state.xy[pth.getAttribute('data-b')];
-      if (pa && pb) pth.setAttribute('d', orPaintLinks.d(pa, pb));
-    });
-  }
+     pointer. The held node goes straight into the field and the tick
+     draws it, along with everything its springs are pulling. */
+  orSim.put(d.id, ux + d.dx, uy + d.dy);
+  orHeat(SIM.hold);
+  if (!orSim.raf) orSim.draw(false);
 }
 
 function orDragEnd(e) {
   const d = state.drag;
   state.drag = null;
+  orSim.quiet = false;
   const svg = byId('orSvg');
   if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }
   if (!d || d.id == null) return;
-  if (!d.moved) { orOpen(d.id); return; }
-  const p = state.xy[d.id];
-  state.pos[d.id] = [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10];
-  if (!orWrite({ pos: state.pos })) orSay('Not saved — storage unavailable.');
-  orPaint();
+
+  const pinned = !!state.pin[d.id];
+  if (!d.moved) {
+    orSim.hold(d.id, pinned);
+    /* One press opens, two pin — and the only way to tell them apart
+       is to wait for the second. A quarter-second of lag on the open
+       is cheaper than opening the note you were trying to lock, and
+       cheaper still than a pin you can only reach with a mouse. */
+    if (orPin.last === d.id) {
+      clearTimeout(orPin.t); orPin.t = 0; orPin.last = null;
+      orPin(d.id);
+      return;
+    }
+    orPin.last = d.id;
+    clearTimeout(orPin.t);
+    orPin.t = setTimeout(() => { orPin.t = 0; orPin.last = null; orOpen(d.id); }, 240);
+    return;
+  }
+
+  /* Dragging a PINNED node moves its pin: the pin is a decision, and
+     the obvious way to change a decision is to put the thing somewhere
+     else. Everything unpinned goes back into the simulation carrying
+     the velocity the pointer gave it, and the neighbourhood springs
+     back around it. */
+  if (pinned) {
+    const p = state.xy[d.id];
+    state.pin[d.id] = [Math.round(p[0] * 10) / 10, Math.round(p[1] * 10) / 10];
+    if (!orWrite({ pin: state.pin })) orSay('Not saved — storage unavailable.');
+    orPaint();
+    return;
+  }
+  orSim.hold(d.id, false);
+  orHeat(SIM.warm);
 }
 
 /* ── keyboard ──
    Delegated from the svg: the focused node's keydown bubbles here.
-   Arrows nudge 4px, 16 with Shift, and every move saves — a keyboard
-   arrangement is as much yours as a dragged one. Enter and Space open. */
+   Arrows nudge 4px, 16 with Shift. Enter and Space open; Enter with any
+   modifier pins, so every state the pointer can reach the keyboard can
+   reach too. */
 function orKeyNode(e) {
   const g = e.target.closest ? e.target.closest('.or-node') : null;
   if (!g) return;
   const id = g.getAttribute('data-id');
   if (e.key === 'Enter' || e.key === ' ') {
     e.preventDefault();
-    orOpen(id);
+    if (e.key === 'Enter' && (e.shiftKey || e.ctrlKey || e.metaKey || e.altKey)) orPin(id);
+    else orOpen(id);
     return;
   }
   const step = e.shiftKey ? 16 : 4;
@@ -2624,16 +3392,29 @@ function orKeyNode(e) {
   if (!mv) return;
   e.preventDefault();
   const p = state.xy[id] || [500, 500];
-  const next = [Math.round((p[0] + mv[0]) * 10) / 10, Math.round((p[1] + mv[1]) * 10) / 10];
-  state.xy[id] = next;
-  state.pos[id] = next.slice();
-  if (!orWrite({ pos: state.pos })) orSay('Not saved — storage unavailable.');
-  orPaint();
-  /* The paint just replaced the element that held focus. Put focus
-     back on the new one, or the next arrow press goes nowhere. */
-  const ng = byId('orNodes');
-  const g2 = ng && ng.querySelector(`[data-id="${CSS.escape(id)}"]`);
-  if (g2) { try { g2.focus({ preventScroll: true }); } catch (_) {} }
+  const nx = Math.round((p[0] + mv[0]) * 10) / 10;
+  const ny = Math.round((p[1] + mv[1]) * 10) / 10;
+  orSim.put(id, nx, ny, true);
+
+  /* A nudge on a pinned node moves the pin, and that is a placement:
+     saved, and the field rearranges around it. */
+  if (state.pin[id]) {
+    state.pin[id] = [nx, ny];
+    if (!orWrite({ pin: state.pin })) orSay('Not saved — storage unavailable.');
+    orPaint();
+    /* The paint just replaced the element that held focus. Put focus
+       back on the new one, or the next arrow press goes nowhere. */
+    const ng = byId('orNodes');
+    const g2 = ng && ng.querySelector(`[data-id="${CSS.escape(id)}"]`);
+    if (g2) { try { g2.focus({ preventScroll: true }); } catch (_) {} }
+    return;
+  }
+  /* A nudge on an unpinned node does NOT reheat. Your hands are on the
+     arrow keys and the field is at rest; waking it to argue with each
+     press would make the keyboard the one input that cannot place a
+     node at all. Pin it and the placement is kept — leave it, and the
+     next shove reclaims it, exactly as a dropped node is reclaimed. */
+  orSim.draw(false);
 }
 
 /* ── wiring ──
@@ -2668,12 +3449,10 @@ function orKeyNode(e) {
     orZoom(e.deltaY < 0 ? 1.16 : 1 / 1.16, p.x, p.y);
   }, { passive: false });
 
-  /* Hover and focus are one state for the labels: either one earns a
-     node its chip. Repaint is labels-only — cheap, and it cannot
-     disturb a node mid-hover. */
-  const over = id => {
-    if (id !== state.hover) { state.hover = id; if (!state.drag) orPaintLabels(); }
-  };
+  /* Hover and focus are one state: either one lifts the node and its
+     neighbours and earns it a chip. Never during a drag — the thing
+     under the pointer then is the thing you are holding. */
+  const over = id => { if (!state.drag) orHover(id); };
   svg.addEventListener('pointerover', e => {
     const g = e.target.closest ? e.target.closest('.or-node') : null;
     over(g ? g.getAttribute('data-id') : null);
@@ -2700,6 +3479,17 @@ function orKeyNode(e) {
     else if (e.key === '0') orZoom(0);
     else return;
     e.preventDefault();
+  });
+
+  /* A resize does not move the viewBox — meet holds the whole field —
+     but it changes where the viewport edge is, and a chip flips
+     against that edge. Reheat once the window handle has stopped
+     moving, and re-place the chips against the edge they now have. */
+  let rz = 0;
+  window.addEventListener('resize', () => {
+    if (state.view !== 'map') return;
+    clearTimeout(rz);
+    rz = setTimeout(() => { orHeat(SIM.stir); orPaintLabels(); }, 160);
   });
 
   const wire = (id, fn) => { const b = byId(id); if (b) b.addEventListener('click', fn); };
@@ -3051,6 +3841,11 @@ const { orAttach, orPickDir, orForget } = (() => {
     if (typeof orPaint === 'function') orPaint();
     if (typeof orLegend === 'function') orLegend();
     if (typeof orStats === 'function') orStats();
+    /* A vault is the largest energy anything puts into this field.
+       orPaint's own seed already reheats when the note set changes;
+       this covers the re-read of a vault whose ids came back the same
+       but whose links did not. */
+    if (typeof orHeat === 'function') orHeat(SIM.alpha0, true);
   };
 
   /* The vault view's three labels, and Forget only offered when there
@@ -3716,6 +4511,13 @@ function orOnly(cat) {
   state.only = (!c || state.only === cat) ? null : cat;
   orWrite({ only: state.only });
   orPaint();
+  /* A filter dims, it never removes, so there is nothing here for the
+     springs to rearrange — and on a field that has already converged
+     this is a single tick that moves nothing. It is here so that the
+     one case where it is NOT a no-op — an isolate thrown while the
+     field is still settling — carries on settling instead of freezing
+     half way. */
+  orHeat(SIM.stir);
   orSay(state.only ? `Only ${c.label}.` : 'Every category.');
 }
 
@@ -3775,6 +4577,7 @@ function orSearch() {
     const box = byId('orSearch');
     state.q = box ? box.value : '';
     orPaint();
+    orHeat(SIM.stir);            /* see orOnly — a no-op on a quiet field */
     const q = state.q.trim();
     if (q) {
       const k = (state.notes || []).filter(orPaint.match).length;
