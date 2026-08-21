@@ -240,16 +240,15 @@
   letter-spacing: -.02em; color: var(--ink); }
 .hb-cl { font-family: var(--mono); font-size: .55rem; line-height: 1.25;
   letter-spacing: .12em; text-transform: uppercase; color: var(--ink-3); }
-.hb-blocks { flex: 1; display: flex; gap: 5px; position: relative;
-  transition: gap .55s cubic-bezier(.5, 0, .2, 1); }
+.hb-blocks { flex: 1; display: flex; gap: 0; position: relative; }
 /* ── every one of them marked ──
-   The six stop being six. The gaps close, the blocks fade out and one
-   continuous ramp takes their place — every colour that earned it still
-   in there, no longer being counted separately.
+   The shape does not change — it is the same line it was at one of six.
+   What changes is that the hard edges dissolve into one ramp and it
+   lights up. Same object, finished.
 
-   ::before is the merged bar, ::after the light it throws. Both are
+   ::before is the merged ramp, ::after the light it throws. Both are
    painted whether or not the day is complete and revealed by opacity,
-   so the change is a fade rather than a layout. */
+   so the change is a fade and never a layout. */
 .hb-blocks::before, .hb-blocks::after {
   content: ""; position: absolute; opacity: 0; pointer-events: none;
   background: var(--ultra);
@@ -257,8 +256,16 @@
 .hb-blocks::before { inset: 0; border-radius: 3px; transition: opacity .5s ease-out .15s; }
 .hb-blocks::after { left: 0; right: 0; top: 1px; height: 9px;
   filter: blur(14px); transition: opacity .8s ease-out .3s; }
-.hb-blocks[data-all] { gap: 0; }
-.hb-blocks[data-all] i { opacity: 0; }
+/* Both selectors, and not by accident. `.hb-blocks i[data-on]` and
+   `.hb-blocks[data-all] i` weigh exactly the same (0,2,1), and the
+   [data-on] rule is written further down — so it won, and the six
+   blocks never faded at all. They sat at full opacity UNDERNEATH the
+   ramp, invisible only because the ramp happens to be opaque, which is
+   a thing that looks correct until the day something above it is not.
+   Naming [data-on] here outweighs it instead of relying on which rule
+   came last. */
+.hb-blocks[data-all] i,
+.hb-blocks[data-all] i[data-on] { opacity: 0; }
 .hb-blocks[data-all]::before { opacity: 1; }
 .hb-blocks[data-all]::after { opacity: .75; }
 /* Only on the day it TURNS complete. The panel is rebuilt on every
@@ -274,15 +281,25 @@
   0% { opacity: 0; } 20% { opacity: 1; } 100% { opacity: .75; }
 }
 @media (prefers-reduced-motion: reduce) {
-  .hb-blocks { transition: none; }
+  .hb-blocks i { transition: none; }
   .hb-blocks::before, .hb-blocks::after { transition: none; }
   .hb-blocks.hb-bloom::before, .hb-blocks.hb-bloom::after { animation: none; }
 }
-/* Kept takes the habit's colour, missed stays the same block at a
-   fourteenth of it — an absence, not a mark against you. */
-.hb-blocks i { flex: 1; height: 7px; border-radius: 3px;
+/* ONE LINE, ALWAYS. The six used to sit apart with 5px between them and
+   only close up when the day was finished, so a part-done day and a
+   finished one were two different shapes. They are one shape now and
+   the only thing that changes is the light in it: the bar is always
+   continuous, and a kept habit lights its length of it.
+
+   Kept takes the habit's colour, missed is the same colour at a
+   fourteenth — an absence, not a mark against you. Hard edges between
+   them on purpose: a smooth blend here would say WHICH nothing, and
+   which is the whole reason these have colours. */
+.hb-blocks i { flex: 1; height: 7px; border-radius: 0;
   background: var(--lit, var(--accent)); opacity: .14;
-  transition: opacity .2s; }
+  transition: opacity .35s ease-out; }
+.hb-blocks i:first-child { border-radius: 3px 0 0 3px; }
+.hb-blocks i:last-child  { border-radius: 0 3px 3px 0; }
 .hb-blocks i[data-on] { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .hb-blocks i { transition: none; } }
 

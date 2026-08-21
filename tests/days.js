@@ -167,9 +167,13 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
   console.log('\n── a finished day ──');
   const strip = () => page.evaluate(() => {
     const b = document.querySelector('.hb-blocks');
+    const r = b.getBoundingClientRect();
+    const seg = [...b.querySelectorAll('i')].map(i => +getComputedStyle(i).opacity);
     return { all: b.hasAttribute('data-all'), bloom: b.classList.contains('hb-bloom'),
              gap: getComputedStyle(b).gap,
-             bar: +getComputedStyle(b, '::before').opacity };
+             bar: +getComputedStyle(b, '::before').opacity,
+             box: [Math.round(r.width), Math.round(r.height)],
+             seg };
   });
   await page.evaluate(() => localStorage.removeItem('habits.v1'));
   await page.reload({ waitUntil: 'networkidle' });
@@ -179,14 +183,26 @@ const SPLITS = ['push', 'pull', 'legs', 'rest'];
     await page.waitForTimeout(70);
   }
   let sN = await strip();
-  ok('five of six is still six blocks', sN.all === false && sN.bar === 0, sN);
+  const partial = sN.box;
+  ok('a part-done day is not merged', sN.all === false && sN.bar === 0, sN);
+  /* ONE LINE IN BOTH STATES. The six used to sit 5px apart and only
+     close up when the day was finished, so a part-done day and a
+     finished one were two different shapes. */
+  ok('but it is already one continuous line', sN.gap === '0px', sN.gap);
+  ok('and the kept ones are lit while the missed one is not',
+     sN.seg.filter(o => o === 1).length === 5
+     && sN.seg.filter(o => o < 0.3).length === 1, sN.seg);
   await page.click('[data-pick]');
   await page.waitForTimeout(150);
   await page.click('[data-split="push"]');
   await page.waitForTimeout(250);
   sN = await strip();
-  ok('the sixth merges them into one bar', sN.all === true && sN.gap === '0px' && sN.bar === 1, sN);
+  ok('the sixth dissolves the edges into one ramp',
+     sN.all === true && sN.bar === 1 && sN.seg.every(o => o === 0), sN);
   ok('and it blooms as it lands', sN.bloom === true);
+  /* Same object, finished — not a second object that replaces it. */
+  ok('the line is the same shape it was',
+     sN.box[0] === partial[0] && sN.box[1] === partial[1], [partial, sN.box]);
   /* The ramp is brighter than any of the six, not their average — that
      average is #ad9c9c and the rest-day grey is #918e88, so a perfect
      day would have looked like a day of nothing. */
