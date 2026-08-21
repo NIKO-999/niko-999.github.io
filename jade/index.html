@@ -1235,6 +1235,14 @@ svg { display: block; }
   gap: 12px;
 }
 
+/* Eight habits divide into four and four. Left to auto-fill, a wide
+   window took five across and left a ragged 5 + 3 with a hole beside
+   it; fixed at four, the block is square at every size that can hold it
+   and the cards take the extra width instead of a fifth column. */
+@media (min-width: 1100px) {
+  .jt-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+
 .jt-card {
   display: flex;
   flex-direction: column;
@@ -1691,7 +1699,18 @@ svg { display: block; }
 /* One pip per habit that was kept or was due. Filled took it, hollow
    did not — and hollow keeps the habit's own colour rather than turning
    into a warning, because the colour says WHICH, never whether. */
-.jc-dots { display: flex; flex-wrap: wrap; gap: 4px; align-content: flex-start; }
+/* Anchored to the floor of the cell, not the ceiling. On a maximised
+   window the rows are 180px tall and one line of pips clinging under
+   the date left every cell looking unfinished; with the number at the
+   top and the marks at the bottom, the cell is framed rather than
+   half-empty. */
+.jc-dots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-content: flex-end;
+  margin-top: auto;
+}
 .jc-pip {
   width: 11px;
   height: 11px;
