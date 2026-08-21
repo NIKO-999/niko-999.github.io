@@ -160,6 +160,98 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
   await browser.close();
 }
 
+/* ══ 3b. THE DONUT AGREES WITH THE NUMBER INSIDE IT ═══════════════
+   One wedge per unit of the denominator, filled for each unit of the
+   numerator. It read 8/8 over seven wedges once, because the ratio and
+   the picture each worked out the list of habits for themselves and a
+   habit ticked on a rest day only made it into one of them. */
+{
+  const { browser, page, errs } = await open();
+
+  const donut = () => page.evaluate(() => {
+    const p = [...document.getElementById('dayDonut').querySelectorAll('path')];
+    return {
+      wedges: p.length,
+      filled: p.filter(n => n.getAttribute('fill').includes('color-mix')).length,
+      /* which ones, not how many: a filled wedge sits at the habit's
+         own place in the ring, so counting them tells you nothing
+         about where to point the sampler. */
+      at: p.map((n, i) => [n.getAttribute('fill').includes('color-mix'), i])
+        .filter(x => x[0]).map(x => x[1]),
+      txt: document.getElementById('dayRingTxt').textContent
+    };
+  });
+
+  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps', 'water'] }) });
+  let d = await donut();
+  let [kept, due] = d.txt.split('/').map(Number);
+  ok('one wedge for every habit the day owes', d.wedges === due, d);
+  ok('and one filled for every one kept', d.filled === kept, d);
+
+  /* Abs is every second day: kept yesterday, it is not owed today —
+     so ticking it today is the extra that lands on both sides of the
+     ratio, and the drawing has to grow by a wedge with it. */
+  await seed(page, { 'jade.v1': jadeStore({ [AGO(1)]: ['abs'], [TODAY]: ['steps'] }) });
+  const rest = await donut();
+  await page.click('.jt-card[data-id="abs"]');
+  await page.waitForTimeout(400);
+  d = await donut();
+  [kept, due] = d.txt.split('/').map(Number);
+  ok('a habit kept on a rest day still gets a wedge',
+    d.wedges === rest.wedges + 1, { before: rest, after: d });
+  ok('and the drawing still matches the ratio beside it',
+    d.wedges === due && d.filled === kept, d);
+
+  /* Ticking a habit the day already owed shifts every fill a step
+     along the ramp without changing the wedges. The nodes have to
+     survive that or there is nothing for the transition to run from,
+     and the ring snaps where it used to wind on. */
+  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }) });
+  await page.evaluate(() => {
+    document.getElementById('dayDonut').querySelectorAll('path')
+      .forEach((n, i) => { n.dataset.mark = i; });
+  });
+  await page.click('.jt-card[data-id="water"]');
+  await page.waitForTimeout(500);
+  const marks = await page.$$eval('#dayDonut path', ns => ns.map(n => n.dataset.mark));
+  ok('a tick repaints the wedges rather than replacing them',
+    marks.every((m, i) => m === String(i)), marks);
+
+  /* Sampled off the composited page: the fills are color-mix, so the
+     computed string tells you nothing about what landed on screen. */
+  for (const theme of ['dark', 'light']) {
+    await page.evaluate(t => {
+      localStorage.setItem('jade.ui.v1', JSON.stringify({ rail: 'open', theme: t }));
+    }, theme);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(320);
+
+    const png = PNG.sync.read(await (await page.$('.jt-donut')).screenshot());
+    const at = (r, deg) => {
+      const t = (deg - 90) * Math.PI / 180, sc = png.width / 140;
+      const x = Math.round(png.width / 2 + r * sc * Math.cos(t));
+      const y = Math.round(png.height / 2 + r * sc * Math.sin(t));
+      const i = (png.width * y + x) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    /* The ground is read off the shot too, at a radius outside the
+       ring: whatever the strip's own background computes to, this is
+       the colour the wedge is actually sitting on. */
+    const card = at(78, 45);
+    const shape = await donut();
+    const step = 360 / shape.wedges;
+    const worst = Math.min(...shape.at.map(i => ratio(at(54, i * step + step / 2), card)));
+    /* 3:1, the floor for something that is a picture rather than text.
+       The ramp runs between the app's two pinks for this reason: mixed
+       toward the page instead, the palest wedge came out at 1.9:1 on
+       light and simply was not there. */
+    ok(`${theme}: the palest wedge is still a wedge`, worst >= 3, worst.toFixed(2));
+  }
+
+  ok('no errors', errs.length === 0, errs);
+  await browser.close();
+}
+
 /* ══ 4. REPAIRED, NEVER DISCARDED ═════════════════════════════════
    The days are the only thing that cannot be got back. A broken notes
    object, a day whose value is a number, a habit id that no longer

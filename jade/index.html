@@ -1321,13 +1321,44 @@ svg { display: block; }
 }
 .jt-tk { color: var(--jt-c, var(--accent)); }
 
-.jt-ring-lg { width: 132px; height: 132px; }
-/* 10 device px. The viewBox is 120 units drawn at 132, so a user unit
-   is 132/120 of a pixel and a stroke has to be written in the units
-   the path it belongs to is drawn in. */
-.jt-ring-lg .jt-track,
-.jt-ring-lg .jt-prog { stroke-width: 9.09; }
-.jt-ring-lg .jt-ringn { font-size: 1.32rem; }
+/* ── the day ──
+   A filled donut, not a stroked ring: hard wedges meeting each other,
+   a hole cut clean through to the page. The hole is the page rather
+   than a disc drawn over it, so it is right in both themes without
+   anybody deciding what colour it is. */
+.jt-donut {
+  position: relative;
+  flex: none;
+  width: 140px;
+  height: 140px;
+}
+.jt-donut svg { width: 100%; height: 100%; display: block; }
+.jt-donut path { transition: fill .32s ease; }
+.jt-donut-t {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  line-height: 1;
+}
+.jt-donut-t b {
+  font-family: var(--mono);
+  font-size: 1.24rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+}
+.jt-donut-t i {
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: .5rem;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
 
 /* ── the grid ──
    auto-fill rather than auto-fit: eight cards on a wide screen keep a
@@ -1696,6 +1727,7 @@ svg { display: block; }
 @media (prefers-reduced-motion: reduce) {
   .jt-prog,
   .jt-card,
+  .jt-donut path,
   .jt-r,
   .jt-saved { transition: none; }
 }
@@ -2199,12 +2231,17 @@ svg { display: block; }
            identical boxes was the first version and that was the
            problem: nothing led, so the eye had nowhere to enter. -->
       <section class="jt-strip">
-        <div class="jt-ring jt-ring-lg">
-          <svg viewBox="0 0 120 120" aria-hidden="true">
-            <circle class="jt-track" cx="60" cy="60" r="51"/>
-            <circle class="jt-prog" id="dayRing" cx="60" cy="60" r="51"/>
-          </svg>
-          <span class="jt-ringn" id="dayRingTxt">0/0</span>
+        <!-- The day as a filled donut rather than a stroked arc: one
+             wedge per thing due, the kept ones in tints of the one
+             pink. It does not wind on when you tick something — a path
+             has no dash offset to transition — and that is the trade,
+             taken knowingly. -->
+        <div class="jt-donut">
+          <svg id="dayDonut" viewBox="0 0 140 140" aria-hidden="true"></svg>
+          <span class="jt-donut-t">
+            <b id="dayRingTxt">0/0</b>
+            <i id="dayDonutCap">kept</i>
+          </span>
         </div>
         <div class="jt-dayt">
           <b id="dayDate">Today</b>
@@ -2583,17 +2620,28 @@ function weekStat(id, ref) {
   return { kept: kept, due: due };
 }
 
-function dayStat(k) {
+/* The ids a day's ratio is built from: everything it owed, then
+   anything kept that it did not. A habit kept on a day it did not owe
+   you lands on both sides of the ratio, so the count moves the moment
+   anything is ticked and can never fall.
+
+   The donut draws one wedge per entry and dayStat counts the same
+   list, which is the point of it being one function: the two were
+   computed separately and drifted the first time a rest-day habit was
+   ticked — seven wedges under a heading that read 8/8. */
+function dayIdsOn(k) {
   const ids = dueIdsOn(k);
-  const on = state.days[k] || [];
+  (state.days[k] || []).forEach(function (id) {
+    if (HAB[id] && ids.indexOf(id) < 0) ids.push(id);
+  });
+  return ids;
+}
+
+function dayStat(k) {
+  const ids = dayIdsOn(k);
   let kept = 0;
   ids.forEach(function (id) { if (keptOn(k, id)) kept++; });
-  /* A habit kept on a day it did not owe you lands on both sides of
-     the ratio, so the ring moves the moment anything is ticked and
-     can never fall. */
-  let extra = 0;
-  on.forEach(function (id) { if (HAB[id] && ids.indexOf(id) < 0) extra++; });
-  return { kept: kept + extra, due: ids.length + extra };
+  return { kept: kept, due: ids.length };
 }
 
 /* Consecutive DUE days kept, walking back from today. A day it was
@@ -2727,7 +2775,7 @@ window.JADE = {
   dayKey: dayKey, fromKey: fromKey, shift: shift, weekStart: weekStart,
   todayKey: todayKey, isFuture: isFuture,
   keptOn: keptOn, setKept: setKept, toggle: toggle,
-  dueOn: dueOn, dueIdsOn: dueIdsOn,
+  dueOn: dueOn, dueIdsOn: dueIdsOn, dayIdsOn: dayIdsOn,
   weekStat: weekStat, dayStat: dayStat, chain: chain, streak: streak,
   best: best, weekPct: weekPct,
   noteOn: noteOn, setNote: setNote,
@@ -2994,7 +3042,7 @@ function jtStrip() {
   /* The day ring is kept ÷ due for TODAY, and it moves the moment
      anything is ticked — that is the whole reason it is the biggest
      thing on the screen. */
-  jtRing.set(document.getElementById('dayRing').closest('.jt-ring'), s.kept, s.due);
+  jtDonut(s.kept, s.due);
 
   document.getElementById('dayDate').textContent = fmtLong(new Date());
   /* The caption carries the two streak figures now. They were panels
@@ -3017,6 +3065,73 @@ function jtStrip() {
 
 /* "three still to go", not "3/7 (43%)". The ring already carries the
    fraction; this is the sentence you read instead of doing the sum. */
+/* An annulus sector: out along the outer radius and back along the
+   inner one. Angles run clockwise from twelve o'clock, like the arc
+   this replaced. */
+function jtWedge(ro, ri, a0, a1) {
+  const at = function (r, a) {
+    const t = (a - 90) * Math.PI / 180;
+    return (70 + r * Math.cos(t)).toFixed(2) + ' ' + (70 + r * Math.sin(t)).toFixed(2);
+  };
+  /* A single wedge covering the whole circle has coincident endpoints
+     and draws nothing at all, so it stops a hair short of closing. */
+  const end = Math.min(a1, a0 + 359.99);
+  const big = end - a0 > 180 ? 1 : 0;
+  return 'M' + at(ro, a0) + 'A' + ro + ' ' + ro + ' 0 ' + big + ' 1 ' + at(ro, end)
+    + 'L' + at(ri, end) + 'A' + ri + ' ' + ri + ' 0 ' + big + ' 0 ' + at(ri, a0) + 'Z';
+}
+
+function jtDonut(kept, due) {
+  const svg = document.getElementById('dayDonut');
+  document.getElementById('dayRingTxt').textContent = due ? kept + '/' + due : '0';
+  document.getElementById('dayDonutCap').textContent = due ? 'kept' : 'nothing due';
+
+  if (!due) {
+    svg.dataset.sig = '';
+    svg.innerHTML = '<path d="' + jtWedge(68, 40, 0, 360) + '" fill="var(--track)"/>';
+    return;
+  }
+
+  const k = todayKey();
+  const ids = dayIdsOn(k);
+  const step = 360 / due;
+  /* A gap in degrees, not pixels: eight habits or three, the hairline
+     between wedges stays the same weight. Half of it comes off each
+     end, so the wedges stay centred on their own share of the circle.
+     Without it two neighbouring tints two steps apart on the ramp read
+     as one wedge, and the count you can see stops matching the count
+     in the middle. */
+  const gap = Math.min(1.6, step / 4);
+  let nth = 0;
+  const fills = ids.map(function (id) {
+    if (!keptOn(k, id)) return 'var(--track)';
+    /* The ramp runs between the app's two pinks rather than toward
+       the page. Mixed toward the background the palest wedge falls
+       to 1.9:1 on light, which is a wedge you cannot see. */
+    const pct = kept > 1 ? 100 - nth * (100 / (kept - 1)) : 100;
+    nth++;
+    return 'color-mix(in srgb, var(--accent) ' + pct.toFixed(1)
+      + '%, var(--accent-on-wash))';
+  });
+
+  /* The wedges are rebuilt only when there is a different set of them.
+     Ticking one usually leaves the shape alone and shifts every fill a
+     step along the ramp — repainting the same nodes lets CSS ease that,
+     where fresh nodes from an innerHTML would snap to their colour with
+     nothing to transition from. This is the arc winding on, in the only
+     form a segmented ring has. */
+  const sig = ids.join(',');
+  if (svg.dataset.sig !== sig) {
+    svg.dataset.sig = sig;
+    svg.innerHTML = ids.map(function (id, i) {
+      return '<path d="'
+        + jtWedge(68, 40, i * step + gap / 2, (i + 1) * step - gap / 2) + '"/>';
+    }).join('');
+  }
+  const paths = svg.querySelectorAll('path');
+  fills.forEach(function (f, i) { paths[i].setAttribute('fill', f); });
+}
+
 function jtSay(kept, due) {
   if (!due) return 'nothing due';
   const left = due - kept;
