@@ -53,6 +53,22 @@
   --focus:     #FF6FA5;
   color-scheme: dark;
 
+  /* A WASH, NOT A FILL — in both themes. A solid accent is a slab
+     whichever ground it is on, and there are eight of them across one
+     screen. Surfaces take a tint of it; lines and marks — the nav
+     underline, the now line, the focus ring, the day ring — stay solid,
+     because a 1px rule washed to 14% is not a rule.
+
+     The ink that goes ON a wash cannot be the accent. Here it measures
+     4.61:1 on the 14% tint and 4.00 on the 22% one, so it fails exactly
+     where the button is loudest; a paler relative of the same pink is
+     6.45 and 5.60. On light the same problem runs the other way and the
+     answer is a darker one. */
+  --accent-wash:    color-mix(in srgb, var(--accent) 14%, var(--card));
+  --accent-wash-2:  color-mix(in srgb, var(--accent) 22%, var(--card));
+  --accent-edge:    color-mix(in srgb, var(--accent) 34%, var(--card));
+  --accent-on-wash: #FFA3C6;
+
   /* BUBBLE GEOMETRY. Everything that holds text is round: a panel is a
      22px bubble, anything that holds one line — a chip, a rail row, a
      log entry, a control — is a full pill. Tokens rather than numbers
@@ -120,22 +136,11 @@
   --h-read:     #9C7A00;
   --h-audible:  #E03131;
 
-  /* A WASH, NOT A FILL. On near-black a solid accent is a highlight; on
-     white it is a slab, and eight of them across one screen is a lot of
-     shouting for a habit tracker. The same pink at 14% of the card
-     reads as a tint, and what sits on it goes accent rather than white
-     — which is also the only way it stays readable, since white on a
-     14% pink is 1.2:1. Surfaces take these; lines and marks — the nav
-     underline, the now line, the focus ring — stay solid, because a
-     1px rule washed to 14% is not a rule. */
+  /* The same four, mixed against this card and inked the other way. */
   --accent-wash:   color-mix(in srgb, var(--accent) 14%, var(--card));
   --accent-wash-2: color-mix(in srgb, var(--accent) 22%, var(--card));
   --accent-edge:   color-mix(in srgb, var(--accent) 34%, var(--card));
-  /* And a deeper pink for whatever sits ON the wash. The accent itself
-     measures 3.76:1 against its own 14% tint, which is under the floor
-     for text — so the word gets a darker relative of the same colour
-     rather than the colour it is sitting on. */
-  --accent-deep:   #A61E4D;
+  --accent-on-wash:   #A61E4D;
 }
 
 
@@ -397,10 +402,10 @@ svg { display: block; }
   flex: none;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid var(--accent-edge);
   border-radius: var(--r-pill);
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash-2);
+  color: var(--accent-on-wash);
   cursor: pointer;
   transition: filter .12s ease;
 }
@@ -488,17 +493,6 @@ svg { display: block; }
 :root[data-theme="light"] .glyph .moon { display: none; }
 
 /* The one filled control in the header, washed on light. */
-:root[data-theme="light"] .add {
-  /* The heavier wash, not the light one. It is the only "do the thing"
-     button in the header and at 14% it had faded into the bar. */
-  background: var(--accent-wash-2);
-  border: 1px solid var(--accent-edge);
-  color: var(--accent-deep);
-}
-@media (hover: hover) {
-  :root[data-theme="light"] .add:hover { background: var(--accent-wash-2); filter: none; }
-}
-
 /* Shut is display:none, not a width transition. Collapsing a flex child
    to zero animates on the wide layout and does nothing on the stacked
    one, so half the app would slide and half would blink — and the pane
@@ -862,8 +856,8 @@ svg { display: block; }
    side. */
 .jm-d.out { opacity: .38; }
 .jm-d.now {
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
   font-weight: 600;
 }
 
@@ -884,13 +878,13 @@ svg { display: block; }
   background: var(--ink-3);
 }
 .jm-dot.full { background: var(--accent); }
-.jm-d.now .jm-dot { background: var(--accent-in); }
+.jm-d.now .jm-dot { background: var(--accent-on-wash); }
 
 @media (hover: hover) {
   .jm-arw:hover { color: var(--ink); background: var(--card-2); }
   .jm-t:hover { background: var(--card-2); }
   .jm-d:hover { background: var(--card-2); color: var(--ink); }
-  .jm-d.now:hover { background: var(--accent); color: var(--accent-in); }
+  .jm-d.now:hover { background: var(--accent-wash-2); color: var(--accent-on-wash); }
 }
 .jm-d:focus-visible,
 .jm-t:focus-visible,
@@ -910,17 +904,6 @@ svg { display: block; }
 
 /* Today's pill. It is still the only tinted cell in the month, so it
    still reads as today without being a solid stamp. */
-:root[data-theme="light"] .jm-d.now {
-  background: var(--accent-wash);
-  color: var(--accent-deep);
-}
-:root[data-theme="light"] .jm-d.now .jm-dot { background: var(--accent-deep); }
-@media (hover: hover) {
-  :root[data-theme="light"] .jm-d.now:hover {
-    background: var(--accent-wash-2);
-    color: var(--accent-deep);
-  }
-}
 
 /* ══ REMINDERS ════════════════════════════════════════════════════
    The foot of the panel. Three at a time, snapping, no scrollbar — the
@@ -1017,12 +1000,12 @@ svg { display: block; }
   flex: none;
   display: grid;
   place-items: center;
-  border: 0;
+  border: 1px solid var(--accent-edge);
   border-radius: var(--r-pill);
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
   cursor: pointer;
-  transition: filter .12s ease;
+  transition: background-color .12s ease;
 }
 .jr-send svg {
   width: 13px;
@@ -1035,7 +1018,7 @@ svg { display: block; }
 }
 .jr-send:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (hover: hover) { .jr-send:hover { filter: brightness(1.08); } }
-.jr-send:active { filter: brightness(.94); }
+.jr-send:active { background: var(--accent-edge); }
 
 /* ── the five seconds after a tick ──
    It stands where the field stands, so ticking one does not change the
@@ -1068,8 +1051,8 @@ svg { display: block; }
   padding: 0 12px;
   border: 0;
   border-radius: var(--r-pill);
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash-2);
+  color: var(--accent-on-wash);
   font: inherit;
   font-size: .66rem;
   font-weight: 500;
@@ -1108,8 +1091,8 @@ svg { display: block; }
   /* One accent for all of them. A reminder has no identity of its own
      the way a habit does, and eight colours here would say there were
      eight kinds. */
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
 }
 .jr-av svg {
   width: 12px;
@@ -1159,7 +1142,7 @@ svg { display: block; }
 }
 .jr-tk:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
 @media (hover: hover) {
-  .jr-tk:hover::before { background: var(--accent); border-color: var(--accent); }
+  .jr-tk:hover::before { background: var(--accent-wash-2); border-color: var(--accent-edge); }
 }
 
 .jr-none {
@@ -1183,26 +1166,6 @@ svg { display: block; }
    matters most: five solid pink discs down the side of a white panel
    was the loudest thing on the screen and it is the quietest section
    on it. */
-:root[data-theme="light"] .jr-av {
-  background: var(--accent-wash);
-  color: var(--accent-deep);
-}
-:root[data-theme="light"] .jr-send {
-  background: var(--accent-wash);
-  border: 1px solid var(--accent-edge);
-  color: var(--accent-deep);
-}
-:root[data-theme="light"] .jr-undo button {
-  background: var(--accent-wash-2);
-  color: var(--accent-deep);
-}
-@media (hover: hover) {
-  :root[data-theme="light"] .jr-send:hover { background: var(--accent-wash-2); filter: none; }
-  :root[data-theme="light"] .jr-tk:hover::before {
-    background: var(--accent-wash-2);
-    border-color: var(--accent-edge);
-  }
-}
 
 /* ══ TODAY ═══════════════════════════════════════════════════════
    The strip says how the day is going, the grid says what it is made
@@ -1588,20 +1551,18 @@ svg { display: block; }
    the accent, or it would stop meaning "this one". The avatar keeps
    its habit colour even here: orange says WHEN, colour says WHICH. */
 .jt-r[data-next] {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-in);
+  border-color: var(--accent-edge);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
 }
 .jt-r[data-next] .jt-r-nm,
-.jt-r[data-next] .jt-r-at { color: var(--accent-in); }
-.jt-r[data-next] .jt-r-tk {
-  border-color: color-mix(in srgb, var(--accent-in) 62%, transparent);
-}
+.jt-r[data-next] .jt-r-at { color: var(--accent-on-wash); }
+.jt-r[data-next] .jt-r-tk { border-color: var(--accent-edge); }
 @media (hover: hover) {
   .jt-r[data-next]:hover {
-    border-color: var(--accent);
-    background: var(--accent);
-    filter: brightness(1.06);
+    border-color: var(--accent-edge);
+    background: var(--accent-wash-2);
+    filter: none;
   }
 }
 
@@ -1739,7 +1700,6 @@ svg { display: block; }
   .jt-saved { transition: none; }
 }
 
-
 /* ══ LIGHT ════════════════════════════════════════════════════════
    Three things on this screen were built for a dark ground. */
 :root[data-theme="light"] {
@@ -1764,21 +1724,6 @@ svg { display: block; }
 
 /* The one row in the rail that says "this one next". Washed rather than
    filled, and its words take the accent instead of the page colour. */
-:root[data-theme="light"] .jt-r[data-next] {
-  background: var(--accent-wash);
-  border-color: var(--accent-edge);
-  color: var(--accent-deep);
-}
-:root[data-theme="light"] .jt-r[data-next] .jt-r-nm,
-:root[data-theme="light"] .jt-r[data-next] .jt-r-at { color: var(--accent-deep); }
-:root[data-theme="light"] .jt-r[data-next] .jt-r-tk { border-color: var(--accent-edge); }
-@media (hover: hover) {
-  :root[data-theme="light"] .jt-r[data-next]:hover {
-    background: var(--accent-wash-2);
-    border-color: var(--accent-edge);
-    filter: none;
-  }
-}
 
 /* ══ THE CALENDAR ═════════════════════════════════════════════════
    Month, week and day. The week is the real thing — an hour grid with
@@ -1881,8 +1826,8 @@ svg { display: block; }
   color: var(--ink-2);
 }
 .jc-cell.now .jc-num {
-  background: var(--accent);
-  color: var(--accent-in);
+  background: var(--accent-wash);
+  color: var(--accent-on-wash);
   font-weight: 600;
 }
 .jc-sc {
@@ -2162,11 +2107,6 @@ svg { display: block; }
 }
 :root[data-theme="light"] .jc-ev.on {
   background: color-mix(in srgb, var(--jc-c) 16%, var(--card));
-}
-
-:root[data-theme="light"] .jc-cell.now .jc-num {
-  background: var(--accent-wash);
-  color: var(--accent-deep);
 }
 </style>
 </head>
