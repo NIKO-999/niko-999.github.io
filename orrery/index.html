@@ -95,6 +95,11 @@
      would vanish into its own node. The one place that bites — the
      selection ring over light glass — is re-inked below. */
   --or-core: #fff6e8;
+  /* Measured off the reference: its star cores read 255,249,228 — a
+     warm white, not a pure one. On paper a star cannot be white at all,
+     so the same ten gradient stops draw it in ink instead. */
+  --or-star-core: #fffaef;
+  --or-star-a: 1;
 
   /* Chip and card fills are the shell's opaque menu surface, aliased
      rather than copied: text on them must not depend on which corner
@@ -114,6 +119,8 @@
   --or-cat-mind:    #963050;
   --or-cat-world:   #2f4a86;
   --or-cat-other:   #4a453e;
+  --or-star-core:   #241f19;
+  --or-star-a:      1.85;      /* paper needs more ink than black needs light */
   /* --or-hair, --or-chip and --or-chip-line re-resolve through the
      shell tokens they alias; --or-core stays warm white — see above. */
 }
@@ -185,6 +192,18 @@
    the two can be true at once. Same ink as the selection ring, and the
    same reason for the light-mode swap: warm white dies on glass. */
 .or-pinr { stroke: var(--or-core); }
+
+/* The instrument turns — see orPaintRings. transform-origin is the
+   viewBox centre, not the element's box: an SVG group's own box is
+   whatever its children happen to span, so a box-relative origin would
+   swing each ring around a different point. */
+@keyframes or-turn { to { transform: rotate(360deg); } }
+.or-turn {
+  transform-origin: 500px 500px;
+  animation: or-turn var(--turn, 400s) linear infinite;
+}
+.or-rev { animation-direction: reverse; }
+@media (prefers-reduced-motion: reduce) { .or-turn { animation: none; } }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
 /* ── hover drift ──
@@ -2746,12 +2765,17 @@ function orPin(id) {
   orSim.hold(id, on);
   orPaint();
   orHeat(SIM.warm);
-  orSay(`${orPin.name(id)} ${on ? 'pinned' : 'released'}.`
+  orSay(`${orPin.title(id)} ${on ? 'pinned' : 'released'}.`
     + (saved ? '' : ' Not saved — storage unavailable.'));
 }
 orPin.t = 0;              /* the pending open, cancelled by a second press */
 orPin.last = null;
-orPin.name = (id) => {
+/* Not orPin.name. Every function already HAS a .name — a read-only
+   string — so the assignment silently did nothing and the call threw
+   at the one moment it mattered, announcing a pin. The same class of
+   collision the house rules are about, one level down: a property on a
+   function is as much a namespace as the top level is. */
+orPin.title = (id) => {
   if (id.indexOf('hub:') === 0) return (orLayout.label || {})[id.slice(4)] || 'Folder';
   const n = (orLayout.note || {})[id];
   return (n && n.title) || id;
@@ -2834,17 +2858,69 @@ function orPaintRings() {
     defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
     svg.insertBefore(defs, svg.firstChild);
   }
-  defs.innerHTML = orLayout.cats().map(c =>
-    `<radialGradient id="orGlow-${esc(c.id)}">`
-    + `<stop offset="0" style="stop-color:var(--or-cat-${esc(c.id)})" stop-opacity=".55"/>`
-    + `<stop offset="1" style="stop-color:var(--or-cat-${esc(c.id)})" stop-opacity="0"/>`
-    + `</radialGradient>`).join('');
+  /* The falloff is measured, not drawn. Walking a radial out from the
+     brightest stars of a reference chart gives a curve that is nearly
+     vertical — 90% of peak still at one pixel, half of it by three, a
+     tenth by seven, gone by twelve. A two-stop gradient falls off in a
+     straight line and reads as a lamp; these ten stops have the steep
+     shoulder and the long faint tail a real point source has, which is
+     the whole difference between a star and a glowing dot.
+
+     stop-color rides the custom properties, so a star flips with the
+     theme without anyone repainting it: on paper --or-star-core is
+     near-black and the same ten stops draw an ink star instead. */
+  const STOPS = [[0, 0, 1], [.08, 22, .89], [.17, 52, .57], [.25, 78, .41],
+                 [.33, 100, .32], [.42, 100, .2], [.5, 100, .1],
+                 [.6, 100, .04], [.75, 100, .015], [1, 100, 0]];
+  defs.innerHTML = orLayout.cats().map(c => {
+    const v = `var(--or-cat-${esc(c.id)})`;
+    return `<radialGradient id="orStar-${esc(c.id)}">`
+      + STOPS.map(([o, m, a]) => `<stop offset="${o}" style="stop-color:`
+        + (m === 0 ? 'var(--or-star-core)'
+           : m === 100 ? v
+           : `color-mix(in srgb, ${v} ${m}%, var(--or-star-core))`)
+        /* stop-opacity as a STYLE, not an attribute, so it can take a
+           token: the falloff was measured against black, and the same
+           .32 that reads as a bloom there is invisible on paper. The
+           theme scales the whole ramp through --or-star-a and the
+           gradient re-resolves on its own — no repaint, no JS that has
+           to know which theme it is in. */
+        + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('')
+      + `</radialGradient>`;
+  }).join('');
 
   const out = [];
 
+  /* An orrery is a machine, and a machine that never moves is a diagram
+     of one. Each ring turns at its own rate and the tick rim turns
+     against them — two hands of the same clock. Minutes per revolution,
+     never seconds: this has to sit under reading without pulling at the
+     eye, and the reduced-motion rule stops it dead. CSS drives it, so
+     it costs nothing per tick and the simulation never sees it. */
+  const turn = (secs, rev) =>
+    ` class="or-turn${rev ? ' or-rev' : ''}" style="--turn:${secs}s"`;
+
+  /* Field stars. Unnamed specks with nothing to say, which is exactly
+     what makes the named ones read as named — measured, a reference
+     chart's are not dim, they are SMALL, and dimming them instead of
+     shrinking them is what turns a sky into grey noise. They sit under
+     everything and do not turn: the sky the instrument measures is not
+     part of the instrument. */
+  const dg = orRng('orrery.dust');
+  const dust = [];
+  for (let i = 0; i < 95; i++) {
+    const a = dg() * Math.PI * 2;
+    const d = 96 + Math.pow(dg(), .55) * 392;
+    dust.push(`<circle cx="${N(500 + Math.cos(a) * d)}" cy="${N(500 + Math.sin(a) * d)}"`
+      + ` r="${N(.35 + Math.pow(dg(), 2.2) * .95)}" fill="var(--or-star-core)"`
+      + ` opacity="${N(.3 + dg() * .62)}"/>`);
+  }
+  out.push(`<g class="or-dust">${dust.join('')}</g>`);
+
   /* atmosphere */
-  [[470, .10], [452, .08], [430, .06], [405, .05]].forEach(([r, o]) => out.push(
-    `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`));
+  out.push(`<g${turn(520)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
+    `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`
+  ).join('') + `</g>`);
 
   /* tick rim — 180 ticks, one path, one stroke. */
   const ticks = [];
@@ -2854,17 +2930,17 @@ function orPaintRings() {
     const [x2, y2] = P(i % 5 ? 398 : 402, a);
     ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
   }
-  out.push(`<path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/>`);
+  out.push(`<g${turn(300, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
 
   /* dotted ring */
-  out.push(`<circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/>`);
+  out.push(`<g${turn(700)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
 
   /* the two heavy arcs */
   const arc = (r, a, b) => {
     const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
     return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(b - a) > 180 ? 1 : 0} 1 ${N(x2)} ${N(y2)}`;
   };
-  out.push(`<path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/>`);
+  out.push(`<g${turn(420, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
 
   /* thin ring */
   out.push(`<circle cx="500" cy="500" r="330" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".18"/>`);
@@ -3001,27 +3077,57 @@ function orPaintNodes() {
     const sel = state.sel === it.id;
     const cat = esc(it.cat);
     const parts = [];
-    if (it.t === 'hub' || it.t === 'major')
-      parts.push(`<circle class="or-halo" r="${N(r * 2.8)}" fill="url(#orGlow-${cat})" opacity=".7"/>`);
-    else if (it.t === 'minor')
-      parts.push(`<circle class="or-halo" r="${N(r * 2.8)}" fill="url(#orGlow-${cat})" opacity=".35"/>`);
-    /* The thin ring is the hub's by right and the selection's on any
-       tier: selected, it takes --or-core at .9 and 1.6 wide. */
-    if (it.t === 'hub' || sel)
-      parts.push(`<circle class="or-ringc" r="${N(r * 1.6)}" fill="none"`
-        + ` stroke="${sel ? 'var(--or-core)' : `var(--or-cat-${cat})`}"`
-        + ` stroke-width="${sel ? 1.6 : .7}" opacity="${sel ? .9 : .5}"/>`);
+    const g2 = orRng(it.id + ':star');
+
+    /* Magnitude, not size. Measured, a chart's stars are all about as
+       BRIGHT as each other and differ in how far the bloom carries, so
+       the tier sets the reach and the seed sets the burn.
+
+       The ramp is superlinear on purpose. Held to the reference's own
+       falloff every tier came out the same tiny point — correct for a
+       chart, which has no hierarchy to show, and wrong for a map, which
+       has nothing but. A hub is a whole category and a leaf is one note
+       nothing points at, and you have to see which is which before
+       reading a label. So the top of the ladder grows and the bottom
+       stays where the measurements put it. */
+    const mag = .8 + g2() * .45;
+    const rank = 1 + Math.pow(r / 13, 1.6) * .75;
+    const ext = r * 1.2 * rank * (.86 + mag * .22);
+    /* Sized off the NODE, never off its bloom — off the bloom it grows
+       with the ramp squared and a hub comes out a flat white disc. The
+       pinpoint is what makes it a star. */
+    const core = Math.max(.32, r * .085 * (1 + (rank - 1) * .55));
+
+    /* Companions, on the big ones only, drawn FIRST so the star sits on
+       them: the near ones come out veiled by its glow, which is what a
+       companion close to something that bright looks like. Every one is
+       the same star at a smaller size — flat discs beside a glowing
+       core read as two languages on one node. Nothing orbits a note
+       nothing points at, so a leaf stays two elements, which is what
+       keeps this affordable on a field of four thousand. */
     if (it.t === 'hub' || it.t === 'major') {
-      parts.push(`<polygon class="or-hex" points="${orHex(r)}" fill="var(--or-cat-${cat})"/>`);
-      parts.push(`<polygon class="or-corep" points="${orHex(r * .46)}" fill="var(--or-core)" opacity=".8"/>`);
-    } else {
-      parts.push(`<circle class="or-dotc" r="${r}" fill="var(--or-cat-${cat})"/>`);
+      const n = it.t === 'hub' ? 9 : 6;
+      for (let i = 0; i < n; i++) {
+        const a = g2() * Math.PI * 2;
+        const d = r * (.85 + Math.pow(g2(), .6) * 1.7);
+        parts.push(`<circle class="or-sat" cx="${N(Math.cos(a) * d)}"`
+          + ` cy="${N(Math.sin(a) * d)}" r="${N(r * (.26 + g2() * .5))}"`
+          + ` fill="url(#orStar-${cat})" opacity="${N(.5 + g2() * .42)}"/>`);
+      }
     }
+    parts.push(`<circle class="or-halo" r="${N(ext)}" fill="url(#orStar-${cat})"`
+      + ` opacity="${N(Math.min(1, .82 * mag))}"/>`);
+    /* The thin ring is the selection's alone now. A hub no longer needs
+       one to say it is a hub — its reach and its retinue already do. */
+    if (sel)
+      parts.push(`<circle class="or-ringc" r="${N(ext * .62)}" fill="none"`
+        + ` stroke="var(--or-core)" stroke-width="1.6" opacity=".9"/>`);
+    parts.push(`<circle class="or-corec" r="${N(core)}" fill="var(--or-star-core)" opacity=".98"/>`);
     /* The pin: a dotted hairline ring OUTSIDE the node, so "locked" is
        legible without a legend and without touching the node's own
        colour. Drawn last of the rings so nothing sits on it. */
     if (state.pin[it.id])
-      parts.push(`<circle class="or-pinr" r="${N(r * 2.1 + 3)}" fill="none"`
+      parts.push(`<circle class="or-pinr" r="${N(ext * .78 + 3)}" fill="none"`
         + ` stroke-width=".9" stroke-dasharray="1.6 3" opacity=".8"/>`);
     const cls = 'or-node or-' + it.t + (sel ? ' or-sel' : '') + (it.match ? '' : ' or-dim');
     /* Dimming is an opacity, never a removal: a node that fails the

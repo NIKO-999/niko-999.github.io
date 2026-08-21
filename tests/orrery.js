@@ -197,10 +197,13 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     pos[scheme] = await positions(page);
 
     /* ── the seed paints, in its own colours ──
-       The fill is read COMPUTED off each drawn shape and compared to
-       the category token resolved through a probe element. The source
-       saying var(--or-cat-x) proves nothing: an unsupported var() in an
-       attribute paints black and reads fine in the file. */
+       A star carries its category in a GRADIENT, not in a solid fill,
+       so the check follows it there: every node points at its own
+       category's gradient, and that gradient's outer stop resolves to
+       the category token. Both halves matter — a node aimed at the
+       wrong gradient and a gradient whose colour never resolved are
+       different bugs and the source proves neither. An unsupported
+       var() in a stop paints black and reads perfectly in the file. */
     const fills = await page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement);
       const probe = (v) => { const d = document.createElement('div');
@@ -212,9 +215,21 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
         n++;
         const cat = g.getAttribute('data-cat');
         if (!(cat in want)) want[cat] = probe(cs.getPropertyValue('--or-cat-' + cat).trim());
-        const shape = g.querySelector('.or-hex') || g.querySelector('.or-dotc');
-        const got = shape ? getComputedStyle(shape).fill : 'no shape';
-        if (got !== want[cat]) bad.push(`${g.getAttribute('data-id')}: ${got} ≠ ${want[cat]}`);
+        const halo = g.querySelector('.or-halo');
+        const fill = halo ? getComputedStyle(halo).fill : 'no shape';
+        if (!/url\(.*#orStar-/.test(fill) || fill.indexOf('orStar-' + cat) < 0) {
+          bad.push(`${g.getAttribute('data-id')}: aimed at ${fill}, not orStar-${cat}`);
+          return;
+        }
+        /* The gradient's last stop is the category at full strength —
+           that is where the colour actually has to have resolved. */
+        const grad = document.getElementById('orStar-' + cat);
+        const stops = grad ? grad.querySelectorAll('stop') : [];
+        const got = stops.length ? getComputedStyle(stops[stops.length - 1]).stopColor : 'no stop';
+        /* stop-color carries no alpha here; compare the rgb triple. */
+        const rgb = (v) => (String(v).match(/\d+/g) || []).slice(0, 3).join(',');
+        if (rgb(got) !== rgb(want[cat]))
+          bad.push(`${g.getAttribute('data-id')}: stop ${got} ≠ ${want[cat]}`);
       });
       return { n, bad: bad.slice(0, 4) };
     });
@@ -516,20 +531,39 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   }), hitC.id);
   ok('a pointer drag moves the node', drag.t !== t0, { was: t0, now: drag.t });
   const at = parseT(drag.t);
-  ok('and the drop is saved', drag.saved
-    && Math.abs(at[0] - drag.saved[0]) < 0.15 && Math.abs(at[1] - drag.saved[1]) < 0.15,
-    { transform: at, saved: drag.saved });
+  /* A release hands the node back to the simulation — it does NOT
+     file a position. That is the contract now: the field is a fabric,
+     so a node let go where the springs disagree gets pulled back, and
+     PINNING is what makes a placement permanent. */
+  ok('a release files no position — the sim has it back', !drag.saved, drag.saved);
+
+  /* Double-click pins where it sits, and a pin is what survives. */
+  const pinAt = await page.evaluate((id) => {
+    const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+    const r = g.getBoundingClientRect();
+    return { cx: r.x + r.width / 2, cy: r.y + r.height / 2 };
+  }, hitC.id);
+  await page.mouse.dblclick(pinAt.cx, pinAt.cy);
+  await page.waitForTimeout(450);
+  const pinned = await page.evaluate((id) => ({
+    xy: state.xy[id].slice(),
+    pin: (JSON.parse(localStorage.getItem('orrery.v1') || '{}').pin || {})[id] || null,
+    ring: !!document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"] .or-pinr`),
+  }), hitC.id);
+  ok('double-click pins the node where it sits', pinned.pin
+    && Math.abs(pinned.pin[0] - pinned.xy[0]) < 0.15
+    && Math.abs(pinned.pin[1] - pinned.xy[1]) < 0.15, pinned);
+  ok('and the pin is drawn, so locked is legible without a legend', pinned.ring);
 
   await page.reload({ waitUntil: 'networkidle' });
   await waitPaint(page);
   const back = await page.evaluate((id) => ({
-    t: document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`).getAttribute('transform'),
-    saved: (JSON.parse(localStorage.getItem('orrery.v1') || '{}').pos || {})[id] || null,
+    xy: state.xy[id].slice(),
+    pin: (JSON.parse(localStorage.getItem('orrery.v1') || '{}').pin || {})[id] || null,
   }), hitC.id);
-  const bt = parseT(back.t);
-  ok('and it is still there after a reload', back.saved
-    && Math.abs(bt[0] - back.saved[0]) < 0.15 && Math.abs(bt[1] - back.saved[1]) < 0.15
-    && back.t !== t0, { transform: bt, saved: back.saved });
+  ok('and a pinned node is still exactly there after a reload', back.pin
+    && Math.abs(back.xy[0] - pinned.pin[0]) < 0.15
+    && Math.abs(back.xy[1] - pinned.pin[1]) < 0.15, back);
 
   /* the keyboard is a first-class pointer */
   const kid = allIds.find((id) => id !== hitC.id);
@@ -544,8 +578,8 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   }), kid);
   ok('ArrowRight moves the focused node 4px', Math.abs(key.x - (kx + 4)) < 0.11,
     { was: kx, now: key.x });
-  ok('and the keyboard move saves too', key.saved && Math.abs(key.saved[0] - key.x) < 0.11,
-    key.saved);
+  ok('and files no position either — same contract as the pointer',
+    !key.saved, key.saved);
 
   /* ── the legend isolates by dimming, never by removing ── */
   console.log('\n── which, not whether ──');
@@ -659,14 +693,17 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.waitForTimeout(400);
   const fit = await page.evaluate((ids) => ({
     pos: JSON.parse(localStorage.getItem('orrery.v1') || '{}').pos,
+    pin: JSON.parse(localStorage.getItem('orrery.v1') || '{}').pin,
     t: ids.map((id) =>
       document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`).getAttribute('transform')),
   }), [hitC.id, kid]);
-  ok('relayout clears every saved position', fit.pos
-    && Object.keys(fit.pos).length === 0, fit.pos);
-  ok('and the moved nodes return to their computed places',
-    fit.t[0] === posB[hitC.id] && fit.t[1] === posB[kid],
-    { got: fit.t, want: [posB[hitC.id], posB[kid]] });
+  /* Relayout releases every pin and clears every filed position. It is
+     the one honest destroyer on this screen, and what it destroys is an
+     arrangement you can rebuild by dragging — which is why it needs no
+     bin behind it. */
+  ok('relayout clears every filed position', !fit.pos || Object.keys(fit.pos).length === 0,
+    fit.pos);
+  ok('and releases every pin', !fit.pin || Object.keys(fit.pin).length === 0, fit.pin);
 
   /* ── the folding panel, shut by default and remembered ── */
   console.log('\n── the fold ──');
