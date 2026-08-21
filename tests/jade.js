@@ -73,7 +73,6 @@ async function seed(page, store) {
   await page.waitForTimeout(320);
 }
 const jadeStore = (days, notes) => JSON.stringify({ v: 1, days: days || {}, notes: notes || {} });
-const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
 
 (async () => {
 
@@ -336,20 +335,19 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
   await browser.close();
 }
 
-/* ══ 7. THE BOXES THAT PROMISE THREE ══════════════════════════════
-   Both scrollers say "three, always whole". The height is stated as
+/* ══ 7. THE BOX THAT PROMISES THREE ═══════════════════════════════
+   Daily thoughts says "three, always whole". The height is stated as
    three times the row so the two cannot drift apart, and this is what
-   notices if they ever do. */
+   notices if they ever do. Reminders used to be measured here too, by
+   the same loop — it is still a loop so that a second scroller is one
+   line to add back rather than a rewrite. */
 {
   const { browser, page, errs } = await open();
   await seed(page, {
     'jade.v1': jadeStore({ [TODAY]: ['steps'] },
       { [TODAY]: 'a', [AGO(1)]: 'b', [AGO(2)]: 'c', [AGO(3)]: 'd', [AGO(4)]: 'e' }),
-    'jade.reminders.v1': remStore([1, 2, 3, 4, 5].map(i =>
-      ({ id: 'r' + i, t: 'reminder ' + i, made: TODAY, done: null }))),
   });
-  for (const [what, box, row] of [['daily thoughts', '#thoughtScroll', '.jt-thw, .jt-th'],
-    ['reminders', '.jr-scr', '.jr-row']]) {
+  for (const [what, box, row] of [['daily thoughts', '#thoughtScroll', '.jt-thw, .jt-th']]) {
     const m = await page.evaluate(([b, r]) => {
       const sc = document.querySelector(b);
       const rows = [...sc.querySelectorAll(r)];
@@ -372,53 +370,6 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
     ok(`${what}: it comes to rest on a row, never between two`,
       at % m.hs[0] === 0, { landedAt: at, row: m.hs[0] });
   }
-  ok('no errors', errs.length === 0, errs);
-  await browser.close();
-}
-
-/* ══ 8. REMINDERS, AND THE FIVE SECONDS AFTER ═════════════════════ */
-{
-  const { browser, page, errs } = await open();
-  await seed(page, { 'jade.v1': jadeStore({}), 'jade.reminders.v1': remStore([]) });
-  const live = () => page.$$eval('.jr-row .jr-t', ns => ns.map(x => x.textContent));
-  const list = () => page.evaluate(() => JSON.parse(localStorage.getItem('jade.reminders.v1')).list);
-
-  ok('the send is not there until there is something to send',
-    !(await page.isVisible('#remSend')));
-  await page.fill('#remIn', 'Book the physio');
-  await page.waitForTimeout(150);
-  ok('and it is there once there is', await page.isVisible('#remSend'));
-  await page.click('#remSend');
-  await page.waitForTimeout(250);
-  ok('writing one puts it at the top', (await live())[0] === 'Book the physio');
-  ok('and empties the field', (await page.inputValue('#remIn')) === '');
-
-  await page.fill('#remIn', 'Ring mum back');
-  await page.keyboard.press('Enter');
-  await page.waitForTimeout(200);
-
-  await page.click('.jr-row:first-child .jr-tk');
-  await page.waitForTimeout(250);
-  ok('ticking one takes it off the list', !(await live()).includes('Ring mum back'));
-  ok('and offers it back', await page.isVisible('#remUndo'));
-  ok('the field steps aside rather than the section changing height',
-    await page.isHidden('#remForm'));
-  ok('it is stamped, not yet gone', (await list()).length === 2);
-
-  /* The comment on remResume promises the window survives a refresh.
-     It did not, until this noticed. */
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(300);
-  ok('the undo survives a reload', await page.isVisible('#remUndo'));
-  await page.click('#remUndoBtn');
-  await page.waitForTimeout(250);
-  ok('undo puts it back', (await live()).includes('Ring mum back'));
-  ok('and unstamps it', (await list()).every(r => r.done === null));
-
-  await page.click('.jr-row:first-child .jr-tk');
-  await page.waitForTimeout(5400);
-  ok('left alone, the window closes and it is gone for good',
-    (await list()).length === 1 && !(await page.isVisible('#remUndo')));
   ok('no errors', errs.length === 0, errs);
   await browser.close();
 }
@@ -564,7 +515,6 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
     const { browser, page, errs } = await open({ viewport: { width: w, height: h } });
     await seed(page, {
       'jade.v1': jadeStore({ [TODAY]: ['steps', 'water'] }, { [TODAY]: 'a', [AGO(1)]: 'b', [AGO(2)]: 'c' }),
-      'jade.reminders.v1': remStore([1, 2, 3, 4].map(i => ({ id: 'r' + i, t: 'r' + i, made: TODAY, done: null }))),
     });
     const over = async () => page.evaluate(() =>
       document.documentElement.scrollWidth - document.documentElement.clientWidth);
@@ -585,16 +535,22 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
       ok(`${w}: eight cards sit four and four`, cols === 4, cols);
     }
     if (w > 1080) {
-      /* The panel fills, and the month is not clipped doing it. */
+      /* The month is the panel's floor, and it is not clipped being it.
+         It used to be told to grow into whatever the column had spare,
+         which at 1200px pulled its six weeks a hundred pixels apart —
+         so the check is that it sits ON the floor at its own height,
+         not that it reaches the floor by stretching. */
       const foot = await page.evaluate(() => {
         const r = document.querySelector('.rail').getBoundingClientRect();
-        const j = document.querySelector('.jr').getBoundingClientRect();
         const m = document.querySelector('.jm').getBoundingClientRect();
-        const last = document.querySelector('.jm-grid').lastElementChild.getBoundingClientRect();
-        return { gap: Math.round(r.bottom - j.bottom), clipped: Math.round(last.bottom - m.bottom) > 1 };
+        const rows = [...document.querySelectorAll('.jm-d')].map(n => n.getBoundingClientRect());
+        const last = rows[rows.length - 1];
+        return { gap: Math.round(r.bottom - m.bottom), tallest: Math.round(Math.max(...rows.map(x => x.height))),
+          clipped: Math.round(last.bottom - m.bottom) > 1 };
       });
-      ok(`${w}: the panel has no dead space at its foot`, foot.gap === 0, foot);
-      ok(`${w}: and the month keeps its last week`, !foot.clipped, foot);
+      ok(`${w}: the month sits on the panel's floor`, foot.gap === 0, foot);
+      ok(`${w}: and keeps its last week`, !foot.clipped, foot);
+      ok(`${w}: a day cell is a day cell, not a stretched one`, foot.tallest <= 48, foot);
     }
     ok(`${w}×${h}: no errors`, errs.length === 0, errs);
     await browser.close();
@@ -604,8 +560,7 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
 /* ══ 12. EVERY CONTROL IS PRESSABLE ═══════════════════════════════ */
 {
   const { browser, page, errs } = await open({ viewport: { width: 1280, height: 900 } });
-  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }),
-    'jade.reminders.v1': remStore([{ id: 'r1', t: 'one', made: TODAY, done: null }]) });
+  await seed(page, { 'jade.v1': jadeStore({ [TODAY]: ['steps'] }) });
   const small = await page.$$eval('button', ns => ns.filter(b => {
     const r = b.getBoundingClientRect();
     if (!r.width || !r.height) return false;                 /* hidden ones are not controls */
