@@ -210,9 +210,9 @@
 
 /* The dust drifts in three shells at three rates — depth by speed. */
 #orDustA, #orDustB, #orDustC { transform-origin: 500px 500px; }
-#orDustA { animation: or-turn 620s linear infinite; }
-#orDustB { animation: or-turn 380s linear infinite reverse; }
-#orDustC { animation: or-turn 900s linear infinite; }
+#orDustA { animation: or-turn 230s linear infinite; }
+#orDustB { animation: or-turn 145s linear infinite reverse; }
+#orDustC { animation: or-turn 330s linear infinite; }
 
 /* Precession. The instrument nods, so it reads as a solid thing seen
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
@@ -225,7 +225,7 @@
 #orNod {
   transform-origin: 500px 500px;
   transform-box: view-box;
-  animation: or-nod 34s ease-in-out infinite;
+  animation: or-nod 22s ease-in-out infinite;
 }
 
 /* One star, briefly brighter. Real starlight scintillates; a field
@@ -2743,6 +2743,25 @@ orSim.draw = (final) => {
     if (d === L.d) continue;
     L.d = d;
     L.el.setAttribute('d', d);
+    /* TENSION SHOWS. A link rests at .22 so that eighty-five of them do
+       not become a net you read instead of the notes — right at rest,
+       and wrong the moment one is stretched. Pull a node clear of its
+       neighbours and the line spans hundreds of units at an opacity
+       that cannot survive the distance, so the node looks cut loose
+       from a line still exactly attached to it. Watching for that, you
+       see nothing; the failure is invisible by construction.
+
+       So the ink follows the strain, the way a real spring shows it.
+       Slack stays quiet, stretched comes up, and it holds whether you
+       are dragging, whether it is springing back, or whether it just
+       settled somewhere far from home. */
+    if (!orSim.drag) {
+      const dx = pa[0] - pb[0], dy = pa[1] - pb[1];
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const t = Math.min(1, Math.max(0, (len / (L.rest || 60)) - 1) / 2.2);
+      const op = L.op + (0.9 - L.op) * t;
+      if (op !== L.lit) { L.lit = op; L.el.setAttribute('opacity', N(op)); }
+    }
   }
   if (final) { orPaintLabels(); return; }
   const cs = orSim.chips;
@@ -2882,7 +2901,14 @@ orHover.paint = () => {
        both ends happen to be neighbours of it, which would light the
        mesh between them and bury the thing you pointed at. */
     const lit = !kin || L.a === hv || L.b === hv;
-    L.el.setAttribute('opacity', String(lit ? L.op : N(L.op * SIM.dim)));
+    /* L.lit, not L.op. L.op is the link's SLACK opacity; L.lit is what
+       tension has made of it, and this runs after every repaint — so
+       writing L.op here silently undoes the tension pass and leaves a
+       stretched link dark while its own cache insists it is bright.
+       Two writers, one attribute: the later one has to know what the
+       earlier one meant. */
+    const base = L.lit == null ? L.op : L.lit;
+    L.el.setAttribute('opacity', String(lit ? base : N(base * SIM.dim)));
   }
 };
 
@@ -2982,7 +3008,7 @@ function orPaintRings() {
     + `<g id="orDustC" class="or-dust">${dust.filter((d, i) => i % 3 === 2).join('')}</g>`);
 
   /* atmosphere */
-  out.push(`<g${turn(520)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
+  out.push(`<g${turn(190)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
     `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`
   ).join('') + `</g>`);
 
@@ -2994,10 +3020,10 @@ function orPaintRings() {
     const [x2, y2] = P(i % 5 ? 398 : 402, a);
     ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
   }
-  out.push(`<g${turn(300, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
+  out.push(`<g${turn(105, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
 
   /* dotted ring */
-  out.push(`<g${turn(700)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
+  out.push(`<g${turn(250)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
 
   /* the two heavy arcs */
   const arc = (r, a, b) => {
@@ -3011,7 +3037,7 @@ function orPaintRings() {
      a second and read as painted on. Two minutes a revolution is three
      degrees a second — plain if you look at it, still slow enough to
      sit under reading. */
-  out.push(`<g${turn(120, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
+  out.push(`<g${turn(78, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
 
   /* The thin ring stays put, and not by oversight: a plain circle
      rotated about its own centre is identical to itself, so turning it
@@ -3072,6 +3098,10 @@ function orPaintRings() {
    every line sags inward and the field reads as orbital rather than as
    a mesh. Stroked in the SOURCE note's colour: an edge is a claim the
    writer made, and the colour says who made it. */
+/* Rest lengths survive a repaint, keyed by the pair. See the capture
+   below for why they must not be re-measured mid-flight. */
+orPaintLinks.rest = Object.create(null);
+
 function orPaintLinks() {
   const g = byId('orLinks');
   if (!g) return;
@@ -3088,7 +3118,23 @@ function orPaintLinks() {
        the map survives the search. */
     const dim = !sel && !orPaint.match(note[a]) && !orPaint.match(note[b]);
     const d = orPaintLinks.d(pa, pb);
-    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d });
+    /* The link's length AT REST is its own reference. The spring's rest
+       constant is not: home gravity holds every node in its slot far
+       harder than the spring pulls, so links settle anywhere from 25 to
+       130 units while SIM.rest says 38 — measure tension against that
+       and an ordinary link reads as fully stretched.
+
+       Captured only while the field is STILL. A repaint lands right
+       after a release, when the node is at full stretch and flying
+       home; re-baselining there records 470 units as this link's idea
+       of slack and it never lights again for the rest of the spring
+       back. So a moving field keeps whatever baseline it already had. */
+    const key = a + '\n' + b;
+    const was = orPaintLinks.rest[key];
+    const now = Math.max(40, Math.hypot(pa[0] - pb[0], pa[1] - pb[1]));
+    const rest = (orSim.raf || orSim.drag) && was ? was : now;
+    orPaintLinks.rest[key] = rest;
+    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest });
     /* A link keeps its colour when it touches the selection, for the
        same reason its ends do. */
     const lit = !state.sel || near.has(a) || near.has(b);
@@ -3104,7 +3150,8 @@ function orPaintLinks() {
   const els = g.childNodes;
   const lines = new Array(keep.length);
   for (let i = 0; i < keep.length; i++)
-    lines[i] = { el: els[i], a: keep[i].a, b: keep[i].b, op: keep[i].op, d: keep[i].d };
+    lines[i] = { el: els[i], a: keep[i].a, b: keep[i].b, op: keep[i].op,
+                 d: keep[i].d, lit: keep[i].op, rest: keep[i].rest };
   orSim.lines = lines;
 }
 orPaintLinks.d = (pa, pb) => {
@@ -3427,6 +3474,9 @@ orPaint.hubMatch = s => {
    slightly different every time. Cleared, it runs the identical tick
    sequence a cold load runs, and lands where a cold load lands. */
 function orFit() {
+  /* A relayout moves everything, so every remembered slack length is
+     now about positions that no longer exist. */
+  orPaintLinks.rest = Object.create(null);
   state.pin = {};
   state.xy = {}; state.vel = {};
   state.zoom = 1; state.panX = 0; state.panY = 0;
@@ -3574,6 +3624,7 @@ function orDragMove(e) {
   /* No repaint mid-drag — that would replace the node under the
      pointer. The held node goes straight into the field and the tick
      draws it, along with everything its springs are pulling. */
+  orSim.drag = d.id;
   orSim.put(d.id, ux + d.dx, uy + d.dy);
   orHeat(SIM.hold);
   if (!orSim.raf) orSim.draw(false);
@@ -3600,6 +3651,11 @@ orDragStart.lit = (id, on) => {
     if (L.a !== id && L.b !== id) continue;
     L.el.setAttribute('opacity', on ? '.92' : String(L.op));
     L.el.setAttribute('stroke-width', on ? '1.7' : '.8');
+    /* Move the cache with the attribute. Left behind, the tension pass
+       compares against a value the element no longer has, decides
+       nothing needs doing, and the link stays dark for the whole
+       spring-back — the exact moment it most needs to be visible. */
+    L.lit = on ? .92 : L.op;
   }
 };
 
@@ -3607,6 +3663,7 @@ function orDragEnd(e) {
   const d = state.drag;
   state.drag = null;
   orSim.quiet = false;
+  orSim.drag = null;
   if (d && d.id != null && d.moved) orDragStart.lit(d.id, false);
   const svg = byId('orSvg');
   if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }

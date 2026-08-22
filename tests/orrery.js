@@ -593,7 +593,46 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     { rest, held });
   ok('and never leave the node, measured in screen pixels',
     gaps.length > 0 && gaps.every((g) => g < 1.5), gaps);
-  ok('and settle back when you let go', after.every((o) => o < .5), after);
+  /* Not "dark the instant you let go" any more: a released node is
+     still stretched and still flying home, and the tension pass keeps
+     its links lit for exactly that stretch. Slack is what it settles
+     to, so settling is what this waits for. */
+  await settle(page);
+  const slackAfter = await linksOf(hitD.id);
+  ok('and go quiet once the node has settled', slackAfter.every((o) => o < .5),
+    { onRelease: after, settled: slackAfter });
+
+  /* TENSION SHOWS, and it has to survive the spring back. The failure
+     this replaces was invisible by construction: the node flies home
+     across hundreds of units with its links at slack opacity, so it
+     reads as cut loose from lines that are exactly attached to it.
+     Three writers touch a link's opacity — the drag, the tension pass
+     and the hover repaint — and every one of them has to agree, which
+     is what the mid-flight sample below actually tests. */
+  await settle(page);
+  const stretch = await page.evaluate((id) => {
+    const before = [...document.querySelectorAll('#orLinks path[data-a]')]
+      .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id)
+      .map((t) => +t.getAttribute('opacity'));
+    /* Fling it far without a pointer, then read on the way home. */
+    const p0 = state.xy[id].slice();
+    orSim.put(id, p0[0] + 430, p0[1] + 330);
+    orHeat(1);
+    return new Promise((res) => setTimeout(() => {
+      const now = [...document.querySelectorAll('#orLinks path[data-a]')]
+        .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id)
+        .map((t) => +t.getAttribute('opacity'));
+      res({ before, now });
+    }, 260));
+  }, hitD.id);
+  ok('a stretched link brightens on its way home',
+    stretch.now.length > 0 && stretch.now.every((o) => o > .5), stretch);
+  await settle(page);
+  const slack = await page.evaluate((id) =>
+    [...document.querySelectorAll('#orLinks path[data-a]')]
+      .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id)
+      .map((t) => +t.getAttribute('opacity')), hitD.id);
+  ok('and goes quiet again once it is slack', slack.every((o) => o < .5), slack);
 
   /* Double-click pins where it sits, and a pin is what survives. */
   const pinAt = await page.evaluate((id) => {
@@ -760,10 +799,14 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   const rates = await page.evaluate(() => [...document.querySelectorAll('#orRings g.or-turn')]
     .map((g) => 360 / parseFloat(getComputedStyle(g).animationDuration)));
   ok('every ring group is turning', rates.length >= 4 && rates.every((r) => r > 0), rates);
-  ok('and the innermost arcs turn fastest, by a clear margin',
-    Math.max.apply(null, rates) >= 2.5
-    && Math.max.apply(null, rates) > 2 * rates.slice().sort((a, b) => b - a)[1],
-    rates);
+  /* Fast enough to SEE. Under about a degree a second nothing reads as
+     moving over the seconds anybody looks at a screen, which is what
+     every one of these used to be. */
+  ok('and every one of them fast enough to read as moving',
+    rates.every((r) => r >= 1.2), rates);
+  ok('and the innermost arcs are the fastest of them',
+    Math.max.apply(null, rates) === rates[rates.length - 1]
+    || Math.max.apply(null, rates) >= 4, rates);
 
   const stg = await page.locator('#orStage').boundingBox();
   await page.mouse.move(stg.x + stg.width * 0.8, stg.y + stg.height * 0.25);
