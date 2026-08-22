@@ -208,13 +208,39 @@
 .or-fly { transition: transform .62s cubic-bezier(.32, .72, 0, 1); }
 @media (prefers-reduced-motion: reduce) { .or-fly { transition: none; } }
 
+/* The dust drifts in three shells at three rates — depth by speed. */
+#orDustA, #orDustB, #orDustC { transform-origin: 500px 500px; }
+#orDustA { animation: or-turn 620s linear infinite; }
+#orDustB { animation: or-turn 380s linear infinite reverse; }
+#orDustC { animation: or-turn 900s linear infinite; }
+
+/* Precession. The instrument nods, so it reads as a solid thing seen
+   slightly off-axis rather than a flat drawing. Subtle on purpose: at
+   nine degrees over half a minute you feel it and never catch it. It
+   sits OUTSIDE #orView, which the camera owns. */
+@keyframes or-nod {
+  0%, 100% { transform: rotateX(0deg) rotateZ(0deg); }
+  50%      { transform: rotateX(9deg) rotateZ(1.2deg); }
+}
+#orNod {
+  transform-origin: 500px 500px;
+  transform-box: view-box;
+  animation: or-nod 34s ease-in-out infinite;
+}
+
+/* One star, briefly brighter. Real starlight scintillates; a field
+   where nothing ever flickers reads as printed. */
+@keyframes or-flare { 30% { opacity: 1; } }
+
 @keyframes or-turn { to { transform: rotate(360deg); } }
 .or-turn {
   transform-origin: 500px 500px;
   animation: or-turn var(--turn, 400s) linear infinite;
 }
 .or-rev { animation-direction: reverse; }
-@media (prefers-reduced-motion: reduce) { .or-turn { animation: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .or-turn, #orNod, #orDustA, #orDustB, #orDustC { animation: none; }
+}
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
 /* ── hover drift ──
@@ -930,12 +956,17 @@
       <div id="orStage">
         <svg id="orSvg" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid meet">
           <defs></defs>
+          <!-- The nod rides its own group. The camera writes #orView's
+               transform sixty times a second; a CSS animation on the
+               same attribute would be overwritten on the first tick. -->
+          <g id="orNod">
           <g id="orView">
             <g id="orRings"></g>
             <g id="orLinks"></g>
             <g id="orLeads"></g>
             <g id="orNodes"></g>
             <g id="orLabels"></g>
+          </g>
           </g>
         </svg>
 
@@ -2942,7 +2973,13 @@ function orPaintRings() {
       + ` r="${N(.35 + Math.pow(dg(), 2.2) * .95)}" fill="var(--or-star-core)"`
       + ` opacity="${N(.3 + dg() * .62)}"/>`);
   }
-  out.push(`<g class="or-dust">${dust.join('')}</g>`);
+  /* Three shells, three rates, one of them against the others. The eye
+     reads different speeds as different distances, so the field gains
+     depth with no 3D anywhere — and the pointer tows them by different
+     amounts for the same reason. */
+  out.push(`<g id="orDustA" class="or-dust">${dust.filter((d, i) => i % 3 === 0).join('')}</g>`
+    + `<g id="orDustB" class="or-dust">${dust.filter((d, i) => i % 3 === 1).join('')}</g>`
+    + `<g id="orDustC" class="or-dust">${dust.filter((d, i) => i % 3 === 2).join('')}</g>`);
 
   /* atmosphere */
   out.push(`<g${turn(520)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
@@ -4537,6 +4574,7 @@ function orOpen(id) {
      is what re-rings the selected node and relights its edges. */
   orPaint();
   orOpen.reveal(state.sel);
+  orSignal(state.sel);
   /* Focus lands on the pane itself, so a keyboard open reads from the
      top of the note rather than stranding you on the map. */
   if (pane) { try { pane.focus({ preventScroll: true }); } catch (e) {} }
@@ -4906,6 +4944,87 @@ function orFold(id) {
    Move a note by hand. The override outlives the vault: it is applied
    onto the notes every time the index is read back, because a filing
    you chose is a decision, not a cache. */
+/* ── scintillation ──
+   One star, briefly brighter, roughly once a second. Driven from a
+   seeded generator advanced over time rather than Math.random: the
+   layout's determinism is a property of this whole file, and reaching
+   for randomness "just for decoration" is how that quietly stops being
+   true. Nothing here moves a node — it is opacity and nothing else. */
+function orTwinkle() {
+  clearTimeout(orTwinkle.t);
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const halos = document.querySelectorAll('#orNodes .or-halo');
+  if (halos.length) {
+    const el = halos[Math.floor(orTwinkle.r() * halos.length)];
+    if (el && !el.dataset.lit) {
+      el.dataset.lit = '1';
+      el.style.animation = 'or-flare 1.1s ease';
+      setTimeout(() => { el.style.animation = ''; delete el.dataset.lit; }, 1150);
+    }
+  }
+  orTwinkle.t = setTimeout(orTwinkle, 620 + orTwinkle.r() * 900);
+}
+orTwinkle.t = 0;
+orTwinkle.r = orRng('orrery.scintillation');
+
+/* ── pointer tow ──
+   The dust shells lean toward the pointer, the near ones further than
+   the far. Parallax you drive with your hand. It writes to style
+   .translate and never to state, so a tow can never be mistaken for a
+   pan and cannot end up in anybody's saved positions. */
+function orTow(e) {
+  const st = byId('orStage');
+  if (!st) return;
+  const r = st.getBoundingClientRect();
+  if (!r.width) return;
+  const dx = (e.clientX - r.left) / r.width - .5;
+  const dy = (e.clientY - r.top) / r.height - .5;
+  orTow.k.forEach(([id, k]) => {
+    const g = byId(id);
+    if (g) g.style.translate = orLayout.N(dx * k) + 'px ' + orLayout.N(dy * k) + 'px';
+  });
+}
+orTow.k = [['orDustA', 26], ['orDustB', 15], ['orDustC', 8]];
+orTow.clear = () => orTow.k.forEach(([id]) => {
+  const g = byId(id); if (g) g.style.translate = '';
+});
+
+/* ── the signal ──
+   Opening a note sends a bead of light down every link it has. A
+   wikilink is a thing this note SAYS about another one, and watching it
+   travel is the closest a still map gets to showing that.
+
+   animateMotion drives it: declarative, compositor-side, and it dies
+   with the element. Links are stored one way round, so half of them run
+   the path backwards — the bead always leaves the star you opened. */
+function orSignal(id) {
+  const fx = byId('orLinks');
+  if (!fx || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  fx.querySelectorAll('path[data-a]').forEach((pth) => {
+    const a = pth.getAttribute('data-a'), b = pth.getAttribute('data-b');
+    if (a !== id && b !== id) return;
+    const d = pth.getAttribute('d');
+    if (!d) return;
+    const dot = document.createElementNS(NS, 'circle');
+    dot.setAttribute('r', '2.6');
+    dot.setAttribute('fill', 'var(--or-star-core)');
+    dot.setAttribute('class', 'or-bead');
+    const mo = document.createElementNS(NS, 'animateMotion');
+    mo.setAttribute('dur', '.85s');
+    mo.setAttribute('fill', 'freeze');
+    mo.setAttribute('path', d);
+    if (b === id) {
+      mo.setAttribute('keyPoints', '1;0');
+      mo.setAttribute('keyTimes', '0;1');
+      mo.setAttribute('calcMode', 'linear');
+    }
+    dot.appendChild(mo);
+    fx.appendChild(dot);
+    setTimeout(() => dot.remove(), 950);
+  });
+}
+
 function orRefile(id, cat) {
   const c = orLayout.cats().filter(x => x.id === cat)[0];
   const n = (state.notes || []).filter(x => x.id === id)[0];
@@ -5160,6 +5279,20 @@ orRefile.apply = (notes) => {
       orPaint();
       orShow(state.view);
     });
+  });
+
+  /* Neither of these waits on the vault, so neither belongs inside the
+     load — and putting them in its CATCH, as the first pass did, armed
+     them only when the loader failed. They were dead on every normal
+     open, which is a silent failure the page cannot report: no error,
+     no missing element, just two effects that quietly never happened. */
+  step(() => {
+    const st = byId('orStage');
+    if (st) {
+      st.addEventListener('pointermove', orTow);
+      st.addEventListener('pointerleave', orTow.clear);
+    }
+    orTwinkle();
   });
 })();
 </script>

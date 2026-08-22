@@ -676,6 +676,60 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('and flies back out to the whole field',
     Math.abs(cleared.zoom - 1) < 0.01, cleared.zoom);
 
+  /* ── the field is alive ──
+     Every one of these can die silently: no error, no missing element,
+     just an effect that quietly never happens. The first build wired
+     two of them inside the loader's CATCH, so they were dead on every
+     normal open and nothing said a word. Each gets an assertion. */
+  console.log('\n── the field is alive ──');
+  const alive = await page.evaluate(() => {
+    const anim = (id) => {
+      const el = document.getElementById(id);
+      return el ? getComputedStyle(el).animationName : 'MISSING';
+    };
+    return { a: anim('orDustA'), b: anim('orDustB'), c: anim('orDustC'), nod: anim('orNod') };
+  });
+  ok('the dust drifts in three shells', alive.a !== 'none' && alive.b !== 'none'
+    && alive.c !== 'none' && alive.a !== 'MISSING', alive);
+  ok('and the instrument nods', alive.nod !== 'none' && alive.nod !== 'MISSING', alive);
+
+  const stg = await page.locator('#orStage').boundingBox();
+  await page.mouse.move(stg.x + stg.width * 0.8, stg.y + stg.height * 0.25);
+  await page.waitForTimeout(220);
+  const towed = await page.evaluate(() => ['orDustA', 'orDustB', 'orDustC']
+    .map((id) => document.getElementById(id).style.translate || ''));
+  const px = towed.map((t) => Math.abs(parseFloat(t) || 0));
+  /* Near shells lean further than far ones — that difference IS the
+     parallax. Equal amounts would be a slide, not depth. */
+  ok('the pointer tows the shells', px[0] > 0, towed);
+  ok('and tows the near one further than the far', px[0] > px[1] && px[1] > px[2], px);
+  await page.mouse.move(stg.x + 4, stg.y + 4);
+
+  const flares = await page.evaluate(() => new Promise((res) => {
+    let seen = 0;
+    const iv = setInterval(() => {
+      if (document.querySelector('#orNodes .or-halo[data-lit]')) seen++;
+    }, 90);
+    setTimeout(() => { clearInterval(iv); res(seen); }, 3200);
+  }));
+  ok('stars scintillate', flares > 0, flares);
+
+  await page.evaluate(() => { orClose(); });
+  await page.waitForTimeout(700);
+  const sig = await page.evaluate(() => {
+    orOpen('trading/models/cisd');
+    return new Promise((res) => setTimeout(() => res({
+      beads: document.querySelectorAll('.or-bead').length,
+      links: orKin('trading/models/cisd').size,
+    }), 200));
+  });
+  ok('opening sends a bead down every link', sig.beads > 0, sig);
+  await page.waitForTimeout(1200);
+  const swept = await page.evaluate(() => document.querySelectorAll('.or-bead').length);
+  ok('and the beads clear themselves up', swept === 0, swept);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(800);
+
   /* ── the legend isolates by dimming, never by removing ── */
   console.log('\n── which, not whether ──');
   const countAll = (await page.$$('#orNodes .or-node')).length;
