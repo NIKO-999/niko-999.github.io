@@ -37,7 +37,11 @@ const ok = (c, m) => { console.log((c ? '  ✓ ' : '  ✗ ') + m); c ? pass++ : 
 
   /* It has to cover the cell, or "click anywhere on the day" is a lie. */
   const box = await pg.evaluate(() => {
-    const d = document.querySelector('.day:not(.today)');
+    /* Not .blank. A month opening mid-week pads the grid with filler
+       cells that carry .day, are aria-hidden and hold no button — this
+       asked for "a day that is not today" and got one of those the
+       first time August opened on a Saturday with the weekend shown. */
+    const d = document.querySelector('.day:not(.today):not(.blank)');
     const b = d.querySelector('.day-new');
     const a = d.getBoundingClientRect(), c = b.getBoundingClientRect();
     return { dayW: Math.round(a.width), dayH: Math.round(a.height),

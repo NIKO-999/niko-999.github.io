@@ -3463,9 +3463,19 @@ function renderCalendar() {
 
   /* The market week is five days, so the grid is five columns — until a
      trade actually lands on a weekend, at which point the weekend
-     appears rather than the trade being hidden. */
+     appears rather than the trade being hidden.
+
+     Or until TODAY is the weekend. The rule was written about trades and
+     forgot the day you are standing on: every Saturday and Sunday the
+     current month rendered with no cell for today, so the ring marking
+     it had nowhere to sit and the check-in's way into the journal —
+     which looks itself up as #grid .day.today — found nothing and went
+     quiet. A calendar that cannot show you today two days in seven is
+     wrong on those two days, not five-sevenths right. */
   let cols = 5;
-  for (let d = 1; d <= len; d++) if (idx(d) > 4 && days.has(key(d))) { cols = 7; break; }
+  for (let d = 1; d <= len; d++) {
+    if (idx(d) > 4 && (days.has(key(d)) || key(d) === todayIso)) { cols = 7; break; }
+  }
   const dow = document.getElementById('dow');
   document.getElementById('grid').style.setProperty('--cols', cols);
   dow.style.setProperty('--cols', cols);   // the header is a sibling, not a child
