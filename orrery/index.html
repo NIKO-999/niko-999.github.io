@@ -3252,8 +3252,21 @@ function orPaintNodes() {
           + ` fill="url(#orStar-${cat})" opacity="${N(.5 + g2() * .42)}"/>`);
       }
     }
-    parts.push(`<circle class="or-halo" r="${N(ext)}" fill="url(#orStar-${cat})"`
-      + ` opacity="${N(Math.min(1, .82 * mag))}"/>`);
+    /* A neighbour BURNS. Muting the strangers said which ones answered
+       the question by taking colour away from everything else, and that
+       left the answer itself no brighter than it was — the links to it
+       lit up while the notes at their ends sat exactly as quiet as
+       before, so the lines read as the finding and the notes did not.
+       Kin come up to full and take a ring of their own; a stranger
+       keeps its place and sits back. */
+    const kin = near ? near.has(it.id) : null;
+    const burn = kin === true && !sel;
+    parts.push(`<circle class="or-halo" r="${N(ext * (burn ? 1.22 : 1))}"`
+      + ` fill="url(#orStar-${cat})"`
+      + ` opacity="${N(Math.min(1, .82 * mag * (burn ? 1.5 : 1)))}"/>`);
+    if (burn)
+      parts.push(`<circle class="or-kinr" r="${N(ext * .58)}" fill="none"`
+        + ` stroke="var(--or-cat-${cat})" stroke-width="1.1" opacity=".72"/>`);
     /* The thin ring is the selection's alone now. A hub no longer needs
        one to say it is a hub — its reach and its retinue already do. */
     if (sel)
@@ -3268,12 +3281,14 @@ function orPaintNodes() {
     if (state.pin[it.id])
       parts.push(`<circle class="or-pinr" r="${N(ext * .78 + 3)}" fill="none"`
         + ` stroke-width=".9" stroke-dasharray="1.6 3" opacity=".8"/>`);
-    const cls = 'or-node or-' + it.t + (sel ? ' or-sel' : '') + (it.match ? '' : ' or-dim');
+    const cls = 'or-node or-' + it.t + (sel ? ' or-sel' : '')
+      + (burn ? ' or-kin' : '') + (it.match ? '' : ' or-dim');
     /* Dimming is an opacity, never a removal: a node that fails the
        filter drops to .12 and holds its place, so the map does not
        jump and you do not lose yours. */
     return `<g class="${cls}" data-id="${esc(it.id)}" data-cat="${cat}" tabindex="0" role="button"`
-      + ` aria-label="${esc(it.aria)}"${it.match ? '' : ' opacity=".12"'}`
+      + ` aria-label="${esc(it.aria)}"`
+      + (!it.match ? ' opacity=".12"' : kin === false ? ' opacity=".55"' : '')
       + ` transform="translate(${N(p[0])} ${N(p[1])})">${parts.join('')}</g>`;
   });
   g.innerHTML = out.join('');
@@ -3287,7 +3302,13 @@ function orPaintNodes() {
   const cache = new Array(drawn.length);
   for (let i = 0; i < drawn.length; i++) {
     const p = state.xy[drawn[i].id];
-    cache[i] = { id: drawn[i].id, g: kids[i], op: drawn[i].match ? 1 : .12,
+    /* The base the hover drift dims FROM, so all three narrows compose:
+       the filter's .12, the selection's .55 for a stranger, and full
+       for a note the selection actually reaches. Left at a flat 1 the
+       next repaint hands every stranger its brightness back. */
+    const st = drawn[i];
+    const base = !st.match ? .12 : (near && !near.has(st.id)) ? .55 : 1;
+    cache[i] = { id: st.id, g: kids[i], op: base,
                  x: N(p[0]), y: N(p[1]) };
   }
   orSim.el = cache;

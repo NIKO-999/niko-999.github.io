@@ -716,6 +716,33 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     mute.nodes === seed.length + corpus.hubs, mute.nodes);
   ok('and it is a minority that stays lit, or it says nothing',
     mute.kin > 1 && mute.kin < mute.nodes / 3, { kin: mute.kin, of: mute.nodes });
+
+  /* The neighbours BURN, they do not merely keep their colour. Muting
+     the strangers said which notes answered by taking colour off
+     everything else, which left the answer itself no brighter than it
+     started: the links lit up while the notes at their ends sat exactly
+     as quiet as before. */
+  /* Park the pointer off the map first. Hover drift multiplies every
+     node by SIM.dim, so measuring brightness with the mouse still
+     resting on a star reads .3 for a node that is in fact at full
+     strength — two narrows composing exactly as designed, and an
+     assertion that blames the wrong one. */
+  await page.mouse.move(4, 4);
+  await page.waitForTimeout(350);
+  const burn = await page.evaluate(() => {
+    const kin = orKin(state.sel);
+    const gs = [...document.querySelectorAll('#orNodes .or-node')];
+    const op = (g) => +(g.getAttribute('opacity') || 1);
+    const kins = gs.filter((g) => kin.has(g.getAttribute('data-id')));
+    const far = gs.filter((g) => !kin.has(g.getAttribute('data-id')));
+    return { kinOp: [...new Set(kins.map(op))], farOp: [...new Set(far.map(op))],
+             rings: document.querySelectorAll('#orNodes .or-kinr').length,
+             kinN: kins.length };
+  });
+  ok('a connected note is at full strength', burn.kinOp.every((o) => o > .9), burn);
+  ok('and wears a ring of its own', burn.rings >= burn.kinN - 1, burn);
+  ok('while a stranger sits back without leaving',
+    burn.farOp.every((o) => o > .2 && o < .8), burn);
   /* ── the camera flies in, and the labels do not come with it ──
      Opening flies the view onto the neighbourhood. The stars grow; the
      labels must not, or they arrive four times too big and cover what
