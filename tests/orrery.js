@@ -619,11 +619,62 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     mute.nodes === seed.length + corpus.hubs, mute.nodes);
   ok('and it is a minority that stays lit, or it says nothing',
     mute.kin > 1 && mute.kin < mute.nodes / 3, { kin: mute.kin, of: mute.nodes });
+  /* ── the camera flies in, and the labels do not come with it ──
+     Opening flies the view onto the neighbourhood. The stars grow; the
+     labels must not, or they arrive four times too big and cover what
+     they name. And the map may never cross into the reading column at
+     any zoom — the stage clips, and this proves it still does. */
+  const flew = await page.evaluate(() => {
+    const kin = orKin(state.sel);
+    const sr = document.getElementById('orSvg').getBoundingClientRect();
+    const nr = document.getElementById('orNote').getBoundingClientRect();
+    let on = 0;
+    kin.forEach((id) => {
+      const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+      if (!g) return;
+      const r = g.getBoundingClientRect();
+      const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
+      if (cx >= sr.x && cx <= sr.right && cy >= sr.y && cy <= sr.bottom) on++;
+    });
+    const chip = document.querySelector('#orLabels .or-chip .or-t1');
+    return { zoom: state.zoom, kin: kin.size, onScreen: on,
+             overlaps: !(sr.left >= nr.right || nr.left >= sr.right),
+             chipPx: chip ? +getComputedStyle(chip).fontSize.replace('px', '') : 0 };
+  });
+  ok('opening flies the camera in', flew.zoom > 1.6, flew.zoom);
+  ok('and lands with the whole neighbourhood on screen',
+    flew.onScreen === flew.kin, flew);
+  ok('the map never crosses into the text, at any zoom', !flew.overlaps, flew);
+  /* Counter-scaled, a label renders at the same pixel size it would at
+     1x. Uncounter-scaled it would be ~4x that here. */
+  ok('a label holds its size while the field grows under it',
+    flew.chipPx > 4 && flew.chipPx < 16, flew.chipPx);
+
+  const faded = await page.evaluate(() => {
+    const kin = orKin(state.sel);
+    const cs = [...document.querySelectorAll('#orLabels .or-chip')];
+    const near = cs.filter((c) => kin.has(c.getAttribute('data-for')));
+    const far = cs.filter((c) => !kin.has(c.getAttribute('data-for')));
+    const op = (c) => +(c.getAttribute('opacity') || 1);
+    return { near: near.length, far: far.length,
+             nearFull: near.every((c) => op(c) > .9),
+             farFaded: far.every((c) => op(c) > 0 && op(c) < .6) };
+  });
+  ok('a stranger\u2019s label fades but stays on the map',
+    faded.far === 0 || faded.farFaded, faded);
+  ok('and the neighbourhood\u2019s labels stay at full strength',
+    faded.nearFull, faded);
+
   await page.keyboard.press('Escape');
-  await page.waitForTimeout(400);
-  const cleared = await page.evaluate(() => [...document.querySelectorAll('#orNodes .or-halo')]
-    .filter((h) => (h.getAttribute('fill') || '').indexOf('orStar-mute') >= 0).length);
-  ok('closing the note gives every colour back', cleared === 0, cleared);
+  await page.waitForTimeout(900);
+  const cleared = await page.evaluate(() => ({
+    muted: [...document.querySelectorAll('#orNodes .or-halo')]
+      .filter((h) => (h.getAttribute('fill') || '').indexOf('orStar-mute') >= 0).length,
+    zoom: state.zoom,
+  }));
+  ok('closing the note gives every colour back', cleared.muted === 0, cleared);
+  ok('and flies back out to the whole field',
+    Math.abs(cleared.zoom - 1) < 0.01, cleared.zoom);
 
   /* ── the legend isolates by dimming, never by removing ── */
   console.log('\n── which, not whether ──');

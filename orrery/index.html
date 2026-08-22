@@ -203,6 +203,11 @@
    viewBox centre, not the element's box: an SVG group's own box is
    whatever its children happen to span, so a box-relative origin would
    swing each ring around a different point. */
+/* The camera's flight. On #orView alone — the nodes carry their own
+   per-tick transforms and must not be caught by this. */
+.or-fly { transition: transform .62s cubic-bezier(.32, .72, 0, 1); }
+@media (prefers-reduced-motion: reduce) { .or-fly { transition: none; } }
+
 @keyframes or-turn { to { transform: rotate(360deg); } }
 .or-turn {
   transform-origin: 500px 500px;
@@ -2710,9 +2715,14 @@ orSim.draw = (final) => {
   }
   if (final) { orPaintLabels(); return; }
   const cs = orSim.chips;
+  /* Carry the counter-scale through the settle. Rewriting the transform
+     with translate alone drops it, and every label springs back to
+     four times its size for as long as the field is moving. */
+  const ck = 1 / (state.zoom || 1);
   if (cs) for (let i = 0; i < cs.length; i++) {
     const c = cs[i], p = xy[c.id];
-    if (p) c.el.setAttribute('transform', `translate(${N(p[0] + c.ox)} ${N(p[1] + c.oy)})`);
+    if (p) c.el.setAttribute('transform',
+      `translate(${N(p[0] + c.ox)} ${N(p[1] + c.oy)}) scale(${N(ck)})`);
   }
 };
 
@@ -3250,6 +3260,13 @@ function orPaintLabels() {
      DROPS to hover-only. Fewer chips is degradation; illegible chips
      are a fault. */
   const right = (VIEWBOX - state.panX) / state.zoom;
+  /* A label is chrome, not scenery: it holds one size on screen while
+     the field it names grows under it. Without this, flying into a note
+     lands at nearly 4x and every label arrives four times too big,
+     clipped against the stage and covering the very stars it names. The
+     counter-scale rides the label's own transform, so the collision
+     pass has to reason in the same units — hence ew and eh below. */
+  const k = 1 / (state.zoom || 1);
   const order = { hub: 0, sel: 1, hover: 2, major: 3 };
   const rankOf = (id) =>
     id.indexOf('hub:') === 0 ? 'hub'
@@ -3267,29 +3284,38 @@ function orPaintLabels() {
     return { ch, id, p, w, rank: rankOf(id) };
   }).filter(Boolean).sort((a, b) => order[a.rank] - order[b.rank] || a.p[1] - b.p[1]);
   const kept = [], place = [];
-  const hits = (x, y, w) => kept.some(k =>
-    x < k.x + k.w + 2 && k.x < x + w + 2 && y - 12 < k.y + 14 && k.y - 12 < y + 14);
+  const eh = 12 * k, gap = 2 * k;
+  const hits = (x, y, w) => kept.some(q =>
+    x < q.x + q.w + gap && q.x < x + w + gap
+    && y - eh < q.y + eh + gap && q.y - eh < y + eh + gap);
   for (const c of chips) {
     const r = TIERS[tier[c.id]] || 5;
-    const rx = c.p[0] + r + 9, lx = c.p[0] - r - 9 - c.w;
-    const sides = rx + c.w > right ? [lx, rx] : [rx, lx];
+    const ew = c.w * k;                    /* what it actually occupies */
+    const rx = c.p[0] + r + 9 * k, lx = c.p[0] - r - 9 * k - ew;
+    const sides = rx + ew > right ? [lx, rx] : [rx, lx];
     let x = sides[0], y = c.p[1], ok = false;
-    for (const dy of [0, 14, -14, 26, -26]) {
+    for (const dy of [0, 15 * k, -15 * k, 28 * k, -28 * k]) {
       for (const sx of sides) {
-        if (!hits(sx, c.p[1] + dy, c.w)) { x = sx; y = c.p[1] + dy; ok = true; break; }
+        if (!hits(sx, c.p[1] + dy, ew)) { x = sx; y = c.p[1] + dy; ok = true; break; }
       }
       if (ok) break;
     }
     if (!ok && c.rank === 'major') { c.ch.remove(); continue; }
-    kept.push({ x, y, w: c.w });
-    c.ch.setAttribute('transform', `translate(${N(x)} ${N(y)})`);
+    kept.push({ x, y, w: ew });
+    c.ch.setAttribute('transform', `translate(${N(x)} ${N(y)}) scale(${N(k)})`);
+    /* A stranger's label stays READABLE-if-you-look but stops competing
+       — still there, still findable, no longer answering a question you
+       did not ask. Fading beats hiding: a label that vanishes takes the
+       note's name with it, and you cannot go back to something you can
+       no longer read. */
+    c.ch.setAttribute('opacity', nearL && !nearL.has(c.id) ? '.3' : '1');
     c.ch.querySelector('.or-chipbg').setAttribute('width', c.w);
     /* The offset this chip was PLACED at. While the field is settling
        the chip rides it — measuring glyphs and re-resolving every chip
        against every other, sixty times a second, is the one thing that
        would make this crawl. The last frame runs this pass again, and
        that is the frame where the answer matters. */
-    place.push({ el: c.ch, id: c.id, ox: x - c.p[0], oy: y - c.p[1] });
+    place.push({ el: c.ch, id: c.id, ox: x - c.p[0], oy: y - c.p[1] });   /* user units, scale-free */
   }
   orSim.chips = place;
 }
@@ -3390,6 +3416,18 @@ function orToUser(cx, cy) {
 /* Pan by a delta in viewBox units and re-apply the transform.
    orPan(0, 0) is the canonical "sync the transform" call. */
 function orPan(dx, dy) {
+  /* A hand on the map ends any flight in progress, where it is. An
+     eased transform racing a drag makes the map feel like it is
+     arguing with you. */
+  if (dx || dy) {
+    const v0 = byId('orView');
+    if (v0 && v0.classList.contains('or-fly')) {
+      const m = new DOMMatrix(getComputedStyle(v0).transform);
+      state.panX = m.e; state.panY = m.f; state.zoom = m.a || state.zoom;
+      v0.classList.remove('or-fly');
+      clearTimeout(orZoom.t);
+    }
+  }
   state.panX += dx;
   state.panY += dy;
   const v = byId('orView');
@@ -4608,16 +4646,81 @@ orOpen.chrome = (reading) => {
    you panned or zoomed it there. Nudge the pan just far enough to
    bring it back inside a margin; never touch the zoom, which is yours. */
 orOpen.reveal = (id) => {
-  const p = state.xy[id];
-  if (!p) return;
-  const vx = state.panX + state.zoom * p[0];
-  const vy = state.panY + state.zoom * p[1];
-  const M = 90;
-  let dx = 0, dy = 0;
-  if (vx < M) dx = M - vx; else if (vx > VIEWBOX - M) dx = VIEWBOX - M - vx;
-  if (vy < M) dy = M - vy; else if (vy > VIEWBOX - M) dy = VIEWBOX - M - vy;
-  if (dx || dy) orPan(dx, dy);
+  if (!state.xy[id]) return;
+  orZoom.fly(orKin(id));
 };
+
+/* ── flying to a neighbourhood ──
+   Opening a note takes the camera in until the note and the things it
+   links to fill the stage. Muting told you which ones those were;
+   flying means you are actually AMONG them, at a size where the titles
+   are readable, instead of reading a note while its subject is four
+   pixels wide on the far side of the field.
+
+   It cannot reach the text. #orStage clips at its own edge and the
+   reading column is a flex sibling, not an overlay — the map has no
+   route across that boundary at any zoom. The padding below is about
+   the constellation not touching the stage's own edges, which is a
+   separate and much smaller worry.
+
+   The maths has to respect preserveAspectRatio="xMidYMid meet": the
+   1000-unit viewBox is letterboxed into a stage that is rarely square,
+   so the visible user-space region is WIDER than the viewBox on the
+   long axis. Fitting to a flat 1000 would leave a third of the stage
+   unused on one side and crop on the other. */
+orZoom.fly = (ids) => {
+  const svg = byId('orSvg'), view = byId('orView');
+  if (!svg || !view) return;
+  const r = svg.getBoundingClientRect();
+  if (!r.width || !r.height) return;
+
+  /* What the stage can actually show, in user units. */
+  const s = Math.min(r.width, r.height) / VIEWBOX;
+  const W = r.width / s, H = r.height / s;
+
+  /* The box to land on, each node grown by its own reach so a bloom is
+     never clipped by the very frame that went looking for it. */
+  const tier = orLayout.tier || {};
+  let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity, n = 0;
+  ids.forEach((id) => {
+    const p = state.xy[id];
+    if (!p) return;
+    const pad = (TIERS[tier[id]] || TIERS.hub) * 2.4;
+    x0 = Math.min(x0, p[0] - pad); x1 = Math.max(x1, p[0] + pad);
+    y0 = Math.min(y0, p[1] - pad); y1 = Math.max(y1, p[1] + pad);
+    n++;
+  });
+  if (!n) return;
+
+  /* A lone note with nothing linked to it has no box to speak of, so it
+     gets a standing distance rather than the maximum zoom — arriving at
+     4x on one star says "you are lost", not "here it is". */
+  const M = 70;
+  const bw = Math.max(x1 - x0, n === 1 ? 190 : 60);
+  const bh = Math.max(y1 - y0, n === 1 ? 190 : 60);
+  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  const z = Math.min(4, Math.max(.35, Math.min((W - M * 2) / bw, (H - M * 2) / bh)));
+
+  orZoom.glide(z, VIEWBOX / 2 - cx * z, VIEWBOX / 2 - cy * z);
+};
+
+/* Move the camera as one eased flight rather than a cut. The class
+   carries the transition and comes off the moment a hand touches the
+   map, so a drag is never fighting an animation. */
+orZoom.glide = (z, px, py) => {
+  const view = byId('orView');
+  if (!view) return;
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!still) view.classList.add('or-fly');
+  state.zoom = z; state.panX = px; state.panY = py;
+  orPan(0, 0);
+  clearTimeout(orZoom.t);
+  orZoom.t = setTimeout(() => {
+    view.classList.remove('or-fly');
+    orPaintLabels();          /* chips flip against the edge, and the edge moved */
+  }, still ? 0 : 620);
+};
+orZoom.t = 0;
 
 /* Close puts everything back: the cards return, the map widens, and
    focus goes to the node you were reading — the paint just replaced
@@ -4631,6 +4734,10 @@ function orClose() {
   state.sel = null;
   orWrite({ sel: null });
   orPaint();
+  /* Back out to the whole field. Closing a note is stepping away from
+     it, and being left parked at 3x on a constellation you have just
+     dismissed is how you lose the map. */
+  orZoom.glide(1, 0, 0);
   if (was) {
     const wrap = byId('orNodes');
     const g = wrap ? wrap.querySelector(`[data-id="${CSS.escape(was)}"]`) : null;
