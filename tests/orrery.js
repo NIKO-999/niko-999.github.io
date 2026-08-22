@@ -700,18 +700,67 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       if (kin.has(id) === muted) wrong.push(id + (muted ? ': kin but muted' : ': stranger but coloured'));
     });
     const links = [...document.querySelectorAll('#orLinks path')];
+    /* BOTH ends, not either. Lighting on either end drew a full-colour
+       line from a neighbour out to a note two hops away, which is not
+       kin and so stayed at .55 — a lit line ending on an unlit star. */
     const linkWrong = links.filter((l) => {
-      const touches = kin.has(l.getAttribute('data-a')) || kin.has(l.getAttribute('data-b'));
+      const both = kin.has(l.getAttribute('data-a')) && kin.has(l.getAttribute('data-b'));
       const muted = (l.getAttribute('stroke') || '').indexOf('or-mute') >= 0;
-      return touches === muted;
+      return both === muted;
     }).length;
+    /* The invariant that failure was really about, stated directly:
+       follow any coloured line and you arrive somewhere lit. */
+    const orphanLit = links.filter((l) => {
+      if ((l.getAttribute('stroke') || '').indexOf('or-mute') >= 0) return false;
+      return [l.getAttribute('data-a'), l.getAttribute('data-b')].some((id) => {
+        const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+        return !g || +(g.getAttribute('opacity') || 1) < .9;
+      });
+    }).map((l) => l.getAttribute('data-a') + '→' + l.getAttribute('data-b'));
     return { nodes: gs.length, kin: kin.size, wrong: wrong.slice(0, 4),
-             linkWrong, links: links.length };
+             linkWrong, links: links.length, orphanLit: orphanLit.slice(0, 4),
+             orphanN: orphanLit.length };
   });
   ok('the selection and its links keep their colour, nothing else does',
     mute.wrong.length === 0, mute.wrong);
   ok('and every link agrees with the nodes it joins', mute.linkWrong === 0,
     { wrong: mute.linkWrong, of: mute.links });
+  ok('so no lit line ends on a star that is not lit',
+    mute.orphanN === 0, mute.orphanLit);
+
+
+  /* ── the camera does not fly into the wall ──
+     Everything the map draws sits inside #orView, so the camera scales
+     all of it. A tight cluster fitted its box at 3.9x — a hair off the
+     4x hand-zoom clamp — and the whole field was rasterising at
+     fifteen times the pixel area to show six stars. It reported as
+     "glitchy when it zooms in", which is exactly what it was. */
+  const flewTo = await page.evaluate(() => state.zoom);
+  ok('a flight stops short of the hand-zoom clamp',
+    flewTo <= 2.4 + 1e-6 && flewTo > 1, flewTo);
+
+  /* And nothing drifts while it is moving. An animating group cannot
+     be cached — it is redrawn every frame at whatever scale the flight
+     has reached — so the ambient layers hold still for the one moment
+     the whole field is being redrawn at a changing scale. */
+  const amb = await page.evaluate(() => {
+    const svg = document.getElementById('orSvg');
+    const st = (sel) => getComputedStyle(document.querySelector(sel)).animationPlayState;
+    return { cls: svg.getAttribute('class') || '',
+             nod: st('#orNod'), dust: st('#orDustA'), turn: st('.or-turn') };
+  });
+  ok('and the drift holds still while the camera is close in',
+    /or-tight/.test(amb.cls) && amb.nod === 'paused'
+    && amb.dust === 'paused' && amb.turn === 'paused', amb);
+  ok('the nod is written in 2D — nothing here sets perspective, so '
+    + 'rotateX would only have been scaleY the expensive way',
+    await page.evaluate(() => {
+      const css = [...document.styleSheets].flatMap((sh) => {
+        try { return [...sh.cssRules]; } catch (e) { return []; }
+      }).filter((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'or-nod');
+      const txt = css.map((r) => r.cssText).join(' ');
+      return txt.includes('scaleY') && !txt.includes('rotateX');
+    }));
   ok('muting is not removing — every node is still drawn',
     mute.nodes === seed.length + corpus.hubs, mute.nodes);
   ok('and it is a minority that stays lit, or it says nothing',
@@ -736,11 +785,31 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     const kins = gs.filter((g) => kin.has(g.getAttribute('data-id')));
     const far = gs.filter((g) => !kin.has(g.getAttribute('data-id')));
     return { kinOp: [...new Set(kins.map(op))], farOp: [...new Set(far.map(op))],
-             rings: document.querySelectorAll('#orNodes .or-kinr').length,
+             /* The burn is brightness now, not a ring. Measure the
+                thing that actually says "lit": a kin halo is bigger
+                than the same node's would be at rest. */
+             kinHalo: kins.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
+             farHalo: far.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
+             hoops: document.querySelectorAll('#orNodes .or-kinr').length,
              kinN: kins.length };
   });
   ok('a connected note is at full strength', burn.kinOp.every((o) => o > .9), burn);
-  ok('and wears a ring of its own', burn.rings >= burn.kinN - 1, burn);
+  ok('and wears a ring of its own', burn.hoops >= burn.kinN - 1, burn);
+  /* Brightness carries it too, and that half is independent of how the
+     star is drawn — measured on halo radius, same tier both sides so
+     this cannot be comparing a hub with a leaf. */
+  ok('and burns brighter than a stranger of its own tier',
+    await page.evaluate(() => {
+      const kin = orKin(state.sel);
+      const g = [...document.querySelectorAll('#orNodes .or-node')];
+      const r = (x) => +x.querySelector('.or-halo').getAttribute('r');
+      const tier = (x) => (x.getAttribute('class').match(/or-(hub|major|minor|leaf)/) || [])[1];
+      const lit = g.filter((x) => kin.has(x.getAttribute('data-id')) && tier(x) === 'major');
+      const not = g.filter((x) => !kin.has(x.getAttribute('data-id')) && tier(x) === 'major');
+      if (!lit.length || !not.length) return false;
+      const avg = (a) => a.reduce((s, x) => s + r(x), 0) / a.length;
+      return avg(lit) > avg(not) * 1.1;
+    }));
   ok('while a stranger sits back without leaving',
     burn.farOp.every((o) => o > .2 && o < .8), burn);
 
@@ -927,6 +996,26 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      answer, and a resting map must carry none of them — otherwise the
      folder lines become permanent furniture and the field is the
      hairball this whole layout exists to avoid. */
+  /* ── the tow reads the stage once, not once per event ──
+     It used to read a rect — which flushes layout — then write three
+     style properties, which dirties it again, on every pointermove. A
+     61-step sweep cost 62 forced layouts, and a trackpad on a 120Hz
+     panel delivers moves faster than the screen refreshes, so most of
+     that was work for frames that never existed. */
+  await page.evaluate(() => { window.__rects = 0;
+    const g = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function () {
+      window.__rects++; return g.call(this); }; });
+  const stage = await page.evaluate(() => {
+    const r = document.getElementById('orStage').getBoundingClientRect();
+    return { x: r.x, y: r.y, w: r.width, h: r.height }; });
+  for (let i = 0; i <= 60; i++)
+    await page.mouse.move(stage.x + 30 + (stage.w - 60) * i / 60, stage.y + stage.h * 0.45);
+  await page.waitForTimeout(350);
+  const rects = await page.evaluate(() => window.__rects);
+  ok('a 61-step sweep costs a handful of forced layouts, not 62',
+    rects < 12, rects);
+
   ok('a resting map carries no tethers',
     await page.evaluate(() => document.querySelectorAll('#orLinks .or-tether').length === 0));
   const sig = await page.evaluate(() => {
@@ -943,30 +1032,64 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.keyboard.press('Escape');
   await page.waitForTimeout(800);
 
-  /* ── the legend isolates by dimming, never by removing ── */
+  /* ── the legend opens a place, and the isolate lives inside it ──
+     A click used to do one thing: dim six sevenths of the sky and
+     leave you hunting the rest by eye. There was no route from a
+     category to a note except finding its dot. Now it opens the column
+     and lists what is filed there; the filter is a control beside the
+     list it filters. */
   console.log('\n── which, not whether ──');
   const countAll = (await page.$$('#orNodes .or-node')).length;
   await page.click('#orLegRows [data-cat="mind"]');
+  await page.waitForTimeout(350);
+  const panel = await page.evaluate(() => {
+    const p = document.getElementById('orCatPane');
+    const rows = [...document.querySelectorAll('#orCatList [data-open]')];
+    const cats = (window.orLayout.catOf) || {};
+    return { open: !p.hidden, n: rows.length,
+      title: document.getElementById('orCatTitle').textContent,
+      allMind: rows.every((r) => cats[r.getAttribute('data-open')] === 'mind'),
+      real: (state.notes || []).filter((x) => cats[x.id] === 'mind').length };
+  });
+  ok('clicking a category opens it as a list', panel.open && panel.n > 0, panel);
+  ok('holding every note filed there, and only those',
+    panel.n === panel.real && panel.allMind, panel);
+  ok('named by the category, not by a note', /mind/i.test(panel.title), panel.title);
+  /* And a row is a way in: the note opens, the list stands down. */
+  await page.click('#orCatList [data-open]');
+  await page.waitForTimeout(400);
+  const wentIn = await page.evaluate(() => ({
+    note: !document.getElementById('orNote').hidden,
+    list: !document.getElementById('orCatPane').hidden,
+    sel: state.sel }));
+  ok('and a row opens the note it names', wentIn.note && !!wentIn.sel, wentIn);
+  ok('one column, so the list stands down', wentIn.list === false, wentIn);
+  await page.evaluate(() => orClose());
+  await page.waitForTimeout(300);
+  /* Now the isolate, from where it lives. */
+  await page.click('#orLegRows [data-cat="mind"]');
+  await page.waitForTimeout(300);
+  await page.click('#orCatOnly');
   await page.waitForTimeout(300);
   const iso = await page.evaluate(() => {
     const gs = [...document.querySelectorAll('#orNodes .or-node')];
     return {
       n: gs.length,
-      pressed: document.querySelector('#orLegRows [data-cat="mind"]').getAttribute('aria-pressed'),
+      pressed: document.querySelector('#orCatOnly').getAttribute('aria-pressed'),
       mindDim: gs.filter((g) => g.getAttribute('data-cat') === 'mind')
         .filter((g) => +getComputedStyle(g).opacity < 0.5).length,
       otherLit: gs.filter((g) => g.getAttribute('data-cat') !== 'mind')
         .filter((g) => +getComputedStyle(g).opacity > 0.5).length,
     };
   });
-  ok('the legend isolates a category', iso.pressed === 'true' && iso.mindDim === 0
+  ok('the panel isolates a category', iso.pressed === 'true' && iso.mindDim === 0
     && iso.otherLit === 0, iso);
   ok('by dimming — the node count is unchanged', iso.n === countAll,
     { before: countAll, after: iso.n });
-  await page.click('#orLegRows [data-cat="mind"]');
+  await page.click('#orCatOnly');
   await page.waitForTimeout(300);
   const clear = await page.evaluate(() => ({
-    pressed: document.querySelector('#orLegRows [data-cat="mind"]').getAttribute('aria-pressed'),
+    pressed: document.querySelector('#orCatOnly').getAttribute('aria-pressed'),
     dim: [...document.querySelectorAll('#orNodes .or-node')]
       .filter((g) => +getComputedStyle(g).opacity < 0.5).length,
   }));
@@ -1229,8 +1352,24 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     return { n: rs.length, bad };
   });
   let ov = await overlaps();
-  ok('label chips share no pixels at the default fit',
-    ov.n > 2 && ov.bad.length === 0, ov.bad.slice(0, 5));
+  /* At rest there are now NONE, and that is the point: a chip is an
+     answer and nothing has been asked. Forty of them standing on a
+     field of fifty-nine stars was a list with a picture behind it. */
+  ok('a map nobody is pointing at carries no chips at all',
+    ov.n === 0, ov);
+  /* Hover is the question. The collision pass still has to hold, so
+     ask one and measure what comes back. */
+  await c.page.evaluate(() => {
+    const n = document.querySelector('#orNodes .or-hub') ||
+              document.querySelector('#orNodes .or-node');
+    const r = n.getBoundingClientRect();
+    n.dispatchEvent(new PointerEvent('pointerover',
+      { bubbles: true, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 }));
+  });
+  await c.page.waitForTimeout(400);
+  ov = await overlaps();
+  ok('hovering names it and its neighbours', ov.n > 2, ov);
+  ok('and those chips share no pixels', ov.bad.length === 0, ov.bad.slice(0, 5));
   await c.page.evaluate(() => {
     const hub = [...document.querySelectorAll('#orNodes .or-node')]
       .find(n => (n.getAttribute('data-id') || '').indexOf('hub:growth') === 0)

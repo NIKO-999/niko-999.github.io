@@ -218,9 +218,26 @@
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
    nine degrees over half a minute you feel it and never catch it. It
    sits OUTSIDE #orView, which the camera owns. */
+/* Written in 2D, and it is not an approximation of the 3D version —
+   it is the same matrix. Nothing here sets `perspective`, so rotateX
+   projects orthographically and rotateX(9deg) IS scaleY(cos 9°) =
+   scaleY(.9877). Identical pixels.
+
+   So this is a simplification, not a fix, and it is written down that
+   way on purpose. The theory was that rotateX pulls the thousand-odd
+   elements under #orNod into a 3D compositing context; the layer tree
+   says otherwise — 65 layers and 13.36M composited pixels, identical
+   either way, no 3D-transformed layer in either. The frame timings
+   that seemed to show a win were noise from a software rasteriser
+   that also timed 3.9x as faster than 1x.
+
+   It stays because it cannot be worse: same matrix, fewer code paths,
+   and no 3D syntax implying a depth this drawing does not have. If
+   something here is ever shown to cost real milliseconds, it will not
+   be this line — do not come back and credit it. */
 @keyframes or-nod {
-  0%, 100% { transform: rotateX(0deg) rotateZ(0deg); }
-  50%      { transform: rotateX(9deg) rotateZ(1.2deg); }
+  0%, 100% { transform: scaleY(1)     rotate(0deg); }
+  50%      { transform: scaleY(.9877) rotate(1.2deg); }
 }
 #orNod {
   transform-origin: 500px 500px;
@@ -240,6 +257,29 @@
 .or-rev { animation-direction: reverse; }
 @media (prefers-reduced-motion: reduce) {
   .or-turn, #orNod, #orDustA, #orDustB, #orDustC { animation: none; }
+}
+
+/* ── the camera is the expensive part ──
+   Rings, dust, links and stars all sit inside #orView, so the camera
+   scales every one of them. Fly in close and a thousand vector
+   elements rasterise at several times the linear size — squared in
+   pixels, and squared again on a Retina panel.
+
+   Anything still ANIMATING through that cannot be cached: the browser
+   redraws it every frame at whatever scale the flight has reached. The
+   precession is worse than the rest, because rotateX drags the whole
+   subtree into a 3D context to do it.
+
+   So the drift stops while the camera is moving, and while it is close
+   in. Paused, not removed: the geometry stays exactly where it was,
+   and pausing keeps the angle it had rather than snapping it home.
+   None of it is legible at that magnification anyway — the reason it
+   is safe to stop is the same reason it was costing us nothing. */
+#orSvg.or-tight  .or-turn, #orSvg.or-tight  #orNod,
+#orSvg.or-tight  #orDustA, #orSvg.or-tight  #orDustB, #orSvg.or-tight  #orDustC,
+#orSvg.or-flying .or-turn, #orSvg.or-flying #orNod,
+#orSvg.or-flying #orDustA, #orSvg.or-flying #orDustB, #orSvg.or-flying #orDustC {
+  animation-play-state: paused;
 }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
@@ -389,7 +429,7 @@
    glass already carries --ink at floor contrast, and a box here would
    turn the reference's open field back into furniture. Space is what
    frames it. */
-#orNote {
+#orNote, #orCatPane {
   position: relative;
   width: clamp(380px, 42%, 620px);
   flex: none;
@@ -409,20 +449,63 @@
           mask-image: linear-gradient(180deg,
     transparent 0, #000 28px, #000 calc(100% - 28px), transparent 100%);
 }
-#orNote::-webkit-scrollbar { display: none; }
+#orNote::-webkit-scrollbar, #orCatPane::-webkit-scrollbar { display: none; }
 /* Opening hands the pane programmatic focus (tabindex -1) so a
    keyboard open reads from the top. A ring around the whole column
    would box the one view built on having no box — and nothing can
    Tab here, so nothing is being hidden from the keyboard. */
-#orNote:focus { outline: none; }
+#orNote:focus, #orCatPane:focus { outline: none; }
 /* Positioning context for the close, and a size container so the
    title can answer to the COLUMN's width rather than the viewport's. */
-#orNote { position: relative; container-type: inline-size; }
+#orNote, #orCatPane { position: relative; container-type: inline-size; }
 /* display:none cannot animate, so arrival is a keyframe: the column
    settles in from the left as the map slides right. The shell zeroes
    it under reduced motion. */
 @keyframes or-slide { from { opacity: 0; transform: translateX(-14px); } }
-#orNote:not([hidden]) { animation: or-slide .28s ease; }
+#orNote:not([hidden]), #orCatPane:not([hidden]) { animation: or-slide .28s ease; }
+
+/* ── the category list ──
+   A category is a place you can be, not only a filter you can throw.
+   Clicking Trading used to dim six sevenths of the sky and leave you
+   still hunting for a star by eye; now it opens the column and lists
+   what is in there, so a note is two clicks from the legend whether or
+   not you can find its dot. */
+.or-cl {
+  list-style: none;
+  margin: 18px 0 0;
+  padding: 0;
+}
+.or-cl li { margin: 0; }
+.or-cl-row {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  width: 100%;
+  padding: 9px 2px;
+  background: none;
+  border: 0;
+  border-bottom: 1px solid var(--glass-line);
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.or-cl-row:hover .or-cl-t, .or-cl-row:focus-visible .or-cl-t {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+.or-cl-t { flex: 1 1 auto; }
+/* The count of what it links to. Right-aligned and quiet: it orders
+   the list by weight without competing with the titles. */
+.or-cl-n {
+  flex: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: .1em;
+  color: var(--ink-3, var(--or-mute));
+}
+.or-cl-none { margin-top: 18px; color: var(--ink-3, var(--or-mute)); }
+.or-cl-only { margin-top: 16px; }
 
 /* The close pins to the column's top right corner. Not a float: a
    float only pushes FLOW neighbours aside, and everything beside it
@@ -791,7 +874,7 @@
    and the stage takes whatever the note leaves. */
 @media (max-width: 800px) {
   #orMapSection { flex-direction: column; }
-  #orNote {
+  #orNote, #orCatPane {
     width: 100%;
     flex: 0 1 auto;
     max-height: 56%;
@@ -802,7 +885,7 @@
 /* Phone-narrow. The type ramp already clamps; what has to give is
    the padding around it. */
 @media (max-width: 520px) {
-  #orNote { padding: 24px 16px 38px; }
+  #orNote, #orCatPane { padding: 24px 16px 38px; }
   .or-note-in { padding-left: 18px; }
   .or-eyebrow { padding-left: 19px; }
   #orVaultSection { padding: 4px 14px 22px; }
@@ -950,6 +1033,29 @@
           <ul id="orNoteOut"></ul>
           <h3 id="orNoteInH">Backlinks</h3>
           <ul id="orNoteIn"></ul>
+        </div>
+      </aside>
+
+      <!-- The same column as the note, never at the same time as it:
+           two panes here would be two reading columns and no map. -->
+      <aside id="orCatPane" role="complementary" aria-labelledby="orCatTitle"
+             tabindex="-1" hidden>
+        <button class="btn btn-ghost" type="button" id="orCatClose"
+                aria-label="Close the category">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none"
+               stroke="currentColor" stroke-width="1.8" stroke-linecap="round"
+               aria-hidden="true"><path d="M6.5 6.5 17.5 17.5M17.5 6.5 6.5 17.5" /></svg>
+        </button>
+        <div class="or-eyebrow">
+          <span id="orCatEyebrow"></span>
+          <span id="orCatCount"></span>
+        </div>
+        <div class="or-note-in">
+          <h2 id="orCatTitle"></h2>
+          <button class="btn btn-ghost or-cl-only" type="button" id="orCatOnly"
+                  aria-pressed="false">Only this on the map</button>
+          <ul class="or-cl" id="orCatList"></ul>
+          <p class="or-cl-none" id="orCatNone" hidden>Nothing is filed here yet.</p>
         </div>
       </aside>
 
@@ -3142,9 +3248,15 @@ function orPaintLinks() {
     orPaintLinks.rest[key] = rest;
     keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest,
                 w: sel ? 1.5 : .8 });
-    /* A link keeps its colour when it touches the selection, for the
-       same reason its ends do. */
-    const lit = !state.sel || near.has(a) || near.has(b);
+    /* BOTH ends, not either. Lighting a link because one end was kin
+       drew a line at full colour from a neighbour off to a note two
+       hops away — and that note is not kin, so it stayed at .55. A lit
+       line pointing at an unlit star, which reads as the map failing to
+       finish rather than as the answer it is.
+       Measured: selecting "Sitting out" lit an edge in the growth
+       colour whose far end sat at .55 with no ring. Both ends lit, or
+       the line is not part of what you asked about. */
+    const lit = !state.sel || (near.has(a) && near.has(b));
     out.push(`<path d="${d}" fill="none"`
       + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
       + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
@@ -3394,16 +3506,32 @@ function orPaintLabels() {
     taken.add(id);
     want.push({ id, title, sub, cat });
   };
-  sec.forEach(s => { if (hubOk(s)) add('hub:' + s.id, s.label, `${s.n} ${s.n === 1 ? 'note' : 'notes'}`, s.id); });
+  /* ── a chip is an answer, so it waits to be asked ──
+     Every hub and every major used to carry one at rest: forty-odd
+     chips standing on a field of fifty-nine stars, which is a list
+     with a picture behind it rather than a map. Now the map is stars,
+     and the names arrive where you point.
+
+     It is also the single biggest thing this screen does per frame.
+     Each chip is four elements, and the placement pass below measures
+     every one of them and then resolves the collisions between them —
+     getBBox per chip, then a pairwise sweep. Rendering forty of those
+     to sit still and be read is most of the cost of a repaint.
+
+     Hover names what you point at. A selection names the constellation
+     it just lit, because that IS the answer on screen. Nothing else. */
+  const hv = state.hover;
+  const hoverKin = hv ? orKin(hv) : null;
+  const wants = (id) => id === hv || id === state.sel
+    || (hoverKin && hoverKin.has(id)) || (nearL && nearL.has(id));
+  sec.forEach(s => {
+    if (hubOk(s) && wants('hub:' + s.id))
+      add('hub:' + s.id, s.label, `${s.n} ${s.n === 1 ? 'note' : 'notes'}`, s.id);
+  });
   (state.notes || []).forEach(n => {
-    if ((tier[n.id] === 'major' || state.sel === n.id || state.hover === n.id) && orPaint.match(n))
+    if (wants(n.id) && orPaint.match(n))
       add(n.id, n.title, label[catOf[n.id]] || 'Unfiled', catOf[n.id] || 'other');
   });
-  const hv = state.hover;
-  if (hv && hv.indexOf('hub:') === 0) {
-    const s = sec.find(x => 'hub:' + x.id === hv);
-    if (s && hubOk(s)) add(hv, s.label, `${s.n} notes`, s.id);
-  }
 
   /* The rect fill is the shell's own opaque menu surface: contrast on
      a chip must not depend on what corner of the photograph it happens
@@ -3611,7 +3739,17 @@ function orPan(dx, dy) {
   const v = byId('orView');
   if (v) v.setAttribute('transform',
     `translate(${orLayout.N(state.panX)} ${orLayout.N(state.panY)}) scale(${orLayout.N(state.zoom)})`);
+  /* Compared before it is written: this runs on every frame of a drag,
+     and a classList write per frame is the kind of thing that costs
+     nothing until the frame is already full. */
+  const tight = state.zoom > 1.6;
+  if (tight !== orPan.tight) {
+    orPan.tight = tight;
+    const svg = byId('orSvg');
+    if (svg) svg.classList.toggle('or-tight', tight);
+  }
 }
+orPan.tight = false;
 
 /* Zoom by a factor about a viewBox point — the point under the cursor
    stays under the cursor. orZoom(0) is the reset. Clamped 0.35–4:
@@ -3905,12 +4043,30 @@ function orKeyNode(e) {
      moving, and re-place the chips against the edge they now have. */
   let rz = 0;
   window.addEventListener('resize', () => {
+    orTow.box = null;
     if (state.view !== 'map') return;
     clearTimeout(rz);
     rz = setTimeout(() => { orHeat(SIM.stir); orPaintLabels(); }, 160);
   });
 
   const wire = (id, fn) => { const b = byId(id); if (b) b.addEventListener('click', fn); };
+  wire('orCatClose', orCloseCat);
+  /* The isolate lives inside the panel now, beside the list it filters,
+     rather than being the only thing a legend click could do. */
+  wire('orCatOnly', () => {
+    const c = state.catPane;
+    if (!c) return;
+    orOnly(c);
+    const b = byId('orCatOnly');
+    if (b) b.setAttribute('aria-pressed', String(state.only === c));
+  });
+  /* Delegated: the list is rebuilt on every open, so a listener per
+     row would be a listener per row per open. */
+  const cl = byId('orCatList');
+  if (cl) cl.addEventListener('click', (e) => {
+    const b = e.target.closest ? e.target.closest('[data-open]') : null;
+    if (b) orOpen(b.getAttribute('data-open'));
+  });
   wire('orFit', orFit);
   wire('orZoomIn', () => orZoom(1.25, 500, 500));
   wire('orZoomOut', () => orZoom(1 / 1.25, 500, 500));
@@ -4743,6 +4899,9 @@ function orBacklinks(id) {
    A hub opens as the folder itself: same ramp, and the body is the
    category's notes, most-linked first, the way a folder note reads. */
 function orOpen(id) {
+  /* The list and the note share the column. Whichever you asked for
+     last is the one that is in it. */
+  orCloseCat();
   const got = orOpen.fill(id);
   if (!got) { orSay('That note is not on the map any more.'); return; }
   state.sel = String(id);
@@ -4849,6 +5008,9 @@ orOpen.fill = (id) => {
    keyboard is a trap, not chrome. The inline opacity doubles the CSS
    so the behaviour survives a stylesheet that has not caught up. */
 orOpen.chrome = (reading) => {
+  /* The stage narrows when the pane arrives, so the tow's cached box
+     is stale from this moment. */
+  orTow.box = null;
   ['orLegend', 'orStats'].forEach(cid => {
     const c = byId(cid);
     if (!c) return;
@@ -4886,6 +5048,7 @@ orOpen.reveal = (id) => {
    so the visible user-space region is WIDER than the viewBox on the
    long axis. Fitting to a flat 1000 would leave a third of the stage
    unused on one side and crop on the other. */
+const FLY_MAX = 2.4;
 orZoom.fly = (ids) => {
   const svg = byId('orSvg'), view = byId('orView');
   if (!svg || !view) return;
@@ -4917,7 +5080,13 @@ orZoom.fly = (ids) => {
   const bw = Math.max(x1 - x0, n === 1 ? 190 : 60);
   const bh = Math.max(y1 - y0, n === 1 ? 190 : 60);
   const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
-  const z = Math.min(4, Math.max(.35, Math.min((W - M * 2) / bw, (H - M * 2) / bh)));
+  /* The wheel may go to 4x by hand. A flight may not. A tight cluster
+     fits its box at 3.9x and arrives filling the frame with six stars
+     and no context — and the whole map is rasterising at sixteen times
+     the pixels to show it, which is what made the flight stutter.
+     2.4x reads the same and costs a third of it. */
+  const z = Math.min(FLY_MAX, Math.max(.35,
+    Math.min((W - M * 2) / bw, (H - M * 2) / bh)));
 
   orZoom.glide(z, VIEWBOX / 2 - cx * z, VIEWBOX / 2 - cy * z);
 };
@@ -4929,12 +5098,18 @@ orZoom.glide = (z, px, py) => {
   const view = byId('orView');
   if (!view) return;
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const svg = byId('orSvg');
   if (!still) view.classList.add('or-fly');
+  /* The flight is the one moment the whole field is being redrawn at a
+     changing scale, so it is the one moment nothing else may be
+     moving. */
+  if (svg) svg.classList.add('or-flying');
   state.zoom = z; state.panX = px; state.panY = py;
   orPan(0, 0);
   clearTimeout(orZoom.t);
   orZoom.t = setTimeout(() => {
     view.classList.remove('or-fly');
+    if (svg) svg.classList.remove('or-flying');
     orPaintLabels();          /* chips flip against the edge, and the edge moved */
   }, still ? 0 : 620);
 };
@@ -4990,6 +5165,67 @@ function orLegend() {
         + `<span class="or-leg-lb">${esc(c.label)}</span>`
         + `<em class="or-leg-n">${k}</em></button>`;
     }).join('');
+}
+
+/* ── the category as a place ──
+   The legend used to do one thing with a click: isolate, which dims
+   six sevenths of the sky and leaves you hunting the remaining
+   seventh by eye. Fine as a filter, useless as a way in — there was no
+   route to a note except finding its dot.
+
+   So the click opens the column instead and lists what is filed there,
+   sorted by how connected each note is: the ones holding the category
+   together come first, the loose ends last. The isolate is still here,
+   as a control inside the panel, which is where a filter belongs —
+   next to the thing it filters. */
+function orOpenCat(cat) {
+  const c = orLayout.cats().filter(x => x.id === cat)[0];
+  const pane = byId('orCatPane');
+  if (!c || !pane) return;
+  /* One column, so the note stands down. */
+  const np = byId('orNote');
+  if (np && !np.hidden) { np.hidden = true; state.sel = null; orWrite({ sel: null }); orPaint(); }
+  state.catPane = cat;
+
+  const deg = orLayout.deg || {}, catOf = orLayout.catOf || {};
+  const rows = (state.notes || [])
+    .filter(n => (catOf[n.id] || 'other') === cat)
+    .sort((a, b) => (deg[b.id] || 0) - (deg[a.id] || 0)
+      || a.title.localeCompare(b.title));
+
+  /* byId directly: the two put() helpers in this file are both const
+     in inner scopes, and neither reaches here. */
+  const txt = (id, v) => { const n = byId(id); if (n) n.textContent = v; };
+  txt('orCatEyebrow', c.label);
+  txt('orCatCount', `${rows.length} ${rows.length === 1 ? 'note' : 'notes'}`);
+  txt('orCatTitle', c.label);
+  const only = byId('orCatOnly');
+  if (only) only.setAttribute('aria-pressed', String(state.only === cat));
+  const none = byId('orCatNone');
+  if (none) none.hidden = rows.length > 0;
+
+  const list = byId('orCatList');
+  if (list) list.innerHTML = rows.map(n => {
+    const d = deg[n.id] || 0;
+    return `<li><button type="button" class="or-cl-row" data-open="${esc(n.id)}">`
+      + `<span class="or-cl-t">${esc(n.title)}</span>`
+      + `<span class="or-cl-n">${d} ${d === 1 ? 'link' : 'links'}</span>`
+      + `</button></li>`;
+  }).join('');
+
+  pane.hidden = false;
+  orOpen.chrome(true);
+  try { pane.focus({ preventScroll: true }); } catch (e) {}
+  orSay(`${c.label} — ${rows.length} ${rows.length === 1 ? 'note' : 'notes'}.`);
+}
+
+function orCloseCat() {
+  const pane = byId('orCatPane');
+  if (!pane || pane.hidden) return;
+  pane.hidden = true;
+  state.catPane = null;
+  orOpen.chrome(false);
+  orSay('Category closed.');
 }
 
 /* Isolate one category, or clear the isolate by asking for it twice.
@@ -5152,22 +5388,46 @@ orTwinkle.r = orRng('orrery.scintillation');
    the far. Parallax you drive with your hand. It writes to style
    .translate and never to state, so a tow can never be mistaken for a
    pan and cannot end up in anybody's saved positions. */
+/* Coalesced to one write a frame, and the stage box is read once
+   rather than once per event.
+
+   It used to do both per pointermove: read a rect — which flushes
+   layout — then write three style properties, which dirties it again,
+   so the next event flushed a dirty tree. Measured on a 61-step sweep:
+   61 events, 62 forced layouts. A trackpad on a 120Hz panel delivers
+   moves faster than the screen refreshes, so most of that work was
+   being done for frames that never existed. */
 function orTow(e) {
+  orTow.px = e.clientX; orTow.py = e.clientY;
+  if (orTow.raf) return;
+  orTow.raf = requestAnimationFrame(orTow.run);
+}
+orTow.raf = 0;
+orTow.px = 0; orTow.py = 0;
+orTow.box = null;
+orTow.run = () => {
+  orTow.raf = 0;
   const st = byId('orStage');
   if (!st) return;
-  const r = st.getBoundingClientRect();
-  if (!r.width) return;
-  const dx = (e.clientX - r.left) / r.width - .5;
-  const dy = (e.clientY - r.top) / r.height - .5;
+  /* Cached, and invalidated by the two things that actually move this
+     box: the window resizing, and the reading pane opening or closing
+     beside it. Anything else that moved it would be moving the whole
+     map, and the tow is 26px of lean — it does not need to be right to
+     the pixel, it needs to be cheap. */
+  const r = orTow.box || (orTow.box = st.getBoundingClientRect());
+  if (!r.width) { orTow.box = null; return; }
+  const dx = (orTow.px - r.left) / r.width - .5;
+  const dy = (orTow.py - r.top) / r.height - .5;
   orTow.k.forEach(([id, k]) => {
     const g = byId(id);
     if (g) g.style.translate = orLayout.N(dx * k) + 'px ' + orLayout.N(dy * k) + 'px';
   });
-}
+};
 orTow.k = [['orDustA', 26], ['orDustB', 15], ['orDustC', 8]];
-orTow.clear = () => orTow.k.forEach(([id]) => {
-  const g = byId(id); if (g) g.style.translate = '';
-});
+orTow.clear = () => {
+  if (orTow.raf) { cancelAnimationFrame(orTow.raf); orTow.raf = 0; }
+  orTow.k.forEach(([id]) => { const g = byId(id); if (g) g.style.translate = ''; });
+};
 
 /* ── the signal ──
    Opening a note sends a bead of light down every link it has. A
@@ -5306,7 +5566,7 @@ orRefile.apply = (notes) => {
     const lr = byId('orLegRows');
     if (lr) lr.addEventListener('click', e => {
       const b = e.target.closest ? e.target.closest('[data-cat]') : null;
-      if (b) orOnly(b.getAttribute('data-cat'));
+      if (b) orOpenCat(b.getAttribute('data-cat'));
     });
   });
 
@@ -5362,6 +5622,10 @@ orRefile.apply = (notes) => {
       const t = e.target;
       if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
       if (state.view !== 'map') return;
+      /* Whichever column is open. Escape means "put this away", and
+         which one "this" is depends on what is on screen. */
+      const cp = byId('orCatPane');
+      if (cp && !cp.hidden) { orCloseCat(); return; }
       orClose();
     });
   });
