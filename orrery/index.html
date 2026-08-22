@@ -174,10 +174,14 @@
 /* The shell's focus rule already matches [tabindex], but that is a
    :where() aimed at HTML controls — the map's keyboard reachability
    is not something to leave to a selector's generosity. */
-.or-node:focus-visible {
-  outline: 2px solid var(--focus);
-  outline-offset: 2px;
-}
+/* A CSS outline on an SVG group draws a RECTANGLE around whatever its
+   children happen to span, which on a star field is a hard box floating
+   in space — and on a hub, a box the size of its whole cluster. The
+   ring is drawn instead: same job, same colour, the shape the thing
+   actually is. The outline is suppressed rather than left to double. */
+.or-node:focus { outline: none; }
+.or-focus { opacity: 0; pointer-events: none; }
+.or-node:focus-visible .or-focus { opacity: 1; }
 /* The paint strokes the selected ring var(--or-core) inline. Warm
    white over light glass is invisible, so light mode re-inks the
    SELECTION ring only — selection is a state, not a category, so no
@@ -3126,6 +3130,8 @@ function orPaintNodes() {
     /* The pin: a dotted hairline ring OUTSIDE the node, so "locked" is
        legible without a legend and without touching the node's own
        colour. Drawn last of the rings so nothing sits on it. */
+    parts.push(`<circle class="or-focus" r="${N(ext * .62 + 4)}" fill="none"`
+      + ` stroke="var(--focus)" stroke-width="2"/>`);
     if (state.pin[it.id])
       parts.push(`<circle class="or-pinr" r="${N(ext * .78 + 3)}" fill="none"`
         + ` stroke-width=".9" stroke-dasharray="1.6 3" opacity=".8"/>`);
