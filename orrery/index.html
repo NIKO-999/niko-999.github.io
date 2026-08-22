@@ -3020,13 +3020,13 @@ function orPaintRings() {
      can show you they are moving. */
   out.push(`<circle cx="500" cy="500" r="330" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".18"/>`);
 
-  /* rim type, on an invisible circle. The path starts at the top and
-     sweeps clockwise so the sentence reads left to right where the eye
-     enters the map. */
-  out.push(`<path id="orRimPath" d="M500 156A344 344 0 1 1 500 844A344 344 0 1 1 500 156" fill="none"/>`
-    + `<text font-size="8" fill="var(--or-hair)" opacity=".45"`
-    + ` style="font-family:var(--mono);letter-spacing:.18em;text-transform:uppercase">`
-    + `<textPath href="#orRimPath">A mechanical model of what you know, and how it moves</textPath></text>`);
+  /* No rim type. The poster it came from is a print, and a print has to
+     say what it is because nothing else on the page will. This does not
+     — you are inside the thing, the notes are right there, and a
+     sentence wrapped round the edge is one more piece of furniture
+     competing with them. The invisible path it rode on goes with it;
+     an unreferenced <path> in a live <defs> is the kind of leftover
+     that outlives the reason for it. */
 
   /* orbit rings. The hub orbit is one shared circle — every hub rides
      r 120, so seven copies of it would be one line drawn seven times.
