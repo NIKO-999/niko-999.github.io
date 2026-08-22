@@ -188,7 +188,10 @@
    white over light glass is invisible, so light mode re-inks the
    SELECTION ring only — selection is a state, not a category, so no
    identity moves. */
-:root[data-resolved="light"] .or-node.or-sel .or-ringc { stroke: var(--ink); }
+/* The spikes take their colour from the star, and the ramp already
+   mixes toward --or-star-core, which is near-black on paper. So there
+   is nothing here for the light theme to correct — the rule that used
+   to darken the selection ring went with the ring. */
 
 /* ── the pin ──
    A locked node wears a dotted hairline ring OUTSIDE itself, so the
@@ -3051,6 +3054,9 @@ function orPaintRings() {
   const STOPS = [[0, 0, 1], [.08, 22, .89], [.17, 52, .57], [.25, 78, .41],
                  [.33, 100, .32], [.42, 100, .2], [.5, 100, .1],
                  [.6, 100, .04], [.75, 100, .015], [1, 100, 0]];
+  /* Offset, opacity. Symmetrical about the middle because the ray runs
+     through the star, not out from it. */
+  const SPIKE = [[0, 0], [.34, .24], [.5, .95], [.66, .24], [1, 0]];
   defs.innerHTML = orLayout.cats().map(c => {
     const v = `var(--or-cat-${esc(c.id)})`;
     return `<radialGradient id="orStar-${esc(c.id)}">`
@@ -3077,7 +3083,24 @@ function orPaintRings() {
   + STOPS.map(([o, m, a]) => `<stop offset="${o}" style="stop-color:`
     + (m === 0 ? 'var(--or-star-core)' : 'var(--or-mute)')
     + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('')
-  + `</radialGradient>`;
+  + `</radialGradient>`
+  /* ── the spike ramps ──
+     A bright source on a photographic plate throws four rays. That is
+     optics, not decoration, and it is the one way to mark the selected
+     star that stays inside the language the rest of this drawing
+     speaks — no hoop, no outline, nothing bolted on.
+
+     Two LINEAR ramps, one per axis, bright at the core and gone by the
+     tip. A radial gradient cannot do this on a bar: objectBoundingBox
+     maps it to the bar's own box, so every ray gets its own little
+     bullseye and the whole thing reads as a grey smudge. */
+  + orLayout.cats().map(c => {
+    const v = `color-mix(in srgb, var(--or-cat-${esc(c.id)}) 30%, var(--or-star-core))`;
+    const ramp = SPIKE.map(([o, a]) => `<stop offset="${o}" style="stop-color:${v}`
+      + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('');
+    return `<linearGradient id="orSpx-${esc(c.id)}" x1="0" y1="0" x2="1" y2="0">${ramp}</linearGradient>`
+      + `<linearGradient id="orSpy-${esc(c.id)}" x1="0" y1="0" x2="0" y2="1">${ramp}</linearGradient>`;
+  }).join('');
 
   const out = [];
 
@@ -3247,7 +3270,7 @@ function orPaintLinks() {
     const rest = (orSim.raf || orSim.drag) && was ? was : now;
     orPaintLinks.rest[key] = rest;
     keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest,
-                w: sel ? 1.5 : .8 });
+                w: sel ? 1 : .8 });
     /* BOTH ends, not either. Lighting a link because one end was kin
        drew a line at full colour from a neighbour off to a note two
        hops away — and that note is not kin, so it stayed at .55. A lit
@@ -3259,7 +3282,7 @@ function orPaintLinks() {
     const lit = !state.sel || (near.has(a) && near.has(b));
     out.push(`<path d="${d}" fill="none"`
       + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
-      + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
+      + ` stroke-width="${sel ? 1 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
   }
   /* ── the folder tether ──
@@ -3424,20 +3447,40 @@ function orPaintNodes() {
        before, so the lines read as the finding and the notes did not.
        Kin come up to full and take a ring of their own; a stranger
        keeps its place and sits back. */
+    /* ── light, not geometry ──
+       A ring in the category colour used to be drawn round every
+       connected star, with a heavy white one round the star you had
+       clicked. Three hard outlines in a drawing otherwise made
+       entirely of light — and on a real vault, where the majors are
+       large, the hoop dominated the star inside it.
+
+       So the answer is told in the only vocabulary the rest of the
+       field speaks. Kin grow and brighten; the selection grows
+       furthest, brightens most, and takes a hotter core. */
     const kin = near ? near.has(it.id) : null;
     const burn = kin === true && !sel;
-    parts.push(`<circle class="or-halo" r="${N(ext * (burn ? 1.22 : 1))}"`
+    const lit  = sel ? 1.36 : burn ? 1.3 : 1;
+    const litO = sel ? 1.8 : burn ? 1.6 : 1;
+    const bloom = ext * lit;
+    parts.push(`<circle class="or-halo" r="${N(bloom)}"`
       + ` fill="url(#orStar-${cat})"`
-      + ` opacity="${N(Math.min(1, .82 * mag * (burn ? 1.5 : 1)))}"/>`);
-    if (burn)
-      parts.push(`<circle class="or-kinr" r="${N(ext * .58)}" fill="none"`
-        + ` stroke="var(--or-cat-${cat})" stroke-width="1.1" opacity=".72"/>`);
+      + ` opacity="${N(Math.min(1, .82 * mag * litO))}"/>`);
     /* The thin ring is the selection's alone now. A hub no longer needs
        one to say it is a hub — its reach and its retinue already do. */
-    if (sel)
-      parts.push(`<circle class="or-ringc" r="${N(ext * .62)}" fill="none"`
-        + ` stroke="var(--or-core)" stroke-width="1.6" opacity=".9"/>`);
-    parts.push(`<circle class="or-corec" r="${N(core)}" fill="var(--or-star-core)" opacity=".98"/>`);
+    /* Four rays, and no ring anywhere on the map. Drawn AFTER the
+       bloom so they sit on the glow rather than under it, and sized
+       off the node rather than off its bloom — off the bloom they
+       grow with the magnitude ramp squared and a hub throws rays
+       across the field. */
+    if (sel) {
+      const L = bloom * 2.15, w = Math.max(1.1, core * 2.6);
+      parts.push(`<rect class="or-spike" x="${N(-L)}" y="${N(-w / 2)}"`
+        + ` width="${N(L * 2)}" height="${N(w)}" fill="url(#orSpx-${cat})"/>`
+        + `<rect class="or-spike" x="${N(-w / 2)}" y="${N(-L)}"`
+        + ` width="${N(w)}" height="${N(L * 2)}" fill="url(#orSpy-${cat})"/>`);
+    }
+    parts.push(`<circle class="or-corec" r="${N(core * (sel ? 1.4 : 1))}"`
+      + ` fill="var(--or-star-core)" opacity=".98"/>`);
     /* The pin: a dotted hairline ring OUTSIDE the node, so "locked" is
        legible without a legend and without touching the node's own
        colour. Drawn last of the rings so nothing sits on it. */
@@ -3874,7 +3917,7 @@ orDragStart.lit = (id, on) => {
        tether at 1, so letting go handed both back thinner than the
        neighbours they sit beside — permanently, since nothing
        rewrites width until the next full paint. */
-    L.el.setAttribute('stroke-width', on ? '1.7' : String(L.w));
+    L.el.setAttribute('stroke-width', on ? '1.25' : String(L.w));
     /* Move the cache with the attribute. Left behind, the tension pass
        compares against a value the element no longer has, decides
        nothing needs doing, and the link stays dark for the whole

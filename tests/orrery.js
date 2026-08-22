@@ -790,14 +790,29 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
                 than the same node's would be at rest. */
              kinHalo: kins.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
              farHalo: far.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
-             hoops: document.querySelectorAll('#orNodes .or-kinr').length,
+             hoops: document.querySelectorAll('#orNodes .or-kinr, #orNodes .or-ringc').length,
+             /* Two crossed bars, on the selection and nowhere else. */
+             rays: document.querySelectorAll('#orNodes .or-spike').length,
+             raysElsewhere: [...document.querySelectorAll('#orNodes .or-node')]
+               .filter((g) => g.getAttribute('data-id') !== state.sel)
+               .filter((g) => g.querySelector('.or-spike')).length,
+             /* One mark left on the whole map: the star you clicked. */
+
              kinN: kins.length };
   });
   ok('a connected note is at full strength', burn.kinOp.every((o) => o > .9), burn);
-  ok('and wears a ring of its own', burn.hoops >= burn.kinN - 1, burn);
+  /* A hoop round every lit star read as geometry bolted onto a drawing
+     made of light — and worse on a real vault, where the majors are
+     big enough for the ring to dominate the star inside it. */
+  ok('and no star wears a hoop to say so', burn.hoops === 0, burn.hoops);
   /* Brightness carries it too, and that half is independent of how the
      star is drawn — measured on halo radius, same tier both sides so
      this cannot be comparing a hub with a leaf. */
+  /* The selection throws four rays instead of wearing a ring: what a
+     bright source actually does on a photographic plate, which keeps
+     the mark inside the same language as the glow. */
+  ok('the one you clicked throws four rays', burn.rays === 2, burn.rays);
+  ok('and nothing else on the map does', burn.raysElsewhere === 0, burn.raysElsewhere);
   ok('and burns brighter than a stranger of its own tier',
     await page.evaluate(() => {
       const kin = orKin(state.sel);
@@ -1168,7 +1183,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     const pick = (sel) => [...new Set([...document.querySelectorAll(sel)]
       .map((t) => t.getAttribute('stroke-width')))];
     return { teth: pick('#orLinks .or-tether'),
-             sel: pick('#orLinks path[data-a]:not(.or-tether)[stroke-width="1.5"]') };
+             sel: pick('#orLinks path[data-a]:not(.or-tether)[stroke-width="1"]') };
   });
   const wBefore = await widths();
   await page.mouse.move(hitW.x, hitW.y);
@@ -1181,7 +1196,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     JSON.stringify(wAfter.teth) === JSON.stringify(wBefore.teth)
     && wAfter.teth.join() === '1', { wBefore, wAfter });
   ok('and so is a released link of the selection',
-    wAfter.sel.length > 0 && wAfter.sel.join() === '1.5', wAfter);
+    wAfter.sel.length > 0 && wAfter.sel.join() === '1', wAfter);
   await page.evaluate(() => orClose());
   await page.waitForTimeout(500);
 
