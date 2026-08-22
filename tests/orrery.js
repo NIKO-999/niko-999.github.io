@@ -581,6 +581,50 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('and files no position either — same contract as the pointer',
     !key.saved, key.saved);
 
+  /* ── selecting colours only what it reaches ──
+     The question a click asks is "what does this touch?", so the answer
+     has to be the only thing still wearing a colour. Measured off the
+     drawn elements: the kin keep their category gradient, everything
+     else points at the colourless one, and NOTHING disappears. */
+  console.log('\n── what it touches ──');
+  await page.evaluate(() => orOpen('trading/models/cisd'));
+  await page.waitForTimeout(600);
+  const mute = await page.evaluate(() => {
+    const kin = orKin(state.sel);
+    const gs = [...document.querySelectorAll('#orNodes .or-node')];
+    const fillOf = (g) => {
+      const h = g.querySelector('.or-halo');
+      return h ? (h.getAttribute('fill') || '') : '';
+    };
+    const wrong = [];
+    gs.forEach((g) => {
+      const id = g.getAttribute('data-id');
+      const muted = fillOf(g).indexOf('orStar-mute') >= 0;
+      if (kin.has(id) === muted) wrong.push(id + (muted ? ': kin but muted' : ': stranger but coloured'));
+    });
+    const links = [...document.querySelectorAll('#orLinks path')];
+    const linkWrong = links.filter((l) => {
+      const touches = kin.has(l.getAttribute('data-a')) || kin.has(l.getAttribute('data-b'));
+      const muted = (l.getAttribute('stroke') || '').indexOf('or-mute') >= 0;
+      return touches === muted;
+    }).length;
+    return { nodes: gs.length, kin: kin.size, wrong: wrong.slice(0, 4),
+             linkWrong, links: links.length };
+  });
+  ok('the selection and its links keep their colour, nothing else does',
+    mute.wrong.length === 0, mute.wrong);
+  ok('and every link agrees with the nodes it joins', mute.linkWrong === 0,
+    { wrong: mute.linkWrong, of: mute.links });
+  ok('muting is not removing — every node is still drawn',
+    mute.nodes === seed.length + corpus.hubs, mute.nodes);
+  ok('and it is a minority that stays lit, or it says nothing',
+    mute.kin > 1 && mute.kin < mute.nodes / 3, { kin: mute.kin, of: mute.nodes });
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(400);
+  const cleared = await page.evaluate(() => [...document.querySelectorAll('#orNodes .or-halo')]
+    .filter((h) => (h.getAttribute('fill') || '').indexOf('orStar-mute') >= 0).length);
+  ok('closing the note gives every colour back', cleared === 0, cleared);
+
   /* ── the legend isolates by dimming, never by removing ── */
   console.log('\n── which, not whether ──');
   const countAll = (await page.$$('#orNodes .or-node')).length;

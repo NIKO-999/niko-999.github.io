@@ -100,6 +100,7 @@
      so the same ten gradient stops draw it in ink instead. */
   --or-star-core: #fffaef;
   --or-star-a: 1;
+  --or-mute:   #8e8a83;      /* the colourless star: light without hue */
 
   /* Chip and card fills are the shell's opaque menu surface, aliased
      rather than copied: text on them must not depend on which corner
@@ -121,6 +122,7 @@
   --or-cat-other:   #4a453e;
   --or-star-core:   #241f19;
   --or-star-a:      1.85;      /* paper needs more ink than black needs light */
+  --or-mute:        #6f6a62;
   /* --or-hair, --or-chip and --or-chip-line re-resolve through the
      shell tokens they alias; --or-core stays warm white — see above. */
 }
@@ -2891,7 +2893,18 @@ function orPaintRings() {
            to know which theme it is in. */
         + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('')
       + `</radialGradient>`;
-  }).join('');
+  }).join('')
+  /* The colourless one. Selecting a note mutes everything it does not
+     reach to this — same falloff, same light, no hue — so what remains
+     in colour IS the neighbourhood, read at a glance and without
+     hunting for a highlight. Muted, never hidden: a note you cannot see
+     is a note you cannot find your way back from, and the shape of the
+     whole map is the thing you are navigating by. */
+  + `<radialGradient id="orStar-mute">`
+  + STOPS.map(([o, m, a]) => `<stop offset="${o}" style="stop-color:`
+    + (m === 0 ? 'var(--or-star-core)' : 'var(--or-mute)')
+    + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('')
+  + `</radialGradient>`;
 
   const out = [];
 
@@ -3005,6 +3018,7 @@ function orPaintLinks() {
   const g = byId('orLinks');
   if (!g) return;
   const note = orLayout.note || {}, catOf = orLayout.catOf || {};
+  const near = state.sel ? orKin(state.sel) : null;
   const out = [], keep = [];
   for (const [a, b] of state.edges) {
     const pa = state.xy[a], pb = state.xy[b];
@@ -3017,8 +3031,11 @@ function orPaintLinks() {
     const dim = !sel && !orPaint.match(note[a]) && !orPaint.match(note[b]);
     const d = orPaintLinks.d(pa, pb);
     keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d });
+    /* A link keeps its colour when it touches the selection, for the
+       same reason its ends do. */
+    const lit = !state.sel || near.has(a) || near.has(b);
     out.push(`<path d="${d}" fill="none"`
-      + ` stroke="var(--or-cat-${esc(catOf[a] || 'other')})"`
+      + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
       + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
   }
@@ -3074,12 +3091,17 @@ function orPaintNodes() {
   const rank = { leaf: 0, minor: 1, major: 2, hub: 3 };
   items.sort((a, b) => rank[a.t] - rank[b.t] || (a.id < b.id ? -1 : 1));
 
+  /* Selecting is asking "what does this touch?", so the answer is the
+     only thing left wearing a colour. Nothing moves and nothing goes
+     away — the field keeps its shape, it just stops competing. */
+  const near = state.sel ? orKin(state.sel) : null;
+
   const out = items.map(it => {
     const p = state.xy[it.id];
     if (!p) return '';
     const r = TIERS[it.t];
     const sel = state.sel === it.id;
-    const cat = esc(it.cat);
+    const cat = near && !near.has(it.id) ? 'mute' : esc(it.cat);
     const parts = [];
     const g2 = orRng(it.id + ':star');
 
@@ -3175,6 +3197,11 @@ function orPaintLabels() {
   const catOf = orLayout.catOf || {}, label = orLayout.label || {}, note = orLayout.note || {};
 
   const hubOk = orPaint.hubMatch;
+  /* A chip's subtitle names the category, so it mutes with its node —
+     a grey star under a coloured word says two different things. */
+  const nearL = state.sel ? orKin(state.sel) : null;
+  const subInk = (w) => nearL && !nearL.has(w.id)
+    ? 'var(--or-mute)' : `var(--or-cat-${esc(w.cat)})`;
   const want = [];
   const taken = new Set();
   const add = (id, title, sub, cat) => {
@@ -3203,7 +3230,7 @@ function orPaintLabels() {
       + ` fill="var(--menu)" stroke="var(--glass-line)"/>`
       + `<text class="or-t1" x="8" y="-2" font-size="8" fill="var(--ink)"`
       + ` style="font-family:var(--sans)">${esc(w.title)}</text>`
-      + `<text class="or-t2" x="8" y="8" font-size="7" fill="var(--or-cat-${esc(w.cat)})"`
+      + `<text class="or-t2" x="8" y="8" font-size="7" fill="${subInk(w)}"`
       + ` style="font-family:var(--mono);letter-spacing:.14em;text-transform:uppercase">${esc(w.sub)}</text>`
       + `</g>`;
   }).join('');
