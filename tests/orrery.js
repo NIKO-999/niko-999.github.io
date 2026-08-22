@@ -206,6 +206,30 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     }
     pos[scheme] = await positions(page);
 
+    /* ── the selection's mark has to survive the theme ──
+       It is stroked var(--or-core), which is near-white: a mark on
+       black and nothing whatsoever on paper. An invisible stroke does
+       not announce itself — it just quietly stops being a selection
+       marker — so the light theme names its own ink, and this holds it
+       to being visible against the ground it is actually drawn on. */
+    const mark = await page.evaluate(() => {
+      orOpen('trading/models/cisd');
+      const r = document.querySelector('#orNodes .or-sel .or-ringc');
+      const lum = (c) => {
+        const [R, G, B] = (String(c).match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3)
+          .map(Number).map((v) => { v /= 255;
+            return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; });
+        return .2126 * R + .7152 * G + .0722 * B;
+      };
+      const ink = lum(getComputedStyle(r).stroke);
+      const bg = lum(getComputedStyle(document.body).backgroundColor);
+      return { ink, bg, ratio: (Math.max(ink, bg) + .05) / (Math.min(ink, bg) + .05) };
+    });
+    ok('the selection mark is visible against this theme\u2019s ground',
+      mark.ratio > 3, mark);
+    await page.evaluate(() => orClose());
+    await page.waitForTimeout(250);
+
     /* ── the seed paints, in its own colours ──
        A star carries its category in a GRADIENT, not in a solid fill,
        so the check follows it there: every node points at its own
@@ -790,12 +814,10 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
                 than the same node's would be at rest. */
              kinHalo: kins.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
              farHalo: far.map((g) => +g.querySelector('.or-halo').getAttribute('r')),
-             hoops: document.querySelectorAll('#orNodes .or-kinr, #orNodes .or-ringc').length,
-             /* Two crossed bars, on the selection and nowhere else. */
-             rays: document.querySelectorAll('#orNodes .or-spike').length,
-             raysElsewhere: [...document.querySelectorAll('#orNodes .or-node')]
-               .filter((g) => g.getAttribute('data-id') !== state.sel)
-               .filter((g) => g.querySelector('.or-spike')).length,
+             /* No hoop on any KIN — they answer with light. */
+             hoops: document.querySelectorAll('#orNodes .or-kinr').length,
+             /* One mark on the whole map: the star you clicked. */
+             marks: document.querySelectorAll('#orNodes .or-ringc').length,
              /* One mark left on the whole map: the star you clicked. */
 
              kinN: kins.length };
@@ -808,11 +830,16 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   /* Brightness carries it too, and that half is independent of how the
      star is drawn — measured on halo radius, same tier both sides so
      this cannot be comparing a hub with a leaf. */
-  /* The selection throws four rays instead of wearing a ring: what a
-     bright source actually does on a photographic plate, which keeps
-     the mark inside the same language as the glow. */
-  ok('the one you clicked throws four rays', burn.rays === 2, burn.rays);
-  ok('and nothing else on the map does', burn.raysElsewhere === 0, burn.raysElsewhere);
+  /* One hairline, tucked inside the bloom rather than drawn round it,
+     and only on the star you clicked. */
+  ok('and exactly one star is marked — the one you clicked',
+    burn.marks === 1, burn.marks);
+  ok('the mark sits inside the bloom, not around it',
+    await page.evaluate(() => {
+      const g = document.querySelector('#orNodes .or-sel');
+      return +g.querySelector('.or-ringc').getAttribute('r')
+           < +g.querySelector('.or-halo').getAttribute('r') * .55;
+    }));
   ok('and burns brighter than a stranger of its own tier',
     await page.evaluate(() => {
       const kin = orKin(state.sel);

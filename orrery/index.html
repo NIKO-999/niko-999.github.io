@@ -188,10 +188,11 @@
    white over light glass is invisible, so light mode re-inks the
    SELECTION ring only — selection is a state, not a category, so no
    identity moves. */
-/* The spikes take their colour from the star, and the ramp already
-   mixes toward --or-star-core, which is near-black on paper. So there
-   is nothing here for the light theme to correct — the rule that used
-   to darken the selection ring went with the ring. */
+/* --or-core is near-white, which is a mark on black and nothing at all
+   on paper. An invalid or invisible stroke does not announce itself —
+   it just quietly stops being a selection marker — so the light theme
+   names its own ink. */
+:root[data-resolved="light"] .or-node.or-sel .or-ringc { stroke: var(--ink); }
 
 /* ── the pin ──
    A locked node wears a dotted hairline ring OUTSIDE itself, so the
@@ -3054,9 +3055,6 @@ function orPaintRings() {
   const STOPS = [[0, 0, 1], [.08, 22, .89], [.17, 52, .57], [.25, 78, .41],
                  [.33, 100, .32], [.42, 100, .2], [.5, 100, .1],
                  [.6, 100, .04], [.75, 100, .015], [1, 100, 0]];
-  /* Offset, opacity. Symmetrical about the middle because the ray runs
-     through the star, not out from it. */
-  const SPIKE = [[0, 0], [.34, .24], [.5, .95], [.66, .24], [1, 0]];
   defs.innerHTML = orLayout.cats().map(c => {
     const v = `var(--or-cat-${esc(c.id)})`;
     return `<radialGradient id="orStar-${esc(c.id)}">`
@@ -3083,24 +3081,7 @@ function orPaintRings() {
   + STOPS.map(([o, m, a]) => `<stop offset="${o}" style="stop-color:`
     + (m === 0 ? 'var(--or-star-core)' : 'var(--or-mute)')
     + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('')
-  + `</radialGradient>`
-  /* ── the spike ramps ──
-     A bright source on a photographic plate throws four rays. That is
-     optics, not decoration, and it is the one way to mark the selected
-     star that stays inside the language the rest of this drawing
-     speaks — no hoop, no outline, nothing bolted on.
-
-     Two LINEAR ramps, one per axis, bright at the core and gone by the
-     tip. A radial gradient cannot do this on a bar: objectBoundingBox
-     maps it to the bar's own box, so every ray gets its own little
-     bullseye and the whole thing reads as a grey smudge. */
-  + orLayout.cats().map(c => {
-    const v = `color-mix(in srgb, var(--or-cat-${esc(c.id)}) 30%, var(--or-star-core))`;
-    const ramp = SPIKE.map(([o, a]) => `<stop offset="${o}" style="stop-color:${v}`
-      + `;stop-opacity:calc(${a} * var(--or-star-a))"/>`).join('');
-    return `<linearGradient id="orSpx-${esc(c.id)}" x1="0" y1="0" x2="1" y2="0">${ramp}</linearGradient>`
-      + `<linearGradient id="orSpy-${esc(c.id)}" x1="0" y1="0" x2="0" y2="1">${ramp}</linearGradient>`;
-  }).join('');
+  + `</radialGradient>`;
 
   const out = [];
 
@@ -3459,27 +3440,23 @@ function orPaintNodes() {
        furthest, brightens most, and takes a hotter core. */
     const kin = near ? near.has(it.id) : null;
     const burn = kin === true && !sel;
-    const lit  = sel ? 1.36 : burn ? 1.3 : 1;
-    const litO = sel ? 1.8 : burn ? 1.6 : 1;
+    const lit  = sel ? 1.44 : burn ? 1.3 : 1;
+    const litO = sel ? 1.85 : burn ? 1.6 : 1;
     const bloom = ext * lit;
     parts.push(`<circle class="or-halo" r="${N(bloom)}"`
       + ` fill="url(#orStar-${cat})"`
       + ` opacity="${N(Math.min(1, .82 * mag * litO))}"/>`);
     /* The thin ring is the selection's alone now. A hub no longer needs
        one to say it is a hub — its reach and its retinue already do. */
-    /* Four rays, and no ring anywhere on the map. Drawn AFTER the
-       bloom so they sit on the glow rather than under it, and sized
-       off the node rather than off its bloom — off the bloom they
-       grow with the magnitude ramp squared and a hub throws rays
-       across the field. */
-    if (sel) {
-      const L = bloom * 2.15, w = Math.max(1.1, core * 2.6);
-      parts.push(`<rect class="or-spike" x="${N(-L)}" y="${N(-w / 2)}"`
-        + ` width="${N(L * 2)}" height="${N(w)}" fill="url(#orSpx-${cat})"/>`
-        + `<rect class="or-spike" x="${N(-w / 2)}" y="${N(-L)}"`
-        + ` width="${N(w)}" height="${N(L * 2)}" fill="url(#orSpy-${cat})"/>`);
-    }
-    parts.push(`<circle class="or-corec" r="${N(core * (sel ? 1.4 : 1))}"`
+    /* The one mark left on the whole map, and only because you do have
+       to know which of six burning stars you clicked. A hairline at
+       four tenths of the bloom sits INSIDE the glow rather than around
+       it — close enough to the core to read as part of the star rather
+       than as a hoop bolted round one. */
+    if (sel)
+      parts.push(`<circle class="or-ringc" r="${N(bloom * .4)}" fill="none"`
+        + ` stroke="var(--or-core)" stroke-width=".55" opacity=".55"/>`);
+    parts.push(`<circle class="or-corec" r="${N(core * (sel ? 1.35 : 1))}"`
       + ` fill="var(--or-star-core)" opacity=".98"/>`);
     /* The pin: a dotted hairline ring OUTSIDE the node, so "locked" is
        legible without a legend and without touching the node's own
