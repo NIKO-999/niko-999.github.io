@@ -3004,9 +3004,20 @@ function orPaintRings() {
     const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
     return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(b - a) > 180 ? 1 : 0} 1 ${N(x2)} ${N(y2)}`;
   };
-  out.push(`<g${turn(420, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
+  /* The arcs run three and a half times faster than the rings outside
+     them. They are the innermost furniture and the only bold strokes
+     out there, so they are the one part of the instrument you can
+     actually watch turn: at the old 420s they moved less than a degree
+     a second and read as painted on. Two minutes a revolution is three
+     degrees a second — plain if you look at it, still slow enough to
+     sit under reading. */
+  out.push(`<g${turn(120, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
 
-  /* thin ring */
+  /* The thin ring stays put, and not by oversight: a plain circle
+     rotated about its own centre is identical to itself, so turning it
+     would cost a compositor layer to render exactly nothing. Only the
+     things with a START and an END — the arcs, the ticks, the dashes —
+     can show you they are moving. */
   out.push(`<circle cx="500" cy="500" r="330" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".18"/>`);
 
   /* rim type, on an invisible circle. The path starts at the top and

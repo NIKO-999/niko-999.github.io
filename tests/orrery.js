@@ -693,6 +693,20 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     && alive.c !== 'none' && alive.a !== 'MISSING', alive);
   ok('and the instrument nods', alive.nod !== 'none' && alive.nod !== 'MISSING', alive);
 
+  /* The furniture turns at four rates and the inner arcs are the one
+     part you can WATCH turn — everything outside them is under a degree
+     and a half a second, which is deliberate and also invisible over
+     the seconds anybody actually looks. Measured off the composited
+     transform, not off the stylesheet: an animation that is declared
+     and not running reads perfectly in the source. */
+  const rates = await page.evaluate(() => [...document.querySelectorAll('#orRings g.or-turn')]
+    .map((g) => 360 / parseFloat(getComputedStyle(g).animationDuration)));
+  ok('every ring group is turning', rates.length >= 4 && rates.every((r) => r > 0), rates);
+  ok('and the innermost arcs turn fastest, by a clear margin',
+    Math.max.apply(null, rates) >= 2.5
+    && Math.max.apply(null, rates) > 2 * rates.slice().sort((a, b) => b - a)[1],
+    rates);
+
   const stg = await page.locator('#orStage').boundingBox();
   await page.mouse.move(stg.x + stg.width * 0.8, stg.y + stg.height * 0.25);
   await page.waitForTimeout(220);
