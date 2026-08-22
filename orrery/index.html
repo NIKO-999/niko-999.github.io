@@ -2755,7 +2755,7 @@ orSim.draw = (final) => {
        Slack stays quiet, stretched comes up, and it holds whether you
        are dragging, whether it is springing back, or whether it just
        settled somewhere far from home. */
-    if (!orSim.drag) {
+    if (!orSim.drag && !L.tether) {
       const dx = pa[0] - pb[0], dy = pa[1] - pb[1];
       const len = Math.sqrt(dx * dx + dy * dy);
       const t = Math.min(1, Math.max(0, (len / (L.rest || 60)) - 1) / 2.2);
@@ -3140,7 +3140,8 @@ function orPaintLinks() {
     const now = Math.max(40, Math.hypot(pa[0] - pb[0], pa[1] - pb[1]));
     const rest = (orSim.raf || orSim.drag) && was ? was : now;
     orPaintLinks.rest[key] = rest;
-    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest });
+    keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest,
+                w: sel ? 1.5 : .8 });
     /* A link keeps its colour when it touches the selection, for the
        same reason its ends do. */
     const lit = !state.sel || near.has(a) || near.has(b);
@@ -3148,6 +3149,57 @@ function orPaintLinks() {
       + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
       + ` stroke-width="${sel ? 1.5 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
+  }
+  /* ── the folder tether ──
+     A hub carries no edge of its own, because membership is not a
+     claim the writer made — the reading pane counts LINKS · 3 and a
+     fourth solid line would contradict it in the same glance.
+
+     But that left a selected note lighting its folder's sun and
+     nothing running to it. The hub came up to full, took its ring,
+     and sat there unattached to the constellation it had just joined
+     — which reads as a broken map exactly where the map is most
+     complete. A glow is not a connection; a line is.
+
+     So: drawn only while something is selected, only between two ends
+     that are BOTH already lit, and DASHED. The dashes are the whole
+     distinction — an authored link is solid, belonging is not. It
+     enters no spring and changes no position: the hub keeps degree
+     zero and the field does not move because a line was drawn. */
+  if (near) {
+    let nt = 0;
+    for (const id of near) {
+      /* Selecting a folder tethers every member, which is the honest
+         mirror of a note tethering its folder. A vault can file four
+         thousand notes in one, though, and past a certain count the
+         spokes stop being a drawing and become a fill — so it stops.
+         The members are all still lit; only the lines run out. */
+      if (nt >= 120) break;
+      if (id.indexOf('hub:') === 0) continue;
+      const h = 'hub:' + (catOf[id] || 'other');
+      if (!near.has(h)) continue;
+      const pa = state.xy[id], pb = state.xy[h];
+      if (!pa || !pb) continue;
+      nt++;
+      const d = orPaintLinks.d(pa, pb);
+      /* A tether goes wherever its note goes. Left at full strength it
+         outlived the star it hung from: search for one word and fifty
+         notes drop to .12 while their dashed lines still ran bright
+         down to the sun — four lines to nowhere, measured, and the
+         only thing on screen still claiming those notes existed. */
+      const tdim = !orPaint.match(note[id]);
+      const op = tdim ? .05 : .52;
+      /* It opts out of the TENSION pass, not out of every other narrow:
+         there is no spring behind it, so length is not strain and a
+         tether that brightened with distance would be inventing a
+         force. Drag lighting still reaches it — that is your hand on
+         the node, which is true of a tether as much as an edge. */
+      keep.push({ a: id, b: h, op, d, rest: 0, tether: true, w: 1 });
+      out.push(`<path class="or-tether" d="${d}" fill="none"`
+        + ` stroke="var(--or-cat-${esc(catOf[id] || 'other')})"`
+        + ` stroke-width="1" stroke-dasharray="2 5" stroke-linecap="round"`
+        + ` opacity="${op}" data-a="${esc(id)}" data-b="${esc(h)}"/>`);
+    }
   }
   g.innerHTML = out.join('');
   /* The sim moves these sixty times a second and must not pay a query
@@ -3157,7 +3209,8 @@ function orPaintLinks() {
   const lines = new Array(keep.length);
   for (let i = 0; i < keep.length; i++)
     lines[i] = { el: els[i], a: keep[i].a, b: keep[i].b, op: keep[i].op,
-                 d: keep[i].d, lit: keep[i].op, rest: keep[i].rest };
+                 d: keep[i].d, lit: keep[i].op, rest: keep[i].rest,
+                 tether: !!keep[i].tether, w: keep[i].w };
   orSim.lines = lines;
 }
 orPaintLinks.d = (pa, pb) => {
@@ -3677,7 +3730,13 @@ orDragStart.lit = (id, on) => {
     const L = ls[i];
     if (L.a !== id && L.b !== id) continue;
     L.el.setAttribute('opacity', on ? '.92' : String(L.op));
-    L.el.setAttribute('stroke-width', on ? '1.7' : '.8');
+    /* Restore the width this line was PAINTED at, never a literal.
+       '.8' was every link's width when this was written, and it has
+       not been for two changes: a selected edge paints at 1.5 and a
+       tether at 1, so letting go handed both back thinner than the
+       neighbours they sit beside — permanently, since nothing
+       rewrites width until the next full paint. */
+    L.el.setAttribute('stroke-width', on ? '1.7' : String(L.w));
     /* Move the cache with the attribute. Left behind, the tension pass
        compares against a value the element no longer has, decides
        nothing needs doing, and the link stays dark for the whole

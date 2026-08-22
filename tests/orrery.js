@@ -743,6 +743,71 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('and wears a ring of its own', burn.rings >= burn.kinN - 1, burn);
   ok('while a stranger sits back without leaving',
     burn.farOp.every((o) => o > .2 && o < .8), burn);
+
+  /* ── the folder is JOINED, not merely lit ──
+     A hub is synthetic and carries no edge, so selecting a note lit its
+     folder's sun and ran nothing to it: full halo, its own ring, and
+     empty space between. A glow is not a connection, and the map read
+     as broken at the exact point it was most complete. The tether is
+     what closes it, and these hold it to being a tether rather than a
+     forged link. */
+  const teth = await page.evaluate(() => {
+    const sel = state.sel, hub = 'hub:' + orLayout.catOf[sel];
+    const kin = orKin(sel);
+    const all = [...document.querySelectorAll('#orLinks path[data-a]')];
+    const tet = all.filter((t) => t.classList.contains('or-tether'));
+    const ends = (t) => [t.getAttribute('data-a'), t.getAttribute('data-b')];
+    /* Authored links are what the reading pane counts. A tether must be
+       excluded from that tally by something the eye can also use. */
+    const solid = all.filter((t) => !t.classList.contains('or-tether')
+      && ends(t).includes(sel));
+    const authored = (state.edges || []).filter((e) => e.includes(sel)).length;
+    return {
+      hub,
+      toHub: tet.some((t) => ends(t).join() === [sel, hub].join()),
+      strayEnd: tet.filter((t) => !ends(t).every((id) => kin.has(id))).length,
+      dashed: tet.every((t) => (t.getAttribute('stroke-dasharray') || '') !== ''),
+      solidDashed: solid.some((t) => (t.getAttribute('stroke-dasharray') || '') !== ''),
+      solidN: solid.length, authored,
+      tracked: (orSim.lines || []).filter((l) => l.tether).length, n: tet.length,
+      /* Belonging is not a force. The hub took no edge and no degree,
+         so nothing in the field moved because a line was drawn. */
+      hubDeg: (orLayout.deg || {})[hub] || 0,
+      hubEdges: (state.edges || []).filter((e) => e.includes(hub)).length,
+    };
+  });
+  ok('the folder is joined to the note, not merely lit beside it', teth.toHub, teth);
+  ok('and every tether lands on two ends that are already lit',
+    teth.n > 0 && teth.strayEnd === 0, teth);
+  ok('a tether is dashed and an authored link is not',
+    teth.n > 0 && teth.dashed && !teth.solidDashed, teth);
+  ok('so the map still counts the links the pane counts',
+    teth.solidN === teth.authored, teth);
+  ok('the sim owns every tether, or one comes adrift the first frame',
+    teth.n > 0 && teth.tracked === teth.n, teth);
+  ok('and belonging costs the physics nothing',
+    teth.hubDeg === 0 && teth.hubEdges === 0, teth);
+  /* Attached in the pixels, not just in the data — the failure this
+     whole class of bug hides behind is a line that is geometrically
+     perfect and visually gone. */
+  const tgap = await page.evaluate(() => {
+    const c = (id) => {
+      const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+      const r = g.querySelector('.or-corec').getBoundingClientRect();
+      return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+    };
+    return [...document.querySelectorAll('#orLinks .or-tether')].map((t) => {
+      const a = c(t.getAttribute('data-a')), b = c(t.getAttribute('data-b'));
+      const m = t.getScreenCTM();
+      const q0 = t.getPointAtLength(0), q1 = t.getPointAtLength(t.getTotalLength());
+      const p0 = new DOMPoint(q0.x, q0.y).matrixTransform(m);
+      const p1 = new DOMPoint(q1.x, q1.y).matrixTransform(m);
+      return +Math.max(Math.hypot(p0.x - a.x, p0.y - a.y),
+                       Math.hypot(p1.x - b.x, p1.y - b.y)).toFixed(1);
+    });
+  });
+  ok('a tether reaches both stars, measured in screen pixels',
+    tgap.length > 0 && tgap.every((g) => g < 1.5), tgap);
   /* ── the camera flies in, and the labels do not come with it ──
      Opening flies the view onto the neighbourhood. The stars grow; the
      labels must not, or they arrive four times too big and cover what
@@ -858,6 +923,12 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
 
   await page.evaluate(() => { orClose(); });
   await page.waitForTimeout(700);
+  /* A tether answers a question. With nothing asked there is nothing to
+     answer, and a resting map must carry none of them — otherwise the
+     folder lines become permanent furniture and the field is the
+     hairball this whole layout exists to avoid. */
+  ok('a resting map carries no tethers',
+    await page.evaluate(() => document.querySelectorAll('#orLinks .or-tether').length === 0));
   const sig = await page.evaluate(() => {
     orOpen('trading/models/cisd');
     return new Promise((res) => setTimeout(() => res({
@@ -926,6 +997,69 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('and leaves the map\'s shape intact', found.n === countAll
     && JSON.stringify(shape1) === JSON.stringify(shape0));
   await page.fill('#orSearch', '');
+  await page.waitForTimeout(500);
+
+  /* ── a tether goes where its note goes ──
+     Selection decides WHICH lines exist; the filter decides which stars
+     are still there. Two narrows, and the tether only ever obeyed the
+     first: search one word, fifty notes fall to .12, and their dashed
+     lines went on running bright down to the sun — four lines to
+     nowhere, and the only thing left on screen insisting those notes
+     were there. */
+  await page.evaluate(() => orOpen('trading/models/cisd'));
+  await settle(page);
+  await page.mouse.move(4, 4);
+  await page.fill('#orSearch', 'displacement');
+  await page.waitForTimeout(600);
+  const tfilt = await page.evaluate(() => {
+    const t = [...document.querySelectorAll('#orLinks .or-tether')];
+    const off = t.filter((x) => {
+      const g = document.querySelector(`#orNodes [data-id="${CSS.escape(x.getAttribute('data-a'))}"]`);
+      const star = g && +(g.getAttribute('opacity') || 1) < .2;
+      const line = +x.getAttribute('opacity') < .1;
+      return star !== line;
+    });
+    return { n: t.length, disagree: off.length,
+             ops: [...new Set(t.map((x) => x.getAttribute('opacity')))] };
+  });
+  ok('a filtered-out note takes its tether down with it',
+    tfilt.n > 0 && tfilt.disagree === 0, tfilt);
+  ok('and the ones that survive the filter keep theirs',
+    tfilt.ops.some((o) => +o > .4), tfilt);
+  await page.fill('#orSearch', '');
+  await page.waitForTimeout(500);
+
+  /* ── letting go hands back the width it was painted at ──
+     orDragStart.lit restored a literal '.8', which was every link's
+     width the day it was written and has not been since: a selected
+     edge paints at 1.5 and a tether at 1. So the one line your hand had
+     just been on came back thinner than the ones beside it, and stayed
+     that way — nothing rewrites width until the next full paint. */
+  await settle(page);
+  const hitW = await page.evaluate(() => {
+    const r = document.querySelector('#orNodes [data-id="trading/models/cisd"] .or-corec')
+      .getBoundingClientRect();
+    return { x: r.x + r.width / 2, y: r.y + r.height / 2 };
+  });
+  const widths = () => page.evaluate(() => {
+    const pick = (sel) => [...new Set([...document.querySelectorAll(sel)]
+      .map((t) => t.getAttribute('stroke-width')))];
+    return { teth: pick('#orLinks .or-tether'),
+             sel: pick('#orLinks path[data-a]:not(.or-tether)[stroke-width="1.5"]') };
+  });
+  const wBefore = await widths();
+  await page.mouse.move(hitW.x, hitW.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(hitW.x + i * 12, hitW.y + i * 8);
+  await page.mouse.up();
+  await settle(page);
+  const wAfter = await widths();
+  ok('a released tether is the width it was drawn at',
+    JSON.stringify(wAfter.teth) === JSON.stringify(wBefore.teth)
+    && wAfter.teth.join() === '1', { wBefore, wAfter });
+  ok('and so is a released link of the selection',
+    wAfter.sel.length > 0 && wAfter.sel.join() === '1.5', wAfter);
+  await page.evaluate(() => orClose());
   await page.waitForTimeout(500);
 
   /* ── the camera rides #orView, never the svg ── */
