@@ -5850,7 +5850,8 @@ document.getElementById('backupBtn').addEventListener('click', () => {
     + (bt ? ` and ${bt} ${bt === 1 ? 'backtest' : 'backtests'}` : '') + ' go with it.';
   document.getElementById('bkCount').textContent = isDemo()
     ? 'You are still looking at the sample ledger — there is nothing of your own to save yet. ' + links
-    : `${t} ${t === 1 ? 'trade' : 'trades'} and ${f} capital ${f === 1 ? 'movement' : 'movements'} held here. ` + links;
+    : `${t} ${t === 1 ? 'trade' : 'trades'}, ${f} capital ${f === 1 ? 'movement' : 'movements'} `
+      + `and ${ckDays().length} ${ckDays().length === 1 ? 'check-in' : 'check-ins'} held here. ` + links;
   bk.showModal();
 });
 document.getElementById('bkClose').addEventListener('click', () => bk.close());
@@ -5860,9 +5861,20 @@ document.getElementById('bkSave').addEventListener('click', () => {
   /* Resources ride along in the same file. They are kept under their own
      key at rest, but a person saving "a copy" means a copy of everything
      they typed — two files to keep is one file to lose. */
+  /* The check-in rides along too, for exactly the reason above. It was
+     left out when this was written and the omission was invisible: the
+     file said "a copy", restored without complaint, and quietly did not
+     carry a year of mornings. The days are the part you cannot
+     reconstruct — a trade you can read off a broker statement, how you
+     felt before you took it you cannot.
+
+     Riding in one file is not the same as merging. The check-in stays
+     under its own key at rest and under its own name here; nothing
+     computes across it and the ledger. */
   const blob = new Blob([JSON.stringify({ app: 'ledger', v: 1,
     saved: new Date().toISOString(), events: state.events,
-    bin: bin(), res: resAll(), bt: btRuns(), btBin: btBin() }, null, 2)],
+    bin: bin(), res: resAll(), bt: btRuns(), btBin: btBin(),
+    checkin: ckDays(), risk: { pct: riskPct } }, null, 2)],
     { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -5914,6 +5926,22 @@ bkFile.addEventListener('change', async () => {
     btState = { runs: parsed.bt, bin: Array.isArray(parsed.btBin) ? parsed.btBin : [] };
     btWrite();
   }
+  /* Same rule a third time: absent means a file written before the
+     check-in rode along, and such a file must not be able to wipe the
+     mornings it never carried. */
+  if (Array.isArray(parsed.checkin)) {
+    ckState = { days: parsed.checkin };
+    ckWrite();
+  }
+  /* A percentage is a rule you set, not a record — but restoring the
+     ledger without it leaves every figure on the risk screen computed
+     against a cap you did not choose, which is worse than obviously
+     missing. Validated, because a hand-edited file must not be able to
+     put a number the screen cannot render into the store. */
+  if (parsed.risk && RISK_PCTS.includes(parsed.risk.pct)) {
+    riskPct = parsed.risk.pct;
+    riskSave();
+  }
   let extra = '';
   if (Array.isArray(parsed.res)) {
     try {
@@ -5924,7 +5952,9 @@ bkFile.addEventListener('change', async () => {
   }
   renderAll();
   bk.close();
-  say.textContent = `Restored ${parsed.events.length} records${extra}.`;
+  const ckN = Array.isArray(parsed.checkin) ? parsed.checkin.length : 0;
+  const days = ckN ? `, ${ckN} ${ckN === 1 ? 'check-in' : 'check-ins'}` : '';
+  say.textContent = `Restored ${parsed.events.length} records${days}${extra}.`;
 });
 
 /* ═══ resources ═══

@@ -333,6 +333,43 @@ const ok = (name, cond, extra) => {
   ok('and the ledger never saw any of it', await p.evaluate(() =>
     state.events.every(e => ['trade', 'deposit', 'withdraw'].includes(e.k))));
 
+  // ── the copy carries the mornings ──────────────────────────────
+  /* The backup said "a copy" and did not carry the check-in. Silent:
+     the file wrote, restored without complaint, and dropped a year of
+     days on the floor. A trade you can rebuild off a broker statement;
+     how you felt before you took it you cannot. */
+  const file = JSON.parse(await p.evaluate(() => {
+    let held = null;
+    const orig = URL.createObjectURL;
+    URL.createObjectURL = (b) => { held = b; return orig.call(URL, b); };
+    document.getElementById('backupBtn').click();
+    document.getElementById('bkSave').click();
+    URL.createObjectURL = orig;
+    return held.text();
+  }));
+  ok('the copy carries the check-in',
+    Array.isArray(file.checkin) && file.checkin.length >= 1, file.checkin);
+  ok('and the morning in it is the one that was written',
+    (file.checkin || []).some((d) => d.note === 'Slept fine.'), file.checkin);
+  ok('and the risk cap that reads the ledger',
+    file.risk && [5, 10].includes(file.risk.pct), file.risk);
+  ok('while the events stay under their own name, unmerged',
+    Array.isArray(file.events) && file.checkin !== file.events);
+  await p.evaluate(() => document.getElementById('bkDone').click());
+
+  /* A file written before the check-in rode along must not be able to
+     wipe the mornings it never carried — the same rule the bin and the
+     links already get, and the reason all three are written as
+     "absent is not empty". */
+  const kept = await p.evaluate(() => {
+    const before = ckDays().length;
+    const parsed = { events: [], res: [] };
+    if (Array.isArray(parsed.checkin)) { ckState = { days: parsed.checkin }; ckWrite(); }
+    return { before, after: ckDays().length };
+  });
+  ok('an older copy leaves the mornings alone rather than wiping them',
+    kept.before > 0 && kept.after === kept.before, kept);
+
   ok('still no page errors', errs.length === 0, errs);
   console.log(`\n${pass} passed, ${fail} failed`);
   await b.close();

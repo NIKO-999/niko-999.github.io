@@ -199,6 +199,26 @@ watching it still bite.
 suite alone. No build step, no framework, no CDN; both apps are still
 plain static files you can open off the disk.
 
+## The review skill
+
+`.claude/skills/review/` writes the weekly review into the Obsidian
+vault. The intelligence lives in a session and never in the apps —
+which is the only way they keep the promise that nothing leaves the
+browser. No model, no key, no network call goes into `trading/` or
+`orrery/` to make this work.
+
+**It only runs where the vault is.** A cloud session cannot see a folder
+on the user's machine, and the workaround does not exist: this
+repository is **public**, served at niko-999.github.io, so a note
+committed here is a note published. The skill says so and stops rather
+than improvising.
+
+The backup is its input, which is why the copy now carries `checkin`
+and `risk` alongside the events. It said "a copy" and did not carry the
+mornings — silent, because the file wrote and restored without
+complaint. A trade can be rebuilt off a broker statement; how you felt
+before you took it cannot.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding
