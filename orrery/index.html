@@ -210,9 +210,9 @@
 
 /* The dust drifts in three shells at three rates — depth by speed. */
 #orDustA, #orDustB, #orDustC { transform-origin: 500px 500px; }
-#orDustA { animation: or-turn 230s linear infinite; }
-#orDustB { animation: or-turn 145s linear infinite reverse; }
-#orDustC { animation: or-turn 330s linear infinite; }
+#orDustA { animation: or-turn 78s linear infinite; }
+#orDustB { animation: or-turn 48s linear infinite reverse; }
+#orDustC { animation: or-turn 110s linear infinite; }
 
 /* Precession. The instrument nods, so it reads as a solid thing seen
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
@@ -2976,7 +2976,13 @@ function orPaintRings() {
   const out = [];
 
   /* An orrery is a machine, and a machine that never moves is a diagram
-     of one. Each ring turns at its own rate and the tick rim turns
+     of one. It runs at a speed you can WATCH now rather than one you
+     have to take on trust — the first pass was minutes per revolution,
+     which over the seconds anybody looks at a screen is
+     indistinguishable from a still picture. What keeps it from becoming
+     a fairground ride is that the rates still differ and the tick rim
+     still runs against the rest: what you read is one mechanism with
+     parts, not a picture spinning. Each ring turns at its own rate and the tick rim turns
      against them — two hands of the same clock. Minutes per revolution,
      never seconds: this has to sit under reading without pulling at the
      eye, and the reduced-motion rule stops it dead. CSS drives it, so
@@ -3008,7 +3014,7 @@ function orPaintRings() {
     + `<g id="orDustC" class="or-dust">${dust.filter((d, i) => i % 3 === 2).join('')}</g>`);
 
   /* atmosphere */
-  out.push(`<g${turn(190)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
+  out.push(`<g${turn(62)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
     `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`
   ).join('') + `</g>`);
 
@@ -3020,10 +3026,10 @@ function orPaintRings() {
     const [x2, y2] = P(i % 5 ? 398 : 402, a);
     ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
   }
-  out.push(`<g${turn(105, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
+  out.push(`<g${turn(34, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
 
   /* dotted ring */
-  out.push(`<g${turn(250)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
+  out.push(`<g${turn(82)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
 
   /* the two heavy arcs */
   const arc = (r, a, b) => {
@@ -3037,7 +3043,7 @@ function orPaintRings() {
      a second and read as painted on. Two minutes a revolution is three
      degrees a second — plain if you look at it, still slow enough to
      sit under reading. */
-  out.push(`<g${turn(78, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
+  out.push(`<g${turn(26, true)}><path d="${arc(352, 196, 334)}${arc(352, 14, 86)}" fill="none" stroke="var(--or-hair)" stroke-width="2.2" opacity=".55" stroke-linecap="round"/></g>`);
 
   /* The thin ring stays put, and not by oversight: a plain circle
      rotated about its own centre is identical to itself, so turning it
