@@ -148,6 +148,16 @@ const waitPaint = async (page) => {
   await page.waitForTimeout(500);
 };
 
+/* Wait for the field to stop moving. pickHittable checks that a node is
+   reachable AT THE MOMENT IT LOOKS; if the simulation is still settling,
+   the node has drifted by the time the press lands and the click goes
+   to empty space — a background pan instead of a drag, and an assertion
+   that fails for a reason nothing in its message mentions. */
+const settle = async (page) => {
+  await page.waitForFunction(() => !orSim.raf, { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(250);
+};
+
 const positions = (page) => page.$$eval('#orNodes .or-node', (gs) =>
   Object.fromEntries(gs.map((g) => [g.getAttribute('data-id'), g.getAttribute('transform')])));
 
@@ -536,6 +546,54 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      so a node let go where the springs disagree gets pulled back, and
      PINNING is what makes a placement permanent. */
   ok('a release files no position — the sim has it back', !drag.saved, drag.saved);
+
+  /* A held node's links come up to full strength. At rest they sit at
+     .22 so eighty-five of them do not become a net you read instead of
+     the notes; dragged clear of its neighbours, a line at .22 stretched
+     over hundreds of units cannot survive the distance and the node
+     LOOKS snapped free of a line still exactly attached to it. The
+     geometry was never wrong here — only the visibility — so this
+     asserts the visibility. */
+  await settle(page);
+  /* A node with no links proves nothing about lighting its links, so
+     pick from the ones the corpus says have some. Derived from edges —
+     there is no degree map on the corpus, and asking for one that does
+     not exist silently falls through to "any node at all". */
+  const linkedIds = new Set();
+  corpus.edges.forEach((k) => k.split(' ').forEach((id) => linkedIds.add(id)));
+  const linked2 = allIds.filter((id) => linkedIds.has(id));
+  const hitD = await pickHittable(page, linked2);
+  const linksOf = (id) => page.evaluate((n) =>
+    [...document.querySelectorAll('#orLinks path[data-a]')]
+      .filter((t) => t.getAttribute('data-a') === n || t.getAttribute('data-b') === n)
+      .map((t) => +t.getAttribute('opacity')), id);
+  const rest = await linksOf(hitD.id);
+  await page.mouse.move(hitD.cx, hitD.cy);
+  await page.mouse.down();
+  for (let i = 1; i <= 8; i++) await page.mouse.move(hitD.cx + i * 14, hitD.cy + i * 9);
+  const held = await linksOf(hitD.id);
+  /* And still attached, in the pixels: the endpoint of every one of its
+     links lands on the node's own core. */
+  const gaps = await page.evaluate((id) => {
+    const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+    const cr = g.querySelector('.or-corec').getBoundingClientRect();
+    const nc = { x: cr.x + cr.width / 2, y: cr.y + cr.height / 2 };
+    return [...document.querySelectorAll('#orLinks path[data-a]')].filter((t) =>
+      t.getAttribute('data-a') === id || t.getAttribute('data-b') === id).map((t) => {
+      const at0 = t.getAttribute('data-a') === id;
+      const pt = t.getPointAtLength(at0 ? 0 : t.getTotalLength());
+      const sp = new DOMPoint(pt.x, pt.y).matrixTransform(t.getScreenCTM());
+      return +Math.hypot(sp.x - nc.x, sp.y - nc.y).toFixed(1);
+    });
+  }, hitD.id);
+  await page.mouse.up();
+  await page.waitForTimeout(900);
+  const after = await linksOf(hitD.id);
+  ok('a held node\u2019s links light up', held.length > 0 && held.every((o) => o > .8),
+    { rest, held });
+  ok('and never leave the node, measured in screen pixels',
+    gaps.length > 0 && gaps.every((g) => g < 1.5), gaps);
+  ok('and settle back when you let go', after.every((o) => o < .5), after);
 
   /* Double-click pins where it sits, and a pin is what survives. */
   const pinAt = await page.evaluate((id) => {

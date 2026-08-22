@@ -3568,6 +3568,7 @@ function orDragMove(e) {
     const lg = byId('orLabels');
     const ch = lg && lg.querySelector(`.or-chip[data-for="${CSS.escape(d.id)}"]`);
     if (ch) ch.setAttribute('opacity', '0');
+    orDragStart.lit(d.id, true);
   }
   const [ux, uy] = orToUser(e.clientX, e.clientY);
   /* No repaint mid-drag — that would replace the node under the
@@ -3578,10 +3579,35 @@ function orDragMove(e) {
   if (!orSim.raf) orSim.draw(false);
 }
 
+/* ── the springs you are pulling on ──
+   A link sits at .22 so eighty-five of them do not become a net you
+   read instead of the notes. That is right at rest and wrong the moment
+   you drag: pull a node clear of its neighbours and the line stretches
+   over hundreds of units at an opacity that cannot survive the
+   distance, so the node appears to snap free of a line that is in fact
+   still exactly attached to it — measured, zero pixels of gap, the
+   whole way through the drag. Nothing was broken except that you could
+   not see it.
+
+   So the edges of a held node come up to full strength for the ride.
+   It is also the honest reading: those are the springs your hand is
+   working, and they are what the rest of the field is moving in
+   answer to. */
+orDragStart.lit = (id, on) => {
+  const ls = orSim.lines || [];
+  for (let i = 0; i < ls.length; i++) {
+    const L = ls[i];
+    if (L.a !== id && L.b !== id) continue;
+    L.el.setAttribute('opacity', on ? '.92' : String(L.op));
+    L.el.setAttribute('stroke-width', on ? '1.7' : '.8');
+  }
+};
+
 function orDragEnd(e) {
   const d = state.drag;
   state.drag = null;
   orSim.quiet = false;
+  if (d && d.id != null && d.moved) orDragStart.lit(d.id, false);
   const svg = byId('orSvg');
   if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }
   if (!d || d.id == null) return;
