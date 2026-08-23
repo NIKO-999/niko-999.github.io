@@ -612,8 +612,19 @@
    here is flex — the old layout merely happened to miss. The eyebrow
    reserves the corner instead. Escape closes too — this is the
    visible way out, not the only one. */
-#orNoteClose { position: absolute; top: 36px; right: 30px; }
-.or-eyebrow { padding-right: 44px; }
+/* Both closes, and #orCatClose was not in this rule — it sat in
+   normal flow at the column's top LEFT, a 36px row of its own above
+   the eyebrow, 27px out of line with every other element in the
+   column, while the shared eyebrow went on reserving an empty corner
+   for a button that was not in it. */
+#orNoteClose, #orCatClose { position: absolute; top: 36px; right: 30px; }
+/* Wide enough to actually clear it. The button is 30px from the right
+   and about 36 across, so it occupies the last 66px of the column —
+   and this reserved 44. Measured: at 1512px the select happened to
+   stop short and it looked fine; at 1280 it ran 57px under the button
+   and the corner swallowed the click. A number that only works at the
+   width the test happened to use is not a number. */
+.or-eyebrow { padding-right: 76px; }
 
 /* The ramp, top to bottom. The eyebrow's padding matches the ruled
    block below it — border and padding, 27px — so the whole column
@@ -652,6 +663,14 @@
      word it shows, starving the path beside it to nothing. The boot
      sizes it to the CURRENT word; this is the ceiling if that fails. */
   max-width: 11em;
+  /* And it gives way before the row overflows. Without this the flex
+     item refuses to shrink below its content, so a narrow column does
+     not compress the select — it pushes it out under the close. */
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   padding: 0;
   border: 0;
   background: none;
@@ -759,16 +778,30 @@
 
 /* A wikilink is a button dressed as a link: it navigates the map, not
    the browser. */
+/* ── the link carries its accent in the RULE, not in the text ──
+   The pane has no card behind it on purpose — the text sits on the
+   photograph. So every colour in here is composited over whatever that
+   photograph happens to be doing at that spot, and the accent is the
+   one token that changes with the palette rather than with the theme.
+   On 'turtle' in the dark it resolves to a pale grey-blue and the
+   backdrop washes bright exactly under the link rows: measured 3.82:1,
+   3.87, 3.98 — six runs under the 4.5 floor, while every other run of
+   text in the pane passed.
+
+   Body ink is what is guaranteed to survive that ground, because it is
+   the colour the whole pane was checked against. So the words take the
+   ink and the accent moves to the underline, where a lower ratio is a
+   decoration rather than a word you cannot read. */
 .or-wl {
   padding: 0;
   border: 0;
   background: none;
-  color: var(--accent);
+  color: var(--ink);
   font: inherit;
   text-align: left;
   cursor: pointer;
   overflow-wrap: break-word;
-  border-bottom: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--accent) 70%, transparent);
 }
 /* The dead one is a loose end — it goes nowhere, and it says so by
    refusing the pointer's invitation. */
@@ -2033,14 +2066,35 @@ function orRead() {
   const cats = new Set(Array.isArray(CATS) ? CATS.map(c => c && c.id)
                                            : Object.keys(CATS));
 
+  /* Finite is not the same as renderable. A pin of 9e99 passes
+     Number.isFinite and then SVG rejects the attribute — three console
+     errors a paint, repeating forever, and no map. And a pin dragged
+     to the corner of the window at high zoom lands hundreds of units
+     outside the viewBox, survives the reload, and is then invisible at
+     the default camera with no way back to it.
+
+     Both are the same problem: a stored pin that the default camera
+     cannot reach. So it is clamped on the way IN rather than
+     restricted on the way out — you can still drag a node anywhere you
+     like during a session; what you cannot do is come back to a map
+     with a note parked somewhere you cannot see.
+
+     The band is the viewBox, not the stage. preserveAspectRatio="meet"
+     guarantees the whole 0–1000 box is on screen at the default
+     camera whatever the window's shape; anything outside it is only
+     visible on some aspect ratios, which is not a guarantee. Inset far
+     enough that the star's whole bloom clears the edge. */
+  const PIN_LO = 15, PIN_HI = 985;
+  const clamp = (v) => Math.min(PIN_HI, Math.max(PIN_LO, v));
   const xy = (p) => Array.isArray(p) && Number.isFinite(p[0]) && Number.isFinite(p[1]);
   const pin = map(v.pin);
-  for (const id in pin) if (xy(pin[id])) out.pin[id] = [pin[id][0], pin[id][1]];
+  for (const id in pin) if (xy(pin[id]))
+    out.pin[id] = [clamp(pin[id][0]), clamp(pin[id][1])];
   /* The migration. A live pin always wins — somebody who has already
      upgraded and re-pinned is not overruled by the old field. */
   const pos = map(v.pos);
   for (const id in pos) if (xy(pos[id]) && !(id in out.pin))
-    out.pin[id] = [pos[id][0], pos[id][1]];
+    out.pin[id] = [clamp(pos[id][0]), clamp(pos[id][1])];
 
   const cat = map(v.cat);
   for (const id in cat) if (cats.has(cat[id])) out.cat[id] = cat[id];
@@ -2984,7 +3038,12 @@ orSim.seed = () => {
     S.M[i] = SIM.m[t] || SIM.m.leaf;
     S.HK[i] = SIM.home * (t === 'hub' ? SIM.hubHome : 1)
       * (orLayout.homeK == null ? 1 : orLayout.homeK);
-    S.FIX[i] = pin ? 1 : 0;
+    /* A live drag is a hold too. seed() rebuilds FIX from the pins
+       alone, so any repaint during a drag — pressing Enter on the
+       held node, a filter keystroke — handed the node back to the
+       springs while the pointer was still down, and it slid out from
+       under a stationary hand. Measured: 66 units in 600ms. */
+    S.FIX[i] = (pin || (state.drag && state.drag.id === id)) ? 1 : 0;
     hs[i] = ((h[0] * 8) | 0) + ',' + ((h[1] * 8) | 0);
   }
 
@@ -3179,7 +3238,19 @@ function orPin(id) {
   }
   const saved = orWrite({ pin: state.pin });
   orSim.hold(id, on);
+  /* Was the keyboard on this star? orPaint replaces every node
+     element, so whatever had focus is about to be removed from the
+     document and focus falls to <body> — the next arrow key then goes
+     nowhere and the only way back is to Tab the whole field again.
+     Asked before the paint, restored after it, by id. */
+  const kbd = document.activeElement;
+  const hadFocus = !!(kbd && kbd.closest && kbd.closest('.or-node')
+    && kbd.closest('.or-node').getAttribute('data-id') === id);
   orPaint();
+  if (hadFocus) {
+    const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+    if (g) { try { g.focus({ preventScroll: true }); } catch (e) {} }
+  }
   orHeat(SIM.warm);
   orSay(`${orPin.title(id)} ${on ? 'pinned' : 'released'}.`
     + (saved ? '' : ' Not saved — storage unavailable.'));
@@ -3492,7 +3563,17 @@ function orPaintLinks() {
     const key = a + '\n' + b;
     const was = orPaintLinks.rest[key];
     const now = Math.max(40, Math.hypot(pa[0] - pb[0], pa[1] - pb[1]));
-    const rest = (orSim.raf || orSim.drag) && was ? was : now;
+    /* Capped. A node PINNED far from its neighbours makes those links
+       genuinely long at rest — 614 units, measured — so the baseline
+       becomes 614, tension reads zero, and the link sits at .22 across
+       most of the screen, which is invisible. That is the "links
+       disappear" failure again, arriving by a different road: the
+       tension is honest and the resting ink is not enough.
+
+       So slack has a ceiling. Past it a link is stretched no matter
+       what its own history says, because nothing this layout intends
+       is that long. */
+    const rest = Math.min(210, (orSim.raf || orSim.drag) && was ? was : now);
     orPaintLinks.rest[key] = rest;
     keep.push({ a, b, op: sel ? .85 : dim ? .05 : .22, d, rest,
                 w: sel ? 1 : .8 });
@@ -3836,7 +3917,26 @@ function orPaintLabels() {
      then a short vertical slide, and a major that still cannot fit
      DROPS to hover-only. Fewer chips is degradation; illegible chips
      are a fault. */
-  const right = (VIEWBOX - state.panX) / state.zoom;
+  /* The VIEWPORT's right edge in user units, not the viewBox's.
+     preserveAspectRatio="meet" letterboxes the 1000-unit box into a
+     stage that is almost never square, so on a wide window the visible
+     user-space range runs well past 1000 — measured -266 to 1266 at
+     1512px. Flipping against 1000 threw chips to the left of stars
+     that had 232px of empty stage to their right and needed 96.
+
+     Asked of the element rather than derived: getScreenCTM already
+     carries the letterbox, the camera and anything else in the chain,
+     so inverting it gives the true edge without this having to know
+     what any of them did. */
+  let right = (VIEWBOX - state.panX) / state.zoom;
+  const svgEl = byId('orSvg');
+  const ctm = svgEl && svgEl.getScreenCTM && svgEl.getScreenCTM();
+  if (ctm) {
+    const box = svgEl.getBoundingClientRect();
+    const inv = ctm.inverse();
+    const edge = new DOMPoint(box.right, box.top).matrixTransform(inv);
+    if (Number.isFinite(edge.x)) right = (edge.x - state.panX) / state.zoom;
+  }
   /* A label is chrome, not scenery: it holds one size on screen while
      the field it names grows under it. Without this, flying into a note
      lands at nearly 4x and every label arrives four times too big,
@@ -4059,6 +4159,13 @@ orZoom.raf = 0;
    drag that silently dies. The svg outlives every repaint. */
 function orDragStart(e) {
   if (e.button != null && e.button !== 0) return;
+  /* One hand at a time. touch-action is none, so the app owns every
+     finger and the browser never sends pointercancel — a second finger
+     landing mid-drag used to overwrite state.drag, which orphaned the
+     node the FIRST finger was holding: frozen out of the physics with
+     FIX=1 and no pin, so no ring said so and nothing ever released it.
+     The second press is simply ignored. */
+  if (state.drag) return;
   const svg = byId('orSvg');
   if (!svg) return;
   const g = e.target.closest ? e.target.closest('.or-node') : null;
@@ -4187,6 +4294,21 @@ function orDragEnd(e) {
   orSim.quiet = false;
   orSim.drag = null;
   if (d && d.id != null && d.moved) orDragStart.lit(d.id, false);
+  /* Hover was suppressed for the ride and has to be handed back. The
+     pointer is usually still ON the node you just dropped, so leaving
+     state.hover null meant the star under your cursor had no chip and
+     no neighbourhood — and no pointer event was coming to fix it,
+     because the pointer had not moved. */
+  /* elementFromPoint, not e.target: the SVG has pointer capture for
+     the whole drag, so the pointerup's target is the SVG every time
+     and closest('.or-node') is always null. Asking the document what
+     is actually under the cursor is also the only thing that survives
+     the repaint the drop causes, which replaces every node element. */
+  if (d && d.id != null && e && Number.isFinite(e.clientX)) {
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const over = el && el.closest ? el.closest('.or-node') : null;
+    orHover(over ? over.getAttribute('data-id') : null);
+  }
   const svg = byId('orSvg');
   if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }
   /* ── a click on empty sky puts everything down ──
@@ -4781,7 +4903,7 @@ const { orAttach, orPickDir, orForget } = (() => {
       const loose = orResolve(notes);
       state.notes = notes;
       state.loose = loose.length;
-      if (state.sel && !notes.some((n) => n.id === state.sel)) state.sel = null;
+      if (state.sel && !notes.some((n) => n.id === state.sel)) orDropSel();
       orIdbPut('idx', 'index', { k: 'index', notes, loose: loose.length })
         .catch(() => {});
       orWrite({ vault: { name, at: Date.now(), n: notes.length } });
@@ -4860,7 +4982,7 @@ const { orAttach, orPickDir, orForget } = (() => {
     state.notes = SEED.map((n) =>
       Object.assign({}, n, { tags: n.tags.slice(), links: n.links.slice() }));
     state.loose = orResolve(state.notes).length;
-    state.sel = null;
+    orDropSel();
     meta();
     repaint();
     orLog('Vault forgotten. The files are untouched on your disk.');
@@ -4957,15 +5079,25 @@ const { orAttach, orPickDir, orForget } = (() => {
          folder's colour would undo a filing you chose by hand. orRead
          has already dropped category ids the build does not know. */
       const filed = orRead().cat;
-      for (const n of rec.notes) if (filed[n.id]) n.cat = filed[n.id];
-      state.notes = rec.notes;
-      state.loose = Number.isFinite(rec.loose) ? rec.loose
-        : orResolve(rec.notes).length;
-      if (state.sel && !state.notes.some((n) => n.id === state.sel)) state.sel = null;
+      /* A damaged entry is dropped; the cache is not. One null in the
+         array threw on n.id, and because this is the async boot TAIL
+         everything after it never ran — meta(), the Forget control,
+         and the remembered folder's reconnect all vanished with it. A
+         torn record costs you that record. It must not cost you the
+         vault. */
+      const whole = rec.notes.filter(n => n && typeof n === 'object' && typeof n.id === 'string');
+      const torn = rec.notes.length - whole.length;
+      for (const n of whole) if (filed[n.id]) n.cat = filed[n.id];
+      state.notes = whole;
+      state.loose = torn === 0 && Number.isFinite(rec.loose) ? rec.loose
+        : orResolve(whole).length;
+      if (state.sel && !state.notes.some((n) => n.id === state.sel)) orDropSel();
       repaint();
       const v = orRead().vault;
       orLog(`${v ? v.name : 'Vault'} — ${state.notes.length.toLocaleString('en-GB')} `
-        + 'notes from the cache.');
+        + 'notes from the cache.'
+        + (torn ? ` ${torn} damaged ${torn === 1 ? 'record was' : 'records were'} `
+          + 'skipped — attach the folder again to rebuild them.' : ''));
     } else if (state.notes.length && state.loose == null) {
       /* The seed goes through the same resolver, so its loose ends
          are counted the same way a vault's are. */
@@ -5472,6 +5604,26 @@ orZoom.land = () => {
 /* Close puts everything back: the cards return, the map widens, and
    focus goes to the node you were reading — the paint just replaced
    the element that had it, so it is found again by id. */
+/* ── the note under the pane just stopped existing ──
+   Attaching a second vault, or forgetting the first, replaces
+   state.notes wholesale. Three places dropped state.sel when the open
+   note was not in the new set — and dropping the id is only a third of
+   closing. The pane stayed open showing a note that no longer existed,
+   title and path still on screen; `sel` stayed in storage so it came
+   back on every reload; and because orOpen.chrome(true) is what hides
+   the Categories and The field cards, those two stayed at opacity 0
+   AND inert for the rest of the session. A map with no legend and no
+   way to get one back.
+
+   One function, and all three call it. */
+function orDropSel() {
+  state.sel = null;
+  orWrite({ sel: null });
+  const pane = byId('orNote');
+  if (pane) pane.hidden = true;
+  orOpen.chrome(false);
+}
+
 function orClose() {
   const pane = byId('orNote');
   if (!pane || pane.hidden) return;

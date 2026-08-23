@@ -1471,6 +1471,125 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.evaluate(() => { orForm('orrery'); });
   await settle(page);
 
+  /* ── what the sweep found ──
+     Each of these was reproduced before it was fixed; each is written
+     as the thing that was WRONG, so a regression reads as the same
+     sentence failing rather than as a mystery. */
+
+  /* A stored pin must come back reachable. Finite is not renderable —
+     9e99 passes Number.isFinite and then SVG rejects the attribute,
+     three console errors a paint and no map — and a pin dragged to the
+     window corner at high zoom survives the reload invisible at the
+     default camera. */
+  const strayPins = await page.evaluate(() => {
+    localStorage.setItem('orrery.v1', JSON.stringify({ v: 1, pin: {
+      'body/hydration': [9e99, 9e99],
+      'trading/models/cisd': [-530.6, -156.2] } }));
+    return true;
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitPaint(page);
+  await page.waitForTimeout(400);
+  const pins = await page.evaluate(() => {
+    const box = document.getElementById('orSvg').getBoundingClientRect();
+    const on = (id) => {
+      const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+      if (!g) return false;
+      const r = g.getBoundingClientRect();
+      return r.right > box.left && r.left < box.right
+          && r.bottom > box.top && r.top < box.bottom;
+    };
+    return { huge: state.pin['body/hydration'],
+             off: state.pin['trading/models/cisd'],
+             bothOnStage: on('body/hydration') && on('trading/models/cisd') };
+  });
+  ok('a stored pin comes back inside the field',
+    pins.huge.every((v) => v >= 15 && v <= 985)
+    && pins.off.every((v) => v >= 15 && v <= 985), pins);
+  ok('and is somewhere the default camera can actually see',
+    pins.bothOnStage, pins);
+  ok('and it costs no console errors to load one', errs.length === 0, errs.slice(0, 3));
+  await page.evaluate(() => localStorage.clear());
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitPaint(page);
+  await page.waitForTimeout(300);
+
+  /* A note that stops existing under an open pane takes the pane with
+     it. Dropping the id was a third of closing: the pane stayed open
+     on a note that was gone, sel stayed in storage so it came back
+     every reload, and the two cards stayed inert for the session. */
+  await page.evaluate(() => orOpen('trading/models/cisd'));
+  await settle(page);
+  const vanished = await page.evaluate(() => {
+    state.notes = [{ id: 'craft/three', title: 'Three', cat: 'craft', tags: [],
+      links: [], aliases: [], body: 'x', words: 1, mtime: 0 }];
+    state.loose = 0;
+    if (state.sel && !state.notes.some((n) => n.id === state.sel)) orDropSel();
+    orPaint();
+    return { sel: state.sel,
+      stored: JSON.parse(localStorage.getItem('orrery.v1') || '{}').sel,
+      paneOpen: !document.getElementById('orNote').hidden };
+  });
+  /* The cards fade back rather than snapping, so this reads the
+     landing, not the flight — measured mid-transition it says .17 and
+     blames the wrong thing. */
+  await page.waitForTimeout(700);
+  const cards = await page.evaluate(() => {
+    const lg = document.getElementById('orLegend');
+    return { legend: +getComputedStyle(lg).opacity,
+             inert: lg.hasAttribute('inert') || lg.inert === true };
+  });
+  ok('a note vanishing under the pane closes the pane', !vanished.paneOpen, vanished);
+  ok('and forgets it in storage, so it does not come back on reload',
+    vanished.sel === null && !vanished.stored, vanished);
+  ok('and gives the legend back rather than leaving it inert',
+    cards.legend === 1 && !cards.inert, cards);
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitPaint(page);
+  await settle(page);
+
+  /* One hand at a time. touch-action is none, so the app owns every
+     finger and no pointercancel ever arrives — a second press used to
+     overwrite state.drag and orphan the held node: FIX=1, no pin, no
+     ring saying so, and nothing to release it. */
+  const twoHands = await page.evaluate(() => {
+    const id = 'trading/models/cisd';
+    const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);
+    const r = g.getBoundingClientRect();
+    const svg = document.getElementById('orSvg');
+    svg.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 1, bubbles: true,
+      button: 0, clientX: r.x + r.width / 2, clientY: r.y + r.height / 2 }));
+    const first = state.drag && state.drag.id;
+    svg.dispatchEvent(new PointerEvent('pointerdown', { pointerId: 2, bubbles: true,
+      button: 0, clientX: r.x + 260, clientY: r.y + 180 }));
+    const after = state.drag && state.drag.id;
+    svg.dispatchEvent(new PointerEvent('pointerup', { pointerId: 1, bubbles: true }));
+    return { first, after };
+  });
+  ok('a second finger does not steal the node the first is holding',
+    twoHands.first === twoHands.after, twoHands);
+  await settle(page);
+  const orphans = await page.evaluate(() => {
+    const S = orSim.S || {}; let n = 0;
+    if (S.FIX) for (let i = 0; i < S.n; i++) if (S.FIX[i] && !state.pin[S.ids[i]]) n++;
+    return n;
+  });
+  ok('and no node is left frozen with no pin to say why', orphans === 0, orphans);
+
+  /* A wiki-link's words take body ink. The pane has no card behind it
+     on purpose, so every colour composites over the photograph — and
+     the accent is the one token that moves with the PALETTE. On
+     'turtle' in the dark it measured 3.82:1 under the link rows while
+     every other run of text in the pane passed. */
+  ok('a wiki-link is coloured by the ink, not by the accent',
+    await page.evaluate(() => {
+      const a = document.querySelector('.or-wl');
+      if (!a) return true;
+      const s2 = getComputedStyle(a);
+      const ink = getComputedStyle(document.body).color;
+      return s2.color === ink;
+    }));
+
   /* ── search dims and holds the shape ── */
   await page.mouse.move(0, 0);
   const shape0 = await positions(page);

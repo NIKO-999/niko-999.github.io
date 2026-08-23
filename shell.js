@@ -43,7 +43,12 @@ const ICON = {
 const media = window.matchMedia('(prefers-color-scheme: dark)');
 const themeBtn  = document.getElementById('themeBtn');
 const themeRail = document.getElementById('themeRail');
-let mode = readStore(KEY) || 'system';
+/* Validated, not taken at face value. A stored value this does not
+   know reaches dataset.resolved verbatim — so no theme rule matches,
+   the appearance label renders empty, and ICON[mode] is undefined,
+   which SVG reports as two `<path d="undefined">` errors a load. The
+   palette beside it has always been checked; this was not. */
+let mode = MODES.includes(readStore(KEY)) ? readStore(KEY) : 'system';
 
 function paint() {
   const resolved = mode === 'system' ? (media.matches ? 'dark' : 'light') : mode;
