@@ -2286,17 +2286,29 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     const out = {};
     orVoice.chosen = null;
 
-    /* The one that sounds best is remote. He must not take it. */
-    set([mk('Google UK English Male', 'en-GB', false),
-         mk('Daniel', 'en-GB', true)]);
+    /* The remote one is deliberately given the HIGHER rank — same
+       locale, better tier, warmer name — so the filter is the only
+       thing that can be keeping it out. Pitting a remote voice against
+       a local one that already outranks it proves nothing, which is
+       what the first version of this assertion did. */
+    set([mk('Serena Online (Natural)', 'en-GB', false),
+         mk('Zarvox', 'en-GB', true)]);
     out.refusesRemote = nm();
-    /* And refuses it even when the flag is missing, by name. */
+    /* And refuses it by name when the browser leaves the flag unset. */
     set([mk('Google UK English Female', 'en-GB', undefined),
-         mk('Daniel', 'en-GB', true)]);
+         mk('Zarvox', 'en-GB', true)]);
     out.refusesUnflagged = nm();
-    /* Rather be mute than upload. */
+    /* Rather be mute than upload — until you say otherwise. */
     set([mk('Google UK English Male', 'en-GB', false)]);
+    orVoice.ok = false;
     out.remoteOnly = orVoice.pick();
+    /* A remembered cloud voice whose consent flag is gone must NOT
+       quietly resume uploading on the next reload. */
+    orVoice.chosen = 'Google UK English Male'; orVoice.ok = false;
+    out.consentGone = orVoice.pick();
+    orVoice.ok = true;
+    out.consentKept = (orVoice.pick() || {}).name;
+    orVoice.chosen = null; orVoice.ok = false;
 
     /* Tier beats name: plain Daniel is the compact MacinTalk voice and
        is exactly what "extremely robotic" sounds like. */
@@ -2330,12 +2342,16 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     window.speechSynthesis.getVoices = real;
     return out;
   });
-  ok('he refuses a cloud voice that would upload what he says',
-    jvoice.refusesRemote === 'Daniel', jvoice);
+  ok('he refuses a better-ranked cloud voice for a worse local one',
+    jvoice.refusesRemote === 'Zarvox', jvoice);
   ok('and refuses it by name when the browser does not flag it',
-    jvoice.refusesUnflagged === 'Daniel', jvoice);
+    jvoice.refusesUnflagged === 'Zarvox', jvoice);
   ok('with nothing but cloud voices he stays mute rather than uploading',
     jvoice.remoteOnly === null, jvoice);
+  ok('a remembered cloud voice with no consent left does not resume uploading',
+    jvoice.consentGone === null, jvoice);
+  ok('and does resume once you have said so',
+    jvoice.consentKept === 'Google UK English Male', jvoice);
   ok('an enhanced voice beats a warmer-named compact one',
     jvoice.tierOverName === 'Kate (Enhanced)', jvoice);
   ok('and premium beats enhanced', jvoice.premiumWins === 'Serena (Premium)', jvoice);
@@ -2377,39 +2393,76 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      thing you choose once, and the bar had just lost two buttons.
      Pressing a chip re-renders the list rather than closing it,
      because you are auditioning. */
-  const jvl = await j.page.evaluate(async () => {
+  const jvl = await j.page.evaluate(() => {
     const real = window.speechSynthesis.getVoices;
+    /* A stock Mac in Chrome: one compact British voice, some other
+       locales, and Chrome's own cloud voices — which are the good ones.
+       This is the case the whole design is for. */
+    const mk = (n, l, loc) => ({ name: n, lang: l, localService: loc, voiceURI: n });
     window.speechSynthesis.getVoices = () => [
-      { name: 'Daniel (Enhanced)', lang: 'en-GB', localService: true, voiceURI: 'd' },
-      { name: 'Serena (Premium)', lang: 'en-GB', localService: true, voiceURI: 's' },
-      { name: 'Google UK English Male', lang: 'en-GB', localService: false, voiceURI: 'g' },
+      mk('Daniel', 'en-GB', true), mk('Karen', 'en-AU', true),
+      mk('Samantha', 'en-US', true),
+      mk('Google UK English Female', 'en-GB', false),
+      mk('Google US English', 'en-US', false),
     ];
-    orVoice.chosen = null;
-    orAsk('voices');
+    orVoice.chosen = null; orVoice.ok = false; orVoice.voice = null;
     const rp = document.getElementById('orReply');
-    const listed = Array.from(rp.querySelectorAll('[data-voice]'))
-      .map((b) => b.getAttribute('data-voice'));
-    rp.querySelector('[data-voice="Daniel (Enhanced)"]').click();
-    const after = { text: rp.textContent, open: !rp.hidden,
-      rows: rp.querySelectorAll('[data-voice]').length,
-      pressed: Array.from(rp.querySelectorAll('[data-voice]'))
-        .filter((b) => b.getAttribute('aria-pressed') === 'true')
-        .map((b) => b.getAttribute('data-voice')) };
-    orVoice.chosen = null;
+    const chips = () => Array.from(rp.querySelectorAll('[data-voice]'))
+      .map((b) => ({ name: b.getAttribute('data-voice'),
+                     up: b.classList.contains('or-rl-up'),
+                     on: b.getAttribute('aria-pressed') === 'true' }));
+    const btn = () => document.getElementById('orVoiceBtn').getAttribute('aria-label');
+
+    orAsk('voices');
+    const listed = { chips: chips(), text: rp.textContent,
+                     using: (orVoice.pick() || {}).name, btn: btn() };
+    rp.querySelector('[data-voice="Google UK English Female"]').click();
+    const took = { chips: chips(), text: rp.textContent, ok: orVoice.ok,
+                   using: (orVoice.pick() || {}).name, btn: btn(),
+                   stored: JSON.parse(localStorage.getItem('orrery.v1')) };
+    orAsk('use Daniel');
+    const back = { ok: orVoice.ok, using: (orVoice.pick() || {}).name, btn: btn(),
+                   stored: JSON.parse(localStorage.getItem('orrery.v1')) };
+    orVoice.chosen = null; orVoice.ok = false; orVoice.voice = null;
     window.speechSynthesis.getVoices = real;
-    return { listed, after };
+    return { listed, took, back };
   });
-  ok('asked for voices he lists the local ones, best first',
-    JSON.stringify(jvl.listed) === JSON.stringify(['Serena (Premium)', 'Daniel (Enhanced)']),
-    jvl.listed);
-  ok('and does not offer the cloud one at all',
-    jvl.listed.every((n) => n.indexOf('Google') < 0), jvl.listed);
-  ok('pressing one switches to it and leaves the list up to try the next',
-    /Daniel \(Enhanced\)/.test(jvl.after.text) && jvl.after.open
-    && jvl.after.rows === 2, jvl.after);
-  ok('and the one in use is the one marked',
-    JSON.stringify(jvl.after.pressed) === JSON.stringify(['Daniel (Enhanced)']),
-    jvl.after.pressed);
+
+  /* ── the stock Mac ── */
+  ok('the only local British voice is what he uses, unasked',
+    jvl.listed.using === 'Daniel', jvl.listed);
+  ok('and he says outright that it is the robotic one, with the fix',
+    /compact one, which is the robotic one/.test(jvl.listed.text)
+    && /Manage Voices/.test(jvl.listed.text), jvl.listed.text.slice(0, 140));
+  ok('the cloud voices are offered rather than hidden',
+    jvl.listed.chips.filter((c) => c.up).map((c) => c.name)
+      .indexOf('Google UK English Female') >= 0, jvl.listed.chips);
+  ok('and every one of them is marked on the chip, not only in the prose',
+    jvl.listed.chips.every((c) => c.up === (c.name.indexOf('Google') === 0)),
+    jvl.listed.chips);
+  ok('the price is stated before you press anything',
+    /uploaded to be spoken/.test(jvl.listed.text), jvl.listed.text.slice(-200));
+
+  /* ── pressing one is the consent ── */
+  ok('pressing a cloud chip switches to it',
+    jvl.took.using === 'Google UK English Female' && jvl.took.ok === true, jvl.took);
+  ok('and says what that now costs, in the answer',
+    /goes to that voice.s server/.test(jvl.took.text), jvl.took.text.slice(0, 160));
+  ok('the always-visible control says it too',
+    /cloud voice/.test(jvl.took.btn), jvl.took.btn);
+  ok('and the consent is stored beside the name, not folded into it',
+    jvl.took.stored.voiceName === 'Google UK English Female'
+    && jvl.took.stored.voiceCloud === true, jvl.took.stored);
+  ok('the chip in use is the one marked',
+    jvl.took.chips.filter((c) => c.on).map((c) => c.name).join()
+      === 'Google UK English Female', jvl.took.chips);
+
+  /* ── and going back withdraws it ── */
+  ok('choosing a local voice again clears the consent',
+    jvl.back.using === 'Daniel' && jvl.back.ok === false
+    && jvl.back.stored.voiceCloud === false, jvl.back);
+  ok('and the control stops warning once nothing is being uploaded',
+    !/cloud voice/.test(jvl.back.btn), jvl.back.btn);
 
   /* ── the promise ──
      Nothing he does reaches a network. Everything above ran through

@@ -307,15 +307,34 @@ Dictation is not — `SpeechRecognition` in this browser uploads the
 microphone to a server — so there is no listen button and there will
 not be one.
 
-**The voice is local or there is no voice.** Chrome lists "Google UK
-English Male" beside the OS voices; it is the best-sounding thing in the
-list and it synthesises on Google's servers, so speaking with it uploads
-the sentence — your note titles, your folder names — to be spoken. It is
-refused by `localService`, and by name as a backstop for a browser that
-leaves the flag undefined. He would rather be mute; the answer is on
-screen either way. Playwright's request interception cannot see that
-traffic, so the assertion in `tests/orrery.js` is the only thing
-guarding it.
+**No voice that leaves the machine is ever chosen for you.** Chrome
+lists "Google UK English Male" beside the OS voices; it is the best
+thing in the list and it synthesises on Google's servers, so speaking
+with it uploads the sentence — your note titles, your folder names — to
+be spoken. Nothing automatic reaches those: `orVoice.list` is
+local-only, filtered on `localService` and by name as a backstop for a
+browser that leaves the flag unset.
+
+**But refusing on your behalf was the wrong shape, and shipping that was
+a mistake.** A stock Mac has exactly one local British voice and it is
+the compact MacinTalk one, so "local only" quietly meant "sound like a
+railway announcement, permanently". The promise here is that nothing
+leaves without you saying so — not that you may never say so. The cloud
+voices are listed, marked on the chip (an arrow and a dashed edge, never
+colour: the accent moves with the palette and a warning that changes
+with the wallpaper is not a warning), and taken only on a press.
+
+The consent is stored **beside** the name, not folded into it. A
+remembered cloud voice whose flag is gone falls back to a local voice
+rather than quietly resuming an upload on the next reload. While one is
+in use the mic button's own label says so — it is the only thing on
+screen that is always there to say it.
+
+Playwright's request interception cannot see speech traffic, so these
+assertions are the only thing guarding any of it. Prove them by making
+the remote voice outrank the local one: an earlier version pitted a
+cloud voice against a `WANT`-listed local one that already beat it on
+rank, so it passed with the filter deleted.
 
 **Then locale, then tier, then warmth.** macOS ships "Daniel" and
 "Daniel (Enhanced)" as two entries sharing a base name; the plain one is

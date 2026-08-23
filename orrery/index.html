@@ -668,6 +668,17 @@
   cursor: pointer;
 }
 .or-rl:hover { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+/* Leaves the machine. Dashed rather than coloured: the accent moves
+   with the palette and a warning that changes colour with the wallpaper
+   is not a warning. */
+.or-rl-up {
+  background: none;
+  border-style: dashed;
+  border-color: color-mix(in srgb, var(--ink-3, var(--or-mute)) 60%, transparent);
+  color: var(--ink-2);
+}
+.or-rl-up:hover { background: var(--glass-in-2); color: var(--ink); }
+.or-rl-up span[aria-hidden] { opacity: .7; }
 .or-rl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── the formation picker ──
@@ -2183,7 +2194,7 @@ orForm.of = (id) => FORMS.find(f => f.id === id) || FORMS[0];
 function orRead() {
   const out = { v: 1, pin: {}, cat: {}, fold: {}, sel: null, only: null,
                 view: 'map', vault: null, form: 'orrery', voice: true,
-                voiceName: null };
+                voiceName: null, voiceCloud: false };
   let raw = null;
   try { raw = localStorage.getItem(KEY); } catch (e) { return out; }
   if (!raw) return out;
@@ -2262,6 +2273,10 @@ function orRead() {
      so validating now would throw the choice away every reload. The
      pick falls back to the ranking when the name is gone. */
   out.voiceName = str(v.voiceName);
+  /* Stored apart from the name on purpose. A remembered cloud voice
+     whose consent is gone falls back to a local one rather than
+     quietly resuming an upload on the next reload. */
+  if (v.voiceCloud === true && out.voiceName) out.voiceCloud = true;
 
   if (v.vault && typeof v.vault === 'object' && !Array.isArray(v.vault)) {
     out.vault = {
@@ -6036,8 +6051,15 @@ function orVoice(on) {
        the button's whole accessible name — there is no text in it — so
        an aria-label frozen at "answers out loud" would read the wrong
        state aloud for as long as he was muted. */
-    const say = orVoice.on ? 'Jarvis answers out loud'
-                           : 'Jarvis answers in writing only';
+    /* A cloud voice uploads what he says, so the control that turns him
+       on has to say so — it is the only thing on screen that is always
+       there to say it. */
+    const cur = orVoice.on ? orVoice.pick() : null;
+    const say = !orVoice.on ? 'Jarvis answers in writing only'
+      : (cur && !orVoice.local(cur))
+        ? `Jarvis answers out loud, as ${cur.name} \u2014 a cloud voice, so what`
+          + ' he says is uploaded to be spoken'
+        : 'Jarvis answers out loud';
     b.setAttribute('aria-label', say);
     b.title = say;
   }
@@ -6109,15 +6131,27 @@ orVoice.rank = (v) => {
 /* Every English voice that speaks without leaving the machine, best
    first. Deterministic on ties so the pick does not wander between
    reloads on a machine with two equally good voices. */
-orVoice.list = () => {
+orVoice.all = () => {
   let all = [];
   try { all = window.speechSynthesis.getVoices() || []; } catch (e) { return []; }
-  return all
-    .filter(v => /^en/i.test(String(v.lang || '').replace('_', '-')))
-    .filter(orVoice.local)
+  return all.filter(v => /^en/i.test(String(v.lang || '').replace('_', '-')))
     .sort((a, b) => orVoice.rank(b) - orVoice.rank(a)
       || String(a.name || '').localeCompare(String(b.name || '')));
 };
+orVoice.list  = () => orVoice.all().filter(orVoice.local);
+/* ── the cloud ones, offered but never taken ──
+   A stock Mac has exactly one local British voice and it is the compact
+   MacinTalk one — so "use a local voice" can mean "sound like a railway
+   announcement, permanently", and no ranking fixes that.
+
+   Refusing on your behalf was the wrong shape. The promise this app
+   makes is that nothing leaves without you saying so, not that you may
+   never say so. So they are listed, marked for what they cost, and
+   never selected by anything but a press. The consent is stored
+   separately from the name: a remembered choice that lost its flag
+   falls back to a local voice rather than quietly resuming an upload. */
+orVoice.cloud = () => orVoice.all().filter(v => !orVoice.local(v));
+orVoice.ok = false;           /* you have said so, for a cloud voice */
 
 orVoice.voice = null;
 /* NOT orVoice.name. orVoice is a function, every function already owns
@@ -6128,24 +6162,35 @@ orVoice.voice = null;
    grepping a name before you take it applies to the ones the language
    took first. */
 orVoice.chosen = null;
+/* Your choice outranks the ranking; the ranking never reaches the
+   cloud. A cloud voice is only ever returned here when you named it
+   AND the consent flag is still set. */
 orVoice.pick = () => {
   const list = orVoice.list();
-  if (!list.length) return null;
   if (orVoice.chosen) {
     const hit = list.filter(v => v.name === orVoice.chosen)[0];
     if (hit) return hit;
+    if (orVoice.ok) {
+      const c = orVoice.cloud().filter(v => v.name === orVoice.chosen)[0];
+      if (c) return c;
+    }
   }
-  return list[0];
+  return list[0] || null;
 };
-/* Your choice outranks the ranking and survives the reload. Nothing in
-   the chrome sets this — you ask him for it, which is the whole point
-   of having a librarian instead of another button. */
+/* Nothing in the chrome sets this — you ask him for it, which is the
+   point of having a librarian instead of another button. */
 orVoice.use = (name) => {
-  const hit = orVoice.list().filter(v => v.name === name)[0];
-  if (!hit) return null;
+  let hit = orVoice.list().filter(v => v.name === name)[0];
+  let cloud = false;
+  if (!hit) {
+    hit = orVoice.cloud().filter(v => v.name === name)[0];
+    if (!hit) return null;
+    cloud = true;               /* naming it IS the saying so */
+  }
   orVoice.chosen = hit.name;
   orVoice.voice = hit;
-  orWrite({ voiceName: hit.name });
+  orVoice.ok = cloud;
+  orWrite({ voiceName: hit.name, voiceCloud: cloud });
   return hit;
 };
 
@@ -6450,44 +6495,72 @@ orAsk.advice = (q) => {
    thing you press to hear a voice is the thing that lists it. */
 orAsk.voices = (want) => {
   orAsk.filter('');
-  const list = orVoice.list();
-  if (!list.length) {
-    /* Not a failure to report as one. The cloud voices in this browser
-       would upload what he says, so having none installed locally is
-       the app working, not breaking. */
-    orReply('Nothing on this machine speaks without leaving it, so I answer '
-      + 'in writing. The cloud voices in this browser would upload what I say.'
-      + orReply.hint(orVoice.HOWTO), null);
+  const list = orVoice.list(), sky = orVoice.cloud();
+  if (!list.length && !sky.length) {
+    orReply('This browser has no English voice at all, so I answer in writing.',
+      null);
     return 'voices';
   }
   if (want) {
     const k = String(want).toLowerCase();
-    const hit = list.filter(v => v.name.toLowerCase() === k)[0]
-             || list.filter(v => v.name.toLowerCase().indexOf(k) >= 0)[0];
+    const pool = list.concat(sky);
+    const hit = pool.filter(v => v.name.toLowerCase() === k)[0]
+             || pool.filter(v => v.name.toLowerCase().indexOf(k) >= 0)[0];
     if (!hit) {
-      orReply(`No local voice called <b>${esc(want)}</b>.`
-        + orAsk.voices.rows(list), `No local voice called ${want}.`);
+      orReply(`No voice called <b>${esc(want)}</b>.` + orAsk.voices.body(list, sky),
+        `No voice called ${want}.`);
       return null;
     }
+    const cloud = !orVoice.local(hit);
     orVoice.use(hit.name);
-    if (!orVoice.on) orVoice(true);
-    orReply(`Speaking as <b>${esc(hit.name)}</b>.` + orAsk.voices.rows(list)
-      + (orVoice.plain(hit) ? orReply.hint(orVoice.HOWTO) : ''),
+    if (!orVoice.on) orVoice(true); else orVoice();   /* the button says which */
+    orReply(`Speaking as <b>${esc(hit.name)}</b>.`
+      + (cloud ? ' Everything I say now goes to that voice\u2019s server to be'
+               + ' spoken \u2014 your note titles with it. Nothing else on this'
+               + ' page leaves.' : '')
+      + orAsk.voices.body(list, sky)
+      + (!cloud && orVoice.plain(hit) ? orReply.hint(orVoice.HOWTO) : ''),
       `Speaking as ${hit.name}. This is how I sound.`);
     return hit.name;
   }
   const cur = orVoice.pick();
-  orReply(`Speaking as <b>${esc(cur ? cur.name : 'nothing')}</b> \u2014 `
-    + `${list.length} local ${list.length === 1 ? 'voice' : 'voices'} here.`
-    + orAsk.voices.rows(list)
-    + (orVoice.plain(cur) ? orReply.hint(orVoice.HOWTO) : ''),
+  /* The honest headline, which on a stock Mac is bad news: one local
+     British voice and it is the compact one. Saying that outright beats
+     leaving you to wonder why the ranking did not help. */
+  const stuck = cur && orVoice.local(cur) && orVoice.plain(cur)
+    && !list.some(v => !orVoice.plain(v));
+  orReply(`Speaking as <b>${esc(cur ? cur.name : 'nothing')}</b>.`
+    + (stuck ? ` That is the only quality of voice installed here \u2014 the`
+             + ` compact one, which is the robotic one.` : '')
+    + orAsk.voices.body(list, sky)
+    + (stuck ? orReply.hint(orVoice.HOWTO) : ''),
     cur ? `Speaking as ${cur.name}.` : 'No voice.');
   return 'voices';
 };
-orAsk.voices.rows = (list) => `<ul>${list.slice(0, 12).map(v =>
-  `<li><button type="button" class="or-rl" data-voice="${esc(v.name)}"`
-  + ` aria-pressed="${orVoice.voice ? orVoice.voice.name === v.name : false}">`
-  + `${esc(v.name)}</button></li>`).join('')}</ul>`;
+
+/* Two groups, and the second one is labelled rather than hidden. */
+orAsk.voices.body = (list, sky) =>
+  (list.length ? orAsk.voices.rows(list) : '')
+  + (sky.length
+      ? orReply.hint('These speak on a server \u2014 pick one and what I say is '
+          + 'uploaded to be spoken. Better voices, and that is the price.')
+        + orAsk.voices.rows(sky)
+      : '');
+
+/* The cloud ones are marked on the chip itself, not only in the
+   sentence above them. Two identical rows of chips separated by a line
+   of prose is one list with a note in the middle, and the note is the
+   part you skim. The arrow says leaves-this-machine and the dashed
+   edge says it again without relying on colour. */
+orAsk.voices.rows = (list) => `<ul>${list.slice(0, 12).map(v => {
+  const up = !orVoice.local(v);
+  return `<li><button type="button" class="or-rl${up ? ' or-rl-up' : ''}"`
+    + ` data-voice="${esc(v.name)}"`
+    + ` aria-pressed="${orVoice.voice ? orVoice.voice.name === v.name : false}">`
+    + (up ? '<span aria-hidden="true">\u2191</span> ' : '')
+    + `${esc(v.name)}${up ? ' <span class="sr">(speaks on a server)</span>' : ''}`
+    + `</button></li>`;
+}).join('')}</ul>`;
 
 /* ── categories and folders ──
    The same word means both here and that is deliberate: `trading` is a
@@ -6898,6 +6971,7 @@ orRefile.apply = (notes) => {
   step(() => {
     const st = orRead();
     orVoice.chosen = st.voiceName;
+    orVoice.ok = st.voiceCloud === true;
     orVoice(st.voice);
     const b = byId('orVoiceBtn');
     if (b) b.addEventListener('click', () => {
@@ -6908,8 +6982,9 @@ orRefile.apply = (notes) => {
          which it is. */
       const v = orVoice.pick();
       orSay(v ? `Jarvis answers out loud, as ${v.name}.`
-              : 'No local voice installed \u2014 Jarvis answers in writing.');
+              : 'No local voice installed \u2014 ask for voices.');
       if (v) orVoice.say('Ready.');
+      else orAsk('voices');
     });
     /* The voice list is empty on a cold page in every browser that has
        one and fills in a moment later. Clearing the cached pick is

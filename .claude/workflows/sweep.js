@@ -108,10 +108,10 @@ DELIBERATE, and NOT bugs:
     only by aria-label and title. That is deliberate, not a missing label.
   - Jarvis never reaches a network and never has an opinion. Being told he
     cannot form a view is the designed answer, not a failure.
-  - he refuses every voice with localService === false, and every "Google ..."
-    voice by name, because those synthesise on a server. Him staying mute on a
-    machine with no local voice is the app working. So is him telling you to
-    download an Enhanced voice.
+  - nothing AUTOMATIC ever selects a voice with localService === false, or a
+    "Google ..." voice by name, because those synthesise on a server. They are
+    listed and marked and taken only on a press, and that press is the consent.
+    Him telling you to download an Enhanced voice is the app working.
   - the gauntlet test reports 11 pre-existing faults across the repo
 `
 
