@@ -307,13 +307,54 @@ Dictation is not — `SpeechRecognition` in this browser uploads the
 microphone to a server — so there is no listen button and there will
 not be one.
 
-The voice is picked by NAME first (Daniel, Oliver, Serena), then any
-en-GB, then any English. Picking by `lang` alone lands on whichever
-en-GB the OS enumerates first, which is never one of those. The voice
-list is populated asynchronously in every browser that has one, so the
-pick is deferred to the first thing he says and cleared on
-`voiceschanged`. The toggle costs the voice and nothing else: the strip
-under the box is written either way.
+**The voice is local or there is no voice.** Chrome lists "Google UK
+English Male" beside the OS voices; it is the best-sounding thing in the
+list and it synthesises on Google's servers, so speaking with it uploads
+the sentence — your note titles, your folder names — to be spoken. It is
+refused by `localService`, and by name as a backstop for a browser that
+leaves the flag undefined. He would rather be mute; the answer is on
+screen either way. Playwright's request interception cannot see that
+traffic, so the assertion in `tests/orrery.js` is the only thing
+guarding it.
+
+**Then locale, then tier, then warmth.** macOS ships "Daniel" and
+"Daniel (Enhanced)" as two entries sharing a base name; the plain one is
+the compact MacinTalk voice and it is what "extremely robotic" sounds
+like. Ranking by name first picked it whenever both were installed.
+Locale outranks tier — a premium American is still American, and the
+accent was the ask.
+
+If the best available is still base-tier, he says so and gives the
+macOS path to download an Enhanced or Premium voice. On that machine the
+fix is a download, not code, and pretending otherwise wastes your time.
+
+**The voice is chosen by asking, not by a control.** `voices` lists the
+local ones as chips; pressing one switches and leaves the list up,
+because you are auditioning. `use Serena` does the same by name. It is a
+thing you set once — a seventh button on a bar that just lost two would
+be the wrong trade.
+
+The list is populated asynchronously in every browser that has one, so
+the pick is deferred to the first thing he says and cleared on
+`voiceschanged`. Your choice is stored by name and re-resolved, never
+held as an object across that event. The toggle costs the voice and
+nothing else: the strip under the box is written either way.
+
+**NOT `orVoice.name`.** Every function already owns a non-writable
+`name`, and assigning to it fails silently outside strict mode. That
+field held the voice you chose; the `localStorage` write beside it
+succeeded, so the choice was durable and simply never applied — read
+back as the string `"orVoice"`, matched nothing, defaulted every time.
+`tests/names.js` now refuses `name`, `length`, `caller` and `arguments`
+as state on any top-level function. Namespacing onto a function is the
+pattern this whole codebase uses (`orSearch.t`, `orPaint.match`,
+`orLoose.miss`); this is the one square on that board that is mined.
+
+**Speech can never take the answer down with it.** Assigning a voice
+throws if the object came from a `getVoices()` batch the browser has
+since replaced. `orReply` writes first and speaks second, and the speak
+is wrapped — a throw on the way to the speaker would otherwise come back
+out through `orAsk` and lose the sentence you asked for.
 
 **The grammar is ordered and the order is load-bearing.** `review` is a
 word in the advice branch and the title of a note in the seed, so "what

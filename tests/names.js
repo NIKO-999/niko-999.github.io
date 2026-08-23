@@ -128,6 +128,48 @@ for (const file of APPS) {
 }
 
 
+/* ── 5. names the language took first ────────────────────────────
+   Every function already owns `name`, `length`, `caller` and
+   `arguments`, and they are non-writable. Hanging state off one of them
+   fails SILENTLY outside strict mode: the assignment does nothing, the
+   read comes back with the built-in value, and the property looks set
+   everywhere you inspect it in a debugger.
+
+   orVoice.name cost an afternoon on exactly this. It stored the voice
+   you chose; the write beside it into localStorage succeeded, so the
+   choice was durable and simply never applied — read back as the string
+   "orVoice", matched nothing, and fell through to the default voice
+   every time.
+
+   Namespaced onto a function is the pattern this whole codebase uses
+   (orSearch.t, orPaint.match, orLoose.miss), so this is not exotic — it
+   is the one square on that board that is mined. */
+const RESERVED = ['name', 'length', 'caller', 'arguments'];
+for (const file of APPS.concat(['shell.js'])) {
+  const src = read(file);
+  const bodies = file.endsWith('.js') ? [{ body: src, at: 1 }] : scriptOf(src);
+  const hits = [];
+  for (const { body, at } of bodies) {
+    /* An assignment TO the property, not a read of it: `f.name =` but
+       not `f.name ===`, and not a declared object literal key. */
+    const re = new RegExp(
+      '(^|[^\\w$.])([A-Za-z_$][\\w$]*)\\.(' + RESERVED.join('|') + ')\\s*=(?!=)', 'g');
+    let m;
+    while ((m = re.exec(body))) {
+      const owner = m[2];
+      /* Only when the owner is a function declared at the top level of
+         this file — an element's .name or a plain object's is fine. */
+      if (!new RegExp('(?:^|\\n)(?:async\\s+)?function\\s+' + owner + '\\s*\\(').test(body)
+        && !new RegExp('(?:^|\\n)(?:const|let|var)\\s+' + owner + '\\s*=\\s*(?:async\\s*)?(?:function|\\()').test(body))
+        continue;
+      hits.push(`${owner}.${m[3]} at line ${at + body.slice(0, m.index).split('\n').length - 1}`);
+    }
+  }
+  ok(`${file}: nothing hangs state off a function's own name or length`,
+     hits.length === 0,
+     hits.join('\n      ') + '\n      these assignments do nothing and throw nothing');
+}
+
 /* ── every var() points at a token that exists ──
    Three declarations in trading/index.html asked for `var(--bg)`, which
    no stylesheet defines. An invalid custom property does not fall back

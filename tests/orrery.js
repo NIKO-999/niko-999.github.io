@@ -2266,34 +2266,150 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('turned down, he still answers in writing',
     !jv.mute.hidden && /\d/.test(jv.mute.text), jv.mute);
 
-  /* ── he is British ──
-     No voices are installed in this browser, so the list is stubbed:
-     what is being held is the ORDER of preference. Picking by lang
-     alone lands on whatever the OS enumerates first, and the warm
-     en-GB voices are never first. */
+  /* ── which voice he uses, and what he refuses to use ──
+     No voices are installed in this browser, so the list is stubbed —
+     what is being held is the ORDER, and one hard refusal.
+
+     The refusal first, because it is not about how he sounds: Chrome
+     lists "Google UK English Male" beside the OS voices and it
+     synthesises on Google's servers, so speaking with it uploads the
+     sentence — note titles, folder names — to be spoken. An earlier
+     build of this picker preferred it, and Playwright's request
+     interception cannot see that traffic, so nothing else in this file
+     would have caught it. This is the assertion that does. */
   const jvoice = await j.page.evaluate(() => {
-    const mk = (name, lang) => ({ name, lang });
+    const mk = (name, lang, localService, voiceURI) =>
+      ({ name, lang, localService, voiceURI: voiceURI || name });
     const real = window.speechSynthesis.getVoices;
     const set = (list) => { window.speechSynthesis.getVoices = () => list; };
+    const nm = () => (orVoice.pick() || {}).name;
     const out = {};
-    set([mk('Samantha', 'en-US'), mk('Google UK English Male', 'en-GB'),
-         mk('Daniel', 'en-GB'), mk('Zarvox', 'en-US')]);
-    out.named = (orVoice.pick() || {}).name;
-    set([mk('Samantha', 'en-US'), mk('Google UK English Male', 'en-GB')]);
-    out.anyGb = (orVoice.pick() || {}).name;
-    set([mk('Samantha', 'en-US'), mk('Amelie', 'fr-FR')]);
-    out.noGb = (orVoice.pick() || {}).name;
-    set([mk('Amelie', 'fr-FR')]);
+    orVoice.chosen = null;
+
+    /* The one that sounds best is remote. He must not take it. */
+    set([mk('Google UK English Male', 'en-GB', false),
+         mk('Daniel', 'en-GB', true)]);
+    out.refusesRemote = nm();
+    /* And refuses it even when the flag is missing, by name. */
+    set([mk('Google UK English Female', 'en-GB', undefined),
+         mk('Daniel', 'en-GB', true)]);
+    out.refusesUnflagged = nm();
+    /* Rather be mute than upload. */
+    set([mk('Google UK English Male', 'en-GB', false)]);
+    out.remoteOnly = orVoice.pick();
+
+    /* Tier beats name: plain Daniel is the compact MacinTalk voice and
+       is exactly what "extremely robotic" sounds like. */
+    set([mk('Daniel', 'en-GB', true), mk('Kate (Enhanced)', 'en-GB', true)]);
+    out.tierOverName = nm();
+    set([mk('Daniel (Enhanced)', 'en-GB', true),
+         mk('Serena (Premium)', 'en-GB', true)]);
+    out.premiumWins = nm();
+    /* Locale beats tier: a premium American is still American. */
+    set([mk('Samantha (Premium)', 'en-US', true), mk('Daniel', 'en-GB', true)]);
+    out.localeFirst = nm();
+    /* Warmth breaks a tie between equals. */
+    set([mk('Zarvox', 'en-GB', true), mk('Serena', 'en-GB', true)]);
+    out.warmth = nm();
+    /* No en-GB at all: still English. None at all: nothing. */
+    set([mk('Samantha', 'en-US', true), mk('Amelie', 'fr-FR', true)]);
+    out.noGb = nm();
+    set([mk('Amelie', 'fr-FR', true)]);
     out.none = orVoice.pick();
+
+    /* Your choice outranks the ranking, and is remembered. */
+    set([mk('Daniel (Enhanced)', 'en-GB', true), mk('Kate', 'en-GB', true)]);
+    orAsk('use Kate');
+    out.chose = (orVoice.pick() || {}).name;
+    out.stored = JSON.parse(localStorage.getItem('orrery.v1')).voiceName;
+    /* But a chosen voice that is no longer installed falls back rather
+       than leaving him mute. */
+    set([mk('Daniel (Enhanced)', 'en-GB', true)]);
+    out.gone = nm();
+    orVoice.chosen = null;
     window.speechSynthesis.getVoices = real;
     return out;
   });
-  ok('a named warm en-GB voice wins over any other en-GB',
-    jvoice.named === 'Daniel', jvoice);
-  ok('and any en-GB wins over en-US', jvoice.anyGb === 'Google UK English Male', jvoice);
+  ok('he refuses a cloud voice that would upload what he says',
+    jvoice.refusesRemote === 'Daniel', jvoice);
+  ok('and refuses it by name when the browser does not flag it',
+    jvoice.refusesUnflagged === 'Daniel', jvoice);
+  ok('with nothing but cloud voices he stays mute rather than uploading',
+    jvoice.remoteOnly === null, jvoice);
+  ok('an enhanced voice beats a warmer-named compact one',
+    jvoice.tierOverName === 'Kate (Enhanced)', jvoice);
+  ok('and premium beats enhanced', jvoice.premiumWins === 'Serena (Premium)', jvoice);
+  ok('but the accent outranks the tier', jvoice.localeFirst === 'Daniel', jvoice);
+  ok('warmth breaks a tie between equals', jvoice.warmth === 'Serena', jvoice);
   ok('with no en-GB at all he still speaks English', jvoice.noGb === 'Samantha', jvoice);
   ok('and no English at all is no voice rather than a French one',
     jvoice.none === null, jvoice);
+  ok('asking for a voice by name sets it and remembers it',
+    jvoice.chose === 'Kate' && jvoice.stored === 'Kate', jvoice);
+  ok('and a remembered voice that is gone falls back instead of muting',
+    jvoice.gone === 'Daniel (Enhanced)', jvoice);
+
+  /* ── speech can never take the answer down with it ──
+     Assigning a voice throws if the object came from a getVoices()
+     batch the browser has since replaced — and voiceschanged fires
+     whenever the OS installs one. orReply writes before it speaks, so
+     a throw on the way to the speaker would come back out through
+     orAsk and lose the sentence you asked for. Forced here with a
+     voice object no platform will accept. */
+  const jthrow = await j.page.evaluate(() => {
+    const real = window.speechSynthesis.getVoices;
+    window.speechSynthesis.getVoices = () =>
+      [{ name: 'Impostor', lang: 'en-GB', localService: true, voiceURI: 'x' }];
+    orVoice.chosen = null; orVoice.voice = null;
+    let threw = false;
+    try { orAsk('how many notes'); } catch (e) { threw = String(e); }
+    const rp = document.getElementById('orReply');
+    const out = { threw, shown: !rp.hidden, text: rp.textContent.slice(0, 40) };
+    orVoice.chosen = null; orVoice.voice = null;
+    window.speechSynthesis.getVoices = real;
+    return out;
+  });
+  ok('a voice the platform rejects costs the voice, not the answer',
+    jthrow.threw === false && jthrow.shown && /\d/.test(jthrow.text), jthrow);
+
+  /* ── and the list is a thing you can press ──
+     The voice is set by asking, not by a control in the bar: it is a
+     thing you choose once, and the bar had just lost two buttons.
+     Pressing a chip re-renders the list rather than closing it,
+     because you are auditioning. */
+  const jvl = await j.page.evaluate(async () => {
+    const real = window.speechSynthesis.getVoices;
+    window.speechSynthesis.getVoices = () => [
+      { name: 'Daniel (Enhanced)', lang: 'en-GB', localService: true, voiceURI: 'd' },
+      { name: 'Serena (Premium)', lang: 'en-GB', localService: true, voiceURI: 's' },
+      { name: 'Google UK English Male', lang: 'en-GB', localService: false, voiceURI: 'g' },
+    ];
+    orVoice.chosen = null;
+    orAsk('voices');
+    const rp = document.getElementById('orReply');
+    const listed = Array.from(rp.querySelectorAll('[data-voice]'))
+      .map((b) => b.getAttribute('data-voice'));
+    rp.querySelector('[data-voice="Daniel (Enhanced)"]').click();
+    const after = { text: rp.textContent, open: !rp.hidden,
+      rows: rp.querySelectorAll('[data-voice]').length,
+      pressed: Array.from(rp.querySelectorAll('[data-voice]'))
+        .filter((b) => b.getAttribute('aria-pressed') === 'true')
+        .map((b) => b.getAttribute('data-voice')) };
+    orVoice.chosen = null;
+    window.speechSynthesis.getVoices = real;
+    return { listed, after };
+  });
+  ok('asked for voices he lists the local ones, best first',
+    JSON.stringify(jvl.listed) === JSON.stringify(['Serena (Premium)', 'Daniel (Enhanced)']),
+    jvl.listed);
+  ok('and does not offer the cloud one at all',
+    jvl.listed.every((n) => n.indexOf('Google') < 0), jvl.listed);
+  ok('pressing one switches to it and leaves the list up to try the next',
+    /Daniel \(Enhanced\)/.test(jvl.after.text) && jvl.after.open
+    && jvl.after.rows === 2, jvl.after);
+  ok('and the one in use is the one marked',
+    JSON.stringify(jvl.after.pressed) === JSON.stringify(['Daniel (Enhanced)']),
+    jvl.after.pressed);
 
   /* ── the promise ──
      Nothing he does reaches a network. Everything above ran through
