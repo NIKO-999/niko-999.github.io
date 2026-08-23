@@ -773,6 +773,72 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     return { cls: svg.getAttribute('class') || '',
              nod: st('#orNod'), dust: st('#orDustA'), turn: st('.or-turn') };
   });
+  /* ── a hand on the map puts the camera DOWN ──
+     Interrupting a flight used to clearTimeout the only thing that
+     takes it down, so or-flying stranded on the svg — and that class
+     pauses the precession and all three dust shells. A pan during a
+     flight stopped the whole instrument moving, permanently and
+     silently, until some later flight happened to end cleanly. */
+  await page.evaluate(() => { orClose(); });
+  await settle(page);
+  const landed = await page.evaluate(() => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => { orPan(12, 8); }, 150);        /* a hand, mid-flight */
+    setTimeout(() => res({
+      cls: document.getElementById('orSvg').getAttribute('class') || '',
+      fly: document.getElementById('orView').classList.contains('or-fly'),
+      nod: getComputedStyle(document.getElementById('orNod')).animationPlayState,
+      dust: getComputedStyle(document.getElementById('orDustA')).animationPlayState,
+    }), 2200);                                        /* well past the 620ms */
+  }));
+  ok('a pan during a flight lands the camera rather than stranding it',
+    !/or-flying/.test(landed.cls) && !landed.fly, landed);
+  /* Landing at zoom > 1.6 leaves or-tight on, which pauses the drift
+     ON PURPOSE — that is the close-in rule doing its job, not the
+     stranding. The thing the stranding broke is that it never came
+     back, so that is what this asks: come back out, and the
+     instrument runs again. */
+  const woke = await page.evaluate(() => new Promise((res) => {
+    orZoom(0);
+    setTimeout(() => res({
+      cls: document.getElementById('orSvg').getAttribute('class') || '',
+      zoom: state.zoom,
+      nod: getComputedStyle(document.getElementById('orNod')).animationPlayState,
+      dust: getComputedStyle(document.getElementById('orDustA')).animationPlayState,
+    }), 500);
+  }));
+  ok('and the instrument runs again once you are back out',
+    woke.nod === 'running' && woke.dust === 'running', woke);
+
+  /* ── and a wheel tick during a flight does not teleport ──
+     A flight owns state.zoom as its DESTINATION for the whole 620ms.
+     Zooming read that and compounded off a camera that had not
+     arrived: 2.4 claimed while the map was still drawn at 1, times
+     1.25, and the view jumped to 3. orPan's guard never caught it
+     because orZoom pans by (0, 0) and the guard tests `dx || dy`. */
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
+  const wheeled = await page.evaluate(() => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => {
+      const claimed = state.zoom;
+      orZoom(1.25, 500, 500);
+      setTimeout(() => res({ claimed, after: state.zoom,
+        cls: document.getElementById('orSvg').getAttribute('class') || '' }), 90);
+    }, 150);
+  }));
+  ok('a wheel tick mid-flight zooms from where the camera IS',
+    wheeled.after < wheeled.claimed, wheeled);
+  ok('and takes the flight down with it', !/or-flying/.test(wheeled.cls), wheeled);
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
+  await page.evaluate(() => { orClose(); });
+  await settle(page);
+  await page.evaluate(() => orOpen('trading/models/cisd'));
+  await settle(page);
+  await page.mouse.move(4, 4);
+  await page.waitForTimeout(300);
+
   ok('and the drift holds still while the camera is close in',
     /or-tight/.test(amb.cls) && amb.nod === 'paused'
     && amb.dust === 'paused' && amb.turn === 'paused', amb);

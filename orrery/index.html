@@ -3745,15 +3745,7 @@ function orPan(dx, dy) {
   /* A hand on the map ends any flight in progress, where it is. An
      eased transform racing a drag makes the map feel like it is
      arguing with you. */
-  if (dx || dy) {
-    const v0 = byId('orView');
-    if (v0 && v0.classList.contains('or-fly')) {
-      const m = new DOMMatrix(getComputedStyle(v0).transform);
-      state.panX = m.e; state.panY = m.f; state.zoom = m.a || state.zoom;
-      v0.classList.remove('or-fly');
-      clearTimeout(orZoom.t);
-    }
-  }
+  if (dx || dy) orZoom.grab();
   state.panX += dx;
   state.panY += dy;
   const v = byId('orView');
@@ -3775,6 +3767,13 @@ orPan.tight = false;
    stays under the cursor. orZoom(0) is the reset. Clamped 0.35–4:
    below that the map is a coin, above it a single hexagon is a wall. */
 function orZoom(f, px, py) {
+  /* Before reading state.zoom for anything. Mid-flight it holds the
+     DESTINATION, not where the camera is — so a wheel tick during a
+     flight used to compound off a camera that had not arrived: 2.4
+     claimed while the map was still drawn at 1, times 1.25, and the
+     view teleported to 3. orPan's own guard never caught it because
+     orZoom pans by (0, 0) and the guard tests `dx || dy`. */
+  orZoom.grab();
   if (f === 0) {
     state.zoom = 1; state.panX = 0; state.panY = 0;
   } else {
@@ -5127,13 +5126,41 @@ orZoom.glide = (z, px, py) => {
   state.zoom = z; state.panX = px; state.panY = py;
   orPan(0, 0);
   clearTimeout(orZoom.t);
-  orZoom.t = setTimeout(() => {
-    view.classList.remove('or-fly');
-    if (svg) svg.classList.remove('or-flying');
-    orPaintLabels();          /* chips flip against the edge, and the edge moved */
-  }, still ? 0 : 620);
+  orZoom.t = setTimeout(orZoom.land, still ? 0 : 620);
 };
 orZoom.t = 0;
+
+/* Taking a flight down where it actually got to. A flight owns
+   state.zoom/panX/panY as its destination for the whole 620ms, so
+   anything that computes a NEW camera from them has to land first and
+   pick up the real transform — otherwise the map jumps to somewhere it
+   was still travelling towards. Returns whether it interrupted one. */
+orZoom.grab = () => {
+  const v = byId('orView'), svg = byId('orSvg');
+  const mid = !!(v && v.classList.contains('or-fly'));
+  if (!mid && !(svg && svg.classList.contains('or-flying'))) return false;
+  if (mid) {
+    const m = new DOMMatrix(getComputedStyle(v).transform);
+    state.panX = m.e; state.panY = m.f; state.zoom = m.a || state.zoom;
+  }
+  orZoom.land();
+  return true;
+};
+
+/* Putting the camera down, however the flight ended — run out, or
+   interrupted by a hand on the map. One function because there are two
+   callers and three things to undo, and the version where one caller
+   did two of them is the bug above. Idempotent: calling it on a camera
+   that is already still costs a repaint of the label layer and
+   nothing else. */
+orZoom.land = () => {
+  clearTimeout(orZoom.t);
+  orZoom.t = 0;
+  const v = byId('orView'), svg = byId('orSvg');
+  if (v) v.classList.remove('or-fly');
+  if (svg) svg.classList.remove('or-flying');
+  orPaintLabels();            /* chips flip against the edge, and the edge moved */
+};
 
 /* Close puts everything back: the cards return, the map widens, and
    focus goes to the node you were reading — the paint just replaced
