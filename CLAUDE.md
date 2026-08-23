@@ -1,14 +1,21 @@
 # Working on this repo
 
-Three single-file apps that share a design system:
+Single-file apps that share a design system:
 
 - `trading/index.html` — the ledger, calendar, log, metrics, risk,
   backtesting, resources and the check-in
-- `arc/index.html` — the vision board and long-term timeline
 - `days/index.html` — habits and reminders
-- `shell.css` + `shell.js` at the root — the shared shell all three
+- `orrery/index.html` — the star chart over an Obsidian vault
+- `shell.css` + `shell.js` at the root — the shared shell they all
   consume. A rule that only two of them need belongs in the two, not
   in the file every one of them loads.
+
+**`arc/` is not an app any more.** It held a vision board and a
+long-term timeline and both are gone, along with its five test files.
+What is left in that folder is not optional and must not be tidied
+away: `arc/bg/` holds the fourteen backdrop photographs that
+`shell.css` names by path, and `arc/fonts/` holds the face every app
+preloads. Delete the folder and every screen loses its wallpaper.
 
 No build step, no framework, no CDN. Vanilla JS, everything inline, one
 file per app.

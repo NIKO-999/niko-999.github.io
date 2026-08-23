@@ -1200,11 +1200,6 @@
            stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M6 19v-4M11 19v-8M16 19v-11M21 19v-14M3 19h18" /></svg>
     </a>
-    <a href="../arc/" aria-label="Arc — projects" title="Arc — projects">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"
-           stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-        <path d="M3 17.5h18M5.5 17.5a6.5 6.5 0 0 1 13 0M12 6v2.2M18.5 10.2l1.4-1.4M5.5 10.2 4.1 8.8" /></svg>
-    </a>
     <a href="../days/" aria-label="Days — habits and reminders" title="Days — habits and reminders">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
            aria-hidden="true">
@@ -2165,28 +2160,48 @@ const IDB = 'ORRERY';
    whole map failed to paint — no nodes, no error anybody would connect
    to a picker. A list two functions validate against belongs above
    both of them. */
+/* ── the five ──
+   Every one of them keeps a note with its folder. That is the whole
+   point of the picker now: they are five ways to see the SAME grouping,
+   not five different ideas about what belongs together.
+
+   Two of the originals broke it and are gone. Spiral ranked the whole
+   vault on one arm and Strata put it in four global shells, so in both
+   of them a category was scattered round the ring and its colour was
+   the only thing left of it — a map that tells you what is near what,
+   arranged so that nothing near each other is related. Free had no
+   arrangement at all by design, which is the same problem with a
+   better excuse. The gestures survived: Arms is the spiral once per
+   folder, Terraces is importance-as-distance inside a folder's own
+   wedge. */
 const FORMS = [
-  { id: 'orrery',  label: 'Orrery',  say: 'folders on orbits', home: 1, spring: 1,
+  { id: 'orrery',   label: 'Orrery',   say: 'folders on orbits', home: 1, spring: 1,
     ic: '<circle cx="9" cy="9" r="6.4"/><path d="M9 2.6A6.4 6.4 0 0 1 9 15.4"/>'
       + '<circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/>'
       + '<circle cx="15.4" cy="9" r="1.4" fill="currentColor" stroke="none"/>' },
-  { id: 'free',    label: 'Free',    say: 'the links decide', home: .04, spring: 1,
-    ic: '<path d="M4.2 5.4 9 9M9 9l5.4-3.2M9 9l-1.6 5.2M14.4 5.8l.6 6"/>'
-      + ['4.2 5.4','9 9','14.4 5.8','7.4 14.2','15 11.8'].map(function (q) {
-          var c = q.split(' ');
-          return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="1.35"'
-            + ' fill="currentColor" stroke="none"/>'; }).join('') },
-  { id: 'spiral',  label: 'Spiral',  say: 'one arm, most linked first', home: 3.2, spring: .1,
-    ic: '<path d="M9.70 9.00L9.80 9.23L9.83 9.51L9.75 9.81L9.56 10.11L9.27 10.35L8.88 10.51L8.43 10.55L7.95 10.44L7.49 10.19L7.10 9.79L6.83 9.26L6.70 8.64L6.77 7.97L7.03 7.31L7.48 6.73L8.11 6.27L8.88 6.00L9.73 5.95L10.60 6.14L11.41 6.59L12.09 7.27L12.58 8.14L12.81 9.15L12.76 10.22L12.40 11.27L11.74 12.21L10.82 12.96L9.70 13.44L8.46 13.60L7.18 13.40L5.97 12.85L4.93 11.96L4.15 10.79L3.71 9.42L3.66 7.94L4.03 6.47L4.81 5.12L5.95 4.02L7.38 3.24L9.00 2.88L10.70 2.98L12.34 3.55L13.79 4.57L14.93 5.98L15.66 7.67L15.91 9.54L15.63 11.45L14.82 13.23"/>' },
-  { id: 'strata',  label: 'Strata',  say: 'importance as distance', home: 3.2, spring: .1,
-    ic: '<circle cx="9" cy="9" r="6.6"/><circle cx="9" cy="9" r="4.2"/>'
-      + '<circle cx="9" cy="9" r="1.7" fill="currentColor" stroke="none"/>' },
-  { id: 'islands', label: 'Islands', say: 'folders held apart', home: 1.8, spring: .45,
+  { id: 'arms',     label: 'Arms',     say: 'a spiral arm each, most linked innermost',
+    home: 2.6, spring: .2,
+    ic: '<path d="M9 9c1.9-.3 3.7.5 4.9 1.9 1.2 1.5 1.5 3.3 1 4.6"/>'
+      + '<path d="M9 9c.3-1.9-.5-3.7-1.9-4.9C5.6 2.9 3.8 2.6 2.5 3.1"/>'
+      + '<path d="M9 9c1.5 1.2 2.1 3 1.8 4.7-.3 1.8-1.5 3.2-2.8 3.6"/>'
+      + '<circle cx="9" cy="9" r="1.4" fill="currentColor" stroke="none"/>' },
+  { id: 'terraces', label: 'Terraces', say: 'folder wedges, rank as distance',
+    home: 3.2, spring: .1,
+    ic: '<path d="M2.6 12.4A6.6 6.6 0 0 1 15.4 12.4"/>'
+      + '<path d="M4.6 13.6A4.6 4.6 0 0 1 13.4 13.6"/>'
+      + '<path d="M6.7 14.8A2.5 2.5 0 0 1 11.3 14.8"/>'
+      + '<path d="M9 2.4v3.1"/>' },
+  { id: 'islands',  label: 'Islands',  say: 'folders held apart', home: 1.8, spring: .45,
     ic: [[5,5.4],[13.1,6],[8.7,13.6]].map(function (c) {
           return [[0,0],[2.4,.7],[.8,2.5]].map(function (o) {
             return '<circle cx="' + (c[0] + o[0]) + '" cy="' + (c[1] + o[1]) + '" r="1.15"'
               + ' fill="currentColor" stroke="none"/>'; }).join(''); }).join('') },
+  { id: 'chord',    label: 'Chord',    say: 'folders on the rim, links across the middle',
+    home: 3.4, spring: .08,
+    ic: '<circle cx="9" cy="9" r="6.6"/>'
+      + '<path d="M4.4 4.4 13.6 13.6M13.6 4.4 6.2 12.1M9 2.4l3.4 12.6"/>' },
 ];
+
 /* A stored value from another build, or a hand-edited one, must not
    leave the field with no arrangement at all. */
 orForm.of = (id) => FORMS.find(f => f.id === id) || FORMS[0];
@@ -2641,56 +2656,74 @@ function orLayout() {
      draws from — is only correct because the sector pass ran. */
   const FORM = orForm.of(state.form);
   if (FORM.id !== 'orrery') {
-    const live = notes.map(n => n.id).filter(id => !state.pin[id]).sort();
-    const byDeg = live.slice().sort((a, b) =>
-      (deg[b] || 0) - (deg[a] || 0) || (a < b ? -1 : 1));
-    const GA = 137.50776405003785;   /* the golden angle, in degrees */
+    const secs = orLayout.sec || [];
+    /* A sector's own notes, most-linked first, pins left where they
+       are. Every formation below walks the sectors and only ever
+       places a note inside its own — which is what "grouped" means
+       here, and what makes the sector spokes and the rim's names
+       still true in all five. */
+    const of = (sc) => (mem[sc.id] || [])
+      .filter(id => !state.pin[id])
+      .sort((a, b) => (deg[b] || 0) - (deg[a] || 0) || (a < b ? -1 : 1));
 
-    if (FORM.id === 'spiral') {
-      /* An ARM you can follow with a finger, most-connected first.
-         The golden angle was the obvious step and it is the wrong one
-         here: it packs evenly, which is a sunflower — a filled disc
-         with no visible path through it, exactly what a formation
-         called Spiral must not be. Two and a half turns spread over
-         however many notes there are gives a line instead. */
-      const turns = 2.5;
-      const step = turns * 360 / Math.max(1, byDeg.length);
-      byDeg.forEach((id, k) => {
-        const t = k / Math.max(1, byDeg.length - 1);
-        const rng = orRng(id + ':sp');
-        xy[id] = orLayout.polar(62 + t * 296 + (rng() * 2 - 1) * 7, k * step - 90);
+    if (FORM.id === 'arms') {
+      /* A spiral, once per folder, trailing from the centre outward —
+         the old Spiral's gesture without its cost. Most-linked at the
+         inner end, so the arm reads as a thread you can follow from
+         the thing everything hangs off out to the leaves.
+
+         The sweep is the SECTOR'S OWN width, not a fixed angle. A
+         fixed 62° looked better and put twenty of fifty-two notes in
+         a neighbour's wedge — measured — which is the one thing every
+         formation here is supposed to stop. An arm that leaves its
+         folder is not an arm of that folder. */
+      secs.forEach(sc => {
+        const ids = of(sc);
+        const w = sc.a1 - sc.a0;
+        const pad = Math.min(6, w * .1);
+        const sweep = w - 2 * pad;
+        const n = Math.max(1, ids.length - 1);
+        ids.forEach((id, k) => {
+          const t = ids.length === 1 ? .5 : k / n;
+          const rng = orRng(id + ':arm');
+          const r = 74 + t * 268 + (rng() * 2 - 1) * 9;
+          const a = sc.a0 + pad + t * sweep + (rng() * 2 - 1) * 2.5;
+          xy[id] = orLayout.polar(r, a);
+        });
       });
-    } else if (FORM.id === 'strata') {
-      /* Distance from the centre means one thing and means it
-         consistently: how much hangs off this note. */
-      /* Quartiles of the actual distribution, not fixed fractions of
-         the top. Thresholds at .6 and .3 of the maximum degree put
-         every note in this corpus into two shells and left the outer
-         two empty — measured, homes spanned 80 to 190 of a possible
-         344, so "importance as distance" was drawing half a claim.
-         Quartiles always stratify, whatever the vault's shape. */
-      const shell = [[], [], [], []];
-      byDeg.forEach((id, k) => {
-        shell[Math.min(3, Math.floor(k * 4 / Math.max(1, byDeg.length)))].push(id);
-      });
-      shell.forEach((row, b) => {
-        /* Sorted by category so a shell still reads as coloured
-           groups rather than as confetti. */
-        row.sort((a, b2) => (catOf[a] < catOf[b2] ? -1 : catOf[a] > catOf[b2] ? 1 : a < b2 ? -1 : 1));
-        const r = [92, 178, 262, 344][b];
-        row.forEach((id, k) => {
-          const rng = orRng(id);
-          xy[id] = orLayout.polar(r + (rng() * 2 - 1) * 12, (k / row.length) * 360 - 90);
+    } else if (FORM.id === 'terraces') {
+      /* Distance from the centre is importance, the way Strata claimed
+         it — but inside the folder's own wedge rather than across the
+         whole ring, so a category is still one shape. Four steps, cut
+         at quartiles of THIS sector's own ranking: fixed thresholds
+         put small folders entirely in one band and the claim goes with
+         it. */
+      const R4 = [102, 178, 254, 330];
+      secs.forEach(sc => {
+        const ids = of(sc);
+        const w = sc.a1 - sc.a0;
+        const pad = Math.min(9, w * .13);
+        const step = [[], [], [], []];
+        ids.forEach((id, k) => {
+          step[Math.min(3, Math.floor(k * 4 / Math.max(1, ids.length)))].push(id);
+        });
+        step.forEach((row, b) => {
+          row.sort();
+          row.forEach((id, k) => {
+            const rng = orRng(id + ':ter');
+            const a = sc.a0 + pad + (k + .5) * (w - 2 * pad) / row.length
+              + (rng() * 2 - 1) * 3;
+            xy[id] = orLayout.polar(R4[b] + (rng() * 2 - 1) * 10, a);
+          });
         });
       });
     } else if (FORM.id === 'islands') {
       /* Every folder a separate object with real space around it. The
-         cost is that a cross-folder link becomes a long line over
-         open water, which is either the point or the problem. */
-      const secs = orLayout.sec || [];
-      secs.forEach((sc) => {
+         cost is that a cross-folder link becomes a long line over open
+         water, which is either the point or the problem. */
+      secs.forEach(sc => {
         const c = orLayout.polar(268, sc.mid);
-        const ids = (mem[sc.id] || []).filter(id => !state.pin[id]).sort();
+        const ids = of(sc);
         ids.forEach((id, k) => {
           if (k === 0) { xy[id] = c.slice(); return; }
           const rng = orRng(id);
@@ -2699,14 +2732,24 @@ function orLayout() {
           xy[id] = [c[0] + Math.cos(a) * rr, c[1] + Math.sin(a) * rr];
         });
       });
-    } else if (FORM.id === 'free') {
-      /* Nothing to arrange. The home pull is switched off in seed()
-         and the springs are left to it — so all this does is give the
-         field somewhere loose to start from, and the answer that comes
-         out is the graph's own, not ours. */
-      live.forEach((id, k) => {
-        const rng = orRng(id + ':free');
-        xy[id] = orLayout.polar(120 + rng() * 190, (k / live.length) * 360 + rng() * 40);
+    } else if (FORM.id === 'chord') {
+      /* Everything pushed out to the rim and the middle left empty, so
+         every cross-folder link has to cross open ground to get where
+         it is going. That is the one thing this arrangement is for:
+         which folders actually talk to each other is unreadable in the
+         other four and unmissable here.
+
+         Two rows, alternating, because a wide folder on one row runs
+         its notes into its neighbours. */
+        secs.forEach(sc => {
+        const ids = of(sc);
+        const w = sc.a1 - sc.a0;
+        const pad = Math.min(7, w * .1);
+        ids.forEach((id, k) => {
+          const rng = orRng(id + ':ch');
+          const a = sc.a0 + pad + (k + .5) * (w - 2 * pad) / ids.length;
+          xy[id] = orLayout.polar((k % 2 ? 302 : 340) + (rng() * 2 - 1) * 7, a);
+        });
       });
     }
   }
@@ -3752,9 +3795,15 @@ function orPaintRings() {
      Each category then gets an arc across its own sector at each member
      ring it actually occupies: its orbits, and only its. */
   out.push(`<circle cx="500" cy="500" r="120" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".1"/>`);
-  sec.forEach(s => s.rings.forEach((on, ri) => {
-    if (on) out.push(`<path d="${arc(RINGS[ri], s.a0, s.a1)}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".1"/>`);
-  }));
+  /* Only in the Orrery. The three member rings are where THAT
+     formation puts its notes; under Arms or Chord they are arcs
+     through empty space, drawn where nothing is. The sector spokes
+     below stay in all five, because all five group by sector — which
+     is the one thing every formation now has in common. */
+  if (state.form === 'orrery')
+    sec.forEach(s => s.rings.forEach((on, ri) => {
+      if (on) out.push(`<path d="${arc(RINGS[ri], s.a0, s.a1)}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".1"/>`);
+    }));
 
   /* sector spokes */
   sec.forEach(s => [s.a0, s.a1].forEach(a => {

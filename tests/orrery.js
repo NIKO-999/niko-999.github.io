@@ -1519,20 +1519,97 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     shapes.every((x) => x.at && Math.hypot(x.at[0] - anchored[0], x.at[1] - anchored[1]) < 2),
     { anchored, at: shapes.map((x) => x.at) });
 
-  /* Strata's claim is that distance from the centre IS importance.
-     Fixed thresholds put this corpus into two of four shells and left
-     the outer two empty, which is half a claim. Quartiles stratify
-     whatever shape the vault turns out to have. */
-  const strat = await page.evaluate(() => {
-    orForm('strata');
+  /* ── all five keep a note with its folder ──
+     This is what the picker is FOR. Two of the originals ranked the
+     whole vault globally — Spiral on one arm, Strata in four shells —
+     so a category ended up sprayed round the ring with its colour as
+     the only trace of it: a map whose whole claim is what is near what,
+     arranged so that nothing near each other is related.
+
+     Measured as an angle, not eyeballed: every note's bearing from the
+     centre has to land inside its own sector's wedge. The tolerance is
+     for the settle, which can push a node a couple of degrees past the
+     boundary; a formation that puts notes in a NEIGHBOUR's wedge shows
+     up as tens of strays, not two. The first Arms did exactly that —
+     twenty of fifty-two — because its sweep was a fixed angle instead
+     of the sector's own width. */
+  const grouped = [];
+  for (const f of picker.forms) {
+    await page.evaluate((k) => orForm(k), f);
+    await settle(page);
+    grouped.push(await page.evaluate(() => {
+      const wedge = {};
+      (orLayout.sec || []).forEach((s) => { wedge[s.id] = [s.a0, s.a1]; });
+      const catOf = orLayout.catOf || {};
+      let strays = 0, tot = 0;
+      for (const id in state.xy) {
+        if (id.indexOf('hub:') === 0) continue;
+        const w = wedge[catOf[id]];
+        if (!w) continue;
+        const p = state.xy[id];
+        let a = Math.atan2(p[1] - 500, p[0] - 500) * 180 / Math.PI;
+        while (a < w[0] - 180) a += 360;
+        while (a >= w[0] + 180) a -= 360;
+        tot++;
+        if (a < w[0] - 14 || a > w[1] + 14) strays++;
+      }
+      const r = Object.keys(state.xy).filter((i) => i.indexOf('hub:') !== 0)
+        .map((i) => Math.hypot(state.xy[i][0] - 500, state.xy[i][1] - 500));
+      return { form: state.form, strays, tot,
+               lo: Math.round(Math.min(...r)), hi: Math.round(Math.max(...r)) };
+    }));
+  }
+  ok('every formation keeps every note inside its own folder’s wedge',
+    grouped.every((g) => g.tot > 40 && g.strays === 0),
+    grouped.filter((g) => g.strays).map((g) => `${g.form}: ${g.strays}/${g.tot}`));
+
+  /* Terraces inherits Strata's claim — distance from the centre IS
+     importance — and has to make it inside a wedge rather than across
+     the whole ring. Fixed thresholds put a small folder entirely in
+     one band and the claim goes with it; quartiles of the sector's own
+     ranking always step, whatever shape the folder turns out to be. */
+  const terr = await page.evaluate(() => {
+    orForm('terraces');
+    const H = orLayout.home;
+    const byCat = {};
+    const catOf = orLayout.catOf || {};
+    Object.keys(H).forEach((i) => {
+      if (i.indexOf('hub:') === 0 || state.pin[i]) return;
+      (byCat[catOf[i]] = byCat[catOf[i]] || [])
+        .push(Math.round(Math.hypot(H[i][0] - 500, H[i][1] - 500)));
+    });
+    const big = Object.entries(byCat).sort((a, b) => b[1].length - a[1].length)[0];
+    const all = [].concat(...Object.values(byCat));
+    return { cat: big[0], steps: new Set(big[1].map((x) => Math.round(x / 70))).size,
+             lo: Math.min(...all), hi: Math.max(...all) };
+  });
+  ok('terraces steps the biggest folder across the whole field',
+    terr.steps >= 4 && terr.hi - terr.lo > 200, terr);
+
+  /* Chord is the one arrangement whose point is the MIDDLE: everything
+     out at the rim, so a cross-folder link has to cross open ground and
+     which folders talk to each other becomes readable. An empty centre
+     is the assertion. */
+  const chord = await page.evaluate(() => {
+    orForm('chord');
     const H = orLayout.home;
     const r = Object.keys(H).filter((i) => i.indexOf('hub:') !== 0 && !state.pin[i])
       .map((i) => Math.hypot(H[i][0] - 500, H[i][1] - 500));
-    return { lo: Math.min(...r), hi: Math.max(...r),
-             shells: new Set(r.map((x) => Math.round(x / 60))).size };
+    return { lo: Math.round(Math.min(...r)), hi: Math.round(Math.max(...r)) };
   });
-  ok('strata uses the whole field, not two rings of it',
-    strat.hi - strat.lo > 200 && strat.shells >= 4, strat);
+  ok('chord clears the middle and stands everything on the rim',
+    chord.lo > 250, chord);
+
+  /* The three member rings belong to the Orrery. Under Arms or Chord
+     they are arcs drawn through empty space. */
+  const arcs = await page.evaluate(() => {
+    const n = () => document.querySelectorAll('#orRings path[d^="M"]').length;
+    orForm('orrery'); const o = n();
+    orForm('chord'); const c2 = n();
+    return { orrery: o, chord: c2 };
+  });
+  ok('the orbit arcs are the Orrery’s own and go with it',
+    arcs.orrery > arcs.chord, arcs);
 
   /* A formation from another build, or a hand-edited one, must not
      leave the field with no arrangement at all — every branch in

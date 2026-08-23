@@ -14,17 +14,8 @@ const VIEWS = [
       await p.locator('.day.empty .day-new, .day .day-new').first().click();
       await p.waitForTimeout(350); } ],
   ['trade/metrics@800',`${BASE}/trading/`, 'metrics',  null, { width: 800, height: 900 }],
-  ['arc/board@800',    `${BASE}/arc/`,     'board',    null, { width: 800, height: 900 }],
   ['trade/metrics@420',`${BASE}/trading/`, 'metrics',  null, { width: 420, height: 860 }],
   ['trade/calendar@420',`${BASE}/trading/`,'calendar', null, { width: 420, height: 860 }],
-  ['arc/board@420',    `${BASE}/arc/`,     'board',    null, { width: 420, height: 860 }],
-  ['arc/palette',      `${BASE}/arc/`,     'board',    async (p) => {
-      await p.locator('#palBtn').click(); await p.waitForTimeout(250); } ],
-  /* Vision is the plan's third tab now, not a view on the rail. */
-  ['arc/vision',       `${BASE}/arc/`,     'board', async (p) => {
-      await p.locator('#tabVision').click(); await p.waitForTimeout(350); } ],
-  ['arc/board',        `${BASE}/arc/`,     'board'],
-  ['arc/past',         `${BASE}/arc/`,     'past'],
   ['trade/metrics',    `${BASE}/trading/`, 'metrics'],
   ['trade/calendar',   `${BASE}/trading/`, 'calendar'],
   ['trade/settings',   `${BASE}/trading/`, 'settings'],

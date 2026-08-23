@@ -276,8 +276,6 @@ const ok = (name, cond, extra) => {
   /* ── and no way back into the ledger except a link ── */
   ok('the rail links out to the ledger', await p.evaluate(() =>
     !!document.querySelector('.rail a[href="../trading/"]')));
-  ok('and to Arc', await p.evaluate(() =>
-    !!document.querySelector('.rail a[href="../arc/"]')));
   ok('two views here and no more', await p.evaluate(() =>
     document.querySelectorAll('.rail [data-view]').length === 2));
 
