@@ -1,9 +1,8 @@
 export const meta = {
   name: 'sweep',
   description: 'Drive the whole star chart across every state and report real defects',
-  whenToUse: 'Before shipping anything that touches the map, or when something '
-    + 'is reported as glitchy and hand-measurement has not found it.',
-  phases: [{ title: 'Sweep', detail: 'five lenses driving the real app' }],
+  whenToUse: 'Before shipping anything that touches the map, or when something is reported as glitchy and hand-measurement has not found it.',
+  phases: [{ title: 'Sweep', detail: 'six lenses driving the real app' }],
 }
 
 /* ─── why there is no verify phase ──────────────────────────────────
@@ -68,7 +67,9 @@ Then drive it with Playwright via the repo's own helper, which finds Chromium:
 Useful globals in the page: state (sel, zoom, panX/panY, xy, notes, edges, only,
 catPane, form, pin), orLayout (catOf, deg, tier, note, home, cats()), orSim
 (raf, lines, el, drag, S), orKin(id), orOpen(id), orClose(), orOpenCat(cat),
-orForm(id), orZoom(f,px,py), orZoom.fly(ids), orPin(id), orPaint(), SEED.
+orForm(id), orZoom(f,px,py), orZoom.fly(ids), orPin(id), orPaint(), SEED,
+orAsk(q) and its helpers (seek, back, cat, folder, folders, byTitle, brief),
+orReply(html, spoken) / orReply.clear(), orVoice(on) / orVoice.pick(), orLoose().
 Theme: localStorage 'arc.theme' = 'dark' | 'light' | 'system', palette
 'arc.palette', then reload. Wait for quiet with:
   await page.waitForFunction(() => !orSim.raf, null, {timeout:20000}).catch(()=>{});
@@ -97,6 +98,16 @@ DELIBERATE, and NOT bugs:
   - the camera flight caps at zoom 2.4; the hand zoom clamps 1–4
   - only the heavy arc and the three dust shells move; nothing else drifts
   - a stored pin is clamped into the viewBox on read, on purpose
+  - there is exactly ONE card on the map. The field card — notes, links,
+    categories, loose ends — was deliberately removed; Jarvis answers all four
+    on request. Its absence is not a regression.
+  - that card is translucent glass over the backdrop photograph on purpose. It
+    still has to clear 4.5:1 on every row, at every palette — that part IS
+    yours to check.
+  - the voice control lives inside the search field, icon-only, and is named
+    only by aria-label and title. That is deliberate, not a missing label.
+  - Jarvis never reaches a network and never has an opinion. Being told he
+    cannot form a view is the designed answer, not a failure.
   - the gauntlet test reports 11 pre-existing faults across the repo
 `
 
@@ -123,9 +134,10 @@ const FINDINGS = {
   required: ['findings', 'coverage'],
 }
 
-/* Five proven lenses. The two obvious gaps, if this is ever widened:
-   keyboard-only navigation end to end, and the vault ingest path —
-   drop, pick, reconnect, forget — both of which got thin coverage. */
+/* Six lenses. Five are proven; jarvis is new with the feature. The
+   two obvious gaps, if this is ever widened: keyboard-only navigation
+   end to end, and the vault ingest path — drop, pick, reconnect,
+   forget — both of which got thin coverage. */
 const LENSES = [
   { key: 'flight', port: 8931, prompt: `
 YOUR LENS: THE CAMERA FLIGHT. Click nodes of every tier (hub, major, minor, leaf)
@@ -171,6 +183,29 @@ and stored shapes that break on reload. Feed it damaged input on purpose — a
 torn orrery.v1, a torn cached index in IndexedDB, an out-of-range pin, an
 unknown theme or formation — and confirm each is REPAIRED rather than throwing
 or blanking the map.` },
+
+  { key: 'jarvis', port: 8936, prompt: `
+YOUR LENS: JARVIS. He is a librarian over the in-memory index and he must be
+right or silent. Drive orAsk with the real input — type into #orSearch and press
+Enter, do not only call the function — across: every category by id, by label
+and by folder alias; every folder at every depth, by full path and by leaf name;
+notes by exact title, by basename, by a frontmatter alias and by a substring
+that matches several; "what links to X" in each of its phrasings; orphans; loose
+ends; "how many" in each phrasing; advice intents; help; empty input; a name
+that does not exist; and adversarial input — a very long string, regex-special
+characters, HTML and a script tag, a leading "jarvis,", trailing punctuation.
+
+RECOMPUTE EVERY FIGURE HE STATES from state.notes / state.edges / orBacklinks
+and compare. A wrong number stated confidently is the worst defect this feature
+can have. Check the ordering of the grammar holds (a backlink question that
+contains an advice word must still reach backlinks). Check nothing he renders
+can inject markup. Check the reply strip: is it ever left showing the answer to
+a previous question, is it ever painted over by another element (measure with
+elementFromPoint), does Escape take it before the filter, does the box and
+state.q ever disagree. Check the voice toggle costs the voice and nothing else,
+survives reload, and that orVoice.pick prefers a named en-GB voice — stub
+speechSynthesis.getVoices to test it. Finally, record EVERY request the page
+makes across the whole pass and report any that leaves the origin.` },
 
   { key: 'visual', port: 8935, prompt: `
 YOUR LENS: VISUAL INTEGRITY, BOTH THEMES, EVERY PALETTE. Sample REAL PIXELS off

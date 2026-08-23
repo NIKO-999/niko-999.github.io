@@ -251,6 +251,85 @@ mornings — silent, because the file wrote and restored without
 complaint. A trade can be rebuilt off a broker statement; how you felt
 before you took it cannot.
 
+## The map's chrome
+
+**One card, and it is glass.** There were two: Categories top-left and
+The field bottom-left — notes, links, categories, loose ends. Four
+figures that do not change while you look at them, parked over a corner
+of the thing that does. They are answers now: ask Jarvis and he says all
+four, which is where a number you want once an hour belongs.
+
+The card that stayed is translucent over the backdrop photograph, blurred
+and desaturated. **The alpha is not free.** It is mixed off `--menu`
+rather than `--glass` — near .75 in both themes — because the rows are
+6pt type over a photograph, and an unblurred or thinner card puts them
+at a contrast ratio that looks deliberate and is not. `tests/orrery.js`
+measures every row on real pixels at every backdrop; thin it and the
+measurement is what says so. It also proves the glass IS glass: `--menu`
+does not move with the backdrop, so anything inside the card that
+changes when the photograph changes got there by being seen through.
+
+**Jarvis lives in the field he is asked in.** A labelled button in the
+top bar made him read as a mode you put the app into, and it was a sixth
+control on a row that had five. Icon only, named by `aria-label` and
+`title`, accent when he speaks.
+
+**His answer strip sits at z-index 40, and that is measured.** The strip
+is anchored in the top bar and the cards in the stage, so the two meet
+in the root stacking context: at 4 the Categories card at 5 painted
+straight over the answer. The answer was still there underneath, which
+is worse than no answer.
+
+## Jarvis
+
+A librarian, not an oracle. Every branch of `orAsk` answers out of the
+index already in memory — a category, a folder, a title, what links to
+what — so a question costs a lookup and reaches nothing. `tests/
+orrery.js` watches every request the page makes across the whole Jarvis
+pass and fails if one leaves the origin. That assertion IS the feature:
+it is what refuses a model, a key or a lookup added later to make him
+cleverer.
+
+**He refuses exactly one thing, deliberately: a view.** Ask what he
+makes of a note and he says he cannot, opens it, and puts a written
+prompt on your clipboard for the session on your machine that reads the
+files — the review skill's job, not his. A model pretending to have
+read your vault from inside a static file would be wrong in a way that
+sounds right, and you would have no way to audit it.
+
+The prompt is rendered BEFORE the clipboard write and upgraded to
+`copied` afterwards. Rendering only inside the promise callback left
+the strip showing the answer to the previous question for as long as
+the write was pending, which reads as him ignoring you.
+
+**Typed in, spoken back.** Speech synthesis is local and free.
+Dictation is not — `SpeechRecognition` in this browser uploads the
+microphone to a server — so there is no listen button and there will
+not be one.
+
+The voice is picked by NAME first (Daniel, Oliver, Serena), then any
+en-GB, then any English. Picking by `lang` alone lands on whichever
+en-GB the OS enumerates first, which is never one of those. The voice
+list is populated asynchronously in every browser that has one, so the
+pick is deferred to the first thing he says and cleared on
+`voiceschanged`. The toggle costs the voice and nothing else: the strip
+under the box is written either way.
+
+**The grammar is ordered and the order is load-bearing.** `review` is a
+word in the advice branch and the title of a note in the seed, so "what
+links to the review" has to reach backlinks first. There is an
+assertion holding that order.
+
+**The answer never outlives the question.** Typing again clears the
+strip — a reply left up under a box that now says something else reads
+as a reply to what you are typing now. Escape takes the answer first
+and the filter second, and BOTH branches call `preventDefault`:
+Chromium clears a `type="search"` input on Escape by itself, and that
+native clear emptied the box without touching `state.q`, leaving the
+map filtered by a word no longer on screen with no visible way to clear
+it. Enter cancels the pending `orSearch` debounce for the same reason —
+without it the filter lands 140ms later carrying the whole question.
+
 ## Git
 
 Develop on the designated feature branch. Deploy by fast-forwarding

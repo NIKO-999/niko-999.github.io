@@ -385,19 +385,47 @@
    text carries its own contrast. The fade for reading time is set
    inline by the pane code; the transition here is what makes it a
    fade rather than a cut. */
-#orLegend, #orStats {
+/* ── the one card on the map ──
+   Glass rather than a panel: the sky behind it is the subject, and a
+   solid rectangle sitting on top of it is a lid. Blurred and
+   desaturated so the backdrop reads as depth and never as texture —
+   an unblurred translucent card puts a photograph behind seven rows of
+   6pt type, which is how you get a legend nobody can read.
+
+   The alpha is not free. It is mixed off --menu rather than --glass,
+   which lands near .75 in both themes and holds every row over 4.5:1
+   against whatever the palette is showing; the theme pass measures
+   that on real pixels, at every backdrop. Thin it and the measurement
+   is what says so. */
+#orLegend {
   position: absolute;
   left: 14px;
+  top: 14px;
   width: var(--or-card);
+  max-height: min(52%, 340px);
+  overflow-y: auto;
   z-index: 5;
-  padding: 12px 14px;
+  padding: 13px 13px 11px;
   border: 1px solid var(--glass-line);
-  border-radius: 12px;
-  background: var(--menu);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--menu) 78%, transparent);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  backdrop-filter: blur(26px) saturate(160%);
+  /* The inset hairline is the whole trick: a lit top edge is what the
+     eye reads as a pane of something rather than a hole. */
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .30),
+              inset 0 1px 0 rgba(255, 255, 255, .07);
   transition: opacity .25s;
 }
-#orLegend { top: 14px; max-height: min(46%, 320px); overflow-y: auto; }
-#orStats  { bottom: 14px; }
+:root[data-resolved="light"] #orLegend {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .12),
+              inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+/* A browser with no backdrop-filter gets the solid card back rather
+   than a translucent one over an unblurred photograph. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #orLegend { background: var(--menu); }
+}
 
 .or-card-h {
   margin: 0 0 8px;
@@ -443,19 +471,9 @@
   font-size: .64rem;
   color: var(--ink-3);
 }
-.or-stat {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  min-height: 24px;
-  font-size: .7rem;
-  color: var(--ink-2);
-}
-.or-stat-v { margin-left: auto; font-size: .78rem; font-weight: 400; color: var(--ink); }
-
 /* ── zoom ──
-   Bottom right, opposite the stats, and it does NOT fade with them:
-   the map is still driveable while you read. */
+   Bottom right, and it does NOT fade with the card: the map is still
+   driveable while you read. */
 .or-zoom {
   position: absolute;
   right: 14px;
@@ -544,6 +562,113 @@
    it under reduced motion. */
 @keyframes or-slide { from { opacity: 0; transform: translateX(-14px); } }
 #orNote:not([hidden]), #orCatPane:not([hidden]) { animation: or-slide .28s ease; }
+
+/* ── what Jarvis said ──
+   Hung under the search field rather than placed in the flow: the top
+   bar is a flex row and a second line in it would push every control
+   down the moment he answered. */
+.search { position: relative; }
+/* Inside the field, at the end of the line you type. Icon only: an
+   icon-only control with no accessible name is a control only the
+   sighted can find, so the name goes to aria-label and title and moves
+   with the state. Accent when he speaks, muted when he does not —
+   the icon says which too, because colour alone is not a state. */
+.or-mic {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  margin-right: -5px;
+  padding: 0;
+  border: 0;
+  border-radius: 7px;
+  background: none;
+  color: var(--ink-3);
+  cursor: pointer;
+  transition: color .18s, background .18s;
+}
+.or-mic:hover { color: var(--ink); background: var(--glass-in-2); }
+.or-mic[aria-pressed="true"] { color: var(--accent); }
+.or-mic[aria-pressed="true"]:hover { color: var(--accent); }
+.or-mic:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* ── what he said ──
+   A sheet hanging off the field, not a bar: it exists only while there
+   is an answer, and it is the same glass as the card on the map so the
+   two read as one material.
+
+   z-index 40 is measured, not guessed. The strip is anchored in the top
+   bar and the cards are anchored in the stage, so the two meet in the
+   root stacking context — at 4 the Categories card at 5 drew straight
+   over his answer, and the answer was still there underneath, which is
+   the worst kind of wrong. */
+#orReply {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  right: 0;
+  z-index: 40;
+  margin: 0;
+  padding: 10px 14px;
+  border: 1px solid var(--glass-line);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--menu) 88%, transparent);
+  -webkit-backdrop-filter: blur(26px) saturate(160%);
+  backdrop-filter: blur(26px) saturate(160%);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, .34),
+              inset 0 1px 0 rgba(255, 255, 255, .06);
+  color: var(--ink);
+  font-size: 13px;
+  line-height: 1.45;
+}
+:root[data-resolved="light"] #orReply {
+  box-shadow: 0 14px 34px rgba(0, 0, 0, .14),
+              inset 0 1px 0 rgba(255, 255, 255, .85);
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  #orReply { background: var(--menu); }
+}
+#orReply[hidden] { display: none; }
+#orReply b { font-weight: 500; }
+/* The caption line: what he offered, what he copied, what is still
+   missing. Mono and muted so it reads as a footnote to the sentence
+   above rather than a second sentence. NOT uppercased — two of its
+   three uses are note names, and a note name in caps is a different
+   note name. */
+#orReply em {
+  display: block;
+  margin-top: 5px;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-style: normal;
+  letter-spacing: .03em;
+  line-height: 1.5;
+  color: var(--ink-3, var(--or-mute));
+}
+/* The prompt he could not put on your clipboard. One click takes the
+   whole thing, because the only thing you want to do with it is carry
+   it somewhere else. */
+#orReply em.or-rp { user-select: all; color: var(--ink); font-size: 12px; }
+
+/* Rows he offers you. Buttons, not a printed list: the answer to "show
+   me the trading folder" is only useful if you can walk into it from
+   where it is written. */
+#orReply ul { list-style: none; margin: 8px 0 0; padding: 0;
+  display: flex; flex-wrap: wrap; gap: 5px; }
+#orReply li { margin: 0; }
+.or-rl {
+  font: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+  color: var(--ink);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid var(--glass-line);
+  border-radius: 999px;
+  padding: 4px 10px;
+  cursor: pointer;
+}
+.or-rl:hover { background: color-mix(in srgb, var(--accent) 26%, transparent); }
+.or-rl:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ── the formation picker ──
    Five ways for the field to stand, in the card the categories already
@@ -1093,7 +1218,21 @@
           <circle cx="11" cy="11" r="7" /><path d="m20 20-3.6-3.6" />
         </svg>
         <label class="sr" for="orSearch">Search your notes</label>
-        <input id="orSearch" type="search" placeholder="Search your notes" autocomplete="off" />
+        <input id="orSearch" type="search" placeholder="Search your notes, or ask" autocomplete="off" />
+        <!-- He lives in the box he is asked in. A labelled button out in
+             the bar made him look like a mode you put the app into, and
+             put a sixth control on a row that already had five. He is a
+             property of this field, so he sits in it. -->
+        <button type="button" id="orVoiceBtn" class="or-mic" aria-pressed="true"
+                aria-label="Jarvis answers out loud" title="Jarvis answers out loud">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+               stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"
+               width="15" height="15" id="orVoiceIcon"></svg>
+        </button>
+        <!-- What he said, in writing. Speech alone is unreviewable and
+             unreadable with the sound off, so the answer is always on
+             screen whether or not he is allowed to say it. -->
+        <p id="orReply" role="status" aria-live="polite" hidden></p>
       </div>
 
       <!-- The one control that costs you your arrangement, so its title
@@ -1219,13 +1358,11 @@
           <div id="orFormRows" role="group" aria-label="Formation"></div>
         </div>
 
-        <div id="orStats">
-          <h2 class="or-card-h">The field</h2>
-          <div class="or-stat">Notes<span class="or-stat-v" id="orStatNodes"></span></div>
-          <div class="or-stat">Links<span class="or-stat-v" id="orStatLinks"></span></div>
-          <div class="or-stat">Categories<span class="or-stat-v" id="orStatCats"></span></div>
-          <div class="or-stat">Loose ends<span class="or-stat-v" id="orStatLoose"></span></div>
-        </div>
+        <!-- The field card used to sit here: notes, links, categories,
+             loose ends. Four figures that never changed while you looked
+             at them, parked over the bottom-left corner of the map for
+             the whole session. Ask Jarvis and he says all four, which is
+             where a number you want once an hour belongs. -->
 
         <div class="or-zoom" role="group" aria-label="Camera">
           <button type="button" id="orZoomIn" aria-label="Zoom in">
@@ -2045,7 +2182,7 @@ orForm.of = (id) => FORMS.find(f => f.id === id) || FORMS[0];
 
 function orRead() {
   const out = { v: 1, pin: {}, cat: {}, fold: {}, sel: null, only: null,
-                view: 'map', vault: null, form: 'orrery' };
+                view: 'map', vault: null, form: 'orrery', voice: true };
   let raw = null;
   try { raw = localStorage.getItem(KEY); } catch (e) { return out; }
   if (!raw) return out;
@@ -2115,6 +2252,10 @@ function orRead() {
      leave the field with no arrangement at all — every branch in
      orLayout is keyed off this string. */
   if (FORMS.some(f => f.id === v.form)) out.form = v.form;
+  /* Only a stored `false` turns him down. Anything else — missing,
+     damaged, a string from a hand edit — means nobody has said, and
+     the answer he gives out loud is the one you asked for. */
+  if (v.voice === false) out.voice = false;
 
   if (v.vault && typeof v.vault === 'object' && !Array.isArray(v.vault)) {
     out.vault = {
@@ -4019,7 +4160,6 @@ function orPaint() {
   if (em) em.hidden = (state.notes || []).length > 0;
   orLegend();
   orPaintForms();
-  orStats();
 }
 /* One matcher for links, nodes and labels, so "matches the filter"
    cannot mean three different things on one screen. Both narrows dim
@@ -4853,7 +4993,6 @@ const { orAttach, orPickDir, orForget } = (() => {
     if (typeof orLayout === 'function') orLayout();
     if (typeof orPaint === 'function') orPaint();
     if (typeof orLegend === 'function') orLegend();
-    if (typeof orStats === 'function') orStats();
     /* A vault is the largest energy anything puts into this field.
        orPaint's own seed already reheats when the note set changes;
        this covers the re-read of a vault whose ids came back the same
@@ -5100,9 +5239,10 @@ const { orAttach, orPickDir, orForget } = (() => {
           + 'skipped — attach the folder again to rebuild them.' : ''));
     } else if (state.notes.length && state.loose == null) {
       /* The seed goes through the same resolver, so its loose ends
-         are counted the same way a vault's are. */
+         are counted the same way a vault's are. Kept on state because
+         the cached vault record carries it; nothing paints it, and
+         Jarvis re-derives from the bodies so he can name them. */
       state.loose = orResolve(state.notes).length;
-      if (typeof orStats === 'function') orStats();
     }
     meta();
     let h = null;
@@ -5457,7 +5597,7 @@ orOpen.fill = (id) => {
    keyboard is a trap, not chrome. The inline opacity doubles the CSS
    so the behaviour survives a stylesheet that has not caught up. */
 orOpen.chrome = (reading) => {
-  ['orLegend', 'orStats'].forEach(cid => {
+  ['orLegend'].forEach(cid => {
     const c = byId(cid);
     if (!c) return;
     c.style.opacity = reading ? '0' : '';
@@ -5787,35 +5927,22 @@ function orOnly(cat) {
   orSay(state.only ? `Only ${c.label}.` : 'Every category.');
 }
 
-/* ── the stats card ──
-   Nodes, links, categories, loose ends — four rows, the node study's
-   insights card. Categories counts the drawn sectors, so the figure
-   can never disagree with the map beside it. */
-function orStats() {
-  const notes = state.notes || [];
-  const put = (id, v) => { const e = byId(id); if (e) e.textContent = String(v); };
-  put('orStatNodes', notes.length);
-  put('orStatLinks', (state.edges || []).length);
-  let k = (orLayout.sec || []).length;
-  if (!k) {
-    const s = new Set(['trading', 'growth']);
-    notes.forEach(n => s.add(orOpen.cat(n)));
-    k = s.size;
-  }
-  put('orStatCats', k);
-  /* The ingest resolves frontmatter aliases and leaves its count on
-     state; the recount from the bodies is the floor for the seed and
-     a cold cache. Two counters would otherwise mean two numbers. */
-  put('orStatLoose', Number.isFinite(state.loose) ? state.loose : orStats.loose());
-}
+/* ── loose ends ──
+   DISTINCT wikilink targets that resolve to nothing, over every body.
+   Distinct, because five mentions of one missing note are one gap in
+   the brain, not five. Cached against the notes array: this walks
+   megabytes and the filter asks for it on every keystroke.
 
-/* Loose ends: DISTINCT wikilink targets that resolve to nothing, over
-   every body. Distinct, because five mentions of one missing note are
-   one gap in the brain, not five. Cached against the notes array —
-   this walks megabytes, and orStats repaints on every filter key. */
-orStats.loose = () => {
+   It used to be one of four rows on a card parked over the bottom-left
+   of the map for the whole session — four figures that do not change
+   while you look at them, in the way of the thing that does. The
+   figures did not go anywhere: Jarvis says all four on request, and a
+   number you want once an hour belongs behind a question. This is the
+   only one with a list behind it, which is why it is the only one that
+   needed a function. */
+function orLoose() {
   const notes = state.notes || [];
-  if (orStats.src === notes && orStats.n != null) return orStats.n;
+  if (orLoose.src === notes && orLoose.n != null) return orLoose.n;
   const missed = new Set();
   for (const n of notes) {
     const b = String(n.body || '');
@@ -5826,10 +5953,17 @@ orStats.loose = () => {
       if (target && !orMd.resolve(target)) missed.add(target.toLowerCase());
     }
   }
-  orStats.src = notes;
-  orStats.n = missed.size;
-  return orStats.n;
-};
+  orLoose.src = notes;
+  orLoose.n = missed.size;
+  /* The names, not only the count. Jarvis names them; recomputing the
+     list separately would walk the same megabytes twice for the same
+     answer. */
+  orLoose.miss = Array.from(missed).sort();
+  return orLoose.n;
+}
+orLoose.src = null;
+orLoose.n = null;
+orLoose.miss = [];
 
 /* ── search ──
    Filters as you type, debounced: the paint relays a whole vault, and
@@ -5856,6 +5990,481 @@ function orSearch() {
 }
 orSearch.t = 0;
 orSearch.had = false;
+
+/* ── Jarvis ──
+   A librarian, not an oracle. Every answer below is computed from the
+   index already in memory — a category, a folder, a title, what links
+   to what — so asking costs a lookup and reaches no network. That is
+   the promise the whole app is built on and it is not worth spending
+   on conversation.
+
+   Which is why he refuses exactly one thing: a view. Ask him what he
+   makes of a note and he says he cannot, and hands the question to the
+   session on your machine that reads the files, with the prompt
+   already written. A model pretending to have read your vault from
+   inside a static file would be wrong in a way that sounds right.
+
+   Typed in, spoken back. Speech synthesis is local; dictation in this
+   browser uploads the microphone to a server, which is the one thing
+   this app has never done, so there is no listen button and there will
+   not be one. */
+
+function orVoice(on) {
+  if (on !== undefined) {
+    orVoice.on = !!on;
+    orWrite({ voice: orVoice.on });
+    if (!orVoice.on) orVoice.hush();
+  }
+  const b = byId('orVoiceBtn'), ic = byId('orVoiceIcon');
+  if (b) {
+    b.setAttribute('aria-pressed', String(orVoice.on));
+    /* The label moves with the state, not just the pressed flag. It is
+       the button's whole accessible name — there is no text in it — so
+       an aria-label frozen at "answers out loud" would read the wrong
+       state aloud for as long as he was muted. */
+    const say = orVoice.on ? 'Jarvis answers out loud'
+                           : 'Jarvis answers in writing only';
+    b.setAttribute('aria-label', say);
+    b.title = say;
+  }
+  if (ic) ic.innerHTML = orVoice.on ? orVoice.ON : orVoice.OFF;
+  return orVoice.on;
+}
+orVoice.on = true;
+orVoice.ON = '<path d="M4 9.4h3.5L12 5.5v13L7.5 14.6H4z"/>'
+  + '<path d="M15.9 9.3a3.9 3.9 0 0 1 0 5.4"/>'
+  + '<path d="M18.5 6.9a7.4 7.4 0 0 1 0 10.2"/>';
+orVoice.OFF = '<path d="M4 9.4h3.5L12 5.5v13L7.5 14.6H4z"/>'
+  + '<path d="m16.2 9.6 4.3 4.8"/><path d="m20.5 9.6-4.3 4.8"/>';
+
+orVoice.hush = () => { try { window.speechSynthesis.cancel(); } catch (e) {} };
+
+/* Named voices first. Picking by lang alone lands on whichever en-GB
+   the OS enumerates first, and on a Mac that is a compact synth that
+   sounds like a lift announcement — which is the opposite of the point.
+   The list is only ever a preference: an OS with none of them still
+   gets the best en-GB it has, then any English at all. */
+orVoice.WANT = ['daniel', 'oliver', 'serena', 'arthur', 'stephanie',
+                'malcolm', 'kate', 'jamie'];
+orVoice.voice = null;
+orVoice.pick = () => {
+  let list = [];
+  try { list = window.speechSynthesis.getVoices() || []; } catch (e) { return null; }
+  if (!list.length) return null;
+  const gb = list.filter(v => /^en[-_]GB/i.test(v.lang || ''));
+  for (const w of orVoice.WANT) {
+    const hit = gb.filter(v => String(v.name || '').toLowerCase().indexOf(w) >= 0)[0];
+    if (hit) return hit;
+  }
+  return gb.filter(v => !/compact|eloquence|novelty/i.test(v.name || ''))[0]
+      || gb[0]
+      || list.filter(v => /^en/i.test(v.lang || ''))[0]
+      || null;
+};
+
+/* The voice list is populated asynchronously in every browser that has
+   one — getVoices() on a cold page returns [] and fills in later. So
+   the pick is deferred to the first thing he says rather than cached
+   at boot, and voiceschanged clears it so a voice installed mid-session
+   is picked up. */
+orVoice.say = (text) => {
+  if (!orVoice.on || !text) return;
+  let S = null;
+  try { S = window.speechSynthesis; } catch (e) {}
+  if (!S || typeof window.SpeechSynthesisUtterance !== 'function') return;
+  try { S.cancel(); } catch (e) {}
+  const u = new window.SpeechSynthesisUtterance(String(text));
+  if (!orVoice.voice) orVoice.voice = orVoice.pick();
+  if (orVoice.voice) { u.voice = orVoice.voice; u.lang = orVoice.voice.lang; }
+  else u.lang = 'en-GB';
+  /* Just under conversational. The default reads a list of note titles
+     at the pace of a station announcement. */
+  u.rate = .94; u.pitch = 1; u.volume = 1;
+  try { S.speak(u); } catch (e) {}
+};
+
+/* What he said, in writing, under the box you asked in. The strip is
+   the live region itself, so orSay is not called here — two regions
+   announcing the same sentence reads it twice. */
+function orReply(html, spoken) {
+  const box = byId('orReply');
+  if (box) { box.innerHTML = html || ''; box.hidden = !html; }
+  if (spoken) orVoice.say(spoken);
+}
+orReply.clear = () => {
+  const box = byId('orReply');
+  if (box && !box.hidden) { box.innerHTML = ''; box.hidden = true; }
+  orVoice.hush();
+};
+/* Rows he offers you. Buttons, not text: the answer to "show me the
+   trading folder" is only useful if you can then walk into it. */
+orReply.rows = (notes, n) => notes.length
+  ? `<ul>${notes.slice(0, n || 8).map(x =>
+      `<li><button type="button" class="or-rl" data-open="${esc(x.id)}">`
+      + `${esc(x.title)}</button></li>`).join('')}</ul>`
+  : '';
+orReply.hint = (s) => `<em>${esc(s)}</em>`;
+
+/* ── the grammar ──
+   Deterministic and ordered. Every branch is a regex over the typed
+   line, and the order matters: "what links to review" must reach the
+   backlinks branch before the word `review` reaches the advice one. */
+function orAsk(raw) {
+  const q0 = String(raw || '').trim();
+  if (!q0) { orReply.clear(); return null; }
+  /* Address and punctuation are not the question. */
+  const q = q0.replace(/^(?:hey\s+|ok\s+|hi\s+)?jarvis[,:\s]+/i, '')
+              .replace(/^(?:please|can you|could you|would you)\s+/i, '')
+              .replace(/\s+(?:please)$/i, '')
+              .replace(/[?.!]+$/, '')
+              .trim();
+  const lc = q.toLowerCase();
+  if (!q) { orReply.clear(); return null; }
+
+  if (/^(?:help|what can you do|what can i ask|who are you|what do you do)/.test(lc))
+    return orAsk.help();
+
+  let m;
+  if ((m = q.match(/^(?:what|who|which notes?)\s+(?:links?|points?|refers?)\s+(?:to|at)\s+(.+)$/i))
+   || (m = q.match(/^backlinks?\s*(?:for|to|of)?\s*(.+)$/i))
+   || (m = q.match(/^(?:what|who)\s+(?:cites|mentions)\s+(.+)$/i)))
+    return orAsk.back(m[1].trim());
+
+  if (/\b(?:orphans?|loose ends?|unlinked|dead ends?)\b/.test(lc)
+   || /\bnot (?:connected|linked)\b/.test(lc)
+   || /\bnothing links\b/.test(lc))
+    return orAsk.lone(/\bloose end/.test(lc));
+
+  if (/^how many\b/.test(lc)) return orAsk.count(q);
+
+  if (/\b(?:advice|advise|opinion|critique|what do you think|what do you make of|how am i doing|your read|your take)\b/.test(lc)
+   || /^(?:analys|analyz|assess|review|judge|grade)e?\s+/.test(lc))
+    return orAsk.advice(q);
+
+  const seek = q.match(/^(?:where(?:'s| is| are)?|find|show(?: me)?|open|list|read|go to|take me to|jump to|pull up|bring up|get me)\s+(?:the\s+)?(.+?)(?:\s+(?:folder|category|notes?|note))?$/i);
+  return orAsk.seek(seek ? seek[1].trim() : q);
+}
+
+/* "A, B and C" — spoken only. A comma-separated list read aloud never
+   lands: the synth gives the last item the same fall as the rest, and
+   you cannot hear where it ended. */
+orAsk.and = (a) => a.length < 2 ? (a[0] || '')
+  : a.slice(0, -1).join(', ') + ' and ' + a[a.length - 1];
+
+/* The field is filtered by what you typed as you typed it, and the
+   debounce from the last keystroke is still in flight when Enter
+   lands. Both lines below stop it carrying the question into the
+   filter — the timer is cancelled, and the box it would read is
+   rewritten — and either alone is enough. Measured: removing one and
+   leaving the other still held. They are kept as a pair because they
+   fail in opposite directions, not because both are load-bearing. */
+orAsk.filter = (term) => {
+  clearTimeout(orSearch.t);
+  const box = byId('orSearch');
+  if (box) box.value = term;
+  state.q = term;
+  orSearch.had = !!term;
+  orPaint();
+};
+
+orAsk.help = () => {
+  orAsk.filter('');
+  orReply('<b>Ask me for a place or a name.</b> A category, a folder, '
+    + 'or a note — I will open it and tell you what is in it.'
+    + orReply.hint('where is … · trading · what links to … · orphans · how many in body · advice on …'),
+    'Ask me for a category, a folder, or a note by name, and I will open it and tell you what is in it.');
+  return 'help';
+};
+
+orAsk.note = (id) => (orLayout.note || {})[id] || (state.notes || [])
+  .filter(n => n.id === id)[0] || null;
+
+orAsk.label = (id) => {
+  const c = (orLayout.catOf || {})[id] || 'other';
+  const row = orLayout.cats().filter(x => x.id === c)[0];
+  return row ? row.label : c;
+};
+
+/* A note, said out loud. Where it lives, how big it is, and how
+   connected — the three things that decide whether it is worth
+   reading, none of which the title tells you. */
+orAsk.brief = (id) => {
+  const n = orAsk.note(id);
+  if (!n) return null;
+  const out = (n.links || []).length, back = orBacklinks(id).length;
+  const w = n.words || 0;
+  return {
+    html: `<b>${esc(n.title)}</b> — ${esc(orAsk.label(id))}. `
+      + `${w} ${w === 1 ? 'word' : 'words'}, ${out} out, ${back} in.`,
+    say: `${n.title}. Filed under ${orAsk.label(id)}. `
+      + `${w} words, ${out} links out, ${back} in.`,
+  };
+};
+
+orAsk.back = (t) => {
+  const id = orMd.resolve(t) || orAsk.byTitle(t)[0];
+  if (!id) return orAsk.miss(t);
+  const rows = orBacklinks(id);
+  const n = orAsk.note(id);
+  orAsk.filter('');
+  orOpen(id);
+  const title = n ? n.title : id;
+  if (!rows.length) {
+    orReply(`Nothing links to <b>${esc(title)}</b> yet.`,
+      `Nothing links to ${title} yet.`);
+    return id;
+  }
+  orReply(`${rows.length} ${rows.length === 1 ? 'note links' : 'notes link'} `
+    + `to <b>${esc(title)}</b>.` + orReply.rows(rows),
+    `${rows.length} ${rows.length === 1 ? 'note links' : 'notes link'} to ${title}. `
+    + orAsk.and(rows.slice(0, 5).map(r => r.title)) + '.');
+  return id;
+};
+
+/* Two different kinds of nothing. An orphan is a note you wrote and
+   never joined to anything; a loose end is a link you wrote to a note
+   that does not exist. The second is a to-do list and the first is a
+   pile, and calling them the same thing loses the useful one. */
+orAsk.lone = (ends) => {
+  orAsk.filter('');
+  if (ends) {
+    orLoose();                /* fills orLoose.miss; cached against the notes */
+    const miss = orLoose.miss || [];
+    if (!miss.length) {
+      orReply('No loose ends — every link you have written resolves.',
+        'No loose ends. Every link you have written resolves.');
+      return 'ends';
+    }
+    orReply(`${miss.length} loose ${miss.length === 1 ? 'end' : 'ends'} — `
+      + 'links written to notes that do not exist yet.'
+      + orReply.hint(miss.slice(0, 10).join(' · ')),
+      `${miss.length} loose ${miss.length === 1 ? 'end' : 'ends'}. `
+      + orAsk.and(miss.slice(0, 5)) + '.');
+    return 'ends';
+  }
+  const joined = new Set();
+  for (const e of (state.edges || [])) { joined.add(e[0]); joined.add(e[1]); }
+  const rows = (state.notes || []).filter(n => !joined.has(n.id))
+    .sort((a, b) => a.title.localeCompare(b.title));
+  if (!rows.length) {
+    orReply('No orphans — every note is joined to something.',
+      'No orphans. Every note is joined to something.');
+    return 'orphans';
+  }
+  orReply(`${rows.length} ${rows.length === 1 ? 'orphan' : 'orphans'} — `
+    + 'written, never linked.' + orReply.rows(rows, 10),
+    `${rows.length} ${rows.length === 1 ? 'orphan' : 'orphans'}. `
+    + orAsk.and(rows.slice(0, 5).map(r => r.title)) + '.');
+  return 'orphans';
+};
+
+orAsk.count = (q) => {
+  orAsk.filter('');
+  const m = q.match(/^how many\s+(?:notes?\s+)?(?:are\s+)?(?:in|under|inside)\s+(?:the\s+)?(.+?)(?:\s+(?:folder|category))?$/i)
+        || q.match(/^how many\s+(.+?)\s+notes?$/i);
+  const total = (state.notes || []).length;
+  if (m) {
+    const t = m[1].trim();
+    const cat = orAsk.cat(t);
+    if (cat) {
+      const k = ((orLayout.mem || {})[cat] || []).length;
+      const lab = orAsk.catLabel(cat);
+      orReply(`<b>${k}</b> in ${esc(lab)}, of ${total}.`,
+        `${k} in ${lab}, of ${total}.`);
+      return cat;
+    }
+    const f = orAsk.folder(t);
+    if (f) {
+      const k = orAsk.folders().get(f).length;
+      orReply(`<b>${k}</b> in <b>${esc(f)}</b>, of ${total}.`,
+        `${k} in ${f}, of ${total}.`);
+      return f;
+    }
+    return orAsk.miss(t);
+  }
+  if (/\blinks?\b/.test(q.toLowerCase())) {
+    const k = (state.edges || []).length;
+    orReply(`<b>${k}</b> ${k === 1 ? 'link' : 'links'} between ${total} notes.`,
+      `${k} links between ${total} notes.`);
+    return 'links';
+  }
+  orReply(`<b>${total}</b> ${total === 1 ? 'note' : 'notes'} on the map.`,
+    `${total} ${total === 1 ? 'note' : 'notes'} on the map.`);
+  return 'notes';
+};
+
+/* ── the one refusal ──
+   He cannot have a view and the honest move is to say so and hand the
+   question on, rather than improvise something that sounds like one.
+   The prompt goes to the clipboard ready to paste; if the clipboard is
+   refused — an insecure origin, a browser that wants a gesture it did
+   not get — it goes on screen instead, because the point is that you
+   end up holding it either way. */
+orAsk.advice = (q) => {
+  const m = q.match(/\b(?:on|about|of|for)\s+(.+)$/i);
+  const t = m ? m[1].trim() : '';
+  const id = t ? (orMd.resolve(t) || orAsk.byTitle(t)[0]) : state.sel;
+  const n = id ? orAsk.note(id) : null;
+  const ask = n
+    ? `Read ${n.id}.md in my vault and give me your read on it: what it `
+      + `claims, what it leaves open, and what elsewhere in the vault `
+      + `disagrees with it. Terse, second person, no market opinion.`
+    : `Run the weekly review.`;
+  const where = n ? `<b>${esc(n.title)}</b>` : 'the week';
+  const line = `I cannot form a view in here — nothing on this page talks to `
+    + `a model, which is what keeps the vault in your browser. `;
+  const spoken = 'I cannot form a view in here. Nothing on this page talks to a '
+    + 'model, which is what keeps your vault in your browser. I have put the '
+    + 'question on your clipboard for the session that reads your files.';
+  if (n) { orAsk.filter(''); orOpen(id); }
+  /* Written first, clipboard second. The write is a promise and the
+     answer must not wait on it — an earlier build rendered only inside
+     the callback, and while it was pending the strip still showed the
+     answer to the PREVIOUS question, which reads as him ignoring you.
+     So the prompt goes on screen now, and the caption upgrades to
+     `copied` if the clipboard takes it. Only the first render speaks;
+     the second is the same sentence. */
+  const put = (ok) => orReply(line + `The question on ${where} is `
+    + (ok ? 'on your clipboard' : 'below') + `; paste it into the session on `
+    + `your machine that reads your files.`
+    + (ok ? orReply.hint('copied') : `<em class="or-rp">${esc(ask)}</em>`),
+    ok ? null : spoken);
+  put(false);
+  let p = null;
+  try { p = navigator.clipboard.writeText(ask); } catch (e) {}
+  if (p && typeof p.then === 'function') p.then(() => put(true), () => {});
+  return id || 'advice';
+};
+
+/* ── categories and folders ──
+   The same word means both here and that is deliberate: `trading` is a
+   sector on the map AND a top folder in the vault, and somebody asking
+   for it does not care which one answered. Category first, because
+   that is the one with a panel behind it. */
+orAsk.cat = (t) => {
+  const k = String(t).toLowerCase().replace(/[^a-z ]/g, ' ').replace(/\s+/g, ' ').trim();
+  if (!k) return null;
+  const hit = orLayout.cats().filter(x =>
+    x.id === k || String(x.label).toLowerCase() === k)[0];
+  if (hit) return hit.id;
+  return CAT_ALIAS[k] || null;
+};
+orAsk.catLabel = (id) => {
+  const row = orLayout.cats().filter(x => x.id === id)[0];
+  return row ? row.label : id;
+};
+
+/* Every folder in the vault, at every depth, rebuilt only when the
+   notes array is replaced — the same contract orMd.index keeps, and
+   for the same reason. */
+orAsk.folders = () => {
+  const notes = state.notes || [];
+  if (orAsk.fsrc === notes && orAsk.fmap) return orAsk.fmap;
+  const m = new Map();
+  for (const n of notes) {
+    const p = n.id.split('/');
+    p.pop();
+    for (let i = 1; i <= p.length; i++) {
+      const k = p.slice(0, i).join('/');
+      if (!m.has(k)) m.set(k, []);
+      m.get(k).push(n);
+    }
+  }
+  for (const v of m.values()) v.sort((a, b) => a.title.localeCompare(b.title));
+  orAsk.fsrc = notes;
+  orAsk.fmap = m;
+  return m;
+};
+orAsk.fsrc = null;
+orAsk.fmap = null;
+
+/* Full path first, then a leaf name on its own — "models" for
+   trading/models — because nobody types the path they are standing in. */
+orAsk.folder = (t) => {
+  const k = String(t).toLowerCase().replace(/^\/+|\/+$/g, '');
+  if (!k) return null;
+  const all = orAsk.folders();
+  for (const name of all.keys()) if (name.toLowerCase() === k) return name;
+  for (const name of all.keys())
+    if (name.slice(name.lastIndexOf('/') + 1).toLowerCase() === k) return name;
+  return null;
+};
+
+orAsk.byTitle = (t) => {
+  const k = String(t).toLowerCase().trim();
+  if (!k) return [];
+  const notes = (state.notes || []).slice()
+    .sort((a, b) => (a.id < b.id ? -1 : a.id > b.id ? 1 : 0));
+  const exact = notes.filter(n => String(n.title).toLowerCase() === k);
+  if (exact.length) return exact.map(n => n.id);
+  return notes.filter(n => String(n.title).toLowerCase().indexOf(k) >= 0
+    || String(n.id).toLowerCase().indexOf(k) >= 0).map(n => n.id);
+};
+
+orAsk.miss = (t) => {
+  orAsk.filter('');
+  orReply(`Nothing called <b>${esc(t)}</b> — not a note, not a folder, `
+    + `not a category.`, `Nothing called ${t}.`);
+  return null;
+};
+
+orAsk.seek = (t) => {
+  const cat = orAsk.cat(t);
+  if (cat) {
+    orAsk.filter('');
+    orOpenCat(cat);
+    const mem = (orLayout.mem || {})[cat] || [];
+    const deg = orLayout.deg || {};
+    const top = mem.slice().sort((a, b) => (deg[b] || 0) - (deg[a] || 0))
+      .slice(0, 3).map(id => (orAsk.note(id) || {}).title).filter(Boolean);
+    const lab = orAsk.catLabel(cat);
+    orReply(`<b>${esc(lab)}</b> — ${mem.length} ${mem.length === 1 ? 'note' : 'notes'}.`
+      + (top.length ? ` Most linked: ${esc(top.join(', '))}.` : ''),
+      `${lab}. ${mem.length} ${mem.length === 1 ? 'note' : 'notes'}.`
+      + (top.length ? ` Most linked: ${orAsk.and(top)}.` : ''));
+    return cat;
+  }
+
+  const f = orAsk.folder(t);
+  if (f) {
+    /* The field filters by id as well as title, so a folder path IS a
+       query — you get the folder listed here and lit on the map at the
+       same time, which is what "get me through the folder" means. */
+    orAsk.filter(f);
+    const rows = orAsk.folders().get(f) || [];
+    orReply(`<b>${esc(f)}</b> — ${rows.length} ${rows.length === 1 ? 'note' : 'notes'}.`
+      + orReply.rows(rows, 10),
+      `${f}. ${rows.length} ${rows.length === 1 ? 'note' : 'notes'}. `
+      + orAsk.and(rows.slice(0, 5).map(r => r.title)) + '.');
+    return f;
+  }
+
+  const hit = orMd.resolve(t);
+  if (hit) {
+    orAsk.filter('');
+    orOpen(hit);
+    const b = orAsk.brief(hit);
+    if (b) orReply(b.html, b.say);
+    return hit;
+  }
+
+  const ids = orAsk.byTitle(t);
+  if (ids.length === 1) {
+    orAsk.filter('');
+    orOpen(ids[0]);
+    const b = orAsk.brief(ids[0]);
+    if (b) orReply(b.html, b.say);
+    return ids[0];
+  }
+  if (ids.length > 1) {
+    orAsk.filter(t);
+    const rows = ids.map(orAsk.note).filter(Boolean);
+    orReply(`${rows.length} match <b>${esc(t)}</b>.` + orReply.rows(rows, 10),
+      `${rows.length} match ${t}. ` + orAsk.and(rows.slice(0, 5).map(r => r.title)) + '.');
+    return null;
+  }
+  return orAsk.miss(t);
+};
 
 /* ── the rail switch ──
    Two views, mirroring days/: aria-current on the rail button, hidden
@@ -6087,16 +6696,78 @@ orRefile.apply = (notes) => {
     /* The long placeholder clips mid-glyph at 420px. The phone flag
        is set pre-stylesheet, so it is already true here. */
     if (document.documentElement.dataset.phone === 'on') box.placeholder = 'Search';
-    box.addEventListener('input', orSearch);
+    box.addEventListener('input', () => {
+      /* His last answer described the map before this keystroke.
+         Leaving it up under a box that now says something else is how
+         you end up reading a reply to a question you have moved on
+         from. */
+      orReply.clear();
+      orSearch();
+    });
     /* Escape in the box clears the box — and does not fall through to
        close the note you are reading, which is a different Escape. */
     box.addEventListener('keydown', e => {
-      if (e.key !== 'Escape' || !box.value) return;
+      /* Enter is the ask. The same line has been filtering the field
+         since you started typing it, so a question that happens to
+         name a note has already dimmed the map to it — Enter is what
+         turns the filter into an answer. */
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        orAsk(box.value);
+        return;
+      }
+      if (e.key !== 'Escape') return;
+      /* Two Escapes, in order: the answer, then the filter. Dropping
+         both at once means a reply you were still reading disappears
+         along with the query that produced it. */
+      /* preventDefault on BOTH branches: Chromium clears a
+         type="search" box on Escape all by itself, and a native clear
+         that runs while this handler is busy with the reply strip
+         empties the box without touching state.q — leaving the map
+         filtered by a word that is no longer on screen, which is the
+         exact failure the box-clear below exists to prevent. */
+      const rp = byId('orReply');
+      if (rp && !rp.hidden) { e.preventDefault(); orReply.clear(); return; }
+      if (!box.value) return;
+      e.preventDefault();
       box.value = '';
       state.q = '';
       orPaint();
       orSay('Filter cleared.');
       orSearch.had = false;
+    });
+  });
+
+  /* ── Jarvis ──
+     The toggle decides whether he speaks, never whether he answers:
+     the strip under the box is written either way, so sound off costs
+     you nothing but the voice. */
+  step(() => {
+    orVoice(orRead().voice);
+    const b = byId('orVoiceBtn');
+    if (b) b.addEventListener('click', () => {
+      const on = orVoice(!orVoice.on);
+      orSay(on ? 'Jarvis answers out loud.' : 'Jarvis answers in writing.');
+      if (on) orVoice.say('Ready.');
+    });
+    /* The voice list is empty on a cold page in every browser that has
+       one and fills in a moment later. Clearing the cached pick is
+       enough — the next thing he says re-picks. */
+    try {
+      window.speechSynthesis.addEventListener('voiceschanged',
+        () => { orVoice.voice = null; });
+    } catch (e) {}
+  });
+
+  /* The rows he offers are real buttons, delegated here because the
+     strip is rewritten on every answer. */
+  step(() => {
+    const rp = byId('orReply');
+    if (rp) rp.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('[data-open]') : null;
+      if (!b) return;
+      orReply.clear();
+      orOpen(b.getAttribute('data-open'));
     });
   });
 

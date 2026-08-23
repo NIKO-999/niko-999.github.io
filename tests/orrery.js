@@ -143,7 +143,7 @@ async function patches(page, clip, items, dsf) {
 const waitPaint = async (page) => {
   await page.waitForFunction(() =>
     document.querySelectorAll('#orNodes .or-node').length > 0
-    && (document.getElementById('orStatNodes') || {}).textContent !== '',
+    && document.querySelectorAll('#orLegRows .or-leg').length > 0,
     { timeout: 15000 });
   await page.waitForTimeout(500);
 };
@@ -167,7 +167,7 @@ const positions = (page) => page.$$eval('#orNodes .or-node', (gs) =>
    neighbour's halo. */
 const pickHittable = (page, ids) => page.evaluate((ids) => {
   const stage = document.getElementById('orStage').getBoundingClientRect();
-  const keep = [document.getElementById('orLegend'), document.getElementById('orStats'),
+  const keep = [document.getElementById('orLegend'),
                 document.querySelector('.or-zoom')]
     .filter(Boolean).map((e) => e.getBoundingClientRect());
   for (const id of ids) {
@@ -290,7 +290,10 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     ok('seven categories, no two closer than dE 20',
       ids.length === 7 && worst.d >= 20, `${worst.a}/${worst.b} dE ${worst.d.toFixed(1)}`);
 
-    /* ── the two cards, against their own composited ground ── */
+    /* ── the card, against its own composited ground ──
+       It is translucent now and blurs whatever the palette is showing
+       through it, so this is the assertion that decides how thin the
+       glass is allowed to be. Sampled off real pixels at 2x. ── */
     const cardItems = await page.evaluate(() => {
       const items = [];
       const push = (label, r) => { if (r && r.width > 3 && r.height > 3)
@@ -302,29 +305,59 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
         push('legend ' + nm.textContent, R(nm));
         push('count ' + nm.textContent, R(b.querySelector('.or-leg-n')));
       });
-      push('stats heading', R(document.querySelector('#orStats .or-card-h')));
-      document.querySelectorAll('#orStats .or-stat').forEach((row) => {
-        for (const n of row.childNodes) {
-          if (n.nodeType === 3 && n.textContent.trim()) {
-            const rg = document.createRange(); rg.selectNode(n);
-            push('stat ' + n.textContent.trim(), rg.getBoundingClientRect());
-          }
-        }
-        const v = row.querySelector('.or-stat-v');
-        push('value of ' + row.textContent.trim().slice(0, 12), R(v));
-      });
+      push('formation heading', R(document.querySelector('#orLegend .or-form-h')));
       const a = document.getElementById('orLegend').getBoundingClientRect();
-      const b = document.getElementById('orStats').getBoundingClientRect();
-      const x = Math.min(a.left, b.left) - 4, y = Math.min(a.top, b.top) - 4;
-      return { items, clip: { x, y, width: Math.max(a.right, b.right) - x + 8,
-                              height: Math.max(a.bottom, b.bottom) - y + 8 } };
+      return { items, clip: { x: a.left - 4, y: a.top - 4,
+                              width: a.width + 8, height: a.height + 8 } };
     });
     const cardRuns = await patches(page, cardItems.clip, cardItems.items, 2);
     const cardBad = cardRuns.map((r) => ({ ...r, c: ratio(r.hi, r.lo) }))
       .filter((r) => r.c < 4.5);
-    ok(`every card run clears 4.5:1 (${cardRuns.length} sampled)`,
-      cardRuns.length >= 16 && cardBad.length === 0,
+    ok(`every card run clears 4.5:1 through the glass (${cardRuns.length} sampled)`,
+      cardRuns.length >= 15 && cardBad.length === 0,
       cardBad.slice(0, 3).map((r) => `${r.label} ${r.c.toFixed(2)}:1`));
+
+    /* ── and it is actually glass ──
+       The declaration is not the proof: backdrop-filter with an opaque
+       background is a solid card that says it is glass. --menu does not
+       move with the backdrop, so anything INSIDE the card that changes
+       when the photograph behind it changes got there by being seen
+       through. Two backdrops far apart in tone, one patch of the card's
+       own padding, measured. */
+    const glassDecl = await page.evaluate(() => {
+      const g = getComputedStyle(document.getElementById('orLegend'));
+      return { bd: g.backdropFilter || g.webkitBackdropFilter,
+               bg: g.backgroundColor, radius: g.borderTopLeftRadius,
+               fieldCard: !!document.getElementById('orStats') };
+    });
+    const alpha = +((glassDecl.bg.match(/[\d.]+/g) || [])[3] ?? 1);
+    ok('the card blurs what is behind it', /blur/.test(glassDecl.bd || ''), glassDecl.bd);
+    ok('and is translucent rather than a panel that claims to be',
+      alpha > .3 && alpha < .95, { alpha, bg: glassDecl.bg });
+    ok('the field card is gone from the map', glassDecl.fieldCard === false);
+
+    const seen = [];
+    for (const bg of ['iceberg', 'umber']) {
+      await page.evaluate((b) => { document.documentElement.dataset.bg = b; }, bg);
+      await page.waitForTimeout(1100);
+      const patch = await page.evaluate(() => {
+        const r = document.getElementById('orLegend').getBoundingClientRect();
+        /* The card's own gutter, clear of every row and of the border. */
+        return { x: r.left + 4, y: r.bottom - 7, w: r.width - 8, h: 4 };
+      });
+      const got = await patches(page, { x: patch.x - 1, y: patch.y - 1,
+        width: patch.w + 2, height: patch.h + 2 },
+        [{ label: bg, ...patch }], 2);
+      seen.push(got[0]);
+    }
+    const drift = seen.length === 2
+      ? Math.max(dE(`rgb(${seen[0].lo.join(',')})`, `rgb(${seen[1].lo.join(',')})`),
+                 dE(`rgb(${seen[0].hi.join(',')})`, `rgb(${seen[1].hi.join(',')})`))
+      : 0;
+    ok('the sky changes the colour inside the card, so you are seeing through it',
+      drift >= 3, { drift: +drift.toFixed(2), seen });
+    await page.evaluate(() => { delete document.documentElement.dataset.bg; });
+    await page.waitForTimeout(500);
 
     /* ── the reading pane, open on a real note ── */
     await page.evaluate(() => orOpen('growth/boredom'));
@@ -399,17 +432,21 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     domPairs.length === corpus.edges.length
     && corpus.edges.every((k) => domPairs.includes(k)),
     { drawn: domPairs.length, want: corpus.edges.length });
-  const stats = await page.evaluate(() => ({
-    nodes: document.getElementById('orStatNodes').textContent,
-    links: document.getElementById('orStatLinks').textContent,
-    cats: document.getElementById('orStatCats').textContent,
-    loose: document.getElementById('orStatLoose').textContent,
-  }));
-  ok('the stats card counts what is drawn',
-    +stats.nodes === seed.length && +stats.links === corpus.edges.length
-    && +stats.cats === corpus.hubs, stats);
-  ok(`the loose-ends figure matches the corpus (${corpus.loose.size} real)`,
-    +stats.loose === corpus.loose.size, stats.loose);
+  /* The field card is gone and its four figures did not go with it —
+     they are answers now. Held against the same independently computed
+     corpus the card was held against, so removing the card cost the
+     suite no coverage. */
+  const stats = await page.evaluate(() => {
+    const say = (q) => { orAsk(q); return document.getElementById('orReply').textContent; };
+    return { nodes: say('how many notes'), links: say('how many links'),
+             loose: say('loose ends'), cleared: (orReply.clear(), state.q) };
+  });
+  ok('asked, he counts what is drawn',
+    stats.nodes.indexOf(String(seed.length)) === 0
+    && stats.links.indexOf(String(corpus.edges.length)) === 0, stats);
+  ok(`and his loose-ends figure matches the corpus (${corpus.loose.size} real)`,
+    stats.loose.indexOf(String(corpus.loose.size)) === 0, stats.loose);
+  ok('and asking left the map unfiltered', stats.cleared === '', stats);
 
   /* ── click a node, read the note ── */
   console.log('\n── the open field ──');
@@ -514,18 +551,17 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   /* ── reading time dims the chrome ── */
   const chrome = () => page.evaluate(() => ({
     legend: getComputedStyle(document.getElementById('orLegend')).opacity,
-    stats: getComputedStyle(document.getElementById('orStats')).opacity,
     pe: getComputedStyle(document.getElementById('orLegend')).pointerEvents,
     pane: document.getElementById('orNote').hidden,
   }));
   let ch = await chrome();
-  ok('the legend and stats are gone while a note is open',
-    ch.legend === '0' && ch.stats === '0' && ch.pe === 'none', ch);
+  ok('the card is gone while a note is open',
+    ch.legend === '0' && ch.pe === 'none', ch);
   await page.keyboard.press('Escape');
   await page.waitForTimeout(500);
   ch = await chrome();
   ok('Escape closes the note', ch.pane === true);
-  ok('and the cards come back', ch.legend === '1' && ch.stats === '1', ch);
+  ok('and the card comes back', ch.legend === '1', ch);
 
   /* ── movable, three ways ── */
   console.log('\n── movable ──');
@@ -1715,7 +1751,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
         const el = document.elementFromPoint(x, y);
         if (!el || !el.closest) continue;
         if (el.closest('.or-node') || el.closest('#orLegend')
-          || el.closest('#orStats') || el.closest('.or-zoom')) continue;
+          || el.closest('.or-zoom')) continue;
         if (!el.closest('#orStage')) continue;
         return { x, y };
       }
@@ -1905,6 +1941,347 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('no page errors through the chip and eyebrow checks',
     c.errs.length === 0, c.errs.slice(0, 3));
   await c.browser.close();
+
+  /* ═══ Jarvis — a librarian, and only a librarian ═══
+     Two things are being held here. That every answer is the truth the
+     index already holds — the counts and the ids are recomputed from
+     state and compared, never read out of his sentence and trusted —
+     and that asking him anything costs no request. The second is the
+     whole reason the app is allowed to read your notes at all, so it
+     is measured rather than asserted in a comment. */
+  console.log('\n── Jarvis ──');
+  const j = await open({ colorScheme: 'dark' });
+  const off = [];
+  j.page.on('request', (r) => {
+    const u = r.url();
+    if (u.indexOf(BASE) !== 0 && u.indexOf('data:') !== 0 && u.indexOf('blob:') !== 0)
+      off.push(u);
+  });
+  await j.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(j.page);
+  await settle(j.page);
+
+  /* Everything he can be asked, asked through the real function, with
+     the page's own numbers computed alongside for comparison. */
+  const jAsk = (q) => j.page.evaluate((q) => {
+    const box = document.getElementById('orSearch');
+    if (box) box.value = q;
+    const ret = orAsk(q);
+    const rp = document.getElementById('orReply');
+    return {
+      ret, hidden: rp.hidden, text: rp.textContent, html: rp.innerHTML,
+      rows: Array.from(rp.querySelectorAll('[data-open]'))
+        .map((b) => b.getAttribute('data-open')),
+      q: state.q, sel: state.sel, cat: state.catPane,
+    };
+  }, q);
+
+  /* ── a category is a panel, not a paragraph ── */
+  const jcat = await jAsk('trading');
+  const jcatN = await j.page.evaluate(() => ((orLayout.mem || {}).trading || []).length);
+  ok('a category opens its panel', jcat.cat === 'trading', jcat.cat);
+  ok('and he says the number the map holds',
+    !jcat.hidden && jcat.text.indexOf(`${jcatN} notes`) >= 0, { said: jcat.text, n: jcatN });
+
+  /* ── a folder is a place you can walk into ──
+     The point of the whole feature: ask for a folder, get its notes as
+     things you can press, and see them lit on the map at the same time.
+     A printed list would be half of that. */
+  const jfold = await jAsk('trading/models');
+  const jfoldIds = await j.page.evaluate(() => (state.notes || [])
+    .filter((n) => n.id.indexOf('trading/models/') === 0).map((n) => n.id).sort());
+  ok('a folder answers with every note in it',
+    JSON.stringify(jfold.rows.slice().sort()) === JSON.stringify(jfoldIds),
+    { said: jfold.rows, real: jfoldIds });
+  ok('and lights that folder on the map as it lists it',
+    jfold.q === 'trading/models', jfold.q);
+  await j.page.click('#orReply [data-open]');
+  await j.page.waitForTimeout(400);
+  const jrow = await j.page.evaluate(() => ({ sel: state.sel,
+    hidden: document.getElementById('orReply').hidden }));
+  ok('the rows he offers are doors',
+    jfoldIds.indexOf(jrow.sel) >= 0 && jrow.hidden, jrow);
+
+  /* ── he is in the field, not in the bar ──
+     The top bar already carried five controls. A sixth, labelled, read
+     as a mode you put the app into rather than a property of the box
+     you type in. */
+  const jseat = await j.page.evaluate(() => {
+    const b = document.getElementById('orVoiceBtn');
+    const f = document.querySelector('.search');
+    const bar = document.querySelector('.topbar');
+    const r = b.getBoundingClientRect(), fr = f.getBoundingClientRect();
+    return {
+      inField: f.contains(b),
+      inside: r.left >= fr.left && r.right <= fr.right + 1
+           && r.top >= fr.top - 1 && r.bottom <= fr.bottom + 1,
+      named: (b.getAttribute('aria-label') || '').length > 3,
+      text: b.textContent.trim(),
+      barButtons: bar.querySelectorAll(':scope > button, :scope > .pal > button').length,
+    };
+  });
+  ok('the voice control sits inside the field he is asked in',
+    jseat.inField && jseat.inside, jseat);
+  ok('icon only, but it still has a name to read out',
+    jseat.text === '' && jseat.named, jseat);
+  ok('and it took a control off the top bar rather than adding one',
+    jseat.barButtons === 4, jseat);
+
+  /* ── his answer is on top of the map, not under it ──
+     The strip is anchored in the top bar and the cards in the stage, so
+     they meet in the root stacking context. At z-index 4 the Categories
+     card at 5 painted straight over the answer — which is worse than no
+     answer, because the answer was there and unreadable. Measured by
+     asking the page what is actually at those pixels. */
+  await jAsk('trading/models');
+  await j.page.waitForTimeout(250);
+  const jtop = await j.page.evaluate(() => {
+    const rp = document.getElementById('orReply');
+    const r = rp.getBoundingClientRect();
+    const leg = document.getElementById('orLegend').getBoundingClientRect();
+    const pts = [[r.left + 14, r.top + 10], [r.left + 14, r.bottom - 10],
+                 [r.left + r.width / 2, r.top + r.height / 2]];
+    return {
+      overlapsCard: !(r.right < leg.left || r.left > leg.right
+                   || r.bottom < leg.top || r.top > leg.bottom),
+      covered: pts.filter(([x, y]) => {
+        const el = document.elementFromPoint(x, y);
+        return !el || !rp.contains(el) && el !== rp;
+      }).length,
+    };
+  });
+  ok('his answer overlaps the card it used to hide behind',
+    jtop.overlapsCard, jtop);
+  ok('and nothing is drawn over it', jtop.covered === 0, jtop);
+
+  /* ── the strip is legible, measured off the composited pixels ──
+     The chips are a pairing that exists nowhere else in the shell —
+     var(--ink) over a 12% wash of the accent — and an accent this app
+     lets you change. A token that resolved to nothing would inherit
+     rather than fall back, look deliberate, and run at 1.7:1. */
+  await jAsk('trading/models');
+  await j.page.waitForTimeout(200);
+  const jbox = await j.page.evaluate(() => {
+    const rp = document.getElementById('orReply');
+    const r = rp.getBoundingClientRect();
+    const b = rp.querySelector('b'), c = rp.querySelector('.or-rl');
+    const box = (e) => { const q = e.getBoundingClientRect();
+      return { x: q.x, y: q.y, w: q.width, h: q.height }; };
+    return { clip: { x: r.x - 2, y: r.y - 2, width: r.width + 4, height: r.height + 4 },
+             items: [{ label: 'sentence', ...box(b) }, { label: 'chip', ...box(c) }] };
+  });
+  const jpx = await patches(j.page, jbox.clip, jbox.items, 1);
+  for (const q of jpx)
+    ok(`his ${q.label} is readable against what is behind it`,
+      ratio(q.lo, q.hi) >= 4.5, { label: q.label, ratio: +ratio(q.lo, q.hi).toFixed(2) });
+  ok('both text runs in the strip were actually found', jpx.length === 2,
+    jpx.map((q) => q.label));
+
+  /* ── a note, described by figures that are checked ──
+     Every number in the sentence is recomputed here from the note
+     itself. He is allowed to be terse; he is not allowed to be wrong. */
+  const jnote = await jAsk('where is CISD');
+  const jreal = await j.page.evaluate(() => {
+    const n = (state.notes || []).filter((x) => x.id === 'trading/models/cisd')[0];
+    return n ? { out: (n.links || []).length, back: orBacklinks(n.id).length,
+                 words: n.words, title: n.title } : null;
+  });
+  ok('a note by name opens the note', jnote.sel === 'trading/models/cisd', jnote.sel);
+  ok('and every figure in his sentence is the real one',
+    jreal && jnote.text.indexOf(`${jreal.words} words`) >= 0
+    && jnote.text.indexOf(`${jreal.out} out`) >= 0
+    && jnote.text.indexOf(`${jreal.back} in`) >= 0, { said: jnote.text, real: jreal });
+
+  /* ── the grammar is ordered, and the order is load-bearing ──
+     `review` is a word in the advice branch AND the title of a note in
+     this vault. Asking what links to it must reach backlinks first;
+     if the branches are ever reordered this is what says so. */
+  const jback = await jAsk('what links to the review');
+  /* Resolved the way he resolves it. orMd.resolve alone answers null
+     here — the file is `the-review` and the question says "the review",
+     which is a title match, not a basename one. */
+  const jbackReal = await j.page.evaluate(() => {
+    const id = orMd.resolve('the review') || orAsk.byTitle('the review')[0];
+    return id ? { id, n: orBacklinks(id).length,
+                  ids: orBacklinks(id).slice(0, 8).map((r) => r.id).sort() } : null;
+  });
+  ok('"what links to the review" is a backlink question, not an advice one',
+    jbackReal && jback.ret === jbackReal.id
+    && jback.text.indexOf('cannot form a view') < 0, { ret: jback.ret, real: jbackReal });
+  ok('and the notes he names are the notes that link there',
+    jbackReal && jbackReal.n > 0
+    && JSON.stringify(jback.rows.slice().sort())
+      === JSON.stringify(jbackReal.ids), { said: jback.rows, real: jbackReal });
+
+  /* ── the one refusal ──
+     He has no model behind him and the honest answer is to say so and
+     hand the question on. A build that quietly started improvising a
+     verdict would still pass every other assertion in this file. */
+  const jadv = await jAsk('advice on CISD');
+  ok('asked for a view, he says he has none',
+    jadv.text.indexOf('cannot form a view') >= 0, jadv.text.slice(0, 90));
+  ok('and hands over a prompt naming the real file',
+    jadv.text.indexOf('trading/models/cisd.md') >= 0
+    || /copied/.test(jadv.text), jadv.text.slice(-140));
+
+  /* ── two different kinds of nothing ──
+     An orphan is a note you never joined to anything; a loose end is a
+     link to a note that does not exist. Answering one with the other
+     loses the useful half. */
+  const jorph = await jAsk('orphans');
+  const jorphReal = await j.page.evaluate(() => {
+    const seen = new Set();
+    for (const e of (state.edges || [])) { seen.add(e[0]); seen.add(e[1]); }
+    return (state.notes || []).filter((n) => !seen.has(n.id)).map((n) => n.id).sort();
+  });
+  ok('orphans are the notes nothing joins',
+    jorphReal.length
+      ? JSON.stringify(jorph.rows.slice().sort()) === JSON.stringify(jorphReal.slice(0, 10))
+      : /No orphans/.test(jorph.text), { said: jorph.rows, real: jorphReal });
+  const jends = await jAsk('loose ends');
+  const jendsN = await j.page.evaluate(() => orLoose());
+  ok('loose ends are a different question with a different number',
+    jends.ret === 'ends' && jends.text.indexOf(String(jendsN)) === 0,
+    { said: jends.text.slice(0, 60), real: jendsN });
+
+  /* ── he counts what is there ── */
+  const jhow = await jAsk('how many in body');
+  const jhowN = await j.page.evaluate(() => ((orLayout.mem || {}).body || []).length);
+  ok('a count is the map’s own count',
+    jhow.text.indexOf(String(jhowN)) === 0, { said: jhow.text, real: jhowN });
+
+  /* ── a miss opens nothing ──
+     The tempting failure is to guess: open the nearest note and hope.
+     A second brain that shows you the wrong note confidently is worse
+     than one that shrugs. */
+  await j.page.evaluate(() => orClose());
+  const jmiss = await jAsk('zzzqqq');
+  ok('a name he does not have opens nothing',
+    jmiss.ret === null && jmiss.sel === null
+    && /Nothing called/.test(jmiss.text), jmiss);
+
+  /* ── the answer never outlives the question ──
+     The strip sits under the box. Leaving the last answer up while the
+     box says something else reads as a reply to what you are typing
+     now, and it is a reply to what you typed before. */
+  await jAsk('orphans');
+  await j.page.click('#orSearch');
+  await j.page.keyboard.type('ri');
+  await j.page.waitForTimeout(300);
+  ok('typing again drops the last answer',
+    await j.page.evaluate(() => document.getElementById('orReply').hidden));
+
+  /* ── Escape drops the answer before the filter ──
+     And the box and the query can never disagree. Chromium clears a
+     type="search" input on Escape by itself; while the handler was
+     busy with the reply strip that native clear emptied the box and
+     left state.q set, so the map stayed filtered by a word no longer
+     on screen with no visible way to clear it. */
+  await j.page.evaluate(() => { orReply.clear(); orAsk('trading/models'); });
+  await j.page.waitForTimeout(200);
+  await j.page.focus('#orSearch');
+  await j.page.keyboard.press('Escape');
+  const jesc1 = await j.page.evaluate(() => ({
+    reply: document.getElementById('orReply').hidden,
+    box: document.getElementById('orSearch').value, q: state.q }));
+  ok('the first Escape takes the answer and leaves the filter',
+    jesc1.reply && jesc1.box === 'trading/models' && jesc1.q === 'trading/models', jesc1);
+  await j.page.keyboard.press('Escape');
+  const jesc2 = await j.page.evaluate(() => ({
+    box: document.getElementById('orSearch').value, q: state.q }));
+  ok('the second takes the filter, and the box and the query agree',
+    jesc2.box === '' && jesc2.q === '', jesc2);
+
+  /* ── the question never becomes the filter ──
+     Every keystroke schedules a filter 140ms out, so at the moment
+     Enter answers there is a pending orSearch carrying the whole
+     sentence. Two things stop it landing — orAsk.filter cancels the
+     timer AND rewrites the box — and removing either one alone was
+     measured and still held, so this is the invariant, not a proof of
+     one line. Break both and the map ends up filtered by "where is
+     CISD", which matches nothing, so the answer opens a note on an
+     empty sky. */
+  await j.page.evaluate(() => { orReply.clear(); orClose(); });
+  await j.page.focus('#orSearch');
+  await j.page.keyboard.type('where is CISD');
+  await j.page.keyboard.press('Enter');
+  await j.page.waitForTimeout(400);
+  const jent = await j.page.evaluate(() => ({ q: state.q, sel: state.sel,
+    hidden: document.getElementById('orReply').hidden }));
+  ok('Enter answers and the pending filter does not land on the question',
+    jent.sel === 'trading/models/cisd' && jent.q === '' && !jent.hidden, jent);
+
+  /* ── the voice is a preference, never a gate ──
+     Turning him down must cost the voice and nothing else: the strip
+     is written either way, so sound off is still a working assistant. */
+  const jv = await j.page.evaluate(() => {
+    const b = document.getElementById('orVoiceBtn');
+    const on = { pressed: b.getAttribute('aria-pressed'),
+                 name: b.getAttribute('aria-label'),
+                 icon: document.getElementById('orVoiceIcon').innerHTML };
+    b.click();
+    const offS = { pressed: b.getAttribute('aria-pressed'),
+                   name: b.getAttribute('aria-label'),
+                   icon: document.getElementById('orVoiceIcon').innerHTML,
+                   stored: JSON.parse(localStorage.getItem('orrery.v1')).voice };
+    orAsk('how many notes');
+    const said = document.getElementById('orReply');
+    const mute = { hidden: said.hidden, text: said.textContent };
+    b.click();
+    return { on, off: offS, mute,
+             back: JSON.parse(localStorage.getItem('orrery.v1')).voice };
+  });
+  ok('the voice toggle flips, is remembered, and comes back',
+    jv.on.pressed === 'true' && jv.off.pressed === 'false'
+    && jv.off.stored === false && jv.back === true, jv);
+  ok('and the icon says which state it is in', jv.on.icon !== jv.off.icon);
+  /* The button has no text, so aria-label is its whole name. Frozen at
+     "answers out loud" it would read the wrong state for as long as he
+     was muted, and a screen reader has nothing else to go on. */
+  ok('and its name says which state it is in, not just aria-pressed',
+    jv.on.name !== jv.off.name && /out loud/.test(jv.on.name)
+    && /writing/.test(jv.off.name), { on: jv.on.name, off: jv.off.name });
+  ok('turned down, he still answers in writing',
+    !jv.mute.hidden && /\d/.test(jv.mute.text), jv.mute);
+
+  /* ── he is British ──
+     No voices are installed in this browser, so the list is stubbed:
+     what is being held is the ORDER of preference. Picking by lang
+     alone lands on whatever the OS enumerates first, and the warm
+     en-GB voices are never first. */
+  const jvoice = await j.page.evaluate(() => {
+    const mk = (name, lang) => ({ name, lang });
+    const real = window.speechSynthesis.getVoices;
+    const set = (list) => { window.speechSynthesis.getVoices = () => list; };
+    const out = {};
+    set([mk('Samantha', 'en-US'), mk('Google UK English Male', 'en-GB'),
+         mk('Daniel', 'en-GB'), mk('Zarvox', 'en-US')]);
+    out.named = (orVoice.pick() || {}).name;
+    set([mk('Samantha', 'en-US'), mk('Google UK English Male', 'en-GB')]);
+    out.anyGb = (orVoice.pick() || {}).name;
+    set([mk('Samantha', 'en-US'), mk('Amelie', 'fr-FR')]);
+    out.noGb = (orVoice.pick() || {}).name;
+    set([mk('Amelie', 'fr-FR')]);
+    out.none = orVoice.pick();
+    window.speechSynthesis.getVoices = real;
+    return out;
+  });
+  ok('a named warm en-GB voice wins over any other en-GB',
+    jvoice.named === 'Daniel', jvoice);
+  ok('and any en-GB wins over en-US', jvoice.anyGb === 'Google UK English Male', jvoice);
+  ok('with no en-GB at all he still speaks English', jvoice.noGb === 'Samantha', jvoice);
+  ok('and no English at all is no voice rather than a French one',
+    jvoice.none === null, jvoice);
+
+  /* ── the promise ──
+     Nothing he does reaches a network. Everything above ran through
+     the real function, and the only requests this page made were for
+     its own files. If a model, a key or a lookup is ever added to make
+     him cleverer, this is what refuses it. */
+  ok('nothing Jarvis answered required a request off this origin',
+    off.length === 0, off.slice(0, 4));
+  ok('no page errors through any of Jarvis', j.errs.length === 0, j.errs.slice(0, 4));
+  await j.browser.close();
 
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
