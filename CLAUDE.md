@@ -199,6 +199,38 @@ watching it still bite.
 suite alone. No build step, no framework, no CDN; both apps are still
 plain static files you can open off the disk.
 
+## The sweep
+
+`.claude/workflows/sweep.js` drives the orrery across every state —
+flying, zoomed to both clamps, mid-drag, both themes, every palette,
+damaged input — and reports what it measured. Run it with the Workflow
+tool by name before shipping anything that touches the map, or when
+something is reported as glitchy and hand-measurement has not found it.
+
+It earns its keep. Its first run filed 21 findings and all 21 were
+real — including the chip ballooning 2.38x through a camera flight,
+which was the cause of a "glitchy when it zooms in" report that had
+been chased by hand three times and missed.
+
+**It has no verify phase, deliberately.** There was one: a panel told
+to REFUTE each finding, defaulting to refuted when uncertain. Across
+two runs it dismissed about sixteen findings that were real and
+correctly killed almost nothing. Gating on it would have shipped none
+of the fixes. The failure is structural rather than bad luck — an
+agent asked to argue will always find words, and one that could not
+reproduce something writes a confident essay instead of saying so. It
+also cost about half the run's agents.
+
+What validates a finding is reproducing it, which takes about thirty
+seconds because every finding carries its steps and its numbers. That
+contract is the whole design: **a finding arrives with a repro and a
+measurement, or it does not arrive.**
+
+If a verify stage is ever wanted back, it must be told to REPRODUCE
+and report what it measured, never to argue. A verifier that must
+produce a number either confirms it or reports that it could not, and
+both of those are worth having.
+
 ## The review skill
 
 `.claude/skills/review/` writes the weekly review into the Obsidian
