@@ -596,6 +596,25 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.mouse.down();
   for (let i = 1; i <= 8; i++) await page.mouse.move(hitD.cx + i * 14, hitD.cy + i * 9);
   const held = await linksOf(hitD.id);
+  /* ── and the stars on the ends of them ──
+     Holding a star lit every link touching it and stopped there: a fan
+     of bright lines running out to stars doing nothing at all, which
+     reads as lines attached to empty space. A lit line lights what it
+     lands on. Sampled WHILE HELD — the class comes off on release, so
+     reading it afterwards measures the cleanup, not the lighting. */
+  const hot = await page.evaluate((id) => {
+    const kin = new Set();
+    (state.edges || []).forEach((e) => {
+      if (e[0] === id) kin.add(e[1]); else if (e[1] === id) kin.add(e[0]);
+    });
+    const at = (k, sel) => document.querySelector(
+      `#orNodes [data-id="${CSS.escape(k)}"]${sel}`);
+    return { kin: kin.size,
+      lit: [...kin].filter((k) => { const g = at(k, ''); 
+        return g && g.classList.contains('or-hot'); }).length,
+      op: [...new Set([...kin].map((k) => { const h = at(k, ' .or-halo');
+        return h ? +getComputedStyle(h).opacity : null; }))] };
+  }, hitD.id);
   /* And still attached, in the pixels: the endpoint of every one of its
      links lands on the node's own core. */
   const gaps = await page.evaluate((id) => {
@@ -615,6 +634,10 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   const after = await linksOf(hitD.id);
   ok('a held node\u2019s links light up', held.length > 0 && held.every((o) => o > .8),
     { rest, held });
+  ok('and every star on the end of one lights with them',
+    hot.kin > 0 && hot.lit === hot.kin, hot);
+  ok('at full strength, not merely un-dimmed',
+    hot.op.every((o) => o > .95), hot);
   ok('and never leave the node, measured in screen pixels',
     gaps.length > 0 && gaps.every((g) => g < 1.5), gaps);
   /* Not "dark the instant you let go" any more: a released node is
@@ -1253,6 +1276,54 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   }));
   ok('and clicking again clears it', clear.pressed === 'false' && clear.dim === 0, clear);
 
+  /* ── and a click on empty sky clears it too ──
+     The isolate had one way in and one way out: the legend opened the
+     panel, and only the panel's own toggle could clear it. But
+     state.only is written to storage and the panel is not — so a
+     reload came back with every star at .12 and nothing on screen
+     offering to undo it. Reproduced: only='trading' survives the
+     reload, panel hidden, 44 nodes dimmed, no control for it. */
+  await settle(page);
+  await page.evaluate(() => { orOpenCat('mind'); orOnly('mind'); });
+  await page.waitForTimeout(350);
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForSelector('#orNodes .or-node');
+  await settle(page);
+  await page.mouse.move(4, 4);
+  await page.waitForTimeout(300);
+  const stranded = await page.evaluate(() => ({
+    only: state.only,
+    panel: !document.getElementById('orCatPane').hidden,
+    dim: [...document.querySelectorAll('#orNodes .or-node')]
+      .filter((g) => +getComputedStyle(g).opacity < .2).length }));
+  ok('an isolate survives a reload without its panel', stranded.only === 'mind'
+    && stranded.panel === false && stranded.dim > 0, stranded);
+  const sky = await page.evaluate(() => {
+    const r = document.getElementById('orStage').getBoundingClientRect();
+    return { x: r.x + r.width * 0.87, y: r.y + r.height * 0.87 };
+  });
+  await page.mouse.click(sky.x, sky.y);
+  await page.waitForTimeout(500);
+  const skyClick = await page.evaluate(() => ({ only: state.only, sel: state.sel,
+    dim: [...document.querySelectorAll('#orNodes .or-node')]
+      .filter((g) => +getComputedStyle(g).opacity < .2).length }));
+  ok('and a click on empty sky puts it down', skyClick.only === null
+    && skyClick.sel === null && skyClick.dim === 0, skyClick);
+  /* A pan is not a click. Drag the sky and the isolate must survive,
+     or the map cannot be moved while a filter is on. */
+  await page.evaluate(() => orOnly('mind'));
+  await page.waitForTimeout(300);
+  await page.mouse.move(sky.x, sky.y);
+  await page.mouse.down();
+  for (let i = 1; i <= 6; i++) await page.mouse.move(sky.x - i * 9, sky.y - i * 6);
+  await page.mouse.up();
+  await page.waitForTimeout(350);
+  ok('but dragging the sky is a pan and keeps it',
+    await page.evaluate(() => state.only === 'mind'),
+    await page.evaluate(() => state.only));
+  await page.mouse.click(sky.x, sky.y);
+  await page.waitForTimeout(400);
+
   /* ── search dims and holds the shape ── */
   await page.mouse.move(0, 0);
   const shape0 = await positions(page);
@@ -1341,7 +1412,16 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('and so is a released link of the selection',
     wAfter.sel.length > 0 && wAfter.sel.join() === '1', wAfter);
   await page.evaluate(() => orClose());
-  await page.waitForTimeout(500);
+  /* Wait for the camera to actually land, not for a guess at how long
+     that takes. Closing glides the view back out over 620ms, and a
+     zoom DURING a flight now correctly picks up the transform the
+     camera has reached rather than its destination — so a fixed 500ms
+     wait here left the next block zooming from mid-glide and reading
+     scale(1.29) where it asserts 1.25. It was passing on timing. */
+  await page.waitForFunction(() =>
+    !document.getElementById('orSvg').classList.contains('or-flying'),
+    null, { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(150);
 
   /* ── the camera rides #orView, never the svg ── */
   console.log('\n── the camera ──');

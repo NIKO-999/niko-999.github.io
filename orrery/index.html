@@ -310,8 +310,31 @@
    that nudged the field would move the map while you were reading it.
    The lift is the same halo the :hover rule above uses, one step down,
    so a neighbourhood reads as one thing at two strengths. */
-.or-node.or-kin .or-halo { opacity: .88; }
+/* Hover lights the neighbourhood the same way a drag does, if less
+   hard: pointing at a star and having its neighbours merely fail to
+   dim is not the same as watching them come up. */
+.or-node.or-kin .or-halo { opacity: .88; transform: scale(1.16); }
 .or-node.or-kin.or-minor .or-halo { opacity: .45; }
+
+/* ── a lit line lights the star on the end of it ──
+   Holding a star lit every link touching it and stopped there: a fan
+   of bright lines running out to stars doing nothing at all, which
+   reads as the lines being attached to empty space.
+
+   Done in CSS rather than by repainting, because this happens on
+   pointerdown and again on pointerup and must not cost a paint of
+   several hundred nodes. The halo's cx/cy are 0 — the group carries
+   the position — so scaling it scales the bloom about the star's own
+   centre, which is the same thing the selection burn does by
+   arithmetic. */
+/* Both selectors, and the minor one deliberately: .or-kin.or-minor is
+   three classes and holds a hovered minor's halo at .45, which outranks
+   a two-class .or-hot and left one star in the fan dark while its
+   siblings lit. Descendant-scoping is not enough on its own here — the
+   rule that wins is the one that names the same specificity later. */
+.or-node.or-hot .or-halo,
+.or-node.or-hot.or-minor .or-halo { opacity: 1; transform: scale(1.3); }
+.or-node.or-hot .or-corec { transform: scale(1.35); }
 .or-node, #orLinks path { transition: opacity .16s; }
 
 /* ── label chips ──
@@ -3835,7 +3858,8 @@ function orDragStart(e) {
        where the keyboard can pick it up. */
     try { g.focus({ preventScroll: true }); } catch (_) {}
   } else {
-    state.drag = { id: null, cx: e.clientX, cy: e.clientY };
+    state.drag = { id: null, cx: e.clientX, cy: e.clientY,
+                   sx: e.clientX, sy: e.clientY, moved: false };
   }
   try { svg.setPointerCapture(e.pointerId); } catch (_) {}
   e.preventDefault();
@@ -3855,6 +3879,9 @@ function orDragMove(e) {
     const p1 = new DOMPoint(e.clientX, e.clientY).matrixTransform(inv);
     const p0 = new DOMPoint(d.cx, d.cy).matrixTransform(inv);
     d.cx = e.clientX; d.cy = e.clientY;
+    /* Same 3px the nodes get: a hand wobbles, and a press that files a
+       one-pixel move as a pan steals the click that clears the map. */
+    if (!d.moved && Math.hypot(e.clientX - d.sx, e.clientY - d.sy) > 3) d.moved = true;
     orPan(p1.x - p0.x, p1.y - p0.y);
     return;
   }
@@ -3900,6 +3927,21 @@ function orDragMove(e) {
    answer to. */
 orDragStart.lit = (id, on) => {
   const ls = orSim.lines || [];
+  /* The far end of every link that is about to light. Collected first
+     and applied through the node cache, so this is one pass over the
+     lines and one over the nodes however many hundred there are. */
+  const ends = new Set();
+  for (let i = 0; i < ls.length; i++) {
+    const L = ls[i];
+    if (L.a === id) ends.add(L.b);
+    else if (L.b === id) ends.add(L.a);
+  }
+  const els = orSim.el || [];
+  for (let i = 0; i < els.length; i++) {
+    const e = els[i];
+    if (e.g && e.g.classList && ends.has(e.id))
+      e.g.classList.toggle('or-hot', on);
+  }
   for (let i = 0; i < ls.length; i++) {
     const L = ls[i];
     if (L.a !== id && L.b !== id) continue;
@@ -3927,6 +3969,26 @@ function orDragEnd(e) {
   if (d && d.id != null && d.moved) orDragStart.lit(d.id, false);
   const svg = byId('orSvg');
   if (svg) { try { svg.releasePointerCapture(e.pointerId); } catch (_) {} }
+  /* ── a click on empty sky puts everything down ──
+     An isolate was reachable one way in and one way out: the legend
+     opened the panel, and only the panel's own toggle could clear it.
+     Lose the panel — reload with a category isolated, or isolate one
+     that later empties out of the legend — and every star on the map
+     sits at .12 with nothing on screen offering to undo it.
+
+     Clicking nothing is the universal way out of a selection, and it
+     costs nothing to honour: the press landed on no node, and the hand
+     did not move, so it was a click on the sky. */
+  if (d && d.id == null && !d.moved) {
+    const had = state.sel || state.only || state.catPane;
+    if (had) {
+      if (state.only) orOnly(state.only);       /* toggles it off */
+      orCloseCat();
+      orClose();
+      orSay('Cleared.');
+    }
+    return;
+  }
   if (!d || d.id == null) return;
 
   const pinned = !!state.pin[d.id];
