@@ -4462,11 +4462,13 @@ function orDragEnd(e) {
      costs nothing to honour: the press landed on no node, and the hand
      did not move, so it was a click on the sky. */
   if (d && d.id == null && !d.moved) {
-    const had = state.sel || state.only || state.catPane;
+    const rp = byId('orReply');
+    const had = state.sel || state.only || state.catPane || (rp && !rp.hidden);
     if (had) {
       if (state.only) orOnly(state.only);       /* toggles it off */
       orCloseCat();
       orClose();
+      orReply.clear();
       orSay('Cleared.');
     }
     return;
@@ -5491,6 +5493,11 @@ function orOpen(id) {
   /* The list and the note share the column. Whichever you asked for
      last is the one that is in it. */
   orCloseCat();
+  /* Any navigation is a new question. Jarvis renders AFTER opening, so
+     his own answers survive this; what does not is an answer left over
+     from before you clicked a star, which describes a note you are no
+     longer looking at. */
+  if (typeof orReply === 'function') orReply.clear();
   const got = orOpen.fill(id);
   if (!got) { orSay('That note is not on the map any more.'); return; }
   state.sel = String(id);
@@ -5828,6 +5835,7 @@ function orOpenCat(cat) {
   const c = orLayout.cats().filter(x => x.id === cat)[0];
   const pane = byId('orCatPane');
   if (!c || !pane) return;
+  if (typeof orReply === 'function') orReply.clear();   /* see orOpen */
   /* One column, so the note stands down. */
   const np = byId('orNote');
   if (np && !np.hidden) { np.hidden = true; state.sel = null; orWrite({ sel: null }); orPaint(); }

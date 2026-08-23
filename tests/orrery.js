@@ -2171,6 +2171,28 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('typing again drops the last answer',
     await j.page.evaluate(() => document.getElementById('orReply').hidden));
 
+  /* ── a new question retires the old answer ──
+     Clicking a star is a question too. The strip sits under a box you
+     may not have touched, so an answer left there after you navigated
+     somewhere else describes a note you are no longer looking at.
+     His own answers survive it: he renders after he opens. */
+  await jAsk('orphans');
+  await j.page.evaluate(() => orOpen('trading/models/cisd'));
+  await j.page.waitForTimeout(300);
+  ok('opening a note by hand drops the previous answer',
+    await j.page.evaluate(() => document.getElementById('orReply').hidden));
+  const jkept = await jAsk('where is CISD');
+  ok('but his own answer survives the note he opens to give it',
+    !jkept.hidden && /CISD/.test(jkept.text), jkept.text.slice(0, 60));
+  await j.page.evaluate(() => orOpenCat('body'));
+  await j.page.waitForTimeout(300);
+  ok('and opening a category by hand drops it too',
+    await j.page.evaluate(() => document.getElementById('orReply').hidden));
+  const jkept2 = await jAsk('body');
+  ok('while his own category answer stays up',
+    !jkept2.hidden && /\d/.test(jkept2.text), jkept2.text.slice(0, 60));
+  await j.page.evaluate(() => { orCloseCat(); orClose(); });
+
   /* ── Escape drops the answer before the filter ──
      And the box and the query can never disagree. Chromium clears a
      type="search" input on Escape by itself; while the handler was
