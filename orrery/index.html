@@ -212,8 +212,20 @@
 .or-fly { transition: transform .62s cubic-bezier(.32, .72, 0, 1); }
 @media (prefers-reduced-motion: reduce) { .or-fly { transition: none; } }
 
-/* Three shells, still drawn in three depths, no longer turning. */
+/* ── the sky turns, the instrument does not ──
+   The field stars drift in three shells at three rates, which is what
+   makes the depth read. This is the one piece of the old ambient
+   motion worth its cost: ninety-odd specks, about 2% of the drawing,
+   against the precession's 97.7% — that one animated a transform on
+   the ANCESTOR of every ring, link, star and chip, which is why it had
+   to go and this does not.
+
+   Slow on purpose. These are stars; the whole point is that you notice
+   it has moved rather than watch it moving. */
 #orDustA, #orDustB, #orDustC { transform-origin: 500px 500px; }
+#orDustA { animation: or-turn 210s linear infinite; }
+#orDustB { animation: or-turn 320s linear infinite reverse; }
+#orDustC { animation: or-turn 440s linear infinite; }
 
 /* Precession. The instrument nods, so it reads as a solid thing seen
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
@@ -257,7 +269,7 @@
 }
 .or-rev { animation-direction: reverse; }
 @media (prefers-reduced-motion: reduce) {
-  .or-turn { animation: none; }
+  .or-turn, #orDustA, #orDustB, #orDustC { animation: none; }
 }
 
 /* ── the camera is the expensive part ──
@@ -299,7 +311,10 @@
 #orSvg.or-flying #orLabels { opacity: 0; transition: none; }
 @media (prefers-reduced-motion: reduce) { #orLabels { transition: none; } }
 
-#orSvg.or-tight .or-turn, #orSvg.or-flying .or-turn {
+#orSvg.or-tight  .or-turn, #orSvg.or-tight  #orDustA,
+#orSvg.or-tight  #orDustB, #orSvg.or-tight  #orDustC,
+#orSvg.or-flying .or-turn, #orSvg.or-flying #orDustA,
+#orSvg.or-flying #orDustB, #orSvg.or-flying #orDustC {
   animation-play-state: paused;
 }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
@@ -3804,8 +3819,13 @@ function orPan(dx, dy) {
 orPan.tight = false;
 
 /* Zoom by a factor about a viewBox point — the point under the cursor
-   stays under the cursor. orZoom(0) is the reset. Clamped 0.35–4:
-   below that the map is a coin, above it a single hexagon is a wall. */
+   stays under the cursor. orZoom(0) is the reset.
+
+   Clamped ZOOM_OUT–4. The floor is the default fit, not something
+   below it: the whole field already sits in the frame at 1, so every
+   step further out only shrank the thing you came to read and pushed
+   the rim in from the edges. Above 4 a single star is a wall. */
+const ZOOM_OUT = 1;
 function orZoom(f, px, py) {
   /* Before reading state.zoom for anything. Mid-flight it holds the
      DESTINATION, not where the camera is — so a wheel tick during a
@@ -3818,7 +3838,7 @@ function orZoom(f, px, py) {
     state.zoom = 1; state.panX = 0; state.panY = 0;
   } else {
     const z0 = state.zoom;
-    const z1 = Math.min(4, Math.max(.35, z0 * f));
+    const z1 = Math.min(4, Math.max(ZOOM_OUT, z0 * f));
     if (px == null) { px = 500; py = 500; }
     state.panX = px - (px - state.panX) / z0 * z1;
     state.panY = py - (py - state.panY) / z0 * z1;
@@ -5121,7 +5141,7 @@ orOpen.chrome = (reading) => {
    bring it back inside a margin; never touch the zoom, which is yours. */
 orOpen.reveal = (id) => {
   if (!state.xy[id]) return;
-  orZoom.fly(orKin(id));
+  orZoom.fly(orKin(id), id);
 };
 
 /* ── flying to a neighbourhood ──
@@ -5143,7 +5163,7 @@ orOpen.reveal = (id) => {
    long axis. Fitting to a flat 1000 would leave a third of the stage
    unused on one side and crop on the other. */
 const FLY_MAX = 2.4;
-orZoom.fly = (ids) => {
+orZoom.fly = (ids, focus) => {
   const svg = byId('orSvg'), view = byId('orView');
   if (!svg || !view) return;
   const r = svg.getBoundingClientRect();
@@ -5173,13 +5193,23 @@ orZoom.fly = (ids) => {
   const M = 70;
   const bw = Math.max(x1 - x0, n === 1 ? 190 : 60);
   const bh = Math.max(y1 - y0, n === 1 ? 190 : 60);
-  const cx = (x0 + x1) / 2, cy = (y0 + y1) / 2;
+  /* The zoom fits the whole neighbourhood; the CENTRE is the star you
+     clicked. Landing on the bounding box's middle put the note you
+     asked for off to one side of its own constellation — often behind
+     the reading pane's edge — and left you hunting the thing the
+     camera had just flown to. */
+  const f = focus && state.xy[focus];
+  const cx = f ? f[0] : (x0 + x1) / 2;
+  const cy = f ? f[1] : (y0 + y1) / 2;
   /* The wheel may go to 4x by hand. A flight may not. A tight cluster
      fits its box at 3.9x and arrives filling the frame with six stars
      and no context — and the whole map is rasterising at sixteen times
      the pixels to show it, which is what made the flight stutter.
      2.4x reads the same and costs a third of it. */
-  const z = Math.min(FLY_MAX, Math.max(.35,
+  /* A flight obeys the same floor. Flying OUT past the default to fit
+     a wide constellation would leave you further from the map than you
+     can get back to by hand. */
+  const z = Math.min(FLY_MAX, Math.max(ZOOM_OUT,
     Math.min((W - M * 2) / bw, (H - M * 2) / bh)));
 
   orZoom.glide(z, VIEWBOX / 2 - cx * z, VIEWBOX / 2 - cy * z);

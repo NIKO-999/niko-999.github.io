@@ -783,6 +783,38 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      fifteen times the pixel area to show six stars. It reported as
      "glitchy when it zooms in", which is exactly what it was. */
   const flewTo = await page.evaluate(() => state.zoom);
+  /* ── you cannot get further out than the view you started at ──
+     The floor was .35, four steps out from the default, and every one
+     of them only shrank the field and pulled the rim in from the edges
+     of a stage it already fitted. */
+  const outMost = await page.evaluate(() => {
+    orClose(); orZoom(0);
+    for (let i = 0; i < 25; i++) orZoom(1 / 1.25, 500, 500);
+    return state.zoom;
+  });
+  ok('zooming out stops at the default fit', outMost === 1, outMost);
+  await page.evaluate(() => orZoom(0));
+  await settle(page);
+  await page.evaluate(() => orOpen('trading/models/cisd'));
+  await settle(page);
+  await page.mouse.move(4, 4);
+  await page.waitForTimeout(250);
+
+  /* ── and the camera lands on the star you clicked ──
+     Fitting the neighbourhood centred its bounding box, which put the
+     note you asked for off to one side of its own constellation. The
+     zoom still fits the group; the centre is the one you named. */
+  const centred = await page.evaluate(() => {
+    const svg = document.getElementById('orSvg');
+    const g = document.querySelector('#orNodes .or-sel .or-corec');
+    const s = svg.getBoundingClientRect(), r = g.getBoundingClientRect();
+    return { dx: Math.abs((r.x + r.width / 2) - (s.x + s.width / 2)),
+             dy: Math.abs((r.y + r.height / 2) - (s.y + s.height / 2)),
+             w: s.width, h: s.height };
+  });
+  ok('the star you clicked lands near the middle of the stage',
+    centred.dx < centred.w * .12 && centred.dy < centred.h * .12, centred);
+
   ok('a flight stops short of the hand-zoom clamp',
     flewTo <= 2.4 + 1e-6 && flewTo > 1, flewTo);
 
@@ -1106,9 +1138,13 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      shells moved the whole 1000-unit tree every frame; on a vault of
      several hundred notes that is a thousand gradient-filled elements
      re-rasterised for motion nobody asked to watch. */
-  ok('the dust shells hold still', alive.a === 'none' && alive.b === 'none'
-    && alive.c === 'none', alive);
-  ok('and the instrument does not nod', alive.nod === 'none', alive);
+  /* The sky turns; the instrument does not. Ninety-odd specks in three
+     shells is about 2% of the drawing — worth it for the depth. The
+     precession animated a transform on the ANCESTOR of every ring,
+     link, star and chip, 97.7%, which is why that one stayed dead. */
+  ok('the sky drifts in three shells', alive.a !== 'none' && alive.b !== 'none'
+    && alive.c !== 'none' && alive.a !== 'MISSING', alive);
+  ok('and the instrument still does not nod', alive.nod === 'none', alive);
 
   /* The furniture turns at four rates and the inner arcs are the one
      part you can WATCH turn — everything outside them is under a degree
@@ -1146,7 +1182,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
              pct: +(inside.size / all.length * 100).toFixed(1) };
   });
   ok('almost nothing on the map is in continuous motion',
-    motion.pct < 5, motion);
+    motion.pct < 12, motion);
 
   ok('exactly one ring group still turns', rates.length === 1, rates);
   ok('and it is fast enough to read as moving', rates[0] >= 4, rates);
