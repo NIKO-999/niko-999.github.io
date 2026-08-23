@@ -545,6 +545,25 @@
 @keyframes or-slide { from { opacity: 0; transform: translateX(-14px); } }
 #orNote:not([hidden]), #orCatPane:not([hidden]) { animation: or-slide .28s ease; }
 
+/* ── the formation picker ──
+   Five ways for the field to stand, in the card the categories already
+   live in. Two columns because five names in one column is a list you
+   read; in two it is a control you use. */
+.or-form-h { margin-top: 16px; padding-top: 14px; border-top: 1px solid var(--glass-line); }
+#orFormRows { display: flex; gap: 3px; }
+.or-form {
+  display: grid; place-items: center; flex: 1 1 0; min-width: 0;
+  aspect-ratio: 1; padding: 0;
+  background: none; border: 1px solid transparent; border-radius: 5px;
+  color: var(--ink-3); cursor: pointer;
+}
+.or-form:hover { background: var(--glass); color: var(--ink); }
+.or-form svg { display: block; }
+.or-form[aria-pressed="true"] {
+  background: var(--glass); border-color: var(--glass-line); color: var(--ink);
+}
+.or-form:focus-visible { outline: 2px solid var(--focus); outline-offset: 1px; }
+
 /* ── the category list ──
    A category is a place you can be, not only a filter you can throw.
    Clicking Trading used to dim six sevenths of the sky and leave you
@@ -1160,6 +1179,11 @@
         <div id="orLegend">
           <h2 class="or-card-h">Categories</h2>
           <div id="orLegRows"></div>
+          <!-- Same card, because a formation is a way of looking at the
+               categories rather than a separate concern, and a third
+               floating box on the map is a third thing in the way. -->
+          <h2 class="or-card-h or-form-h">Formation</h2>
+          <div id="orFormRows" role="group" aria-label="Formation"></div>
         </div>
 
         <div id="orStats">
@@ -1953,9 +1977,42 @@ const IDB = 'ORRERY';
    frame — on the property, before any read. Touching it bare would take
    the page down, so every touch of it in this file is wrapped and the
    failure is a default shape rather than a black screen. */
+/* ── the formations ──
+   Declared HERE, above orRead and orLayout, because both of them run
+   during init and both read this list. As a `const` in the graph
+   section it sat in the temporal dead zone at that moment and the
+   whole map failed to paint — no nodes, no error anybody would connect
+   to a picker. A list two functions validate against belongs above
+   both of them. */
+const FORMS = [
+  { id: 'orrery',  label: 'Orrery',  say: 'folders on orbits', home: 1, spring: 1,
+    ic: '<circle cx="9" cy="9" r="6.4"/><path d="M9 2.6A6.4 6.4 0 0 1 9 15.4"/>'
+      + '<circle cx="9" cy="9" r="1.5" fill="currentColor" stroke="none"/>'
+      + '<circle cx="15.4" cy="9" r="1.4" fill="currentColor" stroke="none"/>' },
+  { id: 'free',    label: 'Free',    say: 'the links decide', home: .04, spring: 1,
+    ic: '<path d="M4.2 5.4 9 9M9 9l5.4-3.2M9 9l-1.6 5.2M14.4 5.8l.6 6"/>'
+      + ['4.2 5.4','9 9','14.4 5.8','7.4 14.2','15 11.8'].map(function (q) {
+          var c = q.split(' ');
+          return '<circle cx="' + c[0] + '" cy="' + c[1] + '" r="1.35"'
+            + ' fill="currentColor" stroke="none"/>'; }).join('') },
+  { id: 'spiral',  label: 'Spiral',  say: 'one arm, most linked first', home: 3.2, spring: .1,
+    ic: '<path d="M9.70 9.00L9.80 9.23L9.83 9.51L9.75 9.81L9.56 10.11L9.27 10.35L8.88 10.51L8.43 10.55L7.95 10.44L7.49 10.19L7.10 9.79L6.83 9.26L6.70 8.64L6.77 7.97L7.03 7.31L7.48 6.73L8.11 6.27L8.88 6.00L9.73 5.95L10.60 6.14L11.41 6.59L12.09 7.27L12.58 8.14L12.81 9.15L12.76 10.22L12.40 11.27L11.74 12.21L10.82 12.96L9.70 13.44L8.46 13.60L7.18 13.40L5.97 12.85L4.93 11.96L4.15 10.79L3.71 9.42L3.66 7.94L4.03 6.47L4.81 5.12L5.95 4.02L7.38 3.24L9.00 2.88L10.70 2.98L12.34 3.55L13.79 4.57L14.93 5.98L15.66 7.67L15.91 9.54L15.63 11.45L14.82 13.23"/>' },
+  { id: 'strata',  label: 'Strata',  say: 'importance as distance', home: 3.2, spring: .1,
+    ic: '<circle cx="9" cy="9" r="6.6"/><circle cx="9" cy="9" r="4.2"/>'
+      + '<circle cx="9" cy="9" r="1.7" fill="currentColor" stroke="none"/>' },
+  { id: 'islands', label: 'Islands', say: 'folders held apart', home: 1.8, spring: .45,
+    ic: [[5,5.4],[13.1,6],[8.7,13.6]].map(function (c) {
+          return [[0,0],[2.4,.7],[.8,2.5]].map(function (o) {
+            return '<circle cx="' + (c[0] + o[0]) + '" cy="' + (c[1] + o[1]) + '" r="1.15"'
+              + ' fill="currentColor" stroke="none"/>'; }).join(''); }).join('') },
+];
+/* A stored value from another build, or a hand-edited one, must not
+   leave the field with no arrangement at all. */
+orForm.of = (id) => FORMS.find(f => f.id === id) || FORMS[0];
+
 function orRead() {
   const out = { v: 1, pin: {}, cat: {}, fold: {}, sel: null, only: null,
-                view: 'map', vault: null };
+                view: 'map', vault: null, form: 'orrery' };
   let raw = null;
   try { raw = localStorage.getItem(KEY); } catch (e) { return out; }
   if (!raw) return out;
@@ -2000,6 +2057,10 @@ function orRead() {
   out.sel  = str(v.sel);
   out.only = cats.has(v.only) ? v.only : null;
   if (v.view === 'vault') out.view = 'vault';
+  /* A formation from another build, or a hand-edited one, must not
+     leave the field with no arrangement at all — every branch in
+     orLayout is keyed off this string. */
+  if (FORMS.some(f => f.id === v.form)) out.form = v.form;
 
   if (v.vault && typeof v.vault === 'object' && !Array.isArray(v.vault)) {
     out.vault = {
@@ -2044,7 +2105,7 @@ const state = (() => {
   const s = orRead();
   return {
     notes: [], edges: [],
-    pin: s.pin, sel: s.sel, only: s.only, view: s.view,
+    pin: s.pin, sel: s.sel, only: s.only, view: s.view, form: s.form,
     zoom: 1, panX: 0, panY: 0, q: '',
   };
 })();
@@ -2348,6 +2409,100 @@ function orLayout() {
     });
   });
   orLayout.tier = tier;
+
+  /* ── formations ──
+     A formation is only a set of HOME POSITIONS. Nothing about the
+     physics changes: the same springs, the same repulsion, the same
+     drag, and a note you moved by hand keeps its pin in every one of
+     them. Switching re-homes the field and lets it settle, and that
+     settle IS the transition — there is no separate animation to
+     write, and no state to keep in step with one.
+
+     The orbital slots above are computed first and then overwritten
+     here when the formation is not the default. That is one wasted
+     linear pass; the alternative is five copies of the pin handling
+     and the sector bookkeeping, and s.rings — which the furniture
+     draws from — is only correct because the sector pass ran. */
+  const FORM = orForm.of(state.form);
+  if (FORM.id !== 'orrery') {
+    const live = notes.map(n => n.id).filter(id => !state.pin[id]).sort();
+    const byDeg = live.slice().sort((a, b) =>
+      (deg[b] || 0) - (deg[a] || 0) || (a < b ? -1 : 1));
+    const GA = 137.50776405003785;   /* the golden angle, in degrees */
+
+    if (FORM.id === 'spiral') {
+      /* An ARM you can follow with a finger, most-connected first.
+         The golden angle was the obvious step and it is the wrong one
+         here: it packs evenly, which is a sunflower — a filled disc
+         with no visible path through it, exactly what a formation
+         called Spiral must not be. Two and a half turns spread over
+         however many notes there are gives a line instead. */
+      const turns = 2.5;
+      const step = turns * 360 / Math.max(1, byDeg.length);
+      byDeg.forEach((id, k) => {
+        const t = k / Math.max(1, byDeg.length - 1);
+        const rng = orRng(id + ':sp');
+        xy[id] = orLayout.polar(62 + t * 296 + (rng() * 2 - 1) * 7, k * step - 90);
+      });
+    } else if (FORM.id === 'strata') {
+      /* Distance from the centre means one thing and means it
+         consistently: how much hangs off this note. */
+      /* Quartiles of the actual distribution, not fixed fractions of
+         the top. Thresholds at .6 and .3 of the maximum degree put
+         every note in this corpus into two shells and left the outer
+         two empty — measured, homes spanned 80 to 190 of a possible
+         344, so "importance as distance" was drawing half a claim.
+         Quartiles always stratify, whatever the vault's shape. */
+      const shell = [[], [], [], []];
+      byDeg.forEach((id, k) => {
+        shell[Math.min(3, Math.floor(k * 4 / Math.max(1, byDeg.length)))].push(id);
+      });
+      shell.forEach((row, b) => {
+        /* Sorted by category so a shell still reads as coloured
+           groups rather than as confetti. */
+        row.sort((a, b2) => (catOf[a] < catOf[b2] ? -1 : catOf[a] > catOf[b2] ? 1 : a < b2 ? -1 : 1));
+        const r = [92, 178, 262, 344][b];
+        row.forEach((id, k) => {
+          const rng = orRng(id);
+          xy[id] = orLayout.polar(r + (rng() * 2 - 1) * 12, (k / row.length) * 360 - 90);
+        });
+      });
+    } else if (FORM.id === 'islands') {
+      /* Every folder a separate object with real space around it. The
+         cost is that a cross-folder link becomes a long line over
+         open water, which is either the point or the problem. */
+      const secs = orLayout.sec || [];
+      secs.forEach((sc) => {
+        const c = orLayout.polar(268, sc.mid);
+        const ids = (mem[sc.id] || []).filter(id => !state.pin[id]).sort();
+        ids.forEach((id, k) => {
+          if (k === 0) { xy[id] = c.slice(); return; }
+          const rng = orRng(id);
+          const a = (k / Math.max(1, ids.length - 1)) * Math.PI * 2;
+          const rr = 34 + (k % 3) * 21 + rng() * 10;
+          xy[id] = [c[0] + Math.cos(a) * rr, c[1] + Math.sin(a) * rr];
+        });
+      });
+    } else if (FORM.id === 'free') {
+      /* Nothing to arrange. The home pull is switched off in seed()
+         and the springs are left to it — so all this does is give the
+         field somewhere loose to start from, and the answer that comes
+         out is the graph's own, not ours. */
+      live.forEach((id, k) => {
+        const rng = orRng(id + ':free');
+        xy[id] = orLayout.polar(120 + rng() * 190, (k / live.length) * 360 + rng() * 40);
+      });
+    }
+  }
+  /* How hard each formation is held, and how much say the springs get
+     inside it. Free is the extreme: no home at all, springs are the
+     entire answer. Spiral and Strata are the other extreme — the
+     ARRANGEMENT is the claim, and a spring pulling a note off its
+     shell is just noise. Orrery and Islands sit where the field always
+     sat, because in both of them the neighbours belong near each
+     other anyway. */
+  orLayout.homeK   = FORM.home;
+  orLayout.springK = FORM.spring;
 
   /* Eight relaxation passes. Only computed nodes move: a place you
      chose by hand is a decision, not an overlap to be tidied, and the
@@ -2677,7 +2832,14 @@ function orTick() {
   S.pairs = pairs;
 
   /* springs */
-  const EA = S.EA, EB = S.EB, ER = S.ER, ne = S.ne, ks = SIM.spring;
+  /* A formation that puts LINKED notes deliberately far apart — the
+     spiral orders by degree, so a note and its neighbour can sit at
+     opposite ends of the arm — hands the springs an enormous pull, and
+     they win: the arrangement collapses into the tangle it was meant
+     to replace. So the formation says how much the springs get a vote
+     in it. The forces are the same forces; only the balance moves. */
+  const EA = S.EA, EB = S.EB, ER = S.ER, ne = S.ne,
+        ks = SIM.spring * (orLayout.springK == null ? 1 : orLayout.springK);
   for (let e = 0; e < ne; e++) {
     const a = EA[e], b = EB[e];
     let dx = X[b] - X[a], dy = Y[b] - Y[a];
@@ -2820,7 +2982,8 @@ orSim.seed = () => {
     const t = tier[id] || 'leaf';
     S.Q[i] = SIM.q[t] || SIM.q.leaf;
     S.M[i] = SIM.m[t] || SIM.m.leaf;
-    S.HK[i] = SIM.home * (t === 'hub' ? SIM.hubHome : 1);
+    S.HK[i] = SIM.home * (t === 'hub' ? SIM.hubHome : 1)
+      * (orLayout.homeK == null ? 1 : orLayout.homeK);
     S.FIX[i] = pin ? 1 : 0;
     hs[i] = ((h[0] * 8) | 0) + ',' + ((h[1] * 8) | 0);
   }
@@ -3755,6 +3918,7 @@ function orPaint() {
   const em = byId('orEmpty');
   if (em) em.hidden = (state.notes || []).length > 0;
   orLegend();
+  orPaintForms();
   orStats();
 }
 /* One matcher for links, nodes and labels, so "matches the filter"
@@ -5418,6 +5582,42 @@ function orCloseCat() {
   orSay('Category closed.');
 }
 
+/* ── formations ──
+   Every one of these is a set of home positions and nothing else. The
+   physics is untouched, pins survive all five, and switching just
+   re-homes the field and lets it settle — which is why the transition
+   needs no code: watching it settle IS the transition. */
+
+function orForm(id) {
+  const f = orForm.of(id);
+  if (f.id === state.form) return;
+  state.form = f.id;
+  orWrite({ form: f.id });
+  orPaint();
+  /* Cold, not warm: every home has moved, so this is a new field
+     rather than a shove, and it has the whole distance to travel. */
+  orHeat(1);
+  orSay(`${f.label} — ${f.say}.`);
+}
+
+function orPaintForms() {
+  const box = byId('orFormRows');
+  if (!box) return;
+  /* Icons alone. The name still has to reach a screen reader and a
+     hover, so it goes to aria-label and title rather than being
+     dropped — an icon-only control with no accessible name is a
+     control only the sighted can find. */
+  box.innerHTML = FORMS.map(f => {
+    const on = state.form === f.id;
+    return `<button type="button" class="or-form" data-form="${esc(f.id)}"`
+      + ` aria-pressed="${on}" aria-label="${esc(f.label)} — ${esc(f.say)}"`
+      + ` title="${esc(f.label)} — ${esc(f.say)}">`
+      + `<svg viewBox="0 0 18 18" width="18" height="18" fill="none"`
+      + ` stroke="currentColor" stroke-width="1.25" stroke-linecap="round"`
+      + ` stroke-linejoin="round" aria-hidden="true">${f.ic}</svg></button>`;
+  }).join('');
+}
+
 /* Isolate one category, or clear the isolate by asking for it twice.
    Dimming, never removal — orPaint owns that distinction. */
 function orOnly(cat) {
@@ -5717,6 +5917,15 @@ orRefile.apply = (notes) => {
     if (lr) lr.addEventListener('click', e => {
       const b = e.target.closest ? e.target.closest('[data-cat]') : null;
       if (b) orOpenCat(b.getAttribute('data-cat'));
+    });
+    /* Its own listener. #orFormRows is a SIBLING of #orLegRows inside
+       the card, so a click on it never passes through the legend's
+       handler — the buttons rendered, they highlighted on hover, and
+       nothing happened. */
+    const fr = byId('orFormRows');
+    if (fr) fr.addEventListener('click', e => {
+      const b = e.target.closest ? e.target.closest('[data-form]') : null;
+      if (b) orForm(b.getAttribute('data-form'));
     });
   });
 

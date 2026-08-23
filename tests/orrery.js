@@ -1398,6 +1398,79 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.mouse.click(sky.x, sky.y);
   await page.waitForTimeout(400);
 
+  /* ── formations ──
+     Five ways for the field to stand. Each is only a set of HOME
+     positions: the physics is untouched, and a note you moved by hand
+     keeps its pin in all five. */
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
+  const picker = await page.evaluate(() => {
+    const b = [...document.querySelectorAll('#orFormRows .or-form')];
+    return { n: b.length,
+      forms: b.map((x) => x.getAttribute('data-form')),
+      /* Icons only, so the NAME has to reach a screen reader some
+         other way or this is a control only the sighted can use. */
+      named: b.every((x) => (x.getAttribute('aria-label') || '').length > 4),
+      iconOnly: b.every((x) => !x.textContent.trim() && x.querySelector('svg')) };
+  });
+  ok('five formations, as icons', picker.n === 5 && picker.iconOnly, picker);
+  ok('and every one of them still has a name for a screen reader',
+    picker.named, picker);
+
+  const PINNED = 'trading/models/cisd';
+  await page.evaluate((id) => orPin(id), PINNED);
+  await settle(page);
+  const anchored = await page.evaluate((id) => state.pin[id] && state.pin[id].slice(), PINNED);
+  const shapes = [];
+  for (const f of picker.forms) {
+    await page.evaluate((k) => orForm(k), f);
+    await settle(page);
+    shapes.push(await page.evaluate((id) => {
+      const p = Object.values(state.xy);
+      return { form: state.form,
+        sig: +p.reduce((a, q) => a + q[0] * 1.7 + q[1] * 2.3, 0).toFixed(0),
+        at: state.xy[id] && state.xy[id].slice(),
+        drawn: document.querySelectorAll('#orNodes .or-node').length };
+    }, PINNED));
+  }
+  ok('each one arranges the field differently',
+    new Set(shapes.map((x) => x.sig)).size === 5, shapes.map((x) => x.sig));
+  ok('none of them loses a note', shapes.every((x) => x.drawn === shapes[0].drawn), shapes);
+  ok('and a note you pinned by hand stays pinned in all five',
+    shapes.every((x) => x.at && Math.hypot(x.at[0] - anchored[0], x.at[1] - anchored[1]) < 2),
+    { anchored, at: shapes.map((x) => x.at) });
+
+  /* Strata's claim is that distance from the centre IS importance.
+     Fixed thresholds put this corpus into two of four shells and left
+     the outer two empty, which is half a claim. Quartiles stratify
+     whatever shape the vault turns out to have. */
+  const strat = await page.evaluate(() => {
+    orForm('strata');
+    const H = orLayout.home;
+    const r = Object.keys(H).filter((i) => i.indexOf('hub:') !== 0 && !state.pin[i])
+      .map((i) => Math.hypot(H[i][0] - 500, H[i][1] - 500));
+    return { lo: Math.min(...r), hi: Math.max(...r),
+             shells: new Set(r.map((x) => Math.round(x / 60))).size };
+  });
+  ok('strata uses the whole field, not two rings of it',
+    strat.hi - strat.lo > 200 && strat.shells >= 4, strat);
+
+  /* A formation from another build, or a hand-edited one, must not
+     leave the field with no arrangement at all — every branch in
+     orLayout is keyed off this string. */
+  await page.evaluate(() => {
+    const v = JSON.parse(localStorage.getItem('orrery.v1') || '{}');
+    v.form = 'nonsense';
+    localStorage.setItem('orrery.v1', JSON.stringify(v));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await waitPaint(page);
+  ok('a formation it does not know falls back rather than blanking',
+    await page.evaluate(() => state.form === 'orrery'
+      && document.querySelectorAll('#orNodes .or-node').length > 10));
+  await page.evaluate(() => { orForm('orrery'); });
+  await settle(page);
+
   /* ── search dims and holds the shape ── */
   await page.mouse.move(0, 0);
   const shape0 = await positions(page);
