@@ -262,6 +262,28 @@
    where nothing ever flickers reads as printed. */
 @keyframes or-flare { 30% { opacity: 1; } }
 
+/* ── the surge ──
+   Opening a note sends a band of the LINE along each of its links —
+   the link's own colour brightened, not a white dot riding on top.
+   The thing that moves is the connection.
+
+   pathLength="100" is what makes it work on a real map: the dash is
+   written in PERCENT of the line, so one number means the same thing
+   on a 30-unit link and a 400-unit one. Without it a long link's pulse
+   crawls and a short link's is gone before you see it.
+
+   Only ever on the links of the note you have open — a handful of
+   paths, never the six hundred you are not reading. */
+@keyframes or-surge { to { stroke-dashoffset: -100; } }
+.or-surge {
+  stroke-dasharray: 10 90;
+  stroke-linecap: round;
+  animation: or-surge var(--surge, 1.3s) linear infinite;
+}
+/* Still, it is a bright dash parked on a line, which reads as a fault
+   rather than as restraint. So it goes entirely. */
+@media (prefers-reduced-motion: reduce) { .or-surge { display: none; } }
+
 @keyframes or-turn { to { transform: rotate(360deg); } }
 .or-turn {
   transform-origin: 500px 500px;
@@ -2920,7 +2942,7 @@ orSim.draw = (final) => {
        Slack stays quiet, stretched comes up, and it holds whether you
        are dragging, whether it is springing back, or whether it just
        settled somewhere far from home. */
-    if (!orSim.drag && !L.tether) {
+    if (!orSim.drag && !L.tether && !L.surge) {
       const dx = pa[0] - pb[0], dy = pa[1] - pb[1];
       const len = Math.sqrt(dx * dx + dy * dy);
       const t = Math.min(1, Math.max(0, (len / (L.rest || 60)) - 1) / 2.2);
@@ -3072,6 +3094,10 @@ orHover.paint = () => {
        stretched link dark while its own cache insists it is bright.
        Two writers, one attribute: the later one has to know what the
        earlier one meant. */
+    /* The surge is an overlay carrying its own animation. Writing an
+       opacity onto it here would dim the pulse to whatever the hover
+       thought the LINK underneath should be. */
+    if (L.surge) continue;
     const base = L.lit == null ? L.op : L.lit;
     L.el.setAttribute('opacity', String(lit ? base : N(base * SIM.dim)));
   }
@@ -3320,6 +3346,16 @@ function orPaintLinks() {
       + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
       + ` stroke-width="${sel ? 1 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
       + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
+    /* The overlay rides the same `d`, so it must be in the same cache
+       the tick rewrites — otherwise it stays where the link was when
+       you opened the note and the two peel apart as the field settles. */
+    if (sel) {
+      keep.push({ a, b, op: 1, d, rest: 0, w: 2, surge: true });
+      out.push(`<path class="or-surge" d="${d}" pathLength="100" fill="none"`
+        + ` stroke="color-mix(in srgb, var(--or-cat-${esc(catOf[a] || 'other')}) 55%,`
+        + ` var(--or-star-core))" stroke-width="2"`
+        + ` style="animation-delay:${(-(out.length % 7) * .17).toFixed(2)}s"/>`);
+    }
   }
   /* ── the folder tether ──
      A hub carries no edge of its own, because membership is not a
@@ -3381,7 +3417,7 @@ function orPaintLinks() {
   for (let i = 0; i < keep.length; i++)
     lines[i] = { el: els[i], a: keep[i].a, b: keep[i].b, op: keep[i].op,
                  d: keep[i].d, lit: keep[i].op, rest: keep[i].rest,
-                 tether: !!keep[i].tether, w: keep[i].w };
+                 tether: !!keep[i].tether, surge: !!keep[i].surge, w: keep[i].w };
   orSim.lines = lines;
 }
 orPaintLinks.d = (pa, pb) => {
@@ -3964,7 +4000,7 @@ orDragStart.lit = (id, on) => {
   }
   for (let i = 0; i < ls.length; i++) {
     const L = ls[i];
-    if (L.a !== id && L.b !== id) continue;
+    if (L.a !== id && L.b !== id || L.surge) continue;
     L.el.setAttribute('opacity', on ? '.92' : String(L.op));
     /* Restore the width this line was PAINTED at, never a literal.
        '.8' was every link's width when this was written, and it has

@@ -746,7 +746,9 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       const muted = fillOf(g).indexOf('orStar-mute') >= 0;
       if (kin.has(id) === muted) wrong.push(id + (muted ? ': kin but muted' : ': stranger but coloured'));
     });
-    const links = [...document.querySelectorAll('#orLinks path')];
+    /* Links, not the surge overlays riding on them — those carry no
+       data-a/data-b and are not edges. */
+    const links = [...document.querySelectorAll('#orLinks path[data-a]')];
     /* BOTH ends, not either. Lighting on either end drew a full-colour
        line from a neighbour out to a note two hops away, which is not
        kin and so stayed at .55 — a lit line ending on an unlit star. */
@@ -774,6 +776,40 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     { wrong: mute.linkWrong, of: mute.links });
   ok('so no lit line ends on a star that is not lit',
     mute.orphanN === 0, mute.orphanLit);
+
+  /* ── the surge ──
+     Opening a note sends a band of the LINE along each of its links,
+     in the link's own colour brightened — not a white dot riding on
+     top. The thing that moves is the connection. */
+  const surge = await page.evaluate(() => {
+    const su = [...document.querySelectorAll('#orLinks .or-surge')];
+    const authored = (state.edges || []).filter((e) => e.includes(state.sel)).length;
+    const s0 = su[0];
+    const base = [...document.querySelectorAll('#orLinks path[data-a]')].find((p) =>
+      !p.classList.contains('or-tether')
+      && (p.getAttribute('data-a') === state.sel || p.getAttribute('data-b') === state.sel));
+    const cs = s0 && getComputedStyle(s0);
+    return { n: su.length, authored,
+      /* pathLength normalises the dash to PERCENT of the line, which is
+         what stops a long link's pulse crawling and a short one's
+         vanishing before you see it. */
+      norm: su.every((p) => p.getAttribute('pathLength') === '100'),
+      running: cs && cs.animationName === 'or-surge',
+      dashed: cs && /10px/.test(cs.strokeDasharray),
+      onTheLine: !!(base && su.some((p) => p.getAttribute('d') === base.getAttribute('d'))),
+      /* the pulse is the line's colour, never the core white */
+      white: su.filter((p) => {
+        const c = getComputedStyle(p).stroke.replace(/[^\d.,]/g, '').split(',').map(Number);
+        return c.length >= 3 && c.every((v) => v > .93);
+      }).length };
+  });
+  ok('opening a note runs a surge down each of its links',
+    surge.n > 0 && surge.n === surge.authored, surge);
+  ok('normalised to the line, so a long link is not slower',
+    surge.norm && surge.running && surge.dashed, surge);
+  ok('and it rides exactly on the link, not beside it', surge.onTheLine, surge);
+  ok('in the line\u2019s own colour, never the core white',
+    surge.white === 0, surge);
 
 
   /* ── the camera does not fly into the wall ──
@@ -1233,6 +1269,8 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('a 61-step sweep costs a handful of forced layouts, not 62',
     rects < 12, rects);
 
+  ok('a resting map carries no surges either',
+    await page.evaluate(() => document.querySelectorAll('.or-surge').length === 0));
   ok('a resting map carries no tethers',
     await page.evaluate(() => document.querySelectorAll('#orLinks .or-tether').length === 0));
   const sig = await page.evaluate(() => {
