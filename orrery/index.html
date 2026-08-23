@@ -212,11 +212,8 @@
 .or-fly { transition: transform .62s cubic-bezier(.32, .72, 0, 1); }
 @media (prefers-reduced-motion: reduce) { .or-fly { transition: none; } }
 
-/* The dust drifts in three shells at three rates — depth by speed. */
+/* Three shells, still drawn in three depths, no longer turning. */
 #orDustA, #orDustB, #orDustC { transform-origin: 500px 500px; }
-#orDustA { animation: or-turn 78s linear infinite; }
-#orDustB { animation: or-turn 48s linear infinite reverse; }
-#orDustC { animation: or-turn 110s linear infinite; }
 
 /* Precession. The instrument nods, so it reads as a solid thing seen
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
@@ -239,15 +236,15 @@
    and no 3D syntax implying a depth this drawing does not have. If
    something here is ever shown to cost real milliseconds, it will not
    be this line — do not come back and credit it. */
-@keyframes or-nod {
-  0%, 100% { transform: scaleY(1)     rotate(0deg); }
-  50%      { transform: scaleY(.9877) rotate(1.2deg); }
-}
-#orNod {
-  transform-origin: 500px 500px;
-  transform-box: view-box;
-  animation: or-nod 22s ease-in-out infinite;
-}
+
+/* The nod is gone, and so is the drift. Everything the instrument
+   did ambiently — precession, three dust shells at three rates, three
+   of the four ring groups — moved the whole 1000-unit tree every
+   frame, and on a vault of several hundred notes that is a thousand
+   gradient-filled elements re-rasterised for motion nobody asked to
+   watch. One arc still turns, the heavy one closest to the field, and
+   it is enough to say the thing is running. */
+#orNod { transform-box: view-box; }
 
 /* One star, briefly brighter. Real starlight scintillates; a field
    where nothing ever flickers reads as printed. */
@@ -260,7 +257,7 @@
 }
 .or-rev { animation-direction: reverse; }
 @media (prefers-reduced-motion: reduce) {
-  .or-turn, #orNod, #orDustA, #orDustB, #orDustC { animation: none; }
+  .or-turn { animation: none; }
 }
 
 /* ── the camera is the expensive part ──
@@ -279,10 +276,30 @@
    and pausing keeps the angle it had rather than snapping it home.
    None of it is legible at that magnification anyway — the reason it
    is safe to stop is the same reason it was costing us nothing. */
-#orSvg.or-tight  .or-turn, #orSvg.or-tight  #orNod,
-#orSvg.or-tight  #orDustA, #orSvg.or-tight  #orDustB, #orSvg.or-tight  #orDustC,
-#orSvg.or-flying .or-turn, #orSvg.or-flying #orNod,
-#orSvg.or-flying #orDustA, #orSvg.or-flying #orDustB, #orSvg.or-flying #orDustC {
+/* ── the chips stand down for the flight ──
+   They ride inside #orView, so the camera scales them — and their
+   counter-scale is only rewritten when the flight LANDS, because the
+   label layer is not in the per-frame loop. So for the whole 620ms a
+   chip carries the counter-scale for the zoom it started at and grows
+   with the camera: measured 39.8px to 94.8px, 2.38x, and then a snap
+   back to 40 at the end. That snap is most of what "glitchy when it
+   zooms in" was.
+
+   Counter-scaling them per frame is the wrong fix: the chip pass is a
+   getBBox per chip and then a pairwise collision sweep, and putting
+   that inside the most expensive 620ms on the screen buys a smooth
+   label nobody is reading. Nobody reads a label while the camera is
+   moving. They stand down and come back at the right size. */
+/* Asymmetric on purpose. Going away has to be INSTANT — a fade out
+   over .2s leaves the chips on screen for the first third of the
+   flight, still growing with the camera: measured 1.71x even with the
+   fade in place. Coming back can take its time, and reads as the
+   labels arriving once the camera has stopped. */
+#orLabels { transition: opacity .22s ease; }
+#orSvg.or-flying #orLabels { opacity: 0; transition: none; }
+@media (prefers-reduced-motion: reduce) { #orLabels { transition: none; } }
+
+#orSvg.or-tight .or-turn, #orSvg.or-flying .or-turn {
   animation-play-state: paused;
 }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
@@ -3124,7 +3141,7 @@ function orPaintRings() {
     + `<g id="orDustC" class="or-dust">${dust.filter((d, i) => i % 3 === 2).join('')}</g>`);
 
   /* atmosphere */
-  out.push(`<g${turn(62)}>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
+  out.push(`<g>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
     `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`
   ).join('') + `</g>`);
 
@@ -3136,10 +3153,10 @@ function orPaintRings() {
     const [x2, y2] = P(i % 5 ? 398 : 402, a);
     ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
   }
-  out.push(`<g${turn(34, true)}><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
+  out.push(`<g><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
 
   /* dotted ring */
-  out.push(`<g${turn(82)}><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
+  out.push(`<g><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
 
   /* the two heavy arcs */
   const arc = (r, a, b) => {
@@ -4062,7 +4079,6 @@ function orKeyNode(e) {
      moving, and re-place the chips against the edge they now have. */
   let rz = 0;
   window.addEventListener('resize', () => {
-    orTow.box = null;
     if (state.view !== 'map') return;
     clearTimeout(rz);
     rz = setTimeout(() => { orHeat(SIM.stir); orPaintLabels(); }, 160);
@@ -5027,9 +5043,6 @@ orOpen.fill = (id) => {
    keyboard is a trap, not chrome. The inline opacity doubles the CSS
    so the behaviour survives a stylesheet that has not caught up. */
 orOpen.chrome = (reading) => {
-  /* The stage narrows when the pane arrives, so the tow's cached box
-     is stale from this moment. */
-  orTow.box = null;
   ['orLegend', 'orStats'].forEach(cid => {
     const c = byId(cid);
     if (!c) return;
@@ -5121,8 +5134,10 @@ orZoom.glide = (z, px, py) => {
   if (!still) view.classList.add('or-fly');
   /* The flight is the one moment the whole field is being redrawn at a
      changing scale, so it is the one moment nothing else may be
-     moving. */
-  if (svg) svg.classList.add('or-flying');
+     moving. Not under reduced motion: there is no flight to protect,
+     and adding the class for the one frame before a zero-delay timeout
+     only blinks the labels. */
+  if (svg && !still) svg.classList.add('or-flying');
   state.zoom = z; state.panX = px; state.panY = py;
   orPan(0, 0);
   clearTimeout(orZoom.t);
@@ -5430,51 +5445,11 @@ function orTwinkle() {
 orTwinkle.t = 0;
 orTwinkle.r = orRng('orrery.scintillation');
 
-/* ── pointer tow ──
-   The dust shells lean toward the pointer, the near ones further than
-   the far. Parallax you drive with your hand. It writes to style
-   .translate and never to state, so a tow can never be mistaken for a
-   pan and cannot end up in anybody's saved positions. */
-/* Coalesced to one write a frame, and the stage box is read once
-   rather than once per event.
-
-   It used to do both per pointermove: read a rect — which flushes
-   layout — then write three style properties, which dirties it again,
-   so the next event flushed a dirty tree. Measured on a 61-step sweep:
-   61 events, 62 forced layouts. A trackpad on a 120Hz panel delivers
-   moves faster than the screen refreshes, so most of that work was
-   being done for frames that never existed. */
-function orTow(e) {
-  orTow.px = e.clientX; orTow.py = e.clientY;
-  if (orTow.raf) return;
-  orTow.raf = requestAnimationFrame(orTow.run);
-}
-orTow.raf = 0;
-orTow.px = 0; orTow.py = 0;
-orTow.box = null;
-orTow.run = () => {
-  orTow.raf = 0;
-  const st = byId('orStage');
-  if (!st) return;
-  /* Cached, and invalidated by the two things that actually move this
-     box: the window resizing, and the reading pane opening or closing
-     beside it. Anything else that moved it would be moving the whole
-     map, and the tow is 26px of lean — it does not need to be right to
-     the pixel, it needs to be cheap. */
-  const r = orTow.box || (orTow.box = st.getBoundingClientRect());
-  if (!r.width) { orTow.box = null; return; }
-  const dx = (orTow.px - r.left) / r.width - .5;
-  const dy = (orTow.py - r.top) / r.height - .5;
-  orTow.k.forEach(([id, k]) => {
-    const g = byId(id);
-    if (g) g.style.translate = orLayout.N(dx * k) + 'px ' + orLayout.N(dy * k) + 'px';
-  });
-};
-orTow.k = [['orDustA', 26], ['orDustB', 15], ['orDustC', 8]];
-orTow.clear = () => {
-  if (orTow.raf) { cancelAnimationFrame(orTow.raf); orTow.raf = 0; }
-  orTow.k.forEach(([id]) => { const g = byId(id); if (g) g.style.translate = ''; });
-};
+/* The pointer tow used to live here: the dust shells leaned toward
+   the cursor, the near ones further than the far. It went when the
+   drift did — parallax on three shells that no longer move is a style
+   write per frame for nothing. The coalescing lesson it taught is
+   written up where it still applies. */
 
 /* ── the signal ──
    Opening a note sends a bead of light down every link it has. A
@@ -5780,8 +5755,11 @@ orRefile.apply = (notes) => {
   step(() => {
     const st = byId('orStage');
     if (st) {
-      st.addEventListener('pointermove', orTow);
-      st.addEventListener('pointerleave', orTow.clear);
+      /* The tow is gone with the drift. It leaned the three dust shells
+         toward the pointer — a style write and, before it was
+         coalesced, a forced layout on every pointermove, all to move
+         shells that now hold still. Nothing to lean, nothing to
+         spend. */
     }
     orTwinkle();
   });

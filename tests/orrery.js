@@ -787,8 +787,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     setTimeout(() => res({
       cls: document.getElementById('orSvg').getAttribute('class') || '',
       fly: document.getElementById('orView').classList.contains('or-fly'),
-      nod: getComputedStyle(document.getElementById('orNod')).animationPlayState,
-      dust: getComputedStyle(document.getElementById('orDustA')).animationPlayState,
+      turn: getComputedStyle(document.querySelector('.or-turn')).animationPlayState,
     }), 2200);                                        /* well past the 620ms */
   }));
   ok('a pan during a flight lands the camera rather than stranding it',
@@ -803,12 +802,11 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     setTimeout(() => res({
       cls: document.getElementById('orSvg').getAttribute('class') || '',
       zoom: state.zoom,
-      nod: getComputedStyle(document.getElementById('orNod')).animationPlayState,
-      dust: getComputedStyle(document.getElementById('orDustA')).animationPlayState,
+      turn: getComputedStyle(document.querySelector('.or-turn')).animationPlayState,
     }), 500);
   }));
   ok('and the instrument runs again once you are back out',
-    woke.nod === 'running' && woke.dust === 'running', woke);
+    woke.turn === 'running', woke);
 
   /* ── and a wheel tick during a flight does not teleport ──
      A flight owns state.zoom as its DESTINATION for the whole 620ms.
@@ -830,6 +828,37 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('a wheel tick mid-flight zooms from where the camera IS',
     wheeled.after < wheeled.claimed, wheeled);
   ok('and takes the flight down with it', !/or-flying/.test(wheeled.cls), wheeled);
+
+  /* ── a chip never balloons through a flight ──
+     Chips ride inside #orView, so the camera scales them, and their
+     counter-scale is only rewritten when the flight LANDS. For the
+     whole 620ms each one carried the counter-scale for the zoom it
+     started at and grew with the camera — 39.8px to 94.8px, 2.38x,
+     then a snap back to 40. Measured while VISIBLE, because the fix
+     is that they stand down: geometry alone reads the same either
+     way, which is how this hid in the first place. */
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
+  await page.mouse.move(4, 4);
+  const grew = await page.evaluate(() => new Promise((res) => {
+    const w = [], view = document.getElementById('orView');
+    const L = document.getElementById('orLabels'), t0 = performance.now();
+    const tick = () => {
+      const c = document.querySelector('#orLabels .or-chip');
+      if (c && +getComputedStyle(L).opacity > .05)
+        w.push(+c.getBoundingClientRect().width.toFixed(1));
+      if (performance.now() - t0 < 1000) requestAnimationFrame(tick);
+      else res({ n: w.length, min: Math.min(...w), max: Math.max(...w),
+                 view: +new DOMMatrix(getComputedStyle(view).transform).a.toFixed(2) });
+    };
+    orOpen('trading/models/cisd');
+    requestAnimationFrame(tick);
+  }));
+  ok('a chip holds its size through a flight, or is not on screen for it',
+    grew.n > 0 && grew.max / grew.min < 1.12, grew);
+  ok('and the camera did fly, so that was not a no-op', grew.view > 1.5, grew);
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
   await page.evaluate(() => { orClose(); orZoom(0); });
   await settle(page);
   await page.evaluate(() => { orClose(); });
@@ -839,18 +868,12 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await page.mouse.move(4, 4);
   await page.waitForTimeout(300);
 
-  ok('and the drift holds still while the camera is close in',
-    /or-tight/.test(amb.cls) && amb.nod === 'paused'
-    && amb.dust === 'paused' && amb.turn === 'paused', amb);
-  ok('the nod is written in 2D — nothing here sets perspective, so '
-    + 'rotateX would only have been scaleY the expensive way',
-    await page.evaluate(() => {
-      const css = [...document.styleSheets].flatMap((sh) => {
-        try { return [...sh.cssRules]; } catch (e) { return []; }
-      }).filter((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'or-nod');
-      const txt = css.map((r) => r.cssText).join(' ');
-      return txt.includes('scaleY') && !txt.includes('rotateX');
-    }));
+  ok('and the one thing that turns holds still while the camera is close in',
+    /or-tight/.test(amb.cls) && amb.turn === 'paused', amb);
+  ok('there is no nod keyframe left to be expensive',
+    await page.evaluate(() => ![...document.styleSheets].flatMap((sh) => {
+      try { return [...sh.cssRules]; } catch (e) { return []; }
+    }).some((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'or-nod')));
   ok('muting is not removing — every node is still drawn',
     mute.nodes === seed.length + corpus.hubs, mute.nodes);
   ok('and it is a minority that stays lit, or it says nothing',
@@ -1055,9 +1078,14 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     };
     return { a: anim('orDustA'), b: anim('orDustB'), c: anim('orDustC'), nod: anim('orNod') };
   });
-  ok('the dust drifts in three shells', alive.a !== 'none' && alive.b !== 'none'
-    && alive.c !== 'none' && alive.a !== 'MISSING', alive);
-  ok('and the instrument nods', alive.nod !== 'none' && alive.nod !== 'MISSING', alive);
+  /* Stillness is the contract now, and it is worth a test because it
+     is worth real milliseconds. The precession and the three dust
+     shells moved the whole 1000-unit tree every frame; on a vault of
+     several hundred notes that is a thousand gradient-filled elements
+     re-rasterised for motion nobody asked to watch. */
+  ok('the dust shells hold still', alive.a === 'none' && alive.b === 'none'
+    && alive.c === 'none', alive);
+  ok('and the instrument does not nod', alive.nod === 'none', alive);
 
   /* The furniture turns at four rates and the inner arcs are the one
      part you can WATCH turn — everything outside them is under a degree
@@ -1067,26 +1095,48 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      and not running reads perfectly in the source. */
   const rates = await page.evaluate(() => [...document.querySelectorAll('#orRings g.or-turn')]
     .map((g) => 360 / parseFloat(getComputedStyle(g).animationDuration)));
-  ok('every ring group is turning', rates.length >= 4 && rates.every((r) => r > 0), rates);
-  /* Fast enough to SEE. Under about a degree a second nothing reads as
-     moving over the seconds anybody looks at a screen, which is what
-     every one of these used to be. */
-  ok('and every one of them fast enough to read as moving',
-    rates.every((r) => r >= 1.2), rates);
-  ok('and the innermost arcs are the fastest of them',
-    Math.max.apply(null, rates) === rates[rates.length - 1]
-    || Math.max.apply(null, rates) >= 4, rates);
+  /* One group turns, not four: the heavy arc closest to the field. It
+     is enough to say the instrument is running, and it is the only one
+     you could ever actually watch — the outer three were under a
+     degree and a half a second, which is invisible over the seconds
+     anybody looks and was costing a repaint of the whole tree to be
+     invisible with. */
+  /* ── almost nothing may be in motion ──
+     #orNod wrapped #orView, which holds every ring, link, star and
+     chip — so the precession animated a transform on the ANCESTOR of
+     the entire drawing, forever. Measured on a 320-note vault: 3787 of
+     3876 elements, 97.7%, sat inside a running animation at rest, and
+     an animating subtree cannot be cached — it is re-rasterised every
+     frame at whatever scale the camera has reached. That was the lag.
+     One arc turns now, and the odd star flaring. */
+  const motion = await page.evaluate(() => {
+    const svg = document.getElementById('orSvg');
+    const all = [...svg.querySelectorAll('*')];
+    const moving = all.filter((e) => {
+      const c = getComputedStyle(e);
+      return c.animationName && c.animationName !== 'none'
+        && c.animationPlayState === 'running';
+    });
+    const inside = new Set();
+    moving.forEach((g) => { inside.add(g); g.querySelectorAll('*').forEach((x) => inside.add(x)); });
+    return { total: all.length, moving: inside.size,
+             pct: +(inside.size / all.length * 100).toFixed(1) };
+  });
+  ok('almost nothing on the map is in continuous motion',
+    motion.pct < 5, motion);
 
+  ok('exactly one ring group still turns', rates.length === 1, rates);
+  ok('and it is fast enough to read as moving', rates[0] >= 4, rates);
+
+  /* The tow went with the drift: leaning three shells toward the
+     pointer is a style write per frame to move things that now hold
+     still. Nothing may write to them on a pointermove. */
   const stg = await page.locator('#orStage').boundingBox();
   await page.mouse.move(stg.x + stg.width * 0.8, stg.y + stg.height * 0.25);
   await page.waitForTimeout(220);
   const towed = await page.evaluate(() => ['orDustA', 'orDustB', 'orDustC']
     .map((id) => document.getElementById(id).style.translate || ''));
-  const px = towed.map((t) => Math.abs(parseFloat(t) || 0));
-  /* Near shells lean further than far ones — that difference IS the
-     parallax. Equal amounts would be a slide, not depth. */
-  ok('the pointer tows the shells', px[0] > 0, towed);
-  ok('and tows the near one further than the far', px[0] > px[1] && px[1] > px[2], px);
+  ok('the pointer moves nothing', towed.every((t) => !t), towed);
   await page.mouse.move(stg.x + 4, stg.y + 4);
 
   const flares = await page.evaluate(() => new Promise((res) => {
