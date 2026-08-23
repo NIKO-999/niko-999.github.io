@@ -3562,6 +3562,18 @@ function orPaintRings() {
 
   const out = [];
 
+  /* Declared here rather than beside the heavy arcs that were its first
+     caller: the concordance below needs it too, and a `const` read
+     above its own declaration is a temporal dead zone — which does not
+     throw where you can see it. It throws inside the first paint and
+     leaves the whole map blank, with a message naming a line that looks
+     fine. This file has already lost an afternoon to that once, over
+     FORMS. */
+  const arc = (r, a, b) => {
+    const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
+    return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(b - a) > 180 ? 1 : 0} 1 ${N(x2)} ${N(y2)}`;
+  };
+
   /* An orrery is a machine, and a machine that never moves is a diagram
      of one. It runs at a speed you can WATCH now rather than one you
      have to take on trust — the first pass was minutes per revolution,
@@ -3600,29 +3612,112 @@ function orPaintRings() {
     + `<g id="orDustB" class="or-dust">${dust.filter((d, i) => i % 3 === 1).join('')}</g>`
     + `<g id="orDustC" class="or-dust">${dust.filter((d, i) => i % 3 === 2).join('')}</g>`);
 
-  /* atmosphere */
-  out.push(`<g>` + [[470, .10], [452, .08], [430, .06], [405, .05]].map(([r, o]) =>
-    `<circle cx="500" cy="500" r="${r}" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity="${o}"/>`
-  ).join('') + `</g>`);
+  /* ── the concordance ──
+     The rim is set the way a book is set: three registers of type
+     running round the limb, one per region. The name, its contents
+     most-linked first, and its census. Read the edge and you know what
+     the vault is ABOUT before you have opened anything — which is the
+     one thing the map itself never tells you. It answers what is near
+     what, brilliantly, and answers what is IN here not at all.
 
-  /* tick rim — 180 ticks, one path, one stroke. */
-  const ticks = [];
-  for (let i = 0; i < 180; i++) {
-    const a = i * 2;
-    const [x1, y1] = P(392, a);
-    const [x2, y2] = P(i % 5 ? 398 : 402, a);
-    ticks.push(`M${N(x1)} ${N(y1)}L${N(x2)} ${N(y2)}`);
+     This replaces four atmosphere hairlines, a hundred and eighty
+     identical ticks and a dotted ring: three hundred–odd marks of even
+     weight all the way round, carrying nothing. Forty-five elements
+     carrying the whole shape of the vault is a better trade than any
+     amount of texture.
+
+     Type on a path runs the way the path is DRAWN, so the bottom half
+     of the circle has to be drawn backwards or every word down there is
+     upside down. Which half a sector's middle falls in decides it, once
+     per sector.
+
+     The registers dim with the isolate and the filter, through the same
+     orPaint.hubMatch every hub uses. A rim that named all seven regions
+     at full weight while the map showed one would be the loudest
+     contradiction on the screen. */
+  {
+    const note = orLayout.note || {}, deg = orLayout.deg || {},
+          mem = orLayout.mem || {};
+    const MONO = 'font-family:var(--mono)';
+    /* Reversed arc, for the half where forwards would be upside down. */
+    const rarc = (r, a, b) => { const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
+      return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(a - b) > 180 ? 1 : 0} 0 ${N(x2)} ${N(y2)}`; };
+    const band = (r, s, pad) => (Math.sin(s.mid * Math.PI / 180) > 0)
+      ? rarc(r + 7, s.a1 - pad, s.a0 + pad) : arc(r, s.a0 + pad, s.a1 - pad);
+    const defs = [];
+    let k = 0;
+    /* The register is named on the element. Keying anything off the
+       font-size instead — which the tests did for one run — means a
+       type change silently stops finding the thing it was watching,
+       and a check that finds nothing passes. */
+    const run = (reg, r, s, pad, anchor, off, size, track, fill, op, txt) => {
+      const id = `orRim${k++}`;
+      defs.push(`<path id="${id}" fill="none" d="${band(r, s, pad)}"/>`);
+      out.push(`<text class="or-rim-${reg}" font-size="${size}" fill="${fill}"`
+        + ` opacity="${N(op)}" style="${MONO};letter-spacing:${track}">`
+        + `<textPath href="#${id}" startOffset="${off}" text-anchor="${anchor}">`
+        + `${esc(txt)}</textPath></text>`);
+    };
+
+    out.push(`<circle cx="500" cy="500" r="399" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".2"/>`);
+    out.push(`<circle cx="500" cy="500" r="489" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".12"/>`);
+
+    sec.forEach(s => {
+      /* MIXED toward the ink, not the raw category colour. Measured on
+         composited pixels over three backdrops in both themes: the raw
+         colour at the opacities this was first drawn at ran 1.4:1 to
+         3.7:1, which is the failure this repo has already shipped once
+         and calls out by name. 65% of the category over 35% ink clears
+         4.5:1 everywhere with margin and still reads as that category's
+         hue — the sweep is in the commit, and going past 75% loses the
+         bar again. Size did more of the work than opacity: below about
+         5 CSS pixels antialiasing alone caps what is reachable, so no
+         amount of opacity rescues type that is too small. */
+      const v = `color-mix(in srgb, var(--or-cat-${esc(s.id)}) 65%, var(--ink))`;
+      const lit = orPaint.hubMatch(s) ? 1 : .22;
+      const span = s.a1 - s.a0;
+
+      /* Contents, r 448. Ranked the way the vault ranks them, and it
+         stops when the sector is FULL rather than when the list is: a
+         region wider on the map gets to say more, which is the same
+         proportion the sectors already carry. */
+      const ids = (mem[s.id] || []).slice()
+        .sort((a, b) => (deg[b] || 0) - (deg[a] || 0) || (a < b ? -1 : 1));
+      const fs = 7.8;
+      const room = (span - 4) * Math.PI / 180 * 448 / (fs * .78);
+      let line = '';
+      for (const id of ids) {
+        const t = (note[id] || {}).title || id.split('/').pop();
+        const nx = line ? line + '  \u00b7  ' + t : t;
+        if (nx.length > room) break;
+        line = nx;
+      }
+      if (line) run('c', 448, s, 2, 'middle', '50%', fs, '.16em', v, lit, line);
+
+      /* The name, r 474, tracked wide enough to read as a region rather
+         than as a caption on the line below it. */
+      run('n', 474, s, 2, 'middle', '50%', 10.2, '.5em', v, lit,
+        (orLayout.label[s.id] || s.id).toUpperCase());
+
+      /* A third register held the census — n notes, n links, flush to
+         the sector's leading edge. It is gone, and not for contrast:
+         the Categories card is on screen with exactly those counts in
+         it, so the rim was repeating the loudest thing next to it. The
+         rim's job is what the map does NOT say. Dropping it also clears
+         r 422, where it was crowding the leader lines' own numerals at
+         428 — two numbering systems one ring apart. */
+
+      /* The join between one region and the next: a tick, not a rule. */
+      [s.a0, s.a1].forEach(a => {
+        const [x1, y1] = P(399, a), [x2, y2] = P(489, a);
+        out.push(`<line x1="${N(x1)}" y1="${N(y1)}" x2="${N(x2)}" y2="${N(y2)}"`
+          + ` stroke="var(--or-hair)" stroke-width=".6" opacity=".1"/>`);
+      });
+    });
+    out.unshift(`<defs>${defs.join('')}</defs>`);
   }
-  out.push(`<g><path d="${ticks.join('')}" fill="none" stroke="var(--or-hair)" stroke-width=".7" opacity=".18"/></g>`);
-
-  /* dotted ring */
-  out.push(`<g><circle cx="500" cy="500" r="376" fill="none" stroke="var(--or-hair)" stroke-width=".8" stroke-dasharray="1 7" opacity=".3"/></g>`);
 
   /* the two heavy arcs */
-  const arc = (r, a, b) => {
-    const [x1, y1] = P(r, a), [x2, y2] = P(r, b);
-    return `M${N(x1)} ${N(y1)}A${r} ${r} 0 ${(b - a) > 180 ? 1 : 0} 1 ${N(x2)} ${N(y2)}`;
-  };
   /* The arcs run three and a half times faster than the rings outside
      them. They are the innermost furniture and the only bold strokes
      out there, so they are the one part of the instrument you can
@@ -3639,13 +3734,18 @@ function orPaintRings() {
      can show you they are moving. */
   out.push(`<circle cx="500" cy="500" r="330" fill="none" stroke="var(--or-hair)" stroke-width=".8" opacity=".18"/>`);
 
-  /* No rim type. The poster it came from is a print, and a print has to
-     say what it is because nothing else on the page will. This does not
-     — you are inside the thing, the notes are right there, and a
-     sentence wrapped round the edge is one more piece of furniture
-     competing with them. The invisible path it rode on goes with it;
-     an unreferenced <path> in a live <defs> is the kind of leftover
-     that outlives the reason for it. */
+  /* There used to be a rule here saying NO RIM TYPE, on the grounds
+     that the poster this came from is a print and a print has to say
+     what it is because nothing else on the page will — whereas you are
+     inside this one and the notes are right there.
+
+     That argument only holds against type that says what the thing is.
+     The concordance above says what is IN it, which nothing else on
+     the screen does: the map answers what is near what and answers what
+     this vault is about nowhere. Type that carries information the map
+     cannot is not furniture competing with the notes, it is the one
+     part of the rim doing work. The rule stands for anything else —
+     a title, a legend, a sentence about the instrument. */
 
   /* orbit rings. The hub orbit is one shared circle — every hub rides
      r 120, so seven copies of it would be one line drawn seven times.

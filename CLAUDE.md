@@ -280,6 +280,71 @@ in the root stacking context: at 4 the Categories card at 5 painted
 straight over the answer. The answer was still there underneath, which
 is worse than no answer.
 
+## The rim
+
+**The rim says what the vault is ABOUT.** Three registers of type round
+the limb: the region's name, and its contents ranked the way the vault
+ranks them, most-linked first. It replaced four atmosphere hairlines, a
+hundred and eighty identical ticks and a dotted ring — three hundred-odd
+marks of even weight carrying nothing. The map answers what is near what
+brilliantly and answers what is in here nowhere; that gap is the rim's
+job.
+
+**The old rule said NO RIM TYPE** and the reasoning was sound as far as
+it went: the poster this came from is a print, and a print has to say
+what it is because nothing else on the page will. That argument only
+holds against type that says what the thing IS. Type carrying
+information the map cannot is not furniture competing with the notes.
+The rule still stands for a title, a legend, or a sentence about the
+instrument.
+
+**Type on a path runs the way the path is drawn**, so the bottom half of
+the circle is drawn backwards or every word down there is upside down.
+Nothing about the bounding box tells you which — `tests/orrery.js` reads
+the path's first point and compares it against both ends.
+
+**The colour is mixed toward `--ink`, and the number is measured.** Drawn
+in the raw category colours at the opacities it was designed at, the rim
+ran **1.40:1 to 3.67:1** over three backdrops in two themes and looked
+deliberate — the failure this repo has shipped before. 65% of the
+category over 35% ink clears 4.5:1 everywhere with margin and still
+reads as that category's hue; past 75% it loses the bar again.
+
+**Size did more of that work than opacity.** Below about 5 CSS pixels
+antialiasing alone caps what is reachable, so no opacity rescues type
+that is too small. A third register held a census — *n* notes, *n*
+links — and it is gone, but not for contrast: the Categories card is on
+screen with exactly those counts, so the rim was repeating the loudest
+thing next to it.
+
+**Each register is named on the element** (`or-rim-n`, `or-rim-c`). The
+tests keyed off `font-size` for one round; a type change then silently
+stops finding what it was watching, and a check that finds nothing
+passes.
+
+**It dims with the isolate**, through the same `orPaint.hubMatch` every
+hub uses. A rim naming all seven regions at full weight while the map
+shows one is the loudest contradiction on the screen.
+
+## Options come from lenses, not from one mind
+
+The first six rim proposals were six variations on *instrument bezel*
+and read as one idea shown six times, because they came from one pass of
+one mind converging. The second round put six agents on deliberately
+distant lenses — an old sea chart, a clock of the vault, a machined
+object seen edge-on, language, something grown or eroded, and absence —
+each forbidden the others' vocabulary. Four returned something nobody
+had proposed; the one that shipped came from the lens that had to argue
+its way past a house rule to exist.
+
+**Every proposal was rendered in the real app before it was shown.**
+`.claude/workflows/` has the harness: an agent writes a generator, the
+harness injects it into the live page over the real vault and
+screenshots both themes, and the agent has to READ ITS OWN SCREENSHOT.
+An agent that only writes SVG returns something plausible. The round
+before this one was rejected as "too cartoonish" because the drawings
+looked better than the thing did.
+
 ## Jarvis
 
 A librarian, not an oracle. Every branch of `orAsk` answers out of the

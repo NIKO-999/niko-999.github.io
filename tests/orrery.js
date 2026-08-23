@@ -359,6 +359,49 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     await page.evaluate(() => { delete document.documentElement.dataset.bg; });
     await page.waitForTimeout(500);
 
+    /* ── the concordance, against the photograph it is set on ──
+       This is the assertion that caught it. Drawn first in the raw
+       category colours at the opacities it was designed at, the rim ran
+       1.40:1 to 3.67:1 over three backdrops — and looked deliberate,
+       which is exactly the failure mode this file exists for. Every run
+       is sampled off composited pixels, in both themes, because a
+       category colour that clears the bar on ink does not clear it on
+       paper. */
+    const rimItems = await page.evaluate(() => {
+      const stage = document.getElementById('orStage').getBoundingClientRect();
+      const items = [];
+      document.querySelectorAll('#orRings text').forEach((t) => {
+        const r = t.getBoundingClientRect();
+        if (r.width < 8 || r.height < 3) return;
+        items.push({ label: (t.textContent || '').trim().slice(0, 22),
+                     x: r.x, y: r.y, w: r.width, h: r.height });
+      });
+      return { items, clip: { x: stage.x, y: stage.y, width: stage.width, height: stage.height } };
+    });
+    const rimRuns = await patches(page, rimItems.clip, rimItems.items, 2);
+    const rimBad = rimRuns.map((r) => ({ ...r, c: ratio(r.hi, r.lo) })).filter((r) => r.c < 4.5);
+    ok(`every rim run clears 4.5:1 on the photograph (${rimRuns.length} sampled)`,
+      rimRuns.length >= 12 && rimBad.length === 0,
+      rimBad.slice(0, 4).map((r) => `${r.label} ${r.c.toFixed(2)}:1`));
+
+    /* ── the rim is INSIDE the stage ──
+       It reaches r 489 of a 500 half-box, so it is the one piece of
+       furniture that can fall off the edge when the stage is a shape
+       nobody tested. */
+    const rimFit = await page.evaluate(() => {
+      const st = document.getElementById('orStage').getBoundingClientRect();
+      let out = 0, pad = 1e9;
+      document.querySelectorAll('#orRings text, #orRings line, #orRings circle').forEach((t) => {
+        const r = t.getBoundingClientRect();
+        if (r.width < 1 || r.height < 1) return;
+        if (r.left < st.left - .5 || r.right > st.right + .5
+          || r.top < st.top - .5 || r.bottom > st.bottom + .5) out++;
+        pad = Math.min(pad, r.top - st.top, st.bottom - r.bottom);
+      });
+      return { out, pad: Math.round(pad) };
+    });
+    ok('nothing on the rim falls off the stage', rimFit.out === 0, rimFit);
+
     /* ── the reading pane, open on a real note ── */
     await page.evaluate(() => orOpen('growth/boredom'));
     await page.waitForTimeout(600);
@@ -1949,6 +1992,107 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      and that asking him anything costs no request. The second is the
      whole reason the app is allowed to read your notes at all, so it
      is measured rather than asserted in a comment. */
+  /* ═══ the concordance ═══
+     The rim stopped being texture and became the one place on screen
+     that says what this vault is ABOUT. Which means it can now be
+     WRONG, and everything below is held against the vault itself. */
+  console.log('\n── the rim ──');
+  {
+    /* Its own browser: the pass above closes its own, and a block that
+       borrows a handle somebody else owns fails with "target closed"
+       three hundred lines from the close that did it. */
+    const c = await open({ colorScheme: 'dark' });
+    await c.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+    await waitPaint(c.page);
+    await settle(c.page);
+    const R = await c.page.evaluate(() => {
+      const runs = Array.from(document.querySelectorAll('#orRings text'))
+        .map((t) => ({ reg: t.getAttribute('class'),
+                       size: +t.getAttribute('font-size'),
+                       fill: t.getAttribute('fill'),
+                       op: +t.getAttribute('opacity'),
+                       txt: (t.textContent || '').trim() }));
+      const deg = orLayout.deg || {}, note = orLayout.note || {}, mem = orLayout.mem || {};
+      const want = {};
+      (orLayout.sec || []).forEach((s) => {
+        const ids = (mem[s.id] || []).slice()
+          .sort((a, b) => (deg[b] || 0) - (deg[a] || 0) || (a < b ? -1 : 1));
+        want[(orLayout.label[s.id] || s.id).toUpperCase()] =
+          ids.length ? (note[ids[0]] || {}).title : null;
+      });
+      /* Which way round each sector's contents path is drawn. Text on a
+         path runs the way the path runs, so a bottom-half sector drawn
+         forwards is upside down and nothing about its bounding box
+         says so. Read the path's first point instead. */
+      const spin = (orLayout.sec || []).map((s) => {
+        const t = Array.from(document.querySelectorAll('#orRings text'))
+          .filter((n) => n.getAttribute('class') === 'or-rim-n'
+            && n.textContent.trim() === (orLayout.label[s.id] || s.id).toUpperCase())[0];
+        if (!t) return null;
+        const d = document.querySelector(t.querySelector('textPath').getAttribute('href'))
+          .getAttribute('d');
+        const m = d.match(/^M([-\d.]+) ([-\d.]+)/);
+        const P = orLayout.polar;
+        const at0 = P(474, s.a0), at1 = P(481, s.a1);
+        const d0 = Math.hypot(+m[1] - at0[0], +m[2] - at0[1]);
+        const d1 = Math.hypot(+m[1] - at1[0], +m[2] - at1[1]);
+        return { id: s.id, bottom: Math.sin(s.mid * Math.PI / 180) > 0, startsAtEnd: d1 < d0 };
+      }).filter(Boolean);
+      return { runs, want, spin, tick: document.querySelectorAll('#orRings [stroke-dasharray]').length,
+               els: document.getElementById('orRings').querySelectorAll('*').length };
+    });
+
+    const names = R.runs.filter((r) => r.reg === 'or-rim-n').map((r) => r.txt).sort();
+    const wantNames = Object.keys(R.want).sort();
+    ok('the rim names every region on the map',
+      JSON.stringify(names) === JSON.stringify(wantNames), { names, wantNames });
+    ok('and each name is mixed off its own category token, not a literal',
+      R.runs.filter((r) => r.reg === 'or-rim-n').length === 7
+      && R.runs.filter((r) => r.reg === 'or-rim-n')
+        .every((r) => /color-mix\(in srgb, var\(--or-cat-[a-z]+\) \d+%, var\(--ink\)\)/.test(r.fill)),
+      R.runs.filter((r) => r.reg === 'or-rim-n').map((r) => r.fill).slice(0, 2));
+
+    /* The contents line is the vault's own ranking, not an alphabet:
+       most-linked first is what makes the rim worth reading. */
+    const lead = {};
+    R.runs.filter((r) => r.reg === 'or-rim-c').forEach((r) => { lead[r.txt.split('  ·  ')[0]] = true; });
+    const wantLead = Object.values(R.want).filter(Boolean);
+    ok('each region opens its contents with its most-linked note',
+      wantLead.filter((t) => lead[t]).length >= Math.min(5, wantLead.length),
+      { got: Object.keys(lead), want: wantLead });
+
+    ok('the bottom half is drawn backwards so its words are not upside down',
+      R.spin.length >= 6 && R.spin.every((s) => s.startsAtEnd === s.bottom), R.spin);
+
+    ok('the tick rim and the dotted ring it replaced are gone', R.tick === 0);
+    ok('and it costs a couple of hundred elements, not a couple of thousand',
+      R.els > 100 && R.els < 400, R.els);
+
+    /* An isolate that left all seven names at full weight would be the
+       loudest contradiction on the screen. */
+    await c.page.evaluate(() => orOnly('body'));
+    await c.page.waitForTimeout(400);
+    const dim = await c.page.evaluate(() => {
+      const out = {};
+      document.querySelectorAll('#orRings text').forEach((t) => {
+        if (t.getAttribute('class') !== 'or-rim-n') return;
+        out[t.textContent.trim()] = +t.getAttribute('opacity');
+      });
+      return out;
+    });
+    ok('an isolate dims every region but the one you kept',
+      dim.BODY === 1 && Object.entries(dim).filter(([k]) => k !== 'BODY')
+        .every(([, v]) => v < .4), dim);
+    await c.page.evaluate(() => orOnly('body'));
+    await c.page.waitForTimeout(300);
+    const back = await c.page.evaluate(() => Array.from(document.querySelectorAll('#orRings text'))
+      .filter((t) => t.getAttribute('class') === 'or-rim-n')
+      .every((t) => +t.getAttribute('opacity') === 1));
+    ok('and clearing it brings them all back', back);
+    ok('no page errors through the rim', c.errs.length === 0, c.errs.slice(0, 3));
+    await c.browser.close();
+  }
+
   console.log('\n── Jarvis ──');
   const j = await open({ colorScheme: 'dark' });
   const off = [];
