@@ -2940,6 +2940,69 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('a hand on the map cuts the debris down with the camera',
     cut.n === 0 && cut.live === 0, cut);
 
+  /* ── nothing animates inside the camera while the camera is moving ──
+     Everything the map draws sits inside #orView, so a flight rescales
+     all of it every frame. Anything still animating through that cannot
+     be cached — it is re-rasterised at each new scale, and on a Retina
+     panel at four times the pixels this box renders.
+
+     There WAS a rule for this and it named the three layers that
+     existed when it was written. The ambient field shipped later,
+     inside #orView like everything else, kept animating through every
+     flight, and carried the only CSS filter in the app while it did —
+     which is what "it glitches its way to the star on a Mac" was. The
+     old check had the same blind spot as the rule: it read
+     animationPlayState off #orNod, #orDustA and .or-turn by name, so a
+     layer added afterwards passed it without ever being looked at.
+
+     So this counts, rather than naming: EVERY element under #orView,
+     whatever it is and however it got styled. A future layer is covered
+     on the day it is added, which a list has now twice failed to do. */
+  await pg.page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(pg.page);
+  const frozen = await pg.page.evaluate(() => new Promise((res) => {
+    const view = document.getElementById('orView');
+    const running = () => [...view.querySelectorAll('*')].filter((e) => {
+      const s = getComputedStyle(e);
+      return s.animationName && s.animationName !== 'none' && s.animationPlayState === 'running';
+    });
+    const filtered = () => [...view.querySelectorAll('*')]
+      .filter((e) => { const s = getComputedStyle(e); return s.filter && s.filter !== 'none'; });
+    const restAnim = running().length, restFilt = filtered().length;
+    orOpen('trading/models/cisd');
+    setTimeout(() => {
+      const midAnim = running(), midFilt = filtered().length;
+      /* The other half, and it has to be measured in the same window:
+         the pause must NOT have taken the debris with it. SMIL does not
+         read animation-play-state, which is exactly why the rule is
+         allowed to be this blunt — but "exactly why" is a claim, and an
+         unmeasured claim is how the first version of this shipped. */
+      const deb = [...document.querySelectorAll('#orDebris > g')];
+      const was = deb.map((g) => g.getBoundingClientRect().x);
+      setTimeout(() => {
+        const moved = deb.filter((g) => g.isConnected)
+          .some((g, i) => was[i] !== undefined && Math.abs(g.getBoundingClientRect().x - was[i]) > 1);
+        setTimeout(() => res({
+          restAnim, restFilt,
+          midAnim: midAnim.length, midFilt,
+          leftover: midAnim.map((e) => e.getAttribute('class') || e.id || e.tagName),
+          debris: deb.length, debrisMoved: moved,
+          backAnim: running().length, backFilt: filtered().length,
+        }), 1500);
+      }, 160);
+    }, 400);
+  }));
+  ok('at rest the map genuinely is animating, so this measured something',
+    frozen.restAnim > 0 && frozen.restFilt > 0, frozen);
+  ok('but nothing under the camera animates while it is flying',
+    frozen.midAnim === 0, frozen);
+  ok('and nothing under it carries a filter while it is flying',
+    frozen.midFilt === 0, frozen);
+  ok('the debris is SMIL and keeps running through the pause',
+    frozen.debris > 0 && frozen.debrisMoved, frozen);
+  ok('and it all comes back once the camera has landed',
+    frozen.backAnim === frozen.restAnim && frozen.backFilt === frozen.restFilt, frozen);
+
   ok('no page errors through the passage so far', pg.errs.length === 0, pg.errs.slice(0, 4));
 
   /* ── reduced motion: no debris, ever ── */

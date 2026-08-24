@@ -511,6 +511,48 @@ absent. `orAmbient.boot` checks the media query itself and returns
 before building anything, the same shape as `orDebris.spawn`'s own
 check.
 
+**And it stops dead while the camera is flying — which it did not, and
+that shipped.** Everything the map draws sits inside `#orView`, so a
+flight rescales all of it every frame, and anything still animating
+through that cannot be cached: it is re-rasterised at each new scale.
+There was already a rule pausing exactly that, and a comment above it
+explaining why. It named `.or-turn` and the three dust shells — the
+three layers that existed when it was written — so the ambient field,
+added later and sitting in the same subtree, animated straight through
+every flight and carried the app's only CSS filter (six `blur(.35px)`
+motes) while it did. It reported as **"the fly-in glitches its way to
+the star on a Mac"**, which is where it would surface first: a Retina
+panel renders each of those frames at four times the pixels this box
+does.
+
+The fix is stated as a property of the subtree rather than a list of
+its members — `#orSvg.or-flying #orView * { animation-play-state:
+paused }` — so the next layer is covered on the day it is added. Two
+things that fall out of that and are worth knowing:
+
+**It has to be `!important`, and that is load-bearing.** `orAmbient.
+wander` gives every mote its own keyframes through an INLINE
+`animation` shorthand, and `orTwinkle` writes `style.animation` onto a
+halo. An inline shorthand beats any selector however specific, and
+resets `animation-play-state` to `running` on the way past. Without
+`!important` the rule covers only what happens to be styled from a
+sheet — the same shape of failure as the list it replaced.
+
+**SMIL does not read `animation-play-state`, which is the only reason
+the rule is allowed to be this blunt.** The flight debris is
+`<animateMotion>` and MUST run in exactly this window. That is a claim,
+and `tests/orrery.js` measures both halves in the same window: zero CSS
+animations under `#orView` mid-flight, and the debris demonstrably
+still moving.
+
+**The old check had the rule's own blind spot**, which is why it caught
+nothing: it read `animationPlayState` off `#orNod`, `#orDustA` and
+`.or-turn` by name. A layer added afterwards passed it without ever
+being looked at. It counts every element under `#orView` now. Twice
+now, a hardcoded list of what to check has silently skipped what was
+not in it — the other time was `tests/run.js` — and both times the
+symptom was a green suite that had not run the assertion that mattered.
+
 ## Jarvis
 
 A librarian, not an oracle. Every branch of `orAsk` answers out of the

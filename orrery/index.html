@@ -386,6 +386,49 @@
 #orSvg.or-flying #orDustB, #orSvg.or-flying #orDustC {
   animation-play-state: paused;
 }
+
+/* ── and EVERYTHING else in there, by construction ──
+   The rule above names the three things that existed when it was
+   written, and that is how it failed: the ambient field shipped later,
+   inside #orView like everything else, and kept animating straight
+   through every flight — ten elements, six of them carrying the only
+   CSS filter in this app, re-blurred at whatever scale the camera had
+   reached, every frame. It reported as the flight glitching its way to
+   the star on a Retina Mac, where each of those frames is four times
+   the pixels this box renders. The reasoning was already written down
+   two rules up; only the selector list was wrong.
+
+   So this is stated as a property of the subtree instead of a list of
+   its members: while the camera is moving, nothing inside it animates.
+   The next layer someone adds is covered on the day they add it.
+
+   `animation-play-state` is a CSS-animation property and SMIL does not
+   read it, so the flight debris — <animateMotion>, which MUST run
+   during exactly this window — is untouched. That is not a lucky
+   accident to rely on quietly: tests/orrery.js asserts both halves.
+
+   Only .or-flying, not .or-tight. The flight is 880ms and pausing the
+   world for it costs nothing you can see; .or-tight persists for as
+   long as you stay zoomed in, and a surge you started down a link
+   while close in has to be allowed to run.
+
+   !important, and it is load-bearing rather than lazy. Two things here
+   set animation as an INLINE shorthand — orAmbient.wander gives every
+   mote its own keyframes and duration, and orTwinkle writes
+   `style.animation` onto a halo to flare it — and an inline shorthand
+   beats any selector no matter how specific, then resets
+   animation-play-state to `running` on its way past. Without this the
+   rule silently covers only what happens to be styled from a sheet,
+   which is the same shape of failure as the list above it: correct
+   about the elements it can see, blind to the ones it cannot. An
+   invariant that any later inline style can switch off is not one. */
+#orSvg.or-flying #orView * { animation-play-state: paused !important; }
+
+/* The blur is the expensive one and pausing does not switch it off: a
+   paused element inside a scaling parent is still re-rasterised, and
+   its filter re-applied, at every new scale. It is .35px of softening
+   on a mote nobody is looking at while the camera moves. */
+#orSvg.or-flying .or-amb-wa { filter: none; }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
 /* ── hover drift ──
