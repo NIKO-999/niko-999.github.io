@@ -511,6 +511,51 @@ absent. `orAmbient.boot` checks the media query itself and returns
 before building anything, the same shape as `orDebris.spawn`'s own
 check.
 
+**The flecks are the field you actually see, and they are four
+elements.** Angular shards rather than dots — the one silhouette this
+map did not already have — in four layers, where the layer IS the
+depth: bigger shards are nearer, so they are brighter and sweep
+faster, and size decides the layer rather than the generator's next
+random number. Bucketing at random was the first cut and it read as
+grain; size, brightness and rate all have to agree about distance or
+the spread is noise.
+
+Every fleck in a layer is a SUBPATH of one `<path>`, so a layer
+animates as a single element and the whole field costs four against
+the continuous-motion budget. Be honest about what that is: it makes
+the METRIC cheap, not the raster. A hundred and ninety rotating shards
+is real work, and the element count understates it — which is why
+`tests/orrery.js` asserts the shard count as well as the layer count.
+
+They rotate rather than drift, for the reason the dust turns: a
+rotation has no seam. A translation has to wrap, and a wrap on a finite
+scatter either tears a gap across the field or needs the pattern drawn
+twice to tile. They reuse `or-turn`, the dust shells' own keyframes —
+a second identical block would be a name to keep in sync for nothing.
+
+**Reduced motion KEEPS them and simply stops them**, which is the
+opposite of the trickle beside them. A trickle streak has no opacity of
+its own outside its keyframes, so a still one is a bare line at full
+strength — worse than absent, so it is never built. A fleck is a shape
+at an opacity either way. Stillness is a legitimate version of one and
+not the other, and the two are handled differently on purpose.
+
+**The wander motes were removed to pay for them.** With both, the field
+landed at 11.89% against a hard 12% ceiling — about one element of
+slack, which is not a margin. The wander was the right thing to cut: it
+cost six elements to the flecks' four, and it carried the only CSS
+filter in the app, the six `blur(.35px)` motes that had just been the
+cause of the flight stuttering on a Retina Mac. There are now no CSS
+filters anywhere on this map, and `orAmbient` no longer generates a
+`<style>` at all.
+
+**A comparison sheet has to show a treatment at ITS OWN SIZE.** The
+eleven particle options were rendered at the stage's real 758px and
+then laid out in a grid at 372px a cell, so every one of them was
+judged at half scale. The choice was made on an image that understated
+how loud the winner is. Render the grid at whatever size, but send the
+pick at 1:1 before building on it.
+
 **And it stops dead while the camera is flying — which it did not, and
 that shipped.** Everything the map draws sits inside `#orView`, so a
 flight rescales all of it every frame, and anything still animating

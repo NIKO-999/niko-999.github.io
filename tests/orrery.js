@@ -1084,12 +1084,24 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await settle(page);
   const wheeled = await page.evaluate(() => new Promise((res) => {
     orOpen('trading/models/cisd');
-    setTimeout(() => {
+    /* Wait for the camera to have actually MOVED, not for a fixed
+       150ms. The flight is driven one rAF frame at a time, and on a
+       loaded machine 150ms can be fewer than one frame — the sample
+       then lands at zoom exactly 1 with the flight not yet started, and
+       the assertion fails for want of a frame rather than for want of
+       the behaviour it is testing. Caught in a full-suite run, having
+       passed standalone. */
+    const t0 = performance.now();
+    const tick = () => {
+      if (state.zoom <= 1.02 && performance.now() - t0 < 3000) {
+        requestAnimationFrame(tick); return;
+      }
       const claimed = state.zoom;
       orZoom(1.25, 500, 500);
       setTimeout(() => res({ claimed, after: state.zoom,
         cls: document.getElementById('orSvg').getAttribute('class') || '' }), 90);
-    }, 150);
+    };
+    requestAnimationFrame(tick);
   }));
   ok('mid-flight, the camera is already short of the destination',
     wheeled.claimed > 1 && wheeled.claimed < 2.4 - 1e-6, wheeled);
@@ -2966,9 +2978,17 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       const s = getComputedStyle(e);
       return s.animationName && s.animationName !== 'none' && s.animationPlayState === 'running';
     });
+    /* orTwinkle flares one random halo for 1.1s about once a second, so
+       the raw count wanders by one depending on whether a flare happens
+       to be lit when you look. Fine for "is anything running at all",
+       useless for "is it the same as before" — so the before/after
+       comparison uses the layers that are always on. The mid-flight
+       check deliberately keeps counting halos: a flare must stand down
+       for the flight like everything else. */
+    const stable = () => running().filter((e) => !e.classList.contains('or-halo'));
     const filtered = () => [...view.querySelectorAll('*')]
       .filter((e) => { const s = getComputedStyle(e); return s.filter && s.filter !== 'none'; });
-    const restAnim = running().length, restFilt = filtered().length;
+    const restAnim = stable().length, restFilt = filtered().length;
     orOpen('trading/models/cisd');
     setTimeout(() => {
       const midAnim = running(), midFilt = filtered().length;
@@ -2977,23 +2997,44 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
          read animation-play-state, which is exactly why the rule is
          allowed to be this blunt — but "exactly why" is a claim, and an
          unmeasured claim is how the first version of this shipped. */
+      /* Sampled across the whole burst, not over one 160ms window. The
+         streaks are staggered over 420ms and each lives about 400ms, so
+         a single short window can fall entirely between "the early ones
+         have landed" and "the late ones have not begun" — which is what
+         it did, under full-suite load, having passed standalone.
+         Tracked per element by identity too: filtering the list and then
+         indexing into the unfiltered one silently compares a streak
+         against a different streak's position. */
       const deb = [...document.querySelectorAll('#orDebris > g')];
-      const was = deb.map((g) => g.getBoundingClientRect().x);
-      setTimeout(() => {
-        const moved = deb.filter((g) => g.isConnected)
-          .some((g, i) => was[i] !== undefined && Math.abs(g.getBoundingClientRect().x - was[i]) > 1);
+      const track = deb.map((g) => ({ g, xs: [] }));
+      let n = 0;
+      const sample = () => {
+        track.forEach((t) => {
+          if (t.g.isConnected) t.xs.push(t.g.getBoundingClientRect().x);
+        });
+        if (++n < 7) { setTimeout(sample, 90); return; }
+        const moved = track.some((t) =>
+          t.xs.length > 1 && Math.max(...t.xs) - Math.min(...t.xs) > 1);
         setTimeout(() => res({
           restAnim, restFilt,
           midAnim: midAnim.length, midFilt,
           leftover: midAnim.map((e) => e.getAttribute('class') || e.id || e.tagName),
           debris: deb.length, debrisMoved: moved,
-          backAnim: running().length, backFilt: filtered().length,
-        }), 1500);
-      }, 160);
+          spans: track.map((t) => t.xs.length > 1
+            ? +(Math.max(...t.xs) - Math.min(...t.xs)).toFixed(1) : null),
+          backAnim: stable().length, backFilt: filtered().length,
+        }), 1200);
+      };
+      sample();
     }, 400);
   }));
   ok('at rest the map genuinely is animating, so this measured something',
-    frozen.restAnim > 0 && frozen.restFilt > 0, frozen);
+    frozen.restAnim > 0, frozen);
+  /* Nothing on this map carries a CSS filter any more — the six blurred
+     wander motes were the only ones and they are gone. This stays as a
+     forward guard rather than a live measurement: a filter added inside
+     #orView later has to stand down for the flight like everything
+     else, and the flight is where it would cost the most. */
   ok('but nothing under the camera animates while it is flying',
     frozen.midAnim === 0, frozen);
   ok('and nothing under it carries a filter while it is flying',
@@ -3034,31 +3075,48 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await waitPaint(am.page);
   await am.page.waitForTimeout(500);
   const ambCounts = await am.page.evaluate(() => {
-    const g = document.getElementById('orAmbient');
-    return { tk: g.querySelectorAll('.or-amb-tk').length,
-             wa: g.querySelectorAll('.or-amb-wa').length };
+    const fk = [...document.getElementById('orFlecks').children];
+    return { tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
+             fkLayers: fk.length,
+             /* Every fleck is a SUBPATH, so a layer is one element however
+                many shards it draws. That is what makes the drift fit the
+                budget at all — and it is also why the element count alone
+                understates what is really being drawn, so count both. */
+             fkShards: fk.reduce((n, p) => n + (p.getAttribute('d').match(/M/g) || []).length, 0),
+             durs: fk.map((p) => getComputedStyle(p).animationDuration) };
   });
   ok('the ambient field is a handful, not a crowd',
-    ambCounts.tk > 0 && ambCounts.tk <= 6 && ambCounts.wa > 0 && ambCounts.wa <= 10, ambCounts);
-  /* The bug this repro'd: the wander keyframes lived in a <style>
-     appended to <defs> — which orPaintRings overwrites wholesale on
-     every repaint (a filter keystroke, a re-file). The <circle>s
-     themselves survive that (they live in #orAmbient, not #orRings) —
-     an element-count check would have missed this entirely, which is
-     exactly what happened the first time this was written. Only actual
-     MOTION, sampled before and after a repaint, tells the two apart. */
+    ambCounts.tk > 0 && ambCounts.tk <= 6
+    && ambCounts.fkLayers === 4 && ambCounts.fkShards > 100 && ambCounts.fkShards <= 260,
+    ambCounts);
+  /* Each fleck layer is a DEPTH, and the rate is what says so: bigger
+     shards are nearer, brighter and sweep faster. Four layers all
+     turning at one rate would be a texture, not a field with a front
+     and a back. */
+  ok('and its four layers each sweep at their own rate, which is the depth cue',
+    new Set(ambCounts.durs).size === 4 && ambCounts.durs.every((d) => parseFloat(d) > 60),
+    ambCounts.durs);
+  /* orPaint rebuilds #orRings, #orLinks, #orNodes and <defs> wholesale.
+     Anything ambient has to live outside all of them — #orFlecks and
+     #orAmbient are siblings of those for exactly this reason. Measured
+     as MOTION rather than as an element count: the elements survived
+     the bug this replaces, only their animation did not, so a count
+     would have sailed straight through it. */
   const moved = await am.page.evaluate(() => new Promise((res) => {
-    const before = [...document.querySelectorAll('.or-amb-wa')]
-      .map((c) => c.getBoundingClientRect());
+    /* The layer's own transform, not its bounding box: a rotating
+       scatter is very nearly circular, so its box hardly moves however
+       far round it has turned. The matrix says exactly where it is. */
+    const at = () => {
+      const el = document.querySelector('.or-amb-fk4');
+      return el ? new DOMMatrix(getComputedStyle(el).transform).b : null;
+    };
+    const before = at();
     orPaint();
-    setTimeout(() => {
-      const after = [...document.querySelectorAll('.or-amb-wa')]
-        .map((c) => c.getBoundingClientRect());
-      res(before.map((b, i) => +Math.hypot(after[i].x - b.x, after[i].y - b.y).toFixed(1)));
-    }, 1800);
+    setTimeout(() => res({ before, after: at() }), 900);
   }));
   ok('and survives a repaint — a filter keystroke does not wipe its motion',
-    moved.some((d) => d > 3), moved);
+    moved.before !== null && moved.after !== null
+    && Math.abs(moved.after - moved.before) > 1e-4, moved);
   ok('no page errors through the ambient field', am.errs.length === 0, am.errs.slice(0, 4));
   await am.browser.close();
 
@@ -3067,11 +3125,20 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await waitPaint(amr.page);
   await amr.page.waitForTimeout(500);
   const noAmb = await amr.page.evaluate(() => {
-    const g = document.getElementById('orAmbient');
-    return { tk: g.querySelectorAll('.or-amb-tk').length, wa: g.querySelectorAll('.or-amb-wa').length };
+    const fk = [...document.getElementById('orFlecks').children];
+    return { tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
+             fkLayers: fk.length,
+             running: fk.filter((p) => getComputedStyle(p).animationName !== 'none').length };
   });
-  ok('reduced motion builds none of it — the trickle and the wander are each entirely their own animation',
-    noAmb.tk === 0 && noAmb.wa === 0, noAmb);
+  /* The two are treated differently ON PURPOSE. A trickle streak has no
+     opacity of its own outside its keyframes, so a still one is a bare
+     line at full strength — worse than absent, and it is not built. A
+     fleck is a shape at an opacity either way, so it IS built and simply
+     stops. Stillness is a legitimate version of one and not the other. */
+  ok('reduced motion drops the trickle, which is nothing without its animation',
+    noAmb.tk === 0, noAmb);
+  ok('but keeps the flecks and just stops them — a still shard is still a shard',
+    noAmb.fkLayers === 4 && noAmb.running === 0, noAmb);
   ok('no page errors with the ambient field held back', amr.errs.length === 0, amr.errs.slice(0, 4));
   await amr.browser.close();
 

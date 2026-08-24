@@ -110,7 +110,13 @@ const alive = (url) => new Promise((res) => {
       cwd: __dirname,
       env: { ...process.env, BASE_URL: base },
       encoding: 'utf8',
-      timeout: 300000,
+      /* Was 300s, and orrery grew past it — 280-odd assertions across a
+         dozen browser contexts, several of which have to sit and watch
+         a real 880ms flight settle. A file that trips this reports as
+         "no summary", which reads exactly like a crash and is not one,
+         so the number wants headroom rather than to sit on the edge of
+         the longest file's real runtime. */
+      timeout: 600000,
     });
     const out = (r.stdout || '') + (r.stderr || '');
     const secs = ((Date.now() - t0) / 1000).toFixed(1);

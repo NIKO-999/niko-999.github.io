@@ -263,11 +263,42 @@
   100%    { opacity: 0; transform: translateX(var(--or-amb-len)); }
 }
 
-/* The wander motes amble a seeded curve rather than travel a line or
-   turn on an axis — each circle carries its OWN @keyframes, written at
-   boot (see orAmbient.wander); this only supplies what all of them
-   share. Blurred a touch so they read as soft motes, not stars. */
-.or-amb-wa { filter: blur(.35px); pointer-events: none; }
+/* ── the flecks ──
+   Angular shards rather than dots, which is the one silhouette this
+   map did not already have. Four layers, and the layer is the DEPTH:
+   bigger flecks are nearer, so they are brighter and they sweep
+   faster. The eye reads differing rates as differing distances — the
+   same argument the three dust shells are built on.
+
+   Four elements, not a hundred and ninety. Every fleck in a layer is a
+   subpath of ONE <path>, so the layer animates as a single element and
+   the whole field costs four against the map's continuous-motion
+   budget, which has about five to give. Bucketing them was originally
+   just to keep the element count down; it is what makes the drift
+   affordable at all.
+
+   Rotation rather than drift, for the same reason the dust turns: a
+   rotation has no seam. A translation has to wrap, and a wrap on a
+   finite scatter either tears a gap across the field or needs the
+   pattern drawn twice to tile.
+
+   `or-turn` is the dust shells' own keyframes, reused deliberately —
+   a second identical @keyframes block would be a name to keep in sync
+   for nothing. */
+#orFlecks { pointer-events: none; }
+.or-amb-fk { transform-origin: 500px 500px; }
+.or-amb-fk1 { animation: or-turn 300s linear infinite; }
+.or-amb-fk2 { animation: or-turn 220s linear infinite reverse; }
+.or-amb-fk3 { animation: or-turn 165s linear infinite; }
+.or-amb-fk4 { animation: or-turn 120s linear infinite reverse; }
+
+/* Unlike the trickle and the wander, a fleck is a real shape at a real
+   opacity with or without its animation — so reduced motion STOPS this
+   layer rather than refusing to build it. Stillness is a legitimate
+   version of this one; it is not of those two. */
+@media (prefers-reduced-motion: reduce) {
+  .or-amb-fk { animation: none; }
+}
 
 /* Both are entirely a property of their own animation — the trickle's
    line has no opacity of its own, the wander mote's position IS its
@@ -412,23 +443,18 @@
    long as you stay zoomed in, and a surge you started down a link
    while close in has to be allowed to run.
 
-   !important, and it is load-bearing rather than lazy. Two things here
-   set animation as an INLINE shorthand — orAmbient.wander gives every
-   mote its own keyframes and duration, and orTwinkle writes
-   `style.animation` onto a halo to flare it — and an inline shorthand
-   beats any selector no matter how specific, then resets
-   animation-play-state to `running` on its way past. Without this the
+   !important, and it is load-bearing rather than lazy. orTwinkle sets
+   animation as an INLINE shorthand — `style.animation` on a halo, to
+   flare it — and an inline shorthand beats any selector no matter how
+   specific, then resets animation-play-state to `running` on its way
+   past. The trickle carries an inline animation-duration and -delay
+   for the same reason, longhands only. Without this the
    rule silently covers only what happens to be styled from a sheet,
    which is the same shape of failure as the list above it: correct
    about the elements it can see, blind to the ones it cannot. An
    invariant that any later inline style can switch off is not one. */
 #orSvg.or-flying #orView * { animation-play-state: paused !important; }
 
-/* The blur is the expensive one and pausing does not switch it off: a
-   paused element inside a scaling parent is still re-rasterised, and
-   its filter re-applied, at every new scale. It is .35px of softening
-   on a mote nobody is looking at while the camera moves. */
-#orSvg.or-flying .or-amb-wa { filter: none; }
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
 /* ── hover drift ──
@@ -1435,6 +1461,12 @@
                same attribute would be overwritten on the first tick. -->
           <g id="orNod">
           <g id="orView">
+            <!-- Flecks. BEHIND the drawing, unlike #orAmbient below,
+                 which is the last child and sits over it: these are
+                 matter the map is seen through, not lights in front of
+                 it. Owned by orAmbient.flecks, built once at boot, and
+                 outside #orRings so a repaint never touches it. -->
+            <g id="orFlecks"></g>
             <g id="orRings"></g>
             <g id="orLinks"></g>
             <g id="orLeads"></g>
@@ -6441,52 +6473,36 @@ orAmbient.trickle = () => {
   return out;
 };
 
-/* Motes that amble rather than travel a line or turn on an axis — a
-   seeded two-harmonic-per-axis wander, pre-sampled into dense keyframe
-   stops so the only things animating at runtime are transform/opacity,
-   never an offset-path (that property is neither, and this field's
-   whole cost model rests on staying compositor-only). Each particle's
-   curve is baked once, here, at boot. */
-orAmbient.wander = () => {
-  const r = orRng('orrery.ambient.wander');
-  const N = 6, STEPS = 20, TWO_PI = Math.PI * 2, FREQS = [1, 2, 3];
-  const pick = (excl) => { let f; do { f = FREQS[Math.floor(r() * FREQS.length)]; } while (f === excl); return f; };
-  let css = '', svgOut = '';
+/* Angular shards, four layers deep — see the .or-amb-fk rules for why
+   the layer is the depth and why there are only four of them.
+
+   Size decides the layer, NOT the generator's next random number. A
+   fleck's size, its brightness and how fast it sweeps all have to agree
+   about how far away it is, or the spread reads as noise instead of as
+   depth. Bucketing at random was what the first cut did and it looked
+   like grain. */
+orAmbient.flecks = () => {
+  const r = orRng('orrery.ambient.flecks');
+  const N = 190, W0 = 1.2, W1 = 5;
+  const lay = ['', '', '', ''];
   for (let i = 0; i < N; i++) {
-    const ang = r() * TWO_PI;
-    const dist = 110 + Math.sqrt(r()) * 320;
-    const ax0 = (500 + Math.cos(ang) * dist).toFixed(2);
-    const ay0 = (500 + Math.sin(ang) * dist).toFixed(2);
-    const fx1 = FREQS[Math.floor(r() * FREQS.length)], fx2 = pick(fx1);
-    const fy1 = pick(fx1), fy2 = pick(fy1);
-    const px1 = r() * TWO_PI, px2 = r() * TWO_PI, py1 = r() * TWO_PI, py2 = r() * TWO_PI;
-    const amp = 24 + r() * 56;
-    const ax1 = amp, ax2 = amp * (.3 + r() * .3);
-    const ay1 = amp * (.7 + r() * .4), ay2 = amp * (.25 + r() * .3);
-    const bh = 1 + Math.floor(r() * 2), bp = r() * TWO_PI;
-    const opBase = .38 + r() * .16, opSwing = .16 + r() * .14;
-    const scBase = .92 + r() * .1, scSwing = .1 + r() * .12;
-    const dur = (14 + r() * 24).toFixed(2);
-    const delay = (-(r() * dur)).toFixed(2);
-    const mix = (55 + r() * 35).toFixed(0);
-    const radius = (1.7 + r() * 1.7).toFixed(2);
-    const kf = `or-amb-wa${i}`;
-    let stops = '';
-    for (let s = 0; s <= STEPS; s++) {
-      const t = s / STEPS;
-      const x = (Math.sin(t * TWO_PI * fx1 + px1) * ax1 + Math.sin(t * TWO_PI * fx2 + px2) * ax2).toFixed(2);
-      const y = (Math.sin(t * TWO_PI * fy1 + py1) * ay1 + Math.sin(t * TWO_PI * fy2 + py2) * ay2).toFixed(2);
-      const op = Math.max(.08, opBase + Math.sin(t * TWO_PI * bh + bp) * opSwing).toFixed(2);
-      const sc = (scBase + Math.sin(t * TWO_PI * bh + bp) * scSwing).toFixed(3);
-      stops += `${(t * 100).toFixed(2)}%{transform:translate(${x}px,${y}px) scale(${sc});opacity:${op}}`;
-    }
-    css += `@keyframes ${kf}{${stops}}`;
-    svgOut += `<circle class="or-amb-wa" cx="${ax0}" cy="${ay0}" r="${radius}"`
-      + ` fill="color-mix(in srgb, var(--or-star-core) ${mix}%, var(--or-hair))"`
-      + ` style="transform-origin:${ax0}px ${ay0}px;`
-      + ` animation:${kf} ${dur}s cubic-bezier(.37,0,.63,1) ${delay}s infinite"/>`;
+    /* Area-even scatter, so the middle is not crowded. */
+    const a = r() * Math.PI * 2;
+    const rad = 40 + Math.sqrt(r()) * 455;
+    const x = 500 + Math.cos(a) * rad, y = 500 + Math.sin(a) * rad;
+    /* Skewed small: a field is mostly far things, with a few near ones. */
+    const w = W0 + Math.pow(r(), 1.8) * W1;
+    const hh = w * (.25 + r() * .5);
+    const t = r() * Math.PI;
+    const ct = Math.cos(t), st = Math.sin(t);
+    const p = (dx, dy) => `${orLayout.N(x + dx * ct - dy * st)} `
+      + `${orLayout.N(y + dx * st + dy * ct)}`;
+    const b = Math.min(3, Math.floor((w - W0) / W1 * 4));
+    lay[b] += `M${p(-w, -hh)}L${p(w, -hh)}L${p(w, hh)}L${p(-w, hh)}Z`;
   }
-  return { css, svg: svgOut };
+  return lay.map((d, i) =>
+    `<path class="or-amb-fk or-amb-fk${i + 1}" d="${d}"`
+    + ` fill="var(--or-star-core)" opacity="${orLayout.N(.3 + i * .2)}"/>`).join('');
 };
 
 /* Built once. orAmbient.built guards a second call — a reload of the
@@ -6494,19 +6510,15 @@ orAmbient.wander = () => {
 orAmbient.boot = () => {
   if (orAmbient.built) return;
   orAmbient.built = true;
+  /* The flecks are built either way — they are shapes, and a still
+     shape is still a shape. Only the trickle, which IS its own
+     animation and is a bare line without it, is skipped below. */
+  const fk = byId('orFlecks');
+  if (fk) fk.innerHTML = orAmbient.flecks();
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const g = byId('orAmbient');
   if (!g) return;
-  const wa = orAmbient.wander();
-  g.innerHTML = orAmbient.trickle() + wa.svg;
-  /* NOT inside <defs> — orPaintRings owns that element and overwrites
-     its innerHTML wholesale on every repaint (a filter keystroke, a
-     re-file), which would wipe these keyframes the first time anyone
-     touched the map after this ran. A <style> is document-wide
-     regardless of where it sits, so <head> is both safe and correct. */
-  const css = document.createElement('style');
-  css.textContent = wa.css;
-  document.head.appendChild(css);
+  g.innerHTML = orAmbient.trickle();
 };
 
 function orDropSel() {
