@@ -207,10 +207,21 @@
    viewBox centre, not the element's box: an SVG group's own box is
    whatever its children happen to span, so a box-relative origin would
    swing each ring around a different point. */
-/* The camera's flight. On #orView alone — the nodes carry their own
-   per-tick transforms and must not be caught by this. */
-.or-fly { transition: transform .62s cubic-bezier(.32, .72, 0, 1); }
-@media (prefers-reduced-motion: reduce) { .or-fly { transition: none; } }
+/* The camera's flight. Used to carry a CSS transition; the flight is
+   now driven per FRAME — see orZoom.glide — because a linear
+   transition on `transform` moves the SCALE linearly, and what the eye
+   reads as speed is d(ln z)/dt, not dz/dt. A flight into 2.4x always
+   read as giving up halfway however the easing curve was bent, for
+   exactly that reason. The class stays: orZoom.grab still tests it to
+   know a flight is in the air. */
+.or-fly { transition: none; }
+
+/* The three dust shells, parted for a flight — see orDust. transform
+   ORIGIN has to be set per flight (about the star you are flying to,
+   not the viewBox centre), so it rides inline style rather than this
+   rule; this only says the wrapper is worth a compositor layer while
+   it is moving. */
+.or-dp { transform-box: view-box; will-change: transform, opacity; }
 
 /* ── the sky turns, the instrument does not ──
    The field stars drift in three shells at three rates, which is what
@@ -1350,6 +1361,10 @@
             <g id="orLeads"></g>
             <g id="orNodes"></g>
             <g id="orLabels"></g>
+            <!-- Flight debris. Owned by orDebris, not by orPaint — a
+                 note you open never touches it, so it survives every
+                 repaint that would otherwise wipe a child of #orRings. -->
+            <g id="orDebris"></g>
           </g>
           </g>
         </svg>
@@ -5851,6 +5866,217 @@ orOpen.reveal = (id) => {
    long axis. Fitting to a flat 1000 would leave a third of the stage
    unused on one side and crop on the other. */
 const FLY_MAX = 2.4;
+
+/* ── the field parts ──
+   The three dust shells already sit inside #orView, so the camera
+   scales them like everything else during a flight. This gives them
+   the EXTRA a nearer thing would have on top of that: the near shell
+   overtakes the camera and is gone before you arrive, the middle one
+   lags behind it, the far one barely moves — parallax about the star
+   you are flying TO, not the middle of the viewBox. Depth with no 3D
+   anywhere, the same trick the shells already play with speed, played
+   here with position.
+
+   A wrapper per shell, because the shells carry a rotation that is
+   PAUSED for the flight (see #orSvg.or-flying), not removed — a
+   running CSS animation beats an inline transform in the cascade, and
+   un-pausing it to make room would snap the angle home. Made on
+   demand: orPaintRings rebuilds #orRings wholesale on every repaint,
+   so a wrapper from an earlier flight does not survive one — the cost
+   of a repaint mid-flight is that flight's parallax, and nothing
+   else. */
+const orDust = {};
+orDust.live = [];
+orDust.SHELL = [
+  { id: 'orDustA', push: .60, lag: .26, fade: 0,   at: .58 },
+  { id: 'orDustB', push: .29, lag: .12, fade: .40, at: .78 },
+  { id: 'orDustC', push: .12, lag: .04, fade: .80, at: .94 },
+];
+orDust.wrap = (id) => {
+  const g = byId(id);
+  if (!g || !g.parentNode) return null;
+  if (g.parentNode.classList.contains('or-dp')) return g.parentNode;
+  const w = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+  w.setAttribute('class', 'or-dp');
+  g.parentNode.insertBefore(w, g);
+  w.appendChild(g);
+  return w;
+};
+orDust.open = (ox, oy, depth) => {
+  orDust.live = [];
+  orDust.SHELL.forEach((s) => {
+    const w = orDust.wrap(s.id);
+    if (!w) return;
+    w.style.transformOrigin = ox + 'px ' + oy + 'px';
+    w.style.transform = 'none';
+    w.style.opacity = '1';
+    orDust.live.push({ w, s, d: depth });
+  });
+};
+/* Driven from the camera's own tick, so the field's speed and the
+   camera's are one number. u is the trip's own progress; dx/dy is how
+   far the camera centre has moved in user units since it opened. */
+orDust.step = (u, dx, dy) => {
+  for (const L of orDust.live) {
+    const k = 1 + L.s.push * L.d * u;
+    const f = Math.min(1, u / L.s.at);
+    L.w.style.transform = `translate(${(-dx * L.s.lag).toFixed(2)}px, ${(-dy * L.s.lag).toFixed(2)}px)`
+      + ` scale(${k.toFixed(4)})`;
+    L.w.style.opacity = (L.d > 0 ? 1 - (1 - L.s.fade) * f : 1).toFixed(3);
+  }
+};
+/* Home, and it has to be silent. Sliding ninety specks back to where
+   they started un-tells the whole story the parting told, so the
+   geometry snaps while the shell is still faded and only the light
+   comes back. */
+orDust.rest = () => {
+  orDust.live.forEach(({ w }) => {
+    w.style.transition = 'none';
+    w.style.transform = 'none';
+    void w.getBoundingClientRect();
+    w.style.transition = `opacity ${orDust.REST_MS}ms linear`;
+    w.style.opacity = '1';
+  });
+  orDust.live = [];
+};
+orDust.REST_MS = 540;
+
+/* ── debris ──
+   A flight is not silent travel — you pass things on the way. A
+   handful of streaks rush outward from the star you are flying to and
+   are gone before you land: the same declarative bead orSignal already
+   sends down a link, <animateMotion>, dies with the element, nothing
+   per frame once it is spawned.
+
+   Zoom OUT is not a passage, it is a return — orClose glides back to
+   the fit — so orZoom.glide only spawns these for a flight that gets
+   closer. Under reduced motion neither this nor orDust ever runs.
+
+   Staggering is done by DELAYING THE INSERT, not with `begin="Xs"` on
+   the animateMotion: begin is relative to the document's own timeline,
+   not to when the element joins it, so on a page that has been open
+   more than that many seconds the browser resolves it to its frozen
+   end state on arrival — measured, before this shipped. A dynamically
+   inserted animation with no begin at all starts the instant it is
+   attached, which is the only offset that means what it looks like it
+   means here. */
+const orDebris = {};
+orDebris.N = 11;
+orDebris.r = orRng('orrery.debris');      /* advances across the session */
+orDebris.live = [];
+orDebris.timers = [];
+orDebris.grad = (svg) => {
+  if (byId('orDebrisTrail')) return;
+  const defs = svg.querySelector('defs');
+  if (!defs) return;
+  const NS = 'http://www.w3.org/2000/svg';
+  const g = document.createElementNS(NS, 'linearGradient');
+  g.id = 'orDebrisTrail';
+  /* Head opaque, tail transparent — the direction of travel is the
+     line's own local +x, baked into its endpoints, so this reads as a
+     comet whichever way the outer <g> is placed. Bright over most of
+     its own length, not just the last stretch of it: a ramp held
+     transparent until 70% in and thin drew something technically
+     correct and invisible against a field of similarly warm, similarly
+     thin link lines — measured by forcing it solid red, which was the
+     only way it showed up in a screenshot at all. */
+  g.innerHTML = '<stop offset="0" stop-color="var(--or-star-core)" stop-opacity="0"/>'
+    + '<stop offset=".25" stop-color="var(--or-star-core)" stop-opacity=".85"/>'
+    + '<stop offset="1" stop-color="var(--or-star-core)" stop-opacity="1"/>';
+  defs.appendChild(g);
+};
+orDebris.stop = () => {
+  orDebris.timers.forEach((t) => clearTimeout(t));
+  orDebris.timers = [];
+  orDebris.live.forEach((el) => el.remove());
+  orDebris.live = [];
+};
+/* Staggered with beginElementAt, not with a delayed INSERT.
+
+   The obvious way to stagger a burst of SMIL elements is to create
+   each one a little later — setTimeout, then append, with no `begin`
+   attribute so it starts the instant it joins the document. That
+   reads as correct and is wrong on any page that has been open more
+   than about `dur` seconds: an animation's `begin`, including the
+   IMPLICIT default of 0s, is measured against the SVG document's own
+   animation clock (svg.getCurrentTime()), never against when the
+   element was inserted. A flight opened five seconds into a session
+   gets an animation whose 0s-to-.4s window closed five seconds ago,
+   and the browser resolves it to its frozen END state on arrival —
+   no visible motion at all. orSignal's own bead has carried this bug
+   since it shipped; it went unnoticed because a dot frozen at the
+   right end of the right path still looks like a dot, briefly, in
+   roughly the right place.
+
+   The fix is the API SMIL has for exactly this: `begin="indefinite"`
+   turns off the automatic clock-relative start, and
+   `beginElementAt(offset)` schedules it `offset` seconds from NOW —
+   genuinely relative to insertion, whatever the document clock reads.
+   Every streak is built synchronously, in order, and only the START
+   is staggered. */
+orDebris.spawn = (ox, oy) => {
+  orDebris.stop();
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const svg = byId('orSvg'), layer = byId('orDebris');
+  if (!svg || !layer) return;
+  orDebris.grad(svg);
+  const NS = 'http://www.w3.org/2000/svg';
+  const batch = [];
+  let maxLife = 0;
+  for (let i = 0; i < orDebris.N; i++) {
+    const a = orDebris.r() * 360;
+    const rad = a * Math.PI / 180;
+    /* Sized to actually READ against a 1000-unit sky: the first pass
+       drew these at 15-33 units and they vanished into the star field
+       — a streak has to compete with the stars it is passing, not
+       just exist near them. */
+    const near = 20 + orDebris.r() * 60;          /* where it starts, off the target */
+    const dist = 190 + orDebris.r() * 250;        /* how far it travels */
+    const len = 42 + orDebris.r() * 46;
+    const delay = orDebris.r() * .42;             /* seconds, staggered across the pull-away */
+    const dur = .32 + orDebris.r() * .16;
+    const width = (1.9 + orDebris.r() * 1.5).toFixed(2);
+    const sx = (ox + Math.cos(rad) * near).toFixed(2);
+    const sy = (oy + Math.sin(rad) * near).toFixed(2);
+
+    const g = document.createElementNS(NS, 'g');
+    g.setAttribute('transform', `translate(${sx} ${sy}) rotate(${a.toFixed(1)})`);
+    /* The static base BEFORE beginElementAt fires — without it the
+       unanimated default (fully opaque) shows for the whole delay. */
+    g.setAttribute('opacity', '0');
+    const line = document.createElementNS(NS, 'line');
+    line.setAttribute('x2', len.toFixed(1));
+    line.setAttribute('y1', '0'); line.setAttribute('y2', '0');
+    line.setAttribute('stroke', 'url(#orDebrisTrail)');
+    line.setAttribute('stroke-width', width);
+    line.setAttribute('stroke-linecap', 'round');
+    const mo = document.createElementNS(NS, 'animateMotion');
+    mo.setAttribute('path', `M0 0 L${dist.toFixed(1)} 0`);
+    mo.setAttribute('begin', 'indefinite');
+    mo.setAttribute('dur', dur.toFixed(2) + 's');
+    mo.setAttribute('fill', 'freeze');
+    const fade = document.createElementNS(NS, 'animate');
+    fade.setAttribute('attributeName', 'opacity');
+    fade.setAttribute('values', '0;1;1;0');
+    fade.setAttribute('keyTimes', '0;.15;.6;1');
+    fade.setAttribute('begin', 'indefinite');
+    fade.setAttribute('dur', dur.toFixed(2) + 's');
+    fade.setAttribute('fill', 'freeze');
+    g.appendChild(mo); g.appendChild(fade); g.appendChild(line);
+    layer.appendChild(g);
+    mo.beginElementAt(delay);
+    fade.beginElementAt(delay);
+    batch.push(g);
+    maxLife = Math.max(maxLife, delay * 1000 + dur * 1000);
+  }
+  orDebris.live = batch;
+  const t = setTimeout(() => {
+    batch.forEach((el) => el.remove());
+    if (orDebris.live === batch) orDebris.live = [];
+  }, maxLife + 80);
+  orDebris.timers.push(t);
+};
+
 orZoom.fly = (ids, focus) => {
   const svg = byId('orSvg'), view = byId('orView');
   if (!svg || !view) return;
@@ -5900,33 +6126,101 @@ orZoom.fly = (ids, focus) => {
   const z = Math.min(FLY_MAX, Math.max(ZOOM_OUT,
     Math.min((W - M * 2) / bw, (H - M * 2) / bh)));
 
-  orZoom.glide(z, VIEWBOX / 2 - cx * z, VIEWBOX / 2 - cy * z);
+  orZoom.glide(z, VIEWBOX / 2 - cx * z, VIEWBOX / 2 - cy * z, f);
 };
 
-/* Move the camera as one eased flight rather than a cut. The class
-   carries the transition and comes off the moment a hand touches the
-   map, so a drag is never fighting an animation. */
-orZoom.glide = (z, px, py) => {
-  const view = byId('orView');
+/* ── the passage ──
+   The camera used to be a CSS transition on `transform`, which
+   interpolates the SCALE linearly. What the eye reads as speed is not
+   dz/dt, it is d(ln z)/dt: going 1→1.2 and 2→2.4 are the same amount
+   of travel, and a linear ramp gives the first one twice the apparent
+   speed of the second. A flight in to 2.4x always read as giving up
+   halfway, whatever easing curve was bent over the top of it.
+
+   So the camera is driven per FRAME instead, on a geometric law:
+
+     z(t) = z0 · (z1/z0)^S(t)        ln z is what moves at a steady rate
+
+   and the pan follows the 1/z law, so the star you asked for slides to
+   the middle EARLY and the rest of the flight is closing on something
+   you are already looking at — you aim, then you approach.
+
+   S is an explicit velocity profile — pull away, cruise at a constant
+   apparent rate, berth — with smoothstep shoulders so neither joint
+   has a step in the acceleration. Three numbers you can hold an
+   opinion about, which a cubic-bezier is not. */
+const FLY_MS = 880, ACC = .215, DEC = .42;
+const FLY_V = 1 / (1 - (ACC + DEC) / 2);              /* cruise rate, so ∫v = 1 */
+const flyRamp = (x) => x * x * x - x * x * x * x / 2;  /* ∫ smoothstep */
+const flyS = (t) => {
+  if (t <= 0) return 0;
+  if (t >= 1) return 1;
+  if (t < ACC) return FLY_V * ACC * flyRamp(t / ACC);
+  if (t < 1 - DEC) return FLY_V * (ACC / 2 + (t - ACC));
+  return 1 - FLY_V * DEC * flyRamp((1 - t) / DEC);
+};
+
+orZoom.glide = (z, px, py, focus) => {
+  const view = byId('orView'), svg = byId('orSvg');
   if (!view) return;
-  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const svg = byId('orSvg');
-  if (!still) view.classList.add('or-fly');
-  /* The flight is the one moment the whole field is being redrawn at a
-     changing scale, so it is the one moment nothing else may be
-     moving. Not under reduced motion: there is no flight to protect,
-     and adding the class for the one frame before a zero-delay timeout
-     only blinks the labels. */
-  if (svg && !still) svg.classList.add('or-flying');
-  state.zoom = z; state.panX = px; state.panY = py;
-  orPan(0, 0);
+  /* Land anything still in the air FIRST. state.zoom holds a
+     DESTINATION for the length of a flight, and every number below is
+     measured from where the camera actually is. */
+  orZoom.grab();
+
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    state.zoom = z; state.panX = px; state.panY = py;
+    orPan(0, 0); orZoom.land(); return;
+  }
+
+  const z0 = state.zoom, H = VIEWBOX / 2;
+  /* The camera as a PLACE and a HEIGHT, not as a matrix. */
+  const ax = (H - state.panX) / z0, ay = (H - state.panY) / z0;
+  const bx = (H - px) / z, by = (H - py) / z;
+  const lz = Math.log(z / z0);
+  const dz = Math.abs(1 / z0 - 1 / z) > 1e-6;
+
+  view.classList.add('or-fly');
+  if (svg) svg.classList.add('or-flying');
+  const aim = focus || null;
+  orDust.open(aim ? aim[0] : H, aim ? aim[1] : H,
+    Math.max(-1, Math.min(1, lz / Math.log(FLY_MAX))));
+  /* Debris only for a flight that gets CLOSER. orClose glides back to
+     the fit on the same function, and a return is not a passage — the
+     field does not rush past you on the way out. */
+  if (z > z0) orDebris.spawn(aim ? aim[0] : H, aim ? aim[1] : H);
+
+  const t0 = performance.now();
+  const tick = () => {
+    const u = Math.min(1, (performance.now() - t0) / FLY_MS);
+    const p = flyS(u);
+    const zz = z0 * Math.exp(lz * p);
+    /* The 1/z law: interpolating the centre LINEARLY makes the target
+       crawl in from the side for the whole trip. This brings it to the
+       middle while you are still a long way out, so the back half of
+       the flight is closing on something you are already looking at. */
+    const w = dz ? (1 / z0 - 1 / zz) / (1 / z0 - 1 / z) : p;
+    const cx = ax + (bx - ax) * w, cy = ay + (by - ay) * w;
+    state.zoom = zz; state.panX = H - cx * zz; state.panY = H - cy * zz;
+    orPan(0, 0);
+    orDust.step(p, cx - ax, cy - ay);
+    if (u < 1) { orZoom.warp = requestAnimationFrame(tick); return; }
+    orZoom.warp = 0;
+    orZoom.land();
+  };
+  orZoom.warp = requestAnimationFrame(tick);
+  /* Backstop. A background tab starves rAF, and a flight that never
+     gets another frame would leave or-fly/or-flying on the map for the
+     rest of the session — labels off, dust paused, no way back. The
+     timer is the one thing that cannot be starved. */
   clearTimeout(orZoom.t);
-  orZoom.t = setTimeout(orZoom.land, still ? 0 : 620);
+  orZoom.t = setTimeout(orZoom.land, FLY_MS + 400);
 };
 orZoom.t = 0;
+orZoom.warp = 0;
 
 /* Taking a flight down where it actually got to. A flight owns
-   state.zoom/panX/panY as its destination for the whole 620ms, so
+   state.zoom/panX/panY as its destination for the whole trip, so
    anything that computes a NEW camera from them has to land first and
    pick up the real transform — otherwise the map jumps to somewhere it
    was still travelling towards. Returns whether it interrupted one. */
@@ -5942,15 +6236,19 @@ orZoom.grab = () => {
   return true;
 };
 
-/* Putting the camera down, however the flight ended — run out, or
-   interrupted by a hand on the map. One function because there are two
-   callers and three things to undo, and the version where one caller
-   did two of them is the bug above. Idempotent: calling it on a camera
-   that is already still costs a repaint of the label layer and
-   nothing else. */
+/* Putting the camera down, however the flight ended — run out,
+   interrupted by a hand on the map, or the backstop. One function
+   because there are three callers and four things to undo, and the
+   version where one caller did two of them is the bug above.
+   Idempotent: calling it on a camera that is already still costs a
+   repaint of the label layer and nothing else. */
 orZoom.land = () => {
+  if (orZoom.warp) cancelAnimationFrame(orZoom.warp);
+  orZoom.warp = 0;
   clearTimeout(orZoom.t);
   orZoom.t = 0;
+  orDust.rest();
+  orDebris.stop();
   const v = byId('orView'), svg = byId('orSvg');
   if (v) v.classList.remove('or-fly');
   if (svg) svg.classList.remove('or-flying');

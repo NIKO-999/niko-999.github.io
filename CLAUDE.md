@@ -352,6 +352,69 @@ An agent that only writes SVG returns something plausible. The round
 before this one was rejected as "too cartoonish" because the drawings
 looked better than the thing did.
 
+## The passage
+
+Clicking a star used to move the camera on a CSS transition — linear
+in `transform`, which moves the SCALE linearly. What the eye reads as
+speed is d(ln z)/dt, not dz/dt: going 1→1.2 and 2→2.4 are the same
+amount of travel, and a flight in to 2.4x always read as giving up
+halfway, whatever easing curve was bent over the linear ramp.
+
+The camera is driven per FRAME now, on `z(t) = z0·(z1/z0)^S(t)` — ln z
+moves at a rate S sets, not the raw scale — with pan following the 1/z
+law so the star you asked for slides to the middle EARLY and the back
+half of the flight is closing on something you are already looking at.
+S is an explicit velocity profile — pull away, cruise, berth, with
+smoothstep shoulders — three numbers you can hold an opinion about,
+which a cubic-bezier is not.
+
+**`state.zoom` is now wherever the camera actually is, every tick.**
+It used to hold the flight's DESTINATION for the whole trip, with the
+visible position catching up underneath — which is why the old wheel-
+mid-flight test asserted `after < claimed`: `claimed` was the stale
+2.4, and the fix was proven by the multiplied result landing under it.
+Under the passage `claimed` is already the true position, so the same
+interruption naturally gives `after ≈ claimed × 1.25` — a bigger
+number, correctly. A test asserting the old inequality is testing the
+old bug's symptom, not the invariant; asserting `zooms 1.25x from
+where the camera IS` is what survives the rewrite.
+
+**Debris rushes outward from the star you are flying to, for a flight
+that gets CLOSER only** — orClose's glide back to the fit is a return,
+not a passage, and spawns none. Eight-odd streaks, `<animateMotion>` +
+`<animate>` on `opacity`, the same declarative bead orSignal already
+sends down a link: dies with the element, nothing per frame once it is
+spawned. Measured at under a millisecond of synchronous JS per streak
+and zero ongoing cost — the motion runs on the browser's own SMIL
+timeline, never through the camera's rAF loop.
+
+**`begin`, including the IMPLICIT default of 0s, is measured against
+the SVG document's own animation clock — never against when the
+element joined it.** A dynamically inserted `<animateMotion>` with no
+`begin` looks like it starts "now"; on a page open more than about
+`dur` seconds, "0s" on the document's clock has already passed, and
+the browser resolves it straight to its frozen end state on arrival.
+No motion, no error, nothing to catch by looking at the element a
+moment after creating it. **orSignal's own bead has carried this since
+it shipped** — a dot that lands on the right point of the right path
+and vanishes 950ms later reads as a dot doing its job, not as one that
+never moved, which is exactly how it went unnoticed. Known, not fixed
+here: fixing it is one line the same shape as the one below, but it
+was not what this pass was asked to touch.
+
+The fix is the SMIL API built for this: `begin="indefinite"` turns off
+the automatic clock-relative start, and `beginElementAt(offset)`
+schedules it `offset` seconds from NOW, genuinely relative to
+insertion. `tests/orrery.js` proves it the only way that means
+anything — its own browser, held open several REAL seconds before the
+first flight, so the assertion is running in the exact window the bug
+needed. Sampled from inside the camera's own rAF loop, not a separate
+timer: a `setInterval` competing with a live flight for the main
+thread starved for most of a second in testing, which is a measurement
+artefact worth knowing about on its own, not a verdict on the frame
+cost — the actual synchronous cost of a tick, measured directly, is a
+fraction of a millisecond.
+
 ## Jarvis
 
 A librarian, not an oracle. Every branch of `orAsk` answers out of the

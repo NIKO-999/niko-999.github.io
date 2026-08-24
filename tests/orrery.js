@@ -605,6 +605,17 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ch = await chrome();
   ok('Escape closes the note', ch.pane === true);
   ok('and the card comes back', ch.legend === '1', ch);
+  /* Escape closes on orClose, which glides the view back out — the
+     chrome above comes back synchronously, before the camera does.
+     The movable block below computes a hit target from the CURRENT
+     screen position and then drives a real mouse there in several
+     round trips; a flight still in the air keeps moving nodes under
+     that position between the computation and the click, and the
+     click lands on whichever node ended up there instead. */
+  await page.waitForFunction(() =>
+    !document.getElementById('orSvg').classList.contains('or-flying'),
+    null, { timeout: 5000 }).catch(() => {});
+  await page.waitForTimeout(150);
 
   /* ── movable, three ways ── */
   console.log('\n── movable ──');
@@ -912,8 +923,17 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await settle(page);
   await page.evaluate(() => orOpen('trading/models/cisd'));
   await settle(page);
+  /* settle() only waits on the force sim, not the camera — and the
+     passage's own curve holds back on purpose for its first ~20%
+     (the pull-away Passage was chosen for), so a fixed 250ms wait
+     that was already tight against the old 620ms flight reads this
+     mid-pull-away against the new one. Wait for or-flying to actually
+     clear. */
+  await page.waitForFunction(() =>
+    !document.getElementById('orSvg').classList.contains('or-flying'),
+    null, { timeout: 3000 }).catch(() => {});
   await page.mouse.move(4, 4);
-  await page.waitForTimeout(250);
+  await page.waitForTimeout(150);
 
   /* ── and the camera lands on the star you clicked ──
      Fitting the neighbourhood centred its bounding box, which put the
@@ -958,7 +978,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       cls: document.getElementById('orSvg').getAttribute('class') || '',
       fly: document.getElementById('orView').classList.contains('or-fly'),
       turn: getComputedStyle(document.querySelector('.or-turn')).animationPlayState,
-    }), 2200);                                        /* well past the 620ms */
+    }), 2200);                                    /* well past any flight */
   }));
   ok('a pan during a flight lands the camera rather than stranding it',
     !/or-flying/.test(landed.cls) && !landed.fly, landed);
@@ -979,11 +999,20 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     woke.turn === 'running', woke);
 
   /* ── and a wheel tick during a flight does not teleport ──
-     A flight owns state.zoom as its DESTINATION for the whole 620ms.
-     Zooming read that and compounded off a camera that had not
-     arrived: 2.4 claimed while the map was still drawn at 1, times
+     Used to own state.zoom as a DESTINATION for the whole flight — set
+     synchronously to 2.4 the instant the flight was asked for, with the
+     visible camera catching up underneath via a CSS transition.
+     Zooming read that destination and compounded off a camera that had
+     not arrived: 2.4 claimed while the map was still drawn at 1, times
      1.25, and the view jumped to 3. orPan's guard never caught it
-     because orZoom pans by (0, 0) and the guard tests `dx || dy`. */
+     because orZoom pans by (0, 0) and the guard tests `dx || dy`.
+
+     Passage's per-frame camera does not have a destination to read —
+     state.zoom IS wherever the camera actually is, every tick, so
+     `claimed` here is already the true mid-flight position rather than
+     the 2.4 the old bug read. The invariant that survives is the
+     test's own title: a wheel tick zooms from where the camera is, so
+     the result is a plain 1.25x of THAT, not of the destination. */
   await page.evaluate(() => { orClose(); orZoom(0); });
   await settle(page);
   const wheeled = await page.evaluate(() => new Promise((res) => {
@@ -995,18 +1024,28 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
         cls: document.getElementById('orSvg').getAttribute('class') || '' }), 90);
     }, 150);
   }));
-  ok('a wheel tick mid-flight zooms from where the camera IS',
-    wheeled.after < wheeled.claimed, wheeled);
+  ok('mid-flight, the camera is already short of the destination',
+    wheeled.claimed > 1 && wheeled.claimed < 2.4 - 1e-6, wheeled);
+  ok('a wheel tick mid-flight zooms 1.25x from where the camera IS, not from 2.4',
+    Math.abs(wheeled.after - wheeled.claimed * 1.25) < 0.01
+    && wheeled.after < 3 - 1e-6, wheeled);
   ok('and takes the flight down with it', !/or-flying/.test(wheeled.cls), wheeled);
 
   /* ── a chip never balloons through a flight ──
      Chips ride inside #orView, so the camera scales them, and their
      counter-scale is only rewritten when the flight LANDS. For the
-     whole 620ms each one carried the counter-scale for the zoom it
+     whole flight each one carried the counter-scale for the zoom it
      started at and grew with the camera — 39.8px to 94.8px, 2.38x,
      then a snap back to 40. Measured while VISIBLE, because the fix
      is that they stand down: geometry alone reads the same either
-     way, which is how this hid in the first place. */
+     way, which is how this hid in the first place.
+
+     The sampling window has to clear FLY_MS, then the .22s fade back
+     in, with margin — a window sized to the OLD 620ms flight left
+     under 150ms for a visible sample once the passage lengthened it,
+     and on this box's own throttled frame rate that was sometimes
+     zero rAF ticks landing inside it: a real sample, missed by a
+     window that was too tight, not a chip that never came back. */
   await page.evaluate(() => { orClose(); orZoom(0); });
   await settle(page);
   await page.mouse.move(4, 4);
@@ -1017,7 +1056,7 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       const c = document.querySelector('#orLabels .or-chip');
       if (c && +getComputedStyle(L).opacity > .05)
         w.push(+c.getBoundingClientRect().width.toFixed(1));
-      if (performance.now() - t0 < 1000) requestAnimationFrame(tick);
+      if (performance.now() - t0 < 1500) requestAnimationFrame(tick);
       else res({ n: w.length, min: Math.min(...w), max: Math.max(...w),
                  view: +new DOMMatrix(getComputedStyle(view).transform).a.toFixed(2) });
     };
@@ -1835,11 +1874,11 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     wAfter.sel.length > 0 && wAfter.sel.join() === '1', wAfter);
   await page.evaluate(() => orClose());
   /* Wait for the camera to actually land, not for a guess at how long
-     that takes. Closing glides the view back out over 620ms, and a
-     zoom DURING a flight now correctly picks up the transform the
-     camera has reached rather than its destination — so a fixed 500ms
-     wait here left the next block zooming from mid-glide and reading
-     scale(1.29) where it asserts 1.25. It was passing on timing. */
+     that takes. Closing glides the view back out, and a zoom DURING a
+     flight now correctly picks up the transform the camera has
+     reached rather than its destination — so a fixed 500ms wait here
+     left the next block zooming from mid-glide and reading scale(1.29)
+     where it asserts 1.25. It was passing on timing. */
   await page.waitForFunction(() =>
     !document.getElementById('orSvg').classList.contains('or-flying'),
     null, { timeout: 5000 }).catch(() => {});
@@ -2694,6 +2733,165 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     off.length === 0, off.slice(0, 4));
   ok('no page errors through any of Jarvis', j.errs.length === 0, j.errs.slice(0, 4));
   await j.browser.close();
+
+  /* ═══ the passage ═══
+     The camera flies on a geometric law now — d(ln z)/dt constant
+     rather than dz/dt — and a burst of debris rushes outward from the
+     star you are flying to and is gone before you land.
+
+     Its own browser, held open for several REAL seconds before the
+     first flight. That is not padding: the debris streaks are SMIL
+     (<animateMotion>, <animate>), and a dynamically inserted SMIL
+     element's `begin` — including the IMPLICIT default of 0s — is
+     measured against the SVG document's own animation clock, never
+     against when the element joined it. On a page that has been open
+     less than a second the two clocks are close enough that a naive
+     build passes by accident; open a few real seconds first and an
+     animation timed against "0s" has already closed, so the browser
+     resolves it straight to its frozen end state — no visible motion
+     at all. This shipped once, undetected, in orSignal's own bead: a
+     dot that lands on the right point of the right path and vanishes
+     950ms later looks like a dot doing its job, not a dot that never
+     moved. The fix here is `begin="indefinite"` plus
+     `beginElementAt(offset)`, which is measured from NOW regardless of
+     how long the document has been running — and this section proves
+     it by being the one place in the file that actually waits. */
+  console.log('\n── the passage ──');
+  const pg = await open({ colorScheme: 'dark' });
+  await pg.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(pg.page);
+  await settle(pg.page);
+  await pg.page.waitForTimeout(4000);       /* the exact window the bug needed */
+
+  const N = await pg.page.evaluate(() => orDebris.N);
+
+  /* ── the camera itself ── */
+  const flight = await pg.page.evaluate(() => new Promise((res) => {
+    const log = []; const t0 = performance.now();
+    function tick() {
+      log.push({ t: Math.round(performance.now() - t0), z: state.zoom });
+      if (performance.now() - t0 < 1300) requestAnimationFrame(tick);
+      else res(log);
+    }
+    orOpen('trading/models/cisd');
+    requestAnimationFrame(tick);
+  }));
+  const zEnd = flight[flight.length - 1].z;
+  const zMid = flight.find((r) => r.t > 100 && r.t < 300);
+  ok('the flight reaches the same 2.4x clamp it always did',
+    Math.abs(zEnd - 2.4) < 0.01, zEnd);
+  ok('and gets there gradually, not in one jump',
+    !!zMid && zMid.z > 1 && zMid.z < 2.3, zMid);
+  const monotone = flight.every((r, i) => i === 0 || r.z >= flight[i - 1].z - 1e-6);
+  ok('the zoom never runs backward mid-flight', monotone,
+    flight.filter((r, i) => i && r.z < flight[i - 1].z - 1e-6).slice(0, 3));
+
+  /* ── debris exists, is capped, and is the declared shape ── */
+  await pg.page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(pg.page);
+  const shape = await pg.page.evaluate((wantN) => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => {
+      const gs = Array.from(document.querySelectorAll('#orDebris > g'));
+      res({
+        n: gs.length,
+        capped: gs.length <= wantN,
+        allHaveLine: gs.every((g) => !!g.querySelector('line')),
+        strokeIsTrail: gs.every((g) =>
+          (g.querySelector('line').getAttribute('stroke') || '') === 'url(#orDebrisTrail)'),
+        gradExists: !!document.getElementById('orDebrisTrail'),
+      });
+    }, 300);
+  }), N);
+  ok('the flight spawns debris, capped at the declared count',
+    shape.n > 0 && shape.capped, shape);
+  ok('every streak is a line painted from the shared trail gradient',
+    shape.allHaveLine && shape.strokeIsTrail && shape.gradExists, shape);
+
+  /* ── THE regression: it actually moves, seconds into a real session ──
+     Sampled from inside the SAME rAF loop the camera runs on, not a
+     separate timer — a setInterval competing with a live flight for
+     the main thread is exactly what made the first few attempts at
+     this measurement misleading. */
+  await pg.page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(pg.page);
+  const life = await pg.page.evaluate(() => new Promise((res) => {
+    /* One streak, tracked by ITS OWN identity across every tick — not
+       one rect compared against another streak's, which is a
+       different bug wearing a passing test: two elements at two
+       angles always read two different x's, frozen or not. */
+    let maxOp = 0, tracked = null, firstX = null, moved = false;
+    const t0 = performance.now();
+    function tick() {
+      if (!tracked || !tracked.isConnected)
+        tracked = document.querySelector('#orDebris > g');
+      if (tracked) {
+        const o = +getComputedStyle(tracked).opacity;
+        if (o > maxOp) maxOp = o;
+        const x = tracked.querySelector('line').getBoundingClientRect().x;
+        if (firstX == null) firstX = x;
+        else if (Math.abs(x - firstX) > 3) moved = true;
+      }
+      if (performance.now() - t0 < 1050) requestAnimationFrame(tick);
+      else res({ maxOp: +maxOp.toFixed(2), moved });
+    }
+    orOpen('trading/models/cisd');
+    requestAnimationFrame(tick);
+  }));
+  ok('a streak actually brightens — not frozen at opacity 0 the whole time',
+    life.maxOp > 0.5, life);
+  ok('and it actually travels — the same streak, watched over time',
+    life.moved, life);
+
+  /* ── zoom OUT is a return, not a passage ── */
+  await pg.page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(pg.page);
+  await pg.page.evaluate(() => orOpen('trading/models/cisd'));
+  await pg.page.waitForFunction(() =>
+    !document.getElementById('orSvg').classList.contains('or-flying'),
+    null, { timeout: 3000 }).catch(() => {});
+  await pg.page.waitForTimeout(150);
+  const outN = await pg.page.evaluate(() => new Promise((res) => {
+    orClose();
+    setTimeout(() => res(document.querySelectorAll('#orDebris > g').length), 150);
+  }));
+  ok('closing back out to the fit spawns no debris', outN === 0, outN);
+
+  /* ── interrupted, it stops rather than finishing over a still camera ── */
+  await pg.page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(pg.page);
+  const cut = await pg.page.evaluate(() => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => {
+      orPan(10, 6);                 /* a hand, mid-flight */
+      setTimeout(() => res({
+        n: document.querySelectorAll('#orDebris > g').length,
+        live: orDebris.live.length,
+      }), 30);
+    }, 120);
+  }));
+  ok('a hand on the map cuts the debris down with the camera',
+    cut.n === 0 && cut.live === 0, cut);
+
+  ok('no page errors through the passage so far', pg.errs.length === 0, pg.errs.slice(0, 4));
+
+  /* ── reduced motion: no debris, ever ── */
+  await pg.browser.close();
+  const pr = await open({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await pr.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(pr.page);
+  const still = await pr.page.evaluate(() => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => res({
+      n: document.querySelectorAll('#orDebris > g').length,
+      zoom: state.zoom,
+      flying: document.getElementById('orSvg').classList.contains('or-flying'),
+    }), 80);
+  }));
+  ok('reduced motion lands the camera instantly and spawns no debris',
+    still.n === 0 && still.zoom === 2.4 && !still.flying, still);
+  ok('no page errors through the passage', pr.errs.length === 0, pr.errs.slice(0, 4));
+  await pr.browser.close();
 
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
