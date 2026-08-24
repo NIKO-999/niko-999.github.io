@@ -2915,7 +2915,15 @@ const SIM = {
      one. */
   hubHome: 3.4,
   centre: .0018,
+  /* Only what a HELD node bleeds off — a pointer stopped moving but has
+     not let go yet. Everything else settling under its own spring uses
+     orSim.DP, tuned per node against S.HK — see orSim.seed. */
   damp: .82,
+  /* Just under 1 (critical) on purpose — 1 reads as inert, this still
+     reads as a spring that had somewhere to be. Measured: a formation
+     switch that used to overshoot 182 units past a 154-unit move now
+     overshoots about 10, on the stiffest formation there is. */
+  zeta: .9,
   maxV: 14,
   /* A fixed timestep has no way to notice that a step was too big, so
      the step is what gets bounded. Two nodes seeded on the same point
@@ -3078,7 +3086,7 @@ function orTick() {
   const dt = SIM.dt, half = .5 * dt * dt;
   const X = S.X, Y = S.Y, VX = S.VX, VY = S.VY, AX = S.AX, AY = S.AY;
   const NX = S.NX, NY = S.NY, Q = S.Q, M = S.M;
-  const HX = S.HX, HY = S.HY, HK = S.HK, FIX = S.FIX;
+  const HX = S.HX, HY = S.HY, HK = S.HK, FIX = S.FIX, DP = S.DP;
 
   for (let i = 0; i < n; i++) {
     NX[i] = 0; NY[i] = 0;
@@ -3159,19 +3167,20 @@ function orTick() {
     NY[i] += (HY[i] - Y[i]) * HK[i] * mi + (500 - Y[i]) * kc * mi;
   }
 
-  const dp = SIM.damp, vmax = SIM.maxV, amax = SIM.maxA;
+  const vmax = SIM.maxV, amax = SIM.maxA;
   let fast = 0;
   for (let i = 0; i < n; i++) {
     if (FIX[i]) {
       /* A held node keeps whatever velocity the pointer gave it and
          bleeds it off if the pointer stops, so a release hands the
          springs a live throw rather than a stale one. */
-      VX[i] *= dp; VY[i] *= dp; AX[i] = 0; AY[i] = 0;
+      VX[i] *= SIM.damp; VY[i] *= SIM.damp; AX[i] = 0; AY[i] = 0;
       continue;
     }
     let ax = NX[i] / M[i], ay = NY[i] / M[i];
     const am = Math.sqrt(ax * ax + ay * ay);
     if (am > amax) { ax = ax / am * amax; ay = ay / am * amax; }
+    const dp = DP[i];
     let vx = (VX[i] + (AX[i] + ax) * .5 * dt) * dp;
     let vy = (VY[i] + (AY[i] + ay) * .5 * dt) * dp;
     const v2 = vx * vx + vy * vy;
@@ -3262,6 +3271,7 @@ orSim.seed = () => {
     S.HX = new Float64Array(c); S.HY = new Float64Array(c);
     S.Q = new Float64Array(c); S.M = new Float64Array(c);
     S.HK = new Float64Array(c); S.FIX = new Uint8Array(c);
+    S.DP = new Float64Array(c);
   }
   const tier = orLayout.tier || {};
   const xy = {}, vel = {}, arr = new Array(n), varr = new Array(n), ix = new Map();
@@ -3285,6 +3295,17 @@ orSim.seed = () => {
     S.M[i] = SIM.m[t] || SIM.m.leaf;
     S.HK[i] = SIM.home * (t === 'hub' ? SIM.hubHome : 1)
       * (orLayout.homeK == null ? 1 : orLayout.homeK);
+    /* Damping tuned to THIS node's own home spring, not a flat constant.
+       Terraces and Chord hold a note up to 3.4x harder than Orrery does,
+       and a hub sits on top of that again — one damping figure that
+       looked right for the loosest formation left the stiffest ones
+       ringing, which is what "bounces like a spider web" was: a formation
+       switch reheats the whole field at once, so fifty-odd notes were
+       all doing that ringing together. exp(-2*zeta*sqrt(k)) is the
+       standard critically-damped-spring figure for a per-tick spring of
+       rate k at dt=1; zeta<1 on purpose — 1 kills the overshoot but also
+       every last bit of the settle reading as motion at all. */
+    S.DP[i] = Math.exp(-2 * SIM.zeta * Math.sqrt(S.HK[i]));
     /* A live drag is a hold too. seed() rebuilds FIX from the pins
        alone, so any repaint during a drag — pressing Enter on the
        held node, a filter keystroke — handed the node back to the

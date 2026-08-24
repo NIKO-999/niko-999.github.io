@@ -771,6 +771,73 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
       .map((t) => +t.getAttribute('opacity')), hitD.id);
   ok('and goes quiet again once it is slack', slack.every((o) => o < .5), slack);
 
+  /* ── the settle does not spring back ──
+     Damping used to be one constant for every node, tuned against the
+     softest spring in the app (Orrery's own, home:1). Terraces and
+     Chord hold a note up to 3.4x harder, and a hub sits on top of that
+     again — so the same constant left the stiffest formations visibly
+     ringing on the way in: a note would arrive, overshoot, and swing
+     back. That is what "bounces like a spider web" was.
+
+     The direct proof is the mechanism, not a threshold on a noisy
+     multi-second trace: orSim.DP (set in orSim.seed) is now derived
+     from each node's OWN spring rate, so the same note damps harder
+     under a stiffer formation. Reverting DP to the flat SIM.damp it
+     used to be — the exact old bug — makes dpLoose and dpStiff below
+     equal, which is what this catches. */
+  const stiff = await page.evaluate(() => {
+    const id = Object.keys(orLayout.tier || {}).find((x) => orLayout.tier[x] !== 'hub');
+    orForm('orrery');
+    const dpLoose = orSim.DP[orSim.ix.get(id)];
+    orForm('chord');
+    const dpStiff = orSim.DP[orSim.ix.get(id)];
+    orForm('orrery');
+    return { id, dpLoose, dpStiff };
+  });
+  await settle(page);
+  ok('the same note damps harder under a stiffer formation, not by one flat constant',
+    stiff.dpStiff > 0 && stiff.dpStiff < stiff.dpLoose * .8, stiff);
+  ok('and damping never reaches or exceeds 1, or the field could gain energy',
+    stiff.dpLoose > 0 && stiff.dpLoose < 1 && stiff.dpStiff > 0 && stiff.dpStiff < 1, stiff);
+
+  /* And a loose behavioural check that the mechanism above actually
+     pays off on screen: switch to Chord — the stiffest arrangement —
+     and follow the note that moves farthest. A wide margin on purpose;
+     the exact figure jitters run to run; catching a damping constant
+     reverted to flat is the assertion above's job, not this one's. */
+  const formBounce = await page.evaluate(() => new Promise((res) => {
+    const ids = Object.keys(orLayout.tier || {});
+    const before = {};
+    ids.forEach((id) => { const i = orSim.ix.get(id); before[id] = [orSim.HX[i], orSim.HY[i]]; });
+    orForm('chord');
+    let worst = null, maxJump = 0;
+    ids.forEach((id) => {
+      const i = orSim.ix.get(id);
+      const j = Math.hypot(orSim.HX[i] - before[id][0], orSim.HY[i] - before[id][1]);
+      if (j > maxJump) { maxJump = j; worst = id; }
+    });
+    const d = [], t0 = performance.now();
+    const tick = () => {
+      const i = orSim.ix.get(worst);
+      d.push(+Math.hypot(orSim.X[i] - orSim.HX[i], orSim.Y[i] - orSim.HY[i]).toFixed(1));
+      if (performance.now() - t0 < 2200) requestAnimationFrame(tick);
+      else res({ worst, maxJump: +maxJump.toFixed(0), d });
+    };
+    requestAnimationFrame(tick);
+  }));
+  await page.evaluate(() => { orForm('orrery'); });
+  await settle(page);
+  ok('switching formation actually moved the worst-case note, so this measured something',
+    formBounce.maxJump > 100, formBounce);
+  {
+    const d = formBounce.d;
+    let nearAt = d.findIndex((v) => v < 20);
+    if (nearAt < 0) nearAt = d.length - 1;
+    const rebound = Math.max(...d.slice(nearAt)) - Math.min(...d.slice(0, nearAt + 1));
+    ok('and settles without a wild swing on the way in',
+      rebound < 60, { rebound, nearAt, ...formBounce });
+  }
+
   /* Double-click pins where it sits, and a pin is what survives. */
   const pinAt = await page.evaluate((id) => {
     const g = document.querySelector(`#orNodes [data-id="${CSS.escape(id)}"]`);

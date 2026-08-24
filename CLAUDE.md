@@ -352,6 +352,43 @@ An agent that only writes SVG returns something plausible. The round
 before this one was rejected as "too cartoonish" because the drawings
 looked better than the thing did.
 
+## The field settles
+
+Switching formations, or letting go of a dragged note, used to make the
+field visibly ring — a note would arrive at its new home, overshoot,
+and swing back, which read as a spider web being shaken rather than a
+diagram forming. One constant, `SIM.damp`, decayed every node's
+velocity by the same fraction every tick, tuned by eye against
+Orrery's own home spring — the softest one there is. Terraces and
+Chord hold a note up to 3.4x harder, a hub sits on top of that again,
+and the SAME constant left over that stiffness underdamped: the
+stiffer the pull, the more it rang.
+
+Fixed by deriving each node's damping from its OWN spring rate rather
+than reading one constant off `SIM`: `orSim.DP[i] =
+exp(-2·ζ·√HK[i])`, the standard figure for a critically damped spring
+of rate `HK[i]` at a one-tick timestep, computed once in `orSim.seed`
+alongside `HK` itself. `ζ` sits at .9, just under critical — 1 kills
+the overshoot but also reads as inert, like a diagram snapping into
+place rather than a thing that had somewhere to be. Measured on the
+stiffest real case in the seed vault (Orrery → Chord, the note that
+moves farthest): the overshoot past its own home fell from roughly a
+fifth of the distance it had to travel to under a tenth.
+
+`SIM.damp` still exists — it is what a HELD node bleeds its
+pointer-given velocity down by while your hand is still on it, which
+is a different question from how a released spring settles, and nudging
+one must not silently nudge the other.
+
+**The test is the mechanism, not a threshold on a noisy multi-second
+trace.** A node's damping compared under Orrery and under Chord has to
+come out different; reverting `orSim.DP` to the old flat constant
+makes them equal, which is what `tests/orrery.js` actually asserts.
+The behavioural trace underneath it — watch the worst-case note settle
+after a real formation switch — carries a wide margin on purpose: the
+exact figure jitters run to run, and catching a damping constant
+reverted to flat is the assertion above's job, not this one's.
+
 ## The passage
 
 Clicking a star used to move the camera on a CSS transition — linear
