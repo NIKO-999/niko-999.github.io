@@ -452,6 +452,65 @@ artefact worth knowing about on its own, not a verdict on the frame
 cost — the actual synchronous cost of a tick, measured directly, is a
 fraction of a millisecond.
 
+## The ambient field
+
+Asked for "debris and particles... always there, not just event-
+triggered," which is two words and two mechanisms — `orAmbient.trickle`
+answers "debris," `orAmbient.wander` answers "particles" — rather than
+one setting tuned two ways. **Options came from lenses again**: four
+agents (a straight-line parallax drift, the flight debris run as a
+permanent trickle, the existing dust breathing in place, and motes
+ambling on a curved path) each rendered their proposal in the real app
+across three moments of its own loop, not a single still — motion is
+the entire subject, so a still is not a proposal. `.claude/workflows/
+particle-lab.js` and `particle-render.js` are the harness, mirroring
+`rim-lab`/`rim-render`. The trickle and the wander were the two that
+survived; the honest write-up on the breathing-dust one said so itself
+— "this may genuinely be too little to answer the ask."
+
+**It is built once, at boot, and lives outside `#orRings`** — same
+reasoning as `orDebris`: a filter keystroke or a re-file repaints
+`#orRings` wholesale, and content that lived inside it would be rebuilt
+or wiped on every one of those. `#orAmbient` sits as a sibling instead.
+
+**The `<style>` for the wander keyframes has to live outside the SVG
+entirely, in `<head>` — not in `<defs>`, even though `<defs>` is right
+there and is where `orDebris` puts ITS gradient.** `orPaintRings` owns
+`<defs>` and overwrites its `innerHTML` wholesale on every repaint, for
+reasons that have nothing to do with the ambient field — this cost half
+this pass to find, because the failure is silent: the `<circle>`
+elements survive (they are not inside `#orRings`), only their
+`@keyframes` do not, so the field looks correct in a screenshot and is
+frozen the moment anyone touches the map. A `<style>` is document-wide
+regardless of where it sits, so `<head>` is both safe and free. The
+regression test for this samples actual `getBoundingClientRect()`
+positions before and after a real `orPaint()`, not element counts — an
+element-count check is exactly what this bug would sail through, since
+nothing about the count ever changes.
+
+**It is a handful, on purpose, and the number is not a taste call — it
+is a budget.** `tests/orrery.js` already asserted "almost nothing on
+the map is in continuous motion" (`< 12%` of every SVG element sitting
+inside a running animation), written after the old precession bug
+animated the ancestor of the entire drawing. The existing dust shells
+already spend most of that budget — 10.8% before this shipped. The
+first cut of this field (5 trickle streaks, 9 wander motes, each
+trickle streak wrapped in an extra `<g>` for no reason that survived
+scrutiny) landed at exactly 12.0%, which is not under 12. Dropping the
+redundant wrapper and trimming to 4 and 6 landed at 11.5% — the fix was
+making the feature cheaper, not moving the ceiling: the ceiling is
+correct and the budget was almost entirely spent already.
+
+**Reduced motion does not freeze this field — it is never built.**
+Both mechanisms are entirely a property of their own animation (the
+trickle's line has no opacity of its own outside its keyframes; the
+wander mote's position IS its keyframes), so `animation: none` under
+`prefers-reduced-motion` would leave a static line at full opacity and
+motes snapped to their anchor points at full brightness — worse than
+absent. `orAmbient.boot` checks the media query itself and returns
+before building anything, the same shape as `orDebris.spawn`'s own
+check.
+
 ## Jarvis
 
 A librarian, not an oracle. Every branch of `orAsk` answers out of the

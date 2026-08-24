@@ -2960,6 +2960,58 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   ok('no page errors through the passage', pr.errs.length === 0, pr.errs.slice(0, 4));
   await pr.browser.close();
 
+  /* ── the ambient field ──
+     Built once at boot, outside #orRings, on the same reasoning as
+     #orDebris — so the two real bugs worth guarding are (1) something
+     later wiping it and (2) it costing more continuous motion than the
+     app's own budget allows (see "almost nothing on the map is in
+     continuous motion" above — dust already spends most of it). */
+  const am = await open({ colorScheme: 'dark' });
+  await am.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(am.page);
+  await am.page.waitForTimeout(500);
+  const ambCounts = await am.page.evaluate(() => {
+    const g = document.getElementById('orAmbient');
+    return { tk: g.querySelectorAll('.or-amb-tk').length,
+             wa: g.querySelectorAll('.or-amb-wa').length };
+  });
+  ok('the ambient field is a handful, not a crowd',
+    ambCounts.tk > 0 && ambCounts.tk <= 6 && ambCounts.wa > 0 && ambCounts.wa <= 10, ambCounts);
+  /* The bug this repro'd: the wander keyframes lived in a <style>
+     appended to <defs> — which orPaintRings overwrites wholesale on
+     every repaint (a filter keystroke, a re-file). The <circle>s
+     themselves survive that (they live in #orAmbient, not #orRings) —
+     an element-count check would have missed this entirely, which is
+     exactly what happened the first time this was written. Only actual
+     MOTION, sampled before and after a repaint, tells the two apart. */
+  const moved = await am.page.evaluate(() => new Promise((res) => {
+    const before = [...document.querySelectorAll('.or-amb-wa')]
+      .map((c) => c.getBoundingClientRect());
+    orPaint();
+    setTimeout(() => {
+      const after = [...document.querySelectorAll('.or-amb-wa')]
+        .map((c) => c.getBoundingClientRect());
+      res(before.map((b, i) => +Math.hypot(after[i].x - b.x, after[i].y - b.y).toFixed(1)));
+    }, 1800);
+  }));
+  ok('and survives a repaint — a filter keystroke does not wipe its motion',
+    moved.some((d) => d > 3), moved);
+  ok('no page errors through the ambient field', am.errs.length === 0, am.errs.slice(0, 4));
+  await am.browser.close();
+
+  const amr = await open({ colorScheme: 'dark', reducedMotion: 'reduce' });
+  await amr.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(amr.page);
+  await amr.page.waitForTimeout(500);
+  const noAmb = await amr.page.evaluate(() => {
+    const g = document.getElementById('orAmbient');
+    return { tk: g.querySelectorAll('.or-amb-tk').length, wa: g.querySelectorAll('.or-amb-wa').length };
+  });
+  ok('reduced motion builds none of it — the trickle and the wander are each entirely their own animation',
+    noAmb.tk === 0 && noAmb.wa === 0, noAmb);
+  ok('no page errors with the ambient field held back', amr.errs.length === 0, amr.errs.slice(0, 4));
+  await amr.browser.close();
+
   console.log(`\n${pass} passed, ${fail} failed`);
   process.exit(fail ? 1 : 0);
 })().catch((e) => {

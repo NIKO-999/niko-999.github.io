@@ -238,6 +238,42 @@
 #orDustB { animation: or-turn 320s linear infinite reverse; }
 #orDustC { animation: or-turn 440s linear infinite; }
 
+/* ── the ambient field ──
+   Built once at boot — see orAmbient. Two mechanisms, two costs, both
+   transform/opacity only: no @keyframes below may touch anything else,
+   because this runs forever on every load with no JS clock behind it.
+
+   The trickle reuses #orDebris's own visual language (a head-bright,
+   tail-faint gradient) at ambient scale: parked at opacity 0 for the
+   first 91% of its own loop, so "one streak every few seconds" costs
+   nothing while it waits. --or-amb-len/--or-amb-op vary per streak;
+   see orAmbient.trickle. */
+.or-amb-tk {
+  opacity: 0;
+  transform: translateX(0px);
+  animation-name: or-amb-cross;
+  animation-timing-function: linear;
+  animation-iteration-count: infinite;
+  pointer-events: none;
+}
+@keyframes or-amb-cross {
+  0%, 91% { opacity: 0; transform: translateX(0px); }
+  94%     { opacity: var(--or-amb-op); transform: translateX(calc(var(--or-amb-len) * .2)); }
+  98%     { opacity: var(--or-amb-op); transform: translateX(calc(var(--or-amb-len) * .88)); }
+  100%    { opacity: 0; transform: translateX(var(--or-amb-len)); }
+}
+
+/* The wander motes amble a seeded curve rather than travel a line or
+   turn on an axis — each circle carries its OWN @keyframes, written at
+   boot (see orAmbient.wander); this only supplies what all of them
+   share. Blurred a touch so they read as soft motes, not stars. */
+.or-amb-wa { filter: blur(.35px); pointer-events: none; }
+
+/* Both are entirely a property of their own animation — the trickle's
+   line has no opacity of its own, the wander mote's position IS its
+   keyframes — so under reduced motion this field is not built at all
+   rather than frozen mid-cycle. See orAmbient.boot. */
+
 /* Precession. The instrument nods, so it reads as a solid thing seen
    slightly off-axis rather than a flat drawing. Subtle on purpose: at
    nine degrees over half a minute you feel it and never catch it. It
@@ -1365,6 +1401,9 @@
                  note you open never touches it, so it survives every
                  repaint that would otherwise wipe a child of #orRings. -->
             <g id="orDebris"></g>
+            <!-- The ambient field. Owned by orAmbient, built once at
+                 boot — same reasoning as orDebris above. -->
+            <g id="orAmbient"></g>
           </g>
           </g>
         </svg>
@@ -6291,6 +6330,142 @@ orZoom.land = () => {
    way to get one back.
 
    One function, and all three call it. */
+/* ── the ambient field ──
+   The dust shells (#orDustA/B/C) and the flight debris (orDebris) were
+   the whole ambient field there was: one rotates so slowly it is felt
+   rather than watched, the other only exists for the half-second of a
+   flight. Asked for debris and particles that are just THERE — built
+   once at boot, never rebuilt by a repaint (same reasoning as
+   #orDebris: it sits as its own child of #orView, not of #orRings).
+
+   Two mechanisms, because the ask was two words. A trickle answers
+   "debris" — the exact streak #orDebris draws during a flight, reused
+   at ambient scale: rare, dim, one crossing every few seconds forever,
+   never eleven at once. A wander answers "particles" — motes that
+   amble on a curve rather than travel a line or turn on an axis, which
+   is a kind of motion nothing else on this screen has. Both a
+   "handful": under fifty elements between them, well under what the
+   dust already spends.
+
+   ALL motion here is transform/opacity, on a CSS @keyframes loop with
+   no JS clock — the cost model the dust shells already prove out.
+   Nothing here runs per frame; the browser's compositor owns it for
+   the life of the tab. */
+const orAmbient = {};
+
+/* One streak at a time, on the visual language #orDebris already
+   established (a head-bright, tail-faint gradient) — dimmer, slower,
+   and never more than one active window at a time. Evenly-spaced
+   delays, not random ones: a short active window (9% of a 20-30s
+   loop) picked at random leaves a real chance of a multi-second gap
+   with nothing crossing, which reads as broken rather than rare. */
+orAmbient.trickle = () => {
+  const r = orRng('orrery.ambient.trickle');
+  const N = 4, SPACING = 6.2;
+  let out = '';
+  for (let i = 0; i < N; i++) {
+    const a = r() * 360;
+    const rad = a * Math.PI / 180;
+    const travel = 240 + r() * 220;
+    /* A chord through the dense part of the field, not the empty rim
+       past the last ring — centred well inside the dust's own band. */
+    const rC = 60 + r() * 260;
+    const aC = r() * 360;
+    const cx = 500 + Math.cos(aC * Math.PI / 180) * rC;
+    const cy = 500 + Math.sin(aC * Math.PI / 180) * rC;
+    const sx = (cx - Math.cos(rad) * travel / 2).toFixed(2);
+    const sy = (cy - Math.sin(rad) * travel / 2).toFixed(2);
+    const len = (18 + r() * 22).toFixed(2);
+    const width = (1.5 + r() * 1).toFixed(2);
+    const dur = 20 + r() * 10;
+    /* animation-delay is SUBTRACTED from elapsed time, so this solves
+       "this mote's 91%-of-cycle active window starts at t = i*SPACING"
+       for every mote, regardless of its own random duration — the
+       rhythm is deterministic even though nothing else about it is. */
+    const delay = (i * SPACING - .91 * dur).toFixed(2);
+    const peak = (.35 + r() * .3).toFixed(2);
+    const gid = `orAmbTrail${i}`;
+    out += `<linearGradient id="${gid}" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="${len}" y2="0">`
+      + `<stop offset="0" stop-color="var(--or-star-core)" stop-opacity="0"/>`
+      + `<stop offset=".3" stop-color="var(--or-star-core)" stop-opacity=".7"/>`
+      + `<stop offset="1" stop-color="var(--or-star-core)" stop-opacity="1"/></linearGradient>`
+      + `<g transform="translate(${sx} ${sy}) rotate(${a.toFixed(2)})">`
+      + `<line class="or-amb-tk" x1="0" y1="0" x2="${len}" y2="0" stroke="url(#${gid})"`
+      + ` stroke-width="${width}" stroke-linecap="round"`
+      + ` style="--or-amb-len:${travel.toFixed(1)}px;--or-amb-op:${peak};`
+      + `animation-duration:${dur.toFixed(2)}s;animation-delay:${delay}s"/></g>`;
+  }
+  return out;
+};
+
+/* Motes that amble rather than travel a line or turn on an axis — a
+   seeded two-harmonic-per-axis wander, pre-sampled into dense keyframe
+   stops so the only things animating at runtime are transform/opacity,
+   never an offset-path (that property is neither, and this field's
+   whole cost model rests on staying compositor-only). Each particle's
+   curve is baked once, here, at boot. */
+orAmbient.wander = () => {
+  const r = orRng('orrery.ambient.wander');
+  const N = 6, STEPS = 20, TWO_PI = Math.PI * 2, FREQS = [1, 2, 3];
+  const pick = (excl) => { let f; do { f = FREQS[Math.floor(r() * FREQS.length)]; } while (f === excl); return f; };
+  let css = '', svgOut = '';
+  for (let i = 0; i < N; i++) {
+    const ang = r() * TWO_PI;
+    const dist = 110 + Math.sqrt(r()) * 320;
+    const ax0 = (500 + Math.cos(ang) * dist).toFixed(2);
+    const ay0 = (500 + Math.sin(ang) * dist).toFixed(2);
+    const fx1 = FREQS[Math.floor(r() * FREQS.length)], fx2 = pick(fx1);
+    const fy1 = pick(fx1), fy2 = pick(fy1);
+    const px1 = r() * TWO_PI, px2 = r() * TWO_PI, py1 = r() * TWO_PI, py2 = r() * TWO_PI;
+    const amp = 24 + r() * 56;
+    const ax1 = amp, ax2 = amp * (.3 + r() * .3);
+    const ay1 = amp * (.7 + r() * .4), ay2 = amp * (.25 + r() * .3);
+    const bh = 1 + Math.floor(r() * 2), bp = r() * TWO_PI;
+    const opBase = .38 + r() * .16, opSwing = .16 + r() * .14;
+    const scBase = .92 + r() * .1, scSwing = .1 + r() * .12;
+    const dur = (14 + r() * 24).toFixed(2);
+    const delay = (-(r() * dur)).toFixed(2);
+    const mix = (55 + r() * 35).toFixed(0);
+    const radius = (1.7 + r() * 1.7).toFixed(2);
+    const kf = `or-amb-wa${i}`;
+    let stops = '';
+    for (let s = 0; s <= STEPS; s++) {
+      const t = s / STEPS;
+      const x = (Math.sin(t * TWO_PI * fx1 + px1) * ax1 + Math.sin(t * TWO_PI * fx2 + px2) * ax2).toFixed(2);
+      const y = (Math.sin(t * TWO_PI * fy1 + py1) * ay1 + Math.sin(t * TWO_PI * fy2 + py2) * ay2).toFixed(2);
+      const op = Math.max(.08, opBase + Math.sin(t * TWO_PI * bh + bp) * opSwing).toFixed(2);
+      const sc = (scBase + Math.sin(t * TWO_PI * bh + bp) * scSwing).toFixed(3);
+      stops += `${(t * 100).toFixed(2)}%{transform:translate(${x}px,${y}px) scale(${sc});opacity:${op}}`;
+    }
+    css += `@keyframes ${kf}{${stops}}`;
+    svgOut += `<circle class="or-amb-wa" cx="${ax0}" cy="${ay0}" r="${radius}"`
+      + ` fill="color-mix(in srgb, var(--or-star-core) ${mix}%, var(--or-hair))"`
+      + ` style="transform-origin:${ax0}px ${ay0}px;`
+      + ` animation:${kf} ${dur}s cubic-bezier(.37,0,.63,1) ${delay}s infinite"/>`;
+  }
+  return { css, svg: svgOut };
+};
+
+/* Built once. orAmbient.built guards a second call — a reload of the
+   vault repaints #orRings, never #orView's own children. */
+orAmbient.boot = () => {
+  if (orAmbient.built) return;
+  orAmbient.built = true;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const g = byId('orAmbient');
+  if (!g) return;
+  const wa = orAmbient.wander();
+  g.innerHTML = orAmbient.trickle() + wa.svg;
+  /* NOT inside <defs> — orPaintRings owns that element and overwrites
+     its innerHTML wholesale on every repaint (a filter keystroke, a
+     re-file), which would wipe these keyframes the first time anyone
+     touched the map after this ran. A <style> is document-wide
+     regardless of where it sits, so <head> is both safe and correct. */
+  const css = document.createElement('style');
+  css.textContent = wa.css;
+  document.head.appendChild(css);
+};
+
 function orDropSel() {
   state.sel = null;
   orWrite({ sel: null });
@@ -7677,6 +7852,7 @@ orRefile.apply = (notes) => {
     }
     orTwinkle();
   });
+  step(() => { orAmbient.boot(); });
 })();
 </script>
 <script src="../shell.js" defer></script>
