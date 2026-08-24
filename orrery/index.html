@@ -1574,7 +1574,7 @@ const SEED = [
 You do not trade the level, you trade the change. A level alone is a line on a chart; a CISD is an event with a before and an after. [[displacement]] confirms the move had intent, and the [[liquidity-sweep]] that usually precedes it tells you whose stops paid for it.
 
 The candle that closes the change is your marker. Price accepted back through it and holding is the thesis gone — [[invalidation]] names the rule.`,
-    words: 122, mtime: 0 },
+    impact: 5, words: 122, mtime: 0 },
 
   { id: 'trading/models/liquidity-sweep', title: 'Liquidity sweep', cat: 'trading',
     tags: ['model', 'liquidity'],
@@ -1583,7 +1583,7 @@ The candle that closes the change is your marker. Price accepted back through it
     body: `Stops cluster where everyone can see them — above an equal high, under an obvious low. Price reaches through, takes them, and comes back. The sweep is not the trade; it is the fuel gauge. A move that starts without one has to generate its own orders, and those moves die young.
 
 Watch what happens after the reach. A true sweep rejects fast and closes back inside; acceptance beyond the level is a different fact, and the honest reading is that the level failed. The sweep is the cause and the [[cisd]] is the confirmation, with [[draw-on-liquidity]] saying where the move is owed. Until the close prints, the right response is [[sitting-out]].`,
-    words: 112, mtime: 0 },
+    impact: 4, words: 112, mtime: 0 },
 
   { id: 'trading/models/displacement', title: 'Displacement', cat: 'trading',
     tags: ['model'],
@@ -1594,7 +1594,7 @@ Watch what happens after the reach. A true sweep rejects fast and closes back in
 Any candle points somewhere. Displacement is the candle that leaves — a body that dwarfs its neighbours, closing near its extreme, a gap in the deliveries behind it. It is the difference between a market drifting and a market deciding.
 
 You use it as a filter on the [[cisd]]: a change in delivery that happens slowly is a change you should doubt. And you use it for context — displacement out of a [[premium-discount]] extreme carries further than displacement in the middle of a range. If the [[liquidity-sweep]] behind it was shallow, expect the move to be shallow too.`,
-    words: 103, mtime: 0 },
+    impact: 4, words: 103, mtime: 0 },
 
   { id: 'trading/models/draw-on-liquidity', title: 'Draw on liquidity', cat: 'trading',
     tags: ['model', 'liquidity'],
@@ -1603,7 +1603,7 @@ You use it as a filter on the [[cisd]]: a change in delivery that happens slowly
     body: `Where price is going, not where it is. Every resting pool of orders — an old high, an untraded gap, a clean level everyone has marked — is a magnet, and the market moves from one to the next. The draw is your target-side thesis.
 
 Name it before the session or you will invent one on the fly, and an invented draw always sits wherever your position needs it to. Write it down, then ask what has to happen on the way there: a [[liquidity-sweep]] against the draw first is normal, not a failure, and the [[session-model]] says when the run at it tends to start. This is [[second-order]] thinking applied to price — not what the level is, but what the level makes people do.`,
-    words: 126, mtime: 0 },
+    impact: 3, words: 126, mtime: 0 },
 
   { id: 'trading/models/premium-discount', title: 'Premium and discount', cat: 'trading',
     tags: ['model'],
@@ -1612,7 +1612,7 @@ Name it before the session or you will invent one on the fly, and an invented dr
     body: `Halve the range that matters and you have the only context that is free. Above the midpoint you are paying premium; below it you are buying at discount. That is all it is, and it is enough to keep you from the one thing that bleeds accounts: buying the top of the leg because the leg is exciting.
 
 You do not buy in premium or sell in discount, whatever the candle looks like. The [[draw-on-liquidity]] gives the destination and this gives permission. When both line up with [[displacement]] out of the extreme you have a trade — the [[session-model]] says when to expect it.`,
-    words: 104, mtime: 0 },
+    impact: 3, words: 104, mtime: 0 },
 
   { id: 'trading/models/session-model', title: 'The session model', cat: 'trading',
     tags: ['model', 'time'],
@@ -1625,7 +1625,7 @@ You do not buy in premium or sell in discount, whatever the candle looks like. T
 - After: flat, whatever happened.
 
 Time of day is the filter that costs nothing and saves the most. An entry pattern in dead hours is a pattern in a market with nobody in it. The old [[market-structure]] note covers the ranges this repeats inside, and [[premium-discount]] tells you which half of the day's range you are standing in.`,
-    words: 123, mtime: 0 },
+    impact: 3, words: 123, mtime: 0 },
 
   { id: 'trading/process/risk-per-idea', title: 'Risk per idea', cat: 'trading',
     tags: ['process', 'risk'],
@@ -1634,7 +1634,7 @@ Time of day is the filter that costs nothing and saves the most. An entry patter
     body: `One idea, one unit of risk. Not per entry — per idea. If the thesis needs two attempts, both come out of the same unit, because the market does not owe you a fresh allowance for re-trying the thing it already rejected once.
 
 Fix the unit as a fraction of capital and stop tuning it. The number you can hold while [[losing-well]] is smaller than the number that looks right on a winning week, and sizing by conviction is sizing by mood. The whole point of [[one-good-trade]] is that the idea was defined before the money touched it — [[the-plan]] is where the unit gets written down.`,
-    words: 107, mtime: 0 },
+    impact: 5, words: 107, mtime: 0 },
 
   { id: 'trading/process/the-plan', title: 'The plan', cat: 'trading',
     tags: ['process'],
@@ -1648,7 +1648,7 @@ Fix the unit as a fraction of capital and stop tuning it. The number you can hol
 - The condition for [[sitting-out]] — named now, while it is cheap.
 
 Three lines is enough. The plan is not a forecast; it is a filter you build while calm, for the person you become when price starts moving. Anything not in it does not get traded, and [[invalidation]] is part of the setup, never an afterthought.`,
-    words: 107, mtime: 0 },
+    impact: 4, words: 107, mtime: 0 },
 
   { id: 'trading/process/invalidation', title: 'Invalidation', cat: 'trading',
     tags: ['process', 'risk'],
@@ -1656,7 +1656,7 @@ Three lines is enough. The plan is not a forecast; it is a filter you build whil
     body: `A thesis you cannot kill is not a thesis. Before the entry, write the fact that would prove it wrong — a close back through the [[cisd]] candle, the draw traded into from the wrong side, the time window expiring with nothing in it. A price level is the bluntest of these and still better than none.
 
 The skill is [[inversion]]: do not ask what confirms the idea, ask what buries it, then watch for that. If the burying fact prints, you are out — not smaller, out. Moving the stop is editing the past. [[the-plan]] holds the invalidation precisely so the person watching the trade does not get a vote.`,
-    words: 111, mtime: 0 },
+    impact: 5, words: 111, mtime: 0 },
 
   { id: 'trading/process/the-review', title: 'The review', cat: 'trading',
     tags: ['process', 'review'],
@@ -1667,7 +1667,7 @@ The skill is [[inversion]]: do not ask what confirms the idea, ask what buries i
 Grade the process, never the outcome. A planned trade that lost is a pass; an unplanned trade that paid is a fail, and the review says so in those words. Pull the entry from [[the-log]], mark it against the plan, and note the one thing you would repeat and the one you would not.
 
 Do it the same day. Memory is generous by morning, and it flatters you in exactly the places [[losing-well]] needs you honest. The [[weekly-review]] then reads seven of these instead of asking you to remember a week.`,
-    words: 108, mtime: 0 },
+    impact: 3, words: 108, mtime: 0 },
 
   { id: 'trading/process/one-good-trade', title: 'One good trade', cat: 'trading',
     tags: ['process'],
@@ -1678,7 +1678,7 @@ Do it the same day. Memory is generous by morning, and it flatters you in exactl
 Most damage is not one bad decision; it is the third unplanned entry taken to repair the first. The cap is not a limit on opportunity, it is a limit on tilt. If the market gives nothing that matches [[the-plan]], then [[sitting-out]] was the good trade, and it counts.
 
 **Done is a number of decisions, not a number of tickets.** Size and frequency both answer to [[risk-per-idea]].`,
-    words: 97, mtime: 0 },
+    impact: 4, words: 97, mtime: 0 },
 
   { id: 'trading/process/sitting-out', title: 'Sitting out', cat: 'trading',
     tags: ['process', 'discipline'],
@@ -1686,7 +1686,7 @@ Most damage is not one bad decision; it is the third unplanned entry taken to re
     body: `Flat is a position. Most sessions do not offer the setup, and the work on those days is to watch the whole thing happen without you.
 
 The urge to act is not information. It is [[boredom]] wearing a costume, and it shows up loudest exactly when the range is thinnest. You do not need a reason to stay out; you need a reason to get in, and the reason has to be in [[the-plan]] before the session opens. A day out of the market costs nothing. It only feels expensive because nothing is the one result you cannot screenshot.`,
-    words: 99, mtime: 0 },
+    impact: 4, words: 99, mtime: 0 },
 
   { id: 'trading/process/the-log', title: 'The log', cat: 'trading',
     tags: ['process', 'review'],
@@ -1694,7 +1694,7 @@ The urge to act is not information. It is [[boredom]] wearing a costume, and it 
     body: `Every trade, the day it happened: date, setup, unit, result, and one honest sentence. The sentence is the part that appreciates — the numbers say what happened, the sentence says who you were while it did.
 
 Keep it in [[plain-text]], one file per day, named \`YYYY-MM-DD\`. A log you can search at year-end is a dataset; a log inside an app you abandon is a diary you lost. Feed it into [[the-review]] the same evening, while the sentence is still true.`,
-    words: 81, mtime: 0 },
+    impact: 2, words: 81, mtime: 0 },
 
   { id: 'trading/process/losing-well', title: 'Losing well', cat: 'trading',
     tags: ['process', 'risk'],
@@ -1702,7 +1702,7 @@ Keep it in [[plain-text]], one file per day, named \`YYYY-MM-DD\`. A log you can
     body: `A loss is inventory, not a verdict. The plan defines where you are wrong; the loss is the fee for finding out, priced in advance by [[risk-per-idea]]. Taken at the planned level, at the planned size, a loss is the system working.
 
 What you are guarding against is not the loss but the response to it — the revenge entry, the doubled size, the stop that migrates. The tell is speed: an honest loss leaves you slow and unhurried, a tilted one makes the next click urgent. Write every one into [[the-review]] the same day. A loss you have written down stops arguing with you.`,
-    words: 105, mtime: 0 },
+    impact: 4, words: 105, mtime: 0 },
 
   /* ── growth ── the other pole. The standard, the chain, and the
      places attention actually goes. */
@@ -1715,7 +1715,7 @@ What you are guarding against is not the loss but the response to it — the rev
 > You do not rise to the occasion. You fall to the level of the floor you kept.
 
 Keep the floor small enough to hold on the worst day you can foresee. A standard with exceptions is a preference, and a preference bends exactly when it matters. Every held floor is one of the [[identity-votes]]; checking that it held is [[discipline]]'s job daily and the [[weekly-review]]'s job on the seventh.`,
-    words: 103, mtime: 0 },
+    impact: 5, words: 103, mtime: 0 },
 
   { id: 'growth/the-avoided-thing', title: 'The avoided thing', cat: 'growth',
     tags: ['principle'],
@@ -1725,7 +1725,7 @@ Keep the floor small enough to hold on the worst day you can foresee. A standard
 The avoidance costs more than the task. It sits in the background taxing everything else you do, and the tax compounds daily. So the rule: the avoided thing goes first, before the day gets a say. Not finished — started, ten honest minutes.
 
 Naming it is most of the work. [[the-standard]] holds the floor, [[saying-no]] clears the room, and what is left in the room staring at you is usually it. The discomfort is [[boredom]]'s louder cousin, and it fades the same way: by staying.`,
-    words: 120, mtime: 0 },
+    impact: 4, words: 120, mtime: 0 },
 
   { id: 'growth/attention', title: 'Attention', cat: 'growth',
     tags: ['principle', 'focus'],
@@ -1735,7 +1735,7 @@ Naming it is most of the work. [[the-standard]] holds the floor, [[saying-no]] c
 Treat it as a stock that depletes. It is highest early, and every switch levies a toll on what remains. Guard it structurally, not heroically — the phone in another room beats the phone resisted, which is the whole argument of [[environment-design]], and [[saying-no]] is attention spent once, saved daily.
 
 The taste for it grows in silence. Sit with one thing past the first urge to leave and the urge weakens; that is [[boredom]] doing its work.`,
-    words: 103, mtime: 0 },
+    impact: 4, words: 103, mtime: 0 },
 
   { id: 'growth/sleep-is-an-input', title: 'Sleep is an input', cat: 'growth',
     tags: ['principle', 'sleep'],
@@ -1743,7 +1743,7 @@ The taste for it grows in silence. Sit with one thing past the first urge to lea
     body: `Sleep is an input, not a reward. You do not earn it by finishing; you spend it in advance, on tomorrow's judgement, mood and restraint. Treated as the thing you trim when the day runs long, it quietly trims you back — the running bill is [[sleep-debt]].
 
 The lever is the bedtime, not the alarm. The alarm is where the night is settled; the bedtime is where it is decided. Fix it, defend it like an appointment, and the mornings fix themselves — which is why a kept bedtime extends [[the-chain]] more reliably than any morning habit, and why a defended evening is the cheapest [[attention]] you will buy all week.`,
-    words: 111, mtime: 0 },
+    impact: 4, words: 111, mtime: 0 },
 
   { id: 'growth/goal-vs-direction', title: 'A goal and a direction', cat: 'growth',
     tags: ['principle'],
@@ -1753,7 +1753,7 @@ The lever is the bedtime, not the alarm. The alarm is where the night is settled
 A direction cannot be finished, only kept or left. Stronger than last month outlives any number by summer. So set the direction first, use goals only as milestones along it, and never let a missed milestone argue that the bearing was wrong.
 
 Progress along a direction is counted in [[identity-votes]], and its outward sign is [[the-chain]] — unbroken not because you never miss, but because the bearing survives the miss.`,
-    words: 112, mtime: 0 },
+    impact: 3, words: 112, mtime: 0 },
 
   { id: 'growth/the-chain', title: 'The chain', cat: 'growth',
     tags: ['habit'],
@@ -1761,7 +1761,7 @@ Progress along a direction is counted in [[identity-votes]], and its outward sig
     body: `Do not break the chain — but define breaking honestly. A chain that dies on one missed day gets abandoned the first time life happens; a chain that tolerates the honest miss survives the year.
 
 The chain measures showing up, never output. Two minutes counts. The point is that tomorrow's decision is pre-made — you are someone who does this, so the question of whether you will today never opens for bidding. That pre-decision is what [[discipline]] mostly is on the good days, and it is aimed by [[goal-vs-direction]]: the chain is how a bearing looks up close.`,
-    words: 98, mtime: 0 },
+    impact: 4, words: 98, mtime: 0 },
 
   { id: 'growth/environment-design', title: 'Environment design', cat: 'growth',
     tags: ['habit'],
@@ -1773,7 +1773,7 @@ The chain measures showing up, never output. Two minutes counts. The point is th
 - One clear surface for the work; a surface that holds one thing asks for that thing.
 
 Willpower is what you spend when the room is against you. [[attention]] is the resource being defended, and half of [[the-avoided-thing]]'s power evaporates when its opposite is the path of least resistance.`,
-    words: 113, mtime: 0 },
+    impact: 4, words: 113, mtime: 0 },
 
   { id: 'growth/weekly-review', title: 'The weekly review', cat: 'growth',
     tags: ['review'],
@@ -1783,7 +1783,7 @@ Willpower is what you spend when the room is against you. [[attention]] is the r
 The review is navigation, not a report card. You are checking the bearing against [[goal-vs-direction]], not grading the week out of ten — a bad week on the right bearing beats a good week on the wrong one.
 
 Empty the [[someday]] list while you are there: promote at most one thing, delete one thing you no longer mean. Then set the single priority for the week ahead and let the rest queue. Held weekly, it keeps [[the-standard]] honest, because nothing erodes a floor faster than not looking at it.`,
-    words: 102, mtime: 0 },
+    impact: 2, words: 102, mtime: 0 },
 
   { id: 'growth/discipline', title: 'Discipline', cat: 'growth',
     tags: ['principle', 'discipline'],
@@ -1794,7 +1794,7 @@ Empty the [[someday]] list while you are there: promote at most one thing, delet
 Most of it can be outsourced: [[environment-design]] removes the choice, routine removes the negotiation, and what remains — the genuinely hard moment — is rare enough to win. Spending willpower where structure would do is bad engineering.
 
 It compounds sideways, too. Kept in one place it gets cheaper everywhere else, which is why [[sitting-out]] at the desk and the rest day under the bar are the same skill in different clothes. The reference is [[the-standard]]. Not perfection — the floor, held.`,
-    words: 99, mtime: 0 },
+    impact: 3, words: 99, mtime: 0 },
 
   { id: 'growth/boredom', title: 'Boredom', cat: 'growth',
     tags: ['principle', 'focus'],
@@ -1804,7 +1804,7 @@ It compounds sideways, too. Kept in one place it gets cheaper everywhere else, w
 Do not treat it as a problem; it is the doorway. On the other side of the first ten minutes of an unstimulated task is the deep engagement everything worthwhile requires — the [[attention]] you keep trying to summon on demand lives there. So schedule some: a walk without audio, a queue without the phone.
 
 The tolerance rebuilds faster than you expect, and [[the-chain]] gets easier to keep once the alternative has lost its glow.`,
-    words: 100, mtime: 0 },
+    impact: 2, words: 100, mtime: 0 },
 
   { id: 'growth/identity-votes', title: 'Identity votes', cat: 'growth',
     tags: ['habit', 'principle'],
@@ -1814,7 +1814,7 @@ The tolerance rebuilds faster than you expect, and [[the-chain]] gets easier to 
 So aim at the identity, not the outcome — someone who trains outlasts any target, because outcomes end and identities compound. Cast the small vote on the bad day; it counts double, because it was cast against the wind.
 
 [[the-standard]] defines the ballot. [[the-chain]] is the tally, kept where you can see it.`,
-    words: 94, mtime: 0 },
+    impact: 5, words: 94, mtime: 0 },
 
   { id: 'growth/saying-no', title: 'Saying no', cat: 'growth',
     tags: ['principle', 'focus'],
@@ -1824,7 +1824,7 @@ So aim at the identity, not the outcome — someone who trains outlasts any targ
 The default has to be no — polite, fast, unexplained. Explanations are openings for negotiation, and a negotiated no is a slow yes. Keep a shortlist of what gets the automatic yes; everything else earns its place or is declined.
 
 The refusals are where the shape comes from — [[via-negativa]], applied to a calendar. And the hardest no is to the appealing distraction that lets you keep avoiding [[the-avoided-thing]].`,
-    words: 104, mtime: 0 },
+    impact: 3, words: 104, mtime: 0 },
 
   /* ── body ── training, sleep, food. The inputs. */
 
@@ -1834,7 +1834,7 @@ The refusals are where the shape comes from — [[via-negativa]], applied to a c
     body: `Push, pull, legs, rest — the rotation, and rest is inside it, not a lapse of it. A day you chose not to train is a decision worth recording; a day you failed to train is a different fact, and the split keeps you honest about which one happened.
 
 The order matters less than the rotation completing. Miss a day and the split slides forward — you do not skip the day, you delay it. Progression stays boring: small additions, held form. When the additions stall for two weeks running, the answer is rarely more; it is the [[deload]], and a look at what the [[food-rules]] were doing that fortnight.`,
-    words: 110, mtime: 0 },
+    impact: 4, words: 110, mtime: 0 },
 
   { id: 'body/sleep-debt', title: 'Sleep debt', cat: 'body',
     tags: ['sleep'],
@@ -1844,7 +1844,7 @@ The order matters less than the rotation completing. Miss a day and the split sl
 You cannot bank sleep in advance, but you can stop borrowing, and the repayment schedule is boring: the same bedtime, kept, for as long as it takes.
 
 Debt shows in training before it shows anywhere else. The stalled lift argues for a [[deload]] when the honest fix is a fortnight of full nights — the [[morning-walk]] is where you find out which, because a tired walk does not lie.`,
-    words: 112, mtime: 0 },
+    impact: 5, words: 112, mtime: 0 },
 
   { id: 'body/morning-walk', title: 'The morning walk', cat: 'body',
     tags: ['training', 'routine'],
@@ -1854,7 +1854,7 @@ Debt shows in training before it shows anywhere else. The stalled lift argues fo
 The walk is three tools in one coat: light in the eyes to set the day's clock, easy movement to spend the night's stiffness, and a stretch of quiet before anything starts asking. Pace does not matter. Missing the point does — a walk with a podcast is exercise; a walk without one is maintenance for the head.
 
 Do it before deciding whether to. The [[breathwork]] note pairs with it on the rough mornings, and after a short night it is the [[sleep-debt]] collection notice you actually read. The [[hydration]] rule starts here too: the first glass is before the door, not after the coffee.`,
-    words: 118, mtime: 0 },
+    impact: 3, words: 118, mtime: 0 },
 
   { id: 'body/hydration', title: 'Water', cat: 'body',
     tags: ['routine'],
@@ -1864,7 +1864,7 @@ Do it before deciding whether to. The [[breathwork]] note pairs with it on the r
 Front-load it. The first litre before midday does more than the third after dinner, and the late catch-up mostly buys you a broken night. Thirst is a lagging signal — by the time it speaks you are already paying in focus, and in appetite, where it impersonates hunger convincingly enough to beat the [[food-rules]] from inside.
 
 Start on the [[morning-walk]] rule: a glass before the door. After that the day mostly keeps itself, provided the water is where you are — carry it, or you will drink whatever was nearer.`,
-    words: 111, mtime: 0 },
+    impact: 2, words: 111, mtime: 0 },
 
   { id: 'body/deload', title: 'The deload', cat: 'body',
     tags: ['training'],
@@ -1874,7 +1874,7 @@ Start on the [[morning-walk]] rule: a glass before the door. After that the day 
 It is the hardest week to take, precisely because nothing hurts yet. You feel strong, the numbers are moving, and pulling back reads as waste. That read is wrong the way skipping sleep is wrong: the bill has not arrived yet. Plan it into [[the-split]] in advance so it never depends on how you feel.
 
 Doing less, deliberately, as a method — [[via-negativa]] under a barbell. If you cannot face it, check [[sleep-debt]]; the resistance is usually fatigue talking.`,
-    words: 116, mtime: 0 },
+    impact: 3, words: 116, mtime: 0 },
 
   { id: 'body/food-rules', title: 'Food rules', cat: 'body',
     tags: ['routine', 'food'],
@@ -1886,7 +1886,7 @@ Doing less, deliberately, as a method — [[via-negativa]] under a barbell. If y
 - The default meal is boring, repeated, and decided once.
 
 The last one is [[environment-design]] on a plate: what is in the house is what gets eaten, so the shopping list is where the diet is actually decided. Appetite lies twice a day and [[hydration]] catches one of the lies. Training days get fed properly — see [[the-split]]; under-eating on a heavy day is not discipline, it is a slower way to stall.`,
-    words: 112, mtime: 0 },
+    impact: 3, words: 112, mtime: 0 },
 
   /* ── craft ── how the work gets built. */
 
@@ -1898,7 +1898,7 @@ The last one is [[environment-design]] on a plate: what is in the house is what 
 Big tools promise everything and bill you in migrations, updates and lock-in — the price is never on the label. Before adopting anything, ask what it replaces and what it will cost to leave. A tool you cannot leave owns you.
 
 Chain small ones instead: [[plain-text]] between them is the joint that never seizes. The same instinct scales down to [[one-file]] projects, and down again to [[naming]] — the craft is mostly choosing what to leave out.`,
-    words: 111, mtime: 0 },
+    impact: 4, words: 111, mtime: 0 },
 
   { id: 'craft/plain-text', title: 'Plain text', cat: 'craft',
     tags: ['tools'],
@@ -1908,7 +1908,7 @@ Chain small ones instead: [[plain-text]] between them is the joint that never se
 Notes, logs, plans, all of it: files you can read on anything, search with \`grep\`, diff, back up by copying. The friction you save is not typing — it is never again migrating a decade of thinking out of a dying app.
 
 This is why [[small-tools]] compose: they all speak text. The [[the-log|log]] lives this way for the same reason. The day you want to ask a year of entries one question is the day the format decides whether you can.`,
-    words: 115, mtime: 0 },
+    impact: 3, words: 115, mtime: 0 },
 
   { id: 'craft/naming', title: 'Naming', cat: 'craft',
     tags: ['practice'],
@@ -1918,7 +1918,7 @@ This is why [[small-tools]] compose: they all speak text. The [[the-log|log]] li
 If you cannot name it, you do not understand it yet. The struggle is diagnostic, not clerical. And where two things share a name, one quietly eats the other — a folder of [[plain-text]] notes lives or dies on this.
 
 Small scope earns a short name; wide scope has to pay for a longer, truer one. The same economy as [[one-file]]: what you save in ceremony, spend on clarity.`,
-    words: 120, mtime: 0 },
+    impact: 3, words: 120, mtime: 0 },
 
   { id: 'craft/one-file', title: 'One file', cat: 'craft',
     tags: ['practice', 'tools'],
@@ -1928,7 +1928,7 @@ Small scope earns a short name; wide scope has to pay for a longer, truer one. T
 The limit is real. Past a few thousand lines the file needs discipline the folder used to impose for free: order matters more, names carry more, every section has to announce itself. Those costs are visible, which is the point — a folder hides its mess in a tree; a file makes you scroll past yours.
 
 Start with one, split when it hurts, not before. [[small-tools]] applies to structure too, and [[finish-things]] is easier when there is only one thing to finish.`,
-    words: 115, mtime: 0 },
+    impact: 2, words: 115, mtime: 0 },
 
   { id: 'craft/finish-things', title: 'Finishing', cat: 'craft',
     tags: ['practice'],
@@ -1938,7 +1938,7 @@ Start with one, split when it hurts, not before. [[small-tools]] applies to stru
 Finishing is its own skill, distinct from starting and harder to practise, because every project ends exactly once. So make more endings: cut scope until the end is near, then hit it. The last stretch — the tests, the notes, the cleanup — is where [[deliberate-practice]] actually lives, since it is the part you always avoid.
 
 A [[one-file]] project helps by making done visible: one thing, shipped or not. Abandoning deliberately is fine. Drifting away is not — write the line that closes it either way.`,
-    words: 120, mtime: 0 },
+    impact: 4, words: 120, mtime: 0 },
 
   { id: 'craft/deliberate-practice', title: 'Deliberate practice', cat: 'craft',
     tags: ['practice'],
@@ -1948,7 +1948,7 @@ A [[one-file]] project helps by making done visible: one thing, shipped or not. 
 The recipe is unglamorous: isolate one weakness, design the rep that stresses it, keep the feedback loop shorter than your excuse-making. It will feel bad on schedule — the edge is uncomfortable by definition, and [[boredom]] arrives right before the improvement does.
 
 Keep it small and daily rather than heroic and rare. Then [[finish-things]] with it: practice that never feeds a finished thing curdles into a hobby of preparation.`,
-    words: 107, mtime: 0 },
+    impact: 4, words: 107, mtime: 0 },
 
   /* ── mind ── the thinking tools everything else borrows. */
 
@@ -1960,7 +1960,7 @@ Keep it small and daily rather than heroic and rare. Then [[finish-things]] with
 To rebuild: list what you actually know to be true, discard the rest, and reconstruct upward from the short list. It is expensive, which is why you reserve it for what matters and copy convention everywhere else — rebuilding everything from scratch is not rigour, it is procrastination in a lab coat.
 
 [[inversion]] is the cheap first pass. [[beginners-mind]] is the posture that lets you see the cached answer at all.`,
-    words: 116, mtime: 0 },
+    impact: 5, words: 116, mtime: 0 },
 
   { id: 'mind/inversion', title: 'Inversion', cat: 'mind',
     tags: ['thinking'],
@@ -1970,7 +1970,7 @@ To rebuild: list what you actually know to be true, discard the rest, and recons
 Avoiding stupidity beats seeking brilliance, and beats it on reliability: brilliance needs conditions, while not-stupid works every day. Before any plan, run it once through the mirror — what would make this a disaster — and patch those holes first.
 
 It is [[first-principles]]' scrappy sibling, and one of the removals catalogued in [[via-negativa]]: improvement by subtraction, the kind that never overshoots.`,
-    words: 108, mtime: 0 },
+    impact: 4, words: 108, mtime: 0 },
 
   { id: 'mind/second-order', title: 'Second-order effects', cat: 'mind',
     tags: ['thinking'],
@@ -1980,7 +1980,7 @@ It is [[first-principles]]' scrappy sibling, and one of the removals catalogued 
 Ask the question twice more than feels natural. Most bad decisions are first-order good — that is exactly why they get made — and most good ones are first-order costly, which is why they go unclaimed long enough for you to have them.
 
 The habit is mechanical, not clever: for each consequence, write the consequence of that. It composes with [[first-principles]] — derive what is true, then trace where it leads — and with [[inversion]], when you walk the chain backwards from the disaster instead.`,
-    words: 121, mtime: 0 },
+    impact: 4, words: 121, mtime: 0 },
 
   { id: 'mind/via-negativa', title: 'Via negativa', cat: 'mind',
     tags: ['thinking'],
@@ -1990,7 +1990,7 @@ The habit is mechanical, not clever: for each consequence, write the consequence
 So when something underperforms, look for what to remove before shopping for what to add. The removed thing cannot break, cannot distract, and cannot lie to you; robustness built this way approaches [[antifragility]] from the cheap side.
 
 Knowing what to leave out is the expensive knowledge, and every craft's best converge on it. [[inversion]] finds the candidates: list what does the damage, then delete from the top.`,
-    words: 115, mtime: 0 },
+    impact: 4, words: 115, mtime: 0 },
 
   { id: 'mind/circle-of-competence', title: 'The circle of competence', cat: 'mind',
     tags: ['thinking'],
@@ -2000,7 +2000,7 @@ Knowing what to leave out is the expensive knowledge, and every craft's best con
 The size of the circle matters less than the honesty of its edge. A small circle precisely known beats a large one with a disputed frontier, because every disaster lives in the overestimate. Real competence includes a map of where it stops.
 
 So act inside, study outside, and never bet on the boundary itself. When a decision falls beyond the edge, the expert move is [[sitting-out]] — declining is a verdict, not the absence of one. The edge moves slowly; [[beginners-mind]] keeps the map current.`,
-    words: 122, mtime: 0 },
+    impact: 4, words: 122, mtime: 0 },
 
   { id: 'mind/memento-mori', title: 'Memento mori', cat: 'mind',
     tags: ['thinking'],
@@ -2012,7 +2012,7 @@ So act inside, study outside, and never bet on the boundary itself. When a decis
 Held daily, it is a filter. The grudge shrinks, the feed loses its grip, the deferred conversation stops deferring. Nothing clarifies a list like a deadline nobody can move.
 
 It is the closing argument for [[goal-vs-direction]] — you may not get the arrival, so the bearing has to be worth walking today — and the companion of [[via-negativa]]: with finite days, everything you remove returns time, and time is the one budget with no top-up.`,
-    words: 116, mtime: 0 },
+    impact: 2, words: 116, mtime: 0 },
 
   { id: 'mind/beginners-mind', title: "Beginner's mind", cat: 'mind',
     tags: ['thinking'],
@@ -2022,7 +2022,7 @@ It is the closing argument for [[goal-vs-direction]] — you may not get the arr
 So hold both: the expert's standards, the beginner's questions. Ask the obvious question on purpose, especially when you are the senior person in the room and the question feels beneath you. That feeling is the tell.
 
 The practice is small. Explain the basics from scratch now and then, and notice where the explanation leans on obviously — every obviously is a cached step, and [[first-principles]] names the cache. The [[circle-of-competence]] stays honestly mapped only if the interior gets re-surveyed too.`,
-    words: 115, mtime: 0 },
+    impact: 2, words: 115, mtime: 0 },
 
   /* ── world ── reference. Each of these exists to serve a note in
      another category, which is why almost every link here crosses. */
@@ -2035,7 +2035,7 @@ The practice is small. Explain the basics from scratch now and then, and notice 
 What it mostly teaches is that win rate is a vanity metric. A method that wins a third of the time pays handsomely if the winners are large, and a method that wins nine in ten can still bleed. The pair moves together; you cannot tune one without paying in the other.
 
 It needs a sample — twenty attempts is a rumour, a hundred starts to be a fact. It is the ground [[bet-sizing]] builds on, and the reason [[risk-per-idea]] holds the unit constant: expectancy in units only means something if the unit does.`,
-    words: 121, mtime: 0 },
+    impact: 3, words: 121, mtime: 0 },
 
   { id: 'resources/spaced-repetition', title: 'Spaced repetition', cat: 'world',
     tags: ['reference', 'learning'],
@@ -2045,7 +2045,7 @@ It needs a sample — twenty attempts is a rumour, a hundred starts to be a fact
 Cramming feels better and works worse. The difficulty of a barely-successful recall is the active ingredient, not a sign of failure — the brain consolidates whatever it is made to retrieve.
 
 The same law is why [[deliberate-practice]] revisits a weakness on a schedule instead of once, and why [[habit-loops]] deepen with repetition: behaviour is retrieved too.`,
-    words: 110, mtime: 0 },
+    impact: 2, words: 110, mtime: 0 },
 
   { id: 'resources/circadian-light', title: 'Light and the clock', cat: 'world',
     tags: ['reference', 'sleep'],
@@ -2055,7 +2055,7 @@ The same law is why [[deliberate-practice]] revisits a weakness on a schedule in
 Morning light — outdoors, inside an hour of waking — anchors the whole cycle: alertness now, the sleep signal on schedule fourteen-odd hours later. Indoor light is a rounding error; even an overcast sky is many times brighter than a lit room. Evening screens run the same experiment in reverse, telling the clock it is noon at midnight.
 
 This is the mechanism under [[sleep-is-an-input]], and the unglamorous reason the [[morning-walk]] earns its slot: the walk is a light dose wearing exercise clothes.`,
-    words: 104, mtime: 0 },
+    impact: 3, words: 104, mtime: 0 },
 
   { id: 'resources/bet-sizing', title: 'Bet sizing', cat: 'world',
     tags: ['reference', 'risk'],
@@ -2065,7 +2065,7 @@ This is the mechanism under [[sleep-is-an-input]], and the unglamorous reason th
 The optimal fraction grows with the edge and shrinks with the variance, and it is always startlingly smaller than instinct suggests. The practical rule: estimate the edge conservatively, then take half of what the arithmetic allows, because your estimate is the shakiest input in it.
 
 Sizing is decided before the attempt, in cold blood. [[risk-per-idea]] is this note operationalised, and [[expectancy]] supplies the edge it needs as input.`,
-    words: 105, mtime: 0 },
+    impact: 3, words: 105, mtime: 0 },
 
   { id: 'resources/habit-loops', title: 'Habit loops', cat: 'world',
     tags: ['reference', 'learning'],
@@ -2077,7 +2077,7 @@ The loop every habit runs on, kept or unwanted alike. The cue fires, the routine
 To build one: make the cue unmissable and the first step trivial. To break one: do not fight the routine — starve the cue, or keep the cue and swap the routine under it. Willpower attacks the middle of the loop, which is its strongest link; design attacks the ends.
 
 Repetition consolidates the wiring the same way [[spaced-repetition]] consolidates recall. This is the machinery [[the-chain]] rides on — the chain is a reward acting on a cue you can see.`,
-    words: 116, mtime: 0 },
+    impact: 3, words: 116, mtime: 0 },
 
   /* ── other ── two notes that refuse a folder, so Unfiled is a fact
      on the map rather than a theory in the legend. */
@@ -2092,7 +2092,7 @@ Repetition consolidates the wiring the same way [[spaced-repetition]] consolidat
 - The trip, the tool, the redesign.
 
 Review it during the [[weekly-review]]: promote at most one thing, delete anything you no longer mean, because a someday list that only grows is a guilt list. Whatever resists filing goes to [[loose-thread]] first, and a thing promoted off this list deserves an ending — [[finish-things]] — or it boomerangs back on. An idea for [[the-daily-note]] has sat here longer than most, which is either a verdict or a queue.`,
-    words: 132, mtime: 0 },
+    impact: 3, words: 132, mtime: 0 },
 
   { id: 'loose-thread', title: 'Loose thread', cat: 'other',
     tags: [],
@@ -2102,7 +2102,7 @@ Review it during the [[weekly-review]]: promote at most one thing, delete anythi
 So this is the airlock. A thought sits here until it earns a place or admits it belongs on [[someday]]. Most reveal themselves within a week; the ones that do not are usually two thoughts sharing a sentence, and splitting them is the filing.
 
 The test for readiness is [[naming]]: when you can name it truly, you know what it is, and what it is tells you where it lives.`,
-    words: 113, mtime: 0 },
+    impact: 2, words: 113, mtime: 0 },
 
 ];
 
@@ -2536,8 +2536,35 @@ function orLayout() {
   edges.forEach(e => { deg[e[0]] = (deg[e[0]] || 0) + 1; deg[e[1]] = (deg[e[1]] || 0) + 1; });
   orLayout.deg = deg;
 
+  /* ── how much a note weighs ──
+     Link count answers "how much filing did you do", which is the
+     wrong question for a library of other people's ideas: nobody
+     cross-links two hundred video summaries, so degree collapses to
+     nought for almost all of them and the map goes flat.
+
+     `impact:` in the frontmatter, 1 to 5, is the answer instead — the
+     one field you set rather than the file. When NO note carries one
+     the vault is a writer's vault and degree is exactly right, so it
+     falls back whole rather than per note: a mixed scale, where three
+     notes are ranked by how much they mattered and the rest by how
+     many links they happen to have, is two scales wearing one set of
+     sizes. */
+  let imp = {};
+  const rated = notes.filter(n => n.impact >= 1).length;
+  orLayout.rated = rated;
+  if (rated) {
+    notes.forEach(n => { imp[n.id] = n.impact >= 1 ? (n.impact - 1) / 4 : 0; });
+  } else {
+    const top = Math.max(1, ...notes.map(n => deg[n.id] || 0));
+    notes.forEach(n => { imp[n.id] = Math.min(1, (deg[n.id] || 0) / top); });
+  }
+  orLayout.imp = imp;
+
   const tier = {};
   notes.forEach(n => {
+    /* Tier still decides the ORBIT and the paint order. Weight decides
+       how bright it burns, and the two are allowed to disagree: a note
+       nothing links to can be the most important thing you own. */
     const d = deg[n.id] || 0;
     tier[n.id] = d >= 3 ? 'major' : d ? 'minor' : 'leaf';
   });
@@ -4926,7 +4953,7 @@ function orProgress(done, total, verb) {
    page with. Scalars, inline lists and dash lists cover what Obsidian
    actually writes; anything cleverer stays in the body. */
 function orFrontmatter(text) {
-  const meta = { title: null, tags: [], category: null, aliases: [] };
+  const meta = { title: null, tags: [], category: null, aliases: [], impact: 0 };
   const m = /^---[ \t]*\r?\n([\s\S]*?)\r?\n(?:---|\.\.\.)[ \t]*(?:\r?\n|$)/.exec(text);
   if (!m) return { meta, body: text };
   const strip = (s) => String(s).trim().replace(/^["']+|["']+$/g, '').trim();
@@ -4942,6 +4969,17 @@ function orFrontmatter(text) {
     const val = kv[2].trim();
     if (key === 'title') { if (val) meta.title = strip(val); }
     else if (key === 'category') { if (val) meta.category = strip(val); }
+    /* How much this one changed something, 1 to 5, and the only field
+       here you set rather than the file. A library of other people's
+       ideas has no useful link count — you did not sit and cross-link
+       two hundred video summaries — so link count as visual weight is
+       measuring how much work you did filing, not how much the idea
+       mattered. Anything outside 1..5 is no answer rather than a bad
+       one, and falls back. */
+    else if (key === 'impact') {
+      const n = parseFloat(strip(val));
+      if (Number.isFinite(n) && n >= 1 && n <= 5) meta.impact = n;
+    }
     else if (LIST[key]) {
       const into = LIST[key];
       if (!val) { open = into; continue; }
@@ -5030,6 +5068,7 @@ function orParse(path, text, mtime, manual) {
     body,
     words: body.split(/\s+/).filter(Boolean).length,
     mtime: mtime || 0,
+    impact: meta.impact || 0,
   };
 }
 
@@ -7237,6 +7276,11 @@ orRefile.apply = (notes) => {
         body: typeof n.body === 'string' ? n.body : '',
         words: Number.isFinite(n.words) ? n.words : 0,
         mtime: Number.isFinite(n.mtime) ? n.mtime : 0,
+        /* Out of range is NO answer rather than a bad one: 0 drops the
+           note out of the rated set, and a vault where nothing is rated
+           falls back to link count whole. */
+        impact: (Number.isFinite(n.impact) && n.impact >= 1 && n.impact <= 5)
+          ? n.impact : 0,
       });
     }
     return out;

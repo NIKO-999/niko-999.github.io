@@ -325,11 +325,35 @@ const remStore = (list) => JSON.stringify({ v: 1, list: list || [] });
   await page.waitForTimeout(250);
   ok('a tick on tomorrow changes nothing',
     (await page.evaluate(() => localStorage.getItem('jade.v1'))) === before);
+  /* The week strip starts on MONDAY, so on a Monday there is no past
+     day in it at all and AGO(1) selects a column that was never
+     rendered — the click finds nothing and the assertion reads as the
+     app refusing a tick it would happily have taken. It failed one day
+     in seven for exactly that reason, which is worse than a test that
+     never passes: a suite that goes red on a schedule teaches you to
+     ignore red. Ask the strip which past days it is actually showing,
+     and only fall back to yesterday when it is showing none. */
   ok('and a past day still takes one', await (async () => {
-    const past = AGO(1);
-    const s = `.jc-col[data-k="${past}"] .jc-ev[data-id="read"]`;
-    if (!(await page.$(s))) return false;
-    await page.click(s); await page.waitForTimeout(250);
+    let past = await page.evaluate((t) => {
+      const k = [...document.querySelectorAll('.jc-col')].map((c) => c.dataset.k)
+        .filter((x) => x && x < t).sort();
+      return k.length ? k[k.length - 1] : null;
+    }, TODAY);
+    if (!past) {
+      /* Monday: the strip starts today, so step it back a week and ask
+         again rather than clicking a column that was never drawn. */
+      await page.click('#calPrev');
+      await page.waitForTimeout(350);
+      past = await page.evaluate((t) => {
+        const k = [...document.querySelectorAll('.jc-col')].map((c) => c.dataset.k)
+          .filter((x) => x && x < t).sort();
+        return k.length ? k[k.length - 1] : null;
+      }, TODAY);
+    }
+    if (!past) return false;
+    const hit = await page.$(`.jc-col[data-k="${past}"] .jc-ev[data-id="read"]`);
+    if (!hit) return false;
+    await hit.click({ force: true }); await page.waitForTimeout(250);
     return page.evaluate(k => (JSON.parse(localStorage.getItem('jade.v1')).days[k] || []).includes('read'), past);
   })());
   ok('no errors on the calendar', errs.length === 0, errs);
