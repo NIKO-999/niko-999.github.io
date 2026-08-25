@@ -6559,6 +6559,11 @@ function orDropSel() {
 function orClose() {
   const pane = byId('orNote');
   if (!pane || pane.hidden) return;
+  /* After the guard, so this fires on a real close and not on the many
+     calls that find the pane already shut — orClose is the universal
+     "put it down", and half its callers are clearing a pane that was
+     never open. */
+  orIndex();
   const was = state.sel;
   pane.hidden = true;
   orOpen.chrome(false);
@@ -6661,6 +6666,7 @@ function orOpenCat(cat) {
 function orCloseCat() {
   const pane = byId('orCatPane');
   if (!pane || pane.hidden) return;
+  orIndex();
   pane.hidden = true;
   state.catPane = null;
   orOpen.chrome(false);

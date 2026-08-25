@@ -1423,6 +1423,11 @@ const pickHittable = async (page, ids) => {
      an animating subtree cannot be cached — it is re-rasterised every
      frame at whatever scale the camera has reached. That was the lag.
      One arc turns now, and the odd star flaring. */
+  /* On a STILL map. The dial turns for a couple of seconds after any
+     interaction with the notes, and while it does, #orRings and
+     everything under it is legitimately inside a running animation.
+     This assertion is about what the map costs AT REST. */
+  await settle(page);
   const motion = await page.evaluate(() => {
     const svg = document.getElementById('orSvg');
     const all = [...svg.querySelectorAll('*')];
@@ -1570,6 +1575,32 @@ const pickHittable = async (page, ids) => {
      and everything under it permanently inside a running animation. */
   ok('and lets go of the class, so one click does not spend the motion budget',
     !engaged.cls, engaged);
+
+  /* Any interaction with the notes turns it — opening one, closing one,
+     dismissing a category, choosing a formation. But only a REAL one:
+     orClose is the universal "put it down" and half its callers are
+     clearing a pane that was never open, which is not the instrument
+     being used. */
+  await settle(page);
+  const onClose = await page.evaluate(() => new Promise((res) => {
+    const on = () => document.getElementById('orSvg').classList.contains('or-index');
+    orClose();
+    const closed = on();
+    /* Wait for the turn to actually END rather than guessing at it.
+       Closing also flies the camera back to the fit, and the dial is
+       held paused for the whole flight — so the turn runs 880ms later
+       than it does on an open, and a fixed wait that looked generous
+       was still inside the first turn. */
+    const idle = () => {
+      if (on()) { setTimeout(idle, 120); return; }
+      orClose();                     /* nothing open: must not fire */
+      res({ closed, noop: on() });
+    };
+    setTimeout(idle, 200);
+  }));
+  ok('closing a note turns it too', onClose.closed, onClose);
+  ok('but closing what is already closed does not', !onClose.noop, onClose);
+  await settle(page);
 
   const budgetAfter = await page.evaluate(() => {
     orClose(); orZoom(0);
