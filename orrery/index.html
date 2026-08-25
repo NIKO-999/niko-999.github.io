@@ -337,6 +337,34 @@
   .or-turn, #orDustA, #orDustB, #orDustC { animation: none; }
 }
 
+/* ── the spin ──
+   Turn the whole instrument, on a press.
+
+   It rides #orNod and NOT #orView, and that is not a preference: the
+   camera writes #orView's transform on every frame of a pan, a zoom and
+   a flight, so a CSS animation on the same element is overwritten on
+   the first tick. #orNod exists as a separate wrapper for exactly this
+   reason — it is where the old precession lived.
+
+   Reusing `or-turn` rather than writing a second identical keyframes
+   block: one name to keep in sync instead of two.
+
+   72s is a deliberate compromise. Fast enough that you can see it
+   turning without staring, slow enough that a note stays readable long
+   enough to click. The dust shells run 210-440s because they are meant
+   to be noticed only in hindsight; this one is the point. */
+#orSvg.or-spin #orNod {
+  transform-origin: 500px 500px;
+  animation: or-turn 72s linear infinite;
+}
+
+/* Nothing to offer someone who has asked for no motion, so the control
+   is not there at all rather than there and inert. */
+@media (prefers-reduced-motion: reduce) {
+  #orSpin { display: none; }
+  #orSvg.or-spin #orNod { animation: none; }
+}
+
 /* ── the camera is the expensive part ──
    Rings, dust, links and stars all sit inside #orView, so the camera
    scales every one of them. Fly in close and a thousand vector
@@ -417,8 +445,15 @@
    rule silently covers only what happens to be styled from a sheet,
    which is the same shape of failure as the list above it: correct
    about the elements it can see, blind to the ones it cannot. An
-   invariant that any later inline style can switch off is not one. */
-#orSvg.or-flying #orView * { animation-play-state: paused !important; }
+   invariant that any later inline style can switch off is not one.
+
+   It names #orNod rather than #orView because the spin rides that
+   wrapper: it is the one animating thing that is an ANCESTOR of the
+   camera rather than a descendant of it, and a flight through a
+   spinning instrument is the most expensive frame this app can
+   draw. */
+#orSvg.or-flying #orNod,
+#orSvg.or-flying #orNod * { animation-play-state: paused !important; }
 
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
@@ -1466,6 +1501,17 @@
           <button type="button" id="orZoomOut" aria-label="Zoom out">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
                  stroke-linecap="round" aria-hidden="true"><path d="M5.5 12h13" /></svg>
+          </button>
+          <!-- Turn the whole instrument. Off by default and never
+               remembered: a map that is already spinning when you open
+               it is disorienting, and this is a thing you switch on to
+               watch rather than a setting you keep. -->
+          <button type="button" id="orSpin" aria-pressed="false"
+                  aria-label="Spin the instrument" title="Spin the instrument">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
+                 stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20.5 12a8.5 8.5 0 1 1-2.9-6.4" /><path d="M20.7 4.4v5h-5" />
+            </svg>
           </button>
           <button type="button" id="orZoomFit" aria-label="Back to the whole map">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"
@@ -4958,6 +5004,19 @@ function orKeyNode(e) {
   wire('orZoomIn', () => orZoom(1.25, 500, 500));
   wire('orZoomOut', () => orZoom(1 / 1.25, 500, 500));
   wire('orZoomFit', () => orZoom(0));
+  /* The spin is a CLASS and nothing else — no state, no stored value,
+     no per-frame work. Toggling it hands the whole question to the
+     compositor, which is the only way a thing this large is affordable
+     to turn at all: the old precession did the same and was removed for
+     being permanent, not for being a rotation. */
+  wire('orSpin', () => {
+    const svg = byId('orSvg'), b = byId('orSpin');
+    if (!svg || !b) return;
+    const on = !svg.classList.contains('or-spin');
+    svg.classList.toggle('or-spin', on);
+    b.setAttribute('aria-pressed', String(on));
+    orSay(on ? 'The instrument is turning.' : 'Stopped.');
+  });
 })();
 
 /* ─── 4 · VAULT ─── Everything async in it resolves after the whole

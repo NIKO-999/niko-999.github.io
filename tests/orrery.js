@@ -1429,6 +1429,70 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   const towed = await page.evaluate(() => ['orDustA', 'orDustB', 'orDustC']
     .map((id) => document.getElementById(id).style.translate || ''));
   ok('the pointer moves nothing', towed.every((t) => !t), towed);
+
+  /* ── the spin ──
+     A button that turns the whole instrument. Three things about it are
+     load-bearing and none of them are visible in a screenshot. */
+  const spinOff = await page.evaluate(() => ({
+    exists: !!document.getElementById('orSpin'),
+    pressed: document.getElementById('orSpin').getAttribute('aria-pressed'),
+    cls: document.getElementById('orSvg').classList.contains('or-spin'),
+    nod: getComputedStyle(document.getElementById('orNod')).animationName,
+  }));
+  ok('the instrument does not spin until you ask it to',
+    spinOff.exists && spinOff.pressed === 'false' && !spinOff.cls && spinOff.nod === 'none',
+    spinOff);
+
+  await page.click('#orSpin');
+  const spinning = await page.evaluate(() => new Promise((res) => {
+    const ang = () => {
+      const m = new DOMMatrix(getComputedStyle(document.getElementById('orNod')).transform);
+      return Math.atan2(m.b, m.a) * 180 / Math.PI;
+    };
+    const first = ang();
+    setTimeout(() => res({
+      first, second: ang(),
+      pressed: document.getElementById('orSpin').getAttribute('aria-pressed'),
+      /* It has to ride #orNod. On #orView the camera would overwrite it
+         on the first frame of the next pan — orPan writes that
+         element's transform directly, which is why the wrapper exists
+         at all. A spin that stops the moment you touch the map is the
+         failure this asserts against. */
+      onNod: getComputedStyle(document.getElementById('orNod')).animationName,
+      onView: getComputedStyle(document.getElementById('orView')).animationName,
+    }), 1400);
+  }));
+  ok('pressing it turns the whole instrument',
+    spinning.pressed === 'true' && Math.abs(spinning.second - spinning.first) > .5, spinning);
+  ok('and it turns the wrapper, not the element the camera owns',
+    spinning.onNod !== 'none' && spinning.onView === 'none', spinning);
+
+  /* A flight through a spinning instrument is the most expensive frame
+     this app can draw: the camera rescales every element while an
+     ancestor of all of them is also being re-rasterised. The flight
+     rule has to reach the wrapper, not just the camera's own subtree. */
+  const spinFly = await page.evaluate(() => new Promise((res) => {
+    orOpen('trading/models/cisd');
+    setTimeout(() => res({
+      flying: document.getElementById('orSvg').classList.contains('or-flying'),
+      nodState: getComputedStyle(document.getElementById('orNod')).animationPlayState,
+    }), 300);
+  }));
+  ok('and it stands still for a flight, like everything else under the camera',
+    spinFly.flying && spinFly.nodState === 'paused', spinFly);
+  await page.waitForFunction(
+    () => !document.getElementById('orSvg').classList.contains('or-flying'), { timeout: 8000 }).catch(() => {});
+
+  await page.click('#orSpin');
+  const stopped = await page.evaluate(() => ({
+    pressed: document.getElementById('orSpin').getAttribute('aria-pressed'),
+    nod: getComputedStyle(document.getElementById('orNod')).animationName,
+  }));
+  ok('and pressing it again stops it', stopped.pressed === 'false' && stopped.nod === 'none', stopped);
+  /* Left spinning, every pointer test after this one would be aiming at
+     a moving target. */
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
   await page.mouse.move(stg.x + 4, stg.y + 4);
 
   const flares = await page.evaluate(() => new Promise((res) => {
