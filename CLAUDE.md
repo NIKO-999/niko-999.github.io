@@ -455,9 +455,11 @@ fraction of a millisecond.
 ## The ambient field
 
 Asked for "debris and particles... always there, not just event-
-triggered," which is two words and two mechanisms — `orAmbient.trickle`
-answers "debris," `orAmbient.wander` answers "particles" — rather than
-one setting tuned two ways. **Options came from lenses again**: four
+triggered," which is two words and was built as two mechanisms —
+`orAmbient.trickle` answering "debris," `orAmbient.wander` answering
+"particles" — rather than one setting tuned two ways. **Only the
+trickle is left**; see the end of this section for where the particle
+half went and why it is not worth reviving as it was. **Options came from lenses again**: four
 agents (a straight-line parallax drift, the flight debris run as a
 permanent trickle, the existing dust breathing in place, and motes
 ambling on a curved path) each rendered their proposal in the real app
@@ -473,20 +475,19 @@ reasoning as `orDebris`: a filter keystroke or a re-file repaints
 `#orRings` wholesale, and content that lived inside it would be rebuilt
 or wiped on every one of those. `#orAmbient` sits as a sibling instead.
 
-**The `<style>` for the wander keyframes has to live outside the SVG
-entirely, in `<head>` — not in `<defs>`, even though `<defs>` is right
-there and is where `orDebris` puts ITS gradient.** `orPaintRings` owns
-`<defs>` and overwrites its `innerHTML` wholesale on every repaint, for
-reasons that have nothing to do with the ambient field — this cost half
-this pass to find, because the failure is silent: the `<circle>`
-elements survive (they are not inside `#orRings`), only their
-`@keyframes` do not, so the field looks correct in a screenshot and is
-frozen the moment anyone touches the map. A `<style>` is document-wide
-regardless of where it sits, so `<head>` is both safe and free. The
-regression test for this samples actual `getBoundingClientRect()`
-positions before and after a real `orPaint()`, not element counts — an
-element-count check is exactly what this bug would sail through, since
-nothing about the count ever changes.
+**A generated `<style>` must never go in `<defs>`.** Nothing generates
+one any more — the wander was the only thing that did — but the trap is
+worth keeping, because `<defs>` is right there and is where `orDebris`
+puts ITS gradient. `orPaintRings` owns `<defs>` and overwrites its
+`innerHTML` wholesale on every repaint, for reasons that have nothing to
+do with the ambient field, and the failure is silent: the elements
+survive (they are not inside `#orRings`), only their `@keyframes` do
+not, so the field looks correct in a screenshot and is frozen the moment
+anyone touches the map. A `<style>` is document-wide regardless of where
+it sits, so `<head>` is both safe and free. Whatever tests this has to
+measure MOTION across a real `orPaint()` and not element counts — a
+count is exactly what this bug sails through, since nothing about the
+count ever changes.
 
 **It is a handful, on purpose, and the number is not a taste call — it
 is a budget.** `tests/orrery.js` already asserted "almost nothing on
@@ -497,57 +498,45 @@ already spend most of that budget — 10.8% before this shipped. The
 first cut of this field (5 trickle streaks, 9 wander motes, each
 trickle streak wrapped in an extra `<g>` for no reason that survived
 scrutiny) landed at exactly 12.0%, which is not under 12. Dropping the
-redundant wrapper and trimming to 4 and 6 landed at 11.5% — the fix was
+redundant wrapper and trimming the counts brought it under — the fix was
 making the feature cheaper, not moving the ceiling: the ceiling is
-correct and the budget was almost entirely spent already.
+correct and the budget was almost entirely spent already. Every later
+attempt to add to this field ran into the same wall, which is the
+honest reason there is so little of it.
 
-**Reduced motion does not freeze this field — it is never built.**
-Both mechanisms are entirely a property of their own animation (the
-trickle's line has no opacity of its own outside its keyframes; the
-wander mote's position IS its keyframes), so `animation: none` under
-`prefers-reduced-motion` would leave a static line at full opacity and
-motes snapped to their anchor points at full brightness — worse than
-absent. `orAmbient.boot` checks the media query itself and returns
+**Reduced motion does not freeze this field — it is never built.** The
+trickle is entirely a property of its own animation: its line has no
+opacity outside its keyframes, so `animation: none` under
+`prefers-reduced-motion` would leave a static line at full strength —
+worse than absent. `orAmbient.boot` checks the media query itself and returns
 before building anything, the same shape as `orDebris.spawn`'s own
 check.
 
-**The flecks are the field you actually see, and they are four
-elements.** Angular shards rather than dots — the one silhouette this
-map did not already have — in four layers, where the layer IS the
-depth: bigger shards are nearer, so they are brighter and sweep
-faster, and size decides the layer rather than the generator's next
-random number. Bucketing at random was the first cut and it read as
-grain; size, brightness and rate all have to agree about distance or
-the spread is noise.
+**Eleven particle fields were rendered and none of them shipped.** The
+ask was for visible drifting particles; the options ran from bokeh and
+motes through embers, fireflies, streams and a depth swarm, then a
+second set varying silhouette (spikes, angular flecks, hollow rings),
+colour (tinted by the nearest note's folder) and distribution (clumped
+flocks). Flecks were picked, built, tested, deployed — and then looked
+at for a day and removed. They are worth knowing about rather than
+re-deriving: `.claude/workflows/look-render.js` renders any of them
+over the real vault in both themes, and the generators are small.
 
-Every fleck in a layer is a SUBPATH of one `<path>`, so a layer
-animates as a single element and the whole field costs four against
-the continuous-motion budget. Be honest about what that is: it makes
-the METRIC cheap, not the raster. A hundred and ninety rotating shards
-is real work, and the element count understates it — which is why
-`tests/orrery.js` asserts the shard count as well as the layer count.
+**What the exercise actually settled** is that the map does not want
+another scatter of light in it. It already has ninety-odd field stars,
+sixty gradient-haloed notes and a photograph behind all of it; a new
+particle layer either disappears into that or competes with the notes,
+and flecks were the version that competed. If this comes up again, the
+thing to try is not another texture — it is motion the map does not
+already have, or something that carries information the notes do not.
 
-They rotate rather than drift, for the reason the dust turns: a
-rotation has no seam. A translation has to wrap, and a wrap on a finite
-scatter either tears a gap across the field or needs the pattern drawn
-twice to tile. They reuse `or-turn`, the dust shells' own keyframes —
-a second identical block would be a name to keep in sync for nothing.
-
-**Reduced motion KEEPS them and simply stops them**, which is the
-opposite of the trickle beside them. A trickle streak has no opacity of
-its own outside its keyframes, so a still one is a bare line at full
-strength — worse than absent, so it is never built. A fleck is a shape
-at an opacity either way. Stillness is a legitimate version of one and
-not the other, and the two are handled differently on purpose.
-
-**The wander motes were removed to pay for them.** With both, the field
-landed at 11.89% against a hard 12% ceiling — about one element of
-slack, which is not a margin. The wander was the right thing to cut: it
-cost six elements to the flecks' four, and it carried the only CSS
-filter in the app, the six `blur(.35px)` motes that had just been the
+**The wander motes went with them, and stay gone.** They were cut to
+pay for the flecks' budget, and the reason they were the right thing to
+cut outlived the feature: they cost six elements, and they carried the
+only CSS filter in the app — the six `blur(.35px)` motes that were the
 cause of the flight stuttering on a Retina Mac. There are now no CSS
-filters anywhere on this map, and `orAmbient` no longer generates a
-`<style>` at all.
+filters anywhere on this map and `orAmbient` no longer generates a
+`<style>` at all, which is worth more than the motes were.
 
 **A comparison sheet has to show a treatment at ITS OWN SIZE.** The
 eleven particle options were rendered at the stage's real 758px and

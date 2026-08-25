@@ -263,42 +263,7 @@
   100%    { opacity: 0; transform: translateX(var(--or-amb-len)); }
 }
 
-/* ── the flecks ──
-   Angular shards rather than dots, which is the one silhouette this
-   map did not already have. Four layers, and the layer is the DEPTH:
-   bigger flecks are nearer, so they are brighter and they sweep
-   faster. The eye reads differing rates as differing distances — the
-   same argument the three dust shells are built on.
 
-   Four elements, not a hundred and ninety. Every fleck in a layer is a
-   subpath of ONE <path>, so the layer animates as a single element and
-   the whole field costs four against the map's continuous-motion
-   budget, which has about five to give. Bucketing them was originally
-   just to keep the element count down; it is what makes the drift
-   affordable at all.
-
-   Rotation rather than drift, for the same reason the dust turns: a
-   rotation has no seam. A translation has to wrap, and a wrap on a
-   finite scatter either tears a gap across the field or needs the
-   pattern drawn twice to tile.
-
-   `or-turn` is the dust shells' own keyframes, reused deliberately —
-   a second identical @keyframes block would be a name to keep in sync
-   for nothing. */
-#orFlecks { pointer-events: none; }
-.or-amb-fk { transform-origin: 500px 500px; }
-.or-amb-fk1 { animation: or-turn 300s linear infinite; }
-.or-amb-fk2 { animation: or-turn 220s linear infinite reverse; }
-.or-amb-fk3 { animation: or-turn 165s linear infinite; }
-.or-amb-fk4 { animation: or-turn 120s linear infinite reverse; }
-
-/* Unlike the trickle and the wander, a fleck is a real shape at a real
-   opacity with or without its animation — so reduced motion STOPS this
-   layer rather than refusing to build it. Stillness is a legitimate
-   version of this one; it is not of those two. */
-@media (prefers-reduced-motion: reduce) {
-  .or-amb-fk { animation: none; }
-}
 
 /* Both are entirely a property of their own animation — the trickle's
    line has no opacity of its own, the wander mote's position IS its
@@ -1461,12 +1426,6 @@
                same attribute would be overwritten on the first tick. -->
           <g id="orNod">
           <g id="orView">
-            <!-- Flecks. BEHIND the drawing, unlike #orAmbient below,
-                 which is the last child and sits over it: these are
-                 matter the map is seen through, not lights in front of
-                 it. Owned by orAmbient.flecks, built once at boot, and
-                 outside #orRings so a repaint never touches it. -->
-            <g id="orFlecks"></g>
             <g id="orRings"></g>
             <g id="orLinks"></g>
             <g id="orLeads"></g>
@@ -6473,48 +6432,11 @@ orAmbient.trickle = () => {
   return out;
 };
 
-/* Angular shards, four layers deep — see the .or-amb-fk rules for why
-   the layer is the depth and why there are only four of them.
-
-   Size decides the layer, NOT the generator's next random number. A
-   fleck's size, its brightness and how fast it sweeps all have to agree
-   about how far away it is, or the spread reads as noise instead of as
-   depth. Bucketing at random was what the first cut did and it looked
-   like grain. */
-orAmbient.flecks = () => {
-  const r = orRng('orrery.ambient.flecks');
-  const N = 190, W0 = 1.2, W1 = 5;
-  const lay = ['', '', '', ''];
-  for (let i = 0; i < N; i++) {
-    /* Area-even scatter, so the middle is not crowded. */
-    const a = r() * Math.PI * 2;
-    const rad = 40 + Math.sqrt(r()) * 455;
-    const x = 500 + Math.cos(a) * rad, y = 500 + Math.sin(a) * rad;
-    /* Skewed small: a field is mostly far things, with a few near ones. */
-    const w = W0 + Math.pow(r(), 1.8) * W1;
-    const hh = w * (.25 + r() * .5);
-    const t = r() * Math.PI;
-    const ct = Math.cos(t), st = Math.sin(t);
-    const p = (dx, dy) => `${orLayout.N(x + dx * ct - dy * st)} `
-      + `${orLayout.N(y + dx * st + dy * ct)}`;
-    const b = Math.min(3, Math.floor((w - W0) / W1 * 4));
-    lay[b] += `M${p(-w, -hh)}L${p(w, -hh)}L${p(w, hh)}L${p(-w, hh)}Z`;
-  }
-  return lay.map((d, i) =>
-    `<path class="or-amb-fk or-amb-fk${i + 1}" d="${d}"`
-    + ` fill="var(--or-star-core)" opacity="${orLayout.N(.3 + i * .2)}"/>`).join('');
-};
-
 /* Built once. orAmbient.built guards a second call — a reload of the
    vault repaints #orRings, never #orView's own children. */
 orAmbient.boot = () => {
   if (orAmbient.built) return;
   orAmbient.built = true;
-  /* The flecks are built either way — they are shapes, and a still
-     shape is still a shape. Only the trickle, which IS its own
-     animation and is a bare line without it, is skipped below. */
-  const fk = byId('orFlecks');
-  if (fk) fk.innerHTML = orAmbient.flecks();
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   const g = byId('orAmbient');
   if (!g) return;

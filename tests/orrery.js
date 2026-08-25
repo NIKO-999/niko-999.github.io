@@ -3074,49 +3074,33 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await am.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
   await waitPaint(am.page);
   await am.page.waitForTimeout(500);
-  const ambCounts = await am.page.evaluate(() => {
-    const fk = [...document.getElementById('orFlecks').children];
-    return { tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
-             fkLayers: fk.length,
-             /* Every fleck is a SUBPATH, so a layer is one element however
-                many shards it draws. That is what makes the drift fit the
-                budget at all — and it is also why the element count alone
-                understates what is really being drawn, so count both. */
-             fkShards: fk.reduce((n, p) => n + (p.getAttribute('d').match(/M/g) || []).length, 0),
-             durs: fk.map((p) => getComputedStyle(p).animationDuration) };
-  });
+  const ambCounts = await am.page.evaluate(() => ({
+    tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
+  }));
   ok('the ambient field is a handful, not a crowd',
-    ambCounts.tk > 0 && ambCounts.tk <= 6
-    && ambCounts.fkLayers === 4 && ambCounts.fkShards > 100 && ambCounts.fkShards <= 260,
-    ambCounts);
-  /* Each fleck layer is a DEPTH, and the rate is what says so: bigger
-     shards are nearer, brighter and sweep faster. Four layers all
-     turning at one rate would be a texture, not a field with a front
-     and a back. */
-  ok('and its four layers each sweep at their own rate, which is the depth cue',
-    new Set(ambCounts.durs).size === 4 && ambCounts.durs.every((d) => parseFloat(d) > 60),
-    ambCounts.durs);
-  /* orPaint rebuilds #orRings, #orLinks, #orNodes and <defs> wholesale.
-     Anything ambient has to live outside all of them — #orFlecks and
-     #orAmbient are siblings of those for exactly this reason. Measured
-     as MOTION rather than as an element count: the elements survived
-     the bug this replaces, only their animation did not, so a count
-     would have sailed straight through it. */
+    ambCounts.tk > 0 && ambCounts.tk <= 6, ambCounts);
+  /* orPaint rebuilds #orRings, #orLinks, #orNodes and <defs> wholesale,
+     so #orAmbient is a sibling of all of them rather than a child. This
+     is measured as MOTION and not as an element count: in the bug it
+     replaces the elements all survived and only their animation did
+     not, which a count sails straight through.
+
+     A trickle streak is parked at opacity 0 for most of its own long
+     cycle, so "is it moving" is read off its animation's own progress
+     rather than off where the element happens to be. */
   const moved = await am.page.evaluate(() => new Promise((res) => {
-    /* The layer's own transform, not its bounding box: a rotating
-       scatter is very nearly circular, so its box hardly moves however
-       far round it has turned. The matrix says exactly where it is. */
     const at = () => {
-      const el = document.querySelector('.or-amb-fk4');
-      return el ? new DOMMatrix(getComputedStyle(el).transform).b : null;
+      const el = document.querySelector('.or-amb-tk');
+      if (!el) return null;
+      const a = el.getAnimations ? el.getAnimations()[0] : null;
+      return a ? a.currentTime : null;
     };
     const before = at();
     orPaint();
     setTimeout(() => res({ before, after: at() }), 900);
   }));
   ok('and survives a repaint — a filter keystroke does not wipe its motion',
-    moved.before !== null && moved.after !== null
-    && Math.abs(moved.after - moved.before) > 1e-4, moved);
+    moved.before !== null && moved.after !== null && moved.after > moved.before, moved);
   ok('no page errors through the ambient field', am.errs.length === 0, am.errs.slice(0, 4));
   await am.browser.close();
 
@@ -3124,21 +3108,15 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
   await amr.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
   await waitPaint(amr.page);
   await amr.page.waitForTimeout(500);
-  const noAmb = await amr.page.evaluate(() => {
-    const fk = [...document.getElementById('orFlecks').children];
-    return { tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
-             fkLayers: fk.length,
-             running: fk.filter((p) => getComputedStyle(p).animationName !== 'none').length };
-  });
-  /* The two are treated differently ON PURPOSE. A trickle streak has no
-     opacity of its own outside its keyframes, so a still one is a bare
-     line at full strength — worse than absent, and it is not built. A
-     fleck is a shape at an opacity either way, so it IS built and simply
-     stops. Stillness is a legitimate version of one and not the other. */
+  const noAmb = await amr.page.evaluate(() => ({
+    tk: document.getElementById('orAmbient').querySelectorAll('.or-amb-tk').length,
+  }));
+  /* A trickle streak has no opacity of its own outside its keyframes, so
+     a still one is a bare line at full strength — worse than absent.
+     That is why this layer is never BUILT under reduced motion rather
+     than built and stopped. */
   ok('reduced motion drops the trickle, which is nothing without its animation',
     noAmb.tk === 0, noAmb);
-  ok('but keeps the flecks and just stops them — a still shard is still a shard',
-    noAmb.fkLayers === 4 && noAmb.running === 0, noAmb);
   ok('no page errors with the ambient field held back', amr.errs.length === 0, amr.errs.slice(0, 4));
   await amr.browser.close();
 
