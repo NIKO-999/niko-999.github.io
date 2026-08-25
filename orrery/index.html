@@ -317,11 +317,39 @@
 
    Only ever on the links of the note you have open — a handful of
    paths, never the six hundred you are not reading. */
-@keyframes or-surge { to { stroke-dashoffset: -100; } }
+/* THREE PASSES, NOT `infinite`, and this is the single most expensive
+   thing that was on this map.
+
+   stroke-dashoffset is neither transform nor opacity, so it can never
+   be composited — and in Blink it is worse than an ordinary paint
+   property, because stroke geometry feeds the SVG bounding box and so
+   dirties SVG layout too. The cost is a property of the whole <svg>
+   rather than of the element: measured, ONE dash-animated path costs
+   2.28ms a frame above the floor and SIX cost 2.36, so trimming how
+   many links surge buys nothing at all and only stopping does.
+
+   Measured with a note open at 1.71x on a 2x device pixel ratio: 5.04ms
+   of main thread per frame with it running, 1.36ms without. That was
+   3.7ms every frame for as long as a note stayed open — while reading,
+   which is most of the time anyone spends here — and it is the one
+   always-on animation `.or-tight` deliberately does NOT pause, so it
+   ran hardest at the zoom where the repaint area is largest.
+
+   Three passes says "these are the connections" and gets out of the
+   way; nobody watched the fourth. `forwards` holds the last keyframe so
+   the overlay ends INVISIBLE rather than parked bright on the line,
+   which is the failure the comment above already worried about. A
+   finished CSS animation does not tick, so the per-frame cost goes to
+   zero and the paths can stay in the DOM for orSim to keep rewriting. */
+@keyframes or-surge {
+  from { stroke-dashoffset: 0;    opacity: 1; }
+  88%  {                          opacity: 1; }
+  to   { stroke-dashoffset: -100; opacity: 0; }
+}
 .or-surge {
   stroke-dasharray: 10 90;
   stroke-linecap: round;
-  animation: or-surge var(--surge, 1.3s) linear infinite;
+  animation: or-surge var(--surge, 1.3s) linear 3 forwards;
 }
 /* Still, it is a bright dash parked on a line, which reads as a fault
    rather than as restraint. So it goes entirely. */
@@ -445,6 +473,28 @@
    labels arriving once the camera has stopped. */
 #orLabels { transition: opacity .22s ease; }
 #orSvg.or-flying #orLabels { opacity: 0; transition: none; }
+
+/* ── and the rim stands down with them ──
+   The two registers are fourteen <text><textPath> carrying 374 glyphs,
+   and SVG text is re-shaped whenever the screen scale factor of its
+   CTM changes — every frame of a flight, because the camera IS a scale.
+   Measured over 300 camera frames at a 2x device pixel ratio with a
+   note open: 1.6ms of layout per frame with the rim in, 0.3ms with it
+   out. Fourteen elements cost four times what the other 851 under
+   #orView cost together, and a Retina panel makes it worse again
+   because the glyph metrics are computed in device space.
+
+   Proof it is the SCALE and not the transform: 200 translate-only
+   writes to #orView cost .0065ms of layout a frame; 200 scale writes
+   cost 1.50ms. Two hundred and thirty times.
+
+   `display`, not `opacity`: an invisible <text> is still laid out and
+   still re-shaped, which is the trap the #orLabels rule above is still
+   in. Instant, for the chips' own reason — nobody reads the rim while
+   the camera is moving, and by 2.4x almost all of it is off the frame
+   anyway. */
+#orSvg.or-flying .or-rim-n,
+#orSvg.or-flying .or-rim-c { display: none; }
 @media (prefers-reduced-motion: reduce) { #orLabels { transition: none; } }
 
 #orSvg.or-tight  .or-turn, #orSvg.or-tight  #orDustA,
@@ -495,8 +545,26 @@
    camera rather than a descendant of it, and a flight through a
    spinning instrument is the most expensive frame this app can
    draw. */
-#orSvg.or-flying #orNod,
-#orSvg.or-flying #orNod * { animation-play-state: paused !important; }
+/* Marked per flight by orZoom.hold, NOT matched by a `*` under a
+   toggled class. That selector was mine and it was expensive: a
+   universal descendant under a class hands Blink a whole-subtree
+   invalidation, so all 866 elements under #orNod recomputed their style
+   when `.or-flying` went on and again when it came off. Measured over
+   100 toggles at a 2x device pixel ratio: 4.99ms per toggle, against
+   0.076ms for `.or-tight` doing the same thing. One of those lands in
+   the same synchronous task as the click — part of why clicking did not
+   feel instant — and the other lands inside the landing frame, the one
+   frame that can least afford it.
+
+   Marking the nine elements that are ACTUALLY animating costs 0.317ms,
+   and the property the `*` was written for survives: the list is still
+   derived at runtime from getAnimations, so a layer added tomorrow is
+   covered on the day it is added rather than on the day someone
+   remembers to add it to a selector.
+
+   !important for the reason it always was: orTwinkle writes an inline
+   `animation` shorthand and an inline shorthand beats any selector. */
+.or-held { animation-play-state: paused !important; }
 
 :root[data-resolved="light"] .or-pinr { stroke: var(--ink); }
 
@@ -3687,6 +3755,8 @@ function orPin(id) {
 }
 orPin.t = 0;              /* the pending open, cancelled by a second press */
 orPin.last = null;
+/* Where the first press of a possible double landed, in client pixels. */
+orPin.at = [-1e9, -1e9];
 /* Not orPin.name. Every function already HAS a .name — a read-only
    string — so the assignment silently did nothing and the call threw
    at the one moment it mattered, announcing a pin. The same class of
@@ -4856,6 +4926,31 @@ function orDragEnd(e) {
      Clicking nothing is the universal way out of a selection, and it
      costs nothing to honour: the press landed on no node, and the hand
      did not move, so it was a click on the sky. */
+  /* ── the second press of a double ──
+     Read from where and when it happened, never from what is under it.
+     The open is optimistic now, so by the time a second press arrives
+     the camera is already flying and the reading pane has already
+     narrowed the stage: the node this press started on is somewhere
+     else, or is no longer under the cursor at all, or the press landed
+     on empty sky. Hit-testing it — which is what `d.id` is — pinned
+     nothing, and three assertions caught exactly that.
+
+     Time and place is how a double-click is defined anyway. Within the
+     quarter second, and within a dozen pixels of the first press, it is
+     the second half of a double on THAT node whatever has since slid
+     underneath. */
+  if (orPin.t && orPin.last && !(d && d.moved) && e && Number.isFinite(e.clientX)
+      && Math.hypot(e.clientX - orPin.at[0], e.clientY - orPin.at[1]) < 14) {
+    clearTimeout(orPin.t); orPin.t = 0;
+    const id = orPin.last; orPin.last = null;
+    const svg0 = byId('orSvg');
+    if (svg0) { try { svg0.releasePointerCapture(e.pointerId); } catch (_) {} }
+    state.drag = null; orSim.quiet = false; orSim.drag = null;
+    /* Undo the optimistic open, then do what the double actually meant. */
+    orClose();
+    orPin(id);
+    return;
+  }
   if (d && d.id == null && !d.moved) {
     const rp = byId('orReply');
     const had = state.sel || state.only || state.catPane || (rp && !rp.hidden);
@@ -4873,18 +4968,26 @@ function orDragEnd(e) {
   const pinned = !!state.pin[d.id];
   if (!d.moved) {
     orSim.hold(d.id, pinned);
-    /* One press opens, two pin — and the only way to tell them apart
-       is to wait for the second. A quarter-second of lag on the open
-       is cheaper than opening the note you were trying to lock, and
-       cheaper still than a pin you can only reach with a mouse. */
-    if (orPin.last === d.id) {
-      clearTimeout(orPin.t); orPin.t = 0; orPin.last = null;
-      orPin(d.id);
-      return;
-    }
+    /* One press opens, two pin. This used to wait 240ms for a possible
+       second press before doing ANYTHING — measured, pointerup to the
+       camera's first frame was 303ms and 243 of it was this timer. A
+       quarter of a second of nothing is most of what "clicking a note
+       is not instant" actually was, and every single open paid it to
+       insure against the rarer gesture.
+
+       So the common press is answered NOW and the rare one is undone.
+       Nothing new had to be built to take it back: orZoom.grab already
+       puts a flight down wherever it got to, and orClose already puts
+       the pane away — both because a hand on the map has always been
+       allowed to interrupt. The second press just uses them. */
     orPin.last = d.id;
+    orPin.at = [e && Number.isFinite(e.clientX) ? e.clientX : -1e9,
+                e && Number.isFinite(e.clientY) ? e.clientY : -1e9];
     clearTimeout(orPin.t);
-    orPin.t = setTimeout(() => { orPin.t = 0; orPin.last = null; orOpen(d.id); }, 240);
+    /* The timer still runs — it is what makes a second press within the
+       quarter second read as a pin — but nothing waits on it any more. */
+    orPin.t = setTimeout(() => { orPin.t = 0; orPin.last = null; }, 240);
+    orOpen(d.id);
     return;
   }
 
@@ -6381,6 +6484,7 @@ orZoom.glide = (z, px, py, focus) => {
 
   view.classList.add('or-fly');
   if (svg) svg.classList.add('or-flying');
+  orZoom.hold(true);
   const aim = focus || null;
   orDust.open(aim ? aim[0] : H, aim ? aim[1] : H,
     Math.max(-1, Math.min(1, lz / Math.log(FLY_MAX))));
@@ -6441,6 +6545,29 @@ orZoom.grab = () => {
    version where one caller did two of them is the bug above.
    Idempotent: calling it on a camera that is already still costs a
    repaint of the label layer and nothing else. */
+/* Which elements actually animate, asked at the moment of asking rather
+   than written down in a selector. getAnimations does not report SMIL in
+   this engine — measured, eleven live <animateMotion> and nine
+   animations returned — which is the same reason the CSS rule this
+   replaces was safe to be blunt: the flight debris must keep running in
+   exactly this window, and it does. */
+orZoom.hold = (on) => {
+  const nod = byId('orNod');
+  if (!nod) return;
+  if (!on) {
+    nod.querySelectorAll('.or-held').forEach((e) => e.classList.remove('or-held'));
+    nod.classList.remove('or-held');
+    return;
+  }
+  if (!nod.getAnimations) return;
+  const els = new Set();
+  nod.getAnimations({ subtree: true }).forEach((a) => {
+    const t = a.effect && a.effect.target;
+    if (t && t.classList) els.add(t);
+  });
+  els.forEach((e) => e.classList.add('or-held'));
+};
+
 orZoom.land = () => {
   if (orZoom.warp) cancelAnimationFrame(orZoom.warp);
   orZoom.warp = 0;
@@ -6451,6 +6578,7 @@ orZoom.land = () => {
   const v = byId('orView'), svg = byId('orSvg');
   if (v) v.classList.remove('or-fly');
   if (svg) svg.classList.remove('or-flying');
+  orZoom.hold(false);
   orPaintLabels();            /* chips flip against the edge, and the edge moved */
 };
 
@@ -7567,6 +7695,18 @@ orIndex.wired = false;
 function orTwinkle() {
   clearTimeout(orTwinkle.t);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  /* Not while the camera is moving. orZoom.hold marks what is animating
+     at the moment the flight STARTS, so unlike the blanket selector it
+     replaced it cannot catch an animation that begins mid-flight — and
+     this is the only thing in the app that does, on a 620-1520ms timer
+     that lands inside an 880ms flight most of the time. Skip the flare
+     and come back on the next tick rather than starting one that would
+     run unpaused through the most expensive frames on the screen. */
+  const svg = byId('orSvg');
+  if (svg && svg.classList.contains('or-flying')) {
+    orTwinkle.t = setTimeout(orTwinkle, 320);
+    return;
+  }
   const halos = document.querySelectorAll('#orNodes .or-halo');
   if (halos.length) {
     const el = halos[Math.floor(orTwinkle.r() * halos.length)];
