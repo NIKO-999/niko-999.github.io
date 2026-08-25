@@ -358,11 +358,54 @@
   animation: or-turn 72s linear infinite;
 }
 
+/* ── one turn, on being used ──
+   Opening a note or changing formation turns the instrument once and
+   leaves it where it started. A FULL revolution rather than a part of
+   one, and that is the whole reason this is safe: the map's orientation
+   carries meaning — the rim names each sector, and you learn where your
+   folders live — so a mechanism that indexed by some fraction and
+   stopped there would quietly move every note to a new place on the
+   screen each time you clicked. 360° is the only rotation that is free.
+
+   The timing is the mechanical part. Linear reads as a motor; this
+   pulls away hard, runs, and settles into the stop, which is what a
+   thing with mass and a detent does.
+
+   It turns #orRings and NOT the whole instrument, which is what the
+   button does. Three reasons, in order of how much they matter:
+
+   The notes hold still, so the map stays clickable throughout. Turning
+   everything meant a pointer was aimed at where a note HAD been — the
+   suite caught a drag opening a neighbour of the node it had aimed at,
+   because the map rotated between choosing a target and arriving at
+   it. Ignoring clicks for two seconds was the alternative, and both
+   are worse than not moving the targets.
+
+   It costs about a sixth of the elements. Turning #orNod put 91% of
+   the drawing inside a running animation — the precession cost that was
+   removed from this app for making it lag, re-introduced and merely
+   time-boxed.
+
+   And it is the better idea anyway: an astrolabe turns its engraved
+   dial over a fixed sky. A mechanism is parts moving RELATIVE to each
+   other; rotating the whole picture rigidly is just rotating a picture.
+
+   Rotating the parent composes with the children rather than replacing
+   them, so the dust shells and the heavy arcs keep their own slow turns
+   and simply ride this one — no restart, no snap back to zero when it
+   ends. */
+#orSvg.or-index #orRings {
+  transform-box: view-box;
+  transform-origin: 500px 500px;
+  animation: or-turn 2.1s cubic-bezier(.62, 0, .3, 1);
+}
+
 /* Nothing to offer someone who has asked for no motion, so the control
    is not there at all rather than there and inert. */
 @media (prefers-reduced-motion: reduce) {
   #orSpin { display: none; }
-  #orSvg.or-spin #orNod { animation: none; }
+  #orSvg.or-spin #orNod,
+  #orSvg.or-index #orRings { animation: none; }
 }
 
 /* ── the camera is the expensive part ──
@@ -5877,6 +5920,9 @@ function orOpen(id) {
   if (typeof orReply === 'function') orReply.clear();
   const got = orOpen.fill(id);
   if (!got) { orSay('That note is not on the map any more.'); return; }
+  /* After the miss above, not before it: asking for a note that is no
+     longer on the map is not the instrument being used. */
+  orIndex();
   state.sel = String(id);
   orWrite({ sel: state.sel });
   const pane = byId('orNote');
@@ -6636,6 +6682,10 @@ function orForm(id) {
   /* Cold, not warm: every home has moved, so this is a new field
      rather than a shove, and it has the whole distance to travel. */
   orHeat(1);
+  /* After orPaint, which rebuilds the node and link layers. The class
+     rides #orSvg so it would have survived either way, but firing it
+     before a wholesale repaint is asking for the two to race. */
+  orIndex();
   orSay(`${f.label} — ${f.say}.`);
 }
 
@@ -7461,6 +7511,53 @@ function orFold(id) {
    layout's determinism is a property of this whole file, and reaching
    for randomness "just for decoration" is how that quietly stops being
    true. Nothing here moves a node — it is opacity and nothing else. */
+/* ── the mechanism engages ──
+   One full turn, fired when the instrument is USED — a note opened, a
+   formation chosen. Nothing here decides when the turn actually
+   happens: opening a note also starts an 880ms flight, and the flight
+   rule pauses everything under #orNod while the camera moves, so a turn
+   fired at the same instant simply holds at zero and runs once the
+   camera lands. The sequencing falls out of a rule that was already
+   there for a different reason, which is why there is no timer.
+
+   Restarting a CSS animation that is already on the element needs the
+   class off, a forced reflow, and the class on again — without the
+   reflow the browser coalesces the two writes and nothing replays. */
+function orIndex() {
+  const svg = byId('orSvg');
+  if (!svg) return;
+  /* Already turning under its own steam: a one-shot on top would be two
+     animations on one element, and the later rule would simply win. */
+  if (svg.classList.contains('or-spin')) return;
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const dial = byId('orRings');
+  /* The class comes OFF when the turn ends, and that is not tidiness.
+     A finished CSS animation still reports animationPlayState
+     'running' — so leaving it on would hold #orRings and everything
+     under it permanently inside "a running animation", which is the
+     exact measure the map's continuous-motion budget is written
+     against. One click would have spent a sixth of the budget for the
+     rest of the session.
+
+     Guarded on the target: animationend bubbles, and the dust shells
+     and the heavy arcs INSIDE the dial fire their own constantly.
+     Listening without that check would tear the class off on whichever
+     of them finished a lap first.
+
+     The listener survives a repaint: orPaintRings replaces the
+     CHILDREN of #orRings, never the element itself. */
+  if (dial && !orIndex.wired) {
+    orIndex.wired = true;
+    dial.addEventListener('animationend', (e) => {
+      if (e.target === dial) svg.classList.remove('or-index');
+    });
+  }
+  svg.classList.remove('or-index');
+  void svg.getBoundingClientRect();
+  svg.classList.add('or-index');
+}
+orIndex.wired = false;
+
 function orTwinkle() {
   clearTimeout(orTwinkle.t);
   if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;

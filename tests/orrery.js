@@ -155,6 +155,15 @@ const waitPaint = async (page) => {
    that fails for a reason nothing in its message mentions. */
 const settle = async (page) => {
   await page.waitForFunction(() => !orSim.raf, { timeout: 15000 }).catch(() => {});
+  /* And the one-turn mechanism, which runs for a couple of seconds
+     after a note is opened or a formation chosen. "Settled" has to mean
+     the map has stopped MOVING, not just that the force simulation has
+     converged — otherwise every rest-state assertion after a click is
+     reading a rotating map, and every pointer test is aiming at a
+     moving target. */
+  await page.waitForFunction(
+    () => !document.getElementById('orSvg').classList.contains('or-index'),
+    { timeout: 15000 }).catch(() => {});
   await page.waitForTimeout(250);
 };
 
@@ -165,7 +174,18 @@ const positions = (page) => page.$$eval('#orNodes .or-node', (gs) =>
    clear of the floated cards, and — the part that matters — the topmost
    element there resolves to THIS node, not to a later-painted
    neighbour's halo. */
-const pickHittable = (page, ids) => page.evaluate((ids) => {
+const pickHittable = async (page, ids) => {
+  /* A still map, first. This computes a screen position and the caller
+     then drives a real mouse to it over several round trips — so it
+     needs the map to have stopped moving, not merely to have stopped
+     simulating. While the instrument is mid-turn the notes take no
+     clicks at all (see #orSvg.or-index #orNodes), and a moment later
+     they are somewhere else. */
+  await page.waitForFunction(() => {
+    const svg = document.getElementById('orSvg');
+    return !svg.classList.contains('or-index') && !svg.classList.contains('or-flying');
+  }, null, { timeout: 10000 }).catch(() => {});
+  return page.evaluate((ids) => {
   const stage = document.getElementById('orStage').getBoundingClientRect();
   const keep = [document.getElementById('orLegend'),
                 document.querySelector('.or-zoom')]
@@ -184,7 +204,8 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     if (hit && hit.getAttribute('data-id') === id) return { id, cx, cy };
   }
   return null;
-}, ids);
+  }, ids);
+};
 
 (async () => {
   let seed = null, corpus = null;
@@ -613,8 +634,9 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
      that position between the computation and the click, and the
      click lands on whichever node ended up there instead. */
   await page.waitForFunction(() =>
-    !document.getElementById('orSvg').classList.contains('or-flying'),
-    null, { timeout: 5000 }).catch(() => {});
+    !document.getElementById('orSvg').classList.contains('or-flying')
+    && !document.getElementById('orSvg').classList.contains('or-index'),
+    null, { timeout: 8000 }).catch(() => {});
   await page.waitForTimeout(150);
 
   /* ── movable, three ways ── */
@@ -1489,6 +1511,96 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
     nod: getComputedStyle(document.getElementById('orNod')).animationName,
   }));
   ok('and pressing it again stops it', stopped.pressed === 'false' && stopped.nod === 'none', stopped);
+
+  /* ── the mechanism engages ──
+     Using the instrument turns it once. Opening a note also starts an
+     880ms flight, and the flight rule pauses everything under #orNod,
+     so the turn holds at zero until the camera lands and then runs. No
+     timer arranges that; it falls out of a rule already there. */
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
+  const engaged = await page.evaluate(() => new Promise((res) => {
+    const dial = () => {
+      const m = new DOMMatrix(getComputedStyle(document.getElementById('orRings')).transform);
+      return Math.atan2(m.b, m.a) * 180 / Math.PI;
+    };
+    const noteAt = () => {
+      const g = document.querySelector('#orNodes .or-node');
+      const b = g.getBoundingClientRect();
+      return [b.x, b.y];
+    };
+    orOpen('trading/models/cisd');
+    const seen = [], notes = [];
+    let held = null;
+    setTimeout(() => {
+      held = { a: dial(), ps: getComputedStyle(document.getElementById('orRings')).animationPlayState,
+               fly: document.getElementById('orSvg').classList.contains('or-flying') };
+    }, 340);
+    const iv = setInterval(() => { seen.push(dial()); notes.push(noteAt()); }, 200);
+    setTimeout(() => {
+      clearInterval(iv);
+      /* The camera lands mid-way through this window, so a note's screen
+         position legitimately changes while the flight is running. Only
+         the samples AFTER the flight matter for "the notes hold still",
+         and by then the dial is the only thing still moving. */
+      const late = notes.slice(-8);
+      const drift = Math.max(...late.map(([x, y]) =>
+        Math.hypot(x - late[0][0], y - late[0][1])));
+      res({ held, spread: Math.max(...seen.map(Math.abs)), settled: dial(), drift,
+            cls: document.getElementById('orSvg').classList.contains('or-index') });
+    }, 4300);
+  }));
+  ok('opening a note turns the dial once', engaged.spread > 20, engaged);
+  ok('and it waits for the flight rather than turning through it',
+    engaged.held && engaged.held.fly && engaged.held.ps === 'paused'
+    && Math.abs(engaged.held.a) < 1, engaged.held);
+  /* A full revolution and not a fraction of one. The rim rides the dial
+     and names each sector, so a turn that stopped part-way would leave
+     every folder's name pointing at somebody else's notes. */
+  ok('and comes back to where it started, so the rim still names its own sector',
+    Math.abs(engaged.settled) < 1.5, engaged);
+  /* The reason this turns the dial and not the whole instrument: a
+     pointer has to be able to hit what it aimed at. Turning #orNod moved
+     every note under the cursor and the suite caught a drag opening a
+     neighbour of the node it wanted. */
+  ok('and the notes hold still through it, so the map stays clickable',
+    engaged.drift < 2, engaged);
+  /* The class has to come OFF. A finished CSS animation still reports
+     animationPlayState 'running', so leaving it on would hold #orRings
+     and everything under it permanently inside a running animation. */
+  ok('and lets go of the class, so one click does not spend the motion budget',
+    !engaged.cls, engaged);
+
+  const budgetAfter = await page.evaluate(() => {
+    orClose(); orZoom(0);
+    const svg = document.getElementById('orSvg');
+    const all = [...svg.querySelectorAll('*')];
+    const run = all.filter((e) => {
+      const c = getComputedStyle(e);
+      return c.animationName && c.animationName !== 'none' && c.animationPlayState === 'running';
+    });
+    const inside = new Set();
+    run.forEach((g) => { inside.add(g); g.querySelectorAll('*').forEach((x) => inside.add(x)); });
+    return +(inside.size / all.length * 100).toFixed(2);
+  });
+  ok('the map is back under its motion budget after a turn has run',
+    budgetAfter < 12, budgetAfter);
+
+  /* Already turning under its own steam: a one-shot on top would be two
+     animations declared on one element and the later rule would win. */
+  const both = await page.evaluate(() => {
+    document.getElementById('orSpin').click();
+    const before = getComputedStyle(document.getElementById('orRings')).animationDuration;
+    orIndex();
+    const after = getComputedStyle(document.getElementById('orRings')).animationDuration;
+    const idx = document.getElementById('orSvg').classList.contains('or-index');
+    document.getElementById('orSpin').click();
+    return { before, after, idx };
+  });
+  ok('a one-shot does not fight the spin that is already running',
+    both.before === both.after && !both.idx, both);
+  await page.evaluate(() => { orClose(); orZoom(0); });
+  await settle(page);
   /* Left spinning, every pointer test after this one would be aiming at
      a moving target. */
   await page.evaluate(() => { orClose(); orZoom(0); });
@@ -3079,15 +3191,24 @@ const pickHittable = (page, ids) => page.evaluate((ids) => {
         if (++n < 7) { setTimeout(sample, 90); return; }
         const moved = track.some((t) =>
           t.xs.length > 1 && Math.max(...t.xs) - Math.min(...t.xs) > 1);
-        setTimeout(() => res({
-          restAnim, restFilt,
-          midAnim: midAnim.length, midFilt,
-          leftover: midAnim.map((e) => e.getAttribute('class') || e.id || e.tagName),
-          debris: deb.length, debrisMoved: moved,
-          spans: track.map((t) => t.xs.length > 1
-            ? +(Math.max(...t.xs) - Math.min(...t.xs)).toFixed(1) : null),
-          backAnim: stable().length, backFilt: filtered().length,
-        }), 1200);
+        /* Not a fixed wait. Opening a note also turns the dial, and that
+           runs on past the landing — sampled too early, the turn counts
+           as a permanent extra and "back to how it was" fails by one. */
+        const back = () => {
+          if (document.getElementById('orSvg').classList.contains('or-index')) {
+            setTimeout(back, 120); return;
+          }
+          res({
+            restAnim, restFilt,
+            midAnim: midAnim.length, midFilt,
+            leftover: midAnim.map((e) => e.getAttribute('class') || e.id || e.tagName),
+            debris: deb.length, debrisMoved: moved,
+            spans: track.map((t) => t.xs.length > 1
+              ? +(Math.max(...t.xs) - Math.min(...t.xs)).toFixed(1) : null),
+            backAnim: stable().length, backFilt: filtered().length,
+          });
+        };
+        setTimeout(back, 1200);
       };
       sample();
     }, 400);
