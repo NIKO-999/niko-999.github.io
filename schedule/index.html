@@ -45,6 +45,29 @@
     <p class="caption" id="scLiveOf"></p>
   </header>
 
+  <!-- ── the ring ──
+       The same day, drawn instead of listed. It replaces the hero above
+       rather than sitting under it: the ring's own middle says the state
+       and the figure, and saying both twice on one screen is how the
+       week-list's running row came to be painted the same as everything
+       round it. Empty until scPaintRing fills it. -->
+  <section class="ring" id="scRing" hidden>
+    <div class="sr-wrap">
+      <svg class="sr-face" id="scRingSvg" viewBox="0 0 286 286" aria-hidden="true"></svg>
+      <div class="sr-mid" id="scRingMid" aria-live="polite">
+        <span class="sr-kick" id="scRingKick"></span>
+        <b class="sr-num" id="scRingNum"></b>
+        <span class="sr-unit" id="scRingUnit"></span>
+        <span class="sr-name" id="scRingName"></span>
+      </div>
+    </div>
+    <p class="sr-key" id="scRingKey"></p>
+    <div class="sr-rest">
+      <p class="sr-lbl">Rest of today</p>
+      <ol class="sr-list" id="scRingList"></ol>
+    </div>
+  </section>
+
   <ol class="rail" id="scRail"></ol>
 
   <p class="empty" id="scEmpty" hidden>
@@ -58,6 +81,15 @@
      Thumb-height, over the poster. Add by hand on the left, speak on the
      right, because the right is where a thumb already is. -->
 <div class="bar">
+  <!-- Icon only, named by aria-label, and the icon shows what you would
+       GET rather than where you are — a control that draws its current
+       state reads as a status light, not a switch. -->
+  <button class="ghost" id="scView" aria-label="Show the ring">
+    <svg viewBox="0 0 24 24" aria-hidden="true" id="scViewIcon">
+      <circle cx="12" cy="12" r="8" /><path d="M12 4v5" />
+    </svg>
+  </button>
+
   <button class="ghost" id="scAdd" aria-label="Add a block by hand">
     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
   </button>

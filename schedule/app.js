@@ -636,7 +636,7 @@
        six rows of furniture. Today is the exception: the day you are in
        says so even when it is free. */
     var shown = scWeek().filter(function (d) { return scByDay(d).length || d === today; });
-    $('scEmpty').hidden = state.items.length > 0;
+    $('scEmpty').hidden = state.items.length > 0 || view === 'ring';
 
     shown.forEach(function (d) {
       var rows = scByDay(d);
@@ -691,6 +691,11 @@
      often would fight a finger that is in the middle of scrolling it. */
   function scLive() {
     if (new Date().toDateString() !== painted) { scRender(); return; }
+
+    /* The ring is a different drawing of the same half-minute pass, and
+       it is the only thing on screen when it is up — so it repaints
+       here and the rest of this function has nothing to do. */
+    if (view === 'ring') { scPaintRing(); scPaintRingList(); return; }
 
     var today = new Date().getDay(), now = scNowMin();
     var rows = document.querySelectorAll('.day.is-today .row');
@@ -751,6 +756,233 @@
     $('scLiveNum').textContent = sc12(at);
     $('scLiveUnit').textContent = scMer(at);
     $('scLiveOf').textContent = of;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE RING
+
+     The same day the rail shows, drawn. It answers one question the
+     list answers badly — how long until this is over — and it is
+     scoped to TODAY on purpose: a ring is a picture of one span, and a
+     list under it that runs into tomorrow is a second view wearing the
+     first one's chrome.
+
+     There is no "behind you today" line. It was there and it is gone:
+     a countdown is about what is in front of you, and a figure telling
+     you how much of the day you have already spent is a different
+     screen's job.
+     ═══════════════════════════════════════════════════════════ */
+
+  var RING_C = 143, RING_R = 118;
+
+  function srPol(r, deg) {
+    var a = (deg - 90) * Math.PI / 180;
+    return [RING_C + r * Math.cos(a), RING_C + r * Math.sin(a)];
+  }
+
+  /* A mark has to be a real unit of time or counting them is a guess.
+     Fixed at 96 marks round the circle — which is what the prototype
+     did — a mark is 75 seconds inside a two-hour block and seven
+     minutes across a ten-hour gap, so "four marks is an hour" is true
+     of nothing. The unit is picked from a ladder, the smallest that
+     keeps the count under 60, and it is printed under the ring.
+     No 2 in the ladder, deliberately. It fits — a two-hour block came
+     out at sixty two-minute marks — but nobody thinks in two minutes,
+     and sixty marks at 1.7px is close enough to a solid ring that the
+     counting it exists for stops working. Every unit here is one a
+     person actually says. */
+  var TICK_UNITS = [1, 5, 10, 15, 30, 60];
+
+  function scRingUnit(span) {
+    for (var i = 0; i < TICK_UNITS.length; i++) {
+      if (span / TICK_UNITS[i] <= 60) return TICK_UNITS[i];
+    }
+    return 60;
+  }
+
+  function scUnitWord(u) {
+    if (u === 1) return 'a minute';
+    if (u === 60) return 'an hour';
+    return u + ' minutes';
+  }
+
+  /* What the ring is counting down. Three cases, and only the first is
+     the obvious one:
+
+       running   the block you are in
+       waiting   the GAP to the next block — which is a span too, and
+                 the reason the ring is not a dead grey circle for the
+                 ten hours this week has between Trading and Read
+       done      nothing left today
+
+     A ring that only knew the first would be blank most of the day. */
+  function scRingSpan() {
+    var today = new Date().getDay(), now = scNowMin(), mine = scByDay(today);
+    var running = null, next = null, prevEnd = 0;
+    mine.forEach(function (it) {
+      if (it.s <= now && now < it.e) running = it;
+      else if (it.s > now && !next) next = it;
+      if (it.e <= now) prevEnd = Math.max(prevEnd, it.e);
+    });
+    if (running) {
+      return { kind: 'running', it: running, a: running.s, b: running.e,
+               left: running.e - now };
+    }
+    if (next) {
+      /* From the end of the last thing, or from the start of the day if
+         nothing has run yet — never from midnight, which would put you
+         40% through a wait before you woke up. */
+      var from = prevEnd || Math.min(next.s, scNowMin());
+      return { kind: 'waiting', it: next, a: Math.min(from, now), b: next.s,
+               left: next.s - now };
+    }
+    return { kind: 'done' };
+  }
+
+  function scPaintRing() {
+    var svg = $('scRingSvg');
+    if (!svg) return;
+    var sp = scRingSpan(), now = scNowMin();
+
+    $('scRing').classList.toggle('is-done', sp.kind === 'done');
+
+    if (sp.kind === 'done') {
+      svg.innerHTML = '<circle cx="' + RING_C + '" cy="' + RING_C + '" r="' + RING_R +
+        '" fill="none" stroke="#ececec" stroke-width="3"/>';
+      $('scRingKick').textContent = 'Done';
+      $('scRingNum').textContent = '—';
+      $('scRingUnit').textContent = 'for today';
+      $('scRingName').textContent = '';
+      $('scRingKey').textContent = '';
+      return;
+    }
+
+    var span = Math.max(1, sp.b - sp.a);
+    var frac = Math.min(1, Math.max(0, (now - sp.a) / span));
+    var unit = scRingUnit(span);
+    var n = Math.max(4, Math.round(span / unit));
+    /* k < remaining, NOT k >= spent. The second lights the HIGH angles,
+       which is the arc running back up to twelve from the LEFT — so the
+       ring counts down anti-clockwise off the same number the figure in
+       the middle is counting down clockwise. It shipped that way in the
+       prototype and only the screenshot said so. */
+    var rem = (1 - frac) * n;
+
+    var out = [];
+    for (var k = 0; k < n; k++) {
+      var deg = k / n * 360, lit = k < rem;
+      var p0 = srPol(RING_R - 7, deg), p1 = srPol(RING_R + 7, deg);
+      out.push('<path d="M' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) +
+        'L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + '" stroke="' +
+        (lit ? '#e2231a' : '#ececec') + '" stroke-width="' +
+        /* Every fourth mark heavier, so the eye counts in groups rather
+           than reading a texture. */
+        (k % 4 ? 1.7 : 2.8) + '"/>');
+    }
+
+    /* The leading edge — where the lit marks stop — is the only place on
+       this drawing anything is going to happen, and it is the one place
+       the eye has no reason to look.
+
+       Placed on the LAST LIT MARK, not at (1-frac)·360. The raw angle is
+       the boundary of the span and lands on the first UNLIT mark, a
+       whole mark past the red — 30px on this ring, measured. On a
+       quantised drawing the marker has to be quantised with it, or the
+       two say different things about the same moment. It steps a mark
+       at a time as a result, which is what the marks do. */
+    var litN = Math.ceil(rem);
+    var head = srPol(RING_R, (litN ? litN - 1 : 0) / n * 360);
+    out.push('<circle cx="' + head[0].toFixed(2) + '" cy="' + head[1].toFixed(2) +
+      '" r="4.5" fill="#e2231a"/>');
+    if (!scStill()) {
+      out.push('<circle class="sr-ping" cx="' + head[0].toFixed(2) + '" cy="' +
+        head[1].toFixed(2) + '" r="9" fill="none" stroke="#e2231a" stroke-width="2"/>');
+    }
+
+    svg.innerHTML = out.join('');
+
+    var f = scBigSpan(sp.left);
+    $('scRingKick').textContent = sp.kind === 'running' ? 'Left of' : 'Until';
+    $('scRingNum').textContent = f.n;
+    $('scRingUnit').textContent = f.u;
+    $('scRingName').textContent = sp.it.n;
+    $('scRingKey').textContent = 'One mark is ' + scUnitWord(unit) +
+      ' · ' + n + ' to go round';
+  }
+
+  /* A duration split so the unit can be set small. "1 h 30 m" is right
+     in a row and wrong at 58px, where it reflows the middle of the ring
+     every time it crosses an hour. */
+  function scBigSpan(m) {
+    if (m < 60) return { n: String(m), u: 'min' };
+    var h = Math.floor(m / 60), r = m % 60;
+    if (r) return { n: h + ':' + (r < 10 ? '0' : '') + r, u: 'hrs' };
+    return { n: String(h), u: h === 1 ? 'hour' : 'hrs' };
+  }
+
+  function scStill() {
+    return window.matchMedia &&
+      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  }
+
+  function scPaintRingList() {
+    var list = $('scRingList');
+    if (!list) return;
+    list.textContent = '';
+    var today = new Date().getDay(), now = scNowMin();
+    var sp = scRingSpan();
+    var rest = scByDay(today).filter(function (it) {
+      return it.s > now && !(sp.it && it.id === sp.it.id);
+    });
+    if (!rest.length) {
+      var p = scEl('li', 'sr-none',
+        sp.kind === 'done' ? 'Nothing else today.'
+                           : 'Nothing else today once this is done.');
+      list.appendChild(p);
+      return;
+    }
+    rest.forEach(function (it) {
+      var li = scEl('li');
+      var b = scEl('button', 'sr-row');
+      b.appendChild(scEl('b', null, it.n));
+      b.appendChild(scEl('span', null,
+        scHHMM(it.s) + ' · in ' + scSpan(it.s - now)));
+      b.setAttribute('aria-label',
+        it.n + ', ' + scRangeLong(it.s, it.e) + ', in ' + scSpan(it.s - now) + '. Edit.');
+      b.addEventListener('click', function () { scEditSheet(it, today); });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+  }
+
+  /* Which view is up, remembered. Its own key: the schedule is the
+     record and this is a preference about looking at it, and folding a
+     preference into the record is how a damaged one takes the other
+     down with it. */
+  var VIEW_KEY = 'sched.view.v1';
+  var view = 'list';
+
+  function scSetView(v, save) {
+    view = v === 'ring' ? 'ring' : 'list';
+    var ring = view === 'ring';
+    $('scRing').hidden = !ring;
+    $('scRail').hidden = ring;
+    /* The ring's own middle says the state and the figure. Leaving the
+       hero above it says both twice, and the louder of the two is the
+       one that is not the point of the screen. */
+    $('scLive').hidden = ring;
+    $('scLiveOf').hidden = ring;
+    if (!ring) $('scEmpty').hidden = state.items.length > 0;
+    else $('scEmpty').hidden = true;
+
+    var btn = $('scView');
+    btn.setAttribute('aria-label', ring ? 'Show the week' : 'Show the ring');
+    $('scViewIcon').innerHTML = ring
+      ? '<path d="M4 7h16M4 12h16M4 17h10"/>'
+      : '<circle cx="12" cy="12" r="8"/><path d="M12 4v5"/>';
+    if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
+    if (ring) { scPaintRing(); scPaintRingList(); }
+    else scLive();
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -1206,7 +1438,19 @@
      ═══════════════════════════════════════════════════════════ */
 
   scLoad();
+
+  /* Read before the first paint, so the app opens on the view you left
+     it in rather than flashing the list on the way to the ring. A bad
+     stored value falls through to the list; it is a preference and
+     there is nothing here worth repairing. */
+  try { if (localStorage.getItem(VIEW_KEY) === 'ring') view = 'ring'; } catch (e) {}
+
   scRender();
+  scSetView(view, false);
+
+  $('scView').addEventListener('click', function () {
+    scSetView(view === 'ring' ? 'list' : 'ring', true);
+  });
 
   $('scMic').addEventListener('click', function () {
     if (rec) { scStopVoice(); return; }

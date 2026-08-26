@@ -527,6 +527,225 @@ const SAID = [
     [...document.querySelectorAll('.row')].filter((r) =>
       getComputedStyle(r, '::after').animationName !== 'none').length) === 1);
 
+  /* ── the ring ──
+     The second view, still on the frozen Tuesday: Trading runs 9 to 11
+     and it is 9:30, so exactly a quarter of the block is gone and the
+     ring has a running span to draw. Everything below is a mechanism
+     rather than an appearance — the two faults this feature actually
+     shipped were a ring drawn the wrong way round and a mark that was
+     not a unit of anything, and neither shows up in a screenshot you
+     are not looking hard at. */
+  console.log('\n── the ring ──');
+  await page.click('#scView');
+  await page.waitForTimeout(220);
+
+  const upSwap = await page.evaluate(() => ({
+    ring: !document.getElementById('scRing').hidden,
+    rail: document.getElementById('scRail').hidden,
+    hero: document.getElementById('scLive').hidden,
+  }));
+  ok('the ring replaces the rail rather than joining it',
+    upSwap.ring && upSwap.rail, upSwap);
+  /* The ring's own middle carries the state and the figure. Leaving the
+     hero above it says both twice, and the louder of the two is the one
+     that is not the point of the screen. */
+  ok('and the hero goes with it, so nothing is said twice', upSwap.hero, upSwap);
+
+  const ring = await page.evaluate(() => {
+    const marks = [...document.querySelectorAll('#scRingSvg path')];
+    const red = (p) => p.getAttribute('stroke') === '#e2231a';
+    return {
+      n: marks.length,
+      lit: marks.filter(red).length,
+      first: red(marks[0]),
+      last: red(marks[marks.length - 1]),
+      /* Where the lit run stops. On a ring drawn clockwise from twelve
+         this is the boundary; on one drawn the other way round the lit
+         marks are the TAIL of the array and this is 0. */
+      edge: marks.findIndex((p) => !red(p)),
+      key: document.getElementById('scRingKey').textContent,
+      kick: document.getElementById('scRingKick').textContent,
+      num: document.getElementById('scRingNum').textContent,
+      unit: document.getElementById('scRingUnit').textContent,
+      name: document.getElementById('scRingName').textContent,
+    };
+  });
+
+  /* 9:30 inside a 9-to-11 block is a quarter gone, so three quarters of
+     the marks are lit. Asserted as a proportion of whatever count the
+     unit ladder chose, not as a number, so changing the ladder cannot
+     silently make this vacuous. */
+  ok(`three quarters of the ${ring.n} marks are lit at a quarter through`,
+    ring.n > 4 && Math.abs(ring.lit / ring.n - 0.75) < 0.03, ring);
+
+  /* THE DIRECTION. This shipped backwards: lighting the marks at
+     k >= spent lights the HIGH angles, which is the arc running back up
+     to twelve from the LEFT — an anti-clockwise countdown beside a
+     clockwise figure, off the same number. Nothing about the element
+     count, the lit count or the bounding box moves when it flips, so
+     this is the only assertion that can catch it. */
+  ok('and they run clockwise from twelve, not back to it',
+    ring.first === true && ring.last === false && ring.edge === ring.lit, ring);
+
+  /* A mark has to be worth a unit a person says. At a fixed 96 marks
+     round the circle — which is what the prototype drew — a mark is 75
+     seconds inside a two-hour block, so "four marks is an hour" is true
+     of nothing. The printed key and the drawn count have to agree, and
+     the unit has to be on the ladder. */
+  const keyed = ring.key.match(/One mark is (?:a |an )?(\d+)?\s*(minute|minutes|hour)s? · (\d+) to go round/);
+  ok('the key states a real unit and the count it actually drew',
+    !!keyed && +keyed[3] === ring.n
+    && [1, 5, 10, 15, 30, 60].includes(keyed[2] === 'hour' ? 60 : +keyed[1]),
+    { key: ring.key, drew: ring.n });
+
+  ok('the middle counts the running block down',
+    ring.kick === 'Left of' && ring.num === '1:30' && ring.unit === 'hrs'
+    && ring.name === 'Trading', ring);
+
+  /* Asked for and removed. A countdown is about what is in front of
+     you; how much of the day is already spent is another screen's job,
+     and it was on this one. */
+  ok('nothing on the ring says how much is behind you',
+    !/behind you/i.test(await page.$eval('#scRing', (e) => e.textContent)));
+
+  /* Today only, which is the whole reason the ring is not just the
+     Countdown view with a circle on it. Tuesday's remaining blocks are
+     Read and Down; Wednesday's Wake must not appear. */
+  const restNames = await page.$$eval('#scRingList .sr-row b', (b) => b.map((x) => x.textContent));
+  /* Wake is the first thing on EVERY day, so it is the one name that
+     appears the moment the list steps over midnight. */
+  ok('the list under it is today and stops there',
+    restNames.length > 0 && !restNames.includes('Wake'), restNames);
+
+  /* The pulse marks the leading edge — the one place on the drawing
+     anything is going to happen and the one place the eye has no reason
+     to look. It has to be an animation that is actually running, not an
+     element that exists: a keyframe pair that cancels out is present,
+     still, and perfect in a screenshot. */
+  const ping = await page.evaluate(() => new Promise((res) => {
+    const el = document.querySelector('.sr-ping');
+    if (!el) return res(null);
+    const seen = new Set();
+    const t0 = performance.now();
+    (function tick() {
+      const s = getComputedStyle(el);
+      seen.add(s.transform + '|' + s.opacity);
+      if (performance.now() - t0 < 900) requestAnimationFrame(tick);
+      else res({ frames: [...seen], name: s.animationName });
+    })();
+  }));
+  ok('the pulse is actually running', ping && ping.frames.length > 4,
+    ping && ping.frames.slice(0, 2));
+  /* transform and opacity only. stroke-width or a filter here would
+     repaint the whole ring twice a second, forever, on the one screen
+     this app is meant to be left open on. */
+  ok('and it is transform and opacity, so it composites',
+    ping && ping.frames.every((f) => /^matrix|^none/.test(f)), ping && ping.frames[0]);
+  ok('and it is the ring’s own keyframes, not the microphone’s',
+    ping && ping.name === 'sr-ping', ping && ping.name);
+
+  /* The pulse sits ON the boundary the marks draw. Built off the lit
+     count instead of the same fraction, it would drift a mark at a time
+     and nothing would say so. */
+  const onEdge = await page.evaluate(() => {
+    const el = document.querySelector('.sr-ping');
+    const marks = [...document.querySelectorAll('#scRingSvg path')];
+    const lit = marks.filter((p) => p.getAttribute('stroke') === '#e2231a');
+    const b = lit[lit.length - 1].getBoundingClientRect();
+    const p = el.getBoundingClientRect();
+    return Math.hypot(b.x + b.width / 2 - (p.x + p.width / 2),
+                      b.y + b.height / 2 - (p.y + p.height / 2));
+  });
+  ok(`the pulse sits on the last lit mark (${onEdge.toFixed(1)}px off)`, onEdge < 22, onEdge);
+
+  /* Not paused — never built. A paused ping is a red circle frozen at
+     whatever size the frame caught it, parked on the ring forever,
+     which is worse than no effect at all. */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.evaluate(() => document.getElementById('scView').click());
+  await page.evaluate(() => document.getElementById('scView').click());
+  await page.waitForTimeout(220);
+  const still = await page.evaluate(() => ({
+    ping: !!document.querySelector('.sr-ping'),
+    marks: document.querySelectorAll('#scRingSvg path').length,
+    lit: [...document.querySelectorAll('#scRingSvg path')]
+      .filter((p) => p.getAttribute('stroke') === '#e2231a').length,
+  }));
+  ok('reduced motion does not build the pulse', still.ping === false, still);
+  ok('and the ring still says everything it said',
+    still.marks === ring.n && still.lit === ring.lit, still);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+
+  /* Real pixels. The middle sits inside the ring rather than on paper,
+     and the marks pass behind nothing — but the unit key is 10px grey
+     and that is exactly the size and weight this app has shipped at
+     2:1 before. */
+  await page.waitForTimeout(200);
+  const ringInk = await (async () => {
+    const png = PNG.sync.read(await page.screenshot());
+    const at = (x, y) => {
+      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    const out = [];
+    for (const sel of ['#scRingKick', '#scRingNum', '#scRingName', '#scRingKey', '.sr-row b', '.sr-row span']) {
+      const el = await page.$(sel);
+      if (!el) continue;
+      const b = await el.boundingBox();
+      const col = (await page.$eval(sel, (e) => getComputedStyle(e).color))
+        .match(/[\d.]+/g).slice(0, 3).map(Number);
+      /* The ground just outside the type, on the same line — the colour
+         the eye actually receives after everything over it has had its
+         turn, not the one the cascade says. */
+      out.push({ sel, r: ratio(col, at(b.x + b.width + 6, b.y + b.height / 2)) });
+    }
+    return out;
+  })();
+  ringInk.forEach((t) => ok(`${t.sel} clears 4.5:1 on the ring (${t.r.toFixed(1)}:1)`, t.r >= 4.5, t));
+
+  /* The choice survives a reload. Its own key, not folded into the
+     schedule: the schedule is the record and this is a preference about
+     looking at it, and a damaged record must not take the view with it
+     or the other way round. */
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(200);
+  ok('the ring is still up after a reload',
+    await page.evaluate(() => !document.getElementById('scRing').hidden));
+  ok('and it is remembered under its own key, away from the schedule',
+    await page.evaluate(() => localStorage.getItem('sched.view.v1') === 'ring'
+      && !/view/.test(localStorage.getItem('sched.v1') || '')));
+
+  /* A ring that only knew the block you are in would be a dead grey
+     circle for the ten hours this week has between Trading and Read.
+     Between blocks it counts down the GAP, which is a span too. */
+  await page.evaluate(() => {
+    const FROZEN = new Date('2026-09-01T14:00:00').getTime();
+    const R = Date;
+    // eslint-disable-next-line no-global-assign
+    Date = class extends R {
+      constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+      static now() { return FROZEN; }
+    };
+    document.getElementById('scView').click();
+    document.getElementById('scView').click();
+  });
+  await page.waitForTimeout(220);
+  const gap = await page.evaluate(() => {
+    const marks = [...document.querySelectorAll('#scRingSvg path')];
+    const lit = marks.filter((p) => p.getAttribute('stroke') === '#e2231a').length;
+    return { kick: document.getElementById('scRingKick').textContent,
+             name: document.getElementById('scRingName').textContent,
+             n: marks.length, lit };
+  });
+  ok('between blocks the ring counts the wait, not nothing',
+    gap.kick === 'Until' && gap.n > 4 && gap.lit > 0 && gap.lit < gap.n, gap);
+
+  await page.click('#scView');
+  await page.waitForTimeout(180);
+  ok('and the rail comes back when you switch away',
+    await page.evaluate(() => !document.getElementById('scRail').hidden
+      && document.getElementById('scRing').hidden));
+
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet
      open reads the bar and the rows and calls it done — the day picker
