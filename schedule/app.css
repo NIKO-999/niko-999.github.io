@@ -807,17 +807,30 @@ body {
    disc of the ground with the accent drawn on it IS the choice, and it
    reads at a glance in a row of seven.
 
-   Four across, two rows. A single scrolling row was the first cut and
-   it put Plum off the right edge of a 390px sheet — an option you have
-   to discover by swiping is an option most people never see. Seven
-   across would need 42px chips, which is under the touch floor. A grid
-   shows all seven at 81px each and reads as a grid rather than as a
-   row that ran out. */
-.themes {
+   Four across. A single scrolling row was the first cut and it put the
+   last theme off the right edge of a 390px sheet — an option you have
+   to discover by swiping is one most people never see. Thirteen across
+   would need 22px chips, far under the touch floor. A grid shows every
+   one at 81px and reads as a grid rather than as a row that ran out.
+
+   And split into light and dark. Thirteen chips in one block is a
+   colour chart; the half you are in is the first thing anyone deciding
+   wants, and it is the only grouping the set actually has. */
+.themes { margin: 14px 0 0; }
+.theme-g {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
   gap: 14px 10px;
-  margin: 14px 0 0;
+  margin: 9px 0 18px;
+}
+.theme-g:last-child { margin-bottom: 0; }
+.theme-h {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--spent);
 }
 
 .theme {

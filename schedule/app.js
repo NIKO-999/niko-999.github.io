@@ -982,54 +982,109 @@
      ═══════════════════════════════════════════════════════════ */
 
   var THEMES = [
-    { id:'paper', name:'Paper', note:'White. 4.7:1',
+    { id:'paper', name:'Paper', kind:'light', note:'White. 4.7:1',
       t:{ '--paper':'#ffffff', '--ink':'#111111', '--dim':'#4a4a4a', '--spent':'#737373',
           '--red':'#e2231a', '--hair':'#dcdcdc', '--tick-off':'#ececec',
           '--bad':'#e2231a',
           '--on-red':'#ffffff',
           '--g0':'#ffffff', '--g1':'transparent', '--g2':'transparent' } },
 
-    { id:'nebula', name:'Nebula', note:'Violet on indigo. 6.7:1',
+    { id:'nebula', name:'Nebula', kind:'dark', note:'Violet on indigo. 6.7:1',
       t:{ '--paper':'#0A0B2E', '--ink':'#F4F1FF', '--dim':'#BDB6E8', '--spent':'#9A92CE',
           '--red':'#C08BFF', '--hair':'#2A2A5C', '--tick-off':'#26264F',
           '--bad':'#FF7A85',
           '--on-red':'#0A0B2E',
           '--g0':'#0A0B2E', '--g1':'rgba(78,42,190,.55)', '--g2':'rgba(160,60,190,.30)' } },
 
-    { id:'ember', name:'Ember', note:'Coral on indigo. 8:1',
+    { id:'ember', name:'Ember', kind:'dark', note:'Coral on indigo. 8:1',
       t:{ '--paper':'#0C0D33', '--ink':'#FFF1EA', '--dim':'#F3C2AC', '--spent':'#D79C82',
           '--red':'#FF8A5B', '--hair':'#2E2A5E', '--tick-off':'#282652',
           '--bad':'#FF4A6B',
           '--on-red':'#0C0D33',
           '--g0':'#0C0D33', '--g1':'rgba(220,90,50,.34)', '--g2':'rgba(90,40,150,.42)' } },
 
-    { id:'aurora', name:'Aurora', note:'Green on near-black. 8.6:1',
+    { id:'aurora', name:'Aurora', kind:'dark', note:'Green on near-black. 8.6:1',
       t:{ '--paper':'#04141A', '--ink':'#E8FBF4', '--dim':'#9FD9C7', '--spent':'#7FBBA9',
           '--red':'#4FE0A8', '--hair':'#123038', '--tick-off':'#102A31',
           '--bad':'#FF8A8A',
           '--on-red':'#04141A',
           '--g0':'#04141A', '--g1':'rgba(18,150,130,.40)', '--g2':'rgba(30,90,150,.34)' } },
 
-    { id:'solar', name:'Solar', note:'Amber, no blue anywhere. 7.9:1',
+    { id:'solar', name:'Solar', kind:'dark', note:'Amber, no blue anywhere. 7.9:1',
       t:{ '--paper':'#15100A', '--ink':'#FFF6E6', '--dim':'#E2C89C', '--spent':'#BFA47C',
           '--red':'#FFB020', '--hair':'#3A2E1C', '--tick-off':'#332818',
           '--bad':'#FF8A7A',
           '--on-red':'#15100A',
           '--g0':'#15100A', '--g1':'rgba(200,120,20,.34)', '--g2':'rgba(120,50,10,.40)' } },
 
-    { id:'ice', name:'Ice', note:'Pale cyan on slate. 7.2:1',
+    { id:'ice', name:'Ice', kind:'dark', note:'Pale cyan on slate. 7.2:1',
       t:{ '--paper':'#0D1420', '--ink':'#EAF3FB', '--dim':'#A9C2D8', '--spent':'#8AA5BD',
           '--red':'#5CC8F8', '--hair':'#233246', '--tick-off':'#1E2C3E',
           '--bad':'#FF8A8A',
           '--on-red':'#0D1420',
           '--g0':'#0D1420', '--g1':'rgba(40,110,180,.42)', '--g2':'rgba(90,90,190,.28)' } },
 
-    { id:'plum', name:'Plum', note:'Rose on aubergine. 6.7:1',
+    { id:'plum', name:'Plum', kind:'dark', note:'Rose on aubergine. 6.7:1',
       t:{ '--paper':'#1A0B1F', '--ink':'#FCEDF5', '--dim':'#DDAEC6', '--spent':'#BC8CA6',
           '--red':'#FF6FA5', '--hair':'#3B1F42', '--tick-off':'#341B3B',
           '--bad':'#FFA07A',
           '--on-red':'#1A0B1F',
           '--g0':'#1A0B1F', '--g1':'rgba(160,30,110,.40)', '--g2':'rgba(90,30,140,.38)' } },
+
+    /* ── the light six ──
+       A light theme cannot simply reuse a dark one's accent. There the
+       accent is the pale colour standing off a near-black page; here the
+       pale colour is the WASH — where it belongs, since a gradient is
+       never asked to be legible — and the accent is the deep end of the
+       same hue. The reference palettes prove why: their pale hues
+       measure 1.49:1 and 2.74:1 on their own grounds and cannot carry a
+       word between them.
+
+       So the wash, the accent and the ink are one hue at three depths,
+       and the page reads as one thing rather than as white with a tint
+       dropped on it. The gradient is weighted to the FOOT, because that
+       is the third of the screen with nothing to read in it. */
+    { id:'blush', name:'Blush', kind:'light', note:'Peach on white. 5.2:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#1C110D', '--dim':'#4A3229', '--spent':'#6A5047',
+          '--red':'#C0402A', '--hair':'#E9DCD6', '--tick-off':'#F0E4DE',
+          '--bad':'#A81438', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(248,138,100,1)',
+          '--g2':'rgba(150,142,138,.34)', '--g3':'rgba(190,104,78,.92)' } },
+
+    { id:'slate', name:'Slate', kind:'light', note:'Blue-grey on white. 7.2:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#111524', '--dim':'#333A52', '--spent':'#4E5772',
+          '--red':'#2F4DA8', '--hair':'#DCDFE7', '--tick-off':'#E7E9EF',
+          '--bad':'#B01430', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(88,112,132,1)',
+          '--g2':'rgba(96,110,132,.36)', '--g3':'rgba(52,66,102,.92)' } },
+
+    { id:'linen', name:'Linen', kind:'light', note:'Warm neutral. 6.7:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#191410', '--dim':'#463C34', '--spent':'#665A50',
+          '--red':'#7A4A2E', '--hair':'#E6E0D9', '--tick-off':'#EFEAE4',
+          '--bad':'#A81438', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(196,166,128,1)',
+          '--g2':'rgba(160,148,134,.32)', '--g3':'rgba(152,132,108,.90)' } },
+
+    { id:'mist', name:'Mist', kind:'light', note:'Cyan into teal. 6.1:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#0B1819', '--dim':'#28403F', '--spent':'#455E5E',
+          '--red':'#0F6E6A', '--hair':'#D8E4E4', '--tick-off':'#E5EDED',
+          '--bad':'#B01430', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(88,184,184,1)',
+          '--g2':'rgba(104,152,172,.34)', '--g3':'rgba(52,110,140,.90)' } },
+
+    { id:'bloom', name:'Bloom', kind:'light', note:'Pink into lilac. 7:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#1B0F1A', '--dim':'#4A2A3E', '--spent':'#6A4860',
+          '--red':'#9B2C70', '--hair':'#EBDCE6', '--tick-off':'#F2E7EE',
+          '--bad':'#B8241C', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(246,132,176,1)',
+          '--g2':'rgba(178,158,224,.34)', '--g3':'rgba(150,110,206,.90)' } },
+
+    { id:'sand', name:'Sand', kind:'light', note:'Gold into bronze. 5.9:1',
+      t:{ '--paper':'#FFFFFF', '--ink':'#191509', '--dim':'#443C22', '--spent':'#63593E',
+          '--red':'#8A5A0B', '--hair':'#E9E2CE', '--tick-off':'#F1ECDD',
+          '--bad':'#AE1B2E', '--on-red':'#FFFFFF',
+          '--g0':'#FFFFFF', '--g1':'rgba(242,184,68,1)',
+          '--g2':'rgba(176,158,116,.34)', '--g3':'rgba(186,146,72,.90)' } },
   ];
 
   var THEME_KEY = 'sched.theme.v1';
@@ -1046,10 +1101,21 @@
      without a second copy of every rule. Nothing else in the app knows
      a theme exists — every colour it draws already came from a token,
      which is what the previous pass was for. */
+  /* Every token a theme is allowed to set, named once. scPaint CLEARS
+     all of them before writing the new set — without that, a token one
+     theme names and another does not is inherited from whatever was up
+     last: switch from a light theme that sets --g3 to a dark one that
+     does not, and the dark page keeps the light one's third wash. The
+     symptom is a colour that only appears in one order of clicks, which
+     is close to impossible to find by looking. */
+  var TOKENS = ['--paper', '--ink', '--dim', '--spent', '--red', '--hair',
+                '--tick-off', '--on-red', '--bad', '--g0', '--g1', '--g2', '--g3'];
+
   function scPaint(id, save) {
     var t = scTheme(id);
     theme = t.id;
     var r = document.documentElement.style;
+    TOKENS.forEach(function (k) { r.removeProperty(k); });
     for (var k in t.t) if (t.t.hasOwnProperty(k)) r.setProperty(k, t.t[k]);
 
     /* The browser's own chrome — the status bar, the URL bar, the
@@ -1475,22 +1541,36 @@
          It applies on press and stays open, because you are comparing
          — a picker that closes on the first tap makes you reopen it
          six times to see six themes. */
-      var lab = scEl('span', 'label', 'Theme');
-      lab.style.marginTop = '2px';
-      body.appendChild(lab);
+      /* ── the theme row ──
+         A swatch, not a word. "Aurora" tells you nothing you can act
+         on; a disc of the ground with the accent drawn on it is the
+         choice itself, at the size a thumb needs.
 
+         Split light from dark and labelled. Thirteen chips in one
+         undifferentiated block is a colour chart; the first thing
+         anyone deciding wants is the half they are in, and it is the
+         only grouping the set actually has.
+
+         It applies on press and stays open, because you are comparing —
+         a picker that closes on the first tap makes you reopen it
+         thirteen times to see thirteen themes. */
       var row = scEl('div', 'themes');
-      THEMES.forEach(function (t) {
+      var hint = scEl('p', 'hint');
+      hint.style.marginTop = '2px';
+
+      var chip = function (t) {
         var b = scEl('button', 'theme' + (t.id === theme ? ' on' : ''));
         b.type = 'button';
         b.dataset.theme = t.id;
         var disc = scEl('i', 'swatch');
-        /* The same two washes the page itself gets, on a 34px disc —
-           so the chip is a photograph of the theme rather than a
-           label for it. */
+        /* The same three washes the page itself gets, on a 34px disc, so
+           the chip is a photograph of the theme rather than a label for
+           it. --g3 is missing on the older sets and resolves to
+           transparent, which is what they draw. */
         disc.style.background =
-          'radial-gradient(120% 100% at 22% 108%, ' + t.t['--g1'] + ' 0%, transparent 64%),' +
-          'radial-gradient(100% 80% at 92% -8%, ' + t.t['--g2'] + ' 0%, transparent 60%),' +
+          'radial-gradient(140% 92% at 8% 116%, ' + (t.t['--g1'] || 'transparent') + ' 0%, transparent 74%),' +
+          'radial-gradient(120% 66% at 100% -12%, ' + (t.t['--g2'] || 'transparent') + ' 0%, transparent 70%),' +
+          'radial-gradient(125% 84% at 96% 112%, ' + (t.t['--g3'] || 'transparent') + ' 0%, transparent 72%),' +
           t.t['--g0'];
         disc.style.borderColor = t.t['--hair'];
         var dot = scEl('u');
@@ -1502,20 +1582,30 @@
         b.setAttribute('aria-pressed', t.id === theme ? 'true' : 'false');
         b.addEventListener('click', function () {
           scPaint(t.id, true);
-          [].forEach.call(row.children, function (c) {
+          [].forEach.call(row.querySelectorAll('.theme'), function (c) {
             var on = c.dataset.theme === t.id;
             c.classList.toggle('on', on);
             c.setAttribute('aria-pressed', on ? 'true' : 'false');
           });
-          hint.textContent = t.name + ' · ' + t.note + ' on the smallest type';
+          hint.textContent = t.name + ' \u00b7 ' + t.note + ' on the smallest type';
         });
-        row.appendChild(b);
-      });
-      body.appendChild(row);
+        return b;
+      };
 
-      var hint = scEl('p', 'hint',
-        scTheme(theme).name + ' · ' + scTheme(theme).note + ' on the smallest type');
-      hint.style.marginTop = '2px';
+      [['Light', 'light'], ['Dark', 'dark']].forEach(function (grp) {
+        var mine = THEMES.filter(function (t) { return t.kind === grp[1]; });
+        if (!mine.length) return;
+        row.appendChild(scEl('span', 'theme-h', grp[0]));
+        var g = scEl('div', 'theme-g');
+        mine.forEach(function (t) { g.appendChild(chip(t)); });
+        row.appendChild(g);
+      });
+
+      var lab = scEl('span', 'label', 'Theme');
+      lab.style.marginTop = '2px';
+      body.appendChild(lab);
+      body.appendChild(row);
+      hint.textContent = scTheme(theme).name + ' \u00b7 ' + scTheme(theme).note + ' on the smallest type';
       body.appendChild(hint);
 
       var rule = scEl('div', 'menu-rule');

@@ -862,15 +862,21 @@ const SAID = [
   await page.evaluate(() => document.getElementById('scView').click());
   await page.waitForTimeout(200);
 
-  const IDS = ['paper', 'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum'];
+  const IDS = ['paper', 'blush', 'slate', 'linen', 'mist', 'bloom', 'sand',
+               'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum'];
   await page.click('#scMenu');
   await page.waitForTimeout(320);
   ok('the picker offers every theme, as a swatch rather than a word',
     await page.$$eval('.theme', (e) => e.map((x) => x.dataset.theme).join(' ')) === IDS.join(' '));
+  /* Split light from dark. Thirteen chips in one undifferentiated block
+     is a colour chart; the half you are in is the first thing anyone
+     deciding wants, and it is the only grouping the set actually has. */
+  ok('and they are split into light and dark',
+    await page.$$eval('.theme-h', (e) => e.map((x) => x.textContent).join('/')) === 'Light/Dark');
   /* All seven ON SCREEN. The first cut was one scrolling row, which put
      the seventh past the right edge of a 390px sheet — an option you
      have to discover by swiping is one most people never find. */
-  ok('and all seven are on screen without scrolling',
+  ok('and all thirteen are on screen without scrolling',
     await page.$$eval('.theme', (els) => els.every((e) => {
       const r = e.getBoundingClientRect();
       return r.left >= 0 && r.right <= 390;
@@ -966,6 +972,34 @@ const SAID = [
   ok('and it is kept under its own key, away from the schedule',
     await page.evaluate(() => localStorage.getItem('sched.theme.v1') === 'plum'
       && !/theme/.test(localStorage.getItem('sched.v1') || '')));
+
+  /* ── no token survives a switch ──
+     Every theme has to name every token, or one it leaves out is
+     inherited from whatever was up last: go from a light theme that
+     sets --g3 to a dark one that does not, and the dark page keeps the
+     light one's third wash. It is a colour that only appears in one
+     ORDER of clicks, which is close to impossible to find by looking —
+     so scPaint clears the whole set before writing, and this drives the
+     exact order that would expose it. */
+  await page.click('#scMenu');
+  await page.waitForTimeout(300);
+  await page.click('.theme[data-theme="bloom"]');
+  await page.waitForTimeout(200);
+  const leak = await page.evaluate(() => {
+    const read = () => ['--g1', '--g2', '--g3', '--bad', '--on-red'].map((k) =>
+      getComputedStyle(document.documentElement).getPropertyValue(k).trim());
+    const light = read();
+    document.querySelector('.theme[data-theme="nebula"]').click();
+    const dark = read();
+    return { light, dark };
+  });
+  await page.waitForTimeout(200);
+  ok('a light theme’s third wash does not survive into a dark one',
+    leak.light[2] !== leak.dark[2] && /transparent|^$/.test(leak.dark[2]), leak);
+  ok('and every other token moves with it',
+    leak.light.every((v, i) => v !== leak.dark[i]), leak);
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForTimeout(300);
 
   /* Back to the shipped palette, so nothing below this reads a themed
      page and calls it the default. */
