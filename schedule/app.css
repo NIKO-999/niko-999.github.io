@@ -56,21 +56,45 @@
   --red:     #e2231a;
   --red-rgb: 226, 35, 26;
 
+  /* The ground, as three stops rather than one flat fill. On the shipped
+     palette the two washes are transparent, so this is exactly the white
+     page it has always been — the gradient exists so a theme can reach
+     for it without the markup changing shape.
+
+     Painted on the BODY and nowhere else. It is a background, not a
+     filter: it rasterises once and composites from then on. The orrery
+     spent three rounds of performance work discovering that a
+     backdrop-filter over a moving subtree re-blurs every frame to
+     arrive at the same pixels — a static gradient behind a static page
+     has none of that cost, and putting one on an element the ring
+     repaints inside would give it all of it. */
+  --g0: var(--paper);
+  --g1: transparent;
+  --g2: transparent;
+
   --hair:  #dcdcdc;
+  /* The unlit marks. Its own token rather than --hair: a hairline
+     between rows and a mark that has not been spent are the same
+     grey today and have no reason to stay the same one. */
+  --tick-off: #ececec;
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-html { -webkit-text-size-adjust: 100%; background: var(--paper); }
+html { -webkit-text-size-adjust: 100%; background: var(--g0); }
 
 body {
   min-height: 100dvh;
+  background:
+    radial-gradient(115% 75% at 18% 108%, var(--g1) 0%, transparent 62%),
+    radial-gradient(85% 60% at 92% -8%, var(--g2) 0%, transparent 58%),
+    var(--g0);
+  background-attachment: fixed;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'tnum' 1;   /* a ticking countdown must not shift what is beside it */
   color: var(--ink);
-  background: var(--paper);
   padding: max(14px, env(safe-area-inset-top)) 0
            calc(96px + env(safe-area-inset-bottom)) 0;
   overscroll-behavior-y: none;
@@ -505,7 +529,11 @@ body {
   justify-content: center;
   gap: 22px;
   padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
-  background: var(--paper);
+  /* --g0, not --paper. The page's ground is a gradient now, and a bar
+     filled with the flat base colour cuts a visible rectangle out of
+     the bottom of it. On the shipped palette the two are the same
+     white and nothing changes. */
+  background: var(--g0);
   border-top: 1px solid var(--hair);
 }
 

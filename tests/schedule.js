@@ -746,6 +746,47 @@ const SAID = [
     await page.evaluate(() => !document.getElementById('scRail').hidden
       && document.getElementById('scRing').hidden));
 
+  /* ── the ring takes its colour from the tokens ──
+     SVG presentation attributes take a literal, so the marks were drawn
+     with the palette's hex typed into the string — a copy of a token
+     that drifts the moment the palette moves. Proven by moving it: push
+     a colour nothing in this app uses onto :root, repaint, and the
+     marks have to come back wearing it. Reverting scInk to the literals
+     leaves them red and this falls over. */
+  await page.evaluate(() => {
+    document.documentElement.style.setProperty('--red', 'rgb(0, 128, 255)');
+    document.documentElement.style.setProperty('--tick-off', 'rgb(9, 9, 9)');
+    document.getElementById('scView').click();
+  });
+  await page.waitForTimeout(220);
+  const themed = await page.evaluate(() => {
+    const m = [...document.querySelectorAll('#scRingSvg path')].map((p) => p.getAttribute('stroke'));
+    return { lit: m.filter((c) => c === 'rgb(0, 128, 255)').length,
+             off: m.filter((c) => c === 'rgb(9, 9, 9)').length,
+             stale: m.filter((c) => /e2231a|ececec/i.test(c)).length,
+             head: document.querySelector('#scRingSvg circle[fill]').getAttribute('fill') };
+  });
+  ok('the marks are drawn in whatever --red currently is',
+    themed.lit > 0 && themed.off > 0 && themed.stale === 0
+    && themed.head === 'rgb(0, 128, 255)', themed);
+
+  /* And the ground is a gradient the palette can reach, which on the
+     shipped palette resolves to the flat white page it has always been.
+     Sampled off a real pixel in a corner nothing is drawn in. */
+  await page.evaluate(() => {
+    document.documentElement.style.removeProperty('--red');
+    document.documentElement.style.removeProperty('--tick-off');
+    document.getElementById('scView').click();
+  });
+  await page.waitForTimeout(180);
+  const corner = await (async () => {
+    const png = PNG.sync.read(await page.screenshot());
+    const i = (png.width * Math.round(300 * dpr) + Math.round(376 * dpr)) << 2;
+    return [png.data[i], png.data[i + 1], png.data[i + 2]];
+  })();
+  ok('the default ground is still flat white paper',
+    corner.every((c) => c === 255), corner);
+
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet
      open reads the bar and the rows and calls it done — the day picker

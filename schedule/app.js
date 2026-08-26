@@ -839,16 +839,26 @@
     return { kind: 'done' };
   }
 
+  /* Read, not written in. The ring is SVG, and SVG presentation
+     attributes take a literal — so a colour typed here is a copy of a
+     token that drifts the moment the palette moves. Pulled off the
+     element instead, once per paint, which is twice a minute. */
+  function scInk(name, fallback) {
+    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+    return v || fallback;
+  }
+
   function scPaintRing() {
     var svg = $('scRingSvg');
     if (!svg) return;
     var sp = scRingSpan(), now = scNowMin();
+    var LIT = scInk('--red', '#e2231a'), OFF = scInk('--tick-off', '#ececec');
 
     $('scRing').classList.toggle('is-done', sp.kind === 'done');
 
     if (sp.kind === 'done') {
       svg.innerHTML = '<circle cx="' + RING_C + '" cy="' + RING_C + '" r="' + RING_R +
-        '" fill="none" stroke="#ececec" stroke-width="3"/>';
+        '" fill="none" stroke="' + OFF + '" stroke-width="3"/>';
       $('scRingKick').textContent = 'Done';
       $('scRingNum').textContent = '—';
       $('scRingUnit').textContent = 'for today';
@@ -874,7 +884,7 @@
       var p0 = srPol(RING_R - 7, deg), p1 = srPol(RING_R + 7, deg);
       out.push('<path d="M' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) +
         'L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + '" stroke="' +
-        (lit ? '#e2231a' : '#ececec') + '" stroke-width="' +
+        (lit ? LIT : OFF) + '" stroke-width="' +
         /* Every fourth mark heavier, so the eye counts in groups rather
            than reading a texture. */
         (k % 4 ? 1.7 : 2.8) + '"/>');
@@ -893,10 +903,10 @@
     var litN = Math.ceil(rem);
     var head = srPol(RING_R, (litN ? litN - 1 : 0) / n * 360);
     out.push('<circle cx="' + head[0].toFixed(2) + '" cy="' + head[1].toFixed(2) +
-      '" r="4.5" fill="#e2231a"/>');
+      '" r="4.5" fill="' + LIT + '"/>');
     if (!scStill()) {
       out.push('<circle class="sr-ping" cx="' + head[0].toFixed(2) + '" cy="' +
-        head[1].toFixed(2) + '" r="9" fill="none" stroke="#e2231a" stroke-width="2"/>');
+        head[1].toFixed(2) + '" r="9" fill="none" stroke="' + LIT + '" stroke-width="2"/>');
     }
 
     svg.innerHTML = out.join('');
