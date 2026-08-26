@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════════════════════════════
-   SCHEDULE — a week of classes on one glass card.
+   SCHEDULE — a week on a rail, and one day lit up.
 
    Standalone on purpose. This app reads no shared stylesheet, no
    shared script, no backdrop from arc/, and no storage key belonging
@@ -16,7 +16,8 @@
 /* One face, one @font-face, declared as the weight RANGE it actually
    covers. Declaring the same file once per weight fetches identical
    bytes N times AND pins the axis, which throws away the thing a
-   variable font is for. */
+   variable font is for — and this design spends that axis hard, from
+   200 on the hero figure to 800 on a day label. */
 @font-face {
   font-family: 'Inter';
   font-weight: 100 900;
@@ -28,135 +29,179 @@
 :root {
   color-scheme: dark;
 
-  /* ── the sky ──
-     Deliberately kept off the light end. The reference poster runs to
-     near-white at the bottom, and white 6pt type over near-white is
-     the failure this looks like a design choice for. The lightest the
-     sky is allowed to get is what sets the floor for every contrast
-     ratio on the card. */
-  --sky-1: #4a5772;
-  --sky-2: #5f6d87;
-  --sky-3: #8593a8;
-  --sky-4: #a3b0c0;
+  /* ── the palette ──
+     Six values, taken as given rather than sampled off a picture, and
+     named by ROLE here because that is what the rules below are about.
+     What they are: Black, Dark Green, Gray, Green, Spring Green and
+     White.
 
-  /* ── the glass ──
-     Mixed off a fixed slate rather than off whatever is behind it, at
-     an alpha high enough that the sky only modulates the card instead
-     of setting it. The alpha is not free: every row here is small type
-     over a gradient, and a thinner card puts the whole schedule at a
-     ratio that reads as deliberate and is not. */
-  --glass-1: rgba(19, 29, 48, .50);
-  --glass-2: rgba(15, 24, 41, .60);
-  --edge:    rgba(255, 255, 255, .22);
+     The accent is the loudest colour in the set by a distance, so it
+     is spent in exactly two places — the day you are in, and whatever
+     is live inside it. Used on six subjects it would turn the rail
+     into a chart of nothing. */
+  --ground:    #000000;
+  --surface:   #16302b;   /* a day card, and the sheet */
+  --surface-2: #202020;   /* a field, a secondary control */
+  --accent:    #05d680;
+  --accent-2:  #04c274;   /* the gradient's near end — see the note below */
+  --ink:       #dce4e7;
+  --ink-on:    #16302b;   /* on the accent, never on the ground */
 
-  /* A day's card, over the glass. */
-  --card-edge: rgba(255, 255, 255, .10);
+  /* ── why the gradient stops where it does ──
+     The palette's own swatch runs Spring Green all the way down to
+     Green, and over that far end this ink measures 2.07:1 — a card
+     whose right-hand side you cannot read. Today's card therefore runs
+     accent → accent-2 only, which holds 6.0:1 at its darkest point.
+     Green itself is still in the set, as the wash off the top corner,
+     where nothing is set over it. */
 
-  /* The one accent, spent only on what is LIVE — the day you are in,
-     the class you are in, the microphone while it listens. It is never
-     a category: six coloured subjects would make the card a chart. */
-  --live: #7ff0dc;
+  /* ── the same six, as channels ──
+     Every translucent use of the palette — a hairline, a glow, the
+     wash under a finished class — is an alpha of one of these
+     colours, and there are about twenty of them. Written as literals
+     they are twenty independent copies of a value, and changing the
+     accent means finding all of them. The one place a literal is
+     unavoidable is the crest on today's card: it lives inside a data:
+     URL, where a custom property cannot reach. */
+  --ground-rgb: 0, 0, 0;
+  --ink-rgb:    220, 228, 231;
+  --ink-on-rgb: 22, 48, 43;
+  --accent-rgb: 5, 214, 128;
+  --deep-rgb:   2, 103, 79;
+
+  --hair:   rgba(var(--ink-rgb), .12);
+  --hair-2: rgba(var(--ink-rgb), .22);
 
   --rail: 40px;   /* the day-label column */
   --gap:  16px;   /* label to card */
   --dot:  27px;   /* dot centre, from the top of a day — on the first row's text */
+  --wave: 13px;   /* the crest above a lit card */
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
-html { -webkit-text-size-adjust: 100%; }
+html { -webkit-text-size-adjust: 100%; background: var(--ground); }
 
 body {
   min-height: 100dvh;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'tnum' 1;   /* a ticking countdown must not shift what is beside it */
-  color: #fff;
-  background: var(--sky-1);
+  color: var(--ink);
+  background: var(--ground);
   padding: max(14px, env(safe-area-inset-top)) 14px
            calc(96px + env(safe-area-inset-bottom)) 14px;
   overscroll-behavior-y: none;
 }
 
-/* ── the sky ─────────────────────────────────────────────── */
+/* ── the ground ──────────────────────────────────────────── */
 
 .sky {
   position: fixed;
   inset: 0;
   z-index: -1;
   background:
-    radial-gradient(120% 70% at 12% 0%,   rgba(41, 51, 73, .55) 0%, rgba(41, 51, 73, 0) 62%),
-    linear-gradient(168deg, var(--sky-1) 0%, var(--sky-2) 34%, var(--sky-3) 72%, var(--sky-4) 100%);
+    radial-gradient(78% 42% at 6% -6%,  rgba(var(--deep-rgb), .60), rgba(var(--deep-rgb), 0) 68%),
+    radial-gradient(96% 44% at 62% 104%, rgba(var(--accent-rgb), .16), rgba(var(--accent-rgb), 0) 66%),
+    var(--ground);
 }
-.sky svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 
-/* ── the poster ──────────────────────────────────────────── */
+/* ── the head ────────────────────────────────────────────── */
 
 .poster {
   max-width: 460px;
   margin: 0 auto;
-  padding: 30px 18px 26px;
-  border-radius: 34px;
-  border: 1px solid var(--edge);
-  background: linear-gradient(180deg, var(--glass-1), var(--glass-2));
-  box-shadow: 0 26px 60px rgba(12, 18, 32, .34);
+  padding: 22px 6px 20px;
 }
 
-/* The frost is one element, not one per card. A backdrop filter is
-   re-composited against everything behind it as the page scrolls, so
-   the count of them is the cost — six blurred day cards inside a
-   blurred poster is seven passes for one look. */
-@supports ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
-  .poster {
-    -webkit-backdrop-filter: blur(16px) saturate(112%);
-    backdrop-filter: blur(16px) saturate(112%);
-  }
-}
-
-.head { padding: 0 4px 22px 2px; }
+.head { padding: 0 4px 26px 2px; }
 
 .title {
-  font-size: clamp(28px, 8.4vw, 36px);
+  font-size: clamp(23px, 6.4vw, 27px);
   font-weight: 800;
-  letter-spacing: -.033em;
-  line-height: 1.04;
+  letter-spacing: -.028em;
+  line-height: 1.06;
 }
 
 .sub {
-  margin-top: 7px;
-  font-size: 14px;
+  margin-top: 5px;
+  font-size: 12.5px;
   font-weight: 300;
   font-style: italic;
-  letter-spacing: .004em;
-  color: rgba(255, 255, 255, .93);
+  letter-spacing: .006em;
 }
 
 /* Editable-by-tap, and it has to look it without becoming a form. */
 .title:focus-visible, .sub:focus-visible {
-  outline: 2px solid var(--live);
+  outline: 2px solid var(--accent);
   outline-offset: 4px;
   border-radius: 6px;
 }
 
+/* ── the hero ──
+   The one line that makes a week into a scheduler, given the size the
+   thing deserves: how long you have. A schedule is consulted in a
+   corridor, and the answer is a number of minutes — so the number is
+   the biggest thing on the screen and the title is not.
+
+   Weight 200 at this size, which is the whole reason the face is
+   loaded as a variable one. */
 .live {
-  margin-top: 14px;
+  display: grid;
+  gap: 2px;
+  margin-top: 22px;
+}
+/* A class selector beats the UA's [hidden] rule, so the attribute has
+   to be honoured explicitly or an empty hero still takes its grid. */
+.live[hidden] { display: none; }
+
+.live .eyebrow {
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: .012em;
-  min-height: 15px;
+  gap: 7px;
 }
-.live::before {
+.live .eyebrow::before {
   content: '';
   width: 6px; height: 6px;
   border-radius: 50%;
-  background: var(--live);
-  box-shadow: 0 0 0 3px rgba(127, 240, 220, .18);
+  background: var(--accent);
+  box-shadow: 0 0 0 3px rgba(var(--accent-rgb), .16), 0 0 12px rgba(var(--accent-rgb), .55);
   flex: none;
 }
-.live:empty { display: none; }
-.live.is-next::before { background: rgba(255, 255, 255, .55); box-shadow: none; }
+/* Nothing is running, so nothing pulses: the marker drops to the ink
+   and loses its glow rather than colouring a countdown that has not
+   started. */
+.live.is-next .eyebrow { color: var(--ink); }
+.live.is-next .eyebrow::before { background: var(--hair-2); box-shadow: none; }
+
+.live .figure {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  font-variant-numeric: tabular-nums;
+}
+.live .figure b {
+  font-size: clamp(44px, 14.5vw, 58px);
+  font-weight: 200;
+  letter-spacing: -.035em;
+  line-height: 1;
+}
+.live .figure i {
+  font-size: 13px;
+  font-weight: 400;
+  font-style: normal;
+  letter-spacing: .01em;
+}
+.live .caption {
+  margin-top: 4px;
+  font-size: 12.5px;
+  font-weight: 400;
+  letter-spacing: .004em;
+}
 
 /* ── the rail ────────────────────────────────────────────── */
 
@@ -183,7 +228,7 @@ body {
   top: 0; bottom: 0;
   width: 2px;
   margin-left: -1px;
-  background: rgba(255, 255, 255, .88);
+  background: var(--hair-2);
 }
 .day:first-child::before { top: var(--dot); }
 .day:last-child::before  { bottom: calc(100% - var(--dot)); }
@@ -193,10 +238,10 @@ body {
   position: absolute;
   left: calc(var(--rail) + var(--gap) / 2);
   top: var(--dot);
-  width: 13px; height: 13px;
-  margin: -6.5px 0 0 -6.5px;
+  width: 11px; height: 11px;
+  margin: -5.5px 0 0 -5.5px;
   border-radius: 50%;
-  background: #fff;
+  background: rgba(var(--ink-rgb), .45);
 }
 
 .day-name {
@@ -208,14 +253,15 @@ body {
   letter-spacing: .055em;
 }
 
-/* Today is the only thing on the card that is coloured, and it is the
-   dot and the label — not the rows. Tinting a whole day's block would
-   compete with the row that is actually running. */
 .day.is-today::after {
-  background: var(--live);
-  box-shadow: 0 0 0 5px rgba(127, 240, 220, .16);
+  background: var(--accent);
+  width: 13px; height: 13px;
+  margin: -6.5px 0 0 -6.5px;
+  box-shadow: 0 0 0 5px rgba(var(--accent-rgb), .14), 0 0 16px rgba(var(--accent-rgb), .6);
 }
-.day.is-today .day-name { color: var(--live); }
+.day.is-today .day-name { color: var(--accent); }
+
+/* ── a day ───────────────────────────────────────────────── */
 
 /* The COLUMNS belong to the card, not to the row. Three columns sized
    per-row would let Tuesday's "8:00 - 11:00 AM" and "1:00 - 4:00 PM"
@@ -228,17 +274,41 @@ body {
   display: grid;
   grid-template-columns: max-content max-content 1fr;
   column-gap: 10px;
-  border-radius: 18px;
-  border: 1px solid var(--card-edge);
-  background: linear-gradient(112deg, rgba(255, 255, 255, .13), rgba(255, 255, 255, .07));
+  border-radius: 16px;
+  border: 1px solid var(--hair);
+  background: var(--surface);
   padding: 4px 11px;
   overflow: hidden;
 }
 
-/* A day whose rows carry no room at all drops the column rather than
-   leaving a zero-width track with a gap on either side of it — which is
-   how the reference's Monday and its Tuesday come out of one rule. */
+/* A day whose rows carry no room drops the column rather than leaving
+   a zero-width track with a gap on either side of it — which is how
+   the reference's Monday and its Tuesday come out of one rule. */
 .day-card.no-room { grid-template-columns: max-content 1fr; }
+
+/* ── today ──
+   The single lit surface on the page, and the only place the accent is
+   spent at any size. Its top edge is a crest rather than a straight
+   line — the one flourish here, and it is load-bearing: with every day
+   drawn as the same rounded rectangle, the day you are in has to be
+   recognisable before you have read a word of it.
+
+   The crest is painted as the card's own background rather than as an
+   element above it, so `overflow: hidden` still holds and the rows
+   inside stay clipped to the corners. The gradient starts a pixel
+   under the crest's box so the two cannot leave a seam between them. */
+.day.is-today .day-card {
+  color: var(--ink-on);
+  border: 0;
+  border-radius: 0 0 16px 16px;
+  padding: calc(var(--wave) + 5px) 11px 4px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 300 13' preserveAspectRatio='none'%3E%3Cpath d='M0 13V7.6c26-6 52 1.4 78 3.2 30 2 58-6.4 88-7.2 34-.9 62 6.4 92 3.6 16-1.5 30-5.4 42-7.2V13z' fill='%2305d680'/%3E%3C/svg%3E")
+      top left / 100% var(--wave) no-repeat,
+    linear-gradient(118deg, var(--accent), var(--accent-2))
+      0 calc(var(--wave) - 1px) / 100% calc(100% - var(--wave) + 1px) no-repeat;
+  box-shadow: 0 12px 34px rgba(var(--accent-rgb), .13);
+}
 
 /* ── a row ───────────────────────────────────────────────── */
 
@@ -271,8 +341,10 @@ body {
   cursor: pointer;
   transition: background-color .18s ease, opacity .25s ease;
 }
-.row:active { background: rgba(255, 255, 255, .12); }
-.row:focus-visible { outline: 2px solid var(--live); outline-offset: -2px; }
+.row:active { background: rgba(var(--ink-rgb), .1); }
+.day.is-today .day-card .row:active { background: rgba(var(--ink-on-rgb), .12); }
+.row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.day.is-today .day-card .row:focus-visible { outline-color: var(--ink-on); }
 
 /* Safari before 16 and Chrome before 117 have no subgrid. They get a
    fixed time column instead — it is wide enough for the longest string
@@ -288,6 +360,7 @@ body {
    entirely rather than dropping its label into the time track. */
 .row.is-free { display: block; opacity: .72; }
 .row.is-free .n { font-weight: 300; font-style: italic; }
+
 /* Both of these are RIGHT-aligned, which is what makes a stack of them
    read as a column rather than as a ragged list. Their tracks are sized
    to the longest string in the card, so a shorter time leaves its slack
@@ -320,25 +393,35 @@ body {
 /* Hierarchy here is WEIGHT, not opacity. The reference dims its times
    to about 70% white, which over this card measures under 4.5:1 at
    10px — and a schedule you cannot read in daylight is the one thing
-   this must not be. 300 against 600 separates them at full strength.
+   this must not be. 300 against 600 separates them at full strength. */
 
-   Past is the one exception: a class that is over says so by fading,
-   and it is fading out of relevance, not out of legibility. It stops
-   at .62 and only on the day you are actually in. */
-.day.is-today .row.is-past { opacity: .62; }
+/* Past and now are marked on TODAY only — a class on Friday is neither
+   — and today's card is always the lit one, so both are stated once,
+   against the accent, and there is no second surface to write a
+   variant for.
 
+   Neither of them fades. Dimming text on the lit card fades it TOWARD
+   the surface rather than away from it: ink at .78 over the accent
+   measures 2.8:1, where the same fade on a dark card would have been
+   7.3:1. So a finished class sinks instead — a wash the colour of the
+   ink, at an alpha low enough that the text sitting over it is
+   untouched — and the running one sinks further and gets the weight. */
+.day.is-today .row.is-past { background: rgba(var(--ink-on-rgb), .09); }
+
+/* On the lit card the accent is already the ground, so "now" cannot be
+   said in colour. It is said in weight and in a deeper inset — the
+   same information, in the only register left. */
 .day.is-today .row.is-now {
-  background: rgba(127, 240, 220, .13);
-  box-shadow: inset 0 0 0 1px rgba(127, 240, 220, .34);
+  background: rgba(var(--ink-on-rgb), .16);
+  box-shadow: inset 0 0 0 1.5px rgba(var(--ink-on-rgb), .34);
 }
-.day.is-today .row.is-now .n { color: var(--live); }
+.day.is-today .row.is-now .n { font-weight: 800; }
 
 .empty {
   padding: 4px 6px 8px;
   font-size: 13px;
   font-weight: 300;
   line-height: 1.55;
-  color: rgba(255, 255, 255, .96);
 }
 .empty em { font-weight: 400; }
 
@@ -354,7 +437,7 @@ body {
   justify-content: center;
   gap: 22px;
   padding: 10px 20px calc(14px + env(safe-area-inset-bottom));
-  background: linear-gradient(180deg, rgba(20, 29, 47, 0), rgba(20, 29, 47, .62) 46%);
+  background: linear-gradient(180deg, rgba(var(--ground-rgb), 0), rgba(var(--ground-rgb), .46) 46%, rgba(var(--ground-rgb), .66));
   pointer-events: none;
 }
 .bar > * { pointer-events: auto; }
@@ -363,33 +446,38 @@ body {
   display: grid;
   place-items: center;
   border-radius: 50%;
-  border: 1px solid var(--edge);
-  color: #fff;
   cursor: pointer;
-  -webkit-backdrop-filter: blur(10px);
-  backdrop-filter: blur(10px);
 }
 
 /* 48px is the floor, not the target. Everything on this bar is pressed
    with a thumb, in a hurry, one-handed. */
 .ghost {
   width: 48px; height: 48px;
-  background: rgba(255, 255, 255, .12);
+  border: 1px solid var(--hair);
+  background: var(--surface-2);
+  color: var(--ink);
 }
-.ghost:active { background: rgba(255, 255, 255, .22); }
+.ghost:active { background: #2c2c2c; }
 
+/* The one control that is the accent, because it is the one that does
+   the thing this app is for. */
 .mic {
   position: relative;
   width: 66px; height: 66px;
-  background: rgba(255, 255, 255, .17);
-  transition: transform .16s cubic-bezier(.3, 1.4, .6, 1), background-color .2s ease;
+  border: 0;
+  background: linear-gradient(150deg, var(--accent), var(--accent-2));
+  color: var(--ink-on);
+  /* The dark ring is not decoration. This button is the accent and it
+     is fixed over a scrolling page, so sooner or later it sits on top
+     of the one card that is ALSO the accent — and there it vanishes
+     into its own background. The ring reads as nothing against the
+     black ground, where it is not needed, and cuts the button out of
+     the lit card, where it is. */
+  box-shadow: 0 0 0 4px rgba(var(--ground-rgb), .5), 0 6px 26px rgba(var(--accent-rgb), .34);
+  transition: transform .16s cubic-bezier(.3, 1.4, .6, 1), box-shadow .2s ease;
 }
 .mic:active { transform: scale(.94); }
-.mic.is-live {
-  background: var(--live);
-  border-color: var(--live);
-  color: #0d2b27;
-}
+.mic.is-live { box-shadow: 0 0 0 4px rgba(var(--ground-rgb), .5), 0 6px 34px rgba(var(--accent-rgb), .6); }
 
 .ghost svg, .mic svg {
   width: 22px; height: 22px;
@@ -399,7 +487,7 @@ body {
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.mic svg { width: 27px; height: 27px; }
+.mic svg { width: 27px; height: 27px; stroke-width: 2; }
 .ghost svg circle { fill: currentColor; stroke: none; }
 
 /* The ring only exists while listening, so there is nothing animating
@@ -408,13 +496,13 @@ body {
   position: absolute;
   inset: -1px;
   border-radius: 50%;
-  border: 2px solid var(--live);
+  border: 2px solid var(--accent);
   opacity: 0;
 }
 .mic.is-live .pulse { animation: sc-pulse 1.7s ease-out infinite; }
 @keyframes sc-pulse {
   0%   { opacity: .8; transform: scale(1); }
-  100% { opacity: 0;  transform: scale(1.55); }
+  100% { opacity: 0;  transform: scale(1.6); }
 }
 
 /* ── the sheet ───────────────────────────────────────────── */
@@ -423,9 +511,7 @@ body {
   position: fixed;
   inset: 0;
   z-index: 40;
-  background: rgba(9, 14, 25, .58);
-  -webkit-backdrop-filter: blur(3px);
-  backdrop-filter: blur(3px);
+  background: rgba(var(--ground-rgb), .66);
   opacity: 0;
   transition: opacity .24s ease;
 }
@@ -440,13 +526,14 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 10px 18px calc(22px + env(safe-area-inset-bottom));
-  border-radius: 26px 26px 0 0;
-  border-top: 1px solid var(--edge);
-  background: #1b2438;
+  border-radius: 24px 24px 0 0;
+  border-top: 1px solid var(--hair);
+  background: var(--surface);
   transform: translateY(100%);
   transition: transform .3s cubic-bezier(.22, 1, .36, 1);
 }
 .sheet.is-open { transform: translateY(0); }
+.sheet:focus { outline: none; }
 
 @media (prefers-reduced-motion: reduce) {
   .sheet, .scrim, .mic, .row { transition: none; }
@@ -457,7 +544,7 @@ body {
   width: 38px; height: 4px;
   margin: 0 auto 16px;
   border-radius: 2px;
-  background: rgba(255, 255, 255, .3);
+  background: var(--hair-2);
 }
 
 .sheet-title {
@@ -473,7 +560,6 @@ body {
   font-size: 13px;
   font-weight: 300;
   line-height: 1.55;
-  color: rgba(255, 255, 255, .95);
 }
 .hint em { font-weight: 400; font-style: italic; }
 .hint + .hint { margin-top: 10px; }
@@ -484,39 +570,39 @@ body {
   min-height: 62px;
   margin: 14px 0;
   padding: 13px 15px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .07);
-  border: 1px solid rgba(255, 255, 255, .1);
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
   font-size: 15px;
   font-weight: 400;
   line-height: 1.45;
 }
-.heard .partial { color: rgba(255, 255, 255, .62); }
+.heard .partial { color: rgba(var(--ink-rgb), .55); }
 
 .field {
   width: 100%;
   margin: 12px 0;
   padding: 13px 15px;
-  border-radius: 14px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: rgba(255, 255, 255, .07);
-  color: #fff;
+  border-radius: 12px;
+  border: 1px solid var(--hair);
+  background: var(--surface-2);
+  color: var(--ink);
   /* 16px exactly: anything smaller and iOS zooms the page on focus. */
   font: 400 16px/1.4 'Inter', system-ui, sans-serif;
 }
-.field:focus { outline: 2px solid var(--live); outline-offset: 1px; border-color: transparent; }
-.field::placeholder { color: rgba(255, 255, 255, .48); }
+.field:focus { outline: 2px solid var(--accent); outline-offset: 1px; border-color: transparent; }
+.field::placeholder { color: rgba(var(--ink-rgb), .42); }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
 
 .label {
   display: block;
   margin: 14px 0 -4px;
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: .07em;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: .14em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, .82);
+  color: var(--accent);
 }
 
 /* All seven share the row and split it evenly. Left to size themselves
@@ -527,18 +613,18 @@ body {
   flex: 1 1 0;
   min-width: 0;
   padding: 16px 2px;
-  border-radius: 12px;
-  border: 1px solid rgba(255, 255, 255, .18);
-  background: rgba(255, 255, 255, .07);
-  color: #fff;
+  border-radius: 11px;
+  border: 1px solid var(--hair);
+  background: var(--surface-2);
+  color: var(--ink);
   font: 600 12px/1 'Inter', system-ui, sans-serif;
   letter-spacing: .05em;
   cursor: pointer;
 }
 .pick[aria-pressed="true"] {
-  background: var(--live);
-  border-color: var(--live);
-  color: #0d2b27;
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--ink-on);
 }
 
 /* A parsed entry, shown before it is committed. It is the row the app
@@ -552,13 +638,13 @@ body {
   align-items: baseline;
   padding: 13px 15px;
   margin-bottom: 8px;
-  border-radius: 14px;
-  background: rgba(255, 255, 255, .08);
-  border: 1px solid rgba(255, 255, 255, .12);
+  border-radius: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--hair);
 }
 .parsed .p-day {
   font-size: 12px; font-weight: 800; letter-spacing: .055em;
-  color: var(--live);
+  color: var(--accent);
 }
 .parsed .p-name { font-size: 15px; font-weight: 600; }
 .parsed .p-meta {
@@ -573,16 +659,16 @@ body {
 .btn {
   flex: 1;
   padding: 15px 16px;
-  border-radius: 15px;
+  border-radius: 13px;
   border: 1px solid transparent;
   font: 600 15px/1 'Inter', system-ui, sans-serif;
   letter-spacing: -.005em;
   cursor: pointer;
 }
-.btn.go { background: var(--live); color: #08221f; }
-.btn.go:active { background: #6adcc7; }
-.btn.off { background: rgba(255, 255, 255, .1); color: #fff; border-color: rgba(255, 255, 255, .18); }
-.btn.bad { background: rgba(255, 120, 120, .16); color: #ffc9c9; border-color: rgba(255, 120, 120, .32); }
+.btn.go { background: var(--accent); color: var(--ink-on); }
+.btn.go:active { background: var(--accent-2); }
+.btn.off { background: var(--surface-2); color: var(--ink); border-color: var(--hair); }
+.btn.bad { background: rgba(255, 120, 120, .14); color: #ffc9c9; border-color: rgba(255, 120, 120, .3); }
 .btn:disabled { opacity: .45; cursor: default; }
 
 .menu-item {
@@ -590,9 +676,9 @@ body {
   width: 100%;
   padding: 16px 4px;
   border: 0;
-  border-bottom: 1px solid rgba(255, 255, 255, .09);
+  border-bottom: 1px solid var(--hair);
   background: none;
-  color: #fff;
+  color: var(--ink);
   font: 500 15px/1.3 'Inter', system-ui, sans-serif;
   text-align: left;
   cursor: pointer;
@@ -602,7 +688,6 @@ body {
   margin-top: 3px;
   font-size: 12px;
   font-weight: 300;
-  color: rgba(255, 255, 255, .78);
 }
 .menu-item.bad { color: #ffc9c9; }
 
@@ -617,10 +702,10 @@ body {
   align-items: center;
   gap: 12px;
   padding: 13px 14px 13px 17px;
-  border-radius: 15px;
-  border: 1px solid rgba(255, 255, 255, .16);
-  background: #232d44;
-  box-shadow: 0 14px 34px rgba(8, 12, 22, .45);
+  border-radius: 13px;
+  border: 1px solid var(--hair);
+  background: var(--surface);
+  box-shadow: 0 14px 34px rgba(var(--ground-rgb), .6);
   font-size: 14px;
   font-weight: 400;
   opacity: 0;
@@ -632,12 +717,10 @@ body {
 .toast button {
   flex: none;
   padding: 9px 14px;
-  border-radius: 10px;
+  border-radius: 9px;
   border: 0;
-  background: var(--live);
-  color: #08221f;
+  background: var(--accent);
+  color: var(--ink-on);
   font: 700 13px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
-
-.sheet:focus { outline: none; }

@@ -8,7 +8,7 @@
      floor of 16px is what stops iOS zooming on focus instead. -->
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <meta name="color-scheme" content="dark" />
-<meta name="theme-color" content="#4a5772" />
+<meta name="theme-color" content="#000000" />
 <meta name="description" content="A week of classes on one card, spoken in." />
 <title>Schedule</title>
 
@@ -25,37 +25,21 @@
 </head>
 <body>
 
-<!-- ── the sky ──
-     Drawn, not photographed. A soft slate gradient with two folds of
-     silk in the bottom corner, so there is no image to download, nothing
-     to go blurry on a dense screen, and the whole app stays four small
-     files. The folds are gradients rather than blurred shapes: a large
-     blur filter is the one thing on a page like this that a phone
-     rasterises badly. -->
-<div class="sky" aria-hidden="true">
-  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
-    <defs>
-      <linearGradient id="scSilkA" x1="0.1" y1="0" x2="0.9" y2="1">
-        <stop offset="0"   stop-color="#fff" stop-opacity="0" />
-        <stop offset=".45" stop-color="#fff" stop-opacity=".34" />
-        <stop offset="1"   stop-color="#fff" stop-opacity=".06" />
-      </linearGradient>
-      <linearGradient id="scSilkB" x1="0" y1="0" x2="1" y2="0.6">
-        <stop offset="0"   stop-color="#fff" stop-opacity=".26" />
-        <stop offset=".6"  stop-color="#e9eef4" stop-opacity=".12" />
-        <stop offset="1"   stop-color="#fff" stop-opacity="0" />
-      </linearGradient>
-      <linearGradient id="scShade" x1="0" y1="0" x2="0.4" y2="1">
-        <stop offset="0"   stop-color="#2c3549" stop-opacity=".22" />
-        <stop offset="1"   stop-color="#2c3549" stop-opacity="0" />
-      </linearGradient>
-    </defs>
-    <!-- the fold's shadow side, laid down first so the light edge sits on it -->
-    <path d="M400 470 C 300 500 214 592 150 800 L400 800 Z" fill="url(#scShade)" />
-    <path d="M400 505 C 286 530 196 626 138 800 L400 800 Z" fill="url(#scSilkA)" />
-    <path d="M400 640 C 330 654 268 712 236 800 L400 800 Z" fill="url(#scSilkB)" />
-  </svg>
-</div>
+<!-- ── the ground ──
+     Black, with a wash of Green off the top corner and Spring Green
+     off the foot. Fixed and unanimated, so it rasterises once and
+     never again, and no blur filter anywhere — a large one is the
+     single thing on a page like this that a phone renders badly.
+
+     There WAS a crest down here, the palette's full sweep drawn as a
+     wave across the bottom. It is gone because it was never visible:
+     the cards cover the width at every scroll position that reaches
+     it, and where they stop, the bar's own gradient starts. Lifting it
+     clear was not available either — a bright band with rows scrolling
+     over it puts white type at about 2:1, which the contrast pass
+     rejects on sight. The reference's one filled panel is answered by
+     today's card, which is where it belongs: on the thing it means. -->
+<div class="sky" aria-hidden="true"></div>
 
 <main class="poster" id="scPoster">
 
@@ -65,9 +49,15 @@
     <p class="sub" id="scSub" tabindex="0" role="button"
        aria-label="Subtitle, tap to edit"></p>
 
-    <!-- The one line that makes a poster a scheduler: what is on right
-         now, or what is next, counted down. -->
-    <p class="live" id="scLive" aria-live="polite"></p>
+    <!-- The one thing that makes a week into a scheduler, at the size
+         it deserves: how long you have. Three parts, because a figure
+         alone is a number with no subject — what state you are in, the
+         figure, and what it is about. -->
+    <div class="live" id="scLive" aria-live="polite">
+      <span class="eyebrow" id="scLiveState"></span>
+      <span class="figure"><b id="scLiveNum"></b><i id="scLiveUnit"></i></span>
+      <span class="caption" id="scLiveOf"></span>
+    </div>
   </header>
 
   <ol class="rail" id="scRail"></ol>

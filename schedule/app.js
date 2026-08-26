@@ -633,6 +633,17 @@
       if (on) live = el;
     }
 
+    /* ── the hero ──
+       Always the same three parts and always the same shape: a state,
+       a CLOCK TIME as the figure, and what it is about underneath.
+
+       The figure is a time rather than the countdown, which was the
+       other candidate and is the more obviously useful number. A
+       countdown cannot hold one shape — it is "42", then "1 h 30 m",
+       then "in 2 h" — so at 58px it reflows the whole head every time
+       it crosses an hour. A time is four or five glyphs forever, sets
+       in tabular figures, and the duration still gets said, in the
+       caption where changing width costs nothing. */
     var line = $('scLive');
     var mine = scByDay(today);
     var running = null, next = null;
@@ -641,25 +652,33 @@
       else if (it.s > now && !next) next = it;
     });
 
-    line.classList.remove('is-next');
+    var state, at, of;
     if (running) {
-      line.textContent = running.n + ' · ' + scSpan(running.e - now) + ' left';
+      state = 'Now';
+      at = running.e;
+      of = running.n + ' · ' + scSpan(running.e - now) + ' left';
     } else if (next) {
-      line.classList.add('is-next');
-      line.textContent = 'Next · ' + next.n + ' at ' + sc12(next.s) + ' ' + scMer(next.s) +
-        ' · in ' + scSpan(next.s - now);
+      state = 'Next';
+      at = next.s;
+      of = next.n + ' · in ' + scSpan(next.s - now);
     } else {
       var ahead = null;
       for (var k = 1; k <= 7 && !ahead; k++) {
         var d = (today + k) % 7, list = scByDay(d);
         if (list.length) ahead = { d: d, it: list[0], k: k };
       }
-      line.classList.add('is-next');
-      line.textContent = ahead
-        ? (ahead.k === 1 ? 'Tomorrow' : FULL[ahead.d]) + ' · ' + ahead.it.n +
-          ' at ' + sc12(ahead.it.s) + ' ' + scMer(ahead.it.s)
-        : '';
+      if (!ahead) { line.hidden = true; return; }
+      state = ahead.k === 1 ? 'Tomorrow' : FULL[ahead.d];
+      at = ahead.it.s;
+      of = ahead.it.n;
     }
+
+    line.hidden = false;
+    line.classList.toggle('is-next', !running);
+    $('scLiveState').textContent = running ? state + ' · until' : state;
+    $('scLiveNum').textContent = sc12(at);
+    $('scLiveUnit').textContent = scMer(at);
+    $('scLiveOf').textContent = of;
   }
 
   /* ═══════════════════════════════════════════════════════════

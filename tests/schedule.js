@@ -171,12 +171,26 @@ const SAID = [
       const i = (png.width * Math.round(y) + Math.round(x)) << 2;
       return [png.data[i], png.data[i + 1], png.data[i + 2]];
     };
-    /* The BACKGROUND behind a run of text, not the text: the lightest
-       pixel in a band just under each row's baseline, which is the
-       surface every glyph in it is sitting on. */
+    /* Each row's own TEXT colour against its own background, sampled
+       across the row. It cannot assume white any more: most of the
+       week is White on Dark Green and the day you are in is Dark Green
+       on Spring Green, so a check written around one polarity would
+       pass the lit card without ever looking at it.
+
+       Opacity is folded in by hand. It never shows up in the computed
+       colour, so a row faded to .5 measures exactly as well as one at
+       full strength — which is how a dimmed row sails through a
+       contrast check that only reads CSS. */
     const boxes = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => {
       const b = r.getBoundingClientRect();
-      return { x: b.left, y: b.top, w: b.width, h: b.height, n: r.querySelector('.n').textContent };
+      const spans = [...r.querySelectorAll('.t, .r, .n')];
+      return {
+        x: b.left, y: b.top, w: b.width, h: b.height,
+        n: r.querySelector('.n').textContent,
+        op: parseFloat(getComputedStyle(r).opacity) || 1,
+        inks: [...new Set(spans.map((s) => getComputedStyle(s).color))]
+          .map((c) => c.match(/[\d.]+/g).slice(0, 3).map(Number)),
+      };
     }));
     /* The bar is fixed over the foot of the screen and its icons are
        pure white, so a row underneath it samples the icon rather than
@@ -185,17 +199,21 @@ const SAID = [
     const barTop = await page.$eval('.bar', (e) => e.getBoundingClientRect().top);
     for (const b of boxes) {
       if (b.y < 0 || b.y + b.h > barTop) continue;   /* only what is on screen and clear */
-      let lightest = null;
+      /* Every sampled pixel, not just the lightest one: which extreme
+         is the worst case flips with the polarity of the text, and
+         both polarities are on this screen at once. */
       for (let dx = 4; dx < b.w - 4; dx += 3) {
         const p = at((b.x + dx) * dpr, (b.y + b.h - 3) * dpr);
-        if (!lightest || lum(p) > lum(lightest)) lightest = p;
+        for (const ink of b.inks) {
+          const seen = ink.map((v, i) => v * b.op + p[i] * (1 - b.op));
+          const r = ratio(seen, p);
+          if (r < worst.r) { worst.r = r; worst.of = b.n; worst.px = p; worst.ink = seen; worst.at = top; }
+        }
       }
-      const r = ratio([255, 255, 255], lightest);
-      if (r < worst.r) { worst.r = r; worst.of = b.n; worst.px = lightest; worst.at = top; }
     }
   }
   await page.evaluate(() => window.scrollTo(0, 0));
-  ok(`white on the card clears 4.5:1 at every scroll position (worst ${worst.r.toFixed(2)}:1 on "${worst.of}")`,
+  ok(`every row clears 4.5:1 at every scroll position (worst ${worst.r.toFixed(2)}:1 on "${worst.of}")`,
     worst.r >= 4.5, worst);
 
   /* The dimmed things are dimmed by WEIGHT, not by alpha — so a past
@@ -310,8 +328,38 @@ const SAID = [
   ok('exactly one class is live', await page.$$eval('.row.is-now',
     (r) => r.map((x) => x.querySelector('.n').textContent))
     .then((v) => v.length === 1 && v[0] === 'Analytical Chemistry'));
-  ok('and it says how long is left',
-    /Analytical Chemistry · 1 h 30 m left/.test(await page.$eval('#scLive', (e) => e.textContent)));
+
+  /* The hero is read part by part rather than as one string, because
+     its whole design is that the figure holds ONE shape whatever the
+     state — a clock time, never a duration that grows a unit and
+     reflows the head every time it crosses an hour. */
+  const hero = await page.evaluate(() => ({
+    state: document.getElementById('scLiveState').textContent,
+    num: document.getElementById('scLiveNum').textContent,
+    unit: document.getElementById('scLiveUnit').textContent,
+    of: document.getElementById('scLiveOf').textContent,
+  }));
+  ok('the hero counts the running class down', hero.state === 'Now · until'
+    && hero.num === '11:00' && hero.unit === 'AM'
+    && hero.of === 'Analytical Chemistry · 1 h 30 m left', hero);
+
+  /* ── one lit surface ──
+     The accent is spent on the day you are in and nothing else. Six
+     coloured subjects would make the rail a chart of nothing, and the
+     rule is only worth writing down if something measures it. */
+  const lit = await page.evaluate(() => {
+    const px = (el) => getComputedStyle(el).backgroundImage + '|' + getComputedStyle(el).backgroundColor;
+    const cards = [...document.querySelectorAll('.day-card')];
+    const today = document.querySelector('.day.is-today .day-card');
+    return {
+      today: px(today),
+      others: [...new Set(cards.filter((c) => c !== today).map(px))],
+    };
+  });
+  ok('today is the one card painted differently',
+    lit.others.length === 1 && lit.today !== lit.others[0], lit);
+  ok('and it carries the crest that marks it',
+    /svg\+xml/.test(lit.today) && !/svg\+xml/.test(lit.others[0]));
 
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet
