@@ -41,6 +41,24 @@ const ratio = (a, b) => {
   return (x + .05) / (y + .05);
 };
 
+/* CIE Lab distance. Comparing two hexes tells you they differ; it does
+   not tell you a person can see the difference, and this repo already
+   measures a palette this way on the habits screen for exactly that
+   reason. Twelve is the floor used there. */
+const toLab = (rgb) => {
+  const f = (c) => { c /= 255; return c <= .04045 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
+  const [r, g, b] = rgb.map(f);
+  const g2 = (t) => (t > 0.008856 ? Math.cbrt(t) : 7.787 * t + 16 / 116);
+  const X = g2((.4124 * r + .3576 * g + .1805 * b) / .95047);
+  const Y = g2(.2126 * r + .7152 * g + .0722 * b);
+  const Z = g2((.0193 * r + .1192 * g + .9505 * b) / 1.08883);
+  return [116 * Y - 16, 500 * (X - Y), 200 * (Y - Z)];
+};
+const deltaE = (a, b) => {
+  const [A, B] = [toLab(a), toLab(b)];
+  return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
+};
+
 /* A phone, and a real one — the app has no other layout. */
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 
@@ -787,6 +805,144 @@ const SAID = [
   ok('the default ground is still flat white paper',
     corner.every((c) => c === 255), corner);
 
+  /* ── themes ──
+     Seven palettes, and the whole point of the exercise is that each is
+     a COMPLETE set rather than an accent swapped on a white page. So
+     every one is driven through the real picker and then measured on
+     composited pixels, exactly as the shipped palette is at the top of
+     this file — a grey that reads 8.9:1 on white is 1.4:1 on indigo,
+     and a palette that reuses another palette's greys has not been
+     checked, it has been guessed. */
+  console.log('\n── themes ──');
+  await page.evaluate(() => document.getElementById('scView').click());
+  await page.waitForTimeout(200);
+
+  const IDS = ['paper', 'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum'];
+  await page.click('#scMenu');
+  await page.waitForTimeout(320);
+  ok('the picker offers every theme, as a swatch rather than a word',
+    await page.$$eval('.theme', (e) => e.map((x) => x.dataset.theme).join(' ')) === IDS.join(' '));
+  /* All seven ON SCREEN. The first cut was one scrolling row, which put
+     the seventh past the right edge of a 390px sheet — an option you
+     have to discover by swiping is one most people never find. */
+  ok('and all seven are on screen without scrolling',
+    await page.$$eval('.theme', (els) => els.every((e) => {
+      const r = e.getBoundingClientRect();
+      return r.left >= 0 && r.right <= 390;
+    })));
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForTimeout(300);
+
+  const palettes = [];
+  for (const id of IDS) {
+    await page.click('#scMenu');
+    await page.waitForTimeout(300);
+    await page.click(`.theme[data-theme="${id}"]`);
+    await page.waitForTimeout(240);
+
+    /* The glyph ON the accent, read off the computed style while the
+       sheet is up. This is the one that would have shipped broken:
+       white on the amber theme measures 1.9:1 and on the mint one
+       1.7:1 — a control with an invisible label. */
+    const [fg, bg] = await page.$eval('.mic', (m) => {
+      const cs = getComputedStyle(m);
+      return [cs.color, cs.backgroundColor];
+    });
+    const num = (v) => v.match(/[\d.]+/g).slice(0, 3).map(Number);
+    const onAccent = ratio(num(fg), num(bg));
+
+    const dangers = await page.evaluate(() => {
+      const el = document.querySelector('.menu-item.bad');
+      const sh = document.querySelector('.sheet');
+      const root = getComputedStyle(document.documentElement);
+      return [getComputedStyle(el).color, getComputedStyle(sh).backgroundColor,
+              root.getPropertyValue('--red').trim()];
+    });
+    const accentRGB = dangers[2].startsWith('#')
+      ? dangers[2].match(/\w\w/g).map((h) => parseInt(h, 16))
+      : num(dangers[2]);
+    const onBad = +ratio(num(dangers[0]), num(dangers[1])).toFixed(2);
+    const dE = deltaE(num(dangers[0]), accentRGB);
+
+    await page.evaluate(() => document.getElementById('scScrim').click());
+    await page.waitForTimeout(320);
+
+    const png = PNG.sync.read(await page.screenshot());
+    const at = (x, y) => {
+      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    const rows = [];
+    for (const sel of ['.title', '.sub', '#scRingKick', '#scRingNum',
+                       '#scRingName', '#scRingKey', '.sr-lbl', '.sr-row b', '.sr-row span']) {
+      const el = await page.$(sel);
+      if (!el) continue;
+      const b3 = await el.boundingBox();
+      if (!b3) continue;
+      const col = num(await page.$eval(sel, (e) => getComputedStyle(e).color));
+      rows.push({ sel, r: +ratio(col, at(b3.x + b3.width + 6, b3.y + b3.height / 2)).toFixed(2) });
+    }
+    const worst = rows.reduce((a, x) => (x.r < a.r ? x : a), rows[0]);
+    palettes.push({ id, worst, bad: rows.filter((x) => x.r < 4.5),
+                    onAccent: +onAccent.toFixed(2), onBad, dE });
+  }
+
+  palettes.forEach((t) => ok(
+    `${t.id}: every piece of type clears 4.5:1 (worst ${t.worst.r}:1, ${t.worst.sel})`,
+    t.bad.length === 0, t.bad));
+  palettes.forEach((t) => ok(
+    `${t.id}: the glyph on the accent clears 4.5:1 (${t.onAccent}:1)`,
+    t.onAccent >= 4.5, t));
+
+  /* Danger is not the accent. On the shipped palette they are the same
+     red and there was never a reason to tell them apart; under a theme
+     they come apart hard — "Clear everything" in Solar's amber reads as
+     a highlight and in Aurora's mint it reads as approval. Measured in
+     Lab, not by comparing hexes: two colours can differ by a lot of
+     hex and very little eye. Paper is exempt because there the two ARE
+     the same red, deliberately. */
+  palettes.forEach((t) => {
+    if (t.id === 'paper') return;
+    ok(`${t.id}: danger is visibly not the accent (ΔE ${t.dE.toFixed(1)})`,
+      t.dE >= 12, t);
+  });
+  palettes.forEach((t) => ok(
+    `${t.id}: danger clears 4.5:1 on the sheet (${t.onBad}:1)`,
+    t.onBad >= 4.5, t));
+
+  /* And the choice survives a reload, under its own key. A palette is a
+     preference about looking at the record, not part of it — folding
+     one into the other is how a damaged record takes the other down. */
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(240);
+  ok('the theme is still up after a reload',
+    await page.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim() === '#FF6FA5'));
+  ok('and it is kept under its own key, away from the schedule',
+    await page.evaluate(() => localStorage.getItem('sched.theme.v1') === 'plum'
+      && !/theme/.test(localStorage.getItem('sched.v1') || '')));
+
+  /* Back to the shipped palette, so nothing below this reads a themed
+     page and calls it the default. */
+  await page.evaluate(() => { localStorage.removeItem('sched.theme.v1'); });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(240);
+  ok('and clearing it falls back to the white page that ships',
+    await page.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim() === '#e2231a'));
+
+  /* Back to the rail as well. The view key outlives a reload by design,
+     so leaving the ring up here hides every .row from the sections
+     below — which read as a broken app rather than a test that left the
+     furniture where it found it. */
+  await page.evaluate(() => {
+    if (!document.getElementById('scRail').hidden) return;
+    document.getElementById('scView').click();
+  });
+  await page.waitForTimeout(220);
+  ok('and the rail is back for what follows',
+    await page.evaluate(() => !document.getElementById('scRail').hidden));
+
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet
      open reads the bar and the rows and calls it done — the day picker
@@ -797,7 +953,12 @@ const SAID = [
   await page.waitForTimeout(360);
   ok('the edit sheet is up to be measured',
     await page.$$eval('.pick', (p) => p.length) === 7);
-  const small = await page.$$eval('.mic, .ghost, .row, .pick, .btn', (els) => els
+  /* `.theme` is in this list because a hardcoded list of what to
+     measure silently skips what is not in it, and this repo has been
+     bitten by that twice — a test file the suite never ran, and a
+     reduced-motion check that read three layers by name while a fourth
+     animated straight past it. */
+  const small = await page.$$eval('.mic, .ghost, .row, .pick, .btn, .theme', (els) => els
     .map((e) => ({ c: e.className, h: e.getBoundingClientRect().height }))
     .filter((e) => e.h > 0 && e.h < 44));
   ok('every control clears 44px', small.length === 0, small);

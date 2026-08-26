@@ -77,6 +77,22 @@
      between rows and a mark that has not been spent are the same
      grey today and have no reason to stay the same one. */
   --tick-off: #ececec;
+
+  /* What sits ON the accent — the microphone's glyph, the go button's
+     label. White is right on a red at 4.7:1 and wrong on every bright
+     accent: white on the amber theme measures 1.9:1 and on the mint one
+     1.7:1, which is a control with an invisible label. Each theme names
+     its own, and every dark theme names its own near-black GROUND,
+     which is the colour its accent was already chosen to stand off. */
+  --on-red: #ffffff;
+
+  /* Danger, which is NOT the accent. On the shipped palette the two are
+     the same red and there was no reason to tell them apart. Under a
+     theme they come apart hard: "Clear everything" in Solar's amber
+     reads as a highlight, and in Aurora's mint it reads as approval.
+     A destructive action has to look destructive whatever the page
+     round it is doing. */
+  --bad: #e2231a;
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
@@ -374,7 +390,9 @@ body {
   cursor: pointer;
   position: relative;
 }
-.row:active { background: #f4f4f4; }
+/* --tick-off, not a literal grey: it is the lightest neutral each
+   theme owns, and on white it is the #ececec this always was. */
+.row:active { background: var(--tick-off); }
 .row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
 /* ── the measure ──
@@ -561,9 +579,11 @@ body {
   width: 62px; height: 62px;
   border: 0;
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
 }
-.mic:active { background: #c31d15; }
+/* Opacity rather than a hand-darkened red. A second hex per theme is
+   a second thing to keep true, and a press state does not need one. */
+.mic:active { opacity: .82; }
 
 .ghost svg, .mic svg {
   width: 22px; height: 22px;
@@ -734,10 +754,10 @@ body {
   font: 600 15px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
-.btn.go { background: var(--red); border-color: var(--red); color: #fff; }
-.btn.go:active { background: #c31d15; }
+.btn.go { background: var(--red); border-color: var(--red); color: var(--on-red); }
+.btn.go:active { opacity: .82; }
 .btn.off { background: var(--paper); color: var(--ink); }
-.btn.bad { background: var(--paper); color: var(--red); border-color: var(--red); }
+.btn.bad { background: var(--paper); color: var(--bad); border-color: var(--bad); }
 .btn:disabled { opacity: .4; cursor: default; }
 
 .menu-item {
@@ -758,7 +778,74 @@ body {
   font-size: 12px;
   color: var(--dim);
 }
-.menu-item.bad { color: var(--red); }
+.menu-item.bad { color: var(--bad); }
+
+/* ── the theme picker ──
+   A swatch, not a word. "Aurora" tells you nothing you can act on; a
+   disc of the ground with the accent drawn on it IS the choice, and it
+   reads at a glance in a row of seven.
+
+   Four across, two rows. A single scrolling row was the first cut and
+   it put Plum off the right edge of a 390px sheet — an option you have
+   to discover by swiping is an option most people never see. Seven
+   across would need 42px chips, which is under the touch floor. A grid
+   shows all seven at 81px each and reads as a grid rather than as a
+   row that ran out. */
+.themes {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px 10px;
+  margin: 14px 0 0;
+}
+
+.theme {
+  display: grid;
+  justify-items: center;
+  gap: 7px;
+  /* 44px of target in both directions: 34px of disc plus the padding,
+     and the caption underneath is inside the same button. */
+  padding: 5px 4px 4px;
+  border: 0;
+  background: none;
+  color: var(--dim);
+  font: inherit;
+  cursor: pointer;
+}
+.theme .swatch {
+  position: relative;
+  display: block;
+  width: 34px; height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--hair);
+}
+/* The accent, drawn ON the ground rather than beside it — the pairing
+   is the thing being chosen, and two swatches side by side let you
+   judge the colours without judging the combination. */
+.theme .swatch u {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 12px; height: 12px;
+  margin: -6px 0 0 -6px;
+  border-radius: 50%;
+  text-decoration: none;
+}
+.theme-n {
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: .01em;
+  white-space: nowrap;
+}
+/* The ring round the current one is offset OUTSIDE the disc, so the
+   swatch it is marking is not covered by the mark. */
+.theme.on .swatch { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--red); }
+.theme.on .theme-n { color: var(--ink); font-weight: 700; }
+.theme:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.menu-rule {
+  height: 1px;
+  background: var(--hair);
+  margin: 18px 0 2px;
+}
 
 /* ── the toast ───────────────────────────────────────────── */
 
@@ -786,7 +873,7 @@ body {
   padding: 9px 13px;
   border: 0;
   background: var(--red);
-  color: #fff;
+  color: var(--on-red);
   font: 700 13px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }

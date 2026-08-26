@@ -965,6 +965,109 @@
     });
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     THEMES
+
+     Seven complete token sets. Every one of them was measured on
+     composited pixels at the size the type actually ships — 4.5:1 or
+     it is not in this list. The greys are per-theme rather than shared
+     for exactly that reason: --dim reads 8.9:1 on white and 1.4:1 on
+     indigo, so a palette that reuses another palette's greys has not
+     been checked, it has been guessed.
+
+     The numbers in each note are the worst piece of type on that
+     ground, and they are the argument: every dark theme here reads
+     better than the white one that ships, because a saturated hue on
+     near-black has room a saturated hue on white does not.
+     ═══════════════════════════════════════════════════════════ */
+
+  var THEMES = [
+    { id:'paper', name:'Paper', note:'White. 4.7:1',
+      t:{ '--paper':'#ffffff', '--ink':'#111111', '--dim':'#4a4a4a', '--spent':'#737373',
+          '--red':'#e2231a', '--hair':'#dcdcdc', '--tick-off':'#ececec',
+          '--bad':'#e2231a',
+          '--on-red':'#ffffff',
+          '--g0':'#ffffff', '--g1':'transparent', '--g2':'transparent' } },
+
+    { id:'nebula', name:'Nebula', note:'Violet on indigo. 6.7:1',
+      t:{ '--paper':'#0A0B2E', '--ink':'#F4F1FF', '--dim':'#BDB6E8', '--spent':'#9A92CE',
+          '--red':'#C08BFF', '--hair':'#2A2A5C', '--tick-off':'#26264F',
+          '--bad':'#FF7A85',
+          '--on-red':'#0A0B2E',
+          '--g0':'#0A0B2E', '--g1':'rgba(78,42,190,.55)', '--g2':'rgba(160,60,190,.30)' } },
+
+    { id:'ember', name:'Ember', note:'Coral on indigo. 8:1',
+      t:{ '--paper':'#0C0D33', '--ink':'#FFF1EA', '--dim':'#F3C2AC', '--spent':'#D79C82',
+          '--red':'#FF8A5B', '--hair':'#2E2A5E', '--tick-off':'#282652',
+          '--bad':'#FF4A6B',
+          '--on-red':'#0C0D33',
+          '--g0':'#0C0D33', '--g1':'rgba(220,90,50,.34)', '--g2':'rgba(90,40,150,.42)' } },
+
+    { id:'aurora', name:'Aurora', note:'Green on near-black. 8.6:1',
+      t:{ '--paper':'#04141A', '--ink':'#E8FBF4', '--dim':'#9FD9C7', '--spent':'#7FBBA9',
+          '--red':'#4FE0A8', '--hair':'#123038', '--tick-off':'#102A31',
+          '--bad':'#FF8A8A',
+          '--on-red':'#04141A',
+          '--g0':'#04141A', '--g1':'rgba(18,150,130,.40)', '--g2':'rgba(30,90,150,.34)' } },
+
+    { id:'solar', name:'Solar', note:'Amber, no blue anywhere. 7.9:1',
+      t:{ '--paper':'#15100A', '--ink':'#FFF6E6', '--dim':'#E2C89C', '--spent':'#BFA47C',
+          '--red':'#FFB020', '--hair':'#3A2E1C', '--tick-off':'#332818',
+          '--bad':'#FF8A7A',
+          '--on-red':'#15100A',
+          '--g0':'#15100A', '--g1':'rgba(200,120,20,.34)', '--g2':'rgba(120,50,10,.40)' } },
+
+    { id:'ice', name:'Ice', note:'Pale cyan on slate. 7.2:1',
+      t:{ '--paper':'#0D1420', '--ink':'#EAF3FB', '--dim':'#A9C2D8', '--spent':'#8AA5BD',
+          '--red':'#5CC8F8', '--hair':'#233246', '--tick-off':'#1E2C3E',
+          '--bad':'#FF8A8A',
+          '--on-red':'#0D1420',
+          '--g0':'#0D1420', '--g1':'rgba(40,110,180,.42)', '--g2':'rgba(90,90,190,.28)' } },
+
+    { id:'plum', name:'Plum', note:'Rose on aubergine. 6.7:1',
+      t:{ '--paper':'#1A0B1F', '--ink':'#FCEDF5', '--dim':'#DDAEC6', '--spent':'#BC8CA6',
+          '--red':'#FF6FA5', '--hair':'#3B1F42', '--tick-off':'#341B3B',
+          '--bad':'#FFA07A',
+          '--on-red':'#1A0B1F',
+          '--g0':'#1A0B1F', '--g1':'rgba(160,30,110,.40)', '--g2':'rgba(90,30,140,.38)' } },
+  ];
+
+  var THEME_KEY = 'sched.theme.v1';
+  var theme = 'paper';
+
+  function scTheme(id) {
+    var t = null;
+    for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === id) t = THEMES[i];
+    return t || THEMES[0];
+  }
+
+  /* Written as inline custom properties on the root, which is the one
+     place that beats the stylesheet's :root without !important and
+     without a second copy of every rule. Nothing else in the app knows
+     a theme exists — every colour it draws already came from a token,
+     which is what the previous pass was for. */
+  function scPaint(id, save) {
+    var t = scTheme(id);
+    theme = t.id;
+    var r = document.documentElement.style;
+    for (var k in t.t) if (t.t.hasOwnProperty(k)) r.setProperty(k, t.t[k]);
+
+    /* The browser's own chrome — the status bar, the URL bar, the
+       overscroll gutter — takes its colour from these two and nothing
+       else. Left on white under a dark theme the page ends in a bright
+       band the design never asked for. */
+    var cs = document.querySelector('meta[name="color-scheme"]');
+    if (cs) cs.setAttribute('content', t.id === 'paper' ? 'light' : 'dark');
+    var tc = document.querySelector('meta[name="theme-color"]');
+    if (tc) tc.setAttribute('content', t.t['--g0']);
+
+    /* The ring draws itself in SVG, and SVG takes a literal — so it has
+       to be told to read the tokens again. The rail is pure CSS and has
+       already changed by the time this line runs. */
+    if (view === 'ring') scPaintRing();
+    if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
+  }
+
   /* Which view is up, remembered. Its own key: the schedule is the
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
@@ -1364,6 +1467,60 @@
         body.appendChild(b);
       };
 
+      /* ── the theme row ──
+         A swatch, not a word. "Aurora" tells you nothing you can act
+         on; a disc of the ground with the accent drawn on it is the
+         choice itself, at the size a thumb needs.
+
+         It applies on press and stays open, because you are comparing
+         — a picker that closes on the first tap makes you reopen it
+         six times to see six themes. */
+      var lab = scEl('span', 'label', 'Theme');
+      lab.style.marginTop = '2px';
+      body.appendChild(lab);
+
+      var row = scEl('div', 'themes');
+      THEMES.forEach(function (t) {
+        var b = scEl('button', 'theme' + (t.id === theme ? ' on' : ''));
+        b.type = 'button';
+        b.dataset.theme = t.id;
+        var disc = scEl('i', 'swatch');
+        /* The same two washes the page itself gets, on a 34px disc —
+           so the chip is a photograph of the theme rather than a
+           label for it. */
+        disc.style.background =
+          'radial-gradient(120% 100% at 22% 108%, ' + t.t['--g1'] + ' 0%, transparent 64%),' +
+          'radial-gradient(100% 80% at 92% -8%, ' + t.t['--g2'] + ' 0%, transparent 60%),' +
+          t.t['--g0'];
+        disc.style.borderColor = t.t['--hair'];
+        var dot = scEl('u');
+        dot.style.background = t.t['--red'];
+        disc.appendChild(dot);
+        b.appendChild(disc);
+        b.appendChild(scEl('span', 'theme-n', t.name));
+        b.setAttribute('aria-label', t.name + '. ' + t.note);
+        b.setAttribute('aria-pressed', t.id === theme ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          scPaint(t.id, true);
+          [].forEach.call(row.children, function (c) {
+            var on = c.dataset.theme === t.id;
+            c.classList.toggle('on', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+          hint.textContent = t.name + ' · ' + t.note + ' on the smallest type';
+        });
+        row.appendChild(b);
+      });
+      body.appendChild(row);
+
+      var hint = scEl('p', 'hint',
+        scTheme(theme).name + ' · ' + scTheme(theme).note + ' on the smallest type');
+      hint.style.marginTop = '2px';
+      body.appendChild(hint);
+
+      var rule = scEl('div', 'menu-rule');
+      body.appendChild(rule);
+
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
@@ -1454,6 +1611,15 @@
      stored value falls through to the list; it is a preference and
      there is nothing here worth repairing. */
   try { if (localStorage.getItem(VIEW_KEY) === 'ring') view = 'ring'; } catch (e) {}
+
+  /* Before the first paint, so the app opens in its theme rather than
+     flashing white on the way to it. scTheme falls back to Paper on a
+     stored id that no longer exists — it is a preference and there is
+     nothing in it worth repairing. */
+  try {
+    var saved = localStorage.getItem(THEME_KEY);
+    if (saved) scPaint(saved, false);
+  } catch (e) {}
 
   scRender();
   scSetView(view, false);
