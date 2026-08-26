@@ -31,8 +31,23 @@ const ok = (name, cond, extra) => {
 };
 
 const read = (f) => fs.readFileSync(path.join(ROOT, f), 'utf8');
-const APPS = ['trading/index.html', 'days/index.html',
-              'jade/index.html', 'orrery/index.html'];
+
+/* An app is its markup plus whatever script it loads beside it. Four of
+   these are a single file with the code inline; schedule/ is a folder,
+   because it is standalone rather than a consumer of the shell and its
+   script is not something the other apps could ever share. Listing the
+   FILES rather than the file is what lets a check see all of an app —
+   a hardcoded list has silently skipped what was not in it twice in
+   this repo's history, and both times the suite went green. */
+const APPS = [
+  ['trading/index.html'],
+  ['days/index.html'],
+  ['jade/index.html'],
+  ['orrery/index.html'],
+  ['schedule/index.html', 'schedule/app.js'],
+];
+const NAMED = (app) => app[0];
+const MARKUP = (app) => app.filter(f => f.endsWith('.html'));
 
 /* The inline <script> only, so markup containing the word "function" is
    not mistaken for code. */
@@ -57,15 +72,21 @@ const topLevel = (body, at) => {
   return found;
 };
 
+/* Every run of code an app carries: the inline <script>s of its markup,
+   and the whole of any .js file it loads. */
+const codeOf = (app) => app.flatMap(f =>
+  f.endsWith('.js') ? [{ body: read(f), at: 1, file: f }]
+                    : scriptOf(read(f)).map(s => ({ ...s, file: f })));
+
 /* ── 1. one name, declared twice in a file ─────────────────────── */
-for (const file of APPS) {
+for (const app of APPS) {
   const seen = new Map();
-  for (const { body, at } of scriptOf(read(file)))
+  for (const { body, at } of codeOf(app))
     for (const [name, line] of topLevel(body, at))
       seen.set(name, (seen.get(name) || []).concat(line));
 
   const dupes = [...seen].filter(([, ls]) => ls.length > 1);
-  ok(`${file}: no name declared twice at the top level`, dupes.length === 0,
+  ok(`${NAMED(app)}: no name declared twice at the top level`, dupes.length === 0,
      dupes.map(([n, ls]) => `${n} declared at lines ${ls.join(' and ')} — `
        + 'the second silently replaces the first').join('\n      '));
 }
@@ -101,7 +122,7 @@ for (const file of APPS) {
    getElementById returns the FIRST match and says nothing about the
    second. Every screen in this app is addressed by id, and the two apps
    now carry 400-odd of them between them. */
-for (const file of APPS) {
+for (const file of APPS.flatMap(MARKUP)) {
   const src = read(file);
   const seen = new Map();
   for (const m of src.matchAll(/\sid="([^"]+)"/g)) {
@@ -118,12 +139,27 @@ for (const file of APPS) {
    A renamed element leaves getElementById returning null, and the throw
    lands wherever the value is finally used rather than where it was
    fetched. */
-for (const file of APPS) {
-  const src = read(file);
-  const present = new Set([...src.matchAll(/\sid="([^"]+)"/g)].map(m => m[1]));
-  const wanted = new Set([...src.matchAll(/getElementById\('([^']+)'\)/g)].map(m => m[1]));
+for (const app of APPS) {
+  const present = new Set(MARKUP(app).flatMap(f =>
+    [...read(f).matchAll(/\sid="([^"]+)"/g)].map(m => m[1])));
+
+  const wanted = new Set();
+  for (const f of app) {
+    const src = read(f);
+    for (const m of src.matchAll(/getElementById\('([^']+)'\)/g)) wanted.add(m[1]);
+
+    /* schedule/ reaches its markup through a one-character alias, and a
+       check that only knows the long spelling passes an app it never
+       looked at. The alias is only trusted in a file that actually
+       DEFINES it as a getElementById wrapper — read anywhere else, $ is
+       as likely to be a querySelector alias, and $('div') would be
+       reported as a missing id. */
+    if (/\$\s*=\s*function\s*\(\s*\w+\s*\)\s*\{\s*return\s+document\.getElementById/.test(src))
+      for (const m of src.matchAll(/(?:^|[^\w$.])\$\('([A-Za-z][\w-]*)'\)/g)) wanted.add(m[1]);
+  }
+
   const missing = [...wanted].filter(id => !present.has(id));
-  ok(`${file}: every id the script fetches is in the markup`, missing.length === 0,
+  ok(`${NAMED(app)}: every id the script fetches is in the markup`, missing.length === 0,
      missing.map(id => `#${id}`).join(', '));
 }
 
@@ -145,9 +181,9 @@ for (const file of APPS) {
    (orSearch.t, orPaint.match, orLoose.miss), so this is not exotic — it
    is the one square on that board that is mined. */
 const RESERVED = ['name', 'length', 'caller', 'arguments'];
-for (const file of APPS.concat(['shell.js'])) {
-  const src = read(file);
-  const bodies = file.endsWith('.js') ? [{ body: src, at: 1 }] : scriptOf(src);
+for (const app of APPS.concat([['shell.js']])) {
+  const file = NAMED(app);
+  const bodies = codeOf(app);
   const hits = [];
   for (const { body, at } of bodies) {
     /* An assignment TO the property, not a read of it: `f.name =` but
@@ -188,8 +224,12 @@ for (const file of APPS.concat(['shell.js'])) {
      loads no shell.css — so it is checked against itself and the union
      is harmless. A fourth app is a fourth place for a token to go
      missing. */
+  /* schedule/app.css is the same case as jade — it defines every token
+     it uses in its own :root and loads no shell.css — so it is checked
+     against itself and the union is harmless. A fifth app is a fifth
+     place for a token to go missing. */
   const SRC = ['shell.css', 'trading/index.html', 'days/index.html',
-               'jade/index.html', 'orrery/index.html'];
+               'jade/index.html', 'orrery/index.html', 'schedule/app.css'];
   const text = SRC.map(f => read(f)).join('\n');
   /* Defined anywhere: a stylesheet, an inline style attribute, or a
      template literal that sets one. All three are legitimate. */

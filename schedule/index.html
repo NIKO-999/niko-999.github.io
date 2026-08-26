@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<!-- viewport-fit=cover so the sky runs under the notch and the home bar;
+     every edge that holds a control pays it back with env(safe-area-*).
+     No maximum-scale: pinch-zoom stays available, and the input font
+     floor of 16px is what stops iOS zooming on focus instead. -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="color-scheme" content="dark" />
+<meta name="theme-color" content="#4a5772" />
+<meta name="description" content="A week of classes on one card, spoken in." />
+<title>Schedule</title>
+
+<link rel="manifest" href="manifest.json" />
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<link rel="apple-touch-icon" href="icon-180.png" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="apple-mobile-web-app-title" content="Schedule" />
+
+<link rel="preload" as="font" type="font/woff2" href="fonts/Inter.woff2" crossorigin />
+<link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+<!-- ── the sky ──
+     Drawn, not photographed. A soft slate gradient with two folds of
+     silk in the bottom corner, so there is no image to download, nothing
+     to go blurry on a dense screen, and the whole app stays four small
+     files. The folds are gradients rather than blurred shapes: a large
+     blur filter is the one thing on a page like this that a phone
+     rasterises badly. -->
+<div class="sky" aria-hidden="true">
+  <svg viewBox="0 0 400 800" preserveAspectRatio="xMidYMid slice">
+    <defs>
+      <linearGradient id="scSilkA" x1="0.1" y1="0" x2="0.9" y2="1">
+        <stop offset="0"   stop-color="#fff" stop-opacity="0" />
+        <stop offset=".45" stop-color="#fff" stop-opacity=".34" />
+        <stop offset="1"   stop-color="#fff" stop-opacity=".06" />
+      </linearGradient>
+      <linearGradient id="scSilkB" x1="0" y1="0" x2="1" y2="0.6">
+        <stop offset="0"   stop-color="#fff" stop-opacity=".26" />
+        <stop offset=".6"  stop-color="#e9eef4" stop-opacity=".12" />
+        <stop offset="1"   stop-color="#fff" stop-opacity="0" />
+      </linearGradient>
+      <linearGradient id="scShade" x1="0" y1="0" x2="0.4" y2="1">
+        <stop offset="0"   stop-color="#2c3549" stop-opacity=".22" />
+        <stop offset="1"   stop-color="#2c3549" stop-opacity="0" />
+      </linearGradient>
+    </defs>
+    <!-- the fold's shadow side, laid down first so the light edge sits on it -->
+    <path d="M400 470 C 300 500 214 592 150 800 L400 800 Z" fill="url(#scShade)" />
+    <path d="M400 505 C 286 530 196 626 138 800 L400 800 Z" fill="url(#scSilkA)" />
+    <path d="M400 640 C 330 654 268 712 236 800 L400 800 Z" fill="url(#scSilkB)" />
+  </svg>
+</div>
+
+<main class="poster" id="scPoster">
+
+  <header class="head">
+    <h1 class="title" id="scTitle" tabindex="0" role="button"
+        aria-label="Schedule title, tap to rename">Class Schedule</h1>
+    <p class="sub" id="scSub" tabindex="0" role="button"
+       aria-label="Subtitle, tap to edit"></p>
+
+    <!-- The one line that makes a poster a scheduler: what is on right
+         now, or what is next, counted down. -->
+    <p class="live" id="scLive" aria-live="polite"></p>
+  </header>
+
+  <ol class="rail" id="scRail"></ol>
+
+  <p class="empty" id="scEmpty" hidden>
+    Nothing scheduled yet. Hold the microphone and say something like
+    <em>“Analytical Chemistry Tuesday 8 to 11 in room 1509”</em>.
+  </p>
+
+</main>
+
+<!-- ── the bar ──
+     Thumb-height, over the poster. Add by hand on the left, speak on the
+     right, because the right is where a thumb already is. -->
+<div class="bar">
+  <button class="ghost" id="scAdd" aria-label="Add a class by hand">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+  </button>
+
+  <button class="mic" id="scMic" aria-label="Speak a class in">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z" />
+      <path d="M5 11a7 7 0 0 0 14 0M12 18v3" />
+    </svg>
+    <span class="pulse" aria-hidden="true"></span>
+  </button>
+
+  <button class="ghost" id="scMenu" aria-label="Settings">
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="12" cy="5" r="1.6" /><circle cx="12" cy="12" r="1.6" /><circle cx="12" cy="19" r="1.6" />
+    </svg>
+  </button>
+</div>
+
+<!-- ── the sheet ──
+     One element, three jobs — listening, confirming what was heard, and
+     editing a row by hand. They are the same shape and never on screen
+     together, so three sheets would only be three ways to drift apart. -->
+<div class="scrim" id="scScrim" hidden></div>
+<section class="sheet" id="scSheet" role="dialog" aria-modal="true" aria-labelledby="scSheetTitle" tabindex="-1" hidden>
+  <div class="grab" aria-hidden="true"></div>
+  <h2 class="sheet-title" id="scSheetTitle">Listening</h2>
+  <div class="sheet-body" id="scSheetBody"></div>
+</section>
+
+<div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
+
+<script src="app.js"></script>
+</body>
+</html>

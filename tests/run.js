@@ -28,7 +28,7 @@ const SUITE = [
   'bt', 'models', 'restest', 'swingtest', 'psptest', 'aligntest',
   'logtest', 'journal', 'bintest', 'snaptest', 'daytest', 'intest',
   'lenstest', 'besttest', 'scratch', 'tiles',
-  'checkin', 'habits', 'reminders', 'days', 'jade', 'orrery',
+  'checkin', 'habits', 'reminders', 'days', 'jade', 'schedule', 'orrery',
   'gauntlet',
 ];
 
