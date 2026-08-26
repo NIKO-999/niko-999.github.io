@@ -71,6 +71,10 @@
   --g0: var(--paper);
   --g1: transparent;
   --g2: transparent;
+  /* A third wash. Two corners is a tint; three is a gradient you can
+     see across the whole frame, which is what the references actually
+     do. Transparent by default, so the shipped page is untouched. */
+  --g3: transparent;
 
   --hair:  #dcdcdc;
   /* The unlit marks. Its own token rather than --hair: a hairline
@@ -103,9 +107,17 @@ html { -webkit-text-size-adjust: 100%; background: var(--g0); }
 
 body {
   min-height: 100dvh;
+  /* Wide and overlapping, and WEIGHTED TO THE BOTTOM. Three washes of
+     equal strength was the first cut: it read as one field, which was
+     the point, and it put a dark corner directly behind the subtitle —
+     Slate measured 2.95:1 there. The page's type is all in the top two
+     thirds and its empty space is all at the foot, so the two heavy
+     washes go bottom-left and bottom-right and the top one is a tint.
+     The gradient is at its strongest exactly where nothing is read. */
   background:
-    radial-gradient(115% 75% at 18% 108%, var(--g1) 0%, transparent 62%),
-    radial-gradient(85% 60% at 92% -8%, var(--g2) 0%, transparent 58%),
+    radial-gradient(140% 88% at 6% 116%, var(--g1) 0%, transparent 74%),
+    radial-gradient(120% 62% at 100% -14%, var(--g2) 0%, transparent 70%),
+    radial-gradient(125% 82% at 96% 112%, var(--g3) 0%, transparent 72%),
     var(--g0);
   background-attachment: fixed;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
@@ -547,11 +559,21 @@ body {
   justify-content: center;
   gap: 22px;
   padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
-  /* --g0, not --paper. The page's ground is a gradient now, and a bar
-     filled with the flat base colour cuts a visible rectangle out of
-     the bottom of it. On the shipped palette the two are the same
-     white and nothing changes. */
-  background: var(--g0);
+  /* The SAME wash as the body, not a flat fill. --g0 alone was the
+     first fix and it still cut a hard white band across the bottom
+     eighth of the page — which is precisely where the gradient is
+     strongest, so the bar was erasing the thing it sits on.
+
+     Both this and the body are positioned against the viewport and both
+     paint the gradient `fixed`, so the two resolve to the same pixels
+     at the same place and the seam disappears. It cannot simply be
+     transparent: the bar is fixed over scrolling content. */
+  background:
+    radial-gradient(140% 88% at 6% 116%, var(--g1) 0%, transparent 74%),
+    radial-gradient(120% 62% at 100% -14%, var(--g2) 0%, transparent 70%),
+    radial-gradient(125% 82% at 96% 112%, var(--g3) 0%, transparent 72%),
+    var(--g0);
+  background-attachment: fixed;
   border-top: 1px solid var(--hair);
 }
 

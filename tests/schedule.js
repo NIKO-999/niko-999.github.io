@@ -805,6 +805,51 @@ const SAID = [
   ok('the default ground is still flat white paper',
     corner.every((c) => c === 255), corner);
 
+  /* ── the bar sits IN the ground, not on it ──
+     The gradient is weighted to the foot of the page, which is exactly
+     where the bar is — and a bar filled with the flat base colour cuts
+     a hard band across the strongest part of it. Both paint the same
+     wash `fixed` and both are positioned against the viewport, so the
+     two have to resolve to the same pixels at the seam.
+
+     Driven with a wash pushed onto :root rather than with a shipped
+     theme, because on the default palette everything is white and the
+     assertion would pass on a bar that was still flat. */
+  const seam = await (async () => {
+    await page.evaluate(() => {
+      const r = document.documentElement.style;
+      r.setProperty('--g1', 'rgba(246,132,176,1)');
+      r.setProperty('--g3', 'rgba(150,110,206,.9)');
+    });
+    await page.waitForTimeout(160);
+    const box = await page.$eval('.bar', (b) => {
+      const r = b.getBoundingClientRect();
+      return { top: r.top, left: r.left, width: r.width };
+    });
+    const png = PNG.sync.read(await page.screenshot());
+    const at = (x, y) => {
+      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    /* Clear of the 1px hairline on either side, and away from the
+       buttons — the far left of the bar is always bare ground. */
+    const x = box.left + 6;
+    const above = at(x, box.top - 4);
+    const below = at(x, box.top + 5);
+    return { above, below,
+             drift: Math.max(...above.map((c, i) => Math.abs(c - below[i]))) };
+  })();
+  /* Six of 255 per channel. The wash is a gradient, so the two samples
+     are nine pixels apart on it and are not expected to be identical —
+     they are expected to be continuous. A flat bar measures in the
+     tens. */
+  ok(`the bar carries the same wash as the page (${seam.drift}/255 across the seam)`,
+    seam.drift <= 6, seam);
+  await page.evaluate(() => {
+    document.documentElement.style.removeProperty('--g1');
+    document.documentElement.style.removeProperty('--g3');
+  });
+
   /* ── themes ──
      Seven palettes, and the whole point of the exercise is that each is
      a COMPLETE set rather than an accent swapped on a white page. So
