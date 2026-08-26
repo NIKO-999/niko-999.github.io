@@ -5,15 +5,14 @@
    in the suite covers a line of it. Three things are worth measuring
    and are measured here rather than looked at:
 
-     · the CONTRAST. It is white type from 9px up, over a gradient,
-       under a translucent card. The reference it was drawn from runs
-       its own times at about 2.9:1 — this repo has shipped that
-       mistake before and the only thing that catches it is sampling
-       the composited pixel.
+     · the CONTRAST. Type from 9px up, in two polarities at once —
+       White on Dark Green for the week, Dark Green on Spring Green
+       for the day you are in. A check written around one of them
+       passes the other without looking at it.
      · the PARSER. A table of sentences with the answer written down,
        driven through the field a thumb actually types into.
      · that NOTHING LEAVES. The whole claim of the app is that a
-       spoken sentence becomes a scheduled class without a server.
+       spoken sentence becomes a block on the rail without a server.
        That is not a design note, it is an assertion: every request
        the page makes is counted, and one to somewhere else fails the
        run. It is what refuses a model or an API key added later to
@@ -29,8 +28,8 @@ const ok = (name, cond, extra) => {
 };
 
 /* WCAG contrast off a composited screenshot pixel — the colour the eye
-   actually receives, after the gradient, the glass and the card have
-   all had their turn. Reading the CSS would only prove what was typed. */
+   actually receives, after the ground, the card and any wash over it
+   have had their turn. Reading the CSS proves only what was typed. */
 const lum = ([r, g, b]) => {
   const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
   return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
@@ -43,40 +42,41 @@ const ratio = (a, b) => {
 /* A phone, and a real one — the app has no other layout. */
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
 
-/* Sentence in, schedule out. Every row here has been said out loud at
-   a phone; the awkward ones are the point — no meridiem at all, a
-   spelled-out time, two days at once, a room that is a name. */
+/* Sentence in, day out. Every row here is something you would actually
+   say at a phone about your own day; the awkward ones are the point —
+   no meridiem at all, a spelled-out time, several days at once, a
+   place that is a word rather than a code. */
 const SAID = [
-  ['Analytical Chemistry Tuesday 8 to 11 in room 1509',
-    { days: 'TUE', name: 'Analytical Chemistry', s: '8:00 AM', e: '11:00 AM', room: '1509' }],
-  ['Add Ethics on Monday and Wednesday from 9 to 10:30 in 7307',
-    { days: 'MON WED', name: 'Ethics', s: '9:00 AM', e: '10:30 AM', room: '7307' }],
-  /* No meridiem anywhere, and the two readings are both legal English.
-     An afternoon class is the only sane one, and nothing in the
-     sentence says so — the scoring does. */
-  ['STS Monday 1:30 to 3',
-    { days: 'MON', name: 'STS', s: '1:30 PM', e: '3:00 PM', room: '' }],
-  ['Art Appreciation Monday 7:30 to 9',
-    { days: 'MON', name: 'Art Appreciation', s: '7:30 AM', e: '9:00 AM', room: '' }],
-  ['CWTS 2 Friday 12 to 3 PM soc hall',
-    { days: 'FRI', name: 'CWTS 2', s: '12:00 PM', e: '3:00 PM', room: 'Soc Hall' }],
-  ['I have KSAF on Saturday from three to four',
-    { days: 'SAT', name: 'KSAF', s: '3:00 PM', e: '4:00 PM', room: '' }],
-  ['put Biology Lab on Thursday at half past one for 90 minutes',
-    { days: 'THU', name: 'Biology Lab', s: '1:30 PM', e: '3:00 PM', room: '' }],
-  ['schedule Physics every Tuesday at 8 for 2 hours',
-    { days: 'TUE', name: 'Physics', s: '8:00 AM', e: '10:00 AM', room: '' }],
-  /* "weekdays" set the days AND stayed in the name, so this shipped a
-     subject called "Calculus Weekdays" five times over. */
-  ['Calculus weekdays 10 to 11',
-    { days: 'MON TUE WED THU FRI', name: 'Calculus', s: '10:00 AM', e: '11:00 AM', room: '' }],
+  ['Train every day 6:30 to 7:30 at the gym',
+    { days: 'MON TUE WED THU FRI SAT SUN', name: 'Train', s: '6:30 AM', e: '7:30 AM', room: 'Gym' }],
+  ['Add Walk on Monday and Wednesday from 7:45 to 8:30',
+    { days: 'MON WED', name: 'Walk', s: '7:45 AM', e: '8:30 AM', room: '' }],
+  /* No meridiem anywhere, and both readings are legal English. An
+     afternoon block is the only sane one, and nothing in the sentence
+     says so — the scoring does. */
+  ['Admin Monday 1:30 to 3',
+    { days: 'MON', name: 'Admin', s: '1:30 PM', e: '3:00 PM', room: '' }],
+  ['Trading weekdays 9 to 10:30',
+    { days: 'MON TUE WED THU FRI', name: 'Trading', s: '9:00 AM', e: '10:30 AM', room: '' }],
+  ['Shift Friday 12 to 3 PM in the shop',
+    { days: 'FRI', name: 'Shift', s: '12:00 PM', e: '3:00 PM', room: 'Shop' }],
+  ['I have football on Saturday from three to four',
+    { days: 'SAT', name: 'Football', s: '3:00 PM', e: '4:00 PM', room: '' }],
+  ['put Meal prep on Sunday at half past one for 90 minutes',
+    { days: 'SUN', name: 'Meal Prep', s: '1:30 PM', e: '3:00 PM', room: '' }],
+  ['schedule Physio every Tuesday at 8 for 2 hours',
+    { days: 'TUE', name: 'Physio', s: '8:00 AM', e: '10:00 AM', room: '' }],
+  /* "weekends" set the days AND stayed in the name, so the same bug
+     shipped a block called "Long walk weekends" twice over. */
+  ['Long walk weekends 10 to 11',
+    { days: 'SAT SUN', name: 'Long Walk', s: '10:00 AM', e: '11:00 AM', room: '' }],
   /* The filler list must not eat a word that is part of the name. */
-  ['Introduction to Chemistry Monday 8 to 9',
-    { days: 'MON', name: 'Introduction to Chemistry', s: '8:00 AM', e: '9:00 AM', room: '' }],
-  ['Ethics tues 9 to 1030',
-    { days: 'TUE', name: 'Ethics', s: '9:00 AM', e: '10:30 AM', room: '' }],
-  ['Statistics Friday eight thirty to ten',
-    { days: 'FRI', name: 'Statistics', s: '8:30 AM', e: '10:00 AM', room: '' }],
+  ['Back to back calls Monday 8 to 9',
+    { days: 'MON', name: 'Back to Back Calls', s: '8:00 AM', e: '9:00 AM', room: '' }],
+  ['Read tues 9 to 1030',
+    { days: 'TUE', name: 'Read', s: '9:00 AM', e: '10:30 AM', room: '' }],
+  ['Stretch Friday eight thirty to ten',
+    { days: 'FRI', name: 'Stretch', s: '8:30 AM', e: '10:00 AM', room: '' }],
 ];
 
 (async () => {
@@ -99,9 +99,11 @@ const SAID = [
 
   console.log('\n── the poster ──');
 
-  ok('it opens with the week on it', await page.$$eval('.row[data-id]', (r) => r.length) === 18);
-  ok('and the days run Monday first', await page.$$eval('.day-name',
-    (n) => n.map((x) => x.textContent).join(' ')) === 'MON TUE WED THU FRI SAT');
+  const SEEDED = 47;
+  ok('it opens with the week on it',
+    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
+  ok('and the days run Monday first, with Sunday last', await page.$$eval('.day-name',
+    (n) => n.map((x) => x.textContent).join(' ')) === 'MON TUE WED THU FRI SAT SUN');
 
   /* ── side by side means the same box ──
      Within a card, the times are one column and the names are another.
@@ -117,10 +119,14 @@ const SAID = [
   ok('and the names share one left edge',
     cols.every((c) => new Set(c.n).size === 1), cols.map((c) => c.n));
 
-  /* A day whose rows carry no room drops the column rather than leaving
-     a zero-width track with a gap on either side of it. */
-  ok('a day with no rooms has no room column',
-    await page.$$eval('.day-card.no-room .r', (r) => r.length) === 0);
+  /* A day whose rows carry no place drops the column rather than
+     leaving a zero-width track with a gap on either side of it. Both
+     branches are checked, and the second one is why: asserting only
+     that a place-less card has no place column passes trivially on a
+     week where nothing has a place, which is exactly this seed. */
+  ok('no block starts with a place, so no card has that column',
+    await page.$$eval('.day-card', (c) => c.every((x) => x.classList.contains('no-room')))
+    && await page.$$eval('.row .r', (r) => r.length) === 0);
 
   /* ── the rail joins its dots ──
      The line is drawn per day, so the join is the thing that can break:
@@ -246,7 +252,7 @@ const SAID = [
   }
 
   /* Half a sentence must not become half a class. */
-  await page.fill('#scSheetBody .field', 'Zoology');
+  await page.fill('#scSheetBody .field', 'Stretching');
   await page.waitForTimeout(40);
   ok('a sentence missing its day and time cannot be added',
     await page.$eval('#scSheetBody .btn.go', (b) => b.disabled));
@@ -255,35 +261,49 @@ const SAID = [
   ok('and one missing its name cannot either',
     await page.$eval('#scSheetBody .btn.go', (b) => b.disabled));
 
-  /* Two days named, two rows written — a timetable entry is per-day. */
-  await page.fill('#scSheetBody .field', 'Pharmacology Tuesday and Friday 8 to 11 in room 1509');
+  /* Two days named, two rows written — a repeating block is per-day. */
+  await page.fill('#scSheetBody .field', 'Physio Tuesday and Friday 8 to 9 at the clinic');
   await page.waitForTimeout(60);
   await page.click('#scSheetBody .btn.go');
   await page.waitForTimeout(420);
   ok('two days named writes two rows',
-    await page.$$eval('.row[data-id]', (r) => r.length) === 20);
+    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED + 2);
   ok('and it lands in time order inside the day',
     await page.$$eval('.day:nth-child(2) .row[data-id] .n', (n) => n.map((x) => x.textContent))
-      .then((v) => v.join('|') === 'Analytical Chemistry|Pharmacology|PMLSP 2|PMLSP 2'));
+      .then((v) => v.join('|') === 'Wake|Train|Walk|Physio|Trading|Read|Down'));
+
+  /* The other branch of the place column: a day that now has one gets
+     the track, and the days that still have none do not. */
+  ok('the day that gained a place gained the column',
+    await page.$$eval('.day:nth-child(2) .day-card',
+      (c) => !c[0].classList.contains('no-room')
+        && c[0].querySelectorAll('.r').length === 7));
+  ok('and a day with none still has neither',
+    await page.$$eval('.day:nth-child(1) .day-card',
+      (c) => c[0].classList.contains('no-room') && c[0].querySelectorAll('.r').length === 0));
 
   /* ── nothing deletes without a way back ── */
   console.log('\n── the way back ──');
   await page.click('#scToast button');
   await page.waitForTimeout(320);
-  ok('undo puts the schedule back', await page.$$eval('.row[data-id]', (r) => r.length) === 18);
+  ok('undo puts the week back',
+    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
 
-  await page.fill('#scSheetBody .field', 'delete Ethics').catch(() => {});
+  /* Work is on five of the seven days, so one sentence has to take all
+     five — a delete that stopped at the first match would look like it
+     had worked. */
   await page.click('#scMic');
   await page.waitForTimeout(120);
-  await page.fill('#scSheetBody .field', 'delete Ethics');
+  await page.fill('#scSheetBody .field', 'delete Work');
   await page.waitForTimeout(60);
   await page.click('#scSheetBody .btn.go');
   await page.waitForTimeout(420);
-  ok('a spoken delete takes both of them',
-    await page.$$eval('.row[data-id]', (r) => r.length) === 16);
+  ok('a spoken delete takes every day it is on',
+    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED - 5);
   await page.click('#scToast button');
   await page.waitForTimeout(320);
-  ok('and that is undoable too', await page.$$eval('.row[data-id]', (r) => r.length) === 18);
+  ok('and that is undoable too',
+    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
 
   /* ── a damaged store is repaired, not thrown away ── */
   console.log('\n── the store ──');
@@ -310,8 +330,8 @@ const SAID = [
   /* ── the live line ── */
   console.log('\n── now ──');
   await page.evaluate(() => localStorage.removeItem('sched.v1'));
-  /* A Tuesday, mid-morning: Analytical Chemistry runs 8 to 11, so at
-     9:30 exactly one row is live and the one before it is not. */
+  /* A Tuesday, mid-morning. Trading runs 9 to 11 on the open days, so
+     at 9:30 exactly one row is live and the three before it are not. */
   await page.addInitScript(() => {
     const FROZEN = new Date('2026-09-01T09:30:00').getTime();
     const R = Date;
@@ -327,7 +347,10 @@ const SAID = [
     (n) => n.map((x) => x.textContent)).then((v) => v.length === 1 && v[0] === 'TUE'));
   ok('exactly one class is live', await page.$$eval('.row.is-now',
     (r) => r.map((x) => x.querySelector('.n').textContent))
-    .then((v) => v.length === 1 && v[0] === 'Analytical Chemistry'));
+    .then((v) => v.length === 1 && v[0] === 'Trading'));
+  ok('and the morning behind it is marked done',
+    await page.$$eval('.row.is-past .n', (r) => r.map((x) => x.textContent).join('|'))
+      .then((v) => v === 'Wake|Train|Walk'));
 
   /* The hero is read part by part rather than as one string, because
      its whole design is that the figure holds ONE shape whatever the
@@ -341,7 +364,7 @@ const SAID = [
   }));
   ok('the hero counts the running class down', hero.state === 'Now · until'
     && hero.num === '11:00' && hero.unit === 'AM'
-    && hero.of === 'Analytical Chemistry · 1 h 30 m left', hero);
+    && hero.of === 'Trading · 1 h 30 m left', hero);
 
   /* ── one lit surface ──
      The accent is spent on the day you are in and nothing else. Six

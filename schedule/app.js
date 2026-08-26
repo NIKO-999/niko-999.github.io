@@ -9,7 +9,7 @@
    ── on the "backend" ──
    There isn't one, and there is nothing to build. Speech becomes text
    in the phone (SpeechRecognition, which every modern mobile browser
-   ships), and text becomes a scheduled class in scParse below — a few
+   ships), and text becomes a block on the rail in scParse below — a few
    hundred lines of matching, run on the device. So this app installs
    to a home screen, opens with no signal, costs nothing to host, and
    has no key that could leak.
@@ -38,33 +38,64 @@
   var FULL  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   /* ── the seed ──
-     The schedule the app was designed around, so the first open is the
-     thing itself rather than an empty frame with instructions in it.
-     Written once, on first run only — clearing everything does not
-     bring it back, because a "clear" that refills itself is not one. */
+     The day this was built around, so the first open is a week with a
+     shape rather than an empty frame with instructions in it. Written
+     once, on first run only — clearing everything does not bring it
+     back, because a "clear" that refills itself is not one.
+
+     The anchors are the ones already written down in this repo, in
+     routine/data.js: up at 5:45, train at 6:30, down at 22:45, and a
+     shift pattern that is different every day and absent on Tuesday
+     and Wednesday. Everything else is laid around them. It is a
+     starting shape, not a claim — every row is one tap from being
+     right.
+
+     A block CAN carry a place, and none of these do. The field earns
+     its keep when it matters (which gym, which desk) and a column of
+     six blanks to show one value is worse than no column, which is
+     why a day with nothing to say there drops it entirely. */
   var SEED = {
-    title: 'Class Schedule',
-    sub: 'MMLS 1-1 ; 2nd Semester',
-    items: [
-      { d: 1, s: 450, e: 540,  r: '',         n: 'Art Appreciation' },
-      { d: 1, s: 540, e: 630,  r: '',         n: 'Ethics' },
-      { d: 1, s: 810, e: 900,  r: '',         n: 'STS' },
-      { d: 1, s: 1020, e: 1080, r: '',        n: 'ECF' },
-      { d: 1, s: 1080, e: 1140, r: '',        n: 'PMLSP 2' },
-      { d: 2, s: 480, e: 660,  r: '1509',     n: 'Analytical Chemistry' },
-      { d: 2, s: 660, e: 720,  r: '7307',     n: 'PMLSP 2' },
-      { d: 2, s: 780, e: 960,  r: '1506',     n: 'PMLSP 2' },
-      { d: 3, s: 450, e: 540,  r: '7307',     n: 'Art Appreciation' },
-      { d: 3, s: 540, e: 630,  r: '7307',     n: 'Ethics' },
-      { d: 3, s: 810, e: 900,  r: '7307',     n: 'STS' },
-      { d: 4, s: 480, e: 600,  r: 'Soc Hall', n: 'E-BFA AND BS' },
-      { d: 4, s: 810, e: 900,  r: '7307',     n: 'Purposive Communication' },
-      { d: 4, s: 900, e: 990,  r: '7307',     n: 'KSAF' },
-      { d: 5, s: 480, e: 660,  r: '1509',     n: 'Analytical Chemistry' },
-      { d: 5, s: 720, e: 900,  r: 'Soc Hall', n: 'CWTS 2' },
-      { d: 6, s: 810, e: 900,  r: '',         n: 'Purposive Communication' },
-      { d: 6, s: 900, e: 960,  r: '',         n: 'KSAF' }
-    ]
+    title: 'Daily Process',
+    sub: 'Up at 5:45 · down at 22:45',
+    items: [].concat(
+      /* the fixed part, which is the whole point of having one */
+      [0, 1, 2, 3, 4, 5, 6].reduce(function (all, d) {
+        return all.concat([
+          { d: d, s: 345,  e: 375,  r: '', n: 'Wake' },
+          { d: d, s: 390,  e: 450,  r: '', n: 'Train' },
+          { d: d, s: 465,  e: 510,  r: '', n: 'Walk' },
+          { d: d, s: 1365, e: 1380, r: '', n: 'Down' }
+        ]);
+      }, []),
+      /* the screen time, moved to whatever the shift leaves open */
+      [
+        { d: 0, s: 540, e: 630, r: '', n: 'Trading' },
+        { d: 1, s: 540, e: 630, r: '', n: 'Trading' },
+        { d: 2, s: 540, e: 660, r: '', n: 'Trading' },
+        { d: 3, s: 540, e: 660, r: '', n: 'Trading' },
+        { d: 4, s: 540, e: 630, r: '', n: 'Trading' },
+        { d: 5, s: 525, e: 585, r: '', n: 'Trading' },
+        { d: 6, s: 525, e: 585, r: '', n: 'Trading' }
+      ],
+      /* the shift — different every day, and gone on the open ones */
+      [
+        { d: 0, s: 660, e: 1020, r: '', n: 'Work' },
+        { d: 1, s: 780, e: 1260, r: '', n: 'Work' },
+        { d: 4, s: 720, e: 1320, r: '', n: 'Work' },
+        { d: 5, s: 600, e: 1080, r: '', n: 'Work' },
+        { d: 6, s: 600, e: 1080, r: '', n: 'Work' }
+      ],
+      /* thirty minutes, after whatever the day turned out to be */
+      [
+        { d: 0, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: 1, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: 2, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: 3, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: 4, s: 1320, e: 1350, r: '', n: 'Read' },
+        { d: 5, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: 6, s: 1275, e: 1305, r: '', n: 'Read' }
+      ]
+    )
   };
 
   /* ═══════════════════════════════════════════════════════════
@@ -75,7 +106,7 @@
   var undoSnap = null;
 
   /* A damaged stored shape is repaired, not discarded. A bad title, or
-     one unreadable row, must not cost a term's worth of typing — the
+     one unreadable row, must not cost a week's worth of building — the
      rows are independent of each other and of the header. */
   function scClean(raw) {
     var out = { title: SEED.title, sub: SEED.sub, items: [] };
@@ -154,8 +185,8 @@
   function scMer(min) { return Math.floor(min / 60) % 24 < 12 ? 'AM' : 'PM'; }
 
   /* The meridiem is printed ONCE, on the end. Not a shortcut and not a
-     borrowed habit from the poster: with an end time known and a class
-     shorter than twelve hours, the start has exactly one reading, so
+     borrowed habit from the reference: with an end time known and a
+     block shorter than twelve hours, the start has one reading, so
      the second AM/PM carries no information. It costs about fifty
      pixels on a 390px screen — the difference between "Analytical
      Chemistry" on one line and on two — and the column it takes them
@@ -194,7 +225,7 @@
   /* ═══════════════════════════════════════════════════════════
      THE PARSER
 
-     One sentence in, zero or more classes out. Everything below runs
+     One sentence in, zero or more blocks out. Everything below runs
      against a normalised copy whose LENGTH matches the original
      character for character, so a span matched on the lowercase mirror
      can be struck out of the original — which is what leaves the title
@@ -326,15 +357,35 @@
     /\b(?:in|at)\s+(?:the\s+)?([a-z][a-z']{1,11}\s+(?:hall|lab|laboratory|gym|gymnasium|building|bldg|centre|center|theatre|theater|annex))\b/g,
     /\b((?:soc|socio|gym|comp|sci)\s*hall)\b/g,
     /\b(?:in|at)\s+([a-z]{0,2}\d{3,5}[a-z]?)\b/g,
-    /\b(\d{3,5})\b/g
+    /\b(\d{3,5})\b/g,
+    /* A place that is a WORD rather than a code — "at the gym", "in the
+       shop", "at home". Last, so a code always wins, and last for a
+       second reason: it is the loosest pattern here and anything it
+       claims is taken out of the name.
+
+       It is also the normal case. Every rule above it came from a room
+       number, and a day is not held in rooms — it is held in places
+       that are just called what they are. */
+    /\b(?:in|at)\s+(?:the\s+)?([a-z][a-z'’-]{2,14})\b/g
   ];
+
+  /* What follows "at" is as often a time as a place, and none of these
+     are somewhere you can stand. Without the list, "stretch in the
+     morning" files itself under a location called Morning. */
+  var NOT_A_PLACE = {
+    morning: 1, afternoon: 1, evening: 1, night: 1, nights: 1, noon: 1,
+    midnight: 1, midday: 1, dawn: 1, dusk: 1, weekend: 1, weekends: 1,
+    weekday: 1, weekdays: 1, least: 1, most: 1, once: 1, twice: 1,
+    first: 1, last: 1, start: 1, end: 1, half: 1, quarter: 1, past: 1,
+    hour: 1, hours: 1, minute: 1, minutes: 1, mins: 1, same: 1, time: 1
+  };
 
   var FILLER = {
     add: 1, adds: 1, 'new': 1, schedule: 1, scheduled: 1, put: 1, set: 1, create: 1,
     make: 1, i: 1, have: 1, ive: 1, got: 1, a: 1, an: 1, the: 1, my: 1, class: 1,
     classes: 1, subject: 1, 'for': 1, on: 1, at: 1, 'in': 1, from: 1, to: 1, and: 1,
     every: 1, each: 1, week: 1, weekly: 1, please: 1, it: 1, is: 1, called: 1,
-    named: 1, entry: 1, block: 1, of: 1, then: 1, also: 1, with: 1, starts: 1,
+    named: 1, entry: 1, block: 1, blocks: 1, of: 1, then: 1, also: 1, with: 1, starts: 1,
     starting: 1, start: 1, ends: 1, ending: 1, until: 1, am: 1, pm: 1, oclock: 1,
     room: 1, rm: 1, thanks: 1, please_: 1, um: 1, uh: 1
   };
@@ -456,6 +507,7 @@
       re.lastIndex = 0;
       while ((m = re.exec(low))) {
         if (!free(m.index, m.index + m[0].length)) continue;
+        if (NOT_A_PLACE[m[1]]) continue;
         out.room = norm.slice(m.index + m[0].indexOf(m[1]), m.index + m[0].indexOf(m[1]) + m[1].length);
         out.room = out.room.replace(/\s+/g, ' ').trim();
         if (/^[a-z ]+$/.test(out.room)) out.room = scTitleCase(out.room);
@@ -496,9 +548,9 @@
   /* What a parse still needs before it can become a row. */
   function scMissing(p) {
     if (p.kind === 'clear') return p.days.length ? null : 'which day to clear';
-    if (p.kind === 'delete') return p.name ? null : 'which class to remove';
+    if (p.kind === 'delete') return p.name ? null : 'which block to remove';
     var want = [];
-    if (!p.name) want.push('what it is called');
+    if (!p.name) want.push('what it is');
     if (!p.days.length) want.push('which day');
     if (p.s === null) want.push('what time');
     if (!want.length) return null;
@@ -538,7 +590,7 @@
       }
     });
     var msg = added && gone ? added + ' added, ' + gone + ' removed'
-      : added ? (added === 1 ? 'Added' : added + ' classes added')
+      : added ? (added === 1 ? 'Added' : added + ' blocks added')
       : gone ? (gone === 1 ? 'Removed' : gone + ' removed')
       : 'Nothing changed';
     scCommit(msg);
@@ -781,7 +833,7 @@
       var heard = scEl('div', 'heard');
       var field = scEl('input', 'field');
       field.type = 'text';
-      field.placeholder = 'Ethics Monday 9 to 10:30 in 7307';
+      field.placeholder = 'Train every day 6:30 to 7:30';
       field.autocapitalize = 'sentences';
       field.autocomplete = 'off';
       field.enterKeyHint = 'done';
@@ -795,9 +847,9 @@
 
       var hint = scEl('p', 'hint');
       hint.innerHTML = SR
-        ? 'Or type it. <em>“Analytical Chemistry Tuesday and Friday 8 to 11 in room 1509”</em>'
+        ? 'Or type it. <em>“Walk weekdays 7:45 to 8:30”</em>'
         : 'This browser has no speech button — use the microphone key on your keyboard, ' +
-          'or type it. <em>“Analytical Chemistry Tuesday 8 to 11 in room 1509”</em>';
+          'or type it. <em>“Walk weekdays 7:45 to 8:30”</em>';
 
       body.appendChild(heard);
       body.appendChild(field);
@@ -938,10 +990,10 @@
 
   function scEditSheet(item, day) {
     var isNew = !item;
-    scSheet(isNew ? 'New class' : 'Edit', function (body) {
+    scSheet(isNew ? 'New block' : 'Edit', function (body) {
       var name = scEl('input', 'field');
       name.type = 'text';
-      name.placeholder = 'What is it called';
+      name.placeholder = 'What is it';
       name.value = item ? item.n : '';
       name.autocapitalize = 'words';
 
@@ -973,10 +1025,10 @@
 
       var room = scEl('input', 'field');
       room.type = 'text';
-      room.placeholder = 'Room, if it has one';
+      room.placeholder = 'Where, if it matters';
       room.value = item ? item.r : '';
 
-      body.appendChild(scEl('span', 'label', 'Class'));
+      body.appendChild(scEl('span', 'label', 'What'));
       body.appendChild(name);
       body.appendChild(scEl('span', 'label', isNew ? 'Days' : 'Day'));
       body.appendChild(picks);
@@ -1064,10 +1116,10 @@
         } else scPasteSheet(text);
       });
       item('Restore a backup', 'Paste one back in', '', function () { scRestoreSheet(); });
-      item('Clear everything', state.items.length + ' classes. This one asks first.', 'bad', function () {
+      item('Clear everything', state.items.length + ' blocks. This one asks first.', 'bad', function () {
         scSheet('Clear everything?', function (b2) {
           var p = scEl('p', 'hint',
-            'All ' + state.items.length + ' classes go. Nothing is kept anywhere else, ' +
+            'All ' + state.items.length + ' blocks go. Nothing is kept anywhere else, ' +
             'so take a backup first if you might want them.');
           b2.appendChild(p);
           var acts = scEl('div', 'acts');
@@ -1122,7 +1174,7 @@
         scMark();
         state = next;
         scClose();
-        scCommit('Restored ' + next.items.length + ' classes');
+        scCommit('Restored ' + next.items.length + ' blocks');
       }));
       body.appendChild(acts);
       setTimeout(function () { f.focus(); }, 340);
