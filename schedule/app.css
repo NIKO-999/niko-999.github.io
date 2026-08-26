@@ -50,11 +50,18 @@
   --spent: #737373;
 
   /* One red, and it clears 4.7:1 on white, so it is allowed to carry
-     text and not only decoration. The channels are separate because
-     the sweep needs an alpha of it, and a translucent palette colour
-     retyped as a literal is a copy that drifts. */
+     text and not only decoration.
+
+     There used to be a --red-rgb beside it, holding the same colour as
+     bare channels so the sweep could take an alpha of it. The comment
+     on it said, in as many words, that a palette colour retyped as a
+     literal is a copy that drifts — and then it drifted: themes set
+     --red and nothing set --red-rgb, so on all twelve of them the
+     sweep's leading edge followed the accent while its trailing wash
+     stayed the original 226,35,26. A mint hairline dragging a red
+     smear. It is gone; color-mix takes the alpha off --red itself, so
+     there is one source and nothing to keep in step. */
   --red:     #e2231a;
-  --red-rgb: 226, 35, 26;
 
   /* The ground, as three stops rather than one flat fill. On the shipped
      palette the two washes are transparent, so this is exactly the white
@@ -509,8 +516,13 @@ body {
   inset: 0;
   pointer-events: none;
   border-right: 2px solid var(--red);
+  /* color-mix off --red rather than a second token holding the same
+     colour as channels. On a browser without it the whole declaration
+     drops and the sweep is its 2px leading edge alone — which still
+     reads, and which is a better failure than a wash in a colour the
+     page stopped using. */
   background: linear-gradient(90deg, transparent calc(100% - 68px),
-                                     rgba(var(--red-rgb), .13));
+                                     color-mix(in srgb, var(--red) 13%, transparent));
   transform: translateX(-100%);
   animation: sc-sweep 2.8s linear infinite;
 }

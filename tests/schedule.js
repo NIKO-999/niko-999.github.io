@@ -540,6 +540,65 @@ const SAID = [
   ok(`the sweep spoils ${spoil.pct.toFixed(1)}% of the row, under the 1.5% ceiling`,
     spoil.pct < 1.5, spoil);
 
+  /* ── the sweep is ONE colour ──
+     Its leading edge and its trailing wash are both meant to be the
+     accent. They were two tokens holding the same colour — --red and a
+     --red-rgb beside it carrying bare channels so the wash could take
+     an alpha — and the comment on the second said, in as many words,
+     that a palette colour retyped as a literal is a copy that drifts.
+     It drifted the moment themes arrived: every theme set --red and
+     none set --red-rgb, so on all twelve the edge followed the accent
+     and the wash stayed 226,35,26. A mint hairline dragging a red
+     smear, on a screen nobody thinks to re-check after a palette
+     change.
+
+     Asserted as a RELATIONSHIP rather than a value: whatever the accent
+     is, the wash has to be made of it. A literal passes this on the
+     shipped palette and fails on every theme, which is exactly the
+     shape of the bug. */
+  const oneColour = await page.evaluate(() => {
+    const row = document.querySelector('.row.is-now');
+    const a = getComputedStyle(row, '::after');
+    /* Chrome serialises a resolved color-mix as color(srgb r g b / a)
+       with the channels 0..1, and a plain colour as rgb()/rgba() with
+       them 0..255. Both forms have to be read or the check passes on
+       whichever one it happens to understand — which is how a test
+       ends up measuring its own parser. */
+    const chan = (t) => {
+      const n = (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      return /^color\(/.test(t) ? n.map((c) => Math.round(c * 255)) : n;
+    };
+    const all = a.backgroundImage.match(/(?:rgba?|color)\([^)]*\)/g) || [];
+    return { edge: chan(a.borderRightColor),
+             wash: all.length ? chan(all[all.length - 1]) : null,
+             raw: a.backgroundImage };
+  });
+  ok('the sweep’s wash is made of the same accent as its edge',
+    oneColour.wash && oneColour.edge.every((c, i) =>
+      Math.abs(c - oneColour.wash[i]) <= 2), oneColour);
+
+  /* AND WITH THE ACCENT MOVED. The line above passes with the bug in
+     it, because on the shipped palette the literal and the token hold
+     the same red — the copy is only wrong once something changes it.
+     A check that only ever runs on the default can never see a drifting
+     copy, which is precisely why this one went out. */
+  const moved = await page.evaluate(() => {
+    document.documentElement.style.setProperty('--red', '#4FE0A8');
+    const a = getComputedStyle(document.querySelector('.row.is-now'), '::after');
+    const chan = (t) => {
+      const n = (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      return /^color\(/.test(t) ? n.map((c) => Math.round(c * 255)) : n;
+    };
+    const all = a.backgroundImage.match(/(?:rgba?|color)\([^)]*\)/g) || [];
+    const out = { edge: chan(a.borderRightColor),
+                  wash: all.length ? chan(all[all.length - 1]) : null };
+    document.documentElement.style.removeProperty('--red');
+    return out;
+  });
+  ok('and it still is when the accent is changed under it',
+    moved.wash && moved.edge.every((c, i) => Math.abs(c - moved.wash[i]) <= 2),
+    moved);
+
   /* Spent on the one row that is running, like the red itself. */
   ok('nothing else on the sheet sweeps', await page.evaluate(() =>
     [...document.querySelectorAll('.row')].filter((r) =>
