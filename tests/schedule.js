@@ -169,6 +169,24 @@ const SAID = [
   const { PNG } = require('pngjs');
   const dpr = 2;
 
+  /* The sweep is hidden for this pass, and that is a NARROWING, so it
+     needs its reason and its replacement.
+
+     This check samples a band of the row and compares it to the row's
+     text colour. That proxy assumes the row's background is uniform,
+     which it was until a 2px line started crossing it: the sample then
+     lands on solid red about half a percent of the time and reports
+     1.89:1 for a mark that is under a glyph for roughly fifteen
+     milliseconds. Judging the palette through a moving object measures
+     the object, not the palette.
+
+     What replaces it is stricter, not weaker, and lives in the sweep
+     section below: the same row is sampled ACROSS its width with the
+     sweep running, and the proportion of background that fails has to
+     stay under three percent. A wash that got wider, darker or slower
+     fails that immediately; a hairline does not. */
+  await page.addStyleTag({ content: '.row.is-now::after{display:none !important}' });
+
   /* This SCROLLS rather than taking one full-page shot, and the
      difference is the whole measurement. The sky is position:fixed, so
      its gradient spans the VIEWPORT — the lightest part of it is
@@ -230,6 +248,11 @@ const SAID = [
     }
   }
   await page.evaluate(() => window.scrollTo(0, 0));
+  await page.evaluate(() => {
+    [...document.querySelectorAll('style')].forEach((s) => {
+      if (/is-now::after\{display:none/.test(s.textContent)) s.remove();
+    });
+  });
   ok(`every row clears 4.5:1 at every scroll position (worst ${worst.r.toFixed(2)}:1 on "${worst.of}")`,
     worst.r >= 4.5, worst);
 
@@ -371,6 +394,40 @@ const SAID = [
      its whole design is that the figure holds ONE shape whatever the
      state — a clock time, never a duration that grows a unit and
      reflows the head every time it crosses an hour. */
+  /* The running row is 13px wider than the rest so its rule can reach
+     into the margin. Its columns still have to line up with every other
+     row — and this is the only place in the file guaranteed to HAVE a
+     running row, because the clock is frozen inside one. The check at
+     the top of the file sees it only when the real time happens to fall
+     inside a block, which is how a 13px step went unnoticed. */
+  const align = await page.evaluate(() => {
+    const day = document.querySelector('.day.is-today');
+    const edge = (sel, side) => [...day.querySelectorAll('.row[data-id]')]
+      .map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
+    return { t: edge('.t', 'right'), m: edge('.m', 'left') };
+  });
+  ok('the running row keeps the column it is in',
+    new Set(align.t).size === 1 && new Set(align.m).size === 1, align);
+
+  /* ── reduced motion ──
+     Checked HERE, where a running row is guaranteed. The sweep must
+     not be built, and the row must still be marked: an effect that
+     degrades to nothing has not been disabled, it has removed the
+     mark. Paused would be worse than absent — a red line frozen
+     partway across a row reads as a bug. */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  const calm = await page.evaluate(() => {
+    const row = document.querySelector('.row.is-now');
+    const a = getComputedStyle(row, '::after');
+    return { display: a.display, anim: a.animationName,
+             rule: getComputedStyle(row).borderLeftColor,
+             weight: getComputedStyle(row.querySelector('.n')).fontWeight };
+  });
+  ok('reduced motion does not build the sweep', calm.display === 'none', calm);
+  ok('and the row is still marked without it',
+    calm.rule === 'rgb(226, 35, 26)' && calm.weight === '700', calm);
+  await page.emulateMedia({ reducedMotion: 'no-preference' });
+
   const hero = await page.evaluate(() => ({
     state: document.getElementById('scLiveState').textContent,
     num: document.getElementById('scLiveNum').textContent,
@@ -398,6 +455,77 @@ const SAID = [
   });
   ok('the red marks today and the running block, and nothing else',
     reds.length === 3 && reds.filter((r) => /day-name/.test(r)).length === 1, reds);
+
+  /* ── the sweep ──
+     The running block carries a hairline that crosses it and keeps
+     crossing it. "The element exists" is not the test — a sweep whose
+     animation never starts, or whose keyframes cancel out, is present
+     and still, and looks entirely correct in a screenshot. Two of the
+     effects proposed alongside this one failed exactly that way. So
+     the row is SAMPLED WHILE RUNNING and the frames have to differ. */
+  console.log('\n── the sweep ──');
+  const frames = await page.evaluate(() => new Promise((res) => {
+    const row = document.querySelector('.row.is-now');
+    if (!row) return res(null);
+    const seen = new Set();
+    const t0 = performance.now();
+    (function tick() {
+      /* getComputedStyle on a pseudo-element reports the animated
+         transform as a live matrix, which is the value actually being
+         composited rather than the one that was declared. */
+      seen.add(getComputedStyle(row, '::after').transform);
+      if (performance.now() - t0 < 900) requestAnimationFrame(tick);
+      else res([...seen]);
+    })();
+  }));
+  ok('the running block is actually moving', frames && frames.length > 4,
+    frames && frames.slice(0, 3));
+  ok('and it is a transform, so it never repaints',
+    frames && frames.every((f) => /^matrix/.test(f)), frames && frames[0]);
+
+  /* And it has to actually PAINT. A transform that keeps changing on an
+     element nobody can see satisfies every check above — which is not
+     hypothetical: the first build of this put the sweep at z-index -1,
+     where it animated flawlessly behind the page's own white. Real
+     pixels, two moments apart, have to differ. */
+  const nowRow = await page.$('.row.is-now');
+  const a = await nowRow.screenshot();
+  await page.waitForTimeout(700);
+  const b2 = await nowRow.screenshot();
+  ok('and the row it is on visibly changes', !a.equals(b2));
+
+  /* How much of the row the sweep is allowed to spoil. The trail is a
+     13% wash and text over it measures about 7:1, so only the 2px line
+     itself falls below the bar — roughly half a percent of a 340px
+     row. The ceiling is one and a half percent, and it is calibrated
+     rather than guessed: as built this measures 0.6%, a 20px line
+     measures 5.6%, and a wash at 45% instead of 13% measures 2.2%.
+     Three percent — the first number that looked reasonable — let that
+     last one through, which is exactly the failure this is for. */
+  const spoil = await (async () => {
+    const box = await page.$eval('.row.is-now', (r) => {
+      const b = r.getBoundingClientRect();
+      return { x: b.x, y: b.y, w: b.width, h: b.height };
+    });
+    const png = PNG.sync.read(await page.screenshot());
+    const ink = (await page.$eval('.row.is-now .t', (e) => getComputedStyle(e).color))
+      .match(/[\d.]+/g).slice(0, 3).map(Number);
+    let bad = 0, seen = 0;
+    for (let dx = 6; dx < box.w - 6; dx += 2) {
+      const i = (png.width * Math.round((box.y + box.h - 4) * dpr)
+        + Math.round((box.x + dx) * dpr)) << 2;
+      seen++;
+      if (ratio(ink, [png.data[i], png.data[i + 1], png.data[i + 2]]) < 4.5) bad++;
+    }
+    return { pct: bad / seen * 100, seen };
+  })();
+  ok(`the sweep spoils ${spoil.pct.toFixed(1)}% of the row, under the 1.5% ceiling`,
+    spoil.pct < 1.5, spoil);
+
+  /* Spent on the one row that is running, like the red itself. */
+  ok('nothing else on the sheet sweeps', await page.evaluate(() =>
+    [...document.querySelectorAll('.row')].filter((r) =>
+      getComputedStyle(r, '::after').animationName !== 'none').length) === 1);
 
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet

@@ -50,8 +50,11 @@
   --spent: #737373;
 
   /* One red, and it clears 4.7:1 on white, so it is allowed to carry
-     text and not only decoration. */
-  --red:   #e2231a;
+     text and not only decoration. The channels are separate because
+     the sweep needs an alpha of it, and a translucent palette colour
+     retyped as a literal is a copy that drifts. */
+  --red:     #e2231a;
+  --red-rgb: 226, 35, 26;
 
   --hair:  #dcdcdc;
   --pad:   18px;   /* the page's left edge — everything aligns to it */
@@ -206,6 +209,7 @@ body {
   font: inherit;
   text-align: left;
   cursor: pointer;
+  position: relative;
 }
 .row:active { background: #f4f4f4; }
 .row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
@@ -269,10 +273,71 @@ body {
    today's own name. */
 .row.is-now {
   border-left: 4px solid var(--red);
+  /* The row reaches 13px further LEFT for its rule, and has to grow by
+     the same amount rather than slide. With a plain width:100% the
+     negative margin moves the whole box, so the right edge lands 13px
+     inside every other row and the time column steps out of the one
+     alignment this design is built on. It only shows when something is
+     actually running, which is how it went unseen. */
   margin-left: -13px;
+  width: calc(100% + 13px);
   padding-left: 9px;
+  overflow: hidden;   /* the clip the sweep runs inside */
 }
 .row.is-now .n { font-weight: 700; }
+
+/* ── the sweep ──
+   A hairline that crosses the running block and keeps crossing it, so
+   the one row that is happening now is the one row that moves.
+
+   Three things about how it is built, all of them load-bearing:
+
+   · It travels on TRANSFORM alone, and only in percentages of its own
+     width. The element is exactly as wide as the row, so -100% puts
+     its trailing edge on the row's left edge and 0 puts it on the
+     right — one full crossing, with no need to know the row's width
+     in CSS and no layout or paint work per frame. Animating `left` or
+     a background position would do the same thing visually and repaint
+     the strip sixty times a second.
+
+   · It sits behind the TEXT but in front of the page, so the wash
+     never tints a word. That distinction cost a round: z-index:-1
+     alone put it behind the body's own white, where it animated
+     perfectly and painted nothing — the transform kept changing, so a
+     check reading computed style called it working. The row is not a
+     stacking context, so "behind" meant behind everything. What lifts
+     the text is the text, given a z-index of its own.
+
+   · The trail is 68px and the line is 2px. The line alone reads as a
+     glitch; the trail alone reads as a wash with no direction. */
+.row.is-now::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-right: 2px solid var(--red);
+  background: linear-gradient(90deg, transparent calc(100% - 68px),
+                                     rgba(var(--red-rgb), .13));
+  transform: translateX(-100%);
+  animation: sc-sweep 2.8s linear infinite;
+}
+@keyframes sc-sweep {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+/* The row's own content, lifted over the wash. */
+.row.is-now .m,
+.row.is-now .n,
+.row.is-now .t { position: relative; z-index: 1; }
+
+/* The row keeps its rule and its weight either way — an effect that
+   degrades to nothing has not been disabled, it has removed the mark.
+   Not built rather than paused: a paused sweep is a red line frozen
+   somewhere across the row, which reads as a bug. */
+@media (prefers-reduced-motion: reduce) {
+  .row.is-now::after { display: none; }
+}
 
 .row.is-free {
   display: block;
