@@ -4760,8 +4760,23 @@ function orPan(dx, dy) {
   state.panX += dx;
   state.panY += dy;
   const v = byId('orView');
+  /* Four decimals, not orLayout.N's two, and this is the only place in
+     the app that needs them. Everywhere else N writes a number that is
+     drawn once and sat still; this one is written every frame of a
+     flight, and 2dp quantises the SCALE in steps of .01 — worth about
+     4 screen px for a star half the viewBox out. The camera then
+     spends whole frames writing the same rounded number it wrote last
+     frame: the map does not move, and then it jumps.
+
+     Counted over the real velocity profile: at 60Hz, 13-15% of a
+     flight's frames are frozen; at the 120Hz a ProMotion panel runs
+     at, 20-23%. Nearly a quarter of the flight, stuttering harder the
+     better the display — which is why it reported from a Mac and why
+     this box, which throttles rAF to about 20Hz, could never see it:
+     at 20Hz the steps are too big to ever collide. At 4dp it is 0-2
+     frames of the whole flight. */
   if (v) v.setAttribute('transform',
-    `translate(${orLayout.N(state.panX)} ${orLayout.N(state.panY)}) scale(${orLayout.N(state.zoom)})`);
+    `translate(${orZoom.N(state.panX)} ${orZoom.N(state.panY)}) scale(${orZoom.N(state.zoom)})`);
   /* Compared before it is written: this runs on every frame of a drag,
      and a classList write per frame is the kind of thing that costs
      nothing until the frame is already full. */
@@ -4808,6 +4823,8 @@ function orZoom(f, px, py) {
   orZoom.raf = requestAnimationFrame(() => { orZoom.raf = 0; orPaintLabels(); });
 }
 orZoom.raf = 0;
+/* The camera's own rounding. See orPan for why it is not orLayout.N. */
+orZoom.N = (v) => Math.round(v * 10000) / 10000;
 
 /* ── drag ──
    Capture goes to the SVG, not the node: a paint replaces every node
@@ -6064,6 +6081,12 @@ function orBacklinks(id) {
    A hub opens as the folder itself: same ramp, and the body is the
    category's notes, most-linked first, the way a folder note reads. */
 function orOpen(id) {
+  /* Before anything that can change the layout, which is everything
+     below: the column may be carrying the category list, and closing
+     that widens the stage a frame before the note narrows it again.
+     One task, one paint — so the only geometry that matters is what
+     was on screen when this was called. See orZoom.reframe. */
+  const V0 = orZoom.frame();
   /* The list and the note share the column. Whichever you asked for
      last is the one that is in it. */
   orCloseCat();
@@ -6085,6 +6108,14 @@ function orOpen(id) {
   /* Repaint AFTER the reveal: the stage just narrowed, and the paint
      is what re-rings the selected node and relights its edges. */
   orPaint();
+  /* Only when a flight will actually follow. orOpen.reveal returns
+     without flying for a note with no position, and holding the
+     picture still is only free while something is about to move it:
+     at the fit, the re-letterboxing IS the desirable behaviour —
+     `meet` is what keeps the whole field in the narrower stage — so
+     cancelling it with nothing to absorb the difference would leave
+     you cropped with only the fit button to get back. */
+  if (state.xy[state.sel]) orZoom.reframe(V0);
   orOpen.reveal(state.sel);
   orSignal(state.sel);
   /* Focus lands on the pane itself, so a keyboard open reads from the
@@ -6263,6 +6294,20 @@ orDust.open = (ox, oy, depth) => {
     w.style.transformOrigin = ox + 'px ' + oy + 'px';
     w.style.transform = 'none';
     w.style.opacity = '1';
+    /* A return is not a passage — the same rule orDebris keeps thirty
+       lines below, arrived at here from the other end. The excursion
+       is linear in depth, so a flight OUT parts the near shell to
+       scale .40 where an equal flight in parts it to 1.60: the field
+       races inward two and a half times faster than the camera, and
+       then orDust.rest snaps the geometry home in the landing frame.
+       Going in that snap is invisible and rest()'s own comment says
+       why — the shell has faded to `fade`, which is 0 for the near
+       one, by the time it happens. Going out step() pins opacity at 1,
+       so the snap is naked: measured 95 specks moving a median of 72px
+       and up to 271px in a single frame, at full strength, in both
+       themes. The parallax on the way out was never worth what it
+       cost, because what it cost is the thing you see. */
+    if (depth <= 0) return;
     orDust.live.push({ w, s, d: depth });
   });
 };
@@ -6513,7 +6558,7 @@ const flyS = (t) => {
   return 1 - FLY_V * DEC * flyRamp((1 - t) / DEC);
 };
 
-orZoom.glide = (z, px, py, focus) => {
+orZoom.glide = (z, px, py, focus, back) => {
   const view = byId('orView'), svg = byId('orSvg');
   if (!view) return;
   /* Land anything still in the air FIRST. state.zoom holds a
@@ -6537,18 +6582,35 @@ orZoom.glide = (z, px, py, focus) => {
   if (svg) svg.classList.add('or-flying');
   orZoom.hold(true);
   const aim = focus || null;
-  orDust.open(aim ? aim[0] : H, aim ? aim[1] : H,
-    Math.max(-1, Math.min(1, lz / Math.log(FLY_MAX))));
-  /* Debris only for a flight that gets CLOSER. orClose glides back to
-     the fit on the same function, and a return is not a passage — the
-     field does not rush past you on the way out. */
-  if (z > z0) orDebris.spawn(aim ? aim[0] : H, aim ? aim[1] : H);
+  /* Debris and the parting field are for a flight that gets CLOSER.
+     orClose glides back to the fit on this same function, and a return
+     is not a passage — the field does not rush past you on the way
+     out.
+
+     `back` says so outright rather than leaving it to `z > z0`, and
+     that is not belt and braces. orZoom.reframe re-expresses the
+     camera in the stage the pane just left behind, so on a stacked
+     layout — where closing a note nearly doubles the stage's height —
+     the camera comes out of it BELOW 1 and the glide home is an
+     increase in state.zoom. The arithmetic then says passage about the
+     one gesture that is definitionally a return, and you get a burst
+     of debris for closing a note. */
+  const dep = back ? -1
+    : Math.max(-1, Math.min(1, lz / Math.log(FLY_MAX)));
+  orDust.open(aim ? aim[0] : H, aim ? aim[1] : H, dep);
+  if (dep > 0) orDebris.spawn(aim ? aim[0] : H, aim ? aim[1] : H);
 
   const t0 = performance.now();
   const tick = () => {
     const u = Math.min(1, (performance.now() - t0) / FLY_MS);
     const p = flyS(u);
-    const zz = z0 * Math.exp(lz * p);
+    /* The last tick lands on the number it was given, not on the
+       geometric law's opinion of it. z0·e^(ln(z/z0)) is z to about a
+       part in 10^16, which was invisible while every flight started
+       from a round number — orZoom.reframe means they no longer do,
+       and a camera that finishes at 0.9999999999999999 is one that
+       compounds. */
+    const zz = u < 1 ? z0 * Math.exp(lz * p) : z;
     /* The 1/z law: interpolating the centre LINEARLY makes the target
        crawl in from the side for the whole trip. This brings it to the
        middle while you are still a long way out, so the back half of
@@ -6617,6 +6679,72 @@ orZoom.hold = (on) => {
     if (t && t.classList) els.add(t);
   });
   els.forEach((e) => e.classList.add('or-held'));
+};
+
+/* ── the stage just changed shape ──
+   #orNote is `flex: none` at clamp(380px, 42%, 620px) and it comes and
+   goes with `hidden`, so opening or closing a note resizes #orStage by
+   about 490px in a single layout pass — and preserveAspectRatio
+   "xMidYMid meet" re-letterboxes the whole 1000-unit viewBox into
+   whatever box it now has. Every star on screen moves, and the camera
+   has not moved at all.
+
+   Measured on a close at 1512x950, dark and light identical to 0.1px:
+   #orSvg goes 673.8 to 1161.6 CSS px, the base scale .674 to .758, and
+   the 59 stars move a median of 252px with state.zoom sitting at 2.4
+   the whole time. The largest step the 880ms passage that follows ever
+   takes in one frame is 20.6px — so the jump is 12.3x the fastest
+   legitimate frame of the flight, and it is in the OPPOSITE direction:
+   the map snaps left, then the flight travels back right. That is what
+   was reported as the zoom rocking rather than flying, and no easing
+   on the camera could ever have hidden it, because the camera is not
+   what moved.
+
+   So the camera is re-expressed in the new stage's terms before the
+   flight starts. The picture holds exactly where it is, and the
+   passage absorbs the difference over its own 880ms — which is what it
+   is for.
+
+   Taken off the svg's own screen CTM rather than off its width, so it
+   is aspect-ratio-general: the stage can change on either axis and it
+   is `meet` — min(w, h) — that decides the base scale. Under 1416px
+   the layout stacks rather than splitting, and there it is the HEIGHT
+   that moves.
+
+   Written out as two scalars rather than as T' = V1⁻¹·V0·T, which is
+   the same thing and was the first version. A screen point is
+   a·(pan + z·p) + e, so holding it still across a change of V gives
+
+     z'   = z · a0/a1
+     pan' = (a0·pan + e0 − e1) / a1
+
+   and the reason to prefer it is exactness: when the base scale did
+   NOT change, a0/a1 is exactly 1 and the camera comes back bit for
+   bit. Going through an inversion, (1/a)·a is not, and it left
+   state.zoom at 0.9999999999999999 on a stage that had only moved
+   sideways — a residue that compounds over a session of opening and
+   closing notes. */
+orZoom.frame = () => {
+  const svg = byId('orSvg');
+  return svg && svg.getScreenCTM ? svg.getScreenCTM() : null;
+};
+
+orZoom.reframe = (V0) => {
+  const V1 = orZoom.frame();
+  /* A stage with no size — a hidden tab, a pane mid-transition — is
+     not a frame to re-express anything in. */
+  if (!V0 || !V1 || !V1.a || !V1.d) return;
+  /* Asked before anything is done about it: opening a second note
+     while one is already open does not move the stage at all, and
+     landing a flight for a no-op would be a real cost for nothing. */
+  if (V0.a === V1.a && V0.d === V1.d && V0.e === V1.e && V0.f === V1.f) return;
+  /* A flight in the air owns state.zoom as its DESTINATION, so put it
+     down where the camera actually is before re-expressing it. */
+  orZoom.grab();
+  state.panX = (V0.a * state.panX + V0.e - V1.e) / V1.a;
+  state.panY = (V0.d * state.panY + V0.f - V1.f) / V1.d;
+  state.zoom = state.zoom * (V0.a / V1.a);
+  orPan(0, 0);
 };
 
 orZoom.land = () => {
@@ -6738,6 +6866,9 @@ function orDropSel() {
 function orClose() {
   const pane = byId('orNote');
   if (!pane || pane.hidden) return;
+  /* The stage as it is right now, before the pane goes away and takes
+     490px of width with it. See orZoom.reframe. */
+  const V0 = orZoom.frame();
   /* After the guard, so this fires on a real close and not on the many
      calls that find the pane already shut — orClose is the universal
      "put it down", and half its callers are clearing a pane that was
@@ -6749,10 +6880,11 @@ function orClose() {
   state.sel = null;
   orWrite({ sel: null });
   orPaint();
+  orZoom.reframe(V0);
   /* Back out to the whole field. Closing a note is stepping away from
      it, and being left parked at 3x on a constellation you have just
      dismissed is how you lose the map. */
-  orZoom.glide(1, 0, 0);
+  orZoom.glide(1, 0, 0, null, true);
   if (was) {
     const wrap = byId('orNodes');
     const g = wrap ? wrap.querySelector(`[data-id="${CSS.escape(was)}"]`) : null;

@@ -389,6 +389,89 @@ after a real formation switch — carries a wide margin on purpose: the
 exact figure jitters run to run, and catching a damping constant
 reverted to flat is the assertion above's job, not this one's.
 
+## The stage is a frame, and it moves
+
+The reading pane is `flex: none` at `clamp(380px, 42%, 620px)` and it
+comes and goes with `hidden`, so opening or closing a note resizes
+`#orStage` by about 490px in a single layout pass. The svg is
+`preserveAspectRatio="xMidYMid meet"`, so a change to the stage
+re-letterboxes the whole 1000-unit viewBox into whatever box it now
+has — and **every star on screen moves while the camera sits
+perfectly still**.
+
+Measured on a close at 1512x950, dark and light identical to 0.1px:
+the svg goes 673.8 to 1161.6 CSS px, the base scale .674 to .758, and
+the 59 stars move a **median of 252px, max 317**, with `state.zoom` at
+2.4 throughout. The biggest step the 880ms passage that follows ever
+takes in one frame is **20.6px**. So the jump is 12.3x the fastest
+legitimate frame of the flight — and it is in the OPPOSITE direction:
+the map snaps left, then the flight travels back right. That is what
+was reported as the zoom rocking rather than flying, and no easing on
+the camera could ever have hidden it, because the camera is not what
+moved.
+
+`orZoom.reframe` re-expresses the camera in the new stage's terms
+before the flight starts: the picture holds exactly where it is and
+the passage absorbs the difference over its own 880ms, which is what
+it is for. Both callers capture the frame **before any layout change**
+— at the very top of `orOpen`, because `orCloseCat` runs first and the
+list and the note share the column. It is all one task and the browser
+paints once at the end, so the only geometry that matters is what was
+on screen when the function was called.
+
+**Written as two scalars, not as a matrix inversion**, and the reason
+is exactness. `T' = V1⁻¹·V0·T` is the same thing and was the first
+version; it left `state.zoom` at 0.9999999999999999 on a stage that
+had only moved sideways, because `(1/a)·a` is not 1 in floating point.
+`z' = z·a0/a1` **is** exactly z when the base scale did not change.
+A residue that compounds over a session of opening and closing notes
+is not a rounding detail, it is a slow leak.
+
+**It only fires when a flight will follow.** At the fit, the
+re-letterboxing IS the desirable behaviour — `meet` is what keeps the
+whole field inside the narrower stage — so cancelling it with nothing
+to absorb the difference would leave you cropped with only the fit
+button to get back.
+
+**And it changes what the arithmetic means.** A stacked close nearly
+doubles the stage, so the reframed camera can come out BELOW 1 and the
+glide home is then an INCREASE in `state.zoom` — measured at .45 after
+zooming to the floor with the pane open. Left to `z > z0`, closing a
+note throws eleven debris streaks at you and parts the field.
+`orZoom.glide` takes `back` and `orClose` passes it: a return is not a
+passage, said outright rather than inferred. The test asserts `z < 1`
+first, because without that it passes vacuously in any layout where
+the stage does not change.
+
+## The camera needs more decimals than everything else
+
+`orLayout.N` rounds to 2dp. That is right for every number in this app
+that is drawn once and then sits still, and wrong for the one that is
+written 60 to 120 times a second. A .01 quantum of **scale** is worth
+about 4 screen px for a star half the viewBox out, so the camera spent
+whole frames re-writing the number it wrote last frame: the map does
+not move, and then it jumps.
+
+Counted over the real velocity profile: **13-15% of a flight's frames
+are frozen at 60Hz, 20-23% at 120Hz**. Nearly a quarter of the flight,
+stuttering harder the better the display — which is why it reported
+from a Mac, and why this repo's own test browser can never reproduce
+it by watching: rAF is throttled to about 20Hz here, where the steps
+are far too big to ever collide. At 4dp it is 0-2 frames of the whole
+flight.
+
+**So the test asserts the mechanism, not the symptom.** The camera has
+to write a number it was given rather than a rounded one — set
+`state.zoom` to 1.2345, sync, and read `scale(1.2345)` back off the
+attribute. Reverting `orPan` to `orLayout.N` makes it `scale(1.23)`
+and the assertion falls over. A frame-timing threshold measured here
+would prove nothing about the machine the bug was reported on.
+
+This is the third time a number that looked like a formatting choice
+turned out to be load-bearing, and the pattern is the same each time:
+the value is fine everywhere it is read by a person and wrong in the
+one place it is read by the compositor.
+
 ## The passage
 
 Clicking a star used to move the camera on a CSS transition — linear

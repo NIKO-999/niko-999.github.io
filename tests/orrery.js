@@ -3337,6 +3337,117 @@ const pickHittable = async (page, ids) => {
   ok('no page errors through the passage', pr.errs.length === 0, pr.errs.slice(0, 4));
   await pr.browser.close();
 
+  /* ═══ the stage as a frame ═══
+     The reading pane is `flex: none` and comes and goes with `hidden`,
+     so opening or closing a note resizes #orStage in one layout pass —
+     and preserveAspectRatio "meet" re-letterboxes the whole viewBox
+     into whatever box it now has. Every star on screen moved 252px
+     with the camera sitting still, which is what the zoom rocking
+     rather than flying actually was.
+
+     Measured as the ONE-FRAME displacement across the synchronous call,
+     because that is the only frame there is: everything orOpen and
+     orClose do happens in one task and the browser paints once at the
+     end of it. So the question is exactly "where were the stars when
+     this was called, and where are they when it returns". */
+  console.log('\n── the stage as a frame ──');
+  const fr = await open({ colorScheme: 'dark' });
+  await fr.page.goto(`${BASE}/orrery/`, { waitUntil: 'networkidle' });
+  await waitPaint(fr.page);
+  await fr.page.evaluate(() => {
+    window.__pts = () => {
+      const m = document.getElementById('orView').getScreenCTM();
+      return Object.keys(state.xy).sort().map((id) => {
+        const p = state.xy[id];
+        return [m.a * p[0] + m.e, m.d * p[1] + m.f];
+      });
+    };
+    window.__moved = (a, b) => a.reduce((w, p, i) =>
+      Math.max(w, Math.hypot(p[0] - b[i][0], p[1] - b[i][1])), 0);
+  });
+  const camStill = () => fr.page.waitForFunction(() => {
+    const s = document.getElementById('orSvg');
+    return !s.classList.contains('or-flying') && !s.classList.contains('or-index');
+  }, null, { timeout: 10000 }).catch(() => {});
+
+  /* Both layouts. Under 1416px the column stacks instead of splitting,
+     and there it is the stage's HEIGHT the pane takes — which is why
+     orZoom.reframe is written off the screen CTM rather than off a
+     width ratio. It is also the case that broke the first version:
+     a stacked close nearly doubles the stage, so the reframed camera
+     comes out BELOW 1 and the glide home is arithmetically an
+     approach. A burst of debris for closing a note. */
+  for (const [w, h, how] of [[1512, 950, 'split'], [760, 900, 'stacked']]) {
+    await fr.page.setViewportSize({ width: w, height: h });
+    await fr.page.evaluate(() => { orClose(); orZoom.land(); orZoom(0); });
+    await camStill();
+    const o = await fr.page.evaluate(() => {
+      const A = window.__pts(); orOpen('trading/models/cisd'); const B = window.__pts();
+      return { moved: window.__moved(A, B) };
+    });
+    ok(`opening a note does not move the map before the camera does (${how})`,
+      o.moved < 1, o);
+    await camStill();
+    const k = await fr.page.evaluate(() => {
+      const A = window.__pts(); orClose(); const B = window.__pts();
+      return { moved: window.__moved(A, B), dust: orDust.live.length,
+               debris: document.querySelectorAll('#orDebris > g').length };
+    });
+    ok(`and closing it does not either (${how})`, k.moved < 1, k);
+    ok(`a return parts no field and spawns no debris (${how})`,
+      k.dust === 0 && k.debris === 0, k);
+    await camStill();
+    const home = await fr.page.evaluate(() => state.zoom);
+    ok(`the flight lands on exactly the number it was given (${how})`, home === 1, { home });
+
+    /* The reachable form of the arithmetic trap. Zoom out to the floor
+       with the pane still open, then close: the stage grows by more
+       than the camera has left to give, so the reframed camera comes
+       out BELOW 1 and the glide home is an increase in state.zoom. Left
+       to `z > z0`, closing a note would throw debris at you and part
+       the field. `z < 1` is asserted first because without it this
+       passes vacuously in any layout where the stage does not change. */
+    await fr.page.evaluate(() => orOpen('trading/models/cisd'));
+    await camStill();
+    await fr.page.evaluate(() => orZoom(0));
+    await camStill();
+    const bk = await fr.page.evaluate(() => {
+      orClose();
+      return { z: state.zoom, dust: orDust.live.length,
+               debris: document.querySelectorAll('#orDebris > g').length };
+    });
+    ok(`a return is not a passage even where the arithmetic says it is (${how})`,
+      bk.z < 1 && bk.dust === 0 && bk.debris === 0, bk);
+    await camStill();
+  }
+
+  /* orLayout.N rounds to 2dp, which is right for everything that is
+     drawn once and sits still and wrong for the one thing written 60 to
+     120 times a second. A .01 quantum of SCALE is about 4 screen px for
+     a star half the viewBox out, so the camera spent whole frames
+     re-writing the number it wrote last frame: 13-15% of a flight's
+     frames frozen at 60Hz, 20-23% at 120Hz. It stutters harder the
+     better the display, which is why it reported from a Mac and why
+     this suite's own browser — rAF throttled to about 20Hz, steps far
+     too big to ever collide — cannot reproduce it by watching.
+
+     So this asserts the MECHANISM: the camera must write a number it
+     was given, not a rounded one. Reverting orPan to orLayout.N makes
+     it scale(1.23). */
+  const prec = await fr.page.evaluate(() => {
+    const z = state.zoom, px = state.panX, py = state.panY;
+    state.zoom = 1.2345; state.panX = 0; state.panY = 0;
+    orPan(0, 0);
+    const t = document.getElementById('orView').getAttribute('transform');
+    state.zoom = z; state.panX = px; state.panY = py; orPan(0, 0);
+    return t;
+  });
+  ok('the camera writes enough precision to move on every frame of a 120Hz panel',
+    /scale\(1\.2345\)/.test(prec), { prec });
+
+  ok('no page errors through the reframing', fr.errs.length === 0, fr.errs.slice(0, 4));
+  await fr.browser.close();
+
   /* ── the ambient field ──
      Built once at boot, outside #orRings, on the same reasoning as
      #orDebris — so the two real bugs worth guarding are (1) something
