@@ -5,14 +5,16 @@
    in the suite covers a line of it. Three things are worth measuring
    and are measured here rather than looked at:
 
-     · the CONTRAST. Type from 9px up, in two polarities at once —
-       White on Dark Green for the week, Dark Green on Spring Green
-       for the day you are in. A check written around one of them
-       passes the other without looking at it.
+     · the CONTRAST. Type from 9px up on paper. The design this was
+       drawn from set finished blocks at #b4b4b4 and times at #8c8c8c,
+       which measure 2.0:1 and 3.2:1 on white — both look right in a
+       picture and neither is readable. The check samples composited
+       pixels and is polarity-agnostic, because this app has been
+       light and dark and may be again.
      · the PARSER. A table of sentences with the answer written down,
        driven through the field a thumb actually types into.
      · that NOTHING LEAVES. The whole claim of the app is that a
-       spoken sentence becomes a block on the rail without a server.
+       spoken sentence becomes a block on the sheet without a server.
        That is not a design note, it is an assertion: every request
        the page makes is counted, and one to somewhere else fails the
        run. It is what refuses a model or an API key added later to
@@ -102,8 +104,17 @@ const SAID = [
   const SEEDED = 47;
   ok('it opens with the week on it',
     await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
-  ok('and the days run Monday first, with Sunday last', await page.$$eval('.day-name',
-    (n) => n.map((x) => x.textContent).join(' ')) === 'MON TUE WED THU FRI SAT SUN');
+  /* Today first, then the days after it — a daily process is opened
+     to find out what is happening now, and on a Saturday a Monday-first
+     week puts that four screens down. The frozen-clock pass below is a
+     Tuesday, so this list is checked against the real clock instead of
+     a literal. */
+  const ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const from = new Date().getDay();
+  const wantOrder = Array.from({ length: 7 }, (_, i) => ABBR[(from + i) % 7]).join(' ');
+  ok(`the week opens on today (${ABBR[from]}) and runs forward`,
+    await page.$$eval('.day-name', (n) => n.map((x) => x.textContent).join(' ')) === wantOrder,
+    wantOrder);
 
   /* ── side by side means the same box ──
      Within a card, the times are one column and the names are another.
@@ -112,42 +123,42 @@ const SAID = [
   const cols = await page.$$eval('.day-card', (cards) => cards.map((c) => {
     const rows = [...c.querySelectorAll('.row[data-id]')];
     const edge = (sel, side) => rows.map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
-    return { t: edge('.t', 'right'), n: edge('.n', 'left'), rooms: rows.every((r) => r.querySelector('.r')) };
+    return { t: edge('.t', 'right'), n: edge('.n', 'left') };
   }));
   ok('the times in a card share one right edge',
     cols.every((c) => new Set(c.t).size === 1), cols.map((c) => c.t));
   ok('and the names share one left edge',
     cols.every((c) => new Set(c.n).size === 1), cols.map((c) => c.n));
 
-  /* A day whose rows carry no place drops the column rather than
-     leaving a zero-width track with a gap on either side of it. Both
-     branches are checked, and the second one is why: asserting only
-     that a place-less card has no place column passes trivially on a
-     week where nothing has a place, which is exactly this seed. */
-  ok('no block starts with a place, so no card has that column',
-    await page.$$eval('.day-card', (c) => c.every((x) => x.classList.contains('no-room')))
-    && await page.$$eval('.row .r', (r) => r.length) === 0);
+  /* The place rides INSIDE the name rather than taking a column of
+     its own, so an empty one costs nothing and there is no track to
+     collapse. Both branches are checked; the second one is added
+     further down, after a block with a place has been spoken in. */
+  ok('no block starts with a place, and none is drawn',
+    await page.$$eval('.row .n em', (e) => e.length) === 0);
 
-  /* ── the rail joins its dots ──
-     The line is drawn per day, so the join is the thing that can break:
-     the first segment has to start at the first dot and the last has to
-     stop at the last one, or the rail overshoots into the padding. */
-  const rail = await page.evaluate(() => {
-    const days = [...document.querySelectorAll('.day')];
-    const seg = (el, which) => {
-      const s = getComputedStyle(el, '::before');
-      const r = el.getBoundingClientRect();
-      return which === 'top' ? r.top + parseFloat(s.top) : r.bottom - parseFloat(s.bottom);
-    };
-    const dot = (el) => {
-      const s = getComputedStyle(el, '::after');
-      return el.getBoundingClientRect().top + parseFloat(s.top);
-    };
-    const f = days[0], l = days[days.length - 1];
-    return { headGap: Math.abs(seg(f, 'top') - dot(f)), tailGap: Math.abs(seg(l, 'bottom') - dot(l)) };
-  });
-  ok('the rail starts at the first dot', rail.headGap < 1.5, rail);
-  ok('and stops at the last one', rail.tailGap < 1.5, rail);
+  /* ── the measure ──
+     The one thing this design says that a list cannot: a rule as long
+     as the block is. It is the whole reason this variant was picked,
+     so it gets the assertion it deserves — the rendered widths have to
+     be ORDERED by duration, not merely present. A rule that is drawn
+     but constant is the failure this catches, and it looks completely
+     fine in a screenshot. */
+  const meas = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => ({
+    n: r.querySelector('.n').firstChild.textContent,
+    mins: +r.dataset.e - +r.dataset.s,
+    w: r.querySelector('.m').getBoundingClientRect().width,
+  })));
+  ok('every block carries a measure', meas.length === 47 && meas.every((m) => m.w >= 3), meas.slice(0, 3));
+  ok('and the widths are ordered by duration', (() => {
+    const by = [...meas].sort((a, b) => a.mins - b.mins);
+    return by.every((m, i) => i === 0 || m.w >= by[i - 1].w - 0.01);
+  })(), meas);
+  /* Ordered is not enough on its own — a constant width is also
+     "ordered". The longest has to be visibly longer than the shortest. */
+  const span = { min: Math.min(...meas.map((m) => m.w)), max: Math.max(...meas.map((m) => m.w)) };
+  ok(`the longest block reads far longer than the shortest (${span.min}px → ${span.max}px)`,
+    span.max >= span.min * 8, span);
 
   /* ── contrast, on real pixels ──
      Sampled the length of the poster, because the sky is lightest at
@@ -268,19 +279,23 @@ const SAID = [
   await page.waitForTimeout(420);
   ok('two days named writes two rows',
     await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED + 2);
+  /* Found by LABEL, not by position. The week rotates with the clock
+     now, so .day:nth-child(2) is a different weekday every day and a
+     test written against it passes or fails depending on when it runs. */
+  const rowsOf = (abbr) => page.evaluate((a) => {
+    const day = [...document.querySelectorAll('.day')]
+      .find((d) => d.querySelector('.day-name').textContent === a);
+    return [...day.querySelectorAll('.row[data-id] .n')].map((n) => n.firstChild.textContent);
+  }, abbr);
   ok('and it lands in time order inside the day',
-    await page.$$eval('.day:nth-child(2) .row[data-id] .n', (n) => n.map((x) => x.textContent))
-      .then((v) => v.join('|') === 'Wake|Train|Walk|Physio|Trading|Read|Down'));
+    await rowsOf('TUE').then((v) => v.join('|') === 'Wake|Train|Walk|Physio|Trading|Read|Down'),
+    await rowsOf('TUE'));
 
-  /* The other branch of the place column: a day that now has one gets
-     the track, and the days that still have none do not. */
-  ok('the day that gained a place gained the column',
-    await page.$$eval('.day:nth-child(2) .day-card',
-      (c) => !c[0].classList.contains('no-room')
-        && c[0].querySelectorAll('.r').length === 7));
-  ok('and a day with none still has neither',
-    await page.$$eval('.day:nth-child(1) .day-card',
-      (c) => c[0].classList.contains('no-room') && c[0].querySelectorAll('.r').length === 0));
+  /* The other branch: a block spoken in with a place shows it, beside
+     its own name and nowhere else. */
+  ok('the blocks that gained a place show it',
+    await page.$$eval('.row .n em', (e) => e.map((x) => x.textContent))
+      .then((v) => v.length === 2 && v.every((x) => x === 'Clinic')));
 
   /* ── nothing deletes without a way back ── */
   console.log('\n── the way back ──');
@@ -366,23 +381,23 @@ const SAID = [
     && hero.num === '11:00' && hero.unit === 'AM'
     && hero.of === 'Trading · 1 h 30 m left', hero);
 
-  /* ── one lit surface ──
-     The accent is spent on the day you are in and nothing else. Six
-     coloured subjects would make the rail a chart of nothing, and the
-     rule is only worth writing down if something measures it. */
-  const lit = await page.evaluate(() => {
-    const px = (el) => getComputedStyle(el).backgroundImage + '|' + getComputedStyle(el).backgroundColor;
-    const cards = [...document.querySelectorAll('.day-card')];
-    const today = document.querySelector('.day.is-today .day-card');
-    return {
-      today: px(today),
-      others: [...new Set(cards.filter((c) => c !== today).map(px))],
-    };
+  /* ── one red, spent twice ──
+     The accent marks the day you are in and the block that is running,
+     and nothing else. Six coloured subjects would make the sheet a
+     chart of nothing, and a rule is only worth writing down if
+     something measures it. */
+  const reds = await page.evaluate(() => {
+    const red = 'rgb(226, 35, 26)';
+    const hit = [];
+    document.querySelectorAll('.day-name, .row, .row .n, .row .t, .row .m, .title, .sub').forEach((el) => {
+      const s = getComputedStyle(el);
+      if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
+        hit.push(el.className + ':' + (el.textContent || '').slice(0, 14));
+    });
+    return hit;
   });
-  ok('today is the one card painted differently',
-    lit.others.length === 1 && lit.today !== lit.others[0], lit);
-  ok('and it carries the crest that marks it',
-    /svg\+xml/.test(lit.today) && !/svg\+xml/.test(lit.others[0]));
+  ok('the red marks today and the running block, and nothing else',
+    reds.length === 3 && reds.filter((r) => /day-name/.test(r)).length === 1, reds);
 
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet

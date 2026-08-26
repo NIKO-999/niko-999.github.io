@@ -30,10 +30,17 @@
   var KEY = 'sched.v1';
   var $ = function (id) { return document.getElementById(id); };
 
-  /* Monday first. The week a schedule is read in is not the week
-     Date.getDay() counts in, and every loop over days here uses this
-     order rather than 0..6. */
+  /* TODAY first, then the days after it. A weekly planner starts on
+     Monday because you are laying a week out; a daily process is
+     opened to find out what is happening now, and the answer should
+     not be four screens down on a Saturday. Monday-first was the
+     ordering while this was a class timetable and it is the one thing
+     that did not survive becoming a day. */
   var ORDER = [1, 2, 3, 4, 5, 6, 0];
+  var scWeek = function () {
+    var t = new Date().getDay(), i = ORDER.indexOf(t);
+    return ORDER.slice(i).concat(ORDER.slice(0, i));
+  };
   var ABBR  = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   var FULL  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
@@ -50,10 +57,10 @@
      starting shape, not a claim — every row is one tap from being
      right.
 
-     A block CAN carry a place, and none of these do. The field earns
-     its keep when it matters (which gym, which desk) and a column of
-     six blanks to show one value is worse than no column, which is
-     why a day with nothing to say there drops it entirely. */
+     A block CAN carry a place, and none of these do. It rides inside
+     the name when there is one, rather than taking a column of its
+     own — most blocks have none, and a fourth track standing empty
+     all week is worse than no track. */
   var SEED = {
     title: 'Daily Process',
     sub: 'Up at 5:45 · down at 22:45',
@@ -628,16 +635,18 @@
     /* A day with nothing on it is not drawn — a rail of empty cards is
        six rows of furniture. Today is the exception: the day you are in
        says so even when it is free. */
-    var shown = ORDER.filter(function (d) { return scByDay(d).length || d === today; });
+    var shown = scWeek().filter(function (d) { return scByDay(d).length || d === today; });
     $('scEmpty').hidden = state.items.length > 0;
 
     shown.forEach(function (d) {
       var rows = scByDay(d);
       var li = scEl('li', 'day' + (d === today ? ' is-today' : ''));
-      li.appendChild(scEl('span', 'day-name', ABBR[d]));
+      var dn = scEl('button', 'day-name', ABBR[d]);
+      dn.setAttribute('aria-label', 'Add a block on ' + FULL[d]);
+      dn.addEventListener('click', function () { scEditSheet(null, d); });
+      li.appendChild(dn);
 
-      var hasRoom = rows.some(function (it) { return !!it.r; });
-      var card = scEl('div', 'day-card' + (hasRoom ? '' : ' no-room'));
+      var card = scEl('div', 'day-card');
 
       if (!rows.length) {
         var free = scEl('button', 'row is-free');
@@ -651,9 +660,19 @@
         row.dataset.id = it.id;
         row.dataset.s = it.s;
         row.dataset.e = it.e;
-        row.appendChild(scEl('span', 't', scRange(it.s, it.e)));
-        if (hasRoom) row.appendChild(scEl('span', 'r', it.r));
-        row.appendChild(scEl('span', 'n', it.n));
+
+        /* The measure: a rule as long as the block is. 52px is ten
+           hours; floored at 3 because below that a rule stops being a
+           mark and becomes a speck, capped at the column because ten
+           hours is already the longest thing anyone puts in a day. */
+        var m = scEl('i', 'm');
+        m.style.width = Math.max(3, Math.min(52, (it.e - it.s) / 600 * 52)).toFixed(1) + 'px';
+        row.appendChild(m);
+
+        var n = scEl('span', 'n', it.n);
+        if (it.r) n.appendChild(scEl('em', null, it.r));
+        row.appendChild(n);
+        row.appendChild(scEl('span', 't', scHHMM(it.s) + '\u2013' + scHHMM(it.e)));
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e) + (it.r ? ', ' + it.r : '') + '. Edit.');
         row.addEventListener('click', function () { scEditSheet(it, d); });
@@ -719,13 +738,14 @@
         var d = (today + k) % 7, list = scByDay(d);
         if (list.length) ahead = { d: d, it: list[0], k: k };
       }
-      if (!ahead) { line.hidden = true; return; }
+      if (!ahead) { line.hidden = true; $('scLiveOf').hidden = true; return; }
       state = ahead.k === 1 ? 'Tomorrow' : FULL[ahead.d];
       at = ahead.it.s;
       of = ahead.it.n;
     }
 
     line.hidden = false;
+    $('scLiveOf').hidden = false;
     line.classList.toggle('is-next', !running);
     $('scLiveState').textContent = running ? state + ' · until' : state;
     $('scLiveNum').textContent = sc12(at);
@@ -1001,7 +1021,7 @@
       if (item) picked[item.d] = 1; else picked[day === undefined ? new Date().getDay() : day] = 1;
 
       var picks = scEl('div', 'days-pick');
-      ORDER.forEach(function (d) {
+      scWeek().forEach(function (d) {
         var b = scEl('button', 'pick', ABBR[d]);
         b.type = 'button';
         b.setAttribute('aria-pressed', picked[d] ? 'true' : 'false');

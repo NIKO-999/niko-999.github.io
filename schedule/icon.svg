@@ -1,29 +1,13 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
-  <!-- The rail, with the day you are in lit. It is the app's one idea
-       and nothing else on a home screen is a line with days hanging
-       off it. -->
-  <defs>
-    <linearGradient id="lit" x1="0" y1="0" x2="1" y2="0.5">
-      <stop offset="0" stop-color="#05d680"/>
-      <stop offset="1" stop-color="#04c274"/>
-    </linearGradient>
-    <linearGradient id="foot" x1="0" y1="0" x2="1" y2="0.4">
-      <stop offset="0" stop-color="#05d680" stop-opacity=".30"/>
-      <stop offset="1" stop-color="#02674f" stop-opacity=".30"/>
-    </linearGradient>
-  </defs>
-
-  <rect width="512" height="512" fill="#000"/>
-  <path d="M0 430 C 96 412 176 452 268 440 C 348 430 400 408 512 418 L512 512 L0 512 Z" fill="url(#foot)"/>
-
-  <g>
-    <rect x="150" y="128" width="8" height="256" rx="4" fill="#dce4e7" opacity=".28"/>
-    <circle cx="154" cy="150" r="13" fill="#dce4e7" opacity=".45"/>
-    <circle cx="154" cy="256" r="19" fill="#05d680"/>
-    <circle cx="154" cy="362" r="13" fill="#dce4e7" opacity=".45"/>
-
-    <rect x="206" y="128" width="164" height="44" rx="15" fill="#16302b"/>
-    <rect x="206" y="234" width="216" height="44" rx="15" fill="url(#lit)"/>
-    <rect x="206" y="340" width="128" height="44" rx="15" fill="#16302b"/>
+  <!-- The measure: three rules of three different lengths, the middle
+       one red. It is the one idea this app has that a list does not,
+       and nothing else on a home screen looks like it. -->
+  <rect width="512" height="512" fill="#fff"/>
+  <rect x="64" y="96" width="384" height="10" fill="#111"/>
+  <g fill="#111">
+    <rect x="64" y="190" width="150" height="14"/>
+    <rect x="64" y="330" width="96"  height="14"/>
+    <rect x="64" y="398" width="232" height="14"/>
   </g>
+  <rect x="64" y="260" width="384" height="14" fill="#e2231a"/>
 </svg>
