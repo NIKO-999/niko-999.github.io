@@ -389,6 +389,127 @@ after a real formation switch — carries a wide margin on purpose: the
 exact figure jitters run to run, and catching a damping constant
 reverted to flat is the assertion above's job, not this one's.
 
+## The work is not on the main thread
+
+Three rounds of performance work shipped and the report survived all
+three. Each round found something real — animations under a moving
+camera, four measured cuts to the interaction paths, a 252px stage jump
+and a camera frozen for a fifth of every flight — and none of them was
+the thing.
+
+A real Chrome trace, which nobody had taken in three rounds, says why.
+Of a click-to-settled interaction: **script 4.4%, layout 1.8%, style
+1.5%, paint 1.1% — and 86% compositing, tile management and raster.**
+Throttling the renderer's main thread 6x changes the frame cost by
+**1.00x**. The interaction does not live where every previous round was
+working, and the three fixes above were between them optimising about
+6% of the problem.
+
+**The dominant cost was `backdrop-filter` on `.app`** — the panel that
+is the ancestor of every app's content, including the orrery's camera.
+A backdrop pass is redone whenever the FILTERED ELEMENT'S OWN SUBTREE
+repaints, not only when what is behind it changes, so an 880ms flight
+re-blurred four megapixels every frame to arrive at the same pixels
+each time. The backdrop is a photograph. It does not move.
+
+Measured, frames delivered in a fixed window, six runs each way with
+the order alternated: **flight 1.9x, click 2.6x, close 2.4x**, ranges
+non-overlapping in all three. Median frame gap on a real click:
+**66.7ms to 16.7ms** — four vsyncs to one, in 6/6 runs. The repo's own
+test suite ran 195s against 243s with the live blur restored.
+
+So the photograph is blurred ONCE on a static underlay and composited
+from then on. Three things about that fix are load-bearing and each was
+found by screenshot rather than by reading the cascade:
+
+- **The tint is drawn twice, on `.app` and on `.app::after`.** An
+  element's own background paints BELOW its negative z-index children,
+  so the one on `.app` is hidden wherever the underlay reaches — but
+  `overflow` clips descendants to the PADDING box, so no pseudo-element
+  can paint the 1px ring under the border and only the element itself
+  can. Dropping it left a bright hairline right around the panel,
+  measured at 210/255 in one channel in light mode.
+- **Radius was never the lever.** blur(4), blur(10) and blur(20) all
+  cost the same, and even blur(0) still paid two thirds. Two thirds of
+  the cost is the render pass existing. Thinning the blur would have
+  spent the panel's contrast for nothing.
+- **Moving it to a pseudo-element with `backdrop-filter` still on it
+  does not work** — built and measured at 16 frames against 17. It has
+  to stop being a backdrop pass.
+
+**The Categories card KEEPS its backdrop-filter and that is not an
+oversight.** Four lenses measured removing it and `* { backdrop-filter:
+none }` came out **2.1x WORSE** — raster tasks 1972 to 4549, no overlap
+over five runs — because the filter is what promotes the card to its
+own composited layer, and without it the card's region falls back into
+the same layer as the moving stage. The glass is paying for itself. The
+contrast argument in this file remains the only argument that applies
+to it.
+
+**The suite has a blind spot that explains all three failed rounds.**
+`tests/orrery.js` measures element counts, paint rects and pixel
+colours, and none of those move when the compositor is the bottleneck.
+Its continuous-motion budget counts ANIMATED ELEMENTS at `< 12%`, and
+it measured 9 of 956 — **0.9%, thirteen times under the ceiling, while
+the display compositor ran at 95%.** The unit is wrong. What costs is
+not how many elements animate, it is whether anything forces a
+compositor property to be recomputed per frame over a large area.
+
+**And a test that samples a spring at a fixed wall-clock moment is
+measuring the frame rate.** "A stretched link brightens on its way
+home" read 260ms after a fling and required every link to be bright. It
+passed only because the main thread was too loaded to tick the
+simulation far in that time: with the blur gone the sim runs about four
+times as far in the same wall clock — 492 units from home at t+480ms
+before, 128 after — so the flung node's neighbours have time to follow
+it and a link to a neighbour that came along is genuinely slack. It
+asserts the mechanism now: sample every frame, and hold every link that
+IS stretched to being bright.
+
+## Two things measured in CSS pixels, so they transfer
+
+The blur's SIZE does not transfer — it was measured on a software
+rasteriser with no GPU, where every absolute millisecond is untrustable.
+The mechanism transfers unchanged; the multiple will not. These two do
+transfer, because they are main-thread work measured in CSS pixels:
+
+**The link surge ran three passes and dammed up behind the flight.**
+`stroke-dashoffset` is neither transform nor opacity, so it can never be
+composited, and in Blink it dirties SVG layout as well as paint. Three
+passes is 3.9s, held for the flight, so it was still going 4.9s after
+the click. Over a 3s band starting once the camera lands: 96 paints
+against 24, 32 layouts against 14, 1532ms of main thread against 474.
+One pass. The stagger came down from -.17s to -.05s with it, because a
+negative `animation-delay` can only truncate — at the old step the
+worst-placed link got 0.28s of its only 1.3s pass.
+
+**And `orOpen` kept working for 100-170ms after the pane was already on
+screen.** `orPaint` rebuilds every ring, link, node and label, and each
+layer is written and then READ BACK, so style and layout flush for the
+whole drawing several times over, synchronously, inside the pointerup
+handler — and none of it can paint until the handler returns. Deferred
+to one `requestAnimationFrame`: 133/208/147/120/130ms against
+52/53/43/48/43ms on a 312-note vault. It is the only cost here that
+GROWS with the vault — 63ms at 52 notes, 78 at 156, 134 at 312.
+
+`orZoom.reframe` stays synchronous inside that handler and must: it is
+what stops the stage jump above, and deferring it by a frame is the
+snap. The deferred half re-reads `state.sel` rather than closing over
+it — a second click inside the deferred frame has already moved the
+selection on, and painting the previous one would be a frame of the
+wrong note.
+
+**The dial was shortened rather than skipped.** Its 2.1s turn is paused
+at zero for the whole flight and released the instant the camera lands
+at 2.4x, with the rings, three dust shells and the rim re-rasterised
+every frame for as long as it runs: 63.1ms of raster CPU in the 2.6s
+after landing against 28.5ms, five runs each way with no overlap. The
+measured-better fix was to not turn the dial for a note that is already
+on the map — and that is a feature removal wearing a performance
+argument, because the turn is what says the instrument was used and
+opening a note is the main way you use it. 1.15s, on a curve that does
+not spend a fifth of itself turning less than two degrees.
+
 ## The stage is a frame, and it moves
 
 The reading pane is `flex: none` at `clamp(380px, 42%, 620px)` and it

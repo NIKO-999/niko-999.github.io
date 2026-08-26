@@ -517,20 +517,90 @@ body {
    and that visible margin is what makes the glass legible as glass —
    with the panel edge-to-edge there is nothing behind it to see
    through to, and every other glass property is wasted. */
+/* ── the blur is BAKED, not live ──
+   This was a `backdrop-filter` on `.app` itself, and `.app` is the
+   ancestor of every app's content — including the orrery's camera. A
+   backdrop pass is redone whenever the filtered element's own subtree
+   repaints, not only when what is BEHIND it changes, so an 880ms
+   camera flight re-blurred the whole four-megapixel panel every single
+   frame to arrive at the same pixels each time. The backdrop is a
+   PHOTOGRAPH. It does not move.
+
+   Measured, frames delivered in a fixed window, six runs each way with
+   the order alternated: flight 1.9x, click 2.6x, close 2.4x, ranges
+   non-overlapping in all three. The median frame gap on a real click
+   went from 66.7ms to 16.7ms — four vsyncs to one, in 6/6 runs.
+
+   Radius was never the lever and that was measured too: blur(4),
+   blur(10) and blur(20) all cost the same, and even blur(0) still paid
+   two thirds. Two thirds of the cost is the render pass existing.
+   Thinning the blur would have spent the panel's contrast for nothing.
+
+   Nor does moving it to a pseudo-element with `backdrop-filter` still
+   on it — that was built and measured at 16 frames against 17. It has
+   to stop being a backdrop pass. So the photograph is blurred ONCE as
+   an ordinary element filter on a static underlay: cc rasterises a
+   filtered layer whose contents never change, and composites the cached
+   texture from then on. */
 .app {
   position: relative;
+  /* A stacking context, so the two underlays stay inside the panel
+     rather than sliding under the page. */
+  z-index: 0;
   display: flex;
   margin: clamp(28px, 7vh, 84px) clamp(40px, 10vw, 170px);
   height: calc(100vh - 2 * clamp(28px, 7vh, 84px));
   border: 1px solid var(--glass-line);
   border-radius: var(--r-panel);
+  /* The tint is drawn TWICE and both are load-bearing. An element's
+     own background paints BELOW its negative z-index children, so this
+     one is hidden by the blurred underlay everywhere the underlay
+     reaches — which is why ::after exists to put it back on top.
+
+     But `overflow` clips descendants to the PADDING box, so neither
+     pseudo-element can paint the 1px ring under the border, and only
+     the element itself can. Dropping this declaration left that ring
+     showing bare photograph: a bright seam right around the panel,
+     measured at 210/255 in one channel in light mode and visible as a
+     hairline. Belt and braces here is the actual fix. */
   background: var(--glass);
-  /* Measured: the reference cuts high-frequency energy 5.6× but leaves
-     the roofline legible as a form — that is ~20px, not 34px. And its
-     glass is DESATURATED against the photo, so saturate() goes below 1. */
-  -webkit-backdrop-filter: blur(20px) saturate(.9) brightness(var(--glass-bright));
-          backdrop-filter: blur(20px) saturate(.9) brightness(var(--glass-bright));
   overflow: hidden;
+}
+/* The photograph, blurred once and then left alone.
+   Measured: the reference cuts high-frequency energy 5.6× but leaves
+   the roofline legible as a form — that is ~20px, not 34px. And its
+   glass is DESATURATED against the photo, so saturate() goes below 1.
+
+   `background-attachment: fixed` makes the positioning area the
+   viewport, so this lands on `.backdrop` pixel for pixel whatever the
+   panel's inset works out to. `inset: -70px` puts the blur's own edge
+   fade outside the panel's clip, so the corner does not go pale. */
+.app::before {
+  content: '';
+  position: absolute;
+  inset: -70px;
+  z-index: -2;
+  pointer-events: none;
+  background-color: var(--ground);
+  background-image:
+    radial-gradient(125% 92% at 50% 44%, transparent 34%, rgba(0, 0, 0, .52) 100%),
+    var(--photo);
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  filter: blur(20px) saturate(.9) brightness(var(--glass-bright));
+}
+/* The glass tint, unfiltered and over the blur — the same order the
+   backdrop composite had. */
+.app::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  border-radius: inherit;
+  background: var(--glass);
 }
 
 /* ── icon rail (wide screens; the phone gets a bottom bar) ── */
@@ -937,9 +1007,10 @@ body {
     border-radius: 0;
     flex-direction: column;
     background: var(--ground);
-    -webkit-backdrop-filter: none;
-            backdrop-filter: none;
   }
+  /* .backdrop is already display:none up here and the panel goes
+     opaque, so there is nothing to see through and nothing to blur. */
+  .app::before, .app::after { display: none; }
 
   .main { order: 1; }
 

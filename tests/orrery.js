@@ -233,8 +233,15 @@ const pickHittable = async (page, ids) => {
        not announce itself — it just quietly stops being a selection
        marker — so the light theme names its own ink, and this holds it
        to being visible against the ground it is actually drawn on. */
+    /* orOpen defers its paint by a frame — the pane is the answer to
+       the click and the drawing follows it — so the ring this reads
+       does not exist until the next tick. Two rAFs: one to run the
+       deferred paint, one to be sure it has committed. The assertion is
+       about a stroke colour, not about timing. */
+    await page.evaluate(() => orOpen('trading/models/cisd'));
+    await page.evaluate(() => new Promise((r) =>
+      requestAnimationFrame(() => requestAnimationFrame(r))));
     const mark = await page.evaluate(() => {
-      orOpen('trading/models/cisd');
       const r = document.querySelector('#orNodes .or-sel .or-ringc');
       const lum = (c) => {
         const [R, G, B] = (String(c).match(/[\d.]+/g) || [0, 0, 0]).slice(0, 3)
@@ -377,6 +384,72 @@ const pickHittable = async (page, ids) => {
       : 0;
     ok('the sky changes the colour inside the card, so you are seeing through it',
       drift >= 3, { drift: +drift.toFixed(2), seen });
+    await page.evaluate(() => { delete document.documentElement.dataset.bg; });
+    await page.waitForTimeout(500);
+
+    /* ── the PANEL's glass is baked, and it is still glass ──
+       The panel used to carry `backdrop-filter` on `.app`, which is the
+       ancestor of everything the camera moves — so an 880ms flight
+       re-blurred four megapixels every frame to arrive at the same
+       pixels each time. Measured: frames delivered in a fixed window
+       1.9x on a flight, 2.6x on a click, 2.4x on a close, and the median
+       frame gap on a real click went 66.7ms to 16.7ms. Four vsyncs to
+       one. Three earlier rounds of work never found it because they
+       measured script and style, and a trace puts those at 6% of the
+       interaction against 86% for compositing and raster.
+
+       The photograph does not move, so it is blurred ONCE on a static
+       underlay and composited from then on.
+
+       Two assertions, because the declaration is not the proof and the
+       lab that found this was itself caught by the second one: an
+       injected stylesheet resolved var(--photo) against the wrong base,
+       404'd, and spent a whole run blurring a flat colour — while still
+       timing as a large win. So the second test is that the panel still
+       changes colour when the photograph does. A flat colour cannot. */
+    const panel = await page.evaluate(() => {
+      const el = document.querySelector('.app');
+      const g = getComputedStyle(el);
+      const u = getComputedStyle(el, '::before');
+      return { live: g.backdropFilter || g.webkitBackdropFilter || 'none',
+               baked: u.filter || 'none' };
+    });
+    ok('the panel does not re-blur itself every frame the map moves',
+      !/blur/.test(panel.live), panel);
+    ok('and the blur it lost is baked into a static underlay instead',
+      /blur/.test(panel.baked), panel);
+
+    /* A spot inside the panel with nothing drawn over it, found by
+       asking rather than by hardcoding a corner that a later layout
+       change would quietly move off. */
+    const bare = await page.evaluate(() => {
+      const app = document.querySelector('.app');
+      const r = app.getBoundingClientRect();
+      for (let y = r.top + 14; y < r.bottom - 14; y += 7) {
+        for (let x = r.left + 4; x < r.left + 44; x += 4) {
+          const e = document.elementFromPoint(x, y);
+          if (e === app || (e && e.classList.contains('rail')))
+            return { x: Math.round(x), y: Math.round(y), w: 6, h: 4 };
+        }
+      }
+      return null;
+    });
+    const panelSeen = [];
+    if (bare) {
+      for (const bg of ['iceberg', 'umber']) {
+        await page.evaluate((b) => { document.documentElement.dataset.bg = b; }, bg);
+        await page.waitForTimeout(1100);
+        const got = await patches(page, { x: bare.x - 1, y: bare.y - 1,
+          width: bare.w + 2, height: bare.h + 2 }, [{ label: bg, ...bare }], 2);
+        panelSeen.push(got[0]);
+      }
+    }
+    const panelDrift = panelSeen.length === 2
+      ? Math.max(dE(`rgb(${panelSeen[0].lo.join(',')})`, `rgb(${panelSeen[1].lo.join(',')})`),
+                 dE(`rgb(${panelSeen[0].hi.join(',')})`, `rgb(${panelSeen[1].hi.join(',')})`))
+      : 0;
+    ok('the sky still changes the panel, so the underlay is a photograph and not a colour',
+      !!bare && panelDrift >= 3, { drift: +panelDrift.toFixed(2), bare, panelSeen });
     await page.evaluate(() => { delete document.documentElement.dataset.bg; });
     await page.waitForTimeout(500);
 
@@ -769,23 +842,55 @@ const pickHittable = async (page, ids) => {
      and the hover repaint — and every one of them has to agree, which
      is what the mid-flight sample below actually tests. */
   await settle(page);
+  /* Keyed on each link's OWN extension, not on a stopwatch.
+     This read a fixed 260ms after the fling and asserted every link was
+     bright, which held only because the main thread was too loaded to
+     tick the simulation far in that time. Once the compositor stopped
+     re-blurring the panel every frame the sim ran about four times as
+     far in the same wall clock — measured, 492 units from home at
+     t+480ms before, 128 after — so the flung node's NEIGHBOURS have
+     time to follow it, and a link to a neighbour that came along is
+     genuinely slack. The old assertion was reading the frame rate.
+
+     What the code actually promises is that the ink follows the strain,
+     so that is what this measures: sample every frame, and hold every
+     link that IS stretched to being bright. Rest lengths come from the
+     settled field a moment ago, which is what rest means. */
   const stretch = await page.evaluate((id) => {
-    const before = [...document.querySelectorAll('#orLinks path[data-a]')]
-      .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id)
-      .map((t) => +t.getAttribute('opacity'));
-    /* Fling it far without a pointer, then read on the way home. */
+    const links = () => [...document.querySelectorAll('#orLinks path[data-a]')]
+      .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id);
+    const len = (t) => {
+      const a = state.xy[t.getAttribute('data-a')], b = state.xy[t.getAttribute('data-b')];
+      return a && b ? Math.hypot(a[0] - b[0], a[1] - b[1]) : 0;
+    };
+    const rest = links().map(len);
+    const before = links().map((t) => +t.getAttribute('opacity'));
+    /* Fling it far without a pointer, then watch the whole way home. */
     const p0 = state.xy[id].slice();
     orSim.put(id, p0[0] + 430, p0[1] + 330);
     orHeat(1);
-    return new Promise((res) => setTimeout(() => {
-      const now = [...document.querySelectorAll('#orLinks path[data-a]')]
-        .filter((t) => t.getAttribute('data-a') === id || t.getAttribute('data-b') === id)
-        .map((t) => +t.getAttribute('opacity'));
-      res({ before, now });
-    }, 260));
+    return new Promise((res) => {
+      const seen = [];
+      let n = 0;
+      const step = () => {
+        links().forEach((t, i) => {
+          if (!rest[i]) return;
+          seen.push({ ratio: len(t) / rest[i], op: +t.getAttribute('opacity') });
+        });
+        if (++n < 40) return requestAnimationFrame(step);
+        res({ before, rest: rest.map((r) => +r.toFixed(1)), n: seen.length,
+              /* op = L.op + (.9 - L.op)·t, t = clamp((len/rest - 1)/2.2),
+                 so .22 at rest crosses .5 at 1.9x. 2.2x leaves room for
+                 the settled length not being exactly the modelled one. */
+              taut: seen.filter((s) => s.ratio >= 2.2),
+              dim: seen.filter((s) => s.ratio >= 2.2 && s.op <= .5) });
+      };
+      requestAnimationFrame(step);
+    });
   }, hitD.id);
-  ok('a stretched link brightens on its way home',
-    stretch.now.length > 0 && stretch.now.every((o) => o > .5), stretch);
+  ok('a link that is stretched is bright, at whatever frame rate',
+    stretch.taut.length >= 3 && stretch.dim.length === 0,
+    { taut: stretch.taut.length, dim: stretch.dim.slice(0, 3), rest: stretch.rest });
   await settle(page);
   const slack = await page.evaluate((id) =>
     [...document.querySelectorAll('#orLinks path[data-a]')]

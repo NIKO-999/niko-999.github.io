@@ -346,10 +346,26 @@
   88%  {                          opacity: 1; }
   to   { stroke-dashoffset: -100; opacity: 0; }
 }
+/* ONE pass, not three. Three was already a cut from `infinite`, and it
+   cut the right thing for the wrong reason: what makes this the most
+   expensive animation on the map is that it runs at all. It is
+   stroke-dashoffset, which is neither transform nor opacity, so it can
+   never be composited — and in Blink it dirties SVG layout as well as
+   paint, because stroke geometry feeds the bounding box.
+
+   Three passes is 3.9s, and orZoom.hold dams it behind the flight, so
+   it was still going 4.9s after the click that started it. Measured
+   over a 3s band beginning once the camera lands, note open at 2.4x on
+   a 2x device pixel ratio: 96 paints against 24, 32 layouts against 14,
+   1532ms of main thread against 474. The map stops moving at 2.4s
+   instead of 4.9s.
+
+   The comment above already says three passes "gets out of the way;
+   nobody watched the fourth". The same sentence reaches the second. */
 .or-surge {
   stroke-dasharray: 10 90;
   stroke-linecap: round;
-  animation: or-surge var(--surge, 1.3s) linear 3 forwards;
+  animation: or-surge var(--surge, 1.3s) linear 1 forwards;
 }
 /* Still, it is a bright dash parked on a line, which reads as a fault
    rather than as restraint. So it goes entirely. */
@@ -422,10 +438,31 @@
    them, so the dust shells and the heavy arcs keep their own slow turns
    and simply ride this one — no restart, no snap back to zero when it
    ends. */
+/* Shortened from 2.1s, and the curve changed with it. orZoom.hold
+   pauses this at zero for the whole 880ms passage, so the ENTIRE turn
+   is released the instant the camera lands — at 2.4x, the highest zoom
+   this app ever flies to, with #orRings, three dust shells and the rim
+   all re-rasterised every frame for as long as it runs. Measured on a
+   real click at a 2x device pixel ratio: 63.1ms of raster CPU in the
+   2.6s after landing against 28.5ms, five runs each way with no
+   overlap.
+
+   The shipped curve also spent 18% of its 2.1s turning less than two
+   degrees, which is time on screen that reads as the map refusing to
+   settle rather than as an instrument coming to rest.
+
+   NOT fixed by not turning the dial for a note that is on the map. That
+   measures better and removes the thing it was asked for: the turn is
+   what says the instrument was used, and a note is the main way you use
+   it. NOT fixed by adding #orRings to the .or-tight pause list either —
+   .or-tight stays on for as long as you are zoomed in, so the turn
+   would freeze part way and finish only when you zoomed back out. A
+   turn that never runs is free; a turn that stops half way is a lie
+   about which way the instrument is pointing. */
 #orSvg.or-index #orRings {
   transform-box: view-box;
   transform-origin: 500px 500px;
-  animation: or-turn 2.1s cubic-bezier(.62, 0, .3, 1);
+  animation: or-turn 1.15s cubic-bezier(.34, 0, .38, 1);
 }
 
 /* Nothing to offer someone who has asked for no motion, so the control
@@ -4255,7 +4292,12 @@ function orPaintLinks() {
       out.push(`<path class="or-surge" d="${d}" pathLength="100" fill="none"`
         + ` stroke="color-mix(in srgb, var(--or-cat-${esc(catOf[a] || 'other')}) 55%,`
         + ` var(--or-star-core))" stroke-width="2"`
-        + ` style="animation-delay:${(-(out.length % 7) * .17).toFixed(2)}s"/>`);
+        /* The stagger comes down with the pass count. A negative
+           animation-delay can only ever truncate, so at the old -.17s
+           step the worst-placed link would start 1.02s into its only
+           1.3s pass and get 0.28s of surge. At -.05s it keeps 1.0s of
+           the 1.3s and the stagger still reads as a stagger. */
+        + ` style="animation-delay:${(-(out.length % 7) * .05).toFixed(2)}s"/>`);
     }
   }
   /* ── the folder tether ──
@@ -6105,10 +6147,13 @@ function orOpen(id) {
   const pane = byId('orNote');
   if (pane) { pane.hidden = false; pane.scrollTop = 0; }
   orOpen.chrome(true);
-  /* Repaint AFTER the reveal: the stage just narrowed, and the paint
-     is what re-rings the selected node and relights its edges. */
-  orPaint();
-  /* Only when a flight will actually follow. orOpen.reveal returns
+  /* STAYS SYNCHRONOUS, and it is the only thing down here that does.
+     The stage has just narrowed by ~490px and `meet` has already
+     re-letterboxed every star; deferring this by a frame is the
+     documented snap — the map jumps left and the flight then travels
+     back right. It costs one getScreenCTM.
+
+     Only when a flight will actually follow. orOpen.reveal returns
      without flying for a note with no position, and holding the
      picture still is only free while something is about to move it:
      at the fit, the re-letterboxing IS the desirable behaviour —
@@ -6116,8 +6161,32 @@ function orOpen(id) {
      cancelling it with nothing to absorb the difference would leave
      you cropped with only the fit button to get back. */
   if (state.xy[state.sel]) orZoom.reframe(V0);
-  orOpen.reveal(state.sel);
-  orSignal(state.sel);
+  /* ── everything the answer does not need waits a frame ──
+     The pane IS the answer to the click, and it is on screen by the
+     line above. orPaint rebuilds every ring, link, node and label, and
+     each layer is written and then READ BACK — chip placement asks the
+     svg for its screen CTM — so the browser is forced to flush style
+     and layout for the whole drawing several times over, synchronously,
+     inside the pointerup handler. None of it can paint until the
+     handler returns, so all of it was added to the wait for the pane.
+
+     Measured on a 312-note vault at a 2x device pixel ratio, pairs
+     interleaved: pointerup to the end of the blocking task 133/208/147/
+     120/130ms against 52/53/43/48/43ms. First frame roughly halved. It
+     is also the only cost here that GROWS with the vault — 63ms at 52
+     notes, 78 at 156, 134 at 312 — so it gets worse as the map gets
+     more worth having. Deleting orPaint from the open outright measures
+     no faster than deferring it, so nothing is left on the table. */
+  cancelAnimationFrame(orOpen.raf);
+  orOpen.raf = requestAnimationFrame(() => {
+    orOpen.raf = 0;
+    /* Re-read state.sel rather than closing over it: a second click
+       inside the deferred frame has already moved the selection on, and
+       painting the previous one would be a frame of the wrong note. */
+    orPaint();
+    orOpen.reveal(state.sel);
+    orSignal(state.sel);
+  });
   /* Focus lands on the pane itself, so a keyboard open reads from the
      top of the note rather than stranding you on the map. */
   if (pane) { try { pane.focus({ preventScroll: true }); } catch (e) {} }
@@ -6125,6 +6194,11 @@ function orOpen(id) {
     ? `${got.label} — ${got.n} ${got.n === 1 ? 'note' : 'notes'}.`
     : `${got.title} — ${got.label}.`);
 }
+
+/* The deferred tail of an open. Cancelled and re-armed rather than
+   queued: clicking through three notes quickly must paint the third,
+   not all three in a row. */
+orOpen.raf = 0;
 
 /* Effective category: the manual re-file is applied to the note
    itself, so this only has to survive an id the build does not know —
