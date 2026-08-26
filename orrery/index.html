@@ -495,6 +495,50 @@
    anyway. */
 #orSvg.or-flying .or-rim-n,
 #orSvg.or-flying .or-rim-c { display: none; }
+
+/* ── pointing at a folder in the card ──
+   Hovering a row in Categories previews what isolating it would show:
+   everything else falls back to the same .12 a filtered-out note
+   already uses, and that folder alone stays lit. No click, nothing
+   stored, gone when the pointer leaves.
+
+   It is one attribute on #orSvg and pure CSS from there — no repaint,
+   no JS per node. It has to be, because a hover fires far more often
+   than anything else on this screen and this app has just spent a round
+   getting main-thread work out of the interaction paths.
+
+   Seven explicit rules rather than something clever: CSS cannot compare
+   an attribute on one element with an attribute on another, and the
+   seven are CODE — CATS is fixed and nothing in this app can write an
+   eighth. A generated rule would be the same seven lines through a
+   layer of indirection.
+
+   These beat the `opacity=".12"` a dimmed node already carries because
+   that is a PRESENTATION ATTRIBUTE, and any stylesheet rule outranks
+   one. No !important needed, so a filter that is genuinely active still
+   wins on the way back out. */
+#orSvg[data-hi] #orNodes .or-node,
+#orSvg[data-hi] #orLinks path,
+#orSvg[data-hi] #orLabels { opacity: .12; }
+#orSvg[data-hi="trading"] #orNodes .or-node[data-cat="trading"],
+#orSvg[data-hi="trading"] #orLinks path[data-cat="trading"] { opacity: 1; }
+#orSvg[data-hi="growth"] #orNodes .or-node[data-cat="growth"],
+#orSvg[data-hi="growth"] #orLinks path[data-cat="growth"] { opacity: 1; }
+#orSvg[data-hi="body"] #orNodes .or-node[data-cat="body"],
+#orSvg[data-hi="body"] #orLinks path[data-cat="body"] { opacity: 1; }
+#orSvg[data-hi="craft"] #orNodes .or-node[data-cat="craft"],
+#orSvg[data-hi="craft"] #orLinks path[data-cat="craft"] { opacity: 1; }
+#orSvg[data-hi="mind"] #orNodes .or-node[data-cat="mind"],
+#orSvg[data-hi="mind"] #orLinks path[data-cat="mind"] { opacity: 1; }
+#orSvg[data-hi="world"] #orNodes .or-node[data-cat="world"],
+#orSvg[data-hi="world"] #orLinks path[data-cat="world"] { opacity: 1; }
+#orSvg[data-hi="other"] #orNodes .or-node[data-cat="other"],
+#orSvg[data-hi="other"] #orLinks path[data-cat="other"] { opacity: 1; }
+
+/* Eased rather than snapped. The pointer crosses these rows on its way
+   to anywhere else in the card, and an instant black-out on every row
+   it passes over reads as flicker rather than as an answer. */
+#orSvg[data-hi] #orNodes .or-node[data-cat] { transition: opacity .16s ease; }
 @media (prefers-reduced-motion: reduce) { #orLabels { transition: none; } }
 
 #orSvg.or-tight  .or-turn, #orSvg.or-tight  #orDustA,
@@ -4195,7 +4239,14 @@ function orPaintLinks() {
     out.push(`<path d="${d}" fill="none"`
       + ` stroke="${lit ? `var(--or-cat-${esc(catOf[a] || 'other')})` : 'var(--or-mute)'}"`
       + ` stroke-width="${sel ? 1 : .8}" opacity="${sel ? .85 : dim ? .05 : .22}"`
-      + ` data-a="${esc(a)}" data-b="${esc(b)}"/>`);
+      + ` data-a="${esc(a)}" data-b="${esc(b)}"`
+      /* Only when BOTH ends are in it — the same argument the comment
+         above makes for the selection. A link tagged because one end
+         matched would stay lit while the star it points at went grey,
+         which reads as the map failing to finish. So a folder's own web
+         shines and the lines out of it go quiet with everything else. */
+      + (catOf[a] && catOf[a] === catOf[b] ? ` data-cat="${esc(catOf[a])}"` : '')
+      + `/>`);
     /* The overlay rides the same `d`, so it must be in the same cache
        the tick rewrites — otherwise it stays where the link was when
        you opened the note and the two peel apart as the field settles. */
@@ -7875,6 +7926,53 @@ orRefile.apply = (notes) => {
       const b = e.target.closest ? e.target.closest('[data-form]') : null;
       if (b) orForm(b.getAttribute('data-form'));
     });
+
+    /* ── pointing at a folder previews isolating it ──
+       One attribute on #orSvg; the seven rules in the stylesheet do the
+       rest. No repaint and no per-node work, which is the whole reason
+       it is safe to hang off an event that fires this often.
+
+       pointerover/pointerout rather than pointerenter/leave: these
+       BUBBLE, so one pair of listeners on the container covers every
+       row and keeps covering them after orLegend rewrites its
+       innerHTML — which it does on every repaint. A per-row listener
+       would be re-attached on each rewrite or, more likely, silently
+       not be.
+
+       The relatedTarget check is what stops the flicker: pointerout
+       fires when the pointer crosses from a row onto the dot or the
+       label INSIDE it, and clearing on that would strobe the map as
+       you move along a row. Only a move that genuinely leaves the row
+       counts as leaving. */
+    const legRows = byId('orLegRows');
+    if (legRows) {
+      const svg = byId('orSvg');
+      const hi = (cat) => {
+        if (!svg) return;
+        if (cat) svg.setAttribute('data-hi', cat);
+        else svg.removeAttribute('data-hi');
+      };
+      legRows.addEventListener('pointerover', (e) => {
+        const b = e.target.closest ? e.target.closest('.or-leg[data-cat]') : null;
+        if (b) hi(b.getAttribute('data-cat'));
+      });
+      legRows.addEventListener('pointerout', (e) => {
+        const b = e.target.closest ? e.target.closest('.or-leg[data-cat]') : null;
+        if (!b) return;
+        const to = e.relatedTarget;
+        if (to && b.contains(to)) return;      /* still on the same row */
+        hi(null);
+      });
+      /* Belt and braces, and not paranoia: a pointerout can be missed
+         outright if the row is removed under the cursor, which orLegend
+         does on any repaint — a filter keystroke while the pointer
+         rests on a row would stick the whole map at .12 with no way
+         back. Leaving the card clears it whatever happened inside. */
+      const card = byId('orLegend');
+      if (card) card.addEventListener('pointerleave', () => hi(null));
+      /* And a press commits to something, so the preview is over. */
+      legRows.addEventListener('click', () => hi(null));
+    }
   });
 
   step(() => {

@@ -1457,6 +1457,63 @@ const pickHittable = async (page, ids) => {
     .map((id) => document.getElementById(id).style.translate || ''));
   ok('the pointer moves nothing', towed.every((t) => !t), towed);
 
+  /* ── pointing at a folder previews isolating it ──
+     Hover a row in Categories and that folder alone stays lit. It is
+     one attribute on #orSvg and pure CSS from there, which is what
+     makes it safe to hang off an event that fires this often — so what
+     these assert is the ATTRIBUTE and the resulting opacities, not a
+     repaint that should never happen. */
+  const legBox = await page.evaluate(() => {
+    const b = document.querySelector('.or-leg[data-cat="body"]');
+    const r = b.getBoundingClientRect();
+    return { cx: r.x + r.width / 2, cy: r.y + r.height / 2 };
+  });
+  const litState = () => page.evaluate(() => {
+    const nodes = [...document.querySelectorAll('#orNodes .or-node')];
+    const avg = (a) => a.length
+      ? +(a.reduce((s, n) => s + +getComputedStyle(n).opacity, 0) / a.length).toFixed(3) : null;
+    return {
+      hi: document.getElementById('orSvg').getAttribute('data-hi'),
+      inCat: avg(nodes.filter((n) => n.getAttribute('data-cat') === 'body')),
+      others: avg(nodes.filter((n) => n.getAttribute('data-cat') !== 'body')),
+    };
+  });
+  const beforeHover = await litState();
+  await page.mouse.move(legBox.cx, legBox.cy);
+  await page.waitForTimeout(320);
+  const hovering = await litState();
+  /* Moving WITHIN the row must not clear it. pointerout fires when the
+     pointer crosses onto the dot or the label inside the row, and
+     clearing on that strobes the whole map as you read along it. */
+  await page.mouse.move(legBox.cx + 18, legBox.cy + 3);
+  await page.waitForTimeout(220);
+  const stillHovering = await litState();
+  await page.mouse.move(4, 4);
+  await page.waitForTimeout(320);
+  const afterHover = await litState();
+
+  ok('nothing is dimmed until the pointer is on a row',
+    beforeHover.hi === null && beforeHover.others > .9, beforeHover);
+  ok('hovering a folder dims everything else and leaves that one lit',
+    hovering.hi === 'body' && hovering.inCat > .9 && hovering.others < .2, hovering);
+  ok('and moving along the row does not strobe it off',
+    stillHovering.hi === 'body' && stillHovering.others < .2, stillHovering);
+  ok('and it lets go the moment the pointer leaves',
+    afterHover.hi === null && afterHover.others > .9, afterHover);
+  /* A link is tagged with a folder only when BOTH ends are in it — the
+     same argument the selection already makes. Tagged on either end, a
+     lit line would point at a star that had gone grey. */
+  const litLinks = await page.evaluate(() => {
+    const tagged = [...document.querySelectorAll('#orLinks path[data-cat]')];
+    const catOf = orLayout.catOf || {};
+    return { n: tagged.length,
+             bothEnds: tagged.every((p) =>
+               catOf[p.getAttribute('data-a')] === p.getAttribute('data-cat')
+               && catOf[p.getAttribute('data-b')] === p.getAttribute('data-cat')) };
+  });
+  ok('and a link carries a folder only when both its ends are in it',
+    litLinks.n > 0 && litLinks.bothEnds, litLinks);
+
   /* ── the spin ──
      A button that turns the whole instrument. Three things about it are
      load-bearing and none of them are visible in a screenshot. */
