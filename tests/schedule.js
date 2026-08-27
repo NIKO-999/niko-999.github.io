@@ -1373,6 +1373,61 @@ const SAID = [
      this file — a grey that reads 8.9:1 on white is 1.4:1 on indigo,
      and a palette that reuses another palette's greys has not been
      checked, it has been guessed. */
+  /* ── your picture ──
+     A face by default, drawn from the palette rather than stored. The
+     claim being checked is that it is DERIVED: change theme and the
+     face has to change with it, or it is a copy of a token and this
+     repo has now paid for four of those. */
+  console.log('\n── your picture ──');
+  await show('list');
+  await page.click('#scMenu');
+  await page.waitForTimeout(340);
+  const pic = await page.evaluate(() => {
+    const el = document.querySelector('.pic-item .pic');
+    const cs = getComputedStyle(el);
+    return { round: cs.borderRadius,
+             marks: el.querySelectorAll('svg circle, svg path').length,
+             tile: el.querySelector('svg rect').getAttribute('fill'),
+             on: el.querySelector('svg circle').getAttribute('fill'),
+             red: getComputedStyle(document.documentElement).getPropertyValue('--red').trim() };
+  });
+  ok('your picture is round', pic.round === '50%', pic);
+  ok('and with no photo it is the face — two eyes and a mouth',
+    pic.marks === 3, pic);
+  ok('drawn in the palette’s own accent',
+    pic.tile.toLowerCase() === pic.red.toLowerCase(), pic);
+
+  /* MOVED, because the line above passes on a face painted with the
+     shipped red typed in as a literal. */
+  const faceMoved = await page.evaluate(() => {
+    document.documentElement.style.setProperty('--red', '#4FE0A8');
+    document.documentElement.style.setProperty('--on-red', '#04141A');
+    document.querySelector('.pic-item').click();
+    const el = document.querySelector('.sheet .pic svg');
+    const got = { tile: el.querySelector('rect').getAttribute('fill'),
+                  on: el.querySelector('circle').getAttribute('fill') };
+    document.documentElement.style.removeProperty('--red');
+    document.documentElement.style.removeProperty('--on-red');
+    return got;
+  });
+  ok('and it follows the palette when the palette is changed under it',
+    faceMoved.tile === '#4FE0A8' && faceMoved.on === '#04141A', faceMoved);
+
+  /* The mouth is offset, which is the whole character of it. Centred it
+     is a generic smiley — asserted on the path so a later tidy-up
+     cannot quietly symmetrise it. */
+  const mouth = await page.evaluate(() => {
+    const d = document.querySelector('.sheet .pic svg path').getAttribute('d');
+    const n = d.match(/[\d.]+/g).map(Number);
+    return { d, x0: n[0], x1: n[4], eyes: [...document.querySelectorAll('.sheet .pic svg circle')]
+      .map((c) => +c.getAttribute('cx')) };
+  });
+  ok('the mouth is offset, not centred',
+    (mouth.x0 + mouth.x1) / 2 > 55 && mouth.x1 > Math.max(...mouth.eyes), mouth);
+
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForTimeout(340);
+
   console.log('\n── themes ──');
   await show('ring');
   await page.waitForTimeout(200);

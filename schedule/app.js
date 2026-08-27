@@ -1878,6 +1878,180 @@
     });
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     YOUR PICTURE
+
+     A face by default, and a photograph over it if you choose one.
+
+     THE FACE IS DERIVED, NOT STORED. It is your accent with the colour
+     that palette already uses ON its accent drawn on top, so changing
+     theme changes your face and there is nothing to keep in step. It
+     also cannot fail a contrast check: accent-against-on-accent is the
+     exact pairing every palette here was measured on before it
+     shipped, and the worst of the thirteen is Paper's own 4.68:1.
+
+     The geometry is measured off the reference rather than remembered.
+     A first pass drawn from memory came out a generic smiley — eyes
+     half again too big and too close together, mouth twice the weight
+     and nearly centred. As fractions of a 100 box:
+
+       eyes    cx 22 and 84, cy 35, r 5
+       mouth   43 to 92, dipping to 70, stroke 4.5
+
+     THE OFFSET IS THE WHOLE CHARACTER OF IT. The mouth's left end
+     starts nearer the middle than the left eye does and its right end
+     runs past the right eye entirely, so the face reads as glancing
+     sideways rather than as a symmetrical smiley. Centre it and it
+     stops being this face.
+
+     A stroked arc with round caps, never a filled crescent: the weight
+     then scales with the tile instead of collapsing to a smear at the
+     26px a feed uses. */
+  var PIC_KEY = 'sched.pic.v1';
+  var myPic = null;
+
+  function scFace(px) {
+    var NS = 'http://www.w3.org/2000/svg';
+    var mk = function (n, a) {
+      var e = document.createElementNS(NS, n);
+      for (var k in a) if (a.hasOwnProperty(k)) e.setAttribute(k, a[k]);
+      return e;
+    };
+    var cs = getComputedStyle(document.documentElement);
+    var red = cs.getPropertyValue('--red').trim();
+    var on = cs.getPropertyValue('--on-red').trim();
+    var s2 = mk('svg', { viewBox: '0 0 100 100' });
+    s2.setAttribute('aria-hidden', 'true');
+    s2.appendChild(mk('rect', { x: 0, y: 0, width: 100, height: 100, fill: red }));
+    s2.appendChild(mk('circle', { cx: 22, cy: 35, r: 5, fill: on }));
+    s2.appendChild(mk('circle', { cx: 84, cy: 35, r: 5, fill: on }));
+    s2.appendChild(mk('path', { d: 'M43 62 Q67 78 92 60', fill: 'none', stroke: on,
+      'stroke-width': 4.5, 'stroke-linecap': 'round' }));
+    var w = scEl('span', 'pic');
+    w.style.width = px + 'px'; w.style.height = px + 'px';
+    w.appendChild(s2);
+    return w;
+  }
+
+  /* The picture as it currently stands: the photograph if there is one,
+     the face if there is not. There is no empty state and nobody is
+     nagged to add one — the face is a real answer rather than a
+     placeholder with a plus on it. */
+  function scPic(px) {
+    if (!myPic) return scFace(px);
+    var w = scEl('span', 'pic');
+    w.style.width = px + 'px'; w.style.height = px + 'px';
+    var i = document.createElement('img');
+    i.src = myPic; i.alt = '';
+    w.appendChild(i);
+    return w;
+  }
+
+  /* IndexedDB, not localStorage, and the reason is written down two
+     apps over: a picture in localStorage shares a 5MB budget with the
+     record, so the day it is too big it does not fail by itself — it
+     takes the schedule with it. The trading app keeps its chart images
+     the same way and for the same reason. */
+  function scPicDB(fn) {
+    var r = indexedDB.open('schedPic', 1);
+    r.onupgradeneeded = function () {
+      if (!r.result.objectStoreNames.contains('pic')) r.result.createObjectStore('pic');
+    };
+    r.onsuccess = function () { fn(r.result); };
+    r.onerror = function () { fn(null); };
+  }
+  function scPicLoad(done) {
+    try {
+      scPicDB(function (db) {
+        if (!db) return done();
+        var q = db.transaction('pic').objectStore('pic').get('me');
+        q.onsuccess = function () { myPic = q.result || null; done(); };
+        q.onerror = function () { done(); };
+      });
+    } catch (e) { done(); }
+  }
+  function scPicSave(v, done) {
+    myPic = v;
+    try {
+      scPicDB(function (db) {
+        if (!db) return done && done();
+        var st = db.transaction('pic', 'readwrite').objectStore('pic');
+        if (v) st.put(v, 'me'); else st.delete('me');
+        st.transaction.oncomplete = function () { done && done(); };
+      });
+    } catch (e) { done && done(); }
+  }
+
+  function scPicSheet() {
+    scSheet('Your picture', function (body) {
+      var row = scEl('div', 'pic-row');
+      row.appendChild(scPic(76));
+      /* Both, always: what you have now and what your theme gives you
+         if you take it away. A picker that shows only the current state
+         makes removing a photo feel like deleting something rather than
+         going back to a default. */
+      if (myPic) {
+        var d = scFace(76);
+        d.classList.add('is-off');
+        row.appendChild(d);
+      }
+      body.appendChild(row);
+      body.appendChild(scEl('p', 'hint', myPic
+        ? 'Yours now, and the face your theme gives you if you take it away.'
+        : 'Your theme draws this. Change palette and it changes with you.'));
+
+      var file = scEl('input', 'pic-file');
+      file.type = 'file';
+      file.accept = 'image/*';
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        scPicCrop(f, function (url) {
+          if (!url) { scToast('That image could not be read', false); return; }
+          scPicSave(url, function () { scClose(); scToast('Picture set', false); });
+        });
+      });
+      body.appendChild(file);
+
+      var acts = scEl('div', 'acts');
+      if (myPic) acts.appendChild(scBtn('off', 'Use the face', function () {
+        scPicSave(null, function () { scClose(); scToast('Back to the face', false); });
+      }));
+      acts.appendChild(scBtn('go', myPic ? 'Choose another' : 'Choose a photo',
+        function () { file.click(); }));
+      body.appendChild(acts);
+
+      body.appendChild(scEl('p', 'hint',
+        'A picture is the first thing this app would ever send anywhere, and it '
+        + 'only would once you add a friend. The face never leaves — it is drawn '
+        + 'from the palette you already picked.'));
+    });
+  }
+
+  /* Cropped square and scaled down before it is stored. A phone camera
+     hands over four megapixels; kept whole that is several megabytes
+     sitting in a database to be drawn at 26 pixels. 256 is twice what
+     the largest use needs, which is the margin a retina screen wants
+     and nothing more. */
+  function scPicCrop(file, done) {
+    var fr = new FileReader();
+    fr.onerror = function () { done(null); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { done(null); };
+      img.onload = function () {
+        var S = 256, c = document.createElement('canvas');
+        c.width = S; c.height = S;
+        var side = Math.min(img.width, img.height);
+        c.getContext('2d').drawImage(img,
+          (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+        try { done(c.toDataURL('image/jpeg', 0.82)); } catch (e) { done(null); }
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
   function scMenuSheet() {
     scSheet('Schedule', function (body) {
       var item = function (label, note, cls, fn) {
@@ -1888,14 +2062,17 @@
         body.appendChild(b);
       };
 
-      /* ── the theme row ──
-         A swatch, not a word. "Aurora" tells you nothing you can act
-         on; a disc of the ground with the accent drawn on it is the
-         choice itself, at the size a thumb needs.
+      /* Your picture, first: it is the one row in here that is about
+         you rather than about the app. */
+      var pr = scEl('button', 'menu-item pic-item');
+      pr.appendChild(scPic(38));
+      var pl = scEl('span');
+      pl.appendChild(document.createTextNode('Your picture'));
+      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your theme'));
+      pr.appendChild(pl);
+      pr.addEventListener('click', scPicSheet);
+      body.appendChild(pr);
 
-         It applies on press and stays open, because you are comparing
-         — a picker that closes on the first tap makes you reopen it
-         six times to see six themes. */
       /* ── the theme row ──
          A swatch, not a word. "Aurora" tells you nothing you can act
          on; a disc of the ground with the accent drawn on it is the
@@ -2064,6 +2241,11 @@
      the tally can be the view you left it on, and it opening empty and
      filling in a frame later reads as having lost the day. */
   scTickLoad();
+
+  /* The picture is read asynchronously and nothing waits for it: the
+     face is a complete answer on its own, so a photograph arriving a
+     frame later replaces a real thing rather than filling a hole. */
+  scPicLoad(function () {});
 
   /* Before the first paint, so the app opens in its theme rather than
      flashing white on the way to it. scTheme falls back to Paper on a

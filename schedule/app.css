@@ -245,6 +245,33 @@ body {
 }
 .caption:empty { display: none; }
 
+/* ── your picture ──
+   ROUND. It was a rounded square for one round of options, matching
+   the reference it came from, and a circle is what a person's picture
+   is in every list that has ever had one. The face's geometry survives
+   the crop: its furthest mark is the mouth's right end at 43 units
+   from centre in a 50-unit radius, so nothing touches the edge.
+
+   overflow:hidden does the cropping for a photograph as well as for
+   the drawing, so one shape holds both and there is no second rule to
+   keep in step. */
+.pic {
+  display: block; flex: none; overflow: hidden;
+  border-radius: 50%;
+  background: var(--tick-off);
+}
+.pic svg, .pic img { display: block; width: 100%; height: 100%; }
+.pic img { object-fit: cover; }
+.pic.is-off { opacity: .45; }
+
+.pic-row { display: flex; align-items: center; gap: 20px; margin: 6px 0 2px; }
+.pic-item { display: flex; align-items: center; gap: 13px; }
+/* The file input is driven by the button beside it. Hidden with
+   position rather than display:none, because a display:none input
+   cannot be opened by a click in every browser that matters. */
+.pic-file { position: absolute; width: 1px; height: 1px; opacity: 0;
+  pointer-events: none; }
+
 /* ── the tally ────────────────────────────────────────────
    Five things a day, as cards. Two up, and where you have logged a
    photograph the photograph IS the card.
