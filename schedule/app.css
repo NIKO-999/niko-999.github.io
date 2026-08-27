@@ -407,6 +407,16 @@ body {
 .fr-code { margin-top: 6px; font-size: 27px; font-weight: 800;
   letter-spacing: .16em; font-variant-numeric: tabular-nums; }
 
+/* Yours and the button that copies it, on one line. `Copy` is next to
+   the thing it copies rather than down in the sheet's action row,
+   because the action row below belongs to adding THEM — two buttons
+   there would be two answers to the question "what does this sheet
+   do". */
+.fr-swap { display: flex; align-items: center; gap: 12px; }
+.fr-swap .fr-code { flex: 1; min-width: 0; margin-top: 0;
+  font-size: 24px; letter-spacing: .13em; }
+.fr-swap .btn { flex: none; padding: 11px 18px; }
+
 /* ── a log ──
    Photograph, name, a line. The picture is square and the card has no
    surface of its own: a feed of bordered boxes on a washed page is a
@@ -551,7 +561,22 @@ body {
    card apart. Same row, same kind of object, different spacing. */
 .ty-card.wide { grid-column: 1 / -1; aspect-ratio: auto; min-height: 128px; }
 
-.ty-n { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+/* The glyph, top-left, where the name used to be. It is not a
+   decoration in a spare corner — it is what the card is called, so it
+   sits where a title sits and the value still leads from below.
+
+   WIDTH AND HEIGHT ARE ON THE RULE, not on the element. An inline
+   <svg> with neither falls back to 300x150 and fills the card, which
+   is what the first draft of this did the moment the sizing moved off
+   the markup and into a sheet. */
+.ty-i {
+  position: absolute; top: 14px; left: 14px;
+  display: block; width: 27px; height: 27px;
+  fill: none; stroke: currentColor; stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: .5;
+}
+.ty-card.on .ty-i { opacity: .85 }
 .ty-v {
   margin-top: auto; font-size: 26px; font-weight: 700; line-height: 1;
   letter-spacing: -.03em; font-variant-numeric: tabular-nums;
