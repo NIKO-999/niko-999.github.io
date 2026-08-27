@@ -710,6 +710,7 @@
        fault that only appears if you sit and look at the screen. */
     if (view === 'ring') { scPaintRing(); scPaintRingList(); return; }
     if (view === 'tally') { scPaintTally(); return; }
+    if (view === 'friends') { scPaintFriends(); return; }
 
     var today = new Date().getDay(), now = scNowMin();
     var rows = document.querySelectorAll('.day.is-today .row');
@@ -1146,6 +1147,7 @@
        to be told to read the tokens again. The rail is pure CSS and has
        already changed by the time this line runs. */
     if (view === 'ring') scPaintRing();
+    if (typeof scPaintTabFace === 'function') scPaintTabFace();
     if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
   }
 
@@ -1444,6 +1446,93 @@
     });
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     FRIENDS
+
+     Nothing here reaches the network, because there is nothing to
+     reach yet — and the screen is built so that stays visible rather
+     than being papered over. You are on the leaderboard from the first
+     day out of your own ticks, and the two halves that need a server
+     say so in a sentence instead of miming at it with a spinner and a
+     fake empty state.
+
+     WHEN THE SERVER EXISTS, exactly two things change: scFriendsPeers
+     returns other people instead of nothing, and scFeedItems returns
+     entries. Everything else on this screen already works.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Your own thirty days, counted the way the board will count
+     everyone's: ticks over a rolling window, never all-time — all-time
+     means whoever started first wins permanently and nobody new can
+     catch up. */
+  function scTicksIn(days) {
+    var n = 0;
+    for (var i = 0; i < days; i++) {
+      var d = tickLog[scDayBack(i)];
+      if (d) n += Object.keys(d).length;
+    }
+    return n;
+  }
+
+  /* The seam the server plugs into. Empty until there is one, and
+     deliberately a function rather than an array so the shape of the
+     call site is already right. */
+  function scFriendsPeers() { return []; }
+  function scFeedItems() { return []; }
+
+  function scPaintFriends() {
+    var me = { name: 'You', me: true, ticks: scTicksIn(30), streak: scStreak() };
+    var all = [me].concat(scFriendsPeers())
+      .sort(function (a, b) { return b.ticks - a.ticks; });
+
+    var list = $('scFriendList');
+    list.textContent = '';
+    all.forEach(function (p, i) {
+      var li = scEl('li', 'fr-row' + (p.me ? ' is-me' : ''));
+      li.appendChild(scEl('span', 'fr-rank', String(i + 1)));
+      li.appendChild(scPic(38));
+      var n = scEl('span');
+      var nm = scEl('span', 'fr-n', p.name);
+      /* The crown, on whoever leads, in their own accent. With one row
+         it is yours — which is not a trophy, it is the mark saying who
+         is top, and it would be strange for it to appear only once
+         somebody else arrives. */
+      if (i === 0) {
+        var c = scEl('span', 'fr-crown');
+        c.innerHTML = '<svg viewBox="0 0 24 20" aria-hidden="true">'
+          + '<path d="M2 6l4.6 3.6L12 2l5.4 7.6L22 6l-1.8 11H3.8L2 6z"/></svg>';
+        var w = scEl('span', 'fr-nw');
+        w.appendChild(nm); w.appendChild(c);
+        n.appendChild(w);
+      } else n.appendChild(nm);
+      n.appendChild(scEl('span', 'fr-s',
+        p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
+      li.appendChild(n);
+      li.appendChild(scEl('span', 'fr-t', String(p.ticks)));
+      list.appendChild(li);
+    });
+
+    var add = $('scFriendAdd');
+    add.textContent = '';
+    add.appendChild(scEl('p', 'fr-note',
+      all.length > 1
+        ? 'Thirty days, rolling. Tap a name to see their logs.'
+        : 'Nobody added yet. Adding a friend needs a server — this app has '
+          + 'never had one, and turning it on is the moment it stops being '
+          + 'true that nothing leaves this browser. Not built yet.'));
+
+    $('scFeedK').hidden = false;
+    var feed = $('scFeed');
+    feed.textContent = '';
+    var items = scFeedItems();
+    if (!items.length) {
+      feed.appendChild(scEl('p', 'fr-note',
+        'Nothing logged. A log is a photograph and a line about one of the '
+        + 'five — yours and your friends\u2019 together. It needs somewhere to '
+        + 'put the picture, so it lands with the rest of this.'));
+    }
+  }
+
   /* Which view is up, remembered. Its own key: the schedule is the
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
@@ -1455,40 +1544,39 @@
      be wrong — the orrery learned that on a row of five — and these are
      three ways of looking at the same day rather than three places to
      go, which is exactly what a cycle is for. */
-  var VIEWS = ['list', 'ring', 'tally'];
+  var VIEWS = ['list', 'ring', 'tally', 'friends'];
 
   function scSetView(v, save) {
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var ring = view === 'ring', tal = view === 'tally';
+    var ring = view === 'ring', tal = view === 'tally', fr = view === 'friends';
 
     $('scRing').hidden = !ring;
     $('scTally').hidden = !tal;
-    $('scRail').hidden = ring || tal;
+    $('scFriends').hidden = !fr;
+    $('scRail').hidden = ring || tal || fr;
     /* The ring's own middle says the state and the figure, and the
        tally has a hero of its own. Leaving the week's above either says
        it twice, and the louder of the two is the one that is not the
        point of the screen. */
-    $('scLive').hidden = ring || tal;
-    $('scLiveOf').hidden = ring || tal;
-    $('scEmpty').hidden = ring || tal || state.items.length > 0;
+    $('scLive').hidden = ring || tal || fr;
+    $('scLiveOf').hidden = ring || tal || fr;
+    $('scEmpty').hidden = ring || tal || fr || state.items.length > 0;
 
-    /* The icon shows what you would GET, not where you are — a control
-       that draws its own state reads as a status light rather than a
-       switch. */
-    var next = VIEWS[(VIEWS.indexOf(view) + 1) % VIEWS.length];
-    $('scView').setAttribute('aria-label',
-      next === 'ring' ? 'Show the ring'
-        : next === 'tally' ? 'Show today’s five' : 'Show the week');
-    $('scViewIcon').innerHTML = next === 'ring'
-      ? '<circle cx="12" cy="12" r="8"/><path d="M12 4v5"/>'
-      : next === 'tally'
-        ? '<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/>'
-          + '<rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/>'
-        : '<path d="M4 7h16M4 12h16M4 17h10"/>';
+    /* The tab you are on, lit. The old single button had to draw the
+       NEXT view rather than the current one — a control that shows its
+       own state reads as a status light — and the cost of that was
+       that nothing on screen ever said where you were. Four tabs say
+       both, and cost the same strip. */
+    [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
+      var on = t.dataset.view === view;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-current', on ? 'page' : 'false');
+    });
 
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
     if (ring) { scPaintRing(); scPaintRingList(); }
     else if (tal) scPaintTally();
+    else if (fr) scPaintFriends();
     else scLive();
   }
 
@@ -1542,7 +1630,7 @@
     /* Back where it came from, unless that row has just been deleted
        out from under it — then the bar is the honest place to land. */
     if (cameFrom && document.contains(cameFrom)) cameFrom.focus();
-    else $('scMic').focus();
+    else $('scAdd').focus();
     cameFrom = null;
   }
 
@@ -1584,7 +1672,10 @@
   function scStopVoice() {
     clearTimeout(recTimer);
     if (rec) { try { rec.stop(); } catch (e) {} rec = null; }
-    $('scMic').classList.remove('is-live');
+    /* The bar's microphone is gone, so the live state is on the sheet's
+       own button now — and it may not be on screen when this runs. */
+    var s2 = document.querySelector('.say');
+    if (s2) s2.classList.remove('is-live');
   }
 
   function scVoiceSheet(auto) {
@@ -1611,6 +1702,32 @@
           'or type it. <em>“Walk weekdays 7:45 to 8:30”</em>';
 
       body.appendChild(heard);
+
+      /* ── the speak button, and it is not optional ──
+         Speech used to start one way only: the bar's microphone called
+         this sheet with auto set. With that control gone there would be
+         NO route to it at all — the sheet would silently become a text
+         box, and the feature this app was built around would still be
+         in the code, unreachable. It lives here now. */
+      if (SR) {
+        var say = scEl('button', 'say');
+        var mk = function (live) {
+          say.textContent = '';
+          say.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M12 3a3 3 0 0 1 3 3v6a3 3 0 0 1-6 0V6a3 3 0 0 1 3-3z"/>'
+            + '<path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg>';
+          say.appendChild(document.createTextNode(live ? 'Listening…' : 'Say it'));
+          say.classList.toggle('is-live', !!live);
+        };
+        mk(false);
+        say.addEventListener('click', function () {
+          if (rec) { scStopVoice(); mk(false); return; }
+          listen();
+          mk(true);
+        });
+        body.appendChild(say);
+      }
+
       body.appendChild(field);
       body.appendChild(preview);
       body.appendChild(hint);
@@ -1671,75 +1788,75 @@
         if (ev.key === 'Enter') { ev.preventDefault(); commit(); }
       });
 
-      /* No speech to report yet, so no box for it — the hint under the
-         field already says what to do, and saying it twice in two
-         different shapes reads as two different instructions. */
-      if (!(SR && auto)) {
-        heard.hidden = true;
-        setTimeout(function () { field.focus(); }, 340);
-        return;
+      /* ── listening, as a function ──
+         It was inline and reachable one way only: scVoiceSheet(true),
+         called by the bar's microphone. With that control gone the
+         whole block would have been dead code and the sheet would have
+         become a text box, silently. It is a function now, called from
+         the auto path and from the sheet's own speak button. */
+      function listen() {
+        heard.hidden = false;
+        heard.textContent = 'Go ahead…';
+        var finalText = '';
+
+        rec = new SR();
+        rec.lang = navigator.language || 'en-US';
+        rec.interimResults = true;
+        rec.continuous = false;
+        rec.maxAlternatives = 1;
+
+        rec.onresult = function (ev) {
+          var fin = '', part = '';
+          for (var i = 0; i < ev.results.length; i++) {
+            var r = ev.results[i];
+            if (r.isFinal) fin += r[0].transcript;
+            else part += r[0].transcript;
+          }
+          finalText = fin;
+          heard.hidden = false;
+          heard.textContent = fin;
+          if (part) heard.appendChild(scEl('span', 'partial', (fin ? ' ' : '') + part));
+          if (fin) { field.value = fin.trim(); show(field.value); }
+        };
+
+        rec.onerror = function (ev) {
+          var why = ev.error === 'not-allowed' || ev.error === 'service-not-allowed'
+            ? 'No microphone permission. Allow it in your browser settings, or type it below.'
+            : ev.error === 'no-speech' ? 'Did not catch anything. Try again, or type it below.'
+            : ev.error === 'network' ? 'Speech needs a connection. Type it below and it works offline.'
+            : 'Speech stopped. Type it below.';
+          heard.hidden = false;
+          heard.textContent = why;
+          $('scSheetTitle').textContent = 'Say it, or type it';
+          scStopVoice();
+          setTimeout(function () { field.focus(); }, 60);
+        };
+
+        rec.onend = function () {
+          clearTimeout(recTimer);
+          rec = null;
+          var sb = document.querySelector('.say');
+          if (sb) sb.classList.remove('is-live');
+          $('scSheetTitle').textContent = finalText.trim() ? 'Heard' : 'Say it, or type it';
+          if (finalText.trim()) { field.value = finalText.trim(); show(field.value); }
+          else if (!heard.hidden && !/microphone|connection|catch/.test(heard.textContent)) {
+            heard.textContent = 'Nothing heard. Type it below, or press Say it again.';
+          }
+        };
+
+        try {
+          rec.start();
+          /* Some browsers never fire onend when nothing is said at all. */
+          recTimer = setTimeout(scStopVoice, 15000);
+        } catch (e) {
+          heard.textContent = 'Could not start the microphone. Type it below.';
+          rec = null;
+        }
       }
 
-      /* ── listening ── */
-      heard.textContent = 'Go ahead…';
-      var finalText = '';
-
-      rec = new SR();
-      rec.lang = navigator.language || 'en-US';
-      rec.interimResults = true;
-      rec.continuous = false;
-      rec.maxAlternatives = 1;
-
-      rec.onresult = function (ev) {
-        var fin = '', part = '';
-        for (var i = 0; i < ev.results.length; i++) {
-          var r = ev.results[i];
-          if (r.isFinal) fin += r[0].transcript;
-          else part += r[0].transcript;
-        }
-        finalText = fin;
-        heard.hidden = false;
-        heard.textContent = fin;
-        if (part) {
-          var p = scEl('span', 'partial', (fin ? ' ' : '') + part);
-          heard.appendChild(p);
-        }
-        if (fin) { field.value = fin.trim(); show(field.value); }
-      };
-
-      rec.onerror = function (ev) {
-        var why = ev.error === 'not-allowed' || ev.error === 'service-not-allowed'
-          ? 'No microphone permission. Allow it in your browser settings, or type it below.'
-          : ev.error === 'no-speech' ? 'Did not catch anything. Try again, or type it below.'
-          : ev.error === 'network' ? 'Speech needs a connection. Type it below and it works offline.'
-          : 'Speech stopped. Type it below.';
-        heard.hidden = false;
-        heard.textContent = why;
-        $('scSheetTitle').textContent = 'Say it, or type it';
-        scStopVoice();
-        setTimeout(function () { field.focus(); }, 60);
-      };
-
-      rec.onend = function () {
-        $('scMic').classList.remove('is-live');
-        clearTimeout(recTimer);
-        rec = null;
-        $('scSheetTitle').textContent = finalText.trim() ? 'Heard' : 'Say it, or type it';
-        if (finalText.trim()) { field.value = finalText.trim(); show(field.value); }
-        else if (!heard.hidden && !/microphone|connection|catch/.test(heard.textContent)) {
-          heard.textContent = 'Nothing heard. Type it below, or press the microphone again.';
-        }
-      };
-
-      try {
-        rec.start();
-        $('scMic').classList.add('is-live');
-        /* Some browsers never fire onend when nothing is said at all. */
-        recTimer = setTimeout(scStopVoice, 15000);
-      } catch (e) {
-        heard.textContent = 'Could not start the microphone. Type it below.';
-        rec = null;
-      }
+      if (SR && auto) { listen(); return; }
+      heard.hidden = true;
+      setTimeout(function () { field.focus(); }, 340);
     });
   }
 
@@ -2008,14 +2125,18 @@
         if (!f) return;
         scPicCrop(f, function (url) {
           if (!url) { scToast('That image could not be read', false); return; }
-          scPicSave(url, function () { scClose(); scToast('Picture set', false); });
+          scPicSave(url, function () {
+          scClose(); scPaintTabFace(); scToast('Picture set', false);
+        });
         });
       });
       body.appendChild(file);
 
       var acts = scEl('div', 'acts');
       if (myPic) acts.appendChild(scBtn('off', 'Use the face', function () {
-        scPicSave(null, function () { scClose(); scToast('Back to the face', false); });
+        scPicSave(null, function () {
+          scClose(); scPaintTabFace(); scToast('Back to the face', false);
+        });
       }));
       acts.appendChild(scBtn('go', myPic ? 'Choose another' : 'Choose a photo',
         function () { file.click(); }));
@@ -2245,7 +2366,7 @@
   /* The picture is read asynchronously and nothing waits for it: the
      face is a complete answer on its own, so a photograph arriving a
      frame later replaces a real thing rather than filling a hole. */
-  scPicLoad(function () {});
+  scPicLoad(function () { scPaintTabFace(); });
 
   /* Before the first paint, so the app opens in its theme rather than
      flashing white on the way to it. scTheme falls back to Paper on a
@@ -2259,16 +2380,32 @@
   scRender();
   scSetView(view, false);
 
-  $('scView').addEventListener('click', function () {
-    scSetView(VIEWS[(VIEWS.indexOf(view) + 1) % VIEWS.length], true);
+  [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
+    t.addEventListener('click', function () { scSetView(t.dataset.view, true); });
   });
+  $('scTabYou').addEventListener('click', scMenuSheet);
 
-  $('scMic').addEventListener('click', function () {
+  /* The face in the You tab is redrawn whenever the palette moves,
+     because it is derived from it — a tab holding last theme's face is
+     the one place the derivation would be visible as a bug. */
+  function scPaintTabFace() {
+    var f = $('scTabFace');
+    if (!f) return;
+    f.textContent = '';
+    var p2 = scPic(21);
+    while (p2.firstChild) f.appendChild(p2.firstChild);
+  }
+  scPaintTabFace();
+
+  /* Add opens the sheet that takes a sentence spoken OR typed. It does
+     not auto-listen: the microphone used to be a separate control, so
+     pressing it WAS the decision to speak. This one is the general
+     "add" and starting the microphone on every press would ask for a
+     permission prompt from somebody who meant to type. */
+  $('scAdd').addEventListener('click', function () {
     if (rec) { scStopVoice(); return; }
-    scVoiceSheet(true);
+    scVoiceSheet(false);
   });
-  $('scAdd').addEventListener('click', function () { scEditSheet(null); });
-  $('scMenu').addEventListener('click', scMenuSheet);
   $('scScrim').addEventListener('click', scClose);
 
   $('scTitle').addEventListener('click', function () {

@@ -284,7 +284,7 @@ const SAID = [
 
   /* ── the sentence ── */
   console.log('\n── the sentence ──');
-  await page.click('#scMic');
+  await page.click('#scAdd');
   await page.waitForTimeout(120);
 
   for (const [said, want] of SAID) {
@@ -348,7 +348,7 @@ const SAID = [
   /* Work is on five of the seven days, so one sentence has to take all
      five — a delete that stopped at the first match would look like it
      had worked. */
-  await page.click('#scMic');
+  await page.click('#scAdd');
   await page.waitForTimeout(120);
   await page.fill('#scSheetBody .field', 'delete Work');
   await page.waitForTimeout(60);
@@ -759,95 +759,108 @@ const SAID = [
      shipped were a ring drawn the wrong way round and a mark that was
      not a unit of anything, and neither shows up in a screenshot you
      are not looking hard at. */
-  /* ── the bar ──
-     It is a bar, not four boxes standing on the page. Each ghost used to
-     be a 1px --ink outline on --paper, so the foot of the screen was
-     five separate objects floating over the gradient. What is asserted
-     is the property, not the styling: an icon sitting ON the surface has
-     no border and no fill of its own, and the microphone is the only
-     control that is a block. */
-  console.log('\n── the bar ──');
-  const bar = await page.evaluate(() => {
-    const box = (el) => {
-      const s = getComputedStyle(el);
-      return { bw: parseFloat(s.borderTopWidth) + parseFloat(s.borderLeftWidth),
-               bg: s.backgroundColor, w: Math.round(el.getBoundingClientRect().width) };
-    };
-    return { ghosts: [...document.querySelectorAll('.ghost')].map(box),
-             mic: box(document.querySelector('.mic')),
-             spread: getComputedStyle(document.querySelector('.bar')).justifyContent };
-  });
-  const clear = (b) => b.bw === 0 && /rgba\(0, 0, 0, 0\)|transparent/.test(b.bg);
-  ok('every ghost is an icon on the bar, not a box on the page',
-    bar.ghosts.length === 3 && bar.ghosts.every(clear), bar.ghosts);
-  ok('and the microphone is the one control that is still a block',
-    !clear(bar.mic) && bar.mic.w >= 50, bar.mic);
-
-  /* Every control INSIDE the block. This is the fault the floating bar
-     can have that the full-width one could not: a button whose box
-     reaches past the block's rounded corner takes in page pixels from
-     outside it, which measured 4.6:1 in the round that picked this —
-     the lowest of every treatment that passed. It is asserted as
-     containment rather than as a padding value, so the next change to
-     the mic's size cannot quietly reintroduce it. */
-  const inside = await page.evaluate(() => {
-    const bar = document.querySelector('.bar');
-    const cs = getComputedStyle(bar);
-    const b = bar.getBoundingClientRect();
-    /* The block is the ::before, so its box is the bar's padding box
-       minus the insets the pseudo-element is given. Read it back off
-       the computed style rather than repeating the numbers here. */
-    const p2 = getComputedStyle(bar, '::before');
-    const box = { l: b.left + parseFloat(p2.left || 12),
-                  r: b.right - parseFloat(p2.right || 12),
-                  t: b.top + parseFloat(p2.top || 0),
-                  bo: b.bottom - parseFloat(p2.bottom || 0) };
-    return [...bar.querySelectorAll('button')].map((el) => {
-      const r = el.getBoundingClientRect();
-      return { id: el.id,
-               out: +(Math.max(box.l - r.left, r.right - box.r,
-                               box.t - r.top, r.bottom - box.bo)).toFixed(1) };
-    });
-  });
-  ok('every control sits inside the block, with room to spare',
-    inside.every((c) => c.out <= -3), inside);
-  ok('the controls reach the page’s own edges', bar.spread === 'space-between', bar);
-
-  /* THE VIEW ICON IS A RING, AND IT HAS TO STAY ONE. `.ghost svg circle`
-     filled every circle on the bar so it could fill the settings dots —
-     and the view control's glyph is a ring with a hand on it, so it drew
-     a solid blob. The whole design of that button is that it shows what
-     you would GET rather than where you are, and it was showing nothing.
-     Read off the composited style, and both halves are asserted: the
-     ring hollow, the dots filled. */
-  const glyphs = await page.evaluate(() => ({
-    ring: getComputedStyle(document.querySelector('#scViewIcon circle')).fill,
-    dots: getComputedStyle(document.querySelector('#scMenu svg circle')).fill,
-    ink: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
-  }));
-  ok('the view icon’s ring is hollow', glyphs.ring === 'none', glyphs);
-  ok('and the settings dots are still filled', glyphs.dots !== 'none', glyphs);
-
-  /* The view button cycles three stops now, so "click twice to leave
-     and come back" is no longer a round trip — it lands on the tally.
-     Drive the real control until the view asked for is up, rather than
-     counting presses: a test that counts presses has to be re-counted
-     every time a stop is added, and the one time it is not, it silently
+  /* Each view is its own labelled tab now, so a view is asked for by
+     name rather than reached by pressing a cycling button until it
+     turns up. A test that counts presses has to be re-counted every
+     time a stop is added, and the one time it is not, it silently
      measures the wrong screen. */
   const show = async (v) => {
-    for (let i = 0; i < 4; i++) {
+    for (let i = 0; i < 3; i++) {
       const at = await page.evaluate(() => ({
         ring: !document.getElementById('scRing').hidden,
         tally: !document.getElementById('scTally').hidden,
+        friends: !document.getElementById('scFriends').hidden,
         rail: !document.getElementById('scRail').hidden,
       }));
       if ((v === 'ring' && at.ring) || (v === 'tally' && at.tally)
-          || (v === 'list' && at.rail)) return;
-      await page.evaluate(() => document.getElementById('scView').click());
+          || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
+      await page.evaluate((want) => {
+        const t = document.querySelector('.tab[data-view="' + want + '"]');
+        if (t) t.click();
+      }, v);
       await page.waitForTimeout(180);
     }
     throw new Error('could not reach view ' + v);
   };
+
+  /* ── the bar ──
+     Four labelled stops in a glass pill, and the one control that ADDS
+     as its own circle beside it. What is asserted is the property, not
+     the styling: the pill is translucent and blurred, the tabs carry no
+     fill of their own, and the add button is the only filled thing. */
+  console.log('\n── the bar ──');
+  const bar = await page.evaluate(() => {
+    const g = (el) => { const s2 = getComputedStyle(el);
+      return { bw: parseFloat(s2.borderTopWidth) + parseFloat(s2.borderLeftWidth),
+               bg: s2.backgroundColor, r: s2.borderRadius,
+               w: Math.round(el.getBoundingClientRect().width) }; };
+    const pill = getComputedStyle(document.querySelector('.tabs'));
+    return { tabs: [...document.querySelectorAll('.tab')].map(g),
+             prime: g(document.querySelector('.prime')),
+             blur: pill.backdropFilter || pill.webkitBackdropFilter,
+             tint: pill.backgroundColor };
+  });
+  const clear = (b2) => b2.bw === 0 && /rgba\(0, 0, 0, 0\)|transparent/.test(b2.bg);
+  /* EXACTLY ONE tab carries a fill, and it is the one you are on. The
+     first version of this asserted that none of them did and failed on
+     the lit tab — which was the assertion being wrong rather than the
+     bar. The lozenge is the whole point: at 10px a label that only
+     shifts grey is a difference you have to go looking for. */
+  ok('exactly one tab is lit, and the rest carry no fill of their own',
+    bar.tabs.filter(clear).length === bar.tabs.length - 1, bar.tabs);
+  ok('the add button is the one filled control, and it is round',
+    !clear(bar.prime) && /50%/.test(bar.prime.r) && bar.prime.w >= 52, bar.prime);
+
+  /* THE PILL IS GLASS, and both halves of that are checked. A blur with
+     no tint puts row text straight behind a 10px label; a tint with no
+     blur is just a translucent bar and does the same. It needs both. */
+  ok('the pill is blurred', /blur\(\d/.test(bar.blur || ''), bar);
+  ok('and tinted, not merely transparent',
+    /rgba?\(|color\(/.test(bar.tint) && !/rgba\(0, 0, 0, 0\)/.test(bar.tint), bar);
+
+  /* And the labels survive a row passing underneath, which is the only
+     state a fixed bar is about. Swept rather than sampled once: one
+     scroll offset misses the row that breaks it by four pixels. */
+  const swept = await (async () => {
+    let low = 99, at = 0;
+    for (let y = 0; y <= 200; y += 25) {
+      await page.evaluate((v) => window.scrollTo(0, v), y);
+      await page.waitForTimeout(60);
+      const png = PNG.sync.read(await page.screenshot());
+      const px = (x, yy) => { const i = (png.width * Math.round(yy * dpr)
+        + Math.round(x * dpr)) << 2; return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      for (const el of await page.$$('.tab span:last-child')) {
+        const b2 = await el.boundingBox(); if (!b2) continue;
+        const col = (await el.evaluate((e) => getComputedStyle(e).color))
+          .match(/[\d.]+/g).slice(0, 3).map(Number);
+        const near = (q) => Math.abs(q[0] - col[0]) + Math.abs(q[1] - col[1])
+                          + Math.abs(q[2] - col[2]) < 110;
+        for (let x = 2; x < b2.width - 2; x += 3) {
+          for (let yy = 1; yy < b2.height - 1; yy += 1) {
+            let ok2 = true;
+            for (let d = -2; d <= 2 && ok2; d++)
+              if (near(px(b2.x + x + d, b2.y + yy)) || near(px(b2.x + x, b2.y + yy + d))) ok2 = false;
+            if (!ok2) continue;
+            const r = ratio(col, px(b2.x + x, b2.y + yy));
+            if (r < low) { low = r; at = y; }
+          }
+        }
+      }
+    }
+    await page.evaluate(() => window.scrollTo(0, 0));
+    return { low: +low.toFixed(2), at };
+  })();
+  ok(`a label clears 4.5:1 with a row behind it (worst ${swept.low}:1 at ${swept.at}px)`,
+    swept.low >= 4.5, swept);
+
+  /* THE RING TAB'S ICON IS A RING. A rule filling every circle on the
+     bar so the settings dots would be solid used to fill this one too,
+     and the control drew a blob. The dots are in the sheet now, so this
+     is the only circle left out here — and it must stay hollow. */
+  const glyphs = await page.evaluate(() => ({
+    ring: getComputedStyle(document.querySelector('#scTabRing circle')).fill,
+  }));
+  ok('the ring tab’s icon is hollow', glyphs.ring === 'none', glyphs);
 
   console.log('\n── the ring ──');
   await show('ring');
@@ -1052,22 +1065,26 @@ const SAID = [
   ok('between blocks the ring counts the wait, not nothing',
     gap.kick === 'Until' && gap.n > 4 && gap.lit > 0 && gap.lit < gap.n, gap);
 
-  /* The cycle, asserted as a cycle. It used to be "click once and the
-     rail is back", which was true of two stops and quietly wrong of
-     three — the press now lands on the tally, and an assertion that
-     names the destination has to name the right one. */
-  const cycle = [];
-  for (let i = 0; i < 4; i++) {
-    cycle.push(await page.evaluate(() => {
-      const at = document.getElementById('scRing').hidden
-        ? (document.getElementById('scTally').hidden ? 'list' : 'tally') : 'ring';
-      document.getElementById('scView').click();
-      return at;
-    }));
-    await page.waitForTimeout(170);
-  }
-  ok('the one button cycles week → ring → tally and round again',
-    cycle.join(' ') === 'ring tally list ring', cycle);
+  /* ── the tabs ──
+     It was one button cycling four stops, and the assertion here used
+     to be about the cycle's ORDER. There is no cycle: each view is its
+     own labelled tab and the one you are on is lit, which is the thing
+     the cycling button could never do — its icon had to draw the NEXT
+     view, so nothing on screen ever said where you were. */
+  const tabs = await page.evaluate(() => {
+    const out = [];
+    for (const t of document.querySelectorAll('.tab[data-view]')) {
+      t.click();
+      out.push({ want: t.dataset.view,
+                 lit: [...document.querySelectorAll('.tab.on')].map((x) => x.dataset.view) });
+    }
+    return out;
+  });
+  ok('every view has its own tab and lights only that one',
+    tabs.length === 4 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
+  ok('and each one is labelled',
+    await page.$$eval('.tab span:last-child',
+      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Ring Today Friends');
   await show('ring');
 
   /* ── the ring takes its colour from the tokens ──
@@ -1319,29 +1336,31 @@ const SAID = [
   });
   ok('a day three back is outside the window', shut.closed !== shut.open, shut);
 
-  /* ── the rounding rule, and its one exception ──
-     The tally's cards are the only rounded thing in this app. That is
-     written down in app.css and it is worth measuring, because an
-     exception nothing checks is just a rule that stopped being true:
-     the next rounded surface would inherit this one's permission
-     silently. Every other box on this screen stays square. */
+  /* ── the rounding rule, and the things it lets through ──
+     Rounded corners are the exception in this app, and the exceptions
+     are named in app.css. Worth measuring, because an exception nothing
+     checks is just a rule that stopped being true — the next rounded
+     surface would inherit these ones' permission silently. Everything
+     not on the list stays square. */
   const round = await page.evaluate(() => {
     const r = (el) => parseFloat(getComputedStyle(el).borderTopLeftRadius);
-    /* The exceptions are named, and everything else is held square. */
+    const q = (sel) => document.querySelector(sel);
     const others = ['.row', '.day-card', '.sheet', '.btn', '.field',
-                    '.ghost', '.poster', '.toast', '.day-name']
-      .map((sel) => { const e = document.querySelector(sel); return e ? [sel, r(e)] : null; })
+                    '.poster', '.toast', '.day-name']
+      .map((sel) => { const e = q(sel); return e ? [sel, r(e)] : null; })
       .filter(Boolean).filter(([, v]) => v > 0);
     return { cards: [...document.querySelectorAll('.ty-card')].map(r),
-             block: parseFloat(getComputedStyle(document.querySelector('.bar'), '::before')
-                      .borderTopLeftRadius),
-             mic: r(document.querySelector('.mic')),
+             pill: r(q('.tabs')), tab: r(q('.tab')),
+             prime: getComputedStyle(q('.prime')).borderRadius,
+             face: getComputedStyle(q('.tab-face')).borderRadius,
              others };
   });
-  ok('the tally’s cards are rounded, and so is the bar’s block',
+  ok('the named exceptions are rounded — the tally’s cards, the bar’s pill and its tabs',
     round.cards.length === 5 && round.cards.every((v) => v >= 10)
-    && round.block >= 10 && round.mic > 0, round);
-  ok('and nothing else in the app is',
+    && round.pill >= 20 && round.tab >= 15, round);
+  ok('and the two circles are circles — the add button and your picture',
+    /50%/.test(round.prime) && /50%/.test(round.face), round);
+  ok('and nothing else in the app is rounded at all',
     round.others.length === 0, round.others);
 
   /* Put the week back, and clear what this section wrote. Everything
@@ -1380,7 +1399,7 @@ const SAID = [
      repo has now paid for four of those. */
   console.log('\n── your picture ──');
   await show('list');
-  await page.click('#scMenu');
+  await page.click('#scTabYou');
   await page.waitForTimeout(340);
   const pic = await page.evaluate(() => {
     const el = document.querySelector('.pic-item .pic');
@@ -1434,7 +1453,7 @@ const SAID = [
 
   const IDS = ['paper', 'blush', 'slate', 'linen', 'mist', 'bloom', 'sand',
                'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum'];
-  await page.click('#scMenu');
+  await page.click('#scTabYou');
   await page.waitForTimeout(320);
   ok('the picker offers every theme, as a swatch rather than a word',
     await page.$$eval('.theme', (e) => e.map((x) => x.dataset.theme).join(' ')) === IDS.join(' '));
@@ -1456,7 +1475,7 @@ const SAID = [
 
   const palettes = [];
   for (const id of IDS) {
-    await page.click('#scMenu');
+    await page.click('#scTabYou');
     await page.waitForTimeout(300);
     await page.click(`.theme[data-theme="${id}"]`);
     await page.waitForTimeout(240);
@@ -1465,7 +1484,12 @@ const SAID = [
        sheet is up. This is the one that would have shipped broken:
        white on the amber theme measures 1.9:1 and on the mint one
        1.7:1 — a control with an invisible label. */
-    const [fg, bg] = await page.$eval('.mic', (m) => {
+    /* .prime, not .mic. The bar's microphone is gone and the add
+       button is the filled control now — same question, same colours,
+       different element. A selector left pointing at a control that no
+       longer exists does not fail quietly here, but the check it was
+       making would have been lost. */
+    const [fg, bg] = await page.$eval('.prime', (m) => {
       const cs = getComputedStyle(m);
       return [cs.color, cs.backgroundColor];
     });
@@ -1551,7 +1575,7 @@ const SAID = [
      ORDER of clicks, which is close to impossible to find by looking —
      so scPaint clears the whole set before writing, and this drives the
      exact order that would expose it. */
-  await page.click('#scMenu');
+  await page.click('#scTabYou');
   await page.waitForTimeout(300);
   await page.click('.theme[data-theme="bloom"]');
   await page.waitForTimeout(200);
