@@ -437,13 +437,23 @@ const SAID = [
   const calm = await page.evaluate(() => {
     const row = document.querySelector('.row.is-now');
     const a = getComputedStyle(row, '::after');
+    const w = (r) => +getComputedStyle(r.querySelector('.n')).fontWeight;
+    /* The weight is read RELATIVE to a row that is not running, never
+       against a literal. It was `=== '700'`, and the day the base rows
+       went from 500 to 700 that assertion started passing on a screen
+       where the running row was no heavier than anything round it —
+       the check would have found nothing and said so in green. What is
+       being claimed is "heavier than its neighbours", so that is what
+       is measured. */
+    const other = [...document.querySelectorAll('.row[data-id]')]
+      .find((r) => !r.classList.contains('is-now'));
     return { display: a.display, anim: a.animationName,
              rule: getComputedStyle(row).borderLeftColor,
-             weight: getComputedStyle(row.querySelector('.n')).fontWeight };
+             weight: w(row), plain: other ? w(other) : null };
   });
   ok('reduced motion does not build the sweep', calm.display === 'none', calm);
   ok('and the row is still marked without it',
-    calm.rule === 'rgb(226, 35, 26)' && calm.weight === '700', calm);
+    calm.rule === 'rgb(226, 35, 26)' && calm.weight > calm.plain, calm);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   const hero = await page.evaluate(() => ({
@@ -456,23 +466,160 @@ const SAID = [
     && hero.num === '11:00' && hero.unit === 'AM'
     && hero.of === 'Trading · 1 h 30 m left', hero);
 
-  /* ── one red, spent twice ──
-     The accent marks the day you are in and the block that is running,
-     and nothing else. Six coloured subjects would make the sheet a
+  /* ── the head stays a label ──
+     Read RELATIVE to the hero's own figure, never as a px literal: a
+     figure typed into a test stops meaning anything the day the type
+     moves, and this file has already had one of those go quiet.
+
+     What is claimed is rank, which is the thing that was nearly lost —
+     a 38px wordmark was built here and taken back out, and this is what
+     says it did not creep back. The name sits under the sub's own
+     order of magnitude and far under the figure. */
+  const head = await page.evaluate(() => {
+    const px = (el) => parseFloat(getComputedStyle(el).fontSize);
+    const t = document.querySelector('.title');
+    return { title: px(t),
+             sub: px(document.querySelector('.sub')),
+             figure: px(document.querySelector('.live .figure b')),
+             fits: t.scrollWidth <= t.clientWidth + 1 };
+  });
+  ok('the name is a label, not the top of the page',
+    head.title < head.sub * 2 && head.fits, head);
+  ok('and the hero’s figure outranks it several times over',
+    head.figure >= head.title * 2.5, head);
+
+  /* ── a block’s name is its row’s subheading ──
+     The name is what you scan for. It was 14px/500 — the same volume as
+     the time beside it — and these say it now outranks both its own
+     time and the place inside it, without reaching the hero. */
+  const rowType = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.row[data-id]')]
+      .find((x) => !x.classList.contains('is-now') && !x.classList.contains('is-past'));
+    const px = (el) => parseFloat(getComputedStyle(el).fontSize);
+    return { n: px(r.querySelector('.n')),
+             w: +getComputedStyle(r.querySelector('.n')).fontWeight,
+             t: px(r.querySelector('.t')) };
+  });
+  ok('the block’s name outranks its time', rowType.n > rowType.t
+    && rowType.w >= 700, rowType);
+  ok('and stays a subheading — the hero is still far bigger',
+    head.figure >= rowType.n * 2, { head, rowType });
+
+  /* ── where, in the accent ──
+     Nothing in the seed has a place on it, so the seed cannot prove
+     this — the <em> is never built and a check for it would pass by
+     finding nothing. One is written in here on purpose. */
+  await page.evaluate(() => {
+    const s = JSON.parse(localStorage.getItem('sched.v1'));
+    s.items.find((i) => i.n === 'Trading' && i.d === 2).r = 'Desk';
+    /* One on a block that is already behind you — on a normal morning
+       most of the day is, so a place that only shows its colour while
+       something is running has not shipped the colour, it has shipped a
+       highlight on the running row. */
+    s.items.filter((i) => i.n === 'Train').forEach((i) => { i.r = 'Gym'; });
+    localStorage.setItem('sched.v1', JSON.stringify(s));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(200);
+
+  const whereRGB = (t) => t.trim().startsWith('#')
+    ? t.trim().match(/\w\w/g).map((h) => parseInt(h, 16))
+    : t.match(/[\d.]+/g).slice(0, 3).map(Number);
+
+  const where = await page.evaluate(() => {
+    const em = document.querySelector('.row.is-now .n em');
+    if (!em) return null;
+    const root = getComputedStyle(document.documentElement);
+    return { text: em.textContent,
+             colour: getComputedStyle(em).color,
+             red: root.getPropertyValue('--red').trim(),
+             /* The grey it used to be. Naming it is what stops the pair
+                below passing on a page where the place never took a
+                colour at all. */
+             dim: root.getPropertyValue('--dim').trim() };
+  });
+  ok('a block’s place shows up beside its name', where && where.text === 'Desk', where);
+  ok('and takes the accent — the colour today’s heading takes',
+    where && String(whereRGB(where.colour)) === String(whereRGB(where.red))
+    && String(whereRGB(where.colour)) !== String(whereRGB(where.dim)), where);
+
+  /* A place is an identity; done is a state. Fading the one with the
+     other is the mistake the habits screen has a whole rule against —
+     colour there says WHICH, never whether. And on a normal morning
+     most of the day is behind you, so a place that only shows its
+     colour while something is running has not shipped a colour, it has
+     shipped a highlight on the running row. */
+  const doneWhere = await page.evaluate(() => {
+    const em = document.querySelector('.row.is-past .n em');
+    return em ? { text: em.textContent, colour: getComputedStyle(em).color,
+                  name: getComputedStyle(em.parentElement).color } : null;
+  });
+  ok('a finished block still says where it was, in the same colour',
+    doneWhere && doneWhere.text === 'Gym'
+    && String(whereRGB(doneWhere.colour)) === String(whereRGB(where.colour)), doneWhere);
+  ok('while its name goes quiet around it',
+    doneWhere && doneWhere.name !== doneWhere.colour, doneWhere);
+
+  /* AND WITH THE ACCENT MOVED. The pair above passes on a page where
+     the place is written as the literal #e2231a rather than as the
+     token — on the shipped palette those are the same red, which is
+     exactly the copy-that-drifts the sweep’s wash shipped as for
+     twelve palettes. secMoved, not `moved`: the sweep’s own
+     accent-moved check further down already owns that name in this
+     scope, and a duplicate const is a SyntaxError that takes the whole
+     file’s assertions with it. */
+  const secMoved = await page.evaluate(() => {
+    const em = document.querySelector('.row.is-now .n em');
+    document.documentElement.style.setProperty('--red', '#4FE0A8');
+    const got = getComputedStyle(em).color;
+    document.documentElement.style.removeProperty('--red');
+    return got;
+  });
+  ok('the place follows the accent when the accent is changed under it',
+    String(whereRGB(secMoved)) === String([79, 224, 168]), { secMoved });
+
+  /* ── one red, spent three ways ──
+     The accent marks the day you are in, the block that is running, and
+     where a block is — and nothing else. It was two; the place was
+     added on top of a --sec of its own, and the second colour was taken
+     back out in favour of the one already on the screen.
+
+     Counted by KIND rather than by a total, because the total now
+     depends on how many blocks happen to have a place typed on them and
+     a check pinned to a number would have to be re-typed every time the
+     seed changes. What is claimed is that nothing OUTSIDE those three
+     kinds is ever red. Six coloured subjects would make the sheet a
      chart of nothing, and a rule is only worth writing down if
      something measures it. */
   const reds = await page.evaluate(() => {
     const red = 'rgb(226, 35, 26)';
     const hit = [];
-    document.querySelectorAll('.day-name, .row, .row .n, .row .t, .row .m, .title, .sub').forEach((el) => {
-      const s = getComputedStyle(el);
-      if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
-        hit.push(el.className + ':' + (el.textContent || '').slice(0, 14));
-    });
+    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, .row .m, .title, .sub')
+      .forEach((el) => {
+        const s = getComputedStyle(el);
+        if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
+          hit.push({ today: el.classList.contains('day-name'),
+                     running: !!el.closest('.row.is-now'),
+                     place: el.tagName === 'EM',
+                     what: el.className + ':' + (el.textContent || '').slice(0, 14) });
+      });
     return hit;
   });
-  ok('the red marks today and the running block, and nothing else',
-    reds.length === 3 && reds.filter((r) => /day-name/.test(r)).length === 1, reds);
+  ok('the red marks today, the running block and a place — nothing else',
+    reds.length > 0
+    && reds.every((r) => r.today || r.running || r.place)
+    && reds.filter((r) => r.today).length === 1
+    && reds.some((r) => r.running) && reds.some((r) => r.place),
+    /* Both halves of the claim in the payload, because they fail for
+       opposite reasons and the message cannot tell you which: `stray`
+       is something red that should not be, and a missing kind is the
+       accent having quietly stopped marking something. Reporting only
+       the strays printed an empty array when the place lost its
+       colour — a failure whose evidence said nothing. */
+    { stray: reds.filter((r) => !(r.today || r.running || r.place)),
+      today: reds.filter((r) => r.today).length,
+      running: reds.filter((r) => r.running).length,
+      place: reds.filter((r) => r.place).length });
 
   /* ── the sweep ──
      The running block carries a hairline that crosses it and keeps

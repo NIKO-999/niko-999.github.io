@@ -104,6 +104,7 @@
      A destructive action has to look destructive whatever the page
      round it is doing. */
   --bad: #e2231a;
+
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
@@ -145,6 +146,21 @@ body {
 
 .head { padding-bottom: 4px; }
 
+/* Stays a label, and that is a decision rather than the absence of one.
+   Nine treatments were rendered in the real app at phone size — a
+   wordmark, the waking window as a figure, today's date as a figure, a
+   masthead bracket, a progress rail in place of the rule, a reversed
+   accent bar, a one-line split, and no name at all. The 38px wordmark
+   was picked off the sheet, built, shipped, looked at on the phone for
+   an evening, and put back.
+
+   What the round settled, so it is not re-derived: the head is the one
+   place on this screen where MORE is not better. At 38px the name is
+   the loudest thing above the fold and it is the one thing you already
+   know, because it is on the icon you just tapped — and every option
+   that put a figure up here (the window, the date) was competing with
+   the hero four inches below it for the same job. The head is a label.
+   The screen's argument starts at the rule. */
 .title {
   font-size: 15px;
   font-weight: 700;
@@ -431,23 +447,46 @@ body {
 .row.is-past .m { background: var(--spent); }
 .row.is-now .m { background: var(--red); height: 3px; }
 
+/* The block's name is the subheading of its own row — it is what you
+   are scanning for, and at 14px/500 it sat at the same volume as the
+   time beside it and the place inside it. 16px/700 is a subheading and
+   not a heading: the hero's figure is still four times its size, so
+   nothing on the screen has moved rank. */
 .row .n {
-  font-size: 14px;
-  font-weight: 500;
-  letter-spacing: -.012em;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.014em;
   line-height: 1.2;
   min-width: 0;
 }
 /* The place rides inside the name rather than taking a column of its
    own — most blocks have none, and a fourth track standing empty all
-   week is worse than no track. */
+   week is worse than no track.
+
+   It takes the accent — the same colour the day heading takes when the
+   day is today — so that WHERE and WHAT are told apart by hue rather
+   than by both being grey at different sizes.
+
+   This was built once as --sec, a second hue every palette named for
+   itself, on the argument that the accent here means NOW and a desk is
+   never urgent. That argument is real and it lost anyway: a thirteenth
+   colour that appears on one kind of word is a colour the screen has to
+   teach you, and the accent is already the screen's one loud thing.
+   Asked for directly, and the token went with it rather than sitting in
+   the file unused.
+
+   So the accent is spent three ways now — today's heading, the running
+   block, a place — and the "one red" check counts by KIND rather than
+   by a total, because the total depends on how many blocks happen to
+   have a place typed on them. What it holds is that nothing outside
+   those three is ever red. */
 .row .n em {
   font-style: normal;
-  font-size: 9.5px;
+  font-size: 10px;
   font-weight: 600;
   letter-spacing: .09em;
   text-transform: uppercase;
-  color: var(--dim);
+  color: var(--red);
   margin-left: 7px;
   white-space: nowrap;
 }
@@ -465,8 +504,19 @@ body {
    fading text until it reads as "off" is how a schedule becomes
    unreadable in daylight. */
 .row.is-past .n, .row.is-past .t { color: var(--spent); }
-.row.is-past .n { font-weight: 400; }
-.row.is-past .n em { color: var(--spent); }
+/* A finished block drops a step rather than to 400. The live rows are
+   700 now, so 400 beside them is two steps and reads as another kind of
+   thing entirely instead of as the same thing, done. */
+.row.is-past .n { font-weight: 500; }
+/* The place does NOT fade with the block. It used to take --spent here,
+   back when it was grey anyway and the whole row simply went quiet —
+   but a place is an identity and doneness is a state, and a colour that
+   carries an identity must not also be carrying whether. Faded, it also
+   made the second colour invisible in practice: on a normal morning
+   most of the day is behind you, so the hue showed on one row out of
+   six and read as a highlight on the running block rather than as what
+   WHERE looks like. The name and the time going quiet is what says the
+   block is done; that has not changed. */
 
 /* The one running block: a red rule down the margin and the weight to
    match. It is the only place on the page the red is spent besides
@@ -484,7 +534,12 @@ body {
   padding-left: 9px;
   overflow: hidden;   /* the clip the sweep runs inside */
 }
-.row.is-now .n { font-weight: 700; }
+/* 800, because the base is 700 now. This rule used to be the only
+   thing making the running row's name heavier than the rest; leaving it
+   at 700 would have made it silently stop doing anything, which is the
+   quietest way for a state to disappear. The sweep and the red measure
+   still carry most of the signal — this is the last step of it. */
+.row.is-now .n { font-weight: 800; }
 
 /* ── the sweep ──
    A hairline that crosses the running block and keeps crossing it, so

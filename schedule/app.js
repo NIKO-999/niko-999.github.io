@@ -1109,7 +1109,8 @@
      symptom is a colour that only appears in one order of clicks, which
      is close to impossible to find by looking. */
   var TOKENS = ['--paper', '--ink', '--dim', '--spent', '--red', '--hair',
-                '--tick-off', '--on-red', '--bad', '--g0', '--g1', '--g2', '--g3'];
+                '--tick-off', '--on-red', '--bad',
+                '--g0', '--g1', '--g2', '--g3'];
 
   function scPaint(id, save) {
     var t = scTheme(id);
