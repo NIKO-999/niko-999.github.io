@@ -14,11 +14,16 @@
    The idiom is a Swiss timetable: paper, one red, a hard left grid,
    tabular figures, and nothing shadowed anywhere.
 
-   NOTHING IS ROUNDED EITHER, WITH TWO NAMED EXCEPTIONS: the tally's
-   cards, and the bottom bar's block. Both were picked out of a set of
-   rendered options rather than reached for — five treatments of the
-   tally, six of the bar — and in both cases the radius is most of what
-   makes the thing read as an object rather than as a panel.
+   NOTHING IS ROUNDED EITHER, WITH ONE NAMED EXCEPTION: the bottom
+   bar's pill. It was picked out of six rendered treatments rather than
+   reached for, and the radius is most of what makes it read as an
+   object rather than as a panel.
+
+   IT USED TO BE TWO. The tally's cards were the other, argued for on
+   the grounds that a photograph could one day BE the card — and
+   nothing ever posted one there. The screen is five rings now and the
+   exception went with the cards, which is the rule getting stronger
+   rather than an exception being spent.
 
    The rule is not weaker for having exceptions; it is stronger for
    naming them. `tests/schedule.js` holds every other surface in this
@@ -541,47 +546,49 @@ body {
 .ty-cap { margin-top: 6px; font-size: 11px; color: var(--dim); }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
 
+/* FIVE ACROSS. At 390 wide with the page's 18px margins and a 6px gap
+   each cell is 66px, so every one of them clears the 44px a thumb
+   needs on its own — the ring is 58 of that and the two lines under it
+   are the rest. */
 .ty-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px;
 }
 .ty-card {
-  position: relative; aspect-ratio: 1 / 1;
-  border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
-  padding: 14px; display: flex; flex-direction: column;
-  background: none; color: inherit; font: inherit; text-align: left;
+  display: flex; flex-direction: column; align-items: center; gap: 7px;
+  padding: 0; border: 0; border-radius: 0;
+  background: none; color: inherit; font: inherit; text-align: center;
   cursor: pointer;
 }
-.ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-.ty-card.on { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+.ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
-/* The fifth card takes the full width, and min-height is load-bearing:
-   dropping aspect-ratio also drops the thing the value's auto margin
-   pushes against, so the wide card collapses to its content and its two
-   lines sit on top of each other while the four square ones hold them a
-   card apart. Same row, same kind of object, different spacing. */
-.ty-card.wide { grid-column: 1 / -1; aspect-ratio: auto; min-height: 128px; }
-
-/* The glyph, top-left, where the name used to be. It is not a
-   decoration in a spare corner — it is what the card is called, so it
-   sits where a title sits and the value still leads from below.
-
-   WIDTH AND HEIGHT ARE ON THE RULE, not on the element. An inline
-   <svg> with neither falls back to 300x150 and fills the card, which
-   is what the first draft of this did the moment the sizing moved off
-   the markup and into a sheet. */
+.ty-ring { display: block; width: 100%; max-width: 58px; }
+.ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
+.ty-arc { fill: none; stroke: var(--ink); stroke-width: 5; }
+/* No width or height here and none wanted: the glyph is a <g> inside
+   the ring's own viewBox, so it is sized by the transform rather than
+   by a box. The 300x150 trap is for an <svg> element, and there is
+   only one of those. */
+/* A TOKEN, NOT AN OPACITY. --ink at .4 measured 2.58:1 on the white
+   page — under the 3:1 a graphic needs, and undetectable from the
+   cascade because the token it names is 18:1. It is the same lesson
+   the friend's week taught with its discs: opacity is not a way of
+   saying "quieter", it is a way of losing contrast you cannot see
+   yourself losing. --spent is 4.7:1 and defined for exactly this. */
 .ty-i {
-  position: absolute; top: 14px; left: 14px;
-  display: block; width: 27px; height: 27px;
-  fill: none; stroke: currentColor; stroke-width: 1.8;
+  fill: none; stroke: var(--spent); stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round;
-  opacity: .5;
 }
-.ty-card.on .ty-i { opacity: .85 }
-.ty-v {
-  margin-top: auto; font-size: 26px; font-weight: 700; line-height: 1;
-  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+.ty-card.on .ty-i { stroke: var(--ink); }
+
+.ty-nm { font-size: 10.5px; font-weight: 600; color: var(--dim); line-height: 1.15; }
+.ty-card.on .ty-nm { color: var(--ink); }
+/* The figure, small, under the name. min-height so a ring with nothing
+   logged under it does not sit 12px higher than the four beside it —
+   the row is one box and the part that varies absorbs the difference. */
+.ty-sub {
+  min-height: 13px; font-size: 10px; line-height: 1.3;
+  color: var(--spent); font-variant-numeric: tabular-nums;
 }
-.ty-s { margin-top: 4px; font-size: 11px; opacity: .72; }
 
 /* ── missed its window ──
    The schedule already knows that Train was 06:30 to 07:30 and that it
@@ -589,8 +596,8 @@ body {
    app is holding. It is deliberately NOT the accent and not danger: the
    day is not over, the thing can still be done, and a red card for a
    late gym session is the judgement this screen exists to avoid. */
-.ty-card.late { border-style: dashed; }
-.ty-card.late .ty-s { opacity: 1; color: var(--dim); font-weight: 600; }
+.ty-card.late .ty-track { stroke-dasharray: 5 5; }
+.ty-card.late .ty-sub { color: var(--dim); font-weight: 600; }
 
 /* ── the ring ─────────────────────────────────────────────
    Every class here carries an `sr-` prefix and every keyframe an `sr-`

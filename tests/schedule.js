@@ -1218,10 +1218,18 @@ const SAID = [
       item: c.dataset.item,
       svg: !!c.querySelector('.ty-i'),
       paths: c.querySelectorAll('.ty-i path').length,
-      box: (() => { const r = c.querySelector('.ty-i').getBoundingClientRect();
-                    return [Math.round(r.width), Math.round(r.height)]; })(),
+      /* getBBox on the <g> is in the glyph's OWN 24-unit space, before
+         the translate that centres it in the ring — so this is the
+         drawing measured against the box it was drawn for. Half the
+         1.8 stroke is added by hand, because getBBox reports the path
+         and not the ink. */
+      fits: (() => { const b = c.querySelector('.ty-i').getBBox(), h = 0.9;
+                     return [+(b.x - h).toFixed(2), +(b.y - h).toFixed(2),
+                             +(b.x + b.width + h).toFixed(2),
+                             +(b.y + b.height + h).toFixed(2)]; })(),
+      ring: !!c.querySelector('.ty-ring'),
       label: c.getAttribute('aria-label'),
-      words: c.textContent,
+      sub: c.querySelector('.ty-sub').textContent,
     })));
   ok('every card carries a glyph', marks.every((m) => m.svg), marks.map((m) => m.item));
   /* Steps is TWO prints and every other glyph is one drawing. An
@@ -1230,19 +1238,70 @@ const SAID = [
   ok('and Steps is a pair of them',
     marks.find((m) => m.item === 'p').paths === 2,
     marks.map((m) => m.item + ':' + m.paths).join());
-  /* An inline <svg> with no width or height falls back to 300x150 and
-     fills the card. It is a silent failure — the glyph is still there
-     and still correct — so it is measured rather than assumed. */
-  ok('...drawn at the size it was asked for, not the SVG default',
-    marks.every((m) => m.box[0] === 27 && m.box[1] === 27),
-    marks.map((m) => m.box.join('x')).join());
-  ok('no card draws its name any more',
-    marks.every((m) => !/Train|Mind|Steps|Fuel|Water/.test(m.words)),
-    marks.map((m) => m.words).join(' | '));
+  ok('and every one of them is inside a ring', marks.every((m) => m.ring));
+  /* THE CLIPPING CHECK. Steps sat half a stroke above its own viewBox
+     and the ring cut a flat line across the top print — visible, and
+     invisible to every other assertion here, because the element was
+     present, the right size and the right shape. A drawing that leaves
+     the box it was drawn for is decidable from the geometry, so it is
+     decided rather than looked at. */
+  ok('no glyph is drawn outside the box the ring clips it to',
+    marks.every((m) => m.fits[0] >= 0 && m.fits[1] >= 0
+      && m.fits[2] <= 24 && m.fits[3] <= 24),
+    marks.map((m) => m.item + ':' + m.fits.join()).join(' '));
   ok('and every card still SAYS its name',
     ['Train', 'Mind', 'Steps', 'Fuel', 'Water']
       .every((n, i) => marks[i].label.indexOf(n) === 0),
     marks.map((m) => m.label.slice(0, 12)).join(' | '));
+
+  /* ── the figure under the ring ──
+     A ring says WHETHER and nothing else, so on its own it swallowed
+     the only number anybody logs Steps, Fuel and Water for. Asserted
+     on the drawn text and on the accessible name, because the first
+     version of this screen had the figure in neither. */
+  {
+    await page.evaluate((d) => {
+      localStorage.setItem('sched.tick.v1',
+        JSON.stringify({ [d]: { t: 1, p: '12480', w: '2.5' } }));
+      localStorage.setItem('sched.view.v1', 'tally');
+    }, await page.evaluate(() => {
+      const x = new Date();
+      return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0')
+        + '-' + String(x.getDate()).padStart(2, '0');
+    }));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(260);
+    const figs = await page.evaluate(() => {
+      const g = (id) => {
+        const c = document.querySelector('.ty-card[data-item="' + id + '"]');
+        return { sub: c.querySelector('.ty-sub').textContent,
+                 label: c.getAttribute('aria-label') };
+      };
+      return { p: g('p'), w: g('w'), f: g('f'), t: g('t') };
+    });
+    ok('a logged number is written under its ring',
+      figs.p.sub === '12480' && figs.w.sub === '2.5 L', JSON.stringify(figs));
+    ok('...and is in the accessible name too',
+      figs.p.label.indexOf('12480') > 0 && figs.w.label.indexOf('2.5 L') > 0,
+      figs.p.label);
+    /* A do-item has no figure, so its line says where the tick came
+       from instead — and an item with nothing logged says nothing
+       rather than prompting under a ring that already reads as empty. */
+    ok('a thing with no number says where its tick came from',
+      figs.t.sub === 'logged' || figs.t.sub.indexOf('from ') === 0, figs.t.sub);
+    ok('and one with nothing logged says nothing', figs.f.sub === '', figs.f.sub);
+    /* PUT THE DAY BACK. This block seeds three ticks to have figures to
+       read, and everything below it opens by asserting a fresh day —
+       leaving them seeded broke three assertions that had nothing to do
+       with this one. A check that changes the state it ran in owes the
+       next one the state it found. */
+    await page.evaluate(() => {
+      localStorage.removeItem('sched.tick.v1');
+      localStorage.removeItem('sched.log.v1');
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(260);
+  }
 
   /* The glyph is now the only thing naming the card, so it is a
      graphic that carries meaning: 3:1, WCAG 1.4.11. Measured on
@@ -1302,7 +1361,7 @@ const SAID = [
   await page.waitForTimeout(150);
   const linked = await page.evaluate(() => ({
     card: document.querySelector('.ty-card[data-item="t"]').className,
-    via: document.querySelector('.ty-card[data-item="t"] .ty-s').textContent,
+    via: document.querySelector('.ty-card[data-item="t"] .ty-sub').textContent,
     cap: document.getElementById('scTallyCap').textContent,
     log: localStorage.getItem('sched.log.v1'),
   }));
@@ -1370,12 +1429,15 @@ const SAID = [
   const late = await page.evaluate(() => {
     const g = (id) => {
       const c = document.querySelector('.ty-card[data-item="' + id + '"]');
-      return { late: c.classList.contains('late'), s: c.querySelector('.ty-s').textContent };
+      return { late: c.classList.contains('late'), s: c.querySelector('.ty-sub').textContent };
     };
     return { t: g('t'), m: g('m'), w: g('w') };
   });
+  /* One word, not a sentence: the line under a ring is a fifth of a
+     phone wide and `Missed its window` does not fit it. The fact is
+     still on the card's accessible name in full. */
   ok('a block whose window has passed says so', late.t.late
-    && late.t.s === 'Missed its window', late);
+    && late.t.s === 'missed', late);
   ok('but one that can still be satisfied does not', !late.m.late, late);
   ok('and an item with no block behind it never can', !late.w.late, late);
 
@@ -1438,9 +1500,15 @@ const SAID = [
              face: getComputedStyle(q('.tab-face')).borderRadius,
              others };
   });
-  ok('the named exceptions are rounded — the tally’s cards, the bar’s pill and its tabs',
-    round.cards.length === 5 && round.cards.every((v) => v >= 10)
-    && round.pill >= 20 && round.tab >= 15, round);
+/* ONE exception now, not two. The tally's cards were the other, and
+     they were argued for on the grounds that a photograph could one day
+     BE the card — nothing ever posted one there, and the screen is five
+     rings now. An exception that stops being needed should be given
+     back rather than kept, so this asserts the cards are SQUARE. */
+  ok('the one named exception is rounded — the bar’s pill and its tabs',
+    round.pill >= 20 && round.tab >= 15, round);
+  ok('and the tally has handed its exception back',
+    round.cards.length === 5 && round.cards.every((v) => v === 0), round.cards);
   ok('and the two circles are circles — the add button and your picture',
     /50%/.test(round.prime) && /50%/.test(round.face), round);
   ok('and nothing else in the app is rounded at all',

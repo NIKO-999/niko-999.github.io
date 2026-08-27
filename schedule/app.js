@@ -1209,8 +1209,13 @@
     t: '<path d="M6.5 9v6M3.5 10.5v3M17.5 9v6M20.5 10.5v3M6.5 12h11"/>',
     m: '<path d="M12 6.6v12.8M12 6.6C10.4 5.1 8.3 4.6 4 5.1v12.8c4.3-.5 6.4 0 8 1.5'
        + 'M12 6.6C13.6 5.1 15.7 4.6 20 5.1v12.8c-4.3-.5-6.4 0-8 1.5"/>',
-    p: '<g transform="translate(-3 -1.5) scale(.62)"><path d="' + FOOT + '"/></g>'
-       + '<g transform="translate(5.6 6.5) scale(.62)"><path d="' + FOOT + '"/></g>',
+    /* PLACED SO THE STROKE FITS. FOOT spans y 3.0 to 19.4 in the 24
+       box; at .62 that is 10.2 tall, and the old translate of -1.5 put
+       the upper print's top edge at y 0.4 — half a 1.8 stroke past the
+       viewBox, so the ring clipped a flat line across the top of it.
+       The numbers below leave 0.7 of clearance at every edge. */
+    p: '<g transform="translate(-2.6 -.2) scale(.62)"><path d="' + FOOT + '"/></g>'
+       + '<g transform="translate(7.4 9.6) scale(.62)"><path d="' + FOOT + '"/></g>',
     f: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
     w: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>'
   };
@@ -1398,18 +1403,28 @@
     grid.textContent = '';
     TALLY.forEach(function (it, i) {
       var on = !!got[it.id], late = !on && scLate(it);
-      var c = scEl('button', 'ty-card' + (on ? ' on' : '') + (late ? ' late' : '')
-                             + (i === TALLY.length - 1 ? ' wide' : ''));
+      var c = scEl('button', 'ty-card' + (on ? ' on' : '') + (late ? ' late' : ''));
       c.dataset.item = it.id;
-      c.insertAdjacentHTML('beforeend',
-        '<svg class="ty-i" viewBox="0 0 24 24" aria-hidden="true">'
-        + TALLY_ICON[it.id] + '</svg>');
-      c.appendChild(scEl('span', 'ty-v',
-        on ? (it.k === 'num' ? String(got[it.id]) + (it.unit || '') : '✓') : 'Tap'));
 
-      /* Once it is done the caption says where it came from, not what
-         to do — a prompt still showing under a finished thing is the
-         screen not noticing you did it. */
+      /* A RING, and it is the app's own instrument at a smaller scale.
+         This screen and the Ring view were two unrelated drawings of
+         the same day; five small ones make them the same thing said
+         twice at two sizes rather than twice in two languages.
+
+         The glyph is a <g> inside the ring's own 64 box rather than a
+         nested <svg>: translate(20 20) centres the 24-unit drawing, and
+         one element is one element. */
+      c.insertAdjacentHTML('beforeend',
+        '<svg class="ty-ring" viewBox="0 0 64 64" aria-hidden="true">'
+        + '<circle class="ty-track" cx="32" cy="32" r="26"/>'
+        + (on ? '<circle class="ty-arc" cx="32" cy="32" r="26"/>' : '')
+        + '<g class="ty-i" transform="translate(20 20)">' + TALLY_ICON[it.id] + '</g>'
+        + '</svg>');
+      c.appendChild(scEl('span', 'ty-nm', it.n));
+
+      /* Once it is done the line under it says where it came from, not
+         what to do — a prompt still showing under a finished thing is
+         the screen not noticing you did it. */
       var via = null;
       if (on && it.from) {
         var b = scBlocksFor(it, new Date().getDay()).filter(function (x) {
@@ -1417,10 +1432,19 @@
         })[0];
         if (b) via = 'from ' + b.n;
       }
-      c.appendChild(scEl('span', 'ty-s',
-        via || (on ? 'logged' : (late ? 'Missed its window' : it.s))));
+      /* THE FIGURE, small, under the name. The ring says whether and
+         this says how much — and without it Steps, Fuel and Water were
+         three rings that had swallowed the only number anybody logs
+         them for. A do-item has no figure, so it says where its tick
+         came from instead, and an item whose window has passed says so
+         in one word: `Missed its window` does not fit a fifth of a
+         phone and the fact is worth more than the sentence. */
+      c.appendChild(scEl('span', 'ty-sub',
+        it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
+          : (via || (on ? 'logged' : (late ? 'missed' : '')))));
 
       c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
+        + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
         + (late ? ', missed its window' : '') + '. ' + it.s + '.');
       c.addEventListener('click', function () { scTallyTap(it, day); });
       grid.appendChild(c);
