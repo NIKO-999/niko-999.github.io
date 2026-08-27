@@ -2174,8 +2174,11 @@
         bar.style.height = (18 + n * 9) + 'px';
         if (n && p.acc) bar.style.background = p.acc;
         cell.appendChild(bar);
+        /* Two letters, not one. One gives W T F S S M T across a week,
+           where two of the T's are different days and so are both S's —
+           a strip whose whole job is telling you which day is which. */
         cell.appendChild(scEl('span', 'fp-w',
-          new Date(day + 'T12:00:00').toDateString().slice(0, 1)));
+          ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][new Date(day + 'T12:00:00').getDay()]));
         cell.title = n + (n === 1 ? ' tick' : ' ticks');
         strip.appendChild(cell);
       }

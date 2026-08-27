@@ -1948,6 +1948,12 @@ const SAID = [
     const bars = await fp.$$eval('.fp-d i', (b) => b.map((x) => x.style.height));
     ok('and the strip says how many by HEIGHT, never by a colour for missing',
       new Set(bars).size > 1 && bars.every((h) => parseFloat(h) >= 18), bars.join());
+    /* Two letters, because one gives W T F S S M T over a week and
+       two of those T's are different days. A strip whose job is saying
+       which day is which cannot be ambiguous about two of the seven. */
+    ok('and every day in the strip is named unambiguously',
+      await fp.$$eval('.fp-w', (w) => new Set(w.map((x) => x.textContent)).size) === 7,
+      await fp.$$eval('.fp-w', (w) => w.map((x) => x.textContent).join()));
     ok('their logs are on it', await fp.$$eval('.sheet .po', (p) => p.length) === 1);
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(420);
