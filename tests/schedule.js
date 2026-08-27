@@ -1204,6 +1204,89 @@ const SAID = [
     tal.cards === 5, tal);
   ok('and nothing is logged on a fresh day', tal.cap === '0 of 5 today', tal);
 
+  /* ── the glyph is the name ──
+     The card used to carry `Steps` at 17px bold in one corner and
+     nothing in the other. With a mark opposite it the two said the
+     same thing, and the word was the half that could go.
+
+     WHAT MUST NOT GO WITH IT is the name in the ACCESSIBLE name — a
+     screen reader arriving at this grid would otherwise be handed five
+     buttons called "logged" and "Tap". So the check is in two halves:
+     nothing draws the word, and every card still says it. */
+  const marks = await page.evaluate(() => [...document.querySelectorAll('.ty-card')]
+    .map((c) => ({
+      item: c.dataset.item,
+      svg: !!c.querySelector('.ty-i'),
+      paths: c.querySelectorAll('.ty-i path').length,
+      box: (() => { const r = c.querySelector('.ty-i').getBoundingClientRect();
+                    return [Math.round(r.width), Math.round(r.height)]; })(),
+      label: c.getAttribute('aria-label'),
+      words: c.textContent,
+    })));
+  ok('every card carries a glyph', marks.every((m) => m.svg), marks.map((m) => m.item));
+  /* Steps is TWO prints and every other glyph is one drawing. An
+     assertion on the count is what stops the pair quietly becoming a
+     single foot again. */
+  ok('and Steps is a pair of them',
+    marks.find((m) => m.item === 'p').paths === 2,
+    marks.map((m) => m.item + ':' + m.paths).join());
+  /* An inline <svg> with no width or height falls back to 300x150 and
+     fills the card. It is a silent failure — the glyph is still there
+     and still correct — so it is measured rather than assumed. */
+  ok('...drawn at the size it was asked for, not the SVG default',
+    marks.every((m) => m.box[0] === 27 && m.box[1] === 27),
+    marks.map((m) => m.box.join('x')).join());
+  ok('no card draws its name any more',
+    marks.every((m) => !/Train|Mind|Steps|Fuel|Water/.test(m.words)),
+    marks.map((m) => m.words).join(' | '));
+  ok('and every card still SAYS its name',
+    ['Train', 'Mind', 'Steps', 'Fuel', 'Water']
+      .every((n, i) => marks[i].label.indexOf(n) === 0),
+    marks.map((m) => m.label.slice(0, 12)).join(' | '));
+
+  /* The glyph is now the only thing naming the card, so it is a
+     graphic that carries meaning: 3:1, WCAG 1.4.11. Measured on
+     composited pixels in BOTH card states, because a logged card
+     inverts to ink-on-paper and the two are different problems — and
+     the opacity is not in the token, so nothing but the pixel knows
+     what the eye gets. */
+  {
+    const { PNG: PNG2 } = require('pngjs');
+    const lum2 = ([r, g, b]) => {
+      const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
+      return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
+    };
+    const ratio2 = (a, b) => {
+      const [x, y] = [lum2(a), lum2(b)].sort((m, n) => n - m);
+      return (x + .05) / (y + .05);
+    };
+    let low = { r: 99 };
+    const png = PNG2.sync.read(await page.screenshot());
+    const at = (x, y) => {
+      const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    for (const m of await page.$$('.ty-card')) {
+      const g = await m.$('.ty-i');
+      const bx = await g.boundingBox();
+      const on = await m.evaluate((e) => e.classList.contains('on'));
+      /* The card's own ground, sampled clear of the glyph and clear of
+         the border; then the stroke, as the pixels furthest from it. */
+      const ground = at(bx.x + bx.width + 34, bx.y + bx.height / 2);
+      const px = [];
+      for (let x = 1; x < bx.width - 1; x++)
+        for (let y = 1; y < bx.height - 1; y++) px.push(at(bx.x + x, bx.y + y));
+      const gl = lum2(ground);
+      px.sort((a, c) => Math.abs(lum2(c) - gl) - Math.abs(lum2(a) - gl));
+      const ink = px.slice(0, 24)
+        .reduce((z, q) => q.map((c, i) => z[i] + c), [0, 0, 0]).map((c) => c / 24);
+      const r = +ratio2(ink, ground).toFixed(2);
+      if (r < low.r) low = { r, on };
+    }
+    ok('the glyph clears 3:1 on the card, measured on pixels',
+      low.r >= 3, JSON.stringify(low));
+  }
+
   /* THE LIST IS CODE, NOT DATA. It is what makes a leaderboard over it
      mean anything, so the storage must not carry it — a list that round
      -trips through localStorage is a list a damaged record can change,
@@ -1908,11 +1991,40 @@ const SAID = [
        makes nothing — it shows you a string you already have — and
        given the plus as well it read as a fourth thing to create, on
        the row directly under the one that adds people. */
-    ok('the + belongs to the action that creates, and Your code has its own glyph',
-      await glyphs('#scFrPane') === 'Add a friend|plus Your code|go',
-      await glyphs('#scFrPane'));
+    /* ONE action on the board. `Your code` used to sit directly under
+       this as a second row — two rows for the two halves of a single
+       act. Adding a friend IS the swap, so both codes live on that
+       sheet, and the friends settings moved to the app's own settings
+       where Rename and the backup already are. */
+    ok('the board carries one action and it is the + that adds somebody',
+      await glyphs('#scFrPane') === 'Add a friend|plus', await glyphs('#scFrPane'));
     ok('and the composer keeps the +',
       await glyphs('#scFeed') === 'Write one|plus', await glyphs('#scFeed'));
+
+    /* Both codes on one sheet, because that is the exchange. */
+    await fp.click('text=Add a friend');
+    await fp.waitForTimeout(460);
+    ok('yours is on the sheet where you take theirs',
+      await fp.$eval('.fr-swap .fr-code', (e) => e.textContent) === mine.code);
+    /* Two assertions, not one `&&`. As a single line it reported a
+       failure without saying which half, which is a check you cannot
+       act on. */
+    const swapBtn = await fp.$$eval('.fr-swap .btn', (b) => b.map((x) => x.textContent));
+    const actBtn = await fp.$$eval('.sheet .acts .btn', (b) => b.map((x) => x.textContent));
+    ok('...with the button that copies it beside the code', swapBtn.join() === 'Copy', swapBtn);
+    ok('...and the action row below belongs to adding THEM',
+      actBtn.join() === 'Cancel,Add', actBtn);
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(420);
+
+    /* And the settings for it are where the app's other settings are. */
+    await fp.click('#scTabYou');
+    await fp.waitForTimeout(460);
+    ok('the settings menu says whether friends are on, and under what code',
+      (await fp.$$eval('.menu-item', (b) => b.map((x) => x.textContent).join('\n')))
+        .includes('Friends' + 'On \u00b7 ' + mine.code));
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(420);
 
     /* ── their colours, not yours ── */
     const crown = await fp.$eval('.fr-crown', (e) => ({
@@ -2196,9 +2308,11 @@ const SAID = [
 
     /* ── leaving ── */
     await stop('board');
-    await fp.click('text=Your code');
-    await fp.waitForTimeout(420);
-    ok('your code is on screen to give away',
+    await fp.click('#scTabYou');
+    await fp.waitForTimeout(460);
+    await fp.click('.sheet >> text=Friends');
+    await fp.waitForTimeout(460);
+    ok('your code is on the friends settings too, as a reference',
       (await fp.$eval('.fr-code', (e) => e.textContent)) === mine.code);
     await fp.click('text=Turn friends off');
     await fp.waitForTimeout(420);

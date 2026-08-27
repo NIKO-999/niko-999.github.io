@@ -1182,6 +1182,39 @@
   var TICK_KEY = 'sched.tick.v1';
   var LOG_KEY = 'sched.log.v1';
 
+  /* One glyph per item, and like TALLY itself this is CODE rather than
+     data: the five are fixed and identical for everybody, so their
+     marks can be too. Drawn to the bar's idiom — stroke, round caps,
+     no fill, a 24 box.
+
+     THE GLYPH IS THE NAME NOW. The card used to carry `Steps` at 17px
+     bold in one corner and nothing in the other; with a mark opposite
+     it, the two were the same thing said twice, and the word was the
+     half that could go. The name has not gone from the card's
+     ACCESSIBLE name — the aria-label below still opens with it — so
+     this is a change to what is drawn and not to what is said.
+
+     Steps is two prints rather than one, and both are the same path
+     scaled: a footprint drawn small a second time lost the taper that
+     makes the first one read, and two shapes that are nearly the same
+     but not quite look like a mistake instead of a pair. The first cut
+     placed them at .55 and they came out as specks on the real card —
+     the enlargement said they were fine, which is exactly why a glyph
+     is judged at the size it is drawn. */
+  var FOOT = 'M15.1 3.1c1.9 1.2 2.4 4.3 1.6 6.7-.5 1.6-1.5 2.4-1.8 3.9-.3 1.6.5 2.9-.3 4.4'
+    + '-.9 1.7-3.3 2-4.7.7-1.5-1.3-1.4-3.4-1-5.2.4-1.9.2-2.7-.4-4.5-.9-2.6-.1-5.6 2.1-6.7'
+    + '1.5-.8 3.1-.6 4.5.7z';
+
+  var TALLY_ICON = {
+    t: '<path d="M6.5 9v6M3.5 10.5v3M17.5 9v6M20.5 10.5v3M6.5 12h11"/>',
+    m: '<path d="M12 6.6v12.8M12 6.6C10.4 5.1 8.3 4.6 4 5.1v12.8c4.3-.5 6.4 0 8 1.5'
+       + 'M12 6.6C13.6 5.1 15.7 4.6 20 5.1v12.8c-4.3-.5-6.4 0-8 1.5"/>',
+    p: '<g transform="translate(-3 -1.5) scale(.62)"><path d="' + FOOT + '"/></g>'
+       + '<g transform="translate(5.6 6.5) scale(.62)"><path d="' + FOOT + '"/></g>',
+    f: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
+    w: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>'
+  };
+
   var TALLY = [
     { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
     { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
@@ -1368,7 +1401,9 @@
       var c = scEl('button', 'ty-card' + (on ? ' on' : '') + (late ? ' late' : '')
                              + (i === TALLY.length - 1 ? ' wide' : ''));
       c.dataset.item = it.id;
-      c.appendChild(scEl('span', 'ty-n', it.n));
+      c.insertAdjacentHTML('beforeend',
+        '<svg class="ty-i" viewBox="0 0 24 24" aria-hidden="true">'
+        + TALLY_ICON[it.id] + '</svg>');
       c.appendChild(scEl('span', 'ty-v',
         on ? (it.k === 'num' ? String(got[it.id]) + (it.unit || '') : '✓') : 'Tap'));
 
@@ -1907,7 +1942,6 @@
       add.appendChild(scLink('Turn on friends', scNetSheet));
     } else {
       add.appendChild(scLink('Add a friend', scAddSheet));
-      add.appendChild(scLink('Your code', scNetSheet, 'go'));
     }
 
     var feed = $('scFeed');
@@ -2096,22 +2130,13 @@
         return;
       }
 
+      /* Here it is a reference, not the thing you came for — the copy
+         button lives on Add a friend, which is where a code is
+         actually wanted. This is the settings page: it says what your
+         code is because that is a thing you might come looking for,
+         and then it gets out of the way. */
       body.appendChild(scEl('span', 'label', 'Your code'));
-      var big = scEl('p', 'fr-code', net.code);
-      body.appendChild(big);
-      body.appendChild(scEl('p', 'hint',
-        'Give this to a friend and they can see your board and your logs. It '
-        + 'reads and never writes — the string that can post as you is a '
-        + 'different one and stays on this phone.'));
-      var acts2 = scEl('div', 'acts');
-      acts2.appendChild(scBtn('off', 'Done', scClose));
-      acts2.appendChild(scBtn('go', 'Copy it', function () {
-        var done = function () { scToast('Code copied', false); };
-        if (navigator.clipboard && navigator.clipboard.writeText)
-          navigator.clipboard.writeText(net.code).then(done, done);
-        else done();
-      }));
-      body.appendChild(acts2);
+      body.appendChild(scEl('p', 'fr-code', net.code));
 
       body.appendChild(scEl('div', 'menu-rule'));
       var nm = scEl('button', 'menu-item');
@@ -2154,18 +2179,41 @@
     });
   }
 
+  /* ── the swap ──
+     Both codes, in the one place the exchange actually happens. `Your
+     code` used to be its own row on the board, directly under `Add a
+     friend` — two rows for the two halves of a single act, and the
+     board carrying a control that is only ever wanted while you are
+     adding somebody. Adding a friend IS the swap: you give them
+     yours, they give you theirs.
+
+     It leaves the board with exactly one action on it, and the friends
+     settings — your name, and turning it off — move to the app's own
+     settings, where Rename and the backup already live. */
   function scAddSheet() {
     scSheet('Add a friend', function (body) {
-      body.appendChild(scEl('span', 'label', 'Their code'));
+      body.appendChild(scEl('span', 'label', 'Yours'));
+      var row = scEl('div', 'fr-swap');
+      row.appendChild(scEl('span', 'fr-code', net.code));
+      row.appendChild(scBtn('off', 'Copy', function () {
+        var done = function () { scToast('Code copied', false); };
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(net.code).then(done, done);
+        else done();
+      }));
+      body.appendChild(row);
+      /* No caption under it. `Yours` over a code beside a button that
+         says Copy is a sentence already, and the paragraph explaining
+         that a code reads and never writes belongs where somebody is
+         deciding whether to turn this on — not on the sheet they open
+         forty times to swap one. */
+      body.appendChild(scEl('span', 'label', 'Theirs'));
       var f = scEl('input', 'field');
       f.type = 'text';
       f.autocapitalize = 'characters';
       f.spellcheck = false;
       f.placeholder = '8 letters and numbers';
       body.appendChild(f);
-      body.appendChild(scEl('p', 'hint',
-        'A code reads and never writes, so giving one away costs you nothing '
-        + 'but the reading.'));
       var acts = scEl('div', 'acts');
       acts.appendChild(scBtn('off', 'Cancel', scClose));
       acts.appendChild(scBtn('go', 'Add', function () {
@@ -3157,6 +3205,13 @@
 
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
+
+      /* Friends, where the app's other settings are. It used to be
+         reached from a row on the board itself, which put a control
+         you want about once a month directly under the leaderboard —
+         and the one thing anybody actually opened it for, your code,
+         is now on Add a friend where the swap happens. */
+      item('Friends', net.on ? 'On \u00b7 ' + net.code : 'Off', '', scNetSheet);
 
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });

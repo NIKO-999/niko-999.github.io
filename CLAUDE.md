@@ -363,6 +363,27 @@ win however the new rule is written: the friend sheet shipped one round
 with two red capital headings and a hairline under Remove, with the new
 classes sitting on the elements doing nothing. That is the fourth time.
 
+**The tally cards are glyphs now, and the glyph IS the name.** Each
+card carried its title at 17px bold in one corner and nothing in the
+other; with a mark opposite it the two said the same thing, and the
+word was the half that could go. What did NOT go is the name in the
+card's accessible name — without that, a screen reader arriving at the
+grid is handed five buttons called "logged" and "Tap", so the check is
+in two halves: nothing draws the word, every card still says it.
+
+**An inline `<svg>` with no width or height falls back to 300x150 and
+fills its parent.** It happened the moment the sizing moved off the
+markup and into a sheet, and it is silent — the glyph is still there
+and still correct, just enormous. Measured rather than assumed.
+
+**Steps is two prints and both are the same path scaled.** Drawing a
+small footprint by hand a second time lost the taper that makes the
+first one read, and two shapes nearly the same but not quite look like
+a mistake rather than a pair. The first cut placed them at .55 and they
+came out as SPECKS on the real card — the 4x sheet said they were fine.
+That is the second time an enlargement has lied about a treatment; a
+glyph is judged at the size it is drawn, full stop.
+
 ## The sweep
 
 `.claude/workflows/sweep.js` drives the orrery across every state —
