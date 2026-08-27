@@ -643,6 +643,26 @@
      Train is the exception: its plates are taller here, because on the
      tally it sits inside a ring that frames it and on a bare row a
      6-unit-tall dumbbell in a 24 box reads as a dash. */
+  /* One footprint, drawn twice at the same scale. A second print drawn
+     small by hand lost the taper that makes the first one read, and two
+     shapes nearly the same but not quite look like a mistake rather
+     than a pair.
+
+     PLACED SO THE STROKE FITS. FOOT spans y 3.0 to 19.4 in the 24 box;
+     at .62 that is 10.2 tall, and an earlier translate of -1.5 put the
+     upper print's top edge at y 0.4 — half a 1.8 stroke past the
+     viewBox, so the tally's ring clipped a flat line across the top of
+     it. These numbers leave 0.7 of clearance at every edge.
+
+     IT LIVES HERE BECAUSE TWO SCREENS DRAW IT: the tally's Steps card
+     and the week's Walk row are the same idea, so they are the same
+     drawing rather than two of them. */
+  var FOOT = 'M15.1 3.1c1.9 1.2 2.4 4.3 1.6 6.7-.5 1.6-1.5 2.4-1.8 3.9-.3 1.6.5 2.9-.3 4.4'
+    + '-.9 1.7-3.3 2-4.7.7-1.5-1.3-1.4-3.4-1-5.2.4-1.9.2-2.7-.4-4.5-.9-2.6-.1-5.6 2.1-6.7'
+    + '1.5-.8 3.1-.6 4.5.7z';
+  var STEPS = '<g transform="translate(-2.6 -.2) scale(.62)"><path d="' + FOOT + '"/></g>'
+    + '<g transform="translate(7.4 9.6) scale(.62)"><path d="' + FOOT + '"/></g>';
+
   var BLOCK_ICON = {
     train: '<path d="M6.5 7.6v8.8M3.5 9.8v4.4M17.5 7.6v8.8M20.5 9.8v4.4M6.5 12h11"/>',
     read: '<path d="M12 6.6v12.8M12 6.6C10.4 5.1 8.3 4.6 4 5.1v12.8c4.3-.5 6.4 0 8 1.5'
@@ -650,11 +670,19 @@
     eat: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
     water: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>',
 
-    walk: '<circle cx="13" cy="4.6" r="2"/>'
-        + '<path d="M13 8v4.6l3 3.4v4.5M13 12.6l-3.4 2.6-1.6 5.3M13 9.6l3.8 1.8"/>',
-    run: '<circle cx="14.4" cy="4.6" r="2"/>'
-       + '<path d="M14 8.4l-3.6 1.8-1.4 4.4 3.6 1.6 1.4 4.4M10.4 10.2L6.4 12l-.9 3'
-       + 'M12.6 16.2l-3.4 4.4M14 8.4l3.6 2.2 2.4-.4"/>',
+    /* THE FOOTPRINTS, and they are the tally's Steps card verbatim. The
+       two are the same idea at two sizes, so they are one drawing. It
+       replaced a walking stick-figure that was the third stick-figure
+       on the sheet — walk, run and stretch were one silhouette in three
+       poses, which is the collision this file keeps re-learning. */
+    walk: STEPS,
+    /* A TRAINER, not a fourth stick-figure. Silhouette only: the lace
+       flap and the heel counter were both drawn and both close into a
+       blob at 22px, where a shoe is nothing but its outline. The first
+       cut sat in the bottom third of the box and read as a slipper
+       beside glyphs that fill it. */
+    run: '<path d="M3 17.6v-7.6a2 2 0 012-2h2.4l1.6 3 3.6 1.6 6.6 1.9'
+       + 'a3 3 0 012.1 2.9v.6H3zM3 18.2v2h18.3v-2"/>',
     cycle: '<circle cx="5.6" cy="16.4" r="3.6"/><circle cx="18.4" cy="16.4" r="3.6"/>'
          + '<path d="M5.6 16.4l4.4-7.4h4.6l-2.4 7.4h6.2M12.4 9h3.4"/>',
     swim: '<circle cx="16.4" cy="7.2" r="1.9"/>'
@@ -1448,22 +1476,18 @@
      but not quite look like a mistake instead of a pair. The first cut
      placed them at .55 and they came out as specks on the real card —
      the enlargement said they were fine, which is exactly why a glyph
-     is judged at the size it is drawn. */
-  var FOOT = 'M15.1 3.1c1.9 1.2 2.4 4.3 1.6 6.7-.5 1.6-1.5 2.4-1.8 3.9-.3 1.6.5 2.9-.3 4.4'
-    + '-.9 1.7-3.3 2-4.7.7-1.5-1.3-1.4-3.4-1-5.2.4-1.9.2-2.7-.4-4.5-.9-2.6-.1-5.6 2.1-6.7'
-    + '1.5-.8 3.1-.6 4.5.7z';
+     is judged at the size it is drawn.
+
+     FOOT and STEPS themselves are defined up beside BLOCK_ICON, because
+     the week's Walk row draws the same footprints and a `var` assigned
+     further down the file than the object that reads it is `undefined`
+     at the moment the object is built. */
 
   var TALLY_ICON = {
     t: '<path d="M6.5 9v6M3.5 10.5v3M17.5 9v6M20.5 10.5v3M6.5 12h11"/>',
     m: '<path d="M12 6.6v12.8M12 6.6C10.4 5.1 8.3 4.6 4 5.1v12.8c4.3-.5 6.4 0 8 1.5'
        + 'M12 6.6C13.6 5.1 15.7 4.6 20 5.1v12.8c-4.3-.5-6.4 0-8 1.5"/>',
-    /* PLACED SO THE STROKE FITS. FOOT spans y 3.0 to 19.4 in the 24
-       box; at .62 that is 10.2 tall, and the old translate of -1.5 put
-       the upper print's top edge at y 0.4 — half a 1.8 stroke past the
-       viewBox, so the ring clipped a flat line across the top of it.
-       The numbers below leave 0.7 of clearance at every edge. */
-    p: '<g transform="translate(-2.6 -.2) scale(.62)"><path d="' + FOOT + '"/></g>'
-       + '<g transform="translate(7.4 9.6) scale(.62)"><path d="' + FOOT + '"/></g>',
+    p: STEPS,
     f: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
     w: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>'
   };
