@@ -824,6 +824,26 @@ body {
    this repo's own note says absolute timings here are untrustable. If
    it ever stutters on a real phone, `Fade` from that round is the
    drop-in: same intent, one gradient, no render pass. */
+/* ONE .bar rule, and it did not use to be. A second one sat at the
+   bottom of the file, left over from the bar this replaced, and it won
+   — so the padding on screen was always the old block's 7/20/17 and
+   never the 0/12/10 written here. Nothing looked wrong, which is why it
+   survived a deploy: the numbers it imposed were themselves measured,
+   just for a different bar. The figures below are the ones that were
+   actually rendering, carried over deliberately rather than reverted to
+   the ones this rule claimed. That is the third time in this app a dead
+   rule later in the file has quietly been the live one.
+
+   Both of those numbers still earn their place, and the reasoning is
+   the old block's:
+
+   20px at the sides, so the outermost controls are not flush to the
+   edge. Flush, the first and last button's boxes reach the rounded
+   corners and take in page pixels from outside the block — measured at
+   4.6:1, the lowest of every treatment that passed.
+
+   17px at the bottom on top of the safe area, so the pill clears the
+   home indicator rather than sitting on it. */
 .bar {
   position: fixed;
   left: 0; right: 0;
@@ -831,10 +851,11 @@ body {
   z-index: 30;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: 10px;
-  padding: 0 max(12px, env(safe-area-inset-left))
-           calc(10px + env(safe-area-inset-bottom))
-           max(12px, env(safe-area-inset-right));
+  padding: 7px max(20px, env(safe-area-inset-left))
+           calc(17px + env(safe-area-inset-bottom))
+           max(20px, env(safe-area-inset-right));
   background: none;
   border-top: 0;
 }
@@ -885,6 +906,12 @@ body {
   stroke-linecap: round; stroke-linejoin: round;
 }
 #scTabTally svg rect { stroke-width: 2.1; }
+/* Two glyphs are FILLED dots. This used to say `.ghost svg circle`,
+   which is every circle on the bar — and the view control's icon is a
+   ring with a hand on it, so the ring filled solid and the control drew
+   a blob. A button that shows what you would GET is the whole reason
+   that icon exists, and it was showing nothing. Named, not scoped by
+   ancestor. */
 #scMenu svg circle, #scTabWeek svg circle { fill: currentColor; stroke: none; }
 .tab:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
@@ -898,6 +925,12 @@ body {
    pill says where you are and this does something. Round, matching the
    reference and the profile picture, which are now the only two
    circles in the app. */
+/* There used to be a second .prime, later in the file, left over from
+   the floating pill this replaced — and being later it won, so the
+   13px radius it carried for a microphone-sized button was why the add
+   control drew as a rounded square when it had been written as a
+   circle. A dead rule that still cascades is not dead. It is gone, and
+   so is the whole 554-line block that came with it. */
 .prime {
   flex: none;
   width: 58px; height: 58px;
@@ -916,633 +949,6 @@ body {
   stroke-linecap: round; stroke-linejoin: round;
 }
 .prime:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
-
-/* ── the streak, on the bar ──
-   The only figure this app carries across every view, and a control as
-   well as a number: it opens the tally, which is the screen the figure
-   is about. Tabular so it does not shuffle the bar when it crosses ten.
-   It sits where the microphone was. */
-
-/* ── say it ──
-   In the sheet, because the bar's microphone is gone. Full width and
-   labelled: it is the only route to speech now, and an icon alone
-   would be a control nobody finds twice. */
-.say {
-  display: flex; align-items: center; justify-content: center; gap: 9px;
-  width: 100%; margin: 4px 0 10px; padding: 13px 14px;
-  border: 1px solid var(--ink); background: none; color: var(--ink);
-  font: 600 15px/1 'Inter', system-ui, sans-serif; cursor: pointer;
-}
-.say svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
-  stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.say.is-live { background: var(--red); border-color: var(--red); color: var(--on-red); }
-
-/* ── your picture ──
-   ROUND. It was a rounded square for one round of options, matching
-   the reference it came from, and a circle is what a person's picture
-   is in every list that has ever had one. The face's geometry survives
-   the crop: its furthest mark is the mouth's right end at 43 units
-   from centre in a 50-unit radius, so nothing touches the edge.
-
-   overflow:hidden does the cropping for a photograph as well as for
-   the drawing, so one shape holds both and there is no second rule to
-   keep in step. */
-.pic {
-  display: block; flex: none; overflow: hidden;
-  border-radius: 50%;
-  background: var(--tick-off);
-}
-.pic svg, .pic img { display: block; width: 100%; height: 100%; }
-.pic img { object-fit: cover; }
-.pic.is-off { opacity: .45; }
-
-.pic-row { display: flex; align-items: center; gap: 20px; margin: 6px 0 2px; }
-.pic-item { display: flex; align-items: center; gap: 13px; }
-/* The file input is driven by the button beside it. Hidden with
-   position rather than display:none, because a display:none input
-   cannot be opened by a click in every browser that matters. */
-.pic-file { position: absolute; width: 1px; height: 1px; opacity: 0;
-  pointer-events: none; }
-
-/* ── friends ── */
-.friends { margin-top: 18px; }
-.friends[hidden] { display: none; }
-.fr-k { font-size: 9px; font-weight: 700; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--dim); margin-top: 22px; }
-.fr-k:first-child { margin-top: 0; }
-.fr-list { list-style: none; margin-top: 8px; }
-.fr-row { display: flex; align-items: center; gap: 13px;
-  padding: 12px 0; border-bottom: 1px solid var(--hair); }
-.fr-row:last-child { border-bottom: 0; }
-.fr-rank { font-size: 12px; font-weight: 700; color: var(--dim); width: 12px;
-  font-variant-numeric: tabular-nums; }
-.fr-row.is-me .fr-rank { color: var(--ink); font-weight: 800; }
-.fr-nw { display: flex; align-items: center; gap: 7px; }
-.fr-n { font-size: 16px; font-weight: 700; letter-spacing: -.014em; }
-.fr-s { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
-.fr-t { margin-left: auto; font-size: 17px; font-weight: 700;
-  font-variant-numeric: tabular-nums; }
-
-/* The crown, in the leader's own accent with a halo of the same
-   colour. Four attempts got here: the accent raw is 1.67:1 on a light
-   page, mixed toward your ink it went grey, and a badge of their whole
-   theme was a shape nobody wanted. It dilutes only as far as the page
-   forces — 45 of 78 accent-and-reader pairings leave it exactly the
-   accent — and the halo never dilutes at all, because it carries
-   nothing. On your own row it is simply your accent. */
-.fr-crown { position: relative; width: 22px; height: 22px; flex: none;
-  display: grid; place-items: center; }
-.fr-crown::before { content: ''; position: absolute; inset: -7px;
-  border-radius: 50%; pointer-events: none;
-  background: radial-gradient(circle,
-    color-mix(in srgb, var(--red) 70%, transparent) 0%,
-    color-mix(in srgb, var(--red) 22%, transparent) 45%, transparent 72%); }
-.fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
-  fill: var(--red); }
-
-.fr-note { margin-top: 12px; font-size: 12.5px; line-height: 1.55; color: var(--dim); }
-
-/* Settings, top right of the head. Absolute rather than a flex sibling
-   so the title's own wrapping is untouched by it. */
-.head { position: relative; }
-.head-you { position: absolute; top: 0; right: 0;
-  width: 38px; height: 38px; display: grid; place-items: center;
-  border: 0; background: none; padding: 0; cursor: pointer; }
-.head-you:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-.head-you .tab-face { width: 30px; height: 30px; }
-
-/* ── the tally ────────────────────────────────────────────
-   Five things a day, as cards. Two up, and where you have logged a
-   photograph the photograph IS the card.
-
-   THIS SCREEN IS THE ONE EXCEPTION TO "nothing rounded or shadowed
-   anywhere", and it is a decision rather than a slip. Five treatments
-   were rendered in the real app — no marks at all, a grid of cards, the
-   app's own ring as five arcs, one segmented bar, and a feed — and this
-   was picked over the other four. It is the only one where a
-   photograph is the design rather than an attachment to it, and a
-   14px radius is most of what makes it read as a card instead of a
-   panel. The timetable idiom still owns every other screen: the week,
-   the ring and the sheet are square, and nothing here is shadowed.
-   ═════════════════════════════════════════════════════════ */
-.tally { margin-top: 18px; }
-.tally[hidden] { display: none; }
-
-/* The streak, and it is the only figure this screen carries. It counts
-   days you logged ANYTHING, never days you got all five: a figure that
-   moves only on a perfect day spends most of its life at zero, and a
-   screen that passes judgement is a screen you stop opening. The habits
-   app has the same rule written out at length. */
-.ty-hero { display: flex; align-items: baseline; }
-.ty-lbl {
-  font-size: 9px; font-weight: 700; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--red);
-}
-.ty-fig {
-  margin-left: auto; font-size: 44px; font-weight: 700; line-height: .9;
-  letter-spacing: -.04em; font-variant-numeric: tabular-nums;
-}
-.ty-fig i {
-  font-style: normal; font-size: 13px; font-weight: 500;
-  margin-left: 5px; color: var(--dim);
-}
-.ty-cap { margin-top: 6px; font-size: 11px; color: var(--dim); }
-.ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
-
-.ty-grid {
-  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;
-}
-.ty-card {
-  position: relative; aspect-ratio: 1 / 1;
-  border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
-  padding: 14px; display: flex; flex-direction: column;
-  background: none; color: inherit; font: inherit; text-align: left;
-  cursor: pointer;
-}
-.ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-.ty-card.on { border-color: var(--ink); background: var(--ink); color: var(--paper); }
-
-/* The fifth card takes the full width, and min-height is load-bearing:
-   dropping aspect-ratio also drops the thing the value's auto margin
-   pushes against, so the wide card collapses to its content and its two
-   lines sit on top of each other while the four square ones hold them a
-   card apart. Same row, same kind of object, different spacing. */
-.ty-card.wide { grid-column: 1 / -1; aspect-ratio: auto; min-height: 128px; }
-
-.ty-n { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
-.ty-v {
-  margin-top: auto; font-size: 26px; font-weight: 700; line-height: 1;
-  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
-}
-.ty-s { margin-top: 4px; font-size: 11px; opacity: .72; }
-
-/* ── missed its window ──
-   The schedule already knows that Train was 06:30 to 07:30 and that it
-   is nine o'clock. Saying "Tap" at that point throws away a fact the
-   app is holding. It is deliberately NOT the accent and not danger: the
-   day is not over, the thing can still be done, and a red card for a
-   late gym session is the judgement this screen exists to avoid. */
-.ty-card.late { border-style: dashed; }
-.ty-card.late .ty-s { opacity: 1; color: var(--dim); font-weight: 600; }
-
-/* ── the ring ─────────────────────────────────────────────
-   Every class here carries an `sr-` prefix and every keyframe an `sr-`
-   name, because `.pulse` and `sc-pulse` are ALREADY TAKEN by the
-   microphone at the bottom of this same page. A collision does not
-   throw; it replaces, and the symptom turns up on the other screen.
-
-   The ring is ticks rather than a smooth arc: a stroke says what
-   fraction is left and nothing else, and the one complaint about that
-   is you cannot read a figure off it. A mark you can count fixes
-   exactly that — so the mark has to be a real unit of time, which is
-   what scRingUnit picks and what .sr-key states out loud. */
-
-/* The 3px rule the hero used to carry. Without it the ring floats in
-   the middle of a page whose whole idiom is things hung off a hard
-   horizontal — the drawing changed, the grid did not. */
-.ring {
-  margin-top: 20px;
-  border-top: 3px solid var(--ink);
-  padding-top: 4px;
-}
-.ring[hidden] { display: none; }
-
-.sr-wrap {
-  position: relative;
-  width: 100%;
-  max-width: 286px;
-  margin: 18px auto 0;
-}
-.sr-face { display: block; width: 100%; height: auto; }
-
-/* The figure is HTML over the drawing, not <text> inside it. SVG text
-   cannot inherit the page's colour tokens or its tabular figures, and
-   this is the one number on the screen that must never shift width. */
-.sr-mid {
-  position: absolute;
-  inset: 22%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-  pointer-events: none;
-}
-.sr-kick {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--red);
-}
-.sr-num {
-  margin-top: 7px;
-  font-size: 58px;
-  font-weight: 700;
-  letter-spacing: -.05em;
-  line-height: .92;
-  font-variant-numeric: tabular-nums;
-}
-.sr-unit {
-  margin-top: 6px;
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: .16em;
-  text-transform: uppercase;
-  color: var(--spent);
-}
-.sr-name {
-  margin-top: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  letter-spacing: -.015em;
-}
-.ring.is-done .sr-kick { color: var(--dim); }
-
-/* What one mark is worth. It changes with the span — a mark is a
-   minute inside a half-hour block and a quarter of an hour across a
-   ten-hour gap — so leaving it unsaid would make the counting a
-   guess. */
-.sr-key {
-  margin-top: 14px;
-  text-align: center;
-  font-size: 10px;
-  letter-spacing: .04em;
-  color: var(--spent);
-}
-.sr-key:empty { display: none; }
-
-.sr-rest { margin-top: 26px; border-top: 3px solid var(--ink); padding-top: 11px; }
-.sr-lbl {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .2em;
-  text-transform: uppercase;
-  color: var(--dim);
-}
-.sr-list { list-style: none; }
-.sr-row {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 12px;
-  align-items: baseline;
-  /* 14px a side, same as .row: every line here opens the same editor. */
-  padding: 14px 0;
-  border-bottom: 1px solid var(--hair);
-  width: 100%;
-  border-left: 0; border-right: 0; border-top: 0;
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-.sr-row b { font-size: 15px; font-weight: 600; }
-.sr-row span { font-size: 12px; font-weight: 500; color: var(--dim); }
-.sr-row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
-.sr-none { padding: 14px 0; font-size: 13px; color: var(--spent); }
-
-/* transform and opacity only — never stroke-width, stroke-dashoffset or
-   a filter. The pulse is the one thing on this page that runs forever,
-   so it has to be a compositor property or it repaints the whole ring
-   twice a second. */
-.sr-ping {
-  transform-box: fill-box;
-  transform-origin: center;
-  animation: sr-ping 2.4s cubic-bezier(.2, .7, .3, 1) infinite;
-}
-@keyframes sr-ping {
-  0%        { transform: scale(.5);  opacity: .6; }
-  70%, 100% { transform: scale(2.6); opacity: 0;  }
-}
-
-/* Not paused — never built. A paused ping is a stray red circle frozen
-   at whatever size the frame caught it, sitting on the ring forever,
-   which is worse than no effect at all. scPaintRing checks the query
-   itself and omits the element. */
-@media (prefers-reduced-motion: reduce) {
-  .sr-ping { animation: none; display: none; }
-}
-
-/* ── a day ───────────────────────────────────────────────── */
-
-.rail { list-style: none; }
-
-.day { margin-top: 26px; }
-
-.day-name {
-  display: block;
-  width: 100%;
-  border: 0;
-  border-bottom: 1px solid var(--ink);
-  background: none;
-  padding: 0 0 7px;
-  color: inherit;
-  font-family: inherit;
-  font-size: 46px;
-  font-weight: 700;
-  letter-spacing: -.05em;
-  line-height: .86;
-  text-align: left;
-  text-transform: uppercase;
-  cursor: pointer;
-}
-.day.is-today .day-name { color: var(--red); }
-.day-name:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-
-/* ── a row ───────────────────────────────────────────────── */
-
-/* Three columns, sized identically on every row without subgrid: the
-   measure is fixed, the name takes the slack, and the time is one
-   format in tabular figures so it is the same width in every row it
-   will ever hold. The version before this carried a subgrid and a
-   fallback and a collapsing column to keep three tracks aligned; a
-   fixed format made all of it unnecessary. */
-.row {
-  display: grid;
-  grid-template-columns: var(--meas) 1fr auto;
-  gap: 12px;
-  align-items: center;
-  width: 100%;
-  /* 14px, which puts a row at 45. The drawing this came from sets them
-     at 9, giving a 36px row — right for a printed timetable, wrong for
-     a list where every line opens an editor. The sheet is taller for
-     it and that is the correct trade: a target you miss costs more
-     than a scroll you did not need. */
-  padding: 14px 0;
-  border: 0;
-  border-bottom: 1px solid var(--hair);
-  background: none;
-  color: inherit;
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
-  position: relative;
-}
-/* --tick-off, not a literal grey: it is the lightest neutral each
-   theme owns, and on white it is the #ececec this always was. */
-.row:active { background: var(--tick-off); }
-.row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
-
-/* ── the measure ──
-   The one thing this design adds. A rule as long as the block is, so
-   a ten-hour shift reads as a bar and a fifteen-minute one as a stub.
-   No list can say that otherwise: in a list every block is one row
-   tall whatever it costs you.
-
-   Floored at 3px because below that a rule stops being a mark and
-   starts being a speck, and capped at the column because ten hours is
-   already the longest thing anybody puts in a day. */
-.row .m {
-  display: block;
-  height: 2px;
-  background: var(--ink);
-}
-/* ── a block the tally has counted ──
-   The measure fills solid rather than the row taking a colour. It is
-   the mark that already says how long the block is, so filling it says
-   "this one happened" in the language the row already speaks — and it
-   works on a block that is still in the future, which a done state has
-   to: you can finish a run before its window opens. */
-.row.is-done .m { height: 6px; background: var(--ink); }
-.row.is-done.is-past .m { background: var(--spent); }
-
-.row.is-past .m { background: var(--spent); }
-.row.is-now .m { background: var(--red); height: 3px; }
-
-/* The block's name is the subheading of its own row — it is what you
-   are scanning for, and at 14px/500 it sat at the same volume as the
-   time beside it and the place inside it. 16px/700 is a subheading and
-   not a heading: the hero's figure is still four times its size, so
-   nothing on the screen has moved rank. */
-.row .n {
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -.014em;
-  line-height: 1.2;
-  min-width: 0;
-}
-/* The place rides inside the name rather than taking a column of its
-   own — most blocks have none, and a fourth track standing empty all
-   week is worse than no track.
-
-   It takes the accent — the same colour the day heading takes when the
-   day is today — so that WHERE and WHAT are told apart by hue rather
-   than by both being grey at different sizes.
-
-   This was built once as --sec, a second hue every palette named for
-   itself, on the argument that the accent here means NOW and a desk is
-   never urgent. That argument is real and it lost anyway: a thirteenth
-   colour that appears on one kind of word is a colour the screen has to
-   teach you, and the accent is already the screen's one loud thing.
-   Asked for directly, and the token went with it rather than sitting in
-   the file unused.
-
-   So the accent is spent three ways now — today's heading, the running
-   block, a place — and the "one red" check counts by KIND rather than
-   by a total, because the total depends on how many blocks happen to
-   have a place typed on them. What it holds is that nothing outside
-   those three is ever red. */
-.row .n em {
-  font-style: normal;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: .09em;
-  text-transform: uppercase;
-  color: var(--red);
-  margin-left: 7px;
-  white-space: nowrap;
-}
-
-.row .t {
-  font-size: 11px;
-  font-weight: 400;
-  color: var(--dim);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-
-/* Finished blocks go grey — and only as far as --spent, which still
-   clears 4.7:1. Hierarchy the rest of the way is weight, because
-   fading text until it reads as "off" is how a schedule becomes
-   unreadable in daylight. */
-.row.is-past .n, .row.is-past .t { color: var(--spent); }
-/* A finished block drops a step rather than to 400. The live rows are
-   700 now, so 400 beside them is two steps and reads as another kind of
-   thing entirely instead of as the same thing, done. */
-.row.is-past .n { font-weight: 500; }
-/* The place does NOT fade with the block. It used to take --spent here,
-   back when it was grey anyway and the whole row simply went quiet —
-   but a place is an identity and doneness is a state, and a colour that
-   carries an identity must not also be carrying whether. Faded, it also
-   made the second colour invisible in practice: on a normal morning
-   most of the day is behind you, so the hue showed on one row out of
-   six and read as a highlight on the running block rather than as what
-   WHERE looks like. The name and the time going quiet is what says the
-   block is done; that has not changed. */
-
-/* The one running block: a red rule down the margin and the weight to
-   match. It is the only place on the page the red is spent besides
-   today's own name. */
-.row.is-now {
-  border-left: 4px solid var(--red);
-  /* The row reaches 13px further LEFT for its rule, and has to grow by
-     the same amount rather than slide. With a plain width:100% the
-     negative margin moves the whole box, so the right edge lands 13px
-     inside every other row and the time column steps out of the one
-     alignment this design is built on. It only shows when something is
-     actually running, which is how it went unseen. */
-  margin-left: -13px;
-  width: calc(100% + 13px);
-  padding-left: 9px;
-  overflow: hidden;   /* the clip the sweep runs inside */
-}
-/* 800, because the base is 700 now. This rule used to be the only
-   thing making the running row's name heavier than the rest; leaving it
-   at 700 would have made it silently stop doing anything, which is the
-   quietest way for a state to disappear. The sweep and the red measure
-   still carry most of the signal — this is the last step of it. */
-.row.is-now .n { font-weight: 800; }
-
-/* ── the sweep ──
-   A hairline that crosses the running block and keeps crossing it, so
-   the one row that is happening now is the one row that moves.
-
-   Three things about how it is built, all of them load-bearing:
-
-   · It travels on TRANSFORM alone, and only in percentages of its own
-     width. The element is exactly as wide as the row, so -100% puts
-     its trailing edge on the row's left edge and 0 puts it on the
-     right — one full crossing, with no need to know the row's width
-     in CSS and no layout or paint work per frame. Animating `left` or
-     a background position would do the same thing visually and repaint
-     the strip sixty times a second.
-
-   · It sits behind the TEXT but in front of the page, so the wash
-     never tints a word. That distinction cost a round: z-index:-1
-     alone put it behind the body's own white, where it animated
-     perfectly and painted nothing — the transform kept changing, so a
-     check reading computed style called it working. The row is not a
-     stacking context, so "behind" meant behind everything. What lifts
-     the text is the text, given a z-index of its own.
-
-   · The trail is 68px and the line is 2px. The line alone reads as a
-     glitch; the trail alone reads as a wash with no direction. */
-.row.is-now::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-right: 2px solid var(--red);
-  /* color-mix off --red rather than a second token holding the same
-     colour as channels. On a browser without it the whole declaration
-     drops and the sweep is its 2px leading edge alone — which still
-     reads, and which is a better failure than a wash in a colour the
-     page stopped using. */
-  background: linear-gradient(90deg, transparent calc(100% - 68px),
-                                     color-mix(in srgb, var(--red) 13%, transparent));
-  transform: translateX(-100%);
-  animation: sc-sweep 2.8s linear infinite;
-}
-@keyframes sc-sweep {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
-}
-
-/* The row's own content, lifted over the wash. */
-.row.is-now .m,
-.row.is-now .n,
-.row.is-now .t { position: relative; z-index: 1; }
-
-/* The row keeps its rule and its weight either way — an effect that
-   degrades to nothing has not been disabled, it has removed the mark.
-   Not built rather than paused: a paused sweep is a red line frozen
-   somewhere across the row, which reads as a bug. */
-@media (prefers-reduced-motion: reduce) {
-  .row.is-now::after { display: none; }
-}
-
-.row.is-free {
-  display: block;
-  color: var(--dim);
-  font-size: 13px;
-  font-style: italic;
-}
-
-.empty {
-  padding: 10px 0;
-  font-size: 13px;
-  line-height: 1.6;
-  color: var(--ink);
-}
-.empty em { font-style: italic; }
-
-/* ── the bar ─────────────────────────────────────────────── */
-
-/* ── the bar ──
-   The controls in their own block, inset from the page, with the week
-   running past it to the bottom of the phone.
-
-   IT USED TO BE A FULL-WIDTH SURFACE and the comment there is worth
-   keeping, because it is why this one is shaped as it is. That bar
-   painted the body's own wash `fixed`, so the two resolved to the same
-   pixels at the same place and the seam disappeared — the fix for a
-   flat --g0 cutting a white band across the bottom eighth of the page,
-   which is precisely where the gradient is strongest. The rule it was
-   obeying was "it cannot simply be transparent: the bar is fixed over
-   scrolling content".
-
-   That rule still holds and this obeys it differently. There is no
-   full-width surface to match a seam across any more — the block is
-   opaque where the controls are and the page is simply the page
-   everywhere else. Six treatments were measured with a row scrolled
-   underneath, and the one with no surface at all failed at 1.51:1 on a
-   dark palette: a row's text passing directly behind an unbacked icon
-   is exactly what an opaque bar exists to prevent. This keeps the
-   opacity and spends only the strip the controls actually occupy. */
-.bar {
-  position: fixed;
-  left: 0; right: 0;
-  bottom: 0;
-  z-index: 30;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  /* 20px, so the outermost controls are not flush to the block's own
-     edge. Flush, the first and last button's bounding boxes reach the
-     rounded corners and take in page pixels from outside the block —
-     which measured 4.6:1, the lowest of every treatment that passed.
-     8px of shoulder each side and it is a non-issue. */
-  /* 7px of top padding, and the bottom carries it too — so the block
-     is 68px tall round 54px of control and the microphone has 7px of
-     shoulder on every side. Flush, its 13px corners poked past the
-     block's own 18px curve top and bottom, which is the same fault the
-     prototype had: a control bursting out of the thing that contains
-     it reads as a mistake rather than as emphasis. */
-  padding: 7px max(20px, env(safe-area-inset-left))
-           calc(17px + env(safe-area-inset-bottom))
-           max(20px, env(safe-area-inset-right));
-  background: none;
-  border-top: 0;
-}
-
-
-/* The bar's controls used to be four ghosts and one filled block in a
-   floating pill. Both are gone: the pill became a tab strip with its
-   own rules further up, and nothing here is a .ghost any more. Removed
-   rather than left in place — a second .prime later in the file than
-   the real one was silently winning, and the microphone-sized 13px
-   radius it carried was why the add button drew as a rounded square
-   when it had been written as a circle. A dead rule that still
-   cascades is not dead. */
-
-/* The settings glyph is three FILLED dots. This used to say
-   `.ghost svg circle`, which is every circle on the bar — and the view
-   control's icon is a ring with a hand on it, so the ring was filled
-   solid and the control drew a blob. A button that shows what you would
-   GET is the whole reason that icon exists, and it was showing nothing.
-   Scoped to the one button that wants filled circles. */
-#scMenu svg circle { fill: currentColor; stroke: none; }
 
 /* The ring only exists while listening, so there is nothing animating
    on this page in the state it spends all its time in. */

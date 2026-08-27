@@ -69,6 +69,28 @@ turns up screens away.
 - Descendant-scoping (`.bt-fig .cell`) is not enough on its own: a later
   global rule still supplies every property yours does not name.
 
+**A later rule in the same file is the live one, and that has bitten
+three times.** `.prime` kept a microphone's 13px radius from the bar it
+replaced, so the add control drew as a rounded square after being
+written as a circle. `.ghost svg circle` filled the view icon's ring
+into a blob. And `.bar` had a whole second copy of itself at the foot of
+`schedule/app.css` — 554 lines of that file were duplicated verbatim —
+imposing the previous bar's padding over the padding the live rule's own
+comment explained. That third one is the worst, because the numbers it
+forced were themselves measured, just for a different bar, so nothing on
+screen ever looked wrong. **A dead rule that still cascades is not
+dead.**
+
+Unlike `.live` and `.grid`, this IS statically decidable: it asks
+whether one selector, spelled identically, is written twice in one file,
+and the answer is in the text. `tests/names.js` checks it. Eleven pairs
+were already standing in four other screens when it was written and are
+baselined by name — a debt written down, not an approval, and each is a
+place where editing the first rule does nothing. **The baseline is
+checked in both directions**: a named pair that has gone fails too,
+because otherwise the list rots into an inventory of things that do not
+exist and quietly waves through the duplicate that replaced them.
+
 ## Data
 
 Everything lives in this browser and is never uploaded. `ledger.v1`
