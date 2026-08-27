@@ -1173,6 +1173,116 @@ const SAID = [
     document.documentElement.style.removeProperty('--g3');
   });
 
+  /* ══ what kind of thing a block is ═════════════════════════
+     A glyph per row, worked out from the name you typed. The DRAWING is
+     judged by eye at 22px — a check cannot tell you a car reads as a
+     car. What a check can hold is everything around it, and all of it
+     fails silently: a keyword pointing at a glyph that does not exist
+     draws an empty box, an ordering mistake draws the confidently wrong
+     glyph, and an <svg> with no width fills its parent at 300x150 while
+     still drawing correctly.
+
+     Driven through the app's own store and its own renderer, never by
+     calling the matcher — scIconFor lives inside the IIFE, and a test
+     that reaches past the wrapper is testing a function rather than the
+     screen. */
+  console.log('\n── what kind of thing a block is ──');
+  {
+    const src = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'schedule', 'app.js'), 'utf8');
+    const cut = (from, to) => src.slice(src.indexOf(from), src.indexOf(to));
+    const all = (s, re) => [...s.matchAll(re)].map((m) => m[1]);
+    const drawn = all(cut('var BLOCK_ICON = {', 'var ICON_MATCH'), /^\s{4}([a-z]+):/gm);
+    const named = [...new Set(all(cut('var ICON_MATCH = [', 'var ICON_RE'),
+      /\['([a-z]+)', \[/g))];
+
+    ok('every glyph a keyword points at is actually drawn',
+      named.every((k) => drawn.includes(k)),
+      named.filter((k) => !drawn.includes(k)));
+    /* The other direction, and it is the one that rots: a glyph nothing
+       can reach is dead weight that looks like coverage. `block` is the
+       fallback and is reached by returning it, not by a keyword. */
+    ok('and every glyph drawn can actually be reached',
+      drawn.every((k) => k === 'block' || named.includes(k)),
+      drawn.filter((k) => k !== 'block' && !named.includes(k)));
+    ok('and there are enough of them to be worth having',
+      drawn.length >= 38, drawn.length);
+
+    /* Each of these was a real collision before it was a line in the
+       table. First hit wins, so every pair where one phrase contains
+       another has to be listed the long way round — and "Train" is the
+       gym rather than the railway, which is a DECISION and belongs
+       somewhere it can be asserted. */
+    const TRY = [
+      ['Walk the dog', 'pet'], ['Walk', 'walk'],
+      ['Work out', 'train'], ['Deep work', 'work'],
+      ['School run', 'drive'], ['Run', 'run'],
+      ['Water plants', 'garden'], ['Water', 'water'],
+      ['Meal prep', 'cook'], ['Dinner', 'eat'],
+      ['Edit photos', 'photo'], ['Journal', 'write'],
+      ['Train', 'train'], ['Flight to Milan', 'travel'],
+      /* Word boundaries. "bread" contains "read" and "grunt" contains
+         "run"; a substring match looked perfect on the seed and
+         mislabels the moment anybody types a real sentence. */
+      ['Bread', 'block'], ['Grunt', 'block'],
+      ['Xylophone recital', 'block'],
+    ];
+    await page.evaluate((TRY) => {
+      const raw = JSON.parse(localStorage.getItem('sched.v1'));
+      raw.items = TRY.map((t, i) => ({ id: 'ic' + i, d: 2, s: 400 + i * 20,
+                                       e: 415 + i * 20, r: '', n: t[0] }));
+      localStorage.setItem('sched.v1', JSON.stringify(raw));
+      localStorage.setItem('sched.view.v1', 'list');
+    }, TRY);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(280);
+
+    const got = await page.evaluate(() => [...document.querySelectorAll('.row[data-id]')]
+      .map((r) => {
+        const ic = r.querySelector('.ic');
+        const b = ic.getBBox();
+        const box = ic.getBoundingClientRect();
+        return {
+          n: r.querySelector('.n').textContent,
+          icon: ic.getAttribute('data-icon'),
+          hidden: ic.getAttribute('aria-hidden'),
+          marks: ic.children.length,
+          /* Half the 1.8 stroke by hand — getBBox reports the path and
+             not the ink it is drawn with. */
+          fits: [+(b.x - 0.9).toFixed(2), +(b.y - 0.9).toFixed(2),
+                 +(b.x + b.width + 0.9).toFixed(2), +(b.y + b.height + 0.9).toFixed(2)],
+          w: Math.round(box.width), h: Math.round(box.height),
+        };
+      }));
+
+    const wrong = got.filter((g, i) => g.icon !== TRY[i][1])
+      .map((g, i) => g.n + ' → ' + g.icon);
+    ok('the name decides the glyph, and the order decides the ties',
+      wrong.length === 0, wrong);
+    ok('a name it cannot place gets the clock, never an empty box',
+      got.filter((g) => g.icon === 'block').every((g) => g.marks >= 1), got);
+    /* An inline <svg> with no width or height falls back to 300x150 and
+       fills its parent — silently, and while still drawing the right
+       glyph. It has happened once on this screen already. */
+    ok('and every glyph is 22px, not the 300x150 an unsized svg becomes',
+      got.every((g) => g.w === 22 && g.h === 22), got.map((g) => [g.w, g.h]));
+    /* The Steps footprint shipped drawn half a stroke outside its own
+       viewBox and the ring clipped a flat line across the top of it. */
+    ok('and every glyph is inside its own 24 box, stroke included',
+      got.every((g) => g.fits[0] >= 0 && g.fits[1] >= 0
+                    && g.fits[2] <= 24 && g.fits[3] <= 24),
+      got.filter((g) => g.fits[0] < 0 || g.fits[1] < 0
+                     || g.fits[2] > 24 || g.fits[3] > 24).map((g) => [g.icon, g.fits]));
+    ok('and it is hidden from a screen reader, which has the name already',
+      got.every((g) => g.hidden === 'true'), got[0]);
+  }
+
+  /* Put the real week back — everything after this reads the shipped
+     blocks by name. */
+  await page.evaluate(() => localStorage.removeItem('sched.v1'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+
   /* ── the tally ──
      Five things a day. Nearly everything below is a MECHANISM rather
      than an appearance: the two records agreeing about one morning, a
@@ -1464,8 +1574,12 @@ const SAID = [
     foot: document.getElementById('scTallyFoot').textContent,
   }));
   ok('an unlogged today does not break the run', run.fig === '5days', run);
-  ok('and the longest run is counted, and says “days” only when it is many',
-    run.foot === 'Longest run 5 days.', run);
+  /* STREAK, not run — one word for it, everywhere. The panel a row
+     opens says "longest streak" beside four other figures, and the foot
+     of the same screen saying "longest run" for the same idea is the
+     screen using two names for one thing in one glance. */
+  ok('and the longest streak is counted, and says “days” only when it is many',
+    run.foot === 'Longest streak 5 days.', run);
 
   /* ── two days, then the day shuts ──
      Unlimited backfill makes a shared number fiction — somebody fills
@@ -1481,6 +1595,314 @@ const SAID = [
   });
   ok('a day three back is outside the window', shut.closed !== shut.open, shut);
 
+  /* ══ the history a row opens ══════════════════════════════
+     Twenty-six weeks of one item, over the page. Everything here is a
+     MECHANISM: how many filters draw the glow, which weekday a column
+     lands on, which of the three figures each kind of item gets. None
+     of those move in a screenshot of a panel that looks correct.
+
+     Seeded with a real half-year, because the shape of the data is what
+     the panel is drawing and an empty one proves nothing. */
+  console.log('\n── the history a row opens ──');
+  await page.evaluate(() => {
+    const pad = (n) => String(n).padStart(2, '0');
+    const day = (n) => { const d = new Date(); d.setDate(d.getDate() - n);
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const P = { t: (i) => i % 3 !== 0, m: (i) => i % 7 !== 5,
+                p: (i) => i % 4 !== 2, f: (i) => i > 168 ? false : i % 4 !== 1,
+                w: (i) => i % 2 === 0 };
+    const V = { p: (i) => String(5200 + i * 31), f: (i) => String(1780 + i * 6),
+                w: (i) => (1.1 + (i % 20) / 10).toFixed(1) };
+    const out = {};
+    for (let i = 0; i < 182; i++) {
+      const r = {};
+      Object.keys(P).forEach((k) => { if (P[k](i)) r[k] = V[k] ? V[k](i) : 1; });
+      if (Object.keys(r).length) out[day(i)] = r;
+    }
+    localStorage.setItem('sched.tick.v1', JSON.stringify(out));
+    localStorage.setItem('sched.view.v1', 'tally');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(300);
+
+  /* ── two targets, and neither inside the other ──
+     A <button> inside a <button> is invalid and collapses to one press,
+     which would silently make the strip un-openable while looking
+     exactly right. The row is one element and the strip is its sibling,
+     and that is the thing worth asserting. */
+  const rows = await page.evaluate(() => {
+    const r = [...document.querySelectorAll('.ty-row')];
+    return {
+      n: r.length,
+      nested: r.some((x) => x.querySelector('button button')),
+      pairs: r.every((x) => x.querySelector(':scope > .ty-card')
+                         && x.querySelector(':scope > .ty-hist')),
+      taps: r.map((x) => {
+        const a = x.querySelector('.ty-card').getBoundingClientRect();
+        const b = x.querySelector('.ty-hist').getBoundingClientRect();
+        return [Math.round(Math.min(a.width, a.height)), Math.round(b.width)];
+      }),
+      labels: r.map((x) => x.querySelector('.ty-hist').getAttribute('aria-label')),
+    };
+  });
+  ok('five rows, each a card and a strip side by side',
+    rows.n === 5 && rows.pairs, rows);
+  ok('and the strip is a SIBLING of the card, never nested inside it',
+    !rows.nested, rows);
+  ok('both halves of a row clear 44px for a thumb',
+    rows.taps.every(([a, b]) => a >= 44 && b >= 44), rows.taps);
+  ok('and the strip says what it opens, since it draws no words',
+    rows.labels.every((l) => /history/.test(l || '')), rows.labels);
+
+  /* Pressed the way a thumb presses it — the handler is what has to
+     open the panel, not a call to the function behind it. */
+  await page.click('.ty-row:has([data-item="p"]) .ty-hist');
+  await page.waitForTimeout(220);
+
+  /* ── ONE FILTER, NOT ONE HUNDRED AND EIGHTY-TWO ──
+     The whole argument for drawing the glow this way is that every lit
+     day gets its own falloff at the cost of a fixed number of filter
+     passes. Counting filters against lit days is what says so, and it
+     is exactly what a screenshot cannot say: the sketch that put a
+     larger low-alpha rect behind each cell looked nearly identical. */
+  const glow = await page.evaluate(() => {
+    const cal = document.querySelector('.ty-cal');
+    const kids = [...cal.children].filter((e) => e.tagName !== 'defs');
+    return {
+      filters: cal.querySelectorAll('defs filter').length,
+      blurs: [...cal.querySelectorAll('feGaussianBlur')]
+        .map((e) => +e.getAttribute('stdDeviation')),
+      groups: cal.querySelectorAll('g[filter]').length,
+      lit: cal.querySelectorAll('rect[fill*="--ink"]').length,
+      /* Order matters: the blurred copies have to be painted BEFORE the
+         solid marks or the glow sits on top of what it is lighting. */
+      lastIsSolid: kids[kids.length - 1].tagName === 'rect',
+      groupsBeforeSolid: kids.findIndex((e) => e.tagName === 'g') <
+                         kids.findIndex((e, i) => e.tagName === 'rect' && i > 40),
+    };
+  });
+  ok('the glow is a fixed number of filter passes, not one per day',
+    glow.filters === 2 && glow.groups === 2 && glow.lit > 200, glow);
+  ok('and it is two passes — a tight core and a wide falloff',
+    glow.blurs.length === 2 && Math.max(...glow.blurs) > Math.min(...glow.blurs) * 2,
+    glow.blurs);
+  ok('and the blurred copies are painted behind the solid marks',
+    glow.lastIsSolid, glow);
+
+  /* ── weeks across, weekdays DOWN ──
+     Without the first day's own weekday as a column offset, every
+     column is a rolling seven days and the row a given day sits in
+     drifts — which destroys the one thing the shape is good for. The
+     assertion is that today lands on today's weekday row. */
+  const grid = await page.evaluate(() => {
+    /* `:scope > rect` — the DAYS, not the glow. The blurred copies are
+       grown and therefore offset by half the difference, so counting
+       every rect in the svg finds fourteen rows rather than seven and
+       picks a glow rect as "today". They live inside a <g>; the days do
+       not. */
+    const cal = document.querySelector('.ty-cal');
+    const days = [...cal.querySelectorAll(':scope > rect')];
+    const ys = [...new Set(days.map((r) => +r.getAttribute('y')))].sort((a, b) => a - b);
+    const last = days[days.length - 1];
+    return { rows: ys.length, cells: days.length,
+             todayRow: ys.indexOf(+last.getAttribute('y')),
+             dow: new Date().getDay() };
+  });
+  ok('the calendar is seven rows deep and today sits on today’s weekday',
+    grid.rows === 7 && grid.todayRow === grid.dow && grid.cells === 182, grid);
+
+  /* ── the three figures are not the same three for every item ──
+     Two of the five are ticks and three are numbers: a tick has no
+     average to take. And Fuel is the one number you do NOT want more
+     of, so calling its biggest day "your best" would be praise for the
+     wrong thing. */
+  const figs = {};
+  for (const id of ['p', 'f', 'w', 't', 'm']) {
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(120);
+    await page.click('.ty-row:has([data-item="' + id + '"]) .ty-hist');
+    await page.waitForTimeout(200);
+    figs[id] = await page.evaluate(() => ({
+      title: document.querySelector('.ty-title').textContent,
+      caps: [...document.querySelectorAll('.ty-stats span')].map((e) => e.textContent),
+      units: [...document.querySelectorAll('.ty-stats b i')].map((e) => e.textContent),
+      hint: document.querySelector('.ty-hint').textContent,
+    }));
+  }
+  ok('every item’s longest run is called a STREAK',
+    Object.values(figs).every((f) => f.caps.includes('longest streak')), figs.p);
+  ok('a tick gets shape rather than an average it cannot have',
+    figs.t.caps.join('|') === 'longest streak|days on now|days a week'
+    && figs.m.caps.indexOf('average a day') < 0, [figs.t.caps, figs.m.caps]);
+  ok('a number gets its average and its extreme',
+    figs.p.caps[0] === 'average a day' && figs.p.caps[1] === 'your best', figs.p.caps);
+  ok('but a calorie count’s biggest day is not called your BEST',
+    figs.f.caps[1] === 'your highest'
+    && !Object.values(figs).some((f) => f.caps.includes('your best') && f.title === 'Fuel'),
+    figs.f.caps);
+  ok('and the unit rides the figure, so 2,631 and 2.7 are not read alike',
+    figs.f.units.length === 2 && figs.f.units[0] === 'kcal'
+    && figs.w.units[0] === 'L' && figs.t.units.length === 0,
+    { f: figs.f.units, w: figs.w.units, t: figs.t.units });
+  ok('and the span is the same 26 weeks on every one of them',
+    Object.values(figs).every((f) => / of 182 days/.test(f.hint)), figs.w.hint);
+
+  /* ── the misses have to stay visible ──
+     A wider halo was measured and rejected because its falloff reached
+     into the gaps and greyed the unlit days out. That is the one thing
+     a record of showing up must never lose, so it is measured on
+     composited pixels rather than trusted to the constants. */
+  {
+    const { PNG: PNG3 } = require('pngjs');
+    const png = PNG3.sync.read(await page.screenshot());
+    const at = (x, y) => { const i = (png.width * Math.round(y * 2)
+      + Math.round(x * 2)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+    const lin = (c) => { c /= 255;
+      return c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4); };
+    const lum = (p) => .2126 * lin(p[0]) + .7152 * lin(p[1]) + .0722 * lin(p[2]);
+    const cell = await page.evaluate(() => {
+      const cal = document.querySelector('.ty-cal');
+      const b = cal.getBoundingClientRect();
+      const vb = cal.viewBox.baseVal;
+      const s = Math.min(b.width / vb.width, b.height / vb.height);
+      const ox = b.x + (b.width - vb.width * s) / 2 - vb.x * s;
+      const oy = b.y + (b.height - vb.height * s) / 2 - vb.y * s;
+      /* An unlit day and a lit one, taken from the SVG's own geometry
+         rather than eyeballed off the picture. */
+      const pick = (want) => [...cal.querySelectorAll('rect')].find((r) =>
+        (r.getAttribute('fill') || '').includes(want));
+      const mid = (r) => ({ x: ox + (+r.getAttribute('x') + 4.7) * s,
+                            y: oy + (+r.getAttribute('y') + 4.7) * s });
+      return { off: mid(pick('tick-off')), on: mid(pick('--ink')) };
+    });
+    const panel = at(cell.off.x, cell.off.y - 26);
+    const off = at(cell.off.x, cell.off.y);
+    const on = at(cell.on.x, cell.on.y);
+    const sep = Math.abs(lum(off) - lum(panel));
+    ok('a missed day is still a mark, not swallowed by its neighbours’ glow',
+      sep > .02 && Math.abs(lum(on) - lum(off)) > .3,
+      { panel, off, on, sep: +sep.toFixed(3) });
+  }
+
+  /* ── it closes, three ways, and never outlives its view ──
+     The panel lives OUTSIDE the tally section, which is what stops the
+     section's `hidden` from stranding it — and is exactly why leaving
+     the view has to close it by hand. */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(160);
+  const shutEsc = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
+  await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+  await page.waitForTimeout(180);
+  await page.click('.ty-veil', { position: { x: 6, y: 6 } });
+  await page.waitForTimeout(160);
+  const shutTap = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
+  const stranded = await page.evaluate(() => {
+    document.querySelector('.ty-row .ty-hist').click();
+    document.querySelector('.tab[data-view="ring"]').click();
+    return { veil: document.getElementById('scTyVeil').hidden,
+             ring: !document.getElementById('scRing').hidden };
+  });
+  ok('escape closes it, and takes the panel before the sheet',
+    shutEsc === true, { shutEsc });
+  ok('and tapping the page behind it closes it too', shutTap === true, { shutTap });
+  ok('and leaving the view cannot strand it over another screen',
+    stranded.veil && stranded.ring, stranded);
+
+  /* ── every string on the glass, on every palette ──
+     MEASURED, NEVER READ OFF THE CASCADE. The panel is --g0 at 82% over
+     a blurred page over whatever the theme's own three washes put
+     there; the arithmetic only knows about --g0, and this repo has
+     already shipped one thing that passed the arithmetic and measured
+     2.92:1 on screen.
+
+     AND POLARITY-AGNOSTIC, OR NONE. Seven of the thirteen palettes are
+     dark, so taking a low percentile as ink and a high one as ground
+     compares the track against itself on over half of them — this repo
+     has made that exact mistake in three separate harnesses, the last
+     one reporting a label at 1.05:1 that was really 7.64:1. Ground is
+     the most common pixel in the patch and ink is whatever is furthest
+     from it in luminance, which is right whichever way round it is.
+
+     THE LIST COMES FROM THE APP. An earlier cut of this queried the DOM
+     for palette buttons, found none, measured ONE palette and printed
+     all clear — a check that finds nothing passes, which is the failure
+     tests/run.js and the flight-pause rule are both written about. It
+     refuses to run on a short list now. */
+  {
+    const { PNG: PNG4 } = require('pngjs');
+    const src = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'schedule', 'app.js'), 'utf8');
+    const block = src.slice(src.indexOf('var THEMES = ['));
+    const palettes = (block.slice(0, block.indexOf('var THEME_KEY'))
+      .match(/id: *'([a-z]+)'/g) || []).map((s) => s.replace(/id: *'|'/g, ''));
+    ok('the contrast pass has found every palette to measure',
+      palettes.length >= 13, palettes);
+
+    /* lum and ratio are this file's own, at the top — one definition of
+       the arithmetic, so a fix to it reaches every measurement here. */
+    const pair = (png, b) => {
+      const seen = new Map(), px = [];
+      for (let y = Math.round(b.y * 2); y < Math.round((b.y + b.height) * 2); y++)
+        for (let x = Math.round(b.x * 2); x < Math.round((b.x + b.width) * 2); x++) {
+          const i = (png.width * y + x) << 2;
+          const p = [png.data[i], png.data[i + 1], png.data[i + 2]];
+          px.push(p);
+          const k = (p[0] >> 2) + ',' + (p[1] >> 2) + ',' + (p[2] >> 2);
+          const e = seen.get(k);
+          if (e) e.n++; else seen.set(k, { n: 1, p });
+        }
+      let ground = null;
+      seen.forEach((e) => { if (!ground || e.n > ground.n) ground = e; });
+      const gl = lum(ground.p);
+      let ink = ground.p, far = -1;
+      px.forEach((p) => { const d = Math.abs(lum(p) - gl); if (d > far) { far = d; ink = p; } });
+      return ratio(ink, ground.p);
+    };
+
+    /* 4.5:1 for the type, 3:1 for the marks. */
+    const WANT = [['.ty-title', 4.5], ['.ty-span', 4.5], ['.ty-stats b', 4.5],
+                  ['.ty-stats span', 4.5], ['.ty-hint', 4.5]];
+    const low = {};
+    for (const theme of palettes) {
+      /* The view goes back with every reload. The block above this one
+         leaves the app on the RING — it proves the panel cannot be
+         stranded by switching there — so without this the first
+         palette reloads onto a screen with no rows and waits 30s for a
+         strip that is not on it. */
+      await page.evaluate((t) => {
+        localStorage.setItem('sched.theme.v1', t);
+        localStorage.setItem('sched.view.v1', 'tally');
+      }, theme);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(240);
+      await page.click('.ty-row:has([data-item="f"]) .ty-hist');
+      await page.waitForTimeout(220);
+      const png = PNG4.sync.read(await page.screenshot());
+      for (const [sel, want] of WANT) {
+        const r = pair(png, await page.locator(sel).first().boundingBox());
+        if (!low[sel] || r < low[sel].r) low[sel] = { r: +r.toFixed(2), theme, want };
+      }
+      const cal = await page.locator('.ty-cal').boundingBox();
+      const r = pair(png, { x: cal.x + cal.width * .45, y: cal.y + cal.height * .3,
+                            width: 26, height: 20 });
+      if (!low.marks || r < low.marks.r) low.marks = { r: +r.toFixed(2), theme, want: 3 };
+      await page.keyboard.press('Escape');
+    }
+    const bad = Object.entries(low).filter(([, v]) => v.r < v.want);
+    ok('every string and mark on the glass clears its ratio, on all '
+      + palettes.length + ' palettes', bad.length === 0, low);
+  }
+
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.theme.v1');
+    localStorage.setItem('sched.view.v1', 'tally');
+    localStorage.removeItem('sched.tick.v1');
+    localStorage.removeItem('sched.log.v1');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+
   /* ── the rounding rule, and the things it lets through ──
      Rounded corners are the exception in this app, and the exceptions
      are named in app.css. Worth measuring, because an exception nothing
@@ -1495,7 +1917,7 @@ const SAID = [
       .map((sel) => { const e = q(sel); return e ? [sel, r(e)] : null; })
       .filter(Boolean).filter(([, v]) => v > 0);
     return { cards: [...document.querySelectorAll('.ty-card')].map(r),
-             pill: r(q('.tabs')), tab: r(q('.tab')),
+             pill: r(q('.tabs')), tab: r(q('.tab')), panel: r(q('.ty-panel')),
              prime: getComputedStyle(q('.prime')).borderRadius,
              face: getComputedStyle(q('.tab-face')).borderRadius,
              others };
@@ -1505,8 +1927,14 @@ const SAID = [
      BE the card — nothing ever posted one there, and the screen is five
      rings now. An exception that stops being needed should be given
      back rather than kept, so this asserts the cards are SQUARE. */
-  ok('the one named exception is rounded — the bar’s pill and its tabs',
+  ok('the named exceptions are rounded — the bar’s pill and its tabs',
     round.pill >= 20 && round.tab >= 15, round);
+  /* The second, and it is NAMED in app.css rather than smuggled in
+     under the two circles' permission: a pane of glass held above the
+     page, where a square corner would read as a crop of the page rather
+     than as a separate object. */
+  ok('and the glass a row opens, which is the other one',
+    round.panel >= 20, round);
   ok('and the tally has handed its exception back',
     round.cards.length === 5 && round.cards.every((v) => v === 0), round.cards);
   ok('and the two circles are circles — the add button and your picture',
@@ -1914,15 +2342,19 @@ const SAID = [
     /* Two ticks of your own, so the board has a real figure on it
        rather than a zero that any code path would produce. */
     await tab('tally');
-    await fp.click('#scTally button >> nth=0');
+    /* BY ITEM, not by position. A row is two buttons now — the card
+       logs and the strip beside it opens the history — so `#scTally
+       button >> nth=1` is Train's STRIP rather than Mind's card, and
+       the panel it opens then swallows every click after it. */
+    await fp.click('.ty-card[data-item="t"]');
     await fp.waitForTimeout(220);
-    await fp.click('#scTally button >> nth=1');
+    await fp.click('.ty-card[data-item="m"]');
     await fp.waitForTimeout(220);
     /* A number nothing else in the app could produce, typed into
        Steps. The tick means YOU LOGGED IT and never what it was, and
        the only way to hold that claim is to go looking for the figure
        afterwards. */
-    await fp.click('#scTally button >> nth=2');
+    await fp.click('.ty-card[data-item="p"]');
     await fp.waitForTimeout(400);
     await fp.fill('.sheet input[type=text]', '18437');
     await fp.click('.sheet .btn.go');

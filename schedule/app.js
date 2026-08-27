@@ -621,6 +621,222 @@
     return el;
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     WHAT KIND OF THING A BLOCK IS
+
+     A glyph per row, worked out from the name you typed. Nothing to
+     set, nothing to pick: a schedule you have to decorate is a schedule
+     you stop keeping.
+
+     DRAWN TO THE BAR'S IDIOM — stroke, round caps, no fill, a 24 box at
+     1.8 — and JUDGED AT 22PX, which is the size a row draws them. That
+     is not a formality. The first sheet had `drive` and `rest` as the
+     same silhouette (a body with no wheels under it is a sofa), `clean`
+     reading as a pencil with a plus beside it, and eat, coffee and cook
+     as three bowls with steam over them told apart only by which way a
+     handle pointed. All four looked fine at 88px. Two glyphs with one
+     silhouette is worse than a glyph missing, because the row is then
+     confidently wrong.
+
+     Four are the tally's own, reused verbatim rather than redrawn —
+     two dumbbells on one app is the mistake the Steps footprint taught.
+     Train is the exception: its plates are taller here, because on the
+     tally it sits inside a ring that frames it and on a bare row a
+     6-unit-tall dumbbell in a 24 box reads as a dash. */
+  var BLOCK_ICON = {
+    train: '<path d="M6.5 7.6v8.8M3.5 9.8v4.4M17.5 7.6v8.8M20.5 9.8v4.4M6.5 12h11"/>',
+    read: '<path d="M12 6.6v12.8M12 6.6C10.4 5.1 8.3 4.6 4 5.1v12.8c4.3-.5 6.4 0 8 1.5'
+        + 'M12 6.6C13.6 5.1 15.7 4.6 20 5.1v12.8c-4.3-.5-6.4 0-8 1.5"/>',
+    eat: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
+    water: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>',
+
+    walk: '<circle cx="13" cy="4.6" r="2"/>'
+        + '<path d="M13 8v4.6l3 3.4v4.5M13 12.6l-3.4 2.6-1.6 5.3M13 9.6l3.8 1.8"/>',
+    run: '<circle cx="14.4" cy="4.6" r="2"/>'
+       + '<path d="M14 8.4l-3.6 1.8-1.4 4.4 3.6 1.6 1.4 4.4M10.4 10.2L6.4 12l-.9 3'
+       + 'M12.6 16.2l-3.4 4.4M14 8.4l3.6 2.2 2.4-.4"/>',
+    cycle: '<circle cx="5.6" cy="16.4" r="3.6"/><circle cx="18.4" cy="16.4" r="3.6"/>'
+         + '<path d="M5.6 16.4l4.4-7.4h4.6l-2.4 7.4h6.2M12.4 9h3.4"/>',
+    swim: '<circle cx="16.4" cy="7.2" r="1.9"/>'
+        + '<path d="M4 11.6l4.4-2.4 4 3.2 3.4-1.2M2.6 17.6c1.6 0 1.6 1.4 3.2 1.4s1.6-1.4 3.2-1.4'
+        + '1.6 1.4 3.2 1.4 1.6-1.4 3.2-1.4 1.6 1.4 3.2 1.4"/>',
+    /* Wheels, or it is the bed below it. */
+    drive: '<path d="M3.6 15.8v-2l1.9-4.6A2 2 0 017.4 8h9.2a2 2 0 011.9 1.2l1.9 4.6v2'
+         + 'M3.6 13.8h16.8"/>'
+         + '<circle cx="7.4" cy="16.4" r="2"/><circle cx="16.6" cy="16.4" r="2"/>',
+    travel: '<path d="M2.8 13.4l18.4-6.6-3.6 8-5-1.4-3.2 5.4-1.2-4.6z"/>',
+
+    sleep: '<path d="M20 14.8A8.2 8.2 0 019.4 4.2 8.2 8.2 0 1020 14.8z"/>',
+    wake: '<path d="M3.4 18.6h17.2M7.2 18.6a4.8 4.8 0 019.6 0M12 3.6v2.8'
+        + 'M5.4 8.2l1.9 1.9M18.6 8.2l-1.9 1.9"/>',
+    sun: '<circle cx="12" cy="12" r="4.4"/>'
+       + '<path d="M12 3v2.2M12 18.8V21M3 12h2.2M18.8 12H21M5.6 5.6l1.6 1.6'
+       + 'M16.8 16.8l1.6 1.6M18.4 5.6l-1.6 1.6M7.2 16.8l-1.6 1.6"/>',
+    meditate: '<circle cx="12" cy="5.2" r="2.2"/>'
+            + '<path d="M12 8.8v4.4M12 13.2l-3.6 1.9M12 13.2l3.6 1.9'
+            + 'M6.4 18.8c0-2.1 2.5-3.8 5.6-3.8s5.6 1.7 5.6 3.8z"/>',
+    stretch: '<circle cx="12" cy="4.6" r="2"/>'
+           + '<path d="M12 8v5.4M4.6 9.6l7.4 1.4 7.4-1.4M12 13.4l-3.6 7M12 13.4l3.6 7"/>',
+    /* The headboard standing at the left end is what tells it from the car. */
+    rest: '<path d="M3.4 19.6V8.4M3.4 14.4h17.2v5.2M20.6 14.6v5'
+        + 'M6.6 14.4v-2.2a1.8 1.8 0 011.8-1.8h8.4a1.8 1.8 0 011.8 1.8v2.2"/>',
+
+    work: '<path d="M4.4 6.2h15.2v9.2H4.4zM2.4 18.4h19.2"/>',
+    trading: '<path d="M3.4 19.6h17.2M6.2 15.4l3.8-4.8 3.4 2.8 5.4-6.6M14.6 6.8h4.2v4.2"/>',
+    code: '<path d="M8.4 8L4 12l4.4 4M15.6 8L20 12l-4.4 4M13.6 5.2l-3.2 13.6"/>',
+    write: '<path d="M4 20l1-4.2L16 4.8l3.2 3.2L8.2 19zM14 6.8l3.2 3.2M4 20l4.2-1"/>',
+    plan: '<path d="M5.4 4.4h13.2v15.2H5.4zM8.6 9.2l1.6 1.6 3-3M8.6 15h6.8"/>',
+    email: '<path d="M3.4 6.2h17.2v11.6H3.4zM3.4 6.6l8.6 6.6 8.6-6.6"/>',
+    call: '<path d="M8.2 3.6L11 8l-2.2 2a12.6 12.6 0 005.2 5.2l2-2.2 4.4 2.8v3a1.8 1.8 0 01-2 1.8'
+        + 'C10.6 19.6 4.4 13.4 3.4 5.6a1.8 1.8 0 011.8-2h3z"/>',
+    meeting: '<circle cx="9" cy="7.8" r="3"/><circle cx="17.2" cy="8.6" r="2.3"/>'
+           + '<path d="M3.2 19a5.8 5.8 0 0111.6 0M16 13.8a4.8 4.8 0 014.8 4.8"/>',
+    study: '<path d="M2.6 9.4L12 5l9.4 4.4L12 13.8zM6.6 11.4V16c0 0 2.2 1.9 5.4 1.9s5.4-1.9 5.4-1.9'
+         + 'v-4.6M21.4 9.4v5"/>',
+    /* A NOTE, NOT A CURRENCY SIGN. A $ on a British schedule is the app
+       having an opinion about somebody's money. */
+    money: '<path d="M2.6 7.2h18.8v9.6H2.6zM5.8 10.2v3.6M18.2 10.2v3.6"/>'
+         + '<circle cx="12" cy="12" r="2.6"/>',
+
+    coffee: '<path d="M4.2 8.6h12v5.6a4.2 4.2 0 01-4.2 4.2H8.4a4.2 4.2 0 01-4.2-4.2z'
+          + 'M16.2 10.2h1.6a2.3 2.3 0 010 4.6h-1.6M7.2 3.2v2.4M11.4 2.8v2.8M15.4 3.2v2.4"/>',
+    /* A toque, because a pan is a third bowl with steam over it. */
+    cook: '<path d="M6.6 13.2v6.2h10.8v-6.2M6.6 16.4h10.8'
+        + 'M7 13.4a3.5 3.5 0 01.2-6.8 3.7 3.7 0 019.6-.6 3.5 3.5 0 010 7"/>',
+    shower: '<path d="M12 3.4a4.2 4.2 0 00-4.2 4.2M3.6 7.6h16.8M7 11.6v1.8M10.4 11v2'
+          + 'M13.6 11.6v1.8M17 11v2M8.6 16.4v1.8M12 15.8v2.2M15.4 16.4v1.8"/>',
+    /* Not a broom: at 22px a broom is a diagonal line with a smudge on
+       the end. Two sparkles is what everything means "tidy" with, and it
+       survives the size because it is two solid shapes and no detail. */
+    clean: '<path d="M10 3.6l1.7 4.6 4.6 1.7-4.6 1.7L10 16.2 8.3 11.6 3.7 9.9l4.6-1.7z'
+         + 'M17.6 13.8l.9 2.5 2.5.9-2.5.9-.9 2.5-.9-2.5-2.5-.9 2.5-.9z"/>',
+    shop: '<path d="M5.4 7.8h13.2l-1.2 12H6.6zM9 7.8V5.6a3 3 0 016 0v2.2"/>',
+    home: '<path d="M3.4 11.2L12 4.2l8.6 7M6 9.8v9.8h12V9.8"/>',
+    garden: '<path d="M12 20.4v-7.6M12 12.8c0-4 2.6-7.4 7-8.2.6 4.6-2 8.2-7 8.2z'
+          + 'M12 15.2C8.6 15.2 6 13 5.4 9.4c3.6.6 6 3 6.6 5.8z"/>',
+    pet: '<ellipse cx="6.4" cy="9.6" rx="2.1" ry="2.7"/><ellipse cx="17.6" cy="9.6" rx="2.1" ry="2.7"/>'
+       + '<ellipse cx="10" cy="5.6" rx="1.9" ry="2.4"/><ellipse cx="14" cy="5.6" rx="1.9" ry="2.4"/>'
+       + '<path d="M12 12.6c3.4 0 5.4 2.4 5.4 4.6s-2 3.4-5.4 3.4-5.4-1.2-5.4-3.4 2-4.6 5.4-4.6z"/>',
+    health: '<path d="M12 20.2C12 20.2 3.6 14.6 3.6 9.4A4.3 4.3 0 0112 7.5a4.3 4.3 0 018.4 1.9'
+          + 'c0 5.2-8.4 10.8-8.4 10.8z"/>',
+
+    music: '<circle cx="6.6" cy="17.6" r="2.8"/><circle cx="17" cy="15.6" r="2.8"/>'
+         + '<path d="M9.4 17.6V6.4l10.4-2.2v11.4M9.4 9.4l10.4-2.2"/>',
+    podcast: '<path d="M4.4 14.6v-2.4a7.6 7.6 0 0115.2 0v2.4'
+           + 'M3 14h3.2v6H4.6A1.6 1.6 0 013 18.4zM21 14h-3.2v6h1.6a1.6 1.6 0 001.6-1.6z"/>',
+    game: '<path d="M8.4 11h-3.2M6.8 9.4v3.2M15.6 10.6h.1M18 13h.1'
+        + 'M8 6.6h8a5.4 5.4 0 015.3 6.4l-.7 3.6a3 3 0 01-5.4 1.2l-.9-1.2h-3.6l-.9 1.2'
+        + 'a3 3 0 01-5.4-1.2l-.7-3.6A5.4 5.4 0 018 6.6z"/>',
+    /* The play triangle is the only thing separating this from the
+       laptop — both are a lit rectangle on a base at 22px. */
+    watch: '<path d="M3.4 5.6h17.2v11.2H3.4zM8.4 20.4h7.2M12 16.8v3.6'
+         + 'M10.4 8.8l4.4 2.4-4.4 2.4z"/>',
+    photo: '<circle cx="12" cy="13.4" r="4"/>'
+         + '<path d="M3.4 7.6h4l1.8-2.6h5.6l1.8 2.6h4v12H3.4z"/>',
+
+    /* THE FALLBACK IS A CLOCK, and it is the only honest one: everything
+       in this list is a block with a start and an end, so a shape saying
+       no more than "a scheduled thing" is exactly right for one whose
+       kind the app cannot work out. A question mark would be the app
+       telling you it does not understand your own schedule. */
+    block: '<circle cx="12" cy="12" r="8.2"/><path d="M12 7v5.4l3.6 2.2"/>'
+  };
+
+  /* ── ORDERED, AND THE ORDER IS THE WHOLE MECHANISM ──
+     First hit wins, so every pair where one phrase contains another has
+     to be listed the long way round. Each of these was a real collision
+     before it was a line here:
+
+       "walk the dog"   pet must beat walk
+       "work out"       train must beat work
+       "school run"     drive must beat run
+       "water plants"   garden must beat water
+       "meal prep"      cook must beat eat
+       "edit photos"    photo must beat write
+
+     AND "TRAIN" IS THE GYM, NOT THE RAILWAY. It is genuinely both, and
+     this app's own schedule ships a Train block that is a gym session —
+     so the gym wins and the railway is reached by "commute", "travel"
+     or "flight". A word that means two things has to be decided, and the
+     decision belongs here in the open rather than in whichever entry
+     happened to be typed first.
+
+     A LIST, NOT A REGEX PER ENTRY. Names are matched on word
+     boundaries, so "read" does not fire on "bread" and "up" does not
+     fire on "supper" — a substring match looked fine on the seed and
+     mislabels the moment anybody types a real sentence. */
+  var ICON_MATCH = [
+    ['pet', ['walk the dog', 'the dog', 'dog', 'cat', 'puppy', 'pet', 'vet']],
+    ['garden', ['water plants', 'plants', 'garden', 'gardening', 'allotment', 'yard']],
+    ['drive', ['school run', 'commute', 'drive', 'driving', 'car', 'taxi', 'lift']],
+    ['cook', ['meal prep', 'food prep', 'cook', 'cooking', 'bake', 'baking', 'kitchen']],
+    ['train', ['gym', 'work out', 'workout', 'weights', 'lifting', 'train', 'training',
+               'session', 'exercise', 'crossfit', 'boxing']],
+    ['work', ['deep work', 'desk', 'office', 'admin', 'work', 'focus', 'shift']],
+    ['run', ['run', 'running', 'jog', 'jogging', 'sprint', 'marathon', '5k', '10k']],
+    ['walk', ['walk', 'walking', 'stroll', 'hike', 'hiking', 'steps']],
+    ['cycle', ['cycle', 'cycling', 'bike', 'ride', 'spin']],
+    ['swim', ['swim', 'swimming', 'pool', 'laps']],
+    ['stretch', ['stretch', 'stretching', 'yoga', 'mobility', 'warm up', 'warmup', 'pilates']],
+    ['meditate', ['meditate', 'meditation', 'breathe', 'breathwork', 'mindful',
+                  'pray', 'prayer', 'stillness']],
+    ['photo', ['edit photos', 'photos', 'photo', 'camera', 'shoot', 'photography']],
+    ['read', ['read', 'reading', 'book', 'chapter']],
+    ['study', ['study', 'revise', 'revision', 'course', 'class', 'lecture', 'lesson',
+               'learn', 'school', 'uni', 'homework']],
+    ['write', ['write', 'writing', 'journal', 'diary', 'blog', 'essay', 'notes', 'note']],
+    ['code', ['code', 'coding', 'dev', 'program', 'debug', 'repo', 'build', 'ship']],
+    ['trading', ['trading', 'trade', 'trades', 'market', 'markets', 'charts', 'chart',
+                 'invest', 'stocks']],
+    ['money', ['money', 'budget', 'bank', 'bills', 'invoice', 'accounts', 'finance', 'tax']],
+    ['plan', ['plan', 'planning', 'review', 'checklist', 'to-do', 'todo', 'prep',
+              'organise', 'organize', 'sort out']],
+    ['email', ['email', 'emails', 'inbox', 'mail']],
+    ['call', ['call', 'calls', 'phone', 'ring']],
+    ['meeting', ['meeting', 'meet', 'standup', 'stand-up', 'catch up', 'catch-up',
+                 '1:1', 'interview', 'team', 'sync']],
+    ['coffee', ['coffee', 'cafe', 'café', 'espresso', 'brew', 'tea']],
+    ['eat', ['breakfast', 'brunch', 'lunch', 'dinner', 'supper', 'meal', 'eat',
+             'food', 'fuel', 'snack']],
+    ['water', ['water', 'hydrate', 'hydration', 'drink']],
+    ['wake', ['wake', 'get up', 'morning', 'rise', 'alarm', 'sunrise']],
+    ['sleep', ['sleep', 'bed', 'bedtime', 'down', 'night', 'nap', 'lights out']],
+    ['rest', ['rest', 'break', 'recover', 'recovery', 'relax', 'chill', 'downtime']],
+    ['shower', ['shower', 'bath', 'wash', 'shave', 'groom', 'skincare']],
+    ['clean', ['clean', 'cleaning', 'tidy', 'chores', 'laundry', 'dishes',
+               'hoover', 'vacuum']],
+    ['shop', ['shop', 'shopping', 'groceries', 'grocery', 'store', 'errand', 'errands']],
+    ['health', ['doctor', 'dentist', 'gp', 'therapy', 'physio', 'appointment',
+                'medicine', 'health', 'meds']],
+    ['travel', ['travel', 'flight', 'fly', 'airport', 'trip', 'journey']],
+    ['home', ['home', 'house', 'family', 'kids']],
+    ['music', ['music', 'guitar', 'piano', 'practice', 'band', 'sing', 'choir']],
+    ['podcast', ['podcast', 'audiobook', 'listen', 'audio']],
+    ['game', ['game', 'games', 'gaming', 'xbox', 'playstation', 'switch']],
+    ['watch', ['tv', 'film', 'movie', 'netflix', 'series', 'watch']],
+    ['sun', ['sun', 'outdoors', 'outdoor', 'outside', 'fresh air', 'daylight']]
+  ];
+
+  /* Built once. Forty-one entries at a few keywords each is a couple of
+     hundred regexes, and the row loop runs on every paint. */
+  var ICON_RE = ICON_MATCH.map(function (pair) {
+    return [pair[0], pair[1].map(function (k) {
+      return new RegExp('(^|[^a-z0-9])' + k.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+        + '([^a-z0-9]|$)');
+    })];
+  });
+
+  function scIconFor(name) {
+    var s = String(name || '').toLowerCase();
+    for (var i = 0; i < ICON_RE.length; i++) {
+      var res = ICON_RE[i][1];
+      for (var j = 0; j < res.length; j++) {
+        if (res[j].test(s)) return ICON_RE[i][0];
+      }
+    }
+    return 'block';
+  }
+
   function scRender() {
     var today = new Date().getDay();
     painted = new Date().toDateString();
@@ -661,6 +877,30 @@
         row.dataset.s = it.s;
         row.dataset.e = it.e;
 
+        /* WHAT KIND, above HOW LONG. Both live in the measure's own
+           52px, so the left gutter answers the two things about a block
+           that are not its name and the name loses no width to either.
+           Rendering it in its own column instead was built and looked
+           at: it pushes the name 34px right and leaves the measure's
+           little rule floating in the middle of a gutter, detached from
+           anything.
+
+           aria-hidden, because the name is the next thing in the row
+           and a screen reader announcing "coffee, coffee" is the glyph
+           charging twice for one fact. */
+        var kind = scIconFor(it.n);
+        var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        ic.setAttribute('class', 'ic');
+        ic.setAttribute('viewBox', '0 0 24 24');
+        ic.setAttribute('aria-hidden', 'true');
+        /* Named on the element. The glyphs are anonymous paths, so
+           without this there is no way to assert from the outside that
+           "walk the dog" reached the paw and not the walker — and the
+           ordering of ICON_MATCH is the entire mechanism. */
+        ic.setAttribute('data-icon', kind);
+        ic.innerHTML = BLOCK_ICON[kind];
+        row.appendChild(ic);
+
         /* The measure: a rule as long as the block is. 52px is ten
            hours; floored at 3 because below that a rule stops being a
            mark and becomes a speck, capped at the column because ten
@@ -675,10 +915,18 @@
         var bd = scDay(scDateOfDow(d));
         if (blockLog[bd] && blockLog[bd][it.id]) row.classList.add('is-done');
 
+        /* THE TIME GOES ABOVE THE NAME, and in the source as well as in
+           the grid. It used to sit in a third column at the right
+           margin, so reading a row meant going across to the edge and
+           back for every line; stacked, a row reads down in one
+           movement \u2014 when, then what. Appended in this order because a
+           screen reader and a tab order follow the source, and a time
+           announced after the name it is drawn above is the same
+           mistake pointing the other way. */
+        row.appendChild(scEl('span', 't', scHHMM(it.s) + '\u2013' + scHHMM(it.e)));
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
         row.appendChild(n);
-        row.appendChild(scEl('span', 't', scHHMM(it.s) + '\u2013' + scHHMM(it.e)));
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e) + (it.r ? ', ' + it.r : '') + '. Edit.');
         row.addEventListener('click', function () { scEditSheet(it, d); });
@@ -1223,9 +1471,13 @@
   var TALLY = [
     { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
     { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
-    { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '' },
-    { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal' },
-    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L' }
+    { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '', dp: 0 },
+    /* `neu` — a number you do NOT want more of. Every other figure on
+       this screen gets called "your best"; doing that to a calorie count
+       calls your biggest day a win, which is the opposite of what the
+       number is for. Same figure, named without the praise. */
+    { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1 },
+    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1 }
   ];
 
   /* Two records, not one, and they are different KINDS of thing: which
@@ -1420,7 +1672,9 @@
         + (on ? '<circle class="ty-arc" cx="32" cy="32" r="26"/>' : '')
         + '<g class="ty-i" transform="translate(20 20)">' + TALLY_ICON[it.id] + '</g>'
         + '</svg>');
-      c.appendChild(scEl('span', 'ty-nm', it.n));
+      var body = scEl('span', 'ty-body');
+      c.appendChild(body);
+      body.appendChild(scEl('span', 'ty-nm', it.n));
 
       /* Once it is done the line under it says where it came from, not
          what to do — a prompt still showing under a finished thing is
@@ -1439,7 +1693,7 @@
          came from instead, and an item whose window has passed says so
          in one word: `Missed its window` does not fit a fifth of a
          phone and the fact is worth more than the sentence. */
-      c.appendChild(scEl('span', 'ty-sub',
+      body.appendChild(scEl('span', 'ty-sub',
         it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
           : (via || (on ? 'logged' : (late ? 'missed' : '')))));
 
@@ -1447,12 +1701,27 @@
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
         + (late ? ', missed its window' : '') + '. ' + it.s + '.');
       c.addEventListener('click', function () { scTallyTap(it, day); });
-      grid.appendChild(c);
+
+      /* SIBLINGS, NOT NESTED. A button inside a button is invalid and
+         collapses to one target, so the row is one press and the strip
+         beside it is its own — the mark logs, the record opens the
+         record. Wrapped in a <div class="ty-row"> so the two sit on one
+         line while staying two elements. */
+      var hist = scEl('button', 'ty-hist');
+      hist.type = 'button';
+      hist.innerHTML = scStripSvg(scHist(it.id));
+      hist.setAttribute('aria-label', it.n + ', open 26 weeks of history');
+      hist.addEventListener('click', function () { scOpenHist(it); });
+
+      var row = scEl('div', 'ty-row');
+      row.appendChild(c);
+      row.appendChild(hist);
+      grid.appendChild(row);
     });
 
     var best = scBest();
     $('scTallyFoot').textContent = st
-      ? 'Longest run ' + best + (best === 1 ? ' day.' : ' days.')
+      ? 'Longest streak ' + best + (best === 1 ? ' day.' : ' days.')
       : 'Log one thing and the run starts.';
   }
 
@@ -1465,6 +1734,195 @@
       if (run > best) best = run;
     }
     return best;
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE RECORD BEHIND A ROW
+
+     Twenty-six weeks of one item, and there is no retention rule to
+     raise for it: tickLog is never pruned, so the only limit here is how
+     long you have had the app. The 30 in the friends half is a different
+     number answering a different question — how much gets PUSHED, not
+     how much is kept.
+     ═══════════════════════════════════════════════════════════ */
+
+  var HIST = 182;                    /* 26 weeks, and the strip fits it */
+
+  function scHist(id) {
+    var out = [], d = new Date();
+    d.setDate(d.getDate() - (HIST - 1));
+    for (var i = 0; i < HIST; i++) {
+      var rec = tickLog[scDay(d)], v = rec && rec[id];
+      out.push({ on: !!v, raw: parseFloat(v) || 0, dow: d.getDay() });
+      d.setDate(d.getDate() + 1);
+    }
+    return out;
+  }
+
+  /* Weeks run across, weekdays run down. The FIRST day's own weekday
+     sets the column offset — without it every column is a rolling seven
+     days and the row a given day sits in drifts, which destroys the one
+     thing this shape is good for: a habit that always dies on a Sunday
+     showing up as a row. */
+  function scCalGeom(days, cell, gap) {
+    var off = days.length ? days[0].dow : 0;
+    var cols = Math.ceil((days.length + off) / 7);
+    return {
+      W: cols * (cell + gap) - gap,
+      H: 7 * (cell + gap) - gap,
+      x: function (i) { return (Math.floor((i + off) / 7) * (cell + gap)).toFixed(2); },
+      y: function (i) { return (days[i].dow * (cell + gap)).toFixed(2); }
+    };
+  }
+
+  /* Centred on the cell it belongs to, so a grown copy stays concentric
+     with the block it is the light for. */
+  function scCalRect(g, i, cell, w, fill) {
+    var d = (w - cell) / 2;
+    return '<rect x="' + (g.x(i) - d).toFixed(2) + '" y="' + (g.y(i) - d).toFixed(2)
+      + '" width="' + w.toFixed(2) + '" height="' + w.toFixed(2)
+      + '" rx="' + (w * .3).toFixed(2) + '" fill="' + fill + '"/>';
+  }
+
+  function scStripSvg(days) {
+    var cell = 3.6, g = scCalGeom(days, cell, 1.1), out = '';
+    days.forEach(function (d, i) {
+      out += scCalRect(g, i, cell, cell, d.on ? 'var(--ink)' : 'var(--tick-off)');
+    });
+    return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" aria-hidden="true">'
+      + out + '</svg>';
+  }
+
+  /* ── the glow ──
+     ONE FILTER, NOT ONE HUNDRED AND EIGHTY-TWO. Every lit day is drawn
+     into a <g>, that group is duplicated and blurred, and the copy goes
+     behind. Each block gets its own falloff — which is the ask — at the
+     cost of one filter pass over a panel that does not move. The sketch
+     before this put a larger low-alpha rect behind each cell instead:
+     same idea, hard edges, and a hard edge is exactly what makes a glow
+     read as cartoon.
+
+     TWO PASSES, because one is not a glow. A tight bright core hugging
+     each block AND a wide faint one under all of them is what a light
+     source does; a single blur is either a halo or a shadow and never
+     reads as both. Measured against three single-pass tunings on the
+     real panel in both polarities.
+
+     IT IS POLARITY-DEPENDENT AND THAT IS THE DESIGN. In a dark palette
+     --ink is near-white, so the blurred copy is a genuine emissive
+     bloom. In a light one --ink is near-black and the same layer is a
+     contact shadow. Both are what "lit" means in that polarity — ink on
+     paper under a lamp glows by casting — and seven of the thirteen
+     palettes are dark, so both halves are the real product. The only
+     literal glow available on a white page is painting the marks in the
+     accent, and that costs the rule this screen just bought: one mark
+     means one thing, at all three sizes it is drawn.
+
+     A WIDER HALO WAS MEASURED AND REJECTED. At blur 3.2 grown 14% the
+     falloff reaches into the gaps and greys out the unlit days, so the
+     misses stop being visible — which is the one thing a record of
+     showing up must never lose. */
+  var GLOW = [{ blur: 3.6, op: .3, grow: 1.1 }, { blur: 1.1, op: .5, grow: 1 }];
+
+  function scCalSvg(days) {
+    var cell = 9.4, pad = 9, g = scCalGeom(days, cell, 2.5);
+    var off = '', lit = '', lay = [], defs = '';
+    GLOW.forEach(function () { lay.push(''); });
+    days.forEach(function (d, i) {
+      if (!d.on) { off += scCalRect(g, i, cell, cell, 'var(--tick-off)'); return; }
+      GLOW.forEach(function (L, n) {
+        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--ink)');
+      });
+      lit += scCalRect(g, i, cell, cell, 'var(--ink)');
+    });
+    var body = '';
+    GLOW.forEach(function (L, n) {
+      /* The filter region has to be bigger than the box it filters or
+         the blur is clipped at the edge of each group's bounds, which
+         puts a straight line through the falloff. */
+      defs += '<filter id="tyG' + n + '" x="-40%" y="-40%" width="180%" height="180%">'
+        + '<feGaussianBlur stdDeviation="' + L.blur + '"/></filter>';
+      body += '<g filter="url(#tyG' + n + ')" opacity="' + L.op + '">' + lay[n] + '</g>';
+    });
+    return '<svg class="ty-cal" viewBox="' + (-pad) + ' ' + (-pad) + ' '
+      + (g.W + pad * 2).toFixed(2) + ' ' + (g.H + pad * 2).toFixed(2)
+      + '" preserveAspectRatio="xMidYMid meet" aria-hidden="true">'
+      + '<defs>' + defs + '</defs>' + off + body + lit + '</svg>';
+  }
+
+  /* THE THREE FIGURES ARE NOT THE SAME THREE FOR EVERY ITEM, and they
+     cannot be: two of the five are ticks and three are numbers. A tick
+     has no average to take, so its figures are about shape — the longest
+     streak, whether you are on one now, and what it works out at a week,
+     which is the honest summary of a habit that was never meant to be
+     daily. */
+  function scHistStats(item, d) {
+    var kept = d.filter(function (x) { return x.on; });
+    var best = 0, run = 0, now = 0, i;
+    for (i = 0; i < d.length; i++) { run = d[i].on ? run + 1 : 0; if (run > best) best = run; }
+    for (i = d.length - 1; i >= 0 && d[i].on; i--) now++;
+
+    if (item.k === 'do') {
+      return { kept: kept.length, rows: [
+        [String(best), 'longest streak'],
+        [String(now), now === 1 ? 'day on now' : 'days on now'],
+        [(kept.length / (d.length / 7)).toFixed(1), 'days a week']
+      ] };
+    }
+    var dp = item.dp || 0;
+    var fmt = function (v) {
+      return v.toLocaleString('en-GB',
+        { minimumFractionDigits: dp, maximumFractionDigits: dp });
+    };
+    var sum = 0, top = 0;
+    kept.forEach(function (x) { sum += x.raw; if (x.raw > top) top = x.raw; });
+    var unit = (item.unit || '').trim();
+    return { kept: kept.length, unit: unit, rows: [
+      [fmt(kept.length ? sum / kept.length : 0), 'average a day', 1],
+      [fmt(top), item.neu ? 'your highest' : 'your best', 1],
+      [String(best), 'longest streak']
+    ] };
+  }
+
+  var histBack = null;    /* what to hand focus back to on close */
+
+  function scOpenHist(item) {
+    var d = scHist(item.id), st = scHistStats(item, d);
+    var p = $('scTyPanel');
+    p.textContent = '';
+
+    var head = scEl('div', 'ty-head');
+    var t = scEl('span', 'ty-title', item.n);
+    t.id = 'scTyTitle';
+    head.appendChild(t);
+    head.appendChild(scEl('span', 'ty-span', '26 weeks'));
+    p.appendChild(head);
+    p.insertAdjacentHTML('beforeend', scCalSvg(d));
+
+    var stats = scEl('div', 'ty-stats');
+    st.rows.forEach(function (r) {
+      var cell = scEl('div');
+      var b = scEl('b', null, r[0]);
+      if (r[2] && st.unit) b.appendChild(scEl('i', null, st.unit));
+      cell.appendChild(b);
+      cell.appendChild(scEl('span', null, r[1]));
+      stats.appendChild(cell);
+    });
+    p.appendChild(stats);
+    p.appendChild(scEl('p', 'ty-hint',
+      st.kept + ' of ' + HIST + ' days · tap anywhere to close'));
+
+    histBack = document.activeElement;
+    $('scTyVeil').hidden = false;
+    p.focus();
+  }
+
+  function scCloseHist() {
+    if ($('scTyVeil').hidden) return;
+    $('scTyVeil').hidden = true;
+    $('scTyPanel').textContent = '';
+    if (histBack && histBack.focus) histBack.focus();
+    histBack = null;
   }
 
   function scTallyTap(item, day) {
@@ -2496,6 +2954,10 @@
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
     var ring = view === 'ring', tal = view === 'tally', fr = view === 'friends';
 
+    /* The history sits OUTSIDE the tally section, so hiding the section
+       would leave it up over whatever you switched to. */
+    scCloseHist();
+
     $('scRing').hidden = !ring;
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
@@ -3402,9 +3864,20 @@
     scTextSheet('Subtitle', 'Subtitle', state.sub, function (v) { state.sub = v; });
   });
 
+  /* The history takes Escape FIRST. Both can be open at once — the
+     number sheet is reachable from a row whose strip is also pressable —
+     and closing the thing underneath while the thing on top stays up is
+     the wrong one every time. */
   document.addEventListener('keydown', function (ev) {
-    if (ev.key === 'Escape' && sheetOpen) { ev.preventDefault(); scClose(); }
+    if (ev.key !== 'Escape') return;
+    if (!$('scTyVeil').hidden) { ev.preventDefault(); scCloseHist(); return; }
+    if (sheetOpen) { ev.preventDefault(); scClose(); }
   });
+
+  /* Tap anywhere, the panel included — it says so on the panel, and a
+     card you have finished reading is a card you want gone rather than
+     one you want to hunt a cross on. */
+  $('scTyVeil').addEventListener('click', scCloseHist);
 
   /* Half a minute is fine for a countdown printed to the minute, and it
      is one pass over a handful of rows. It stops entirely when the app

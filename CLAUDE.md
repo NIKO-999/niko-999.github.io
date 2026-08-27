@@ -228,6 +228,120 @@ watching it still bite.
 suite alone. No build step, no framework, no CDN; both apps are still
 plain static files you can open off the disk.
 
+## The history a row opens
+
+The tally is five ROWS now, not five cells across, and the layout turned
+because the space was measured first: across, each cell was 66px and
+there was nowhere to put half a year of anything. Down, the ring and its
+two lines take 131 of the 354 the page has and the rest is a 26-week
+strip. **A row is two press targets** — the card logs, the strip beside
+it opens the record — and they are SIBLINGS, because a `<button>` inside
+a `<button>` is invalid and collapses to one press while looking exactly
+right.
+
+**The glow is ONE filter, not one hundred and eighty-two.** Every lit
+day is drawn into a `<g>`, the group is duplicated and blurred, and the
+copy goes behind. Each block gets its own falloff at the cost of one
+filter pass over a panel that does not move. The sketch before it put a
+larger low-alpha rect behind each cell: same idea, hard edges, and a
+hard edge is what makes a glow read as cartoon.
+
+**Two passes, because one is not a glow** — a tight bright core hugging
+each block AND a wide faint one under all of them, which is what a light
+source does. And a wider halo was measured and rejected: at blur 3.2
+grown 14% the falloff reaches into the gaps and greys the unlit days
+out, and losing the misses is the one thing a record of showing up must
+never do.
+
+**It is polarity-dependent and that is the design.** In a dark palette
+`--ink` is near-white, so the blurred copy is a genuine emissive bloom;
+in a light one it is a contact shadow. Ink on paper under a lamp glows
+by casting. Seven of the thirteen palettes are dark, so both halves are
+the real product — and the only literal glow available on a white page
+is painting the marks in the accent, which costs the rule that one mark
+means one thing at all three sizes it is drawn.
+
+**The first sheet was judged on a wall.** 168 of 182 days lit is one
+solid mass, and a per-block glow can then only show around the OUTSIDE
+of it — every interior block's falloff is painted over by its
+neighbours. A per-block treatment judged on a shape with no interior
+gaps measures nothing.
+
+**The veil was tuned DOWN four times, and the crop is what hid it.**
+22px of blur under a 46% wash took the page away; so did 14 under 14; so
+did 8 under 26; 5 under 22 lost the words. It sits at 3 under 18, where
+the title, the streak figure and the tab bar are all still readable and
+all still obviously behind something. Every one of the first four was
+judged on a screenshot cropped to the panel — with the page out of the
+frame there is nothing for the blur to be measured against. **A veil is
+a statement about the thing behind it, so it can only be judged on a
+frame that contains it.**
+
+**The three figures are not the same three for every item**, and cannot
+be: two of the five are ticks and three are numbers. A tick has no
+average, so it gets shape — longest streak, days on now, days a week.
+**And Fuel is the one number you do not want more of**: "your best" on a
+calorie count calls your biggest day a win, so it says "your highest" —
+the same figure, named without the praise. The unit rides the figure
+rather than the caption, because `2,631` and `2.7` are unreadable side
+by side without one.
+
+It is **streak** everywhere, never "run" — the panel and the foot of the
+same screen using two names for one idea in one glance.
+
+## The week's rows
+
+**The time is ABOVE the name, and the row lost a column for it.** It sat
+in a third track at the right margin, so reading a row was a movement
+out to the edge and back for every line, and the name — squeezed by a
+column it could never collide with — wrapped on anything long. The rows
+are taller (six blocks fill the screen where seven used to) and that is
+the trade: the full width for the name, and one direction of travel.
+
+**The time is `--dim`, and `--spent` was a real regression.** It went in
+as `--spent` on the reasoning that the smallest type wants the quieter
+token, which has the two backwards: `--spent` is the LIGHTER one at
+4.74:1, and 4.74 is a rounding error above the bar rather than a margin.
+The suite caught it from an angle nothing anticipated — the running
+row's sweep lays a 13% wash of the accent across that line, and a wash
+over 4.74:1 is under 4.5:1.
+
+**A glyph per row, worked out from the name, with nothing to set.** A
+schedule you have to decorate is a schedule you stop keeping.
+
+**Judged at 22px, which is the size a row draws them.** Not a
+formality: the first sheet had `drive` and `rest` as the same silhouette
+(a body with no wheels under it is a sofa), `clean` reading as a pencil
+with a plus beside it, and eat, coffee and cook as three bowls of steam
+told apart only by which way a handle pointed. All four looked fine at
+88px. **Two glyphs with one silhouette is worse than a glyph missing,
+because the row is then confidently wrong.**
+
+**The ORDER of the keyword table is the whole mechanism.** First hit
+wins, so every pair where one phrase contains another is listed the long
+way round — `walk the dog` before `walk`, `work out` before `work`,
+`school run` before `run`, `water plants` before `water`, `meal prep`
+before `meal`. Each was a real collision before it was a line. Matching
+is on word boundaries: a substring match looked perfect on the seed and
+mislabels the moment anybody types a sentence.
+
+**And "Train" is the gym, not the railway.** It is genuinely both; this
+app's own schedule ships a Train block that is a gym session, so the gym
+wins and the railway is reached by commute, travel or flight. A word
+that means two things has to be DECIDED, and the decision belongs in the
+open where a test can hold it.
+
+The glyphs are anonymous paths, so the icon's key is written onto the
+element — without it there is no way to assert from outside that "walk
+the dog" reached the paw and not the walker, which is the only thing the
+ordering exists to do. `tests/schedule.js` also holds both directions of
+coverage: a keyword pointing at a glyph that does not exist draws an
+empty box, and a glyph nothing can reach is dead weight that looks like
+coverage.
+
+**`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
+fixed here. Its twelve standing faults are all RADIUS in `jade/`.
+
 ## The worker
 
 `worker/` is the one thing in this repository that is not a static file

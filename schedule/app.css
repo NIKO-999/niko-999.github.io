@@ -25,6 +25,15 @@
    exception went with the cards, which is the rule getting stronger
    rather than an exception being spent.
 
+   AND IT IS TWO AGAIN, because the history panel is glass. That is the
+   argument and it is a narrow one: the panel is a pane held ABOVE the
+   page rather than a region of it, and a square-cornered sheet of glass
+   floating over a document reads as a crop of the document. The radius
+   is most of what says it is a separate object, the same thing it is
+   doing on the bar's pill. It is named here and asserted in
+   `tests/schedule.js` rather than left to slip in under the two
+   circles' permission.
+
    The rule is not weaker for having exceptions; it is stronger for
    naming them. `tests/schedule.js` holds every other surface in this
    app to square corners, so a third rounded thing has to argue for
@@ -546,22 +555,35 @@ body {
 .ty-cap { margin-top: 6px; font-size: 11px; color: var(--dim); }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
 
-/* FIVE ACROSS. At 390 wide with the page's 18px margins and a 6px gap
-   each cell is 66px, so every one of them clears the 44px a thumb
-   needs on its own — the ring is 58 of that and the two lines under it
-   are the rest. */
-.ty-grid {
-  display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin-top: 18px;
-}
+/* FIVE DOWN, not five across, and the row is what bought the history.
+   Across, each cell was 66px wide and there was nowhere to put six
+   months of anything. Down, the ring and its two lines take 131 of the
+   354 the page has and the remaining 200-odd is the strip — which is
+   the whole reason the layout turned: the space was measured first and
+   the arrangement followed it.
+
+   TWO TARGETS IN ONE ROW. The left block logs the item, the strip opens
+   its history. Pressing the mark to log and pressing the record to read
+   the record is the mapping that needs no explaining, and both halves
+   clear 44px on their own. */
+.ty-grid { display: block; margin-top: 18px; }
+.ty-row { display: flex; align-items: center; gap: 13px; padding: 10px 0; }
 .ty-card {
-  display: flex; flex-direction: column; align-items: center; gap: 7px;
-  padding: 0; border: 0; border-radius: 0;
-  background: none; color: inherit; font: inherit; text-align: center;
+  display: flex; flex-direction: row; align-items: center; gap: 13px;
+  flex: none; padding: 0; border: 0; border-radius: 0;
+  background: none; color: inherit; font: inherit; text-align: left;
   cursor: pointer;
 }
 .ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* The ring and its lines are ONE press. A button inside a button is
+   invalid, so the row is the button and the strip beside it is its own
+   — siblings, never nested. */
+.ty-body { display: flex; flex-direction: column; gap: 1px; flex: none; width: 74px; }
 
-.ty-ring { display: block; width: 100%; max-width: 58px; }
+/* flex:none, or the ring shrinks to whatever is left after the widest
+   name — which is a different width per row, and five rings at five
+   sizes is the mistake this file opens by naming. */
+.ty-ring { display: block; width: 44px; max-width: 44px; flex: none; }
 .ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
 .ty-arc { fill: none; stroke: var(--ink); stroke-width: 5; }
 /* No width or height here and none wanted: the glyph is a <g> inside
@@ -580,15 +602,27 @@ body {
 }
 .ty-card.on .ty-i { stroke: var(--ink); }
 
-.ty-nm { font-size: 10.5px; font-weight: 600; color: var(--dim); line-height: 1.15; }
+.ty-nm { font-size: 15px; font-weight: 600; color: var(--dim); line-height: 1.15; }
 .ty-card.on .ty-nm { color: var(--ink); }
 /* The figure, small, under the name. min-height so a ring with nothing
    logged under it does not sit 12px higher than the four beside it —
    the row is one box and the part that varies absorbs the difference. */
 .ty-sub {
-  min-height: 13px; font-size: 10px; line-height: 1.3;
+  min-height: 13px; font-size: 11px; line-height: 1.3;
   color: var(--spent); font-variant-numeric: tabular-nums;
 }
+
+/* ── the strip beside the row ──
+   Twenty-six weeks at about 4.7px a column. You cannot pick a Tuesday
+   out of it and that is the point: at this size it stops being a chart
+   and becomes the SHAPE of how you have been. It never grows either —
+   a second year is simply a finer strip, not a wider one. */
+.ty-hist {
+  flex: 1; min-width: 0; display: block; padding: 0; border: 0;
+  background: none; color: inherit; font: inherit; cursor: pointer;
+}
+.ty-hist:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.ty-hist svg { display: block; width: 100%; }
 
 /* ── missed its window ──
    The schedule already knows that Train was 06:30 to 07:30 and that it
@@ -598,6 +632,76 @@ body {
    late gym session is the judgement this screen exists to avoid. */
 .ty-card.late .ty-track { stroke-dasharray: 5 5; }
 .ty-card.late .ty-sub { color: var(--dim); font-weight: 600; }
+
+/* ── the history a row opens ────────────────────────────────
+   THE VEIL IS TUNED, NOT MAXED, and it was tuned DOWN three times.
+   22px of blur under a 46% wash took the page away entirely. 14 under
+   14 still did. So did 8 under 26, and 5 under 22 lost the words. At 3
+   under 18 the title, the streak figure and the tab bar are all still
+   readable and all still obviously behind something, which is the
+   brief: move the eye, do not clear the room.
+
+   EVERY ONE OF THOSE WAS JUDGED ON A CROP OF THE PANEL AND THAT IS WHY
+   IT TOOK FOUR GOES. With the page cut out of the frame there is
+   nothing for the blur to be measured against, and 14px looked
+   perfectly reasonable. A veil is a statement about the thing BEHIND
+   it, so it can only be judged on a frame that contains it.
+
+   BOTH LEVERS, ALWAYS. Blur alone leaves the page as bright as it was
+   so the panel has nothing to stand off; a wash alone leaves the rows
+   readable enough to keep reading. Turning one up is what lets the
+   other down — and blur is by far the stronger of the two, which is
+   what all four rounds were really measuring.
+
+   The two blurs are doing different jobs and both are needed: the veil
+   softens the page, and the panel's own blur is what makes the panel
+   look like a thickness of glass rather than a hole cut in the page. */
+.ty-veil {
+  position: fixed; inset: 0; z-index: 60;
+  display: flex; align-items: center; justify-content: center; padding: 0 16px;
+  background: color-mix(in srgb, var(--g0) 18%, transparent);
+  -webkit-backdrop-filter: blur(3px) saturate(1.05);
+  backdrop-filter: blur(3px) saturate(1.05);
+}
+.ty-veil[hidden] { display: none; }
+.ty-panel {
+  position: relative; width: 100%; max-width: 420px; border-radius: 26px;
+  padding: 20px 18px 18px;
+  background: color-mix(in srgb, var(--g0) 82%, transparent);
+  -webkit-backdrop-filter: blur(34px) saturate(1.6);
+  backdrop-filter: blur(34px) saturate(1.6);
+  border: 1px solid color-mix(in srgb, var(--ink) 9%, transparent);
+  box-shadow: 0 26px 64px -22px color-mix(in srgb, var(--ink) 30%, transparent);
+}
+.ty-head { display: flex; align-items: center; gap: 10px; }
+.ty-title { font-size: 19px; font-weight: 700; letter-spacing: -.02em; }
+.ty-span { margin-left: auto; font-size: 11px; color: var(--spent); }
+.ty-cal { display: block; width: 100%; margin-top: 16px; }
+.ty-stats { display: flex; gap: 18px; margin-top: 20px; }
+.ty-stats b {
+  display: block; font-size: 22px; font-weight: 700;
+  letter-spacing: -.025em; font-variant-numeric: tabular-nums;
+}
+/* The unit rides the FIGURE, not the caption. "2,631" and "2.7" beside
+   each other are unreadable without one, and putting it in the caption
+   makes the caption say two things. */
+.ty-stats b i {
+  font-style: normal; font-size: 12px; font-weight: 600;
+  letter-spacing: 0; margin-left: 2px; color: var(--spent);
+}
+.ty-stats span { display: block; margin-top: 2px; font-size: 10.5px; color: var(--spent); }
+.ty-hint { margin-top: 16px; font-size: 11px; color: var(--spent); }
+
+/* A backdrop-filter on a panel that neither moves nor animates. The
+   orrery took every CSS filter off ITS map after measuring what one
+   costs over a subtree being rescaled every frame; the argument does
+   not reach here, and the same measurement showed a filter is also what
+   promotes an element to its own composited layer. */
+@media (prefers-reduced-motion: reduce) {
+  .ty-veil, .ty-panel { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .ty-veil { background: color-mix(in srgb, var(--g0) 56%, transparent); }
+  .ty-panel { background: var(--g0); }
+}
 
 /* ── the ring ─────────────────────────────────────────────
    Every class here carries an `sr-` prefix and every keyframe an `sr-`
@@ -766,17 +870,27 @@ body {
 
 /* ── a row ───────────────────────────────────────────────── */
 
-/* Three columns, sized identically on every row without subgrid: the
-   measure is fixed, the name takes the slack, and the time is one
-   format in tabular figures so it is the same width in every row it
-   will ever hold. The version before this carried a subgrid and a
-   fallback and a collapsing column to keep three tracks aligned; a
-   fixed format made all of it unnecessary. */
+/* TWO columns and two lines, not three columns and one.
+   The measure is fixed on the left; the time and the name stack in the
+   track beside it. It was three tracks with the time at the right
+   margin, which meant reading a row was a movement out to the edge and
+   back for every line — and the name, squeezed by a column it could
+   never collide with, wrapped on anything long. Stacked, a row reads
+   straight down: when, then what.
+
+   The rows are taller for it and that is the trade: six blocks fill the
+   screen where seven used to. It buys the full width for the name and
+   one direction of travel instead of two.
+
+   The time is still one format in tabular figures, so it is the same
+   width in every row it will ever hold — which is what let the third
+   track go without a subgrid, and is still what keeps the two lines
+   from jittering as the day moves. */
 .row {
   display: grid;
-  grid-template-columns: var(--meas) 1fr auto;
-  gap: 12px;
-  align-items: center;
+  grid-template-columns: var(--meas) 1fr;
+  gap: 0 12px;
+  align-items: start;
   width: 100%;
   /* 14px, which puts a row at 45. The drawing this came from sets them
      at 9, giving a 36px row — right for a printed timetable, wrong for
@@ -807,10 +921,39 @@ body {
    Floored at 3px because below that a rule stops being a mark and
    starts being a speck, and capped at the column because ten hours is
    already the longest thing anybody puts in a day. */
+/* ── what kind of thing it is ──
+   A glyph worked out from the name, with nothing to set: a schedule you
+   have to decorate is a schedule you stop keeping.
+
+   IT SHARES THE MEASURE'S COLUMN. Kind above length, both inside the
+   52px the left gutter already owns, so the name loses no width to
+   either. A column of its own was built and measured at 34px off the
+   name — a fifth of what the name has — and it leaves the measure's
+   little rule floating detached in the middle of the gutter.
+
+   The width and height are ON THE ELEMENT'S BOX here and not left to
+   the markup: an inline <svg> with neither falls back to 300x150 and
+   fills its parent, silently and while still drawing correctly. */
+.row .ic {
+  grid-column: 1; grid-row: 1;
+  display: block; width: 22px; height: 22px;
+  fill: none; stroke: var(--ink); stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* It follows the row's own state rather than holding a colour of its
+   own — a finished block whose glyph stayed black would be the one part
+   of the row still claiming to be live. */
+.row.is-past .ic { stroke: var(--spent); }
+.row.is-now .ic { stroke: var(--red); }
+
 .row .m {
   display: block;
   height: 2px;
   background: var(--ink);
+  /* Under its own glyph, on the name's line. */
+  grid-column: 1;
+  grid-row: 2;
+  margin-top: 7px;
 }
 /* ── a block the tally has counted ──
    The measure fills solid rather than the row taking a colour. It is
@@ -830,6 +973,7 @@ body {
    not a heading: the hero's figure is still four times its size, so
    nothing on the screen has moved rank. */
 .row .n {
+  grid-column: 2;
   font-size: 16px;
   font-weight: 700;
   letter-spacing: -.014em;
@@ -868,12 +1012,34 @@ body {
   white-space: nowrap;
 }
 
+/* ── the time, on top ──
+   A LABEL, not a caption. At 11px/400 in --dim it sat directly above a
+   16px/700 name and read as a smaller version of the same kind of
+   thing, which is exactly what a stacked pair must not do. Small,
+   tracked out and heavy makes it a different register: the eye takes
+   it as a marker on the row rather than as the row's first words, and
+   the name below is unambiguously the thing. It is the one treatment
+   here borrowed from outside — and the fill, the tint and the rounded
+   card it was borrowed from stayed where they were.
+
+   --dim, and it is the DARKER of the two greys at 8.9:1. It was written
+   as --spent on the reasoning that small type needs the quieter token,
+   which has the two backwards: --spent is the lighter one at 4.74:1,
+   and 4.74 is not a margin, it is a rounding error above the bar. The
+   suite said so immediately and from an angle nothing here anticipated
+   — the running row's sweep lays a 13% wash of the accent across it,
+   and a wash over 4.74:1 is under 4.5:1. Tracked-out 9.5px is the
+   smallest type on this screen and it now carries what the row's third
+   column used to; it gets the darker grey. */
 .row .t {
-  font-size: 11px;
-  font-weight: 400;
+  grid-column: 2;
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .11em;
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
+  margin-bottom: 3px;
 }
 
 /* Finished blocks go grey — and only as far as --spent, which still

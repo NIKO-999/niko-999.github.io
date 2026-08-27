@@ -91,6 +91,17 @@
     <p class="ty-foot" id="scTallyFoot"></p>
   </section>
 
+  <!-- ── the history a row opens ──
+       Half a year of one item, over the page rather than instead of it:
+       the veil is thin enough to read the rows through and thick enough
+       that they are plainly not the point. Empty until scOpenHist fills
+       it, and it lives OUTSIDE the tally section so closing the view
+       cannot leave it stranded on screen. -->
+  <div class="ty-veil" id="scTyVeil" hidden>
+    <div class="ty-panel" id="scTyPanel" role="dialog" aria-modal="true"
+         aria-labelledby="scTyTitle" tabindex="-1"></div>
+  </div>
+
   <!-- ── friends ──
        The leaderboard and the feed, which are the same subject seen
        twice. YOU are on it from the first day: your thirty-day count
