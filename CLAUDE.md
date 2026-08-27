@@ -206,6 +206,47 @@ watching it still bite.
 suite alone. No build step, no framework, no CDN; both apps are still
 plain static files you can open off the disk.
 
+## The worker
+
+`worker/` is the one thing in this repository that is not a static file
+in a browser: a Cloudflare Worker over one KV namespace, and the server
+for the friends half of `schedule/`. It exists because a leaderboard
+between two phones cannot be done inside one of them. Nothing else
+reaches it and nothing else may — the promise that a screen keeps its
+data on the device is still the promise everywhere the worker is not,
+and `schedule/` is the only app that has a URL for it.
+
+**It cannot tell you who anybody is, and the friend list is the reason.**
+There are no accounts, no email and no sessions; identity is two strings
+the client generates — a short public `code` that reads, and a secret
+32-hex `key` that writes, stored only as its SHA-256. **The friend list
+lives on the client**, so there is no `/friends` endpoint and the server
+holds no graph. That absence is load-bearing: the endpoint that would
+make it convenient is one line shorter and hands the whole social graph
+to somebody else's machine for nothing. `tests/worker.js` asserts the
+door is not there, which is the only kind of check a missing feature can
+have.
+
+**Thirty days is the shape of the data, not a policy note**, and the
+window runs two days AHEAD of the server. That is not slack. The worker
+runs on UTC and the client files a day under its OWN local date — which
+is what stops a tick taken at 9pm in London landing on yesterday — so
+east of Greenwich the two disagree for part of every day. A window that
+stopped at the server's today would drop the day being lived in, on
+write, and answer 200.
+
+**A Worker is a function from a Request to a Response**, so `tests/
+worker.js` runs the real file in Node against a Map standing in for KV:
+no account, no network, a second and a half, and it goes second in the
+suite behind `names`. Everything it checks fails SILENTLY in production
+— a day filed under the wrong date, a write accepted without a key, a
+picture id that dedupes nothing. Two of those three were in the first
+draft, and the second is the sharpest lesson in the folder: the id was
+hashed from `Date.now()` under a comment that said "stored by content
+hash, so posting the same picture twice costs one entry". It reads
+identically, it dedupes nothing, and the comment was the only place the
+intent ever existed.
+
 ## The sweep
 
 `.claude/workflows/sweep.js` drives the orrery across every state —
