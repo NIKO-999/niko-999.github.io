@@ -320,6 +320,49 @@ re-fetched the peer and overwrote it before a pixel was read. **A
 measurement that produces a plausible sheet of numbers is not evidence
 that it measured the thing.**
 
+**Options came from lenses on the friends screen too**, and the pattern
+held: five ways to take things OFF the board, four for a friend's page,
+three for the state before you turn it on — each rendered over the real
+app at 390x844, which is the phone rather than a grid cell. What shipped
+was the one nobody would have converged on: **two stops**, so the board
+and the feed are never on screen together and the CONTROL is the
+heading. A label naming a section beside the thing that takes you to
+that section is the same word twice.
+
+**Nothing on that screen is a filled block any more.** Two solid accent
+rectangles for things done about once a week each, sitting under a
+three-row list, were louder than the board they were about. A line of
+type with a glyph is the same 44px tap. **The glyph carries meaning**:
+`+` for the actions that make something exist, a chevron for `Your
+code`, which shows you a string you already have — given the plus as
+well it read as a fourth thing to create, on the row directly under the
+one that adds people.
+
+**The friend's week is discs whose SIZE says how many, and that is a
+correction.** The first cut varied the ALPHA of their accent from .42 to
+1, which measured **1.30:1 on the white page for solar's amber** — and
+the same pass established that opacity was never the lever, because that
+amber is about 1.9:1 on white at FULL strength. Diluting a colour that
+already fails only makes the number worse. Size costs no contrast at
+all: every disc is drawn at the one strength `scCrown` has already
+solved to clear 3:1 on your page, and the count moves the diameter.
+A day with none is a flat neutral, never a red one — the habits screen's
+rule, for the habits screen's reason.
+
+**A polarity-agnostic measurement, or none.** The pass that caught the
+disc also reported the unlit stop's label at **1.05:1**, which was the
+measurement and not the control: it took the 3rd percentile as ink and
+the 90th as ground, and seven of the thirteen themes are dark, so on
+those it compared the track against itself. Measured from the most
+common pixel outward it is **7.64:1**. This repo has now made the
+light-on-dark assumption in three separate harnesses.
+
+**And `.sheet .fp-k` rather than `.fp-k`.** `.label` and `.menu-item` are
+defined further down `schedule/app.css`, so at equal specificity they
+win however the new rule is written: the friend sheet shipped one round
+with two red capital headings and a hairline under Remove, with the new
+classes sitting on the elements doing nothing. That is the fourth time.
+
 ## The sweep
 
 `.claude/workflows/sweep.js` drives the orrery across every state —

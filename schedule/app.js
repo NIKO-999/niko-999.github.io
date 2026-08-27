@@ -1889,48 +1889,86 @@
       list.appendChild(li);
     });
 
+    /* ── the two quiet actions ──
+       These were a filled accent button and a bordered one, side by
+       side, directly under a three-row list. Two blocks of solid colour
+       for things you do about once a week each, louder than the board
+       they were about. A line of type at the foot of the list is the
+       same tap and does not compete with anything. */
     var add = $('scFriendAdd');
     add.textContent = '';
     if (!net.on) {
+      /* One line here and the whole argument on the sheet where the
+         decision actually gets made. A paragraph on the screen you
+         merely arrive at is a disclaimer; on the sheet it is a
+         decision. */
       add.appendChild(scEl('p', 'fr-note',
-        'You are on the board out of your own ticks, and nothing has left this '
-        + 'browser to put you there. Friends need a server — turning one on is '
-        + 'the moment that stops being true, and it says exactly what goes.'));
-      var acts0 = scEl('div', 'acts');
-      acts0.appendChild(scBtn('go', 'Turn on friends', scNetSheet));
-      add.appendChild(acts0);
+        'Friends need a server. Nothing has left this browser.'));
+      add.appendChild(scLink('Turn on friends', scNetSheet));
     } else {
-      var acts = scEl('div', 'fr-acts');
-      acts.appendChild(scBtn('go', 'Add a friend', scAddSheet));
-      acts.appendChild(scBtn('off', 'Your code', scNetSheet));
-      add.appendChild(acts);
-      add.appendChild(scEl('p', 'fr-note', friends.length
-        ? 'Thirty days, rolling. Tap a name to see their logs.'
-        : 'Nobody added yet. Swap codes with somebody and they appear here.'));
+      add.appendChild(scLink('Add a friend', scAddSheet));
+      add.appendChild(scLink('Your code', scNetSheet, 'go'));
     }
 
-    $('scFeedK').hidden = false;
     var feed = $('scFeed');
     feed.textContent = '';
     var items = net.on ? scFeedItems() : [];
-    if (!items.length) {
-      feed.appendChild(scEl('p', 'fr-note', net.on
-        ? 'Nothing logged yet. A log is a photograph and a line about one of '
-          + 'the five — yours and your friends’ together.'
-        : 'A log is a photograph and a line about one of the five — yours '
-          + 'and your friends’ together. It needs somewhere to put the '
-          + 'picture, so it arrives with the rest of this.'));
-      if (net.on) {
-        var a2 = scEl('div', 'acts');
-        a2.appendChild(scBtn('go', 'Write one', scLogSheet));
-        feed.appendChild(a2);
-      }
+    if (!net.on) {
+      feed.appendChild(scEl('p', 'fr-note',
+        'A log is a photograph and a line about one of the five — yours and '
+        + 'your friends’ together. It arrives when you turn friends on.'));
     } else {
-      var a3 = scEl('div', 'fr-acts');
-      a3.appendChild(scBtn('go', 'Write one', scLogSheet));
-      feed.appendChild(a3);
-      items.slice(0, 40).forEach(function (it) { feed.appendChild(scPost(it)); });
+      feed.appendChild(scLink('Write one', scLogSheet));
+      if (!items.length) {
+        feed.appendChild(scEl('p', 'fr-note',
+          'Nothing logged yet. A photograph and a line about one of the five.'));
+      } else {
+        items.slice(0, 40).forEach(function (it) { feed.appendChild(scPost(it)); });
+      }
     }
+  }
+
+  /* A line of type that is a button. The glyph is drawn rather than
+     typed, so it lines up with the label's cap height at any size and
+     cannot be selected as part of the text.
+
+     TWO GLYPHS, and the difference carries meaning. A `+` is for the
+     three that make something exist — a friend, a log, an account on a
+     server. `Your code` makes nothing; it shows you a string you
+     already have. Given the plus as well it read as a fourth thing to
+     create, on a row directly under the one that adds people.
+
+     It still gets a glyph rather than none, because the label has to
+     start where the others do — a bare line of text sitting 21px left
+     of the two above it looks like a different kind of control. */
+  function scLink(label, fn, glyph) {
+    var b = scEl('button', 'fr-link');
+    b.type = 'button';
+    b.innerHTML = '<svg viewBox="0 0 14 14" aria-hidden="true"><path d="'
+      + (glyph === 'go' ? 'M5 2l5 5-5 5' : 'M7 2v10M2 7h10') + '"/></svg>';
+    b.appendChild(document.createTextNode(label));
+    b.addEventListener('click', fn);
+    return b;
+  }
+
+  /* ── which stop ──
+     Remembered, and in its own key. The schedule is the record and this
+     is a preference about looking at it, which is the same argument
+     `sched.view.v1` already makes for itself — and folding a preference
+     into the record is how a damaged one takes the other down. */
+  var FRSTOP_KEY = 'sched.fr.v1';
+  var frStop = 'board';
+
+  function scFrStop(v, save) {
+    frStop = v === 'feed' ? 'feed' : 'board';
+    $('scFrPane').hidden = frStop !== 'board';
+    $('scFeed').hidden = frStop !== 'feed';
+    [].forEach.call(document.querySelectorAll('.fr-stop'), function (t) {
+      var on = t.dataset.stop === frStop;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-current', on ? 'page' : 'false');
+    });
+    if (save) { try { localStorage.setItem(FRSTOP_KEY, frStop); } catch (e) {} }
   }
 
   /* ── refreshing ──
@@ -2151,29 +2189,61 @@
   function scFriendSheet(p) {
     scSheet(p.name, function (body) {
       var r = peers[p.code] || {};
-      var top = scEl('div', 'fp-top');
-      top.appendChild(scPicOf(60, p));
-      var s = scEl('span');
-      s.appendChild(scEl('span', 'fp-t', String(p.ticks)));
-      s.appendChild(scEl('span', 'fp-s', 'ticks in thirty days · '
-        + p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
-      top.appendChild(s);
-      body.appendChild(top);
 
-      body.appendChild(scEl('span', 'label', 'Last seven days'));
+      /* TWO FIGURES, not one hero and a caption. The total was 30px
+         with `ticks in thirty days · 20 days showing up` running under
+         it as one sentence — which put the two numbers you came to
+         compare at different sizes, one of them inside prose. They are
+         the same kind of thing, so they get the same treatment and sit
+         side by side.
+
+         The face went with it. The sheet's own title is their name, so
+         a 60px portrait under it was the third time in six inches that
+         the screen said who this is. */
+      var pair = scEl('div', 'fp-pair');
+      var fig = function (n, cap) {
+        var d = scEl('div');
+        d.appendChild(scEl('b', '', String(n)));
+        d.appendChild(scEl('span', '', cap));
+        pair.appendChild(d);
+      };
+      fig(p.ticks, 'ticks · 30 days');
+      fig(p.streak, p.streak === 1 ? 'day showing up' : 'days showing up');
+      body.appendChild(pair);
+
+      body.appendChild(scEl('span', 'label fp-k', 'Last seven days'));
       var strip = scEl('div', 'fp-week');
       for (var i = 6; i >= 0; i--) {
         var day = scDayBack(i);
         var n = (r.days && r.days[day]) || 0;
         var cell = scEl('span', 'fp-d' + (n ? ' on' : ''));
-        /* Height by how many of the five, colour by whose it is. The
-           habits screen's rule, and for its reason: a wash of red
-           across a week somebody missed is a judgement, and a bar that
-           is simply shorter is a fact. */
+        /* A disc per day, and its SIZE says how many of the five. A day
+           with none is a flat neutral at the smallest size — never a
+           red one. That is the habits screen's rule and its reason: a
+           wash of red across a week somebody missed is a judgement
+           about them, and a smaller mark is a fact.
+
+           It was seven bars of different heights, which is a chart, and
+           a chart of seven numbers between 0 and 5 is more apparatus
+           than the numbers deserve. A row of discs is read at a glance
+           and measured by nobody.
+
+           SIZE RATHER THAN OPACITY, and that is not a taste call. The
+           first cut varied the alpha of their accent from .42 to 1 and
+           was measured across every theme against a spread of peer
+           accents: solar's amber at .42 came out at 1.30:1 on the white
+           page. Opacity could never have fixed it either — that amber
+           at FULL strength is about 1.9:1 on white, so the accent
+           itself is the problem and diluting it only made a bad number
+           worse. Size costs no contrast at all: every disc is drawn at
+           the one strength scCrown has already solved to clear 3:1 on
+           your page, and the count moves the diameter instead. */
         var bar = scEl('i');
-        bar.style.height = (18 + n * 9) + 'px';
-        if (n && p.acc) bar.style.background = p.acc;
-        cell.appendChild(bar);
+        if (n && p.acc) bar.style.background = scCrown(p.acc);
+        bar.style.width = (n ? 46 + (Math.min(n, 5) - 1) * 13.5 : 46) + '%';
+        var hold = scEl('span', 'fp-hold');
+        hold.appendChild(bar);
+        cell.appendChild(hold);
         /* Two letters, not one. One gives W T F S S M T across a week,
            where two of the T's are different days and so are both S's —
            a strip whose whole job is telling you which day is which. */
@@ -2185,16 +2255,20 @@
       body.appendChild(strip);
 
       var logs = (Array.isArray(r.logs) ? r.logs : []).slice().reverse();
-      body.appendChild(scEl('span', 'label', logs.length ? 'Their logs' : 'No logs yet'));
+      body.appendChild(scEl('span', 'label fp-k', logs.length ? 'Their logs' : 'No logs yet'));
       logs.slice(0, 20).forEach(function (q) {
         body.appendChild(scPost({ p: q, who: p.name, acc: p.acc, ink: p.ink, pic: p.pic }));
       });
 
+      /* `Remove`, and nothing else. It carried a two-line explanation
+         of what removing does — on a sheet you opened to look at
+         somebody, about the one control there you are least likely to
+         press. Removing a friend takes them off a list; it is not the
+         kind of delete that needs warning about, and the sheet says so
+         by not saying anything. */
       body.appendChild(scEl('div', 'menu-rule'));
-      var rm = scEl('button', 'menu-item bad');
-      rm.appendChild(document.createTextNode('Remove ' + p.name));
-      rm.appendChild(scEl('span', 'sub-note',
-        'Off your list and out of this browser. Nothing of theirs is yours to delete.'));
+      var rm = scEl('button', 'menu-item bad fp-rm');
+      rm.appendChild(document.createTextNode('Remove'));
       rm.addEventListener('click', function () {
         scDropFriend(p.code);
         scClose();
@@ -2376,7 +2450,7 @@
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
     if (ring) { scPaintRing(); scPaintRingList(); }
     else if (tal) scPaintTally();
-    else if (fr) { scPaintFriends(); scFriendsRefresh(); }
+    else if (fr) { scPaintFriends(); scFrStop(frStop, false); scFriendsRefresh(); }
     else scLive();
   }
 
@@ -3183,6 +3257,11 @@
      filling in a frame later reads as having lost the day. */
   scTickLoad();
 
+  try {
+    var fs2 = localStorage.getItem(FRSTOP_KEY);
+    if (fs2 === 'board' || fs2 === 'feed') frStop = fs2;
+  } catch (e) {}
+
   /* Whether friends are on, and who is on your list. Reading it makes
      no request — with no URL stored, scApi returns before it builds
      one — so an app nobody has turned this on for behaves exactly as
@@ -3208,6 +3287,9 @@
 
   [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
     t.addEventListener('click', function () { scSetView(t.dataset.view, true); });
+  });
+  [].forEach.call(document.querySelectorAll('.fr-stop'), function (t) {
+    t.addEventListener('click', function () { scFrStop(t.dataset.stop, true); });
   });
   $('scTabYou').addEventListener('click', scMenuSheet);
 

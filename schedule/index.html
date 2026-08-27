@@ -97,12 +97,26 @@
        and your run are both computed out of the ticks already on this
        phone, so this is a real screen with one real row rather than an
        empty state waiting for a server. -->
+  <!-- TWO STOPS, and only one of them is ever on screen. The board and
+       the feed are different things — one is where you stand, the other
+       is what people did — and stacked they made a screen with two
+       headings, two filled buttons and a note line on it. Nothing is
+       removed here; it is put away, which is the rule the folding
+       panels elsewhere in this project already follow.
+
+       The stops are the section headings now. Two labels naming the two
+       halves, one of which is also the control that reaches them, is
+       the same word twice. -->
   <section class="friends" id="scFriends" hidden>
-    <p class="fr-k">Leaderboard</p>
-    <ol class="fr-list" id="scFriendList"></ol>
-    <div class="fr-add" id="scFriendAdd"></div>
-    <p class="fr-k" id="scFeedK">Feed</p>
-    <div class="fr-feed" id="scFeed"></div>
+    <nav class="fr-seg" id="scFrSeg" aria-label="Friends">
+      <button class="fr-stop on" id="scFrBoard" data-stop="board" aria-current="page">Leaderboard</button>
+      <button class="fr-stop" id="scFrFeed" data-stop="feed" aria-current="false">Feed</button>
+    </nav>
+    <div id="scFrPane">
+      <ol class="fr-list" id="scFriendList"></ol>
+      <div class="fr-add" id="scFriendAdd"></div>
+    </div>
+    <div class="fr-feed" id="scFeed" hidden></div>
   </section>
 
   <ol class="rail" id="scRail"></ol>

@@ -289,9 +289,70 @@ body {
 /* ── friends ── */
 .friends { margin-top: 18px; }
 .friends[hidden] { display: none; }
-.fr-k { font-size: 9px; font-weight: 700; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--dim); margin-top: 22px; }
-.fr-k:first-child { margin-top: 0; }
+
+/* ── the two stops ──
+   The board and the feed used to be stacked under two letterspaced
+   capital headings, with a filled accent button under each. Two stops
+   put one thing on screen at a time and let the control BE the
+   heading — a label naming a section, sitting next to the thing that
+   takes you to that section, is the same word twice.
+
+   A `background` on the lit stop rather than a colour change on its
+   label: at 13px a difference in grey is something you go looking for,
+   and this has to say where you are at a glance. */
+.fr-seg {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin-bottom: 18px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+.fr-stop {
+  flex: 1;
+  min-height: 44px;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  color: var(--dim);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.fr-stop.on { background: var(--g0); color: var(--ink); }
+.fr-stop:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+#scFrPane[hidden], .fr-feed[hidden] { display: none; }
+
+/* ── an action that is a line of type ──
+   These were a filled accent block and a bordered one, side by side,
+   under a three-row list. Two solid rectangles for things you do about
+   once a week each, louder than the board they were about. Same tap,
+   same 44px, none of the weight. */
+.fr-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 44px;
+  padding: 11px 0;
+  border: 0;
+  background: none;
+  color: var(--dim);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+.fr-link svg {
+  width: 13px; height: 13px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round;
+}
+.fr-link:active { opacity: .6; }
+.fr-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
 .fr-list { list-style: none; margin-top: 8px; }
 .fr-row { display: flex; align-items: center; gap: 13px;
   padding: 12px 0; border-bottom: 1px solid var(--hair); }
@@ -359,26 +420,58 @@ body {
 .po-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .po-c { margin-top: 8px; font-size: 13.5px; line-height: 1.5; }
 
-/* ── a friend ── */
-.fp-top { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
-.fp-t { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums;
-  letter-spacing: -.02em; display: block; }
-.fp-s { display: block; margin-top: 1px; font-size: 11.5px; color: var(--dim); }
+/* ── a friend ──
+   Two figures of the same kind, so they get the same size and sit on
+   one line. It was a 30px total with the streak running under it inside
+   a sentence — the two numbers you came to compare, at different
+   weights, one of them in prose. */
+/* A quieter heading, and ONLY on this sheet. `.label` is 9px accent
+   capitals at .2em, which is right where a sheet is a form — it is the
+   only thing separating a field from the one above it. Here the
+   headings sit over a figure and a row of discs, which separate
+   themselves, so the same treatment reads as two small alarms.
+   Restyling `.label` itself would have quietly changed every other
+   sheet in the app.
 
-/* Seven days, and the bar's HEIGHT says how many of the five — never
-   its colour. The habits screen's rule and its reason: a wash of red
-   across a week somebody missed is a judgement about them, and a
-   shorter bar is a fact. A day with nothing is the same hollow shape
-   as a day with everything, only smaller.
+   `.sheet` IS LOAD-BEARING, and this shipped without it for one round.
+   `.label` and `.menu-item` are defined further down this file, so at
+   equal specificity they win however this rule is written — the sheet
+   came out with two red capital headings and a hairline under Remove,
+   exactly as before, with the new classes on the elements and doing
+   nothing. Same shape as `.prime`, `.ghost svg circle` and `.bar`
+   before it: a later rule in the same file is the live one. */
+.sheet .fp-k { font-size: 11px; font-weight: 700; letter-spacing: -.01em;
+  text-transform: none; color: var(--dim); margin: 22px 0 6px; }
 
-   align-items: end so the bars sit on one baseline whatever they are
-   — the rule about a row being one box, with the part that varies
-   absorbing the difference. */
-.fp-week { display: flex; align-items: end; gap: 6px; margin-top: 8px; }
-.fp-d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
-.fp-d i { display: block; width: 100%; border-radius: 6px;
+.fp-pair { display: flex; gap: 26px; margin: 2px 0 4px; }
+.fp-pair b { display: block; font-size: 26px; font-weight: 800;
+  letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.fp-pair span { display: block; margin-top: 1px; font-size: 11px; color: var(--dim); }
+
+/* Seven discs. How many of the five sets the WEIGHT of their colour;
+   a day with none is a flat neutral and never a red one. The habits
+   screen's rule and its reason: a wash of red across a week somebody
+   missed is a judgement about them, and a fainter mark is a fact.
+
+   It was seven bars of different heights — a chart of seven numbers
+   between 0 and 5, which is more apparatus than the numbers deserve.
+   A row of discs is read at a glance and measured by nobody. */
+.fp-week { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+.fp-d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+/* The row is one box and the part that varies absorbs the difference:
+   every cell reserves the full disc's height so a quiet day cannot
+   shorten the strip, and the disc centres inside whatever it gets.
+   Width is written on the element; aspect-ratio makes it a circle. */
+.fp-hold { width: 100%; aspect-ratio: 1; display: grid; place-items: center; }
+.fp-d i { display: block; aspect-ratio: 1; border-radius: 50%;
   background: var(--tick-off); }
 .fp-w { font-size: 10px; color: var(--dim); }
+
+/* No border and no paragraph. Removing somebody takes them off a list;
+   it is not the kind of delete that needs warning about, and the sheet
+   says so by not saying anything. */
+.sheet .fp-rm { border-bottom: 0; padding: 16px 0 0;
+  font-size: 13px; font-weight: 600; }
 
 /* ── writing one ── */
 .lg-prev { margin-bottom: 12px; border-radius: 14px; overflow: hidden;
