@@ -623,9 +623,14 @@ body {
   z-index: 30;
   display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 22px;
-  padding: 12px 20px calc(14px + env(safe-area-inset-bottom));
+  /* Spread to the page's own edges rather than a huddle in the middle.
+     Centred with a 22px gap, four controls sat as a clump with dead
+     space either side, which is what made them read as objects ON the
+     page instead of as the page's own bar. */
+  justify-content: space-between;
+  padding: 8px max(14px, env(safe-area-inset-left))
+           calc(10px + env(safe-area-inset-bottom))
+           max(14px, env(safe-area-inset-right));
   /* The SAME wash as the body, not a flat fill. --g0 alone was the
      first fix and it still cut a hard white band across the bottom
      eighth of the page — which is precisely where the gradient is
@@ -651,15 +656,23 @@ body {
   cursor: pointer;
 }
 
-/* 48px is the floor, not the target. Everything on this bar is pressed
-   with a thumb, in a hurry, one-handed. */
+/* 52px is the floor, not the target. Everything on this bar is pressed
+   with a thumb, in a hurry, one-handed.
+
+   No border and no fill, and that is the whole point of this rule. Each
+   ghost used to be a 1px --ink box on --paper, so the foot of the page
+   was four outlined white squares and one red one floating over a
+   gradient — five separate objects rather than one bar, and it read as
+   litter on the wash instead of as chrome. The BAR is the surface; the
+   buttons are icons sitting on it. The one that is still a filled block
+   is the microphone, because it is the only one that should be. */
 .ghost {
-  width: 48px; height: 48px;
-  border: 1px solid var(--ink);
-  background: var(--paper);
-  color: var(--ink);
+  width: 52px; height: 52px;
+  border: 0;
+  background: none;
+  color: var(--dim);
 }
-.ghost:active { background: #f0f0f0; }
+.ghost:active { color: var(--ink); }
 
 /* The one control that is the accent, because it is the one that does
    the thing this app is for. White on this red measures 4.7:1. */
@@ -683,7 +696,14 @@ body {
   stroke-linejoin: round;
 }
 .mic svg { width: 26px; height: 26px; stroke-width: 2; }
-.ghost svg circle { fill: currentColor; stroke: none; }
+
+/* The settings glyph is three FILLED dots. This used to say
+   `.ghost svg circle`, which is every circle on the bar — and the view
+   control's icon is a ring with a hand on it, so the ring was filled
+   solid and the control drew a blob. A button that shows what you would
+   GET is the whole reason that icon exists, and it was showing nothing.
+   Scoped to the one button that wants filled circles. */
+#scMenu svg circle { fill: currentColor; stroke: none; }
 
 /* The ring only exists while listening, so there is nothing animating
    on this page in the state it spends all its time in. */

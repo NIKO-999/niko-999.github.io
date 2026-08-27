@@ -759,6 +759,46 @@ const SAID = [
      shipped were a ring drawn the wrong way round and a mark that was
      not a unit of anything, and neither shows up in a screenshot you
      are not looking hard at. */
+  /* ── the bar ──
+     It is a bar, not four boxes standing on the page. Each ghost used to
+     be a 1px --ink outline on --paper, so the foot of the screen was
+     five separate objects floating over the gradient. What is asserted
+     is the property, not the styling: an icon sitting ON the surface has
+     no border and no fill of its own, and the microphone is the only
+     control that is a block. */
+  console.log('\n── the bar ──');
+  const bar = await page.evaluate(() => {
+    const box = (el) => {
+      const s = getComputedStyle(el);
+      return { bw: parseFloat(s.borderTopWidth) + parseFloat(s.borderLeftWidth),
+               bg: s.backgroundColor, w: Math.round(el.getBoundingClientRect().width) };
+    };
+    return { ghosts: [...document.querySelectorAll('.ghost')].map(box),
+             mic: box(document.querySelector('.mic')),
+             spread: getComputedStyle(document.querySelector('.bar')).justifyContent };
+  });
+  const clear = (b) => b.bw === 0 && /rgba\(0, 0, 0, 0\)|transparent/.test(b.bg);
+  ok('every ghost is an icon on the bar, not a box on the page',
+    bar.ghosts.length === 3 && bar.ghosts.every(clear), bar.ghosts);
+  ok('and the microphone is the one control that is still a block',
+    !clear(bar.mic) && bar.mic.w >= 56, bar.mic);
+  ok('the controls reach the page’s own edges', bar.spread === 'space-between', bar);
+
+  /* THE VIEW ICON IS A RING, AND IT HAS TO STAY ONE. `.ghost svg circle`
+     filled every circle on the bar so it could fill the settings dots —
+     and the view control's glyph is a ring with a hand on it, so it drew
+     a solid blob. The whole design of that button is that it shows what
+     you would GET rather than where you are, and it was showing nothing.
+     Read off the composited style, and both halves are asserted: the
+     ring hollow, the dots filled. */
+  const glyphs = await page.evaluate(() => ({
+    ring: getComputedStyle(document.querySelector('#scViewIcon circle')).fill,
+    dots: getComputedStyle(document.querySelector('#scMenu svg circle')).fill,
+    ink: getComputedStyle(document.documentElement).getPropertyValue('--ink').trim(),
+  }));
+  ok('the view icon’s ring is hollow', glyphs.ring === 'none', glyphs);
+  ok('and the settings dots are still filled', glyphs.dots !== 'none', glyphs);
+
   console.log('\n── the ring ──');
   await page.click('#scView');
   await page.waitForTimeout(220);
