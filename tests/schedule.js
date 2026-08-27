@@ -1752,6 +1752,13 @@ const SAID = [
       await fp.click(`.tab[data-view="${v}"]`);
       await fp.waitForTimeout(220);
     };
+    /* The board and the feed are two stops now, so a test that wants
+       the feed has to go to it. Driven by name rather than by counting
+       presses — the same reason the view helper above exists. */
+    const stop = async (v) => {
+      await fp.click(`.fr-stop[data-stop="${v}"]`);
+      await fp.waitForTimeout(240);
+    };
 
     /* Two ticks of your own, so the board has a real figure on it
        rather than a zero that any code path would produce. */
@@ -1778,6 +1785,53 @@ const SAID = [
       fetched.filter((u) => !u.startsWith(BASE)));
     ok('you are on the board anyway, out of your own ticks',
       await fp.$$eval('.fr-row', (r) => r.length) === 1);
+
+    /* ── two stops, one screen ──
+       The board and the feed were stacked under two letterspaced
+       capital headings with a filled accent button under each. Only
+       one is on screen now, and the control that reaches a half IS the
+       heading for it — a label naming a section beside the thing that
+       takes you there is the same word twice. */
+    ok('only one half is on screen at a time',
+      await fp.evaluate(() => document.getElementById('scFrPane').hidden
+        !== document.getElementById('scFeed').hidden));
+    ok('the board is the stop you arrive at',
+      await fp.evaluate(() => !document.getElementById('scFrPane').hidden));
+    ok('and the lit stop says which one it is',
+      await fp.$eval('.fr-stop.on', (e) => e.dataset.stop) === 'board');
+    await stop('feed');
+    ok('the feed stop puts the feed up and the board away',
+      await fp.evaluate(() => document.getElementById('scFrPane').hidden
+        && !document.getElementById('scFeed').hidden));
+    /* Remembered, and in its own key: the schedule is the record and
+       this is a preference about looking at it, which is the same
+       argument sched.view.v1 already makes for itself. */
+    await fp.reload({ waitUntil: 'networkidle' });
+    await fp.waitForTimeout(340);
+    ok('and which stop you were on outlives a reload',
+      await fp.evaluate(() => !document.getElementById('scFeed').hidden));
+    await stop('board');
+
+    /* Nothing on this screen is a filled block any more. Two solid
+       rectangles for things done about once a week each, sitting under
+       a three-row list, were louder than the board they were about. */
+    ok('no action on the screen is a filled button',
+      await fp.$$eval('.friends .btn', (b) => b.length) === 0);
+    ok('and every one of them still clears 44px',
+      await fp.$$eval('.fr-link, .fr-stop', (b) => b.length > 0
+        && b.every((x) => x.getBoundingClientRect().height >= 44)));
+    /* Checked here AND once friends are on, because the interesting
+       case only exists then: with it off the screen has one action on
+       it and any glyph at all passes. The first version of this ran
+       only here and could not fail. */
+    /* Scoped to ONE pane. Both halves stay in the DOM — the stop hides
+       them with display:none — so an unscoped query returns the feed's
+       actions alongside the board's whichever stop is up. */
+    const glyphs = (where) => fp.$$eval(where + ' .fr-link', (b) => b.map((x) =>
+      x.textContent.trim() + '|' + (x.querySelector('path').getAttribute('d')
+        .indexOf('M7 2v10') === 0 ? 'plus' : 'go')).join(' '));
+    ok('the one action off the shelf is a +',
+      await glyphs('#scFrPane') === 'Turn on friends|plus');
 
     /* ── turning it on ── */
     await fp.click('text=Turn on friends');
@@ -1849,6 +1903,16 @@ const SAID = [
     ok('and your friend list is in this browser',
       await fp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
         .map((f) => f.code).join() === 'JADE2K7P'));
+
+    /* A `+` is for the actions that make something exist. `Your code`
+       makes nothing — it shows you a string you already have — and
+       given the plus as well it read as a fourth thing to create, on
+       the row directly under the one that adds people. */
+    ok('the + belongs to the action that creates, and Your code has its own glyph',
+      await glyphs('#scFrPane') === 'Add a friend|plus Your code|go',
+      await glyphs('#scFrPane'));
+    ok('and the composer keeps the +',
+      await glyphs('#scFeed') === 'Write one|plus', await glyphs('#scFeed'));
 
     /* ── their colours, not yours ── */
     const crown = await fp.$eval('.fr-crown', (e) => ({
@@ -1928,6 +1992,100 @@ const SAID = [
       ok('a friend’s crown clears 3:1 on your page, measured on pixels',
         low.r >= 3, JSON.stringify(low));
     }
+
+    /* ── the smallest disc, and the unlit stop ──
+       Two claims that only pixels can settle. The disc is the one that
+       was WRONG: varying their accent's alpha put solar's amber at
+       1.30:1 on the white page, and the pass that found it also found
+       that opacity was never the lever — the amber is about 1.9:1 on
+       white at full strength. Size carries the count now and every
+       disc is the colour scCrown already solved.
+
+       Measured POLARITY-AGNOSTICALLY, from the most common pixel in
+       the box outward. The first version of the stop measurement took
+       the 3rd percentile as ink and the 90th as ground, which assumes
+       dark type on a light track — seven of the thirteen themes are
+       dark, so on those it compared the track against itself and
+       reported 1.05:1 for a control that actually measures 7.6:1. */
+    {
+      const { PNG } = require('pngjs');
+      const lum = ([r, g, b]) => {
+        const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
+        return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
+      };
+      const ratio = (a, b) => {
+        const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+        return (x + .05) / (y + .05);
+      };
+      let lowD = { r: 99 }, lowS = { r: 99 };
+      for (const [reader, acc] of [['paper', '#FFB020'], ['blush', '#FF6FA5'],
+                                   ['nebula', '#5CC8F8'], ['linen', '#FFB020']]) {
+        const seeded = JSON.parse(store.get('rec:JADE2K7P'));
+        seeded.acc = acc;
+        /* Every day exactly ONE tick, so what is measured is the
+           smallest disc the strip can draw. */
+        seeded.days = {};
+        for (let i = 0; i < 7; i++) seeded.days[day(i)] = 1;
+        store.set('rec:JADE2K7P', JSON.stringify(seeded));
+        await fp.evaluate((t) => {
+          localStorage.setItem('sched.theme.v1', t);
+          localStorage.setItem('sched.view.v1', 'friends');
+          localStorage.setItem('sched.fr.v1', 'board');
+        }, reader);
+        await fp.reload({ waitUntil: 'networkidle' });
+        await fp.evaluate(async () => { await document.fonts.ready; });
+        await fp.waitForTimeout(220);
+
+        const png0 = PNG.sync.read(await fp.screenshot());
+        const at0 = (x, y) => {
+          const i = (png0.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
+          return [png0.data[i], png0.data[i + 1], png0.data[i + 2]];
+        };
+        const sb = await fp.$eval('#scFrFeed', (e) => {
+          const r = e.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height };
+        });
+        const sp = [];
+        for (let x = 10; x < sb.w - 10; x++)
+          for (let y = 8; y < sb.h - 8; y++) sp.push(at0(sb.x + x, sb.y + y));
+        const bag = {};
+        sp.forEach((q) => { const k = q.join(); bag[k] = (bag[k] || 0) + 1; });
+        const track = Object.entries(bag).sort((a, c) => c[1] - a[1])[0][0].split(',').map(Number);
+        const tl = lum(track);
+        const far = sp.slice().sort((m, n) => Math.abs(lum(n) - tl) - Math.abs(lum(m) - tl)).slice(0, 40);
+        const glyph = far.reduce((z, q) => q.map((c, i) => z[i] + c), [0, 0, 0]).map((c) => c / 40);
+        const rs = +ratio(glyph, track).toFixed(2);
+        if (rs < lowS.r) lowS = { r: rs, reader };
+
+        await fp.click('.fr-row.is-tap');
+        await fp.waitForTimeout(540);
+        const db = await fp.$eval('.fp-d i', (e) => {
+          const r = e.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height };
+        });
+        const png = PNG.sync.read(await fp.screenshot());
+        const at = (x, y) => {
+          const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
+          return [png.data[i], png.data[i + 1], png.data[i + 2]];
+        };
+        const rd = +ratio(at(db.x + db.w / 2, db.y + db.h / 2),
+                          at(db.x + db.w / 2, db.y - 11)).toFixed(2);
+        if (rd < lowD.r) lowD = { r: rd, reader, acc };
+        await fp.keyboard.press('Escape');
+        await fp.waitForTimeout(380);
+      }
+      ok('the smallest disc clears 3:1 on your page, measured on pixels',
+        lowD.r >= 3, JSON.stringify(lowD));
+      ok('and the stop you are NOT on is still readable type',
+        lowS.r >= 4.5, JSON.stringify(lowS));
+    }
+    {
+      const seeded = JSON.parse(store.get('rec:JADE2K7P'));
+      seeded.acc = '#0F6E6A';
+      seeded.days = {};
+      for (let i = 0; i < 12; i++) seeded.days[day(i)] = (i % 5) + 1;
+      store.set('rec:JADE2K7P', JSON.stringify(seeded));
+    }
     {
       const seeded = JSON.parse(store.get('rec:JADE2K7P'));
       seeded.acc = '#0F6E6A';
@@ -1945,9 +2103,19 @@ const SAID = [
     /* Height says how many of the five and colour never says whether —
        the habits screen's rule. A day with nothing is the same shape,
        only shorter. */
-    const bars = await fp.$$eval('.fp-d i', (b) => b.map((x) => x.style.height));
-    ok('and the strip says how many by HEIGHT, never by a colour for missing',
-      new Set(bars).size > 1 && bars.every((h) => parseFloat(h) >= 18), bars.join());
+    /* SIZE says how many, and every disc is drawn at full strength.
+       The first cut varied the alpha of their accent instead and
+       measured 1.30:1 on the white page for solar's amber — and
+       opacity could never have fixed that, because the amber is about
+       1.9:1 on white at FULL strength. Diluting a colour that already
+       fails only makes the number worse. */
+    const discs = await fp.$$eval('.fp-d i', (b) => b.map((x) => ({
+      w: x.style.width, o: getComputedStyle(x).opacity })));
+    ok('the strip says how many by SIZE, never by a colour for missing',
+      new Set(discs.map((d) => d.w)).size > 1
+      && discs.every((d) => parseFloat(d.w) >= 46), JSON.stringify(discs));
+    ok('and no disc is diluted to say it — opacity cannot rescue a light accent',
+      discs.every((d) => d.o === '1'), JSON.stringify(discs.map((d) => d.o)));
     /* Two letters, because one gives W T F S S M T over a week and
        two of those T's are different days. A strip whose job is saying
        which day is which cannot be ambiguous about two of the seven. */
@@ -1955,10 +2123,34 @@ const SAID = [
       await fp.$$eval('.fp-w', (w) => new Set(w.map((x) => x.textContent)).size) === 7,
       await fp.$$eval('.fp-w', (w) => w.map((x) => x.textContent).join()));
     ok('their logs are on it', await fp.$$eval('.sheet .po', (p) => p.length) === 1);
+    /* `.label` is 9px accent capitals at .2em, which is right where a
+       sheet is a form and is the only thing separating one field from
+       the next. Here the headings sit over a figure and a row of discs
+       that separate themselves, so the same treatment reads as two
+       small alarms. Scoped to this sheet — restyling .label itself
+       would quietly have changed every other sheet in the app.
+
+       `.sheet .fp-k` and not `.fp-k`, and that shipped wrong for one
+       round: .label and .menu-item are defined further down the file,
+       so at equal specificity they win however the new rule is
+       written. The sheet came out with two red capital headings and a
+       hairline under Remove, with the new classes on the elements
+       doing nothing at all. */
+    const heads = await fp.$$eval('.sheet .fp-k', (e) => e.map((x) => {
+      const cs = getComputedStyle(x);
+      return { t: cs.textTransform, ls: cs.letterSpacing, size: cs.fontSize };
+    }));
+    ok('the sheet\u2019s headings are not letterspaced capitals',
+      heads.length === 2 && heads.every((h) => h.t === 'none'
+        && parseFloat(h.ls) <= 0 && parseFloat(h.size) >= 11), JSON.stringify(heads));
+    ok('and Remove carries no hairline and no paragraph',
+      await fp.$eval('.fp-rm', (e) => getComputedStyle(e).borderBottomWidth === '0px'
+        && !e.querySelector('.sub-note')));
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(420);
 
     /* ── writing one ── */
+    await stop('feed');
     await fp.click('text=Write one');
     await fp.waitForTimeout(420);
     await fp.evaluate(() => {
@@ -2003,6 +2195,7 @@ const SAID = [
         === 'Niko,Rae');
 
     /* ── leaving ── */
+    await stop('board');
     await fp.click('text=Your code');
     await fp.waitForTimeout(420);
     ok('your code is on screen to give away',
