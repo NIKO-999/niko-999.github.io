@@ -317,6 +317,15 @@ told apart only by which way a handle pointed. All four looked fine at
 88px. **Two glyphs with one silhouette is worse than a glyph missing,
 because the row is then confidently wrong.**
 
+**A closed shape inside a glyph needs 3.4 units of the 24 box, or it
+fills in.** The sneaker was drawn five times with a midsole as its own
+band — four units deep, a 1.8 stroke on each edge, so 2.2 units of white
+between them, which is about two device pixels on the row. All five
+closed into a solid slab and read WORSE than the flat shoe they were
+meant to beat. Anything inside an outline at this size is a single
+stroke; the shape has to come out of the silhouette. The lace flap, the
+heel counter and the swoosh each went the same way.
+
 **The ORDER of the keyword table is the whole mechanism.** First hit
 wins, so every pair where one phrase contains another is listed the long
 way round — `walk the dog` before `walk`, `work out` before `work`,

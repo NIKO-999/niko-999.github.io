@@ -676,13 +676,25 @@
        on the sheet — walk, run and stretch were one silhouette in three
        poses, which is the collision this file keeps re-learning. */
     walk: STEPS,
-    /* A TRAINER, not a fourth stick-figure. Silhouette only: the lace
-       flap and the heel counter were both drawn and both close into a
-       blob at 22px, where a shoe is nothing but its outline. The first
-       cut sat in the bottom third of the box and read as a slipper
-       beside glyphs that fill it. */
-    run: '<path d="M3 17.6v-7.6a2 2 0 012-2h2.4l1.6 3 3.6 1.6 6.6 1.9'
-       + 'a3 3 0 012.1 2.9v.6H3zM3 18.2v2h18.3v-2"/>',
+    /* A TRAINER, not a fourth stick-figure — and the sneaker read comes
+       out of the OUTLINE: a rounded toe and a sole seam sitting 3.4 up
+       from the bottom. The first cut ended in a square corner with a
+       hairline under it and was a plimsoll.
+
+       A CLOSED MIDSOLE BAND CANNOT WORK AT THIS SIZE, and five were
+       drawn before that was obvious. A band four units deep with a 1.8
+       stroke on each edge leaves 2.2 units of white — about two device
+       pixels on the row — so every one of them filled in and read WORSE
+       than the flat shoe it was meant to beat. Anything inside the
+       outline here is a single stroke, and any gap is held at 3.4 or
+       more.
+
+       The lace flap, the heel counter and the swoosh were each drawn
+       and each close into a smudge at 22px. A shoe this small is
+       nothing but its silhouette. */
+    run: '<path d="M4.4 8.6h2.2l1.4 3 3.5 1.5 5.5 1.7c2.3.7 3.7 1.9 3.9 3.1'
+       + '.2 1.2-.7 2.1-2.2 2.1H5.4A2.4 2.4 0 013 17.6v-7.2a1.8 1.8 0 011.4-1.8z'
+       + 'M3.1 16.1h16.9"/>',
     cycle: '<circle cx="5.6" cy="16.4" r="3.6"/><circle cx="18.4" cy="16.4" r="3.6"/>'
          + '<path d="M5.6 16.4l4.4-7.4h4.6l-2.4 7.4h6.2M12.4 9h3.4"/>',
     swim: '<circle cx="16.4" cy="7.2" r="1.9"/>'
