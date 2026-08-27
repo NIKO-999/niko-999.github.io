@@ -20,11 +20,16 @@ const ROOT = path.resolve(__dirname, '..');
 
 /* Order is deliberate. The static checks need no browser and take
    milliseconds, so a duplicate name or a clobbered class fails before
-   anything spends a minute driving Chromium. The gauntlet goes last
+   anything spends a minute driving Chromium. `worker` is the second of
+   those: a Worker is a function from a Request to a Response, so it
+   runs in this process against a Map, with no account and no network.
+   Nothing downstream depends on it — it is early because it is fast,
+   and because it is the only file here guarding data that leaves the
+   phone. The gauntlet goes last
    because it reports faults rather than passes and reads best as a
    closing summary. */
 const SUITE = [
-  'names',
+  'names', 'worker',
   'bt', 'models', 'restest', 'swingtest', 'psptest', 'aligntest',
   'logtest', 'journal', 'bintest', 'snaptest', 'daytest', 'intest',
   'lenstest', 'besttest', 'scratch', 'tiles',

@@ -69,6 +69,28 @@ turns up screens away.
 - Descendant-scoping (`.bt-fig .cell`) is not enough on its own: a later
   global rule still supplies every property yours does not name.
 
+**A later rule in the same file is the live one, and that has bitten
+three times.** `.prime` kept a microphone's 13px radius from the bar it
+replaced, so the add control drew as a rounded square after being
+written as a circle. `.ghost svg circle` filled the view icon's ring
+into a blob. And `.bar` had a whole second copy of itself at the foot of
+`schedule/app.css` — 554 lines of that file were duplicated verbatim —
+imposing the previous bar's padding over the padding the live rule's own
+comment explained. That third one is the worst, because the numbers it
+forced were themselves measured, just for a different bar, so nothing on
+screen ever looked wrong. **A dead rule that still cascades is not
+dead.**
+
+Unlike `.live` and `.grid`, this IS statically decidable: it asks
+whether one selector, spelled identically, is written twice in one file,
+and the answer is in the text. `tests/names.js` checks it. Eleven pairs
+were already standing in four other screens when it was written and are
+baselined by name — a debt written down, not an approval, and each is a
+place where editing the first rule does nothing. **The baseline is
+checked in both directions**: a named pair that has gone fails too,
+because otherwise the list rots into an inventory of things that do not
+exist and quietly waves through the duplicate that replaced them.
+
 ## Data
 
 Everything lives in this browser and is never uploaded. `ledger.v1`
@@ -205,6 +227,98 @@ watching it still bite.
 **The apps have no dependencies.** `package.json` exists for the test
 suite alone. No build step, no framework, no CDN; both apps are still
 plain static files you can open off the disk.
+
+## The worker
+
+`worker/` is the one thing in this repository that is not a static file
+in a browser: a Cloudflare Worker over one KV namespace, and the server
+for the friends half of `schedule/`. It exists because a leaderboard
+between two phones cannot be done inside one of them. Nothing else
+reaches it and nothing else may — the promise that a screen keeps its
+data on the device is still the promise everywhere the worker is not,
+and `schedule/` is the only app that has a URL for it.
+
+**It cannot tell you who anybody is, and the friend list is the reason.**
+There are no accounts, no email and no sessions; identity is two strings
+the client generates — a short public `code` that reads, and a secret
+32-hex `key` that writes, stored only as its SHA-256. **The friend list
+lives on the client**, so there is no `/friends` endpoint and the server
+holds no graph. That absence is load-bearing: the endpoint that would
+make it convenient is one line shorter and hands the whole social graph
+to somebody else's machine for nothing. `tests/worker.js` asserts the
+door is not there, which is the only kind of check a missing feature can
+have.
+
+**Thirty days is the shape of the data, not a policy note**, and the
+window runs two days AHEAD of the server. That is not slack. The worker
+runs on UTC and the client files a day under its OWN local date — which
+is what stops a tick taken at 9pm in London landing on yesterday — so
+east of Greenwich the two disagree for part of every day. A window that
+stopped at the server's today would drop the day being lived in, on
+write, and answer 200.
+
+**A Worker is a function from a Request to a Response**, so `tests/
+worker.js` runs the real file in Node against a Map standing in for KV:
+no account, no network, a second and a half, and it goes second in the
+suite behind `names`. Everything it checks fails SILENTLY in production
+— a day filed under the wrong date, a write accepted without a key, a
+picture id that dedupes nothing. Two of those three were in the first
+draft, and the second is the sharpest lesson in the folder: the id was
+hashed from `Date.now()` under a comment that said "stored by content
+hash, so posting the same picture twice costs one entry". It reads
+identically, it dedupes nothing, and the comment was the only place the
+intent ever existed. **That happened twice in one day** — the client
+pushed each log's `local` field, the whole data URL of its own
+photograph, under a comment saying "this is never sent".
+
+**The CORS allowance is a pattern, not a list.** It named three origins,
+one of them a hardcoded dev port, and the app's own suite could not talk
+to it: `tests/run.js` finds a FREE port at run time, so it is never on
+any list written in advance. It surfaced as "could not reach that
+address" — a CORS rejection wearing a network error. Loopback on any
+port is allowed now, because a local port number was never a security
+boundary; the production origin is still exact, and `*` never.
+
+**The client half is inert until you turn it on, and that is measured.**
+`scApi` returns before it builds a request when there is no URL, so
+`tests/schedule.js` can keep counting every request the main page makes
+and failing on one that leaves the origin — the app's whole promise.
+The friends section runs on its OWN page for exactly that reason:
+relaxing that filter to let the section through would quietly relax it
+for everything else.
+
+**Both clocks have to be frozen together.** The page files a day under
+its own local date and the worker trims to a window from its own clock.
+Freeze only the page and you are measuring a five-day skew rather than
+the app — the first run of the round trip reported an empty board and
+looked like a bug in the client.
+
+**A paint must not fetch.** The first version refreshed from inside
+`scPaintFriends` and repainted from inside the fetch. That is a loop,
+and it did not even need a server to close it: with nobody on your list
+`scPullAll` has nothing to wait for and calls back synchronously, so the
+first paint recursed until the stack went — and came out as a board with
+its buttons and no rows, which reads as an empty leaderboard rather than
+as a crash. Arriving at the screen fetches; drawing it only draws.
+
+**A friend's accent is a colour your page never agreed to.** Thirteen
+themes each way is 169 pairings, and every crown measurement before this
+was of your own accent on your own page — the one case a palette cannot
+get wrong. `scCrown` mixes their colour toward your ink and stops at the
+first step that clears 3:1 for a graphic. All 169 were measured on
+composited pixels: aiming at a bare 3.0 puts **26 of them under 3:1 on
+screen, worst 2.92:1**, because the page draws three washes over `--g0`
+and the arithmetic only knows about `--g0`. At 3.4 the worst measured is
+3.25:1 and **97 of the 169 never move at all**. The suite measures the
+six that came out worst, and dropping the constant is what it catches.
+
+That measurement was itself wrong twice before it was right: the first
+harness reloaded a page whose `addInitScript` re-seeded the peer record,
+so all 169 pairings measured the same black accent; the second planted
+the accent only in the client's cache, and arriving at the screen
+re-fetched the peer and overwrote it before a pixel was read. **A
+measurement that produces a plausible sheet of numbers is not evidence
+that it measured the thing.**
 
 ## The sweep
 

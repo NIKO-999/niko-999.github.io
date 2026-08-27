@@ -1,0 +1,82 @@
+# The worker
+
+The server for the friends half of `schedule/`. Everything else in this
+repository runs in your browser and sends nothing anywhere. This does
+not, which is the whole reason it is a separate folder with its own
+README rather than a file somewhere in the app.
+
+It is about two hundred lines and it is deliberately stupid: no
+accounts, no email, no passwords, no sessions. It cannot tell you who
+anybody is because it has never been told. It does not know who is
+friends with whom either — **your friend list lives on your phone**, and
+the server only ever sees "somebody asked for the record under code
+X". Read `index.js`; the reasoning is written where each decision is.
+
+## Deploying it
+
+Four commands. You need a Cloudflare account; the free tier is far more
+than this will ever use.
+
+```sh
+cd worker
+npx wrangler login                      # opens a browser, once
+npx wrangler kv namespace create SCHED  # prints an id
+```
+
+Paste that id into `wrangler.toml`, replacing
+`PASTE_THE_KV_NAMESPACE_ID_HERE`. Then:
+
+```sh
+npx wrangler deploy
+```
+
+It prints a URL ending in `.workers.dev`. **That URL is the thing to
+hand back** — the app is inert until it has one, and holds no other
+configuration.
+
+## What it costs
+
+The free tier is 100,000 requests and 1,000 KV writes a day. A whole
+record is written at a time rather than a tick at a time, so a heavy day
+of ticking is a handful of writes rather than one per glass of water.
+Reads are 100,000/day and a friend's record is one of them.
+
+## Two strings, and only one of them is shareable
+
+- **code** — short, public, read-only. This is what you text a friend.
+  Anyone holding it can read your record.
+- **key** — 32 hex characters, secret, write-only. It never leaves your
+  phone except in an `Authorization` header, and the server keeps only
+  its SHA-256.
+
+Splitting them is the security model. One string doing both jobs would
+mean that sharing your code shares the ability to post as you.
+
+## What is actually up there
+
+Your name, your two theme colours, an avatar, thirty rolling days of
+ticks, and your log entries with their photographs. That is everything
+the feed needs, which is what was asked for, and it is a long way past
+the five bits a day the leaderboard alone would have taken. The app says
+so on the screen where you turn it on.
+
+Thirty days is the retention, and it is the shape of the data rather
+than a policy note: the board is a rolling thirty days, so there is no
+fortieth day to keep. Photographs carry their own expiry and age out on
+their own.
+
+`DELETE /v1/rec/<code>` is final and takes the write key with it. It is
+the one thing in this app with no bin, on purpose — a bin protects a
+record you cannot rebuild, and this is somebody asking to be off a
+server.
+
+## Changing it
+
+`npm test worker` runs the real worker in Node against a Map standing in
+for KV — no account, no network, a second and a half. Run it before
+`wrangler deploy`, because a Worker fails at request time on somebody's
+phone and there is nothing on screen that will tell you.
+
+If you widen the origin rule in `index.js`, understand that you are
+choosing who may read the photographs. It answers the app's own origin,
+plus a loopback on any port for working on it, and never `*`.

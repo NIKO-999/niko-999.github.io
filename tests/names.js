@@ -206,6 +206,131 @@ for (const app of APPS.concat([['shell.js']])) {
      hits.join('\n      ') + '\n      these assignments do nothing and throw nothing');
 }
 
+/* ── one selector, one rule ──
+   THREE TIMES NOW a rule later in the same file has silently been the
+   live one. `.prime` carried a microphone's 13px radius left over from
+   the bar it replaced, so the add control drew as a rounded square
+   after being written as a circle. `.ghost svg circle` filled the view
+   icon's ring into a blob. And `.bar` kept a whole second copy of
+   itself at the foot of schedule/app.css, imposing the previous bar's
+   padding over the padding the live rule's own comment explained — the
+   worst of the three, because the numbers it forced were themselves
+   measured, just for a different bar, so nothing on screen looked
+   wrong. It came with 554 lines of the file duplicated verbatim around
+   it.
+
+   THIS IS DECIDABLE and the .live / .grid case above is not, which is
+   why one gets a check and the other does not. That one asks whether
+   two different elements were meant to share a class name, which no
+   parser can answer. This asks whether ONE selector, spelled
+   identically, is written twice in one file — and the answer is in the
+   text.
+
+   A later rule overriding an earlier one is legal CSS and sometimes
+   meant, so what is already in the tree is named here one by one
+   rather than the check being loosened to wave it through. Eleven of
+   these were standing the day it was written, in four screens this
+   pass was not asked to touch. Baselining them is a debt written down,
+   NOT an approval: each is a place where editing the first rule does
+   nothing, and each wants a look from whoever is next in that file.
+
+   The baseline is checked in both directions. A named pair that is no
+   longer there fails too — otherwise the list rots into an inventory
+   of things that do not exist, quietly waving through the new
+   duplicate that took its place. */
+{
+  const KNOWN = {
+    /* `.dot` takes --accent, then a themed swatch rule supersedes it
+       with `var(--sw, var(--accent))`. The fallback IS the earlier
+       value, so this one is deliberate and cannot change what an
+       unthemed dot draws. The other two are not triaged. */
+    'shell.css': [
+      '.dot { background }',
+      '.fab { position }',
+      '.pal-back { min-height }', '.pal-back { color }',
+      '.pal-back { font-size }', '.pal-back { font-weight }',
+    ],
+    'trading/index.html': ['.cp-ny { color }'],
+    /* Same shape as .dot: the later value falls back to the earlier. */
+    'jade/index.html': ['.jt-tk { color }'],
+    /* The first two are the SAME value written twice, which is the
+       harmless end of this; .or-idx is a genuine override. */
+    'orrery/index.html': [
+      '#orNote { position }', '#orCatPane { position }',
+      '.or-idx { gap }', '.or-idx { font-size }',
+    ],
+  };
+
+  /* @media and @supports bodies come out first: a rule inside one is
+     an override BY CONSTRUCTION, and flagging it would flag every
+     responsive stylesheet ever written. */
+  const flatten = (css) => {
+    let s = css.replace(/\/\*[\s\S]*?\*\//g, ' '), prev;
+    do {
+      prev = s;
+      s = s.replace(/@[a-z-]+[^{]*\{(?:[^{}]|\{[^{}]*\})*\}/gi, ' ');
+    } while (s !== prev);
+    return s;
+  };
+
+  const styleOf = (f) => f.endsWith('.css') ? read(f)
+    : [...read(f).matchAll(/<style[^>]*>([\s\S]*?)<\/style>/g)].map(m => m[1]).join('\n');
+
+  for (const f of ['shell.css', 'schedule/app.css', 'trading/index.html',
+                   'days/index.html', 'jade/index.html', 'orrery/index.html']) {
+    const s = flatten(styleOf(f));
+    const by = new Map();
+    for (const m of s.matchAll(/([^{}]+)\{([^{}]*)\}/g)) {
+      const line = s.slice(0, m.index).split('\n').length;
+      const props = new Map();
+      for (const d of m[2].split(';')) {
+        const c = d.indexOf(':');
+        if (c > 0) props.set(d.slice(0, c).trim(), d.slice(c + 1).trim());
+      }
+      /* Split on commas at DEPTH ZERO only. A plain `.split(',')` cuts
+         `:not(a, b)` in half and reports the fragment `:focus-visible)
+         .or-halo` as a selector — which is how this check first read
+         the orrery, and a check that misquotes the file is worse than
+         no check because its output cannot be acted on. */
+      const parts = [];
+      let depth = 0, buf = '';
+      for (const ch of m[1]) {
+        if (ch === '(') depth++;
+        else if (ch === ')') depth--;
+        if (ch === ',' && depth === 0) { parts.push(buf); buf = ''; }
+        else buf += ch;
+      }
+      parts.push(buf);
+      for (const one of parts.map(x => x.trim().replace(/\s+/g, ' ')).filter(Boolean)) {
+        if (one.startsWith('@') || /^\d/.test(one)) continue;
+        if (!by.has(one)) by.set(one, []);
+        by.get(one).push({ line, props });
+      }
+    }
+    const seen = new Set(), fresh = [];
+    for (const [sel, list] of by) {
+      if (list.length < 2) continue;
+      for (let a = 0; a < list.length; a++) {
+        for (let b = a + 1; b < list.length; b++) {
+          for (const [p, v] of list[a].props) {
+            if (!list[b].props.has(p)) continue;
+            const id = `${sel} { ${p} }`;
+            seen.add(id);
+            if ((KNOWN[f] || []).includes(id)) continue;
+            fresh.push(`${id} line ${list[a].line} says ${v}, `
+              + `line ${list[b].line} says ${list[b].props.get(p)} and wins`);
+          }
+        }
+      }
+    }
+    ok(`${f}: no NEW selector sets the same property twice`, fresh.length === 0,
+       fresh.slice(0, 8).join('\n      '));
+    const gone = (KNOWN[f] || []).filter(id => !seen.has(id));
+    ok(`${f}: the baseline still describes the file`, gone.length === 0,
+       gone.join(', ') + ' — fixed? then delete the line, do not leave it here');
+  }
+}
+
 /* ── every var() points at a token that exists ──
    Three declarations in trading/index.html asked for `var(--bg)`, which
    no stylesheet defines. An invalid custom property does not fall back
