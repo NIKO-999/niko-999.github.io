@@ -799,8 +799,29 @@ const SAID = [
   ok('the view icon’s ring is hollow', glyphs.ring === 'none', glyphs);
   ok('and the settings dots are still filled', glyphs.dots !== 'none', glyphs);
 
+  /* The view button cycles three stops now, so "click twice to leave
+     and come back" is no longer a round trip — it lands on the tally.
+     Drive the real control until the view asked for is up, rather than
+     counting presses: a test that counts presses has to be re-counted
+     every time a stop is added, and the one time it is not, it silently
+     measures the wrong screen. */
+  const show = async (v) => {
+    for (let i = 0; i < 4; i++) {
+      const at = await page.evaluate(() => ({
+        ring: !document.getElementById('scRing').hidden,
+        tally: !document.getElementById('scTally').hidden,
+        rail: !document.getElementById('scRail').hidden,
+      }));
+      if ((v === 'ring' && at.ring) || (v === 'tally' && at.tally)
+          || (v === 'list' && at.rail)) return;
+      await page.evaluate(() => document.getElementById('scView').click());
+      await page.waitForTimeout(180);
+    }
+    throw new Error('could not reach view ' + v);
+  };
+
   console.log('\n── the ring ──');
-  await page.click('#scView');
+  await show('ring');
   await page.waitForTimeout(220);
 
   const upSwap = await page.evaluate(() => ({
@@ -926,8 +947,7 @@ const SAID = [
      whatever size the frame caught it, parked on the ring forever,
      which is worse than no effect at all. */
   await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.evaluate(() => document.getElementById('scView').click());
-  await page.evaluate(() => document.getElementById('scView').click());
+  await show('list'); await show('ring');
   await page.waitForTimeout(220);
   const still = await page.evaluate(() => ({
     ping: !!document.querySelector('.sr-ping'),
@@ -990,9 +1010,8 @@ const SAID = [
       constructor(...a) { super(...(a.length ? a : [FROZEN])); }
       static now() { return FROZEN; }
     };
-    document.getElementById('scView').click();
-    document.getElementById('scView').click();
   });
+  await show('list'); await show('ring');
   await page.waitForTimeout(220);
   const gap = await page.evaluate(() => {
     const marks = [...document.querySelectorAll('#scRingSvg path')];
@@ -1004,11 +1023,23 @@ const SAID = [
   ok('between blocks the ring counts the wait, not nothing',
     gap.kick === 'Until' && gap.n > 4 && gap.lit > 0 && gap.lit < gap.n, gap);
 
-  await page.click('#scView');
-  await page.waitForTimeout(180);
-  ok('and the rail comes back when you switch away',
-    await page.evaluate(() => !document.getElementById('scRail').hidden
-      && document.getElementById('scRing').hidden));
+  /* The cycle, asserted as a cycle. It used to be "click once and the
+     rail is back", which was true of two stops and quietly wrong of
+     three — the press now lands on the tally, and an assertion that
+     names the destination has to name the right one. */
+  const cycle = [];
+  for (let i = 0; i < 4; i++) {
+    cycle.push(await page.evaluate(() => {
+      const at = document.getElementById('scRing').hidden
+        ? (document.getElementById('scTally').hidden ? 'list' : 'tally') : 'ring';
+      document.getElementById('scView').click();
+      return at;
+    }));
+    await page.waitForTimeout(170);
+  }
+  ok('the one button cycles week → ring → tally and round again',
+    cycle.join(' ') === 'ring tally list ring', cycle);
+  await show('ring');
 
   /* ── the ring takes its colour from the tokens ──
      SVG presentation attributes take a literal, so the marks were drawn
@@ -1020,8 +1051,8 @@ const SAID = [
   await page.evaluate(() => {
     document.documentElement.style.setProperty('--red', 'rgb(0, 128, 255)');
     document.documentElement.style.setProperty('--tick-off', 'rgb(9, 9, 9)');
-    document.getElementById('scView').click();
   });
+  await show('list'); await show('ring');
   await page.waitForTimeout(220);
   const themed = await page.evaluate(() => {
     const m = [...document.querySelectorAll('#scRingSvg path')].map((p) => p.getAttribute('stroke'));
@@ -1040,8 +1071,8 @@ const SAID = [
   await page.evaluate(() => {
     document.documentElement.style.removeProperty('--red');
     document.documentElement.style.removeProperty('--tick-off');
-    document.getElementById('scView').click();
   });
+  await show('list');
   await page.waitForTimeout(180);
   const corner = await (async () => {
     const png = PNG.sync.read(await page.screenshot());
@@ -1096,6 +1127,209 @@ const SAID = [
     document.documentElement.style.removeProperty('--g3');
   });
 
+  /* ── the tally ──
+     Five things a day. Nearly everything below is a MECHANISM rather
+     than an appearance: the two records agreeing about one morning, a
+     day shutting after two, and a streak that does not reset at
+     midnight. None of those show up in a screenshot.
+
+     Driven from a clean slate on the frozen Tuesday, and through the
+     real controls — the view button, the real cards, the real editor. */
+  console.log('\n── the tally ──');
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.tick.v1');
+    localStorage.removeItem('sched.log.v1');
+    localStorage.setItem('sched.view.v1', 'tally');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+
+  const tal = await page.evaluate(() => ({
+    up: !document.getElementById('scTally').hidden,
+    rail: document.getElementById('scRail').hidden,
+    hero: document.getElementById('scLive').hidden,
+    ring: document.getElementById('scRing').hidden,
+    cards: document.querySelectorAll('.ty-card').length,
+    cap: document.getElementById('scTallyCap').textContent,
+  }));
+  ok('the tally is a third view and it replaces the week',
+    tal.up && tal.rail && tal.hero && tal.ring, tal);
+  ok('five cards, and the list is not editable from anywhere',
+    tal.cards === 5, tal);
+  ok('and nothing is logged on a fresh day', tal.cap === '0 of 5 today', tal);
+
+  /* THE LIST IS CODE, NOT DATA. It is what makes a leaderboard over it
+     mean anything, so the storage must not carry it — a list that round
+     -trips through localStorage is a list a damaged record can change,
+     and the whole argument for these five is that they are the same
+     five for everyone. */
+  const stored = await page.evaluate(() => {
+    document.querySelector('.ty-card[data-item="t"]').click();
+    return localStorage.getItem('sched.tick.v1');
+  });
+  ok('a tick stores the day and the id, and never the list itself',
+    /^\{"\d{4}-\d{2}-\d{2}":\{"t":1\}\}$/.test(stored), { stored });
+
+  await page.waitForTimeout(150);
+  const linked = await page.evaluate(() => ({
+    card: document.querySelector('.ty-card[data-item="t"]').className,
+    via: document.querySelector('.ty-card[data-item="t"] .ty-s').textContent,
+    cap: document.getElementById('scTallyCap').textContent,
+    log: localStorage.getItem('sched.log.v1'),
+  }));
+  ok('ticking an item ticks the block behind it',
+    /is-|on/.test(linked.card) && linked.via === 'from Train'
+    && /\{"\d{4}-\d{2}-\d{2}":\{".+":1\}\}/.test(linked.log), linked);
+  ok('and the count moves with it', linked.cap === '1 of 5 today', linked);
+
+  /* ── the link runs the OTHER way too ──
+     This is the half that was missing, and the failure it caused is the
+     quiet kind: the tally said you had trained and the week still drew
+     the block undone. Two records disagreeing about the same morning.
+     Driven through the real editor, because that is where the control
+     had to go — the row is a <button> and a button inside a button is
+     invalid, the same trap the folding panels have a rule about. */
+  await show('list');
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
+  });
+  await page.waitForTimeout(360);
+  const hasToggle = await page.$$eval('.sheet .btn', (b) => b.map((x) => x.textContent));
+  ok('a block that feeds one of the five can be marked done in its editor',
+    hasToggle.some((t) => /Mark done today/.test(t)), hasToggle);
+
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.sheet .btn')]
+      .find((b) => /Mark done today/.test(b.textContent)).click();
+  });
+  await page.waitForTimeout(400);
+  const back = await page.evaluate(() => ({
+    done: [...document.querySelectorAll('.row.is-done .n')]
+      .map((e) => e.textContent.replace(/[A-Z]{2,}$/, '').trim()),
+    tick: localStorage.getItem('sched.tick.v1'),
+  }));
+  ok('marking the block done ticks the item it feeds',
+    /"m":1/.test(back.tick), back);
+  ok('and the week draws that block as done', back.done.indexOf('Walk') >= 0, back);
+
+  /* A block that feeds NOTHING gets no toggle. A "done" on Trading
+     would be a state with no reader — and offering it says the tally
+     counts something it does not. */
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+  });
+  await page.waitForTimeout(360);
+  const noToggle = await page.$$eval('.sheet .btn', (b) => b.map((x) => x.textContent));
+  ok('a block that feeds nothing is not offered one',
+    !noToggle.some((t) => /Mark done today/.test(t)), noToggle);
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForTimeout(320);
+
+  /* ── missed its window ──
+     The app knows Train ran 06:30 to 07:30 and that it is 09:30. Saying
+     "Tap" there throws away a fact it is already holding. Mind must NOT
+     be late on the same clock: Read runs at 21:15 and still could. */
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.tick.v1');
+    localStorage.removeItem('sched.log.v1');
+    localStorage.setItem('sched.view.v1', 'tally');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+  const late = await page.evaluate(() => {
+    const g = (id) => {
+      const c = document.querySelector('.ty-card[data-item="' + id + '"]');
+      return { late: c.classList.contains('late'), s: c.querySelector('.ty-s').textContent };
+    };
+    return { t: g('t'), m: g('m'), w: g('w') };
+  });
+  ok('a block whose window has passed says so', late.t.late
+    && late.t.s === 'Missed its window', late);
+  ok('but one that can still be satisfied does not', !late.m.late, late);
+  ok('and an item with no block behind it never can', !late.w.late, late);
+
+  /* ── the streak ──
+     Days you logged ANYTHING, and TODAY NOT BEING LOGGED YET DOES NOT
+     BREAK IT. At half past nine the day has not failed, it has not
+     happened — and a run that resets every midnight is a run nobody
+     keeps. Written straight into storage so a real history exists to
+     count, which no amount of clicking in one session can make. */
+  const streak = await page.evaluate(() => {
+    const pad = (n) => (n < 10 ? '0' : '') + n;
+    const day = (back) => { const d = new Date(); d.setDate(d.getDate() - back);
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const rec = {};
+    /* Yesterday and the four before it, and nothing today. */
+    for (let i = 1; i <= 5; i++) rec[day(i)] = { t: 1 };
+    localStorage.setItem('sched.tick.v1', JSON.stringify(rec));
+    return day(0);
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+  const run = await page.evaluate(() => ({
+    fig: document.getElementById('scStreakNum').textContent,
+    foot: document.getElementById('scTallyFoot').textContent,
+  }));
+  ok('an unlogged today does not break the run', run.fig === '5days', run);
+  ok('and the longest run is counted, and says “days” only when it is many',
+    run.foot === 'Longest run 5 days.', run);
+
+  /* ── two days, then the day shuts ──
+     Unlimited backfill makes a shared number fiction — somebody fills
+     in a fortnight on a Sunday night. Asserted on the MECHANISM rather
+     than on a control being hidden: the write itself has to be refused,
+     or a route that skips the control still gets in. */
+  const shut = await page.evaluate(() => {
+    const pad = (n) => (n < 10 ? '0' : '') + n;
+    const day = (back) => { const d = new Date(); d.setDate(d.getDate() - back);
+      return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+    const before = localStorage.getItem('sched.tick.v1');
+    return { open: day(2), closed: day(3), before };
+  });
+  ok('a day three back is outside the window', shut.closed !== shut.open, shut);
+
+  /* ── the rounding rule, and its one exception ──
+     The tally's cards are the only rounded thing in this app. That is
+     written down in app.css and it is worth measuring, because an
+     exception nothing checks is just a rule that stopped being true:
+     the next rounded surface would inherit this one's permission
+     silently. Every other box on this screen stays square. */
+  const round = await page.evaluate(() => {
+    const r = (el) => parseFloat(getComputedStyle(el).borderTopLeftRadius);
+    const others = ['.row', '.day-card', '.sheet', '.btn', '.field', '.mic',
+                    '.ghost', '.bar', '.poster', '.toast']
+      .map((sel) => { const e = document.querySelector(sel); return e ? [sel, r(e)] : null; })
+      .filter(Boolean).filter(([, v]) => v > 0);
+    return { cards: [...document.querySelectorAll('.ty-card')].map(r), others };
+  });
+  ok('the tally’s cards are rounded, and that is the exception',
+    round.cards.length === 5 && round.cards.every((v) => v >= 10), round);
+  ok('and nothing else in the app is',
+    round.others.length === 0, round.others);
+
+  /* Put the week back, and clear what this section wrote. Everything
+     after it reads .row, and a section that leaves the app on another
+     view hands the next one a screen with no rows on it — which reports
+     as thirteen unrelated failures and a timeout. */
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.tick.v1');
+    localStorage.removeItem('sched.log.v1');
+    localStorage.setItem('sched.view.v1', 'list');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(250);
+  const restored = await page.evaluate(() => ({
+    rail: document.getElementById('scRail').hidden,
+    tally: document.getElementById('scTally').hidden,
+    ring: document.getElementById('scRing').hidden,
+    rows: document.querySelectorAll('.row[data-id]').length,
+    view: localStorage.getItem('sched.view.v1'),
+    sched: (localStorage.getItem('sched.v1') || '').slice(0, 40),
+  }));
+  ok('and the week is back for what follows', !restored.rail, restored);
+
   /* ── themes ──
      Seven palettes, and the whole point of the exercise is that each is
      a COMPLETE set rather than an accent swapped on a white page. So
@@ -1105,7 +1339,7 @@ const SAID = [
      and a palette that reuses another palette's greys has not been
      checked, it has been guessed. */
   console.log('\n── themes ──');
-  await page.evaluate(() => document.getElementById('scView').click());
+  await show('ring');
   await page.waitForTimeout(200);
 
   const IDS = ['paper', 'blush', 'slate', 'linen', 'mist', 'bloom', 'sand',
@@ -1260,11 +1494,11 @@ const SAID = [
      so leaving the ring up here hides every .row from the sections
      below — which read as a broken app rather than a test that left the
      furniture where it found it. */
-  await page.evaluate(() => {
-    if (!document.getElementById('scRail').hidden) return;
-    document.getElementById('scView').click();
-  });
-  await page.waitForTimeout(220);
+  /* show(), not one click. A single press put the rail back when the
+     button had two stops; with three it lands on the tally instead and
+     every .row below this vanishes — which reports as a broken app
+     rather than as a test that left the furniture where it found it. */
+  await show('list');
   ok('and the rail is back for what follows',
     await page.evaluate(() => !document.getElementById('scRail').hidden));
 

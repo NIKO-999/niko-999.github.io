@@ -669,6 +669,12 @@
         m.style.width = Math.max(3, Math.min(52, (it.e - it.s) / 600 * 52)).toFixed(1) + 'px';
         row.appendChild(m);
 
+        /* A block the tally has counted reads as done HERE too. The
+           two records must never disagree about the same morning —
+           that was the whole reason the link runs both ways. */
+        var bd = scDay(scDateOfDow(d));
+        if (blockLog[bd] && blockLog[bd][it.id]) row.classList.add('is-done');
+
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
         row.appendChild(n);
@@ -692,10 +698,18 @@
   function scLive() {
     if (new Date().toDateString() !== painted) { scRender(); return; }
 
-    /* The ring is a different drawing of the same half-minute pass, and
-       it is the only thing on screen when it is up — so it repaints
-       here and the rest of this function has nothing to do. */
+    /* The ring and the tally are different drawings of the same
+       half-minute pass, and each is the only thing on screen when it is
+       up — so the one that is showing repaints and the rest of this
+       function has nothing to do.
+
+       The tally's guard is not just an optimisation. Everything below
+       un-hides the hero, and this runs every thirty seconds: without
+       the early return the week's figure comes back on top of the
+       tally half a minute after you switch to it, which is the sort of
+       fault that only appears if you sit and look at the screen. */
     if (view === 'ring') { scPaintRing(); scPaintRingList(); return; }
+    if (view === 'tally') { scPaintTally(); return; }
 
     var today = new Date().getDay(), now = scNowMin();
     var rows = document.querySelectorAll('.day.is-today .row');
@@ -1135,6 +1149,301 @@
     if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     THE TALLY
+
+     Five things a day, and the list is CODE, NOT DATA — fixed,
+     identical, not editable by anyone, the same rule the habits screen
+     holds its six under. Here it is load-bearing rather than tidy: the
+     whole point of these five is that they are the same five for
+     everybody, so a leaderboard over them compares like with like. A
+     list you could edit is two people quoting unrelated numbers at each
+     other.
+
+     `from` names the blocks that satisfy an item. Two blocks may feed
+     one: an outdoor walk and something read are both Mind, and either
+     is enough.
+
+     `kind` is the difference between doing a thing and recording a
+     number. Both are one tick — the tick means YOU LOGGED IT, never
+     that you hit a target. That is what keeps the quantities off the
+     wire when the friends half lands, and it is what stops this
+     ranking people on how far they walked.
+     ═══════════════════════════════════════════════════════════ */
+
+  var TICK_KEY = 'sched.tick.v1';
+  var LOG_KEY = 'sched.log.v1';
+
+  var TALLY = [
+    { id: 't', n: 'Train', s: 'Gym, a run, a session', k: 'do',  from: ['Train'] },
+    { id: 'm', n: 'Mind',  s: 'Walk, read, listen',    k: 'do',  from: ['Walk', 'Read'] },
+    { id: 'p', n: 'Steps', s: 'Log the number',        k: 'num', unit: '' },
+    { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal' },
+    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L' }
+  ];
+
+  /* Two records, not one, and they are different KINDS of thing: which
+     blocks of your week you finished, and which of the five you logged.
+     A block can be done and feed nothing (Trading); an item can be
+     logged with no block behind it (Steps). Folding them together would
+     make one of the two a special case of the other, and neither is. */
+  /* tickLog, not `tick` — the half-minute interval handle further down
+     this file is already called that, and two `var tick` in one IIFE
+     scope is one binding: `tick = setInterval(...)` wrote a number over
+     the day's record, and the first press threw "Cannot create property
+     on number '1'". tests/names.js catches duplicate declarations at the
+     TOP level and these are inside the wrapper, so nothing saw it.
+     Named to pair with blockLog, which is the other half of the same
+     record. */
+  var tickLog = null;      /* { '2026-09-01': { t:1, p:'8420' } } */
+  var blockLog = null;  /* { '2026-09-01': { <block id>: 1 } } */
+
+  /* Local date, never toISOString(). toISOString is UTC, so anywhere
+     west of Greenwich it hands back YESTERDAY for most of the evening —
+     which would file a tickLog under the wrong day and break a streak
+     silently, in the one direction nobody would think to check. */
+  function scDay(d) {
+    d = d || new Date();
+    return d.getFullYear() + '-' + scPad(d.getMonth() + 1) + '-' + scPad(d.getDate());
+  }
+
+  function scDayBack(n) {
+    var d = new Date();
+    d.setDate(d.getDate() - n);
+    return scDay(d);
+  }
+
+  /* Two days, then the day shuts for good. Long enough to catch an
+     evening you missed; short enough that nobody fills in a fortnight
+     on a Sunday night, which is the only thing that keeps a shared
+     number worth reading. Today counts as day 0. */
+  var BACKFILL = 2;
+  function scTallyOpen(day) {
+    for (var i = 0; i <= BACKFILL; i++) if (scDayBack(i) === day) return true;
+    return false;
+  }
+
+  /* The DATE this weekday most recently was, looking back over the
+     backfill window only. The schedule is a weekly template with no
+     dates in it, so a block on Tuesday has to be resolved to a real
+     Tuesday before anything can be filed against it — and the only
+     Tuesdays that can still be written to are the two days behind
+     today. Anything older resolves to today's date and is refused by
+     scTallyOpen on the way in, rather than quietly writing to a day
+     that has shut. */
+  function scDateOfDow(dow) {
+    for (var i = 0; i <= BACKFILL; i++) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      if (d.getDay() === dow) return d;
+    }
+    return new Date();
+  }
+
+  function scTickLoad() {
+    var read = function (k) {
+      try {
+        var raw = JSON.parse(localStorage.getItem(k) || '{}');
+        return (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+      } catch (e) { return {}; }
+    };
+    tickLog = read(TICK_KEY);
+    blockLog = read(LOG_KEY);
+  }
+  function scTickSave() {
+    try {
+      localStorage.setItem(TICK_KEY, JSON.stringify(tickLog));
+      localStorage.setItem(LOG_KEY, JSON.stringify(blockLog));
+    } catch (e) {}
+  }
+
+  function scTicked(day, id) {
+    var d = tickLog[day];
+    return !!(d && d[id]);
+  }
+
+  /* ── the link runs both ways ──
+     Finishing the Train block ticks Train, and ticking Train marks the
+     Train block finished. It was one-directional at first and that left
+     two records disagreeing about the same morning: the tally said you
+     trained and the week still showed the block undone. Whichever end
+     you touch, both ends move. */
+  function scItemsFor(name) {
+    return TALLY.filter(function (it) {
+      return it.from && it.from.indexOf(name) >= 0;
+    });
+  }
+  function scBlocksFor(item, dow) {
+    if (!item.from) return [];
+    return scByDay(dow).filter(function (b) { return item.from.indexOf(b.n) >= 0; });
+  }
+
+  function scSetTick(day, id, val) {
+    if (!scTallyOpen(day)) return false;
+    if (!tickLog[day]) tickLog[day] = {};
+    if (val) tickLog[day][id] = val; else delete tickLog[day][id];
+    if (!Object.keys(tickLog[day]).length) delete tickLog[day];
+
+    /* Carry it back to the week, but only for a day whose weekday we
+       can resolve — the schedule is a weekly template, so a tickLog on a
+       past date still maps onto that date's own day of the week. */
+    var item = TALLY.filter(function (x) { return x.id === id; })[0];
+    if (item && item.from) {
+      var dow = new Date(day + 'T12:00:00').getDay();
+      if (!blockLog[day]) blockLog[day] = {};
+      scBlocksFor(item, dow).forEach(function (b) {
+        if (val) blockLog[day][b.id] = 1; else delete blockLog[day][b.id];
+      });
+      if (!Object.keys(blockLog[day]).length) delete blockLog[day];
+    }
+    scTickSave();
+    return true;
+  }
+
+  function scSetBlockDone(day, block, dow, val) {
+    if (!scTallyOpen(day)) return false;
+    if (!blockLog[day]) blockLog[day] = {};
+    if (val) blockLog[day][block.id] = 1; else delete blockLog[day][block.id];
+    if (!Object.keys(blockLog[day]).length) delete blockLog[day];
+
+    scItemsFor(block.n).forEach(function (item) {
+      /* An item fed by two blocks stays ticked while EITHER is done —
+         unticking Walk must not undo Mind if Read was also finished. */
+      var any = scBlocksFor(item, dow).some(function (b) {
+        return blockLog[day] && blockLog[day][b.id];
+      });
+      if (!tickLog[day]) tickLog[day] = {};
+      if (any) tickLog[day][item.id] = 1; else delete tickLog[day][item.id];
+      if (!Object.keys(tickLog[day]).length) delete tickLog[day];
+    });
+    scTickSave();
+    return true;
+  }
+
+  /* Days you logged ANYTHING, running back from today. Today not being
+     logged yet does not break it — at nine in the morning it has not
+     failed, it has not happened, and a streak that resets every
+     midnight is a streak nobody keeps. */
+  function scStreak() {
+    var n = 0;
+    for (var i = 0; i < 3650; i++) {
+      var d = scDayBack(i);
+      if (tickLog[d] && Object.keys(tickLog[d]).length) n++;
+      else if (i > 0) break;
+    }
+    return n;
+  }
+
+  /* ── missed its window ──
+     The app already knows Train was 06:30 to 07:30 and that it is nine
+     o'clock; saying "Tap" there throws that away. Only for items with
+     blocks behind them — nothing schedules when you drink water — and
+     only for today, because on a backfilled day every window has
+     passed and marking all five late would say nothing. */
+  function scLate(item) {
+    if (!item.from) return false;
+    var now = scNowMin();
+    var mine = scBlocksFor(item, new Date().getDay());
+    if (!mine.length) return false;
+    return mine.every(function (b) { return b.e <= now; });
+  }
+
+  function scPaintTally() {
+    var day = scDay();
+    var got = tickLog[day] || {};
+    var n = TALLY.filter(function (it) { return got[it.id]; }).length;
+
+    var st = scStreak();
+    $('scStreakNum').textContent = '';
+    $('scStreakNum').appendChild(document.createTextNode(String(st)));
+    $('scStreakNum').appendChild(scEl('i', null, st === 1 ? 'day' : 'days'));
+    $('scTallyCap').textContent = n + ' of ' + TALLY.length + ' today';
+
+    var grid = $('scTallyGrid');
+    grid.textContent = '';
+    TALLY.forEach(function (it, i) {
+      var on = !!got[it.id], late = !on && scLate(it);
+      var c = scEl('button', 'ty-card' + (on ? ' on' : '') + (late ? ' late' : '')
+                             + (i === TALLY.length - 1 ? ' wide' : ''));
+      c.dataset.item = it.id;
+      c.appendChild(scEl('span', 'ty-n', it.n));
+      c.appendChild(scEl('span', 'ty-v',
+        on ? (it.k === 'num' ? String(got[it.id]) + (it.unit || '') : '✓') : 'Tap'));
+
+      /* Once it is done the caption says where it came from, not what
+         to do — a prompt still showing under a finished thing is the
+         screen not noticing you did it. */
+      var via = null;
+      if (on && it.from) {
+        var b = scBlocksFor(it, new Date().getDay()).filter(function (x) {
+          return blockLog[day] && blockLog[day][x.id];
+        })[0];
+        if (b) via = 'from ' + b.n;
+      }
+      c.appendChild(scEl('span', 'ty-s',
+        via || (on ? 'logged' : (late ? 'Missed its window' : it.s))));
+
+      c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
+        + (late ? ', missed its window' : '') + '. ' + it.s + '.');
+      c.addEventListener('click', function () { scTallyTap(it, day); });
+      grid.appendChild(c);
+    });
+
+    var best = scBest();
+    $('scTallyFoot').textContent = st
+      ? 'Longest run ' + best + (best === 1 ? ' day.' : ' days.')
+      : 'Log one thing and the run starts.';
+  }
+
+  function scBest() {
+    var best = 0, run = 0, days = Object.keys(tickLog).sort();
+    for (var i = 0; i < days.length; i++) {
+      if (i && (new Date(days[i] + 'T12:00:00') - new Date(days[i - 1] + 'T12:00:00'))
+               <= 86400000 + 3600000) run++;
+      else run = 1;
+      if (run > best) best = run;
+    }
+    return best;
+  }
+
+  function scTallyTap(item, day) {
+    if (item.k === 'do') {
+      scSetTick(day, item.id, scTicked(day, item.id) ? 0 : 1);
+      scPaintTally();
+      if (view === 'list') scRender();
+      return;
+    }
+    scNumSheet(item, day);
+  }
+
+  function scNumSheet(item, day) {
+    scSheet(item.n, function (body) {
+      var f = scEl('input', 'field');
+      f.type = 'text';
+      f.inputMode = 'decimal';
+      f.placeholder = item.s;
+      f.value = (tickLog[day] && tickLog[day][item.id]) || '';
+      body.appendChild(f);
+      body.appendChild(scEl('p', 'hint',
+        'The number stays on this phone. Only whether you logged it is '
+        + 'ever shared.'));
+      /* scBtn and scClose, which are what the other four sheets use.
+         This was written as a bare `go` class and a `scCloseSheet` that
+         does not exist — the class would have rendered an unstyled
+         button and the call would have thrown on the one path nobody
+         looks at twice, which is the press that saves your number. */
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Cancel', scClose));
+      acts.appendChild(scBtn('go', 'Save', function () {
+        scSetTick(day, item.id, f.value.trim() || 0);
+        scClose();
+        scPaintTally();
+      }));
+      body.appendChild(acts);
+      setTimeout(function () { f.focus(); }, 260);
+    });
+  }
+
   /* Which view is up, remembered. Its own key: the schedule is the
      record and this is a preference about looking at it, and folding a
      preference into the record is how a damaged one takes the other
@@ -1142,26 +1451,44 @@
   var VIEW_KEY = 'sched.view.v1';
   var view = 'list';
 
-  function scSetView(v, save) {
-    view = v === 'ring' ? 'ring' : 'list';
-    var ring = view === 'ring';
-    $('scRing').hidden = !ring;
-    $('scRail').hidden = ring;
-    /* The ring's own middle says the state and the figure. Leaving the
-       hero above it says both twice, and the louder of the two is the
-       one that is not the point of the screen. */
-    $('scLive').hidden = ring;
-    $('scLiveOf').hidden = ring;
-    if (!ring) $('scEmpty').hidden = state.items.length > 0;
-    else $('scEmpty').hidden = true;
+  /* Three stops, cycled by one button. A fifth control on the bar would
+     be wrong — the orrery learned that on a row of five — and these are
+     three ways of looking at the same day rather than three places to
+     go, which is exactly what a cycle is for. */
+  var VIEWS = ['list', 'ring', 'tally'];
 
-    var btn = $('scView');
-    btn.setAttribute('aria-label', ring ? 'Show the week' : 'Show the ring');
-    $('scViewIcon').innerHTML = ring
-      ? '<path d="M4 7h16M4 12h16M4 17h10"/>'
-      : '<circle cx="12" cy="12" r="8"/><path d="M12 4v5"/>';
+  function scSetView(v, save) {
+    view = VIEWS.indexOf(v) >= 0 ? v : 'list';
+    var ring = view === 'ring', tal = view === 'tally';
+
+    $('scRing').hidden = !ring;
+    $('scTally').hidden = !tal;
+    $('scRail').hidden = ring || tal;
+    /* The ring's own middle says the state and the figure, and the
+       tally has a hero of its own. Leaving the week's above either says
+       it twice, and the louder of the two is the one that is not the
+       point of the screen. */
+    $('scLive').hidden = ring || tal;
+    $('scLiveOf').hidden = ring || tal;
+    $('scEmpty').hidden = ring || tal || state.items.length > 0;
+
+    /* The icon shows what you would GET, not where you are — a control
+       that draws its own state reads as a status light rather than a
+       switch. */
+    var next = VIEWS[(VIEWS.indexOf(view) + 1) % VIEWS.length];
+    $('scView').setAttribute('aria-label',
+      next === 'ring' ? 'Show the ring'
+        : next === 'tally' ? 'Show today’s five' : 'Show the week');
+    $('scViewIcon').innerHTML = next === 'ring'
+      ? '<circle cx="12" cy="12" r="8"/><path d="M12 4v5"/>'
+      : next === 'tally'
+        ? '<rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/>'
+          + '<rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/>'
+        : '<path d="M4 7h16M4 12h16M4 17h10"/>';
+
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
     if (ring) { scPaintRing(); scPaintRingList(); }
+    else if (tal) scPaintTally();
     else scLive();
   }
 
@@ -1497,6 +1824,33 @@
         scClose();
         scCommit(isNew ? 'Added' : 'Saved');
       }));
+      /* ── the other direction ──
+         The tally ticks Train and the week agrees. This is the same
+         edge walked the other way: finish the block here and the item
+         ticks. It lives in the editor rather than on the row because
+         the row IS a button and a button inside a button is invalid —
+         the same trap the folding panels have a rule about.
+
+         Only on a day still open for backfill, and only for a block
+         that actually feeds one of the five: a "done" on Trading would
+         be a state nothing reads. */
+      if (!isNew) {
+        var bDay = scDay(scDateOfDow(day));
+        if (scTallyOpen(bDay) && scItemsFor(item.n).length) {
+          var done = !!(blockLog[bDay] && blockLog[bDay][item.id]);
+          var fed = scItemsFor(item.n).map(function (x) { return x.n; }).join(' and ');
+          var tog = scBtn(done ? 'go' : 'off',
+            done ? 'Done today \u2713' : 'Mark done today', function () {
+              scSetBlockDone(bDay, item, day, !done);
+              scClose();
+              if (view === 'tally') scPaintTally(); else scRender();
+              scToast(done ? 'Unmarked' : 'Counted toward ' + fed, false);
+            });
+          tog.style.marginTop = '4px';
+          body.appendChild(tog);
+        }
+      }
+
       body.appendChild(acts);
 
       if (isNew) setTimeout(function () { name.focus(); }, 340);
@@ -1701,7 +2055,15 @@
      it in rather than flashing the list on the way to the ring. A bad
      stored value falls through to the list; it is a preference and
      there is nothing here worth repairing. */
-  try { if (localStorage.getItem(VIEW_KEY) === 'ring') view = 'ring'; } catch (e) {}
+  try {
+    var sv = localStorage.getItem(VIEW_KEY);
+    if (VIEWS.indexOf(sv) >= 0) view = sv;
+  } catch (e) {}
+
+  /* The ticks, before the first paint for the same reason the theme is:
+     the tally can be the view you left it on, and it opening empty and
+     filling in a frame later reads as having lost the day. */
+  scTickLoad();
 
   /* Before the first paint, so the app opens in its theme rather than
      flashing white on the way to it. scTheme falls back to Paper on a
@@ -1716,7 +2078,7 @@
   scSetView(view, false);
 
   $('scView').addEventListener('click', function () {
-    scSetView(view === 'ring' ? 'list' : 'ring', true);
+    scSetView(VIEWS[(VIEWS.indexOf(view) + 1) % VIEWS.length], true);
   });
 
   $('scMic').addEventListener('click', function () {

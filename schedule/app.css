@@ -12,7 +12,17 @@
    keep true.
 
    The idiom is a Swiss timetable: paper, one red, a hard left grid,
-   tabular figures, and nothing rounded or shadowed anywhere. Every
+   tabular figures, and nothing shadowed anywhere.
+
+   NOTHING IS ROUNDED EITHER, WITH ONE NAMED EXCEPTION: the tally's
+   cards. Five treatments of that screen were rendered in the real app
+   and the grid of cards was picked over the other four, and a 14px
+   radius is most of what makes a card read as a card rather than a
+   panel. The rule is not weaker for having an exception — it is
+   stronger, because the exception is one screen, is written down here,
+   and is measured: `tests/schedule.js` holds every other surface to
+   square corners, so the next rounded thing has to argue for itself
+   rather than inherit this one's permission. Every
    rule below is in service of that or of the one thing it adds — the
    measure.
    ═══════════════════════════════════════════════════════════════ */
@@ -231,6 +241,80 @@ body {
 }
 .caption:empty { display: none; }
 
+/* ── the tally ────────────────────────────────────────────
+   Five things a day, as cards. Two up, and where you have logged a
+   photograph the photograph IS the card.
+
+   THIS SCREEN IS THE ONE EXCEPTION TO "nothing rounded or shadowed
+   anywhere", and it is a decision rather than a slip. Five treatments
+   were rendered in the real app — no marks at all, a grid of cards, the
+   app's own ring as five arcs, one segmented bar, and a feed — and this
+   was picked over the other four. It is the only one where a
+   photograph is the design rather than an attachment to it, and a
+   14px radius is most of what makes it read as a card instead of a
+   panel. The timetable idiom still owns every other screen: the week,
+   the ring and the sheet are square, and nothing here is shadowed.
+   ═════════════════════════════════════════════════════════ */
+.tally { margin-top: 18px; }
+.tally[hidden] { display: none; }
+
+/* The streak, and it is the only figure this screen carries. It counts
+   days you logged ANYTHING, never days you got all five: a figure that
+   moves only on a perfect day spends most of its life at zero, and a
+   screen that passes judgement is a screen you stop opening. The habits
+   app has the same rule written out at length. */
+.ty-hero { display: flex; align-items: baseline; }
+.ty-lbl {
+  font-size: 9px; font-weight: 700; letter-spacing: .2em;
+  text-transform: uppercase; color: var(--red);
+}
+.ty-fig {
+  margin-left: auto; font-size: 44px; font-weight: 700; line-height: .9;
+  letter-spacing: -.04em; font-variant-numeric: tabular-nums;
+}
+.ty-fig i {
+  font-style: normal; font-size: 13px; font-weight: 500;
+  margin-left: 5px; color: var(--dim);
+}
+.ty-cap { margin-top: 6px; font-size: 11px; color: var(--dim); }
+.ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
+
+.ty-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px;
+}
+.ty-card {
+  position: relative; aspect-ratio: 1 / 1;
+  border: 1px solid var(--hair); border-radius: 14px; overflow: hidden;
+  padding: 14px; display: flex; flex-direction: column;
+  background: none; color: inherit; font: inherit; text-align: left;
+  cursor: pointer;
+}
+.ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.ty-card.on { border-color: var(--ink); background: var(--ink); color: var(--paper); }
+
+/* The fifth card takes the full width, and min-height is load-bearing:
+   dropping aspect-ratio also drops the thing the value's auto margin
+   pushes against, so the wide card collapses to its content and its two
+   lines sit on top of each other while the four square ones hold them a
+   card apart. Same row, same kind of object, different spacing. */
+.ty-card.wide { grid-column: 1 / -1; aspect-ratio: auto; min-height: 128px; }
+
+.ty-n { font-size: 17px; font-weight: 700; letter-spacing: -.02em; }
+.ty-v {
+  margin-top: auto; font-size: 26px; font-weight: 700; line-height: 1;
+  letter-spacing: -.03em; font-variant-numeric: tabular-nums;
+}
+.ty-s { margin-top: 4px; font-size: 11px; opacity: .72; }
+
+/* ── missed its window ──
+   The schedule already knows that Train was 06:30 to 07:30 and that it
+   is nine o'clock. Saying "Tap" at that point throws away a fact the
+   app is holding. It is deliberately NOT the accent and not danger: the
+   day is not over, the thing can still be done, and a red card for a
+   late gym session is the judgement this screen exists to avoid. */
+.ty-card.late { border-style: dashed; }
+.ty-card.late .ty-s { opacity: 1; color: var(--dim); font-weight: 600; }
+
 /* ── the ring ─────────────────────────────────────────────
    Every class here carries an `sr-` prefix and every keyframe an `sr-`
    name, because `.pulse` and `sc-pulse` are ALREADY TAKEN by the
@@ -444,6 +528,15 @@ body {
   height: 2px;
   background: var(--ink);
 }
+/* ── a block the tally has counted ──
+   The measure fills solid rather than the row taking a colour. It is
+   the mark that already says how long the block is, so filling it says
+   "this one happened" in the language the row already speaks — and it
+   works on a block that is still in the future, which a done state has
+   to: you can finish a run before its window opens. */
+.row.is-done .m { height: 6px; background: var(--ink); }
+.row.is-done.is-past .m { background: var(--spent); }
+
 .row.is-past .m { background: var(--spent); }
 .row.is-now .m { background: var(--red); height: 3px; }
 

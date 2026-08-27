@@ -68,6 +68,22 @@
     </div>
   </section>
 
+  <!-- ── the tally ──
+       Five things a day, the same five for everyone. It replaces the
+       week for the same reason the ring does: it is a different answer
+       to "how is today going", and two answers to one question on one
+       screen is how the running row came to be painted like everything
+       round it. Empty until scPaintTally fills it. -->
+  <section class="tally" id="scTally" hidden>
+    <div class="ty-hero">
+      <span class="ty-lbl">Showing up</span>
+      <b class="ty-fig" id="scStreakNum">0<i>days</i></b>
+    </div>
+    <p class="ty-cap" id="scTallyCap"></p>
+    <div class="ty-grid" id="scTallyGrid"></div>
+    <p class="ty-foot" id="scTallyFoot"></p>
+  </section>
+
   <ol class="rail" id="scRail"></ol>
 
   <p class="empty" id="scEmpty" hidden>
