@@ -781,7 +781,36 @@ const SAID = [
   ok('every ghost is an icon on the bar, not a box on the page',
     bar.ghosts.length === 3 && bar.ghosts.every(clear), bar.ghosts);
   ok('and the microphone is the one control that is still a block',
-    !clear(bar.mic) && bar.mic.w >= 56, bar.mic);
+    !clear(bar.mic) && bar.mic.w >= 50, bar.mic);
+
+  /* Every control INSIDE the block. This is the fault the floating bar
+     can have that the full-width one could not: a button whose box
+     reaches past the block's rounded corner takes in page pixels from
+     outside it, which measured 4.6:1 in the round that picked this —
+     the lowest of every treatment that passed. It is asserted as
+     containment rather than as a padding value, so the next change to
+     the mic's size cannot quietly reintroduce it. */
+  const inside = await page.evaluate(() => {
+    const bar = document.querySelector('.bar');
+    const cs = getComputedStyle(bar);
+    const b = bar.getBoundingClientRect();
+    /* The block is the ::before, so its box is the bar's padding box
+       minus the insets the pseudo-element is given. Read it back off
+       the computed style rather than repeating the numbers here. */
+    const p2 = getComputedStyle(bar, '::before');
+    const box = { l: b.left + parseFloat(p2.left || 12),
+                  r: b.right - parseFloat(p2.right || 12),
+                  t: b.top + parseFloat(p2.top || 0),
+                  bo: b.bottom - parseFloat(p2.bottom || 0) };
+    return [...bar.querySelectorAll('button')].map((el) => {
+      const r = el.getBoundingClientRect();
+      return { id: el.id,
+               out: +(Math.max(box.l - r.left, r.right - box.r,
+                               box.t - r.top, r.bottom - box.bo)).toFixed(1) };
+    });
+  });
+  ok('every control sits inside the block, with room to spare',
+    inside.every((c) => c.out <= -3), inside);
   ok('the controls reach the page’s own edges', bar.spread === 'space-between', bar);
 
   /* THE VIEW ICON IS A RING, AND IT HAS TO STAY ONE. `.ghost svg circle`
@@ -1298,14 +1327,20 @@ const SAID = [
      silently. Every other box on this screen stays square. */
   const round = await page.evaluate(() => {
     const r = (el) => parseFloat(getComputedStyle(el).borderTopLeftRadius);
-    const others = ['.row', '.day-card', '.sheet', '.btn', '.field', '.mic',
-                    '.ghost', '.bar', '.poster', '.toast']
+    /* The exceptions are named, and everything else is held square. */
+    const others = ['.row', '.day-card', '.sheet', '.btn', '.field',
+                    '.ghost', '.poster', '.toast', '.day-name']
       .map((sel) => { const e = document.querySelector(sel); return e ? [sel, r(e)] : null; })
       .filter(Boolean).filter(([, v]) => v > 0);
-    return { cards: [...document.querySelectorAll('.ty-card')].map(r), others };
+    return { cards: [...document.querySelectorAll('.ty-card')].map(r),
+             block: parseFloat(getComputedStyle(document.querySelector('.bar'), '::before')
+                      .borderTopLeftRadius),
+             mic: r(document.querySelector('.mic')),
+             others };
   });
-  ok('the tally’s cards are rounded, and that is the exception',
-    round.cards.length === 5 && round.cards.every((v) => v >= 10), round);
+  ok('the tally’s cards are rounded, and so is the bar’s block',
+    round.cards.length === 5 && round.cards.every((v) => v >= 10)
+    && round.block >= 10 && round.mic > 0, round);
   ok('and nothing else in the app is',
     round.others.length === 0, round.others);
 

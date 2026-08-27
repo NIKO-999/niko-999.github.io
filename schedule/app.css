@@ -14,15 +14,19 @@
    The idiom is a Swiss timetable: paper, one red, a hard left grid,
    tabular figures, and nothing shadowed anywhere.
 
-   NOTHING IS ROUNDED EITHER, WITH ONE NAMED EXCEPTION: the tally's
-   cards. Five treatments of that screen were rendered in the real app
-   and the grid of cards was picked over the other four, and a 14px
-   radius is most of what makes a card read as a card rather than a
-   panel. The rule is not weaker for having an exception — it is
-   stronger, because the exception is one screen, is written down here,
-   and is measured: `tests/schedule.js` holds every other surface to
-   square corners, so the next rounded thing has to argue for itself
-   rather than inherit this one's permission. Every
+   NOTHING IS ROUNDED EITHER, WITH TWO NAMED EXCEPTIONS: the tally's
+   cards, and the bottom bar's block. Both were picked out of a set of
+   rendered options rather than reached for — five treatments of the
+   tally, six of the bar — and in both cases the radius is most of what
+   makes the thing read as an object rather than as a panel.
+
+   The rule is not weaker for having exceptions; it is stronger for
+   naming them. `tests/schedule.js` holds every other surface in this
+   app to square corners, so a third rounded thing has to argue for
+   itself rather than inherit these two's permission — and the day the
+   list of exceptions is longer than the list of squares, the rule has
+   quietly become the opposite of itself and should be rewritten rather
+   than extended again. Every
    rule below is in service of that or of the one thing it adds — the
    measure.
    ═══════════════════════════════════════════════════════════════ */
@@ -709,6 +713,27 @@ body {
 
 /* ── the bar ─────────────────────────────────────────────── */
 
+/* ── the bar ──
+   The controls in their own block, inset from the page, with the week
+   running past it to the bottom of the phone.
+
+   IT USED TO BE A FULL-WIDTH SURFACE and the comment there is worth
+   keeping, because it is why this one is shaped as it is. That bar
+   painted the body's own wash `fixed`, so the two resolved to the same
+   pixels at the same place and the seam disappeared — the fix for a
+   flat --g0 cutting a white band across the bottom eighth of the page,
+   which is precisely where the gradient is strongest. The rule it was
+   obeying was "it cannot simply be transparent: the bar is fixed over
+   scrolling content".
+
+   That rule still holds and this obeys it differently. There is no
+   full-width surface to match a seam across any more — the block is
+   opaque where the controls are and the page is simply the page
+   everywhere else. Six treatments were measured with a row scrolled
+   underneath, and the one with no surface at all failed at 1.51:1 on a
+   dark palette: a row's text passing directly behind an unbacked icon
+   is exactly what an opaque bar exists to prevent. This keeps the
+   opacity and spends only the strip the controls actually occupy. */
 .bar {
   position: fixed;
   left: 0; right: 0;
@@ -716,30 +741,34 @@ body {
   z-index: 30;
   display: flex;
   align-items: center;
-  /* Spread to the page's own edges rather than a huddle in the middle.
-     Centred with a 22px gap, four controls sat as a clump with dead
-     space either side, which is what made them read as objects ON the
-     page instead of as the page's own bar. */
   justify-content: space-between;
-  padding: 8px max(14px, env(safe-area-inset-left))
-           calc(10px + env(safe-area-inset-bottom))
-           max(14px, env(safe-area-inset-right));
-  /* The SAME wash as the body, not a flat fill. --g0 alone was the
-     first fix and it still cut a hard white band across the bottom
-     eighth of the page — which is precisely where the gradient is
-     strongest, so the bar was erasing the thing it sits on.
+  /* 20px, so the outermost controls are not flush to the block's own
+     edge. Flush, the first and last button's bounding boxes reach the
+     rounded corners and take in page pixels from outside the block —
+     which measured 4.6:1, the lowest of every treatment that passed.
+     8px of shoulder each side and it is a non-issue. */
+  /* 7px of top padding, and the bottom carries it too — so the block
+     is 68px tall round 54px of control and the microphone has 7px of
+     shoulder on every side. Flush, its 13px corners poked past the
+     block's own 18px curve top and bottom, which is the same fault the
+     prototype had: a control bursting out of the thing that contains
+     it reads as a mistake rather than as emphasis. */
+  padding: 7px max(20px, env(safe-area-inset-left))
+           calc(17px + env(safe-area-inset-bottom))
+           max(20px, env(safe-area-inset-right));
+  background: none;
+  border-top: 0;
+}
 
-     Both this and the body are positioned against the viewport and both
-     paint the gradient `fixed`, so the two resolve to the same pixels
-     at the same place and the seam disappears. It cannot simply be
-     transparent: the bar is fixed over scrolling content. */
-  background:
-    radial-gradient(140% 88% at 6% 116%, var(--g1) 0%, transparent 74%),
-    radial-gradient(120% 62% at 100% -14%, var(--g2) 0%, transparent 70%),
-    radial-gradient(125% 82% at 96% 112%, var(--g3) 0%, transparent 72%),
-    var(--g0);
-  background-attachment: fixed;
-  border-top: 1px solid var(--hair);
+/* The block itself, on a pseudo-element so the controls can sit above
+   it without the flex layout having to hold a sibling. */
+.bar::before {
+  content: '';
+  position: absolute;
+  inset: 0 12px calc(10px + env(safe-area-inset-bottom)) 12px;
+  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 18px;
 }
 
 .ghost, .mic {
@@ -760,7 +789,8 @@ body {
    buttons are icons sitting on it. The one that is still a filled block
    is the microphone, because it is the only one that should be. */
 .ghost {
-  width: 52px; height: 52px;
+  position: relative;
+  width: 52px; height: 54px;
   border: 0;
   background: none;
   color: var(--dim);
@@ -769,10 +799,16 @@ body {
 
 /* The one control that is the accent, because it is the one that does
    the thing this app is for. White on this red measures 4.7:1. */
+/* 54px, not 62. At its old size the microphone overhung the block top
+   and bottom and broke the one shape this bar is — a control bursting
+   out of the thing that contains it reads as a mistake, not emphasis.
+   It is still the only filled block on the bar, which is what it is
+   for. */
 .mic {
   position: relative;
-  width: 62px; height: 62px;
+  width: 54px; height: 54px;
   border: 0;
+  border-radius: 13px;
   background: var(--red);
   color: var(--on-red);
 }
