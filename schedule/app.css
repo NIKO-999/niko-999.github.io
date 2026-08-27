@@ -912,30 +912,49 @@ body {
 .row:active { background: var(--tick-off); }
 .row:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
-/* ── the measure ──
-   The one thing this design adds. A rule as long as the block is, so
-   a ten-hour shift reads as a bar and a fifteen-minute one as a stub.
-   No list can say that otherwise: in a list every block is one row
-   tall whatever it costs you.
+/* ── the measure is gone ──
+   It was a rule as long as the block is, and the argument for it was
+   real: in a list every block is one row tall whatever it costs you,
+   so a ten-hour shift and a fifteen-minute one look the same. This was
+   the one thing the design added.
 
-   Floored at 3px because below that a rule stops being a mark and
-   starts being a speck, and capped at the column because ten hours is
-   already the longest thing anybody puts in a day. */
+   WHAT KILLED IT IS THAT THE ROW PRINTS THE RANGE NOW. With
+   `10:00–18:00` on the line above, the bar is saying a second time what
+   the numbers already say — the same argument that took the titles off
+   the tally cards. And the redundancy was not even the worst of it: on
+   a real morning almost every block is under an hour, so the rule was a
+   3px stub sitting beside the glyph, reading as a stray dash rather
+   than as a length. It kept its 52px column: the glyph uses it.
+
+   The `--meas` token stays. It is the gutter's width, which is still a
+   real thing, and it is named for what used to justify the number. */
+
 /* ── what kind of thing it is ──
    A glyph worked out from the name, with nothing to set: a schedule you
    have to decorate is a schedule you stop keeping.
 
-   IT SHARES THE MEASURE'S COLUMN. Kind above length, both inside the
-   52px the left gutter already owns, so the name loses no width to
-   either. A column of its own was built and measured at 34px off the
-   name — a fifth of what the name has — and it leaves the measure's
-   little rule floating detached in the middle of the gutter.
+   IT HAS THE GUTTER TO ITSELF. A column of its own was built and
+   measured at 34px off the name — a fifth of what the name has — so it
+   sits in the 52px the left margin already owned.
+
+   IT SITS WHERE THE MEASURE'S RULE USED TO. The glyph was on the
+   time's line with the rule beneath it, and with the rule gone a glyph
+   pinned to the top of a two-line row hangs off it. Spanning both rows
+   and centring puts it against the pair rather than against the first
+   of them.
 
    The width and height are ON THE ELEMENT'S BOX here and not left to
    the markup: an inline <svg> with neither falls back to 300x150 and
-   fills its parent, silently and while still drawing correctly. */
+   fills its parent, silently and while still drawing correctly. That is
+   not hypothetical: this comment lost its terminator one edit ago and
+   the rule below vanished with it, and the replacement comment then did
+   it AGAIN by quoting a close-comment marker inside itself. A CSS
+   comment cannot contain that sequence — it ends at the first one, and
+   everything after it becomes declarations the parser throws away
+   together with the next rule. Never write the marker in prose. */
 .row .ic {
-  grid-column: 1; grid-row: 1;
+  grid-column: 1; grid-row: 1 / span 2;
+  align-self: center;
   display: block; width: 22px; height: 22px;
   fill: none; stroke: var(--ink); stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round;
@@ -946,26 +965,29 @@ body {
 .row.is-past .ic { stroke: var(--spent); }
 .row.is-now .ic { stroke: var(--red); }
 
-.row .m {
-  display: block;
-  height: 2px;
-  background: var(--ink);
-  /* Under its own glyph, on the name's line. */
-  grid-column: 1;
-  grid-row: 2;
-  margin-top: 7px;
-}
 /* ── a block the tally has counted ──
-   The measure fills solid rather than the row taking a colour. It is
-   the mark that already says how long the block is, so filling it says
-   "this one happened" in the language the row already speaks — and it
-   works on a block that is still in the future, which a done state has
-   to: you can finish a run before its window opens. */
-.row.is-done .m { height: 6px; background: var(--ink); }
-.row.is-done.is-past .m { background: var(--spent); }
+   It used to be the measure filling solid, and the measure is gone, so
+   the state needed somewhere to live rather than quietly disappearing —
+   the two records agreeing about one morning is the whole reason the
+   link between them runs both ways.
 
-.row.is-past .m { background: var(--spent); }
-.row.is-now .m { background: var(--red); height: 3px; }
+   A TICK, and only on a done row. Every other row's gutter holds one
+   thing, which is what removing the rule was for; a mark that appears
+   rather than a mark that changes costs the ordinary row nothing.
+
+   It is --ink and not the accent: the accent means the block running
+   NOW, and a screen where one colour means two states is a screen that
+   has to be learned. It also works on a block still in the future,
+   which a done state has to — you can finish a run before its window
+   opens. */
+.row .tick {
+  grid-column: 1; grid-row: 1 / span 2;
+  align-self: center; justify-self: end;
+  display: block; width: 14px; height: 14px;
+  fill: none; stroke: var(--ink); stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.row.is-past .tick { stroke: var(--spent); }
 
 /* The block's name is the subheading of its own row — it is what you
    are scanning for, and at 14px/500 it sat at the same volume as the
@@ -1130,7 +1152,8 @@ body {
 }
 
 /* The row's own content, lifted over the wash. */
-.row.is-now .m,
+.row.is-now .ic,
+.row.is-now .tick,
 .row.is-now .n,
 .row.is-now .t { position: relative; z-index: 1; }
 

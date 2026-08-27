@@ -307,7 +307,36 @@ row's sweep lays a 13% wash of the accent across that line, and a wash
 over 4.74:1 is under 4.5:1.
 
 **A glyph per row, worked out from the name, with nothing to set.** A
-schedule you have to decorate is a schedule you stop keeping.
+schedule you have to decorate is a schedule you stop keeping. It has
+the gutter to itself and sits centred against the pair of lines.
+
+**The measure is gone.** It was a rule as long as the block is — the one
+thing this design added, and the reason the layout was picked. What
+killed it is that the row PRINTS the range now: with `10:00–18:00` on
+the line above, a bar saying the same thing is the tally-card titles all
+over again. And on a real morning almost every block is under an hour,
+so the rule was a 3px stub beside the glyph, reading as a stray dash
+rather than as a length. Its three assertions were replaced rather than
+deleted — the printed range has to be each block's real start and end,
+and more than one distinct value, because a constant string is "present"
+too.
+
+**It was also the only mark for a block the tally had counted**, so
+removing it silently would have made a finished block identical to an
+untouched one — and the two records agreeing about one morning is why
+the link between them runs both ways. That state is a tick beside the
+glyph now, drawn only when the block is done: a mark that APPEARS rather
+than one that changes, so an ordinary row's gutter still holds one
+thing. It is `--ink`, never the accent, because the accent already means
+the block running now.
+
+**A CSS comment cannot quote a close-comment marker.** Writing one in
+prose ends the comment there, and every line after it becomes
+declarations the parser throws away along with the next rule. This
+happened twice in one edit: the comment lost its terminator, the `.ic`
+rule vanished and the unsized `<svg>` filled its parent at 300x150 —
+and the replacement comment, which was explaining that exact trap, broke
+the same rule again by naming the marker.
 
 **Judged at 22px, which is the size a row draws them.** Not a
 formality: the first sheet had `drive` and `rest` as the same silhouette

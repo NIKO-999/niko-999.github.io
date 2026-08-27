@@ -155,28 +155,43 @@ const SAID = [
   ok('no block starts with a place, and none is drawn',
     await page.$$eval('.row .n em', (e) => e.length) === 0);
 
-  /* ── the measure ──
-     The one thing this design says that a list cannot: a rule as long
-     as the block is. It is the whole reason this variant was picked,
-     so it gets the assertion it deserves — the rendered widths have to
-     be ORDERED by duration, not merely present. A rule that is drawn
-     but constant is the failure this catches, and it looks completely
-     fine in a screenshot. */
-  const meas = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => ({
+  /* ── the measure is gone, and the row still says how long ──
+     It was a rule as long as the block is, and it had three assertions
+     here holding it to being ordered by duration rather than merely
+     drawn. What replaced it is not another mark: the row PRINTS the
+     range, so the fact is on the screen in words rather than in a bar.
+     That is what these check now — every row carries its own start and
+     end, and the two are the real ones. */
+  const spans = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => ({
     n: r.querySelector('.n').firstChild.textContent,
-    mins: +r.dataset.e - +r.dataset.s,
-    w: r.querySelector('.m').getBoundingClientRect().width,
+    s: +r.dataset.s, e: +r.dataset.e,
+    t: r.querySelector('.t').textContent,
   })));
-  ok('every block carries a measure', meas.length === 47 && meas.every((m) => m.w >= 3), meas.slice(0, 3));
-  ok('and the widths are ordered by duration', (() => {
-    const by = [...meas].sort((a, b) => a.mins - b.mins);
-    return by.every((m, i) => i === 0 || m.w >= by[i - 1].w - 0.01);
-  })(), meas);
-  /* Ordered is not enough on its own — a constant width is also
-     "ordered". The longest has to be visibly longer than the shortest. */
-  const span = { min: Math.min(...meas.map((m) => m.w)), max: Math.max(...meas.map((m) => m.w)) };
-  ok(`the longest block reads far longer than the shortest (${span.min}px → ${span.max}px)`,
-    span.max >= span.min * 8, span);
+  const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':'
+    + String(m % 60).padStart(2, '0');
+  ok('every block prints its own range where the rule used to be',
+    spans.length === 47 && spans.every((s) => /^\d\d:\d\d–\d\d:\d\d$/.test(s.t)),
+    spans.slice(0, 3));
+  /* Present is not enough — a constant string is also present, which is
+     the shape of the failure the measure's own check was written for. */
+  ok('and the printed range is the block’s real start and end',
+    spans.every((s) => s.t === hhmm(s.s) + '–' + hhmm(s.e))
+    && new Set(spans.map((s) => s.t)).size > 5,
+    spans.slice(0, 3));
+  /* The gutter holds ONE thing now, which is the whole reason the rule
+     went: a glyph and a 3px stub beside it read as a glyph with a stray
+     dash. Nothing but the icon may be in that column on an ordinary
+     row — a done row adds its tick, and that is the only exception. */
+  const gutter = await page.$$eval('.row[data-id]', (rows) => rows.map((r) =>
+    [...r.children].filter((e) => getComputedStyle(e).gridColumnStart === '1')
+      .map((e) => e.getAttribute('class'))));
+  const okGut = (g) => g.length === 1 ? g[0] === 'ic'
+    : g.length === 2 && g.includes('ic') && g.includes('tick');
+  /* The payload is the rows that FAILED, not the rows that look odd by
+     some second rule — an extra of `[]` beside a red line tells you
+     nothing, which is what the first cut of this printed. */
+  ok('and the gutter carries the glyph alone unless the block is done',
+    gutter.every(okGut), gutter.filter((g) => !okGut(g)).slice(0, 4));
 
   /* ── contrast, on real pixels ──
      Sampled the length of the poster, because the sky is lightest at
@@ -422,7 +437,12 @@ const SAID = [
     const day = document.querySelector('.day.is-today');
     const edge = (sel, side) => [...day.querySelectorAll('.row[data-id]')]
       .map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
-    return { t: edge('.t', 'right'), m: edge('.m', 'left') };
+    /* The glyph's LEFT and the time's, since the measure that used to
+       hold this column is gone. Both still have to be one number: the
+       running row reaches 13px further left for its rule and has to
+       grow rather than slide, and a plain width:100% moves the whole
+       box instead. */
+    return { t: edge('.t', 'left'), m: edge('.ic', 'left') };
   });
   ok('the running row keeps the column it is in',
     new Set(align.t).size === 1 && new Set(align.m).size === 1, align);
@@ -594,7 +614,7 @@ const SAID = [
   const reds = await page.evaluate(() => {
     const red = 'rgb(226, 35, 26)';
     const hit = [];
-    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, .row .m, .title, .sub')
+    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, .title, .sub')
       .forEach((el) => {
         const s = getComputedStyle(el);
         if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)

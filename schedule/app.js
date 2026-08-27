@@ -676,25 +676,26 @@
        on the sheet — walk, run and stretch were one silhouette in three
        poses, which is the collision this file keeps re-learning. */
     walk: STEPS,
-    /* A TRAINER, not a fourth stick-figure — and the sneaker read comes
-       out of the OUTLINE: a rounded toe and a sole seam sitting 3.4 up
-       from the bottom. The first cut ended in a square corner with a
-       hairline under it and was a plimsoll.
+    /* A SHOE IN MOTION: tilted toe-up, with three speed lines behind
+       it. It replaced a static side-on trainer, and the tilt is doing
+       most of the work — an upright shoe is footwear, a tilted one with
+       marks trailing it is running, which is the thing the row names.
 
-       A CLOSED MIDSOLE BAND CANNOT WORK AT THIS SIZE, and five were
-       drawn before that was obvious. A band four units deep with a 1.8
-       stroke on each edge leaves 2.2 units of white — about two device
-       pixels on the row — so every one of them filled in and read WORSE
-       than the flat shoe it was meant to beat. Anything inside the
-       outline here is a single stroke, and any gap is held at 3.4 or
-       more.
+       SIZE IS THE ONLY LEVER LEFT. The reference is about ten strokes
+       and the row draws this at 22px, so everything that stays has to
+       be as big as the box allows: the body is scaled 1.12 and shifted,
+       putting its ink at 0.6..22.8 across and 3.2..18.1 down, which is
+       inside the 24 box with the 1.8 stroke and nothing to spare.
 
-       The lace flap, the heel counter and the swoosh were each drawn
-       and each close into a smudge at 22px. A shoe this small is
-       nothing but its silhouette. */
-    run: '<path d="M4.4 8.6h2.2l1.4 3 3.5 1.5 5.5 1.7c2.3.7 3.7 1.9 3.9 3.1'
-       + '.2 1.2-.7 2.1-2.2 2.1H5.4A2.4 2.4 0 013 17.6v-7.2a1.8 1.8 0 011.4-1.8z'
-       + 'M3.1 16.1h16.9"/>',
+       WHAT DID NOT SURVIVE: a ground line under the shoe, which read as
+       a stray underline, and the sole seam inside it, which read as a
+       smudge — the same 3.4-unit floor every interior detail on this
+       sheet has run into. A closed midsole band failed the same way
+       five times over before that floor was written down. */
+    run: '<g transform="translate(-1.5 -1.3) scale(1.12)">'
+       + '<path d="M8.4 4.8c1.1 1.6 1 3.4-.4 4.7L6.9 10.7l5.8 5.8h5.5'
+       + 'a2.7 2.7 0 000-5.4h-.7L15.3 7.3c-2.4 1-5-.1-6.9-2.5z"/></g>'
+       + '<path d="M1.7 4.8h3.2M1.5 9.6h2.8M2 14.2h2.2"/>',
     cycle: '<circle cx="5.6" cy="16.4" r="3.6"/><circle cx="18.4" cy="16.4" r="3.6"/>'
          + '<path d="M5.6 16.4l4.4-7.4h4.6l-2.4 7.4h6.2M12.4 9h3.4"/>',
     swim: '<circle cx="16.4" cy="7.2" r="1.9"/>'
@@ -941,13 +942,29 @@
         ic.innerHTML = BLOCK_ICON[kind];
         row.appendChild(ic);
 
-        /* The measure: a rule as long as the block is. 52px is ten
-           hours; floored at 3 because below that a rule stops being a
-           mark and becomes a speck, capped at the column because ten
-           hours is already the longest thing anyone puts in a day. */
-        var m = scEl('i', 'm');
-        m.style.width = Math.max(3, Math.min(52, (it.e - it.s) / 600 * 52)).toFixed(1) + 'px';
-        row.appendChild(m);
+        /* ── the measure is gone, and this is what replaced it ──
+           It was a rule as long as the block is, and it was the one
+           thing this list said that a list cannot. What killed it is
+           that the row now PRINTS the range: with `10:00–18:00` sitting
+           on the line above, a 52px bar and a 3px stub were saying a
+           second time what the numbers already say, and on a normal
+           morning almost every block is short enough that the rule read
+           as a stray dash beside the glyph rather than as a length.
+
+           But it was also the ONLY mark on this screen for a block the
+           tally has counted, so removing it silently would have made a
+           finished block identical to an untouched one. That state moves
+           onto a tick beside the glyph — drawn only when the block is
+           done, so an ordinary row's gutter holds one thing. */
+        if (blockLog[scDay(scDateOfDow(d))]
+            && blockLog[scDay(scDateOfDow(d))][it.id]) {
+          var tk = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          tk.setAttribute('class', 'tick');
+          tk.setAttribute('viewBox', '0 0 24 24');
+          tk.setAttribute('aria-hidden', 'true');
+          tk.innerHTML = '<path d="M4.5 12.8l5.2 5.2L19.5 6"/>';
+          row.appendChild(tk);
+        }
 
         /* A block the tally has counted reads as done HERE too. The
            two records must never disagree about the same morning —
