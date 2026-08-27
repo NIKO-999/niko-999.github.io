@@ -48,17 +48,26 @@ const MAX_REC = 96 * 1024;      /* a record, JSON, without images      */
 const MAX_IMG = 400 * 1024;     /* one picture, already cropped client-side */
 const DAYS = 30;                /* the board's window, and the retention */
 
-/* Only the app's own origin. A worker that answers `*` is a public API
-   somebody else can build on, and this one is holding photographs. */
-const ORIGINS = [
-  'https://niko-999.github.io',
-  'http://127.0.0.1:8945',
-  'http://localhost:8945',
-];
+/* Only the app's own origin, plus a loopback for working on it. A
+   worker that answers `*` is a public API somebody else can build on,
+   and this one is holding photographs.
+
+   THE LOOPBACK RULE IS A PATTERN, NOT A LIST. It named two ports and
+   the app's own test suite could not talk to it: the suite finds a
+   FREE port at run time, so it is never on any list written in
+   advance, and the failure was a CORS rejection that surfaced as
+   "could not reach that address". A local port number is not a
+   security boundary — anything on the machine can open any port — so
+   pinning three of them bought nothing and cost the only automated
+   thing that exercises this file end to end. */
+const ORIGIN = 'https://niko-999.github.io';
+const LOOPBACK = /^http:\/\/(127\.0\.0\.1|localhost|\[::1\])(:\d+)?$/;
+
+function allowed(o) { return o === ORIGIN || LOOPBACK.test(o); }
 
 function cors(req) {
   const o = req.headers.get('Origin') || '';
-  const allow = ORIGINS.includes(o) ? o : ORIGINS[0];
+  const allow = allowed(o) ? o : ORIGIN;
   return {
     'Access-Control-Allow-Origin': allow,
     'Access-Control-Allow-Methods': 'GET,PUT,POST,DELETE,OPTIONS',

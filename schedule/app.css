@@ -312,17 +312,84 @@ body {
    forces — 45 of 78 accent-and-reader pairings leave it exactly the
    accent — and the halo never dilutes at all, because it carries
    nothing. On your own row it is simply your accent. */
+/* --crown is written on the element for a FRIEND who leads, and falls
+   back to your own accent on your own row. It is one custom property
+   rather than three rules because the halo and the glyph have to move
+   together — a crown drawn in one palette haloed in another is not a
+   thing either theme contains. */
 .fr-crown { position: relative; width: 22px; height: 22px; flex: none;
   display: grid; place-items: center; }
 .fr-crown::before { content: ''; position: absolute; inset: -7px;
   border-radius: 50%; pointer-events: none;
   background: radial-gradient(circle,
-    color-mix(in srgb, var(--red) 70%, transparent) 0%,
-    color-mix(in srgb, var(--red) 22%, transparent) 45%, transparent 72%); }
+    color-mix(in srgb, var(--crown, var(--red)) 70%, transparent) 0%,
+    color-mix(in srgb, var(--crown, var(--red)) 22%, transparent) 45%, transparent 72%); }
 .fr-crown svg { position: relative; width: 17px; height: 14px; display: block;
-  fill: var(--red); }
+  fill: var(--crown, var(--red)); }
 
 .fr-note { margin-top: 12px; font-size: 12.5px; line-height: 1.55; color: var(--dim); }
+
+/* A row is a button only when somebody is behind it, so the pressed
+   state is on a class the script adds rather than on .fr-row. Your own
+   row opens nothing and must not look as though it would. */
+.fr-row.is-tap { cursor: pointer; }
+.fr-row.is-tap:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.fr-row.is-tap:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+.fr-acts { display: flex; gap: 8px; margin-top: 14px; }
+.fr-acts .btn { flex: 1; }
+
+/* The code, at the size somebody reads out over a phone. Tabular and
+   spaced, because it is going to be transcribed by hand and an
+   ambiguous character is the whole cost of getting it wrong. The
+   alphabet already drops I, O, 0 and 1. */
+.fr-code { margin-top: 6px; font-size: 27px; font-weight: 800;
+  letter-spacing: .16em; font-variant-numeric: tabular-nums; }
+
+/* ── a log ──
+   Photograph, name, a line. The picture is square and the card has no
+   surface of its own: a feed of bordered boxes on a washed page is a
+   second grid competing with the week's. */
+.po { margin-top: 18px; }
+.po-h { display: flex; align-items: center; gap: 9px; }
+.po-n { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
+.po-s { display: block; margin-top: 1px; font-size: 10.5px; color: var(--dim); }
+.po-img { margin-top: 9px; border-radius: 14px; overflow: hidden;
+  background: var(--tick-off); aspect-ratio: 1; }
+.po-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.po-c { margin-top: 8px; font-size: 13.5px; line-height: 1.5; }
+
+/* ── a friend ── */
+.fp-top { display: flex; align-items: center; gap: 14px; margin-bottom: 4px; }
+.fp-t { font-size: 30px; font-weight: 800; font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em; display: block; }
+.fp-s { display: block; margin-top: 1px; font-size: 11.5px; color: var(--dim); }
+
+/* Seven days, and the bar's HEIGHT says how many of the five — never
+   its colour. The habits screen's rule and its reason: a wash of red
+   across a week somebody missed is a judgement about them, and a
+   shorter bar is a fact. A day with nothing is the same hollow shape
+   as a day with everything, only smaller.
+
+   align-items: end so the bars sit on one baseline whatever they are
+   — the rule about a row being one box, with the part that varies
+   absorbing the difference. */
+.fp-week { display: flex; align-items: end; gap: 6px; margin-top: 8px; }
+.fp-d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 5px; }
+.fp-d i { display: block; width: 100%; border-radius: 6px;
+  background: var(--tick-off); }
+.fp-w { font-size: 10px; color: var(--dim); }
+
+/* ── writing one ── */
+.lg-prev { margin-bottom: 12px; border-radius: 14px; overflow: hidden;
+  aspect-ratio: 1; background: var(--tick-off); }
+.lg-prev[hidden] { display: none; }
+.lg-prev img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.lg-row { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 6px; }
+.lg-c { padding: 10px 14px; min-height: 44px; border-radius: 22px;
+  border: 1px solid var(--hair); background: none; color: var(--dim);
+  font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
+.lg-c.on { border-color: var(--red); background: var(--red); color: var(--on-red); }
 
 /* Settings, top right of the head. Absolute rather than a flex sibling
    so the title's own wrapping is untouched by it. */

@@ -1653,6 +1653,376 @@ const SAID = [
     await page.evaluate(() => ['ledger.v1', 'habits.v1', 'reminders.v1', 'backtest.v1', 'checkin.v1']
       .every((k) => localStorage.getItem(k) === null)));
 
+  /* ═══════════════════════════════════════════════════════════
+     FRIENDS
+
+     Driven against the REAL worker. Playwright answers every request
+     to the fake host by calling `worker.fetch` with a Map for KV, so
+     the app talks to the code that will be deployed and the round trip
+     is genuine — no account, no network, no wrangler.
+
+     ON ITS OWN PAGE, deliberately. The section above counts every
+     request the main page makes and fails on one that leaves the
+     origin, and that assertion is the app's whole promise. Turning
+     friends on here would poison it, and relaxing its filter to let
+     this through would quietly relax it for everything else too. The
+     promise is "off until you turn it on", so the page that never
+     turns it on is the one that has to prove it.
+
+     BOTH CLOCKS ARE FROZEN to the same instant. The page files a day
+     under its own local date and the worker trims to a window from its
+     own clock; freezing only one of the two measures a five-day skew
+     rather than the app, and the first run of this reported an empty
+     board for exactly that reason. */
+  console.log('\n── friends ──');
+  {
+    const worker = (await import('file://' + require('path')
+      .resolve(__dirname, '..', 'worker', 'index.js'))).default;
+
+    const FROZEN = new Date('2026-09-01T09:30:00').getTime();
+    const RealDate = Date;
+    globalThis.Date = class extends RealDate {
+      constructor(...a) { super(...(a.length ? a : [FROZEN])); }
+      static now() { return FROZEN; }
+    };
+
+    const store = new Map();
+    const env = { SCHED: {
+      async get(k, type) {
+        if (!store.has(k)) return null;
+        const v = store.get(k);
+        if (type === 'arrayBuffer') return v;
+        return typeof v === 'string' ? v : new TextDecoder().decode(new Uint8Array(v));
+      },
+      async put(k, v) { store.set(k, v); },
+      async delete(k) { store.delete(k); },
+    } };
+
+    const HOST = 'https://sched.test.workers.dev';
+    const day = (off) => {
+      const d = new Date(FROZEN);
+      d.setDate(d.getDate() - off);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        + '-' + String(d.getDate()).padStart(2, '0');
+    };
+
+    /* Somebody already on the server, so adding a friend is a real
+       fetch of a real record rather than a fixture handed to the page. */
+    const days = {};
+    for (let i = 0; i < 12; i++) days[day(i)] = (i % 5) + 1;
+    store.set('key:JADE2K7P', 'x'.repeat(64));
+    store.set('rec:JADE2K7P', JSON.stringify({
+      code: 'JADE2K7P', name: 'Rae', acc: '#0F6E6A', ink: '#ffffff', pic: '',
+      days, at: FROZEN - 60000,
+      logs: [{ id: 'a1', at: FROZEN - 3600e3, day: day(0), item: 'm',
+               cap: 'Eight miles before the light came up.', img: '' }],
+    }));
+
+    const fp = await browser.newPage({ ...PHONE });
+    const ferrs = [];
+    fp.on('pageerror', (e) => ferrs.push(String(e)));
+    fp.on('console', (m) => { if (m.type() === 'error') ferrs.push(m.text()); });
+    const paths = [];
+    await fp.route(HOST + '/**', async (route) => {
+      const r = route.request();
+      paths.push(r.method() + ' ' + new URL(r.url()).pathname);
+      const res = await worker.fetch(new Request(r.url(), {
+        method: r.method(), headers: r.headers(),
+        body: ['GET', 'HEAD'].includes(r.method()) ? undefined : r.postDataBuffer(),
+      }), env);
+      await route.fulfill({ status: res.status,
+        headers: Object.fromEntries(res.headers),
+        body: Buffer.from(await res.arrayBuffer()) });
+    });
+    await fp.addInitScript(() => {
+      const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
+      window.Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [F])); }
+        static now() { return F; }
+      };
+      delete window.SpeechRecognition;
+      delete window.webkitSpeechRecognition;
+    });
+    const fetched = [];
+    fp.on('request', (r) => fetched.push(r.url()));
+    await fp.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await fp.evaluate(async () => { await document.fonts.ready; });
+
+    const tab = async (v) => {
+      await fp.click(`.tab[data-view="${v}"]`);
+      await fp.waitForTimeout(220);
+    };
+
+    /* Two ticks of your own, so the board has a real figure on it
+       rather than a zero that any code path would produce. */
+    await tab('tally');
+    await fp.click('#scTally button >> nth=0');
+    await fp.waitForTimeout(220);
+    await fp.click('#scTally button >> nth=1');
+    await fp.waitForTimeout(220);
+    /* A number nothing else in the app could produce, typed into
+       Steps. The tick means YOU LOGGED IT and never what it was, and
+       the only way to hold that claim is to go looking for the figure
+       afterwards. */
+    await fp.click('#scTally button >> nth=2');
+    await fp.waitForTimeout(400);
+    await fp.fill('.sheet input[type=text]', '18437');
+    await fp.click('.sheet .btn.go');
+    await fp.waitForTimeout(400);
+
+    await tab('friends');
+    ok('friends is off out of the box',
+      await fp.evaluate(() => localStorage.getItem('sched.net.v1') === null));
+    ok('and off means no request was made',
+      fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:') || u.startsWith('blob:')),
+      fetched.filter((u) => !u.startsWith(BASE)));
+    ok('you are on the board anyway, out of your own ticks',
+      await fp.$$eval('.fr-row', (r) => r.length) === 1);
+
+    /* ── turning it on ── */
+    await fp.click('text=Turn on friends');
+    await fp.waitForTimeout(420);
+    await fp.fill('input[type=url]', HOST);
+    await fp.fill('.sheet input[type=text]', 'Niko');
+    await fp.click('text=Turn it on');
+    await fp.waitForTimeout(900);
+
+    const mine = await fp.evaluate(() => JSON.parse(localStorage.getItem('sched.net.v1')));
+    ok('it claims a code', /^[A-Z0-9]{8}$/.test(mine.code || ''), mine.code);
+    /* I, O, 0 and 1 are out of the alphabet on purpose: this is a
+       string somebody reads down a phone. */
+    ok('and the code cannot contain a character anyone would mishear',
+      !/[IO01]/.test(mine.code), mine.code);
+    ok('the write key is 32 hex and is not the code',
+      /^[a-f0-9]{32}$/.test(mine.key || '') && mine.key !== mine.code);
+    ok('the server stored the key HASHED, never as itself',
+      store.get('key:' + mine.code) !== mine.key
+      && String(store.get('key:' + mine.code)).length === 64);
+
+    /* WITH NOBODY ON YOUR LIST, and that is the case this exists for.
+       The first version fetched from inside the paint and repainted
+       from inside the fetch — and with no friends the fetch calls back
+       synchronously, so the very first paint recursed until the stack
+       went. It came out as a board with its buttons and no rows, which
+       reads as an empty leaderboard rather than as a crash. */
+    ok('turning it on with nobody added still leaves you on the board',
+      await fp.$$eval('.fr-row', (r) => r.length) === 1);
+    ok('nothing threw doing it', ferrs.length === 0, ferrs);
+
+    const rec = () => JSON.parse(store.get('rec:' + mine.code));
+    ok('your record went up', !!store.get('rec:' + mine.code));
+    ok('it carries the day COUNT, not which of the five',
+      rec().days[day(0)] === 3, JSON.stringify(rec().days));
+    /* The tally holds Steps, Fuel and Water as numbers you typed. The
+       tick means you logged it and never what it was, which is what
+       keeps the quantities off the wire. */
+    ok('the Steps figure is on this phone and nowhere in the record',
+      (await fp.evaluate((d) => (JSON.parse(localStorage.getItem('sched.tick.v1'))
+        || {})[d].p, day(0))) === '18437'
+      && !JSON.stringify(rec()).includes('18437'), JSON.stringify(rec()));
+    ok('and every day is a count of five or fewer, never a shape',
+      Object.values(rec().days).every((v) => typeof v === 'number' && v <= 5),
+      JSON.stringify(rec().days));
+    ok('it carries the two colours a friend draws you with',
+      /^#/.test(rec().acc) && /^#/.test(rec().ink), rec().acc + ' ' + rec().ink);
+    ok('it does not carry your week',
+      !JSON.stringify(rec()).includes('Trading'));
+
+    /* ── adding somebody ── */
+    await fp.click('text=Add a friend');
+    await fp.waitForTimeout(420);
+    await fp.fill('.sheet input[type=text]', 'jade2k7p');
+    await fp.click('.sheet .btn.go');
+    await fp.waitForTimeout(900);
+    ok('a code typed in lower case still finds them',
+      await fp.$$eval('.fr-n', (n) => n.map((x) => x.textContent)).then((n) => n.includes('Rae')));
+    ok('and the board ranks on ticks, not on who is you',
+      await fp.$$eval('.fr-n', (n) => n[0].textContent) === 'Rae');
+
+    /* THE GRAPH NEVER LEAVES. There is no endpoint that would return
+       your people and this is what refuses one being added: everything
+       the page has asked for is a record by code, an image, or the
+       claim. */
+    ok('the server was never told who is on your list',
+      paths.every((p) => /^(POST \/v1\/claim|PUT \/v1\/rec\/|GET \/v1\/rec\/|POST \/v1\/img|GET \/v1\/img\/|DELETE \/v1\/rec\/)/.test(p)),
+      paths.filter((p) => !/^(POST|PUT|GET|DELETE) \/v1\/(claim|rec|img)/.test(p)));
+    ok('and your friend list is in this browser',
+      await fp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
+        .map((f) => f.code).join() === 'JADE2K7P'));
+
+    /* ── their colours, not yours ── */
+    const crown = await fp.$eval('.fr-crown', (e) => ({
+      set: e.style.getPropertyValue('--crown'),
+      fill: getComputedStyle(e.querySelector('svg')).fill,
+    }));
+    ok('the crown goes to the leader and takes THEIR accent',
+      crown.set !== '' && crown.fill !== 'rgb(226, 35, 26)', JSON.stringify(crown));
+    const faceFill = await fp.$eval('.fr-row .pic svg rect', (e) => e.getAttribute('fill'));
+    ok('and so does their face', faceFill === '#0F6E6A', faceFill);
+
+    /* Measured on composited pixels, not argued from the token. Every
+       one of the 169 reader-against-leader pairings was measured while
+       this was written: aiming at a bare 3:1 puts 26 of them under it
+       on screen, worst 2.92:1, because the page draws three washes over
+       --g0 and the arithmetic only knows about --g0. The 3.4 the code
+       aims at leaves the worst at 3.25:1 and leaves 97 of the 169
+       exactly their own accent.
+
+       The pairings below are the ones that measured worst. Drop
+       CROWN_MIN to 3.0 and this section is what says so. */
+    {
+      const { PNG } = require('pngjs');
+      const WORST = [['slate', '#FF6FA5'], ['blush', '#FF6FA5'], ['slate', '#5CC8F8'],
+                     ['mist', '#0F6E6A'], ['linen', '#FFB020'], ['blush', '#FF8A5B']];
+      let low = { r: 99 };
+      for (const [reader, acc] of WORST) {
+        /* THE SERVER'S COPY TOO, and the first version only wrote the
+           cache. Arriving at the screen refreshes from the worker, so
+           the planted accent was overwritten by the seeded one before
+           a single pixel was read: all six pairings measured the same
+           colour and dropping CROWN_MIN to 3.0 sailed through. */
+        const seeded = JSON.parse(store.get('rec:JADE2K7P'));
+        seeded.acc = acc;
+        store.set('rec:JADE2K7P', JSON.stringify(seeded));
+        await fp.evaluate(([t, a]) => {
+          localStorage.setItem('sched.theme.v1', t);
+          const c = JSON.parse(localStorage.getItem('sched.peer.v1'));
+          c.JADE2K7P.acc = a;
+          localStorage.setItem('sched.peer.v1', JSON.stringify(c));
+          localStorage.setItem('sched.view.v1', 'friends');
+        }, [reader, acc]);
+        await fp.reload({ waitUntil: 'networkidle' });
+        await fp.evaluate(async () => { await document.fonts.ready; });
+        await fp.waitForTimeout(160);
+        const box = await fp.$eval('.fr-crown', (e) => {
+          const r = e.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height };
+        });
+        const png = PNG.sync.read(await fp.screenshot());
+        const at = (x, y) => {
+          const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
+          return [png.data[i], png.data[i + 1], png.data[i + 2]];
+        };
+        const lum = ([r, g, b]) => {
+          const f = (c) => { c /= 255; return c <= .03928 ? c / 12.92 : ((c + .055) / 1.055) ** 2.4; };
+          return .2126 * f(r) + .7152 * f(g) + .0722 * f(b);
+        };
+        const ratio = (a, b) => {
+          const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m);
+          return (x + .05) / (y + .05);
+        };
+        /* The ground is sampled 26px clear of the box, because the halo
+           reaches 7px past it and is the same colour as the glyph.
+           Sampling inside it would compare the mark against itself. */
+        const ground = at(box.x + box.w + 26, box.y + box.h / 2);
+        const px = [];
+        for (let x = 3; x < box.w - 3; x++)
+          for (let y = 3; y < box.h - 3; y++) px.push(at(box.x + x, box.y + y));
+        const gl = lum(ground);
+        px.sort((m, n) => Math.abs(lum(n) - gl) - Math.abs(lum(m) - gl));
+        const mark = px.slice(0, 12)
+          .reduce((s, q) => q.map((c, i) => s[i] + c), [0, 0, 0]).map((c) => c / 12);
+        const r = +ratio(mark, ground).toFixed(2);
+        if (r < low.r) low = { r, reader, acc };
+      }
+      ok('a friend’s crown clears 3:1 on your page, measured on pixels',
+        low.r >= 3, JSON.stringify(low));
+    }
+    {
+      const seeded = JSON.parse(store.get('rec:JADE2K7P'));
+      seeded.acc = '#0F6E6A';
+      store.set('rec:JADE2K7P', JSON.stringify(seeded));
+    }
+    await fp.evaluate(() => localStorage.removeItem('sched.theme.v1'));
+    await fp.reload({ waitUntil: 'networkidle' });
+    await fp.waitForTimeout(300);
+
+    /* ── their page ── */
+    await fp.click('.fr-row.is-tap');
+    await fp.waitForTimeout(520);
+    ok('their page shows seven days',
+      await fp.$$eval('.fp-d', (d) => d.length) === 7);
+    /* Height says how many of the five and colour never says whether —
+       the habits screen's rule. A day with nothing is the same shape,
+       only shorter. */
+    const bars = await fp.$$eval('.fp-d i', (b) => b.map((x) => x.style.height));
+    ok('and the strip says how many by HEIGHT, never by a colour for missing',
+      new Set(bars).size > 1 && bars.every((h) => parseFloat(h) >= 18), bars.join());
+    ok('their logs are on it', await fp.$$eval('.sheet .po', (p) => p.length) === 1);
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(420);
+
+    /* ── writing one ── */
+    await fp.click('text=Write one');
+    await fp.waitForTimeout(420);
+    await fp.evaluate(() => {
+      const c = document.createElement('canvas');
+      c.width = c.height = 1200;
+      const g = c.getContext('2d');
+      const grd = g.createLinearGradient(0, 0, 1200, 1200);
+      grd.addColorStop(0, '#0f7b6c'); grd.addColorStop(1, '#e2231a');
+      g.fillStyle = grd; g.fillRect(0, 0, 1200, 1200);
+      return new Promise((res) => c.toBlob((bl) => {
+        const dt = new DataTransfer();
+        dt.items.add(new File([bl], 'shot.jpg', { type: 'image/jpeg' }));
+        const f = document.querySelector('.sheet .pic-file');
+        f.files = dt.files;
+        f.dispatchEvent(new Event('change', { bubbles: true }));
+        res();
+      }, 'image/jpeg', 0.9));
+    });
+    await fp.waitForTimeout(800);
+    ok('the photograph previews before you commit to it',
+      await fp.$eval('.lg-prev', (e) => !e.hidden));
+    await fp.click('.lg-c:has-text("Mind")');
+    await fp.fill('.sheet textarea', 'Walked the long way round.');
+    await fp.click('text=Post it');
+    await fp.waitForTimeout(1400);
+
+    ok('the picture went up as bytes', [...store.keys()].filter((k) => k.startsWith('img:')).length === 1);
+    const post = rec().logs[rec().logs.length - 1];
+    ok('the log names the picture by id', /^[a-f0-9]{24}$/.test(post.img || ''), post.img);
+    /* A post keeps the whole data URL locally so your own feed draws
+       instantly and still draws with no signal. Pushed whole that is a
+       second copy of the picture, base64, and base64 is a third bigger
+       again — two of them and the record is past the worker's 96KB
+       ceiling and every write comes back 413. The comment on the field
+       said it was never sent; for one round that was the only place
+       that was true. */
+    ok('and the record carries no copy of the picture itself',
+      !JSON.stringify(rec()).includes('data:image')
+      && JSON.stringify(rec()).length < 4096, JSON.stringify(rec()).length);
+    ok('both logs are in the feed, newest first',
+      await fp.$$eval('#scFeed .po .po-n', (n) => n.map((x) => x.textContent).join())
+        === 'Niko,Rae');
+
+    /* ── leaving ── */
+    await fp.click('text=Your code');
+    await fp.waitForTimeout(420);
+    ok('your code is on screen to give away',
+      (await fp.$eval('.fr-code', (e) => e.textContent)) === mine.code);
+    await fp.click('text=Turn friends off');
+    await fp.waitForTimeout(420);
+    await fp.click('.sheet .btn.bad');
+    await fp.waitForTimeout(900);
+    ok('leaving deletes your record from the server', !store.get('rec:' + mine.code));
+    ok('and the write key with it', !store.get('key:' + mine.code));
+    ok('and clears the friend list out of this browser',
+      await fp.evaluate(() => localStorage.getItem('sched.friends.v1') === '[]'));
+    /* Your week, your ticks and your streak never left, so leaving
+       cannot take them. */
+    ok('your own ticks are untouched — they were never up there',
+      await fp.evaluate(() => {
+        const t = JSON.parse(localStorage.getItem('sched.tick.v1') || '{}');
+        return Object.keys(t.ticks || t).length > 0;
+      }));
+    ok('and the board still has you on it', await fp.$$eval('.fr-row', (r) => r.length) === 1);
+
+    ok('no page errors through any of the friends half', ferrs.length === 0, ferrs);
+    await fp.close();
+    globalThis.Date = RealDate;
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

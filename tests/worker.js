@@ -227,6 +227,25 @@ const day = (off) => {
   const allow = r.headers.get('Access-Control-Allow-Origin');
   ok('a stranger is never answered with * — this holds photographs',
     allow !== '*' && allow !== 'https://evil.example', allow);
+
+  /* A loopback on ANY port, because the port is not the boundary and
+     pinning three of them shut this app's own suite out: the runner
+     finds a free port at run time, so it can never be on a list
+     written in advance. That surfaced as "could not reach that
+     address" — a CORS rejection wearing a network error. */
+  for (const o of ['http://127.0.0.1:8902', 'http://localhost:41235', 'http://[::1]:9']) {
+    r = await hit('GET', '/v1/rec/NIKO4821', { origin: o });
+    ok('a loopback origin is answered: ' + o,
+      r.headers.get('Access-Control-Allow-Origin') === o,
+      r.headers.get('Access-Control-Allow-Origin'));
+  }
+  for (const o of ['http://127.0.0.1.evil.example', 'https://127.0.0.1:8902',
+                   'http://localhost.evil.example']) {
+    r = await hit('GET', '/v1/rec/NIKO4821', { origin: o });
+    ok('and something dressed as one is not: ' + o,
+      r.headers.get('Access-Control-Allow-Origin') !== o,
+      r.headers.get('Access-Control-Allow-Origin'));
+  }
   ok('the origin is varied on, so a cache cannot serve one to another',
     (r.headers.get('Vary') || '').includes('Origin'));
 

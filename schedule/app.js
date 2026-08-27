@@ -1149,6 +1149,12 @@
     if (view === 'ring') scPaintRing();
     if (typeof scPaintTabFace === 'function') scPaintTabFace();
     if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
+    /* Your face and your crown are drawn on your friends' screens out
+       of the two hexes in your record, so a palette they never see
+       still has to reach them. Debounced with everything else — the
+       theme picker stays open while you compare thirteen of them, and
+       thirteen presses must not be thirteen writes. */
+    if (save) scPush();
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -1299,6 +1305,7 @@
       if (!Object.keys(blockLog[day]).length) delete blockLog[day];
     }
     scTickSave();
+    scPush();
     return true;
   }
 
@@ -1319,22 +1326,15 @@
       if (!Object.keys(tickLog[day]).length) delete tickLog[day];
     });
     scTickSave();
+    scPush();
     return true;
   }
 
-  /* Days you logged ANYTHING, running back from today. Today not being
-     logged yet does not break it — at nine in the morning it has not
-     failed, it has not happened, and a streak that resets every
-     midnight is a streak nobody keeps. */
-  function scStreak() {
-    var n = 0;
-    for (var i = 0; i < 3650; i++) {
-      var d = scDayBack(i);
-      if (tickLog[d] && Object.keys(tickLog[d]).length) n++;
-      else if (i > 0) break;
-    }
-    return n;
-  }
+  /* scStreak lives with the counting in FRIENDS now, because the
+     leaderboard has to count everybody the same way and there were
+     about to be two implementations of it — one walking tickLog for
+     you and one walking a record for a friend. The day those two
+     disagree the board is wrong and nothing on it says so. */
 
   /* ── missed its window ──
      The app already knows Train was 06:30 to 07:30 and that it is nine
@@ -1449,40 +1449,402 @@
   /* ═══════════════════════════════════════════════════════════
      FRIENDS
 
-     Nothing here reaches the network, because there is nothing to
-     reach yet — and the screen is built so that stays visible rather
-     than being papered over. You are on the leaderboard from the first
-     day out of your own ticks, and the two halves that need a server
-     say so in a sentence instead of miming at it with a spinner and a
-     fake empty state.
+     The one part of this app that reaches a network. Everything else
+     here is a promise that nothing leaves the browser, and this is the
+     exception you turn on yourself — with a screen that says what goes
+     and a way back off that actually deletes.
 
-     WHEN THE SERVER EXISTS, exactly two things change: scFriendsPeers
-     returns other people instead of nothing, and scFeedItems returns
-     entries. Everything else on this screen already works.
+     UNTIL YOU TURN IT ON THERE IS NO URL, and with no URL `scApi`
+     returns before it builds a request. That is not a nicety: the
+     suite counts every request the page makes and fails on one that
+     leaves the origin, so the default has to be genuinely inert rather
+     than merely quiet.
+
+     THE FRIEND LIST LIVES HERE, in this browser, and the server has no
+     endpoint that would return it. You hold your friends' codes and
+     ask for each record by code, so what the server sees is a stream
+     of unrelated reads with no graph behind it. It would be one line
+     shorter to ask it "who are my people" and that one line is the
+     whole difference.
      ═══════════════════════════════════════════════════════════ */
 
-  /* Your own thirty days, counted the way the board will count
-     everyone's: ticks over a rolling window, never all-time — all-time
-     means whoever started first wins permanently and nobody new can
-     catch up. */
-  function scTicksIn(days) {
+  /* Four keys, four different things — and the split is the same
+     argument the rest of this app makes. Where the server is and who
+     you are on it is configuration. The friend list is the graph. The
+     peer cache is disposable. Your logs are the only one of the four
+     you would miss, and folding it in with the cache is how a stale
+     fetch takes it with it. */
+  var NET_KEY = 'sched.net.v1';
+  var FRIEND_KEY = 'sched.friends.v1';
+  var PEER_KEY = 'sched.peer.v1';
+  var POST_KEY = 'sched.post.v1';
+
+  var net = { url: '', code: '', key: '', name: '', pic: '', on: false };
+  var friends = [];   /* [{ code, name }] — the graph, and it stays here  */
+  var peers = {};     /* code -> the last record fetched, so this paints offline */
+  var posts = [];     /* your own log entries */
+
+  function scReadJSON(k, fallback) {
+    try {
+      var v = JSON.parse(localStorage.getItem(k));
+      return v === null || v === undefined ? fallback : v;
+    } catch (e) { return fallback; }
+  }
+  function scWriteJSON(k, v) {
+    try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {}
+  }
+
+  function scNetLoad() {
+    var n = scReadJSON(NET_KEY, null);
+    if (n && typeof n === 'object') {
+      for (var k in net) if (net.hasOwnProperty(k) && typeof n[k] === typeof net[k]) net[k] = n[k];
+    }
+    friends = scReadJSON(FRIEND_KEY, []);
+    if (!Array.isArray(friends)) friends = [];
+    peers = scReadJSON(PEER_KEY, {});
+    if (!peers || typeof peers !== 'object') peers = {};
+    posts = scReadJSON(POST_KEY, []);
+    if (!Array.isArray(posts)) posts = [];
+  }
+  function scNetSave() { scWriteJSON(NET_KEY, net); }
+
+  /* crypto, never Math.random. The key is the only thing between your
+     code — which you hand out on purpose — and somebody posting as
+     you, and a browser's Math.random is a fast PRNG seeded per page,
+     not a source of secrets.
+
+     Both alphabets divide 256 exactly (32 and 16), so the modulo is
+     uniform. An alphabet of, say, 36 would bias the first four letters
+     upward, which is the sort of thing that is invisible and stays
+     wrong. */
+  var CODE_A = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';   /* no I, O, 0, 1 */
+  var HEX_A = '0123456789abcdef';
+  function scRand(n, alphabet) {
+    var a = new Uint8Array(n);
+    crypto.getRandomValues(a);
+    var out = '';
+    for (var i = 0; i < n; i++) out += alphabet.charAt(a[i] % alphabet.length);
+    return out;
+  }
+
+  /* Every request in the app goes through here, and the first line is
+     the promise: no URL, no request. */
+  function scApi(path, opts, done) {
+    done = done || function () {};
+    if (!net.url) return done(null, 'off');
+    var o = opts || {};
+    var h = {};
+    if (o.auth) h.Authorization = 'Bearer ' + net.key;
+    if (o.json) h['Content-Type'] = 'application/json';
+    if (o.bin) h['Content-Type'] = 'application/octet-stream';
+    fetch(net.url + path, { method: o.method || 'GET', headers: h, body: o.body })
+      .then(function (r) {
+        return r.json().then(
+          function (j) { done(r.ok ? j : null, r.status); },
+          function () { done(null, r.status); });
+      }, function () { done(null, 'offline'); });
+  }
+
+  function scImgURL(id) { return net.url ? net.url + '/v1/img/' + id : ''; }
+
+  /* ── joining ──
+     The client draws its own code and key and claims the code. A 409
+     is a collision on a 32^8 space rather than an error worth showing
+     anybody, so it retries; anything else is the URL being wrong,
+     which is the one thing the person in front of it can fix. */
+  function scJoin(url, name, done) {
+    net.url = String(url || '').trim().replace(/\/+$/, '');
+    net.name = String(name || '').trim().slice(0, 24) || 'You';
+    var tries = 0;
+    var go = function () {
+      var code = scRand(8, CODE_A), key = scRand(32, HEX_A);
+      scApi('/v1/claim', {
+        method: 'POST', json: true,
+        body: JSON.stringify({ code: code, key: key })
+      }, function (okd, status) {
+        if (okd) {
+          net.code = code; net.key = key; net.on = true;
+          scNetSave();
+          scPushNow();
+          return done(true);
+        }
+        if (status === 409 && ++tries < 4) return go();
+        /* The URL is cleared on the way out. Left set, every later
+           call would keep firing at a host that is not the server —
+           which is a page quietly making requests off its origin, the
+           exact thing the rest of this file is careful about. */
+        net.url = '';
+        done(false, status);
+      });
+    };
+    go();
+  }
+
+  /* Off, and it means off. The record and the write key are deleted
+     server-side, then everything about it goes from this browser.
+     Nothing else in this app deletes without a bin; a bin protects a
+     record you cannot rebuild, and this is somebody asking to be off a
+     server — the copy that matters never left. */
+  function scLeave(done) {
+    var after = function () {
+      net = { url: '', code: '', key: '', name: '', pic: '', on: false };
+      friends = []; peers = {}; posts = [];
+      scNetSave();
+      scWriteJSON(FRIEND_KEY, friends);
+      scWriteJSON(PEER_KEY, peers);
+      scWriteJSON(POST_KEY, posts);
+      done();
+    };
+    if (!net.on || !net.code) return after();
+    scApi('/v1/rec/' + net.code, { method: 'DELETE', auth: true }, after);
+  }
+
+  /* ── pushing ──
+     The whole record at a time, debounced. Ticking five boxes in ten
+     seconds is one write rather than five, which is the difference
+     between a free tier that lasts and one that does not. */
+  var pushT = null;
+  function scPush() {
+    if (!net.on || !net.code) return;
+    clearTimeout(pushT);
+    pushT = setTimeout(scPushNow, 1500);
+  }
+
+  function scPushNow() {
+    if (!net.on || !net.code) return;
+    clearTimeout(pushT);
+    var cs = getComputedStyle(document.documentElement);
+    scApi('/v1/rec/' + net.code, {
+      method: 'PUT', auth: true, json: true,
+      body: JSON.stringify({
+        name: net.name,
+        /* The two colours, so a friend's face and crown are drawn in
+           THEIR palette on your screen. Sending the theme's id instead
+           would mean this app could never gain a theme without every
+           friend's copy going grey until they updated. */
+        acc: cs.getPropertyValue('--red').trim(),
+        ink: cs.getPropertyValue('--on-red').trim(),
+        pic: net.pic || '',
+        days: scMyDays(),
+        /* `local` is stripped HERE, and the first version did not do
+           it. A post carries the full data URL of its own photograph so
+           your own feed draws instantly and still draws with no signal
+           — that is a second copy of the picture, base64, and base64 is
+           a third bigger again. Pushed whole it went up inside the JSON
+           beside the id of the very same image, and two photographs
+           would have put the record past the worker's 96KB ceiling and
+           started failing every write with a 413.
+           The comment on the field said "this is never sent". That is
+           the second time today a comment has been the only place an
+           intention existed. */
+        logs: posts.slice(-30).map(function (q) {
+          return { id: q.id, at: q.at, day: q.day, item: q.item, cap: q.cap, img: q.img };
+        }),
+        at: Date.now()
+      })
+    });
+  }
+
+  function scPullAll(done) {
+    done = done || function () {};
+    if (!net.url || !friends.length) return done();
+    var left = friends.length;
+    friends.forEach(function (f) {
+      scApi('/v1/rec/' + f.code, {}, function (rec) {
+        /* A failed fetch keeps the cached copy. Blanking a friend
+           because the train went into a tunnel would empty the board
+           and read as them having stopped. */
+        if (rec) peers[f.code] = rec;
+        if (!--left) { scWriteJSON(PEER_KEY, peers); done(); }
+      });
+    });
+  }
+
+  function scAddFriend(code, done) {
+    code = String(code || '').trim().toUpperCase();
+    if (!/^[A-Z0-9]{4,12}$/.test(code)) return done(false, 'that is not a code');
+    if (code === net.code) return done(false, 'that one is yours');
+    if (friends.some(function (f) { return f.code === code; }))
+      return done(false, 'already on your list');
+    scApi('/v1/rec/' + code, {}, function (rec) {
+      if (!rec) return done(false, 'nobody has that code');
+      friends.push({ code: code, name: rec.name || code });
+      peers[code] = rec;
+      scWriteJSON(FRIEND_KEY, friends);
+      scWriteJSON(PEER_KEY, peers);
+      done(true, rec.name || code);
+    });
+  }
+
+  function scDropFriend(code) {
+    friends = friends.filter(function (f) { return f.code !== code; });
+    delete peers[code];
+    scWriteJSON(FRIEND_KEY, friends);
+    scWriteJSON(PEER_KEY, peers);
+  }
+
+  /* ── counting, once, for everybody ──
+     Mine used to be counted by walking tickLog and a peer's would have
+     been counted by walking their record: two implementations of "how
+     many ticks in thirty days" on the same leaderboard. The day they
+     disagree the board is simply wrong and nothing on it says so. One
+     function, and my own days are shaped into the same object a peer
+     sends before it is asked. */
+  function scMyDays() {
+    var days = {};
+    for (var i = 0; i < 30; i++) {
+      var d = scDayBack(i), t = tickLog[d];
+      /* The COUNT, never which five. The board and the strip both only
+         ever need how many, so sending the items themselves would be
+         spending something for nothing. */
+      if (t) { var n = Object.keys(t).length; if (n) days[d] = n; }
+    }
+    return days;
+  }
+
+  /* Ticks over a rolling window, never all-time — all-time means
+     whoever started first wins permanently and nobody new can catch
+     up. */
+  function scCount(days, n) {
+    var t = 0;
+    for (var i = 0; i < n; i++) t += (days && days[scDayBack(i)]) || 0;
+    return t;
+  }
+
+  /* Days you logged ANYTHING, running back from today. Today not being
+     logged yet does not break it — at nine in the morning it has not
+     failed, it has not happened, and a streak that resets every
+     midnight is a streak nobody keeps. */
+  function scRunOf(days) {
     var n = 0;
-    for (var i = 0; i < days; i++) {
-      var d = tickLog[scDayBack(i)];
-      if (d) n += Object.keys(d).length;
+    for (var i = 0; i < 3650; i++) {
+      if (days && days[scDayBack(i)]) n++;
+      else if (i > 0) break;
     }
     return n;
   }
 
-  /* The seam the server plugs into. Empty until there is one, and
-     deliberately a function rather than an array so the shape of the
-     call site is already right. */
-  function scFriendsPeers() { return []; }
-  function scFeedItems() { return []; }
+  function scStreak() { return scRunOf(scMyDays()); }
+  function scTicksIn(n) { return scCount(scMyDays(), n); }
 
+  /* ── a friend's colour on your page ──
+     Their accent was chosen against THEIR ground and is about to be
+     drawn on yours. Thirteen themes each way is 169 pairings and
+     nobody has looked at any of them: the crown was measured over four
+     rounds, and every one of those measurements was of your own accent
+     on your own page, which is the one case that cannot go wrong.
+
+     So it is mixed toward your ink, one step at a time, and stops at
+     the first step that clears 3:1 — the bar for a graphic, WCAG
+     1.4.11. On a pairing that already clears it, which is most of
+     them, nothing moves and it is exactly their colour.
+
+     THE GROUND HERE IS AN APPROXIMATION and that is said out loud,
+     because this app has been wrong about precisely this before, on
+     precisely this glyph: reasoning about a colour against a token
+     instead of against the pixel cost four rounds. --g0 is the flat
+     base and the page draws three washes over it, so what the eye gets
+     is always a little worse than what this arithmetic says.
+
+     So all 169 were measured on composited pixels rather than argued
+     about. Aiming at a bare 3.0 here, 26 of them come out UNDER 3:1 on
+     screen — worst 2.92:1, solar's amber on five different grounds.
+     Aiming at 3.4, none do: the worst measured is 3.25:1 and 97 of the
+     169 never move at all, which is the point. It dilutes only as far
+     as the page forces. */
+  var CROWN_MIN = 3.4;   /* 3:1 plus the 0.4 the washes were measured to take */
+
+  function scRGB(c) {
+    c = String(c || '').trim();
+    var m = c.match(/^#([0-9a-f]{3})$/i);
+    if (m) return [0, 1, 2].map(function (i) {
+      return parseInt(m[1].charAt(i) + m[1].charAt(i), 16);
+    });
+    m = c.match(/^#([0-9a-f]{6})$/i);
+    if (m) return [0, 2, 4].map(function (i) { return parseInt(m[1].substr(i, 2), 16); });
+    /* getComputedStyle hands back `rgb(255, 0, 0)`, never a hex — and a
+       hex-only reader silently returned NaN for it once, which fell
+       through to solid ink and looked like a deliberate choice. */
+    m = c.match(/^rgba?\(([^)]+)\)/);
+    if (m) {
+      var p = m[1].split(/[\s,\/]+/).filter(Boolean).slice(0, 3).map(parseFloat);
+      if (p.length === 3 && p.every(function (x) { return !isNaN(x); })) {
+        /* `color(srgb .5 .2 .1)` and modern rgb() both serialise 0–1 in
+           some browsers. Anything with no channel above 1 is that. */
+        var unit = p.every(function (x) { return x <= 1; });
+        return p.map(function (x) { return Math.round(unit ? x * 255 : x); });
+      }
+    }
+    return null;
+  }
+
+  function scLum(rgb) {
+    var f = function (c) {
+      c /= 255;
+      return c <= 0.03928 ? c / 12.92 : Math.pow((c + 0.055) / 1.055, 2.4);
+    };
+    return 0.2126 * f(rgb[0]) + 0.7152 * f(rgb[1]) + 0.0722 * f(rgb[2]);
+  }
+
+  function scRatio(a, b) {
+    var x = scLum(a), y = scLum(b);
+    return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05);
+  }
+
+  function scCrown(hex) {
+    var acc = scRGB(hex);
+    if (!acc) return 'var(--red)';
+    var cs = getComputedStyle(document.documentElement);
+    var ground = scRGB(cs.getPropertyValue('--g0'));
+    var ink = scRGB(cs.getPropertyValue('--ink'));
+    if (!ground || !ink) return hex;
+    for (var t = 0; t <= 1.0001; t += 0.05) {
+      var mix = acc.map(function (c, i) { return Math.round(c + (ink[i] - c) * t); });
+      if (scRatio(mix, ground) >= CROWN_MIN)
+        return 'rgb(' + mix[0] + ', ' + mix[1] + ', ' + mix[2] + ')';
+    }
+    /* Their accent and your ink both invisible on your ground is not a
+       thing any pair of these themes produces, but falling through to
+       your own accent is a colour that certainly reads, and a crown
+       that reads in the wrong palette beats one that does not read. */
+    return 'var(--red)';
+  }
+
+  /* ── the two seams the screen paints from ── */
+  function scFriendsPeers() {
+    return friends.map(function (f) {
+      var r = peers[f.code] || null;
+      return {
+        code: f.code,
+        name: (r && r.name) || f.name || f.code,
+        ticks: r ? scCount(r.days, 30) : 0,
+        streak: r ? scRunOf(r.days) : 0,
+        acc: r && r.acc, ink: r && r.ink, pic: r && r.pic,
+        cold: !r
+      };
+    });
+  }
+
+  function scFeedItems() {
+    var out = posts.map(function (p) { return { p: p, who: net.name || 'You', me: true }; });
+    friends.forEach(function (f) {
+      var r = peers[f.code];
+      if (!r || !Array.isArray(r.logs)) return;
+      r.logs.forEach(function (p) {
+        out.push({ p: p, code: f.code, who: r.name || f.name || f.code,
+                   acc: r.acc, ink: r.ink, pic: r.pic });
+      });
+    });
+    return out.sort(function (a, b) { return (b.p.at || 0) - (a.p.at || 0); });
+  }
+
+  /* ── the screen ── */
   function scPaintFriends() {
-    var me = { name: 'You', me: true, ticks: scTicksIn(30), streak: scStreak() };
-    var all = [me].concat(scFriendsPeers())
+    var me = {
+      name: net.on ? (net.name || 'You') : 'You',
+      me: true, ticks: scTicksIn(30), streak: scStreak()
+    };
+    var all = [me].concat(net.on ? scFriendsPeers() : [])
       .sort(function (a, b) { return b.ticks - a.ticks; });
 
     var list = $('scFriendList');
@@ -1490,7 +1852,7 @@
     all.forEach(function (p, i) {
       var li = scEl('li', 'fr-row' + (p.me ? ' is-me' : ''));
       li.appendChild(scEl('span', 'fr-rank', String(i + 1)));
-      li.appendChild(scPic(38));
+      li.appendChild(scPicOf(38, p));
       var n = scEl('span');
       var nm = scEl('span', 'fr-n', p.name);
       /* The crown, on whoever leads, in their own accent. With one row
@@ -1499,38 +1861,473 @@
          somebody else arrives. */
       if (i === 0) {
         var c = scEl('span', 'fr-crown');
+        if (!p.me && p.acc) c.style.setProperty('--crown', scCrown(p.acc));
         c.innerHTML = '<svg viewBox="0 0 24 20" aria-hidden="true">'
           + '<path d="M2 6l4.6 3.6L12 2l5.4 7.6L22 6l-1.8 11H3.8L2 6z"/></svg>';
         var w = scEl('span', 'fr-nw');
         w.appendChild(nm); w.appendChild(c);
         n.appendChild(w);
       } else n.appendChild(nm);
-      n.appendChild(scEl('span', 'fr-s',
-        p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
+      n.appendChild(scEl('span', 'fr-s', p.cold
+        ? 'not fetched yet'
+        : p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
       li.appendChild(n);
       li.appendChild(scEl('span', 'fr-t', String(p.ticks)));
+      /* A row is a button only when there is somebody behind it. A
+         name you can press that opens nothing is worse than a name you
+         cannot. */
+      if (!p.me) {
+        li.classList.add('is-tap');
+        li.setAttribute('role', 'button');
+        li.tabIndex = 0;
+        var open = function () { scFriendSheet(p); };
+        li.addEventListener('click', open);
+        li.addEventListener('keydown', function (e) {
+          if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
+        });
+      }
       list.appendChild(li);
     });
 
     var add = $('scFriendAdd');
     add.textContent = '';
-    add.appendChild(scEl('p', 'fr-note',
-      all.length > 1
+    if (!net.on) {
+      add.appendChild(scEl('p', 'fr-note',
+        'You are on the board out of your own ticks, and nothing has left this '
+        + 'browser to put you there. Friends need a server — turning one on is '
+        + 'the moment that stops being true, and it says exactly what goes.'));
+      var acts0 = scEl('div', 'acts');
+      acts0.appendChild(scBtn('go', 'Turn on friends', scNetSheet));
+      add.appendChild(acts0);
+    } else {
+      var acts = scEl('div', 'fr-acts');
+      acts.appendChild(scBtn('go', 'Add a friend', scAddSheet));
+      acts.appendChild(scBtn('off', 'Your code', scNetSheet));
+      add.appendChild(acts);
+      add.appendChild(scEl('p', 'fr-note', friends.length
         ? 'Thirty days, rolling. Tap a name to see their logs.'
-        : 'Nobody added yet. Adding a friend needs a server — this app has '
-          + 'never had one, and turning it on is the moment it stops being '
-          + 'true that nothing leaves this browser. Not built yet.'));
+        : 'Nobody added yet. Swap codes with somebody and they appear here.'));
+    }
 
     $('scFeedK').hidden = false;
     var feed = $('scFeed');
     feed.textContent = '';
-    var items = scFeedItems();
+    var items = net.on ? scFeedItems() : [];
     if (!items.length) {
-      feed.appendChild(scEl('p', 'fr-note',
-        'Nothing logged. A log is a photograph and a line about one of the '
-        + 'five — yours and your friends\u2019 together. It needs somewhere to '
-        + 'put the picture, so it lands with the rest of this.'));
+      feed.appendChild(scEl('p', 'fr-note', net.on
+        ? 'Nothing logged yet. A log is a photograph and a line about one of '
+          + 'the five — yours and your friends’ together.'
+        : 'A log is a photograph and a line about one of the five — yours '
+          + 'and your friends’ together. It needs somewhere to put the '
+          + 'picture, so it arrives with the rest of this.'));
+      if (net.on) {
+        var a2 = scEl('div', 'acts');
+        a2.appendChild(scBtn('go', 'Write one', scLogSheet));
+        feed.appendChild(a2);
+      }
+    } else {
+      var a3 = scEl('div', 'fr-acts');
+      a3.appendChild(scBtn('go', 'Write one', scLogSheet));
+      feed.appendChild(a3);
+      items.slice(0, 40).forEach(function (it) { feed.appendChild(scPost(it)); });
     }
+  }
+
+  /* ── refreshing ──
+     THIS IS NOT IN scPaintFriends, and the first version was. A paint
+     that fetches and a fetch that repaints is a loop, and it did not
+     even need a server to close it: with nobody on your list scPullAll
+     has nothing to wait for and calls back SYNCHRONOUSLY, so the first
+     paint recursed until the stack went. The screen came out with its
+     buttons and no rows, which reads as an empty leaderboard rather
+     than as a crash.
+
+     So arriving at the screen fetches, and drawing it only draws. The
+     board is painted from the cache first either way — a spinner over
+     figures that are a minute old would be showing you less than the
+     figures do. */
+  var pulling = false;
+  function scFriendsRefresh() {
+    if (pulling || !net.on || !friends.length) return;
+    pulling = true;
+    scPullAll(function () {
+      pulling = false;
+      if (view === 'friends') scPaintFriends();
+    });
+  }
+
+  function scPost(it) {
+    var p = it.p;
+    var card = scEl('article', 'po');
+    var head = scEl('div', 'po-h');
+    head.appendChild(scPicOf(26, it));
+    var who = scEl('span');
+    who.appendChild(scEl('span', 'po-n', it.who));
+    var it2 = TALLY.filter(function (x) { return x.id === p.item; })[0];
+    who.appendChild(scEl('span', 'po-s',
+      (it2 ? it2.n + ' · ' : '') + scAgo(p.at)));
+    head.appendChild(who);
+    card.appendChild(head);
+    if (p.img) {
+      var wrap = scEl('div', 'po-img');
+      var im = document.createElement('img');
+      im.src = it.me && p.local ? p.local : scImgURL(p.img);
+      im.alt = p.cap || '';
+      im.loading = 'lazy';
+      wrap.appendChild(im);
+      card.appendChild(wrap);
+    }
+    if (p.cap) card.appendChild(scEl('p', 'po-c', p.cap));
+    return card;
+  }
+
+  /* Relative, and it stops at the day. "3 weeks ago" is a number
+     nobody reads as a duration; past a week the date is the useful
+     thing and this is a feed, not a diary. */
+  function scAgo(at) {
+    if (!at) return '';
+    var s = Math.max(0, Math.round((Date.now() - at) / 1000));
+    if (s < 90) return 'just now';
+    var m = Math.round(s / 60);
+    if (m < 60) return m + 'm ago';
+    var h = Math.round(m / 60);
+    if (h < 24) return h + 'h ago';
+    var d = Math.round(h / 24);
+    if (d < 8) return d + 'd ago';
+    return new Date(at).toDateString().slice(4, 10);
+  }
+
+  /* ── turning it on ── */
+  function scNetSheet() {
+    scSheet(net.on ? 'Friends' : 'Turn on friends', function (body) {
+      if (!net.on) {
+        body.appendChild(scEl('p', 'hint',
+          'This is the only part of the app that reaches a network, and it is '
+          + 'off until you do this. It needs a server of your own — the '
+          + 'worker in this project, on your own Cloudflare account. Paste its '
+          + 'address.'));
+        var u = scEl('input', 'field');
+        u.type = 'url';
+        u.placeholder = 'https://sched.you.workers.dev';
+        u.value = net.url || '';
+        body.appendChild(scEl('span', 'label', 'Your server'));
+        body.appendChild(u);
+        var nf = scEl('input', 'field');
+        nf.type = 'text';
+        nf.placeholder = 'What your friends call you';
+        nf.maxLength = 24;
+        nf.value = net.name || '';
+        body.appendChild(scEl('span', 'label', 'Name'));
+        body.appendChild(nf);
+
+        /* Said plainly and in full, on the screen where it starts. A
+           sentence about privacy under a button that has already been
+           pressed is a disclaimer; here it is a decision. */
+        body.appendChild(scEl('p', 'hint',
+          'What goes: your name, your two theme colours, your picture, how many '
+          + 'of the five you ticked on each of the last thirty days, and any log '
+          + 'you write — photograph and caption. What never goes: your week, '
+          + 'your blocks, and the numbers behind Steps, Fuel and Water. Your '
+          + 'friend list stays on this phone; the server is never told who you '
+          + 'have added.'));
+
+        var acts = scEl('div', 'acts');
+        acts.appendChild(scBtn('off', 'Not now', scClose));
+        var join = scBtn('go', 'Turn it on', function () {
+          if (!/^https?:\/\/.+/.test(u.value.trim())) {
+            scToast('That does not look like an address', false); return;
+          }
+          join.disabled = true;
+          join.textContent = 'Asking…';
+          scJoin(u.value, nf.value, function (okd, status) {
+            if (!okd) {
+              join.disabled = false;
+              join.textContent = 'Turn it on';
+              scToast(status === 'offline'
+                ? 'Could not reach that address'
+                : 'That address did not answer as the worker', false);
+              return;
+            }
+            scClose();
+            scPaintFriends();
+            scToast('On. Your code is ' + net.code, false);
+          });
+        });
+        acts.appendChild(join);
+        body.appendChild(acts);
+        return;
+      }
+
+      body.appendChild(scEl('span', 'label', 'Your code'));
+      var big = scEl('p', 'fr-code', net.code);
+      body.appendChild(big);
+      body.appendChild(scEl('p', 'hint',
+        'Give this to a friend and they can see your board and your logs. It '
+        + 'reads and never writes — the string that can post as you is a '
+        + 'different one and stays on this phone.'));
+      var acts2 = scEl('div', 'acts');
+      acts2.appendChild(scBtn('off', 'Done', scClose));
+      acts2.appendChild(scBtn('go', 'Copy it', function () {
+        var done = function () { scToast('Code copied', false); };
+        if (navigator.clipboard && navigator.clipboard.writeText)
+          navigator.clipboard.writeText(net.code).then(done, done);
+        else done();
+      }));
+      body.appendChild(acts2);
+
+      body.appendChild(scEl('div', 'menu-rule'));
+      var nm = scEl('button', 'menu-item');
+      nm.appendChild(document.createTextNode('Name'));
+      nm.appendChild(scEl('span', 'sub-note', net.name || 'not set'));
+      nm.addEventListener('click', function () {
+        scTextSheet('Name', 'Name', net.name, function (v) {
+          net.name = (v || '').slice(0, 24) || 'You';
+          scNetSave();
+          scPushNow();
+        });
+      });
+      body.appendChild(nm);
+
+      var off = scEl('button', 'menu-item bad');
+      off.appendChild(document.createTextNode('Turn friends off'));
+      off.appendChild(scEl('span', 'sub-note',
+        'Deletes your record and your logs from the server. This one is final.'));
+      off.addEventListener('click', function () {
+        scSheet('Turn friends off?', function (b2) {
+          b2.appendChild(scEl('p', 'hint',
+            'Your record, your logs and your pictures are deleted from the '
+            + 'server, and the code goes back in the pool. Your week, your '
+            + 'ticks and your streak are untouched — they never left. '
+            + 'There is no bin for this, because the copy that matters is the '
+            + 'one still here.'));
+          var a4 = scEl('div', 'acts');
+          a4.appendChild(scBtn('off', 'Stay on', scClose));
+          a4.appendChild(scBtn('bad', 'Turn it off', function () {
+            scLeave(function () {
+              scClose();
+              scPaintFriends();
+              scToast('Off. Nothing of yours is up there.', false);
+            });
+          }));
+          b2.appendChild(a4);
+        });
+      });
+      body.appendChild(off);
+    });
+  }
+
+  function scAddSheet() {
+    scSheet('Add a friend', function (body) {
+      body.appendChild(scEl('span', 'label', 'Their code'));
+      var f = scEl('input', 'field');
+      f.type = 'text';
+      f.autocapitalize = 'characters';
+      f.spellcheck = false;
+      f.placeholder = '8 letters and numbers';
+      body.appendChild(f);
+      body.appendChild(scEl('p', 'hint',
+        'A code reads and never writes, so giving one away costs you nothing '
+        + 'but the reading.'));
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Cancel', scClose));
+      acts.appendChild(scBtn('go', 'Add', function () {
+        scAddFriend(f.value, function (okd, msg) {
+          if (!okd) { scToast(msg, false); return; }
+          scClose();
+          scPaintFriends();
+          scToast(msg + ' added', false);
+        });
+      }));
+      body.appendChild(acts);
+      setTimeout(function () { f.focus(); }, 260);
+    });
+  }
+
+  /* ── a friend ──
+     Their seven days, their board figures, and everything they have
+     logged. The strip is the one thing here the leaderboard cannot
+     say: a total of 97 is the same number whether it came from a
+     fortnight of everything or thirty days of one. */
+  function scFriendSheet(p) {
+    scSheet(p.name, function (body) {
+      var r = peers[p.code] || {};
+      var top = scEl('div', 'fp-top');
+      top.appendChild(scPicOf(60, p));
+      var s = scEl('span');
+      s.appendChild(scEl('span', 'fp-t', String(p.ticks)));
+      s.appendChild(scEl('span', 'fp-s', 'ticks in thirty days · '
+        + p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
+      top.appendChild(s);
+      body.appendChild(top);
+
+      body.appendChild(scEl('span', 'label', 'Last seven days'));
+      var strip = scEl('div', 'fp-week');
+      for (var i = 6; i >= 0; i--) {
+        var day = scDayBack(i);
+        var n = (r.days && r.days[day]) || 0;
+        var cell = scEl('span', 'fp-d' + (n ? ' on' : ''));
+        /* Height by how many of the five, colour by whose it is. The
+           habits screen's rule, and for its reason: a wash of red
+           across a week somebody missed is a judgement, and a bar that
+           is simply shorter is a fact. */
+        var bar = scEl('i');
+        bar.style.height = (18 + n * 9) + 'px';
+        if (n && p.acc) bar.style.background = p.acc;
+        cell.appendChild(bar);
+        cell.appendChild(scEl('span', 'fp-w',
+          new Date(day + 'T12:00:00').toDateString().slice(0, 1)));
+        cell.title = n + (n === 1 ? ' tick' : ' ticks');
+        strip.appendChild(cell);
+      }
+      body.appendChild(strip);
+
+      var logs = (Array.isArray(r.logs) ? r.logs : []).slice().reverse();
+      body.appendChild(scEl('span', 'label', logs.length ? 'Their logs' : 'No logs yet'));
+      logs.slice(0, 20).forEach(function (q) {
+        body.appendChild(scPost({ p: q, who: p.name, acc: p.acc, ink: p.ink, pic: p.pic }));
+      });
+
+      body.appendChild(scEl('div', 'menu-rule'));
+      var rm = scEl('button', 'menu-item bad');
+      rm.appendChild(document.createTextNode('Remove ' + p.name));
+      rm.appendChild(scEl('span', 'sub-note',
+        'Off your list and out of this browser. Nothing of theirs is yours to delete.'));
+      rm.addEventListener('click', function () {
+        scDropFriend(p.code);
+        scClose();
+        scPaintFriends();
+        scToast(p.name + ' removed', false);
+      });
+      body.appendChild(rm);
+    });
+  }
+
+  /* ── writing one ── */
+  function scLogSheet() {
+    scSheet('Write a log', function (body) {
+      var chosen = '';
+      var shot = null;      /* the data URL, for the preview and the upload */
+
+      var prev = scEl('div', 'lg-prev');
+      prev.hidden = true;
+      body.appendChild(prev);
+
+      var file = scEl('input', 'pic-file');
+      file.type = 'file';
+      file.accept = 'image/*';
+      file.addEventListener('change', function () {
+        var f = file.files && file.files[0];
+        if (!f) return;
+        scShot(f, function (url) {
+          if (!url) { scToast('That image could not be read', false); return; }
+          shot = url;
+          prev.textContent = '';
+          var im = document.createElement('img');
+          im.src = url; im.alt = '';
+          prev.appendChild(im);
+          prev.hidden = false;
+        });
+      });
+      body.appendChild(file);
+
+      body.appendChild(scEl('span', 'label', 'About'));
+      var row = scEl('div', 'lg-row');
+      TALLY.forEach(function (t) {
+        var b = scEl('button', 'lg-c');
+        b.type = 'button';
+        b.textContent = t.n;
+        b.addEventListener('click', function () {
+          chosen = chosen === t.id ? '' : t.id;
+          [].forEach.call(row.querySelectorAll('.lg-c'), function (c) {
+            c.classList.toggle('on', c === b && chosen === t.id);
+          });
+        });
+        row.appendChild(b);
+      });
+      body.appendChild(row);
+
+      body.appendChild(scEl('span', 'label', 'Caption'));
+      var cap = scEl('textarea', 'field');
+      cap.rows = 3;
+      cap.maxLength = 240;
+      body.appendChild(cap);
+
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Add a photo', function () { file.click(); }));
+      var post = scBtn('go', 'Post it', function () {
+        var text = cap.value.trim();
+        if (!text && !shot) { scToast('A photograph or a line, at least', false); return; }
+        post.disabled = true;
+        post.textContent = 'Posting…';
+        var finish = function (imgId) {
+          posts.push({
+            id: scRand(10, HEX_A), at: Date.now(), day: scDay(),
+            item: chosen, cap: text, img: imgId || '',
+            /* The local copy, so your own post draws instantly and
+               still draws with no signal. The id is what a friend
+               fetches; this is never sent. */
+            local: imgId ? shot : ''
+          });
+          posts = posts.slice(-30);
+          scWriteJSON(POST_KEY, posts);
+          scPushNow();
+          scClose();
+          scPaintFriends();
+          scToast('Posted', false);
+        };
+        if (!shot) return finish('');
+        scUpload(shot, function (id) {
+          if (!id) {
+            post.disabled = false;
+            post.textContent = 'Post it';
+            scToast('The picture would not upload', false);
+            return;
+          }
+          finish(id);
+        });
+      });
+      acts.appendChild(post);
+      body.appendChild(acts);
+      setTimeout(function () { cap.focus(); }, 260);
+    });
+  }
+
+  /* 900px square at 0.78, which lands well inside the worker's 400KB
+     ceiling for anything a phone camera produces. Bigger is not free:
+     it is a photograph going up a mobile connection to be looked at in
+     a 350px column. */
+  function scShot(file, done) {
+    var fr = new FileReader();
+    fr.onerror = function () { done(null); };
+    fr.onload = function () {
+      var img = new Image();
+      img.onerror = function () { done(null); };
+      img.onload = function () {
+        var S = 900, c = document.createElement('canvas');
+        c.width = S; c.height = S;
+        var side = Math.min(img.width, img.height);
+        c.getContext('2d').drawImage(img,
+          (img.width - side) / 2, (img.height - side) / 2, side, side, 0, 0, S, S);
+        try { done(c.toDataURL('image/jpeg', 0.78)); } catch (e) { done(null); }
+      };
+      img.src = fr.result;
+    };
+    fr.readAsDataURL(file);
+  }
+
+  /* A data URL is base64 text; the worker wants the bytes. Decoded
+     here rather than posted as a string, because base64 is a third
+     bigger and the 400KB ceiling is on what arrives. */
+  function scUpload(dataURL, done) {
+    var bin;
+    try {
+      var b64 = dataURL.slice(dataURL.indexOf(',') + 1);
+      var raw = atob(b64);
+      bin = new Uint8Array(raw.length);
+      for (var i = 0; i < raw.length; i++) bin[i] = raw.charCodeAt(i);
+    } catch (e) { return done(null); }
+    scApi('/v1/img?code=' + net.code, { method: 'POST', auth: true, bin: true, body: bin },
+      function (r) { done(r && r.id); });
   }
 
   /* Which view is up, remembered. Its own key: the schedule is the
@@ -1576,7 +2373,7 @@
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
     if (ring) { scPaintRing(); scPaintRingList(); }
     else if (tal) scPaintTally();
-    else if (fr) scPaintFriends();
+    else if (fr) { scPaintFriends(); scFriendsRefresh(); }
     else scLive();
   }
 
@@ -2027,7 +2824,7 @@
   var PIC_KEY = 'sched.pic.v1';
   var myPic = null;
 
-  function scFace(px) {
+  function scFaceIn(px, acc, ink) {
     var NS = 'http://www.w3.org/2000/svg';
     var mk = function (n, a) {
       var e = document.createElementNS(NS, n);
@@ -2035,8 +2832,8 @@
       return e;
     };
     var cs = getComputedStyle(document.documentElement);
-    var red = cs.getPropertyValue('--red').trim();
-    var on = cs.getPropertyValue('--on-red').trim();
+    var red = acc || cs.getPropertyValue('--red').trim();
+    var on = ink || cs.getPropertyValue('--on-red').trim();
     var s2 = mk('svg', { viewBox: '0 0 100 100' });
     s2.setAttribute('aria-hidden', 'true');
     s2.appendChild(mk('rect', { x: 0, y: 0, width: 100, height: 100, fill: red }));
@@ -2050,19 +2847,27 @@
     return w;
   }
 
-  /* The picture as it currently stands: the photograph if there is one,
-     the face if there is not. There is no empty state and nobody is
-     nagged to add one — the face is a real answer rather than a
-     placeholder with a plus on it. */
-  function scPic(px) {
-    if (!myPic) return scFace(px);
+  function scFace(px) { return scFaceIn(px, null, null); }
+
+  /* One person's picture at one size: the photograph if there is one,
+     the face out of their palette if there is not. */
+  function scPicIn(px, src, acc, ink) {
+    if (!src) return scFaceIn(px, acc, ink);
     var w = scEl('span', 'pic');
     w.style.width = px + 'px'; w.style.height = px + 'px';
     var i = document.createElement('img');
-    i.src = myPic; i.alt = '';
+    i.src = src; i.alt = '';
     w.appendChild(i);
     return w;
   }
+
+  function scPic(px) { return scPicIn(px, myPic, null, null); }
+
+  function scPicOf(px, p) {
+    if (p.me) return scPic(px);
+    return scPicIn(px, p.pic ? scImgURL(p.pic) : '', p.acc, p.ink);
+  }
+
 
   /* IndexedDB, not localStorage, and the reason is written down two
      apps over: a picture in localStorage shares a 5MB budget with the
@@ -2097,6 +2902,18 @@
         st.transaction.oncomplete = function () { done && done(); };
       });
     } catch (e) { done && done(); }
+    /* The copy your friends see is a separate upload, and only if you
+       have friends on. Taking the photograph away clears the id rather
+       than leaving the old one up: the face is what a cleared id draws,
+       and it is the answer you just chose. */
+    if (!net.on) return;
+    if (!v) { net.pic = ''; scNetSave(); scPush(); return; }
+    scUpload(v, function (id) {
+      if (!id) return;
+      net.pic = id;
+      scNetSave();
+      scPushNow();
+    });
   }
 
   function scPicSheet() {
@@ -2362,6 +3179,12 @@
      the tally can be the view you left it on, and it opening empty and
      filling in a frame later reads as having lost the day. */
   scTickLoad();
+
+  /* Whether friends are on, and who is on your list. Reading it makes
+     no request — with no URL stored, scApi returns before it builds
+     one — so an app nobody has turned this on for behaves exactly as
+     it did before any of this existed. */
+  scNetLoad();
 
   /* The picture is read asynchronously and nothing waits for it: the
      face is a complete answer on its own, so a photograph arriving a

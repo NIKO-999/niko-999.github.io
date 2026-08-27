@@ -77,5 +77,6 @@ for KV — no account, no network, a second and a half. Run it before
 `wrangler deploy`, because a Worker fails at request time on somebody's
 phone and there is nothing on screen that will tell you.
 
-If you widen `ORIGINS` in `index.js`, understand that you are choosing
-who may read the photographs. It answers a fixed list and never `*`.
+If you widen the origin rule in `index.js`, understand that you are
+choosing who may read the photographs. It answers the app's own origin,
+plus a loopback on any port for working on it, and never `*`.
