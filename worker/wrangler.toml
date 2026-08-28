@@ -23,5 +23,12 @@ id = "e924044bdaf14d5b96c8c27da74e1503"
 # No routes and no custom domain: the worker answers on its own
 # workers.dev URL, which is the string the app is given. A custom domain
 # would mean a zone, and there is nothing here worth a DNS record.
+#
+# workers_dev IS SAID OUT LOUD, because the first deploy landed with "No
+# URLs enabled" — the code was up and there was no address to call it
+# on. Leaving it unstated relies on a default, and a default that varies
+# between `wrangler deploy` from a laptop and a Git-connected build is
+# the kind of thing that reads as the worker being broken.
+workers_dev = true
 [observability]
 enabled = true
