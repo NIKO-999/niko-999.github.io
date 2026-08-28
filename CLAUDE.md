@@ -380,6 +380,68 @@ coverage.
 **`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
 fixed here. Its twelve standing faults are all RADIUS in `jade/`.
 
+## An invitation is a link, and the link carries the server
+
+**A code alone names nothing.** `K7PQ2M4X` is a row in one KV
+namespace, so handing it to somebody is only an invitation if their app
+is already pointed at the same worker — and nothing in their app knows
+whether it is. It worked because every copy shares one `HOME`, which is
+a coincidence of there being one deployment rather than a property of
+the design. Deploy a second and every code is ambiguous with no error
+to show for it: the read misses and the app says *nobody has that
+code*, which is indistinguishable from a typo.
+
+So the invitation is a URL carrying both, and `at` is written **only
+when the server is not HOME**. A link that names the default is a link
+that breaks the day the default moves, and pinning every invitation to
+today's address is how a rename becomes a dead link in everybody's
+messages.
+
+**It is the fragment, never the query.** Both survive GitHub Pages, but
+a query string is sent in the request line and a fragment never leaves
+the browser. A friend code in somebody's access log is a small thing,
+and it is the only kind of thing this app has spent every other
+decision not doing.
+
+**Read at boot, redeemed at the tab.** Reading a hash costs nothing and
+reaches nothing; the join and the add happen through the same
+`scArriveFriends` every ordinary visit takes. An invitation that joined
+a server from the wiring would be the single hole in *no request until
+you are on that screen*, which is the assertion the whole friends half
+is built to keep.
+
+**The link decides the server only for somebody who has not joined.**
+Once you are on one, your record and every code on your list live
+there, and letting a link move you would orphan both silently — every
+existing friend would then read as *nobody has that code*. A link to
+another server is refused with a sentence, not followed.
+
+**And the hash is stripped the moment it is read.** Spent, it adds
+nothing on a reload; left in the bar, a bookmark of the page is
+somebody else's invitation for as long as it exists. `replaceState`,
+not `location.hash =`, which pushes a history entry and turns Back into
+a no-op that looks broken.
+
+**The invitation is cleared BEFORE the request, not in the callback.**
+A fetch that fails offline must not leave a pending add that fires
+again on the next repaint — and `scAddFriend` refuses a duplicate
+politely enough that the second attempt would look like it had worked.
+
+**The test is a second phone, and it is the only thing that can hold
+this.** Every part of the feature is invisible from the sending device:
+the hash being read, the server arriving from the link rather than the
+build, the add happening untyped, the bar being clean afterwards. A
+fresh context with nothing in `localStorage` and one URL is the whole
+check. **The live worker is routed to a refusal in it** — if the link
+is not read, `HOME` is the fallback, and the test would otherwise make
+a real request to the deployed server and could pass while doing it.
+Breaking the arrival on purpose fired that guard exactly as intended.
+
+`navigator.share` is stubbed to record rather than open, because
+Chromium has none: without it the button falls to the clipboard branch,
+the link is only readable through a permission grant, and the branch a
+phone actually takes goes untested.
+
 ## The one browser this is developed on is not the one it runs on
 
 **Four fixes for one bug went out on a model of it rather than a

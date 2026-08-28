@@ -2598,6 +2598,13 @@ const SAID = [
         localStorage.setItem('sched.net.v1', JSON.stringify({
           url: host, code: '', key: '', name: 'Niko', pic: '', on: false }));
       }
+      /* A share sheet that records instead of opening one. Chromium has
+         no navigator.share, so without this the button falls to the
+         clipboard branch and the link is only readable through a
+         permission grant — and the branch a phone takes goes untested,
+         which is the one that matters. */
+      window.__shared = [];
+      navigator.share = function (d) { window.__shared.push(d); return Promise.resolve(); };
     }, HOST);
     const fetched = [];
     fp.on('request', (r) => fetched.push(r.url()));
@@ -2809,9 +2816,29 @@ const SAID = [
        act on. */
     const swapBtn = await fp.$$eval('.fr-swap .btn', (b) => b.map((x) => x.textContent));
     const actBtn = await fp.$$eval('.sheet .acts .btn', (b) => b.map((x) => x.textContent));
-    ok('...with the button that copies it beside the code', swapBtn.join() === 'Copy', swapBtn);
+    ok('...with the button that shares it beside the code', swapBtn.join() === 'Share', swapBtn);
     ok('...and the action row below belongs to adding THEM',
       actBtn.join() === 'Cancel,Add', actBtn);
+
+    /* ── what Share actually hands over ──
+       Read off the share sheet rather than the clipboard: it is the
+       branch a phone takes, and it is the one place the link exists as
+       a string before it goes to somebody. */
+    await fp.click('.fr-swap .btn');
+    await fp.waitForTimeout(260);
+    const shared = await fp.evaluate(() => (window.__shared || []).slice());
+    const link = (shared[0] || {}).text || '';
+    ok('sharing hands over a link, not a bare code',
+      shared.length === 1 && /^https?:\/\/.+#add=/.test(link), link);
+    ok('...carrying your code', link.includes('#add=' + mine.code), link);
+    ok('...and the server it is on, because a code alone names nothing',
+      link.includes('&at=' + encodeURIComponent(HOST)), link);
+    /* The whole reason the link exists: a code is a row in ONE KV
+       namespace. Handed to somebody pointed elsewhere it is not wrong,
+       it is absent — the read misses and the app says "nobody has that
+       code". */
+    ok('...and it is the fragment that carries them, never the query',
+      link.indexOf('#') < link.indexOf('add=') && !/\?/.test(link), link);
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(420);
 
@@ -3131,6 +3158,137 @@ const SAID = [
 
     ok('no page errors through any of the friends half', ferrs.length === 0, ferrs);
     await fp.close();
+
+    /* ═══ the other phone ═══
+       Everything above is one device that was seeded with the server's
+       address. This is the person it was sent TO: a fresh context, a
+       browser that has never heard of this app, nothing in
+       localStorage, and one link.
+
+       It is the only assertion that can hold the feature, because every
+       part of it is invisible from inside the sending phone — the hash
+       being read, the server coming out of the link rather than out of
+       the build, the add happening without anybody typing, and the URL
+       being clean afterwards.
+
+       THE LIVE SERVER IS ROUTED TO A REFUSAL, not left to the network.
+       If the link is not read, `HOME` is the fallback and this test
+       would quietly make a real request to the deployed worker — which
+       is a test that reaches production and, worse, one that could pass
+       while doing it. Aborted and counted, so the fallback is a
+       failure rather than a round trip. */
+    {
+      const gp = await browser.newPage({ ...PHONE });
+      const gerrs = [];
+      gp.on('pageerror', (e) => gerrs.push(String(e)));
+      gp.on('console', (m) => { if (m.type() === 'error') gerrs.push(m.text()); });
+
+      const live = [];
+      await gp.route('https://sched.nikorapullin.workers.dev/**', (route) => {
+        live.push(route.request().url());
+        return route.abort();
+      });
+      await gp.route(HOST + '/**', async (route) => {
+        const r = route.request();
+        const res = await worker.fetch(new Request(r.url(), {
+          method: r.method(), headers: r.headers(),
+          body: ['GET', 'HEAD'].includes(r.method()) ? undefined : r.postDataBuffer(),
+        }), env);
+        await route.fulfill({ status: res.status,
+          headers: Object.fromEntries(res.headers),
+          body: Buffer.from(await res.arrayBuffer()) });
+      });
+      /* NOTHING is seeded. No net record, no url — the point is that the
+         link is the only thing this browser is told. */
+      await gp.addInitScript(() => {
+        const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
+        window.Date = class extends R {
+          constructor(...a) { super(...(a.length ? a : [F])); }
+          static now() { return F; }
+        };
+        delete window.SpeechRecognition;
+        delete window.webkitSpeechRecognition;
+      });
+
+      /* Rae is back on the server — the phone above deleted its own
+         record on the way out, not hers. */
+      const url = `${BASE}/schedule/#add=JADE2K7P&at=${encodeURIComponent(HOST)}`;
+      await gp.goto(url, { waitUntil: 'networkidle' });
+      await gp.waitForTimeout(1400);
+
+      ok('a link opens the app on the friends screen, with nothing pressed',
+        !(await gp.$eval('#scFriends', (e) => e.hidden)));
+      ok('...and the address it was sent to came out of the link',
+        (await gp.evaluate(() =>
+          (JSON.parse(localStorage.getItem('sched.net.v1') || '{}')).url)) === HOST, HOST);
+      ok('...so the built-in server was never asked', live.length === 0, live);
+      ok('...it claimed a code of its own on the way',
+        await gp.evaluate(() => {
+          const n = JSON.parse(localStorage.getItem('sched.net.v1') || '{}');
+          return !!(n.on && /^[A-Z0-9]{8}$/.test(n.code));
+        }));
+      ok('...and the person who sent it is on the list, untyped',
+        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
+          .map((f) => f.code).join())) === 'JADE2K7P');
+      ok('...showing on the board by name',
+        (await gp.$$eval('.fr-n', (n) => n.map((x) => x.textContent))).includes('Rae'));
+
+      /* Left in the bar it is redeemed again on every reload — spent, so
+         it adds nothing, but a bookmark of this page is then somebody
+         else's invitation for as long as it exists. */
+      ok('the link is taken out of the address bar once it is spent',
+        !(await gp.evaluate(() => location.hash)));
+
+      /* It is one invitation, not a standing instruction. The reload is
+         the real test of that: `invite` is cleared before the request
+         rather than in its callback, so a second pass cannot re-add. */
+      await gp.reload({ waitUntil: 'networkidle' });
+      await gp.waitForTimeout(900);
+      ok('and reloading does not add them a second time',
+        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
+          .length)) === 1);
+
+      /* The other door into the same reader. Somebody who was sent a
+         link and pasted the whole thing gets the same result as
+         somebody who was told the code across a table. */
+      await gp.evaluate(() => {
+        localStorage.setItem('sched.friends.v1', '[]');
+        localStorage.setItem('sched.peer.v1', '{}');
+      });
+      await gp.reload({ waitUntil: 'networkidle' });
+      await gp.waitForTimeout(700);
+      await gp.click('.tab[data-view="friends"]');
+      await gp.waitForTimeout(400);
+      await gp.click('text=Add a friend');
+      await gp.waitForTimeout(460);
+      await gp.fill('.sheet input[type=text]', url);
+      await gp.click('.sheet .btn.go');
+      await gp.waitForTimeout(900);
+      ok('a whole link pasted into the field works as well as a code',
+        (await gp.evaluate(() => (JSON.parse(localStorage.getItem('sched.friends.v1')) || [])
+          .map((f) => f.code).join())) === 'JADE2K7P');
+
+      /* A link naming a server you are not on is refused rather than
+         followed. Following it would point an app with a record and a
+         friend list on one server at another, orphaning both — and the
+         read would then miss on every code already on the list. */
+      await gp.click('text=Add a friend');
+      await gp.waitForTimeout(460);
+      await gp.fill('.sheet input[type=text]',
+        `${BASE}/schedule/#add=QQQQ2222&at=${encodeURIComponent('https://elsewhere.example')}`);
+      await gp.click('.sheet .btn.go');
+      await gp.waitForTimeout(700);
+      ok('...but a link to a different server is refused, not followed',
+        (await gp.$eval('#scToast', (e) => e.textContent)).includes('another server')
+        && (await gp.evaluate(() =>
+          (JSON.parse(localStorage.getItem('sched.net.v1') || '{}')).url)) === HOST,
+        await gp.$eval('#scToast', (e) => e.textContent));
+
+      ok('no page errors on the phone that was sent the link',
+        gerrs.length === 0, gerrs);
+      await gp.close();
+    }
+
     globalThis.Date = RealDate;
   }
 

@@ -2262,9 +2262,76 @@
     });
   }
 
+  /* ── an invitation is a LINK, and the link carries the server ──
+     The code alone is not portable. It names a row in one KV namespace,
+     so handing somebody `K7PQ2M4X` is only an invitation if they are
+     already pointed at the same worker — and the app they open has no
+     way to know that they are. It worked here because every copy of
+     this app shares one HOME, which is a coincidence of there being one
+     deployment rather than a property of the design. Deploy a second
+     one and every code becomes ambiguous with no error to show for it:
+     the read simply misses and says "nobody has that code".
+
+     So the invitation is a URL that carries both, and `at` is written
+     ONLY when the server is not HOME — a link that names the default
+     is a link that goes stale the day the default moves, and pinning
+     every invitation to today's address is how a rename becomes a
+     broken link in everybody's messages.
+
+     IT IS THE HASH, not a query string. Both survive GitHub Pages, but
+     a query is sent to the server in the request line and a fragment
+     never leaves the browser. A friend code in somebody's access log
+     is a small thing that this app has spent every other decision not
+     doing. */
+  function scLinkFor(code) {
+    var at = net.url || HOME;
+    /* From href rather than origin + pathname: opened off the disk,
+       `location.origin` is the string "null" and the link comes out as
+       nonsense rather than as nothing. */
+    var base = location.href.replace(/[#?].*$/, '');
+    return base + '#add=' + code
+      + (at && at !== HOME ? '&at=' + encodeURIComponent(at) : '');
+  }
+
+  /* One reader for both doors: what the URL was opened with, and what
+     somebody pasted into `Theirs`. They take the same strings for the
+     same reason — a person handed a link pastes the link, and a person
+     told a code over a table types the code. Refusing either would be
+     a field that knows which half of the exchange you had. */
+  function scInviteIn(s) {
+    s = String(s || '').trim();
+    if (!s) return null;
+    /* Case-insensitive on the parameter names: `Theirs` is set to
+       autocapitalize for the code, which is what somebody typing one
+       wants, and it reaches a pasted link's `add=` on the way past. */
+    var m = /[#?&]add=([A-Za-z0-9]{4,12})/i.exec(s);
+    if (m) {
+      var at = /[#?&]at=([^&\s]+)/i.exec(s);
+      var url = '';
+      try { url = at ? decodeURIComponent(at[1]) : ''; } catch (e) { url = ''; }
+      /* Only http(s), and only ever as the address of an API. A link is
+         a thing strangers send you, so the one field in it that becomes
+         a fetch target is the one field worth being strict about. */
+      if (!/^https?:\/\/[^\s]+$/.test(url)) url = '';
+      return { code: m[1].toUpperCase(), at: url.replace(/\/+$/, '') };
+    }
+    if (/^[A-Za-z0-9]{4,12}$/.test(s)) return { code: s.toUpperCase(), at: '' };
+    return null;
+  }
+
+  /* Read at boot, redeemed on arrival at the tab, and cleared either
+     way. It is deliberately NOT acted on where it is read: the app
+     makes no request until somebody is on the friends screen, and an
+     invitation that joined a server from the wiring would be the one
+     hole in that. */
+  var invite = null;
+
   function scAddFriend(code, done) {
-    code = String(code || '').trim().toUpperCase();
-    if (!/^[A-Z0-9]{4,12}$/.test(code)) return done(false, 'that is not a code');
+    var inv = scInviteIn(code);
+    if (!inv) return done(false, 'that is not a code');
+    if (inv.at && net.url && inv.at !== net.url)
+      return done(false, 'that link is for another server');
+    code = inv.code;
     if (code === net.code) return done(false, 'that one is yours');
     if (friends.some(function (f) { return f.code === code; }))
       return done(false, 'already on your list');
@@ -2625,14 +2692,47 @@
   function scArriveFriends() {
     /* A server chosen by hand outranks the built-in one. Without that,
        "Use another server" would be overruled by HOME on the next
-       visit, and the sheet would look like it had done nothing. */
-    var where = net.url || HOME;
-    if (net.on || !where || joining) return scFriendsRefresh();
+       visit, and the sheet would look like it had done nothing.
+
+       An invitation outranks both, but ONLY for somebody who has not
+       joined yet. A link is how you reach a server you were never
+       going to type, so on a first open it decides; once you are on
+       one, your own record and your existing friends are there and a
+       link cannot move you off it without silently orphaning them. */
+    var where = (!net.on && invite && invite.at) || net.url || HOME;
+    if (net.on) return scRedeem(scFriendsRefresh);
+    if (!where || joining) return scFriendsRefresh();
     joining = true;
     scJoin(where, net.name, function (okd) {
       joining = false;
+      if (!okd) { if (view === 'friends') scPaintFriends(); return; }
+      scRedeem(function () {
+        if (view === 'friends') scPaintFriends();
+        scFriendsRefresh();
+      });
+    });
+  }
+
+  /* ── redeeming the link you arrived on ──
+     One attempt, and the invitation is spent BEFORE the request rather
+     than in the callback: a fetch that fails offline must not leave a
+     pending add that fires again on the next repaint, and adding the
+     same person twice is a thing `scAddFriend` refuses politely enough
+     that the second attempt would look like it worked.
+
+     It says what happened either way. An add that succeeds silently is
+     indistinguishable from a link that did nothing, and the whole
+     point of this is that the person tapping it never had to
+     understand what it was. */
+  function scRedeem(done) {
+    done = done || function () {};
+    var inv = invite;
+    if (!inv || !net.on) return done();
+    invite = null;
+    scAddFriend(inv.code, function (okd, msg) {
+      scToast(okd ? msg + ' added' : msg, false);
       if (view === 'friends') scPaintFriends();
-      if (okd) scFriendsRefresh();
+      done();
     });
   }
 
@@ -2803,10 +2903,29 @@
       body.appendChild(scEl('span', 'label', 'Yours'));
       var row = scEl('div', 'fr-swap');
       row.appendChild(scEl('span', 'fr-code', net.code));
-      row.appendChild(scBtn('off', 'Copy', function () {
-        var done = function () { scToast('Code copied', false); };
+      /* SHARE, not Copy, and what goes is the link — the code is still
+         printed beside it because a code is what you say out loud
+         across a table, and that is a different exchange from sending
+         somebody a message.
+
+         The share sheet first where there is one: on the phone this app
+         is for, `Copy` means finding the thread yourself afterwards.
+         It resolves on cancel as well as on send and there is no
+         difference visible to us, so neither one toasts — a "Link
+         copied" after somebody backed out of the share sheet is the app
+         claiming something that did not happen. */
+      row.appendChild(scBtn('off', 'Share', function () {
+        var link = scLinkFor(net.code);
+        if (navigator.share) {
+          try {
+            navigator.share({ title: 'Daily Process', text: link })
+              .then(function () {}, function () {});
+            return;
+          } catch (e) {}
+        }
+        var done = function () { scToast('Link copied', false); };
         if (navigator.clipboard && navigator.clipboard.writeText)
-          navigator.clipboard.writeText(net.code).then(done, done);
+          navigator.clipboard.writeText(link).then(done, done);
         else done();
       }));
       body.appendChild(row);
@@ -2820,7 +2939,11 @@
       f.type = 'text';
       f.autocapitalize = 'characters';
       f.spellcheck = false;
-      f.placeholder = '8 letters and numbers';
+      /* It takes a pasted LINK as readily as a code, because half the
+         people using this sheet were sent one. A field that accepts
+         only the code makes somebody edit a URL down by hand on a
+         phone, having been given exactly the thing it needs. */
+      f.placeholder = 'Their code, or a link they sent';
       body.appendChild(f);
       var acts = scEl('div', 'acts');
       acts.appendChild(scBtn('off', 'Cancel', scClose));
@@ -3958,6 +4081,30 @@
      one — so an app nobody has turned this on for behaves exactly as
      it did before any of this existed. */
   scNetLoad();
+
+  /* ── the link somebody was sent ──
+     Read here and NOT acted on here. Reading a hash costs nothing and
+     reaches nothing; the join and the add happen on arrival at the
+     friends tab, through the same path every other visit takes, so the
+     rule that this app makes no request until you are on that screen
+     holds for an invitation exactly as it does for an ordinary open.
+
+     The hash is stripped the moment it is read. Left in the address
+     bar it is redeemed again on every reload — spent, so it adds
+     nothing, but it also means a bookmark of this page is somebody
+     else's invitation forever. `replaceState` rather than assigning
+     `location.hash`, which would push a history entry and make Back
+     into a no-op that looks broken. */
+  var hash = location.hash || '';
+  if (hash) {
+    invite = scInviteIn(hash);
+    if (invite) {
+      view = 'friends';
+      try {
+        history.replaceState(null, '', location.href.replace(/#.*$/, ''));
+      } catch (e) {}
+    }
+  }
 
   /* The picture is read asynchronously and nothing waits for it: the
      face is a complete answer on its own, so a photograph arriving a
