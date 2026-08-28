@@ -1433,8 +1433,22 @@ body {
 .field:focus { outline: 2px solid var(--red); outline-offset: 1px; }
 .field::placeholder { color: var(--spent); }
 
-.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.grid2 .field { margin: 0; }
+/* minmax(0, 1fr), NOT 1fr — and the difference is the whole rule.
+   A `1fr` track is `minmax(auto, 1fr)`, so its floor is the item's
+   min-content width and a wide item pushes the track out rather than
+   being squeezed by it. `input[type=time]` is exactly that item: Safari
+   gives it an intrinsic width around 217px against a 173px track, so
+   the second field ran past the right margin and the 10px gap
+   disappeared under it.
+
+   min-width:0 on .field was the first fix and it is NOT enough — it
+   was live on the phone that reported this. Safari keeps sizing the
+   control from its own shadow DOM, so the constraint has to be on the
+   TRACK, where it holds whatever the child does. Chromium sizes the
+   control to fit and never reproduced any of it, which is why this
+   went out twice. */
+.grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 10px; }
+.grid2 .field { margin: 0; min-width: 0; max-width: 100%; }
 
 /* A LABEL OWNS THE GAP UNDER ITSELF. It used to carry margin-bottom:-4
    and lean on the next element having a 12px top margin of its own —

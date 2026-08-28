@@ -1605,6 +1605,41 @@ const SAID = [
     hasToggle && /Done today/.test(hasToggle.text), hasToggle);
   ok('and the toggle is the same box as the fields above it',
     hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
+
+  /* ── the two time fields, and why this is a SOURCE check ──
+     They overflowed the sheet on a phone: `input[type=time]` has an
+     intrinsic width in Safari of about 217px against a 173px track, and
+     a `1fr` track is `minmax(auto, 1fr)` — its floor is the item's
+     min-content, so the item pushes the track out instead of being
+     squeezed by it. The second field ran past the right margin and the
+     gap vanished under it.
+
+     THIS BROWSER CANNOT SEE IT. Chromium sizes that control to fit, so
+     every measurement here passes whether the fix is present or not —
+     which is exactly how it shipped twice, once with min-width:0 on the
+     child that Safari ignores. So the assertion is on the text of the
+     rule, because the text is the only place the difference exists in a
+     browser that never reproduces the bug. */
+  {
+    const css = require('fs').readFileSync(
+      require('path').join(__dirname, '..', 'schedule', 'app.css'), 'utf8');
+    const rule = (css.match(/^\.grid2 \{[^}]*\}/m) || [''])[0];
+    ok('the time fields sit in tracks that cannot be pushed open',
+      /minmax\(\s*0\s*,\s*1fr\s*\)\s+minmax\(\s*0\s*,\s*1fr\s*\)/.test(rule), rule);
+    const both = await page.evaluate(() => {
+      const g = document.querySelector('.sheet .grid2');
+      const b = g.getBoundingClientRect();
+      return [...g.children].map((e) => {
+        const r = e.getBoundingClientRect();
+        return { w: Math.round(r.width), over: Math.round(r.right - b.right) };
+      });
+    });
+    /* True in Chromium either way, and worth keeping: if it ever DOES
+       reproduce here, this is what says so. */
+    ok('and neither of them overflows its own row',
+      both.length === 2 && both.every((f) => f.over <= 0)
+      && both[0].w === both[1].w, both);
+  }
   ok('and it says off before it is pressed',
     hasToggle && hasToggle.on === false && hasToggle.pressed === 'false', hasToggle);
 
