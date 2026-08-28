@@ -1513,14 +1513,26 @@ const SAID = [
       .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
   });
   await page.waitForTimeout(360);
-  const hasToggle = await page.$$eval('.sheet .btn', (b) => b.map((x) => x.textContent));
-  ok('a block that feeds one of the five can be marked done in its editor',
-    hasToggle.some((t) => /Mark done today/.test(t)), hasToggle);
-
-  await page.evaluate(() => {
-    [...document.querySelectorAll('.sheet .btn')]
-      .find((b) => /Mark done today/.test(b.textContent)).click();
+  const hasToggle = await page.evaluate(() => {
+    const m = document.querySelector('.sheet .mark');
+    const r = m && m.getBoundingClientRect();
+    const f = document.querySelector('.sheet .field').getBoundingClientRect();
+    return m ? { text: m.textContent.trim(), on: m.classList.contains('is-on'),
+                 pressed: m.getAttribute('aria-pressed'),
+                 /* Same box as every other control on the form. As an
+                    scBtn it carried flex:1 outside a flex parent and
+                    drew 156px wide beside two 172px buttons. */
+                 sameWidth: Math.round(r.width) === Math.round(f.width),
+                 sameHeight: Math.round(r.height) === Math.round(f.height) } : null;
   });
+  ok('a block that feeds one of the five can be marked done in its editor',
+    hasToggle && /Done today/.test(hasToggle.text), hasToggle);
+  ok('and the toggle is the same box as the fields above it',
+    hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
+  ok('and it says off before it is pressed',
+    hasToggle && hasToggle.on === false && hasToggle.pressed === 'false', hasToggle);
+
+  await page.evaluate(() => document.querySelector('.sheet .mark').click());
   await page.waitForTimeout(400);
   const back = await page.evaluate(() => ({
     done: [...document.querySelectorAll('.row.is-done .n')]
@@ -1531,19 +1543,51 @@ const SAID = [
     /"m":1/.test(back.tick), back);
   ok('and the week draws that block as done', back.done.indexOf('Walk') >= 0, back);
 
-  /* A block that feeds NOTHING gets no toggle. A "done" on Trading
-     would be a state with no reader — and offering it says the tally
-     counts something it does not. */
+  /* EVERY BLOCK GETS THE TOGGLE, including one that feeds none of the
+     five. It used to be refused for Trading on the grounds that a done
+     state there had no reader — true when the measure filling solid was
+     the only mark, and the measure existed to agree with the tally. The
+     row draws a tick for any done block now, so the state is visible
+     and the refusal was the leftover. */
   await page.evaluate(() => {
     [...document.querySelectorAll('.day.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
   });
   await page.waitForTimeout(360);
-  const noToggle = await page.$$eval('.sheet .btn', (b) => b.map((x) => x.textContent));
-  ok('a block that feeds nothing is not offered one',
-    !noToggle.some((t) => /Mark done today/.test(t)), noToggle);
-  await page.evaluate(() => document.getElementById('scScrim').click());
-  await page.waitForTimeout(320);
+  const feedsNothing = await page.evaluate(() => {
+    const m = document.querySelector('.sheet .mark');
+    return { has: !!m, text: m && m.textContent.trim() };
+  });
+  ok('and so does a block that feeds none of them', feedsNothing.has, feedsNothing);
+
+  /* BEFORE and after, not the state afterwards. Walk was marked done a
+     few lines up and its item is already ticked, so reading the whole
+     log here would fail on somebody else's tick — the assertion is that
+     marking Trading changes NOTHING, which only a delta can say. */
+  const tickWas = await page.evaluate(() => localStorage.getItem('sched.tick.v1'));
+  await page.evaluate(() => document.querySelector('.sheet .mark').click());
+  await page.waitForTimeout(420);
+  const trad = await page.evaluate(() => ({
+    /* The tick is the mark the measure used to be, and it is what makes
+       a done Trading block a state you can see. */
+    ticked: [...document.querySelectorAll('.row.is-done')]
+      .map((r) => [r.querySelector('.n').textContent.replace(/[A-Z]{2,}$/, '').trim(),
+                   !!r.querySelector('.tick')]),
+    tick: localStorage.getItem('sched.tick.v1'),
+  }));
+  ok('a done block that feeds nothing draws its tick',
+    trad.ticked.some((t) => t[0] === 'Trading' && t[1]), trad.ticked);
+  ok('and marking it moves nothing on the tally',
+    trad.tick === tickWas, { was: tickWas, now: trad.tick });
+
+  /* Put it back, so the rows below this see the week they expect. */
+  await page.evaluate(() => {
+    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+      .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
+  });
+  await page.waitForTimeout(360);
+  await page.evaluate(() => document.querySelector('.sheet .mark').click());
+  await page.waitForTimeout(400);
 
   /* ── missed its window ──
      The app knows Train ran 06:30 to 07:30 and that it is 09:30. Saying

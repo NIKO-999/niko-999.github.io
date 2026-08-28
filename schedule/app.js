@@ -3355,7 +3355,6 @@
       var times = scEl('div', 'grid2');
       var t1 = scEl('input', 'field'); t1.type = 'time'; t1.step = 300;
       var t2 = scEl('input', 'field'); t2.type = 'time'; t2.step = 300;
-      t1.style.margin = '0'; t2.style.margin = '0';
       t1.value = scHHMM(item ? item.s : 480);
       t2.value = scHHMM(item ? item.e : 570);
       times.appendChild(t1); times.appendChild(t2);
@@ -3409,22 +3408,44 @@
          the row IS a button and a button inside a button is invalid —
          the same trap the folding panels have a rule about.
 
-         Only on a day still open for backfill, and only for a block
-         that actually feeds one of the five: a "done" on Trading would
-         be a state nothing reads. */
+         EVERY BLOCK NOW, not only the three that feed one of the five.
+         The restriction was written when the measure filling solid was
+         the only mark a done block had, and the measure existed to
+         agree with the tally \u2014 so a "done" on Trading really was a
+         state nothing on the screen would draw. The row draws a tick
+         for ANY done block now, so there is no longer a reason to
+         refuse it for Trading, Work or Wake.
+
+         The day still has to be open for backfill. That rule is about
+         not filling in a fortnight on a Sunday night, which has nothing
+         to do with which item a block feeds, and it stays. */
       if (!isNew) {
         var bDay = scDay(scDateOfDow(day));
-        if (scTallyOpen(bDay) && scItemsFor(item.n).length) {
+        if (scTallyOpen(bDay)) {
           var done = !!(blockLog[bDay] && blockLog[bDay][item.id]);
           var fed = scItemsFor(item.n).map(function (x) { return x.n; }).join(' and ');
-          var tog = scBtn(done ? 'go' : 'off',
-            done ? 'Done today \u2713' : 'Mark done today', function () {
-              scSetBlockDone(bDay, item, day, !done);
-              scClose();
-              if (view === 'tally') scPaintTally(); else scRender();
-              scToast(done ? 'Unmarked' : 'Counted toward ' + fed, false);
-            });
-          tog.style.marginTop = '4px';
+          /* A TOGGLE, not a third action. As an scBtn it carried
+             flex:1, which does nothing outside a flex parent, so it sat
+             156px wide above two 172px buttons \u2014 visibly failing to
+             line up with the row it looked like it belonged to. */
+          var tog = scEl('button', 'mark' + (done ? ' is-on' : ''));
+          tog.type = 'button';
+          tog.appendChild(document.createTextNode('Done today'));
+          tog.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
+          tog.setAttribute('aria-pressed', done ? 'true' : 'false');
+          tog.addEventListener('click', function () {
+            scSetBlockDone(bDay, item, day, !done);
+            scClose();
+            if (view === 'tally') scPaintTally(); else scRender();
+            /* Only name what it fed when it fed something. Dropping the
+               gate without this leaves "Counted toward " with nothing
+               after it on every block that feeds nothing. */
+            scToast(done ? 'Unmarked'
+              : fed ? 'Counted toward ' + fed : 'Marked done', false);
+          });
+          body.appendChild(scEl('span', 'label', 'Today'));
           body.appendChild(tog);
         }
       }

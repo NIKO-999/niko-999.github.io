@@ -1416,6 +1416,12 @@ body {
 
 .field {
   width: 100%;
+  /* A grid or flex item defaults to min-width:auto, so a control with a
+     large intrinsic width blows its track out rather than shrinking.
+     input[type=time] is exactly that: Chromium sizes it small enough to
+     fit, Safari does not, so the second time field ran past the right
+     margin on the phone and nowhere in the test browser. */
+  min-width: 0;
   margin: 12px 0;
   padding: 13px 14px;
   border: 1px solid var(--ink);
@@ -1428,16 +1434,27 @@ body {
 .field::placeholder { color: var(--spent); }
 
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid2 .field { margin: 0; }
 
+/* A LABEL OWNS THE GAP UNDER ITSELF. It used to carry margin-bottom:-4
+   and lean on the next element having a 12px top margin of its own —
+   true of .field, true of .days-pick, and NOT true of .grid2, so the
+   From — to label sat 4px lower than the other three and crowded the
+   time fields. A negative margin that only works next to some siblings
+   is a rule with a list in it. */
 .label {
   display: block;
-  margin: 16px 0 -4px;
+  margin: 14px 0 8px;
   font-size: 9px;
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
   color: var(--red);
 }
+.label + .field,
+.label + .days-pick,
+.label + .grid2,
+.label + .mark { margin-top: 0; }
 
 /* All seven share the row and split it evenly. Left to size themselves
    they wrap SUN onto a line of its own, which reads as a different kind
@@ -1446,7 +1463,10 @@ body {
 .pick {
   flex: 1 1 0;
   min-width: 0;
-  padding: 16px 2px;
+  /* 18, not 16, so a chip is 50px tall — the same as a field. Seven
+     chips and two time boxes on one form reading as two different sizes
+     of control was the loudest thing wrong with this sheet. */
+  padding: 18px 2px;
   border: 1px solid var(--ink);
   background: var(--paper);
   color: var(--ink);
@@ -1480,6 +1500,34 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .parsed.is-gone .p-name { text-decoration: line-through; }
+
+/* ── done today ──
+   A TOGGLE, not a third action. It was an scBtn sitting loose in the
+   body: .btn carries flex:1, which does nothing outside a flex parent,
+   so it sized to its own text and drew 156px wide above two 172px
+   buttons — a control that looked like it belonged to the Delete/Save
+   row and had visibly failed to line up with it. Full width, its own
+   label above it, and the tick appears rather than the words changing.
+
+   ON is the same pair the day chips use, so "set" looks like "set"
+   twice on one form rather than twice in two languages. */
+.mark {
+  display: flex; align-items: center; gap: 10px;
+  width: 100%; padding: 15px 16px;
+  border: 1px solid var(--ink);
+  background: var(--paper); color: var(--ink);
+  font: 600 15px/1 'Inter', system-ui, sans-serif;
+  text-align: left; cursor: pointer;
+}
+.mark svg {
+  margin-left: auto; width: 18px; height: 18px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2.6;
+  stroke-linecap: round; stroke-linejoin: round;
+  visibility: hidden;
+}
+.mark.is-on { background: var(--ink); color: var(--paper); }
+.mark.is-on svg { visibility: visible; }
+.mark:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .acts { display: flex; gap: 10px; margin-top: 18px; }
 .btn {
