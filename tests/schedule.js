@@ -1946,6 +1946,64 @@ const SAID = [
   ok('and the span is the same 26 weeks on every one of them',
     Object.values(figs).every((f) => / of 182 days/.test(f.hint)), figs.w.hint);
 
+  /* ── a glyph per figure ──
+     Drawn at 12px beside a 10.5px caption, which is half the size the
+     row glyphs get — so the same two things are checked as there, for
+     the same reasons: an unsized inline <svg> falls back to 300x150 and
+     fills its parent while still drawing correctly, and a shape drawn
+     outside its own viewBox is clipped silently. */
+  {
+    const marks = await page.evaluate(() => [...document.querySelectorAll('.ty-stats span')]
+      .map((s) => {
+        const g = s.querySelector('svg');
+        if (!g) return null;
+        const b = g.getBBox(), r = g.getBoundingClientRect();
+        return { cap: s.textContent.trim(), hidden: g.getAttribute('aria-hidden'),
+                 w: Math.round(r.width), h: Math.round(r.height),
+                 fits: [+(b.x - 1.05).toFixed(2), +(b.y - 1.05).toFixed(2),
+                        +(b.x + b.width + 1.05).toFixed(2),
+                        +(b.y + b.height + 1.05).toFixed(2)] };
+      }));
+    ok('every figure’s caption carries a glyph',
+      marks.length === 3 && marks.every(Boolean), marks);
+    ok('and each is 12px, not the 300x150 an unsized svg becomes',
+      marks.every((m) => m && m.w === 12 && m.h === 12), marks);
+    ok('and each is inside its own 24 box, stroke included',
+      marks.every((m) => m && m.fits[0] >= 0 && m.fits[1] >= 0
+        && m.fits[2] <= 24 && m.fits[3] <= 24),
+      marks.filter((m) => m && (m.fits[0] < 0 || m.fits[2] > 24)));
+    ok('and it is hidden from a screen reader, which has the caption',
+      marks.every((m) => m && m.hidden === 'true'), marks);
+    /* The FIVE captions across the two kinds each get their own mark,
+       so a copy-paste that gave two figures the same glyph is caught.
+       Collected over every item rather than the one on screen. */
+    const paths = {};
+    for (const id of ['t', 'p', 'f']) {
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(120);
+      await page.click('.ty-row:has([data-item="' + id + '"]) .ty-hist');
+      await page.waitForTimeout(200);
+      (await page.evaluate(() => [...document.querySelectorAll('.ty-stats span')]
+        .map((s) => [s.textContent.trim(),
+                     s.querySelector('svg').innerHTML.slice(0, 40)])))
+        .forEach(([cap, d]) => { paths[cap.replace(/^\d+ /, '')] = d; });
+    }
+    const kinds = Object.keys(paths);
+    ok('every caption either kind can show is marked', kinds.length === 6, kinds);
+    /* SIX CAPTIONS, FIVE MARKS, and the pair is deliberate: "your best"
+       and "your highest" are the same figure, named without the praise
+       on the one number you do not want more of. They share a glyph
+       because they ARE one — asserting six distinct marks would be
+       asserting that the wording change made it a different figure. */
+    ok('and the marks are five, because two of the captions are one figure',
+      new Set(Object.values(paths)).size === 5,
+      Object.entries(paths).map(([k, v]) => k + ' → ' + v.slice(0, 18)));
+    ok('and it is the best/highest pair that shares one',
+      paths['your best'] === paths['your highest']
+      && paths['your best'] !== paths['average a day'],
+      { best: paths['your best'], highest: paths['your highest'] });
+  }
+
   /* ── the misses have to stay visible ──
      A wider halo was measured and rejected because its falloff reached
      into the gaps and greyed the unlit days out. That is the one thing

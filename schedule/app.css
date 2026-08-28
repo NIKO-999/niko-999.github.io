@@ -689,7 +689,24 @@ body {
   font-style: normal; font-size: 12px; font-weight: 600;
   letter-spacing: 0; margin-left: 2px; color: var(--spent);
 }
-.ty-stats span { display: block; margin-top: 2px; font-size: 10.5px; color: var(--spent); }
+/* The caption carries a glyph, and it is on the caption rather than
+   the figure: beside a 22px number a mark is a second thing competing
+   at that size, while beside 10.5px words it is what lets the three be
+   told apart before any of them is read. */
+.ty-stats span {
+  display: flex; align-items: center; gap: 4px;
+  margin-top: 2px; font-size: 10.5px; color: var(--spent);
+}
+/* currentColor, so it fades and themes with the words it belongs to
+   rather than holding a colour of its own. 2.1 rather than 1.8: a
+   stroke scaled down to half the size the row glyphs are drawn at
+   thins out with everything else, and these are already the smallest
+   marks in the app. */
+.ty-stats span svg {
+  width: 12px; height: 12px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2.1;
+  stroke-linecap: round; stroke-linejoin: round;
+}
 .ty-hint { margin-top: 16px; font-size: 11px; color: var(--spent); }
 
 /* A backdrop-filter on a panel that neither moves nor animates. The

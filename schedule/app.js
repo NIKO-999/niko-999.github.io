@@ -1888,6 +1888,27 @@
      streak, whether you are on one now, and what it works out at a week,
      which is the honest summary of a habit that was never meant to be
      daily. */
+  /* One glyph per FIGURE, drawn at 12px beside a 10.5px caption. That
+     is half the size a row's glyph gets, so the floor this file keeps
+     running into bites twice as hard: two or three strokes each and no
+     interior detail at all.
+
+     A flame for the streak was the obvious first choice and it is a
+     teardrop at this size — which is already Water's mark on the same
+     screen. Three blocks in a row is what a streak actually is, and it
+     cannot be mistaken for anything else here. */
+  var STAT_ICON = {
+    streak: '<path d="M3 9h4.2v6H3zM9.9 9h4.2v6H9.9zM16.8 9h4.2v6h-4.2z"/>',
+    now: '<circle cx="12" cy="12" r="3.2"/><circle cx="12" cy="12" r="8.4"/>',
+    week: '<path d="M4 5.6h16v14.8H4zM4 10.4h16M8.4 3.2v4.4M15.6 3.2v4.4"/>',
+    /* Two waves: the "approximately" sign, which is what an average is. */
+    avg: '<path d="M3 9.4c2-2.6 4-2.6 6 0s4 2.6 6 0 4-2.6 6 0'
+       + 'M3 16.2c2-2.6 4-2.6 6 0s4 2.6 6 0 4-2.6 6 0"/>',
+    /* A peak rather than an up arrow: an arrow says MORE, and the
+       figure beside this one is the top rather than a direction. */
+    peak: '<path d="M2.6 19.4l6.6-9.4 4 4.6 3.6-6 4.6 10.8z"/>'
+  };
+
   function scHistStats(item, d) {
     var kept = d.filter(function (x) { return x.on; });
     var best = 0, run = 0, now = 0, i;
@@ -1896,9 +1917,9 @@
 
     if (item.k === 'do') {
       return { kept: kept.length, rows: [
-        [String(best), 'longest streak'],
-        [String(now), now === 1 ? 'day on now' : 'days on now'],
-        [(kept.length / (d.length / 7)).toFixed(1), 'days a week']
+        { v: String(best), cap: 'longest streak', ic: 'streak' },
+        { v: String(now), cap: now === 1 ? 'day on now' : 'days on now', ic: 'now' },
+        { v: (kept.length / (d.length / 7)).toFixed(1), cap: 'days a week', ic: 'week' }
       ] };
     }
     var dp = item.dp || 0;
@@ -1910,9 +1931,11 @@
     kept.forEach(function (x) { sum += x.raw; if (x.raw > top) top = x.raw; });
     var unit = (item.unit || '').trim();
     return { kept: kept.length, unit: unit, rows: [
-      [fmt(kept.length ? sum / kept.length : 0), 'average a day', 1],
-      [fmt(top), item.neu ? 'your highest' : 'your best', 1],
-      [String(best), 'longest streak']
+      { v: fmt(kept.length ? sum / kept.length : 0), cap: 'average a day',
+        ic: 'avg', unit: 1 },
+      { v: fmt(top), cap: item.neu ? 'your highest' : 'your best',
+        ic: 'peak', unit: 1 },
+      { v: String(best), cap: 'longest streak', ic: 'streak' }
     ] };
   }
 
@@ -1934,10 +1957,19 @@
     var stats = scEl('div', 'ty-stats');
     st.rows.forEach(function (r) {
       var cell = scEl('div');
-      var b = scEl('b', null, r[0]);
-      if (r[2] && st.unit) b.appendChild(scEl('i', null, st.unit));
+      var b = scEl('b', null, r.v);
+      if (r.unit && st.unit) b.appendChild(scEl('i', null, st.unit));
       cell.appendChild(b);
-      cell.appendChild(scEl('span', null, r[1]));
+      /* The glyph goes on the CAPTION, not the figure. Beside a 22px
+         number it would be a second thing competing at that size; beside
+         10.5px words it is what lets the three be told apart before they
+         are read. aria-hidden, because the caption is the next thing in
+         the same line. */
+      var cap = scEl('span');
+      cap.insertAdjacentHTML('beforeend',
+        '<svg viewBox="0 0 24 24" aria-hidden="true">' + STAT_ICON[r.ic] + '</svg>');
+      cap.appendChild(document.createTextNode(r.cap));
+      cell.appendChild(cap);
       stats.appendChild(cell);
     });
     p.appendChild(stats);
