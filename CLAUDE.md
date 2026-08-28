@@ -404,12 +404,25 @@ meant for a block.
 stops at 0, so without room either side the first card cannot be
 centred however far you scroll — Monday and Sunday opened against the
 screen edge while every other day sat in the middle, 43px out, measured.
-It is arithmetic in CSS now instead of a number measured in JS, because
-nothing depends on it being right any more: `max(--pad, (100% -
---wk-open) / 2 + --pad)`, where the percentage resolves against the
-poster's content box and the bleed is added back. The open card's width
-is a token, since two rules need it and written twice they drift — the
-symptom of which is a card centred on most days and not on Monday.
+Nothing depends on it being right any more, since a press opens a card,
+so it is arithmetic in CSS rather than a number measured in JS.
+
+**AND IT CANNOT BE PADDING.** Safari does not count a scroll
+container's TRAILING padding in its scrollable width. The deck could
+then not scroll far enough, and every day near the end of the week sat
+right of centre and ran off the screen — reported from the phone on a
+Friday, while this machine's Chromium centred all seven at 0px and said
+it was fine. It is a `::before` / `::after` flex SPACER now: a flex
+item's size is in `scrollWidth` in every engine, and the percentage
+resolves against the rail's own content box rather than the poster's,
+so no bleed has to be added back either.
+
+**A spacer is an item, so the GAP counts as lead-in too.** Left in, it
+put the first card 10px past the middle — and only the first and last
+can ever show it, because everywhere else the scroll absorbs it. The
+gap is a token for that reason, as is the open card's width: two rules
+need each, and written twice they drift. The symptom of that drift is
+exactly this bug — a card centred on most days and not on Monday.
 
 **Snap went from mandatory to proximity with it.** Snap was
 load-bearing while the nearest card decided what opened; it is

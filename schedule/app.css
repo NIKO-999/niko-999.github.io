@@ -139,6 +139,13 @@
      be able to sit in the middle. Written twice they drift, and the
      symptom is a card that is centred on most days and not on Monday. */
   --wk-open: 268px;
+  /* The deck's gap, named because the lead-in spacers have to subtract
+     it: a spacer is a flex ITEM, so there is a gap between it and the
+     first card, and that gap is lead-in too. Left in, it pushed the
+     first card 10px past the middle — and it can only ever be seen on
+     the first and last day, because everywhere else the scroll absorbs
+     it. */
+  --wk-gap: 10px;
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
 
@@ -896,7 +903,7 @@ body {
 .rail {
   list-style: none;
   display: flex;
-  gap: 10px;
+  gap: var(--wk-gap);
   align-items: stretch;
   /* Bled past the poster's padding so the neighbours are cut by the
      SCREEN. A peek that stops short of the edge reads as a small card
@@ -911,23 +918,7 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   margin: 0 calc(var(--pad) * -1);
-  /* ── the ends need room to reach the middle ──
-     A scroller stops at 0, so without a lead-in the first card cannot
-     be centred however far you scroll: Monday opened against the left
-     edge while every other day sat in the middle. The room needed is
-     half the difference between the rail and an open card.
-
-     Percentage padding resolves against the CONTAINING BLOCK, which is
-     the poster's content box, and the rail is wider than that by the
-     bleed it takes either side — so the pad is added back. Pure
-     arithmetic in CSS rather than a measured number in JS: nothing
-     depends on it being right any more, since a card is opened by being
-     pressed, and it follows the screen without anyone re-measuring.
-
-     `max` with --pad is the floor, for a screen too narrow to hold an
-     open card with anything either side. */
-  padding: 2px max(var(--pad),
-                   calc((100% - var(--wk-open)) / 2 + var(--pad)));
+  padding: 2px 0;
   /* PROXIMITY, not mandatory. Snap used to be load-bearing — the card
      nearest the middle after a swipe was the one that opened — and it
      is decoration now that a press opens a card. Mandatory against
@@ -938,6 +929,31 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 .rail::-webkit-scrollbar { display: none; }
+
+/* ── the lead-in is a SPACER, not padding ──
+   A scroller stops at 0, so without room either side the first card
+   cannot be centred however far you scroll — and the last cannot either,
+   for the mirror reason. The room needed is half the difference between
+   the rail and an open card.
+
+   IT CANNOT BE PADDING. Safari does not count a scroll container's
+   TRAILING padding in its scrollable width, so the deck could not scroll
+   far enough and every day near the end of the week sat right of centre
+   and ran off the screen — Friday, on the phone, while Chromium centred
+   all seven perfectly and said it was fine. A flex item's size is always
+   in `scrollWidth`, in every engine, which is what makes this the
+   version that works on both.
+
+   The percentage resolves against the flex container's own content box
+   — the rail — rather than the poster's, so no bleed has to be added
+   back either. `max` is the floor for a screen too narrow to hold an
+   open card with anything beside it. */
+.rail::before,
+.rail::after {
+  content: '';
+  flex: 0 0 max(var(--pad),
+                calc((100% - var(--wk-open)) / 2 - var(--wk-gap)));
+}
 
 .day {
   flex: none;
