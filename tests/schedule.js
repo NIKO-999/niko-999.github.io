@@ -1630,39 +1630,45 @@ const SAID = [
     ok('the cache-busting queries match what they name', stale.length === 0, stale);
   }
 
-  /* ── the two time fields, and why this is a SOURCE check ──
-     They overflowed the sheet on a phone: `input[type=time]` has an
-     intrinsic width in Safari of about 217px against a 173px track, and
-     a `1fr` track is `minmax(auto, 1fr)` — its floor is the item's
-     min-content, so the item pushes the track out instead of being
-     squeezed by it. The second field ran past the right margin and the
-     gap vanished under it.
+  /* ── the two time fields, and the box the control keeps ──
+     They overflowed their row on iOS through FOUR attempted fixes, all
+     of them about grid track sizing. It was never the track. Measured
+     on the phone that had it: the tracks came out correct at 175px, the
+     field's `width` computed to 175px as told, and its BORDER BOX was
+     205px — box-sizing came back content-box in spite of the `*` reset
+     at the top of app.css, because Safari's natively-appearing control
+     keeps its own metrics. 175 of content plus 28 padding plus 2 border
+     is 205, and two of those overflow by 30, which is what it said.
 
-     THIS BROWSER CANNOT SEE IT. Chromium sizes that control to fit, so
-     every measurement here passes whether the fix is present or not —
-     which is exactly how it shipped twice, once with min-width:0 on the
-     child that Safari ignores. So the assertion is on the text of the
-     rule, because the text is the only place the difference exists in a
-     browser that never reproduces the bug. */
+     The proof that it is APPEARANCE rather than specificity: on that
+     phone `.grid2 .field` set min-width and max-width in one rule, and
+     max-width applied while min-width came back 45px.
+
+     THIS is measurable here, which the track theory never was — that is
+     the whole reason four fixes shipped unverified. Chromium sizes the
+     control to fit, so no layout assertion could tell the presence of a
+     fix from its absence; these read the two properties the control was
+     overriding, and both are wrong the moment the fix goes. */
   {
-    const css = require('fs').readFileSync(
-      require('path').join(__dirname, '..', 'schedule', 'app.css'), 'utf8');
-    const rule = (css.match(/^\.grid2 \{[^}]*\}/m) || [''])[0];
-    ok('the time fields sit in tracks that cannot be pushed open',
-      /minmax\(\s*0\s*,\s*1fr\s*\)\s+minmax\(\s*0\s*,\s*1fr\s*\)/.test(rule), rule);
-    const both = await page.evaluate(() => {
+    const fields = await page.evaluate(() => {
       const g = document.querySelector('.sheet .grid2');
-      const b = g.getBoundingClientRect();
+      const gb = g.getBoundingClientRect();
+      const track = parseFloat(getComputedStyle(g).gridTemplateColumns.split(' ')[0]);
       return [...g.children].map((e) => {
-        const r = e.getBoundingClientRect();
-        return { w: Math.round(r.width), over: Math.round(r.right - b.right) };
+        const s = getComputedStyle(e), r = e.getBoundingClientRect();
+        return { box: s.boxSizing, look: s.webkitAppearance || s.appearance,
+                 drawn: Math.round(r.width), track: Math.round(track),
+                 over: Math.round(r.right - gb.right) };
       });
     });
-    /* True in Chromium either way, and worth keeping: if it ever DOES
-       reproduce here, this is what says so. */
-    ok('and neither of them overflows its own row',
-      both.length === 2 && both.every((f) => f.over <= 0)
-      && both[0].w === both[1].w, both);
+    ok('the time fields are sized by their border box, not their content',
+      fields.length === 2 && fields.every((f) => f.box === 'border-box'), fields);
+    ok('and the native appearance is dropped, which is what hands the box over',
+      fields.every((f) => f.look === 'none'), fields);
+    /* The consequence, and the thing a person actually sees: what is
+       drawn is the track, not the track plus the control's padding. */
+    ok('so what is drawn is the track itself, and nothing runs past the row',
+      fields.every((f) => f.drawn === f.track && f.over <= 0), fields);
   }
   ok('and it says off before it is pressed',
     hasToggle && hasToggle.on === false && hasToggle.pressed === 'false', hasToggle);

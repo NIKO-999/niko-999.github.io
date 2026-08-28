@@ -1433,11 +1433,30 @@ body {
 
 .field {
   width: 100%;
-  /* A grid or flex item defaults to min-width:auto, so a control with a
-     large intrinsic width blows its track out rather than shrinking.
-     input[type=time] is exactly that: Chromium sizes it small enough to
-     fit, Safari does not, so the second time field ran past the right
-     margin on the phone and nowhere in the test browser. */
+  /* ── the native control keeps its own box, and that was the bug ──
+     input[type=time] overflowed its row on iOS through four attempted
+     fixes, every one of them about track sizing. It was never the
+     track. Measured on the phone: the tracks came out at 175px each and
+     correct, the field's `width` computed to 175px as told — and its
+     border box was 205px, because `box-sizing` computed to CONTENT-BOX
+     despite the `*` reset at the top of this file. 175 of content plus
+     28 padding plus 2 border is 205, and two of those overflow by 30,
+     which is exactly what was measured.
+
+     Safari's natively-appearing form control carries its own metrics
+     and does not take the author's. The proof that it is APPEARANCE and
+     not specificity: `.grid2 .field` sets min-width and max-width in
+     one rule, and on that phone max-width applied while min-width came
+     back as 45px. Dropping the native appearance is what hands the box
+     back — and then box-sizing has to be said again here, because the
+     universal selector is what it was being taken from.
+
+     appearance:none does not cost the picker: tapping still opens the
+     iOS time wheel. It costs the native chrome around the value, which
+     this field was already drawing itself. */
+  -webkit-appearance: none;
+  appearance: none;
+  box-sizing: border-box;
   min-width: 0;
   margin: 12px 0;
   padding: 13px 14px;

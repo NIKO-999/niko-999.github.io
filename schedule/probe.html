@@ -5,25 +5,35 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Probe</title>
 <!-- ── a measurement taken on the phone that has the problem ──
-     The edit sheet's two time fields overflow their row on iOS and on
-     nothing else. Chromium is the only browser installed on the machine
-     this app is developed on, and it sizes input[type=time] to fit — so
-     three fixes went out on a model of the bug rather than a
-     measurement of it, and all three were reported still broken.
+     The edit sheet's two time fields overflowed their row on iOS and on
+     nothing else. Chromium is the only browser on the machine this app
+     is developed on and it sizes input[type=time] to fit, so four
+     attempted fixes went out on a model of the bug rather than a
+     measurement of it.
 
-     This builds the same row out of the same stylesheet and prints what
-     the browser actually did with it. It also prints whether the CSS it
-     loaded contains the fix, which is the only way to tell a wrong rule
-     from a cached one from the outside.
+     The first probe found it. The tracks were correct at 175px, the
+     field's `width` computed to 175px as told, and its border box was
+     205px — `box-sizing` came back CONTENT-BOX in spite of the `*`
+     reset, because Safari's natively-appearing control keeps its own
+     metrics. 175 + 28 padding + 2 border = 205, and two of those
+     overflow by 30, which is what was measured.
 
-     Delete this file once the numbers have been read. -->
+     This version shows the shipped fix beside the control, so one
+     screenshot says whether it worked rather than another round of
+     reasoning. Delete this file once it has. -->
 <link rel="stylesheet" href="app.css" />
 <style>
-  body { padding: 16px; font: 400 13px/1.5 system-ui, sans-serif; }
-  h1 { font-size: 15px; margin: 0 0 10px; }
-  #out { margin-top: 16px; white-space: pre-wrap; font: 400 12px/1.5 ui-monospace, monospace; }
-  .edge { position: fixed; top: 0; bottom: 0; width: 1px; background: red; }
+  body { padding: 16px 0; font: 400 13px/1.5 system-ui, sans-serif; }
+  h1 { font-size: 15px; margin: 0 16px 4px; }
+  h2 { font-size: 12px; margin: 20px 16px 2px; letter-spacing: .08em;
+       text-transform: uppercase; color: #737373; }
+  p { margin: 0 16px 8px; }
+  .pen { padding: 0 18px; }
   .frame { outline: 1px dashed red; outline-offset: 2px; }
+  pre { margin: 4px 16px 0; white-space: pre-wrap;
+        font: 400 12px/1.45 ui-monospace, monospace; }
+  /* The control: the native box, as it was before the fix. */
+  .raw .field { -webkit-appearance: auto; appearance: auto; box-sizing: content-box; }
 </style>
 </head>
 <body>
@@ -31,27 +41,24 @@
 <h1>Time row probe</h1>
 <p>Screenshot everything below.</p>
 
-<!-- The sheet's own padding, so the row is measured in the box it
-     really sits in rather than in the body. -->
-<div class="sheet-body" style="padding: 0 18px">
-  <span class="label">From — to</span>
-  <div class="grid2 frame" id="row">
-    <input class="field" type="time" step="300" value="10:00" />
-    <input class="field" type="time" step="300" value="18:00" />
-  </div>
-</div>
+<h2>As shipped now</h2>
+<div class="pen"><div class="grid2 frame" id="fix">
+  <input class="field" type="time" step="300" value="10:00" />
+  <input class="field" type="time" step="300" value="18:00" />
+</div></div>
 
-<div id="out">measuring…</div>
+<h2>The old behaviour, for comparison</h2>
+<div class="pen raw"><div class="grid2 frame" id="raw">
+  <input class="field" type="time" step="300" value="10:00" />
+  <input class="field" type="time" step="300" value="18:00" />
+</div></div>
+
+<pre id="out">measuring…</pre>
 
 <script>
 (function () {
-  var out = document.getElementById('out');
-  var row = document.getElementById('row');
-  var kids = [].slice.call(row.children);
   var R = function (n) { return Math.round(n * 10) / 10; };
 
-  /* Did the stylesheet that loaded actually contain the fix? A rule
-     read back from the cascade answers this without trusting a cache. */
   var css = '(could not read)';
   try {
     var sheets = [].slice.call(document.styleSheets);
@@ -59,36 +66,40 @@
       if (!/app\.css/.test(sheets[i].href || '')) continue;
       var rules = [].slice.call(sheets[i].cssRules);
       for (var j = 0; j < rules.length; j++) {
-        if (rules[j].selectorText === '.grid2') { css = rules[j].cssText; }
+        if (rules[j].selectorText === '.grid2') css = rules[j].cssText;
       }
     }
   } catch (e) { css = 'blocked: ' + e.message; }
 
-  var b = row.getBoundingClientRect();
   var lines = [
     'viewport      ' + window.innerWidth + ' x ' + window.innerHeight,
-    'dpr           ' + window.devicePixelRatio,
-    'ua            ' + navigator.userAgent.slice(0, 90),
+    'ua            ' + navigator.userAgent.slice(0, 60),
     '',
-    'THE RULE THAT LOADED',
     css,
-    '',
-    'computed cols ' + getComputedStyle(row).gridTemplateColumns,
-    'row           left ' + R(b.left) + '  right ' + R(b.right) + '  width ' + R(b.width),
+    ''
   ];
-  kids.forEach(function (k, n) {
-    var r = k.getBoundingClientRect(), s = getComputedStyle(k);
-    lines.push('field ' + (n + 1) + '       left ' + R(r.left) + '  right ' + R(r.right)
-      + '  width ' + R(r.width));
-    lines.push('              min-w ' + s.minWidth + '  max-w ' + s.maxWidth
-      + '  width ' + s.width + '  box ' + s.boxSizing);
-    lines.push('              overflows row by ' + R(r.right - b.right) + 'px');
+
+  ['fix', 'raw'].forEach(function (id) {
+    var row = document.getElementById(id);
+    var b = row.getBoundingClientRect();
+    var kids = [].slice.call(row.children);
+    var last = kids[kids.length - 1].getBoundingClientRect();
+    lines.push((id === 'fix' ? 'AS SHIPPED' : 'OLD BEHAVIOUR')
+      + '   cols ' + getComputedStyle(row).gridTemplateColumns);
+    lines.push('  row     right ' + R(b.right) + '  width ' + R(b.width));
+    kids.forEach(function (k, n) {
+      var r = k.getBoundingClientRect(), s = getComputedStyle(k);
+      lines.push('  field ' + (n + 1) + ' right ' + R(r.right) + '  border box ' + R(r.width)
+        + '  width ' + s.width);
+      lines.push('          box ' + s.boxSizing + '  min-w ' + s.minWidth
+        + '  appearance ' + (s.webkitAppearance || s.appearance));
+    });
+    lines.push('  >>> ' + (last.right > b.right + 0.5
+      ? 'OVERFLOWS by ' + R(last.right - b.right) + 'px' : 'fits'));
+    lines.push('');
   });
-  lines.push('');
-  lines.push(kids[1].getBoundingClientRect().right > b.right + 0.5
-    ? '>>> STILL OVERFLOWING'
-    : '>>> fits');
-  out.textContent = lines.join('\n');
+
+  document.getElementById('out').textContent = lines.join('\n');
 })();
 </script>
 
