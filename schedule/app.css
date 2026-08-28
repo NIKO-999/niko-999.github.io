@@ -907,7 +907,12 @@ body {
   overflow-y: hidden;
   margin: 0 calc(var(--pad) * -1);
   padding: 2px var(--pad);
-  scroll-snap-type: x mandatory;
+  /* PROXIMITY, not mandatory. Snap used to be load-bearing — the card
+     nearest the middle after a swipe was the one that opened — and it
+     is decoration now that a press opens a card. Mandatory against
+     cards of two different widths fights a finger that is only trying
+     to see what is further along the week. */
+  scroll-snap-type: x proximity;
   scrollbar-width: none;
   -webkit-overflow-scrolling: touch;
 }
@@ -915,6 +920,7 @@ body {
 
 .day {
   flex: none;
+  position: relative;   /* the face is absolute to this */
   scroll-snap-align: center;
   display: flex;
   flex-direction: column;
@@ -957,6 +963,33 @@ body {
   box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
 }
 .day:not(.is-open) { width: 76px; opacity: .82; }
+
+/* ── the face of a shut card ──
+   The whole card is one press that opens that day. It is a real button
+   over the card rather than a listener on the list item: focusable,
+   named, and reachable from a keyboard, which is how every day of the
+   week stays available to somebody who is not swiping at all.
+
+   It sits OVER the bars and under nothing, so the press target is the
+   card's own 76 x 578 rather than the words in it. On the open card it
+   is put away — the rows underneath are the things you press there, and
+   a transparent button over them would swallow every one. */
+.wk-face {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  border: 0;
+  padding: 0;
+  background: none;
+  border-radius: 18px;
+  cursor: pointer;
+  z-index: 2;
+}
+.day.is-open .wk-face { display: none; }
+.wk-face:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* The press wants an acknowledgement of its own: the card grows a
+   moment later, and until it does nothing has said the tap landed. */
+.wk-face:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
 .day:not(.is-open) .day-card { display: none; }
 .day.is-open .wk-mini { display: none; }
 

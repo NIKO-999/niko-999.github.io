@@ -1045,36 +1045,50 @@ const SAID = [
     ok(`...and is still on today after a trip to ${away}`,
       (await openName()) === 'Tuesday', await openName());
   }
-  /* Scrolled TWICE, and that is the mechanism rather than a retry.
-     Opening a card takes it from 76px to 268px, so the deck reflows
-     around the thing that was just centred and it is no longer centred.
-     The app re-centres itself after opening; a test driving the scroller
-     by hand has to let it settle and then correct. */
+  /* ONE press, and it either opened that day or it did not. The deck
+     used to open whichever card ended up nearest the middle of the
+     scroller, so this helper scrolled and then corrected — geometry
+     standing in for an intention, and a test that had to model the
+     geometry to say anything. A press is the whole mechanism now. */
   const goTo = async (dow) => {
-    for (let i = 0; i < 4; i++) {
-      await page.evaluate((d) => {
-        const rail = document.getElementById('scRail');
-        const t = [...rail.children].find((li) => +li.dataset.d === d);
-        const rb = rail.getBoundingClientRect(), r = t.getBoundingClientRect();
-        rail.scrollLeft += (r.left + r.width / 2) - (rb.left + rb.width / 2);
-      }, dow);
-      await page.waitForTimeout(300);
-      const cls = await page.$eval('.day.is-open', (e) => e.dataset.d);
-      if (+cls === dow) return true;
-    }
-    return false;
+    const hit = await page.evaluate((d) => {
+      const li = [...document.querySelectorAll('#scRail .day')]
+        .find((x) => +x.dataset.d === d);
+      const f = li && li.querySelector('.wk-face');
+      if (!f) return false;
+      f.click();
+      return true;
+    }, dow);
+    if (!hit) return false;
+    await page.waitForTimeout(420);
+    return +(await page.$eval('.day.is-open', (e) => e.dataset.d)) === dow;
   };
 
-  /* ── every day is reachable, and the ends are the awkward ones ──
-     Nearest-to-centre cannot choose the first card or the last: a
-     scroller stops at 0, and with the open card 268px against 76px
+  /* ── every day opens, in one press ──
+     This is the reason the deck stopped opening by geometry. Nearest-
+     to-centre cannot choose the first card or the last: a scroller
+     stops at 0, and with the open card at 268px against 76px
      neighbours the middle of the rail at that point sits over the THIRD
-     card. Monday and Sunday were not awkward to reach, they were
-     unreachable. Checked at both ends, because a clamp written for one
-     of them is half a fix. */
-  for (const [dow, name] of [[1, 'Monday'], [0, 'Sunday'], [3, 'Wednesday']]) {
-    ok(`the deck can open ${name}`, await goTo(dow), await openName());
+     card. Monday and Sunday were not awkward, they were unreachable,
+     and Tuesday took two swipes. Every day is checked, not just the
+     ends, because the ends were only where it showed first. */
+  for (const dow of [1, 2, 3, 4, 5, 6, 0]) {
+    ok(`one press opens ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]}`,
+      await goTo(dow), await openName());
   }
+  /* And the shut cards are real buttons, which is what makes the week
+     reachable without a swipe at all. */
+  ok('every shut card is a named, focusable control',
+    await page.$$eval('.day:not(.is-open) .wk-face', (f) => f.length === 6
+      && f.every((x) => x.tagName === 'BUTTON'
+        && /^Open \w+$/.test(x.getAttribute('aria-label') || ''))),
+    await page.$$eval('.day:not(.is-open) .wk-face',
+      (f) => f.map((x) => x.getAttribute('aria-label'))));
+  /* On the open card it is put away — a transparent button over the
+     rows would swallow every press meant for a block. */
+  ok('...and the open card has none over its rows',
+    await page.$eval('.day.is-open .wk-face',
+      (f) => getComputedStyle(f).display) === 'none');
   await goTo(2);
 
   /* ── the card opens rather than jumping open ──
@@ -1114,14 +1128,7 @@ const SAID = [
      screen with Monday in front of it. Today passes this trivially,
      because centring on today is what a fresh render does anyway; only
      a day you moved to can tell the difference. */
-  await page.evaluate(() => {
-    const rail = document.getElementById('scRail');
-    const fri = [...rail.children].find((li) => +li.dataset.d === 5);
-    const rb = rail.getBoundingClientRect(), r = fri.getBoundingClientRect();
-    rail.scrollLeft += (r.left + r.width / 2) - (rb.left + rb.width / 2);
-  });
-  await page.waitForTimeout(320);
-  ok('swiping opens the card you land on', (await openName()) === 'Friday',
+  ok('pressing a card opens it', await goTo(5) && (await openName()) === 'Friday',
     await openName());
   await show('tally');
   await page.waitForTimeout(220);

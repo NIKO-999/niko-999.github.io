@@ -906,8 +906,15 @@
 
       var head = scEl('div', 'wk-h');
       var dn = scEl('button', 'day-name', isOpen ? FULL[d] : ABBR[d]);
-      dn.setAttribute('aria-label', 'Add a block on ' + FULL[d]);
-      dn.addEventListener('click', function () { scEditSheet(null, d); });
+      /* On the open card the name adds a block, which is what it has
+         always done; on a shut one it means what the rest of that card
+         means. One word with two answers depending on a state you
+         cannot see would be worse than either. */
+      dn.setAttribute('aria-label', isOpen
+        ? 'Add a block on ' + FULL[d] : 'Open ' + FULL[d]);
+      dn.addEventListener('click', function () {
+        if (d === scOpenDay()) scEditSheet(null, d); else scDeckGo(d);
+      });
       head.appendChild(dn);
       /* Committed hours, opposite the name. It is the one figure a card
          can carry for nothing — the rows are already here to add up —
@@ -936,6 +943,26 @@
         });
       });
       li.appendChild(mini);
+
+      /* ── you OPEN a card by pressing it ──
+         It used to open by being nearest the middle of the scroller
+         after a swipe, and that was geometry standing in for an
+         intention: a scroller stops at 0, so the first card could never
+         reach the middle and Monday was unopenable. It was then
+         reachable only through a special case for the ends, and Tuesday
+         only after the deck reflowed and you swiped a second time. A
+         press says which day you meant, and none of that arithmetic has
+         to be right.
+
+         A REAL BUTTON sized to the card, not a click handler on the
+         <li>: it is focusable, it has a name, and a keyboard reaches
+         every day of the week. It is a SIBLING of the rows rather than
+         their ancestor, because a button inside a button is invalid and
+         collapses to one press while looking exactly right. */
+      var face = scEl('button', 'wk-face');
+      face.setAttribute('aria-label', 'Open ' + FULL[d]);
+      face.addEventListener('click', function () { scDeckGo(d); });
+      li.appendChild(face);
 
       var card = scEl('div', 'day-card');
 
@@ -1139,80 +1166,6 @@
      number in a place that cannot see the hero reflow, the notch
      change, or the type scale move — and it would be wrong on the first
      phone that did any of those. */
-  /* ── a swipe opens a card ──
-     Classes only, never a re-render: every card already carries its
-     rows, so opening one is moving `is-open` and swapping the two day
-     names. A full scRender here would rebuild the deck under a finger
-     that is still on it and reset scrollLeft mid-gesture.
-
-     Settled rather than live. Firing on every scroll event opens and
-     shuts five cards on the way past, which is both a lot of layout and
-     visibly wrong; 120ms after the last event is after the snap. */
-  var settle = null;
-  function scDeckWatch() {
-    var rail = $('scRail');
-    rail.addEventListener('scroll', function () {
-      /* ── a hidden deck is not being swiped ──
-         Hiding the rail resets its scrollLeft to 0 and fires a scroll
-         event on the way, so switching to the ring, the tally or
-         friends looked exactly like a swipe to Monday — and coming back
-         to the week silently put you on the wrong day. It is invisible
-         at the moment it happens, which is what let it through: the
-         only symptom is the card you find when you return. */
-      if (rail.hidden) return;
-      if (settle) clearTimeout(settle);
-      settle = setTimeout(function () {
-        settle = null;
-        if (rail.hidden) return;
-        /* ── RECTS, not offsetLeft ──
-           `scrollLeft` is measured from the rail's content box and
-           `offsetLeft` from the offsetParent, which for a bled,
-           unpositioned rail is neither the rail nor the same origin.
-           Mixing them puts a constant bias in every comparison, so the
-           card the deck called nearest was the one BESIDE the one in the
-           middle — and it was self-consistent, because the centring used
-           the same wrong arithmetic and landed where the picker expected
-           to find it. A viewport rect either side needs no origin at
-           all. */
-        var rb = rail.getBoundingClientRect();
-        var mid = rb.left + rb.width / 2;
-        var best = null, gap = Infinity;
-        [].forEach.call(rail.children, function (li) {
-          var r = li.getBoundingClientRect();
-          var c = r.left + r.width / 2;
-          if (Math.abs(c - mid) < gap) { gap = Math.abs(c - mid); best = li; }
-        });
-        /* ── THE ENDS CANNOT REACH THE MIDDLE ──
-           Nearest-to-centre alone cannot ever choose the first card or
-           the last: a scroller stops at 0, and with the open card 268px
-           wide against 76px neighbours the middle of the rail at that
-           point is over the THIRD card. Monday and Sunday were
-           unreachable — not awkward, unreachable, with no way to open
-           them at all. At either end the answer is the end card, which
-           is also what a person swiping to the end means. */
-        var end = rail.scrollWidth - rail.clientWidth;
-        if (rail.scrollLeft <= 1) best = rail.firstElementChild;
-        else if (rail.scrollLeft >= end - 1) best = rail.lastElementChild;
-        if (!best) return;
-        var d = +best.dataset.d;
-        if (d === scOpenDay()) return;
-        openDay = d;
-        scDeckOpen();
-        /* Opening a card takes it from 76px to 268px, so the deck
-           reflows AROUND the thing that was just centred and it is no
-           longer centred. Without this the picker's next pass finds a
-           different card under the middle and opens that instead — the
-           deck walks sideways one card at a time and never settles. The
-           scroll this causes runs the picker once more, which then finds
-           the same card and returns at the check above.
-
-           Smooth here, because this is the one call that happens on the
-           end of somebody's own swipe. */
-        scDeckCentre(true);
-      }, 120);
-    }, { passive: true });
-  }
-
   /* Put the open card back in the middle. The rail loses its
      scrollLeft every time it is hidden, so returning to the week
      without this lands you at Monday however the deck was left. */
@@ -1248,14 +1201,36 @@
     }
   }
 
+  /* Open a day and bring it to the middle. The classes move first and
+     the centring runs after, because opening takes a card from 76px to
+     268px and the deck reflows around it — centred before that, it is
+     no longer centred a frame later. */
+  function scDeckGo(d) {
+    if (d === scOpenDay()) return;
+    openDay = d;
+    scDeckOpen();
+    scDeckCentre(true);
+  }
+
   function scDeckOpen() {
     var open = scOpenDay();
     var rail = $('scRail');
     [].forEach.call(rail.children, function (li) {
       var d = +li.dataset.d;
-      li.classList.toggle('is-open', d === open);
+      var mine = d === open;
+      li.classList.toggle('is-open', mine);
       var nm = li.querySelector('.day-name');
-      if (nm) nm.textContent = d === open ? FULL[d] : ABBR[d];
+      if (nm) {
+        nm.textContent = mine ? FULL[d] : ABBR[d];
+        nm.setAttribute('aria-label',
+          (mine ? 'Add a block on ' : 'Open ') + FULL[d]);
+      }
+      /* The face is put away by CSS on the open card rather than
+         removed, so all this has to do is keep the NAME honest: a stale
+         "Open Friday" on the card that is already open tells a screen
+         reader the wrong thing about the one card it is on. */
+      var fc = li.querySelector('.wk-face');
+      if (fc) fc.setAttribute('aria-label', 'Open ' + FULL[d]);
     });
     var dots = document.querySelector('.wk-dots');
     if (dots) {
@@ -4461,14 +4436,15 @@
 
   scRender();
   scSetView(view, false);
-  scDeckWatch();
 
   /* The deck is sized against the bar, so anything that moves the bar or
      the hero has to re-measure. A rotation is the obvious one; the
      address bar collapsing on scroll is the one that actually happens
      every time somebody uses the app. */
   window.addEventListener('resize', function () {
-    if (view === 'list') scDeckFit($('scRail'), document.querySelector('.wk-dots'));
+    if (view !== 'list') return;
+    scDeckFit($('scRail'), document.querySelector('.wk-dots'));
+    scDeckCentre();
   });
 
   [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {

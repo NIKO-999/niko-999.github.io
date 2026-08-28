@@ -363,30 +363,47 @@ true throughout the bug. It measures the LAYOUT now — on each view,
 exactly one of the four has a real box on screen — because what is
 drawn is the only thing the attribute was ever a proxy for.
 
-**Nearest-to-centre cannot reach the ends.** A scroller stops at
-`scrollLeft` 0, and with the open card at 268px against 76px
-neighbours the middle of the rail at that point sits over the THIRD
-card: Monday and Sunday were not awkward to open, they were impossible.
-At either end the answer is the end card, which is also what somebody
-swiping to the end means.
+**A CARD IS OPENED BY BEING PRESSED, and that replaced a pile of
+arithmetic.** It opened by being nearest the middle of the scroller
+after a swipe, which is geometry standing in for an intention, and the
+geometry could not be made to work:
 
-**And opening a card moves it.** 76px to 268px, so the deck reflows
-around the thing that was just centred and it is no longer centred —
-the picker's next pass then finds a different card under the middle and
-opens that one, and the deck walks sideways a card at a time without
-settling. `scDeckCentre` runs after the class moves; the scroll that
-causes runs the picker once more, which finds the same card and returns
-at the equality check. A test driving the scroller by hand has to do
-the same thing twice for the same reason.
+- A scroller stops at `scrollLeft` 0, and with the open card at 268px
+  against 76px neighbours the middle of the rail at that point sits
+  over the THIRD card. Monday and Sunday were not awkward to open, they
+  were **impossible**.
+- Special-casing the two ends made them reachable and left Tuesday
+  needing two swipes, because opening a card takes it 76px to 268px and
+  the deck reflows around the thing just centred — the next pass then
+  finds a different card under the middle and opens that one instead.
+- A lead-in equal to half the difference between the rail and a card
+  fixed all of it, and had to be measured off a SHUT card rather than
+  an open one, since the card is chosen while it is still shut and the
+  open one is mid-transition whenever you measure it.
+- Underneath all three, `scrollLeft` is measured from the scroller's
+  content box and `offsetLeft` from the offsetParent, which for a bled,
+  unpositioned rail is neither. Mixing them biased every comparison,
+  self-consistently — the centring used the same wrong arithmetic and
+  landed where the picker expected — so it only surfaced once something
+  else moved the deck.
 
-**`scrollLeft` and `offsetLeft` are not the same origin.** One is
-measured from the scroller's content box and the other from the
-offsetParent, which for a bled, unpositioned rail is neither. Mixing
-them put a constant bias in every comparison, and it was
-self-consistent — the centring used the same wrong arithmetic and
-landed where the picker expected to find it, so it only showed once
-something else moved the deck. Two viewport rects need no origin at
-all.
+Four fixes, each correct, for a mechanism that should not have existed.
+A press says which day you meant and none of that has to be right. The
+whole picker, the end clamp and the lead-in went with it.
+
+**The press target is a real BUTTON over the shut card**, not a
+listener on the list item: focusable, named, and reachable from a
+keyboard, so every day of the week is available to somebody who is not
+swiping at all. It is a SIBLING of the rows rather than their ancestor
+— a button inside a button is invalid and collapses to one press while
+looking exactly right — and it is `display: none` on the open card,
+where a transparent button over the rows would swallow every press
+meant for a block.
+
+**Snap went from mandatory to proximity with it.** Snap was
+load-bearing while the nearest card decided what opened; it is
+decoration now, and mandatory against cards of two different widths
+fights a finger that is only trying to see further along the week.
 
 **`[hidden]` HAS TO BE SAID ONCE A VIEW TAKES A `display`.** The app
 puts a view away by setting the `hidden` attribute, which works only
