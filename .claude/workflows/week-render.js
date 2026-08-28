@@ -202,8 +202,14 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
        The glyph is taken as the app drew it: the keyword table decided
        it, and a lab that re-derives the icon is a lab measuring its own
        guess about which glyph "Trading" reaches. */
-    await page.evaluate(gen);
-    await page.evaluate(() => {
+    await page.addInitScript((live) => { window.__WVLIVE = live; }, !!process.env.WVLIVE);
+    /* WVLIVE=1 photographs the app's OWN week view. The harvest below
+       reads the shipped markup to hand a proposal its rows, so under
+       WVLIVE it is not merely unnecessary — it reads day labels that
+       the real screen is free to change, and it did: the open card
+       prints the full day name, so the harvest threw on "wednesday". */
+    if (!process.env.WVLIVE) await page.evaluate(gen);
+    if (!process.env.WVLIVE) await page.evaluate(() => {
       const V = globalThis.WEEKVIEW;
       /* The app writes these UPPERCASE into the markup — it is not a
          text-transform. Matched case-insensitively rather than copied,
@@ -259,9 +265,14 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
         st.textContent = V.css;
         document.head.appendChild(st);
       }
-      rail.textContent = '';
-      rail.className = 'rail wv';
-      V.paint({ rail, week, rows: byDay, now, today, hhmm, el });
+      /* WVLIVE leaves the app's own render alone — the lab is then a
+         screenshot rig for the real screen rather than a place to
+         inject a proposal over it. */
+      if (!window.__WVLIVE) {
+        rail.textContent = '';
+        rail.className = 'rail wv';
+        V.paint({ rail, week, rows: byDay, now, today, hhmm, el });
+      }
     });
     await page.waitForTimeout(260);
 

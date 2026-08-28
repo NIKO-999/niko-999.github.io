@@ -588,6 +588,20 @@
 
   var painted = '';   /* the day the card was last drawn for */
 
+  /* ── which card is face-on ──
+     null means today, and it RESOLVES rather than stores: a deck that
+     remembered Friday across midnight would open on Friday, and the
+     one thing this screen must never be wrong about is which day you
+     are in. Swiping sets it for the session and nothing writes it to
+     storage — where you left the deck is not a preference, it is where
+     your thumb happened to stop. */
+  var openDay = null;
+  function scOpenDay() {
+    var t = new Date().getDay();
+    if (openDay === null) return t;
+    return ORDER.indexOf(openDay) >= 0 ? openDay : t;
+  }
+
   function scByDay(d) {
     return state.items.filter(function (it) { return it.d === d; })
       .sort(function (a, b) { return a.s - b.s || a.e - b.e; });
@@ -868,30 +882,94 @@
     var rail = $('scRail');
     rail.textContent = '';
 
-    /* A day with nothing on it is not drawn — a rail of empty cards is
-       six rows of furniture. Today is the exception: the day you are in
-       says so even when it is free. */
-    var shown = scWeek().filter(function (d) { return scByDay(d).length || d === today; });
+    /* ── every day, always ──
+       The rail used to skip a day with nothing on it, because a column
+       of empty cards was six rows of furniture. A DECK cannot skip:
+       the seven cards are the week's spine, and a Tuesday that vanishes
+       because you cleared it leaves six cards and no way to put
+       anything back on the day that went. An empty card says "nothing
+       yet" and is one tap from fixing that.
+
+       Monday first, and not today first. A week whose leftmost card
+       moves every morning has no shape to remember — you scroll to
+       today, and where today sits IS information. */
     $('scEmpty').hidden = state.items.length > 0 || view === 'ring';
 
-    shown.forEach(function (d) {
+    var open = scOpenDay();
+    var mine = null;
+
+    ORDER.forEach(function (d) {
       var rows = scByDay(d);
-      var li = scEl('li', 'day' + (d === today ? ' is-today' : ''));
-      var dn = scEl('button', 'day-name', ABBR[d]);
+      var isOpen = d === open;
+      var li = scEl('li', 'day' + (d === today ? ' is-today' : '')
+        + (isOpen ? ' is-open' : ''));
+      li.dataset.d = d;
+      if (isOpen) mine = li;
+
+      var head = scEl('div', 'wk-h');
+      var dn = scEl('button', 'day-name', isOpen ? FULL[d] : ABBR[d]);
       dn.setAttribute('aria-label', 'Add a block on ' + FULL[d]);
       dn.addEventListener('click', function () { scEditSheet(null, d); });
-      li.appendChild(dn);
+      head.appendChild(dn);
+      /* Committed hours, opposite the name. It is the one figure a card
+         can carry for nothing — the rows are already here to add up —
+         and it is what makes a card comparable to the card beside it. */
+      var mins = rows.reduce(function (a, it) { return a + (it.e - it.s); }, 0);
+      if (mins) {
+        head.appendChild(scEl('span', 'wk-hrs',
+          (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs'));
+      }
+      li.appendChild(head);
+
+      /* The shut cards get bars: duration as length, the session breaks
+         as gaps, no words. Built for every card whether or not it is
+         open, so a swipe moves one class instead of running a render. */
+      var mini = scEl('div', 'wk-mini');
+      scSessions(rows).forEach(function (g, gi) {
+        if (gi) mini.appendChild(document.createElement('hr'));
+        g.rows.forEach(function (it) {
+          var b = scEl('i', blockLog[scDay(scDateOfDow(d))]
+            && blockLog[scDay(scDateOfDow(d))][it.id] ? 'is-done' : null);
+          /* Floored at 34%: below about a third a bar stops reading as
+             a bar and reads as a dot, and a fifteen-minute Down drew
+             one. */
+          b.style.width = Math.max(34, Math.min(100, (it.e - it.s) / 5)) + '%';
+          mini.appendChild(b);
+        });
+      });
+      li.appendChild(mini);
 
       var card = scEl('div', 'day-card');
 
       if (!rows.length) {
         var free = scEl('button', 'row is-free');
-        free.appendChild(scEl('span', 'n', 'Nothing today'));
+        free.appendChild(scEl('span', 'n', 'Nothing yet'));
         free.addEventListener('click', function () { scEditSheet(null, d); });
         card.appendChild(free);
       }
 
+      /* The session headings are interleaved with the rows rather than
+         wrapping them: a row's own grid is what aligns the glyph, the
+         time and the name, and nesting each session in a box of its own
+         would give three separate grids that agree only by luck. */
+      var head3 = {};
+      scSessions(rows).forEach(function (g) { head3[g.rows[0].id] = g; });
+
       rows.forEach(function (it) {
+        if (head3[it.id]) {
+          var g = head3[it.id];
+          var sh = scEl('div', 'wk-sh'
+            + (d === today && scNowMin() >= g.s.a && scNowMin() < g.s.b
+               ? ' is-live' : ''));
+          sh.appendChild(scEl('b', null, g.s.k));
+          sh.appendChild(scEl('i'));
+          sh.appendChild(scEl('em', null, String(g.rows.length)));
+          /* aria-hidden: the rows below carry their own full day and
+             time in their labels, so a screen reader meeting this would
+             hear the day sliced twice. It is a visual grouping. */
+          sh.setAttribute('aria-hidden', 'true');
+          card.appendChild(sh);
+        }
         var row = scEl('button', 'row');
         row.dataset.id = it.id;
         row.dataset.s = it.s;
@@ -965,7 +1043,67 @@
         row.appendChild(n);
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e) + (it.r ? ', ' + it.r : '') + '. Edit.');
-        row.addEventListener('click', function () { scEditSheet(it, d); });
+        /* ── tap edits, a long press ticks ──
+           The week is where you CHANGE the schedule, so the tap keeps
+           doing what it always did. Marking a block done is the tally's
+           job and it stays the tally's job; this is the same act
+           reachable from the row it is about, for the mornings when
+           the block in front of you is the one you just finished.
+
+           550ms, and it cancels on any movement over 10px. Without the
+           move guard every scroll of the deck that starts on a row
+           fires it — the finger is on a row for the whole gesture, and
+           the gesture is a scroll. `moved` is checked rather than
+           pointercancel because a scroll inside .day-card does not
+           always cancel the pointer on the row it began in. */
+        var held = null, hx = 0, hy = 0, moved = false, fired = false;
+        var drop = function () {
+          if (held) { clearTimeout(held); held = null; }
+        };
+        row.addEventListener('pointerdown', function (ev) {
+          hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
+          drop();
+          held = setTimeout(function () {
+            held = null;
+            if (moved) return;
+            fired = true;
+            var bd = scDay(scDateOfDow(d));
+            var was = !!(blockLog[bd] && blockLog[bd][it.id]);
+            if (!scSetBlockDone(bd, it, d, !was)) {
+              scToast('That day is not open yet', false);
+              return;
+            }
+            /* Haptic where there is one. A long press with no
+               acknowledgement is indistinguishable from a press that
+               did not register, and the row only redraws a frame
+               later. */
+            if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+            scRender();
+            scToast(was ? it.n + ' unticked' : it.n + ' done', false);
+          }, 550);
+        });
+        row.addEventListener('pointermove', function (ev) {
+          if (Math.abs(ev.clientX - hx) > 10 || Math.abs(ev.clientY - hy) > 10) {
+            moved = true;
+            drop();
+          }
+        });
+        row.addEventListener('pointerup', drop);
+        row.addEventListener('pointercancel', function () { moved = true; drop(); });
+        row.addEventListener('click', function () {
+          /* A long press has already done its work; without this the
+             finger lifting then opens the editor on top of the tick.
+             An explicit flag rather than an inference from the timer:
+             `held` is null after an ordinary tap too, so a check on it
+             would swallow every click. */
+          if (fired) { fired = false; return; }
+          scEditSheet(it, d);
+        });
+        /* A long press reaches neither a keyboard nor a screen reader,
+           and it is deliberately NOT the only way to tick a block: the
+           tally does the same thing with a plain press and always did.
+           This is a shortcut from the row the block is on, not a
+           feature that lives here. */
         card.appendChild(row);
       });
 
@@ -973,7 +1111,120 @@
       rail.appendChild(li);
     });
 
+    /* Seven dots. With two cards on screen and five off it, nothing
+       else on the page says how many there are or where you stand. */
+    var dots = scEl('div', 'wk-dots');
+    dots.setAttribute('aria-hidden', 'true');
+    ORDER.forEach(function (d) {
+      dots.appendChild(scEl('i', d === open ? 'on' : null));
+    });
+    /* Replaced, not appended. scRender runs on every edit and on the
+       half-minute tick that crosses midnight, and an insertBefore with
+       no removal leaves a new row of dots under the last one every
+       time — silent, and only visible after a few edits. */
+    var was = document.querySelector('.wk-dots');
+    if (was) was.parentNode.removeChild(was);
+    rail.parentNode.insertBefore(dots, rail.nextSibling);
+
+    scDeckFit(rail, dots);
+    if (mine) {
+      /* Set directly rather than through scrollIntoView, which scrolls
+         the PAGE as well and drags the hero off the top on its way to
+         centring a card. */
+      rail.scrollLeft = mine.offsetLeft - (rail.clientWidth - mine.offsetWidth) / 2;
+    }
+
     scLive();
+  }
+
+  /* ── the deck's height is measured, never set ──
+     The gap between the top of the rail and the top of the bar, less
+     what the dots take. Written as a constant it would be the same
+     number in a place that cannot see the hero reflow, the notch
+     change, or the type scale move — and it would be wrong on the first
+     phone that did any of those. */
+  /* ── a swipe opens a card ──
+     Classes only, never a re-render: every card already carries its
+     rows, so opening one is moving `is-open` and swapping the two day
+     names. A full scRender here would rebuild the deck under a finger
+     that is still on it and reset scrollLeft mid-gesture.
+
+     Settled rather than live. Firing on every scroll event opens and
+     shuts five cards on the way past, which is both a lot of layout and
+     visibly wrong; 120ms after the last event is after the snap. */
+  var settle = null;
+  function scDeckWatch() {
+    var rail = $('scRail');
+    rail.addEventListener('scroll', function () {
+      if (settle) clearTimeout(settle);
+      settle = setTimeout(function () {
+        settle = null;
+        var mid = rail.scrollLeft + rail.clientWidth / 2;
+        var best = null, gap = Infinity;
+        [].forEach.call(rail.children, function (li) {
+          var c = li.offsetLeft + li.offsetWidth / 2;
+          if (Math.abs(c - mid) < gap) { gap = Math.abs(c - mid); best = li; }
+        });
+        if (!best) return;
+        var d = +best.dataset.d;
+        if (d === scOpenDay()) return;
+        openDay = d;
+        scDeckOpen();
+      }, 120);
+    }, { passive: true });
+  }
+
+  function scDeckOpen() {
+    var open = scOpenDay();
+    var rail = $('scRail');
+    [].forEach.call(rail.children, function (li) {
+      var d = +li.dataset.d;
+      li.classList.toggle('is-open', d === open);
+      var nm = li.querySelector('.day-name');
+      if (nm) nm.textContent = d === open ? FULL[d] : ABBR[d];
+    });
+    var dots = document.querySelector('.wk-dots');
+    if (dots) {
+      [].forEach.call(dots.children, function (i, n) {
+        i.classList.toggle('on', ORDER[n] === open);
+      });
+    }
+  }
+
+  function scDeckFit(rail, dots) {
+    var bar = document.querySelector('.bar');
+    var top = rail.getBoundingClientRect().top;
+    var floor = bar ? bar.getBoundingClientRect().top : window.innerHeight;
+    /* The dots' own margin is not in its height, and the bar's glass
+       pill reaches above the box `getBoundingClientRect` reports for it
+       — so the first measurement left the dots sitting inside the bar.
+       Read the margin rather than adding a number that happens to work
+       at this type scale. */
+    var give = 24;
+    if (dots) {
+      var ds = getComputedStyle(dots);
+      give = dots.getBoundingClientRect().height
+        + parseFloat(ds.marginTop || 0) + parseFloat(ds.marginBottom || 0) + 18;
+    }
+    rail.style.height = Math.max(260, floor - top - give) + 'px';
+  }
+
+  /* ── morning, afternoon, evening ──
+     Noon and five o'clock, which is where the words already sit in
+     English rather than anywhere this app decided. A session with
+     nothing in it is dropped rather than drawn empty: an "Afternoon"
+     heading over no rows is furniture, and on a real week at least one
+     of the three is empty most days. */
+  var SESSION = [
+    { k: 'Morning',   a: 0,    b: 720 },
+    { k: 'Afternoon', a: 720,  b: 1020 },
+    { k: 'Evening',   a: 1020, b: 1440 }
+  ];
+  function scSessions(rows) {
+    return SESSION.map(function (s) {
+      return { s: s, rows: rows.filter(function (it) {
+        return it.s >= s.a && it.s < s.b; }) };
+    }).filter(function (g) { return g.rows.length; });
   }
 
   /* The live pass touches classes and one line of text, never the DOM's
@@ -4122,6 +4373,15 @@
 
   scRender();
   scSetView(view, false);
+  scDeckWatch();
+
+  /* The deck is sized against the bar, so anything that moves the bar or
+     the hero has to re-measure. A rotation is the obvious one; the
+     address bar collapsing on scroll is the one that actually happens
+     every time somebody uses the app. */
+  window.addEventListener('resize', function () {
+    if (view === 'list') scDeckFit($('scRail'), document.querySelector('.wk-dots'));
+  });
 
   [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
     t.addEventListener('click', function () { scSetView(t.dataset.view, true); });

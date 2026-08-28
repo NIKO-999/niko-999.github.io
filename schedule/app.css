@@ -861,29 +861,217 @@ body {
 
 /* ── a day ───────────────────────────────────────────────── */
 
-.rail { list-style: none; }
+/* ── the week is a DECK, not a rail ──
+   Seven cards side by side, one open, the rest turned away at the
+   screen edges. It was a single column of seven stacked day cards, and
+   the whole week was then one very long page on which the boundary
+   between Sunday night and Monday morning — the least meaningful gap
+   in the list — got exactly the same treatment as the gap between
+   work and sleep. A day is a UNIT, so moving between days is a
+   different gesture from moving within one, and the deck is that
+   said in layout.
 
-.day { margin-top: 26px; }
+   EVERY CARD CARRIES ITS ROWS. Only the open one draws them; the rest
+   collapse to a column of bars. Rendering rows for the open day alone
+   was the first design and it needed a re-render on every swipe — this
+   way a swipe moves one class and the browser does the rest, and the
+   whole week is in the document for anything that needs to read it. */
+.rail {
+  list-style: none;
+  display: flex;
+  gap: 10px;
+  align-items: stretch;
+  /* Bled past the poster's padding so the neighbours are cut by the
+     SCREEN. A peek that stops short of the edge reads as a small card
+     rather than as a deck that continues.
 
+     THE SCROLLER IS WHAT CONTAINS THAT BLEED, and it is not a detail:
+     bled without one the page overflows horizontally, and mobile
+     Safari and Chromium both answer by zooming the whole page out.
+     Measured in the lab at 390x844 — innerHeight went 844 to 992 and
+     the card ran off the bottom of the screen while every number said
+     it fitted. */
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 0 calc(var(--pad) * -1);
+  padding: 2px var(--pad);
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.rail::-webkit-scrollbar { display: none; }
+
+.day {
+  flex: none;
+  scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  padding: 15px 14px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+}
+/* The open card is paper and the others are not, so the one you are
+   reading is lifted off the ground rather than merely wider. */
+.day.is-open {
+  width: 268px;
+  background: var(--paper);
+  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
+  box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
+}
+.day:not(.is-open) { width: 76px; opacity: .82; }
+.day:not(.is-open) .day-card { display: none; }
+.day.is-open .wk-mini { display: none; }
+
+/* ── the day's name ──
+   46px and uppercase when a day was a whole section of a scrolling
+   page; inside a 268px card that is four characters of heading over a
+   card that is mostly rows, and it pushed the first block below the
+   fold on its own. It is the card's title now, at the size a title
+   wants, with the day's committed hours opposite it — which is the one
+   figure a card can carry for free and a stacked list never could. */
+.wk-h {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex: none;
+  padding-bottom: 10px;
+  margin-bottom: 2px;
+  border-bottom: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
+}
 .day-name {
-  display: block;
-  width: 100%;
   border: 0;
-  border-bottom: 1px solid var(--ink);
   background: none;
-  padding: 0 0 7px;
+  padding: 0;
   color: inherit;
   font-family: inherit;
-  font-size: 46px;
+  font-size: 14px;
   font-weight: 700;
-  letter-spacing: -.05em;
-  line-height: .86;
+  letter-spacing: .02em;
+  line-height: 1;
   text-align: left;
-  text-transform: uppercase;
   cursor: pointer;
 }
+.day.is-open .day-name { font-size: 17px; letter-spacing: -.01em; }
 .day.is-today .day-name { color: var(--red); }
-.day-name:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.day-name:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+/* Only on the open card. At 76px the shut ones cannot hold it, and
+   with `white-space: nowrap` and a space-between head it did not wrap
+   or clip — it ran straight out of the card and printed itself over the
+   open one beside it. Overflow that ESCAPES its box is the kind a
+   narrower column never warns you about. */
+.day:not(.is-open) .wk-hrs { display: none; }
+.wk-hrs {
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--spent);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The rows scroll inside the card rather than the card growing: the
+   deck's height is measured against the bar once, so a sixteen-block
+   Thursday and a four-block Sunday are the same object. */
+.day-card {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.day-card::-webkit-scrollbar { display: none; }
+
+/* ── morning, afternoon, evening ──
+   Noon and five, which is where the words already sit in English
+   rather than anywhere this app decided. A session with nothing in it
+   is not drawn at all — an empty "Afternoon" is furniture, and on a
+   real week at least one of the three is empty most days.
+
+   A RULE, not a panel and not a tint. The card already has a heading,
+   a border and a shadow; three tinted blocks inside it is a frame
+   inside a frame inside a frame. This is one line of 9.5px type and
+   one hairline, and it is the whole treatment.
+
+   The count sits opposite. It is the only thing here a person cannot
+   work out at a glance from the rows themselves — six things after
+   five o'clock is a fact about the evening, and it is on screen before
+   you have scrolled to any of them. */
+.wk-sh {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 15px 0 7px;
+}
+.wk-sh:first-child { padding-top: 5px; }
+.wk-sh b {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  color: var(--spent);
+}
+.wk-sh i {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--ink) 12%, transparent);
+}
+.wk-sh em {
+  font-style: normal;
+  font-size: 9.5px;
+  font-weight: 600;
+  color: var(--spent);
+  font-variant-numeric: tabular-nums;
+}
+/* The session you are IN takes the accent. It is a fourth use of the
+   red on this screen — today's name, the running block, a place, and
+   now this — and it is the same fact as the running block seen one
+   level up, never a different one. */
+.wk-sh.is-live b, .wk-sh.is-live em { color: var(--red); }
+.wk-sh.is-live i { background: color-mix(in srgb, var(--red) 30%, transparent); }
+
+/* ── a day you are not reading ──
+   Bars, never names: at 76px a name is a clipped fragment, and a
+   clipped word reads as a rendering fault rather than as a label. The
+   length is the block's duration and the gaps are the session breaks,
+   so a neighbour still carries the SHAPE of that day and the same
+   three-part structure as the open one, with none of its words. */
+.wk-mini {
+  flex: 1 1 auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 8px 0;
+}
+.wk-mini i {
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
+}
+.wk-mini i.is-done { background: color-mix(in srgb, var(--ink) 42%, transparent); }
+.wk-mini hr {
+  border: 0;
+  height: 1px;
+  margin: 3px 0;
+  background: color-mix(in srgb, var(--ink) 13%, transparent);
+}
+
+/* Which of the seven you are on. Seven dots is the one thing the deck
+   cannot say for itself — with two cards visible and five off-screen,
+   nothing on the page says how many there are or where in them you
+   stand. */
+.wk-dots {
+  display: flex;
+  justify-content: center;
+  gap: 5px;
+  margin: 12px 0 0;
+}
+.wk-dots i {
+  width: 6px;
+  height: 6px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--ink) 18%, transparent);
+}
+.wk-dots i.on { background: var(--red); width: 18px; }
 
 /* ── a row ───────────────────────────────────────────────── */
 
@@ -903,9 +1091,14 @@ body {
    width in every row it will ever hold — which is what let the third
    track go without a subgrid, and is still what keeps the two lines
    from jittering as the day moves. */
+/* THE GUTTER IS NARROWER INSIDE A CARD. --meas is 52px, which was the
+   left margin of a full-width row and is a fifth of a 268px card — the
+   name lost more to it than the glyph ever used. The glyph is the only
+   thing in there now, so the column is sized to the glyph. The token
+   keeps its value for everything else that reads it. */
 .row {
   display: grid;
-  grid-template-columns: var(--meas) 1fr;
+  grid-template-columns: 30px 1fr;
   gap: 0 12px;
   align-items: start;
   width: 100%;

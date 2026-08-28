@@ -204,11 +204,30 @@ const SAID = [
      Tuesday, so this list is checked against the real clock instead of
      a literal. */
   const ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
+  const FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+    'Friday', 'Saturday'];
   const from = new Date().getDay();
-  const wantOrder = Array.from({ length: 7 }, (_, i) => ABBR[(from + i) % 7]).join(' ');
-  ok(`the week opens on today (${ABBR[from]}) and runs forward`,
-    await page.$$eval('.day-name', (n) => n.map((x) => x.textContent).join(' ')) === wantOrder,
-    wantOrder);
+  /* ── MONDAY FIRST, and it used to be today first ──
+     A rail that began on today was right for a scrolling column: the
+     thing you want is at the top and the week runs away from it. A DECK
+     cannot do that — its leftmost card would move every morning, so the
+     week would have no shape to remember and Thursday would sit in a
+     different place each time you looked. You scroll to today instead,
+     and WHERE today sits is itself information. */
+  const wantOrder = [1, 2, 3, 4, 5, 6, 0]
+    .map((d) => (d === from ? FULL[d] : ABBR[d])).join(' ');
+  ok('the week is Monday first, whatever day it is',
+    await page.$$eval('.day-name', (n) => n.map((x) => x.textContent).join(' '))
+      === wantOrder, wantOrder);
+  /* The open card prints the day in full and the shut ones abbreviate:
+     four uppercase characters is a label on a 76px card and a heading
+     on a 268px one, and they are not the same job. */
+  ok('...with today the one card that is open',
+    await page.$$eval('.day.is-open', (d) => d.map((x) =>
+      x.querySelector('.day-name').textContent)).then((v) =>
+        v.length === 1 && v[0] === FULL[from]), FULL[from]);
+  ok('...and every day has a card, including one you have cleared',
+    await page.$$eval('.day', (d) => d.length) === 7);
 
   /* ── side by side means the same box ──
      Within a card, the times are one column and the names are another.
@@ -491,7 +510,93 @@ const SAID = [
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(200);
   ok('today is the only day marked', await page.$$eval('.day.is-today .day-name',
-    (n) => n.map((x) => x.textContent)).then((v) => v.length === 1 && v[0] === 'TUE'));
+    (n) => n.map((x) => x.textContent)).then((v) => v.length === 1 && v[0] === 'Tuesday'));
+  /* ── morning, afternoon, evening ──
+     Noon and five o'clock. A session with nothing in it is not drawn:
+     an "Afternoon" heading over no rows is furniture, and on a real
+     week at least one of the three is empty most days — the seeded
+     Tuesday has no shift on it, which is what makes that testable
+     rather than merely stated. */
+  const sess = await page.$$eval('.day.is-open .wk-sh', (h) => h.map((x) => ({
+    k: x.querySelector('b').textContent,
+    n: +x.querySelector('em').textContent,
+    live: x.classList.contains('is-live'),
+  })));
+  /* A SUBSEQUENCE of the three, not all three. The seeded Tuesday has
+     no shift on it, so it genuinely has nothing between noon and five —
+     asserting all three here would have been the test insisting on data
+     the fixture deliberately does not have. */
+  const ORDER3 = ['Morning', 'Afternoon', 'Evening'];
+  ok('the open day is cut into sessions, in order',
+    sess.length > 0 && sess.every((x) => ORDER3.includes(x.k))
+    && sess.map((x) => ORDER3.indexOf(x.k))
+       .every((v, i, a) => i === 0 || v > a[i - 1]), sess);
+  ok('...each carrying how many things are in it',
+    sess.every((x) => x.n > 0)
+    && sess.reduce((a, x) => a + x.n, 0)
+       === await page.$$eval('.day.is-open .row[data-id]', (r) => r.length), sess);
+  /* 10:12 on the frozen clock, so Morning is the live one and the other
+     two must NOT be. A rule that marked every session would pass an
+     "is it marked" check and say nothing. */
+  ok('...and only the session you are in takes the accent',
+    sess.filter((x) => x.live).map((x) => x.k).join() === 'Morning', sess);
+
+  /* ── an empty session is DROPPED, and both directions are checked ──
+     Watching it disappear alone would pass on code that never drew an
+     afternoon at all, so the heading is made to appear first. The
+     seeded Tuesday has nothing between noon and five, which is what
+     makes it the right day to put something into. */
+  const heads = () => page.$$eval('.day.is-open .wk-sh b',
+    (b) => b.map((x) => x.textContent).join());
+  ok('the open day has no afternoon to start with',
+    (await heads()) === 'Morning,Evening', await heads());
+  await page.evaluate(() => {
+    const w = JSON.parse(localStorage.getItem('sched.v1'));
+    w.items.push({ d: 2, s: 840, e: 900, r: '', n: 'Lunch', id: 'zz1' });
+    localStorage.setItem('sched.v1', JSON.stringify(w));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(220);
+  ok('...one block after noon and the heading appears, in its place',
+    (await heads()) === 'Morning,Afternoon,Evening', await heads());
+  await page.evaluate(() => {
+    const w = JSON.parse(localStorage.getItem('sched.v1'));
+    w.items = w.items.filter((it) => it.id !== 'zz1');
+    localStorage.setItem('sched.v1', JSON.stringify(w));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(220);
+  ok('...and take it away and the heading goes rather than showing a zero',
+    (await heads()) === 'Morning,Evening', await heads());
+
+  /* ── the deck ── */
+  ok('the shut cards carry bars rather than names, and the session breaks with them',
+    await page.$$eval('.day:not(.is-open)', (d) => d.every((x) =>
+      x.querySelectorAll('.wk-mini i').length > 0
+      && x.querySelectorAll('.wk-mini hr').length > 0
+      && getComputedStyle(x.querySelector('.day-card')).display === 'none')));
+  /* At 76px the hours label does not wrap or clip — it runs straight
+     out of the card and prints over the open one beside it. Overflow
+     that ESCAPES its box is the kind a narrow column never warns you
+     about, so it is measured rather than trusted. */
+  const bleed = await page.$$eval('.day:not(.is-open)', (d) => d.map((x) => {
+    const c = x.getBoundingClientRect();
+    return [...x.querySelectorAll('*')].some((k) => {
+      const r = k.getBoundingClientRect();
+      return r.width && r.right > c.right + 0.5;
+    });
+  }));
+  ok('and nothing inside a shut card draws outside it', bleed.every((b) => !b), bleed);
+  ok('seven dots, with today lit',
+    await page.$$eval('.wk-dots i', (i) => i.length === 7
+      && i.filter((x) => x.classList.contains('on')).length === 1));
+  /* scRender runs on every edit and on the tick that crosses midnight.
+     Inserted without removing, the dots stack a new row under the last
+     one every time — silent, and only visible after a few edits. */
+  await page.evaluate(() => { window.scReRender && window.scReRender(); });
+  ok('...and one row of them however many times the week redraws',
+    await page.$$eval('.wk-dots', (d) => d.length) === 1);
+
   ok('exactly one class is live', await page.$$eval('.row.is-now',
     (r) => r.map((x) => x.querySelector('.n').textContent))
     .then((v) => v.length === 1 && v[0] === 'Trading'));
@@ -1216,9 +1321,22 @@ const SAID = [
   });
   await show('list');
   await page.waitForTimeout(180);
+  /* ── ASKED FOR, not hardcoded ──
+     This sampled (376, 300), which was empty margin when the week was a
+     column and is now inside a card: the deck bleeds to both screen
+     edges, so the far right at that height is a shut day drawing its 4%
+     wash and the sample came back 247,247,247. The fault was the fixed
+     coordinate, not the ground — a point picked once for one layout is
+     a point that silently starts measuring something else.
+     The dots are centred with real page either side of them, so the
+     page is asked where its own ground is. */
   const corner = await (async () => {
+    const at = await page.evaluate(() => {
+      const d = document.querySelector('.wk-dots').getBoundingClientRect();
+      return { x: Math.round(d.left / 2), y: Math.round(d.top + d.height / 2) };
+    });
     const png = PNG.sync.read(await page.screenshot());
-    const i = (png.width * Math.round(300 * dpr) + Math.round(376 * dpr)) << 2;
+    const i = (png.width * Math.round(at.y * dpr) + Math.round(at.x * dpr)) << 2;
     return [png.data[i], png.data[i + 1], png.data[i + 2]];
   })();
   ok('the default ground is still flat white paper',

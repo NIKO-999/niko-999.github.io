@@ -289,6 +289,92 @@ by side without one.
 It is **streak** everywhere, never "run" — the panel and the foot of the
 same screen using two names for one idea in one glance.
 
+## The week is a deck
+
+**Seven cards side by side, one open.** It was a single column of seven
+stacked day cards, and the whole week was then one very long page on
+which the boundary between Sunday night and Monday morning — the least
+meaningful gap in the list — got the same treatment as the gap between
+work and sleep. A day is a UNIT, so moving between days is a different
+gesture from moving within one.
+
+**Every card carries its rows; only the open one draws them.** The
+first design rendered rows for the open day alone and needed a
+re-render on every swipe. This way a swipe moves one class and the
+browser does the rest, and the whole week is in the document for
+anything that needs to read it. The shut cards collapse to bars —
+length is duration, gaps are the session breaks, no words, because at
+76px a name is a clipped fragment and a clipped word reads as a
+rendering fault.
+
+**MONDAY FIRST, and it used to be today first.** A rail that began on
+today was right for a scrolling column: the thing you want is at the
+top and the week runs away from it. A deck cannot do that — its
+leftmost card would move every morning, so the week would have no shape
+to remember and Thursday would sit somewhere different each time you
+looked. You scroll to today instead, and where today sits is itself
+information.
+
+**A deck must not skip an empty day.** The rail drew only days with
+something on them, because a column of empty cards was furniture. Seven
+cards are the week's spine: a Tuesday that vanishes because you cleared
+it leaves six cards and no way to put anything back on the day that
+went.
+
+**The bleed needs a scroller, and that is not a detail.** The cards run
+past the poster's padding so the neighbours are cut by the SCREEN — a
+peek that stops short of the edge reads as a small card rather than a
+deck that continues. Bled without `overflow-x`, the page overflows
+horizontally and mobile Chromium answers by zooming the whole page out:
+measured at 390x844, `innerHeight` went **844 to 992**, so every
+measurement was taken in a coordinate space 844/992 of the one being
+photographed and the card ran off the bottom of the screen while the
+numbers said it fitted.
+
+**The height is measured, never set.** The gap from the top of the rail
+to the top of the fixed bar, less what the dots take — including their
+MARGIN, which is not in `getBoundingClientRect().height` and whose
+omission left the dots sitting inside the bar. A constant here is the
+same number written where it cannot see the hero reflow, the notch
+change, or the type scale move.
+
+**Overflow that ESCAPES its box is the kind a narrow column never warns
+you about.** The day's committed hours sit opposite its name; on a 76px
+shut card, with `white-space: nowrap` in a space-between head, it did
+not wrap and did not clip — it ran out of the card and printed itself
+over the open one beside it. `tests/schedule.js` measures every
+descendant of every shut card against the card's own right edge.
+
+## Morning, afternoon, evening
+
+**Noon and five o'clock**, which is where the words already sit in
+English rather than anywhere this app decided.
+
+**A RULE, not a panel and not a tint.** The card already has a heading,
+a border and a shadow; three tinted blocks inside it is a frame inside
+a frame inside a frame. Rendered and looked at: the tinted version put
+a red wash under eight greyed-out past rows and read muddier than the
+hairline, and it cost enough vertical space to lose most of a session.
+This is one line of 9.5px type and one hairline.
+
+**A session with nothing in it is not drawn.** An "Afternoon" heading
+over no rows is furniture, and on a real week at least one of the three
+is empty most days — the seeded Tuesday has no shift on it, which is
+what makes that testable rather than merely stated. **Both directions
+are checked**: watching a heading disappear would pass on code that
+never drew an afternoon at all, so the test puts a block after noon,
+sees the heading appear in its right place, then takes it away again.
+
+**The headings are interleaved with the rows, not wrapping them.** A
+row's own grid aligns the glyph, the time and the name; nesting each
+session in a box of its own gives three separate grids that agree only
+by luck.
+
+**The session you are in takes the accent** — a fourth use of the red
+on this screen, after today's name, the running block and a place. It
+is the same fact as the running block seen one level up, never a
+different one.
+
 ## The week's rows
 
 **The time is ABOVE the name, and the row lost a column for it.** It sat
@@ -309,6 +395,34 @@ over 4.74:1 is under 4.5:1.
 **A glyph per row, worked out from the name, with nothing to set.** A
 schedule you have to decorate is a schedule you stop keeping. It has
 the gutter to itself and sits centred against the pair of lines.
+
+**The deck did NOT reverse any of this, and it nearly did.** The lab
+mock the card layout was chosen from put the time in a right-hand
+column beside the name, on one line — which is exactly the arrangement
+the paragraphs above record replacing, for reasons that were measured.
+What was being chosen in that mock was the SESSION treatment; the row
+underneath it was a lab construction nobody had opinions about, and
+shipping it would have undone a decision by way of a mock that happened
+to be drawn differently. The gutter narrowed from `--meas` at 52px to
+30px, because 52 was the left margin of a full-width row and is a fifth
+of a 268px card — the glyph is the only thing in there now, so the
+column is sized to the glyph. Nothing else about the row moved.
+
+**Tap edits; a long press ticks.** The week is where you CHANGE the
+schedule, so the tap keeps doing what it always did. The long press is
+550ms and cancels on any movement over 10px — without the move guard
+every scroll of the deck that begins on a row fires it, because the
+finger is on a row for the whole gesture and the gesture is a scroll. A
+scroll inside `.day-card` does not reliably cancel the pointer on the
+row it began in, so the guard is a `moved` flag rather than
+`pointercancel`. The click that follows a fired press is swallowed by
+an explicit flag, never by inferring from the timer: the timer is null
+after an ordinary tap too, so a check on it swallows every click.
+
+It is deliberately not the only way to tick a block — the tally does
+the same thing with a plain press and always did. A long press reaches
+neither a keyboard nor a screen reader, so it is a shortcut from the
+row the block is on, not a feature that lives here.
 
 **The measure is gone.** It was a rule as long as the block is — the one
 thing this design added, and the reason the layout was picked. What
