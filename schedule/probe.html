@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Probe</title>
+<!-- ── a measurement taken on the phone that has the problem ──
+     The edit sheet's two time fields overflow their row on iOS and on
+     nothing else. Chromium is the only browser installed on the machine
+     this app is developed on, and it sizes input[type=time] to fit — so
+     three fixes went out on a model of the bug rather than a
+     measurement of it, and all three were reported still broken.
+
+     This builds the same row out of the same stylesheet and prints what
+     the browser actually did with it. It also prints whether the CSS it
+     loaded contains the fix, which is the only way to tell a wrong rule
+     from a cached one from the outside.
+
+     Delete this file once the numbers have been read. -->
+<link rel="stylesheet" href="app.css" />
+<style>
+  body { padding: 16px; font: 400 13px/1.5 system-ui, sans-serif; }
+  h1 { font-size: 15px; margin: 0 0 10px; }
+  #out { margin-top: 16px; white-space: pre-wrap; font: 400 12px/1.5 ui-monospace, monospace; }
+  .edge { position: fixed; top: 0; bottom: 0; width: 1px; background: red; }
+  .frame { outline: 1px dashed red; outline-offset: 2px; }
+</style>
+</head>
+<body>
+
+<h1>Time row probe</h1>
+<p>Screenshot everything below.</p>
+
+<!-- The sheet's own padding, so the row is measured in the box it
+     really sits in rather than in the body. -->
+<div class="sheet-body" style="padding: 0 18px">
+  <span class="label">From — to</span>
+  <div class="grid2 frame" id="row">
+    <input class="field" type="time" step="300" value="10:00" />
+    <input class="field" type="time" step="300" value="18:00" />
+  </div>
+</div>
+
+<div id="out">measuring…</div>
+
+<script>
+(function () {
+  var out = document.getElementById('out');
+  var row = document.getElementById('row');
+  var kids = [].slice.call(row.children);
+  var R = function (n) { return Math.round(n * 10) / 10; };
+
+  /* Did the stylesheet that loaded actually contain the fix? A rule
+     read back from the cascade answers this without trusting a cache. */
+  var css = '(could not read)';
+  try {
+    var sheets = [].slice.call(document.styleSheets);
+    for (var i = 0; i < sheets.length; i++) {
+      if (!/app\.css/.test(sheets[i].href || '')) continue;
+      var rules = [].slice.call(sheets[i].cssRules);
+      for (var j = 0; j < rules.length; j++) {
+        if (rules[j].selectorText === '.grid2') { css = rules[j].cssText; }
+      }
+    }
+  } catch (e) { css = 'blocked: ' + e.message; }
+
+  var b = row.getBoundingClientRect();
+  var lines = [
+    'viewport      ' + window.innerWidth + ' x ' + window.innerHeight,
+    'dpr           ' + window.devicePixelRatio,
+    'ua            ' + navigator.userAgent.slice(0, 90),
+    '',
+    'THE RULE THAT LOADED',
+    css,
+    '',
+    'computed cols ' + getComputedStyle(row).gridTemplateColumns,
+    'row           left ' + R(b.left) + '  right ' + R(b.right) + '  width ' + R(b.width),
+  ];
+  kids.forEach(function (k, n) {
+    var r = k.getBoundingClientRect(), s = getComputedStyle(k);
+    lines.push('field ' + (n + 1) + '       left ' + R(r.left) + '  right ' + R(r.right)
+      + '  width ' + R(r.width));
+    lines.push('              min-w ' + s.minWidth + '  max-w ' + s.maxWidth
+      + '  width ' + s.width + '  box ' + s.boxSizing);
+    lines.push('              overflows row by ' + R(r.right - b.right) + 'px');
+  });
+  lines.push('');
+  lines.push(kids[1].getBoundingClientRect().right > b.right + 0.5
+    ? '>>> STILL OVERFLOWING'
+    : '>>> fits');
+  out.textContent = lines.join('\n');
+})();
+</script>
+
+</body>
+</html>
