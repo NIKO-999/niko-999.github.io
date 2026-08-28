@@ -21,7 +21,16 @@
 <meta name="apple-mobile-web-app-title" content="Schedule" />
 
 <link rel="preload" as="font" type="font/woff2" href="fonts/Inter.woff2" crossorigin />
-<link rel="stylesheet" href="app.css" />
+<!-- ?v= is the CONTENT'S OWN FINGERPRINT, not a number somebody
+     remembers to bump. A phone reported a fixed layout still broken
+     twice: app.js had updated and app.css had not, because they are two
+     files with two caches and iOS gives no reliable way to bypass one.
+     A changed filename is the only thing a cache cannot ignore.
+
+     tests/schedule.js hashes both files and fails if either query is
+     stale, printing the value to paste in — so this cannot rot into a
+     version that stopped tracking what it names. -->
+<link rel="stylesheet" href="app.css?v=0cfc0bd6" />
 </head>
 <body>
 
@@ -191,6 +200,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=e9332673"></script>
 </body>
 </html>

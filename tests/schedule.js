@@ -1606,6 +1606,30 @@ const SAID = [
   ok('and the toggle is the same box as the fields above it',
     hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
 
+  /* ── the asset queries are the assets' own fingerprints ──
+     A layout fix was reported still broken twice after it shipped, and
+     both times the file on the server was correct: app.js had updated
+     on the phone and app.css had not. They are two files with two
+     caches and iOS offers no reliable way to bypass one, so "hard
+     refresh and see" is not a fix — a changed URL is.
+
+     A hand-bumped number would rot the first time somebody edits the
+     CSS and forgets, which is a stale version that LOOKS like
+     versioning. So the query has to be the content's own hash, and this
+     recomputes it and prints what to paste in when it drifts. */
+  {
+    const crypto = require('crypto'), fs = require('fs'), pth = require('path');
+    const here = (n) => pth.join(__dirname, '..', 'schedule', n);
+    const html = fs.readFileSync(here('index.html'), 'utf8');
+    const stale = ['app.css', 'app.js'].map((n) => {
+      const want = crypto.createHash('sha1')
+        .update(fs.readFileSync(here(n))).digest('hex').slice(0, 8);
+      const got = (html.match(new RegExp(n.replace('.', '\\.') + '\\?v=([a-f0-9]{8})')) || [])[1];
+      return got === want ? null : `${n} should be ?v=${want}, index.html says ?v=${got}`;
+    }).filter(Boolean);
+    ok('the cache-busting queries match what they name', stale.length === 0, stale);
+  }
+
   /* ── the two time fields, and why this is a SOURCE check ──
      They overflowed the sheet on a phone: `input[type=time]` has an
      intrinsic width in Safari of about 217px against a 173px track, and
