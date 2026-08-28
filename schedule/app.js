@@ -45,17 +45,26 @@
   var FULL  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
   /* ── the seed ──
-     The day this was built around, so the first open is a week with a
-     shape rather than an empty frame with instructions in it. Written
-     once, on first run only — clearing everything does not bring it
-     back, because a "clear" that refills itself is not one.
+     What a person sees the first time they open this, and it is a
+     STARTER rather than anybody's actual week.
 
-     The anchors are the ones already written down in this repo, in
-     routine/data.js: up at 5:45, train at 6:30, down at 22:45, and a
-     shift pattern that is different every day and absent on Tuesday
-     and Wednesday. Everything else is laid around them. It is a
-     starting shape, not a claim — every row is one tap from being
-     right.
+     IT USED TO BE MINE. Wake, Train, Walk and Down around a real shift
+     pattern and real trading hours, seeded from routine/data.js — which
+     meant every person who was ever sent this link opened it and found
+     somebody else's life already filled in, down to which days they
+     worked. That is not a first-run experience, it is a disclosure, and
+     it shipped because the file that made a good default for one person
+     was never asked whether it made a good default for a stranger.
+
+     What survives is the argument for having a seed at all: the first
+     open should be a week with a shape rather than an empty frame with
+     instructions in it. So it is five blocks a day that most people
+     recognise, at times most people could live with, and every row is
+     one tap from being right. Nothing in it says anything about anyone.
+
+     The old week is not gone — it moved to tests/schedule.js, which is
+     where a fixture belongs. It was doing two jobs and only one of them
+     was a default.
 
      A block CAN carry a place, and none of these do. It rides inside
      the name when there is one, rather than taking a column of its
@@ -63,46 +72,16 @@
      all week is worse than no track. */
   var SEED = {
     title: 'Daily Process',
-    sub: 'Up at 5:45 · down at 22:45',
-    items: [].concat(
-      /* the fixed part, which is the whole point of having one */
-      [0, 1, 2, 3, 4, 5, 6].reduce(function (all, d) {
-        return all.concat([
-          { d: d, s: 345,  e: 375,  r: '', n: 'Wake' },
-          { d: d, s: 390,  e: 450,  r: '', n: 'Train' },
-          { d: d, s: 465,  e: 510,  r: '', n: 'Walk' },
-          { d: d, s: 1365, e: 1380, r: '', n: 'Down' }
-        ]);
-      }, []),
-      /* the screen time, moved to whatever the shift leaves open */
-      [
-        { d: 0, s: 540, e: 630, r: '', n: 'Trading' },
-        { d: 1, s: 540, e: 630, r: '', n: 'Trading' },
-        { d: 2, s: 540, e: 660, r: '', n: 'Trading' },
-        { d: 3, s: 540, e: 660, r: '', n: 'Trading' },
-        { d: 4, s: 540, e: 630, r: '', n: 'Trading' },
-        { d: 5, s: 525, e: 585, r: '', n: 'Trading' },
-        { d: 6, s: 525, e: 585, r: '', n: 'Trading' }
-      ],
-      /* the shift — different every day, and gone on the open ones */
-      [
-        { d: 0, s: 660, e: 1020, r: '', n: 'Work' },
-        { d: 1, s: 780, e: 1260, r: '', n: 'Work' },
-        { d: 4, s: 720, e: 1320, r: '', n: 'Work' },
-        { d: 5, s: 600, e: 1080, r: '', n: 'Work' },
-        { d: 6, s: 600, e: 1080, r: '', n: 'Work' }
-      ],
-      /* thirty minutes, after whatever the day turned out to be */
-      [
-        { d: 0, s: 1275, e: 1305, r: '', n: 'Read' },
-        { d: 1, s: 1275, e: 1305, r: '', n: 'Read' },
-        { d: 2, s: 1275, e: 1305, r: '', n: 'Read' },
-        { d: 3, s: 1275, e: 1305, r: '', n: 'Read' },
-        { d: 4, s: 1320, e: 1350, r: '', n: 'Read' },
-        { d: 5, s: 1275, e: 1305, r: '', n: 'Read' },
-        { d: 6, s: 1275, e: 1305, r: '', n: 'Read' }
-      ]
-    )
+    sub: 'Up at 6:00 · down at 22:45',
+    items: [0, 1, 2, 3, 4, 5, 6].reduce(function (all, d) {
+      return all.concat([
+        { d: d, s: 360,  e: 390,  r: '', n: 'Wake' },
+        { d: d, s: 390,  e: 450,  r: '', n: 'Train' },
+        { d: d, s: 465,  e: 510,  r: '', n: 'Walk' },
+        { d: d, s: 1275, e: 1305, r: '', n: 'Read' },
+        { d: d, s: 1365, e: 1380, r: '', n: 'Down' }
+      ]);
+    }, [])
   };
 
   /* ═══════════════════════════════════════════════════════════
@@ -2049,7 +2028,28 @@
   var PEER_KEY = 'sched.peer.v1';
   var POST_KEY = 'sched.post.v1';
 
+  /* ── the server this copy of the app is paired with ──
+     It was blank, and every person had to be told a `.workers.dev`
+     address and type it into a box before friends did anything. That is
+     a URL nobody can check and everybody mistypes, and it made joining
+     a conversation rather than a tap.
+
+     Naming it here does NOT make the app chatty. `scApi` still returns
+     before it builds a request when there is no url, and nothing on the
+     week, the ring or the tally calls it — the first request of any
+     kind happens when somebody opens the Friends tab. The suite still
+     counts every request the main page makes and still fails on one
+     that leaves the origin, which is the assertion that keeps this
+     honest rather than the empty string was.
+
+     Deploying your own copy means changing this line and nothing else.
+     An empty string puts the app back to asking. */
+  var HOME = 'https://sched.nikorapullin.workers.dev';
+
   var net = { url: '', code: '', key: '', name: '', pic: '', on: false };
+  /* One attempt per visit. A claim that fails offline must not become a
+     request every time the tab is painted. */
+  var joining = false;
   var friends = [];   /* [{ code, name }] — the graph, and it stays here  */
   var peers = {};     /* code -> the last record fetched, so this paints offline */
   var posts = [];     /* your own log entries */
@@ -2467,16 +2467,27 @@
        same tap and does not compete with anything. */
     var add = $('scFriendAdd');
     add.textContent = '';
-    if (!net.on) {
-      /* One line here and the whole argument on the sheet where the
-         decision actually gets made. A paragraph on the screen you
-         merely arrive at is a disclaimer; on the sheet it is a
-         decision. */
-      add.appendChild(scEl('p', 'fr-note',
-        'Friends need a server. Nothing has left this browser.'));
-      add.appendChild(scLink('Turn on friends', scNetSheet));
-    } else {
+    if (net.on) {
+      /* The action first, because arriving here already did the setting
+         up. The sentence under it is what the turn-on sheet used to
+         say — it stays on the board rather than being shown once and
+         pressed through, since nobody presses through it any more. */
       add.appendChild(scLink('Add a friend', scAddSheet));
+      add.appendChild(scEl('p', 'fr-note',
+        'Your name, picture, ticks and logs are on the server. '
+        + 'Remove yourself any time in Settings.'));
+    } else if (joining) {
+      add.appendChild(scEl('p', 'fr-note', 'Setting up…'));
+    } else {
+      /* Only reached when the claim could not be made — offline, or a
+         server that is not there. The manual sheet is still the way to
+         point it somewhere else. */
+      add.appendChild(scEl('p', 'fr-note',
+        'Could not reach the server. Nothing has left this browser.'));
+      add.appendChild(scLink('Try again', function () {
+        joining = false; scArriveFriends(); scPaintFriends();
+      }));
+      add.appendChild(scLink('Use another server', scNetSheet));
     }
 
     var feed = $('scFeed');
@@ -2560,6 +2571,36 @@
     scPullAll(function () {
       pulling = false;
       if (view === 'friends') scPaintFriends();
+    });
+  }
+
+  /* ── arriving at the friends tab ──
+     A code is claimed here rather than behind a button. Somebody sent a
+     link, and being handed a `.workers.dev` address to type before
+     anything works is the wrong first minute — the code and key are
+     generated on the device either way, and neither is a decision
+     anybody can make a better version of by being asked.
+
+     WHAT LEAVES STAYS ON THE SCREEN. The old flow put that on the sheet
+     you pressed through, on the argument that a paragraph you merely
+     arrive at is a disclaimer while one on a sheet is a decision. With
+     the sheet gone the sentence has to live on the board, where it is
+     visible every time rather than once.
+
+     One attempt per visit: a claim that fails offline must not fire
+     again on every repaint, and the manual sheet is still there under
+     it for a URL that needs correcting. */
+  function scArriveFriends() {
+    /* A server chosen by hand outranks the built-in one. Without that,
+       "Use another server" would be overruled by HOME on the next
+       visit, and the sheet would look like it had done nothing. */
+    var where = net.url || HOME;
+    if (net.on || !where || joining) return scFriendsRefresh();
+    joining = true;
+    scJoin(where, net.name, function (okd) {
+      joining = false;
+      if (view === 'friends') scPaintFriends();
+      if (okd) scFriendsRefresh();
     });
   }
 
@@ -3037,7 +3078,10 @@
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
     if (ring) { scPaintRing(); scPaintRingList(); }
     else if (tal) scPaintTally();
-    else if (fr) { scPaintFriends(); scFrStop(frStop, false); scFriendsRefresh(); }
+    /* ARRIVING claims, drawing only draws — the same split the refresh
+       already keeps. A paint that fetched would recurse the first time
+       it ran, which is a bug this file has already had once. */
+    else if (fr) { scPaintFriends(); scFrStop(frStop, false); scArriveFriends(); }
     else scLive();
   }
 

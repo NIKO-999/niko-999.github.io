@@ -111,6 +111,82 @@ const SAID = [
     delete window.webkitSpeechRecognition;
   });
 
+  /* ── the week these assertions were written against ──
+     This used to be the app's own SEED, and it was one person's real
+     week: a shift pattern, trading hours, the lot. It made a fine
+     fixture and a terrible default — every stranger sent the link
+     opened it and found somebody else's life filled in — so the app
+     ships a generic starter now and the specific week lives here, which
+     is where a fixture belongs.
+
+     Everything below still measures against it: 47 blocks, a Walk that
+     feeds Mind, a Trading that feeds nothing, a Work shift long enough
+     to prove a range prints, and a Tuesday with no shift on it. Ids are
+     left off on purpose — scClean fills them in, so this also exercises
+     the repair path on every run. */
+  const WEEK = {
+    title: 'Daily Process',
+    sub: 'Up at 5:45 · down at 22:45',
+    items: [].concat(
+      [0, 1, 2, 3, 4, 5, 6].reduce((all, d) => all.concat([
+        { d, s: 345, e: 375, r: '', n: 'Wake' },
+        { d, s: 390, e: 450, r: '', n: 'Train' },
+        { d, s: 465, e: 510, r: '', n: 'Walk' },
+        { d, s: 1365, e: 1380, r: '', n: 'Down' },
+      ]), []),
+      [{ d: 0, s: 540, e: 630, r: '', n: 'Trading' },
+       { d: 1, s: 540, e: 630, r: '', n: 'Trading' },
+       { d: 2, s: 540, e: 660, r: '', n: 'Trading' },
+       { d: 3, s: 540, e: 660, r: '', n: 'Trading' },
+       { d: 4, s: 540, e: 630, r: '', n: 'Trading' },
+       { d: 5, s: 525, e: 585, r: '', n: 'Trading' },
+       { d: 6, s: 525, e: 585, r: '', n: 'Trading' }],
+      [{ d: 0, s: 660, e: 1020, r: '', n: 'Work' },
+       { d: 1, s: 780, e: 1260, r: '', n: 'Work' },
+       { d: 4, s: 720, e: 1320, r: '', n: 'Work' },
+       { d: 5, s: 600, e: 1080, r: '', n: 'Work' },
+       { d: 6, s: 600, e: 1080, r: '', n: 'Work' }],
+      [{ d: 0, s: 1275, e: 1305, r: '', n: 'Read' },
+       { d: 1, s: 1275, e: 1305, r: '', n: 'Read' },
+       { d: 2, s: 1275, e: 1305, r: '', n: 'Read' },
+       { d: 3, s: 1275, e: 1305, r: '', n: 'Read' },
+       { d: 4, s: 1320, e: 1350, r: '', n: 'Read' },
+       { d: 5, s: 1275, e: 1305, r: '', n: 'Read' },
+       { d: 6, s: 1275, e: 1305, r: '', n: 'Read' }]
+    ),
+  };
+  /* ── this page is pointed AWAY from the real server ──
+     The app now carries the address of a live worker and claims a code
+     the moment the Friends tab is opened. This page visits that tab
+     several times, so without this it would create a record on a real
+     server on every run — which it did, once, before this line existed.
+
+     Same-origin on purpose rather than a blocked host: the claim 404s,
+     friends stays off, and the "nothing leaves this origin" count below
+     stays exactly as strict as it was. The friends half is exercised on
+     its own page further down, against a worker running in this
+     process. */
+  await page.addInitScript(([w, nowhere]) => {
+    if (!localStorage.getItem('sched.v1')) {
+      localStorage.setItem('sched.v1', JSON.stringify(w));
+    }
+    if (!localStorage.getItem('sched.net.v1')) {
+      localStorage.setItem('sched.net.v1', JSON.stringify({
+        url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
+    }
+  }, [WEEK, `${BASE}/schedule/nofriends`]);
+  /* Answered here rather than left to the static server, and answered
+     with 200. Left to the server a POST gets 405; answered with 404 it
+     is still a failed fetch, and Chromium logs any failed fetch as a
+     console error — which the last assertion in this file counts, and
+     which carries no URL in its text, so it cannot be filtered by path
+     either. A 200 makes the claim succeed against a stand-in, so this
+     page also exercises the board in its ON state rather than only its
+     failure state. The real worker is exercised properly further down,
+     against the actual worker file running in this process. */
+  await page.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+    status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+
   /* ── every request, counted ── */
   const asked = [];
   page.on('request', (r) => asked.push(r.url()));
@@ -2377,7 +2453,7 @@ const SAID = [
         headers: Object.fromEntries(res.headers),
         body: Buffer.from(await res.arrayBuffer()) });
     });
-    await fp.addInitScript(() => {
+    await fp.addInitScript((host) => {
       const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
       window.Date = class extends R {
         constructor(...a) { super(...(a.length ? a : [F])); }
@@ -2385,7 +2461,21 @@ const SAID = [
       };
       delete window.SpeechRecognition;
       delete window.webkitSpeechRecognition;
-    });
+      /* Pointed at the worker running in THIS process, not the live one
+         the app ships with. Everything below is a real round trip
+         through the real worker file, and none of it touches a server
+         anybody else can see.
+
+         ONLY IF ABSENT. An init script runs on every navigation, and
+         this page reloads halfway through — written unconditionally it
+         put the record back to on:false with no code, throwing away the
+         claim the test had just made, and the failure surfaced four
+         hundred lines later as a log post that never landed. */
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          url: host, code: '', key: '', name: 'Niko', pic: '', on: false }));
+      }
+    }, HOST);
     const fetched = [];
     fp.on('request', (r) => fetched.push(r.url()));
     await fp.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
@@ -2424,14 +2514,51 @@ const SAID = [
     await fp.click('.sheet .btn.go');
     await fp.waitForTimeout(400);
 
-    await tab('friends');
-    ok('friends is off out of the box',
-      await fp.evaluate(() => localStorage.getItem('sched.net.v1') === null));
-    ok('and off means no request was made',
+    /* Scoped to ONE pane. Both halves stay in the DOM — the stop hides
+       them with display:none — so an unscoped query returns the feed's
+       actions alongside the board's whichever stop is up. */
+    const glyphs = (where) => fp.$$eval(where + ' .fr-link', (b) => b.map((x) =>
+      x.textContent.trim() + '|' + (x.querySelector('path').getAttribute('d')
+        .indexOf('M7 2v10') === 0 ? 'plus' : 'go')).join(' '));
+
+    /* ── nothing has left, and the tab has not been opened ──
+       This used to read "friends is off out of the box", and off meant
+       a person had to be told a .workers.dev address and type it in
+       before anything worked. That is gone: the build carries a server
+       and arriving at the tab claims a code.
+
+       What survives is the half that was actually the promise — the
+       week, the ring and the tally reach nothing at all. So the check
+       moves to WHEN rather than whether, and it is stricter for it: a
+       single request off this origin before the Friends tab is opened
+       fails, and that is the line the app must not cross. */
+    ok('the week, the ring and the tally have asked for nothing off origin',
       fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:') || u.startsWith('blob:')),
       fetched.filter((u) => !u.startsWith(BASE)));
-    ok('you are on the board anyway, out of your own ticks',
+    ok('and nothing has been claimed yet',
+      await fp.evaluate(() => {
+        const n = JSON.parse(localStorage.getItem('sched.net.v1') || 'null');
+        return !n || !n.on;
+      }));
+
+    await tab('friends');
+    await fp.waitForTimeout(900);
+
+    /* ── arriving turns it on ── */
+    ok('opening the tab claims a code, with nothing to type',
+      paths.includes('POST /v1/claim'), paths);
+    ok('you are on the board, out of your own ticks',
       await fp.$$eval('.fr-row', (r) => r.length) === 1);
+    ok('and the action waiting is Add a friend',
+      (await glyphs('#scFrPane')) === 'Add a friend|plus');
+    /* The turn-on sheet used to carry the sentence about what leaves,
+       on the argument that a paragraph you press through is a decision.
+       Nobody presses through anything now, so it has to be on the board
+       — visible every time rather than once. */
+    ok('and the board says what is on the server',
+      /name.+picture.+ticks.+logs/i.test(
+        await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent)),
+      await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent));
 
     /* ── two stops, one screen ──
        The board and the feed were stacked under two letterspaced
@@ -2464,30 +2591,14 @@ const SAID = [
        a three-row list, were louder than the board they were about. */
     ok('no action on the screen is a filled button',
       await fp.$$eval('.friends .btn', (b) => b.length) === 0);
+    /* SCOPED TO THE PANE THAT IS UP. Both halves stay in the DOM and
+       the stop hides one with display:none, so an unscoped query picks
+       up the feed's own action at zero height and reports it as a
+       control too small to press. It passed before only because friends
+       were off and the feed had no action in it. */
     ok('and every one of them still clears 44px',
-      await fp.$$eval('.fr-link, .fr-stop', (b) => b.length > 0
+      await fp.$$eval('#scFrPane .fr-link, .fr-stop', (b) => b.length > 0
         && b.every((x) => x.getBoundingClientRect().height >= 44)));
-    /* Checked here AND once friends are on, because the interesting
-       case only exists then: with it off the screen has one action on
-       it and any glyph at all passes. The first version of this ran
-       only here and could not fail. */
-    /* Scoped to ONE pane. Both halves stay in the DOM — the stop hides
-       them with display:none — so an unscoped query returns the feed's
-       actions alongside the board's whichever stop is up. */
-    const glyphs = (where) => fp.$$eval(where + ' .fr-link', (b) => b.map((x) =>
-      x.textContent.trim() + '|' + (x.querySelector('path').getAttribute('d')
-        .indexOf('M7 2v10') === 0 ? 'plus' : 'go')).join(' '));
-    ok('the one action off the shelf is a +',
-      await glyphs('#scFrPane') === 'Turn on friends|plus');
-
-    /* ── turning it on ── */
-    await fp.click('text=Turn on friends');
-    await fp.waitForTimeout(420);
-    await fp.fill('input[type=url]', HOST);
-    await fp.fill('.sheet input[type=text]', 'Niko');
-    await fp.click('text=Turn it on');
-    await fp.waitForTimeout(900);
-
     const mine = await fp.evaluate(() => JSON.parse(localStorage.getItem('sched.net.v1')));
     ok('it claims a code', /^[A-Z0-9]{8}$/.test(mine.code || ''), mine.code);
     /* I, O, 0 and 1 are out of the alphabet on purpose: this is a

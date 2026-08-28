@@ -380,6 +380,51 @@ coverage.
 **`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
 fixed here. Its twelve standing faults are all RADIUS in `jade/`.
 
+## The first minute
+
+**The seed was one person's real week, and it was the default.** Wake,
+Train and Walk around an actual shift pattern and actual trading hours,
+taken from `routine/data.js`. Every stranger sent the link opened it and
+found somebody else's life filled in, down to which days they worked.
+It shipped because a file that made a good default for the person who
+wrote it was never asked whether it made a good default for anybody
+else — it was doing two jobs, fixture and first run, and only one of
+them was a default.
+
+The app ships a generic starter now — five blocks a day most people
+recognise, at times most people could live with — and the specific week
+moved into `tests/schedule.js`, which is where a fixture belongs. The
+argument for having a seed at all survives: a first open should be a
+week with a shape rather than an empty frame with instructions in it.
+
+**The app names its server, and the promise moved rather than went.**
+`HOME` in `schedule/app.js` carries the `.workers.dev` address, so
+nobody is handed a URL to type and mistype. What used to be checked —
+friends is off until you turn it on — has become something stricter and
+truer: **the week, the ring and the tally reach nothing at all**, and a
+single request off origin before the Friends tab is opened fails the
+suite. Arriving at that tab claims a code; drawing it still only draws,
+which is the same split that stopped the first version recursing.
+
+**The sentence about what leaves has to live where nobody presses
+through it.** It was on the turn-on sheet, on the argument that a
+paragraph you press through is a decision and one you merely arrive at
+is a disclaimer. With the sheet gone that argument inverts: it sits on
+the board now, visible every time instead of once.
+
+**An init script runs on every navigation.** `tests/schedule.js` seeds
+`sched.net.v1` so it never touches the live server, and written
+unconditionally it put the record back to `on:false` with no code after
+the page reloaded halfway through — throwing away the claim the test had
+just made. It surfaced four hundred lines later as a log post that never
+landed. Seed only when the key is absent.
+
+**And a test that points the app at a dead end must answer it.** Left to
+the static server a POST gets 405; answered 404 it is still a failed
+fetch, and Chromium logs any failed fetch as a console error — which the
+last assertion in that file counts, and whose text carries no URL, so it
+cannot be filtered by path either. The stand-in answers 200.
+
 ## The worker
 
 `worker/` is the one thing in this repository that is not a static file
