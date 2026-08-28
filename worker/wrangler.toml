@@ -13,13 +13,6 @@ name = "sched"
 main = "index.js"
 compatibility_date = "2026-01-01"
 
-# The binding name is what `env.SCHED` in index.js resolves to. Rename
-# it here and the worker stops finding its store — with `undefined is
-# not an object`, at request time, on somebody's phone.
-[[kv_namespaces]]
-binding = "SCHED"
-id = "e924044bdaf14d5b96c8c27da74e1503"
-
 # No routes and no custom domain: the worker answers on its own
 # workers.dev URL, which is the string the app is given. A custom domain
 # would mean a zone, and there is nothing here worth a DNS record.
@@ -29,6 +22,21 @@ id = "e924044bdaf14d5b96c8c27da74e1503"
 # on. Leaving it unstated relies on a default, and a default that varies
 # between `wrangler deploy` from a laptop and a Git-connected build is
 # the kind of thing that reads as the worker being broken.
+#
+# AND IT SITS ABOVE [[kv_namespaces]], WHICH IS THE WHOLE POINT. In TOML
+# every key after a table header belongs to that table until the next
+# header, so written below the block it parsed as a property of the KV
+# BINDING — `{binding, id, workers_dev}` — where it means nothing and
+# nothing complains. A top-level setting has to be written before the
+# first table or it stops being top-level.
 workers_dev = true
+
+# The binding name is what `env.SCHED` in index.js resolves to. Rename
+# it here and the worker stops finding its store — with `undefined is
+# not an object`, at request time, on somebody's phone.
+[[kv_namespaces]]
+binding = "SCHED"
+id = "e924044bdaf14d5b96c8c27da74e1503"
+
 [observability]
 enabled = true

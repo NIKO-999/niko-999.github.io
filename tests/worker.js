@@ -262,6 +262,46 @@ const day = (off) => {
   r = await hit('PUT', '/v1/rec/NIKO4821', { key: KEY, body: { name: 'back' } });
   ok('the old key opens nothing afterwards', r.status === 401, 'got ' + r.status);
 
+  /* ── the deployment config, parsed rather than eyeballed ──
+     wrangler.toml is the other half of this worker and nothing here
+     used to look at it. It cost a real bug: `workers_dev = true` was
+     written UNDER the [[kv_namespaces]] block, and in TOML every key
+     after a table header belongs to that table until the next one — so
+     it parsed as a property of the KV binding, where it means nothing
+     and nothing complains. The file read correctly to a human and was
+     wrong to the parser, which is the only kind of wrong worth a test.
+
+     `binding` gets the same treatment for the same reason: index.js
+     reads env.SCHED, and a rename here fails at request time on
+     somebody's phone with no way to see why. */
+  {
+    const toml = require('fs').readFileSync(
+      path.resolve(__dirname, '..', 'worker', 'wrangler.toml'), 'utf8');
+    /* A five-line TOML reader: enough for a flat file of scalars and
+       one array-of-tables, and it models the ONE rule the bug turned
+       on — a key belongs to whatever header last opened. */
+    const top = {}, tables = {};
+    let where = top;
+    for (const line of toml.split('\n')) {
+      const s = line.replace(/#.*$/, '').trim();
+      if (!s) continue;
+      const tbl = s.match(/^\[\[?([a-z_]+)\]\]?$/);
+      if (tbl) { where = tables[tbl[1]] = tables[tbl[1]] || {}; continue; }
+      const kv = s.match(/^([a-z_]+)\s*=\s*(.+)$/);
+      if (kv) where[kv[1]] = kv[2].replace(/^"|"$/g, '');
+    }
+    ok('the worker is named, and named the same as its URL',
+      top.name === 'sched' && top.main === 'index.js', JSON.stringify(top));
+    ok('workers_dev is TOP LEVEL, not swallowed by the table under it',
+      top.workers_dev === 'true', JSON.stringify(top));
+    ok('and the KV binding is the name index.js actually reads',
+      tables.kv_namespaces && tables.kv_namespaces.binding === 'SCHED',
+      JSON.stringify(tables.kv_namespaces));
+    ok('and it names a namespace rather than the placeholder',
+      /^[a-f0-9]{32}$/.test((tables.kv_namespaces || {}).id || ''),
+      JSON.stringify(tables.kv_namespaces));
+  }
+
   console.log('\n  ' + pass + ' passed, ' + fail + ' failed\n');
   process.exit(fail ? 1 : 0);
 })().catch((e) => { console.error(e); process.exit(1); });
