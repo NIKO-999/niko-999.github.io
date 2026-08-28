@@ -380,6 +380,59 @@ coverage.
 **`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
 fixed here. Its twelve standing faults are all RADIUS in `jade/`.
 
+## The one browser this is developed on is not the one it runs on
+
+**Four fixes for one bug went out on a model of it rather than a
+measurement.** The edit sheet's two time fields overflowed their row on
+iOS and on nothing else, and every attempt was about track sizing —
+`minmax(0, 1fr)` for the `1fr`, `min-width: 0`, `max-width: 100%`,
+`margin: 0`. All four were reported back as still clipping.
+
+It was never the track. **A natively-appearing form control in Safari
+keeps its own metrics and does not take the author's.** Measured on the
+phone: tracks 191px each and correct, the field's `width` computed to
+191px as told, and its border box 221px — `box-sizing` came back
+CONTENT-BOX in spite of the `*` reset at the top of the file. 191 of
+content plus 28 padding plus 2 border is 221, and two of those overflow
+by 30. `-webkit-appearance: none` is what hands the box back, and
+`box-sizing` then has to be said again locally, because the universal
+selector is where it was being taken from. The picker is not the cost:
+tapping still opens the iOS wheel.
+
+The tell was in the same sheet and was read past three times: `.grid2
+.field` sets `min-width` and `max-width` in ONE rule, and the phone
+reported `max-width: 100%` applied while `min-width` came back as
+**45px**. One rule, half of it landing, is never a specificity story.
+
+**Chromium is the only browser on this machine, and it sizes
+`input[type=time]` to fit.** So every layout assertion written for this
+passed identically whether the fix was there or not. A check that cannot
+fail is worse than none, because it is what made three of the four
+claims of "fixed" sound verified. The tests were green the entire time
+the app was broken.
+
+**What ended it was a page that took the measurement on the device.**
+`schedule/probe.html` drew the row and printed its own computed tracks,
+box-sizing, appearance, min-width and overflow — one screenshot, and the
+cause was in it. Then the same page drew the row twice, as shipped and
+with the native box forced back, so a second screenshot confirmed the
+fix rather than another round of reasoning. It was deleted the moment it
+had answered, which is the whole shape of the thing: **a probe is
+written to be thrown away, and leaving it in is how it rots into a page
+nobody dares delete.**
+
+Only then is a test worth writing. Forcing `appearance: auto` reproduces
+the phone's numbers exactly in Chromium, so the assertion is a
+measurement — the fields are sized by their border box, the native
+appearance is gone, and nothing draws wider than its track — and it was
+proven to bite by reverting the fix and watching it fall over. **A
+source-text check for the declaration would have passed on a stylesheet
+that had the line and no effect.**
+
+If a phone reports something the suite says is fine, the suite is
+measuring the wrong machine. Ship a probe, read a number off the device,
+and only then reason.
+
 ## The first minute
 
 **The seed was one person's real week, and it was the default.** Wake,
