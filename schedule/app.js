@@ -896,7 +896,6 @@
     $('scEmpty').hidden = state.items.length > 0 || view === 'ring';
 
     var open = scOpenDay();
-    var mine = null;
 
     ORDER.forEach(function (d) {
       var rows = scByDay(d);
@@ -904,7 +903,6 @@
       var li = scEl('li', 'day' + (d === today ? ' is-today' : '')
         + (isOpen ? ' is-open' : ''));
       li.dataset.d = d;
-      if (isOpen) mine = li;
 
       var head = scEl('div', 'wk-h');
       var dn = scEl('button', 'day-name', isOpen ? FULL[d] : ABBR[d]);
@@ -1127,12 +1125,10 @@
     rail.parentNode.insertBefore(dots, rail.nextSibling);
 
     scDeckFit(rail, dots);
-    if (mine) {
-      /* Set directly rather than through scrollIntoView, which scrolls
-         the PAGE as well and drags the hero off the top on its way to
-         centring a card. */
-      rail.scrollLeft = mine.offsetLeft - (rail.clientWidth - mine.offsetWidth) / 2;
-    }
+    /* Set directly rather than through scrollIntoView, which scrolls the
+       PAGE as well and drags the hero off the top on its way to
+       centring a card. */
+    scDeckCentre();
 
     scLive();
   }
@@ -1156,22 +1152,100 @@
   function scDeckWatch() {
     var rail = $('scRail');
     rail.addEventListener('scroll', function () {
+      /* ── a hidden deck is not being swiped ──
+         Hiding the rail resets its scrollLeft to 0 and fires a scroll
+         event on the way, so switching to the ring, the tally or
+         friends looked exactly like a swipe to Monday — and coming back
+         to the week silently put you on the wrong day. It is invisible
+         at the moment it happens, which is what let it through: the
+         only symptom is the card you find when you return. */
+      if (rail.hidden) return;
       if (settle) clearTimeout(settle);
       settle = setTimeout(function () {
         settle = null;
-        var mid = rail.scrollLeft + rail.clientWidth / 2;
+        if (rail.hidden) return;
+        /* ── RECTS, not offsetLeft ──
+           `scrollLeft` is measured from the rail's content box and
+           `offsetLeft` from the offsetParent, which for a bled,
+           unpositioned rail is neither the rail nor the same origin.
+           Mixing them puts a constant bias in every comparison, so the
+           card the deck called nearest was the one BESIDE the one in the
+           middle — and it was self-consistent, because the centring used
+           the same wrong arithmetic and landed where the picker expected
+           to find it. A viewport rect either side needs no origin at
+           all. */
+        var rb = rail.getBoundingClientRect();
+        var mid = rb.left + rb.width / 2;
         var best = null, gap = Infinity;
         [].forEach.call(rail.children, function (li) {
-          var c = li.offsetLeft + li.offsetWidth / 2;
+          var r = li.getBoundingClientRect();
+          var c = r.left + r.width / 2;
           if (Math.abs(c - mid) < gap) { gap = Math.abs(c - mid); best = li; }
         });
+        /* ── THE ENDS CANNOT REACH THE MIDDLE ──
+           Nearest-to-centre alone cannot ever choose the first card or
+           the last: a scroller stops at 0, and with the open card 268px
+           wide against 76px neighbours the middle of the rail at that
+           point is over the THIRD card. Monday and Sunday were
+           unreachable — not awkward, unreachable, with no way to open
+           them at all. At either end the answer is the end card, which
+           is also what a person swiping to the end means. */
+        var end = rail.scrollWidth - rail.clientWidth;
+        if (rail.scrollLeft <= 1) best = rail.firstElementChild;
+        else if (rail.scrollLeft >= end - 1) best = rail.lastElementChild;
         if (!best) return;
         var d = +best.dataset.d;
         if (d === scOpenDay()) return;
         openDay = d;
         scDeckOpen();
+        /* Opening a card takes it from 76px to 268px, so the deck
+           reflows AROUND the thing that was just centred and it is no
+           longer centred. Without this the picker's next pass finds a
+           different card under the middle and opens that instead — the
+           deck walks sideways one card at a time and never settles. The
+           scroll this causes runs the picker once more, which then finds
+           the same card and returns at the check above.
+
+           Smooth here, because this is the one call that happens on the
+           end of somebody's own swipe. */
+        scDeckCentre(true);
       }, 120);
     }, { passive: true });
+  }
+
+  /* Put the open card back in the middle. The rail loses its
+     scrollLeft every time it is hidden, so returning to the week
+     without this lands you at Monday however the deck was left. */
+  function scDeckCentre(smooth) {
+    var rail = $('scRail');
+    var mine = rail.querySelector('.day.is-open');
+    if (!mine) return;
+    /* A DELTA in one coordinate system, for the same reason the picker
+       above takes rects: how far the open card's middle is from the
+       rail's, added to where the rail is scrolled now. */
+    var rb = rail.getBoundingClientRect(), r = mine.getBoundingClientRect();
+    var to = rail.scrollLeft + (r.left + r.width / 2) - (rb.left + rb.width / 2);
+
+    /* ── smooth only when it is a CORRECTION ──
+       After a swipe the card grows under your thumb and the deck has to
+       shuffle to keep it centred; done instantly that is a second,
+       unasked-for jump on the end of your own gesture. Arriving at the
+       screen is not a correction — the week appearing already
+       mid-animation looks like it was left running while you were
+       somewhere else — so a first paint and a return from another tab
+       both land instantly.
+
+       A smooth scroll emits events until it finishes, and the picker
+       waits 120ms after the LAST one, so it runs once on arrival, finds
+       the card it just centred and returns at the equality check rather
+       than chasing itself. */
+    var still = window.matchMedia
+      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (smooth && !still && rail.scrollTo) {
+      rail.scrollTo({ left: to, behavior: 'smooth' });
+    } else {
+      rail.scrollLeft = to;
+    }
   }
 
   function scDeckOpen() {
@@ -3462,6 +3536,20 @@
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
     $('scRail').hidden = ring || tal || fr;
+    /* The dots are a SIBLING of the rail, not a child — the rail is the
+       scroller, and a page indicator that scrolls sideways with the
+       cards it indicates is not an indicator. So it has to be hidden
+       with it: left alone it sat on the friends board and the tally
+       under a week that was not on screen. */
+    var wkd = document.querySelector('.wk-dots');
+    if (wkd) wkd.hidden = ring || tal || fr;
+    /* Coming back to the week: re-measure, because the rail's own rect
+       was zero for as long as it was hidden, and re-centre, because its
+       scrollLeft went with it. */
+    if (!(ring || tal || fr)) {
+      scDeckFit($('scRail'), wkd);
+      scDeckCentre();
+    }
     /* The ring's own middle says the state and the figure, and the
        tally has a hero of its own. Leaving the week's above either says
        it twice, and the louder of the two is the one that is not the

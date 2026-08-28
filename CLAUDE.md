@@ -345,6 +345,107 @@ not wrap and did not clip — it ran out of the card and printed itself
 over the open one beside it. `tests/schedule.js` measures every
 descendant of every shut card against the card's own right edge.
 
+**`[hidden]` HAS TO BE SAID ONCE A VIEW TAKES A `display`.** The app
+puts a view away by setting the `hidden` attribute, which works only
+because of the browser's own `[hidden] { display: none }` — and any
+author rule outranks it. The rail was a plain block for its whole life,
+so `hidden` did what it looked like it did; the day it became `display:
+flex` for the deck the attribute stopped meaning anything and the week
+stayed on screen underneath the friends board and the tally. Nothing
+threw, the property was still being set, and it had quietly stopped
+working. The dots went the same way for a different reason: they are a
+SIBLING of the rail rather than a child — a page indicator that scrolls
+sideways with the cards it indicates is not an indicator — so they are
+a second thing to hide and were the half left behind.
+
+**The check that missed it read the property.** `!scRail.hidden` was
+true throughout the bug. It measures the LAYOUT now — on each view,
+exactly one of the four has a real box on screen — because what is
+drawn is the only thing the attribute was ever a proxy for.
+
+**Nearest-to-centre cannot reach the ends.** A scroller stops at
+`scrollLeft` 0, and with the open card at 268px against 76px
+neighbours the middle of the rail at that point sits over the THIRD
+card: Monday and Sunday were not awkward to open, they were impossible.
+At either end the answer is the end card, which is also what somebody
+swiping to the end means.
+
+**And opening a card moves it.** 76px to 268px, so the deck reflows
+around the thing that was just centred and it is no longer centred —
+the picker's next pass then finds a different card under the middle and
+opens that one, and the deck walks sideways a card at a time without
+settling. `scDeckCentre` runs after the class moves; the scroll that
+causes runs the picker once more, which finds the same card and returns
+at the equality check. A test driving the scroller by hand has to do
+the same thing twice for the same reason.
+
+**`scrollLeft` and `offsetLeft` are not the same origin.** One is
+measured from the scroller's content box and the other from the
+offsetParent, which for a bled, unpositioned rail is neither. Mixing
+them put a constant bias in every comparison, and it was
+self-consistent — the centring used the same wrong arithmetic and
+landed where the picker expected to find it, so it only showed once
+something else moved the deck. Two viewport rects need no origin at
+all.
+
+**`[hidden]` HAS TO BE SAID ONCE A VIEW TAKES A `display`.** The app
+puts a view away by setting the `hidden` attribute, which works only
+because of the browser's own `[hidden] { display: none }` — and any
+author rule outranks it. The rail was a plain block for its whole life,
+so `hidden` did what it looked like it did; the day it became `display:
+flex` for the deck the attribute stopped meaning anything and the week
+stayed on screen underneath the friends board and the tally. Nothing
+threw, the property was still being set, and it had quietly stopped
+working. The dots went the same way for a different reason: they are a
+SIBLING of the rail rather than a child — a page indicator that scrolls
+sideways with the cards it indicates is not an indicator — so they are
+a second thing to hide, and they were the half left behind.
+
+**The check that missed it read the property.** `!scRail.hidden` was
+true throughout the bug. It measures the LAYOUT now — on each view,
+exactly one of the four has a real box on screen — because what is
+drawn is the only thing the attribute was ever a proxy for.
+
+**Nearest-to-centre cannot reach the ends.** A scroller stops at
+`scrollLeft` 0, and with the open card at 268px against 76px
+neighbours the middle of the rail at that point sits over the THIRD
+card: Monday and Sunday were not awkward to open, they were impossible.
+At either end the answer is the end card, which is also what somebody
+swiping to the end means.
+
+**And opening a card moves it.** 76px to 268px, so the deck reflows
+around the thing that was just centred and it is no longer centred —
+the picker's next pass then finds a different card under the middle and
+opens that one, and the deck walks sideways a card at a time without
+settling. `scDeckCentre` runs after the class moves; the scroll that
+causes runs the picker once more, which finds the same card and returns
+at the equality check. A test driving the scroller by hand has to do
+the same thing twice for the same reason.
+
+**`scrollLeft` and `offsetLeft` are not the same origin.** One is
+measured from the scroller's content box and the other from the
+offsetParent, which for a bled, unpositioned rail is neither. Mixing
+them put a constant bias in every comparison, and it was
+self-consistent — the centring used the same wrong arithmetic and
+landed where the picker expected to find it, so it only showed once
+something else moved the deck. Two viewport rects need no origin at
+all.
+
+**The card OPENS rather than jumping open, and the re-centre is smooth
+only when it is a correction.** A whole card's width appearing in one
+frame, with the deck shuffling in the same frame to keep it centred,
+read as a snap on the end of your own swipe. Width is a layout property
+and animating one is usually the wrong answer — here there are seven
+boxes, all siblings of a fixed-height scroller, so the reflow is
+bounded, and a transform cannot do the job because scaling a 76px card
+to 268px stretches its type. **Both states must be a length**: between
+`auto` and a number there is nothing to interpolate, and a transition
+naming `width` over an `auto` does nothing while looking identical in
+the stylesheet — which is what the test asserts rather than the
+declaration. Arriving at the screen stays instant: a week that appears
+already mid-animation looks like it was left running while you were
+somewhere else.
+
 ## Morning, afternoon, evening
 
 **Noon and five o'clock**, which is where the words already sit in

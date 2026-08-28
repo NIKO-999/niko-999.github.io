@@ -876,6 +876,18 @@ body {
    was the first design and it needed a re-render on every swipe — this
    way a swipe moves one class and the browser does the rest, and the
    whole week is in the document for anything that needs to read it. */
+/* ── [hidden] HAS TO BE SAID, and that is the whole bug ──
+   The `hidden` attribute works by a UA rule of `display: none`, and any
+   author `display` beats it. The rail was a plain block for its whole
+   life, so `hidden` did what it looked like it did; the moment it
+   became `display: flex` the attribute stopped meaning anything, and
+   the week stayed on screen underneath the friends board and the tally.
+   Nothing threw and nothing looked broken from the code — the property
+   was being set exactly as before, and had quietly stopped working.
+   Any element in this file that takes a `display` and is ever hidden
+   needs this line. */
+.rail[hidden], .wk-dots[hidden] { display: none; }
+
 .rail {
   list-style: none;
   display: flex;
@@ -910,6 +922,31 @@ body {
   padding: 15px 14px;
   background: color-mix(in srgb, var(--ink) 4%, transparent);
   border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  /* ── the card OPENS rather than jumping open ──
+     76px to 268px is the whole width of a card appearing in one frame,
+     and with the deck re-centring on it in the same frame the swipe
+     read as a snap rather than as a card turning to face you. Eased,
+     the two happen together and the movement is one gesture.
+
+     Width is a layout property and animating one is normally the wrong
+     answer — but there are seven boxes on this deck, all of them
+     siblings of a fixed-height scroller, so the reflow is bounded and
+     does not touch the rest of the page. The alternative, a transform,
+     cannot do it: scaling a 76px card to 268px stretches its type.
+
+     `flex: none` above and a width in px on both states is what makes
+     it animatable at all; between `auto` and a length there is nothing
+     for the browser to interpolate. */
+  transition: width .26s cubic-bezier(.2, .7, .3, 1),
+              background-color .26s ease,
+              border-color .26s ease,
+              box-shadow .26s ease,
+              opacity .26s ease;
+}
+/* Motion is the whole subject here, so this is a real setting rather
+   than a formality: with it on, the card is simply the size it is. */
+@media (prefers-reduced-motion: reduce) {
+  .day { transition: none; }
 }
 /* The open card is paper and the others are not, so the one you are
    reading is lifted off the ground rather than merely wider. */

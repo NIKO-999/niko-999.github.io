@@ -952,6 +952,7 @@ const SAID = [
     [...document.querySelectorAll('.row')].filter((r) =>
       getComputedStyle(r, '::after').animationName !== 'none').length) === 1);
 
+
   /* ── the ring ──
      The second view, still on the frozen Tuesday: Trading runs 9 to 11
      and it is 9:30, so exactly a quarter of the block is gone and the
@@ -983,6 +984,173 @@ const SAID = [
     }
     throw new Error('could not reach view ' + v);
   };
+
+  /* ── one view at a time, MEASURED rather than asked ──
+     `hidden` works by a UA rule of `display: none`, and any author
+     `display` beats it. The rail was a plain block for its whole life,
+     so setting `hidden` did what it looked like it did; the day it
+     became `display: flex` for the deck the attribute silently stopped
+     meaning anything, and the week stayed on screen under the friends
+     board and the tally. Nothing threw, and the property was still
+     being set exactly as before.
+
+     So this asks the LAYOUT, not the property: a real box with real
+     area is on screen whatever the attribute says. Reading `.hidden`
+     here would have passed throughout the bug — which is precisely
+     what the old check did. */
+  const onScreen = async () => page.evaluate(() => {
+    const box = (id) => {
+      const el = document.getElementById(id) || document.querySelector(id);
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    };
+    return { rail: box('scRail'), ring: box('scRing'), tally: box('scTally'),
+             friends: box('scFriends'), dots: box('.wk-dots') };
+  });
+  for (const [v, want] of [['list', 'rail'], ['ring', 'ring'],
+                           ['tally', 'tally'], ['friends', 'friends']]) {
+    await show(v);
+    await page.waitForTimeout(160);
+    const on = await onScreen();
+    ok(`on ${v}, ${want} is the only view drawing`,
+      on[want] && ['rail', 'ring', 'tally', 'friends']
+        .filter((k) => k !== want).every((k) => !on[k]), { v, on });
+    /* The dots are a sibling of the rail rather than a child — a page
+       indicator that scrolls sideways with the cards it indicates is
+       not an indicator — so they are a second thing to hide, and they
+       were the half that got left behind. */
+    ok(`...and the deck's dots go with it`, on.dots === (want === 'rail'),
+      { v, dots: on.dots });
+  }
+  await show('list');
+  await page.waitForTimeout(160);
+
+  /* ── leaving the week and coming back lands on today ──
+     Hiding the rail resets its scrollLeft to 0 and fires a scroll event
+     on the way out, which the deck's settle handler read as a swipe to
+     Monday. Nothing was visibly wrong at the moment it happened — the
+     only symptom is the card you find when you return, which is why it
+     needs a check that leaves and comes back rather than one that looks
+     at the deck standing still. */
+  const openName = () => page.$$eval('.day.is-open .day-name',
+    (d) => d.map((x) => x.textContent).join());
+  ok('the week opens on today to begin with',
+    (await openName()) === 'Tuesday', await openName());
+  for (const away of ['friends', 'tally', 'ring']) {
+    await show(away);
+    await page.waitForTimeout(200);
+    await show('list');
+    await page.waitForTimeout(280);
+    ok(`...and is still on today after a trip to ${away}`,
+      (await openName()) === 'Tuesday', await openName());
+  }
+  /* Scrolled TWICE, and that is the mechanism rather than a retry.
+     Opening a card takes it from 76px to 268px, so the deck reflows
+     around the thing that was just centred and it is no longer centred.
+     The app re-centres itself after opening; a test driving the scroller
+     by hand has to let it settle and then correct. */
+  const goTo = async (dow) => {
+    for (let i = 0; i < 4; i++) {
+      await page.evaluate((d) => {
+        const rail = document.getElementById('scRail');
+        const t = [...rail.children].find((li) => +li.dataset.d === d);
+        const rb = rail.getBoundingClientRect(), r = t.getBoundingClientRect();
+        rail.scrollLeft += (r.left + r.width / 2) - (rb.left + rb.width / 2);
+      }, dow);
+      await page.waitForTimeout(300);
+      const cls = await page.$eval('.day.is-open', (e) => e.dataset.d);
+      if (+cls === dow) return true;
+    }
+    return false;
+  };
+
+  /* ── every day is reachable, and the ends are the awkward ones ──
+     Nearest-to-centre cannot choose the first card or the last: a
+     scroller stops at 0, and with the open card 268px against 76px
+     neighbours the middle of the rail at that point sits over the THIRD
+     card. Monday and Sunday were not awkward to reach, they were
+     unreachable. Checked at both ends, because a clamp written for one
+     of them is half a fix. */
+  for (const [dow, name] of [[1, 'Monday'], [0, 'Sunday'], [3, 'Wednesday']]) {
+    ok(`the deck can open ${name}`, await goTo(dow), await openName());
+  }
+  await goTo(2);
+
+  /* ── the card opens rather than jumping open ──
+     76px to 268px in one frame, with the deck re-centring on it in the
+     same frame, read as a snap on the end of your own swipe rather than
+     as a card turning to face you. Both eased now. The width has to be
+     a length in both states for there to be anything to interpolate,
+     which is what is actually asserted — a transition naming `width`
+     over an `auto` does nothing and looks identical in the stylesheet. */
+  const ease = await page.evaluate(() => {
+    const open = document.querySelector('.day.is-open');
+    const shut = document.querySelector('.day:not(.is-open)');
+    const a = getComputedStyle(open), b = getComputedStyle(shut);
+    return { prop: a.transitionProperty, dur: a.transitionDuration,
+             openW: a.width, shutW: b.width };
+  });
+  ok('the card animates its own width', /width/.test(ease.prop)
+    && parseFloat(ease.dur) > 0, ease);
+  ok('...and both states are a length, so there is something to animate',
+    /^\d/.test(ease.openW) && /^\d/.test(ease.shutW)
+    && parseFloat(ease.openW) > parseFloat(ease.shutW), ease);
+
+  /* Motion is the entire subject of that rule, so this is a real
+     setting rather than a formality. */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(120);
+  ok('...and asked to sit still, it does',
+    await page.$eval('.day.is-open', (e) =>
+      parseFloat(getComputedStyle(e).transitionDuration) === 0));
+  await page.emulateMedia({ reducedMotion: null });
+  await page.waitForTimeout(120);
+
+  /* ── a day you swiped to survives the trip too ──
+     The deck's scrollLeft is reset by hiding it, so coming back has to
+     put the open card in the middle again — otherwise the day you chose
+     is still `is-open` and 268px wide, sitting off the left of the
+     screen with Monday in front of it. Today passes this trivially,
+     because centring on today is what a fresh render does anyway; only
+     a day you moved to can tell the difference. */
+  await page.evaluate(() => {
+    const rail = document.getElementById('scRail');
+    const fri = [...rail.children].find((li) => +li.dataset.d === 5);
+    const rb = rail.getBoundingClientRect(), r = fri.getBoundingClientRect();
+    rail.scrollLeft += (r.left + r.width / 2) - (rb.left + rb.width / 2);
+  });
+  await page.waitForTimeout(320);
+  ok('swiping opens the card you land on', (await openName()) === 'Friday',
+    await openName());
+  await show('tally');
+  await page.waitForTimeout(220);
+  await show('list');
+  await page.waitForTimeout(320);
+  ok('...and it is still the open one after leaving the week',
+    (await openName()) === 'Friday', await openName());
+  const centred = await page.evaluate(() => {
+    const rail = document.getElementById('scRail');
+    const el = rail.querySelector('.day.is-open');
+    const r = el.getBoundingClientRect(), b = rail.getBoundingClientRect();
+    return Math.round(Math.abs((r.left + r.width / 2) - (b.left + b.width / 2)));
+  });
+  ok('...and back in the middle of the deck rather than off the side',
+    centred <= 6, centred);
+  /* Put the week back on today for everything that follows. */
+  ok('...and the deck goes back to today when asked', await goTo(2)
+    && (await openName()) === 'Tuesday', await openName());
+
+  /* And the card it lands on is one you can actually reach: a deck left
+     scrolled to Monday puts today's rows in a 76px column whose own
+     container is display:none, so every row measures zero and nothing
+     on this screen can be pressed. */
+  ok('...with today drawn wide enough to hold its rows',
+    await page.$eval('.day.is-open', (d) => d.getBoundingClientRect().width) > 200);
+  ok('...and its rows on screen',
+    await page.$eval('.day.is-today .row[data-id]',
+      (r) => { const b = r.getBoundingClientRect();
+               return b.width > 100 && b.height > 20; }));
 
   /* ── the bar ──
      Four labelled stops in a glass pill, and the one control that ADDS
