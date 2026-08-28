@@ -38,8 +38,15 @@ actually set up by:
 2. Put it in `wrangler.toml` (GitHub's web editor is enough — it is one
    line).
 3. Dashboard → **Compute → Workers** → create from a Git repository,
-   with the root directory set to `worker`. `worker/package.json` has
-   no dependencies, so nothing installs and there is no build command.
+   with the **Path** set to `/worker` (the field is under Advanced
+   settings, and it is the root directory). No build command.
+
+`package-lock.json` in this folder is why that build works. A
+Git-connected build runs `npm ci` in the root directory before it does
+anything else, and `npm ci` refuses to run without a lockfile — it does
+not fall back to `npm install`. There are no dependencies to lock, so
+the file is four lines and installs nothing; it exists purely so the
+install step has something to succeed at.
 
 Pasting `index.js` straight into the dashboard editor works too, and
 then no id is needed at all — but `wrangler.toml` is not read on that
