@@ -1,9 +1,13 @@
 # The whole deployment, and it is four lines of substance.
 #
-# `id` below is the ONE thing that is not in this file: a KV namespace
-# id belongs to an account, so it is filled in per-account by whoever
-# runs `wrangler kv namespace create SCHED` and pastes the id back.
-# See README.md in this folder for the four commands.
+# `id` below names a KV namespace on one Cloudflare account. It is an
+# address rather than a credential — reaching it still needs that
+# account's API token — which is why it is committed rather than kept
+# out, and why this repository being public costs nothing here.
+#
+# Anyone deploying their OWN copy replaces it with their own namespace's
+# id: dashboard → Storage & databases → KV → create one, and the id is
+# the last segment of that namespace's URL.
 
 name = "sched"
 main = "index.js"
@@ -14,7 +18,7 @@ compatibility_date = "2026-01-01"
 # not an object`, at request time, on somebody's phone.
 [[kv_namespaces]]
 binding = "SCHED"
-id = "PASTE_THE_KV_NAMESPACE_ID_HERE"
+id = "e924044bdaf14d5b96c8c27da74e1503"
 
 # No routes and no custom domain: the worker answers on its own
 # workers.dev URL, which is the string the app is given. A custom domain

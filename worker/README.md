@@ -14,25 +14,41 @@ X". Read `index.js`; the reasoning is written where each decision is.
 
 ## Deploying it
 
-Four commands. You need a Cloudflare account; the free tier is far more
-than this will ever use.
+You need a Cloudflare account; the free tier is far more than this will
+ever use. `wrangler.toml` already carries a namespace id, so a deploy
+onto THAT account needs no edit — anyone deploying their own copy
+replaces it with their own.
+
+From a machine:
 
 ```sh
 cd worker
 npx wrangler login                      # opens a browser, once
-npx wrangler kv namespace create SCHED  # prints an id
-```
-
-Paste that id into `wrangler.toml`, replacing
-`PASTE_THE_KV_NAMESPACE_ID_HERE`. Then:
-
-```sh
+npx wrangler kv namespace create SCHED  # prints an id, if you need one
 npx wrangler deploy
 ```
 
-It prints a URL ending in `.workers.dev`. **That URL is the thing to
-hand back** — the app is inert until it has one, and holds no other
-configuration.
+**From a phone, with no command line**, which is the route this was
+actually set up by:
+
+1. Dashboard → **Storage & databases → KV** → create a namespace. The
+   name is only a label; the **id** is the last segment of the
+   namespace's own URL, and that is the string `wrangler.toml` wants.
+   The id is not on the Settings tab — read it out of the address bar.
+2. Put it in `wrangler.toml` (GitHub's web editor is enough — it is one
+   line).
+3. Dashboard → **Compute → Workers** → create from a Git repository,
+   with the root directory set to `worker`. `worker/package.json` has
+   no dependencies, so nothing installs and there is no build command.
+
+Pasting `index.js` straight into the dashboard editor works too, and
+then no id is needed at all — but `wrangler.toml` is not read on that
+path, so the KV binding has to be added by hand under the worker's
+**Settings → Bindings**, with the variable named `SCHED`.
+
+Either way it ends with a URL ending in `.workers.dev`. **That URL is
+the thing to hand back** — the app is inert until it has one, and holds
+no other configuration.
 
 ## What it costs
 
