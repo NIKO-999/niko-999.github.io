@@ -86,6 +86,56 @@ const WEEK = {
   ),
 };
 
+/* ── the same week, but FULL ── WVFULL=1
+   The fixture above is five to seven blocks a day, which is a schedule
+   somebody is keeping rather than one somebody has filled in. A proposal
+   that only ever meets it is a proposal judged on its best case: the
+   deck's rows are equal shares of the card height, so six of them are
+   comfortable and sixteen are the question.
+
+   Sixteen on a weekday, ten at the weekend, with the short domestic
+   blocks that are the actual reason a day gets full — coffee, shower,
+   lunch, a shop, a call. Every name here reaches a glyph through the
+   app's own keyword table, which is also worth exercising: it is the
+   first fixture with enough variety to catch one that does not. */
+const FULL = {
+  title: 'Daily Process',
+  sub: 'Up at 5:45 · down at 22:45',
+  items: [].concat(
+    [1, 2, 3, 4, 5].reduce((all, d) => all.concat([
+      { d, s: 345,  e: 375,  r: '', n: 'Wake' },
+      { d, s: 375,  e: 390,  r: '', n: 'Coffee' },
+      { d, s: 390,  e: 450,  r: '', n: 'Train' },
+      { d, s: 450,  e: 465,  r: '', n: 'Shower' },
+      { d, s: 465,  e: 495,  r: '', n: 'Breakfast' },
+      { d, s: 540,  e: 660,  r: '', n: 'Trading' },
+      { d, s: 660,  e: 690,  r: '', n: 'Email' },
+      { d, s: 690,  e: 735,  r: '', n: 'Walk the dog' },
+      { d, s: 750,  e: 780,  r: '', n: 'Lunch' },
+      { d, s: 780,  e: 1050, r: '', n: 'Work' },
+      { d, s: 1050, e: 1095, r: '', n: 'Shop' },
+      { d, s: 1110, e: 1155, r: '', n: 'Cook' },
+      { d, s: 1155, e: 1200, r: '', n: 'Eat' },
+      { d, s: 1230, e: 1260, r: '', n: 'Call Mum' },
+      { d, s: 1275, e: 1320, r: '', n: 'Read' },
+      { d, s: 1365, e: 1380, r: '', n: 'Down' },
+    ]), []),
+    [0, 6].reduce((all, d) => all.concat([
+      { d, s: 420,  e: 450,  r: '', n: 'Wake' },
+      { d, s: 450,  e: 465,  r: '', n: 'Coffee' },
+      { d, s: 480,  e: 570,  r: '', n: 'Run' },
+      { d, s: 570,  e: 600,  r: '', n: 'Shower' },
+      { d, s: 600,  e: 660,  r: '', n: 'Breakfast' },
+      { d, s: 720,  e: 840,  r: '', n: 'Clean' },
+      { d, s: 870,  e: 960,  r: '', n: 'Garden' },
+      { d, s: 1020, e: 1140, r: '', n: 'Friends' },
+      { d, s: 1170, e: 1230, r: '', n: 'Eat' },
+      { d, s: 1275, e: 1335, r: '', n: 'Film' },
+      { d, s: 1380, e: 1395, r: '', n: 'Down' },
+    ]), [])
+  ),
+};
+
 /* A Wednesday at 10:12, which is inside the Trading block — so every
    proposal has to say something about a block that is RUNNING, and
    about a morning that is already spent. A frozen clock at 3am would
@@ -126,7 +176,7 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
       const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
         + '-' + String(d.getDate()).padStart(2, '0');
       localStorage.setItem('sched.block.v1', JSON.stringify({ [k]: {} }));
-    }, [WEEK, FROZEN, theme]);
+    }, [process.env.WVFULL ? FULL : WEEK, FROZEN, theme]);
 
     await page.goto(`http://127.0.0.1:${port}/schedule/`, { waitUntil: 'networkidle' });
     await page.evaluate(async () => { await document.fonts.ready; });
@@ -226,6 +276,8 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
           deckSet: d && d.style.height, deckH: d && d.getBoundingClientRect().height,
           deckTop: d && d.getBoundingClientRect().top,
           cardH: c && c.getBoundingClientRect().height,
+          rows: [].map.call(document.querySelectorAll('.wv-card.mid .wv-cr'),
+            (r) => Math.round(r.getBoundingClientRect().height)),
           cardBottom: c && c.getBoundingClientRect().bottom,
           scroll: document.documentElement.scrollHeight };
       }), null, 1));
