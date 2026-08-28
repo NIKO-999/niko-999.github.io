@@ -215,6 +215,22 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
     });
     await page.waitForTimeout(260);
 
+    if (process.env.WVDEBUG) {
+      console.log(theme, JSON.stringify(await page.evaluate(() => {
+        const r = document.getElementById('scRail').getBoundingClientRect();
+        const b = document.querySelector('.bar').getBoundingClientRect();
+        const d = document.querySelector('.wv-deck');
+        const c = document.querySelector('.wv-card.mid');
+        return { railTop: r.top, railH: r.height, barTop: b.top, barH: b.height,
+          vh: window.innerHeight,
+          deckSet: d && d.style.height, deckH: d && d.getBoundingClientRect().height,
+          deckTop: d && d.getBoundingClientRect().top,
+          cardH: c && c.getBoundingClientRect().height,
+          cardBottom: c && c.getBoundingClientRect().bottom,
+          scroll: document.documentElement.scrollHeight };
+      }), null, 1));
+    }
+
     await page.screenshot({ path: path.join(dir, `${name}-${theme}.png`) });
     await page.close();
   }
