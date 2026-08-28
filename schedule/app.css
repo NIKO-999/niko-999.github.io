@@ -134,6 +134,11 @@
   --bad: #e2231a;
 
   --pad:   18px;   /* the page's left edge — everything aligns to it */
+  /* The open card's width, named because TWO rules need it: the card
+     itself, and the lead-in the deck needs either side for that card to
+     be able to sit in the middle. Written twice they drift, and the
+     symptom is a card that is centred on most days and not on Monday. */
+  --wk-open: 268px;
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
 
@@ -906,7 +911,23 @@ body {
   overflow-x: auto;
   overflow-y: hidden;
   margin: 0 calc(var(--pad) * -1);
-  padding: 2px var(--pad);
+  /* ── the ends need room to reach the middle ──
+     A scroller stops at 0, so without a lead-in the first card cannot
+     be centred however far you scroll: Monday opened against the left
+     edge while every other day sat in the middle. The room needed is
+     half the difference between the rail and an open card.
+
+     Percentage padding resolves against the CONTAINING BLOCK, which is
+     the poster's content box, and the rail is wider than that by the
+     bleed it takes either side — so the pad is added back. Pure
+     arithmetic in CSS rather than a measured number in JS: nothing
+     depends on it being right any more, since a card is opened by being
+     pressed, and it follows the screen without anyone re-measuring.
+
+     `max` with --pad is the floor, for a screen too narrow to hold an
+     open card with anything either side. */
+  padding: 2px max(var(--pad),
+                   calc((100% - var(--wk-open)) / 2 + var(--pad)));
   /* PROXIMITY, not mandatory. Snap used to be load-bearing — the card
      nearest the middle after a swipe was the one that opened — and it
      is decoration now that a press opens a card. Mandatory against
@@ -957,7 +978,7 @@ body {
 /* The open card is paper and the others are not, so the one you are
    reading is lifted off the ground rather than merely wider. */
 .day.is-open {
-  width: 268px;
+  width: var(--wk-open);
   background: var(--paper);
   border-color: color-mix(in srgb, var(--ink) 16%, transparent);
   box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);

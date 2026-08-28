@@ -400,6 +400,17 @@ looking exactly right — and it is `display: none` on the open card,
 where a transparent button over the rows would swallow every press
 meant for a block.
 
+**The lead-in came back, for LOOKS rather than for reach.** A scroller
+stops at 0, so without room either side the first card cannot be
+centred however far you scroll — Monday and Sunday opened against the
+screen edge while every other day sat in the middle, 43px out, measured.
+It is arithmetic in CSS now instead of a number measured in JS, because
+nothing depends on it being right any more: `max(--pad, (100% -
+--wk-open) / 2 + --pad)`, where the percentage resolves against the
+poster's content box and the bleed is added back. The open card's width
+is a token, since two rules need it and written twice they drift — the
+symptom of which is a card centred on most days and not on Monday.
+
 **Snap went from mandatory to proximity with it.** Snap was
 load-bearing while the nearest card decided what opened; it is
 decoration now, and mandatory against cards of two different widths

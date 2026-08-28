@@ -1076,6 +1076,33 @@ const SAID = [
     ok(`one press opens ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]}`,
       await goTo(dow), await openName());
   }
+  /* ── and it lands in the MIDDLE, including at the ends ──
+     A scroller stops at 0, so without a lead-in the first card cannot
+     be centred however far it is scrolled: Monday opened against the
+     left edge while every other day sat in the middle. The room either
+     side is half the difference between the rail and an open card, done
+     in CSS — nothing depends on it being right now that a press is what
+     opens a card, so it is arithmetic rather than a measured constant.
+
+     Every day, not just the ends: the ends are where it showed, not the
+     whole of it. Measured on composited geometry, because the value
+     that matters is where the card actually is. */
+  const offCentre = async () => page.evaluate(() => {
+    const rail = document.getElementById('scRail');
+    const o = rail.querySelector('.day.is-open');
+    const rb = rail.getBoundingClientRect(), r = o.getBoundingClientRect();
+    return Math.round(Math.abs((r.left + r.width / 2) - (rb.left + rb.width / 2)));
+  });
+  const strays = [];
+  for (const dow of [1, 2, 3, 4, 5, 6, 0]) {
+    await goTo(dow);
+    const off = await offCentre();
+    if (off > 2) strays.push(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
+      + ' off by ' + off);
+  }
+  ok('every day, opened, sits in the middle of the deck',
+    strays.length === 0, strays);
+
   /* And the shut cards are real buttons, which is what makes the week
      reachable without a swipe at all. */
   ok('every shut card is a named, focusable control',
