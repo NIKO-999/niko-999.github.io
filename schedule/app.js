@@ -192,10 +192,45 @@
   function scRange(s, e) { return sc12(s) + ' - ' + sc12(e) + ' ' + scMer(e); }
 
   function scRangeLong(s, e) {
-    return sc12(s) + ' ' + scMer(s) + ' to ' + sc12(e) + ' ' + scMer(e);
+    return scT(s) + scMerIf(s) + ' to ' + scT(e) + scMerIf(e);
   }
 
+  /* Strict 24-hour, and it stays that way whatever the phone shows:
+     this is the value an <input type="time"> takes and the format the
+     parser reads back. What a PERSON sees goes through scT below. */
   function scHHMM(min) { return scPad(Math.floor(min / 60)) + ':' + scPad(min % 60); }
+
+  /* ── the phone's own clock ──
+     Asked by FORMATTING a known afternoon time and looking for
+     letters, not by reading a locale off Intl. On iOS the 24-Hour Time
+     switch in Settings changes what toLocaleTimeString draws while the
+     locale stays whatever it was — so the only reliable question is
+     what the device actually renders, which is the one this asks.
+     Intl is the fallback for an engine whose toLocaleTimeString says
+     nothing, and 24-hour is the last resort because it is the reading
+     that cannot be ambiguous.
+
+     Resolved ONCE: it cannot change without the page reloading, and a
+     locale lookup per drawn row is sixteen of them a render. */
+  var H12 = (function () {
+    try {
+      var t = new Date(2000, 0, 1, 13, 5).toLocaleTimeString();
+      if (/\d/.test(t)) return /[ap]\.?\s?m/i.test(t);
+    } catch (e) {}
+    try {
+      var o = new Intl.DateTimeFormat(undefined, { hour: 'numeric' }).resolvedOptions();
+      if (typeof o.hour12 === 'boolean') return o.hour12;
+      if (o.hourCycle) return o.hourCycle === 'h11' || o.hourCycle === 'h12';
+    } catch (e) {}
+    return false;
+  })();
+
+  /* A time as the phone writes it, WITHOUT the meridiem — a separate
+     call, because a range prints it once on the end rather than twice
+     and an axis may not want it at all. */
+  function scT(min) { return H12 ? sc12(min) : scHHMM(min); }
+  /* '' on a 24-hour phone, so every caller can concatenate it blind. */
+  function scMerIf(min) { return H12 ? ' ' + scMer(min) : ''; }
 
   function scFromHHMM(v) {
     var m = /^(\d{1,2}):(\d{2})$/.exec(String(v || '').trim());
@@ -1159,7 +1194,12 @@
            screen reader and a tab order follow the source, and a time
            announced after the name it is drawn above is the same
            mistake pointing the other way. */
-        row.appendChild(scEl('span', 't', scHHMM(it.s) + '\u2013' + scHHMM(it.e)));
+        /* The meridiem ONCE, on the end, and only where the phone
+           writes one at all — with an end time known and a block under
+           twelve hours the start has one reading, and the column a
+           second one would take is the one holding the name. */
+        row.appendChild(scEl('span', 't',
+          scT(it.s) + '\u2013' + scT(it.e) + scMerIf(it.e)));
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
         row.appendChild(n);
@@ -1801,7 +1841,7 @@
   function scDate() {
     var d = new Date(), n = d.getDate();
     $('scHdDate').textContent = FULL[d.getDay()] + ' ' + n + scOrd(n)
-      + ' \u00b7 ' + scHHMM(scNowMin());
+      + ' \u00b7 ' + scT(scNowMin()) + scMerIf(scNowMin());
   }
 
   /* ── the day's span ──
@@ -1841,8 +1881,13 @@
     }
 
     wrap.hidden = false;
-    $('scSpanA').textContent = scHHMM(a);
-    $('scSpanB').textContent = scHHMM(b);
+    /* The meridiem is printed here on a 12-hour phone and nowhere on a
+       24-hour one. An axis in 24-hour figures says what the dot's
+       position says and needs no letters; "5:45" and "11:00" with no
+       letters is two times that could be either half of the day, which
+       is worse than the noise. */
+    $('scSpanA').textContent = scT(a) + scMerIf(a);
+    $('scSpanB').textContent = scT(b) + scMerIf(b);
     $('scSpanAn').textContent = first.n;
     $('scSpanBn').textContent = last.n;
     $('scSpanFill').style.width = pc + '%';
@@ -4111,7 +4156,8 @@
               ? 'Clear ' + p.days.map(function (d) { return FULL[d]; }).join(', ')
               : 'Remove ' + p.name));
             card.appendChild(scEl('span', 'p-meta', hits.length
-              ? hits.map(function (h) { return ABBR[h.d] + ' ' + sc12(h.s); }).join('  ·  ')
+              ? hits.map(function (h) {
+                  return ABBR[h.d] + ' ' + scT(h.s) + scMerIf(h.s); }).join('  ·  ')
               : 'Nothing on the card matches that'));
           }
           preview.appendChild(card);

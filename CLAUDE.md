@@ -1141,6 +1141,39 @@ rather than a decision.
 starts at 23:40 and ends at 00:40 is on two days, and this app's whole
 record is one day per row.
 
+## The clock is the phone's, not the app's
+
+Every time a PERSON reads now follows the device: 24-hour where the
+phone is, 12-hour with a meridiem where it is not. `scHHMM` stays
+strict 24-hour and is not part of that — it is the value an `<input
+type="time">` takes and the format the parser reads back, and a sweep
+that reached those fields would break the edit sheet on exactly the
+phones this was written for. `scT` is what a person sees.
+
+**Asked by FORMATTING a known afternoon time and looking for letters**,
+never by reading a locale off `Intl`. The 24-Hour Time switch in iOS
+Settings changes what `toLocaleTimeString` draws while the locale stays
+whatever it was, so the only reliable question is what the device
+actually renders. `Intl` is the fallback for an engine that says
+nothing, and 24-hour is the last resort because it is the reading that
+cannot be ambiguous. Resolved ONCE at boot: it cannot change without a
+reload, and a locale lookup per row is sixteen a render.
+
+**The meridiem is once per range, on the end.** A row reading
+"9:00 AM–11:00 AM" spends the column the name needs, and with an end
+time known and a block under twelve hours the start has one reading
+anyway. The span's ends are the exception in the other direction: on a
+24-hour phone an axis needs no letters, but "5:45" and "11:00" without
+them are two times that could be either half of the day.
+
+**THE SUITE'S LOCALE IS PINNED, and that is not tidiness.** With the
+output following the device, an unpinned context measures the machine:
+the same assertion reads "09:00–11:00" here and "9:00–11:00 AM" on a
+box set to en-US, and the one that fails is the box. `PHONE` is en-GB,
+and the 12-hour half is measured on its own en-US context at the foot
+of the file — a format that follows the device cannot be checked on
+one device.
+
 ## Nobody is called "You"
 
 `scJoin` defaulted the name to `'You'` and PUSHED it, so every person

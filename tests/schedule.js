@@ -59,8 +59,17 @@ const deltaE = (a, b) => {
   return Math.hypot(A[0] - B[0], A[1] - B[1], A[2] - B[2]);
 };
 
-/* A phone, and a real one — the app has no other layout. */
-const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isMobile: true, hasTouch: true };
+/* A phone, and a real one — the app has no other layout.
+
+   THE LOCALE IS PINNED, and that is not tidiness. Every printed time
+   now follows the phone's own clock, so an unpinned context measures
+   whatever machine the suite is on: the same assertion reads
+   "09:00–11:00" here and "9:00–11:00 AM" on a box set to en-US, and
+   the one that fails is the machine rather than the app. en-GB is
+   24-hour, which is what the person this is built for uses. The
+   12-hour half is measured on its own context further down. */
+const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
+  isMobile: true, hasTouch: true, locale: 'en-GB' };
 
 /* Sentence in, day out. Every row here is something you would actually
    say at a phone about your own day; the awkward ones are the point —
@@ -68,35 +77,35 @@ const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2, isM
    place that is a word rather than a code. */
 const SAID = [
   ['Train every day 6:30 to 7:30 at the gym',
-    { days: 'MON TUE WED THU FRI SAT SUN', name: 'Train', s: '6:30 AM', e: '7:30 AM', room: 'Gym' }],
+    { days: 'MON TUE WED THU FRI SAT SUN', name: 'Train', s: '06:30', e: '07:30', room: 'Gym' }],
   ['Add Walk on Monday and Wednesday from 7:45 to 8:30',
-    { days: 'MON WED', name: 'Walk', s: '7:45 AM', e: '8:30 AM', room: '' }],
+    { days: 'MON WED', name: 'Walk', s: '07:45', e: '08:30', room: '' }],
   /* No meridiem anywhere, and both readings are legal English. An
      afternoon block is the only sane one, and nothing in the sentence
      says so — the scoring does. */
   ['Admin Monday 1:30 to 3',
-    { days: 'MON', name: 'Admin', s: '1:30 PM', e: '3:00 PM', room: '' }],
+    { days: 'MON', name: 'Admin', s: '13:30', e: '15:00', room: '' }],
   ['Trading weekdays 9 to 10:30',
-    { days: 'MON TUE WED THU FRI', name: 'Trading', s: '9:00 AM', e: '10:30 AM', room: '' }],
+    { days: 'MON TUE WED THU FRI', name: 'Trading', s: '09:00', e: '10:30', room: '' }],
   ['Shift Friday 12 to 3 PM in the shop',
-    { days: 'FRI', name: 'Shift', s: '12:00 PM', e: '3:00 PM', room: 'Shop' }],
+    { days: 'FRI', name: 'Shift', s: '12:00', e: '15:00', room: 'Shop' }],
   ['I have football on Saturday from three to four',
-    { days: 'SAT', name: 'Football', s: '3:00 PM', e: '4:00 PM', room: '' }],
+    { days: 'SAT', name: 'Football', s: '15:00', e: '16:00', room: '' }],
   ['put Meal prep on Sunday at half past one for 90 minutes',
-    { days: 'SUN', name: 'Meal Prep', s: '1:30 PM', e: '3:00 PM', room: '' }],
+    { days: 'SUN', name: 'Meal Prep', s: '13:30', e: '15:00', room: '' }],
   ['schedule Physio every Tuesday at 8 for 2 hours',
-    { days: 'TUE', name: 'Physio', s: '8:00 AM', e: '10:00 AM', room: '' }],
+    { days: 'TUE', name: 'Physio', s: '08:00', e: '10:00', room: '' }],
   /* "weekends" set the days AND stayed in the name, so the same bug
      shipped a block called "Long walk weekends" twice over. */
   ['Long walk weekends 10 to 11',
-    { days: 'SAT SUN', name: 'Long Walk', s: '10:00 AM', e: '11:00 AM', room: '' }],
+    { days: 'SAT SUN', name: 'Long Walk', s: '10:00', e: '11:00', room: '' }],
   /* The filler list must not eat a word that is part of the name. */
   ['Back to back calls Monday 8 to 9',
-    { days: 'MON', name: 'Back to Back Calls', s: '8:00 AM', e: '9:00 AM', room: '' }],
+    { days: 'MON', name: 'Back to Back Calls', s: '08:00', e: '09:00', room: '' }],
   ['Read tues 9 to 1030',
-    { days: 'TUE', name: 'Read', s: '9:00 AM', e: '10:30 AM', room: '' }],
+    { days: 'TUE', name: 'Read', s: '09:00', e: '10:30', room: '' }],
   ['Stretch Friday eight thirty to ten',
-    { days: 'FRI', name: 'Stretch', s: '8:30 AM', e: '10:00 AM', room: '' }],
+    { days: 'FRI', name: 'Stretch', s: '08:30', e: '10:00', room: '' }],
 ];
 
 (async () => {
@@ -553,20 +562,20 @@ const SAID = [
   };
   const n1 = await nowSaid('Watch a podcast now');
   ok('“now” is a time, and it brings an hour with it',
-    n1 && n1.days === 'TUE' && /^9:30 AM to 10:30 AM/.test(n1.meta), n1);
+    n1 && n1.days === 'TUE' && /^09:30 to 10:30/.test(n1.meta), n1);
   ok('...and the word does not end up in the name',
     n1 && !/now/i.test(n1.name), n1);
   /* It carries its own day. Saying "now" on a Tuesday and being asked
      which day is the app not having listened. */
   const n2 = await nowSaid('Watch a podcast today now');
   ok('...and a day said as well does not double it',
-    n2 && n2.days === 'TUE' && /^9:30 AM to 10:30 AM/.test(n2.meta), n2);
+    n2 && n2.days === 'TUE' && /^09:30 to 10:30/.test(n2.meta), n2);
   const n3 = await nowSaid('Read now for 90 minutes');
   ok('...and a length said after it is honoured',
-    n3 && /^9:30 AM to 11:00 AM/.test(n3.meta), n3);
+    n3 && /^09:30 to 11:00/.test(n3.meta), n3);
   const n4 = await nowSaid('Read now for 2 hours');
   ok('...in hours as well as minutes',
-    n4 && /^9:30 AM to 11:30 AM/.test(n4.meta), n4);
+    n4 && /^09:30 to 11:30/.test(n4.meta), n4);
   /* An explicit clock time still wins: somebody who says both is
      correcting themselves, and the digits are the correction. */
   /* Both halves, because they fail apart: the explicit clock has to
@@ -576,7 +585,7 @@ const SAID = [
      using none of it. */
   const n5 = await nowSaid('Read now at 3');
   ok('...and a real time said with it wins the clock',
-    n5 && /^3:00 PM to 4:00 PM/.test(n5.meta), n5);
+    n5 && /^15:00 to 16:00/.test(n5.meta), n5);
   ok('...while the word still leaves the name and still says the day',
     n5 && n5.days === 'TUE' && !/now/i.test(n5.name), n5);
   await page.keyboard.press('Escape');
@@ -872,9 +881,15 @@ const SAID = [
              last: rows[rows.length - 1].querySelector('.t').textContent,
              mins };
   });
-  ok('the span runs from the day’s first block to its last, in 24-hour time',
-    span.a === '05:45' && span.b === '23:00'
-    && span.first.indexOf('05:45') === 0 && span.last.indexOf('23:00') > 0, span);
+  ok('the span runs from the day’s first block to its last',
+    span.first.indexOf('05:45') === 0 && span.last.indexOf('23:00') > 0, span);
+  /* ── the phone's own clock ──
+     24-hour here because the context is pinned to en-GB, which is the
+     half this person uses. The 12-hour half needs its own context and
+     gets one at the foot of this file: a format that follows the
+     device cannot be checked on one device. */
+  ok('...written the way this phone writes a time',
+    span.a === '05:45' && span.b === '23:00', span);
   ok('and it names both ends', span.an === 'Wake' && span.bn === 'Down', span);
   ok('the dot sits where the clock is between them',
     Math.abs(span.dot - (570 - 345) / (1380 - 345) * 100) < 0.5
@@ -910,7 +925,7 @@ const SAID = [
   }
 
   ok('and it is spoken as well as drawn',
-    /5:45 AM to 11:00 PM/.test(span.label)
+    /05:45 to 23:00/.test(span.label)
     && /Wake to Down/.test(span.label), span.label);
 
   /* ── a block’s name is its row’s subheading ──
@@ -4136,6 +4151,62 @@ const SAID = [
     }
 
     globalThis.Date = RealDate;
+  }
+
+  /* ── the same app on a 12-hour phone ──
+     A format that follows the device cannot be checked on one device.
+     Its own context at en-US, seeded and frozen exactly as the main
+     one is, and every place a time is drawn has to come back with a
+     meridiem — the head's clock, the span's ends, and a row.
+
+     THE MERIDIEM IS ONCE PER RANGE, on the end. A row reading
+     "9:00 AM–11:00 AM" is the second one taking the column the name
+     needs, and with an end time known and a block under twelve hours
+     the start already has only one reading. Both halves are asserted,
+     because "it has a meridiem" passes on a row carrying two.
+
+     And the EDIT FIELDS stay 24-hour whatever the phone shows:
+     <input type="time"> takes that format and nothing else, so a
+     sweep that reached them would break the sheet on exactly the
+     phones this was written for. */
+  {
+    const up = await browser.newPage({ ...PHONE, locale: 'en-US' });
+    await up.addInitScript(([w, f]) => {
+      localStorage.setItem('sched.v1', JSON.stringify(w));
+      localStorage.setItem('sched.view.v1', 'list');
+      localStorage.setItem('sched.net.v1', JSON.stringify({
+        url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [f])); }
+        static now() { return f; }
+      };
+    }, [WEEK, new Date('2026-09-01T09:30:00').getTime()]);
+    await up.goto(BASE + '/schedule/', { waitUntil: 'networkidle' });
+    await up.waitForTimeout(400);
+    const twelve = await up.evaluate(() => ({
+      head: document.getElementById('scHdDate').textContent,
+      a: document.getElementById('scSpanA').textContent,
+      b: document.getElementById('scSpanB').textContent,
+      row: [...document.querySelectorAll('.day.is-open .row[data-id] .t')]
+        .map((t) => t.textContent),
+    }));
+    ok('a 12-hour phone gets 12-hour times',
+      /9:30 AM$/.test(twelve.head) && twelve.a === '5:45 AM'
+      && twelve.b === '11:00 PM', twelve);
+    const withMer = twelve.row.filter((t) => /[AP]M/.test(t));
+    ok('...and a row carries the meridiem once, on the end',
+      withMer.length === twelve.row.length && twelve.row.length > 1
+      && twelve.row.every((t) => (t.match(/[AP]M/g) || []).length === 1
+        && /[AP]M$/.test(t)), twelve.row);
+    await up.click('.day.is-open .row[data-id]');
+    await up.waitForTimeout(240);
+    const fields = await up.$$eval('#scSheetBody input[type="time"]',
+      (i) => i.map((x) => x.value));
+    ok('...while the edit fields stay strict 24-hour, which is all they take',
+      fields.length === 2 && fields.every((v) => /^\d{2}:\d{2}$/.test(v)), fields);
+    await up.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);
