@@ -295,11 +295,11 @@ body {
 }
 
 /* ── the hero ──
-   A rule, then the state, then the time it runs to. The figure is a
-   CLOCK TIME rather than a countdown on purpose: a duration cannot
-   hold one shape — "42", then "1 h 30 m" — so at 44px it reflows the
-   whole head every time it crosses an hour. The duration is still
-   said, in the caption, where changing width costs nothing. */
+   Two lines: what state the day is in, and what the block is. The 44px
+   clock time that used to sit between them is GONE — the span above
+   draws where in the day you are and the caption below says how long
+   is left, so the biggest object on the screen was repeating both of
+   them and adding nothing. */
 .live {
   margin-top: 16px;
   display: flex;
@@ -317,29 +317,12 @@ body {
 }
 .live.is-next .eyebrow { color: var(--dim); }
 
-.live .figure {
-  margin-top: 3px;
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
-.live .figure b {
-  font-size: 44px;
-  font-weight: 700;
-  letter-spacing: -.045em;
-  line-height: .92;
-}
-.live .figure i {
-  font-size: 11px;
-  font-weight: 400;
-  font-style: normal;
-  letter-spacing: .06em;
-  margin-left: 5px;
-  color: var(--dim);
-}
-
+/* The sentence is the hero now that the figure has gone, so it takes a
+   step it did not need underneath a 44px number. */
 .caption {
-  margin-top: 5px;
-  font-size: 12px;
+  margin-top: 4px;
+  font-size: 14px;
+  font-weight: 600;
   color: var(--ink);
 }
 .caption:empty { display: none; }

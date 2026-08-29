@@ -308,6 +308,21 @@ carrying it: a string nothing renders and nothing can edit is not
 preserved data, it is a key that outlives everyone who knows what it
 was for.
 
+**AND THE 44px CLOCK TIME IS GONE.** It was the biggest object on the
+screen and it was saying twice what the two things either side of it
+already said: the span draws where in the day you are, the caption
+says how long is left. What is left is a state and a sentence — "NOW"
+over "Trading · 48 min left". The eyebrow lost its "· until" with it,
+because a preposition pointing at a figure that is not drawn reads as
+a string that failed to fill in, and the caption took a step up to 14
+because it is the hero now rather than a note under a number.
+
+The one branch that has to print a clock time is the one with nothing
+left today: "in 7 h" means nothing about tomorrow morning, so that
+caption carries the time the figure used to. `tests/schedule.js`
+asserts the ABSENCE of the element rather than of its text — an
+emptied `<b>` still reserves its line.
+
 **The span is the divider.** The hero used to hang off a 3px black
 rule, which was the loudest object above the fold and carried nothing.
 The same line is now the day's own first minute to its last — never

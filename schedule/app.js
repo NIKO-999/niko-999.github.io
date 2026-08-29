@@ -1798,14 +1798,12 @@
       else if (it.s > now && !next) next = it;
     });
 
-    var state, at, of;
+    var state, of;
     if (running) {
       state = 'Now';
-      at = running.e;
       of = running.n + ' · ' + scSpan(running.e - now) + ' left';
     } else if (next) {
       state = 'Next';
-      at = next.s;
       of = next.n + ' · in ' + scSpan(next.s - now);
     } else {
       var ahead = null;
@@ -1815,16 +1813,20 @@
       }
       if (!ahead) { line.hidden = true; $('scLiveOf').hidden = true; return; }
       state = ahead.k === 1 ? 'Tomorrow' : FULL[ahead.d];
-      at = ahead.it.s;
-      of = ahead.it.n;
+      /* The other two branches say how far off it is; a day away is too
+         far for that to mean anything, so this one prints the clock
+         time instead. It is the only branch that has to, and it is the
+         one the removed figure used to cover. */
+      of = ahead.it.n + ' · ' + sc12(ahead.it.s) + ' ' + scMer(ahead.it.s);
     }
 
     line.hidden = false;
     $('scLiveOf').hidden = false;
     line.classList.toggle('is-next', !running);
-    $('scLiveState').textContent = running ? state + ' · until' : state;
-    $('scLiveNum').textContent = sc12(at);
-    $('scLiveUnit').textContent = scMer(at);
+    /* "Now", never "Now · until" — the "until" was pointing at a clock
+       time that is no longer drawn, and a preposition with nothing
+       after it reads as a string that failed to fill in. */
+    $('scLiveState').textContent = state;
     $('scLiveOf').textContent = of;
   }
 

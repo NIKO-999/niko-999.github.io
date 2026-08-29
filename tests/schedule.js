@@ -721,12 +721,16 @@ const SAID = [
 
   const hero = await page.evaluate(() => ({
     state: document.getElementById('scLiveState').textContent,
-    num: document.getElementById('scLiveNum').textContent,
-    unit: document.getElementById('scLiveUnit').textContent,
     of: document.getElementById('scLiveOf').textContent,
+    /* The 44px clock time is gone and must not come back — the span
+       above draws where in the day you are and this line says how long
+       is left, so a figure between them repeats both. Asserted as
+       ABSENCE of the element, not of its text: an emptied <b> still
+       reserves its line. */
+    fig: !document.querySelector('.live .figure'),
   }));
-  ok('the hero counts the running class down', hero.state === 'Now · until'
-    && hero.num === '11:00' && hero.unit === 'AM'
+  ok('the hero counts the running class down, in two lines and no figure',
+    hero.state === 'Now' && hero.fig
     && hero.of === 'Trading · 1 h 30 m left', hero);
 
   /* ── the head stays a label ──
@@ -743,13 +747,10 @@ const SAID = [
     const t = document.querySelector('.title');
     return { title: px(t),
              date: px(document.querySelector('.hd-date')),
-             figure: px(document.querySelector('.live .figure b')),
              fits: t.scrollWidth <= t.clientWidth + 1 };
   });
   ok('the name is a label, not the top of the page',
     head.title < head.date && head.fits, head);
-  ok('and the hero’s figure outranks it several times over',
-    head.figure >= head.title * 2.5, head);
 
   /* ── the date ──
      The one fact up here that nothing else on the screen carries. The
@@ -823,8 +824,12 @@ const SAID = [
      rather than against a literal. */
   ok('the block’s name outranks its time', rowType.n > rowType.t
     && rowType.w >= 600, rowType);
-  ok('and stays a subheading — the hero is still far bigger',
-    head.figure >= rowType.n * 2, { head, rowType });
+  /* The date is the only figure in the head now, and the row's name has
+     to stay under it: this is what the removed 44px clock used to be
+     measured against, and dropping the claim entirely would let the
+     rows creep up on the one thing above them that is a figure. */
+  ok('and stays a subheading — the head’s one figure is still bigger',
+    head.date > rowType.n, { head, rowType });
 
   /* ── where, in the accent ──
      Nothing in the seed has a place on it, so the seed cannot prove

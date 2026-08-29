@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=82b3075f" />
+<link rel="stylesheet" href="app.css?v=9413d4b0" />
 </head>
 <body>
 
@@ -81,14 +81,13 @@
       </div>
     </div>
 
-    <!-- The one thing that makes a week into a scheduler: what is
-         running and when it ends. The state sits left and the figure
-         right, on the rule — and the caption drops BELOW the rule,
-         outside this row, because a third thing on a baseline with a
-         44px figure has nowhere to sit that does not fight it. -->
+    <!-- What is running, and what it is. THE 44px CLOCK TIME IS GONE:
+         the span above already draws where in the day you are, and the
+         caption below already says how long is left, so the figure was
+         the biggest object on the screen repeating both of them. Two
+         quiet lines carry everything it did. -->
     <div class="live" id="scLive" aria-live="polite">
       <span class="eyebrow" id="scLiveState"></span>
-      <span class="figure"><b id="scLiveNum"></b><i id="scLiveUnit"></i></span>
     </div>
     <p class="caption" id="scLiveOf"></p>
   </header>
@@ -243,6 +242,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=26d5f37d"></script>
+<script src="app.js?v=d0940e33"></script>
 </body>
 </html>
