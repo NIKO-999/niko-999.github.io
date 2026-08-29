@@ -1176,6 +1176,37 @@ body {
 .wk-turn:active svg { stroke: var(--red); }
 .wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
 
+/* ── MAIN OBJECTIVES ──
+   The face names itself. It is the sessions' treatment from the front —
+   a small-caps label with a hairline running off it — in the ACCENT
+   rather than in --spent, because on this face the accent is what the
+   whole list is wearing: every glyph takes it, and a grey heading over
+   red marks would read as a caption for something else.
+
+   Drawn only over a list that exists. A heading on an empty card names
+   something that is not there, and the empty state already says what
+   the face is for. */
+.ob-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex: none;
+  padding: 10px 2px 2px;
+}
+.ob-head b {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .17em;
+  text-transform: uppercase;
+  color: var(--red);
+  white-space: nowrap;
+}
+.ob-head i {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--red) 26%, transparent);
+}
+
 /* ── an objective ──
    A rank, a glyph and a figure. No name is drawn: what you want at a
    glance is WHICH thing and HOW MUCH, and a line of prose here would
@@ -1221,10 +1252,20 @@ body {
    The sentence beside it is what you read. At 30px it was the loudest
    object on a face whose whole job is the words, and a drawing that
    competes with the text it labels has stopped labelling it. */
+/* ── EVERY glyph takes the accent ──
+   They were --dim with only the first in red. Asked for outright: the
+   objectives are the things that matter, and marking one of five as
+   important said the other four were not. The list is the important
+   thing, and the accent is what this app spends on important.
+
+   The first is still the first — it keeps a heavier stroke and a step
+   of weight on its words. That signal is quieter than it was, and it
+   is the honest cost of the change rather than something papered
+   over. */
 .ob-ic {
   width: 15px; height: 15px;
   margin-top: 2px;
-  fill: none; stroke: var(--dim); stroke-width: 2;
+  fill: none; stroke: var(--red); stroke-width: 2;
   stroke-linecap: round; stroke-linejoin: round;
 }
 /* ── the main one ──
@@ -1233,7 +1274,7 @@ body {
    weight on the words, and NOT with a rank number — a column of
    figures down the side of five short sentences is a second ordering
    drawn over the one the list already has. */
-.ob.is-frog .ob-ic { stroke: var(--red); stroke-width: 2.2; }
+.ob.is-frog .ob-ic { stroke-width: 2.5; }
 .ob.is-frog .ob-t { font-weight: 700; color: var(--ink); }
 .ob-t {
   font-size: 13px;
@@ -1254,7 +1295,9 @@ body {
    still clears 4.7:1. An objective you can no longer read is a record
    of the day that has stopped being one. */
 .ob.is-done .ob-tick { opacity: 1; }
-.ob.is-done .ob-ic { stroke: var(--spent); }
+/* Done fades the accent rather than swapping to grey — a finished
+   objective is the same kind of thing, spent, not a different kind. */
+.ob.is-done .ob-ic { stroke: color-mix(in srgb, var(--red) 42%, transparent); }
 .ob.is-done .ob-t { color: var(--spent); font-weight: 500; }
 .ob:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
@@ -1350,7 +1393,11 @@ body {
 .wk-h {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  /* The name pushes everything else right rather than the row spreading
+     its children out. With three things on the front and two on the
+     back, `space-between` put the turn control in a different place on
+     each face — you pressed one spot to go and another to come back. */
+  justify-content: flex-start;
   gap: 8px;
   flex: none;
   padding-bottom: 10px;
@@ -1371,6 +1418,7 @@ body {
   cursor: pointer;
 }
 .day.is-open .day-name { font-size: 17px; letter-spacing: -.01em; }
+.wk-h .day-name, .wk-h .ob-day { margin-right: auto; }
 .day.is-today .day-name { color: var(--red); }
 .day-name:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 /* Only on the open card. At 76px the shut ones cannot hold it, and

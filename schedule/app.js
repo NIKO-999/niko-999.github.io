@@ -924,13 +924,7 @@
          Only on the open card: a 76px sliver has nothing to show on its
          back, and a control that appears on seven cards to be useful on
          one is six pieces of furniture. */
-      if (isOpen) {
-        var turn = scEl('button', 'wk-turn');
-        turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
-        turn.innerHTML = OBJ_MARK;
-        turn.addEventListener('click', function () { scFlip(d, true); });
-        head.appendChild(turn);
-      }
+
       /* Committed hours, opposite the name. It is the one figure a card
          can carry for nothing — the rows are already here to add up —
          and it is what makes a card comparable to the card beside it. */
@@ -938,6 +932,18 @@
       if (mins) {
         head.appendChild(scEl('span', 'wk-hrs',
           (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs'));
+      }
+      /* ── LAST, so it lands in the corner the back puts it in ──
+         It sat between the day and the hours, which put the control
+         that turns the card in a different place on each face: you
+         pressed one spot to go and another to come back. Same corner
+         both ways, and the turn is one place rather than two. */
+      if (isOpen) {
+        var turn = scEl('button', 'wk-turn');
+        turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
+        turn.innerHTML = OBJ_MARK;
+        turn.addEventListener('click', function () { scFlip(d, true); });
+        head.appendChild(turn);
       }
       front.appendChild(head);
 
@@ -1349,10 +1355,33 @@
      decision, and re-ranking is a press.
      ═══════════════════════════════════════════════════════════ */
 
-  /* A flag on a post: the thing you are heading for. Drawn rather than
-     labelled, like every other glyph on this screen. */
+  /* ── a checklist and a target ──
+     Reduced, and the reduction is the whole job: the reference has four
+     ticked rows and a target with an arrow through it, which at the
+     19px this is drawn at is a smudge with a hole in it. Two ticked
+     rows, one ring and a centre — the fewest marks that still read as
+     BOTH objects.
+
+     The sheet's outline BREAKS where the target crosses it. Drawn
+     through, the two shapes merge into one blob at this size; a gap of
+     about a unit and a half is what makes them read as a disc in front
+     of a page.
+
+     The ring is r5 around a centre dot at r1.2, which leaves 3.8 units
+     of the 24 box between them — above the 3.4 this repo measured as
+     the floor before a closed shape fills in at row size. Two rings, as
+     the reference has, would leave 3 and close up. */
   var OBJ_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-    + '<path d="M6 21V4M6 4.6h11.5l-2.3 3.7 2.3 3.7H6"/></svg>';
+    /* the page, broken at the lower right where the target sits */
+    + '<path d="M14.2 10.2V4.9a1.4 1.4 0 00-1.4-1.4H4.4A1.4 1.4 0 003 4.9v13.7'
+    + 'a1.4 1.4 0 001.4 1.4h4.3"/>'
+    /* two rows, each a tick and a rule */
+    + '<path d="M5.2 8.1l1.2 1.2 2.2-2.4M10.8 8.3h2.2"/>'
+    + '<path d="M5.2 13.2l1.2 1.2 2.2-2.4M10.8 13.4h1.5"/>'
+    /* the target, in front */
+    + '<circle cx="16.6" cy="16.6" r="5"/>'
+    + '<circle cx="16.6" cy="16.6" r="1.25" fill="currentColor" stroke="none"/>'
+    + '</svg>';
 
   var OBJ_KEY = 'sched.obj.v1';
   var objLog = {};   /* date -> [{ id, n, tgt, done }] */
@@ -1479,8 +1508,17 @@
     head.appendChild(turn);
     back.appendChild(head);
 
-    var list = scEl('ol', 'ob-list');
     var all = scObjFor(day);
+    /* Only over something. A heading on an empty card names a list that
+       is not there — the empty state already says what the face is for,
+       and two sentences over nothing is furniture. */
+    if (all.length) {
+      var oh = scEl('div', 'ob-head');
+      oh.appendChild(scEl('b', null, 'Main objectives'));
+      oh.appendChild(scEl('i'));
+      back.appendChild(oh);
+    }
+    var list = scEl('ol', 'ob-list');
     all.forEach(function (o, i) {
       var li = scEl('li');
       var b = scEl('button', 'ob' + (o.done ? ' is-done' : '')

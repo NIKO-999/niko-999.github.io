@@ -521,12 +521,44 @@ makes it a table, and a table is a thing you scan for a value rather
 than a list of things you have decided.
 
 **Position is priority and the first is the frog** — the one you would
-rather not start. It takes the accent on its glyph and one step of
-weight on its words, and NOT a rank number: a column of figures down
-the side of five short sentences is a second ordering drawn over the
-one the list already has. Re-ranking is one move and always the same
-move, *make this first*, because up-and-down arrows on five rows is
-four presses to do what one should.
+rather not start. It takes one step of weight on its words and a
+heavier stroke on its glyph, and NOT a rank number: a column of figures
+down the side of five short sentences is a second ordering drawn over
+the one the list already has. Re-ranking is one move and always the
+same move, *make this first*, because up-and-down arrows on five rows
+is four presses to do what one should.
+
+**EVERY glyph takes the accent, and that cost the frog its colour.**
+They were `--dim` with only the first in red, and marking one of five
+as important said the other four were not — the list is the important
+thing. What it costs is real and is written down rather than papered
+over: the frog is now told apart by stroke weight and type weight
+alone, which is quieter than a colour. `tests/schedule.js` asserts both
+halves — every glyph the same accent, and the first still heavier.
+
+**The face names itself in that same accent.** `MAIN OBJECTIVES` is the
+sessions' treatment from the front — small caps, a hairline running off
+it — but in `--red` rather than `--spent`, because a grey heading over
+red marks reads as a caption for something else. Drawn only over a list
+that exists.
+
+**The turn control is in the SAME CORNER on both faces.** It sat
+between the day and the hours on the front and at the end on the back,
+so you pressed one place to turn the card over and a different one to
+come back. Asserted in LAYOUT coordinates, not client rects: the front
+lives inside a 180° rotation while the card is turned, so its rects
+come back mirrored — a control 11px from its own right edge reported
+227px from the card's right, which is 238 minus 11, the same corner
+seen from behind.
+
+**The mark is a checklist and a target, reduced.** The reference had
+four ticked rows and a target with an arrow through it, which at the
+19px this is drawn at is a smudge with a hole in it. Two rows, one ring
+and a centre. The page's outline BREAKS where the target crosses it —
+drawn through, the two shapes merge into one blob. And the ring is r5
+around a dot at r1.2, leaving 3.8 units of the 24 box between them:
+above the 3.4 this repo measured as the floor before a closed shape
+fills in. Two rings, as the reference has, leaves 3 and closes up.
 
 **The plus is nearly nothing.** A full-width dashed box was a second
 object on the card, competing with the objectives it was meant to sit

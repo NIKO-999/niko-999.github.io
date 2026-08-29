@@ -1001,6 +1001,35 @@ const SAID = [
     facing.a <= -0.99 && facing.back === 'hidden', facing);
   ok('an empty back says what the face is for',
     (await page.$$eval('.day.is-open .ob-empty', (p) => p.length)) === 1);
+  /* A heading over nothing names a list that is not there, and the
+     empty state already says what the face is for. */
+  ok('...and is not headed, because there is nothing to head',
+    (await page.$$eval('.day.is-open .ob-head', (h) => h.length)) === 0);
+
+  /* ── THE SAME CORNER ON BOTH FACES ──
+     The control sat between the day and the hours on the front and at
+     the end on the back, so you pressed one place to turn the card over
+     and a different one to come back. Measured rather than eyeballed:
+     the two controls have to land on the same pixels. */
+  const corners = await page.evaluate(() => {
+    /* LAYOUT coordinates, not client rects. The front sits inside a
+       180-degree rotation while the card is turned over, so its rects
+       come back MIRRORED — the control 11px from its own right edge
+       reported 227px from the card's right, which is 238 minus 11: the
+       same corner seen from behind. offsetLeft is unaffected by a
+       transform, and "the same corner of its own face" is the claim
+       being made anyway. */
+    const box = (sel) => {
+      const e = document.querySelector('.day.is-open ' + sel + ' .wk-turn');
+      const h = e.parentElement;
+      return { right: Math.round(h.offsetWidth - (e.offsetLeft + e.offsetWidth)),
+               top: Math.round(e.offsetTop) };
+    };
+    return { f: box('.wk-front'), b: box('.wk-back') };
+  });
+  ok('the turn control is in the same corner on both faces',
+    Math.abs(corners.f.right - corners.b.right) <= 1
+    && Math.abs(corners.f.top - corners.b.top) <= 2, corners);
 
   /* ── writing one ── */
   const addObj = async (text) => {
@@ -1042,11 +1071,33 @@ const SAID = [
     icSize.w <= 22 && icSize.t > icSize.w * 4, icSize);
   ok('the first is the main one, and it is the only one marked',
     obs.filter((o) => o.frog).length === 1 && obs[0].frog, obs);
-  ok('...said in the accent rather than with a rank number',
-    (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0
-    && (await page.$eval('.day.is-open .ob.is-frog .ob-ic',
-      (e) => getComputedStyle(e).stroke)) !== (await page.$eval(
-      '.day.is-open .ob:not(.is-frog) .ob-ic', (e) => getComputedStyle(e).stroke)));
+  /* ── EVERY glyph takes the accent ──
+     They were --dim with only the first in red, and marking one of five
+     as important said the other four were not. The list is the
+     important thing. What that costs is the frog's colour signal, so it
+     is carried by stroke WEIGHT and a step of type weight instead —
+     quieter than it was, and asserted rather than assumed. */
+  const obMarks = await page.evaluate(() => {
+    const g = (s) => getComputedStyle(document.querySelector(s));
+    const frog = g('.day.is-open .ob.is-frog .ob-ic');
+    const rest = g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-ic');
+    const red = g('.day.is-open .ob-head b').color;
+    return { frog: frog.stroke, rest: rest.stroke, red,
+      fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
+      ft: g('.day.is-open .ob.is-frog .ob-t').fontWeight,
+      rt: g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-t').fontWeight };
+  });
+  ok('every objective\u2019s glyph is in the accent, not just the first',
+    obMarks.frog === obMarks.rest && obMarks.rest === obMarks.red, obMarks);
+  ok('...so the first is told apart by weight instead',
+    obMarks.fw > obMarks.rw && +obMarks.ft > +obMarks.rt, obMarks);
+  ok('...and never by a rank number',
+    (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0);
+
+  /* ── the face names itself ── */
+  ok('the list is headed, in the accent the glyphs now wear',
+    (await page.$eval('.day.is-open .ob-head b', (e) => e.textContent))
+      === 'Main objectives' && obMarks.red === obMarks.rest);
 
   /* ── re-ranking is one move, and always the same move ── */
   await page.click('.day.is-open .ob-add');
