@@ -1378,28 +1378,24 @@
     /* two rows, each a tick and a rule */
     + '<path d="M5.2 8.1l1.2 1.2 2.2-2.4M10.8 8.3h2.2"/>'
     + '<path d="M5.2 13.2l1.2 1.2 2.2-2.4M10.8 13.4h1.5"/>'
-    /* ── the target, with an arrow in it ──
-       The ring is an ARC, not a circle: it is cut where the shaft
-       crosses it, from about -68 to -24 degrees. Drawn through, the
-       ring and the shaft merge into one blob at 19px and the arrow
-       stops reading as a separate object — the same break the page
-       already takes where the target crosses IT.
+    /* ── the target, and an arrow still coming ──
+       IN FLIGHT, not landed. Which changes the drawing: an arrow buried
+       in the bullseye can be a bare shaft, because where it is going is
+       obvious — one that has not arrived has to SAY which way it is
+       pointing, so the head moves to the leading end and the fletching
+       goes.
 
-       The point is buried in the bullseye and the fletching is at the
-       OUTER end, which is how the reference draws it and what says the
-       arrow has landed rather than that it is on its way.
+       And it needs somewhere to be. The target moved down and left to
+       clear the top-right corner: at 19px the gap between an arrowhead
+       and a ring is about a pixel and a half, and there is no room for
+       it while the target sits in the corner the arrow comes from.
 
-       A head at the bullseye end instead was built and looked at: it
-       is less ambiguous in the abstract — an outward V can read as an
-       arrow leaving — and it is worse on the card, because the head,
-       the centre dot and the ring all meet inside five units and merge.
-       Ambiguity that resolves the moment you know what the icon is for
-       beats a muddle that never resolves. Two strokes either way,
-       because a drawn triangle fills in at 19px. */
-    + '<path d="M21.17 14.57A5 5 0 1 1 18.47 11.96"/>'
-    + '<path d="M22.6 10.6L17.4 15.8"/>'
-    + '<path d="M22.6 10.6l-3 .5M22.6 10.6l-.5 3"/>'
-    + '<circle cx="16.6" cy="16.6" r="1.25" fill="currentColor" stroke="none"/>'
+       The ring is a whole circle again — nothing crosses it now, so the
+       break that stopped the two merging has nothing to do. */
+    + '<circle cx="15.4" cy="17.4" r="4.4"/>'
+    + '<circle cx="15.4" cy="17.4" r="1.15" fill="currentColor" stroke="none"/>'
+    + '<path d="M23 9L19.2 12.8"/>'
+    + '<path d="M19.2 12.8l.24-1.99M19.2 12.8l1.99-.24"/>'
     + '</svg>';
 
   var OBJ_KEY = 'sched.obj.v1';
