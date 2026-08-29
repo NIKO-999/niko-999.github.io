@@ -3437,9 +3437,9 @@
     });
   }
 
-  function scPost(it) {
+  function scPost(it, bare) {
     var p = it.p;
-    var card = scEl('article', 'po');
+    var card = scEl('article', 'po' + (bare ? ' is-bare' : ''));
     var head = scEl('div', 'po-h');
     head.appendChild(scPicOf(26, it));
     var who = scEl('span');
@@ -3448,6 +3448,18 @@
     who.appendChild(scEl('span', 'po-s',
       (it2 ? it2.n + ' · ' : '') + scAgo(p.at)));
     head.appendChild(who);
+    /* ── ONLY ON YOURS ──
+       There is nothing to press on somebody else's, so nothing is
+       drawn on it: a control that exists and refuses is worse than one
+       that is not there. */
+    if (it.me) {
+      var rm = scEl('button', 'po-x');
+      rm.setAttribute('aria-label', 'Delete this log');
+      rm.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M6 6l12 12M18 6L6 18"/></svg>';
+      rm.addEventListener('click', function () { scPostGone(p); });
+      head.appendChild(rm);
+    }
     card.appendChild(head);
     if (p.img) {
       var wrap = scEl('div', 'po-img');
@@ -3460,6 +3472,44 @@
     }
     if (p.cap) card.appendChild(scEl('p', 'po-c', p.cap));
     return card;
+  }
+
+  /* ── deleting one, and it ASKS ──
+     This app's rule is that nothing deletes without a way back, and
+     the one exception written down is the reminders — because a bin
+     protects a record you cannot rebuild and a reminder you have dealt
+     with is not a record of anything. A log is the other way round: it
+     is a photograph and a line about a day, and the photograph is the
+     part you cannot get back. There is no bin on this screen to put it
+     in, so the ask is what stands in for one.
+
+     The push is the whole record, so removing it here removes it from
+     the server and out of every friend's feed on their next fetch.
+
+     Nothing sweeps the picture and nothing needs to: the worker puts
+     every image under a TTL two days past its own window, so a blob
+     nothing points at expires by itself. The local data URL is inside
+     the post and goes when the post does. */
+  function scPostGone(p) {
+    scSheet('Delete this log?', function (body) {
+      body.appendChild(scEl('p', 'hint', p.img
+        ? 'It goes from here and from your friends’ feeds, and the '
+          + 'photograph with it. There is no bin for logs.'
+        : 'It goes from here and from your friends’ feeds. There is no '
+          + 'bin for logs.'));
+      var go = scBtn('go', 'Delete it', function () {
+        posts = posts.filter(function (q) { return q.id !== p.id; });
+        scWriteJSON(POST_KEY, posts);
+        scPushNow();
+        scClose();
+        scPaintFriends();
+        scToast('Deleted', false);
+      });
+      var row = scEl('div', 'lg-row');
+      row.appendChild(scBtn('', 'Keep it', scClose));
+      row.appendChild(go);
+      body.appendChild(row);
+    });
   }
 
   /* Relative, and it stops at the day. "3 weeks ago" is a number
@@ -3691,9 +3741,29 @@
       fig(p.streak, p.streak === 1 ? 'day showing up' : 'days showing up');
       body.appendChild(pair);
 
-      body.appendChild(scEl('span', 'label fp-k', 'Last seven days'));
-      var strip = scEl('div', 'fp-week');
-      for (var i = 6; i >= 0; i--) {
+      /* THIRTY, not seven. The record already holds thirty days and
+         the two figures above are both about thirty, so a seven-day
+         strip under them was answering a question nobody had asked and
+         hiding three quarters of what is there.
+
+         Two things had to change with the count, and both are the same
+         arithmetic. The day letters went, because at thirty across a
+         phone each cell is nine pixels and two characters do not go in
+         nine — and they were telling a Tuesday from a Thursday, which
+         is a question about a WEEK. And the mark went from a disc back
+         to a BAR: a disc's diameter is bounded by the cell's width, so
+         at thirty the smallest one is about four pixels and
+         antialiasing alone took it to 1.18:1 on the white page. The
+         suite caught that, not the eye.
+
+         A bar's height is free of the count, so it holds its colour at
+         any width — and the note that says a chart of seven numbers
+         between 0 and 5 is more apparatus than the numbers deserve was
+         written about SEVEN. Thirty days of them is a shape, and a
+         shape is the thing you came to read. */
+      body.appendChild(scEl('span', 'label fp-k', 'Thirty days'));
+      var strip = scEl('div', 'fp-week is-month');
+      for (var i = 29; i >= 0; i--) {
         var day = scDayBack(i);
         var n = (r.days && r.days[day]) || 0;
         var cell = scEl('span', 'fp-d' + (n ? ' on' : ''));
@@ -3720,16 +3790,17 @@
            your page, and the count moves the diameter instead. */
         var bar = scEl('i');
         if (n && p.acc) bar.style.background = scCrown(p.acc);
-        bar.style.width = (n ? 46 + (Math.min(n, 5) - 1) * 13.5 : 46) + '%';
+        /* A floor rather than a share: a day with nothing still has to
+           be a mark, because a gap in the strip would be a day that is
+           not there rather than a day with none on it. */
+        bar.style.height = (n ? 30 + Math.min(n, 5) * 14 : 16) + '%';
         var hold = scEl('span', 'fp-hold');
         hold.appendChild(bar);
         cell.appendChild(hold);
         /* Two letters, not one. One gives W T F S S M T across a week,
            where two of the T's are different days and so are both S's —
            a strip whose whole job is telling you which day is which. */
-        cell.appendChild(scEl('span', 'fp-w',
-          ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'][new Date(day + 'T12:00:00').getDay()]));
-        cell.title = n + (n === 1 ? ' tick' : ' ticks');
+        cell.title = day + ' · ' + n + (n === 1 ? ' tick' : ' ticks');
         strip.appendChild(cell);
       }
       body.appendChild(strip);
@@ -3737,7 +3808,8 @@
       var logs = (Array.isArray(r.logs) ? r.logs : []).slice().reverse();
       body.appendChild(scEl('span', 'label fp-k', logs.length ? 'Their logs' : 'No logs yet'));
       logs.slice(0, 20).forEach(function (q) {
-        body.appendChild(scPost({ p: q, who: p.name, acc: p.acc, ink: p.ink, pic: p.pic }));
+        body.appendChild(scPost({ p: q, who: p.name, acc: p.acc,
+          ink: p.ink, pic: p.pic }, true));
       });
 
       /* `Remove`, and nothing else. It carried a two-line explanation

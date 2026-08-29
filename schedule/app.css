@@ -493,11 +493,36 @@ body {
    Photograph, name, a line. The picture is square and the card has no
    surface of its own: a feed of bordered boxes on a washed page is a
    second grid competing with the week's. */
-.po { margin-top: 18px; }
+/* ── A POST IS A CARD ──
+   A hairline and a radius, so a feed of them is a stack of things
+   rather than one column of text with pictures in it. Where one post
+   ended and the next began was carried by nothing but the gap, which
+   is enough between two lines and not between two photographs.
+
+   A border, never a shadow: the tally is this app's one exception to
+   "nothing rounded or shadowed", and it earned it by making the
+   photograph the card. Here the photograph is IN the card, so the card
+   only has to be a boundary. The radius nests inside the image's own —
+   16 outside, 12 in — because two rounded rectangles at the same
+   radius, one inside the other, read as a mistake. */
+.po { margin-top: 12px; padding: 12px 12px 13px;
+  border: 1px solid var(--hair); border-radius: 16px; }
+/* Inside the friend's sheet the frame is the sheet, and a card in a
+   card is the frame-inside-a-frame this project keeps taking out. */
+.po.is-bare { border: 0; padding: 0; margin-top: 18px; }
 .po-h { display: flex; align-items: center; gap: 9px; }
 .po-n { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
 .po-s { display: block; margin-top: 1px; font-size: 10.5px; color: var(--dim); }
-.po-img { margin-top: 9px; border-radius: 14px; overflow: hidden;
+/* 44px of target on an 18px mark, pushed into the card's own padding so
+   the drawing sits where the corner is rather than an inch inside it. */
+.po-x { margin: -13px -13px -13px auto; width: 44px; height: 44px;
+  display: grid; place-items: center; border: 0; background: none;
+  padding: 0; cursor: pointer; }
+.po-x svg { width: 15px; height: 15px; fill: none; stroke: var(--spent);
+  stroke-width: 2; stroke-linecap: round; }
+.po-x:active svg { stroke: var(--red); }
+.po-x:focus-visible { outline: 2px solid var(--red); outline-offset: -6px; }
+.po-img { margin-top: 9px; border-radius: 12px; overflow: hidden;
   background: var(--tick-off); aspect-ratio: 1; }
 .po-img img { display: block; width: 100%; height: 100%; object-fit: cover; }
 .po-c { margin-top: 8px; font-size: 13.5px; line-height: 1.5; }
@@ -539,6 +564,16 @@ body {
    between 0 and 5, which is more apparatus than the numbers deserve.
    A row of discs is read at a glance and measured by nobody. */
 .fp-week { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+/* Thirty cells across a phone is nine pixels each, so the gap has to
+   come down with the count or the discs vanish into it. */
+.fp-week.is-month { gap: 2px; align-items: stretch; height: 46px; }
+/* The cell is the full height and the bar sits on the floor of it, so
+   thirty of them read as one shape with a baseline rather than as
+   thirty marks each floating at its own middle. */
+.fp-week.is-month .fp-hold { width: 100%; height: 100%; aspect-ratio: auto;
+  align-items: end; }
+.fp-week.is-month .fp-d i { width: 100%; aspect-ratio: auto;
+  border-radius: 2px; }
 .fp-d { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
 /* The row is one box and the part that varies absorbs the difference:
    every cell reserves the full disc's height so a quiet day cannot

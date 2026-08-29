@@ -1369,6 +1369,54 @@ those it compared the track against itself. Measured from the most
 common pixel outward it is **7.64:1**. This repo has now made the
 light-on-dark assumption in three separate harnesses.
 
+**The friend's week became a MONTH, and the mark changed with it.**
+The record already holds thirty days and both figures above the strip
+are about thirty, so seven of them was hiding three quarters of what
+is there. Two things fell out of the count and both are the same
+arithmetic: the two-letter day labels went, because nine pixels a cell
+does not take two characters — and they were telling a Tuesday from a
+Thursday, which is a question about a WEEK — and the disc went back to
+a BAR. A disc's diameter is bounded by the cell's width, so at thirty
+the smallest is about four pixels and antialiasing alone took it to
+**1.18:1** on the white page. A bar's height is free of the count, so
+it holds its colour at any width. The note saying a chart of seven
+numbers between 0 and 5 is more apparatus than the numbers deserve was
+written about SEVEN; thirty of them is a shape, and a shape is what
+you came to read.
+
+**And the contrast check has to sample a LIT bar.** An unlit day is
+deliberately the flat neutral — a day with none is never a red one —
+so it makes no colour claim, and holding it to 3:1 measures a mark
+that is not breaking the rule. Over thirty days the first cell is
+usually empty, which is how a passing design started reporting 1.18:1.
+
+**A post is a card.** A hairline and a 16px radius, so a feed is a
+stack of things rather than one column of text with photographs in it
+— the boundary between two posts was carried by nothing but a gap,
+which is enough between two lines and not between two pictures. A
+border and never a shadow: the tally earned this app's one exception
+to "nothing rounded or shadowed" by making the photograph the card,
+and here the photograph is IN the card, so the card only has to be an
+edge. The radius nests — 16 outside, 12 on the image — because two
+rounded rectangles at one radius read as a mistake.
+
+**Inside the friend's sheet the post is BARE**, because there the frame
+is the sheet and a card in a card is the frame-inside-a-frame this
+project keeps taking out.
+
+**Deleting a log ASKS, and there is no bin.** The rule here is that
+nothing deletes without a way back, and the written exception is the
+reminders — a bin protects a record you cannot rebuild, and a reminder
+you have dealt with is not a record of anything. A log is the other
+way round: a photograph and a line about a day, and the photograph is
+the half you cannot get back. There is no bin on this screen, so the
+ask stands in for one. Nothing sweeps the picture and nothing needs
+to: the worker puts every image under a TTL two days past its own
+window, so a blob nothing points at expires by itself. The push is the
+whole record, so the delete reaches every friend's feed on their next
+fetch. And the control is drawn ONLY on your own posts — one that
+exists and refuses is worse than one that is not there.
+
 **And `.sheet .fp-k` rather than `.fp-k`.** `.label` and `.menu-item` are
 defined further down `schedule/app.css`, so at equal specificity they
 win however the new rule is written: the friend sheet shipped one round

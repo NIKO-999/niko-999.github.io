@@ -3857,10 +3857,21 @@ const SAID = [
 
         await fp.click('.fr-row.is-tap');
         await fp.waitForTimeout(540);
-        const db = await fp.$eval('.fp-d i', (e) => {
+        /* The smallest LIT bar, not the first one in the strip. An
+           unlit day is deliberately the flat neutral — "a day with
+           none is never a red one" — so it makes no colour claim and
+           holding it to 3:1 measures the wrong mark. Over thirty days
+           the first cell is usually empty, which is how this started
+           reporting 1.18:1 against a rule it was not breaking. */
+        const db = await fp.$$eval('.fp-d i', (all) => {
+          const lit = all.filter((e) => e.style.background);
+          const e = lit.sort((a, b) =>
+            a.getBoundingClientRect().height - b.getBoundingClientRect().height)[0];
+          if (!e) return null;
           const r = e.getBoundingClientRect();
           return { x: r.x, y: r.y, w: r.width, h: r.height };
         });
+        if (!db) throw new Error('no lit bar in the strip to measure');
         const png = PNG.sync.read(await fp.screenshot());
         const at = (x, y) => {
           const i = (png.width * Math.round(y * 2) + Math.round(x * 2)) << 2;
@@ -3897,7 +3908,7 @@ const SAID = [
     await fp.click('.fr-row.is-tap');
     await fp.waitForTimeout(520);
     ok('their page shows seven days',
-      await fp.$$eval('.fp-d', (d) => d.length) === 7);
+      await fp.$$eval('.fp-d', (d) => d.length) === 30);
     /* Height says how many of the five and colour never says whether —
        the habits screen's rule. A day with nothing is the same shape,
        only shorter. */
@@ -3907,20 +3918,43 @@ const SAID = [
        opacity could never have fixed that, because the amber is about
        1.9:1 on white at FULL strength. Diluting a colour that already
        fails only makes the number worse. */
+    /* HEIGHT, now the strip is a month. A disc's diameter is bounded
+       by the cell's width, and at thirty across a phone that is about
+       four pixels — the smallest one measured 1.18:1 on the white page
+       with nothing wrong but antialiasing. A bar's height is free of
+       the count, so it can hold its colour at any width. */
     const discs = await fp.$$eval('.fp-d i', (b) => b.map((x) => ({
-      w: x.style.width, o: getComputedStyle(x).opacity })));
+      w: x.style.height, o: getComputedStyle(x).opacity })));
     ok('the strip says how many by SIZE, never by a colour for missing',
       new Set(discs.map((d) => d.w)).size > 1
-      && discs.every((d) => parseFloat(d.w) >= 46), JSON.stringify(discs));
+      && discs.every((d) => parseFloat(d.w) >= 16), JSON.stringify(discs));
     ok('and no disc is diluted to say it — opacity cannot rescue a light accent',
       discs.every((d) => d.o === '1'), JSON.stringify(discs.map((d) => d.o)));
-    /* Two letters, because one gives W T F S S M T over a week and
-       two of those T's are different days. A strip whose job is saying
-       which day is which cannot be ambiguous about two of the seven. */
-    ok('and every day in the strip is named unambiguously',
-      await fp.$$eval('.fp-w', (w) => new Set(w.map((x) => x.textContent)).size) === 7,
-      await fp.$$eval('.fp-w', (w) => w.map((x) => x.textContent).join()));
+    /* The day letters are GONE and the strip is thirty days. Two
+       characters do not go in the nine pixels a month leaves per cell,
+       and they were answering "which day is this" — a question about a
+       week. Each cell still carries its own date in a title, which is
+       what the letters were standing in for. Asserted as absence plus
+       the thing that replaced it, because "no letters" alone passes on
+       a strip that lost its cells too. */
+    ok('a month has no room for day letters, and says the date instead',
+      await fp.$$eval('.fp-w', (w) => w.length) === 0
+      && await fp.$$eval('.fp-d', (d) =>
+        d.every((x) => /^\d{4}-\d{2}-\d{2} · \d+ tick/.test(x.title))));
     ok('their logs are on it', await fp.$$eval('.sheet .po', (p) => p.length) === 1);
+    /* ── a post is a card, and a card in a card is not ──
+       The feed's posts carry a hairline so a stack of photographs
+       reads as separate things; inside this sheet the frame IS the
+       sheet, and a bordered card within it is the frame-inside-a-frame
+       this project keeps taking out. Measured as the drawn border, not
+       as the class.
+
+       And there is NOTHING TO PRESS on somebody else's log: a control
+       that exists and refuses is worse than one that is not there. */
+    ok('...bare inside the sheet, and with no delete on somebody else’s',
+      await fp.$eval('.sheet .po', (e) =>
+        parseFloat(getComputedStyle(e).borderTopWidth) === 0)
+      && await fp.$$eval('.sheet .po .po-x', (x) => x.length) === 0);
     /* `.label` is 9px accent capitals at .2em, which is right where a
        sheet is a form and is the only thing separating one field from
        the next. Here the headings sit over a figure and a row of discs
