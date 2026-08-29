@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=c8699a2a" />
+<link rel="stylesheet" href="app.css?v=991bf75f" />
 </head>
 <body>
 
@@ -88,29 +88,6 @@
     </div>
 
   </header>
-
-  <!-- ── the ring ──
-       The same day, drawn instead of listed. It replaces the hero above
-       rather than sitting under it: the ring's own middle says the state
-       and the figure, and saying both twice on one screen is how the
-       week-list's running row came to be painted the same as everything
-       round it. Empty until scPaintRing fills it. -->
-  <section class="ring" id="scRing" hidden>
-    <div class="sr-wrap">
-      <svg class="sr-face" id="scRingSvg" viewBox="0 0 286 286" aria-hidden="true"></svg>
-      <div class="sr-mid" id="scRingMid" aria-live="polite">
-        <span class="sr-kick" id="scRingKick"></span>
-        <b class="sr-num" id="scRingNum"></b>
-        <span class="sr-unit" id="scRingUnit"></span>
-        <span class="sr-name" id="scRingName"></span>
-      </div>
-    </div>
-    <p class="sr-key" id="scRingKey"></p>
-    <div class="sr-rest">
-      <p class="sr-lbl">Rest of today</p>
-      <ol class="sr-list" id="scRingList"></ol>
-    </div>
-  </section>
 
   <!-- ── the tally ──
        Five things a day, the same five for everyone. It replaces the
@@ -203,10 +180,6 @@
       <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>
       <span>Week</span>
     </button>
-    <button class="tab" id="scTabRing" data-view="ring" aria-label="The ring">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 4v5"/></svg>
-      <span>Ring</span>
-    </button>
     <button class="tab" id="scTabTally" data-view="tally" aria-label="Today’s five">
       <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7" height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13" width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>
       <span>Today</span>
@@ -239,6 +212,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=6360c430"></script>
+<script src="app.js?v=3d8dd89f"></script>
 </body>
 </html>

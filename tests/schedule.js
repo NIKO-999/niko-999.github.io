@@ -743,7 +743,7 @@ const SAID = [
     })(),
   }));
   ok('the label under the dot names the running class and counts it down',
-    hero.lead === 'Trading' && hero.of === 'Trading · 1 h 30 m left'
+    hero.lead === 'Trading' && hero.of === 'Trading · 1 h 30 m'
     && hero.fig, hero);
   ok('...and it sits under the dot, inside the track',
     Math.abs(hero.mid.off) <= 2 && hero.mid.inside, hero.mid);
@@ -1372,15 +1372,7 @@ const SAID = [
   ok('...though what was written on it survives',
     await page.$$eval('.day.is-open .ob', (b) => b.length) === 2);
 
-  /* ── the ring ──
-     The second view, still on the frozen Tuesday: Trading runs 9 to 11
-     and it is 9:30, so exactly a quarter of the block is gone and the
-     ring has a running span to draw. Everything below is a mechanism
-     rather than an appearance — the two faults this feature actually
-     shipped were a ring drawn the wrong way round and a mark that was
-     not a unit of anything, and neither shows up in a screenshot you
-     are not looking hard at. */
-  /* Each view is its own labelled tab now, so a view is asked for by
+  /* Each view is its own labelled tab, so a view is asked for by
      name rather than reached by pressing a cycling button until it
      turns up. A test that counts presses has to be re-counted every
      time a stop is added, and the one time it is not, it silently
@@ -1388,12 +1380,11 @@ const SAID = [
   const show = async (v) => {
     for (let i = 0; i < 3; i++) {
       const at = await page.evaluate(() => ({
-        ring: !document.getElementById('scRing').hidden,
         tally: !document.getElementById('scTally').hidden,
         friends: !document.getElementById('scFriends').hidden,
         rail: !document.getElementById('scRail').hidden,
       }));
-      if ((v === 'ring' && at.ring) || (v === 'tally' && at.tally)
+      if ((v === 'tally' && at.tally)
           || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
       await page.evaluate((want) => {
         const t = document.querySelector('.tab[data-view="' + want + '"]');
@@ -1424,16 +1415,16 @@ const SAID = [
       const r = el.getBoundingClientRect();
       return r.width > 1 && r.height > 1;
     };
-    return { rail: box('scDeckWin'), ring: box('scRing'), tally: box('scTally'),
+    return { rail: box('scDeckWin'), tally: box('scTally'),
              friends: box('scFriends'), dots: box('.wk-dots') };
   });
-  for (const [v, want] of [['list', 'rail'], ['ring', 'ring'],
+  for (const [v, want] of [['list', 'rail'],
                            ['tally', 'tally'], ['friends', 'friends']]) {
     await show(v);
     await page.waitForTimeout(160);
     const on = await onScreen();
     ok(`on ${v}, ${want} is the only view drawing`,
-      on[want] && ['rail', 'ring', 'tally', 'friends']
+      on[want] && ['rail', 'tally', 'friends']
         .filter((k) => k !== want).every((k) => !on[k]), { v, on });
     /* The dots are a sibling of the rail rather than a child — a page
        indicator that scrolls sideways with the cards it indicates is
@@ -1456,7 +1447,7 @@ const SAID = [
     (d) => d.map((x) => x.textContent).join());
   ok('the week opens on today to begin with',
     (await openName()) === 'Tuesday', await openName());
-  for (const away of ['friends', 'tally', 'ring']) {
+  for (const away of ['friends', 'tally']) {
     await show(away);
     await page.waitForTimeout(200);
     await show('list');
@@ -1675,198 +1666,39 @@ const SAID = [
   ok(`a label clears 4.5:1 with a row behind it (worst ${swept.low}:1 at ${swept.at}px)`,
     swept.low >= 4.5, swept);
 
-  /* THE RING TAB'S ICON IS A RING. A rule filling every circle on the
-     bar so the settings dots would be solid used to fill this one too,
-     and the control drew a blob. The dots are in the sheet now, so this
-     is the only circle left out here — and it must stay hollow. */
-  const glyphs = await page.evaluate(() => ({
-    ring: getComputedStyle(document.querySelector('#scTabRing circle')).fill,
-  }));
-  ok('the ring tab’s icon is hollow', glyphs.ring === 'none', glyphs);
-
-  console.log('\n── the ring ──');
-  await show('ring');
-  await page.waitForTimeout(220);
-
-  const upSwap = await page.evaluate(() => ({
-    ring: !document.getElementById('scRing').hidden,
-    rail: document.getElementById('scRail').hidden,
-    hero: document.getElementById('scSpan').hidden,
-  }));
-  ok('the ring replaces the rail rather than joining it',
-    upSwap.ring && upSwap.rail, upSwap);
-  /* The ring's own middle carries the state and the figure, and the
-     span above carries the same day with a label on it. Leaving the
-     span up says all of it twice. */
-  ok('and the day span goes with it, so nothing is said twice',
-    upSwap.hero, upSwap);
-
-  const ring = await page.evaluate(() => {
-    const marks = [...document.querySelectorAll('#scRingSvg path')];
-    const red = (p) => p.getAttribute('stroke') === '#e2231a';
-    return {
-      n: marks.length,
-      lit: marks.filter(red).length,
-      first: red(marks[0]),
-      last: red(marks[marks.length - 1]),
-      /* Where the lit run stops. On a ring drawn clockwise from twelve
-         this is the boundary; on one drawn the other way round the lit
-         marks are the TAIL of the array and this is 0. */
-      edge: marks.findIndex((p) => !red(p)),
-      key: document.getElementById('scRingKey').textContent,
-      kick: document.getElementById('scRingKick').textContent,
-      num: document.getElementById('scRingNum').textContent,
-      unit: document.getElementById('scRingUnit').textContent,
-      name: document.getElementById('scRingName').textContent,
-    };
-  });
-
-  /* 9:30 inside a 9-to-11 block is a quarter gone, so three quarters of
-     the marks are lit. Asserted as a proportion of whatever count the
-     unit ladder chose, not as a number, so changing the ladder cannot
-     silently make this vacuous. */
-  ok(`three quarters of the ${ring.n} marks are lit at a quarter through`,
-    ring.n > 4 && Math.abs(ring.lit / ring.n - 0.75) < 0.03, ring);
-
-  /* THE DIRECTION. This shipped backwards: lighting the marks at
-     k >= spent lights the HIGH angles, which is the arc running back up
-     to twelve from the LEFT — an anti-clockwise countdown beside a
-     clockwise figure, off the same number. Nothing about the element
-     count, the lit count or the bounding box moves when it flips, so
-     this is the only assertion that can catch it. */
-  ok('and they run clockwise from twelve, not back to it',
-    ring.first === true && ring.last === false && ring.edge === ring.lit, ring);
-
-  /* A mark has to be worth a unit a person says. At a fixed 96 marks
-     round the circle — which is what the prototype drew — a mark is 75
-     seconds inside a two-hour block, so "four marks is an hour" is true
-     of nothing. The printed key and the drawn count have to agree, and
-     the unit has to be on the ladder. */
-  const keyed = ring.key.match(/One mark is (?:a |an )?(\d+)?\s*(minute|minutes|hour)s? · (\d+) to go round/);
-  ok('the key states a real unit and the count it actually drew',
-    !!keyed && +keyed[3] === ring.n
-    && [1, 5, 10, 15, 30, 60].includes(keyed[2] === 'hour' ? 60 : +keyed[1]),
-    { key: ring.key, drew: ring.n });
-
-  ok('the middle counts the running block down',
-    ring.kick === 'Left of' && ring.num === '1:30' && ring.unit === 'hrs'
-    && ring.name === 'Trading', ring);
-
-  /* Asked for and removed. A countdown is about what is in front of
-     you; how much of the day is already spent is another screen's job,
-     and it was on this one. */
-  ok('nothing on the ring says how much is behind you',
-    !/behind you/i.test(await page.$eval('#scRing', (e) => e.textContent)));
-
-  /* Today only, which is the whole reason the ring is not just the
-     Countdown view with a circle on it. Tuesday's remaining blocks are
-     Read and Down; Wednesday's Wake must not appear. */
-  const restNames = await page.$$eval('#scRingList .sr-row b', (b) => b.map((x) => x.textContent));
-  /* Wake is the first thing on EVERY day, so it is the one name that
-     appears the moment the list steps over midnight. */
-  ok('the list under it is today and stops there',
-    restNames.length > 0 && !restNames.includes('Wake'), restNames);
-
-  /* The pulse marks the leading edge — the one place on the drawing
-     anything is going to happen and the one place the eye has no reason
-     to look. It has to be an animation that is actually running, not an
-     element that exists: a keyframe pair that cancels out is present,
-     still, and perfect in a screenshot. */
-  const ping = await page.evaluate(() => new Promise((res) => {
-    const el = document.querySelector('.sr-ping');
-    if (!el) return res(null);
-    const seen = new Set();
-    const t0 = performance.now();
-    (function tick() {
-      const s = getComputedStyle(el);
-      seen.add(s.transform + '|' + s.opacity);
-      if (performance.now() - t0 < 900) requestAnimationFrame(tick);
-      else res({ frames: [...seen], name: s.animationName });
-    })();
-  }));
-  ok('the pulse is actually running', ping && ping.frames.length > 4,
-    ping && ping.frames.slice(0, 2));
-  /* transform and opacity only. stroke-width or a filter here would
-     repaint the whole ring twice a second, forever, on the one screen
-     this app is meant to be left open on. */
-  ok('and it is transform and opacity, so it composites',
-    ping && ping.frames.every((f) => /^matrix|^none/.test(f)), ping && ping.frames[0]);
-  ok('and it is the ring’s own keyframes, not the microphone’s',
-    ping && ping.name === 'sr-ping', ping && ping.name);
-
-  /* The pulse sits ON the boundary the marks draw. Built off the lit
-     count instead of the same fraction, it would drift a mark at a time
-     and nothing would say so. */
-  const onEdge = await page.evaluate(() => {
-    const el = document.querySelector('.sr-ping');
-    const marks = [...document.querySelectorAll('#scRingSvg path')];
-    const lit = marks.filter((p) => p.getAttribute('stroke') === '#e2231a');
-    const b = lit[lit.length - 1].getBoundingClientRect();
-    const p = el.getBoundingClientRect();
-    return Math.hypot(b.x + b.width / 2 - (p.x + p.width / 2),
-                      b.y + b.height / 2 - (p.y + p.height / 2));
-  });
-  ok(`the pulse sits on the last lit mark (${onEdge.toFixed(1)}px off)`, onEdge < 22, onEdge);
-
-  /* Not paused — never built. A paused ping is a red circle frozen at
-     whatever size the frame caught it, parked on the ring forever,
-     which is worse than no effect at all. */
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await show('list'); await show('ring');
-  await page.waitForTimeout(220);
-  const still = await page.evaluate(() => ({
-    ping: !!document.querySelector('.sr-ping'),
-    marks: document.querySelectorAll('#scRingSvg path').length,
-    lit: [...document.querySelectorAll('#scRingSvg path')]
-      .filter((p) => p.getAttribute('stroke') === '#e2231a').length,
-  }));
-  ok('reduced motion does not build the pulse', still.ping === false, still);
-  ok('and the ring still says everything it said',
-    still.marks === ring.n && still.lit === ring.lit, still);
-  await page.emulateMedia({ reducedMotion: 'no-preference' });
-
-  /* Real pixels. The middle sits inside the ring rather than on paper,
-     and the marks pass behind nothing — but the unit key is 10px grey
-     and that is exactly the size and weight this app has shipped at
-     2:1 before. */
-  await page.waitForTimeout(200);
-  const ringInk = await (async () => {
-    const png = PNG.sync.read(await page.screenshot());
-    const at = (x, y) => {
-      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
-      return [png.data[i], png.data[i + 1], png.data[i + 2]];
-    };
-    const out = [];
-    for (const sel of ['#scRingKick', '#scRingNum', '#scRingName', '#scRingKey', '.sr-row b', '.sr-row span']) {
-      const el = await page.$(sel);
-      if (!el) continue;
-      const b = await el.boundingBox();
-      const col = (await page.$eval(sel, (e) => getComputedStyle(e).color))
-        .match(/[\d.]+/g).slice(0, 3).map(Number);
-      /* The ground just outside the type, on the same line — the colour
-         the eye actually receives after everything over it has had its
-         turn, not the one the cascade says. */
-      out.push({ sel, r: ratio(col, at(b.x + b.width + 6, b.y + b.height / 2)) });
-    }
-    return out;
-  })();
-  ringInk.forEach((t) => ok(`${t.sel} clears 4.5:1 on the ring (${t.r.toFixed(1)}:1)`, t.r >= 4.5, t));
-
-  /* The choice survives a reload. Its own key, not folded into the
+  /* The view survives a reload. Its own key, not folded into the
      schedule: the schedule is the record and this is a preference about
      looking at it, and a damaged record must not take the view with it
      or the other way round. */
-  await page.reload({ waitUntil: 'networkidle' });
+  await show('tally');
   await page.waitForTimeout(200);
-  ok('the ring is still up after a reload',
-    await page.evaluate(() => !document.getElementById('scRing').hidden));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(220);
+  ok('the tally is still up after a reload',
+    await page.evaluate(() => !document.getElementById('scTally').hidden));
   ok('and it is remembered under its own key, away from the schedule',
-    await page.evaluate(() => localStorage.getItem('sched.view.v1') === 'ring'
+    await page.evaluate(() => localStorage.getItem('sched.view.v1') === 'tally'
       && !/view/.test(localStorage.getItem('sched.v1') || '')));
 
-  /* A ring that only knew the block you are in would be a dead grey
-     circle for the ten hours this week has between Trading and Read.
-     Between blocks it counts down the GAP, which is a span too. */
+  /* ── the ring is gone, and its stored value with it ──
+     It drew today as a dial with the running span lit — a second answer
+     to the question the week's own card already answers. Nobody may be
+     stranded on a view that no longer exists, so a stored 'ring' has to
+     fall through to the week rather than leaving a blank screen with a
+     bar on it. */
+  await page.evaluate(() => localStorage.setItem('sched.view.v1', 'ring'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(220);
+  ok('a view that no longer exists lands on the week, not on nothing',
+    await page.evaluate(() => {
+      const r = document.getElementById('scDeckWin').getBoundingClientRect();
+      return r.width > 1 && r.height > 1
+        && !document.querySelector('#scRing, #scTabRing, .sr-wrap');
+    }));
+
+  /* Back to a clock inside no block, which the section below inherits.
+     It was set here for the ring's own between-blocks case; the freeze
+     stays because later assertions were written under it. */
   await page.evaluate(() => {
     const FROZEN = new Date('2026-09-01T14:00:00').getTime();
     const R = Date;
@@ -1876,17 +1708,8 @@ const SAID = [
       static now() { return FROZEN; }
     };
   });
-  await show('list'); await show('ring');
+  await show('list');
   await page.waitForTimeout(220);
-  const gap = await page.evaluate(() => {
-    const marks = [...document.querySelectorAll('#scRingSvg path')];
-    const lit = marks.filter((p) => p.getAttribute('stroke') === '#e2231a').length;
-    return { kick: document.getElementById('scRingKick').textContent,
-             name: document.getElementById('scRingName').textContent,
-             n: marks.length, lit };
-  });
-  ok('between blocks the ring counts the wait, not nothing',
-    gap.kick === 'Until' && gap.n > 4 && gap.lit > 0 && gap.lit < gap.n, gap);
 
   /* ── the tabs ──
      It was one button cycling four stops, and the assertion here used
@@ -1904,43 +1727,14 @@ const SAID = [
     return out;
   });
   ok('every view has its own tab and lights only that one',
-    tabs.length === 4 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
+    tabs.length === 3 && tabs.every((t) => t.lit.length === 1 && t.lit[0] === t.want), tabs);
   ok('and each one is labelled',
     await page.$$eval('.tab span:last-child',
-      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Ring Today Friends');
-  await show('ring');
+      (e) => e.map((x) => x.textContent).join(' ')) === 'Week Today Friends');
 
-  /* ── the ring takes its colour from the tokens ──
-     SVG presentation attributes take a literal, so the marks were drawn
-     with the palette's hex typed into the string — a copy of a token
-     that drifts the moment the palette moves. Proven by moving it: push
-     a colour nothing in this app uses onto :root, repaint, and the
-     marks have to come back wearing it. Reverting scInk to the literals
-     leaves them red and this falls over. */
-  await page.evaluate(() => {
-    document.documentElement.style.setProperty('--red', 'rgb(0, 128, 255)');
-    document.documentElement.style.setProperty('--tick-off', 'rgb(9, 9, 9)');
-  });
-  await show('list'); await show('ring');
-  await page.waitForTimeout(220);
-  const themed = await page.evaluate(() => {
-    const m = [...document.querySelectorAll('#scRingSvg path')].map((p) => p.getAttribute('stroke'));
-    return { lit: m.filter((c) => c === 'rgb(0, 128, 255)').length,
-             off: m.filter((c) => c === 'rgb(9, 9, 9)').length,
-             stale: m.filter((c) => /e2231a|ececec/i.test(c)).length,
-             head: document.querySelector('#scRingSvg circle[fill]').getAttribute('fill') };
-  });
-  ok('the marks are drawn in whatever --red currently is',
-    themed.lit > 0 && themed.off > 0 && themed.stale === 0
-    && themed.head === 'rgb(0, 128, 255)', themed);
-
-  /* And the ground is a gradient the palette can reach, which on the
+  /* The ground is a gradient the palette can reach, which on the
      shipped palette resolves to the flat white page it has always been.
      Sampled off a real pixel in a corner nothing is drawn in. */
-  await page.evaluate(() => {
-    document.documentElement.style.removeProperty('--red');
-    document.documentElement.style.removeProperty('--tick-off');
-  });
   await show('list');
   await page.waitForTimeout(180);
   /* ── ASKED FOR, not hardcoded ──
@@ -2140,12 +1934,11 @@ const SAID = [
     up: !document.getElementById('scTally').hidden,
     rail: document.getElementById('scRail').hidden,
     hero: document.getElementById('scSpan').hidden,
-    ring: document.getElementById('scRing').hidden,
     cards: document.querySelectorAll('.ty-card').length,
     cap: document.getElementById('scTallyCap').textContent,
   }));
   ok('the tally is a third view and it replaces the week',
-    tal.up && tal.rail && tal.hero && tal.ring, tal);
+    tal.up && tal.rail && tal.hero, tal);
   ok('five cards, and the list is not editable from anywhere',
     tal.cards === 5, tal);
   ok('and nothing is logged on a fresh day', tal.cap === '0 of 5 today', tal);
@@ -2802,15 +2595,15 @@ const SAID = [
   const shutTap = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
   const stranded = await page.evaluate(() => {
     document.querySelector('.ty-row .ty-hist').click();
-    document.querySelector('.tab[data-view="ring"]').click();
+    document.querySelector('.tab[data-view="list"]').click();
     return { veil: document.getElementById('scTyVeil').hidden,
-             ring: !document.getElementById('scRing').hidden };
+             gone: document.getElementById('scDeckWin').getBoundingClientRect().height > 1 };
   });
   ok('escape closes it, and takes the panel before the sheet',
     shutEsc === true, { shutEsc });
   ok('and tapping the page behind it closes it too', shutTap === true, { shutTap });
   ok('and leaving the view cannot strand it over another screen',
-    stranded.veil && stranded.ring, stranded);
+    stranded.veil && stranded.gone, stranded);
 
   /* ── every string on the glass, on every palette ──
      MEASURED, NEVER READ OFF THE CASCADE. The panel is --g0 at 82% over
@@ -2959,7 +2752,6 @@ const SAID = [
   const restored = await page.evaluate(() => ({
     rail: document.getElementById('scRail').hidden,
     tally: document.getElementById('scTally').hidden,
-    ring: document.getElementById('scRing').hidden,
     rows: document.querySelectorAll('.row[data-id]').length,
     view: localStorage.getItem('sched.view.v1'),
     sched: (localStorage.getItem('sched.v1') || '').slice(0, 40),
@@ -3030,7 +2822,6 @@ const SAID = [
   await page.waitForTimeout(340);
 
   console.log('\n── themes ──');
-  await show('ring');
   await page.waitForTimeout(200);
 
   const IDS = ['paper', 'blush', 'slate', 'linen', 'mist', 'bloom', 'sand',
@@ -3101,8 +2892,7 @@ const SAID = [
     };
     const rows = [];
     for (const sel of ['.title', '.hd-date', '.sp-t', '.sp-ends span',
-                       '#scRingKick', '#scRingNum',
-                       '#scRingName', '#scRingKey', '.sr-lbl', '.sr-row b', '.sr-row span']) {
+                       '.ty-lbl', '.ty-cap', '.ty-foot']) {
       const el = await page.$(sel);
       if (!el) continue;
       const b3 = await el.boundingBox();
@@ -3187,10 +2977,6 @@ const SAID = [
     await page.evaluate(() => getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim() === '#e2231a'));
 
-  /* Back to the rail as well. The view key outlives a reload by design,
-     so leaving the ring up here hides every .row from the sections
-     below — which read as a broken app rather than a test that left the
-     furniture where it found it. */
   /* show(), not one click. A single press put the rail back when the
      button had two stops; with three it lands on the tally instead and
      every .row below this vanishes — which reports as a broken app
@@ -3399,11 +3185,11 @@ const SAID = [
        and arriving at the tab claims a code.
 
        What survives is the half that was actually the promise — the
-       week, the ring and the tally reach nothing at all. So the check
+       week and the tally reach nothing at all. So the check
        moves to WHEN rather than whether, and it is stricter for it: a
        single request off this origin before the Friends tab is opened
        fails, and that is the line the app must not cross. */
-    ok('the week, the ring and the tally have asked for nothing off origin',
+    ok('the week and the tally have asked for nothing off origin',
       fetched.every((u) => u.startsWith(BASE) || u.startsWith('data:') || u.startsWith('blob:')),
       fetched.filter((u) => !u.startsWith(BASE)));
     ok('and nothing has been claimed yet',

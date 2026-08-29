@@ -901,7 +901,7 @@
        Monday first, and not today first. A week whose leftmost card
        moves every morning has no shape to remember — you scroll to
        today, and where today sits IS information. */
-    $('scEmpty').hidden = state.items.length > 0 || view === 'ring';
+    $('scEmpty').hidden = state.items.length > 0;
 
     var open = scOpenDay();
 
@@ -1749,17 +1749,15 @@
   function scLive() {
     if (new Date().toDateString() !== painted) { scRender(); return; }
 
-    /* The ring and the tally are different drawings of the same
-       half-minute pass, and each is the only thing on screen when it is
-       up — so the one that is showing repaints and the rest of this
-       function has nothing to do.
+    /* The tally is a different drawing of the same half-minute pass
+       and is the only thing on screen when it is up — so it repaints
+       and the rest of this function has nothing to do.
 
-       The tally's guard is not just an optimisation. Everything below
+       That guard is not just an optimisation. Everything below
        un-hides the hero, and this runs every thirty seconds: without
        the early return the week's figure comes back on top of the
        tally half a minute after you switch to it, which is the sort of
        fault that only appears if you sit and look at the screen. */
-    if (view === 'ring') { scPaintRing(); scPaintRingList(); return; }
     if (view === 'tally') { scPaintTally(); return; }
     if (view === 'friends') { scPaintFriends(); return; }
 
@@ -1807,7 +1805,7 @@
     var lead = '', tail;
     if (running) {
       lead = running.n;
-      tail = scSpan(running.e - now) + ' left';
+      tail = scSpan(running.e - now);
     } else if (next) {
       lead = next.n;
       tail = 'in ' + scSpan(next.s - now);
@@ -1858,213 +1856,6 @@
     if (a.left < b.left) dx = b.left - a.left;
     else if (a.right > b.right) dx = b.right - a.right;
     if (dx) lab.style.transform = 'translateX(calc(-50% + ' + Math.round(dx) + 'px))';
-  }
-
-  /* ═══════════════════════════════════════════════════════════
-     THE RING
-
-     The same day the rail shows, drawn. It answers one question the
-     list answers badly — how long until this is over — and it is
-     scoped to TODAY on purpose: a ring is a picture of one span, and a
-     list under it that runs into tomorrow is a second view wearing the
-     first one's chrome.
-
-     There is no "behind you today" line. It was there and it is gone:
-     a countdown is about what is in front of you, and a figure telling
-     you how much of the day you have already spent is a different
-     screen's job.
-     ═══════════════════════════════════════════════════════════ */
-
-  var RING_C = 143, RING_R = 118;
-
-  function srPol(r, deg) {
-    var a = (deg - 90) * Math.PI / 180;
-    return [RING_C + r * Math.cos(a), RING_C + r * Math.sin(a)];
-  }
-
-  /* A mark has to be a real unit of time or counting them is a guess.
-     Fixed at 96 marks round the circle — which is what the prototype
-     did — a mark is 75 seconds inside a two-hour block and seven
-     minutes across a ten-hour gap, so "four marks is an hour" is true
-     of nothing. The unit is picked from a ladder, the smallest that
-     keeps the count under 60, and it is printed under the ring.
-     No 2 in the ladder, deliberately. It fits — a two-hour block came
-     out at sixty two-minute marks — but nobody thinks in two minutes,
-     and sixty marks at 1.7px is close enough to a solid ring that the
-     counting it exists for stops working. Every unit here is one a
-     person actually says. */
-  var TICK_UNITS = [1, 5, 10, 15, 30, 60];
-
-  function scRingUnit(span) {
-    for (var i = 0; i < TICK_UNITS.length; i++) {
-      if (span / TICK_UNITS[i] <= 60) return TICK_UNITS[i];
-    }
-    return 60;
-  }
-
-  function scUnitWord(u) {
-    if (u === 1) return 'a minute';
-    if (u === 60) return 'an hour';
-    return u + ' minutes';
-  }
-
-  /* What the ring is counting down. Three cases, and only the first is
-     the obvious one:
-
-       running   the block you are in
-       waiting   the GAP to the next block — which is a span too, and
-                 the reason the ring is not a dead grey circle for the
-                 ten hours this week has between Trading and Read
-       done      nothing left today
-
-     A ring that only knew the first would be blank most of the day. */
-  function scRingSpan() {
-    var today = new Date().getDay(), now = scNowMin(), mine = scByDay(today);
-    var running = null, next = null, prevEnd = 0;
-    mine.forEach(function (it) {
-      if (it.s <= now && now < it.e) running = it;
-      else if (it.s > now && !next) next = it;
-      if (it.e <= now) prevEnd = Math.max(prevEnd, it.e);
-    });
-    if (running) {
-      return { kind: 'running', it: running, a: running.s, b: running.e,
-               left: running.e - now };
-    }
-    if (next) {
-      /* From the end of the last thing, or from the start of the day if
-         nothing has run yet — never from midnight, which would put you
-         40% through a wait before you woke up. */
-      var from = prevEnd || Math.min(next.s, scNowMin());
-      return { kind: 'waiting', it: next, a: Math.min(from, now), b: next.s,
-               left: next.s - now };
-    }
-    return { kind: 'done' };
-  }
-
-  /* Read, not written in. The ring is SVG, and SVG presentation
-     attributes take a literal — so a colour typed here is a copy of a
-     token that drifts the moment the palette moves. Pulled off the
-     element instead, once per paint, which is twice a minute. */
-  function scInk(name, fallback) {
-    var v = getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-    return v || fallback;
-  }
-
-  function scPaintRing() {
-    var svg = $('scRingSvg');
-    if (!svg) return;
-    var sp = scRingSpan(), now = scNowMin();
-    var LIT = scInk('--red', '#e2231a'), OFF = scInk('--tick-off', '#ececec');
-
-    $('scRing').classList.toggle('is-done', sp.kind === 'done');
-
-    if (sp.kind === 'done') {
-      svg.innerHTML = '<circle cx="' + RING_C + '" cy="' + RING_C + '" r="' + RING_R +
-        '" fill="none" stroke="' + OFF + '" stroke-width="3"/>';
-      $('scRingKick').textContent = 'Done';
-      $('scRingNum').textContent = '—';
-      $('scRingUnit').textContent = 'for today';
-      $('scRingName').textContent = '';
-      $('scRingKey').textContent = '';
-      return;
-    }
-
-    var span = Math.max(1, sp.b - sp.a);
-    var frac = Math.min(1, Math.max(0, (now - sp.a) / span));
-    var unit = scRingUnit(span);
-    var n = Math.max(4, Math.round(span / unit));
-    /* k < remaining, NOT k >= spent. The second lights the HIGH angles,
-       which is the arc running back up to twelve from the LEFT — so the
-       ring counts down anti-clockwise off the same number the figure in
-       the middle is counting down clockwise. It shipped that way in the
-       prototype and only the screenshot said so. */
-    var rem = (1 - frac) * n;
-
-    var out = [];
-    for (var k = 0; k < n; k++) {
-      var deg = k / n * 360, lit = k < rem;
-      var p0 = srPol(RING_R - 7, deg), p1 = srPol(RING_R + 7, deg);
-      out.push('<path d="M' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) +
-        'L' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + '" stroke="' +
-        (lit ? LIT : OFF) + '" stroke-width="' +
-        /* Every fourth mark heavier, so the eye counts in groups rather
-           than reading a texture. */
-        (k % 4 ? 1.7 : 2.8) + '"/>');
-    }
-
-    /* The leading edge — where the lit marks stop — is the only place on
-       this drawing anything is going to happen, and it is the one place
-       the eye has no reason to look.
-
-       Placed on the LAST LIT MARK, not at (1-frac)·360. The raw angle is
-       the boundary of the span and lands on the first UNLIT mark, a
-       whole mark past the red — 30px on this ring, measured. On a
-       quantised drawing the marker has to be quantised with it, or the
-       two say different things about the same moment. It steps a mark
-       at a time as a result, which is what the marks do. */
-    var litN = Math.ceil(rem);
-    var head = srPol(RING_R, (litN ? litN - 1 : 0) / n * 360);
-    out.push('<circle cx="' + head[0].toFixed(2) + '" cy="' + head[1].toFixed(2) +
-      '" r="4.5" fill="' + LIT + '"/>');
-    if (!scStill()) {
-      out.push('<circle class="sr-ping" cx="' + head[0].toFixed(2) + '" cy="' +
-        head[1].toFixed(2) + '" r="9" fill="none" stroke="' + LIT + '" stroke-width="2"/>');
-    }
-
-    svg.innerHTML = out.join('');
-
-    var f = scBigSpan(sp.left);
-    $('scRingKick').textContent = sp.kind === 'running' ? 'Left of' : 'Until';
-    $('scRingNum').textContent = f.n;
-    $('scRingUnit').textContent = f.u;
-    $('scRingName').textContent = sp.it.n;
-    $('scRingKey').textContent = 'One mark is ' + scUnitWord(unit) +
-      ' · ' + n + ' to go round';
-  }
-
-  /* A duration split so the unit can be set small. "1 h 30 m" is right
-     in a row and wrong at 58px, where it reflows the middle of the ring
-     every time it crosses an hour. */
-  function scBigSpan(m) {
-    if (m < 60) return { n: String(m), u: 'min' };
-    var h = Math.floor(m / 60), r = m % 60;
-    if (r) return { n: h + ':' + (r < 10 ? '0' : '') + r, u: 'hrs' };
-    return { n: String(h), u: h === 1 ? 'hour' : 'hrs' };
-  }
-
-  function scStill() {
-    return window.matchMedia &&
-      window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  }
-
-  function scPaintRingList() {
-    var list = $('scRingList');
-    if (!list) return;
-    list.textContent = '';
-    var today = new Date().getDay(), now = scNowMin();
-    var sp = scRingSpan();
-    var rest = scByDay(today).filter(function (it) {
-      return it.s > now && !(sp.it && it.id === sp.it.id);
-    });
-    if (!rest.length) {
-      var p = scEl('li', 'sr-none',
-        sp.kind === 'done' ? 'Nothing else today.'
-                           : 'Nothing else today once this is done.');
-      list.appendChild(p);
-      return;
-    }
-    rest.forEach(function (it) {
-      var li = scEl('li');
-      var b = scEl('button', 'sr-row');
-      b.appendChild(scEl('b', null, it.n));
-      b.appendChild(scEl('span', null,
-        scHHMM(it.s) + ' · in ' + scSpan(it.s - now)));
-      b.setAttribute('aria-label',
-        it.n + ', ' + scRangeLong(it.s, it.e) + ', in ' + scSpan(it.s - now) + '. Edit.');
-      b.addEventListener('click', function () { scEditSheet(it, today); });
-      li.appendChild(b);
-      list.appendChild(li);
-    });
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -2233,7 +2024,6 @@
     /* The ring draws itself in SVG, and SVG takes a literal — so it has
        to be told to read the tokens again. The rail is pure CSS and has
        already changed by the time this line runs. */
-    if (view === 'ring') scPaintRing();
     if (typeof scPaintTabFace === 'function') scPaintTabFace();
     if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
     /* Your face and your crown are drawn on your friends' screens out
@@ -2871,7 +2661,7 @@
 
      Naming it here does NOT make the app chatty. `scApi` still returns
      before it builds a request when there is no url, and nothing on the
-     week, the ring or the tally calls it — the first request of any
+     week or the tally calls it — the first request of any
      kind happens when somebody opens the Friends tab. The suite still
      counts every request the main page makes and still fails on one
      that leaves the origin, which is the assertion that keeps this
@@ -4000,37 +3790,40 @@
      be wrong — the orrery learned that on a row of five — and these are
      three ways of looking at the same day rather than three places to
      go, which is exactly what a cycle is for. */
-  var VIEWS = ['list', 'ring', 'tally', 'friends'];
+  /* THREE, and the ring was the fourth. It drew today as a dial with
+     the running span lit — a second answer to the question the week's
+     own card already answers, on a screen you had to leave the week to
+     see. What it added over the span in the head was the shape of one
+     block, and the head now draws the shape of the whole day. A stored
+     'ring' falls through to the list below, so nobody is stranded on a
+     view that no longer exists. */
+  var VIEWS = ['list', 'tally', 'friends'];
 
   function scSetView(v, save) {
     view = VIEWS.indexOf(v) >= 0 ? v : 'list';
-    var ring = view === 'ring', tal = view === 'tally', fr = view === 'friends';
+    var tal = view === 'tally', fr = view === 'friends';
 
     /* The history sits OUTSIDE the tally section, so hiding the section
        would leave it up over whatever you switched to. */
     scCloseHist();
 
-    $('scRing').hidden = !ring;
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
-    $('scRail').hidden = ring || tal || fr;
-    $('scDeckWin').hidden = ring || tal || fr;
+    $('scRail').hidden = tal || fr;
+    $('scDeckWin').hidden = tal || fr;
     /* The dots are a SIBLING of the rail, not a child — the rail is the
        scroller, and a page indicator that scrolls sideways with the
        cards it indicates is not an indicator. So it has to be hidden
        with it: left alone it sat on the friends board and the tally
        under a week that was not on screen. */
     var wkd = document.querySelector('.wk-dots');
-    if (wkd) wkd.hidden = ring || tal || fr;
-    /* The ring's own middle says the state and the figure, and the
-       tally has a hero of its own. Leaving the week's above either says
-       it twice, and the louder of the two is the one that is not the
-       point of the screen. */
+    if (wkd) wkd.hidden = tal || fr;
     /* The label lives INSIDE the span now, so hiding the span takes it
-       with it — the ring's own middle and the tally's hero each say the
-       same thing on their own screen. */
-    $('scSpan').hidden = ring || tal || fr || !scByDay(new Date().getDay()).length;
-    $('scEmpty').hidden = ring || tal || fr || state.items.length > 0;
+       with it. The tally has a hero of its own, and leaving the week's
+       above it says the same thing twice — the louder of the two being
+       the one that is not the point of the screen. */
+    $('scSpan').hidden = tal || fr || !scByDay(new Date().getDay()).length;
+    $('scEmpty').hidden = tal || fr || state.items.length > 0;
 
     /* Coming back to the week: re-measure, because the window's own
        rect was zero for as long as it was hidden, and re-centre, because
@@ -4049,7 +3842,7 @@
        It survived because the error was the height of the hero alone
        and the dots had that much room to give. The span put another
        35px on the head and spent it. */
-    if (!(ring || tal || fr)) {
+    if (!(tal || fr)) {
       scDeckFit($('scRail'), wkd);
       scDeckJump();
     }
@@ -4066,8 +3859,8 @@
     });
 
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
-    if (ring) { scPaintRing(); scPaintRingList(); }
-    else if (tal) scPaintTally();
+
+    if (tal) scPaintTally();
     /* ARRIVING claims, drawing only draws — the same split the refresh
        already keeps. A paint that fetched would recurse the first time
        it ran, which is a bug this file has already had once. */
@@ -4890,7 +4683,7 @@
   scLoad();
 
   /* Read before the first paint, so the app opens on the view you left
-     it in rather than flashing the list on the way to the ring. A bad
+     it in rather than flashing the list on the way to it. A bad
      stored value falls through to the list; it is a preference and
      there is nothing here worth repairing. */
   try {

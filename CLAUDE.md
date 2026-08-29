@@ -378,6 +378,28 @@ the veil took it to **4.43:1**. That is the tell, and it is the row
 time's lesson twice: `--spent` is the LIGHTER token, and 4.74 is a
 rounding error above the bar rather than a margin.
 
+## The ring is gone
+
+It drew today as a dial with the running span lit, and it was the app's
+second view. What killed it is the head: the span is the same day drawn
+the same way, on the screen you are already on, and the ring's own
+middle said what the label under the dot now says. A whole tab you had
+to leave the week to reach, for a picture the week now carries.
+
+**A stored view has to fall through.** `sched.view.v1` outlives the
+code that wrote it, so `VIEWS.indexOf(sv)` failing has to mean the
+week rather than a blank page with a bar on it. `tests/schedule.js`
+plants `ring` in the key, reloads, and measures that the deck has a
+real box.
+
+**Deleting the first arm of an if/else chain is not deleting a
+statement.** `if (ring) {...} else if (tal) ... else if (fr) ... else
+scLive()` sat directly under `if (save) {...}`. Taking the first line
+out joined the whole chain onto the SAVE branch, so every view painted
+only when it was not being saved — clicking a tab stopped painting it.
+Nothing threw, the tabs still lit, and it surfaced four hundred lines
+later as the friends board never claiming a code.
+
 ## The week is a deck
 
 **Seven cards side by side, one open.** It was a single column of seven
