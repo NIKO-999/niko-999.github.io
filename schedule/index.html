@@ -30,24 +30,56 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=1f18debf" />
+<link rel="stylesheet" href="app.css?v=b39b08a0" />
 </head>
 <body>
 
 <main class="poster" id="scPoster">
 
   <header class="head">
+    <!-- The DATE, and only the date. It went in as a day name and a
+         date, the way a diary page is headed — and the day name was
+         already on today's card four inches below, in the same accent,
+         which is the one thing the deck's colour rule exists to say.
+         The number is not written anywhere else on this screen.
+
+         Settings sits on this row rather than absolutely over it: two
+         boxes claiming one corner is a collision waiting on a wider
+         figure. -->
+    <div class="hd-top">
+      <b class="hd-date" id="scHdDate"></b>
+      <!-- Settings, top right, because the bar lost the stop it lived on.
+           It is your own face: the one control in this app that is about
+           you rather than about the week, and it already has a drawing. -->
+      <button class="head-you" id="scTabYou" aria-label="You and settings">
+        <span class="tab-face" id="scTabFace"></span>
+      </button>
+    </div>
+
     <h1 class="title" id="scTitle" tabindex="0" role="button"
         aria-label="Title, tap to rename">Daily Process</h1>
-    <p class="sub" id="scSub" tabindex="0" role="button"
-       aria-label="Subtitle, tap to edit"></p>
 
-    <!-- Settings, top right, because the bar lost the stop it lived on.
-         It is your own face: the one control in this app that is about
-         you rather than about the week, and it already has a drawing. -->
-    <button class="head-you" id="scTabYou" aria-label="You and settings">
-      <span class="tab-face" id="scTabFace"></span>
-    </button>
+    <!-- ── the day's span ──
+         The waking window drawn rather than written. It replaces the
+         3px black rule the hero used to hang off: that rule was the
+         loudest object above the fold and it carried nothing, and this
+         is the same line doing the same job while also saying where in
+         the day you are.
+
+         It is a role="img" with a written label rather than aria-hidden
+         — the first and last block are the only facts on this screen
+         that nothing else repeats, so hiding it would lose them. -->
+    <div class="span" id="scSpan" role="img">
+      <div class="sp-line">
+        <span class="sp-t" id="scSpanA"></span>
+        <span class="sp-track"><i class="sp-fill" id="scSpanFill"></i><i class="sp-dot" id="scSpanDot"></i></span>
+        <span class="sp-t" id="scSpanB"></span>
+      </div>
+      <div class="sp-ends">
+        <span id="scSpanAn"></span>
+        <span id="scSpanBn"></span>
+      </div>
+    </div>
 
     <!-- The one thing that makes a week into a scheduler: what is
          running and when it ends. The state sits left and the figure
@@ -211,6 +243,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=232f4463"></script>
+<script src="app.js?v=8e40408d"></script>
 </body>
 </html>

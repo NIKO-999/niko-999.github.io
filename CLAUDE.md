@@ -289,6 +289,63 @@ by side without one.
 It is **streak** everywhere, never "run" — the panel and the foot of the
 same screen using two names for one idea in one glance.
 
+## The head says which day, and how much of it is left
+
+**One figure, and it is the DATE.** It went in as a day name and a
+date, the way a diary page is headed, and the name came straight back
+out: today's card in the deck already prints it, in the accent, and the
+deck's whole colour rule is that red on a day name means today. Said
+twice on one screen it means neither time. The number is the one fact
+up here that nothing else on the screen carries.
+
+**The subtitle is gone, not emptied.** It only ever held "Up at 6:00 ·
+down at 22:45" — which the span below now DRAWS, with a dot on it
+saying where in that window you are. A sentence and a picture of the
+same fact, one under the other, is the duplication this project keeps
+having to take back out. The field, its Settings row and the tap to
+edit went with it, and `scClean` drops the stored key rather than
+carrying it: a string nothing renders and nothing can edit is not
+preserved data, it is a key that outlives everyone who knows what it
+was for.
+
+**The span is the divider.** The hero used to hang off a 3px black
+rule, which was the loudest object above the fold and carried nothing.
+The same line is now the day's own first minute to its last — never
+midnight to midnight — with the spent half in `--ink` and a dot at the
+clock. 24-hour figures, because a meridiem on an AXIS says what the
+dot's position already says.
+
+**It is `role="img"` with a written label, never `aria-hidden`.** The
+first and last block are the only facts up here that nothing else
+repeats, so hiding it from a screen reader throws them away.
+
+**A day with one instant on it divides by zero**, and the dot then
+lands at `NaN%`, which renders at the track's left edge and looks
+deliberate. The span is floored at one minute. The dot is CLAMPED to
+the ends rather than the whole thing being hidden outside them: before
+the first block and after the last, a dot parked on the end is the
+honest picture, and a head that goes blank at 23:00 is a head that
+goes blank at the hour you are most likely to be looking at it.
+
+**`scDeckFit` has to run AFTER the head is put back.** It reads
+`#scDeckWin`'s own `top`, and coming back to the week from any other
+tab the hero was still hidden when it ran — so the deck was measured
+against a head three registers shorter than the one it would be a
+frame later, and came out that much too tall. Nothing about the deck
+looked wrong, because it is a window with cards clipped inside it; the
+whole visible symptom was the page dots missing, having gone under the
+bar and then off the bottom of the screen. It survived for as long as
+the error was exactly the hero's height and the dots had that much
+slack to give. The span put another 35px on the head and spent it.
+
+**And a ratio a change to a DIFFERENT screen can push under the bar
+was never clearing it.** `.ty-hint` is 11px on the history glass —
+`--g0` at 82% over a blurred page — and it sat at `--spent`, which is
+4.74:1 on flat paper. Twenty-odd pixels of the page moving down behind
+the veil took it to **4.43:1**. That is the tell, and it is the row
+time's lesson twice: `--spent` is the LIGHTER token, and 4.74 is a
+rounding error above the bar rather than a margin.
+
 ## The week is a deck
 
 **Seven cards side by side, one open.** It was a single column of seven

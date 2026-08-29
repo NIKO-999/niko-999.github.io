@@ -211,16 +211,85 @@ body {
   font-weight: 700;
   letter-spacing: .02em;
   text-transform: uppercase;
-}
-
-.sub {
-  margin-top: 4px;
-  font-size: 11px;
-  font-weight: 400;
   color: var(--dim);
 }
 
-.title:focus-visible, .sub:focus-visible {
+/* ── the date ────────────────────────────────────────────────
+   One figure and settings, on one row. The day NAME was here for a
+   round and came out: today's card in the deck already carries it, in
+   the accent, and the deck's whole colour rule is that the red on a
+   day name means today. Said twice on one screen it means nothing. */
+.hd-top {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1px;
+}
+.hd-date {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: .9;
+  letter-spacing: -.045em;
+  font-variant-numeric: tabular-nums;
+}
+.hd-top .head-you { margin-left: auto; }
+
+/* ── the day's span ──
+   A scale, in 24-hour time, because AM/PM on an axis is four glyphs
+   saying what the position already says. The track is the divider the
+   hero used to carry as a 3px black rule — same line, same job, and
+   now it also says how much of the day is behind you.
+
+   The dot is the accent and it is the only thing on this row that
+   moves. It carries a ring of paper so it stays a dot when it lands on
+   the boundary between the spent half and the rest, where an unringed
+   mark of any colour reads as a kink in the line. */
+.span { margin-top: 13px; }
+.span[hidden] { display: none; }
+.sp-line { display: flex; align-items: center; gap: 8px; }
+.sp-t {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--dim);
+  flex: none;
+}
+.sp-track {
+  position: relative;
+  flex: 1;
+  height: 2px;
+  border-radius: 2px;
+  background: var(--hair);
+}
+.sp-fill {
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  border-radius: 2px;
+  background: var(--ink);
+}
+.sp-dot {
+  position: absolute;
+  top: 50%;
+  width: 9px; height: 9px;
+  margin: -4.5px 0 0 -4.5px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 0 2.5px var(--paper);
+}
+.sp-ends {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 5px;
+}
+.sp-ends span {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+  color: var(--spent);
+}
+
+.title:focus-visible {
   outline: 2px solid var(--red);
   outline-offset: 3px;
 }
@@ -232,11 +301,10 @@ body {
    whole head every time it crosses an hour. The duration is still
    said, in the caption, where changing width costs nothing. */
 .live {
-  margin-top: 20px;
-  border-top: 3px solid var(--ink);
-  padding-top: 10px;
+  margin-top: 16px;
   display: flex;
-  align-items: baseline;
+  flex-direction: column;
+  align-items: flex-start;
 }
 .live[hidden] { display: none; }
 
@@ -250,7 +318,7 @@ body {
 .live.is-next .eyebrow { color: var(--dim); }
 
 .live .figure {
-  margin-left: auto;
+  margin-top: 3px;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
@@ -270,7 +338,7 @@ body {
 }
 
 .caption {
-  margin-top: 7px;
+  margin-top: 5px;
   font-size: 12px;
   color: var(--ink);
 }
@@ -525,10 +593,11 @@ body {
   font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
 .lg-c.on { border-color: var(--red); background: var(--red); color: var(--on-red); }
 
-/* Settings, top right of the head. Absolute rather than a flex sibling
-   so the title's own wrapping is untouched by it. */
-.head { position: relative; }
-.head-you { position: absolute; top: 0; right: 0;
+/* Settings, on the end of the date row. It WAS absolutely positioned
+   over the head's top-right corner, which was right while the corner
+   was empty — the date figure now sits there, and two boxes claiming
+   one corner is a collision waiting on a long day name. */
+.head-you { flex: none;
   width: 38px; height: 38px; display: grid; place-items: center;
   border: 0; background: none; padding: 0; cursor: pointer; }
 .head-you:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
@@ -724,7 +793,20 @@ body {
   fill: none; stroke: currentColor; stroke-width: 2.1;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.ty-hint { margin-top: 16px; font-size: 11px; color: var(--spent); }
+/* --dim, and --spent is what it was. This is 11px type on GLASS: the
+   panel is --g0 at 82% over a blurred page, so the ratio the cascade
+   computes is not the one the eye receives. --spent measures 4.74:1 on
+   flat paper, which is a rounding error above the bar rather than a
+   margin, and through the glass it came out 4.43:1 — under it, on the
+   default palette, the plainest case there is.
+
+   What exposed it was the head growing by a date figure, twenty-odd
+   pixels of the page moving down behind the veil. That is the tell: a
+   ratio that a change to a DIFFERENT screen can push under the bar was
+   never clearing it, it was passing. Same lesson as the row's time,
+   which went to --spent on the reasoning that the smallest type wants
+   the quietest token and had the two backwards. */
+.ty-hint { margin-top: 16px; font-size: 11px; color: var(--dim); }
 
 /* A backdrop-filter on a panel that neither moves nor animates. The
    orrery took every CSS filter off ITS map after measuring what one

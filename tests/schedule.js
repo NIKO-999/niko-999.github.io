@@ -475,7 +475,7 @@ const SAID = [
   console.log('\n── the store ──');
   await page.evaluate(() => {
     localStorage.setItem('sched.v1', JSON.stringify({
-      title: 'Kept', sub: 7,
+      title: 'Kept', sub: 7, view: {},
       items: [
         { id: 'a', d: 1, s: 480, e: 540, r: '', n: 'Survivor' },
         { id: 'b', d: 9, s: 480, e: 540, r: '', n: 'Bad day' },
@@ -490,7 +490,11 @@ const SAID = [
   ok('the readable rows survive a damaged store',
     await page.$$eval('.row[data-id] .n', (n) => n.map((x) => x.textContent)).then((v) =>
       v.length === 1 && v[0] === 'Survivor'));
-  ok('and a broken subtitle does not take the title with it',
+  /* `sub` is a key this app USED to keep and no longer reads, and
+     `view` is a key it never had. Both are in the damaged store on
+     purpose: a repair that only tolerates the shape it writes today
+     throws a title away the first time the format moves. */
+  ok('and a stray key from another version does not take the title with it',
     await page.$eval('#scTitle', (e) => e.textContent) === 'Kept');
 
   /* ── the live line ── */
@@ -681,26 +685,77 @@ const SAID = [
     && hero.of === 'Trading · 1 h 30 m left', hero);
 
   /* ── the head stays a label ──
-     Read RELATIVE to the hero's own figure, never as a px literal: a
-     figure typed into a test stops meaning anything the day the type
+     Read RELATIVE to the two figures around it, never as a px literal:
+     a figure typed into a test stops meaning anything the day the type
      moves, and this file has already had one of those go quiet.
 
      What is claimed is rank, which is the thing that was nearly lost —
      a 38px wordmark was built here and taken back out, and this is what
-     says it did not creep back. The name sits under the sub's own
-     order of magnitude and far under the figure. */
+     says it did not creep back. The name sits under the date it is
+     printed beneath and far under the hero's figure. */
   const head = await page.evaluate(() => {
     const px = (el) => parseFloat(getComputedStyle(el).fontSize);
     const t = document.querySelector('.title');
     return { title: px(t),
-             sub: px(document.querySelector('.sub')),
+             date: px(document.querySelector('.hd-date')),
              figure: px(document.querySelector('.live .figure b')),
              fits: t.scrollWidth <= t.clientWidth + 1 };
   });
   ok('the name is a label, not the top of the page',
-    head.title < head.sub * 2 && head.fits, head);
+    head.title < head.date && head.fits, head);
   ok('and the hero’s figure outranks it several times over',
     head.figure >= head.title * 2.5, head);
+
+  /* ── the date ──
+     The one fact up here that nothing else on the screen carries. The
+     day NAME is not with it and must not come back: today's card in
+     the deck already prints it in the accent, and the reds scan above
+     holds that to exactly one element. */
+  ok('the head prints today’s date and not its name',
+    await page.$eval('#scHdDate', (e) => e.textContent) === '1'
+    && await page.$$eval('.head', (h) => !/tuesday/i.test(h[0].textContent)));
+
+  /* ── the day's span ──
+     A scale, so it is read as one: the ends are the day's OWN first and
+     last minute rather than midnight to midnight, they are printed in
+     24-hour time because a meridiem on an axis says what the position
+     already says, and the dot is where the clock is between them.
+
+     The dot's position is checked as ARITHMETIC on the seed rather
+     than against a literal percentage — the frozen clock is 09:30 in a
+     day that runs 05:45 to 23:00, and a percentage typed here would
+     stop meaning anything the day the fixture moves. */
+  const span = await page.evaluate(() => {
+    const el = document.getElementById('scSpan');
+    const rows = [...document.querySelectorAll('.day.is-today .row[data-id]')];
+    const mins = (t) => { const m = /(\d+):(\d+)/.exec(t); return +m[1] * 60 + +m[2]; };
+    return { a: document.getElementById('scSpanA').textContent,
+             b: document.getElementById('scSpanB').textContent,
+             an: document.getElementById('scSpanAn').textContent,
+             bn: document.getElementById('scSpanBn').textContent,
+             dot: parseFloat(document.getElementById('scSpanDot').style.left),
+             fill: parseFloat(document.getElementById('scSpanFill').style.width),
+             label: el.getAttribute('aria-label'),
+             /* The times on the rows are the app's own render, so the
+                span is checked against what the day actually says
+                rather than against the fixture read a second time. */
+             first: rows[0].querySelector('.t').textContent,
+             last: rows[rows.length - 1].querySelector('.t').textContent,
+             mins };
+  });
+  ok('the span runs from the day’s first block to its last, in 24-hour time',
+    span.a === '05:45' && span.b === '23:00'
+    && span.first.indexOf('05:45') === 0 && span.last.indexOf('23:00') > 0, span);
+  ok('and it names both ends', span.an === 'Wake' && span.bn === 'Down', span);
+  ok('the dot sits where the clock is between them',
+    Math.abs(span.dot - (570 - 345) / (1380 - 345) * 100) < 0.5
+    && Math.abs(span.fill - span.dot) < 0.001, span);
+  /* It draws a picture, so it says the picture in words — the first and
+     last block are the only facts on this screen nothing else repeats,
+     and aria-hidden would have thrown them away. */
+  ok('and it is spoken as well as drawn',
+    /5:45 AM to 11:00 PM/.test(span.label)
+    && /Wake to Down/.test(span.label), span.label);
 
   /* ── a block’s name is its row’s subheading ──
      The name is what you scan for. It was 14px/500 — the same volume as
@@ -808,21 +863,28 @@ const SAID = [
   const reds = await page.evaluate(() => {
     const red = 'rgb(226, 35, 26)';
     const hit = [];
-    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, .title, .sub')
+    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, '
+      + '.title, .hd-date, .sp-t, .sp-ends span, .sp-fill, .sp-dot')
       .forEach((el) => {
         const s = getComputedStyle(el);
         if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
           hit.push({ today: el.classList.contains('day-name'),
                      running: !!el.closest('.row.is-now'),
                      place: el.tagName === 'EM',
+                     /* The span's dot is where you are in the day, which
+                        is the running block seen one level up — the same
+                        fact, so the same colour. Its TRACK and its spent
+                        half are not, and are in the scan above to say so. */
+                     now: el.id === 'scSpanDot',
                      what: el.className + ':' + (el.textContent || '').slice(0, 14) });
       });
     return hit;
   });
-  ok('the red marks today, the running block and a place — nothing else',
+  ok('the red marks today, the running block, now and a place — nothing else',
     reds.length > 0
-    && reds.every((r) => r.today || r.running || r.place)
+    && reds.every((r) => r.today || r.running || r.place || r.now)
     && reds.filter((r) => r.today).length === 1
+    && reds.filter((r) => r.now).length === 1
     && reds.some((r) => r.running) && reds.some((r) => r.place),
     /* Both halves of the claim in the payload, because they fail for
        opposite reasons and the message cannot tell you which: `stray`
@@ -830,9 +892,10 @@ const SAID = [
        accent having quietly stopped marking something. Reporting only
        the strays printed an empty array when the place lost its
        colour — a failure whose evidence said nothing. */
-    { stray: reds.filter((r) => !(r.today || r.running || r.place)),
+    { stray: reds.filter((r) => !(r.today || r.running || r.place || r.now)),
       today: reds.filter((r) => r.today).length,
       running: reds.filter((r) => r.running).length,
+      now: reds.filter((r) => r.now).length,
       place: reds.filter((r) => r.place).length });
 
   /* ── the sweep ──
@@ -2964,7 +3027,8 @@ const SAID = [
       return [png.data[i], png.data[i + 1], png.data[i + 2]];
     };
     const rows = [];
-    for (const sel of ['.title', '.sub', '#scRingKick', '#scRingNum',
+    for (const sel of ['.title', '.hd-date', '.sp-t', '.sp-ends span',
+                       '#scRingKick', '#scRingNum',
                        '#scRingName', '#scRingKey', '.sr-lbl', '.sr-row b', '.sr-row span']) {
       const el = await page.$(sel);
       if (!el) continue;

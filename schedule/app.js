@@ -70,9 +70,18 @@
      the name when there is one, rather than taking a column of its
      own — most blocks have none, and a fourth track standing empty
      all week is worse than no track. */
+  /* THE SUBTITLE IS GONE, and the span is why. It only ever said "Up
+     at 6:00 · down at 22:45" — which the span above now draws, with a
+     dot on it saying where in that window you are. A sentence and a
+     picture of the same fact, one under the other, is the duplication
+     this project keeps having to take back out.
+
+     scClean drops the field rather than carrying it forward: a stored
+     string nothing renders and nothing can edit is not preserved data,
+     it is a key that will outlive everyone who remembers what it was
+     for. */
   var SEED = {
     title: 'Daily Process',
-    sub: 'Up at 6:00 · down at 22:45',
     items: [0, 1, 2, 3, 4, 5, 6].reduce(function (all, d) {
       return all.concat([
         { d: d, s: 360,  e: 390,  r: '', n: 'Wake' },
@@ -95,10 +104,9 @@
      one unreadable row, must not cost a week's worth of building — the
      rows are independent of each other and of the header. */
   function scClean(raw) {
-    var out = { title: SEED.title, sub: SEED.sub, items: [] };
+    var out = { title: SEED.title, items: [] };
     if (!raw || typeof raw !== 'object') return out;
     if (typeof raw.title === 'string') out.title = raw.title.slice(0, 60);
-    if (typeof raw.sub === 'string') out.sub = raw.sub.slice(0, 90);
     var list = Array.isArray(raw.items) ? raw.items : [];
     for (var i = 0; i < list.length; i++) {
       var it = list[i];
@@ -876,8 +884,8 @@
     painted = new Date().toDateString();
 
     $('scTitle').textContent = state.title;
-    $('scSub').textContent = state.sub;
-    $('scSub').hidden = !state.sub;
+    scDate();
+    scDaySpan();
 
     var rail = $('scRail');
     rail.textContent = '';
@@ -1680,6 +1688,59 @@
     if (!quiet && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
   }
 
+  /* ── which day it is ──
+     The app knew the date and never printed it. Drawn once per render
+     rather than per live pass: it can only change by the day turning
+     over, and scLive already re-renders the whole screen when it does. */
+  function scDate() { $('scHdDate').textContent = new Date().getDate(); }
+
+  /* ── the day's span ──
+     First block to last block, with a dot where you are in it. The
+     figures are 24-hour (scHHMM) rather than the app's usual 12-hour:
+     this is an AXIS, and the meridiem on a scale is four glyphs saying
+     what the dot's position already says.
+
+     NOT named scSpan — that is taken, by the duration formatter, and a
+     silent replacement is the failure this project has already had
+     three times.
+
+     The dot is CLAMPED to the ends rather than the track hidden
+     outside them: before the first block and after the last one the
+     honest picture is a dot parked on the end, and a span that
+     disappears at 23:00 is a screen that goes blank at exactly the
+     hour you are most likely to be checking it. */
+  function scDaySpan() {
+    var wrap = $('scSpan'), mine = scByDay(new Date().getDay());
+    if (!mine.length) { wrap.hidden = true; return; }
+    var a = mine[0].s, b = mine[0].e, i;
+    for (i = 1; i < mine.length; i++) {
+      if (mine[i].s < a) a = mine[i].s;
+      if (mine[i].e > b) b = mine[i].e;
+    }
+    /* A day with one instant on it would divide by zero and put the
+       dot at NaN%, which renders as the track's left edge and looks
+       deliberate. */
+    var span = Math.max(1, b - a);
+    var at = Math.min(b, Math.max(a, scNowMin()));
+    var pc = (at - a) / span * 100;
+
+    var first = mine[0], last = mine[0];
+    for (i = 1; i < mine.length; i++) {
+      if (mine[i].s < first.s) first = mine[i];
+      if (mine[i].e > last.e) last = mine[i];
+    }
+
+    wrap.hidden = false;
+    $('scSpanA').textContent = scHHMM(a);
+    $('scSpanB').textContent = scHHMM(b);
+    $('scSpanAn').textContent = first.n;
+    $('scSpanBn').textContent = last.n;
+    $('scSpanFill').style.width = pc + '%';
+    $('scSpanDot').style.left = pc + '%';
+    wrap.setAttribute('aria-label', 'Today runs ' + scRangeLong(a, b)
+      + ', from ' + first.n + ' to ' + last.n + '.');
+  }
+
   /* The live pass touches classes and one line of text, never the DOM's
      shape — it runs every half minute, and rebuilding the card that
      often would fight a finger that is in the middle of scrolling it. */
@@ -1723,6 +1784,10 @@
        it crosses an hour. A time is four or five glyphs forever, sets
        in tabular figures, and the duration still gets said, in the
        caption where changing width costs nothing. */
+    /* The dot is the one thing up here that moves with the clock, so
+       it is repainted on the same half-minute pass the hero is. */
+    scDaySpan();
+
     var line = $('scLive');
     var mine = scByDay(today);
     var running = null, next = null;
@@ -3923,20 +3988,36 @@
        under a week that was not on screen. */
     var wkd = document.querySelector('.wk-dots');
     if (wkd) wkd.hidden = ring || tal || fr;
-    /* Coming back to the week: re-measure, because the window's own
-       rect was zero for as long as it was hidden, and re-centre, because its
-       transform went with it. */
-    if (!(ring || tal || fr)) {
-      scDeckFit($('scRail'), wkd);
-      scDeckJump();
-    }
     /* The ring's own middle says the state and the figure, and the
        tally has a hero of its own. Leaving the week's above either says
        it twice, and the louder of the two is the one that is not the
        point of the screen. */
     $('scLive').hidden = ring || tal || fr;
     $('scLiveOf').hidden = ring || tal || fr;
+    $('scSpan').hidden = ring || tal || fr || !scByDay(new Date().getDay()).length;
     $('scEmpty').hidden = ring || tal || fr || state.items.length > 0;
+
+    /* Coming back to the week: re-measure, because the window's own
+       rect was zero for as long as it was hidden, and re-centre, because
+       its transform went with it.
+
+       AFTER the head is put back, never before. scDeckFit reads the
+       window's own `top`, and the hero above it was still hidden when
+       this ran first — so the deck was measured against a head three
+       registers shorter than the one it would be under a frame later,
+       and came out that much too tall. It cost the dots, which went
+       under the bar and then off the bottom of the screen: the deck
+       itself is a window with cards clipped inside it, so nothing about
+       it looked wrong, and the only visible symptom was the page
+       indicator being missing on every return to the week.
+
+       It survived because the error was the height of the hero alone
+       and the dots had that much room to give. The span put another
+       35px on the head and spent it. */
+    if (!(ring || tal || fr)) {
+      scDeckFit($('scRail'), wkd);
+      scDeckJump();
+    }
 
     /* The tab you are on, lit. The old single button had to draw the
        NEXT view rather than the current one — a control that shows its
@@ -4694,9 +4775,6 @@
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
-      item('Subtitle', state.sub || 'none', '', function () {
-        scTextSheet('Subtitle', 'Subtitle', state.sub, function (v) { state.sub = v; });
-      });
       item('Copy a backup', 'Puts the whole schedule on the clipboard as text', '', function () {
         var text = JSON.stringify(state);
         var done = function () { scClose(); scToast('Copied. Paste it somewhere safe.', false); };
@@ -4877,10 +4955,6 @@
   $('scTitle').addEventListener('click', function () {
     scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
   });
-  $('scSub').addEventListener('click', function () {
-    scTextSheet('Subtitle', 'Subtitle', state.sub, function (v) { state.sub = v; });
-  });
-
   /* The history takes Escape FIRST. Both can be open at once — the
      number sheet is reachable from a row whose strip is also pressable —
      and closing the thing underneath while the thing on top stays up is
