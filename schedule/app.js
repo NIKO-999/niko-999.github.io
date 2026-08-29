@@ -903,6 +903,10 @@
       var li = scEl('li', 'day' + (d === today ? ' is-today' : '')
         + (isOpen ? ' is-open' : ''));
       li.dataset.d = d;
+      /* The two faces of the card turn together, so they sit inside one
+         box that is transformed rather than being transformed apart. */
+      var flip = scEl('div', 'wk-flip');
+      var front = scEl('div', 'wk-front');
 
       var head = scEl('div', 'wk-h');
       var dn = scEl('button', 'day-name', isOpen ? FULL[d] : ABBR[d]);
@@ -916,6 +920,17 @@
         if (d === scOpenDay()) scEditSheet(null, d); else scDeckGo(d);
       });
       head.appendChild(dn);
+      /* ── the turn ──
+         Only on the open card: a 76px sliver has nothing to show on its
+         back, and a control that appears on seven cards to be useful on
+         one is six pieces of furniture. */
+      if (isOpen) {
+        var turn = scEl('button', 'wk-turn');
+        turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
+        turn.innerHTML = OBJ_MARK;
+        turn.addEventListener('click', function () { scFlip(d, true); });
+        head.appendChild(turn);
+      }
       /* Committed hours, opposite the name. It is the one figure a card
          can carry for nothing — the rows are already here to add up —
          and it is what makes a card comparable to the card beside it. */
@@ -924,7 +939,7 @@
         head.appendChild(scEl('span', 'wk-hrs',
           (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs'));
       }
-      li.appendChild(head);
+      front.appendChild(head);
 
       /* The shut cards get bars: duration as length, the session breaks
          as gaps, no words. Built for every card whether or not it is
@@ -942,7 +957,7 @@
           mini.appendChild(b);
         });
       });
-      li.appendChild(mini);
+      front.appendChild(mini);
 
       /* ── you OPEN a card by pressing it ──
          It used to open by being nearest the middle of the scroller
@@ -959,10 +974,7 @@
          every day of the week. It is a SIBLING of the rows rather than
          their ancestor, because a button inside a button is invalid and
          collapses to one press while looking exactly right. */
-      var face = scEl('button', 'wk-face');
-      face.setAttribute('aria-label', 'Open ' + FULL[d]);
-      face.addEventListener('click', function () { scDeckGo(d); });
-      li.appendChild(face);
+
 
       var card = scEl('div', 'day-card');
 
@@ -1132,7 +1144,21 @@
         card.appendChild(row);
       });
 
-      li.appendChild(card);
+      front.appendChild(card);
+      flip.appendChild(front);
+      /* Built for every card, not only the open one, for the same
+         reason the rows are: opening a day moves a class and nothing
+         re-renders, so whatever the new card needs has to be there
+         already. */
+      flip.appendChild(scObjBack(d));
+      li.appendChild(flip);
+      /* OUTSIDE the flip, so it is not turned away with the front: a
+         shut card is pressed to be opened whichever way its faces
+         happen to be pointing. */
+      var face = scEl('button', 'wk-face');
+      face.setAttribute('aria-label', 'Open ' + FULL[d]);
+      face.addEventListener('click', function () { scDeckGo(d); });
+      li.appendChild(face);
       rail.appendChild(li);
     });
 
@@ -1296,6 +1322,298 @@
       return { s: s, rows: rows.filter(function (it) {
         return it.s >= s.a && it.s < s.b; }) };
     }).filter(function (g) { return g.rows.length; });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE OBJECTIVES
+
+     What the day is FOR, as against what is on it. The schedule says
+     when things happen; this says which two or three of them actually
+     matter, in the order they should be done. It lives on the back of
+     the day's own card because it is the same day seen from the other
+     side, and a second screen for three lines would be a tab you stop
+     opening.
+
+     ── PER DATE, not per weekday ──
+     The schedule repeats: every Monday has the same shape, which is
+     what makes it a shape. An objective does not — "the thing that
+     matters today" is a decision you take on the day, and one that
+     repeated every Monday would be a routine wearing an objective's
+     clothes. So these are keyed by the real date, and a card in the
+     deck shows the objectives of the date that weekday falls on THIS
+     week.
+
+     ── AND THEY ARE ORDERED ──
+     Position is priority and the first is the frog: the one you would
+     rather not start. Nothing here sorts itself — the order is the
+     decision, and re-ranking is a press.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* A flag on a post: the thing you are heading for. Drawn rather than
+     labelled, like every other glyph on this screen. */
+  var OBJ_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+    + '<path d="M6 21V4M6 4.6h11.5l-2.3 3.7 2.3 3.7H6"/></svg>';
+
+  var OBJ_KEY = 'sched.obj.v1';
+  var objLog = {};   /* date -> [{ id, n, tgt, done }] */
+
+  function scObjLoad() {
+    objLog = scReadJSON(OBJ_KEY, {});
+    if (!objLog || typeof objLog !== 'object' || Array.isArray(objLog)) objLog = {};
+    /* ── kept to a window, unlike the schedule ──
+       This is one record per DATE, so left alone it grows forever, and
+       an objective from March is not a record anybody wants back — it
+       is a decision that was taken and is over. Ninety days is long
+       enough to look back over a season and short enough that the key
+       cannot quietly become the biggest thing in this browser.
+
+       Repaired rather than rejected: a damaged day is dropped and the
+       rest of the record survives, because the days are independent and
+       throwing the object away would take a season with it. */
+    var cut = new Date();
+    cut.setDate(cut.getDate() - 90);
+    var floor = scDay(cut);
+    Object.keys(objLog).forEach(function (k) {
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(k) || k < floor
+          || !Array.isArray(objLog[k])) { delete objLog[k]; return; }
+      objLog[k] = objLog[k].filter(function (o) {
+        return o && typeof o === 'object' && typeof o.n === 'string' && o.n;
+      }).map(function (o) {
+        return { id: o.id || scRand(10, HEX_A), n: String(o.n).slice(0, 60),
+                 done: !!o.done };
+      });
+      if (!objLog[k].length) delete objLog[k];
+    });
+  }
+  function scObjSave() { scWriteJSON(OBJ_KEY, objLog); }
+
+  function scObjFor(day) { return objLog[day] || []; }
+
+  /* Five, and the ceiling is the feature. A list of twelve objectives
+     is a schedule with the times taken off — the whole point is that
+     naming the two or three that matter costs you the rest. */
+  var OBJ_MAX = 5;
+
+  /* ── a SENTENCE, not a name and a number ──
+     "Call a hundred clients" is the objective; there is no field for
+     how much, because the amount is already in the words and a form
+     that asked for it separately would make you take a decision apart
+     to type it in. The glyph is worked out from the same sentence, so
+     nothing is set twice. */
+  function scObjAdd(day, name) {
+    name = String(name || '').trim();
+    if (!name) return false;
+    var all = objLog[day] || (objLog[day] = []);
+    if (all.length >= OBJ_MAX) return false;
+    all.push({ id: scRand(10, HEX_A), n: name.slice(0, 60), done: false });
+    scObjSave();
+    return true;
+  }
+  function scObjDrop(day, id) {
+    if (!objLog[day]) return;
+    objLog[day] = objLog[day].filter(function (o) { return o.id !== id; });
+    if (!objLog[day].length) delete objLog[day];
+    scObjSave();
+  }
+  /* Re-ranking is one move and it is always the same move: make this
+     the frog. Up-and-down arrows on a list of at most five is four
+     presses to do what one should. */
+  function scObjFirst(day, id) {
+    var all = objLog[day];
+    if (!all) return;
+    var i = all.findIndex(function (o) { return o.id === id; });
+    if (i <= 0) return;
+    all.unshift(all.splice(i, 1)[0]);
+    scObjSave();
+  }
+  function scObjToggle(day, id) {
+    var all = objLog[day];
+    if (!all) return;
+    all.forEach(function (o) { if (o.id === id) o.done = !o.done; });
+    scObjSave();
+  }
+
+  /* ── the back of the card ──
+     Glyphs and figures, and deliberately no prose. A row of writing
+     here would be the schedule again with the times taken off; what
+     you want at a glance is WHICH thing and HOW MUCH, and both of
+     those are drawn. The name is still on the element for a screen
+     reader — the tally cards made exactly this trade and the rule that
+     came out of it was that the glyph may BE the name on screen, and
+     must never be the only place the name exists.
+
+     Rank in the gutter, and the first is the accent: the frog is
+     whatever you would rather not start, and this screen's only job is
+     to keep saying which one that is. */
+  function scObjBack(d) {
+    var day = scDay(scDateOfDow(d));
+    var back = scEl('div', 'wk-back');
+
+    var head = scEl('div', 'wk-h');
+    /* NOT `.day-name`. The front already owns that class, and a second
+       one per card made every query for the week's day names return two
+       — the deck read as "Tuesday, Tuesday" and today counted twice
+       against the rule that says what the accent is spent on. It is
+       also plain ink here: the frog's rank is this face's one live
+       thing, and a red heading over it would be two. */
+    var t = scEl('button', 'ob-day', FULL[d]);
+    t.setAttribute('aria-label', 'Back to ' + FULL[d] + '\u2019s schedule');
+    t.addEventListener('click', function () { scFlip(d, false); });
+    head.appendChild(t);
+    var turn = scEl('button', 'wk-turn');
+    turn.setAttribute('aria-label', 'Back to the schedule');
+    turn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+      + '<path d="M4 7h16M4 12h16M4 17h10"/></svg>';
+    turn.addEventListener('click', function () { scFlip(d, false); });
+    head.appendChild(turn);
+    back.appendChild(head);
+
+    var list = scEl('ol', 'ob-list');
+    var all = scObjFor(day);
+    all.forEach(function (o, i) {
+      var li = scEl('li');
+      var b = scEl('button', 'ob' + (o.done ? ' is-done' : '')
+        + (i === 0 ? ' is-frog' : ''));
+      /* SMALL, and it is a marker rather than a picture: the sentence
+         beside it is what you read, and a 30px glyph next to fifteen
+         words made the drawing the loudest thing on a face whose whole
+         job is the words. */
+      var kind = scIconFor(o.n);
+      var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      ic.setAttribute('class', 'ob-ic');
+      ic.setAttribute('viewBox', '0 0 24 24');
+      ic.setAttribute('aria-hidden', 'true');
+      ic.setAttribute('data-icon', kind);
+      ic.innerHTML = BLOCK_ICON[kind];
+      b.appendChild(ic);
+
+      b.appendChild(scEl('span', 'ob-t', o.n));
+
+      /* The tick is a mark that APPEARS, the same as a finished block
+         on the front: an untouched row's gutter holds one thing. */
+      var tk = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      tk.setAttribute('class', 'ob-tick');
+      tk.setAttribute('viewBox', '0 0 24 24');
+      tk.setAttribute('aria-hidden', 'true');
+      tk.innerHTML = '<path d="M4.5 12.8l5.2 5.2L19.5 6"/>';
+      b.appendChild(tk);
+
+      /* Everything the drawing says, said. Without this a screen reader
+         meets a list of buttons called "1" and "2". */
+      b.setAttribute('aria-label', (i + 1) + '. ' + o.n
+        + (i === 0 ? ', the main one' : '') + '. '
+        + (o.done ? 'Done' : 'Not done') + '. Tap to mark.');
+      b.setAttribute('aria-pressed', o.done ? 'true' : 'false');
+      b.addEventListener('click', function () {
+        scObjToggle(day, o.id);
+        scRender();
+        scFlip(d, true, true);
+      });
+      li.appendChild(b);
+      list.appendChild(li);
+    });
+    back.appendChild(list);
+
+    if (all.length < OBJ_MAX) {
+      var add = scEl('button', 'ob-add');
+      add.setAttribute('aria-label', 'Add an objective for ' + FULL[d]);
+      add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+        + '<path d="M12 5v14M5 12h14"/></svg>';
+      add.addEventListener('click', function () { scObjSheet(d, day); });
+      back.appendChild(add);
+    }
+    /* The one line of prose on this face, and only when there is
+       nothing else on it: a blank card with a plus on it says what to
+       press and not what the thing is for. */
+    if (!all.length) {
+      back.appendChild(scEl('p', 'ob-empty',
+        'What today is for. Two or three, hardest first.'));
+    }
+    return back;
+  }
+
+  /* ── adding one, and re-ranking it ──
+     One sheet for the whole of it: a field to add, and every objective
+     already there with the two things you would want to do to it. A
+     separate edit screen for a list of at most five would be a second
+     place for the same five things to disagree.
+
+     Delete is final here and there is no bin, which is the reminders'
+     exception rather than a new one: a bin protects a record you cannot
+     rebuild, and an objective you have taken off today's card is a
+     decision you have just changed your mind about. */
+  function scObjSheet(d, day) {
+    scSheet('Objectives \u00b7 ' + FULL[d], function (body) {
+      var all = scObjFor(day);
+      if (all.length) {
+        body.appendChild(scEl('span', 'label', 'On the card'));
+        all.forEach(function (o, i) {
+          var row = scEl('div', 'ob-edit');
+          var kind = scIconFor(o.n);
+          var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          ic.setAttribute('class', 'ic');
+          ic.setAttribute('viewBox', '0 0 24 24');
+          ic.setAttribute('aria-hidden', 'true');
+          ic.innerHTML = BLOCK_ICON[kind];
+          row.appendChild(ic);
+          row.appendChild(scEl('span', 'ob-e-n', o.n));
+          /* One move, always the same move: make this the frog. Up and
+             down arrows on five rows is four presses to do what one
+             should, and the only rank anybody actually argues about is
+             which one is first. */
+          if (i > 0) {
+            row.appendChild(scBtn('off', 'First', function () {
+              scObjFirst(day, o.id);
+              scClose();
+              scRender();
+              scFlip(d, true, true);
+            }));
+          }
+          row.appendChild(scBtn('bad', 'Remove', function () {
+            scObjDrop(day, o.id);
+            scClose();
+            scRender();
+            scFlip(d, true, true);
+          }));
+          body.appendChild(row);
+        });
+      }
+
+      body.appendChild(scEl('span', 'label', 'Add one'));
+      /* ONE field. Say the whole thing — "Call a hundred clients" — and
+         the glyph comes out of the same sentence. A second box for the
+         amount would be asking you to take a decision apart in order to
+         type it in, and then to keep the two halves in step. */
+      var f = scEl('input', 'field');
+      f.type = 'text';
+      f.placeholder = 'Call a hundred clients\u2026';
+      f.maxLength = 60;
+      body.appendChild(f);
+
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Done', scClose));
+      acts.appendChild(scBtn('go', 'Add', function () {
+        if (!scObjAdd(day, f.value)) {
+          scToast(f.value.trim() ? 'Five is the most' : 'Give it a name', false);
+          return;
+        }
+        scClose();
+        scRender();
+        scFlip(d, true, true);
+      }));
+      body.appendChild(acts);
+      setTimeout(function () { f.focus(); }, 260);
+    });
+  }
+
+  /* Turning is a class, and the state is not stored: an objective is
+     for today and a card found face-down tomorrow morning would be the
+     app remembering the wrong half of a decision. */
+  function scFlip(d, on, quiet) {
+    var li = $('scRail').querySelector('.day[data-d="' + d + '"]');
+    if (!li) return;
+    li.classList.toggle('is-flipped', !!on);
+    if (!quiet && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
   }
 
   /* The live pass touches classes and one line of text, never the DOM's
@@ -4407,6 +4725,7 @@
      the tally can be the view you left it on, and it opening empty and
      filling in a frame later reads as having lost the day. */
   scTickLoad();
+  scObjLoad();
 
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);

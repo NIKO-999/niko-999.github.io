@@ -492,6 +492,70 @@ declaration. Arriving at the screen stays instant: a week that appears
 already mid-animation looks like it was left running while you were
 somewhere else.
 
+## The card has a back
+
+**The objectives live on the back of the day's own card**, because they
+are the same day seen from the other side. The schedule says when
+things happen; this says which two or three of them actually matter. A
+second screen for three lines would be a tab you stop opening.
+
+**PER DATE, not per weekday.** The schedule repeats — every Monday has
+the same shape, which is what makes it a shape. An objective does not:
+"the thing that matters today" is a decision you take on the day, and
+one that repeated every Monday would be a routine wearing an
+objective's clothes. Kept to a ninety-day window, because this is one
+record per date and an objective from March is not something anybody
+wants back.
+
+**A SENTENCE, and there is no field for how much.** "Call a hundred
+clients" is the objective. A second box for the amount would make you
+take a decision apart in order to type it in, and then keep the two
+halves in step. The glyph is worked out from the same sentence through
+the app's own keyword table, so nothing is set twice.
+
+**The glyph is a MARKER, not a picture.** It went in at 30px and was
+the loudest object on a face whose whole job is the words — a drawing
+that competes with the text it labels has stopped labelling it. 15px,
+beside 13px type, with no rules between the rows: a hairline under each
+makes it a table, and a table is a thing you scan for a value rather
+than a list of things you have decided.
+
+**Position is priority and the first is the frog** — the one you would
+rather not start. It takes the accent on its glyph and one step of
+weight on its words, and NOT a rank number: a column of figures down
+the side of five short sentences is a second ordering drawn over the
+one the list already has. Re-ranking is one move and always the same
+move, *make this first*, because up-and-down arrows on five rows is
+four presses to do what one should.
+
+**The plus is nearly nothing.** A full-width dashed box was a second
+object on the card, competing with the objectives it was meant to sit
+behind. It is a small mark in the glyph's own column now, and the press
+target is still the 44px everything else holds to — only the drawing is
+small.
+
+**The back is the rare one.** A sheen rather than a colour: two washes
+of the accent and one of the ink, angled across the same paper the
+front is. It is the only surface in this app that is not flat, and that
+is the point — the objectives are the one thing on the screen you chose
+rather than scheduled. **Mixed from the palette, never a literal**:
+thirteen themes move `--red` and `--ink` together, so a gradient in hex
+would be somebody else's card on twelve of them. The alphas stay low
+enough that it is a sheen and not a ground the words have to fight, and
+`tests/schedule.js` measures a line of it on composited pixels.
+
+**Two faces, one of them turned away** — `backface-visibility: hidden`
+is what makes it a card with a back rather than two panels that swap,
+and without it the schedule reads through the objectives mirror-imaged.
+The turn is NOT remembered: an objective is for today, and a card found
+face-down tomorrow morning is the app having kept the wrong half of a
+decision.
+
+**The back's title is `.ob-day`, not `.day-name`.** The front already
+owns that class, and a second one per card made every query for the
+week's day names return two — the deck read as "Tuesday, Tuesday" and
+today counted twice against the rule about what the accent is spent on.
+
 ## Morning, afternoon, evening
 
 **Noon and five o'clock**, which is where the words already sit in

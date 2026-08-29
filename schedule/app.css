@@ -950,13 +950,11 @@ body {
 
 .day {
   flex: none;
-  position: relative;   /* the face is absolute to this */
-  display: flex;
-  flex-direction: column;
-  border-radius: 18px;
-  padding: 15px 14px;
-  background: color-mix(in srgb, var(--ink) 4%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  position: relative;   /* the face and the flip are absolute to this */
+  /* The depth the turn is seen in. Without it the card does not rotate,
+     it squashes: a flat rotateY is an affine scale on X and reads as
+     the card being crushed rather than turned over. */
+  perspective: 1000px;
   /* ── the card OPENS rather than jumping open ──
      76px to 268px is the whole width of a card appearing in one frame,
      and with the deck re-centring on it in the same frame the swipe
@@ -978,6 +976,37 @@ body {
               box-shadow .26s ease,
               opacity .26s ease;
 }
+
+/* ── the two faces ──
+   Both are absolutely placed in the same box and one of them is turned
+   away, so the card has a real back rather than two panels that swap.
+   `backface-visibility` is what stops the far side showing through
+   mirror-imaged — without it the schedule reads backwards through the
+   objectives. */
+.wk-flip {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+  transition: transform .52s cubic-bezier(.2, .7, .3, 1);
+}
+.day.is-flipped .wk-flip { transform: rotateY(180deg); }
+@media (prefers-reduced-motion: reduce) {
+  .wk-flip { transition: none; }
+}
+.wk-front, .wk-back {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  border-radius: 18px;
+  padding: 15px 14px;
+  background: color-mix(in srgb, var(--ink) 4%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ink) 10%, transparent);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  overflow: hidden;
+}
+.wk-back { transform: rotateY(180deg); }
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {
@@ -985,13 +1014,218 @@ body {
 }
 /* The open card is paper and the others are not, so the one you are
    reading is lifted off the ground rather than merely wider. */
-.day.is-open {
-  width: var(--wk-open);
-  background: var(--paper);
+.day.is-open { width: var(--wk-open); }
+/* The lift is on both faces; the GROUND is only on the front, because
+   the back paints its own and a background written twice leaves the
+   first one dead. tests/names.js is what said so. */
+.day.is-open .wk-front,
+.day.is-open .wk-back {
   border-color: color-mix(in srgb, var(--ink) 16%, transparent);
   box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
 }
+.day.is-open .wk-front { background: var(--paper); }
 .day:not(.is-open) { width: var(--wk-shut); opacity: .82; }
+
+/* ── the back is the rare one ──
+   A sheen rather than a colour: two washes of the accent and one of the
+   ink, angled across the card, over the same paper the front is. It is
+   the only surface in this app that is not flat, and that is the point
+   — the objectives are the one thing on the screen you chose rather
+   than scheduled, so the card they are on should look like something
+   you would keep.
+
+   MIXED FROM THE PALETTE, never a literal. Thirteen themes move --red
+   and --ink together, so a gradient written in hex would be somebody
+   else's card on twelve of them. And the alphas are deliberately low:
+   everything on this face is drawn in --ink at full strength, so the
+   wash has to stay a sheen rather than become a ground that the glyphs
+   then have to fight. */
+.day.is-open .wk-back {
+  background:
+    radial-gradient(128% 82% at 12% -8%,
+      color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
+    radial-gradient(120% 88% at 92% 106%,
+      color-mix(in srgb, var(--ink) 13%, transparent), transparent 58%),
+    linear-gradient(148deg,
+      color-mix(in srgb, var(--red) 7%, transparent) 0%,
+      transparent 42%,
+      color-mix(in srgb, var(--ink) 7%, transparent) 100%),
+    var(--paper);
+}
+
+/* The back's own title. Sized like the front's so the two faces are
+   plainly the same card, and in ink rather than the accent — the frog's
+   rank is the one live thing on this face. */
+.ob-day {
+  border: 0;
+  background: none;
+  padding: 0;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1;
+  text-align: left;
+  cursor: pointer;
+}
+.ob-day:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+/* ── the turn ──
+   Icon only, and named by aria: a word here would be a third thing in a
+   head that already holds a day and a figure. */
+.wk-turn {
+  flex: none;
+  width: 30px; height: 30px;
+  margin: -5px -4px -5px 0;
+  border: 0; padding: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  place-items: center;
+}
+.wk-turn svg {
+  width: 19px; height: 19px;
+  fill: none; stroke: var(--dim); stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.wk-turn:active svg { stroke: var(--red); }
+.wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+
+/* ── an objective ──
+   A rank, a glyph and a figure. No name is drawn: what you want at a
+   glance is WHICH thing and HOW MUCH, and a line of prose here would
+   be the schedule again with the times taken off. The name is on the
+   element for a screen reader, which is the rule the tally cards
+   already set — the glyph may be the name on screen and must never be
+   the only place the name exists. */
+/* `0 1 auto`, not `1 1 auto`. Grown to fill, the list pushed the add
+   button to the floor of the card and left a hand's width of nothing
+   between the last objective and it — which reads as the card being
+   half empty rather than as a list you can still add to. It takes the
+   height of what is in it and the empty space falls below, where empty
+   space belongs. */
+.ob-list { list-style: none; margin: 6px 0 0; padding: 0;
+  flex: 0 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
+.ob-list::-webkit-scrollbar { display: none; }
+/* ── QUIET, and the quiet is the design ──
+   The face has one job: you look at it and know what has to happen.
+   That is not helped by size — a list set large reads as a poster and
+   you start skimming it. Small, tightly set, with air between the
+   lines and no rules across them, it reads the way a note to yourself
+   reads: five short statements, and you are done looking.
+
+   The rows have NO borders. A hairline between each is a table, and a
+   table is a thing you scan for a value rather than a list of things
+   you have decided. The spacing separates them. */
+.ob {
+  display: grid;
+  grid-template-columns: 15px 1fr 14px;
+  align-items: start;
+  gap: 9px;
+  width: 100%;
+  min-height: 44px;
+  padding: 10px 2px;
+  border: 0;
+  background: none;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* ── the glyph is a MARKER, not a picture ──
+   The sentence beside it is what you read. At 30px it was the loudest
+   object on a face whose whole job is the words, and a drawing that
+   competes with the text it labels has stopped labelling it. */
+.ob-ic {
+  width: 15px; height: 15px;
+  margin-top: 2px;
+  fill: none; stroke: var(--dim); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+/* ── the main one ──
+   Position is priority and the first is the frog: the one you would
+   rather not start. Said with the accent on the glyph and one step of
+   weight on the words, and NOT with a rank number — a column of
+   figures down the side of five short sentences is a second ordering
+   drawn over the one the list already has. */
+.ob.is-frog .ob-ic { stroke: var(--red); stroke-width: 2.2; }
+.ob.is-frog .ob-t { font-weight: 700; color: var(--ink); }
+.ob-t {
+  font-size: 13px;
+  font-weight: 500;
+  line-height: 1.42;
+  color: var(--dim);
+  letter-spacing: -.002em;
+  min-width: 0;
+}
+.ob-tick {
+  width: 14px; height: 14px;
+  margin-top: 2px;
+  fill: none; stroke: var(--ink); stroke-width: 3;
+  stroke-linecap: round; stroke-linejoin: round;
+  opacity: 0;
+}
+/* Done goes quiet rather than away, and only as far as --spent, which
+   still clears 4.7:1. An objective you can no longer read is a record
+   of the day that has stopped being one. */
+.ob.is-done .ob-tick { opacity: 1; }
+.ob.is-done .ob-ic { stroke: var(--spent); }
+.ob.is-done .ob-t { color: var(--spent); font-weight: 500; }
+.ob:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+/* ── the plus is nearly nothing ──
+   A full-width dashed box was a second object on the card, and one
+   competing with the objectives for the eye it was meant to be behind.
+   It is a small mark in the glyph's own column now — lined up under
+   the markers, the size of one, and quiet enough that the list still
+   ends at the last objective. The press target is the 44px the app
+   holds everything else to; only the drawing is small. */
+.ob-add {
+  flex: none;
+  margin: 2px 0 0;
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  background: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: 15px 1fr;
+  align-items: center;
+  gap: 9px;
+  padding: 0 2px;
+}
+.ob-add svg {
+  width: 15px; height: 15px;
+  fill: none; stroke: var(--spent); stroke-width: 2;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.ob-add:active svg { stroke: var(--red); }
+.ob-add:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+.ob-empty {
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--spent);
+  margin: 2px 2px 0;
+}
+
+/* The editor's rows, on the sheet rather than the card. */
+.ob-edit {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--hair);
+}
+.ob-edit .ic {
+  width: 22px; height: 22px; flex: none;
+  fill: none; stroke: var(--ink); stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.ob-e-n { flex: 1; font-size: 15px; font-weight: 600; min-width: 0;
+  line-height: 1.3; }
+.ob-edit .btn { padding: 7px 11px; font-size: 12px; }
 
 /* ── the face of a shut card ──
    The whole card is one press that opens that day. It is a real button

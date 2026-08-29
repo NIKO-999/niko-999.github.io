@@ -152,7 +152,11 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
   await new Promise((r) => srv.listen(port, r));
   const browser = await chromium.launch({ executablePath: exe });
 
-  for (const theme of ['light', 'dark']) {
+  /* PALETTE IDS, not 'light' and 'dark'. The app falls back to Paper on
+     an id it does not know, so a lab asking for 'dark' photographed the
+     white theme twice and every dark render in this folder was a light
+     one. Nothing threw; the two files simply matched. */
+  for (const theme of ['paper', 'nebula']) {
     const page = await browser.newPage({
       viewport: { width: 390, height: 844 }, deviceScaleFactor: 3,
       isMobile: true, hasTouch: true,
@@ -294,7 +298,7 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
       }), null, 1));
     }
 
-    await page.screenshot({ path: path.join(dir, `${name}-${theme}.png`) });
+    await page.screenshot({ path: path.join(dir, `${name}-${theme === 'paper' ? 'light' : 'dark'}.png`) });
     await page.close();
   }
 

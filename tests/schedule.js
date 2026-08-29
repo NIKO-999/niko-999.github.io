@@ -953,6 +953,175 @@ const SAID = [
       getComputedStyle(r, '::after').animationName !== 'none').length) === 1);
 
 
+  /* ═══ the objectives ═══
+     The back of the day's card: what the day is FOR, as against what is
+     on it. Per DATE rather than per weekday — the schedule repeats and
+     a decision about today does not. */
+  console.log('\n── the objectives ──');
+
+  ok('the card starts face up', await page.$eval('.day.is-open',
+    (d) => !d.classList.contains('is-flipped')));
+  /* Both faces are in the document at once, so which one is SHOWING
+     cannot be read off a property — it is which way the card is
+     turned. */
+  ok('...and both faces are built, one of them turned away',
+    await page.$$eval('.day.is-open .wk-front, .day.is-open .wk-back',
+      (f) => f.length) === 2);
+  ok('...with the turn control only on the open card',
+    await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 1);
+
+  await page.click('.day.is-open .wk-front .wk-turn');
+  await page.waitForTimeout(700);
+  ok('pressing it turns the card over', await page.$eval('.day.is-open',
+    (d) => d.classList.contains('is-flipped')));
+  /* MEASURED, not the class. backface-visibility is what makes this a
+     card with a back rather than two panels that swap, and without it
+     the schedule reads through the objectives mirror-imaged. */
+  const facing = await page.evaluate(() => {
+    const m = new DOMMatrix(getComputedStyle(
+      document.querySelector('.day.is-open .wk-flip')).transform);
+    return { a: Math.round(m.a * 100) / 100,
+      back: getComputedStyle(document.querySelector('.day.is-open .wk-back'))
+        .backfaceVisibility };
+  });
+  ok('...really turned, with the far side hidden rather than mirrored',
+    facing.a <= -0.99 && facing.back === 'hidden', facing);
+  ok('an empty back says what the face is for',
+    (await page.$$eval('.day.is-open .ob-empty', (p) => p.length)) === 1);
+
+  /* ── writing one ── */
+  const addObj = async (text) => {
+    await page.click('.day.is-open .ob-add');
+    await page.waitForTimeout(420);
+    await page.fill('.sheet input[type=text]', text);
+    await page.click('.sheet .btn.go');
+    await page.waitForTimeout(520);
+  };
+  await addObj('Call a hundred clients');
+  await addObj('Walk the dog before it gets dark');
+
+  const obs = await page.$$eval('.day.is-open .ob', (b) => b.map((x) => ({
+    text: x.querySelector('.ob-t').textContent,
+    icon: x.querySelector('.ob-ic').getAttribute('data-icon'),
+    frog: x.classList.contains('is-frog'),
+    label: x.getAttribute('aria-label'),
+  })));
+  /* A SENTENCE, and the whole of it. There is no field for how much —
+     the amount is already in the words, and a form that asked for it
+     separately would make you take a decision apart to type it in. */
+  ok('an objective is written out in full',
+    obs.length === 2 && obs[0].text === 'Call a hundred clients'
+    && obs[1].text === 'Walk the dog before it gets dark', obs);
+  /* The glyph comes out of the same sentence, through the app's own
+     keyword table — so nothing is set twice and "walk the dog" reaches
+     the paw rather than the walker. */
+  ok('...with a glyph worked out from those same words',
+    obs[0].icon === 'call' && obs[1].icon === 'pet', obs.map((o) => o.icon));
+  const icSize = await page.$eval('.day.is-open .ob-ic', (e) => ({
+    w: Math.round(e.getBoundingClientRect().width),
+    t: Math.round(document.querySelector('.day.is-open .ob-t')
+      .getBoundingClientRect().width),
+  }));
+  /* SMALL, and a marker rather than a picture: the sentence is the
+     thing you read, and a glyph that competes with the text it labels
+     has stopped labelling it. */
+  ok('...small beside it, not competing with it',
+    icSize.w <= 22 && icSize.t > icSize.w * 4, icSize);
+  ok('the first is the main one, and it is the only one marked',
+    obs.filter((o) => o.frog).length === 1 && obs[0].frog, obs);
+  ok('...said in the accent rather than with a rank number',
+    (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0
+    && (await page.$eval('.day.is-open .ob.is-frog .ob-ic',
+      (e) => getComputedStyle(e).stroke)) !== (await page.$eval(
+      '.day.is-open .ob:not(.is-frog) .ob-ic', (e) => getComputedStyle(e).stroke)));
+
+  /* ── re-ranking is one move, and always the same move ── */
+  await page.click('.day.is-open .ob-add');
+  await page.waitForTimeout(420);
+  await page.click('.sheet .ob-edit .btn.off');
+  await page.waitForTimeout(560);
+  const ranked = await page.$$eval('.day.is-open .ob-t',
+    (t) => t.map((x) => x.textContent));
+  ok('making one the main objective moves it up, and nothing else moves',
+    ranked[0] === 'Walk the dog before it gets dark'
+    && ranked[1] === 'Call a hundred clients', ranked);
+
+  /* ── ticking ── */
+  await page.click('.day.is-open .ob >> nth=0');
+  await page.waitForTimeout(460);
+  ok('an objective ticks where it stands',
+    await page.$eval('.day.is-open .ob', (b) => b.classList.contains('is-done')
+      && b.getAttribute('aria-pressed') === 'true'));
+  ok('...and the card stays turned over while you do it',
+    await page.$eval('.day.is-open', (d) => d.classList.contains('is-flipped')));
+  const objStore = await page.evaluate(() => {
+    const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
+    const d = new Date();
+    const k = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+      + '-' + String(d.getDate()).padStart(2, '0');
+    return { keys: Object.keys(o), k, mine: o[k] };
+  });
+  ok('...saved under the DATE, not the weekday',
+    objStore.keys.length === 1 && objStore.keys[0] === objStore.k
+    && objStore.mine.length === 2 && objStore.mine[0].done === true,
+    JSON.stringify(objStore));
+
+  /* ── the rare card ──
+     A sheen mixed from the palette and never a literal: thirteen themes
+     move --red and --ink together, so a gradient written in hex would
+     be somebody else's card on twelve of them. */
+  const sheen = await page.$eval('.day.is-open .wk-back',
+    (e) => getComputedStyle(e).backgroundImage);
+  ok('the back is a gradient rather than a flat fill',
+    (sheen.match(/gradient/g) || []).length >= 2, sheen.slice(0, 80));
+  ok('...mixed from the palette, with no literal colour in it',
+    !/#[0-9a-f]{3,8}/i.test(sheen), sheen.slice(0, 160));
+
+  /* And it stays a SHEEN. Everything on this face is drawn at full
+     strength, so the wash must not become a ground the words then have
+     to fight. Measured on composited pixels, and polarity-agnostic —
+     seven of the thirteen palettes are dark. */
+  const obInk = await (async () => {
+    const box = await page.$eval('.day.is-open .ob:not(.is-done) .ob-t', (e) => {
+      const b = e.getBoundingClientRect();
+      return { x: b.x, y: b.y, w: b.width, h: b.height };
+    });
+    const png = PNG.sync.read(await page.screenshot());
+    const px = [];
+    for (let dy = 1; dy < box.h - 1; dy++) {
+      for (let dx = 1; dx < box.w - 1; dx++) {
+        const i = (png.width * Math.round((box.y + dy) * dpr)
+          + Math.round((box.x + dx) * dpr)) << 2;
+        px.push([png.data[i], png.data[i + 1], png.data[i + 2]]);
+      }
+    }
+    const lum = (c) => {
+      const f = c.map((v) => { v /= 255;
+        return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); });
+      return 0.2126 * f[0] + 0.7152 * f[1] + 0.0722 * f[2];
+    };
+    const ls = px.map(lum).sort((a, b) => a - b);
+    const lo = ls[Math.floor(ls.length * 0.05)];
+    const hi = ls[Math.floor(ls.length * 0.95)];
+    return Math.round(((Math.max(lo, hi) + 0.05) / (Math.min(lo, hi) + 0.05)) * 100) / 100;
+  })();
+  ok('an objective on the rare card still clears 4.5:1', obInk >= 4.5, obInk);
+
+  /* ── turning back ── */
+  await page.click('.day.is-open .wk-back .wk-turn');
+  await page.waitForTimeout(700);
+  ok('and it turns back to the schedule',
+    await page.$eval('.day.is-open', (d) => !d.classList.contains('is-flipped')));
+  /* The turn is NOT remembered. An objective is for today, and a card
+     found face-down tomorrow morning is the app having kept the wrong
+     half of a decision. */
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(340);
+  ok('...and a card is never found face-down on the next visit',
+    await page.$$eval('.day.is-flipped', (d) => d.length) === 0);
+  ok('...though what was written on it survives',
+    await page.$$eval('.day.is-open .ob', (b) => b.length) === 2);
+
   /* ── the ring ──
      The second view, still on the frozen Tuesday: Trading runs 9 to 11
      and it is 9:30, so exactly a quarter of the block is gone and the
