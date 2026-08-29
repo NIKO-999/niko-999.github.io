@@ -2659,40 +2659,86 @@ body {
      and the radius is what makes that a card rather than a crop. */
   overflow: hidden;
 
-  /* --paper on --ink, and the wash is the only thing over it. A flat
-     black rectangle is a hole in the page; one corner lit by the
-     workout's own colour is a card with a light on it.
+  /* ── THE CARD IS ITS OWN OBJECT, NOT THE PAGE INVERTED ──
+     It was --ink with --paper on it, which made it the one inverted
+     thing on the screen — and that was right for exactly as long as
+     every palette was a light one. On a dark theme --ink is near-white,
+     so the day the light palettes were deleted every workout card
+     turned into a pale sticker: a washed-out pink rectangle where the
+     reference has a slab of near-black with one colour in it.
+
+     So the ground is its own, and it is the SAME on all thirteen
+     palettes — which is the argument the nine hues already make. A
+     colour that says WHICH session this is has to be the same colour
+     everywhere or it has stopped being that thing's colour, and a card
+     built to carry them is the same object for the same reason. It is
+     the one surface in this app that does not follow the theme.
 
      --wc-hue is written onto the element by the card that uses it, so
      the value here is the fallback and the declaration tests/names.js
-     needs. */
+     needs. --wc-lit is 62% toward white rather than toward --paper: the
+     ground no longer moves, so neither does the correction, and the sum
+     that used to be wrong about it — 4.6:1 computed against --ink and
+     3.28:1 measured on screen — is not being made any more. */
   --wc-hue: var(--red);
-  /* ── 52%, AND THE ARITHMETIC IS NOT WHERE THAT CAME FROM ──
-     Mixed 66% toward --paper the figures compute to 4.6:1 against
-     --ink at the worst of thirteen palettes by nine hues, and they
-     MEASURED 3.28:1 on screen — because the card is not --ink: there
-     is a wash of the hue in one corner and a swoop across the middle,
-     and the arithmetic knows about neither. It is the same gap the
-     friends crown found, in the same direction and about the same
-     size. 46% leaves the margin that gap costs — 52 measured 4.47:1,
-     which is under the bar by a rounding error, and this repo has a
-     rule about calling that a margin. And
-     tests/schedule.js measures the result on composited pixels rather
-     than recomputing this sum. */
-  --wc-lit: color-mix(in srgb, var(--wc-hue) 46%, var(--paper));
+  --wc-dark: #101013;
+  --wc-lit: color-mix(in srgb, var(--wc-hue) 62%, #ffffff);
   background:
     linear-gradient(150deg,
       color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
-    var(--ink);
-  color: var(--paper);
-  box-shadow: 0 3px 14px color-mix(in srgb, var(--ink) 26%, transparent);
+    var(--wc-dark);
+  color: #ffffff;
+
+  /* ── AND IT IS LIFTED OFF THE PAGE ──
+     Three shadows, and each does a different job. A half-pixel ring of
+     the workout's own colour gives the card an EDGE, so it stops fading
+     into a page that is nearly the same black. A tight contact shadow
+     puts it on something. A wide offset one puts a gap under it. One
+     flat 14px blur did all three badly, and the card read as a
+     rectangle that happened to be darker. */
+  box-shadow: 0 0 0 .5px color-mix(in srgb, var(--wc-hue) 30%, transparent),
+              0 1px 2px rgba(0, 0, 0, .55),
+              0 16px 38px -10px rgba(0, 0, 0, .72);
+
+  /* The deal. Folded into this rule rather than written as a second
+     `.wc` two hundred lines down — see the keyframes below for why the
+     properties are `translate`/`rotate`/`scale` and never `transform`. */
+  animation: wcDeal .46s cubic-bezier(.22, 1, .36, 1) both;
 }
 
-/* ── THE TWO BEHIND ──
-   Mixed toward --paper rather than given an alpha: these sit at 86%
-   and 70% of the way to the page, which reads as depth on both
-   polarities. An opacity would let the page through and make the pair
-   a different colour on every backdrop a theme sets.
+/* ── A TOOTH OVER THE WHOLE SURFACE ──
+   A generated grain at 14%, in `overlay` so it lifts the light half of
+   the gradient and deepens the dark half rather than greying both.
+
+   It is doing one measurable job. The card is a 284px sweep from a
+   tinted corner to near-black, which is exactly the shape that BANDS
+   on an 8-bit display — visible steps across the middle of it. Noise
+   is the standard answer to that, and it is also why the surface reads
+   as printed matter rather than as a fill.
+
+   INLINE AS A DATA URI, because this app fetches nothing. */
+.wc::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.5'/%3E%3C/svg%3E");
+  background-size: 120px 120px;
+  opacity: .14;
+  mix-blend-mode: overlay;
+}
+
+/* ── THE TWO BEHIND, FANNED ──
+   Offset AND turned, three degrees apart, so the stack reads as a hand
+   of cards rather than as one card with two shadows under it. Square,
+   the pair only showed along the bottom and the right — a fan shows a
+   corner of each, which is what says there are more of these.
+
+   Two steps up from the front card's own ground rather than an alpha:
+   an opacity would let the page through and make the pair a different
+   colour on each of the thirteen backdrops. Literals for the same
+   reason the front card's ground is one — this whole object is the
+   same on every palette.
 
    THE TRANSFORM IS WHAT MAKES THEM THE CARDS BEHIND, and it was
    deleted once already — a rewrite of the block above this one took
@@ -2703,17 +2749,17 @@ body {
    deal is running, so it fails whether the rule is deleted or
    overwritten by keyframes naming `transform`. */
 .wc.b1 {
-  transform: translate(15px, 11px) scale(.965);
-  background: color-mix(in srgb, var(--ink) 86%, var(--paper));
-  /* The delay belongs in the same rule as the transform, not in a
-     second .wc.b1 further down: one selector spelled twice in one file
-     is this repo's most-repeated bug, and a dead rule that still
-     cascades is not dead. */
-  animation-delay: .06s;
+  transform: translate(13px, 9px) rotate(3deg) scale(.965);
+  background: #1b1b20;
+  /* The delay lives with the transform rather than in a second .wc.b1
+     further down: one selector spelled twice in one file is this
+     repo's most-repeated bug, and a dead rule that still cascades is
+     not dead. */
+  animation-delay: .07s;
 }
 .wc.b2 {
-  transform: translate(28px, 21px) scale(.93);
-  background: color-mix(in srgb, var(--ink) 70%, var(--paper));
+  transform: translate(25px, 18px) rotate(6deg) scale(.93);
+  background: #26262c;
   animation-delay: 0s;
 }
 
@@ -2780,7 +2826,7 @@ body {
   font-weight: 700;
   letter-spacing: .13em;
   text-transform: uppercase;
-  color: color-mix(in srgb, var(--paper) 58%, transparent);
+  color: rgba(255, 255, 255, .58);
 }
 .wc-top div b {
   font-size: 16px;
@@ -2811,38 +2857,40 @@ body {
   font-weight: 800;
   letter-spacing: -.032em;
   line-height: 1;
-  color: var(--paper);
+  color: #ffffff;
 }
 .wc-d {
   margin-top: 9px;
   font-size: 13.5px;
   line-height: 1.35;
-  color: color-mix(in srgb, var(--paper) 72%, transparent);
+  color: rgba(255, 255, 255, .72);
 }
 
-/* ── THE DECK IS DEALT ──
-   All three fly in, back one first, and it replays on every press —
-   which is what makes changing the pick read as dealing a hand rather
-   than repainting a panel.
+/* ── THE DECK IS DEALT, ON AN ANGLE ──
+   All three come in from below and to the right, turned, and settle
+   flat. The first cut slid them straight up with no rotation and it
+   read as a panel appearing rather than as cards being put down —
+   which is the whole difference, because a straight slide is what
+   every sheet in this app already does and this one is a HAND.
 
-   IT ANIMATES `translate` AND `scale`, NEVER `transform`. The two
-   behind ARE a transform: b1 sits at translate(15px, 11px) scale(.965)
-   and that is what makes it the card behind. Keyframes naming
-   `transform` replace that outright, so the pair land square on top of
-   the front card and the deck arrives as one card. The individual
-   properties compose with it instead — translate, then scale, then
-   whatever `transform` says — so one set of keyframes is correct for
-   all three positions and none of them has to know its own resting
-   place. */
+   IT ANIMATES `translate`, `rotate` AND `scale`, NEVER `transform`.
+   The two behind ARE a transform: b1 sits at translate(13px, 9px)
+   rotate(3deg) scale(.965), and that is what makes it the card behind.
+   Keyframes naming `transform` replace that outright, so the pair land
+   square on top of the front card and the deck arrives as one card
+   with a heavier shadow — which is not a shape anybody would report.
+   The individual properties compose with it instead, so one set of
+   keyframes is correct for all three positions and none of them has to
+   know its own resting place. tests/schedule.js reads that matrix back
+   off .wc.b1 WHILE the deal is running. */
 @keyframes wcDeal {
-  from { translate: 0 34px; scale: .94; opacity: 0; }
-  to   { translate: 0 0; scale: 1; opacity: 1; }
+  from { translate: 30px 46px; rotate: -9deg; scale: .92; opacity: 0; }
+  to   { translate: 0 0; rotate: 0deg; scale: 1; opacity: 1; }
 }
-.wc { animation: wcDeal .42s cubic-bezier(.22, 1, .36, 1) both; }
-/* Back to front, and 60ms apart: dealt front-first the card you are
-   being asked about is the first thing to arrive and then gets covered
-   twice, which reads as the deck landing ON your answer. */
-.wc.is-front { animation-delay: .12s; }
+/* Back to front, 70ms apart. Dealt front-first the card you are being
+   asked about arrives first and is then covered twice, which reads as
+   the deck landing ON your answer. */
+.wc.is-front { animation-delay: .14s; }
 
 .wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
@@ -2859,9 +2907,6 @@ body {
   cursor: pointer;
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .wc { animation: none; }
-}
 
 /* ── what you trained, on the row it happened on ──
    NOT the accent, and .row .n em is. The red on this screen already
@@ -2885,4 +2930,153 @@ body {
   display: flex;
   justify-content: center;
   gap: 4px;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THE WORKOUTS VIEW
+
+   Two stops on Today, and this is the second: what you actually
+   trained, as against the five you ticked. It reuses .fr-stops and
+   .fr-stop wholesale — the friends board answered this exact shape
+   first, and a second pair of classes drawn to look identical is two
+   places to keep one control in step.
+   ═══════════════════════════════════════════════════════════ */
+
+#scTyPane[hidden], .work[hidden] { display: none; }
+
+/* The figure alone, so it does NOT take .ty-fig's `margin-left: auto`:
+   that pushes it right against a label on the tally, and there is no
+   label here — the stop above is the heading. */
+.wo-head { display: flex; align-items: baseline; }
+.wo-head .ty-fig { margin-left: 0; }
+.wo-head .ty-fig i { margin-left: 9px; }
+
+/* ── EVERY SURFACE HERE IS FILLED, NOT OUTLINED ──
+   The first cut drew each panel as a hairline box. On a page that is
+   nearly black a 1px border is the only thing there, so the screen
+   read as a wireframe of itself — the reference fills its panels and
+   draws no borders at all, and it is right: a filled surface is an
+   OBJECT, an outlined one is a diagram of where an object would go.
+
+   Mixed off --ink rather than a literal, so it lifts on all thirteen
+   palettes — the same 7% the friends board's own segment uses. */
+
+/* ── ONE PANEL PER WORKOUT, AND THE WHOLE PANEL IS THE BUTTON ──
+   The calendar is INSIDE it. A row that opens a picture drawn
+   somewhere else on the page is two things to look at for one press;
+   this way the panel simply grows, and what grew is under your thumb. */
+.wo-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
+
+.wo-p {
+  display: block;
+  width: 100%;
+  padding: 14px;
+  border: 0;
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  color: var(--ink);
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+/* ── THIS SCREEN WEARS THE THEME'S ACCENT, NOT THE NINE HUES ──
+   The workout cards carry a literal colour each because a colour that
+   says WHICH session this is has to be the same on every palette. Here
+   nothing needs saying: the panel prints the name in words and the
+   calendar belongs to one card at a time, so a hue would be a second
+   colour system running down a screen that already has an accent. It
+   would also mean a page whose marks are red on a lime theme, which is
+   the one thing every other screen in this app is careful not to do. */
+.wo-p.is-open {
+  background: color-mix(in srgb, var(--ink) 10%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 34%, transparent);
+}
+.wo-p:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+.wo-row { display: flex; align-items: center; gap: 14px; position: relative; }
+.wo-tx { min-width: 0; }
+.wo-w {
+  display: block;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: -.016em;
+  line-height: 1.15;
+}
+.wo-s { display: block; margin-top: 2px; font-size: 12.5px; color: var(--dim); }
+
+/* The ring is the count against your most-done session, so the panels
+   read against each other rather than against a target nobody set. */
+.wo-r { flex: none; width: 52px; height: 52px; display: block; }
+.wo-rt { fill: none; stroke: var(--tick-off); stroke-width: 4; }
+.wo-ra {
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 26px 26px;
+}
+.wo-n {
+  position: absolute;
+  left: 0; top: 0;
+  width: 52px; height: 52px;
+  display: grid;
+  place-items: center;
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.02em;
+}
+
+/* ── THE CALENDAR, INSIDE THE PANEL IT BELONGS TO ──
+   Three months across, one dot a day, lit where you did THAT session.
+   No border and no second fill: a panel inside a panel is the
+   frame-inside-a-frame this project keeps taking back out. */
+.wo-cal {
+  display: flex;
+  gap: 10px;
+  margin: 2px 2px 16px;
+}
+.wo-m { flex: 1; min-width: 0; }
+.wo-mn {
+  display: block;
+  margin-bottom: 9px;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  color: var(--dim);
+  text-align: center;
+}
+/* Seven columns, Monday first — the deck's own week. */
+.wo-g {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 3px;
+  justify-items: center;
+}
+.wo-d {
+  width: 5px; height: 5px;
+  border-radius: 50%;
+  background: var(--tick-off);
+}
+.wo-d.is-gap { background: none; }
+/* A tight bloom and no spread. At 6px with a unit of spread a run of
+   lit days merged into vertical smears and the gaps between them —
+   which is what the picture is FOR — closed up. */
+.wo-d.is-on {
+  background: var(--red);
+  /* `color` beside it, so the bloom is the accent rather than whatever
+     the panel's text colour happens to be — as currentColor the glow
+     was the page's ink and a run of lit days merged into a white
+     smear. */
+  color: var(--red);
+  box-shadow: 0 0 4px currentColor;
+}
+
+.wo-none {
+  margin-top: 22px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--dim);
 }

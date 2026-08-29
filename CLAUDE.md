@@ -1576,6 +1576,33 @@ row is a SIBLING of the card**, because the card is a `<button>` and a
 button inside a button is invalid and collapses to one press while
 looking exactly right.
 
+**THE CARD IS ITS OWN OBJECT, NOT THE PAGE INVERTED.** It was `--ink`
+with `--paper` on it, which made it the one inverted thing on the
+screen — right for exactly as long as every palette was a light one. On
+a dark theme `--ink` is near-white, so the day the light palettes went
+every workout card turned into a pale sticker. The ground is its own
+now and the SAME on all thirteen palettes, which is the argument the
+nine hues already make: a card built to carry a colour that means
+*which* is the same object for the same reason. It is the one surface
+in this app that does not follow the theme, and `--wc-lit` is a fixed
+62% toward white because the ground no longer moves.
+
+**Three shadows, each doing a different job.** A half-pixel ring of the
+workout's own colour gives the card an EDGE, so it stops fading into a
+page that is nearly the same black; a tight contact shadow puts it on
+something; a wide offset one puts a gap under it. One flat 14px blur
+did all three badly and the card read as a rectangle that happened to
+be darker. Over it, a generated grain at 14% in `overlay` — the card is
+a 284px sweep from a tinted corner to near-black, which is exactly the
+shape that BANDS on an 8-bit display.
+
+**The deck is DEALT, on an angle, and the two behind are FANNED.** Three
+degrees apart and offset, so the stack reads as a hand rather than as
+one card with two shadows under it: square, the pair only showed along
+the bottom and the right, and a fan shows a corner of each. The
+entrance slid straight up once and read as a panel appearing, which is
+what every other sheet in this app already does.
+
 **A swoop, not a wordmark, and not waves.** Three treatments: four
 contour waves, stretched to the card's width with the stroke stretched
 with them, which drew as black bars lying across it; then the card's
@@ -1667,6 +1694,76 @@ mirrored ramp; the critic found that dropping every glyph would not fix
 Recovery, because the stick figure was the group's FALLBACK. That is
 the shape to keep: a critic that must name the failure, and a designer
 that must produce a picture — never a verifier asked to argue.
+
+## Workouts is the second stop on Today
+
+What you actually trained, as against the five you ticked. **Two stops
+rather than a fourth tab**: the bar holds three and an add control at
+390px, and a fourth would be the control that made the row too tight to
+press. It is the friends board's own pattern, and the CONTROL IS THE
+HEADING — the hero's own "Showing up" label went with it, because a
+word naming a section directly under the button that opens that section
+is the same word twice.
+
+**THE CALENDAR BELONGS TO THE CARD YOU PRESS.** Three months of dots
+with the days you did THAT session lit. A calendar of everything, with
+nine hues scattered through it, says you were busy and nothing else —
+and the question you open this screen with is whether you are actually
+doing the one thing you say you do. So the panel CONTAINS the picture
+rather than sitting above it: a row that opens something drawn
+elsewhere on the page is two things to look at for one press.
+
+**The top one opens by itself.** A first visit showing three shut rows
+hides the whole point behind a press nobody knows to make. Which panel
+is open is NOT stored — it is a position on a screen you are looking
+at, and one restored from last week opens on a session you have stopped
+doing. Which STOP you were on is stored, in its own key.
+
+**One panel per workout you actually did**, not per workout that
+exists: twenty-two panels, nineteen reading zero, is a menu rather than
+a record, and the deck two taps away is already the menu.
+
+**It says which day it lands on only where three sessions say so.** A
+majority of one is one, and "Sundays" under a panel reading 1 is the
+app inventing a routine out of a single Sunday. Below three it says how
+long ago instead.
+
+**And the marks wear the THEME's accent, not the nine hues.** The cards
+carry a literal colour each because a colour that says WHICH session
+this is has to be the same on every palette. Here nothing needs saying
+— the panel prints the name and the calendar belongs to one card — so a
+hue would be a second colour system down a screen that already has an
+accent, and on the shipped lime page it would draw the marks red.
+
+**Every surface here is filled, never outlined.** The first cut drew
+each panel as a hairline box, and on a page that is nearly black a 1px
+border is the only thing there: the screen read as a wireframe of
+itself. A filled surface is an OBJECT; an outlined one is a diagram of
+where an object would go.
+
+**There is no weight on it and there will not be.** This app has never
+asked what you weigh, and a number you are asked for every morning is a
+different relationship with a screen than one that only ever says you
+showed up.
+
+**Today's two stops wear `.fr-stop`, and that claimed them.** They are
+the same control, so they share the class — and the friends wiring said
+`querySelectorAll('.fr-stop')`, so pressing Workouts also ran
+`scFrStop` with an undefined stop, fell through to `board`, and cleared
+`aria-current` from every stop on the page including the one just
+pressed. The panes still switched, so the only symptom was a screen
+reader being told nothing was current. Both halves are scoped by the
+data attribute now, and the friends assertions that read a bare
+`.fr-stop` were reading Today's.
+
+**A CHECK THAT ONLY PASSES AT CERTAIN HOURS IS THE SHAPE ITS OWN
+COMMENT WARNS ABOUT.** "The times in a card share one right edge" reads
+the column off a card with times drawn — and a finished block draws
+none, `is-past` is set on today's card alone, and a shut card draws no
+rows at all. So the only card that could supply a column was today's,
+and only while it still had un-elapsed blocks. Run at 23:00 every list
+came back empty and it failed on the CLOCK. It measures another day's
+card now, which has no past rows by construction at any hour.
 
 ## The light themes are gone
 

@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=fc279712" />
+<link rel="stylesheet" href="app.css?v=5bf33a9c" />
 </head>
 <body>
 
@@ -94,14 +94,31 @@
        to "how is today going", and two answers to one question on one
        screen is how the running row came to be painted like everything
        round it. Empty until scPaintTally fills it. -->
+  <!-- ── TWO STOPS, AND THE CONTROL IS THE HEADING ──
+       Showing up is the five, Workouts is what you actually trained.
+       They are the same subject at two grains and neither is a summary
+       of the other, so they are two stops rather than two panels down
+       one page — the friends board's own answer to the same shape.
+
+       The hero's own "Showing up" label went with it: a word naming a
+       section, sitting directly under the button that takes you to
+       that section, is the same word twice. -->
   <section class="tally" id="scTally" hidden>
-    <div class="ty-hero">
-      <span class="ty-lbl">Showing up</span>
-      <b class="ty-fig" id="scStreakNum">0<i>days</i></b>
+    <nav class="fr-seg" id="scTyStops" aria-label="Today">
+      <button class="fr-stop on" id="scTyUp" data-tystop="up"
+              aria-current="true">Showing up</button>
+      <button class="fr-stop" id="scTyWork" data-tystop="work"
+              aria-current="false">Workouts</button>
+    </nav>
+    <div id="scTyPane">
+      <div class="ty-hero">
+        <b class="ty-fig" id="scStreakNum">0<i>days</i></b>
+      </div>
+      <p class="ty-cap" id="scTallyCap"></p>
+      <div class="ty-grid" id="scTallyGrid"></div>
+      <p class="ty-foot" id="scTallyFoot"></p>
     </div>
-    <p class="ty-cap" id="scTallyCap"></p>
-    <div class="ty-grid" id="scTallyGrid"></div>
-    <p class="ty-foot" id="scTallyFoot"></p>
+    <div class="work" id="scWorkPane" hidden></div>
   </section>
 
   <!-- ── the history a row opens ──
@@ -211,6 +228,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=fcf03a85"></script>
+<script src="app.js?v=4a9894de"></script>
 </body>
 </html>

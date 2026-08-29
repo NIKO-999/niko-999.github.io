@@ -43,6 +43,12 @@
   };
   var ABBR  = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   var FULL  = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  /* Written out rather than taken off Intl. Every printed TIME in this
+     app follows the phone, and these do not: they are three labels
+     over a dot grid, and a locale that spells a month at full length
+     puts "September" across a 118px column. */
+  var MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+             'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
   /* ── the seed ──
      What a person sees the first time they open this, and it is a
@@ -1941,7 +1947,12 @@
        the early return the week's figure comes back on top of the
        tally half a minute after you switch to it, which is the sort of
        fault that only appears if you sit and look at the screen. */
-    if (view === 'tally') { scPaintTally(); return; }
+    if (view === 'tally') {
+      /* The half-minute pass, so it must not force the stop back: it
+         redraws whichever half is up and leaves the other alone. */
+      if (tyStop === 'work') scPaintWork(); else scPaintTally();
+      return;
+    }
     if (view === 'friends') { scPaintFriends(); return; }
 
     var today = new Date().getDay(), now = scNowMin();
@@ -3452,7 +3463,7 @@
     frStop = v === 'feed' ? 'feed' : 'board';
     $('scFrPane').hidden = frStop !== 'board';
     $('scFeed').hidden = frStop !== 'feed';
-    [].forEach.call(document.querySelectorAll('.fr-stop'), function (t) {
+    [].forEach.call(document.querySelectorAll('[data-stop]'), function (t) {
       var on = t.dataset.stop === frStop;
       t.classList.toggle('on', on);
       t.setAttribute('aria-current', on ? 'page' : 'false');
@@ -4226,7 +4237,7 @@
 
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
 
-    if (tal) scPaintTally();
+    if (tal) { scPaintTally(); scTyStop(tyStop, false); }
     /* ARRIVING claims, drawing only draws — the same split the refresh
        already keeps. A paint that fetched would recurse the first time
        it ran, which is a bug this file has already had once. */
@@ -4730,7 +4741,7 @@
   }
 
   var TRAIN_GROUPS = [
-    { k: 'bro', n: 'Bro split', sw: 'a', c: '#e6412f', d: 'One body part a day.', of: [
+    { k: 'bro', n: 'All exercises', sw: 'a', c: '#e6412f', d: 'One body part a day.', of: [
       { k: 'chest', sw: 'a', n: 'Chest',     t: 50, c: '#e6412f',
         d: 'Press, fly and dip.' },
       { k: 'back',  sw: 'a', n: 'Back',      t: 50, c: '#2f7fe6',
@@ -5123,6 +5134,260 @@
 
       draw();
     });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE WORKOUTS VIEW
+
+     What you actually trained, as against the five you ticked. It is
+     the second stop on Today rather than a fourth tab: the bar holds
+     three and an add control at 390px, and a fourth would be the
+     control that made the row too tight to press. The two stops are
+     the friends board's own pattern, and the CONTROL IS THE HEADING —
+     a word naming a section beside the button that opens that section
+     is the same word twice.
+
+     IT DRAWS THE RECORD AND NOTHING ELSE. There is no weight here and
+     there will not be: this app has never asked what you weigh, and a
+     number you are asked for every morning is a different relationship
+     with a screen than one that only ever says you showed up.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* Thirteen weeks. The record is kept for ninety days, so this is all
+     of it — and three month blocks is what fits across a phone at a
+     dot size a thumb can still see. */
+  var WORK_DAYS = 91;
+
+  /* ── every logged session, newest first ── */
+  function scWorkAll() {
+    var out = [];
+    for (var i = 0; i < WORK_DAYS; i++) {
+      var day = scDayBack(i);
+      var rec = trainLog[day];
+      if (!rec) continue;
+      Object.keys(rec).forEach(function (id) {
+        var r = scTrainRec(rec[id]);
+        var w = r && scWorkout(r.k);
+        if (w) out.push({ day: day, w: w, e: r.e });
+      });
+    }
+    return out;
+  }
+
+  /* ── THE DAY IT USUALLY LANDS ON ──
+     "Fridays" is the one thing a list of dates says that a count does
+     not: it is the SHAPE of your week rather than the size of it. Only
+     claimed where one weekday actually holds a majority of the
+     sessions — with three spread over three different days there is no
+     usual day, and inventing one would be the app telling you
+     something about yourself that it made up. */
+  function scWorkDow(hits) {
+    var by = [0, 0, 0, 0, 0, 0, 0];
+    hits.forEach(function (h) { by[new Date(h.day + 'T12:00:00').getDay()]++; });
+    var top = 0;
+    for (var i = 1; i < 7; i++) if (by[i] > by[top]) top = i;
+    /* THREE SESSIONS BEFORE IT WILL SAY ONE. A majority of one is one,
+       and "Sundays" under a tile reading 1 is the app inventing a
+       routine out of a single Sunday. Below that it says how long ago
+       instead, which is the honest fact about a session you have done
+       once. */
+    return hits.length >= 3 && by[top] * 2 > hits.length ? FULL[top] + 's' : '';
+  }
+
+  /* ── THE DOT CALENDAR, AND IT BELONGS TO ONE WORKOUT ──
+     Three months of dots with the days you did THAT session lit in its
+     own colour. It is not a calendar of everything: a picture with
+     nine hues scattered through it says you were busy and nothing
+     else, and the question you open this screen with is whether you
+     are actually doing the one thing you say you do.
+
+     So it hangs off the card you press. Press Chest and the calendar
+     is Chest's — which is the whole mechanism, and why the panel
+     CONTAINS the row rather than sitting above it.
+
+     The days you missed are drawn, at --tick-off. A calendar of only
+     the days you trained is a list of wins with the gaps taken out,
+     and losing the misses is the one thing a record of showing up must
+     never do — the tally's own calendar is under the same rule. */
+  function scWorkCal(hits, w) {
+    var on = {};
+    hits.forEach(function (h) { on[h.day] = 1; });
+
+    var cal = scEl('div', 'wo-cal');
+    /* Whole months, so the labels are months rather than "13 weeks
+       ago". The oldest is clipped by the window and that is honest: it
+       is where the record starts. */
+    var first = new Date();
+    first.setDate(first.getDate() - (WORK_DAYS - 1));
+    var months = [];
+    var cur = new Date(first.getFullYear(), first.getMonth(), 1);
+    var end = new Date();
+    while (cur <= end) {
+      months.push(new Date(cur));
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    months = months.slice(-3);          /* three is what a phone holds */
+
+    months.forEach(function (m) {
+      var col = scEl('div', 'wo-m');
+      col.appendChild(scEl('span', 'wo-mn', MON[m.getMonth()]));
+      var grid = scEl('div', 'wo-g');
+      /* MONDAY FIRST, the deck's own week. A calendar starting on
+         Sunday beside a deck starting on Monday is two weeks on one
+         app. */
+      var lead = (new Date(m.getFullYear(), m.getMonth(), 1).getDay() + 6) % 7;
+      for (var i = 0; i < lead; i++) grid.appendChild(scEl('i', 'wo-d is-gap'));
+      var days = new Date(m.getFullYear(), m.getMonth() + 1, 0).getDate();
+      for (var d = 1; d <= days; d++) {
+        var key = scDay(new Date(m.getFullYear(), m.getMonth(), d));
+        /* The lit day's colour is the PAGE's accent and is set in the
+           sheet, not here — see .wo-d.is-on. It was the session's own
+           hue written inline, which put red marks on a lime page and
+           ran a second colour system down a screen that already has an
+           accent. */
+        grid.appendChild(scEl('i', 'wo-d' + (on[key] ? ' is-on' : '')));
+      }
+      col.appendChild(grid);
+      cal.appendChild(col);
+    });
+    cal.setAttribute('role', 'img');
+    cal.setAttribute('aria-label', w.n + ', ' + hits.length
+      + (hits.length === 1 ? ' session' : ' sessions')
+      + ' over three months.');
+    return cal;
+  }
+
+  /* ── ONE PANEL PER WORKOUT YOU HAVE ACTUALLY DONE ──
+     Not one per workout that EXISTS. Twenty-two panels, nineteen of
+     them reading zero, is a menu rather than a record — and the deck
+     two taps away is already the menu.
+
+     THE WHOLE PANEL IS THE BUTTON, and the calendar is inside it. A
+     row that opens a picture drawn somewhere else on the page is two
+     things to look at for one press; this way the panel simply grows,
+     and what grew is under your thumb. */
+  function scWorkPanel(w, hits, most, open, pick) {
+    var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
+    p.type = 'button';
+    p.style.setProperty('--wc-hue', w.c);
+    p.dataset.workout = w.key;
+    p.setAttribute('aria-expanded', open ? 'true' : 'false');
+
+    if (open) p.appendChild(scWorkCal(hits, w));
+
+    var row = scEl('div', 'wo-row');
+    /* The ring is the count against your most-done session, so the
+       panels read against each other rather than against a target
+       nobody set. */
+    var r = 21, c = 2 * Math.PI * r;
+    row.insertAdjacentHTML('beforeend',
+      '<svg class="wo-r" viewBox="0 0 52 52" aria-hidden="true">'
+      + '<circle class="wo-rt" cx="26" cy="26" r="' + r + '"/>'
+      + '<circle class="wo-ra" cx="26" cy="26" r="' + r + '"'
+      + ' stroke-dasharray="' + (c * hits.length / most).toFixed(1) + ' '
+      + c.toFixed(1) + '"/></svg>');
+    row.appendChild(scEl('b', 'wo-n', String(hits.length)));
+    var txt = scEl('div', 'wo-tx');
+    txt.appendChild(scEl('span', 'wo-w', w.n));
+    /* The usual day where there is one, and how long ago where there
+       is not — never both, and never neither. */
+    var dow = scWorkDow(hits);
+    txt.appendChild(scEl('span', 'wo-s', dow || scWorkAgo(hits[0].day)));
+    row.appendChild(txt);
+    p.appendChild(row);
+
+    p.setAttribute('aria-label', w.n + ', ' + hits.length
+      + (hits.length === 1 ? ' session' : ' sessions')
+      + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
+      + '. ' + (open ? 'Showing its three months.' : 'Show its three months.'));
+    p.addEventListener('click', pick);
+    return p;
+  }
+
+  function scWorkAgo(day) {
+    var n = Math.round((new Date(scDay() + 'T12:00:00')
+      - new Date(day + 'T12:00:00')) / 86400000);
+    if (n <= 0) return 'today';
+    if (n === 1) return 'yesterday';
+    if (n < 7) return n + ' days ago';
+    if (n < 14) return 'last week';
+    return Math.floor(n / 7) + ' weeks ago';
+  }
+
+  /* Which panel is open. Not stored: it is a position on a screen you
+     are looking at, not a preference — and one remembered from a week
+     ago opens on a session you have stopped doing. */
+  var workOpen = '';
+
+  function scPaintWork() {
+    var pane = $('scWorkPane');
+    pane.textContent = '';
+    var all = scWorkAll();
+
+    if (!all.length) {
+      /* An empty state that names the press rather than describing the
+         feature, and says it once. */
+      pane.appendChild(scEl('p', 'wo-none',
+        'Nothing here yet. Tick a training block and it asks what you '
+        + 'trained; what you pick shows up here.'));
+      return;
+    }
+
+    var head = scEl('div', 'wo-head');
+    var fig = scEl('b', 'ty-fig', String(all.length));
+    fig.appendChild(scEl('i', null, all.length === 1 ? 'session' : 'sessions'));
+    head.appendChild(fig);
+    pane.appendChild(head);
+    pane.appendChild(scEl('p', 'ty-cap', 'In the last thirteen weeks'));
+
+    /* Grouped by workout, most-done first, ties broken by which you did
+       last — so the panel that moves is the one you just logged. */
+    var by = {};
+    all.forEach(function (h) { (by[h.w.key] || (by[h.w.key] = [])).push(h); });
+    var keys = Object.keys(by).sort(function (a, b) {
+      return by[b].length - by[a].length
+        || (by[b][0].day < by[a][0].day ? -1 : 1);
+    });
+    /* THE TOP ONE IS OPEN UNLESS YOU SAY OTHERWISE, so the screen
+       always has a calendar on it. A first visit that showed three
+       shut rows would be hiding the whole point behind a press nobody
+       knows to make. */
+    if (keys.indexOf(workOpen) < 0) workOpen = keys[0];
+    var most = by[keys[0]].length;
+
+    var list = scEl('div', 'wo-list');
+    keys.forEach(function (k) {
+      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, k === workOpen,
+        function () {
+          /* Pressing the open one shuts nothing: a screen with no
+             calendar on it is the state this view exists to avoid. */
+          if (workOpen === k) return;
+          workOpen = k;
+          scPaintWork();
+        }));
+    });
+    pane.appendChild(list);
+  }
+
+  /* ── THE STOP ──
+     Its own key, like the friends board's: which half of a screen you
+     were last on is a preference about looking at the record, and
+     folding it into the record is how a damaged record takes the other
+     down. */
+  var TYSTOP_KEY = 'sched.ty.v1';
+  var tyStop = 'up';
+
+  function scTyStop(v, save) {
+    tyStop = v === 'work' ? 'work' : 'up';
+    $('scTyPane').hidden = tyStop !== 'up';
+    $('scWorkPane').hidden = tyStop !== 'work';
+    [].forEach.call(document.querySelectorAll('[data-tystop]'), function (t) {
+      var on = t.dataset.tystop === tyStop;
+      t.classList.toggle('on', on);
+      t.setAttribute('aria-current', on ? 'true' : 'false');
+    });
+    if (tyStop === 'work') scPaintWork();
+    if (save) { try { localStorage.setItem(TYSTOP_KEY, tyStop); } catch (e) {} }
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -5713,6 +5978,8 @@
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);
     if (fs2 === 'board' || fs2 === 'feed') frStop = fs2;
+    var ts2 = localStorage.getItem(TYSTOP_KEY);
+    if (ts2 === 'up' || ts2 === 'work') tyStop = ts2;
   } catch (e) {}
 
   /* Whether friends are on, and who is on your list. Reading it makes
@@ -5765,7 +6032,20 @@
   [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
     t.addEventListener('click', function () { scSetView(t.dataset.view, true); });
   });
-  [].forEach.call(document.querySelectorAll('.fr-stop'), function (t) {
+  [].forEach.call(document.querySelectorAll('[data-tystop]'), function (t) {
+    t.addEventListener('click', function () { scTyStop(t.dataset.tystop, true); });
+  });
+
+  /* ── SCOPED BY THE DATA ATTRIBUTE, NOT BY THE CLASS ──
+     Today's two stops wear .fr-stop as well, because they are the same
+     control and a second set of classes drawn to look identical is two
+     places to keep one thing in step. So this selector claimed them
+     too: pressing Workouts also ran scFrStop with an undefined stop,
+     which fell through to 'board' and cleared aria-current from every
+     .fr-stop on the page — including the one you had just pressed. The
+     panes still switched, so the only visible symptom was a screen
+     reader being told nothing was current. */
+  [].forEach.call(document.querySelectorAll('[data-stop]'), function (t) {
     t.addEventListener('click', function () { scFrStop(t.dataset.stop, true); });
   });
   $('scTabYou').addEventListener('click', scMenuSheet);

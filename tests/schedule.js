@@ -241,7 +241,24 @@ const SAID = [
   /* ── side by side means the same box ──
      Within a card, the times are one column and the names are another.
      Sized per ROW instead of per CARD they step in and out by a few
-     pixels down the card, which reads as a wobble because it is one. */
+     pixels down the card, which reads as a wobble because it is one.
+
+     MEASURED ON A DAY THAT IS NOT TODAY, and that is not tidiness. A
+     finished block draws no time, `is-past` is set on today's card
+     alone, and a shut card draws no rows at all — so the only card
+     that can supply a column is today's, and only while it still has
+     un-elapsed blocks on it. Run at 23:00 there are none, every list
+     comes back empty, and the check fails on the CLOCK rather than on
+     the layout. Its own comment warns about exactly this shape and it
+     was still standing in it. Another day's card has no past rows by
+     construction, at any hour. */
+  /* Dispatched rather than pressed: the deck is a window over a track,
+     so a card two days out is clipped and a real click waits forever
+     for it to become visible. What is being measured is the layout of
+     an open card, not the reachability of a shut one — the press
+     target has its own check further down. */
+  await page.evaluate(() => document.querySelector('.day:not(.is-today) .wk-face').click());
+  await page.waitForTimeout(460);
   const cols = await page.$$eval('.day-card', (cards) => cards.map((c) => {
     const rows = [...c.querySelectorAll('.row[data-id]')];
     const edge = (sel, side) => rows.map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
@@ -264,6 +281,10 @@ const SAID = [
     && cols.some((c) => c.t.length > 1), cols.map((c) => c.t));
   ok('and the names share one left edge',
     cols.every((c) => new Set(c.n).size === 1), cols.map((c) => c.n));
+  /* Back to today, so nothing below reads a week left where this
+     found it. */
+  await page.evaluate(() => document.querySelector('.day.is-today .wk-face').click());
+  await page.waitForTimeout(460);
 
   /* The place rides INSIDE the name rather than taking a column of
      its own, so an empty one costs nothing and there is no track to
@@ -3736,8 +3757,13 @@ const SAID = [
         !== document.getElementById('scFeed').hidden));
     ok('the board is the stop you arrive at',
       await fp.evaluate(() => !document.getElementById('scFrPane').hidden));
+    /* SCOPED TO THE FRIENDS SECTION. Today wears the same .fr-stop —
+       it is the same control and a second set of classes drawn to look
+       identical is two places to keep one thing in step — and its two
+       come FIRST in the document, so a bare selector reads "Showing
+       up" and asks it which friends stop it is. */
     ok('and the lit stop says which one it is',
-      await fp.$eval('.fr-stop.on', (e) => e.dataset.stop) === 'board');
+      await fp.$eval('.friends .fr-stop.on', (e) => e.dataset.stop) === 'board');
     await stop('feed');
     ok('the feed stop puts the feed up and the board away',
       await fp.evaluate(() => document.getElementById('scFrPane').hidden
@@ -3762,7 +3788,7 @@ const SAID = [
        control too small to press. It passed before only because friends
        were off and the feed had no action in it. */
     ok('and every one of them still clears 44px',
-      await fp.$$eval('#scFrPane .fr-link, .fr-stop', (b) => b.length > 0
+      await fp.$$eval('#scFrPane .fr-link, .friends .fr-stop', (b) => b.length > 0
         && b.every((x) => x.getBoundingClientRect().height >= 44)));
     const mine = await fp.evaluate(() => JSON.parse(localStorage.getItem('sched.net.v1')));
     ok('it claims a code', /^[A-Z0-9]{8}$/.test(mine.code || ''), mine.code);
@@ -4528,7 +4554,7 @@ const SAID = [
     const one = await face();
     ok('ticking a training block asks what you trained',
       one.title === 'What did you train?'
-      && one.chips.join('|') === 'Bro split|PPL|Run|Recovery', one);
+      && one.chips.join('|') === 'All exercises|PPL|Run|Recovery', one);
 
     /* A DECK IS THREE CARDS AND ONE OF THEM IS PRESSABLE. The pair
        behind show 15px and 28px of an edge; focusable, they are two
@@ -4565,12 +4591,27 @@ const SAID = [
       };
       return { b2: of('.wc.b2'), b1: of('.wc.b1'), front: of('.wc.is-front') };
     });
-    const m1 = (deal.b1.m.match(/matrix\(([^)]+)\)/) || [])[1] || '';
+    const m1 = ((deal.b1.m.match(/matrix\(([^)]+)\)/) || [])[1] || '')
+      .split(',').map(Number);
     ok('all three are dealt in, on their own delays',
       [deal.b2, deal.b1, deal.front].every((d) => d.name === 'wcDeal' && d.state > 0)
       && new Set([deal.b2.delay, deal.b1.delay, deal.front.delay]).size === 3, deal);
-    ok('...and the deal does not flatten the two behind onto the front card',
-      /^0\.965, *0, *0, *0\.965, *15, *11$/.test(m1.trim()), deal.b1.m);
+    /* ── AND THE DEAL DOES NOT FLATTEN THE TWO BEHIND ──
+       Read as the resting transform surviving while the animation is
+       running: b1 is offset AND turned, so the matrix has to carry a
+       .965 scale, three degrees of rotation and a 13/9 translate. Any
+       keyframe naming `transform` replaces all of that, the pair land
+       square on the front card, and the deck arrives as one card with
+       a heavier shadow — which is not a shape anybody would report.
+       Decomposed rather than string-matched, because the six numbers
+       are a product of three properties and a literal would have to be
+       retyped every time one of them is nudged. */
+    const scale1 = Math.hypot(m1[0], m1[1]);
+    const turn1 = Math.atan2(m1[1], m1[0]) * 180 / Math.PI;
+    ok(`...and the deal does not flatten the two behind onto the front card `
+      + `(${scale1.toFixed(3)} at ${turn1.toFixed(1)}°)`,
+      Math.abs(scale1 - .965) < .004 && Math.abs(turn1 - 3) < .3
+      && m1[4] === 13 && m1[5] === 9, deal.b1.m);
 
     /* ── STEPPING IN ──
        A split is not a workout. The first press says which KIND of
@@ -4583,7 +4624,7 @@ const SAID = [
     await page.waitForTimeout(520);
     const two = await face();
     ok('pressing a kind opens it, and the chips become its own',
-      two.title === 'Bro split' && two.chips.length === 6
+      two.title === 'All exercises' && two.chips.length === 6
       && two.chips.join('|') === 'Chest|Back|Shoulders|Arms|Legs|Abs'
       && two.foot.join('|') === 'All kinds', two);
 
@@ -4912,6 +4953,238 @@ const SAID = [
       localStorage.removeItem('sched.tick.v1');
       localStorage.removeItem('sched.log.v1');
       localStorage.removeItem('sched.train.v1');
+      localStorage.setItem('sched.view.v1', 'list');
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE WORKOUTS VIEW
+
+     The second stop on Today: what you actually trained, as against
+     the five you ticked. Everything here fails silently — a calendar
+     that drops the days you missed, a panel per workout that EXISTS
+     rather than per one you did, a usual day claimed off a single
+     session, a calendar drawn for the wrong card — so none of it is
+     read off a declaration.
+     ═══════════════════════════════════════════════════════════ */
+  {
+    const { PNG: PNG5 } = require('pngjs');
+    const dpr5 = 2;
+    const d0 = new Date();
+    const back = (n) => {
+      const x = new Date(d0); x.setDate(x.getDate() - n);
+      return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0')
+        + '-' + String(x.getDate()).padStart(2, '0');
+    };
+
+    const openWork = async (log) => {
+      await page.evaluate((rec) => {
+        if (rec) localStorage.setItem('sched.train.v1', JSON.stringify(rec));
+        else localStorage.removeItem('sched.train.v1');
+        localStorage.setItem('sched.view.v1', 'tally');
+        localStorage.removeItem('sched.ty.v1');
+      }, log);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(340);
+      await page.click('[data-tystop="work"]');
+      await page.waitForTimeout(320);
+    };
+
+    /* ── TWO STOPS, AND EXACTLY ONE OF THEM IS ON SCREEN ──
+       Measured as a BOX rather than as the hidden property. The rail
+       and the page dots both had that bug — the attribute was set
+       correctly throughout and a rule with its own `display` outranked
+       the browser's [hidden] — and both times the check that missed it
+       read the property. */
+    await openWork(null);
+    const stops = await page.evaluate(() => {
+      const box = (id) => {
+        const r = document.getElementById(id).getBoundingClientRect();
+        return r.width > 40 && r.height > 8;
+      };
+      return { names: [...document.querySelectorAll('[data-tystop]')]
+                 .map((b) => b.textContent),
+               on: [...document.querySelectorAll('[data-tystop]')]
+                 .filter((b) => b.getAttribute('aria-current') === 'true')
+                 .map((b) => b.dataset.tystop),
+               up: box('scTyPane'), work: box('scWorkPane'),
+               /* The hero's own label went with the stop that replaced
+                  it: a word naming a section directly under the button
+                  that opens that section is the same word twice. */
+               lbl: document.querySelectorAll('.ty-lbl').length };
+    });
+    ok('Today has two stops and only the one you pressed is drawn',
+      stops.names.join('|') === 'Showing up|Workouts'
+      && stops.on.join('') === 'work' && stops.work && !stops.up
+      && stops.lbl === 0, stops);
+
+    /* An empty record draws no apparatus. A calendar of ninety unlit
+       days under a zero is a screen telling you off for not using a
+       feature you have not found yet. */
+    const bare = await page.evaluate(() => ({
+      none: !!document.querySelector('.wo-none'),
+      cal: document.querySelectorAll('.wo-cal').length,
+      panels: document.querySelectorAll('.wo-p').length,
+    }));
+    ok('with nothing logged it says so, and draws no calendar and no panels',
+      bare.none && bare.cal === 0 && bare.panels === 0, bare);
+
+    /* ── A REAL THIRTEEN WEEKS ──
+       Chest on eight of one weekday, Back on five of another, one
+       Pull. Enough for the usual-day claim to be true of two of them
+       and false of the third, which is the only way to check it is a
+       claim rather than a label. */
+    const log = {};
+    const put = (n, k) => { log[back(n)] = { ['b' + n]: { k, e: 'Hard' } }; };
+    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest');
+    for (let i = 0; i < 5; i++) put(4 + i * 7, 'bro.back');
+    /* Day 3, and not 9: nine is 2 + 7, which is Chest's second Friday,
+       and one record per block per day means the Pull simply replaced
+       it — seven Chests where the assertion says eight, and a fixture
+       quietly measuring something other than what it describes. */
+    put(3, 'ppl.pull');
+    await openWork(log);
+
+    const drawn = await page.evaluate(() => {
+      const rows = [...document.querySelectorAll('.wo-p')].map((t) => ({
+        k: t.dataset.workout,
+        n: t.querySelector('.wo-n').textContent,
+        w: t.querySelector('.wo-w').textContent,
+        s: t.querySelector('.wo-s').textContent,
+        open: t.getAttribute('aria-expanded') === 'true',
+        cal: !!t.querySelector('.wo-cal'),
+      }));
+      const dots = [...document.querySelectorAll('.wo-d')];
+      return { fig: document.querySelector('.wo-head .ty-fig').textContent,
+        months: [...document.querySelectorAll('.wo-mn')].map((m) => m.textContent),
+        rows,
+        cals: document.querySelectorAll('.wo-cal').length,
+        lit: dots.filter((d) => d.classList.contains('is-on')).length,
+        unlit: dots.filter((d) => !d.classList.contains('is-on')
+          && !d.classList.contains('is-gap')).length,
+        label: document.querySelector('.wo-cal').getAttribute('aria-label') };
+    });
+    ok('it counts every session and names three months',
+      /^14/.test(drawn.fig) && drawn.months.length === 3
+      && drawn.months.every((m) => /^[A-Z][a-z]{2}$/.test(m)), drawn);
+
+    /* ── A PANEL PER WORKOUT YOU DID, NOT PER WORKOUT THAT EXISTS ──
+       Twenty-two panels, nineteen of them reading zero, is a menu
+       rather than a record — and the deck two taps away is already the
+       menu. Most-done first, so the panel you look at is the thing you
+       actually do. */
+    ok('one panel per workout you actually did, most-done first',
+      drawn.rows.length === 3
+      && drawn.rows.map((t) => t.w + ' ' + t.n).join('|')
+         === 'Chest 8|Back 5|Pull 1', drawn.rows);
+
+    /* ── THE CALENDAR BELONGS TO ONE CARD, AND EXACTLY ONE IS OPEN ──
+       A picture with nine hues scattered through it says you were busy
+       and nothing else. And the TOP one opens by itself: a first visit
+       showing three shut rows hides the whole point behind a press
+       nobody knows to make. */
+    ok('the top panel is open, and it is the only one with a calendar',
+      drawn.cals === 1 && drawn.rows[0].open && drawn.rows[0].cal
+      && drawn.rows.slice(1).every((r) => !r.open && !r.cal), drawn.rows);
+
+    /* ── THE DAYS YOU MISSED ARE DRAWN ──
+       A calendar of only the days you trained is a list of wins with
+       the gaps taken out. Both halves: eight lit for the open card,
+       and an unlit day for every other day in those three months. */
+    ok(`the misses are drawn too (${drawn.lit} lit, ${drawn.unlit} not)`,
+      drawn.lit === 8 && drawn.unlit > 60, drawn);
+    ok('...and the picture is spoken as the card it belongs to',
+      /^Chest, 8 sessions over three months/.test(drawn.label), drawn.label);
+
+    /* ── AND IT ONLY CLAIMS A USUAL DAY WHERE THERE IS ONE ──
+       A majority of one is one. A weekday under a panel reading 1 is
+       the app inventing a routine out of a single session, so under
+       three it says how long ago instead. Both directions, because
+       watching the claim appear passes on code that always claims. */
+    ok('...saying which day it lands on only where three or more say so',
+      /days$/.test(drawn.rows[0].s) && /days$/.test(drawn.rows[1].s)
+      && /ago|today|yesterday|last week/.test(drawn.rows[2].s), drawn.rows);
+
+    /* ── PRESSING ANOTHER CARD MOVES THE CALENDAR INTO IT ──
+       This is the whole mechanism, so it is driven rather than
+       inspected: press Back and the picture has to become Back's, with
+       five lit days rather than eight. */
+    await page.click('.wo-p[data-workout="bro.back"]');
+    await page.waitForTimeout(300);
+    const moved = await page.evaluate(() => {
+      const open = document.querySelector('.wo-p.is-open');
+      return { k: open.dataset.workout,
+        cals: document.querySelectorAll('.wo-cal').length,
+        lit: document.querySelectorAll('.wo-d.is-on').length,
+        inside: !!open.querySelector('.wo-cal') };
+    });
+    ok('pressing another card moves the calendar into it',
+      moved.k === 'bro.back' && moved.cals === 1 && moved.inside
+      && moved.lit === 5, moved);
+
+    /* ── AND THE MARKS WEAR THE THEME'S ACCENT, NOT THE NINE HUES ──
+       The workout cards carry a literal colour each, because a colour
+       that says WHICH session this is has to be the same on every
+       palette. Here nothing needs saying — the panel prints the name
+       and the calendar belongs to one card — so a hue would be a
+       second colour system down a screen that already has an accent,
+       and on the shipped lime page it would draw the marks red.
+
+       Measured on composited pixels, because the dot is 5px with a
+       bloom under it: this repo has twice found a mark that passed the
+       arithmetic and vanished on screen. */
+    const hue = await page.evaluate(() => {
+      const d = document.querySelector('.wo-d.is-on');
+      const r = d.getBoundingClientRect();
+      const ring = document.querySelector('.wo-p.is-open .wo-ra');
+      const rr = ring.getBoundingClientRect();
+      return { x: r.left + r.width / 2, y: r.top + r.height / 2,
+        want: getComputedStyle(document.documentElement)
+          .getPropertyValue('--red').trim(),
+        ring: getComputedStyle(ring).stroke,
+        rx: rr.left + rr.width / 2, ry: rr.top + 2 };
+    });
+    const png5 = PNG5.sync.read(await page.screenshot());
+    const at5 = (x, y) => {
+      const i = (png5.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
+      return [png5.data[i], png5.data[i + 1], png5.data[i + 2]];
+    };
+    const hex5 = (h) => h.replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16));
+    const dot = at5(hue.x, hue.y);
+    const ground = at5(hue.x, hue.y - 30);
+    const want = hex5(hue.want);
+    ok(`a lit day is the page's own accent (${dot.join(',')} against ${want.join(',')})`,
+      deltaE(dot, want) < 22 && ratio(dot, ground) >= 3, { dot, want, ground });
+    ok('...and so is the ring, rather than the session\'s own colour',
+      hue.ring === 'rgb(' + want.join(', ') + ')', hue);
+
+    /* ── THE STOP IS REMEMBERED, UNDER ITS OWN KEY ──
+       Which half of a screen you were last on is a preference about
+       looking at the record; folding it into the record is how a
+       damaged record takes the other down.
+
+       WHICH PANEL WAS OPEN IS NOT REMEMBERED, deliberately: it is a
+       position on a screen you are looking at, and one restored from
+       last week opens on a session you have stopped doing. Asserted,
+       because "not stored" is only visible from outside as the top one
+       being open again. */
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(340);
+    const kept5 = await page.evaluate(() => ({
+      key: localStorage.getItem('sched.ty.v1'),
+      inSchedule: /tystop/.test(localStorage.getItem('sched.v1') || ''),
+      work: document.getElementById('scWorkPane').getBoundingClientRect().height > 8,
+      open: (document.querySelector('.wo-p.is-open') || { dataset: {} }).dataset.workout,
+    }));
+    ok('the stop is still up after a reload, kept away from the schedule',
+      kept5.key === 'work' && !kept5.inSchedule && kept5.work
+      && kept5.open === 'bro.chest', kept5);
+
+    await page.evaluate(() => {
+      localStorage.removeItem('sched.train.v1');
+      localStorage.removeItem('sched.ty.v1');
       localStorage.setItem('sched.view.v1', 'list');
     });
     await page.reload({ waitUntil: 'networkidle' });
