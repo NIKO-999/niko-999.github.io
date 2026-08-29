@@ -3521,6 +3521,24 @@
     return card;
   }
 
+  /* ── one post, on its own ──
+     Opened from a tile on somebody's profile. The sheet is one at a
+     time in this app, so it REPLACES the profile — which is why it
+     carries the way back: without it, closing lands you on the board
+     and the profile you were reading is two presses away again. */
+  function scPostSheet(it, back) {
+    scSheet(it.who, function (body) {
+      body.appendChild(scPost(it, true));
+      if (back) {
+        body.appendChild(scEl('div', 'menu-rule'));
+        var b = scEl('button', 'menu-item');
+        b.appendChild(document.createTextNode('Back to ' + it.who));
+        b.addEventListener('click', back);
+        body.appendChild(b);
+      }
+    });
+  }
+
   /* ── deleting one, and it ASKS ──
      This app's rule is that nothing deletes without a way back, and
      the one exception written down is the reminders — because a bin
@@ -3878,12 +3896,45 @@
       }
       body.appendChild(strip);
 
+      /* ── WHAT THEY HAVE POSTED, AS A WALL ──
+         It was every log drawn out in full, one under another, which
+         made the profile a second feed — and the feed is a stop of its
+         own two taps away. A profile wants the SHAPE of what somebody
+         has done: a grid you take in at a glance, and one of them
+         opens if you want the words.
+
+         A log with no photograph still gets a tile, carrying its own
+         first line. Dropping it would make the grid a photo album
+         rather than a record of what they did, and the two are
+         different claims about somebody. */
       var logs = (Array.isArray(r.logs) ? r.logs : []).slice().reverse();
-      body.appendChild(scEl('span', 'label fp-k', logs.length ? 'Their logs' : 'No logs yet'));
-      logs.slice(0, 20).forEach(function (q) {
-        body.appendChild(scPost({ p: q, who: p.name, acc: p.acc,
-          ink: p.ink, pic: p.pic }, true));
-      });
+      var lh = scEl('div', 'fp-kh');
+      lh.appendChild(scEl('span', 'label fp-k', logs.length ? 'What they have posted' : 'Nothing posted yet'));
+      if (logs.length) lh.appendChild(scEl('em', null, String(logs.length)));
+      body.appendChild(lh);
+      if (logs.length) {
+        var grid = scEl('div', 'fp-grid');
+        logs.slice(0, 24).forEach(function (q) {
+          var t = scEl('button', 'fp-t' + (q.img ? '' : ' is-words'));
+          t.setAttribute('aria-label', (q.cap || 'A log') + ', ' + scAgo(q.at)
+            + '. Open it.');
+          if (q.img) {
+            var im = document.createElement('img');
+            im.src = scImgURL(q.img);
+            im.alt = '';
+            im.loading = 'lazy';
+            t.appendChild(im);
+          } else {
+            t.appendChild(scEl('span', null, q.cap || ''));
+          }
+          t.addEventListener('click', function () {
+            scPostSheet({ p: q, who: p.name, acc: p.acc, ink: p.ink, pic: p.pic },
+              function () { scFriendSheet(p); });
+          });
+          grid.appendChild(t);
+        });
+        body.appendChild(grid);
+      }
 
       /* `Remove`, and nothing else. It carried a two-line explanation
          of what removing does — on a sheet you opened to look at

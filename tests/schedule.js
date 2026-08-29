@@ -4043,20 +4043,46 @@ const SAID = [
       await fp.$$eval('.fp-w', (w) => w.length) === 0
       && await fp.$$eval('.fp-d', (d) =>
         d.every((x) => /^\d{4}-\d{2}-\d{2} · \d+ tick/.test(x.title))));
-    ok('their logs are on it', await fp.$$eval('.sheet .po', (p) => p.length) === 1);
-    /* ── a post is a card, and a card in a card is not ──
-       The feed's posts carry a hairline so a stack of photographs
-       reads as separate things; inside this sheet the frame IS the
-       sheet, and a bordered card within it is the frame-inside-a-frame
-       this project keeps taking out. Measured as the drawn border, not
-       as the class.
+    /* ── WHAT THEY HAVE POSTED, AS A WALL ──
+       It was every log drawn out in full one under another, which made
+       the profile a second feed — and the feed is its own stop two taps
+       away. A profile wants the shape of what somebody has done, so it
+       is a grid, and the words are one press in. */
+    ok('their posts are a wall of tiles rather than a second feed',
+      await fp.$$eval('.sheet .fp-t', (t) => t.length) === 1
+      && await fp.$$eval('.sheet .po', (p) => p.length) === 0);
 
-       And there is NOTHING TO PRESS on somebody else's log: a control
-       that exists and refuses is worse than one that is not there. */
-    ok('...bare inside the sheet, and with no delete on somebody else’s',
-      await fp.$eval('.sheet .po', (e) =>
-        parseFloat(getComputedStyle(e).borderTopWidth) === 0)
-      && await fp.$$eval('.sheet .po .po-x', (x) => x.length) === 0);
+    /* ── and one of them opens ── */
+    await fp.click('.sheet .fp-t');
+    await fp.waitForTimeout(320);
+    const opened = await fp.evaluate(() => ({
+      title: document.getElementById('scSheetTitle').textContent,
+      posts: document.querySelectorAll('.sheet .po').length,
+      cap: (document.querySelector('.sheet .po-c') || {}).textContent,
+      /* A post is a card in the feed, where a stack of photographs
+         needs a boundary; in a sheet the frame IS the sheet, and a
+         bordered card inside one is the frame-inside-a-frame this
+         project keeps taking out. Measured as the drawn border. */
+      bare: parseFloat(getComputedStyle(
+        document.querySelector('.sheet .po')).borderTopWidth) === 0,
+      /* Nothing to press on somebody else's log: a control that exists
+         and refuses is worse than one that is not there. */
+      mine: document.querySelectorAll('.sheet .po .po-x').length,
+      /* The sheet is one at a time in this app, so opening a post
+         REPLACES the profile — and without a way back, closing lands
+         on the board and the profile is two presses away again. */
+      back: [...document.querySelectorAll('.sheet .menu-item')]
+        .some((b) => /^Back to /.test(b.textContent)),
+    }));
+    ok('pressing a tile opens that post, bare and with no delete on it',
+      opened.posts === 1 && opened.bare && opened.mine === 0
+      && /light came up/.test(opened.cap || ''), opened);
+    ok('...and it carries the way back to the profile it replaced',
+      opened.title === 'Rae' && opened.back, opened);
+    await fp.click('.sheet .menu-item');
+    await fp.waitForTimeout(320);
+    ok('...which really goes back to it',
+      await fp.$$eval('.sheet .fp-t', (t) => t.length) === 1);
     /* `.label` is 9px accent capitals at .2em, which is right where a
        sheet is a form and is the only thing separating one field from
        the next. Here the headings sit over a figure and a row of discs

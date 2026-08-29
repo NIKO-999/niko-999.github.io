@@ -1461,6 +1461,19 @@ and here the photograph is IN the card, so the card only has to be an
 edge. The radius nests — 16 outside, 12 on the image — because two
 rounded rectangles at one radius read as a mistake.
 
+**A profile is a WALL, not a second feed.** It drew every log out in
+full, one under another — which is the feed, and the feed is its own
+stop two taps away. A profile wants the shape of what somebody has
+done: three across, square, the photograph filling its tile, and the
+words one press in. A log with no photograph still gets a tile
+carrying its own first line, because dropping it would make this a
+photo album, and a photo album is a different claim about somebody.
+
+**The post that opens carries the way back.** The sheet is one at a
+time in this app, so opening a tile REPLACES the profile — without a
+way back, closing lands you on the board and the profile you were
+reading is two presses away again.
+
 **Inside the friend's sheet the post is BARE**, because there the frame
 is the sheet and a card in a card is the frame-inside-a-frame this
 project keeps taking out.

@@ -591,6 +591,31 @@ body {
   background: var(--tick-off); }
 .fp-w { font-size: 10px; color: var(--dim); }
 
+/* ── the wall ──
+   Three across, square, and the photograph fills its tile. It was
+   every log drawn out in full one under another, which made the
+   profile a second feed — and the feed is its own stop two taps away.
+   A profile wants the SHAPE of what somebody has done; the words are
+   one press in.
+
+   The radius nests inside the sheet's own the way the feed card's
+   image nests inside the card. */
+.fp-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px;
+  margin-top: 10px; }
+.fp-t { aspect-ratio: 1; border-radius: 10px; overflow: hidden; border: 0;
+  padding: 0; background: var(--tick-off); cursor: pointer; display: block; }
+.fp-t img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.fp-t:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* A log with no photograph is still a thing they did, so it keeps a
+   tile and carries its own first line rather than being dropped —
+   dropping it would make this a photo album, which is a different
+   claim about somebody. */
+.fp-t.is-words { display: grid; align-items: start; padding: 9px;
+  background: none; box-shadow: inset 0 0 0 1px var(--hair); }
+.fp-t.is-words span { font-size: 11px; line-height: 1.35; font-weight: 500;
+  color: var(--dim); text-align: left; overflow: hidden;
+  display: -webkit-box; -webkit-line-clamp: 5; -webkit-box-orient: vertical; }
+
 /* No border and no paragraph. Removing somebody takes them off a list;
    it is not the kind of delete that needs warning about, and the sheet
    says so by not saying anything. */
