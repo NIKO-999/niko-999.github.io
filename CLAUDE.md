@@ -308,6 +308,23 @@ carrying it: a string nothing renders and nothing can edit is not
 preserved data, it is a key that outlives everyone who knows what it
 was for.
 
+**AND THE LABEL SITS UNDER THE DOT.** "Trading · 48 min left" at 10px,
+on its own row under the span, centred on the mark it is about. It was
+a 9px eyebrow and a 14px sentence on two registers of their own,
+saying about the dot's position what the dot's position says. On the
+line it belongs to it needs no state word at all — a label under the
+mark for now means now — and the state only appears when nothing is
+running, where the state IS the fact.
+
+**Positioned in PIXELS off the TRACK's box, never off the dot's own
+percentage.** The dot lives inside `.sp-track`, which sits between the
+two time figures; the label's row is the full width of the span. The
+same percentage in the two is a different place on screen, and the
+first version put the label six pixels off the thing it points at. It
+is nudged back inside the track at either end, because a label whose
+edge is off the page is worse than one a few pixels from its mark, and
+at 05:45 the dot is at 0%.
+
 **AND THE 44px CLOCK TIME IS GONE.** It was the biggest object on the
 screen and it was saying twice what the two things either side of it
 already said: the span draws where in the day you are, the caption

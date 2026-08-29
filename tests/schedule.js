@@ -720,18 +720,33 @@ const SAID = [
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   const hero = await page.evaluate(() => ({
-    state: document.getElementById('scLiveState').textContent,
     of: document.getElementById('scLiveOf').textContent,
-    /* The 44px clock time is gone and must not come back — the span
-       above draws where in the day you are and this line says how long
-       is left, so a figure between them repeats both. Asserted as
-       ABSENCE of the element, not of its text: an emptied <b> still
-       reserves its line. */
-    fig: !document.querySelector('.live .figure'),
+    /* The block's NAME is the emphasis and the rest is a note on it, so
+       the two are separate elements — one string at one weight was the
+       version this replaced. */
+    lead: document.querySelector('#scLiveOf b').textContent,
+    /* The 44px clock time and its eyebrow are gone and must not come
+       back: the span draws where in the day you are, and this label
+       sits under the dot saying what is there. Asserted as ABSENCE of
+       the elements, not of their text — an emptied <b> still reserves
+       its line. */
+    fig: !document.querySelector('.live') && !document.querySelector('.caption'),
+    /* Under the DOT, which is the whole point of moving it here. Read
+       as boxes: the label's middle within a few px of the dot's, or
+       clamped to an end of the track. */
+    mid: (() => {
+      const l = document.getElementById('scLiveOf').getBoundingClientRect();
+      const d = document.getElementById('scSpanDot').getBoundingClientRect();
+      const t = document.getElementById('scSpanDot').parentNode.getBoundingClientRect();
+      return { off: Math.round((l.left + l.right) / 2 - (d.left + d.right) / 2),
+               inside: l.left >= t.left - 0.5 && l.right <= t.right + 0.5 };
+    })(),
   }));
-  ok('the hero counts the running class down, in two lines and no figure',
-    hero.state === 'Now' && hero.fig
-    && hero.of === 'Trading · 1 h 30 m left', hero);
+  ok('the label under the dot names the running class and counts it down',
+    hero.lead === 'Trading' && hero.of === 'Trading · 1 h 30 m left'
+    && hero.fig, hero);
+  ok('...and it sits under the dot, inside the track',
+    Math.abs(hero.mid.off) <= 2 && hero.mid.inside, hero.mid);
 
   /* ── the head stays a label ──
      Read RELATIVE to the two figures around it, never as a px literal:
@@ -1676,14 +1691,15 @@ const SAID = [
   const upSwap = await page.evaluate(() => ({
     ring: !document.getElementById('scRing').hidden,
     rail: document.getElementById('scRail').hidden,
-    hero: document.getElementById('scLive').hidden,
+    hero: document.getElementById('scSpan').hidden,
   }));
   ok('the ring replaces the rail rather than joining it',
     upSwap.ring && upSwap.rail, upSwap);
-  /* The ring's own middle carries the state and the figure. Leaving the
-     hero above it says both twice, and the louder of the two is the one
-     that is not the point of the screen. */
-  ok('and the hero goes with it, so nothing is said twice', upSwap.hero, upSwap);
+  /* The ring's own middle carries the state and the figure, and the
+     span above carries the same day with a label on it. Leaving the
+     span up says all of it twice. */
+  ok('and the day span goes with it, so nothing is said twice',
+    upSwap.hero, upSwap);
 
   const ring = await page.evaluate(() => {
     const marks = [...document.querySelectorAll('#scRingSvg path')];
@@ -2123,7 +2139,7 @@ const SAID = [
   const tal = await page.evaluate(() => ({
     up: !document.getElementById('scTally').hidden,
     rail: document.getElementById('scRail').hidden,
-    hero: document.getElementById('scLive').hidden,
+    hero: document.getElementById('scSpan').hidden,
     ring: document.getElementById('scRing').hidden,
     cards: document.querySelectorAll('.ty-card').length,
     cap: document.getElementById('scTallyCap').textContent,

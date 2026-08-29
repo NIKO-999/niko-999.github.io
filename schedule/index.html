@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=9413d4b0" />
+<link rel="stylesheet" href="app.css?v=c8699a2a" />
 </head>
 <body>
 
@@ -79,17 +79,14 @@
         <span id="scSpanAn"></span>
         <span id="scSpanBn"></span>
       </div>
+      <!-- What is happening, UNDER THE DOT. It was a 9px eyebrow and a
+           14px sentence sitting on their own two registers below the
+           span, saying about the dot's position what the dot's position
+           says. Put on the line it is about, it costs one row and needs
+           no state word: a label under the mark means now. -->
+      <div class="sp-now"><span id="scLiveOf" aria-live="polite"></span></div>
     </div>
 
-    <!-- What is running, and what it is. THE 44px CLOCK TIME IS GONE:
-         the span above already draws where in the day you are, and the
-         caption below already says how long is left, so the figure was
-         the biggest object on the screen repeating both of them. Two
-         quiet lines carry everything it did. -->
-    <div class="live" id="scLive" aria-live="polite">
-      <span class="eyebrow" id="scLiveState"></span>
-    </div>
-    <p class="caption" id="scLiveOf"></p>
   </header>
 
   <!-- ── the ring ──
@@ -242,6 +239,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=d0940e33"></script>
+<script src="app.js?v=6360c430"></script>
 </body>
 </html>

@@ -1787,10 +1787,9 @@
        in tabular figures, and the duration still gets said, in the
        caption where changing width costs nothing. */
     /* The dot is the one thing up here that moves with the clock, so
-       it is repainted on the same half-minute pass the hero is. */
+       it is repainted on the same half-minute pass the label is. */
     scDaySpan();
 
-    var line = $('scLive');
     var mine = scByDay(today);
     var running = null, next = null;
     mine.forEach(function (it) {
@@ -1798,36 +1797,67 @@
       else if (it.s > now && !next) next = it;
     });
 
-    var state, of;
+    /* ── the label ──
+       The block's NAME is the emphasis and the rest is the note on it,
+       so the two are separate elements rather than one string at one
+       weight. No state word when something is running: the label sits
+       under the dot, and a label under the mark for now means now.
+       When nothing is, the state IS the fact — "Next", or which day —
+       so it goes in front. */
+    var lead = '', tail;
     if (running) {
-      state = 'Now';
-      of = running.n + ' · ' + scSpan(running.e - now) + ' left';
+      lead = running.n;
+      tail = scSpan(running.e - now) + ' left';
     } else if (next) {
-      state = 'Next';
-      of = next.n + ' · in ' + scSpan(next.s - now);
+      lead = next.n;
+      tail = 'in ' + scSpan(next.s - now);
     } else {
       var ahead = null;
       for (var k = 1; k <= 7 && !ahead; k++) {
         var d = (today + k) % 7, list = scByDay(d);
         if (list.length) ahead = { d: d, it: list[0], k: k };
       }
-      if (!ahead) { line.hidden = true; $('scLiveOf').hidden = true; return; }
-      state = ahead.k === 1 ? 'Tomorrow' : FULL[ahead.d];
+      if (!ahead) { $('scLiveOf').hidden = true; return; }
+      lead = ahead.it.n;
       /* The other two branches say how far off it is; a day away is too
          far for that to mean anything, so this one prints the clock
-         time instead. It is the only branch that has to, and it is the
-         one the removed figure used to cover. */
-      of = ahead.it.n + ' · ' + sc12(ahead.it.s) + ' ' + scMer(ahead.it.s);
+         time and the day instead. */
+      tail = (ahead.k === 1 ? 'tomorrow' : FULL[ahead.d]) + ' '
+        + sc12(ahead.it.s) + ' ' + scMer(ahead.it.s);
     }
 
-    line.hidden = false;
-    $('scLiveOf').hidden = false;
-    line.classList.toggle('is-next', !running);
-    /* "Now", never "Now · until" — the "until" was pointing at a clock
-       time that is no longer drawn, and a preposition with nothing
-       after it reads as a string that failed to fill in. */
-    $('scLiveState').textContent = state;
-    $('scLiveOf').textContent = of;
+    var lab = $('scLiveOf');
+    lab.hidden = false;
+    lab.textContent = '';
+    lab.appendChild(scEl('b', null, lead));
+    lab.appendChild(document.createTextNode(' · ' + tail));
+    scSpanNow();
+  }
+
+  /* Under the dot, and nudged back inside the track at either end. The
+     text is written by scLive and the dot placed by scDaySpan, so this
+     runs after both — a clamp computed before the words are in is a
+     clamp on the previous block's width. */
+  function scSpanNow() {
+    var lab = $('scLiveOf'), dot = $('scSpanDot');
+    if (lab.hidden || $('scSpan').hidden) return;
+    var b = dot.parentNode.getBoundingClientRect();
+    var box = lab.parentNode.getBoundingClientRect();
+    if (!b.width) return;
+    /* IN PIXELS, off the TRACK's box — not the dot's own percentage.
+       The dot is positioned inside `.sp-track`, which sits between the
+       two time labels, and this row is the full width of the span: the
+       same percentage in the two is a different place on screen, and
+       the first version put the label 6px off the mark it points at. */
+    var pc = parseFloat(dot.style.left) || 0;
+    lab.style.left = (b.left - box.left + b.width * pc / 100) + 'px';
+    lab.style.transform = 'translateX(-50%)';
+    var a = lab.getBoundingClientRect();
+    if (!a.width) return;
+    var dx = 0;
+    if (a.left < b.left) dx = b.left - a.left;
+    else if (a.right > b.right) dx = b.right - a.right;
+    if (dx) lab.style.transform = 'translateX(calc(-50% + ' + Math.round(dx) + 'px))';
   }
 
   /* ═══════════════════════════════════════════════════════════
@@ -3996,8 +4026,9 @@
        tally has a hero of its own. Leaving the week's above either says
        it twice, and the louder of the two is the one that is not the
        point of the screen. */
-    $('scLive').hidden = ring || tal || fr;
-    $('scLiveOf').hidden = ring || tal || fr;
+    /* The label lives INSIDE the span now, so hiding the span takes it
+       with it — the ring's own middle and the tally's hero each say the
+       same thing on their own screen. */
     $('scSpan').hidden = ring || tal || fr || !scByDay(new Date().getDay()).length;
     $('scEmpty').hidden = ring || tal || fr || state.items.length > 0;
 
