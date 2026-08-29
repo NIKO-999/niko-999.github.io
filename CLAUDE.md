@@ -591,6 +591,28 @@ are the same day seen from the other side. The schedule says when
 things happen; this says which two or three of them actually matter. A
 second screen for three lines would be a tab you stop opening.
 
+**AND EVERY CARD IS ITS OWN DATE, which it was not.** `scObjBack`
+resolved a card through `scDateOfDow` — the TICK path's resolver,
+which looks back over the two-day backfill window and then returns
+TODAY so `scTallyOpen` can refuse a day that has shut. That is right
+for a tick and silently wrong for this: every card more than two days
+behind, and every day still ahead, read and WROTE today's objectives.
+Friday's card showed today's list, and adding one to Friday added it
+to today. `scObjDay` is its own resolver — the Monday-first week
+containing today, which is what the deck is — and a day still to come
+simply has none yet, because you decide an objective on the day.
+
+**A card's own column check has to read the rows that DRAW a time.**
+Narrowing the running-row check for the finished blocks left the
+per-card one comparing a box that is not drawn, which reports 0,
+against a real column. It passed for months and then failed on the
+hour, because the real clock has to put a block behind you AND the
+file has to reach that line — which is the shape of a check that only
+sometimes runs. It also had to move from `=== 1` to `<= 1` plus a card
+that actually has times: a shut card now contributes an empty list
+rather than a column of zeros, and `<= 1` alone would pass on a screen
+with no times drawn anywhere.
+
 **PER DATE, not per weekday.** The schedule repeats — every Monday has
 the same shape, which is what makes it a shape. An objective does not:
 "the thing that matters today" is a decision you take on the day, and

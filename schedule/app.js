@@ -1499,8 +1499,29 @@
      Rank in the gutter, and the first is the accent: the frog is
      whatever you would rather not start, and this screen's only job is
      to keep saying which one that is. */
+  /* ── THE DATE THIS CARD IS ──
+     Not scDateOfDow, which is the TICK path's resolver: it looks back
+     over the two-day backfill window only and then returns TODAY, so
+     scTallyOpen can refuse a day that has shut rather than quietly
+     filing against one that has not. That is right for a tick and
+     wrong for this — every card more than two days behind, and every
+     day still to come, was reading and writing TODAY's objectives.
+     Friday's card showed today's list, and adding one to it added it
+     to today.
+
+     Objectives are per DATE and the deck is the Monday-first week
+     containing today, so that is what this answers: this week's
+     Monday, this week's Friday, behind you or ahead. A day still to
+     come simply has none yet, which is the honest answer — you decide
+     an objective on the day. */
+  function scObjDay(dow) {
+    var d = new Date();
+    d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + ((dow + 6) % 7));
+    return scDay(d);
+  }
+
   function scObjBack(d) {
-    var day = scDay(scDateOfDow(d));
+    var day = scObjDay(d);
     var back = scEl('div', 'wk-back');
 
     /* ── the foil edge ──

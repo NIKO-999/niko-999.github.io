@@ -236,10 +236,23 @@ const SAID = [
   const cols = await page.$$eval('.day-card', (cards) => cards.map((c) => {
     const rows = [...c.querySelectorAll('.row[data-id]')];
     const edge = (sel, side) => rows.map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
-    return { t: edge('.t', 'right'), n: edge('.n', 'left') };
+    /* The TIMES are read off the rows that draw one. A finished block
+       has none, and a box that is not drawn reports 0 — so on today's
+       card, at any hour with a block behind it, this was comparing
+       nothing against a real column. It passed for months because the
+       clock had to be inside the right window for a row to be past AND
+       for this file to reach here, which is exactly the shape of a
+       check that only sometimes runs. The NAMES stay every row. */
+    const shown = rows.map((r) => r.querySelector('.t').getClientRects().length > 0);
+    return { t: edge('.t', 'right').filter((v, i) => shown[i]), n: edge('.n', 'left') };
   }));
+  /* `<= 1` and then a card that actually HAS times: a shut card draws
+     none, so it now contributes an empty list rather than a column of
+     zeros, and `=== 1` fails on the empty one while `<= 1` alone would
+     pass on a screen with no times drawn anywhere. */
   ok('the times in a card share one right edge',
-    cols.every((c) => new Set(c.t).size === 1), cols.map((c) => c.t));
+    cols.every((c) => new Set(c.t).size <= 1)
+    && cols.some((c) => c.t.length > 1), cols.map((c) => c.t));
   ok('and the names share one left edge',
     cols.every((c) => new Set(c.n).size === 1), cols.map((c) => c.n));
 
@@ -1582,6 +1595,45 @@ const SAID = [
     await page.$eval('.day.is-today .row[data-id]',
       (r) => { const b = r.getBoundingClientRect();
                return b.width > 100 && b.height > 20; }));
+
+  /* ── EVERY card is its own date ──
+     scObjBack resolved a card through scDateOfDow, which is the TICK
+     path's resolver: it looks back over the two-day backfill window
+     and then returns TODAY. So every card more than two days behind,
+     and every day still ahead, read and WROTE today's objectives —
+     Friday's card showed today's list, and adding one to Friday added
+     it to today.
+
+     The deck is the Monday-first week containing today, so that is
+     what a card's date means now. Planted on this week's Monday and
+     on this week's Friday, and each has to turn up on its own card
+     and on no other. Today is a Tuesday, so one is behind and one is
+     ahead — the two halves the old resolver got wrong for different
+     reasons. */
+  await page.evaluate(() => {
+    const iso = (off) => { const d = new Date();
+      d.setDate(d.getDate() - ((d.getDay() + 6) % 7) + off);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0')
+        + '-' + String(d.getDate()).padStart(2, '0'); };
+    const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
+    o[iso(0)] = [{ id: 'om', n: 'Monday only', done: false }];
+    o[iso(4)] = [{ id: 'of', n: 'Friday only', done: false }];
+    localStorage.setItem('sched.obj.v1', JSON.stringify(o));
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(260);
+  const perDay = await page.$$eval('.day', (days) => days.map((li) => ({
+    day: li.querySelector('.ob-day').textContent,
+    obj: [...li.querySelectorAll('.ob-t')].map((t) => t.textContent).join('|'),
+  })));
+  const byName = Object.fromEntries(perDay.map((r) => [r.day, r.obj]));
+  ok('a past day’s card carries that day’s objectives',
+    byName.Monday === 'Monday only', byName);
+  ok('...a day still to come carries its own',
+    byName.Friday === 'Friday only', byName);
+  ok('...and neither has leaked onto today',
+    !/Monday only|Friday only/.test(byName.Tuesday || ''), byName);
+
 
   /* ── the bar ──
      Four labelled stops in a glass pill, and the one control that ADDS
