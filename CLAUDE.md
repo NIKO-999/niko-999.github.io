@@ -291,12 +291,26 @@ same screen using two names for one idea in one glance.
 
 ## The head says which day, and how much of it is left
 
-**One figure, and it is the DATE.** It went in as a day name and a
-date, the way a diary page is headed, and the name came straight back
-out: today's card in the deck already prints it, in the accent, and the
-deck's whole colour rule is that red on a day name means today. Said
-twice on one screen it means neither time. The number is the one fact
-up here that nothing else on the screen carries.
+**The name, then the date and the clock.** It went in as a bare 30px
+figure with the day name taken off it, on the argument that today's
+card in the deck already prints the name in the accent. That argument
+was right about the COLOUR and wrong about the line: a lone number
+over a title reads as a count, not as a date. It is a sentence now —
+"Saturday 29th · 16:19" — and the day name is repeated from the card
+below on purpose, because what makes this a date is the three parts
+together. What is not repeated is the ordinal and the clock.
+
+**And the rule the name broke is intact.** The head's copy is plain
+`--dim`, never the accent, so the red still marks exactly one day name
+on the screen — `tests/schedule.js` holds both halves.
+
+**The clock runs on the LIVE pass, not the render.** The minute
+changes and the date does not. Half a minute of lag on a display that
+only shows minutes is a clock that is never more than one minute
+wrong, which is the trade for not standing a second timer up beside
+the one that already runs. 24-hour, matching the span below it — a
+meridiem beside an axis written in 24-hour figures is two clocks on
+one screen.
 
 **The subtitle is gone, not emptied.** It only ever held "Up at 6:00 ·
 down at 22:45" — which the span below now DRAWS, with a dot on it

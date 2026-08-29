@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=b38926e8" />
+<link rel="stylesheet" href="app.css?v=4184c78a" />
 </head>
 <body>
 
@@ -47,7 +47,8 @@
          boxes claiming one corner is a collision waiting on a wider
          figure. -->
     <div class="hd-top">
-      <b class="hd-date" id="scHdDate"></b>
+      <h1 class="title" id="scTitle" tabindex="0" role="button"
+          aria-label="Title, tap to rename">Daily Process</h1>
       <!-- Settings, top right, because the bar lost the stop it lived on.
            It is your own face: the one control in this app that is about
            you rather than about the week, and it already has a drawing. -->
@@ -56,8 +57,12 @@
       </button>
     </div>
 
-    <h1 class="title" id="scTitle" tabindex="0" role="button"
-        aria-label="Title, tap to rename">Daily Process</h1>
+    <!-- WHICH day and WHAT time, on one line under the name. The date
+         went in as a bare figure and came back out: a lone number over
+         a title reads as a count, and the day name it needs to be a
+         date was the thing that had been taken off it. The clock is the
+         one fact up here that changes while you are looking. -->
+    <p class="hd-when" id="scHdDate"></p>
 
     <!-- ── the day's span ──
          The waking window drawn rather than written. It replaces the
@@ -206,6 +211,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=e4156156"></script>
+<script src="app.js?v=dab26aeb"></script>
 </body>
 </html>

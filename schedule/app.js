@@ -1734,11 +1734,29 @@
     if (!quiet && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
   }
 
-  /* ── which day it is ──
-     The app knew the date and never printed it. Drawn once per render
-     rather than per live pass: it can only change by the day turning
-     over, and scLive already re-renders the whole screen when it does. */
-  function scDate() { $('scHdDate').textContent = new Date().getDate(); }
+  /* ── which day it is, and what time ──
+     "Saturday 29th · 16:19". The date went in as a bare figure and came
+     back out: a lone number over a title reads as a count, and the day
+     name it needs in order to BE a date was the thing that had been
+     taken off it.
+
+     24-hour, matching the span below it — a meridiem beside an axis
+     written in 24-hour figures is two clocks on one screen.
+
+     It runs on the live pass rather than the render, because the
+     minute changes and the date does not. Half a minute of lag on a
+     clock that only shows minutes is a clock that is right most of the
+     time and never more than one minute wrong, which is the trade for
+     not standing a second timer up beside the one that already runs. */
+  function scOrd(n) {
+    if (n % 100 >= 11 && n % 100 <= 13) return 'th';
+    return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
+  }
+  function scDate() {
+    var d = new Date(), n = d.getDate();
+    $('scHdDate').textContent = FULL[d.getDay()] + ' ' + n + scOrd(n)
+      + ' \u00b7 ' + scHHMM(scNowMin());
+  }
 
   /* ── the day's span ──
      First block to last block, with a dot where you are in it. The
@@ -1817,8 +1835,9 @@
       if (on) live = el;
     }
 
-    /* The dot is the one thing up here that moves with the clock, so
-       it is repainted on the same half-minute pass the rows are.
+    /* The clock and the dot are the two things up here that move with
+       the clock, so both are repainted on the same half-minute pass
+       the rows are.
 
        AND IT IS THE ONLY THING LEFT. There was a hero under the span —
        a state, a 44px clock time and a sentence, then a 10px label
@@ -1827,6 +1846,7 @@
        row on the open card wearing the accent and a sweep, four inches
        below, and the dot already says where in the day that is. A head
        that repeats the card is a head you stop reading. */
+    scDate();
     scDaySpan();
   }
 

@@ -211,27 +211,37 @@ body {
   font-weight: 700;
   letter-spacing: .02em;
   text-transform: uppercase;
-  color: var(--dim);
 }
 
-/* ── the date ────────────────────────────────────────────────
-   One figure and settings, on one row. The day NAME was here for a
-   round and came out: today's card in the deck already carries it, in
-   the accent, and the deck's whole colour rule is that the red on a
-   day name means today. Said twice on one screen it means nothing. */
+/* ── which day, and what time ────────────────────────────────
+   The name and settings on one row, the date and the clock on the next.
+
+   The date was a bare 30px figure for a round — the day name having
+   been taken off it because the deck already prints it — and a lone
+   number over a title reads as a count rather than as a date. It is a
+   sentence now: "Saturday 29th · 16:19". The day name is repeated from
+   the card below and that is accepted, because what makes this a DATE
+   is the three parts together; what is not repeated is the ordinal and
+   the clock, and the clock is the one fact up here that moves while
+   you are looking at it.
+
+   Plain --dim, never the accent: the deck's colour rule is that red on
+   a day name means TODAY, and this line names today whether or not
+   today is the card you are looking at. */
 .hd-top {
   display: flex;
   align-items: center;
-  margin-bottom: 1px;
-}
-.hd-date {
-  font-size: 30px;
-  font-weight: 700;
-  line-height: .9;
-  letter-spacing: -.045em;
-  font-variant-numeric: tabular-nums;
+  margin-bottom: 3px;
 }
 .hd-top .head-you { margin-left: auto; }
+.hd-when {
+  font-size: 12.5px;
+  font-weight: 500;
+  letter-spacing: .01em;
+  color: var(--dim);
+  /* Tabular, so the minute turning over does not shuffle the line. */
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── the day's span ──
    A scale, in 24-hour time, because AM/PM on an axis is four glyphs

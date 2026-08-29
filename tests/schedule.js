@@ -760,21 +760,36 @@ const SAID = [
   const head = await page.evaluate(() => {
     const px = (el) => parseFloat(getComputedStyle(el).fontSize);
     const t = document.querySelector('.title');
+    const row = [...document.querySelectorAll('.day.is-open .row[data-id] .n')][0];
     return { title: px(t),
-             date: px(document.querySelector('.hd-date')),
+             when: px(document.querySelector('.hd-when')),
+             row: px(row),
              fits: t.scrollWidth <= t.clientWidth + 1 };
   });
+  /* Measured against a BLOCK'S NAME on the card, which is the thing
+     you are meant to be reading. A 38px wordmark was built here once
+     and taken back out; anything that outranks the schedule itself is
+     the same mistake returning. */
   ok('the name is a label, not the top of the page',
-    head.title < head.date && head.fits, head);
+    head.title <= head.row * 1.2 && head.fits, head);
+  ok('...and the date sits under it, quieter', head.when < head.title, head);
 
   /* ── the date ──
      The one fact up here that nothing else on the screen carries. The
      day NAME is not with it and must not come back: today's card in
      the deck already prints it in the accent, and the reds scan above
      holds that to exactly one element. */
-  ok('the head prints today’s date and not its name',
-    await page.$eval('#scHdDate', (e) => e.textContent) === '1'
-    && await page.$$eval('.head', (h) => !/tuesday/i.test(h[0].textContent)));
+  /* The day name is BACK, and it is a reversal worth naming rather than
+     quietly deleting the check that held the other way. It came off
+     because today's card in the deck prints it in the accent and a
+     lone name said twice means neither time. What brought it back is
+     that the figure alone was not a date — a bare "29" over a title
+     reads as a count. The rule it broke is intact: the head's copy is
+     plain --dim, so the ACCENT still marks exactly one day name. */
+  ok('the head names the day rather than showing a bare figure',
+    await page.$eval('#scHdDate', (e) => /^[A-Z][a-z]+ \d/.test(e.textContent))
+    && await page.$eval('#scHdDate',
+      (e) => getComputedStyle(e).color !== 'rgb(226, 35, 26)'));
 
   /* ── the day's span ──
      A scale, so it is read as one: the ends are the day's OWN first and
@@ -839,12 +854,40 @@ const SAID = [
      rather than against a literal. */
   ok('the block’s name outranks its time', rowType.n > rowType.t
     && rowType.w >= 600, rowType);
-  /* The date is the only figure in the head now, and the row's name has
-     to stay under it: this is what the removed 44px clock used to be
-     measured against, and dropping the claim entirely would let the
-     rows creep up on the one thing above them that is a figure. */
-  ok('and stays a subheading — the head’s one figure is still bigger',
-    head.date > rowType.n, { head, rowType });
+  /* ── the date reads as a date ──
+     It was a bare 30px number over the title, which reads as a count.
+     All three parts have to be there — a day name without an ordinal
+     is the deck's own card, and an ordinal without a clock is a fact
+     that never changes. Checked against the frozen date rather than a
+     pattern, because "Tuesday 1st" is exactly the case an ordinal
+     table gets wrong. */
+  ok('the head names the day, the date and the clock',
+    await page.$eval('#scHdDate', (e) => e.textContent) === 'Tuesday 1st · 09:30');
+  /* 11, 12 and 13 are the three a naive `n % 10` puts an st, nd and rd
+     on, and no frozen fixture can reach them from the 1st — so the
+     clock is moved to one of them and moved back. The restore is not
+     tidiness: every assertion below this was written under the Tuesday
+     09:30 freeze, and leaving the page on a Friday in the middle of
+     the month would silently change what they measure. */
+  const freeze = async (iso) => {
+    await page.addInitScript((f) => {
+      const R = Date;
+      // eslint-disable-next-line no-global-assign
+      Date = class extends R {
+        constructor(...a) { super(...(a.length ? a : [f])); }
+        static now() { return f; }
+      };
+    }, new Date(iso).getTime());
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(200);
+  };
+  await freeze('2026-09-12T09:30:00');
+  ok('...and the ordinal holds on a teen, where n % 10 does not',
+    await page.$eval('#scHdDate', (e) => e.textContent) === 'Saturday 12th · 09:30',
+    await page.$eval('#scHdDate', (e) => e.textContent));
+  await freeze('2026-09-01T09:30:00');
+  ok('...and the clock is back where the rest of this file left it',
+    await page.$eval('#scHdDate', (e) => e.textContent) === 'Tuesday 1st · 09:30');
 
   /* ── where, in the accent ──
      Nothing in the seed has a place on it, so the seed cannot prove
@@ -936,7 +979,7 @@ const SAID = [
     const red = 'rgb(226, 35, 26)';
     const hit = [];
     document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, '
-      + '.title, .hd-date, .sp-t, .sp-ends span, .sp-fill, .sp-dot')
+      + '.title, .hd-when, .sp-t, .sp-ends span, .sp-fill, .sp-dot')
       .forEach((el) => {
         const s = getComputedStyle(el);
         if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
@@ -3087,7 +3130,7 @@ const SAID = [
       return [png.data[i], png.data[i + 1], png.data[i + 2]];
     };
     const rows = [];
-    for (const sel of ['.title', '.hd-date', '.sp-t', '.sp-ends span',
+    for (const sel of ['.title', '.hd-when', '.sp-t', '.sp-ends span',
                        '.ty-lbl', '.ty-cap', '.ty-foot']) {
       const el = await page.$(sel);
       if (!el) continue;
