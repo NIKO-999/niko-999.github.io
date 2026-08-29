@@ -3430,8 +3430,11 @@ const SAID = [
 
     /* Somebody already on the server, so adding a friend is a real
        fetch of a real record rather than a fixture handed to the page. */
+    /* Two counts a day now: how many of the five they ticked, and how
+       many of their blocks they kept. Never which five and never which
+       blocks — the schedule itself has still never left a phone. */
     const days = {};
-    for (let i = 0; i < 12; i++) days[day(i)] = (i % 5) + 1;
+    for (let i = 0; i < 12; i++) days[day(i)] = { t: (i % 5) + 1, b: (i % 4) + 1 };
     store.set('key:JADE2K7P', 'x'.repeat(64));
     store.set('rec:JADE2K7P', JSON.stringify({
       code: 'JADE2K7P', name: 'Rae', acc: '#0F6E6A', ink: '#ffffff', pic: '',
@@ -3672,7 +3675,14 @@ const SAID = [
     const rec = () => JSON.parse(store.get('rec:' + mine.code));
     ok('your record went up', !!store.get('rec:' + mine.code));
     ok('it carries the day COUNT, not which of the five',
-      rec().days[day(0)] === 3, JSON.stringify(rec().days));
+      rec().days[day(0)].t === 3, JSON.stringify(rec().days));
+    /* And the blocks the same way. A count says you showed up; a list
+       says what your day is, and the second is the thing this app
+       exists not to send. */
+    ok('...and how many blocks were kept, never which ones',
+      typeof rec().days[day(0)].b === 'number'
+      && !/\bWake\b|\bTrading\b/.test(store.get('rec:' + mine.code)),
+      JSON.stringify(rec().days[day(0)]));
     /* The tally holds Steps, Fuel and Water as numbers you typed. The
        tick means you logged it and never what it was, which is what
        keeps the quantities off the wire. */
@@ -3680,8 +3690,16 @@ const SAID = [
       (await fp.evaluate((d) => (JSON.parse(localStorage.getItem('sched.tick.v1'))
         || {})[d].p, day(0))) === '18437'
       && !JSON.stringify(rec()).includes('18437'), JSON.stringify(rec()));
-    ok('and every day is a count of five or fewer, never a shape',
-      Object.values(rec().days).every((v) => typeof v === 'number' && v <= 5),
+    /* TWO NUMBERS AND NOTHING ELSE. It was one number, and the claim
+       was that a day is a count rather than a shape — which still
+       holds, it is just two counts now. Written as "every value is a
+       number" it would pass on a day carrying a list of block names
+       beside them, so what is asserted is the exact set of keys. */
+    ok('and a day is two counts, never a shape',
+      Object.values(rec().days).every((v) =>
+        Object.keys(v).sort().join() === 'b,t'
+        && typeof v.t === 'number' && v.t <= 5
+        && typeof v.b === 'number'),
       JSON.stringify(rec().days));
     ok('it carries the two colours a friend draws you with',
       /^#/.test(rec().acc) && /^#/.test(rec().ink), rec().acc + ' ' + rec().ink);
@@ -3880,7 +3898,7 @@ const SAID = [
         /* Every day exactly ONE tick, so what is measured is the
            smallest disc the strip can draw. */
         seeded.days = {};
-        for (let i = 0; i < 7; i++) seeded.days[day(i)] = 1;
+        for (let i = 0; i < 7; i++) seeded.days[day(i)] = { t: 1, b: 1 };
         store.set('rec:JADE2K7P', JSON.stringify(seeded));
         await fp.evaluate((t) => {
           localStorage.setItem('sched.theme.v1', t);
@@ -3949,7 +3967,7 @@ const SAID = [
       const seeded = JSON.parse(store.get('rec:JADE2K7P'));
       seeded.acc = '#0F6E6A';
       seeded.days = {};
-      for (let i = 0; i < 12; i++) seeded.days[day(i)] = (i % 5) + 1;
+      for (let i = 0; i < 12; i++) seeded.days[day(i)] = { t: (i % 5) + 1, b: (i % 4) + 1 };
       store.set('rec:JADE2K7P', JSON.stringify(seeded));
     }
     {
@@ -3975,6 +3993,33 @@ const SAID = [
        opacity could never have fixed that, because the amber is about
        1.9:1 on white at FULL strength. Diluting a colour that already
        fails only makes the number worse. */
+    /* ── AN OLD RECORD STILL READS ──
+       Every record written before blocks were sent carries a bare
+       NUMBER where this now expects two counts, and those records are
+       on the server right now with up to thirty days left to live.
+       Read as an object they give NaN in every figure they feed, so
+       the shape is normalised on the way in — proven against a record
+       in the old shape rather than trusted. */
+    {
+      const was = JSON.parse(store.get('rec:JADE2K7P'));
+      const old2 = JSON.parse(JSON.stringify(was));
+      old2.days = {};
+      for (let i = 0; i < 5; i++) old2.days[day(i)] = 2;
+      store.set('rec:JADE2K7P', JSON.stringify(old2));
+      await fp.keyboard.press('Escape');
+      await fp.waitForTimeout(200);
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.waitForTimeout(800);
+      const shown = await fp.$eval('.fr-row:not(.is-me) .fr-t', (e) => e.textContent);
+      ok('a record from before blocks were sent still reads as a number',
+        shown === '10', shown);
+      store.set('rec:JADE2K7P', JSON.stringify(was));
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.waitForTimeout(800);
+      await fp.click('.fr-row.is-tap');
+      await fp.waitForTimeout(540);
+    }
+
     /* HEIGHT, now the strip is a month. A disc's diameter is bounded
        by the cell's width, and at thirty across a phone that is about
        four pixels — the smallest one measured 1.18:1 on the white page

@@ -3045,16 +3045,37 @@
      disagree the board is simply wrong and nothing on it says so. One
      function, and my own days are shaped into the same object a peer
      sends before it is asked. */
+  /* ── what a day of yours looks like to a friend ──
+     TWO COUNTS AND NOTHING ELSE: how many of the five you ticked, and
+     how many of your blocks you kept. Never which five and never which
+     blocks — a count says you showed up, a list says what your day is,
+     and the second is the thing this app exists not to send. The
+     schedule itself has never left and does not now.
+
+     `b` is the addition. Before it a friend could see you ticked three
+     of the five and had no way to know whether you trained. */
   function scMyDays() {
     var days = {};
     for (var i = 0; i < 30; i++) {
-      var d = scDayBack(i), t = tickLog[d];
-      /* The COUNT, never which five. The board and the strip both only
-         ever need how many, so sending the items themselves would be
-         spending something for nothing. */
-      if (t) { var n = Object.keys(t).length; if (n) days[d] = n; }
+      var d = scDayBack(i);
+      var t = tickLog[d] ? Object.keys(tickLog[d]).length : 0;
+      var b = blockLog[d] ? Object.keys(blockLog[d]).length : 0;
+      if (t || b) days[d] = { t: t, b: b };
     }
     return days;
+  }
+
+  /* A day out of anybody's record, old shape or new. Every record
+     written before blocks were sent carries a bare NUMBER — the tally
+     count on its own — and those records are on the server right now
+     with up to thirty days left to live. Reading one as an object
+     gives NaN in every figure it feeds, so the shape is normalised on
+     the way in rather than migrated on the way out: there is nothing
+     here to migrate, because the writer is the phone that owns it and
+     it will overwrite itself on the next push. */
+  function scDayOf(v) {
+    if (typeof v === 'number') return { t: v, b: 0 };
+    return { t: (v && +v.t) || 0, b: (v && +v.b) || 0 };
   }
 
   /* Ticks over a rolling window, never all-time — all-time means
@@ -3062,7 +3083,13 @@
      up. */
   function scCount(days, n) {
     var t = 0;
-    for (var i = 0; i < n; i++) t += (days && days[scDayBack(i)]) || 0;
+    for (var i = 0; i < n; i++) t += scDayOf(days && days[scDayBack(i)]).t;
+    return t;
+  }
+
+  function scBlocksIn(days, n) {
+    var t = 0;
+    for (var i = 0; i < n; i++) t += scDayOf(days && days[scDayBack(i)]).b;
     return t;
   }
 
@@ -3073,7 +3100,11 @@
   function scRunOf(days) {
     var n = 0;
     for (var i = 0; i < 3650; i++) {
-      if (days && days[scDayBack(i)]) n++;
+      /* A day you did ANYTHING — a tick or a block. It counted ticks
+         alone, which was the only thing recorded; a day you kept every
+         block and touched none of the five was a day off. */
+      var v = scDayOf(days && days[scDayBack(i)]);
+      if (v.t || v.b) n++;
       else if (i > 0) break;
     }
     return n;
@@ -3185,6 +3216,7 @@
         code: f.code,
         name: scPeerName(r && r.name) || scPeerName(f.name) || f.code,
         ticks: r ? scCount(r.days, 30) : 0,
+        blocks: r ? scBlocksIn(r.days, 30) : 0,
         streak: r ? scRunOf(r.days) : 0,
         acc: r && r.acc, ink: r && r.ink, pic: r && r.pic,
         cold: !r
@@ -3783,11 +3815,26 @@
          between 0 and 5 is more apparatus than the numbers deserve was
          written about SEVEN. Thirty days of them is a shape, and a
          shape is the thing you came to read. */
-      body.appendChild(scEl('span', 'label fp-k', 'Thirty days'));
+      /* ── THE STRIP IS THE BLOCKS ──
+         It was the tally's five, which is what the record used to
+         carry — and the two figures above are already about those
+         five. The question you open somebody's profile with is
+         whether they are doing the thing, and the thing is the
+         blocks. The count rides the heading rather than taking a
+         third figure: three at 26px do not go across a phone, and
+         this one is about the picture under it. */
+      var kh = scEl('div', 'fp-kh');
+      kh.appendChild(scEl('span', 'label fp-k', 'Blocks kept'));
+      kh.appendChild(scEl('em', null, String(p.blocks || 0)));
+      body.appendChild(kh);
       var strip = scEl('div', 'fp-week is-month');
+      var top = 0;
+      for (var k = 0; k < 30; k++) {
+        top = Math.max(top, scDayOf(r.days && r.days[scDayBack(k)]).b);
+      }
       for (var i = 29; i >= 0; i--) {
         var day = scDayBack(i);
-        var n = (r.days && r.days[day]) || 0;
+        var n = scDayOf(r.days && r.days[day]).b;
         var cell = scEl('span', 'fp-d' + (n ? ' on' : ''));
         /* A disc per day, and its SIZE says how many of the five. A day
            with none is a flat neutral at the smallest size — never a
@@ -3815,7 +3862,11 @@
         /* A floor rather than a share: a day with nothing still has to
            be a mark, because a gap in the strip would be a day that is
            not there rather than a day with none on it. */
-        bar.style.height = (n ? 30 + Math.min(n, 5) * 14 : 16) + '%';
+        /* Scaled against the busiest day in the window rather than a
+           constant: five was the tally's ceiling and a day has as many
+           blocks as it has. A floor, so a day with none is still a
+           mark — a gap would be a day that is not there. */
+        bar.style.height = (n ? 26 + (n / Math.max(1, top)) * 74 : 16) + '%';
         var hold = scEl('span', 'fp-hold');
         hold.appendChild(bar);
         cell.appendChild(hold);

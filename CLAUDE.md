@@ -1402,6 +1402,34 @@ those it compared the track against itself. Measured from the most
 common pixel outward it is **7.64:1**. This repo has now made the
 light-on-dark assumption in three separate harnesses.
 
+**A DAY IS TWO COUNTS NOW: the five, and the blocks.** A friend could
+see you ticked three of the five and had no way to know whether you
+trained — the blocks were never sent at all. `days[k]` is
+`{ t, b }`: how many of the five, and how many of your blocks you
+kept. Never which five and never which blocks, because a count says
+you showed up and a list says what your day is, and the second is the
+thing this app exists not to send. The schedule itself has still never
+left a phone.
+
+**Every record written before that carries a bare NUMBER**, and those
+records are on the server right now with up to thirty days left to
+live. Read as an object they give NaN in every figure they feed, so
+the shape is normalised on the way IN — `scDayOf` — rather than
+migrated on the way out: the writer is the phone that owns the record
+and it overwrites itself on the next push, so there is nothing to
+migrate. `tests/schedule.js` plants an old-shape record and reads the
+board off it.
+
+**The strip is the blocks, and the two figures above are the five.**
+The question you open somebody's profile with is whether they are
+doing the thing, and the thing is the blocks. The count rides the
+heading rather than taking a third figure — three at 26px do not go
+across a phone, and this one is about the picture under it.
+
+**And a day showing up is a day you did ANYTHING.** `scRunOf` counted
+ticks alone, which was all there was; a day you kept every block and
+touched none of the five was a day off.
+
 **The friend's week became a MONTH, and the mark changed with it.**
 The record already holds thirty days and both figures above the strip
 are about thirty, so seven of them was hiding three quarters of what

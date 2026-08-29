@@ -563,6 +563,13 @@ body {
    It was seven bars of different heights — a chart of seven numbers
    between 0 and 5, which is more apparatus than the numbers deserve.
    A row of discs is read at a glance and measured by nobody. */
+/* The heading carries the figure, so the strip's number sits on the
+   words that name it rather than taking a column of its own. */
+.sheet .fp-kh { display: flex; align-items: baseline; gap: 10px; }
+.sheet .fp-kh .fp-k { margin-bottom: 0; }
+.sheet .fp-kh em { margin-left: auto; font-style: normal; font-size: 15px;
+  font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+
 .fp-week { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
 /* Thirty cells across a phone is nine pixels each, so the gap has to
    come down with the count or the discs vanish into it. */
