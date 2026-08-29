@@ -1018,12 +1018,18 @@ body {
 /* The lift is on both faces; the GROUND is only on the front, because
    the back paints its own and a background written twice leaves the
    first one dead. tests/names.js is what said so. */
+/* The LIFT is on both faces; the ground and the border are the front's
+   alone, because the back paints its own ground and wears the foil
+   instead of a border. A property written twice leaves the first one
+   dead, and tests/names.js is what says so. */
 .day.is-open .wk-front,
 .day.is-open .wk-back {
-  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
   box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
 }
-.day.is-open .wk-front { background: var(--paper); }
+.day.is-open .wk-front {
+  background: var(--paper);
+  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
+}
 .day:not(.is-open) { width: var(--wk-shut); opacity: .82; }
 
 /* ── the back is the rare one ──
@@ -1051,6 +1057,84 @@ body {
       transparent 42%,
       color-mix(in srgb, var(--ink) 7%, transparent) 100%),
     var(--paper);
+}
+
+/* ── the foil edge, and it LOOPS ──
+   The card's rim catches a light that keeps going round it. A card
+   that is worth keeping is a card that does something when you are not
+   doing anything, and this is the only thing on the screen that moves
+   on its own.
+
+   TWO BOXES. The outer one is the ring: a border-width mask with the
+   middle excluded, so only a 1.7px band of whatever is inside it ever
+   shows. The inner one is a conic gradient turning at its own centre.
+   Masks apply to an element AND its content, which is what makes this
+   work with no clipping of its own — and it is why the turning box
+   cannot be the masked one, since rotating the ring would swing a
+   rounded rectangle round on its corner.
+
+   The inner box is SQUARE and sized off the card's height, which is the
+   larger dimension: a 200%-by-200% box is not square, and at 45° a
+   non-square leaves the corners of the ring unlit for a sixth of every
+   turn — a gap that crosses the corner and reads as a fault rather
+   than as a highlight.
+
+   Mixed from the palette. Two lights rather than one, a half-turn
+   apart, so the rim is never entirely dark and the loop has no moment
+   that looks like it stopped. */
+/* The card's own border gets out of the way where the foil runs, or
+   the rim is two rings a pixel apart. */
+.day.is-open .wk-back { border-color: transparent; }
+
+.ob-foil {
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  padding: 1.7px;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.ob-foil > i {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  height: 210%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--red) 92%, transparent) 26deg,
+    color-mix(in srgb, var(--paper) 70%, transparent) 40deg,
+    color-mix(in srgb, var(--ink) 55%, transparent) 62deg,
+    transparent 104deg,
+    transparent 180deg,
+    color-mix(in srgb, var(--red) 92%, transparent) 206deg,
+    color-mix(in srgb, var(--paper) 70%, transparent) 220deg,
+    color-mix(in srgb, var(--ink) 55%, transparent) 242deg,
+    transparent 284deg,
+    transparent 360deg);
+  animation: obFoil 6s linear infinite;
+  /* ── PAUSED UNLESS THE FACE IS TOWARDS YOU ──
+     Both faces are in the document at all times, so without this the
+     rim turns for all seven days of the week behind a schedule nobody
+     can see through — seven rotating conic gradients, each in its own
+     masked layer, costing a compositor pass a frame to draw nothing. */
+  animation-play-state: paused;
+}
+.day.is-flipped .ob-foil > i { animation-play-state: running; }
+@keyframes obFoil {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+/* Still, not gone. The rim is the thing that was asked for; what the
+   setting turns off is the travelling, so it holds at the phase where
+   both lights are on the long edges. */
+@media (prefers-reduced-motion: reduce) {
+  .ob-foil > i { animation: none; transform: translate(-50%, -50%) rotate(28deg); }
 }
 
 /* The back's own title. Sized like the front's so the two faces are

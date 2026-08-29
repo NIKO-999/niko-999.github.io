@@ -1449,6 +1449,17 @@
     var day = scDay(scDateOfDow(d));
     var back = scEl('div', 'wk-back');
 
+    /* ── the foil edge ──
+       A light that travels round the rim. It is a real element rather
+       than a pseudo because it needs a CHILD: the ring is a mask on the
+       outer box, and the thing that turns has to be masked BY it —
+       rotating the mask itself would swing a rectangular ring round on
+       its corner. Two boxes, one turning inside the other's shape. */
+    var foil = scEl('i', 'ob-foil');
+    foil.setAttribute('aria-hidden', 'true');
+    foil.appendChild(scEl('i'));
+    back.appendChild(foil);
+
     var head = scEl('div', 'wk-h');
     /* NOT `.day-name`. The front already owns that class, and a second
        one per card made every query for the week's day names return two

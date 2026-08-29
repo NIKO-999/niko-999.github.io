@@ -581,10 +581,23 @@ const SAID = [
      about, so it is measured rather than trusted. */
   const bleed = await page.$$eval('.day:not(.is-open)', (d) => d.map((x) => {
     const c = x.getBoundingClientRect();
-    return [...x.querySelectorAll('*')].some((k) => {
-      const r = k.getBoundingClientRect();
-      return r.width && r.right > c.right + 0.5;
-    });
+    /* Walked rather than queried, and it STOPS at anything that clips.
+       getBoundingClientRect reports an element's own box whether or not
+       an ancestor is hiding most of it — the foil's turning square is
+       578px inside a 76px card and draws none of it, so a flat
+       querySelectorAll('*') reported six cards bleeding when nothing
+       was. What is drawn is the question; a clipping box is where the
+       drawing stops. */
+    const over = (el) => {
+      for (const k of el.children) {
+        const r = k.getBoundingClientRect();
+        if (r.width && r.right > c.right + 0.5) return true;
+        const o = getComputedStyle(k).overflowX;
+        if (o !== 'hidden' && o !== 'clip' && over(k)) return true;
+      }
+      return false;
+    };
+    return over(x);
   }));
   ok('and nothing inside a shut card draws outside it', bleed.every((b) => !b), bleed);
   ok('seven dots, with today lit',
@@ -1106,6 +1119,57 @@ const SAID = [
     return Math.round(((Math.max(lo, hi) + 0.05) / (Math.min(lo, hi) + 0.05)) * 100) / 100;
   })();
   ok('an objective on the rare card still clears 4.5:1', obInk >= 4.5, obInk);
+
+  /* ── the foil edge ──
+     A light that keeps going round the rim. The ring is a mask on the
+     outer box and the thing that turns is masked BY it — rotating the
+     ring itself would swing a rounded rectangle round on its corner. */
+  const foil = await page.evaluate(() => {
+    const f = document.querySelector('.day.is-open .ob-foil');
+    const i = f && f.firstElementChild;
+    if (!i) return null;
+    const fs = getComputedStyle(f), is = getComputedStyle(i);
+    return { mask: (fs.maskComposite || fs.webkitMaskComposite || ''),
+      pad: fs.paddingTop, dur: parseFloat(is.animationDuration),
+      count: is.animationIterationCount, play: is.animationPlayState,
+      bg: is.backgroundImage.slice(0, 40),
+      w: Math.round(i.getBoundingClientRect().width),
+      h: Math.round(i.getBoundingClientRect().height) };
+  });
+  ok('the rim is a masked ring with something turning inside it',
+    foil && /exclude|xor/.test(foil.mask) && parseFloat(foil.pad) > 0
+    && /conic/.test(foil.bg), foil);
+  ok('...and it LOOPS rather than running once',
+    foil.dur > 0 && foil.count === 'infinite', foil);
+  /* SQUARE, and sized off the card's height. A 200%-by-200% box is not
+     square, and at 45 degrees a non-square leaves the ring's corners
+     unlit for part of every turn — a gap crossing a corner reads as a
+     fault rather than as a highlight. */
+  ok('...turning a square, so no corner of the rim ever goes unlit',
+    Math.abs(foil.w - foil.h) <= 2, foil);
+
+  /* ── PAUSED unless the face is towards you ──
+     Both faces of all seven cards are in the document at all times.
+     Left running, that is seven rotating conic gradients, each in its
+     own masked layer, costing a compositor pass a frame to draw
+     something nobody can see. */
+  ok('it runs on the card you are looking at', foil.play === 'running', foil.play);
+  const asleep = await page.$$eval('.day:not(.is-flipped) .ob-foil > i',
+    (n) => n.map((x) => getComputedStyle(x).animationPlayState));
+  ok('...and is paused on every face that is turned away',
+    asleep.length === 6 && asleep.every((p) => p === 'paused'), asleep);
+
+  /* Still, not gone: the rim is the thing that was asked for, and what
+     the setting turns off is the travelling. */
+  await page.emulateMedia({ reducedMotion: 'reduce' });
+  await page.waitForTimeout(140);
+  const foilStill = await page.$eval('.day.is-open .ob-foil > i', (i) => ({
+    name: getComputedStyle(i).animationName,
+    bg: /conic/.test(getComputedStyle(i).backgroundImage) }));
+  ok('asked to sit still it stops travelling, and the rim stays',
+    foilStill.name === 'none' && foilStill.bg, foilStill);
+  await page.emulateMedia({ reducedMotion: null });
+  await page.waitForTimeout(140);
 
   /* ── turning back ── */
   await page.click('.day.is-open .wk-back .wk-turn');

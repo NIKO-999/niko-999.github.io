@@ -544,6 +544,34 @@ would be somebody else's card on twelve of them. The alphas stay low
 enough that it is a sheen and not a ground the words have to fight, and
 `tests/schedule.js` measures a line of it on composited pixels.
 
+**The rim is a foil edge, and it LOOPS.** A light that keeps going
+round the card — the only thing on this screen that moves while you are
+not doing anything, which is what makes the card read as something you
+would keep rather than a panel. **Two boxes**: the outer one is the
+ring, a border-width mask with the middle excluded, and the inner one
+is a conic gradient turning at its own centre. A mask applies to an
+element AND its content, which is what confines the turn to the band —
+and it is why the turning box cannot be the masked one, since rotating
+the ring swings a rounded rectangle round on its corner.
+
+**The turning box is SQUARE, sized off the card's height.** A
+200%-by-200% box is not square, and at 45° a non-square leaves the
+ring's corners unlit for part of every turn: a gap crossing a corner
+reads as a fault rather than as a highlight.
+
+**And it is PAUSED unless the face is towards you.** Both faces of all
+seven cards are in the document at all times, so left running that is
+seven rotating conic gradients, each in its own masked layer, costing a
+compositor pass a frame to draw something nobody can see. Reduced
+motion stops the travelling and keeps the rim — the rim is the thing
+that was asked for.
+
+**`getBoundingClientRect` reports a box whether or not an ancestor is
+hiding it.** The shut-card overflow check walks children now and STOPS
+at anything that clips: the foil's turning square is 578px inside a
+76px card and draws none of it, and a flat `querySelectorAll('*')`
+reported six cards bleeding when nothing was.
+
 **Two faces, one of them turned away** — `backface-visibility: hidden`
 is what makes it a card with a back rather than two panels that swap,
 and without it the schedule reads through the objectives mirror-imaged.
