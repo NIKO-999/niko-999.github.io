@@ -946,7 +946,20 @@
          that turns the card in a different place on each face: you
          pressed one spot to go and another to come back. Same corner
          both ways, and the turn is one place rather than two. */
-      if (isOpen) {
+      /* ── ON EVERY CARD, and it was on ONE ──
+         It was built `if (isOpen)`, and the deck opens a card by
+         toggling a class rather than by re-rendering — so the control
+         existed only on whichever day happened to be open when the
+         rail was last built. Press any other day and there was no way
+         to reach its objectives at all, which is not a card you can
+         turn over, it is a card whose back you can only see on the day
+         the page loaded.
+
+         Built for all seven and put away by CSS on the shut ones, the
+         same way `.wk-face` is put away on the open one: a swipe moves
+         a class and the browser does the rest, which is the deck's
+         whole design. */
+      {
         var turn = scEl('button', 'wk-turn');
         turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
         turn.innerHTML = OBJ_MARK;

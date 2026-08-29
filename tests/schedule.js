@@ -1115,8 +1115,52 @@ const SAID = [
   ok('...and both faces are built, one of them turned away',
     await page.$$eval('.day.is-open .wk-front, .day.is-open .wk-back',
       (f) => f.length) === 2);
-  ok('...with the turn control only on the open card',
-    await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 1);
+  /* ── ON EVERY CARD, and DRAWN on the open one ──
+     It was built `if (isOpen)` and the deck opens a card by toggling a
+     class, so the control existed only on whichever day was open when
+     the rail was last built: press any other day and its objectives
+     were unreachable. Both halves are measured, because each passes on
+     the other's bug — "seven exist" passes on seven drawn at once, and
+     "one is drawn" passed for the whole life of the fault. */
+  const turns = await page.evaluate(() => {
+    const all = [...document.querySelectorAll('.wk-front .wk-turn')];
+    return { built: all.length,
+             drawn: all.filter((t) => t.getClientRects().length > 0).length,
+             mine: all.filter((t) => t.closest('.day').classList.contains('is-open'))
+               .every((t) => t.getClientRects().length > 0) };
+  });
+  ok('every day carries the turn control, and only the open one draws it',
+    turns.built === 7 && turns.drawn === 1 && turns.mine, turns);
+
+  /* Now that all seven exist, the pause rule has something to say: six
+     conic gradients turning behind 76px cards would be a compositor
+     pass a frame to draw what nobody can see. */
+  ok('...and the six put away are not turning anything',
+    await page.$$eval('.day:not(.is-open) .wk-front .tn-foil > i',
+      (i) => i.length === 6
+        && i.every((x) => getComputedStyle(x).animationPlayState === 'paused')));
+
+  /* Reachable on a day that is not today, which is the whole point of
+     the change: open another card and its control has to be the one
+     that is drawn, named for ITS day. */
+  /* Pressed by hand rather than through goTo, which is declared four
+     hundred lines below this — a helper hoisted into a block it is
+     defined after is a ReferenceError, not a convenience. */
+  const openDow = async (dow) => {
+    await page.evaluate((d) => {
+      const li = [...document.querySelectorAll('#scRail .day')]
+        .find((x) => +x.dataset.d === d);
+      if (li && li.querySelector('.wk-face')) li.querySelector('.wk-face').click();
+    }, dow);
+    await page.waitForTimeout(420);
+  };
+  await openDow(4);
+  ok('...and opening another day brings that day’s control with it',
+    await page.$$eval('.wk-front .wk-turn', (all) => {
+      const on = all.filter((t) => t.getClientRects().length > 0);
+      return on.length === 1 && /Thursday/.test(on[0].getAttribute('aria-label'));
+    }));
+  await openDow(2);
 
   /* ── the pill wears what it opens ──
      Six affordances were rendered over the real card and what settled
@@ -1154,6 +1198,18 @@ const SAID = [
   });
   ok('the pill carries the objectives face’s sheen and its rim',
     pill.sheen >= 3 && pill.xor && pill.square, pill);
+
+  /* ── and the BACK's control is not a second one ──
+     The pill went on `.wk-turn` and reached both faces, so the way
+     back to the schedule came up wearing a sheen chip on a sheen card
+     — the same treatment twice, thirty pixels apart, on a face that
+     already carries the card's own rim. Measured as the ground it
+     actually paints, never as a class. */
+  ok('...and the way back is a plain glyph, not a second pill',
+    await page.$eval('.day.is-open .wk-back .wk-turn', (t) => {
+      const cs = getComputedStyle(t);
+      return !/gradient/.test(cs.backgroundImage) && !t.querySelector('.tn-foil');
+    }));
   ok('...the rim turns, and only on the face you can see',
     pill.turning && !pill.onBack, pill);
 
@@ -1203,6 +1259,26 @@ const SAID = [
     await page.$$eval('.day.is-open .wk-front .tn-foil > i',
       (i) => i.length === 1
         && getComputedStyle(i[0]).animationPlayState === 'paused'));
+
+  /* ── and the pill is not DRAWN behind the back either ──
+     backface-visibility held for everything on the front except this:
+     the foil's turning square is an animated transform, so it is
+     promoted to its own compositor layer, and a composited descendant
+     of a backface-hidden ancestor is not reliably culled with it. On
+     iOS the pill drew through the back MIRRORED — the back is a
+     180-degree rotation, so a control 11px from the front's right edge
+     landed on top of the day name on the left, and it reported as
+     "the objective icon inside the title".
+
+     Chromium does not reproduce it, so this asserts the property that
+     makes it impossible rather than the symptom: a face turned away
+     has no control to press, so nothing is drawn whichever way the
+     engine would have culled it. A source check for the declaration
+     would pass on a stylesheet where it had no effect. */
+  ok('...and nothing of the front’s control is drawn behind the back',
+    await page.$eval('.day.is-open .wk-front .wk-turn',
+      (t) => getComputedStyle(t).visibility === 'hidden'
+        && t.getClientRects().length > 0));
   /* MEASURED, not the class. backface-visibility is what makes this a
      card with a back rather than two panels that swap, and without it
      the schedule reads through the objectives mirror-imaged. */

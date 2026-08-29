@@ -1057,17 +1057,58 @@ body {
    The ground is mixed from the palette exactly as the back's is —
    thirteen themes move --red and --ink together, and a gradient in
    hex would be somebody else's card on twelve of them. */
+/* Put away on a shut card rather than not built: at 76px there is no
+   room for it beside the day's abbreviation, and the press target over
+   a shut card is the card itself. Same pattern as `.wk-face`, which is
+   display:none on the OPEN one. */
+.day:not(.is-open) .wk-front .wk-turn { display: none; }
+/* ── AND IT GOES AWAY WHEN THE CARD IS TURNED ──
+   `backface-visibility: hidden` on the two faces is what stops the
+   schedule reading through the objectives, and it held for everything
+   on the front EXCEPT this: the foil's turning square is an animated
+   transform, so it is promoted to its own compositor layer, and a
+   composited descendant of a backface-hidden ancestor is not reliably
+   culled with it. On iOS the pill drew straight through the back —
+   MIRRORED, because the back is a 180-degree rotation, so a control
+   11px from the front's right edge lands on top of the day name on
+   the left. It reported as "the objective icon inside the title".
+
+   Chromium does not reproduce it, which is the whole reason this is a
+   rule about the ELEMENT rather than a fix aimed at the bug: a face
+   turned away has no control to press, so there is nothing to draw
+   whether or not the engine would have culled it. */
+.day.is-flipped .wk-front .wk-turn { visibility: hidden; }
+/* ONE BOX, TWO SKINS. The two faces' controls have to land on the same
+   pixel — you press one place to turn the card and the same place to
+   come back — so the box is shared and only the surface differs. It
+   was two boxes with two sets of margins and they came out 1px apart
+   across and 3px down, which the corner check caught. */
 .wk-turn {
   flex: none;
-  position: relative;
   width: auto; height: 26px;
   margin: -2px -3px -2px 0;
   padding: 0 9px;
   border: 0;
-  border-radius: 13px;
+  background: none;
   cursor: pointer;
   display: grid;
   place-items: center;
+}
+.wk-turn svg {
+  width: 15px; height: 15px;
+  fill: none; stroke: var(--dim); stroke-width: 1.9;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+
+/* ── THE PILL IS THE FRONT'S ALONE ──
+   It went on `.wk-turn` and reached both faces, so the way BACK to the
+   schedule came up wearing a sheen chip on a sheen card: the same
+   treatment twice, thirty pixels apart, on a face that already carries
+   the card's own rim. The pill's whole job is to advertise the back
+   from the front — on the back there is nothing left to advertise. */
+.wk-front .wk-turn {
+  position: relative;
+  border-radius: 13px;
   background:
     radial-gradient(128% 82% at 12% -8%,
       color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
@@ -1079,12 +1120,7 @@ body {
       color-mix(in srgb, var(--ink) 7%, transparent) 100%),
     var(--paper);
 }
-.wk-turn svg {
-  position: relative; z-index: 1;
-  width: 15px; height: 15px;
-  fill: none; stroke: var(--dim); stroke-width: 1.9;
-  stroke-linecap: round; stroke-linejoin: round;
-}
+.wk-front .wk-turn svg { position: relative; z-index: 1; }
 .wk-turn:active svg { stroke: var(--red); }
 .wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
 

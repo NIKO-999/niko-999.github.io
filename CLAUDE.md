@@ -675,6 +675,33 @@ the objectives face's own two marks instead: the sheen, mixed from the
 palette exactly as the back's is, and a rim that travels. The thing
 you press looks like the thing it turns to.
 
+**IT IS ON ALL SEVEN CARDS, and it was on one.** It was built `if
+(isOpen)`, and the deck opens a card by moving a class rather than by
+re-rendering — so the control existed only on whichever day happened
+to be open when the rail was last built. Press any other day and there
+was no way to reach its objectives at all; worse, the one that did
+exist stayed drawn on that card once it shut, clipped at the edge of a
+76px bar. Built for all seven now and put away by CSS on the shut
+ones, the same way `.wk-face` is put away on the open one.
+
+**AND IT IS HIDDEN WHILE THE CARD IS TURNED.** `backface-visibility`
+held for everything on the front except this: the foil's turning
+square is an animated transform, so it is promoted to its own
+compositor layer, and a composited descendant of a backface-hidden
+ancestor is not reliably culled with it. On iOS the pill drew straight
+through the back — MIRRORED, because the back is a 180-degree
+rotation, so a control 11px from the front's right edge landed on top
+of the day name on the left. It reported as "the objective icon inside
+the title", and Chromium does not reproduce it. The rule is therefore
+about the ELEMENT rather than aimed at the bug: a face turned away has
+no control to press, so there is nothing to draw whichever way an
+engine would have culled it.
+
+**One box, two skins.** The two faces' controls have to land on the
+same pixel, so the box is shared and only the surface differs. Written
+as two boxes with two sets of margins they came out 1px apart across
+and 3px down — which is what the same-corner check is for.
+
 **The turning square is sized off the pill's HEIGHT**, which is its
 smaller dimension, at 340% — enough to clear the diagonal of a box
 three times as wide as it is tall. A non-square leaves the ends unlit
