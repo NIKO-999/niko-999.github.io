@@ -951,8 +951,15 @@ body {
 .rail::before,
 .rail::after {
   content: '';
-  flex: 0 0 max(var(--pad),
-                calc((100% - var(--wk-open)) / 2 - var(--wk-gap)));
+  /* LONGHAND, deliberately. A math function inside a SHORTHAND is a
+     known weak spot in Safari's parser, and a shorthand that fails to
+     parse takes the whole declaration with it — which here means no
+     spacer at all, silently, and the deck back to the bug this rule is
+     for. Three longhands cannot fail as a group. */
+  flex-grow: 0;
+  flex-shrink: 0;
+  flex-basis: max(var(--pad),
+                  calc((100% - var(--wk-open)) / 2 - var(--wk-gap)));
 }
 
 .day {

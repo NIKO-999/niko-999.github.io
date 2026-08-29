@@ -4437,6 +4437,57 @@
   scRender();
   scSetView(view, false);
 
+  /* ── a probe, and it is meant to be deleted ──
+     The deck's open card sits centred here and off-centre on the phone,
+     through two fixes that were reasoned about rather than measured.
+     This repo has been here before: if a phone reports something the
+     suite says is fine, the suite is measuring the wrong machine.
+
+     Reached at #deck and nothing else turns it on, so it costs an
+     ordinary visit a single string comparison. It prints the real
+     numbers off the real deck on the real device — the spacers'
+     computed basis above all, because if Safari dropped that
+     declaration the lead-in is simply not there and every number below
+     follows from that one fact. */
+  if (/deck/.test(location.hash)) {
+    setTimeout(function () {
+      var rail = $('scRail');
+      var cs = getComputedStyle(rail);
+      var be = getComputedStyle(rail, '::before');
+      var af = getComputedStyle(rail, '::after');
+      var rb = rail.getBoundingClientRect();
+      var L = [
+        'screen   ' + window.innerWidth + ' x ' + window.innerHeight
+          + '  dpr ' + window.devicePixelRatio,
+        'ua       ' + navigator.userAgent.slice(0, 52),
+        '',
+        'rail     client ' + rail.clientWidth + '  scroll ' + rail.scrollWidth
+          + '  left ' + Math.round(rail.scrollLeft)
+          + '  max ' + (rail.scrollWidth - rail.clientWidth),
+        'padding  ' + cs.paddingLeft + ' / ' + cs.paddingRight
+          + '   gap ' + cs.gap,
+        'before   w ' + be.width + '  basis ' + be.flexBasis,
+        'after    w ' + af.width + '  basis ' + af.flexBasis,
+        'tokens   open ' + cs.getPropertyValue('--wk-open').trim()
+          + '  gap ' + cs.getPropertyValue('--wk-gap').trim(),
+        ''
+      ];
+      [].forEach.call(rail.children, function (li) {
+        var r = li.getBoundingClientRect();
+        L.push('  ' + (li.querySelector('.day-name') || {}).textContent
+          + '  w ' + Math.round(r.width)
+          + '  off ' + Math.round((r.left + r.width / 2) - (rb.left + rb.width / 2))
+          + (li.classList.contains('is-open') ? '   <= OPEN' : ''));
+      });
+      var pre = document.createElement('pre');
+      pre.textContent = L.join('\n');
+      pre.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;margin:0;'
+        + 'padding:8px;background:#fff;color:#111;font:400 10px/1.35 ui-monospace,'
+        + 'monospace;white-space:pre-wrap;border-bottom:2px solid red';
+      document.body.appendChild(pre);
+    }, 700);
+  }
+
   /* The deck is sized against the bar, so anything that moves the bar or
      the hero has to re-measure. A rotation is the obvious one; the
      address bar collapsing on scroll is the one that actually happens
