@@ -400,34 +400,39 @@ looking exactly right — and it is `display: none` on the open card,
 where a transparent button over the rows would swallow every press
 meant for a block.
 
-**The lead-in came back, for LOOKS rather than for reach.** A scroller
-stops at 0, so without room either side the first card cannot be
-centred however far you scroll — Monday and Sunday opened against the
-screen edge while every other day sat in the middle, 43px out, measured.
-Nothing depends on it being right any more, since a press opens a card,
-so it is arithmetic in CSS rather than a number measured in JS.
+**IT IS A WINDOW AND A TRACK, NOT A SCROLLER — and that was four
+fixes too late.** Centring a card inside a horizontal scroller took
+four attempts, each of which worked on this machine and not on the
+phone. `scrollLeft` stops at 0, so the first card could never reach the
+middle. Padding either side fixed that here — and Safari does not count
+a scroll container's TRAILING padding in its scrollable width, so the
+end of the week sat off-centre and clipped. Flex spacers fixed that,
+and then the gap between a spacer and the first card was lead-in as
+well. Written as `flex: 0 0 max(...)`, a math function in a SHORTHAND,
+Safari's parser could drop the whole declaration and leave no spacer at
+all.
 
-**AND IT CANNOT BE PADDING.** Safari does not count a scroll
-container's TRAILING padding in its scrollable width. The deck could
-then not scroll far enough, and every day near the end of the week sat
-right of centre and ran off the screen — reported from the phone on a
-Friday, while this machine's Chromium centred all seven at 0px and said
-it was fine. It is a `::before` / `::after` flex SPACER now: a flex
-item's size is in `scrollWidth` in every engine, and the percentage
-resolves against the rail's own content box rather than the poster's,
-so no bleed has to be added back either.
+A transform has none of it. The track is laid out once, a window clips
+it, and the open card is centred by moving the track a number of pixels
+— the same number in every engine. Nothing clamps and nothing is
+silently dropped. The scroller, the snap, the end clamp, the padding
+and the spacers all went.
 
-**A spacer is an item, so the GAP counts as lead-in too.** Left in, it
-put the first card 10px past the middle — and only the first and last
-can ever show it, because everywhere else the scroll absorbs it. The
-gap is a token for that reason, as is the open card's width: two rules
-need each, and written twice they drift. The symptom of that drift is
-exactly this bug — a card centred on most days and not on Monday.
+**And the position is WORKED OUT, never read off the page.** The first
+transform read `offsetLeft` and `offsetWidth` the instant the class
+moved — but the card's width is transitioned, so the read describes the
+layout BEFORE it and the deck centred each card where the previous one
+had been. It measured 96px out on every day of the week, with the
+applied transform at -551 where -455 was right: a constant error, which
+is what an off-by-one layout looks like when every card is the same
+size. The shut width, the open width and the gap are all tokens now,
+and the deck's position is arithmetic on the three — index, then shut
+cards and gaps before it, then half an open card. There is nothing left
+to be stale.
 
-**Snap went from mandatory to proximity with it.** Snap was
-load-bearing while the nearest card decided what opened; it is
-decoration now, and mandatory against cards of two different widths
-fights a finger that is only trying to see further along the week.
+The rail is `position: relative` regardless, so a card's `offsetLeft`
+is a coordinate inside the track rather than inside whatever ancestor
+happens to be positioned.
 
 **`[hidden]` HAS TO BE SAID ONCE A VIEW TAKES A `display`.** The app
 puts a view away by setting the `hidden` attribute, which works only

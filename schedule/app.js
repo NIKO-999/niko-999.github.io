@@ -1149,13 +1149,14 @@
        time — silent, and only visible after a few edits. */
     var was = document.querySelector('.wk-dots');
     if (was) was.parentNode.removeChild(was);
-    rail.parentNode.insertBefore(dots, rail.nextSibling);
+    /* After the WINDOW. Inside it they would be clipped along with the
+       track, and they are an indicator of the deck rather than part of
+       it. */
+    var win = $('scDeckWin');
+    win.parentNode.insertBefore(dots, win.nextSibling);
 
     scDeckFit(rail, dots);
-    /* Set directly rather than through scrollIntoView, which scrolls the
-       PAGE as well and drags the hero off the top on its way to
-       centring a card. */
-    scDeckCentre();
+    scDeckJump();
 
     scLive();
   }
@@ -1166,50 +1167,67 @@
      number in a place that cannot see the hero reflow, the notch
      change, or the type scale move — and it would be wrong on the first
      phone that did any of those. */
-  /* Put the open card back in the middle. The rail loses its
-     scrollLeft every time it is hidden, so returning to the week
-     without this lands you at Monday however the deck was left. */
-  function scDeckCentre(smooth) {
-    var rail = $('scRail');
+  /* ── the open card is centred by MOVING THE TRACK ──
+     Not by scrolling. A scroller clamps at 0, so the first card could
+     never reach the middle, and the three fixes for that each behaved
+     differently in Safari — the last of them silently, because a
+     shorthand it could not parse simply vanished. A transform is one
+     number: half the window minus the middle of the card, measured
+     inside the track. It cannot clamp and there is nothing for an
+     engine to leave out.
+
+     `offsetLeft` is safe here where it was not before: the rail is the
+     card's offsetParent, so it is a position INSIDE the track, which is
+     exactly the space the transform moves. */
+  function scDeckCentre() {
+    var win = $('scDeckWin'), rail = $('scRail');
     var mine = rail.querySelector('.day.is-open');
-    if (!mine) return;
-    /* A DELTA in one coordinate system, for the same reason the picker
-       above takes rects: how far the open card's middle is from the
-       rail's, added to where the rail is scrolled now. */
-    var rb = rail.getBoundingClientRect(), r = mine.getBoundingClientRect();
-    var to = rail.scrollLeft + (r.left + r.width / 2) - (rb.left + rb.width / 2);
+    if (!mine || !win.clientWidth) return;
 
-    /* ── smooth only when it is a CORRECTION ──
-       After a swipe the card grows under your thumb and the deck has to
-       shuffle to keep it centred; done instantly that is a second,
-       unasked-for jump on the end of your own gesture. Arriving at the
-       screen is not a correction — the week appearing already
-       mid-animation looks like it was left running while you were
-       somewhere else — so a first paint and a return from another tab
-       both land instantly.
+    /* ── WORKED OUT, not read off the page ──
+       Reading `offsetLeft` and `offsetWidth` here is wrong and it was
+       wrong quietly: the card's width is transitioned from 76px to
+       268px, so a read taken the instant the class moves still
+       describes the layout BEFORE it, and the deck centred each card
+       where the previous one had been. Measured at 96px out on every
+       day of the week, with the applied transform -551 where -455 was
+       right — a constant error, which is what an off-by-one layout
+       looks like when every card is the same size.
 
-       A smooth scroll emits events until it finishes, and the picker
-       waits 120ms after the LAST one, so it runs once on arrival, finds
-       the card it just centred and returns at the equality check rather
-       than chasing itself. */
-    var still = window.matchMedia
-      && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (smooth && !still && rail.scrollTo) {
-      rail.scrollTo({ left: to, behavior: 'smooth' });
-    } else {
-      rail.scrollLeft = to;
-    }
+       The three widths are tokens, so this is arithmetic on numbers the
+       stylesheet owns: index of the open card, shut cards and gaps
+       before it, then half an open card. Nothing to be stale. */
+    var cs = getComputedStyle(rail);
+    var shut = parseFloat(cs.getPropertyValue('--wk-shut'));
+    var open = parseFloat(cs.getPropertyValue('--wk-open'));
+    var gap = parseFloat(cs.getPropertyValue('--wk-gap'));
+    if (!(shut > 0 && open > 0)) return;
+    var i = [].indexOf.call(rail.children, mine);
+    var x = win.clientWidth / 2 - (i * (shut + gap) + open / 2);
+    rail.style.transform = 'translateX(' + Math.round(x) + 'px)';
+  }
+
+  /* Arriving at the screen is instant — a week that appears already
+     mid-animation looks like it was left running while you were
+     somewhere else. Only a press animates. */
+  function scDeckJump() {
+    var rail = $('scRail');
+    rail.style.transition = 'none';
+    scDeckCentre();
+    /* Read back to force the style to land before the transition is
+       restored, or the browser coalesces both and animates anyway. */
+    void rail.offsetWidth;
+    rail.style.transition = '';
   }
 
   /* Open a day and bring it to the middle. The classes move first and
      the centring runs after, because opening takes a card from 76px to
-     268px and the deck reflows around it — centred before that, it is
-     no longer centred a frame later. */
+     268px and the track's own layout changes with it. */
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
     scDeckOpen();
-    scDeckCentre(true);
+    scDeckCentre();
   }
 
   function scDeckOpen() {
@@ -1241,8 +1259,9 @@
   }
 
   function scDeckFit(rail, dots) {
+    var win = $('scDeckWin');
     var bar = document.querySelector('.bar');
-    var top = rail.getBoundingClientRect().top;
+    var top = win.getBoundingClientRect().top;
     var floor = bar ? bar.getBoundingClientRect().top : window.innerHeight;
     /* The dots' own margin is not in its height, and the bar's glass
        pill reaches above the box `getBoundingClientRect` reports for it
@@ -1255,7 +1274,10 @@
       give = dots.getBoundingClientRect().height
         + parseFloat(ds.marginTop || 0) + parseFloat(ds.marginBottom || 0) + 18;
     }
-    rail.style.height = Math.max(260, floor - top - give) + 'px';
+    /* On the WINDOW, because that is the box with a fixed size; the
+       track inside it is as tall as the window and as wide as it needs
+       to be. */
+    win.style.height = Math.max(260, floor - top - give) + 'px';
   }
 
   /* ── morning, afternoon, evening ──
@@ -3511,6 +3533,7 @@
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
     $('scRail').hidden = ring || tal || fr;
+    $('scDeckWin').hidden = ring || tal || fr;
     /* The dots are a SIBLING of the rail, not a child — the rail is the
        scroller, and a page indicator that scrolls sideways with the
        cards it indicates is not an indicator. So it has to be hidden
@@ -3518,12 +3541,12 @@
        under a week that was not on screen. */
     var wkd = document.querySelector('.wk-dots');
     if (wkd) wkd.hidden = ring || tal || fr;
-    /* Coming back to the week: re-measure, because the rail's own rect
-       was zero for as long as it was hidden, and re-centre, because its
-       scrollLeft went with it. */
+    /* Coming back to the week: re-measure, because the window's own
+       rect was zero for as long as it was hidden, and re-centre, because its
+       transform went with it. */
     if (!(ring || tal || fr)) {
       scDeckFit($('scRail'), wkd);
-      scDeckCentre();
+      scDeckJump();
     }
     /* The ring's own middle says the state and the figure, and the
        tally has a hero of its own. Leaving the week's above either says
@@ -4436,67 +4459,6 @@
 
   scRender();
   scSetView(view, false);
-
-  /* ── a probe, and it is meant to be deleted ──
-     The deck's open card sits centred here and off-centre on the phone,
-     through two fixes that were reasoned about rather than measured.
-     This repo has been here before: if a phone reports something the
-     suite says is fine, the suite is measuring the wrong machine.
-
-     Reached at #deck and nothing else turns it on, so it costs an
-     ordinary visit a single string comparison. It prints the real
-     numbers off the real deck on the real device — the spacers'
-     computed basis above all, because if Safari dropped that
-     declaration the lead-in is simply not there and every number below
-     follows from that one fact. */
-  if (/deck/.test(location.hash)) {
-    setTimeout(function () {
-      var rail = $('scRail');
-      var cs = getComputedStyle(rail);
-      var be = getComputedStyle(rail, '::before');
-      var af = getComputedStyle(rail, '::after');
-      var rb = rail.getBoundingClientRect();
-      var L = [
-        'screen   ' + window.innerWidth + ' x ' + window.innerHeight
-          + '  dpr ' + window.devicePixelRatio,
-        'ua       ' + navigator.userAgent.slice(0, 52),
-        '',
-        'rail     client ' + rail.clientWidth + '  scroll ' + rail.scrollWidth
-          + '  left ' + Math.round(rail.scrollLeft)
-          + '  max ' + (rail.scrollWidth - rail.clientWidth),
-        'padding  ' + cs.paddingLeft + ' / ' + cs.paddingRight
-          + '   gap ' + cs.gap,
-        'before   w ' + be.width + '  basis ' + be.flexBasis,
-        'after    w ' + af.width + '  basis ' + af.flexBasis,
-        'tokens   open ' + cs.getPropertyValue('--wk-open').trim()
-          + '  gap ' + cs.getPropertyValue('--wk-gap').trim(),
-        ''
-      ];
-      [].forEach.call(rail.children, function (li) {
-        var r = li.getBoundingClientRect();
-        L.push('  ' + (li.querySelector('.day-name') || {}).textContent
-          + '  w ' + Math.round(r.width)
-          + '  off ' + Math.round((r.left + r.width / 2) - (rb.left + rb.width / 2))
-          + (li.classList.contains('is-open') ? '   <= OPEN' : ''));
-      });
-      var pre = document.createElement('pre');
-      pre.textContent = L.join('\n');
-      pre.style.cssText = 'position:fixed;left:0;right:0;top:0;z-index:99;margin:0;'
-        + 'padding:8px;background:#fff;color:#111;font:400 10px/1.35 ui-monospace,'
-        + 'monospace;white-space:pre-wrap;border-bottom:2px solid red';
-      document.body.appendChild(pre);
-    }, 700);
-  }
-
-  /* The deck is sized against the bar, so anything that moves the bar or
-     the hero has to re-measure. A rotation is the obvious one; the
-     address bar collapsing on scroll is the one that actually happens
-     every time somebody uses the app. */
-  window.addEventListener('resize', function () {
-    if (view !== 'list') return;
-    scDeckFit($('scRail'), document.querySelector('.wk-dots'));
-    scDeckCentre();
-  });
 
   [].forEach.call(document.querySelectorAll('.tab[data-view]'), function (t) {
     t.addEventListener('click', function () { scSetView(t.dataset.view, true); });

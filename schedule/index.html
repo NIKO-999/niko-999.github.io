@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=ae03e1a2" />
+<link rel="stylesheet" href="app.css?v=65678c84" />
 </head>
 <body>
 
@@ -139,7 +139,18 @@
     <div class="fr-feed" id="scFeed" hidden></div>
   </section>
 
-  <ol class="rail" id="scRail"></ol>
+  <!-- ── the week ──
+       A WINDOW with a track inside it, not a scroller. The deck was a
+       horizontal scroller and every attempt to centre a card in it
+       fought `scrollLeft`: it stops at 0, so the first card could not
+       reach the middle; padding fixed that here and not on Safari,
+       which leaves a scroll container's trailing padding out of its
+       scrollable width; spacers fixed that and left the gap to account
+       for. A transform has none of those — it is a number, the same
+       number in every engine, and any card can be put dead centre. -->
+  <div class="wk-win" id="scDeckWin">
+    <ol class="rail" id="scRail"></ol>
+  </div>
 
   <p class="empty" id="scEmpty" hidden>
     Nothing here yet. Press the microphone and say something like
@@ -200,6 +211,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=0bb73b00"></script>
+<script src="app.js?v=60f7a118"></script>
 </body>
 </html>

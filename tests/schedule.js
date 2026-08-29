@@ -1005,7 +1005,7 @@ const SAID = [
       const r = el.getBoundingClientRect();
       return r.width > 1 && r.height > 1;
     };
-    return { rail: box('scRail'), ring: box('scRing'), tally: box('scTally'),
+    return { rail: box('scDeckWin'), ring: box('scRing'), tally: box('scTally'),
              friends: box('scFriends'), dots: box('.wk-dots') };
   });
   for (const [v, want] of [['list', 'rail'], ['ring', 'ring'],
@@ -1088,10 +1088,10 @@ const SAID = [
      whole of it. Measured on composited geometry, because the value
      that matters is where the card actually is. */
   const offCentre = async () => page.evaluate(() => {
-    const rail = document.getElementById('scRail');
-    const o = rail.querySelector('.day.is-open');
-    const rb = rail.getBoundingClientRect(), r = o.getBoundingClientRect();
-    return Math.round(Math.abs((r.left + r.width / 2) - (rb.left + rb.width / 2)));
+    const win = document.getElementById('scDeckWin');
+    const o = win.querySelector('.day.is-open');
+    const wb = win.getBoundingClientRect(), r = o.getBoundingClientRect();
+    return Math.round(Math.abs((r.left + r.width / 2) - (wb.left + wb.width / 2)));
   });
   const strays = [];
   for (const dow of [1, 2, 3, 4, 5, 6, 0]) {
@@ -1164,9 +1164,9 @@ const SAID = [
   ok('...and it is still the open one after leaving the week',
     (await openName()) === 'Friday', await openName());
   const centred = await page.evaluate(() => {
-    const rail = document.getElementById('scRail');
-    const el = rail.querySelector('.day.is-open');
-    const r = el.getBoundingClientRect(), b = rail.getBoundingClientRect();
+    const win = document.getElementById('scDeckWin');
+    const el = win.querySelector('.day.is-open');
+    const r = el.getBoundingClientRect(), b = win.getBoundingClientRect();
     return Math.round(Math.abs((r.left + r.width / 2) - (b.left + b.width / 2)));
   });
   ok('...and back in the middle of the deck rather than off the side',

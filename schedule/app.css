@@ -146,6 +146,11 @@
      the first and last day, because everywhere else the scroll absorbs
      it. */
   --wk-gap: 10px;
+  /* And the shut width, for the same reason: the deck's position is
+     worked out from these three rather than read off the elements,
+     because the card's width is TRANSITIONED and a read taken the
+     instant the class moves still describes the layout before it. */
+  --wk-shut: 76px;
   --meas:  52px;   /* the measure column: 52px is ten hours */
 }
 
@@ -878,94 +883,74 @@ body {
    screen edges. It was a single column of seven stacked day cards, and
    the whole week was then one very long page on which the boundary
    between Sunday night and Monday morning — the least meaningful gap
-   in the list — got exactly the same treatment as the gap between
-   work and sleep. A day is a UNIT, so moving between days is a
-   different gesture from moving within one, and the deck is that
-   said in layout.
+   in the list — got exactly the same treatment as the gap between work
+   and sleep. A day is a UNIT, so moving between days is a different
+   gesture from moving within one.
 
    EVERY CARD CARRIES ITS ROWS. Only the open one draws them; the rest
    collapse to a column of bars. Rendering rows for the open day alone
-   was the first design and it needed a re-render on every swipe — this
-   way a swipe moves one class and the browser does the rest, and the
+   was the first design and it needed a re-render on every press — this
+   way a press moves one class and the browser does the rest, and the
    whole week is in the document for anything that needs to read it. */
-/* ── [hidden] HAS TO BE SAID, and that is the whole bug ──
-   The `hidden` attribute works by a UA rule of `display: none`, and any
-   author `display` beats it. The rail was a plain block for its whole
-   life, so `hidden` did what it looked like it did; the moment it
-   became `display: flex` the attribute stopped meaning anything, and
-   the week stayed on screen underneath the friends board and the tally.
-   Nothing threw and nothing looked broken from the code — the property
-   was being set exactly as before, and had quietly stopped working.
-   Any element in this file that takes a `display` and is ever hidden
-   needs this line. */
-.rail[hidden], .wk-dots[hidden] { display: none; }
+
+/* ── A WINDOW AND A TRACK, NOT A SCROLLER ──
+   This was a horizontal scroller, and centring a card inside one took
+   four fixes that each worked on this machine and not on the phone.
+   `scrollLeft` stops at 0, so the first card could never reach the
+   middle. Padding either side fixed that here — and Safari does not
+   count a scroll container's TRAILING padding in its scrollable width,
+   so the end of the week sat off-centre and clipped. Flex spacers
+   fixed that, and then the gap between a spacer and the first card was
+   lead-in as well.
+
+   A transform has none of it. The track is laid out once, the window
+   clips it, and the open card is centred by moving the track a number
+   of pixels — the same number in every engine. Nothing clamps, nothing
+   is silently dropped, and Monday and Sunday are no more special than
+   Wednesday. */
+.wk-win {
+  overflow: hidden;
+  /* Bled past the poster's padding so the neighbours are cut by the
+     SCREEN. A peek that stops short of the edge reads as a small card
+     rather than a deck that continues — and with the clipping here
+     rather than on a scroller, the bleed costs nothing. */
+  margin: 0 calc(var(--pad) * -1);
+  padding: 2px 0;
+}
+.wk-win[hidden], .wk-dots[hidden] { display: none; }
 
 .rail {
   list-style: none;
+  /* POSITIONED, and the centring depends on it: it makes the rail the
+     cards' offsetParent, so `offsetLeft` is a coordinate INSIDE the
+     track — the same space the transform moves. Unpositioned, the
+     offsetParent is whatever ancestor happens to be positioned and
+     every card carries that element's own offset: measured at a
+     constant 96px out on a screen wide enough to centre the poster,
+     and 0 on a narrow one, which is exactly the kind of error that
+     passes on a phone and fails on a desk. */
+  position: relative;
   display: flex;
   gap: var(--wk-gap);
   align-items: stretch;
-  /* Bled past the poster's padding so the neighbours are cut by the
-     SCREEN. A peek that stops short of the edge reads as a small card
-     rather than as a deck that continues.
-
-     THE SCROLLER IS WHAT CONTAINS THAT BLEED, and it is not a detail:
-     bled without one the page overflows horizontally, and mobile
-     Safari and Chromium both answer by zooming the whole page out.
-     Measured in the lab at 390x844 — innerHeight went 844 to 992 and
-     the card ran off the bottom of the screen while every number said
-     it fitted. */
-  overflow-x: auto;
-  overflow-y: hidden;
-  margin: 0 calc(var(--pad) * -1);
-  padding: 2px 0;
-  /* PROXIMITY, not mandatory. Snap used to be load-bearing — the card
-     nearest the middle after a swipe was the one that opened — and it
-     is decoration now that a press opens a card. Mandatory against
-     cards of two different widths fights a finger that is only trying
-     to see what is further along the week. */
-  scroll-snap-type: x proximity;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
+  height: 100%;
+  /* The track is wider than the window and hangs off both sides, which
+     is what lets the first and last cards sit in the middle like any
+     other. max-content stops it being squeezed to fit. */
+  width: max-content;
+  will-change: transform;
+  transition: transform .28s cubic-bezier(.2, .7, .3, 1);
 }
-.rail::-webkit-scrollbar { display: none; }
-
-/* ── the lead-in is a SPACER, not padding ──
-   A scroller stops at 0, so without room either side the first card
-   cannot be centred however far you scroll — and the last cannot either,
-   for the mirror reason. The room needed is half the difference between
-   the rail and an open card.
-
-   IT CANNOT BE PADDING. Safari does not count a scroll container's
-   TRAILING padding in its scrollable width, so the deck could not scroll
-   far enough and every day near the end of the week sat right of centre
-   and ran off the screen — Friday, on the phone, while Chromium centred
-   all seven perfectly and said it was fine. A flex item's size is always
-   in `scrollWidth`, in every engine, which is what makes this the
-   version that works on both.
-
-   The percentage resolves against the flex container's own content box
-   — the rail — rather than the poster's, so no bleed has to be added
-   back either. `max` is the floor for a screen too narrow to hold an
-   open card with anything beside it. */
-.rail::before,
-.rail::after {
-  content: '';
-  /* LONGHAND, deliberately. A math function inside a SHORTHAND is a
-     known weak spot in Safari's parser, and a shorthand that fails to
-     parse takes the whole declaration with it — which here means no
-     spacer at all, silently, and the deck back to the bug this rule is
-     for. Three longhands cannot fail as a group. */
-  flex-grow: 0;
-  flex-shrink: 0;
-  flex-basis: max(var(--pad),
-                  calc((100% - var(--wk-open)) / 2 - var(--wk-gap)));
+/* Motion is the whole subject, so this is a real setting: the deck
+   simply is where it is. */
+@media (prefers-reduced-motion: reduce) {
+  .rail { transition: none; }
 }
+.rail[hidden] { display: none; }
 
 .day {
   flex: none;
   position: relative;   /* the face is absolute to this */
-  scroll-snap-align: center;
   display: flex;
   flex-direction: column;
   border-radius: 18px;
@@ -1006,7 +991,7 @@ body {
   border-color: color-mix(in srgb, var(--ink) 16%, transparent);
   box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
 }
-.day:not(.is-open) { width: 76px; opacity: .82; }
+.day:not(.is-open) { width: var(--wk-shut); opacity: .82; }
 
 /* ── the face of a shut card ──
    The whole card is one press that opens that day. It is a real button
