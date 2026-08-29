@@ -781,13 +781,24 @@ const SAID = [
        is measured. */
     const other = [...document.querySelectorAll('.row[data-id]')]
       .find((r) => !r.classList.contains('is-now'));
+    /* ── THE ACCENT IS ASKED FOR, NEVER TYPED ──
+       This was the literal rgb(226, 35, 26), which was the shipped
+       red — and the shipped palette is Lime now, so the assertion was
+       measuring a colour that is nowhere on the page. Read off the
+       root it holds whatever the palette is, which is the claim being
+       made: the running row wears the ACCENT. */
+    const accent = getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim();
     return { display: a.display, anim: a.animationName,
              rule: getComputedStyle(row).borderLeftColor,
+             accent: accent,
              weight: w(row), plain: other ? w(other) : null };
   });
+  const hexRGB = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
+    .map((x) => parseInt(x, 16)).join(', ') + ')';
   ok('reduced motion does not build the sweep', calm.display === 'none', calm);
   ok('and the row is still marked without it',
-    calm.rule === 'rgb(226, 35, 26)' && calm.weight > calm.plain, calm);
+    calm.rule === hexRGB(calm.accent) && calm.weight > calm.plain, calm);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   /* ── nothing under the span but the span ──
@@ -1071,7 +1082,13 @@ const SAID = [
      chart of nothing, and a rule is only worth writing down if
      something measures it. */
   const reds = await page.evaluate(() => {
-    const red = 'rgb(226, 35, 26)';
+    /* Asked for rather than typed, for the same reason as above: the
+       palette this ships with has moved once and will again, and a
+       literal here measures a colour that is nowhere on screen —
+       which passes by finding nothing, in green. */
+    const red = 'rgb(' + getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
+      .map((x) => parseInt(x, 16)).join(', ') + ')';
     const hit = [];
     document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, '
       + '.title, .hd-when, .sp-t, .sp-ends span, .sp-fill, .sp-dot')
@@ -2108,8 +2125,16 @@ const SAID = [
     const i = (png.width * Math.round(at.y * dpr) + Math.round(at.x * dpr)) << 2;
     return [png.data[i], png.data[i + 1], png.data[i + 2]];
   })();
-  ok('the default ground is still flat white paper',
-    corner.every((c) => c === 255), corner);
+  /* ── AND THE DEFAULT GROUND IS THE ONE THE STYLESHEET CARRIES ──
+     It was "still flat white paper", asserted as every channel at 255.
+     Seven light palettes came out of THEMES in one pass and the base
+     :root went with them, so what ships now is near-black with a lime
+     wash weighted to the foot. Asserted as DARK with the wash in it
+     rather than as three exact numbers: the sample is taken beside the
+     page dots, which is inside the gradient, so a literal would be a
+     number nobody could re-derive. */
+  ok('the default ground is the near-black the stylesheet ships',
+    corner.every((c) => c < 60) && Math.max.apply(null, corner) > 4, corner);
 
   /* ── the bar sits IN the ground, not on it ──
      The gradient is weighted to the foot of the page, which is exactly
@@ -3183,17 +3208,29 @@ const SAID = [
   console.log('\n── themes ──');
   await page.waitForTimeout(200);
 
-  const IDS = ['paper', 'blush', 'slate', 'linen', 'mist', 'bloom', 'sand',
-               'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum'];
+  /* ── THIRTEEN, AND EVERY ONE OF THEM DARK ──
+     Seven light palettes came out of this list in one pass and six new
+     dark ones went in beside the six that stayed. Written out rather
+     than counted, because the ORDER is what the picker draws and Lime
+     being first is the point: it is the palette the stylesheet itself
+     carries, so it is the one a fresh phone opens on. */
+  const IDS = ['lime', 'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum',
+               'crimson', 'cobalt', 'sepia', 'fuchsia', 'verdant', 'iris'];
   await page.click('#scTabYou');
   await page.waitForTimeout(320);
   ok('the picker offers every theme, as a swatch rather than a word',
     await page.$$eval('.theme', (e) => e.map((x) => x.dataset.theme).join(' ')) === IDS.join(' '));
-  /* Split light from dark. Thirteen chips in one undifferentiated block
-     is a colour chart; the half you are in is the first thing anyone
-     deciding wants, and it is the only grouping the set actually has. */
-  ok('and they are split into light and dark',
-    await page.$$eval('.theme-h', (e) => e.map((x) => x.textContent).join('/')) === 'Light/Dark');
+  /* ── AND THE LIGHT/DARK HEADS WENT WITH THE LIGHT ONES ──
+     That split was the only grouping the set actually had, and with
+     every palette dark it is one heading over the whole list saying
+     what all of it is. A heading that never distinguishes anything is
+     furniture. The picker still draws the split where more than one
+     kind has members, so this asserts the ABSENCE rather than the
+     rule — a code path that hardcoded "Dark" would pass a check on
+     the rule and fail this one. */
+  ok('and no heading is drawn, because every one of them is dark',
+    await page.$$eval('.theme-h', (e) => e.length) === 0
+    && await page.$$eval('.theme', (e) => e.length) === 13);
   /* All seven ON SCREEN. The first cut was one scrolling row, which put
      the seventh past the right edge of a 390px sheet — an option you
      have to discover by swiping is one most people never find. */
@@ -3276,10 +3313,14 @@ const SAID = [
      they come apart hard — "Clear everything" in Solar's amber reads as
      a highlight and in Aurora's mint it reads as approval. Measured in
      Lab, not by comparing hexes: two colours can differ by a lot of
-     hex and very little eye. Paper is exempt because there the two ARE
-     the same red, deliberately. */
+     hex and very little eye.
+
+     NOTHING IS EXEMPT NOW. Paper used to be, because there the accent
+     and the danger were the same red deliberately — and Paper is gone,
+     so the exemption goes with it rather than sitting in the file as a
+     name nothing matches. A skip keyed to an id that no longer exists
+     is a check that has quietly stopped running. */
   palettes.forEach((t) => {
-    if (t.id === 'paper') return;
     ok(`${t.id}: danger is visibly not the accent (ΔE ${t.dE.toFixed(1)})`,
       t.dE >= 12, t);
   });
@@ -3292,38 +3333,61 @@ const SAID = [
      one into the other is how a damaged record takes the other down. */
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(240);
+  /* THE LAST ONE THE LOOP TOUCHED, whichever that is — pinned to
+     'plum' this read a palette that is no longer last in the list, so
+     it failed on a change to the ORDER rather than on the behaviour it
+     is about. */
+  const last = IDS[IDS.length - 1];
+  const kept = await page.evaluate(() => ({
+    accent: getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim().toLowerCase(),
+    key: localStorage.getItem('sched.theme.v1'),
+    inSchedule: /theme/.test(localStorage.getItem('sched.v1') || ''),
+  }));
+  /* NOT PINNED TO A NAME OR A HEX. It was 'plum' and '#FF6FA5', so it
+     failed on a change to the ORDER of the list rather than on the
+     behaviour it is about — and a hex here would have to be retyped
+     every time a palette is retuned. What is claimed is that the
+     choice survived the reload, which is: the key holds whatever the
+     loop last pressed, and the page is no longer wearing the one the
+     stylesheet ships. */
   ok('the theme is still up after a reload',
-    await page.evaluate(() => getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim() === '#FF6FA5'));
+    kept.accent !== '#c6f73c' && /^#[0-9a-f]{6}$/.test(kept.accent), kept);
   ok('and it is kept under its own key, away from the schedule',
-    await page.evaluate(() => localStorage.getItem('sched.theme.v1') === 'plum'
-      && !/theme/.test(localStorage.getItem('sched.v1') || '')));
+    kept.key === last && !kept.inSchedule, { kept, last });
 
   /* ── no token survives a switch ──
      Every theme has to name every token, or one it leaves out is
-     inherited from whatever was up last: go from a light theme that
-     sets --g3 to a dark one that does not, and the dark page keeps the
-     light one's third wash. It is a colour that only appears in one
-     ORDER of clicks, which is close to impossible to find by looking —
-     so scPaint clears the whole set before writing, and this drives the
-     exact order that would expose it. */
+     inherited from whatever was up last. It is a colour that only
+     appears in one ORDER of clicks, which is close to impossible to
+     find by looking — so scPaint clears the whole set before writing,
+     and this drives an order that would expose it.
+
+     IT USED TO BE DRIVEN BY --g3, the third wash only the light
+     palettes set. Those are gone and nothing sets it now, so a check
+     on --g3 would pass by finding transparent on both sides of the
+     switch — which is a check that cannot fail. Driven on the two
+     washes every palette DOES set instead. */
   await page.click('#scTabYou');
   await page.waitForTimeout(300);
-  await page.click('.theme[data-theme="bloom"]');
+  await page.click('.theme[data-theme="verdant"]');
   await page.waitForTimeout(200);
   const leak = await page.evaluate(() => {
-    const read = () => ['--g1', '--g2', '--g3', '--bad', '--on-red'].map((k) =>
+    const read = () => ['--g1', '--g2', '--g3', '--bad', '--on-red', '--red'].map((k) =>
       getComputedStyle(document.documentElement).getPropertyValue(k).trim());
-    const light = read();
+    const was = read();
     document.querySelector('.theme[data-theme="nebula"]').click();
-    const dark = read();
-    return { light, dark };
+    const now = read();
+    return { was, now };
   });
   await page.waitForTimeout(200);
-  ok('a light theme’s third wash does not survive into a dark one',
-    leak.light[2] !== leak.dark[2] && /transparent|^$/.test(leak.dark[2]), leak);
+  ok('no wash survives a switch to another palette',
+    leak.was[0] !== leak.now[0] && leak.was[1] !== leak.now[1]
+    && /rgba/.test(leak.now[0]), leak);
+  ok('and the third stays transparent, because nothing sets it any more',
+    /transparent|^$/.test(leak.was[2]) && /transparent|^$/.test(leak.now[2]), leak);
   ok('and every other token moves with it',
-    leak.light.every((v, i) => v !== leak.dark[i]), leak);
+    [3, 4, 5].every((i) => leak.was[i] !== leak.now[i]), leak);
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(300);
 
@@ -3332,9 +3396,47 @@ const SAID = [
   await page.evaluate(() => { localStorage.removeItem('sched.theme.v1'); });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(240);
-  ok('and clearing it falls back to the white page that ships',
-    await page.evaluate(() => getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim() === '#e2231a'));
+  /* ── THE STYLESHEET AND THE LIST HAVE TO AGREE ──
+     app.css carries a complete palette so the first paint is right
+     before app.js runs, and THEMES carries the same set under a name
+     you can press. They are the one thing in this app written down
+     twice, and the failure if they drift is the ugliest kind: clearing
+     the stored theme drops you onto a fourteenth palette that is on no
+     list and that nothing can get you back to. Held in step here, on
+     the tokens rather than on the id. */
+  const ships = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const keys = ['--paper', '--ink', '--dim', '--spent', '--red',
+                  '--hair', '--tick-off', '--bad', '--on-red', '--g1', '--g2'];
+    const root = {};
+    keys.forEach((k) => { root[k] = cs.getPropertyValue(k).trim().toLowerCase(); });
+    return root;
+  });
+  ok('clearing it falls back to the page the stylesheet itself carries',
+    ships['--red'] === '#c6f73c' && ships['--paper'] === '#060607'
+    && ships['--ink'] === '#ffffff', ships);
+  const listed = await page.evaluate(() => {
+    /* Read off the picker's own swatch rather than out of the source:
+       the chip is drawn FROM the entry, so this is the entry. */
+    const b = document.querySelector('.theme[data-theme="lime"] .swatch');
+    return b ? { bg: b.style.background, dot: b.querySelector('u').style.background } : null;
+  });
+  await page.click('#scTabYou');
+  await page.waitForTimeout(320);
+  const lime = await page.evaluate(() => {
+    const b = document.querySelector('.theme[data-theme="lime"] .swatch');
+    return { dot: b.querySelector('u').style.background,
+             /* The COMPUTED background-color, not the tail of the
+                shorthand: the shorthand carries three radial-gradients
+                whose own rgba() stops contain commas, so splitting on
+                the last one returns "7)". */
+             ground: getComputedStyle(b).backgroundColor };
+  });
+  ok('...and Lime in the list is that same page under a name you can press',
+    lime.dot === 'rgb(198, 247, 60)'
+    && lime.ground.replace(/\s/g, '') === 'rgb(6,6,7)', { lime, listed });
+  await page.evaluate(() => document.getElementById('scScrim').click());
+  await page.waitForTimeout(300);
 
   /* show(), not one click. A single press put the rail back when the
      button had two stops; with three it lands on the tally instead and
@@ -4747,9 +4849,15 @@ const SAID = [
       const r = [...document.querySelectorAll('.day.is-today .row[data-id]')]
         .find((x) => /Train/.test(x.querySelector('.n').firstChild.textContent));
       const em = r.querySelector('.n em.wo');
+      /* Every grey asked for rather than typed. The palette moved
+         once already and a literal here measures a colour that is
+         nowhere on the page. */
+      const cs = getComputedStyle(document.documentElement);
+      const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
+        .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
       return { mark: em && em.textContent, label: r.getAttribute('aria-label'),
         colour: em && getComputedStyle(em).color,
-        accent: getComputedStyle(document.documentElement).getPropertyValue('--red').trim() };
+        dim: rgb('--dim'), spent: rgb('--spent'), accent: rgb('--red') };
     });
     ok('and the row it happened on says what it was, through a reload',
       row.mark === 'Legs' && / Legs\.? /.test(row.label + ' '), row);
@@ -4764,7 +4872,8 @@ const SAID = [
        the accent" rather than as one hex, which would pass or fail on
        what time the suite happens to run. */
     ok('...in a grey, because the accent is spent four times already',
-      ['rgb(74, 74, 74)', 'rgb(115, 115, 115)'].indexOf(row.colour) >= 0, row);
+      [row.dim, row.spent].indexOf(row.colour) >= 0
+      && row.colour !== row.accent, row);
 
     /* ── UNTICKING TAKES IT WITH IT ──
        The record is a fact ABOUT a finished block. Left behind on one

@@ -59,10 +59,23 @@
 }
 
 :root {
-  color-scheme: light;
+  /* ── THE PAGE SHIPS DARK, AND THERE IS NO LIGHT ONE TO GO BACK TO ──
+     Seven light palettes were deleted from THEMES in one pass, and a
+     default that stayed white would have been a fourteenth palette
+     nothing could choose and nothing could leave: clearing the stored
+     key would have dropped you onto a page not on the list. So this IS
+     the Lime theme, spelled out — black, grey, white and one lime —
+     and `lime` in THEMES is the same set under a name you can press.
 
-  --paper: #ffffff;
-  --ink:   #111111;
+     THE ONE THING KEPT IN TWO PLACES, then, and deliberately: the
+     stylesheet has to carry a complete palette for the first paint
+     before app.js runs, and a page that flashed white for a frame and
+     then went black is worse than a duplicated hex. tests/schedule.js
+     holds the two in step. */
+  color-scheme: dark;
+
+  --paper: #060607;
+  --ink:   #ffffff;
 
   /* ── the greys are measured, not chosen ──
      The design this came from set finished blocks at #b4b4b4 and times
@@ -70,15 +83,26 @@
      3.2:1 on white. Both are far under the 4.5:1 that 11px type needs,
      and this repo has shipped exactly that mistake before.
 
-     These are the lightest greys that actually pass: --dim at 8.9:1,
-     --spent at 4.7:1. They are a shade heavier than the drawing and
-     the difference between a finished block and a coming one is still
-     unmistakable, because the gap to --ink is enormous. */
-  --dim:   #4a4a4a;
-  --spent: #737373;
+     These are the greys that actually pass on THIS ground: --dim at
+     9.8:1, --spent at 6.1:1. They are a shade heavier than the drawing
+     and the difference between a finished block and a coming one is
+     still unmistakable, because the gap to --ink is enormous.
 
-  /* One red, and it clears 4.7:1 on white, so it is allowed to carry
-     text and not only decoration.
+     Inverted with the page, and it is not the old pair read backwards:
+     a grey that measures 4.7:1 as ink on white does not measure 4.7:1
+     as ink on black, because luminance is not symmetric about the
+     middle. Both were solved again from the new ground. */
+  --dim:   #b4b4ba;
+  --spent: #8c8c94;
+
+  /* ── ONE ACCENT, AND IT IS LIME ──
+     16:1 on this ground, so it is allowed to carry text and not only
+     decoration. The token is still called --red: it is the ACCENT, it
+     has been every colour in the list for a year, and renaming it
+     across two files and a suite would be a rename rather than a
+     change. What it must never be is a second colour — the sessions'
+     nine hues are the only other colour on this page, and they are the
+     one thing that says WHICH rather than whether.
 
      There used to be a --red-rgb beside it, holding the same colour as
      bare channels so the sweep could take an alpha of it. The comment
@@ -89,12 +113,13 @@
      stayed the original 226,35,26. A mint hairline dragging a red
      smear. It is gone; color-mix takes the alpha off --red itself, so
      there is one source and nothing to keep in step. */
-  --red:     #e2231a;
+  --red:     #c6f73c;
 
-  /* The ground, as three stops rather than one flat fill. On the shipped
-     palette the two washes are transparent, so this is exactly the white
-     page it has always been — the gradient exists so a theme can reach
-     for it without the markup changing shape.
+  /* The ground, as three stops rather than one flat fill. On the
+     shipped palette the near wash is the accent at a fifth strength
+     and the far one a neutral lift, so the page is black with one
+     colour in it — the same colour the accent is, at two depths,
+     rather than a tint dropped on a grey page.
 
      Painted on the BODY and nowhere else. It is a background, not a
      filter: it rasterises once and composites from then on. The orrery
@@ -104,34 +129,45 @@
      has none of that cost, and putting one on an element the ring
      repaints inside would give it all of it. */
   --g0: var(--paper);
-  --g1: transparent;
-  --g2: transparent;
+  --g1: rgba(160, 220, 40, .20);
+  --g2: rgba(120, 124, 132, .14);
   /* A third wash. Two corners is a tint; three is a gradient you can
-     see across the whole frame, which is what the references actually
-     do. Transparent by default, so the shipped page is untouched. */
+     see across the whole frame. It was the light palettes' own third
+     stop and nothing sets it now — kept, and kept transparent, because
+     the rule that reads it is one line in the body's background and
+     deleting the token would only move the same emptiness into the
+     rule. scPaint still clears it between themes. */
   --g3: transparent;
 
-  --hair:  #dcdcdc;
+  --hair:  #232327;
   /* The unlit marks. Its own token rather than --hair: a hairline
      between rows and a mark that has not been spent are the same
      grey today and have no reason to stay the same one. */
-  --tick-off: #ececec;
+  /* Lighter than it looks like it needs to be, and measured: the
+     tally's calendar draws every unlit day in this and lays a glow
+     over the lit ones. On a near-black page an unlit mark at #1b1b1f
+     separated from the panel behind it by .009 of luminance, which is
+     a day you cannot see you missed — and losing the misses is the one
+     thing a record of showing up must never do. */
+  --tick-off: #34343a;
 
   /* What sits ON the accent — the microphone's glyph, the go button's
      label. White is right on a red at 4.7:1 and wrong on every bright
      accent: white on the amber theme measures 1.9:1 and on the mint one
      1.7:1, which is a control with an invisible label. Each theme names
-     its own, and every dark theme names its own near-black GROUND,
-     which is the colour its accent was already chosen to stand off. */
-  --on-red: #ffffff;
+     its own, and every one of them names its own near-black GROUND,
+     which is the colour its accent was already chosen to stand off.
+     15.7:1 here, on a lime that white would sit on at 1.3:1. */
+  --on-red: #0a0c05;
 
-  /* Danger, which is NOT the accent. On the shipped palette the two are
-     the same red and there was no reason to tell them apart. Under a
-     theme they come apart hard: "Clear everything" in Solar's amber
-     reads as a highlight, and in Aurora's mint it reads as approval.
-     A destructive action has to look destructive whatever the page
-     round it is doing. */
-  --bad: #e2231a;
+  /* Danger, which is NOT the accent, and on the shipped palette it
+     never was: the two used to be the same red, which is exactly why
+     they came apart hard the day a theme moved one of them —
+     "Clear everything" in Solar's amber reads as a highlight and in
+     Aurora's mint it reads as approval. On a lime page a red is the
+     only thing on screen that is not lime, grey or white, which is as
+     loud as a destructive action should be. */
+  --bad: #ff7a7a;
 
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   /* The open card's width, named because TWO rules need it: the card

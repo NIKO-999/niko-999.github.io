@@ -256,8 +256,12 @@ never do.
 **It is polarity-dependent and that is the design.** In a dark palette
 `--ink` is near-white, so the blurred copy is a genuine emissive bloom;
 in a light one it is a contact shadow. Ink on paper under a lamp glows
-by casting. Seven of the thirteen palettes are dark, so both halves are
-the real product — and the only literal glow available on a white page
+by casting. **Every palette is dark now** — the seven light ones were
+deleted in one pass — so the emissive half is what ships and the
+contact-shadow half is history the drawing still supports. It stays
+polarity-dependent rather than being simplified to the case that
+remains, because the mechanism is the same either way and the day a
+light palette comes back it works. The only literal glow on a white page
 is painting the marks in the accent, which costs the rule that one mark
 means one thing at all three sizes it is drawn.
 
@@ -1397,8 +1401,8 @@ rule, for the habits screen's reason.
 **A polarity-agnostic measurement, or none.** The pass that caught the
 disc also reported the unlit stop's label at **1.05:1**, which was the
 measurement and not the control: it took the 3rd percentile as ink and
-the 90th as ground, and seven of the thirteen themes are dark, so on
-those it compared the track against itself. Measured from the most
+the 90th as ground, and the themes are dark, so it compared the track
+against itself. Measured from the most
 common pixel outward it is **7.64:1**. This repo has now made the
 light-on-dark assumption in three separate harnesses.
 
@@ -1663,6 +1667,77 @@ mirrored ramp; the critic found that dropping every glyph would not fix
 Recovery, because the stick figure was the group's FALLBACK. That is
 the shape to keep: a critic that must name the failure, and a designer
 that must produce a picture — never a verifier asked to argue.
+
+## The light themes are gone
+
+Seven of them, in one pass: Paper, Blush, Slate, Linen, Mist, Bloom,
+Sand. Six new dark ones went in beside the six that stayed — Crimson,
+Cobalt, Sepia, Fuchsia, Verdant, Iris — each taking a hue family none
+of the others held: true red, saturated blue, tan, magenta,
+gold-on-green, periwinkle.
+
+**Iris is the near one and it is kept anyway.** Nebula is already a
+violet; the two differ where it matters, a pale lilac lifting off an
+indigo page against a deeper periwinkle on a page that is nearly black.
+Written down rather than glossed, because the next person to add a
+violet should know there are two.
+
+**THE BASE `:root` HAD TO GO DARK WITH THEM.** The stylesheet carries a
+complete palette so the first paint is right before `app.js` runs, and
+that palette was the white one. Left alone it would have become a
+fourteenth theme that nothing could choose and nothing could leave:
+clearing the stored key drops you onto a page that is on no list. So
+`:root` IS the Lime theme spelled out, and `lime` in `THEMES` is the
+same set under a name you can press. It is the one thing in this app
+written down twice, deliberately — a page that flashed white for a
+frame and then went black is worse than a duplicated hex — and
+`tests/schedule.js` holds the two in step on the tokens rather than on
+the id.
+
+**Black, grey, white and one lime.** Everything that would carry the
+accent carries lime and nothing else is coloured at all, which is a
+different claim from the twelve others where the hue is the whole page.
+The gradient is lime too, so the wash and the accent are one colour at
+two strengths rather than a tint dropped on a grey page. **The workout
+cards keep their own nine colours on it**, and that is the point rather
+than an exception: a colour that says WHICH session this is has to be
+the same on every theme, so the card reads as the one coloured object
+on the screen — which is what it is.
+
+**The greys were solved again, not read backwards.** A grey that
+measures 4.7:1 as ink on white does not measure 4.7:1 as ink on black,
+because luminance is not symmetric about the middle. `--dim` and
+`--spent` are 9.8:1 and 6.1:1 on the new ground.
+
+**`--tick-off` is lighter than it looks like it needs to be, and that
+is measured.** The tally's calendar draws every unlit day in it and
+lays a glow over the lit ones; at `#1b1b1f` an unlit mark separated
+from the panel behind it by **.009 of luminance**, which is a day you
+cannot see you missed. Losing the misses is the one thing a record of
+showing up must never do.
+
+**The Light/Dark headings went with the light ones.** That split was
+the only grouping the set actually had, and with every palette dark it
+is one heading over the whole list saying what all of it is. The picker
+still draws the split where more than one kind has members, so the day
+a light palette returns the heading returns with it — and the test
+asserts the ABSENCE of the heads rather than the rule, because a code
+path that hardcoded "Dark" would pass a check on the rule.
+
+**Three assertions were pinned to the shipped red and measured nothing
+once it moved.** `rgb(226, 35, 26)` was typed into the running-row
+check, the accent-budget scan and the row's workout mark; with the
+palette on lime all three were looking for a colour that is nowhere on
+the page, and the scan in particular passes by finding NOTHING. They
+ask the root for `--red` now. The same went for the palette-survives-a
+-reload check, pinned to `plum` and `#FF6FA5` — it failed on a change
+to the ORDER of the list rather than on the behaviour it is about.
+
+**And a skip keyed to a deleted id is a check that has stopped
+running.** `if (t.id === 'paper') return;` exempted the one palette
+where danger and the accent were deliberately the same red. Paper is
+gone, so the exemption went with it rather than sitting in the file as
+a name nothing matches.
 
 ## The sweep
 

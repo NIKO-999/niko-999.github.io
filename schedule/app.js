@@ -1990,12 +1990,25 @@
      ═══════════════════════════════════════════════════════════ */
 
   var THEMES = [
-    { id:'paper', name:'Paper', kind:'light', note:'White. 4.7:1',
-      t:{ '--paper':'#ffffff', '--ink':'#111111', '--dim':'#4a4a4a', '--spent':'#737373',
-          '--red':'#e2231a', '--hair':'#dcdcdc', '--tick-off':'#ececec',
-          '--bad':'#e2231a',
-          '--on-red':'#ffffff',
-          '--g0':'#ffffff', '--g1':'transparent', '--g2':'transparent' } },
+    /* ── THE DEFAULT, AND IT IS THE ONE THE PAGE SHIPS WITH ──
+       Black, grey, white and one lime. Everything that would carry the
+       accent carries lime and nothing else is coloured at all — which
+       is a different claim from the twelve below, where the hue is the
+       whole page. The gradient is lime too, so the wash and the accent
+       are one colour at two strengths rather than a tint dropped on a
+       grey page.
+
+       THE WORKOUT CARDS KEEP THEIR OWN COLOURS ON IT, and that is the
+       point rather than an exception: a colour that says WHICH session
+       this is has to be the same on every theme, so nine hues sit on a
+       page that has none. It reads as the one coloured object on the
+       screen, which is what it is. */
+    { id:'lime', name:'Lime', kind:'dark', note:'Lime on black. 6.1:1',
+      t:{ '--paper':'#060607', '--ink':'#FFFFFF', '--dim':'#B4B4BA', '--spent':'#8C8C94',
+          '--red':'#C6F73C', '--hair':'#232327', '--tick-off':'#34343A',
+          '--bad':'#FF7A7A',
+          '--on-red':'#0A0C05',
+          '--g0':'#060607', '--g1':'rgba(160,220,40,.20)', '--g2':'rgba(120,124,132,.14)' } },
 
     { id:'nebula', name:'Nebula', kind:'dark', note:'Violet on indigo. 6.7:1',
       t:{ '--paper':'#0A0B2E', '--ink':'#F4F1FF', '--dim':'#BDB6E8', '--spent':'#9A92CE',
@@ -2039,60 +2052,59 @@
           '--on-red':'#1A0B1F',
           '--g0':'#1A0B1F', '--g1':'rgba(160,30,110,.40)', '--g2':'rgba(90,30,140,.38)' } },
 
-    /* ── the light six ──
-       A light theme cannot simply reuse a dark one's accent. There the
-       accent is the pale colour standing off a near-black page; here the
-       pale colour is the WASH — where it belongs, since a gradient is
-       never asked to be legible — and the accent is the deep end of the
-       same hue. The reference palettes prove why: their pale hues
-       measure 1.49:1 and 2.74:1 on their own grounds and cannot carry a
-       word between them.
+    /* ── THE SIX THAT REPLACED THE LIGHT ONES ──
+       Seven light palettes came out of this list in one pass, and what
+       went in is not seven more of the same idea: each of these takes a
+       hue family none of the six above holds. True red, saturated blue,
+       tan, magenta, gold-on-green, periwinkle.
 
-       So the wash, the accent and the ink are one hue at three depths,
-       and the page reads as one thing rather than as white with a tint
-       dropped on it. The gradient is weighted to the FOOT, because that
-       is the third of the screen with nothing to read in it. */
-    { id:'blush', name:'Blush', kind:'light', note:'Peach on white. 5.2:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#1C110D', '--dim':'#4A3229', '--spent':'#6A5047',
-          '--red':'#C0402A', '--hair':'#E9DCD6', '--tick-off':'#F0E4DE',
-          '--bad':'#A81438', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(248,138,100,1)',
-          '--g2':'rgba(150,142,138,.34)', '--g3':'rgba(190,104,78,.92)' } },
+       Iris is the near one — Nebula is already a violet — and it is
+       kept because the two differ where it matters: Nebula's accent is
+       a pale lilac lifting off an indigo page, Iris's is a deeper
+       periwinkle on a page that is nearly black. Written down rather
+       than glossed, because the next person to add a violet should
+       know there are two already. */
+    { id:'crimson', name:'Crimson', kind:'dark', note:'Red on oxblood. 6.6:1',
+      t:{ '--paper':'#120507', '--ink':'#FFECEC', '--dim':'#E0A8A8', '--spent':'#BC8686',
+          '--red':'#FF5C5C', '--hair':'#341A1E', '--tick-off':'#2C1518',
+          '--bad':'#FFA84A',
+          '--on-red':'#120507',
+          '--g0':'#120507', '--g1':'rgba(190,30,50,.42)', '--g2':'rgba(120,20,60,.34)' } },
 
-    { id:'slate', name:'Slate', kind:'light', note:'Blue-grey on white. 7.2:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#111524', '--dim':'#333A52', '--spent':'#4E5772',
-          '--red':'#2F4DA8', '--hair':'#DCDFE7', '--tick-off':'#E7E9EF',
-          '--bad':'#B01430', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(88,112,132,1)',
-          '--g2':'rgba(96,110,132,.36)', '--g3':'rgba(52,66,102,.92)' } },
+    { id:'cobalt', name:'Cobalt', kind:'dark', note:'Royal blue on midnight. 7.2:1',
+      t:{ '--paper':'#050A1A','--ink':'#E9EFFF','--dim':'#A9BCE8','--spent':'#8A9CC8',
+          '--red':'#6E9BFF', '--hair':'#1C2A48', '--tick-off':'#17233D',
+          '--bad':'#FF8A8A',
+          '--on-red':'#050A1A',
+          '--g0':'#050A1A', '--g1':'rgba(30,70,220,.44)', '--g2':'rgba(20,120,190,.28)' } },
 
-    { id:'linen', name:'Linen', kind:'light', note:'Warm neutral. 6.7:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#191410', '--dim':'#463C34', '--spent':'#665A50',
-          '--red':'#7A4A2E', '--hair':'#E6E0D9', '--tick-off':'#EFEAE4',
-          '--bad':'#A81438', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(196,166,128,1)',
-          '--g2':'rgba(160,148,134,.32)', '--g3':'rgba(152,132,108,.90)' } },
+    { id:'sepia', name:'Sepia', kind:'dark', note:'Tan on espresso. 6.9:1',
+      t:{ '--paper':'#14100C', '--ink':'#F7EEE2', '--dim':'#D6BFA4', '--spent':'#B29B82',
+          '--red':'#E0A96D', '--hair':'#332A20', '--tick-off':'#2C241B',
+          '--bad':'#FF8A72',
+          '--on-red':'#14100C',
+          '--g0':'#14100C', '--g1':'rgba(150,100,50,.38)', '--g2':'rgba(90,60,40,.42)' } },
 
-    { id:'mist', name:'Mist', kind:'light', note:'Cyan into teal. 6.1:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#0B1819', '--dim':'#28403F', '--spent':'#455E5E',
-          '--red':'#0F6E6A', '--hair':'#D8E4E4', '--tick-off':'#E5EDED',
-          '--bad':'#B01430', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(88,184,184,1)',
-          '--g2':'rgba(104,152,172,.34)', '--g3':'rgba(52,110,140,.90)' } },
+    { id:'fuchsia', name:'Fuchsia', kind:'dark', note:'Magenta on charcoal. 7:1',
+      t:{ '--paper':'#100A14', '--ink':'#FCE9F8', '--dim':'#DEAED6', '--spent':'#BA8CB4',
+          '--red':'#FF6AD5', '--hair':'#2E1F35', '--tick-off':'#281A2E',
+          '--bad':'#FFA05A',
+          '--on-red':'#100A14',
+          '--g0':'#100A14', '--g1':'rgba(200,20,150,.40)', '--g2':'rgba(60,30,140,.34)' } },
 
-    { id:'bloom', name:'Bloom', kind:'light', note:'Pink into lilac. 7:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#1B0F1A', '--dim':'#4A2A3E', '--spent':'#6A4860',
-          '--red':'#9B2C70', '--hair':'#EBDCE6', '--tick-off':'#F2E7EE',
-          '--bad':'#B8241C', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(246,132,176,1)',
-          '--g2':'rgba(178,158,224,.34)', '--g3':'rgba(150,110,206,.90)' } },
+    { id:'verdant', name:'Verdant', kind:'dark', note:'Gold on deep forest. 7.2:1',
+      t:{ '--paper':'#071410', '--ink':'#EAF6EE', '--dim':'#AFCFBC', '--spent':'#8FAF9C',
+          '--red':'#E8C547', '--hair':'#1B3128', '--tick-off':'#172A22',
+          '--bad':'#FF8A8A',
+          '--on-red':'#071410',
+          '--g0':'#071410', '--g1':'rgba(20,120,80,.44)', '--g2':'rgba(160,130,30,.24)' } },
 
-    { id:'sand', name:'Sand', kind:'light', note:'Gold into bronze. 5.9:1',
-      t:{ '--paper':'#FFFFFF', '--ink':'#191509', '--dim':'#443C22', '--spent':'#63593E',
-          '--red':'#8A5A0B', '--hair':'#E9E2CE', '--tick-off':'#F1ECDD',
-          '--bad':'#AE1B2E', '--on-red':'#FFFFFF',
-          '--g0':'#FFFFFF', '--g1':'rgba(242,184,68,1)',
-          '--g2':'rgba(176,158,116,.34)', '--g3':'rgba(186,146,72,.90)' } },
+    { id:'iris', name:'Iris', kind:'dark', note:'Periwinkle on near-black. 6.1:1',
+      t:{ '--paper':'#08071A', '--ink':'#EDEBFF', '--dim':'#B4AEE8', '--spent':'#948EC6',
+          '--red':'#8A7DFF', '--hair':'#22204A', '--tick-off':'#1D1B40',
+          '--bad':'#FF8A9E',
+          '--on-red':'#08071A',
+          '--g0':'#08071A', '--g1':'rgba(60,50,200,.46)', '--g2':'rgba(30,90,180,.26)' } },
   ];
 
   var THEME_KEY = 'sched.theme.v1';
@@ -5566,12 +5578,20 @@
         return b;
       };
 
-      [['Light', 'light'], ['Dark', 'dark']].forEach(function (grp) {
-        var mine = THEMES.filter(function (t) { return t.kind === grp[1]; });
-        if (!mine.length) return;
-        row.appendChild(scEl('span', 'theme-h', grp[0]));
+      /* ── AND THE HEADINGS ARE GONE WITH THE LIGHT ONES ──
+         Light and Dark was the only grouping the set actually had, and
+         with every palette dark it is one heading over the whole list
+         saying what all of it is. A heading that never distinguishes
+         anything is furniture. Written as a filter that draws a head
+         only where more than one kind has members, so the day a light
+         one comes back the split comes back with it. */
+      var kinds = [['Light', 'light'], ['Dark', 'dark']].filter(function (grp) {
+        return THEMES.some(function (t) { return t.kind === grp[1]; });
+      });
+      kinds.forEach(function (grp) {
+        if (kinds.length > 1) row.appendChild(scEl('span', 'theme-h', grp[0]));
         var g = scEl('div', 'theme-g');
-        mine.forEach(function (t) { g.appendChild(chip(t)); });
+        THEMES.forEach(function (t) { if (t.kind === grp[1]) g.appendChild(chip(t)); });
         row.appendChild(g);
       });
 
