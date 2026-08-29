@@ -1012,9 +1012,11 @@
           var sh = scEl('div', 'wk-sh'
             + (d === today && scNowMin() >= g.s.a && scNowMin() < g.s.b
                ? ' is-live' : ''));
+          /* The word alone. It carried a hairline running off it and a
+             count of the rows under it; the count is a figure nobody
+             acts on, and the rule was the same mark the rows have
+             stopped drawing between themselves. */
           sh.appendChild(scEl('b', null, g.s.k));
-          sh.appendChild(scEl('i'));
-          sh.appendChild(scEl('em', null, String(g.rows.length)));
           /* aria-hidden: the rows below carry their own full day and
              time in their labels, so a screen reader meeting this would
              hear the day sliced twice. It is a visual grouping. */

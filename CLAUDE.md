@@ -772,6 +772,46 @@ than one that changes, so an ordinary row's gutter still holds one
 thing. It is `--ink`, never the accent, because the accent already means
 the block running now.
 
+**NOTHING IS DRAWN BETWEEN THE ROWS.** There was a hairline under
+every one of them, and the session heading had a rule running off it
+and a count of what was under it — on a full day, seventeen marks
+carrying nothing. A line between every two items in a list is what
+makes it a table, and a table is a thing you scan for a value rather
+than a list of things you are going to do. Space does the same work
+and draws nothing to do it. Six other treatments were rendered over
+the real card first: one line a block with the glyph gone, the start
+time only, ghosted glyphs, a vertical spine through the gutter. The
+spine was the best picture and the wrong answer — it removes six rules
+and adds one, which is a different ornament rather than less of one.
+
+**A FINISHED BLOCK HAS NO TIME.** The figure is what you plan against
+and there is nothing left to plan about a morning that has happened,
+so the card empties out behind you as the day goes and what is left on
+it is what is left of the day. Only TODAY's card: `is-past` is set by
+`scLive` on `.day.is-today .row` alone, and a Monday with its mornings
+rubbed out would be the deck claiming the week only runs forwards. It
+costs a screen reader nothing — the row's `aria-label` carries the
+full range through `scRangeLong`, drawn or not.
+
+Measured as a BOX, never as a class or a computed `display`, and both
+sides of it: "no past row draws a time" passes on a rule that hid
+every time on the card, and on a day with nothing behind you it passes
+by finding nothing at all.
+
+**And the column check had to be narrowed for it.** `.t`'s left edge
+is one number down the card — but a box that is not drawn reports 0,
+so a finished row was being compared against a real column. It reads
+the rows that DRAW a time now. The GLYPH is still every row, because
+every row has one and that is the column the narrowing could have
+hidden. Proven by shifting the running row's time 8px and watching it
+fall over.
+
+**The name went 16/700 to 15/600 with the rules.** The hairlines were
+carrying the separation and the name was carrying the emphasis; with
+them gone the name is the only thing on the row at full strength, and
+16/700 sixteen times down a card reads as a wall. Three steps still —
+800 running, 600 ahead, 500 done.
+
 **A CSS comment cannot quote a close-comment marker.** Writing one in
 prose ends the comment there, and every line after it becomes
 declarations the parser throws away along with the next rule. This

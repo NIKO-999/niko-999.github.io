@@ -521,11 +521,17 @@ const SAID = [
      week at least one of the three is empty most days — the seeded
      Tuesday has no shift on it, which is what makes that testable
      rather than merely stated. */
-  const sess = await page.$$eval('.day.is-open .wk-sh', (h) => h.map((x) => ({
-    k: x.querySelector('b').textContent,
-    n: +x.querySelector('em').textContent,
-    live: x.classList.contains('is-live'),
-  })));
+  /* The count each heading used to PRINT is gone, so the grouping is
+     measured off the card instead: walk forward from each heading to
+     the next one. That is the stronger check of the two — the printed
+     figure could agree with itself while the rows under it did not. */
+  const sess = await page.$$eval('.day.is-open .wk-sh', (h) => h.map((x) => {
+    let n = 0;
+    for (let el = x.nextElementSibling; el && !el.classList.contains('wk-sh');
+         el = el.nextElementSibling) if (el.dataset.id) n++;
+    return { k: x.querySelector('b').textContent, n,
+             live: x.classList.contains('is-live') };
+  }));
   /* A SUBSEQUENCE of the three, not all three. The seeded Tuesday has
      no shift on it, so it genuinely has nothing between noon and five —
      asserting all three here would have been the test insisting on data
@@ -535,7 +541,7 @@ const SAID = [
     sess.length > 0 && sess.every((x) => ORDER3.includes(x.k))
     && sess.map((x) => ORDER3.indexOf(x.k))
        .every((v, i, a) => i === 0 || v > a[i - 1]), sess);
-  ok('...each carrying how many things are in it',
+  ok('...each with rows under it, and every row under one of them',
     sess.every((x) => x.n > 0)
     && sess.reduce((a, x) => a + x.n, 0)
        === await page.$$eval('.day.is-open .row[data-id]', (r) => r.length), sess);
@@ -621,6 +627,36 @@ const SAID = [
     await page.$$eval('.row.is-past .n', (r) => r.map((x) => x.textContent).join('|'))
       .then((v) => v === 'Wake|Train|Walk'));
 
+  /* ── a finished block has no time ──
+     The figure is what you plan against and there is nothing left to
+     plan about a morning that has happened, so the card empties out
+     behind you as the day goes.
+
+     MEASURED AS A BOX, never as a class or a computed `display`. This
+     file has already had one check that read the property and was true
+     throughout the bug it was watching for — what is claimed is that
+     nothing is drawn, so nothing drawn is what is looked at.
+
+     BOTH SIDES, and both have to be non-empty: "no past row draws a
+     time" passes on a rule that hid every time on the card, and on a
+     day with nothing behind you it passes by finding nothing at all. */
+  const times = await page.$$eval('.day.is-today .row[data-id]', (rows) => {
+    const drawn = (r) => r.querySelector('.t').getClientRects().length > 0;
+    return { gone: rows.filter((r) => r.classList.contains('is-past')).map(drawn),
+             kept: rows.filter((r) => !r.classList.contains('is-past')).map(drawn) };
+  });
+  ok('a finished block draws no time, and everything still ahead keeps one',
+    times.gone.length > 0 && times.kept.length > 0
+    && times.gone.every((v) => v === false)
+    && times.kept.every((v) => v === true), times);
+
+  /* And only TODAY. Every other card in the deck is a plan rather than
+     a record — a Monday with its mornings rubbed out would be the deck
+     claiming the week only runs forwards. */
+  ok('...and no other day in the week loses one',
+    await page.$$eval('.day:not(.is-today) .row[data-id] .t',
+      (t) => t.length > 0 && t.every((x) => getComputedStyle(x).display !== 'none')));
+
   /* The hero is read part by part rather than as one string, because
      its whole design is that the figure holds ONE shape whatever the
      state — a clock time, never a duration that grows a unit and
@@ -633,17 +669,26 @@ const SAID = [
      inside a block, which is how a 13px step went unnoticed. */
   const align = await page.evaluate(() => {
     const day = document.querySelector('.day.is-today');
-    const edge = (sel, side) => [...day.querySelectorAll('.row[data-id]')]
+    const rows = [...day.querySelectorAll('.row[data-id]')];
+    const shown = rows.map((r) => r.querySelector('.t').getClientRects().length > 0);
+    const edge = (sel, side) => rows
       .map((r) => Math.round(r.querySelector(sel).getBoundingClientRect()[side]));
     /* The glyph's LEFT and the time's, since the measure that used to
        hold this column is gone. Both still have to be one number: the
        running row reaches 13px further left for its rule and has to
        grow rather than slide, and a plain width:100% moves the whole
        box instead. */
-    return { t: edge('.t', 'left'), m: edge('.ic', 'left') };
+    /* The TIME's column is read off the rows that draw one. A finished
+       block has no time now, and a box that is not drawn reports left
+       0 — comparing it against a real column is comparing nothing
+       against something. The GLYPH is still every row, because every
+       row has one and that is the column the narrowing could hide. */
+    return { t: edge('.t', 'left').filter((v, i) => shown[i]),
+             m: edge('.ic', 'left') };
   });
   ok('the running row keeps the column it is in',
-    new Set(align.t).size === 1 && new Set(align.m).size === 1, align);
+    align.t.length > 1 && new Set(align.t).size === 1
+    && new Set(align.m).size === 1, align);
 
   /* ── reduced motion ──
      Checked HERE, where a running row is guaranteed. The sweep must
@@ -769,8 +814,15 @@ const SAID = [
              w: +getComputedStyle(r.querySelector('.n')).fontWeight,
              t: px(r.querySelector('.t')) };
   });
+  /* 600, not 700, and the figure moved with the rules coming out: the
+     hairlines were carrying the separation and the name was carrying
+     the emphasis, so with them gone the name is the only thing on the
+     row at full strength. What is claimed is still rank — three steps,
+     800 running, 600 ahead, 500 done — and the running row's own step
+     is measured against a plain row up in the reduced-motion block
+     rather than against a literal. */
   ok('the block’s name outranks its time', rowType.n > rowType.t
-    && rowType.w >= 700, rowType);
+    && rowType.w >= 600, rowType);
   ok('and stays a subheading — the hero is still far bigger',
     head.figure >= rowType.n * 2, { head, rowType });
 
