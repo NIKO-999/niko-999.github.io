@@ -1046,23 +1046,106 @@ body {
 /* ── the turn ──
    Icon only, and named by aria: a word here would be a third thing in a
    head that already holds a day and a figure. */
+/* ── THE PILL WEARS WHAT IT OPENS ──
+   It was a bare 19px glyph on the card's own ground, and it read as a
+   decoration rather than a control — six affordances were rendered
+   over the real card before this one, and what settled it is that
+   none of the six said anything about the BACK. This does: the pill
+   carries the objectives face's own sheen and its own travelling
+   rim, so the thing you press looks like the thing it turns to.
+
+   The ground is mixed from the palette exactly as the back's is —
+   thirteen themes move --red and --ink together, and a gradient in
+   hex would be somebody else's card on twelve of them. */
 .wk-turn {
   flex: none;
-  width: 30px; height: 30px;
-  margin: -5px -4px -5px 0;
-  border: 0; padding: 0;
-  background: none;
+  position: relative;
+  width: auto; height: 26px;
+  margin: -2px -3px -2px 0;
+  padding: 0 9px;
+  border: 0;
+  border-radius: 13px;
   cursor: pointer;
   display: grid;
   place-items: center;
+  background:
+    radial-gradient(128% 82% at 12% -8%,
+      color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
+    radial-gradient(120% 88% at 92% 106%,
+      color-mix(in srgb, var(--ink) 13%, transparent), transparent 58%),
+    linear-gradient(148deg,
+      color-mix(in srgb, var(--red) 7%, transparent) 0%,
+      transparent 42%,
+      color-mix(in srgb, var(--ink) 7%, transparent) 100%),
+    var(--paper);
 }
 .wk-turn svg {
-  width: 19px; height: 19px;
+  position: relative; z-index: 1;
+  width: 15px; height: 15px;
   fill: none; stroke: var(--dim); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .wk-turn:active svg { stroke: var(--red); }
 .wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
+
+/* The card's foil, at pill scale and by the same mechanism: an outer
+   box masked to its own border width, and a SQUARE turning inside it.
+   Square matters — a 200%-by-200% box is not, and at 45 degrees a
+   non-square leaves the pill's ends unlit for part of every turn,
+   which reads as a fault rather than as a highlight. Sized off the
+   pill's HEIGHT, which is the smaller dimension, so 340% clears the
+   diagonal of a box three times as wide as it is tall. */
+.tn-foil {
+  position: absolute;
+  inset: 0;
+  border-radius: 13px;
+  padding: 1.4px;
+  pointer-events: none;
+  overflow: hidden;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+.tn-foil > i {
+  position: absolute;
+  left: 50%; top: 50%;
+  height: 340%;
+  aspect-ratio: 1;
+  transform: translate(-50%, -50%);
+  background: conic-gradient(from 0deg,
+    transparent 0deg,
+    color-mix(in srgb, var(--red) 92%, transparent) 26deg,
+    color-mix(in srgb, var(--paper) 70%, transparent) 40deg,
+    color-mix(in srgb, var(--ink) 55%, transparent) 62deg,
+    transparent 104deg,
+    transparent 180deg,
+    color-mix(in srgb, var(--red) 92%, transparent) 206deg,
+    color-mix(in srgb, var(--paper) 70%, transparent) 220deg,
+    color-mix(in srgb, var(--ink) 55%, transparent) 242deg,
+    transparent 284deg,
+    transparent 360deg);
+  animation: tnFoil 5s linear infinite;
+  /* ── PAUSED UNLESS YOU CAN SEE IT ──
+     Seven cards are in the document at all times and each has this
+     control on its front face. Left running that is seven conic
+     gradients in seven masked layers, six of them behind a shut card
+     76px wide and one of them behind a schedule turned away from you,
+     costing a compositor pass a frame to draw nothing. The card's own
+     rim already keeps this rule; this is the same rule one level in. */
+  animation-play-state: paused;
+}
+.day.is-open:not(.is-flipped) .wk-front .tn-foil > i { animation-play-state: running; }
+@keyframes tnFoil {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg); }
+}
+/* Still, not gone — the rim is the thing that was asked for, and a
+   pill that loses its edge under reduced motion loses the half that
+   says it is a control. */
+@media (prefers-reduced-motion: reduce) {
+  .day.is-open:not(.is-flipped) .wk-front .tn-foil > i { animation-play-state: paused; }
+}
 
 /* ── MAIN OBJECTIVES ──
    The face names itself. It is the sessions' treatment from the front —

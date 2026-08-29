@@ -665,6 +665,37 @@ come back mirrored — a control 11px from its own right edge reported
 227px from the card's right, which is 238 minus 11, the same corner
 seen from behind.
 
+**THE TURN CONTROL WEARS WHAT IT OPENS.** It was a bare 19px glyph on
+the card's own ground and it read as a decoration rather than a
+control. Six affordances were rendered over the real card first — a
+hairline pill, a tint chip, the glyph plus a word, the accent, a
+folded corner, and a card-with-an-arrow glyph — and what settled it is
+that none of the six said anything about the BACK. The pill carries
+the objectives face's own two marks instead: the sheen, mixed from the
+palette exactly as the back's is, and a rim that travels. The thing
+you press looks like the thing it turns to.
+
+**The turning square is sized off the pill's HEIGHT**, which is its
+smaller dimension, at 340% — enough to clear the diagonal of a box
+three times as wide as it is tall. A non-square leaves the ends unlit
+for part of every turn, which reads as a fault rather than a
+highlight; it is the card's own lesson at a different aspect ratio.
+
+**And it stops when its face turns away.** That check was written
+first as "paused on every card that is not open", which found nothing
+and failed for it — the control is built for the open card alone, so a
+shut card has no rim to pause. The case that exists is the flip: the
+front stays in the document with the schedule turned away from you,
+and a conic gradient turning behind it costs a compositor pass a frame
+to draw what nobody can see. **A check that finds nothing must not
+pass**, so the count is asserted beside the state.
+
+**The glyph's ground moved, so its contrast was re-measured.** `--dim`
+went from flat paper to four layers of wash. Measured on composited
+pixels to 3:1, because a glyph is a graphic — the arithmetic only
+knows about `--paper` and this repo has already shipped one thing that
+passed the arithmetic and read 2.92:1 on screen.
+
 **The mark is a checklist and a target, reduced.** The reference had
 four ticked rows and a target with an arrow through it, which at the
 19px this is drawn at is a smudge with a hole in it. Two rows, one ring

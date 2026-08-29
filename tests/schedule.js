@@ -1118,10 +1118,91 @@ const SAID = [
   ok('...with the turn control only on the open card',
     await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 1);
 
+  /* ── the pill wears what it opens ──
+     Six affordances were rendered over the real card and what settled
+     it is that none of the others said anything about the BACK. So
+     the claim is not "it looks like a button" — it is that the pill
+     carries the objectives face's own two marks, a sheen mixed from
+     the palette and a rim that travels, and that the rim only turns
+     where somebody can see it.
+
+     The GROUND is read as a composited pixel, never off the cascade:
+     it is four layers of color-mix over --paper, and a theme that
+     resolved none of them would still report a background string. */
+  const pill = await page.evaluate(() => {
+    const t = document.querySelector('.day.is-open .wk-front .wk-turn');
+    const f = t.querySelector('.tn-foil > i');
+    const cs = getComputedStyle(t), fs = getComputedStyle(f);
+    const mask = getComputedStyle(t.querySelector('.tn-foil'));
+    const r = f.getBoundingClientRect();
+    return {
+      /* A ring is a mask with the middle taken out, and the composite
+         is the whole mechanism: without `exclude` the turning square
+         floods the pill and buries the glyph. */
+      xor: (mask.maskComposite || mask.webkitMaskComposite || '')
+        .split(',').map((v) => v.trim()).filter((v) => v !== 'exclude').length === 0,
+      /* SQUARE, sized off the pill's height. A non-square leaves the
+         ends unlit for part of every turn, which reads as a fault. */
+      square: Math.abs(r.width - r.height) < 1 && r.height > t.getBoundingClientRect().height * 2,
+      turning: fs.animationName === 'tnFoil' && fs.animationPlayState === 'running',
+      sheen: (cs.backgroundImage.match(/gradient/g) || []).length,
+      /* The BACK's control must not have one: that face already wears
+         the card's own rim, and a second light 30px inside it is two
+         lights on one object. */
+      onBack: !!document.querySelector('.day.is-open .wk-back .tn-foil'),
+    };
+  });
+  ok('the pill carries the objectives face’s sheen and its rim',
+    pill.sheen >= 3 && pill.xor && pill.square, pill);
+  ok('...the rim turns, and only on the face you can see',
+    pill.turning && !pill.onBack, pill);
+
+  /* The glyph went from --dim on flat paper to --dim on four layers of
+     wash. Measured on composited pixels rather than computed — this
+     repo has shipped one thing that passed the arithmetic and read
+     2.92:1 on screen — and to 3:1, because a glyph is a graphic. */
+  {
+    const b = await page.$eval('.day.is-open .wk-front .wk-turn',
+      (e) => { const r = e.getBoundingClientRect();
+               return { x: r.x, y: r.y, width: r.width, height: r.height }; });
+    const png = PNG.sync.read(await page.screenshot({ clip: b }));
+    const seen = new Map(), px = [];
+    for (let i = 0; i < png.data.length; i += 4) {
+      const p = [png.data[i], png.data[i + 1], png.data[i + 2]];
+      px.push(p);
+      const k = (p[0] >> 2) + ',' + (p[1] >> 2) + ',' + (p[2] >> 2);
+      const e = seen.get(k);
+      if (e) e.n++; else seen.set(k, { n: 1, p });
+    }
+    let ground = null;
+    seen.forEach((e) => { if (!ground || e.n > ground.n) ground = e; });
+    let ink = ground.p, far = -1;
+    px.forEach((p) => { const d = Math.abs(lum(p) - lum(ground.p));
+                        if (d > far) { far = d; ink = p; } });
+    const r = +ratio(ink, ground.p).toFixed(2);
+    ok(`the glyph still clears 3:1 on the sheen (${r}:1)`, r >= 3, { r, ground: ground.p });
+  }
+
   await page.click('.day.is-open .wk-front .wk-turn');
   await page.waitForTimeout(700);
   ok('pressing it turns the card over', await page.$eval('.day.is-open',
     (d) => d.classList.contains('is-flipped')));
+
+  /* ── and the pill's rim stops when its face turns away ──
+     Written first as "paused on every card that is NOT open", which
+     found nothing and failed for it: the control is built for the
+     open card alone, so the shut cards have no rim to pause. The case
+     that does exist is this one — the front is still in the document
+     with the schedule turned away from you, and a conic gradient
+     turning behind it costs a compositor pass a frame to draw what
+     nobody can see. Same rule the card's own rim keeps, one level in.
+
+     A check that finds nothing must not pass, which is why the count
+     is asserted beside the state. */
+  ok('...and the pill’s rim stops once its face is turned away',
+    await page.$$eval('.day.is-open .wk-front .tn-foil > i',
+      (i) => i.length === 1
+        && getComputedStyle(i[0]).animationPlayState === 'paused'));
   /* MEASURED, not the class. backface-visibility is what makes this a
      card with a back rather than two panels that swap, and without it
      the schedule reads through the objectives mirror-imaged. */

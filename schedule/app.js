@@ -950,6 +950,16 @@
         var turn = scEl('button', 'wk-turn');
         turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
         turn.innerHTML = OBJ_MARK;
+        /* The foil goes on the FRONT's control only. The back already
+           wears the card's own rim, and a second one 30px inside it is
+           two lights on one object. A real element with a child rather
+           than a pseudo, for the same reason the card's is: a mask
+           applies to an element AND its content, so the turning square
+           has to be masked BY the ring rather than be it. */
+        var tf = scEl('i', 'tn-foil');
+        tf.setAttribute('aria-hidden', 'true');
+        tf.appendChild(scEl('i'));
+        turn.insertBefore(tf, turn.firstChild);
         turn.addEventListener('click', function () { scFlip(d, true); });
         head.appendChild(turn);
       }
