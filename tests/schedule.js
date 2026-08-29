@@ -1431,10 +1431,29 @@ const SAID = [
     facing.a <= -0.99 && facing.back === 'hidden', facing);
   ok('an empty back says what the face is for',
     (await page.$$eval('.day.is-open .ob-empty', (p) => p.length)) === 1);
-  /* A heading over nothing names a list that is not there, and the
-     empty state already says what the face is for. */
-  ok('...and is not headed, because there is nothing to head',
-    (await page.$$eval('.day.is-open .ob-head', (h) => h.length)) === 0);
+  /* HEADED ANYWAY, and it was not. The argument for drawing the
+     heading only over a list was sound and wrong about which nothing
+     this is: an empty card is not a card with no heading, it is a card
+     with no objectives yet, and the heading is the thing that says so.
+     Without it the face opens on a plus and a sentence floating in a
+     gradient, anchored to nothing. */
+  ok('...and is headed all the same, so the empty face is still a list',
+    (await page.$$eval('.day.is-open .ob-head b',
+      (h) => h.map((x) => x.textContent).join())) === 'Main objectives');
+
+  /* ── AND THE FRONT IS NOT DRAWN THROUGH IT ──
+     The running row's sweep is an infinite transform animation, hence
+     its own compositor layer, and a composited descendant of a
+     backface-hidden ancestor is not reliably culled with it: on iOS the
+     whole running row came through the objectives face MIRRORED, over
+     the card you were reading. Chromium does not reproduce it, so this
+     asserts the property that makes it impossible rather than the
+     symptom — and it has to be checked AFTER the turn has settled,
+     because the front is deliberately still visible for the first half
+     of it. */
+  ok('...with the front no longer drawn at all behind it',
+    await page.$eval('.day.is-open .wk-front',
+      (e) => getComputedStyle(e).visibility === 'hidden'));
 
   /* ── THE SAME CORNER ON BOTH FACES ──
      The control sat between the day and the hours on the front and at
@@ -3540,8 +3559,46 @@ const SAID = [
       paths.includes('POST /v1/claim'), paths);
     ok('you are on the board, out of your own ticks',
       await fp.$$eval('.fr-row', (r) => r.length) === 1);
+    /* ── A PROFILE FIRST ──
+       On a fresh claim there is no nickname, so the thing to do first
+       is offered first: your row says "You", which is a label rather
+       than a name, and a friend who adds you back sees a code. Setting
+       one has to take the offer away — a "create a profile" that never
+       leaves is a task you can never finish — so both states are
+       measured here rather than only the empty one. */
     ok('and the action waiting is Add a friend',
-      (await glyphs('#scFrPane')) === 'Add a friend|plus');
+      (await glyphs('#scFrPane')) === 'Add a friend|plus', await glyphs('#scFrPane'));
+    ok('...with the board calling you by the name you set, not "You"',
+      await fp.$eval('.fr-row.is-me .fr-n', (e) => e.textContent) === 'Niko');
+
+    /* ── A PROFILE FIRST, when there is no name yet ──
+       This fixture arrives already named, so the unnamed state is
+       reached by taking the name away rather than by assuming it: on a
+       fresh claim your row says "You", which is a label rather than a
+       name, and a friend who adds you back sees a code. The thing to
+       do first is offered first — and setting it has to take the offer
+       away, because a "create a profile" that never leaves is a task
+       you can never finish. Both states, because each passes on the
+       other's bug. */
+    const setName = async (v) => {
+      await fp.evaluate((n) => {
+        const r = JSON.parse(localStorage.getItem('sched.net.v1'));
+        r.name = n;
+        localStorage.setItem('sched.net.v1', JSON.stringify(r));
+      }, v);
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.waitForTimeout(700);
+    };
+    await setName('');
+    ok('...and with no name yet, a profile is offered before a friend is',
+      (await glyphs('#scFrPane')) === 'Create a profile|plus Add a friend|plus',
+      await glyphs('#scFrPane'));
+    ok('...and your row falls back to the label until you pick one',
+      await fp.$eval('.fr-row.is-me .fr-n', (e) => e.textContent) === 'You');
+    /* Put it back, because everything below this was written under it. */
+    await setName('Niko');
+    ok('...and setting one takes the offer away again',
+      (await glyphs('#scFrPane')) === 'Add a friend|plus', await glyphs('#scFrPane'));
     /* The turn-on sheet used to carry the sentence about what leaves,
        on the argument that a paragraph you press through is a decision.
        Nobody presses through anything now, so it has to be on the board

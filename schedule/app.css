@@ -958,6 +958,26 @@ body {
   overflow: hidden;
 }
 .wk-back { transform: rotateY(180deg); }
+
+/* ── A TURNED FACE IS NOT DRAWN, and backface-visibility alone is not
+   enough to do that ──
+   The running row's sweep is an infinite animation on `transform`, so
+   it is promoted to its own compositor layer — and a composited
+   descendant of a backface-hidden ancestor is not reliably culled with
+   it. On iOS the whole running row came through the objectives face
+   MIRRORED: "Read" backwards, its time backwards, over the card you
+   were reading. Chromium does not reproduce it, which is why this is a
+   rule about the FACE rather than a fix aimed at the sweep — the pill
+   leaked the same way for the same reason, and the next animated thing
+   added to the front would too.
+
+   HIDDEN HALFWAY THROUGH THE TURN, not at the start of it: the front
+   is the thing rotating away and you are still looking at it for the
+   first half. `visibility` transitions as a discrete property, so a
+   delay of half the flip is all this takes. Coming back it is
+   immediate, because by then the front is what you are turning to. */
+.wk-front { visibility: visible; transition: visibility 0s; }
+.day.is-flipped .wk-front { visibility: hidden; transition: visibility 0s linear .26s; }
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {

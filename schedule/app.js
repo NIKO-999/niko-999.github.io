@@ -1664,15 +1664,17 @@
     back.appendChild(head);
 
     var all = scObjFor(day);
-    /* Only over something. A heading on an empty card names a list that
-       is not there — the empty state already says what the face is for,
-       and two sentences over nothing is furniture. */
-    if (all.length) {
-      var oh = scEl('div', 'ob-head');
-      oh.appendChild(scEl('b', null, 'Main objectives'));
-      oh.appendChild(scEl('i'));
-      back.appendChild(oh);
-    }
+    /* ALWAYS, and it was drawn only over a list that existed. The
+       argument for that was sound — a heading over nothing names
+       something that is not there — and it was wrong about which
+       nothing this is: an empty card is not a card with no heading, it
+       is a card with no objectives YET, and the heading is what says
+       so. Without it the face opens on a plus and a sentence floating
+       in the middle of a gradient, anchored to nothing. */
+    var oh = scEl('div', 'ob-head');
+    oh.appendChild(scEl('b', null, 'Main objectives'));
+    oh.appendChild(scEl('i'));
+    back.appendChild(oh);
     var list = scEl('ol', 'ob-list');
     all.forEach(function (o, i) {
       var li = scEl('li');
@@ -3272,6 +3274,19 @@
          up. The sentence under it is what the turn-on sheet used to
          say — it stays on the board rather than being shown once and
          pressed through, since nobody presses through it any more. */
+      /* ── A PROFILE FIRST, and it is one field ──
+         Before a nickname there is nothing to add anybody TO: your row
+         says "You", which is a label rather than a name, and a friend
+         who adds you back sees a code. So the thing to do first is
+         offered first, and it stops being offered the moment it is
+         done — a permanent "create a profile" on a screen where you
+         already have one is a task you can never finish. */
+      if (!net.name) {
+        add.appendChild(scLink('Create a profile', scNameSheet));
+        add.appendChild(scEl('p', 'fr-note',
+          'A nickname, and that is the whole of it. Until you pick one '
+          + 'your friends see your code where your name should be.'));
+      }
       add.appendChild(scLink('Add a friend', scAddSheet));
       add.appendChild(scEl('p', 'fr-note',
         'Your name, picture, ticks and logs are on the server. '
@@ -3528,6 +3543,19 @@
     return new Date(at).toDateString().slice(4, 10);
   }
 
+  /* ── your name, and it is the whole profile ──
+     One place, because there are two ways in: this settings sheet, and
+     the board itself before you have set one. Two copies of a field
+     that writes the same key is two places for it to drift. */
+  function scNameSheet() {
+    scTextSheet('Your name', 'Name', net.name, function (v) {
+      net.name = (v || '').slice(0, 24);
+      scNetSave();
+      scPushNow();
+      scPaintFriends();
+    });
+  }
+
   /* ── turning it on ── */
   function scNetSheet() {
     scSheet(net.on ? 'Friends' : 'Turn on friends', function (body) {
@@ -3601,13 +3629,7 @@
       var nm = scEl('button', 'menu-item');
       nm.appendChild(document.createTextNode('Name'));
       nm.appendChild(scEl('span', 'sub-note', net.name || 'not set'));
-      nm.addEventListener('click', function () {
-        scTextSheet('Name', 'Name', net.name, function (v) {
-          net.name = (v || '').slice(0, 24);
-          scNetSave();
-          scPushNow();
-        });
-      });
+      nm.addEventListener('click', scNameSheet);
       body.appendChild(nm);
 
       var off = scEl('button', 'menu-item bad');

@@ -721,6 +721,31 @@ about the ELEMENT rather than aimed at the bug: a face turned away has
 no control to press, so there is nothing to draw whichever way an
 engine would have culled it.
 
+**A TURNED FACE IS NOT DRAWN, and `backface-visibility` alone does
+not do that.** The running row's sweep is an infinite animation on
+`transform`, so it is promoted to its own compositor layer — and a
+composited descendant of a backface-hidden ancestor is not reliably
+culled with it. On iOS the whole running row came through the
+objectives face MIRRORED, over the card you were reading. It is the
+pill's bug a second time, from a different element, which is why the
+rule is now about the FACE: `.day.is-flipped .wk-front` goes
+`visibility: hidden`, so the next animated thing added to the front is
+covered on the day it is added.
+
+**Hidden HALFWAY through the turn, not at the start of it.** The front
+is the thing rotating away and you are still looking at it for the
+first half. `visibility` transitions as a discrete property, so a
+delay of half the flip is the whole mechanism; coming back it is
+immediate, because by then the front is what you are turning to.
+
+**The face is headed whether or not it has a list.** `MAIN OBJECTIVES`
+was drawn only over objectives that existed, on the argument that a
+heading over nothing names something that is not there. That was right
+about headings and wrong about which nothing this is: an empty card is
+not a card with no heading, it is a card with no objectives YET, and
+the heading is what says so. Without it the face opens on a plus and a
+sentence floating in a gradient, anchored to nothing.
+
 **One box, two skins.** The two faces' controls have to land on the
 same pixel, so the box is shared and only the surface differs. Written
 as two boxes with two sets of margins they came out 1px apart across
@@ -1187,6 +1212,14 @@ unset and falls through to their CODE — unique, and the string you
 typed to add them. Nobody picks it as a nickname, and the one person
 it could honestly belong to is the one row that is not drawn from peer
 data.
+
+**A profile is offered before a friend is.** Before a nickname there
+is nothing to add anybody to: your row says "You", which is a label
+rather than a name, and a friend who adds you back sees a code. So the
+thing to do first is offered first — and it stops being offered the
+moment it is done, because a "create a profile" that never leaves is a
+task you can never finish. Both states are measured, since each passes
+on the other's bug.
 
 **And your own row opens you.** Rows were pressable only when there
 was a friend behind them, on the rule that a name you can press which
