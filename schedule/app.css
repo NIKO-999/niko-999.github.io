@@ -289,30 +289,6 @@ body {
   color: var(--spent);
 }
 
-/* ── what is happening, under the dot ──
-   Absolutely placed at the dot's own percentage and NUDGED back inside
-   the track when it would hang off an end: a label whose left edge is
-   off the page is worse than one that is a few pixels from where it
-   points. Its own row rather than sharing the ends' — at 05:45 the dot
-   is at 0%, so the two would collide on the one morning the label
-   matters most. */
-.sp-now { position: relative; height: 14px; margin-top: 5px; }
-.sp-now span {
-  position: absolute; top: 0; left: 0;
-  white-space: nowrap;
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .005em;
-  color: var(--dim);
-}
-.sp-now span[hidden] { display: none; }
-.sp-now b { font-weight: 700; color: var(--ink); }
-
-.title:focus-visible {
-  outline: 2px solid var(--red);
-  outline-offset: 3px;
-}
-
 /* ── say it ──
    In the sheet, because the bar's microphone is gone. Full width and
    labelled: it is the only route to speech now, and an icon alone

@@ -1773,90 +1773,20 @@
       if (on) live = el;
     }
 
-    /* ── the hero ──
-       Always the same three parts and always the same shape: a state,
-       a CLOCK TIME as the figure, and what it is about underneath.
-
-       The figure is a time rather than the countdown, which was the
-       other candidate and is the more obviously useful number. A
-       countdown cannot hold one shape — it is "42", then "1 h 30 m",
-       then "in 2 h" — so at 58px it reflows the whole head every time
-       it crosses an hour. A time is four or five glyphs forever, sets
-       in tabular figures, and the duration still gets said, in the
-       caption where changing width costs nothing. */
     /* The dot is the one thing up here that moves with the clock, so
-       it is repainted on the same half-minute pass the label is. */
+       it is repainted on the same half-minute pass the rows are.
+
+       AND IT IS THE ONLY THING LEFT. There was a hero under the span —
+       a state, a 44px clock time and a sentence, then a 10px label
+       riding the dot — and each round of taking one out made the next
+       one look like what it was: the running block is already the one
+       row on the open card wearing the accent and a sweep, four inches
+       below, and the dot already says where in the day that is. A head
+       that repeats the card is a head you stop reading. */
     scDaySpan();
-
-    var mine = scByDay(today);
-    var running = null, next = null;
-    mine.forEach(function (it) {
-      if (it.s <= now && now < it.e) running = it;
-      else if (it.s > now && !next) next = it;
-    });
-
-    /* ── the label ──
-       The block's NAME is the emphasis and the rest is the note on it,
-       so the two are separate elements rather than one string at one
-       weight. No state word when something is running: the label sits
-       under the dot, and a label under the mark for now means now.
-       When nothing is, the state IS the fact — "Next", or which day —
-       so it goes in front. */
-    var lead = '', tail;
-    if (running) {
-      lead = running.n;
-      tail = scSpan(running.e - now);
-    } else if (next) {
-      lead = next.n;
-      tail = 'in ' + scSpan(next.s - now);
-    } else {
-      var ahead = null;
-      for (var k = 1; k <= 7 && !ahead; k++) {
-        var d = (today + k) % 7, list = scByDay(d);
-        if (list.length) ahead = { d: d, it: list[0], k: k };
-      }
-      if (!ahead) { $('scLiveOf').hidden = true; return; }
-      lead = ahead.it.n;
-      /* The other two branches say how far off it is; a day away is too
-         far for that to mean anything, so this one prints the clock
-         time and the day instead. */
-      tail = (ahead.k === 1 ? 'tomorrow' : FULL[ahead.d]) + ' '
-        + sc12(ahead.it.s) + ' ' + scMer(ahead.it.s);
-    }
-
-    var lab = $('scLiveOf');
-    lab.hidden = false;
-    lab.textContent = '';
-    lab.appendChild(scEl('b', null, lead));
-    lab.appendChild(document.createTextNode(' · ' + tail));
-    scSpanNow();
   }
 
-  /* Under the dot, and nudged back inside the track at either end. The
-     text is written by scLive and the dot placed by scDaySpan, so this
-     runs after both — a clamp computed before the words are in is a
-     clamp on the previous block's width. */
-  function scSpanNow() {
-    var lab = $('scLiveOf'), dot = $('scSpanDot');
-    if (lab.hidden || $('scSpan').hidden) return;
-    var b = dot.parentNode.getBoundingClientRect();
-    var box = lab.parentNode.getBoundingClientRect();
-    if (!b.width) return;
-    /* IN PIXELS, off the TRACK's box — not the dot's own percentage.
-       The dot is positioned inside `.sp-track`, which sits between the
-       two time labels, and this row is the full width of the span: the
-       same percentage in the two is a different place on screen, and
-       the first version put the label 6px off the mark it points at. */
-    var pc = parseFloat(dot.style.left) || 0;
-    lab.style.left = (b.left - box.left + b.width * pc / 100) + 'px';
-    lab.style.transform = 'translateX(-50%)';
-    var a = lab.getBoundingClientRect();
-    if (!a.width) return;
-    var dx = 0;
-    if (a.left < b.left) dx = b.left - a.left;
-    else if (a.right > b.right) dx = b.right - a.right;
-    if (dx) lab.style.transform = 'translateX(calc(-50% + ' + Math.round(dx) + 'px))';
-  }
+
 
   /* ═══════════════════════════════════════════════════════════
      THEMES

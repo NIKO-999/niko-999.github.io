@@ -657,10 +657,6 @@ const SAID = [
     await page.$$eval('.day:not(.is-today) .row[data-id] .t',
       (t) => t.length > 0 && t.every((x) => getComputedStyle(x).display !== 'none')));
 
-  /* The hero is read part by part rather than as one string, because
-     its whole design is that the figure holds ONE shape whatever the
-     state — a clock time, never a duration that grows a unit and
-     reflows the head every time it crosses an hour. */
   /* The running row is 13px wider than the rest so its rule can reach
      into the margin. Its columns still have to line up with every other
      row — and this is the only place in the file guaranteed to HAVE a
@@ -719,34 +715,25 @@ const SAID = [
     calm.rule === 'rgb(226, 35, 26)' && calm.weight > calm.plain, calm);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
-  const hero = await page.evaluate(() => ({
-    of: document.getElementById('scLiveOf').textContent,
-    /* The block's NAME is the emphasis and the rest is a note on it, so
-       the two are separate elements — one string at one weight was the
-       version this replaced. */
-    lead: document.querySelector('#scLiveOf b').textContent,
-    /* The 44px clock time and its eyebrow are gone and must not come
-       back: the span draws where in the day you are, and this label
-       sits under the dot saying what is there. Asserted as ABSENCE of
-       the elements, not of their text — an emptied <b> still reserves
-       its line. */
-    fig: !document.querySelector('.live') && !document.querySelector('.caption'),
-    /* Under the DOT, which is the whole point of moving it here. Read
-       as boxes: the label's middle within a few px of the dot's, or
-       clamped to an end of the track. */
-    mid: (() => {
-      const l = document.getElementById('scLiveOf').getBoundingClientRect();
-      const d = document.getElementById('scSpanDot').getBoundingClientRect();
-      const t = document.getElementById('scSpanDot').parentNode.getBoundingClientRect();
-      return { off: Math.round((l.left + l.right) / 2 - (d.left + d.right) / 2),
-               inside: l.left >= t.left - 0.5 && l.right <= t.right + 0.5 };
-    })(),
+  /* ── nothing under the span but the span ──
+     There was a hero here: a state, a 44px clock time and a sentence,
+     then a 10px label riding the dot. All of it said what the open
+     card says four inches below — the running block is the one row
+     wearing the accent and a sweep — and the dot already says where in
+     the day that is. Asserted as the ABSENCE of the elements rather
+     than of their text, because an emptied node still reserves a line,
+     and by measuring that the deck starts within a head's height of
+     the top rather than trusting a class. */
+  const quiet = await page.evaluate(() => ({
+    parts: ['.live', '.caption', '#scLiveOf', '#scLiveState']
+      .filter((s2) => document.querySelector(s2)),
+    headBottom: Math.round(document.querySelector('.head').getBoundingClientRect().bottom),
+    running: [...document.querySelectorAll('.day.is-open .row.is-now .n')]
+      .map((n) => n.textContent).join(),
   }));
-  ok('the label under the dot names the running class and counts it down',
-    hero.lead === 'Trading' && hero.of === 'Trading · 1 h 30 m'
-    && hero.fig, hero);
-  ok('...and it sits under the dot, inside the track',
-    Math.abs(hero.mid.off) <= 2 && hero.mid.inside, hero.mid);
+  ok('the head carries no second copy of the running block',
+    quiet.parts.length === 0 && quiet.headBottom < 200, quiet);
+  ok('...and the open card is where it is said', quiet.running === 'Trading', quiet);
 
   /* ── the head stays a label ──
      Read RELATIVE to the two figures around it, never as a px literal:
@@ -756,7 +743,7 @@ const SAID = [
      What is claimed is rank, which is the thing that was nearly lost —
      a 38px wordmark was built here and taken back out, and this is what
      says it did not creep back. The name sits under the date it is
-     printed beneath and far under the hero's figure. */
+     printed beneath. */
   const head = await page.evaluate(() => {
     const px = (el) => parseFloat(getComputedStyle(el).fontSize);
     const t = document.querySelector('.title');
@@ -821,7 +808,7 @@ const SAID = [
   /* ── a block’s name is its row’s subheading ──
      The name is what you scan for. It was 14px/500 — the same volume as
      the time beside it — and these say it now outranks both its own
-     time and the place inside it, without reaching the hero. */
+     time and the place inside it. */
   const rowType = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.row[data-id]')]
       .find((x) => !x.classList.contains('is-now') && !x.classList.contains('is-past'));
@@ -1933,12 +1920,12 @@ const SAID = [
   const tal = await page.evaluate(() => ({
     up: !document.getElementById('scTally').hidden,
     rail: document.getElementById('scRail').hidden,
-    hero: document.getElementById('scSpan').hidden,
+    span: document.getElementById('scSpan').hidden,
     cards: document.querySelectorAll('.ty-card').length,
     cap: document.getElementById('scTallyCap').textContent,
   }));
   ok('the tally is a third view and it replaces the week',
-    tal.up && tal.rail && tal.hero, tal);
+    tal.up && tal.rail && tal.span, tal);
   ok('five cards, and the list is not editable from anywhere',
     tal.cards === 5, tal);
   ok('and nothing is logged on a fresh day', tal.cap === '0 of 5 today', tal);

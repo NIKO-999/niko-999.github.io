@@ -308,37 +308,18 @@ carrying it: a string nothing renders and nothing can edit is not
 preserved data, it is a key that outlives everyone who knows what it
 was for.
 
-**AND THE LABEL SITS UNDER THE DOT.** "Trading · 48 min left" at 10px,
-on its own row under the span, centred on the mark it is about. It was
-a 9px eyebrow and a 14px sentence on two registers of their own,
-saying about the dot's position what the dot's position says. On the
-line it belongs to it needs no state word at all — a label under the
-mark for now means now — and the state only appears when nothing is
-running, where the state IS the fact.
+**AND THERE IS NOTHING UNDER THE SPAN BUT THE SPAN.** There was a
+hero: a state, a 44px clock time and a sentence, then a 10px label
+riding the dot. Each round of taking one out made the next one look
+like what it was — the running block is already the one row on the
+open card wearing the accent and a sweep, four inches below, and the
+dot already says where in the day that is. A head that repeats the
+card is a head you stop reading. `scLive` now does two things: mark
+the rows behind you, and move the dot.
 
-**Positioned in PIXELS off the TRACK's box, never off the dot's own
-percentage.** The dot lives inside `.sp-track`, which sits between the
-two time figures; the label's row is the full width of the span. The
-same percentage in the two is a different place on screen, and the
-first version put the label six pixels off the thing it points at. It
-is nudged back inside the track at either end, because a label whose
-edge is off the page is worse than one a few pixels from its mark, and
-at 05:45 the dot is at 0%.
-
-**AND THE 44px CLOCK TIME IS GONE.** It was the biggest object on the
-screen and it was saying twice what the two things either side of it
-already said: the span draws where in the day you are, the caption
-says how long is left. What is left is a state and a sentence — "NOW"
-over "Trading · 48 min left". The eyebrow lost its "· until" with it,
-because a preposition pointing at a figure that is not drawn reads as
-a string that failed to fill in, and the caption took a step up to 14
-because it is the hero now rather than a note under a number.
-
-The one branch that has to print a clock time is the one with nothing
-left today: "in 7 h" means nothing about tomorrow morning, so that
-caption carries the time the figure used to. `tests/schedule.js`
-asserts the ABSENCE of the element rather than of its text — an
-emptied `<b>` still reserves its line.
+Asserted as the ABSENCE of the elements, never of their text — an
+emptied node still reserves its line — and by measuring where the head
+ends, so a rule that merely hid the hero would not pass.
 
 **The span is the divider.** The hero used to hang off a 3px black
 rule, which was the loudest object above the fold and carried nothing.
