@@ -2509,6 +2509,16 @@ body {
   transform: translateY(8px);
   transition: opacity .22s ease, transform .22s ease;
 }
+/* ── `[hidden]` HAS TO BE SAID ONCE A THING TAKES A `display` ──
+   The app puts the toast away with the hidden attribute, which works
+   only because of the browser's own [hidden] { display: none } — and
+   any author rule outranks it. This one is `display: flex`, so a put-
+   away toast was still a full-width fixed bar at z-index 60, sitting
+   at opacity 0 across the screen 92px up. Invisible and still taking
+   every press that landed on it: the sheet's own foot controls are
+   exactly there. It is the deck's bug and the rail's bug, a third
+   time, and the property was being set correctly throughout. */
+.toast[hidden] { display: none; }
 .toast.is-open { opacity: 1; transform: translateY(0); }
 .toast span { flex: 1; }
 .toast button {
@@ -2519,4 +2529,324 @@ body {
   color: var(--on-red);
   font: 700 13px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   THE WORKOUT DECK
+
+   Finish a training block and it asks what you trained. Five cards
+   in a stack, one at the front, the two behind it peeking out — the
+   shape is the reference's and the surface is this app's: the card
+   is --ink with --paper on it, so it is the one INVERTED thing on
+   the screen and it does not need a second colour to say so.
+
+   EVERY WORKOUT HAS ITS OWN COLOUR AND IT IS A LITERAL, which is the
+   one exception on this screen: everything else mixes its colour out
+   of the palette, because thirteen themes move --red and --ink
+   together and a hex would be somebody else's app on twelve of them.
+   A colour that says WHICH thing this is has to be the same colour on
+   every theme or it has stopped being that thing's colour — the
+   habits screen already argued this. It never says WHETHER.
+
+   THE COLOUR ON THE CARD IS MIXED, NEVER DRAWN RAW. These hues on
+   --ink measure between about 2.6:1 and 4.1:1, which fails the bar
+   for the 16px figure sitting in them. --wc-lit is the hue mixed
+   toward whatever --paper is on this card, which lightens it on a
+   light palette and darkens it on a dark one: the same correction
+   either way round, because the card's polarity follows the theme's.
+   tests/schedule.js measures it on composited pixels.
+   ═══════════════════════════════════════════════════════════ */
+
+.wc-sub {
+  margin: -2px 0 15px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--dim);
+}
+
+/* Bled to the sheet's edges, so the row of kinds is cut by the SCREEN
+   rather than stopping short of it — the deck's own lesson: a strip
+   that ends inside the padding reads as a short list rather than one
+   that continues. */
+.wc-chips {
+  display: flex;
+  gap: 7px;
+  margin: 0 calc(var(--pad) * -1) 15px;
+  padding: 2px var(--pad) 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wc-chips::-webkit-scrollbar { display: none; }
+
+.wc-chip {
+  flex: none;
+  height: 33px;
+  padding: 0 14px;
+  border: 1px solid var(--hair);
+  border-radius: 17px;
+  background: none;
+  color: var(--dim);
+  font: 700 12.5px/1 'Inter', system-ui, sans-serif;
+  letter-spacing: .01em;
+  cursor: pointer;
+}
+.wc-chip[aria-pressed="true"] {
+  border-color: var(--ink);
+  background: var(--ink);
+  color: var(--paper);
+}
+.wc-chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* The two behind are offset down and right, so the stack peeks at the
+   bottom and the trailing edge. The box has to hold the front card
+   PLUS that offset plus the shadow under it — a height equal to the
+   card clips the pair that make it a deck. */
+.wc-deck {
+  position: relative;
+  height: 312px;
+}
+
+.wc {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 284px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding: 19px 20px 21px;
+  border: 0;
+  border-radius: 22px;
+  text-align: left;
+  cursor: pointer;
+
+  /* The wordmark runs off all four edges, so the card has to cut it —
+     and the radius is what makes that a card rather than a crop. */
+  overflow: hidden;
+
+  /* --paper on --ink, and the wash is the only thing over it. A flat
+     black rectangle is a hole in the page; one corner lit by the
+     workout's own colour is a card with a light on it.
+
+     --wc-hue is written onto the element by the card that uses it, so
+     the value here is the fallback and the declaration tests/names.js
+     needs. */
+  --wc-hue: var(--red);
+  /* ── 52%, AND THE ARITHMETIC IS NOT WHERE THAT CAME FROM ──
+     Mixed 66% toward --paper the figures compute to 4.6:1 against
+     --ink at the worst of thirteen palettes by nine hues, and they
+     MEASURED 3.28:1 on screen — because the card is not --ink: there
+     is a wash of the hue in one corner and a swoop across the middle,
+     and the arithmetic knows about neither. It is the same gap the
+     friends crown found, in the same direction and about the same
+     size. 46% leaves the margin that gap costs — 52 measured 4.47:1,
+     which is under the bar by a rounding error, and this repo has a
+     rule about calling that a margin. And
+     tests/schedule.js measures the result on composited pixels rather
+     than recomputing this sum. */
+  --wc-lit: color-mix(in srgb, var(--wc-hue) 46%, var(--paper));
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
+    var(--ink);
+  color: var(--paper);
+  box-shadow: 0 3px 14px color-mix(in srgb, var(--ink) 26%, transparent);
+}
+
+/* ── THE TWO BEHIND ──
+   Mixed toward --paper rather than given an alpha: these sit at 86%
+   and 70% of the way to the page, which reads as depth on both
+   polarities. An opacity would let the page through and make the pair
+   a different colour on every backdrop a theme sets.
+
+   THE TRANSFORM IS WHAT MAKES THEM THE CARDS BEHIND, and it was
+   deleted once already — a rewrite of the block above this one took
+   the region between two anchors and these two rules were inside it.
+   Nothing threw; the deck simply arrived as a single card with a
+   heavier shadow, which is not a shape anybody would report. The check
+   in tests/schedule.js reads this matrix back off .wc.b1 while the
+   deal is running, so it fails whether the rule is deleted or
+   overwritten by keyframes naming `transform`. */
+.wc.b1 {
+  transform: translate(15px, 11px) scale(.965);
+  background: color-mix(in srgb, var(--ink) 86%, var(--paper));
+  /* The delay belongs in the same rule as the transform, not in a
+     second .wc.b1 further down: one selector spelled twice in one file
+     is this repo's most-repeated bug, and a dead rule that still
+     cascades is not dead. */
+  animation-delay: .06s;
+}
+.wc.b2 {
+  transform: translate(28px, 21px) scale(.93);
+  background: color-mix(in srgb, var(--ink) 70%, var(--paper));
+  animation-delay: 0s;
+}
+
+/* ── THE SWOOP ──
+   Behind everything, filling the card. `slice` on a box whose ratio
+   matches the card's crops almost nothing, so each curve keeps the
+   shape it was drawn as while still running off both edges.
+
+   NON-SCALING STROKES. A width in viewBox units is multiplied by
+   whatever the box is stretched to, and it fails silently: the drawing
+   stays correct and comes out several times too heavy. The waves this
+   replaced were four black bars across the card for exactly that. */
+.wc-sw {
+  position: absolute;
+  inset: 0;
+  width: 100%; height: 100%;
+  display: block;
+  pointer-events: none;
+}
+/* 15%, not 20%: the crescent covers the top-right corner, which is
+   where the two figures and the glyph sit, and it was taking about a
+   fifth off their measured contrast on its own. */
+.sw-f { fill: color-mix(in srgb, var(--wc-hue) 15%, transparent); stroke: none; }
+.sw-l {
+  fill: none;
+  stroke: color-mix(in srgb, var(--wc-hue) 46%, transparent);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.sw-s {
+  fill: none;
+  stroke: color-mix(in srgb, var(--wc-hue) 26%, transparent);
+  stroke-width: 26;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+/* ── HOW HARD IT WAS ──
+   A SIBLING of the card, never a control inside it: the card is a
+   <button>, and a button inside a button is invalid and collapses to
+   one press while looking exactly right. The card's Effort figure is
+   a readout of this row. */
+.wc-eff { margin-top: 15px; }
+.wc-eff-l {
+  display: block;
+  margin-bottom: 8px;
+  font-size: 12.5px;
+  color: var(--dim);
+}
+ /* .wc-ef as well as .wc-chip: these wear the chip's clothes and are
+    a different control, and without a class of their own every query
+    for "the workout chips" returns nine of them — which is how the
+    first pass at this drove the deck by pressing an effort. */
+.wc-eff-r { display: flex; gap: 7px; }
+
+.wc-top {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+.wc-top div { display: flex; flex-direction: column; gap: 5px; }
+.wc-top div span {
+  font-size: 9.5px;
+  font-weight: 700;
+  letter-spacing: .13em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--paper) 58%, transparent);
+}
+.wc-top div b {
+  font-size: 16px;
+  font-weight: 800;
+  letter-spacing: -.01em;
+  color: var(--wc-lit);
+}
+
+/* Sized in the sheet, never on the markup: an inline <svg> with no
+   width or height falls back to 300x150 and fills its parent, and it
+   is silent — the glyph is still correct, just enormous. */
+.wc-g {
+  width: 40px; height: 40px;
+  margin-left: auto;
+  flex: none;
+  fill: none;
+  stroke: var(--wc-lit);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* auto on the top margin, so the name and its line sit on the floor of
+   the card whatever the description wraps to. */
+.wc-n {
+  margin: auto 0 0;
+  font-size: 34px;
+  font-weight: 800;
+  letter-spacing: -.032em;
+  line-height: 1;
+  color: var(--paper);
+}
+.wc-d {
+  margin-top: 9px;
+  font-size: 13.5px;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--paper) 72%, transparent);
+}
+
+/* ── THE DECK IS DEALT ──
+   All three fly in, back one first, and it replays on every press —
+   which is what makes changing the pick read as dealing a hand rather
+   than repainting a panel.
+
+   IT ANIMATES `translate` AND `scale`, NEVER `transform`. The two
+   behind ARE a transform: b1 sits at translate(15px, 11px) scale(.965)
+   and that is what makes it the card behind. Keyframes naming
+   `transform` replace that outright, so the pair land square on top of
+   the front card and the deck arrives as one card. The individual
+   properties compose with it instead — translate, then scale, then
+   whatever `transform` says — so one set of keyframes is correct for
+   all three positions and none of them has to know its own resting
+   place. */
+@keyframes wcDeal {
+  from { translate: 0 34px; scale: .94; opacity: 0; }
+  to   { translate: 0 0; scale: 1; opacity: 1; }
+}
+.wc { animation: wcDeal .42s cubic-bezier(.22, 1, .36, 1) both; }
+/* Back to front, and 60ms apart: dealt front-first the card you are
+   being asked about is the first thing to arrive and then gets covered
+   twice, which reads as the deck landing ON your answer. */
+.wc.is-front { animation-delay: .12s; }
+
+.wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+
+.wc-clear {
+  display: block;
+  margin: 15px auto 0;
+  padding: 10px 14px;
+  border: 0;
+  background: none;
+  color: var(--dim);
+  font: 600 13px/1 'Inter', system-ui, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .wc { animation: none; }
+}
+
+/* ── what you trained, on the row it happened on ──
+   NOT the accent, and .row .n em is. The red on this screen already
+   means today's name, the block running now, the session you are in
+   and the room a block is in; a fifth would stop it meaning anything.
+   The room stays red because it is where you have to be — a workout
+   is what you already did, which is the quieter fact of the two.
+
+   More specific than .row .n em, so the order in this file is not
+   what decides it. That has bitten four times here. */
+.row .n em.wo {
+  color: var(--dim);
+  letter-spacing: .07em;
+}
+.row.is-past .n em.wo { color: var(--spent); }
+
+/* Two controls at most and they are a row: stacked, "All kinds" and
+   "Take it off" are two underlined sentences under a card, which reads
+   as a paragraph rather than as two ways out. */
+.wc-foot {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
 }

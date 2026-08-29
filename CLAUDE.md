@@ -1518,6 +1518,152 @@ came out as SPECKS on the real card — the 4x sheet said they were fine.
 That is the second time an enlargement has lied about a treatment; a
 glyph is judged at the size it is drawn, full stop.
 
+## Finish a training block and it asks what you trained
+
+**IT HANGS OFF THE TICK, NOT THE TAP.** Tap edits — that is the week's
+rule and it stays — so the moment to ask is the one press that already
+means *that happened*. Three doors: the tally's Train card, a long
+press on the row, and the editor's *Done today*. The editor is not the
+convenience one, it is the only one a keyboard or a screen reader can
+reach; the long press is a shortcut from the row it is about.
+
+**Two levels, because a split is not a workout.** Four kinds — Bro
+split, PPL, Run, Recovery — and the one you press opens into its own.
+One flat list put Push beside Run as if they were the same answer and
+had nowhere to put a session that is not a lift. A fourth level of
+*which press variation* would be a training log, and this is one press
+at the end of a session.
+
+**RECOVERY IS A GROUP, NOT A ROW UNDER A SPLIT.** A stretch, a slow
+incline walk and a cold plunge have nothing in common except when you
+do them, which is exactly what makes them a group. Without it they are
+not loggable at all, and a day spent recovering reads as a day off.
+
+**The key is QUALIFIED — `ppl.legs`, not `legs`.** Legs is in two
+groups and Core is in two more, so a bare key names two cards with two
+colours, and the one it resolved to would be whichever came first in
+the list. That is not a decision anybody took.
+
+**Every workout carries a literal hex, and it is the one exception on
+this screen.** Everything else mixes its colour out of the palette,
+because thirteen themes move `--red` and `--ink` together. A colour
+that says WHICH thing this is has to be the same on every theme or it
+has stopped being that thing's colour — the habits screen's argument.
+It never says whether: the card is `--ink` with `--paper` on it in
+every palette, so the hue is a wash in one corner and the figures at
+the top.
+
+**46%, and the arithmetic is not where that came from.** Mixed 66%
+toward `--paper` the figures compute to 4.6:1 against `--ink` across
+thirteen palettes by nine hues — and measured **3.28:1** on screen,
+because the card is not `--ink`: there is a wash of the hue in one
+corner and a swoop across the middle, and the sum knows about neither.
+Same gap as the friends crown, same direction, about the same size. 52
+then measured 4.47, which is under the bar by a rounding error and is
+the `--spent` lesson a third time.
+
+**EFFORT IS YOURS, AND THE MINUTES ONLY SUGGEST IT.** It went in as a
+field somebody typed — Hard, Hard, Hard, Easy — which is the app
+holding an opinion about a session it knows nothing about. Then it was
+derived from the time, which is honest and still wrong, and said so in
+its own words: an Easy run at forty minutes came back *Moderate*. So
+the minutes set where the control starts and a press moves it. **The
+row is a SIBLING of the card**, because the card is a `<button>` and a
+button inside a button is invalid and collapses to one press while
+looking exactly right.
+
+**A swoop, not a wordmark, and not waves.** Three treatments: four
+contour waves, stretched to the card's width with the stroke stretched
+with them, which drew as black bars lying across it; then the card's
+own name blown up and cropped, which was better and still wrong,
+because it says in ghost type what the 34px line at the bottom already
+says and the eye reads a word whether or not it is meant to. A curve
+carries no reading at all — it fills the empty middle, gives the name
+something to sit on, and there is nothing in it to understand.
+
+**Six of them, and which one is DATA.** Twenty-two cards is too many
+for one drawing, and the deck is three deep so two are always on screen
+together. Assigned by character rather than one each: the heavy lifts
+share the solid band, the runs the open arcs, recovery the quietest.
+The viewBox is 100x80 against a 354x284 card — the same ratio to within
+half a percent — so `slice` crops almost nothing. **The strokes are
+non-scaling**, which is the waves' lesson kept: a width in viewBox
+units is multiplied by whatever the box is stretched to, and it fails
+silently, because the drawing stays correct and comes out several times
+too heavy.
+
+**Ten lift glyphs were drawn twice and cut both times.** Chest, Back,
+Shoulders, Arms, Legs, Abs, Push, Pull and Core. At 26px beside the
+name every one was a smudge; redrawn for the 40px slot they were
+legible and WRONG — the back's V-taper read as a shield, the flexed arm
+as a squiggle, the bent leg as a hook, the waist with two bands as a
+coffee bean. **The four runs work because a pace profile is not a
+picture of an object**, it is the shape of the session, which is a
+thing a line can be. A lift has no equivalent: every honest drawing of
+one is a bar with plates, so ten would be one silhouette ten times.
+
+A ramp for the incline walk and a snowflake for the cold went the same
+way, later and for a softer reason: both were legible and both were
+stock. A right triangle is a set square and a six-barbed flake is the
+one in every icon set there has ever been. The first ramp was also
+drawn **mirrored**, descending left to right against four profiles that
+all rise, and that survived two rounds of looking at it.
+
+**RECOVERY HAS NO GLYPH AT ALL.** It had the row's stretching figure,
+which is a stick person — and at 40px that is a circle on four sticks
+rather than a marker. It was also false on two of the four cards: a
+figure stretching over one whose line reads *Abs, obliques and lower
+back*. Nothing honest replaces it. A rolled mat reads as a hook, a
+padlock or a capsule; a circular arrow is a refresh button; a foam
+roller is a battery; a dome is the wake glyph. An empty slot is what
+this app already concluded about the ten lifts, and the card **skips
+the element** rather than drawing an empty 40px box the layout still
+pays for.
+
+**All four pace profiles sit on the same baseline and run left to
+right.** `easy` had its baseline at 19.6 with the profile a parallel
+line above it — no figure and no ground, which at 40px is an equals
+sign. And **tempo is a plateau, not a step**: drawn as rise-and-hold it
+was `long` shifted left, the same silhouette with the knee in a
+different place, which at this size is a parameter rather than a shape
+— and the two are adjacent cards in one group.
+
+**`[hidden]` HAS TO BE SAID ONCE A THING TAKES A `display`, and the
+toast never said it.** `.toast` is `display: flex`, so a put-away toast
+was a full-width fixed bar at z-index 60 sitting at opacity 0 across
+the screen 92px up — invisible, and taking every press that landed on
+it, which is exactly where a sheet's own foot controls are. The rail's
+bug and the dots' bug, a third time, and the attribute was being set
+correctly throughout.
+
+**`scClean` mints an id for every block that has none, and `scLoad` did
+not save the result.** `blockLog` and `trainLog` are keyed BY id, so a
+stored week that predates ids got new ones on every open and orphaned
+its whole record — silently, and again on the next open. Writing the
+cleaned shape back is what makes an id a fact about a block rather than
+a fact about this page view. `scTrainLoad` had the same hole: a repair
+held only in memory is redone every boot and lost the moment anything
+else writes the key, which is how *repaired, not discarded* quietly
+becomes *discarded on the next write*.
+
+**The two cards behind ARE a transform**, and it was deleted once
+already — a rewrite of the rule above them took the region between two
+anchors and both were inside it. Nothing threw; the deck simply arrived
+as a single card with a heavier shadow, which is not a shape anybody
+would report. It is why the deal animates `translate` and `scale`
+rather than `transform`: keyframes naming `transform` replace the
+resting position outright, and the pair land square on the front card.
+The check reads the matrix back off `.wc.b1` **while the animation is
+running**, so it fails on the deletion and on the overwrite alike.
+
+**Agents were put on the glyphs and both were worth having.** One asked
+to critique and one to propose, each required to render in the real app
+at 390x844 and read its own screenshot. They independently found the
+mirrored ramp; the critic found that dropping every glyph would not fix
+Recovery, because the stick figure was the group's FALLBACK. That is
+the shape to keep: a critic that must name the failure, and a designer
+that must produce a picture — never a verifier asked to argue.
+
 ## The sweep
 
 `.claude/workflows/sweep.js` drives the orrery across every state —

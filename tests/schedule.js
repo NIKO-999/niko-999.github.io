@@ -2447,6 +2447,12 @@ const SAID = [
     document.querySelector('.ty-card[data-item="t"]').click();
     return localStorage.getItem('sched.tick.v1');
   });
+  /* Ticking Train opens the workout deck over this screen. Nothing
+     below cares which workout it was, so it is dismissed — but it has
+     to be dismissed, because the scrim under a sheet takes every press
+     that lands on it. */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(360);
   ok('a tick stores the day and the id, and never the list itself',
     /^\{"\d{4}-\d{2}-\d{2}":\{"t":1\}\}$/.test(stored), { stored });
 
@@ -3514,7 +3520,13 @@ const SAID = [
        button >> nth=1` is Train's STRIP rather than Mind's card, and
        the panel it opens then swallows every click after it. */
     await fp.click('.ty-card[data-item="t"]');
-    await fp.waitForTimeout(220);
+    await fp.waitForTimeout(500);
+    /* Train now asks what you trained, so the deck is up over the
+       tally and its scrim takes every press after it. Dismissed
+       rather than answered: this section is about the board's
+       figures, and the answer is not one of them. */
+    await fp.keyboard.press('Escape');
+    await fp.waitForTimeout(360);
     await fp.click('.ty-card[data-item="m"]');
     await fp.waitForTimeout(220);
     /* A number nothing else in the app could produce, typed into
@@ -4369,6 +4381,432 @@ const SAID = [
     ok('...while the edit fields stay strict 24-hour, which is all they take',
       fields.length === 2 && fields.every((v) => /^\d{2}:\d{2}$/.test(v)), fields);
     await up.close();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE WORKOUT DECK
+
+     Finish a training block and it asks what you trained: four kinds
+     of session, and the one you press opens into its own. Everything
+     here fails silently — a record filed under a key two cards share,
+     a figure at 3:1 on the card's own ground, a deck whose back cards
+     land square on top of the front one — so none of it is read off a
+     declaration.
+     ═══════════════════════════════════════════════════════════ */
+  {
+    /* Its own require and its own scale: the pair at the top of this
+       file are block-scoped to the section that declared them. */
+    const { PNG: PNG5 } = require('pngjs');
+    const dpr5 = 2;
+    const deck = async (theme) => {
+      await page.evaluate((t) => {
+        if (t) localStorage.setItem('sched.theme.v1', t);
+        else localStorage.removeItem('sched.theme.v1');
+        localStorage.removeItem('sched.train.v1');
+        localStorage.removeItem('sched.tick.v1');
+        localStorage.removeItem('sched.log.v1');
+        localStorage.setItem('sched.view.v1', 'tally');
+      }, theme);
+      await page.reload({ waitUntil: 'networkidle' });
+      await page.waitForTimeout(320);
+      await page.click('[data-item="t"]');
+      await page.waitForTimeout(560);
+    };
+    const face = () => page.evaluate(() => ({
+      title: document.getElementById('scSheetTitle').textContent,
+      chips: [...document.querySelectorAll('.wc-chips .wc-chip')].map((c) => c.textContent),
+      on: [...document.querySelectorAll('.wc-chips .wc-chip')]
+        .findIndex((c) => c.getAttribute('aria-pressed') === 'true'),
+      cards: [...document.querySelectorAll('.wc')].map((c) => c.className),
+      front: (document.querySelector('.wc.is-front') || {}).dataset,
+      foot: [...document.querySelectorAll('.wc-foot button')].map((b) => b.textContent),
+    }));
+
+    await deck(null);
+    const one = await face();
+    ok('ticking a training block asks what you trained',
+      one.title === 'What did you train?'
+      && one.chips.join('|') === 'Bro split|PPL|Run|Recovery', one);
+
+    /* A DECK IS THREE CARDS AND ONE OF THEM IS PRESSABLE. The pair
+       behind show 15px and 28px of an edge; focusable, they are two
+       tab stops that do nothing and two more things a screen reader
+       has to walk past. */
+    const shape = await page.evaluate(() => {
+      const all = [...document.querySelectorAll('.wc')];
+      const front = document.querySelector('.wc.is-front');
+      const r = front.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return { n: all.length,
+        tags: all.map((c) => c.tagName),
+        hidden: all.filter((c) => c.getAttribute('aria-hidden') === 'true').length,
+        onTop: front.contains(hit) };
+    });
+    ok('...as a stack of three, one of them a button, the front one on top',
+      shape.n === 3 && shape.tags.filter((t) => t === 'BUTTON').length === 1
+      && shape.hidden === 2 && shape.onTop, shape);
+
+    /* ── THE DEAL ──
+       All three fly in, and the keyframes name `translate` and `scale`
+       rather than `transform`. That is the whole assertion: b1 and b2
+       ARE a transform — translate(15px, 11px) scale(.965) is what makes
+       one the card behind — so keyframes touching `transform` replace
+       it, the pair land square on the front card, and the deck arrives
+       as a single card. Read as the resting transform surviving while
+       the animation is running. */
+    const deal = await page.evaluate(() => {
+      const of = (s) => {
+        const el = document.querySelector(s);
+        const cs = getComputedStyle(el);
+        return { name: cs.animationName, delay: cs.animationDelay,
+          m: cs.transform, state: el.getAnimations().length };
+      };
+      return { b2: of('.wc.b2'), b1: of('.wc.b1'), front: of('.wc.is-front') };
+    });
+    const m1 = (deal.b1.m.match(/matrix\(([^)]+)\)/) || [])[1] || '';
+    ok('all three are dealt in, on their own delays',
+      [deal.b2, deal.b1, deal.front].every((d) => d.name === 'wcDeal' && d.state > 0)
+      && new Set([deal.b2.delay, deal.b1.delay, deal.front.delay]).size === 3, deal);
+    ok('...and the deal does not flatten the two behind onto the front card',
+      /^0\.965, *0, *0, *0\.965, *15, *11$/.test(m1.trim()), deal.b1.m);
+
+    /* ── STEPPING IN ──
+       A split is not a workout. The first press says which KIND of
+       session, the second says which one — on the same three controls,
+       so the chips have to be REBUILT rather than relabelled: four
+       kinds and six body parts are different lengths, and a pass that
+       only rewrites the text leaves a chip standing that selects an
+       index nothing is at. */
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(520);
+    const two = await face();
+    ok('pressing a kind opens it, and the chips become its own',
+      two.title === 'Bro split' && two.chips.length === 6
+      && two.chips.join('|') === 'Chest|Back|Shoulders|Arms|Legs|Abs'
+      && two.foot.join('|') === 'All kinds', two);
+
+    /* ── EVERY KEY IS QUALIFIED ──
+       Legs is in two groups and Core is in two more. A bare 'legs' on
+       disk names two cards with two colours, and the one it resolved
+       to would be whichever came first in the list — which is not a
+       decision anybody took. Walked across all four groups, because a
+       collision is only visible from outside one of them. */
+    const keys = [];
+    for (let g = 0; g < 4; g++) {
+      if (g) {
+        await page.click('.wc-foot button');
+        await page.waitForTimeout(360);
+        await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
+        await page.waitForTimeout(360);
+        await page.click('.wc.is-front');
+        await page.waitForTimeout(420);
+      }
+      const n = await page.$$eval('.wc-chips .wc-chip', (c) => c.length);
+      for (let i = 0; i < n; i++) {
+        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
+        await page.waitForTimeout(120);
+        keys.push(await page.$eval('.wc.is-front', (e) => e.dataset.workout));
+      }
+    }
+    ok(`every workout is stored under its own key (${keys.length} of them)`,
+      keys.length === 18 && new Set(keys).size === 18
+      && keys.every((k) => /^(bro|ppl|run|rec)\.[a-z]+$/.test(k))
+      && keys.filter((k) => /\.legs$/.test(k)).length === 2, keys);
+
+    /* ── EFFORT IS YOURS, AND THE MINUTES ONLY SUGGEST IT ──
+       Two wrong answers came before this. A field somebody typed is
+       the app holding an opinion about a session it knows nothing
+       about; worked out from the time it is honest and still wrong,
+       and said so in its own words — an Easy run at forty minutes
+       came back "Moderate". So the minutes set where the control
+       starts and a press moves it.
+
+       THE ROW IS A SIBLING OF THE CARD, never a control inside it:
+       the card is a <button>, and a button inside a button is invalid
+       and collapses to one press while looking exactly right. */
+    await page.click('.wc-foot button');
+    await page.waitForTimeout(360);
+    await page.click('.wc-chips .wc-chip:nth-child(1)');
+    await page.waitForTimeout(360);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(420);
+    const figs = [];
+    for (let i = 0; i < 6; i++) {
+      await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
+      await page.waitForTimeout(120);
+      figs.push(await page.$eval('.wc.is-front', (e) => [...e.querySelectorAll('.wc-top div')]
+        .map((d) => d.querySelector('span').textContent + ' ' + d.querySelector('b').textContent)));
+    }
+    const said = figs.map((f) => f.join(' / '));
+    const eff = (s) => (s.match(/Effort (\w+)/) || [])[1];
+    const min = (s) => +(s.match(/Est\. time (\d+)/) || [])[1];
+    ok('every card says how long and what that costs',
+      said.every((s) => /^Est\. time \d+ min \/ Effort (Easy|Moderate|Hard)$/.test(s)), said);
+    ok('...and the minutes are what suggest it, on every card in the group',
+      said.every((s) => eff(s) === (min(s) < 25 ? 'Easy' : min(s) < 50 ? 'Moderate' : 'Hard'))
+      && new Set(said.map(eff)).size === 3, said);
+
+    const effRow = await page.evaluate(() => {
+      const r = document.querySelector('.wc-eff-r');
+      const b = [...r.querySelectorAll('.wc-ef')];
+      return { names: b.map((x) => x.textContent),
+        on: b.filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent),
+        card: document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent,
+        outside: !document.querySelector('.wc .wc-eff-r'),
+        labelled: r.getAttribute('aria-labelledby') === 'scEffLab' };
+    });
+    ok('the effort row stands outside the card, named, showing the suggestion',
+      effRow.names.join('|') === 'Easy|Moderate|Hard' && effRow.outside
+      && effRow.labelled && effRow.on.length === 1
+      && effRow.on[0] === effRow.card, effRow);
+
+    await page.click('.wc-eff-r .wc-ef:nth-child(3)');
+    await page.waitForTimeout(320);
+    const overruled = await page.evaluate(() => ({
+      card: document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent,
+      on: [...document.querySelectorAll('.wc-eff-r .wc-ef')]
+        .filter((x) => x.getAttribute('aria-pressed') === 'true').map((x) => x.textContent),
+    }));
+    ok('...and pressing one overrules it, on the card as well as the row',
+      overruled.card === 'Hard' && overruled.on.join('') === 'Hard', overruled);
+
+    /* Moving to another card has to re-suggest — sixty minutes of legs
+       and twenty of abs are not the same session — while a press must
+       survive the deck being redrawn under it, which it is on every
+       chip and on every effort. */
+    await page.click('.wc-chips .wc-chip:nth-child(5)');
+    await page.waitForTimeout(320);
+    const moved = await page.evaluate(() =>
+      document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent);
+    ok('...and the next card suggests its own again rather than keeping the last',
+      moved === 'Hard', moved);
+
+    /* ── THE SWOOP ──
+       A curve through the card and nothing else: the wordmark this
+       replaced said in ghost type what the 34px name at the bottom
+       already says, and the eye reads a word whether or not it is
+       meant to. Six drawings across twenty-two cards, assigned by
+       character, so a deck three cards deep is never the same curve
+       twice over.
+
+       BOTH HALVES. That every card HAS one passes on a single drawing
+       used everywhere, which is wallpaper; that six exist passes on a
+       set nothing reaches. And the strokes have to be non-scaling —
+       the failure there is silent, since the drawing stays correct
+       and simply comes out several times too heavy. */
+    const swoops = [];
+    for (let g = 0; g < 4; g++) {
+      if (g) {
+        await page.click('.wc-foot button');
+        await page.waitForTimeout(340);
+        await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
+        await page.waitForTimeout(340);
+        await page.click('.wc.is-front');
+        await page.waitForTimeout(400);
+      } else {
+        await page.click('.wc-foot button');
+        await page.waitForTimeout(340);
+        await page.click('.wc-chips .wc-chip:nth-child(1)');
+        await page.waitForTimeout(340);
+        await page.click('.wc.is-front');
+        await page.waitForTimeout(400);
+      }
+      const n = await page.$$eval('.wc-chips .wc-chip', (c) => c.length);
+      for (let i = 0; i < n; i++) {
+        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
+        await page.waitForTimeout(110);
+        swoops.push(await page.$eval('.wc.is-front .wc-sw', (e) => e.dataset.swoop));
+      }
+    }
+    const drawn = await page.$eval('.wc.is-front .wc-sw', (e) => {
+      const p = e.querySelector('path');
+      const box = e.getBoundingClientRect();
+      const d = p.getAttribute('d');
+      return { n: e.querySelectorAll('path').length, d,
+        stroke: getComputedStyle(p).vectorEffect,
+        wide: box.width, tall: box.height };
+    });
+    ok(`every card carries a swoop, and there are six of them (${new Set(swoops).size})`,
+      swoops.length === 18 && swoops.every((k) => /^[a-f]$/.test(k))
+      && new Set(swoops).size === 6, swoops);
+    ok('...drawn past both edges, filling the card, and not stroke-scaled',
+      /^M-6 |^M106 /.test(drawn.d) && /106 |-6[ Z]/.test(drawn.d)
+      && drawn.wide > 300 && drawn.tall > 200
+      && (drawn.stroke === 'non-scaling-stroke' || !drawn.d.includes('sw-')), drawn);
+
+    /* ── THE CARD'S OWN COLOUR, MEASURED ON THE CARD ──
+       Every workout carries a literal hex, which is the one exception
+       on this screen and the habits screen's argument: a colour that
+       says WHICH thing this is has to be the same on every palette or
+       it has stopped being that thing's colour. What it must never do
+       is fail to be readable — these hues on --ink run from about
+       2.6:1 to 4.1:1 raw, so the card mixes each toward its own
+       --paper and this measures the result on composited pixels.
+
+       BOTH POLARITIES. On a dark palette --ink is near-white and the
+       card inverts, so a check written for a black card measures the
+       one case that cannot go wrong. */
+    for (const theme of [null, 'nebula']) {
+      await deck(theme);
+      await page.click('.wc.is-front');                  /* into Bro split */
+      await page.waitForTimeout(500);
+      const worst = { fig: 99, glyph: 99, desc: 99, of: '' };
+      for (let i = 0; i < 6; i++) {
+        await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
+        await page.waitForTimeout(420);
+        const at = await page.evaluate(() => {
+          const c = document.querySelector('.wc.is-front');
+          const box = (s) => { const r = c.querySelector(s).getBoundingClientRect();
+            return { x: r.left + r.width / 2, y: r.top + r.height / 2,
+              l: r.left, r: r.right, t: r.top, b: r.bottom }; };
+          return { name: c.dataset.workout, card: c.getBoundingClientRect().toJSON(),
+            fig: box('.wc-top div b'), g: box('.wc-g'), d: box('.wc-d') };
+        });
+        const png = PNG5.sync.read(await page.screenshot());
+        const px = (x, y) => {
+          const i2 = (png.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
+          return [png.data[i2], png.data[i2 + 1], png.data[i2 + 2]];
+        };
+        /* Ink and ground are taken from the SAME neighbourhood: the
+           card's own gradient and its wordmark both move the ground
+           under a figure, and a ratio against --ink read off the
+           stylesheet would be measuring a colour that is nowhere on
+           screen. Darkest and lightest pixel in a band through the
+           mark is the honest pair, and it is polarity-agnostic. */
+        const band = (b, pad) => {
+          const out = [];
+          for (let x = Math.round(b.l); x < b.r; x++) {
+            for (let y = Math.round(b.t) - pad; y < b.b + pad; y++) out.push(px(x, y));
+          }
+          return out;
+        };
+        const worstOf = (b, pad) => {
+          const s = band(b, pad).sort((p, q) => lum(p) - lum(q));
+          return ratio(s[0], s[s.length - 1]);
+        };
+        const fig = worstOf(at.fig, 1), g = worstOf(at.g, 0), d = worstOf(at.d, 1);
+        if (fig < worst.fig) { worst.fig = fig; worst.of = at.name; }
+        worst.glyph = Math.min(worst.glyph, g);
+        worst.desc = Math.min(worst.desc, d);
+      }
+      const t = theme || 'paper';
+      ok(`the figures clear 4.5:1 on the card on ${t} (worst ${worst.fig.toFixed(2)}:1 on ${worst.of})`,
+        worst.fig >= 4.5, worst);
+      ok(`...the description too, over the wordmark behind it (${worst.desc.toFixed(2)}:1)`,
+        worst.desc >= 4.5, worst);
+      ok(`...and the glyph clears 3:1 as a graphic (${worst.glyph.toFixed(2)}:1)`,
+        worst.glyph >= 3, worst);
+    }
+
+    /* ── IT LANDS ON THE BLOCK, AND IT STAYS THERE ── */
+    await deck(null);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(460);
+    await page.click('.wc-chips .wc-chip:nth-child(5)');           /* Legs */
+    await page.waitForTimeout(420);
+    await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Easy */
+    await page.waitForTimeout(320);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(460);
+    const stored = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.train.v1') || '{}'));
+    const one2 = Object.values(Object.values(stored)[0] || {})[0] || {};
+    ok('picking one files it against that block, with the effort you said',
+      Object.keys(stored).length === 1
+      && one2.k === 'bro.legs' && one2.e === 'Easy', stored);
+
+    /* ── EVERY RECORD WRITTEN BEFORE THE EFFORT EXISTED IS A BARE
+       STRING ──
+       Read as an object those give undefined for both figures: the
+       card opens on nothing and the row draws no name. Normalised on
+       the way in rather than migrated, because this browser owns the
+       record and rewrites it the next time you touch that block. */
+    const old = await page.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.train.v1'));
+      const day = Object.keys(raw)[0], id = Object.keys(raw[day])[0];
+      raw[day][id] = 'ppl.push';
+      localStorage.setItem('sched.train.v1', JSON.stringify(raw));
+      return { day, id };
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(340);
+    const healed = await page.evaluate(([d, i]) =>
+      JSON.parse(localStorage.getItem('sched.train.v1'))[d][i], [old.day, old.id]);
+    ok('a record from before the effort existed is repaired, not thrown away',
+      healed && healed.k === 'ppl.push' && healed.e === 'Hard', healed);
+    await page.evaluate(([d, i]) => {
+      const raw = JSON.parse(localStorage.getItem('sched.train.v1'));
+      raw[d][i] = { k: 'bro.legs', e: 'Easy' };
+      localStorage.setItem('sched.train.v1', JSON.stringify(raw));
+    }, [old.day, old.id]);
+
+    await page.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(360);
+    const row = await page.evaluate(() => {
+      const r = [...document.querySelectorAll('.day.is-today .row[data-id]')]
+        .find((x) => /Train/.test(x.querySelector('.n').firstChild.textContent));
+      const em = r.querySelector('.n em.wo');
+      return { mark: em && em.textContent, label: r.getAttribute('aria-label'),
+        colour: em && getComputedStyle(em).color,
+        accent: getComputedStyle(document.documentElement).getPropertyValue('--red').trim() };
+    });
+    ok('and the row it happened on says what it was, through a reload',
+      row.mark === 'Legs' && / Legs\.? /.test(row.label + ' '), row);
+    /* NOT THE ACCENT. The red on this screen already means today's
+       name, the block running now, the session you are in and the room
+       a block is in — a fifth would stop it meaning anything, and the
+       room beside it on the same row IS red.
+
+       Either grey, because a block behind you fades to --spent with
+       the rest of its row and this fixture's Train is a 06:30 that has
+       already happened. Asserted as "one of the two greys and never
+       the accent" rather than as one hex, which would pass or fail on
+       what time the suite happens to run. */
+    ok('...in a grey, because the accent is spent four times already',
+      ['rgb(74, 74, 74)', 'rgb(115, 115, 115)'].indexOf(row.colour) >= 0, row);
+
+    /* ── UNTICKING TAKES IT WITH IT ──
+       The record is a fact ABOUT a finished block. Left behind on one
+       that is no longer done it is a session the app remembers and the
+       row cannot draw — and the next tick would open the deck already
+       showing an answer nobody gave. */
+    await page.evaluate(() => localStorage.setItem('sched.view.v1', 'tally'));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(360);
+    await page.click('[data-item="t"]');
+    await page.waitForTimeout(420);
+    const gone = await page.evaluate(() => ({
+      /* The KEYS, not the string: scTrainSet deletes the day once its
+         last block goes and the file is then "{}", which is falsy in
+         intent and truthy in JavaScript. */
+      train: Object.keys(JSON.parse(localStorage.getItem('sched.train.v1') || '{}')).length,
+      open: !document.getElementById('scSheet').hidden,
+    }));
+    ok('unticking the block takes the workout off with it, and asks nothing',
+      gone.train === 0 && !gone.open, gone);
+
+    /* ── AND IT IS ONLY ASKED ABOUT TRAINING ──
+       What counts is the keyword table's answer rather than a second
+       list of words kept in step with it by hand. Mind is fed by Walk
+       and Read, which reach the walk and read glyphs, so ticking it
+       must draw no deck at all. */
+    await page.click('[data-item="m"]');
+    await page.waitForTimeout(420);
+    const mind = await page.evaluate(() => ({
+      open: !document.getElementById('scSheet').hidden,
+      ticked: /"m"/.test(localStorage.getItem('sched.tick.v1') || ''),
+    }));
+    ok('a block that is not training is ticked without being asked about',
+      mind.ticked && !mind.open, mind);
+    await page.evaluate(() => {
+      localStorage.removeItem('sched.tick.v1');
+      localStorage.removeItem('sched.log.v1');
+      localStorage.removeItem('sched.train.v1');
+      localStorage.setItem('sched.view.v1', 'list');
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

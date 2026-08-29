@@ -138,6 +138,14 @@
       return;
     }
     state = scClean(raw);
+    /* ── AND THE REPAIR IS SAVED ──
+       scClean mints an id for every block that has none, and without
+       this those ids are new on every single load: blockLog and
+       trainLog are keyed BY id, so a stored week that predates ids
+       orphans its whole record on the next open, silently and
+       repeatedly. Writing the cleaned shape back is what makes an id
+       a fact about a block rather than a fact about this page view. */
+    scSave();
   }
 
   function scSave() {
@@ -1202,9 +1210,17 @@
           scT(it.s) + '\u2013' + scT(it.e) + scMerIf(it.e)));
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
+        /* What you trained, on the block it happened on. It rides the
+           name rather than taking a column: it exists on about one row
+           of a week, and a track held open across every other row for
+           it is the third column the time was moved out of. */
+        var wr = scTrainOf(bd, it.id);
+        var wk = wr && scWorkout(wr.k);
+        if (wk) n.appendChild(scEl('em', 'wo', wk.n));
         row.appendChild(n);
         row.setAttribute('aria-label',
-          it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e) + (it.r ? ', ' + it.r : '') + '. Edit.');
+          it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
+          + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk.n : '') + '. Edit.');
         /* ── tap edits, a long press ticks ──
            The week is where you CHANGE the schedule, so the tap keeps
            doing what it always did. Marking a block done is the tally's
@@ -1240,7 +1256,19 @@
                did not register, and the row only redraws a frame
                later. */
             if (navigator.vibrate) { try { navigator.vibrate(12); } catch (e) {} }
+            /* Unticking takes the workout with it. The record is a fact
+               ABOUT a finished block, so leaving it behind on one that
+               is no longer done is a session the app remembers and the
+               row cannot draw. */
+            if (was) scTrainSet(bd, it.id, '');
             scRender();
+            /* ── the deck, on the press that says it happened ──
+               scSheet takes the toast down on its way up, so this is
+               the toast rather than something after it: naming the
+               block again under a sheet asking about that same block
+               is the sentence and the picture this project keeps
+               having to take back out. */
+            if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
           }, 550);
         });
@@ -2671,9 +2699,31 @@
 
   function scTallyTap(item, day) {
     if (item.k === 'do') {
-      scSetTick(day, item.id, scTicked(day, item.id) ? 0 : 1);
+      var on = !scTicked(day, item.id);
+      /* The return, not the intent: scSetTick refuses a day that has
+         shut, and without this a refused tick still opened the deck —
+         a question about a session the app had just declined to record. */
+      if (!scSetTick(day, item.id, on ? 1 : 0)) return;
+      /* Unticking Train takes the workout off the block it was on, the
+         same as unticking the block itself: a record about a session
+         must not outlive the session being marked done. */
+      var fed = item.from ? scBlocksFor(item, new Date(day + 'T12:00:00').getDay()) : [];
+      if (!on) fed.forEach(function (b) { scTrainSet(day, b.id, ''); });
       scPaintTally();
       if (view === 'list') scRender();
+      /* ── the deck's third door, and the most literal one ──
+         "Press Train and it asks what you trained" is the whole
+         feature said in one sentence, and this card is where somebody
+         actually presses Train.
+
+         ONE BLOCK ONLY. This tick marks every block of that name on
+         the day, so a week with two sessions on a Tuesday has two
+         records and no way to say which card the answer is about —
+         and asking twice in a row for one press is worse than not
+         asking. Two sessions are picked from their own rows, where
+         the question has an answer. */
+      var only = fed.filter(scIsTrain);
+      if (on && only.length === 1) scTrainAsk(only[0], only[0].d, day);
       return;
     }
     scNumSheet(item, day);
@@ -4454,6 +4504,616 @@
   }
 
   /* ═══════════════════════════════════════════════════════════
+     THE WORKOUT DECK
+
+     Finish a training block and it asks what you trained. Five cards
+     dealt into a stack, one at the front and the two behind it
+     peeking out at the corner.
+
+     IT HANGS OFF THE TICK, NOT OFF THE TAP. Tap edits — that is a
+     written rule and the week is where you change the schedule — so
+     the moment to ask is the moment you mark the session done, which
+     is the one press that already means "that happened". A workout
+     nobody trained is not a record worth keeping.
+
+     AND IT IS REACHABLE WITHOUT THE LONG PRESS. The row's press
+     reaches neither a keyboard nor a screen reader, exactly as the
+     tick does not, so the editor carries the same control — the
+     shortcut lives on the row, the feature lives in the sheet.
+
+     IT NEVER LEAVES THE BROWSER. The friends half pushes a COUNT of
+     the blocks you finished, which is what somebody else needs to
+     know whether you showed up. Which split you ran is a different
+     question and nobody asked it: scPush is not called from here and
+     the key is not in the pushed record.
+     ═══════════════════════════════════════════════════════════ */
+
+  /* ── ONE GLYPH, NOT FIVE ──
+     Five drawings were made and every one of them was a different
+     class of object — a barbell with an arrow, a figure on a rail, a
+     squat, a torso, a shoe — which is the right rule when the glyph
+     has to say WHICH. Here it does not: the card already says Push in
+     34px type with a line under it explaining what that means, so a
+     second thing saying the same word in pictures is the sentence and
+     the picture this project keeps having to take back out.
+
+     The weight is what all five have in common — it says this card is
+     a session — so it is the Train row's own dumbbell, reused
+     verbatim. Two dumbbells on one app is the mistake the Steps
+     footprint taught.
+
+     ONE PER GROUP, THEREFORE, AND NOT ONE PER WORKOUT: the weight is
+     right for all four of a split and wrong on a cold plunge, so Run
+     takes the row's shoe and Recovery its stretch. Three glyphs
+     answering the only question a picture is left on this card —
+     which of the three kinds of session this is. */
+  var WORKOUT_ICON = {
+    bro: BLOCK_ICON.train,
+    ppl: BLOCK_ICON.train,
+    run: BLOCK_ICON.run,
+    /* ── RECOVERY HAS NONE, DELIBERATELY ──
+       It had the row's stretching figure, which is a stick person —
+       ruled out for these in capitals two comments up, and drawn at
+       40px it is a circle on four sticks rather than a marker. It was
+       also simply false on two of the four cards: a figure stretching
+       over one whose line reads "Abs, obliques and lower back".
+
+       Nothing honest replaces it. A rolled mat reads as a hook, a
+       padlock or a capsule; a circular arrow is a refresh button; a
+       foam roller is a battery; a dome is the wake glyph. Recovery is
+       four sessions that have nothing in common except when you do
+       them, so there is no object that is all four — and an empty slot
+       is what this file already concluded about the ten lifts. The
+       name is there at 34px with its line under it. */
+    rec: ''
+  };
+
+  /* ── THE SWOOP ──
+     A curve sweeping through the card, behind everything on it. Two
+     things were tried here first and both were wrong. Four contour
+     waves, stretched to the card's width with the stroke stretched
+     with them, drew as black bars lying across it. The card's own
+     name, blown up and cropped, was better and still wrong: it says
+     in ghost type what the 34px line at the bottom already says at
+     full strength, and the eye reads a word whether or not it is
+     meant to.
+
+     A curve carries no reading at all. It fills the empty middle, it
+     gives the name something to sit on, and there is nothing in it to
+     understand — which is the whole job.
+
+     SIX OF THEM, AND WHICH ONE IS DATA. Twenty-two cards is too many
+     for one drawing: every card the same is wallpaper, and the deck is
+     three cards deep so two of them are always on screen together.
+     They are assigned by CHARACTER rather than one each — the heavy
+     lifts share the solid band, the runs share the open arcs, and
+     recovery gets the quietest of them. Cards that are the same kind
+     of session look the same on purpose.
+
+     100x80 AGAINST A CARD THAT IS 354x284, which is the same ratio to
+     within half a percent, so `slice` crops almost nothing and every
+     curve keeps the shape it was drawn as. The paths run from -6 to
+     106 on purpose: a curve that starts inside the card has a visible
+     end, and a visible end is a shape sitting on the card rather than
+     something the card is a window onto.
+
+     THE STROKES ARE NON-SCALING. It is the waves' lesson kept: a
+     stroke width in viewBox units is scaled by whatever the box is
+     stretched to, and the failure is silent — the drawing is still
+     correct and simply several times too heavy. */
+  var SWOOP = {
+    /* One band, and the name sits on it. */
+    a: '<path class="sw-f" d="M-6 54C20 26 48 66 106 18V86H-6Z"/>',
+    /* Two open arcs and nothing filled — the lightest of the six. */
+    b: '<path class="sw-l" d="M-6 44C20 16 48 56 106 8"/>'
+     + '<path class="sw-l" d="M-6 64C20 36 48 76 106 28"/>',
+    /* The band with a hairline running off the top of it. */
+    c: '<path class="sw-f" d="M-6 58C20 30 48 70 106 22V86H-6Z"/>'
+     + '<path class="sw-l" d="M-6 44C20 16 48 56 106 8"/>',
+    /* A crescent off the top-right corner, so the weight is opposite
+       the name rather than under it. */
+    d: '<path class="sw-f" d="M106 -6C60 -6 22 26 -6 78V-6Z"/>',
+    /* Three nested hairlines. */
+    e: '<path class="sw-l" d="M-6 40C22 12 50 52 106 4"/>'
+     + '<path class="sw-l" d="M-6 56C22 28 50 68 106 20"/>'
+     + '<path class="sw-l" d="M-6 72C22 44 50 84 106 36"/>',
+    /* One thick tapering sweep, low and to the right. */
+    f: '<path class="sw-s" d="M-6 66C24 34 46 74 106 14"/>'
+  };
+
+  /* ── AND A GLYPH FOR THE SESSION ITSELF ──
+     WORKOUT_ICON above says which of the four KINDS this is and is the
+     same on every card in a group. This is the other question — which
+     one — and where it has an answer it takes the same 40px slot,
+     because two glyphs on one card is the card saying twice over what
+     it is and the words are what it is for.
+
+     NOT A FIGURE, ANYWHERE IN HERE. A stick person bent into the shape
+     of the muscle it means is the collision this file has run into
+     four times: walk, run and stretch were one silhouette in three
+     poses at 22px, and a body drawn to mean "arms" beside one drawn to
+     mean "abs" is worse, because they differ by which limb is thicker.
+     So: equipment, a shape of muscle with no body attached, or the
+     SHAPE OF THE EFFORT.
+
+     JUDGED AT 40PX AND DRAWN FOR IT. The first cut of these sat at
+     26px beside the name and every one of the lifts was a smudge —
+     two capital Ts for a bench press, a squiggle for an arm. The run
+     profiles were the only four that survived, because they are three
+     strokes each. Given the whole slot they are drawings rather than
+     marks, and the ones that still could not be drawn honestly are
+     simply not here.
+
+     MISSING IS A STATE, NOT A GAP. Stretch has no mark that is not a
+     figure, and a glyph that has to be explained is worse than the
+     group's own: the name is beside it at 34px either way. */
+  var KIND_ICON = {
+    /* ── THE FOUR RUNS ARE PACE PROFILES ──
+       A shallow wave, a plateau, a spike train, and a late rise held.
+       They are the one place on this sheet where the drawing carries
+       something the words do not: Tempo and Intervals are both hard,
+       and they are hard in shapes you can see.
+
+       ALL FOUR SIT ON THE SAME BASELINE AT y21, and the axis running
+       left to right is the whole grammar. `easy` had its baseline at
+       19.6 with the profile a parallel line above it: no figure and no
+       ground, which at 40px is an equals sign rather than a run.
+
+       AND TEMPO IS A PLATEAU, NOT A STEP. Drawn as rise-and-hold it
+       was `long` shifted left — the same silhouette with the knee in a
+       different place, which at this size is a parameter rather than a
+       shape, and the two are adjacent cards in one group. A block you
+       come down off is what a tempo run is anyway. */
+    easy:  '<path d="M2.4 14.6q4.8-3 9.6 0t9.6 0"/>'
+         + '<path d="M2.4 21h19.2" opacity=".4"/>',
+    tempo: '<path d="M2.4 17h3.4l2.6-8.4h7.2l2.6 8.4h3.4"/>'
+         + '<path d="M2.4 21h19.2" opacity=".4"/>',
+    reps:  '<path d="M2.4 17h2.6l1.8-8.6h1.8L10.4 17h2.4l1.8-8.6h1.8L18.2 17h3.4"/>'
+         + '<path d="M2.4 21h19.2" opacity=".4"/>',
+    long:  '<path d="M2.4 17h12.2l3.2-7.6h3.8"/>'
+         + '<path d="M2.4 21h19.2" opacity=".4"/>'
+  };
+
+  /* ── NOTHING ELSE IS IN THAT LIST, AND THAT IS THE RESULT RATHER
+     THAN THE GAP ──
+     Chest, Back, Shoulders, Arms, Legs, Abs, Push, Pull and Core were
+     drawn twice over and cut both times. At 26px beside the name every
+     one was a smudge. Redrawn for the 40px slot they were legible and
+     wrong: the back's V-taper read as a SHIELD, the flexed arm as a
+     squiggle, the bent leg as a hook, and the waist with two bands as
+     a coffee bean.
+
+     The run four work because a pace profile is not a picture of an
+     object — it is the shape of the session, which is a thing a line
+     can be. A lift has no equivalent: every honest drawing of one is a
+     bar with plates on it, so ten of them would be one silhouette ten
+     times. And a glyph that is confidently the wrong object is worse
+     than none, because the card then says something false rather than
+     nothing.
+
+     A RAMP FOR THE INCLINE WALK AND A SNOWFLAKE FOR THE COLD WENT THE
+     SAME WAY, later and for a softer reason: both were legible and
+     both were stock. A right triangle is a set square and a six-barbed
+     flake is the one in every icon set there has ever been — neither
+     is wrong, and neither is worth the slot. The first ramp was also
+     drawn MIRRORED, descending left to right against four pace
+     profiles that all rise, which nobody spotted for two rounds.
+
+     So the lifts wear the group's weight, which is true of all of
+     them, and the name is beside it at 34px with the muscles named
+     under it. If any of these come back it will be because somebody
+     found a drawing, not because the gap looked untidy. */
+
+  function scTrainSwoop(w) {
+    var box = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    box.setAttribute('class', 'wc-sw');
+    box.setAttribute('viewBox', '0 0 100 80');
+    box.setAttribute('preserveAspectRatio', 'xMidYMid slice');
+    box.setAttribute('aria-hidden', 'true');
+    /* Named on the element: the paths are anonymous curves, so this is
+       the only thing a check outside this file can hold the pairing to. */
+    box.setAttribute('data-swoop', w.sw);
+    box.innerHTML = SWOOP[w.sw];
+    return box;
+  }
+
+  var TRAIN_GROUPS = [
+    { k: 'bro', n: 'Bro split', sw: 'a', c: '#e6412f', d: 'One body part a day.', of: [
+      { k: 'chest', sw: 'a', n: 'Chest',     t: 50, c: '#e6412f',
+        d: 'Press, fly and dip.' },
+      { k: 'back',  sw: 'a', n: 'Back',      t: 50, c: '#2f7fe6',
+        d: 'Rows, pulldowns and pull-ups.' },
+      { k: 'delts', sw: 'c', n: 'Shoulders', t: 45, c: '#8a4fe0',
+        d: 'Press and all three heads.' },
+      { k: 'arms',  sw: 'c', n: 'Arms',      t: 40, c: '#e0761a',
+        d: 'Biceps and triceps.' },
+      { k: 'legs',  sw: 'f', n: 'Legs',      t: 60, c: '#17a06b',
+        d: 'Quads, hamstrings, glutes and calves.' },
+      { k: 'abs',   sw: 'd', n: 'Abs',       t: 20, c: '#14a2a2',
+        d: 'Abs, obliques and lower back.' }
+    ] },
+    { k: 'ppl', n: 'PPL', sw: 'c', c: '#2f7fe6', d: 'Push, pull, legs and core.', of: [
+      { k: 'push', sw: 'a', n: 'Push', t: 55, c: '#e6412f',
+        d: 'Chest, shoulders and triceps.' },
+      { k: 'pull', sw: 'a', n: 'Pull', t: 50, c: '#2f7fe6',
+        d: 'Back, lats and biceps.' },
+      { k: 'legs', sw: 'f', n: 'Legs', t: 60, c: '#8a4fe0',
+        d: 'Quads, hamstrings, glutes and calves.' },
+      { k: 'core', sw: 'd', n: 'Core', t: 20, c: '#17a06b',
+        d: 'Abs, obliques and lower back.' }
+    ] },
+    { k: 'run', n: 'Run', sw: 'b', c: '#e08a12', d: 'Easy, tempo, intervals or long.', of: [
+      { k: 'easy',  sw: 'b', n: 'Easy',      t: 40, c: '#17a06b',
+        d: 'Conversational pace, flat.' },
+      { k: 'tempo', sw: 'f', n: 'Tempo',     t: 35, c: '#e0761a',
+        d: 'Comfortably hard, held.' },
+      { k: 'reps',  sw: 'f', n: 'Intervals', t: 45, c: '#e6412f',
+        d: 'Hard efforts, walked or jogged between.' },
+      { k: 'long',  sw: 'b', n: 'Long',      t: 75, c: '#2f7fe6',
+        d: 'Time on the feet, easy throughout.' }
+    ] },
+    { k: 'rec', n: 'Recovery', sw: 'e', c: '#14a2a2', d: 'Walk, stretch, core or cold.', of: [
+      { k: 'incline', sw: 'e', n: 'Incline walk', t: 40, c: '#14a2a2',
+        d: 'Steep, slow, nothing to prove.' },
+      { k: 'stretch', sw: 'e', n: 'Stretch',      t: 20, c: '#8a4fe0',
+        d: 'Mobility and long holds.' },
+      { k: 'core',    sw: 'd', n: 'Core',         t: 20, c: '#17a06b',
+        d: 'Abs, obliques and lower back.' },
+      { k: 'cold',    sw: 'b', n: 'Cold',         t: 10, c: '#2f7fe6',
+        d: 'Plunge or the end of a shower.' }
+    ] }
+  ];
+
+  /* ── EFFORT IS YOURS, AND THE TIME ONLY SUGGESTS IT ──
+     It went in as a fourth field somebody typed — Hard, Hard, Hard,
+     Easy — which is the app holding an opinion about a session it
+     knows nothing about. Then it was worked out from the minutes,
+     which is honest and still wrong: forty minutes is a walk for one
+     person and the hardest thing in their week for another, and an
+     easy run at forty came back "Moderate" in its own words.
+
+     So the minutes only set where the control STARTS. The number is a
+     good guess and a bad verdict, and the difference between those two
+     is one press. Twenty-five and fifty are the only figures in it. */
+  var EFFORTS = ['Easy', 'Moderate', 'Hard'];
+  function scEffort(min) {
+    return min < 25 ? 'Easy' : min < 50 ? 'Moderate' : 'Hard';
+  }
+
+  /* Flattened once, with each workout stamped with the group it came
+     out of and the key it is stored under.
+
+     THE KEY IS QUALIFIED, AND IT HAS TO BE. Legs is in two groups and
+     Core is in two more, so a bare 'legs' on disk names two cards with
+     two colours — and the one it resolved to would be whichever came
+     first in this list, which is not a decision anybody took. */
+  var WORKOUTS = [];
+  TRAIN_GROUPS.forEach(function (grp) {
+    grp.key = grp.k;
+    grp.lab = 'Sessions';
+    grp.val = String(grp.of.length);
+    grp.of.forEach(function (w) {
+      w.gk = grp.k;
+      w.key = grp.k + '.' + w.k;
+      w.lab = 'Est. time';
+      w.val = w.t + ' min';
+      WORKOUTS.push(w);
+    });
+  });
+
+  function scWorkout(k) {
+    for (var i = 0; i < WORKOUTS.length; i++) if (WORKOUTS[i].key === k) return WORKOUTS[i];
+    return null;
+  }
+  function scTrainGroup(k) {
+    for (var i = 0; i < TRAIN_GROUPS.length; i++) {
+      if (TRAIN_GROUPS[i].k === k) return TRAIN_GROUPS[i];
+    }
+    return null;
+  }
+
+  var TRAIN_KEY = 'sched.train.v1';
+  var trainLog = {};                 /* date -> blockId -> { k, e } */
+
+  /* ── EVERY RECORD WRITTEN BEFORE THE EFFORT EXISTED IS A BARE
+     STRING ──
+     Read as an object those give undefined for both figures, and the
+     card then opens on nothing and the row draws no name. Normalised
+     on the way IN rather than migrated on the way out, which is the
+     friends half's own answer to the same question: this browser owns
+     the record and rewrites it the next time you touch that block, so
+     there is nothing to migrate. */
+  function scTrainRec(v) {
+    if (typeof v === 'string') return { k: v, e: '' };
+    if (!v || typeof v !== 'object') return null;
+    return { k: String(v.k || ''), e: String(v.e || '') };
+  }
+
+  function scTrainLoad() {
+    trainLog = scReadJSON(TRAIN_KEY, {});
+    if (!trainLog || typeof trainLog !== 'object' || Array.isArray(trainLog)) trainLog = {};
+    /* Ninety days, the objectives' window and the objectives' reason:
+       this is one record per date, and which split you ran in March is
+       not something anybody wants back.
+
+       REPAIRED, NOT REJECTED — a damaged day is dropped and the rest
+       survives. A key naming a workout this build no longer has goes
+       with it: the card, the row's mark and the name all come out of
+       WORKOUTS, so a kind that is not in it would draw a blank card
+       and a row that says nothing. */
+    var cut = new Date();
+    cut.setDate(cut.getDate() - 90);
+    var floor = scDay(cut);
+    Object.keys(trainLog).forEach(function (day) {
+      var rec = trainLog[day];
+      if (!/^\d{4}-\d{2}-\d{2}$/.test(day) || day < floor
+          || !rec || typeof rec !== 'object' || Array.isArray(rec)) {
+        delete trainLog[day];
+        return;
+      }
+      Object.keys(rec).forEach(function (id) {
+        var r = scTrainRec(rec[id]);
+        if (!r || !scWorkout(r.k)) { delete rec[id]; return; }
+        if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(scWorkout(r.k).t);
+        rec[id] = r;
+      });
+      if (!Object.keys(rec).length) delete trainLog[day];
+    });
+    /* WRITTEN BACK, not just held. The old-shape records this repairs
+       are on disk, and a repair that lives only in memory is redone on
+       every boot and lost the moment anything else writes the key —
+       which is how "repaired, not discarded" quietly becomes
+       "discarded on the next write". */
+    scTrainSave();
+  }
+  function scTrainSave() { scWriteJSON(TRAIN_KEY, trainLog); }
+
+  function scTrainOf(day, id) {
+    return (trainLog[day] && scTrainRec(trainLog[day][id])) || null;
+  }
+  function scTrainSet(day, id, k, e) {
+    if (k) {
+      if (!trainLog[day]) trainLog[day] = {};
+      trainLog[day][id] = { k: k, e: e };
+    } else if (trainLog[day]) {
+      delete trainLog[day][id];
+      if (!Object.keys(trainLog[day]).length) delete trainLog[day];
+    }
+    scTrainSave();
+  }
+
+  /* WHAT COUNTS AS TRAINING IS THE KEYWORD TABLE'S ANSWER, not a
+     second list of words kept in step with it by hand. `train` is the
+     gym on this app — a decision written down in the open beside the
+     table — so anything the table sends there is a session, and
+     adding "hyrox" to that one list makes the deck appear here too. */
+  function scIsTrain(item) {
+    return !!item && scIconFor(item.n) === 'train';
+  }
+
+  /* ── the card ──
+     A <button> at the front and a plain <div> behind, because a stack
+     of focusable cards is two tab stops that do nothing: the pair
+     behind show 15px and 28px of an edge and cannot be pressed. */
+  function scTrainCard(w, cls, pick, ef) {
+    var card = scEl(pick ? 'button' : 'div', 'wc' + (cls ? ' ' + cls : ''));
+    /* Set on the element rather than as a class per workout: these are
+       DATA — another one is a row in TRAIN_GROUPS — and a stylesheet
+       that has to grow a rule alongside it is the same fact in two
+       files, kept in step by hand. */
+    card.style.setProperty('--wc-hue', w.c);
+    card.dataset.workout = w.key;
+    if (pick) {
+      card.type = 'button';
+      card.setAttribute('aria-label',
+        'Trained ' + w.n + (ef ? ', ' + ef.toLowerCase() : '') + '. ' + w.d);
+    } else {
+      card.setAttribute('aria-hidden', 'true');
+    }
+
+    /* Behind everything, and first in the source rather than pushed
+       there with a z-index: it is the only absolutely positioned child
+       in the card's own stacking context, so source order IS the depth
+       and nothing has to be lifted over it. */
+    card.appendChild(scTrainSwoop(w));
+
+    var top = scEl('div', 'wc-top');
+    /* The time, then what that costs. Effort is worked out from the
+       minutes rather than set beside them — see scEffort. */
+    var figs = [[w.lab, w.val]];
+    /* A group has no one duration, so it has no effort either — the
+       cards inside it run from ten minutes to seventy-five. */
+    if (ef) figs.push(['Effort', ef]);
+    figs.forEach(function (pair) {
+      var col = scEl('div');
+      col.appendChild(scEl('span', null, pair[0]));
+      col.appendChild(scEl('b', null, pair[1]));
+      top.appendChild(col);
+    });
+
+    /* The session's own drawing where there is one, the group's where
+       there is not, and NOTHING where neither has one — an empty 40px
+       <svg> is a hole the layout still pays for. Named on the element,
+       because these are anonymous paths and it is the only thing a
+       check outside this file can hold the pairing to. */
+    var mark = KIND_ICON[w.k] || WORKOUT_ICON[w.gk || w.k];
+    if (mark) {
+      var g = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+      g.setAttribute('class', 'wc-g');
+      g.setAttribute('viewBox', '0 0 24 24');
+      g.setAttribute('aria-hidden', 'true');
+      g.setAttribute('data-kind', KIND_ICON[w.k] ? w.k : (w.gk || w.k));
+      g.innerHTML = mark;
+      top.appendChild(g);
+    }
+    card.appendChild(top);
+
+    card.appendChild(scEl('span', 'wc-n', w.n));
+    card.appendChild(scEl('span', 'wc-d', w.d));
+    if (pick) card.addEventListener('click', pick);
+    return card;
+  }
+
+  /* ── the sheet, in two steps ──
+     The deck answers WHICH KIND first and WHICH ONE second, on the
+     same three controls: a chip row, a stack, and the front card.
+     Stepping in swaps what the chips are and what the deck holds,
+     which is why both are rebuilt by one draw() rather than by two
+     builders that have to agree about the layout between them.
+
+     THE STEP IS NOT REMEMBERED. Coming back to a block you already
+     logged opens on ITS group with ITS card at the front, and a block
+     with nothing on it opens on the three kinds — the state is read
+     off the record every time rather than kept in a variable that
+     outlives the sheet. */
+  /* ── the sheet, in two steps ──
+     The deck answers WHICH KIND first and WHICH ONE second, on the
+     same three controls: a chip row, a stack, and the front card.
+     Stepping in swaps what the chips are and what the deck holds,
+     which is why both are rebuilt by one draw() rather than by two
+     builders that have to agree about the layout between them.
+
+     THE STEP IS NOT REMEMBERED. Coming back to a block you already
+     logged opens on ITS group with ITS card at the front and ITS
+     effort already chosen — the state is read off the record every
+     time rather than kept in a variable that outlives the sheet. */
+  function scTrainAsk(item, dow, day) {
+    var rec = scTrainOf(day, item.id);
+    var got = rec && scWorkout(rec.k);
+    var into = got ? scTrainGroup(got.gk) : null;
+    var at = got ? into.of.indexOf(got) : 0;
+    var ef = got ? rec.e : '';
+
+    scSheet('What did you train?', function (body) {
+      body.appendChild(scEl('p', 'wc-sub',
+        'Pick one and it goes on ' + item.n + '.'));
+
+      var chips = scEl('div', 'wc-chips');
+      var deck = scEl('div', 'wc-deck');
+      var howHard = scEl('div', 'wc-eff');
+      var foot = scEl('div', 'wc-foot');
+      body.appendChild(chips);
+      body.appendChild(deck);
+      body.appendChild(howHard);
+      body.appendChild(foot);
+
+      function list() { return into ? into.of : TRAIN_GROUPS; }
+
+      function press(w) {
+        return function () {
+          /* Step one opens the group; step two is the answer. */
+          if (!into) { into = w; at = 0; ef = ''; draw(); return; }
+          scTrainSet(day, item.id, w.key, ef || scEffort(w.t));
+          scClose();
+          if (view === 'tally') scPaintTally(); else scRender();
+          scToast(w.n + ' logged', false);
+        };
+      }
+
+      function draw() {
+        var all = list();
+        var w = all[at];
+        /* THE MINUTES SET WHERE THE CONTROL STARTS, and only where a
+           choice has not been made: moving to another card in the same
+           group has to re-suggest, because sixty minutes of legs and
+           ten minutes of cold are not the same session — but a press
+           on the effort row must survive a redraw of the deck. */
+        if (into && !ef) ef = scEffort(w.t);
+        $('scSheetTitle').textContent = into ? into.n : 'What did you train?';
+
+        /* THE CHIPS ARE REBUILT, NOT RELABELLED. The two levels have
+           different lengths, so a pass that only rewrites the text
+           leaves a chip standing on a group of four that selects an
+           index nothing is at. */
+        chips.textContent = '';
+        all.forEach(function (x, i) {
+          var c = scEl('button', 'wc-chip', x.n);
+          c.type = 'button';
+          c.setAttribute('aria-pressed', i === at ? 'true' : 'false');
+          c.addEventListener('click', function () {
+            if (at === i) return;
+            at = i;
+            /* A new card suggests its own effort again. */
+            ef = '';
+            draw();
+          });
+          chips.appendChild(c);
+        });
+
+        /* THE TWO BEHIND GO IN FIRST. These are absolutely positioned
+           siblings with no z-index between them, so the stacking order
+           IS the source order — written front-first the pair that make
+           it a deck are painted over the card they are behind, and the
+           whole thing reads as one card with a shadow. */
+        deck.textContent = '';
+        deck.appendChild(scTrainCard(all[(at + 2) % all.length], 'b2'));
+        deck.appendChild(scTrainCard(all[(at + 1) % all.length], 'b1'));
+        deck.appendChild(scTrainCard(w, 'is-front', press(w), ef));
+
+        /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
+           The card is a <button> and a control inside a button is
+           invalid: it collapses to one press while looking exactly
+           right, which is the trap the day cards and the tally rows
+           have both had a rule about. So it is a SIBLING, and the
+           card's own Effort figure is a readout of it.
+
+           Drawn only at step two: a group is four sessions running
+           from ten minutes to seventy-five and has no one effort. */
+        howHard.textContent = '';
+        if (into) {
+          var lab = scEl('span', 'wc-eff-l', 'How hard was it?');
+          lab.id = 'scEffLab';
+          howHard.appendChild(lab);
+          var row = scEl('div', 'wc-eff-r');
+          row.setAttribute('role', 'group');
+          row.setAttribute('aria-labelledby', 'scEffLab');
+          EFFORTS.forEach(function (name) {
+            var b = scEl('button', 'wc-chip wc-ef', name);
+            b.type = 'button';
+            b.setAttribute('aria-pressed', name === ef ? 'true' : 'false');
+            b.addEventListener('click', function () {
+              if (ef === name) return;
+              ef = name;
+              draw();
+            });
+            row.appendChild(b);
+          });
+          howHard.appendChild(row);
+        }
+
+        foot.textContent = '';
+        if (into) {
+          var back = scEl('button', 'wc-clear', 'All kinds');
+          back.type = 'button';
+          back.addEventListener('click', function () {
+            at = TRAIN_GROUPS.indexOf(into);
+            into = null;
+            ef = '';
+            draw();
+          });
+          foot.appendChild(back);
+        }
+        /* Only where there is something to take off, and it is the
+           last thing on the sheet: a control that undoes the answer
+           sitting above the answer reads as one of the options. */
+        if (scTrainOf(day, item.id)) {
+          var clear = scEl('button', 'wc-clear', 'Take it off');
+          clear.type = 'button';
+          clear.addEventListener('click', function () {
+            scTrainSet(day, item.id, '');
+            scClose();
+            if (view === 'tally') scPaintTally(); else scRender();
+            scToast('Taken off', false);
+          });
+          foot.appendChild(clear);
+        }
+      }
+
+      draw();
+    });
+  }
+
+  /* ═══════════════════════════════════════════════════════════
      THE EDIT SHEET
      ═══════════════════════════════════════════════════════════ */
 
@@ -4569,8 +5229,10 @@
           tog.setAttribute('aria-pressed', done ? 'true' : 'false');
           tog.addEventListener('click', function () {
             scSetBlockDone(bDay, item, day, !done);
+            if (done) scTrainSet(bDay, item.id, '');
             scClose();
             if (view === 'tally') scPaintTally(); else scRender();
+            if (!done && scIsTrain(item)) { scTrainAsk(item, day, bDay); return; }
             /* Only name what it fed when it fed something. Dropping the
                gate without this leaves "Counted toward " with nothing
                after it on every block that feeds nothing. */
@@ -4579,6 +5241,31 @@
           });
           body.appendChild(scEl('span', 'label', 'Today'));
           body.appendChild(tog);
+
+          /* ── the deck's OTHER door, and it is the one that matters ──
+             The row opens it on a long press, which reaches neither a
+             keyboard nor a screen reader — the same split the tick
+             itself has. This is where the feature actually lives; the
+             press is a shortcut from the row it is about.
+
+             Only on a block the app already calls training, and only
+             on a day open for backfill, because both of those are
+             conditions on the tick this record hangs off. */
+          if (scIsTrain(item)) {
+            var gr = scTrainOf(bDay, item.id);
+            var got = gr && scWorkout(gr.k);
+            var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
+            wob.type = 'button';
+            wob.appendChild(document.createTextNode(got ? got.n : 'Pick a workout'));
+            wob.insertAdjacentHTML('beforeend',
+              '<svg viewBox="0 0 24 24" aria-hidden="true">'
+              + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
+            wob.addEventListener('click', function () {
+              scTrainAsk(item, day, bDay);
+            });
+            body.appendChild(scEl('span', 'label', 'Trained'));
+            body.appendChild(wob);
+          }
         }
       }
 
@@ -5001,6 +5688,7 @@
      filling in a frame later reads as having lost the day. */
   scTickLoad();
   scObjLoad();
+  scTrainLoad();
 
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);
