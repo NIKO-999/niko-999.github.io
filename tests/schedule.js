@@ -528,6 +528,59 @@ const SAID = [
   await page.waitForTimeout(200);
   ok('today is the only day marked', await page.$$eval('.day.is-today .day-name',
     (n) => n.map((x) => x.textContent)).then((v) => v.length === 1 && v[0] === 'Tuesday'));
+
+  /* ── "now" ──
+     Read HERE rather than up with the rest of the sentences, because
+     it is the one phrase whose answer moves: against the real clock
+     the expected times would have to be computed the same way the app
+     computes them, which is a test agreeing with itself. On the frozen
+     Tuesday 09:30 they are literals.
+
+     Three claims, and each fails for its own reason: the clock is
+     taken from now, an hour is the default the way a bare "at 9" gets
+     one, and the word is STRUCK OUT — "Watching podcast now" was
+     landing a block called "Watching Podcast Now". */
+  await page.click('#scAdd');
+  await page.waitForTimeout(140);
+  const nowSaid = async (text) => {
+    await page.fill('#scSheetBody .field', text);
+    await page.waitForTimeout(60);
+    return page.$eval('#scSheetBody .parsed', (e) => ({
+      days: e.querySelector('.p-day').textContent,
+      name: e.querySelector('.p-name').textContent,
+      meta: e.querySelector('.p-meta').textContent,
+    })).catch(() => null);
+  };
+  const n1 = await nowSaid('Watch a podcast now');
+  ok('“now” is a time, and it brings an hour with it',
+    n1 && n1.days === 'TUE' && /^9:30 AM to 10:30 AM/.test(n1.meta), n1);
+  ok('...and the word does not end up in the name',
+    n1 && !/now/i.test(n1.name), n1);
+  /* It carries its own day. Saying "now" on a Tuesday and being asked
+     which day is the app not having listened. */
+  const n2 = await nowSaid('Watch a podcast today now');
+  ok('...and a day said as well does not double it',
+    n2 && n2.days === 'TUE' && /^9:30 AM to 10:30 AM/.test(n2.meta), n2);
+  const n3 = await nowSaid('Read now for 90 minutes');
+  ok('...and a length said after it is honoured',
+    n3 && /^9:30 AM to 11:00 AM/.test(n3.meta), n3);
+  const n4 = await nowSaid('Read now for 2 hours');
+  ok('...in hours as well as minutes',
+    n4 && /^9:30 AM to 11:30 AM/.test(n4.meta), n4);
+  /* An explicit clock time still wins: somebody who says both is
+     correcting themselves, and the digits are the correction. */
+  /* Both halves, because they fail apart: the explicit clock has to
+     win the TIME, and the word still has to leave the name and still
+     has to supply the day. It landed a block called "Read Now" that
+     did not know which day it was on — the app hearing the word and
+     using none of it. */
+  const n5 = await nowSaid('Read now at 3');
+  ok('...and a real time said with it wins the clock',
+    n5 && /^3:00 PM to 4:00 PM/.test(n5.meta), n5);
+  ok('...while the word still leaves the name and still says the day',
+    n5 && n5.days === 'TUE' && !/now/i.test(n5.name), n5);
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(160);
   /* ── morning, afternoon, evening ──
      Noon and five o'clock. A session with nothing in it is not drawn:
      an "Afternoon" heading over no rows is furniture, and on a real
@@ -829,6 +882,33 @@ const SAID = [
   /* It draws a picture, so it says the picture in words — the first and
      last block are the only facts on this screen nothing else repeats,
      and aria-hidden would have thrown them away. */
+  /* ── the mark casts ──
+     MEASURED ON COMPOSITED PIXELS, never off the declaration: a
+     box-shadow written with a color-mix a browser cannot resolve
+     drops the whole rule and reports the string all the same. Two
+     samples on the page ABOVE the dot — one just outside its ring,
+     one well clear of it — and the near one has to be tinted toward
+     the accent while the far one is the page. Both halves matter: a
+     bloom big enough to reach the far sample is a wash, not a glow. */
+  {
+    const at = await page.$eval('#scSpanDot', (e) => {
+      const r = e.getBoundingClientRect();
+      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top) };
+    });
+    const png = PNG.sync.read(await page.screenshot());
+    const px = (x, y) => {
+      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]];
+    };
+    /* Redness against the other two channels, which is polarity-proof:
+       it rises with the accent on a white page and on a black one. */
+    const cast = (p) => p[0] - (p[1] + p[2]) / 2;
+    const near = cast(px(at.x, at.y - 4));
+    const far = cast(px(at.x, at.y - 26));
+    ok(`the mark casts onto the page (${near.toFixed(0)} against ${far.toFixed(0)})`,
+      near - far >= 8 && far < 8, { near, far });
+  }
+
   ok('and it is spoken as well as drawn',
     /5:45 AM to 11:00 PM/.test(span.label)
     && /Wake to Down/.test(span.label), span.label);

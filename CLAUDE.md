@@ -342,6 +342,16 @@ midnight to midnight — with the spent half in `--ink` and a dot at the
 clock. 24-hour figures, because a meridiem on an AXIS says what the
 dot's position already says.
 
+**The mark casts.** Two shadows on the dot and the order is the
+design: a hard ring of `--paper` first, which is what keeps it a dot
+where it lands on the boundary between the spent half and the rest,
+then a soft bloom of the accent outside that. Without the ring the
+bloom washes the join and the mark reads as a smudge. Polarity-
+dependent the way the tally's glow is — emissive on a dark palette, a
+cast light on paper — and measured on composited pixels rather than
+read off the declaration, as redness against the other two channels so
+the check holds either way round.
+
 **It is `role="img"` with a written label, never `aria-hidden`.** The
 first and last block are the only facts up here that nothing else
 repeats, so hiding it from a screen reader throws them away.
@@ -1105,6 +1115,52 @@ that had the line and no effect.**
 If a phone reports something the suite says is fine, the suite is
 measuring the wrong machine. Ship a probe, read a number off the device,
 and only then reason.
+
+## "Now" is a time, and it brings an hour
+
+The one time word with no digits in it. It resolves to the clock and
+defaults to sixty minutes, for the same reason a bare "at 9" gets an
+hour: that is the length of the block you would have typed, and it is
+the one thing about "now" you can be wrong about without losing the
+sentence.
+
+**It is scanned whatever else the sentence carries, and used for the
+TIME only if nothing else set one.** An explicit clock beats it —
+somebody who says both is correcting themselves and the digits are the
+correction. But the word is struck out either way and supplies the day
+either way: "read now at 3" was landing a block called "Read Now" that
+still did not know which day it was on, which is the app hearing the
+word and using none of it.
+
+**Two patterns, not one with an optional tail.** An optional group
+after `\bnow\b` makes "now" and "now for 2 hours" the same match at
+the same index, and which one wins is then the engine's backtracking
+rather than a decision.
+
+**Clamped to the end of the day, never rolled over.** A block that
+starts at 23:40 and ends at 00:40 is on two days, and this app's whole
+record is one day per row.
+
+## Nobody is called "You"
+
+`scJoin` defaulted the name to `'You'` and PUSHED it, so every person
+who had not set one was literally called that on the server. Add a
+friend and the board reads "You" twice. "You" is a label for your own
+row, decided when the row is drawn; it is not a name and must not
+leave the browser.
+
+Records already out there carry it, so a peer named "You" is read as
+unset and falls through to their CODE — unique, and the string you
+typed to add them. Nobody picks it as a nickname, and the one person
+it could honestly belong to is the one row that is not drawn from peer
+data.
+
+**And your own row opens you.** Rows were pressable only when there
+was a friend behind them, on the rule that a name you can press which
+opens nothing is worse than a name you cannot. Your own row was the
+one that opened nothing — and the setting it needed was three taps
+away behind a link called "Your code". A board that says "You" twice
+is somebody who could not find the place to fix it.
 
 ## The first minute
 

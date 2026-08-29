@@ -283,6 +283,14 @@
     '\\b(?:at|starting(?:\\s+at)?|starts(?:\\s+at)?)\\s+' + HM +
     '\\s*(?:for|,)?\\s*(\\d{1,3})\\s*(hours?|hrs?|h|minutes?|mins?|m)\\b', 'g');
   var RE_AT = new RegExp('\\b(?:at|from|starting(?:\\s+at)?)\\s+' + HM + '\\b', 'g');
+  /* ── "now" ──
+     The one time word that needs no digits. Two patterns rather than
+     one with an optional tail: an optional group after \bnow\b makes
+     "now" and "now for 2 hours" the same match at the same index, and
+     the one that wins is then whichever the engine backtracks to,
+     which is not a thing to leave to the engine. */
+  var RE_NOW_FOR = /\bnow\s*(?:for|,)?\s*(\d{1,3})\s*(hours?|hrs?|h|minutes?|mins?|m)\b/g;
+  var RE_NOW = /\bnow\b/g;
 
   function scHM(tok) {
     tok = String(tok).trim();
@@ -493,7 +501,45 @@
         if (span) { mark(m.index, m.index + m[0].length); break; }
       }
     }
+    /* ── NOW, and an hour of it ──
+       Scanned whatever else the sentence carries, and used for the
+       time only if nothing else set one: an explicit clock beats it,
+       because somebody who says both is correcting themselves and the
+       digits are the correction. But the WORD is struck out either
+       way, and it supplies the day either way — "read now at 3" was
+       landing a block called "Read Now" that still did not know which
+       day it was on, which is the app hearing the word and using none
+       of it.
+
+       An hour is the default, for the same reason a bare "at 9" gets
+       one. Clamped to the end of the day rather than rolled over: a
+       block from 23:40 to 00:40 is on two days and this app's whole
+       record is one day per row. */
+    var nowSeen = false, nowSpan = null;
+    var nowScan = function (re, dur) {
+      var mm;
+      re.lastIndex = 0;
+      while ((mm = re.exec(low))) {
+        if (!free(mm.index, mm.index + mm[0].length)) continue;
+        var len = dur ? (/^(h|hr|hour)/.test(mm[2]) ? +mm[1] * 60 : +mm[1]) : 60;
+        if (!(len > 0 && len <= 480)) continue;
+        mark(mm.index, mm.index + mm[0].length);
+        nowSeen = true;
+        var st = scNowMin();
+        if (st < 1439) nowSpan = { s: st, e: Math.min(1440, st + len) };
+        return true;
+      }
+      return false;
+    };
+    if (!nowScan(RE_NOW_FOR, true)) nowScan(RE_NOW, false);
+    if (!span && nowSpan) span = nowSpan;
+
     if (span) { out.s = span.s; out.e = span.e; }
+    /* "now" carries its own day. Saying it on a Tuesday and being asked
+       which day is the app not having listened — and the day words are
+       struck out long before this runs, so it can only be filled in
+       here. */
+    if (nowSeen && !out.days.length) out.days = [new Date().getDay()];
 
     /* ── where ── */
     for (var r = 0; r < ROOM_RES.length && !out.room; r++) {
@@ -2743,7 +2789,13 @@
      which is the one thing the person in front of it can fix. */
   function scJoin(url, name, done) {
     net.url = String(url || '').trim().replace(/\/+$/, '');
-    net.name = String(name || '').trim().slice(0, 24) || 'You';
+    /* EMPTY, never 'You'. It defaulted to 'You' and pushed it, so
+       every person who had not set a name was literally CALLED "You"
+       on the server — add one and the board reads "You" twice, which
+       is what this cost. "You" is a label for your own row and is
+       decided when the row is drawn; it is not a name and must not
+       leave the browser. */
+    net.name = String(name || '').trim().slice(0, 24);
     var tries = 0;
     var go = function () {
       var code = scRand(8, CODE_A), key = scRand(32, HEX_A);
@@ -3067,12 +3119,24 @@
   }
 
   /* ── the two seams the screen paints from ── */
+  /* A name a peer never chose. 'You' was this app's own default and it
+     went to the server, so records out there carry it — and a friend
+     called "You" beside your own row called "You" is a board that
+     names nobody. It is read as unset and falls through to the code,
+     which is unique and is the string you typed to add them. Nobody
+     picks "You" as a nickname; the one person it could belong to is
+     the one row that is not drawn from this. */
+  function scPeerName(n) {
+    n = String(n || '').trim();
+    return (!n || n.toLowerCase() === 'you') ? '' : n;
+  }
+
   function scFriendsPeers() {
     return friends.map(function (f) {
       var r = peers[f.code] || null;
       return {
         code: f.code,
-        name: (r && r.name) || f.name || f.code,
+        name: scPeerName(r && r.name) || scPeerName(f.name) || f.code,
         ticks: r ? scCount(r.days, 30) : 0,
         streak: r ? scRunOf(r.days) : 0,
         acc: r && r.acc, ink: r && r.ink, pic: r && r.pic,
@@ -3087,7 +3151,8 @@
       var r = peers[f.code];
       if (!r || !Array.isArray(r.logs)) return;
       r.logs.forEach(function (p) {
-        out.push({ p: p, code: f.code, who: r.name || f.name || f.code,
+        out.push({ p: p, code: f.code,
+                   who: scPeerName(r.name) || scPeerName(f.name) || f.code,
                    acc: r.acc, ink: r.ink, pic: r.pic });
       });
     });
@@ -3129,14 +3194,18 @@
         : p.streak + (p.streak === 1 ? ' day' : ' days') + ' showing up'));
       li.appendChild(n);
       li.appendChild(scEl('span', 'fr-t', String(p.ticks)));
-      /* A row is a button only when there is somebody behind it. A
-         name you can press that opens nothing is worse than a name you
-         cannot. */
-      if (!p.me) {
+      /* EVERY row opens something, including your own — it opens YOU,
+         which is where your name is set. It used to be friends only, on
+         the rule that a name you can press which opens nothing is worse
+         than a name you cannot; your own row was the one that opened
+         nothing, and the setting it needed was three taps away behind a
+         link called "Your code". A board that says "You" twice is
+         somebody who could not find the place to fix it. */
+      {
         li.classList.add('is-tap');
         li.setAttribute('role', 'button');
         li.tabIndex = 0;
-        var open = function () { scFriendSheet(p); };
+        var open = p.me ? scNetSheet : function () { scFriendSheet(p); };
         li.addEventListener('click', open);
         li.addEventListener('keydown', function (e) {
           if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); open(); }
@@ -3439,7 +3508,7 @@
       nm.appendChild(scEl('span', 'sub-note', net.name || 'not set'));
       nm.addEventListener('click', function () {
         scTextSheet('Name', 'Name', net.name, function (v) {
-          net.name = (v || '').slice(0, 24) || 'You';
+          net.name = (v || '').slice(0, 24);
           scNetSave();
           scPushNow();
         });

@@ -271,20 +271,38 @@ body {
   border-radius: 2px;
   background: var(--hair);
 }
+/* The spent half carries a much softer one of its own, mixed off
+   --ink rather than the accent: it is the hours behind you, not the
+   instant you are at, and the two must not read as the same kind of
+   mark. */
 .sp-fill {
   position: absolute;
   left: 0; top: 0; bottom: 0;
   border-radius: 2px;
   background: var(--ink);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--ink) 22%, transparent);
 }
+/* ── THE MARK CASTS ──
+   Two shadows, and the order is the design: a hard ring of --paper
+   first, which is what keeps the dot a dot where it lands on the
+   boundary between the spent half and the rest, then a soft bloom of
+   the accent outside that. Without the ring the bloom washes the join
+   and the mark reads as a smudge on the line.
+
+   POLARITY-DEPENDENT, the same way the tally's glow is. On a dark
+   palette --paper is near-black and the bloom is a genuine emissive
+   halo; on white it is the light the mark is casting onto the page.
+   Both are the real product — seven of the thirteen palettes are
+   dark. */
 .sp-dot {
   position: absolute;
   top: 50%;
-  width: 9px; height: 9px;
-  margin: -4.5px 0 0 -4.5px;
+  width: 10px; height: 10px;
+  margin: -5px 0 0 -5px;
   border-radius: 50%;
   background: var(--red);
-  box-shadow: 0 0 0 2.5px var(--paper);
+  box-shadow: 0 0 0 2.5px var(--paper),
+              0 0 10px 2px color-mix(in srgb, var(--red) 55%, transparent);
 }
 .sp-ends {
   display: flex;
