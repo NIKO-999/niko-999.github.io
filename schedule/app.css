@@ -1077,8 +1077,34 @@ body {
    first half. `visibility` transitions as a discrete property, so a
    delay of half the flip is all this takes. Coming back it is
    immediate, because by then the front is what you are turning to. */
-.wk-front { visibility: visible; transition: visibility 0s; }
-.day.is-flipped .wk-front { visibility: hidden; transition: visibility 0s linear .26s; }
+/* ── AND VISIBILITY ALONE WAS NOT ENOUGH EITHER ──
+   It came back: the running row still bled through the objectives face
+   on iOS with this rule in place. `visibility` is a PAINT-time
+   property, and the whole shape of this bug is a layer the compositor
+   keeps and paints without consulting the paint tree — which is why
+   hiding the ancestor missed it twice.
+
+   `opacity` is the lever that reaches the layer itself: a composited
+   layer at zero is not drawn by the compositor, whatever it thinks the
+   paint tree says. It also transitions, so it carries the same
+   half-a-turn delay rather than needing a second mechanism.
+
+   AND THE ANIMATION STOPS, stated as a property of the SUBTREE rather
+   than aimed at the sweep — a rule naming the thing that leaked is a
+   rule the next animated thing on this face walks straight past, which
+   is how this got shipped twice. `!important` because an inline
+   `animation` shorthand beats any selector however specific, and this
+   app writes one on the tally's halo. An animation that is not running
+   is not promoted, which is the root of it. */
+.wk-front { visibility: visible; opacity: 1; transition: visibility 0s, opacity 0s; }
+.day.is-flipped .wk-front {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s linear .26s, opacity 0s linear .26s;
+}
+.day.is-flipped .wk-front *,
+.day.is-flipped .wk-front *::before,
+.day.is-flipped .wk-front *::after { animation-play-state: paused !important; }
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {
@@ -1389,13 +1415,21 @@ body {
   font-weight: 700;
   letter-spacing: .17em;
   text-transform: uppercase;
-  color: var(--dim);
+  /* ── THE ONE TITLE THAT KEEPS THE ACCENT ──
+     Every other heading in this app is white; this one is not, and it
+     is not an exception smuggled in. The face it names is the only
+     surface here that is not flat — a sheen mixed from the accent —
+     and a grey heading over it reads as a caption for something else
+     rather than as the name of the thing you turned the card to find.
+     It is the same treatment the sessions get on the front, in --red
+     rather than --spent. */
+  color: var(--red);
   white-space: nowrap;
 }
 .ob-head i {
   flex: 1;
   height: 1px;
-  background: color-mix(in srgb, var(--ink) 20%, transparent);
+  background: color-mix(in srgb, var(--red) 26%, transparent);
 }
 
 /* ── an objective ──

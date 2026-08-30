@@ -1507,9 +1507,60 @@ const SAID = [
      symptom — and it has to be checked AFTER the turn has settled,
      because the front is deliberately still visible for the first half
      of it. */
+  /* THREE PROPERTIES, and the first two were not enough on their own.
+     `visibility` is a PAINT-time property and the whole shape of this
+     bug is a layer the compositor keeps and draws without consulting
+     the paint tree — it shipped with visibility alone and the running
+     row still came through. `opacity` is the lever that reaches the
+     layer itself, and it transitions, so it carries the same
+     half-a-turn delay rather than needing a second mechanism. The
+     animation stopping is the root of it: a thing that is not
+     animating is not promoted.
+
+     Asserted as a property of the SUBTREE rather than of the sweep. A
+     check naming the element that leaked is one the next animated
+     thing on this face walks straight past, which is how this got
+     shipped twice — so it counts every animation under the turned
+     face and requires the count to be non-zero, because a check that
+     finds nothing passes. */
+  const turned = await page.evaluate(() => {
+    const f = document.querySelector('.day.is-open .wk-front');
+    const cs = getComputedStyle(f);
+    /* ── THE THING THAT LEAKS IS A PSEUDO-ELEMENT ──
+       The sweep is `.row.is-now::after`, and querySelectorAll('*')
+       cannot see it. Written that way this counted ONE animation — the
+       turn pill's foil rim, which another rule already pauses — and
+       reported "nothing is animating" while the element the bug is
+       about went unlooked at. It passed with the fix deleted, which is
+       how it was caught.
+
+       And the sweep only exists on a row that is running, which is a
+       fact about the hour. Planted rather than waited for: this file
+       already has two lessons about checks that only fire at certain
+       times of day. */
+    const row = f.querySelector('.row[data-id]');
+    if (row) row.classList.add('is-now');
+    const marks = [];
+    [f, ...f.querySelectorAll('*')].forEach((e) => {
+      ['', '::before', '::after'].forEach((q) => {
+        const c = getComputedStyle(e, q || null);
+        if (c.animationName && c.animationName !== 'none') {
+          marks.push({ what: (e.className || e.tagName) + q,
+            state: c.animationPlayState });
+        }
+      });
+    });
+    return { vis: cs.visibility, op: cs.opacity,
+      anim: marks.length,
+      pseudo: marks.filter((m) => /::/.test(m.what)).length,
+      running: marks.filter((m) => m.state !== 'paused').length,
+      marks };
+  });
   ok('...with the front no longer drawn at all behind it',
-    await page.$eval('.day.is-open .wk-front',
-      (e) => getComputedStyle(e).visibility === 'hidden'));
+    turned.vis === 'hidden' && +turned.op === 0, turned);
+  ok(`...and nothing on it is still animating (${turned.anim} found, `
+    + `${turned.pseudo} of them pseudo-elements)`,
+    turned.anim > 0 && turned.pseudo > 0 && turned.running === 0, turned.marks);
 
   /* ── THE SAME CORNER ON BOTH FACES ──
      The control sat between the day and the hours on the front and at
@@ -1626,15 +1677,15 @@ const SAID = [
   ok('...and never by a rank number',
     (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0);
 
-  /* ── the face names itself, and the heading is a TITLE ──
-     It was drawn in the accent, matching the glyphs under it. Every
-     title in this app is white now and the accent is for the record,
-     so the heading has to be told apart from the marks it heads —
-     asserted from both sides: it is not the accent, and the glyphs
-     under it still are. */
-  ok('the list is headed, and the heading is not the accent the marks wear',
+  /* ── the face names itself, in the accent ──
+     Every other heading in this app is white and this one is not. The
+     face it names is the only surface here that is not flat — a sheen
+     mixed from the accent — and a grey heading over it reads as a
+     caption for something else rather than as the name of the thing
+     you turned the card to find. */
+  ok('the list is headed, in the accent the marks under it wear',
     (await page.$eval('.day.is-open .ob-head b', (e) => e.textContent))
-      === 'Main objectives' && obMarks.head !== obMarks.red
+      === 'Main objectives' && obMarks.head === obMarks.red
       && obMarks.rest === obMarks.red, obMarks);
 
   /* ── re-ranking is one move, and always the same move ── */

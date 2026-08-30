@@ -778,6 +778,29 @@ first half. `visibility` transitions as a discrete property, so a
 delay of half the flip is the whole mechanism; coming back it is
 immediate, because by then the front is what you are turning to.
 
+**AND `visibility` ALONE WAS NOT ENOUGH — it was reported again.** The
+running row still came through the objectives face with that rule in
+place. `visibility` is a PAINT-time property, and the whole shape of
+this bug is a layer the compositor keeps and draws without consulting
+the paint tree, which is why hiding the ancestor missed it twice.
+**`opacity` is the lever that reaches the layer itself**, and it
+transitions, so it carries the same half-a-turn delay rather than
+needing a second mechanism. The animation stops as well, stated as a
+property of the SUBTREE: a thing that is not animating is not
+promoted, and a rule naming the element that leaked is one the next
+animated thing walks straight past.
+
+**The check that missed it could not see the culprit.** It counted
+`querySelectorAll('*')` — and the sweep is `.row.is-now::after`, a
+pseudo-element, which that cannot reach. It found ONE animation, the
+turn pill's foil rim, which another rule already pauses, and reported
+"nothing is animating" while the element the bug is about went
+unlooked at. It passed cleanly with the fix deleted. It walks
+`::before` and `::after` now, plants `is-now` rather than waiting for
+an hour when a row happens to be running, and requires at least one
+pseudo-element among what it found — because a check that cannot see
+the thing it is about is worse than none.
+
 **The face is headed whether or not it has a list.** `MAIN OBJECTIVES`
 was drawn only over objectives that existed, on the argument that a
 heading over nothing names something that is not there. That was right
@@ -1109,11 +1132,17 @@ answered two questions in two colours, under headings that were a
 third.
 
 **The accent marks what happened. Chrome is white.** Titles: `.label`,
-`MAIN OBJECTIVES`, the tally's own label, the parsed preview's day.
+the tally's own label, the parsed preview's day.
 Filled controls: Save, the deck's *Log …*, *Done today*, the add
 button, a set chip, Undo on the toast, a picked workout chip.
 
-**Two things keep it and both are the record wearing a title's
+**`MAIN OBJECTIVES` is the one title that keeps it**, and it is not an
+exception smuggled in. The face it names is the only surface in this
+app that is not flat — a sheen mixed from the accent — and a grey
+heading over it reads as a caption for something else rather than as
+the name of the thing you turned the card to find.
+
+**Two more keep it and both are the record wearing a title's
 clothes.** The session you are IN is a heading, and it is the running
 block seen one level up rather than a word naming a section. Today's
 day name is the same: it says which day you are on. A heading that
