@@ -1746,6 +1746,21 @@ majority of one is one, and "Sundays" under a panel reading 1 is the
 app inventing a routine out of a single Sunday. Below three it says how
 long ago instead.
 
+**Three figures on the right, about the SESSION.** How long it takes,
+how hard it comes out, and what share of your training it is — where
+the left half is about the day. **Only the effort is a real average**:
+it is the one thing on this record you choose per session, so five Hard
+and three Easy come back Moderate, a word in neither input, which is
+what tells an average from a pick. The time is the card's own estimate
+and is not called an average, because nothing here carries a duration
+and an "average" of one figure repeated is that figure with an untrue
+word in front of it. The shares have to sum to the whole, or the
+denominator is wrong.
+
+**Spoken once, not as five marks.** Two glyphs and three figures read
+out separately would charge twice for what the panel already says, so
+the block is `aria-hidden` and the panel carries one sentence.
+
 **And the marks wear the THEME's accent, not the nine hues.** The cards
 carry a literal colour each because a colour that says WHICH session
 this is has to be the same on every palette. Here nothing needs saying

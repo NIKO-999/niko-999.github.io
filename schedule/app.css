@@ -3016,6 +3016,46 @@ body {
 }
 .wo-s { display: block; margin-top: 2px; font-size: 12.5px; color: var(--dim); }
 
+/* ── THE FIGURES, ON THE RIGHT ──
+   How long it takes, how hard it comes out and what share of your
+   training it is: three short facts about the SESSION, where the left
+   half is about the day. `margin-left: auto` rather than a column
+   track, because the name is the thing that should get the width and a
+   track held open for three short figures takes it from a long one. */
+.wo-f {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3px;
+  text-align: right;
+}
+.wo-fl {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 11.5px;
+  color: var(--dim);
+  font-variant-numeric: tabular-nums;
+}
+.wo-fl b { font-weight: 600; }
+/* Sized in the sheet, never on the markup: an inline <svg> with no
+   width or height falls back to 300x150 and fills its parent. */
+.wo-fl svg {
+  width: 13px; height: 13px;
+  flex: none;
+  fill: none;
+  stroke: var(--spent);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+/* The share carries no glyph — % is one — so its line is indented to
+   the same left edge as the two above it rather than sitting flush and
+   reading as a fourth column. */
+.wo-fl.is-bare { padding-left: 18px; }
+
 /* The ring is the count against your most-done session, so the panels
    read against each other rather than against a target nobody set. */
 .wo-r { flex: none; width: 52px; height: 52px; display: block; }

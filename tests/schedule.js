@@ -5072,8 +5072,11 @@ const SAID = [
        and false of the third, which is the only way to check it is a
        claim rather than a label. */
     const log = {};
-    const put = (n, k) => { log[back(n)] = { ['b' + n]: { k, e: 'Hard' } }; };
-    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest');
+    const put = (n, k, e) => { log[back(n)] = { ['b' + n]: { k, e: e || 'Hard' } }; };
+    /* Chest comes out FIVE Hard and THREE Easy, which averages to
+       Moderate — a word that is in neither input. An average that can
+       only return one of the values it was given is a pick. */
+    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest', i < 5 ? 'Hard' : 'Easy');
     for (let i = 0; i < 5; i++) put(4 + i * 7, 'bro.back');
     /* Day 3, and not 9: nine is 2 + 7, which is Chest's second Friday,
        and one record per block per day means the Pull simply replaced
@@ -5090,6 +5093,10 @@ const SAID = [
         s: t.querySelector('.wo-s').textContent,
         open: t.getAttribute('aria-expanded') === 'true',
         cal: !!t.querySelector('.wo-cal'),
+        f: [...t.querySelectorAll('.wo-fl b')].map((b) => b.textContent),
+        glyphs: t.querySelectorAll('.wo-fl svg').length,
+        spoken: t.getAttribute('aria-label'),
+        quiet: t.querySelector('.wo-f').getAttribute('aria-hidden') === 'true',
       }));
       const dots = [...document.querySelectorAll('.wo-d')];
       return { fig: document.querySelector('.wo-head .ty-fig').textContent,
@@ -5141,6 +5148,36 @@ const SAID = [
     ok('...saying which day it lands on only where three or more say so',
       /days$/.test(drawn.rows[0].s) && /days$/.test(drawn.rows[1].s)
       && /ago|today|yesterday|last week/.test(drawn.rows[2].s), drawn.rows);
+
+    /* ── THREE FIGURES ON THE RIGHT, ABOUT THE SESSION ──
+       How long it takes, how hard it comes out, and what share of your
+       training it is — where the left half is about the day. The
+       shares have to sum to the whole, or the denominator is wrong. */
+    ok('every panel carries its time, its effort and its share',
+      drawn.rows.every((r) => r.f.length === 3 && /^\d+ min$/.test(r.f[0])
+        && /^(Easy|Moderate|Hard)$/.test(r.f[1]) && /^\d+%$/.test(r.f[2])
+        && r.glyphs === 2), drawn.rows.map((r) => r.f));
+    ok('...and the shares add up to the whole record',
+      Math.abs(drawn.rows.reduce((n, r) => n + parseInt(r.f[2], 10), 0) - 100) <= 2,
+      drawn.rows.map((r) => r.f[2]));
+
+    /* ── THE EFFORT IS A REAL AVERAGE ──
+       It is the one figure on this record you chose per session, so it
+       is the one that can move. Chest is five Hard and three Easy, and
+       the panel says Moderate — a word in neither input, which is what
+       tells an average from a pick. */
+    ok('the effort is averaged, not picked',
+      drawn.rows[0].f[1] === 'Moderate' && drawn.rows[1].f[1] === 'Hard',
+      drawn.rows.map((r) => r.w + ' ' + r.f[1]));
+
+    /* ── AND THE BLOCK IS SPOKEN ONCE ──
+       Two glyphs and three figures read out as marks would charge
+       twice for one fact, so the figures are aria-hidden and the whole
+       panel carries one sentence. */
+    ok('...spoken once in the panel\'s own label, not as five marks',
+      drawn.rows[0].quiet
+      && /50 minutes, usually moderate, 57 per cent of your sessions/
+         .test(drawn.rows[0].spoken), drawn.rows[0].spoken);
 
     /* ── PRESSING ANOTHER CARD MOVES THE CALENDAR INTO IT ──
        This is the whole mechanism, so it is driven rather than

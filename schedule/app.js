@@ -5299,7 +5299,7 @@
      row that opens a picture drawn somewhere else on the page is two
      things to look at for one press; this way the panel simply grows,
      and what grew is under your thumb. */
-  function scWorkPanel(w, hits, most, open, pick) {
+  function scWorkPanel(w, hits, most, total, open, pick) {
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';
     p.style.setProperty('--wc-hue', w.c);
@@ -5327,15 +5327,75 @@
     var dow = scWorkDow(hits);
     txt.appendChild(scEl('span', 'wo-s', dow || scWorkAgo(hits[0].day)));
     row.appendChild(txt);
+
+    /* ── THE FIGURES, ON THE RIGHT ──
+       How long it takes, how hard it comes out, and what share of your
+       training it is. Three short facts about the session rather than
+       about the day, which is what the left half already says.
+
+       aria-hidden on the glyphs and the whole block spoken once in the
+       panel's own label: a screen reader reading "clock 50 min bolt
+       Hard 34 percent" is three marks charging twice for one fact. */
+    var figs = scEl('div', 'wo-f');
+    figs.setAttribute('aria-hidden', 'true');
+    var eff = scWorkEffort(hits);
+    var share = Math.round(hits.length / total * 100);
+    [['time', w.t + ' min'], ['lift', eff], [null, share + '%']].forEach(function (f) {
+      if (!f[1]) return;
+      var line = scEl('span', 'wo-fl');
+      if (f[0]) {
+        line.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">' + WORK_ICON[f[0]] + '</svg>');
+      } else {
+        /* The share has no glyph and needs none: % is one. */
+        line.classList.add('is-bare');
+      }
+      line.appendChild(scEl('b', null, f[1]));
+      figs.appendChild(line);
+    });
+    row.appendChild(figs);
     p.appendChild(row);
 
     p.setAttribute('aria-label', w.n + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
-      + '. ' + (open ? 'Showing its three months.' : 'Show its three months.'));
+      + '. ' + w.t + ' minutes'
+      + (eff ? ', usually ' + eff.toLowerCase() : '')
+      + ', ' + share + ' per cent of your sessions. '
+      + (open ? 'Showing its three months.' : 'Show its three months.'));
     p.addEventListener('click', pick);
     return p;
   }
+
+  /* ── THE AVERAGE EFFORT IS A REAL AVERAGE ──
+     Effort is the one thing on this record you chose per session, so
+     it is the one figure here that can move: eight Chests logged Hard,
+     Hard, Moderate come back Hard. Averaged on the three-point scale
+     and mapped back to a word, because "2.3" is a number about a thing
+     that has no units. */
+  function scWorkEffort(hits) {
+    var n = 0, sum = 0;
+    hits.forEach(function (h) {
+      var i = EFFORTS.indexOf(h.e);
+      if (i >= 0) { sum += i; n++; }
+    });
+    return n ? EFFORTS[Math.round(sum / n)] : '';
+  }
+
+  /* ── AND THE TIME IS NOT ONE, WHICH IS WHY IT IS NOT CALLED ONE ──
+     Nothing on this record carries a duration: the card's figure is an
+     estimate and every session of a kind shares it, so an "average" of
+     them is that estimate with a word in front of it that is not true.
+     It is drawn as the time, and the clock beside it says which figure
+     it is. If a real duration is ever logged this is where it goes. */
+  var WORK_ICON = {
+    /* The block glyph's own clock, reused rather than redrawn: two
+       clocks on one app is the mistake the Steps footprint taught. */
+    time: BLOCK_ICON.block,
+    /* A bolt. Effort has no object to draw, and at 13px a bolt is the
+       one shape that means it without a word. */
+    lift: '<path d="M13.2 2.4L4.6 13.8h6.2l-1 7.8 8.6-11.4h-6.2z"/>'
+  };
 
   function scWorkAgo(day) {
     var n = Math.round((new Date(scDay() + 'T12:00:00')
@@ -5390,7 +5450,7 @@
 
     var list = scEl('div', 'wo-list');
     keys.forEach(function (k) {
-      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, k === workOpen,
+      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, all.length, k === workOpen,
         function () {
           /* Pressing the open one shuts nothing: a screen with no
              calendar on it is the state this view exists to avoid. */
