@@ -5365,19 +5365,23 @@ const SAID = [
       lift.keys.length === 1 && /translate/.test(lift.keys[0])
       && !/transform/.test(lift.keys[0]), lift.keys);
 
-    /* ── AND INSIDE A GROUP THE CARD GOES TO THE BACK ──
+    /* ── AND INSIDE A GROUP THE CARD IS TAKEN OFF THE LEFT ──
        You are stepping THROUGH one hand here, not choosing another, so
-       the card in front is put down and the next is underneath it.
+       the card in front is taken off and the next comes over the top.
 
        The outgoing card is KEPT rather than rebuilt: it carries the
        workout you were looking at, with its own name and its own
        colour, and the whole gesture is that THAT card is the one being
-       put down. Asserted by its name, so a fresh element standing in
-       for it would fail — and by its position last in the deck, since
-       these are absolutely positioned siblings with no z-index and
-       source order is the stacking order. A card being put down that
-       is painted UNDER the one it is uncovering has nothing to
-       uncover. */
+       taken off. Asserted by its name, so a fresh element standing in
+       for it would fail — and by its position DIRECTLY UNDER the card
+       arriving, since these are absolutely positioned siblings with no
+       z-index and source order is the stacking order. It used to go in
+       last, on top of everything, and fade to nothing there: two names
+       and two swoops legible at once, which is a card passing through
+       another card rather than past it. Neither keyframe carries an
+       opacity now, so the order is the only thing keeping the pair
+       from being double-exposed while they cross — which is why it is
+       asserted here and why the fade is asserted ABSENT below. */
     /* .wc-n is the card's NAME. The first `b` on a card is the Est.
        time figure, which is the same "50 min" on both cards and would
        have made this pass on any element at all. */
@@ -5392,16 +5396,54 @@ const SAID = [
       return { on: deck.classList.contains('is-shuffling'),
         out: o && getComputedStyle(o).animationName,
         name: o && o.querySelector('.wc-n').textContent,
-        last: !!o && kids[kids.length - 1] === o,
+        under: !!o && kids[kids.length - 1] === deck.querySelector('.wc.is-front')
+          && kids[kids.length - 2] === o,
         deaf: o && getComputedStyle(o).pointerEvents,
         front: getComputedStyle(deck.querySelector('.wc.is-front')).animationName,
         b1: getComputedStyle(deck.querySelector('.wc.b1')).animationName };
     });
     ok(`a step inside a group puts ${was} to the back of the stack`,
       shuf.on && shuf.out === 'wcOut' && shuf.name === was
-      && shuf.last && shuf.deaf === 'none', { was, shuf });
+      && shuf.under && shuf.deaf === 'none', { was, shuf });
     ok('...and it is not a deal — the two behind hold still',
       shuf.front === 'wcStep' && shuf.b1 === 'none', shuf);
+    /* ── OFF ONE SIDE, IN FROM THE OTHER, AND NEITHER OF THEM FADES ──
+       Both halves measured on the composited box rather than read off
+       the stylesheet: the animations are seeked to a third of the way
+       through and the two cards' left edges are compared against the
+       deck's own, so a keyframe that names the right property and the
+       wrong sign fails. The old pass receded the outgoing card DOWN
+       AND RIGHT onto the fan while fading it to nothing, which put two
+       names on screen at once and then vanished one of them; it is
+       taken off to the left now and the next one comes in from the
+       right, at full strength end to end.
+
+       The fade is asserted ABSENT rather than assumed gone — an
+       opacity keyframe is one line to add back and it is the whole of
+       what was wrong, so it is checked on the keyframes themselves,
+       which is where it would reappear. */
+    const cross = await page.evaluate(() => {
+      const deck = document.querySelector('.wc-deck');
+      const o = deck.querySelector('.wc.is-out');
+      const f = deck.querySelector('.wc.is-front');
+      const anim = (el) => el.getAnimations();
+      const fades = (el) => anim(el).some((a) =>
+        a.effect.getKeyframes().some((k) => k.opacity != null));
+      const faded = fades(o) || fades(f);
+      anim(o).concat(anim(f)).forEach((a) => {
+        a.pause(); a.currentTime = a.effect.getTiming().duration * .34;
+      });
+      const d = deck.getBoundingClientRect();
+      const r = { faded, out: o.getBoundingClientRect().x - d.x,
+        into: f.getBoundingClientRect().x - d.x,
+        oOp: +getComputedStyle(o).opacity, fOp: +getComputedStyle(f).opacity };
+      anim(o).concat(anim(f)).forEach((a) => a.finish());
+      return r;
+    });
+    ok('...and it is taken off the LEFT while the next comes in from the right',
+      cross.out < -40 && cross.into > 20, cross);
+    ok('...at full strength the whole way — nothing on this pass fades',
+      !cross.faded && cross.oOp === 1 && cross.fOp === 1, cross);
     /* SWEPT, and on a timer as well as on animationend: an animation
        that never runs — a background tab — would otherwise leave a dead
        card on the pile, and the next press would put a second one on
@@ -5759,7 +5801,17 @@ const SAID = [
       const worst = { fig: 99, glyph: 99, desc: 99, of: '' };
       for (let i = 0; i < 6; i++) {
         await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
-        await page.waitForTimeout(420);
+        /* WAITED OUT ON THE ANIMATION, never on a number of
+           milliseconds. This was 420ms, which was comfortably past the
+           300ms the shuffle used to take — and the day the pass was
+           slowed to 600ms so you could see one card leave and the next
+           arrive, every sample here was taken with the card still
+           sliding in from the right, a third of it off the screen. The
+           figures came back 1.57:1 and it read as a contrast
+           regression on a colour nothing had touched. */
+        await page.waitForFunction(() =>
+          [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
+            c.getAnimations().every((a) => a.playState === 'finished')));
         const at = await page.evaluate(() => {
           const c = document.querySelector('.wc.is-front');
           const box = (s) => { const r = c.querySelector(s).getBoundingClientRect();

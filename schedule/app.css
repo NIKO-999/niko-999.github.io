@@ -2316,6 +2316,16 @@ body {
   z-index: 50;
   max-height: 88dvh;
   overflow-y: auto;
+  /* ── AND NOT SIDEWAYS ──
+     overflow-x is `visible` on this box, which computes to `auto`
+     beside a scrolling overflow-y — so anything a sheet puts outside
+     itself horizontally is not merely clipped, it is PANNABLE. The
+     workout deck's pass starts the arriving card a full card's width
+     off to the right, which measured 368px of scrollable width for
+     the 600ms it runs: a finger crossing the sheet in that window
+     drags the whole thing sideways. Said out loud, the overflow is
+     still there and no longer reachable. */
+  overflow-x: hidden;
   -webkit-overflow-scrolling: touch;
   padding: 10px var(--pad) calc(22px + env(safe-area-inset-bottom));
   /* ── NO RULE ACROSS THE TOP ──
@@ -3176,51 +3186,91 @@ body {
 .wc-deck.is-turning .wc.is-front {
   animation: wcTurn .26s cubic-bezier(.2, .7, .3, 1) both;
 }
-/* ── AND INSIDE A GROUP, THE CARD GOES TO THE BACK ──
+/* ── AND INSIDE A GROUP, THE CARD IS DEALT OFF THE LEFT ──
    Stepping between the four kinds deals the whole hand again — at that
    level you are choosing what sort of session it was, and the deal is
    what that screen is. Inside a group you are stepping THROUGH one
-   hand, so the card in front is put down and the next is underneath
-   it. Dealing there would say you had started again.
+   hand, so the card in front is taken off and the next one comes over
+   the top of the stack. Dealing there would say you had started again.
 
-   It lands on b2's own resting position — 25px across, 18px down, 6°,
-   scaled to .93 — so the card being put down goes exactly where the
-   third card in the stack sits rather than to a number chosen to look
-   about right. Written with the independent properties rather than
-   `transform`, which is the rule the whole deck is built on: a
-   keyframe naming transform REPLACES a resting one, and that is how
-   the fan was flattened once already. This card has no resting
-   transform, so it is safe either way and uses them anyway, because
-   the next thing pointed at this rule may not be.
+   ── IT GOES SOMEWHERE, IT DOES NOT DISSOLVE ──
+   The first cut receded onto b2's resting position and faded to
+   nothing while painted ON TOP of the card arriving. Three separate
+   things were wrong with that and all three were reported: it was
+   quick enough (300ms) to be over before you had read it; the fade
+   put two names and two swoops on screen at once, which is a card
+   going THROUGH another card rather than past it; and a card that
+   ends at zero opacity has not gone anywhere — it has vanished, which
+   is what it looked like.
 
-   `pointer-events: none` — it is on TOP for the whole of its recede,
-   and a press landing on a card that is leaving is a press on the
-   workout you just moved away from. */
+   So the gesture is a hand-off across the deck. The card you were on
+   is taken off to the LEFT and off the screen — the sheet is a scroll
+   container, so its own left edge cuts the card and nothing has to
+   fade for it to be gone — and the next one comes in from the RIGHT,
+   over the top of everything. The two behind never move and never
+   dim: they are the deck, and the whole point of the pass is that you
+   can see them the entire way through it.
+
+   FULL STRENGTH FROM END TO END. There is no opacity in either
+   keyframe, deliberately, and adding one back is how this reverts.
+
+   Written with the independent `translate` / `rotate` / `scale`
+   properties rather than `transform`, which is the rule the whole
+   deck is built on: a keyframe naming transform REPLACES a resting
+   one, and that is how the fan was flattened once already. Neither
+   card here has a resting transform, so it is safe either way and
+   uses them anyway, because the next thing pointed at these rules may
+   not be.
+
+   THE TRAVEL IS A PERCENTAGE, NOT A NUMBER OF PIXELS. Each card
+   clears its own width whatever the screen is, which is the only
+   figure that means "off the side" on a phone this app does not know
+   the width of.
+
+   The drift and the tilt are bounded by the deck's own box. The card
+   is 284px in a 312px well, so 10px of fall plus what a 4° turn drops
+   the low corner by is most of the 28px of slack — a heavier tilt
+   puts the corner of a leaving card through the effort row
+   underneath it.
+
+   `pointer-events: none` — a press landing on a card that is leaving
+   is a press on the workout you just moved away from. */
 @keyframes wcOut {
-  from { translate: 0 0;       scale: 1;   rotate: 0deg; opacity: 1; }
-  /* THE FADE IS FRONT-LOADED and the travel is not. A linear fade over
-     the same 300ms left the two cards double-exposed through the
-     middle of it — two names and two descriptions legible at once,
-     which reads as a rendering fault rather than as one card passing
-     behind another. Most of the opacity goes in the first third, so
-     what you see is the old card leaving and the new one already
-     readable underneath. */
-  35%  { opacity: .4; }
-  to   { translate: 25px 18px; scale: .93; rotate: 6deg; opacity: 0; }
+  from { translate: 0 0;        rotate: 0deg;  scale: 1; }
+  to   { translate: -112% 10px; rotate: -4deg; scale: .97; }
 }
 .wc.is-out {
-  animation: wcOut .3s cubic-bezier(.3, .7, .4, 1) both;
+  animation: wcOut .6s cubic-bezier(.4, .05, .5, 1) both;
   pointer-events: none;
 }
-/* The one underneath steps forward as it is uncovered. Small, because
-   what carries this is the card LEAVING — a new card arriving with a
-   flourish of its own would be two things happening at once. */
+
+/* ── AND THE NEXT ONE COMES IN OVER THE TOP ──
+   A CARD'S WIDTH OFF TO THE RIGHT, not a nudge from behind the fan.
+   It was tried at 64px — just past b2 — and the two cards then share
+   almost the whole window for the whole pass, so the one leaving is
+   covered before it has gone anywhere: rendered at five moments over
+   the real sheet, you never see it leave. Starting off the frame is
+   what makes it a hand-off. The two meet edge to edge across the
+   middle of the pass and there is no moment where the deck is empty
+   between them, which the same sheet is what settled — a gap of blank
+   fan in the middle reads as the deck emptying and refilling.
+
+   ONE CURVE FOR BOTH, and the same duration. They are two halves of
+   one movement and a card that lags the other by even a tenth opens
+   that gap.
+
+   It is on top because it is LAST in the deck: these are absolutely
+   positioned siblings with no z-index between them, so source order
+   is the stacking order, and scTrainAsk inserts the card being taken
+   off ahead of it. Nothing here sets a z-index, and it must not — an
+   explicit one on this rule alone would put the arriving card over
+   the whole sheet. */
 @keyframes wcStep {
-  from { scale: .97; }
-  to   { scale: 1; }
+  from { translate: 108% 10px; rotate: 4deg;  scale: .97; }
+  to   { translate: 0 0;       rotate: 0deg;  scale: 1; }
 }
 .wc-deck.is-shuffling .wc.is-front {
-  animation: wcStep .3s cubic-bezier(.2, .7, .3, 1) both;
+  animation: wcStep .6s cubic-bezier(.4, .05, .5, 1) both;
 }
 
 /* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──

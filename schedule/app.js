@@ -5490,16 +5490,23 @@
         deck.textContent = '';
         deck.appendChild(scTrainBack('b2'));
         deck.appendChild(scTrainBack('b1'));
-        deck.appendChild(scTrainCard(w, 'is-front'
-          + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
-          press(w), into ? ef : '', saidMin ? mins : 0));
-        /* LAST, so it is on top: these are absolutely positioned
-           siblings with no z-index between them, so source order is
-           the stacking order. The card being put down has to start
-           over the one it is uncovering, or there is nothing to
-           uncover. Swept on animationend AND on a timer, because an
-           animation that never runs — reduced motion, a background
-           tab — would otherwise leave a dead card on the pile. */
+        /* ── THE CARD BEING TAKEN OFF GOES IN BEFORE THE ONE ARRIVING ──
+           These are absolutely positioned siblings with no z-index
+           between them, so source order IS the stacking order. It used
+           to go in LAST, on top of the whole deck, and it faded to
+           nothing there — which is a card passing THROUGH the one that
+           replaced it and then disappearing, and that is exactly what
+           it was reported as.
+
+           Under the arriving card and over the two behind is where a
+           card taken off a deck actually is. It never fades now, so
+           the order is the only thing keeping the two from being
+           double-exposed while they cross.
+
+           Swept on animationend AND on a timer, because an animation
+           that never runs — reduced motion, a background tab — would
+           otherwise leave a dead card on the pile for the next press
+           to stack on. */
         if (out) {
           deck.appendChild(out);
           var sweep = function () {
@@ -5509,6 +5516,9 @@
           out.addEventListener('animationend', sweep);
           setTimeout(sweep, 700);
         }
+        deck.appendChild(scTrainCard(w, 'is-front'
+          + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
+          press(w), into ? ef : '', saidMin ? mins : 0));
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
            The card is a <button> and a control inside a button is
