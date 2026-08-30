@@ -4818,9 +4818,9 @@ const SAID = [
     const eff = (s) => (s.match(/Effort (\w+)/) || [])[1];
     const min = (s) => +(s.match(/Est\. time (\d+)/) || [])[1];
     ok('every card says how long and what that costs',
-      said.every((s) => /^Est\. time \d+ min \/ Effort (Easy|Moderate|Hard)$/.test(s)), said);
+      said.every((s) => /^Est\. time \d+ min \/ Effort (Light|Moderate|Hard)$/.test(s)), said);
     ok('...and the minutes are what suggest it, on every card in the group',
-      said.every((s) => eff(s) === (min(s) < 25 ? 'Easy' : min(s) < 50 ? 'Moderate' : 'Hard'))
+      said.every((s) => eff(s) === (min(s) < 25 ? 'Light' : min(s) < 50 ? 'Moderate' : 'Hard'))
       && new Set(said.map(eff)).size === 3, said);
 
     const effRow = await page.evaluate(() => {
@@ -4833,7 +4833,7 @@ const SAID = [
         labelled: r.getAttribute('aria-labelledby') === 'scEffLab' };
     });
     ok('the effort row stands outside the card, named, showing the suggestion',
-      effRow.names.join('|') === 'Easy|Moderate|Hard' && effRow.outside
+      effRow.names.join('|') === 'Light|Moderate|Hard' && effRow.outside
       && effRow.labelled && effRow.on.length === 1
       && effRow.on[0] === effRow.card, effRow);
 
@@ -4983,7 +4983,7 @@ const SAID = [
     await page.waitForTimeout(420);
     await page.click('.wc.is-front');                              /* choose it */
     await page.waitForTimeout(320);
-    await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Easy */
+    await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Light */
     await page.waitForTimeout(320);
     await page.click('.wc-go');                                    /* file it */
     await page.waitForTimeout(460);
@@ -4992,7 +4992,7 @@ const SAID = [
     const one2 = Object.values(Object.values(stored)[0] || {})[0] || {};
     ok('picking one files it against that block, with the effort you said',
       Object.keys(stored).length === 1
-      && one2.k === 'bro.legs' && one2.e === 'Easy', stored);
+      && one2.k === 'bro.legs' && one2.e === 'Light', stored);
 
     /* ── EVERY RECORD WRITTEN BEFORE THE EFFORT EXISTED IS A BARE
        STRING ──
@@ -5013,9 +5013,33 @@ const SAID = [
       JSON.parse(localStorage.getItem('sched.train.v1'))[d][i], [old.day, old.id]);
     ok('a record from before the effort existed is repaired, not thrown away',
       healed && healed.k === 'ppl.push' && healed.e === 'Hard', healed);
+
+    /* ── AND THE WORD MOVED, NOT THE RECORD ──
+       "Easy" became "Light" — a light day is a decision you took, and
+       the word for it should not sound like a shrug. Every record
+       written before that says Easy, and read as an unknown effort
+       they would all be recomputed from the minutes, throwing away a
+       choice somebody actually made. Renamed on the way in. */
     await page.evaluate(([d, i]) => {
       const raw = JSON.parse(localStorage.getItem('sched.train.v1'));
       raw[d][i] = { k: 'bro.legs', e: 'Easy' };
+      localStorage.setItem('sched.train.v1', JSON.stringify(raw));
+    }, [old.day, old.id]);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(340);
+    const renamed = await page.evaluate(([d, i]) =>
+      JSON.parse(localStorage.getItem('sched.train.v1'))[d][i], [old.day, old.id]);
+    /* PLANTED ON LEGS, WHICH IS SIXTY MINUTES AND THEREFORE HARD.
+       It was on Abs first, at twenty minutes — where a recompute would
+       ALSO have said Light, so the check could not tell a rename from
+       a record that was thrown away and rebuilt. The whole point is
+       that the word moved and nothing else did, and a fixture whose
+       two outcomes agree cannot see that. */
+    ok('...and a record saying Easy is renamed rather than recomputed',
+      renamed && renamed.k === 'bro.legs' && renamed.e === 'Light', renamed);
+    await page.evaluate(([d, i]) => {
+      const raw = JSON.parse(localStorage.getItem('sched.train.v1'));
+      raw[d][i] = { k: 'bro.legs', e: 'Light' };
       localStorage.setItem('sched.train.v1', JSON.stringify(raw));
     }, [old.day, old.id]);
 
@@ -5174,10 +5198,10 @@ const SAID = [
        claim rather than a label. */
     const log = {};
     const put = (n, k, e) => { log[back(n)] = { ['b' + n]: { k, e: e || 'Hard' } }; };
-    /* Chest comes out FIVE Hard and THREE Easy, which averages to
+    /* Chest comes out FIVE Hard and THREE Light, which averages to
        Moderate — a word that is in neither input. An average that can
        only return one of the values it was given is a pick. */
-    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest', i < 5 ? 'Hard' : 'Easy');
+    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest', i < 5 ? 'Hard' : 'Light');
     for (let i = 0; i < 5; i++) put(4 + i * 7, 'bro.back');
     /* Day 3, and not 9: nine is 2 + 7, which is Chest's second Friday,
        and one record per block per day means the Pull simply replaced
@@ -5262,9 +5286,45 @@ const SAID = [
        here somebody could read as this session's actual length. */
     ok('every panel carries its average time and its effort',
       drawn.rows.every((r) => /^\d+ min$/.test(r.f[0])
-        && /^(Easy|Moderate|Hard)$/.test(r.f[1])
+        && /^(Light|Moderate|Hard)$/.test(r.f[1])
         && r.lab.join('') === 'Avg' && r.glyphs === 2),
       drawn.rows.map((r) => r.lab.join('') + ' ' + r.f.join(' / ')));
+
+    /* ── A TWO-PART SESSION IS ONE ROW, NAMED FOR BOTH ──
+       Pull and core is one thing you do: it has its own length, its
+       own days and its own place in the week, and split across a Pull
+       panel and a Core panel none of that is anywhere. So the row is
+       "Chest + Abs", timed as both — and it must NOT also appear as
+       two rows of its own, which is the version this replaced. */
+    /* ONE session on the record and nothing else, or the rest of the
+       fixture's own Chest and Abs rows are indistinguishable from the
+       combination being counted twice — which is the bug this is for. */
+    await page.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.train.v1') || '{}');
+      const day = Object.keys(raw).sort()[0];
+      localStorage.setItem('sched.train.v1',
+        JSON.stringify({ [day]: { solo: { k: 'bro.chest+bro.abs', e: 'Hard' } } }));
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(340);
+    await page.click('[data-tystop="work"]');
+    await page.waitForTimeout(340);
+    const joined = await page.evaluate(() => {
+      const all = [...document.querySelectorAll('.wo-p')];
+      const p = all.find((x) => x.dataset.workout.indexOf('+') >= 0);
+      return { keys: all.map((x) => x.dataset.workout),
+        w: p && p.querySelector('.wo-w').textContent,
+        t: p && p.querySelector('.wo-fl b').textContent };
+    });
+    ok('a two-part session is one row named for both, timed as both',
+      joined.w === 'Chest + Abs'
+      /* 50 for chest and 20 for abs: the length of a session is the
+         length of everything in it. */
+      && joined.t === '70 min', joined);
+    ok('...and it is not also counted as two rows of its own',
+      joined.keys.indexOf('bro.chest') < 0 && joined.keys.indexOf('bro.abs') < 0,
+      joined.keys);
+    await openWork(log);
 
     /* ── AND THE SHARE IS THIS MONTH'S ──
        Over thirteen weeks the figure barely moves, which makes it a
@@ -5282,7 +5342,7 @@ const SAID = [
 
     /* ── THE EFFORT IS A REAL AVERAGE ──
        It is the one figure on this record you chose per session, so it
-       is the one that can move. Chest is five Hard and three Easy, and
+       is the one that can move. Chest is five Hard and three Light, and
        the panel says Moderate — a word in neither input, which is what
        tells an average from a pick. */
     ok('the effort is averaged, not picked',

@@ -1578,12 +1578,17 @@ state, and a chip meaning both would be one control answering two
 questions. The tick on a chip is a readout, so a pick scrolled off the
 front is still visible without stepping through the deck to find it.
 
-**A session lands in every panel it names.** Pull and abs counts toward
-Pull and toward Abs, because the question a panel answers is *how often
-do I do this*. It follows that the shares can sum past a hundred and
-they should: the share says in what proportion of this month's sessions
-that thing appeared, not what slice of a pie it is. What must NOT be
-flattened is the session count — one entry per logged block, or a day
+**A SESSION IS ONE ROW, NAMED FOR THE WHOLE OF IT.** It landed in every
+panel it named first — Pull and abs counting toward Pull and toward Abs
+— and that was wrong: Pull and core is ONE thing you do. It has its own
+length, its own days and its own place in the week, and split across
+two panels none of that is anywhere. The row is "Pull + Core" and its
+time is both parts summed. What that costs is that Pull alone and Pull
++ Core are different rows, which is right — they are different sessions
+— and it is why the order is press order, so the same two chosen the
+same way always land on the same row.
+
+The session count is one entry per logged BLOCK either way, or a day
 you trained once reads as two.
 
 **The way back is an ARROW.** It was the words "All kinds", underlined,
@@ -1615,7 +1620,7 @@ then measured 4.47, which is under the bar by a rounding error and is
 the `--spent` lesson a third time.
 
 **EFFORT IS YOURS, AND THE MINUTES ONLY SUGGEST IT.** It went in as a
-field somebody typed — Hard, Hard, Hard, Easy — which is the app
+field somebody typed — Hard, Hard, Hard, Light — which is the app
 holding an opinion about a session it knows nothing about. Then it was
 derived from the time, which is honest and still wrong, and said so in
 its own words: an Easy run at forty minutes came back *Moderate*. So
@@ -1811,6 +1816,17 @@ could read as this session's actual length — nothing on this record
 carries a duration. The shares have to sum to the whole, or the
 denominator is wrong.
 
+**LIGHT, NOT EASY.** "Easy" is a verdict on the session and half the
+time an untrue one; a light day is a decision you took, and the word
+for it should not sound like a shrug. Every record written before the
+rename says Easy, and read as an unknown effort those would all be
+recomputed from the minutes — throwing away a choice somebody actually
+made. Renamed on the way in: the word moved, the record did not. The
+check plants it on a sixty-minute session, whose derived effort is
+Hard, because a fixture whose rename and recompute agree cannot tell
+the two apart — the first one was on a twenty-minute session and could
+not.
+
 **Spoken once, not as five marks.** Two glyphs and three figures read
 out separately would charge twice for what the panel already says, so
 the block is `aria-hidden` and the panel carries one sentence.
@@ -1851,6 +1867,17 @@ rows at all. So the only card that could supply a column was today's,
 and only while it still had un-elapsed blocks. Run at 23:00 every list
 came back empty and it failed on the CLOCK. It measures another day's
 card now, which has no past rows by construction at any hour.
+
+**AND THE SHEET LOST ITS WHITE STRIP.** `border-top: 3px solid
+var(--ink)` was a black rule setting the sheet off a white page, and
+the day every palette went dark it became a 3px white slab across the
+screen — the loudest object in the app and the first thing you saw
+every time a sheet came up. A radius was the obvious replacement and
+is not allowed: exactly five things in this app are rounded and a
+sixth smuggled in for a sheet is that list becoming a suggestion, which
+`tests/schedule.js` catches. Nor can it be a shadow, because the page
+is nearly black and a dark shadow over it separates nothing. One pixel
+of `--hair`.
 
 ## The light themes are gone
 

@@ -4811,9 +4811,12 @@
      So the minutes only set where the control STARTS. The number is a
      good guess and a bad verdict, and the difference between those two
      is one press. Twenty-five and fifty are the only figures in it. */
-  var EFFORTS = ['Easy', 'Moderate', 'Hard'];
+  /* LIGHT, not Easy. "Easy" is a verdict on the session and half the
+     time an untrue one — a light day is a decision you took, and the
+     word for it should not sound like a shrug. */
+  var EFFORTS = ['Light', 'Moderate', 'Hard'];
   function scEffort(min) {
-    return min < 25 ? 'Easy' : min < 50 ? 'Moderate' : 'Hard';
+    return min < 25 ? EFFORTS[0] : min < 50 ? EFFORTS[1] : EFFORTS[2];
   }
 
   /* Flattened once, with each workout stamped with the group it came
@@ -4912,6 +4915,11 @@
         var ws = r && scWorkoutsOf(r.k);
         if (!ws || !ws.length) { delete rec[id]; return; }
         r.k = ws.map(function (w) { return w.key; }).join('+');
+        /* Every record written before the rename says "Easy", and read
+           as an unknown effort those would all be recomputed from the
+           minutes — throwing away a choice somebody actually made. The
+           word moved; the record did not. */
+        if (r.e === 'Easy') r.e = 'Light';
         if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(ws[0].t);
         rec[id] = r;
       });
@@ -5316,8 +5324,19 @@
     }
     return out;
   }
-  function scWorkHas(h, w) {
-    return h.ws.some(function (x) { return x.key === w.key; });
+  /* ── A SESSION'S SIGNATURE IS THE WHOLE OF IT ──
+     Pull and core is ONE thing you do, not two things that happened to
+     land on the same block: it has its own length, its own days and its
+     own place in the week, and split across a Pull panel and a Core
+     panel none of that is anywhere. So the record groups on the joined
+     key and the panel is called "Pull + Core".
+
+     What that costs is that Pull alone and Pull + Core are different
+     rows, which is right — they are different sessions — and it is why
+     the order is press order: the same two chosen the same way always
+     land on the same row. */
+  function scWorkSig(h) {
+    return h.ws.map(function (w) { return w.key; }).join('+');
   }
 
   /* ── THE DAY IT USUALLY LANDS ON ──
@@ -5355,7 +5374,7 @@
      the days you trained is a list of wins with the gaps taken out,
      and losing the misses is the one thing a record of showing up must
      never do — the tally's own calendar is under the same rule. */
-  function scWorkCal(hits, w) {
+  function scWorkCal(hits, name) {
     var on = {};
     hits.forEach(function (h) { on[h.day] = 1; });
 
@@ -5397,7 +5416,7 @@
       cal.appendChild(col);
     });
     cal.setAttribute('role', 'img');
-    cal.setAttribute('aria-label', w.n + ', ' + hits.length
+    cal.setAttribute('aria-label', name + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + ' over three months.');
     return cal;
@@ -5412,14 +5431,19 @@
      row that opens a picture drawn somewhere else on the page is two
      things to look at for one press; this way the panel simply grows,
      and what grew is under your thumb. */
-  function scWorkPanel(w, hits, most, month, open, pick) {
+  function scWorkPanel(sig, hits, most, month, open, pick) {
+    var ws = scWorkoutsOf(sig);
+    var name = scWorkName(sig);
+    /* The length of a session is the length of everything in it: pull
+       at fifty and core at twenty is seventy minutes, not fifty. */
+    var mins = ws.reduce(function (n, x) { return n + x.t; }, 0);
+
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';
-    p.style.setProperty('--wc-hue', w.c);
-    p.dataset.workout = w.key;
+    p.dataset.workout = sig;
     p.setAttribute('aria-expanded', open ? 'true' : 'false');
 
-    if (open) p.appendChild(scWorkCal(hits, w));
+    if (open) p.appendChild(scWorkCal(hits, name));
 
     var row = scEl('div', 'wo-row');
     /* The ring is the count against your most-done session, so the
@@ -5434,7 +5458,7 @@
       + c.toFixed(1) + '"/></svg>');
     row.appendChild(scEl('b', 'wo-n', String(hits.length)));
     var txt = scEl('div', 'wo-tx');
-    txt.appendChild(scEl('span', 'wo-w', w.n));
+    txt.appendChild(scEl('span', 'wo-w', name));
     /* The usual day where there is one, and how long ago where there
        is not — never both, and never neither. */
     var dow = scWorkDow(hits);
@@ -5461,10 +5485,10 @@
 
        Omitted where the month is empty rather than drawn as 0%: a
        panel that reads "11 weeks ago" has already said it. */
-    var mine = month.filter(function (h) { return scWorkHas(h, w); }).length;
+    var mine = month.filter(function (h) { return scWorkSig(h) === sig; }).length;
     var share = month.length && mine ? Math.round(mine / month.length * 100) : 0;
 
-    var lines = [['time', 'Avg', w.t + ' min'], ['lift', '', eff]];
+    var lines = [['time', 'Avg', mins + ' min'], ['lift', '', eff]];
     if (share) lines.push([null, '', share + '% this month']);
     lines.forEach(function (f) {
       if (!f[2]) return;
@@ -5485,10 +5509,10 @@
     row.appendChild(figs);
     p.appendChild(row);
 
-    p.setAttribute('aria-label', w.n + ', ' + hits.length
+    p.setAttribute('aria-label', name + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
-      + '. ' + w.t + ' minutes on average'
+      + '. ' + mins + ' minutes on average'
       + (eff ? ', usually ' + eff.toLowerCase() : '')
       + (share ? ', ' + share + ' per cent of this month\'s sessions' : '') + '. '
       + (open ? 'Showing its three months.' : 'Show its three months.'));
@@ -5564,15 +5588,17 @@
 
     /* Grouped by workout, most-done first, ties broken by which you did
        last — so the panel that moves is the one you just logged. */
-    /* ── A SESSION LANDS IN EVERY PANEL IT NAMES ──
-       Pull and abs counts toward Pull and toward Abs, because the
-       question each panel answers is "how often do I do this", and you
-       did both. It follows that the shares can sum past a hundred, and
-       they should: the share says in what proportion of this month's
-       sessions that thing appeared, not what slice of a pie it is. */
+    /* ── GROUPED ON THE WHOLE SESSION, NOT ON ITS PARTS ──
+       Pull and core is one thing you do: it has its own length, its own
+       days and its own place in the week, and split across a Pull panel
+       and a Core panel none of that is anywhere. So the row is "Pull +
+       Core" — which means Pull alone and Pull + Core are different
+       rows, and they should be. The shares sum to a hundred again,
+       because every session is in exactly one of them. */
     var by = {};
     all.forEach(function (h) {
-      h.ws.forEach(function (w) { (by[w.key] || (by[w.key] = [])).push(h); });
+      var sig = scWorkSig(h);
+      (by[sig] || (by[sig] = [])).push(h);
     });
     var keys = Object.keys(by).sort(function (a, b) {
       return by[b].length - by[a].length
@@ -5592,7 +5618,7 @@
 
     var list = scEl('div', 'wo-list');
     keys.forEach(function (k) {
-      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, month, k === workOpen,
+      list.appendChild(scWorkPanel(k, by[k], most, month, k === workOpen,
         function () {
           /* Pressing the open one shuts nothing: a screen with no
              calendar on it is the state this view exists to avoid. */

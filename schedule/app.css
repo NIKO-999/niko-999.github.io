@@ -2216,7 +2216,21 @@ body {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   padding: 10px var(--pad) calc(22px + env(safe-area-inset-bottom));
-  border-top: 3px solid var(--ink);
+  /* ── NO RULE ACROSS THE TOP ──
+     It was `border-top: 3px solid var(--ink)`, which on a white page
+     was a black rule setting the sheet off the paper — and the day
+     every palette went dark it became a 3px WHITE SLAB spanning the
+     screen, the loudest object in the app and the first thing you saw
+     every time a sheet came up.
+
+     A HAIRLINE, and not a radius. The corners were the obvious answer
+     and this app has a rule against them: exactly five things are
+     rounded — the bar's pill, its tabs, the glass a row opens and two
+     circles — and a sixth smuggled in for a sheet is that list
+     becoming a suggestion. Nor can it be a shadow: the page is nearly
+     black, so a dark shadow over it separates nothing. One pixel of
+     --hair is an edge without being an object. */
+  border-top: 1px solid var(--hair);
   background: var(--paper);
   transform: translateY(100%);
   transition: transform .3s cubic-bezier(.22, 1, .36, 1);
