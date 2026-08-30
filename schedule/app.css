@@ -59,19 +59,20 @@
 }
 
 :root {
-  /* ── THE PAGE SHIPS DARK, AND THERE IS NO LIGHT ONE TO GO BACK TO ──
-     Seven light palettes were deleted from THEMES in one pass, and a
-     default that stayed white would have been a fourteenth palette
-     nothing could choose and nothing could leave: clearing the stored
-     key would have dropped you onto a page not on the list. So this IS
-     the Lime theme, spelled out — black, grey, white and one lime —
-     and `lime` in THEMES is the same set under a name you can press.
+  /* ── THERE IS ONE GROUND AND IT IS THIS ──
+     Thirteen palettes came out of app.js in one pass and what replaced
+     them is this page and a wheel that turns the accent. Nothing here
+     moves any more except --red and the wash made from it, so these
+     are not "the default theme" — they are the app's colours, and the
+     hue is the setting.
 
-     THE ONE THING KEPT IN TWO PLACES, then, and deliberately: the
-     stylesheet has to carry a complete palette for the first paint
-     before app.js runs, and a page that flashed white for a frame and
-     then went black is worse than a duplicated hex. tests/schedule.js
-     holds the two in step. */
+     THE ONE THING KEPT IN TWO PLACES, and deliberately: the stylesheet
+     has to carry a complete palette for the first paint before app.js
+     runs, and a page that flashed white for a frame and then went
+     black is worse than a duplicated hex. What is duplicated is now
+     the OUTPUT of one function at one angle rather than a set somebody
+     typed — scAccent(124) — and tests/schedule.js holds the two in
+     step on the tokens. */
   color-scheme: dark;
 
   --paper: #060607;
@@ -113,7 +114,7 @@
      stayed the original 226,35,26. A mint hairline dragging a red
      smear. It is gone; color-mix takes the alpha off --red itself, so
      there is one source and nothing to keep in step. */
-  --red:     #c6f73c;
+  --red:     #c8fa42;
 
   /* The ground, as three stops rather than one flat fill. On the
      shipped palette the near wash is the accent at a fifth strength
@@ -129,14 +130,14 @@
      has none of that cost, and putting one on an element the ring
      repaints inside would give it all of it. */
   --g0: var(--paper);
-  --g1: rgba(160, 220, 40, .20);
+  --g1: rgba(200, 250, 66, .20);
   --g2: rgba(120, 124, 132, .14);
   /* A third wash. Two corners is a tint; three is a gradient you can
      see across the whole frame. It was the light palettes' own third
      stop and nothing sets it now — kept, and kept transparent, because
      the rule that reads it is one line in the body's background and
      deleting the token would only move the same emptiness into the
-     rule. scPaint still clears it between themes. */
+     rule. scPaint still clears it between accents. */
   --g3: transparent;
 
   --hair:  #232327;
@@ -151,22 +152,31 @@
      thing a record of showing up must never do. */
   --tick-off: #34343a;
 
-  /* What sits ON the accent — the microphone's glyph, the go button's
+  /* What sits ON the accent — the add button's plus, the go button's
      label. White is right on a red at 4.7:1 and wrong on every bright
-     accent: white on the amber theme measures 1.9:1 and on the mint one
-     1.7:1, which is a control with an invisible label. Each theme names
-     its own, and every one of them names its own near-black GROUND,
-     which is the colour its accent was already chosen to stand off.
-     15.7:1 here, on a lime that white would sit on at 1.3:1. */
-  --on-red: #0a0c05;
+     accent: white on an amber measures 1.9:1 and on a mint 1.7:1,
+     which is a control with an invisible label.
 
-  /* Danger, which is NOT the accent, and on the shipped palette it
-     never was: the two used to be the same red, which is exactly why
-     they came apart hard the day a theme moved one of them —
-     "Clear everything" in Solar's amber reads as a highlight and in
-     Aurora's mint it reads as approval. On a lime page a red is the
-     only thing on screen that is not lime, grey or white, which is as
-     loud as a destructive action should be. */
+     It is DERIVED now, and it has to be: with a wheel there is no
+     author left to name one per palette. The wheel's own floor puts
+     every accent at a luminance of at least .26, so a near-black on
+     any of them clears 4.5:1 by the same arithmetic that put it there
+     — measured at worst 5.8:1 all the way round. Tinted 4% with the
+     hue rather than flat, so it is the accent's own dark rather than
+     the page's. */
+  --on-red: #0e1009;
+
+  /* Danger, which is NOT the accent. The two used to be the same red,
+     which is exactly why they came apart hard the day a palette moved
+     one of them — "Clear everything" in an amber accent reads as a
+     highlight and in a mint one it reads as approval.
+
+     AND NOW YOU CAN PICK RED, so this is the app's to hold apart
+     rather than a palette author's. It holds: --bad is a pale
+     desaturated red and every accent the wheel can produce sits at
+     full chroma, so the nearest the whole circle comes is ΔE 17.9, at
+     hue 18. Measured in Lab in tests/schedule.js rather than left as
+     a hope. */
   --bad: #ff7a7a;
 
   --pad:   18px;   /* the page's left edge — everything aligns to it */
@@ -326,10 +336,11 @@ body {
    and the mark reads as a smudge on the line.
 
    POLARITY-DEPENDENT, the same way the tally's glow is. On a dark
-   palette --paper is near-black and the bloom is a genuine emissive
-   halo; on white it is the light the mark is casting onto the page.
-   Both are the real product — seven of the thirteen palettes are
-   dark. */
+   page --paper is near-black and the bloom is a genuine emissive halo;
+   on white it is the light the mark is casting onto the page. Only the
+   first ships — the page is dark and there is no light one to go back
+   to — and it stays written for both because the mechanism is the same
+   either way and the drawing already supports it. */
 .sp-dot {
   position: absolute;
   top: 50%;
@@ -1079,7 +1090,7 @@ body {
    than scheduled, so the card they are on should look like something
    you would keep.
 
-   MIXED FROM THE PALETTE, never a literal. Thirteen themes move --red
+   MIXED FROM THE PALETTE, never a literal. The wheel moves --red
    and --ink together, so a gradient written in hex would be somebody
    else's card on twelve of them. And the alphas are deliberately low:
    everything on this face is drawn in --ink at full strength, so the
@@ -1206,7 +1217,7 @@ body {
    rim, so the thing you press looks like the thing it turns to.
 
    The ground is mixed from the palette exactly as the back's is —
-   thirteen themes move --red and --ink together, and a gradient in
+   the wheel moves --red through every hue there is, and a gradient in
    hex would be somebody else's card on twelve of them. */
 /* Put away on a shut card rather than not built: at 76px there is no
    room for it beside the day's abbreviation, and the press target over
@@ -2177,7 +2188,7 @@ body {
   color: var(--on-red);
   cursor: pointer;
 }
-/* Opacity rather than a hand-darkened red. A second hex per theme is a
+/* Opacity rather than a hand-darkened red. A second hex to derive is a
    second thing to keep true, and a press state does not need one. */
 .prime:active { opacity: .82; }
 .prime svg {
@@ -2466,79 +2477,73 @@ body {
 }
 .menu-item.bad { color: var(--bad); }
 
-/* ── the theme picker ──
-   A swatch, not a word. "Aurora" tells you nothing you can act on; a
-   disc of the ground with the accent drawn on it IS the choice, and it
-   reads at a glance in a row of seven.
+/* ── THE WHEEL ──
+   Thirteen chips became a circle. The ring is painted in JS because
+   every stop on it is a SOLVED accent rather than a hue — a raw
+   rainbow would be a control that lies about its own output — and
+   nothing else about it needs a script.
 
-   Four across. A single scrolling row was the first cut and it put the
-   last theme off the right edge of a 390px sheet — an option you have
-   to discover by swiping is one most people never see. Thirteen across
-   would need 22px chips, far under the touch floor. A grid shows every
-   one at 81px and reads as a grid rather than as a row that ran out.
-
-   And split into light and dark. Thirteen chips in one block is a
-   colour chart; the half you are in is the first thing anyone deciding
-   wants, and it is the only grouping the set actually has. */
-.themes { margin: 14px 0 0; }
-.theme-g {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 14px 10px;
-  margin: 9px 0 18px;
+   THE SIXTH ROUNDED THING, AND IT IS NAMED HERE RATHER THAN SMUGGLED
+   IN. The rule at the top of this file says the exceptions are named
+   and the day the list of exceptions is longer than the list of
+   squares the rule has become its opposite. This one does not test
+   the rule: a colour wheel that is not round is not a colour wheel,
+   and there is nothing else it could be. */
+.cw-wrap {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0 10px;
 }
-.theme-g:last-child { margin-bottom: 0; }
-.theme-h {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .18em;
-  text-transform: uppercase;
-  color: var(--spent);
-}
-
-.theme {
-  display: grid;
-  justify-items: center;
-  gap: 7px;
-  /* 44px of target in both directions: 34px of disc plus the padding,
-     and the caption underneath is inside the same button. */
-  padding: 5px 4px 4px;
-  border: 0;
-  background: none;
-  color: var(--dim);
-  font: inherit;
+.cw {
+  position: relative;
+  width: 170px; height: 170px;
+  border-radius: 50%;
+  /* The drag has to own the gesture: without this, a thumb crossing
+     the wheel scrolls the sheet underneath it and the colour follows
+     the finger for exactly as long as the browser has not decided the
+     gesture was a scroll. */
+  touch-action: none;
   cursor: pointer;
 }
-.theme .swatch {
-  position: relative;
-  display: block;
-  width: 34px; height: 34px;
-  border-radius: 50%;
-  border: 1px solid var(--hair);
-}
-/* The accent, drawn ON the ground rather than beside it — the pairing
-   is the thing being chosen, and two swatches side by side let you
-   judge the colours without judging the combination. */
-.theme .swatch u {
+.cw:focus-visible { outline: 2px solid var(--ink); outline-offset: 4px; }
+/* The middle is the page, off the same tokens the body uses, so it
+   repaints itself the instant scPaint writes and needs no JS at all.
+   The accent sits ON it rather than beside it: the pairing is the
+   thing being chosen. */
+.cw-mid {
   position: absolute;
   left: 50%; top: 50%;
-  width: 12px; height: 12px;
-  margin: -6px 0 0 -6px;
+  width: 118px; height: 118px;
+  margin: -59px 0 0 -59px;
   border-radius: 50%;
-  text-decoration: none;
+  background:
+    radial-gradient(140% 92% at 8% 116%, var(--g1) 0%, transparent 74%),
+    radial-gradient(120% 66% at 100% -12%, var(--g2) 0%, transparent 70%),
+    var(--g0);
+  box-shadow: 0 0 0 1px var(--hair);
 }
-.theme-n {
-  font-size: 10px;
-  font-weight: 500;
-  letter-spacing: .01em;
-  white-space: nowrap;
+.cw-mid::after {
+  content: '';
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 46px; height: 46px;
+  margin: -23px 0 0 -23px;
+  border-radius: 50%;
+  background: var(--red);
 }
-/* The ring round the current one is offset OUTSIDE the disc, so the
-   swatch it is marking is not covered by the mark. */
-.theme.on .swatch { box-shadow: 0 0 0 2px var(--paper), 0 0 0 4px var(--red); }
-.theme.on .theme-n { color: var(--ink); font-weight: 700; }
-.theme:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+/* The knob is a hole in the ring rather than a blob on it — a filled
+   mark has to be some colour, and every colour it could be is one the
+   ring already carries somewhere else. A ring of the page with the
+   band showing through the middle says WHERE without adding a hue. */
+.cw-k {
+  position: absolute;
+  left: 50%; top: 50%;
+  width: 26px; height: 26px;
+  margin: -13px 0 0 -13px;
+  border-radius: 50%;
+  box-shadow: 0 0 0 3px var(--paper), 0 0 0 4.5px var(--ink);
+  pointer-events: none;
+}
 
 .menu-rule {
   height: 1px;
@@ -2598,7 +2603,7 @@ body {
 
    EVERY WORKOUT HAS ITS OWN COLOUR AND IT IS A LITERAL, which is the
    one exception on this screen: everything else mixes its colour out
-   of the palette, because thirteen themes move --red and --ink
+   of the palette, because the wheel moves --red
    together and a hex would be somebody else's app on twelve of them.
    A colour that says WHICH thing this is has to be the same colour on
    every theme or it has stopped being that thing's colour — the
@@ -2776,9 +2781,9 @@ body {
 
    Two steps up from the front card's own ground rather than an alpha:
    an opacity would let the page through and make the pair a different
-   colour on each of the thirteen backdrops. Literals for the same
-   reason the front card's ground is one — this whole object is the
-   same on every palette.
+   colour on each of the nine hues. Literals for the same reason the
+   front card's ground is one — this whole object is the same whatever
+   the accent is.
 
    THE TRANSFORM IS WHAT MAKES THEM THE CARDS BEHIND, and it was
    deleted once already — a rewrite of the block above this one took
@@ -3100,7 +3105,7 @@ body {
 }
 /* ── THIS SCREEN WEARS THE THEME'S ACCENT, NOT THE NINE HUES ──
    The workout cards carry a literal colour each because a colour that
-   says WHICH session this is has to be the same on every palette. Here
+   says WHICH session this is has to be the same at every hue. Here
    nothing needs saying: the panel prints the name in words and the
    calendar belongs to one card at a time, so a hue would be a second
    colour system running down a screen that already has an accent. It

@@ -1985,190 +1985,220 @@
 
 
   /* ═══════════════════════════════════════════════════════════
-     THEMES
+     THE ACCENT
 
-     Seven complete token sets. Every one of them was measured on
-     composited pixels at the size the type actually ships — 4.5:1 or
-     it is not in this list. The greys are per-theme rather than shared
-     for exactly that reason: --dim reads 8.9:1 on white and 1.4:1 on
-     indigo, so a palette that reuses another palette's greys has not
-     been checked, it has been guessed.
+     Thirteen complete palettes came out of this file in one pass, and
+     what replaced them is ONE ground and a wheel. Every one of the
+     thirteen moved --paper, --ink and both greys together, so each was
+     a page to solve and a page to measure — and twelve of them were
+     the shipped page with a different hue washed over it. The ground
+     is the Lime page's now, always; the only thing you choose is the
+     colour on it.
 
-     The numbers in each note are the worst piece of type on that
-     ground, and they are the argument: every dark theme here reads
-     better than the white one that ships, because a saturated hue on
-     near-black has room a saturated hue on white does not.
+     WHICH MAKES THE HUE THE WHOLE SETTING, and that is the argument
+     for a wheel rather than a list. A list of thirteen names is a list
+     somebody else wrote, and there was never a reason yours had to be
+     on it.
+
+     THE WHEEL PICKS A HUE AND THE APP OWNS THE LIGHTNESS. A free
+     colour picker lets you choose #101010 for type on a near-black
+     page, and "you chose it" is not an answer to a screen you cannot
+     read. So every point on the wheel is SOLVED rather than taken: the
+     hue at its fullest — the lightness at which sRGB holds the most of
+     that colour — lifted until it clears 6:1 on this ground. 4.5 is
+     the bar and this repo has now twice shipped 4.74 believing that
+     was a margin; 6 is a margin. Measured at every one of the 360
+     degrees, the worst point on the wheel is exactly 6.00:1 and the
+     default is 17:1.
+
+     The lightness therefore VARIES round the wheel, and it has to: a
+     yellow at a blue's lightness is mud, and a blue at a yellow's is
+     white. Holding one lightness for every hue was built and looked
+     at — the greens survive it and everything from cyan round to red
+     comes out pastel, which is a wheel of one colour and eleven
+     tints.
      ═══════════════════════════════════════════════════════════ */
 
-  var THEMES = [
-    /* ── THE DEFAULT, AND IT IS THE ONE THE PAGE SHIPS WITH ──
-       Black, grey, white and one lime. Everything that would carry the
-       accent carries lime and nothing else is coloured at all — which
-       is a different claim from the twelve below, where the hue is the
-       whole page. The gradient is lime too, so the wash and the accent
-       are one colour at two strengths rather than a tint dropped on a
-       grey page.
+  /* OKLCH is the whole reason this can be one rule instead of thirteen
+     hand-mixed sets: it is the one space where holding a number fixed
+     and turning the hue gives colours that look like each other. The
+     arithmetic is Björn Ottosson's, written out rather than fetched —
+     the apps have no dependencies and this is twenty lines. */
+  function scOkRGB(L, C, h) {
+    var t = h * Math.PI / 180, a = C * Math.cos(t), b = C * Math.sin(t);
+    var l = L + 0.3963377774 * a + 0.2158037573 * b;
+    var m = L - 0.1055613458 * a - 0.0638541728 * b;
+    var s = L - 0.0894841775 * a - 1.2914855480 * b;
+    l = l * l * l; m = m * m * m; s = s * s * s;
+    return [4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+            -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+            -0.0041960863 * l - 0.7034186147 * m + 1.7076147010 * s];
+  }
+  function scEnc(c) {
+    c = c < 0 ? 0 : c > 1 ? 1 : c;
+    return Math.round(255 * (c <= 0.0031308 ? 12.92 * c
+      : 1.055 * Math.pow(c, 1 / 2.4) - 0.055));
+  }
+  /* The ground, once. Everything on the wheel is measured against this
+     and nothing else, which is only true because there is one ground
+     now — and is the whole reason the wheel can be SOLVED rather than
+     sampled.
 
-       THE WORKOUT CARDS KEEP THEIR OWN COLOURS ON IT, and that is the
-       point rather than an exception: a colour that says WHICH session
-       this is has to be the same on every theme, so nine hues sit on a
-       page that has none. It reads as the one coloured object on the
-       screen, which is what it is. */
-    { id:'lime', name:'Lime', kind:'dark', note:'Lime on black. 6.1:1',
-      t:{ '--paper':'#060607', '--ink':'#FFFFFF', '--dim':'#B4B4BA', '--spent':'#8C8C94',
-          '--red':'#C6F73C', '--hair':'#232327', '--tick-off':'#34343A',
-          '--bad':'#FF7A7A',
-          '--on-red':'#0A0C05',
-          '--g0':'#060607', '--g1':'rgba(160,220,40,.20)', '--g2':'rgba(120,124,132,.14)' } },
+     scLum and scRatio are the friends board's, four hundred lines
+     down, and this went in with a second pair of its own under the
+     same two names. A duplicate declaration does not throw, it
+     REPLACES, and the crown that reads them is on a screen you have to
+     add somebody to reach: the first symptom would have been a
+     friend's colour coming out wrong weeks later. It is the file's
+     oldest bug and tests/names.js could not see it, because the whole
+     app is inside an IIFE and that check read column zero. */
+  var GROUND = [6, 6, 7];
+  /* The most chroma sRGB holds at this lightness and hue. Bisection
+     rather than the analytic boundary: the boundary is six plane
+     intersections and this is four lines that cannot be got wrong. */
+  function scOkFit(L, h) {
+    var lo = 0, hi = 0.45, i, m, v;
+    for (i = 0; i < 22; i++) {
+      m = (lo + hi) / 2; v = scOkRGB(L, m, h);
+      if (v[0] >= -1e-4 && v[0] <= 1.0001 && v[1] >= -1e-4 && v[1] <= 1.0001
+        && v[2] >= -1e-4 && v[2] <= 1.0001) lo = m; else hi = m;
+    }
+    return lo;
+  }
 
-    { id:'nebula', name:'Nebula', kind:'dark', note:'Violet on indigo. 6.7:1',
-      t:{ '--paper':'#0A0B2E', '--ink':'#F4F1FF', '--dim':'#BDB6E8', '--spent':'#9A92CE',
-          '--red':'#C08BFF', '--hair':'#2A2A5C', '--tick-off':'#26264F',
-          '--bad':'#FF7A85',
-          '--on-red':'#0A0B2E',
-          '--g0':'#0A0B2E', '--g1':'rgba(78,42,190,.55)', '--g2':'rgba(160,60,190,.30)' } },
+  /* Lime's own chroma, which is the cap. Uncapped, the cyans and
+     magentas sit hard on the sRGB boundary with a channel at 0 and
+     another at 255, and read as fluorescent beside a default that does
+     not. A cap is one number and it is the default's own. */
+  var A_C = 0.2073;
+  /* 6:1, and the margin is the point — see above. */
+  var A_MIN = 6;
 
-    { id:'ember', name:'Ember', kind:'dark', note:'Coral on indigo. 8:1',
-      t:{ '--paper':'#0C0D33', '--ink':'#FFF1EA', '--dim':'#F3C2AC', '--spent':'#D79C82',
-          '--red':'#FF8A5B', '--hair':'#2E2A5E', '--tick-off':'#282652',
-          '--bad':'#FF4A6B',
-          '--on-red':'#0C0D33',
-          '--g0':'#0C0D33', '--g1':'rgba(220,90,50,.34)', '--g2':'rgba(90,40,150,.42)' } },
+  var scHueCache = {};
+  /* The hue at its fullest, lifted until it is readable. Two steps,
+     and the order matters: the cusp first, because that is the most of
+     the colour there is, and the lift second, because a colour that
+     cannot be read is not an accent whatever else it is. */
+  function scAccentRGB(h) {
+    h = ((Math.round(h) % 360) + 360) % 360;
+    if (scHueCache[h]) return scHueCache[h];
+    var L = 0.5, best = -1, x, c, v;
+    for (x = 0.05; x <= 0.995; x += 0.01) {
+      c = scOkFit(x, h);
+      if (c > best) { best = c; L = x; }
+    }
+    for (x = 0; x < 400; x++) {
+      c = Math.min(A_C, scOkFit(L, h));
+      v = scOkRGB(L, c, h).map(scEnc);
+      if (scRatio(v, GROUND) >= A_MIN || L >= 0.999) break;
+      L += 0.0025;
+    }
+    scHueCache[h] = v;
+    return v;
+  }
+  function scHex(v) {
+    return '#' + v.map(function (c) {
+      return (c < 16 ? '0' : '') + c.toString(16);
+    }).join('');
+  }
+  function scMixed(v, a) {
+    return scHex([Math.round(v[0] * a + 6 * (1 - a)),
+                  Math.round(v[1] * a + 6 * (1 - a)),
+                  Math.round(v[2] * a + 7 * (1 - a))]);
+  }
 
-    { id:'aurora', name:'Aurora', kind:'dark', note:'Green on near-black. 8.6:1',
-      t:{ '--paper':'#04141A', '--ink':'#E8FBF4', '--dim':'#9FD9C7', '--spent':'#7FBBA9',
-          '--red':'#4FE0A8', '--hair':'#123038', '--tick-off':'#102A31',
-          '--bad':'#FF8A8A',
-          '--on-red':'#04141A',
-          '--g0':'#04141A', '--g1':'rgba(18,150,130,.40)', '--g2':'rgba(30,90,150,.34)' } },
+  /* The ground, spelled out once. It is the Lime palette's, and it is
+     also what app.css carries at :root so the first paint is right
+     before this file runs — the one thing in this app written down
+     twice, and tests/schedule.js holds the two in step. */
+  function scAccent(h) {
+    var v = scAccentRGB(h);
+    return { '--paper': '#060607', '--ink': '#ffffff',
+      '--dim': '#b4b4ba', '--spent': '#8c8c94',
+      '--hair': '#232327', '--tick-off': '#34343a', '--bad': '#ff7a7a',
+      '--red': scHex(v),
+      /* The wash IS the accent, at a fifth. It used to be a second,
+         slightly deeper hex beside it, which is a copy that drifts —
+         the same mistake --red-rgb made and the same fix. */
+      '--g1': 'rgba(' + v.join(',') + ',.20)',
+      '--g0': '#060607', '--g2': 'rgba(120,124,132,.14)',
+      /* Ink ON the accent, and it can be black on every one of them:
+         the floor above puts every accent at a luminance of at least
+         .26, so a near-black on it clears 6:1 by the same arithmetic
+         that put it there. Tinted with the hue rather than flat, so
+         the chip is the accent's own dark rather than the page's. */
+      '--on-red': scMixed(v, 0.04) };
+  }
 
-    { id:'solar', name:'Solar', kind:'dark', note:'Amber, no blue anywhere. 7.9:1',
-      t:{ '--paper':'#15100A', '--ink':'#FFF6E6', '--dim':'#E2C89C', '--spent':'#BFA47C',
-          '--red':'#FFB020', '--hair':'#3A2E1C', '--tick-off':'#332818',
-          '--bad':'#FF8A7A',
-          '--on-red':'#15100A',
-          '--g0':'#15100A', '--g1':'rgba(200,120,20,.34)', '--g2':'rgba(120,50,10,.40)' } },
-
-    { id:'ice', name:'Ice', kind:'dark', note:'Pale cyan on slate. 7.2:1',
-      t:{ '--paper':'#0D1420', '--ink':'#EAF3FB', '--dim':'#A9C2D8', '--spent':'#8AA5BD',
-          '--red':'#5CC8F8', '--hair':'#233246', '--tick-off':'#1E2C3E',
-          '--bad':'#FF8A8A',
-          '--on-red':'#0D1420',
-          '--g0':'#0D1420', '--g1':'rgba(40,110,180,.42)', '--g2':'rgba(90,90,190,.28)' } },
-
-    { id:'plum', name:'Plum', kind:'dark', note:'Rose on aubergine. 6.7:1',
-      t:{ '--paper':'#1A0B1F', '--ink':'#FCEDF5', '--dim':'#DDAEC6', '--spent':'#BC8CA6',
-          '--red':'#FF6FA5', '--hair':'#3B1F42', '--tick-off':'#341B3B',
-          '--bad':'#FFA07A',
-          '--on-red':'#1A0B1F',
-          '--g0':'#1A0B1F', '--g1':'rgba(160,30,110,.40)', '--g2':'rgba(90,30,140,.38)' } },
-
-    /* ── THE SIX THAT REPLACED THE LIGHT ONES ──
-       Seven light palettes came out of this list in one pass, and what
-       went in is not seven more of the same idea: each of these takes a
-       hue family none of the six above holds. True red, saturated blue,
-       tan, magenta, gold-on-green, periwinkle.
-
-       Iris is the near one — Nebula is already a violet — and it is
-       kept because the two differ where it matters: Nebula's accent is
-       a pale lilac lifting off an indigo page, Iris's is a deeper
-       periwinkle on a page that is nearly black. Written down rather
-       than glossed, because the next person to add a violet should
-       know there are two already. */
-    { id:'crimson', name:'Crimson', kind:'dark', note:'Red on oxblood. 6.6:1',
-      t:{ '--paper':'#120507', '--ink':'#FFECEC', '--dim':'#E0A8A8', '--spent':'#BC8686',
-          '--red':'#FF5C5C', '--hair':'#341A1E', '--tick-off':'#2C1518',
-          '--bad':'#FFA84A',
-          '--on-red':'#120507',
-          '--g0':'#120507', '--g1':'rgba(190,30,50,.42)', '--g2':'rgba(120,20,60,.34)' } },
-
-    { id:'cobalt', name:'Cobalt', kind:'dark', note:'Royal blue on midnight. 7.2:1',
-      t:{ '--paper':'#050A1A','--ink':'#E9EFFF','--dim':'#A9BCE8','--spent':'#8A9CC8',
-          '--red':'#6E9BFF', '--hair':'#1C2A48', '--tick-off':'#17233D',
-          '--bad':'#FF8A8A',
-          '--on-red':'#050A1A',
-          '--g0':'#050A1A', '--g1':'rgba(30,70,220,.44)', '--g2':'rgba(20,120,190,.28)' } },
-
-    { id:'sepia', name:'Sepia', kind:'dark', note:'Tan on espresso. 6.9:1',
-      t:{ '--paper':'#14100C', '--ink':'#F7EEE2', '--dim':'#D6BFA4', '--spent':'#B29B82',
-          '--red':'#E0A96D', '--hair':'#332A20', '--tick-off':'#2C241B',
-          '--bad':'#FF8A72',
-          '--on-red':'#14100C',
-          '--g0':'#14100C', '--g1':'rgba(150,100,50,.38)', '--g2':'rgba(90,60,40,.42)' } },
-
-    { id:'fuchsia', name:'Fuchsia', kind:'dark', note:'Magenta on charcoal. 7:1',
-      t:{ '--paper':'#100A14', '--ink':'#FCE9F8', '--dim':'#DEAED6', '--spent':'#BA8CB4',
-          '--red':'#FF6AD5', '--hair':'#2E1F35', '--tick-off':'#281A2E',
-          '--bad':'#FFA05A',
-          '--on-red':'#100A14',
-          '--g0':'#100A14', '--g1':'rgba(200,20,150,.40)', '--g2':'rgba(60,30,140,.34)' } },
-
-    { id:'verdant', name:'Verdant', kind:'dark', note:'Gold on deep forest. 7.2:1',
-      t:{ '--paper':'#071410', '--ink':'#EAF6EE', '--dim':'#AFCFBC', '--spent':'#8FAF9C',
-          '--red':'#E8C547', '--hair':'#1B3128', '--tick-off':'#172A22',
-          '--bad':'#FF8A8A',
-          '--on-red':'#071410',
-          '--g0':'#071410', '--g1':'rgba(20,120,80,.44)', '--g2':'rgba(160,130,30,.24)' } },
-
-    { id:'iris', name:'Iris', kind:'dark', note:'Periwinkle on near-black. 6.1:1',
-      t:{ '--paper':'#08071A', '--ink':'#EDEBFF', '--dim':'#B4AEE8', '--spent':'#948EC6',
-          '--red':'#8A7DFF', '--hair':'#22204A', '--tick-off':'#1D1B40',
-          '--bad':'#FF8A9E',
-          '--on-red':'#08071A',
-          '--g0':'#08071A', '--g1':'rgba(60,50,200,.46)', '--g2':'rgba(30,90,180,.26)' } },
-  ];
-
+  var ACCENT_KEY = 'sched.accent.v1';
   var THEME_KEY = 'sched.theme.v1';
-  var theme = 'paper';
+  /* Lime, to the nearest degree. The default is a HUE now rather than
+     a set of hexes, so there is one place a colour comes from. */
+  var HUE0 = 124;
+  var hue = HUE0;
 
-  function scTheme(id) {
-    var t = null;
-    for (var i = 0; i < THEMES.length; i++) if (THEMES[i].id === id) t = THEMES[i];
-    return t || THEMES[0];
+  /* ── THE THIRTEEN NAMES SURVIVE AS THIRTEEN ANGLES ──
+     A palette is a choice somebody made, and the half of it this app
+     still has is the hue. Dropping everyone onto lime because the
+     ground changed would throw that away for nothing; read once and
+     the old key is spent, because a name that resolves to a number is
+     not something to keep resolving. Same shape as Easy → Light: the
+     word moved and the record did not. */
+  var WAS = { lime: 124, nebula: 304, ember: 42, aurora: 164, solar: 75,
+    ice: 230, plum: 359, crimson: 24, cobalt: 264, sepia: 68,
+    fuchsia: 340, verdant: 93, iris: 285,
+    /* The seven light ones went a year before the wheel did. Their
+       accents were the same hues under different grounds. */
+    paper: 124, blush: 340, slate: 230, linen: 42, mist: 230,
+    bloom: 304, sand: 68 };
+
+  function scHueOf(v) {
+    v = Math.round(+v);
+    return v >= 0 && v < 360 ? v : HUE0;
   }
 
   /* Written as inline custom properties on the root, which is the one
      place that beats the stylesheet's :root without !important and
      without a second copy of every rule. Nothing else in the app knows
-     a theme exists — every colour it draws already came from a token,
-     which is what the previous pass was for. */
-  /* Every token a theme is allowed to set, named once. scPaint CLEARS
-     all of them before writing the new set — without that, a token one
-     theme names and another does not is inherited from whatever was up
-     last: switch from a light theme that sets --g3 to a dark one that
-     does not, and the dark page keeps the light one's third wash. The
-     symptom is a colour that only appears in one order of clicks, which
-     is close to impossible to find by looking. */
+     an accent setting exists — every colour it draws already came from
+     a token, which is what an earlier pass was for. */
   var TOKENS = ['--paper', '--ink', '--dim', '--spent', '--red', '--hair',
                 '--tick-off', '--on-red', '--bad',
                 '--g0', '--g1', '--g2', '--g3'];
 
-  function scPaint(id, save) {
-    var t = scTheme(id);
-    theme = t.id;
+  function scPaint(h, save) {
+    hue = scHueOf(h);
+    var t = scAccent(hue);
     var r = document.documentElement.style;
+    /* Cleared before the new set is written. A token one set names and
+       another does not would otherwise be inherited from whatever was
+       up last — the symptom is a colour that only appears in one order
+       of presses, which is close to impossible to find by looking. It
+       matters less now that one function writes every token, and it
+       stays because that is a fact about today's function rather than
+       about the mechanism. */
     TOKENS.forEach(function (k) { r.removeProperty(k); });
-    for (var k in t.t) if (t.t.hasOwnProperty(k)) r.setProperty(k, t.t[k]);
+    for (var k in t) if (t.hasOwnProperty(k)) r.setProperty(k, t[k]);
 
     /* The browser's own chrome — the status bar, the URL bar, the
        overscroll gutter — takes its colour from these two and nothing
-       else. Left on white under a dark theme the page ends in a bright
-       band the design never asked for. */
+       else. Left on white the page would end in a bright band the
+       design never asked for. */
     var cs = document.querySelector('meta[name="color-scheme"]');
-    if (cs) cs.setAttribute('content', t.id === 'paper' ? 'light' : 'dark');
+    if (cs) cs.setAttribute('content', 'dark');
     var tc = document.querySelector('meta[name="theme-color"]');
-    if (tc) tc.setAttribute('content', t.t['--g0']);
+    if (tc) tc.setAttribute('content', t['--g0']);
 
     /* The ring draws itself in SVG, and SVG takes a literal — so it has
        to be told to read the tokens again. The rail is pure CSS and has
        already changed by the time this line runs. */
     if (typeof scPaintTabFace === 'function') scPaintTabFace();
-    if (save) { try { localStorage.setItem(THEME_KEY, theme); } catch (e) {} }
+    if (save) { try { localStorage.setItem(ACCENT_KEY, String(hue)); } catch (e) {} }
     /* Your face and your crown are drawn on your friends' screens out
-       of the two hexes in your record, so a palette they never see
+       of the two hexes in your record, so an accent they never see
        still has to reach them. Debounced with everything else — the
-       theme picker stays open while you compare thirteen of them, and
-       thirteen presses must not be thirteen writes. */
+       wheel stays open while you drag through the whole circle, and a
+       drag must not be three hundred writes. */
     if (save) scPush();
   }
 
@@ -3719,7 +3749,7 @@
            sentence about privacy under a button that has already been
            pressed is a disclaimer; here it is a decision. */
         body.appendChild(scEl('p', 'hint',
-          'What goes: your name, your two theme colours, your picture, how many '
+          'What goes: your name, your accent and your ink, your picture, how many '
           + 'of the five you ticked on each of the last thirty days, and any log '
           + 'you write — photograph and caption. What never goes: your week, '
           + 'your blocks, and the numbers behind Steps, Fuel and Water. Your '
@@ -5925,12 +5955,12 @@
 
      A face by default, and a photograph over it if you choose one.
 
-     THE FACE IS DERIVED, NOT STORED. It is your accent with the colour
-     that palette already uses ON its accent drawn on top, so changing
-     theme changes your face and there is nothing to keep in step. It
-     also cannot fail a contrast check: accent-against-on-accent is the
-     exact pairing every palette here was measured on before it
-     shipped, and the worst of the thirteen is Paper's own 4.68:1.
+     THE FACE IS DERIVED, NOT STORED. It is your accent with the
+     colour the app already draws ON that accent on top, so turning
+     the wheel turns your face and there is nothing to keep in step.
+     It also cannot fail a contrast check: accent-against-on-accent is
+     the pairing the accent solver is built around, and the worst of
+     the 360 is 5.8:1.
 
      The geometry is measured off the reference rather than remembered.
      A first pass drawn from memory came out a generic smiley — eyes
@@ -6059,8 +6089,8 @@
       }
       body.appendChild(row);
       body.appendChild(scEl('p', 'hint', myPic
-        ? 'Yours now, and the face your theme gives you if you take it away.'
-        : 'Your theme draws this. Change palette and it changes with you.'));
+        ? 'Yours now, and the face your accent gives you if you take it away.'
+        : 'Your accent draws this. Turn the wheel and it turns with you.'));
 
       var file = scEl('input', 'pic-file');
       file.type = 'file';
@@ -6134,84 +6164,119 @@
       pr.appendChild(scPic(38));
       var pl = scEl('span');
       pl.appendChild(document.createTextNode('Your picture'));
-      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your theme'));
+      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your accent'));
       pr.appendChild(pl);
       pr.addEventListener('click', scPicSheet);
       body.appendChild(pr);
 
-      /* ── the theme row ──
-         A swatch, not a word. "Aurora" tells you nothing you can act
-         on; a disc of the ground with the accent drawn on it is the
-         choice itself, at the size a thumb needs.
+      /* ── THE WHEEL ──
+         Thirteen chips became a circle, and the circle is not a
+         decoration on the same idea: a list can only offer what
+         somebody put on it, and there was never a reason your colour
+         had to be one of thirteen.
 
-         Split light from dark and labelled. Thirteen chips in one
-         undifferentiated block is a colour chart; the first thing
-         anyone deciding wants is the half they are in, and it is the
-         only grouping the set actually has.
+         IT IS DRAWN FROM THE SOLVED ACCENTS, NOT FROM HUE. A conic
+         gradient of raw hues would show you a bright blue at the
+         bottom and hand you the pale one the floor actually produces,
+         which is a control that lies about its own output. Thirty-six
+         stops, each of them the exact colour that angle gives — so
+         what you press is what you get, and the wheel is a photograph
+         of the setting rather than a diagram of colour.
 
-         It applies on press and stays open, because you are comparing —
-         a picker that closes on the first tap makes you reopen it
-         thirteen times to see thirteen themes. */
-      var row = scEl('div', 'themes');
+         The middle is the PAGE, with the accent on it at the size a
+         thumb is: the pairing is the thing being chosen, and a swatch
+         beside the page rather than on it lets you judge the colour
+         without judging the combination. It needs no JavaScript at
+         all — it is the same three washes the body has, off the same
+         tokens, so it repaints itself the instant scPaint writes. */
+      var lab = scEl('span', 'label', 'Accent');
+      lab.style.marginTop = '2px';
+      body.appendChild(lab);
+
+      var wrap = scEl('div', 'cw-wrap');
+      var wheel = scEl('div', 'cw');
+      var stops = [];
+      for (var wi = 0; wi <= 36; wi++) {
+        stops.push(scHex(scAccentRGB(wi * 10)) + ' ' + (wi * 10) + 'deg');
+      }
+      /* from -90deg? No: a conic gradient already starts at twelve
+         o'clock, which is where hue 0 goes, and runs clockwise, which
+         is the direction the knob's own arithmetic runs. Turning it
+         would put two conventions in one control. */
+      wheel.style.background = 'conic-gradient(' + stops.join(',') + ')';
+      var mid = scEl('i', 'cw-mid');
+      var knob = scEl('i', 'cw-k');
+      knob.setAttribute('aria-hidden', 'true');
+      wheel.appendChild(mid);
+      wheel.appendChild(knob);
+      wheel.tabIndex = 0;
+      wheel.setAttribute('role', 'slider');
+      wheel.setAttribute('aria-label', 'Accent colour');
+      wheel.setAttribute('aria-valuemin', '0');
+      wheel.setAttribute('aria-valuemax', '359');
+
       var hint = scEl('p', 'hint');
       hint.style.marginTop = '2px';
 
-      var chip = function (t) {
-        var b = scEl('button', 'theme' + (t.id === theme ? ' on' : ''));
-        b.type = 'button';
-        b.dataset.theme = t.id;
-        var disc = scEl('i', 'swatch');
-        /* The same three washes the page itself gets, on a 34px disc, so
-           the chip is a photograph of the theme rather than a label for
-           it. --g3 is missing on the older sets and resolves to
-           transparent, which is what they draw. */
-        disc.style.background =
-          'radial-gradient(140% 92% at 8% 116%, ' + (t.t['--g1'] || 'transparent') + ' 0%, transparent 74%),' +
-          'radial-gradient(120% 66% at 100% -12%, ' + (t.t['--g2'] || 'transparent') + ' 0%, transparent 70%),' +
-          'radial-gradient(125% 84% at 96% 112%, ' + (t.t['--g3'] || 'transparent') + ' 0%, transparent 72%),' +
-          t.t['--g0'];
-        disc.style.borderColor = t.t['--hair'];
-        var dot = scEl('u');
-        dot.style.background = t.t['--red'];
-        disc.appendChild(dot);
-        b.appendChild(disc);
-        b.appendChild(scEl('span', 'theme-n', t.name));
-        b.setAttribute('aria-label', t.name + '. ' + t.note);
-        b.setAttribute('aria-pressed', t.id === theme ? 'true' : 'false');
-        b.addEventListener('click', function () {
-          scPaint(t.id, true);
-          [].forEach.call(row.querySelectorAll('.theme'), function (c) {
-            var on = c.dataset.theme === t.id;
-            c.classList.toggle('on', on);
-            c.setAttribute('aria-pressed', on ? 'true' : 'false');
-          });
-          hint.textContent = t.name + ' \u00b7 ' + t.note + ' on the smallest type';
-        });
-        return b;
+      /* The hex and its measured contrast, because those are the two
+         things about this choice the picture cannot show you. The old
+         hint named the palette and the worst type on it; with one
+         ground the worst type never moves, so the number worth
+         printing is the accent's own. */
+      var say = function () {
+        var v = scAccentRGB(hue);
+        wheel.setAttribute('aria-valuenow', String(hue));
+        wheel.setAttribute('aria-valuetext', scHex(v)
+          + (hue === HUE0 ? ', the one it ships with' : ''));
+        knob.style.transform = 'rotate(' + hue + 'deg) translateY(-72px)';
+        hint.textContent = scHex(v) + ' · '
+          + (Math.round(scRatio(v, GROUND) * 10) / 10) + ':1 against the page'
+          + (hue === HUE0 ? ' · the one it ships with' : '');
       };
+      /* Painted on every move and SAVED on the way up. A drag across
+         the whole circle is three hundred pointermoves, and a write
+         and a push on each of them is a write and a push you did not
+         ask for — the colour you meant is the one your thumb stopped
+         on. */
+      var set = function (h, save) { scPaint(h, save); say(); };
 
-      /* ── AND THE HEADINGS ARE GONE WITH THE LIGHT ONES ──
-         Light and Dark was the only grouping the set actually had, and
-         with every palette dark it is one heading over the whole list
-         saying what all of it is. A heading that never distinguishes
-         anything is furniture. Written as a filter that draws a head
-         only where more than one kind has members, so the day a light
-         one comes back the split comes back with it. */
-      var kinds = [['Light', 'light'], ['Dark', 'dark']].filter(function (grp) {
-        return THEMES.some(function (t) { return t.kind === grp[1]; });
+      var at = function (e) {
+        var r = wheel.getBoundingClientRect();
+        var dx = e.clientX - (r.left + r.width / 2);
+        var dy = e.clientY - (r.top + r.height / 2);
+        return (Math.atan2(dx, -dy) * 180 / Math.PI + 360) % 360;
+      };
+      var drag = false;
+      wheel.addEventListener('pointerdown', function (e) {
+        drag = true;
+        wheel.setPointerCapture(e.pointerId);
+        set(at(e), false);
+        e.preventDefault();
       });
-      kinds.forEach(function (grp) {
-        if (kinds.length > 1) row.appendChild(scEl('span', 'theme-h', grp[0]));
-        var g = scEl('div', 'theme-g');
-        THEMES.forEach(function (t) { if (t.kind === grp[1]) g.appendChild(chip(t)); });
-        row.appendChild(g);
+      wheel.addEventListener('pointermove', function (e) {
+        if (drag) set(at(e), false);
+      });
+      var up = function () { if (drag) { drag = false; set(hue, true); } };
+      wheel.addEventListener('pointerup', up);
+      wheel.addEventListener('pointercancel', up);
+      /* A step of one degree is a step nobody can see, and 360 presses
+         to cross the wheel is not a keyboard route — it is the
+         appearance of one. Five, and fifteen with Page. */
+      wheel.addEventListener('keydown', function (e) {
+        var k = e.key, d = 0;
+        if (k === 'ArrowRight' || k === 'ArrowUp') d = 5;
+        else if (k === 'ArrowLeft' || k === 'ArrowDown') d = -5;
+        else if (k === 'PageUp') d = 15;
+        else if (k === 'PageDown') d = -15;
+        else if (k === 'Home') { set(HUE0, true); e.preventDefault(); return; }
+        if (!d) return;
+        e.preventDefault();
+        set((hue + d + 360) % 360, true);
       });
 
-      var lab = scEl('span', 'label', 'Theme');
-      lab.style.marginTop = '2px';
-      body.appendChild(lab);
-      body.appendChild(row);
-      hint.textContent = scTheme(theme).name + ' \u00b7 ' + scTheme(theme).note + ' on the smallest type';
+      wrap.appendChild(wheel);
+      body.appendChild(wrap);
+      say();
       body.appendChild(hint);
 
       var rule = scEl('div', 'menu-rule');
@@ -6369,8 +6434,18 @@
      stored id that no longer exists — it is a preference and there is
      nothing in it worth repairing. */
   try {
-    var saved = localStorage.getItem(THEME_KEY);
-    if (saved) scPaint(saved, false);
+    var saved = localStorage.getItem(ACCENT_KEY);
+    if (saved === null) {
+      /* Once, and the old key is spent: a palette name resolves to an
+         angle, and an angle is not something to keep resolving. Saved
+         under the new key immediately, so this runs on exactly one
+         boot per browser rather than on every one of them. */
+      var old = localStorage.getItem(THEME_KEY);
+      if (old && WAS[old] !== undefined) saved = String(WAS[old]);
+      if (old) localStorage.removeItem(THEME_KEY);
+      if (saved !== null) localStorage.setItem(ACCENT_KEY, saved);
+    }
+    if (saved !== null) scPaint(saved, false);
   } catch (e) {}
 
   scRender();

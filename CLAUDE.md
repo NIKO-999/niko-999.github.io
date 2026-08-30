@@ -805,7 +805,7 @@ of the accent and one of the ink, angled across the same paper the
 front is. It is the only surface in this app that is not flat, and that
 is the point — the objectives are the one thing on the screen you chose
 rather than scheduled. **Mixed from the palette, never a literal**:
-thirteen themes move `--red` and `--ink` together, so a gradient in hex
+the wheel moves `--red` through every hue there is, so a gradient in hex
 would be somebody else's card on twelve of them. The alphas stay low
 enough that it is a sheen and not a ground the words have to fight, and
 `tests/schedule.js` measures a line of it on composited pixels.
@@ -1612,11 +1612,11 @@ the list. That is not a decision anybody took.
 
 **Every workout carries a literal hex, and it is the one exception on
 this screen.** Everything else mixes its colour out of the palette,
-because thirteen themes move `--red` and `--ink` together. A colour
+because the wheel moves `--red` through every hue there is. A colour
 that says WHICH thing this is has to be the same on every theme or it
 has stopped being that thing's colour — the habits screen's argument.
 It never says whether: the card is `--ink` with `--paper` on it in
-every palette, so the hue is a wash in one corner and the figures at
+every accent, so the hue is a wash in one corner and the figures at
 the top.
 
 **46%, and the arithmetic is not where that came from.** Mixed 66%
@@ -1666,7 +1666,7 @@ with `--paper` on it, which made it the one inverted thing on the
 screen — right for exactly as long as every palette was a light one. On
 a dark theme `--ink` is near-white, so the day the light palettes went
 every workout card turned into a pale sticker. The ground is its own
-now and the SAME on all thirteen palettes, which is the argument the
+now and the SAME whatever the accent is, which is the argument the
 nine hues already make: a card built to carry a colour that means
 *which* is the same object for the same reason. It is the one surface
 in this app that does not follow the theme, and `--wc-lit` is a fixed
@@ -1874,7 +1874,7 @@ the block is `aria-hidden` and the panel carries one sentence.
 
 **And the marks wear the THEME's accent, not the nine hues.** The cards
 carry a literal colour each because a colour that says WHICH session
-this is has to be the same on every palette. Here nothing needs saying
+this is has to be the same at every hue. Here nothing needs saying
 — the panel prints the name and the calendar belongs to one card — so a
 hue would be a second colour system down a screen that already has an
 accent, and on the shipped lime page it would draw the marks red.
@@ -1911,7 +1911,7 @@ card now, which has no past rows by construction at any hour.
 
 **AND THE SHEET LOST ITS WHITE STRIP.** `border-top: 3px solid
 var(--ink)` was a black rule setting the sheet off a white page, and
-the day every palette went dark it became a 3px white slab across the
+the day the light palettes went it became a 3px white slab across the
 screen — the loudest object in the app and the first thing you saw
 every time a sheet came up. A radius was the obvious replacement and
 is not allowed: exactly five things in this app are rounded and a
@@ -1920,46 +1920,110 @@ sixth smuggled in for a sheet is that list becoming a suggestion, which
 is nearly black and a dark shadow over it separates nothing. One pixel
 of `--hair`.
 
-## The light themes are gone
+## The themes are gone and there is a wheel
 
-Seven of them, in one pass: Paper, Blush, Slate, Linen, Mist, Bloom,
-Sand. Six new dark ones went in beside the six that stayed — Crimson,
-Cobalt, Sepia, Fuchsia, Verdant, Iris — each taking a hue family none
-of the others held: true red, saturated blue, tan, magenta,
-gold-on-green, periwinkle.
+Thirteen palettes came out of `app.js` in one pass. Seven light ones
+had gone a year before — Paper, Blush, Slate, Linen, Mist, Bloom, Sand
+— and six new dark ones went in beside the six that stayed; those
+thirteen are what this replaced.
 
-**Iris is the near one and it is kept anyway.** Nebula is already a
-violet; the two differ where it matters, a pale lilac lifting off an
-indigo page against a deeper periwinkle on a page that is nearly black.
-Written down rather than glossed, because the next person to add a
-violet should know there are two.
+**Every one of them moved `--paper`, `--ink` and both greys together**,
+so each was a page to solve and a page to measure, and twelve of them
+were the shipped page with a different hue washed over it. What is
+chosen now is the hue and nothing else. There is one ground, it is the
+Lime page's, and the accent turns.
 
-**THE BASE `:root` HAD TO GO DARK WITH THEM.** The stylesheet carries a
-complete palette so the first paint is right before `app.js` runs, and
-that palette was the white one. Left alone it would have become a
-fourteenth theme that nothing could choose and nothing could leave:
-clearing the stored key drops you onto a page that is on no list. So
-`:root` IS the Lime theme spelled out, and `lime` in `THEMES` is the
-same set under a name you can press. It is the one thing in this app
-written down twice, deliberately — a page that flashed white for a
-frame and then went black is worse than a duplicated hex — and
-`tests/schedule.js` holds the two in step on the tokens rather than on
-the id.
+**WHICH MAKES THE HUE THE WHOLE SETTING, and that is the argument for a
+wheel.** A list of thirteen names is a list somebody else wrote, and
+there was never a reason yours had to be on it.
 
-**Black, grey, white and one lime.** Everything that would carry the
-accent carries lime and nothing else is coloured at all, which is a
-different claim from the twelve others where the hue is the whole page.
-The gradient is lime too, so the wash and the accent are one colour at
-two strengths rather than a tint dropped on a grey page. **The workout
-cards keep their own nine colours on it**, and that is the point rather
-than an exception: a colour that says WHICH session this is has to be
-the same on every theme, so the card reads as the one coloured object
-on the screen — which is what it is.
+**THE WHEEL PICKS A HUE AND THE APP OWNS THE LIGHTNESS.** A free colour
+picker lets you choose `#101010` for type on a near-black page, and
+"you chose it" is not an answer to a screen you cannot read. So every
+point on the circle is SOLVED rather than taken: the hue at its
+fullest — the OKLCH lightness at which sRGB holds the most of that
+colour — lifted until it clears **6:1** on this ground, with chroma
+capped at the default's own so nothing comes out fluorescent beside a
+default that is not. 4.5 is the bar and this repo has now twice
+shipped 4.74 believing that was a margin. Measured at all 360 degrees:
+the worst point on the wheel is exactly **6.00:1** and the default is
+**16.6:1**.
+
+**The lightness therefore varies round the wheel and it has to.** A
+yellow at a blue's lightness is mud and a blue at a yellow's is white.
+Holding one lightness for every hue was built and looked at — the
+greens survive it and everything from cyan round to red comes out
+pastel, which is a wheel of one colour and eleven tints.
+
+**The ring is painted from the ACCENTS, not from hue.** A conic
+gradient of raw hues shows a bright blue at the bottom and hands you
+the pale one the floor actually produces: a control that lies about
+its own output. Thirty-seven stops, each the exact colour that angle
+gives. The check measures every stop against the page AND measures the
+raw rainbow beside it — without that second half it passes on any
+rainbow whose stops happen to be bright.
+
+**The middle is the page with the accent on it**, off the same tokens
+the body uses, so it repaints itself and needs no JavaScript at all.
+The pairing is the thing being chosen; a swatch beside the page rather
+than on it lets you judge the colour without judging the combination.
+
+**It is the sixth rounded thing and it is named in `app.css`.** The
+rule there is that the exceptions are named, and that the day the list
+of exceptions is longer than the list of squares the rule has become
+its opposite. This one does not test the rule: a colour wheel that is
+not round is not a colour wheel.
+
+**`--on-red` is derived now, and it had to be**: with a wheel there is
+no author left to name one per palette. The floor puts every accent at
+a luminance of at least .26, so a near-black on any of them clears the
+bar by the same arithmetic that put it there — worst measured 5.8:1
+all the way round.
+
+**AND NOW YOU CAN PICK RED, so danger is the app's to hold apart.**
+"Clear everything" reading as a highlight rather than a warning was a
+palette author's mistake to make; with a wheel it is one anybody can
+make in a second. It holds, and not by luck: `--bad` is a pale
+desaturated red and every accent the wheel produces sits at full
+chroma, so the nearest the whole circle comes is **ΔE 17.9 at hue 18**.
+Measured in Lab, over the wheel rather than over a list.
+
+**A stored palette name comes back as its own hue, once.** A palette is
+a choice somebody made and the half of it this app still has is the
+hue; dropping everyone onto lime because the ground changed would throw
+that away for nothing. Read once and the old key is spent — a name that
+resolves to a number is not something to keep resolving — and the test
+asserts the old key is GONE rather than merely ignored. Same shape as
+Easy → Light: the word moved and the record did not.
+
+**`:root` is still the one thing written down twice**, and what is
+duplicated is now the OUTPUT of one function at one angle rather than a
+set somebody typed. The stylesheet has to carry a complete palette for
+the first paint before `app.js` runs, and a page that flashed white for
+a frame is worse than a duplicated hex. The check reads the tokens off
+a page that has never run `scPaint` — the key is clear — then turns the
+wheel to 124 and reads them again, so it compares the two copies rather
+than one copy with itself.
+
+**A stored accent that is not an angle falls through to the default.**
+The key outlives the code that wrote it, and `NaN` degrees resolves to
+a colour silently.
+
+### What survived the deletion
+
+**Black, grey, white and one accent.** Nothing else on the page is
+coloured at all. The gradient is the accent too — the same colour at a
+fifth strength rather than a tint dropped on a grey page — and it is
+the accent itself now rather than a second, slightly deeper hex beside
+it, which was a copy that drifts. **The workout cards keep their own
+nine colours**, and that is the point rather than an exception: a
+colour that says WHICH session this is has to be the same at every hue,
+so the card reads as the one coloured object on the screen.
 
 **The greys were solved again, not read backwards.** A grey that
 measures 4.7:1 as ink on white does not measure 4.7:1 as ink on black,
 because luminance is not symmetric about the middle. `--dim` and
-`--spent` are 9.8:1 and 6.1:1 on the new ground.
+`--spent` are 9.8:1 and 6.1:1 on this ground.
 
 **`--tick-off` is lighter than it looks like it needs to be, and that
 is measured.** The tally's calendar draws every unlit day in it and
@@ -1968,28 +2032,46 @@ from the panel behind it by **.009 of luminance**, which is a day you
 cannot see you missed. Losing the misses is the one thing a record of
 showing up must never do.
 
-**The Light/Dark headings went with the light ones.** That split was
-the only grouping the set actually had, and with every palette dark it
-is one heading over the whole list saying what all of it is. The picker
-still draws the split where more than one kind has members, so the day
-a light palette returns the heading returns with it — and the test
-asserts the ABSENCE of the heads rather than the rule, because a code
-path that hardcoded "Dark" would pass a check on the rule.
-
 **Three assertions were pinned to the shipped red and measured nothing
 once it moved.** `rgb(226, 35, 26)` was typed into the running-row
-check, the accent-budget scan and the row's workout mark; with the
-palette on lime all three were looking for a colour that is nowhere on
-the page, and the scan in particular passes by finding NOTHING. They
-ask the root for `--red` now. The same went for the palette-survives-a
--reload check, pinned to `plum` and `#FF6FA5` — it failed on a change
-to the ORDER of the list rather than on the behaviour it is about.
+check, the accent-budget scan and the row's workout mark; the scan in
+particular passes by finding NOTHING. They ask the root for `--red`
+now — which is what makes them survive a setting that can be any
+colour at all.
 
-**And a skip keyed to a deleted id is a check that has stopped
-running.** `if (t.id === 'paper') return;` exempted the one palette
-where danger and the accent were deliberately the same red. Paper is
-gone, so the exemption went with it rather than sitting in the file as
-a name nothing matches.
+**And a name nothing matches is a check that has stopped running.**
+`if (t.id === 'paper') return;` exempted the one palette where danger
+and the accent were deliberately the same red; Paper was gone, so the
+exemption went with it. The same bug was found again in the friends
+crown when the wheel landed: its six worst reader-against-leader
+pairings named `slate`, `blush`, `mist` and `linen` — all deleted a
+year earlier — so `scTheme` fell back to the first entry on every one
+of them and all six had been measuring the same page. **Twice is a
+pattern: an identifier in a fixture is a reference nothing type-checks,
+and the failure mode is always green.**
+
+### The duplicate-name check was reading column zero
+
+`tests/names.js` catches a name declared twice in one file, which is
+this codebase's oldest bug — a duplicate declaration does not throw, it
+REPLACES. It read **column zero only**, and `schedule/app.js` is five
+thousand lines inside a single IIFE, so every name in the largest file
+in the repo sat at column 2 and none of them was ever looked at.
+
+It let this very change through: `scLum` and `scRatio` went in for the
+accent solver four hundred lines above the pair the friends board
+already had, silently replacing them. The friends crown is on a screen
+you have to add somebody to reach, so the first symptom would have been
+a friend's colour coming out wrong, weeks later. The suite was green
+and the check was running.
+
+The indent is measured now, from the first real line inside the
+wrapper rather than assumed: jade's IIFE holds its body at column zero
+and schedule's at two, and guessing either way round reports every
+local in the other. **And a wrapped run is its own SCOPE** — `trading`
+and `days` each carry a small wrapped pre-paint script beside a large
+unwrapped one, and each pair declares `phone`; those cannot collide,
+because that is what the wrapper is for.
 
 ## The sweep
 

@@ -59,14 +59,51 @@ const scriptOf = (src) => {
   return out;
 };
 
-/* Column zero only. A `const x` inside a function is a local and shadows
-   nothing; one at the left margin is the file's only x, and a second
-   silently wins. */
+/* ── THE OUTERMOST LEVEL, WHICH IS NOT ALWAYS COLUMN ZERO ──
+   A `const x` inside a function is a local and shadows nothing; one at
+   the run's own outer level is its only x, and a second silently wins.
+
+   This read column zero for its whole life, and schedule/app.js is
+   five thousand lines inside a single IIFE — so every name in the
+   largest file in this repo sat at column 2 and none of them was ever
+   looked at. It let through exactly the bug it exists for: a second
+   scLum and a second scRatio written four hundred lines above the pair
+   the friends board already had, silently replacing them. The suite
+   was green and the check was running.
+
+   So a wrapped run is opened and read at ITS indent, taken from the
+   first real line inside rather than assumed — jade's IIFE holds its
+   body at column zero and schedule's at two, and guessing either way
+   round reports every local in the other.
+
+   AND A WRAPPED RUN IS ITS OWN SCOPE. Both `trading` and `days` carry
+   a small wrapped pre-paint script beside a large unwrapped one, and
+   each pair declares `phone`. Those two cannot collide — that is what
+   the wrapper is for — so the wrapped runs are compared against
+   themselves alone and only the unwrapped ones share a namespace. */
+const scopeOf = (body) => {
+  const t = body.replace(/\/\*[\s\S]*?\*\//g, '').trim().replace(/^'use strict';/, '').trim();
+  const wrapped =
+    (/^\(\s*(?:async\s+)?function\s*\(/.test(t) || /^\(\s*(?:async\s+)?\(\s*\)\s*=>/.test(t))
+    && /\}\s*\)\s*\(\s*\)\s*;?\s*$/.test(t);
+  if (!wrapped) return { indent: 0, own: false };
+  const lines = body.split('\n');
+  let i = lines.findIndex((l) => /^\s*\(\s*(?:async\s+)?(?:function|\()/.test(l));
+  for (i++; i < lines.length; i++) {
+    const l = lines[i];
+    if (!l.trim() || /^\s*(?:'use strict';|\/[/*]|\*)/.test(l)) continue;
+    return { indent: l.match(/^\s*/)[0].length, own: true };
+  }
+  return { indent: 0, own: true };
+};
 const topLevel = (body, at) => {
   const found = [];
+  const pad = ' '.repeat(scopeOf(body).indent);
   body.split('\n').forEach((ln, i) => {
-    const m = ln.match(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/)
-           || ln.match(/^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/);
+    if (!ln.startsWith(pad) || /^\s/.test(ln.slice(pad.length))) return;
+    const rest = ln.slice(pad.length);
+    const m = rest.match(/^(?:async\s+)?function\s+([A-Za-z_$][\w$]*)/)
+           || rest.match(/^(?:const|let|var)\s+([A-Za-z_$][\w$]*)\s*=/);
     if (m) found.push([m[1], at + i]);
   });
   return found;
@@ -80,12 +117,22 @@ const codeOf = (app) => app.flatMap(f =>
 
 /* ── 1. one name, declared twice in a file ─────────────────────── */
 for (const app of APPS) {
-  const seen = new Map();
-  for (const { body, at } of codeOf(app))
+  /* One namespace for everything sharing the global, and one per
+     wrapped run — which is the only reason a wrapper is worth having. */
+  const shared = new Map();
+  const dupes = [];
+  const collect = (into, body, at) => {
     for (const [name, line] of topLevel(body, at))
-      seen.set(name, (seen.get(name) || []).concat(line));
-
-  const dupes = [...seen].filter(([, ls]) => ls.length > 1);
+      into.set(name, (into.get(name) || []).concat(line));
+  };
+  for (const run of codeOf(app)) {
+    if (scopeOf(run.body).own) {
+      const own = new Map();
+      collect(own, run.body, run.at);
+      dupes.push(...[...own].filter(([, ls]) => ls.length > 1));
+    } else collect(shared, run.body, run.at);
+  }
+  dupes.push(...[...shared].filter(([, ls]) => ls.length > 1));
   ok(`${NAMED(app)}: no name declared twice at the top level`, dupes.length === 0,
      dupes.map(([n, ls]) => `${n} declared at lines ${ls.join(' and ')} — `
        + 'the second silently replaces the first').join('\n      '));

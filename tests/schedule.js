@@ -3029,35 +3029,31 @@ const SAID = [
   ok('and leaving the view cannot strand it over another screen',
     stranded.veil && stranded.gone, stranded);
 
-  /* ── every string on the glass, on every palette ──
+  /* ── every string on the glass, all the way round the wheel ──
      MEASURED, NEVER READ OFF THE CASCADE. The panel is --g0 at 82% over
      a blurred page over whatever the theme's own three washes put
      there; the arithmetic only knows about --g0, and this repo has
      already shipped one thing that passed the arithmetic and measured
      2.92:1 on screen.
 
-     AND POLARITY-AGNOSTIC, OR NONE. Seven of the thirteen palettes are
-     dark, so taking a low percentile as ink and a high one as ground
-     compares the track against itself on over half of them — this repo
-     has made that exact mistake in three separate harnesses, the last
-     one reporting a label at 1.05:1 that was really 7.64:1. Ground is
-     the most common pixel in the patch and ink is whatever is furthest
-     from it in luminance, which is right whichever way round it is.
+     AND POLARITY-AGNOSTIC, OR NONE. It was written when seven of the
+     thirteen palettes were light, and taking a low percentile as ink
+     and a high one as ground compared the track against itself on over
+     half of them — this repo has made that exact mistake in three
+     separate harnesses, the last reporting a label at 1.05:1 that was
+     really 7.64:1. Ground is the most common pixel in the patch and
+     ink is whatever is furthest from it in luminance, which is right
+     whichever way round it is. It stays that way with one dark page,
+     because what was wrong was the mechanism rather than the answer.
 
-     THE LIST COMES FROM THE APP. An earlier cut of this queried the DOM
-     for palette buttons, found none, measured ONE palette and printed
-     all clear — a check that finds nothing passes, which is the failure
-     tests/run.js and the flight-pause rule are both written about. It
-     refuses to run on a short list now. */
+     THIRTEEN PALETTES BECAME A WHEEL, so this walks the wheel instead.
+     The ground no longer moves and the accent reaches this glass
+     through --g1, the wash the page itself is painted with — so the
+     hues below are the thing that varies, and there are more of them
+     than there were palettes. */
   {
     const { PNG: PNG4 } = require('pngjs');
-    const src = require('fs').readFileSync(
-      require('path').join(__dirname, '..', 'schedule', 'app.js'), 'utf8');
-    const block = src.slice(src.indexOf('var THEMES = ['));
-    const palettes = (block.slice(0, block.indexOf('var THEME_KEY'))
-      .match(/id: *'([a-z]+)'/g) || []).map((s) => s.replace(/id: *'|'/g, ''));
-    ok('the contrast pass has found every palette to measure',
-      palettes.length >= 13, palettes);
+    const palettes = [0, 33, 66, 100, 124, 160, 200, 240, 270, 300, 316, 340];
 
     /* lum and ratio are this file's own, at the top — one definition of
        the arithmetic, so a fix to it reaches every measurement here. */
@@ -3091,7 +3087,7 @@ const SAID = [
          palette reloads onto a screen with no rows and waits 30s for a
          strip that is not on it. */
       await page.evaluate((t) => {
-        localStorage.setItem('sched.theme.v1', t);
+        localStorage.setItem('sched.accent.v1', String(t));
         localStorage.setItem('sched.view.v1', 'tally');
       }, theme);
       await page.reload({ waitUntil: 'networkidle' });
@@ -3110,12 +3106,12 @@ const SAID = [
       await page.keyboard.press('Escape');
     }
     const bad = Object.entries(low).filter(([, v]) => v.r < v.want);
-    ok('every string and mark on the glass clears its ratio, on all '
-      + palettes.length + ' palettes', bad.length === 0, low);
+    ok('every string and mark on the glass clears its ratio, at all '
+      + palettes.length + ' points on the wheel', bad.length === 0, low);
   }
 
   await page.evaluate(() => {
-    localStorage.removeItem('sched.theme.v1');
+    localStorage.removeItem('sched.accent.v1');
     localStorage.setItem('sched.view.v1', 'tally');
     localStorage.removeItem('sched.tick.v1');
     localStorage.removeItem('sched.log.v1');
@@ -3245,59 +3241,163 @@ const SAID = [
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(340);
 
-  console.log('\n── themes ──');
+  console.log('\n── the accent ──');
   await page.waitForTimeout(200);
 
-  /* ── THIRTEEN, AND EVERY ONE OF THEM DARK ──
-     Seven light palettes came out of this list in one pass and six new
-     dark ones went in beside the six that stayed. Written out rather
-     than counted, because the ORDER is what the picker draws and Lime
-     being first is the point: it is the palette the stylesheet itself
-     carries, so it is the one a fresh phone opens on. */
-  const IDS = ['lime', 'nebula', 'ember', 'aurora', 'solar', 'ice', 'plum',
-               'crimson', 'cobalt', 'sepia', 'fuchsia', 'verdant', 'iris'];
+  /* ── THIRTEEN PALETTES BECAME ONE GROUND AND A WHEEL ──
+     Every one of the thirteen moved --paper, --ink and both greys
+     together, so each was a page to solve and a page to measure — and
+     twelve of them were the shipped page with a different hue over it.
+     What is chosen now is the hue and nothing else, which is why this
+     is a wheel: a list of thirteen names is a list somebody else wrote,
+     and there was never a reason yours had to be on it.
+
+     Asserted as the ABSENCE of the chips as well as the presence of the
+     wheel. A picker that drew both would pass a check on either. */
   await page.click('#scTabYou');
   await page.waitForTimeout(320);
-  ok('the picker offers every theme, as a swatch rather than a word',
-    await page.$$eval('.theme', (e) => e.map((x) => x.dataset.theme).join(' ')) === IDS.join(' '));
-  /* ── AND THE LIGHT/DARK HEADS WENT WITH THE LIGHT ONES ──
-     That split was the only grouping the set actually had, and with
-     every palette dark it is one heading over the whole list saying
-     what all of it is. A heading that never distinguishes anything is
-     furniture. The picker still draws the split where more than one
-     kind has members, so this asserts the ABSENCE rather than the
-     rule — a code path that hardcoded "Dark" would pass a check on
-     the rule and fail this one. */
-  ok('and no heading is drawn, because every one of them is dark',
-    await page.$$eval('.theme-h', (e) => e.length) === 0
-    && await page.$$eval('.theme', (e) => e.length) === 13);
-  /* All seven ON SCREEN. The first cut was one scrolling row, which put
-     the seventh past the right edge of a 390px sheet — an option you
-     have to discover by swiping is one most people never find. */
-  ok('and all thirteen are on screen without scrolling',
-    await page.$$eval('.theme', (els) => els.every((e) => {
-      const r = e.getBoundingClientRect();
-      return r.left >= 0 && r.right <= 390;
-    })));
+  const wheelUp = await page.evaluate(() => {
+    const w = document.querySelector('.cw');
+    if (!w) return { chips: document.querySelectorAll('.theme').length };
+    const r = w.getBoundingClientRect();
+    const cs = getComputedStyle(w);
+    return { chips: document.querySelectorAll('.theme').length,
+      heads: document.querySelectorAll('.theme-h').length,
+      w: Math.round(r.width), h: Math.round(r.height),
+      left: r.left, right: r.right,
+      round: cs.borderTopLeftRadius, touch: cs.touchAction,
+      role: w.getAttribute('role'), now: w.getAttribute('aria-valuenow'),
+      min: w.getAttribute('aria-valuemin'), max: w.getAttribute('aria-valuemax'),
+      text: w.getAttribute('aria-valuetext'), tab: w.tabIndex,
+      mid: !!w.querySelector('.cw-mid'),
+      stops: (cs.backgroundImage.match(/rgb\([^)]*\)/g) || [])
+        .map((v) => v.match(/\d+/g).map(Number)) };
+  });
+  ok('the thirteen chips are gone and one wheel is in their place',
+    wheelUp.chips === 0 && wheelUp.heads === 0
+    && wheelUp.w === 170 && wheelUp.h === 170 && wheelUp.mid, wheelUp);
+  /* THE SIXTH ROUNDED THING, and it is named in app.css rather than
+     smuggled in under the two circles' permission — the rule at the top
+     of that file is that the exceptions are named. This one does not
+     test the rule: a colour wheel that is not round is not one. */
+  ok('...whole on a 390px sheet, round, and owning its own gesture',
+    wheelUp.left >= 0 && wheelUp.right <= 390
+    && /50%|85px/.test(wheelUp.round) && wheelUp.touch === 'none', wheelUp);
+  /* A drag reaches neither a keyboard nor a screen reader, and this is
+     the only way to set the colour — so unlike the row's long press it
+     cannot be a shortcut, it has to BE the control. */
+  ok('...and it is the slider it looks like, from a keyboard too',
+    wheelUp.role === 'slider' && wheelUp.tab === 0
+    && wheelUp.min === '0' && wheelUp.max === '359'
+    && wheelUp.now === '124' && /^#[0-9a-f]{6},/.test(wheelUp.text), wheelUp);
+
+  /* ── THE RING IS PAINTED FROM THE ACCENTS, NOT FROM HUE ──
+     A conic gradient of raw hues shows a bright blue at the bottom and
+     hands you the pale one the floor actually produces — a control that
+     lies about its own output. Every stop is the exact colour that
+     angle gives, so what you press is what you get.
+
+     Proven against the thing it is not: the same hues at full
+     saturation are measured right here, and the assertion is that the
+     ring clears the bar where the rainbow does not. Without that half
+     this passes on a rainbow whose stops happen to be bright. */
+  const PAGE = [6, 6, 7];
+  const hsl = (h) => {
+    const f = (n) => {
+      const k = (n + h / 30) % 12;
+      return Math.round(255 * (0.5 - 0.5 * Math.max(-1, Math.min(k - 3, 9 - k, 1))));
+    };
+    return [f(0), f(8), f(4)];
+  };
+  const ringLow = wheelUp.stops.reduce((a, v) => Math.min(a, ratio(v, PAGE)), 99);
+  const rawLow = wheelUp.stops.map((v, i) => ratio(hsl(i * 10), PAGE))
+    .reduce((a, v) => Math.min(a, v), 99);
+  ok(`every stop on the ring clears 6:1 on the page (worst ${ringLow.toFixed(2)}:1)`,
+    wheelUp.stops.length >= 36 && ringLow >= 5.9, { ringLow, n: wheelUp.stops.length });
+  ok(`...which a rainbow of the same hues does not (worst ${rawLow.toFixed(2)}:1)`,
+    rawLow < 4.5, rawLow);
+
+  /* ── AND THE HUE IS THE ONLY THING IT MOVES ──
+     "Change the accent" is the whole ask. The ground, the ink and both
+     greys are the app's colours now rather than a theme's, so a wheel
+     that moved any of them would be the thirteen palettes back under
+     one control. Held on every token the old sets were allowed to
+     write. */
+  const FIXED = ['--paper', '--ink', '--dim', '--spent', '--hair',
+                 '--tick-off', '--bad', '--g0', '--g2'];
+  const MOVES = ['--red', '--g1', '--on-red'];
+  /* Spaces stripped, because a custom property comes back as the
+     AUTHOR'S text: the stylesheet writes `rgba(120, 124, 132, .14)`
+     and the solver writes the same colour without the spaces, and a
+     string compare calls that a change. */
+  const readTokens = () => page.evaluate((ks) => {
+    const cs = getComputedStyle(document.documentElement);
+    const o = {};
+    ks.forEach((k) => { o[k] = cs.getPropertyValue(k).replace(/\s/g, '').toLowerCase(); });
+    return o;
+  }, FIXED.concat(MOVES));
+  const before = await readTokens();
+
+  /* Pressed rather than written into localStorage: what is being
+     checked is the control, and a test that only ever sets the key
+     proves the key works. */
+  const spin = async (h) => {
+    const box = await page.evaluate(() => {
+      const b = document.querySelector('.cw').getBoundingClientRect();
+      return { x: b.left + b.width / 2, y: b.top + b.height / 2, r: b.width / 2 - 13 };
+    });
+    const t = h * Math.PI / 180;
+    await page.mouse.move(box.x + Math.sin(t) * box.r, box.y - Math.cos(t) * box.r);
+    await page.mouse.down();
+    await page.mouse.up();
+    await page.waitForTimeout(180);
+  };
+  await spin(264);
+  const after = await readTokens();
+  ok('a press on the ring moves the accent, its wash and the ink on it',
+    MOVES.every((k) => before[k] !== after[k]) && /^#[0-9a-f]{6}$/.test(after['--red']),
+    { before, after });
+  ok('...and moves nothing else at all — the ground is the app\u2019s, not a theme\u2019s',
+    FIXED.every((k) => before[k] === after[k]),
+    FIXED.filter((k) => before[k] !== after[k]).map((k) => k + ' ' + before[k] + ' → ' + after[k]));
+
+  /* The two things the picture cannot show you: what the colour is, and
+     whether it can be read. The old hint named the palette and the
+     worst type on it; with one ground the worst type never moves, so
+     the number worth printing is the accent's own. */
+  const said = await page.evaluate(() => ({
+    hint: document.querySelector('.cw-wrap').nextElementSibling.textContent,
+    now: document.querySelector('.cw').getAttribute('aria-valuenow'),
+    knob: document.querySelector('.cw-k').style.transform }));
+  ok('the wheel says the hex and its measured ratio, and the knob follows',
+    said.hint.indexOf(after['--red']) === 0 && /\d(\.\d)?:1 against the page/.test(said.hint)
+    && said.now === '264' && /rotate\(264deg\)/.test(said.knob), said);
+
+  /* ── EVERY POINT ON THE WHEEL, ON THE PAGE ──
+     Thirteen palettes were thirteen hand-mixed sets and each was
+     measured. A wheel is 360 of them and none is hand-mixed, so what
+     has to be true is a property of the solver rather than of a list —
+     which is only worth claiming if it is measured somewhere it can
+     fail. Twelve points, on real pixels, on the type the accent
+     actually carries.
+
+     The worst point on the wheel is hue 316 by arithmetic, so it is on
+     the list by name rather than by luck. */
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(300);
-
-  const palettes = [];
-  for (const id of IDS) {
+  const HUES = [0, 24, 60, 96, 124, 160, 200, 240, 264, 300, 316, 340];
+  const spun = [];
+  for (const h of HUES) {
+    await page.evaluate((v) => localStorage.setItem('sched.accent.v1', String(v)), h);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(240);
     await page.click('#scTabYou');
     await page.waitForTimeout(300);
-    await page.click(`.theme[data-theme="${id}"]`);
-    await page.waitForTimeout(240);
 
     /* The glyph ON the accent, read off the computed style while the
        sheet is up. This is the one that would have shipped broken:
-       white on the amber theme measures 1.9:1 and on the mint one
-       1.7:1 — a control with an invisible label. */
-    /* .prime, not .mic. The bar's microphone is gone and the add
-       button is the filled control now — same question, same colours,
-       different element. A selector left pointing at a control that no
-       longer exists does not fail quietly here, but the check it was
-       making would have been lost. */
+       white on an amber accent measures 1.9:1 and on a mint one 1.7:1 —
+       a control with an invisible label. */
     const [fg, bg] = await page.$eval('.prime', (m) => {
       const cs = getComputedStyle(m);
       return [cs.color, cs.backgroundColor];
@@ -3313,10 +3413,11 @@ const SAID = [
               root.getPropertyValue('--red').trim()];
     });
     const accentRGB = dangers[2].startsWith('#')
-      ? dangers[2].match(/\w\w/g).map((h) => parseInt(h, 16))
+      ? dangers[2].match(/\w\w/g).map((x) => parseInt(x, 16))
       : num(dangers[2]);
     const onBad = +ratio(num(dangers[0]), num(dangers[1])).toFixed(2);
     const dE = deltaE(num(dangers[0]), accentRGB);
+    const onPage = +ratio(accentRGB, PAGE).toFixed(2);
 
     await page.evaluate(() => document.getElementById('scScrim').click());
     await page.waitForTimeout(320);
@@ -3337,113 +3438,97 @@ const SAID = [
       rows.push({ sel, r: +ratio(col, at(b3.x + b3.width + 6, b3.y + b3.height / 2)).toFixed(2) });
     }
     const worst = rows.reduce((a, x) => (x.r < a.r ? x : a), rows[0]);
-    palettes.push({ id, worst, bad: rows.filter((x) => x.r < 4.5),
-                    onAccent: +onAccent.toFixed(2), onBad, dE });
+    spun.push({ h, worst, bad: rows.filter((x) => x.r < 4.5),
+                onAccent: +onAccent.toFixed(2), onBad, dE, onPage });
   }
 
-  palettes.forEach((t) => ok(
-    `${t.id}: every piece of type clears 4.5:1 (worst ${t.worst.r}:1, ${t.worst.sel})`,
-    t.bad.length === 0, t.bad));
-  palettes.forEach((t) => ok(
-    `${t.id}: the glyph on the accent clears 4.5:1 (${t.onAccent}:1)`,
-    t.onAccent >= 4.5, t));
+  const low = (k) => spun.reduce((a, x) => (x[k] < a[k] ? x : a), spun[0]);
+  ok(`every piece of type clears 4.5:1 at every hue (worst ${low('onPage').worst.r}:1 `
+    + `on ${low('onPage').worst.sel})`,
+    spun.every((t) => t.bad.length === 0), spun.filter((t) => t.bad.length).map((t) => t.h + ': ' + JSON.stringify(t.bad)));
+  /* THE FLOOR THE SOLVER AIMS AT, measured rather than computed. 6:1 is
+     a margin over the 4.5 the type needs, and this repo has twice
+     shipped 4.74 believing that was one. */
+  ok(`the accent itself never drops under 6:1 on the page (worst ${low('onPage').onPage}:1 at hue ${low('onPage').h})`,
+    spun.every((t) => t.onPage >= 5.9), spun.map((t) => t.h + ':' + t.onPage));
+  ok(`the glyph on the accent clears 4.5:1 at every hue (worst ${low('onAccent').onAccent}:1)`,
+    spun.every((t) => t.onAccent >= 4.5), spun.map((t) => t.h + ':' + t.onAccent));
 
-  /* Danger is not the accent. On the shipped palette they are the same
-     red and there was never a reason to tell them apart; under a theme
-     they come apart hard — "Clear everything" in Solar's amber reads as
-     a highlight and in Aurora's mint it reads as approval. Measured in
-     Lab, not by comparing hexes: two colours can differ by a lot of
-     hex and very little eye.
+  /* ── DANGER IS NOT THE ACCENT, AND NOW YOU CAN PICK RED ──
+     "Clear everything" reading as a highlight rather than a warning was
+     a palette author's mistake to make; with a wheel it is one anybody
+     can make in a second, so it is the APP that has to hold them apart.
+     It does, and not by luck: --bad is a pale desaturated red and every
+     solved accent sits at full chroma, so the nearest the whole wheel
+     comes is ΔE 17.9 at hue 18. Measured in Lab rather than by
+     comparing hexes — two colours can differ by a lot of hex and very
+     little eye. */
+  ok(`danger is visibly not the accent at any hue (nearest ΔE ${low('dE').dE.toFixed(1)} at hue ${low('dE').h})`,
+    spun.every((t) => t.dE >= 12), spun.map((t) => t.h + ':' + t.dE.toFixed(1)));
+  ok(`and danger clears 4.5:1 on the sheet (${low('onBad').onBad}:1)`,
+    spun.every((t) => t.onBad >= 4.5), spun.map((t) => t.h + ':' + t.onBad));
 
-     NOTHING IS EXEMPT NOW. Paper used to be, because there the accent
-     and the danger were the same red deliberately — and Paper is gone,
-     so the exemption goes with it rather than sitting in the file as a
-     name nothing matches. A skip keyed to an id that no longer exists
-     is a check that has quietly stopped running. */
-  palettes.forEach((t) => {
-    ok(`${t.id}: danger is visibly not the accent (ΔE ${t.dE.toFixed(1)})`,
-      t.dE >= 12, t);
-  });
-  palettes.forEach((t) => ok(
-    `${t.id}: danger clears 4.5:1 on the sheet (${t.onBad}:1)`,
-    t.onBad >= 4.5, t));
-
-  /* And the choice survives a reload, under its own key. A palette is a
-     preference about looking at the record, not part of it — folding
-     one into the other is how a damaged record takes the other down. */
-  await page.reload({ waitUntil: 'networkidle' });
-  await page.waitForTimeout(240);
-  /* THE LAST ONE THE LOOP TOUCHED, whichever that is — pinned to
-     'plum' this read a palette that is no longer last in the list, so
-     it failed on a change to the ORDER rather than on the behaviour it
-     is about. */
-  const last = IDS[IDS.length - 1];
+  /* ── THE CHOICE SURVIVES A RELOAD, UNDER ITS OWN KEY ──
+     An accent is a preference about looking at the record, not part of
+     it — folding one into the other is how a damaged record takes the
+     other down. */
   const kept = await page.evaluate(() => ({
     accent: getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim().toLowerCase(),
-    key: localStorage.getItem('sched.theme.v1'),
-    inSchedule: /theme/.test(localStorage.getItem('sched.v1') || ''),
+    key: localStorage.getItem('sched.accent.v1'),
+    inSchedule: /accent|theme/.test(localStorage.getItem('sched.v1') || ''),
   }));
-  /* NOT PINNED TO A NAME OR A HEX. It was 'plum' and '#FF6FA5', so it
-     failed on a change to the ORDER of the list rather than on the
-     behaviour it is about — and a hex here would have to be retyped
-     every time a palette is retuned. What is claimed is that the
-     choice survived the reload, which is: the key holds whatever the
-     loop last pressed, and the page is no longer wearing the one the
-     stylesheet ships. */
-  ok('the theme is still up after a reload',
-    kept.accent !== '#c6f73c' && /^#[0-9a-f]{6}$/.test(kept.accent), kept);
-  ok('and it is kept under its own key, away from the schedule',
-    kept.key === last && !kept.inSchedule, { kept, last });
+  ok('the accent is still up after a reload, and kept away from the schedule',
+    kept.key === String(HUES[HUES.length - 1]) && !kept.inSchedule
+    && /^#[0-9a-f]{6}$/.test(kept.accent) && kept.accent !== '#c8fa42', kept);
 
-  /* ── no token survives a switch ──
-     Every theme has to name every token, or one it leaves out is
-     inherited from whatever was up last. It is a colour that only
-     appears in one ORDER of clicks, which is close to impossible to
-     find by looking — so scPaint clears the whole set before writing,
-     and this drives an order that would expose it.
-
-     IT USED TO BE DRIVEN BY --g3, the third wash only the light
-     palettes set. Those are gone and nothing sets it now, so a check
-     on --g3 would pass by finding transparent on both sides of the
-     switch — which is a check that cannot fail. Driven on the two
-     washes every palette DOES set instead. */
-  await page.click('#scTabYou');
-  await page.waitForTimeout(300);
-  await page.click('.theme[data-theme="verdant"]');
-  await page.waitForTimeout(200);
-  const leak = await page.evaluate(() => {
-    const read = () => ['--g1', '--g2', '--g3', '--bad', '--on-red', '--red'].map((k) =>
-      getComputedStyle(document.documentElement).getPropertyValue(k).trim());
-    const was = read();
-    document.querySelector('.theme[data-theme="nebula"]').click();
-    const now = read();
-    return { was, now };
+  /* ── A STORED PALETTE NAME BECOMES AN ANGLE ──
+     A palette is a choice somebody made and the half of it this app
+     still has is the hue. Dropping everyone onto lime because the
+     ground changed would throw that away for nothing. Read once and the
+     old key is spent — a name that resolves to a number is not
+     something to keep resolving — which is asserted as the old key
+     being GONE rather than merely ignored. Same shape as Easy → Light:
+     the word moved, the record did not. */
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.accent.v1');
+    localStorage.setItem('sched.theme.v1', 'cobalt');
   });
-  await page.waitForTimeout(200);
-  ok('no wash survives a switch to another palette',
-    leak.was[0] !== leak.now[0] && leak.was[1] !== leak.now[1]
-    && /rgba/.test(leak.now[0]), leak);
-  ok('and the third stays transparent, because nothing sets it any more',
-    /transparent|^$/.test(leak.was[2]) && /transparent|^$/.test(leak.now[2]), leak);
-  ok('and every other token moves with it',
-    [3, 4, 5].every((i) => leak.was[i] !== leak.now[i]), leak);
-  await page.evaluate(() => document.getElementById('scScrim').click());
-  await page.waitForTimeout(300);
-
-  /* Back to the shipped palette, so nothing below this reads a themed
-     page and calls it the default. */
-  await page.evaluate(() => { localStorage.removeItem('sched.theme.v1'); });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(240);
-  /* ── THE STYLESHEET AND THE LIST HAVE TO AGREE ──
+  const carried = await page.evaluate(() => ({
+    hue: localStorage.getItem('sched.accent.v1'),
+    old: localStorage.getItem('sched.theme.v1'),
+    red: getComputedStyle(document.documentElement).getPropertyValue('--red').trim(),
+  }));
+  ok('a stored palette name comes back as its own hue, once',
+    carried.hue === '264' && carried.old === null && carried.red !== '#c8fa42', carried);
+
+  /* ── AND A HUE THAT MEANS NOTHING FALLS THROUGH ──
+     The key outlives the code that wrote it. A stored value that is not
+     a number on the circle has to mean the one it ships with, rather
+     than NaN degrees — which resolves to a colour, silently, and would
+     be the app opening on a page nothing chose. */
+  await page.evaluate(() => localStorage.setItem('sched.accent.v1', 'plum'));
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(240);
+  ok('a stored accent that is not an angle falls back to the one it ships with',
+    await page.evaluate(() =>
+      getComputedStyle(document.documentElement).getPropertyValue('--red').trim())
+      === '#c8fa42');
+
+  /* ── THE STYLESHEET AND THE SOLVER HAVE TO AGREE ──
      app.css carries a complete palette so the first paint is right
-     before app.js runs, and THEMES carries the same set under a name
-     you can press. They are the one thing in this app written down
+     before app.js runs. That is the one thing in this app written down
      twice, and the failure if they drift is the ugliest kind: clearing
-     the stored theme drops you onto a fourteenth palette that is on no
-     list and that nothing can get you back to. Held in step here, on
-     the tokens rather than on the id. */
+     the stored key drops you onto a page that nothing can reproduce and
+     nothing can get you back to. What is duplicated is now the OUTPUT
+     of one function at one angle rather than a set somebody typed, so
+     this reads the wheel's own 124 back off the page and holds the
+     stylesheet to it. */
+  await page.evaluate(() => { localStorage.removeItem('sched.accent.v1'); });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(240);
   const ships = await page.evaluate(() => {
     const cs = getComputedStyle(document.documentElement);
     const keys = ['--paper', '--ink', '--dim', '--spent', '--red',
@@ -3453,28 +3538,25 @@ const SAID = [
     return root;
   });
   ok('clearing it falls back to the page the stylesheet itself carries',
-    ships['--red'] === '#c6f73c' && ships['--paper'] === '#060607'
+    ships['--red'] === '#c8fa42' && ships['--paper'] === '#060607'
     && ships['--ink'] === '#ffffff', ships);
-  const listed = await page.evaluate(() => {
-    /* Read off the picker's own swatch rather than out of the source:
-       the chip is drawn FROM the entry, so this is the entry. */
-    const b = document.querySelector('.theme[data-theme="lime"] .swatch');
-    return b ? { bg: b.style.background, dot: b.querySelector('u').style.background } : null;
-  });
+  /* NOTHING HAS RUN scPaint AT THIS POINT — the key is clear, so every
+     token above came from the stylesheet. Turning the wheel to 124 and
+     reading them again is therefore a comparison of the two copies
+     rather than of one copy with itself, which is the whole claim. */
   await page.click('#scTabYou');
   await page.waitForTimeout(320);
-  const lime = await page.evaluate(() => {
-    const b = document.querySelector('.theme[data-theme="lime"] .swatch');
-    return { dot: b.querySelector('u').style.background,
-             /* The COMPUTED background-color, not the tail of the
-                shorthand: the shorthand carries three radial-gradients
-                whose own rgba() stops contain commas, so splitting on
-                the last one returns "7)". */
-             ground: getComputedStyle(b).backgroundColor };
-  });
-  ok('...and Lime in the list is that same page under a name you can press',
-    lime.dot === 'rgb(198, 247, 60)'
-    && lime.ground.replace(/\s/g, '') === 'rgb(6,6,7)', { lime, listed });
+  await spin(124);
+  const solved = await page.evaluate((keys) => {
+    const cs = getComputedStyle(document.documentElement);
+    const o = {};
+    keys.forEach((k) => { o[k] = cs.getPropertyValue(k).trim().toLowerCase(); });
+    return o;
+  }, Object.keys(ships));
+  ok('...and the wheel\u2019s own 124 is that same page, token for token',
+    Object.keys(ships).every((k) => ships[k].replace(/\s/g, '') === solved[k].replace(/\s/g, '')),
+    Object.keys(ships).filter((k) => ships[k].replace(/\s/g, '') !== solved[k].replace(/\s/g, ''))
+      .map((k) => k + ': css ' + ships[k] + ' / wheel ' + solved[k]));
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(300);
 
@@ -3501,7 +3583,7 @@ const SAID = [
      bitten by that twice — a test file the suite never ran, and a
      reduced-motion check that read three layers by name while a fourth
      animated straight past it. */
-  const small = await page.$$eval('.mic, .ghost, .row, .pick, .btn, .theme', (els) => els
+  const small = await page.$$eval('.mic, .ghost, .row, .pick, .btn, .cw', (els) => els
     .map((e) => ({ c: e.className, h: e.getBoundingClientRect().height }))
     .filter((e) => e.h > 0 && e.h < 44));
   ok('every control clears 44px', small.length === 0, small);
@@ -3973,19 +4055,29 @@ const SAID = [
     ok('and so does their face', faceFill === '#0F6E6A', faceFill);
 
     /* Measured on composited pixels, not argued from the token. Every
-       one of the 169 reader-against-leader pairings was measured while
+       one of the 169 reader-against-leader pairings was measured when
        this was written: aiming at a bare 3:1 puts 26 of them under it
        on screen, worst 2.92:1, because the page draws three washes over
        --g0 and the arithmetic only knows about --g0. The 3.4 the code
        aims at leaves the worst at 3.25:1 and leaves 97 of the 169
        exactly their own accent.
 
-       The pairings below are the ones that measured worst. Drop
-       CROWN_MIN to 3.0 and this section is what says so. */
+       THE SQUARE IS A LINE NOW. Thirteen reader pages became one, so
+       what varies is the peer's accent and — through --g1 alone — the
+       hue of the page it lands on. The readers below are hues rather
+       than names, and that is a repair rather than a rename: this list
+       said slate, blush, mist and linen, which were LIGHT palettes
+       deleted a year before the wheel was. scTheme fell back to the
+       first entry on every one of them, so all six pairings had been
+       measuring the same page for a year. A name nothing matches is a
+       check that has stopped running, and this file already says so
+       about a skip keyed to a deleted id.
+
+       Drop CROWN_MIN to 3.0 and this section is what says so. */
     {
       const { PNG } = require('pngjs');
-      const WORST = [['slate', '#FF6FA5'], ['blush', '#FF6FA5'], ['slate', '#5CC8F8'],
-                     ['mist', '#0F6E6A'], ['linen', '#FFB020'], ['blush', '#FF8A5B']];
+      const WORST = [[124, '#FF6FA5'], [340, '#FF6FA5'], [124, '#5CC8F8'],
+                     [200, '#0F6E6A'], [42, '#FFB020'], [340, '#FF8A5B']];
       let low = { r: 99 };
       for (const [reader, acc] of WORST) {
         /* THE SERVER'S COPY TOO, and the first version only wrote the
@@ -3997,7 +4089,7 @@ const SAID = [
         seeded.acc = acc;
         store.set('rec:JADE2K7P', JSON.stringify(seeded));
         await fp.evaluate(([t, a]) => {
-          localStorage.setItem('sched.theme.v1', t);
+          localStorage.setItem('sched.accent.v1', String(t));
           const c = JSON.parse(localStorage.getItem('sched.peer.v1'));
           c.JADE2K7P.acc = a;
           localStorage.setItem('sched.peer.v1', JSON.stringify(c));
@@ -4066,8 +4158,8 @@ const SAID = [
         return (x + .05) / (y + .05);
       };
       let lowD = { r: 99 }, lowS = { r: 99 };
-      for (const [reader, acc] of [['paper', '#FFB020'], ['blush', '#FF6FA5'],
-                                   ['nebula', '#5CC8F8'], ['linen', '#FFB020']]) {
+      for (const [reader, acc] of [[124, '#FFB020'], [340, '#FF6FA5'],
+                                   [264, '#5CC8F8'], [42, '#FFB020']]) {
         const seeded = JSON.parse(store.get('rec:JADE2K7P'));
         seeded.acc = acc;
         /* Every day exactly ONE tick, so what is measured is the
@@ -4076,7 +4168,7 @@ const SAID = [
         for (let i = 0; i < 7; i++) seeded.days[day(i)] = { t: 1, b: 1 };
         store.set('rec:JADE2K7P', JSON.stringify(seeded));
         await fp.evaluate((t) => {
-          localStorage.setItem('sched.theme.v1', t);
+          localStorage.setItem('sched.accent.v1', String(t));
           localStorage.setItem('sched.view.v1', 'friends');
           localStorage.setItem('sched.fr.v1', 'board');
         }, reader);
@@ -4150,7 +4242,7 @@ const SAID = [
       seeded.acc = '#0F6E6A';
       store.set('rec:JADE2K7P', JSON.stringify(seeded));
     }
-    await fp.evaluate(() => localStorage.removeItem('sched.theme.v1'));
+    await fp.evaluate(() => localStorage.removeItem('sched.accent.v1'));
     await fp.reload({ waitUntil: 'networkidle' });
     await fp.waitForTimeout(300);
 
@@ -4571,8 +4663,8 @@ const SAID = [
     const dpr5 = 2;
     const deck = async (theme) => {
       await page.evaluate((t) => {
-        if (t) localStorage.setItem('sched.theme.v1', t);
-        else localStorage.removeItem('sched.theme.v1');
+        if (t !== null) localStorage.setItem('sched.accent.v1', String(t));
+        else localStorage.removeItem('sched.accent.v1');
         localStorage.removeItem('sched.train.v1');
         localStorage.removeItem('sched.tick.v1');
         localStorage.removeItem('sched.log.v1');
@@ -5004,7 +5096,7 @@ const SAID = [
        BOTH POLARITIES. On a dark palette --ink is near-white and the
        card inverts, so a check written for a black card measures the
        one case that cannot go wrong. */
-    for (const theme of [null, 'nebula']) {
+    for (const theme of [null, 264]) {
       await deck(theme);
       await page.click('.wc.is-front');                  /* into Bro split */
       await page.waitForTimeout(500);
@@ -5047,7 +5139,7 @@ const SAID = [
         worst.glyph = Math.min(worst.glyph, g);
         worst.desc = Math.min(worst.desc, d);
       }
-      const t = theme || 'paper';
+      const t = theme === null ? 'the lime it ships with' : 'hue ' + theme;
       ok(`the figures clear 4.5:1 on the card on ${t} (worst ${worst.fig.toFixed(2)}:1 on ${worst.of})`,
         worst.fig >= 4.5, worst);
       ok(`...the description too, over the wordmark behind it (${worst.desc.toFixed(2)}:1)`,
