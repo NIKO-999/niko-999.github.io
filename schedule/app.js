@@ -5313,22 +5313,25 @@
        control putting on a performance while you are trying to read
        it. The fold is the thing worth having; the deal is worth
        exactly one showing. */
-    var dealt = false;
-    /* ── AND THE SECOND LEVEL GETS A LIFT, NOT A DEAL ──
-       Pressing a kind used to replace the front card outright, which
-       after a dealt first level reads as dead rather than as restraint.
-       The front card rises 14px and fades over 200ms; the two behind it
-       do not move at all, which is the whole point — they are what
-       makes it a deck, and re-dealing them is the performance this
-       screen already took out.
+    /* ── THE TWO LEVELS MOVE DIFFERENTLY, AND THAT IS THE POINT ──
+       The four kinds are a HAND: pressing between All exercises, PPL,
+       Run and Recovery deals the whole thing again every time, because
+       at that level you are choosing what sort of session this was and
+       the deal is what that screen is.
 
-       ONE DRAW'S WORTH, and only where the LEVEL changed. draw() also
-       runs on a chip, an effort, a length and a pick, and on every one
-       of those the card in front is the same card with different
-       figures on it — a card that lifted for a press on Hard would be
-       the deck answering a question nobody asked. Set at the two places
-       that go in and come back out, and consumed by the next draw. */
-    var turn = false;
+       Inside a group you are stepping THROUGH one hand, so the card in
+       front goes to the back of the stack and the next one is
+       underneath it — the gesture of putting one down and taking the
+       next. Dealing there would say you had started again.
+
+       Three entrances then, and one variable rather than three flags:
+       a draw is a deal, a lift, a shuffle, or nothing. draw() also runs
+       on an effort, a length and a pick, and on every one of those the
+       card in front is the SAME card with different figures on it — a
+       deck that moved for a press on Hard would be answering a question
+       nobody asked. Set where the intent is and consumed by the next
+       draw, so nothing else can inherit it. */
+    var entr = 'deal';
 
     scSheet('What did you train?', function (body) {
       /* "What you did", not "one": a session can be a lift and one
@@ -5360,7 +5363,7 @@
       function press(w) {
         return function () {
           /* Step one opens the group. */
-          if (!into) { into = w; at = 0; ef = ''; turn = true; draw(); return; }
+          if (!into) { into = w; at = 0; ef = ''; entr = 'lift'; draw(); return; }
           /* ── STEP TWO TOGGLES, IT DOES NOT LOG ──
              It used to log on the press, which is one tap and made a
              second workout impossible: most people's real session is a
@@ -5423,6 +5426,9 @@
           c.addEventListener('click', function () {
             if (at === i) return;
             at = i;
+            /* A hand at the top level, one hand being stepped through
+               inside a group. */
+            entr = into ? 'shuffle' : 'deal';
             /* Nothing is cleared here. This line used to blank the
                effort so the next card could suggest its own, and once
                a press could SAY an effort the two fought: the clear
@@ -5439,15 +5445,33 @@
            IS the source order — written front-first the pair that make
            it a deck are painted over the card they are behind, and the
            whole thing reads as one card with a shadow. */
-        /* Set BEFORE the cards go in, because it is what they match on
-           — and cleared after the first draw, so every later one puts
-           the same fold up with no entrance. */
-        deck.classList.toggle('is-dealing', !dealt);
-        /* Never both: the deal already brings the front card in, and a
-           lift on top of it would run two entrances over one card. */
-        deck.classList.toggle('is-turning', dealt && turn);
-        dealt = true;
-        turn = false;
+        /* Set BEFORE the cards go in, because it is what they match
+           on — the cards are new elements every draw, so a class on the
+           deck is what decides whether they arrive with anything. */
+        deck.classList.toggle('is-dealing', entr === 'deal');
+        deck.classList.toggle('is-turning', entr === 'lift');
+        deck.classList.toggle('is-shuffling', entr === 'shuffle');
+
+        /* ── THE CARD YOU WERE ON GOES TO THE BACK ──
+           Kept rather than rebuilt: it is the OUTGOING workout, with
+           its own colour and its own name, and the whole gesture is
+           that THAT card is the one being put down. A fresh element
+           would be a different card pretending.
+
+           textContent = '' detaches it along with everything else,
+           which is what makes this work at all — an element removed
+           and re-inserted starts its animation on insertion, so the
+           recede begins exactly when the new hand is laid out rather
+           than whenever the class happened to land. */
+        var out = null;
+        if (entr === 'shuffle') {
+          out = deck.querySelector('.wc.is-front');
+          if (out) {
+            out.classList.remove('is-front', 'is-picked');
+            out.classList.add('is-out');
+          }
+        }
+        entr = null;
 
         deck.textContent = '';
         deck.appendChild(scTrainBack('b2'));
@@ -5455,6 +5479,22 @@
         deck.appendChild(scTrainCard(w, 'is-front'
           + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
           press(w), into ? ef : '', saidMin ? mins : 0));
+        /* LAST, so it is on top: these are absolutely positioned
+           siblings with no z-index between them, so source order is
+           the stacking order. The card being put down has to start
+           over the one it is uncovering, or there is nothing to
+           uncover. Swept on animationend AND on a timer, because an
+           animation that never runs — reduced motion, a background
+           tab — would otherwise leave a dead card on the pile. */
+        if (out) {
+          deck.appendChild(out);
+          var sweep = function () {
+            if (out && out.parentNode) out.parentNode.removeChild(out);
+            out = null;
+          };
+          out.addEventListener('animationend', sweep);
+          setTimeout(sweep, 700);
+        }
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
            The card is a <button> and a control inside a button is
@@ -5539,11 +5579,11 @@
             into = null;
             sel = [];
             ef = '';
-            /* Coming back is a level change too, and it gets the same
-               lift. What it does NOT get is the deal: that is a
-               first-arrival event, and re-dealing the hand on the way
-               back would be the performance again. */
-            turn = true;
+            /* Coming back is a level change, so it lifts. It is NOT a
+               deal, even though the four kinds are what you land on:
+               the deal is for choosing among them, and arriving back
+               is one step of a movement you are already making. */
+            entr = 'lift';
             draw();
           });
           foot.appendChild(back);

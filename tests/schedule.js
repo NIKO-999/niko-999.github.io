@@ -5215,28 +5215,36 @@ const SAID = [
       Math.abs(scale1 - .965) < .004 && Math.abs(turn1 - 3) < .3
       && m1[4] === 13 && m1[5] === 9, deal.b1.m);
 
-    /* ── AND IT DEALS ONCE, NOT ON EVERY PRESS ──
-       draw() rebuilds the deck on every chip, every effort and every
-       step into a group, and the cards are new elements each time — so
-       with the animation on `.wc` the same hand was dealt again for
-       each of them, and comparing four splits meant sitting through
-       four entrances. What is worth having is the FOLD, which is a
-       resting state.
+    /* ── AND IT DEALS AGAIN ON EVERY KIND ──
+       This asserted the opposite for a long time: the deck dealt once
+       and every later draw put the same fold up with no entrance,
+       because re-dealing on every press meant sitting through four
+       entrances to compare four splits. That was right about draw()
+       and wrong about WHICH draws.
 
-       Driven rather than inspected: press a chip and the new front
-       card must have no animation on it at all. */
+       The four kinds are a HAND. Choosing between All exercises, PPL,
+       Run and Recovery deals it again every time, because at that level
+       you are choosing what sort of session this was and the deal is
+       what that screen is. What must not deal is a step through one
+       hand, which is the shuffle below — and an effort, a length or a
+       pick, which do not move the deck at all. */
     await page.click('.wc-chips .wc-chip:nth-child(2)');
-    await page.waitForTimeout(220);
+    await page.waitForTimeout(60);
     const again = await page.evaluate(() => {
-      const f = document.querySelector('.wc.is-front');
-      return { name: getComputedStyle(f).animationName,
-        running: f.getAnimations().length,
+      const nm = (s2) => {
+        const e = document.querySelector(s2);
+        return e ? getComputedStyle(e).animationName : null;
+      };
+      return { front: nm('.wc.is-front'), b1: nm('.wc.b1'), b2: nm('.wc.b2'),
+        out: document.querySelectorAll('.wc.is-out').length,
         dealing: document.querySelector('.wc-deck').classList.contains('is-dealing') };
     });
-    ok('...and it is dealt once, not again on every press',
-      again.name === 'none' && again.running === 0 && !again.dealing, again);
+    ok('...and a press on another KIND deals the whole hand again',
+      again.dealing && [again.front, again.b1, again.b2]
+        .every((n) => n === 'wcDeal') && again.out === 0, again);
+    await page.waitForTimeout(600);
     await page.click('.wc-chips .wc-chip:nth-child(1)');
-    await page.waitForTimeout(220);
+    await page.waitForTimeout(600);
 
     /* ── THE SECOND LEVEL LIFTS, AND ONLY THE FRONT CARD MOVES ──
        Pressing a kind card replaced the front card outright, which
@@ -5304,23 +5312,69 @@ const SAID = [
       lift.keys.length === 1 && /translate/.test(lift.keys[0])
       && !/transform/.test(lift.keys[0]), lift.keys);
 
-    /* AND IT IS THE LEVEL CHANGING, NOT THE DRAW. draw() also runs on a
-       chip, an effort, a length and a pick, and on every one of those
-       the card in front is the SAME card with different figures on it —
-       a card that lifted for a press on Hard would be the deck
-       answering a question nobody asked. Both halves, because watching
-       it appear passes on code that lifts on every draw. */
+    /* ── AND INSIDE A GROUP THE CARD GOES TO THE BACK ──
+       You are stepping THROUGH one hand here, not choosing another, so
+       the card in front is put down and the next is underneath it.
+
+       The outgoing card is KEPT rather than rebuilt: it carries the
+       workout you were looking at, with its own name and its own
+       colour, and the whole gesture is that THAT card is the one being
+       put down. Asserted by its name, so a fresh element standing in
+       for it would fail — and by its position last in the deck, since
+       these are absolutely positioned siblings with no z-index and
+       source order is the stacking order. A card being put down that
+       is painted UNDER the one it is uncovering has nothing to
+       uncover. */
+    /* .wc-n is the card's NAME. The first `b` on a card is the Est.
+       time figure, which is the same "50 min" on both cards and would
+       have made this pass on any element at all. */
+    const was = await page.evaluate(() =>
+      document.querySelector('.wc.is-front .wc-n').textContent);
+    await page.evaluate(() =>
+      document.querySelector('.wc-chips .wc-chip:nth-child(3)').click());
+    const shuf = await page.evaluate(() => {
+      const deck = document.querySelector('.wc-deck');
+      const o = deck.querySelector('.wc.is-out');
+      const kids = [...deck.querySelectorAll('.wc')];
+      return { on: deck.classList.contains('is-shuffling'),
+        out: o && getComputedStyle(o).animationName,
+        name: o && o.querySelector('.wc-n').textContent,
+        last: !!o && kids[kids.length - 1] === o,
+        deaf: o && getComputedStyle(o).pointerEvents,
+        front: getComputedStyle(deck.querySelector('.wc.is-front')).animationName,
+        b1: getComputedStyle(deck.querySelector('.wc.b1')).animationName };
+    });
+    ok(`a step inside a group puts ${was} to the back of the stack`,
+      shuf.on && shuf.out === 'wcOut' && shuf.name === was
+      && shuf.last && shuf.deaf === 'none', { was, shuf });
+    ok('...and it is not a deal — the two behind hold still',
+      shuf.front === 'wcStep' && shuf.b1 === 'none', shuf);
+    /* SWEPT, and on a timer as well as on animationend: an animation
+       that never runs — a background tab — would otherwise leave a dead
+       card on the pile, and the next press would put a second one on
+       top of it. */
+    await page.waitForTimeout(800);
+    ok('...and the card put down is swept, not left on the pile',
+      await page.evaluate(() =>
+        document.querySelectorAll('.wc-deck .wc').length === 3
+        && !document.querySelector('.wc.is-out')));
+
+    /* AND AN EFFORT, A LENGTH AND A PICK MOVE NOTHING. draw() runs on
+       all three, and on every one of them the card in front is the SAME
+       card with different figures on it — a deck that moved for a press
+       on Hard would be answering a question nobody asked. */
     const quiet = {};
-    for (const [what, sel] of [['a chip', '.wc-chips .wc-chip:nth-child(2)'],
-                               ['an effort', '.wc-eff .wc-chip:nth-child(1)'],
+    for (const [what, sel] of [['an effort', '.wc-eff .wc-chip:nth-child(1)'],
+                               ['a length', '.wc-mins .wc-min:nth-child(2)'],
                                ['a pick', '.wc.is-front']]) {
       await page.click(sel);
       await page.waitForTimeout(90);
-      quiet[what] = await page.evaluate(() =>
-        getComputedStyle(document.querySelector('.wc.is-front')).animationName);
+      quiet[what] = await page.evaluate(() => ({
+        front: getComputedStyle(document.querySelector('.wc.is-front')).animationName,
+        cards: document.querySelectorAll('.wc-deck .wc').length }));
     }
-    ok('a chip, an effort and a pick lift nothing',
-      Object.values(quiet).every((v) => v === 'none'), quiet);
+    ok('an effort, a length and a pick move the deck not at all',
+      Object.values(quiet).every((v) => v.front === 'none' && v.cards === 3), quiet);
     /* Coming back is a level change too and gets the same lift — but
        never the deal, which is a first-arrival event. */
     await page.click('.wc-back');

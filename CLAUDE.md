@@ -1874,14 +1874,48 @@ reading. A card behind a card has no information to carry: what it has
 to say is *there are more of these*, and an empty slab at the right
 angle says that and nothing else.
 
-**ONCE, THOUGH, AND ONLY ON THE WAY IN.** `draw()` rebuilds the deck on
-every press — of a chip, of an effort, of a kind — and the cards are
-new elements each time, so with the animation on `.wc` the same hand
-was dealt again for each of them: comparing four splits meant sitting
-through four entrances. What is worth having is the FOLD, which is a
-resting state rather than a performance. The deck carries `is-dealing`
-for its first draw and nothing after it, and the check presses a chip
-and requires the new front card to have no animation on it at all.
+**THE TWO LEVELS MOVE DIFFERENTLY, AND THAT IS THE WHOLE THING.** The
+four kinds are a HAND: pressing between All exercises, PPL, Run and
+Recovery deals it again every time, because at that level you are
+choosing what sort of session this was and the deal is what that
+screen is. Inside a group you are stepping THROUGH one hand, so the
+card in front is put down and the next is underneath it. Dealing there
+would say you had started again.
+
+**Three entrances, one variable.** A draw is a deal, a lift, a shuffle
+or nothing, set where the intent is and consumed by the next draw so
+nothing else inherits it. `draw()` also runs on an effort, a length and
+a pick, and on every one of those the card in front is the SAME card
+with different figures on it — a deck that moved for a press on Hard
+would be answering a question nobody asked.
+
+**This reversed a rule.** The deck dealt once and every later draw put
+the same fold up with no entrance, because re-dealing on every press
+meant sitting through four entrances to compare four splits. That was
+right about `draw()` and wrong about WHICH draws: the cost was never
+the deal, it was dealing when you had not changed hands.
+
+**The card put down is KEPT, not rebuilt.** It carries the workout you
+were looking at — its name, its colour — and the whole gesture is that
+THAT card is the one going away. It is appended LAST so it is on top:
+these are absolutely positioned siblings with no z-index, so source
+order is the stacking order, and a card being put down that paints
+under the one it is uncovering has nothing to uncover. It lands on
+b2's own resting position rather than a number chosen to look about
+right.
+
+**`textContent = ''` detaches it, and that is what makes it work**: an
+element removed and re-inserted starts its animation on insertion, so
+the recede begins when the new hand is laid out rather than whenever
+the class happened to land. It is swept on `animationend` AND on a
+timer, because an animation that never runs — a background tab —
+would otherwise leave a dead card on the pile for the next press to
+stack on.
+
+**The fade is front-loaded and the travel is not.** A linear fade over
+the same 300ms left both cards legible through the middle of it — two
+names and two descriptions at once, which reads as a rendering fault
+rather than as one card passing behind another.
 
 **A swoop, not a wordmark, and not waves.** Three treatments: four
 contour waves, stretched to the card's width with the stroke stretched

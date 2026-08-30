@@ -3142,6 +3142,53 @@ body {
 .wc-deck.is-turning .wc.is-front {
   animation: wcTurn .26s cubic-bezier(.2, .7, .3, 1) both;
 }
+/* ── AND INSIDE A GROUP, THE CARD GOES TO THE BACK ──
+   Stepping between the four kinds deals the whole hand again — at that
+   level you are choosing what sort of session it was, and the deal is
+   what that screen is. Inside a group you are stepping THROUGH one
+   hand, so the card in front is put down and the next is underneath
+   it. Dealing there would say you had started again.
+
+   It lands on b2's own resting position — 25px across, 18px down, 6°,
+   scaled to .93 — so the card being put down goes exactly where the
+   third card in the stack sits rather than to a number chosen to look
+   about right. Written with the independent properties rather than
+   `transform`, which is the rule the whole deck is built on: a
+   keyframe naming transform REPLACES a resting one, and that is how
+   the fan was flattened once already. This card has no resting
+   transform, so it is safe either way and uses them anyway, because
+   the next thing pointed at this rule may not be.
+
+   `pointer-events: none` — it is on TOP for the whole of its recede,
+   and a press landing on a card that is leaving is a press on the
+   workout you just moved away from. */
+@keyframes wcOut {
+  from { translate: 0 0;       scale: 1;   rotate: 0deg; opacity: 1; }
+  /* THE FADE IS FRONT-LOADED and the travel is not. A linear fade over
+     the same 300ms left the two cards double-exposed through the
+     middle of it — two names and two descriptions legible at once,
+     which reads as a rendering fault rather than as one card passing
+     behind another. Most of the opacity goes in the first third, so
+     what you see is the old card leaving and the new one already
+     readable underneath. */
+  35%  { opacity: .4; }
+  to   { translate: 25px 18px; scale: .93; rotate: 6deg; opacity: 0; }
+}
+.wc.is-out {
+  animation: wcOut .3s cubic-bezier(.3, .7, .4, 1) both;
+  pointer-events: none;
+}
+/* The one underneath steps forward as it is uncovered. Small, because
+   what carries this is the card LEAVING — a new card arriving with a
+   flourish of its own would be two things happening at once. */
+@keyframes wcStep {
+  from { scale: .97; }
+  to   { scale: 1; }
+}
+.wc-deck.is-shuffling .wc.is-front {
+  animation: wcStep .3s cubic-bezier(.2, .7, .3, 1) both;
+}
+
 /* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──
    This went in behind a prefers-reduced-motion rule while the deal —
    46px of travel with a rotate and a scale on three cards — has never
