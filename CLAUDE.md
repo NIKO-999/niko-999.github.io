@@ -678,6 +678,15 @@ over: the frog is now told apart by stroke weight and type weight
 alone, which is quieter than a colour. `tests/schedule.js` asserts both
 halves — every glyph the same accent, and the first still heavier.
 
+**AND THE WORDS WENT THE SAME WAY, one round later.** The frog had
+`--ink` to itself over four `--dim` rows, which is the glyphs' mistake
+in the other column: greying four of five says those four are the ones
+that do not matter, and the list is the thing that matters. Every
+objective you have not done is full strength now, and the step of type
+weight is the WHOLE of what marks the first. Done still goes to
+`--spent`, which is a different claim — that one is about a row you
+have finished rather than a row that counts for less.
+
 **The face names itself in that same accent.** `MAIN OBJECTIVES` is the
 sessions' treatment from the front — small caps, a hairline running off
 it — but in `--red` rather than `--spent`, because a grey heading over

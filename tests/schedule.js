@@ -1572,12 +1572,31 @@ const SAID = [
     return { frog: frog.stroke, rest: rest.stroke, red,
       fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
       ft: g('.day.is-open .ob.is-frog .ob-t').fontWeight,
-      rt: g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-t').fontWeight };
+      rt: g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-t').fontWeight,
+      ink: getComputedStyle(document.documentElement)
+        .getPropertyValue('--ink').trim(),
+      words: [...document.querySelectorAll(
+        '.day.is-open .ob:not(.is-done) .ob-t')].map((t) =>
+        getComputedStyle(t).color) };
   });
   ok('every objective\u2019s glyph is in the accent, not just the first',
     obMarks.frog === obMarks.rest && obMarks.rest === obMarks.red, obMarks);
   ok('...so the first is told apart by weight instead',
     obMarks.fw > obMarks.rw && +obMarks.ft > +obMarks.rt, obMarks);
+  /* ── AND THE WORDS ARE THE GLYPHS' LESSON AGAIN ──
+     The frog had --ink to itself over four --dim rows, which said the
+     other four were the ones that did not matter. Every objective you
+     have not done is full strength, and the step of weight is the
+     whole of what marks the first. Held against the resolved --ink
+     rather than a literal, since thirteen palettes move it. */
+  ok('every objective\u2019s words are full strength, not just the first',
+    obMarks.words.length > 1
+    && new Set(obMarks.words).size === 1
+    && obMarks.words[0] === await page.evaluate((h) => {
+      const p = document.createElement('i');
+      p.style.color = h; document.body.appendChild(p);
+      const c = getComputedStyle(p).color; p.remove(); return c;
+    }, obMarks.ink), obMarks.words);
   ok('...and never by a rank number',
     (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0);
 

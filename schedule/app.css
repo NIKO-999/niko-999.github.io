@@ -1428,17 +1428,23 @@ body {
 }
 /* ── the main one ──
    Position is priority and the first is the frog: the one you would
-   rather not start. Said with the accent on the glyph and one step of
-   weight on the words, and NOT with a rank number — a column of
+   rather not start. Said with ONE step of type weight and a heavier
+   stroke on its glyph, and NOT with a rank number — a column of
    figures down the side of five short sentences is a second ordering
-   drawn over the one the list already has. */
+   drawn over the one the list already has.
+
+   It had --ink to itself over four --dim rows, which is the glyphs'
+   own mistake a second time: greying four of five said those four
+   were the ones that did not matter, and the list is the thing that
+   matters. Every objective you have not done is full strength now,
+   and the frog keeps the weight. */
 .ob.is-frog .ob-ic { stroke-width: 2.5; }
-.ob.is-frog .ob-t { font-weight: 700; color: var(--ink); }
+.ob.is-frog .ob-t { font-weight: 700; }
 .ob-t {
   font-size: 13px;
   font-weight: 500;
   line-height: 1.42;
-  color: var(--dim);
+  color: var(--ink);
   letter-spacing: -.002em;
   min-width: 0;
 }
