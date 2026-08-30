@@ -5046,6 +5046,81 @@ const SAID = [
       }));
     ok('and the board still has you on it', await fp.$$eval('.fr-row', (r) => r.length) === 1);
 
+    /* ══════════════════════════════════════════════════════════
+       WHAT THE PHONE POSTED
+
+       Shortcuts can make an HTTP request in the background without
+       opening anything, so the automatic route is a POST to the worker
+       and a collection the next time Today is opened. The round trip
+       is the only thing worth asserting: every part of it is invisible
+       from either end on its own.
+       ══════════════════════════════════════════════════════════ */
+    {
+      const you = await fp.evaluate(() => {
+        const n = { url: 'https://sched.test.workers.dev', code: 'WATCH777',
+          key: 'c'.repeat(32), name: 'Me', pic: '', on: true };
+        localStorage.setItem('sched.net.v1', JSON.stringify(n));
+        localStorage.removeItem('sched.tick.v1');
+        localStorage.setItem('sched.view.v1', 'list');
+        return n.code;
+      });
+      /* CLAIMED through the worker rather than planted: auth compares
+         the SHA-256 of the key it is given against what is stored, so a
+         key written in raw is a 401 that looks like the endpoint being
+         wrong. The fixture beside this one plants 'x'.repeat(64) and
+         gets away with it because nothing ever writes to that record. */
+      await worker.fetch(new Request(`${HOST}/v1/claim`,
+        { method: 'POST',
+          headers: { Origin: 'https://niko-999.github.io',
+            'Content-Type': 'application/json' },
+          body: JSON.stringify({ code: you, key: 'c'.repeat(32) }) }), env);
+
+      /* Posted as a Shortcut would, straight at the worker rather than
+         through the page — the whole point is that the phone does this
+         with the app closed. */
+      const post = await worker.fetch(new Request(
+        `${HOST}/v1/health/${you}`,
+        { method: 'POST',
+          headers: { Origin: 'https://niko-999.github.io',
+            Authorization: 'Bearer ' + 'c'.repeat(32),
+            'Content-Type': 'application/json' },
+          body: JSON.stringify({ steps: 8241, sleep: 7.4 }) }), env);
+      ok('a Shortcut can post readings with the app shut', post.status === 200,
+        post.status);
+
+      /* WITH THE WATCH OFF, NOTHING IS COLLECTED. Both halves, because
+         watching them arrive passes on code that collects regardless —
+         and "no request until you turn a thing on" is the promise the
+         whole friends half is built to keep. */
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.click('[data-view="tally"]');
+      await fp.waitForTimeout(700);
+      const off = await fp.evaluate(() =>
+        localStorage.getItem('sched.tick.v1'));
+      ok('with the watch off, arriving at Today collects nothing', !off, off);
+
+      await fp.evaluate(() => localStorage.setItem('sched.watch.v1', '1'));
+      await fp.reload({ waitUntil: 'networkidle' });
+      await fp.click('[data-view="tally"]');
+      await fp.waitForTimeout(900);
+      const got = await fp.evaluate(() => ({
+        rec: JSON.parse(localStorage.getItem('sched.tick.v1') || '{}'),
+        drawn: [...document.querySelectorAll('.ty-row .ty-sub')]
+          .map((e) => e.textContent) }));
+      const key = Object.keys(got.rec)[0];
+      ok('with it on, arriving at Today files what the phone posted',
+        key && got.rec[key].p === 8241 && got.rec[key].s === 7.4, got.rec);
+      ok('...and the screen carries them without a second visit',
+        got.drawn.indexOf('8241') >= 0 && got.drawn.indexOf('7.4 h') >= 0,
+        got.drawn);
+
+      /* THE INBOX IS NOT EMPTIED. A destructive read loses the morning
+         if the app is opened and closed before it files, and writing
+         the same value twice is a no-op anyway. */
+      ok('...and the inbox still holds them for the next open',
+        /8241/.test(store.get('hl:' + you) || ''), store.get('hl:' + you));
+    }
+
     ok('no page errors through any of the friends half', ferrs.length === 0, ferrs);
     await fp.close();
 

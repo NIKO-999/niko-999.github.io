@@ -3040,6 +3040,13 @@
   var HOME = 'https://sched.nikorapullin.workers.dev';
 
   var net = { url: '', code: '', key: '', name: '', pic: '', on: false };
+  /* Its own key rather than a field on net, because it is a different
+     decision: net.on is "I am on a server", and this is "collect what
+     my phone posted there". Off by default, and the app makes no
+     request for it while it is off — the same rule the friends half
+     keeps, one screen over. */
+  var WATCH_KEY = 'sched.watch.v1';
+  var watch = false;
   /* One attempt per visit. A claim that fails offline must not become a
      request every time the tab is painted. */
   var joining = false;
@@ -3070,6 +3077,50 @@
     if (!Array.isArray(posts)) posts = [];
   }
   function scNetSave() { scWriteJSON(NET_KEY, net); }
+
+  function scWatchLoad() {
+    try { watch = localStorage.getItem(WATCH_KEY) === '1'; } catch (e) { watch = false; }
+  }
+  function scWatchSet(on) {
+    watch = !!on;
+    try {
+      if (watch) localStorage.setItem(WATCH_KEY, '1');
+      else localStorage.removeItem(WATCH_KEY);
+    } catch (e) {}
+  }
+
+  /* ── COLLECT WHAT THE PHONE POSTED ──
+     A Shortcut reads the phone's own health store in the background and
+     POSTs four numbers and a date to the worker; this is the other end
+     of that, run on arrival at Today. It files through scSetTick like a
+     number you typed, so the backfill window applies and nothing the
+     inbox holds can reach further into the past than your thumb can.
+
+     The inbox is NOT emptied. Writing the same value twice is a no-op,
+     and a destructive read loses the morning if the app is opened and
+     closed before it files. */
+  var watchAt = 0;
+  function scWatchPull(then) {
+    then = then || function () {};
+    if (!watch || !net.on || !net.code) return then(0);
+    /* Once a minute at most. Arriving at Today is a thing you do a
+       dozen times an hour and the readings change once. */
+    var now = Date.now();
+    if (now - watchAt < 60000) return then(0);
+    watchAt = now;
+    scApi('/v1/health/' + net.code, { auth: 1 }, function (box) {
+      if (!box || typeof box !== 'object') return then(0);
+      var n = 0;
+      for (var d in box) {
+        if (!box.hasOwnProperty(d)) continue;
+        var got = scHealthIn('#' + Object.keys(box[d]).map(function (k) {
+          return k + '=' + box[d][k];
+        }).join('&') + '&on=' + d);
+        n += scHealthTake(got);
+      }
+      then(n);
+    });
+  }
 
   /* crypto, never Math.random. The key is the only thing between your
      code — which you hand out on purpose — and somebody posting as
@@ -4529,7 +4580,21 @@
 
     if (save) { try { localStorage.setItem(VIEW_KEY, view); } catch (e) {} }
 
-    if (tal) { scPaintTally(); scTyStop(tyStop, false); }
+    if (tal) {
+      scPaintTally();
+      scTyStop(tyStop, false);
+      /* ── ARRIVING COLLECTS, DRAWING ONLY DRAWS ──
+         The same split the friends board keeps, for the same reason: a
+         paint that fetched would recurse the first time it came back.
+         And nothing is fetched at all while the watch is off, so an app
+         nobody has turned this on for behaves exactly as it did before
+         any of it existed. */
+      scWatchPull(function (n) {
+        if (!n) return;
+        scPaintTally();
+        scToast(n === 1 ? 'One reading in' : n + ' readings in', false);
+      });
+    }
     /* ARRIVING claims, drawing only draws — the same split the refresh
        already keeps. A paint that fetched would recurse the first time
        it ran, which is a bug this file has already had once. */
@@ -6654,7 +6719,8 @@
          the fragment. What it can do is give you the address to point
          a Shortcut at, with this copy's own origin in it, because that
          is the only part somebody cannot work out for themselves. */
-      item('Your watch', 'Steps and sleep, from a Shortcut', '', scWatchSheet);
+      item('Your watch', watch ? 'Collecting steps and sleep'
+        : 'Steps and sleep, from a Shortcut', '', scWatchSheet);
 
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
@@ -6697,16 +6763,25 @@
   /* ══════════════════════════════════════════════════════════
      THE ADDRESS TO POINT A SHORTCUT AT
 
-     No switch and no state: the app reads the fragment on every open
-     whether or not anybody has been here. This sheet exists to hand
-     over one string, built from THIS copy's own origin — the app is
-     served from a folder and copied between them, and a template with
-     somebody else's address in it is the one part of the setup that
-     cannot be checked by reading it.
+     Two ways in, and the sheet offers whichever one it can.
 
-     Placeholders in capitals so they are obviously holes rather than
-     values, and named for the thing rather than the field, since what
-     goes in each is a variable you pick out of a list.
+     THE FRAGMENT needs nothing at all — no server, no key, no account
+     — and costs one app-switch a morning, because opening a URL is the
+     only channel a static page has and it brings the app to the front.
+
+     THE INBOX is the automatic one. Shortcuts can make an HTTP request
+     in the background without opening anything, so a POST to the
+     worker runs unattended and the app collects it the next time you
+     open Today. What it costs is that four numbers and a date sit on
+     the worker until then, which is the trade every automatic version
+     of this makes — and the reason it is NOT the Garmin Health API is
+     that theirs would put a credential for the whole account there
+     instead.
+
+     The address is built from THIS copy's own origin. The app is
+     served from a folder and copied between them, and a template
+     carrying somebody else's address is the one part of the setup
+     nobody can check by reading it.
      ══════════════════════════════════════════════════════════ */
   function scWatchLink() {
     return location.href.replace(/[#?].*$/, '')
@@ -6717,11 +6792,63 @@
     scSheet('Your watch', function (body) {
       body.appendChild(scEl('p', 'hint',
         'Garmin writes your steps and sleep into the phone\u2019s own health '
-        + 'store. A Shortcut reads them from there and opens this page with '
-        + 'the numbers on the end of the address \u2014 so they never leave '
-        + 'the phone, and there is no account to connect and nothing to '
-        + 'trust.'));
-      body.appendChild(scEl('span', 'label', 'The address'));
+        + 'store. A Shortcut reads them from there \u2014 so nothing is '
+        + 'connected to Garmin and there is no account to approve.'));
+
+      /* ── the automatic one, where there is a code to post to ──
+         It needs one, because the post is authenticated as you; and a
+         code is what turning Friends on gets you. Said plainly rather
+         than hidden, because a control that is missing with no reason
+         given reads as a bug. */
+      body.appendChild(scEl('span', 'label', 'In the background'));
+      if (!net.on || !net.code) {
+        body.appendChild(scEl('p', 'hint',
+          'A Shortcut can post the numbers without opening anything, and '
+          + 'this app collects them when you next open Today. It posts as '
+          + 'you, so it needs the code Friends gives you \u2014 turn that on '
+          + 'first and this fills in.'));
+      } else {
+        var tog = scEl('button', 'mark' + (watch ? ' is-on' : ''));
+        tog.type = 'button';
+        tog.appendChild(document.createTextNode('Collect what my phone posts'));
+        tog.insertAdjacentHTML('beforeend',
+          '<svg viewBox="0 0 24 24" aria-hidden="true">'
+          + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
+        tog.setAttribute('aria-pressed', watch ? 'true' : 'false');
+        tog.addEventListener('click', function () {
+          scWatchSet(!watch);
+          scClose();
+          scToast(watch ? 'Collecting' : 'Not collecting', false);
+        });
+        body.appendChild(tog);
+
+        var post = scEl('input', 'field');
+        post.type = 'text';
+        post.readOnly = true;
+        post.id = 'scWatchPost';
+        post.value = net.url + '/v1/health/' + net.code;
+        post.addEventListener('focus', function () { post.select(); });
+        body.appendChild(scEl('span', 'label', 'Post to'));
+        body.appendChild(post);
+
+        var key = scEl('input', 'field');
+        key.type = 'text';
+        key.readOnly = true;
+        key.id = 'scWatchKey';
+        key.value = 'Bearer ' + net.key;
+        key.addEventListener('focus', function () { key.select(); });
+        body.appendChild(scEl('span', 'label', 'Authorization header'));
+        body.appendChild(key);
+
+        body.appendChild(scEl('p', 'hint',
+          'In Shortcuts: Get Contents of URL, method POST, one header '
+          + 'called Authorization with the line above, and a JSON body of '
+          + 'steps, sleep, water or fuel. Run it on a time of day and it '
+          + 'never opens anything.'));
+      }
+
+      /* ── and the one that needs nothing ── */
+      body.appendChild(scEl('span', 'label', 'Or without a server'));
       var f = scEl('input', 'field');
       f.type = 'text';
       f.readOnly = true;
@@ -6730,15 +6857,15 @@
       f.addEventListener('focus', function () { f.select(); });
       body.appendChild(f);
       body.appendChild(scEl('p', 'hint',
-        'In Shortcuts: Find Health Samples for Steps and for Sleep, then '
-        + 'Open URLs with this address \u2014 replacing STEPS, SLEEP and DATE '
-        + 'with those values. Water and Fuel work the same way if you '
-        + 'track them. Set it to run on a time of day and it fills itself '
-        + 'in.'));
+        'Open URLs with this address instead, replacing STEPS, SLEEP and '
+        + 'DATE. Nothing leaves the phone \u2014 and it opens the app to hand '
+        + 'them over, which is the whole difference between the two.'));
+
       var acts = scEl('div', 'acts');
       acts.appendChild(scBtn('off', 'Close', scClose));
       acts.appendChild(scBtn('go', 'Copy', function () {
-        var text = scWatchLink();
+        var text = (net.on && net.code)
+          ? net.url + '/v1/health/' + net.code : scWatchLink();
         var done = function () { scClose(); scToast('Copied', false); };
         if (navigator.clipboard && navigator.clipboard.writeText) {
           navigator.clipboard.writeText(text).then(done, function () {
@@ -6822,6 +6949,7 @@
      one — so an app nobody has turned this on for behaves exactly as
      it did before any of this existed. */
   scNetLoad();
+  scWatchLoad();
 
   /* ── the link somebody was sent ──
      Read here and NOT acted on here. Reading a hash costs nothing and

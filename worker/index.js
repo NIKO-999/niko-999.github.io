@@ -124,15 +124,35 @@ async function auth(env, code, req) {
    stopped at the server's today would silently drop the day the user
    is actually living in, on write, with a 200 back. Two days of slack
    covers every offset there is and costs two keys. */
-function trim(rec) {
-  const keep = {};
+/* The same window, as a set of the dates in it — the record's trim
+   walks it to copy days across, and the health inbox walks its own
+   keys to drop the ones that have fallen out. Written once because two
+   copies of "which days count" is the pair that drifts. */
+function window() {
+  const keys = {};
   const now = new Date();
   for (let i = -2; i < DAYS; i++) {
     const d = new Date(now);
     d.setUTCDate(d.getUTCDate() - i);
-    const k = d.getUTCFullYear() + '-'
+    keys[d.getUTCFullYear() + '-'
       + String(d.getUTCMonth() + 1).padStart(2, '0') + '-'
-      + String(d.getUTCDate()).padStart(2, '0');
+      + String(d.getUTCDate()).padStart(2, '0')] = 1;
+  }
+  return keys;
+}
+
+/* The server's own date, for a POST that names none. */
+function today() {
+  const d = new Date();
+  return d.getUTCFullYear() + '-'
+    + String(d.getUTCMonth() + 1).padStart(2, '0') + '-'
+    + String(d.getUTCDate()).padStart(2, '0');
+}
+
+function trim(rec) {
+  const keep = {};
+  const win = window();
+  for (const k in win) {
     if (rec.days && rec.days[k]) keep[k] = rec.days[k];
   }
   rec.days = keep;
@@ -204,6 +224,85 @@ export default {
       body.code = code;
       await env.SCHED.put('rec:' + code, JSON.stringify(trim(body)));
       return json(req, { ok: true });
+    }
+
+    /* ══════════════════════════════════════════════════════════
+       THE INBOX A SHORTCUT POSTS INTO
+
+       A Garmin cannot talk to a web page, and Garmin's own Health API
+       is a partner programme whose secret would have to live here — so
+       the sanctioned automatic route is this server holding a
+       credential that can read the whole account. It does not.
+
+       Instead the phone does the reading. Garmin Connect writes steps
+       and sleep into the phone's own health store; a Shortcut reads
+       that store and POSTs the numbers here in the background, and the
+       app collects them the next time it is opened. What crosses the
+       wire is four numbers and a date.
+
+       IT IS AN INBOX, NOT A RECORD. The app files what it finds through
+       the same path a number you typed goes through, so the backfill
+       window applies and nothing here can write further into the past
+       than you can. That is why the read does not clear: a destructive
+       read loses the morning if the app is opened and closed before it
+       files, and writing the same value twice is a no-op anyway.
+
+       THE KEY IS NEEDED TO READ, which /v1/rec does not require. That
+       endpoint is the leaderboard and the code is the thing you share;
+       how long you slept is not.
+       ══════════════════════════════════════════════════════════ */
+    const hl = p.match(/^\/v1\/health\/([A-Z0-9]{4,12})$/);
+
+    /* A ceiling each, and they are the client's ceilings again rather
+       than a second opinion: a Shortcut that hands over milliseconds of
+       sleep instead of hours writes 27000000 into the record, and every
+       figure drawn for the rest of the year is that one day. Checked
+       here as well because a bad reading stored is a bad reading served
+       to every future open, and the client that filters it is not the
+       client that put it in. */
+    const READING = { steps: 200000, sleep: 24, water: 30, fuel: 20000 };
+
+    if (hl && req.method === 'POST') {
+      const code = hl[1];
+      if (!(await auth(env, code, req))) return json(req, { error: 'no' }, 401);
+      const body = await req.json().catch(() => null);
+      if (!body || typeof body !== 'object' || Array.isArray(body))
+        return json(req, { error: 'bad json' }, 400);
+
+      /* The DAY the Shortcut says, defaulting to the server's — and
+         trimmed to the same window everything else here is, so the one
+         thing a phone in another timezone cannot do is file outside it.
+         The client's own backfill rule is stricter and is what actually
+         decides; this only keeps the store from growing. */
+      const on = /^\d{4}-\d{2}-\d{2}$/.test(body.on || '') ? body.on : today();
+      const took = {};
+      for (const k in READING) {
+        if (!(k in body)) continue;
+        const v = Number(body[k]);
+        /* Dropped rather than clamped. A clamped 24 is a lie that looks
+           like a reading; a missing day is what actually happened. */
+        if (!isFinite(v) || v < 0 || v > READING[k]) continue;
+        took[k] = v;
+      }
+      if (!Object.keys(took).length)
+        return json(req, { error: 'no readings' }, 400);
+
+      let box = {};
+      try { box = JSON.parse((await env.SCHED.get('hl:' + code)) || '{}') || {}; }
+      catch (e) { box = {}; }
+      box[on] = { ...(box[on] || {}), ...took };
+      const win = window();
+      for (const d in box) if (!win[d]) delete box[d];
+      await env.SCHED.put('hl:' + code, JSON.stringify(box),
+        { expirationTtl: 60 * 60 * 24 * (DAYS + 2) });
+      return json(req, { ok: true, on, took: Object.keys(took).length });
+    }
+
+    if (hl && req.method === 'GET') {
+      const code = hl[1];
+      if (!(await auth(env, code, req))) return json(req, { error: 'no' }, 401);
+      const got = await env.SCHED.get('hl:' + code);
+      return json(req, got ? JSON.parse(got) : {});
     }
 
     /* ── pictures ──

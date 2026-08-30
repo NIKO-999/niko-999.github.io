@@ -1278,6 +1278,45 @@ figure on that screen where more is not better, and a long night is a
 good night. Six rows fit a 390x844 phone with 37px to spare, measured
 before it was written.
 
+### And the automatic one, which needs a background request
+
+The fragment costs one app-switch a morning, because opening a URL is
+the only channel a static page has and it brings the app to the front.
+**Shortcuts can make an HTTP request without opening anything** — *Get
+Contents of URL* runs in the background — so the automatic version is a
+POST to the worker and a collection the next time Today is opened.
+
+**It is an INBOX, not a record.** `hl:CODE` holds a few days of
+readings under the record's own window, and the app files what it finds
+through `scSetTick` like a number you typed — so the backfill rule
+applies and nothing up there can reach further into the past than your
+thumb can.
+
+**The read does not clear it.** A destructive read loses the morning if
+the app is opened and closed before it files, and writing the same
+value twice is a no-op anyway.
+
+**Reading needs the KEY, which `/v1/rec` does not.** That endpoint is
+the leaderboard and the code is the thing you share; how long you slept
+is not.
+
+**The ceiling is checked at BOTH ends** and that is not belt and
+braces: a bad reading stored is a bad reading served to every future
+open, and the client that filters it is not the client that put it in.
+
+**ARRIVING COLLECTS, DRAWING ONLY DRAWS** — the friends board's own
+rule, for the same reason: a paint that fetched would recurse. And
+nothing is fetched at all while the watch is off, so the promise that
+this app makes no request until you turn a thing on is unchanged; it is
+asserted from both sides, because watching readings arrive passes on
+code that collects regardless.
+
+**Why this and not Garmin's own Health API.** Theirs is a partner
+programme whose secret would have to live on the worker — which would
+mean the worker holding a credential that reads the whole account,
+rather than four numbers and a date the phone chose to send. The phone
+does the reading either way; this way it also decides what leaves.
+
 **The settings row hands over one string and sets nothing.** There is
 nothing to turn on — the app reads the fragment on every open whether
 or not anybody has been there. What it gives you is the address with
