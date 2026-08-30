@@ -2963,6 +2963,318 @@ const SAID = [
   ok('the calendar is seven rows deep and today sits on today’s weekday',
     grid.rows === 7 && grid.todayRow === grid.dow && grid.cells === 182, grid);
 
+  /* ══════════════════════════════════════════════════════════
+     A DAY OFF
+
+     The week is a template and that is what makes it a shape. What it
+     could not say is that THIS Monday is not: a holiday, a swapped
+     shift, an injury. The only tool was deleting the block, which
+     changes every Monday there will ever be.
+
+     Two halves, and the first needs no new record at all:
+
+     — A day the item was never ON the schedule is not a day you missed
+       it. The strip read tickLog and nothing else, so Train on a
+       three-day-a-week schedule drew four misses every week for ever.
+     — And a block can be off for ONE date, which is the exception the
+       first half cannot express.
+     ══════════════════════════════════════════════════════════ */
+  console.log('\n── a day off ──');
+  {
+    /* EVERYTHING THIS SECTION WRITES IS PUT BACK. It replaces the week
+       and the whole tick log, and every section below reads both — a
+       fixture that leaves the furniture where it found it is the
+       difference between this and a dozen unrelated failures. */
+    const kept = await page.evaluate(() => ['sched.v1', 'sched.tick.v1']
+      .map((k) => [k, localStorage.getItem(k)]));
+
+    /* Train on three weekdays only, which the starter week does not
+       do — the seed puts every block on every day, so the derivable
+       half is invisible on it and a check written against the seed
+       would pass on code that never looked at the schedule. */
+    const shape = await page.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const keep = [1, 3, 5];
+      st.items = st.items.filter((it) => it.n !== 'Train' || keep.indexOf(it.d) >= 0);
+      localStorage.setItem('sched.v1', JSON.stringify(st));
+      /* Every Train day ticked, so what is left to measure is the days
+         it was not on. */
+      const pad = (n) => String(n).padStart(2, '0');
+      const log = {};
+      for (let i = 0; i < 182; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        if (keep.indexOf(d.getDay()) < 0) continue;
+        log[d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate())] = { t: 1 };
+      }
+      localStorage.setItem('sched.tick.v1', JSON.stringify(log));
+      localStorage.removeItem('sched.off.v1');
+      localStorage.setItem('sched.view.v1', 'tally');
+      return st.items.filter((it) => it.n === 'Train').map((it) => it.d);
+    });
+    ok('the fixture trains three days a week, not seven',
+      shape.join(',') === '1,3,5', shape);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+    await page.waitForTimeout(300);
+
+    const read = () => page.evaluate(() => {
+      const cal = document.querySelector('.ty-cal');
+      const rects = [...cal.querySelectorAll(':scope > rect')];
+      const w = rects.map((r) => +(+r.getAttribute('width')).toFixed(2));
+      const strip = [...document.querySelector('.ty-hist svg').querySelectorAll('rect')]
+        .map((r) => ({ w: +(+r.getAttribute('width')).toFixed(2), f: r.getAttribute('fill') }));
+      const full = Math.max(...w);
+      return {
+        cells: rects.length,
+        lit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)').length,
+        miss: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
+          && +r.getAttribute('width') === full).length,
+        skip: rects.filter((r) => r.getAttribute('fill') === 'var(--tick-off)'
+          && +r.getAttribute('width') < full).length,
+        /* Every small mark is the NEUTRAL. A third state drawn in a
+           third colour would be the app inventing a judgement for the
+           one state that is not one. */
+        smallLit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)'
+          && +r.getAttribute('width') < full).length,
+        stripSkip: strip.filter((s) => s.f === 'var(--tick-off)'
+          && s.w < Math.max(...strip.map((x) => x.w))).length,
+        figs: [...document.querySelectorAll('.ty-stats b')].map((b) => b.textContent),
+        hint: document.querySelector('.ty-hint').textContent,
+      };
+    });
+    const three = await read();
+    /* 182 days, 78 of them a Mon/Wed/Fri. The exact split moves with
+       what weekday the suite runs on, so this asserts the SHAPE: every
+       cell is one of the three states, the skipped ones are about four
+       sevenths of the window, and none of them is lit. */
+    ok(`a day it was never on is drawn small and neutral (${three.skip} of ${three.cells})`,
+      three.cells === 182 && three.skip > 90 && three.skip < 115
+      && three.lit + three.miss + three.skip === 182 && three.smallLit === 0, three);
+    /* stripSkip > 0 as well as equal: with the third mark drawn at the
+       full size both counts are zero and an equality passes on the bug
+       it is about. */
+    ok('...and the strip beside the row draws it the same way',
+      three.stripSkip > 0 && three.stripSkip === three.skip, three);
+    /* THE FIGURES ARE ABOUT YOU, NOT ABOUT THE SCHEDULE. Every Train
+       day ticked and none missed: seven days a week out of the days it
+       was on, a streak that never breaks, and a foot that counts the
+       days it was on rather than 182. Counted as misses these read
+       3.0, a longest streak of 1, and "78 of 182". */
+    ok(`with every session kept, it says seven days a week (${three.figs.join(' / ')})`,
+      three.figs[2] === '7.0' && +three.figs[0] > 20 && +three.figs[1] > 20, three.figs);
+    ok(`and the foot counts the days it was on, not 182 (${three.hint})`,
+      /^\d+ of \d+ days/.test(three.hint)
+      && +three.hint.split(' of ')[1].split(' ')[0] === three.lit
+      && +three.hint.split(' of ')[1].split(' ')[0] < 182, three.hint);
+
+    /* ── AND THE EXCEPTION, WHICH THE SCHEDULE CANNOT EXPRESS ──
+       One block, one date. Planted through the key rather than pressed,
+       because the control is measured on the week below and what is
+       being checked here is that the record reaches the figures. */
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(160);
+    await page.evaluate(() => {
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      const train = st.items.filter((it) => it.n === 'Train');
+      const pad = (n) => String(n).padStart(2, '0');
+      const off = {}, tick = JSON.parse(localStorage.getItem('sched.tick.v1'));
+      /* The most recent day Train was on, which is a day the fixture
+         ticked — so this is a KEPT day being taken out of the record
+         rather than a miss, and the lit count has to fall. */
+      for (let i = 0; i < 14; i++) {
+        const d = new Date(); d.setDate(d.getDate() - i);
+        const b = train.filter((x) => x.d === d.getDay())[0];
+        if (!b) continue;
+        const k = d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+        off[k] = { [b.id]: 1 };
+        delete tick[k];
+        break;
+      }
+      localStorage.setItem('sched.off.v1', JSON.stringify(off));
+      localStorage.setItem('sched.tick.v1', JSON.stringify(tick));
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+    await page.waitForTimeout(300);
+    const one = await read();
+    ok(`one block off for one date moves one cell (${three.skip} → ${one.skip})`,
+      one.skip === three.skip + 1 && one.lit === three.lit - 1
+      && one.miss === three.miss, { three, one });
+    /* THE STREAK IS SKIPPED OVER, NOT BROKEN. That is the whole point:
+       a day you were never going to train is not a day you failed to,
+       so it neither breaks a run nor extends one. Counted as a miss
+       this reads a longest streak in single figures. */
+    /* THE STREAK RUNS THROUGH IT. The day taken out is the most recent
+       one Train was on, so counted as a miss "days on now" would be 0
+       and the week rate would fall under seven. Skipped, the run
+       carries on across it — one day shorter, because there is one
+       fewer day in it, which is a different thing from broken. */
+    ok(`and the streak runs through it rather than breaking (${one.figs.join(' / ')})`,
+      one.figs[2] === '7.0' && +one.figs[1] > 20
+      && +one.figs[0] === +three.figs[0] - 1, { three, one });
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(160);
+
+    await page.evaluate((rows) => {
+      localStorage.removeItem('sched.off.v1');
+      rows.forEach(([k, v]) => {
+        if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+      });
+    }, kept);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+    ok('and the week and the record are put back for what follows',
+      await page.evaluate(() => JSON.parse(localStorage.getItem('sched.v1'))
+        .items.filter((it) => it.n === 'Train').length === 7
+        && !localStorage.getItem('sched.off.v1')));
+  }
+
+  /* ── AND ON THE WEEK, WHERE YOU SET IT ── */
+  {
+    /* Put back at the end, view included. The section after this one
+       opens a tally strip, and a block that leaves the app on the week
+       hands it a screen with no .ty-row on it — which reports as a
+       thirty-second timeout rather than as a fixture that did not tidy
+       up after itself. */
+    const held = await page.evaluate(() => ['sched.tick.v1', 'sched.log.v1', 'sched.view.v1']
+      .map((k) => [k, localStorage.getItem(k)]));
+    await page.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(360);
+    const open = async (name) => {
+      await page.evaluate((n) => {
+        [...document.querySelectorAll('.day.is-today .row[data-id]')]
+          .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
+      }, name);
+      await page.waitForTimeout(420);
+    };
+    /* Marked DONE first, so the exclusivity below is a state being
+       cleared rather than a state that was never set. */
+    await open('Train');
+    await page.click('.sheet .mark:not(.mark-off)');
+    await page.waitForTimeout(520);
+    const marks = await page.evaluate(() => ({
+      done: !!JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[
+        Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}'))[0]],
+      hrs: document.querySelector('.day.is-today .wk-hrs').textContent }));
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    await open('Train');
+    const sheet = await page.evaluate(() => ({
+      order: [...document.querySelectorAll('.sheet .mark')].map((m) => m.textContent.trim()),
+      /* A control's HEADING is part of what it says. It went in below
+         the workout picker once, under a label reading TRAINED, and
+         read as a second thing to train. */
+      heads: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent),
+      /* Not a tick. Every tick in this app is the accent and they all
+         say one thing — this happened. A day off is the only state on
+         the screen that is not a claim about doing anything. */
+      bar: document.querySelector('.sheet .mark-off svg path').getAttribute('d') }));
+    ok('Off sits under the day\u2019s own heading, beside Done and above Trained',
+      sheet.order[0] === 'Done today' && sheet.order[1] === 'Off this day'
+      && sheet.heads.indexOf('This day') < sheet.heads.indexOf('Trained')
+      && !/l\d/.test(sheet.bar), sheet);
+
+    await page.click('.sheet .mark-off');
+    await page.waitForTimeout(560);
+    const off = await page.evaluate(() => {
+      const r = [...document.querySelectorAll('.day.is-today .row[data-id]')]
+        .find((x) => x.querySelector('.n').textContent.startsWith('Train'));
+      const cs = getComputedStyle(r.querySelector('.n'));
+      const log = JSON.parse(localStorage.getItem('sched.log.v1') || '{}');
+      return { cls: r.className, line: cs.textDecorationLine,
+        hrs: document.querySelector('.day.is-today .wk-hrs').textContent,
+        tick: !!r.querySelector('.tick'),
+        done: Object.keys(log).some((d) => Object.keys(log[d]).length),
+        off: !!localStorage.getItem('sched.off.v1') };
+    });
+    ok('a block off for the day is struck out, never removed',
+      off.off && /is-off/.test(off.cls) && /line-through/.test(off.line), off);
+    /* A block that is not on cannot be running and cannot be behind
+       you: both of those are claims about a thing that was going to
+       happen. */
+    ok('...and it is neither running nor behind you',
+      !/is-now/.test(off.cls) && !/is-past/.test(off.cls), off);
+    /* Done and off are opposite claims about one block on one day, so
+       setting either clears the other — both standing would leave a row
+       struck out AND ticked. */
+    ok('...and it clears the done mark rather than standing beside it',
+      !off.done && !off.tick, off);
+    ok(`...and it comes out of the day\u2019s hours (${marks.hrs} → ${off.hrs})`,
+      off.hrs !== marks.hrs, { marks, off });
+
+    /* ── IT REACHES FURTHER FORWARD THAN DONE DOES ──
+       You cannot mark something done before it happens; a day off is
+       exactly the thing you set in advance. Measured on a card the
+       deck draws that is not today — Done is refused there and Off is
+       not, which is the whole difference between the two resolvers. */
+    const ahead = await page.evaluate(() => {
+      /* THE WEEKDAY WHOSE MOST RECENT OCCURRENCE IS FOUR DAYS BACK,
+         worked out rather than picked. scDateOfDow looks BACKWARD over
+         the two-day window, so "the far end of the deck" is not the
+         same thing as "outside the window" — on a Tuesday the deck's
+         last card is Sunday and Sunday was two days ago, which IS open.
+         Four back is outside it on every day of the week. */
+      const w = (new Date().getDay() + 3) % 7;
+      const cards = [...document.querySelectorAll('.day')];
+      cards[(w + 6) % 7].querySelector('.wk-face').click();
+      return w;
+    });
+    await page.waitForTimeout(520);
+    await page.evaluate(() => {
+      document.querySelector('.day.is-open .row[data-id]').click();
+    });
+    await page.waitForTimeout(440);
+    const far = await page.evaluate(() => ({
+      marks: [...document.querySelectorAll('.sheet .mark')].map((m) => m.textContent.trim()),
+      heads: [...document.querySelectorAll('.sheet .label')].map((l) => l.textContent) }));
+    /* AND DONE IS NOT OFFERED THERE, WHICH IT WAS. scDateOfDow falls
+       back to TODAY for a weekday outside the two-day window, and the
+       comment on it said scTallyOpen refuses that on the way in —
+       scTallyOpen(today) is true, so it never did. "Done today" drew on
+       all seven cards, and pressing it on Friday's card from a Tuesday
+       marked TODAY done, for Friday's block, which then rendered back
+       through the same fallback and looked entirely correct. A round
+       trip through one wrong answer is self-consistent, which is why
+       nothing ever showed. */
+    ok(`a card Done cannot reach still offers Off (weekday ${ahead})`,
+      far.marks.indexOf('Off this day') >= 0
+      && far.marks.indexOf('Done today') < 0, far);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    /* ── AND THE TOAST IS NOT A WHITE SLAB ──
+       It was --ink on --paper, which inverted the page — right for
+       exactly as long as the page was white. The day the light
+       palettes went it became a full-width white bar over a near-black
+       screen, on every save. It is the sheet's own surface now, with
+       the sheet's own hairline: the same answer that replaced the 3px
+       white strip above the workout deck. */
+    const toast = await page.evaluate(() => {
+      const t = document.getElementById('scToast') || document.querySelector('.toast');
+      const cs = getComputedStyle(document.documentElement);
+      const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
+        .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
+      return { bg: getComputedStyle(t).backgroundColor, fg: getComputedStyle(t).color,
+        ink: rgb('--ink'), paper: rgb('--paper') };
+    });
+    ok('the toast wears the page rather than inverting it',
+      toast.bg !== toast.ink && toast.fg === toast.ink, toast);
+
+    await page.evaluate((rows) => {
+      localStorage.removeItem('sched.off.v1');
+      rows.forEach(([k, v]) => {
+        if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+      });
+    }, held);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
+  }
+
+
   /* ── the three figures are not the same three for every item ──
      Two of the five are ticks and three are numbers: a tick has no
      average to take. And Fuel is the one number you do NOT want more

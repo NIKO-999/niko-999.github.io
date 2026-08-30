@@ -859,6 +859,99 @@ owns that class, and a second one per card made every query for the
 week's day names return two — the deck read as "Tuesday, Tuesday" and
 today counted twice against the rule about what the accent is spent on.
 
+## A day off
+
+**The week is a template and that is what makes it a shape** — every
+Monday the same. What it could not say is that THIS Monday is not: a
+holiday, a swapped shift, an injury. The only tool was deleting the
+block, which changes every Monday there will ever be.
+
+Two halves, and **the first needed no new record at all.**
+
+**A DAY THE THING WAS NEVER ON IS NOT A DAY YOU MISSED IT.** The strip
+read `tickLog` and nothing else, so Train on a three-day-a-week
+schedule drew four misses every week for ever — and the figures under
+it were a report on the schedule rather than on you: measured on that
+fixture, a longest streak of **1** and **3.0 days a week** out of seven
+with every single session kept. It reads a streak in the twenties and
+7.0 now. Only the two items FED BY BLOCKS can fail to apply; Steps,
+Fuel and Water are numbers you log and nothing about the week excuses
+one.
+
+Judged against TODAY's schedule for every day in the window, because
+the week is a template and this app keeps no history of it. Storing a
+copy of the shape every time it changes is a second record of the thing
+the first record IS — and it would be wrong in the other direction the
+moment anybody restored a backup.
+
+**Then the exception the schedule cannot express**: one block, one date,
+`sched.off.v1`, the same shape and the same grain as `blockLog`.
+
+**IT IS THE ONE RECORD HERE WRITTEN FORWARD.** Everything else is
+something that happened; a day off is what you set in advance. So it
+takes the backfill window behind — correcting the last two days — and
+no limit at all ahead. Never further back than that, because a day off
+SKIPS a day in the streak, and a record you can edit six months later
+is a leaderboard nobody can trust.
+
+**Three states, and the third is a SIZE.** Kept is the accent, missed
+is the flat neutral, and a day it was never on is the same neutral
+drawn at 45%. Colour is not available: the rule on this screen is that
+a colour never says whether, and a third hue would be inventing a
+judgement for the one state that is not one. Size costs no contrast at
+all — a dot beside a square. Drawn rather than left out: a hole keeps
+the grid's geometry and scatters gaps through it that read as a
+rendering fault.
+
+**A tick always wins.** Train on a Sunday it is not scheduled is still
+a day you trained; drawing that as "did not apply" throws away the one
+thing the record is for.
+
+**Struck out on the row, never removed.** A row that vanishes is a
+block you have to remember was ever there, and the whole point of an
+exception is that the shape underneath it is unchanged. The strike is
+what tells it from a row behind you, which is `--spent` as well and is
+a different claim — that one happened. It is also neither running nor
+past: both of those are claims about a thing that was going to happen.
+
+**Done and off are opposite claims about one block on one day**, so
+setting either clears the other. Both standing leaves a row that is
+struck out AND ticked, and a record that says the block both happened
+and was not on.
+
+**The toggle is a BAR, not a tick.** Every tick in this app is the
+accent and they all say one thing — this happened. A day off is the
+only state on the screen that is not a claim about doing anything, so
+it takes neither the mark nor the colour: it wears the flat neutral the
+strip draws it in, which is the record and the control agreeing.
+
+**A control's HEADING is part of what it says.** It went in below the
+workout picker first, under a label reading TRAINED, and read as a
+second thing to train. It sits under the day's own heading now, beside
+Done and above Trained.
+
+### "Done today" was drawing on cards it could not address
+
+`scDateOfDow` falls back to TODAY for a weekday outside the two-day
+window, and the comment on it said `scTallyOpen` refuses that on the
+way in. `scTallyOpen(today)` is TRUE, so it never did. *Done today*
+drew on all seven cards, and pressing it on Friday's card from a
+Tuesday marked **today** done — for Friday's block, which then rendered
+back through the same fallback and looked entirely correct.
+
+**A round trip through one wrong answer is self-consistent**, which is
+why nothing ever showed. `scDowDate` is the same question able to say
+no, and the editor uses it. Rendering keeps the fallback: a block's id
+is per weekday, so a card reading today's log finds nothing of its own
+in it.
+
+**And the toast was a white slab.** `--ink` on `--paper` inverts the
+page, which was right for exactly as long as the page was white — the
+day the light palettes went it became a full-width white bar over a
+near-black screen, on every save. It is the page's own surface with a
+hairline now: the same answer that replaced the 3px white strip above
+the workout deck, on the day that should have been.
+
 ## Morning, afternoon, evening
 
 **Noon and five o'clock**, which is where the words already sit in

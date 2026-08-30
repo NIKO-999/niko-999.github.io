@@ -1858,6 +1858,23 @@ body {
    accent is for what is left of the day. */
 .row.is-past .tick { stroke: var(--spent); }
 
+/* ── A BLOCK THAT IS OFF FOR ONE DAY ──
+   Struck out, never removed. A row that vanishes is a block you have to
+   remember was ever there, and the whole point of an exception is that
+   the shape underneath it is unchanged — every other Monday still has
+   it. The strike is what tells this apart from a row behind you, which
+   is --spent as well and is a different claim: that one happened. */
+.row.is-off .ic { stroke: var(--spent); }
+.row.is-off .n { color: var(--spent); }
+.row.is-off .n b,
+.row.is-off .n {
+  text-decoration: line-through;
+  text-decoration-thickness: 1px;
+  text-decoration-color: var(--tick-off);
+}
+.row.is-off .t { color: var(--tick-off); }
+.row.is-off .n em { color: var(--spent); text-decoration: none; }
+
 /* The block's name is the subheading of its own row — it is what you
    are scanning for, and at 14px/500 it sat at the same volume as the
    time beside it and the place inside it. 16px/700 is a subheading and
@@ -2466,7 +2483,21 @@ body {
   visibility: hidden;
 }
 .mark.is-on { background: var(--red); border-color: var(--red); color: var(--on-red); }
+/* ── OFF IS NOT A TICK AND NOT THE ACCENT ──
+   Every tick in this app is the accent and every one of them says the
+   same thing: this happened. A day off is the one state on the screen
+   that is not a claim about doing anything, so it takes neither the
+   mark nor the colour. It wears the same flat neutral the strip draws
+   a day off in, which is the record and the control agreeing. */
+.mark.mark-off.is-on {
+  background: var(--tick-off);
+  border-color: var(--spent);
+  color: var(--dim);
+}
 .mark.is-on svg { visibility: visible; }
+/* Two claims about one day sit under one heading, so they need a gap
+   or they read as one segmented control with two halves. */
+.mark + .mark { margin-top: 9px; }
 .mark:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 .acts { display: flex; gap: 10px; margin-top: 18px; }
@@ -2589,8 +2620,17 @@ body {
   gap: 12px;
   margin: 0 var(--pad);
   padding: 13px 13px 13px 15px;
-  background: var(--ink);
-  color: var(--paper);
+  /* ── IT WAS --ink ON --paper, WHICH IS A WHITE SLAB NOW ──
+     Inverting the page was right for exactly as long as the page was
+     white; the day the light palettes went it became the loudest
+     object in the app, a full-width white bar over a near-black
+     screen, and it appears on every save. It is the sheet's own
+     surface with the sheet's own hairline — the same answer that
+     replaced the 3px white strip above the workout deck, for the same
+     reason and on the same day it should have been. */
+  background: var(--g0);
+  color: var(--ink);
+  box-shadow: 0 0 0 1px var(--hair), 0 10px 30px -12px rgba(0, 0, 0, .8);
   font-size: 14px;
   opacity: 0;
   transform: translateY(8px);

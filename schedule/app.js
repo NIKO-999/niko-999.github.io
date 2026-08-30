@@ -1031,7 +1031,15 @@
       /* Committed hours, opposite the name. It is the one figure a card
          can carry for nothing — the rows are already here to add up —
          and it is what makes a card comparable to the card beside it. */
-      var mins = rows.reduce(function (a, it) { return a + (it.e - it.s); }, 0);
+      /* scObjDay, never scDateOfDow: this is a per-DATE fact about the
+         card you are looking at, and the backfill resolver answers
+         "today" for every card more than two days behind and for every
+         one still ahead. That is the objectives' own bug and it would
+         put Friday's day off on today's card. */
+      var cd = scObjDay(d);
+      var mins = rows.reduce(function (a, it) {
+        return a + (scOff(cd, it.id) ? 0 : it.e - it.s);
+      }, 0);
       if (mins) {
         head.appendChild(scEl('span', 'wk-hrs',
           (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs'));
@@ -1199,6 +1207,11 @@
            that was the whole reason the link runs both ways. */
         var bd = scDay(scDateOfDow(d));
         if (blockLog[bd] && blockLog[bd][it.id]) row.classList.add('is-done');
+        /* Off, on this card's own date. Struck out rather than removed:
+           a row that vanishes is a block you have to remember was ever
+           there, and the whole point of an exception is that the shape
+           underneath it is unchanged. */
+        if (scOff(scObjDay(d), it.id)) row.classList.add('is-off');
 
         /* THE TIME GOES ABOVE THE NAME, and in the source as well as in
            the grid. It used to sit in a third column at the right
@@ -1961,8 +1974,12 @@
     for (var i = 0; i < rows.length; i++) {
       var el = rows[i], s = +el.dataset.s, e = +el.dataset.e;
       if (isNaN(s)) continue;
-      el.classList.toggle('is-past', e <= now);
-      var on = s <= now && now < e;
+      /* A block that is not on today cannot be running and cannot be
+         behind you: both of those are claims about a thing that was
+         going to happen. */
+      var skip = el.classList.contains('is-off');
+      el.classList.toggle('is-past', !skip && e <= now);
+      var on = !skip && s <= now && now < e;
       el.classList.toggle('is-now', on);
       if (on) live = el;
     }
@@ -2226,6 +2243,7 @@
 
   var TICK_KEY = 'sched.tick.v1';
   var LOG_KEY = 'sched.log.v1';
+  var OFF_KEY = 'sched.off.v1';
 
   /* One glyph per item, and like TALLY itself this is CODE rather than
      data: the five are fixed and identical for everybody, so their
@@ -2288,6 +2306,7 @@
      record. */
   var tickLog = null;      /* { '2026-09-01': { t:1, p:'8420' } } */
   var blockLog = null;  /* { '2026-09-01': { <block id>: 1 } } */
+  var offLog = null;    /* the same shape, and the opposite claim */
 
   /* Local date, never toISOString(). toISOString is UTC, so anywhere
      west of Greenwich it hands back YESTERDAY for most of the evening —
@@ -2331,6 +2350,28 @@
     return new Date();
   }
 
+  /* ── THE SAME QUESTION, ABLE TO SAY NO ──
+     scDateOfDow falls back to TODAY for a weekday outside the window,
+     and the comment above it says that is safe because scTallyOpen
+     refuses it on the way in. scTallyOpen(today) is true, so it never
+     did: "Done today" drew on all seven cards, and pressing it on
+     Friday's card from a Tuesday marked TODAY done — for Friday's
+     block, which then rendered back through the same fallback and
+     looked entirely correct. A round trip through one wrong answer is
+     self-consistent, which is why nothing showed.
+
+     Rendering keeps the fallback: a block's id is per weekday, so a
+     card reading today's log finds nothing of its own in it. Writing
+     has to be able to refuse. */
+  function scDowDate(dow) {
+    for (var i = 0; i <= BACKFILL; i++) {
+      var d = new Date();
+      d.setDate(d.getDate() - i);
+      if (d.getDay() === dow) return scDay(d);
+    }
+    return null;
+  }
+
   function scTickLoad() {
     var read = function (k) {
       try {
@@ -2340,12 +2381,84 @@
     };
     tickLog = read(TICK_KEY);
     blockLog = read(LOG_KEY);
+    offLog = read(OFF_KEY);
+    /* Pruned to the window anything draws it in, and FORWARD without
+       limit: a day off is the one record here you write before it
+       happens, so a cutoff on both sides would quietly drop the
+       holiday you booked in June. */
+    var floor = scDayBack(HIST);
+    Object.keys(offLog).forEach(function (k) {
+      if (k < floor) delete offLog[k];
+    });
   }
   function scTickSave() {
     try {
       localStorage.setItem(TICK_KEY, JSON.stringify(tickLog));
       localStorage.setItem(LOG_KEY, JSON.stringify(blockLog));
+      localStorage.setItem(OFF_KEY, JSON.stringify(offLog));
     } catch (e) {}
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     A DAY OFF
+
+     The week is a template and that is what makes it a shape — every
+     Monday the same. What it could not say is that THIS Monday is not:
+     a holiday, a shift swapped, an injury. The only tool was deleting
+     the block, which changes every Monday there will ever be.
+
+     A block off on one date. Not a second schedule and not a range —
+     one fact about one day, the same grain as a tick, which is why it
+     is keyed and written exactly like blockLog.
+
+     AND IT IS WRITTEN FORWARD. Every other record here is something
+     that happened; this is the one you set before the day. So it takes
+     the backfill window behind (correcting the last two days) and no
+     limit at all ahead — but never further back than that, because a
+     day off skips a day in the streak, and a record you can edit six
+     months later is a leaderboard nobody can trust.
+     ══════════════════════════════════════════════════════════ */
+  function scOff(day, id) {
+    var d = offLog[day];
+    return !!(d && d[id]);
+  }
+  function scOffOpen(day) { return scTallyOpen(day) || day > scDay(); }
+
+  function scSetOff(day, block, dow, val) {
+    if (!scOffOpen(day)) return false;
+    if (!offLog[day]) offLog[day] = {};
+    if (val) offLog[day][block.id] = 1; else delete offLog[day][block.id];
+    if (!Object.keys(offLog[day]).length) delete offLog[day];
+    /* Done and off are opposite claims about the same block on the same
+       day, so setting one clears the other. Both standing would leave a
+       row that is struck out and ticked, and a record that says the
+       block both happened and was not on. */
+    if (val) scSetBlockDone(day, block, dow, false);
+    scTickSave();
+    return true;
+  }
+
+  /* ── A DAY IT WAS NEVER ON IS NOT A DAY YOU MISSED IT ──
+     The strip read tickLog and nothing else, so a Train row on a
+     schedule that trains three days a week drew four misses every week
+     for ever — and a record that counts days you were never going to
+     train is not a record of showing up, it is a picture of the number
+     four.
+
+     Only the two items FED BY BLOCKS can fail to apply. Steps, Fuel and
+     Water are numbers you log, and nothing about the week excuses one.
+
+     Judged against TODAY'S schedule for every day in the window,
+     because the week is a template and this app keeps no history of it.
+     The alternative is storing a copy of the shape every time it
+     changes, which is a second record of the thing the first record IS
+     — and it would be wrong in the other direction the moment anybody
+     restored a backup. */
+  function scApplied(item, day) {
+    if (!item || !item.from) return true;
+    var bs = scBlocksFor(item, new Date(day + 'T12:00:00').getDay());
+    if (!bs.length) return false;
+    return bs.some(function (b) { return !scOff(day, b.id); });
   }
 
   function scTicked(day, id) {
@@ -2542,11 +2655,16 @@
   var HIST = 182;                    /* 26 weeks, and the strip fits it */
 
   function scHist(id) {
+    var item = TALLY.filter(function (x) { return x.id === id; })[0];
     var out = [], d = new Date();
     d.setDate(d.getDate() - (HIST - 1));
     for (var i = 0; i < HIST; i++) {
-      var rec = tickLog[scDay(d)], v = rec && rec[id];
-      out.push({ on: !!v, raw: parseFloat(v) || 0, dow: d.getDay() });
+      var day = scDay(d), rec = tickLog[day], v = rec && rec[id];
+      /* A tick always wins. Train on a Sunday it is not scheduled is
+         still a day you trained, and drawing it as "did not apply"
+         would throw away the one thing the record is for. */
+      out.push({ on: !!v, off: !v && !scApplied(item, day),
+                 raw: parseFloat(v) || 0, dow: d.getDay() });
       d.setDate(d.getDate() + 1);
     }
     return out;
@@ -2577,10 +2695,25 @@
       + '" rx="' + (w * .3).toFixed(2) + '" fill="' + fill + '"/>';
   }
 
+  /* ── THREE STATES, AND THE THIRD IS A SIZE ──
+     Kept is the accent, missed is the flat neutral, and a day the thing
+     was never on is the SAME neutral drawn small. Colour is not
+     available for it: the rule on this screen is that a colour never
+     says whether, and a third hue would be inventing a judgement for
+     the one state that is not one. Size costs no contrast at all and
+     reads instantly — a dot beside a square.
+
+     Drawn rather than left out. A hole keeps the grid's geometry but
+     scatters gaps through it that read as a rendering fault, and this
+     record's whole job is that the days it does not light are still
+     visible. */
+  var OFF_W = .45;
+
   function scStripSvg(days) {
     var cell = 3.6, g = scCalGeom(days, cell, 1.1), out = '';
     days.forEach(function (d, i) {
-      out += scCalRect(g, i, cell, cell, d.on ? 'var(--red)' : 'var(--tick-off)');
+      out += scCalRect(g, i, cell, d.off ? cell * OFF_W : cell,
+        d.on ? 'var(--red)' : 'var(--tick-off)');
     });
     return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" aria-hidden="true">'
       + out + '</svg>';
@@ -2629,7 +2762,11 @@
     var off = '', lit = '', lay = [], defs = '';
     GLOW.forEach(function () { lay.push(''); });
     days.forEach(function (d, i) {
-      if (!d.on) { off += scCalRect(g, i, cell, cell, 'var(--tick-off)'); return; }
+      if (!d.on) {
+        off += scCalRect(g, i, cell, d.off ? cell * OFF_W : cell,
+          'var(--tick-off)');
+        return;
+      }
       GLOW.forEach(function (L, n) {
         lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--red)');
       });
@@ -2677,17 +2814,34 @@
     peak: '<path d="M2.6 19.4l6.6-9.4 4 4.6 3.6-6 4.6 10.8z"/>'
   };
 
+  /* ── A DAY THAT DID NOT APPLY IS SKIPPED, NOT COUNTED EITHER WAY ──
+     It neither breaks a streak nor extends one, and it is out of the
+     denominator. Counting it as a miss was the old behaviour and it
+     made every figure here a report on the schedule rather than on
+     you: three sessions a week read as 3.0 days a week out of seven
+     and a longest streak that could never pass three. */
   function scHistStats(item, d) {
     var kept = d.filter(function (x) { return x.on; });
+    var live = d.filter(function (x) { return !x.off; });
     var best = 0, run = 0, now = 0, i;
-    for (i = 0; i < d.length; i++) { run = d[i].on ? run + 1 : 0; if (run > best) best = run; }
-    for (i = d.length - 1; i >= 0 && d[i].on; i--) now++;
+    for (i = 0; i < d.length; i++) {
+      if (d[i].off) continue;
+      run = d[i].on ? run + 1 : 0;
+      if (run > best) best = run;
+    }
+    for (i = d.length - 1; i >= 0; i--) {
+      if (d[i].off) continue;
+      if (!d[i].on) break;
+      now++;
+    }
 
     if (item.k === 'do') {
-      return { kept: kept.length, rows: [
+      return { kept: kept.length, live: live.length, rows: [
         { v: String(best), cap: 'longest streak', ic: 'streak' },
         { v: String(now), cap: now === 1 ? 'day on now' : 'days on now', ic: 'now' },
-        { v: (kept.length / (d.length / 7)).toFixed(1), cap: 'days a week', ic: 'week' }
+        /* Out of the days it was ON, not out of seven. */
+        { v: (live.length ? kept.length / (live.length / 7) : 0).toFixed(1),
+          cap: 'days a week', ic: 'week' }
       ] };
     }
     var dp = item.dp || 0;
@@ -2698,7 +2852,7 @@
     var sum = 0, top = 0;
     kept.forEach(function (x) { sum += x.raw; if (x.raw > top) top = x.raw; });
     var unit = (item.unit || '').trim();
-    return { kept: kept.length, unit: unit, rows: [
+    return { kept: kept.length, live: live.length, unit: unit, rows: [
       { v: fmt(kept.length ? sum / kept.length : 0), cap: 'average a day',
         ic: 'avg', unit: 1 },
       { v: fmt(top), cap: item.neu ? 'your highest' : 'your best',
@@ -2741,8 +2895,10 @@
       stats.appendChild(cell);
     });
     p.appendChild(stats);
+    /* Out of the days it was ON. "121 of 182" on a three-day-a-week
+       session is a fraction of a number nobody was ever aiming at. */
     p.appendChild(scEl('p', 'ty-hint',
-      st.kept + ' of ' + HIST + ' days · tap anywhere to close'));
+      st.kept + ' of ' + st.live + ' days · tap anywhere to close'));
 
     histBack = document.activeElement;
     $('scTyVeil').hidden = false;
@@ -5854,32 +6010,50 @@
         scClose();
         scCommit(isNew ? 'Added' : 'Saved');
       }));
-      /* ── the other direction ──
-         The tally ticks Train and the week agrees. This is the same
-         edge walked the other way: finish the block here and the item
-         ticks. It lives in the editor rather than on the row because
-         the row IS a button and a button inside a button is invalid —
-         the same trap the folding panels have a rule about.
+      /* ── THIS DAY, AS AGAINST EVERY OTHER ONE LIKE IT ──
+         Everything above edits the block for every week there will
+         ever be. Everything here is about ONE date: whether it
+         happened, whether it was on at all, and what it was.
 
-         EVERY BLOCK NOW, not only the three that feed one of the five.
-         The restriction was written when the measure filling solid was
-         the only mark a done block had, and the measure existed to
-         agree with the tally \u2014 so a "done" on Trading really was a
-         state nothing on the screen would draw. The row draws a tick
-         for ANY done block now, so there is no longer a reason to
-         refuse it for Trading, Work or Wake.
-
-         The day still has to be open for backfill. That rule is about
-         not filling in a fortnight on a Sunday night, which has nothing
-         to do with which item a block feeds, and it stays. */
+         Two resolvers, because the two records reach different days.
+         Done is filed against the last date this weekday was, inside
+         the backfill window — you cannot mark something done before it
+         happens. Off is a fact about the card you are looking at, so
+         it uses the deck's own Monday-first week and reaches forward
+         without limit. Reading Off through the backfill resolver would
+         put Friday's day off on today's card, which is the objectives'
+         own bug written a second time. */
       if (!isNew) {
-        var bDay = scDay(scDateOfDow(day));
-        if (scTallyOpen(bDay)) {
+        var bDay = scDowDate(day);
+        var oDay = scObjDay(day);
+        var canDone = !!bDay && scTallyOpen(bDay);
+        var canOff = scOffOpen(oDay);
+        if (canDone || canOff) body.appendChild(scEl('span', 'label', 'This day'));
+
+        /* ── the other direction ──
+           The tally ticks Train and the week agrees. This is the same
+           edge walked the other way: finish the block here and the item
+           ticks. It lives in the editor rather than on the row because
+           the row IS a button and a button inside a button is invalid —
+           the same trap the folding panels have a rule about.
+
+           EVERY BLOCK NOW, not only the three that feed one of the five.
+           The restriction was written when the measure filling solid was
+           the only mark a done block had, and the measure existed to
+           agree with the tally — so a "done" on Trading really was a
+           state nothing on the screen would draw. The row draws a tick
+           for ANY done block now, so there is no longer a reason to
+           refuse it for Trading, Work or Wake.
+
+           The day still has to be open for backfill. That rule is about
+           not filling in a fortnight on a Sunday night, which has
+           nothing to do with which item a block feeds, and it stays. */
+        if (canDone) {
           var done = !!(blockLog[bDay] && blockLog[bDay][item.id]);
           var fed = scItemsFor(item.n).map(function (x) { return x.n; }).join(' and ');
           /* A TOGGLE, not a third action. As an scBtn it carried
              flex:1, which does nothing outside a flex parent, so it sat
-             156px wide above two 172px buttons \u2014 visibly failing to
+             156px wide above two 172px buttons — visibly failing to
              line up with the row it looked like it belonged to. */
           var tog = scEl('button', 'mark' + (done ? ' is-on' : ''));
           tog.type = 'button';
@@ -5900,33 +6074,62 @@
             scToast(done ? 'Unmarked'
               : fed ? 'Counted toward ' + fed : 'Marked done', false);
           });
-          body.appendChild(scEl('span', 'label', 'Today'));
           body.appendChild(tog);
+        }
 
-          /* ── the deck's OTHER door, and it is the one that matters ──
-             The row opens it on a long press, which reaches neither a
-             keyboard nor a screen reader — the same split the tick
-             itself has. This is where the feature actually lives; the
-             press is a shortcut from the row it is about.
+        /* ── AND THE OPPOSITE CLAIM, DIRECTLY UNDER IT ──
+           Done says the block happened; off says it was never on. Same
+           grain — one block, one date — so it is the same control
+           twice, under the same heading, and setting either clears the
+           other. It went in below the workout picker once and read as
+           a second thing to train, because the heading above it said
+           TRAINED. A control's heading is part of what it says. */
+        if (canOff) {
+          var isOff = scOff(oDay, item.id);
+          var otog = scEl('button', 'mark mark-off' + (isOff ? ' is-on' : ''));
+          otog.type = 'button';
+          otog.appendChild(document.createTextNode('Off this day'));
+          /* A BAR, NOT A TICK. Every tick in this app is the accent and
+             they all say one thing — this happened. A day off is the
+             only state on this screen that is not a claim about doing
+             anything, so it takes neither the mark nor the colour. */
+          otog.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M5 12h14"/></svg>');
+          otog.setAttribute('aria-pressed', isOff ? 'true' : 'false');
+          otog.addEventListener('click', function () {
+            scSetOff(oDay, item, day, !isOff);
+            if (!isOff) scTrainSet(oDay, item.id, '');
+            scClose();
+            if (view === 'tally') scPaintTally(); else scRender();
+            scToast(isOff ? 'Back on' : 'Off for the day', false);
+          });
+          body.appendChild(otog);
+        }
 
-             Only on a block the app already calls training, and only
-             on a day open for backfill, because both of those are
-             conditions on the tick this record hangs off. */
-          if (scIsTrain(item)) {
-            var gr = scTrainOf(bDay, item.id);
-            var got = gr && scWorkName(gr.k);
-            var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
-            wob.type = 'button';
-            wob.appendChild(document.createTextNode(got || 'Pick a workout'));
-            wob.insertAdjacentHTML('beforeend',
-              '<svg viewBox="0 0 24 24" aria-hidden="true">'
-              + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
-            wob.addEventListener('click', function () {
-              scTrainAsk(item, day, bDay);
-            });
-            body.appendChild(scEl('span', 'label', 'Trained'));
-            body.appendChild(wob);
-          }
+        /* ── the deck's OTHER door, and it is the one that matters ──
+           The row opens it on a long press, which reaches neither a
+           keyboard nor a screen reader — the same split the tick
+           itself has. This is where the feature actually lives; the
+           press is a shortcut from the row it is about.
+
+           Only on a block the app already calls training, and only
+           on a day open for backfill, because both of those are
+           conditions on the tick this record hangs off. */
+        if (canDone && scIsTrain(item)) {
+          var gr = scTrainOf(bDay, item.id);
+          var got = gr && scWorkName(gr.k);
+          var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
+          wob.type = 'button';
+          wob.appendChild(document.createTextNode(got || 'Pick a workout'));
+          wob.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');
+          wob.addEventListener('click', function () {
+            scTrainAsk(item, day, bDay);
+          });
+          body.appendChild(scEl('span', 'label', 'Trained'));
+          body.appendChild(wob);
         }
       }
 
