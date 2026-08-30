@@ -109,6 +109,24 @@ places — it locks once the day has a trade on it, and it colours both
 the pad and its log by what that day made. It is a trading instrument
 that happens to ask about you, so it stays with the thing it reads.
 
+**Sleep is the sixth of the five.** Every other item on that screen is
+something you went and did; this is what happened while you were not
+deciding anything, and it is the number that explains the other five.
+It is not `neu` — Fuel is the one figure there where more is not
+better, and a long night is a good night. Six rows fit a 390x844 phone
+with 37px to spare, measured before it was written.
+
+**And a watch was going to fill it, which is why it went in.** Two
+routes were built and both came back out: a fragment a Shortcut opens
+the app with, and an inbox on the worker a Shortcut posts to in the
+background. Neither was wrong and both worked — the fragment costs an
+app-switch a morning because opening a URL is the only channel a static
+page has, and the inbox costs four numbers and a date sitting on the
+worker until the app collects them. What killed them is that the setup
+is a Shortcut somebody has to build by hand, twice, and a feature whose
+first step is twenty minutes in an editor is a feature nobody turns on.
+The row stays because the row was worth having on its own.
+
 **The habit list is code, not data.** Only the days are saved. It used
 to be written alongside them and read back in preference to the file,
 so any browser that had ever ticked a box kept whatever the list was
@@ -1215,113 +1233,6 @@ coverage.
 
 **`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
 fixed here. Its twelve standing faults are all RADIUS in `jade/`.
-
-## What the watch knows
-
-A Garmin cannot talk to a web page. It syncs to Garmin's own app, and
-their Health API is a partner programme with a secret that would have
-to live on a server — so **the automatic version of this is somebody
-else's machine holding how long you slept**, which is the one thing
-this app is built not to do. It would also be a public repo with a
-client secret in it.
-
-**There is another way in and it needs nothing at all.** Garmin
-Connect writes steps and sleep into the phone's own health store; a
-Shortcut reads that store and opens this app with the numbers in the
-FRAGMENT. Nothing leaves the device, there is no key to keep, no
-account to approve and no server to trust — the same door an
-invitation comes through, carrying readings instead of a code.
-
-    #steps=8241&sleep=7.4&water=2.1&fuel=2260&on=2026-08-30
-
-**NAMES, NOT IDS.** The record's keys are single letters, and this
-fragment is the one part of the app somebody assembles by hand in an
-editor with no autocomplete. `p` for steps is a private detail leaking
-into the only place it would cost anything.
-
-**IT GOES THROUGH `scSetTick` LIKE A NUMBER YOU TYPED**, so the
-backfill window applies — and that matters more here than anywhere
-else, because a watch will happily offer six months of history and a
-Shortcut looping over it would fill in a year of a record whose whole
-worth is that you cannot.
-
-**A reading out of range is DROPPED, not clamped.** A Shortcut that
-hands over milliseconds of sleep instead of hours writes 27,000,000
-into the record, and every figure the panel draws for the rest of the
-year is that one day. A clamped 24 is a lie that looks like a reading;
-a missing day is what actually happened.
-
-**AND IT IS READ ON `hashchange`, NOT ONLY AT BOOT — that half is the
-feature.** Opening a URL that differs only by its fragment does not
-reload the page: the browser changes the hash and fires `hashchange`,
-and on a phone the app it is opening is usually still running from this
-morning. A boot-only read works once a day at most, on the days the app
-happened to have been evicted, which is the shape of a feature that
-looks like it works. The suite drove a fragment-only navigation and
-measured nothing filed, which is how this was found.
-
-**The fragment is stripped either way**, for the invitation's reason
-twice over: spent, it adds nothing on a reload — and left in the bar,
-every reload re-files a morning that is now days old, silently, for as
-long as the backfill window allows.
-
-**It does not move the view.** An invitation is somebody asking you to
-do something and takes you to the screen that does it; a watch handing
-over last night is not a request, and being thrown onto the tally every
-morning because a Shortcut ran is the app deciding what you came for.
-
-**Sleep is the sixth of the five, and a watch is why.** Every other
-item there is something you went and did; this is what happened while
-you were not deciding anything. It never earned a row before because
-nobody types how long they slept. It is not `neu` — Fuel is the one
-figure on that screen where more is not better, and a long night is a
-good night. Six rows fit a 390x844 phone with 37px to spare, measured
-before it was written.
-
-### And the automatic one, which needs a background request
-
-The fragment costs one app-switch a morning, because opening a URL is
-the only channel a static page has and it brings the app to the front.
-**Shortcuts can make an HTTP request without opening anything** — *Get
-Contents of URL* runs in the background — so the automatic version is a
-POST to the worker and a collection the next time Today is opened.
-
-**It is an INBOX, not a record.** `hl:CODE` holds a few days of
-readings under the record's own window, and the app files what it finds
-through `scSetTick` like a number you typed — so the backfill rule
-applies and nothing up there can reach further into the past than your
-thumb can.
-
-**The read does not clear it.** A destructive read loses the morning if
-the app is opened and closed before it files, and writing the same
-value twice is a no-op anyway.
-
-**Reading needs the KEY, which `/v1/rec` does not.** That endpoint is
-the leaderboard and the code is the thing you share; how long you slept
-is not.
-
-**The ceiling is checked at BOTH ends** and that is not belt and
-braces: a bad reading stored is a bad reading served to every future
-open, and the client that filters it is not the client that put it in.
-
-**ARRIVING COLLECTS, DRAWING ONLY DRAWS** — the friends board's own
-rule, for the same reason: a paint that fetched would recurse. And
-nothing is fetched at all while the watch is off, so the promise that
-this app makes no request until you turn a thing on is unchanged; it is
-asserted from both sides, because watching readings arrive passes on
-code that collects regardless.
-
-**Why this and not Garmin's own Health API.** Theirs is a partner
-programme whose secret would have to live on the worker — which would
-mean the worker holding a credential that reads the whole account,
-rather than four numbers and a date the phone chose to send. The phone
-does the reading either way; this way it also decides what leaves.
-
-**The settings row hands over one string and sets nothing.** There is
-nothing to turn on — the app reads the fragment on every open whether
-or not anybody has been there. What it gives you is the address with
-THIS copy's own origin in it, which is the only part of the setup
-nobody can check by reading it.
 
 ## An invitation is a link, and the link carries the server
 
