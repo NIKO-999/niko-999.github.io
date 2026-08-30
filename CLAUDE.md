@@ -1944,25 +1944,97 @@ the deal, it was dealing when you had not changed hands.
 
 **The card put down is KEPT, not rebuilt.** It carries the workout you
 were looking at — its name, its colour — and the whole gesture is that
-THAT card is the one going away. It is appended LAST so it is on top:
-these are absolutely positioned siblings with no z-index, so source
-order is the stacking order, and a card being put down that paints
-under the one it is uncovering has nothing to uncover. It lands on
-b2's own resting position rather than a number chosen to look about
-right.
+THAT card is the one going away. A fresh element would be a different
+card pretending.
 
 **`textContent = ''` detaches it, and that is what makes it work**: an
 element removed and re-inserted starts its animation on insertion, so
-the recede begins when the new hand is laid out rather than whenever
+the pass begins when the new hand is laid out rather than whenever
 the class happened to land. It is swept on `animationend` AND on a
 timer, because an animation that never runs — a background tab —
 would otherwise leave a dead card on the pile for the next press to
 stack on.
 
-**The fade is front-loaded and the travel is not.** A linear fade over
-the same 300ms left both cards legible through the middle of it — two
-names and two descriptions at once, which reads as a rendering fault
-rather than as one card passing behind another.
+### The step inside a group is a HAND-OFF, and three things were wrong
+
+It receded onto b2's resting position — down and right, onto the fan —
+fading to nothing while painted ON TOP of the card arriving. All three
+were reported and all three were separate faults: **300ms is over
+before you have read it**; **the fade put two names and two swoops on
+screen at once**, which is a card going THROUGH another card rather
+than past it; and **a card that ends at zero opacity has not gone
+anywhere** — it has vanished, which is exactly what it looked like.
+
+**Off the LEFT, in from the RIGHT, 600ms, and nothing fades.** There
+is no opacity in either keyframe, deliberately, and putting one back
+is how this reverts. The sheet is a scroll container, so its own left
+edge cuts the leaving card and nothing has to fade for it to be gone.
+
+**The arriving card starts a CARD'S WIDTH off to the right, not a
+nudge from behind the fan.** Tried at 64px — just past b2 — the two
+share almost the whole window for the whole pass, so the one leaving
+is covered before it has gone anywhere and you never see it leave.
+And **one curve for both, at one duration**: lagging either by even a
+tenth opens a gap of blank fan across the middle that reads as the
+deck emptying and refilling. Five candidates were rendered over the
+real sheet at five paused moments each, which is the only way to see
+either of those.
+
+**The travel is a PERCENTAGE.** Each card clears its own width
+whatever the phone is, which is the only figure that means "off the
+side" on a screen this app does not know the width of.
+
+**The leaving card goes in BEFORE the arriving one now.** Source order
+is the stacking order, so that is what puts it underneath — and with
+nothing fading any more, that order is the only thing keeping the pair
+from being double-exposed while they cross.
+
+**`.sheet` had to say `overflow-x: hidden` out loud.** Its overflow-x
+was `visible`, which computes to `auto` beside a scrolling overflow-y
+— so the 368px the arriving card puts outside the sheet was not merely
+clipped, it was PANNABLE for the 600ms the pass runs.
+
+**And a check that waited 420ms was measuring the animation.** The
+card's own contrast scan sampled its figures 420ms after a chip press,
+comfortably past the old 300 and a third of the way into the new 600:
+every sample came back off a card still sliding in, reading 1.57:1 on
+a colour nothing had touched. It waits out the animation now rather
+than a number of milliseconds — the same lesson as the check that only
+passed at certain hours, in the other units.
+
+### The card has an edge
+
+It was a slab with a half-pixel ring of its own hue round it, and
+against a page that is nearly the same black that ring is the only
+thing there: the card read as a rectangle that happened to be darker.
+A **rim** now, lit from the head — bright along the top, gone by the
+middle, back faintly along the foot, which is what a sheet of
+something glassy does under one light. It is the day card's foil trick
+at rest: a border-width mask with the middle excluded, rather than a
+`border`, because a border is one flat colour all the way round and
+that is the whole of what this is not.
+
+**On every `.wc`, so the two behind get it too.** They carry no words
+at all, so an edge is the only thing they have to say they are there
+with — and the hand-off above is the moment you look at them.
+
+**A rim is an edge; a BEVEL is a thickness.** A line of light just
+inside the head and a line of shadow just inside the foot go with it,
+and a thickness is the whole of what reads as three-dimensional. They
+are a token because `.wc.is-picked` replaces the shadow list outright
+to draw its accent ring, and a card you had chosen would otherwise be
+the one in the deck with a flat edge.
+
+**`z-index: 1`, or the rim is not on top of the card.** The swoop is
+`inset: 0` and later in the source, so it draws across the rim; the
+14% overlay grain lies over the lot, which is enough to make a 1px
+highlight granular.
+
+Measured on composited pixels as a RELATIONSHIP rather than a number
+of levels, so it survives a change to the card's own ground: the head
+against the middle is **9.5x with the rim and 1.1x without it**, and
+the foot is asserted darker than the head, because a rim of one flat
+colour all the way round is the border this replaced.
 
 **A swoop, not a wordmark, and not waves.** Three treatments: four
 contour waves, stretched to the card's width with the stroke stretched
@@ -2142,6 +2214,28 @@ each panel as a hairline box, and on a page that is nearly black a 1px
 border is the only thing there: the screen read as a wireframe of
 itself. A filled surface is an OBJECT; an outlined one is a diagram of
 where an object would go.
+
+**And the OPEN one is ringed in the accent.** It went to `--ink` in
+the pass that put every title and every filled control back to white,
+and that pass was about CHROME — a heading naming a section, a button
+you press. This ring is neither: it says which panel the calendar
+under it belongs to, and a calendar of the days you did that session
+is the record, which is the one thing the accent is for. A third of
+the accent rather than the whole of it, because a full-strength ring
+round a nearly-black surface is a box drawn on the page rather than an
+edge on the object.
+
+Measured as the ring's OWN contribution — the edge pixel less the
+panel's interior — because a third of the accent over a wash of
+`--ink` is nobody's colour. That difference is a grey with no spread
+across its channels when the ring is `--ink` and carries the accent's
+own spread when it is the accent: **0 against 62**. Held to the
+accent's strongest channel as well, so it means the same at every
+angle of the wheel rather than only where the default happens to sit.
+**And read off the screen rather than the declaration**: the computed
+box-shadow serialises as `color(srgb 0.78 0.98 0.26 / 0.34)` rather
+than an `rgba`, so a string check against `--red`'s own hex passes on
+nothing and fails on everything.
 
 **There is no weight on it and there will not be.** This app has never
 asked what you weigh, and a number you are asked for every morning is a
