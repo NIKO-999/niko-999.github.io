@@ -3116,9 +3116,18 @@ body {
    actually asked for — they are what makes it a deck, and they carry
    no information, so anything they do is decoration.
 
-   14px and 200ms, against the deal's 46px and 460ms: a quarter of the
-   distance and under half the time, so it reads as the same object
-   settling rather than as a second arrival.
+   26px and 260ms against the deal's 46px and 460ms — a bit over half
+   the distance and a bit over half the time, so it still reads as the
+   same object settling rather than as a second arrival.
+
+   IT WENT IN AT 14px AND 200ms AND NOBODY COULD SEE IT. Two things
+   were wrong and only one of them was the size. The curve was the
+   deal's own cubic-bezier(.22, 1, .36, 1), which is a hard ease-out:
+   it is four fifths done in the first third, so a 200ms animation is
+   really a 70ms one with a long tail nothing moves during. The curve
+   here is gentler, which spends the time on travel you can actually
+   watch. A duration is not a length of motion — the curve decides how
+   much of it you see.
 
    `translate` and `opacity`, never `transform`: the two behind are
    positioned by a resting `transform`, and a keyframe naming transform
@@ -3127,15 +3136,21 @@ body {
    uses the independent property anyway so the next hand it is pointed
    at survives. */
 @keyframes wcTurn {
-  from { translate: 0 14px; opacity: 0; }
+  from { translate: 0 26px; opacity: 0; }
   to   { translate: 0 0;    opacity: 1; }
 }
 .wc-deck.is-turning .wc.is-front {
-  animation: wcTurn .2s cubic-bezier(.22, 1, .36, 1) both;
+  animation: wcTurn .26s cubic-bezier(.2, .7, .3, 1) both;
 }
-@media (prefers-reduced-motion: reduce) {
-  .wc-deck.is-turning .wc.is-front { animation: none; }
-}
+/* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──
+   This went in behind a prefers-reduced-motion rule while the deal —
+   46px of travel with a rotate and a scale on three cards — has never
+   had one. That is exactly backwards: it gated the gentler of the two
+   and left the stronger one running, so a phone with Reduce Motion on
+   saw the deal every time and this never, which is indistinguishable
+   from it not shipping. The pair are one gesture at two sizes and they
+   answer that query together or not at all; today neither does, which
+   is the decision the deck made on the day it was asked to fly in. */
 
 .wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 

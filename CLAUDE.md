@@ -779,6 +779,24 @@ three times as wide as it is tall. A non-square leaves the ends unlit
 for part of every turn, which reads as a fault rather than a
 highlight; it is the card's own lesson at a different aspect ratio.
 
+**THE DECK'S TWO ENTRANCES ANSWER `prefers-reduced-motion` TOGETHER,
+OR NEITHER.** The second level's lift went in behind that query while
+the deal — 46px of travel with a rotate and a scale, on three cards —
+has never had one. That is exactly backwards: it gated the gentler of
+the two and left the stronger one running, so a phone with Reduce
+Motion on saw the deal every time and the lift never, which is
+indistinguishable from the lift not shipping. Today neither answers
+it, which is the decision the deck made on the day it was asked to fly
+in.
+
+**And a duration is not a length of motion — the curve decides how
+much of it you see.** The lift went in at 14px over 200ms on the
+deal's own `cubic-bezier(.22, 1, .36, 1)`, which is four fifths done
+in the first third: a 200ms animation that is really a 70ms one with a
+long tail nothing moves during. It was reported as invisible. 26px
+over 260ms on a gentler curve spends the time on travel you can watch,
+and is still a bit over half the deal on both counts.
+
 **And it stops when its face turns away.** That check was written
 first as "paused on every card that is not open", which found nothing
 and failed for it — the control is built for the open card alone, so a
@@ -2078,6 +2096,31 @@ sixth smuggled in for a sheet is that list becoming a suggestion, which
 `tests/schedule.js` catches. Nor can it be a shadow, because the page
 is nearly black and a dark shadow over it separates nothing. One pixel
 of `--hair`.
+
+## Every deploy landed one open late
+
+`app.css` and `app.js` are requested with a `?v=` fingerprint of their
+own contents, so a new build is a new URL and the service worker can
+never serve one stale. **The only thing that knows the new
+fingerprints is `index.html`** — and it was served cache-first like
+everything else, so it was itself a build behind. You opened the app
+after a deploy, got yesterday's markup pointing at yesterday's assets,
+and the fresh copy went into the cache for next time. The comment on
+that handler said "never a version behind for longer than one open",
+which is a fair description of a bug.
+
+It surfaced as **"I can't notice a difference"** about a change that
+had shipped and was working — the worst shape a caching bug has,
+because everything downstream of it looks like the change was too
+subtle.
+
+The document goes to the network first and falls back to the cache: a
+few kilobytes on a connection you have, and the cached copy on one you
+do not. Offline is unchanged. `'./'` and `'./index.html'` are one page
+and the cache holds both, so the offline fallback tries the request
+and then the shell's own entry — without that, a navigation to the
+folder does not match the file and an offline open of the bookmark
+fails while an open of the file works.
 
 ## The themes are gone and there is a wheel
 
