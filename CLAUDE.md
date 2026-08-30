@@ -1603,6 +1603,15 @@ the bottom and the right, and a fan shows a corner of each. The
 entrance slid straight up once and read as a panel appearing, which is
 what every other sheet in this app already does.
 
+**AND THE TWO BEHIND CARRY NOTHING.** They were the next two workouts
+in the group, drawn in full and clipped to the corner showing — so
+pressing a chip changed what was BEHIND the card as well as the card
+itself, the deck read as moving through the whole list, and mid-deal
+another session's name and figures slid under the one you were
+reading. A card behind a card has no information to carry: what it has
+to say is *there are more of these*, and an empty slab at the right
+angle says that and nothing else.
+
 **ONCE, THOUGH, AND ONLY ON THE WAY IN.** `draw()` rebuilds the deck on
 every press — of a chip, of an effort, of a kind — and the cards are
 new elements each time, so with the animation on `.wc` the same hand

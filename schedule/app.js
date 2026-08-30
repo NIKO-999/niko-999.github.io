@@ -4914,10 +4914,28 @@
     return !!item && scIconFor(item.n) === 'train';
   }
 
+  /* ── THE TWO BEHIND ARE BLANK ──
+     They used to be the next two workouts in the group, drawn in full
+     and clipped to the corner showing. Pressing a chip then changed
+     what was BEHIND the card as well as the card itself, so the deck
+     read as moving through the whole list — and mid-deal you could see
+     another session's name and figures sliding under the one you were
+     looking at, which reads as a glitch because there is no reason for
+     PPL's words to be behind All exercises.
+
+     A card behind a card carries no information. What it has to say is
+     "there are more of these", and an empty slab of the right ground
+     at the right angle says exactly that and nothing else. */
+  function scTrainBack(cls) {
+    var card = scEl('div', 'wc ' + cls);
+    card.setAttribute('aria-hidden', 'true');
+    return card;
+  }
+
   /* ── the card ──
-     A <button> at the front and a plain <div> behind, because a stack
-     of focusable cards is two tab stops that do nothing: the pair
-     behind show 15px and 28px of an edge and cannot be pressed. */
+     A <button>, and the only one in the deck: a stack of focusable
+     cards is two tab stops that do nothing, and the pair behind show
+     an edge each and cannot be pressed. */
   function scTrainCard(w, cls, pick, ef) {
     var card = scEl(pick ? 'button' : 'div', 'wc' + (cls ? ' ' + cls : ''));
     /* Set on the element rather than as a class per workout: these are
@@ -5084,8 +5102,8 @@
         dealt = true;
 
         deck.textContent = '';
-        deck.appendChild(scTrainCard(all[(at + 2) % all.length], 'b2'));
-        deck.appendChild(scTrainCard(all[(at + 1) % all.length], 'b1'));
+        deck.appendChild(scTrainBack('b2'));
+        deck.appendChild(scTrainBack('b1'));
         deck.appendChild(scTrainCard(w, 'is-front', press(w), ef));
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──

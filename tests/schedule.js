@@ -4557,9 +4557,17 @@ const SAID = [
       && one.chips.join('|') === 'All exercises|PPL|Run|Recovery', one);
 
     /* A DECK IS THREE CARDS AND ONE OF THEM IS PRESSABLE. The pair
-       behind show 15px and 28px of an edge; focusable, they are two
-       tab stops that do nothing and two more things a screen reader
-       has to walk past. */
+       behind show an edge each; focusable, they are two tab stops that
+       do nothing and two more things a screen reader has to walk past.
+
+       AND THEY ARE EMPTY. They used to be the next two workouts in the
+       group, drawn in full and clipped to the corner showing — so
+       pressing a chip changed what was BEHIND the card as well as the
+       card itself, and mid-deal another session's name and figures
+       slid under the one you were reading. A card behind a card
+       carries no information: what it has to say is "there are more of
+       these", and a slab at the right angle says that and nothing
+       else. */
     const shape = await page.evaluate(() => {
       const all = [...document.querySelectorAll('.wc')];
       const front = document.querySelector('.wc.is-front');
@@ -4568,11 +4576,15 @@ const SAID = [
       return { n: all.length,
         tags: all.map((c) => c.tagName),
         hidden: all.filter((c) => c.getAttribute('aria-hidden') === 'true').length,
-        onTop: front.contains(hit) };
+        onTop: front.contains(hit),
+        behind: all.filter((c) => c !== front)
+          .map((c) => c.childNodes.length + ':' + c.textContent.trim().length) };
     });
     ok('...as a stack of three, one of them a button, the front one on top',
       shape.n === 3 && shape.tags.filter((t) => t === 'BUTTON').length === 1
       && shape.hidden === 2 && shape.onTop, shape);
+    ok('...and the two behind carry nothing at all',
+      shape.behind.join('|') === '0:0|0:0', shape.behind);
 
     /* ── THE DEAL ──
        All three fly in, and the keyframes name `translate` and `scale`

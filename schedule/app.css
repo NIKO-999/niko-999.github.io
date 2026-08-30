@@ -2724,11 +2724,18 @@ body {
   mix-blend-mode: overlay;
 }
 
-/* ── THE TWO BEHIND, FANNED ──
+/* ── THE TWO BEHIND, FANNED AND EMPTY ──
    Offset AND turned, three degrees apart, so the stack reads as a hand
    of cards rather than as one card with two shadows under it. Square,
    the pair only showed along the bottom and the right — a fan shows a
    corner of each, which is what says there are more of these.
+
+   They carry NOTHING. They used to be the next two workouts in the
+   group, so pressing a chip changed what was behind the card as well
+   as the card itself and the deck read as moving through the list —
+   with another session's words visible under the one you were reading.
+   A card behind a card has no information to carry: an empty slab at
+   the right angle says "there are more of these" and nothing else.
 
    Two steps up from the front card's own ground rather than an alpha:
    an opacity would let the page through and make the pair a different
