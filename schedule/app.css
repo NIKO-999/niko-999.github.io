@@ -2700,10 +2700,6 @@ body {
               0 1px 2px rgba(0, 0, 0, .55),
               0 16px 38px -10px rgba(0, 0, 0, .72);
 
-  /* The deal. Folded into this rule rather than written as a second
-     `.wc` two hundred lines down — see the keyframes below for why the
-     properties are `translate`/`rotate`/`scale` and never `transform`. */
-  animation: wcDeal .46s cubic-bezier(.22, 1, .36, 1) both;
 }
 
 /* ── A TOOTH OVER THE WHOLE SURFACE ──
@@ -2751,16 +2747,10 @@ body {
 .wc.b1 {
   transform: translate(13px, 9px) rotate(3deg) scale(.965);
   background: #1b1b20;
-  /* The delay lives with the transform rather than in a second .wc.b1
-     further down: one selector spelled twice in one file is this
-     repo's most-repeated bug, and a dead rule that still cascades is
-     not dead. */
-  animation-delay: .07s;
 }
 .wc.b2 {
   transform: translate(25px, 18px) rotate(6deg) scale(.93);
   background: #26262c;
-  animation-delay: 0s;
 }
 
 /* ── THE SWOOP ──
@@ -2866,12 +2856,21 @@ body {
   color: rgba(255, 255, 255, .72);
 }
 
-/* ── THE DECK IS DEALT, ON AN ANGLE ──
+/* ── THE DECK IS DEALT ONCE, ON AN ANGLE ──
    All three come in from below and to the right, turned, and settle
    flat. The first cut slid them straight up with no rotation and it
    read as a panel appearing rather than as cards being put down —
    which is the whole difference, because a straight slide is what
    every sheet in this app already does and this one is a HAND.
+
+   ONCE, AND ONLY ON THE WAY IN. draw() rebuilds the deck on every
+   press, and the cards are new elements each time — so with the
+   animation on `.wc` it ran again for every chip, every effort and
+   every step into a group, and comparing four splits meant watching
+   the same hand dealt four times. What is worth having is the FOLD:
+   two cards showing a corner each, which is what says there are more
+   of these. That is a resting state, not a performance. The deck
+   carries `is-dealing` for its first draw and nothing after it.
 
    IT ANIMATES `translate`, `rotate` AND `scale`, NEVER `transform`.
    The two behind ARE a transform: b1 sits at translate(13px, 9px)
@@ -2890,7 +2889,13 @@ body {
 /* Back to front, 70ms apart. Dealt front-first the card you are being
    asked about arrives first and is then covered twice, which reads as
    the deck landing ON your answer. */
-.wc.is-front { animation-delay: .14s; }
+.wc-deck.is-dealing .wc { animation: wcDeal .46s cubic-bezier(.22, 1, .36, 1) both; }
+/* Back to front, 70ms apart. Dealt front-first the card you are being
+   asked about arrives first and is then covered twice, which reads as
+   the deck landing ON your answer. */
+.wc-deck.is-dealing .wc.b2 { animation-delay: 0s; }
+.wc-deck.is-dealing .wc.b1 { animation-delay: .07s; }
+.wc-deck.is-dealing .wc.is-front { animation-delay: .14s; }
 
 .wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 

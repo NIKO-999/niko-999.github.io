@@ -4613,6 +4613,29 @@ const SAID = [
       Math.abs(scale1 - .965) < .004 && Math.abs(turn1 - 3) < .3
       && m1[4] === 13 && m1[5] === 9, deal.b1.m);
 
+    /* ── AND IT DEALS ONCE, NOT ON EVERY PRESS ──
+       draw() rebuilds the deck on every chip, every effort and every
+       step into a group, and the cards are new elements each time — so
+       with the animation on `.wc` the same hand was dealt again for
+       each of them, and comparing four splits meant sitting through
+       four entrances. What is worth having is the FOLD, which is a
+       resting state.
+
+       Driven rather than inspected: press a chip and the new front
+       card must have no animation on it at all. */
+    await page.click('.wc-chips .wc-chip:nth-child(2)');
+    await page.waitForTimeout(220);
+    const again = await page.evaluate(() => {
+      const f = document.querySelector('.wc.is-front');
+      return { name: getComputedStyle(f).animationName,
+        running: f.getAnimations().length,
+        dealing: document.querySelector('.wc-deck').classList.contains('is-dealing') };
+    });
+    ok('...and it is dealt once, not again on every press',
+      again.name === 'none' && again.running === 0 && !again.dealing, again);
+    await page.click('.wc-chips .wc-chip:nth-child(1)');
+    await page.waitForTimeout(220);
+
     /* ── STEPPING IN ──
        A split is not a workout. The first press says which KIND of
        session, the second says which one — on the same three controls,

@@ -5006,6 +5006,15 @@
     var into = got ? scTrainGroup(got.gk) : null;
     var at = got ? into.of.indexOf(got) : 0;
     var ef = got ? rec.e : '';
+    /* ── THE DEAL HAPPENS ONCE, WHEN THE SHEET OPENS ──
+       draw() rebuilds the whole deck on every press — of a chip, of an
+       effort, of a kind — and the cards are new elements each time, so
+       the animation ran again on every one of them. Comparing four
+       splits meant watching the same hand dealt four times, which is a
+       control putting on a performance while you are trying to read
+       it. The fold is the thing worth having; the deal is worth
+       exactly one showing. */
+    var dealt = false;
 
     scSheet('What did you train?', function (body) {
       body.appendChild(scEl('p', 'wc-sub',
@@ -5068,6 +5077,12 @@
            IS the source order — written front-first the pair that make
            it a deck are painted over the card they are behind, and the
            whole thing reads as one card with a shadow. */
+        /* Set BEFORE the cards go in, because it is what they match on
+           — and cleared after the first draw, so every later one puts
+           the same fold up with no entrance. */
+        deck.classList.toggle('is-dealing', !dealt);
+        dealt = true;
+
         deck.textContent = '';
         deck.appendChild(scTrainCard(all[(at + 2) % all.length], 'b2'));
         deck.appendChild(scTrainCard(all[(at + 1) % all.length], 'b1'));

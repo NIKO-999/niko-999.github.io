@@ -1603,6 +1603,15 @@ the bottom and the right, and a fan shows a corner of each. The
 entrance slid straight up once and read as a panel appearing, which is
 what every other sheet in this app already does.
 
+**ONCE, THOUGH, AND ONLY ON THE WAY IN.** `draw()` rebuilds the deck on
+every press — of a chip, of an effort, of a kind — and the cards are
+new elements each time, so with the animation on `.wc` the same hand
+was dealt again for each of them: comparing four splits meant sitting
+through four entrances. What is worth having is the FOLD, which is a
+resting state rather than a performance. The deck carries `is-dealing`
+for its first draw and nothing after it, and the check presses a chip
+and requires the new front card to have no animation on it at all.
+
 **A swoop, not a wordmark, and not waves.** Three treatments: four
 contour waves, stretched to the card's width with the stroke stretched
 with them, which drew as black bars lying across it; then the card's
