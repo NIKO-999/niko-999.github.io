@@ -2408,9 +2408,12 @@ const SAID = [
   }));
   ok('the tally is a third view and it replaces the week',
     tal.up && tal.rail && tal.span, tal);
-  ok('five cards, and the list is not editable from anywhere',
-    tal.cards === 5, tal);
-  ok('and nothing is logged on a fresh day', tal.cap === '0 of 5 today', tal);
+  /* SIX, and it was five for a year. Sleep earns the sixth because a
+     watch can fill it, which is exactly what stopped it being worth a
+     row before: nobody types how long they slept. */
+  ok('six cards, and the list is not editable from anywhere',
+    tal.cards === 6, tal);
+  ok('and nothing is logged on a fresh day', tal.cap === '0 of 6 today', tal);
 
   /* ── the glyph is the name ──
      The card used to carry `Steps` at 17px bold in one corner and
@@ -2582,7 +2585,7 @@ const SAID = [
   ok('ticking an item ticks the block behind it',
     /is-|on/.test(linked.card) && linked.via === 'from Train'
     && /\{"\d{4}-\d{2}-\d{2}":\{".+":1\}\}/.test(linked.log), linked);
-  ok('and the count moves with it', linked.cap === '1 of 5 today', linked);
+  ok('and the count moves with it', linked.cap === '1 of 6 today', linked);
 
   /* ── the link runs the OTHER way too ──
      This is the half that was missing, and the failure it caused is the
@@ -2884,8 +2887,8 @@ const SAID = [
       labels: r.map((x) => x.querySelector('.ty-hist').getAttribute('aria-label')),
     };
   });
-  ok('five rows, each a card and a strip side by side',
-    rows.n === 5 && rows.pairs, rows);
+  ok('six rows, each a card and a strip side by side',
+    rows.n === 6 && rows.pairs, rows);
   ok('and the strip is a SIBLING of the card, never nested inside it',
     !rows.nested, rows);
   ok('both halves of a row clear 44px for a thumb',
@@ -3157,6 +3160,150 @@ const SAID = [
       await page.evaluate(() => JSON.parse(localStorage.getItem('sched.v1'))
         .items.filter((it) => it.n === 'Train').length === 7
         && !localStorage.getItem('sched.off.v1')));
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     WHAT THE WATCH KNOWS
+
+     A Garmin cannot talk to a web page, and their Health API is a
+     partner programme with a secret that would have to live on a
+     server — so the automatic version is somebody else's machine
+     holding how long you slept. Garmin Connect writes steps and sleep
+     into the phone's own health store instead, a Shortcut reads that
+     store, and the numbers arrive in the FRAGMENT: the same door an
+     invitation comes through, carrying readings instead of a code, and
+     reaching nothing but localStorage.
+     ══════════════════════════════════════════════════════════ */
+  console.log('\n── what the watch knows ──');
+  {
+    const held = await page.evaluate(() => ['sched.tick.v1', 'sched.view.v1']
+      .map((k) => [k, localStorage.getItem(k)]));
+    await page.evaluate(() => {
+      localStorage.removeItem('sched.tick.v1');
+      localStorage.setItem('sched.view.v1', 'tally');
+    });
+
+    const day = await page.evaluate(() => {
+      const p2 = (n) => String(n).padStart(2, '0');
+      const d = new Date();
+      return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    });
+
+    /* ── A COLD ARRIVAL, which is what a Shortcut does to an app the
+       phone has evicted. Read before the first paint, so the screen it
+       opens on already carries them rather than filling in a frame
+       later. */
+    await page.goto(`${BASE}/schedule/#steps=8241&sleep=7.4&water=2.1&fuel=2260`,
+      { waitUntil: 'networkidle' });
+    await page.waitForTimeout(420);
+    const cold = await page.evaluate(() => ({
+      hash: location.hash,
+      rec: JSON.parse(localStorage.getItem('sched.tick.v1') || '{}'),
+      cap: document.getElementById('scTallyCap').textContent,
+      view: document.getElementById('scRail').hidden ? 'not the week' : 'the week',
+    }));
+    ok('a cold arrival files every reading in the fragment',
+      JSON.stringify(cold.rec[day]) === '{"p":8241,"s":7.4,"w":2.1,"f":2260}', cold);
+    /* Stripped, and for the invitation's reason twice over: spent it
+       adds nothing on a reload, and left in the bar every reload
+       re-files a morning that is now days old. */
+    ok('...and the fragment is spent, not left in the bar', cold.hash === '', cold);
+    /* AND IT DOES NOT MOVE THE VIEW. An invitation is somebody asking
+       you to do something and takes you to the screen that does it; a
+       watch handing over last night is not a request, and being thrown
+       onto the tally every morning because a Shortcut ran is the app
+       deciding what you came for. */
+    ok('...and it does not decide what you came for', cold.view === 'not the week',
+      cold);
+    ok(`...and Sleep is the sixth of them (${cold.cap})`,
+      cold.cap === '4 of 6 today', cold);
+
+    /* ── AND WARM, WHICH IS THE CASE THAT ACTUALLY HAPPENS ──
+       Opening a URL that differs only by its fragment does NOT reload
+       the page — the browser changes the hash and fires hashchange —
+       and on a phone the app it is opening is usually still running
+       from this morning. A boot-only read would have worked once a day
+       at most, on the days the app happened to have been evicted,
+       which is the shape of a feature that looks like it works. */
+    await page.evaluate(() => { location.hash = '#steps=9333&sleep=6.2'; });
+    await page.waitForTimeout(360);
+    const warm = await page.evaluate(() => ({
+      hash: location.hash,
+      rec: JSON.parse(localStorage.getItem('sched.tick.v1') || '{}'),
+      drawn: [...document.querySelectorAll('.ty-row')]
+        .map((r) => (r.querySelector('.ty-sub') || {}).textContent || ''),
+    }));
+    ok('a fragment arriving while the app is open is read too',
+      warm.rec[day].p === 9333 && warm.rec[day].s === 6.2
+      && warm.rec[day].w === 2.1 && warm.hash === '', warm);
+    ok('...and the screen redraws rather than waiting for a reload',
+      warm.drawn.indexOf('6.2 h') >= 0 && warm.drawn.indexOf('9333') >= 0,
+      warm.drawn);
+
+    /* ── THE BACKFILL WINDOW APPLIES, and it matters more here than
+       anywhere else: a watch will happily offer six months of history,
+       and a Shortcut looping over it would fill in a year of a record
+       whose whole worth is that you cannot. It goes through scSetTick
+       like a number you typed. */
+    const old = await page.evaluate(() => {
+      const p2 = (n) => String(n).padStart(2, '0');
+      const d = new Date(); d.setDate(d.getDate() - 9);
+      return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    });
+    await page.evaluate((o) => { location.hash = '#steps=4000&on=' + o; }, old);
+    await page.waitForTimeout(320);
+    /* Both halves: a date INSIDE the window has to land, or this passes
+       on code that files nothing at all. */
+    const back = await page.evaluate(() => {
+      const p2 = (n) => String(n).padStart(2, '0');
+      const d = new Date(); d.setDate(d.getDate() - 1);
+      return d.getFullYear() + '-' + p2(d.getMonth() + 1) + '-' + p2(d.getDate());
+    });
+    await page.evaluate((y) => { location.hash = '#steps=4000&on=' + y; }, back);
+    await page.waitForTimeout(320);
+    const win = await page.evaluate(() =>
+      JSON.parse(localStorage.getItem('sched.tick.v1') || '{}'));
+    ok('a day past the backfill window is refused, one inside it is not',
+      !win[old] && win[back] && win[back].p === 4000, { old, back, win });
+
+    /* ── AND A READING THAT CANNOT BE ONE IS DROPPED ──
+       A Shortcut that hands over milliseconds of sleep instead of hours
+       writes 27000000 into the record, and every figure the panel draws
+       for the rest of the year is that one day. Dropped rather than
+       clamped: a clamped 24 is a lie that looks like a reading, and a
+       missing day is what actually happened. The good value beside it
+       still lands, or this would pass on code that files nothing. */
+    await page.evaluate(() => { location.hash = '#sleep=27000000&water=1.9'; });
+    await page.waitForTimeout(320);
+    const junk = await page.evaluate((d) =>
+      JSON.parse(localStorage.getItem('sched.tick.v1') || '{}')[d], day);
+    ok('a reading out of range is dropped, and the one beside it is not',
+      junk.s === 6.2 && junk.w === 1.9, junk);
+
+    /* The one thing the sheet is for: the address, with THIS copy's own
+       origin in it. The app is served from a folder and copied between
+       them, and a template carrying somebody else's address is the one
+       part of the setup nobody can check by reading it. */
+    await page.click('#scTabYou');
+    await page.waitForTimeout(320);
+    await page.evaluate(() => [...document.querySelectorAll('.menu-item')]
+      .find((m) => /Your watch/.test(m.textContent)).click());
+    await page.waitForTimeout(380);
+    const link = await page.$eval('#scWatchUrl', (e) => e.value);
+    ok('the sheet hands you this copy\u2019s own address, with holes in it',
+      link.indexOf(`${BASE}/schedule/`) === 0 && /#steps=STEPS/.test(link)
+      && /sleep=SLEEP/.test(link) && /on=DATE/.test(link) && link.indexOf('#') > 0,
+      link);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(300);
+
+    await page.evaluate((rows) => {
+      rows.forEach(([k, v]) => {
+        if (v === null) localStorage.removeItem(k); else localStorage.setItem(k, v);
+      });
+    }, held);
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(300);
   }
 
   /* ── AND ON THE WEEK, WHERE YOU SET IT ── */
@@ -3597,7 +3744,7 @@ const SAID = [
   ok('and the glass a row opens, which is the other one',
     round.panel >= 20, round);
   ok('and the tally has handed its exception back',
-    round.cards.length === 5 && round.cards.every((v) => v === 0), round.cards);
+    round.cards.length === 6 && round.cards.every((v) => v === 0), round.cards);
   ok('and the two circles are circles — the add button and your picture',
     /50%/.test(round.prime) && /50%/.test(round.face), round);
   ok('and nothing else in the app is rounded at all',

@@ -1216,6 +1216,74 @@ coverage.
 **`tests/gauntlet.js` does not visit `schedule/` at all.** Known, not
 fixed here. Its twelve standing faults are all RADIUS in `jade/`.
 
+## What the watch knows
+
+A Garmin cannot talk to a web page. It syncs to Garmin's own app, and
+their Health API is a partner programme with a secret that would have
+to live on a server — so **the automatic version of this is somebody
+else's machine holding how long you slept**, which is the one thing
+this app is built not to do. It would also be a public repo with a
+client secret in it.
+
+**There is another way in and it needs nothing at all.** Garmin
+Connect writes steps and sleep into the phone's own health store; a
+Shortcut reads that store and opens this app with the numbers in the
+FRAGMENT. Nothing leaves the device, there is no key to keep, no
+account to approve and no server to trust — the same door an
+invitation comes through, carrying readings instead of a code.
+
+    #steps=8241&sleep=7.4&water=2.1&fuel=2260&on=2026-08-30
+
+**NAMES, NOT IDS.** The record's keys are single letters, and this
+fragment is the one part of the app somebody assembles by hand in an
+editor with no autocomplete. `p` for steps is a private detail leaking
+into the only place it would cost anything.
+
+**IT GOES THROUGH `scSetTick` LIKE A NUMBER YOU TYPED**, so the
+backfill window applies — and that matters more here than anywhere
+else, because a watch will happily offer six months of history and a
+Shortcut looping over it would fill in a year of a record whose whole
+worth is that you cannot.
+
+**A reading out of range is DROPPED, not clamped.** A Shortcut that
+hands over milliseconds of sleep instead of hours writes 27,000,000
+into the record, and every figure the panel draws for the rest of the
+year is that one day. A clamped 24 is a lie that looks like a reading;
+a missing day is what actually happened.
+
+**AND IT IS READ ON `hashchange`, NOT ONLY AT BOOT — that half is the
+feature.** Opening a URL that differs only by its fragment does not
+reload the page: the browser changes the hash and fires `hashchange`,
+and on a phone the app it is opening is usually still running from this
+morning. A boot-only read works once a day at most, on the days the app
+happened to have been evicted, which is the shape of a feature that
+looks like it works. The suite drove a fragment-only navigation and
+measured nothing filed, which is how this was found.
+
+**The fragment is stripped either way**, for the invitation's reason
+twice over: spent, it adds nothing on a reload — and left in the bar,
+every reload re-files a morning that is now days old, silently, for as
+long as the backfill window allows.
+
+**It does not move the view.** An invitation is somebody asking you to
+do something and takes you to the screen that does it; a watch handing
+over last night is not a request, and being thrown onto the tally every
+morning because a Shortcut ran is the app deciding what you came for.
+
+**Sleep is the sixth of the five, and a watch is why.** Every other
+item there is something you went and did; this is what happened while
+you were not deciding anything. It never earned a row before because
+nobody types how long they slept. It is not `neu` — Fuel is the one
+figure on that screen where more is not better, and a long night is a
+good night. Six rows fit a 390x844 phone with 37px to spare, measured
+before it was written.
+
+**The settings row hands over one string and sets nothing.** There is
+nothing to turn on — the app reads the fragment on every open whether
+or not anybody has been there. What it gives you is the address with
+THIS copy's own origin in it, which is the only part of the setup
+nobody can check by reading it.
+
 ## An invitation is a link, and the link carries the server
 
 **A code alone names nothing.** `K7PQ2M4X` is a row in one KV

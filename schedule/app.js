@@ -2276,7 +2276,12 @@
        + 'M12 6.6C13.6 5.1 15.7 4.6 20 5.1v12.8c-4.3-.5-6.4 0-8 1.5"/>',
     p: STEPS,
     f: '<path d="M3.5 12.5h17a8.5 8.5 0 01-17 0zM9 5.4v3.1M12.5 4.4v4.1M16 6v2.5"/>',
-    w: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>'
+    w: '<path d="M12 3.4c0 0 5.6 6.1 5.6 9.6a5.6 5.6 0 01-11.2 0C6.4 9.5 12 3.4 12 3.4z"/>',
+    /* The crescent the Down block already wears, and the same drawing
+       on purpose: the block is when you go to bed and this is how long
+       you were there, so two glyphs for one subject would be the app
+       telling apart two things that are not. */
+    s: BLOCK_ICON.sleep
   };
 
   var TALLY = [
@@ -2288,7 +2293,17 @@
        calls your biggest day a win, which is the opposite of what the
        number is for. Same figure, named without the praise. */
     { id: 'f', n: 'Fuel',  s: 'Log what you ate',      k: 'num', unit: ' kcal', dp: 0, neu: 1 },
-    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1 }
+    { id: 'w', n: 'Water', s: 'Log what you drank',    k: 'num', unit: ' L', dp: 1 },
+    /* ── THE SIXTH, AND THE ONE YOU DO NOT DO ──
+       Every other item here is something you went and did; this is what
+       happened while you were not deciding anything. It earns a row
+       because it is the number that explains the other five — and
+       because a watch can fill it, which is exactly what stopped it
+       being worth a row before: nobody types how long they slept.
+
+       Not `neu`. Fuel is the one figure on this screen where more is
+       not better; a long night is a good night. */
+    { id: 's', n: 'Sleep', s: 'Hours last night',      k: 'num', unit: ' h', dp: 1 }
   ];
 
   /* Two records, not one, and they are different KINDS of thing: which
@@ -3277,6 +3292,77 @@
      invitation that joined a server from the wiring would be the one
      hole in that. */
   var invite = null;
+
+  /* ══════════════════════════════════════════════════════════
+     WHAT THE WATCH KNOWS
+
+     A Garmin cannot talk to a web page. It syncs to Garmin's own app,
+     and their Health API is a partner programme with a secret that
+     would have to live on a server — so the automatic version of this
+     is somebody else's machine holding how long you slept, which is
+     the one thing this app is built not to do.
+
+     There is another way in and it needs nothing at all. Garmin
+     Connect writes steps and sleep into the phone's own health store;
+     a Shortcut can read that store and open this app with the numbers
+     in the FRAGMENT. Nothing leaves the device, there is no key to
+     keep, no account to approve, and no server to trust — the same
+     door an invitation comes through, carrying numbers instead of a
+     code.
+
+       #steps=8241&sleep=7.4&water=2.1&fuel=2260&on=2026-08-30
+
+     NAMES, NOT IDS. The keys the record uses are single letters and
+     the fragment is a thing a person assembles by hand in an editor
+     with no autocomplete; `p` for steps is a private detail leaking
+     into the one part of this that somebody has to type.
+
+     `on` is optional and defaults to today, and it goes through
+     scSetTick like everything else — so the backfill window applies
+     and a Shortcut cannot fill in a fortnight any more than you can.
+     That matters more here than anywhere: a watch will happily offer
+     six months of history.
+     ══════════════════════════════════════════════════════════ */
+  var HEALTH = { steps: 'p', sleep: 's', water: 'w', fuel: 'f' };
+  /* A ceiling each, and they are not validation for its own sake: a
+     Shortcut that hands over milliseconds of sleep instead of hours
+     writes 27000000 into the record, and every figure the panel draws
+     for the rest of the year is that one day. Out of range is dropped
+     rather than clamped — a clamped 24 is a lie that looks like a
+     reading, and a missing day is what actually happened. */
+  var HEALTH_MAX = { p: 200000, s: 24, w: 30, f: 20000 };
+
+  function scHealthIn(str) {
+    var s2 = String(str || ''), out = null, k;
+    for (k in HEALTH) {
+      if (!HEALTH.hasOwnProperty(k)) continue;
+      var m = new RegExp('[#?&]' + k + '=([0-9.]+)', 'i').exec(s2);
+      if (!m) continue;
+      var v = parseFloat(m[1]);
+      var id = HEALTH[k];
+      if (!isFinite(v) || v < 0 || v > HEALTH_MAX[id]) continue;
+      if (!out) out = { on: '', v: {} };
+      out.v[id] = v;
+    }
+    if (!out) return null;
+    var d = /[#?&]on=(\d{4}-\d{2}-\d{2})/.exec(s2);
+    out.on = d ? d[1] : scDay();
+    return out;
+  }
+
+  /* Filed where it is read, unlike the invitation — because this
+     reaches localStorage and nothing else. scSetTick pushes to the
+     worker when friends are on, which is the same thing that happens
+     when you type a number in yourself, and nothing at all when they
+     are off. */
+  function scHealthTake(h) {
+    if (!h) return 0;
+    var n = 0;
+    for (var id in h.v) {
+      if (h.v.hasOwnProperty(id) && scSetTick(h.on, id, h.v[id])) n++;
+    }
+    return n;
+  }
 
   function scAddFriend(code, done) {
     var inv = scInviteIn(code);
@@ -6563,6 +6649,13 @@
          is now on Add a friend where the swap happens. */
       item('Friends', net.on ? 'On \u00b7 ' + net.code : 'Off', '', scNetSheet);
 
+      /* ── THE ONE THING THIS SHEET HANDS YOU RATHER THAN SETS ──
+         There is nothing to turn on: the app is already listening on
+         the fragment. What it can do is give you the address to point
+         a Shortcut at, with this copy's own origin in it, because that
+         is the only part somebody cannot work out for themselves. */
+      item('Your watch', 'Steps and sleep, from a Shortcut', '', scWatchSheet);
+
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
@@ -6598,6 +6691,62 @@
         'Dictation is the exception — your phone sends those few seconds of audio to ' +
         'its own speech service to turn into text. Typing the same sentence does not.';
       body.appendChild(note);
+    });
+  }
+
+  /* ══════════════════════════════════════════════════════════
+     THE ADDRESS TO POINT A SHORTCUT AT
+
+     No switch and no state: the app reads the fragment on every open
+     whether or not anybody has been here. This sheet exists to hand
+     over one string, built from THIS copy's own origin — the app is
+     served from a folder and copied between them, and a template with
+     somebody else's address in it is the one part of the setup that
+     cannot be checked by reading it.
+
+     Placeholders in capitals so they are obviously holes rather than
+     values, and named for the thing rather than the field, since what
+     goes in each is a variable you pick out of a list.
+     ══════════════════════════════════════════════════════════ */
+  function scWatchLink() {
+    return location.href.replace(/[#?].*$/, '')
+      + '#steps=STEPS&sleep=SLEEP&on=DATE';
+  }
+
+  function scWatchSheet() {
+    scSheet('Your watch', function (body) {
+      body.appendChild(scEl('p', 'hint',
+        'Garmin writes your steps and sleep into the phone\u2019s own health '
+        + 'store. A Shortcut reads them from there and opens this page with '
+        + 'the numbers on the end of the address \u2014 so they never leave '
+        + 'the phone, and there is no account to connect and nothing to '
+        + 'trust.'));
+      body.appendChild(scEl('span', 'label', 'The address'));
+      var f = scEl('input', 'field');
+      f.type = 'text';
+      f.readOnly = true;
+      f.value = scWatchLink();
+      f.id = 'scWatchUrl';
+      f.addEventListener('focus', function () { f.select(); });
+      body.appendChild(f);
+      body.appendChild(scEl('p', 'hint',
+        'In Shortcuts: Find Health Samples for Steps and for Sleep, then '
+        + 'Open URLs with this address \u2014 replacing STEPS, SLEEP and DATE '
+        + 'with those values. Water and Fuel work the same way if you '
+        + 'track them. Set it to run on a time of day and it fills itself '
+        + 'in.'));
+      var acts = scEl('div', 'acts');
+      acts.appendChild(scBtn('off', 'Close', scClose));
+      acts.appendChild(scBtn('go', 'Copy', function () {
+        var text = scWatchLink();
+        var done = function () { scClose(); scToast('Copied', false); };
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+          navigator.clipboard.writeText(text).then(done, function () {
+            f.select(); scToast('Press and hold to copy', false);
+          });
+        } else { f.select(); scToast('Press and hold to copy', false); }
+      }));
+      body.appendChild(acts);
     });
   }
 
@@ -6690,13 +6839,54 @@
   var hash = location.hash || '';
   if (hash) {
     invite = scInviteIn(hash);
-    if (invite) {
-      view = 'friends';
+    /* ── AND THE OTHER THING A FRAGMENT CAN CARRY ──
+       Numbers off the phone's health store, handed over by a Shortcut.
+       Filed here rather than deferred, because unlike an invitation
+       this reaches localStorage and nothing else — and it lands BEFORE
+       the first paint, so the screen it opens on already has them on
+       it rather than filling in a frame later.
+
+       The view is not moved. An invitation is somebody asking you to
+       do something and takes you to the screen that does it; a watch
+       handing over last night is not a request, and being thrown onto
+       the tally every morning because a Shortcut ran is the app
+       deciding what you came for. */
+    var got = scHealthTake(scHealthIn(hash));
+    if (invite) view = 'friends';
+    /* Stripped either way, and for the invitation's reason twice over:
+       spent, it adds nothing on a reload — and left in the bar, every
+       reload of a bookmark re-files a morning that is now days old,
+       silently, for as long as the backfill window allows it. */
+    if (invite || got) {
       try {
         history.replaceState(null, '', location.href.replace(/#.*$/, ''));
       } catch (e) {}
     }
   }
+
+  /* ── AND AGAIN WHEN THE APP IS ALREADY OPEN ──
+     Reading the fragment at boot covers a cold start and nothing else.
+     Opening a URL that differs only by its fragment does not reload
+     the page — the browser changes the hash and fires `hashchange` —
+     and on a phone the app it is opening is usually still running from
+     this morning. So the boot read alone would have worked once a day
+     at most, on the days the app happened to have been evicted, which
+     is the shape of a feature that looks like it works.
+
+     The same strip afterwards, for the same reason: a hash left in the
+     bar re-files those numbers on the next reload, against whatever
+     date is current then. */
+  addEventListener('hashchange', function () {
+    var h = location.hash || '';
+    if (!h) return;
+    var n = scHealthTake(scHealthIn(h));
+    if (!n) return;
+    try {
+      history.replaceState(null, '', location.href.replace(/#.*$/, ''));
+    } catch (e) {}
+    if (view === 'tally') scPaintTally(); else scRender();
+    scToast(n === 1 ? 'One reading in' : n + ' readings in', false);
+  });
 
   /* The picture is read asynchronously and nothing waits for it: the
      face is a complete answer on its own, so a photograph arriving a
