@@ -2870,7 +2870,17 @@ body {
      puts it on something. A wide offset one puts a gap under it. One
      flat 14px blur did all three badly, and the card read as a
      rectangle that happened to be darker. */
+  /* A line of light just inside the head of the card and a line of
+     shadow just inside its foot. The rim below is an EDGE; these two
+     are what give that edge a thickness, and a thickness is the whole
+     of what reads as three-dimensional. A token because .wc.is-picked
+     replaces this list outright to draw its accent ring, and a card
+     you had chosen would otherwise be the one in the deck with a flat
+     edge. */
+  --wc-bev: inset 0 1.5px 0 -.5px rgba(255, 255, 255, .13),
+            inset 0 -1.5px 0 -.5px rgba(0, 0, 0, .5);
   box-shadow: 0 0 0 .5px color-mix(in srgb, var(--wc-hue) 30%, transparent),
+              var(--wc-bev),
               0 1px 2px rgba(0, 0, 0, .55),
               0 16px 38px -10px rgba(0, 0, 0, .72);
 
@@ -2896,6 +2906,55 @@ body {
   background-size: 120px 120px;
   opacity: .14;
   mix-blend-mode: overlay;
+}
+
+/* ── AND THE EDGE IS GLASS ──
+   The card was a slab with a half-pixel ring of its own hue around it,
+   and against a page that is nearly the same black that ring is the
+   only thing saying where the card stops. It reads as a rectangle
+   rather than as an object with a thickness — which is exactly what
+   the two cards behind it are for, and they had the same problem.
+
+   A rim, then, lit from the top left: bright along the head of the
+   card, gone by the middle, and back faintly along the foot, which is
+   what a sheet of something glassy does under one light. It is the
+   day card's foil trick at rest — a border-width mask with the middle
+   excluded — rather than a `border`, because a border is one flat
+   colour all the way round and the whole point here is that it is
+   not.
+
+   ON EVERY .wc, so the two behind get it too. They are what says
+   there are more of these, and an edge is the only thing they have to
+   say it with: they carry no words at all.
+
+   `z-index: 1` puts it over the swoop AND over the grain. Without it
+   the swoop draws across the rim — it is `inset: 0` and comes after
+   in the source — and the 14% overlay grain lies on top of the whole
+   thing, which is enough to make a 1px highlight granular.
+
+   The two INSETS on the box-shadow are the other half. A line round
+   the edge is a rim; a line of light just inside the top and a line
+   of shadow just inside the bottom is a BEVEL, and a bevel is what
+   reads as thickness. They are a token because .wc.is-picked replaces
+   the whole shadow list to draw its accent ring, and a card you had
+   chosen would otherwise be the one card in the deck with no edge. */
+.wc::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(155deg,
+    rgba(255, 255, 255, .5),
+    rgba(255, 255, 255, .12) 26%,
+    rgba(255, 255, 255, 0) 54%,
+    rgba(255, 255, 255, .16));
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  mask-composite: exclude;
+  pointer-events: none;
+  z-index: 1;
 }
 
 /* ── THE TWO BEHIND, FANNED AND EMPTY ──
@@ -2976,6 +3035,7 @@ body {
    is — the hue answers a different question. */
 .wc.is-picked {
   box-shadow: 0 0 0 2px var(--red),
+              var(--wc-bev),
               0 1px 2px rgba(0, 0, 0, .55),
               0 16px 38px -10px rgba(0, 0, 0, .72);
 }
@@ -3391,9 +3451,22 @@ body {
    colour system running down a screen that already has an accent. It
    would also mean a page whose marks are red on a lime theme, which is
    the one thing every other screen in this app is careful not to do. */
+/* ── AND THE OPEN ONE IS RINGED IN THE ACCENT ──
+   The panel that is open is the one whose calendar you are reading,
+   which is the record — and the accent on this app makes exactly one
+   claim, that something happened. It went grey in the pass that put
+   every title and every filled control back to white, and that pass
+   was about CHROME: a heading naming a section, a button you press.
+   This ring is neither. It says which panel the picture underneath it
+   belongs to, and the picture is a record of what you actually did.
+
+   A third of the accent rather than the whole of it, because the
+   panel's ground is a 10% wash of --ink and a full-strength ring
+   round a nearly-black surface is a box drawn on the page rather than
+   an edge on the object. */
 .wo-p.is-open {
   background: color-mix(in srgb, var(--ink) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 34%, transparent);
 }
 .wo-p:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 

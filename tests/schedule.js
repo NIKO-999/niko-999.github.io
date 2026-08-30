@@ -5856,6 +5856,40 @@ const SAID = [
         worst.glyph >= 3, worst);
     }
 
+    /* ── AND THE CARD HAS AN EDGE ──
+       A rim lit from the head of the card and a bevel just inside it,
+       which is what gives the thing a thickness: without them the card
+       is a slab against a page that is nearly the same black, and the
+       two behind — which carry no words at all — have nothing but an
+       edge to say they are there with.
+
+       MEASURED ON COMPOSITED PIXELS, and as a relationship rather than
+       a number of levels, so it survives a change to the card's own
+       ground. The head of the card against its middle is 9.5x with
+       the rim and 1.1x without it, which is the whole margin; the foot
+       is asserted DARKER than the head, because a rim of one flat
+       colour all the way round is a border, and a border is what this
+       replaced. */
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
+        c.getAnimations().every((a) => a.playState === 'finished')));
+    const lit = await page.evaluate(() => {
+      const r = document.querySelector('.wc.is-front').getBoundingClientRect();
+      return { x: r.left + r.width / 2, t: r.top, b: r.bottom };
+    });
+    const pngE = PNG5.sync.read(await page.screenshot());
+    const atE = (x, y) => {
+      const i = (pngE.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
+      return [pngE.data[i], pngE.data[i + 1], pngE.data[i + 2]];
+    };
+    const head = atE(lit.x, lit.t + .5);
+    const mid5 = atE(lit.x, lit.t + 16);
+    const foot = atE(lit.x, lit.b - .6);
+    ok(`the card's head catches a light its middle does not `
+      + `(${lum(head).toFixed(3)} against ${lum(mid5).toFixed(3)})`,
+      lum(head) > lum(mid5) * 3 && lum(head) > lum(foot) * 2,
+      { head, mid5, foot });
+
     /* ── IT LANDS ON THE BLOCK, AND IT STAYS THERE ── */
     await deck(null);
     await page.click('.wc.is-front');
@@ -6408,6 +6442,41 @@ const SAID = [
       deltaE(dot, want) < 22 && ratio(dot, ground) >= 3, { dot, want, ground });
     ok('...and so is the ring, rather than the session\'s own colour',
       hue.ring === 'rgb(' + want.join(', ') + ')', hue);
+
+    /* ── AND THE OPEN PANEL IS RINGED IN IT TOO ──
+       It went grey in the pass that put every title and every filled
+       control back to white, and that pass was about CHROME. This ring
+       is not chrome: it says which panel the calendar under it belongs
+       to, and a calendar of the days you did that session is the
+       record.
+
+       Read off the SCREEN and never off the declaration: the computed
+       box-shadow here serialises as `color(srgb 0.78 0.98 0.26 /
+       0.34)` rather than an rgba, so a string check against --red's
+       own hex passes on nothing and fails on everything.
+
+       Measured as the ring's OWN contribution — the edge pixel less
+       the panel's interior — because the ring is a third of the accent
+       over a wash of --ink and the sum of the two is nobody's colour.
+       That difference is a grey with no spread across its channels
+       when the ring is --ink, and carries the accent's own spread when
+       it is the accent: 0 against 62 on the lime it ships with. Held
+       to the accent's own strongest channel as well, so it means the
+       same thing at every angle of the wheel rather than only where
+       the default happens to sit. */
+    const edge = await page.evaluate(() => {
+      const o = document.querySelector('.wo-p.is-open').getBoundingClientRect();
+      return { x: o.left + o.width / 2, t: o.top };
+    });
+    const ringPx = at5(edge.x, edge.t + .5);
+    const inPx = at5(edge.x, edge.t + 8);
+    const gave = ringPx.map((v, i) => v - inPx[i]);
+    const spread = Math.max(...gave) - Math.min(...gave);
+    const top = (a) => a.indexOf(Math.max(...a));
+    ok(`the open panel is ringed in the accent (spread ${spread}, `
+      + `strongest channel ${top(gave)} against the accent's ${top(want)})`,
+      spread >= 20 && top(gave) === top(want),
+      { ringPx, inPx, gave, want });
 
     /* ── THE STOP IS REMEMBERED, UNDER ITS OWN KEY ──
        Which half of a screen you were last on is a preference about
