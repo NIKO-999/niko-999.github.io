@@ -2886,17 +2886,30 @@ body {
    one press while looking exactly right. The card's Effort figure is
    a readout of this row. */
 .wc-eff { margin-top: 15px; }
+.wc-eff .wc-eff-l:not(:first-child) { margin-top: 15px; }
 .wc-eff-l {
   display: block;
   margin-bottom: 8px;
   font-size: 12.5px;
   color: var(--dim);
 }
- /* .wc-ef as well as .wc-chip: these wear the chip's clothes and are
-    a different control, and without a class of their own every query
-    for "the workout chips" returns nine of them — which is how the
-    first pass at this drove the deck by pressing an effort. */
+ /* .wc-ef and .wc-min as well as .wc-chip: these wear the chip's
+    clothes and are different controls, and without a class of their
+    own every query for "the workout chips" returns all of them —
+    which is how the first pass at this drove the deck by pressing an
+    effort. */
 .wc-eff-r { display: flex; gap: 7px; }
+/* Eight rungs do not fit across a phone, so the ladder scrolls and is
+   bled to the sheet's edges — a row that stops inside the padding
+   reads as a short list rather than one that continues. */
+.wc-mins {
+  margin: 0 calc(var(--pad) * -1);
+  padding: 2px var(--pad) 3px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.wc-mins::-webkit-scrollbar { display: none; }
+.wc-min { min-width: 52px; padding: 0 12px; font-variant-numeric: tabular-nums; }
 
 .wc-top {
   display: flex;

@@ -4815,6 +4815,25 @@
      time an untrue one — a light day is a decision you took, and the
      word for it should not sound like a shrug. */
   var EFFORTS = ['Light', 'Moderate', 'Hard'];
+
+  /* ── HOW LONG, AS A LADDER ──
+     A field would be a keyboard for a number everybody rounds anyway:
+     nobody trains for 47 minutes, they train for "about three quarters
+     of an hour". Eight rungs covers a stretch and a two-hour session,
+     and the card's own estimate is spliced in where it is not already
+     one of them — so the suggestion is always reachable in one press
+     and never a rung you cannot get back to. */
+  var MINS = [15, 20, 30, 45, 60, 75, 90, 120];
+  function scMinLadder(est) {
+    var out = MINS.slice();
+    if (out.indexOf(est) < 0) out.push(est);
+    return out.sort(function (a, b) { return a - b; });
+  }
+  /* The length of a session is the length of everything in it: pull at
+     fifty and core at twenty is seventy minutes, not fifty. */
+  function scTrainMins(ws) {
+    return ws.reduce(function (n, x) { return n + x.t; }, 0);
+  }
   function scEffort(min) {
     return min < 25 ? EFFORTS[0] : min < 50 ? EFFORTS[1] : EFFORTS[2];
   }
@@ -4863,9 +4882,9 @@
      the record and rewrites it the next time you touch that block, so
      there is nothing to migrate. */
   function scTrainRec(v) {
-    if (typeof v === 'string') return { k: v, e: '' };
+    if (typeof v === 'string') return { k: v, e: '', m: 0 };
     if (!v || typeof v !== 'object') return null;
-    return { k: String(v.k || ''), e: String(v.e || '') };
+    return { k: String(v.k || ''), e: String(v.e || ''), m: +v.m || 0 };
   }
 
   /* ── A SESSION CAN BE MORE THAN ONE THING ──
@@ -4920,7 +4939,14 @@
            minutes — throwing away a choice somebody actually made. The
            word moved; the record did not. */
         if (r.e === 'Easy') r.e = 'Light';
-        if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(ws[0].t);
+        var est = scTrainMins(ws);
+        if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(est);
+        /* Every record written before the minutes existed has none, and
+           the card's own estimate is the honest stand-in: it is what
+           the app would have shown for it anyway. Clamped rather than
+           rejected, because a nonsense figure is still a session. */
+        if (!(r.m > 0)) r.m = est;
+        r.m = Math.max(1, Math.min(600, Math.round(r.m)));
         rec[id] = r;
       });
       if (!Object.keys(rec).length) delete trainLog[day];
@@ -4937,10 +4963,10 @@
   function scTrainOf(day, id) {
     return (trainLog[day] && scTrainRec(trainLog[day][id])) || null;
   }
-  function scTrainSet(day, id, k, e) {
+  function scTrainSet(day, id, k, e, m) {
     if (k) {
       if (!trainLog[day]) trainLog[day] = {};
-      trainLog[day][id] = { k: k, e: e };
+      trainLog[day][id] = { k: k, e: e, m: m };
     } else if (trainLog[day]) {
       delete trainLog[day][id];
       if (!Object.keys(trainLog[day]).length) delete trainLog[day];
@@ -4979,7 +5005,7 @@
      A <button>, and the only one in the deck: a stack of focusable
      cards is two tab stops that do nothing, and the pair behind show
      an edge each and cannot be pressed. */
-  function scTrainCard(w, cls, pick, ef) {
+  function scTrainCard(w, cls, pick, ef, mins) {
     var card = scEl(pick ? 'button' : 'div', 'wc' + (cls ? ' ' + cls : ''));
     /* Set on the element rather than as a class per workout: these are
        DATA — another one is a row in TRAIN_GROUPS — and a stylesheet
@@ -4990,7 +5016,8 @@
     if (pick) {
       card.type = 'button';
       card.setAttribute('aria-label',
-        'Trained ' + w.n + (ef ? ', ' + ef.toLowerCase() : '') + '. ' + w.d);
+        'Trained ' + w.n + (mins ? ', ' + mins + ' minutes' : '')
+        + (ef ? ', ' + ef.toLowerCase() : '') + '. ' + w.d);
     } else {
       card.setAttribute('aria-hidden', 'true');
     }
@@ -5004,7 +5031,14 @@
     var top = scEl('div', 'wc-top');
     /* The time, then what that costs. Effort is worked out from the
        minutes rather than set beside them — see scEffort. */
-    var figs = [[w.lab, w.val]];
+    /* ── EST. TIME UNTIL YOU SAY OTHERWISE ──
+       The card shows its own estimate, labelled as one, until a length
+       is actually chosen — and then it shows the SESSION's length and
+       drops the word, because it has stopped being an estimate. The
+       ladder's suggestion is not a choice: a card that said "Time" for
+       a figure nobody had touched would be the app putting words in
+       your mouth. */
+    var figs = [[mins ? 'Time' : w.lab, mins ? mins + ' min' : w.val]];
     /* A group has no one duration, so it has no effort either — the
        cards inside it run from ten minutes to seventy-five. */
     if (ef) figs.push(['Effort', ef]);
@@ -5072,6 +5106,12 @@
     var into = got ? scTrainGroup(got.gk) : null;
     var at = got ? into.of.indexOf(got) : 0;
     var ef = got ? rec.e : '';
+    var mins = got ? rec.m : 0;
+    /* Whether the figures were CHOSEN or merely suggested. Both are
+       seeded off the selection, and both stop moving with it the
+       moment a press says otherwise — an effort and a length are about
+       the session you did, not about the card you are looking at. */
+    var saidEf = !!ef, saidMin = !!mins;
     /* ── THE DEAL HAPPENS ONCE, WHEN THE SHEET OPENS ──
        draw() rebuilds the whole deck on every press — of a chip, of an
        effort, of a kind — and the cards are new elements each time, so
@@ -5100,6 +5140,15 @@
 
       function list() { return into ? into.of : TRAIN_GROUPS; }
 
+      function suggest() {
+        var est = sel.length
+          ? scTrainMins(sel.map(scWorkout))
+          : scTrainMins([list()[at]]);
+        if (!saidEf) ef = scEffort(est);
+        if (!saidMin) mins = est;
+        return est;
+      }
+
       function press(w) {
         return function () {
           /* Step one opens the group. */
@@ -5120,8 +5169,7 @@
 
       function commit() {
         if (!sel.length) return;
-        var first = scWorkout(sel[0]);
-        scTrainSet(day, item.id, sel.join('+'), ef || scEffort(first.t));
+        scTrainSet(day, item.id, sel.join('+'), ef, mins);
         scClose();
         if (view === 'tally') scPaintTally(); else scRender();
         scToast(scWorkName(sel.join('+')) + ' logged', false);
@@ -5135,10 +5183,10 @@
            group has to re-suggest, because sixty minutes of legs and
            ten minutes of cold are not the same session — but a press
            on the effort row must survive a redraw of the deck. */
-        /* The minutes of the FIRST pick set where the effort starts —
-           it is the session's main thing and abs is what you add to
-           it. Only where a choice has not been made. */
-        if (into && !ef) ef = scEffort(sel.length ? scWorkout(sel[0]).t : w.t);
+        /* The selection suggests both figures until a press says
+           otherwise, and it re-suggests as the selection changes: pull
+           and core is seventy minutes where pull alone is fifty. */
+        if (into) suggest();
         $('scSheetTitle').textContent = into ? into.n : 'What did you train?';
 
         /* THE CHIPS ARE REBUILT, NOT RELABELLED. The two levels have
@@ -5167,11 +5215,12 @@
           c.addEventListener('click', function () {
             if (at === i) return;
             at = i;
-            /* A new card suggests its own effort again — but only
-               while nothing has been chosen, because an effort is
-               about the SESSION and the session is the whole
-               selection. */
-            if (!sel.length) ef = '';
+            /* Nothing is cleared here. This line used to blank the
+               effort so the next card could suggest its own, and once
+               a press could SAY an effort the two fought: the clear
+               emptied it and the suggestion refused to refill it,
+               because it had been told not to. suggest() owns both
+               figures and knows which of them you have chosen. */
             draw();
           });
           chips.appendChild(c);
@@ -5193,7 +5242,7 @@
         deck.appendChild(scTrainBack('b1'));
         deck.appendChild(scTrainCard(w, 'is-front'
           + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
-          press(w), into ? ef : ''));
+          press(w), into ? ef : '', saidMin ? mins : 0));
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
            The card is a <button> and a control inside a button is
@@ -5219,11 +5268,44 @@
             b.addEventListener('click', function () {
               if (ef === name) return;
               ef = name;
+              saidEf = true;
               draw();
             });
             row.appendChild(b);
           });
           howHard.appendChild(row);
+
+          /* ── AND HOW LONG ──
+             A ladder rather than a field: nobody trains for 47 minutes,
+             they train for about three quarters of an hour, and a
+             keyboard for a number everybody rounds anyway is a keyboard
+             for nothing. The card's own estimate is spliced into the
+             rungs where it is not already one, so the suggestion is
+             always reachable in one press.
+
+             BLED to the sheet's edges, because eight rungs do not fit
+             across a phone and a row that stops inside the padding
+             reads as a short list rather than one that continues. */
+          var mlab = scEl('span', 'wc-eff-l', 'How long, in minutes?');
+          mlab.id = 'scMinLab';
+          howHard.appendChild(mlab);
+          var mrow = scEl('div', 'wc-eff-r wc-mins');
+          mrow.setAttribute('role', 'group');
+          mrow.setAttribute('aria-labelledby', 'scMinLab');
+          scMinLadder(suggest()).forEach(function (n) {
+            var b = scEl('button', 'wc-chip wc-min', String(n));
+            b.type = 'button';
+            b.setAttribute('aria-pressed', n === mins ? 'true' : 'false');
+            b.setAttribute('aria-label', n + ' minutes');
+            b.addEventListener('click', function () {
+              if (mins === n) return;
+              mins = n;
+              saidMin = true;
+              draw();
+            });
+            mrow.appendChild(b);
+          });
+          howHard.appendChild(mrow);
         }
 
         foot.textContent = '';
@@ -5319,7 +5401,7 @@
       Object.keys(rec).forEach(function (id) {
         var r = scTrainRec(rec[id]);
         var ws = r && scWorkoutsOf(r.k);
-        if (ws && ws.length) out.push({ day: day, ws: ws, e: r.e });
+        if (ws && ws.length) out.push({ day: day, ws: ws, e: r.e, m: r.m });
       });
     }
     return out;
@@ -5432,11 +5514,15 @@
      things to look at for one press; this way the panel simply grows,
      and what grew is under your thumb. */
   function scWorkPanel(sig, hits, most, month, open, pick) {
-    var ws = scWorkoutsOf(sig);
     var name = scWorkName(sig);
-    /* The length of a session is the length of everything in it: pull
-       at fifty and core at twenty is seventy minutes, not fifty. */
-    var mins = ws.reduce(function (n, x) { return n + x.t; }, 0);
+    /* ── A REAL AVERAGE NOW ──
+       It used to be the card's own estimate with the word "Avg" in
+       front of it, which is that figure and an untrue word: every
+       session of a kind shared it and nothing on the record carried a
+       duration. The sheet asks how long, so this is the mean of what
+       you actually logged. */
+    var mins = Math.round(hits.reduce(function (n, h) { return n + h.m; }, 0)
+      / hits.length);
 
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';

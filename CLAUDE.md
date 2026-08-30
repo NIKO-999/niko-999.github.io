@@ -1629,6 +1629,29 @@ row is a SIBLING of the card**, because the card is a `<button>` and a
 button inside a button is invalid and collapses to one press while
 looking exactly right.
 
+**AND THE LENGTH IS ASKED FOR TOO, on the same argument one step
+further.** The card's own figure was an estimate for a KIND of
+session, so every Chest ever logged was fifty minutes and the panel a
+tab away called that an average. A ladder of the lengths a session
+actually comes out at — 15 to 120 — with **the card's own estimate
+spliced in wherever it is not already a rung**, so the figure the card
+is showing you is always pressable and the ladder never disagrees with
+the thing above it. It is scrolled sideways rather than wrapped: the
+rungs are one row you run your thumb along, and a second line of them
+is a grid you have to read.
+
+The card says **Est. time** until you press one and **Time** after,
+which is the whole state visible in one word — and after a press it is
+the SESSION's total rather than the card's, because Pull + Abs is one
+thing that took one length of time.
+
+**Records written before it carry no length at all**, and are repaired
+on the way in with the summed estimate rather than left at zero: zero
+minutes is a number, and a panel averaging it would report a figure
+nobody's session ever had. The repair is WRITTEN BACK — `scTrainSave`
+— because a repair held only in memory is redone every boot and lost
+the moment anything else writes the key.
+
 **THE CARD IS ITS OWN OBJECT, NOT THE PAGE INVERTED.** It was `--ink`
 with `--paper` on it, which made it the one inverted thing on the
 screen — right for exactly as long as every palette was a light one. On
@@ -1807,14 +1830,23 @@ about what you are training now; thirty days is short enough to move
 when you change what you do and long enough not to swing on one week
 off. A session with nothing in that window carries no share at all
 rather than a 0%, because "11 weeks ago" on the same panel has already
-said it. **Only the effort is a real average**:
-it is the one thing on this record you choose per session, so five Hard
-and three Easy come back Moderate, a word in neither input, which is
-what tells an average from a pick. The time is the card's own estimate,
-and it says **Avg** out loud because it is the one figure here somebody
-could read as this session's actual length — nothing on this record
-carries a duration. The shares have to sum to the whole, or the
-denominator is wrong.
+said it. **Both the time and the effort are real averages now**, and
+for one round only the effort was: they are the two things on this
+record you choose per session, so five Hard and three Light come back
+Moderate, and four thirty-minute sessions and four sixty-minute ones
+come back 45 — a word and a number in neither input, which is what
+tells an average from a pick. It still says **Avg** out loud, because
+it is the one figure here somebody could read as this session's actual
+length. The shares have to sum to the whole, or the denominator is
+wrong.
+
+**The fixture is what makes that a claim.** Held at the card's own
+estimate the figure was "present" and "a number of minutes" and passed
+every check written about it — the panel read 50 because every Chest
+estimates 50, and the assertion could not tell the mean from the thing
+it replaced. The eight Chests are four 30s and four 60s now, against a
+card that says 50: reverting the panel to the estimate reads 50 and
+falls over, which was proven by doing it.
 
 **LIGHT, NOT EASY.** "Easy" is a verdict on the session and half the
 time an untrue one; a light day is a decision you took, and the word

@@ -4847,16 +4847,78 @@ const SAID = [
     ok('...and pressing one overrules it, on the card as well as the row',
       overruled.card === 'Hard' && overruled.on.join('') === 'Hard', overruled);
 
-    /* Moving to another card has to re-suggest — sixty minutes of legs
-       and twenty of abs are not the same session — while a press must
-       survive the deck being redrawn under it, which it is on every
-       chip and on every effort. */
-    await page.click('.wc-chips .wc-chip:nth-child(5)');
+    /* ── AND WHAT YOU SAID SURVIVES THE NEXT CARD ──
+       Both figures are seeded off the selection and both stop moving
+       with it the moment a press says otherwise: an effort and a
+       length are about the session you did, not about the card you
+       happen to be looking at.
+
+       This is where the two halves fought. The chip handler blanked
+       the effort so the next card could suggest its own, and once a
+       press could SAY one, the clear emptied it and the suggestion
+       refused to refill it — because it had been told not to. The
+       card came back with no Effort column at all. */
+    await page.click('.wc-chips .wc-chip:nth-child(5)');           /* Legs, 60 */
     await page.waitForTimeout(320);
-    const moved = await page.evaluate(() =>
-      document.querySelector('.wc.is-front .wc-top div:nth-child(2) b').textContent);
-    ok('...and the next card suggests its own again rather than keeping the last',
-      moved === 'Hard', moved);
+    const moved = await page.evaluate(() => {
+      const f = document.querySelector('.wc.is-front');
+      return f ? [...f.querySelectorAll('.wc-top div b')].map((x) => x.textContent) : null;
+    });
+    ok('...and an effort you pressed survives moving to the next card',
+      moved && moved.length === 2 && moved[1] === 'Hard', moved);
+
+    /* ── HOW LONG, AS A LADDER ──
+       A field would be a keyboard for a number everybody rounds
+       anyway: nobody trains for 47 minutes, they train for about three
+       quarters of an hour. The card's own estimate is spliced into the
+       rungs where it is not already one of them, so the suggestion is
+       always reachable in one press and never a rung you cannot get
+       back to. Legs is sixty, which IS a rung; the check that it is
+       spliced is below, on a card that is not. */
+    const ladder = await page.evaluate(() => {
+      const r = document.querySelector('.wc-mins');
+      const b = [...r.querySelectorAll('.wc-min')];
+      return { rungs: b.map((x) => x.textContent),
+        on: b.filter((x) => x.getAttribute('aria-pressed') === 'true')
+          .map((x) => x.textContent),
+        labelled: r.getAttribute('aria-labelledby') === 'scMinLab',
+        outside: !document.querySelector('.wc .wc-mins'),
+        spoken: b[0].getAttribute('aria-label') };
+    });
+    ok('the length is a ladder outside the card, suggesting the estimate',
+      ladder.rungs.join(' ') === '15 20 30 45 60 75 90 120'
+      && ladder.on.join('') === '60' && ladder.labelled && ladder.outside
+      && ladder.spoken === '15 minutes', ladder);
+
+    /* Shoulders is forty-five... which is also a rung. Arms is forty,
+       which is NOT — so the ladder has to grow one and put it in
+       order, or the suggestion would be a figure nothing on screen can
+       select. */
+    await page.click('.wc-chips .wc-chip:nth-child(4)');           /* Arms, 40 */
+    await page.waitForTimeout(320);
+    const spliced = await page.evaluate(() =>
+      [...document.querySelectorAll('.wc-min')].map((x) => x.textContent));
+    ok('...and an estimate that is not a rung is spliced in, in order',
+      spliced.join(' ') === '15 20 30 40 45 60 75 90 120', spliced);
+
+    /* ── AND A LENGTH YOU PRESS IS WHAT GOES ON THE CARD ──
+       The card says "Est. time" for a figure nobody has touched and
+       drops the word once you have: the ladder's suggestion is not a
+       choice, and a card that called it Time would be the app putting
+       words in your mouth. */
+    const before = await page.$eval('.wc.is-front .wc-top div:first-child',
+      (d) => d.textContent);
+    await page.click('.wc-mins .wc-min:nth-child(6)');              /* 60 */
+    await page.waitForTimeout(320);
+    const after = await page.evaluate(() => ({
+      fig: document.querySelector('.wc.is-front .wc-top div:first-child').textContent,
+      on: [...document.querySelectorAll('.wc-min')]
+        .filter((x) => x.getAttribute('aria-pressed') === 'true')
+        .map((x) => x.textContent).join(''),
+    }));
+    ok('a length you press goes on the card, and drops the word Est.',
+      /^Est\. time40 min$/.test(before) && after.fig === 'Time60 min'
+      && after.on === '60', { before, after });
 
     /* ── THE SWOOP ──
        A curve through the card and nothing else: the wordmark this
@@ -4985,14 +5047,16 @@ const SAID = [
     await page.waitForTimeout(320);
     await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Light */
     await page.waitForTimeout(320);
+    await page.click('.wc-mins .wc-min:nth-child(7)');             /* say 90 */
+    await page.waitForTimeout(320);
     await page.click('.wc-go');                                    /* file it */
     await page.waitForTimeout(460);
     const stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('sched.train.v1') || '{}'));
     const one2 = Object.values(Object.values(stored)[0] || {})[0] || {};
-    ok('picking one files it against that block, with the effort you said',
+    ok('picking one files it against that block, with what you said',
       Object.keys(stored).length === 1
-      && one2.k === 'bro.legs' && one2.e === 'Light', stored);
+      && one2.k === 'bro.legs' && one2.e === 'Light' && one2.m === 90, stored);
 
     /* ── EVERY RECORD WRITTEN BEFORE THE EFFORT EXISTED IS A BARE
        STRING ──
@@ -5197,11 +5261,20 @@ const SAID = [
        and false of the third, which is the only way to check it is a
        claim rather than a label. */
     const log = {};
-    const put = (n, k, e) => { log[back(n)] = { ['b' + n]: { k, e: e || 'Hard' } }; };
+    const put = (n, k, e, m) => {
+      log[back(n)] = { ['b' + n]: { k, e: e || 'Hard', m: m || 45 } };
+    };
     /* Chest comes out FIVE Hard and THREE Light, which averages to
        Moderate — a word that is in neither input. An average that can
-       only return one of the values it was given is a pick. */
-    for (let i = 0; i < 8; i++) put(2 + i * 7, 'bro.chest', i < 5 ? 'Hard' : 'Light');
+       only return one of the values it was given is a pick.
+
+       The MINUTES are the same argument twice: four at 30 and four at
+       60 come out 45, which is in neither input and is not the card's
+       own 50-minute estimate either. Reverting the panel to the
+       estimate reads 50 and falls over here — which is the only thing
+       that tells a mean from the figure it replaced. */
+    for (let i = 0; i < 8; i++)
+      put(2 + i * 7, 'bro.chest', i < 5 ? 'Hard' : 'Light', i < 4 ? 30 : 60);
     for (let i = 0; i < 5; i++) put(4 + i * 7, 'bro.back');
     /* Day 3, and not 9: nine is 2 + 7, which is Chest's second Friday,
        and one record per block per day means the Pull simply replaced
@@ -5349,13 +5422,22 @@ const SAID = [
       drawn.rows[0].f[1] === 'Moderate' && drawn.rows[1].f[1] === 'Hard',
       drawn.rows.map((r) => r.w + ' ' + r.f[1]));
 
+    /* ── AND SO IS THE TIME ──
+       Nothing on this record carried a duration until the sheet asked
+       for one, so the figure was the card's own estimate wearing the
+       word "Avg". Chest's eight are four 30s and four 60s: the panel
+       has to read 45, which is neither of those and is not the 50 the
+       card estimates. */
+    ok('the time is the mean of what was logged, not the card\'s estimate',
+      drawn.rows[0].f[0] === '45 min', drawn.rows[0].f);
+
     /* ── AND THE BLOCK IS SPOKEN ONCE ──
        Two glyphs and three figures read out as marks would charge
        twice for one fact, so the figures are aria-hidden and the whole
        panel carries one sentence. */
     ok('...spoken once in the panel\'s own label, not as five marks',
       drawn.rows[0].quiet
-      && /50 minutes on average, usually moderate, \d+ per cent of this month/
+      && /45 minutes on average, usually moderate, \d+ per cent of this month/
          .test(drawn.rows[0].spoken), drawn.rows[0].spoken);
 
     /* A session with nothing in the last thirty days carries no share
