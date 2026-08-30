@@ -1118,7 +1118,14 @@ const SAID = [
         if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
           hit.push({ today: el.classList.contains('day-name'),
                      running: !!el.closest('.row.is-now'),
-                     place: el.tagName === 'EM',
+                     place: el.tagName === 'EM' && !el.classList.contains('wo'),
+                     /* What you trained, which used to be a grey. It is
+                        its own kind rather than folded in with the
+                        place: both are an <em> inside .row .n, so a
+                        check that asked only for the tag would call the
+                        session a place and the scan would stop being
+                        able to tell the two apart. */
+                     did: el.classList.contains('wo'),
                      /* The span's dot is where you are in the day, which
                         is the running block seen one level up — the same
                         fact, so the same colour. Its TRACK and its spent
@@ -1128,9 +1135,10 @@ const SAID = [
       });
     return hit;
   });
-  ok('the red marks today, the running block, now and a place — nothing else',
+  ok('the red marks today, the running block, now, a place and what you '
+    + 'trained — nothing else',
     reds.length > 0
-    && reds.every((r) => r.today || r.running || r.place || r.now)
+    && reds.every((r) => r.today || r.running || r.place || r.now || r.did)
     && reds.filter((r) => r.today).length === 1
     && reds.filter((r) => r.now).length === 1
     && reds.some((r) => r.running) && reds.some((r) => r.place),
@@ -1140,7 +1148,7 @@ const SAID = [
        accent having quietly stopped marking something. Reporting only
        the strays printed an empty array when the place lost its
        colour — a failure whose evidence said nothing. */
-    { stray: reds.filter((r) => !(r.today || r.running || r.place || r.now)),
+    { stray: reds.filter((r) => !(r.today || r.running || r.place || r.now || r.did)),
       today: reds.filter((r) => r.today).length,
       running: reds.filter((r) => r.running).length,
       now: reds.filter((r) => r.now).length,
@@ -2835,7 +2843,7 @@ const SAID = [
       blurs: [...cal.querySelectorAll('feGaussianBlur')]
         .map((e) => +e.getAttribute('stdDeviation')),
       groups: cal.querySelectorAll('g[filter]').length,
-      lit: cal.querySelectorAll('rect[fill*="--ink"]').length,
+      lit: cal.querySelectorAll('rect[fill*="--red"]').length,
       /* Order matters: the blurred copies have to be painted BEFORE the
          solid marks or the glow sits on top of what it is lighting. */
       lastIsSolid: kids[kids.length - 1].tagName === 'rect',
@@ -2850,6 +2858,46 @@ const SAID = [
     glow.blurs);
   ok('and the blurred copies are painted behind the solid marks',
     glow.lastIsSolid, glow);
+
+  /* ── ONE MARK, THREE SIZES, ONE COLOUR ──
+     The ring, the strip beside it and the calendar it opens are the
+     same claim drawn at three scales, so they move together or the
+     screen says one thing in two colours. It was --ink at all three,
+     which on a page whose ink is white made a kept day and a piece of
+     type the same object.
+
+     Asked for as the RESOLVED accent rather than a literal — the wheel
+     turns it to anything — and the unlit mark is measured in the same
+     breath, because a rule that painted everything the accent would
+     pass a check that only looked at the lit ones. Losing the misses
+     is the one thing a record of showing up must never do. */
+  const tyMark = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
+    const rgb = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
+      .map((x) => parseInt(x, 16)).join(', ') + ')';
+    const a1 = document.querySelector('.ty-row .ty-arc');
+    const s1 = document.querySelector('.ty-hist svg');
+    const c1 = document.querySelector('.ty-cal');
+    if (!a1 || !s1 || !c1) return { probe: [!!a1, !!s1, !!c1] };
+    const arc = getComputedStyle(a1).stroke;
+    const fills = (root, sel) => [...root.querySelectorAll(sel)]
+      .map((r) => r.getAttribute('fill'));
+    const strip = fills(s1, 'rect');
+    const cal = fills(c1, ':scope > rect');
+    return { red: rgb(hex('--red')), off: rgb(hex('--tick-off')), arc,
+      stripLit: strip.filter((f) => f === 'var(--red)').length,
+      stripOff: strip.filter((f) => f === 'var(--tick-off)').length,
+      calLit: cal.filter((f) => f === 'var(--red)').length,
+      calOff: cal.filter((f) => f === 'var(--tick-off)').length,
+      other: strip.concat(cal).filter((f) =>
+        f !== 'var(--red)' && f !== 'var(--tick-off)') };
+  });
+  ok('the ring, the strip and the calendar all draw a kept day in the accent',
+    tyMark.arc === tyMark.red && tyMark.stripLit > 0 && tyMark.calLit > 0
+    && tyMark.other.length === 0, tyMark);
+  ok('...and a missed one is still drawn, in neither',
+    tyMark.stripOff > 0 && tyMark.calOff > 0 && tyMark.red !== tyMark.off, tyMark);
 
   /* ── weeks across, weekdays DOWN ──
      Without the first day's own weekday as a column offset, every
@@ -2866,6 +2914,7 @@ const SAID = [
     const days = [...cal.querySelectorAll(':scope > rect')];
     const ys = [...new Set(days.map((r) => +r.getAttribute('y')))].sort((a, b) => a - b);
     const last = days[days.length - 1];
+    if (!last) return { EMPTY: cal.outerHTML.slice(0, 300), n: cal.children.length };
     return { rows: ys.length, cells: days.length,
              todayRow: ys.indexOf(+last.getAttribute('y')),
              dow: new Date().getDay() };
@@ -2992,17 +3041,32 @@ const SAID = [
          rather than eyeballed off the picture. */
       const pick = (want) => [...cal.querySelectorAll('rect')].find((r) =>
         (r.getAttribute('fill') || '').includes(want));
-      const mid = (r) => ({ x: ox + (+r.getAttribute('x') + 4.7) * s,
-                            y: oy + (+r.getAttribute('y') + 4.7) * s });
-      return { off: mid(pick('tick-off')), on: mid(pick('--ink')) };
+      /* Null-tolerant, and that is not defensive noise: pick() looks
+         the marks up BY FILL, so the day the lit mark's colour moves it
+         finds nothing — and a bare r.getAttribute then throws inside
+         page.evaluate, which takes the whole FILE down rather than
+         failing one assertion. It did exactly that when the marks went
+         from --ink to the accent: two hundred assertions after this
+         point never ran, and the output read as a crash. A check that
+         cannot fail cleanly cannot be trusted to have run. */
+      const mid = (r) => r && ({ x: ox + (+r.getAttribute('x') + 4.7) * s,
+                                 y: oy + (+r.getAttribute('y') + 4.7) * s });
+      return { off: mid(pick('tick-off')), on: mid(pick('--red')) };
     });
-    const panel = at(cell.off.x, cell.off.y - 26);
-    const off = at(cell.off.x, cell.off.y);
-    const on = at(cell.on.x, cell.on.y);
+    const found = !!(cell.off && cell.on);
+    const panel = found ? at(cell.off.x, cell.off.y - 26) : [0, 0, 0];
+    const off = found ? at(cell.off.x, cell.off.y) : [0, 0, 0];
+    const on = found ? at(cell.on.x, cell.on.y) : [0, 0, 0];
     const sep = Math.abs(lum(off) - lum(panel));
+    /* .2 between lit and unlit, and it was .3 when the mark was --ink.
+       White is a free win there; the accent is not, and the number that
+       replaces it is the one the wheel actually guarantees — every
+       accent sits at a luminance of at least .26 and --tick-off at .035.
+       Written to the floor rather than to what lime happens to measure,
+       which is .75. */
     ok('a missed day is still a mark, not swallowed by its neighbours’ glow',
-      sep > .02 && Math.abs(lum(on) - lum(off)) > .3,
-      { panel, off, on, sep: +sep.toFixed(3) });
+      found && sep > .02 && Math.abs(lum(on) - lum(off)) > .2,
+      { found, panel, off, on, sep: +sep.toFixed(3) });
   }
 
   /* ── it closes, three ways, and never outlives its view ──
@@ -5237,19 +5301,86 @@ const SAID = [
     });
     ok('and the row it happened on says what it was, through a reload',
       row.mark === 'Legs' && / Legs\.? /.test(row.label + ' '), row);
-    /* NOT THE ACCENT. The red on this screen already means today's
-       name, the block running now, the session you are in and the room
-       a block is in — a fifth would stop it meaning anything, and the
-       room beside it on the same row IS red.
+    /* THE ACCENT, or --spent once the block is behind you — and this
+       fixture's Train is a 06:30, so which one it is depends on the
+       hour the suite runs. Asserted as "the accent, or the grey a past
+       row fades to" rather than as one hex for exactly that reason;
+       what it must never be is --dim, which is what it was.
 
-       Either grey, because a block behind you fades to --spent with
-       the rest of its row and this fixture's Train is a 06:30 that has
-       already happened. Asserted as "one of the two greys and never
-       the accent" rather than as one hex, which would pass or fail on
-       what time the suite happens to run. */
-    ok('...in a grey, because the accent is spent four times already',
-      [row.dim, row.spent].indexOf(row.colour) >= 0
-      && row.colour !== row.accent, row);
+       It went from a grey on the argument that a fifth use would stop
+       the red meaning anything. Counting uses was the wrong question:
+       the accent makes one claim on this app — this happened — and
+       what you trained is that sentence. */
+    ok('...in the accent, or the grey a row behind you fades to',
+      [row.accent, row.spent].indexOf(row.colour) >= 0
+      && row.colour !== row.dim, row);
+
+    /* ── AND MEASURED ON A ROW THAT CANNOT BE BEHIND YOU ──
+       The check above cannot fail at most hours, which is the shape
+       this file already has a lesson about. `is-past` is set on
+       `.day.is-today .row` alone, so a fixture on today's 06:30 Train
+       resolves to --spent from about seven in the morning — and
+       --spent is one of the two answers it accepts, so reverting the
+       colour to --dim sails through it. Proven by doing exactly that.
+
+       Any other card's rows are never past, at any hour, which is the
+       same construction the one-right-edge check had to move to. The
+       record is planted across a fortnight of dates under every block
+       id on the week, so whichever date a given card resolves to is
+       covered without this file working out the deck's arithmetic for
+       itself. */
+    await page.evaluate(() => {
+      const pad = (n) => String(n).padStart(2, '0');
+      const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1)
+        + '-' + pad(d.getDate());
+      const ids = [...document.querySelectorAll('.row[data-id]')]
+        .map((r) => r.dataset.id);
+      const train = {}, log = {};
+      for (let k = -7; k <= 7; k++) {
+        const d = new Date(); d.setDate(d.getDate() + k);
+        train[iso(d)] = {}; log[iso(d)] = {};
+        ids.forEach((id) => {
+          train[iso(d)][id] = { k: 'bro.legs', e: 'Light', m: 60 };
+          log[iso(d)][id] = 1;
+        });
+      }
+      localStorage.setItem('sched.train.v1', JSON.stringify(train));
+      localStorage.setItem('sched.log.v1', JSON.stringify(log));
+    });
+    await page.reload({ waitUntil: 'networkidle' });
+    await page.waitForTimeout(360);
+    const ahead = await page.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
+        .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
+      const r = document.querySelector('.day:not(.is-today) .row[data-id]');
+      const em = r && r.querySelector('.n em.wo');
+      const tk = r && r.querySelector('.tick');
+      return { past: r && r.classList.contains('is-past'),
+        wo: em && getComputedStyle(em).color,
+        tick: tk && getComputedStyle(tk).stroke,
+        accent: rgb('--red'), ink: rgb('--ink'), dim: rgb('--dim') };
+    });
+    ok('what you trained is the accent on a row that is not behind you',
+      ahead.past === false && ahead.wo === ahead.accent
+      && ahead.wo !== ahead.dim, ahead);
+    /* THE TICK WENT THE SAME WAY, and for the same reason: a done
+       block and a kept day on the tally are one record seen from two
+       screens, so drawing them in two colours is the thing that has to
+       be learned. It was --ink. */
+    ok('...and so is the tick on a block the tally has counted',
+      ahead.tick === ahead.accent && ahead.tick !== ahead.ink, ahead);
+
+    /* PUT BACK WHAT THE FORTNIGHT WROTE. The section below unticks
+       today's Train and requires the whole train key to empty, which
+       fifteen days of planted records make impossible — a fixture that
+       leaves the furniture where it found it is the difference between
+       this and thirteen unrelated failures. */
+    await page.evaluate(([d, i]) => {
+      localStorage.setItem('sched.train.v1',
+        JSON.stringify({ [d]: { [i]: { k: 'bro.legs', e: 'Light', m: 60 } } }));
+      localStorage.removeItem('sched.log.v1');
+    }, [old.day, old.id]);
 
     /* ── UNTICKING TAKES IT WITH IT ──
        The record is a fact ABOUT a finished block. Left behind on one

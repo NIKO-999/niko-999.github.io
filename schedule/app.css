@@ -758,7 +758,18 @@ body {
    sizes is the mistake this file opens by naming. */
 .ty-ring { display: block; width: 44px; max-width: 44px; flex: none; }
 .ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
-.ty-arc { fill: none; stroke: var(--ink); stroke-width: 5; }
+/* ── A KEPT DAY IS THE ACCENT, AT ALL THREE SIZES ──
+   The ring, the strip beside it and the calendar it opens are one mark
+   drawn three sizes, so they move together or the screen says the same
+   thing in two colours. It was --ink, which on a page whose ink is
+   white made a kept day and a piece of type the same object.
+
+   It is the same claim the running block makes — this happened — so it
+   is the same colour. What it is NOT is the habits screen's rule
+   inverted: there a colour says WHICH habit, never whether, because
+   there are six identities to tell apart. Here there is one thing
+   being counted, so there is no WHICH for a colour to say. */
+.ty-arc { fill: none; stroke: var(--red); stroke-width: 5; }
 /* No width or height here and none wanted: the glyph is a <g> inside
    the ring's own viewBox, so it is sized by the transform rather than
    by a box. The 300x150 trap is for an <svg> element, and there is
@@ -1822,18 +1833,24 @@ body {
    thing, which is what removing the rule was for; a mark that appears
    rather than a mark that changes costs the ordinary row nothing.
 
-   It is --ink and not the accent: the accent means the block running
-   NOW, and a screen where one colour means two states is a screen that
-   has to be learned. It also works on a block still in the future,
-   which a done state has to — you can finish a run before its window
-   opens. */
+   IT IS THE ACCENT, and it was --ink on the argument that the accent
+   already meant the block running NOW. That argument does not survive
+   the tally taking the accent for a kept day: a done block and a kept
+   day are the SAME record seen from two screens, so drawing them in
+   two colours is the thing that has to be learned. What the accent
+   means here is one claim, not two — this happened, or is happening —
+   and the running row says the second half with a sweep as well as a
+   colour. It still works on a block still in the future, which a done
+   state has to: you can finish a run before its window opens. */
 .row .tick {
   grid-column: 1; grid-row: 1 / span 2;
   align-self: center; justify-self: end;
   display: block; width: 14px; height: 14px;
-  fill: none; stroke: var(--ink); stroke-width: 2.6;
+  fill: none; stroke: var(--red); stroke-width: 2.6;
   stroke-linecap: round; stroke-linejoin: round;
 }
+/* Behind you it goes quiet, the same way the row's own name does — the
+   accent is for what is left of the day. */
 .row.is-past .tick { stroke: var(--spent); }
 
 /* The block's name is the subheading of its own row — it is what you
@@ -3031,18 +3048,22 @@ body {
 
 
 /* ── what you trained, on the row it happened on ──
-   NOT the accent, and .row .n em is. The red on this screen already
-   means today's name, the block running now, the session you are in
-   and the room a block is in; a fifth would stop it meaning anything.
-   The room stays red because it is where you have to be — a workout
-   is what you already did, which is the quieter fact of the two.
+   THE ACCENT, and it was --dim on the argument that a fifth use would
+   stop the red meaning anything. Counting the uses was the wrong way
+   to look at it: what the accent means on this app is one claim, and
+   the claim is THIS HAPPENED — today, the block running now, the
+   session you are in, a kept day on the tally, a done block's tick.
+   What you trained is the same sentence, so it is the same colour,
+   and adding it makes the rule shorter rather than longer.
 
    More specific than .row .n em, so the order in this file is not
    what decides it. That has bitten four times here. */
 .row .n em.wo {
-  color: var(--dim);
+  color: var(--red);
   letter-spacing: .07em;
 }
+/* Behind you it goes quiet with the rest of its row: the accent is
+   for what is left of the day. */
 .row.is-past .n em.wo { color: var(--spent); }
 
 /* A row: the way back, the answer, and the undo. Stacked they were

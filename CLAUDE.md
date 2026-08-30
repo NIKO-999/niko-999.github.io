@@ -117,6 +117,15 @@ arrived at all. Nothing in the app can edit it, so there was never
 anything to preserve — and the one array in `DEFAULT` decides the rows,
 the pips in every cell, and the arms of the radar, in that order.
 
+**Colour on the HABITS screen says WHICH, never whether** — and
+`schedule/`'s tally does the opposite, deliberately. There are six
+habits to tell apart, so a colour there has a WHICH to say and a wash
+of red across a week you missed would be a judgement about you. The
+tally counts one thing at a time, so there is no WHICH left for a
+colour to carry; its kept mark is the accent and its missed one is the
+flat neutral, which is the same rule seen from the other side —
+nothing is ever coloured to say you failed.
+
 **Colour on that screen says WHICH, never whether.** The screen had
 none on purpose: a wash of red across a week you missed is a judgement
 about you, and that is what makes you stop opening it. A habit's colour
@@ -946,8 +955,23 @@ untouched one — and the two records agreeing about one morning is why
 the link between them runs both ways. That state is a tick beside the
 glyph now, drawn only when the block is done: a mark that APPEARS rather
 than one that changes, so an ordinary row's gutter still holds one
-thing. It is `--ink`, never the accent, because the accent already means
-the block running now.
+thing. **It is the ACCENT**, and it was `--ink` on the argument that
+the accent already meant the block running now. Counting the uses was
+the wrong question: what the accent means on this app is ONE claim —
+this happened, or is happening — and a done block, a kept day on the
+tally, today's name, the running row and what you trained are all that
+sentence. Adding to it made the rule shorter rather than longer.
+Behind you it goes to `--spent` with the rest of its row, because the
+accent is for what is left of the day.
+
+**And a check that only passes at certain hours is worse than none.**
+The check on this colour read the fixture's own 06:30 Train, which is
+`is-past` from about seven in the morning — and `--spent` is one of the
+two answers it accepts, so reverting the colour to `--dim` sailed
+through it at every hour anybody would run the suite. `is-past` is set
+on `.day.is-today .row` alone, so it now reads a row on another card,
+which cannot be behind you at any hour. Proved by reverting the colour
+and watching it fall over.
 
 **NOTHING IS DRAWN BETWEEN THE ROWS.** There was a hairline under
 every one of them, and the session heading had a rule running off it

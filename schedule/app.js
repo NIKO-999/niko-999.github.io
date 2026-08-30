@@ -2580,7 +2580,7 @@
   function scStripSvg(days) {
     var cell = 3.6, g = scCalGeom(days, cell, 1.1), out = '';
     days.forEach(function (d, i) {
-      out += scCalRect(g, i, cell, cell, d.on ? 'var(--ink)' : 'var(--tick-off)');
+      out += scCalRect(g, i, cell, cell, d.on ? 'var(--red)' : 'var(--tick-off)');
     });
     return '<svg viewBox="0 0 ' + g.W + ' ' + g.H + '" aria-hidden="true">'
       + out + '</svg>';
@@ -2601,15 +2601,22 @@
      reads as both. Measured against three single-pass tunings on the
      real panel in both polarities.
 
-     IT IS POLARITY-DEPENDENT AND THAT IS THE DESIGN. In a dark palette
-     --ink is near-white, so the blurred copy is a genuine emissive
-     bloom. In a light one --ink is near-black and the same layer is a
-     contact shadow. Both are what "lit" means in that polarity — ink on
-     paper under a lamp glows by casting — and seven of the thirteen
-     palettes are dark, so both halves are the real product. The only
-     literal glow available on a white page is painting the marks in the
-     accent, and that costs the rule this screen just bought: one mark
-     means one thing, at all three sizes it is drawn.
+     IT IS A LITERAL GLOW NOW, because the marks are the ACCENT. This
+     drew them in --ink for its whole life and the write-up said, in as
+     many words, that the only literal glow available was to paint them
+     in the accent — and that doing so would cost the rule that one
+     mark means one thing at all three sizes it is drawn. It costs
+     nothing of the sort: all three sizes moved together, so the ring,
+     the strip and the calendar still say the same thing in the same
+     colour. What was really being protected was the light polarity,
+     where --ink is near-black and the blurred copy is a contact
+     shadow rather than a bloom. Every palette is dark, the ground
+     cannot change any more, and the accent is solved to sit at a
+     luminance of at least .26 on it — so the emissive reading is the
+     only one there is and the copy is genuinely light.
+
+     A day you kept is the same claim as a block that is running: this
+     happened. It is the same accent for the same reason.
 
      A WIDER HALO WAS MEASURED AND REJECTED. At blur 3.2 grown 14% the
      falloff reaches into the gaps and greys out the unlit days, so the
@@ -2624,9 +2631,9 @@
     days.forEach(function (d, i) {
       if (!d.on) { off += scCalRect(g, i, cell, cell, 'var(--tick-off)'); return; }
       GLOW.forEach(function (L, n) {
-        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--ink)');
+        lay[n] += scCalRect(g, i, cell, cell * L.grow, 'var(--red)');
       });
-      lit += scCalRect(g, i, cell, cell, 'var(--ink)');
+      lit += scCalRect(g, i, cell, cell, 'var(--red)');
     });
     var body = '';
     GLOW.forEach(function (L, n) {
