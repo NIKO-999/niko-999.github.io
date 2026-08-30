@@ -1209,7 +1209,17 @@ const SAID = [
     const ink = (await page.$eval('.row.is-now .t', (e) => getComputedStyle(e).color))
       .match(/[\d.]+/g).slice(0, 3).map(Number);
     let bad = 0, seen = 0;
-    for (let dx = 6; dx < box.w - 6; dx += 2) {
+    /* EVERY CSS PIXEL, and it was every other one. The leading edge is
+       a 2px line, so at a step of two it lands on one sample or two
+       depending on where it happens to be when the screenshot is
+       taken — 0.83% or 1.67% of 120, with the 1.5% ceiling sitting
+       exactly between them. The check was a coin flip on the phase of
+       an infinite animation and it had nothing to do with the
+       threshold: at a step of one the same line measures 0.4-0.8% of
+       240 whichever way it falls, a 20px line still measures about 6%
+       and a 45% wash about 2.2%, so the ceiling goes on discriminating
+       and the measurement stops moving. */
+    for (let dx = 6; dx < box.w - 6; dx += 1) {
       const i = (png.width * Math.round((box.y + box.h - 4) * dpr)
         + Math.round((box.x + dx) * dpr)) << 2;
       seen++;
@@ -1576,8 +1586,16 @@ const SAID = [
     const g = (s) => getComputedStyle(document.querySelector(s));
     const frog = g('.day.is-open .ob.is-frog .ob-ic');
     const rest = g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-ic');
-    const red = g('.day.is-open .ob-head b').color;
-    return { frog: frog.stroke, rest: rest.stroke, red,
+    /* THE ROOT, not the heading. This read its expected value off
+       MAIN OBJECTIVES, which was the accent — and the day every title
+       in the app went white it would have started asserting that the
+       glyphs are --dim. A check that reads what it expects off another
+       piece of the design moves with that piece. */
+    const red = 'rgb(' + getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
+      .map((x) => parseInt(x, 16)).join(', ') + ')';
+    const head = g('.day.is-open .ob-head b').color;
+    return { frog: frog.stroke, rest: rest.stroke, red, head,
       fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
       ft: g('.day.is-open .ob.is-frog .ob-t').fontWeight,
       rt: g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-t').fontWeight,
@@ -1608,10 +1626,16 @@ const SAID = [
   ok('...and never by a rank number',
     (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0);
 
-  /* ── the face names itself ── */
-  ok('the list is headed, in the accent the glyphs now wear',
+  /* ── the face names itself, and the heading is a TITLE ──
+     It was drawn in the accent, matching the glyphs under it. Every
+     title in this app is white now and the accent is for the record,
+     so the heading has to be told apart from the marks it heads —
+     asserted from both sides: it is not the accent, and the glyphs
+     under it still are. */
+  ok('the list is headed, and the heading is not the accent the marks wear',
     (await page.$eval('.day.is-open .ob-head b', (e) => e.textContent))
-      === 'Main objectives' && obMarks.red === obMarks.rest);
+      === 'Main objectives' && obMarks.head !== obMarks.red
+      && obMarks.rest === obMarks.red, obMarks);
 
   /* ── re-ranking is one move, and always the same move ── */
   await page.click('.day.is-open .ob-add');
@@ -2589,12 +2613,13 @@ const SAID = [
     hasToggle && /Done today/.test(hasToggle.text), hasToggle);
   ok('and the toggle is the same box as the fields above it',
     hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
-  /* ── AND ITS ON STATE IS THE ACCENT, NOT THE DAY CHIPS' FILL ──
-     It shared --ink with them on the argument that "set should look
-     like set". A day chip says this block RUNS on Tuesday and this says
-     the block is DONE — two different questions, and only one of them
-     is the claim the accent makes everywhere else. Measured against a
-     day chip in the same sheet, so the two have to come apart. */
+  /* ── A FILLED CONTROL IS WHITE, AND SO IS THE BUTTON UNDER IT ──
+     The accent is for the RECORD — a done block on its row, a done
+     objective, a kept day on the tally. A form control is chrome, and
+     a sheet whose day chips are white and whose Done toggle and Save
+     button are coloured reads as two systems on one form. Measured
+     against a day chip in the same sheet AND against the accent, so
+     the assertion fails from either side. */
     const onLook = await page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement);
       const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
@@ -2606,11 +2631,14 @@ const SAID = [
       if (!was) m.classList.remove('is-on');
       const chip = [...document.querySelectorAll('.sheet .pick')]
         .find((c) => c.getAttribute('aria-pressed') === 'true');
+      const go = document.querySelector('.sheet .btn.go');
       return { bg, chip: chip && getComputedStyle(chip).backgroundColor,
+        go: go && getComputedStyle(go).backgroundColor,
         accent: rgb('--red'), ink: rgb('--ink') };
     });
-    ok('and Done today wears the accent, which the day chips do not',
-      onLook.bg === onLook.accent && onLook.chip === onLook.ink, onLook);
+    ok('Done today, Save and the day chips are one white fill',
+      onLook.bg === onLook.ink && onLook.chip === onLook.ink
+      && onLook.go === onLook.ink && onLook.bg !== onLook.accent, onLook);
 
   /* ── the asset queries are the assets' own fingerprints ──
      A layout fix was reported still broken twice after it shipped, and
@@ -3811,15 +3839,23 @@ const SAID = [
     await page.click('#scTabYou');
     await page.waitForTimeout(300);
 
-    /* The glyph ON the accent, read off the computed style while the
-       sheet is up. This is the one that would have shipped broken:
-       white on an amber accent measures 1.9:1 and on a mint one 1.7:1 —
-       a control with an invisible label. */
-    const [fg, bg] = await page.$eval('.prime', (m) => {
-      const cs = getComputedStyle(m);
-      return [cs.color, cs.backgroundColor];
-    });
-    const num = (v) => v.match(/[\d.]+/g).slice(0, 3).map(Number);
+    /* WHAT SITS ON THE ACCENT, and it is your FACE now. This read the
+       add button, which was the accent with --on-red on it — and the
+       day every filled control went white that measurement became
+       near-black on white, 18:1, a check that passes without looking at
+       the accent at all. The face is the one place --on-red still
+       lands: your accent as the ground with its features drawn on top,
+       and it is pushed to your friends, so it is drawn on pages this
+       one has never seen.
+
+       It would have shipped broken: white on an amber accent measures
+       1.9:1 and on a mint one 1.7:1 — a face with no eyes. */
+    const [fg, bg] = await page.$eval('.tab-face svg', (svg) => [
+      svg.querySelector('circle').getAttribute('fill'),
+      svg.querySelector('rect').getAttribute('fill')]);
+    const num = (v) => (v || '').trim().startsWith('#')
+      ? v.trim().replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16))
+      : (v.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
     const onAccent = ratio(num(fg), num(bg));
 
     const dangers = await page.evaluate(() => {
@@ -3868,7 +3904,7 @@ const SAID = [
      shipped 4.74 believing that was one. */
   ok(`the accent itself never drops under 6:1 on the page (worst ${low('onPage').onPage}:1 at hue ${low('onPage').h})`,
     spun.every((t) => t.onPage >= 5.9), spun.map((t) => t.h + ':' + t.onPage));
-  ok(`the glyph on the accent clears 4.5:1 at every hue (worst ${low('onAccent').onAccent}:1)`,
+  ok(`what sits on the accent clears 4.5:1 at every hue (worst ${low('onAccent').onAccent}:1)`,
     spun.every((t) => t.onAccent >= 4.5), spun.map((t) => t.h + ':' + t.onAccent));
 
   /* ── DANGER IS NOT THE ACCENT, AND NOW YOU CAN PICK RED ──
@@ -5201,6 +5237,97 @@ const SAID = [
       again.name === 'none' && again.running === 0 && !again.dealing, again);
     await page.click('.wc-chips .wc-chip:nth-child(1)');
     await page.waitForTimeout(220);
+
+    /* ── THE SECOND LEVEL LIFTS, AND ONLY THE FRONT CARD MOVES ──
+       Pressing a kind card replaced the front card outright, which
+       after a dealt first level reads as dead rather than as restraint.
+       Four entrances were rendered over the real sheet before this one
+       — a lateral page, a short fold, the whole hand tightening, and
+       this — and what settled it is that the other three all move
+       something the deal already moved. The two behind carry no
+       information, so anything they do is decoration; holding them
+       perfectly still is the property being asserted.
+
+       DRIVEN, not read off the stylesheet: a rule naming .is-front is
+       only worth anything if the class is on the card the press
+       produces, and the whole mechanism is a flag consumed by the next
+       draw. */
+    const lift = await page.evaluate(() => {
+      document.querySelector('.wc.is-front').click();            /* into a group */
+      const of = (sel) => {
+        const el = document.querySelector(sel);
+        const cs = getComputedStyle(el);
+        return { name: cs.animationName, ms: parseFloat(cs.animationDuration) * 1000,
+          n: el.getAnimations().length };
+      };
+      return { front: of('.wc.is-front'), b1: of('.wc.b1'), b2: of('.wc.b2'),
+        deck: document.querySelector('.wc-deck').className,
+        /* The keyframes, off the stylesheet, for the one thing a
+           computed style cannot say: `transform` in a keyframe REPLACES
+           the resting transform that makes the pair the cards behind.
+           This rule only reaches .is-front today, and it uses the
+           independent properties anyway so the next hand it is pointed
+           at survives. */
+        keys: [...document.styleSheets].flatMap((sh) => {
+          try { return [...sh.cssRules]; } catch (e) { return []; }
+        }).filter((r) => r.type === CSSRule.KEYFRAMES_RULE && r.name === 'wcTurn')
+          .map((r) => [...r.cssRules].map((k) => k.style.cssText).join(' ')) };
+    });
+    await page.waitForTimeout(320);
+    ok('stepping into a group lifts the front card in',
+      lift.front.name === 'wcTurn' && lift.front.n > 0
+      && /is-turning/.test(lift.deck), lift);
+    ok('...and the two behind do not move at all',
+      lift.b1.name === 'none' && lift.b2.name === 'none'
+      && lift.b1.n === 0 && lift.b2.n === 0, lift);
+    /* SHORTER AND SHALLOWER THAN THE DEAL, asserted as a relationship
+       so a change to either curve keeps the claim meaningful: it has to
+       read as the same object settling rather than as a second
+       arrival. */
+    const dealMs = await page.evaluate(() => {
+      const el = document.createElement('i');
+      el.className = 'wc is-front';
+      const d = document.createElement('div');
+      d.className = 'wc-deck is-dealing';
+      d.appendChild(el); document.body.appendChild(d);
+      const ms = parseFloat(getComputedStyle(el).animationDuration) * 1000;
+      d.remove(); return ms;
+    });
+    ok(`the lift is shorter than the deal (${lift.front.ms}ms against ${dealMs}ms)`,
+      lift.front.ms > 0 && lift.front.ms < dealMs / 2, { lift: lift.front.ms, dealMs });
+    ok('...and it names translate, never transform',
+      lift.keys.length === 1 && /translate/.test(lift.keys[0])
+      && !/transform/.test(lift.keys[0]), lift.keys);
+
+    /* AND IT IS THE LEVEL CHANGING, NOT THE DRAW. draw() also runs on a
+       chip, an effort, a length and a pick, and on every one of those
+       the card in front is the SAME card with different figures on it —
+       a card that lifted for a press on Hard would be the deck
+       answering a question nobody asked. Both halves, because watching
+       it appear passes on code that lifts on every draw. */
+    const quiet = {};
+    for (const [what, sel] of [['a chip', '.wc-chips .wc-chip:nth-child(2)'],
+                               ['an effort', '.wc-eff .wc-chip:nth-child(1)'],
+                               ['a pick', '.wc.is-front']]) {
+      await page.click(sel);
+      await page.waitForTimeout(90);
+      quiet[what] = await page.evaluate(() =>
+        getComputedStyle(document.querySelector('.wc.is-front')).animationName);
+    }
+    ok('a chip, an effort and a pick lift nothing',
+      Object.values(quiet).every((v) => v === 'none'), quiet);
+    /* Coming back is a level change too and gets the same lift — but
+       never the deal, which is a first-arrival event. */
+    await page.click('.wc-back');
+    await page.waitForTimeout(80);
+    const home = await page.evaluate(() => ({
+      name: getComputedStyle(document.querySelector('.wc.is-front')).animationName,
+      b1: getComputedStyle(document.querySelector('.wc.b1')).animationName,
+      deck: document.querySelector('.wc-deck').className }));
+    ok('coming back lifts too, and still does not re-deal',
+      home.name === 'wcTurn' && home.b1 === 'none'
+      && !/is-dealing/.test(home.deck), home);
+    await page.waitForTimeout(300);
 
     /* ── STEPPING IN ──
        A split is not a workout. The first press says which KIND of

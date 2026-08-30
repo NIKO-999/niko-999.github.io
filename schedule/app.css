@@ -114,6 +114,17 @@
      stayed the original 226,35,26. A mint hairline dragging a red
      smear. It is gone; color-mix takes the alpha off --red itself, so
      there is one source and nothing to keep in step. */
+  /* ── WHAT THE ACCENT IS FOR, AND WHAT IT IS NOT ──
+     It marks the RECORD: a day you kept, a block that is running or
+     done, a workout you logged, where you are in the day, the day you
+     are on. Nothing else. Every TITLE and every filled BUTTON in this
+     app is white — labels, section headings, Save, Done today, the add
+     button, a set chip — because those are chrome, and chrome asking
+     for the eye is chrome competing with the thing it frames.
+
+     It was the other way round in a dozen places and the symptom was
+     one form answering two questions in two colours: WHAT and DAY in
+     the accent over white day chips over a coloured Save. */
   --red:     #c8fa42;
 
   /* The ground, as three stops rather than one flat fill. On the
@@ -376,7 +387,7 @@ body {
 }
 .say svg { width: 19px; height: 19px; fill: none; stroke: currentColor;
   stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-.say.is-live { background: var(--red); border-color: var(--red); color: var(--on-red); }
+.say.is-live { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 
 /* ── your picture ──
    ROUND. It was a rounded square for one round of options, matching
@@ -678,7 +689,7 @@ body {
 .lg-c { padding: 10px 14px; min-height: 44px; border-radius: 22px;
   border: 1px solid var(--hair); background: none; color: var(--dim);
   font: inherit; font-size: 13px; font-weight: 600; cursor: pointer; }
-.lg-c.on { border-color: var(--red); background: var(--red); color: var(--on-red); }
+.lg-c.on { border-color: var(--ink); background: var(--ink); color: var(--paper); }
 
 /* Settings, on the end of the date row. It WAS absolutely positioned
    over the head's top-right corner, which was right while the corner
@@ -715,7 +726,7 @@ body {
 .ty-hero { display: flex; align-items: baseline; }
 .ty-lbl {
   font-size: 9px; font-weight: 700; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--red);
+  text-transform: uppercase; color: var(--dim);
 }
 .ty-fig {
   margin-left: auto; font-size: 44px; font-weight: 700; line-height: .9;
@@ -1378,13 +1389,13 @@ body {
   font-weight: 700;
   letter-spacing: .17em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--dim);
   white-space: nowrap;
 }
 .ob-head i {
   flex: 1;
   height: 1px;
-  background: color-mix(in srgb, var(--red) 26%, transparent);
+  background: color-mix(in srgb, var(--ink) 20%, transparent);
 }
 
 /* ── an objective ──
@@ -1669,10 +1680,11 @@ body {
   text-transform: uppercase;
   color: var(--spent);
 }
-/* The session you are IN takes the accent. It is a fourth use of the
-   red on this screen — today's name, the running block, a place, and
-   now this — and it is the same fact as the running block seen one
-   level up, never a different one. */
+/* The session you are IN keeps the accent, and it is the one heading
+   that does: it is not a title saying what the section is, it is the
+   same fact as the running block seen one level up. A heading that
+   names a section is white; a heading that says YOU ARE HERE is a
+   record mark that happens to be a heading. */
 .wk-sh.is-live b { color: var(--red); }
 
 /* ── a day you are not reading ──
@@ -2223,8 +2235,8 @@ body {
   width: 58px; height: 58px;
   display: grid; place-items: center;
   border: 0; border-radius: 50%;
-  background: var(--red);
-  color: var(--on-red);
+  background: var(--ink);
+  color: var(--paper);
   cursor: pointer;
 }
 /* Opacity rather than a hand-darkened red. A second hex to derive is a
@@ -2402,7 +2414,7 @@ body {
   font-weight: 700;
   letter-spacing: .2em;
   text-transform: uppercase;
-  color: var(--red);
+  color: var(--dim);
 }
 .label + .field,
 .label + .days-pick,
@@ -2442,7 +2454,7 @@ body {
 }
 .parsed .p-day {
   font-size: 12px; font-weight: 700; letter-spacing: .06em;
-  color: var(--red);
+  color: var(--dim);
 }
 .parsed .p-name { font-size: 15px; font-weight: 600; }
 .parsed .p-meta {
@@ -2462,12 +2474,12 @@ body {
    row and had visibly failed to line up with it. Full width, its own
    label above it, and the tick appears rather than the words changing.
 
-   ON IS THE ACCENT, and it used to be the day chips' own --ink fill —
-   "set looks like set twice on one form". That pairing was the wrong
-   one: a day chip says this block RUNS on Tuesday and this says the
-   block is DONE, which is the one claim the accent makes everywhere
-   else in the app. Two different questions should not answer in one
-   appearance. It is the pair .lg-c.on and .say.is-live already use. */
+   ON IS THE DAY CHIPS' OWN --ink FILL, so "set" looks like "set"
+   twice on one form rather than twice in two languages. It went to the
+   accent for one round on the argument that a done block and a kept
+   day are one claim — true of the RECORD, and this is a control. A
+   sheet where the chips are white and the toggle above the Save button
+   is coloured reads as two systems on one form. */
 .mark {
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 15px 16px;
@@ -2482,7 +2494,7 @@ body {
   stroke-linecap: round; stroke-linejoin: round;
   visibility: hidden;
 }
-.mark.is-on { background: var(--red); border-color: var(--red); color: var(--on-red); }
+.mark.is-on { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 /* ── OFF IS NOT A TICK AND NOT THE ACCENT ──
    Every tick in this app is the accent and every one of them says the
    same thing: this happened. A day off is the one state on the screen
@@ -2508,7 +2520,17 @@ body {
   font: 600 15px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
-.btn.go { background: var(--red); border-color: var(--red); color: var(--on-red); }
+/* ── A FILLED CONTROL IS WHITE, AND THE ACCENT IS FOR THE RECORD ──
+   Save was the accent and the day chips beside it were --ink, so one
+   form answered two questions in two colours: a chip that is SET and a
+   button you are about to press looked like different kinds of object
+   for no reason either of them could carry.
+
+   The rule this replaces said every tick is the accent, and it stands
+   where a tick is a mark on the RECORD — a done block on its row, a
+   done objective, a kept day on the tally. A tick inside a filled chip
+   is not that: it is contrast on the chip, and the chip is chrome. */
+.btn.go { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .btn.go:active { opacity: .82; }
 .btn.off { background: var(--paper); color: var(--ink); }
 .btn.bad { background: var(--paper); color: var(--bad); border-color: var(--bad); }
@@ -2652,8 +2674,8 @@ body {
   flex: none;
   padding: 9px 13px;
   border: 0;
-  background: var(--red);
-  color: var(--on-red);
+  background: var(--ink);
+  color: var(--paper);
   font: 700 13px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
@@ -2728,8 +2750,8 @@ body {
    state — a chip meaning both would be one control answering two
    questions. A tick rather than a second fill, so the two can be true
    at once without the chip having four appearances. */
-.wc-chip.is-picked { border-color: var(--red); color: var(--red); }
-.wc-chip.is-picked[aria-pressed="true"] { color: var(--on-red); background: var(--red); }
+.wc-chip.is-picked { border-color: var(--ink); color: var(--ink); }
+.wc-chip.is-picked[aria-pressed="true"] { color: var(--paper); background: var(--ink); }
 .wc-chip svg {
   width: 12px; height: 12px;
   margin: 0 5px -1px 0;
@@ -2949,13 +2971,16 @@ body {
   padding: 12px 16px;
   border: 0;
   border-radius: 22px;
-  background: var(--red);
-  color: var(--on-red);
+  /* The same white as .btn.go: it is the same button one sheet over,
+     and leaving it coloured would put the inconsistency back a screen
+     away from where it was noticed. */
+  background: var(--ink);
+  color: var(--paper);
   font: 700 15px/1.2 'Inter', system-ui, sans-serif;
   letter-spacing: -.01em;
   cursor: pointer;
 }
-.wc-go:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+.wc-go:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 /* ── HOW HARD IT WAS ──
    A SIBLING of the card, never a control inside it: the card is a
@@ -3080,6 +3105,38 @@ body {
 .wc-deck.is-dealing .wc.b1 { animation-delay: .07s; }
 .wc-deck.is-dealing .wc.is-front { animation-delay: .14s; }
 
+/* ── THE SECOND LEVEL LIFTS, IT DOES NOT DEAL ──
+   Pressing a kind card used to replace the front card outright — a
+   hard cut, which after a dealt first level reads as dead rather than
+   as restraint. Four entrances were rendered over the real sheet
+   first, each at three moments of its own curve: a lateral page, a
+   short fold, the whole hand tightening, and this. What settled it is
+   that the other three all move something the deal already moved. The
+   two behind hold perfectly still here, which is the property that was
+   actually asked for — they are what makes it a deck, and they carry
+   no information, so anything they do is decoration.
+
+   14px and 200ms, against the deal's 46px and 460ms: a quarter of the
+   distance and under half the time, so it reads as the same object
+   settling rather than as a second arrival.
+
+   `translate` and `opacity`, never `transform`: the two behind are
+   positioned by a resting `transform`, and a keyframe naming transform
+   REPLACES it — which is how the fan was flattened once already. This
+   rule only reaches .is-front, which has no resting transform, and it
+   uses the independent property anyway so the next hand it is pointed
+   at survives. */
+@keyframes wcTurn {
+  from { translate: 0 14px; opacity: 0; }
+  to   { translate: 0 0;    opacity: 1; }
+}
+.wc-deck.is-turning .wc.is-front {
+  animation: wcTurn .2s cubic-bezier(.22, 1, .36, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .wc-deck.is-turning .wc.is-front { animation: none; }
+}
+
 .wc:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 
 .wc-clear {
@@ -3190,7 +3247,7 @@ body {
    the one thing every other screen in this app is careful not to do. */
 .wo-p.is-open {
   background: color-mix(in srgb, var(--ink) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 34%, transparent);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--ink) 18%, transparent);
 }
 .wo-p:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 

@@ -5314,6 +5314,21 @@
        it. The fold is the thing worth having; the deal is worth
        exactly one showing. */
     var dealt = false;
+    /* ── AND THE SECOND LEVEL GETS A LIFT, NOT A DEAL ──
+       Pressing a kind used to replace the front card outright, which
+       after a dealt first level reads as dead rather than as restraint.
+       The front card rises 14px and fades over 200ms; the two behind it
+       do not move at all, which is the whole point — they are what
+       makes it a deck, and re-dealing them is the performance this
+       screen already took out.
+
+       ONE DRAW'S WORTH, and only where the LEVEL changed. draw() also
+       runs on a chip, an effort, a length and a pick, and on every one
+       of those the card in front is the same card with different
+       figures on it — a card that lifted for a press on Hard would be
+       the deck answering a question nobody asked. Set at the two places
+       that go in and come back out, and consumed by the next draw. */
+    var turn = false;
 
     scSheet('What did you train?', function (body) {
       /* "What you did", not "one": a session can be a lift and one
@@ -5345,7 +5360,7 @@
       function press(w) {
         return function () {
           /* Step one opens the group. */
-          if (!into) { into = w; at = 0; ef = ''; draw(); return; }
+          if (!into) { into = w; at = 0; ef = ''; turn = true; draw(); return; }
           /* ── STEP TWO TOGGLES, IT DOES NOT LOG ──
              It used to log on the press, which is one tap and made a
              second workout impossible: most people's real session is a
@@ -5428,7 +5443,11 @@
            — and cleared after the first draw, so every later one puts
            the same fold up with no entrance. */
         deck.classList.toggle('is-dealing', !dealt);
+        /* Never both: the deal already brings the front card in, and a
+           lift on top of it would run two entrances over one card. */
+        deck.classList.toggle('is-turning', dealt && turn);
         dealt = true;
+        turn = false;
 
         deck.textContent = '';
         deck.appendChild(scTrainBack('b2'));
@@ -5520,6 +5539,11 @@
             into = null;
             sel = [];
             ef = '';
+            /* Coming back is a level change too, and it gets the same
+               lift. What it does NOT get is the deal: that is a
+               first-arrival event, and re-dealing the hand on the way
+               back would be the performance again. */
+            turn = true;
             draw();
           });
           foot.appendChild(back);

@@ -1057,16 +1057,38 @@ sentence. Adding to it made the rule shorter rather than longer.
 Behind you it goes to `--spent` with the rest of its row, because the
 accent is for what is left of the day.
 
-**EVERY TICK IN THIS APP IS THE ACCENT.** There are four and they are
-all the same claim — a done objective, a done block, a picked workout,
-and *Done today*. The objectives' tick was `--ink`, which on the one
+**EVERY TICK ON THE RECORD IS THE ACCENT.** A done objective, a done
+block on its row, a picked workout, a kept day on the tally — one
+claim, one colour. The objectives' tick was `--ink`, which on the one
 face in the app that is not flat made a ticked-off objective the same
-colour as the words it was ticking off. *Done today* was the day
-chips' own `--ink` fill, on the argument that "set should look like
-set"; that was the wrong pairing, because a day chip says the block
-RUNS on Tuesday and this says it is DONE, and only one of those is the
-claim the accent makes. Measured against a day chip in the same sheet,
-so the two have to come apart.
+colour as the words it was ticking off.
+
+**AND EVERY TITLE AND EVERY FILLED CONTROL IS WHITE.** That is the
+other half of the same rule and it was got wrong in both directions on
+the way here. *Done today* went to the accent for one round on the
+argument that a done block and a kept day are the same claim — true of
+the RECORD, and that toggle is a control. Beside it the day chips were
+`--ink` and the Save button under them was the accent, so one form
+answered two questions in two colours, under headings that were a
+third.
+
+**The accent marks what happened. Chrome is white.** Titles: `.label`,
+`MAIN OBJECTIVES`, the tally's own label, the parsed preview's day.
+Filled controls: Save, the deck's *Log …*, *Done today*, the add
+button, a set chip, Undo on the toast, a picked workout chip.
+
+**Two things keep it and both are the record wearing a title's
+clothes.** The session you are IN is a heading, and it is the running
+block seen one level up rather than a word naming a section. Today's
+day name is the same: it says which day you are on. A heading that
+names a section is white; a heading that says YOU ARE HERE is a mark.
+
+**What sits on the accent is your FACE now, and the check had to
+move.** It read the add button — accent ground with `--on-red` on it —
+and the day that went white the measurement became near-black on
+white at 18:1, which passes without looking at the accent at all. The
+face is the one place `--on-red` still lands, and it is pushed to your
+friends, so it is drawn on pages this one has never seen.
 
 **And what you trained is a step smaller than the place beside it.** A
 place is where you have to be and reads at the row's own weight; a
