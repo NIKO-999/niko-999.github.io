@@ -1632,6 +1632,25 @@ const SAID = [
       && b.getAttribute('aria-pressed') === 'true'));
   ok('...and the card stays turned over while you do it',
     await page.$eval('.day.is-open', (d) => d.classList.contains('is-flipped')));
+  /* ── EVERY TICK IN THIS APP IS THE ACCENT ──
+     There are four and they are all the same claim: a done objective, a
+     done block, a picked workout, and Done today. This one was --ink,
+     which on the one face in the app that is not flat made a ticked-off
+     objective the same colour as the words it was ticking off. Asked
+     for as the resolved --red rather than a literal, since the wheel
+     turns it to anything. */
+  const obTick = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
+      .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
+    const t = document.querySelector('.day.is-open .ob.is-done .ob-tick');
+    return { stroke: t && getComputedStyle(t).stroke,
+      shown: t && +getComputedStyle(t).opacity,
+      accent: rgb('--red'), ink: rgb('--ink') };
+  });
+  ok('...and the tick it draws is the accent, like every other tick',
+    obTick.shown === 1 && obTick.stroke === obTick.accent
+    && obTick.stroke !== obTick.ink, obTick);
   const objStore = await page.evaluate(() => {
     const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
     const d = new Date();
@@ -2570,6 +2589,28 @@ const SAID = [
     hasToggle && /Done today/.test(hasToggle.text), hasToggle);
   ok('and the toggle is the same box as the fields above it',
     hasToggle && hasToggle.sameWidth && hasToggle.sameHeight, hasToggle);
+  /* ── AND ITS ON STATE IS THE ACCENT, NOT THE DAY CHIPS' FILL ──
+     It shared --ink with them on the argument that "set should look
+     like set". A day chip says this block RUNS on Tuesday and this says
+     the block is DONE — two different questions, and only one of them
+     is the claim the accent makes everywhere else. Measured against a
+     day chip in the same sheet, so the two have to come apart. */
+    const onLook = await page.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
+        .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
+      const m = document.querySelector('.sheet .mark');
+      const was = m.classList.contains('is-on');
+      if (!was) m.classList.add('is-on');
+      const bg = getComputedStyle(m).backgroundColor;
+      if (!was) m.classList.remove('is-on');
+      const chip = [...document.querySelectorAll('.sheet .pick')]
+        .find((c) => c.getAttribute('aria-pressed') === 'true');
+      return { bg, chip: chip && getComputedStyle(chip).backgroundColor,
+        accent: rgb('--red'), ink: rgb('--ink') };
+    });
+    ok('and Done today wears the accent, which the day chips do not',
+      onLook.bg === onLook.accent && onLook.chip === onLook.ink, onLook);
 
   /* ── the asset queries are the assets' own fingerprints ──
      A layout fix was reported still broken twice after it shipped, and
@@ -5346,6 +5387,11 @@ const SAID = [
       }
       localStorage.setItem('sched.train.v1', JSON.stringify(train));
       localStorage.setItem('sched.log.v1', JSON.stringify(log));
+      /* A PLACE, because the size below is a claim against one and the
+         starter week has none typed on it. Put back with the rest. */
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      st.items[0].r = 'Gym';
+      localStorage.setItem('sched.v1', JSON.stringify(st));
     });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(360);
@@ -5356,8 +5402,13 @@ const SAID = [
       const r = document.querySelector('.day:not(.is-today) .row[data-id]');
       const em = r && r.querySelector('.n em.wo');
       const tk = r && r.querySelector('.tick');
+      /* The PLACE, on any row that has one — it and the session share a
+         line, and the size is only a claim against something. */
+      const place = [...document.querySelectorAll('.row .n em:not(.wo)')][0];
       return { past: r && r.classList.contains('is-past'),
         wo: em && getComputedStyle(em).color,
+        size: em && parseFloat(getComputedStyle(em).fontSize),
+        placeSize: place && parseFloat(getComputedStyle(place).fontSize),
         tick: tk && getComputedStyle(tk).stroke,
         accent: rgb('--red'), ink: rgb('--ink'), dim: rgb('--dim') };
     });
@@ -5370,6 +5421,14 @@ const SAID = [
        be learned. It was --ink. */
     ok('...and so is the tick on a block the tally has counted',
       ahead.tick === ahead.accent && ahead.tick !== ahead.ink, ahead);
+    /* ── AND IT IS SMALLER THAN THE PLACE IT SHARES A LINE WITH ──
+       A place is where you have to be; a session is a note about what
+       already happened. At one size the two read as one label broken in
+       half. Asserted as a RELATIONSHIP rather than a pixel count, so a
+       change to the type scale moves both and this still means what it
+       says. */
+    ok(`what you trained is a step smaller than a place (${ahead.size} against ${ahead.placeSize})`,
+      ahead.size > 0 && ahead.placeSize > 0 && ahead.size < ahead.placeSize, ahead);
 
     /* PUT BACK WHAT THE FORTNIGHT WROTE. The section below unticks
        today's Train and requires the whole train key to empty, which
@@ -5380,6 +5439,9 @@ const SAID = [
       localStorage.setItem('sched.train.v1',
         JSON.stringify({ [d]: { [i]: { k: 'bro.legs', e: 'Light', m: 60 } } }));
       localStorage.removeItem('sched.log.v1');
+      const st = JSON.parse(localStorage.getItem('sched.v1'));
+      st.items[0].r = '';
+      localStorage.setItem('sched.v1', JSON.stringify(st));
     }, [old.day, old.id]);
 
     /* ── UNTICKING TAKES IT WITH IT ──

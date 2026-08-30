@@ -1470,10 +1470,15 @@ body {
   letter-spacing: -.002em;
   min-width: 0;
 }
+/* THE ACCENT, like every other tick in this app. It was --ink, which
+   on the one face in here that is not flat made a done objective the
+   same colour as the words it was ticking off. The glyph in the column
+   beside it is already the accent on this same sheen and was measured
+   at 3:1 on composited pixels, so the ground is answered for. */
 .ob-tick {
   width: 14px; height: 14px;
   margin-top: 2px;
-  fill: none; stroke: var(--ink); stroke-width: 3;
+  fill: none; stroke: var(--red); stroke-width: 3;
   stroke-linecap: round; stroke-linejoin: round;
   opacity: 0;
 }
@@ -2440,8 +2445,12 @@ body {
    row and had visibly failed to line up with it. Full width, its own
    label above it, and the tick appears rather than the words changing.
 
-   ON is the same pair the day chips use, so "set" looks like "set"
-   twice on one form rather than twice in two languages. */
+   ON IS THE ACCENT, and it used to be the day chips' own --ink fill —
+   "set looks like set twice on one form". That pairing was the wrong
+   one: a day chip says this block RUNS on Tuesday and this says the
+   block is DONE, which is the one claim the accent makes everywhere
+   else in the app. Two different questions should not answer in one
+   appearance. It is the pair .lg-c.on and .say.is-live already use. */
 .mark {
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 15px 16px;
@@ -2456,7 +2465,7 @@ body {
   stroke-linecap: round; stroke-linejoin: round;
   visibility: hidden;
 }
-.mark.is-on { background: var(--ink); color: var(--paper); }
+.mark.is-on { background: var(--red); border-color: var(--red); color: var(--on-red); }
 .mark.is-on svg { visibility: visible; }
 .mark:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
@@ -3058,9 +3067,16 @@ body {
 
    More specific than .row .n em, so the order in this file is not
    what decides it. That has bitten four times here. */
+/* SMALLER THAN THE PLACE BESIDE IT, and they share a row. A place is
+   where you have to be and is read at the same weight as the time; a
+   session is a note about what already happened. One step down and a
+   tighter track is the whole difference — at the same size the two
+   read as one label broken in half. */
 .row .n em.wo {
   color: var(--red);
-  letter-spacing: .07em;
+  font-size: 9px;
+  letter-spacing: .06em;
+  margin-left: 6px;
 }
 /* Behind you it goes quiet with the rest of its row: the accent is
    for what is left of the day. */

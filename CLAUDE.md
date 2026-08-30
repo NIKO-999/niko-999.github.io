@@ -964,6 +964,26 @@ sentence. Adding to it made the rule shorter rather than longer.
 Behind you it goes to `--spent` with the rest of its row, because the
 accent is for what is left of the day.
 
+**EVERY TICK IN THIS APP IS THE ACCENT.** There are four and they are
+all the same claim — a done objective, a done block, a picked workout,
+and *Done today*. The objectives' tick was `--ink`, which on the one
+face in the app that is not flat made a ticked-off objective the same
+colour as the words it was ticking off. *Done today* was the day
+chips' own `--ink` fill, on the argument that "set should look like
+set"; that was the wrong pairing, because a day chip says the block
+RUNS on Tuesday and this says it is DONE, and only one of those is the
+claim the accent makes. Measured against a day chip in the same sheet,
+so the two have to come apart.
+
+**And what you trained is a step smaller than the place beside it.** A
+place is where you have to be and reads at the row's own weight; a
+session is a note about what already happened. At one size the two read
+as a single label broken in half. Asserted as a relationship rather
+than a pixel count, so a change to the type scale moves both and the
+check still means what it says — which needed a place PLANTED on the
+fixture, since the starter week has none typed on it and a comparison
+against nothing reported `9 against undefined`.
+
 **And a check that only passes at certain hours is worse than none.**
 The check on this colour read the fixture's own 06:30 Train, which is
 `is-past` from about seven in the morning — and `--spent` is one of the
