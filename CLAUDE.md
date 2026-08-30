@@ -1217,13 +1217,27 @@ typed to add them. Nobody picks it as a nickname, and the one person
 it could honestly belong to is the one row that is not drawn from peer
 data.
 
-**A profile is offered before a friend is.** Before a nickname there
-is nothing to add anybody to: your row says "You", which is a label
-rather than a name, and a friend who adds you back sees a code. So the
-thing to do first is offered first — and it stops being offered the
-moment it is done, because a "create a profile" that never leaves is a
-task you can never finish. Both states are measured, since each passes
-on the other's bug.
+**A profile is offered before a friend is — and it is the ONLY thing
+offered.** Before a nickname there is nothing to add anybody to: your
+row says "You", which is a label rather than a name, and a friend who
+adds you back sees a code. Drawing both was offering a choice with one
+right answer, so Add a friend is not on the screen at all until there
+is a profile; and the offer stops the moment it is done, because a
+"create a profile" that never leaves is a task you can never finish.
+Both states are measured, since each passes on the other's bug.
+
+**The line under it says why the other action is missing**, not what
+the sheet is about to ask for. The board carried a description under
+every action, which is a screen reading as instructions for itself.
+What survives beside it is the promise — one line, because it is not a
+description of a control.
+
+**A LINK NEEDS NO PROFILE, and a typed code does.** The two doors are
+not the same: arriving on a link adds somebody untyped through
+`scArriveFriends`, which has nothing to do with your own record, while
+typing a code in is you putting yourself on somebody's board. The
+suite's link-phone had to be given a nickname before it could use the
+second door, which is the rule working rather than a fixture detail.
 
 **And your own row opens you.** Rows were pressable only when there
 was a friend behind them, on the rule that a name you can press which
@@ -1747,14 +1761,20 @@ app inventing a routine out of a single Sunday. Below three it says how
 long ago instead.
 
 **Three figures on the right, about the SESSION.** How long it takes,
-how hard it comes out, and what share of your training it is — where
-the left half is about the day. **Only the effort is a real average**:
+how hard it comes out, and what share of THIS MONTH it is — where the
+left half is about the day. Over the whole thirteen weeks the share
+barely moves, which makes it a fact about your history rather than
+about what you are training now; thirty days is short enough to move
+when you change what you do and long enough not to swing on one week
+off. A session with nothing in that window carries no share at all
+rather than a 0%, because "11 weeks ago" on the same panel has already
+said it. **Only the effort is a real average**:
 it is the one thing on this record you choose per session, so five Hard
 and three Easy come back Moderate, a word in neither input, which is
-what tells an average from a pick. The time is the card's own estimate
-and is not called an average, because nothing here carries a duration
-and an "average" of one figure repeated is that figure with an untrue
-word in front of it. The shares have to sum to the whole, or the
+what tells an average from a pick. The time is the card's own estimate,
+and it says **Avg** out loud because it is the one figure here somebody
+could read as this session's actual length — nothing on this record
+carries a duration. The shares have to sum to the whole, or the
 denominator is wrong.
 
 **Spoken once, not as five marks.** Two glyphs and three figures read

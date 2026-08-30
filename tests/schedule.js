@@ -3728,9 +3728,20 @@ const SAID = [
       await fp.waitForTimeout(700);
     };
     await setName('');
-    ok('...and with no name yet, a profile is offered before a friend is',
-      (await glyphs('#scFrPane')) === 'Create a profile|plus Add a friend|plus',
+    /* ── A PROFILE FIRST, AND IT IS THE ONLY THING OFFERED ──
+       Both used to be drawn, which is offering a choice that has one
+       right answer: before a nickname there is nothing to add anybody
+       TO — your row says "You" and a friend who adds you back sees a
+       code. Add a friend is not on the screen at all until there is a
+       profile, and the line under it says WHY the other action is
+       missing rather than describing the field the sheet will show. */
+    ok('...and with no name yet, a profile is the only thing offered',
+      (await glyphs('#scFrPane')) === 'Create a profile|plus',
       await glyphs('#scFrPane'));
+    ok('...with one line saying why the other action is not there',
+      /^Create a profile to add a friend\.$/.test(
+        await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent.trim())),
+      await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent));
     ok('...and your row falls back to the label until you pick one',
       await fp.$eval('.fr-row.is-me .fr-n', (e) => e.textContent) === 'You');
     /* Put it back, because everything below this was written under it. */
@@ -3741,8 +3752,13 @@ const SAID = [
        on the argument that a paragraph you press through is a decision.
        Nobody presses through anything now, so it has to be on the board
        — visible every time rather than once. */
-    ok('and the board says what is on the server',
-      /name.+picture.+ticks.+logs/i.test(
+    /* ONE NOTE, NOT THREE. The board carried a description under each
+       action as well, which is a screen reading as instructions for
+       itself. What survives is the promise — it is not a description
+       of a control, and it is the one sentence nobody may press past. */
+    ok('and the board says what is on the server, in one line',
+      await fp.$$eval('#scFriendAdd .fr-note', (e) => e.length) === 1
+      && /ticks.+logs.+server.+Settings/i.test(
         await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent)),
       await fp.$eval('#scFriendAdd .fr-note', (e) => e.textContent));
 
@@ -4417,6 +4433,14 @@ const SAID = [
       await gp.evaluate(() => {
         localStorage.setItem('sched.friends.v1', '[]');
         localStorage.setItem('sched.peer.v1', '{}');
+        /* A NICKNAME FIRST, because Add a friend is not on the screen
+           until there is one — before a profile there is nothing to
+           add anybody to. This phone got here through a LINK, which
+           needs no profile and added its friend untyped; typing a code
+           in is the other door, and that one asks you to exist first. */
+        const n = JSON.parse(localStorage.getItem('sched.net.v1') || '{}');
+        n.name = 'Sent';
+        localStorage.setItem('sched.net.v1', JSON.stringify(n));
       });
       await gp.reload({ waitUntil: 'networkidle' });
       await gp.waitForTimeout(700);
@@ -5083,6 +5107,9 @@ const SAID = [
        it — seven Chests where the assertion says eight, and a fixture
        quietly measuring something other than what it describes. */
     put(3, 'ppl.pull');
+    /* Outside the thirty-day window on purpose, so the no-share branch
+       has something to be true of. */
+    put(60, 'run.long');
     await openWork(log);
 
     const drawn = await page.evaluate(() => {
@@ -5094,6 +5121,7 @@ const SAID = [
         open: t.getAttribute('aria-expanded') === 'true',
         cal: !!t.querySelector('.wo-cal'),
         f: [...t.querySelectorAll('.wo-fl b')].map((b) => b.textContent),
+        lab: [...t.querySelectorAll('.wo-fl i')].map((b) => b.textContent),
         glyphs: t.querySelectorAll('.wo-fl svg').length,
         spoken: t.getAttribute('aria-label'),
         quiet: t.querySelector('.wo-f').getAttribute('aria-hidden') === 'true',
@@ -5109,7 +5137,7 @@ const SAID = [
         label: document.querySelector('.wo-cal').getAttribute('aria-label') };
     });
     ok('it counts every session and names three months',
-      /^14/.test(drawn.fig) && drawn.months.length === 3
+      /^15/.test(drawn.fig) && drawn.months.length === 3
       && drawn.months.every((m) => /^[A-Z][a-z]{2}$/.test(m)), drawn);
 
     /* ── A PANEL PER WORKOUT YOU DID, NOT PER WORKOUT THAT EXISTS ──
@@ -5118,9 +5146,9 @@ const SAID = [
        menu. Most-done first, so the panel you look at is the thing you
        actually do. */
     ok('one panel per workout you actually did, most-done first',
-      drawn.rows.length === 3
+      drawn.rows.length === 4
       && drawn.rows.map((t) => t.w + ' ' + t.n).join('|')
-         === 'Chest 8|Back 5|Pull 1', drawn.rows);
+         === 'Chest 8|Back 5|Pull 1|Long 1', drawn.rows);
 
     /* ── THE CALENDAR BELONGS TO ONE CARD, AND EXACTLY ONE IS OPEN ──
        A picture with nine hues scattered through it says you were busy
@@ -5149,17 +5177,31 @@ const SAID = [
       /days$/.test(drawn.rows[0].s) && /days$/.test(drawn.rows[1].s)
       && /ago|today|yesterday|last week/.test(drawn.rows[2].s), drawn.rows);
 
-    /* ── THREE FIGURES ON THE RIGHT, ABOUT THE SESSION ──
-       How long it takes, how hard it comes out, and what share of your
-       training it is — where the left half is about the day. The
-       shares have to sum to the whole, or the denominator is wrong. */
-    ok('every panel carries its time, its effort and its share',
-      drawn.rows.every((r) => r.f.length === 3 && /^\d+ min$/.test(r.f[0])
-        && /^(Easy|Moderate|Hard)$/.test(r.f[1]) && /^\d+%$/.test(r.f[2])
-        && r.glyphs === 2), drawn.rows.map((r) => r.f));
-    ok('...and the shares add up to the whole record',
-      Math.abs(drawn.rows.reduce((n, r) => n + parseInt(r.f[2], 10), 0) - 100) <= 2,
-      drawn.rows.map((r) => r.f[2]));
+    /* ── THE FIGURES ON THE RIGHT, ABOUT THE SESSION ──
+       How long it takes, how hard it comes out, and what share of this
+       month it is — where the left half is about the day.
+
+       AVG IS SAID OUT LOUD on the time, because it is the one figure
+       here somebody could read as this session's actual length. */
+    ok('every panel carries its average time and its effort',
+      drawn.rows.every((r) => /^\d+ min$/.test(r.f[0])
+        && /^(Easy|Moderate|Hard)$/.test(r.f[1])
+        && r.lab.join('') === 'Avg' && r.glyphs === 2),
+      drawn.rows.map((r) => r.lab.join('') + ' ' + r.f.join(' / ')));
+
+    /* ── AND THE SHARE IS THIS MONTH'S ──
+       Over thirteen weeks the figure barely moves, which makes it a
+       fact about your history rather than about what you are training
+       now. Thirty days is short enough to move when you change what
+       you do. The shares have to sum to the whole, or the denominator
+       is wrong — and the fixture is built so the month's split is not
+       the window's: four Chests and four Backs inside thirty days
+       against eight and five over the whole record. */
+    const shares = drawn.rows.map((r) => r.f[2]).filter(Boolean);
+    ok(`the share is this month's, and the shares add up (${shares.join(' ')})`,
+      shares.every((v) => /^\d+% this month$/.test(v))
+      && Math.abs(shares.reduce((n, v) => n + parseInt(v, 10), 0) - 100) <= 2,
+      shares);
 
     /* ── THE EFFORT IS A REAL AVERAGE ──
        It is the one figure on this record you chose per session, so it
@@ -5176,8 +5218,17 @@ const SAID = [
        panel carries one sentence. */
     ok('...spoken once in the panel\'s own label, not as five marks',
       drawn.rows[0].quiet
-      && /50 minutes, usually moderate, 57 per cent of your sessions/
+      && /50 minutes on average, usually moderate, \d+ per cent of this month/
          .test(drawn.rows[0].spoken), drawn.rows[0].spoken);
+
+    /* A session with nothing in the last thirty days carries no share
+       at all, rather than a 0% — "11 weeks ago" on the same panel has
+       already said it, and a zero beside it is the app saying nothing
+       twice. Held on a fixture row that is genuinely outside the
+       window. */
+    const old5 = drawn.rows.filter((r) => /weeks ago/.test(r.s));
+    ok('...and a session you have not done this month carries no share',
+      old5.length > 0 && old5.every((r) => r.f.length === 2), old5);
 
     /* ── PRESSING ANOTHER CARD MOVES THE CALENDAR INTO IT ──
        This is the whole mechanism, so it is driven rather than

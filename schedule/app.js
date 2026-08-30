@@ -3379,23 +3379,36 @@
          up. The sentence under it is what the turn-on sheet used to
          say — it stays on the board rather than being shown once and
          pressed through, since nobody presses through it any more. */
-      /* ── A PROFILE FIRST, and it is one field ──
+      /* ── A PROFILE FIRST, AND IT IS THE ONLY THING OFFERED ──
          Before a nickname there is nothing to add anybody TO: your row
          says "You", which is a label rather than a name, and a friend
-         who adds you back sees a code. So the thing to do first is
-         offered first, and it stops being offered the moment it is
-         done — a permanent "create a profile" on a screen where you
-         already have one is a task you can never finish. */
+         who adds you back sees a code. Offering both was offering a
+         choice that has one right answer, so Add a friend is not drawn
+         at all until there is a profile to add them to — and it stops
+         being offered the moment it is done, because a permanent
+         "create a profile" on a screen where you already have one is a
+         task you can never finish.
+
+         The line under it says WHY the other action is missing rather
+         than describing the field the sheet is about to show. Three
+         sentences of explanation under two actions is a screen that
+         reads as instructions for itself. */
       if (!net.name) {
         add.appendChild(scLink('Create a profile', scNameSheet));
-        add.appendChild(scEl('p', 'fr-note',
-          'A nickname, and that is the whole of it. Until you pick one '
-          + 'your friends see your code where your name should be.'));
+        add.appendChild(scEl('p', 'fr-note', 'Create a profile to add a friend.'));
+      } else {
+        add.appendChild(scLink('Add a friend', scAddSheet));
       }
-      add.appendChild(scLink('Add a friend', scAddSheet));
+      /* ── AND THE PROMISE STAYS ──
+         It used to be on the turn-on sheet, on the argument that a
+         paragraph you press through is a decision and one you merely
+         arrive at is a disclaimer. With that sheet gone the argument
+         inverts and it lives here, where nobody presses past it. It is
+         one line rather than two now — what leaves, and how to stop it
+         — but it is not a description of a control and it does not go
+         with them. */
       add.appendChild(scEl('p', 'fr-note',
-        'Your name, picture, ticks and logs are on the server. '
-        + 'Remove yourself any time in Settings.'));
+        'Your ticks and logs are on the server. Remove yourself in Settings.'));
     } else if (joining) {
       add.appendChild(scEl('p', 'fr-note', 'Setting up…'));
     } else {
@@ -5299,7 +5312,7 @@
      row that opens a picture drawn somewhere else on the page is two
      things to look at for one press; this way the panel simply grows,
      and what grew is under your thumb. */
-  function scWorkPanel(w, hits, most, total, open, pick) {
+  function scWorkPanel(w, hits, most, month, open, pick) {
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';
     p.style.setProperty('--wc-hue', w.c);
@@ -5339,9 +5352,22 @@
     var figs = scEl('div', 'wo-f');
     figs.setAttribute('aria-hidden', 'true');
     var eff = scWorkEffort(hits);
-    var share = Math.round(hits.length / total * 100);
-    [['time', w.t + ' min'], ['lift', eff], [null, share + '%']].forEach(function (f) {
-      if (!f[1]) return;
+    /* ── THE SHARE IS THIS MONTH'S, NOT THE WHOLE WINDOW'S ──
+       Over thirteen weeks the figure barely moves, which makes it a
+       fact about your history rather than about what you are doing —
+       and what it is FOR is saying which session you are training most
+       right now. Thirty days is short enough to move when you change
+       what you do and long enough not to swing on one week off.
+
+       Omitted where the month is empty rather than drawn as 0%: a
+       panel that reads "11 weeks ago" has already said it. */
+    var mine = month.filter(function (h) { return h.w.key === w.key; }).length;
+    var share = month.length && mine ? Math.round(mine / month.length * 100) : 0;
+
+    var lines = [['time', 'Avg', w.t + ' min'], ['lift', '', eff]];
+    if (share) lines.push([null, '', share + '% this month']);
+    lines.forEach(function (f) {
+      if (!f[2]) return;
       var line = scEl('span', 'wo-fl');
       if (f[0]) {
         line.insertAdjacentHTML('beforeend',
@@ -5350,7 +5376,10 @@
         /* The share has no glyph and needs none: % is one. */
         line.classList.add('is-bare');
       }
-      line.appendChild(scEl('b', null, f[1]));
+      /* AVG SAID OUT LOUD on the time, because it is the one figure
+         here somebody could read as this session's actual length. */
+      if (f[1]) line.appendChild(scEl('i', null, f[1]));
+      line.appendChild(scEl('b', null, f[2]));
       figs.appendChild(line);
     });
     row.appendChild(figs);
@@ -5359,9 +5388,9 @@
     p.setAttribute('aria-label', w.n + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
-      + '. ' + w.t + ' minutes'
+      + '. ' + w.t + ' minutes on average'
       + (eff ? ', usually ' + eff.toLowerCase() : '')
-      + ', ' + share + ' per cent of your sessions. '
+      + (share ? ', ' + share + ' per cent of this month\'s sessions' : '') + '. '
       + (open ? 'Showing its three months.' : 'Show its three months.'));
     p.addEventListener('click', pick);
     return p;
@@ -5447,10 +5476,15 @@
        knows to make. */
     if (keys.indexOf(workOpen) < 0) workOpen = keys[0];
     var most = by[keys[0]].length;
+    /* Thirty days, for the share only. Everything else on this screen
+       is the whole window — the count, the ring and the calendar are
+       about the record, and the share is about right now. */
+    var floor = scDayBack(29);
+    var month = all.filter(function (h) { return h.day >= floor; });
 
     var list = scEl('div', 'wo-list');
     keys.forEach(function (k) {
-      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, all.length, k === workOpen,
+      list.appendChild(scWorkPanel(scWorkout(k), by[k], most, month, k === workOpen,
         function () {
           /* Pressing the open one shuts nothing: a screen with no
              calendar on it is the state this view exists to avoid. */

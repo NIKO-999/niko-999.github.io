@@ -3040,6 +3040,15 @@ body {
   font-variant-numeric: tabular-nums;
 }
 .wo-fl b { font-weight: 600; }
+/* The "Avg" that says which figure the time is. Lighter than the value
+   beside it, because it is a label rather than a fact — the same split
+   the card's own EST. TIME makes one level up. */
+.wo-fl i {
+  font-style: normal;
+  font-weight: 500;
+  color: var(--spent);
+  margin-right: -1px;
+}
 /* Sized in the sheet, never on the markup: an inline <svg> with no
    width or height falls back to 300x150 and fills its parent. */
 .wo-fl svg {
