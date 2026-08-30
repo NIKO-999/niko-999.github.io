@@ -5190,21 +5190,29 @@
     return !!item && scIconFor(item.n) === 'train';
   }
 
-  /* ── THE TWO BEHIND ARE BLANK ──
-     They used to be the next two workouts in the group, drawn in full
-     and clipped to the corner showing. Pressing a chip then changed
-     what was BEHIND the card as well as the card itself, so the deck
-     read as moving through the whole list — and mid-deal you could see
-     another session's name and figures sliding under the one you were
-     looking at, which reads as a glitch because there is no reason for
-     PPL's words to be behind All exercises.
+  /* ── THE TWO BEHIND ARE MORE OF THE SAME CARD ──
+     They were the NEXT TWO WORKOUTS in the group once, drawn in full
+     and clipped to the corner showing — so pressing a chip changed
+     what was behind the card as well as the card itself, the deck read
+     as moving through the whole list, and mid-deal another session's
+     name and figures slid under the one you were reading. That is
+     still wrong and is not what this is. Then they were empty grey
+     slabs, which said "there are more of these" and nothing else, and
+     the thing they left out is WHICH these are: a stack of grey behind
+     a red card is a stack of something else.
 
-     A card behind a card carries no information. What it has to say is
-     "there are more of these", and an empty slab of the right ground
-     at the right angle says exactly that and nothing else. */
-  function scTrainBack(cls) {
+     They are the same card now — its hue, its ground, its swoop — so
+     Chest is a hand of Chest and stepping to Push turns the whole hand
+     over. No WORDS, and that is not a shortcut: the fan is 13 and 25
+     pixels, so nothing but an edge is ever visible, and a name drawn
+     where it cannot be read is DOM the deck pays for on every draw.
+     What a card behind a card has to say is "there are more of THIS",
+     and a surface is the whole of that sentence. */
+  function scTrainBack(w, cls) {
     var card = scEl('div', 'wc ' + cls);
+    card.style.setProperty('--wc-hue', w.c);
     card.setAttribute('aria-hidden', 'true');
+    card.appendChild(scTrainSwoop(w));
     return card;
   }
 
@@ -5466,56 +5474,69 @@
         deck.classList.toggle('is-turning', entr === 'lift');
         deck.classList.toggle('is-shuffling', entr === 'shuffle');
 
-        /* ── THE CARD YOU WERE ON GOES TO THE BACK ──
-           Kept rather than rebuilt: it is the OUTGOING workout, with
-           its own colour and its own name, and the whole gesture is
-           that THAT card is the one being put down. A fresh element
-           would be a different card pretending.
+        /* ── THE WHOLE HAND GOES, NOT THE TOP CARD ──
+           The two behind are the same card as the one in front now, so
+           what leaves is a hand of Chest and what arrives is a hand of
+           Push — the deck turns over rather than swapping its top
+           card. Taking only the front one off left two Chest slabs
+           standing while a Push card slid in over them, which is the
+           thing this whole treatment is about seen from the other
+           side.
 
-           textContent = '' detaches it along with everything else,
+           Kept rather than rebuilt: they carry the outgoing workout's
+           own colour and its own swoop, and the whole gesture is that
+           THOSE cards are the ones going away. Fresh elements would be
+           a different hand pretending.
+
+           textContent = '' detaches them along with everything else,
            which is what makes this work at all — an element removed
            and re-inserted starts its animation on insertion, so the
-           recede begins exactly when the new hand is laid out rather
+           pass begins exactly when the new hand is laid out rather
            than whenever the class happened to land. */
         var out = null;
         if (entr === 'shuffle') {
-          out = deck.querySelector('.wc.is-front');
-          if (out) {
-            out.classList.remove('is-front', 'is-picked');
-            out.classList.add('is-out');
-          }
+          out = [].slice.call(deck.querySelectorAll('.wc'));
+          out.forEach(function (c) {
+            c.classList.remove('is-front', 'is-picked');
+            c.classList.add('is-out');
+          });
+          if (!out.length) out = null;
         }
         entr = null;
 
         deck.textContent = '';
-        deck.appendChild(scTrainBack('b2'));
-        deck.appendChild(scTrainBack('b1'));
-        /* ── THE CARD BEING TAKEN OFF GOES IN BEFORE THE ONE ARRIVING ──
+        /* ── THE HAND BEING TAKEN OFF GOES IN FIRST ──
            These are absolutely positioned siblings with no z-index
-           between them, so source order IS the stacking order. It used
-           to go in LAST, on top of the whole deck, and it faded to
-           nothing there — which is a card passing THROUGH the one that
-           replaced it and then disappearing, and that is exactly what
-           it was reported as.
+           between them, so source order IS the stacking order. The
+           outgoing card used to go in LAST, on top of the whole deck,
+           and it faded to nothing there — which is a card passing
+           THROUGH the one that replaced it and then disappearing, and
+           that is exactly what it was reported as.
 
-           Under the arriving card and over the two behind is where a
-           card taken off a deck actually is. It never fades now, so
-           the order is the only thing keeping the two from being
-           double-exposed while they cross.
+           Under the arriving hand is where a hand taken off a deck
+           actually is. Nothing fades now, so this order is the only
+           thing keeping the two hands from being double-exposed while
+           they cross — and b2 before b1 before the front inside each
+           hand, so each keeps its own fan.
 
            Swept on animationend AND on a timer, because an animation
            that never runs — reduced motion, a background tab — would
-           otherwise leave a dead card on the pile for the next press
+           otherwise leave a dead hand on the pile for the next press
            to stack on. */
         if (out) {
-          deck.appendChild(out);
+          out.forEach(function (c) { deck.appendChild(c); });
+          var going = out;
           var sweep = function () {
-            if (out && out.parentNode) out.parentNode.removeChild(out);
-            out = null;
+            going.forEach(function (c) {
+              if (c.parentNode) c.parentNode.removeChild(c);
+            });
+            going = [];
           };
-          out.addEventListener('animationend', sweep);
+          out[out.length - 1].addEventListener('animationend', sweep);
           setTimeout(sweep, 700);
         }
+        deck.appendChild(scTrainBack(w, 'b2'));
+        deck.appendChild(scTrainBack(w, 'b1'));
         deck.appendChild(scTrainCard(w, 'is-front'
           + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
           press(w), into ? ef : '', saidMin ? mins : 0));

@@ -5203,14 +5203,15 @@ const SAID = [
        behind show an edge each; focusable, they are two tab stops that
        do nothing and two more things a screen reader has to walk past.
 
-       AND THEY ARE EMPTY. They used to be the next two workouts in the
-       group, drawn in full and clipped to the corner showing — so
-       pressing a chip changed what was BEHIND the card as well as the
-       card itself, and mid-deal another session's name and figures
-       slid under the one you were reading. A card behind a card
-       carries no information: what it has to say is "there are more of
-       these", and a slab at the right angle says that and nothing
-       else. */
+       AND THEY CARRY NO WORDS. They used to be the next two workouts
+       in the group, drawn in full and clipped to the corner showing —
+       so pressing a chip changed what was BEHIND the card as well as
+       the card itself, and mid-deal another session's name and figures
+       slid under the one you were reading. What they hold now is the
+       front card's own surface — its hue and its swoop, one child
+       each and no text at all — so the hand is three of the same card.
+       The fan is 13 and 25 pixels, so a name drawn there could not be
+       read and would be DOM the deck pays for on every draw. */
     const shape = await page.evaluate(() => {
       const all = [...document.querySelectorAll('.wc')];
       const front = document.querySelector('.wc.is-front');
@@ -5221,13 +5222,16 @@ const SAID = [
         hidden: all.filter((c) => c.getAttribute('aria-hidden') === 'true').length,
         onTop: front.contains(hit),
         behind: all.filter((c) => c !== front)
-          .map((c) => c.childNodes.length + ':' + c.textContent.trim().length) };
+          .map((c) => c.childNodes.length + ':' + c.textContent.trim().length),
+        only: all.filter((c) => c !== front)
+          .every((c) => c.firstChild && c.firstChild.classList
+            && c.firstChild.classList.contains('wc-sw')) };
     });
     ok('...as a stack of three, one of them a button, the front one on top',
       shape.n === 3 && shape.tags.filter((t) => t === 'BUTTON').length === 1
       && shape.hidden === 2 && shape.onTop, shape);
-    ok('...and the two behind carry nothing at all',
-      shape.behind.join('|') === '0:0|0:0', shape.behind);
+    ok('...and the two behind carry the swoop and not one word',
+      shape.behind.join('|') === '1:0|1:0' && shape.only, shape);
 
     /* ── THE DEAL ──
        All three fly in, and the keyframes name `translate` and `scale`
@@ -5365,48 +5369,88 @@ const SAID = [
       lift.keys.length === 1 && /translate/.test(lift.keys[0])
       && !/transform/.test(lift.keys[0]), lift.keys);
 
-    /* ── AND INSIDE A GROUP THE CARD IS TAKEN OFF THE LEFT ──
+    /* ── AND INSIDE A GROUP THE WHOLE HAND IS TAKEN OFF THE LEFT ──
        You are stepping THROUGH one hand here, not choosing another, so
-       the card in front is taken off and the next comes over the top.
+       the hand you were on is taken off and the next comes over the
+       top. THE HAND, not its top card: the two behind are the same
+       card as the one in front, so taking only the front one off left
+       two Chest slabs standing while a Push card slid in over them.
 
-       The outgoing card is KEPT rather than rebuilt: it carries the
+       The outgoing cards are KEPT rather than rebuilt: they carry the
        workout you were looking at, with its own name and its own
-       colour, and the whole gesture is that THAT card is the one being
-       taken off. Asserted by its name, so a fresh element standing in
-       for it would fail — and by its position DIRECTLY UNDER the card
-       arriving, since these are absolutely positioned siblings with no
-       z-index and source order is the stacking order. It used to go in
-       last, on top of everything, and fade to nothing there: two names
-       and two swoops legible at once, which is a card passing through
-       another card rather than past it. Neither keyframe carries an
-       opacity now, so the order is the only thing keeping the pair
-       from being double-exposed while they cross — which is why it is
-       asserted here and why the fade is asserted ABSENT below. */
+       colour, and the whole gesture is that THOSE cards are the ones
+       going. Asserted by the front one's name, so a fresh element
+       standing in for it would fail — and by every outgoing card
+       sitting BEFORE every arriving one, since these are absolutely
+       positioned siblings with no z-index and source order is the
+       stacking order. The outgoing card used to go in last, on top of
+       everything, and fade to nothing there: two names and two swoops
+       legible at once, which is a card passing through another card
+       rather than past it. Neither keyframe carries an opacity now, so
+       the order is the only thing keeping the two hands from being
+       double-exposed while they cross — which is why it is asserted
+       here and why the fade is asserted ABSENT below. */
     /* .wc-n is the card's NAME. The first `b` on a card is the Est.
        time figure, which is the same "50 min" on both cards and would
        have made this pass on any element at all. */
     const was = await page.evaluate(() =>
       document.querySelector('.wc.is-front .wc-n').textContent);
+    /* ── AND THE HAND IS ALL THE SAME CARD ──
+       The two behind were grey slabs, which said "there are more of
+       these" and left out WHICH these are: a stack of grey behind a red
+       card is a stack of something else. They carry the front card's
+       own hue and its own swoop now, so Chest is a hand of Chest.
+
+       No WORDS on them, and that is the half that must not drift: the
+       fan is 13 and 25 pixels, so a name drawn there cannot be read and
+       is DOM the deck pays for on every draw. Read as the elements
+       being EMPTY of text rather than as a class, and with the two
+       still aria-hidden and still not buttons — a stack of focusable
+       cards is two tab stops that do nothing. */
+    const hand = (tag) => page.evaluate((t) => {
+      const at = (s) => document.querySelector('.wc-deck .wc' + s + ':not(.is-out)');
+      const back = [at('.b2'), at('.b1')];
+      const front = at('.is-front');
+      return { tag: t,
+        hue: back.concat([front]).map((c) => c.style.getPropertyValue('--wc-hue')),
+        swoop: back.concat([front]).map((c) => {
+          const g = c.querySelector('.wc-sw');
+          return g ? g.dataset.swoop : null;
+        }),
+        mute: back.every((c) => !c.textContent.trim()),
+        loud: !!front.textContent.trim(),
+        quiet: back.every((c) => c.getAttribute('aria-hidden') === 'true'
+          && c.tagName === 'DIV') };
+    }, tag);
+    const hand0 = await hand('before');
     await page.evaluate(() =>
       document.querySelector('.wc-chips .wc-chip:nth-child(3)').click());
     const shuf = await page.evaluate(() => {
       const deck = document.querySelector('.wc-deck');
-      const o = deck.querySelector('.wc.is-out');
       const kids = [...deck.querySelectorAll('.wc')];
+      const gone = kids.filter((c) => c.classList.contains('is-out'));
+      const here = kids.filter((c) => !c.classList.contains('is-out'));
+      const o = gone.find((c) => !c.classList.contains('b1')
+        && !c.classList.contains('b2'));
+      const nm = (c) => getComputedStyle(c).animationName;
       return { on: deck.classList.contains('is-shuffling'),
-        out: o && getComputedStyle(o).animationName,
+        went: gone.length, came: here.length,
+        out: gone.every((c) => nm(c) === 'wcOut'),
+        into: here.every((c) => nm(c) === 'wcStep'),
         name: o && o.querySelector('.wc-n').textContent,
-        under: !!o && kids[kids.length - 1] === deck.querySelector('.wc.is-front')
-          && kids[kids.length - 2] === o,
-        deaf: o && getComputedStyle(o).pointerEvents,
-        front: getComputedStyle(deck.querySelector('.wc.is-front')).animationName,
-        b1: getComputedStyle(deck.querySelector('.wc.b1')).animationName };
+        under: gone.length > 0 && here.length > 0
+          && kids.indexOf(gone[gone.length - 1]) < kids.indexOf(here[0]),
+        deaf: gone.every((c) => getComputedStyle(c).pointerEvents === 'none'),
+        /* Each hand keeps its own fan: b2 behind b1 behind the front. */
+        fan: [gone, here].every((h) => h[0].classList.contains('b2')
+          && h[1].classList.contains('b1')
+          && h[2].classList.contains('is-front') === (h === here)) };
     });
-    ok(`a step inside a group puts ${was} to the back of the stack`,
-      shuf.on && shuf.out === 'wcOut' && shuf.name === was
-      && shuf.under && shuf.deaf === 'none', { was, shuf });
-    ok('...and it is not a deal — the two behind hold still',
-      shuf.front === 'wcStep' && shuf.b1 === 'none', shuf);
+    ok(`a step inside a group takes the whole ${was} hand off`,
+      shuf.on && shuf.went === 3 && shuf.out && shuf.name === was
+      && shuf.under && shuf.deaf, { was, shuf });
+    ok('...and the hand arriving is three cards moving together, not a deal',
+      shuf.came === 3 && shuf.into && shuf.fan, shuf);
     /* ── OFF ONE SIDE, IN FROM THE OTHER, AND NEITHER OF THEM FADES ──
        Both halves measured on the composited box rather than read off
        the stylesheet: the animations are seeked to a third of the way
@@ -5424,7 +5468,9 @@ const SAID = [
        which is where it would reappear. */
     const cross = await page.evaluate(() => {
       const deck = document.querySelector('.wc-deck');
-      const o = deck.querySelector('.wc.is-out');
+      /* The outgoing FRONT card, not whichever .is-out comes first:
+         b2 is 25px right of it and both hands are three deep now. */
+      const o = deck.querySelector('.wc.is-out:not(.b1):not(.b2)');
       const f = deck.querySelector('.wc.is-front');
       const anim = (el) => el.getAnimations();
       const fades = (el) => anim(el).some((a) =>
@@ -5449,10 +5495,22 @@ const SAID = [
        card on the pile, and the next press would put a second one on
        top of it. */
     await page.waitForTimeout(800);
-    ok('...and the card put down is swept, not left on the pile',
+    ok('...and the hand taken off is swept whole, not left on the pile',
       await page.evaluate(() =>
         document.querySelectorAll('.wc-deck .wc').length === 3
         && !document.querySelector('.wc.is-out')));
+
+    const hand1 = await hand('after');
+    ok('the two behind are the card in front — its hue, its swoop, no words',
+      [hand0, hand1].every((h) => new Set(h.hue).size === 1 && h.hue[0]
+        && new Set(h.swoop).size === 1 && /^[a-f]$/.test(h.swoop[0])
+        && h.mute && h.loud && h.quiet), { hand0, hand1 });
+    /* AND THEY FOLLOW IT. Read as the hue and the swoop having MOVED
+       across the pass, so a build that set them once at the deal and
+       left them there fails — which is the shape the two behind had
+       for their whole life before this. */
+    ok(`...and the whole hand turns over with it (${hand0.hue[0]} to ${hand1.hue[0]})`,
+      hand0.hue[0] !== hand1.hue[0], { hand0, hand1 });
 
     /* AND AN EFFORT, A LENGTH AND A PICK MOVE NOTHING. draw() runs on
        all three, and on every one of them the card in front is the SAME

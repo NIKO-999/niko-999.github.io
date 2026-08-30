@@ -2957,24 +2957,35 @@ body {
   z-index: 1;
 }
 
-/* ── THE TWO BEHIND, FANNED AND EMPTY ──
+/* ── THE TWO BEHIND, FANNED, AND MORE OF THE SAME CARD ──
    Offset AND turned, three degrees apart, so the stack reads as a hand
    of cards rather than as one card with two shadows under it. Square,
    the pair only showed along the bottom and the right — a fan shows a
    corner of each, which is what says there are more of these.
 
-   They carry NOTHING. They used to be the next two workouts in the
-   group, so pressing a chip changed what was behind the card as well
-   as the card itself and the deck read as moving through the list —
-   with another session's words visible under the one you were reading.
-   A card behind a card has no information to carry: an empty slab at
-   the right angle says "there are more of these" and nothing else.
+   They carry no WORDS, and they never will: they used to be the next
+   two workouts in the group, so pressing a chip changed what was
+   behind the card as well as the card itself, the deck read as moving
+   through the list, and another session's name sat under the one you
+   were reading. What they do carry now is the front card's own hue and
+   its own swoop, so Chest is a hand of Chest and stepping to Push
+   turns the whole hand over. A stack of grey behind a red card says
+   there are more of SOMETHING; the thing worth saying is that there
+   are more of THIS.
 
-   Two steps up from the front card's own ground rather than an alpha:
-   an opacity would let the page through and make the pair a different
-   colour on each of the nine hues. Literals for the same reason the
-   front card's ground is one — this whole object is the same whatever
-   the accent is.
+   AND A LITERAL COPY OF THE SURFACE IS NOT IT. The card's ground is a
+   150° wash of its hue running to transparent by 56%, and the corner
+   the fan shows is the FAR one — so copying the ground exactly gives a
+   near-black sliver, darker than the grey slabs it replaced, and the
+   deck goes back to reading as one card. Rendered and looked at, at
+   rest and halfway through a pass. The two behind carry the hue at the
+   GROUND instead, two steps up, so the edge that is actually visible
+   is the one that says which card this is.
+
+   Mixed toward a literal rather than toward --paper: this whole object
+   is the same whatever the accent is, which is the argument the nine
+   hues already make. Not an alpha — an opacity would let the page
+   through and make the pair a different colour on each hue.
 
    THE TRANSFORM IS WHAT MAKES THEM THE CARDS BEHIND, and it was
    deleted once already — a rewrite of the block above this one took
@@ -2986,11 +2997,17 @@ body {
    overwritten by keyframes naming `transform`. */
 .wc.b1 {
   transform: translate(13px, 9px) rotate(3deg) scale(.965);
-  background: #1b1b20;
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
+    color-mix(in srgb, var(--wc-hue) 24%, #17171b);
 }
 .wc.b2 {
   transform: translate(25px, 18px) rotate(6deg) scale(.93);
-  background: #26262c;
+  background:
+    linear-gradient(150deg,
+      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
+    color-mix(in srgb, var(--wc-hue) 38%, #1d1d22);
 }
 
 /* ── THE SWOOP ──
@@ -3217,8 +3234,13 @@ body {
    short fold, the whole hand tightening, and this. What settled it is
    that the other three all move something the deal already moved. The
    two behind hold perfectly still here, which is the property that was
-   actually asked for — they are what makes it a deck, and they carry
-   no information, so anything they do is decoration.
+   actually asked for. They carry the same card's colour now rather
+   than being blank, and lifting the whole hand was built and looked at
+   for it — at the top of the curve the front card is still at zero
+   opacity, so a hand that lifts together spends the first frames as a
+   wordless coloured stack. The front card arriving over a hand that
+   was already there is the gesture; the pass between two cards in a
+   group is where the whole hand moves.
 
    26px and 260ms against the deal's 46px and 460ms — a bit over half
    the distance and a bit over half the time, so it still reads as the
@@ -3329,7 +3351,7 @@ body {
   from { translate: 108% 10px; rotate: 4deg;  scale: .97; }
   to   { translate: 0 0;       rotate: 0deg;  scale: 1; }
 }
-.wc-deck.is-shuffling .wc.is-front {
+.wc-deck.is-shuffling .wc:not(.is-out) {
   animation: wcStep .6s cubic-bezier(.4, .05, .5, 1) both;
 }
 

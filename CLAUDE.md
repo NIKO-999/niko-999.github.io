@@ -1912,14 +1912,29 @@ the bottom and the right, and a fan shows a corner of each. The
 entrance slid straight up once and read as a panel appearing, which is
 what every other sheet in this app already does.
 
-**AND THE TWO BEHIND CARRY NOTHING.** They were the next two workouts
-in the group, drawn in full and clipped to the corner showing — so
-pressing a chip changed what was BEHIND the card as well as the card
-itself, the deck read as moving through the whole list, and mid-deal
-another session's name and figures slid under the one you were
-reading. A card behind a card has no information to carry: what it has
-to say is *there are more of these*, and an empty slab at the right
-angle says that and nothing else.
+**AND THE TWO BEHIND ARE MORE OF THE SAME CARD.** They were the next
+two workouts in the group once, drawn in full and clipped to the
+corner showing — so pressing a chip changed what was BEHIND the card
+as well as the card itself, the deck read as moving through the whole
+list, and mid-deal another session's name and figures slid under the
+one you were reading. That is still wrong. Then they were empty grey
+slabs, which said *there are more of these* and left out WHICH these
+are: a stack of grey behind a red card is a stack of something else.
+
+They carry the front card's own hue and its own swoop now, so Chest is
+a hand of Chest and stepping to Push turns the whole hand over. **No
+WORDS**, and that is not a shortcut — the fan is 13 and 25 pixels, so
+nothing but an edge is ever visible and a name drawn there is DOM the
+deck pays for on every draw.
+
+**AND A LITERAL COPY OF THE SURFACE IS NOT IT.** The card's ground is
+a 150° wash of its hue running to transparent by 56%, and the corner
+the fan shows is the FAR one — so copying the ground exactly gives a
+near-black sliver, DARKER than the grey slabs it replaced, and the
+deck goes back to reading as one card. Four grounds were rendered over
+the real sheet, at rest and halfway through a pass. The two behind
+carry the hue at the GROUND instead, two steps up, so the edge that is
+actually visible is the one that says which card this is.
 
 **THE TWO LEVELS MOVE DIFFERENTLY, AND THAT IS THE WHOLE THING.** The
 four kinds are a HAND: pressing between All exercises, PPL, Run and
@@ -1969,6 +1984,20 @@ anywhere** — it has vanished, which is exactly what it looked like.
 is no opacity in either keyframe, deliberately, and putting one back
 is how this reverts. The sheet is a scroll container, so its own left
 edge cuts the leaving card and nothing has to fade for it to be gone.
+
+**AND IT IS THE HAND THAT GOES, NOT ITS TOP CARD.** With the two
+behind carrying the same card, taking only the front one off left two
+Chest slabs standing while a Push card slid in over them — the
+treatment seen from the other side. All three leave and all three
+arrive; the keyframes name `translate` / `rotate` / `scale`, which
+COMPOSE with b1 and b2's resting `transform`, so one pair of keyframes
+moves the whole fan and each hand keeps its own 3° spacing.
+
+**The LIFT still moves the front card alone.** Lifting the whole hand
+into a group was built and looked at for it: at the top of that curve
+the front card is still at zero opacity, so a hand that lifts together
+spends its first frames as a wordless coloured stack. The front card
+arriving over a hand that was already there is the gesture.
 
 **The arriving card starts a CARD'S WIDTH off to the right, not a
 nudge from behind the fan.** Tried at 64px — just past b2 — the two
