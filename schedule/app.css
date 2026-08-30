@@ -2631,6 +2631,23 @@ body {
   background: var(--ink);
   color: var(--paper);
 }
+/* ── CHOSEN IS NOT THE SAME AS AT THE FRONT ──
+   The chip is the pager: aria-pressed says which card you are looking
+   at. This says which cards you have PICKED, which is the card's own
+   state — a chip meaning both would be one control answering two
+   questions. A tick rather than a second fill, so the two can be true
+   at once without the chip having four appearances. */
+.wc-chip.is-picked { border-color: var(--red); color: var(--red); }
+.wc-chip.is-picked[aria-pressed="true"] { color: var(--on-red); background: var(--red); }
+.wc-chip svg {
+  width: 12px; height: 12px;
+  margin: 0 5px -1px 0;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
 .wc-chip:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
 /* The two behind are offset down and right, so the stack peeks at the
@@ -2794,6 +2811,61 @@ body {
   vector-effect: non-scaling-stroke;
 }
 
+/* ── A CHOSEN CARD SAYS SO ON THE CARD ──
+   A ring of the accent around the whole thing, outside the hue's own
+   half-pixel edge, so it reads as a selection rather than as part of
+   the card's design. It is the accent and not the workout's colour
+   because "this one is chosen" is the same fact whichever session it
+   is — the hue answers a different question. */
+.wc.is-picked {
+  box-shadow: 0 0 0 2px var(--red),
+              0 1px 2px rgba(0, 0, 0, .55),
+              0 16px 38px -10px rgba(0, 0, 0, .72);
+}
+
+/* ── THE WAY BACK IS AN ARROW ──
+   It was the words "All kinds", underlined, sitting under the deck
+   beside "Take it off" — so the two ways out read as a paragraph of
+   options rather than as a way back and a delete. A back control is
+   the one thing on a screen that never needs naming. */
+.wc-back {
+  flex: none;
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+  cursor: pointer;
+}
+.wc-back svg {
+  width: 19px; height: 19px;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.wc-back:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+
+/* ── AND THE ANSWER NAMES ITSELF ──
+   "Log Pull + Abs" rather than "Done". The card stopped logging on its
+   own press because a session can be more than one thing, so the
+   control that files it has to say what it is about to file. */
+.wc-go {
+  flex: 1;
+  min-height: 44px;
+  padding: 12px 16px;
+  border: 0;
+  border-radius: 22px;
+  background: var(--red);
+  color: var(--on-red);
+  font: 700 15px/1.2 'Inter', system-ui, sans-serif;
+  letter-spacing: -.01em;
+  cursor: pointer;
+}
+.wc-go:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; }
+
 /* ── HOW HARD IT WAS ──
    A SIBLING of the card, never a control inside it: the card is a
    <button>, and a button inside a button is invalid and collapses to
@@ -2935,14 +3007,16 @@ body {
 }
 .row.is-past .n em.wo { color: var(--spent); }
 
-/* Two controls at most and they are a row: stacked, "All kinds" and
-   "Take it off" are two underlined sentences under a card, which reads
-   as a paragraph rather than as two ways out. */
+/* A row: the way back, the answer, and the undo. Stacked they were
+   three sentences under a card, which reads as a paragraph rather than
+   as three different kinds of thing. */
 .wc-foot {
   display: flex;
-  justify-content: center;
-  gap: 4px;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
 }
+.wc-foot:empty { display: none; }
 
 /* ═══════════════════════════════════════════════════════════
    THE WORKOUTS VIEW

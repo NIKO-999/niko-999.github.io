@@ -4571,7 +4571,9 @@ const SAID = [
         .findIndex((c) => c.getAttribute('aria-pressed') === 'true'),
       cards: [...document.querySelectorAll('.wc')].map((c) => c.className),
       front: (document.querySelector('.wc.is-front') || {}).dataset,
-      foot: [...document.querySelectorAll('.wc-foot button')].map((b) => b.textContent),
+      foot: [...document.querySelectorAll('.wc-foot button')]
+        .map((b) => b.textContent.trim()).filter(Boolean),
+      back: !!document.querySelector('.wc-back'),
     }));
 
     await deck(null);
@@ -4685,7 +4687,80 @@ const SAID = [
     ok('pressing a kind opens it, and the chips become its own',
       two.title === 'All exercises' && two.chips.length === 6
       && two.chips.join('|') === 'Chest|Back|Shoulders|Arms|Legs|Abs'
-      && two.foot.join('|') === 'All kinds', two);
+      && two.back && two.foot.join('|') === '', two);
+
+    /* ── A SESSION CAN BE MORE THAN ONE THING ──
+       Pull and abs, legs and core: most people's actual session is a
+       lift plus one small thing, and made to pick one they either lie
+       or stop logging. So the card TOGGLES and the foot is the answer
+       — which costs a press on a single pick and buys a screen where
+       you can see what you are about to file.
+
+       The control names what it will file, and the chips carry a tick
+       for anything chosen, so a pick scrolled off the front is still
+       visible without stepping through the deck to find it. */
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(300);
+    const pick1 = await page.evaluate(() => ({
+      go: (document.querySelector('.wc-go') || {}).textContent,
+      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
+      card: document.querySelector('.wc.is-front').classList.contains('is-picked'),
+      stored: localStorage.getItem('sched.train.v1'),
+    }));
+    ok('pressing a card chooses it rather than filing it',
+      pick1.go === 'Log Chest' && pick1.ticked.join('') === 'Chest' && pick1.card
+      && !Object.keys(JSON.parse(pick1.stored || '{}')).length, pick1);
+
+    await page.click('.wc-chips .wc-chip:nth-child(6)');           /* Abs */
+    await page.waitForTimeout(300);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(300);
+    const both = await page.evaluate(() => ({
+      go: document.querySelector('.wc-go').textContent,
+      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
+    }));
+    ok('...and a second card adds to it rather than replacing it',
+      both.go === 'Log Chest + Abs'
+      && both.ticked.join('|') === 'Chest|Abs', both);
+
+    /* Pressing a chosen card again takes it off — a toggle, or the
+       only way out of a mis-tap is closing the sheet. */
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(300);
+    const off = await page.evaluate(() => ({
+      go: document.querySelector('.wc-go').textContent,
+      ticked: [...document.querySelectorAll('.wc-chip.is-picked')].map((c) => c.textContent.trim()),
+    }));
+    ok('...and pressing it again takes it off',
+      off.go === 'Log Chest' && off.ticked.join('') === 'Chest', off);
+
+    /* ── AND BOTH GO ON THE BLOCK, UNDER ONE RECORD ──
+       One session, not two: the keys are joined in the same field, so
+       every reader of this record goes through one place and a shape
+       nothing else knows about cannot leak. */
+    await page.click('.wc-chips .wc-chip:nth-child(6)');
+    await page.waitForTimeout(280);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(280);
+    await page.click('.wc-go');
+    await page.waitForTimeout(460);
+    const multi = await page.evaluate(() => {
+      const raw = JSON.parse(localStorage.getItem('sched.train.v1') || '{}');
+      const day = Object.keys(raw)[0];
+      return { days: Object.keys(raw).length,
+        blocks: Object.keys(raw[day] || {}).length,
+        rec: Object.values(raw[day] || {})[0] };
+    });
+    ok('two cards file as one session naming both',
+      multi.days === 1 && multi.blocks === 1
+      && multi.rec.k === 'bro.chest+bro.abs', multi);
+
+    /* Filing closes the sheet, so everything below has to be put back
+       where it found it: a clean record, the deck open, and stepped
+       into the first group. */
+    await deck(null);
+    await page.click('.wc.is-front');
+    await page.waitForTimeout(480);
 
     /* ── EVERY KEY IS QUALIFIED ──
        Legs is in two groups and Core is in two more. A bare 'legs' on
@@ -4696,7 +4771,7 @@ const SAID = [
     const keys = [];
     for (let g = 0; g < 4; g++) {
       if (g) {
-        await page.click('.wc-foot button');
+        await page.click('.wc-back');
         await page.waitForTimeout(360);
         await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
         await page.waitForTimeout(360);
@@ -4726,7 +4801,7 @@ const SAID = [
        THE ROW IS A SIBLING OF THE CARD, never a control inside it:
        the card is a <button>, and a button inside a button is invalid
        and collapses to one press while looking exactly right. */
-    await page.click('.wc-foot button');
+    await page.click('.wc-back');
     await page.waitForTimeout(360);
     await page.click('.wc-chips .wc-chip:nth-child(1)');
     await page.waitForTimeout(360);
@@ -4799,14 +4874,14 @@ const SAID = [
     const swoops = [];
     for (let g = 0; g < 4; g++) {
       if (g) {
-        await page.click('.wc-foot button');
+        await page.click('.wc-back');
         await page.waitForTimeout(340);
         await page.click(`.wc-chips .wc-chip:nth-child(${g + 1})`);
         await page.waitForTimeout(340);
         await page.click('.wc.is-front');
         await page.waitForTimeout(400);
       } else {
-        await page.click('.wc-foot button');
+        await page.click('.wc-back');
         await page.waitForTimeout(340);
         await page.click('.wc-chips .wc-chip:nth-child(1)');
         await page.waitForTimeout(340);
@@ -4906,9 +4981,11 @@ const SAID = [
     await page.waitForTimeout(460);
     await page.click('.wc-chips .wc-chip:nth-child(5)');           /* Legs */
     await page.waitForTimeout(420);
+    await page.click('.wc.is-front');                              /* choose it */
+    await page.waitForTimeout(320);
     await page.click('.wc-eff-r .wc-ef:nth-child(1)');             /* say Easy */
     await page.waitForTimeout(320);
-    await page.click('.wc.is-front');
+    await page.click('.wc-go');                                    /* file it */
     await page.waitForTimeout(460);
     const stored = await page.evaluate(() =>
       JSON.parse(localStorage.getItem('sched.train.v1') || '{}'));

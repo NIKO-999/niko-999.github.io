@@ -1221,12 +1221,12 @@
            of a week, and a track held open across every other row for
            it is the third column the time was moved out of. */
         var wr = scTrainOf(bd, it.id);
-        var wk = wr && scWorkout(wr.k);
-        if (wk) n.appendChild(scEl('em', 'wo', wk.n));
+        var wk = wr && scWorkName(wr.k);
+        if (wk) n.appendChild(scEl('em', 'wo', wk));
         row.appendChild(n);
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
-          + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk.n : '') + '. Edit.');
+          + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '') + '. Edit.');
         /* ── tap edits, a long press ticks ──
            The week is where you CHANGE the schedule, so the tap keeps
            doing what it always did. Marking a block done is the tally's
@@ -4865,6 +4865,23 @@
     return { k: String(v.k || ''), e: String(v.e || '') };
   }
 
+  /* ── A SESSION CAN BE MORE THAN ONE THING ──
+     Pull and abs, legs and core: most people's actual session is a
+     lift plus one small thing, and made to pick one they either lie or
+     stop logging. Stored as the keys joined with a plus in the SAME
+     field rather than as a second one — every reader of this record
+     goes through here, so a shape nothing else knows about cannot
+     leak, and a record written before this is a list of one.
+
+     ORDER IS PRESS ORDER, so "Pull + Abs" reads the way you chose it
+     rather than the way the list happens to be sorted. */
+  function scWorkoutsOf(k) {
+    return String(k || '').split('+').map(scWorkout).filter(Boolean);
+  }
+  function scWorkName(k) {
+    return scWorkoutsOf(k).map(function (w) { return w.n; }).join(' + ');
+  }
+
   function scTrainLoad() {
     trainLog = scReadJSON(TRAIN_KEY, {});
     if (!trainLog || typeof trainLog !== 'object' || Array.isArray(trainLog)) trainLog = {};
@@ -4889,8 +4906,13 @@
       }
       Object.keys(rec).forEach(function (id) {
         var r = scTrainRec(rec[id]);
-        if (!r || !scWorkout(r.k)) { delete rec[id]; return; }
-        if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(scWorkout(r.k).t);
+        /* Repaired component by component: a record naming one workout
+           this build still has and one it does not keeps the half that
+           resolves rather than losing the session. */
+        var ws = r && scWorkoutsOf(r.k);
+        if (!ws || !ws.length) { delete rec[id]; return; }
+        r.k = ws.map(function (w) { return w.key; }).join('+');
+        if (EFFORTS.indexOf(r.e) < 0) r.e = scEffort(ws[0].t);
         rec[id] = r;
       });
       if (!Object.keys(rec).length) delete trainLog[day];
@@ -5033,7 +5055,12 @@
      time rather than kept in a variable that outlives the sheet. */
   function scTrainAsk(item, dow, day) {
     var rec = scTrainOf(day, item.id);
-    var got = rec && scWorkout(rec.k);
+    /* ── WHAT IS ALREADY ON THE BLOCK, AS A SELECTION ──
+       Order is press order, so "Pull + Abs" reads the way it was
+       chosen. The group opened is the FIRST pick's, because that is
+       the one somebody went looking for — abs is what you add to it. */
+    var sel = rec ? scWorkoutsOf(rec.k).map(function (w) { return w.key; }) : [];
+    var got = sel.length ? scWorkout(sel[0]) : null;
     var into = got ? scTrainGroup(got.gk) : null;
     var at = got ? into.of.indexOf(got) : 0;
     var ef = got ? rec.e : '';
@@ -5048,8 +5075,11 @@
     var dealt = false;
 
     scSheet('What did you train?', function (body) {
+      /* "What you did", not "one": a session can be a lift and one
+         small thing, and copy that says pick ONE is the app telling
+         you the answer has to be a lie. */
       body.appendChild(scEl('p', 'wc-sub',
-        'Pick one and it goes on ' + item.n + '.'));
+        'Pick what you did and it goes on ' + item.n + '.'));
 
       var chips = scEl('div', 'wc-chips');
       var deck = scEl('div', 'wc-deck');
@@ -5064,13 +5094,29 @@
 
       function press(w) {
         return function () {
-          /* Step one opens the group; step two is the answer. */
+          /* Step one opens the group. */
           if (!into) { into = w; at = 0; ef = ''; draw(); return; }
-          scTrainSet(day, item.id, w.key, ef || scEffort(w.t));
-          scClose();
-          if (view === 'tally') scPaintTally(); else scRender();
-          scToast(w.n + ' logged', false);
+          /* ── STEP TWO TOGGLES, IT DOES NOT LOG ──
+             It used to log on the press, which is one tap and made a
+             second workout impossible: most people's real session is a
+             lift plus one small thing, and made to pick one they lie
+             or stop logging. So the card is a choice and the foot is
+             the answer. Selecting one is a press and a press, which is
+             the cost — and it buys a screen where you can see what you
+             are about to file. */
+          var i = sel.indexOf(w.key);
+          if (i >= 0) sel.splice(i, 1); else sel.push(w.key);
+          draw();
         };
+      }
+
+      function commit() {
+        if (!sel.length) return;
+        var first = scWorkout(sel[0]);
+        scTrainSet(day, item.id, sel.join('+'), ef || scEffort(first.t));
+        scClose();
+        if (view === 'tally') scPaintTally(); else scRender();
+        scToast(scWorkName(sel.join('+')) + ' logged', false);
       }
 
       function draw() {
@@ -5081,7 +5127,10 @@
            group has to re-suggest, because sixty minutes of legs and
            ten minutes of cold are not the same session — but a press
            on the effort row must survive a redraw of the deck. */
-        if (into && !ef) ef = scEffort(w.t);
+        /* The minutes of the FIRST pick set where the effort starts —
+           it is the session's main thing and abs is what you add to
+           it. Only where a choice has not been made. */
+        if (into && !ef) ef = scEffort(sel.length ? scWorkout(sel[0]).t : w.t);
         $('scSheetTitle').textContent = into ? into.n : 'What did you train?';
 
         /* THE CHIPS ARE REBUILT, NOT RELABELLED. The two levels have
@@ -5090,14 +5139,31 @@
            index nothing is at. */
         chips.textContent = '';
         all.forEach(function (x, i) {
-          var c = scEl('button', 'wc-chip', x.n);
+          /* THE CHIP IS THE PAGER, NOT THE PICKER. It says which card
+             is at the front; whether that card is CHOSEN is the card's
+             own state, and a chip that meant both would be one control
+             answering two questions. The tick is a readout of the
+             selection so you can see a pick that is scrolled off the
+             front without stepping through the deck to find it. */
+          var picked = into && sel.indexOf(x.key) >= 0;
+          var c = scEl('button', 'wc-chip' + (picked ? ' is-picked' : ''));
           c.type = 'button';
+          if (picked) {
+            c.insertAdjacentHTML('beforeend',
+              '<svg viewBox="0 0 24 24" aria-hidden="true">'
+              + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>');
+          }
+          c.appendChild(document.createTextNode(x.n));
           c.setAttribute('aria-pressed', i === at ? 'true' : 'false');
+          if (picked) c.setAttribute('aria-label', x.n + ', chosen');
           c.addEventListener('click', function () {
             if (at === i) return;
             at = i;
-            /* A new card suggests its own effort again. */
-            ef = '';
+            /* A new card suggests its own effort again — but only
+               while nothing has been chosen, because an effort is
+               about the SESSION and the session is the whole
+               selection. */
+            if (!sel.length) ef = '';
             draw();
           });
           chips.appendChild(c);
@@ -5117,7 +5183,9 @@
         deck.textContent = '';
         deck.appendChild(scTrainBack('b2'));
         deck.appendChild(scTrainBack('b1'));
-        deck.appendChild(scTrainCard(w, 'is-front', press(w), ef));
+        deck.appendChild(scTrainCard(w, 'is-front'
+          + (into && sel.indexOf(w.key) >= 0 ? ' is-picked' : ''),
+          press(w), into ? ef : ''));
 
         /* ── HOW HARD IT WAS IS A ROW, NOT A FIELD ON THE CARD ──
            The card is a <button> and a control inside a button is
@@ -5152,19 +5220,43 @@
 
         foot.textContent = '';
         if (into) {
-          var back = scEl('button', 'wc-clear', 'All kinds');
+          /* ── A BACK ARROW, NOT THE WORDS "ALL KINDS" ──
+             It was an underlined sentence sitting under the deck
+             beside "Take it off", so the two ways out of the sheet
+             read as a paragraph of options rather than as a way back
+             and a delete. A back control is the one thing on a screen
+             that never needs naming. */
+          var back = scEl('button', 'wc-back');
           back.type = 'button';
+          back.setAttribute('aria-label', 'All kinds');
+          back.insertAdjacentHTML('beforeend',
+            '<svg viewBox="0 0 24 24" aria-hidden="true">'
+            + '<path d="M15 4.5L7.5 12l7.5 7.5"/></svg>');
           back.addEventListener('click', function () {
             at = TRAIN_GROUPS.indexOf(into);
             into = null;
+            sel = [];
             ef = '';
             draw();
           });
           foot.appendChild(back);
         }
-        /* Only where there is something to take off, and it is the
-           last thing on the sheet: a control that undoes the answer
-           sitting above the answer reads as one of the options. */
+
+        /* ── THE ANSWER IS THE FOOT, AND IT NAMES ITSELF ──
+           "Log Pull + Abs" rather than "Done": the whole reason the
+           card stopped logging on its own press is that a session can
+           be more than one thing, so the control that files it has to
+           say what it is about to file. */
+        if (sel.length) {
+          var go = scEl('button', 'wc-go', 'Log ' + scWorkName(sel.join('+')));
+          go.type = 'button';
+          go.addEventListener('click', commit);
+          foot.appendChild(go);
+        }
+
+        /* Only where there is something to take off, and last: a
+           control that undoes the answer sitting above the answer
+           reads as one of the options. */
         if (scTrainOf(day, item.id)) {
           var clear = scEl('button', 'wc-clear', 'Take it off');
           clear.type = 'button';
@@ -5204,7 +5296,12 @@
      dot size a thumb can still see. */
   var WORK_DAYS = 91;
 
-  /* ── every logged session, newest first ── */
+  /* ── EVERY LOGGED SESSION, NEWEST FIRST, ONE ENTRY PER BLOCK ──
+     A session can name more than one workout — Pull and abs is one
+     session, not two — so the entry carries the LIST and the count of
+     these is the count of sessions. Flattened to one row per component
+     it would say you trained twice on a day you trained once, which is
+     the figure this whole screen is about. */
   function scWorkAll() {
     var out = [];
     for (var i = 0; i < WORK_DAYS; i++) {
@@ -5213,11 +5310,14 @@
       if (!rec) continue;
       Object.keys(rec).forEach(function (id) {
         var r = scTrainRec(rec[id]);
-        var w = r && scWorkout(r.k);
-        if (w) out.push({ day: day, w: w, e: r.e });
+        var ws = r && scWorkoutsOf(r.k);
+        if (ws && ws.length) out.push({ day: day, ws: ws, e: r.e });
       });
     }
     return out;
+  }
+  function scWorkHas(h, w) {
+    return h.ws.some(function (x) { return x.key === w.key; });
   }
 
   /* ── THE DAY IT USUALLY LANDS ON ──
@@ -5361,7 +5461,7 @@
 
        Omitted where the month is empty rather than drawn as 0%: a
        panel that reads "11 weeks ago" has already said it. */
-    var mine = month.filter(function (h) { return h.w.key === w.key; }).length;
+    var mine = month.filter(function (h) { return scWorkHas(h, w); }).length;
     var share = month.length && mine ? Math.round(mine / month.length * 100) : 0;
 
     var lines = [['time', 'Avg', w.t + ' min'], ['lift', '', eff]];
@@ -5464,8 +5564,16 @@
 
     /* Grouped by workout, most-done first, ties broken by which you did
        last — so the panel that moves is the one you just logged. */
+    /* ── A SESSION LANDS IN EVERY PANEL IT NAMES ──
+       Pull and abs counts toward Pull and toward Abs, because the
+       question each panel answers is "how often do I do this", and you
+       did both. It follows that the shares can sum past a hundred, and
+       they should: the share says in what proportion of this month's
+       sessions that thing appeared, not what slice of a pie it is. */
     var by = {};
-    all.forEach(function (h) { (by[h.w.key] || (by[h.w.key] = [])).push(h); });
+    all.forEach(function (h) {
+      h.ws.forEach(function (w) { (by[w.key] || (by[w.key] = [])).push(h); });
+    });
     var keys = Object.keys(by).sort(function (a, b) {
       return by[b].length - by[a].length
         || (by[b][0].day < by[a][0].day ? -1 : 1);
@@ -5657,10 +5765,10 @@
              conditions on the tick this record hangs off. */
           if (scIsTrain(item)) {
             var gr = scTrainOf(bDay, item.id);
-            var got = gr && scWorkout(gr.k);
+            var got = gr && scWorkName(gr.k);
             var wob = scEl('button', 'mark' + (got ? ' is-on' : ''));
             wob.type = 'button';
-            wob.appendChild(document.createTextNode(got ? got.n : 'Pick a workout'));
+            wob.appendChild(document.createTextNode(got || 'Pick a workout'));
             wob.insertAdjacentHTML('beforeend',
               '<svg viewBox="0 0 24 24" aria-hidden="true">'
               + '<path d="M9 5.5l6.5 6.5L9 18.5"/></svg>');

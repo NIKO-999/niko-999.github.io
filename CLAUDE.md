@@ -1557,6 +1557,40 @@ incline walk and a cold plunge have nothing in common except when you
 do them, which is exactly what makes them a group. Without it they are
 not loggable at all, and a day spent recovering reads as a day off.
 
+**A SESSION CAN BE MORE THAN ONE THING.** Pull and abs, legs and core:
+most people's actual session is a lift plus one small thing, and made
+to pick one they either lie or stop logging. So the card TOGGLES and
+the foot is the answer — "Log Pull + Abs", naming what it is about to
+file. That costs a press on a single pick and buys a screen where you
+can see what you are filing.
+
+**The keys are joined in the SAME field**, not kept in a second one:
+every reader of this record goes through `scWorkoutsOf`, so a shape
+nothing else knows about cannot leak, and a record written before this
+is a list of one. Order is press order, so "Pull + Abs" reads the way
+it was chosen rather than the way the list happens to be sorted. A
+component naming a workout this build no longer has is dropped and the
+rest of the session survives.
+
+**The chip is the PAGER, not the picker.** `aria-pressed` says which
+card is at the front; whether that card is chosen is the card's own
+state, and a chip meaning both would be one control answering two
+questions. The tick on a chip is a readout, so a pick scrolled off the
+front is still visible without stepping through the deck to find it.
+
+**A session lands in every panel it names.** Pull and abs counts toward
+Pull and toward Abs, because the question a panel answers is *how often
+do I do this*. It follows that the shares can sum past a hundred and
+they should: the share says in what proportion of this month's sessions
+that thing appeared, not what slice of a pie it is. What must NOT be
+flattened is the session count — one entry per logged block, or a day
+you trained once reads as two.
+
+**The way back is an ARROW.** It was the words "All kinds", underlined,
+sitting under the deck beside "Take it off", so the two ways out read
+as a paragraph of options rather than as a way back and a delete. A
+back control is the one thing on a screen that never needs naming.
+
 **The key is QUALIFIED — `ppl.legs`, not `legs`.** Legs is in two
 groups and Core is in two more, so a bare key names two cards with two
 colours, and the one it resolved to would be whichever came first in
