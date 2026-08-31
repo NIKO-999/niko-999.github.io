@@ -3528,7 +3528,7 @@ body {
    places to keep one control in step.
    ═══════════════════════════════════════════════════════════ */
 
-#scTyPane[hidden], .work[hidden] { display: none; }
+#scTyPane[hidden], .work[hidden], .pat[hidden] { display: none; }
 
 /* The figure alone, so it does NOT take .ty-fig's `margin-left: auto`:
    that pushes it right against a label on the tally, and there is no
@@ -3723,6 +3723,160 @@ body {
 }
 
 .wo-none {
+  margin-top: 22px;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--dim);
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PATTERN
+
+   The third stop on Today, and the one screen here that reads the
+   record back rather than drawing it. It reuses .fr-seg, .label and
+   .ty-foot wholesale for the same reason the Workouts view does: a
+   second set of classes drawn to look identical is two places to keep
+   one thing in step.
+   ═══════════════════════════════════════════════════════════ */
+
+/* ── THE ASK ──
+   The one control in this app that takes an opinion, so it is the
+   quietest control in it: three words in a segment, no ring, no fill
+   until you have answered. */
+.pat-chips {
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
+.pat-c {
+  flex: 1;
+  min-height: 44px;
+  padding: 9px 0;
+  border: 0;
+  border-radius: 18px;
+  background: none;
+  color: var(--dim);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+/* ── THE PICKED ONE IS THE ACCENT, WHICHEVER OF THE THREE IT IS ──
+   The accent on this app makes exactly one claim — that something
+   happened — and what happened here is that you answered. Lighting
+   Good and leaving Rough grey would be the screen grading your day
+   back at you, which is the one thing every other decision in this
+   file is careful not to do.
+
+   --on-red rather than --paper, because the accent is a wheel and the
+   only colour guaranteed to be readable on it is the one the wheel
+   solves for. */
+.pat-c.is-on { background: var(--red); color: var(--on-red); }
+.pat-c:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+.pat-say {
+  margin-top: 20px;
+  font-size: 15px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--ink);
+}
+/* The name inside the sentence is the only thing on the line that is
+   a value rather than prose — one step of weight, no colour: the
+   accent here would be the sentence claiming the finding is good. */
+.pat-say b { font-weight: 700; }
+
+/* ── THE ZERO IS ONE AXIS, NOT SIX TICKS ──
+   It went in as a 1px hairline inside each row's own track, and on a
+   page that is nearly black six of those are six specks: the bars
+   then read as floating at arbitrary places rather than as two
+   directions off a middle, which is the ENTIRE mechanism that lets
+   this screen say up and down without using a colour to do it. One
+   line down the whole list is what an axis is, and it is a mark that
+   is actually there.
+
+   The three column figures are tokens because the axis and the grid
+   have to agree about where the middle of the track is. Written as a
+   literal in two places they are two numbers to keep in step, and the
+   one that drifts is the invisible one.
+
+   ── AND ITS COLOUR IS A MEASUREMENT, NOT A TOKEN NAME ──
+   It went in as --g0, which is `var(--paper)`: the axis was painted
+   in the page it was drawn on and measured 1.01:1 on screen. It
+   looked like a faint line in the screenshot because the two rows
+   nearest zero draw a bar about a pixel wide, and a green sliver is
+   not an axis. --hair is 1.27:1 and --tick-off, which exists for
+   exactly this kind of mark, is 1.60:1 as a hairline — both are
+   surfaces separating panels rather than a mark carrying a fact.
+   Mixed to 3:1, which is the floor for a graphic, and the whole of
+   what says which side of nothing a bar is on. */
+.pat-list {
+  --pat-n: 42px;                   /* the figure column */
+  --pat-t: 128px;                  /* the track */
+  --pat-g: 10px;                   /* between them */
+  --pat-ax: color-mix(in srgb, var(--ink) 35%, var(--paper));
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.pat-list::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  bottom: 2px;
+  right: calc(var(--pat-n) + var(--pat-g) + var(--pat-t) / 2);
+  width: 1px;
+  background: var(--pat-ax);
+}
+/* NOTHING IS DRAWN BETWEEN THE ROWS, which is the week card's rule
+   for the week card's reason: a line between every two items in a
+   list is what makes it a table, and a table is a thing you scan for
+   a value. The bars are already the picture. */
+.pat-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) var(--pat-t) var(--pat-n);
+  align-items: center;
+  gap: var(--pat-g);
+  min-height: 34px;
+}
+.pat-nm {
+  overflow: hidden;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--ink);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+/* The track is the full swing either way, and the axis above runs
+   down its middle — so which side a bar is on is what says up or
+   down, and it costs no contrast at all. The day-off dot's own
+   argument: a colour here would be this screen saying whether, and it
+   never does. */
+.pat-mid { position: relative; height: 10px; }
+.pat-bar {
+  position: absolute;
+  top: 1px;
+  height: 8px;
+  background: var(--red);
+}
+.pat-bar.is-up { left: 50%; }
+.pat-bar.is-dn { right: 50%; }
+
+.pat-n {
+  font-size: 13px;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--dim);
+  text-align: right;
+}
+
+.pat-none {
   margin-top: 22px;
   font-size: 13px;
   line-height: 1.6;

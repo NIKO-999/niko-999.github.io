@@ -6352,12 +6352,12 @@ const SAID = [
       await page.waitForTimeout(320);
     };
 
-    /* ── TWO STOPS, AND EXACTLY ONE OF THEM IS ON SCREEN ──
+    /* ── THREE STOPS, AND EXACTLY ONE OF THEM IS ON SCREEN ──
        Measured as a BOX rather than as the hidden property. The rail
        and the page dots both had that bug — the attribute was set
        correctly throughout and a rule with its own `display` outranked
        the browser's [hidden] — and both times the check that missed it
-       read the property. */
+       read the property. Pattern was the third chance to make it. */
     await openWork(null);
     const stops = await page.evaluate(() => {
       const box = (id) => {
@@ -6370,14 +6370,15 @@ const SAID = [
                  .filter((b) => b.getAttribute('aria-current') === 'true')
                  .map((b) => b.dataset.tystop),
                up: box('scTyPane'), work: box('scWorkPane'),
+               pat: box('scPatPane'),
                /* The hero's own label went with the stop that replaced
                   it: a word naming a section directly under the button
                   that opens that section is the same word twice. */
                lbl: document.querySelectorAll('.ty-lbl').length };
     });
-    ok('Today has two stops and only the one you pressed is drawn',
-      stops.names.join('|') === 'Showing up|Workouts'
-      && stops.on.join('') === 'work' && stops.work && !stops.up
+    ok('Today has three stops and only the one you pressed is drawn',
+      stops.names.join('|') === 'Showing up|Workouts|Pattern'
+      && stops.on.join('') === 'work' && stops.work && !stops.up && !stops.pat
       && stops.lbl === 0, stops);
 
     /* An empty record draws no apparatus. A calendar of ninety unlit
@@ -6702,6 +6703,421 @@ const SAID = [
     });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     PATTERN — THE RECORD READ BACK
+
+     The third stop on Today, and the only screen in this app that
+     ASKS for something. Everything here is measured on a planted
+     record with a known answer, because the whole feature is one
+     piece of arithmetic and "a number appeared" is what a broken one
+     looks like too.
+     ═══════════════════════════════════════════════════════════ */
+  {
+    const pctx = await browser.newContext(PHONE);
+    const ppage = await pctx.newPage();
+    const perrs = [];
+    ppage.on('pageerror', (e) => perrs.push(String(e)));
+    ppage.on('console', (m) => { if (m.type() === 'error') perrs.push(m.text()); });
+    const pAsked = [];
+    ppage.on('request', (r) => pAsked.push(r.url()));
+
+    /* Every fixture is a function of the day index, so the arithmetic
+       it implies can be worked out on paper and written into the
+       assertion rather than read off the screen and blessed. */
+    const plant = async (spec) => {
+      await ppage.evaluate((sp) => {
+        const pad = (n) => (n < 10 ? '0' : '') + n;
+        const day = (b) => { const d = new Date(); d.setDate(d.getDate() - b);
+          return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()); };
+        const tick = {}, rate = {};
+        // eslint-disable-next-line no-new-func
+        const f = new Function('i', 'd', sp.body);
+        for (let i = 1; i <= sp.n; i++) {
+          const d = day(i), got = f(i, d);
+          if (got.tick) tick[d] = got.tick;
+          if (got.rate !== undefined) rate[d] = got.rate;
+        }
+        localStorage.setItem('sched.tick.v1', JSON.stringify(tick));
+        localStorage.setItem('sched.rate.v1', JSON.stringify(rate));
+        localStorage.setItem('sched.log.v1', '{}');
+        localStorage.setItem('sched.view.v1', 'tally');
+        localStorage.setItem('sched.ty.v1', 'pat');
+        if (sp.week) localStorage.setItem('sched.v1', JSON.stringify(sp.week));
+        else localStorage.removeItem('sched.v1');
+        localStorage.setItem('sched.net.v1',
+          JSON.stringify({ on: false, url: '', code: '' }));
+      }, spec);
+      await ppage.reload({ waitUntil: 'networkidle' });
+      await ppage.waitForTimeout(320);
+    };
+    const readRows = () => ppage.evaluate(() => [...document.querySelectorAll('.pat-row')]
+      .map((r) => ({ n: r.querySelector('.pat-nm').textContent,
+                     v: r.querySelector('.pat-n').textContent,
+                     bar: (() => { const b = r.querySelector('.pat-bar');
+                       return b ? { side: b.className.replace('pat-bar ', ''),
+                                    w: b.getBoundingClientRect().width } : null; })() })));
+
+    await ppage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+
+    /* ── THE FIGURE IS A DIFFERENCE OF MEANS, AND BOTH HALVES OF IT
+           ARE ASSERTED ──
+       Train ticked on twenty days rated Good, not ticked on twenty
+       rated Rough. Mean 2 against mean 0 on a three-point scale, so
+       the answer is exactly +2.0 and nothing else is in the record to
+       be ranked beside it. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+    let rows = await readRows();
+    ok('a thing on your good days and off your rough ones reads +2.0',
+      rows.length === 1 && rows[0].n === 'Train' && rows[0].v === '+2.0', rows);
+
+    /* And the same yes-side against a different no-side. A screen
+       printing the MEAN OF THE DAYS IT WAS ON — which is the figure
+       somebody reaches for first, and is not an answer to the
+       question — reads +2.0 on both fixtures and cannot tell them
+       apart. This one is 2 − 1. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 1 };' });
+    rows = await readRows();
+    ok('...and the same good days against ordinary ones read +1.0, '
+      + 'which is what makes it a difference rather than an average',
+      rows.length === 1 && rows[0].v === '+1.0', rows);
+
+    /* The other direction, and the sign is on the number AND on the
+       side of the axis the bar is drawn. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 0 : 2 };' });
+    rows = await readRows();
+    ok('a thing on your rough days reads −2.0 and draws left of the axis',
+      rows.length === 1 && rows[0].v === '−2.0'
+      && rows[0].bar && rows[0].bar.side === 'is-dn', rows);
+
+    /* ── A DAY IT WAS NEVER ON IS NOT A DAY YOU MISSED IT ──
+       The tally strip's own rule, and the thing this screen would get
+       silently wrong. Sleep is logged on twenty days that split ten
+       Good and ten Rough; on twenty MORE rated days it is not logged
+       at all, and those are all Good.
+
+       Read correctly — the unlogged days dropped from Sleep's
+       arithmetic entirely — it is 2 − 0 = +2.0. Counted as a night
+       below the middle it is 2 − (2·20 + 0·10)/30 = +0.7. The two
+       fixtures differ only in what is done with a day that never
+       asked the question. */
+    await plant({ n: 40, body: `
+      if (i <= 10) return { tick: { s: '8' }, rate: 2 };
+      if (i <= 20) return { tick: { s: '5' }, rate: 0 };
+      return { tick: {}, rate: 2 };` });
+    rows = await readRows();
+    const sleep = rows.filter((r) => /^Sleep/.test(r.n))[0];
+    ok('a night you did not record is dropped from that figure, never '
+      + 'counted as a short one', sleep && sleep.v === '+2.0', rows);
+    /* And the split is printed at the item's own precision, off YOUR
+       own middle rather than a target this app picked — half of your
+       own record is also the only threshold that guarantees both
+       sides have days on them. */
+    ok('...and the row names the split it made, at your own middle',
+      sleep && sleep.n === 'Sleep over 6.5 h', rows);
+
+    /* ── AND A WEEKDAY THE BLOCK IS NOT ON IS THE SAME ANSWER ──
+       Train three days a week, rated Good on the four days it is not
+       scheduled. Counted as four misses a week the figure collapses;
+       dropped, it is the +2.0 the ticks actually say. This is the
+       `do` half of the rule the fixture above proves for a number. */
+    const wk = { title: 'Daily Process', items: [] };
+    for (let d = 0; d < 7; d++) {
+      if (d === 1 || d === 3 || d === 5) {
+        wk.items.push({ d, s: 390, e: 450, r: '', n: 'Train' });
+      }
+      wk.items.push({ d, s: 1275, e: 1305, r: '', n: 'Read' });
+    }
+    await plant({ n: 84, week: wk, body: `
+      const dow = new Date(d + 'T12:00:00').getDay();
+      const on = dow === 1 || dow === 3 || dow === 5;
+      if (!on) return { tick: {}, rate: 2 };
+      return { tick: i % 2 ? { t: 1 } : {}, rate: i % 2 ? 2 : 0 };` });
+    rows = await readRows();
+    const train = rows.filter((r) => r.n === 'Train')[0];
+    ok('a day the block was never on is dropped too, so a three-day '
+      + 'schedule is not four misses a week', train && train.v === '+2.0',
+      rows);
+
+    /* ── FIVE DAYS EITHER SIDE, OR IT IS NOT RANKED ──
+       Two days against eighty is not a comparison, and a difference
+       of means over a sample that small swings on one bad night and
+       prints it as a finding. Both directions, because a floor that
+       only ever refuses is indistinguishable from a factor that never
+       worked. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 4 ? { t: 1 } : {}, rate: i <= 4 ? 2 : 0 };' });
+    ok('four days on one side of a thing is not enough to rank it',
+      (await readRows()).length === 0);
+    await plant({ n: 40, body:
+      'return { tick: i <= 5 ? { t: 1 } : {}, rate: i <= 5 ? 2 : 0 };' });
+    ok('...and five is', (await readRows()).length === 1);
+
+    /* ── AND THE SCREEN SAYS HOW MANY MORE DAYS IT NEEDS ──
+       Below the floor it has nothing to say, and the honest thing to
+       do with nothing is to say what would fix it. Measured as the
+       list being ABSENT rather than empty: a list with no rows still
+       draws its axis. */
+    await plant({ n: 13, body: 'return { tick: { t: 1 }, rate: i % 3 };' });
+    const few = await ppage.evaluate(() => ({
+      say: (document.querySelector('.pat-none') || {}).textContent || '',
+      list: !!document.querySelector('.pat-list'),
+      ask: !!document.querySelector('.pat-chips'),
+    }));
+    ok('under the floor it says how many more days, draws no list, and '
+      + 'still asks about today',
+      /Rate 1 more day\b/.test(few.say) && !few.list && few.ask, few);
+
+    /* ── NOTHING EVER PRINTS −0.0 ──
+       A lift of −0.04 is zero at one decimal place, and reading the
+       sign off the raw number put a minus sign on nothing — which
+       reads as a rendering fault rather than as a thing that makes no
+       difference. A zero wears no sign and draws no bar; the axis
+       runs through the row unbroken. */
+    await plant({ n: 60, body:
+      'return { tick: i % 2 ? { t: 1 } : {}, rate: i % 3 };' });
+    const zed = await readRows();
+    ok('a factor that moves nothing prints a bare 0.0 and draws no bar',
+      zed.length > 0 && zed.every((r) => !/−0\.0|\+0\.0/.test(r.v))
+      && zed.filter((r) => r.v === '0.0').every((r) => !r.bar), zed);
+
+    /* ── THE AXIS IS THE WHOLE OF WHAT SAYS UP OR DOWN ──
+       Which side of it a bar sits on is the only thing carrying the
+       direction, because a colour here would be this screen saying
+       whether — the one thing it never does. So the axis has to be
+       VISIBLE, and it went in as --g0, which is `var(--paper)`: the
+       line was painted in the page it was drawn on and measured
+       1.01:1 on screen. It looked like a faint line in a screenshot
+       because the rows nearest zero drew a bar about a pixel wide,
+       and a green sliver is not an axis.
+
+       Measured as the brightest pixel in a band across where the
+       axis is, against the ground a few pixels off it — never read
+       off the declaration, since --hair and --tick-off both LOOK like
+       the token for this and measure 1.27:1 and 1.60:1. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+    const geo = await ppage.evaluate(() => {
+      const l = document.querySelector('.pat-list').getBoundingClientRect();
+      const right = parseFloat(getComputedStyle(
+        document.querySelector('.pat-list'), '::before').right);
+      const r = document.querySelector('.pat-row').getBoundingClientRect();
+      /* Six pixels up from the row's foot: clear of the bar, which
+         takes the middle eight of a thirty-four pixel row, and INSIDE
+         the axis. Written first as `height - 2` — the axis is inset
+         two pixels top and bottom, so that is its excluded bottom
+         EDGE, and every sample came back as bare page. It reported
+         1.00:1 on an axis that is plainly there in a screenshot,
+         which is the same failure as measuring the wrong machine:
+         a check can be wrong about where it is looking as easily as
+         about what it is looking for. */
+      return { x: l.x + l.width - right, y: r.y + r.height - 6 };
+    });
+    const ppng = PNG.sync.read(await ppage.screenshot());
+    const pAt = (x, y) => { const i = (ppng.width * Math.round(y * dpr)
+      + Math.round(x * dpr)) << 2;
+      return [ppng.data[i], ppng.data[i + 1], ppng.data[i + 2]]; };
+    let axPx = [0, 0, 0];
+    for (let dx = -3; dx <= 0; dx += 0.5) {
+      const p = pAt(geo.x + dx, geo.y);
+      if (lum(p) > lum(axPx)) axPx = p;
+    }
+    const axGround = pAt(geo.x + 16, geo.y);
+    const axR = ratio(axPx, axGround);
+    ok(`the axis is a mark you can see (${axR.toFixed(2)}:1 on composited `
+      + 'pixels, against 1.01 for the token it went in as)',
+      axR >= 3, { axPx, axGround, geo });
+
+    /* ── THE PICKED CHIP TAKES THE ACCENT, WHICHEVER OF THE THREE IT
+           IS ──
+       This app's accent makes exactly one claim — that something
+       happened — and what happened here is that you ANSWERED.
+       Lighting Good and leaving Rough grey would be the screen
+       grading your day back at you, which is the thing every other
+       decision in this file is careful not to do: the habits screen's
+       rule, on the one control that takes an opinion.
+
+       Both are measured on real pixels and required to be the SAME
+       colour, so a palette with a green Good and a red Rough fails
+       whichever of the two happens to be lit when the check runs. */
+    const chipShot = async (n) => {
+      await ppage.evaluate((k) => document.querySelectorAll('.pat-c')[k].click(), n);
+      await ppage.waitForTimeout(140);
+      const b = await ppage.$eval('.pat-c.is-on', (e) => {
+        const r = e.getBoundingClientRect();
+        return { x: r.x + 6, y: r.y + r.height / 2, tx: r.x, tw: r.width,
+                 ty: r.y, th: r.height, txt: e.textContent };
+      });
+      const png = PNG.sync.read(await ppage.screenshot());
+      const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
+        + Math.round(x * dpr)) << 2; return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      /* The worst pixel of the word against the chip's own ground,
+         both taken off the composited image — the ground is a solid
+         accent, so the extreme in the box is the type. */
+      let ink = at(b.x, b.y), g = at(b.x, b.y);
+      for (let x = b.tx + 8; x < b.tx + b.tw - 8; x += 1) {
+        for (let y = b.ty + 12; y < b.ty + b.th - 12; y += 1) {
+          const p = at(x, y);
+          if (lum(p) < lum(ink)) ink = p;
+          if (lum(p) > lum(g)) g = p;
+        }
+      }
+      return { txt: b.txt, ground: g, ink, r: ratio(ink, g) };
+    };
+    const good = await chipShot(0);
+    const rough = await chipShot(2);
+    const accent = await ppage.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim());
+    ok(`Good and Rough light in the same colour (${good.ground} / ${rough.ground})`,
+      good.txt === 'Good' && rough.txt === 'Rough'
+      && good.ground.every((v, i) => Math.abs(v - rough.ground[i]) <= 2),
+      { good, rough });
+    /* And that colour is the accent, not a fourth thing invented for
+       this control — read off the root, because the accent is a wheel
+       and a hex written into a test measures nothing the day it
+       turns. */
+    const want = accent.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
+    ok(`...and it is the accent itself (${accent})`,
+      good.ground.every((v, i) => Math.abs(v - want[i]) <= 6),
+      { ground: good.ground, want });
+    ok(`...and the word on it clears the bar (${rough.r.toFixed(2)}:1)`,
+      rough.r >= 4.5, rough);
+
+    /* Pressing the chip you are already on takes the rating off, so a
+       mis-tap has a way back without a second control to explain it. */
+    const today = await ppage.evaluate(() => { const p = (n) => (n < 10 ? '0' : '') + n;
+      const d = new Date();
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); });
+    const wasSet = await ppage.evaluate((k) =>
+      JSON.parse(localStorage.getItem('sched.rate.v1'))[k], today);
+    await ppage.evaluate(() => document.querySelectorAll('.pat-c')[2].click());
+    await ppage.waitForTimeout(140);
+    const now = await ppage.evaluate((k) => ({
+      has: k in JSON.parse(localStorage.getItem('sched.rate.v1')),
+      on: document.querySelectorAll('.pat-c.is-on').length,
+    }), today);
+    ok('pressing the chip you are on takes the day off again',
+      wasSet === 0 && !now.has, { wasSet, now });
+    ok('...and nothing is lit once it is cleared', now.on === 0, now);
+
+    /* ── HOW YOU FELT NEVER LEAVES THE PHONE ──
+       The record already says a COUNT means you showed up and a LIST
+       means what your day is, and that the second is the thing this
+       app exists not to send. How a day felt is further down that
+       road than either.
+
+       Two halves, because each passes on the other's bug: rating a
+       day must not make a request at all, and a push that happens for
+       some other reason must not be carrying one. The second is the
+       check that was missing the two times a comment reading "this is
+       never sent" was the only place the intention existed. */
+    const HOSTX = 'https://pattern.invalid';
+    const bodies = [];
+    await ppage.route(HOSTX + '/**', async (route) => {
+      const r = route.request();
+      if (r.postData()) bodies.push(r.postData());
+      await route.fulfill({ status: 200, contentType: 'application/json',
+        headers: { 'access-control-allow-origin': '*' }, body: '{}' });
+    });
+    await ppage.evaluate((h) => {
+      localStorage.setItem('sched.net.v1', JSON.stringify({
+        on: true, url: h, code: 'PAT12345', key: 'f'.repeat(32), name: 'Pat' }));
+      localStorage.setItem('sched.ty.v1', 'pat');
+    }, HOSTX);
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(320);
+    const markA = pAsked.length;
+    await ppage.evaluate(() => document.querySelectorAll('.pat-c')[2].click());
+    await ppage.waitForTimeout(2200);          /* past the 1.5s push debounce */
+    const sinceRate = pAsked.slice(markA).filter((u) => u.startsWith(HOSTX));
+    ok('rating a day makes no request at all', sinceRate.length === 0, sinceRate);
+
+    /* Now something that DOES push, so there is a real body to read.
+       Mind rather than Train: ticking a training block opens the
+       workout picker, and a sheet in the way is a different test. */
+    await ppage.evaluate(() => document.getElementById('scTyUp').click());
+    await ppage.waitForTimeout(200);
+    await ppage.evaluate(() =>
+      document.querySelector('.ty-card[data-item="m"]').click());
+    await ppage.waitForTimeout(2400);
+    const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v1'));
+    ok('and a push that does happen carries no rating in it',
+      bodies.length > 0 && bodies.every((b) => !/rate|rough|fine/i.test(b))
+      && rated && rated !== '{}',
+      { bodies: bodies.map((b) => b.slice(0, 160)), rated });
+
+    /* ── ONE PANE AT A TIME, MEASURED ──
+       `hidden` works by a UA rule of `display: none`, and any author
+       `display` beats it — which is how the week once stayed on
+       screen underneath the friends board with the attribute being
+       set correctly throughout. The third stop is a third chance to
+       make that mistake, so this asks the LAYOUT. */
+    await ppage.evaluate(() => {
+      localStorage.setItem('sched.net.v1', JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(300);
+    for (const [stop, id] of [['up', 'scTyPane'], ['work', 'scWorkPane'],
+                              ['pat', 'scPatPane']]) {
+      await ppage.evaluate((s) => document.querySelector('[data-tystop="' + s + '"]').click(), stop);
+      await ppage.waitForTimeout(160);
+      const drawn = await ppage.evaluate(() => ['scTyPane', 'scWorkPane', 'scPatPane']
+        .filter((k) => { const r = document.getElementById(k).getBoundingClientRect();
+          return r.width > 1 && r.height > 1; }));
+      ok(`on ${stop}, ${id} is the only pane drawing`,
+        drawn.length === 1 && drawn[0] === id, { stop, drawn });
+    }
+
+    /* ── AND A STORED STOP HAS TO FALL THROUGH ──
+       The key outlives the code that wrote it, so a value naming a
+       pane this build no longer has must mean the first one rather
+       than a screen with a bar on it and nothing above the bar. Same
+       rule sched.view.v1 already keeps, and the reason the list is
+       written out rather than trusted. */
+    await ppage.evaluate(() => localStorage.setItem('sched.ty.v1', 'ring'));
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(300);
+    ok('a stop naming a pane that is gone falls through to the first',
+      await ppage.evaluate(() => {
+        const r = document.getElementById('scTyPane').getBoundingClientRect();
+        return r.height > 8 && document.getElementById('scTyUp').classList.contains('on');
+      }));
+
+    /* ── A DAMAGED ENTRY IS DROPPED, THE RECORD IS NOT ──
+       The days are what you cannot get back, and one bad value must
+       not take a season of them with it. Repaired on the way in like
+       every other store here, and asserted as the good days SURVIVING
+       rather than as the bad one being refused — rejecting the whole
+       object passes any check written the other way round. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+    await ppage.evaluate(() => {
+      const r = JSON.parse(localStorage.getItem('sched.rate.v1'));
+      const k = Object.keys(r).sort();
+      r[k[0]] = 'good'; r[k[1]] = 9; r[k[2]] = null;
+      localStorage.setItem('sched.rate.v1', JSON.stringify(r));
+    });
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(320);
+    const hurt = await ppage.evaluate(() => ({
+      foot: document.querySelector('#scPatPane .ty-foot').textContent,
+      rows: document.querySelectorAll('.pat-row').length,
+    }));
+    ok('three damaged days are dropped and the other thirty-seven read',
+      /\b37 days\b/.test(hurt.foot) && hurt.rows === 1, hurt);
+
+    ok('nothing threw anywhere on Pattern', perrs.length === 0, perrs);
+    /* The whole screen, on every fixture above, reached nothing off
+       this origin except the one stub it was pointed at on purpose. */
+    ok('and Pattern asked for nothing off origin',
+      pAsked.every((u) => u.startsWith(BASE) || u.startsWith(HOSTX)
+        || u.startsWith('data:') || u.startsWith('blob:')),
+      pAsked.filter((u) => !u.startsWith(BASE) && !u.startsWith(HOSTX)));
+    await pctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

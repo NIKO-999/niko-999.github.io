@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=c841b91d" />
+<link rel="stylesheet" href="app.css?v=9dbcd322" />
 </head>
 <body>
 
@@ -94,11 +94,17 @@
        to "how is today going", and two answers to one question on one
        screen is how the running row came to be painted like everything
        round it. Empty until scPaintTally fills it. -->
-  <!-- ── TWO STOPS, AND THE CONTROL IS THE HEADING ──
-       Showing up is the five, Workouts is what you actually trained.
-       They are the same subject at two grains and neither is a summary
-       of the other, so they are two stops rather than two panels down
-       one page — the friends board's own answer to the same shape.
+  <!-- ── THREE STOPS, AND THE CONTROL IS THE HEADING ──
+       Showing up is the five, Workouts is what you actually trained,
+       and Pattern is the two of them read back. They are the same
+       subject at three grains and none is a summary of another, so
+       they are three stops rather than three panels down one page —
+       the friends board's own answer to the same shape.
+
+       Pattern is the only one of the three that ASKS for something:
+       nothing else on this record says whether a day was any good, and
+       without that there is nothing for the rest of it to line up
+       against. It asks on its own screen, once, and nowhere else.
 
        The hero's own "Showing up" label went with it: a word naming a
        section, sitting directly under the button that takes you to
@@ -109,6 +115,8 @@
               aria-current="true">Showing up</button>
       <button class="fr-stop" id="scTyWork" data-tystop="work"
               aria-current="false">Workouts</button>
+      <button class="fr-stop" id="scTyPat" data-tystop="pat"
+              aria-current="false">Pattern</button>
     </nav>
     <div id="scTyPane">
       <div class="ty-hero">
@@ -119,6 +127,7 @@
       <p class="ty-foot" id="scTallyFoot"></p>
     </div>
     <div class="work" id="scWorkPane" hidden></div>
+    <div class="pat" id="scPatPane" hidden></div>
   </section>
 
   <!-- ── the history a row opens ──
@@ -228,6 +237,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=09fc7fbe"></script>
+<script src="app.js?v=c14e308c"></script>
 </body>
 </html>

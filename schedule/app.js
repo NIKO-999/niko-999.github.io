@@ -6083,24 +6083,426 @@
     pane.appendChild(list);
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     PATTERN — THE RECORD READ BACK
+
+     Every other screen in this app SHOWS you the record. This one
+     reads it: of everything you log, which things are on your good
+     days and which are on your rough ones, ranked by how far each one
+     moves a day.
+
+     ── IT IS THE ONE SCREEN THAT ASKS FOR SOMETHING ──
+     Nothing on this record says whether a day was any good. Ticks say
+     what you did, blocks say what you kept, and neither is an opinion
+     — so there is nothing for the rest of it to line up against, and
+     no amount of arithmetic over the existing keys invents one. The
+     ask is three chips, once a day, on this screen and nowhere else.
+
+     ── AND IT IS THE SMALLEST ASK THAT COULD WORK ──
+     Not a number. This app has never asked what you weigh, and a
+     figure you type every night is a different relationship with a
+     screen than one that only ever says you showed up. Three words is
+     a judgement you can make in a second and can be wrong about
+     without losing anything.
+
+     GOOD, FINE, ROUGH — never a grade. A rough day is something that
+     happened to you; "poor" is a verdict on you, which is the one
+     thing this app has spent every other decision not delivering. It
+     is the Easy → Light rename a second time, for the same reason.
+
+     ── WHAT IS NOT DONE WITH IT ──
+     It never leaves the phone. scPushNow builds its body field by
+     field, so a rating cannot reach a friend by being forgotten about
+     — but the record already says a count means you showed up and a
+     list means what your day IS, and how you felt is further down that
+     road than either. There is no line of code that sends it and there
+     will not be.
+     ═══════════════════════════════════════════════════════════ */
+
+  var RATE_KEY = 'sched.rate.v1';
+  var rateLog = null;              /* { '2026-09-01': 2 } */
+
+  /* Best first, which is the direction the ranking underneath reads
+     in. The VALUE is the scale everything below averages over, and
+     three points is what makes a difference of means mean anything —
+     a yes/no would have no middle for an ordinary day to sit in, so
+     every day you did not think about would land on one end. */
+  var RATINGS = [
+    { v: 2, n: 'Good' },
+    { v: 1, n: 'Fine' },
+    { v: 0, n: 'Rough' }
+  ];
+
+  /* Twelve weeks. Long enough that a factor can have five days either
+     side of it — which is the floor below — and short enough to be
+     about what you are doing rather than about your history. The
+     tally's own window is 26 weeks and answers a different question:
+     that one is the shape of one thing over time, this is a
+     comparison, and a comparison over half a year is a comparison
+     with somebody you no longer are. */
+  var PAT = 84;
+  /* Five on each side of a factor, or it is not ranked at all. Two
+     days against eighty is not a comparison, it is two days — and a
+     difference of means over a sample that small swings on one bad
+     night and prints it as a finding. */
+  var PAT_SIDE = 5;
+  /* And fourteen rated days before the screen says anything. Below
+     that it says how many more, which is honest and is also the only
+     thing it can usefully do on its first open. */
+  var PAT_FLOOR = 14;
+
+  function scRateLoad() {
+    try {
+      var raw = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
+      rateLog = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
+    } catch (e) { rateLog = {}; }
+    /* A damaged entry is dropped and the rest of the record survives
+       — the days are what you cannot get back, and one bad value must
+       not take a season of them with it. */
+    Object.keys(rateLog).forEach(function (k) {
+      var v = rateLog[k];
+      if (v !== 0 && v !== 1 && v !== 2) delete rateLog[k];
+    });
+  }
+  function scRateSave() {
+    try { localStorage.setItem(RATE_KEY, JSON.stringify(rateLog)); } catch (e) {}
+  }
+  function scRateOf(day) {
+    var v = rateLog[day];
+    return (v === 0 || v === 1 || v === 2) ? v : null;
+  }
+  /* The same window every other write on this app takes: today and
+     the two behind it. A rating you can revise a month later is a
+     rating about how the month went, which is not what any of this
+     is measuring. */
+  function scSetRate(day, v) {
+    if (!scTallyOpen(day)) return false;
+    if (v === null) delete rateLog[day]; else rateLog[day] = v;
+    scRateSave();
+    return true;
+  }
+
+  /* ── THE FACTORS ──
+     One question per thing you log, and every one of them has to be
+     answerable YES or NO on a given day — or not at all.
+
+     THE THIRD ANSWER IS WHAT MAKES THE OTHER TWO WORTH HAVING. A day
+     Train was never scheduled is not a day you skipped it; a night
+     you did not record is not a short night. Both are dropped from
+     that factor's arithmetic rather than counted as a no, which is
+     the strip's own three states seen from the other side.
+
+     A NUMBER IS SPLIT AT ITS OWN MIDDLE, never at a figure this app
+     picked. Eight thousand steps is somebody else's target, and
+     halving your own record is what guarantees both sides have days
+     on them — which is the whole condition for a difference of means
+     to say anything. */
+  function scPatMids() {
+    var mid = {}, floor = scDayBack(PAT - 1);
+    TALLY.forEach(function (it) {
+      if (it.k !== 'num') return;
+      var vals = [];
+      Object.keys(tickLog).forEach(function (day) {
+        if (day < floor) return;
+        var v = parseFloat(tickLog[day][it.id]);
+        if (v > 0) vals.push(v);
+      });
+      vals.sort(function (a, b) { return a - b; });
+      if (!vals.length) return;
+      var h = vals.length >> 1;
+      mid[it.id] = vals.length % 2 ? vals[h] : (vals[h - 1] + vals[h]) / 2;
+    });
+    return mid;
+  }
+
+  /* ── AND THE BLOCKS NOTHING ELSE ASKS ABOUT ──
+     Train and Mind already carry Train, Walk and Read, so listing
+     those blocks again would be one question asked twice under two
+     names. What is left is everything the five never look at — the
+     shift, the trading hours, the wind-down — and that is the half of
+     this screen the tally could never have produced.
+
+     BY NAME, not by id. A block's id is per weekday, so "Work" on a
+     Monday and "Work" on a Tuesday are two records, and a factor
+     built on one of them has twelve days in a twelve-week window. */
+  function scPatBlocks() {
+    var seen = {}, out = [];
+    state.items.forEach(function (b) {
+      if (seen[b.n] || scItemsFor(b.n).length) return;
+      seen[b.n] = 1;
+      out.push(b.n);
+    });
+    return out;
+  }
+
+  /* ── DOES THIS FACTOR HOLD ON THIS DAY? ──
+     Yes, no, or NOT ASKED. Named apart from scPatAsk below, which is
+     the control that asks YOU: two functions a character apart doing
+     unrelated things is a reading trap in a file this size. */
+  function scPatHeld(f, day, mid) {
+    var i, bs;
+    if (f.item) {
+      var raw = tickLog[day] && tickLog[day][f.item.id];
+      if (f.item.k === 'do') {
+        if (raw) return 1;
+        return scApplied(f.item, day) ? 0 : -1;
+      }
+      var v = parseFloat(raw);
+      if (!(v > 0) || mid[f.item.id] === undefined) return -1;
+      return v >= mid[f.item.id] ? 1 : 0;
+    }
+    /* A block name: scheduled that weekday and not taken off, or the
+       question was never put. */
+    bs = scByDay(new Date(day + 'T12:00:00').getDay()).filter(function (b) {
+      return b.n === f.block && !scOff(day, b.id);
+    });
+    if (!bs.length) return -1;
+    for (i = 0; i < bs.length; i++) {
+      if (blockLog[day] && blockLog[day][bs[i].id]) return 1;
+    }
+    return 0;
+  }
+
+  /* ── HOW FAR A THING MOVES A DAY ──
+     The mean rating of the days it was on, less the mean of the days
+     it was not. That is the whole statistic, and it is deliberately
+     the simplest one that answers the question asked — anything with
+     a coefficient in it would be a model, and a model you cannot see
+     the working of is exactly the kind of answer this app refuses
+     elsewhere.
+
+     It says what your days have in common. It does not say what
+     caused what, and the foot of the screen says so out loud rather
+     than leaving it to be inferred from a bar. */
+  function scPatRank() {
+    var floor = scDayBack(PAT - 1), mid = scPatMids(), rated = [];
+    Object.keys(rateLog).forEach(function (day) {
+      if (day >= floor && day <= scDay()) rated.push(day);
+    });
+
+    var facts = [];
+    TALLY.forEach(function (it) {
+      facts.push({
+        key: 'i:' + it.id, item: it,
+        /* "Steps over 8,400", never "Steps 8,400+": the suffix hangs
+           off a unit that already has a space in front of it, so
+           "Sleep 7.5 h+" reads as a typo — and the name is dropped
+           whole into the sentence at the top, where a word is a word
+           and a plus sign is punctuation nobody speaks. */
+        n: it.k === 'do' ? it.n
+          : it.n + ' over ' + scPatMid(it, mid[it.id])
+      });
+    });
+    scPatBlocks().forEach(function (n) {
+      facts.push({ key: 'b:' + n, block: n, n: n });
+    });
+
+    var out = [];
+    facts.forEach(function (f) {
+      var yes = 0, ys = 0, no = 0, ns = 0;
+      rated.forEach(function (day) {
+        var a = scPatHeld(f, day, mid);
+        if (a < 0) return;
+        if (a) { yes++; ys += rateLog[day]; } else { no++; ns += rateLog[day]; }
+      });
+      if (yes < PAT_SIDE || no < PAT_SIDE) return;
+      out.push({ key: f.key, n: f.n, yes: yes, no: no,
+                 lift: ys / yes - ns / no });
+    });
+    out.sort(function (a, b) { return Math.abs(b.lift) - Math.abs(a.lift); });
+    return { rows: out, rated: rated.length };
+  }
+
+  /* The split printed at the item's own precision, so "Sleep 7.2 h"
+     and "Steps 8,400" both read as the figure you would have typed. */
+  function scPatMid(it, v) {
+    if (v === undefined) return '';
+    var dp = it.dp || 0;
+    return v.toLocaleString('en-GB',
+      { minimumFractionDigits: dp, maximumFractionDigits: dp })
+      + (it.unit || '');
+  }
+
+  /* ── THE ASK ──
+     Three chips, and the one you pressed takes the ACCENT whichever
+     of the three it is. That is the habits screen's rule seen from
+     the control's side: the accent on this app makes exactly one
+     claim, that something happened, and what happened here is that
+     you answered. Colouring Good and not Rough would be the screen
+     grading your day back at you, which is the thing this whole app
+     is built not to do.
+
+     Pressing the chip you are already on takes the rating OFF, so a
+     mis-tap has a way back without a second control to explain. */
+  function scPatAsk(day, ttl) {
+    var wrap = scEl('div', 'pat-ask');
+    wrap.appendChild(scEl('span', 'label', ttl));
+    var row = scEl('div', 'pat-chips');
+    row.setAttribute('role', 'group');
+    row.setAttribute('aria-label', ttl);
+    RATINGS.forEach(function (r) {
+      var on = scRateOf(day) === r.v;
+      var c = scEl('button', 'pat-c' + (on ? ' is-on' : ''), r.n);
+      c.type = 'button';
+      c.dataset.rate = String(r.v);
+      c.setAttribute('aria-pressed', on ? 'true' : 'false');
+      c.addEventListener('click', function () {
+        if (scSetRate(day, on ? null : r.v)) scPaintPat();
+      });
+      row.appendChild(c);
+    });
+    wrap.appendChild(row);
+    return wrap;
+  }
+
+  function scPaintPat() {
+    var pane = $('scPatPane');
+    pane.textContent = '';
+    var today = scDay();
+
+    pane.appendChild(scPatAsk(today, 'How was today?'));
+    /* Yesterday only while it is unrated AND still open, so the row is
+       a thing to catch rather than a second permanent control. Two
+       days behind is inside the window too and is not offered: at
+       that distance you are not remembering a day, you are guessing
+       at one. */
+    var y = scDayBack(1);
+    if (scRateOf(y) === null && scTallyOpen(y)) {
+      pane.appendChild(scPatAsk(y, 'And yesterday?'));
+    }
+
+    var rank = scPatRank();
+    if (rank.rated < PAT_FLOOR) {
+      var left = PAT_FLOOR - rank.rated;
+      pane.appendChild(scEl('p', 'pat-none', rank.rated
+        ? 'Rate ' + left + (left === 1 ? ' more day' : ' more days')
+          + ' and this starts reading. It needs both kinds to compare.'
+        : 'Say how a day went and this fills in. It lines up everything '
+          + 'you already log against the days you called good.'));
+      return;
+    }
+    if (!rank.rows.length) {
+      /* Rated enough days and still nothing to rank: every factor is
+         lopsided — you kept everything, or logged one thing. Said as
+         what is missing rather than as an error. */
+      pane.appendChild(scEl('p', 'pat-none',
+        'Nothing you log has enough days on both sides of it yet. It '
+        + 'needs ' + PAT_SIDE + ' days with a thing and ' + PAT_SIDE
+        + ' without.'));
+      return;
+    }
+
+    /* ── THE SENTENCE ──
+       The strongest thing in each direction, named. Never a
+       manufactured claim about why: "is on your good days" is what
+       the arithmetic actually found, and anything warmer than that is
+       a sentence the data cannot pay for. */
+    var up = null, dn = null;
+    rank.rows.forEach(function (r) {
+      if (r.lift > .05 && (!up || r.lift > up.lift)) up = r;
+      if (r.lift < -.05 && (!dn || r.lift < dn.lift)) dn = r;
+    });
+    var say = scEl('p', 'pat-say');
+    if (!up && !dn) {
+      say.textContent = 'Nothing you log tells your days apart yet.';
+    } else {
+      if (up) {
+        say.appendChild(scEl('b', null, up.n));
+        say.appendChild(document.createTextNode(
+          ' is on your good days more than anything else you log.'));
+      }
+      if (dn) {
+        if (up) say.appendChild(document.createTextNode(' '));
+        say.appendChild(scEl('b', null, dn.n));
+        say.appendChild(document.createTextNode(' is on your rough ones.'));
+      }
+    }
+    pane.appendChild(say);
+
+    pane.appendChild(scEl('span', 'label', 'What moves a day, most first'));
+
+    /* ── BOTH DIRECTIONS WEAR THE SAME COLOUR ──
+       Which side of the zero line a bar is on is the whole of what
+       says up or down, and it costs no contrast at all — the day-off
+       dot's own argument. A red bar for the things on your rough days
+       would be the one thing this app never does: colour saying
+       whether. The number beside it carries the sign in words.
+
+       Scaled against the LARGEST thing on your own list, not against
+       a ceiling nobody set — the workouts ring's rule, for the same
+       reason: the rows have to read against each other. */
+    var most = Math.abs(rank.rows[0].lift) || 1;
+    var list = scEl('ul', 'pat-list');
+    rank.rows.forEach(function (r) {
+      var li = scEl('li', 'pat-row');
+      li.appendChild(scEl('span', 'pat-nm', r.n));
+      var mid = scEl('span', 'pat-mid');
+      mid.setAttribute('aria-hidden', 'true');
+      li.appendChild(mid);
+      /* ── THE SIGN COMES OFF THE ROUNDED FIGURE ──
+         A lift of -0.04 is zero at one decimal place, and reading the
+         sign off the raw number printed "−0.0" — a minus sign on
+         nothing, which reads as a rendering fault rather than as a
+         thing that makes no difference. Rounded first, and a zero
+         wears no sign at all. */
+      var fig = Math.abs(r.lift).toFixed(1);
+      var nil = fig === '0.0';
+      /* ── A ROW AT ZERO DRAWS NO BAR ──
+         Scaled against the top of the list, a lift of .02 comes out
+         about a pixel wide — a green speck sitting ON the axis, which
+         made the axis look green on exactly the rows that have
+         nothing to say. The figure beside it already reads 0.0, and
+         an unbroken axis with nothing on it is what that looks like. */
+      if (!nil) {
+        var bar = scEl('span', 'pat-bar ' + (r.lift < 0 ? 'is-dn' : 'is-up'));
+        bar.style.width = (Math.abs(r.lift) / most * 50).toFixed(2) + '%';
+        mid.appendChild(bar);
+      }
+      li.appendChild(scEl('span', 'pat-n',
+        (nil ? '' : r.lift < 0 ? '−' : '+') + fig));
+      /* Spoken as one sentence with its sample in it. The bar says
+         nothing a screen reader can use and the bare figure says less
+         — "+0.4" under a heading is a number about nothing. */
+      li.setAttribute('aria-label', r.n + (nil
+        ? ' makes no difference to a day'
+        : ' moves a day ' + (r.lift < 0 ? 'down ' : 'up ') + fig)
+        + ', from ' + r.yes + ' days with it and ' + r.no + ' without.');
+      list.appendChild(li);
+    });
+    pane.appendChild(list);
+
+    pane.appendChild(scEl('p', 'ty-foot',
+      'From the ' + rank.rated + ' days you rated, out of the last twelve '
+      + 'weeks. It says what your days have in common, never what caused '
+      + 'what.'));
+  }
+
   /* ── THE STOP ──
      Its own key, like the friends board's: which half of a screen you
      were last on is a preference about looking at the record, and
      folding it into the record is how a damaged record takes the other
-     down. */
+     down.
+
+     A STORED STOP HAS TO FALL THROUGH. The key outlives the code that
+     wrote it, so a value naming a pane this build no longer has is the
+     first one — the same rule sched.view.v1 already keeps, and the
+     reason the list is written out rather than trusted. */
   var TYSTOP_KEY = 'sched.ty.v1';
+  var TYSTOPS = ['up', 'work', 'pat'];
   var tyStop = 'up';
 
   function scTyStop(v, save) {
-    tyStop = v === 'work' ? 'work' : 'up';
+    tyStop = TYSTOPS.indexOf(v) < 0 ? 'up' : v;
     $('scTyPane').hidden = tyStop !== 'up';
     $('scWorkPane').hidden = tyStop !== 'work';
+    $('scPatPane').hidden = tyStop !== 'pat';
     [].forEach.call(document.querySelectorAll('[data-tystop]'), function (t) {
       var on = t.dataset.tystop === tyStop;
       t.classList.toggle('on', on);
       t.setAttribute('aria-current', on ? 'true' : 'false');
     });
     if (tyStop === 'work') scPaintWork();
+    if (tyStop === 'pat') scPaintPat();
     if (save) { try { localStorage.setItem(TYSTOP_KEY, tyStop); } catch (e) {} }
   }
 
@@ -6770,12 +7172,13 @@
   scTickLoad();
   scObjLoad();
   scTrainLoad();
+  scRateLoad();
 
   try {
     var fs2 = localStorage.getItem(FRSTOP_KEY);
     if (fs2 === 'board' || fs2 === 'feed') frStop = fs2;
     var ts2 = localStorage.getItem(TYSTOP_KEY);
-    if (ts2 === 'up' || ts2 === 'work') tyStop = ts2;
+    if (TYSTOPS.indexOf(ts2) >= 0) tyStop = ts2;
   } catch (e) {}
 
   /* Whether friends are on, and who is on your list. Reading it makes

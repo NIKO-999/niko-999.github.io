@@ -2329,10 +2329,11 @@ that must produce a picture — never a verifier asked to argue.
 
 ## Workouts is the second stop on Today
 
-What you actually trained, as against the five you ticked. **Two stops
+What you actually trained, as against the five you ticked. **A stop
 rather than a fourth tab**: the bar holds three and an add control at
 390px, and a fourth would be the control that made the row too tight to
-press. It is the friends board's own pattern, and the CONTROL IS THE
+press. Pattern is the third stop, added later for the same reason and
+by the same mechanism. It is the friends board's own pattern, and the CONTROL IS THE
 HEADING — the hero's own "Showing up" label went with it, because a
 word naming a section directly under the button that opens that section
 is the same word twice.
@@ -2470,6 +2471,195 @@ sixth smuggled in for a sheet is that list becoming a suggestion, which
 `tests/schedule.js` catches. Nor can it be a shadow, because the page
 is nearly black and a dark shadow over it separates nothing. One pixel
 of `--hair`.
+
+## Pattern is the record read back
+
+Every other screen in this app SHOWS you the record. This one reads
+it: of everything you log, which things are on your good days and
+which are on your rough ones, ranked by how far each one moves a day.
+The third stop on Today, beside Showing up and Workouts — the same
+data one level up, which is what makes it a stop rather than a fourth
+tab the bar has no room for.
+
+**IT IS THE ONE SCREEN THAT ASKS FOR SOMETHING.** Nothing on this
+record says whether a day was any good — ticks say what you did,
+blocks say what you kept, and neither is an opinion — so there is
+nothing for the rest of it to line up against, and no arithmetic over
+the existing keys invents one. Deriving the outcome from the day's own
+completeness was the obvious dodge and is circular: it would rank the
+five things you log against a count of the five things you log.
+
+**AND IT IS THE SMALLEST ASK THAT COULD WORK.** Not a number. This app
+has never asked what you weigh, and a figure you type every night is a
+different relationship with a screen than one that only ever says you
+showed up. Three words is a judgement you can make in a second and can
+be wrong about without losing anything. Three rather than two, because
+a yes/no has no middle for an ordinary day to sit in, so every day you
+did not think about lands on one end.
+
+**GOOD, FINE, ROUGH — never a grade.** A rough day is something that
+happened to you; "poor" is a verdict on you, which is the one thing
+this app has spent every other decision not delivering. It is the
+Easy → Light rename a second time, for the same reason.
+
+**The picked chip takes the accent, whichever of the three it is.**
+The accent makes exactly one claim — that something happened — and
+what happened here is that you ANSWERED. Lighting Good and leaving
+Rough grey would be the screen grading your day back at you, which is
+the habits rule seen from the control's side. Both are measured on
+composited pixels and required to be the SAME colour, so a green Good
+beside a red Rough fails whichever one happens to be lit.
+
+**Pressing the chip you are on clears the day.** A mis-tap has a way
+back without a second control to explain it.
+
+**Yesterday is offered only while it is unrated AND still open**, so
+the row is a thing to catch rather than a second permanent control.
+Two days behind is inside the backfill window and is not offered: at
+that distance you are not remembering a day, you are guessing at one.
+
+### The figure is a difference of means, and that is the whole model
+
+Mean rating of the days a thing was on, less the mean of the days it
+was not. Deliberately the simplest statistic that answers the question
+asked — anything with a coefficient in it is a model, and a model you
+cannot see the working of is exactly the kind of answer this app
+refuses everywhere else.
+
+**Both halves are asserted, because the obvious wrong answer passes
+half of them.** A screen printing the MEAN OF THE DAYS IT WAS ON is
+what somebody reaches for first, and on a fixture of Good-days-on
+against Rough-days-off it reads +2.0 — the same as the right answer.
+The second fixture is the same yes-side against ordinary days and
+reads +1.0, which is what makes it a difference rather than an
+average.
+
+**A DAY IT WAS NEVER ON IS NOT A DAY YOU MISSED IT**, which is the
+strip's own rule and the thing this screen would have got silently
+wrong. A night you did not record is not a short night; a weekday
+Train is not scheduled is not a skipped session. Both are dropped from
+that factor's arithmetic rather than counted as a no. Measured on a
+fixture where the two readings differ — twenty unlogged days rated
+Good give +2.0 read correctly and +0.7 counted as misses.
+
+**A NUMBER IS SPLIT AT ITS OWN MIDDLE**, never at a figure this app
+picked. Eight thousand steps is somebody else's target; halving your
+own record is also the only threshold that guarantees both sides have
+days on them, which is the entire condition for a difference of means
+to say anything.
+
+**Five days either side, or it is not ranked.** Two days against
+eighty is not a comparison, and a difference of means over a sample
+that small swings on one bad night and prints it as a finding. Both
+directions are checked — a floor that only ever refuses is
+indistinguishable from a factor that never worked.
+
+**Fourteen rated days before the screen says anything at all**, and
+below that it says how many more. The honest thing to do with nothing
+is to say what would fix it, and it is also the only useful thing this
+screen can do on its first open.
+
+**"Over 7.5 h", never "7.5 h+".** The suffix hangs off a unit that
+already has a space in front of it, so it read as a typo — and the
+name is dropped whole into the sentence at the top, where a word is a
+word and a plus sign is punctuation nobody speaks.
+
+**The blocks nothing else asks about are half of what this screen is
+for.** Train and Mind already carry Train, Walk and Read, so listing
+those blocks again is one question asked twice under two names. What
+is left — the shift, the trading hours, the wind-down — is the half
+the tally could never have produced. **By name, not by id**: a block's
+id is per weekday, so "Work" on a Monday and "Work" on a Tuesday are
+two records, and a factor built on one has twelve days in a twelve-
+week window.
+
+**Twelve weeks, where the tally's own window is twenty-six.** That one
+is the shape of one thing over time; this is a comparison, and a
+comparison over half a year is a comparison with somebody you no
+longer are.
+
+**The sentence at the top names the strongest thing in each direction
+and claims nothing else.** "is on your good days" is what the
+arithmetic actually found; anything warmer is a sentence the data
+cannot pay for. The foot says it out loud rather than leaving it to be
+inferred from a bar: it says what your days have in common, never what
+caused what.
+
+### The axis is the whole of what says up or down
+
+Which side of it a bar sits on is the only thing carrying the
+direction, because a colour here would be this screen saying WHETHER —
+the one thing it never does. Both directions wear the same accent and
+the number beside them carries the sign in words. Size and side cost
+no contrast at all, which is the day-off dot's own argument.
+
+**So the axis has to be visible, and it went in at 1.01:1.** It was
+`--g0`, which is `var(--paper)`: the line was painted in the page it
+was drawn on. It looked like a faint line in the screenshot because
+the two rows nearest zero drew a bar about a pixel wide, and **a green
+sliver is not an axis**. `--hair` and `--tick-off` both LOOK like the
+token for this and measure 1.27:1 and 1.60:1 as hairlines — they are
+surfaces separating panels, not marks carrying a fact. Mixed to 3:1,
+measured as the brightest pixel in a band across where the axis is
+against the ground a few pixels off it.
+
+**And the check that measures it was itself looking at the wrong
+pixel.** It sampled two pixels up from the row's foot — which is the
+axis's own excluded bottom EDGE, since it is inset two pixels top and
+bottom — so every sample came back as bare page and it reported
+**1.00:1 on an axis that is plainly there in a screenshot**. Proved
+both ways afterwards: 3.08:1 as shipped, 1.00:1 with the colour
+reverted to `--g0`. A check can be wrong about WHERE it is looking as
+easily as about what it is looking for, and the two failures are
+indistinguishable from the output.
+
+**It is ONE axis down the whole list, not six ticks.** Six 1px marks
+on a near-black page are six specks, and the bars then read as
+floating at arbitrary places rather than as two directions off a
+middle. The three column figures are tokens because the axis and the
+grid have to agree about where the middle of the track is; written as
+literals in two places they are two numbers to keep in step, and the
+one that drifts is the invisible one.
+
+**A row at zero draws no bar.** Scaled against the top of the list a
+lift of .02 comes out about a pixel wide — a green speck sitting ON
+the axis, which made the axis look green on exactly the rows that have
+nothing to say. **And nothing ever prints −0.0**: the sign is read off
+the ROUNDED figure, because a minus sign on nothing reads as a
+rendering fault rather than as a thing that makes no difference.
+
+**Nothing is drawn between the rows**, which is the week card's rule
+for the week card's reason: a line between every two items is what
+makes a list a table, and a table is a thing you scan for a value. The
+bars are already the picture.
+
+### How you felt never leaves the phone
+
+The record already says a COUNT means you showed up and a LIST means
+what your day is, and that the second is the thing this app exists not
+to send. How a day felt is further down that road than either.
+`sched.rate.v1` is not in `scPushNow`'s body and `scSetRate` does not
+call `scPush`.
+
+**Two halves, because each passes on the other's bug**: rating a day
+must make no request at all, and a push that happens for some other
+reason must not be carrying one. The second is the check that was
+missing the two times a comment reading "this is never sent" was the
+only place the intention existed.
+
+**A stored stop has to fall through**, and there are three of them
+now. `sched.ty.v1` outlives the code that wrote it, so a value naming
+a pane this build no longer has has to mean the first one rather than
+a bar with nothing above it — the same rule `sched.view.v1` already
+keeps, and the reason the list is written out rather than trusted.
+`[hidden]` is said out loud for the new pane too: the tally's panes
+take a `display`, and that is the third chance to make the mistake
+that once left the week on screen underneath the friends board.
+
+**A damaged entry is dropped and the record is not.** The days are
+what you cannot get back. Asserted as the good days SURVIVING rather
+than as the bad one being refused — rejecting the whole object passes
+any check written the other way round.
 
 ## Every deploy landed one open late
 
