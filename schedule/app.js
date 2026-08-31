@@ -1316,6 +1316,31 @@
         card.appendChild(row);
       });
 
+      /* ── AND TODAY'S CARD ENDS BY ASKING ──
+         The foot of the day is where you are when the day is over,
+         which Pattern is not: that screen is where you go to READ what
+         your good days have in common, so an ask living only there was
+         an ask nobody was standing in front of.
+
+         TODAY'S CARD AND NO OTHER. Every card is built for its own
+         weekday, and a rating written from Friday's card on a Tuesday
+         would land on today under a heading that says Friday — which
+         is exactly the round trip through one wrong answer that
+         "Done today" made, self-consistently, for months. scDowDate is
+         the resolver that can say no, and this draws nothing when it
+         does.
+
+         Inside the scroller rather than under it, so on a long day it
+         is the thing you arrive at having gone through everything,
+         which is when the question makes sense to answer. */
+      var rd = scDowDate(d);
+      if (rd === scDay()) {
+        card.appendChild(scStars(rd, 'How was today?', function () {
+          scRender();
+          scPaintTally();
+        }));
+      }
+
       /* The fade says there is more under the fold, and it comes off at
          the end of the travel. Read off the box rather than off a count
          of rows: what overflows depends on the card's measured height,
@@ -6116,7 +6141,8 @@
      what you did, blocks say what you kept, and neither is an opinion
      — so there is nothing for the rest of it to line up against, and
      no amount of arithmetic over the existing keys invents one. The
-     ask is three chips, once a day, on this screen and nowhere else.
+     ask is five stars, once a day, here and at the foot of today's
+     card — one control, built once and used in both places.
 
      ── AND IT IS THE SMALLEST ASK THAT COULD WORK ──
      Not a number. This app has never asked what you weigh, and a
@@ -6139,19 +6165,17 @@
      will not be.
      ═══════════════════════════════════════════════════════════ */
 
-  var RATE_KEY = 'sched.rate.v1';
-  var rateLog = null;              /* { '2026-09-01': 2 } */
-
-  /* Best first, which is the direction the ranking underneath reads
-     in. The VALUE is the scale everything below averages over, and
-     three points is what makes a difference of means mean anything —
-     a yes/no would have no middle for an ordinary day to sit in, so
-     every day you did not think about would land on one end. */
-  var RATINGS = [
-    { v: 2, n: 'Good' },
-    { v: 1, n: 'Fine' },
-    { v: 0, n: 'Rough' }
-  ];
+  /* ── v2, BECAUSE THE SCALE MOVED AND THE OLD ONE OVERLAPS IT ──
+     It was three words on 0, 1 and 2. It is five stars on 1 to 5, and
+     those two scales share the values 1 and 2 — a stored `1` is either
+     the old Fine or one star, and nothing in the number says which. A
+     record that cannot be read twice needs a second key rather than a
+     cleverer guess, so v1 is converted once and spent, the way the
+     stored palette NAME was when the wheel landed. */
+  var RATE_KEY = 'sched.rate.v2';
+  var RATE_OLD = 'sched.rate.v1';
+  var rateLog = null;              /* { '2026-09-01': 4 } */
+  var RATE_MAX = 5;
 
   /* Twelve weeks. Long enough that a factor can have five days either
      side of it — which is the floor below — and short enough to be
@@ -6172,24 +6196,52 @@
   var PAT_FLOOR = 14;
 
   function scRateLoad() {
-    try {
-      var raw = JSON.parse(localStorage.getItem(RATE_KEY) || '{}');
-      rateLog = (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : {};
-    } catch (e) { rateLog = {}; }
+    var read = function (k) {
+      try {
+        var raw = JSON.parse(localStorage.getItem(k) || 'null');
+        return (raw && typeof raw === 'object' && !Array.isArray(raw)) ? raw : null;
+      } catch (e) { return null; }
+    };
+    rateLog = read(RATE_KEY) || {};
+
+    /* ── THE OLD SCALE COMES ACROSS ONCE ──
+       Rough, Fine and Good were 0, 1 and 2; they are the bottom, the
+       middle and the top of five now, which keeps their order and the
+       even spacing they had. Only when there is nothing under the new
+       key: a v2 record is the one somebody has been writing since, and
+       a migration that ran twice would put months-old answers back
+       over it. The old key is REMOVED rather than left — a number that
+       resolves to another number is not something to keep resolving,
+       and left there it is a second record of the same days that
+       nothing reads. */
+    if (!read(RATE_KEY)) {
+      var was = read(RATE_OLD);
+      if (was) {
+        Object.keys(was).forEach(function (k) {
+          var v = was[k];
+          if (v === 0 || v === 1 || v === 2) rateLog[k] = [1, 3, 5][v];
+        });
+        scRateSave();
+      }
+    }
+    try { localStorage.removeItem(RATE_OLD); } catch (e) {}
+
     /* A damaged entry is dropped and the rest of the record survives
        — the days are what you cannot get back, and one bad value must
        not take a season of them with it. */
     Object.keys(rateLog).forEach(function (k) {
-      var v = rateLog[k];
-      if (v !== 0 && v !== 1 && v !== 2) delete rateLog[k];
+      if (!scRateOK(rateLog[k])) delete rateLog[k];
     });
+  }
+  function scRateOK(v) {
+    return typeof v === 'number' && v >= 1 && v <= RATE_MAX && v === Math.round(v);
   }
   function scRateSave() {
     try { localStorage.setItem(RATE_KEY, JSON.stringify(rateLog)); } catch (e) {}
   }
   function scRateOf(day) {
     var v = rateLog[day];
-    return (v === 0 || v === 1 || v === 2) ? v : null;
+    return scRateOK(v) ? v : null;
   }
   /* The same window every other write on this app takes: today and
      the two behind it. A rating you can revise a month later is a
@@ -6256,9 +6308,9 @@
   }
 
   /* ── DOES THIS FACTOR HOLD ON THIS DAY? ──
-     Yes, no, or NOT ASKED. Named apart from scPatAsk below, which is
-     the control that asks YOU: two functions a character apart doing
-     unrelated things is a reading trap in a file this size. */
+     Yes, no, or NOT ASKED. Named apart from scStars below, which is
+     the control that asks YOU: this one asks whether a THING held on a
+     day, and confusing the two in a file this size is a reading trap. */
   function scPatHeld(f, day, mid) {
     var i, bs;
     if (f.item) {
@@ -6343,44 +6395,72 @@
       + (it.unit || '');
   }
 
-  /* ── THE ASK ──
-     Three chips, and the one you pressed takes the ACCENT whichever
-     of the three it is. That is the habits screen's rule seen from
-     the control's side: the accent on this app makes exactly one
-     claim, that something happened, and what happened here is that
-     you answered. Colouring Good and not Rough would be the screen
-     grading your day back at you, which is the thing this whole app
-     is built not to do.
+  /* ── THE ASK IS FIVE STARS, AND IT IS IN TWO PLACES ──
+     It was three chips on one screen. Stars because the question has
+     more than three honest answers in it and everybody already knows
+     how to answer this one, and in TWO places because the screen that
+     asks and the screen that reads the answer were the same screen:
+     Pattern is where you go to see what your good days have in common,
+     which is not where you are standing when a day ends.
 
-     Pressing the chip you are already on takes the rating OFF, so a
-     mis-tap has a way back without a second control to explain. */
-  function scPatAsk(day, ttl) {
-    var wrap = scEl('div', 'pat-ask');
-    wrap.appendChild(scEl('span', 'label', ttl));
-    var row = scEl('div', 'pat-chips');
+     ONE CONTROL, built once and used twice. Two drawings of one
+     question is how they drift, and a day rated four at the foot of
+     the card had better be a day rated four on Pattern.
+
+     Pressing the star you are already on takes the day off again, so
+     a mis-tap has a way back without a second control to explain it.
+
+     THE LIT STARS ARE THE ACCENT, which is this app's one claim: that
+     something happened. What happened is that you answered. The unlit
+     ones are the flat neutral the tally draws a missed day in — the
+     count is what says how the day went, and the colour never does. */
+  function scStars(day, ttl, after) {
+    var wrap = scEl('div', 'st-ask');
+    if (ttl) wrap.appendChild(scEl('span', 'label', ttl));
+    var row = scEl('div', 'st-row');
     row.setAttribute('role', 'group');
-    row.setAttribute('aria-label', ttl);
-    RATINGS.forEach(function (r) {
-      var on = scRateOf(day) === r.v;
-      var c = scEl('button', 'pat-c' + (on ? ' is-on' : ''), r.n);
-      c.type = 'button';
-      c.dataset.rate = String(r.v);
-      c.setAttribute('aria-pressed', on ? 'true' : 'false');
-      c.addEventListener('click', function () {
-        if (scSetRate(day, on ? null : r.v)) scPaintPat();
-      });
-      row.appendChild(c);
-    });
+    row.setAttribute('aria-label', ttl || 'Rate this day');
+    var now = scRateOf(day);
+    for (var i = 1; i <= RATE_MAX; i++) {
+      (function (n) {
+        var b = scEl('button', 'st' + (now !== null && n <= now ? ' is-on' : ''));
+        b.type = 'button';
+        b.dataset.star = String(n);
+        /* Spoken as what it DOES, not as where it sits in a row: "3"
+           on its own is a number, and five buttons called 1 to 5 with
+           no unit are five numbers. */
+        b.setAttribute('aria-label', n + (n === 1 ? ' star' : ' stars'));
+        b.setAttribute('aria-pressed', now === n ? 'true' : 'false');
+        b.innerHTML = STAR_MARK;
+        b.addEventListener('click', function () {
+          if (!scSetRate(day, now === n ? null : n)) {
+            scToast('That day is not open yet', false);
+            return;
+          }
+          if (navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+          if (after) after();
+        });
+        row.appendChild(b);
+      }(i));
+    }
     wrap.appendChild(row);
     return wrap;
   }
+
+  /* A five-pointed star, filled by CSS rather than by two drawings:
+     the lit and unlit states are the same shape and differ only in
+     colour, and a second path for the outline is a second thing to
+     keep in step. */
+  var STAR_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+    + '<path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5-5.8-3.05'
+    + '-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>';
 
   function scPaintPat() {
     var pane = $('scPatPane');
     pane.textContent = '';
     var today = scDay();
 
-    pane.appendChild(scPatAsk(today, 'How was today?'));
+    pane.appendChild(scStars(today, 'How was today?', scPaintPat));
     /* Yesterday only while it is unrated AND still open, so the row is
        a thing to catch rather than a second permanent control. Two
        days behind is inside the window too and is not offered: at
@@ -6388,7 +6468,7 @@
        at one. */
     var y = scDayBack(1);
     if (scRateOf(y) === null && scTallyOpen(y)) {
-      pane.appendChild(scPatAsk(y, 'And yesterday?'));
+      pane.appendChild(scStars(y, 'And yesterday?', scPaintPat));
     }
 
     var rank = scPatRank();

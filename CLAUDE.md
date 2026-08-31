@@ -2481,42 +2481,84 @@ The third stop on Today, beside Showing up and Workouts — the same
 data one level up, which is what makes it a stop rather than a fourth
 tab the bar has no room for.
 
-**IT IS THE ONE SCREEN THAT ASKS FOR SOMETHING.** Nothing on this
-record says whether a day was any good — ticks say what you did,
-blocks say what you kept, and neither is an opinion — so there is
-nothing for the rest of it to line up against, and no arithmetic over
-the existing keys invents one. Deriving the outcome from the day's own
-completeness was the obvious dodge and is circular: it would rank the
-five things you log against a count of the five things you log.
+**IT IS THE ONE THING THIS APP ASKS FOR.** Nothing on this record says
+whether a day was any good — ticks say what you did, blocks say what
+you kept, and neither is an opinion — so there is nothing for the rest
+of it to line up against, and no arithmetic over the existing keys
+invents one. Deriving the outcome from the day's own completeness was
+the obvious dodge and is circular: it would rank the five things you
+log against a count of the five things you log.
 
-**AND IT IS THE SMALLEST ASK THAT COULD WORK.** Not a number. This app
-has never asked what you weigh, and a figure you type every night is a
-different relationship with a screen than one that only ever says you
-showed up. Three words is a judgement you can make in a second and can
-be wrong about without losing anything. Three rather than two, because
-a yes/no has no middle for an ordinary day to sit in, so every day you
-did not think about lands on one end.
+**IT WENT IN AS THREE WORDS AND IT IS FIVE STARS.** Good, Fine and
+Rough on 0, 1 and 2, argued for as the smallest ask that could work.
+The argument was half right: it is still not a number you type, and
+this app still has never asked what you weigh. But three points is
+fewer honest answers than the question has, and a star row is a
+control nobody has to be taught. The reasoning that survives is the
+shape of the ask — one press, no typing, no field.
 
-**GOOD, FINE, ROUGH — never a grade.** A rough day is something that
-happened to you; "poor" is a verdict on you, which is the one thing
-this app has spent every other decision not delivering. It is the
-Easy → Light rename a second time, for the same reason.
+**Stars are not the grade the old note was refusing.** What that
+paragraph was against is a WORD like "poor", which is a verdict on
+you; a count of stars is a rating of the DAY, which is the thing being
+asked about.
 
-**The picked chip takes the accent, whichever of the three it is.**
-The accent makes exactly one claim — that something happened — and
-what happened here is that you ANSWERED. Lighting Good and leaving
-Rough grey would be the screen grading your day back at you, which is
-the habits rule seen from the control's side. Both are measured on
-composited pixels and required to be the SAME colour, so a green Good
-beside a red Rough fails whichever one happens to be lit.
+**The lit stars are the accent and the unlit ones are the flat
+neutral.** The accent makes exactly one claim — that something
+happened — and what happened here is that you ANSWERED. How the day
+went is carried by HOW MANY are lit, never by a colour: a red star for
+a bad day would be the screen grading you back. Measured on composited
+pixels, and the unlit one is held to being a GREY with no channel
+standing out, which is the whole of what stops this screen having an
+opinion.
 
-**Pressing the chip you are on clears the day.** A mis-tap has a way
+**Pressing the star you are on clears the day.** A mis-tap has a way
 back without a second control to explain it.
 
 **Yesterday is offered only while it is unrated AND still open**, so
 the row is a thing to catch rather than a second permanent control.
 Two days behind is inside the backfill window and is not offered: at
 that distance you are not remembering a day, you are guessing at one.
+
+### The ask is in two places and it is one control
+
+The foot of TODAY's card, and Pattern. The first version was on
+Pattern alone, and that put the ask on the screen you go to in order
+to READ what the answers add up to — which is not where you are
+standing when a day ends. The foot of the day is.
+
+**One control, built once and used twice.** Two drawings of one
+question is how they drift, and a day rated four at the foot of the
+card had better be a day rated four on Pattern. Asserted as exactly
+that: rate it in one place, read it in the other.
+
+**TODAY'S CARD AND NO OTHER**, resolved through `scDowDate` — the one
+that can say no. Every card is built for its own weekday, so a rating
+written from Friday's card on a Tuesday would land on today under a
+heading that says Friday. That is the round trip through one wrong
+answer that *Done today* made, self-consistently, for months. Asserted
+as a COUNT across all seven cards, because "it is on today's card"
+passes on a build that puts it on all of them.
+
+It sits INSIDE the scroller rather than under it, so on a long day it
+is the thing you arrive at having gone through everything, which is
+when the question makes sense to answer.
+
+### A second key, because the two scales overlap
+
+`sched.rate.v2`. The old scale was 0, 1 and 2 and the new one is 1 to
+5, and they SHARE the values 1 and 2: a stored `1` is either the old
+Fine or one star, and nothing in the number says which. A record that
+cannot be read twice needs a second key rather than a cleverer guess.
+
+Rough, Fine and Good come across as one, three and five — the bottom,
+the middle and the top, which keeps their order and the even spacing
+they had. Converted only when there is nothing under the new key: a v2
+record is the one somebody has been writing since, and a migration
+that ran twice would put months-old answers back over it. **The old
+key is removed rather than left**, and asserted GONE rather than
+merely ignored — left there it is a second record of the same days
+that nothing reads. Same shape as the stored palette name when the
+wheel landed.
 
 ### The figure is a difference of means, and that is the whole model
 

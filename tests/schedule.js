@@ -6765,7 +6765,7 @@ const SAID = [
           if (got.rate !== undefined) rate[d] = got.rate;
         }
         localStorage.setItem('sched.tick.v1', JSON.stringify(tick));
-        localStorage.setItem('sched.rate.v1', JSON.stringify(rate));
+        localStorage.setItem('sched.rate.v2', JSON.stringify(rate));
         localStorage.setItem('sched.log.v1', '{}');
         localStorage.setItem('sched.view.v1', 'tally');
         localStorage.setItem('sched.ty.v1', 'pat');
@@ -6794,10 +6794,10 @@ const SAID = [
        the answer is exactly +2.0 and nothing else is in the record to
        be ranked beside it. */
     await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
     let rows = await readRows();
-    ok('a thing on your good days and off your rough ones reads +2.0',
-      rows.length === 1 && rows[0].n === 'Train' && rows[0].v === '+2.0', rows);
+    ok('a thing on your good days and off your rough ones reads +4.0',
+      rows.length === 1 && rows[0].n === 'Train' && rows[0].v === '+4.0', rows);
 
     /* And the same yes-side against a different no-side. A screen
        printing the MEAN OF THE DAYS IT WAS ON — which is the figure
@@ -6805,19 +6805,19 @@ const SAID = [
        question — reads +2.0 on both fixtures and cannot tell them
        apart. This one is 2 − 1. */
     await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 1 };' });
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 3 };' });
     rows = await readRows();
-    ok('...and the same good days against ordinary ones read +1.0, '
+    ok('...and the same good days against ordinary ones read +2.0, '
       + 'which is what makes it a difference rather than an average',
-      rows.length === 1 && rows[0].v === '+1.0', rows);
+      rows.length === 1 && rows[0].v === '+2.0', rows);
 
     /* The other direction, and the sign is on the number AND on the
        side of the axis the bar is drawn. */
     await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 0 : 2 };' });
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 1 : 5 };' });
     rows = await readRows();
-    ok('a thing on your rough days reads −2.0 and draws left of the axis',
-      rows.length === 1 && rows[0].v === '−2.0'
+    ok('a thing on your rough days reads −4.0 and draws left of the axis',
+      rows.length === 1 && rows[0].v === '−4.0'
       && rows[0].bar && rows[0].bar.side === 'is-dn', rows);
 
     /* ── A DAY IT WAS NEVER ON IS NOT A DAY YOU MISSED IT ──
@@ -6827,18 +6827,18 @@ const SAID = [
        at all, and those are all Good.
 
        Read correctly — the unlogged days dropped from Sleep's
-       arithmetic entirely — it is 2 − 0 = +2.0. Counted as a night
-       below the middle it is 2 − (2·20 + 0·10)/30 = +0.7. The two
+       arithmetic entirely — it is 5 − 1 = +4.0. Counted as a night
+       below the middle it is 5 − (5·20 + 1·10)/30 = +1.3. The two
        fixtures differ only in what is done with a day that never
        asked the question. */
     await plant({ n: 40, body: `
-      if (i <= 10) return { tick: { s: '8' }, rate: 2 };
-      if (i <= 20) return { tick: { s: '5' }, rate: 0 };
-      return { tick: {}, rate: 2 };` });
+      if (i <= 10) return { tick: { s: '8' }, rate: 5 };
+      if (i <= 20) return { tick: { s: '5' }, rate: 1 };
+      return { tick: {}, rate: 5 };` });
     rows = await readRows();
     const sleep = rows.filter((r) => /^Sleep/.test(r.n))[0];
     ok('a night you did not record is dropped from that figure, never '
-      + 'counted as a short one', sleep && sleep.v === '+2.0', rows);
+      + 'counted as a short one', sleep && sleep.v === '+4.0', rows);
     /* And the split is printed at the item's own precision, off YOUR
        own middle rather than a target this app picked — half of your
        own record is also the only threshold that guarantees both
@@ -6861,12 +6861,12 @@ const SAID = [
     await plant({ n: 84, week: wk, body: `
       const dow = new Date(d + 'T12:00:00').getDay();
       const on = dow === 1 || dow === 3 || dow === 5;
-      if (!on) return { tick: {}, rate: 2 };
-      return { tick: i % 2 ? { t: 1 } : {}, rate: i % 2 ? 2 : 0 };` });
+      if (!on) return { tick: {}, rate: 5 };
+      return { tick: i % 2 ? { t: 1 } : {}, rate: i % 2 ? 5 : 1 };` });
     rows = await readRows();
     const train = rows.filter((r) => r.n === 'Train')[0];
     ok('a day the block was never on is dropped too, so a three-day '
-      + 'schedule is not four misses a week', train && train.v === '+2.0',
+      + 'schedule is not four misses a week', train && train.v === '+4.0',
       rows);
 
     /* ── FIVE DAYS EITHER SIDE, OR IT IS NOT RANKED ──
@@ -6876,11 +6876,11 @@ const SAID = [
        only ever refuses is indistinguishable from a factor that never
        worked. */
     await plant({ n: 40, body:
-      'return { tick: i <= 4 ? { t: 1 } : {}, rate: i <= 4 ? 2 : 0 };' });
+      'return { tick: i <= 4 ? { t: 1 } : {}, rate: i <= 4 ? 5 : 1 };' });
     ok('four days on one side of a thing is not enough to rank it',
       (await readRows()).length === 0);
     await plant({ n: 40, body:
-      'return { tick: i <= 5 ? { t: 1 } : {}, rate: i <= 5 ? 2 : 0 };' });
+      'return { tick: i <= 5 ? { t: 1 } : {}, rate: i <= 5 ? 5 : 1 };' });
     ok('...and five is', (await readRows()).length === 1);
 
     /* ── AND THE SCREEN SAYS HOW MANY MORE DAYS IT NEEDS ──
@@ -6888,11 +6888,11 @@ const SAID = [
        do with nothing is to say what would fix it. Measured as the
        list being ABSENT rather than empty: a list with no rows still
        draws its axis. */
-    await plant({ n: 13, body: 'return { tick: { t: 1 }, rate: i % 3 };' });
+    await plant({ n: 13, body: 'return { tick: { t: 1 }, rate: (i % 3) + 1 };' });
     const few = await ppage.evaluate(() => ({
       say: (document.querySelector('.pat-none') || {}).textContent || '',
       list: !!document.querySelector('.pat-list'),
-      ask: !!document.querySelector('.pat-chips'),
+      ask: !!document.querySelector('#scPatPane .st-row'),
     }));
     ok('under the floor it says how many more days, draws no list, and '
       + 'still asks about today',
@@ -6905,7 +6905,7 @@ const SAID = [
        difference. A zero wears no sign and draws no bar; the axis
        runs through the row unbroken. */
     await plant({ n: 60, body:
-      'return { tick: i % 2 ? { t: 1 } : {}, rate: i % 3 };' });
+      'return { tick: i % 2 ? { t: 1 } : {}, rate: (i % 3) + 1 };' });
     const zed = await readRows();
     ok('a factor that moves nothing prints a bare 0.0 and draws no bar',
       zed.length > 0 && zed.every((r) => !/−0\.0|\+0\.0/.test(r.v))
@@ -6926,7 +6926,7 @@ const SAID = [
        off the declaration, since --hair and --tick-off both LOOK like
        the token for this and measure 1.27:1 and 1.60:1. */
     await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
     const geo = await ppage.evaluate(() => {
       const l = document.querySelector('.pat-list').getBoundingClientRect();
       const right = parseFloat(getComputedStyle(
@@ -6958,76 +6958,76 @@ const SAID = [
       + 'pixels, against 1.01 for the token it went in as)',
       axR >= 3, { axPx, axGround, geo });
 
-    /* ── THE PICKED CHIP TAKES THE ACCENT, WHICHEVER OF THE THREE IT
-           IS ──
-       This app's accent makes exactly one claim — that something
-       happened — and what happened here is that you ANSWERED.
-       Lighting Good and leaving Rough grey would be the screen
-       grading your day back at you, which is the thing every other
-       decision in this file is careful not to do: the habits screen's
-       rule, on the one control that takes an opinion.
+    /* ── LIT IS THE ACCENT, UNLIT IS THE FLAT NEUTRAL ──
+       The accent on this app makes exactly one claim, that something
+       happened, and what happened here is that you ANSWERED. How the
+       day went is carried by HOW MANY are lit, never by a colour: a
+       red star for a bad day would be the screen grading you back, and
+       this is the one screen that takes an opinion.
 
-       Both are measured on real pixels and required to be the SAME
-       colour, so a palette with a green Good and a red Rough fails
-       whichever of the two happens to be lit when the check runs. */
-    const chipShot = async (n) => {
-      await ppage.evaluate((k) => document.querySelectorAll('.pat-c')[k].click(), n);
-      await ppage.waitForTimeout(140);
-      const b = await ppage.$eval('.pat-c.is-on', (e) => {
-        const r = e.getBoundingClientRect();
-        return { x: r.x + 6, y: r.y + r.height / 2, tx: r.x, tw: r.width,
-                 ty: r.y, th: r.height, txt: e.textContent };
+       Measured on composited pixels, and the accent is read off the
+       root rather than written in: it is a wheel now, so a hex in a
+       test measures nothing the day it turns. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
+    await ppage.evaluate(() =>
+      document.querySelectorAll('#scPatPane .st')[2].click());
+    await ppage.waitForTimeout(220);
+    const starPx = await (async () => {
+      const b = await ppage.evaluate(() => {
+        const on = document.querySelector('#scPatPane .st.is-on');
+        const off = document.querySelector('#scPatPane .st:not(.is-on)');
+        const box = (e) => { const r = e.getBoundingClientRect();
+          return { x: r.x, y: r.y, w: r.width, h: r.height }; };
+        return { on: box(on), off: box(off),
+                 lit: document.querySelectorAll('#scPatPane .st.is-on').length };
       });
       const png = PNG.sync.read(await ppage.screenshot());
       const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
-        + Math.round(x * dpr)) << 2; return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
-      /* The worst pixel of the word against the chip's own ground,
-         both taken off the composited image — the ground is a solid
-         accent, so the extreme in the box is the type. */
-      let ink = at(b.x, b.y), g = at(b.x, b.y);
-      for (let x = b.tx + 8; x < b.tx + b.tw - 8; x += 1) {
-        for (let y = b.ty + 12; y < b.ty + b.th - 12; y += 1) {
-          const p = at(x, y);
-          if (lum(p) < lum(ink)) ink = p;
-          if (lum(p) > lum(g)) g = p;
+        + Math.round(x * dpr)) << 2;
+        return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      /* The brightest pixel inside each star's own box: the mark is a
+         solid fill on a dark card, so the extreme IS the mark. */
+      const peak = (k) => {
+        let best = [0, 0, 0];
+        for (let x = k.x + 10; x < k.x + k.w - 10; x += 1) {
+          for (let y = k.y + 10; y < k.y + k.h - 10; y += 1) {
+            const p = at(x, y);
+            if (lum(p) > lum(best)) best = p;
+          }
         }
-      }
-      return { txt: b.txt, ground: g, ink, r: ratio(ink, g) };
-    };
-    const good = await chipShot(0);
-    const rough = await chipShot(2);
-    const accent = await ppage.evaluate(() => getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim());
-    ok(`Good and Rough light in the same colour (${good.ground} / ${rough.ground})`,
-      good.txt === 'Good' && rough.txt === 'Rough'
-      && good.ground.every((v, i) => Math.abs(v - rough.ground[i]) <= 2),
-      { good, rough });
-    /* And that colour is the accent, not a fourth thing invented for
-       this control — read off the root, because the accent is a wheel
-       and a hex written into a test measures nothing the day it
-       turns. */
+        return best;
+      };
+      return { on: peak(b.on), off: peak(b.off), lit: b.lit };
+    })();
+    const accent = await ppage.evaluate(() => getComputedStyle(
+      document.documentElement).getPropertyValue('--red').trim());
     const want = accent.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
-    ok(`...and it is the accent itself (${accent})`,
-      good.ground.every((v, i) => Math.abs(v - want[i]) <= 6),
-      { ground: good.ground, want });
-    ok(`...and the word on it clears the bar (${rough.r.toFixed(2)}:1)`,
-      rough.r >= 4.5, rough);
+    ok(`pressing the third star lights three, in the accent (${accent})`,
+      starPx.lit === 3
+      && starPx.on.every((v, i) => Math.abs(v - want[i]) <= 8), starPx);
+    /* And the unlit one is a GREY, which is the whole of what stops
+       this screen having an opinion: no channel of it stands out. */
+    const spread = Math.max(...starPx.off) - Math.min(...starPx.off);
+    ok(`...and an unlit star is a flat neutral, not a second colour `
+      + `(spread ${spread})`, spread <= 12, starPx);
 
-    /* Pressing the chip you are already on takes the rating off, so a
+    /* Pressing the star you are already on takes the rating off, so a
        mis-tap has a way back without a second control to explain it. */
     const today = await ppage.evaluate(() => { const p = (n) => (n < 10 ? '0' : '') + n;
       const d = new Date();
       return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); });
     const wasSet = await ppage.evaluate((k) =>
-      JSON.parse(localStorage.getItem('sched.rate.v1'))[k], today);
-    await ppage.evaluate(() => document.querySelectorAll('.pat-c')[2].click());
-    await ppage.waitForTimeout(140);
+      JSON.parse(localStorage.getItem('sched.rate.v2'))[k], today);
+    await ppage.evaluate(() =>
+      document.querySelectorAll('#scPatPane .st')[2].click());
+    await ppage.waitForTimeout(180);
     const now = await ppage.evaluate((k) => ({
-      has: k in JSON.parse(localStorage.getItem('sched.rate.v1')),
-      on: document.querySelectorAll('.pat-c.is-on').length,
+      has: k in JSON.parse(localStorage.getItem('sched.rate.v2')),
+      on: document.querySelectorAll('#scPatPane .st.is-on').length,
     }), today);
-    ok('pressing the chip you are on takes the day off again',
-      wasSet === 0 && !now.has, { wasSet, now });
+    ok('pressing the star you are on takes the day off again',
+      wasSet === 3 && !now.has, { wasSet, now });
     ok('...and nothing is lit once it is cleared', now.on === 0, now);
 
     /* ── HOW YOU FELT NEVER LEAVES THE PHONE ──
@@ -7057,7 +7057,8 @@ const SAID = [
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(320);
     const markA = pAsked.length;
-    await ppage.evaluate(() => document.querySelectorAll('.pat-c')[2].click());
+    await ppage.evaluate(() =>
+      document.querySelectorAll('#scPatPane .st')[3].click());
     await ppage.waitForTimeout(2200);          /* past the 1.5s push debounce */
     const sinceRate = pAsked.slice(markA).filter((u) => u.startsWith(HOSTX));
     ok('rating a day makes no request at all', sinceRate.length === 0, sinceRate);
@@ -7070,9 +7071,9 @@ const SAID = [
     await ppage.evaluate(() =>
       document.querySelector('.ty-card[data-item="m"]').click());
     await ppage.waitForTimeout(2400);
-    const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v1'));
+    const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v2'));
     ok('and a push that does happen carries no rating in it',
-      bodies.length > 0 && bodies.every((b) => !/rate|rough|fine/i.test(b))
+      bodies.length > 0 && bodies.every((b) => !/rate|star/i.test(b))
       && rated && rated !== '{}',
       { bodies: bodies.map((b) => b.slice(0, 160)), rated });
 
@@ -7120,12 +7121,12 @@ const SAID = [
        rather than as the bad one being refused — rejecting the whole
        object passes any check written the other way round. */
     await plant({ n: 40, body:
-      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 2 : 0 };' });
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
     await ppage.evaluate(() => {
-      const r = JSON.parse(localStorage.getItem('sched.rate.v1'));
+      const r = JSON.parse(localStorage.getItem('sched.rate.v2'));
       const k = Object.keys(r).sort();
       r[k[0]] = 'good'; r[k[1]] = 9; r[k[2]] = null;
-      localStorage.setItem('sched.rate.v1', JSON.stringify(r));
+      localStorage.setItem('sched.rate.v2', JSON.stringify(r));
     });
     await ppage.reload({ waitUntil: 'networkidle' });
     await ppage.waitForTimeout(320);
@@ -7135,6 +7136,83 @@ const SAID = [
     }));
     ok('three damaged days are dropped and the other thirty-seven read',
       /\b37 days\b/.test(hurt.foot) && hurt.rows === 1, hurt);
+
+    /* ── THE SAME CONTROL IS AT THE FOOT OF TODAY'S CARD ──
+       The foot of the day is where you are when the day is over, which
+       Pattern is not: that screen is where you go to READ what your
+       good days have in common. One control built once and used twice,
+       because two drawings of one question is how they drift.
+
+       TODAY'S CARD AND NO OTHER. Every card is built for its own
+       weekday, and a rating written from Friday's card on a Tuesday
+       lands on today under a heading that says Friday — the round trip
+       through one wrong answer that "Done today" made, self-
+       consistently, for months. Asserted as a COUNT across all seven,
+       because "it is on today's card" passes on a build that puts it
+       on all of them. */
+    await plant({ n: 40, body:
+      'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
+    await ppage.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(600);
+    const onCards = await ppage.evaluate(() => ({
+      asks: [...document.querySelectorAll('.day')]
+        .filter((c) => c.querySelector('.st-ask')).map((c) => c.dataset.d),
+      today: String(new Date().getDay()),
+      stars: document.querySelectorAll('.day.is-today .st').length,
+      /* Inside the scroller, so on a long day it is what you arrive at
+         having gone through everything. */
+      inCard: !!document.querySelector('.day.is-today .day-card .st-row'),
+    }));
+    ok('the ask is at the foot of today\'s card and no other',
+      onCards.asks.length === 1 && onCards.asks[0] === onCards.today
+      && onCards.stars === 5 && onCards.inCard, onCards);
+
+    /* ── AND THE TWO PLACES ARE ONE RECORD ──
+       A day rated four at the foot of the card had better be a day
+       rated four on Pattern. */
+    await ppage.evaluate(() =>
+      document.querySelectorAll('.day.is-today .st')[3].click());
+    await ppage.waitForTimeout(300);
+    await ppage.evaluate(() => {
+      localStorage.setItem('sched.view.v1', 'tally');
+      localStorage.setItem('sched.ty.v1', 'pat');
+    });
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(450);
+    ok('a day rated on the card reads the same on Pattern',
+      await ppage.evaluate(() =>
+        document.querySelectorAll('#scPatPane .st.is-on').length) === 4);
+
+    /* ── THE OLD THREE-POINT SCALE COMES ACROSS ONCE ──
+       Rough, Fine and Good were 0, 1 and 2 under their own key, and
+       those two scales SHARE the values 1 and 2 — a stored 1 is either
+       the old Fine or one star and the number does not say which. So
+       v1 is converted and spent rather than read twice.
+
+       The old key is asserted GONE rather than merely ignored: left
+       there it is a second record of the same days that nothing reads,
+       and the next migration to look at it would find it. Same shape
+       as the stored palette name when the wheel landed. */
+    await ppage.evaluate(() => {
+      const p = (n) => (n < 10 ? '0' : '') + n;
+      const day = (b) => { const d = new Date(); d.setDate(d.getDate() - b);
+        return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()); };
+      localStorage.removeItem('sched.rate.v2');
+      localStorage.setItem('sched.rate.v1', JSON.stringify({
+        [day(1)]: 0, [day(2)]: 1, [day(3)]: 2, [day(4)]: 'x' }));
+    });
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(450);
+    const moved = await ppage.evaluate(() => ({
+      now: JSON.parse(localStorage.getItem('sched.rate.v2') || '{}'),
+      old: localStorage.getItem('sched.rate.v1'),
+    }));
+    const vals = Object.keys(moved.now).sort().map((k) => moved.now[k]);
+    ok('Rough, Fine and Good come across as one, three and five',
+      vals.join(',') === '5,3,1' && Object.keys(moved.now).length === 3, moved);
+    ok('...and the key they came from is spent, not left behind',
+      moved.old === null, moved);
 
     ok('nothing threw anywhere on Pattern', perrs.length === 0, perrs);
     /* The whole screen, on every fixture above, reached nothing off

@@ -1349,6 +1349,19 @@ body {
 }
 .wk-turn svg {
   width: 15px; height: 15px;
+  /* ── THE COLOUR IS SAID, NOT INHERITED ──
+     The target's centre is the one filled part of this mark and it is
+     `currentColor`. Nothing here set a colour, and the `*` reset does
+     not carry `color: inherit`, so it fell through to the UA's own
+     default for a BUTTON: white in Chromium, and on iOS the system
+     BLUE. It shipped as a blue dot in the middle of a grey glyph, and
+     it could not be seen on the machine this is built on — the edit
+     sheet's time fields all over again, in one declaration.
+
+     Set beside the stroke rather than as a literal, so the fill and
+     the strokes are the same colour by construction wherever this
+     mark is drawn. */
+  color: var(--dim);
   fill: none; stroke: var(--dim); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -4036,6 +4049,10 @@ body {
    named exception to. */
 .tr-ic svg {
   width: 52px; height: 52px;
+  /* Beside the stroke, for the objectives mark's sake: its target has
+     a filled centre drawn in `currentColor`, and left to inherit it
+     would be a white dot in the middle of an accent glyph. */
+  color: var(--red);
   fill: none;
   stroke: var(--red);
   stroke-width: 1.9;
@@ -4117,3 +4134,44 @@ body {
   cursor: pointer;
 }
 .tr-skip:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+
+/* ═══════════════════════════════════════════════════════════
+   THE DAY'S RATING
+
+   Five stars, and the one control the app has in two places: the foot
+   of today's card, which is where you are when a day ends, and
+   Pattern, which is where you go to read what the answers add up to.
+   Built once and used twice, because two drawings of one question is
+   how they drift.
+   ═══════════════════════════════════════════════════════════ */
+
+.st-ask { margin-top: 18px; }
+.st-row { display: flex; gap: 2px; margin-left: -8px; }
+.st {
+  /* 44px of press target around a 24px mark, which is the size every
+     other thing you tap in this app answers to. The negative margin on
+     the row puts the first star's INK on the card's own left edge
+     rather than its padding. */
+  width: 44px; height: 44px;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+}
+.st svg { width: 24px; height: 24px; }
+/* ── LIT IS THE ACCENT, UNLIT IS THE FLAT NEUTRAL ──
+   The accent on this app makes exactly one claim, that something
+   happened, and what happened here is that you answered. How the day
+   went is carried by HOW MANY are lit, never by a colour: a red star
+   for a bad day would be the screen grading you, which is the one
+   thing it does not do.
+
+   --tick-off rather than --hair for the unlit ones. It is the token
+   the tally draws a missed day in and it is deliberately lighter than
+   it looks like it needs to be, for this exact reason: a mark you
+   cannot see is a mark that is not there. */
+.st svg path { fill: var(--tick-off); }
+.st.is-on svg path { fill: var(--red); }
+.st:focus-visible { outline: 2px solid var(--red); outline-offset: -6px; }
