@@ -2661,6 +2661,130 @@ what you cannot get back. Asserted as the good days SURVIVING rather
 than as the bad one being refused — rejecting the whole object passes
 any check written the other way round.
 
+## The first open explains itself, once
+
+Four cards over the app on a first visit, and the rule for what gets
+one is narrow: it has to be something you could not find by pressing
+around. A card about the tab bar is a picture of the thing you are
+already looking at.
+
+**IT WENT IN AT SIX AND TWO OF THEM WERE THE SAME CARD.** "Plan your
+week" and "Track your day" were both about the week and what you put
+on it, in different verbs. What replaced the second is the only claim
+in this app that is not about the week at all, which is the record
+being read back to you. A count is not a shape: six cards that cover
+everything are worse than four that each say one thing, because the
+one people actually need is then a quarter of what they have to sit
+through.
+
+**THE OBJECTIVES GO LAST**, because they are the one feature here with
+no visible name anywhere and the last card is the one still on screen
+when the intro ends.
+
+**AND THE COPY IS NOT THIS FILE'S VOICE.** It went in reading "where
+today sits is itself information", which is right for the notes beside
+the code and wrong on a screen somebody reads once before they have
+any idea what the app is. Two or three words on top, one plain
+sentence under it. **No dashes**: an aside set off mid-sentence is a
+second thought, and each card is allowed exactly one. Asserted rather
+than trusted, because prose drifts back.
+
+### The pointer is the instruction
+
+The objectives live behind a pill in the corner of a day card and are
+named nowhere else. A sentence saying "top right" is a sentence you
+have to hold in your head while you go and look, so the card is
+**drawn** instead, at the real one's proportions, with the pill lit in
+the accent and a ring round it. Its rows are ruled lines rather than
+words: this is a diagram of WHERE something is, and legible text in it
+invites reading the card instead of finding the corner.
+
+**The ring bleeds past the card's edge and has to.** Centred on a pill
+that is itself in the corner, a ring big enough to clear the pill's own
+diagonal cannot also fit inside the card; drawn small enough to fit it
+touches the pill and reads as a border on it rather than as a light
+around it. So the card is inset in the box and the halo is allowed out
+over the edge.
+
+**Measured on composited pixels, never read off the markup.** The
+check takes the centroid of every accent pixel inside the figure's own
+box and requires it in the top right. Coordinates in an SVG string are
+exactly the kind of thing that survives an edit while the picture
+stops being true, and a drawing that says "top right" and puts the
+mark elsewhere is worse than no drawing.
+
+### One meaning per control, and no hidden third state
+
+Continue advances; the last card starts the week. "Don't show again"
+leaves from any card. **Both mark it seen, and Escape does what "Don't
+show again" does** — a way out that quietly means "ask me tomorrow" is
+a state nothing on screen tells you about, and an intro that comes back
+after you dismissed it has stopped being an intro and become furniture.
+
+Which is only affordable because it is not lost: Settings carries
+**Show the intro** and it plays again from the top. Every way out is
+final, so there has to be a way back.
+
+Both halves of every exit are asserted. A "Don't show again" that
+merely closes passes any check that only watches the element go.
+
+### The glyphs were judged against each other, not on their own
+
+Four marks at 52px, rendered side by side in a strip and looked at
+together. Three of them were fixed by that and no other way:
+
+- **The deck** was two stroked outlines that crossed, and the back card
+  read as a bracket. The front one is FILLED with the ground now, so it
+  covers the one behind it.
+- **The crown** drew its own base twice — the path closes with a `z`
+  and there was a rule under it as well, so the bottom edge was heavier
+  than the sides.
+- **Pattern would not read at all.** It draws bars either side of a
+  centre axis, and that is what was drawn first: the bar crossing the
+  axis at its midpoint makes a plus sign, moving the crossing down
+  makes a flag, and four bars close enough to fill the box merge into
+  a blob. Three attempts, each rendered beside the other three glyphs,
+  each worse than its neighbours. It is ranked bars off an axis at the
+  side now — the panel's other true fact, which reads as a chart at a
+  glance. **When every honest drawing of a thing is illegible at the
+  size it is drawn, draw a different true thing**, which is the ten
+  lift glyphs' lesson arriving a second time.
+
+A glyph was also visibly SMALLER than the ones beside it while being
+correct on its own: it filled about half its box where the crown and
+the deck fill theirs. That is invisible in isolation and obvious in a
+strip.
+
+### It is a window and a track
+
+The deck's own answer, here for the deck's own reasons: a scroll
+container clamps at 0, Safari leaves trailing padding out of its
+scrollable width, and a math function inside a flex shorthand can be
+dropped by a parser without a word. A transform is the same number of
+pixels in every engine.
+
+Off-screen cards are `inert` and `aria-hidden`. Left in the tab order a
+keyboard walks into one laid out 390px off the side and the focus ring
+goes with it, which looks exactly like the page having scrolled
+sideways.
+
+**`[hidden]` is said out loud, and this is the fourth time.** The rail,
+the page dots and the toast each had that bug — the attribute set
+correctly throughout while an author `display` outranked the browser's
+own rule. Here the failure is a full-screen surface at z-index 70
+taking every press on the app behind it, invisibly. The check measures
+the BOX.
+
+### Every other test page has to mark it seen
+
+It opens over the whole app on a first visit, which is every fresh
+context the suite makes. Left unset, every assertion in the file that
+presses anything would be pressing the intro. Seeded only when ABSENT,
+like the schedule and the net record beside it: an init script runs on
+every navigation, and written unconditionally it puts the key back
+between a test clearing it and the reload that test is making. That
+exact bug cost four hundred lines of chasing once already.
+
 ## Every deploy landed one open late
 
 `app.css` and `app.js` are requested with a `?v=` fingerprint of their

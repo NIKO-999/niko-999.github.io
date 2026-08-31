@@ -3882,3 +3882,178 @@ body {
   line-height: 1.6;
   color: var(--dim);
 }
+
+/* ═══════════════════════════════════════════════════════════
+   THE INTRO
+
+   The first open. It reuses .btn.go for its own button rather than
+   drawing a filled pill of its own — the reference this was taken from
+   fills that control in its accent, and on this app the accent means
+   the RECORD and chrome is white. A button that starts the week is
+   chrome.
+   ═══════════════════════════════════════════════════════════ */
+
+/* `[hidden]` HAS TO BE SAID, because this takes a `display`. The rail,
+   the page dots and the toast have each been through it: the attribute
+   works only by the browser's own [hidden] { display: none }, and any
+   author rule outranks it. A put-away intro that is still `display:
+   flex` is a full-screen surface at z-index 70 taking every press on
+   the app underneath it, invisibly. */
+.tour[hidden] { display: none; }
+.tour {
+  position: fixed;
+  inset: 0;
+  z-index: 70;
+  display: flex;
+  flex-direction: column;
+  /* The page's own ground and its own accent, so this reads as the app
+     introducing itself rather than as a screen bolted in front of it.
+     One wash rather than the body's three: there is a title in the
+     middle of this surface where the body has empty space, and the
+     body's own note says its gradient is strongest exactly where
+     nothing is read. */
+  background:
+    radial-gradient(120% 58% at 50% -10%,
+      color-mix(in srgb, var(--red) 13%, transparent) 0%, transparent 72%),
+    var(--g0);
+  padding: max(28px, env(safe-area-inset-top)) 22px
+           calc(26px + env(safe-area-inset-bottom));
+}
+.tour:focus { outline: none; }
+
+/* The dialog's accessible name, and nothing else. Drawn off screen
+   rather than `display: none`, which would take it out of the
+   accessibility tree and leave the dialog unnamed. */
+.tr-h {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* IT IS A WINDOW AND A TRACK, NOT A SCROLLER — the deck's own answer,
+   here for the deck's own reasons. A scroll container clamps at 0,
+   Safari leaves trailing padding out of its scrollable width, and a
+   math function inside a flex shorthand can be dropped by a parser
+   without an error. A transform is the same number of pixels
+   everywhere. */
+.tr-win { flex: 1; overflow: hidden; display: flex; }
+.tr-track {
+  display: flex;
+  width: 100%;
+  transition: transform .34s cubic-bezier(.22, .78, .28, 1);
+}
+/* Reduced motion gets the card, not the travel. It is a lone component
+   with no second entrance to answer alongside it, so there is no
+   pairing to get backwards the way the deck's deal and lift were. */
+@media (prefers-reduced-motion: reduce) {
+  .tr-track { transition: none; }
+}
+.tr-slide {
+  flex: 0 0 100%;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  /* Above dead centre. Centred in a 650px window the block floats with
+     a third of the screen empty under it and the eye has to travel
+     down to the button past nothing at all; the reference sits its
+     icon about two fifths down and reads as composed rather than as
+     centred by default. */
+  padding: 0 4px 9%;
+  text-align: center;
+}
+
+/* THE GLYPH IS THE ONE COLOURED THING ON THE CARD. It is a picture of
+   a feature rather than a mark on the record, but every other drawing
+   in this app that is not chrome wears the accent, and a second colour
+   system for one screen is the thing the workout cards are the single
+   named exception to. */
+.tr-ic svg {
+  width: 52px; height: 52px;
+  fill: none;
+  stroke: var(--red);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tr-t {
+  margin: 0;
+  /* Wide enough for the longest of the four on one line at 390px.
+     At 15ch "Compete with friends" broke after the first word and
+     "friends" sat alone on a line, which reads as a wrap fault rather
+     than as a title. */
+  max-width: 19ch;
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -.02em;
+}
+.tr-s {
+  margin: 0;
+  max-width: 30ch;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--dim);
+}
+
+.tr-fig { width: 100%; max-width: 232px; margin-top: 2px; }
+
+.tr-dots {
+  display: flex;
+  justify-content: center;
+  gap: 7px;
+  margin: 22px 0 18px;
+}
+/* Round, and named here because the rule in this file is that the
+   exceptions are argued for rather than smuggled in. This one does
+   not test the rule: a square page indicator is a row of pixels, not
+   a dot.
+
+   NOT "the nth rounded thing", which is how the note above the colour
+   wheel puts it. That count was already behind when this was written
+   and counting again would only put a new wrong number in a second
+   place. An identifier nothing checks rots; so does a tally. */
+.tr-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--tick-off);
+  cursor: pointer;
+  transition: background .2s;
+}
+.tr-dot.is-on { background: var(--ink); }
+
+.tr-foot { display: flex; flex-direction: column; }
+.tr-go { flex: none; width: 100%; }
+/* Spoken, never drawn — the dots already say it to an eye. */
+.tr-step {
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+/* ── THE WAY OUT IS A LINE OF TYPE ──
+   The friends board's own answer to the same shape: a second filled
+   block under the button, for the thing you press once and never
+   again, would be louder than the intro it dismisses. Same 44px tap,
+   none of the weight. */
+.tr-skip {
+  align-self: center;
+  min-height: 44px;
+  margin-top: 4px;
+  padding: 0 12px;
+  border: 0;
+  background: none;
+  color: var(--spent);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.tr-skip:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }

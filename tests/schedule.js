@@ -183,6 +183,21 @@ const SAID = [
       localStorage.setItem('sched.net.v1', JSON.stringify({
         url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
     }
+    /* ── THE INTRO IS MARKED SEEN FOR EVERY OTHER SECTION ──
+       It opens over the whole app on a first visit, which is every
+       fresh context this file makes, and it is a full-screen surface
+       at z-index 70. Left unset, every assertion below that presses
+       anything would be pressing the intro. The section that is
+       actually about it clears this key on its own page.
+
+       Seeded only when ABSENT, like the two above: an init script runs
+       on every navigation, and written unconditionally it would put
+       the key back between a test clearing it and the reload that
+       test is making. That exact bug cost four hundred lines of
+       chasing once already. */
+    if (!localStorage.getItem('sched.tour.v1')) {
+      localStorage.setItem('sched.tour.v1', '1');
+    }
   }, [WEEK, `${BASE}/schedule/nofriends`]);
   /* Answered here rather than left to the static server, and answered
      with 200. Left to the server a POST gets 405; answered with 404 it
@@ -4229,6 +4244,11 @@ const SAID = [
       };
       delete window.SpeechRecognition;
       delete window.webkitSpeechRecognition;
+      /* The intro is marked seen here too: it is a full-screen
+         surface on a first visit and this page presses things. */
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+      }
       /* Pointed at the worker running in THIS process, not the live one
          the app ships with. Everything below is a real round trip
          through the real worker file, and none of it touches a server
@@ -5020,9 +5040,13 @@ const SAID = [
           headers: Object.fromEntries(res.headers),
           body: Buffer.from(await res.arrayBuffer()) });
       });
-      /* NOTHING is seeded. No net record, no url — the point is that the
-         link is the only thing this browser is told. */
+      /* NOTHING about FRIENDS is seeded. No net record, no url — the
+         point is that the link is the only thing this browser is told.
+         The intro is a different question: it is a full-screen surface
+         on a first visit and this page presses a tab, so it is marked
+         seen the same way every other page here marks it. */
       await gp.addInitScript(() => {
+        localStorage.setItem('sched.tour.v1', '1');
         const F = new Date('2026-09-01T09:30:00').getTime(), R = Date;
         window.Date = class extends R {
           constructor(...a) { super(...(a.length ? a : [F])); }
@@ -5143,6 +5167,7 @@ const SAID = [
     await up.addInitScript(([w, f]) => {
       localStorage.setItem('sched.v1', JSON.stringify(w));
       localStorage.setItem('sched.view.v1', 'list');
+      localStorage.setItem('sched.tour.v1', '1');
       localStorage.setItem('sched.net.v1', JSON.stringify({
         url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
       const R = Date;
@@ -6748,6 +6773,7 @@ const SAID = [
         else localStorage.removeItem('sched.v1');
         localStorage.setItem('sched.net.v1',
           JSON.stringify({ on: false, url: '', code: '' }));
+        localStorage.setItem('sched.tour.v1', '1');
       }, spec);
       await ppage.reload({ waitUntil: 'networkidle' });
       await ppage.waitForTimeout(320);
@@ -7118,6 +7144,244 @@ const SAID = [
         || u.startsWith('data:') || u.startsWith('blob:')),
       pAsked.filter((u) => !u.startsWith(BASE) && !u.startsWith(HOSTX)));
     await pctx.close();
+  }
+
+  /* ═══════════════════════════════════════════════════════════
+     THE INTRO
+
+     Four cards on a first open, on its own page because it is the one
+     screen in this file that only exists when a key is ABSENT — and
+     every other section seeds that key precisely so the intro is not
+     sitting on top of whatever they are pressing.
+     ═══════════════════════════════════════════════════════════ */
+  {
+    const ictx = await browser.newContext(PHONE);
+    const ipage = await ictx.newPage();
+    const ierrs = [];
+    ipage.on('pageerror', (e) => ierrs.push(String(e)));
+    ipage.on('console', (m) => { if (m.type() === 'error') ierrs.push(m.text()); });
+    await ipage.addInitScript(() => {
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+
+    const fresh = async () => {
+      await ipage.evaluate(() => localStorage.removeItem('sched.tour.v1'));
+      await ipage.reload({ waitUntil: 'networkidle' });
+      await ipage.waitForTimeout(360);
+    };
+    /* Measured as a BOX, never as the hidden property. The rail, the
+       page dots and the toast have each had that bug — the attribute
+       was being set correctly throughout and an author `display`
+       outranked the browser's own [hidden] rule — and every time, the
+       check that missed it read the property. This is a full-screen
+       surface at z-index 70, so the failure is the whole app becoming
+       unpressable behind something nobody can see. */
+    const drawn = () => ipage.evaluate(() => {
+      const r = document.getElementById('scTour').getBoundingClientRect();
+      return r.width > 1 && r.height > 1;
+    });
+    const card = () => ipage.evaluate(() => {
+      const t = document.getElementById('scTour');
+      /* ── AGAINST THE WINDOW, NOT THE VIEWPORT ──
+         The track is clipped by .tr-win, which is inset by the tour's
+         own 22px padding, so the next card begins 22px BEFORE the
+         screen edge and overlaps the viewport while drawing not one
+         pixel of itself. Asked "is it inside innerWidth" this reported
+         two cards on screen on a deck that was behaving perfectly.
+         What "on screen" means here is overlap with the box that
+         clips it. */
+      const w = t.querySelector('.tr-win').getBoundingClientRect();
+      const lit = [...t.querySelectorAll('.tr-slide')].filter((s) => {
+        const r = s.getBoundingClientRect();
+        return Math.min(r.right, w.right) - Math.max(r.left, w.left) > 1;
+      });
+      return { n: t.querySelectorAll('.tr-slide').length,
+               title: t.querySelector('.tr-h').textContent,
+               go: t.querySelector('.tr-go').textContent,
+               step: t.querySelector('.tr-step').textContent,
+               lit: lit.map((s) => s.dataset.card),
+               live: [...t.querySelectorAll('.tr-slide')]
+                 .filter((s) => s.getAttribute('aria-hidden') === 'false')
+                 .map((s) => s.dataset.card),
+               inert: [...t.querySelectorAll('.tr-slide')]
+                 .filter((s) => s.inert).length };
+    });
+
+    await ipage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await fresh();
+
+    ok('the intro opens on a first visit', await drawn());
+
+    /* ── FOUR CARDS, AND THE ORDER IS THE DESIGN ──
+       It went in at six and two of them were the same card wearing
+       different verbs. Both the count and the order are asserted
+       because both are one line to change and neither would throw. */
+    const first = await card();
+    ok('four cards, in their order, objectives last',
+      first.n === 4
+      && [...await ipage.evaluate(() =>
+          [...document.querySelectorAll('.tr-slide')].map((s) => s.dataset.card))]
+        .join('|') === 'week|pattern|friends|back', first);
+
+    /* ── ONE CARD ON SCREEN, AND THE OTHERS OUT OF REACH ──
+       A track that moves rather than a scroller leaves the other three
+       laid out 390px off the side. Left in the tab order a keyboard
+       walks straight into one of them and the focus ring goes with it,
+       which looks exactly like the page having scrolled sideways. */
+    ok('exactly one card is on screen, and it is the first',
+      first.lit.length === 1 && first.lit[0] === 'week'
+      && first.live.join('') === 'week' && first.inert === 3, first);
+    ok('...and the button says Continue on it, not the last word',
+      first.go === 'Continue' && first.step === 'Step 1 of 4', first);
+
+    /* ── THE POINTER IS THE WHOLE OF THAT CARD ──
+       The objectives live behind a pill in the corner of a day card
+       and are named nowhere else in the app, so this diagram is the
+       only instruction there is. Measured on COMPOSITED PIXELS rather
+       than read off the markup: a drawing that says "top right" and
+       puts the mark somewhere else is worse than no drawing, and the
+       coordinates in an SVG string are exactly the kind of thing that
+       survives an edit while the picture stops being true. */
+    for (let i = 0; i < 3; i++) {
+      await ipage.evaluate(() => document.querySelector('.tr-go').click());
+      await ipage.waitForTimeout(400);
+    }
+    const last = await card();
+    ok('the last card is the objectives one and starts the week',
+      last.live.join('') === 'back' && last.go === 'Start the week'
+      && last.step === 'Step 4 of 4', last);
+
+    const fig = await ipage.$eval('.tr-fig', (e) => {
+      const r = e.getBoundingClientRect();
+      return { x: r.x, y: r.y, w: r.width, h: r.height };
+    });
+    const ipng = PNG.sync.read(await ipage.screenshot());
+    const iAt = (x, y) => { const i = (ipng.width * Math.round(y * dpr)
+      + Math.round(x * dpr)) << 2;
+      return [ipng.data[i], ipng.data[i + 1], ipng.data[i + 2]]; };
+    const acc = (await ipage.evaluate(() => getComputedStyle(document.documentElement)
+      .getPropertyValue('--red').trim())).replace('#', '')
+      .match(/../g).map((h) => parseInt(h, 16));
+    /* The centroid of every pixel that IS the accent inside the
+       figure's own box. The pill is solid accent and the ring around
+       it is the same hue at .55, so a tolerance that takes both still
+       lands on the corner they share. */
+    let sx = 0, sy = 0, n = 0;
+    for (let x = fig.x; x < fig.x + fig.w; x += 1) {
+      for (let y = fig.y; y < fig.y + fig.h; y += 1) {
+        const p = iAt(x, y);
+        if (Math.abs(p[0] - acc[0]) < 70 && Math.abs(p[1] - acc[1]) < 70
+            && Math.abs(p[2] - acc[2]) < 70) { sx += x; sy += y; n++; }
+      }
+    }
+    const fx = n ? (sx / n - fig.x) / fig.w : -1;
+    const fy = n ? (sy / n - fig.y) / fig.h : -1;
+    ok(`the drawn card's mark really is in its top right (${fx.toFixed(2)}`
+      + `, ${fy.toFixed(2)} of the figure, ${n} accent pixels)`,
+      n > 200 && fx > .62 && fy < .42, { fx, fy, n, fig });
+
+    /* ── AND THE GLYPHS ARE THE ACCENT, ASKED OF THE PAGE ──
+       Three assertions in this file were once pinned to a shipped red
+       and measured nothing the day it moved. The accent is a wheel
+       now: a hex written into a check passes on nothing. */
+    const glyph = await ipage.evaluate(() => getComputedStyle(
+      document.querySelector('.tr-slide[data-card="back"] .tr-ic svg')).stroke);
+    const want = await ipage.evaluate(() => {
+      const d = document.createElement('div');
+      d.style.color = getComputedStyle(document.documentElement)
+        .getPropertyValue('--red').trim();
+      document.body.appendChild(d);
+      const c = getComputedStyle(d).color; d.remove(); return c;
+    });
+    ok(`every card's glyph wears the accent (${glyph})`, glyph === want,
+      { glyph, want });
+
+    /* ── FINISHING MARKS IT SEEN ── */
+    await ipage.evaluate(() => document.querySelector('.tr-go').click());
+    await ipage.waitForTimeout(200);
+    ok('pressing through the last card puts it away',
+      !(await drawn())
+      && await ipage.evaluate(() => localStorage.getItem('sched.tour.v1')) === '1');
+    await ipage.reload({ waitUntil: 'networkidle' });
+    await ipage.waitForTimeout(360);
+    ok('...and it does not come back on the next open', !(await drawn()));
+
+    /* ── AND SO DOES EVERY OTHER WAY OUT ──
+       One meaning per control and no hidden third state: a way out
+       that quietly means "ask me tomorrow" is a state nothing on
+       screen tells you about. Both are checked, because "Don't show
+       again" that merely closes passes any check that only watches
+       the element go. */
+    await fresh();
+    await ipage.evaluate(() => document.querySelector('.tr-skip').click());
+    await ipage.waitForTimeout(200);
+    ok('“Don’t show again” closes it and marks it seen',
+      !(await drawn())
+      && await ipage.evaluate(() => localStorage.getItem('sched.tour.v1')) === '1');
+
+    await fresh();
+    await ipage.keyboard.press('Escape');
+    await ipage.waitForTimeout(200);
+    ok('...and so does Escape, rather than inventing a third answer',
+      !(await drawn())
+      && await ipage.evaluate(() => localStorage.getItem('sched.tour.v1')) === '1');
+
+    /* ── WHICH IS ONLY AFFORDABLE BECAUSE IT IS NOT LOST ──
+       Every way out is final, so Settings has to be able to play it
+       again — and from the TOP, not from wherever it was abandoned. */
+    await ipage.evaluate(() => document.getElementById('scTabYou').click());
+    await ipage.waitForTimeout(340);
+    const row = await ipage.evaluate(() => {
+      const b = [...document.querySelectorAll('.menu-item')]
+        .find((x) => /Show the intro/.test(x.textContent));
+      if (b) b.click();
+      return !!b;
+    });
+    await ipage.waitForTimeout(380);
+    const again = await card();
+    ok('Settings plays it again, from the first card',
+      row && await drawn() && again.live.join('') === 'week'
+      && again.step === 'Step 1 of 4', again);
+
+    /* A swipe moves it, which is what the dots promise. */
+    const box = await ipage.$eval('.tr-win', (e) => {
+      const r = e.getBoundingClientRect();
+      return { y: r.y + r.height / 2, l: r.x + 40, rr: r.x + r.width - 40 };
+    });
+    await ipage.mouse.move(box.rr, box.y);
+    await ipage.mouse.down();
+    await ipage.mouse.move(box.l, box.y, { steps: 8 });
+    await ipage.mouse.up();
+    await ipage.waitForTimeout(420);
+    ok('a swipe moves it on a card', (await card()).live.join('') === 'pattern');
+
+    /* ── THE COPY IS PLAIN, AND THAT INCLUDES HAVING NO DASHES ──
+       It went in written the way the notes beside the code are
+       written, which is the wrong register for a screen somebody
+       reads once before they know what the app is. Asserted rather
+       than trusted, because prose drifts back: an em dash is the
+       shape of a second thought, and each of these four cards is
+       allowed exactly one. */
+    const copy = await ipage.evaluate(() =>
+      [...document.querySelectorAll('.tr-slide')]
+        .map((s) => s.querySelector('h3').textContent + ' '
+          + s.querySelector('p').textContent)
+        .concat([document.querySelector('.tr-go').textContent,
+                 document.querySelector('.tr-skip').textContent]));
+    ok('no card carries a dash of any kind',
+      copy.every((t) => !/[—–]|(^|\s)-(\s|$)/.test(t)), copy);
+    /* And it stays short. The reference this was drawn from runs two
+       or three words on top and one sentence under it; six cards of
+       this file's own voice is what it replaced. */
+    const longest = Math.max(...copy.slice(0, 4).map((t) => t.length));
+    ok(`and every card is one short sentence (longest ${longest} chars)`,
+      longest <= 110, copy);
+
+    await ipage.evaluate(() => document.querySelector('.tr-skip').click());
+    await ipage.waitForTimeout(200);
+    ok('nothing threw anywhere in the intro', ierrs.length === 0, ierrs);
+    await ictx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

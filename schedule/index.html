@@ -30,7 +30,7 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=9dbcd322" />
+<link rel="stylesheet" href="app.css?v=4f9a04cc" />
 </head>
 <body>
 
@@ -235,8 +235,24 @@
   <div class="sheet-body" id="scSheetBody"></div>
 </section>
 
+<!-- ── the intro ──
+     The first open, and the only screen in this app that explains
+     rather than records. It exists because four of the things this app
+     can do are INVISIBLE until somebody tells you: a day card has a
+     BACK, the add button takes a sentence, a long press on a row ticks
+     it, and Pattern does nothing at all until you have rated some days.
+     None of those is findable by pressing around, which is the only
+     test a card here has to pass — a slide about the tab bar would be
+     a picture of something you are already looking at.
+
+     It is built by scTourOpen and empty until then: six slides of
+     markup sitting in the document on every open, for a screen most
+     people see once, is furniture that costs a parse. -->
+<div class="tour" id="scTour" role="dialog" aria-modal="true"
+     aria-labelledby="scTourTitle" tabindex="-1" hidden></div>
+
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=c14e308c"></script>
+<script src="app.js?v=48fa87eb"></script>
 </body>
 </html>

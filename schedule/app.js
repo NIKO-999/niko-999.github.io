@@ -6477,6 +6477,317 @@
       + 'what.'));
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     THE INTRO
+
+     Six cards on the first open, and the rule for what gets one is
+     narrow: it has to be something you could not find by pressing
+     around. A slide about the tab bar is a picture of the thing you
+     are already looking at.
+
+     Four of the six are genuinely invisible — a day card has a BACK,
+     the add control takes a SENTENCE, a long press on a row ticks it,
+     and Pattern is inert until you have rated some days. The other two
+     are the shape of the week and the promise about where the data
+     lives, and both are things you would otherwise have to be told by
+     somebody.
+
+     ── ONE MEANING PER CONTROL, AND NO HIDDEN THIRD STATE ──
+     Continue advances; the last one starts the week. "Don't show
+     again" leaves from any card. BOTH mark it seen, and Escape does
+     what "Don't show again" does — a way out that quietly means "ask
+     me tomorrow" is a third state nothing on screen tells you about,
+     and a first-run screen that comes back after you dismissed it has
+     stopped being an intro and become furniture.
+
+     Which is affordable only because it is not lost: Settings carries
+     "Show the intro" and it plays again from the top. Nothing here is
+     a one-time gift.
+     ═══════════════════════════════════════════════════════════ */
+
+  var TOUR_KEY = 'sched.tour.v1';
+
+  /* ── THE POINTER ──
+     The objectives are the one thing in this app with no visible name
+     anywhere: they live behind a pill in the corner of a card, and a
+     sentence saying "top right" is a sentence you have to hold in your
+     head while you go and look. So the card is DRAWN, at the
+     proportions the real one has, with the pill lit in the accent and
+     a ring round it. The picture is the instruction.
+
+     Its rows are ruled lines rather than words. This is a diagram of
+     WHERE something is, and legible text in it would invite reading
+     the card instead of finding the corner.
+
+     THE RING BLEEDS PAST THE CARD'S EDGE, and it has to. Centred on a
+     pill that is itself in the corner, a ring big enough to clear the
+     pill's own diagonal cannot also fit inside the card. Drawn small
+     enough to fit it touches the pill and reads as a border on it
+     rather than as a light around it, which is the one thing it is
+     for. So the card is inset in the box and the halo is allowed out
+     over the edge. */
+  var TOUR_CARD = '<svg viewBox="0 0 168 116" class="tr-fig"'
+    + ' role="img" aria-label="A day card, with the turn control in its'
+    + ' top right corner">'
+    /* the card itself, square, because every card in this app is */
+    + '<rect x="8" y="14" width="152" height="92" fill="var(--g0)"'
+    + ' stroke="var(--hair)" stroke-width="2"/>'
+    /* the day name, top left, at the weight the real one wears */
+    + '<rect x="20" y="26" width="44" height="8" rx="1" fill="var(--dim)"/>'
+    /* two rows: the glyph gutter, then the time over the name */
+    + '<g fill="var(--tick-off)">'
+    + '<circle cx="27" cy="58" r="5"/>'
+    + '<rect x="40" y="53" width="24" height="5" rx="1"/>'
+    + '<rect x="40" y="62" width="62" height="6" rx="1"/>'
+    + '<circle cx="27" cy="86" r="5"/>'
+    + '<rect x="40" y="81" width="24" height="5" rx="1"/>'
+    + '<rect x="40" y="90" width="48" height="6" rx="1"/>'
+    + '</g>'
+    /* and the corner it is about. The ring first and the pill over it,
+       so the halo reads as light around the control rather than as a
+       second object beside it. */
+    + '<circle cx="139.5" cy="29.5" r="20" fill="none"'
+    + ' stroke="var(--red)" stroke-width="2.4" opacity=".55"/>'
+    + '<rect x="127" y="22" width="25" height="15" rx="7.5" fill="var(--red)"/>'
+    + '</svg>';
+
+  /* ── FOUR, AND THE COPY IS PLAIN ──
+     It went in at six, in this file's own voice: "where today sits is
+     itself information". That voice is right for the notes beside the
+     code and wrong on a screen somebody reads once before they have
+     any idea what the app is. A first open is not the place to be
+     interesting. Two or three words on top, one plain sentence under
+     it, and nothing clever in between.
+
+     No dashes either. An aside set off mid-sentence is a second
+     thought, and the whole job of these four cards is to have one
+     thought each.
+
+     ── AND NO TWO OF THEM MAY BE THE SAME CARD ──
+     "Track your day" sat third, about holding a row to tick it off,
+     and it was the first card again wearing a different verb: both of
+     them were about the week and what you put on it. What replaced it
+     is the only claim in the app that is not about the week at all,
+     which is the record being read BACK to you.
+
+     THE OBJECTIVES GO LAST because they are the one thing here nobody
+     can find on their own, and the last card is the one still on
+     screen when the intro ends. */
+  var TOUR = [
+    {
+      k: 'week',
+      t: 'Plan your week',
+      s: 'Seven day cards. Add a block by typing it in plain words.',
+      /* Three cards fanned. The front one is FILLED with the ground so
+         it covers the one behind it: drawn as two outlines they cross,
+         and the back card reads as a bracket rather than as a card. */
+      i: '<rect x="10.4" y="4.2" width="11.4" height="16.6" rx="1.4"'
+       + ' opacity=".42"/>'
+       + '<rect x="2.6" y="6.8" width="12.8" height="14.6" rx="1.4"'
+       + ' fill="var(--paper)"/>'
+       + '<path d="M5.6 11.4h6.8M5.6 14.6h6.8M5.6 17.8h4"'
+       + ' stroke-width="1.4"/>'
+    },
+    {
+      k: 'pattern',
+      t: 'It reads itself back',
+      s: 'Rate how a day went and see what your best days have in '
+       + 'common.',
+      /* ── RANKED BARS OFF AN AXIS, AND IT IS NOT THE PANEL'S OWN
+             SHAPE ──
+         Pattern draws bars either side of a centre axis, because the
+         side is what carries the direction. Drawn that way at 52px it
+         does not read: the bar crossing the axis at its midpoint makes
+         a plus sign, moving the crossing down makes a flag, and four
+         bars close enough to fill the box merge into a blob. Three
+         attempts, all rendered beside the other three glyphs, all
+         worse than the ones next to them.
+
+         So it is the panel's other true fact instead: bars ranked
+         longest first off an axis at the side. That IS what the screen
+         shows, it reads as a chart at a glance, and what it leaves out
+         is a distinction nobody needs before they have seen the
+         screen. It is the ten lift glyphs' lesson: when every honest
+         drawing of a thing is illegible at the size it is drawn, draw
+         a different true thing. */
+      i: '<path d="M4.8 3.6v16.8" stroke-width="1.4" opacity=".6"/>'
+       + '<path d="M4.8 8h14.6M4.8 13h10.4M4.8 18h6.2"'
+       + ' stroke-width="2.8" stroke-linecap="butt"/>'
+    },
+    {
+      k: 'friends',
+      t: 'Compete with friends',
+      s: 'Add a friend and see who shows up most. Nothing else leaves '
+       + 'your phone.',
+      /* The board's own crown, at the same silhouette, stroked rather
+         than filled so it sits with the other three. */
+      i: '<path d="M3 8.8l4.5 3.5L12 4.4l4.5 7.9L21 8.8L19.3 19H4.7L3 8.8z"/>'
+    },
+    {
+      k: 'back',
+      t: 'Flip for objectives',
+      s: 'Each card has a back for the few things that really matter '
+       + 'today.',
+      fig: TOUR_CARD,
+      /* The objectives mark the app already owns. Two glyphs for one
+         subject is the app telling apart two things that are not. */
+      i: 'OBJ'
+    }
+  ];
+
+  var tourAt = 0;
+  var tourFrom = null;      /* where the focus was before this took it */
+
+  function scTourSeen() {
+    try { return localStorage.getItem(TOUR_KEY) === '1'; } catch (e) { return true; }
+  }
+  /* Seen on the way OUT, whichever way you left. Written before the
+     element goes, so a reload landing between the two cannot bring it
+     back on a phone that has already read it. */
+  function scTourSaw() {
+    try { localStorage.setItem(TOUR_KEY, '1'); } catch (e) {}
+  }
+
+  function scTourClose() {
+    scTourSaw();
+    var el = $('scTour');
+    el.hidden = true;
+    el.textContent = '';
+    document.body.style.overflow = '';
+    if (tourFrom && tourFrom.focus) tourFrom.focus();
+    tourFrom = null;
+  }
+
+  /* The track is laid out once and MOVED, never scrolled. That is the
+     deck's own answer and it is here for the deck's own reasons: a
+     scroll container clamps at 0, Safari drops trailing padding out of
+     its scrollable width, and `flex: 0 0 max(...)` — a math function
+     in a shorthand — can be thrown away by a parser without a word.
+     A transform is the same number of pixels in every engine. */
+  function scTourGo(i) {
+    tourAt = Math.max(0, Math.min(TOUR.length - 1, i));
+    var el = $('scTour');
+    el.querySelector('.tr-track').style.transform =
+      'translateX(' + (-tourAt * 100) + '%)';
+    [].forEach.call(el.querySelectorAll('.tr-dot'), function (d, n) {
+      d.classList.toggle('is-on', n === tourAt);
+    });
+    [].forEach.call(el.querySelectorAll('.tr-slide'), function (d, n) {
+      /* Off-screen cards are taken out of the tab order and out of the
+         accessibility tree. Left in, a keyboard tabs into a card that
+         is 390px off the side and the focus ring goes with it. */
+      d.setAttribute('aria-hidden', n === tourAt ? 'false' : 'true');
+      d.inert = n !== tourAt;
+    });
+    /* Reached through the element rather than by id. It is built by
+       scTourOpen, so an id fetch would be asking the markup for
+       something the markup does not have — which tests/names.js
+       refuses, and rightly: that is the shape of an id renamed out
+       from under its reader.
+
+       AND THE COMMENT CANNOT SPELL THE FETCH IT IS ABOUT. Written the
+       obvious way, with the call quoted in prose, that check reads the
+       comment and reports the very id this line exists to stop
+       fetching. It is the CSS comment that broke the same rule by
+       naming the close marker, one file over and in a different
+       language. */
+    el.querySelector('.tr-h').textContent = TOUR[tourAt].t;
+    var go = el.querySelector('.tr-go');
+    go.textContent = tourAt === TOUR.length - 1 ? 'Start the week' : 'Continue';
+    el.querySelector('.tr-step').textContent =
+      'Step ' + (tourAt + 1) + ' of ' + TOUR.length;
+  }
+
+  function scTourOpen() {
+    var el = $('scTour');
+    tourFrom = document.activeElement;
+    el.textContent = '';
+
+    /* The title lives OUTSIDE the track, so the dialog's accessible
+       name is one node that changes rather than six that move. */
+    var lbl = scEl('h2', 'tr-h', TOUR[0].t);
+    lbl.id = 'scTourTitle';
+    el.appendChild(lbl);
+
+    var win = scEl('div', 'tr-win');
+    var track = scEl('div', 'tr-track');
+    TOUR.forEach(function (c) {
+      var s = scEl('section', 'tr-slide');
+      s.dataset.card = c.k;
+      var ic = scEl('div', 'tr-ic');
+      ic.insertAdjacentHTML('beforeend', c.i === 'OBJ' ? OBJ_MARK
+        : '<svg viewBox="0 0 24 24" aria-hidden="true">' + c.i + '</svg>');
+      s.appendChild(ic);
+      /* The heading is repeated inside the card and hidden from a
+         screen reader: the dialog's own label already says it, and
+         hearing the title twice on every step is the duplication this
+         project keeps taking back out. */
+      var t = scEl('h3', 'tr-t', c.t);
+      t.setAttribute('aria-hidden', 'true');
+      s.appendChild(t);
+      s.appendChild(scEl('p', 'tr-s', c.s));
+      if (c.fig) s.insertAdjacentHTML('beforeend', c.fig);
+      track.appendChild(s);
+    });
+    win.appendChild(track);
+    el.appendChild(win);
+
+    var dots = scEl('div', 'tr-dots');
+    dots.setAttribute('aria-hidden', 'true');
+    TOUR.forEach(function (c, n) {
+      var d = scEl('i', 'tr-dot');
+      d.addEventListener('click', function () { scTourGo(n); });
+      dots.appendChild(d);
+    });
+    el.appendChild(dots);
+
+    var foot = scEl('div', 'tr-foot');
+    /* Spoken, never drawn: the dots say it to an eye and this says it
+       to a screen reader, which is one fact told twice to two people
+       rather than twice to one. */
+    foot.appendChild(scEl('span', 'tr-step'));
+
+    var go = scEl('button', 'btn go tr-go', 'Continue');
+    go.type = 'button';
+    go.addEventListener('click', function () {
+      if (tourAt === TOUR.length - 1) scTourClose(); else scTourGo(tourAt + 1);
+    });
+    foot.appendChild(go);
+
+    var skip = scEl('button', 'tr-skip', 'Don’t show again');
+    skip.type = 'button';
+    skip.addEventListener('click', scTourClose);
+    foot.appendChild(skip);
+    el.appendChild(foot);
+
+    /* A swipe, with the move guard the week's long press needed: a
+       drag that began on a card and travelled ten pixels is a swipe,
+       and anything under that is a press that happened to wobble. */
+    var x0 = null;
+    win.addEventListener('pointerdown', function (e) { x0 = e.clientX; });
+    win.addEventListener('pointerup', function (e) {
+      if (x0 === null) return;
+      var dx = e.clientX - x0;
+      x0 = null;
+      if (Math.abs(dx) < 40) return;
+      scTourGo(tourAt + (dx < 0 ? 1 : -1));
+    });
+    win.addEventListener('pointercancel', function () { x0 = null; });
+
+    el.hidden = false;
+    document.body.style.overflow = 'hidden';
+    tourAt = 0;
+    scTourGo(0);
+    el.focus();
+  }
+
+  document.addEventListener('keydown', function (e) {
+    if ($('scTour').hidden) return;
+    if (e.key === 'Escape') { e.preventDefault(); scTourClose(); }
+    else if (e.key === 'ArrowRight') { e.preventDefault(); scTourGo(tourAt + 1); }
+    else if (e.key === 'ArrowLeft') { e.preventDefault(); scTourGo(tourAt - 1); }
+  });
+
   /* ── THE STOP ──
      Its own key, like the friends board's: which half of a screen you
      were last on is a preference about looking at the record, and
@@ -7078,6 +7389,16 @@
       item('Rename', state.title, '', function () {
         scTextSheet('Rename', 'Title', state.title, function (v) { state.title = v || 'Schedule'; });
       });
+      /* Never lost. The intro marks itself seen whichever way you
+         leave it, which is only affordable because it plays again
+         from here — a first-run screen you can destroy in one press
+         and never get back is a one-time gift, and this app does not
+         give any others. */
+      item('Show the intro', 'Six cards on what this app does', '', function () {
+        scClose();
+        scTourOpen();
+      });
+
       item('Copy a backup', 'Puts the whole schedule on the clipboard as text', '', function () {
         var text = JSON.stringify(state);
         var done = function () { scClose(); scToast('Copied. Paste it somewhere safe.', false); };
@@ -7314,6 +7635,16 @@
     if (document.hidden) clearInterval(tick); else scStartTick();
   });
   scStartTick();
+
+  /* ── LAST, AND AFTER THE FIRST PAINT ──
+     The intro is a screen ABOUT the app, so the app has to be there
+     behind it — opened before scPaintView the week is not built yet,
+     and the card that says "press a day to open it" is sitting over an
+     empty frame. It also has to come after scLive, which is what marks
+     the rows behind you: a first open that flashed an unpainted page
+     for a frame before covering it is worse than one that never showed
+     it at all. */
+  if (!scTourSeen()) scTourOpen();
 
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', function () {
