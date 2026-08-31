@@ -1852,6 +1852,53 @@ Same gap as the friends crown, same direction, about the same size. 52
 then measured 4.47, which is under the bar by a rounding error and is
 the `--spent` lesson a third time.
 
+### The card carries its colour all the way across
+
+It was a 30% wash of the hue in the near corner running to nothing by
+56%, so more than half of it was flat `#101013` — and it was reported
+as simply too dark. The hues read as a muddy maroon and a muddy navy
+rather than as red and blue, because the only place they existed at
+strength was one corner. 44% to 28% over a lifted base now: **the far
+corner measures 7.9x the luminance it did.**
+
+**THE GROUND AND THE TEXT ON IT ARE ONE SETTING.** Every step lighter
+costs the figures contrast, and they are `--wc-lit`, the hue mixed
+toward white — so lightening the card means mixing MORE white into
+them, which means the percentage of the hue goes DOWN. Moving the
+ground alone put them at **3.6:1**. 62% to 42%, and what that costs is
+real: 42% of a red is a salmon rather than a red, and it is the reason
+the ground was not taken any lighter than it was. Past this the
+figures stop being the hue at all, which is the one thing a card built
+to carry a colour cannot trade.
+
+**AND THE SCRIM IS WHAT MADE IT AFFORDABLE.** The figures and the
+glyph sit in the LIGHTEST corner, which is why every attempt to
+lighten the card took contrast off them first. A short dark fade down
+from the head, behind those two and nothing else, puts their own
+ground back where it was and lets the rest of the card go as light as
+it likes. **One named stack** — `--wc-wash` — because b1 and b2
+restate the background to sit two steps up and would each need their
+own copy of every layer.
+
+**The label was the one thing nothing measured, and it was the one
+that needed measuring.** 9.5px uppercase is the smallest type on the
+card and the weakest white on it, so it is the first thing a lighter
+ground breaks — and it was already at **4.58:1** before anything
+moved, a rounding error above the bar rather than a margin. It reads
+5.54:1 now and the suite holds it.
+
+**AND THE FACET'S CHECK HAD QUIETLY STOPPED DISCRIMINATING.** It
+compared absolute perimeter values, which worked only while the card
+was nearly black: the day the ground was lightened the wash swamped
+the ring, the linear rim it replaced scored **.37 against a bar of
+.30**, and the check would have passed on the treatment it exists to
+reject. It measures the ring's OWN contribution now — each edge pixel
+less the card's ground 7px in along the same normal. Facet **.44**,
+linear rim **.23**, ring deleted fails the other half at **.03**. It
+is the friends crown's lesson and the Workouts panel's ring, a third
+time: **a thin mark over a coloured ground has to be measured as the
+difference it makes.**
+
 **EFFORT IS YOURS, AND THE MINUTES ONLY SUGGEST IT.** It went in as a
 field somebody typed — Hard, Hard, Hard, Light — which is the app
 holding an opinion about a session it knows nothing about. Then it was

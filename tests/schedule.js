@@ -5905,7 +5905,7 @@ const SAID = [
       await deck(theme);
       await page.click('.wc.is-front');                  /* into Bro split */
       await page.waitForTimeout(500);
-      const worst = { fig: 99, glyph: 99, desc: 99, of: '' };
+      const worst = { fig: 99, glyph: 99, desc: 99, lab: 99, of: '' };
       for (let i = 0; i < 6; i++) {
         await page.click(`.wc-chips .wc-chip:nth-child(${i + 1})`);
         /* WAITED OUT ON THE ANIMATION, never on a number of
@@ -5925,7 +5925,8 @@ const SAID = [
             return { x: r.left + r.width / 2, y: r.top + r.height / 2,
               l: r.left, r: r.right, t: r.top, b: r.bottom }; };
           return { name: c.dataset.workout, card: c.getBoundingClientRect().toJSON(),
-            fig: box('.wc-top div b'), g: box('.wc-g'), d: box('.wc-d') };
+            fig: box('.wc-top div b'), lab: box('.wc-top div span'),
+            g: box('.wc-g'), d: box('.wc-d') };
         });
         const png = PNG5.sync.read(await page.screenshot());
         const px = (x, y) => {
@@ -5950,15 +5951,28 @@ const SAID = [
           return ratio(s[0], s[s.length - 1]);
         };
         const fig = worstOf(at.fig, 1), g = worstOf(at.g, 0), d = worstOf(at.d, 1);
+        const lab = worstOf(at.lab, 1);
         if (fig < worst.fig) { worst.fig = fig; worst.of = at.name; }
         worst.glyph = Math.min(worst.glyph, g);
         worst.desc = Math.min(worst.desc, d);
+        worst.lab = Math.min(worst.lab, lab);
       }
       const t = theme === null ? 'the lime it ships with' : 'hue ' + theme;
       ok(`the figures clear 4.5:1 on the card on ${t} (worst ${worst.fig.toFixed(2)}:1 on ${worst.of})`,
         worst.fig >= 4.5, worst);
       ok(`...the description too, over the wordmark behind it (${worst.desc.toFixed(2)}:1)`,
         worst.desc >= 4.5, worst);
+      /* ── AND THE LABEL, WHICH NOTHING MEASURED UNTIL THE GROUND
+             MOVED ──
+         9.5px uppercase is the smallest type on the card and the
+         weakest white on it, so it is the first thing a lighter ground
+         breaks — and it was sitting at 4.58:1 before anything moved,
+         which is a rounding error above the bar rather than a margin.
+         The one piece of text on this surface that was not held was
+         the one that needed holding. */
+      ok(`...and the label over them, the smallest type on the card `
+        + `(${worst.lab.toFixed(2)}:1)`,
+        worst.lab >= 4.5, worst);
       ok(`...and the glyph clears 3:1 as a graphic (${worst.glyph.toFixed(2)}:1)`,
         worst.glyph >= 3, worst);
     }
@@ -5976,18 +5990,29 @@ const SAID = [
        there are two bright arcs with dark between them, which is what
        a machined block does under one lamp.
 
-       So the check is in two halves and each catches a different
-       reversion. Both are measured on composited pixels round the
-       card's own perimeter, and both are RATIOS, so they survive a
-       change to the card's ground:
+       MEASURED AS THE RING'S OWN CONTRIBUTION — each edge pixel less
+       the card's own ground 7px in along the same normal. A bare
+       reading at the edge is mostly the WASH, and that is not a
+       hypothetical: the first version of this check compared absolute
+       perimeter values, and it worked only while the card was nearly
+       black. The day the ground was lightened the wash swamped the
+       ring, the linear rim it replaced scored .37 against a bar of
+       .30, and the check had quietly stopped telling a cone from a
+       sweep while still passing. It is the friends crown's lesson and
+       the Workouts panel's, a third time: a thin mark over a coloured
+       ground has to be measured as the DIFFERENCE it makes.
 
-         LIT   the brightest point on the ring against the card's
-               interior — 32x here, 18x for the linear rim it
-               replaced, and 3.6x with the ring deleted.
-         ARCS  the brightest point at least a quarter-turn away from
-               the first, as a fraction of it — .42 here and .15 for
-               the linear rim, which is the whole of the difference
-               between a cone and a sweep.
+       Two halves, each catching a different reversion, both on
+       composited pixels:
+
+         LIT   the ring's brightest contribution — .49 here, .26 for
+               the linear rim, and .03 with the ring deleted, which is
+               the half that says a ring exists at all.
+         ARCS  its brightest contribution at least a quarter-turn away
+               from that, as a fraction of it — .44 here and .23 for
+               the linear rim, which is the cone showing up as a
+               number. The no-ring case scores .48 on this one and
+               fails the other, which is why both are needed.
 
        SAMPLED ALONG THE STRAIGHT EDGES ONLY. The corner radius is
        22px, so a sample taken at 45 degrees lands where the ring is
@@ -6002,36 +6027,37 @@ const SAID = [
       const i = (pngE.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
       return [pngE.data[i], pngE.data[i + 1], pngE.data[i + 2]];
     };
-    const IN = .6, RAD = 30, PER = 6, ring = [];
-    for (let i = 0; i < PER; i++) {
-      ring.push(lum(atE(lit.x + RAD + (lit.width - 2 * RAD) * (i + .5) / PER,
-        lit.y + IN)));                                            /* head */
+    const IN = .6, DEEP = 7, RAD = 30, PER = 6, ring = [];
+    const pair = (x, y, nx, ny) =>
+      ring.push(lum(atE(x, y)) - lum(atE(x + nx * DEEP, y + ny * DEEP)));
+    for (let i = 0; i < PER; i++) {                               /* head */
+      pair(lit.x + RAD + (lit.width - 2 * RAD) * (i + .5) / PER, lit.y + IN, 0, 1);
     }
-    for (let i = 0; i < PER; i++) {
-      ring.push(lum(atE(lit.right - IN,
-        lit.y + RAD + (lit.height - 2 * RAD) * (i + .5) / PER)));  /* trailing */
+    for (let i = 0; i < PER; i++) {                               /* trailing */
+      pair(lit.right - IN,
+        lit.y + RAD + (lit.height - 2 * RAD) * (i + .5) / PER, -1, 0);
     }
-    for (let i = 0; i < PER; i++) {
-      ring.push(lum(atE(lit.right - RAD - (lit.width - 2 * RAD) * (i + .5) / PER,
-        lit.bottom - IN)));                                        /* foot */
+    for (let i = 0; i < PER; i++) {                               /* foot */
+      pair(lit.right - RAD - (lit.width - 2 * RAD) * (i + .5) / PER,
+        lit.bottom - IN, 0, -1);
     }
-    for (let i = 0; i < PER; i++) {
-      ring.push(lum(atE(lit.x + IN,
-        lit.bottom - RAD - (lit.height - 2 * RAD) * (i + .5) / PER)));  /* leading */
+    for (let i = 0; i < PER; i++) {                               /* leading */
+      pair(lit.x + IN,
+        lit.bottom - RAD - (lit.height - 2 * RAD) * (i + .5) / PER, 1, 0);
     }
-    const inside = lum(atE(lit.x + lit.width / 2, lit.y + 18));
     const top5 = ring.indexOf(Math.max(...ring));
-    let arc2 = 0;
+    let arc2 = -1;
     ring.forEach((v, i) => {
       const d = Math.min(Math.abs(i - top5), ring.length - Math.abs(i - top5));
       if (d >= ring.length / 4 && v > arc2) arc2 = v;
     });
-    const isLit = ring[top5] / inside, arcs = arc2 / ring[top5];
-    ok(`the card's edge catches a light its middle does not (${isLit.toFixed(1)}x)`,
-      isLit >= 10, { lit: isLit, brightest: ring[top5], inside });
+    const arcs = arc2 / ring[top5];
+    ok(`the card's edge catches a light its middle does not `
+      + `(${ring[top5].toFixed(2)} over its own ground)`,
+      ring[top5] >= .12, { brightest: ring[top5], at: top5 });
     ok(`...on a cone, so a second arc a quarter-turn away catches too `
       + `(${arcs.toFixed(2)} of the first)`,
-      arcs >= .3, { arcs, arc2, brightest: ring[top5], at: top5 });
+      arcs >= .33, { arcs, arc2, brightest: ring[top5], at: top5 });
 
     /* ── IT LANDS ON THE BLOCK, AND IT STAYS THERE ── */
     await deck(null);

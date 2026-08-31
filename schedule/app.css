@@ -2744,10 +2744,12 @@ body {
    THE COLOUR ON THE CARD IS MIXED, NEVER DRAWN RAW. These hues on
    --ink measure between about 2.6:1 and 4.1:1, which fails the bar
    for the 16px figure sitting in them. --wc-lit is the hue mixed
-   toward whatever --paper is on this card, which lightens it on a
-   light palette and darkens it on a dark one: the same correction
-   either way round, because the card's polarity follows the theme's.
-   tests/schedule.js measures it on composited pixels.
+   toward white, and it moves whenever the card's ground moves: the
+   two are one setting seen from either side, and changing one without
+   the other is what put the figures at 3.6:1 on the first attempt to
+   lighten this card. tests/schedule.js measures all four things that
+   sit on it — the figures, the label, the description and the glyph —
+   on composited pixels, across six cards and two accents.
    ═══════════════════════════════════════════════════════════ */
 
 .wc-sub {
@@ -2850,17 +2852,50 @@ body {
 
      --wc-hue is written onto the element by the card that uses it, so
      the value here is the fallback and the declaration tests/names.js
-     needs. --wc-lit is 62% toward white rather than toward --paper: the
-     ground no longer moves, so neither does the correction, and the sum
-     that used to be wrong about it — 4.6:1 computed against --ink and
-     3.28:1 measured on screen — is not being made any more. */
+     needs. --wc-lit is mixed toward white rather than toward --paper:
+     the ground no longer moves, so neither does the correction, and
+     the sum that used to be wrong about it — 4.6:1 computed against
+     --ink and 3.28:1 measured on screen — is not being made any more.
+
+     IT WENT 62% TO 42% WHEN THE GROUND WAS LIGHTENED, which is the
+     direction that always surprises: a lighter card needs MORE white
+     in the figure, so the percentage of the hue goes DOWN. What that
+     costs is real — 42% of a red is a salmon rather than a red — and
+     it is the reason the ground was not taken any lighter than it
+     was. Past this the figures stop being the hue at all, which is
+     the one thing a card built to carry a colour cannot trade. */
   --wc-hue: var(--red);
-  --wc-dark: #101013;
-  --wc-lit: color-mix(in srgb, var(--wc-hue) 62%, #ffffff);
-  background:
+  --wc-dark: #1a1a20;
+  --wc-lit: color-mix(in srgb, var(--wc-hue) 42%, #ffffff);
+
+  /* ── THE CARD CARRIES ITS COLOUR ALL THE WAY ACROSS ──
+     It was a 30% wash of the hue in the near corner running to nothing
+     by 56%, so more than half the card was flat #101013 — and it was
+     reported as simply too dark. The hues read as a muddy maroon and a
+     muddy navy rather than as red and blue, because the only place
+     they existed at strength was one corner.
+
+     44% to 28% over a lifted base instead: the far corner measures
+     7.9x the luminance it did, so the card is a coloured object rather
+     than a black one with a tint on the shoulder.
+
+     AND THE SCRIM IS WHAT MAKES THAT AFFORDABLE. The figures and the
+     glyph sit in the LIGHTEST corner, which is why every attempt to
+     lighten the card took contrast off them first — measured, a ground
+     this light on its own put them at 3.6:1. A short dark fade down
+     from the head, behind those two and nothing else, puts their own
+     ground back where it was and lets the rest of the card go as light
+     as it likes.
+
+     ONE STACK, NAMED, because b1 and b2 restate the background to sit
+     two steps up and would each need their own copy of every layer —
+     which is three places to keep a wash in step by hand. */
+  --wc-wash:
+    linear-gradient(to bottom, rgba(0, 0, 0, .26) 0%, transparent 30%),
     linear-gradient(150deg,
-      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
-    var(--wc-dark);
+      color-mix(in srgb, var(--wc-hue) 44%, transparent) 0%,
+      color-mix(in srgb, var(--wc-hue) 28%, transparent) 100%);
+  background: var(--wc-wash), var(--wc-dark);
   color: #ffffff;
 
   /* ── AND IT IS LIFTED OFF THE PAGE ──
@@ -3019,17 +3054,11 @@ body {
    overwritten by keyframes naming `transform`. */
 .wc.b1 {
   transform: translate(13px, 9px) rotate(3deg) scale(.965);
-  background:
-    linear-gradient(150deg,
-      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
-    color-mix(in srgb, var(--wc-hue) 24%, #17171b);
+  background: var(--wc-wash), color-mix(in srgb, var(--wc-hue) 34%, #202028);
 }
 .wc.b2 {
   transform: translate(25px, 18px) rotate(6deg) scale(.93);
-  background:
-    linear-gradient(150deg,
-      color-mix(in srgb, var(--wc-hue) 30%, transparent) 0%, transparent 56%),
-    color-mix(in srgb, var(--wc-hue) 38%, #1d1d22);
+  background: var(--wc-wash), color-mix(in srgb, var(--wc-hue) 46%, #26262f);
 }
 
 /* ── THE SWOOP ──
@@ -3162,12 +3191,20 @@ body {
   gap: 24px;
 }
 .wc-top div { display: flex; flex-direction: column; gap: 5px; }
+/* ── THE LABEL MOVED WITH THE GROUND ──
+   9.5px uppercase is the smallest type on the card and the weakest
+   white on it, so it is the first thing a lighter ground breaks — and
+   it was ALREADY at 4.58:1 before anything moved, which is this file's
+   oldest lesson about a margin that is really a rounding error. .78
+   reads 5.54:1 on the new ground, better than it ever was on the old
+   one, and tests/schedule.js holds it now rather than leaving the
+   weakest text on the card as the one thing nothing measured. */
 .wc-top div span {
   font-size: 9.5px;
   font-weight: 700;
   letter-spacing: .13em;
   text-transform: uppercase;
-  color: rgba(255, 255, 255, .58);
+  color: rgba(255, 255, 255, .78);
 }
 .wc-top div b {
   font-size: 16px;
@@ -3204,7 +3241,7 @@ body {
   margin-top: 9px;
   font-size: 13.5px;
   line-height: 1.35;
-  color: rgba(255, 255, 255, .72);
+  color: rgba(255, 255, 255, .86);
 }
 
 /* ── THE DECK IS DEALT ONCE, ON AN ANGLE ──
