@@ -2866,10 +2866,10 @@ const SAID = [
     foot: document.getElementById('scTallyFoot').textContent,
   }));
   ok('an unlogged today does not break the run', run.fig === '5days', run);
-  /* STREAK, not run — one word for it, everywhere. The panel a row
-     opens says "longest streak" beside four other figures, and the foot
-     of the same screen saying "longest run" for the same idea is the
-     screen using two names for one thing in one glance. */
+  /* STREAK, not run — one word for it, everywhere. The panel a TICK's
+     row opens says "longest streak", and the foot of the same screen
+     saying "longest run" for the same idea is the screen using two
+     names for one thing in one glance. */
   ok('and the longest streak is counted, and says “days” only when it is many',
     run.foot === 'Longest streak 5 days.', run);
 
@@ -3374,19 +3374,34 @@ const SAID = [
       hint: document.querySelector('.ty-hint').textContent,
     }));
   }
-  ok('every item’s longest run is called a STREAK',
-    Object.values(figs).every((f) => f.caps.includes('longest streak')), figs.p);
+  /* ── A STREAK IS A TICK'S FIGURE, AND ONLY A TICK'S ──
+     It sat on the numbers too, where it counted the days you RECORDED
+     one rather than anything about the number — for Sleep, the longest
+     run of nights you remembered to type a figure in. That is a fact
+     about your logging, and the foot of the same panel already states
+     it better as "121 of 182 days". Asserted as ABSENT from every
+     number, because putting it back is one line. */
+  ok('a streak is a tick’s figure and no number carries one',
+    ['t', 'm'].every((k) => figs[k].caps.includes('longest streak'))
+    && ['p', 'f', 'w'].every((k) => !figs[k].caps.includes('longest streak')),
+    Object.fromEntries(Object.entries(figs).map(([k, f]) => [k, f.caps])));
   ok('a tick gets shape rather than an average it cannot have',
     figs.t.caps.join('|') === 'longest streak|days on now|days a week'
     && figs.m.caps.indexOf('average a day') < 0, [figs.t.caps, figs.m.caps]);
-  ok('a number gets its average and its extreme',
-    figs.p.caps[0] === 'average a day' && figs.p.caps[1] === 'your best', figs.p.caps);
+  /* THE MIDDLE, THE TOP AND THE BOTTOM OF ONE DISTRIBUTION — three
+     readings of the same quantity, which is what the ticks' three are
+     of a shape. And all three carry the unit, or 2,631 and 2.7 are
+     unreadable beside each other. */
+  ok('a number gets the middle, the top and the bottom of its own spread',
+    figs.p.caps.join('|') === 'average a day|your best|your lowest'
+    && figs.f.caps.join('|') === 'average a day|your highest|your lowest',
+    [figs.p.caps, figs.f.caps]);
   ok('but a calorie count’s biggest day is not called your BEST',
     figs.f.caps[1] === 'your highest'
     && !Object.values(figs).some((f) => f.caps.includes('your best') && f.title === 'Fuel'),
     figs.f.caps);
   ok('and the unit rides the figure, so 2,631 and 2.7 are not read alike',
-    figs.f.units.length === 2 && figs.f.units[0] === 'kcal'
+    figs.f.units.length === 3 && figs.f.units[0] === 'kcal'
     && figs.w.units[0] === 'L' && figs.t.units.length === 0,
     { f: figs.f.units, w: figs.w.units, t: figs.t.units });
   ok('and the span is the same 26 weeks on every one of them',
@@ -3420,8 +3435,8 @@ const SAID = [
       marks.filter((m) => m && (m.fits[0] < 0 || m.fits[2] > 24)));
     ok('and it is hidden from a screen reader, which has the caption',
       marks.every((m) => m && m.hidden === 'true'), marks);
-    /* The FIVE captions across the two kinds each get their own mark,
-       so a copy-paste that gave two figures the same glyph is caught.
+    /* The captions across the two kinds each get their own mark, so a
+       copy-paste that gave two figures the same glyph is caught.
        Collected over every item rather than the one on screen. */
     const paths = {};
     for (const id of ['t', 'p', 'f']) {
@@ -3435,15 +3450,26 @@ const SAID = [
         .forEach(([cap, d]) => { paths[cap.replace(/^\d+ /, '')] = d; });
     }
     const kinds = Object.keys(paths);
-    ok('every caption either kind can show is marked', kinds.length === 6, kinds);
-    /* SIX CAPTIONS, FIVE MARKS, and the pair is deliberate: "your best"
+    ok('every caption either kind can show is marked', kinds.length === 7, kinds);
+    /* SEVEN CAPTIONS, SIX MARKS, and the pair is deliberate: "your best"
        and "your highest" are the same figure, named without the praise
        on the one number you do not want more of. They share a glyph
-       because they ARE one — asserting six distinct marks would be
+       because they ARE one — asserting seven distinct marks would be
        asserting that the wording change made it a different figure. */
-    ok('and the marks are five, because two of the captions are one figure',
-      new Set(Object.values(paths)).size === 5,
+    ok('and the marks are six, because two of the captions are one figure',
+      new Set(Object.values(paths)).size === 6,
       Object.entries(paths).map(([k, v]) => k + ' → ' + v.slice(0, 18)));
+    /* AND THE TOP AND THE BOTTOM ARE MIRRORS, which is the one place
+       this file's rule about two glyphs sharing a silhouette does not
+       apply: they sit side by side and are the two ends of one figure,
+       so reading as a pair is the point. Asserted as distinct anyway —
+       a mirror is not a copy, and pointing both at the peak is the
+       copy-paste this whole block exists to catch. */
+    ok('and the peak and the trough are a mirrored pair, not the same path',
+      paths['your lowest'] !== paths['your best']
+      && paths['your lowest'].includes('M2.6 4.6')
+      && paths['your best'].includes('M2.6 19.4'),
+      { low: paths['your lowest'], best: paths['your best'] });
     ok('and it is the best/highest pair that shares one',
       paths['your best'] === paths['your highest']
       && paths['your best'] !== paths['average a day'],

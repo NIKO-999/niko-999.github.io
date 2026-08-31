@@ -311,11 +311,32 @@ frame that contains it.**
 **The three figures are not the same three for every item**, and cannot
 be: two of the five are ticks and three are numbers. A tick has no
 average, so it gets shape — longest streak, days on now, days a week.
-**And Fuel is the one number you do not want more of**: "your best" on a
-calorie count calls your biggest day a win, so it says "your highest" —
-the same figure, named without the praise. The unit rides the figure
-rather than the caption, because `2,631` and `2.7` are unreadable side
-by side without one.
+A number has no shape and it has a SPREAD, so its three are the
+middle, the top and the bottom of one distribution. **And Fuel is the
+one number you do not want more of**: "your best" on a calorie count
+calls your biggest day a win, so it says "your highest" — the same
+figure, named without the praise. The unit rides the figure rather
+than the caption, because `2,631` and `2.7` are unreadable side by
+side without one.
+
+**A STREAK IS A TICK'S FIGURE, AND ONLY A TICK'S.** It sat on the
+numbers too, where it counted the days you RECORDED one rather than
+anything about the number — for Sleep, the longest run of nights you
+remembered to type a figure in. That is a fact about your logging, not
+about your sleep, and the foot of the same panel already said it
+better as "121 of 182 days": two statements of one thing, neither of
+them about the quantity the panel is for. Your lowest replaced it —
+the half of the range a highest on its own hides, and on Sleep the
+more useful half. Asserted as ABSENT from every number, because
+putting it back is one line.
+
+**And the bottom is never called your WORST.** The top says "your
+highest" on Fuel because more is not better there; the bottom is
+neutral on all of them, for the reason this screen never colours
+anything to say you failed. Its glyph is the peak MIRRORED, which is
+the one place the rule about two glyphs sharing a silhouette does not
+apply: the two sit side by side and are the two ends of one figure, so
+reading as a pair is the point.
 
 It is **streak** everywhere, never "run" — the panel and the foot of the
 same screen using two names for one idea in one glance.

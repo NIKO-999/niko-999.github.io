@@ -2806,7 +2806,8 @@
      has no average to take, so its figures are about shape — the longest
      streak, whether you are on one now, and what it works out at a week,
      which is the honest summary of a habit that was never meant to be
-     daily. */
+     daily. A number has no shape and it has a SPREAD, so its three are
+     the middle, the top and the bottom of one distribution. */
   /* One glyph per FIGURE, drawn at 12px beside a 10.5px caption. That
      is half the size a row's glyph gets, so the floor this file keeps
      running into bites twice as hard: two or three strokes each and no
@@ -2825,7 +2826,12 @@
        + 'M3 16.2c2-2.6 4-2.6 6 0s4 2.6 6 0 4-2.6 6 0"/>',
     /* A peak rather than an up arrow: an arrow says MORE, and the
        figure beside this one is the top rather than a direction. */
-    peak: '<path d="M2.6 19.4l6.6-9.4 4 4.6 3.6-6 4.6 10.8z"/>'
+    peak: '<path d="M2.6 19.4l6.6-9.4 4 4.6 3.6-6 4.6 10.8z"/>',
+    /* The peak mirrored, which is the one case this file's rule about
+       two glyphs sharing a silhouette does not apply to: these two sit
+       side by side and are the top and the bottom of the same figure,
+       so reading as a pair is the point rather than a collision. */
+    low: '<path d="M2.6 4.6l6.6 9.4 4-4.6 3.6 6 4.6-10.8z"/>'
   };
 
   /* ── A DAY THAT DID NOT APPLY IS SKIPPED, NOT COUNTED EITHER WAY ──
@@ -2837,19 +2843,27 @@
   function scHistStats(item, d) {
     var kept = d.filter(function (x) { return x.on; });
     var live = d.filter(function (x) { return !x.off; });
-    var best = 0, run = 0, now = 0, i;
-    for (i = 0; i < d.length; i++) {
-      if (d[i].off) continue;
-      run = d[i].on ? run + 1 : 0;
-      if (run > best) best = run;
-    }
-    for (i = d.length - 1; i >= 0; i--) {
-      if (d[i].off) continue;
-      if (!d[i].on) break;
-      now++;
-    }
 
+    /* ── A STREAK IS A TICK'S FIGURE, AND ONLY A TICK'S ──
+       It sat on the numbers too, and on a number it counts the days
+       you RECORDED one rather than anything about the number: for
+       Sleep, the longest run of nights you remembered to type a figure
+       in. That is a fact about your logging, not about your sleep —
+       and the foot of this same panel already says it better, as "121
+       of 182 days". Two statements of one thing, neither of them about
+       the quantity the panel is for. */
     if (item.k === 'do') {
+      var best = 0, run = 0, now = 0, i;
+      for (i = 0; i < d.length; i++) {
+        if (d[i].off) continue;
+        run = d[i].on ? run + 1 : 0;
+        if (run > best) best = run;
+      }
+      for (i = d.length - 1; i >= 0; i--) {
+        if (d[i].off) continue;
+        if (!d[i].on) break;
+        now++;
+      }
       return { kept: kept.length, live: live.length, rows: [
         { v: String(best), cap: 'longest streak', ic: 'streak' },
         { v: String(now), cap: now === 1 ? 'day on now' : 'days on now', ic: 'now' },
@@ -2863,15 +2877,34 @@
       return v.toLocaleString('en-GB',
         { minimumFractionDigits: dp, maximumFractionDigits: dp });
     };
-    var sum = 0, top = 0;
-    kept.forEach(function (x) { sum += x.raw; if (x.raw > top) top = x.raw; });
+    /* ── THE THREE ARE ONE DISTRIBUTION: THE MIDDLE, THE TOP AND THE
+           BOTTOM ──
+       Which is the same argument the ticks' three make — theirs are
+       three readings of a SHAPE over time, and a number has no shape,
+       it has a spread. Over the days it was logged, never over the
+       days it was not: a night you did not record is not a night of
+       no sleep, and averaging one in would make every figure here a
+       report on how often you open the app.
+
+       AND THE BOTTOM IS NOT CALLED YOUR WORST. The top says "your
+       highest" rather than "your best" on Fuel, because more is not
+       better there; the bottom is named neutrally on ALL of them, for
+       the reason this screen never colours anything to say you failed.
+       Your shortest night is the half of the range that a highest on
+       its own hides, and on Sleep it is the more useful half. */
+    var sum = 0, top = 0, bot = 0;
+    kept.forEach(function (x, n) {
+      sum += x.raw;
+      if (x.raw > top) top = x.raw;
+      if (!n || x.raw < bot) bot = x.raw;
+    });
     var unit = (item.unit || '').trim();
     return { kept: kept.length, live: live.length, unit: unit, rows: [
       { v: fmt(kept.length ? sum / kept.length : 0), cap: 'average a day',
         ic: 'avg', unit: 1 },
       { v: fmt(top), cap: item.neu ? 'your highest' : 'your best',
         ic: 'peak', unit: 1 },
-      { v: String(best), cap: 'longest streak', ic: 'streak' }
+      { v: fmt(bot), cap: 'your lowest', ic: 'low', unit: 1 }
     ] };
   }
 
