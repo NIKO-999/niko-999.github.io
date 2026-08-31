@@ -5963,39 +5963,75 @@ const SAID = [
         worst.glyph >= 3, worst);
     }
 
-    /* ── AND THE CARD HAS AN EDGE ──
-       A rim lit from the head of the card and a bevel just inside it,
-       which is what gives the thing a thickness: without them the card
-       is a slab against a page that is nearly the same black, and the
-       two behind — which carry no words at all — have nothing but an
-       edge to say they are there with.
+    /* ── AND THE CARD HAS AN EDGE, LIT ON A CONE ──
+       Without a ring the card is a slab against a page that is nearly
+       the same black, and the two behind — which carry no words at all
+       — have nothing but an edge to say they are there with.
 
-       MEASURED ON COMPOSITED PIXELS, and as a relationship rather than
-       a number of levels, so it survives a change to the card's own
-       ground. The head of the card against its middle is 9.5x with
-       the rim and 1.1x without it, which is the whole margin; the foot
-       is asserted DARKER than the head, because a rim of one flat
-       colour all the way round is a border, and a border is what this
-       replaced. */
+       WHAT MAKES IT A FACET RATHER THAN A RIM IS THE SECOND ARC. A
+       linear gradient's brightness is a function of position along one
+       axis, so walking round the perimeter it rises once and falls
+       once: one lit side, one dark one. A conic is a function of the
+       ANGLE from the centre, so the light comes round the card and
+       there are two bright arcs with dark between them, which is what
+       a machined block does under one lamp.
+
+       So the check is in two halves and each catches a different
+       reversion. Both are measured on composited pixels round the
+       card's own perimeter, and both are RATIOS, so they survive a
+       change to the card's ground:
+
+         LIT   the brightest point on the ring against the card's
+               interior — 32x here, 18x for the linear rim it
+               replaced, and 3.6x with the ring deleted.
+         ARCS  the brightest point at least a quarter-turn away from
+               the first, as a fraction of it — .42 here and .15 for
+               the linear rim, which is the whole of the difference
+               between a cone and a sweep.
+
+       SAMPLED ALONG THE STRAIGHT EDGES ONLY. The corner radius is
+       22px, so a sample taken at 45 degrees lands where the ring is
+       turning and half a pixel either way is off it. */
     await page.waitForFunction(() =>
       [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
         c.getAnimations().every((a) => a.playState === 'finished')));
-    const lit = await page.evaluate(() => {
-      const r = document.querySelector('.wc.is-front').getBoundingClientRect();
-      return { x: r.left + r.width / 2, t: r.top, b: r.bottom };
-    });
+    const lit = await page.evaluate(() =>
+      document.querySelector('.wc.is-front').getBoundingClientRect().toJSON());
     const pngE = PNG5.sync.read(await page.screenshot());
     const atE = (x, y) => {
       const i = (pngE.width * Math.round(y * dpr5) + Math.round(x * dpr5)) << 2;
       return [pngE.data[i], pngE.data[i + 1], pngE.data[i + 2]];
     };
-    const head = atE(lit.x, lit.t + .5);
-    const mid5 = atE(lit.x, lit.t + 16);
-    const foot = atE(lit.x, lit.b - .6);
-    ok(`the card's head catches a light its middle does not `
-      + `(${lum(head).toFixed(3)} against ${lum(mid5).toFixed(3)})`,
-      lum(head) > lum(mid5) * 3 && lum(head) > lum(foot) * 2,
-      { head, mid5, foot });
+    const IN = .6, RAD = 30, PER = 6, ring = [];
+    for (let i = 0; i < PER; i++) {
+      ring.push(lum(atE(lit.x + RAD + (lit.width - 2 * RAD) * (i + .5) / PER,
+        lit.y + IN)));                                            /* head */
+    }
+    for (let i = 0; i < PER; i++) {
+      ring.push(lum(atE(lit.right - IN,
+        lit.y + RAD + (lit.height - 2 * RAD) * (i + .5) / PER)));  /* trailing */
+    }
+    for (let i = 0; i < PER; i++) {
+      ring.push(lum(atE(lit.right - RAD - (lit.width - 2 * RAD) * (i + .5) / PER,
+        lit.bottom - IN)));                                        /* foot */
+    }
+    for (let i = 0; i < PER; i++) {
+      ring.push(lum(atE(lit.x + IN,
+        lit.bottom - RAD - (lit.height - 2 * RAD) * (i + .5) / PER)));  /* leading */
+    }
+    const inside = lum(atE(lit.x + lit.width / 2, lit.y + 18));
+    const top5 = ring.indexOf(Math.max(...ring));
+    let arc2 = 0;
+    ring.forEach((v, i) => {
+      const d = Math.min(Math.abs(i - top5), ring.length - Math.abs(i - top5));
+      if (d >= ring.length / 4 && v > arc2) arc2 = v;
+    });
+    const isLit = ring[top5] / inside, arcs = arc2 / ring[top5];
+    ok(`the card's edge catches a light its middle does not (${isLit.toFixed(1)}x)`,
+      isLit >= 10, { lit: isLit, brightest: ring[top5], inside });
+    ok(`...on a cone, so a second arc a quarter-turn away catches too `
+      + `(${arcs.toFixed(2)} of the first)`,
+      arcs >= .3, { arcs, arc2, brightest: ring[top5], at: top5 });
 
     /* ── IT LANDS ON THE BLOCK, AND IT STAYS THERE ── */
     await deck(null);

@@ -2105,27 +2105,60 @@ A cascade whose three cards share one delay is the block this
 replaced, and it would sail through any check that only read the
 keyframes it names.
 
-### The card has an edge
+### The card has an edge, and it is lit on a CONE
 
 It was a slab with a half-pixel ring of its own hue round it, and
 against a page that is nearly the same black that ring is the only
 thing there: the card read as a rectangle that happened to be darker.
-A **rim** now, lit from the head — bright along the top, gone by the
-middle, back faintly along the foot, which is what a sheet of
-something glassy does under one light. It is the day card's foil trick
-at rest: a border-width mask with the middle excluded, rather than a
-`border`, because a border is one flat colour all the way round and
-that is the whole of what this is not.
+It is the day card's foil trick at rest — a border-width mask with the
+middle excluded, rather than a `border`, because a border is one flat
+colour all the way round and that is the whole of what this is not.
+
+**A LINEAR gradient gives the card a lit side and a dark one; a CONIC
+gives it corners.** That is the whole difference and it is not a
+matter of taste: a linear gradient's brightness is a function of
+position along one axis, so walking round the perimeter it rises once
+and falls once. A conic is a function of the ANGLE from the centre, so
+each edge and each corner meets the light at its own incidence — two
+bright arcs, two dark ones, and the corners between them catching in a
+way a straight sweep cannot produce. It reads as a machined block
+under one lamp rather than as a card with a highlight drawn on it.
+
+**Six edges were rendered over the real deck, at rest AND mid-pass.**
+The hairline rim this replaced; a three-pixel BEZEL, an outer bright
+edge over an inner dark one; an EXTRUDE, six hard offsets giving the
+card a literal side you could grip; a PANE, glass with a gloss across
+the upper third; and a LIFT with no drawn edge at all, floating on a
+wide shadow. **An edge is judged on a MOVING deck**: at rest you are
+looking at one line round one card, and in a pass there are six cards
+on screen with five of them showing nothing but an edge, which is the
+case the two behind exist for.
+
+**The check is in two halves and each catches a different reversion.**
+Both are ratios measured on composited pixels round the card's own
+perimeter, so they survive a change to its ground. LIT is the
+brightest point on the ring against the card's interior — **32x with
+the facet, 18x for the linear rim, 3.6x with the ring deleted**. ARCS
+is the brightest point at least a quarter-turn away from the first, as
+a fraction of it — **.42 with the facet and .15 for the linear rim**,
+which is the cone showing up as a number. Sampled along the STRAIGHT
+edges only: the corner radius is 22px, so a sample at 45 degrees lands
+where the ring is turning and half a pixel either way is off it.
+
+**And the bevel went from two sides to three.** Light inside the head,
+light inside the trailing edge, shadow inside the foot — a bevel lit
+only top and bottom under a light that comes round the corner is the
+two halves disagreeing about where the lamp is.
 
 **On every `.wc`, so the two behind get it too.** They carry no words
 at all, so an edge is the only thing they have to say they are there
 with — and the hand-off above is the moment you look at them.
 
-**A rim is an edge; a BEVEL is a thickness.** A line of light just
-inside the head and a line of shadow just inside the foot go with it,
-and a thickness is the whole of what reads as three-dimensional. They
-are a token because `.wc.is-picked` replaces the shadow list outright
-to draw its accent ring, and a card you had chosen would otherwise be
+**A ring is an edge; a BEVEL is a thickness.** Lines of light and
+shadow just inside it are what give the edge a thickness, and a
+thickness is the whole of what reads as three-dimensional. They are a
+token because `.wc.is-picked` replaces the shadow list outright to
+draw its accent ring, and a card you had chosen would otherwise be
 the one in the deck with a flat edge.
 
 **`z-index: 1`, or the rim is not on top of the card.** The swoop is
@@ -2133,11 +2166,6 @@ the one in the deck with a flat edge.
 14% overlay grain lies over the lot, which is enough to make a 1px
 highlight granular.
 
-Measured on composited pixels as a RELATIONSHIP rather than a number
-of levels, so it survives a change to the card's own ground: the head
-against the middle is **9.5x with the rim and 1.1x without it**, and
-the foot is asserted darker than the head, because a rim of one flat
-colour all the way round is the border this replaced.
 
 **A swoop, not a wordmark, and not waves.** Three treatments: four
 contour waves, stretched to the card's width with the stroke stretched

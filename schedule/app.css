@@ -2870,15 +2870,19 @@ body {
      puts it on something. A wide offset one puts a gap under it. One
      flat 14px blur did all three badly, and the card read as a
      rectangle that happened to be darker. */
-  /* A line of light just inside the head of the card and a line of
-     shadow just inside its foot. The rim below is an EDGE; these two
-     are what give that edge a thickness, and a thickness is the whole
-     of what reads as three-dimensional. A token because .wc.is-picked
-     replaces this list outright to draw its accent ring, and a card
-     you had chosen would otherwise be the one in the deck with a flat
-     edge. */
-  --wc-bev: inset 0 1.5px 0 -.5px rgba(255, 255, 255, .13),
-            inset 0 -1.5px 0 -.5px rgba(0, 0, 0, .5);
+  /* Light just inside the head, light just inside the trailing edge,
+     shadow just inside the foot. The ring below is an EDGE; these
+     three are what give that edge a thickness, and a thickness is the
+     whole of what reads as three-dimensional. THREE sides rather than
+     two, because the ring turns on a cone: a bevel lit only top and
+     bottom under a light that comes round the corner is the two
+     halves disagreeing about where the lamp is. A token because
+     .wc.is-picked replaces this list outright to draw its accent
+     ring, and a card you had chosen would otherwise be the one in the
+     deck with a flat edge. */
+  --wc-bev: inset 0 2px 2px -1px rgba(255, 255, 255, .2),
+            inset -2px 0 2px -1px rgba(255, 255, 255, .08),
+            inset 0 -2px 2px -1px rgba(0, 0, 0, .66);
   box-shadow: 0 0 0 .5px color-mix(in srgb, var(--wc-hue) 30%, transparent),
               var(--wc-bev),
               0 1px 2px rgba(0, 0, 0, .55),
@@ -2915,13 +2919,10 @@ body {
    rather than as an object with a thickness — which is exactly what
    the two cards behind it are for, and they had the same problem.
 
-   A rim, then, lit from the top left: bright along the head of the
-   card, gone by the middle, and back faintly along the foot, which is
-   what a sheet of something glassy does under one light. It is the
-   day card's foil trick at rest — a border-width mask with the middle
-   excluded — rather than a `border`, because a border is one flat
-   colour all the way round and the whole point here is that it is
-   not.
+   A rim, then — the day card's foil trick at rest, a border-width mask
+   with the middle excluded rather than a `border`, because a border is
+   one flat colour all the way round and the whole point here is that
+   it is not. What travels round it is below.
 
    ON EVERY .wc, so the two behind get it too. They are what says
    there are more of these, and an edge is the only thing they have to
@@ -2943,12 +2944,33 @@ body {
   position: absolute;
   inset: 0;
   border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(155deg,
-    rgba(255, 255, 255, .5),
-    rgba(255, 255, 255, .12) 26%,
-    rgba(255, 255, 255, 0) 54%,
-    rgba(255, 255, 255, .16));
+  padding: 1.5px;
+  /* ── ONE LAMP, AND EVERY CORNER TAKES IT DIFFERENTLY ──
+     A CONIC gradient rather than a linear one, which is the whole
+     difference between an edge and a FACET. A linear gradient's
+     brightness is a function of position along one axis, so walking
+     round the perimeter it rises once and falls once: the card has a
+     lit half and a dark half, which is a sheet of something glassy.
+     A conic is a function of the ANGLE from the centre, so each edge
+     and each corner meets the light at its own incidence — two bright
+     arcs, two dark ones, and the corners between them catching in a
+     way a straight sweep cannot produce. That is what a machined
+     block does under one lamp, and it is why this reads as an object
+     rather than as a card with a highlight drawn on it.
+
+     Six edges were rendered over the real deck at rest and mid-pass:
+     a hairline rim, this, a three-pixel bezel, a stack of hard
+     offsets giving the card a literal side, a glass pane with a gloss
+     across it, and one with no drawn edge at all that floats on a
+     shadow instead. */
+  background: conic-gradient(from 202deg at 50% 50%,
+    rgba(255, 255, 255, .06),
+    rgba(255, 255, 255, .70) 11%,
+    rgba(255, 255, 255, .06) 29%,
+    rgba(255, 255, 255, .02) 52%,
+    rgba(255, 255, 255, .40) 70%,
+    rgba(255, 255, 255, .03) 90%,
+    rgba(255, 255, 255, .06));
   -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
   -webkit-mask-composite: xor;
   mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
