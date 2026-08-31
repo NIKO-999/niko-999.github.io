@@ -6892,7 +6892,7 @@ const SAID = [
     const few = await ppage.evaluate(() => ({
       say: (document.querySelector('.pat-none') || {}).textContent || '',
       list: !!document.querySelector('.pat-list'),
-      ask: !!document.querySelector('#scPatPane .st-row'),
+      ask: !!document.querySelector('#scPatPane .rt-row'),
     }));
     ok('under the floor it says how many more days, draws no list, and '
       + 'still asks about today',
@@ -6962,7 +6962,7 @@ const SAID = [
        The accent on this app makes exactly one claim, that something
        happened, and what happened here is that you ANSWERED. How the
        day went is carried by HOW MANY are lit, never by a colour: a
-       red star for a bad day would be the screen grading you back, and
+       red mark for a bad day would be the screen grading you back, and
        this is the one screen that takes an opinion.
 
        Measured on composited pixels, and the accent is read off the
@@ -6971,23 +6971,23 @@ const SAID = [
     await plant({ n: 40, body:
       'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .st')[2].click());
+      document.querySelectorAll('#scPatPane .rt')[2].click());
     await ppage.waitForTimeout(220);
-    const starPx = await (async () => {
+    const markPx = await (async () => {
       const b = await ppage.evaluate(() => {
-        const on = document.querySelector('#scPatPane .st.is-on');
-        const off = document.querySelector('#scPatPane .st:not(.is-on)');
+        const on = document.querySelector('#scPatPane .rt.is-on');
+        const off = document.querySelector('#scPatPane .rt:not(.is-on)');
         const box = (e) => { const r = e.getBoundingClientRect();
           return { x: r.x, y: r.y, w: r.width, h: r.height }; };
         return { on: box(on), off: box(off),
-                 lit: document.querySelectorAll('#scPatPane .st.is-on').length };
+                 lit: document.querySelectorAll('#scPatPane .rt.is-on').length };
       });
       const png = PNG.sync.read(await ppage.screenshot());
       const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
         + Math.round(x * dpr)) << 2;
         return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
-      /* The brightest pixel inside each star's own box: the mark is a
-         solid fill on a dark card, so the extreme IS the mark. */
+      /* The brightest pixel inside each circle's own box: a lit one is
+         a solid fill on a dark card, so the extreme IS the mark. */
       const peak = (k) => {
         let best = [0, 0, 0];
         for (let x = k.x + 10; x < k.x + k.w - 10; x += 1) {
@@ -6998,21 +6998,36 @@ const SAID = [
         }
         return best;
       };
-      return { on: peak(b.on), off: peak(b.off), lit: b.lit };
+      /* And the middle of each, because the two states differ by being
+         FILLED or not: lit is a disc in the accent, unlit is a hollow
+         ring in the flat neutral. That is the habits screen's rule —
+         a kept mark takes the colour, a missed one stays hollow — and
+         it is also what stops five filled circles at the foot of the
+         card reading as a second set of the deck's page dots a few
+         inches below. A brightest-pixel scan alone cannot see it: a
+         filled unlit circle and a hollow one peak at the same grey. */
+      const mid = (k) => at(k.x + k.w / 2, k.y + k.h / 2);
+      return { on: peak(b.on), off: peak(b.off), lit: b.lit,
+               onMid: mid(b.on), offMid: mid(b.off) };
     })();
     const accent = await ppage.evaluate(() => getComputedStyle(
       document.documentElement).getPropertyValue('--red').trim());
     const want = accent.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
-    ok(`pressing the third star lights three, in the accent (${accent})`,
-      starPx.lit === 3
-      && starPx.on.every((v, i) => Math.abs(v - want[i]) <= 8), starPx);
+    ok(`pressing the third circle lights three, in the accent (${accent})`,
+      markPx.lit === 3
+      && markPx.on.every((v, i) => Math.abs(v - want[i]) <= 8), markPx);
     /* And the unlit one is a GREY, which is the whole of what stops
        this screen having an opinion: no channel of it stands out. */
-    const spread = Math.max(...starPx.off) - Math.min(...starPx.off);
-    ok(`...and an unlit star is a flat neutral, not a second colour `
-      + `(spread ${spread})`, spread <= 12, starPx);
+    const spread = Math.max(...markPx.off) - Math.min(...markPx.off);
+    ok(`...and an unlit one is a flat neutral, not a second colour `
+      + `(spread ${spread})`, spread <= 12, markPx);
+    /* Lit is FILLED and unlit is HOLLOW, read at the exact middle of
+       each: the accent in one, the card's own ground in the other. */
+    ok('a lit circle is a disc and an unlit one is a ring',
+      markPx.onMid.every((v, i) => Math.abs(v - want[i]) <= 10)
+      && lum(markPx.offMid) < lum(markPx.off) * 0.5, markPx);
 
-    /* Pressing the star you are already on takes the rating off, so a
+    /* Pressing the circle you are already on takes the rating off, so a
        mis-tap has a way back without a second control to explain it. */
     const today = await ppage.evaluate(() => { const p = (n) => (n < 10 ? '0' : '') + n;
       const d = new Date();
@@ -7020,13 +7035,13 @@ const SAID = [
     const wasSet = await ppage.evaluate((k) =>
       JSON.parse(localStorage.getItem('sched.rate.v2'))[k], today);
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .st')[2].click());
+      document.querySelectorAll('#scPatPane .rt')[2].click());
     await ppage.waitForTimeout(180);
     const now = await ppage.evaluate((k) => ({
       has: k in JSON.parse(localStorage.getItem('sched.rate.v2')),
-      on: document.querySelectorAll('#scPatPane .st.is-on').length,
+      on: document.querySelectorAll('#scPatPane .rt.is-on').length,
     }), today);
-    ok('pressing the star you are on takes the day off again',
+    ok('pressing the circle you are on takes the day off again',
       wasSet === 3 && !now.has, { wasSet, now });
     ok('...and nothing is lit once it is cleared', now.on === 0, now);
 
@@ -7058,7 +7073,7 @@ const SAID = [
     await ppage.waitForTimeout(320);
     const markA = pAsked.length;
     await ppage.evaluate(() =>
-      document.querySelectorAll('#scPatPane .st')[3].click());
+      document.querySelectorAll('#scPatPane .rt')[3].click());
     await ppage.waitForTimeout(2200);          /* past the 1.5s push debounce */
     const sinceRate = pAsked.slice(markA).filter((u) => u.startsWith(HOSTX));
     ok('rating a day makes no request at all', sinceRate.length === 0, sinceRate);
@@ -7073,7 +7088,7 @@ const SAID = [
     await ppage.waitForTimeout(2400);
     const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v2'));
     ok('and a push that does happen carries no rating in it',
-      bodies.length > 0 && bodies.every((b) => !/rate|star/i.test(b))
+      bodies.length > 0 && bodies.every((b) => !/rate|star|circle/i.test(b))
       && rated && rated !== '{}',
       { bodies: bodies.map((b) => b.slice(0, 160)), rated });
 
@@ -7143,6 +7158,13 @@ const SAID = [
        good days have in common. One control built once and used twice,
        because two drawings of one question is how they drift.
 
+       AND ONLY ONCE THE DAY IS DONE. A question about how the day went
+       asked at nine in the morning is a question you cannot answer, and
+       one sitting under a card with five things still on it is a sixth
+       thing on the list. Every block the day asked of you, ticked —
+       so the ask is what you arrive at having finished, rather than a
+       permanent row at the foot of the card.
+
        TODAY'S CARD AND NO OTHER. Every card is built for its own
        weekday, and a rating written from Friday's card on a Tuesday
        lands on today under a heading that says Friday — the round trip
@@ -7150,29 +7172,80 @@ const SAID = [
        consistently, for months. Asserted as a COUNT across all seven,
        because "it is on today's card" passes on a build that puts it
        on all of them. */
+    const todayKey = await ppage.evaluate(() => {
+      const p = (n) => (n < 10 ? '0' : '') + n; const d = new Date();
+      return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate());
+    });
+    /* Tick `keep` of today's blocks and reload. The week is read back
+       out of the store rather than out of the fixture, because scClean
+       mints an id for any block that has none and scLoad writes the
+       cleaned shape back — the ids the log is keyed by are the ones on
+       disk after a load, not the ones a fixture went in with. */
+    const doBlocks = async (keep) => {
+      await ppage.evaluate(({ k, n }) => {
+        const wk = JSON.parse(localStorage.getItem('sched.v1'));
+        const dow = new Date(k + 'T12:00:00').getDay();
+        const mine = (wk.items || wk).filter((b) => b.d === dow);
+        const log = {};
+        mine.slice(0, n === null ? mine.length : n)
+          .forEach((b) => { log[b.id] = 1; });
+        localStorage.setItem('sched.log.v1', JSON.stringify({ [k]: log }));
+        localStorage.setItem('sched.view.v1', 'list');
+      }, { k: todayKey, n: keep });
+      await ppage.reload({ waitUntil: 'networkidle' });
+      await ppage.waitForTimeout(600);
+      return ppage.evaluate(() => ({
+        asks: [...document.querySelectorAll('.day')]
+          .filter((c) => c.querySelector('.rt-ask')).map((c) => c.dataset.d),
+        today: String(new Date().getDay()),
+        marks: document.querySelectorAll('.day.is-today .rt').length,
+        blocks: document.querySelectorAll('.day.is-today .row').length,
+        done: document.querySelectorAll('.day.is-today .row.is-done').length,
+        /* Inside the scroller, so on a long day it is what you arrive
+           at having gone through everything. */
+        inCard: !!document.querySelector('.day.is-today .day-card .rt-row'),
+      }));
+    };
     await plant({ n: 40, body:
       'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
-    await ppage.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
-    await ppage.reload({ waitUntil: 'networkidle' });
-    await ppage.waitForTimeout(600);
-    const onCards = await ppage.evaluate(() => ({
-      asks: [...document.querySelectorAll('.day')]
-        .filter((c) => c.querySelector('.st-ask')).map((c) => c.dataset.d),
-      today: String(new Date().getDay()),
-      stars: document.querySelectorAll('.day.is-today .st').length,
-      /* Inside the scroller, so on a long day it is what you arrive at
-         having gone through everything. */
-      inCard: !!document.querySelector('.day.is-today .day-card .st-row'),
-    }));
-    ok('the ask is at the foot of today\'s card and no other',
+    const none = await doBlocks(0);
+    ok('with the day still ahead of you, no card asks how it went',
+      none.blocks > 1 && none.asks.length === 0, none);
+    /* One short of the whole day. Both directions, because a gate that
+       only ever refuses is indistinguishable from a row that was never
+       built — and "all but one" is the case a count-based gate off by
+       one would wave through. */
+    const near = await doBlocks(-1);
+    ok('...and one block short of finished still does not',
+      near.asks.length === 0, near);
+    const onCards = await doBlocks(null);
+    ok('the ask is at the foot of today\'s card, and no other, once '
+      + 'every block is done',
       onCards.asks.length === 1 && onCards.asks[0] === onCards.today
-      && onCards.stars === 5 && onCards.inCard, onCards);
+      && onCards.marks === 5 && onCards.inCard, onCards);
+
+    /* Pattern's own ask is NOT gated, and must not be: a day you never
+       finished is still a day you can say something about, and that
+       screen is where you go to fill one in afterwards. The card's ask
+       is a convenience at the end of a day, not the only door. */
+    await ppage.evaluate(() => {
+      localStorage.setItem('sched.log.v1', '{}');
+      localStorage.setItem('sched.view.v1', 'tally');
+      localStorage.setItem('sched.ty.v1', 'pat');
+    });
+    await ppage.reload({ waitUntil: 'networkidle' });
+    await ppage.waitForTimeout(450);
+    ok('Pattern still asks about a day you did not finish',
+      await ppage.evaluate(() =>
+        document.querySelectorAll('#scPatPane .rt').length) === 5);
+    await ppage.evaluate(() => localStorage.setItem('sched.view.v1', 'list'));
+    await doBlocks(null);
 
     /* ── AND THE TWO PLACES ARE ONE RECORD ──
        A day rated four at the foot of the card had better be a day
        rated four on Pattern. */
     await ppage.evaluate(() =>
-      document.querySelectorAll('.day.is-today .st')[3].click());
+      document.querySelectorAll('.day.is-today .rt')[3].click());
     await ppage.waitForTimeout(300);
     await ppage.evaluate(() => {
       localStorage.setItem('sched.view.v1', 'tally');
@@ -7182,12 +7255,12 @@ const SAID = [
     await ppage.waitForTimeout(450);
     ok('a day rated on the card reads the same on Pattern',
       await ppage.evaluate(() =>
-        document.querySelectorAll('#scPatPane .st.is-on').length) === 4);
+        document.querySelectorAll('#scPatPane .rt.is-on').length) === 4);
 
     /* ── THE OLD THREE-POINT SCALE COMES ACROSS ONCE ──
        Rough, Fine and Good were 0, 1 and 2 under their own key, and
        those two scales SHARE the values 1 and 2 — a stored 1 is either
-       the old Fine or one star and the number does not say which. So
+       the old Fine or one circle and the number does not say which. So
        v1 is converted and spent rather than read twice.
 
        The old key is asserted GONE rather than merely ignored: left

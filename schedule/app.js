@@ -1332,10 +1332,23 @@
 
          Inside the scroller rather than under it, so on a long day it
          is the thing you arrive at having gone through everything,
-         which is when the question makes sense to answer. */
+         which is when the question makes sense to answer.
+
+         AND ONLY ONCE THE DAY IS DONE. The question is what the day
+         was like, which is not one you can answer at eight in the
+         morning — and a control sitting under an unfinished list all
+         day is one more thing on the card that is not the card. It
+         arrives when the last block is ticked, which is the moment
+         the day stops being a plan.
+
+         It is a CONVENIENCE, not the only door: Pattern asks
+         unconditionally, so a day you never finished is still a day
+         you can rate. Gating the only ask in the app on finishing
+         everything would make the record impossible to keep on exactly
+         the days worth recording. */
       var rd = scDowDate(d);
-      if (rd === scDay()) {
-        card.appendChild(scStars(rd, 'How was today?', function () {
+      if (rd === scDay() && scDayDone(rd, d)) {
+        card.appendChild(scRateRow(rd, 'How was today?', function () {
           scRender();
           scPaintTally();
         }));
@@ -2518,6 +2531,25 @@
     var bs = scBlocksFor(item, new Date(day + 'T12:00:00').getDay());
     if (!bs.length) return false;
     return bs.some(function (b) { return !scOff(day, b.id); });
+  }
+
+  /* ── IS THE DAY DONE? ──
+     Every block the day actually asked of you, ticked. A block marked
+     OFF is not one of them — that is the whole point of a day off, and
+     counting it would make an exception you granted yourself into a
+     thing you failed to do.
+
+     A day with nothing on it is NOT done, and that is deliberate
+     rather than an oversight: "all of them" over an empty list is
+     vacuously true, so an empty Tuesday would call itself finished at
+     one minute past midnight. There has to be something to have
+     finished. */
+  function scDayDone(day, dow) {
+    var mine = scByDay(dow).filter(function (b) { return !scOff(day, b.id); });
+    if (!mine.length) return false;
+    return mine.every(function (b) {
+      return !!(blockLog[day] && blockLog[day][b.id]);
+    });
   }
 
   function scTicked(day, id) {
@@ -6308,7 +6340,7 @@
   }
 
   /* ── DOES THIS FACTOR HOLD ON THIS DAY? ──
-     Yes, no, or NOT ASKED. Named apart from scStars below, which is
+     Yes, no, or NOT ASKED. Named apart from scRateRow below, which is
      the control that asks YOU: this one asks whether a THING held on a
      day, and confusing the two in a file this size is a reading trap. */
   function scPatHeld(f, day, mid) {
@@ -6395,43 +6427,47 @@
       + (it.unit || '');
   }
 
-  /* ── THE ASK IS FIVE STARS, AND IT IS IN TWO PLACES ──
-     It was three chips on one screen. Stars because the question has
-     more than three honest answers in it and everybody already knows
-     how to answer this one, and in TWO places because the screen that
-     asks and the screen that reads the answer were the same screen:
-     Pattern is where you go to see what your good days have in common,
-     which is not where you are standing when a day ends.
+  /* ── THE ASK IS FIVE MARKS, AND IT IS IN TWO PLACES ──
+     It was three chips on one screen. Five because the question has
+     more than three honest answers in it and a row you fill is a
+     control nobody has to be taught, and in TWO places because the
+     screen that asks and the screen that reads the answer were the
+     same screen: Pattern is where you go to see what your good days
+     have in common, which is not where you are standing when a day
+     ends.
 
      ONE CONTROL, built once and used twice. Two drawings of one
      question is how they drift, and a day rated four at the foot of
      the card had better be a day rated four on Pattern.
 
-     Pressing the star you are already on takes the day off again, so
+     Pressing the mark you are already on takes the day off again, so
      a mis-tap has a way back without a second control to explain it.
 
-     THE LIT STARS ARE THE ACCENT, which is this app's one claim: that
-     something happened. What happened is that you answered. The unlit
-     ones are the flat neutral the tally draws a missed day in — the
-     count is what says how the day went, and the colour never does. */
-  function scStars(day, ttl, after) {
-    var wrap = scEl('div', 'st-ask');
+     THE FILLED ONES ARE THE ACCENT, which is this app's one claim:
+     that something happened, and what happened is that you ANSWERED.
+     The rest stay hollow. How the day went is carried by how many are
+     filled, never by a colour — a red mark for a bad day would be the
+     screen grading you back, and this is the one screen in the app
+     that takes an opinion. */
+  function scRateRow(day, ttl, after) {
+    var wrap = scEl('div', 'rt-ask');
     if (ttl) wrap.appendChild(scEl('span', 'label', ttl));
-    var row = scEl('div', 'st-row');
+    var row = scEl('div', 'rt-row');
     row.setAttribute('role', 'group');
     row.setAttribute('aria-label', ttl || 'Rate this day');
     var now = scRateOf(day);
     for (var i = 1; i <= RATE_MAX; i++) {
       (function (n) {
-        var b = scEl('button', 'st' + (now !== null && n <= now ? ' is-on' : ''));
+        var b = scEl('button', 'rt' + (now !== null && n <= now ? ' is-on' : ''));
         b.type = 'button';
-        b.dataset.star = String(n);
+        b.dataset.rate = String(n);
         /* Spoken as what it DOES, not as where it sits in a row: "3"
            on its own is a number, and five buttons called 1 to 5 with
            no unit are five numbers. */
-        b.setAttribute('aria-label', n + (n === 1 ? ' star' : ' stars'));
+        b.setAttribute('aria-label',
+          'Rate this day ' + n + ' out of ' + RATE_MAX);
         b.setAttribute('aria-pressed', now === n ? 'true' : 'false');
-        b.innerHTML = STAR_MARK;
+        b.innerHTML = RATE_DOT;
         b.addEventListener('click', function () {
           if (!scSetRate(day, now === n ? null : n)) {
             scToast('That day is not open yet', false);
@@ -6447,20 +6483,23 @@
     return wrap;
   }
 
-  /* A five-pointed star, filled by CSS rather than by two drawings:
-     the lit and unlit states are the same shape and differ only in
-     colour, and a second path for the outline is a second thing to
+  /* ── A RING THAT FILLS, NOT A STAR ──
+     One circle, and the two states are the same shape: hollow until
+     you pick it, filled after. That is the habits screen's own rule —
+     a kept mark takes the colour and a missed one stays hollow — and
+     it is what keeps five circles in a row from reading as the deck's
+     page dots, which are filled discs of the same family a few inches
+     below. A second path for the outline would be a second thing to
      keep in step. */
-  var STAR_MARK = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-    + '<path d="M12 2.6l2.9 5.9 6.5.95-4.7 4.6 1.1 6.5-5.8-3.05'
-    + '-5.8 3.05 1.1-6.5-4.7-4.6 6.5-.95z"/></svg>';
+  var RATE_DOT = '<svg viewBox="0 0 24 24" aria-hidden="true">'
+    + '<circle cx="12" cy="12" r="8.8"/></svg>';
 
   function scPaintPat() {
     var pane = $('scPatPane');
     pane.textContent = '';
     var today = scDay();
 
-    pane.appendChild(scStars(today, 'How was today?', scPaintPat));
+    pane.appendChild(scRateRow(today, 'How was today?', scPaintPat));
     /* Yesterday only while it is unrated AND still open, so the row is
        a thing to catch rather than a second permanent control. Two
        days behind is inside the window too and is not offered: at
@@ -6468,7 +6507,7 @@
        at one. */
     var y = scDayBack(1);
     if (scRateOf(y) === null && scTallyOpen(y)) {
-      pane.appendChild(scStars(y, 'And yesterday?', scPaintPat));
+      pane.appendChild(scRateRow(y, 'And yesterday?', scPaintPat));
     }
 
     var rank = scPatRank();

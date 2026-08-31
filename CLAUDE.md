@@ -2489,29 +2489,45 @@ invents one. Deriving the outcome from the day's own completeness was
 the obvious dodge and is circular: it would rank the five things you
 log against a count of the five things you log.
 
-**IT WENT IN AS THREE WORDS AND IT IS FIVE STARS.** Good, Fine and
+**IT WENT IN AS THREE WORDS AND IT IS FIVE MARKS.** Good, Fine and
 Rough on 0, 1 and 2, argued for as the smallest ask that could work.
 The argument was half right: it is still not a number you type, and
 this app still has never asked what you weigh. But three points is
-fewer honest answers than the question has, and a star row is a
+fewer honest answers than the question has, and a row you fill in is a
 control nobody has to be taught. The reasoning that survives is the
 shape of the ask — one press, no typing, no field.
 
-**Stars are not the grade the old note was refusing.** What that
+**A count is not the grade the old note was refusing.** What that
 paragraph was against is a WORD like "poor", which is a verdict on
-you; a count of stars is a rating of the DAY, which is the thing being
+you; a count of five is a rating of the DAY, which is the thing being
 asked about.
 
-**The lit stars are the accent and the unlit ones are the flat
+**THEY ARE CIRCLES, NOT STARS.** A star is a rating somebody else's
+app gives a hotel, and it carries a verdict in the shape itself —
+five gold stars is a review. A circle carries nothing at all, which
+is what lets HOW MANY do the whole of the talking, and it is the mark
+this app already fills in everywhere else.
+
+**The lit ones are the accent and the unlit ones are the flat
 neutral.** The accent makes exactly one claim — that something
 happened — and what happened here is that you ANSWERED. How the day
-went is carried by HOW MANY are lit, never by a colour: a red star for
+went is carried by HOW MANY are lit, never by a colour: a red mark for
 a bad day would be the screen grading you back. Measured on composited
 pixels, and the unlit one is held to being a GREY with no channel
 standing out, which is the whole of what stops this screen having an
 opinion.
 
-**Pressing the star you are on clears the day.** A mis-tap has a way
+**A KEPT MARK IS FILLED AND A MISSED ONE IS HOLLOW**, which is the
+habits screen's own rule — and here it does a second job. Drawn filled
+either way, a row of five discs at the foot of the card is the DECK'S
+PAGE DOTS, which are a row of discs a couple of inches below it; two
+rows of the same mark on one screen read as one control answering two
+questions. Hollow until you answer is what tells them apart, and it
+costs no contrast to say. Asserted at the exact MIDDLE of each mark
+rather than by a brightest-pixel scan, because a filled unlit circle
+and a hollow one peak at the same grey.
+
+**Pressing the mark you are on clears the day.** A mis-tap has a way
 back without a second control to explain it.
 
 **Yesterday is offered only while it is unrated AND still open**, so
@@ -2542,6 +2558,29 @@ passes on a build that puts it on all of them.
 It sits INSIDE the scroller rather than under it, so on a long day it
 is the thing you arrive at having gone through everything, which is
 when the question makes sense to answer.
+
+**AND IT IS NOT THERE UNTIL THE DAY IS DONE.** "How was today?" at
+nine in the morning is a question you cannot answer, and a rating row
+standing under a card with five things still on it is a sixth thing on
+the list. `scDayDone` asks whether every block the day actually asked
+of you is ticked — a block marked OFF is not one of them, because
+counting an exception you granted yourself as a thing you failed to do
+is the day-off record's whole point.
+
+**A day with NOTHING on it is not done**, deliberately: "all of them"
+over an empty list is vacuously true, so an empty Tuesday would call
+itself finished at one minute past midnight. There has to be something
+to have finished.
+
+**Pattern's ask is NOT gated, and must not be.** A day you never
+finished is still a day you can say something about, and that screen
+is where you go to fill one in afterwards — the card's ask is a
+convenience at the end of a day, not the only door. Both halves are
+asserted, and the gate is asserted in both directions: absent with
+work outstanding, absent one block short, present once the last one is
+ticked. "All but one" is the case an off-by-one gate waves through,
+and a gate that only ever refuses is indistinguishable from a row that
+was never built.
 
 ### A second key, because the two scales overlap
 
