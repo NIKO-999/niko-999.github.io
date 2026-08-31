@@ -1102,6 +1102,49 @@ body {
   opacity: 0;
   transition: visibility 0s linear .26s, opacity 0s linear .26s;
 }
+/* ── AND THE BACK IS PUT AWAY WHEN THE FRONT IS SHOWING ──
+   This is the front's own rule above, mirrored, and it is here for a
+   reason that has nothing to do with what you can see: it is what
+   makes a long day SCROLL.
+
+   `transform-style: preserve-3d` on the flip box stops a scroll
+   container inside it responding to touch in Chromium, and the two
+   faces overlap exactly — so the back, turned away but still laid out
+   over the front, was taking the gesture. Nothing about that is
+   visible: the box is a real scroller, `overflow-y: auto`, 260px of
+   rows past its own height, and a script writing `scrollTop` moves it
+   perfectly. Only a finger did nothing, and on a day with fourteen
+   blocks that is four rows you cannot reach.
+
+   Hiding the face that is turned away costs nothing — backface-
+   visibility was already not drawing it — and hands the touch back to
+   the face you are looking at. Measured on a real touch drag from a
+   cold load: 0px before, the whole 260 after.
+
+   FOUR OTHER FIXES WERE BUILT FIRST AND ALL OF THEM WERE WRONG.
+   will-change, translateZ(0), contain:paint and isolation on the
+   scroller each moved it 0px. Then `transform-style: flat` at rest
+   with a class to put the 3D back for the turn, which WORKS and is a
+   whole mechanism — a class, a timer, a transitionend — for what two
+   rules do, and it also forces this same back-hiding rule to exist
+   anyway, since flat is exactly the state in which backface-
+   visibility stops working.
+
+   THE ISOLATION THAT FOUND THAT WAS ITSELF WRONG TWICE. Injecting the
+   old declarations back with addStyleTag AFTER the page had settled
+   reported every variant as fixed, including the shipped bug: a
+   scroller that is already composited does not go back. Each variant
+   has to be written to the file and loaded cold, which is the only
+   way the four rows above are true.
+
+   The delay is the front's: half a turn, so the face you are turning
+   towards appears at the point it would have come into view anyway. */
+.wk-back {
+  visibility: hidden;
+  opacity: 0;
+  transition: visibility 0s linear .26s, opacity 0s linear .26s;
+}
+.day.is-flipped .wk-back { visibility: visible; opacity: 1; }
 .day.is-flipped .wk-front *,
 .day.is-flipped .wk-front *::before,
 .day.is-flipped .wk-front *::after { animation-play-state: paused !important; }
@@ -1681,6 +1724,23 @@ body {
   scrollbar-width: none;
 }
 .day-card::-webkit-scrollbar { display: none; }
+/* ── AND A DAY WITH MORE ON IT SAYS SO ──
+   The scrollbar is hidden, so making those rows reachable did not make
+   them findable: the last one is cut clean at the card's edge and the
+   card simply looks like it ends. That is half a fix.
+
+   A MASK rather than a gradient laid over the card, because the ground
+   here is a 4% wash of --ink over whatever the page gradient is doing
+   behind it, and a fade painted in --paper would be a near-match that
+   reads as a smudge somewhere on the wheel. Masking fades the CONTENT
+   and lets the real ground through, so there is no colour to get
+   wrong. It does nothing for the scrolling — that was measured too,
+   and it is the back-hiding above that fixes it. */
+.day-card.has-more {
+  -webkit-mask-image: linear-gradient(to bottom,
+    #000 calc(100% - 38px), transparent);
+  mask-image: linear-gradient(to bottom, #000 calc(100% - 38px), transparent);
+}
 
 /* ── morning, afternoon, evening ──
    Noon and five, which is where the words already sit in English

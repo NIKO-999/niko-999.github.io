@@ -2785,6 +2785,93 @@ every navigation, and written unconditionally it puts the key back
 between a test clearing it and the reload that test is making. That
 exact bug cost four hundred lines of chasing once already.
 
+## A long day would not scroll, and the face turned away was why
+
+Reported as "if I have multiple things on a day, it doesn't allow me to
+scroll downwards and go through everything". On a day with fourteen
+blocks the card holds ten and the last one is cut clean at its edge.
+
+**Every property this repo could have read was correct.** The box is a
+real scroller — `overflow-y: auto`, a scrollHeight 260px past its own
+clientHeight — and a script writing `scrollTop` moves it the whole way.
+`touch-action` is `auto` on the card and on every ancestor, and no
+handler anywhere calls `preventDefault` on a touch. Only a finger did
+nothing.
+
+**The two faces of a day card overlap exactly, and inside
+`preserve-3d` the one turned AWAY was taking the touch.**
+`backface-visibility: hidden` stops it being drawn and does not stop it
+being hit. Hiding the face that is turned away costs nothing that was
+on screen and hands the gesture back to the face you are looking at:
+two rules, no JavaScript, and the mirror image of a rule the front
+already had.
+
+**A WHEEL IS NOT THE GESTURE.** The first measurement used
+`mouse.wheel` and read 0, which was right by luck — mobile emulation
+does not deliver it. The check drives a real touch drag through CDP,
+and it opens with a CONTROL: a plain scroller dropped on the same page
+and dragged identically. Without that, a zero is indistinguishable from
+a harness that cannot dispatch a scrolling touch at all, and the whole
+section would pass or fail for reasons that have nothing to do with the
+app. It measured 124px while the day card measured 0.
+
+### Four fixes were built first and every one of them was wrong
+
+`will-change`, `translateZ(0)`, `contain: paint` and `isolation` on the
+scroller each moved it 0px. Then `transform-style: flat` at rest with a
+class putting the 3D back for the turn — a class, a timer and a
+`transitionend`, carefully got right in both directions, including the
+return leg where `is-flipped` comes off at the START of the turn home.
+It worked. It was also a whole mechanism for what two rules do, and it
+FORCES the back-hiding rule to exist anyway, because flat is exactly
+the state in which `backface-visibility` stops working. It was deleted
+after the isolation below, and the assertion that the card still turns
+in 3D is what would have caught it being kept for nothing.
+
+### The isolation was itself wrong twice, and that is the lesson
+
+Injecting the old declarations back with `addStyleTag` **after the page
+had settled** reported every variant as fixed — including the
+combination that is the shipped bug. A scroller that is already
+composited does not go back when you change the property that stopped
+it composing. Read that sheet and the conclusion is "none of my changes
+did anything", which is what it said.
+
+Each variant has to be written to the file and loaded COLD. Done that
+way the table is unambiguous and every row is reproducible:
+
+| from a cold load | scrollTop |
+| --- | --- |
+| as shipped | **0** |
+| hide the turned-away face | 260 |
+| `transform-style` conditional | 260 |
+| the fade alone | **0** |
+
+**A/B testing a compositing bug by mutating the live page measures the
+page you already have.** It is the probe lesson in a new place: the
+answer came from writing the file and reloading, not from reasoning
+about the cascade.
+
+### And reachable is not findable
+
+The scrollbar is hidden, so the fix made those rows reachable while the
+card still looked like it ended. A short fade at the foot, on a day
+that actually overflows, and off again at the end of the travel — a
+soft edge over nothing is the same lie in the other direction.
+
+**A MASK, not a gradient laid over the card.** The ground is a 4% wash
+of `--ink` over whatever the page gradient is doing behind it, so a
+fade painted in `--paper` is a near-match that reads as a smudge
+somewhere on the wheel. Masking fades the CONTENT and lets the real
+ground through, and there is no colour to get wrong. Measured as the
+difference it makes to real pixels — 174 against 255 unmasked — rather
+than as a class being present, which is exactly what a mask that has
+stopped applying still has.
+
+It is asked AFTER `scDeckFit`, which is what gives a card its height:
+called before it, every card reports the whole page's worth of room and
+nothing ever overflows.
+
 ## Every deploy landed one open late
 
 `app.css` and `app.js` are requested with a `?v=` fingerprint of their

@@ -7384,6 +7384,211 @@ const SAID = [
     await ictx.close();
   }
 
+  /* ═══════════════════════════════════════════════════════════
+     A LONG DAY SCROLLS
+
+     Reported as "if I have multiple things on a day, it doesn't allow
+     me to scroll downwards and go through everything", and it was
+     exactly that. Inside `preserve-3d` the day card's two faces
+     overlap exactly, and the one turned AWAY was taking the touch. The
+     box was a real scroller throughout — `overflow-y: auto`, a
+     scrollHeight 260px past its own clientHeight, and a script writing
+     `scrollTop` moved it perfectly — so every property this suite
+     could have read was correct while a finger did nothing.
+
+     Which is why this drives a REAL TOUCH DRAG through CDP. A wheel is
+     not the gesture that broke, and reading the computed overflow
+     would have passed on the shipped bug every time.
+     ═══════════════════════════════════════════════════════════ */
+  {
+    const sctx = await browser.newContext(PHONE);
+    const spage = await sctx.newPage();
+    const serrs = [];
+    spage.on('pageerror', (e) => serrs.push(String(e)));
+    spage.on('console', (m) => { if (m.type() === 'error') serrs.push(m.text()); });
+    const cdp = await sctx.newCDPSession(spage);
+
+    const heavy = (n) => spage.addInitScript((rows) => {
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.view.v1', 'list');
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      const names = ['Wake', 'Train', 'Shower', 'Commute', 'Work', 'Coffee',
+                     'Meeting', 'Lunch', 'Work', 'Walk', 'Shop', 'Cook',
+                     'Read', 'Down'].slice(0, rows);
+      const items = []; let id = 1;
+      for (let d = 0; d < 7; d++) {
+        let t = 360;
+        for (const nm of names) {
+          items.push({ id: 'b' + (id++), d, s: t, e: t + 45, r: '', n: nm });
+          t += 60;
+        }
+      }
+      localStorage.setItem('sched.v1',
+        JSON.stringify({ title: 'Daily Process', items }));
+    }, n);
+
+    /* A finger, not a wheel: sixty pixels a frame up the middle of the
+       card, which is what a thumb does and what the bug refused. */
+    const dragUp = async (sel) => {
+      const b = await spage.evaluate((s) => {
+        const c = document.querySelector(s);
+        c.scrollTop = 0;
+        const r = c.getBoundingClientRect();
+        return { x: Math.round(r.x + r.width / 2),
+                 y0: Math.round(r.y + r.height * 0.8),
+                 y1: Math.round(r.y + r.height * 0.2) };
+      }, sel);
+      await cdp.send('Input.dispatchTouchEvent',
+        { type: 'touchStart', touchPoints: [{ x: b.x, y: b.y0 }] });
+      for (let i = 1; i <= 12; i++) {
+        await cdp.send('Input.dispatchTouchEvent', { type: 'touchMove',
+          touchPoints: [{ x: b.x, y: Math.round(b.y0 + (b.y1 - b.y0) * i / 12) }] });
+        await spage.waitForTimeout(16);
+      }
+      await cdp.send('Input.dispatchTouchEvent',
+        { type: 'touchEnd', touchPoints: [] });
+      await spage.waitForTimeout(450);
+      return spage.evaluate((s) => {
+        const c = document.querySelector(s);
+        return { top: c.scrollTop, max: c.scrollHeight - c.clientHeight };
+      }, sel);
+    };
+
+    await heavy(14);
+    await spage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await spage.waitForTimeout(650);
+
+    /* ── THE CONTROL COMES FIRST ──
+       A plain scroller dropped on the same page, dragged the same way.
+       Without it a zero here is indistinguishable from a harness that
+       cannot dispatch a scrolling touch at all, and this whole section
+       would pass or fail for reasons that have nothing to do with the
+       app. It measured 124px while the day card measured 0. */
+    await spage.evaluate(() => {
+      const d = document.createElement('div');
+      d.id = 'ctl';
+      d.style.cssText = 'position:fixed;left:10px;top:200px;width:200px;'
+        + 'height:200px;overflow-y:auto;z-index:99';
+      d.innerHTML = '<div style="height:900px"></div>';
+      document.body.appendChild(d);
+    });
+    const ctl = await dragUp('#ctl');
+    await spage.evaluate(() => document.getElementById('ctl').remove());
+    ok(`a touch drag scrolls a plain box in this browser (${ctl.top}px)`,
+      ctl.top > 60, ctl);
+
+    const long = await dragUp('.day.is-open .day-card');
+    ok(`...and it scrolls a day with fourteen blocks on it `
+      + `(${long.top} of ${long.max}px)`,
+      long.max > 100 && long.top >= long.max - 2, long);
+
+    /* ── THE FACE TURNED AWAY IS PUT AWAY, AND THAT IS THE FIX ──
+       The two faces overlap exactly, and inside `preserve-3d` the one
+       turned away was taking the touch. Hiding it costs nothing that
+       was being drawn and hands the gesture back.
+
+       Asserted alongside the drag above rather than instead of it: the
+       drag is the symptom and this is the reason, and a check on the
+       reason alone would pass on any future rule that happens to hide
+       the back for some other purpose while the scrolling stays
+       broken. */
+    const spin = async () => spage.evaluate(() => {
+      const li = document.querySelector('.day.is-open');
+      const g = (s) => getComputedStyle(li.querySelector(s));
+      return { ts: g('.wk-flip').transformStyle,
+               front: g('.wk-front').visibility,
+               back: g('.wk-back').visibility };
+    });
+    const seen = { rest: await spin() };
+    await spage.evaluate(() =>
+      document.querySelector('.day.is-open .wk-front .wk-turn').click());
+    await spage.waitForTimeout(170);
+    seen.turning = await spin();
+    await spage.waitForTimeout(850);
+    seen.onBack = await spin();
+    await spage.evaluate(() =>
+      document.querySelector('.day.is-open .wk-back .wk-turn').click());
+    await spage.waitForTimeout(170);
+    seen.returning = await spin();
+    await spage.waitForTimeout(850);
+    seen.home = await spin();
+
+    ok('the back is hidden while the front is showing, and the other way',
+      seen.rest.back === 'hidden' && seen.rest.front === 'visible'
+      && seen.onBack.back === 'visible' && seen.onBack.front === 'hidden',
+      seen);
+    /* The turn itself is untouched: it still runs in 3D throughout,
+       which is what keeps the objectives face from arriving as a
+       mirror image. `transform-style: flat` at rest was built as the
+       fix first and this is the assertion that would have caught it
+       being kept for nothing. */
+    ok('...and the card still turns in 3D, which is how it stays a card',
+      seen.rest.ts === 'preserve-3d' && seen.onBack.ts === 'preserve-3d',
+      seen);
+    /* Still scrolls after a round trip, which is what the timer and
+       the transitionend between them are for. */
+    const after = await dragUp('.day.is-open .day-card');
+    ok(`...and the card still scrolls after a turn there and back `
+      + `(${after.top}px)`, after.top >= after.max - 2, after);
+
+    /* ── A CARD WITH MORE UNDER THE FOLD SAYS SO ──
+       The scrollbar is hidden, so the fix made those rows reachable
+       without making them findable: the last one is cut clean at the
+       edge and the card simply looks like it ends. Measured as the
+       DIFFERENCE the mask makes to real pixels rather than as a class
+       being present — a class is exactly what a mask that has stopped
+       applying still has. */
+    await spage.evaluate(() => {
+      document.querySelector('.day.is-open .day-card').scrollTop = 0;
+    });
+    await spage.waitForTimeout(200);
+    const foot = await spage.evaluate(() => {
+      const r = document.querySelector('.day.is-open .day-card')
+        .getBoundingClientRect();
+      return { x: r.x, w: r.width, bot: r.bottom };
+    });
+    const brightest = async () => {
+      const png = PNG.sync.read(await spage.screenshot());
+      const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
+        + Math.round(x * dpr)) << 2;
+        return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      let best = 0;
+      for (let x = foot.x + 8; x < foot.x + foot.w - 8; x += 1) {
+        const p = at(x, foot.bot - 26);
+        const L = .2126 * p[0] + .7152 * p[1] + .0722 * p[2];
+        if (L > best) best = L;
+      }
+      return best;
+    };
+    const withMask = await brightest();
+    await spage.addStyleTag({ content: '.day-card.has-more{mask-image:none'
+      + ' !important;-webkit-mask-image:none !important}' });
+    await spage.waitForTimeout(150);
+    const without = await brightest();
+    ok(`the foot of an overflowing card is faded `
+      + `(${withMask.toFixed(0)} against ${without.toFixed(0)} unmasked)`,
+      without - withMask > 40, { withMask, without });
+
+    /* And a day that fits carries no fade at all: a soft edge over
+       nothing says there is more when there is not, which is the same
+       lie the other way round. */
+    await spage.evaluate(() => localStorage.removeItem('sched.v1'));
+    await heavy(4);
+    await spage.reload({ waitUntil: 'networkidle' });
+    await spage.waitForTimeout(650);
+    const shortDay = await spage.evaluate(() => {
+      const c = document.querySelector('.day.is-open .day-card');
+      return { over: c.scrollHeight - c.clientHeight,
+               has: c.classList.contains('has-more') };
+    });
+    ok('a day that fits has no fade on it', !shortDay.has
+      && shortDay.over <= 4, shortDay);
+
+    ok('nothing threw anywhere on a long day', serrs.length === 0, serrs);
+    await sctx.close();
+  }
+
   ok('no page errors through any of it', errs.length === 0, errs);
   await browser.close();
   console.log(`\n${pass} passed, ${fail} failed`);

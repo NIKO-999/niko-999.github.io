@@ -1316,6 +1316,13 @@
         card.appendChild(row);
       });
 
+      /* The fade says there is more under the fold, and it comes off at
+         the end of the travel. Read off the box rather than off a count
+         of rows: what overflows depends on the card's measured height,
+         the type scale and how many session headings got drawn, and a
+         row count knows none of that. */
+      card.addEventListener('scroll', function () { scCardFade(card); });
+
       front.appendChild(card);
       flip.appendChild(front);
       /* Built for every card, not only the open one, for the same
@@ -1355,6 +1362,7 @@
 
     scDeckFit(rail, dots);
     scDeckJump();
+    [].forEach.call(rail.querySelectorAll('.day-card'), scCardFade);
 
     scLive();
   }
@@ -1454,6 +1462,18 @@
         i.classList.toggle('on', ORDER[n] === open);
       });
     }
+  }
+
+  /* ── ASKED AFTER THE HEIGHT IS SETTLED ──
+     scDeckFit is what gives a card its height, so this can only run
+     once that has: called before it, every card reports the whole
+     page's worth of room and nothing ever overflows. Four pixels of
+     slack, because a scroller at its end is routinely a fraction of a
+     pixel short of its own scrollHeight. */
+  function scCardFade(card) {
+    if (!card) return;
+    card.classList.toggle('has-more',
+      card.scrollHeight - card.clientHeight - card.scrollTop > 4);
   }
 
   function scDeckFit(rail, dots) {
