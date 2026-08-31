@@ -3268,92 +3268,121 @@ body {
 .wc-deck.is-turning .wc.is-front {
   animation: wcTurn .26s cubic-bezier(.2, .7, .3, 1) both;
 }
-/* ── AND INSIDE A GROUP, THE CARD IS DEALT OFF THE LEFT ──
-   Stepping between the four kinds deals the whole hand again — at that
-   level you are choosing what sort of session it was, and the deal is
-   what that screen is. Inside a group you are stepping THROUGH one
-   hand, so the card in front is taken off and the next one comes over
-   the top of the stack. Dealing there would say you had started again.
+/* ── THE TWO PASSES, ONE PER LEVEL ──
+   Both were chosen by playing seven candidates against each other in a
+   lab that ran the real card — same 284px, same rim, same fan, same
+   hues — at every speed from full to a quarter, and both were chosen
+   at HALF speed. That is where the numbers below come from: they are
+   the lab's own figures doubled, not a duration anybody guessed at.
 
-   ── IT GOES SOMEWHERE, IT DOES NOT DISSOLVE ──
-   The first cut receded onto b2's resting position and faded to
-   nothing while painted ON TOP of the card arriving. Three separate
-   things were wrong with that and all three were reported: it was
-   quick enough (300ms) to be over before you had read it; the fade
-   put two names and two swoops on screen at once, which is a card
-   going THROUGH another card rather than past it; and a card that
-   ends at zero opacity has not gone anywhere — it has vanished, which
-   is what it looked like.
+   What was rejected is worth as much as what was picked. ONE BLOCK —
+   the whole hand travelling as a single rigid object — was what
+   shipped, and it is the thing being replaced: nothing separates, so
+   the two behind read as a shadow on the front card rather than as
+   cards. UNFOLD opened the fan before it went, STRETCH gave each card
+   its own speed, RIFFLE splayed them on widening arcs, and PUSH-OFF
+   made the arriving hand shove the outgoing one out. All five say the
+   same thing at different volumes; these two say it at the right one
+   for the level they are on.
 
-   So the gesture is a hand-off across the deck. The card you were on
-   is taken off to the LEFT and off the screen — the sheet is a scroll
-   container, so its own left edge cuts the card and nothing has to
-   fade for it to be gone — and the next one comes in from the RIGHT,
-   over the top of everything. The two behind never move and never
-   dim: they are the deck, and the whole point of the pass is that you
-   can see them the entire way through it.
+   AND THE TWO LEVELS ARE DIFFERENT ON PURPOSE, which is the rule the
+   deck has always had. Between the four kinds you are choosing what
+   sort of session this was, so the hand comes apart and reassembles —
+   a CASCADE. Inside a group you are stepping through one hand, so the
+   cards come off the top one at a time — a PEEL. Dealing inside a
+   group would say you had started again; peeling between kinds would
+   say the four were one stack.
 
-   FULL STRENGTH FROM END TO END. There is no opacity in either
-   keyframe, deliberately, and adding one back is how this reverts.
-
-   Written with the independent `translate` / `rotate` / `scale`
-   properties rather than `transform`, which is the rule the whole
-   deck is built on: a keyframe naming transform REPLACES a resting
-   one, and that is how the fan was flattened once already. Neither
-   card here has a resting transform, so it is safe either way and
-   uses them anyway, because the next thing pointed at these rules may
-   not be.
+   FULL STRENGTH FROM END TO END. There is no opacity in any keyframe
+   here, deliberately, and adding one back is how this reverts to the
+   fade that was reported as a card vanishing rather than going
+   anywhere. The sheet is a scroll container, so its own left edge
+   cuts a leaving card and nothing has to fade for it to be gone.
 
    THE TRAVEL IS A PERCENTAGE, NOT A NUMBER OF PIXELS. Each card
    clears its own width whatever the screen is, which is the only
    figure that means "off the side" on a phone this app does not know
    the width of.
 
-   The drift and the tilt are bounded by the deck's own box. The card
-   is 284px in a 312px well, so 10px of fall plus what a 4° turn drops
-   the low corner by is most of the 28px of slack — a heavier tilt
-   puts the corner of a leaving card through the effort row
-   underneath it.
+   Written with the independent `translate` / `rotate` / `scale`
+   properties rather than `transform`: a keyframe naming transform
+   REPLACES a resting one, and that is how the fan was flattened once
+   already. b1 and b2 carry their fan in `transform`, so these
+   properties COMPOSE with it — one pair of keyframes moves the whole
+   hand and each card keeps its own three degrees.
 
    `pointer-events: none` — a press landing on a card that is leaving
    is a press on the workout you just moved away from. */
-@keyframes wcOut {
+.wc.is-out { pointer-events: none; }
+
+/* ── CASCADE, BETWEEN THE FOUR KINDS ──
+   The front card goes first and the two behind follow it out, 180ms
+   apart; arriving, the order reverses so the hand assembles back to
+   front and the card you asked for lands last. That stagger is the
+   whole of it — it is what makes three cards separate on the way out
+   instead of one block sliding. */
+@keyframes wcCascOut {
   from { translate: 0 0;        rotate: 0deg;  scale: 1; }
-  to   { translate: -112% 10px; rotate: -4deg; scale: .97; }
+  to   { translate: -118% 16px; rotate: -7deg; scale: .95; }
 }
-.wc.is-out {
-  animation: wcOut .6s cubic-bezier(.4, .05, .5, 1) both;
-  pointer-events: none;
+@keyframes wcCascIn {
+  from { translate: 112% 14px; rotate: 6deg; scale: .95; }
+  to   { translate: 0 0;       rotate: 0deg; scale: 1; }
 }
+.wc-deck.is-cascading .wc.is-out {
+  animation: wcCascOut 1.12s cubic-bezier(.5, 0, .78, .4) both;
+}
+.wc-deck.is-cascading .wc.is-out.b1 { animation-delay: .18s; }
+.wc-deck.is-cascading .wc.is-out.b2 { animation-delay: .36s; }
+.wc-deck.is-cascading .wc:not(.is-out) {
+  animation: wcCascIn 1.12s cubic-bezier(.2, .78, .28, 1) both;
+  animation-delay: .52s;
+}
+.wc-deck.is-cascading .wc.b1:not(.is-out) { animation-delay: .34s; }
+.wc-deck.is-cascading .wc.b2:not(.is-out) { animation-delay: .16s; }
 
-/* ── AND THE NEXT ONE COMES IN OVER THE TOP ──
-   A CARD'S WIDTH OFF TO THE RIGHT, not a nudge from behind the fan.
-   It was tried at 64px — just past b2 — and the two cards then share
-   almost the whole window for the whole pass, so the one leaving is
-   covered before it has gone anywhere: rendered at five moments over
-   the real sheet, you never see it leave. Starting off the frame is
-   what makes it a hand-off. The two meet edge to edge across the
-   middle of the pass and there is no moment where the deck is empty
-   between them, which the same sheet is what settled — a gap of blank
-   fan in the middle reads as the deck emptying and refilling.
+/* ── PEEL, INSIDE A GROUP ──
+   One card at a time off the top: it lifts up and back before it goes,
+   then arcs away to the left, and the next one is already there
+   underneath. 300ms apart, which is slow enough that you watch three
+   separate cards leave rather than a hand.
 
-   ONE CURVE FOR BOTH, and the same duration. They are two halves of
-   one movement and a card that lags the other by even a tenth opens
-   that gap.
+   THE PIVOT IS THE LOWER-LEFT CORNER, AND ONLY THE FRONT CARD GETS
+   IT. transform-origin applies to a resting `transform` as well as to
+   an animation, and b1 and b2 carry their whole fan in one — so
+   putting the pivot on them swings them off their own position the
+   instant the class lands, before a single frame of the pass has run.
+   Measured on the real deck: b1 drops 14.1px and b2 drops 27.8px
+   between the frame the deck is at rest and the frame the peel
+   starts, which is a jump at exactly the moment the eye is on them.
 
-   It is on top because it is LAST in the deck: these are absolutely
-   positioned siblings with no z-index between them, so source order
-   is the stacking order, and scTrainAsk inserts the card being taken
-   off ahead of it. Nothing here sets a z-index, and it must not — an
-   explicit one on this rule alone would put the arriving card over
-   the whole sheet. */
-@keyframes wcStep {
-  from { translate: 108% 10px; rotate: 4deg;  scale: .97; }
+   The front card has no resting transform, so the pivot costs it
+   nothing — and it is the card you are watching leave, the one on
+   top, so the arc lands where it reads. The two behind peel about
+   their own centres. Rendered side by side at rest and at three
+   moments of the pass: with the pivot on all three there is a visible
+   drop at t=0 and the arcs are otherwise indistinguishable. */
+@keyframes wcPeelOut {
+  0%   { translate: 0 0;         rotate: 0deg;   scale: 1; }
+  28%  { translate: -16px -22px; rotate: -6deg;  scale: 1.02; }
+  100% { translate: -126% 40px;  rotate: -22deg; scale: .96; }
+}
+@keyframes wcPeelIn {
+  from { translate: 114% 26px; rotate: 14deg; scale: .96; }
   to   { translate: 0 0;       rotate: 0deg;  scale: 1; }
 }
-.wc-deck.is-shuffling .wc:not(.is-out) {
-  animation: wcStep .6s cubic-bezier(.4, .05, .5, 1) both;
+.wc-deck.is-peeling .wc.is-out {
+  animation: wcPeelOut 1.24s cubic-bezier(.36, .02, .5, 1) both;
 }
+.wc-deck.is-peeling .wc.is-out:not(.b1):not(.b2) { transform-origin: 0% 100%; }
+.wc-deck.is-peeling .wc.is-out.b1 { animation-delay: .3s; }
+.wc-deck.is-peeling .wc.is-out.b2 { animation-delay: .6s; }
+.wc-deck.is-peeling .wc:not(.is-out) {
+  animation: wcPeelIn 1.2s cubic-bezier(.2, .78, .28, 1) both;
+  animation-delay: .74s;
+}
+.wc-deck.is-peeling .wc.b1:not(.is-out) { animation-delay: .48s; }
+.wc-deck.is-peeling .wc.b2:not(.is-out) { animation-delay: .22s; }
 
 /* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──
    This went in behind a prefers-reduced-motion rule while the deal —

@@ -5336,20 +5336,27 @@
        it. The fold is the thing worth having; the deal is worth
        exactly one showing. */
     /* ── THE TWO LEVELS MOVE DIFFERENTLY, AND THAT IS THE POINT ──
-       The four kinds are a HAND: pressing between All exercises, PPL,
-       Run and Recovery deals the whole thing again every time, because
-       at that level you are choosing what sort of session this was and
-       the deal is what that screen is.
+       Between the four kinds you are choosing what SORT of session
+       this was, so the hand comes apart and reassembles: the front
+       card leaves first and the two behind follow it out, then the new
+       hand lands back to front. A CASCADE.
 
-       Inside a group you are stepping THROUGH one hand, so the card in
-       front goes to the back of the stack and the next one is
-       underneath it — the gesture of putting one down and taking the
-       next. Dealing there would say you had started again.
+       Inside a group you are stepping THROUGH one hand, so the cards
+       come off the top one at a time — each lifts, arcs away, and the
+       next is already there underneath. A PEEL. Cascading inside a
+       group would say the four sessions were one stack; peeling
+       between kinds would say you had started again.
 
-       Three entrances then, and one variable rather than three flags:
-       a draw is a deal, a lift, a shuffle, or nothing. draw() also runs
-       on an effort, a length and a pick, and on every one of those the
-       card in front is the SAME card with different figures on it — a
+       Both were chosen by playing seven candidates against each other
+       in a lab running the real card, and both were chosen at HALF
+       speed — which is where app.css's figures come from rather than
+       from anybody's guess.
+
+       Four entrances then, and one variable rather than four flags: a
+       draw is a deal, a lift, a cascade, a peel, or nothing. draw()
+       also runs on an effort, a length and a pick, and on every one of
+       those the card in front is the SAME card with different figures
+       on it — a
        deck that moved for a press on Hard would be answering a question
        nobody asked. Set where the intent is and consumed by the next
        draw, so nothing else can inherit it. */
@@ -5450,7 +5457,7 @@
             at = i;
             /* A hand at the top level, one hand being stepped through
                inside a group. */
-            entr = into ? 'shuffle' : 'deal';
+            entr = into ? 'peel' : 'cascade';
             /* Nothing is cleared here. This line used to blank the
                effort so the next card could suggest its own, and once
                a press could SAY an effort the two fought: the clear
@@ -5472,7 +5479,8 @@
            deck is what decides whether they arrive with anything. */
         deck.classList.toggle('is-dealing', entr === 'deal');
         deck.classList.toggle('is-turning', entr === 'lift');
-        deck.classList.toggle('is-shuffling', entr === 'shuffle');
+        deck.classList.toggle('is-cascading', entr === 'cascade');
+        deck.classList.toggle('is-peeling', entr === 'peel');
 
         /* ── THE WHOLE HAND GOES, NOT THE TOP CARD ──
            The two behind are the same card as the one in front now, so
@@ -5494,7 +5502,16 @@
            pass begins exactly when the new hand is laid out rather
            than whenever the class happened to land. */
         var out = null;
-        if (entr === 'shuffle') {
+        if (entr === 'cascade' || entr === 'peel') {
+          /* ── A PRESS LANDING MID-PASS DROPS THE HAND ALREADY GOING ──
+             These passes are a second and a half, so walking down the
+             chips faster than that is ordinary rather than perverse —
+             and without this the next draw marks the leaving hand
+             `is-out` a second time, so six cards leave, then nine.
+             The hand you have already left is not worth watching. */
+          [].forEach.call(deck.querySelectorAll('.wc.is-out'), function (c) {
+            c.parentNode.removeChild(c);
+          });
           out = [].slice.call(deck.querySelectorAll('.wc'));
           out.forEach(function (c) {
             c.classList.remove('is-front', 'is-picked');
@@ -5524,16 +5541,27 @@
            otherwise leave a dead hand on the pile for the next press
            to stack on. */
         if (out) {
-          out.forEach(function (c) { deck.appendChild(c); });
-          var going = out;
-          var sweep = function () {
-            going.forEach(function (c) {
+          /* ── EACH CARD SWEEPS ITSELF ──
+             It used to be one listener on the last card in the hand,
+             which was right only while all three moved together. Both
+             passes are staggered now and the card that finishes LAST
+             is b2, at the back — so a single listener on the front one
+             fired at 1.24s and tore the other two off the screen
+             mid-flight. A card knows when its own animation is over.
+
+             On a timer as well, because an animation that never runs —
+             a background tab — would otherwise leave a dead hand on
+             the pile for the next press to stack on. The timer has to
+             outlast the longest pass, which is the peel's b2 at
+             1.84s. */
+          out.forEach(function (c) {
+            deck.appendChild(c);
+            var kill = function () {
               if (c.parentNode) c.parentNode.removeChild(c);
-            });
-            going = [];
-          };
-          out[out.length - 1].addEventListener('animationend', sweep);
-          setTimeout(sweep, 700);
+            };
+            c.addEventListener('animationend', kill);
+            setTimeout(kill, 2400);
+          });
         }
         deck.appendChild(scTrainBack(w, 'b2'));
         deck.appendChild(scTrainBack(w, 'b1'));

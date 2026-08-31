@@ -5279,29 +5279,46 @@ const SAID = [
        entrances to compare four splits. That was right about draw()
        and wrong about WHICH draws.
 
-       The four kinds are a HAND. Choosing between All exercises, PPL,
-       Run and Recovery deals it again every time, because at that level
-       you are choosing what sort of session this was and the deal is
-       what that screen is. What must not deal is a step through one
-       hand, which is the shuffle below — and an effort, a length or a
-       pick, which do not move the deck at all. */
+       The four kinds are a HAND, and choosing between All exercises,
+       PPL, Run and Recovery CASCADES it: the front card leaves first
+       and the two behind follow it out, then the new hand lands back
+       to front. What that level must not do is peel, which is the step
+       through one hand below — and an effort, a length or a pick move
+       the deck at all.
+
+       THE STAGGER IS THE WHOLE OF IT, so it is asserted as three
+       different delays rather than as a named animation: a cascade
+       whose three cards share one delay is the block this replaced,
+       and it would pass any check that only read the keyframes' name. */
     await page.click('.wc-chips .wc-chip:nth-child(2)');
     await page.waitForTimeout(60);
     const again = await page.evaluate(() => {
-      const nm = (s2) => {
-        const e = document.querySelector(s2);
-        return e ? getComputedStyle(e).animationName : null;
+      const deck = document.querySelector('.wc-deck');
+      const of = (s2) => {
+        const e = deck.querySelector(s2);
+        if (!e) return null;
+        const cs = getComputedStyle(e);
+        return { name: cs.animationName, delay: parseFloat(cs.animationDelay) };
       };
-      return { front: nm('.wc.is-front'), b1: nm('.wc.b1'), b2: nm('.wc.b2'),
-        out: document.querySelectorAll('.wc.is-out').length,
-        dealing: document.querySelector('.wc-deck').classList.contains('is-dealing') };
+      return {
+        out: ['.wc.is-out:not(.b1):not(.b2)', '.wc.is-out.b1', '.wc.is-out.b2'].map(of),
+        into: ['.wc.is-front', '.wc.b1:not(.is-out)', '.wc.b2:not(.is-out)'].map(of),
+        on: deck.classList.contains('is-cascading'),
+        dealing: deck.classList.contains('is-dealing') };
     });
-    ok('...and a press on another KIND deals the whole hand again',
-      again.dealing && [again.front, again.b1, again.b2]
-        .every((n) => n === 'wcDeal') && again.out === 0, again);
-    await page.waitForTimeout(600);
+    const delays = (a) => a.map((x) => x && x.delay);
+    ok('...and a press on another KIND cascades the whole hand out',
+      again.on && !again.dealing
+      && again.out.every((x) => x && x.name === 'wcCascOut')
+      && again.into.every((x) => x && x.name === 'wcCascIn'), again);
+    ok(`...front first out, back first in (${delays(again.out).join('/')} then `
+      + `${delays(again.into).join('/')})`,
+      again.out[0].delay < again.out[1].delay && again.out[1].delay < again.out[2].delay
+      && again.into[0].delay > again.into[1].delay
+      && again.into[1].delay > again.into[2].delay, again);
+    await page.waitForTimeout(1800);
     await page.click('.wc-chips .wc-chip:nth-child(1)');
-    await page.waitForTimeout(600);
+    await page.waitForTimeout(1800);
 
     /* ── THE SECOND LEVEL LIFTS, AND ONLY THE FRONT CARD MOVES ──
        Pressing a kind card replaced the front card outright, which
@@ -5433,10 +5450,20 @@ const SAID = [
       const o = gone.find((c) => !c.classList.contains('b1')
         && !c.classList.contains('b2'));
       const nm = (c) => getComputedStyle(c).animationName;
-      return { on: deck.classList.contains('is-shuffling'),
+      const dl = (c) => parseFloat(getComputedStyle(c).animationDelay);
+      /* b2, b1, front in DOM order — so a rising delay down each list
+         is the front card leaving first and the back card landing
+         first, which is the peel. */
+      return { on: deck.classList.contains('is-peeling'),
         went: gone.length, came: here.length,
-        out: gone.every((c) => nm(c) === 'wcOut'),
-        into: here.every((c) => nm(c) === 'wcStep'),
+        out: gone.every((c) => nm(c) === 'wcPeelOut'),
+        into: here.every((c) => nm(c) === 'wcPeelIn'),
+        outDelay: gone.map(dl), inDelay: here.map(dl),
+        /* THE PIVOT IS ON THE FRONT CARD ALONE. On b1 or b2 it applies
+           to their resting fan transform as well and drops them 14 and
+           28px the instant the class lands, before a frame of the pass
+           has run — measured on the real deck. */
+        pivot: gone.map((c) => getComputedStyle(c).transformOrigin),
         name: o && o.querySelector('.wc-n').textContent,
         under: gone.length > 0 && here.length > 0
           && kids.indexOf(gone[gone.length - 1]) < kids.indexOf(here[0]),
@@ -5446,11 +5473,20 @@ const SAID = [
           && h[1].classList.contains('b1')
           && h[2].classList.contains('is-front') === (h === here)) };
     });
-    ok(`a step inside a group takes the whole ${was} hand off`,
+    ok(`a step inside a group peels the whole ${was} hand off`,
       shuf.on && shuf.went === 3 && shuf.out && shuf.name === was
       && shuf.under && shuf.deaf, { was, shuf });
-    ok('...and the hand arriving is three cards moving together, not a deal',
+    ok('...and the hand arriving is three cards, each with its own fan',
       shuf.came === 3 && shuf.into && shuf.fan, shuf);
+    /* ONE AT A TIME, which is the whole of what a peel is: the cards
+       leave front-first and land back-first, and a peel whose three
+       cards share one delay is the block this replaced. */
+    ok(`...one at a time (${shuf.outDelay.join('/')} out, ${shuf.inDelay.join('/')} in)`,
+      shuf.outDelay[0] > shuf.outDelay[1] && shuf.outDelay[1] > shuf.outDelay[2]
+      && shuf.inDelay[0] < shuf.inDelay[1] && shuf.inDelay[1] < shuf.inDelay[2], shuf);
+    ok('...pivoting on the corner, and only the card that has no fan to swing',
+      /^0(px)? /.test(shuf.pivot[2]) && shuf.pivot[0] === shuf.pivot[1]
+      && shuf.pivot[0] !== shuf.pivot[2], shuf.pivot);
     /* ── OFF ONE SIDE, IN FROM THE OTHER, AND NEITHER OF THEM FADES ──
        Both halves measured on the composited box rather than read off
        the stylesheet: the animations are seeked to a third of the way
@@ -5490,11 +5526,22 @@ const SAID = [
       cross.out < -40 && cross.into > 20, cross);
     ok('...at full strength the whole way — nothing on this pass fades',
       !cross.faded && cross.oOp === 1 && cross.fOp === 1, cross);
-    /* SWEPT, and on a timer as well as on animationend: an animation
-       that never runs — a background tab — would otherwise leave a dead
-       card on the pile, and the next press would put a second one on
-       top of it. */
-    await page.waitForTimeout(800);
+    /* SWEPT, and each card on its own animationend rather than one
+       listener on the hand: the peel is staggered, so the card that
+       finishes LAST is b2 at the back — a single listener on the front
+       one fired at 1.24s and tore the other two off the screen
+       mid-flight. On a timer as well, because an animation that never
+       runs — a background tab — would otherwise leave a dead hand on
+       the pile for the next press to stack on.
+
+       WAITED OUT ON THE ANIMATIONS, not on a number of milliseconds.
+       This was an 800ms wait, which was past the 600ms the pass used
+       to take and is less than half of the peel's 1.94s. */
+    await page.waitForFunction(() =>
+      [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
+        c.getAnimations().every((a) => a.playState === 'finished')),
+      { timeout: 6000 });
+    await page.waitForTimeout(120);
     ok('...and the hand taken off is swept whole, not left on the pile',
       await page.evaluate(() =>
         document.querySelectorAll('.wc-deck .wc').length === 3

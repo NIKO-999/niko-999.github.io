@@ -1970,20 +1970,64 @@ timer, because an animation that never runs — a background tab —
 would otherwise leave a dead card on the pile for the next press to
 stack on.
 
-### The step inside a group is a HAND-OFF, and three things were wrong
+### A CASCADE between the kinds, a PEEL inside a group
 
-It receded onto b2's resting position — down and right, onto the fan —
-fading to nothing while painted ON TOP of the card arriving. All three
-were reported and all three were separate faults: **300ms is over
-before you have read it**; **the fade put two names and two swoops on
-screen at once**, which is a card going THROUGH another card rather
-than past it; and **a card that ends at zero opacity has not gone
-anywhere** — it has vanished, which is exactly what it looked like.
+The first hand-off receded onto b2's resting position — down and
+right, onto the fan — fading to nothing while painted ON TOP of the
+card arriving. All three were reported and all three were separate
+faults: **300ms is over before you have read it**; **the fade put two
+names and two swoops on screen at once**, which is a card going
+THROUGH another card rather than past it; and **a card that ends at
+zero opacity has not gone anywhere** — it has vanished, which is
+exactly what it looked like.
 
-**Off the LEFT, in from the RIGHT, 600ms, and nothing fades.** There
-is no opacity in either keyframe, deliberately, and putting one back
-is how this reverts. The sheet is a scroll container, so its own left
-edge cuts the leaving card and nothing has to fade for it to be gone.
+Then the whole hand went off the left as ONE BLOCK, and that was
+reported too, for the reason the block could never fix: a rigid
+object has no interior, so the two behind read as a shadow on the
+front card rather than as cards. What was being asked for was the
+hand coming APART.
+
+**SEVEN CANDIDATES WERE BUILT AS A PLAYABLE LAB, not a contact
+sheet.** A grid of paused frames is how the block was chosen and it is
+what missed this: motion is the subject, and five stills of it are
+five stills. The lab ran the real card — same 284px, same rim, same
+grain, same fan, same swoop paths and hues read out of `app.js` — with
+a play button, a speed control and a scrubber, at both levels. **Both
+winners were picked at HALF SPEED**, which is where the shipped
+durations come from rather than from anybody's guess: 1.64s for the
+cascade, 1.94s for the peel.
+
+**And the two levels got different answers, which is the rule the
+deck already had.** Between the four kinds you are choosing what sort
+of session this was, so the hand comes apart and reassembles — the
+front card leaves first and the two behind follow it out 180ms apart,
+then the new hand lands back to front. Inside a group you are
+stepping through one hand, so the cards come off the top one at a
+time, 300ms apart, each lifting and arcing away. Cascading inside a
+group would say the four sessions were one stack; peeling between
+kinds would say you had started again.
+
+What was rejected is worth as much: UNFOLD opened the fan before it
+went, STRETCH gave each card its own speed, RIFFLE splayed them on
+widening arcs, and PUSH-OFF made the arriving hand shove the outgoing
+one out. All five say the same thing at different volumes.
+
+**The peel's pivot is the lower-left corner, and ONLY the front card
+gets it.** `transform-origin` applies to a resting `transform` as well
+as to an animation, and b1 and b2 carry their whole fan in one — so
+putting the pivot on them swings them off their own position the
+instant the class lands, before a single frame of the pass has run.
+Measured on the real deck: **b1 drops 14.1px and b2 drops 27.8px**
+between the frame the deck is at rest and the frame the peel starts.
+The front card has no resting transform, so it costs nothing there,
+and it is the card you are watching leave. Rendered side by side: with
+the pivot on all three there is a visible drop at t=0 and the arcs are
+otherwise indistinguishable.
+
+**Nothing fades.** There is no opacity in any of the four keyframes,
+deliberately, and putting one back is how this reverts. The sheet is a
+scroll container, so its own left edge cuts a leaving card and nothing
+has to fade for it to be gone.
 
 **AND IT IS THE HAND THAT GOES, NOT ITS TOP CARD.** With the two
 behind carrying the same card, taking only the front one off left two
@@ -1999,37 +2043,51 @@ the front card is still at zero opacity, so a hand that lifts together
 spends its first frames as a wordless coloured stack. The front card
 arriving over a hand that was already there is the gesture.
 
+**Each card sweeps ITSELF now.** It was one `animationend` listener on
+the hand, which is right only while all three move together — both
+passes are staggered, and the card that finishes LAST is b2 at the
+back, so a single listener on the front one fired at 1.24s and tore
+the other two off the screen mid-flight.
+
+**And a press landing mid-pass drops the hand already going.** At a
+second and a half, walking down the chips faster than the animation is
+ordinary rather than perverse — and without that, the next draw marks
+the leaving hand `is-out` a second time, so six cards leave, then
+nine.
+
 **The arriving card starts a CARD'S WIDTH off to the right, not a
 nudge from behind the fan.** Tried at 64px — just past b2 — the two
 share almost the whole window for the whole pass, so the one leaving
 is covered before it has gone anywhere and you never see it leave.
-And **one curve for both, at one duration**: lagging either by even a
-tenth opens a gap of blank fan across the middle that reads as the
-deck emptying and refilling. Five candidates were rendered over the
-real sheet at five paused moments each, which is the only way to see
-either of those.
 
 **The travel is a PERCENTAGE.** Each card clears its own width
 whatever the phone is, which is the only figure that means "off the
 side" on a screen this app does not know the width of.
 
-**The leaving card goes in BEFORE the arriving one now.** Source order
-is the stacking order, so that is what puts it underneath — and with
-nothing fading any more, that order is the only thing keeping the pair
-from being double-exposed while they cross.
+**The leaving hand goes in BEFORE the arriving one.** Source order is
+the stacking order, so that is what puts it underneath — and with
+nothing fading any more, that order is the only thing keeping the two
+hands from being double-exposed while they cross.
 
 **`.sheet` had to say `overflow-x: hidden` out loud.** Its overflow-x
 was `visible`, which computes to `auto` beside a scrolling overflow-y
 — so the 368px the arriving card puts outside the sheet was not merely
-clipped, it was PANNABLE for the 600ms the pass runs.
+clipped, it was PANNABLE for as long as the pass runs.
 
-**And a check that waited 420ms was measuring the animation.** The
-card's own contrast scan sampled its figures 420ms after a chip press,
-comfortably past the old 300 and a third of the way into the new 600:
-every sample came back off a card still sliding in, reading 1.57:1 on
-a colour nothing had touched. It waits out the animation now rather
-than a number of milliseconds — the same lesson as the check that only
-passed at certain hours, in the other units.
+**And two checks were measuring the animation rather than the app.**
+The card's contrast scan sampled its figures 420ms after a chip press
+— comfortably past the 300ms the pass used to take, a third of the way
+into 600, a fifth of the way into the peel — so every sample came back
+off a card still sliding in, reading 1.57:1 on a colour nothing had
+touched. The sweep check waited 800ms for a hand that now takes 1.94s
+to leave. Both wait out the ANIMATIONS now rather than a number of
+milliseconds, which is the same lesson as the check that only passed
+at certain hours, in the other units.
+
+**A stagger is asserted as three different DELAYS, never as a name.**
+A cascade whose three cards share one delay is the block this
+replaced, and it would sail through any check that only read the
+keyframes it names.
 
 ### The card has an edge
 
