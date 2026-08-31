@@ -5460,9 +5460,9 @@ const SAID = [
         into: here.every((c) => nm(c) === 'wcPeelIn'),
         outDelay: gone.map(dl), inDelay: here.map(dl),
         /* THE PIVOT IS ON THE FRONT CARD ALONE. On b1 or b2 it applies
-           to their resting fan transform as well and drops them 14 and
-           28px the instant the class lands, before a frame of the pass
-           has run — measured on the real deck. */
+           to their resting fan transform as well and drops them 14.1
+           and 27.8px the instant the class lands, before a frame of
+           the pass has run — measured on the real deck. */
         pivot: gone.map((c) => getComputedStyle(c).transformOrigin),
         name: o && o.querySelector('.wc-n').textContent,
         under: gone.length > 0 && here.length > 0
@@ -5536,7 +5536,9 @@ const SAID = [
 
        WAITED OUT ON THE ANIMATIONS, not on a number of milliseconds.
        This was an 800ms wait, which was past the 600ms the pass used
-       to take and is less than half of the peel's 1.94s. */
+       to take and is under the peel's 1.39s — and the durations have
+       moved twice since, which is the whole argument for not writing
+       one here at all. */
     await page.waitForFunction(() =>
       [...document.querySelectorAll('.wc-deck .wc')].every((c) =>
         c.getAnimations().every((a) => a.playState === 'finished')),

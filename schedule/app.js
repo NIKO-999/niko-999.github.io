@@ -5348,9 +5348,9 @@
        between kinds would say you had started again.
 
        Both were chosen by playing seven candidates against each other
-       in a lab running the real card, and both were chosen at HALF
-       speed — which is where app.css's figures come from rather than
-       from anybody's guess.
+       in a lab running the real card, and both are the lab's own
+       figures at 0.7x — which is where app.css's durations come from
+       rather than from anybody's guess.
 
        Four entrances then, and one variable rather than four flags: a
        draw is a deal, a lift, a cascade, a peel, or nothing. draw()
@@ -5552,15 +5552,17 @@
              On a timer as well, because an animation that never runs —
              a background tab — would otherwise leave a dead hand on
              the pile for the next press to stack on. The timer has to
-             outlast the longest pass, which is the peel's b2 at
-             1.84s. */
+             outlast the longest card, which is the peel's b2 at
+             .43 + .89 = 1.32s. Fire it early and it kills a card
+             mid-flight, which is the bug the per-card listener above
+             was fixing. */
           out.forEach(function (c) {
             deck.appendChild(c);
             var kill = function () {
               if (c.parentNode) c.parentNode.removeChild(c);
             };
             c.addEventListener('animationend', kill);
-            setTimeout(kill, 2400);
+            setTimeout(kill, 1800);
           });
         }
         deck.appendChild(scTrainBack(w, 'b2'));

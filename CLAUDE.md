@@ -1992,18 +1992,26 @@ sheet.** A grid of paused frames is how the block was chosen and it is
 what missed this: motion is the subject, and five stills of it are
 five stills. The lab ran the real card — same 284px, same rim, same
 grain, same fan, same swoop paths and hues read out of `app.js` — with
-a play button, a speed control and a scrubber, at both levels. **Both
-winners were picked at HALF SPEED**, which is where the shipped
-durations come from rather than from anybody's guess: 1.64s for the
-cascade, 1.94s for the peel.
+a play button, a speed control and a scrubber, at both levels. The
+shipped durations are the lab's own figures at 0.7x rather than
+anything guessed at: **1.17s for the cascade, 1.39s for the peel.**
+
+**THE SPEED WAS SET TWICE, AND THE SECOND TIME IS THE ONE THAT
+MATTERS.** Both were first picked at HALF speed — 1.64s and 1.94s —
+which is what you choose when you are watching a pass once to see how
+it works, and a length you feel on the fifth chip press rather than
+the first. 0.7x is the same two gestures, still slow enough to watch a
+hand come apart and short enough to sit under a control you press
+repeatedly. **A motion is chosen at the speed you study it and set at
+the speed you live with**, and those are not the same number.
 
 **And the two levels got different answers, which is the rule the
 deck already had.** Between the four kinds you are choosing what sort
 of session this was, so the hand comes apart and reassembles — the
-front card leaves first and the two behind follow it out 180ms apart,
+front card leaves first and the two behind follow it out 130ms apart,
 then the new hand lands back to front. Inside a group you are
 stepping through one hand, so the cards come off the top one at a
-time, 300ms apart, each lifting and arcing away. Cascading inside a
+time, 215ms apart, each lifting and arcing away. Cascading inside a
 group would say the four sessions were one stack; peeling between
 kinds would say you had started again.
 
@@ -2046,11 +2054,13 @@ arriving over a hand that was already there is the gesture.
 **Each card sweeps ITSELF now.** It was one `animationend` listener on
 the hand, which is right only while all three move together — both
 passes are staggered, and the card that finishes LAST is b2 at the
-back, so a single listener on the front one fired at 1.24s and tore
-the other two off the screen mid-flight.
+back, so a single listener on the front one fired before the other two
+were home and tore them off the screen mid-flight. The fallback timer
+has to outlast the longest CARD rather than the pass — the peel's b2,
+at its delay plus its own duration.
 
-**And a press landing mid-pass drops the hand already going.** At a
-second and a half, walking down the chips faster than the animation is
+**And a press landing mid-pass drops the hand already going.** At well
+over a second, walking down the chips faster than the animation is
 ordinary rather than perverse — and without that, the next draw marks
 the leaving hand `is-out` a second time, so six cards leave, then
 nine.
@@ -2079,10 +2089,11 @@ The card's contrast scan sampled its figures 420ms after a chip press
 — comfortably past the 300ms the pass used to take, a third of the way
 into 600, a fifth of the way into the peel — so every sample came back
 off a card still sliding in, reading 1.57:1 on a colour nothing had
-touched. The sweep check waited 800ms for a hand that now takes 1.94s
-to leave. Both wait out the ANIMATIONS now rather than a number of
-milliseconds, which is the same lesson as the check that only passed
-at certain hours, in the other units.
+touched. The sweep check waited 800ms for a hand that takes longer
+than that to leave. Both wait out the ANIMATIONS now rather than a
+number of milliseconds — which is the same lesson as the check that
+only passed at certain hours, in the other units, and it is what let
+the durations move twice without either check needing an edit.
 
 **A stagger is asserted as three different DELAYS, never as a name.**
 A cascade whose three cards share one delay is the block this
