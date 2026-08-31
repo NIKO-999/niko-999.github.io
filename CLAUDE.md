@@ -1993,25 +1993,30 @@ what missed this: motion is the subject, and five stills of it are
 five stills. The lab ran the real card — same 284px, same rim, same
 grain, same fan, same swoop paths and hues read out of `app.js` — with
 a play button, a speed control and a scrubber, at both levels. The
-shipped durations are the lab's own figures at 0.7x rather than
-anything guessed at: **1.17s for the cascade, 1.39s for the peel.**
+shipped durations are the lab's own figures at 0.8x rather than
+anything guessed at: **1.03s for the cascade, 1.21s for the peel.**
 
-**THE SPEED WAS SET TWICE, AND THE SECOND TIME IS THE ONE THAT
-MATTERS.** Both were first picked at HALF speed — 1.64s and 1.94s —
-which is what you choose when you are watching a pass once to see how
-it works, and a length you feel on the fifth chip press rather than
-the first. 0.7x is the same two gestures, still slow enough to watch a
-hand come apart and short enough to sit under a control you press
-repeatedly. **A motion is chosen at the speed you study it and set at
-the speed you live with**, and those are not the same number.
+**THE SPEED IS A SETTING SEPARATE FROM THE SHAPE.** Both gestures were
+picked at HALF speed — 1.64s and 1.94s — which is what you choose when
+you are watching a pass once to see how it works, and a length you
+feel on the fifth chip press rather than the first. It came back to
+0.7x and then to 0.8x, and **no keyframe moved on either pass**: every
+duration and delay in the two rules is the lab's figure divided by the
+rate, so a change costs one number per rule and no rendering. **A
+motion is chosen at the speed you STUDY it and set at the speed you
+LIVE with**, and those are not the same number.
+
+That separation is the reusable part. The shape was settled by looking
+at seven of them; the clock is a setting, and treating it as one is
+what made three rounds of it cheap.
 
 **And the two levels got different answers, which is the rule the
 deck already had.** Between the four kinds you are choosing what sort
 of session this was, so the hand comes apart and reassembles — the
-front card leaves first and the two behind follow it out 130ms apart,
+front card leaves first and the two behind follow it out 113ms apart,
 then the new hand lands back to front. Inside a group you are
 stepping through one hand, so the cards come off the top one at a
-time, 215ms apart, each lifting and arcing away. Cascading inside a
+time, 188ms apart, each lifting and arcing away. Cascading inside a
 group would say the four sessions were one stack; peeling between
 kinds would say you had started again.
 

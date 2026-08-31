@@ -5349,8 +5349,10 @@
 
        Both were chosen by playing seven candidates against each other
        in a lab running the real card, and both are the lab's own
-       figures at 0.7x — which is where app.css's durations come from
-       rather than from anybody's guess.
+       figures at 0.8x — which is where app.css's durations come from
+       rather than from anybody's guess. The speed is a setting
+       separate from the shape: it has moved twice and no keyframe
+       moved with it.
 
        Four entrances then, and one variable rather than four flags: a
        draw is a deal, a lift, a cascade, a peel, or nothing. draw()
@@ -5553,7 +5555,7 @@
              a background tab — would otherwise leave a dead hand on
              the pile for the next press to stack on. The timer has to
              outlast the longest card, which is the peel's b2 at
-             .43 + .89 = 1.32s. Fire it early and it kills a card
+             .38 + .78 = 1.16s. Fire it early and it kills a card
              mid-flight, which is the bug the per-card listener above
              was fixing. */
           out.forEach(function (c) {

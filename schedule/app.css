@@ -3272,17 +3272,20 @@ body {
    Both were chosen by playing seven candidates against each other in a
    lab that ran the real card — same 284px, same rim, same fan, same
    hues — with a speed control and a scrubber. That is where the
-   numbers below come from: they are the lab's own figures at 0.7x,
+   numbers below come from: they are the lab's own figures at 0.8x,
    not durations anybody guessed at.
 
-   THE SPEED WAS SET TWICE, AND THE SECOND TIME IS THE ONE THAT
-   MATTERS. Both were first picked at HALF speed, which is what you
-   choose when you are watching a pass once to see how it works — and
-   1.64s and 1.94s are lengths you feel on the fifth chip press rather
-   than the first. 0.7x is the same two gestures at 1.17s and 1.39s:
-   still slow enough to watch a hand come apart, short enough to sit
-   under a control you press repeatedly. A motion is chosen at the
-   speed you study it and set at the speed you live with.
+   THE SPEED IS A SETTING SEPARATE FROM THE SHAPE, and it took three
+   passes to land. Both gestures were picked at HALF speed, which is
+   what you choose when you are watching a pass once to see how it
+   works — and 1.64s and 1.94s are lengths you feel on the fifth chip
+   press rather than the first. 0.8x is the same two shapes at 1.03s
+   and 1.21s: still slow enough to watch a hand come apart, short
+   enough to sit under a control you press repeatedly. A motion is
+   chosen at the speed you STUDY it and set at the speed you LIVE
+   with, and nothing about the keyframes moved between the two —
+   which is why changing it costs one number per rule and no
+   rendering.
 
    What was rejected is worth as much as what was picked. ONE BLOCK —
    the whole hand travelling as a single rigid object — was what
@@ -3325,7 +3328,7 @@ body {
 .wc.is-out { pointer-events: none; }
 
 /* ── CASCADE, BETWEEN THE FOUR KINDS ──
-   The front card goes first and the two behind follow it out, 130ms
+   The front card goes first and the two behind follow it out, 113ms
    apart; arriving, the order reverses so the hand assembles back to
    front and the card you asked for lands last. That stagger is the
    whole of it — it is what makes three cards separate on the way out
@@ -3339,21 +3342,21 @@ body {
   to   { translate: 0 0;       rotate: 0deg; scale: 1; }
 }
 .wc-deck.is-cascading .wc.is-out {
-  animation: wcCascOut .8s cubic-bezier(.5, 0, .78, .4) both;
+  animation: wcCascOut .7s cubic-bezier(.5, 0, .78, .4) both;
 }
-.wc-deck.is-cascading .wc.is-out.b1 { animation-delay: .13s; }
-.wc-deck.is-cascading .wc.is-out.b2 { animation-delay: .26s; }
+.wc-deck.is-cascading .wc.is-out.b1 { animation-delay: .11s; }
+.wc-deck.is-cascading .wc.is-out.b2 { animation-delay: .23s; }
 .wc-deck.is-cascading .wc:not(.is-out) {
-  animation: wcCascIn .8s cubic-bezier(.2, .78, .28, 1) both;
-  animation-delay: .37s;
+  animation: wcCascIn .7s cubic-bezier(.2, .78, .28, 1) both;
+  animation-delay: .33s;
 }
-.wc-deck.is-cascading .wc.b1:not(.is-out) { animation-delay: .24s; }
-.wc-deck.is-cascading .wc.b2:not(.is-out) { animation-delay: .11s; }
+.wc-deck.is-cascading .wc.b1:not(.is-out) { animation-delay: .21s; }
+.wc-deck.is-cascading .wc.b2:not(.is-out) { animation-delay: .1s; }
 
 /* ── PEEL, INSIDE A GROUP ──
    One card at a time off the top: it lifts up and back before it goes,
    then arcs away to the left, and the next one is already there
-   underneath. 215ms apart, which is far enough that you watch three
+   underneath. 188ms apart, which is far enough that you watch three
    separate cards leave rather than a hand.
 
    THE PIVOT IS THE LOWER-LEFT CORNER, AND ONLY THE FRONT CARD GETS
@@ -3381,17 +3384,17 @@ body {
   to   { translate: 0 0;       rotate: 0deg;  scale: 1; }
 }
 .wc-deck.is-peeling .wc.is-out {
-  animation: wcPeelOut .89s cubic-bezier(.36, .02, .5, 1) both;
+  animation: wcPeelOut .78s cubic-bezier(.36, .02, .5, 1) both;
 }
 .wc-deck.is-peeling .wc.is-out:not(.b1):not(.b2) { transform-origin: 0% 100%; }
-.wc-deck.is-peeling .wc.is-out.b1 { animation-delay: .21s; }
-.wc-deck.is-peeling .wc.is-out.b2 { animation-delay: .43s; }
+.wc-deck.is-peeling .wc.is-out.b1 { animation-delay: .19s; }
+.wc-deck.is-peeling .wc.is-out.b2 { animation-delay: .38s; }
 .wc-deck.is-peeling .wc:not(.is-out) {
-  animation: wcPeelIn .86s cubic-bezier(.2, .78, .28, 1) both;
-  animation-delay: .53s;
+  animation: wcPeelIn .75s cubic-bezier(.2, .78, .28, 1) both;
+  animation-delay: .46s;
 }
-.wc-deck.is-peeling .wc.b1:not(.is-out) { animation-delay: .34s; }
-.wc-deck.is-peeling .wc.b2:not(.is-out) { animation-delay: .16s; }
+.wc-deck.is-peeling .wc.b1:not(.is-out) { animation-delay: .3s; }
+.wc-deck.is-peeling .wc.b2:not(.is-out) { animation-delay: .14s; }
 
 /* ── AND IT IS NOT GATED, BECAUSE THE DEAL IS NOT ──
    This went in behind a prefers-reduced-motion rule while the deal —
