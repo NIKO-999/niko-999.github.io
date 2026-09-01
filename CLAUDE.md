@@ -506,6 +506,31 @@ omission left the dots sitting inside the bar. A constant here is the
 same number written where it cannot see the hero reflow, the notch
 change, or the type scale move.
 
+**THE FLOOR IS WHAT IS PAINTED, NOT THE BAR'S BOX.** `.bar` is
+`background: none` — a transparent frame holding two drawn things, the
+tab pill and the add button, and its own padding puts both of them 7px
+below the box it reports. Measuring the box threw those seven pixels
+away for a surface that draws nothing. The comment that used to sit on
+this arithmetic said the opposite — that the pill reaches ABOVE its
+reported box — and it was simply false: measured at 390x844 the box
+top is 759 and the pill's is 766, on every viewport tried. It is read
+off the bar's children now, so a change to either one moves it alone.
+
+**And the rest of the room was two gaps.** The dots' margin went 12 to
+8 and the clearance under them 18 to 12, which with the reclaimed
+padding takes the card from 595px to 612 at 390x844. That is the whole
+of what is available: what is left above it is the head, and what is
+left below is the dots, and both are things somebody decided to have
+rather than slack.
+
+**Asserted in both directions, because "as large as possible" quietly
+becomes "one pixel into the tab bar".** Every drawn thing must clear
+the next with a real gap, AND the deck must come within 30px of the
+painted floor — the first fails if the deck grows into the bar, the
+second if it goes back to stopping at the bar's box. Neither catches
+the other: proved by making each mistake on purpose and watching the
+right one fall over.
+
 **Overflow that ESCAPES its box is the kind a narrow column never warns
 you about.** The day's committed hours sit opposite its name; on a 76px
 shut card, with `white-space: nowrap` in a space-between head, it did

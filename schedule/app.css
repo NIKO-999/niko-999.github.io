@@ -1902,7 +1902,11 @@ body {
   display: flex;
   justify-content: center;
   gap: 5px;
-  margin: 12px 0 0;
+  /* 8, and it was 12. This and the clearance under it in scDeckFit are
+     the only two gaps between the card and the bar, so they are the
+     whole of what the deck can be given without taking the head or the
+     dots away — 17px of card at 390x844, measured rather than felt. */
+  margin: 8px 0 0;
 }
 .wk-dots i {
   width: 6px;

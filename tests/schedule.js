@@ -2121,6 +2121,50 @@ const SAID = [
   ok('every day, opened, sits in the middle of the deck',
     strays.length === 0, strays);
 
+  /* ── THE DECK IS AS TALL AS THE SCREEN ALLOWS AND NO TALLER ──
+     The card is measured, never set — the gap from the top of the deck
+     window down to the bar, less what the page dots take. Two things
+     make that easy to get wrong in opposite directions, so both are
+     asserted rather than the height itself, which moves with the type
+     scale and the notch.
+
+     THE FLOOR IS WHAT IS PAINTED. `.bar` is `background: none`: a
+     transparent frame whose own padding puts the tab pill and the add
+     button 7px below the box it reports. Measuring the box threw those
+     seven pixels away for a surface that draws nothing — so the floor
+     is the topmost painted child, and the comment in the app that said
+     the pill reaches ABOVE its box was simply false.
+
+     AND NOTHING MAY TOUCH. The dots are a sibling of the rail and have
+     twice ended up underneath the bar; the deck growing into them is
+     the same bug from the other side. Every drawn thing is required to
+     clear the next one with a real gap, so "as large as possible"
+     cannot quietly become "one pixel into the tab bar". */
+  const fit = await page.evaluate(() => {
+    const b = (s2) => { const e = document.querySelector(s2);
+      if (!e) return null; const r = e.getBoundingClientRect();
+      return { top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1) }; };
+    const bar = document.querySelector('.bar');
+    const painted = [].map.call(bar.children, (k) => k.getBoundingClientRect().top)
+      .filter((t) => t > 0);
+    return { win: b('#scDeckWin'), dots: b('.wk-dots'),
+      barBox: +bar.getBoundingClientRect().top.toFixed(1),
+      floor: +Math.min.apply(null, painted).toFixed(1),
+      vh: window.innerHeight };
+  });
+  ok(`the deck clears the page dots (${(fit.dots.top - fit.win.bot).toFixed(1)}px)`,
+    fit.dots.top - fit.win.bot >= 4, fit);
+  ok(`and the dots clear the bar's painted edge `
+    + `(${(fit.floor - fit.dots.bot).toFixed(1)}px)`,
+    fit.floor - fit.dots.bot >= 6, fit);
+  /* The slack that is left. The bar's box is taller than anything drawn
+     in it, so a deck that stops at the BOX is leaving real card on the
+     table — this fails if that regresses, and it is the half that
+     "nothing overlaps" alone would never notice. */
+  ok(`and it uses the room the bar only appears to take `
+    + `(${(fit.floor - fit.win.bot).toFixed(1)}px from deck to painted floor)`,
+    fit.floor - fit.win.bot <= 30, fit);
+
   /* And the shut cards are real buttons, which is what makes the week
      reachable without a swipe at all. */
   ok('every shut card is a named, focusable control',

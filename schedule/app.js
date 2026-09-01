@@ -1518,17 +1518,41 @@
     var win = $('scDeckWin');
     var bar = document.querySelector('.bar');
     var top = win.getBoundingClientRect().top;
-    var floor = bar ? bar.getBoundingClientRect().top : window.innerHeight;
-    /* The dots' own margin is not in its height, and the bar's glass
-       pill reaches above the box `getBoundingClientRect` reports for it
-       — so the first measurement left the dots sitting inside the bar.
-       Read the margin rather than adding a number that happens to work
-       at this type scale. */
+    /* ── THE FLOOR IS WHAT IS PAINTED, NOT THE BAR'S BOX ──
+       `.bar` is `background: none` — it is a transparent frame holding
+       two drawn things, the tab pill and the add button, and its own
+       padding puts both of them 7px below the box it reports. Measured
+       at 390x844: the bar's box top is 759 and the pill's is 766, so
+       treating the box as the floor threw away seven pixels of card
+       for a surface that draws nothing.
+
+       The comment this replaces said the opposite — that the pill
+       reaches ABOVE the reported box — which is what the arithmetic
+       had been built around. It is false and was worth measuring
+       rather than believing: the pill sits INSIDE the box, on both
+       axes, at every viewport tried.
+
+       Read from the children rather than by subtracting the padding,
+       so a change to either one moves this on its own. */
+    var floor = window.innerHeight;
+    if (bar) {
+      floor = bar.getBoundingClientRect().top;
+      var tops = [].map.call(bar.children, function (kid) {
+        return kid.getBoundingClientRect().top;
+      }).filter(function (t) { return t > 0; });
+      if (tops.length) floor = Math.min.apply(null, tops);
+    }
+    /* The dots' own margin is not in its height, so it is read rather
+       than assumed — a number that happens to work at this type scale
+       stops working when the scale moves. The 12 below it is the only
+       constant here and it is the clearance between the dots and the
+       pill: at 8 the two read as one control, and there is nothing to
+       be won past it because the pill is the thing being cleared. */
     var give = 24;
     if (dots) {
       var ds = getComputedStyle(dots);
       give = dots.getBoundingClientRect().height
-        + parseFloat(ds.marginTop || 0) + parseFloat(ds.marginBottom || 0) + 18;
+        + parseFloat(ds.marginTop || 0) + parseFloat(ds.marginBottom || 0) + 12;
     }
     /* On the WINDOW, because that is the box with a fixed size; the
        track inside it is as tall as the window and as wide as it needs
