@@ -660,6 +660,149 @@ declaration. Arriving at the screen stays instant: a week that appears
 already mid-animation looks like it was left running while you were
 somewhere else.
 
+## The card is an object, and the running block is a pill
+
+Two changes chosen the way this repo chooses things: six whole visual
+languages were injected over the REAL app at 390x844 and read at 1:1
+— `.claude/workflows/skin-render.js` is the harness, `SKINLIVE=1`
+shoots the shipped app on the same fixture as the baseline. What came
+back was that the app's chrome was already close to right and its two
+weakest objects were the card and the block that is happening now.
+
+**THE FACE IS A MATERIAL, NOT A TINT.** It was a flat 4% wash of the
+ink inside a 10% border, which on a near-black page is a rectangle
+very slightly lighter than the page — a REGION of the screen rather
+than an object on it. Three shadows and each does a different job: a
+specular hairline along the top edge where a light above the phone
+would catch, a contact shadow that puts it on something, and a wide
+offset one that puts a gap under it. One flat blur does all three
+badly, which is the workout card's own lesson at a different size.
+
+**AND THERE IS NO `backdrop-filter` ON IT, DELIBERATELY.** That is
+what the material would be in the OS and it is the one thing this
+deck cannot afford: a backdrop pass is redone whenever the FILTERED
+element's own subtree repaints, and these cards move — the track
+transforms on every press and the open card's WIDTH is transitioned
+for 260ms. Seven faces re-blurring every frame of that is exactly the
+bug that cost the orrery three rounds of performance work, and it
+would arrive here already known. Nothing is lost by drawing it: a
+static wash cannot tell you what is behind it, and behind it is a
+card-shaped piece of one flat ground.
+
+**THE RUNNING ROW IS A PILL.** It was a 4px rule down the left edge,
+which is a MARGIN NOTE — it says something about the row without
+being the row. Filled, the block that is happening now is the one
+object on the card, which is what you open this screen to find.
+
+**IT DOES NOT BLEED, AND THAT TOOK THREE GOES.** The rule version
+reached 13px LEFT and grew by 13 to compensate, because a negative
+margin with `width: 100%` slides the whole box: the right edge lands
+13px inside every other row and the time column steps out of the one
+alignment this design is built on. Equal margins either side fixed
+the slide and broke the shape — **`.day-card` is a SCROLLER**, so a
+row wider than its parent has exactly its four rounded corners
+clipped off. The radius was applied, the corners were cut square, and
+it was reported as *that doesn't look like the pill shape*. The pill
+is the row's own box now: nothing negative, nothing wider than its
+parent, so nothing is clipped and the content cannot move because no
+margin or padding changed.
+
+**A corner has to be measured against the CARD, not the row.** A
+sample taken inside the row's own box lands OUTSIDE the card while
+the row is wider than it, reads the page, and reports "the radius is
+clipping" — which is what it did, on a pill whose corners were being
+cut off. The check compares the row's edges to the card's.
+
+**And the width is said out loud, never left to `auto`.** The card's
+column does not stretch its children, so `auto` is shrink-to-fit: an
+earlier pass ended the pill at the last letter of the block's name
+and the sweep ran off the end of its own ground halfway down the row.
+
+**The sweep is clipped by the ROW, not given a radius of its own.**
+It is `position: absolute; inset: 0`, so it painted a hard rectangle
+straight across the pill's rounded corners — the radius was applied,
+and invisible, which is the worst way for one to fail. Giving the
+`::after` `border-radius: inherit` fixes the corners and is the wrong
+fix: the sweep's leading edge is a 2px BORDER, so the curve bends it
+into a bracket travelling across the row. The row owning the clip
+keeps that edge vertical.
+
+**THE RUNNING ROW'S TIME IS `--ink`, AND THE SWEEP DECIDED THAT.**
+`--dim` is right for a row you are not on and measurably wrong on
+this one: the pill's ground is the accent at 24% and the sweep lays
+another 13% over it as it crosses, so the line the time sits on is
+the accent at about a third. `--dim` there is **3.74:1**, under the
+bar, and under it only for the 68px the trail happens to be covering
+— a contrast failure that MOVES. The suite caught it as 14% of the
+row spoiled. Dropping the fill until `--dim` survives gives up most
+of what makes the pill an object; `--ink` is 7.72:1 with the sweep
+over it and says the right thing anyway, since the block happening
+now is the one row you are meant to be reading. That is the third
+time this sweep's wash has decided a colour on this screen.
+
+**AND THE FILL HAS A CEILING THE ACCENT SETS.** At the same alpha a
+blue keeps its identity and a lime does not: 20% blue over near-black
+still reads blue, 15% lime reads olive. Worse, the ceiling is tighter
+where it is needed most — `--dim` over a lime pill is 5.01:1 at 26%
+and 4.33:1 at 30%, where blue still holds 5.44:1 at 34%. So the fill
+sits at 24% and **the RING carries the object**, at 1.5px and 75% of
+the accent, because nothing is written on a ring and it therefore
+costs no contrast at all.
+
+**THE ACCENT IS NOT HARDCODED, AND SYSTEMBLUE CANNOT BE.** The lens
+this came from was rendered in Apple's own blue, and the wheel
+refuses it: every hue is floored at 6:1 on this ground and `#0A84FF`
+is about 3.6:1, so asking for that angle returns a cyan. The blue in
+the lab shot was forced past the wheel with `!important`. The wheel
+and its lime stayed; what shipped is the material and the pill, which
+is the half that was never about colour.
+
+**Two rules of the founding idiom were reversed, and both are NAMED.**
+Nothing was rounded but the bar's pill, its tabs and the history
+glass; the running block's pill is the third, and its corner is the
+card's own less the face's padding, so the two curves are struck from
+one centre rather than the pill inventing a radius. Nothing cast
+anything; the day card does, because the deck is a hand of cards HELD
+above the page rather than a region printed on it. The TOAST was
+already casting and had no note beside it saying so — which is how an
+exception becomes a precedent nobody argued for. `tests/schedule.js`
+holds both lists by name and everything else at zero, and a hairline
+written as a spread with no blur is a RING rather than a cast.
+
+### Two checks that only passed on certain days
+
+Both were found by a container's clock rolling past midnight, and
+neither had anything to do with the change that surfaced them.
+
+**A day was found by its LABEL, and the open card prints a different
+one.** A shut card shows `TUE` and the open one shows `Tuesday`, so
+`textContent === 'TUE'` finds nothing on the one day of the week when
+Tuesday happens to be open — `find` returns undefined and the next
+line reads `querySelectorAll` off it, taking the whole file down with
+a crash forty assertions before the thing it was testing. It is found
+by `data-d` now, the weekday the card was BUILT for, which does not
+move when the card opens. The same trap is written up against
+`week-render`, which threw on `wednesday` for exactly this reason:
+position was replaced by label, and label carried the same class of
+bug one level down.
+
+**And the fade check sampled one line and hoped.** It read a single
+row of pixels 26px above the card's foot, which lands on a word only
+if the rows sit where they sat the day it was written — and a row's
+height changes with whether its time is drawn, which changes with how
+much of today is behind you. Run in the small hours, with nothing
+past and every row taller, the line fell in the GAP between two rows
+and both readings came back as bare card: 6 against 6, a failure that
+says nothing about the mask. The card is scrolled so the first row
+reaching into the zone has its bottom 6px above the card's, which
+puts its two lines inside the fade at any row height and at any hour;
+the band is read deep, where the mask actually bites — the same line
+measures 255 unmasked, 240 at bot-36 and 161 at bot-24, so a band
+starting at the top of the ramp measures it at its weakest. And the
+unmasked reading is now held to being BRIGHT before the difference is
+allowed to mean anything, so a fixture with nothing under the fold
+says so rather than blaming the mask.
+
 ## The card has a back
 
 **The objectives live on the back of the day's own card**, because they

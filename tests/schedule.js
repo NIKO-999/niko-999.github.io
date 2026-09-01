@@ -488,14 +488,32 @@ const SAID = [
   await page.waitForTimeout(420);
   ok('two days named writes two rows',
     await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED + 2);
-  /* Found by LABEL, not by position. The week rotates with the clock
-     now, so .day:nth-child(2) is a different weekday every day and a
-     test written against it passes or fails depending on when it runs. */
-  const rowsOf = (abbr) => page.evaluate((a) => {
+  /* Found by the day's own DATA, not by position and not by label.
+     Position went first: the week rotates with the clock, so
+     .day:nth-child(2) is a different weekday every day and a test
+     written against it passes or fails depending on when it runs.
+
+     The label replaced it and carried the same class of bug one level
+     down. A SHUT card prints the abbreviation and the OPEN one prints
+     the full day name, so `textContent === 'TUE'` finds nothing on
+     the one day of the week when Tuesday happens to be the card that
+     is open — `find` returns undefined and the next line reads
+     querySelectorAll off it. It sat here until a container's clock
+     rolled past midnight into a Tuesday and took the whole file down
+     with a crash forty assertions before the thing it was testing.
+     The same trap is written up in CLAUDE.md against week-render,
+     which threw on 'wednesday' for exactly this reason.
+
+     `data-d` is the weekday the card was BUILT for. It does not move
+     when the card opens, and there is no day of the week on which
+     this reads differently. */
+  const DOW = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
+  const rowsOf = (abbr) => page.evaluate((d) => {
     const day = [...document.querySelectorAll('.day')]
-      .find((d) => d.querySelector('.day-name').textContent === a);
+      .find((x) => x.dataset.d === String(d));
+    if (!day) throw new Error('no card for weekday ' + d);
     return [...day.querySelectorAll('.row[data-id] .n')].map((n) => n.firstChild.textContent);
-  }, abbr);
+  }, DOW[abbr]);
   ok('and it lands in time order inside the day',
     await rowsOf('TUE').then((v) => v.join('|') === 'Wake|Train|Walk|Physio|Trading|Read|Down'),
     await rowsOf('TUE'));
@@ -805,7 +823,13 @@ const SAID = [
      partway across a row reads as a bug. */
   await page.emulateMedia({ reducedMotion: 'reduce' });
   const calm = await page.evaluate(() => {
-    const row = document.querySelector('.row.is-now');
+    /* THE ONE WITH A REAL BOX. Every card carries its rows and only
+       the open one draws them, so a bare `.row.is-now` can land on a
+       shut card — a zero-width box whose pixels are the page, which
+       is what the sample below read before and why it came back as
+       bare ground. */
+    const row = [...document.querySelectorAll('.row.is-now')]
+      .find((r) => r.getBoundingClientRect().width > 40);
     const a = getComputedStyle(row, '::after');
     const w = (r) => +getComputedStyle(r.querySelector('.n')).fontWeight;
     /* The weight is read RELATIVE to a row that is not running, never
@@ -816,7 +840,8 @@ const SAID = [
        being claimed is "heavier than its neighbours", so that is what
        is measured. */
     const other = [...document.querySelectorAll('.row[data-id]')]
-      .find((r) => !r.classList.contains('is-now'));
+      .find((r) => !r.classList.contains('is-now')
+        && r.getBoundingClientRect().width > 40);
     /* ── THE ACCENT IS ASKED FOR, NEVER TYPED ──
        This was the literal rgb(226, 35, 26), which was the shipped
        red — and the shipped palette is Lime now, so the assertion was
@@ -825,16 +850,111 @@ const SAID = [
        made: the running row wears the ACCENT. */
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim();
+    /* CLIPPED TO THE CARD. The pill bleeds 10px past the row either
+       side, and .day-card is a scroller — so that bleed is clipped
+       and a sample taken 6px inside the pill's own right edge lands
+       on the page BEHIND the card, which is what this read before:
+       bare ground, for the pill and the plain row alike. Intersected
+       with the card, the sample is inside what is actually drawn. */
+    const card = document.querySelector('.day.is-open .day-card')
+      .getBoundingClientRect();
+    const box = (e) => { const r = e.getBoundingClientRect();
+      const x = Math.max(r.x, card.x);
+      const right = Math.min(r.right, card.right);
+      return { x, y: r.y, w: right - x, h: r.height }; };
     return { display: a.display, anim: a.animationName,
-             rule: getComputedStyle(row).borderLeftColor,
              accent: accent,
+             pill: box(row), other: other ? box(other) : null,
              weight: w(row), plain: other ? w(other) : null };
   });
-  const hexRGB = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
-    .map((x) => parseInt(x, 16)).join(', ') + ')';
   ok('reduced motion does not build the sweep', calm.display === 'none', calm);
-  ok('and the row is still marked without it',
-    calm.rule === hexRGB(calm.accent) && calm.weight > calm.plain, calm);
+
+  /* ── THE MARK IS THE PILL NOW, AND IT IS READ OFF THE SCREEN ──
+     It was a 4px rule down the left edge and the check was a string
+     compare against borderLeftColor. Both are gone: the running block
+     is a filled pill, so what has to be true is that its GROUND is
+     the accent's and a plain row's is not.
+
+     Measured on composited pixels rather than from the declaration,
+     because `color-mix(in srgb, var(--red) 15%, transparent)` computes
+     to `color(srgb 0.78 0.98 0.26 / 0.15)` rather than to an rgba —
+     a string check against --red's own hex passes on nothing and
+     fails on everything, which this file has already shipped once.
+
+     And the claim is the accent's own CHANNEL ORDER rather than a
+     colour: the wheel turns --red through every hue there is, so the
+     channel that is largest in the accent has to be the one largest
+     in the difference the pill makes. That holds at every angle,
+     which a hex cannot. Reduced motion is still on, so the sweep is
+     not built and the ground being sampled is the pill's alone. */
+  {
+    const png = PNG.sync.read(await page.screenshot());
+    const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
+      + Math.round(x * dpr)) << 2;
+      return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+    /* Six pixels in from the pill's right edge: inside its ground and
+       clear of the name, which stops well short of it. */
+    const lit = at(calm.pill.x + calm.pill.w - 6, calm.pill.y + calm.pill.h / 2);
+    const off = at(calm.other.x + calm.other.w - 6, calm.other.y + calm.other.h / 2);
+    const acc = calm.accent.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
+    const diff = lit.map((v, i) => v - off[i]);
+    const top = acc.indexOf(Math.max(...acc));
+    ok('the running row\'s ground is the accent and a plain row\'s is not '
+      + `(${lit} against ${off})`,
+      diff[top] > 6 && diff.every((v, i) => i === top || v <= diff[top]), 
+      { lit, off, diff, accent: calm.accent });
+  }
+  ok('and the row is still marked without the sweep',
+    calm.weight > calm.plain, calm);
+
+  /* ── THE PILL IS THE ROW'S OWN BOX, AND NOTHING CLIPS IT ──
+     Two faults, one after the other. The rule version reached 13px
+     LEFT and grew by 13 to compensate, which SLIDES the box: the
+     right edge lands inside every other row and the time column steps
+     out of the one alignment this design is built on. Equal margins
+     either side fixed the slide and broke the shape — `.day-card` is
+     a scroller, so a row wider than its parent has exactly its four
+     rounded corners clipped off, and the pill read as a band across
+     the row rather than as an object.
+
+     So both are asserted: the running row's box matches a plain row's
+     on both edges, and it sits inside the card that would otherwise
+     cut it. A corner measured inside the ROW's box passed while the
+     pill was clipped — the sample landed outside the card and read
+     the page — so the edges are compared against the CARD. */
+  const nowCols = await page.evaluate(() => {
+    const now = document.querySelector('.day.is-open .row.is-now');
+    const plain = [...document.querySelectorAll('.day.is-open .row[data-id]')]
+      .find((r) => !r.classList.contains('is-now'));
+    const at = (r, sel) => { const e = r.querySelector(sel);
+      return e ? +e.getBoundingClientRect().x.toFixed(1) : null; };
+    const right = (r) => +r.getBoundingClientRect().right.toFixed(1);
+    return { nowIc: at(now, '.ic'), plainIc: at(plain, '.ic'),
+             nowN: at(now, '.n'), plainN: at(plain, '.n'),
+             /* The pill's own box bleeds, so its right edge is OUTSIDE
+                a plain row's by the bleed — asserted as equal on both
+                sides rather than merely "wider", which a one-sided
+                slide also satisfies. */
+             nowRight: right(now), plainRight: right(plain),
+             nowLeft: +now.getBoundingClientRect().x.toFixed(1),
+             plainLeft: +plain.getBoundingClientRect().x.toFixed(1),
+             card: (() => { const c = document.querySelector('.day.is-open .day-card')
+               .getBoundingClientRect();
+               return { l: +c.x.toFixed(1), r: +c.right.toFixed(1) }; })(),
+             rad: parseFloat(getComputedStyle(now).borderTopLeftRadius) };
+  });
+  ok('a running row\'s glyph and name sit where every other row\'s do',
+    Math.abs(nowCols.nowIc - nowCols.plainIc) < 1
+    && Math.abs(nowCols.nowN - nowCols.plainN) < 1, nowCols);
+  ok('...and the pill sits exactly on a plain row, neither slid nor wider',
+    Math.abs(nowCols.nowLeft - nowCols.plainLeft) < 1
+    && Math.abs(nowCols.nowRight - nowCols.plainRight) < 1, nowCols);
+  /* Rounded AND not clipped, which is one claim: a radius the card
+     cuts off is a radius that is applied and invisible. */
+  ok('...and its corners are drawn rather than cut off by the card',
+    nowCols.rad >= 8
+    && nowCols.nowLeft >= nowCols.card.l - 0.5
+    && nowCols.nowRight <= nowCols.card.r + 0.5, nowCols);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   /* ── nothing under the span but the span ──
@@ -3696,6 +3816,56 @@ const SAID = [
     /50%/.test(round.prime) && /50%/.test(round.face), round);
   ok('and nothing else in the app is rounded at all',
     round.others.length === 0, round.others);
+
+  /* ── AND THE SAME RULE FOR SHADOW, WHICH HAS ONE EXCEPTION ──
+     The idiom is a Swiss timetable and nothing in it casts. The day
+     card is the one thing that does, on the argument written beside
+     it in app.css: a timetable is printed ON the paper, and the deck
+     is a hand of cards HELD above it. An exception nothing checks is
+     just a rule that stopped being true, which is exactly why the
+     rounding list above exists — so this is the same list for the
+     other half of the idiom.
+
+     Read as "casts something", not as a string: the value carries
+     three shadows and the inset specular hairline, and a check
+     written against the literal would fail on any tuning of it while
+     passing on a card that had quietly stopped casting. */
+  const shade = await page.evaluate(() => {
+    /* A CAST IS A BLUR, and that distinction is the whole check. An
+       inset value is a highlight drawn inside the box, and an outer
+       one with no blur — `0 0 0 1px` — is a RING: a hairline border
+       written as a shadow, which is what the toast uses for its edge
+       and what several surfaces here would use if asked. Counting
+       either as a cast makes this assert "has a box-shadow", which is
+       not the rule. Only an outer shadow with a real blur throws
+       anything. */
+    const cast = (sel) => { const e = document.querySelector(sel);
+      if (!e) return null;
+      const v = getComputedStyle(e).boxShadow;
+      if (!v || v === 'none') return 0;
+      return v.split(/,(?![^(]*\))/)
+        .filter((part) => !/inset/.test(part))
+        .filter((part) => {
+          const px = part.match(/-?[\d.]+px/g) || [];
+          return px.length >= 3 && parseFloat(px[2]) > 0;
+        }).length;
+    };
+    return { face: cast('.wk-front'), toast: cast('.toast'),
+      others: ['.row', '.day-card', '.btn', '.field', '.poster',
+               '.ty-row', '.pat-row', '.ty-card', '.fr-row']
+        .map((sel) => [sel, cast(sel)])
+        .filter(([, v]) => v > 0) };
+  });
+  /* TWO named exceptions, and the second was already here unnamed. The
+     day card casts because the deck is a hand of cards held above the
+     page rather than a region printed on it. The toast casts for the
+     same reason and always did — it is a transient surface over the
+     whole app, and it had no note beside it saying so, which is how
+     an exception becomes a precedent nobody argued for. */
+  ok('the day card casts, and the toast, and those are the two',
+    shade.face >= 2 && shade.toast >= 1, shade);
+  ok('...and nothing else in the app casts anything',
+    shade.others.length === 0, shade);
 
   /* Put the week back, and clear what this section wrote. Everything
      after it reads .row, and a section that leaves the app on another
@@ -7690,8 +7860,27 @@ const SAID = [
        DIFFERENCE the mask makes to real pixels rather than as a class
        being present — a class is exactly what a mask that has stopped
        applying still has. */
+    /* THE CONTENT IS PUT IN THE FADE, not hoped into it. At scrollTop 0
+       the last drawn row happened to end 22px above the card's foot,
+       so the whole 38px fade zone held nothing but the gap before the
+       next row — both readings came back as bare card, 6 against 6,
+       and the failure blamed the mask for a sample that never had
+       anything to measure. Which row lands there is decided by row
+       HEIGHT, and a row's height changes with whether its time is
+       drawn, which changes with how much of today is behind you: it
+       passed for months and broke when a container's clock rolled
+       past midnight and nothing was past any more.
+
+       Scrolled so the first row reaching into the zone has its bottom
+       6px above the card's, which puts its two lines inside the fade
+       at any row height and at any hour. */
     await spage.evaluate(() => {
-      document.querySelector('.day.is-open .day-card').scrollTop = 0;
+      const c = document.querySelector('.day.is-open .day-card');
+      c.scrollTop = 0;
+      const cb = c.getBoundingClientRect().bottom;
+      const next = [...c.querySelectorAll('.row[data-id]')]
+        .find((r) => r.getBoundingClientRect().bottom > cb - 6);
+      if (next) c.scrollTop += next.getBoundingClientRect().bottom - (cb - 6);
     });
     await spage.waitForTimeout(200);
     const foot = await spage.evaluate(() => {
@@ -7704,11 +7893,29 @@ const SAID = [
       const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
         + Math.round(x * dpr)) << 2;
         return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
+      /* A BAND, not one line. It read a single row of pixels 26px up
+         from the foot, which lands on a word only if the rows sit
+         where they sat the day it was written — and a row's height
+         changes with whether its time is drawn, which changes with
+         how much of today is behind you. Run in the small hours, with
+         nothing past and every row therefore taller, the line fell in
+         the gap BETWEEN two rows and both readings came back as bare
+         card: 6 against 6, which fails while saying nothing about the
+         mask. The faded zone is 38px, so the band is scanned and the
+         brightest thing in it is the mark. */
+      /* DEEP in the fade, where it actually bites. The zone is 38px and
+         the mask ramps across it — measured on this fixture the same
+         line reads 255 unmasked, 240 at bot-36 and 161 at bot-24, so
+         a band that starts at the top of the ramp measures the mask
+         at its weakest and reports a difference of forty-odd on a
+         mask that is plainly working. */
       let best = 0;
-      for (let x = foot.x + 8; x < foot.x + foot.w - 8; x += 1) {
-        const p = at(x, foot.bot - 26);
-        const L = .2126 * p[0] + .7152 * p[1] + .0722 * p[2];
-        if (L > best) best = L;
+      for (let y = foot.bot - 28; y <= foot.bot - 14; y += 2) {
+        for (let x = foot.x + 8; x < foot.x + foot.w - 8; x += 1) {
+          const p = at(x, y);
+          const L = .2126 * p[0] + .7152 * p[1] + .0722 * p[2];
+          if (L > best) best = L;
+        }
       }
       return best;
     };
@@ -7717,6 +7924,13 @@ const SAID = [
       + ' !important;-webkit-mask-image:none !important}' });
     await spage.waitForTimeout(150);
     const without = await brightest();
+    /* The unmasked reading has to be BRIGHT before the difference means
+       anything. A fixture with nothing under the fold gives two dark
+       numbers 0 apart, and the message would then blame the mask for
+       a fixture that never overflowed — so say which of the two is
+       actually wrong. */
+    ok(`there is something under the fold to fade (${without.toFixed(0)})`,
+      without > 60, { withMask, without });
     ok(`the foot of an overflowing card is faded `
       + `(${withMask.toFixed(0)} against ${without.toFixed(0)} unmasked)`,
       without - withMask > 40, { withMask, without });
