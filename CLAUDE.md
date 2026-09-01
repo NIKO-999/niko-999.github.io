@@ -685,7 +685,7 @@ declaration. Arriving at the screen stays instant: a week that appears
 already mid-animation looks like it was left running while you were
 somewhere else.
 
-## The card is an object, and the running block is a pill
+## The card is an object, and the pill that was not
 
 Two changes chosen the way this repo chooses things: six whole visual
 languages were injected over the REAL app at 390x844 and read at 1:1
@@ -694,14 +694,15 @@ shoots the shipped app on the same fixture as the baseline. What came
 back was that the app's chrome was already close to right and its two
 weakest objects were the card and the block that is happening now.
 
-**THE FACE IS A MATERIAL, NOT A TINT.** It was a flat 4% wash of the
-ink inside a 10% border, which on a near-black page is a rectangle
-very slightly lighter than the page — a REGION of the screen rather
-than an object on it. Three shadows and each does a different job: a
-specular hairline along the top edge where a light above the phone
-would catch, a contact shadow that puts it on something, and a wide
-offset one that puts a gap under it. One flat blur does all three
-badly, which is the workout card's own lesson at a different size.
+**THE FACE IS A MATERIAL, NOT A TINT, and that half shipped.** It was
+a flat 4% wash of the ink inside a 10% border, which on a near-black
+page is a rectangle very slightly lighter than the page — a REGION of
+the screen rather than an object on it. Three shadows and each does a
+different job: a specular hairline along the top edge where a light
+above the phone would catch, a contact shadow that puts it on
+something, and a wide offset one that puts a gap under it. One flat
+blur does all three badly, which is the workout card's own lesson at
+a different size.
 
 **AND THERE IS NO `backdrop-filter` ON IT, DELIBERATELY.** That is
 what the material would be in the OS and it is the one thing this
@@ -714,85 +715,69 @@ would arrive here already known. Nothing is lost by drawing it: a
 static wash cannot tell you what is behind it, and behind it is a
 card-shaped piece of one flat ground.
 
-**THE RUNNING ROW IS A PILL.** It was a 4px rule down the left edge,
-which is a MARGIN NOTE — it says something about the row without
-being the row. Filled, the block that is happening now is the one
-object on the card, which is what you open this screen to find.
+**THE DAY CARD IS THE ONE THING THAT CASTS**, which reverses half the
+founding idiom and is named in `app.css` rather than smuggled in. A
+timetable is printed ON the paper; the deck is a hand of cards HELD
+above it, and the whole gesture of the week is about objects rather
+than regions of one sheet. The TOAST was already casting with no note
+beside it — which is how an exception becomes a precedent nobody
+argued for — so `tests/schedule.js` holds both by name and everything
+else at zero. A hairline written as a spread with no blur is a RING
+rather than a cast, and does not count.
 
-**IT DOES NOT BLEED, AND THAT TOOK THREE GOES.** The rule version
-reached 13px LEFT and grew by 13 to compensate, because a negative
-margin with `width: 100%` slides the whole box: the right edge lands
-13px inside every other row and the time column steps out of the one
-alignment this design is built on. Equal margins either side fixed
-the slide and broke the shape — **`.day-card` is a SCROLLER**, so a
-row wider than its parent has exactly its four rounded corners
-clipped off. The radius was applied, the corners were cut square, and
-it was reported as *that doesn't look like the pill shape*. The pill
-is the row's own box now: nothing negative, nothing wider than its
-parent, so nothing is clipped and the content cannot move because no
-margin or padding changed.
+### The running block was a pill for a day, and it is a rule again
+
+**It was built, measured, shipped and taken back out**, which is worth
+writing down because the reasoning for it still looks good and the
+answer was still no. The argument was that a 4px rule down the left
+edge is a MARGIN NOTE — it says something about the row without being
+the row — and that the block happening now should be the one object
+on the card. Filled, it was. It was also the loudest thing on a
+screen whose whole job is the words, and it read as a selected cell
+rather than as a schedule.
+
+**Three geometry faults on the way, and the third is the one to
+remember.** Reaching 13px LEFT and growing by 13 keeps the right edge
+still; a plain `width: 100%` with the negative margin SLIDES the box
+and the time column steps out of the one alignment this design is
+built on. Equal margins either side fixed the slide and broke the
+shape — **`.day-card` is a SCROLLER**, so a row wider than its parent
+has exactly its four rounded corners clipped off. The radius was
+applied, the corners were cut square, and it was reported as *that
+doesn't look like the pill shape*.
 
 **A corner has to be measured against the CARD, not the row.** A
 sample taken inside the row's own box lands OUTSIDE the card while
 the row is wider than it, reads the page, and reports "the radius is
 clipping" — which is what it did, on a pill whose corners were being
-cut off. The check compares the row's edges to the card's.
+cut off. That measurement was wrong in interpretation rather than in
+arithmetic, which is the harder kind to notice.
 
-**And the width is said out loud, never left to `auto`.** The card's
-column does not stretch its children, so `auto` is shrink-to-fit: an
-earlier pass ended the pill at the last letter of the block's name
-and the sweep ran off the end of its own ground halfway down the row.
+**THE FILL HAD A CEILING THE ACCENT SET, and that survives the
+removal.** At the same alpha a blue keeps its identity and a lime does
+not: 20% blue over near-black still reads blue, 15% lime reads olive.
+Worse, the ceiling is tighter where it is needed most — `--dim` over a
+lime pill is 5.01:1 at 26% and 4.33:1 at 30%, where blue holds 5.44:1
+at 34%. Any future ground behind that row is bounded by the row's own
+TIME, not by taste.
 
-**The sweep is clipped by the ROW, not given a radius of its own.**
-It is `position: absolute; inset: 0`, so it painted a hard rectangle
-straight across the pill's rounded corners — the radius was applied,
-and invisible, which is the worst way for one to fail. Giving the
-`::after` `border-radius: inherit` fixes the corners and is the wrong
-fix: the sweep's leading edge is a 2px BORDER, so the curve bends it
-into a bracket travelling across the row. The row owning the clip
-keeps that edge vertical.
+**And the sweep decides colours on this row, for the third time.** A
+24% fill plus the sweep's own 13% wash put `--dim` at 3.74:1 — under
+the bar, and under it only for the 68px the trail happens to be
+covering, which is a contrast failure that MOVES. The suite caught it
+as 14% of the row spoiled. It is why the time is neither `--spent`
+nor, on a filled row, `--dim`.
 
-**THE RUNNING ROW'S TIME IS `--ink`, AND THE SWEEP DECIDED THAT.**
-`--dim` is right for a row you are not on and measurably wrong on
-this one: the pill's ground is the accent at 24% and the sweep lays
-another 13% over it as it crosses, so the line the time sits on is
-the accent at about a third. `--dim` there is **3.74:1**, under the
-bar, and under it only for the 68px the trail happens to be covering
-— a contrast failure that MOVES. The suite caught it as 14% of the
-row spoiled. Dropping the fill until `--dim` survives gives up most
-of what makes the pill an object; `--ink` is 7.72:1 with the sweep
-over it and says the right thing anyway, since the block happening
-now is the one row you are meant to be reading. That is the third
-time this sweep's wash has decided a colour on this screen.
+**What survived is one assertion the rule never had**: a running row's
+glyph and name sit exactly where every other row's do, and its right
+edge holds. That is the 13px slide written down as a check, and it was
+one character away from happening again at any time.
 
-**AND THE FILL HAS A CEILING THE ACCENT SETS.** At the same alpha a
-blue keeps its identity and a lime does not: 20% blue over near-black
-still reads blue, 15% lime reads olive. Worse, the ceiling is tighter
-where it is needed most — `--dim` over a lime pill is 5.01:1 at 26%
-and 4.33:1 at 30%, where blue still holds 5.44:1 at 34%. So the fill
-sits at 24% and **the RING carries the object**, at 1.5px and 75% of
-the accent, because nothing is written on a ring and it therefore
-costs no contrast at all.
-
-**THE ACCENT IS NOT HARDCODED, AND SYSTEMBLUE CANNOT BE.** The lens
-this came from was rendered in Apple's own blue, and the wheel
-refuses it: every hue is floored at 6:1 on this ground and `#0A84FF`
-is about 3.6:1, so asking for that angle returns a cyan. The blue in
-the lab shot was forced past the wheel with `!important`. The wheel
-and its lime stayed; what shipped is the material and the pill, which
-is the half that was never about colour.
-
-**Two rules of the founding idiom were reversed, and both are NAMED.**
-Nothing was rounded but the bar's pill, its tabs and the history
-glass; the running block's pill is the third, and its corner is the
-card's own less the face's padding, so the two curves are struck from
-one centre rather than the pill inventing a radius. Nothing cast
-anything; the day card does, because the deck is a hand of cards HELD
-above the page rather than a region printed on it. The TOAST was
-already casting and had no note beside it saying so — which is how an
-exception becomes a precedent nobody argued for. `tests/schedule.js`
-holds both lists by name and everything else at zero, and a hairline
-written as a spread with no blur is a RING rather than a cast.
+**THE ACCENT WAS NEVER THE POINT AND CANNOT BE SYSTEMBLUE.** The lens
+this came from was rendered in Apple's own blue, and the wheel refuses
+it: every hue is floored at 6:1 on this ground and `#0A84FF` is about
+3.6:1, so asking for that angle returns a cyan. The blue in the lab
+shot was forced past the wheel with `!important`.
 
 ### Two checks that only passed on certain days
 

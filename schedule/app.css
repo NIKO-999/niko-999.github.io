@@ -54,15 +54,6 @@
    `tests/schedule.js` rather than left to slip in under the two
    circles' permission.
 
-   AND IT IS THREE, because the block that is RUNNING is a filled
-   pill. It was a 4px rule down the left edge, which is a margin note:
-   it says something about the row without being the row. The one
-   block that is happening now is the thing you open this screen to
-   find, and a filled shape is what makes it an object rather than an
-   annotation. The corner is the card's own, less the face's padding,
-   so the two curves are struck from one centre rather than the pill
-   inventing a radius of its own.
-
    The rule is not weaker for having exceptions; it is stronger for
    naming them. `tests/schedule.js` holds every other surface in this
    app to square corners, so a third rounded thing has to argue for
@@ -238,14 +229,13 @@
      instant the class moves still describes the layout before it. */
   --wk-shut: 76px;
   --meas:  52px;   /* the measure column: 52px is ten hours */
-  /* The card's corner and the corner of a row inside it. CONCENTRIC:
-     the inner is the outer less the face's own 14px of padding, so the
-     two curves are struck from one centre. Named because both rules
-     need them and a pair of numbers written twice is a pair that
-     drifts — which is the whole reason --wk-open and --wk-shut are
-     tokens three lines up. */
+  /* The card's own corner. It was 18 and the material pass took it to
+     26; named rather than written into .wk-front so the face and any
+     later rule that has to agree with it read one number. There was a
+     --wk-ri beside it for a row's corner, and it went with the pill it
+     was for: a token nothing reads is a number waiting to disagree
+     with something. */
   --wk-r:  26px;
-  --wk-ri: 12px;
 }
 
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
@@ -2189,102 +2179,20 @@ body {
 /* The one running block: a red rule down the margin and the weight to
    match. It is the only place on the page the red is spent besides
    today's own name. */
-/* ── THE RUNNING ROW IS A PILL ──
-   It was a 4px rule down the left edge, which is a MARGIN note: it
-   says something about the row without being the row. Filled, the
-   block that is happening now is the one object on the card, which is
-   what you open this screen to find.
-
-   IT DOES NOT BLEED, AND THAT WAS THREE ATTEMPTS. The rule version
-   reached 13px LEFT and grew by 13 to compensate, because a negative
-   margin with width:100% slides the whole box and the right edge then
-   lands 13px inside every other row — the time column steps out of
-   the one alignment this design is built on, and it only shows while
-   something is actually running, which is how it went unseen for
-   months. Equal margins either side fixed the slide and introduced a
-   worse fault: `.day-card` is a SCROLLER, so anything wider than the
-   row is clipped by it, and what gets clipped is exactly the four
-   rounded corners. The radius was applied, the corners were cut off
-   square, and the pill read as a band across the row rather than as
-   an object — reported, correctly, as "that doesn't look like the
-   pill shape".
-
-   The pill is the ROW'S OWN BOX now. Nothing is negative, nothing is
-   wider than its parent, so nothing is clipped and all four corners
-   draw. The content cannot move because no padding or margin changed,
-   which is the property the slide broke and the one worth asserting.
-
-   A corner measured against the CARD, not against the row: a sample
-   taken inside the row's own box lands outside the card when the row
-   is wider than it, and reads the page — which is how a clipped pill
-   measured as "the radius is clipping" and passed.
-
-   THE RING CARRIES IT, NOT THE FILL, and that is forced by the wheel
-   rather than chosen. This was drawn from a lens rendered in Apple's
-   own blue, where a 20% wash over near-black still reads plainly
-   BLUE — a dark blue is still blue. The accent here is a bright
-   yellow-green, and the same wash is olive: [35,43,16], which reads
-   as mud rather than as the colour of anything.
-
-   The obvious answer is more fill, and the row's TIME is what stops
-   it. `--dim` over a lime pill measures 7.15:1 at 15%, 5.01 at 26%
-   and 4.33 at 30% — under the bar before the colour is anywhere near
-   vivid. Blue is not remotely as tight: it holds 5.44:1 at 34%. So
-   the fill sits at 24% (5.31:1, a margin rather than the rounding
-   error above 4.5 this file has shipped twice), and the thing that
-   makes the pill an OBJECT is a bright ring, which costs no text
-   contrast whatever because nothing is written on it.
-
-   1.5px rather than 1: at one device pixel a 75% edge reads as a
-   slightly lighter boundary; at one and a half it reads as a drawn
-   line round a filled shape, which is the difference between a
-   region that is tinted and an object that is there. */
 .row.is-now {
-  /* THE ROW HAS TO BE THE CLIPPER, not merely have `overflow` on it.
-     The sweep is `position: absolute; inset: 0`, so on a static row
-     its containing block is whatever ancestor happens to be
-     positioned — and an `overflow: hidden` that is not on that
-     element does not clip it. The sweep therefore painted a hard
-     rectangle straight across the pill's rounded corners: the radius
-     was applied, and invisible, which is the worst way for one to
-     fail.
-
-     Giving the ::after `border-radius: inherit` fixes the corners and
-     is the wrong fix: the sweep's leading edge is a 2px BORDER, so
-     the curve bends it into a bracket travelling across the row. The
-     row owning the clip keeps that edge vertical, which is what says
-     the sweep is a line crossing a block rather than an object with a
-     shape of its own. */
-  position: relative;
-  border-radius: var(--wk-ri);
-  background: color-mix(in srgb, var(--red) 24%, transparent);
-  box-shadow: inset 0 0 0 1.5px color-mix(in srgb, var(--red) 75%, transparent);
+  border-left: 4px solid var(--red);
+  /* The row reaches 13px further LEFT for its rule, and has to grow by
+     the same amount rather than slide. With a plain width:100% the
+     negative margin moves the whole box, so the right edge lands 13px
+     inside every other row and the time column steps out of the one
+     alignment this design is built on. It only shows when something is
+     actually running, which is how it went unseen. */
+  margin-left: -13px;
+  width: calc(100% + 13px);
+  padding-left: 9px;
   overflow: hidden;   /* the clip the sweep runs inside */
 }
-/* 800 against a base of 600. This rule used to be the only thing
-   making the running row's name heavier than the rest; matching it to
-   the base would make it silently stop doing anything, which is the
-   quietest way for a state to disappear. The sweep and the red measure
-   still carry most of the signal — this is the last step of it. */
 .row.is-now .n { font-weight: 800; }
-/* ── AND ITS TIME GOES TO FULL STRENGTH ──
-   `--dim` is right for a row you are not on. It is wrong on this one
-   for a measured reason: the pill's ground is the accent at 24%, and
-   the SWEEP lays another 13% wash over that as it crosses, so the
-   line the time sits on is the accent at about a third. `--dim` on
-   that is 3.74:1 — under the bar — and it is under it only for the
-   68px of row the trail happens to be covering, which is a contrast
-   failure that moves. The suite caught it as 14% of the row spoiled.
-
-   Dropping the fill until --dim survives would mean giving up most
-   of what makes the pill an object. `--ink` on the same ground is
-   7.72:1 with the sweep over it and 10.95:1 without, and it says the
-   right thing anyway: the block that is happening now is the one row
-   you are meant to be reading, and its name is already the heaviest
-   on the card. This is the third time on this screen that the sweep's
-   wash has decided a colour — it is the reason the time is not
-   --spent either. */
-.row.is-now .t { color: var(--ink); }
 
 /* ── the sweep ──
    A hairline that crosses the running block and keeps crossing it, so

@@ -825,9 +825,7 @@ const SAID = [
   const calm = await page.evaluate(() => {
     /* THE ONE WITH A REAL BOX. Every card carries its rows and only
        the open one draws them, so a bare `.row.is-now` can land on a
-       shut card — a zero-width box whose pixels are the page, which
-       is what the sample below read before and why it came back as
-       bare ground. */
+       shut card, whose rows are 76px of nothing. */
     const row = [...document.querySelectorAll('.row.is-now')]
       .find((r) => r.getBoundingClientRect().width > 40);
     const a = getComputedStyle(row, '::after');
@@ -850,111 +848,43 @@ const SAID = [
        made: the running row wears the ACCENT. */
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim();
-    /* CLIPPED TO THE CARD. The pill bleeds 10px past the row either
-       side, and .day-card is a scroller — so that bleed is clipped
-       and a sample taken 6px inside the pill's own right edge lands
-       on the page BEHIND the card, which is what this read before:
-       bare ground, for the pill and the plain row alike. Intersected
-       with the card, the sample is inside what is actually drawn. */
-    const card = document.querySelector('.day.is-open .day-card')
-      .getBoundingClientRect();
-    const box = (e) => { const r = e.getBoundingClientRect();
-      const x = Math.max(r.x, card.x);
-      const right = Math.min(r.right, card.right);
-      return { x, y: r.y, w: right - x, h: r.height }; };
     return { display: a.display, anim: a.animationName,
+             rule: getComputedStyle(row).borderLeftColor,
              accent: accent,
-             pill: box(row), other: other ? box(other) : null,
              weight: w(row), plain: other ? w(other) : null };
   });
+  const hexRGB = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
+    .map((x) => parseInt(x, 16)).join(', ') + ')';
   ok('reduced motion does not build the sweep', calm.display === 'none', calm);
+  ok('and the row is still marked without it',
+    calm.rule === hexRGB(calm.accent) && calm.weight > calm.plain, calm);
 
-  /* ── THE MARK IS THE PILL NOW, AND IT IS READ OFF THE SCREEN ──
-     It was a 4px rule down the left edge and the check was a string
-     compare against borderLeftColor. Both are gone: the running block
-     is a filled pill, so what has to be true is that its GROUND is
-     the accent's and a plain row's is not.
-
-     Measured on composited pixels rather than from the declaration,
-     because `color-mix(in srgb, var(--red) 15%, transparent)` computes
-     to `color(srgb 0.78 0.98 0.26 / 0.15)` rather than to an rgba —
-     a string check against --red's own hex passes on nothing and
-     fails on everything, which this file has already shipped once.
-
-     And the claim is the accent's own CHANNEL ORDER rather than a
-     colour: the wheel turns --red through every hue there is, so the
-     channel that is largest in the accent has to be the one largest
-     in the difference the pill makes. That holds at every angle,
-     which a hex cannot. Reduced motion is still on, so the sweep is
-     not built and the ground being sampled is the pill's alone. */
-  {
-    const png = PNG.sync.read(await page.screenshot());
-    const at = (x, y) => { const i = (png.width * Math.round(y * dpr)
-      + Math.round(x * dpr)) << 2;
-      return [png.data[i], png.data[i + 1], png.data[i + 2]]; };
-    /* Six pixels in from the pill's right edge: inside its ground and
-       clear of the name, which stops well short of it. */
-    const lit = at(calm.pill.x + calm.pill.w - 6, calm.pill.y + calm.pill.h / 2);
-    const off = at(calm.other.x + calm.other.w - 6, calm.other.y + calm.other.h / 2);
-    const acc = calm.accent.replace('#', '').match(/../g).map((h) => parseInt(h, 16));
-    const diff = lit.map((v, i) => v - off[i]);
-    const top = acc.indexOf(Math.max(...acc));
-    ok('the running row\'s ground is the accent and a plain row\'s is not '
-      + `(${lit} against ${off})`,
-      diff[top] > 6 && diff.every((v, i) => i === top || v <= diff[top]), 
-      { lit, off, diff, accent: calm.accent });
-  }
-  ok('and the row is still marked without the sweep',
-    calm.weight > calm.plain, calm);
-
-  /* ── THE PILL IS THE ROW'S OWN BOX, AND NOTHING CLIPS IT ──
-     Two faults, one after the other. The rule version reached 13px
-     LEFT and grew by 13 to compensate, which SLIDES the box: the
-     right edge lands inside every other row and the time column steps
-     out of the one alignment this design is built on. Equal margins
-     either side fixed the slide and broke the shape — `.day-card` is
-     a scroller, so a row wider than its parent has exactly its four
-     rounded corners clipped off, and the pill read as a band across
-     the row rather than as an object.
-
-     So both are asserted: the running row's box matches a plain row's
-     on both edges, and it sits inside the card that would otherwise
-     cut it. A corner measured inside the ROW's box passed while the
-     pill was clipped — the sample landed outside the card and read
-     the page — so the edges are compared against the CARD. */
+  /* ── AND ITS CONTENT SITS WHERE EVERY OTHER ROW'S DOES ──
+     Kept from the pill that briefly replaced this rule, because it
+     guards the mechanism that was here all along and was never
+     checked. The row reaches 13px LEFT for its rule and has to grow by
+     the same amount rather than slide: with a plain width:100% the
+     negative margin moves the whole box, the right edge lands 13px
+     inside every other row, and the time column steps out of the one
+     alignment this design is built on. It only shows while something
+     is actually running, which is how it went unseen for months — and
+     it is one character away at any time. */
   const nowCols = await page.evaluate(() => {
     const now = document.querySelector('.day.is-open .row.is-now');
     const plain = [...document.querySelectorAll('.day.is-open .row[data-id]')]
       .find((r) => !r.classList.contains('is-now'));
     const at = (r, sel) => { const e = r.querySelector(sel);
       return e ? +e.getBoundingClientRect().x.toFixed(1) : null; };
-    const right = (r) => +r.getBoundingClientRect().right.toFixed(1);
     return { nowIc: at(now, '.ic'), plainIc: at(plain, '.ic'),
              nowN: at(now, '.n'), plainN: at(plain, '.n'),
-             /* The pill's own box bleeds, so its right edge is OUTSIDE
-                a plain row's by the bleed — asserted as equal on both
-                sides rather than merely "wider", which a one-sided
-                slide also satisfies. */
-             nowRight: right(now), plainRight: right(plain),
-             nowLeft: +now.getBoundingClientRect().x.toFixed(1),
-             plainLeft: +plain.getBoundingClientRect().x.toFixed(1),
-             card: (() => { const c = document.querySelector('.day.is-open .day-card')
-               .getBoundingClientRect();
-               return { l: +c.x.toFixed(1), r: +c.right.toFixed(1) }; })(),
-             rad: parseFloat(getComputedStyle(now).borderTopLeftRadius) };
+             nowRight: +now.getBoundingClientRect().right.toFixed(1),
+             plainRight: +plain.getBoundingClientRect().right.toFixed(1) };
   });
   ok('a running row\'s glyph and name sit where every other row\'s do',
     Math.abs(nowCols.nowIc - nowCols.plainIc) < 1
     && Math.abs(nowCols.nowN - nowCols.plainN) < 1, nowCols);
-  ok('...and the pill sits exactly on a plain row, neither slid nor wider',
-    Math.abs(nowCols.nowLeft - nowCols.plainLeft) < 1
-    && Math.abs(nowCols.nowRight - nowCols.plainRight) < 1, nowCols);
-  /* Rounded AND not clipped, which is one claim: a radius the card
-     cuts off is a radius that is applied and invisible. */
-  ok('...and its corners are drawn rather than cut off by the card',
-    nowCols.rad >= 8
-    && nowCols.nowLeft >= nowCols.card.l - 0.5
-    && nowCols.nowRight <= nowCols.card.r + 0.5, nowCols);
+  ok('...and it grows leftward rather than sliding, so the right edge holds',
+    Math.abs(nowCols.nowRight - nowCols.plainRight) < 1, nowCols);
   await page.emulateMedia({ reducedMotion: 'no-preference' });
 
   /* ── nothing under the span but the span ──
