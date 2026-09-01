@@ -2095,6 +2095,58 @@ const SAID = [
     + `(${(fit.floor - fit.win.bot).toFixed(1)}px from deck to painted floor)`,
     fit.floor - fit.win.bot <= 30, fit);
 
+  /* ── AND IT RE-FITS WHEN THE VIEWPORT MOVES ──
+     The height is measured, and it was measured ONCE per render —
+     right on a home screen, where the viewport is a constant, and
+     wrong in every browser, where it is not. Safari collapses its URL
+     bar as you scroll and hands the page back fifty-odd pixels;
+     rotating does the same anywhere, and so does a keyboard closing.
+     The deck kept whatever height it was given while the chrome was
+     still showing, so the card sat short of the bar with visible room
+     under it and no way to claim it — reported from a phone, in
+     Safari, as room going spare below the card.
+
+     Its own page: this resizes the viewport, and a file that leaves
+     the next section measuring a different screen is the kind of
+     cross-talk that reports as ten unrelated failures. */
+  {
+    const rctx = await browser.newContext(PHONE);
+    const rpage = await rctx.newPage();
+    await rpage.addInitScript(() => {
+      localStorage.setItem('sched.tour.v1', '1');
+      localStorage.setItem('sched.view.v1', 'list');
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+    });
+    /* Short first, as though the browser's own chrome were showing. */
+    await rpage.setViewportSize({ width: 390, height: 750 });
+    await rpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await rpage.waitForTimeout(500);
+    const deckOf = () => rpage.evaluate(() => {
+      const w = document.getElementById('scDeckWin').getBoundingClientRect();
+      const bar = document.querySelector('.bar');
+      const painted = [].map.call(bar.children, (k) => k.getBoundingClientRect().top)
+        .filter((t) => t > 0);
+      const d = document.querySelector('.wk-dots').getBoundingClientRect();
+      return { vh: window.innerHeight, h: +w.height.toFixed(1),
+        bot: +w.bottom.toFixed(1), dotsBot: +d.bottom.toFixed(1),
+        floor: +Math.min.apply(null, painted).toFixed(1) };
+    });
+    const shortD = await deckOf();
+    await rpage.setViewportSize({ width: 390, height: 844 });
+    await rpage.waitForTimeout(500);
+    const tallD = await deckOf();
+    ok(`the deck re-fits when the viewport grows `
+      + `(${shortD.h} at ${shortD.vh}px, ${tallD.h} at ${tallD.vh}px)`,
+      tallD.h - shortD.h >= 80, { shortD, tallD });
+    /* And it does not overrun on the way — the same two clearances,
+       measured on the new viewport rather than assumed to survive. */
+    ok('...and still clears the bar afterwards',
+      tallD.floor - tallD.dotsBot >= 6 && tallD.floor - tallD.bot <= 30,
+      tallD);
+    await rctx.close();
+  }
+
   /* And the shut cards are real buttons, which is what makes the week
      reachable without a swipe at all. */
   ok('every shut card is a named, focusable control',

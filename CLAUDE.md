@@ -523,6 +523,26 @@ of what is available: what is left above it is the head, and what is
 left below is the dots, and both are things somebody decided to have
 rather than slack.
 
+**AND IT HAS TO RUN AGAIN WHEN THE VIEWPORT MOVES.** The height was
+measured once per render, which is right on a home screen — where the
+viewport is a constant — and wrong in every browser, where it is not.
+Safari collapses its URL bar as you scroll and hands the page back
+fifty-odd pixels; rotating does the same anywhere, and so does a
+keyboard closing. The deck kept whatever height it was given while the
+chrome was still showing: measured at 390x750 growing to 844, the card
+stayed at **518px while the floor moved to 766** — a hundred and twenty
+pixels of room, visible under the card, with no way to claim it. It was
+reported from a phone, in Safari, as exactly that.
+
+`visualViewport`'s resize is the one that fires for a URL bar
+collapsing — `window.resize` does not do it reliably on iOS — so both
+are heard, plus `orientationchange`, and the work is idempotent. It is
+coalesced into one frame because a resize arrives as a burst and
+`scDeckFit` reads layout: doing it per event is a forced reflow per
+event. It refuses to run unless the deck is the view that is up, since
+writing a height onto `#scDeckWin` while the tally is showing measures
+a rail that is not on screen.
+
 **Asserted in both directions, because "as large as possible" quietly
 becomes "one pixel into the tab bar".** Every drawn thing must clear
 the next with a real gap, AND the deck must come within 30px of the

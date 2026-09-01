@@ -1514,6 +1514,44 @@
       card.scrollHeight - card.clientHeight - card.scrollTop > 4);
   }
 
+  /* ── AND IT HAS TO RUN AGAIN WHEN THE VIEWPORT MOVES ──
+     The height is measured, and until now it was measured ONCE per
+     render — which is right on a phone's home screen, where the
+     viewport is a constant, and wrong in every browser, where it is
+     not. Safari collapses its URL bar as you scroll and hands the page
+     back 50-odd pixels; rotating does the same on any device, and so
+     does a keyboard closing. The deck kept whatever height it was
+     given when the chrome was still showing, so the card sat short of
+     the bar with visible room under it and no way to claim it.
+
+     `visualViewport` is the one that fires for the URL bar collapsing
+     — `window.resize` does not, reliably, on iOS — so both are heard
+     and the work is idempotent either way. Coalesced into one frame
+     because a resize arrives as a burst and scDeckFit reads layout:
+     doing it per event is a forced reflow per event, which is the
+     orrery's own lesson about reading and writing in the same pass.
+
+     Only when the deck is the view that is up. scDeckFit writes a
+     height onto #scDeckWin, and doing that while the tally or the
+     friends board is showing measures a rail that is not on screen. */
+  var fitPend = 0;
+  function scDeckRefit() {
+    if (fitPend) return;
+    fitPend = requestAnimationFrame(function () {
+      fitPend = 0;
+      var rail = $('scRail');
+      var dots = document.querySelector('.wk-dots');
+      if (!rail || rail.hidden || !rail.getBoundingClientRect().height) return;
+      scDeckFit(rail, dots);
+      scDeckJump();
+    });
+  }
+  window.addEventListener('resize', scDeckRefit);
+  window.addEventListener('orientationchange', scDeckRefit);
+  if (window.visualViewport) {
+    window.visualViewport.addEventListener('resize', scDeckRefit);
+  }
+
   function scDeckFit(rail, dots) {
     var win = $('scDeckWin');
     var bar = document.querySelector('.bar');
