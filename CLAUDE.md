@@ -4491,3 +4491,97 @@ and a second one is a SyntaxError that takes the whole file down
 before a single assertion runs. It reported as **"0 assertions across
 1 files"** — which is the greenest-looking failure there is, because
 nothing said FAIL. This repo's oldest bug, wearing test-file clothes.
+
+## Nothing in this app scrolls sideways
+
+The board was a horizontal scroller of 212px columns, so a third
+session sat off the side of the phone and the first was cut in half the
+moment you moved it. It was reported from the phone as exactly that,
+with **"Morning" clipped to "ng" at the left edge**.
+
+The rule that came out of it is broader than the board: **you never
+move a finger sideways to reach anything.** A column you cannot see is
+a column you have to go looking for, and a pager whose end is off the
+screen is a control that hides its own options.
+
+Three things went with it. The board is a **two-column grid** and a
+third session wraps to a second row. The workout sheet's six chips
+**wrap to two rows** instead of scrolling. The length ladder does the
+same — two rows of four fit exactly, which is better than a row you
+have to push, because the rung you are on can no longer be the one off
+the edge.
+
+**NO GUTTER IN A HALF-WIDTH COLUMN.** A board column is about 145px. A
+36px time column left roughly 70px for the name and "Wind down"
+clipped, which is the exact fault the two-column board exists to fix.
+The gutter is the LIST's argument — a column of times is worth its
+width when there is width to spare, and at 145px there is not — so in
+a board the start joins the length on the second line and the name has
+the whole row.
+
+**Asserted as a SCROLLER, never as a clip.** The first cut flagged any
+element whose content was wider than its box, and every ellipsised
+name in the app came back with it: `text-overflow: ellipsis` is
+scrollWidth over clientWidth by definition. What the check asks is the
+one question that means a finger has to move — is this element a
+horizontal scroll container with something outside it — on every view,
+because the app puts a screen away with `hidden` and an element that is
+not laid out reports nothing at all.
+
+**And it runs in its OWN CONTEXT at the foot of the file.** Written
+into the middle of the run it pressed tabs and dismissed sheets, and
+the next section then measured an edit sheet that was no longer open:
+three failures, none of them about overflow. **A check that changes the
+state of the app is a check that has to be alone.**
+
+## Showing up is seven tiles
+
+It was a full-width list with a 26-week strip down the right of every
+row, and before that a two-column board headed Kept and Still to do.
+Both are gone. The question you open that screen with is what you have
+actually done today, and the answer is a figure — so **the figure is
+the loudest thing on the tile** at 22px and everything else is a label
+for it. Two across fits seven items on one screen with no scrolling in
+either direction.
+
+**The switcher went with them.** List and Board sat directly under the
+three stops, which are themselves a row of tabs — two rows of chrome,
+one on top of the other, before a single row of the thing the screen is
+about. Reported as *it's just looking like too much*. `sched.tyview.v1`
+is removed rather than ignored, the way the old palette name and the
+subtitle key were.
+
+**THE CHECK LOGS AND THE CARD OPENS THE RECORD.** Both used to log,
+with the strip beside them opening the history — and the strip is what
+went, so the way in had to move rather than disappear. Two controls
+that did the same thing and a third that did the other one is an
+arrangement a full-width row can afford and a 145px tile cannot. Still
+siblings, never nested. Both carry a written label, because on a tile
+they are a circle and a rectangle with no words between them.
+
+**What it costs is the strip, and that was the argument against it.**
+26 marks in 120px is four pixels a week, and a record you cannot read
+is not a record. The three states are still drawn — the calendar in the
+history sheet is where they live now, one press away.
+
+**SIDE BY SIDE MEANS THE SAME BOX, and this got it wrong first.** Left
+to itself a tile is as tall as what is in it, so a logged figure at
+22px stood beside a "not yet" at 11.5 and the two read as a mistake.
+The grid stretches its children and the card pushes its figure to the
+bottom of whatever height the row settles on.
+
+**`left: auto` is load-bearing on the tile's check.** The base `.chk`
+is positioned from the LEFT for the schedule rows, so setting `right`
+alone leaves both edges anchored — the tick drew over the glyph, seen
+on the real app as a purple check sitting on a dumbbell.
+
+### A test file has scopes, and a move is not a copy
+
+Two self-inflicted faults in one pass, both of them this repo's oldest
+bug in new clothes. `const cols` was already declared in the file and a
+second one is a SyntaxError that reports as **"0 assertions across 1
+files"** — the greenest-looking failure there is. And a script that cut
+a block out and re-inserted it found the same anchor twice, so the file
+ended up with two copies of one section and no closing brace. Both were
+recovered by restoring the file from the last commit and re-applying
+the edits in one pass, which is cheaper than unpicking them.

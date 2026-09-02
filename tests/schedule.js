@@ -2494,8 +2494,11 @@ const SAID = [
      -trips through localStorage is a list a damaged record can change,
      and the whole argument for these five is that they are the same
      five for everyone. */
+  /* THE CHECK LOGS AND THE CARD OPENS THE RECORD. Both used to log,
+     with the strip beside them opening the history; the strip went with
+     the tile, so the two remaining controls each took one job. */
   const stored = await page.evaluate(() => {
-    document.querySelector('.ty-card[data-item="t"]').click();
+    document.querySelector('.ty-row:has(.ty-card[data-item="t"]) > .chk').click();
     return localStorage.getItem('sched.tick.v1');
   });
   /* Ticking Train opens the workout deck over this screen. Nothing
@@ -2801,36 +2804,43 @@ const SAID = [
 
   /* ── two targets, and neither inside the other ──
      A <button> inside a <button> is invalid and collapses to one press,
-     which would silently make the strip un-openable while looking
-     exactly right. The row is one element and the strip is its sibling,
-     and that is the thing worth asserting. */
+     which would silently make one of them unreachable while looking
+     exactly right. The tile's two controls are SIBLINGS: the check
+     logs, and the card under it opens the record.
+
+     The strip that used to be the second target went with the tile —
+     26 marks in 120px is four pixels a week — so the way into the
+     history moved onto the card rather than disappearing with it. */
   const rows = await page.evaluate(() => {
     const r = [...document.querySelectorAll('.ty-row')];
     return {
       n: r.length,
       nested: r.some((x) => x.querySelector('button button')),
       pairs: r.every((x) => x.querySelector(':scope > .ty-card')
-                         && x.querySelector(':scope > .ty-hist')),
+                         && x.querySelector(':scope > .chk')),
+      strip: !!document.querySelector('.ty-hist'),
       taps: r.map((x) => {
         const a = x.querySelector('.ty-card').getBoundingClientRect();
-        const b = x.querySelector('.ty-hist').getBoundingClientRect();
-        return [Math.round(Math.min(a.width, a.height)), Math.round(b.width)];
+        return Math.round(Math.min(a.width, a.height));
       }),
-      labels: r.map((x) => x.querySelector('.ty-hist').getAttribute('aria-label')),
+      labels: r.map((x) => x.querySelector('.ty-card').getAttribute('aria-label')),
+      logs: r.map((x) => x.querySelector('.chk').getAttribute('aria-label')),
     };
   });
-  ok('six rows, each a card and a strip side by side',
-    rows.n === 6 && rows.pairs, rows);
-  ok('and the strip is a SIBLING of the card, never nested inside it',
+  ok('six tiles, each a check and a card', rows.n === 6 && rows.pairs, rows);
+  ok('and the check is a SIBLING of the card, never nested inside it',
     !rows.nested, rows);
-  ok('both halves of a row clear 44px for a thumb',
-    rows.taps.every(([a, b]) => a >= 44 && b >= 44), rows.taps);
-  ok('and the strip says what it opens, since it draws no words',
-    rows.labels.every((l) => /history/.test(l || '')), rows.labels);
+  ok('the strip is gone rather than hidden', !rows.strip, rows);
+  ok('the card clears 44px for a thumb', rows.taps.every((a) => a >= 44), rows.taps);
+  /* Both controls have to SAY which one they are: on a tile they are a
+     circle and a rectangle with no words between them. */
+  ok('the card says it opens the record and the check says it logs',
+    rows.labels.every((l) => /history/.test(l || ''))
+    && rows.logs.every((l) => /^(Log|Unlog) /.test(l || '')), rows.labels);
 
   /* Pressed the way a thumb presses it — the handler is what has to
      open the panel, not a call to the function behind it. */
-  await page.click('.ty-row:has([data-item="p"]) .ty-hist');
+  await page.click('.ty-row:has(.ty-card[data-item="p"]) .ty-card');
   await page.waitForTimeout(220);
 
   /* ── ONE FILTER, NOT ONE HUNDRED AND EIGHTY-TWO ──
@@ -2880,29 +2890,24 @@ const SAID = [
     const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
     const rgb = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
       .map((x) => parseInt(x, 16)).join(', ') + ')';
-    /* The ring is the circle check now, filled on a kept item. */
+    /* The ring is the circle check, filled on a kept item, and the
+       row's own strip is gone with the tile — so the calendar in the
+       history sheet is the whole of the record this measures. */
     const a1 = document.querySelector('.ty-row.is-on > .chk');
-    const s1 = document.querySelector('.ty-hist svg');
     const c1 = document.querySelector('.ty-cal');
-    if (!a1 || !s1 || !c1) return { probe: [!!a1, !!s1, !!c1] };
+    if (!a1 || !c1) return { probe: [!!a1, !!c1] };
     const arc = getComputedStyle(a1).backgroundColor;
-    const fills = (root, sel) => [...root.querySelectorAll(sel)]
-      .map((r) => r.getAttribute('fill'));
-    const strip = fills(s1, 'rect');
-    const cal = fills(c1, ':scope > rect');
+    const cal = [...c1.querySelectorAll(':scope > rect')].map((r) => r.getAttribute('fill'));
     return { red: rgb(hex('--red')), off: rgb(hex('--tick-off')), arc,
-      stripLit: strip.filter((f) => f === 'var(--red)').length,
-      stripOff: strip.filter((f) => f === 'var(--tick-off)').length,
       calLit: cal.filter((f) => f === 'var(--red)').length,
       calOff: cal.filter((f) => f === 'var(--tick-off)').length,
-      other: strip.concat(cal).filter((f) =>
-        f !== 'var(--red)' && f !== 'var(--tick-off)') };
+      other: cal.filter((f) => f !== 'var(--red)' && f !== 'var(--tick-off)') };
   });
-  ok('the check, the strip and the calendar all draw a kept day in the accent',
-    tyMark.arc === tyMark.red && tyMark.stripLit > 0 && tyMark.calLit > 0
+  ok('the check and the calendar both draw a kept day in the accent',
+    tyMark.arc === tyMark.red && tyMark.calLit > 0
     && tyMark.other.length === 0, tyMark);
   ok('...and a missed one is still drawn, in neither',
-    tyMark.stripOff > 0 && tyMark.calOff > 0 && tyMark.red !== tyMark.off, tyMark);
+    tyMark.calOff > 0 && tyMark.red !== tyMark.off, tyMark);
 
   /* ── weeks across, weekdays DOWN ──
      Without the first day's own weekday as a column offset, every
@@ -2979,15 +2984,13 @@ const SAID = [
       shape.join(',') === '1,3,5', shape);
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
-    await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+    await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
     await page.waitForTimeout(300);
 
     const read = () => page.evaluate(() => {
       const cal = document.querySelector('.ty-cal');
       const rects = [...cal.querySelectorAll(':scope > rect')];
       const w = rects.map((r) => +(+r.getAttribute('width')).toFixed(2));
-      const strip = [...document.querySelector('.ty-hist svg').querySelectorAll('rect')]
-        .map((r) => ({ w: +(+r.getAttribute('width')).toFixed(2), f: r.getAttribute('fill') }));
       const full = Math.max(...w);
       return {
         cells: rects.length,
@@ -3001,8 +3004,6 @@ const SAID = [
            one state that is not one. */
         smallLit: rects.filter((r) => r.getAttribute('fill') === 'var(--red)'
           && +r.getAttribute('width') < full).length,
-        stripSkip: strip.filter((s) => s.f === 'var(--tick-off)'
-          && s.w < Math.max(...strip.map((x) => x.w))).length,
         figs: [...document.querySelectorAll('.ty-stats b')].map((b) => b.textContent),
         hint: document.querySelector('.ty-hint').textContent,
       };
@@ -3015,11 +3016,9 @@ const SAID = [
     ok(`a day it was never on is drawn small and neutral (${three.skip} of ${three.cells})`,
       three.cells === 182 && three.skip > 90 && three.skip < 115
       && three.lit + three.miss + three.skip === 182 && three.smallLit === 0, three);
-    /* stripSkip > 0 as well as equal: with the third mark drawn at the
-       full size both counts are zero and an equality passes on the bug
-       it is about. */
-    ok('...and the strip beside the row draws it the same way',
-      three.stripSkip > 0 && three.stripSkip === three.skip, three);
+    /* The strip beside the row drew the same three states and is gone
+       with the tile, so the calendar is the only place they are drawn
+       and the assertion above is the whole of it. */
     /* THE FIGURES ARE ABOUT YOU, NOT ABOUT THE SCHEDULE. Every Train
        day ticked and none missed: seven days a week out of the days it
        was on, a streak that never breaks, and a foot that counts the
@@ -3060,7 +3059,7 @@ const SAID = [
     });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(300);
-    await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+    await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
     await page.waitForTimeout(300);
     const one = await read();
     ok(`one block off for one date moves one cell (${three.skip} → ${one.skip})`,
@@ -3248,7 +3247,7 @@ const SAID = [
   for (const id of ['p', 'f', 'w', 't', 'm']) {
     await page.keyboard.press('Escape');
     await page.waitForTimeout(120);
-    await page.click('.ty-row:has([data-item="' + id + '"]) .ty-hist');
+    await page.click('.ty-row:has(.ty-card[data-item="' + id + '"]) .ty-card');
     await page.waitForTimeout(200);
     figs[id] = await page.evaluate(() => ({
       title: document.querySelector('.ty-title').textContent,
@@ -3325,7 +3324,7 @@ const SAID = [
     for (const id of ['t', 'p', 'f']) {
       await page.keyboard.press('Escape');
       await page.waitForTimeout(120);
-      await page.click('.ty-row:has([data-item="' + id + '"]) .ty-hist');
+      await page.click('.ty-row:has(.ty-card[data-item="' + id + '"]) .ty-card');
       await page.waitForTimeout(200);
       (await page.evaluate(() => [...document.querySelectorAll('.ty-stats span')]
         .map((s) => [s.textContent.trim(),
@@ -3419,13 +3418,13 @@ const SAID = [
   await page.keyboard.press('Escape');
   await page.waitForTimeout(160);
   const shutEsc = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
-  await page.click('.ty-row:has([data-item="t"]) .ty-hist');
+  await page.click('.ty-row:has(.ty-card[data-item="t"]) .ty-card');
   await page.waitForTimeout(180);
   await page.click('.ty-veil', { position: { x: 6, y: 6 } });
   await page.waitForTimeout(160);
   const shutTap = await page.evaluate(() => document.getElementById('scTyVeil').hidden);
   const stranded = await page.evaluate(() => {
-    document.querySelector('.ty-row .ty-hist').click();
+    document.querySelector('.ty-row .ty-card').click();
     document.querySelector('.tab[data-view="list"]').click();
     return { veil: document.getElementById('scTyVeil').hidden,
              gone: document.getElementById('scWeek').getBoundingClientRect().height > 1 };
@@ -3499,7 +3498,7 @@ const SAID = [
       }, theme);
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForTimeout(240);
-      await page.click('.ty-row:has([data-item="f"]) .ty-hist');
+      await page.click('.ty-row:has(.ty-card[data-item="f"]) .ty-card');
       await page.waitForTimeout(220);
       const png = PNG4.sync.read(await page.screenshot());
       for (const [sel, want] of WANT) {
@@ -4238,7 +4237,7 @@ const SAID = [
        logs and the strip beside it opens the history — so `#scTally
        button >> nth=1` is Train's STRIP rather than Mind's card, and
        the panel it opens then swallows every click after it. */
-    await fp.click('.ty-card[data-item="t"]');
+    await fp.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
     await fp.waitForTimeout(500);
     /* Train now asks what you trained, so the deck is up over the
        tally and its scrim takes every press after it. Dismissed
@@ -4246,13 +4245,13 @@ const SAID = [
        figures, and the answer is not one of them. */
     await fp.keyboard.press('Escape');
     await fp.waitForTimeout(360);
-    await fp.click('.ty-card[data-item="m"]');
+    await fp.click('.ty-row:has(.ty-card[data-item="m"]) > .chk');
     await fp.waitForTimeout(220);
     /* A number nothing else in the app could produce, typed into
        Steps. The tick means YOU LOGGED IT and never what it was, and
        the only way to hold that claim is to go looking for the figure
        afterwards. */
-    await fp.click('.ty-card[data-item="p"]');
+    await fp.click('.ty-row:has(.ty-card[data-item="p"]) > .chk');
     await fp.waitForTimeout(400);
     await fp.fill('.sheet input[type=text]', '18437');
     await fp.click('.sheet .btn.go');
@@ -5171,7 +5170,7 @@ const SAID = [
       }, theme);
       await page.reload({ waitUntil: 'networkidle' });
       await page.waitForTimeout(320);
-      await page.click('[data-item="t"]');
+      await page.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
       await page.waitForTimeout(560);
     };
     const face = () => page.evaluate(() => ({
@@ -6262,7 +6261,7 @@ const SAID = [
     await page.evaluate(() => localStorage.setItem('sched.view.v1', 'tally'));
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(360);
-    await page.click('[data-item="t"]');
+    await page.click('.ty-row:has(.ty-card[data-item="t"]) > .chk');
     await page.waitForTimeout(420);
     const gone = await page.evaluate(() => ({
       /* The KEYS, not the string: scTrainSet deletes the day once its
@@ -6279,7 +6278,7 @@ const SAID = [
        list of words kept in step with it by hand. Mind is fed by Walk
        and Read, which reach the walk and read glyphs, so ticking it
        must draw no deck at all. */
-    await page.click('[data-item="m"]');
+    await page.click('.ty-row:has(.ty-card[data-item="m"]) > .chk');
     await page.waitForTimeout(420);
     const mind = await page.evaluate(() => ({
       open: !document.getElementById('scSheet').hidden,
@@ -7040,7 +7039,7 @@ const SAID = [
     await ppage.evaluate(() => document.getElementById('scTyUp').click());
     await ppage.waitForTimeout(200);
     await ppage.evaluate(() =>
-      document.querySelector('.ty-card[data-item="m"]').click());
+      document.querySelector('.ty-row:has(.ty-card[data-item="m"]) > .chk').click());
     await ppage.waitForTimeout(2400);
     const rated = await ppage.evaluate(() => localStorage.getItem('sched.rate.v2'));
     ok('and a push that does happen carries no rating in it',
@@ -7893,6 +7892,106 @@ const SAID = [
 
     ok('nothing threw on the light face', lerrs.length === 0, lerrs);
     await lctx.close();
+  }
+
+  /* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──
+     The board was a horizontal scroller of 212px columns, so a third
+     session sat off the side of the phone and the first was cut in
+     half the moment you moved it. It was reported from the phone with
+     "Morning" clipped to "ng" at the left edge, and the rule that came
+     out of it is broader than the board: you never move a finger
+     sideways to reach anything, because a thing you cannot see is a
+     thing you have to go looking for.
+
+     ITS OWN CONTEXT, at the foot of the file. Written into the middle
+     of the run it pressed tabs and dismissed sheets, which left the
+     next section measuring an edit sheet that was no longer open —
+     three failures, none of them about overflow. A check that changes
+     the state of the app is a check that has to be alone.
+
+     A SCROLLER, not a clip: `text-overflow: ellipsis` puts scrollWidth
+     over clientWidth on every truncated name in the app, so asking
+     "is the content wider than the box" flags the whole design. What
+     this asks is the one question that means a finger has to move —
+     is this a horizontal scroll container with something outside it. */
+  {
+    const octx = await browser.newContext({ ...PHONE });
+    const opage = await octx.newPage();
+    const oerrs = [];
+    opage.on('pageerror', (e) => oerrs.push(String(e)));
+    await opage.addInitScript(([w, nowhere]) => {
+      if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(w));
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) localStorage.setItem('sched.tour.v1', '1');
+    }, [WEEK, `${BASE}/schedule/nofriends`]);
+    await opage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await opage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await opage.waitForTimeout(420);
+
+    const scan = () => opage.evaluate(() => {
+      const out = [];
+      for (const e of document.querySelectorAll('body *')) {
+        if (e.getClientRects().length === 0) continue;
+        const ox = getComputedStyle(e).overflowX;
+        if (ox !== 'auto' && ox !== 'scroll') continue;
+        const over = e.scrollWidth - e.clientWidth;
+        if (over > 1) out.push((e.className || e.tagName) + ' +' + over);
+      }
+      return { over: out.slice(0, 6),
+               doc: document.scrollingElement.scrollWidth
+                  - document.scrollingElement.clientWidth };
+    });
+
+    const wide = [];
+    /* Every view, because the app puts a screen away with `hidden` and
+       an element that is not laid out reports nothing at all — a check
+       that only visited the week would pass on a Today pane three
+       columns wide. */
+    for (const [name, sel] of [['week', '#scTabWeek'], ['today', '#scTabTally'],
+                               ['friends', '#scTabFriends']]) {
+      const hit = await opage.evaluate((s) => {
+        const b = document.querySelector(s);
+        if (!b) return false;
+        b.click();
+        return true;
+      }, sel);
+      if (!hit) { wide.push([name, 'NO TAB']); continue; }
+      await opage.waitForTimeout(460);
+      const found = await scan();
+      if (found.over.length || found.doc > 1) wide.push([name, found]);
+    }
+    ok('no view scrolls sideways, and nothing on one is a scroller with more outside it',
+      wide.length === 0, wide);
+
+    /* And the BOARD, which is where it went wrong: the week has a
+       second layout and the loop above only ever sees whichever one is
+       stored. Two real tracks is asserted beside it, because a grid
+       that has collapsed to one column also reports no overflow and
+       would pass a check that only asked about width. */
+    await opage.evaluate(() => document.querySelector('#scTabWeek').click());
+    await opage.waitForTimeout(360);
+    const opened = await opage.evaluate(() => {
+      const b = [...document.querySelectorAll('.vw')].find((x) => x.dataset.view === 'board');
+      if (!b) return false;
+      b.click();
+      return true;
+    });
+    await opage.waitForTimeout(460);
+    const board = await scan();
+    const tracks = await opage.evaluate(() => {
+      const c = document.querySelector('.day-card');
+      return c ? getComputedStyle(c).gridTemplateColumns : null;
+    });
+    ok('the board is two columns and none of it runs off the side',
+      opened && board.over.length === 0 && board.doc <= 1
+      && /^\S+ \S+$/.test((tracks || '').trim()), { board, tracks, opened });
+
+    ok('nothing threw while measuring it', oerrs.length === 0, oerrs);
+    await octx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

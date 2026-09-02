@@ -806,56 +806,115 @@ body {
 .ty-hero { display: none; }
 .ty-cap { margin-top: 0; font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
-.ty-grid { display: block; margin-top: 4px; }
+/* ── SEVEN TILES, TWO ACROSS ──
+   The screen was a full-width list with a 26-week strip down the right
+   of every row. The figure — what you actually did today — was a chip
+   the same size as the word "logged", which is the one thing you came
+   to this screen to read drawn at the size of everything else.
+
+   A tile gives the figure the room to be the loudest thing on it, and
+   two across fits seven items on one screen with no scrolling in
+   either direction. What it costs is the strip: 26 marks in 120px is
+   four pixels a week, and a record you cannot read is not a record.
+   The history is still one press away — the tile itself opens it. */
+/* SIDE BY SIDE MEANS THE SAME BOX. Left to itself a tile is as tall as
+   what is in it, so a logged figure at 22px stood beside a "not yet" at
+   11.5 and the two read as a mistake. The grid STRETCHES its children
+   and the tile pushes its figure to the bottom, so a row of two is one
+   height whatever is in either. */
+.ty-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: stretch;
+  gap: 9px;
+  margin-top: 8px;
+}
 .ty-row {
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 92px;
-  align-items: stretch;
-  gap: 12px;
-  padding: 10px 2px 10px 34px;
-  border-bottom: 1px solid var(--hair);
+  /* Filled, never outlined: on a page this dark a 1px border is the
+     only thing there and the screen reads as a wireframe of itself.
+     And it does not CAST — the toast is still the only thing in this
+     app that is above the page rather than on it. */
+  background: var(--card);
+  border-radius: 14px;
+  padding: 11px 12px 12px;
 }
-/* ── THE FIGURE IS THE ROW ──
+/* ── THE FIGURE IS THE TILE ──
    It was a chip the same size as every other chip, so what you
    actually did today was drawn as quietly as the word "logged". It is
    the one thing on this screen you came to read. Only the VALUE takes
-   it: "not yet" at 17px would be the screen shouting an absence. */
+   it: "not yet" at 22px would be the screen shouting an absence, and a
+   state is not an achievement. */
 .ty-card .props .val {
-  font-size: 17px;
+  font-size: 22px;
   font-weight: 700;
   color: var(--ink);
-  letter-spacing: -.02em;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+  width: 100%;
 }
+/* A run of days is a figure ABOUT YOU rather than a state of the
+   screen, so it keeps the accent as a colour and sits under the
+   number as its own line. */
+.ty-card .props .pill.is-run { width: 100%; }
+/* `left: auto` is the whole of it: the base .chk is positioned from
+   the LEFT for the schedule rows, so setting `right` alone leaves both
+   edges anchored and the check draws over the glyph. Seen on the real
+   app with a purple tick sitting on top of the dumbbell. */
+.ty-row > .chk {
+  top: 11px; right: 10px; left: auto; transform: none;
+  width: 20px; height: 20px;
+}
+.ty-row > .chk svg { width: 11px; height: 11px; }
 .ty-card {
-  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 3px 10px;
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 6px 8px;
   align-items: center;
+  width: 100%;
   min-width: 0; min-height: 44px; padding: 0; border: 0; border-radius: 0;
   background: none; color: inherit; font: inherit; text-align: left;
   cursor: pointer;
 }
 .ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
 .ty-card .ic {
-  grid-column: 1; grid-row: 1 / span 2;
+  grid-column: 1; grid-row: 1;
   display: block; width: 20px; height: 20px;
   fill: none; stroke: var(--dim); stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .ty-row.is-on .ty-card .ic { stroke: var(--ink); }
 .ty-body { display: contents; }
-.ty-nm { grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.2; letter-spacing: -.014em; }
-.ty-card .props { grid-column: 2; grid-row: 2; }
+/* The name shares the top line with the glyph and gives the whole of
+   the second line to the figure. 13.5, not 15: it is a label for the
+   number under it now rather than the row's own subject, and at 15 the
+   two were the same size in a 145px box. */
+.ty-nm {
+  grid-column: 2; grid-row: 1;
+  font-size: 13.5px; font-weight: 600; color: var(--ink);
+  line-height: 1.2; letter-spacing: -.014em;
+  /* The tick sits in the corner over this line. */
+  padding-right: 22px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.ty-card {
+  /* The name sits on the top line and the figure on the bottom of
+     whatever height the row settles on, so the two tiles' numbers share
+     a baseline instead of floating at their own heights. */
+  grid-template-rows: auto 1fr;
+  height: 100%;
+}
+.ty-card .props {
+  grid-column: 1 / -1; grid-row: 2;
+  flex-wrap: wrap; gap: 2px 8px;
+  align-items: flex-end; align-self: end;
+}
 /* The ring is gone; these are what the tests and the sheet still ask
    for by name, kept as the parts of the strip they were. */
 .ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
 .ty-arc { fill: none; stroke: var(--red); stroke-width: 5; }
 .ty-sub { display: none; }
-.ty-hist {
-  min-width: 0; min-height: 44px; display: grid; align-items: center; padding: 0; border: 0;
-  background: none; color: inherit; font: inherit; cursor: pointer;
-}
-.ty-hist:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-.ty-hist svg { display: block; width: 100%; }
+/* .ty-hist is gone with the strip it drew. The history opens from the
+   tile itself, so the record is one press away rather than a second
+   button in a 145px box. */
 
 /* ── missed its window ──
    The schedule already knows that Train was 06:30 to 07:30 and that it
@@ -1728,7 +1787,6 @@ body {
    is the time column now. On Showing up there is no gutter, so it
    stays where it was. */
 .rowwrap > .chk { left: auto; right: 3px; }
-.ty-row > .chk { left: 4px; }
 .chk:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .row {
   display: grid;
@@ -2037,7 +2095,11 @@ body {
    separator, which reads as a bullet nobody asked for — so the rows,
    whose properties are two short figures, get dots, and the workout
    tile, whose four wrap by design, gets a wider gap instead. */
-.ty-card .props { flex-wrap: nowrap; }
+/* The tile's properties WRAP — the figure takes the whole line and its
+   run of days goes under it. It was nowrap for a full-width row where
+   the two sat side by side with a dot between; that rule now lives on
+   the tile's own declaration further up, and having it in both places
+   is the duplicate the static check refuses. */
 .row .props > * + *::before,
 .ty-card .props > * + *::before {
   content: '\00b7';
@@ -2860,15 +2922,18 @@ body {
    rather than stopping short of it — the deck's own lesson: a strip
    that ends inside the padding reads as a short list rather than one
    that continues. */
+/* ── SIX CHIPS WRAP, THEY DO NOT SCROLL ──
+   It was a bled horizontal scroller, so the sixth workout in a group
+   was off the side of the sheet. Nothing in this app scrolls sideways
+   any more: two rows of three is the whole group on screen, and a
+   pager you can see all of is a pager you do not have to explore. */
 .wc-chips {
   display: flex;
+  flex-wrap: wrap;
   gap: 7px;
-  margin: 0 calc(var(--pad) * -1) 15px;
-  padding: 2px var(--pad) 3px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  margin: 0 0 15px;
+  padding: 2px 0 3px;
 }
-.wc-chips::-webkit-scrollbar { display: none; }
 /* ── THE FOUR KINDS ARE ONE CONTROL, NOT FOUR PILLS ──
    Four separate pills on a scroller say "here are some options, there
    may be more"; a segmented track says "this is the whole choice, and
@@ -3303,17 +3368,19 @@ body {
     which is how the first pass at this drove the deck by pressing an
     effort. */
 .wc-eff-r { display: flex; gap: 7px; }
-/* Eight rungs do not fit across a phone, so the ladder scrolls and is
-   bled to the sheet's edges — a row that stops inside the padding
-   reads as a short list rather than one that continues. */
+/* ── AND SO DOES THE LADDER ──
+   Eight rungs do not fit across a phone, and the answer used to be a
+   bled scroller. Two rows of four fit exactly, which is better than a
+   row you have to push: every length you might pick is in front of
+   you, and the one you are on cannot be the one off the edge. */
 .wc-mins {
-  margin: 0 calc(var(--pad) * -1);
-  padding: 2px var(--pad) 3px;
-  overflow-x: auto;
-  scrollbar-width: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 7px;
+  margin: 0;
+  padding: 2px 0 3px;
 }
-.wc-mins::-webkit-scrollbar { display: none; }
-.wc-min { min-width: 52px; padding: 0 12px; font-variant-numeric: tabular-nums; }
+.wc-min { min-width: 0; flex: 1 1 auto; padding: 0 10px; font-variant-numeric: tabular-nums; }
 
 .wc-top {
   display: flex;
@@ -3723,7 +3790,7 @@ body {
    The rule this is an instance of: you never have to swipe sideways to
    reach anything. tests/schedule.js measures it on every view — the
    page and every element on it must fit its own box across. */
-.day-card.is-board, .ty-grid.is-board {
+.day-card.is-board {
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: start;
@@ -3731,13 +3798,13 @@ body {
   overflow-x: hidden;
 }
 .wk-sess { min-width: 0; }
-.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess { min-width: 0; }
+.day-card.is-board .wk-sess { min-width: 0; }
 .day-card.is-board .wk-sh { padding-top: 2px; }
 /* The day's rating asks one question about the whole day, so it sits
    under both columns rather than inside either. */
 .day-card.is-board > .rt-ask { grid-column: 1 / -1; }
 .day-card.is-board.has-more { -webkit-mask-image: none; mask-image: none; }
-.ty-grid.is-board .ty-hist { display: none; }
+
 /* ── THE GUTTER NARROWS IN A BOARD COLUMN ──
    A column is 212px. The list's row spends 54 of that on the time and
    34 on the check, which leaves about 100px for a name — "Wind down"
@@ -3751,28 +3818,33 @@ body {
    keeps ONE row layout across both views — moving the time back among
    the properties here was tried first and puts it in the same grid
    cell as the length, which stacks two lines on top of each other. */
-.day-card.is-board .row,
-.ty-grid.is-board .ty-row {
-  padding-right: 24px;
-}
+.day-card.is-board .row { padding-right: 22px; }
+/* ── NO GUTTER IN A HALF-WIDTH COLUMN ──
+   A board column is about 145px. A 36px time column left roughly 70px
+   for the name and "Wind down" clipped — which is the exact fault the
+   two-column board exists to fix. The gutter is the LIST's argument:
+   a column of times is worth its width when there is width to spare,
+   and at 145px there is not. Here the start joins the length on the
+   second line and the name has the whole row. */
 .day-card.is-board .row {
-  grid-template-columns: 36px 18px minmax(0, 1fr);
-  gap: 1px 6px;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 1px 7px;
   padding-left: 0;
 }
-.day-card.is-board .row .ic { width: 18px; height: 18px; }
-.day-card.is-board .row .t { font-size: 9.5px; }
-.day-card.is-board .row .n { font-size: 13px; }
-.day-card.is-board .row .dur, .day-card.is-board .row .st { font-size: 10.5px; }
-.day-card.is-board .rowwrap > .chk,
-.ty-grid.is-board .ty-row > .chk { right: 0; left: auto; width: 19px; height: 19px; }
-/* One track: the strip that was the second one does not fit half a
-   phone, so the row is the card alone. */
-.ty-grid.is-board .ty-row { padding-left: 0; grid-template-columns: minmax(0, 1fr); }
-.ty-grid.is-board .ty-card { grid-template-columns: 18px minmax(0, 1fr); gap: 2px 8px; }
-.ty-grid.is-board .ty-card .ic { width: 18px; height: 18px; }
-.ty-grid.is-board .ty-nm { font-size: 13.5px; }
-.ty-grid.is-board .ty-card .props .val { font-size: 15px; }
+.day-card.is-board .row .ic { grid-column: 1; width: 18px; height: 18px; }
+.day-card.is-board .row .n { grid-column: 2; font-size: 12.5px; }
+.day-card.is-board .row .props { grid-column: 2; }
+/* Out of the grid's flow and into the properties line. `order` puts it
+   first there without the DOM moving, and the dot rides the sibling
+   after it exactly as it does everywhere else two figures are printed. */
+.day-card.is-board .row .t {
+  grid-column: 2; grid-row: 2;
+  position: static; align-self: auto;
+  font-size: 10px;
+}
+.day-card.is-board .row .props { display: flex; align-items: center; gap: 5px; }
+.day-card.is-board .row .dur, .day-card.is-board .row .st { font-size: 10px; }
+.day-card.is-board .rowwrap > .chk { right: 0; left: auto; width: 19px; height: 19px; }
 .ty-grid.is-board .grp-h { padding-top: 2px; }
 .wo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .wo-p {

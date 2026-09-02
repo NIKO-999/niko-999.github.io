@@ -2560,26 +2560,21 @@
        row itself. */
     var old = $('scTallyCap').nextElementSibling;
     if (old && old.classList.contains('views')) old.remove();
-    grid.classList.add('is-board');
-    /* The list is one column headed Today; the board is two, kept and
-       still to do, and a row moves between them when it is pressed. */
-    var cols = {};
-    var col = function (key, word, live) {
-      if (cols[key]) return cols[key];
-      var c = scEl('div', 'wk-sess');
-      var gh = scEl('div', 'grp-h');
-      gh.appendChild(scEl('span', 'pill' + (live ? ' is-now' : ''), word));
-      var cnt = scEl('span', 'c', '0');
-      gh.appendChild(cnt);
-      c.appendChild(gh);
-      cols[key] = { el: c, cnt: cnt, n: 0 };
-      grid.appendChild(c);
-      return cols[key];
-    };
-    col('on', 'Kept today', true); col('off', 'Still to do');
+    /* ── SEVEN TILES, TWO ACROSS, NO GROUPING ──
+       It was a full-width list with a 26-week strip down the right of
+       every row, and before that a two-column board headed Kept and
+       Still to do. Both are gone. The question you open this screen
+       with is what you have actually done today, and the answer is a
+       figure — so the figure is the loudest thing on it and everything
+       else on the tile is a label for that figure.
+
+       No headings: whether a thing is kept is already said by its own
+       tick, and a heading saying it again splits seven items into two
+       lists that both have to be read. */
     TALLY.forEach(function (it, i) {
       var on = !!got[it.id], late = !on && scLate(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
+      row.dataset.item = it.id;
       /* ── THE CHECK, then the card, then the record ──
          Three press targets and all three are siblings: a button
          inside a button is invalid and collapses to one press while
@@ -2631,20 +2626,21 @@
         if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-run' : ''), run + ' days'));
       }
       body.appendChild(props);
+      /* ── THE TICK LOGS AND THE TILE OPENS THE RECORD ──
+         Both were logging before, with the strip beside them opening
+         the history — and the strip is what went, so the way in had to
+         move rather than disappear. On a tile with a check in its
+         corner, pressing the check to log and pressing the card to see
+         more is the division everybody already knows; two controls that
+         did the same thing and a third that did the other one was the
+         arrangement a full-width row could afford and a 145px tile
+         cannot. Still siblings, never nested. */
       c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
-        + (late ? ', missed its window' : '') + '. ' + it.s + '.');
-      c.addEventListener('click', function () { scTallyTap(it, day); });
+        + (late ? ', missed its window' : '') + '. Open 26 weeks of history.');
+      c.addEventListener('click', function () { scOpenHist(it); });
       row.appendChild(c);
-      var hist2 = scEl('button', 'ty-hist');
-      hist2.type = 'button';
-      hist2.innerHTML = scStripSvg(scHist(it.id));
-      hist2.setAttribute('aria-label', it.n + ', open 26 weeks of history');
-      hist2.addEventListener('click', function () { scOpenHist(it); });
-      row.appendChild(hist2);
-      var into = col(on ? 'on' : 'off');
-      into.el.appendChild(row);
-      into.cnt.textContent = String(++into.n);
+      grid.appendChild(row);
     });
     var best = scBest();
     $('scTallyFoot').textContent = st
