@@ -3747,105 +3747,17 @@ body {
   color: var(--dim); font: inherit; font-size: 11.5px; font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
-.vw {
-  flex: 1; min-width: 0; min-height: 44px; padding: 9px 0;
-  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
-  border: 0; border-radius: 18px; background: none;
-  color: var(--dim); font: inherit; font-size: 13px; font-weight: 600;
-  white-space: nowrap; overflow: hidden; cursor: pointer;
-}
 .wo-c.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
-.vw.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
-.wo-c:focus-visible, .vw:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
-/* ── LIST OR BOARD ──
-   The same rows either way; the board lays each session out as a
-   column and the rows are already cards. A view switcher, drawn as
-   the workouts strip is, and the choice remembered. */
-.views {
-  /* The same segmented control the stops on Today and Friends are:
-     three switchers on one app drawn three ways is three controls. */
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  margin: 10px 0 0;
-  border-radius: 22px;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-}
-/* Built on every card, put away on the shut ones — the deck opens a
-   card by moving a class, not by re-rendering. */
-.week[hidden] .views { display: none; }
+.wo-c:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+/* ── THERE IS NO BOARD AND NO SWITCHER ──
+   The week had List and Board sitting under the tab bar, and Showing
+   up had the same pair under the three stops: two rows of chrome
+   before a single row of the thing each screen is about. The board
+   also drew the SAME rows in narrower columns, which makes it a second
+   way to look at one thing rather than a second thing to look at.
+   `.views` and `.vw` went with it, and so did both stored keys. */
 .day-card { padding-bottom: 4px; }
-.vw svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
-/* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──
-   The board was a horizontal scroller of 212px columns, so a third
-   session was off the side of the screen and the first one was cut in
-   half the moment you moved. Reported from the phone as exactly that,
-   with "Morning" clipped to "ng" at the left edge.
-
-   It is a two-column GRID now. Three sessions wrap to a second row
-   rather than continuing off the side, which is the whole point: a
-   column you cannot see is a column you have to go looking for, and
-   the board exists to put the day in front of you at once.
-
-   The rule this is an instance of: you never have to swipe sideways to
-   reach anything. tests/schedule.js measures it on every view — the
-   page and every element on it must fit its own box across. */
-.day-card.is-board {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  align-items: start;
-  gap: 10px 9px;
-  overflow-x: hidden;
-}
-.wk-sess { min-width: 0; }
-.day-card.is-board .wk-sess { min-width: 0; }
-.day-card.is-board .wk-sh { padding-top: 2px; }
-/* The day's rating asks one question about the whole day, so it sits
-   under both columns rather than inside either. */
-.day-card.is-board > .rt-ask { grid-column: 1 / -1; }
-.day-card.is-board.has-more { -webkit-mask-image: none; mask-image: none; }
-
-/* ── THE GUTTER NARROWS IN A BOARD COLUMN ──
-   A column is 212px. The list's row spends 54 of that on the time and
-   34 on the check, which leaves about 100px for a name — "Wind down"
-   clipped to "Down" and the rows ran out of their column. Seen on the
-   real app the first time the board was opened after the gutter went
-   in, which is the whole reason to look at a screen rather than at
-   the screen you changed.
-
-   The arrangement does not change, only the two numbers: the column
-   holds `06:00` and nothing wider, and the check sits closer in. That
-   keeps ONE row layout across both views — moving the time back among
-   the properties here was tried first and puts it in the same grid
-   cell as the length, which stacks two lines on top of each other. */
-.day-card.is-board .row { padding-right: 22px; }
-/* ── NO GUTTER IN A HALF-WIDTH COLUMN ──
-   A board column is about 145px. A 36px time column left roughly 70px
-   for the name and "Wind down" clipped — which is the exact fault the
-   two-column board exists to fix. The gutter is the LIST's argument:
-   a column of times is worth its width when there is width to spare,
-   and at 145px there is not. Here the start joins the length on the
-   second line and the name has the whole row. */
-.day-card.is-board .row {
-  grid-template-columns: 18px minmax(0, 1fr);
-  gap: 1px 7px;
-  padding-left: 0;
-}
-.day-card.is-board .row .ic { grid-column: 1; width: 18px; height: 18px; }
-.day-card.is-board .row .n { grid-column: 2; font-size: 12.5px; }
-.day-card.is-board .row .props { grid-column: 2; }
-/* Out of the grid's flow and into the properties line. `order` puts it
-   first there without the DOM moving, and the dot rides the sibling
-   after it exactly as it does everywhere else two figures are printed. */
-.day-card.is-board .row .t {
-  grid-column: 2; grid-row: 2;
-  position: static; align-self: auto;
-  font-size: 10px;
-}
-.day-card.is-board .row .props { display: flex; align-items: center; gap: 5px; }
-.day-card.is-board .row .dur, .day-card.is-board .row .st { font-size: 10px; }
-.day-card.is-board .rowwrap > .chk { right: 0; left: auto; width: 19px; height: 19px; }
-.ty-grid.is-board .grp-h { padding-top: 2px; }
+.ty-grid .grp-h { padding-top: 2px; }
 .wo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .wo-p {
   --wo-c: var(--red);   /* the session's own hex is written on the element */

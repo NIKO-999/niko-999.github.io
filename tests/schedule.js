@@ -7967,28 +7967,33 @@ const SAID = [
     ok('no view scrolls sideways, and nothing on one is a scroller with more outside it',
       wide.length === 0, wide);
 
-    /* And the BOARD, which is where it went wrong: the week has a
-       second layout and the loop above only ever sees whichever one is
-       stored. Two real tracks is asserted beside it, because a grid
-       that has collapsed to one column also reports no overflow and
-       would pass a check that only asked about width. */
-    await opage.evaluate(() => document.querySelector('#scTabWeek').click());
-    await opage.waitForTimeout(360);
-    const opened = await opage.evaluate(() => {
-      const b = [...document.querySelectorAll('.vw')].find((x) => x.dataset.view === 'board');
-      if (!b) return false;
-      b.click();
+    /* ── AND THERE IS NO BOARD TO CHECK, WHICH IS THE POINT ──
+       The week's second layout was where the sideways scrolling came
+       from, and it is gone rather than fixed: it drew the same rows in
+       narrower columns, so it was a second way to look at one thing.
+       Asserted as ABSENT — a switcher that merely stopped being drawn
+       would still leave the stored key deciding a layout nobody can
+       reach, so the key is checked too. */
+    const gone = await opage.evaluate(() => {
+      localStorage.setItem('sched.wkview.v1', 'board');
       return true;
     });
+    await opage.reload({ waitUntil: 'networkidle' });
     await opage.waitForTimeout(460);
-    const board = await scan();
-    const tracks = await opage.evaluate(() => {
-      const c = document.querySelector('.day-card');
-      return c ? getComputedStyle(c).gridTemplateColumns : null;
-    });
-    ok('the board is two columns and none of it runs off the side',
-      opened && board.over.length === 0 && board.doc <= 1
-      && /^\S+ \S+$/.test((tracks || '').trim()), { board, tracks, opened });
+    const after = await opage.evaluate(() => ({
+      views: document.querySelectorAll('.views, .vw').length,
+      board: document.querySelectorAll('.is-board').length,
+      key: localStorage.getItem('sched.wkview.v1'),
+      cols: (() => { const c = document.querySelector('.day-card');
+        return c ? getComputedStyle(c).gridTemplateColumns : null; })(),
+      rows: document.querySelectorAll('.day-card .row').length,
+    }));
+    const stillFits = await scan();
+    ok('no view switcher anywhere, and a stored board falls through to the list',
+      gone && after.views === 0 && after.board === 0 && after.key === null
+      && after.rows > 0, after);
+    ok('and the week still scrolls in one direction only',
+      stillFits.over.length === 0 && stillFits.doc <= 1, stillFits);
 
     ok('nothing threw while measuring it', oerrs.length === 0, oerrs);
     await octx.close();

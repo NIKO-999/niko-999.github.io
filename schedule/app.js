@@ -1012,14 +1012,6 @@
       strip.appendChild(b);
     });
 
-    var views = $('scWkViews');
-    views.textContent = '';
-    views.appendChild(scViews(wkView, function (v) {
-      wkView = v;
-      try { localStorage.setItem(WKV_KEY, v); } catch (e) {}
-      scRender();
-    }));
-
     var rows = scByDay(d);
     $('scEmpty').hidden = state.items.length > 0;
     var card = $('scDayCard');
@@ -1038,7 +1030,6 @@
          column the time used to sit in — and the box is what the board
          lays out as a column. */
       var sess = null;
-      card.classList.toggle('is-board', wkView === 'board');
       rows.forEach(function (it) {
         if (head3[it.id]) {
           var g = head3[it.id];
@@ -2046,36 +2037,25 @@
      Two keys, because the week and Showing up are different lists and
      a board for one is not a board for the other. A stored value that
      is not one of the two falls through to the list. */
-  var WKV_KEY = 'sched.wkview.v1';
-  /* sched.tyview.v1 is GONE rather than ignored. Showing up has one
-     view now, so a stored preference for the other one is a record of
-     a control nobody can reach — the same reason the old palette name
-     and the subtitle key were dropped rather than left. */
-  var wkView = 'list';
+  /* ── THERE IS NO BOARD, AND NO SWITCHER ANYWHERE ──
+     The week had List and Board and Showing up had the same pair, each
+     sitting directly under a row of tabs — two rows of chrome before a
+     single row of the thing the screen is about. Showing up lost its
+     first; this is the week's, and it goes for the same reason plus
+     one of its own: the board and the list drew the same rows in
+     narrower columns, so it was a second way to look at one thing
+     rather than a second thing to look at.
+
+     Both keys are REMOVED rather than ignored. A stored preference for
+     a control nobody can reach is a record of a screen that no longer
+     exists — the same reason the old palette name and the subtitle key
+     were dropped. */
   try {
-    wkView = localStorage.getItem(WKV_KEY) === 'board' ? 'board' : 'list';
-    try { localStorage.removeItem('sched.tyview.v1'); } catch (e) {}
+    try {
+      localStorage.removeItem('sched.tyview.v1');
+      localStorage.removeItem('sched.wkview.v1');
+    } catch (e) {}
   } catch (e) {}
-  var VIEW_ICON = {
-    list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
-    board: '<rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="10" rx="1.5"/>'
-  };
-  function scViews(cur, pick) {
-    var v = scEl('div', 'views');
-    v.setAttribute('role', 'group');
-    v.setAttribute('aria-label', 'View');
-    [['list', 'List'], ['board', 'Board']].forEach(function (o) {
-      var b = scEl('button', 'vw' + (cur === o[0] ? ' is-on' : ''));
-      b.type = 'button';
-      b.dataset.view = o[0];
-      b.setAttribute('aria-pressed', cur === o[0] ? 'true' : 'false');
-      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + VIEW_ICON[o[0]] + '</svg>';
-      b.appendChild(document.createTextNode(o[1]));
-      b.addEventListener('click', function () { if (cur !== o[0]) pick(o[0]); });
-      v.appendChild(b);
-    });
-    return v;
-  }
   var mode = 'auto';
   function scModeLive() {
     if (mode === 'light' || mode === 'dark') return mode;
