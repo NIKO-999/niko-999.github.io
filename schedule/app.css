@@ -1070,121 +1070,20 @@ body {
    `backface-visibility` is what stops the far side showing through
    mirror-imaged — without it the schedule reads backwards through the
    objectives. */
-.wk-flip {
-  /* Relative, and it fills what the column leaves: the panel is the
-     view now rather than a card pinned inside one. */
-  position: relative;
-  flex: 1;
-  min-height: 0;
-  transform-style: preserve-3d;
-  transition: transform .52s cubic-bezier(.2, .7, .3, 1);
-}
-.wk-flip.is-flipped { transform: rotateY(180deg); }
-@media (prefers-reduced-motion: reduce) {
-  .wk-flip { transition: none; }
-}
-/* ── THE FACE IS A MATERIAL, NOT A TINT ──
-   It was a flat 4% wash of the ink inside a 10% border, which on a
-   near-black page is a rectangle very slightly lighter than the page:
-   the card read as a REGION of the screen rather than as an object on
-   it. Three things make it an object and each does a different job —
-   a specular hairline along the top edge, which is the only place a
-   light above the phone would catch; a contact shadow that puts it on
-   something; and a wide offset one that puts a gap under it. One flat
-   blur did all three badly, which is the workout card's own lesson.
+/* ── THERE IS NO FLIP ──
+   The objectives lived on the back of this panel and were reached by
+   turning it over: `perspective`, `transform-style: preserve-3d`,
+   `backface-visibility`, a visibility delay of half the turn, an
+   opacity fallback for the compositor layers that drew through the
+   back anyway, and a rule pausing every animation on the face turned
+   away. All of it is gone with the mechanism.
 
-   AND THERE IS NO backdrop-filter ON IT, deliberately. That is what
-   the material would be in the OS, and it is the one thing this deck
-   cannot afford: a backdrop pass is redone whenever the FILTERED
-   element's own subtree repaints, and these cards move — the track
-   transforms on every press and the open card's WIDTH is transitioned
-   for 260ms. Seven faces re-blurring every frame of that is exactly
-   the bug that cost the orrery three rounds of performance work, and
-   it would arrive here already known. A static wash cannot tell you
-   what is behind it, and behind it is a card-shaped piece of one flat
-   ground, so there is nothing to lose by drawing it rather than
-   sampling it.
-
-   MIXED FROM THE PALETTE, never a literal: the wheel moves --red
-   through every hue there is, so a highlight in hex would be somebody
-   else's card on most of them. */
-.wk-front, .wk-back {
-  position: absolute;
-  inset: 0;
-  display: flex;
-  flex-direction: column;
-  /* 26 outside, 14 of padding, so a row inside sits at 12 — the inner
-     radius is the outer LESS the padding, which is the one geometric
-     rule the thing this came from never breaks. Written as a token
-     because the row has to agree with it and two numbers drift. */
-  /* NO SURFACE HERE. There is one panel now rather than seven cards,
-     and each face owns what it draws: the front nothing at all, since
-     every row is already a card, and the back its sheen. */
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-  overflow: hidden;
-}
-/* ── AND THE BACK DRAWS NOTHING EITHER ──
-   It was the one surface in this app that was not flat: a sheen of
-   the accent inside a card with a travelling foil rim. Everything
-   around it became cards on a ground, and a panel behind a list of
-   cards is the frame-inside-a-frame this project keeps taking back
-   out — the objectives just were not the last place it was still
-   standing. The two faces are the same page now, showing different
-   lists, and the turn is the whole of what says which. */
-.wk-back { transform: rotateY(180deg); }
-.wk-front { visibility: visible; opacity: 1; transition: visibility 0s, opacity 0s; }
-.wk-flip.is-flipped .wk-front {
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s linear .26s, opacity 0s linear .26s;
-}
-/* ── AND THE BACK IS PUT AWAY WHEN THE FRONT IS SHOWING ──
-   This is the front's own rule above, mirrored, and it is here for a
-   reason that has nothing to do with what you can see: it is what
-   makes a long day SCROLL.
-
-   `transform-style: preserve-3d` on the flip box stops a scroll
-   container inside it responding to touch in Chromium, and the two
-   faces overlap exactly — so the back, turned away but still laid out
-   over the front, was taking the gesture. Nothing about that is
-   visible: the box is a real scroller, `overflow-y: auto`, 260px of
-   rows past its own height, and a script writing `scrollTop` moves it
-   perfectly. Only a finger did nothing, and on a day with fourteen
-   blocks that is four rows you cannot reach.
-
-   Hiding the face that is turned away costs nothing — backface-
-   visibility was already not drawing it — and hands the touch back to
-   the face you are looking at. Measured on a real touch drag from a
-   cold load: 0px before, the whole 260 after.
-
-   FOUR OTHER FIXES WERE BUILT FIRST AND ALL OF THEM WERE WRONG.
-   will-change, translateZ(0), contain:paint and isolation on the
-   scroller each moved it 0px. Then `transform-style: flat` at rest
-   with a class to put the 3D back for the turn, which WORKS and is a
-   whole mechanism — a class, a timer, a transitionend — for what two
-   rules do, and it also forces this same back-hiding rule to exist
-   anyway, since flat is exactly the state in which backface-
-   visibility stops working.
-
-   THE ISOLATION THAT FOUND THAT WAS ITSELF WRONG TWICE. Injecting the
-   old declarations back with addStyleTag AFTER the page had settled
-   reported every variant as fixed, including the shipped bug: a
-   scroller that is already composited does not go back. Each variant
-   has to be written to the file and loaded cold, which is the only
-   way the four rows above are true.
-
-   The delay is the front's: half a turn, so the face you are turning
-   towards appears at the point it would have come into view anyway. */
-.wk-back {
-  visibility: hidden;
-  opacity: 0;
-  transition: visibility 0s linear .26s, opacity 0s linear .26s;
-}
-.wk-flip.is-flipped .wk-back { visibility: visible; opacity: 1; }
-.wk-flip.is-flipped .wk-front *,
-.wk-flip.is-flipped .wk-front *::before,
-.wk-flip.is-flipped .wk-front *::after { animation-play-state: paused !important; }
+   Every one of those lines existed because a composited descendant of
+   a backface-hidden ancestor is not reliably culled with it — the
+   running row's sweep and the turn control's foil rim both came
+   through the back on iOS, mirrored, and were reported twice. A sheet
+   has none of that: it is the surface every other secondary screen in
+   this app already opens, and it draws in two dimensions.
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {
@@ -1199,14 +1098,6 @@ body {
    alone, because the back paints its own ground and wears the foil
    instead of a border. A property written twice leaves the first one
    dead, and tests/names.js is what says so. */
-.wk-front {
-  /* ── THE FRONT DRAWS NOTHING ──
-     Every row is already a card, so a panel around them is a card
-     inside a card inside the page — the frame-inside-a-frame this
-     project keeps taking back out, and the last thing that made a
-     day read as a card off a deck. */
-  background: none;
-}
 
 /* ── the back is the rare one ──
    A sheen rather than a colour: two washes of the accent and one of the
@@ -1305,17 +1196,21 @@ body {
    rule about the ELEMENT rather than a fix aimed at the bug: a face
    turned away has no control to press, so there is nothing to draw
    whether or not the engine would have culled it. */
-.wk-flip.is-flipped .wk-front /* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
+/* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
    the fifth time in this app: the rail, the page dots, the toast and
    the intro each had the attribute set correctly while an author
-   display outranked the browser's own rule. Here it left the
+   display outranked the browser's own rule. Here it leaves the
    objectives control drawn on Today and on Friends, where there is no
-   day to turn over. */
+   day it could be about.
+
+   AND IT WAS NOT WORKING. The line above this one ended in a comment
+   that swallowed its own selector, so the rule read
+   `.wk-flip.is-flipped .wk-front .wk-turn[hidden]` — scoped to a face
+   that was turned away, which is the one state the button was never
+   in. It is what this file warns about two hundred lines up: a CSS
+   comment cannot be trusted to end where it looks like it ends, and a
+   selector joined to the one above it fails silently. */
 .wk-turn[hidden] { display: none; }
-/* The back's own control is a plain glyph: the sheen is the face it
-   is sitting on, and a pill wearing it there would be the surface
-   twice. */
-.wk-back .wk-turn { background: none; }
 /* ONE BOX, TWO SKINS. The two faces' controls have to land on the same
    pixel — you press one place to turn the card and the same place to
    come back — so the box is shared and only the surface differs. It
@@ -1371,7 +1266,7 @@ body {
    the reason it can be: the objectives face's own sheen, mixed from
    the palette exactly as the back's is, with a rim that travels. The
    thing you press looks like the thing it turns to. */
-.wk-front .wk-turn svg { position: relative; z-index: 1; }
+.wk-turn svg { position: relative; z-index: 1; }
 .wk-turn:active svg { stroke: var(--red); }
 .wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
 
@@ -2188,87 +2083,57 @@ body {
    WHERE looks like. The name and the time going quiet is what says the
    block is done; that has not changed. */
 
-/* The one running block: a red rule down the margin and the weight to
-   match. It is the only place on the page the red is spent besides
-   today's own name. */
-.row.is-now {
-  /* A RING, not a rule down the margin. The 4px rule reached 13px
-     left of the row and had to grow by the same amount rather than
-     slide — arithmetic that was one character from breaking the
-     column at any time. A card that is its own object takes its
-     state on its own edge: the same hairline ring the session
-     heading wears, and the Now pill under the name says it in a
-     word. The sweep still runs. */
-  box-shadow:
-    inset 0 1px 0 var(--card-edge),
-    var(--card-shadow),
-    0 0 0 1.5px var(--red);
-  overflow: hidden;   /* the clip the sweep runs inside */
-}
+/* ── THE RUNNING BLOCK IS A PROGRESS LINE ──
+   It was a 68px trail of the accent travelling across the row every
+   2.8 seconds, for ever — the only thing moving on a screen where
+   nothing else does, and it looped whether or not you were looking at
+   it. Reported as exactly that.
+
+   What replaced it says something the sweep never did: how much of
+   the block is LEFT. A 3px track on a third line under the row, filled
+   left to right by the fraction of the block that has gone. It is the
+   same fact as the "3h 18m left" beside the length, drawn — and it is
+   the one mark of the six looked at that carries information rather
+   than merely pointing.
+
+   NOTHING ANIMATES. The width is set on the half-minute pass that
+   already moves the clock and marks the rows behind you, so it steps
+   rather than sliding, and a screen you are not touching is a screen
+   that is still. */
 .row.is-now .n { font-weight: 700; }
-/* The sweep decides colours on this row, for the fourth time: --dim
-   over the trail's 13% wash measures under 4.5:1, so the pills on the
-   running row take --ink. */
+/* The row no longer has a wash over it, so the figures go back to
+   --dim with every other row's. The FOURTH time this row's colours
+   were decided by what was drawn across it, and the first time the
+   answer is that nothing is. */
 .row.is-now .t, .row.is-now .dur { color: var(--ink); }
-
-/* ── the sweep ──
-   A hairline that crosses the running block and keeps crossing it, so
-   the one row that is happening now is the one row that moves.
-
-   Three things about how it is built, all of them load-bearing:
-
-   · It travels on TRANSFORM alone, and only in percentages of its own
-     width. The element is exactly as wide as the row, so -100% puts
-     its trailing edge on the row's left edge and 0 puts it on the
-     right — one full crossing, with no need to know the row's width
-     in CSS and no layout or paint work per frame. Animating `left` or
-     a background position would do the same thing visually and repaint
-     the strip sixty times a second.
-
-   · It sits behind the TEXT but in front of the page, so the wash
-     never tints a word. That distinction cost a round: z-index:-1
-     alone put it behind the body's own white, where it animated
-     perfectly and painted nothing — the transform kept changing, so a
-     check reading computed style called it working. The row is not a
-     stacking context, so "behind" meant behind everything. What lifts
-     the text is the text, given a z-index of its own.
-
-   · The trail is 68px and the line is 2px. The line alone reads as a
-     glitch; the trail alone reads as a wash with no direction. */
-.row.is-now::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  pointer-events: none;
-  border-right: 2px solid var(--red);
-  /* color-mix off --red rather than a second token holding the same
-     colour as channels. On a browser without it the whole declaration
-     drops and the sweep is its 2px leading edge alone — which still
-     reads, and which is a better failure than a wash in a colour the
-     page stopped using. */
-  background: linear-gradient(90deg, transparent calc(100% - 68px),
-                                     color-mix(in srgb, var(--red) 13%, transparent));
-  transform: translateX(-100%);
-  animation: sc-sweep 2.8s linear infinite;
+.row-prog {
+  grid-column: 3; grid-row: 3;
+  height: 3px; margin-top: 7px;
+  border-radius: 2px;
+  background: var(--tick-off);
+  overflow: hidden;
 }
-@keyframes sc-sweep {
-  from { transform: translateX(-100%); }
-  to   { transform: translateX(0); }
+.row-prog i {
+  display: block; height: 100%;
+  border-radius: 2px;
+  background: var(--red);
+  /* NO TRANSITION, said out loud. The app carries a global one, so a
+     width set on the half-minute pass would SLIDE — which is the
+     travelling mark this replaced, arriving by the back door. */
+  transition: none;
+  /* A block with one instant on it divides by zero and lands at NaN%,
+     which renders at the left edge and looks deliberate. The width is
+     floored and clamped where it is worked out. */
+  min-width: 3px;
 }
+/* Only the running row draws one: a track on a row that has not
+   started is a claim that it has. */
+.row:not(.is-now) .row-prog { display: none; }
 
-/* The row's own content, lifted over the wash. */
-.row.is-now .ic,
-.row.is-now .tick,
-.row.is-now .n,
-.row.is-now .props { position: relative; z-index: 1; }
-
-/* The row keeps its rule and its weight either way — an effect that
-   degrades to nothing has not been disabled, it has removed the mark.
-   Not built rather than paused: a paused sweep is a red line frozen
-   somewhere across the row, which reads as a bug. */
-@media (prefers-reduced-motion: reduce) {
-  .row.is-now::after { display: none; }
-}
+/* There is no reduced-motion rule here any more, and that is the
+   point rather than an omission: nothing on this row animates, so
+   there is nothing to turn off. The track is a fact drawn at the size
+   the fact is. */
 
 .row.is-free {
   display: block;

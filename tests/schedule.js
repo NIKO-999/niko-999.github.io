@@ -897,18 +897,38 @@ const SAID = [
        made: the running row wears the ACCENT. */
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim();
-    /* The mark is a RING now, not a rule down the margin: the accent
-       has to be in the row's own box-shadow. */
+    /* ── THE MARK IS A PROGRESS LINE ──
+       A 3px track under the row, filled by the fraction of the block
+       that has gone. There is nothing to disable under reduced motion
+       because nothing animates: the width is set on the same
+       half-minute pass that marks the rows behind you, so the mark
+       STEPS rather than sliding. */
+    const pr = row.querySelector('.row-prog');
+    const fill = pr && pr.querySelector('i');
     return { display: a.display, anim: a.animationName,
-             rule: getComputedStyle(row).boxShadow,
+             track: pr ? getComputedStyle(pr).display : null,
+             fillBg: fill ? getComputedStyle(fill).backgroundColor : null,
+             fillPct: fill ? fill.style.width : null,
+             fillAnim: fill ? getComputedStyle(fill).animationName : null,
              accent: accent,
              weight: w(row), plain: other ? w(other) : null };
   });
   const hexRGB = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
     .map((x) => parseInt(x, 16)).join(', ') + ')';
-  ok('reduced motion does not build the sweep', calm.display === 'none', calm);
-  ok('and the row is still marked without it',
-    calm.rule.includes(hexRGB(calm.accent)) && calm.weight > calm.plain, calm);
+  /* Both directions. "Nothing animates" passes on a row with no mark
+     at all, so the track has to be there and filled in the accent. */
+  /* `display` on a pseudo-element with no `content` is whatever the
+     default is rather than `none`, so it says nothing about whether
+     one is generated — what is claimed is that no animation runs, and
+     that is what is read. */
+  ok('the running row draws a progress track and nothing on it animates',
+    calm.track === 'block' && calm.anim === 'none' && calm.fillAnim === 'none',
+    calm);
+  ok('the track is filled in the accent, to a real fraction',
+    calm.fillBg === hexRGB(calm.accent)
+    && /^\d+(\.\d+)?%$/.test(calm.fillPct || '')
+    && parseFloat(calm.fillPct) > 0 && parseFloat(calm.fillPct) <= 100, calm);
+  ok('and the row is still marked without it', calm.weight > calm.plain, calm);
 
   /* ── AND ITS CONTENT SITS WHERE EVERY OTHER ROW'S DOES ──
      Kept from the pill that briefly replaced this rule, because it
@@ -1191,161 +1211,119 @@ const SAID = [
       now: reds.filter((r) => r.now).length,
       place: reds.filter((r) => r.place).length });
 
-  /* ── the sweep ──
-     The running block carries a hairline that crosses it and keeps
-     crossing it. "The element exists" is not the test — a sweep whose
-     animation never starts, or whose keyframes cancel out, is present
-     and still, and looks entirely correct in a screenshot. Two of the
-     effects proposed alongside this one failed exactly that way. So
-     the row is SAMPLED WHILE RUNNING and the frames have to differ. */
-  console.log('\n── the sweep ──');
-  const frames = await page.evaluate(() => new Promise((res) => {
-    const row = document.querySelector('.row.is-now');
-    if (!row) return res(null);
-    const seen = new Set();
-    const t0 = performance.now();
-    (function tick() {
-      /* getComputedStyle on a pseudo-element reports the animated
-         transform as a live matrix, which is the value actually being
-         composited rather than the one that was declared. */
-      seen.add(getComputedStyle(row, '::after').transform);
-      if (performance.now() - t0 < 900) requestAnimationFrame(tick);
-      else res([...seen]);
-    })();
-  }));
-  ok('the running block is actually moving', frames && frames.length > 4,
-    frames && frames.slice(0, 3));
-  ok('and it is a transform, so it never repaints',
-    frames && frames.every((f) => /^matrix/.test(f)), frames && frames[0]);
+  /* ── the progress line ──
+     The sweep is gone: a 68px trail of the accent crossing the row
+     every 2.8 seconds, for ever, and the only thing moving on a screen
+     where nothing else does. What replaced it says something the sweep
+     never did — how much of the block is LEFT.
 
-  /* And it has to actually PAINT. A transform that keeps changing on an
-     element nobody can see satisfies every check above — which is not
-     hypothetical: the first build of this put the sweep at z-index -1,
-     where it animated flawlessly behind the page's own white. Real
-     pixels, two moments apart, have to differ. */
+     THE POINT OF THE OLD CHECK SURVIVES, INVERTED. It sampled the row
+     twice 700ms apart and required the pixels to DIFFER, because a
+     sweep that is present and still looks correct in a screenshot.
+     Here the claim is the opposite one, and it is the claim worth
+     holding: a screen nobody is touching is a screen that does not
+     move. Same measurement, other direction.
+
+     And the fill is checked against the clock rather than merely being
+     non-zero: a track stuck at 100% or at 1% is present, coloured and
+     wrong, which is exactly the shape of failure the sweep's own check
+     was written for. */
+  console.log('\n── the progress line ──');
   const nowRow = await page.$('.row.is-now');
-  const a = await nowRow.screenshot();
-  await page.waitForTimeout(700);
-  const b2 = await nowRow.screenshot();
-  ok('and the row it is on visibly changes', !a.equals(b2));
+  const pa = await nowRow.screenshot();
+  await page.waitForTimeout(900);
+  const pb = await nowRow.screenshot();
+  ok('the running row does not move', pa.equals(pb));
 
-  /* How much of the row the sweep is allowed to spoil. The trail is a
-     13% wash and text over it measures about 7:1, so only the 2px line
-     itself falls below the bar — roughly half a percent of a 340px
-     row. The ceiling is one and a half percent, and it is calibrated
-     rather than guessed: as built this measures 0.6%, a 20px line
-     measures 5.6%, and a wash at 45% instead of 13% measures 2.2%.
-     Three percent — the first number that looked reasonable — let that
-     last one through, which is exactly the failure this is for. */
-  const spoil = await (async () => {
-    const box = await page.$eval('.row.is-now', (r) => {
-      const b = r.getBoundingClientRect();
-      return { x: b.x, y: b.y, w: b.width, h: b.height };
-    });
-    const png = PNG.sync.read(await page.screenshot());
-    const ink = (await page.$eval('.row.is-now .t', (e) => getComputedStyle(e).color))
-      .match(/[\d.]+/g).slice(0, 3).map(Number);
-    let bad = 0, seen = 0;
-    /* EVERY CSS PIXEL, and it was every other one. The leading edge is
-       a 2px line, so at a step of two it lands on one sample or two
-       depending on where it happens to be when the screenshot is
-       taken — 0.83% or 1.67% of 120, with the 1.5% ceiling sitting
-       exactly between them. The check was a coin flip on the phase of
-       an infinite animation and it had nothing to do with the
-       threshold: at a step of one the same line measures 0.4-0.8% of
-       240 whichever way it falls, a 20px line still measures about 6%
-       and a 45% wash about 2.2%, so the ceiling goes on discriminating
-       and the measurement stops moving. */
-    for (let dx = 6; dx < box.w - 6; dx += 1) {
-      const i = (png.width * Math.round((box.y + box.h - 4) * dpr)
-        + Math.round((box.x + dx) * dpr)) << 2;
-      seen++;
-      if (ratio(ink, [png.data[i], png.data[i + 1], png.data[i + 2]]) < 4.5) bad++;
-    }
-    return { pct: bad / seen * 100, seen };
-  })();
-  ok(`the sweep spoils ${spoil.pct.toFixed(1)}% of the row, under the 1.5% ceiling`,
-    spoil.pct < 1.5, spoil);
-
-  /* ── the sweep is ONE colour ──
-     Its leading edge and its trailing wash are both meant to be the
-     accent. They were two tokens holding the same colour — --red and a
-     --red-rgb beside it carrying bare channels so the wash could take
-     an alpha — and the comment on the second said, in as many words,
-     that a palette colour retyped as a literal is a copy that drifts.
-     It drifted the moment themes arrived: every theme set --red and
-     none set --red-rgb, so on all twelve the edge followed the accent
-     and the wash stayed 226,35,26. A mint hairline dragging a red
-     smear, on a screen nobody thinks to re-check after a palette
-     change.
-
-     Asserted as a RELATIONSHIP rather than a value: whatever the accent
-     is, the wash has to be made of it. A literal passes this on the
-     shipped palette and fails on every theme, which is exactly the
-     shape of the bug. */
-  const oneColour = await page.evaluate(() => {
+  const prog = await page.evaluate(() => {
     const row = document.querySelector('.row.is-now');
-    const a = getComputedStyle(row, '::after');
-    /* Chrome serialises a resolved color-mix as color(srgb r g b / a)
-       with the channels 0..1, and a plain colour as rgb()/rgba() with
-       them 0..255. Both forms have to be read or the check passes on
-       whichever one it happens to understand — which is how a test
-       ends up measuring its own parser. */
-    const chan = (t) => {
-      const n = (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-      return /^color\(/.test(t) ? n.map((c) => Math.round(c * 255)) : n;
-    };
-    const all = a.backgroundImage.match(/(?:rgba?|color)\([^)]*\)/g) || [];
-    return { edge: chan(a.borderRightColor),
-             wash: all.length ? chan(all[all.length - 1]) : null,
-             raw: a.backgroundImage };
+    if (!row) return null;
+    const fill = row.querySelector('.row-prog > i');
+    if (!fill) return { NOFILL: true };
+    const s = +row.dataset.s, e = +row.dataset.e;
+    const d = new Date();
+    const now = d.getHours() * 60 + d.getMinutes();
+    return { pct: parseFloat(fill.style.width),
+             want: (now - s) / Math.max(1, e - s) * 100,
+             anim: getComputedStyle(fill).animationName,
+             dur: getComputedStyle(fill).transitionDuration };
   });
-  ok('the sweep’s wash is made of the same accent as its edge',
-    oneColour.wash && oneColour.edge.every((c, i) =>
-      Math.abs(c - oneColour.wash[i]) <= 2), oneColour);
+  ok('and its fill is where the clock says it should be',
+    prog && prog.pct >= 0 && prog.pct <= 100
+    && Math.abs(prog.pct - prog.want) < 4, prog);
+  /* A TRANSITION WOULD MAKE IT SLIDE, which is the thing this
+     replaced. The app has a global transition on everything, so the
+     duration is what has to be zero — `transitionProperty` comes back
+     as "all" whether or not anything moves. */
+  ok('nothing on it animates or transitions',
+    prog && prog.anim === 'none' && parseFloat(prog.dur) === 0, prog);
 
-  /* AND WITH THE ACCENT MOVED. The line above passes with the bug in
-     it, because on the shipped palette the literal and the token hold
-     the same red — the copy is only wrong once something changes it.
-     A check that only ever runs on the default can never see a drifting
-     copy, which is precisely why this one went out. */
-  const moved = await page.evaluate(() => {
-    document.documentElement.style.setProperty('--red', '#4FE0A8');
-    const a = getComputedStyle(document.querySelector('.row.is-now'), '::after');
-    const chan = (t) => {
-      const n = (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
-      return /^color\(/.test(t) ? n.map((c) => Math.round(c * 255)) : n;
+  /* A row that has not started draws no track: a bar on a block you
+     have not reached is a claim that you have. Both directions, since
+     "no other row has one" passes on a build with no tracks at all. */
+  const tracks = await page.evaluate(() => {
+    const drawn = (r) => {
+      const p = r.querySelector('.row-prog');
+      return !!p && p.getClientRects().length > 0;
     };
-    const all = a.backgroundImage.match(/(?:rgba?|color)\([^)]*\)/g) || [];
-    const out = { edge: chan(a.borderRightColor),
-                  wash: all.length ? chan(all[all.length - 1]) : null };
-    document.documentElement.style.removeProperty('--red');
+    const rows = [...document.querySelectorAll('.week.is-today .row[data-id]')];
+    return { now: rows.filter((r) => r.classList.contains('is-now')).map(drawn),
+             rest: rows.filter((r) => !r.classList.contains('is-now')).map(drawn) };
+  });
+  ok('only the running row draws a track',
+    tracks.now.length > 0 && tracks.rest.length > 0
+    && tracks.now.every(Boolean) && !tracks.rest.some(Boolean), tracks);
+
+  /* ── AND NOTHING IN THE WEEK ANIMATES AT ALL ──
+     The sweep was the last of it. Asserted over every element AND its
+     two pseudo-elements, because the sweep itself was a `::after` and
+     a scan of `querySelectorAll('*')` cannot reach one — that exact
+     blind spot let a previous version of this report "nothing is
+     animating" while the thing it was about went unlooked at. */
+  const stillWeek = await page.evaluate(() => {
+    const out = [];
+    for (const e of document.querySelectorAll('.week *')) {
+      if (e.getClientRects().length === 0) continue;
+      for (const pseudo of [null, '::before', '::after']) {
+        const n = getComputedStyle(e, pseudo).animationName;
+        if (n && n !== 'none') out.push((e.className || e.tagName) + (pseudo || '') + ' ' + n);
+      }
+    }
     return out;
   });
-  ok('and it still is when the accent is changed under it',
-    moved.wash && moved.edge.every((c, i) => Math.abs(c - moved.wash[i]) <= 2),
-    moved);
-
-  /* Spent on the one row that is running, like the red itself. */
-  ok('nothing else on the sheet sweeps', await page.evaluate(() =>
-    [...document.querySelectorAll('.row')].filter((r) =>
-      getComputedStyle(r, '::after').animationName !== 'none').length) === 1);
+  ok('nothing in the week animates, pseudo-elements included',
+    stillWeek.length === 0, stillWeek);
 
 
   /* ═══ the objectives ═══
-     The back of the day's card: what the day is FOR, as against what is
-     on it. Per DATE rather than per weekday — the schedule repeats and
-     a decision about today does not. */
+     What the day is FOR, as against what is on it. Per DATE rather
+     than per weekday — the schedule repeats and a decision about today
+     does not.
+
+     THEY ARE A SHEET NOW, NOT THE BACK OF A CARD. A face you have to
+     turn a panel over to find is a feature named nowhere: it needed a
+     card of the intro to say it existed, and every engine bug this app
+     has had about a composited layer drawing through a backface came
+     from that one mechanism. A sheet is what every other secondary
+     surface here already uses, and it draws in two dimensions.
+
+     Asserted as the ABSENCE of the machinery, not just of the markup:
+     a flip left in place but never triggered would pass a check that
+     only looked for `.is-flipped`. */
   console.log('\n── the objectives ──');
 
-  ok('the card starts face up', await page.$eval('.week',
-    (d) => !d.classList.contains('is-flipped')));
-  /* Both faces are in the document at once, so which one is SHOWING
-     cannot be read off a property — it is which way the card is
-     turned. */
-  ok('...and both faces are built, one of them turned away',
-    await page.$$eval('.wk-front, .wk-back',
-      (f) => f.length) === 2);
+  const noFlip = await page.evaluate(() => {
+    const w = document.querySelector('.week');
+    const c = document.querySelector('.day-card');
+    return { faces: document.querySelectorAll('.wk-front, .wk-back, .wk-flip').length,
+             flipped: w ? w.classList.contains('is-flipped') : null,
+             persp: w ? getComputedStyle(w).perspective : null,
+             style3d: c ? getComputedStyle(c.parentElement).transformStyle : null,
+             card: !!c };
+  });
+  ok('there is no flip: no faces, no perspective, no preserve-3d',
+    noFlip.card && noFlip.faces === 0 && noFlip.flipped === false
+    && noFlip.persp === 'none' && noFlip.style3d === 'flat', noFlip);
   /* ── ON EVERY CARD, and DRAWN on the open one ──
      It was built `if (isOpen)` and the deck opens a card by toggling a
      class, so the control existed only on whichever day was open when
@@ -1431,30 +1409,27 @@ const SAID = [
      has no control to press, so nothing is drawn whichever way the
      engine would have culled it. A source check for the declaration
      would pass on a stylesheet where it had no effect. */
-  /* The control is in the HEAD now rather than on the front face, so
-     there is nothing of it inside the rotation for an engine to draw
-     through the back — which is the bug made impossible rather than
-     guarded against. What is asserted is that it is still the one
-     control, outside the turning panel. */
-  ok('...and the control is outside the panel that turns',
-    await page.$eval('#scHdTurn', (t) => !t.closest('#scFlip'))
-    && await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 0);
+  /* One control, in the head, and it opens a sheet rather than turning
+     anything. `aria-haspopup` is part of the claim: a button that
+     opens a dialog and does not say so is a button a screen reader
+     announces as an ordinary toggle. */
+  ok('...and it says it opens a dialog',
+    await page.$eval('#scHdTurn', (b) => b.getAttribute('aria-haspopup')) === 'dialog');
   await page.click('#scHdTurn');
-  await page.waitForTimeout(700);
-  ok('pressing it turns the day over', await page.$eval('#scFlip',
-    (d) => d.classList.contains('is-flipped')));
-  /* MEASURED, not the class. backface-visibility is what makes this a
-     card with a back rather than two panels that swap, and without it
-     the schedule reads through the objectives mirror-imaged. */
-  const facing = await page.evaluate(() => {
-    const m = new DOMMatrix(getComputedStyle(
-      document.querySelector('#scFlip')).transform);
-    return { a: Math.round(m.a * 100) / 100,
-      back: getComputedStyle(document.querySelector('.wk-back'))
-        .backfaceVisibility };
+  await page.waitForTimeout(560);
+  /* MEASURED AS A BOX, never as a class: what is claimed is that the
+     objectives are on screen, and a sheet that has the open class and
+     no height is not. */
+  const opened = await page.evaluate(() => {
+    const s = document.getElementById('scSheet');
+    const r = s ? s.getBoundingClientRect() : null;
+    return { drawn: !!r && r.height > 100 && r.width > 100,
+             title: (document.getElementById('scSheetTitle') || {}).textContent,
+             list: document.querySelectorAll('#scSheetBody .wk-back').length };
   });
-  ok('...really turned, with the far side hidden rather than mirrored',
-    facing.a <= -0.99 && facing.back === 'hidden', facing);
+  ok('pressing it opens the objectives as a sheet',
+    opened.drawn && /objectives/i.test(opened.title || '') && opened.list === 1,
+    opened);
   ok('an empty back says what the face is for',
     (await page.$$eval('.ob-empty', (p) => p.length)) === 1);
   /* HEADED ANYWAY, and it was not. The argument for drawing the
@@ -1463,95 +1438,63 @@ const SAID = [
      with no objectives yet, and the heading is the thing that says so.
      Without it the face opens on a plus and a sentence floating in a
      gradient, anchored to nothing. */
-  ok('...and is headed all the same, so the empty face is still a list',
-    (await page.$$eval('.ob-head b',
-      (h) => h.map((x) => x.textContent).join())) === 'Main objectives');
+  /* HEADED BY THE SHEET, not by a heading of its own. The argument
+     for heading an empty list survives — an empty screen is not a
+     screen with no heading, it is one with nothing on it YET — and in
+     a sheet the title bar is where that heading already is. Drawing a
+     second one under it would be the same words twice. */
+  ok('...and the sheet titles it, so the empty list is still a list',
+    (await page.$eval('#scSheetTitle', (h) => h.textContent)) === 'Main objectives'
+    && (await page.$$eval('#scSheetBody .ob-head', (h) => h.length)) === 0);
 
-  /* ── AND THE FRONT IS NOT DRAWN THROUGH IT ──
-     The running row's sweep is an infinite transform animation, hence
+  /* ── THE WEEK IS BEHIND A SCRIM, NOT BEHIND A BACKFACE ──
+     Everything that used to be asserted here was about a bug the flip
+     created: the running row's sweep was an infinite transform, hence
      its own compositor layer, and a composited descendant of a
-     backface-hidden ancestor is not reliably culled with it: on iOS the
-     whole running row came through the objectives face MIRRORED, over
-     the card you were reading. Chromium does not reproduce it, so this
-     asserts the property that makes it impossible rather than the
-     symptom — and it has to be checked AFTER the turn has settled,
-     because the front is deliberately still visible for the first half
-     of it. */
-  /* THREE PROPERTIES, and the first two were not enough on their own.
-     `visibility` is a PAINT-time property and the whole shape of this
-     bug is a layer the compositor keeps and draws without consulting
-     the paint tree — it shipped with visibility alone and the running
-     row still came through. `opacity` is the lever that reaches the
-     layer itself, and it transitions, so it carries the same
-     half-a-turn delay rather than needing a second mechanism. The
-     animation stopping is the root of it: a thing that is not
-     animating is not promoted.
+     backface-hidden ancestor is not reliably culled with it — on iOS
+     the whole running row came through the objectives face MIRRORED.
+     It was guarded three times, with `backface-visibility`, then
+     `visibility`, then `opacity`, because the first two are paint-time
+     properties and the bug lives in a layer the compositor draws
+     without consulting the paint tree.
 
-     Asserted as a property of the SUBTREE rather than of the sweep. A
-     check naming the element that leaked is one the next animated
-     thing on this face walks straight past, which is how this got
-     shipped twice — so it counts every animation under the turned
-     face and requires the count to be non-zero, because a check that
-     finds nothing passes. */
-  const turned = await page.evaluate(() => {
-    const f = document.querySelector('.wk-front');
-    const cs = getComputedStyle(f);
-    /* ── THE THING THAT LEAKS IS A PSEUDO-ELEMENT ──
-       The sweep is `.row.is-now::after`, and querySelectorAll('*')
-       cannot see it. Written that way this counted ONE animation — the
-       turn pill's foil rim, which another rule already pauses — and
-       reported "nothing is animating" while the element the bug is
-       about went unlooked at. It passed with the fix deleted, which is
-       how it was caught.
-
-       And the sweep only exists on a row that is running, which is a
-       fact about the hour. Planted rather than waited for: this file
-       already has two lessons about checks that only fire at certain
-       times of day. */
-    const row = f.querySelector('.row[data-id]');
-    if (row) row.classList.add('is-now');
-    const marks = [];
-    [f, ...f.querySelectorAll('*')].forEach((e) => {
-      ['', '::before', '::after'].forEach((q) => {
-        const c = getComputedStyle(e, q || null);
-        if (c.animationName && c.animationName !== 'none') {
-          marks.push({ what: (e.className || e.tagName) + q,
-            state: c.animationPlayState });
-        }
-      });
-    });
-    return { vis: cs.visibility, op: cs.opacity,
-      anim: marks.length,
-      pseudo: marks.filter((m) => /::/.test(m.what)).length,
-      running: marks.filter((m) => m.state !== 'paused').length,
-      marks };
+     None of that can happen to a sheet. What replaces those checks is
+     the one thing that has to be true of any surface over another: the
+     week is still there, and it is behind a scrim rather than gone —
+     a sheet that removed what is under it would lose your scroll
+     position every time you glanced at the objectives. */
+  const behind = await page.evaluate(() => {
+    const w = document.querySelector('.week');
+    const s = document.getElementById('scScrim');
+    const sheet = document.getElementById('scSheet');
+    const z = (e) => +getComputedStyle(e).zIndex || 0;
+    return { week: !!w && !w.hidden && w.getBoundingClientRect().height > 100,
+             scrim: !!s && !s.hidden,
+             over: !!s && !!sheet && z(sheet) >= z(s) };
   });
-  ok('...with the front no longer drawn at all behind it',
-    turned.vis === 'hidden' && +turned.op === 0, turned);
-  ok(`...and nothing on it is still animating (${turned.anim} found, `
-    + `${turned.pseudo} of them pseudo-elements)`,
-    turned.anim > 0 && turned.pseudo > 0 && turned.running === 0, turned.marks);
+  ok('the week is still under it, behind the scrim',
+    behind.week && behind.scrim && behind.over, behind);
 
-  /* ── THE SAME CORNER IS NOW THE SAME CONTROL ──
-     The control sat between the day and the hours on the front and at
-     the end on the back, so you pressed one place to turn the card
-     over and a different one to come back — and the check that fixed
-     that measured the two corners against each other in layout
-     coordinates. There is one control in the head now and it turns
-     the panel both ways, which is the same guarantee arrived at by
-     not having two controls: what is asserted is that it is still
-     there, still named for what it will do, once the day is turned. */
+  /* ── ONE CONTROL, ONE JOB ──
+     It used to turn the panel both ways and swap its own glyph to say
+     which way round you were — a control with two states, which is
+     what the "same corner" check existed to hold. A sheet closes by
+     its own means, so the head button only ever opens: one state, one
+     glyph, one name. What is still asserted is that it stays drawn and
+     stays named while the sheet is up, since a control that vanishes
+     under its own sheet is a control you cannot find your way back
+     from. */
   const backTurn = await page.evaluate(() => {
     const b = document.getElementById('scHdTurn');
     const r = b.getBoundingClientRect();
     return { drawn: r.width > 0 && r.height > 0,
              lab: b.getAttribute('aria-label'),
-             back: b.classList.contains('is-back'),
+             glyphs: b.querySelectorAll('.tn-g').length,
              right: Math.round(window.innerWidth - r.right) };
   });
-  ok('the one control turns it back, from the same corner',
-    backTurn.drawn && backTurn.back && backTurn.right < 90
-    && /Back to the schedule/.test(backTurn.lab), backTurn);
+  ok('the control stays drawn and named while the sheet is up',
+    backTurn.drawn && backTurn.glyphs === 1 && backTurn.right < 90
+    && /Objectives for/.test(backTurn.lab), backTurn);
 
   /* ── writing one ── */
   const addObj = async (text) => {
@@ -1603,6 +1546,17 @@ const SAID = [
      is carried by stroke WEIGHT and a step of type weight instead —
      quieter than it was, and asserted rather than assumed. */
   const obMarks = await page.evaluate(() => {
+    /* Guarded rather than assumed. This threw once — `getComputedStyle`
+       on a null — because the row it wanted was not on screen, and a
+       TypeError takes the whole file down with no assertion count and
+       no evidence about WHY. A missing element is a fact worth
+       reporting, so it is reported. */
+    const el = (s) => document.querySelector(s);
+    const probe = { frog: !!el('.ob.is-frog .ob-ic'),
+                    rest: !!el('.ob:not(.is-frog):not(.is-done) .ob-ic'),
+                    obs: [...document.querySelectorAll('.ob')]
+                      .map((o) => o.className) };
+    if (!probe.frog || !probe.rest) return { PROBE: probe };
     const g = (s) => getComputedStyle(document.querySelector(s));
     const frog = g('.ob.is-frog .ob-ic');
     const rest = g('.ob:not(.is-frog):not(.is-done) .ob-ic');
@@ -1614,7 +1568,11 @@ const SAID = [
     const red = 'rgb(' + getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
       .map((x) => parseInt(x, 16)).join(', ') + ')';
-    const head = g('.ob-head b').color;
+    /* The list's heading is the SHEET's title now, so that is what is
+       read. `.ob-head b` is gone with the face that had a heading of
+       its own, and reading a missing element threw a TypeError that
+       took the file down with no assertion count at all. */
+    const head = g('#scSheetTitle').color;
     return { frog: frog.stroke, rest: rest.stroke, red, head,
       fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
       ft: g('.ob.is-frog .ob-t').fontWeight,
@@ -1646,15 +1604,22 @@ const SAID = [
   ok('...and never by a rank number',
     (await page.$$eval('.ob-n', (n) => n.length)) === 0);
 
-  /* ── the face names itself, in the accent ──
-     Every other heading in this app is a grey label and this one is
-     not: it is the only heading you have to turn something over to
-     reach, and the accent is what says the list under it is the one
-     you chose rather than the one you scheduled. */
-  ok('the list is headed, in the accent the marks under it wear',
-    (await page.$eval('.ob-head b', (e) => e.textContent))
-      === 'Main objectives' && obMarks.head === obMarks.red
-      && obMarks.rest === obMarks.red, obMarks);
+  /* ── THE SHEET NAMES IT, AND THE ACCENT GOES WITH THE FACE ──
+     The heading was the one in this app that kept the accent: it named
+     a list you had to turn something over to reach, and the colour
+     said the list under it was the one you CHOSE rather than the one
+     you scheduled. There is nothing to turn over now — the sheet's
+     own title bar names it, in the treatment every other sheet in the
+     app uses, and a red title on one sheet out of eight would be the
+     exception with its reason gone.
+
+     What the accent still marks is the MARKS: every objective's glyph
+     wears it, which is the half of that rule about the record rather
+     than about a heading. */
+  ok('the sheet names the list, and the marks under it keep the accent',
+    (await page.$eval('#scSheetTitle', (e) => e.textContent))
+      === 'Main objectives' && obMarks.rest === obMarks.red
+      && obMarks.frog === obMarks.red, obMarks);
 
   /* ── re-ranking is one move, and always the same move ── */
   await page.click('.ob-add');
@@ -1673,8 +1638,8 @@ const SAID = [
   ok('an objective ticks where it stands',
     await page.$eval('.ob', (b) => b.classList.contains('is-done')
       && b.getAttribute('aria-pressed') === 'true'));
-  ok('...and the day stays turned over while you do it',
-    await page.$eval('#scFlip', (d) => d.classList.contains('is-flipped')));
+  ok('...and the sheet stays up while you do it',
+    await page.$eval('#scSheet', (s) => s.getBoundingClientRect().height > 100));
   /* ── EVERY TICK IN THIS APP IS THE ACCENT ──
      There are four and they are all the same claim: a done objective, a
      done block, a picked workout, and Done today. This one was --ink,
@@ -1761,20 +1726,37 @@ const SAID = [
      no rim to turn and nothing here to hold. The one thing worth
      keeping from it is stated with the tile above: nothing in this
      app sheens or foils any more. */
-  /* ── turning back ── */
-  await page.click('#scHdTurn');
-  await page.waitForTimeout(700);
-  ok('and it turns back to the schedule',
-    await page.$eval('.week', (d) => !d.classList.contains('is-flipped')));
-  /* The turn is NOT remembered. An objective is for today, and a card
-     found face-down tomorrow morning is the app having kept the wrong
-     half of a decision. */
+  /* ── closing ── */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(520);
+  ok('and Escape puts it away, leaving the schedule',
+    await page.$eval('#scSheet', (s) => s.hidden
+      || s.getBoundingClientRect().height < 40)
+    && await page.$eval('.week', (w) => w.getBoundingClientRect().height > 100));
+  /* It is NOT remembered. An objective is for today, and a sheet found
+     open tomorrow morning is the app having kept the wrong half of a
+     decision — the same claim the flip's own check made about a card
+     found face-down. */
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(340);
-  ok('...and a card is never found face-down on the next visit',
-    await page.$$eval('#scFlip.is-flipped', (d) => d.length) === 0);
+  ok('...and the sheet is never found open on the next visit',
+    await page.$eval('#scSheet', (s) => s.hidden
+      || s.getBoundingClientRect().height < 40));
+  /* Re-opened to look: the list lives in a sheet now, so "what was
+     written survives" is a question about the RECORD rather than about
+     what happens to be on screen. */
+  await page.click('#scHdTurn');
+  await page.waitForTimeout(520);
   ok('...though what was written on it survives',
     await page.$$eval('.ob', (b) => b.length) === 2);
+  /* AND PUT AWAY AGAIN. A section that leaves a sheet open hands the
+     next one a screen with the sheet's own white text sitting behind
+     the tab bar — which is exactly how the bar's contrast sweep came
+     back at 1.62:1 against a bar that had not changed. The same
+     lesson as the overflow check needing its own context: a check
+     that changes the state of the app has to put it back. */
+  await page.keyboard.press('Escape');
+  await page.waitForTimeout(480);
 
   /* Each view is its own labelled tab, so a view is asked for by
      name rather than reached by pressing a cycling button until it
@@ -2026,7 +2008,19 @@ const SAID = [
      state a fixed bar is about. Swept rather than sampled once: one
      scroll offset misses the row that breaks it by four pixels. */
   const swept = await (async () => {
-    let low = 99, at = 0;
+    /* ── THE STATE IS ESTABLISHED, NOT INHERITED ──
+       This is about the bar with the WEEK behind it, and it ran on
+       whatever the previous section happened to leave up: a sheet was
+       open, its --spent text sat behind the "Today" label, and the
+       sweep reported 1.62:1 against a bar that had not changed. Three
+       runs went into the number before the payload was made to say
+       which label and what was behind it — which is the fix worth
+       keeping as much as the Escape is. */
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(420);
+    await page.evaluate(() => document.getElementById('scTabWeek').click());
+    await page.waitForTimeout(420);
+    let low = 99, at = 0, worst = null;
     for (let y = 0; y <= 200; y += 25) {
       await page.evaluate((v) => window.scrollTo(0, v), y);
       await page.waitForTimeout(60);
@@ -2037,6 +2031,7 @@ const SAID = [
         const b2 = await el.boundingBox(); if (!b2) continue;
         const col = (await el.evaluate((e) => getComputedStyle(e).color))
           .match(/[\d.]+/g).slice(0, 3).map(Number);
+        const lab = await el.evaluate((e) => e.textContent);
         const near = (q) => Math.abs(q[0] - col[0]) + Math.abs(q[1] - col[1])
                           + Math.abs(q[2] - col[2]) < 110;
         for (let x = 2; x < b2.width - 2; x += 3) {
@@ -2046,13 +2041,23 @@ const SAID = [
               if (near(px(b2.x + x + d, b2.y + yy)) || near(px(b2.x + x, b2.y + yy + d))) ok2 = false;
             if (!ok2) continue;
             const r = ratio(col, px(b2.x + x, b2.y + yy));
-            if (r < low) { low = r; at = y; }
+            /* WHICH label and WHAT was behind it. Without this the
+               failure is a bare number and the state that produced it
+               has to be guessed at — which cost three runs. Read from
+               the pixel buffer rather than the page, because an await
+               inside this loop is a round trip per improving sample. */
+            if (r < low) { low = r; at = y;
+              worst = { lab, col, bg: px(b2.x + x, b2.y + yy) }; }
           }
         }
       }
     }
     await page.evaluate(() => window.scrollTo(0, 0));
-    return { low: +low.toFixed(2), at };
+    const sheetUp = await page.evaluate(() => {
+      const s = document.getElementById('scSheet');
+      return !!s && !s.hidden;
+    });
+    return { low: +low.toFixed(2), at, worst, sheetUp };
   })();
   ok(`a label clears 4.5:1 with a row behind it (worst ${swept.low}:1 at ${swept.at}px)`,
     swept.low >= 4.5, swept);
@@ -3601,8 +3606,10 @@ const SAID = [
           return px.length >= 3 && parseFloat(px[2]) > 0;
         }).length;
     };
+    /* `.wk-front` and `.wk-back` are gone with the flip; the sheet is
+       the surface that used to be the back, and it is the one thing on
+       this screen genuinely above the page. */
     return { face: cast('.wk-front'), toast: cast('.toast'),
-      /* The rows are the card material now and cast with it. */
       row: cast('.row'), tyRow: cast('.ty-row'), back: cast('.wk-back'),
       others: ['.day-card', '.poster', '.ty-card', '.chk']
         .map((sel) => [sel, cast(sel)])
@@ -3629,7 +3636,7 @@ const SAID = [
      build where everything casts, which is the state this replaced. */
   ok('the toast is the only thing on the week that casts',
     shade.toast >= 1 && shade.row === 0 && shade.tyRow === 0
-    && shade.face === 0 && shade.back === 0, shade);
+    && !shade.face && !shade.back, shade);
   ok('...and the scroller, the poster and the press targets inside a card cast nothing',
     shade.others.length === 0, shade);
 
@@ -7606,49 +7613,40 @@ const SAID = [
       + `(${long.top} of ${long.max}px)`,
       long.max > 100 && long.top >= Math.min(long.max - 2, 300), long);
 
-    /* ── THE FACE TURNED AWAY IS PUT AWAY, AND THAT IS THE FIX ──
-       The two faces overlap exactly, and inside `preserve-3d` the one
-       turned away was taking the touch. Hiding it costs nothing that
-       was being drawn and hands the gesture back.
+    /* ── THERE IS NO FACE TURNED AWAY ANY MORE ──
+       This whole section was about a long day that would not scroll:
+       the two faces of the day panel overlapped exactly, and inside
+       `preserve-3d` the one turned AWAY was taking the touch —
+       `backface-visibility: hidden` stops a face being drawn and does
+       not stop it being hit. Four other fixes were built first and all
+       four measured 0px; the answer was to put the turned-away face
+       away.
 
-       Asserted alongside the drag above rather than instead of it: the
-       drag is the symptom and this is the reason, and a check on the
-       reason alone would pass on any future rule that happens to hide
-       the back for some other purpose while the scrolling stays
-       broken. */
-    const spin = async () => spage.evaluate(() => {
-      const li = document.querySelector('.week');
-      const g = (s) => getComputedStyle(li.querySelector(s));
-      return { ts: g('.wk-flip').transformStyle,
-               front: g('.wk-front').visibility,
-               back: g('.wk-back').visibility };
+       The objectives are a sheet now, so there is no second face to
+       take the gesture and the fix is not a fix any more, it is an
+       absence. What survives is the MEASUREMENT that found it: a real
+       touch drag through CDP, against a control scroller on the same
+       page, because a zero is otherwise indistinguishable from a
+       harness that cannot dispatch a scrolling touch at all.
+
+       Asserted round the sheet as well as at rest: opening one over
+       the week and closing it must leave the card scrolling, which is
+       the same round trip the turn used to make. */
+    await spage.evaluate(() => document.getElementById('scHdTurn').click());
+    await spage.waitForTimeout(560);
+    const overlay = await spage.evaluate(() => {
+      const s = document.getElementById('scSheet');
+      const c = document.querySelector('.day-card');
+      return { sheet: !!s && s.getBoundingClientRect().height > 100,
+               faces: document.querySelectorAll('.wk-front, .wk-back, .wk-flip').length
+                    - document.querySelectorAll('#scSheetBody .wk-back').length,
+               cardStill: !!c && c.getBoundingClientRect().height > 100 };
     });
-    const seen = { rest: await spin() };
-    await spage.evaluate(() =>
-      document.querySelector('#scHdTurn').click());
-    await spage.waitForTimeout(170);
-    seen.turning = await spin();
-    await spage.waitForTimeout(850);
-    seen.onBack = await spin();
-    await spage.evaluate(() =>
-      document.getElementById('scHdTurn').click());
-    await spage.waitForTimeout(170);
-    seen.returning = await spin();
-    await spage.waitForTimeout(850);
-    seen.home = await spin();
+    ok('the objectives open over the day rather than turning it over',
+      overlay.sheet && overlay.faces === 0 && overlay.cardStill, overlay);
+    await spage.keyboard.press('Escape');
+    await spage.waitForTimeout(560);
 
-    ok('the back is hidden while the front is showing, and the other way',
-      seen.rest.back === 'hidden' && seen.rest.front === 'visible'
-      && seen.onBack.back === 'visible' && seen.onBack.front === 'hidden',
-      seen);
-    /* The turn itself is untouched: it still runs in 3D throughout,
-       which is what keeps the objectives face from arriving as a
-       mirror image. `transform-style: flat` at rest was built as the
-       fix first and this is the assertion that would have caught it
-       being kept for nothing. */
-    ok('...and the card still turns in 3D, which is how it stays a card',
-      seen.rest.ts === 'preserve-3d' && seen.onBack.ts === 'preserve-3d',
-      seen);
     /* Still scrolls after a round trip, which is what the timer and
        the transitionend between them are for. */
     const after = await dragUp('.day-card');

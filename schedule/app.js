@@ -1162,6 +1162,16 @@
         props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
         props.appendChild(scEl('span', 'st'));
         row.appendChild(props);
+        /* ── HOW MUCH OF IT IS LEFT ──
+           Built on every row and drawn by CSS only on the one that is
+           running, because the deck marks a row live by moving a class
+           rather than by re-rendering — a track built `if (running)`
+           exists on whichever row happened to be live when the week
+           was last drawn, which is the bug the turn control had. */
+        var pr = scEl('span', 'row-prog');
+        pr.setAttribute('aria-hidden', 'true');
+        pr.appendChild(document.createElement('i'));
+        row.appendChild(pr);
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
           + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '') + '. Edit.');
@@ -1305,12 +1315,6 @@
       card.dataset.wired = '1';
       card.addEventListener('scroll', function () { scCardFade(card); });
     }
-    /* The back is rebuilt with the front — an objective is per DATE,
-       so the day you press decides which list this is. */
-    var flip = $('scFlip');
-    var was = flip.querySelector('.wk-back');
-    if (was) flip.removeChild(was);
-    flip.appendChild(scObjBack(d));
     scCardFade(card);
     scLive();
   }
@@ -1326,7 +1330,7 @@
     /* A day found face-down is the app having kept the wrong half of a
        decision, and that is truer still of the day BEFORE the one you
        just pressed. */
-    scFlip(d, false, true);
+
     scRender();
   }
 
@@ -1544,9 +1548,9 @@
     return scDay(d);
   }
 
-  function scObjBack(d) {
+  function scObjBack(d, inSheet) {
     var day = scObjDay(d);
-    var back = scEl('div', 'wk-back');
+    var back = scEl('div', 'wk-back' + (inSheet ? ' in-sheet' : ''));
     /* ── THE FACE IS HEADED, and it has no head of its own ──
        It carried the day name and a second turn control, both of
        which the page's own head now says: the day is up there at
@@ -1555,10 +1559,15 @@
        caps and a count — so the back reads as one of them rather
        than as a screen of its own. */
     var all = scObjFor(day);
-    var oh = scEl('div', 'grp-h ob-head');
-    oh.appendChild(scEl('b', 'pill', 'Main objectives'));
-    if (all.length) oh.appendChild(scEl('span', 'c', String(all.length)));
-    back.appendChild(oh);
+    /* In a sheet the title bar already says what this is, and a
+       heading under it is the same words twice — the frame-inside-a-
+       frame this project keeps taking out, in type. */
+    if (!inSheet) {
+      var oh = scEl('div', 'grp-h ob-head');
+      oh.appendChild(scEl('b', 'pill', 'Main objectives'));
+      if (all.length) oh.appendChild(scEl('span', 'c', String(all.length)));
+      back.appendChild(oh);
+    }
     var list = scEl('ol', 'ob-list');
     all.forEach(function (o, i) {
       var li = scEl('li');
@@ -1588,7 +1597,7 @@
       b.addEventListener('click', function () {
         scObjToggle(day, o.id);
         scRender();
-        scFlip(d, true, true);
+        scObjRedraw(d);
       });
       li.appendChild(b);
       list.appendChild(li);
@@ -1644,14 +1653,14 @@
               scObjFirst(day, o.id);
               scClose();
               scRender();
-              scFlip(d, true, true);
+              scObjRedraw(d);
             }));
           }
           row.appendChild(scBtn('bad', 'Remove', function () {
             scObjDrop(day, o.id);
             scClose();
             scRender();
-            scFlip(d, true, true);
+            scObjRedraw(d);
           }));
           body.appendChild(row);
         });
@@ -1677,7 +1686,7 @@
         }
         scClose();
         scRender();
-        scFlip(d, true, true);
+        scObjRedraw(d);
       }));
       body.appendChild(acts);
       setTimeout(function () { f.focus(); }, 260);
@@ -1687,40 +1696,50 @@
   /* Turning is a class, and the state is not stored: an objective is
      for today and a card found face-down tomorrow morning would be the
      app remembering the wrong half of a decision. */
-  function scFlip(d, on, quiet) {
-    var f = $('scFlip');
-    if (!f) return;
-    f.classList.toggle('is-flipped', !!on);
-    scHeadTurn();
-    if (!quiet && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+  /* ── THE OBJECTIVES ARE A SHEET, NOT A FACE ──
+     They lived on the back of the day panel, reached by turning it
+     over. A face you have to turn a card to find is a feature named
+     nowhere: it needed a card of the intro to explain that it existed
+     at all, and every engine bug this app has had about composited
+     layers drawing through a backface came from that one mechanism.
+
+     A sheet is the control every other secondary surface in this app
+     already uses, it is one press from the head on every screen the
+     head is on, and it costs no 3D at all. The list itself is
+     unchanged — scObjBack builds the same rows, headed by the sheet's
+     own title rather than by one of its own. */
+  function scObjOpen(d) {
+    scSheet('Main objectives', function (body) {
+      body.appendChild(scObjBack(d, true));
+    });
   }
-  /* ── THE TURN CONTROL IS IN THE HEAD ──
-     There is one panel now rather than seven cards, so the control
-     that turns it belongs to the screen rather than to a card — and
-     it is the same control both ways round, which is what the two
-     faces' corners used to have to agree about by hand. */
+  /* ── AFTER AN ADD, THE LIST COMES BACK ──
+     Adding, removing and re-ranking each open a sheet of their own and
+     then call scClose, so a redraw that only repainted an OPEN sheet
+     would find none and leave you on the week — you would press the
+     head again to see the thing you just typed. Re-opening handles
+     both: scSheet replaces the body when one is up and opens one when
+     it is not. */
+  function scObjRedraw(d) { scObjOpen(d); }
+  /* ── THE CONTROL IN THE HEAD OPENS THE SHEET ──
+     It used to turn the panel over and change its own glyph to say
+     which way round you were. There is nothing to be the wrong way
+     round now: it is one button that opens one sheet, so it keeps one
+     glyph and says what it opens. */
   function scHeadTurn() {
     var b = $('scHdTurn');
     if (!b) return;
-    var on = $('scFlip').classList.contains('is-flipped');
     b.hidden = view !== 'list';
-    b.classList.toggle('is-back', on);
-    b.setAttribute('aria-expanded', on ? 'true' : 'false');
-    b.setAttribute('aria-label', on
-      ? 'Back to the schedule'
-      : 'Objectives for ' + FULL[scOpenDay()]);
+    b.setAttribute('aria-haspopup', 'dialog');
+    b.setAttribute('aria-label', 'Objectives for ' + FULL[scOpenDay()]);
     if (!b.dataset.wired) {
       b.dataset.wired = '1';
       var g = document.createElement('span');
       g.className = 'tn-g';
+      g.innerHTML = OBJ_MARK;
       b.appendChild(g);
-      b.addEventListener('click', function () {
-        scFlip(scOpenDay(), !$('scFlip').classList.contains('is-flipped'));
-      });
+      b.addEventListener('click', function () { scObjOpen(scOpenDay()); });
     }
-    b.querySelector('.tn-g').innerHTML = on
-      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
-      : OBJ_MARK;
   }
 
   /* ── which day it is, and what time ──
@@ -1824,6 +1843,17 @@
       /* The status pill says it in a word, and only while it is true. */
       var st = el.querySelector('.st');
       if (st) { st.textContent = on ? 'Now' : ''; st.classList.toggle('is-now', on); }
+      /* And the track says how much of it has gone. Set on THIS pass
+         rather than animated: the width steps once a half-minute, so a
+         screen nobody is touching is a screen that is still. A block
+         with one instant on it divides by zero, so the span is floored
+         at a minute and the fraction clamped to its ends. */
+      var pr = el.querySelector('.row-prog > i');
+      if (pr && on) {
+        var span = Math.max(1, e - s);
+        var pct = Math.min(100, Math.max(0, (now - s) / span * 100));
+        pr.style.width = pct.toFixed(1) + '%';
+      }
       if (on) live = el;
     }
 

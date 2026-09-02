@@ -4585,3 +4585,105 @@ a block out and re-inserted it found the same anchor twice, so the file
 ended up with two copies of one section and no closing brace. Both were
 recovered by restoring the file from the last commit and re-applying
 the edits in one pass, which is cheaper than unpicking them.
+
+## The objectives are a sheet, and the now mark is a progress line
+
+Two things went in one pass, and both are removals of a mechanism
+rather than a redraw of one.
+
+**THE FLIP IS GONE.** The objectives lived on the back of the day
+panel and were reached by turning it over. A face you have to turn a
+card to find is a feature named nowhere: it needed a card of the intro
+to say it existed at all, and **every engine bug this app has had
+about a composited layer drawing through a backface came from that one
+mechanism** — the running row's sweep and the turn pill's foil rim each
+came through the back on iOS, mirrored, and were reported twice.
+
+`perspective`, `transform-style: preserve-3d`, `backface-visibility`,
+the visibility delay of half the turn, the opacity fallback that
+reached the compositor layer the paint-time properties could not, and
+the rule pausing every animation on the face turned away — all of it is
+gone with the thing it was guarding.
+
+**The sheet is the surface every other secondary screen here already
+uses**, it is one press from the head, and it draws in two dimensions.
+The list itself is unchanged: `scObjBack` builds the same rows.
+
+**The sheet's own title heads it.** `.ob-head` is dropped when the list
+is built for a sheet — a heading under a title bar saying the same
+words is the frame-inside-a-frame this project keeps taking out, in
+type. **And the accent went with the heading**: it was the one heading
+in the app that kept the red, because it named a list you had to turn
+something over to reach. There is nothing to turn over, so a red title
+on one sheet out of eight would be an exception with its reason gone.
+The MARKS still wear the accent, which is the half of that rule about
+the record rather than about a heading.
+
+**A redraw re-opens rather than repaints.** Adding, removing and
+re-ranking each open a sheet of their own and then call `scClose`, so a
+redraw that only repainted an open sheet would find none and leave you
+on the week — you would press the head again to see the thing you just
+typed. `scSheet` replaces the body when one is up and opens one when it
+is not, so re-opening covers both.
+
+**AND `.wk-turn[hidden]` WAS NEVER WORKING.** The line above it ended
+in a comment that swallowed its own selector, so the rule read
+`.wk-flip.is-flipped .wk-front .wk-turn[hidden]` — scoped to a face
+that was turned away, which is the one state the button was never in.
+This file already warns that a CSS comment cannot be trusted to end
+where it looks like it ends; this is that trap catching the very rule
+written to fix the bug it describes.
+
+### The sweep is a progress line
+
+It was a 68px trail of the accent travelling across the running row
+every 2.8 seconds, for ever — the only thing moving on a screen where
+nothing else does, and it looped whether or not anybody was looking.
+Reported as exactly that.
+
+**What replaced it says something the sweep never did: how much of the
+block is LEFT.** A 3px track on a third line under the row, filled by
+the fraction that has gone. It is the same fact as the "3h 18m left"
+beside the length, drawn.
+
+**NOTHING ANIMATES, and nothing transitions either.** The width is set
+on the half-minute pass that already moves the clock and marks the rows
+behind you, so the mark STEPS. `transition: none` is said out loud,
+because the app carries a global transition and a width set on that
+pass would otherwise slide — the travelling mark arriving by the back
+door.
+
+**Built on every row, drawn by CSS on the running one.** A track built
+`if (running)` exists on whichever row happened to be live when the
+week was last drawn, which is the turn control's own bug.
+
+**The old check's point survives, inverted.** It sampled the row twice
+700ms apart and required the pixels to DIFFER, because a sweep that is
+present and still looks correct in a screenshot. The claim now is the
+opposite one and it is worth as much: a screen nobody is touching is a
+screen that does not move. Same measurement, other direction. Beside
+it, the fill is checked against the CLOCK rather than merely being
+non-zero — a track stuck at 100% or at 1% is present, coloured and
+wrong.
+
+**And the row's figures go back to `--dim`.** This is the fourth time
+the running row's colours were decided by what was drawn across it, and
+the first time the answer is that nothing is.
+
+### A check that changes the state of the app has to put it back
+
+The bar's contrast sweep came back at **1.62:1** against a bar that had
+not changed. Three runs went into that number: the glass was thickened
+from 78% to 88% on a confident and wrong explanation, and the figure
+did not move by a hundredth — which was the tell, and was read past.
+
+The cause was an earlier section leaving a SHEET open, so the sheet's
+own `--spent` text sat behind the "Today" label. The fix is that the
+sweep now presses Escape and goes to the week before it measures
+anything, and the glass went back to 78 rather than keeping a change
+justified by a false story.
+
+**What made it findable was making the failure say more than a
+number.** The payload carries which label, its colour and the pixel
+behind it now. A bare ratio tells you a check failed; it does not tell
+you the app was in a state the check never meant to measure.
