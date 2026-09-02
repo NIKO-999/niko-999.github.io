@@ -30,7 +30,24 @@
      tests/schedule.js hashes both files and fails if either query is
      stale, printing the value to paste in — so this cannot rot into a
      version that stopped tracking what it names. -->
-<link rel="stylesheet" href="app.css?v=ffdba922" />
+<!-- The face before the first paint. app.css carries the dark set on
+     :root and the light set under [data-mode="light"], so the attribute
+     has to be on the root before the sheet applies or a phone set to
+     light opens dark for a frame and then switches. Read from the same
+     key app.js keeps; no names escape. -->
+<script>
+(function () {
+  try {
+    var m = localStorage.getItem('sched.mode.v1');
+    if (m !== 'light' && m !== 'dark') {
+      m = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+        ? 'light' : 'dark';
+    }
+    document.documentElement.dataset.mode = m;
+  } catch (e) {}
+}());
+</script>
+<link rel="stylesheet" href="app.css?v=239763d5" />
 </head>
 <body>
 
@@ -253,6 +270,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=ea7268ea"></script>
+<script src="app.js?v=35beae9a"></script>
 </body>
 </html>

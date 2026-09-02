@@ -4004,3 +4004,184 @@ without it the filter lands 140ms later carrying the whole question.
 Develop on the designated feature branch. Deploy by fast-forwarding
 `main` — only when the suite is green. Never open a pull request unless
 asked.
+
+## Craft: the app has a light face and a dark one
+
+Twenty-three variants were built in an artifact over the same fixture
+and looked at side by side; what was chosen was **Craft** — a pale
+gradient ground, every row its own floating card with real depth, the
+sessions as colour pills, circular checks — and its night version, an
+indigo-to-plum sky with the same cards as slabs of dark glass. This
+section is the record of bringing the whole app to it. **Everything
+else here about the lime page, the ring on the tally, the flat rows
+and "exactly five rounded things" is history that the checks below
+replaced**; the reasoning in those sections still stands where it is
+about mechanism, and is superseded where it is about the look.
+
+**The workout cards are the one thing kept as they were.** They carry
+their own nine hues for a reason older than this pass, and a card
+built to say WHICH session is the same object on both faces. The
+bottom bar is the original too — the glass pill of three tabs and the
+round add button — because it was asked for by name.
+
+**The mode follows the device unless a chip says otherwise.**
+`sched.mode.v1` is `auto`, `light` or `dark`; `auto` reads
+`prefers-color-scheme` and listens for it changing. Resolved BEFORE
+the stylesheet by an inline script in `index.html` that stamps
+`data-mode` on the root, because a page that paints one face and
+flips to the other a frame later is worse than either. A stored value
+this build does not have falls back to the device, and the suite
+plants `sepia` to prove it.
+
+**The suite's phone is DARK, on purpose.** Playwright's device is
+light unless told otherwise, and with the app following the device
+every pixel measurement in `tests/schedule.js` was suddenly being
+taken on the light face while every figure in it was written for the
+dark one — the first run after the mode landed reported the shipped
+ground as `[246, 245, 246]`. `PHONE` carries `colorScheme: 'dark'`
+now, and the light face is measured on its own context at the foot of
+the file: the tokens, the accent floor at seven hues, a name and a
+pill read against a card on composited pixels, the chip beating the
+device, and the stylesheet's light copy against the script's, token
+for token.
+
+**Two grounds, and the wheel solves against the one that is up.**
+`GROUND` is the dark sky's own `#17142B` — it was `[6, 6, 7]`, the old
+near-black, and an accent floored at 6:1 on that measured 5.3 on the
+new paper. `LIGHT_GROUND` is `#FBF9FF`, and on it the solver steps the
+lightness DOWN until the hue clears 6:1, so the same angle is a
+different colour on the two faces: 284 is `#8f87ff` at night and
+`#5c43d2` by day. The settings caption reads its ratio against
+whichever ground is live; it printed 2.7:1 for a colour that measured
+6:1 until it did.
+
+**284 is the hue it ships with**, where 124 was. Violet was the
+prototype's own, and lime on a white page is the pastel the floor
+turns it into.
+
+**The row is two lines and the name has the width.** The pills went
+in as a third column beside the name for one render — on a 268px
+card the range and the length left the name about sixty pixels and
+"Trading" was "Trad…". That is the arrangement this card already took
+out once, for the same reason, and it was nearly shipped again by way
+of a prototype drawn at 354px. The name sits over its pills: the
+range, the length, and Now while it runs.
+
+**The running row is a RING, not a rule.** The 4px rule down the
+margin reached 13px left and had to grow by 13 rather than slide —
+arithmetic one character from breaking the column at any time. A card
+that is its own object takes its state on its own edge: a 1.5px ring
+in the accent, the same one the session heading wears, and the Now
+pill under the name. The sweep still runs across it.
+
+**And the sweep decided colours on that row for the FOURTH time.**
+`--dim` over the trail's 13% wash measured under 4.5:1 — 16% of the
+row spoiled — so the pills on the running row take `--ink`. The check
+that caught it samples a band across the row's foot against the
+pill's own colour, and it was itself probed to find WHICH pixels were
+failing before anything was changed: thirteen of them, all under the
+trail.
+
+**The Now pill is the accent, never a fifth colour.** The prototype
+drew it green by day and a fixed red by night; here the accent makes
+exactly one claim — something is happening — and the ring is already
+making it. A green would be a second word for it, and a fixed red is
+somebody else's card on eleven twelfths of the wheel.
+
+**The sessions are colour pills, and they are the app's one literal
+pair per face.** Amber, blue and purple: `--s-m-*`, `--s-a-*`,
+`--s-e-*`, muted washes by day and vivid by night because a dark
+ground can take them. They say WHICH, the way the workout hues do, so
+they are the same in every accent.
+
+**The check is a circle beside the row, and it is a sibling.** A
+`<button>` inside the row's `<button>` is invalid and collapses to one
+press while looking exactly right, so `.rowwrap` lays the two over
+each other and the row leaves 44px of room. The tick that used to sit
+beside the glyph IS this, moved to where a thumb expects it. The same
+`.chk` serves Showing up, where it fills on a kept item.
+
+**Showing up is a list of the same cards.** The ring, the 44px figure
+and the two-column hero went: the count and the streak are one line
+under the stops, the glyph sits where the row's does, and the 26-week
+strip is the right-hand third of the row at 92px — dense, and still
+the record at a glance. Three press targets a row, all siblings: the
+check and the card log, the strip opens the history. A run of days
+rides the row as a pill, for a TICK only and from two, because a
+streak on a number is a fact about your logging and "1 day" under a
+thing you just did is the check saying it twice.
+
+**Workouts is a gallery.** A swatch in the session's own hex carrying
+the count, the name with its group as a tinted pill, the figures as
+pills, two up, and the open one takes the row and shows its three
+months. The strip of kinds above it lists All and only the groups you
+have actually done — a chip for a kind with nothing under it is a
+filter that empties the screen. The ring and the three right-hand
+figures went with the panel they were built for. The swatch is drawn
+from `--wo-c` written on the element, and `.wo-p` declares a default
+so the static check can see the token exists.
+
+**Pattern's rows are cards with the thing's own glyph** — the tally's
+for one of the five, the block's for a block — and the lift rides as
+a pill, accent from +0.5. The axis is still ONE line down the list,
+drawn OVER the cards at `z-index: 1`, and it went to 50% of the ink
+because it is read against the card now and 35% measured 2.36:1
+there.
+
+**List or Board, on the week and on Showing up.** Each session is in
+a box of its own now — the rows carry their own grids, so the old
+argument against wrapping them went with the column it protected —
+and the board is those boxes laid out as columns in a horizontal
+scroller, 212px wide with a peek of the next. Showing up's board is
+two columns, kept and still to do, and a row moves between them when
+it is pressed. Two keys, `sched.wkview.v1` and `sched.tyview.v1`,
+because a board for one list is not a board for the other; the
+switcher is built on every card and put away on the shut ones by CSS,
+since the deck opens a card by moving a class. The Now pill wraps in a
+column, so `.props` wraps.
+
+**Everything is a card now, and a card has corners.** The "exactly
+five rounded things" rule is dead and the check that held it became a
+SCALE — 5, 8, 12, 14, 16, 18, 22, 26 — so a stray 9px is still a
+slip. The same for casting: the rows, the tally rows, the pattern
+rows, the friend rows and the posts all cast the one card shadow, and
+what must NOT cast is the scroller, the poster and the press targets
+inside a card.
+
+**The card material is three tokens per face**: `--card`, `--card-edge`
+(the specular hairline along the top) and `--card-shadow`; the deck
+faces take `--deck`, `--deck-open` and `--deck-edge`. No
+`backdrop-filter` on any of them, for the reason the day card already
+gave — these move.
+
+**The neutral is a GREY, and Craft's tints had to give way to it.**
+`--tick-off` went in as a lilac to match the sky, and the rating
+row's unlit mark then read a channel spread of 33 against a rule that
+an unlit mark is a grey with no channel standing out — the whole of
+what stops this screen having an opinion. `#46464F` by night and
+`#E3E2EA` by day.
+
+**The crown sits on a card, not on the page.** `scCrown` solved
+against `--g0` and measured 2.82:1 on the friend row it is actually
+drawn on, because the row is a wash of white over the ground now. It
+composites the `--card` alpha over the ground before it solves.
+
+**The harness learned the mode and the board.** `SKINMODE=light|dark`
+and `SKINBOARD=1` seed the keys before the first load, the workout
+fixture was corrected to the record's real shape (it had been drawing
+an empty Workouts screen and nobody had noticed because the old
+harness never shot it), and the week and the log are seeded only when
+absent — re-seeded on every navigation they minted fresh ids each
+reload and orphaned the ticks the harness had just written.
+
+**Assertions that moved, and why each one moved rather than went**:
+the glyph is 20px not 22; the tally caption carries the streak; the
+running row's mark is read off its box-shadow; the dot's bloom is a
+distance from the page rather than redness, because a blue has none
+to rise by, and all three samples sit on one line above the track
+because 26px up is the date's own type; the intro figure's accent
+pixels are a colour distance, because the per-channel gate let
+`--dim` through on a violet; the long-day scroll asks for 300px
+rather than the exact maximum, because the rows grew; and the fade is
+a ratio, because what the band lands on changed with the row's height
+and the mask takes the same share off either.

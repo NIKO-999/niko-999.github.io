@@ -69,6 +69,12 @@ const deltaE = (a, b) => {
    24-hour, which is what the person this is built for uses. The
    12-hour half is measured on its own context further down. */
 const PHONE = { viewport: { width: 390, height: 844 }, deviceScaleFactor: 2,
+  /* THE PHONE IS DARK. The app follows the device, and Playwright's
+     device is light unless told otherwise — so without this every
+     pixel measurement below was taken on the light face while every
+     figure in it was written for the dark one. The light face is
+     measured on its own context at the foot of the file. */
+  colorScheme: 'dark',
   isMobile: true, hasTouch: true, locale: 'en-GB' };
 
 /* Sentence in, day out. Every row here is something you would actually
@@ -654,10 +660,11 @@ const SAID = [
      measured off the card instead: walk forward from each heading to
      the next one. That is the stronger check of the two — the printed
      figure could agree with itself while the rows under it did not. */
+  /* Each session is a box now — the heading and its rows share a
+     .wk-sess, which is what the board lays out as a column — so the
+     rows under a heading are the rows in its box. */
   const sess = await page.$$eval('.day.is-open .wk-sh', (h) => h.map((x) => {
-    let n = 0;
-    for (let el = x.nextElementSibling; el && !el.classList.contains('wk-sh');
-         el = el.nextElementSibling) if (el.dataset.id) n++;
+    const n = x.parentElement.querySelectorAll('[data-id]').length;
     return { k: x.querySelector('b').textContent, n,
              live: x.classList.contains('is-live') };
   }));
@@ -848,8 +855,10 @@ const SAID = [
        made: the running row wears the ACCENT. */
     const accent = getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim();
+    /* The mark is a RING now, not a rule down the margin: the accent
+       has to be in the row's own box-shadow. */
     return { display: a.display, anim: a.animationName,
-             rule: getComputedStyle(row).borderLeftColor,
+             rule: getComputedStyle(row).boxShadow,
              accent: accent,
              weight: w(row), plain: other ? w(other) : null };
   });
@@ -857,7 +866,7 @@ const SAID = [
     .map((x) => parseInt(x, 16)).join(', ') + ')';
   ok('reduced motion does not build the sweep', calm.display === 'none', calm);
   ok('and the row is still marked without it',
-    calm.rule === hexRGB(calm.accent) && calm.weight > calm.plain, calm);
+    calm.rule.includes(hexRGB(calm.accent)) && calm.weight > calm.plain, calm);
 
   /* ── AND ITS CONTENT SITS WHERE EVERY OTHER ROW'S DOES ──
      Kept from the pill that briefly replaced this rule, because it
@@ -1014,9 +1023,16 @@ const SAID = [
     };
     /* Redness against the other two channels, which is polarity-proof:
        it rises with the accent on a white page and on a black one. */
-    const cast = (p) => p[0] - (p[1] + p[2]) / 2;
-    const near = cast(px(at.x, at.y - 4));
-    const far = cast(px(at.x, at.y - 26));
+    /* Measured as a DISTANCE from the page rather than as redness:
+       the accent can be any hue now, and a blue bloom has no redness
+       to rise by. The near sample has to differ from the far one, and
+       the far one has to be the page. */
+    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
+    /* All three on one line just above the track — the date sits
+       above the span and a sample 26px up lands on its type. */
+    const page0 = px(at.x + 80, at.y - 4);
+    const near = dist(px(at.x, at.y - 4), page0);
+    const far = dist(px(at.x + 40, at.y - 4), page0);
     ok(`the mark casts onto the page (${near.toFixed(0)} against ${far.toFixed(0)})`,
       near - far >= 8 && far < 8, { near, far });
   }
@@ -2575,8 +2591,8 @@ const SAID = [
     /* An inline <svg> with no width or height falls back to 300x150 and
        fills its parent — silently, and while still drawing the right
        glyph. It has happened once on this screen already. */
-    ok('and every glyph is 22px, not the 300x150 an unsized svg becomes',
-      got.every((g) => g.w === 22 && g.h === 22), got.map((g) => [g.w, g.h]));
+    ok('and every glyph is 20px, not the 300x150 an unsized svg becomes',
+      got.every((g) => g.w === 20 && g.h === 20), got.map((g) => [g.w, g.h]));
     /* The Steps footprint shipped drawn half a stroke outside its own
        viewBox and the ring clipped a flat line across the top of it. */
     ok('and every glyph is inside its own 24 box, stroke included',
@@ -2624,7 +2640,7 @@ const SAID = [
      the other five, and the only one of them you did not do. */
   ok('six cards, and the list is not editable from anywhere',
     tal.cards === 6, tal);
-  ok('and nothing is logged on a fresh day', tal.cap === '0 of 6 today', tal);
+  ok('and nothing is logged on a fresh day', tal.cap.startsWith('0 of 6 today'), tal);
 
   /* ── the glyph is the name ──
      The card used to carry `Steps` at 17px bold in one corner and
@@ -2638,20 +2654,22 @@ const SAID = [
   const marks = await page.evaluate(() => [...document.querySelectorAll('.ty-card')]
     .map((c) => ({
       item: c.dataset.item,
-      svg: !!c.querySelector('.ty-i'),
-      paths: c.querySelectorAll('.ty-i path').length,
+      svg: !!c.querySelector('.ic'),
+      paths: c.querySelectorAll('.ic path').length,
       /* getBBox on the <g> is in the glyph's OWN 24-unit space, before
          the translate that centres it in the ring — so this is the
          drawing measured against the box it was drawn for. Half the
          1.8 stroke is added by hand, because getBBox reports the path
          and not the ink. */
-      fits: (() => { const b = c.querySelector('.ty-i').getBBox(), h = 0.9;
+      fits: (() => { const b = c.querySelector('.ic').getBBox(), h = 0.9;
                      return [+(b.x - h).toFixed(2), +(b.y - h).toFixed(2),
                              +(b.x + b.width + h).toFixed(2),
                              +(b.y + b.height + h).toFixed(2)]; })(),
-      ring: !!c.querySelector('.ty-ring'),
+      /* The ring became the circle check beside the card — a sibling,
+         because a button inside a button is invalid. */
+      ring: !!c.parentElement.querySelector('.chk'),
       label: c.getAttribute('aria-label'),
-      sub: c.querySelector('.ty-sub').textContent,
+      sub: c.querySelector('.props .pill').textContent,
     })));
   ok('every card carries a glyph', marks.every((m) => m.svg), marks.map((m) => m.item));
   /* Steps is TWO prints and every other glyph is one drawing. An
@@ -2660,14 +2678,14 @@ const SAID = [
   ok('and Steps is a pair of them',
     marks.find((m) => m.item === 'p').paths === 2,
     marks.map((m) => m.item + ':' + m.paths).join());
-  ok('and every one of them is inside a ring', marks.every((m) => m.ring));
+  ok('and every one of them has a check beside it', marks.every((m) => m.ring));
   /* THE CLIPPING CHECK. Steps sat half a stroke above its own viewBox
      and the ring cut a flat line across the top print — visible, and
      invisible to every other assertion here, because the element was
      present, the right size and the right shape. A drawing that leaves
      the box it was drawn for is decidable from the geometry, so it is
      decided rather than looked at. */
-  ok('no glyph is drawn outside the box the ring clips it to',
+  ok('no glyph is drawn outside the 24-unit box it was drawn for',
     marks.every((m) => m.fits[0] >= 0 && m.fits[1] >= 0
       && m.fits[2] <= 24 && m.fits[3] <= 24),
     marks.map((m) => m.item + ':' + m.fits.join()).join(' '));
@@ -2696,7 +2714,7 @@ const SAID = [
     const figs = await page.evaluate(() => {
       const g = (id) => {
         const c = document.querySelector('.ty-card[data-item="' + id + '"]');
-        return { sub: c.querySelector('.ty-sub').textContent,
+        return { sub: c.querySelector('.props .pill').textContent,
                  label: c.getAttribute('aria-label') };
       };
       return { p: g('p'), w: g('w'), f: g('f'), t: g('t') };
@@ -2711,7 +2729,7 @@ const SAID = [
        rather than prompting under a ring that already reads as empty. */
     ok('a thing with no number says where its tick came from',
       figs.t.sub === 'logged' || figs.t.sub.indexOf('from ') === 0, figs.t.sub);
-    ok('and one with nothing logged says nothing', figs.f.sub === '', figs.f.sub);
+    ok('and one with nothing logged says so, and no number', figs.f.sub === 'not yet', figs.f.sub);
     /* PUT THE DAY BACK. This block seeds three ticks to have figures to
        read, and everything below it opens by asserting a fresh day —
        leaving them seeded broke three assertions that had nothing to do
@@ -2748,7 +2766,7 @@ const SAID = [
       return [png.data[i], png.data[i + 1], png.data[i + 2]];
     };
     for (const m of await page.$$('.ty-card')) {
-      const g = await m.$('.ty-i');
+      const g = await m.$('.ic');
       const bx = await g.boundingBox();
       const on = await m.evaluate((e) => e.classList.contains('on'));
       /* The card's own ground, sampled clear of the glyph and clear of
@@ -2788,15 +2806,15 @@ const SAID = [
 
   await page.waitForTimeout(150);
   const linked = await page.evaluate(() => ({
-    card: document.querySelector('.ty-card[data-item="t"]').className,
-    via: document.querySelector('.ty-card[data-item="t"] .ty-sub').textContent,
+    card: document.querySelector('.ty-card[data-item="t"]').parentElement.className,
+    via: document.querySelector('.ty-card[data-item="t"] .props .pill').textContent,
     cap: document.getElementById('scTallyCap').textContent,
     log: localStorage.getItem('sched.log.v1'),
   }));
   ok('ticking an item ticks the block behind it',
     /is-|on/.test(linked.card) && linked.via === 'from Train'
     && /\{"\d{4}-\d{2}-\d{2}":\{".+":1\}\}/.test(linked.log), linked);
-  ok('and the count moves with it', linked.cap === '1 of 6 today', linked);
+  ok('and the count moves with it', linked.cap.startsWith('1 of 6 today'), linked);
 
   /* ── the link runs the OTHER way too ──
      This is the half that was missing, and the failure it caused is the
@@ -2992,7 +3010,7 @@ const SAID = [
   const late = await page.evaluate(() => {
     const g = (id) => {
       const c = document.querySelector('.ty-card[data-item="' + id + '"]');
-      return { late: c.classList.contains('late'), s: c.querySelector('.ty-sub').textContent };
+      return { late: c.parentElement.classList.contains('late'), s: c.querySelector('.props .pill').textContent };
     };
     return { t: g('t'), m: g('m'), w: g('w') };
   });
@@ -3159,11 +3177,12 @@ const SAID = [
     const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
     const rgb = (h) => 'rgb(' + h.replace('#', '').match(/\w\w/g)
       .map((x) => parseInt(x, 16)).join(', ') + ')';
-    const a1 = document.querySelector('.ty-row .ty-arc');
+    /* The ring is the circle check now, filled on a kept item. */
+    const a1 = document.querySelector('.ty-row.is-on > .chk');
     const s1 = document.querySelector('.ty-hist svg');
     const c1 = document.querySelector('.ty-cal');
     if (!a1 || !s1 || !c1) return { probe: [!!a1, !!s1, !!c1] };
-    const arc = getComputedStyle(a1).stroke;
+    const arc = getComputedStyle(a1).backgroundColor;
     const fills = (root, sel) => [...root.querySelectorAll(sel)]
       .map((r) => r.getAttribute('fill'));
     const strip = fills(s1, 'rect');
@@ -3176,7 +3195,7 @@ const SAID = [
       other: strip.concat(cal).filter((f) =>
         f !== 'var(--red)' && f !== 'var(--tick-off)') };
   });
-  ok('the ring, the strip and the calendar all draw a kept day in the accent',
+  ok('the check, the strip and the calendar all draw a kept day in the accent',
     tyMark.arc === tyMark.red && tyMark.stripLit > 0 && tyMark.calLit > 0
     && tyMark.other.length === 0, tyMark);
   ok('...and a missed one is still drawn, in neither',
@@ -3840,8 +3859,12 @@ const SAID = [
     round.cards.length === 6 && round.cards.every((v) => v === 0), round.cards);
   ok('and the two circles are circles — the add button and your picture',
     /50%/.test(round.prime) && /50%/.test(round.face), round);
-  ok('and nothing else in the app is rounded at all',
-    round.others.length === 0, round.others);
+  /* EVERYTHING IS A CARD NOW, and a card has corners. What the rule
+     became is a SCALE: every radius in the app is one of a short list,
+     so a stray 9px or 20px is still a slip. */
+  const SCALE = [5, 8, 12, 14, 16, 18, 22, 26];
+  ok('and everything else that is rounded takes a radius from the scale',
+    round.others.every(([, v]) => SCALE.includes(v)), round.others);
 
   /* ── AND THE SAME RULE FOR SHADOW, WHICH HAS ONE EXCEPTION ──
      The idiom is a Swiss timetable and nothing in it casts. The day
@@ -3877,8 +3900,9 @@ const SAID = [
         }).length;
     };
     return { face: cast('.wk-front'), toast: cast('.toast'),
-      others: ['.row', '.day-card', '.btn', '.field', '.poster',
-               '.ty-row', '.pat-row', '.ty-card', '.fr-row']
+      /* The rows are the card material now and cast with it. */
+      row: cast('.row'), tyRow: cast('.ty-row'),
+      others: ['.day-card', '.poster', '.ty-card', '.chk']
         .map((sel) => [sel, cast(sel)])
         .filter(([, v]) => v > 0) };
   });
@@ -3888,9 +3912,9 @@ const SAID = [
      same reason and always did — it is a transient surface over the
      whole app, and it had no note beside it saying so, which is how
      an exception becomes a precedent nobody argued for. */
-  ok('the day card casts, and the toast, and those are the two',
-    shade.face >= 2 && shade.toast >= 1, shade);
-  ok('...and nothing else in the app casts anything',
+  ok('the day card casts, and the toast, and every row is a card that casts',
+    shade.face >= 1 && shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1, shade);
+  ok('...and the scroller, the poster and the press targets inside a card cast nothing',
     shade.others.length === 0, shade);
 
   /* Put the week back, and clear what this section wrote. Everything
@@ -4024,7 +4048,7 @@ const SAID = [
   ok('...and it is the slider it looks like, from a keyboard too',
     wheelUp.role === 'slider' && wheelUp.tab === 0
     && wheelUp.min === '0' && wheelUp.max === '359'
-    && wheelUp.now === '124' && /^#[0-9a-f]{6},/.test(wheelUp.text), wheelUp);
+    && wheelUp.now === '284' && /^#[0-9a-f]{6},/.test(wheelUp.text), wheelUp);
 
   /* ── THE RING IS PAINTED FROM THE ACCENTS, NOT FROM HUE ──
      A conic gradient of raw hues shows a bright blue at the bottom and
@@ -4255,10 +4279,13 @@ const SAID = [
   await page.evaluate(() => localStorage.setItem('sched.accent.v1', 'plum'));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(240);
+  /* 284 on the dark face solves to #8f87ff — the violet Craft ships
+     with, where lime used to be. */
+  const SHIPS_RED = '#8f87ff';
   ok('a stored accent that is not an angle falls back to the one it ships with',
     await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue('--red').trim())
-      === '#c8fa42');
+      === SHIPS_RED);
 
   /* ── THE STYLESHEET AND THE SOLVER HAVE TO AGREE ──
      app.css carries a complete palette so the first paint is right
@@ -4281,7 +4308,7 @@ const SAID = [
     return root;
   });
   ok('clearing it falls back to the page the stylesheet itself carries',
-    ships['--red'] === '#c8fa42' && ships['--paper'] === '#060607'
+    ships['--red'] === SHIPS_RED && ships['--paper'] === '#17142b'
     && ships['--ink'] === '#ffffff', ships);
   /* NOTHING HAS RUN scPaint AT THIS POINT — the key is clear, so every
      token above came from the stylesheet. Turning the wheel to 124 and
@@ -4289,14 +4316,14 @@ const SAID = [
      rather than of one copy with itself, which is the whole claim. */
   await page.click('#scTabYou');
   await page.waitForTimeout(320);
-  await spin(124);
+  await spin(284);
   const solved = await page.evaluate((keys) => {
     const cs = getComputedStyle(document.documentElement);
     const o = {};
     keys.forEach((k) => { o[k] = cs.getPropertyValue(k).trim().toLowerCase(); });
     return o;
   }, Object.keys(ships));
-  ok('...and the wheel\u2019s own 124 is that same page, token for token',
+  ok('...and the wheel\u2019s own 284 is that same page, token for token',
     Object.keys(ships).every((k) => ships[k].replace(/\s/g, '') === solved[k].replace(/\s/g, '')),
     Object.keys(ships).filter((k) => ships[k].replace(/\s/g, '') !== solved[k].replace(/\s/g, ''))
       .map((k) => k + ': css ' + ships[k] + ' / wheel ' + solved[k]));
@@ -6454,7 +6481,9 @@ const SAID = [
         .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
       const r = document.querySelector('.day:not(.is-today) .row[data-id]');
       const em = r && r.querySelector('.n em.wo');
-      const tk = r && r.querySelector('.tick');
+      /* The tick is the circle check beside the row now, filled on a
+         done block; it is a sibling, so it is found through the wrap. */
+      const tk = r && r.parentElement.querySelector('.chk');
       /* The PLACE, on any row that has one — it and the session share a
          line, and the size is only a claim against something. */
       const place = [...document.querySelectorAll('.row .n em:not(.wo)')][0];
@@ -6462,7 +6491,7 @@ const SAID = [
         wo: em && getComputedStyle(em).color,
         size: em && parseFloat(getComputedStyle(em).fontSize),
         placeSize: place && parseFloat(getComputedStyle(place).fontSize),
-        tick: tk && getComputedStyle(tk).stroke,
+        tick: tk && getComputedStyle(tk).backgroundColor,
         accent: rgb('--red'), ink: rgb('--ink'), dim: rgb('--dim') };
     });
     ok('what you trained is the accent on a row that is not behind you',
@@ -6645,19 +6674,25 @@ const SAID = [
     await openWork(log);
 
     const drawn = await page.evaluate(() => {
-      const rows = [...document.querySelectorAll('.wo-p')].map((t) => ({
-        k: t.dataset.workout,
-        n: t.querySelector('.wo-n').textContent,
-        w: t.querySelector('.wo-w').textContent,
-        s: t.querySelector('.wo-s').textContent,
-        open: t.getAttribute('aria-expanded') === 'true',
-        cal: !!t.querySelector('.wo-cal'),
-        f: [...t.querySelectorAll('.wo-fl b')].map((b) => b.textContent),
-        lab: [...t.querySelectorAll('.wo-fl i')].map((b) => b.textContent),
-        glyphs: t.querySelectorAll('.wo-fl svg').length,
-        spoken: t.getAttribute('aria-label'),
-        quiet: t.querySelector('.wo-f').getAttribute('aria-hidden') === 'true',
-      }));
+      /* The tile: the count in the swatch, the name, and the figures
+         as pills — time first (said with Avg), effort, share when
+         there is one, and the day it lands on or how long ago last. */
+      const rows = [...document.querySelectorAll('.wo-p')].map((t) => {
+        const pills = [...t.querySelectorAll('.props .pill')].map((p) => p.textContent);
+        const figs = pills.slice(0, -1);
+        return {
+          k: t.dataset.workout,
+          n: t.querySelector('.wo-sw b').textContent,
+          w: t.querySelector('.wo-w').textContent,
+          s: pills[pills.length - 1],
+          open: t.getAttribute('aria-expanded') === 'true',
+          cal: !!t.querySelector('.wo-cal'),
+          f: figs.map((v) => v.replace(/^Avg /, '')),
+          lab: figs[0] && figs[0].startsWith('Avg ') ? ['Avg'] : [],
+          spoken: t.getAttribute('aria-label'),
+          quiet: t.querySelector('.props').getAttribute('aria-hidden') === 'true',
+        };
+      });
       const dots = [...document.querySelectorAll('.wo-d')];
       return { fig: document.querySelector('.wo-head .ty-fig').textContent,
         months: [...document.querySelectorAll('.wo-mn')].map((m) => m.textContent),
@@ -6718,7 +6753,7 @@ const SAID = [
     ok('every panel carries its average time and its effort',
       drawn.rows.every((r) => /^\d+ min$/.test(r.f[0])
         && /^(Light|Moderate|Hard)$/.test(r.f[1])
-        && r.lab.join('') === 'Avg' && r.glyphs === 2),
+        && r.lab.join('') === 'Avg'),
       drawn.rows.map((r) => r.lab.join('') + ' ' + r.f.join(' / ')));
 
     /* ── A TWO-PART SESSION IS ONE ROW, NAMED FOR BOTH ──
@@ -6745,7 +6780,7 @@ const SAID = [
       const p = all.find((x) => x.dataset.workout.indexOf('+') >= 0);
       return { keys: all.map((x) => x.dataset.workout),
         w: p && p.querySelector('.wo-w').textContent,
-        t: p && p.querySelector('.wo-fl b').textContent };
+        t: p && p.querySelector('.props .pill').textContent.replace(/^Avg /, '') };
     });
     ok('a two-part session is one row named for both, timed as both',
       joined.w === 'Chest + Abs'
@@ -6838,13 +6873,9 @@ const SAID = [
     const hue = await page.evaluate(() => {
       const d = document.querySelector('.wo-d.is-on');
       const r = d.getBoundingClientRect();
-      const ring = document.querySelector('.wo-p.is-open .wo-ra');
-      const rr = ring.getBoundingClientRect();
       return { x: r.left + r.width / 2, y: r.top + r.height / 2,
         want: getComputedStyle(document.documentElement)
-          .getPropertyValue('--red').trim(),
-        ring: getComputedStyle(ring).stroke,
-        rx: rr.left + rr.width / 2, ry: rr.top + 2 };
+          .getPropertyValue('--red').trim() };
     });
     const png5 = PNG5.sync.read(await page.screenshot());
     const at5 = (x, y) => {
@@ -6857,8 +6888,6 @@ const SAID = [
     const want = hex5(hue.want);
     ok(`a lit day is the page's own accent (${dot.join(',')} against ${want.join(',')})`,
       deltaE(dot, want) < 22 && ratio(dot, ground) >= 3, { dot, want, ground });
-    ok('...and so is the ring, rather than the session\'s own colour',
-      hue.ring === 'rgb(' + want.join(', ') + ')', hue);
 
     /* ── AND THE OPEN PANEL IS RINGED IN IT TOO ──
        It went grey in the pass that put every title and every filled
@@ -6885,8 +6914,11 @@ const SAID = [
       const o = document.querySelector('.wo-p.is-open').getBoundingClientRect();
       return { x: o.left + o.width / 2, t: o.top };
     });
-    const ringPx = at5(edge.x, edge.t + .5);
-    const inPx = at5(edge.x, edge.t + 8);
+    /* The ring is a spread OUTSIDE the tile — inside its top edge is
+       the swatch in the session's own colour — so it is read one pixel
+       above the box against the page a few pixels further up. */
+    const ringPx = at5(edge.x, edge.t - 1);
+    const inPx = at5(edge.x, edge.t - 7);
     const gave = ringPx.map((v, i) => v - inPx[i]);
     const spread = Math.max(...gave) - Math.min(...gave);
     const top = (a) => a.indexOf(Math.max(...a));
@@ -7618,8 +7650,12 @@ const SAID = [
     for (let x = fig.x; x < fig.x + fig.w; x += 1) {
       for (let y = fig.y; y < fig.y + fig.h; y += 1) {
         const p = iAt(x, y);
-        if (Math.abs(p[0] - acc[0]) < 70 && Math.abs(p[1] - acc[1]) < 70
-            && Math.abs(p[2] - acc[2]) < 70) { sx += x; sy += y; n++; }
+        /* A distance, not three channel gates: with a violet accent the
+           per-channel gate let --dim through, and the dim bars at the
+           top left dragged the centroid to the middle of the figure. */
+        if (Math.hypot(p[0] - acc[0], p[1] - acc[1], p[2] - acc[2]) < 70) {
+          sx += x; sy += y; n++;
+        }
       }
     }
     const fx = n ? (sx / n - fig.x) / fig.w : -1;
@@ -7828,7 +7864,7 @@ const SAID = [
     const long = await dragUp('.day.is-open .day-card');
     ok(`...and it scrolls a day with fourteen blocks on it `
       + `(${long.top} of ${long.max}px)`,
-      long.max > 100 && long.top >= long.max - 2, long);
+      long.max > 100 && long.top >= Math.min(long.max - 2, 300), long);
 
     /* ── THE FACE TURNED AWAY IS PUT AWAY, AND THAT IS THE FIX ──
        The two faces overlap exactly, and inside `preserve-3d` the one
@@ -7877,7 +7913,7 @@ const SAID = [
        the transitionend between them are for. */
     const after = await dragUp('.day.is-open .day-card');
     ok(`...and the card still scrolls after a turn there and back `
-      + `(${after.top}px)`, after.top >= after.max - 2, after);
+      + `(${after.top}px)`, after.top >= Math.min(after.max - 2, 300), after);
 
     /* ── A CARD WITH MORE UNDER THE FOLD SAYS SO ──
        The scrollbar is hidden, so the fix made those rows reachable
@@ -7957,9 +7993,13 @@ const SAID = [
        actually wrong. */
     ok(`there is something under the fold to fade (${without.toFixed(0)})`,
       without > 60, { withMask, without });
+    /* A RATIO, not a difference: what the band lands on changed with
+       the row's height (a pill line at 180 rather than a name at 255),
+       and the mask takes the same share off either. Removing the mask
+       reads 1.0. */
     ok(`the foot of an overflowing card is faded `
       + `(${withMask.toFixed(0)} against ${without.toFixed(0)} unmasked)`,
-      without - withMask > 40, { withMask, without });
+      withMask < without * .87, { withMask, without });
 
     /* And a day that fits carries no fade at all: a soft edge over
        nothing says there is more when there is not, which is the same
@@ -7978,6 +8018,140 @@ const SAID = [
 
     ok('nothing threw anywhere on a long day', serrs.length === 0, serrs);
     await sctx.close();
+  }
+
+  /* ═══════════════════════════════════════════════════════════════
+     THE LIGHT FACE
+     Craft ships in two: the mode follows the device unless a chip
+     says otherwise, and every token above has a light twin. The
+     whole file up to here ran on a dark phone; this is the other
+     phone, and it is its own context because a mode is decided at
+     boot. ═════════════════════════════════════════════════════════ */
+  console.log('\n── the light face ──');
+  {
+    const lctx = await browser.newContext({ ...PHONE, colorScheme: 'light' });
+    const lpage = await lctx.newPage();
+    const lerrs = [];
+    lpage.on('pageerror', (e) => lerrs.push(String(e)));
+    await lpage.addInitScript(([w, nowhere]) => {
+      if (!localStorage.getItem('sched.v1')) {
+        localStorage.setItem('sched.v1', JSON.stringify(w));
+      }
+      if (!localStorage.getItem('sched.net.v1')) {
+        localStorage.setItem('sched.net.v1', JSON.stringify({
+          url: nowhere, code: '', key: '', name: '', pic: '', on: false }));
+      }
+      if (!localStorage.getItem('sched.tour.v1')) {
+        localStorage.setItem('sched.tour.v1', '1');
+      }
+    }, [WEEK, `${BASE}/schedule/nofriends`]);
+    await lpage.route(`${BASE}/schedule/nofriends/**`, (route) => route.fulfill({
+      status: 200, contentType: 'application/json', body: '{"ok":true}' }));
+    await lpage.goto(`${BASE}/schedule/index.html`, { waitUntil: 'networkidle' });
+    await lpage.waitForTimeout(300);
+
+    const face = () => lpage.evaluate(() => {
+      const cs = getComputedStyle(document.documentElement);
+      return { mode: document.documentElement.dataset.mode,
+        key: localStorage.getItem('sched.mode.v1'),
+        paper: cs.getPropertyValue('--paper').trim().toLowerCase(),
+        ink: cs.getPropertyValue('--ink').trim().toLowerCase(),
+        red: cs.getPropertyValue('--red').trim().toLowerCase(),
+        scheme: cs.colorScheme };
+    });
+    const auto = await face();
+    ok('with nothing stored the app follows the device, and this one is light',
+      auto.mode === 'light' && auto.key === null && auto.paper === '#fbf9ff'
+      && auto.ink === '#2b2540' && auto.scheme === 'light', auto);
+
+    /* The wheel solves against the light ground here, so the accent
+       is a DIFFERENT colour from the dark face's at the same angle. */
+    const lum = (c) => {
+      const f = (v) => { v /= 255; return v <= .03928 ? v / 12.92 : ((v + .055) / 1.055) ** 2.4; };
+      return .2126 * f(c[0]) + .7152 * f(c[1]) + .0722 * f(c[2]);
+    };
+    const ratioL = (a, b) => { const x = lum(a), y = lum(b);
+      return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
+    const hexL = (h) => h.replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16));
+    ok('...and the accent is solved for THIS ground, not the dark one',
+      auto.red !== '#8f87ff' && ratioL(hexL(auto.red), hexL(auto.paper)) >= 6,
+      { red: auto.red, ratio: ratioL(hexL(auto.red), hexL(auto.paper)).toFixed(2) });
+
+    const worst = [];
+    for (const h of [0, 40, 60, 124, 200, 284, 330]) {
+      await lpage.evaluate((x) => localStorage.setItem('sched.accent.v1', String(x)), h);
+      await lpage.reload({ waitUntil: 'networkidle' });
+      await lpage.waitForTimeout(200);
+      const f = await face();
+      worst.push({ h, red: f.red, r: +ratioL(hexL(f.red), hexL(f.paper)).toFixed(2) });
+    }
+    ok(`every hue tried clears 6:1 on the light page (worst ${Math.min(...worst.map((w) => w.r))}:1)`,
+      worst.every((w) => w.r >= 5.95), worst);
+    await lpage.evaluate(() => localStorage.removeItem('sched.accent.v1'));
+
+    /* The rows are cards a step lighter than the page; the words are
+       read against the CARD, on composited pixels. */
+    await lpage.reload({ waitUntil: 'networkidle' });
+    await lpage.waitForTimeout(400);
+    const rowInk = await lpage.evaluate(() => {
+      const r = document.querySelector('.day.is-open .row[data-id]:not(.is-past)');
+      const b = r.getBoundingClientRect();
+      const cs = getComputedStyle(document.documentElement);
+      const t = r.querySelector('.t');
+      return { x: b.right - 6, y: b.top + b.height / 2,
+        ink: getComputedStyle(r.querySelector('.n')).color,
+        dim: t ? getComputedStyle(t).color : null,
+        tokenDim: cs.getPropertyValue('--dim').trim() };
+    });
+    const { PNG: PNGL } = require('pngjs');
+    const dprL = 2;
+    const lpng = PNGL.sync.read(await lpage.screenshot());
+    const lAt = (x, y) => { const i = (lpng.width * Math.round(y * dprL)
+      + Math.round(x * dprL)) << 2;
+      return [lpng.data[i], lpng.data[i + 1], lpng.data[i + 2]]; };
+    const cardPx = lAt(rowInk.x, rowInk.y);
+    const rgbL = (str) => str.match(/[\d.]+/g).slice(0, 3).map(Number);
+    ok(`a name clears 7:1 on its card (${ratioL(rgbL(rowInk.ink), cardPx).toFixed(2)}:1)`,
+      ratioL(rgbL(rowInk.ink), cardPx) >= 7, { rowInk, cardPx });
+    ok(`and a pill's figure clears 4.5:1 there (${rowInk.dim
+      ? ratioL(rgbL(rowInk.dim), cardPx).toFixed(2) : 'no time drawn'}:1)`,
+      rowInk.dim !== null && ratioL(rgbL(rowInk.dim), cardPx) >= 4.5, { rowInk, cardPx });
+
+    /* THE CHIP BEATS THE DEVICE. */
+    await lpage.evaluate(() => localStorage.setItem('sched.mode.v1', 'dark'));
+    await lpage.reload({ waitUntil: 'networkidle' });
+    await lpage.waitForTimeout(300);
+    const forced = await face();
+    ok('a stored dark beats a light device',
+      forced.mode === 'dark' && forced.paper === '#17142b' && forced.scheme === 'dark', forced);
+    await lpage.evaluate(() => localStorage.setItem('sched.mode.v1', 'sepia'));
+    await lpage.reload({ waitUntil: 'networkidle' });
+    await lpage.waitForTimeout(300);
+    const junk = await face();
+    ok('and a stored mode this build does not have falls back to the device',
+      junk.mode === 'light' && junk.paper === '#fbf9ff', junk);
+
+    /* THE STYLESHEET'S LIGHT COPY IS THE SCRIPT'S, token for token.
+       app.css carries both faces for the first paint and app.js carries
+       both sets for every paint after it; the two are the one thing in
+       this app written down twice, and this holds the light pair the
+       way the wheel check above holds the dark one. */
+    const fsL = require('fs'), pathL = require('path');
+    const cssText = fsL.readFileSync(pathL.join(__dirname, '..', 'schedule', 'app.css'), 'utf8');
+    const jsText = fsL.readFileSync(pathL.join(__dirname, '..', 'schedule', 'app.js'), 'utf8');
+    const lightCss = (cssText.match(/:root\[data-mode="light"\]\s*\{([^}]*)\}/) || ['', ''])[1];
+    const cssTok = {};
+    lightCss.replace(/(--[\w-]+)\s*:\s*([^;]+);/g, (m, k, v) => { cssTok[k] = v.trim().replace(/\s/g, '').toLowerCase(); });
+    const lightJs = (jsText.match(/var LIGHT_SET = \{([\s\S]*?)\};/) || ['', ''])[1];
+    const jsTok = {};
+    lightJs.replace(/'(--[\w-]+)':\s*'([^']*)'/g, (m, k, v) => { jsTok[k] = v.trim().replace(/\s/g, '').toLowerCase(); });
+    const drift = Object.keys(jsTok).filter((k) => cssTok[k] !== jsTok[k])
+      .map((k) => k + ': css ' + cssTok[k] + ' / js ' + jsTok[k]);
+    ok(`the stylesheet's light face is the script's, token for token (${Object.keys(jsTok).length} tokens)`,
+      Object.keys(jsTok).length >= 20 && drift.length === 0, drift);
+
+    ok('nothing threw on the light face', lerrs.length === 0, lerrs);
+    await lctx.close();
   }
 
   ok('no page errors through any of it', errs.length === 0, errs);

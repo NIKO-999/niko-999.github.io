@@ -95,7 +95,7 @@
      step on the tokens. */
   color-scheme: dark;
 
-  --paper: #060607;
+  --paper: #17142B;
   --ink:   #ffffff;
 
   /* ── the greys are measured, not chosen ──
@@ -171,7 +171,7 @@
      rule. scPaint still clears it between accents. */
   --g3: transparent;
 
-  --hair:  #232327;
+  --hair:  rgba(255,255,255,.10);
   /* The unlit marks. Its own token rather than --hair: a hairline
      between rows and a mark that has not been spent are the same
      grey today and have no reason to stay the same one. */
@@ -181,7 +181,7 @@
      separated from the panel behind it by .009 of luminance, which is
      a day you cannot see you missed — and losing the misses is the one
      thing a record of showing up must never do. */
-  --tick-off: #34343a;
+  --tick-off: #46464F;
 
   /* What sits ON the accent — the add button's plus, the go button's
      label. White is right on a red at 4.7:1 and wrong on every bright
@@ -210,6 +210,30 @@
      a hope. */
   --bad: #ff7a7a;
 
+  /* ── CRAFT ──
+     The visual language changed in one pass, chosen off twenty-three
+     rendered options and named for the app it borrows from: a soft
+     gradient sky, every row a floating card with a lit top edge and a
+     real shadow, session colours as tinted pills, a circular check.
+     It comes in LIGHT and DARK, and for the first time since the
+     seven light palettes were deleted the app has a light face again.
+
+     These are the tokens the language adds. Each has a value in both
+     modes; the dark set is here on :root for the first paint, the
+     light set is on [data-mode="light"] below, and scAccent writes
+     whichever is live inline — the same three-copies arrangement the
+     accent already had. */
+  --ground: linear-gradient(165deg, #1C1832 0%, #2A1B30 50%, #131B2C 100%);
+  --card:   rgba(255,255,255,.07);
+  --card-edge: rgba(255,255,255,.14);
+  --card-shadow: 0 12px 28px -18px rgba(0,0,0,.8);
+  --deck:   rgba(255,255,255,.05);
+  --deck-open: rgba(255,255,255,.08);
+  --deck-edge: rgba(255,255,255,.12);
+  --s-m-bg: #F2B950; --s-m-fg: #2A1A00;
+  --s-a-bg: #5FA8FF; --s-a-fg: #061C3A;
+  --s-e-bg: #B98BFF; --s-e-fg: #23084A;
+  --done-bg: rgba(255,255,255,.10);
   --pad:   18px;   /* the page's left edge — everything aligns to it */
   /* The open card's width, named because TWO rules need it: the card
      itself, and the lead-in the deck needs either side for that card to
@@ -238,6 +262,36 @@
   --wk-r:  26px;
 }
 
+/* ── the light face ──
+   Written in full, not derived: a grey that measures 4.7:1 as ink on
+   white does not measure 4.7:1 as ink on black, because luminance is
+   not symmetric about the middle. --dim and --spent were solved again
+   against the card's white, and the session pills are Notion's own
+   light pairs, which already clear 4.5:1 as text. scAccent carries the
+   same set, and tests/schedule.js holds the two copies in step. */
+:root[data-mode="light"] {
+  color-scheme: light;
+  --paper: #FBF9FF;
+  --ink:   #2B2540;
+  --dim:   #625C78;
+  --spent: #7A7490;
+  --hair:  rgba(60,40,100,.10);
+  --tick-off: #E3E2EA;
+  --bad:   #C7382F;
+  --g0: #FBF9FF; --g1: transparent; --g2: transparent; --g3: transparent;
+  --ground: linear-gradient(160deg, #F6F1FF 0%, #FFF4EE 55%, #EEF6FF 100%);
+  --card:   rgba(255,255,255,.82);
+  --card-edge: #ffffff;
+  --card-shadow: 0 10px 26px -18px rgba(60,40,120,.45);
+  --deck:   rgba(255,255,255,.55);
+  --deck-open: rgba(255,255,255,.85);
+  --deck-edge: #ffffff;
+  --s-m-bg: #FFE3B3; --s-m-fg: #6A3E00;
+  --s-a-bg: #CFE6FF; --s-a-fg: #0F3E7A;
+  --s-e-bg: #E6D6FF; --s-e-fg: #4A2A8A;
+  --done-bg: rgba(60,40,100,.07);
+}
+
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 html { -webkit-text-size-adjust: 100%; background: var(--g0); }
@@ -251,11 +305,12 @@ body {
      thirds and its empty space is all at the foot, so the two heavy
      washes go bottom-left and bottom-right and the top one is a tint.
      The gradient is at its strongest exactly where nothing is read. */
-  background:
-    radial-gradient(140% 88% at 6% 116%, var(--g1) 0%, transparent 74%),
-    radial-gradient(120% 62% at 100% -14%, var(--g2) 0%, transparent 70%),
-    radial-gradient(125% 82% at 96% 112%, var(--g3) 0%, transparent 72%),
-    var(--g0);
+  /* THE SKY. One gradient, angled, in place of the three radial washes
+     off the accent. The washes were the ground carrying the accent at a
+     fifth; Craft's ground is its own colour and the accent sits on it
+     rather than in it. The three wash tokens are kept and transparent,
+     because the wheel's own middle draws itself off them. */
+  background: var(--ground);
   background-attachment: fixed;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
   font-feature-settings: 'tnum' 1;   /* a ticking countdown must not shift what is beside it */
@@ -478,7 +533,7 @@ body {
   font-weight: 600;
   cursor: pointer;
 }
-.fr-stop.on { background: var(--g0); color: var(--ink); }
+.fr-stop.on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
 .fr-stop:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 #scFrPane[hidden], .fr-feed[hidden] { display: none; }
 
@@ -510,10 +565,11 @@ body {
 .fr-link:active { opacity: .6; }
 .fr-link:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 
-.fr-list { list-style: none; margin-top: 8px; }
+.fr-list { list-style: none; margin-top: 8px; display: flex; flex-direction: column; gap: 8px; }
 .fr-row { display: flex; align-items: center; gap: 13px;
-  padding: 12px 0; border-bottom: 1px solid var(--hair); }
-.fr-row:last-child { border-bottom: 0; }
+  padding: 12px; border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
 .fr-rank { font-size: 12px; font-weight: 700; color: var(--dim); width: 12px;
   font-variant-numeric: tabular-nums; }
 .fr-row.is-me .fr-rank { color: var(--ink); font-weight: 800; }
@@ -551,7 +607,7 @@ body {
    state is on a class the script adds rather than on .fr-row. Your own
    row opens nothing and must not look as though it would. */
 .fr-row.is-tap { cursor: pointer; }
-.fr-row.is-tap:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
+.fr-row.is-tap:active { opacity: .8; }
 .fr-row.is-tap:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
 .fr-acts { display: flex; gap: 8px; margin-top: 14px; }
@@ -591,10 +647,11 @@ body {
    16 outside, 12 in — because two rounded rectangles at the same
    radius, one inside the other, read as a mistake. */
 .po { margin-top: 12px; padding: 12px 12px 13px;
-  border: 1px solid var(--hair); border-radius: 16px; }
+  border-radius: 16px; background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow); }
 /* Inside the friend's sheet the frame is the sheet, and a card in a
    card is the frame-inside-a-frame this project keeps taking out. */
-.po.is-bare { border: 0; padding: 0; margin-top: 18px; }
+.po.is-bare { background: none; box-shadow: none; padding: 0; margin-top: 18px; }
 .po-h { display: flex; align-items: center; gap: 9px; }
 .po-n { font-size: 13.5px; font-weight: 700; letter-spacing: -.01em; }
 .po-s { display: block; margin-top: 1px; font-size: 10.5px; color: var(--dim); }
@@ -744,103 +801,54 @@ body {
    ═════════════════════════════════════════════════════════ */
 .tally { margin-top: 18px; }
 .tally[hidden] { display: none; }
-
-/* The streak, and it is the only figure this screen carries. It counts
-   days you logged ANYTHING, never days you got all five: a figure that
-   moves only on a perfect day spends most of its life at zero, and a
-   screen that passes judgement is a screen you stop opening. The habits
-   app has the same rule written out at length. */
-.ty-hero { display: flex; align-items: baseline; }
-.ty-lbl {
-  font-size: 9px; font-weight: 700; letter-spacing: .2em;
-  text-transform: uppercase; color: var(--dim);
-}
-.ty-fig {
-  margin-left: auto; font-size: 44px; font-weight: 700; line-height: .9;
-  letter-spacing: -.04em; font-variant-numeric: tabular-nums;
-}
-.ty-fig i {
-  font-style: normal; font-size: 13px; font-weight: 500;
-  margin-left: 5px; color: var(--dim);
-}
-.ty-cap { margin-top: 6px; font-size: 11px; color: var(--dim); }
+/* ── SHOWING UP IS A LIST OF CARDS ──
+   Craft's row, the week card's own: a circle check, the glyph, the
+   name over its pills, and the record as a strip on the right. The
+   ring, the 44px figure and the two-column hero went — the count and
+   the streak are one line under the stops, which is where the
+   prototype put them and where they read as a caption rather than a
+   dashboard. */
+.ty-hero { display: none; }
+.ty-cap { margin-top: 0; font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
 .ty-foot { margin-top: 16px; font-size: 11px; line-height: 1.5; color: var(--dim); }
-
-/* FIVE DOWN, not five across, and the row is what bought the history.
-   Across, each cell was 66px wide and there was nowhere to put six
-   months of anything. Down, the ring and its two lines take 131 of the
-   354 the page has and the remaining 200-odd is the strip — which is
-   the whole reason the layout turned: the space was measured first and
-   the arrangement followed it.
-
-   TWO TARGETS IN ONE ROW. The left block logs the item, the strip opens
-   its history. Pressing the mark to log and pressing the record to read
-   the record is the mapping that needs no explaining, and both halves
-   clear 44px on their own. */
-.ty-grid { display: block; margin-top: 18px; }
-.ty-row { display: flex; align-items: center; gap: 13px; padding: 10px 0; }
+.ty-grid { display: block; margin-top: 4px; }
+.ty-row {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 92px;
+  align-items: stretch;
+  gap: 12px;
+  margin-bottom: 8px;
+  padding: 9px 12px 9px 44px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
 .ty-card {
-  display: flex; flex-direction: row; align-items: center; gap: 13px;
-  flex: none; padding: 0; border: 0; border-radius: 0;
+  display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 3px 10px;
+  align-items: center;
+  min-width: 0; min-height: 44px; padding: 0; border: 0; border-radius: 0;
   background: none; color: inherit; font: inherit; text-align: left;
   cursor: pointer;
 }
 .ty-card:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
-/* The ring and its lines are ONE press. A button inside a button is
-   invalid, so the row is the button and the strip beside it is its own
-   — siblings, never nested. */
-.ty-body { display: flex; flex-direction: column; gap: 1px; flex: none; width: 74px; }
-
-/* flex:none, or the ring shrinks to whatever is left after the widest
-   name — which is a different width per row, and five rings at five
-   sizes is the mistake this file opens by naming. */
-.ty-ring { display: block; width: 44px; max-width: 44px; flex: none; }
-.ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
-/* ── A KEPT DAY IS THE ACCENT, AT ALL THREE SIZES ──
-   The ring, the strip beside it and the calendar it opens are one mark
-   drawn three sizes, so they move together or the screen says the same
-   thing in two colours. It was --ink, which on a page whose ink is
-   white made a kept day and a piece of type the same object.
-
-   It is the same claim the running block makes — this happened — so it
-   is the same colour. What it is NOT is the habits screen's rule
-   inverted: there a colour says WHICH habit, never whether, because
-   there are six identities to tell apart. Here there is one thing
-   being counted, so there is no WHICH for a colour to say. */
-.ty-arc { fill: none; stroke: var(--red); stroke-width: 5; }
-/* No width or height here and none wanted: the glyph is a <g> inside
-   the ring's own viewBox, so it is sized by the transform rather than
-   by a box. The 300x150 trap is for an <svg> element, and there is
-   only one of those. */
-/* A TOKEN, NOT AN OPACITY. --ink at .4 measured 2.58:1 on the white
-   page — under the 3:1 a graphic needs, and undetectable from the
-   cascade because the token it names is 18:1. It is the same lesson
-   the friend's week taught with its discs: opacity is not a way of
-   saying "quieter", it is a way of losing contrast you cannot see
-   yourself losing. --spent is 4.7:1 and defined for exactly this. */
-.ty-i {
-  fill: none; stroke: var(--spent); stroke-width: 1.8;
+.ty-card .ic {
+  grid-column: 1; grid-row: 1 / span 2;
+  display: block; width: 20px; height: 20px;
+  fill: none; stroke: var(--dim); stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round;
 }
-.ty-card.on .ty-i { stroke: var(--ink); }
-
-.ty-nm { font-size: 15px; font-weight: 600; color: var(--dim); line-height: 1.15; }
-.ty-card.on .ty-nm { color: var(--ink); }
-/* The figure, small, under the name. min-height so a ring with nothing
-   logged under it does not sit 12px higher than the four beside it —
-   the row is one box and the part that varies absorbs the difference. */
-.ty-sub {
-  min-height: 13px; font-size: 11px; line-height: 1.3;
-  color: var(--spent); font-variant-numeric: tabular-nums;
-}
-
-/* ── the strip beside the row ──
-   Twenty-six weeks at about 4.7px a column. You cannot pick a Tuesday
-   out of it and that is the point: at this size it stops being a chart
-   and becomes the SHAPE of how you have been. It never grows either —
-   a second year is simply a finer strip, not a wider one. */
+.ty-row.is-on .ty-card .ic { stroke: var(--ink); }
+.ty-body { display: contents; }
+.ty-nm { grid-column: 2; grid-row: 1; font-size: 15px; font-weight: 600; color: var(--ink); line-height: 1.2; letter-spacing: -.014em; }
+.ty-card .props { grid-column: 2; grid-row: 2; }
+/* The ring is gone; these are what the tests and the sheet still ask
+   for by name, kept as the parts of the strip they were. */
+.ty-track { fill: none; stroke: var(--tick-off); stroke-width: 5; }
+.ty-arc { fill: none; stroke: var(--red); stroke-width: 5; }
+.ty-sub { display: none; }
 .ty-hist {
-  flex: 1; min-width: 0; display: block; padding: 0; border: 0;
+  min-width: 0; min-height: 44px; display: grid; align-items: center; padding: 0; border: 0;
   background: none; color: inherit; font: inherit; cursor: pointer;
 }
 .ty-hist:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
@@ -852,8 +860,7 @@ body {
    app is holding. It is deliberately NOT the accent and not danger: the
    day is not over, the thing can still be done, and a red card for a
    late gym session is the judgement this screen exists to avoid. */
-.ty-card.late .ty-track { stroke-dasharray: 5 5; }
-.ty-card.late .ty-sub { color: var(--dim); font-weight: 600; }
+.ty-row.late .pill.is-late { color: var(--ink); }
 
 /* ── the history a row opens ────────────────────────────────
    THE VEIL IS TUNED, NOT MAXED, and it was tuned DOWN three times.
@@ -1108,16 +1115,11 @@ body {
      because the row has to agree with it and two numbers drift. */
   border-radius: var(--wk-r);
   padding: 15px 14px;
-  background:
-    linear-gradient(180deg,
-      color-mix(in srgb, var(--ink) 9%, transparent) 0%,
-      color-mix(in srgb, var(--ink) 5%, transparent) 38%,
-      color-mix(in srgb, var(--ink) 4%, transparent) 100%);
-  border: 1px solid color-mix(in srgb, var(--ink) 12%, transparent);
+  background: var(--deck);
+  border: 1px solid var(--deck-edge);
   box-shadow:
-    inset 0 1px 0 color-mix(in srgb, var(--ink) 26%, transparent),
-    0 1px 2px rgba(0, 0, 0, .55),
-    0 18px 40px rgba(0, 0, 0, .45);
+    inset 0 1px 0 var(--deck-edge),
+    var(--card-shadow);
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
@@ -1227,13 +1229,11 @@ body {
    alone, because the back paints its own ground and wears the foil
    instead of a border. A property written twice leaves the first one
    dead, and tests/names.js is what says so. */
-.day.is-open .wk-front,
-.day.is-open .wk-back {
-  box-shadow: 0 6px 22px color-mix(in srgb, var(--ink) 11%, transparent);
-}
 .day.is-open .wk-front {
-  background: var(--paper);
-  border-color: color-mix(in srgb, var(--ink) 16%, transparent);
+  /* A step more solid than the shut cards beside it, and still the
+     sky showing through: the open day is the object you are holding,
+     not a sheet of paper laid over the deck. */
+  background: var(--deck-open);
 }
 .day:not(.is-open) { width: var(--wk-shut); opacity: .82; }
 
@@ -1841,22 +1841,31 @@ body {
 .wk-sh {
   display: flex;
   align-items: center;
-  padding: 20px 0 5px;
+  padding: 14px 2px 8px;
 }
 .wk-sh:first-child { padding-top: 2px; }
+/* A PILL IN THE SESSION'S OWN COLOUR — amber morning, blue afternoon,
+   purple evening. The colour says WHICH, the way the workout hues do,
+   so it is the same pair in every accent and both modes have their
+   own. The count sits after it in --dim. */
 .wk-sh b {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .17em;
-  text-transform: uppercase;
-  color: var(--spent);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0;
+  text-transform: none;
+  padding: 3px 9px;
+  border-radius: 5px;
 }
+.wk-sh b.m { background: var(--s-m-bg); color: var(--s-m-fg); }
+.wk-sh b.a { background: var(--s-a-bg); color: var(--s-a-fg); }
+.wk-sh b.e { background: var(--s-e-bg); color: var(--s-e-fg); }
+.wk-sh .c { margin-left: 8px; font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
 /* The session you are IN keeps the accent, and it is the one heading
    that does: it is not a title saying what the section is, it is the
    same fact as the running block seen one level up. A heading that
    names a section is white; a heading that says YOU ARE HERE is a
    record mark that happens to be a heading. */
-.wk-sh.is-live b { color: var(--red); }
+.wk-sh.is-live b { box-shadow: 0 0 0 1.5px var(--red); }
 
 /* ── a day you are not reading ──
    Bars, never names: at 76px a name is a clipped fragment, and a
@@ -1929,10 +1938,43 @@ body {
    name lost more to it than the glyph ever used. The glyph is the only
    thing in there now, so the column is sized to the glyph. The token
    keeps its value for everything else that reads it. */
+/* ── EVERY ROW IS A CARD ──
+   Craft's rule: a floating white (or glass) slab with a lit top edge
+   and a real shadow, 14px corners, 8px of air between. It reverses
+   "nothing is drawn between the rows" — there is nothing between
+   them still, but each one is now an object rather than a line on a
+   sheet. The CHECK is a sibling of the row, not a child, because a
+   button inside a button is invalid and collapses to one press while
+   looking exactly right; .rowwrap holds the two side by side. */
+.rowwrap { position: relative; margin-bottom: 8px; }
+.chk {
+  position: absolute; left: 12px; top: 50%; transform: translateY(-50%);
+  z-index: 2;
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1.5px solid var(--spent);
+  background: none; padding: 0; cursor: pointer;
+  display: grid; place-items: center;
+}
+.chk svg { width: 12px; height: 12px; fill: none; stroke: var(--on-red); stroke-width: 2.6; stroke-linecap: round; stroke-linejoin: round; opacity: 0; }
+.is-done > .chk, .is-on > .chk { background: var(--red); border-color: var(--red); }
+.is-done > .chk svg, .is-on > .chk svg { opacity: 1; }
+.chk:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 .row {
   display: grid;
-  grid-template-columns: 30px 1fr;
-  gap: 0 12px;
+  /* Two tracks and two lines: the glyph, then the name over its
+     pills. The pills were a third column beside the name for one
+     render, which is the arrangement this card already took out once
+     — on a 268px card the range and the length left the name about
+     sixty pixels, and "Trading" was "Trad…". The name has the width
+     and the pills sit under it, which is the only layout here where
+     nothing is squeezed by something it cannot collide with. */
+  grid-template-columns: 22px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 3px 10px;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+  overflow: hidden;
   /* CENTRE, because a finished row loses its time and the grid's first
      track collapses with it — a glyph aligned to the top of a row with
      one line in it sits above the word it labels. */
@@ -1943,14 +1985,13 @@ body {
      a list where every line opens an editor. The sheet is taller for
      it and that is the correct trade: a target you miss costs more
      than a scroll you did not need. */
-  padding: 12px 0;
+  padding: 9px 12px 9px 44px;
   border: 0;
   /* NO RULE BETWEEN ROWS. There was a hairline under every one of them,
      and a line between every two items in a list is what makes it a
      table — a thing you scan for a value, rather than a list of things
      you are going to do. On a full day that is sixteen marks carrying
      nothing. Space does the same work and draws nothing to do it. */
-  background: none;
   color: inherit;
   font: inherit;
   text-align: left;
@@ -2005,7 +2046,7 @@ body {
 .row .ic {
   grid-column: 1; grid-row: 1 / span 2;
   align-self: center;
-  display: block; width: 22px; height: 22px;
+  display: block; width: 20px; height: 20px;
   fill: none; stroke: var(--ink); stroke-width: 1.8;
   stroke-linecap: round; stroke-linejoin: round;
 }
@@ -2034,13 +2075,9 @@ body {
    and the running row says the second half with a sweep as well as a
    colour. It still works on a block still in the future, which a done
    state has to: you can finish a run before its window opens. */
-.row .tick {
-  grid-column: 1; grid-row: 1 / span 2;
-  align-self: center; justify-self: end;
-  display: block; width: 14px; height: 14px;
-  fill: none; stroke: var(--red); stroke-width: 2.6;
-  stroke-linecap: round; stroke-linejoin: round;
-}
+/* The tick beside the glyph went to the CHECK outside the card, which is
+   the same mark in the place a person expects to press it. */
+.row .tick { display: none; }
 /* Behind you it goes quiet, the same way the row's own name does — the
    accent is for what is left of the day. */
 .row.is-past .tick { stroke: var(--spent); }
@@ -2068,7 +2105,9 @@ body {
    not a heading: the hero's figure is still four times its size, so
    nothing on the screen has moved rank. */
 .row .n {
-  grid-column: 2;
+  grid-column: 2; grid-row: 1;
+  align-self: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   /* 15/600 with the rules gone. The rules were carrying the separation
      and the name was carrying the emphasis; without them the name is
      the only thing on the row at full strength, and 16/700 sixteen
@@ -2131,22 +2170,48 @@ body {
    and a wash over 4.74:1 is under 4.5:1. Tracked-out 9.5px is the
    smallest type on this screen and it now carries what the row's third
    column used to; it gets the darker grey. */
-.row .t {
-  grid-column: 2;
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .11em;
+/* ── THE TIME IS A PILL, BESIDE THE NAME ──
+   It was a tracked-out label on the line above. Craft's row is one
+   line: the name, then its properties as pills — the range, the
+   length, and Now or Done when either is true. The pills are the
+   same neutral chip the session heading's colour version is. */
+.row .props {
+  grid-column: 2; grid-row: 2;
+  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  justify-self: start;
+  min-width: 0;
+}
+/* A status with nothing to say draws nothing — an empty pill is a
+   grey dash on every row that is neither running nor done. */
+.row .st:empty { display: none; }
+.row .t, .row .dur, .row .st, .pill {
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 5px;
+  background: var(--done-bg);
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
-  margin-bottom: 3px;
+  line-height: 1.4;
 }
+/* The accent, never a fifth colour: what is happening is the one
+   claim the accent makes on this app, and the ring round the row is
+   already saying it. A green here would be a second word for it. */
+.row .st.is-now, .pill.is-now { background: var(--red); color: var(--on-red); font-weight: 600; }
+.props { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-width: 0; }
+/* ── the group heading ──
+   A session pill and a count, the week card's own heading reused on
+   every list in the app: it is what makes them one family. */
+.grp-h { display: flex; align-items: center; gap: 8px; padding: 14px 2px 8px; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.grp-h .pill { font-weight: 600; padding: 3px 9px; }
+.row .st.is-done { background: var(--done-bg); color: var(--dim); }
 
 /* Finished blocks go grey — and only as far as --spent, which still
    clears 4.7:1. Hierarchy the rest of the way is weight, because
    fading text until it reads as "off" is how a schedule becomes
    unreadable in daylight. */
-.row.is-past .n, .row.is-past .t { color: var(--spent); }
+.row.is-past .n { color: var(--spent); }
 /* ── A FINISHED BLOCK HAS NO TIME ──
    The figure is what you plan against, and there is nothing left to
    plan about a morning that has happened. Kept on the block running
@@ -2180,19 +2245,24 @@ body {
    match. It is the only place on the page the red is spent besides
    today's own name. */
 .row.is-now {
-  border-left: 4px solid var(--red);
-  /* The row reaches 13px further LEFT for its rule, and has to grow by
-     the same amount rather than slide. With a plain width:100% the
-     negative margin moves the whole box, so the right edge lands 13px
-     inside every other row and the time column steps out of the one
-     alignment this design is built on. It only shows when something is
-     actually running, which is how it went unseen. */
-  margin-left: -13px;
-  width: calc(100% + 13px);
-  padding-left: 9px;
+  /* A RING, not a rule down the margin. The 4px rule reached 13px
+     left of the row and had to grow by the same amount rather than
+     slide — arithmetic that was one character from breaking the
+     column at any time. A card that is its own object takes its
+     state on its own edge: the same hairline ring the session
+     heading wears, and the Now pill under the name says it in a
+     word. The sweep still runs. */
+  box-shadow:
+    inset 0 1px 0 var(--card-edge),
+    var(--card-shadow),
+    0 0 0 1.5px var(--red);
   overflow: hidden;   /* the clip the sweep runs inside */
 }
-.row.is-now .n { font-weight: 800; }
+.row.is-now .n { font-weight: 700; }
+/* The sweep decides colours on this row, for the fourth time: --dim
+   over the trail's 13% wash measures under 4.5:1, so the pills on the
+   running row take --ink. */
+.row.is-now .t, .row.is-now .dur { color: var(--ink); }
 
 /* ── the sweep ──
    A hairline that crosses the running block and keeps crossing it, so
@@ -2243,7 +2313,7 @@ body {
 .row.is-now .ic,
 .row.is-now .tick,
 .row.is-now .n,
-.row.is-now .t { position: relative; z-index: 1; }
+.row.is-now .props { position: relative; z-index: 1; }
 
 /* The row keeps its rule and its weight either way — an effect that
    degrades to nothing has not been disabled, it has removed the mark.
@@ -2479,6 +2549,7 @@ body {
      black, so a dark shadow over it separates nothing. One pixel of
      --hair is an edge without being an object. */
   border-top: 1px solid var(--hair);
+  border-radius: 26px 26px 0 0;
   background: var(--paper);
   transform: translateY(100%);
   transition: transform .3s cubic-bezier(.22, 1, .36, 1);
@@ -2492,9 +2563,9 @@ body {
 }
 
 .grab {
-  width: 38px; height: 3px;
+  width: 38px; height: 4px; border-radius: 2px;
   margin: 0 auto 16px;
-  background: var(--spent);
+  background: var(--tick-off);
 }
 
 .sheet-title {
@@ -2520,7 +2591,8 @@ body {
   margin: 14px 0;
   padding: 13px 14px;
   border: 1px solid var(--hair);
-  background: #fafafa;
+  border-radius: 12px;
+  background: var(--card);
   font-size: 15px;
   line-height: 1.45;
 }
@@ -2555,8 +2627,9 @@ body {
   min-width: 0;
   margin: 12px 0;
   padding: 13px 14px;
-  border: 1px solid var(--ink);
-  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--card);
   color: var(--ink);
   /* 16px exactly: anything smaller and iOS zooms the page on focus. */
   font: 400 16px/1.4 'Inter', system-ui, sans-serif;
@@ -2612,8 +2685,9 @@ body {
      chips and two time boxes on one form reading as two different sizes
      of control was the loudest thing wrong with this sheet. */
   padding: 18px 2px;
-  border: 1px solid var(--ink);
-  background: var(--paper);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--card);
   color: var(--ink);
   font: 600 12px/1 'Inter', system-ui, sans-serif;
   letter-spacing: .04em;
@@ -2663,8 +2737,9 @@ body {
 .mark {
   display: flex; align-items: center; gap: 10px;
   width: 100%; padding: 15px 16px;
-  border: 1px solid var(--ink);
-  background: var(--paper); color: var(--ink);
+  border: 1px solid var(--hair);
+  border-radius: 12px;
+  background: var(--card); color: var(--ink);
   font: 600 15px/1 'Inter', system-ui, sans-serif;
   text-align: left; cursor: pointer;
 }
@@ -2697,6 +2772,7 @@ body {
   flex: 1;
   padding: 15px 16px;
   border: 1px solid var(--ink);
+  border-radius: 12px;
   font: 600 15px/1 'Inter', system-ui, sans-serif;
   cursor: pointer;
 }
@@ -2712,8 +2788,8 @@ body {
    is not that: it is contrast on the chip, and the chip is chrome. */
 .btn.go { background: var(--ink); border-color: var(--ink); color: var(--paper); }
 .btn.go:active { opacity: .82; }
-.btn.off { background: var(--paper); color: var(--ink); }
-.btn.bad { background: var(--paper); color: var(--bad); border-color: var(--bad); }
+.btn.off { background: var(--card); color: var(--ink); border-color: var(--hair); }
+.btn.bad { background: var(--card); color: var(--bad); border-color: var(--bad); }
 .btn:disabled { opacity: .4; cursor: default; }
 
 .menu-item {
@@ -3669,153 +3745,82 @@ body {
 /* The figure alone, so it does NOT take .ty-fig's `margin-left: auto`:
    that pushes it right against a label on the tally, and there is no
    label here — the stop above is the heading. */
-.wo-head { display: flex; align-items: baseline; }
-.wo-head .ty-fig { margin-left: 0; }
-.wo-head .ty-fig i { margin-left: 9px; }
-
-/* ── EVERY SURFACE HERE IS FILLED, NOT OUTLINED ──
-   The first cut drew each panel as a hairline box. On a page that is
-   nearly black a 1px border is the only thing there, so the screen
-   read as a wireframe of itself — the reference fills its panels and
-   draws no borders at all, and it is right: a filled surface is an
-   OBJECT, an outlined one is a diagram of where an object would go.
-
-   Mixed off --ink rather than a literal, so it lifts on all thirteen
-   palettes — the same 7% the friends board's own segment uses. */
-
-/* ── ONE PANEL PER WORKOUT, AND THE WHOLE PANEL IS THE BUTTON ──
-   The calendar is INSIDE it. A row that opens a picture drawn
-   somewhere else on the page is two things to look at for one press;
-   this way the panel simply grows, and what grew is under your thumb. */
-.wo-list { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-
+/* ── WORKOUTS IS A GALLERY ──
+   Craft's workout tile: a swatch in the session's own colour carrying
+   the count, the name under it with its group as a tinted pill, and
+   the figures as pills. Two up, and the open one takes the row and
+   shows its three months. The ring and the three right-hand figures
+   went — a tile says which and how many in one glance, and the
+   figures read as pills the same way they do on every other list. */
+.wo-head { display: flex; align-items: baseline; gap: 4px; font-size: 12.5px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.wo-head .ty-fig { margin: 0; font-size: 12.5px; font-weight: 500; letter-spacing: 0; line-height: inherit; }
+.wo-head .ty-fig i { margin-left: 3px; font-size: 12.5px; font-style: normal; }
+.wo-strip { display: flex; gap: 3px; margin-top: 12px; }
+.wo-c, .vw {
+  flex: 1; min-width: 0; min-height: 34px; padding: 6px 0;
+  border: 0; border-radius: 8px; background: none;
+  color: var(--dim); font: inherit; font-size: 11.5px; font-weight: 500;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
+}
+.wo-c.is-on, .vw.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
+.wo-c:focus-visible, .vw:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
+/* ── LIST OR BOARD ──
+   The same rows either way; the board lays each session out as a
+   column and the rows are already cards. A view switcher, drawn as
+   the workouts strip is, and the choice remembered. */
+.views { display: flex; gap: 3px; margin: 6px 0 2px; }
+/* Built on every card, put away on the shut ones — the deck opens a
+   card by moving a class, not by re-rendering. */
+.day:not(.is-open) .views { display: none; }
+.vw { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
+.vw svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.day-card.is-board, .ty-grid.is-board {
+  display: flex; align-items: flex-start; gap: 10px;
+  overflow-x: auto; overflow-y: hidden;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+}
+.ty-grid.is-board { margin: 0 calc(var(--pad) * -1); padding: 4px var(--pad) 8px; }
+.ty-grid.is-board::-webkit-scrollbar { display: none; }
+.wk-sess { min-width: 0; }
+.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess {
+  flex: none; width: 212px; max-height: 100%;
+  overflow-y: auto; scrollbar-width: none;
+  scroll-snap-align: start;
+}
+.day-card.is-board .wk-sess::-webkit-scrollbar { display: none; }
+.day-card.is-board .wk-sh { padding-top: 2px; }
+.day-card.is-board > .rt-ask { flex: none; width: 212px; scroll-snap-align: start; }
+.day-card.is-board.has-more { -webkit-mask-image: none; mask-image: none; }
+.ty-grid.is-board .ty-row { grid-template-columns: minmax(0, 1fr); }
+.ty-grid.is-board .ty-hist { display: none; }
+.ty-grid.is-board .grp-h { padding-top: 2px; }
+.wo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .wo-p {
-  display: block;
-  width: 100%;
-  padding: 14px;
-  border: 0;
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--ink) 7%, transparent);
-  color: var(--ink);
-  font: inherit;
-  text-align: left;
-  cursor: pointer;
+  --wo-c: var(--red);   /* the session's own hex is written on the element */
+  display: block; width: 100%; min-width: 0;
+  padding: 0 0 10px;
+  border: 0; border-radius: 14px; overflow: hidden;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+  color: var(--ink); font: inherit; text-align: left; cursor: pointer;
 }
-/* ── THIS SCREEN WEARS THE THEME'S ACCENT, NOT THE NINE HUES ──
-   The workout cards carry a literal colour each because a colour that
-   says WHICH session this is has to be the same at every hue. Here
-   nothing needs saying: the panel prints the name in words and the
-   calendar belongs to one card at a time, so a hue would be a second
-   colour system running down a screen that already has an accent. It
-   would also mean a page whose marks are red on a lime theme, which is
-   the one thing every other screen in this app is careful not to do. */
-/* ── AND THE OPEN ONE IS RINGED IN THE ACCENT ──
-   The panel that is open is the one whose calendar you are reading,
-   which is the record — and the accent on this app makes exactly one
-   claim, that something happened. It went grey in the pass that put
-   every title and every filled control back to white, and that pass
-   was about CHROME: a heading naming a section, a button you press.
-   This ring is neither. It says which panel the picture underneath it
-   belongs to, and the picture is a record of what you actually did.
-
-   A third of the accent rather than the whole of it, because the
-   panel's ground is a 10% wash of --ink and a full-strength ring
-   round a nearly-black surface is a box drawn on the page rather than
-   an edge on the object. */
-.wo-p.is-open {
-  background: color-mix(in srgb, var(--ink) 10%, transparent);
-  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--red) 34%, transparent);
-}
+.wo-p.is-open { grid-column: 1 / -1; box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow), 0 0 0 1.5px var(--red); }
 .wo-p:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
-
-.wo-row { display: flex; align-items: center; gap: 14px; position: relative; }
-.wo-tx { min-width: 0; }
-.wo-w {
-  display: block;
-  font-size: 16px;
-  font-weight: 700;
-  letter-spacing: -.016em;
-  line-height: 1.15;
+.wo-sw {
+  display: flex; align-items: flex-end; gap: 4px;
+  height: 54px; padding: 10px;
+  background: linear-gradient(135deg, var(--wo-c), color-mix(in srgb, var(--wo-c) 67%, transparent));
+  color: #fff; font-size: 24px; font-weight: 700; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; line-height: 1;
 }
-.wo-s { display: block; margin-top: 2px; font-size: 12.5px; color: var(--dim); }
-
-/* ── THE FIGURES, ON THE RIGHT ──
-   How long it takes, how hard it comes out and what share of your
-   training it is: three short facts about the SESSION, where the left
-   half is about the day. `margin-left: auto` rather than a column
-   track, because the name is the thing that should get the width and a
-   track held open for three short figures takes it from a long one. */
-.wo-f {
-  margin-left: auto;
-  flex: none;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 3px;
-  text-align: right;
-}
-.wo-fl {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-size: 11.5px;
-  color: var(--dim);
-  font-variant-numeric: tabular-nums;
-}
-.wo-fl b { font-weight: 600; }
-/* The "Avg" that says which figure the time is. Lighter than the value
-   beside it, because it is a label rather than a fact — the same split
-   the card's own EST. TIME makes one level up. */
-.wo-fl i {
-  font-style: normal;
-  font-weight: 500;
-  color: var(--spent);
-  margin-right: -1px;
-}
-/* Sized in the sheet, never on the markup: an inline <svg> with no
-   width or height falls back to 300x150 and fills its parent. */
-.wo-fl svg {
-  width: 13px; height: 13px;
-  flex: none;
-  fill: none;
-  stroke: var(--spent);
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-/* The share carries no glyph — % is one — so its line is indented to
-   the same left edge as the two above it rather than sitting flush and
-   reading as a fourth column. */
-.wo-fl.is-bare { padding-left: 18px; }
-
-/* The ring is the count against your most-done session, so the panels
-   read against each other rather than against a target nobody set. */
-.wo-r { flex: none; width: 52px; height: 52px; display: block; }
-.wo-rt { fill: none; stroke: var(--tick-off); stroke-width: 4; }
-.wo-ra {
-  fill: none;
-  stroke: var(--red);
-  stroke-width: 4;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 26px 26px;
-}
-.wo-n {
-  position: absolute;
-  left: 0; top: 0;
-  width: 52px; height: 52px;
-  display: grid;
-  place-items: center;
-  font-size: 17px;
-  font-weight: 700;
-  font-variant-numeric: tabular-nums;
-  letter-spacing: -.02em;
-}
-
-/* ── THE CALENDAR, INSIDE THE PANEL IT BELONGS TO ──
-   Three months across, one dot a day, lit where you did THAT session.
-   No border and no second fill: a panel inside a panel is the
-   frame-inside-a-frame this project keeps taking back out. */
+.wo-sw small { font-size: 11px; font-weight: 500; opacity: .85; }
+.wo-tx { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 12px 6px; min-width: 0; }
+.wo-w { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; min-width: 0; }
+.wo-w i { flex: none; width: 12px; height: 12px; border-radius: 4px; background: var(--wo-c); }
+.wo-gp { background: color-mix(in srgb, var(--wo-c) 14%, transparent); color: var(--wo-c); font-weight: 600; }
+.wo-p .props { padding: 0 12px; }
+.wo-p .wo-cal { margin: 12px 12px 4px; }
 .wo-cal {
   display: flex;
   gap: 10px;
@@ -3949,69 +3954,69 @@ body {
    Mixed to 3:1, which is the floor for a graphic, and the whole of
    what says which side of nothing a bar is on. */
 .pat-list {
-  --pat-n: 42px;                   /* the figure column */
-  --pat-t: 128px;                  /* the track */
-  --pat-g: 10px;                   /* between them */
-  --pat-ax: color-mix(in srgb, var(--ink) 35%, var(--paper));
+  --pat-n: 40px;                   /* the figure's column */
+  --pat-t: 104px;                  /* the track */
+  --pat-g: 10px;                   /* the gap between tracks */
+  --pat-p: 12px;                   /* the card's own padding */
+  /* 50%, not 35: the rows are cards a step up from the page, and
+     the axis is read against THEM. 35% measured 2.36:1 on the card. */
+  --pat-ax: color-mix(in srgb, var(--ink) 50%, var(--paper));
   position: relative;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
+/* ONE axis down the whole list, drawn over the cards: six 1px marks
+   on a near-black page are six specks, and the bars then float. */
 .pat-list::before {
   content: "";
   position: absolute;
+  z-index: 1;
   top: 2px;
   bottom: 2px;
-  right: calc(var(--pat-n) + var(--pat-g) + var(--pat-t) / 2);
+  right: calc(var(--pat-p) + var(--pat-n) + var(--pat-g) + var(--pat-t) / 2);
   width: 1px;
   background: var(--pat-ax);
 }
-/* NOTHING IS DRAWN BETWEEN THE ROWS, which is the week card's rule
-   for the week card's reason: a line between every two items in a
-   list is what makes it a table, and a table is a thing you scan for
-   a value. The bars are already the picture. */
 .pat-row {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--pat-t) var(--pat-n);
+  grid-template-columns: 20px minmax(0, 1fr) var(--pat-t) var(--pat-n);
   align-items: center;
   gap: var(--pat-g);
-  min-height: 34px;
+  min-height: 44px;
+  padding: 9px var(--pat-p);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
+.pat-row .ic {
+  display: block; width: 20px; height: 20px;
+  fill: none; stroke: var(--dim); stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
 }
 .pat-nm {
   overflow: hidden;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -.01em;
   color: var(--ink);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-/* The track is the full swing either way, and the axis above runs
-   down its middle — so which side a bar is on is what says up or
-   down, and it costs no contrast at all. The day-off dot's own
-   argument: a colour here would be this screen saying whether, and it
-   never does. */
 .pat-mid { position: relative; height: 10px; }
 .pat-bar {
   position: absolute;
   top: 1px;
   height: 8px;
+  border-radius: 3px;
   background: var(--red);
 }
 .pat-bar.is-up { left: 50%; }
 .pat-bar.is-dn { right: 50%; }
-
-.pat-n {
-  font-size: 13px;
-  font-weight: 600;
-  font-variant-numeric: tabular-nums;
-  color: var(--dim);
-  text-align: right;
-}
-
+.pat-n { justify-self: end; }
 .pat-none {
   margin-top: 22px;
   font-size: 13px;

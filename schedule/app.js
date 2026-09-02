@@ -1132,9 +1132,17 @@
       var head3 = {};
       scSessions(rows).forEach(function (g) { head3[g.rows[0].id] = g; });
 
+      /* Each session in a box of its own now — the rows carry their
+         own grids, so the argument against wrapping them went with the
+         column the time used to sit in — and the box is what the board
+         lays out as a column. */
+      var sess = null;
+      card.classList.toggle('is-board', wkView === 'board');
       rows.forEach(function (it) {
         if (head3[it.id]) {
           var g = head3[it.id];
+          sess = scEl('div', 'wk-sess');
+          card.appendChild(sess);
           var sh = scEl('div', 'wk-sh'
             + (d === today && scNowMin() >= g.s.a && scNowMin() < g.s.b
                ? ' is-live' : ''));
@@ -1142,12 +1150,14 @@
              count of the rows under it; the count is a figure nobody
              acts on, and the rule was the same mark the rows have
              stopped drawing between themselves. */
-          sh.appendChild(scEl('b', null, g.s.k));
+          var pillb = scEl('b', { Morning: 'm', Afternoon: 'a', Evening: 'e' }[g.s.k] || '', g.s.k);
+          sh.appendChild(pillb);
+          sh.appendChild(scEl('span', 'c', String(g.rows.length)));
           /* aria-hidden: the rows below carry their own full day and
              time in their labels, so a screen reader meeting this would
              hear the day sliced twice. It is a visual grouping. */
           sh.setAttribute('aria-hidden', 'true');
-          card.appendChild(sh);
+          sess.appendChild(sh);
         }
         var row = scEl('button', 'row');
         row.dataset.id = it.id;
@@ -1225,8 +1235,8 @@
            writes one at all — with an end time known and a block under
            twelve hours the start has one reading, and the column a
            second one would take is the one holding the name. */
-        row.appendChild(scEl('span', 't',
-          scT(it.s) + '\u2013' + scT(it.e) + scMerIf(it.e)));
+        var tEl = scEl('span', 't',
+          scT(it.s) + '\u2013' + scT(it.e) + scMerIf(it.e));
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
         /* What you trained, on the block it happened on. It rides the
@@ -1237,6 +1247,16 @@
         var wk = wr && scWorkName(wr.k);
         if (wk) n.appendChild(scEl('em', 'wo', wk));
         row.appendChild(n);
+        /* ── the properties, as pills ──
+           The range, the length, and a status word only when there is
+           one: Now while the block runs, Done once it is ticked. The
+           status is drawn by CSS off the row's own classes, so it can
+           never disagree with the state that draws the rest. */
+        var props = scEl('span', 'props');
+        props.appendChild(tEl);
+        props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
+        props.appendChild(scEl('span', 'st'));
+        row.appendChild(props);
         row.setAttribute('aria-label',
           it.n + ', ' + FULL[d] + ' ' + scRangeLong(it.s, it.e)
           + (it.r ? ', ' + it.r : '') + (wk ? ', ' + wk : '') + '. Edit.');
@@ -1257,13 +1277,11 @@
         var drop = function () {
           if (held) { clearTimeout(held); held = null; }
         };
-        row.addEventListener('pointerdown', function (ev) {
-          hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
-          drop();
-          held = setTimeout(function () {
-            held = null;
-            if (moved) return;
-            fired = true;
+        /* ONE tick, reached two ways: the check beside the row, and a
+           long press on the row itself. The check is the one a keyboard
+           and a screen reader can use; the long press is the shortcut
+           it always was. */
+        var tick = function () {
             var bd = scDay(scDateOfDow(d));
             var was = !!(blockLog[bd] && blockLog[bd][it.id]);
             if (!scSetBlockDone(bd, it, d, !was)) {
@@ -1289,6 +1307,15 @@
                having to take back out. */
             if (!was && scIsTrain(it)) { scTrainAsk(it, d, bd); return; }
             scToast(was ? it.n + ' unticked' : it.n + ' done', false);
+        };
+        row.addEventListener('pointerdown', function (ev) {
+          hx = ev.clientX; hy = ev.clientY; moved = false; fired = false;
+          drop();
+          held = setTimeout(function () {
+            held = null;
+            if (moved) return;
+            fired = true;
+            tick();
           }, 550);
         });
         row.addEventListener('pointermove', function (ev) {
@@ -1313,7 +1340,23 @@
            tally does the same thing with a plain press and always did.
            This is a shortcut from the row the block is on, not a
            feature that lives here. */
-        card.appendChild(row);
+        /* ── THE CHECK, BESIDE THE ROW ──
+           Craft's circle. A sibling of the row rather than a child,
+           because a button inside a button is invalid and collapses to
+           one press while looking exactly right; the wrapper lays the
+           two over each other and the row leaves room for it. It IS
+           the done-mark now — the tick that used to sit beside the
+           glyph is this, moved to where a thumb expects it. */
+        var wrap = scEl('div', 'rowwrap' + (row.classList.contains('is-done') ? ' is-done' : ''));
+        var chk = scEl('button', 'chk');
+        chk.type = 'button';
+        chk.setAttribute('aria-label', (row.classList.contains('is-done') ? 'Untick ' : 'Tick ') + it.n);
+        chk.setAttribute('aria-pressed', row.classList.contains('is-done') ? 'true' : 'false');
+        chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
+        chk.addEventListener('click', function (ev) { ev.stopPropagation(); tick(); });
+        wrap.appendChild(chk);
+        wrap.appendChild(row);
+        (sess || card).appendChild(wrap);
       });
 
       /* ── AND TODAY'S CARD ENDS BY ASKING ──
@@ -1361,6 +1404,11 @@
          row count knows none of that. */
       card.addEventListener('scroll', function () { scCardFade(card); });
 
+      if (rows.length) front.appendChild(scViews(wkView, function (v) {
+        wkView = v;
+        try { localStorage.setItem(WKV_KEY, v); } catch (e) {}
+        scRender();
+      }));
       front.appendChild(card);
       flip.appendChild(front);
       /* Built for every card, not only the open one, for the same
@@ -1609,6 +1657,13 @@
     { k: 'Afternoon', a: 720,  b: 1020 },
     { k: 'Evening',   a: 1020, b: 1440 }
   ];
+  /* 30 min, 2 h, 4.5 h — the figure a pill can carry. */
+  function scDurShort(m) {
+    if (m < 60) return m + ' min';
+    var h = m / 60;
+    return (h % 1 ? h.toFixed(1) : String(h)) + ' h';
+  }
+
   function scSessions(rows) {
     return SESSION.map(function (s) {
       return { s: s, rows: rows.filter(function (it) {
@@ -2101,6 +2156,9 @@
       el.classList.toggle('is-past', !skip && e <= now);
       var on = !skip && s <= now && now < e;
       el.classList.toggle('is-now', on);
+      /* The status pill says it in a word, and only while it is true. */
+      var st = el.querySelector('.st');
+      if (st) { st.textContent = on ? 'Now' : ''; st.classList.toggle('is-now', on); }
       if (on) live = el;
     }
 
@@ -2189,7 +2247,7 @@
      friend's colour coming out wrong weeks later. It is the file's
      oldest bug and tests/names.js could not see it, because the whole
      app is inside an IIFE and that check read column zero. */
-  var GROUND = [6, 6, 7];
+  var GROUND = [23, 20, 43];
   /* The most chroma sRGB holds at this lightness and hue. Bisection
      rather than the analytic boundary: the boundary is six plane
      intersections and this is four lines that cannot be got wrong. */
@@ -2216,21 +2274,33 @@
      and the order matters: the cusp first, because that is the most of
      the colour there is, and the lift second, because a colour that
      cannot be read is not an accent whatever else it is. */
+  /* ── LIGHT AND DARK ──
+     Craft comes in two faces, so the wheel has two grounds to solve
+     against. On the dark one the fullest colour is lifted until it
+     clears the floor; on the light one it is LOWERED, because a hue at
+     its fullest sits far above the white it has to read on. Same
+     search, opposite direction, one cache per ground — a blue solved
+     for black is a pale sky on white, and it had to not be shared. */
+  var LIGHT_GROUND = [251, 249, 255];
+  var scHueCacheL = {};
   function scAccentRGB(h) {
     h = ((Math.round(h) % 360) + 360) % 360;
-    if (scHueCache[h]) return scHueCache[h];
+    var light = scModeLive() === 'light';
+    var cache = light ? scHueCacheL : scHueCache;
+    if (cache[h]) return cache[h];
     var L = 0.5, best = -1, x, c, v;
     for (x = 0.05; x <= 0.995; x += 0.01) {
       c = scOkFit(x, h);
       if (c > best) { best = c; L = x; }
     }
+    var ground = light ? LIGHT_GROUND : GROUND, step = light ? -0.0025 : 0.0025;
     for (x = 0; x < 400; x++) {
       c = Math.min(A_C, scOkFit(L, h));
       v = scOkRGB(L, c, h).map(scEnc);
-      if (scRatio(v, GROUND) >= A_MIN || L >= 0.999) break;
-      L += 0.0025;
+      if (scRatio(v, ground) >= A_MIN || L >= 0.999 || L <= 0.05) break;
+      L += step;
     }
-    scHueCache[h] = v;
+    cache[h] = v;
     return v;
   }
   function scHex(v) {
@@ -2248,30 +2318,114 @@
      also what app.css carries at :root so the first paint is right
      before this file runs — the one thing in this app written down
      twice, and tests/schedule.js holds the two in step. */
+  /* Two complete sets, one per face. Both are also written in app.css
+     — the dark one on :root for the first paint, the light one under
+     [data-mode="light"] — and tests/schedule.js holds each pair in
+     step, because the day one of them drifts is the day the page
+     flashes the wrong colour for a frame on every open. */
+  var DARK_SET = { '--paper': '#17142B', '--ink': '#ffffff',
+    '--dim': '#b4b4ba', '--spent': '#8c8c94',
+    '--hair': 'rgba(255,255,255,.10)', '--tick-off': '#46464F', '--bad': '#ff7a7a',
+    '--g0': '#17142B', '--g2': 'rgba(120,124,132,.14)', '--g3': 'transparent',
+    '--ground': 'linear-gradient(165deg, #1C1832 0%, #2A1B30 50%, #131B2C 100%)',
+    '--card': 'rgba(255,255,255,.07)', '--card-edge': 'rgba(255,255,255,.14)',
+    '--card-shadow': '0 12px 28px -18px rgba(0,0,0,.8)',
+    '--deck': 'rgba(255,255,255,.05)', '--deck-open': 'rgba(255,255,255,.08)',
+    '--deck-edge': 'rgba(255,255,255,.12)',
+    '--s-m-bg': '#F2B950', '--s-m-fg': '#2A1A00',
+    '--s-a-bg': '#5FA8FF', '--s-a-fg': '#061C3A',
+    '--s-e-bg': '#B98BFF', '--s-e-fg': '#23084A',
+    '--done-bg': 'rgba(255,255,255,.10)' };
+  var LIGHT_SET = { '--paper': '#FBF9FF', '--ink': '#2B2540',
+    '--dim': '#625C78', '--spent': '#7A7490',
+    '--hair': 'rgba(60,40,100,.10)', '--tick-off': '#E3E2EA', '--bad': '#C7382F',
+    '--g0': '#FBF9FF', '--g2': 'transparent', '--g3': 'transparent',
+    '--ground': 'linear-gradient(160deg, #F6F1FF 0%, #FFF4EE 55%, #EEF6FF 100%)',
+    '--card': 'rgba(255,255,255,.82)', '--card-edge': '#ffffff',
+    '--card-shadow': '0 10px 26px -18px rgba(60,40,120,.45)',
+    '--deck': 'rgba(255,255,255,.55)', '--deck-open': 'rgba(255,255,255,.85)',
+    '--deck-edge': '#ffffff',
+    '--s-m-bg': '#FFE3B3', '--s-m-fg': '#6A3E00',
+    '--s-a-bg': '#CFE6FF', '--s-a-fg': '#0F3E7A',
+    '--s-e-bg': '#E6D6FF', '--s-e-fg': '#4A2A8A',
+    '--done-bg': 'rgba(60,40,100,.07)' };
   function scAccent(h) {
     var v = scAccentRGB(h);
-    return { '--paper': '#060607', '--ink': '#ffffff',
-      '--dim': '#b4b4ba', '--spent': '#8c8c94',
-      '--hair': '#232327', '--tick-off': '#34343a', '--bad': '#ff7a7a',
-      '--red': scHex(v),
-      /* The wash IS the accent, at a fifth. It used to be a second,
-         slightly deeper hex beside it, which is a copy that drifts —
-         the same mistake --red-rgb made and the same fix. */
-      '--g1': 'rgba(' + v.join(',') + ',.20)',
-      '--g0': '#060607', '--g2': 'rgba(120,124,132,.14)',
-      /* Ink ON the accent, and it can be black on every one of them:
-         the floor above puts every accent at a luminance of at least
-         .26, so a near-black on it clears 6:1 by the same arithmetic
-         that put it there. Tinted with the hue rather than flat, so
-         the chip is the accent's own dark rather than the page's. */
-      '--on-red': scMixed(v, 0.04) };
+    var light = scModeLive() === 'light';
+    var t = {}, base = light ? LIGHT_SET : DARK_SET;
+    for (var k in base) if (base.hasOwnProperty(k)) t[k] = base[k];
+    t['--red'] = scHex(v);
+    /* The wash IS the accent, at a fifth, on the dark face. The light
+       face has its own sky and takes none. */
+    t['--g1'] = light ? 'transparent' : 'rgba(' + v.join(',') + ',.20)';
+    /* Ink ON the accent. Dark face: the floor puts every accent at a
+       luminance of at least .26, so a near-black clears 6:1 on all of
+       them. Light face: the accent was lowered until it clears 6:1 on
+       white, which is the same arithmetic saying white reads on it. */
+    t['--on-red'] = light ? '#ffffff' : scMixed(v, 0.04);
+    return t;
+  }
+
+  /* ── THE MODE ──
+     Light, dark, or the phone's. Stored as a word under its own key
+     and resolved to one of the two faces at paint time; 'auto' follows
+     prefers-color-scheme and repaints when that changes. */
+  var MODE_KEY = 'sched.mode.v1';
+  /* ── LIST OR BOARD, per screen ──
+     Two keys, because the week and Showing up are different lists and
+     a board for one is not a board for the other. A stored value that
+     is not one of the two falls through to the list. */
+  var WKV_KEY = 'sched.wkview.v1', TYV_KEY = 'sched.tyview.v1';
+  var wkView = 'list', tyView = 'list';
+  try {
+    wkView = localStorage.getItem(WKV_KEY) === 'board' ? 'board' : 'list';
+    tyView = localStorage.getItem(TYV_KEY) === 'board' ? 'board' : 'list';
+  } catch (e) {}
+  var VIEW_ICON = {
+    list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
+    board: '<rect x="3" y="4" width="7" height="16" rx="1.5"/><rect x="14" y="4" width="7" height="10" rx="1.5"/>'
+  };
+  function scViews(cur, pick) {
+    var v = scEl('div', 'views');
+    v.setAttribute('role', 'group');
+    v.setAttribute('aria-label', 'View');
+    [['list', 'List'], ['board', 'Board']].forEach(function (o) {
+      var b = scEl('button', 'vw' + (cur === o[0] ? ' is-on' : ''));
+      b.type = 'button';
+      b.dataset.view = o[0];
+      b.setAttribute('aria-pressed', cur === o[0] ? 'true' : 'false');
+      b.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">' + VIEW_ICON[o[0]] + '</svg>';
+      b.appendChild(document.createTextNode(o[1]));
+      b.addEventListener('click', function () { if (cur !== o[0]) pick(o[0]); });
+      v.appendChild(b);
+    });
+    return v;
+  }
+  var mode = 'auto';
+  function scModeLive() {
+    if (mode === 'light' || mode === 'dark') return mode;
+    return window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches
+      ? 'light' : 'dark';
+  }
+  function scSetMode(m) {
+    mode = m === 'light' || m === 'dark' ? m : 'auto';
+    try { localStorage.setItem(MODE_KEY, mode); } catch (e) {}
+    scPaint(hue, false);
+    scRender();
+  }
+  if (window.matchMedia) {
+    try {
+      window.matchMedia('(prefers-color-scheme: light)').addEventListener('change', function () {
+        if (mode === 'auto') { scPaint(hue, false); scRender(); }
+      });
+    } catch (e) {}
   }
 
   var ACCENT_KEY = 'sched.accent.v1';
   var THEME_KEY = 'sched.theme.v1';
   /* Lime, to the nearest degree. The default is a HUE now rather than
      a set of hexes, so there is one place a colour comes from. */
-  var HUE0 = 124;
+  var HUE0 = 284;   /* Craft's violet, to the nearest degree */
   var hue = HUE0;
 
   /* ── THE THIRTEEN NAMES SURVIVE AS THIRTEEN ANGLES ──
@@ -2301,7 +2455,11 @@
      a token, which is what an earlier pass was for. */
   var TOKENS = ['--paper', '--ink', '--dim', '--spent', '--red', '--hair',
                 '--tick-off', '--on-red', '--bad',
-                '--g0', '--g1', '--g2', '--g3'];
+                '--g0', '--g1', '--g2', '--g3',
+                '--ground', '--card', '--card-edge', '--card-shadow',
+                '--deck', '--deck-open', '--deck-edge',
+                '--s-m-bg', '--s-m-fg', '--s-a-bg', '--s-a-fg', '--s-e-bg', '--s-e-fg',
+                '--done-bg'];
 
   function scPaint(h, save) {
     hue = scHueOf(h);
@@ -2316,13 +2474,14 @@
        about the mechanism. */
     TOKENS.forEach(function (k) { r.removeProperty(k); });
     for (var k in t) if (t.hasOwnProperty(k)) r.setProperty(k, t[k]);
+    document.documentElement.dataset.mode = scModeLive();
 
     /* The browser's own chrome — the status bar, the URL bar, the
        overscroll gutter — takes its colour from these two and nothing
        else. Left on white the page would end in a bright band the
        design never asked for. */
     var cs = document.querySelector('meta[name="color-scheme"]');
-    if (cs) cs.setAttribute('content', 'dark');
+    if (cs) cs.setAttribute('content', scModeLive());
     var tc = document.querySelector('meta[name="theme-color"]');
     if (tc) tc.setAttribute('content', t['--g0']);
 
@@ -2708,36 +2867,59 @@
     $('scStreakNum').textContent = '';
     $('scStreakNum').appendChild(document.createTextNode(String(st)));
     $('scStreakNum').appendChild(scEl('i', null, st === 1 ? 'day' : 'days'));
-    $('scTallyCap').textContent = n + ' of ' + TALLY.length + ' today';
-
+    $('scTallyCap').textContent = n + ' of ' + TALLY.length + ' today \u00b7 '
+      + st + (st === 1 ? ' day streak' : ' day streak');
     var grid = $('scTallyGrid');
     grid.textContent = '';
+    var old = $('scTallyCap').nextElementSibling;
+    if (old && old.classList.contains('views')) old.remove();
+    $('scTallyCap').insertAdjacentElement('afterend', scViews(tyView, function (v) {
+      tyView = v;
+      try { localStorage.setItem(TYV_KEY, v); } catch (e) {}
+      scPaintTally();
+    }));
+    grid.classList.toggle('is-board', tyView === 'board');
+    /* The list is one column headed Today; the board is two, kept and
+       still to do, and a row moves between them when it is pressed. */
+    var cols = {};
+    var col = function (key, word, live) {
+      if (cols[key]) return cols[key];
+      var c = scEl('div', 'wk-sess');
+      var gh = scEl('div', 'grp-h');
+      gh.appendChild(scEl('span', 'pill' + (live ? ' is-now' : ''), word));
+      var cnt = scEl('span', 'c', '0');
+      gh.appendChild(cnt);
+      c.appendChild(gh);
+      cols[key] = { el: c, cnt: cnt, n: 0 };
+      grid.appendChild(c);
+      return cols[key];
+    };
+    if (tyView === 'board') { col('on', 'Kept today', true); col('off', 'Still to do'); }
+    else col('all', 'Today');
     TALLY.forEach(function (it, i) {
       var on = !!got[it.id], late = !on && scLate(it);
-      var c = scEl('button', 'ty-card' + (on ? ' on' : '') + (late ? ' late' : ''));
+      var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
+      /* ── THE CHECK, then the card, then the record ──
+         Three press targets and all three are siblings: a button
+         inside a button is invalid and collapses to one press while
+         looking exactly right. The check and the card log; the strip
+         opens the history. */
+      var chk = scEl('button', 'chk');
+      chk.type = 'button';
+      chk.setAttribute('aria-label', (on ? 'Unlog ' : 'Log ') + it.n);
+      chk.setAttribute('aria-pressed', on ? 'true' : 'false');
+      chk.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
+      chk.addEventListener('click', function () { scTallyTap(it, day); });
+      row.appendChild(chk);
+      var c = scEl('button', 'ty-card');
+      c.type = 'button';
       c.dataset.item = it.id;
-
-      /* A RING, and it is the app's own instrument at a smaller scale.
-         This screen and the Ring view were two unrelated drawings of
-         the same day; five small ones make them the same thing said
-         twice at two sizes rather than twice in two languages.
-
-         The glyph is a <g> inside the ring's own 64 box rather than a
-         nested <svg>: translate(20 20) centres the 24-unit drawing, and
-         one element is one element. */
       c.insertAdjacentHTML('beforeend',
-        '<svg class="ty-ring" viewBox="0 0 64 64" aria-hidden="true">'
-        + '<circle class="ty-track" cx="32" cy="32" r="26"/>'
-        + (on ? '<circle class="ty-arc" cx="32" cy="32" r="26"/>' : '')
-        + '<g class="ty-i" transform="translate(20 20)">' + TALLY_ICON[it.id] + '</g>'
-        + '</svg>');
+        '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">'
+        + TALLY_ICON[it.id] + '</svg>');
       var body = scEl('span', 'ty-body');
       c.appendChild(body);
       body.appendChild(scEl('span', 'ty-nm', it.n));
-
-      /* Once it is done the line under it says where it came from, not
-         what to do — a prompt still showing under a finished thing is
-         the screen not noticing you did it. */
       var via = null;
       if (on && it.from) {
         var b = scBlocksFor(it, new Date().getDay()).filter(function (x) {
@@ -2745,39 +2927,39 @@
         })[0];
         if (b) via = 'from ' + b.n;
       }
-      /* THE FIGURE, small, under the name. The ring says whether and
-         this says how much — and without it Steps, Fuel and Water were
-         three rings that had swallowed the only number anybody logs
-         them for. A do-item has no figure, so it says where its tick
-         came from instead, and an item whose window has passed says so
-         in one word: `Missed its window` does not fit a fifth of a
-         phone and the fact is worth more than the sentence. */
-      body.appendChild(scEl('span', 'ty-sub',
-        it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
-          : (via || (on ? 'logged' : (late ? 'missed' : '')))));
-
+      var props = scEl('span', 'props');
+      var word = it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
+          : (via || (on ? 'logged' : (late ? 'missed' : 'not yet')));
+      props.appendChild(scEl('span', 'pill' + (late ? ' is-late' : ''), word));
+      /* Days on now, for a TICK and only a tick — a run on a number
+         counts the days you remembered to type one in, which is a fact
+         about your logging. Drawn from two, because "1 day" under a
+         thing you just did is the check saying it twice. */
+      if (it.k === 'do') {
+        var run = 0, hist = scHist(it.id);
+        for (var j = hist.length - 1; j >= 0; j--) {
+          if (hist[j].on) run++;
+          else if (hist[j].off) continue;
+          else break;
+        }
+        if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-now' : ''), run + ' days'));
+      }
+      body.appendChild(props);
       c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
         + (on && it.k === 'num' ? ', ' + got[it.id] + (it.unit || '') : '')
         + (late ? ', missed its window' : '') + '. ' + it.s + '.');
       c.addEventListener('click', function () { scTallyTap(it, day); });
-
-      /* SIBLINGS, NOT NESTED. A button inside a button is invalid and
-         collapses to one target, so the row is one press and the strip
-         beside it is its own — the mark logs, the record opens the
-         record. Wrapped in a <div class="ty-row"> so the two sit on one
-         line while staying two elements. */
-      var hist = scEl('button', 'ty-hist');
-      hist.type = 'button';
-      hist.innerHTML = scStripSvg(scHist(it.id));
-      hist.setAttribute('aria-label', it.n + ', open 26 weeks of history');
-      hist.addEventListener('click', function () { scOpenHist(it); });
-
-      var row = scEl('div', 'ty-row');
       row.appendChild(c);
-      row.appendChild(hist);
-      grid.appendChild(row);
+      var hist2 = scEl('button', 'ty-hist');
+      hist2.type = 'button';
+      hist2.innerHTML = scStripSvg(scHist(it.id));
+      hist2.setAttribute('aria-label', it.n + ', open 26 weeks of history');
+      hist2.addEventListener('click', function () { scOpenHist(it); });
+      row.appendChild(hist2);
+      var into = tyView === 'board' ? col(on ? 'on' : 'off') : col('all');
+      into.el.appendChild(row);
+      into.cnt.textContent = String(++into.n);
     });
-
     var best = scBest();
     $('scTallyFoot').textContent = st
       ? 'Longest streak ' + best + (best === 1 ? ' day.' : ' days.')
@@ -3636,6 +3818,17 @@
     var ground = scRGB(cs.getPropertyValue('--g0'));
     var ink = scRGB(cs.getPropertyValue('--ink'));
     if (!ground || !ink) return hex;
+    /* THE CROWN SITS ON A CARD, NOT ON THE PAGE. The row is a wash of
+       white over the ground now, and a crown solved against --g0
+       measured 2.82:1 on the row it is actually drawn on. The card's
+       own alpha is composited over the ground here, so the arithmetic
+       knows about the surface it is being read off. */
+    var cm = String(cs.getPropertyValue('--card')).match(
+      /rgba?\(\s*([\d.]+)\s*,\s*([\d.]+)\s*,\s*([\d.]+)\s*(?:,\s*([\d.]+))?\)/);
+    if (cm) {
+      var ca = cm[4] === undefined ? 1 : +cm[4];
+      ground = ground.map(function (g, i) { return Math.round(g + (+cm[i + 1] - g) * ca); });
+    }
     for (var t = 0; t <= 1.0001; t += 0.05) {
       var mix = acc.map(function (c, i) { return Math.round(c + (ink[i] - c) * t); });
       if (scRatio(mix, ground) >= CROWN_MIN)
@@ -6021,86 +6214,42 @@
      and what grew is under your thumb. */
   function scWorkPanel(sig, hits, most, month, open, pick) {
     var name = scWorkName(sig);
-    /* ── A REAL AVERAGE NOW ──
-       It used to be the card's own estimate with the word "Avg" in
-       front of it, which is that figure and an untrue word: every
-       session of a kind shared it and nothing on the record carried a
-       duration. The sheet asks how long, so this is the mean of what
-       you actually logged. */
+    var ws = scWorkoutsOf(sig);
+    var col = ws[0] ? ws[0].c : '#888';
+    var grp = ws[0] ? scTrainGroup(ws[0].key.split('.')[0]) : null;
     var mins = Math.round(hits.reduce(function (n, h) { return n + h.m; }, 0)
       / hits.length);
-
     var p = scEl('button', 'wo-p' + (open ? ' is-open' : ''));
     p.type = 'button';
     p.dataset.workout = sig;
+    p.style.setProperty('--wo-c', col);
     p.setAttribute('aria-expanded', open ? 'true' : 'false');
-
-    if (open) p.appendChild(scWorkCal(hits, name));
-
-    var row = scEl('div', 'wo-row');
-    /* The ring is the count against your most-done session, so the
-       panels read against each other rather than against a target
-       nobody set. */
-    var r = 21, c = 2 * Math.PI * r;
-    row.insertAdjacentHTML('beforeend',
-      '<svg class="wo-r" viewBox="0 0 52 52" aria-hidden="true">'
-      + '<circle class="wo-rt" cx="26" cy="26" r="' + r + '"/>'
-      + '<circle class="wo-ra" cx="26" cy="26" r="' + r + '"'
-      + ' stroke-dasharray="' + (c * hits.length / most).toFixed(1) + ' '
-      + c.toFixed(1) + '"/></svg>');
-    row.appendChild(scEl('b', 'wo-n', String(hits.length)));
-    var txt = scEl('div', 'wo-tx');
-    txt.appendChild(scEl('span', 'wo-w', name));
-    /* The usual day where there is one, and how long ago where there
-       is not — never both, and never neither. */
-    var dow = scWorkDow(hits);
-    txt.appendChild(scEl('span', 'wo-s', dow || scWorkAgo(hits[0].day)));
-    row.appendChild(txt);
-
-    /* ── THE FIGURES, ON THE RIGHT ──
-       How long it takes, how hard it comes out, and what share of your
-       training it is. Three short facts about the session rather than
-       about the day, which is what the left half already says.
-
-       aria-hidden on the glyphs and the whole block spoken once in the
-       panel's own label: a screen reader reading "clock 50 min bolt
-       Hard 34 percent" is three marks charging twice for one fact. */
-    var figs = scEl('div', 'wo-f');
+    /* THE SWATCH IS THE SESSION'S OWN COLOUR — the one place this app
+       keeps a literal hex, for the cards' own reason: a colour that
+       says WHICH has to be the same at every angle of the wheel. */
+    var sw = scEl('span', 'wo-sw');
+    sw.appendChild(scEl('b', null, String(hits.length)));
+    sw.appendChild(scEl('small', null, hits.length === 1 ? 'session' : 'sessions'));
+    p.appendChild(sw);
+    var txt = scEl('span', 'wo-tx');
+    var w = scEl('span', 'wo-w');
+    w.appendChild(scEl('i'));
+    w.appendChild(document.createTextNode(name));
+    txt.appendChild(w);
+    if (grp) txt.appendChild(scEl('span', 'pill wo-gp', grp.n));
+    p.appendChild(txt);
+    var figs = scEl('span', 'props');
     figs.setAttribute('aria-hidden', 'true');
     var eff = scWorkEffort(hits);
-    /* ── THE SHARE IS THIS MONTH'S, NOT THE WHOLE WINDOW'S ──
-       Over thirteen weeks the figure barely moves, which makes it a
-       fact about your history rather than about what you are doing —
-       and what it is FOR is saying which session you are training most
-       right now. Thirty days is short enough to move when you change
-       what you do and long enough not to swing on one week off.
-
-       Omitted where the month is empty rather than drawn as 0%: a
-       panel that reads "11 weeks ago" has already said it. */
     var mine = month.filter(function (h) { return scWorkSig(h) === sig; }).length;
     var share = month.length && mine ? Math.round(mine / month.length * 100) : 0;
-
-    var lines = [['time', 'Avg', mins + ' min'], ['lift', '', eff]];
-    if (share) lines.push([null, '', share + '% this month']);
-    lines.forEach(function (f) {
-      if (!f[2]) return;
-      var line = scEl('span', 'wo-fl');
-      if (f[0]) {
-        line.insertAdjacentHTML('beforeend',
-          '<svg viewBox="0 0 24 24" aria-hidden="true">' + WORK_ICON[f[0]] + '</svg>');
-      } else {
-        /* The share has no glyph and needs none: % is one. */
-        line.classList.add('is-bare');
-      }
-      /* AVG SAID OUT LOUD on the time, because it is the one figure
-         here somebody could read as this session's actual length. */
-      if (f[1]) line.appendChild(scEl('i', null, f[1]));
-      line.appendChild(scEl('b', null, f[2]));
-      figs.appendChild(line);
-    });
-    row.appendChild(figs);
-    p.appendChild(row);
-
+    var dow = scWorkDow(hits);
+    figs.appendChild(scEl('span', 'pill', 'Avg ' + mins + ' min'));
+    if (eff) figs.appendChild(scEl('span', 'pill', eff));
+    if (share) figs.appendChild(scEl('span', 'pill', share + '% this month'));
+    figs.appendChild(scEl('span', 'pill', dow || scWorkAgo(hits[0].day)));
+    p.appendChild(figs);
+    if (open) p.appendChild(scWorkCal(hits, name));
     p.setAttribute('aria-label', name + ', ' + hits.length
       + (hits.length === 1 ? ' session' : ' sessions')
       + (dow ? ', usually ' + dow : ', last ' + scWorkAgo(hits[0].day))
@@ -6111,13 +6260,6 @@
     p.addEventListener('click', pick);
     return p;
   }
-
-  /* ── THE AVERAGE EFFORT IS A REAL AVERAGE ──
-     Effort is the one thing on this record you chose per session, so
-     it is the one figure here that can move: eight Chests logged Hard,
-     Hard, Moderate come back Hard. Averaged on the three-point scale
-     and mapped back to a word, because "2.3" is a number about a thing
-     that has no units. */
   function scWorkEffort(hits) {
     var n = 0, sum = 0;
     hits.forEach(function (h) {
@@ -6156,37 +6298,17 @@
      are looking at, not a preference — and one remembered from a week
      ago opens on a session you have stopped doing. */
   var workOpen = '';
-
+  var workGroup = 'all';
   function scPaintWork() {
     var pane = $('scWorkPane');
     pane.textContent = '';
     var all = scWorkAll();
-
     if (!all.length) {
-      /* An empty state that names the press rather than describing the
-         feature, and says it once. */
       pane.appendChild(scEl('p', 'wo-none',
         'Nothing here yet. Tick a training block and it asks what you '
         + 'trained; what you pick shows up here.'));
       return;
     }
-
-    var head = scEl('div', 'wo-head');
-    var fig = scEl('b', 'ty-fig', String(all.length));
-    fig.appendChild(scEl('i', null, all.length === 1 ? 'session' : 'sessions'));
-    head.appendChild(fig);
-    pane.appendChild(head);
-    pane.appendChild(scEl('p', 'ty-cap', 'In the last thirteen weeks'));
-
-    /* Grouped by workout, most-done first, ties broken by which you did
-       last — so the panel that moves is the one you just logged. */
-    /* ── GROUPED ON THE WHOLE SESSION, NOT ON ITS PARTS ──
-       Pull and core is one thing you do: it has its own length, its own
-       days and its own place in the week, and split across a Pull panel
-       and a Core panel none of that is anywhere. So the row is "Pull +
-       Core" — which means Pull alone and Pull + Core are different
-       rows, and they should be. The shares sum to a hundred again,
-       because every session is in exactly one of them. */
     var by = {};
     all.forEach(function (h) {
       var sig = scWorkSig(h);
@@ -6196,24 +6318,57 @@
       return by[b].length - by[a].length
         || (by[b][0].day < by[a][0].day ? -1 : 1);
     });
-    /* THE TOP ONE IS OPEN UNLESS YOU SAY OTHERWISE, so the screen
-       always has a calendar on it. A first visit that showed three
-       shut rows would be hiding the whole point behind a press nobody
-       knows to make. */
-    if (keys.indexOf(workOpen) < 0) workOpen = keys[0];
-    var most = by[keys[0]].length;
-    /* Thirty days, for the share only. Everything else on this screen
-       is the whole window — the count, the ring and the calendar are
-       about the record, and the share is about right now. */
     var floor = scDayBack(29);
     var month = all.filter(function (h) { return h.day >= floor; });
-
-    var list = scEl('div', 'wo-list');
+    var head = scEl('div', 'wo-head');
+    var fig = scEl('b', 'ty-fig', String(all.length));
+    fig.appendChild(scEl('i', null, all.length === 1 ? 'session' : 'sessions'));
+    head.appendChild(fig);
+    head.appendChild(scEl('span', null, '\u00b7 ' + keys.length
+      + (keys.length === 1 ? ' kind' : ' kinds') + ' \u00b7 ' + month.length
+      + ' this month'));
+    pane.appendChild(head);
+    /* ── the groups as a strip ──
+       All, then only the groups you have actually done: a chip for a
+       kind with nothing under it is a filter that empties the screen. */
+    var groupOf = function (sig) {
+      var w = scWorkoutsOf(sig)[0];
+      return w ? w.key.split('.')[0] : '';
+    };
+    var groups = [];
     keys.forEach(function (k) {
+      var g = groupOf(k);
+      if (g && groups.indexOf(g) < 0) groups.push(g);
+    });
+    if (workGroup !== 'all' && groups.indexOf(workGroup) < 0) workGroup = 'all';
+    if (groups.length > 1) {
+      var strip = scEl('div', 'wo-strip');
+      strip.setAttribute('role', 'group');
+      strip.setAttribute('aria-label', 'Kind of session');
+      [['all', 'All']].concat(groups.map(function (g) {
+        var tg = scTrainGroup(g); return [g, tg ? tg.n : g];
+      })).forEach(function (c) {
+        var b = scEl('button', 'wo-c' + (workGroup === c[0] ? ' is-on' : ''), c[1]);
+        b.type = 'button';
+        b.dataset.wk = c[0];
+        b.setAttribute('aria-pressed', workGroup === c[0] ? 'true' : 'false');
+        b.addEventListener('click', function () {
+          workGroup = c[0];
+          scPaintWork();
+        });
+        strip.appendChild(b);
+      });
+      pane.appendChild(strip);
+    }
+    var shown = keys.filter(function (k) {
+      return workGroup === 'all' || groupOf(k) === workGroup;
+    });
+    if (shown.indexOf(workOpen) < 0) workOpen = shown[0];
+    var most = by[keys[0]].length;
+    var list = scEl('div', 'wo-list');
+    shown.forEach(function (k) {
       list.appendChild(scWorkPanel(k, by[k], most, month, k === workOpen,
         function () {
-          /* Pressing the open one shuts nothing: a screen with no
-             calendar on it is the state this view exists to avoid. */
           if (workOpen === k) return;
           workOpen = k;
           scPaintWork();
@@ -6221,51 +6376,6 @@
     });
     pane.appendChild(list);
   }
-
-  /* ═══════════════════════════════════════════════════════════
-     PATTERN — THE RECORD READ BACK
-
-     Every other screen in this app SHOWS you the record. This one
-     reads it: of everything you log, which things are on your good
-     days and which are on your rough ones, ranked by how far each one
-     moves a day.
-
-     ── IT IS THE ONE SCREEN THAT ASKS FOR SOMETHING ──
-     Nothing on this record says whether a day was any good. Ticks say
-     what you did, blocks say what you kept, and neither is an opinion
-     — so there is nothing for the rest of it to line up against, and
-     no amount of arithmetic over the existing keys invents one. The
-     ask is five stars, once a day, here and at the foot of today's
-     card — one control, built once and used in both places.
-
-     ── AND IT IS THE SMALLEST ASK THAT COULD WORK ──
-     Not a number. This app has never asked what you weigh, and a
-     figure you type every night is a different relationship with a
-     screen than one that only ever says you showed up. Three words is
-     a judgement you can make in a second and can be wrong about
-     without losing anything.
-
-     GOOD, FINE, ROUGH — never a grade. A rough day is something that
-     happened to you; "poor" is a verdict on you, which is the one
-     thing this app has spent every other decision not delivering. It
-     is the Easy → Light rename a second time, for the same reason.
-
-     ── WHAT IS NOT DONE WITH IT ──
-     It never leaves the phone. scPushNow builds its body field by
-     field, so a rating cannot reach a friend by being forgotten about
-     — but the record already says a count means you showed up and a
-     list means what your day IS, and how you felt is further down that
-     road than either. There is no line of code that sends it and there
-     will not be.
-     ═══════════════════════════════════════════════════════════ */
-
-  /* ── v2, BECAUSE THE SCALE MOVED AND THE OLD ONE OVERLAPS IT ──
-     It was three words on 0, 1 and 2. It is five stars on 1 to 5, and
-     those two scales share the values 1 and 2 — a stored `1` is either
-     the old Fine or one star, and nothing in the number says which. A
-     record that cannot be read twice needs a second key rather than a
-     cleverer guess, so v1 is converted once and spent, the way the
-     stored palette NAME was when the wheel landed. */
   var RATE_KEY = 'sched.rate.v2';
   var RATE_OLD = 'sched.rate.v1';
   var rateLog = null;              /* { '2026-09-01': 4 } */
@@ -6472,8 +6582,8 @@
         if (a) { yes++; ys += rateLog[day]; } else { no++; ns += rateLog[day]; }
       });
       if (yes < PAT_SIDE || no < PAT_SIDE) return;
-      out.push({ key: f.key, n: f.n, yes: yes, no: no,
-                 lift: ys / yes - ns / no });
+      out.push({ key: f.key, n: f.n, item: f.item, block: f.block,
+                 yes: yes, no: no, lift: ys / yes - ns / no });
     });
     out.sort(function (a, b) { return Math.abs(b.lift) - Math.abs(a.lift); });
     return { rows: out, rated: rated.length };
@@ -6620,7 +6730,10 @@
     }
     pane.appendChild(say);
 
-    pane.appendChild(scEl('span', 'label', 'What moves a day, most first'));
+    var gh = scEl('div', 'grp-h');
+    gh.appendChild(scEl('span', 'pill', 'What moves a day, most first'));
+    gh.appendChild(scEl('span', 'c', String(rank.rows.length)));
+    pane.appendChild(gh);
 
     /* ── BOTH DIRECTIONS WEAR THE SAME COLOUR ──
        Which side of the zero line a bar is on is the whole of what
@@ -6636,6 +6749,11 @@
     var list = scEl('ul', 'pat-list');
     rank.rows.forEach(function (r) {
       var li = scEl('li', 'pat-row');
+      /* The glyph the thing already wears elsewhere: the tally's own
+         for one of the five, the block's for a block. */
+      var ic = r.item ? TALLY_ICON[r.item.id] : BLOCK_ICON[scIconFor(r.block)];
+      li.insertAdjacentHTML('beforeend',
+        '<svg class="ic" viewBox="0 0 24 24" aria-hidden="true">' + (ic || '') + '</svg>');
       li.appendChild(scEl('span', 'pat-nm', r.n));
       var mid = scEl('span', 'pat-mid');
       mid.setAttribute('aria-hidden', 'true');
@@ -6659,7 +6777,7 @@
         bar.style.width = (Math.abs(r.lift) / most * 50).toFixed(2) + '%';
         mid.appendChild(bar);
       }
-      li.appendChild(scEl('span', 'pat-n',
+      li.appendChild(scEl('span', 'pat-n pill' + (r.lift >= .5 ? ' is-now' : ''),
         (nil ? '' : r.lift < 0 ? '−' : '+') + fig));
       /* Spoken as one sentence with its sample in it. The bar says
          nothing a screen reader can use and the bare figure says less
@@ -7487,8 +7605,35 @@
          without judging the combination. It needs no JavaScript at
          all — it is the same three washes the body has, off the same
          tokens, so it repaints itself the instant scPaint writes. */
+      /* ── LIGHT, DARK, OR THE PHONE'S ──
+         Three chips, one lit. 'Auto' is the default and follows the
+         system; the other two pin a face. Above the wheel, because the
+         wheel's own middle is drawn off the live tokens and repaints
+         the moment a chip is pressed — you see the accent on the face
+         you just chose. */
+      var mlab = scEl('span', 'label', 'Theme');
+      mlab.style.marginTop = '2px';
+      body.appendChild(mlab);
+      var mrow = scEl('div', 'lg-row');
+      [['auto', 'Auto'], ['light', 'Light'], ['dark', 'Dark']].forEach(function (pair) {
+        var ch = scEl('button', 'lg-c' + (mode === pair[0] ? ' on' : ''), pair[1]);
+        ch.type = 'button';
+        ch.dataset.mode = pair[0];
+        ch.setAttribute('aria-pressed', mode === pair[0] ? 'true' : 'false');
+        ch.addEventListener('click', function () {
+          scSetMode(pair[0]);
+          [].forEach.call(mrow.children, function (c) {
+            var on = c.dataset.mode === mode;
+            c.classList.toggle('on', on);
+            c.setAttribute('aria-pressed', on ? 'true' : 'false');
+          });
+        });
+        mrow.appendChild(ch);
+      });
+      body.appendChild(mrow);
+
       var lab = scEl('span', 'label', 'Accent');
-      lab.style.marginTop = '2px';
+      lab.style.marginTop = '14px';
       body.appendChild(lab);
 
       var wrap = scEl('div', 'cw-wrap');
@@ -7528,7 +7673,8 @@
           + (hue === HUE0 ? ', the one it ships with' : ''));
         knob.style.transform = 'rotate(' + hue + 'deg) translateY(-72px)';
         hint.textContent = scHex(v) + ' · '
-          + (Math.round(scRatio(v, GROUND) * 10) / 10) + ':1 against the page'
+          + (Math.round(scRatio(v, scModeLive() === 'light' ? LIGHT_GROUND : GROUND) * 10) / 10)
+          + ':1 against the page'
           + (hue === HUE0 ? ' · the one it ships with' : '');
       };
       /* Painted on every move and SAVED on the way up. A drag across
@@ -7754,8 +7900,14 @@
       if (old) localStorage.removeItem(THEME_KEY);
       if (saved !== null) localStorage.setItem(ACCENT_KEY, saved);
     }
-    if (saved !== null) scPaint(saved, false);
-  } catch (e) {}
+    /* The mode before the paint, and the paint ALWAYS: with two faces
+       the stylesheet's :root can only carry one of them, and a page
+       that opens on the other has to be written inline before the
+       first render or the light face flashes dark. */
+    var sm = localStorage.getItem(MODE_KEY);
+    mode = sm === 'light' || sm === 'dark' ? sm : 'auto';
+    scPaint(saved !== null ? saved : HUE0, false);
+  } catch (e) { scPaint(HUE0, false); }
 
   scRender();
   scSetView(view, false);

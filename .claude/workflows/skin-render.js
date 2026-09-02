@@ -97,9 +97,16 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
      reads as two lenses disagreeing with themselves. Parsed out of the
      skin's own source here so one number lives in one place. */
   const hue = (gen.match(/accent:\s*(\d+)/) || [])[1];
+  /* SKINMODE=light|dark seeds the theme the same way, for the same
+     reason: the mode is read once at boot and the first paint is
+     whichever one the key held. */
+  const mode = process.env.SKINMODE || null;
 
-  await page.addInitScript(([w, f, h]) => {
+  const board = process.env.SKINBOARD ? 1 : 0;
+  await page.addInitScript(([w, f, h, m, b]) => {
     if (h != null) localStorage.setItem('sched.accent.v1', String(h));
+    if (m) localStorage.setItem('sched.mode.v1', m);
+    if (b) { localStorage.setItem('sched.wkview.v1', 'board'); localStorage.setItem('sched.tyview.v1', 'board'); }
     const R = Date;
     window.Date = class extends R {
       constructor(...a) { super(...(a.length ? a : [f])); }
@@ -108,7 +115,10 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
     const d = new R(f), p = (n) => String(n).padStart(2, '0');
     const key = (b) => { const x = new R(f); x.setDate(x.getDate() - b);
       return x.getFullYear() + '-' + p(x.getMonth() + 1) + '-' + p(x.getDate()); };
-    localStorage.setItem('sched.v1', JSON.stringify(w));
+    /* Only when absent: scClean mints ids on the way in, and a week
+       re-seeded on every reload orphans the log written against the
+       previous open's ids. */
+    if (!localStorage.getItem('sched.v1')) localStorage.setItem('sched.v1', JSON.stringify(w));
     localStorage.setItem('sched.tour.v1', '1');
     localStorage.setItem('sched.net.v1', JSON.stringify({
       url: 'about:blank', code: '', key: '', name: '', pic: '', on: false }));
@@ -124,21 +134,24 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
     }
     localStorage.setItem('sched.tick.v1', JSON.stringify(tick));
     localStorage.setItem('sched.rate.v2', JSON.stringify(rate));
-    localStorage.setItem('sched.log.v1', JSON.stringify(log));
+    if (!localStorage.getItem('sched.log.v1')) localStorage.setItem('sched.log.v1', JSON.stringify(log));
     /* Workouts, so the deck and the panels are not empty. */
     const tl = {};
     for (let i = 0; i < 60; i++) {
       if (i % 2) continue;
       const kinds = [['bro.chest'], ['ppl.push', 'bro.abs'], ['run.long'],
         ['bro.back'], ['ppl.legs'], ['rec.stretch']];
-      tl[key(i)] = [{ w: kinds[i % 6], e: 1 + (i % 3), m: 30 + (i % 4) * 15 }];
+      /* The record's own shape: keyed by block id, the kinds joined
+         with a plus in one field, the effort as its word. */
+      tl[key(i)] = { seed: { k: kinds[i % 6].join('+'),
+        e: ['Light', 'Moderate', 'Hard'][i % 3], m: 30 + (i % 4) * 15 } };
     }
     localStorage.setItem('sched.train.v1', JSON.stringify(tl));
     localStorage.setItem('sched.obj.v1', JSON.stringify({
       [key(0)]: [{ t: 'Call a hundred clients', d: 0 },
                  { t: 'Ship the pattern screen', d: 1 },
                  { t: 'Read forty pages', d: 0 }] }));
-  }, [WEEK, FROZEN, hue]);
+  }, [WEEK, FROZEN, hue, mode, board]);
 
   const shoot = async (screen) => {
     if (gen) await page.evaluate(gen);
@@ -201,6 +214,19 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
     } else if (screen === 'today') await go('tally', 'up');
     else if (screen === 'work') await go('tally', 'work');
     else if (screen === 'pat') await go('tally', 'pat');
+    else if (screen === 'friends') await go('friends');
+    else if (screen === 'edit') {
+      await go('list');
+      await page.evaluate(() => {
+        const r = document.querySelector('.day.is-open .row[data-id]');
+        if (r) r.click();
+      });
+      await page.waitForTimeout(600);
+    } else if (screen === 'menu') {
+      await go('list');
+      await page.evaluate(() => { document.getElementById('scTabYou').click(); });
+      await page.waitForTimeout(600);
+    }
     await shoot(screen);
   }
 
