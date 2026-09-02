@@ -6415,49 +6415,41 @@
 
   var TOUR_KEY = 'sched.tour.v1';
 
-  /* ── THE POINTER ──
-     The objectives are the one thing in this app with no visible name
-     anywhere: they live behind a pill in the corner of a card, and a
-     sentence saying "top right" is a sentence you have to hold in your
-     head while you go and look. So the card is DRAWN, at the
-     proportions the real one has, with the pill lit in the accent and
-     a ring round it. The picture is the instruction.
+  /* ── THE ICON IS A SCENE, AND IT MOVES ──
+     Each card carried a static glyph, and the objectives one carried a
+     DIAGRAM as well: a day card drawn at its real proportions with the
+     turn pill lit in the corner and a ring around it, because the
+     objectives lived behind a control a sentence could only describe
+     the position of. That diagram is now false twice over — there is
+     no back to a card and no pill in its corner — and the reason it
+     had to exist is gone with them.
 
-     Its rows are ruled lines rather than words. This is a diagram of
-     WHERE something is, and legible text in it would invite reading
-     the card instead of finding the corner.
+     WHAT REPLACED IT IS THE ARGUMENT AGAINST IT. A still picture can
+     only say WHERE a thing is; that is why the pointer needed a ring,
+     an inset card and a halo bleeding over the edge to aim at one
+     corner. A moving one says WHAT HAPPENS, which is the thing you
+     actually could not have guessed: a sheet comes up from the head.
+     So the second drawing is not redrawn, it is absorbed — one object
+     per card, which is this project's own rule about a frame inside a
+     frame.
 
-     THE RING BLEEDS PAST THE CARD'S EDGE, and it has to. Centred on a
-     pill that is itself in the corner, a ring big enough to clear the
-     pill's own diagonal cannot also fit inside the card. Drawn small
-     enough to fit it touches the pill and reads as a border on it
-     rather than as a light around it, which is the one thing it is
-     for. So the card is inset in the box and the halo is allowed out
-     over the edge. */
-  var TOUR_CARD = '<svg viewBox="0 0 168 116" class="tr-fig"'
-    + ' role="img" aria-label="A day card, with the turn control in its'
-    + ' top right corner">'
-    /* the card itself, square, because every card in this app is */
-    + '<rect x="8" y="14" width="152" height="92" fill="var(--g0)"'
-    + ' stroke="var(--hair)" stroke-width="2"/>'
-    /* the day name, top left, at the weight the real one wears */
-    + '<rect x="20" y="26" width="44" height="8" rx="1" fill="var(--dim)"/>'
-    /* two rows: the glyph gutter, then the time over the name */
-    + '<g fill="var(--tick-off)">'
-    + '<circle cx="27" cy="58" r="5"/>'
-    + '<rect x="40" y="53" width="24" height="5" rx="1"/>'
-    + '<rect x="40" y="62" width="62" height="6" rx="1"/>'
-    + '<circle cx="27" cy="86" r="5"/>'
-    + '<rect x="40" y="81" width="24" height="5" rx="1"/>'
-    + '<rect x="40" y="90" width="48" height="6" rx="1"/>'
-    + '</g>'
-    /* and the corner it is about. The ring first and the pill over it,
-       so the halo reads as light around the control rather than as a
-       second object beside it. */
-    + '<circle cx="139.5" cy="29.5" r="20" fill="none"'
-    + ' stroke="var(--red)" stroke-width="2.4" opacity=".55"/>'
-    + '<rect x="127" y="22" width="25" height="15" rx="7.5" fill="var(--red)"/>'
-    + '</svg>';
+     ── EVERY SCENE IS COMPLETE AT REST ──
+     The animation ADDS to a picture that already reads. Every keyframe
+     set runs from a partial state TO the element's natural one, so
+     `animation: none` under reduced motion leaves the finished scene
+     rather than a frame with something missing from it. That is the
+     ambient trickle's lesson stated the other way round: its line had
+     no opacity outside its keyframes, so stopping the animation would
+     have left a static line at full strength, worse than absent.
+
+     ── AND A PRESENTATION ATTRIBUTE BEATS AN INHERITED VALUE ──
+     `.tr-ic svg` sets fill and stroke on the SVG ELEMENT, so children
+     take them by inheritance — and inheritance is the weakest thing
+     there is, so `fill="currentColor"` on a child wins. That is what
+     lets one scene mix stroked outlines with filled bars without a
+     rule per shape. It would NOT survive the selector being widened to
+     `.tr-ic svg *`, which is worth knowing before somebody tidies it
+     that way and every filled mark in here disappears. */
 
   /* ── FOUR, AND THE COPY IS PLAIN ──
      It went in at six, in this file's own voice: "where today sits is
@@ -6480,21 +6472,35 @@
 
      THE OBJECTIVES GO LAST because they are the one thing here nobody
      can find on their own, and the last card is the one still on
-     screen when the intro ends. */
+     screen when the intro ends.
+
+     TWO OF THE FOUR SENTENCES WERE ALSO WRONG. "Seven day cards"
+     described a deck that is a strip of chips now, and "Flip for
+     objectives" described a mechanism that has been deleted. A first
+     open that teaches a gesture the app does not have is worse than no
+     first open, because the person then goes looking for it. */
   var TOUR = [
     {
       k: 'week',
       t: 'Plan your week',
-      s: 'Seven day cards. Add a block by typing it in plain words.',
-      /* Three cards fanned. The front one is FILLED with the ground so
-         it covers the one behind it: drawn as two outlines they cross,
-         and the back card reads as a bracket rather than as a card. */
-      i: '<rect x="10.4" y="4.2" width="11.4" height="16.6" rx="1.4"'
-       + ' opacity=".42"/>'
-       + '<rect x="2.6" y="6.8" width="12.8" height="14.6" rx="1.4"'
-       + ' fill="var(--paper)"/>'
-       + '<path d="M5.6 11.4h6.8M5.6 14.6h6.8M5.6 17.8h4"'
-       + ' stroke-width="1.4"/>'
+      s: 'Pick a day, then type a block in plain words.',
+      /* A field with a caret travelling across it, and a row landing in
+         the list underneath. The typed sentence is the one thing about
+         this app nobody guesses: every other way in is a control you
+         can see. */
+      i: '<rect x="2.6" y="2.6" width="18.8" height="5.6" rx="2"'
+       + ' opacity=".45"/>'
+       + '<rect class="tr-car" x="5.4" y="4.2" width="1.4" height="2.4"'
+       + ' rx=".6" fill="currentColor" stroke="none"/>'
+       + '<g fill="currentColor" stroke="none">'
+       + '<circle cx="4.6" cy="12.6" r="1.5" opacity=".5"/>'
+       + '<rect x="7.6" y="11.6" width="11.8" height="2" rx="1" opacity=".5"/>'
+       + '<circle cx="4.6" cy="17" r="1.5" opacity=".5"/>'
+       + '<rect x="7.6" y="16" width="8.4" height="2" rx="1" opacity=".5"/>'
+       + '<g class="tr-new">'
+       + '<circle cx="4.6" cy="21.4" r="1.5"/>'
+       + '<rect x="7.6" y="20.4" width="10.2" height="2" rx="1"/>'
+       + '</g></g>'
     },
     {
       k: 'pattern',
@@ -6504,42 +6510,89 @@
       /* ── RANKED BARS OFF AN AXIS, AND IT IS NOT THE PANEL'S OWN
              SHAPE ──
          Pattern draws bars either side of a centre axis, because the
-         side is what carries the direction. Drawn that way at 52px it
+         side is what carries the direction. Drawn that way small it
          does not read: the bar crossing the axis at its midpoint makes
          a plus sign, moving the crossing down makes a flag, and four
          bars close enough to fill the box merge into a blob. Three
-         attempts, all rendered beside the other three glyphs, all
-         worse than the ones next to them.
+         attempts, all rendered beside the other three, all worse than
+         the ones next to them.
 
          So it is the panel's other true fact instead: bars ranked
          longest first off an axis at the side. That IS what the screen
          shows, it reads as a chart at a glance, and what it leaves out
-         is a distinction nobody needs before they have seen the
-         screen. It is the ten lift glyphs' lesson: when every honest
-         drawing of a thing is illegible at the size it is drawn, draw
-         a different true thing. */
-      i: '<path d="M4.8 3.6v16.8" stroke-width="1.4" opacity=".6"/>'
-       + '<path d="M4.8 8h14.6M4.8 13h10.4M4.8 18h6.2"'
-       + ' stroke-width="2.8" stroke-linecap="butt"/>'
+         is a distinction nobody needs before they have seen it.
+
+         They are RECTS rather than the paths this went in as, because
+         the growth is a scaleX about the axis and a horizontal path
+         has a zero-height bounding box for `transform-box: fill-box`
+         to work from. */
+      i: '<path d="M4.4 3.4v17.2" opacity=".45"/>'
+       + '<g fill="currentColor" stroke="none">'
+       + '<rect class="tr-bar" x="5.4" y="6.3" width="13.4" height="2.7" rx="1.35"/>'
+       + '<rect class="tr-bar" x="5.4" y="11" width="9.6" height="2.7" rx="1.35"/>'
+       + '<rect class="tr-bar" x="5.4" y="15.7" width="5.4" height="2.7" rx="1.35"/>'
+       + '</g>'
     },
     {
       k: 'friends',
       t: 'Compete with friends',
       s: 'Add a friend and see who shows up most. Nothing else leaves '
        + 'your phone.',
-      /* The board's own crown, at the same silhouette, stroked rather
-         than filled so it sits with the other three. */
-      i: '<path d="M3 8.8l4.5 3.5L12 4.4l4.5 7.9L21 8.8L19.3 19H4.7L3 8.8z"/>'
+      /* The board's own crown, landing on the tallest column. A crown
+         alone says RANK and says nothing about there being anybody to
+         rank; three columns under it are what make it a leaderboard.
+
+         The placement is on an OUTER g and the animation on an inner
+         one. Keyframes naming a transform replace the resting one
+         outright, so a single element would be flung to the origin the
+         instant the animation started, which is the deck's fan bug in
+         a smaller box. */
+      i: '<g fill="currentColor" stroke="none">'
+       + '<rect x="3.2" y="20.4" width="17.6" height="2.2" rx="1.1" opacity=".45"/>'
+       + '<rect x="4.6" y="14.6" width="4" height="5.2" rx="1.3" opacity=".55"/>'
+       + '<rect x="10" y="11.4" width="4" height="8.4" rx="1.3"/>'
+       + '<rect x="15.4" y="16.2" width="4" height="3.6" rx="1.3" opacity=".55"/>'
+       + '</g>'
+       + '<g transform="translate(6.5 1.3) scale(.46)">'
+       + '<g class="tr-crown">'
+       + '<path d="M3 8.8l4.5 3.5L12 4.4l4.5 7.9L21 8.8L19.3 19H4.7L3 8.8z"'
+       + ' stroke-width="3.7" stroke-linejoin="round"/>'
+       + '</g></g>'
     },
     {
-      k: 'back',
-      t: 'Flip for objectives',
-      s: 'Each card has a back for the few things that really matter '
-       + 'today.',
-      fig: TOUR_CARD,
-      /* The objectives mark the app already owns. Two glyphs for one
-         subject is the app telling apart two things that are not. */
-      i: 'OBJ'
+      k: 'obj',
+      t: 'What matters today',
+      s: 'Open objectives from the top of the week for the few things '
+       + 'that count.',
+      /* The gesture itself: a sheet rising from the foot of the page,
+         with the control it comes from lit at the top. Clipped to the
+         page, so it emerges from the page's own bottom edge rather
+         than sliding over the outside of it.
+
+         The sheet is FILLED with the ground rather than left open,
+         because a transparent one has the rows behind it showing
+         through and reads as a rectangle drawn over a list instead of
+         as a surface in front of it. */
+      i: '<clipPath id="scTrObjClip">'
+       + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"/>'
+       + '</clipPath>'
+       + '<rect x="3.4" y="2.4" width="17.2" height="19.2" rx="2.6"'
+       + ' opacity=".45"/>'
+       + '<rect class="tr-tile" x="5.6" y="4.6" width="4" height="4" rx="1.4"'
+       + ' fill="currentColor" stroke="none" opacity=".55"/>'
+       + '<g fill="currentColor" stroke="none" opacity=".3">'
+       + '<rect x="11.2" y="5.1" width="7.2" height="1.6" rx=".8"/>'
+       + '<rect x="11.2" y="7.7" width="4.6" height="1.6" rx=".8"/>'
+       + '</g>'
+       + '<g clip-path="url(#scTrObjClip)"><g class="tr-sheet">'
+       + '<rect x="4.9" y="12.4" width="14.2" height="11" rx="2.4"'
+       + ' fill="var(--g0)" stroke="currentColor" stroke-width="1.5"/>'
+       + '<rect x="9.7" y="14" width="4.6" height="1.2" rx=".6"'
+       + ' fill="currentColor" stroke="none" opacity=".45"/>'
+       + '<g fill="currentColor" stroke="none">'
+       + '<circle cx="8.2" cy="18" r="1.4"/>'
+       + '<rect x="10.8" y="17" width="6.4" height="2" rx="1"/>'
+       + '</g></g></g>'
     }
   ];
 
@@ -6623,8 +6676,8 @@
       var s = scEl('section', 'tr-slide');
       s.dataset.card = c.k;
       var ic = scEl('div', 'tr-ic');
-      ic.insertAdjacentHTML('beforeend', c.i === 'OBJ' ? OBJ_MARK
-        : '<svg viewBox="0 0 24 24" aria-hidden="true">' + c.i + '</svg>');
+      ic.insertAdjacentHTML('beforeend',
+        '<svg viewBox="0 0 24 24" aria-hidden="true">' + c.i + '</svg>');
       s.appendChild(ic);
       /* The heading is repeated inside the card and hidden from a
          screen reader: the dialog's own label already says it, and
@@ -6634,7 +6687,6 @@
       t.setAttribute('aria-hidden', 'true');
       s.appendChild(t);
       s.appendChild(scEl('p', 'tr-s', c.s));
-      if (c.fig) s.insertAdjacentHTML('beforeend', c.fig);
       track.appendChild(s);
     });
     win.appendChild(track);

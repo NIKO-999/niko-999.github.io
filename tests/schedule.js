@@ -7155,7 +7155,7 @@ const SAID = [
       first.n === 4
       && [...await ipage.evaluate(() =>
           [...document.querySelectorAll('.tr-slide')].map((s) => s.dataset.card))]
-        .join('|') === 'week|pattern|friends|back', first);
+        .join('|') === 'week|pattern|friends|obj', first);
 
     /* ── ONE CARD ON SCREEN, AND THE OTHERS OUT OF REACH ──
        A track that moves rather than a scroller leaves the other three
@@ -7168,70 +7168,78 @@ const SAID = [
     ok('...and the button says Continue on it, not the last word',
       first.go === 'Continue' && first.step === 'Step 1 of 4', first);
 
-    /* ── THE POINTER IS THE WHOLE OF THAT CARD ──
-       The objectives live behind a pill in the corner of a day card
-       and are named nowhere else in the app, so this diagram is the
-       only instruction there is. Measured on COMPOSITED PIXELS rather
-       than read off the markup: a drawing that says "top right" and
-       puts the mark somewhere else is worse than no drawing, and the
-       coordinates in an SVG string are exactly the kind of thing that
-       survives an edit while the picture stops being true. */
+    /* ── THE LAST CARD IS THE OBJECTIVES ONE ── */
     for (let i = 0; i < 3; i++) {
       await ipage.evaluate(() => document.querySelector('.tr-go').click());
       await ipage.waitForTimeout(400);
     }
     const last = await card();
     ok('the last card is the objectives one and starts the week',
-      last.live.join('') === 'back' && last.go === 'Start the week'
+      last.live.join('') === 'obj' && last.go === 'Start the week'
       && last.step === 'Step 4 of 4', last);
 
-    const fig = await ipage.$eval('.tr-fig', (e) => {
-      const r = e.getBoundingClientRect();
-      return { x: r.x, y: r.y, w: r.width, h: r.height };
-    });
-    const ipng = PNG.sync.read(await ipage.screenshot());
-    const iAt = (x, y) => { const i = (ipng.width * Math.round(y * dpr)
-      + Math.round(x * dpr)) << 2;
-      return [ipng.data[i], ipng.data[i + 1], ipng.data[i + 2]]; };
-    const acc = (await ipage.evaluate(() => getComputedStyle(document.documentElement)
-      .getPropertyValue('--red').trim())).replace('#', '')
-      .match(/../g).map((h) => parseInt(h, 16));
-    /* The centroid of every pixel that IS the accent inside the
-       figure's own box. The pill is solid accent and the ring around
-       it is the same hue at .55, so a tolerance that takes both still
-       lands on the corner they share. */
-    let sx = 0, sy = 0, n = 0;
-    for (let x = fig.x; x < fig.x + fig.w; x += 1) {
-      for (let y = fig.y; y < fig.y + fig.h; y += 1) {
-        const p = iAt(x, y);
-        /* A distance, not three channel gates: with a violet accent the
-           per-channel gate let --dim through, and the dim bars at the
-           top left dragged the centroid to the middle of the figure. */
-        if (Math.hypot(p[0] - acc[0], p[1] - acc[1], p[2] - acc[2]) < 70) {
-          sx += x; sy += y; n++;
-        }
-      }
-    }
-    const fx = n ? (sx / n - fig.x) / fig.w : -1;
-    const fy = n ? (sy / n - fig.y) / fig.h : -1;
-    ok(`the drawn card's mark really is in its top right (${fx.toFixed(2)}`
-      + `, ${fy.toFixed(2)} of the figure, ${n} accent pixels)`,
-      n > 200 && fx > .62 && fy < .42, { fx, fy, n, fig });
+    /* ── THE POINTER IS GONE, AND SO IS WHAT IT POINTED AT ──
+       That card drew a day card at its real proportions with the turn
+       pill lit in a corner and a ring bleeding over the edge, because
+       the objectives lived behind a control a sentence could only give
+       the POSITION of. There is no back to a card and no pill in its
+       corner, so the diagram was false twice over and the reason it
+       existed went with them.
 
-    /* ── AND THE GLYPHS ARE THE ACCENT, ASKED OF THE PAGE ──
-       Three assertions in this file were once pinned to a shipped red
-       and measured nothing the day it moved. The accent is a wheel
-       now: a hex written into a check passes on nothing. */
+       Asserted as the element being absent AND as one object per
+       card, because a figure merely emptied still reserves its box —
+       which is the same shape as the hero the head used to carry. */
+    ok('no card carries a second drawing beside its icon',
+      await ipage.evaluate(() => document.querySelectorAll('.tr-fig').length === 0
+        && [...document.querySelectorAll('.tr-slide')]
+          .every((s) => s.querySelectorAll('svg').length === 1)));
+
+    /* ── AND THE ICON MOVES ──
+       A still picture can only say WHERE a thing is. A moving one says
+       WHAT HAPPENS, which on the objectives card is the whole of what
+       nobody guesses: a sheet comes up from the head.
+
+       The count is asserted beside the state, for the reason the foil
+       rim's own check had to be: a check that finds nothing must not
+       pass, and "every animation is paused" is vacuously true of a
+       card with no animations left on it. */
+    const anim = await ipage.evaluate(() =>
+      [...document.querySelectorAll('.tr-slide')].map((s) => {
+        const a = [];
+        s.querySelectorAll('.tr-ic svg *').forEach((e) =>
+          e.getAnimations().forEach((x) => a.push(x.playState)));
+        return { k: s.dataset.card, on: s.getAttribute('aria-hidden') === 'false',
+                 n: a.length, run: a.filter((x) => x === 'running').length };
+      }));
+    ok('every card’s icon is a scene that moves',
+      anim.length === 4 && anim.every((a) => a.n > 0), anim);
+    /* ── AND ONLY THE ONE ON SCREEN IS RUNNING ──
+       Three of the four are laid out off the side at all times, and a
+       loop on one of them is a compositor pass a frame to draw what
+       nobody can see. The rule is written on the SUBTREE rather than
+       on a list of the elements in it, so the next scene added here is
+       covered on the day it is added. */
+    ok('...and the three off the side are paused',
+      anim.filter((a) => a.on).every((a) => a.run === a.n && a.n > 0)
+      && anim.filter((a) => !a.on).every((a) => a.run === 0 && a.n > 0), anim);
+
+    /* ── AND THE ICON WEARS THE INK ──
+       It was --red, on the argument that every drawing in this app
+       that is not chrome wears the accent. There is no accent: colour
+       says WHICH and only a tag says which, and a picture of a feature
+       is chrome. Asked of the PAGE rather than written as a hex —
+       three assertions in this file were once pinned to a shipped red
+       and measured nothing the day it moved. */
     const glyph = await ipage.evaluate(() => getComputedStyle(
-      document.querySelector('.tr-slide[data-card="back"] .tr-ic svg')).stroke);
+      document.querySelector('.tr-slide[data-card="obj"] .tr-ic svg')).stroke);
     const want = await ipage.evaluate(() => {
       const d = document.createElement('div');
       d.style.color = getComputedStyle(document.documentElement)
-        .getPropertyValue('--red').trim();
+        .getPropertyValue('--ink').trim();
       document.body.appendChild(d);
       const c = getComputedStyle(d).color; d.remove(); return c;
     });
-    ok(`every card's glyph wears the accent (${glyph})`, glyph === want,
+    ok(`every card's icon wears the ink (${glyph})`, glyph === want,
       { glyph, want });
 
     /* ── FINISHING MARKS IT SEEN ── */
@@ -7319,6 +7327,72 @@ const SAID = [
     await ipage.waitForTimeout(200);
     ok('nothing threw anywhere in the intro', ierrs.length === 0, ierrs);
     await ictx.close();
+
+    /* ── AND EVERY SCENE IS COMPLETE AT REST ──
+       Its OWN context, because reduced motion is a property of the
+       device rather than of the page — and because a check that
+       changes the state of the app is a check that has to be alone,
+       which cost three runs of chasing a bar contrast figure that was
+       measuring a sheet somebody had left open.
+
+       THE CLAIM IS THE AMBIENT TRICKLE'S, THE OTHER WAY ROUND. That
+       field is entirely a property of its own animation: its line has
+       no opacity outside the keyframes, so `animation: none` would
+       have left a static line at full strength, which is worse than
+       absent. Here every keyframe set runs from a partial state TO the
+       element's natural one, so switching them off has to leave four
+       finished pictures rather than a caret at zero opacity, three
+       bars scaled to nothing and a sheet parked below the page.
+
+       Read off COMPUTED values rather than the keyframes: a scene is
+       complete or it is not, and the declaration cannot say which. */
+    const rctx = await browser.newContext(
+      Object.assign({}, PHONE, { reducedMotion: 'reduce' }));
+    const rpage = await rctx.newPage();
+    await rpage.addInitScript(() => {
+      localStorage.setItem('sched.net.v1',
+        JSON.stringify({ on: false, url: '', code: '' }));
+      localStorage.removeItem('sched.tour.v1');
+    });
+    await rpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
+    await rpage.waitForTimeout(420);
+    const rest = await rpage.evaluate(() => {
+      const bad = [];
+      let n = 0, anim = 0;
+      document.querySelectorAll('.tr-slide').forEach((s) => {
+        s.querySelectorAll('.tr-ic svg *').forEach((e) => {
+          anim += e.getAnimations().length;
+          const cs = getComputedStyle(e);
+          n++;
+          /* A hidden mark, a mark scaled away, and a mark parked off
+             its own position are the three ways a keyframe set leaves
+             a hole when it stops running. */
+          if (+cs.opacity < .25) bad.push([s.dataset.card, 'opacity', cs.opacity]);
+          /* ── DECLARED PLACEMENT IS NOT AN ANIMATION'S RESIDUE ──
+             `getComputedStyle().transform` merges the SVG `transform`
+             ATTRIBUTE, and the crown is placed with one: an outer <g>
+             carries translate+scale so the inner one is free to
+             animate, since keyframes naming a transform replace the
+             resting position outright. Written without this the check
+             reported the crown's own placement as a scene left
+             incomplete, which is a check failing on the fix rather
+             than on the bug. Only elements whose geometry comes from
+             CSS alone are asked where they are. */
+          if (e.hasAttribute('transform')) return;
+          const m = new DOMMatrix(cs.transform === 'none' ? '' : cs.transform);
+          if (Math.abs(m.a) < .6 || Math.abs(m.d) < .6)
+            bad.push([s.dataset.card, 'scale', m.a, m.d]);
+          if (Math.abs(m.e) > 1.5 || Math.abs(m.f) > 1.5)
+            bad.push([s.dataset.card, 'offset', m.e, m.f]);
+        });
+      });
+      return { n, anim, bad };
+    });
+    ok(`reduced motion stops all four scenes (${rest.n} marks)`,
+      rest.n > 20 && rest.anim === 0, rest);
+    ok('...and leaves every one of them complete', rest.bad.length === 0,
+      rest.bad);
+    await rctx.close();
   }
 
   /* ═══════════════════════════════════════════════════════════

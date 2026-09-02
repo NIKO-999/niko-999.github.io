@@ -4018,31 +4018,136 @@ body {
   align-items: center;
   justify-content: center;
   gap: 14px;
-  /* Above dead centre. Centred in a 650px window the block floats with
-     a third of the screen empty under it and the eye has to travel
-     down to the button past nothing at all; the reference sits its
-     icon about two fifths down and reads as composed rather than as
-     centred by default. */
-  padding: 0 4px 9%;
+  /* Above dead centre, and further up than it went in. At 9% the icon
+     landed at about the middle of an 844px phone with four hundred
+     pixels of nothing between the sentence and the dots, which reads
+     as a card that failed to load the rest of itself. The block sits
+     at about two fifths now, which is where the reference puts it and
+     is what makes the space below read as margin rather than as a
+     gap. */
+  padding: 0 4px 20%;
   text-align: center;
 }
 
-/* THE GLYPH IS THE ONE COLOURED THING ON THE CARD. It is a picture of
-   a feature rather than a mark on the record, but every other drawing
-   in this app that is not chrome wears the accent, and a second colour
-   system for one screen is the thing the workout cards are the single
-   named exception to. */
+/* ── THE ICON SITS ON A TILE ──
+   The head's own .h-ic material at twice the size: the card surface, a
+   specular hairline along the top and the card's shadow under it. A
+   bare 52px glyph floating on the ground was the one object in this
+   app that was not on anything, which read as a sticker rather than as
+   part of the screen it is introducing.
+
+   It is the SIXTH thing this app draws in that material and nothing
+   about it is new, which is the point — a first-run screen inventing a
+   surface of its own would be teaching you a page the app does not
+   have. */
+.tr-ic {
+  width: 86px; height: 86px;
+  display: grid; place-items: center;
+  border-radius: 24px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
+/* THE INK, AND IT IS NOT AN ACCENT ANY MORE. These were drawn in
+   --red on the argument that every drawing in this app that is not
+   chrome wears it. The accent is gone: colour says WHICH and only a
+   tag says which, and an intro icon is a picture of a feature rather
+   than a mark on the record. So it is chrome, and chrome is the ink.
+
+   `color` beside the stroke, for the filled marks' sake: the bars, the
+   caret and the tile inside each scene are drawn in `currentColor`,
+   and left to inherit `fill: none` they would be nothing at all. */
 .tr-ic svg {
-  width: 52px; height: 52px;
-  /* Beside the stroke, for the objectives mark's sake: its target has
-     a filled centre drawn in `currentColor`, and left to inherit it
-     would be a white dot in the middle of an accent glyph. */
-  color: var(--red);
+  width: 46px; height: 46px;
+  color: var(--ink);
   fill: none;
-  stroke: var(--red);
-  stroke-width: 1.9;
+  stroke: var(--ink);
+  stroke-width: 1.7;
   stroke-linecap: round;
   stroke-linejoin: round;
+}
+
+/* ── AND THE SCENE MOVES ──
+   One loop each, long and slow: this is the only thing on a first-run
+   screen that moves, and a quick one reads as a spinner. Every set
+   runs from a partial state TO the element's own resting one, so the
+   reduced-motion rule below leaves the finished picture rather than a
+   frame with a piece missing.
+
+   Transform and opacity only. Neither costs a layout pass, which is
+   what lets four of these sit in the document at once. */
+@keyframes tr-car {
+  0%, 4%   { transform: translateX(0); }
+  46%, 62% { transform: translateX(9px); }
+  70%, 100% { transform: translateX(0); opacity: 0; }
+  64%      { opacity: 1; }
+}
+.tr-car { animation: tr-car 3.4s cubic-bezier(.4, 0, .2, 1) infinite; }
+/* The row lands as the caret finishes, which is what makes the two one
+   sentence rather than two things moving in the same box. */
+@keyframes tr-new {
+  0%, 58%  { opacity: 0; transform: translateY(3.2px); }
+  74%, 100% { opacity: 1; transform: translateY(0); }
+}
+.tr-new { animation: tr-new 3.4s cubic-bezier(.22, 1, .36, 1) infinite; }
+
+/* fill-box, because the bars grow FROM the axis: the default box for
+   an SVG transform-origin is the nearest viewport, so a percentage
+   origin without it is measured against the whole 24-unit scene and
+   every bar slides as it scales. */
+@keyframes tr-bar {
+  0%       { transform: scaleX(.04); }
+  40%, 86% { transform: scaleX(1); }
+  100%     { transform: scaleX(.04); }
+}
+.tr-bar {
+  transform-box: fill-box;
+  transform-origin: 0% 50%;
+  animation: tr-bar 3.6s cubic-bezier(.22, 1, .36, 1) infinite;
+}
+.tr-bar:nth-of-type(2) { animation-delay: .12s; }
+.tr-bar:nth-of-type(3) { animation-delay: .24s; }
+
+@keyframes tr-crown {
+  0%       { transform: translateY(-13px); opacity: 0; }
+  26%      { transform: translateY(0); opacity: 1; }
+  34%      { transform: translateY(-2.4px); }
+  44%, 100% { transform: translateY(0); opacity: 1; }
+}
+.tr-crown { animation: tr-crown 3.8s cubic-bezier(.3, 1.4, .5, 1) infinite; }
+
+/* The sheet is the gesture, so it is the slowest of the four and holds
+   at the top for most of the loop: what you are meant to read is where
+   it ENDS, not the travel. */
+@keyframes tr-sheet {
+  0%       { transform: translateY(12px); }
+  30%, 90% { transform: translateY(0); }
+  100%     { transform: translateY(12px); }
+}
+.tr-sheet { animation: tr-sheet 4s cubic-bezier(.22, 1, .36, 1) infinite; }
+@keyframes tr-tile {
+  0%, 22%  { opacity: .55; }
+  10%      { opacity: 1; }
+  100%     { opacity: .55; }
+}
+.tr-tile { animation: tr-tile 4s ease-in-out infinite; }
+
+/* ── PAUSED ON EVERY CARD THAT IS NOT UP ──
+   Three of the four are laid out off the side at all times, and a
+   looping animation on one of them is a compositor pass a frame to
+   draw what nobody can see. This is the foil rim's rule and the
+   orrery's flight rule, said the same way both of those had to be
+   said: as a property of the SUBTREE rather than a list of the
+   elements in it, so the next scene added here is covered on the day
+   it is added, and `!important` because an inline animation shorthand
+   outranks any selector however specific. */
+.tr-slide[aria-hidden="true"] * { animation-play-state: paused !important; }
+
+/* Reduced motion gets the SCENE, not the travel. Every keyframe set
+   above ends at the element's natural state, so switching them off
+   leaves four complete pictures rather than a caret at zero opacity
+   and a sheet parked below the page. */
+@media (prefers-reduced-motion: reduce) {
+  .tr-ic * { animation: none !important; }
 }
 .tr-t {
   margin: 0;
@@ -4063,8 +4168,6 @@ body {
   line-height: 1.55;
   color: var(--dim);
 }
-
-.tr-fig { width: 100%; max-width: 232px; margin-top: 2px; }
 
 .tr-dots {
   display: flex;

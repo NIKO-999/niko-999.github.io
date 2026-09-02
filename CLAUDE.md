@@ -2943,29 +2943,78 @@ sentence under it. **No dashes**: an aside set off mid-sentence is a
 second thought, and each card is allowed exactly one. Asserted rather
 than trusted, because prose drifts back.
 
-### The pointer is the instruction
+### The icon is a scene, and it moves
 
-The objectives live behind a pill in the corner of a day card and are
-named nowhere else. A sentence saying "top right" is a sentence you
-have to hold in your head while you go and look, so the card is
-**drawn** instead, at the real one's proportions, with the pill lit in
-the accent and a ring round it. Its rows are ruled lines rather than
-words: this is a diagram of WHERE something is, and legible text in it
-invites reading the card instead of finding the corner.
+Each card carried a still glyph, and the objectives one carried a
+**diagram** as well: a day card at its real proportions with the turn
+pill lit in a corner and a ring bleeding over the edge, because the
+objectives lived behind a control a sentence could only give the
+POSITION of. That diagram is false twice over now — there is no back
+to a card and no pill in its corner — and the reason it had to exist
+went with them.
 
-**The ring bleeds past the card's edge and has to.** Centred on a pill
-that is itself in the corner, a ring big enough to clear the pill's own
-diagonal cannot also fit inside the card; drawn small enough to fit it
-touches the pill and reads as a border on it rather than as a light
-around it. So the card is inset in the box and the halo is allowed out
-over the edge.
+**What replaced it is the argument against it.** A still picture can
+only say WHERE a thing is; that is why the pointer needed a ring, an
+inset card and a halo allowed outside the box, all to aim at one
+corner. A moving one says WHAT HAPPENS, which is the thing nobody
+guesses: a sheet comes up from the head. So the second drawing is not
+redrawn, it is absorbed — one object per card, which is this project's
+own rule about a frame inside a frame.
 
-**Measured on composited pixels, never read off the markup.** The
-check takes the centroid of every accent pixel inside the figure's own
-box and requires it in the top right. Coordinates in an SVG string are
-exactly the kind of thing that survives an edit while the picture
-stops being true, and a drawing that says "top right" and puts the
-mark elsewhere is worse than no drawing.
+**EVERY SCENE IS COMPLETE AT REST.** The animation ADDS to a picture
+that already reads: every keyframe set runs from a partial state TO
+the element's natural one, so `animation: none` under reduced motion
+leaves the finished scene rather than a frame with a piece missing.
+That is the ambient trickle's lesson the other way round — its line
+had no opacity outside its keyframes, so stopping it would have left a
+static line at full strength, worse than absent. Asserted on COMPUTED
+values in its own context: nothing hidden, nothing scaled away,
+nothing parked off its own position.
+
+**And only the card on screen animates.** Three of the four are laid
+out off the side at all times, so a loop on one of them is a
+compositor pass a frame to draw what nobody can see. Stated on the
+SUBTREE rather than on a list of its elements, and `!important`,
+which is the foil rim's rule and the orrery's flight rule for the
+reasons both of those had to be written that way. **The count is
+asserted beside the state**, because "every animation is paused" is
+vacuously true of a card with no animations left on it.
+
+**Four keyframe sets, transform and opacity only.** A caret crossing a
+field and a row landing under it; three bars growing off an axis; a
+crown dropping onto a podium; a sheet rising from the foot of a page.
+Nothing here costs a layout pass, which is what lets all four sit in
+the document at once.
+
+**A presentation attribute beats an INHERITED value, and that is what
+holds the scenes together.** `.tr-ic svg` sets fill and stroke on the
+svg element, so children take them by inheritance — the weakest thing
+there is — and `fill="currentColor"` on a child wins. It is what lets
+one scene mix stroked outlines with filled bars without a rule per
+shape, and it would NOT survive the selector being widened to `.tr-ic
+svg *`, which is worth knowing before somebody tidies it that way and
+every filled mark in here disappears.
+
+**TWO OF THE FOUR SENTENCES WERE ALSO WRONG.** "Seven day cards"
+described a deck that is a strip of chips, and "Flip for objectives"
+described a mechanism that has been deleted. A first open that teaches
+a gesture the app does not have is worse than no first open, because
+the person then goes looking for it.
+
+**And the icon sits on a tile** — the head's own `.h-ic` material at
+twice the size. A bare glyph floating on the ground was the one object
+in this app that was not on anything, and read as a sticker rather
+than as part of the screen it introduces. It is the ink now rather
+than the accent: colour says WHICH, and a picture of a feature is
+chrome.
+
+**A COMPARISON STRIP MUST NOT CLONE WHAT IT COMPARES.** The four were
+first judged side by side by cloning each `.tr-ic` into one row —
+which duplicates the objectives scene's `clipPath` id, so `url(#..)`
+resolved to the wrong one and the sheet vanished. It reported as the
+scene being broken at rest. Shot from the real cards one at a time it
+was correct all along. A harness that produces a plausible picture is
+not evidence that it measured the thing.
 
 ### One meaning per control, and no hidden third state
 
