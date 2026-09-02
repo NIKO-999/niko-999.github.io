@@ -1132,12 +1132,20 @@
            screen reader and a tab order follow the source, and a time
            announced after the name it is drawn above is the same
            mistake pointing the other way. */
-        /* The meridiem ONCE, on the end, and only where the phone
-           writes one at all — with an end time known and a block under
-           twelve hours the start has one reading, and the column a
-           second one would take is the one holding the name. */
-        var tEl = scEl('span', 't',
-          scT(it.s) + '\u2013' + scT(it.e) + scMerIf(it.e));
+        /* ── THE GUTTER PRINTS THE START, AND THE LENGTH SAYS THE REST
+           The row printed the whole range while the time sat on the
+           line above the name; in a 54px column a range does not fit,
+           and it does not need to — the length is directly under the
+           name and start-plus-length is the same fact as start-to-end.
+
+           The meridiem now rides the START, which is the opposite of
+           the rule that held while a range was drawn. That rule said
+           the end carries it because the pair has one reading; with
+           one figure on screen there is no pair, and "6:30" alone on a
+           12-hour phone is two different times of day. The full range
+           is still spoken: scRangeLong feeds the row's aria-label
+           whether or not anything is drawn. */
+        var tEl = scEl('span', 't', scT(it.s) + scMerIf(it.s));
         var n = scEl('span', 'n', it.n);
         if (it.r) n.appendChild(scEl('em', null, it.r));
         /* What you trained, on the block it happened on. It rides the
@@ -1153,8 +1161,13 @@
            one: Now while the block runs, Done once it is ticked. The
            status is drawn by CSS off the row's own classes, so it can
            never disagree with the state that draws the rest. */
+        /* Before the glyph in the SOURCE as well as in the grid: a
+           screen reader and the tab order follow the source, and a
+           time announced after the name it is drawn beside is the
+           mistake the old right-hand column made, pointing the other
+           way. */
+        row.insertBefore(tEl, row.firstChild);
         var props = scEl('span', 'props');
-        props.appendChild(tEl);
         props.appendChild(scEl('span', 'dur', scDurShort(it.e - it.s)));
         props.appendChild(scEl('span', 'st'));
         row.appendChild(props);
@@ -2587,7 +2600,12 @@
       var props = scEl('span', 'props');
       var word = it.k === 'num' && on ? String(got[it.id]) + (it.unit || '')
           : (via || (on ? 'logged' : (late ? 'missed' : 'not yet')));
-      props.appendChild(scEl('span', 'pill' + (late ? ' is-late' : ''), word));
+      /* `val` only where the word is a FIGURE. "not yet" and "missed"
+         are states, and a state drawn at the size of an achievement is
+         the screen making an absence loud. */
+      props.appendChild(scEl('span',
+        'pill' + (late ? ' is-late' : '') + (it.k === 'num' && on ? ' val' : ''),
+        word));
       /* Days on now, for a TICK and only a tick — a run on a number
          counts the days you remembered to type one in, which is a fact
          about your logging. Drawn from two, because "1 day" under a
@@ -5433,6 +5451,17 @@
            leaves a chip standing on a group of four that selects an
            index nothing is at. */
         chips.textContent = '';
+        /* ── FOUR OR FEWER IS A SEGMENTED CONTROL, MORE IS A LADDER ──
+           The top level is the four kinds of session, and four is a set
+           you choose FROM: one track, equal shares, the whole choice
+           visible without moving. Inside a group there can be six, and
+           six equal segments on a 390px phone is 58px a segment, which
+           clips "Shoulders" — so those stay a scrolling row, which is
+           also the honest shape for a pager you step along.
+
+           Measured off the count rather than off which level you are
+           on, because the deciding fact is whether they FIT. */
+        chips.classList.toggle('is-seg', all.length <= 4);
         all.forEach(function (x, i) {
           /* THE CHIP IS THE PAGER, NOT THE PICKER. It says which card
              is at the front; whether that card is CHOSEN is the card's

@@ -4349,3 +4349,145 @@ that reads every row's ink against its own ground sampled 4px in and
 3px up — which on a 14px radius with a 1.5px accent ring lands on the
 ring where it curves round the corner, and reported 3.28:1 against a
 colour no text is ever drawn over. It measures where the text is.
+
+## The time is a column again, and it is on the other side
+
+The row printed its range on the line above the name, and the name had
+the full width under it. That layout was itself a fix: before it, the
+time sat in a third track at the RIGHT margin, so reading a row was a
+movement out to the edge and back for every line.
+
+**This is the same figure on the other side, which is not the same
+arrangement.** Reading starts at the left, so a time column there is
+where the eye already is: it goes down the times and the names sit
+against them, one direction of travel rather than two. The old third
+track also squeezed the name from a column it could never collide
+with; this one cannot, because it holds a single figure of fixed
+width.
+
+**It prints the START, and the length says the rest.** A range does not
+fit in 54px and does not need to — `06:30` in the gutter with `1h 30m`
+directly under the name is the same fact as `06:30–08:00`, spent over
+two lines that were both already there. The rule that the row must
+print a range came in when the measure bar was deleted, and what that
+rule was protecting is that the row still says how long the block is.
+It does.
+
+**54px, not 44, and that is the 12-hour phone.** `scT` follows the
+device, so a gutter sized to `06:30` wraps on any phone set to
+12-hour. **And the meridiem moved to the START**, reversing the rule
+that put it on the end: that rule is about a RANGE, where the pair has
+one reading and the second meridiem is the one that can go. With one
+figure drawn there is no pair, and `6:30` alone is two different times
+of day. The full range is still spoken either way — `scRangeLong`
+feeds the row's `aria-label` whether or not anything is drawn.
+
+**And the card went, because a card fights a gutter.** Craft made every
+row a floating slab. With a time column down the left the slab reads
+as a frame the gutter is outside of, so the figure and the name it
+belongs to sit on two different surfaces. A hairline puts them back on
+one sheet.
+
+**Which reverses NOTHING IS DRAWN BETWEEN THE ROWS, and the reversal is
+the gutter's cost rather than an ornament creeping back.** That rule
+was written about rows with 8px of air and a card under each, where
+space genuinely separated them. With the cards gone, space stops
+working: a two-line row against a one-line neighbour reads as one
+block of four lines and the times stop lining up with anything. Take
+the rule out and look at it — that is the whole argument.
+
+**`background: none` on `.row` is load-bearing and is not a redundant
+reset.** `.row` is a `<button>`. A button with no background declared
+is painted in the UA's own `buttonface` — a mid-grey slab on the dark
+face, near-white on the light. It shipped that way once in an
+unreleased pass and read as a panel behind every session.
+
+**The check moved to the END of a schedule row** and stayed at the
+start on Showing up, because only one of the two has a gutter. Both
+are still siblings of the row rather than children of it: a `<button>`
+inside a `<button>` is invalid and collapses to one press.
+
+**The figure is the row on Showing up.** What you actually did today
+was drawn as a chip the same size as the word "logged" — the one thing
+you came to that screen to read, at the size of everything else. It
+takes 17px and the ink. Only a VALUE does: `not yet` and `missed` are
+states, and an absence drawn at the size of an achievement is the
+screen shouting about something that has not happened.
+
+### The static check caught the thing it exists for, twice in one edit
+
+`.row .t` was in the group rule `.row .t, .row .dur, .row .st, .pill`
+and I gave it a second `font-size` in its own rule. Written BEFORE the
+group rule the group won and my size did nothing while looking exactly
+right in the file; moved after it, `tests/names.js` still failed —
+correctly, because one selector carrying one property twice is a file
+with two values in it and only one of them live, whichever order they
+are in. The fix is that `.row .t` came OUT of the group list and
+carries its own six declarations. **Sharing a rule and then overriding
+one property from it is the duplicate, not a way around it.**
+
+### The live session is not ringed
+
+`.wk-sh.is-live b` carried a 1.5px accent ring, on the argument that
+the session you are in is the running block seen one level up and so
+earns the accent. That argument was sound and it was already being
+said twice: the running row four inches below wears the Now chip in
+the same accent about the same fact, and the heading's own badge is
+already the one coloured thing at the top of its group. A ring in a
+fourth colour around a badge that has one read as a selected cell.
+
+### Four is a control, six is a ladder
+
+The workout sheet's kinds were four pills on a horizontal scroller,
+which says "here are some options, there may be more". Four is a
+closed set you choose FROM, so it is one segmented track: equal
+shares, the whole choice visible without moving. Inside a group there
+can be six, and six equal segments on a 390px phone is 58px each,
+which clips "Shoulders" — those stay a scroller, which is also the
+honest shape for a pager you step along.
+
+**Toggled off the COUNT, not off which level you are on.** The
+deciding fact is whether they fit. And it is the same buttons with the
+same `aria-pressed` — only the frame changes — so the chip is still
+the pager and every assertion about which card is at the front still
+reads the same element.
+
+### The board is 212px, and the gutter does not fit in it
+
+The list and the board draw the same row. A board column is 212px, and
+the list's row spends 54 of it on the time and 34 on the check — about
+a hundred pixels of name, so "Wind down" clipped and the rows ran out
+of their column. **Found by opening the board on the real app after
+the gutter went in**, which is the whole reason to look at a screen
+other than the one you changed.
+
+What moved is two numbers rather than the arrangement: 42px of gutter,
+20px of glyph, a 26px right margin and a smaller check. Putting the
+time back among the properties in board mode was tried first and is
+wrong — `.t` and `.props` are siblings in the row's grid, so they land
+in the same cell and stack on top of each other. **One row layout,
+two sets of measurements.**
+
+### A finished block spends its time rather than losing it
+
+`.row.is-past .t { display: none }` was right for a time drawn ABOVE
+the name: the row simply lost a line, and the card emptied out behind
+you as the day went. In a COLUMN it leaves a hole, and three holes
+down a morning read as missing data — a column you scan cannot have
+gaps in it and still be a column.
+
+The claim survives in weight instead of in absence: a finished row's
+time drops to `--spent` with the rest of the row. The check moved with
+it, from "no past row draws a time" to a computed colour against the
+tokens, and it grew a third case it did not have — **the running row
+is `--ink`, not `--dim`**, because `--dim` under the sweep's 13% wash
+measures below 4.5:1. Folding that row in with "everything ahead"
+makes a check that fails on the hour and passes the rest of the day.
+
+### And a test file has scopes too
+
+`const cols` was already declared forty lines above the one I added,
+and a second one is a SyntaxError that takes the whole file down
+before a single assertion runs. It reported as **"0 assertions across
+1 files"** — which is the greenest-looking failure there is, because
+nothing said FAIL. This repo's oldest bug, wearing test-file clothes.

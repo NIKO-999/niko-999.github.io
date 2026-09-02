@@ -312,32 +312,58 @@ const SAID = [
      It was a rule as long as the block is, and it had three assertions
      here holding it to being ordered by duration rather than merely
      drawn. What replaced it is not another mark: the row PRINTS the
-     range, so the fact is on the screen in words rather than in a bar.
-     That is what these check now — every row carries its own start and
-     end, and the two are the real ones. */
+     fact in words rather than in a bar.
+
+     The FORM of the printing moved with the gutter. It was the whole
+     range on the line above the name; the time is a 54px column now,
+     which a range does not fit, so it is the START there and the
+     LENGTH on the line under the name. Start-plus-length is the same
+     statement as start-to-end, and it is what these hold — the old
+     assertions were replaced rather than deleted, because what they
+     protect is that a row still says how long the block is. */
   const spans = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => ({
     n: r.querySelector('.n').firstChild.textContent,
     s: +r.dataset.s, e: +r.dataset.e,
     t: r.querySelector('.t').textContent,
+    d: r.querySelector('.dur') ? r.querySelector('.dur').textContent : null,
   })));
   const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':'
     + String(m % 60).padStart(2, '0');
-  ok('every block prints its own range where the rule used to be',
-    spans.length > 4 && spans.every((s) => /^\d\d:\d\d–\d\d:\d\d$/.test(s.t)),
+  ok('every block prints its start in the gutter and its length below',
+    spans.length > 4
+    && spans.every((s) => /^\d\d:\d\d$/.test(s.t))
+    && spans.every((s) => s.d && /\d/.test(s.d)),
     spans.slice(0, 3));
   /* Present is not enough — a constant string is also present, which is
-     the shape of the failure the measure's own check was written for. */
-  ok('and the printed range is the block’s real start and end',
-    spans.every((s) => s.t === hhmm(s.s) + '–' + hhmm(s.e))
-    && new Set(spans.map((s) => s.t)).size > 5,
+     the shape of the failure the measure's own check was written for.
+     So both halves have to be the block's REAL figures, and both have
+     to vary down the card. */
+  ok('and the start and the length are the block’s real ones',
+    spans.every((s) => s.t === hhmm(s.s))
+    && new Set(spans.map((s) => s.t)).size > 5
+    && new Set(spans.map((s) => s.d)).size > 2,
     spans.slice(0, 3));
-  /* The gutter holds ONE thing now, which is the whole reason the rule
-     went: a glyph and a 3px stub beside it read as a glyph with a stray
-     dash. Nothing but the icon may be in that column on an ordinary
-     row — a done row adds its tick, and that is the only exception. */
-  const gutter = await page.$$eval('.row[data-id]', (rows) => rows.map((r) =>
-    [...r.children].filter((e) => getComputedStyle(e).gridColumnStart === '1')
-      .map((e) => e.getAttribute('class'))));
+  /* THE GUTTER IS THE TIME AND THE GLYPH COLUMN IS THE GLYPH. Two
+     columns now, and each holds exactly one thing: column 1 is the
+     start, column 2 is the icon and — only on a done row — its tick.
+     The point of the check is unchanged, that nothing else creeps into
+     the left of a row, and it now has two columns to say it about. */
+  /* rowCols, not cols: `cols` is already declared in this scope for
+     the day cards forty lines up, and a second const of that name is
+     a SyntaxError that takes the whole file down before one assertion
+     runs — which is this repo's oldest bug wearing test-file clothes.
+     It reported as "0 assertions across 1 files". */
+  const rowCols = await page.$$eval('.row[data-id]', (rows) => rows.map((r) => {
+    const at = (n) => [...r.children]
+      .filter((e) => getComputedStyle(e).gridColumnStart === String(n))
+      .map((e) => e.getAttribute('class'));
+    return { one: at(1), two: at(2) };
+  }));
+  const gutter = rowCols.map((c) => c.two);
+  ok('the time column holds the start and nothing else',
+    rowCols.length > 4
+    && rowCols.every((c) => c.one.length === 1 && c.one[0] === 't'),
+    rowCols.filter((c) => c.one.length !== 1 || c.one[0] !== 't').slice(0, 4));
   const okGut = (g) => g.length === 1 ? g[0] === 'ic'
     : g.length === 2 && g.includes('ic') && g.includes('tick');
   /* The payload is the rows that FAILED, not the rows that look odd by
@@ -746,28 +772,54 @@ const SAID = [
     await page.$$eval('.row.is-past .n', (r) => r.map((x) => x.textContent).join('|'))
       .then((v) => v === 'Wake|Train|Walk'));
 
-  /* ── a finished block has no time ──
-     The figure is what you plan against and there is nothing left to
-     plan about a morning that has happened, so the card empties out
-     behind you as the day goes.
+  /* ── a finished block SPENDS its time, and the check moved with it ──
+     It used to be drawn above the name and was removed outright: the
+     figure is what you plan against, and there is nothing left to plan
+     about a morning that has happened. With the time in a 54px column
+     that removal leaves a HOLE, and three holes down a morning read as
+     missing data rather than as a day emptying out.
 
-     MEASURED AS A BOX, never as a class or a computed `display`. This
-     file has already had one check that read the property and was true
-     throughout the bug it was watching for — what is claimed is that
-     nothing is drawn, so nothing drawn is what is looked at.
+     So the claim is now made in weight: a finished row's time drops to
+     --spent with the rest of the row. Both halves are still asserted
+     and both sets still have to be non-empty — "every past time is
+     spent" passes on a rule that greyed every time on the card, and on
+     a day with nothing behind you it passes by finding nothing at all.
 
-     BOTH SIDES, and both have to be non-empty: "no past row draws a
-     time" passes on a rule that hid every time on the card, and on a
-     day with nothing behind you it passes by finding nothing at all. */
+     MEASURED AS A COMPUTED COLOUR against the two tokens rather than
+     as a class, for the reason the old check gave: what is claimed is
+     what is drawn. */
   const times = await page.$$eval('.week.is-today .row[data-id]', (rows) => {
-    const drawn = (r) => r.querySelector('.t').getClientRects().length > 0;
-    return { gone: rows.filter((r) => r.classList.contains('is-past')).map(drawn),
-             kept: rows.filter((r) => !r.classList.contains('is-past')).map(drawn) };
+    const css = getComputedStyle(document.documentElement);
+    const spent = css.getPropertyValue('--spent').trim();
+    const dim = css.getPropertyValue('--dim').trim();
+    const probe = document.createElement('span');
+    document.body.appendChild(probe);
+    const norm = (v) => { probe.style.color = v; return getComputedStyle(probe).color; };
+    const want = { spent: norm(spent), dim: norm(dim),
+                   ink: norm(css.getPropertyValue('--ink').trim()) };
+    const col = (r) => {
+      const e = r.querySelector('.t');
+      return { drawn: e.getClientRects().length > 0,
+               c: getComputedStyle(e).color };
+    };
+    const out = { want,
+      gone: rows.filter((r) => r.classList.contains('is-past')).map(col),
+      /* The running row is its own case and always was: --dim over the
+         sweep's 13% wash measures under 4.5:1, which is why the whole
+         row's figures go to --ink there. Folding it in with "ahead"
+         would make this check fail on the hour and pass the rest of
+         the day, which is the shape this file keeps warning about. */
+      now: rows.filter((r) => r.classList.contains('is-now')).map(col),
+      kept: rows.filter((r) => !r.classList.contains('is-past')
+                            && !r.classList.contains('is-now')).map(col) };
+    probe.remove();
+    return out;
   });
-  ok('a finished block draws no time, and everything still ahead keeps one',
+  ok('a finished block spends its time, and everything ahead keeps it in --dim',
     times.gone.length > 0 && times.kept.length > 0
-    && times.gone.every((v) => v === false)
-    && times.kept.every((v) => v === true), times);
+    && times.gone.every((v) => v.drawn && v.c === times.want.spent)
+    && times.kept.every((v) => v.drawn && v.c === times.want.dim)
+    && times.now.every((v) => v.drawn && v.c === times.want.ink), times);
 
   /* And only TODAY. Every other day is a plan rather than a record —
      a Monday with its mornings rubbed out would be the app claiming
@@ -3563,15 +3615,21 @@ const SAID = [
      same reason and always did — it is a transient surface over the
      whole app, and it had no note beside it saying so, which is how
      an exception becomes a precedent nobody argued for. */
-  /* THE FACE STOPPED CASTING WHEN IT STOPPED BEING A CARD. Every row
-     is one now, and a panel around them was a card inside a card
-     inside the page. What casts is the row, the tally row and the
-     toast; the objectives face keeps a surface because it is one
-     sheet rather than a list of objects. */
-  /* Neither face casts: they draw nothing, and what casts on this
-     screen is every row on them. */
-  ok('every row is a card that casts, and the tally\u2019s rows, and the toast',
-    shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1
+  /* ── AND NOW NOTHING ON THE WEEK CASTS BUT THE TOAST ──
+     The rows were the card material for one design and stopped being
+     cards when the time became a column: a slab with a gutter outside
+     it puts the figure and the name it belongs to on two different
+     surfaces, so the rows are hairline-separated rows on one sheet.
+
+     The toast is the whole of what is left, and it is the ORIGINAL
+     exception rather than a new one — a transient surface over the
+     app, which is the one thing on this screen that is genuinely
+     above the page rather than on it.
+
+     Asserted in both directions. "The toast casts" alone passes on a
+     build where everything casts, which is the state this replaced. */
+  ok('the toast is the only thing on the week that casts',
+    shade.toast >= 1 && shade.row === 0 && shade.tyRow === 0
     && shade.face === 0 && shade.back === 0, shade);
   ok('...and the scroller, the poster and the press targets inside a card cast nothing',
     shade.others.length === 0, shade);
