@@ -2046,11 +2046,15 @@
      Two keys, because the week and Showing up are different lists and
      a board for one is not a board for the other. A stored value that
      is not one of the two falls through to the list. */
-  var WKV_KEY = 'sched.wkview.v1', TYV_KEY = 'sched.tyview.v1';
-  var wkView = 'list', tyView = 'list';
+  var WKV_KEY = 'sched.wkview.v1';
+  /* sched.tyview.v1 is GONE rather than ignored. Showing up has one
+     view now, so a stored preference for the other one is a record of
+     a control nobody can reach — the same reason the old palette name
+     and the subtitle key were dropped rather than left. */
+  var wkView = 'list';
   try {
     wkView = localStorage.getItem(WKV_KEY) === 'board' ? 'board' : 'list';
-    tyView = localStorage.getItem(TYV_KEY) === 'board' ? 'board' : 'list';
+    try { localStorage.removeItem('sched.tyview.v1'); } catch (e) {}
   } catch (e) {}
   var VIEW_ICON = {
     list: '<path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/>',
@@ -2541,14 +2545,22 @@
       + st + (st === 1 ? ' day streak' : ' day streak');
     var grid = $('scTallyGrid');
     grid.textContent = '';
+    /* ── SHOWING UP HAS ONE VIEW AND NO SWITCHER ──
+       It had List and Board, sitting directly under the three stops
+       that are themselves a row of tabs — two rows of chrome, one on
+       top of the other, before a single row of the thing the screen is
+       about. Reported as "it's just looking like too much", and the
+       switcher is the half that goes: the stops say WHICH screen and
+       the switcher said how to draw it, which is a question this screen
+       only ever had one good answer to.
+
+       Kept and Still to do, side by side, with a row crossing over when
+       you press it. What that costs is the 26-week strip, which does
+       not fit half a phone — the history is still one press away on the
+       row itself. */
     var old = $('scTallyCap').nextElementSibling;
     if (old && old.classList.contains('views')) old.remove();
-    $('scTallyCap').insertAdjacentElement('afterend', scViews(tyView, function (v) {
-      tyView = v;
-      try { localStorage.setItem(TYV_KEY, v); } catch (e) {}
-      scPaintTally();
-    }));
-    grid.classList.toggle('is-board', tyView === 'board');
+    grid.classList.add('is-board');
     /* The list is one column headed Today; the board is two, kept and
        still to do, and a row moves between them when it is pressed. */
     var cols = {};
@@ -2564,8 +2576,7 @@
       grid.appendChild(c);
       return cols[key];
     };
-    if (tyView === 'board') { col('on', 'Kept today', true); col('off', 'Still to do'); }
-    else col('all', 'Today');
+    col('on', 'Kept today', true); col('off', 'Still to do');
     TALLY.forEach(function (it, i) {
       var on = !!got[it.id], late = !on && scLate(it);
       var row = scEl('div', 'ty-row' + (on ? ' is-on' : '') + (late ? ' late' : ''));
@@ -2631,7 +2642,7 @@
       hist2.setAttribute('aria-label', it.n + ', open 26 weeks of history');
       hist2.addEventListener('click', function () { scOpenHist(it); });
       row.appendChild(hist2);
-      var into = tyView === 'board' ? col(on ? 'on' : 'off') : col('all');
+      var into = col(on ? 'on' : 'off');
       into.el.appendChild(row);
       into.cnt.textContent = String(++into.n);
     });

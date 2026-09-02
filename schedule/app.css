@@ -3709,25 +3709,34 @@ body {
 .week[hidden] .views { display: none; }
 .day-card { padding-bottom: 4px; }
 .vw svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+/* ── NOTHING IN THIS APP SCROLLS SIDEWAYS ──
+   The board was a horizontal scroller of 212px columns, so a third
+   session was off the side of the screen and the first one was cut in
+   half the moment you moved. Reported from the phone as exactly that,
+   with "Morning" clipped to "ng" at the left edge.
+
+   It is a two-column GRID now. Three sessions wrap to a second row
+   rather than continuing off the side, which is the whole point: a
+   column you cannot see is a column you have to go looking for, and
+   the board exists to put the day in front of you at once.
+
+   The rule this is an instance of: you never have to swipe sideways to
+   reach anything. tests/schedule.js measures it on every view — the
+   page and every element on it must fit its own box across. */
 .day-card.is-board, .ty-grid.is-board {
-  display: flex; align-items: flex-start; gap: 10px;
-  overflow-x: auto; overflow-y: hidden;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: start;
+  gap: 10px 9px;
+  overflow-x: hidden;
 }
-.ty-grid.is-board { margin: 0 calc(var(--pad) * -1); padding: 4px var(--pad) 8px; }
-.ty-grid.is-board::-webkit-scrollbar { display: none; }
 .wk-sess { min-width: 0; }
-.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess {
-  flex: none; width: 212px; max-height: 100%;
-  overflow-y: auto; scrollbar-width: none;
-  scroll-snap-align: start;
-}
-.day-card.is-board .wk-sess::-webkit-scrollbar { display: none; }
+.day-card.is-board .wk-sess, .ty-grid.is-board .wk-sess { min-width: 0; }
 .day-card.is-board .wk-sh { padding-top: 2px; }
-.day-card.is-board > .rt-ask { flex: none; width: 212px; scroll-snap-align: start; }
+/* The day's rating asks one question about the whole day, so it sits
+   under both columns rather than inside either. */
+.day-card.is-board > .rt-ask { grid-column: 1 / -1; }
 .day-card.is-board.has-more { -webkit-mask-image: none; mask-image: none; }
-.ty-grid.is-board .ty-row { grid-template-columns: minmax(0, 1fr); }
 .ty-grid.is-board .ty-hist { display: none; }
 /* ── THE GUTTER NARROWS IN A BOARD COLUMN ──
    A column is 212px. The list's row spends 54 of that on the time and
@@ -3742,13 +3751,28 @@ body {
    keeps ONE row layout across both views — moving the time back among
    the properties here was tried first and puts it in the same grid
    cell as the length, which stacks two lines on top of each other. */
-.day-card.is-board .row {
-  grid-template-columns: 42px 20px minmax(0, 1fr);
-  gap: 2px 7px;
-  padding-right: 26px;
+.day-card.is-board .row,
+.ty-grid.is-board .ty-row {
+  padding-right: 24px;
 }
-.day-card.is-board .row .t { font-size: 10.5px; }
-.day-card.is-board > .wk-sess .rowwrap > .chk { right: 0; width: 20px; height: 20px; }
+.day-card.is-board .row {
+  grid-template-columns: 36px 18px minmax(0, 1fr);
+  gap: 1px 6px;
+  padding-left: 0;
+}
+.day-card.is-board .row .ic { width: 18px; height: 18px; }
+.day-card.is-board .row .t { font-size: 9.5px; }
+.day-card.is-board .row .n { font-size: 13px; }
+.day-card.is-board .row .dur, .day-card.is-board .row .st { font-size: 10.5px; }
+.day-card.is-board .rowwrap > .chk,
+.ty-grid.is-board .ty-row > .chk { right: 0; left: auto; width: 19px; height: 19px; }
+/* One track: the strip that was the second one does not fit half a
+   phone, so the row is the card alone. */
+.ty-grid.is-board .ty-row { padding-left: 0; grid-template-columns: minmax(0, 1fr); }
+.ty-grid.is-board .ty-card { grid-template-columns: 18px minmax(0, 1fr); gap: 2px 8px; }
+.ty-grid.is-board .ty-card .ic { width: 18px; height: 18px; }
+.ty-grid.is-board .ty-nm { font-size: 13.5px; }
+.ty-grid.is-board .ty-card .props .val { font-size: 15px; }
 .ty-grid.is-board .grp-h { padding-top: 2px; }
 .wo-list { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 12px; }
 .wo-p {
