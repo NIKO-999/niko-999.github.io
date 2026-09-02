@@ -1185,7 +1185,13 @@ const SAID = [
        screen, which is true whether or not it happens to be on. */
     for (const el of document.querySelectorAll('.week *, .poster > .head *')) {
       const cs = getComputedStyle(el);
-      const inTag = el.closest('.wk-sh b, .ty-card .tg, .wo-p, .wc');
+      /* .is-now is in this list now, and it is the one entry here that
+         is not a tag. Colour on this screen says WHICH, and the chip
+         says which block is running — the same kind of claim, and the
+         only one you set yourself. It is named rather than waved
+         through by its hue, so a second coloured object cannot arrive
+         beside it unnoticed. */
+      const inTag = el.closest('.wk-sh b, .ty-card .tg, .wo-p, .wc, .is-now');
       const hue = Math.max(spread(chan(cs.color)),
                            spread(chan(cs.backgroundColor)),
                            spread(chan(cs.borderTopColor)));
@@ -1202,7 +1208,7 @@ const SAID = [
     }
     return out;
   });
-  ok('every hue on the week belongs to a tag, and there is at least one',
+  ok('every hue on the week belongs to a tag or to Now, and there is at least one',
     hues.tags > 0 && hues.stray.length === 0, hues);
 
   /* ── the progress line ──
@@ -3685,28 +3691,33 @@ const SAID = [
              marks: el.querySelectorAll('svg circle, svg path').length,
              tile: el.querySelector('svg rect').getAttribute('fill'),
              on: el.querySelector('svg circle').getAttribute('fill'),
-             red: getComputedStyle(document.documentElement).getPropertyValue('--red').trim() };
+             me: getComputedStyle(document.documentElement).getPropertyValue('--me').trim() };
   });
   ok('your picture is round', pic.round === '50%', pic);
   ok('and with no photo it is the face — two eyes and a mouth',
     pic.marks === 3, pic);
-  ok('drawn in the palette’s own accent',
-    pic.tile.toLowerCase() === pic.red.toLowerCase(), pic);
+  /* --me, not --red. It was the accent, and the accent is the ink now,
+     so a face drawn from it is a white disc. Your face is the one
+     place a colour you CHOSE is drawn, and the one setting that
+     travels: it is pushed with your record so a friend's board draws
+     you in it. */
+  ok('drawn in the colour you chose for it',
+    pic.tile.toLowerCase() === pic.me.toLowerCase(), pic);
 
   /* MOVED, because the line above passes on a face painted with the
-     shipped red typed in as a literal. */
+     shipped hex typed in as a literal. */
   const faceMoved = await page.evaluate(() => {
-    document.documentElement.style.setProperty('--red', '#4FE0A8');
+    document.documentElement.style.setProperty('--me', '#4FE0A8');
     document.documentElement.style.setProperty('--on-red', '#04141A');
     document.querySelector('.pic-item').click();
     const el = document.querySelector('.sheet .pic svg');
     const got = { tile: el.querySelector('rect').getAttribute('fill'),
                   on: el.querySelector('circle').getAttribute('fill') };
-    document.documentElement.style.removeProperty('--red');
+    document.documentElement.style.removeProperty('--me');
     document.documentElement.style.removeProperty('--on-red');
     return got;
   });
-  ok('and it follows the palette when the palette is changed under it',
+  ok('and it follows that colour when it is changed under it',
     faceMoved.tile === '#4FE0A8' && faceMoved.on === '#04141A', faceMoved);
 
   /* The mouth is offset, which is the whole character of it. Centred it
@@ -3794,6 +3805,163 @@ const SAID = [
      it sits beside. */
   ok('danger is visibly not the accent', tone.bad !== tone.red, tone);
 
+  /* ══════════════════════════════════════════════════════
+     THE TWO THINGS YOU CHOOSE A COLOUR FOR
+
+     The accent went and the chrome went neutral with it, which left
+     two objects that turn out to have a WHICH after all: your face,
+     which is which PERSON, and the Now chip, which is the one thing
+     happening. Both are set from a row of eight swatches.
+
+     THE DISCIPLINE IS THAT NOTHING ELSE READS THEM. This is one press
+     away from being the wheel again under another name, and the only
+     thing keeping it from being that is how few rules consume the two
+     tokens. So the first assertion is that the chrome did not move:
+     --red is still the ink, and a title, a tick and a filled control
+     are all still neutral. */
+  const pick = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const g = (k) => cs.getPropertyValue(k).trim().toLowerCase();
+    return { me: g('--me'), live: g('--live'), red: g('--red'), ink: g('--ink') };
+  });
+  ok('the two chosen colours exist and neither is the ink',
+    /^#[0-9a-f]{6}$/.test(pick.me) && /^#[0-9a-f]{6}$/.test(pick.live)
+    && pick.me !== pick.ink && pick.live !== pick.ink, pick);
+  /* A COLOUR EACH, which is the whole reason there are two tokens. One
+     shared token passes every check written about either one on its
+     own, and the bug it hides is the two moving together. */
+  ok('...and they are two settings, not one', pick.me !== pick.live, pick);
+  ok('and the chrome is still neutral', pick.red === pick.ink, pick);
+
+  /* ── AND THEY ARE DRAWN WHERE THEY ARE SET ──
+     A token nothing consumes is a setting you can get wrong and never
+     see. Both are read off what is actually PAINTED: the chip's own
+     background, and the face's own fill attribute, which is written by
+     scFaceIn at build time rather than styled — so a repaint does not
+     reach it and a check reading a stylesheet would not either. */
+  const drawnIn = await page.evaluate(() => {
+    const cs = getComputedStyle(document.documentElement);
+    const hex = (k) => cs.getPropertyValue(k).trim().toLowerCase();
+    const num = (t) => (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const paint = (h) => { const d = document.createElement('div');
+      d.style.color = h; document.body.appendChild(d);
+      const c = num(getComputedStyle(d).color); d.remove(); return c; };
+    const chip = document.querySelector('.st.is-now, .pill.is-now');
+    const face = document.querySelector('#scTabFace svg rect');
+    /* ── THE HUE, NOT THE HEX ──
+       The chip is a 22% wash now rather than a solid, so its computed
+       background is the colour composited over the row and can never
+       equal --live as written. What is being claimed is that the chip
+       carries THAT hue and not some other one, so the two are compared
+       as directions: the channel a colour leads on, and by how much.
+       A check against the literal would have to be rewritten every
+       time the wash moves, which is how a check stops meaning what it
+       says. */
+    const lead = (c) => c.indexOf(Math.max(...c));
+    const live = paint(hex('--live'));
+    const got = chip ? num(getComputedStyle(chip).backgroundColor) : null;
+    const bg = num(getComputedStyle(document.body).backgroundColor);
+    return { chip: got, live, bg,
+             sameLead: got ? lead(got) === lead(live) : false,
+             moved: got ? got.some((v, i) => Math.abs(v - bg[i]) > 6) : false,
+             face: face ? face.getAttribute('fill').toLowerCase() : null,
+             wantFace: hex('--me') };
+  });
+  ok('the Now chip carries the colour set for it, and is not bare page',
+    drawnIn.chip !== null && drawnIn.sameLead && drawnIn.moved, drawnIn);
+  ok('...and your face in the one set for that',
+    drawnIn.face !== null && drawnIn.face === drawnIn.wantFace, drawnIn);
+
+  /* ── PRESSING ONE MOVES ONE ──
+     The claim a shared token would break, asserted in both directions
+     because each passes on the other's bug: a build where both rows
+     write the same key changes both, and a build where the second row
+     is wired to nothing changes neither. */
+  await page.evaluate(() => document.getElementById('scTabYou').click());
+  await page.waitForTimeout(360);
+  const pkRows = await page.evaluate(() =>
+    [...document.querySelectorAll('.pk-row')].length);
+  ok('Settings carries a row of swatches for each', pkRows === 2, { pkRows });
+  const swap = await page.evaluate(async () => {
+    const cs = () => {
+      const c = getComputedStyle(document.documentElement);
+      return { me: c.getPropertyValue('--me').trim(),
+               live: c.getPropertyValue('--live').trim() };
+    };
+    const before = cs();
+    const row = document.querySelectorAll('.pk-row')[1];
+    /* Any swatch that is not the one already on, so the check cannot
+       pass by pressing what was pressed. */
+    const other = [...row.children].find((b) => !b.classList.contains('on'));
+    other.click();
+    await new Promise((r) => setTimeout(r, 60));
+    return { before, after: cs(), pressed: other.dataset.pk };
+  });
+  ok('pressing a swatch under Now moves that colour',
+    swap.after.live !== swap.before.live, swap);
+  ok('...and leaves your own alone', swap.after.me === swap.before.me, swap);
+
+  /* ── EVERY SWATCH READS, ON THE FACE IT IS FOR ──
+     Sixteen hexes, and one set for both faces was built first and half
+     of it failed: a chip bright enough to stand off a near-black page
+     is about 2:1 against a white one. So each swatch is a pair, and
+     both halves have to be measured — the light one on its own context
+     at the foot of this file, because the face nobody is developing on
+     is the one that breaks.
+
+     The chip is a filled ground with a LABEL on it, so 4.5:1 for the
+     text, and it has to stand off the page, so 3:1 as a graphic. */
+  const swatch = await page.evaluate(() => {
+    const L = (c) => { const v = c.map((x) => x / 255)
+      .map((x) => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4));
+      return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+    const R = (a, b) => (Math.max(L(a), L(b)) + .05) / (Math.min(L(a), L(b)) + .05);
+    const num = (s) => (s.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+    const paint = (h) => { const d = document.createElement('div');
+      d.style.color = h; document.body.appendChild(d);
+      const c = num(getComputedStyle(d).color); d.remove(); return c; };
+    const cs = getComputedStyle(document.documentElement);
+    const on = paint(cs.getPropertyValue('--on-red').trim());
+    const page = num(getComputedStyle(document.body).backgroundColor);
+    const out = [];
+    document.querySelectorAll('.pk-row')[0].childNodes.forEach((b) => {
+      const c = paint(getComputedStyle(b, '::before').backgroundColor);
+      out.push({ k: b.dataset.pk, label: R(c, on), page: R(c, page) });
+    });
+    return out;
+  });
+  const wLab = Math.min(...swatch.map((x) => x.label));
+  const wPage = Math.min(...swatch.map((x) => x.page));
+  ok(`every swatch carries its label (${swatch.length} of them, worst `
+    + `${wLab.toFixed(2)}:1)`, swatch.length === 8 && wLab >= 4.5, swatch);
+  ok(`...and stands off the page (worst ${wPage.toFixed(2)}:1)`,
+    wPage >= 3, swatch);
+
+  /* ── AND A NAME THIS BUILD DOES NOT HAVE FALLS THROUGH ──
+     What is stored is the swatch's NAME, so it can resolve to a
+     different hex on each face — and a name outlives the code that
+     wrote it, the way sched.view.v1 and sched.ty.v1 both do. A colour
+     that resolves to nothing is a blank chip and an invisible face. */
+  await page.evaluate(() => {
+    localStorage.setItem('sched.me.v1', 'chartreuse');
+    localStorage.setItem('sched.live.v1', 'chartreuse');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(420);
+  const fell = await page.evaluate(() => {
+    const c = getComputedStyle(document.documentElement);
+    return { me: c.getPropertyValue('--me').trim(),
+             live: c.getPropertyValue('--live').trim() };
+  });
+  ok('a stored colour this build does not have falls through to a real one',
+    /^#[0-9a-f]{6}$/i.test(fell.me) && /^#[0-9a-f]{6}$/i.test(fell.live), fell);
+  await page.evaluate(() => {
+    localStorage.removeItem('sched.me.v1');
+    localStorage.removeItem('sched.live.v1');
+  });
+  await page.reload({ waitUntil: 'networkidle' });
+  await page.waitForTimeout(420);
+
   /* ── AND THE TAGS ARE THE ONLY COLOUR LEFT ──
      Nine of them: three sessions and six things you keep. Each is one
      hex, drawn as a ring at 46% and a label mixed 62% toward the ink,
@@ -3801,9 +3969,13 @@ const SAID = [
      a colour that reads on paper can be invisible on the same page as
      an outline.
 
-     The label is type, so 4.5:1. The ring is a graphic, so 3:1. Both
-     against the ground the tag actually sits on, sampled off the
-     element rather than assumed. */
+     THE LABEL IS MEASURED AGAINST THE TAG'S OWN FILL, not against the
+     page. The tag was an outline and is a translucent wash now, so
+     what sits behind the words is the hue at 22% composited over
+     whatever the tag is on — which is darker than the page on one face
+     and lighter on the other, and is the ground the text actually has
+     to clear. Measuring against the page instead would flatter every
+     tag on the dark face and fail every one on the light. */
   const tags = await page.evaluate(() => {
     /* ── BOTH SERIALISATIONS, OR THE CHECK MEASURES ITS OWN PARSER ──
        Chrome returns a resolved color-mix as `color(srgb r g b / a)`
@@ -3826,35 +3998,68 @@ const SAID = [
     const ground = chan(getComputedStyle(document.body).backgroundColor);
     const look = (el, where) => {
       const cs = getComputedStyle(el);
+      /* The FILL carries an alpha, so what is drawn is the wash
+         composited over what is behind it — and what is behind it is
+         the card, not the page. Read off the parent rather than
+         assumed: a tag on a card and a tag on the page have different
+         grounds and the same declaration. */
+      let bg = ground, p = el.parentElement;
+      while (p) {
+        const c = chan(getComputedStyle(p).backgroundColor);
+        if (c.a > 0) { bg = { c: over(c, ground), a: 1 }; break; }
+        p = p.parentElement;
+      }
+      const fill = { c: over(chan(cs.backgroundColor), bg), a: 1 };
       out.push({ where,
-                 /* The RING carries an alpha, so what is drawn is the
-                    ring composited over the page rather than the colour
-                    it was written as. */
-                 label: over(chan(cs.color), ground),
-                 ring: over(chan(cs.borderTopColor), ground),
-                 on: ground.c });
+                 label: over(chan(cs.color), fill),
+                 fill: fill.c,
+                 page: bg.c,
+                 on: fill.c });
     };
     document.querySelectorAll('.wk-sh b').forEach((e) => look(e, 'session ' + e.textContent));
     document.querySelectorAll('.ty-card .tg').forEach((e) => look(e, 'item ' + e.textContent));
+    document.querySelectorAll('.st.is-now, .pill.is-now')
+      .forEach((e) => look(e, 'now ' + e.textContent));
     return out;
   });
   const tagLow = tags.reduce((a, x) => Math.min(a, ratio(x.label, x.on)), 99);
-  const ringLow = tags.reduce((a, x) => Math.min(a, ratio(x.ring, x.on)), 99);
-  ok(`every session tag's label clears 4.5:1 (worst ${tagLow.toFixed(2)}:1)`,
+  ok(`every tag's label clears 4.5:1 on its own fill (worst ${tagLow.toFixed(2)}:1)`,
     tags.length >= 2 && tagLow >= 4.5,
     tags.map((x) => x.where + ' ' + ratio(x.label, x.on).toFixed(2)));
-  ok(`...and its ring clears 3:1 as a graphic (worst ${ringLow.toFixed(2)}:1)`,
-    ringLow >= 3, tags.map((x) => x.where + ' ' + ratio(x.ring, x.on).toFixed(2)));
-  /* THE TAG IS AN OUTLINE, and that is the thing being drawn rather
-     than a preference: a filled chip in a bright hue would be the only
-     loud object left on a page whose whole job is the words. Asserted
-     as no fill, since a ring plus a fill is the filled chip back. */
-  const outlined = await page.evaluate(() => [...document.querySelectorAll('.wk-sh b')]
-    .every((e) => {
-      const bg = getComputedStyle(e).backgroundColor;
-      return /rgba\(0, 0, 0, 0\)|transparent/.test(bg);
+
+  /* ── A TINT AND A LABEL, WHICH IS THE THIRD ANSWER ──
+     Solid first, and the loudest object on a page whose whole job is
+     the words. Then an outline, which was reported from the phone as
+     exactly what it was: a pill corner with nothing in it. Both are
+     the same mistake at opposite ends — a tag's colour has to read as
+     an AREA, because the point of it is catching which session a row
+     is in without reading the word, and an outline gives the colour a
+     perimeter instead.
+
+     Asserted in both directions, because each half passes on the
+     other's bug: there has to BE a fill, and it has to be translucent
+     rather than the solid pill coming back. And no border, since a
+     ring plus a wash is the outline treatment with something added
+     behind it rather than the thing that replaced it. */
+  const tint = await page.evaluate(() =>
+    /* ── ALL THREE, AND THAT IS THE POINT OF THE LIST ──
+       The Now chip was the holdout: the one filled chip in the app, on
+       the argument that the one thing happening earns the one solid
+       treatment. Beside a Morning tag it just read as a different
+       component. Naming the three here is what stops one of them
+       drifting back. */
+    [...document.querySelectorAll('.wk-sh b, .ty-card .tg, .st.is-now, .pill.is-now')]
+    .map((e) => {
+      const cs = getComputedStyle(e);
+      const n = (cs.backgroundColor.match(/[\d.]+/g) || []).map(Number);
+      const a = /^color\(/.test(cs.backgroundColor)
+        ? (n.length > 3 ? n[3] : 1) : (n.length > 3 ? n[3] : 1);
+      return { w: e.textContent, a, border: cs.borderTopWidth };
     }));
-  ok('and a tag is a ring and a label, never a fill', outlined);
+  ok(`every tag is a wash and a label, never an outline and never a slab `
+    + `(${tint.length} of them)`,
+    tint.length >= 3
+    && tint.every((t) => t.a > .05 && t.a < .5 && t.border === '0px'), tint);
 
   await page.evaluate(() => document.getElementById('scScrim').click());
   await page.waitForTimeout(300);
@@ -6861,6 +7066,27 @@ const SAID = [
       && rated && rated !== '{}',
       { bodies: bodies.map((b) => b.slice(0, 160)), rated });
 
+    /* ── YOUR COLOUR IS THE ONE SETTING THAT TRAVELS ──
+       It is pushed with your record so a friend's board draws you in
+       it, which is the whole argument for choosing it rather than
+       deriving it. It used to send --red, and --red is the ink now —
+       so left alone, every friend would draw you as a white disc and
+       the setting would be one only you could see.
+
+       Read off the BODY that actually went, because that is the only
+       place the difference between the two tokens shows. */
+    const sent = bodies.map((b) => { try { return JSON.parse(b); } catch (e) { return {}; } })
+      .filter((b) => b.acc);
+    const mine = await ppage.evaluate(() => ({
+      me: getComputedStyle(document.documentElement)
+        .getPropertyValue('--me').trim().toLowerCase(),
+      red: getComputedStyle(document.documentElement)
+        .getPropertyValue('--red').trim().toLowerCase() }));
+    ok('a push carries the colour you chose, not the ink',
+      sent.length > 0 && sent.every((b) => b.acc.toLowerCase() === mine.me)
+      && mine.me !== mine.red,
+      { acc: sent.map((b) => b.acc), mine });
+
     /* ── ONE PANE AT A TIME, MEASURED ──
        `hidden` works by a UA rule of `display: none`, and any author
        `display` beats it — which is how the week once stayed on
@@ -7712,8 +7938,29 @@ const SAID = [
        read against the CARD, on composited pixels. */
     await lpage.reload({ waitUntil: 'networkidle' });
     await lpage.waitForTimeout(400);
+    /* ── A DAY THAT CANNOT BE BEHIND YOU ──
+       This read `.row[data-id]:not(.is-past)` off whatever day was
+       drawn, which is TODAY — and `is-past` is set on today's rows
+       alone. Run after the last block of the seeded week the selector
+       matched nothing and the next line took the whole file down with
+       it, forty assertions before the end, on a page that was in no
+       way broken. It failed on the CLOCK: green all day and a crash
+       after 23:00.
+
+       This file has now written that lesson down three times, and the
+       answer is the same one every time — measure a day the hour
+       cannot reach. Tuesday's card has no past row by construction,
+       whatever time it is. */
+    await lpage.evaluate(() => {
+      const b = [...document.querySelectorAll('.st-d')]
+        .find((x) => x.dataset.d === '2');
+      if (!b) throw new Error('no chip for Tuesday');
+      b.click();
+    });
+    await lpage.waitForTimeout(220);
     const rowInk = await lpage.evaluate(() => {
       const r = document.querySelector('.row[data-id]:not(.is-past)');
+      if (!r) throw new Error('no un-elapsed row on the day that was pressed');
       const b = r.getBoundingClientRect();
       const cs = getComputedStyle(document.documentElement);
       const t = r.querySelector('.t');
@@ -7786,17 +8033,65 @@ const SAID = [
       const g = chan(getComputedStyle(document.body).backgroundColor);
       return [...document.querySelectorAll('.wk-sh b')].map((e) => {
         const cs = getComputedStyle(e);
-        return { w: e.textContent,
-                 label: over(chan(cs.color), g),
-                 ring: over(chan(cs.borderTopColor), g), on: g.c };
+        /* Against the tag's OWN fill, and the fill against what is
+           behind it — the same walk the dark face does. A deep hue at
+           22% over a near-white card is a different ground from the
+           same wash over a near-black one, and 22 was solved to clear
+           4.5:1 on both. */
+        let bg = g, p = e.parentElement;
+        while (p) {
+          const c = chan(getComputedStyle(p).backgroundColor);
+          if (c.a > 0) { bg = { c: over(c, g), a: 1 }; break; }
+          p = p.parentElement;
+        }
+        const fill = { c: over(chan(cs.backgroundColor), bg), a: 1 };
+        return { w: e.textContent, label: over(chan(cs.color), fill), on: fill.c };
       });
     });
     const lLow = ltags.reduce((a, x) => Math.min(a, ratio(x.label, x.on)), 99);
-    const lRing = ltags.reduce((a, x) => Math.min(a, ratio(x.ring, x.on)), 99);
-    ok(`the light face's tags read too (label ${lLow.toFixed(2)}:1, ring ${lRing.toFixed(2)}:1)`,
-      ltags.length >= 2 && lLow >= 4.5 && lRing >= 3,
-      ltags.map((x) => x.w + ' ' + ratio(x.label, x.on).toFixed(2)
-        + ' / ' + ratio(x.ring, x.on).toFixed(2)));
+    ok(`the light face's tags read too (label ${lLow.toFixed(2)}:1 on its own fill)`,
+      ltags.length >= 2 && lLow >= 4.5,
+      ltags.map((x) => x.w + ' ' + ratio(x.label, x.on).toFixed(2)));
+
+    /* ── AND THE OTHER HALF OF EVERY SWATCH ──
+       Each of the eight is a PAIR: bright on the dark face, deep on
+       the light one. One set for both was built first and half of it
+       failed at about 2:1 against the white page, which is the tag
+       ring's own lesson at a bigger size — and it was only caught
+       because a light-face check existed to catch it. This is that
+       check for the pair that replaced it. */
+    await lpage.evaluate(() => document.getElementById('scTabYou').click());
+    await lpage.waitForTimeout(360);
+    const lsw = await lpage.evaluate(() => {
+      const L = (c) => { const v = c.map((x) => x / 255)
+        .map((x) => x <= .03928 ? x / 12.92 : Math.pow((x + .055) / 1.055, 2.4));
+        return .2126 * v[0] + .7152 * v[1] + .0722 * v[2]; };
+      const R = (a, b) => (Math.max(L(a), L(b)) + .05) / (Math.min(L(a), L(b)) + .05);
+      const num = (t) => (t.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+      const paint = (h) => { const d = document.createElement('div');
+        d.style.color = h; document.body.appendChild(d);
+        const c = num(getComputedStyle(d).color); d.remove(); return c; };
+      const on = paint(getComputedStyle(document.documentElement)
+        .getPropertyValue('--on-red').trim());
+      const pg = num(getComputedStyle(document.body).backgroundColor);
+      return [...document.querySelectorAll('.pk-row')[0].childNodes].map((b) => {
+        const c = paint(getComputedStyle(b, '::before').backgroundColor);
+        return { k: b.dataset.pk, label: R(c, on), page: R(c, pg) };
+      });
+    });
+    const lswLab = Math.min(...lsw.map((x) => x.label));
+    const lswPage = Math.min(...lsw.map((x) => x.page));
+    ok(`the light face's swatches read too (label ${lswLab.toFixed(2)}:1, `
+      + `page ${lswPage.toFixed(2)}:1)`,
+      lsw.length === 8 && lswLab >= 4.5 && lswPage >= 3,
+      lsw.map((x) => x.k + ' ' + x.label.toFixed(2) + ' / ' + x.page.toFixed(2)));
+    /* AND THEY ARE THE OTHER HALF, not the same eight hexes drawn on a
+       different page. A pair that resolved to one value would pass
+       every ratio above on the dark face and fail here — this says so
+       directly, so the reason is in the output rather than inferred. */
+    ok('...and they are not the dark face\u2019s own eight',
+      await lpage.evaluate(() => getComputedStyle(document.documentElement)
+        .getPropertyValue('--me').trim().toLowerCase()) !== '#8b72ff');
 
     ok('nothing threw on the light face', lerrs.length === 0, lerrs);
     await lctx.close();

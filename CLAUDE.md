@@ -4760,19 +4760,46 @@ week and six on Showing up, one per thing: the three sessions
 the habits screen's rule arriving in the one place on this app that
 was still spending a colour on whether.
 
-**A tag is OUTLINED, not filled.** A filled chip is a control — the
-Now pill is the one of those left — and a row of filled chips down a
-card is the wall of colour this replaced. A ring at 72% of the hue
-with the label mixed 62% toward the ink reads as the hue at a glance
-and as type up close.
+### Three treatments, and the third is the one
 
-**72%, and the two faces disagreed about it.** 46% measured
-**2.44:1** on the dark violet, under the 3:1 a graphic needs — and
-amber cleared at 3.11, so one hue would have hidden it. 58 fixed the
-dark face and the LIGHT one then read **2.58:1**. 72 clears both at
-about 3.5. The light face was only looked at because a check for it
-was written in the same pass; without it this would have shipped
-half-measured, which is the shape of every contrast bug in this file.
+**A SOLID pill first**, which was the loudest object on a page whose
+whole job is the words. **Then an OUTLINE** — a ring at 72% of the hue
+with no fill at all — and that was reported from the phone as exactly
+what it was: *a pill corner, but nothing filling it in.*
+
+**Both are the same mistake at opposite ends.** A tag's colour has to
+read as an AREA, because the point of it is catching which session a
+row is in without reading the word. An outline gives the colour a
+perimeter; a solid gives it the whole card. A translucent wash gives
+it an area at a volume that does not compete — which is the Notion
+tag, and is what was asked for by name.
+
+**22% AND 72%, SOLVED RATHER THAN PICKED.** The fill sits under the
+label, so the two move together: every step of fill darkens the ground
+the text is on and every step of text saturates it. Both halves were
+run over all eighteen tag hexes — nine hues by two faces — against the
+CARD each actually sits on rather than the page, and again over the
+sixteen Now swatches against the PAGE, because a Now chip has no card
+under it and that is a different ground for one declaration. 22 under
+72 is the strongest tint whose worst pairing still clears 4.5:1: worst
+**5.13:1** on the tags and **5.28:1** on the swatches.
+
+**AND THE NOW CHIP WAS THE HOLDOUT.** It was the single filled chip in
+the app, on the argument that the one thing happening earns the one
+solid treatment. Set beside a Morning tag it read as a different
+component rather than as the same one saying a different word, and the
+note calling it "the one filled chip" was describing the exception
+rather than making the case for it. **There are no filled chips now**,
+the 999px pill went to the same 6px corner as the other two, and the
+three are named in one rule so none of them can drift back alone.
+
+**The ring's numbers are kept because they are why the wash was
+measured that way.** At 46 the violet Evening ring composited to
+**2.44:1** on the dark page while the amber beside it cleared 3.11 —
+the shape of a failure a check on one hue would miss. 58 fixed the
+dark face and left the light one at **2.58:1**. Nine hexes a face is
+eighteen colours, and the face nobody is developing on is the one that
+breaks.
 
 **AND A STATE IS NEVER COLOURED.** `not yet` and `missed` wear the
 flat neutral — `--tick-off` on the ring, `--spent` on the label —
@@ -4794,6 +4821,91 @@ would find is that nothing calls it.
 serve**: a colour that says WHICH has to be the same colour every
 time you see it, and a solved one is a colour that moves with its
 ground.
+
+## Two things you choose a colour for
+
+The accent went and the chrome went neutral with it, which left the
+app no colour of its own. Two objects turn out to have a WHICH after
+all, and they are the two that were asked for.
+
+**YOUR FACE, which is identity.** Which person this is, is the purest
+WHICH there is — and it is the one setting here that TRAVELS: the
+colour is pushed with your record, so a friend's board draws you in
+it. That is what makes it worth choosing rather than deriving. It read
+`--red` before, and `--red` is the ink, so left alone every friend
+would have drawn you as a white disc and the setting would be one only
+you could see.
+
+**THE NOW CHIP, which is the one thing happening.** A state rather
+than a judgement: this screen never says a day went well or badly, it
+says a block is running. The row's ring and its progress line already
+carry that claim in the ink, and the colour is the third register of
+it.
+
+**AND NOTHING ELSE READS THE TWO TOKENS.** That is the whole
+discipline, because this is one press away from being the wheel again
+under another name. `--red` is still the ink, so every tick, every
+filled control and every title stay neutral. `--live` is read by one
+CSS rule, the Now chip's; `--me` by no stylesheet at all, only by the
+two places that DRAW your face — `scFaceIn`, and the push that sends
+it. Asserted as the chrome NOT having moved, beside the two having.
+
+**A colour each, not one shared.** One token passes every check
+written about either on its own, and the bug it hides is the two
+moving together — so pressing a swatch under Now is asserted to move
+that colour AND to leave the other alone.
+
+**A NAME, NOT A HEX.** What is stored is the swatch's name, so it
+resolves per face — the only way one choice can be a bright chip on a
+black page and a deep one on white. A stored name this build no longer
+has falls through to the default, which is the rule `sched.view.v1`
+and `sched.ty.v1` already keep.
+
+**Eight swatches, sixteen hexes, and one set for both faces failed.**
+A chip bright enough to stand off a near-black page is about 2:1
+against a white one — the tag ring's lesson at a bigger size. So each
+swatch is a PAIR, and what sits on it is `--paper` either way, which
+falls out of the pairing rather than needing a token of its own: black
+on the bright chip, white on the deep one. Worst measured 5.54:1 for
+the label and 5.09:1 against the page.
+
+**FOUR ACROSS, TWO DOWN, and that is measured.** One row of eight
+needs 356px inside a sheet that has about 318, so the eighth wrapped
+onto a line of its own and read as a mistake rather than as a palette.
+The drawing is 34px and the press target is the 44px everything else
+holds to, which is the objectives plus's own rule.
+
+**A row of set colours rather than a wheel**, for the reason the tags
+already gave: a colour that says WHICH has to be the same colour every
+time you see it, and a solved one moves with its ground.
+
+### A crash after 23:00, forty assertions from the end
+
+The light face read `.row[data-id]:not(.is-past)` off whatever day
+was drawn, which is TODAY — and `is-past` is set on today's rows
+alone. Run after the last block of the seeded week the selector
+matched nothing, the next line read `getBoundingClientRect` off null,
+and the whole file went down forty assertions early on an app that
+was in no way broken. **It failed on the CLOCK**: green all day, a
+crash after 23:00, and it reported as `no summary` rather than as a
+FAIL, which is the shape that looks like a broken build.
+
+**This file has now written that lesson down three times** — the
+running-row colour that only bit at certain hours, the per-card column
+check that reported 0 on a finished row, and this. The answer is the
+same one every time: measure a day the hour cannot reach. Tuesday's
+card has no past row by construction whatever time it is.
+
+**And a check that finds nothing now says so.** The lookup throws with
+a sentence naming what it wanted rather than handing null to the next
+line, so the next one of these reports where it happened instead of
+forty assertions later.
+
+**Two captions were stale and the render is what found them.**
+*Drawn from your accent* named a thing that no longer exists, and
+*Six cards on what this app does* had been four for two commits. Both
+were a screen away from the change being made, which is the whole
+argument for opening a screen other than the one you edited.
 
 **The stored hue and the stored palette name are both removed on
 boot**, not merely ignored. A key nothing reads is a second record of

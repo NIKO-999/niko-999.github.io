@@ -1920,6 +1920,75 @@
     '--t-train': '#B3382E', '--t-walk': '#1C7A4E', '--t-read': '#1668C7',
     '--t-steps': '#8A5000', '--t-fuel': '#7A6200', '--t-water': '#0E6E76',
     '--done-bg': 'rgba(60,40,100,.07)' };
+  /* ══════════════════════════════════════════════════════
+     THE TWO THINGS YOU CHOOSE A COLOUR FOR
+
+     The accent went and the chrome went neutral with it, which left
+     the app with no colour of its own at all — colour says WHICH, and
+     a tag is the only thing that has a WHICH to say. Two objects on
+     this screen turn out to have one after all, and they are the two
+     that were asked for:
+
+     YOUR FACE, which is identity. Which person this is, is the purest
+     WHICH there is, and it is the one setting here that TRAVELS: the
+     colour is pushed with your record, so a friend's board draws you
+     in it. That is what makes it worth choosing rather than deriving.
+
+     THE NOW CHIP, which is the one thing happening. It is a state
+     rather than a judgement, and this app's rule is that a colour
+     never says WHETHER — it does not say a day went well or badly, it
+     says a block is running. The row's ring and its own progress line
+     already carry that claim in the ink; the colour is the third
+     register of it, and the one you set.
+
+     AND NOTHING ELSE READS THESE TOKENS. That is the whole discipline:
+     `--red` is still the ink, so every tick, every filled control and
+     every title stay neutral. `--live` is read by one rule in the
+     stylesheet; `--me` by no rule at all, only by the two places that
+     DRAW your face — scFaceIn, and the push that sends it.
+
+     ── A NAME, NOT A HEX ──
+     What is stored is the swatch's name, so it resolves per face —
+     which is the only way one choice can be a bright chip on a black
+     page and a deep one on white. A stored name this build no longer
+     has falls through to the default rather than to a blank, which is
+     the rule `sched.view.v1` and `sched.ty.v1` already keep. */
+  var PICKS = [
+    { k: 'violet', n: 'Violet', d: '#8B72FF', l: '#5A3EDA' },
+    { k: 'blue',   n: 'Blue',   d: '#4C90F7', l: '#1A5FD4' },
+    { k: 'teal',   n: 'Teal',   d: '#2BB3BD', l: '#0A757E' },
+    { k: 'green',  n: 'Green',  d: '#43B96C', l: '#19733F' },
+    { k: 'amber',  n: 'Amber',  d: '#E8B04A', l: '#7E5200' },
+    { k: 'red',    n: 'Red',    d: '#EC6B5E', l: '#AE3226' },
+    { k: 'pink',   n: 'Pink',   d: '#E571A3', l: '#A33465' },
+    { k: 'slate',  n: 'Slate',  d: '#9A9AA6', l: '#55555F' }
+  ];
+  /* ── SIXTEEN HEXES, AND EVERY ONE OF THEM WAS SOLVED ──
+     One set for both faces was built first and half of it failed: a
+     chip bright enough to stand off a near-black page is 2.1:1 against
+     a white one, which is the tag ring's lesson at a bigger size. So
+     each swatch is a PAIR — bright on the dark face, deep on the light
+     one — and what sits on it is `--paper` either way, which falls out
+     of the pairing rather than needing a token of its own: black on
+     the bright chip, white on the deep one. Worst measured is 5.54:1
+     for the label and 5.09:1 against the page. */
+  var ME_KEY = 'sched.me.v1';
+  var LIVE_KEY = 'sched.live.v1';
+  /* Violet was the app's own hue before the wheel went, and green is
+     the one word this chip is for. */
+  var ME0 = 'violet', LIVE0 = 'green';
+  function scPickOf(key, dflt) {
+    var v;
+    try { v = localStorage.getItem(key); } catch (e) { v = null; }
+    for (var i = 0; i < PICKS.length; i++) if (PICKS[i].k === v) return PICKS[i];
+    for (i = 0; i < PICKS.length; i++) if (PICKS[i].k === dflt) return PICKS[i];
+    return PICKS[0];
+  }
+  function scPickHex(key, dflt, light) {
+    var p = scPickOf(key, dflt);
+    return light ? p.l : p.d;
+  }
+
   /* ── THERE IS NO ACCENT ──
      Every tick, every filled control, the progress line, today's own
      name and the streak figure were a hue you turned on a wheel. They
@@ -1951,7 +2020,16 @@
        way round the wheel. With the accent at the ink, the pair is
        the page's own two ends and there is nothing left to compute. */
     t['--on-red'] = base['--paper'];
+    /* The two chosen ones. They are written here rather than left to
+       the stylesheet because a swatch is a per-face pair and only this
+       function knows which face is up. */
+    t['--me'] = scPickHex(ME_KEY, ME0, light);
+    t['--live'] = scPickHex(LIVE_KEY, LIVE0, light);
     return t;
+  }
+  function scSetPick(key, k) {
+    try { localStorage.setItem(key, k); } catch (e) {}
+    scPaint(false);
   }
 
   /* ── THE MODE ──
@@ -2023,7 +2101,7 @@
                 '--s-m', '--s-a', '--s-e',
                 '--t-train', '--t-walk', '--t-read',
                 '--t-steps', '--t-fuel', '--t-water',
-                '--done-bg'];
+                '--done-bg', '--me', '--live'];
 
   function scPaint(save) {
     var t = scAccent();
@@ -3147,7 +3225,7 @@
            THEIR palette on your screen. Sending the theme's id instead
            would mean this app could never gain a theme without every
            friend's copy going grey until they updated. */
-        acc: cs.getPropertyValue('--red').trim(),
+        acc: cs.getPropertyValue('--me').trim(),
         ink: cs.getPropertyValue('--on-red').trim(),
         pic: net.pic || '',
         days: scMyDays(),
@@ -7047,7 +7125,11 @@
       return e;
     };
     var cs = getComputedStyle(document.documentElement);
-    var red = acc || cs.getPropertyValue('--red').trim();
+    /* --me, not --red. Your own face is the one place a colour you
+       chose is drawn, and `acc` is a FRIEND's colour arriving from
+       their record — which is why the fallback is the only branch that
+       moved. */
+    var red = acc || cs.getPropertyValue('--me').trim();
     var on = ink || cs.getPropertyValue('--on-red').trim();
     var s2 = mk('svg', { viewBox: '0 0 100 100' });
     s2.setAttribute('aria-hidden', 'true');
@@ -7221,7 +7303,7 @@
       pr.appendChild(scPic(38));
       var pl = scEl('span');
       pl.appendChild(document.createTextNode('Your picture'));
-      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your accent'));
+      pl.appendChild(scEl('span', 'sub-note', myPic ? 'A photo' : 'Drawn from your colour'));
       pr.appendChild(pl);
       pr.addEventListener('click', scPicSheet);
       body.appendChild(pr);
@@ -7273,18 +7355,64 @@
       });
       body.appendChild(mrow);
 
-      /* ── THERE IS NO WHEEL ──
-         It set the one hue the app spent on itself, and the app does
-         not spend one any more: every tick, every filled control, the
-         progress line and today's own name are the ink. A control that
-         sets a colour nothing draws is a setting you can get wrong and
-         never see, so it goes with the thing it set — and the stored
-         hue goes with it rather than sitting in localStorage deciding
-         nothing.
+      /* ── THERE IS NO WHEEL, AND THERE ARE TWO SWATCH ROWS ──
+         The wheel set the one hue the app spent on itself, and the app
+         does not spend one any more: every tick, every filled control,
+         the progress line and today's own name are the ink. What is
+         coloured is a TAG, and a tag's colour says which thing it is —
+         none of those is a preference.
 
-         What is coloured now is a TAG, and a tag's colour says which
-         thing it is: the three sessions, the six items on Showing up,
-         the nine workouts. None of those is a preference. */
+         These two are. Your face is which PERSON, which is the same
+         kind of claim a tag makes and the only one the app cannot work
+         out for itself; the Now chip is the mark the whole screen is
+         oriented around. Neither is a hue the rest of the app reads,
+         which is what keeps this from being the wheel again under
+         another name.
+
+         A ROW OF SET COLOURS RATHER THAN A WHEEL, and the reason is
+         the one the tags already gave: a colour that says WHICH has to
+         be the same colour every time you see it, and a solved one
+         moves with its ground. Eight is a choice you can see all of. */
+      var pickRow = function (title, key, dflt, drawn) {
+        var lab = scEl('span', 'label', title);
+        lab.style.marginTop = '14px';
+        body.appendChild(lab);
+        var row = scEl('div', 'pk-row');
+        var now = scPickOf(key, dflt);
+        PICKS.forEach(function (pk) {
+          var b = scEl('button', 'pk' + (pk.k === now.k ? ' on' : ''));
+          b.type = 'button';
+          b.dataset.pk = pk.k;
+          b.style.setProperty('--pk', scModeLive() === 'light' ? pk.l : pk.d);
+          /* Named, because a swatch is a colour and a colour has no
+             text. Without this the row is eight buttons called
+             nothing. */
+          b.setAttribute('aria-label', pk.n);
+          b.setAttribute('aria-pressed', pk.k === now.k ? 'true' : 'false');
+          b.addEventListener('click', function () {
+            scSetPick(key, pk.k);
+            [].forEach.call(row.children, function (c) {
+              var on = c.dataset.pk === pk.k;
+              c.classList.toggle('on', on);
+              c.setAttribute('aria-pressed', on ? 'true' : 'false');
+            });
+            drawn();
+          });
+          row.appendChild(b);
+        });
+        body.appendChild(row);
+      };
+      pickRow('Your colour', ME_KEY, ME0, function () {
+        /* The face is DRAWN from the token rather than styled by it, so
+           a repaint does not reach it: every picture of you on screen
+           has to be built again. */
+        scPaintTabFace();
+        /* Safe from here: this one only DRAWS. Arriving at that screen
+           is what fetches, which is the split that stopped the first
+           version recursing. */
+        scPaintFriends();
+      });
+      pickRow('Now', LIVE_KEY, LIVE0, function () {});
 
       var rule = scEl('div', 'menu-rule');
       body.appendChild(rule);
@@ -7304,7 +7432,7 @@
          from here — a first-run screen you can destroy in one press
          and never get back is a one-time gift, and this app does not
          give any others. */
-      item('Show the intro', 'Six cards on what this app does', '', function () {
+      item('Show the intro', 'Four cards on what this app does', '', function () {
         scClose();
         scTourOpen();
       });
