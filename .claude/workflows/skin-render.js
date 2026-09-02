@@ -206,7 +206,7 @@ const FROZEN = new Date('2026-09-02T10:12:00').getTime();
       await page.waitForTimeout(500);
       if (screen === 'flip') {
         await page.evaluate(() => {
-          const b = document.querySelector('.day.is-open .wk-turn');
+          const b = document.getElementById('scHdTurn');
           if (b) b.click();
         });
         await page.waitForTimeout(900);

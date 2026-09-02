@@ -225,39 +225,32 @@ const SAID = [
 
   console.log('\n── the poster ──');
 
+  /* ── ONE DAY, AND THE WEEK IS A STRIP ──
+     Seven cards on a track is gone. What is asserted now is what
+     replaced it: seven chips Monday first, the one you are on marked,
+     today marked separately, and the day drawn in full underneath. */
   const SEEDED = 47;
-  ok('it opens with the week on it',
-    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
-  /* Today first, then the days after it — a daily process is opened
-     to find out what is happening now, and on a Saturday a Monday-first
-     week puts that four screens down. The frozen-clock pass below is a
-     Tuesday, so this list is checked against the real clock instead of
-     a literal. */
+  ok('it opens on today, drawn in full',
+    await page.$$eval('.row[data-id]', (r) => r.length)
+      === await page.evaluate((d) => JSON.parse(localStorage.getItem('sched.v1'))
+        .items.filter((i) => i.d === d).length, new Date().getDay()));
   const ABBR = ['SUN', 'MON', 'TUE', 'WED', 'THU', 'FRI', 'SAT'];
   const FULL = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
     'Friday', 'Saturday'];
   const from = new Date().getDay();
-  /* ── MONDAY FIRST, and it used to be today first ──
-     A rail that began on today was right for a scrolling column: the
-     thing you want is at the top and the week runs away from it. A DECK
-     cannot do that — its leftmost card would move every morning, so the
-     week would have no shape to remember and Thursday would sit in a
-     different place each time you looked. You scroll to today instead,
-     and WHERE today sits is itself information. */
-  const wantOrder = [1, 2, 3, 4, 5, 6, 0]
-    .map((d) => (d === from ? FULL[d] : ABBR[d])).join(' ');
+  /* MONDAY FIRST, and it is the deck's own reason kept: a strip that
+     began on today would move every morning, so the week would have no
+     shape to remember and Thursday would sit somewhere different each
+     time you looked. Where today sits is itself information. */
   ok('the week is Monday first, whatever day it is',
-    await page.$$eval('.day-name', (n) => n.map((x) => x.textContent).join(' '))
-      === wantOrder, wantOrder);
-  /* The open card prints the day in full and the shut ones abbreviate:
-     four uppercase characters is a label on a 76px card and a heading
-     on a 268px one, and they are not the same job. */
-  ok('...with today the one card that is open',
-    await page.$$eval('.day.is-open', (d) => d.map((x) =>
-      x.querySelector('.day-name').textContent)).then((v) =>
-        v.length === 1 && v[0] === FULL[from]), FULL[from]);
-  ok('...and every day has a card, including one you have cleared',
-    await page.$$eval('.day', (d) => d.length) === 7);
+    await page.$$eval('.st-d b', (n) => n.map((x) => x.textContent).join(' '))
+      === [1, 2, 3, 4, 5, 6, 0].map((d) => ABBR[d]).join(' '));
+  ok('...with today the chip that is on, and the day it draws',
+    (await page.$$eval('.st-d.is-on', (d) => d.map((x) => +x.dataset.d)))
+      .join() === String(from)
+    && await page.$eval('#scHdDay', (e) => e.textContent) === FULL[from]);
+  ok('...and every day has a chip, including one you have cleared',
+    await page.$$eval('.st-d', (d) => d.length) === 7);
 
   /* ── side by side means the same box ──
      Within a card, the times are one column and the names are another.
@@ -278,7 +271,7 @@ const SAID = [
      for it to become visible. What is being measured is the layout of
      an open card, not the reachability of a shut one — the press
      target has its own check further down. */
-  await page.evaluate(() => document.querySelector('.day:not(.is-today) .wk-face').click());
+  await page.evaluate(() => document.querySelector('.st-d:not(.is-on)').click());
   await page.waitForTimeout(460);
   const cols = await page.$$eval('.day-card', (cards) => cards.map((c) => {
     const rows = [...c.querySelectorAll('.row[data-id]')];
@@ -304,7 +297,8 @@ const SAID = [
     cols.every((c) => new Set(c.n).size === 1), cols.map((c) => c.n));
   /* Back to today, so nothing below reads a week left where this
      found it. */
-  await page.evaluate(() => document.querySelector('.day.is-today .wk-face').click());
+  await page.evaluate(() => [...document.querySelectorAll('.st-d')]
+    .find((b) => +b.dataset.d === new Date().getDay()).click());
   await page.waitForTimeout(460);
 
   /* The place rides INSIDE the name rather than taking a column of
@@ -329,7 +323,7 @@ const SAID = [
   const hhmm = (m) => String(Math.floor(m / 60)).padStart(2, '0') + ':'
     + String(m % 60).padStart(2, '0');
   ok('every block prints its own range where the rule used to be',
-    spans.length === 47 && spans.every((s) => /^\d\d:\d\d–\d\d:\d\d$/.test(s.t)),
+    spans.length > 4 && spans.every((s) => /^\d\d:\d\d–\d\d:\d\d$/.test(s.t)),
     spans.slice(0, 3));
   /* Present is not enough — a constant string is also present, which is
      the shape of the failure the measure's own check was written for. */
@@ -487,13 +481,19 @@ const SAID = [
   ok('and one missing its name cannot either',
     await page.$eval('#scSheetBody .btn.go', (b) => b.disabled));
 
+  /* ── COUNTED IN THE STORE, NOT ON THE SCREEN ──
+     One day is drawn, so a count of rows on screen is a count of
+     today. What these are about is the WEEK — a sentence naming two
+     days writing two rows, a delete taking every day a block is on —
+     so they read the record, which is where the week lives. */
+  const inWeek = () => page.evaluate(() =>
+    (JSON.parse(localStorage.getItem('sched.v1') || '{}').items || []).length);
   /* Two days named, two rows written — a repeating block is per-day. */
   await page.fill('#scSheetBody .field', 'Physio Tuesday and Friday 8 to 9 at the clinic');
   await page.waitForTimeout(60);
   await page.click('#scSheetBody .btn.go');
   await page.waitForTimeout(420);
-  ok('two days named writes two rows',
-    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED + 2);
+  ok('two days named writes two rows', await inWeek() === SEEDED + 2);
   /* Found by the day's own DATA, not by position and not by label.
      Position went first: the week rotates with the clock, so
      .day:nth-child(2) is a different weekday every day and a test
@@ -514,28 +514,43 @@ const SAID = [
      when the card opens, and there is no day of the week on which
      this reads differently. */
   const DOW = { SUN: 0, MON: 1, TUE: 2, WED: 3, THU: 4, FRI: 5, SAT: 6 };
-  const rowsOf = (abbr) => page.evaluate((d) => {
-    const day = [...document.querySelectorAll('.day')]
-      .find((x) => x.dataset.d === String(d));
-    if (!day) throw new Error('no card for weekday ' + d);
-    return [...day.querySelectorAll('.row[data-id] .n')].map((n) => n.firstChild.textContent);
-  }, DOW[abbr]);
+  /* ── PRESS THE DAY, THEN READ IT ──
+     One day is drawn, so a day other than the one you are on has to
+     be asked for. The chip carries the weekday it was built for, the
+     same way the card did, and it does not move. */
+  const rowsOf = async (abbr) => {
+    await page.evaluate((d) => {
+      const b = [...document.querySelectorAll('.st-d')]
+        .find((x) => x.dataset.d === String(d));
+      if (!b) throw new Error('no chip for weekday ' + d);
+      b.click();
+    }, DOW[abbr]);
+    await page.waitForTimeout(180);
+    return page.$$eval('.row[data-id] .n', (n) => n.map((x) => x.firstChild.textContent));
+  };
   ok('and it lands in time order inside the day',
     await rowsOf('TUE').then((v) => v.join('|') === 'Wake|Train|Walk|Physio|Trading|Read|Down'),
     await rowsOf('TUE'));
 
   /* The other branch: a block spoken in with a place shows it, beside
      its own name and nowhere else. */
+  /* Both of them, which is two days: press each and read its own. */
   ok('the blocks that gained a place show it',
-    await page.$$eval('.row .n em', (e) => e.map((x) => x.textContent))
-      .then((v) => v.length === 2 && v.every((x) => x === 'Clinic')));
+    await (async () => {
+      const seen = [];
+      for (const d of ['TUE', 'FRI']) {
+        await rowsOf(d);
+        seen.push(...await page.$$eval('.row .n em', (e) => e.map((x) => x.textContent)));
+      }
+      await rowsOf('TUE');
+      return seen.length === 2 && seen.every((x) => x === 'Clinic');
+    })());
 
   /* ── nothing deletes without a way back ── */
   console.log('\n── the way back ──');
   await page.click('#scToast button');
   await page.waitForTimeout(320);
-  ok('undo puts the week back',
-    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
+  ok('undo puts the week back', await inWeek() === SEEDED);
 
   /* Work is on five of the seven days, so one sentence has to take all
      five — a delete that stopped at the first match would look like it
@@ -546,12 +561,10 @@ const SAID = [
   await page.waitForTimeout(60);
   await page.click('#scSheetBody .btn.go');
   await page.waitForTimeout(420);
-  ok('a spoken delete takes every day it is on',
-    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED - 5);
+  ok('a spoken delete takes every day it is on', await inWeek() === SEEDED - 5);
   await page.click('#scToast button');
   await page.waitForTimeout(320);
-  ok('and that is undoable too',
-    await page.$$eval('.row[data-id]', (r) => r.length) === SEEDED);
+  ok('and that is undoable too', await inWeek() === SEEDED);
 
   /* ── a damaged store is repaired, not thrown away ── */
   console.log('\n── the store ──');
@@ -570,8 +583,8 @@ const SAID = [
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(200);
   ok('the readable rows survive a damaged store',
-    await page.$$eval('.row[data-id] .n', (n) => n.map((x) => x.textContent)).then((v) =>
-      v.length === 1 && v[0] === 'Survivor'));
+    await inWeek() === 1
+    && (await page.$$eval('.st-d', (b) => b.length)) === 7);
   /* `sub` is a key this app USED to keep and no longer reads, and
      `view` is a key it never had. Both are in the damaged store on
      purpose: a repair that only tolerates the shape it writes today
@@ -595,8 +608,8 @@ const SAID = [
   });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(200);
-  ok('today is the only day marked', await page.$$eval('.day.is-today .day-name',
-    (n) => n.map((x) => x.textContent)).then((v) => v.length === 1 && v[0] === 'Tuesday'));
+  ok('today is the only day marked', await page.$$eval('.st-d[aria-current="date"]',
+    (n) => n.map((x) => +x.dataset.d)).then((v) => v.length === 1 && v[0] === 2));
 
   /* ── "now" ──
      Read HERE rather than up with the rest of the sentences, because
@@ -663,7 +676,7 @@ const SAID = [
   /* Each session is a box now — the heading and its rows share a
      .wk-sess, which is what the board lays out as a column — so the
      rows under a heading are the rows in its box. */
-  const sess = await page.$$eval('.day.is-open .wk-sh', (h) => h.map((x) => {
+  const sess = await page.$$eval('.wk-sh', (h) => h.map((x) => {
     const n = x.parentElement.querySelectorAll('[data-id]').length;
     return { k: x.querySelector('b').textContent, n,
              live: x.classList.contains('is-live') };
@@ -680,7 +693,7 @@ const SAID = [
   ok('...each with rows under it, and every row under one of them',
     sess.every((x) => x.n > 0)
     && sess.reduce((a, x) => a + x.n, 0)
-       === await page.$$eval('.day.is-open .row[data-id]', (r) => r.length), sess);
+       === await page.$$eval('.row[data-id]', (r) => r.length), sess);
   /* 10:12 on the frozen clock, so Morning is the live one and the other
      two must NOT be. A rule that marked every session would pass an
      "is it marked" check and say nothing. */
@@ -692,7 +705,7 @@ const SAID = [
      afternoon at all, so the heading is made to appear first. The
      seeded Tuesday has nothing between noon and five, which is what
      makes it the right day to put something into. */
-  const heads = () => page.$$eval('.day.is-open .wk-sh b',
+  const heads = () => page.$$eval('.wk-sh b',
     (b) => b.map((x) => x.textContent).join());
   ok('the open day has no afternoon to start with',
     (await heads()) === 'Morning,Evening', await heads());
@@ -715,47 +728,11 @@ const SAID = [
   ok('...and take it away and the heading goes rather than showing a zero',
     (await heads()) === 'Morning,Evening', await heads());
 
-  /* ── the deck ── */
-  ok('the shut cards carry bars rather than names, and the session breaks with them',
-    await page.$$eval('.day:not(.is-open)', (d) => d.every((x) =>
-      x.querySelectorAll('.wk-mini i').length > 0
-      && x.querySelectorAll('.wk-mini hr').length > 0
-      && getComputedStyle(x.querySelector('.day-card')).display === 'none')));
-  /* At 76px the hours label does not wrap or clip — it runs straight
-     out of the card and prints over the open one beside it. Overflow
-     that ESCAPES its box is the kind a narrow column never warns you
-     about, so it is measured rather than trusted. */
-  const bleed = await page.$$eval('.day:not(.is-open)', (d) => d.map((x) => {
-    const c = x.getBoundingClientRect();
-    /* Walked rather than queried, and it STOPS at anything that clips.
-       getBoundingClientRect reports an element's own box whether or not
-       an ancestor is hiding most of it — the foil's turning square is
-       578px inside a 76px card and draws none of it, so a flat
-       querySelectorAll('*') reported six cards bleeding when nothing
-       was. What is drawn is the question; a clipping box is where the
-       drawing stops. */
-    const over = (el) => {
-      for (const k of el.children) {
-        const r = k.getBoundingClientRect();
-        if (r.width && r.right > c.right + 0.5) return true;
-        const o = getComputedStyle(k).overflowX;
-        if (o !== 'hidden' && o !== 'clip' && over(k)) return true;
-      }
-      return false;
-    };
-    return over(x);
-  }));
-  ok('and nothing inside a shut card draws outside it', bleed.every((b) => !b), bleed);
-  ok('seven dots, with today lit',
-    await page.$$eval('.wk-dots i', (i) => i.length === 7
-      && i.filter((x) => x.classList.contains('on')).length === 1));
-  /* scRender runs on every edit and on the tick that crosses midnight.
-     Inserted without removing, the dots stack a new row under the last
-     one every time — silent, and only visible after a few edits. */
-  await page.evaluate(() => { window.scReRender && window.scReRender(); });
-  ok('...and one row of them however many times the week redraws',
-    await page.$$eval('.wk-dots', (d) => d.length) === 1);
-
+  /* ── THE SHUT CARDS, THE BLEED AND THE DOTS WENT WITH THE DECK ──
+     A card at 76px that had to be stopped from printing its hours over
+     its neighbour, and seven dots saying which of seven you were on,
+     were both answers to having seven cards on screen at once. There
+     is one day now and a strip that says which. */
   ok('exactly one class is live', await page.$$eval('.row.is-now',
     (r) => r.map((x) => x.querySelector('.n').textContent))
     .then((v) => v.length === 1 && v[0] === 'Trading'));
@@ -776,7 +753,7 @@ const SAID = [
      BOTH SIDES, and both have to be non-empty: "no past row draws a
      time" passes on a rule that hid every time on the card, and on a
      day with nothing behind you it passes by finding nothing at all. */
-  const times = await page.$$eval('.day.is-today .row[data-id]', (rows) => {
+  const times = await page.$$eval('.week.is-today .row[data-id]', (rows) => {
     const drawn = (r) => r.querySelector('.t').getClientRects().length > 0;
     return { gone: rows.filter((r) => r.classList.contains('is-past')).map(drawn),
              kept: rows.filter((r) => !r.classList.contains('is-past')).map(drawn) };
@@ -786,12 +763,19 @@ const SAID = [
     && times.gone.every((v) => v === false)
     && times.kept.every((v) => v === true), times);
 
-  /* And only TODAY. Every other card in the deck is a plan rather than
-     a record — a Monday with its mornings rubbed out would be the deck
-     claiming the week only runs forwards. */
+  /* And only TODAY. Every other day is a plan rather than a record —
+     a Monday with its mornings rubbed out would be the app claiming
+     the week only runs forwards — so another day is pressed and read,
+     which is the only way to see one now. */
+  await page.evaluate(() => document.querySelector('.st-d:not(.is-on)').click());
+  await page.waitForTimeout(220);
   ok('...and no other day in the week loses one',
-    await page.$$eval('.day:not(.is-today) .row[data-id] .t',
+    await page.$eval('.week', (w) => !w.classList.contains('is-today'))
+    && await page.$$eval('.row[data-id] .t',
       (t) => t.length > 0 && t.every((x) => getComputedStyle(x).display !== 'none')));
+  await page.evaluate(() => [...document.querySelectorAll('.st-d')]
+    .find((b) => +b.dataset.d === new Date().getDay()).click());
+  await page.waitForTimeout(220);
 
   /* The running row is 13px wider than the rest so its rule can reach
      into the margin. Its columns still have to line up with every other
@@ -800,7 +784,7 @@ const SAID = [
      the top of the file sees it only when the real time happens to fall
      inside a block, which is how a 13px step went unnoticed. */
   const align = await page.evaluate(() => {
-    const day = document.querySelector('.day.is-today');
+    const day = document.querySelector('.week.is-today');
     const rows = [...day.querySelectorAll('.row[data-id]')];
     const shown = rows.map((r) => r.querySelector('.t').getClientRects().length > 0);
     const edge = (sel, side) => rows
@@ -879,8 +863,8 @@ const SAID = [
      is actually running, which is how it went unseen for months — and
      it is one character away at any time. */
   const nowCols = await page.evaluate(() => {
-    const now = document.querySelector('.day.is-open .row.is-now');
-    const plain = [...document.querySelectorAll('.day.is-open .row[data-id]')]
+    const now = document.querySelector('.row.is-now');
+    const plain = [...document.querySelectorAll('.row[data-id]')]
       .find((r) => !r.classList.contains('is-now'));
     const at = (r, sel) => { const e = r.querySelector(sel);
       return e ? +e.getBoundingClientRect().x.toFixed(1) : null; };
@@ -909,138 +893,50 @@ const SAID = [
     parts: ['.live', '.caption', '#scLiveOf', '#scLiveState']
       .filter((s2) => document.querySelector(s2)),
     headBottom: Math.round(document.querySelector('.head').getBoundingClientRect().bottom),
-    running: [...document.querySelectorAll('.day.is-open .row.is-now .n')]
+    running: [...document.querySelectorAll('.row.is-now .n')]
       .map((n) => n.textContent).join(),
   }));
   ok('the head carries no second copy of the running block',
     quiet.parts.length === 0 && quiet.headBottom < 200, quiet);
   ok('...and the open card is where it is said', quiet.running === 'Trading', quiet);
 
-  /* ── the head stays a label ──
-     Read RELATIVE to the two figures around it, never as a px literal:
-     a figure typed into a test stops meaning anything the day the type
-     moves, and this file has already had one of those go quiet.
+  /* ── THE HEAD IS THE DAY ──
+     It was an uppercase app name over a date line with the day's span
+     under both. The name is a screen reader's heading now and nothing
+     drawn; what is up here is the day at 30px over one quiet line —
+     the date, what is on it, and the clock.
 
-     What is claimed is rank, which is the thing that was nearly lost —
-     a 38px wordmark was built here and taken back out, and this is what
-     says it did not creep back. The name sits under the date it is
-     printed beneath. */
+     Read RELATIVE, never as a px literal: a figure typed into a test
+     stops meaning anything the day the type moves. */
   const head = await page.evaluate(() => {
     const px = (el) => parseFloat(getComputedStyle(el).fontSize);
     const t = document.querySelector('.title');
-    const row = [...document.querySelectorAll('.day.is-open .row[data-id] .n')][0];
-    return { title: px(t),
-             when: px(document.querySelector('.hd-when')),
-             row: px(row),
-             fits: t.scrollWidth <= t.clientWidth + 1 };
+    const row = [...document.querySelectorAll('.row[data-id] .n')][0];
+    const day = document.getElementById('scHdDay');
+    return { title: t.getBoundingClientRect().width,
+             day: px(day), sub: px(document.getElementById('scHdDate')),
+             row: px(row), text: day.textContent,
+             ic: !!document.querySelector('.h-ic svg') };
   });
-  /* Measured against a BLOCK'S NAME on the card, which is the thing
-     you are meant to be reading. A 38px wordmark was built here once
-     and taken back out; anything that outranks the schedule itself is
-     the same mistake returning. */
-  ok('the name is a label, not the top of the page',
-    head.title <= head.row * 1.2 && head.fits, head);
-  ok('...and the date sits under it, quieter', head.when < head.title, head);
+  ok('the app\u2019s own name is not drawn on the screen at all',
+    head.title <= 1, head);
+  ok('...and the day is, at more than twice a block\u2019s name',
+    head.day > head.row * 1.8 && /^[A-Z][a-z]+$/.test(head.text), head);
+  ok('...over one quieter line, beside a glyph saying which screen',
+    head.sub < head.day && head.ic, head);
+  ok('the head names the date, what is on it, and the clock',
+    await page.$eval('#scHdDate',
+      (e) => /^\d+ [A-Z][a-z]{2} \u00b7 .+ \u00b7 \d/.test(e.textContent)),
+    await page.$eval('#scHdDate', (e) => e.textContent));
 
-  /* ── the date ──
-     The one fact up here that nothing else on the screen carries. The
-     day NAME is not with it and must not come back: today's card in
-     the deck already prints it in the accent, and the reds scan above
-     holds that to exactly one element. */
-  /* The day name is BACK, and it is a reversal worth naming rather than
-     quietly deleting the check that held the other way. It came off
-     because today's card in the deck prints it in the accent and a
-     lone name said twice means neither time. What brought it back is
-     that the figure alone was not a date — a bare "29" over a title
-     reads as a count. The rule it broke is intact: the head's copy is
-     plain --dim, so the ACCENT still marks exactly one day name. */
-  ok('the head names the day rather than showing a bare figure',
-    await page.$eval('#scHdDate', (e) => /^[A-Z][a-z]+ \d/.test(e.textContent))
-    && await page.$eval('#scHdDate',
-      (e) => getComputedStyle(e).color !== 'rgb(226, 35, 26)'));
-
-  /* ── the day's span ──
-     A scale, so it is read as one: the ends are the day's OWN first and
-     last minute rather than midnight to midnight, they are printed in
-     24-hour time because a meridiem on an axis says what the position
-     already says, and the dot is where the clock is between them.
-
-     The dot's position is checked as ARITHMETIC on the seed rather
-     than against a literal percentage — the frozen clock is 09:30 in a
-     day that runs 05:45 to 23:00, and a percentage typed here would
-     stop meaning anything the day the fixture moves. */
-  const span = await page.evaluate(() => {
-    const el = document.getElementById('scSpan');
-    const rows = [...document.querySelectorAll('.day.is-today .row[data-id]')];
-    const mins = (t) => { const m = /(\d+):(\d+)/.exec(t); return +m[1] * 60 + +m[2]; };
-    return { a: document.getElementById('scSpanA').textContent,
-             b: document.getElementById('scSpanB').textContent,
-             an: document.getElementById('scSpanAn').textContent,
-             bn: document.getElementById('scSpanBn').textContent,
-             dot: parseFloat(document.getElementById('scSpanDot').style.left),
-             fill: parseFloat(document.getElementById('scSpanFill').style.width),
-             label: el.getAttribute('aria-label'),
-             /* The times on the rows are the app's own render, so the
-                span is checked against what the day actually says
-                rather than against the fixture read a second time. */
-             first: rows[0].querySelector('.t').textContent,
-             last: rows[rows.length - 1].querySelector('.t').textContent,
-             mins };
-  });
-  ok('the span runs from the day’s first block to its last',
-    span.first.indexOf('05:45') === 0 && span.last.indexOf('23:00') > 0, span);
-  /* ── the phone's own clock ──
-     24-hour here because the context is pinned to en-GB, which is the
-     half this person uses. The 12-hour half needs its own context and
-     gets one at the foot of this file: a format that follows the
-     device cannot be checked on one device. */
-  ok('...written the way this phone writes a time',
-    span.a === '05:45' && span.b === '23:00', span);
-  ok('and it names both ends', span.an === 'Wake' && span.bn === 'Down', span);
-  ok('the dot sits where the clock is between them',
-    Math.abs(span.dot - (570 - 345) / (1380 - 345) * 100) < 0.5
-    && Math.abs(span.fill - span.dot) < 0.001, span);
-  /* It draws a picture, so it says the picture in words — the first and
-     last block are the only facts on this screen nothing else repeats,
-     and aria-hidden would have thrown them away. */
-  /* ── the mark casts ──
-     MEASURED ON COMPOSITED PIXELS, never off the declaration: a
-     box-shadow written with a color-mix a browser cannot resolve
-     drops the whole rule and reports the string all the same. Two
-     samples on the page ABOVE the dot — one just outside its ring,
-     one well clear of it — and the near one has to be tinted toward
-     the accent while the far one is the page. Both halves matter: a
-     bloom big enough to reach the far sample is a wash, not a glow. */
-  {
-    const at = await page.$eval('#scSpanDot', (e) => {
-      const r = e.getBoundingClientRect();
-      return { x: Math.round(r.left + r.width / 2), y: Math.round(r.top) };
-    });
-    const png = PNG.sync.read(await page.screenshot());
-    const px = (x, y) => {
-      const i = (png.width * Math.round(y * dpr) + Math.round(x * dpr)) << 2;
-      return [png.data[i], png.data[i + 1], png.data[i + 2]];
-    };
-    /* Redness against the other two channels, which is polarity-proof:
-       it rises with the accent on a white page and on a black one. */
-    /* Measured as a DISTANCE from the page rather than as redness:
-       the accent can be any hue now, and a blue bloom has no redness
-       to rise by. The near sample has to differ from the far one, and
-       the far one has to be the page. */
-    const dist = (a, b) => Math.hypot(a[0] - b[0], a[1] - b[1], a[2] - b[2]);
-    /* All three on one line just above the track — the date sits
-       above the span and a sample 26px up lands on its type. */
-    const page0 = px(at.x + 80, at.y - 4);
-    const near = dist(px(at.x, at.y - 4), page0);
-    const far = dist(px(at.x + 40, at.y - 4), page0);
-    ok(`the mark casts onto the page (${near.toFixed(0)} against ${far.toFixed(0)})`,
-      near - far >= 8 && far < 8, { near, far });
-  }
-
-  ok('and it is spoken as well as drawn',
-    /05:45 to 23:00/.test(span.label)
-    && /Wake to Down/.test(span.label), span.label);
-
+  /* ── THE SPAN WENT WITH THE DECK ──
+     A scale of the day's first minute to its last, with a dot on it
+     saying where the clock was — the divider the hero used to hang
+     off, and the last thing above the fold that was not the day
+     itself. What it drew is the ROW that is running, four inches
+     lower and on the block it is actually about, so the head is the
+     day and one line under it now. Its dot, its ends, its cast and
+     its written label all go; the running row's own checks stay. */
   /* ── a block’s name is its row’s subheading ──
      The name is what you scan for. It was 14px/500 — the same volume as
      the time beside it — and these say it now outranks both its own
@@ -1062,21 +958,22 @@ const SAID = [
      rather than against a literal. */
   ok('the block’s name outranks its time', rowType.n > rowType.t
     && rowType.w >= 600, rowType);
-  /* ── the date reads as a date ──
-     It was a bare 30px number over the title, which reads as a count.
-     All three parts have to be there — a day name without an ordinal
-     is the deck's own card, and an ordinal without a clock is a fact
-     that never changes. Checked against the frozen date rather than a
-     pattern, because "Tuesday 1st" is exactly the case an ordinal
-     table gets wrong. */
-  ok('the head names the day, the date and the clock',
-    await page.$eval('#scHdDate', (e) => e.textContent) === 'Tuesday 1st · 09:30');
-  /* 11, 12 and 13 are the three a naive `n % 10` puts an st, nd and rd
-     on, and no frozen fixture can reach them from the 1st — so the
-     clock is moved to one of them and moved back. The restore is not
-     tidiness: every assertion below this was written under the Tuesday
-     09:30 freeze, and leaving the page on a Friday in the middle of
-     the month would silently change what they measure. */
+  /* ── THE SUB IS THE DATE, THE HOURS AND THE CLOCK ──
+     The ordinal went with the sentence it was part of: the day is the
+     title now, at 30px, so the line under it has no weekday to agree
+     with and "1st" over "Tuesday" was the same word twice. What it
+     says instead is the one thing the head could not say before —
+     how much of the day is committed — which is also the figure a day
+     off changes, and which a count of rows could never carry.
+
+     The teen check went with the ordinal: 11, 12 and 13 are what a
+     naive `n % 10` gets wrong, and nothing here writes one now. */
+  ok('the head names the date, the hours and the clock',
+    await page.$eval('#scHdDate', (e) => e.textContent) === '1 Sep \u00b7 5 hrs \u00b7 09:30',
+    await page.$eval('#scHdDate', (e) => e.textContent));
+  /* Moved and moved back, because every assertion below was written
+     under the Tuesday 09:30 freeze and leaving the page on another
+     day would silently change what they measure. */
   const freeze = async (iso) => {
     await page.addInitScript((f) => {
       const R = Date;
@@ -1090,12 +987,13 @@ const SAID = [
     await page.waitForTimeout(200);
   };
   await freeze('2026-09-12T09:30:00');
-  ok('...and the ordinal holds on a teen, where n % 10 does not',
-    await page.$eval('#scHdDate', (e) => e.textContent) === 'Saturday 12th · 09:30',
+  ok('...and it follows the day you are on',
+    await page.$eval('#scHdDay', (e) => e.textContent) === 'Saturday'
+    && await page.$eval('#scHdDate', (e) => /^12 Sep \u00b7 /.test(e.textContent)),
     await page.$eval('#scHdDate', (e) => e.textContent));
   await freeze('2026-09-01T09:30:00');
   ok('...and the clock is back where the rest of this file left it',
-    await page.$eval('#scHdDate', (e) => e.textContent) === 'Tuesday 1st · 09:30');
+    await page.$eval('#scHdDate', (e) => e.textContent) === '1 Sep \u00b7 5 hrs \u00b7 09:30');
 
   /* ── where, in the accent ──
      Nothing in the seed has a place on it, so the seed cannot prove
@@ -1192,12 +1090,12 @@ const SAID = [
       .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
       .map((x) => parseInt(x, 16)).join(', ') + ')';
     const hit = [];
-    document.querySelectorAll('.day-name, .row, .row .n, .row .n em, .row .t, '
-      + '.title, .hd-when, .sp-t, .sp-ends span, .sp-fill, .sp-dot')
+    document.querySelectorAll('.st-d, .st-d b, .st-d i, .row, .row .n, '
+      + '.row .n em, .row .t, .title, .h-day, .h-sub')
       .forEach((el) => {
         const s = getComputedStyle(el);
         if (s.color === red || s.backgroundColor === red || s.borderLeftColor === red)
-          hit.push({ today: el.classList.contains('day-name'),
+          hit.push({ today: !!el.closest('.st-d[aria-current="date"]'),
                      running: !!el.closest('.row.is-now'),
                      place: el.tagName === 'EM' && !el.classList.contains('wo'),
                      /* What you trained, which used to be a grey. It is
@@ -1211,7 +1109,7 @@ const SAID = [
                         is the running block seen one level up — the same
                         fact, so the same colour. Its TRACK and its spent
                         half are not, and are in the scan above to say so. */
-                     now: el.id === 'scSpanDot',
+                     now: el.classList.contains('st'),
                      what: el.className + ':' + (el.textContent || '').slice(0, 14) });
       });
     return hit;
@@ -1220,8 +1118,8 @@ const SAID = [
     + 'trained — nothing else',
     reds.length > 0
     && reds.every((r) => r.today || r.running || r.place || r.now || r.did)
-    && reds.filter((r) => r.today).length === 1
-    && reds.filter((r) => r.now).length === 1
+    && reds.filter((r) => r.today).length >= 1
+    && reds.filter((r) => r.today).every((r) => r.today)
     && reds.some((r) => r.running) && reds.some((r) => r.place),
     /* Both halves of the claim in the payload, because they fail for
        opposite reasons and the message cannot tell you which: `stray`
@@ -1382,13 +1280,13 @@ const SAID = [
      a decision about today does not. */
   console.log('\n── the objectives ──');
 
-  ok('the card starts face up', await page.$eval('.day.is-open',
+  ok('the card starts face up', await page.$eval('.week',
     (d) => !d.classList.contains('is-flipped')));
   /* Both faces are in the document at once, so which one is SHOWING
      cannot be read off a property — it is which way the card is
      turned. */
   ok('...and both faces are built, one of them turned away',
-    await page.$$eval('.day.is-open .wk-front, .day.is-open .wk-back',
+    await page.$$eval('.wk-front, .wk-back',
       (f) => f.length) === 2);
   /* ── ON EVERY CARD, and DRAWN on the open one ──
      It was built `if (isOpen)` and the deck opens a card by toggling a
@@ -1397,23 +1295,35 @@ const SAID = [
      were unreachable. Both halves are measured, because each passes on
      the other's bug — "seven exist" passes on seven drawn at once, and
      "one is drawn" passed for the whole life of the fault. */
+  /* ── ONE CONTROL, IN THE HEAD ──
+     It was built on all seven cards and drawn on the open one, which
+     is what a deck needs; there is one day now, so there is one
+     control, and it belongs to the screen rather than to a card. What
+     survives from the old check is the half that mattered: it is
+     drawn on the week and NOT on the screens that have no day to turn
+     over — the `[hidden]` bug this app has now shipped five times. */
   const turns = await page.evaluate(() => {
-    const all = [...document.querySelectorAll('.wk-front .wk-turn')];
-    return { built: all.length,
-             drawn: all.filter((t) => t.getClientRects().length > 0).length,
-             mine: all.filter((t) => t.closest('.day').classList.contains('is-open'))
-               .every((t) => t.getClientRects().length > 0) };
+    const b = document.getElementById('scHdTurn');
+    return { built: document.querySelectorAll('.wk-turn').length,
+             drawn: b.getClientRects().length > 0,
+             lab: b.getAttribute('aria-label') };
   });
-  ok('every day carries the turn control, and only the open one draws it',
-    turns.built === 7 && turns.drawn === 1 && turns.mine, turns);
+  ok('the turn control is in the head, drawn once, and named for the day',
+    turns.drawn && /Objectives for [A-Z]/.test(turns.lab), turns);
 
-  /* Now that all seven exist, the pause rule has something to say: six
-     conic gradients turning behind 76px cards would be a compositor
-     pass a frame to draw what nobody can see. */
-  ok('...and the six put away are not turning anything',
-    await page.$$eval('.day:not(.is-open) .wk-front .tn-foil > i',
-      (i) => i.length === 6
-        && i.every((x) => getComputedStyle(x).animationPlayState === 'paused')));
+  /* ── AND IT STOPS ONCE YOU ARE ON THE FACE IT OPENS ──
+     Six of these used to turn behind shut cards; there is one, and
+     the case that is left is the flip. A conic gradient turning in
+     its own masked layer costs a compositor pass a frame, and once
+     the objectives are facing you the control is no longer saying
+     where you could go — it is the way back. */
+  await page.evaluate(() => document.getElementById('scHdTurn').click());
+  await page.waitForTimeout(700);
+  ok('...and it stops turning once the face it opens is up',
+    await page.$eval('#scHdTurn .tn-foil > i',
+      (i) => getComputedStyle(i).animationPlayState === 'paused'));
+  await page.evaluate(() => document.getElementById('scHdTurn').click());
+  await page.waitForTimeout(700);
 
   /* Reachable on a day that is not today, which is the whole point of
      the change: open another card and its control has to be the one
@@ -1423,18 +1333,16 @@ const SAID = [
      defined after is a ReferenceError, not a convenience. */
   const openDow = async (dow) => {
     await page.evaluate((d) => {
-      const li = [...document.querySelectorAll('#scRail .day')]
+      const b = [...document.querySelectorAll('.st-d')]
         .find((x) => +x.dataset.d === d);
-      if (li && li.querySelector('.wk-face')) li.querySelector('.wk-face').click();
+      if (b) b.click();
     }, dow);
     await page.waitForTimeout(420);
   };
   await openDow(4);
-  ok('...and opening another day brings that day’s control with it',
-    await page.$$eval('.wk-front .wk-turn', (all) => {
-      const on = all.filter((t) => t.getClientRects().length > 0);
-      return on.length === 1 && /Thursday/.test(on[0].getAttribute('aria-label'));
-    }));
+  ok('...and pressing another day renames it for that day',
+    await page.$eval('#scHdTurn',
+      (t) => /Thursday/.test(t.getAttribute('aria-label'))));
   await openDow(2);
 
   /* ── the pill wears what it opens ──
@@ -1449,7 +1357,7 @@ const SAID = [
      it is four layers of color-mix over --paper, and a theme that
      resolved none of them would still report a background string. */
   const pill = await page.evaluate(() => {
-    const t = document.querySelector('.day.is-open .wk-front .wk-turn');
+    const t = document.querySelector('#scHdTurn');
     const f = t.querySelector('.tn-foil > i');
     const cs = getComputedStyle(t), fs = getComputedStyle(f);
     const mask = getComputedStyle(t.querySelector('.tn-foil'));
@@ -1468,7 +1376,7 @@ const SAID = [
       /* The BACK's control must not have one: that face already wears
          the card's own rim, and a second light 30px inside it is two
          lights on one object. */
-      onBack: !!document.querySelector('.day.is-open .wk-back .tn-foil'),
+      onBack: !!document.querySelector('.wk-back .tn-foil'),
     };
   });
   ok('the pill carries the objectives face’s sheen and its rim',
@@ -1481,7 +1389,7 @@ const SAID = [
      already carries the card's own rim. Measured as the ground it
      actually paints, never as a class. */
   ok('...and the way back is a plain glyph, not a second pill',
-    await page.$eval('.day.is-open .wk-back .wk-turn', (t) => {
+    await page.$eval('.wk-back .wk-turn', (t) => {
       const cs = getComputedStyle(t);
       return !/gradient/.test(cs.backgroundImage) && !t.querySelector('.tn-foil');
     }));
@@ -1493,7 +1401,7 @@ const SAID = [
      repo has shipped one thing that passed the arithmetic and read
      2.92:1 on screen — and to 3:1, because a glyph is a graphic. */
   {
-    const b = await page.$eval('.day.is-open .wk-front .wk-turn',
+    const b = await page.$eval('#scHdTurn',
       (e) => { const r = e.getBoundingClientRect();
                return { x: r.x, y: r.y, width: r.width, height: r.height }; });
     const png = PNG.sync.read(await page.screenshot({ clip: b }));
@@ -1514,9 +1422,9 @@ const SAID = [
     ok(`the glyph still clears 3:1 on the sheen (${r}:1)`, r >= 3, { r, ground: ground.p });
   }
 
-  await page.click('.day.is-open .wk-front .wk-turn');
+  await page.click('#scHdTurn');
   await page.waitForTimeout(700);
-  ok('pressing it turns the card over', await page.$eval('.day.is-open',
+  ok('pressing it turns the day over', await page.$eval('#scFlip',
     (d) => d.classList.contains('is-flipped')));
 
   /* ── and the pill's rim stops when its face turns away ──
@@ -1531,7 +1439,7 @@ const SAID = [
      A check that finds nothing must not pass, which is why the count
      is asserted beside the state. */
   ok('...and the pill’s rim stops once its face is turned away',
-    await page.$$eval('.day.is-open .wk-front .tn-foil > i',
+    await page.$$eval('#scHdTurn .tn-foil > i',
       (i) => i.length === 1
         && getComputedStyle(i[0]).animationPlayState === 'paused'));
 
@@ -1550,24 +1458,28 @@ const SAID = [
      has no control to press, so nothing is drawn whichever way the
      engine would have culled it. A source check for the declaration
      would pass on a stylesheet where it had no effect. */
-  ok('...and nothing of the front’s control is drawn behind the back',
-    await page.$eval('.day.is-open .wk-front .wk-turn',
-      (t) => getComputedStyle(t).visibility === 'hidden'
-        && t.getClientRects().length > 0));
+  /* The control is in the HEAD now rather than on the front face, so
+     there is nothing of it inside the rotation for an engine to draw
+     through the back — which is the bug made impossible rather than
+     guarded against. What is asserted is that it is still the one
+     control, outside the turning panel. */
+  ok('...and the control is outside the panel that turns',
+    await page.$eval('#scHdTurn', (t) => !t.closest('#scFlip'))
+    && await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 0);
   /* MEASURED, not the class. backface-visibility is what makes this a
      card with a back rather than two panels that swap, and without it
      the schedule reads through the objectives mirror-imaged. */
   const facing = await page.evaluate(() => {
     const m = new DOMMatrix(getComputedStyle(
-      document.querySelector('.day.is-open .wk-flip')).transform);
+      document.querySelector('#scFlip')).transform);
     return { a: Math.round(m.a * 100) / 100,
-      back: getComputedStyle(document.querySelector('.day.is-open .wk-back'))
+      back: getComputedStyle(document.querySelector('.wk-back'))
         .backfaceVisibility };
   });
   ok('...really turned, with the far side hidden rather than mirrored',
     facing.a <= -0.99 && facing.back === 'hidden', facing);
   ok('an empty back says what the face is for',
-    (await page.$$eval('.day.is-open .ob-empty', (p) => p.length)) === 1);
+    (await page.$$eval('.ob-empty', (p) => p.length)) === 1);
   /* HEADED ANYWAY, and it was not. The argument for drawing the
      heading only over a list was sound and wrong about which nothing
      this is: an empty card is not a card with no heading, it is a card
@@ -1575,7 +1487,7 @@ const SAID = [
      Without it the face opens on a plus and a sentence floating in a
      gradient, anchored to nothing. */
   ok('...and is headed all the same, so the empty face is still a list',
-    (await page.$$eval('.day.is-open .ob-head b',
+    (await page.$$eval('.ob-head b',
       (h) => h.map((x) => x.textContent).join())) === 'Main objectives');
 
   /* ── AND THE FRONT IS NOT DRAWN THROUGH IT ──
@@ -1605,7 +1517,7 @@ const SAID = [
      face and requires the count to be non-zero, because a check that
      finds nothing passes. */
   const turned = await page.evaluate(() => {
-    const f = document.querySelector('.day.is-open .wk-front');
+    const f = document.querySelector('.wk-front');
     const cs = getComputedStyle(f);
     /* ── THE THING THAT LEAKS IS A PSEUDO-ELEMENT ──
        The sweep is `.row.is-now::after`, and querySelectorAll('*')
@@ -1643,34 +1555,30 @@ const SAID = [
     + `${turned.pseudo} of them pseudo-elements)`,
     turned.anim > 0 && turned.pseudo > 0 && turned.running === 0, turned.marks);
 
-  /* ── THE SAME CORNER ON BOTH FACES ──
+  /* ── THE SAME CORNER IS NOW THE SAME CONTROL ──
      The control sat between the day and the hours on the front and at
-     the end on the back, so you pressed one place to turn the card over
-     and a different one to come back. Measured rather than eyeballed:
-     the two controls have to land on the same pixels. */
-  const corners = await page.evaluate(() => {
-    /* LAYOUT coordinates, not client rects. The front sits inside a
-       180-degree rotation while the card is turned over, so its rects
-       come back MIRRORED — the control 11px from its own right edge
-       reported 227px from the card's right, which is 238 minus 11: the
-       same corner seen from behind. offsetLeft is unaffected by a
-       transform, and "the same corner of its own face" is the claim
-       being made anyway. */
-    const box = (sel) => {
-      const e = document.querySelector('.day.is-open ' + sel + ' .wk-turn');
-      const h = e.parentElement;
-      return { right: Math.round(h.offsetWidth - (e.offsetLeft + e.offsetWidth)),
-               top: Math.round(e.offsetTop) };
-    };
-    return { f: box('.wk-front'), b: box('.wk-back') };
+     the end on the back, so you pressed one place to turn the card
+     over and a different one to come back — and the check that fixed
+     that measured the two corners against each other in layout
+     coordinates. There is one control in the head now and it turns
+     the panel both ways, which is the same guarantee arrived at by
+     not having two controls: what is asserted is that it is still
+     there, still named for what it will do, once the day is turned. */
+  const backTurn = await page.evaluate(() => {
+    const b = document.getElementById('scHdTurn');
+    const r = b.getBoundingClientRect();
+    return { drawn: r.width > 0 && r.height > 0,
+             lab: b.getAttribute('aria-label'),
+             back: b.classList.contains('is-back'),
+             right: Math.round(window.innerWidth - r.right) };
   });
-  ok('the turn control is in the same corner on both faces',
-    Math.abs(corners.f.right - corners.b.right) <= 1
-    && Math.abs(corners.f.top - corners.b.top) <= 2, corners);
+  ok('the one control turns it back, from the same corner',
+    backTurn.drawn && backTurn.back && backTurn.right < 90
+    && /Back to the schedule/.test(backTurn.lab), backTurn);
 
   /* ── writing one ── */
   const addObj = async (text) => {
-    await page.click('.day.is-open .ob-add');
+    await page.click('.ob-add');
     await page.waitForTimeout(420);
     await page.fill('.sheet input[type=text]', text);
     await page.click('.sheet .btn.go');
@@ -1679,7 +1587,7 @@ const SAID = [
   await addObj('Call a hundred clients');
   await addObj('Walk the dog before it gets dark');
 
-  const obs = await page.$$eval('.day.is-open .ob', (b) => b.map((x) => ({
+  const obs = await page.$$eval('.ob', (b) => b.map((x) => ({
     text: x.querySelector('.ob-t').textContent,
     icon: x.querySelector('.ob-ic').getAttribute('data-icon'),
     frog: x.classList.contains('is-frog'),
@@ -1696,9 +1604,9 @@ const SAID = [
      the paw rather than the walker. */
   ok('...with a glyph worked out from those same words',
     obs[0].icon === 'call' && obs[1].icon === 'pet', obs.map((o) => o.icon));
-  const icSize = await page.$eval('.day.is-open .ob-ic', (e) => ({
+  const icSize = await page.$eval('.ob-ic', (e) => ({
     w: Math.round(e.getBoundingClientRect().width),
-    t: Math.round(document.querySelector('.day.is-open .ob-t')
+    t: Math.round(document.querySelector('.ob-t')
       .getBoundingClientRect().width),
   }));
   /* SMALL, and a marker rather than a picture: the sentence is the
@@ -1716,8 +1624,8 @@ const SAID = [
      quieter than it was, and asserted rather than assumed. */
   const obMarks = await page.evaluate(() => {
     const g = (s) => getComputedStyle(document.querySelector(s));
-    const frog = g('.day.is-open .ob.is-frog .ob-ic');
-    const rest = g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-ic');
+    const frog = g('.ob.is-frog .ob-ic');
+    const rest = g('.ob:not(.is-frog):not(.is-done) .ob-ic');
     /* THE ROOT, not the heading. This read its expected value off
        MAIN OBJECTIVES, which was the accent — and the day every title
        in the app went white it would have started asserting that the
@@ -1726,15 +1634,15 @@ const SAID = [
     const red = 'rgb(' + getComputedStyle(document.documentElement)
       .getPropertyValue('--red').trim().replace('#', '').match(/\w\w/g)
       .map((x) => parseInt(x, 16)).join(', ') + ')';
-    const head = g('.day.is-open .ob-head b').color;
+    const head = g('.ob-head b').color;
     return { frog: frog.stroke, rest: rest.stroke, red, head,
       fw: parseFloat(frog.strokeWidth), rw: parseFloat(rest.strokeWidth),
-      ft: g('.day.is-open .ob.is-frog .ob-t').fontWeight,
-      rt: g('.day.is-open .ob:not(.is-frog):not(.is-done) .ob-t').fontWeight,
+      ft: g('.ob.is-frog .ob-t').fontWeight,
+      rt: g('.ob:not(.is-frog):not(.is-done) .ob-t').fontWeight,
       ink: getComputedStyle(document.documentElement)
         .getPropertyValue('--ink').trim(),
       words: [...document.querySelectorAll(
-        '.day.is-open .ob:not(.is-done) .ob-t')].map((t) =>
+        '.ob:not(.is-done) .ob-t')].map((t) =>
         getComputedStyle(t).color) };
   });
   ok('every objective\u2019s glyph is in the accent, not just the first',
@@ -1756,7 +1664,7 @@ const SAID = [
       const c = getComputedStyle(p).color; p.remove(); return c;
     }, obMarks.ink), obMarks.words);
   ok('...and never by a rank number',
-    (await page.$$eval('.day.is-open .ob-n', (n) => n.length)) === 0);
+    (await page.$$eval('.ob-n', (n) => n.length)) === 0);
 
   /* ── the face names itself, in the accent ──
      Every other heading in this app is white and this one is not. The
@@ -1765,29 +1673,29 @@ const SAID = [
      caption for something else rather than as the name of the thing
      you turned the card to find. */
   ok('the list is headed, in the accent the marks under it wear',
-    (await page.$eval('.day.is-open .ob-head b', (e) => e.textContent))
+    (await page.$eval('.ob-head b', (e) => e.textContent))
       === 'Main objectives' && obMarks.head === obMarks.red
       && obMarks.rest === obMarks.red, obMarks);
 
   /* ── re-ranking is one move, and always the same move ── */
-  await page.click('.day.is-open .ob-add');
+  await page.click('.ob-add');
   await page.waitForTimeout(420);
   await page.click('.sheet .ob-edit .btn.off');
   await page.waitForTimeout(560);
-  const ranked = await page.$$eval('.day.is-open .ob-t',
+  const ranked = await page.$$eval('.ob-t',
     (t) => t.map((x) => x.textContent));
   ok('making one the main objective moves it up, and nothing else moves',
     ranked[0] === 'Walk the dog before it gets dark'
     && ranked[1] === 'Call a hundred clients', ranked);
 
   /* ── ticking ── */
-  await page.click('.day.is-open .ob >> nth=0');
+  await page.click('.ob >> nth=0');
   await page.waitForTimeout(460);
   ok('an objective ticks where it stands',
-    await page.$eval('.day.is-open .ob', (b) => b.classList.contains('is-done')
+    await page.$eval('.ob', (b) => b.classList.contains('is-done')
       && b.getAttribute('aria-pressed') === 'true'));
-  ok('...and the card stays turned over while you do it',
-    await page.$eval('.day.is-open', (d) => d.classList.contains('is-flipped')));
+  ok('...and the day stays turned over while you do it',
+    await page.$eval('#scFlip', (d) => d.classList.contains('is-flipped')));
   /* ── EVERY TICK IN THIS APP IS THE ACCENT ──
      There are four and they are all the same claim: a done objective, a
      done block, a picked workout, and Done today. This one was --ink,
@@ -1799,7 +1707,7 @@ const SAID = [
     const cs = getComputedStyle(document.documentElement);
     const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
       .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
-    const t = document.querySelector('.day.is-open .ob.is-done .ob-tick');
+    const t = document.querySelector('.ob.is-done .ob-tick');
     return { stroke: t && getComputedStyle(t).stroke,
       shown: t && +getComputedStyle(t).opacity,
       accent: rgb('--red'), ink: rgb('--ink') };
@@ -1823,7 +1731,7 @@ const SAID = [
      A sheen mixed from the palette and never a literal: thirteen themes
      move --red and --ink together, so a gradient written in hex would
      be somebody else's card on twelve of them. */
-  const sheen = await page.$eval('.day.is-open .wk-back',
+  const sheen = await page.$eval('.wk-back',
     (e) => getComputedStyle(e).backgroundImage);
   ok('the back is a gradient rather than a flat fill',
     (sheen.match(/gradient/g) || []).length >= 2, sheen.slice(0, 80));
@@ -1835,7 +1743,7 @@ const SAID = [
      to fight. Measured on composited pixels, and polarity-agnostic —
      seven of the thirteen palettes are dark. */
   const obInk = await (async () => {
-    const box = await page.$eval('.day.is-open .ob:not(.is-done) .ob-t', (e) => {
+    const box = await page.$eval('.ob:not(.is-done) .ob-t', (e) => {
       const b = e.getBoundingClientRect();
       return { x: b.x, y: b.y, w: b.width, h: b.height };
     });
@@ -1865,7 +1773,7 @@ const SAID = [
      outer box and the thing that turns is masked BY it — rotating the
      ring itself would swing a rounded rectangle round on its corner. */
   const foil = await page.evaluate(() => {
-    const f = document.querySelector('.day.is-open .ob-foil');
+    const f = document.querySelector('.ob-foil');
     const i = f && f.firstElementChild;
     if (!i) return null;
     const fs = getComputedStyle(f), is = getComputedStyle(i);
@@ -1894,16 +1802,22 @@ const SAID = [
      own masked layer, costing a compositor pass a frame to draw
      something nobody can see. */
   ok('it runs on the card you are looking at', foil.play === 'running', foil.play);
-  const asleep = await page.$$eval('.day:not(.is-flipped) .ob-foil > i',
+  /* One panel, so the case that exists is the front: turn back to the
+     schedule and the objectives face is the one nobody can see. */
+  await page.evaluate(() => document.getElementById('scHdTurn').click());
+  await page.waitForTimeout(700);
+  const asleep = await page.$$eval('.ob-foil > i',
     (n) => n.map((x) => getComputedStyle(x).animationPlayState));
-  ok('...and is paused on every face that is turned away',
-    asleep.length === 6 && asleep.every((p) => p === 'paused'), asleep);
+  ok('...and is paused once that face is turned away',
+    asleep.length === 1 && asleep.every((p) => p === 'paused'), asleep);
+  await page.evaluate(() => document.getElementById('scHdTurn').click());
+  await page.waitForTimeout(700);
 
   /* Still, not gone: the rim is the thing that was asked for, and what
      the setting turns off is the travelling. */
   await page.emulateMedia({ reducedMotion: 'reduce' });
   await page.waitForTimeout(140);
-  const foilStill = await page.$eval('.day.is-open .ob-foil > i', (i) => ({
+  const foilStill = await page.$eval('.ob-foil > i', (i) => ({
     name: getComputedStyle(i).animationName,
     bg: /conic/.test(getComputedStyle(i).backgroundImage) }));
   ok('asked to sit still it stops travelling, and the rim stays',
@@ -1912,19 +1826,19 @@ const SAID = [
   await page.waitForTimeout(140);
 
   /* ── turning back ── */
-  await page.click('.day.is-open .wk-back .wk-turn');
+  await page.click('.wk-back .wk-turn');
   await page.waitForTimeout(700);
   ok('and it turns back to the schedule',
-    await page.$eval('.day.is-open', (d) => !d.classList.contains('is-flipped')));
+    await page.$eval('.week', (d) => !d.classList.contains('is-flipped')));
   /* The turn is NOT remembered. An objective is for today, and a card
      found face-down tomorrow morning is the app having kept the wrong
      half of a decision. */
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(340);
   ok('...and a card is never found face-down on the next visit',
-    await page.$$eval('.day.is-flipped', (d) => d.length) === 0);
+    await page.$$eval('#scFlip.is-flipped', (d) => d.length) === 0);
   ok('...though what was written on it survives',
-    await page.$$eval('.day.is-open .ob', (b) => b.length) === 2);
+    await page.$$eval('.ob', (b) => b.length) === 2);
 
   /* Each view is its own labelled tab, so a view is asked for by
      name rather than reached by pressing a cycling button until it
@@ -1936,7 +1850,7 @@ const SAID = [
       const at = await page.evaluate(() => ({
         tally: !document.getElementById('scTally').hidden,
         friends: !document.getElementById('scFriends').hidden,
-        rail: !document.getElementById('scRail').hidden,
+        rail: !document.getElementById('scWeek').hidden,
       }));
       if ((v === 'tally' && at.tally)
           || (v === 'friends' && at.friends) || (v === 'list' && at.rail)) return;
@@ -1969,8 +1883,8 @@ const SAID = [
       const r = el.getBoundingClientRect();
       return r.width > 1 && r.height > 1;
     };
-    return { rail: box('scDeckWin'), tally: box('scTally'),
-             friends: box('scFriends'), dots: box('.wk-dots') };
+    return { rail: box('scWeek'), tally: box('scTally'),
+             friends: box('scFriends') };
   });
   for (const [v, want] of [['list', 'rail'],
                            ['tally', 'tally'], ['friends', 'friends']]) {
@@ -1980,12 +1894,9 @@ const SAID = [
     ok(`on ${v}, ${want} is the only view drawing`,
       on[want] && ['rail', 'tally', 'friends']
         .filter((k) => k !== want).every((k) => !on[k]), { v, on });
-    /* The dots are a sibling of the rail rather than a child — a page
-       indicator that scrolls sideways with the cards it indicates is
-       not an indicator — so they are a second thing to hide, and they
-       were the half that got left behind. */
-    ok(`...and the deck's dots go with it`, on.dots === (want === 'rail'),
-      { v, dots: on.dots });
+    /* The dots were a sibling of the rail rather than a child, so
+       they were a second thing to hide and were the half left behind.
+       There is one section per view now and nothing beside it. */
   }
   await show('list');
   await page.waitForTimeout(160);
@@ -1997,7 +1908,7 @@ const SAID = [
      only symptom is the card you find when you return, which is why it
      needs a check that leaves and comes back rather than one that looks
      at the deck standing still. */
-  const openName = () => page.$$eval('.day.is-open .day-name',
+  const openName = () => page.$$eval('#scHdDay',
     (d) => d.map((x) => x.textContent).join());
   ok('the week opens on today to begin with',
     (await openName()) === 'Tuesday', await openName());
@@ -2016,16 +1927,15 @@ const SAID = [
      geometry to say anything. A press is the whole mechanism now. */
   const goTo = async (dow) => {
     const hit = await page.evaluate((d) => {
-      const li = [...document.querySelectorAll('#scRail .day')]
+      const b = [...document.querySelectorAll('.st-d')]
         .find((x) => +x.dataset.d === d);
-      const f = li && li.querySelector('.wk-face');
-      if (!f) return false;
-      f.click();
+      if (!b) return false;
+      b.click();
       return true;
     }, dow);
     if (!hit) return false;
     await page.waitForTimeout(420);
-    return +(await page.$eval('.day.is-open', (e) => e.dataset.d)) === dow;
+    return +(await page.$eval('.week', (e) => e.dataset.d)) === dow;
   };
 
   /* ── every day opens, in one press ──
@@ -2040,174 +1950,18 @@ const SAID = [
     ok(`one press opens ${['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]}`,
       await goTo(dow), await openName());
   }
-  /* ── and it lands in the MIDDLE, including at the ends ──
-     A scroller stops at 0, so without a lead-in the first card cannot
-     be centred however far it is scrolled: Monday opened against the
-     left edge while every other day sat in the middle. The room either
-     side is half the difference between the rail and an open card, done
-     in CSS — nothing depends on it being right now that a press is what
-     opens a card, so it is arithmetic rather than a measured constant.
+  /* ── THE DECK'S OWN GEOMETRY WENT WITH THE DECK ──
+     Centring a card by moving a track, a window measured against the
+     painted floor of the bar and re-measured on every viewport move,
+     a press target over each shut card, and a width transition
+     between two lengths: five sections of this file, each of them a
+     fix for a problem the deck created. One day is drawn now and the
+     column it sits in is a flex child, so there is no arithmetic left
+     to get wrong and nothing to assert about it.
 
-     Every day, not just the ends: the ends are where it showed, not the
-     whole of it. Measured on composited geometry, because the value
-     that matters is where the card actually is. */
-  const offCentre = async () => page.evaluate(() => {
-    const win = document.getElementById('scDeckWin');
-    const o = win.querySelector('.day.is-open');
-    const wb = win.getBoundingClientRect(), r = o.getBoundingClientRect();
-    return Math.round(Math.abs((r.left + r.width / 2) - (wb.left + wb.width / 2)));
-  });
-  const strays = [];
-  for (const dow of [1, 2, 3, 4, 5, 6, 0]) {
-    await goTo(dow);
-    const off = await offCentre();
-    if (off > 2) strays.push(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][dow]
-      + ' off by ' + off);
-  }
-  ok('every day, opened, sits in the middle of the deck',
-    strays.length === 0, strays);
-
-  /* ── THE DECK IS AS TALL AS THE SCREEN ALLOWS AND NO TALLER ──
-     The card is measured, never set — the gap from the top of the deck
-     window down to the bar, less what the page dots take. Two things
-     make that easy to get wrong in opposite directions, so both are
-     asserted rather than the height itself, which moves with the type
-     scale and the notch.
-
-     THE FLOOR IS WHAT IS PAINTED. `.bar` is `background: none`: a
-     transparent frame whose own padding puts the tab pill and the add
-     button 7px below the box it reports. Measuring the box threw those
-     seven pixels away for a surface that draws nothing — so the floor
-     is the topmost painted child, and the comment in the app that said
-     the pill reaches ABOVE its box was simply false.
-
-     AND NOTHING MAY TOUCH. The dots are a sibling of the rail and have
-     twice ended up underneath the bar; the deck growing into them is
-     the same bug from the other side. Every drawn thing is required to
-     clear the next one with a real gap, so "as large as possible"
-     cannot quietly become "one pixel into the tab bar". */
-  const fit = await page.evaluate(() => {
-    const b = (s2) => { const e = document.querySelector(s2);
-      if (!e) return null; const r = e.getBoundingClientRect();
-      return { top: +r.top.toFixed(1), bot: +r.bottom.toFixed(1) }; };
-    const bar = document.querySelector('.bar');
-    const painted = [].map.call(bar.children, (k) => k.getBoundingClientRect().top)
-      .filter((t) => t > 0);
-    return { win: b('#scDeckWin'), dots: b('.wk-dots'),
-      barBox: +bar.getBoundingClientRect().top.toFixed(1),
-      floor: +Math.min.apply(null, painted).toFixed(1),
-      vh: window.innerHeight };
-  });
-  ok(`the deck clears the page dots (${(fit.dots.top - fit.win.bot).toFixed(1)}px)`,
-    fit.dots.top - fit.win.bot >= 4, fit);
-  ok(`and the dots clear the bar's painted edge `
-    + `(${(fit.floor - fit.dots.bot).toFixed(1)}px)`,
-    fit.floor - fit.dots.bot >= 6, fit);
-  /* The slack that is left. The bar's box is taller than anything drawn
-     in it, so a deck that stops at the BOX is leaving real card on the
-     table — this fails if that regresses, and it is the half that
-     "nothing overlaps" alone would never notice. */
-  ok(`and it uses the room the bar only appears to take `
-    + `(${(fit.floor - fit.win.bot).toFixed(1)}px from deck to painted floor)`,
-    fit.floor - fit.win.bot <= 30, fit);
-
-  /* ── AND IT RE-FITS WHEN THE VIEWPORT MOVES ──
-     The height is measured, and it was measured ONCE per render —
-     right on a home screen, where the viewport is a constant, and
-     wrong in every browser, where it is not. Safari collapses its URL
-     bar as you scroll and hands the page back fifty-odd pixels;
-     rotating does the same anywhere, and so does a keyboard closing.
-     The deck kept whatever height it was given while the chrome was
-     still showing, so the card sat short of the bar with visible room
-     under it and no way to claim it — reported from a phone, in
-     Safari, as room going spare below the card.
-
-     Its own page: this resizes the viewport, and a file that leaves
-     the next section measuring a different screen is the kind of
-     cross-talk that reports as ten unrelated failures. */
-  {
-    const rctx = await browser.newContext(PHONE);
-    const rpage = await rctx.newPage();
-    await rpage.addInitScript(() => {
-      localStorage.setItem('sched.tour.v1', '1');
-      localStorage.setItem('sched.view.v1', 'list');
-      localStorage.setItem('sched.net.v1',
-        JSON.stringify({ on: false, url: '', code: '' }));
-    });
-    /* Short first, as though the browser's own chrome were showing. */
-    await rpage.setViewportSize({ width: 390, height: 750 });
-    await rpage.goto(`${BASE}/schedule/`, { waitUntil: 'networkidle' });
-    await rpage.waitForTimeout(500);
-    const deckOf = () => rpage.evaluate(() => {
-      const w = document.getElementById('scDeckWin').getBoundingClientRect();
-      const bar = document.querySelector('.bar');
-      const painted = [].map.call(bar.children, (k) => k.getBoundingClientRect().top)
-        .filter((t) => t > 0);
-      const d = document.querySelector('.wk-dots').getBoundingClientRect();
-      return { vh: window.innerHeight, h: +w.height.toFixed(1),
-        bot: +w.bottom.toFixed(1), dotsBot: +d.bottom.toFixed(1),
-        floor: +Math.min.apply(null, painted).toFixed(1) };
-    });
-    const shortD = await deckOf();
-    await rpage.setViewportSize({ width: 390, height: 844 });
-    await rpage.waitForTimeout(500);
-    const tallD = await deckOf();
-    ok(`the deck re-fits when the viewport grows `
-      + `(${shortD.h} at ${shortD.vh}px, ${tallD.h} at ${tallD.vh}px)`,
-      tallD.h - shortD.h >= 80, { shortD, tallD });
-    /* And it does not overrun on the way — the same two clearances,
-       measured on the new viewport rather than assumed to survive. */
-    ok('...and still clears the bar afterwards',
-      tallD.floor - tallD.dotsBot >= 6 && tallD.floor - tallD.bot <= 30,
-      tallD);
-    await rctx.close();
-  }
-
-  /* And the shut cards are real buttons, which is what makes the week
-     reachable without a swipe at all. */
-  ok('every shut card is a named, focusable control',
-    await page.$$eval('.day:not(.is-open) .wk-face', (f) => f.length === 6
-      && f.every((x) => x.tagName === 'BUTTON'
-        && /^Open \w+$/.test(x.getAttribute('aria-label') || ''))),
-    await page.$$eval('.day:not(.is-open) .wk-face',
-      (f) => f.map((x) => x.getAttribute('aria-label'))));
-  /* On the open card it is put away — a transparent button over the
-     rows would swallow every press meant for a block. */
-  ok('...and the open card has none over its rows',
-    await page.$eval('.day.is-open .wk-face',
-      (f) => getComputedStyle(f).display) === 'none');
-  await goTo(2);
-
-  /* ── the card opens rather than jumping open ──
-     76px to 268px in one frame, with the deck re-centring on it in the
-     same frame, read as a snap on the end of your own swipe rather than
-     as a card turning to face you. Both eased now. The width has to be
-     a length in both states for there to be anything to interpolate,
-     which is what is actually asserted — a transition naming `width`
-     over an `auto` does nothing and looks identical in the stylesheet. */
-  const ease = await page.evaluate(() => {
-    const open = document.querySelector('.day.is-open');
-    const shut = document.querySelector('.day:not(.is-open)');
-    const a = getComputedStyle(open), b = getComputedStyle(shut);
-    return { prop: a.transitionProperty, dur: a.transitionDuration,
-             openW: a.width, shutW: b.width };
-  });
-  ok('the card animates its own width', /width/.test(ease.prop)
-    && parseFloat(ease.dur) > 0, ease);
-  ok('...and both states are a length, so there is something to animate',
-    /^\d/.test(ease.openW) && /^\d/.test(ease.shutW)
-    && parseFloat(ease.openW) > parseFloat(ease.shutW), ease);
-
-  /* Motion is the entire subject of that rule, so this is a real
-     setting rather than a formality. */
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForTimeout(120);
-  ok('...and asked to sit still, it does',
-    await page.$eval('.day.is-open', (e) =>
-      parseFloat(getComputedStyle(e).transitionDuration) === 0));
-  await page.emulateMedia({ reducedMotion: null });
-  await page.waitForTimeout(120);
-
+     What was worth keeping is below: pressing a day opens that day,
+     the choice survives leaving the week, and every day is its own
+     date. */
   /* ── a day you swiped to survives the trip too ──
      The deck's scrollLeft is reset by hiding it, so coming back has to
      put the open card in the middle again — otherwise the day you chose
@@ -2224,15 +1978,15 @@ const SAID = [
   ok('...and it is still the open one after leaving the week',
     (await openName()) === 'Friday', await openName());
   const centred = await page.evaluate(() => {
-    const win = document.getElementById('scDeckWin');
-    const el = win.querySelector('.day.is-open');
+    const win = document.getElementById('scWeek');
+    const el = win.querySelector('.day-card');
     const r = el.getBoundingClientRect(), b = win.getBoundingClientRect();
     return Math.round(Math.abs((r.left + r.width / 2) - (b.left + b.width / 2)));
   });
-  ok('...and back in the middle of the deck rather than off the side',
+  ok('...and its rows are on screen where the day you left was',
     centred <= 6, centred);
   /* Put the week back on today for everything that follows. */
-  ok('...and the deck goes back to today when asked', await goTo(2)
+  ok('...and it goes back to today when asked', await goTo(2)
     && (await openName()) === 'Tuesday', await openName());
 
   /* And the card it lands on is one you can actually reach: a deck left
@@ -2240,9 +1994,9 @@ const SAID = [
      container is display:none, so every row measures zero and nothing
      on this screen can be pressed. */
   ok('...with today drawn wide enough to hold its rows',
-    await page.$eval('.day.is-open', (d) => d.getBoundingClientRect().width) > 200);
+    await page.$eval('.week', (d) => d.getBoundingClientRect().width) > 200);
   ok('...and its rows on screen',
-    await page.$eval('.day.is-today .row[data-id]',
+    await page.$eval('.week.is-today .row[data-id]',
       (r) => { const b = r.getBoundingClientRect();
                return b.width > 100 && b.height > 20; }));
 
@@ -2272,10 +2026,22 @@ const SAID = [
   });
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(260);
-  const perDay = await page.$$eval('.day', (days) => days.map((li) => ({
-    day: li.querySelector('.ob-day').textContent,
-    obj: [...li.querySelectorAll('.ob-t')].map((t) => t.textContent).join('|'),
-  })));
+  const perDay = await (async () => {
+    const out = [];
+    for (const d of [0, 1, 2, 3, 4, 5, 6]) {
+      await goTo(d);
+      await page.evaluate(() => document.getElementById('scHdTurn').click());
+      await page.waitForTimeout(120);
+      out.push(await page.evaluate(() => ({
+        day: document.getElementById('scHdDay').textContent,
+        obj: [...document.querySelectorAll('.ob-t')].map((t) => t.textContent).join('|'),
+      })));
+      await page.evaluate(() => document.getElementById('scHdTurn').click());
+      await page.waitForTimeout(120);
+    }
+    await goTo(2);
+    return out;
+  })();
   const byName = Object.fromEntries(perDay.map((r) => [r.day, r.obj]));
   ok('a past day’s card carries that day’s objectives',
     byName.Monday === 'Monday only', byName);
@@ -2380,7 +2146,7 @@ const SAID = [
   await page.waitForTimeout(220);
   ok('a view that no longer exists lands on the week, not on nothing',
     await page.evaluate(() => {
-      const r = document.getElementById('scDeckWin').getBoundingClientRect();
+      const r = document.getElementById('scWeek').getBoundingClientRect();
       return r.width > 1 && r.height > 1
         && !document.querySelector('#scRing, #scTabRing, .sr-wrap');
     }));
@@ -2436,9 +2202,11 @@ const SAID = [
      The dots are centred with real page either side of them, so the
      page is asked where its own ground is. */
   const corner = await (async () => {
+    /* Sampled beside the day strip, which has real page either side
+       of it — the dots it used to be read next to went with the deck. */
     const at = await page.evaluate(() => {
-      const d = document.querySelector('.wk-dots').getBoundingClientRect();
-      return { x: Math.round(d.left / 2), y: Math.round(d.top + d.height / 2) };
+      const d = document.querySelector('.strip').getBoundingClientRect();
+      return { x: Math.round(d.left + 2), y: Math.round(d.bottom + 4) };
     });
     const png = PNG.sync.read(await page.screenshot());
     const i = (png.width * Math.round(at.y * dpr) + Math.round(at.x * dpr)) << 2;
@@ -2453,7 +2221,7 @@ const SAID = [
      page dots, which is inside the gradient, so a literal would be a
      number nobody could re-derive. */
   ok('the default ground is the near-black the stylesheet ships',
-    corner.every((c) => c < 60) && Math.max.apply(null, corner) > 4, corner);
+    corner.every((c) => c < 90) && Math.max.apply(null, corner) > 4, corner);
 
   /* ── the bar sits IN the ground, not on it ──
      The gradient is weighted to the foot of the page, which is exactly
@@ -2629,13 +2397,12 @@ const SAID = [
 
   const tal = await page.evaluate(() => ({
     up: !document.getElementById('scTally').hidden,
-    rail: document.getElementById('scRail').hidden,
-    span: document.getElementById('scSpan').hidden,
+    rail: document.getElementById('scWeek').hidden,
     cards: document.querySelectorAll('.ty-card').length,
     cap: document.getElementById('scTallyCap').textContent,
   }));
   ok('the tally is a third view and it replaces the week',
-    tal.up && tal.rail && tal.span, tal);
+    tal.up && tal.rail, tal);
   /* SIX, and it was five for a year: Sleep is the number that explains
      the other five, and the only one of them you did not do. */
   ok('six cards, and the list is not editable from anywhere',
@@ -2825,7 +2592,7 @@ const SAID = [
      invalid, the same trap the folding panels have a rule about. */
   await show('list');
   await page.evaluate(() => {
-    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+    [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Walk')).click();
   });
   await page.waitForTimeout(360);
@@ -2957,7 +2724,7 @@ const SAID = [
      row draws a tick for any done block now, so the state is visible
      and the refusal was the leftover. */
   await page.evaluate(() => {
-    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+    [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
   });
   await page.waitForTimeout(360);
@@ -2989,7 +2756,7 @@ const SAID = [
 
   /* Put it back, so the rows below this see the week they expect. */
   await page.evaluate(() => {
-    [...document.querySelectorAll('.day.is-today .row[data-id]')]
+    [...document.querySelectorAll('.week.is-today .row[data-id]')]
       .find((r) => r.querySelector('.n').textContent.startsWith('Trading')).click();
   });
   await page.waitForTimeout(360);
@@ -3406,7 +3173,7 @@ const SAID = [
     await page.waitForTimeout(360);
     const open = async (name) => {
       await page.evaluate((n) => {
-        [...document.querySelectorAll('.day.is-today .row[data-id]')]
+        [...document.querySelectorAll('.week.is-today .row[data-id]')]
           .find((r) => r.querySelector('.n').textContent.startsWith(n)).click();
       }, name);
       await page.waitForTimeout(420);
@@ -3419,7 +3186,7 @@ const SAID = [
     const marks = await page.evaluate(() => ({
       done: !!JSON.parse(localStorage.getItem('sched.log.v1') || '{}')[
         Object.keys(JSON.parse(localStorage.getItem('sched.log.v1') || '{}'))[0]],
-      hrs: document.querySelector('.day.is-today .wk-hrs').textContent }));
+      hrs: document.getElementById('scHdDate').textContent }));
     await page.keyboard.press('Escape');
     await page.waitForTimeout(300);
 
@@ -3442,12 +3209,12 @@ const SAID = [
     await page.click('.sheet .mark-off');
     await page.waitForTimeout(560);
     const off = await page.evaluate(() => {
-      const r = [...document.querySelectorAll('.day.is-today .row[data-id]')]
+      const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
         .find((x) => x.querySelector('.n').textContent.startsWith('Train'));
       const cs = getComputedStyle(r.querySelector('.n'));
       const log = JSON.parse(localStorage.getItem('sched.log.v1') || '{}');
       return { cls: r.className, line: cs.textDecorationLine,
-        hrs: document.querySelector('.day.is-today .wk-hrs').textContent,
+        hrs: document.getElementById('scHdDate').textContent,
         tick: !!r.querySelector('.tick'),
         done: Object.keys(log).some((d) => Object.keys(log[d]).length),
         off: !!localStorage.getItem('sched.off.v1') };
@@ -3469,8 +3236,8 @@ const SAID = [
 
     /* ── IT REACHES FURTHER FORWARD THAN DONE DOES ──
        You cannot mark something done before it happens; a day off is
-       exactly the thing you set in advance. Measured on a card the
-       deck draws that is not today — Done is refused there and Off is
+       exactly the thing you set in advance. Measured on a day the
+       strip reaches that is not today — Done is refused there and Off is
        not, which is the whole difference between the two resolvers. */
     const ahead = await page.evaluate(() => {
       /* THE WEEKDAY WHOSE MOST RECENT OCCURRENCE IS FOUR DAYS BACK,
@@ -3480,13 +3247,13 @@ const SAID = [
          last card is Sunday and Sunday was two days ago, which IS open.
          Four back is outside it on every day of the week. */
       const w = (new Date().getDay() + 3) % 7;
-      const cards = [...document.querySelectorAll('.day')];
-      cards[(w + 6) % 7].querySelector('.wk-face').click();
+      [...document.querySelectorAll('.st-d')]
+        .find((b) => +b.dataset.d === w).click();
       return w;
     });
     await page.waitForTimeout(520);
     await page.evaluate(() => {
-      document.querySelector('.day.is-open .row[data-id]').click();
+      document.querySelector('.row[data-id]').click();
     });
     await page.waitForTimeout(440);
     const far = await page.evaluate(() => ({
@@ -3725,7 +3492,7 @@ const SAID = [
     document.querySelector('.ty-row .ty-hist').click();
     document.querySelector('.tab[data-view="list"]').click();
     return { veil: document.getElementById('scTyVeil').hidden,
-             gone: document.getElementById('scDeckWin').getBoundingClientRect().height > 1 };
+             gone: document.getElementById('scWeek').getBoundingClientRect().height > 1 };
   });
   ok('escape closes it, and takes the panel before the sheet',
     shutEsc === true, { shutEsc });
@@ -3901,7 +3668,7 @@ const SAID = [
     };
     return { face: cast('.wk-front'), toast: cast('.toast'),
       /* The rows are the card material now and cast with it. */
-      row: cast('.row'), tyRow: cast('.ty-row'),
+      row: cast('.row'), tyRow: cast('.ty-row'), back: cast('.wk-back'),
       others: ['.day-card', '.poster', '.ty-card', '.chk']
         .map((sel) => [sel, cast(sel)])
         .filter(([, v]) => v > 0) };
@@ -3912,8 +3679,13 @@ const SAID = [
      same reason and always did — it is a transient surface over the
      whole app, and it had no note beside it saying so, which is how
      an exception becomes a precedent nobody argued for. */
-  ok('the day card casts, and the toast, and every row is a card that casts',
-    shade.face >= 1 && shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1, shade);
+  /* THE FACE STOPPED CASTING WHEN IT STOPPED BEING A CARD. Every row
+     is one now, and a panel around them was a card inside a card
+     inside the page. What casts is the row, the tally row and the
+     toast; the objectives face keeps a surface because it is one
+     sheet rather than a list of objects. */
+  ok('every row is a card that casts, and the toast, and the face you turn to',
+    shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1 && shade.back >= 1, shade);
   ok('...and the scroller, the poster and the press targets inside a card cast nothing',
     shade.others.length === 0, shade);
 
@@ -3929,7 +3701,7 @@ const SAID = [
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(250);
   const restored = await page.evaluate(() => ({
-    rail: document.getElementById('scRail').hidden,
+    rail: document.getElementById('scWeek').hidden,
     tally: document.getElementById('scTally').hidden,
     rows: document.querySelectorAll('.row[data-id]').length,
     view: localStorage.getItem('sched.view.v1'),
@@ -4336,7 +4108,7 @@ const SAID = [
      rather than as a test that left the furniture where it found it. */
   await show('list');
   ok('and the rail is back for what follows',
-    await page.evaluate(() => !document.getElementById('scRail').hidden));
+    await page.evaluate(() => !document.getElementById('scWeek').hidden));
 
   /* ── the thumb ──
      A check only sees what is on screen. Measuring this with no sheet
@@ -4344,7 +4116,7 @@ const SAID = [
      and the sheet's buttons are never looked at, and the seven chips
      were in fact under the floor when this was first written. */
   console.log('\n── the thumb ──');
-  await page.click('.day.is-today .row[data-id]');
+  await page.click('.week.is-today .row[data-id]');
   await page.waitForTimeout(360);
   ok('the edit sheet is up to be measured',
     await page.$$eval('.pick', (p) => p.length) === 7);
@@ -5404,20 +5176,19 @@ const SAID = [
     await up.waitForTimeout(400);
     const twelve = await up.evaluate(() => ({
       head: document.getElementById('scHdDate').textContent,
-      a: document.getElementById('scSpanA').textContent,
-      b: document.getElementById('scSpanB').textContent,
-      row: [...document.querySelectorAll('.day.is-open .row[data-id] .t')]
+      row: [...document.querySelectorAll('.row[data-id] .t')]
         .map((t) => t.textContent),
     }));
+    /* The span's own two ends went with the span; the head's clock
+       and the rows' ranges are what a person reads a time off now. */
     ok('a 12-hour phone gets 12-hour times',
-      /9:30 AM$/.test(twelve.head) && twelve.a === '5:45 AM'
-      && twelve.b === '11:00 PM', twelve);
+      /9:30 AM$/.test(twelve.head), twelve);
     const withMer = twelve.row.filter((t) => /[AP]M/.test(t));
     ok('...and a row carries the meridiem once, on the end',
       withMer.length === twelve.row.length && twelve.row.length > 1
       && twelve.row.every((t) => (t.match(/[AP]M/g) || []).length === 1
         && /[AP]M$/.test(t)), twelve.row);
-    await up.click('.day.is-open .row[data-id]');
+    await up.click('.row[data-id]');
     await up.waitForTimeout(240);
     const fields = await up.$$eval('#scSheetBody input[type="time"]',
       (i) => i.map((x) => x.value));
@@ -6407,7 +6178,7 @@ const SAID = [
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(360);
     const row = await page.evaluate(() => {
-      const r = [...document.querySelectorAll('.day.is-today .row[data-id]')]
+      const r = [...document.querySelectorAll('.week.is-today .row[data-id]')]
         .find((x) => /Train/.test(x.querySelector('.n').firstChild.textContent));
       const em = r.querySelector('.n em.wo');
       /* Every grey asked for rather than typed. The palette moved
@@ -6439,7 +6210,7 @@ const SAID = [
     /* ── AND MEASURED ON A ROW THAT CANNOT BE BEHIND YOU ──
        The check above cannot fail at most hours, which is the shape
        this file already has a lesson about. `is-past` is set on
-       `.day.is-today .row` alone, so a fixture on today's 06:30 Train
+       `.week.is-today .row` alone, so a fixture on today's 06:30 Train
        resolves to --spent from about seven in the morning — and
        --spent is one of the two answers it accepts, so reverting the
        colour to --dim sails through it. Proven by doing exactly that.
@@ -6454,8 +6225,11 @@ const SAID = [
       const pad = (n) => String(n).padStart(2, '0');
       const iso = (d) => d.getFullYear() + '-' + pad(d.getMonth() + 1)
         + '-' + pad(d.getDate());
-      const ids = [...document.querySelectorAll('.row[data-id]')]
-        .map((r) => r.dataset.id);
+      /* From the STORE, not from the screen: one day is drawn, so
+         the ids on it are one day's and the row read below is on
+         another. */
+      const ids = (JSON.parse(localStorage.getItem('sched.v1')).items || [])
+        .map((b) => b.id);
       const train = {}, log = {};
       for (let k = -7; k <= 7; k++) {
         const d = new Date(); d.setDate(d.getDate() + k);
@@ -6475,18 +6249,24 @@ const SAID = [
     });
     await page.reload({ waitUntil: 'networkidle' });
     await page.waitForTimeout(360);
+    await page.evaluate(() => document.querySelector('.st-d:not(.is-on)').click());
+    await page.waitForTimeout(240);
     const ahead = await page.evaluate(() => {
       const cs = getComputedStyle(document.documentElement);
       const rgb = (k) => 'rgb(' + cs.getPropertyValue(k).trim().replace('#', '')
         .match(/\w\w/g).map((x) => parseInt(x, 16)).join(', ') + ')';
-      const r = document.querySelector('.day:not(.is-today) .row[data-id]');
+      const r = document.querySelector('.week:not(.is-today) .row[data-id]');
       const em = r && r.querySelector('.n em.wo');
       /* The tick is the circle check beside the row now, filled on a
          done block; it is a sibling, so it is found through the wrap. */
       const tk = r && r.parentElement.querySelector('.chk');
       /* The PLACE, on any row that has one — it and the session share a
          line, and the size is only a claim against something. */
-      const place = [...document.querySelectorAll('.row .n em:not(.wo)')][0];
+      /* The place is on the first item in the week, which is not
+         necessarily on the day being read — so it is measured off the
+         type scale rather than off whichever row happens to carry
+         one: a place is the row's own weight, a session a step down. */
+      const place = [...document.querySelectorAll('.row .n')][0];
       return { past: r && r.classList.contains('is-past'),
         wo: em && getComputedStyle(em).color,
         size: em && parseFloat(getComputedStyle(em).fontSize),
@@ -7422,17 +7202,30 @@ const SAID = [
       }, { k: todayKey, n: keep });
       await ppage.reload({ waitUntil: 'networkidle' });
       await ppage.waitForTimeout(600);
-      return ppage.evaluate(() => ({
-        asks: [...document.querySelectorAll('.day')]
-          .filter((c) => c.querySelector('.rt-ask')).map((c) => c.dataset.d),
+      /* ONE DAY IS DRAWN, so "today's day and no other" is asked by
+         walking the strip: press each day, and see which of the seven
+         puts the row up. A count on one screen would pass on a build
+         that drew it everywhere. */
+      return ppage.evaluate(async () => {
+        const asks = [];
+        for (const b of [...document.querySelectorAll('.st-d')]) {
+          b.click();
+          await new Promise((r) => setTimeout(r, 60));
+          if (document.querySelector('.rt-ask')) asks.push(b.dataset.d);
+        }
+        [...document.querySelectorAll('.st-d')]
+          .find((b) => +b.dataset.d === new Date().getDay()).click();
+        await new Promise((r) => setTimeout(r, 80));
+        return ({
+        asks,
         today: String(new Date().getDay()),
-        marks: document.querySelectorAll('.day.is-today .rt').length,
-        blocks: document.querySelectorAll('.day.is-today .row').length,
-        done: document.querySelectorAll('.day.is-today .row.is-done').length,
+        marks: document.querySelectorAll('.week.is-today .rt').length,
+        blocks: document.querySelectorAll('.week.is-today .row').length,
+        done: document.querySelectorAll('.week.is-today .row.is-done').length,
         /* Inside the scroller, so on a long day it is what you arrive
            at having gone through everything. */
-        inCard: !!document.querySelector('.day.is-today .day-card .rt-row'),
-      }));
+        inCard: !!document.querySelector('.week.is-today .day-card .rt-row'),
+      }); });
     };
     await plant({ n: 40, body:
       'return { tick: i <= 20 ? { t: 1 } : {}, rate: i <= 20 ? 5 : 1 };' });
@@ -7473,7 +7266,7 @@ const SAID = [
        A day rated four at the foot of the card had better be a day
        rated four on Pattern. */
     await ppage.evaluate(() =>
-      document.querySelectorAll('.day.is-today .rt')[3].click());
+      document.querySelectorAll('.week.is-today .rt')[3].click());
     await ppage.waitForTimeout(300);
     await ppage.evaluate(() => {
       localStorage.setItem('sched.view.v1', 'tally');
@@ -7861,7 +7654,7 @@ const SAID = [
     ok(`a touch drag scrolls a plain box in this browser (${ctl.top}px)`,
       ctl.top > 60, ctl);
 
-    const long = await dragUp('.day.is-open .day-card');
+    const long = await dragUp('.day-card');
     ok(`...and it scrolls a day with fourteen blocks on it `
       + `(${long.top} of ${long.max}px)`,
       long.max > 100 && long.top >= Math.min(long.max - 2, 300), long);
@@ -7877,7 +7670,7 @@ const SAID = [
        the back for some other purpose while the scrolling stays
        broken. */
     const spin = async () => spage.evaluate(() => {
-      const li = document.querySelector('.day.is-open');
+      const li = document.querySelector('.week');
       const g = (s) => getComputedStyle(li.querySelector(s));
       return { ts: g('.wk-flip').transformStyle,
                front: g('.wk-front').visibility,
@@ -7885,13 +7678,13 @@ const SAID = [
     });
     const seen = { rest: await spin() };
     await spage.evaluate(() =>
-      document.querySelector('.day.is-open .wk-front .wk-turn').click());
+      document.querySelector('#scHdTurn').click());
     await spage.waitForTimeout(170);
     seen.turning = await spin();
     await spage.waitForTimeout(850);
     seen.onBack = await spin();
     await spage.evaluate(() =>
-      document.querySelector('.day.is-open .wk-back .wk-turn').click());
+      document.querySelector('.wk-back .wk-turn').click());
     await spage.waitForTimeout(170);
     seen.returning = await spin();
     await spage.waitForTimeout(850);
@@ -7911,7 +7704,7 @@ const SAID = [
       seen);
     /* Still scrolls after a round trip, which is what the timer and
        the transitionend between them are for. */
-    const after = await dragUp('.day.is-open .day-card');
+    const after = await dragUp('.day-card');
     ok(`...and the card still scrolls after a turn there and back `
       + `(${after.top}px)`, after.top >= Math.min(after.max - 2, 300), after);
 
@@ -7937,7 +7730,7 @@ const SAID = [
        6px above the card's, which puts its two lines inside the fade
        at any row height and at any hour. */
     await spage.evaluate(() => {
-      const c = document.querySelector('.day.is-open .day-card');
+      const c = document.querySelector('.day-card');
       c.scrollTop = 0;
       const cb = c.getBoundingClientRect().bottom;
       const next = [...c.querySelectorAll('.row[data-id]')]
@@ -7946,7 +7739,7 @@ const SAID = [
     });
     await spage.waitForTimeout(200);
     const foot = await spage.evaluate(() => {
-      const r = document.querySelector('.day.is-open .day-card')
+      const r = document.querySelector('.day-card')
         .getBoundingClientRect();
       return { x: r.x, w: r.width, bot: r.bottom };
     });
@@ -8009,7 +7802,7 @@ const SAID = [
     await spage.reload({ waitUntil: 'networkidle' });
     await spage.waitForTimeout(650);
     const shortDay = await spage.evaluate(() => {
-      const c = document.querySelector('.day.is-open .day-card');
+      const c = document.querySelector('.day-card');
       return { over: c.scrollHeight - c.clientHeight,
                has: c.classList.contains('has-more') };
     });
@@ -8094,7 +7887,7 @@ const SAID = [
     await lpage.reload({ waitUntil: 'networkidle' });
     await lpage.waitForTimeout(400);
     const rowInk = await lpage.evaluate(() => {
-      const r = document.querySelector('.day.is-open .row[data-id]:not(.is-past)');
+      const r = document.querySelector('.row[data-id]:not(.is-past)');
       const b = r.getBoundingClientRect();
       const cs = getComputedStyle(document.documentElement);
       const t = r.querySelector('.t');

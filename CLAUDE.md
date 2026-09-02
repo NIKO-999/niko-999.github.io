@@ -4185,3 +4185,75 @@ pixels are a colour distance, because the per-channel gate let
 rather than the exact maximum, because the rows grew; and the fade is
 a ratio, because what the band lands on changed with the row's height
 and the mask takes the same share off either.
+
+## The deck is gone, and the week is a strip
+
+Craft shipped as the app's look and the week underneath it was still
+seven cards on a track: a window measured against the painted floor of
+the bar, a transform that centred the open one, page dots, a press
+target over every shut card, and a width transition between two
+lengths. It was reported as **"it looks like the old one with Craft
+implemented"** — which was exactly right. A skin over the old
+structure is the old app.
+
+**ONE DAY, DRAWN IN FULL.** The seven days are a strip of chips —
+Monday first, for the deck's own reason: a rail that begins on today
+moves every morning, so the week has no shape to remember and Thursday
+sits somewhere different each time you look. The day you press is
+drawn as one list under it.
+
+**And the page became a COLUMN.** `.poster` is a flex column with the
+head fixed and the view scrolling, so the list owns the room between
+the head and the bar without anything measuring it. `scDeckFit`,
+`scDeckRefit`, `scDeckCentre`, `scDeckJump` and the three viewport
+listeners went with it — four rounds of arithmetic doing what one flex
+child does. Five sections of `tests/schedule.js` went with them, and
+that is the point rather than a cost: they were all fixes for problems
+the deck created.
+
+**THE HEAD IS THE DAY.** It was an uppercase app name, a date line and
+the day's span with a dot on it. What is up here now is a glyph tile
+saying which screen, the day at 30px, and one line: the date, the
+hours committed, and the clock. The app's own name is a screen
+reader's heading and nothing drawn — renaming lives in Settings,
+beside the other things you set once.
+
+**The hours, not a count of blocks.** The prototype's line reads "9
+blocks"; the hours carry more, and they are the figure a day off
+changes. A count of rows could never say that, and the day-off check
+would have lost its subject.
+
+**THE SPAN WENT WITH THE DECK, and it is the second thing here removed
+for saying something twice.** It drew the day's first minute to its
+last with a dot at the clock — and the row that is running draws the
+same fact four inches lower, on the block it is actually about. Its
+dot's cast, its written label and its two ends were four assertions,
+and the running row's own checks already hold what they were for.
+
+**THE FRONT FACE DRAWS NOTHING.** Every row is a card, so a panel
+around them is a card inside a card inside the page — the
+frame-inside-a-frame this project keeps taking back out, and the last
+thing that made a day read as a card off a deck. The BACK keeps its
+surface: the objectives are one sheet rather than a list of objects,
+and the sheen is the whole of what says you turned something over.
+
+**The turn control moved to the head, and that dissolved two bugs.**
+It was built on all seven cards and drawn on the open one; there is
+one now, it turns the panel both ways, and it is OUTSIDE the rotation
+— so the iOS bug where a composited descendant of a backface-hidden
+ancestor drew through the back cannot happen, rather than being
+guarded against. The same-corner check became the same control.
+
+**`[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and that is
+the fifth time.** The rail, the page dots, the toast and the intro
+each had the attribute set correctly while an author `display`
+outranked the browser's own rule. Here it left the objectives control
+drawn on Today and on Friends, where there is no day to turn over.
+
+**A test that counts rows on screen is counting one day now.** Five
+assertions about the WEEK — a sentence naming two days writing two
+rows, a delete taking every day a block is on, undo putting it back —
+read the record instead, which is where the week lives. The ones that
+are genuinely about another day press its chip and read what is drawn:
+`rowsOf`, the per-date objectives, the finished-block time, what you
+trained, and the rating row walking all seven.

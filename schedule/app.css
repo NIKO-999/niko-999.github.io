@@ -297,7 +297,7 @@
 html { -webkit-text-size-adjust: 100%; background: var(--g0); }
 
 body {
-  min-height: 100dvh;
+  height: 100dvh;
   /* Wide and overlapping, and WEIGHTED TO THE BOTTOM. Three washes of
      equal strength was the first cut: it read as one field, which was
      the point, and it put a dark corner directly behind the subtitle —
@@ -322,13 +322,24 @@ body {
 
 .poster {
   max-width: 460px;
+  height: 100%;
   margin: 0 auto;
-  padding: 12px var(--pad) 20px;
+  padding: 12px var(--pad) 0;
+  /* ── A COLUMN, NOT A PAGE ──
+     The head is fixed and the view under it scrolls, which is what
+     lets the week be one day drawn in full: the list owns the room
+     between the head and the bar without anything having to measure
+     it. The deck's own fit — a window sized against the painted floor
+     of the bar, re-run on every viewport move — was four rounds of
+     arithmetic doing what one flex column does. */
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 /* ── the head ────────────────────────────────────────────── */
 
-.head { padding-bottom: 4px; }
+.head { flex: none; padding-bottom: 10px; }
 
 /* Stays a label, and that is a decision rather than the absence of one.
    Nine treatments were rendered in the real app at phone size — a
@@ -345,11 +356,17 @@ body {
    that put a figure up here (the window, the date) was competing with
    the hero four inches below it for the same job. The head is a label.
    The screen's argument starts at the rule. */
+/* The app's own name is a heading for a screen reader and nothing
+   drawn. It was an uppercase line above the day — the app saying what
+   it is on every screen of every day — and renaming lives in
+   Settings now, beside the other things you set once. */
 .title {
-  font-size: 15px;
-  font-weight: 700;
-  letter-spacing: .02em;
-  text-transform: uppercase;
+  position: absolute;
+  width: 1px; height: 1px;
+  margin: -1px; padding: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
 }
 
 /* ── which day, and what time ────────────────────────────────
@@ -370,17 +387,39 @@ body {
 .hd-top {
   display: flex;
   align-items: center;
-  margin-bottom: 3px;
+  gap: 10px;
 }
-.hd-top .head-you { margin-left: auto; }
-.hd-when {
+/* A GLYPH TILE, the card material at 38px: it says which screen you
+   are on in the one place the title cannot, because up here the
+   title is the day and a day is not a screen. */
+.h-ic {
+  flex: none;
+  width: 38px; height: 38px;
+  display: grid; place-items: center;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
+.h-ic svg {
+  width: 20px; height: 20px;
+  fill: none; stroke: var(--ink); stroke-width: 1.8;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+.h-tx { flex: 1; min-width: 0; }
+.h-day {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -.03em;
+  line-height: 1.05;
+}
+.h-sub {
+  margin-top: 1px;
   font-size: 12.5px;
   font-weight: 500;
-  letter-spacing: .01em;
   color: var(--dim);
-  /* Tabular, so the minute turning over does not shuffle the line. */
   font-variant-numeric: tabular-nums;
 }
+.hd-top .head-you { flex: none; }
 
 /* ── the day's span ──
    A scale, in 24-hour time, because AM/PM on an axis is four glyphs
@@ -392,35 +431,10 @@ body {
    moves. It carries a ring of paper so it stays a dot when it lands on
    the boundary between the spent half and the rest, where an unringed
    mark of any colour reads as a kink in the line. */
-.span { margin-top: 13px; }
-.span[hidden] { display: none; }
-.sp-line { display: flex; align-items: center; gap: 8px; }
-.sp-t {
-  font-size: 10.5px;
-  font-weight: 600;
-  letter-spacing: .02em;
-  font-variant-numeric: tabular-nums;
-  color: var(--dim);
-  flex: none;
-}
-.sp-track {
-  position: relative;
-  flex: 1;
-  height: 2px;
-  border-radius: 2px;
-  background: var(--hair);
-}
 /* The spent half carries a much softer one of its own, mixed off
    --ink rather than the accent: it is the hours behind you, not the
    instant you are at, and the two must not read as the same kind of
    mark. */
-.sp-fill {
-  position: absolute;
-  left: 0; top: 0; bottom: 0;
-  border-radius: 2px;
-  background: var(--ink);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--ink) 22%, transparent);
-}
 /* ── THE MARK CASTS ──
    Two shadows, and the order is the design: a hard ring of --paper
    first, which is what keeps the dot a dot where it lands on the
@@ -434,28 +448,6 @@ body {
    first ships — the page is dark and there is no light one to go back
    to — and it stays written for both because the mechanism is the same
    either way and the drawing already supports it. */
-.sp-dot {
-  position: absolute;
-  top: 50%;
-  width: 10px; height: 10px;
-  margin: -5px 0 0 -5px;
-  border-radius: 50%;
-  background: var(--red);
-  box-shadow: 0 0 0 2.5px var(--paper),
-              0 0 10px 2px color-mix(in srgb, var(--red) 55%, transparent);
-}
-.sp-ends {
-  display: flex;
-  justify-content: space-between;
-  margin-top: 5px;
-}
-.sp-ends span {
-  font-size: 9px;
-  font-weight: 700;
-  letter-spacing: .14em;
-  text-transform: uppercase;
-  color: var(--spent);
-}
 
 /* ── say it ──
    In the sheet, because the bar's microphone is gone. Full width and
@@ -994,74 +986,13 @@ body {
    of pixels — the same number in every engine. Nothing clamps, nothing
    is silently dropped, and Monday and Sunday are no more special than
    Wednesday. */
-.wk-win {
-  overflow: hidden;
-  /* Bled past the poster's padding so the neighbours are cut by the
-     SCREEN. A peek that stops short of the edge reads as a small card
-     rather than a deck that continues — and with the clipping here
-     rather than on a scroller, the bleed costs nothing. */
-  margin: 0 calc(var(--pad) * -1);
-  padding: 2px 0;
-}
-.wk-win[hidden], .wk-dots[hidden] { display: none; }
 
-.rail {
-  list-style: none;
-  /* POSITIONED, and the centring depends on it: it makes the rail the
-     cards' offsetParent, so `offsetLeft` is a coordinate INSIDE the
-     track — the same space the transform moves. Unpositioned, the
-     offsetParent is whatever ancestor happens to be positioned and
-     every card carries that element's own offset: measured at a
-     constant 96px out on a screen wide enough to centre the poster,
-     and 0 on a narrow one, which is exactly the kind of error that
-     passes on a phone and fails on a desk. */
-  position: relative;
-  display: flex;
-  gap: var(--wk-gap);
-  align-items: stretch;
-  height: 100%;
-  /* The track is wider than the window and hangs off both sides, which
-     is what lets the first and last cards sit in the middle like any
-     other. max-content stops it being squeezed to fit. */
-  width: max-content;
-  will-change: transform;
-  transition: transform .28s cubic-bezier(.2, .7, .3, 1);
-}
 /* Motion is the whole subject, so this is a real setting: the deck
    simply is where it is. */
 @media (prefers-reduced-motion: reduce) {
   .rail { transition: none; }
 }
-.rail[hidden] { display: none; }
 
-.day {
-  flex: none;
-  position: relative;   /* the face and the flip are absolute to this */
-  /* The depth the turn is seen in. Without it the card does not rotate,
-     it squashes: a flat rotateY is an affine scale on X and reads as
-     the card being crushed rather than turned over. */
-  perspective: 1000px;
-  /* ── the card OPENS rather than jumping open ──
-     76px to 268px is the whole width of a card appearing in one frame,
-     and with the deck re-centring on it in the same frame the swipe
-     read as a snap rather than as a card turning to face you. Eased,
-     the two happen together and the movement is one gesture.
-
-     Width is a layout property and animating one is normally the wrong
-     answer — but there are seven boxes on this deck, all of them
-     siblings of a fixed-height scroller, so the reflow is bounded and
-     does not touch the rest of the page. The alternative, a transform,
-     cannot do it: scaling a 76px card to 268px stretches its type.
-
-     `flex: none` above and a width in px on both states is what makes
-     it animatable at all; between `auto` and a length there is nothing
-     for the browser to interpolate. */
-  transition: width .26s cubic-bezier(.2, .7, .3, 1),
-              background-color .26s ease,
-              border-color .26s ease,
-              box-shadow .26s ease,
-              opacity .26s ease;
-}
 
 /* ── the two faces ──
    Both are absolutely placed in the same box and one of them is turned
@@ -1070,12 +1001,15 @@ body {
    mirror-imaged — without it the schedule reads backwards through the
    objectives. */
 .wk-flip {
-  position: absolute;
-  inset: 0;
+  /* Relative, and it fills what the column leaves: the panel is the
+     view now rather than a card pinned inside one. */
+  position: relative;
+  flex: 1;
+  min-height: 0;
   transform-style: preserve-3d;
   transition: transform .52s cubic-bezier(.2, .7, .3, 1);
 }
-.day.is-flipped .wk-flip { transform: rotateY(180deg); }
+.wk-flip.is-flipped { transform: rotateY(180deg); }
 @media (prefers-reduced-motion: reduce) {
   .wk-flip { transition: none; }
 }
@@ -1113,18 +1047,23 @@ body {
      radius is the outer LESS the padding, which is the one geometric
      rule the thing this came from never breaks. Written as a token
      because the row has to agree with it and two numbers drift. */
-  border-radius: var(--wk-r);
-  padding: 15px 14px;
-  background: var(--deck);
-  border: 1px solid var(--deck-edge);
-  box-shadow:
-    inset 0 1px 0 var(--deck-edge),
-    var(--card-shadow);
+  /* NO SURFACE HERE. There is one panel now rather than seven cards,
+     and each face owns what it draws: the front nothing at all, since
+     every row is already a card, and the back its sheen. */
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
   overflow: hidden;
 }
-.wk-back { transform: rotateY(180deg); }
+.wk-back {
+  /* The back IS one sheet — the objectives are a page you turned to
+     rather than a list of objects — so it keeps the panel the front
+     gave up, and the sheen below paints over it. */
+  transform: rotateY(180deg);
+  border-radius: var(--wk-r);
+  padding: 15px 14px;
+  border: 1px solid var(--deck-edge);
+  box-shadow: inset 0 1px 0 var(--deck-edge), var(--card-shadow);
+}
 
 /* ── A TURNED FACE IS NOT DRAWN, and backface-visibility alone is not
    enough to do that ──
@@ -1163,7 +1102,7 @@ body {
    app writes one on the tally's halo. An animation that is not running
    is not promoted, which is the root of it. */
 .wk-front { visibility: visible; opacity: 1; transition: visibility 0s, opacity 0s; }
-.day.is-flipped .wk-front {
+.wk-flip.is-flipped .wk-front {
   visibility: hidden;
   opacity: 0;
   transition: visibility 0s linear .26s, opacity 0s linear .26s;
@@ -1210,10 +1149,10 @@ body {
   opacity: 0;
   transition: visibility 0s linear .26s, opacity 0s linear .26s;
 }
-.day.is-flipped .wk-back { visibility: visible; opacity: 1; }
-.day.is-flipped .wk-front *,
-.day.is-flipped .wk-front *::before,
-.day.is-flipped .wk-front *::after { animation-play-state: paused !important; }
+.wk-flip.is-flipped .wk-back { visibility: visible; opacity: 1; }
+.wk-flip.is-flipped .wk-front *,
+.wk-flip.is-flipped .wk-front *::before,
+.wk-flip.is-flipped .wk-front *::after { animation-play-state: paused !important; }
 /* Motion is the whole subject here, so this is a real setting rather
    than a formality: with it on, the card is simply the size it is. */
 @media (prefers-reduced-motion: reduce) {
@@ -1221,7 +1160,6 @@ body {
 }
 /* The open card is paper and the others are not, so the one you are
    reading is lifted off the ground rather than merely wider. */
-.day.is-open { width: var(--wk-open); }
 /* The lift is on both faces; the GROUND is only on the front, because
    the back paints its own and a background written twice leaves the
    first one dead. tests/names.js is what said so. */
@@ -1229,13 +1167,14 @@ body {
    alone, because the back paints its own ground and wears the foil
    instead of a border. A property written twice leaves the first one
    dead, and tests/names.js is what says so. */
-.day.is-open .wk-front {
-  /* A step more solid than the shut cards beside it, and still the
-     sky showing through: the open day is the object you are holding,
-     not a sheet of paper laid over the deck. */
-  background: var(--deck-open);
+.wk-front {
+  /* ── THE FRONT DRAWS NOTHING ──
+     Every row is already a card, so a panel around them is a card
+     inside a card inside the page — the frame-inside-a-frame this
+     project keeps taking back out, and the last thing that made a
+     day read as a card off a deck. */
+  background: none;
 }
-.day:not(.is-open) { width: var(--wk-shut); opacity: .82; }
 
 /* ── the back is the rare one ──
    A sheen rather than a colour: two washes of the accent and one of the
@@ -1251,7 +1190,7 @@ body {
    everything on this face is drawn in --ink at full strength, so the
    wash has to stay a sheen rather than become a ground that the glyphs
    then have to fight. */
-.day.is-open .wk-back {
+.wk-back {
   background:
     radial-gradient(128% 82% at 12% -8%,
       color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
@@ -1289,7 +1228,6 @@ body {
    that looks like it stopped. */
 /* The card's own border gets out of the way where the foil runs, or
    the rim is two rings a pixel apart. */
-.day.is-open .wk-back { border-color: transparent; }
 
 .ob-foil {
   position: absolute;
@@ -1330,7 +1268,7 @@ body {
      masked layer, costing a compositor pass a frame to draw nothing. */
   animation-play-state: paused;
 }
-.day.is-flipped .ob-foil > i { animation-play-state: running; }
+.wk-flip.is-flipped .ob-foil > i { animation-play-state: running; }
 @keyframes obFoil {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to   { transform: translate(-50%, -50%) rotate(360deg); }
@@ -1378,7 +1316,6 @@ body {
    room for it beside the day's abbreviation, and the press target over
    a shut card is the card itself. Same pattern as `.wk-face`, which is
    display:none on the OPEN one. */
-.day:not(.is-open) .wk-front .wk-turn { display: none; }
 /* ── AND IT GOES AWAY WHEN THE CARD IS TURNED ──
    `backface-visibility: hidden` on the two faces is what stops the
    schedule reading through the objectives, and it held for everything
@@ -1394,7 +1331,17 @@ body {
    rule about the ELEMENT rather than a fix aimed at the bug: a face
    turned away has no control to press, so there is nothing to draw
    whether or not the engine would have culled it. */
-.day.is-flipped .wk-front .wk-turn { visibility: hidden; }
+.wk-flip.is-flipped .wk-front /* `[hidden]` HAS TO BE SAID ONCE A THING TAKES A DISPLAY, and this is
+   the fifth time in this app: the rail, the page dots, the toast and
+   the intro each had the attribute set correctly while an author
+   display outranked the browser's own rule. Here it left the
+   objectives control drawn on Today and on Friends, where there is no
+   day to turn over. */
+.wk-turn[hidden] { display: none; }
+/* The back's own control is a plain glyph: the sheen is the face it
+   is sitting on, and a pill wearing it there would be the surface
+   twice. */
+.wk-back .wk-turn { background: none; }
 /* ONE BOX, TWO SKINS. The two faces' controls have to land on the same
    pixel — you press one place to turn the card and the same place to
    come back — so the box is shared and only the surface differs. It
@@ -1436,7 +1383,12 @@ body {
    treatment twice, thirty pixels apart, on a face that already carries
    the card's own rim. The pill's whole job is to advertise the back
    from the front — on the back there is nothing left to advertise. */
-.wk-front .wk-turn {
+/* ── THE TURN CONTROL WEARS WHAT IT OPENS ──
+   In the head now rather than in a card's corner, and the surface is
+   the reason it can be: the objectives face's own sheen, mixed from
+   the palette exactly as the back's is, with a rim that travels. The
+   thing you press looks like the thing it turns to. */
+#scHdTurn {
   position: relative;
   border-radius: 13px;
   background:
@@ -1501,7 +1453,12 @@ body {
      rim already keeps this rule; this is the same rule one level in. */
   animation-play-state: paused;
 }
-.day.is-open:not(.is-flipped) .wk-front .tn-foil > i { animation-play-state: running; }
+/* IT TURNS WHILE THE SCHEDULE IS FACING YOU and stops once you are
+   on the face it opens: a conic gradient turning in its own masked
+   layer costs a compositor pass a frame to draw what is no longer
+   telling you anything. */
+#scFlip:not(.is-flipped) ~ #scHdTurn .tn-foil > i,
+.hd-top #scHdTurn:not(.is-back) .tn-foil > i { animation-play-state: running; }
 @keyframes tnFoil {
   from { transform: translate(-50%, -50%) rotate(0deg); }
   to   { transform: translate(-50%, -50%) rotate(360deg); }
@@ -1510,7 +1467,7 @@ body {
    pill that loses its edge under reduced motion loses the half that
    says it is a control. */
 @media (prefers-reduced-motion: reduce) {
-  .day.is-open:not(.is-flipped) .wk-front .tn-foil > i { animation-play-state: paused; }
+  .wk-flip:not(.is-flipped) .tn-foil > i { animation-play-state: paused; }
 }
 
 /* ── MAIN OBJECTIVES ──
@@ -1720,24 +1677,8 @@ body {
    card's own 76 x 578 rather than the words in it. On the open card it
    is put away — the rows underneath are the things you press there, and
    a transparent button over them would swallow every one. */
-.wk-face {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  border: 0;
-  padding: 0;
-  background: none;
-  border-radius: 18px;
-  cursor: pointer;
-  z-index: 2;
-}
-.day.is-open .wk-face { display: none; }
-.wk-face:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
 /* The press wants an acknowledgement of its own: the card grows a
    moment later, and until it does nothing has said the tap landed. */
-.wk-face:active { background: color-mix(in srgb, var(--ink) 6%, transparent); }
-.day:not(.is-open) .day-card { display: none; }
-.day.is-open .wk-mini { display: none; }
 
 /* ── the day's name ──
    46px and uppercase when a day was a whole section of a scrolling
@@ -1760,40 +1701,51 @@ body {
   margin-bottom: 2px;
   border-bottom: 1px solid color-mix(in srgb, var(--ink) 14%, transparent);
 }
-.day-name {
-  border: 0;
-  background: none;
-  padding: 0;
-  color: inherit;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 700;
-  letter-spacing: .02em;
-  line-height: 1;
-  text-align: left;
-  cursor: pointer;
-}
-.day.is-open .day-name { font-size: 17px; letter-spacing: -.01em; }
-.wk-h .day-name, .wk-h .ob-day { margin-right: auto; }
-.day.is-today .day-name { color: var(--red); }
-.day-name:focus-visible { outline: 2px solid var(--red); outline-offset: 3px; }
+.wk-h .ob-day { margin-right: auto; }
 /* Only on the open card. At 76px the shut ones cannot hold it, and
    with `white-space: nowrap` and a space-between head it did not wrap
    or clip — it ran straight out of the card and printed itself over the
    open one beside it. Overflow that ESCAPES its box is the kind a
    narrower column never warns you about. */
-.day:not(.is-open) .wk-hrs { display: none; }
-.wk-hrs {
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--spent);
-  font-variant-numeric: tabular-nums;
-  white-space: nowrap;
-}
 
 /* The rows scroll inside the card rather than the card growing: the
    deck's height is measured against the bar once, so a sixteen-block
    Thursday and a four-block Sunday are the same object. */
+.week {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+.week[hidden] { display: none; }
+/* ── THE SEVEN DAYS ARE A STRIP ──
+   Monday first, for the deck's own reason: a rail that begins on
+   today moves every morning, so the week has no shape to remember
+   and Thursday sits somewhere different each time you look. The chip
+   you are on takes the card material; today takes the accent, which
+   is the one red up here besides whatever is running. */
+.strip { display: flex; gap: 3px; margin: 8px 0 2px; }
+.st-d {
+  flex: 1; min-width: 0;
+  display: flex; flex-direction: column; align-items: center; gap: 1px;
+  min-height: 44px; padding: 6px 0;
+  border: 0; border-radius: 10px;
+  background: none; color: var(--dim); font: inherit; cursor: pointer;
+}
+.st-d b {
+  font-size: 9px; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase;
+}
+.st-d i {
+  font-style: normal; font-size: 13px; font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+.st-d.is-on {
+  background: var(--card); color: var(--ink);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
+.st-d[aria-current="date"] { color: var(--red); }
+.st-d:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 .day-card {
   flex: 1 1 auto;
   min-height: 0;
@@ -1873,47 +1825,11 @@ body {
    length is the block's duration and the gaps are the session breaks,
    so a neighbour still carries the SHAPE of that day and the same
    three-part structure as the open one, with none of its words. */
-.wk-mini {
-  flex: 1 1 auto;
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  padding: 8px 0;
-}
-.wk-mini i {
-  height: 6px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--ink) 22%, transparent);
-}
-.wk-mini i.is-done { background: color-mix(in srgb, var(--ink) 42%, transparent); }
-.wk-mini hr {
-  border: 0;
-  height: 1px;
-  margin: 3px 0;
-  background: color-mix(in srgb, var(--ink) 13%, transparent);
-}
 
 /* Which of the seven you are on. Seven dots is the one thing the deck
    cannot say for itself — with two cards visible and five off-screen,
    nothing on the page says how many there are or where in them you
    stand. */
-.wk-dots {
-  display: flex;
-  justify-content: center;
-  gap: 5px;
-  /* 8, and it was 12. This and the clearance under it in scDeckFit are
-     the only two gaps between the card and the bar, so they are the
-     whole of what the deck can be given without taking the head or the
-     dots away — 17px of card at 390x844, measured rather than felt. */
-  margin: 8px 0 0;
-}
-.wk-dots i {
-  width: 6px;
-  height: 6px;
-  border-radius: 3px;
-  background: color-mix(in srgb, var(--ink) 18%, transparent);
-}
-.wk-dots i.on { background: var(--red); width: 18px; }
 
 /* ── a row ───────────────────────────────────────────────── */
 
@@ -3756,24 +3672,41 @@ body {
 .wo-head .ty-fig { margin: 0; font-size: 12.5px; font-weight: 500; letter-spacing: 0; line-height: inherit; }
 .wo-head .ty-fig i { margin-left: 3px; font-size: 12.5px; font-style: normal; }
 .wo-strip { display: flex; gap: 3px; margin-top: 12px; }
-.wo-c, .vw {
+.wo-c {
   flex: 1; min-width: 0; min-height: 34px; padding: 6px 0;
   border: 0; border-radius: 8px; background: none;
   color: var(--dim); font: inherit; font-size: 11.5px; font-weight: 500;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer;
 }
-.wo-c.is-on, .vw.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
+.vw {
+  flex: 1; min-width: 0; min-height: 44px; padding: 9px 0;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  border: 0; border-radius: 18px; background: none;
+  color: var(--dim); font: inherit; font-size: 13px; font-weight: 600;
+  white-space: nowrap; overflow: hidden; cursor: pointer;
+}
+.wo-c.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
+.vw.is-on { background: var(--card); color: var(--ink); box-shadow: var(--card-shadow); }
 .wo-c:focus-visible, .vw:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 /* ── LIST OR BOARD ──
    The same rows either way; the board lays each session out as a
    column and the rows are already cards. A view switcher, drawn as
    the workouts strip is, and the choice remembered. */
-.views { display: flex; gap: 3px; margin: 6px 0 2px; }
+.views {
+  /* The same segmented control the stops on Today and Friends are:
+     three switchers on one app drawn three ways is three controls. */
+  display: flex;
+  gap: 4px;
+  padding: 4px;
+  margin: 10px 0 0;
+  border-radius: 22px;
+  background: color-mix(in srgb, var(--ink) 7%, transparent);
+}
 /* Built on every card, put away on the shut ones — the deck opens a
    card by moving a class, not by re-rendering. */
-.day:not(.is-open) .views { display: none; }
-.vw { display: inline-flex; align-items: center; justify-content: center; gap: 5px; }
-.vw svg { width: 13px; height: 13px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.week[hidden] .views { display: none; }
+.day-card { padding-bottom: 4px; }
+.vw svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
 .day-card.is-board, .ty-grid.is-board {
   display: flex; align-items: flex-start; gap: 10px;
   overflow-x: auto; overflow-y: hidden;

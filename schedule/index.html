@@ -47,85 +47,33 @@
   } catch (e) {}
 }());
 </script>
-<link rel="stylesheet" href="app.css?v=239763d5" />
+<link rel="stylesheet" href="app.css?v=7ed8189a" />
 </head>
 <body>
 
 <main class="poster" id="scPoster">
 
+  <!-- ── THE HEAD IS THE DAY, NOT THE APP ──
+       It was an uppercase app name, a date line and a span of the
+       day with a dot on it. What replaced all three is the thing the
+       prototype opens with: a glyph tile, the day at 30px, and one
+       plain line under it saying the date, how much is on it and the
+       time. The app's own name is a heading for a screen reader and
+       is renamed from Settings, which is where the other names are. -->
   <header class="head">
-    <!-- The DATE, and only the date. It went in as a day name and a
-         date, the way a diary page is headed — and the day name was
-         already on today's card four inches below, in the same accent,
-         which is the one thing the deck's colour rule exists to say.
-         The number is not written anywhere else on this screen.
-
-         Settings sits on this row rather than absolutely over it: two
-         boxes claiming one corner is a collision waiting on a wider
-         figure. -->
     <div class="hd-top">
-      <h1 class="title" id="scTitle" tabindex="0" role="button"
-          aria-label="Title, tap to rename">Daily Process</h1>
-      <!-- Settings, top right, because the bar lost the stop it lived on.
-           It is your own face: the one control in this app that is about
-           you rather than about the week, and it already has a drawing. -->
+      <span class="h-ic" id="scHdIc" aria-hidden="true"></span>
+      <div class="h-tx">
+        <h2 class="h-day" id="scHdDay"></h2>
+        <p class="h-sub" id="scHdDate"></p>
+      </div>
+      <button class="wk-turn" id="scHdTurn" aria-label="Objectives"></button>
       <button class="head-you" id="scTabYou" aria-label="You and settings">
         <span class="tab-face" id="scTabFace"></span>
       </button>
     </div>
-
-    <!-- WHICH day and WHAT time, on one line under the name. The date
-         went in as a bare figure and came back out: a lone number over
-         a title reads as a count, and the day name it needs to be a
-         date was the thing that had been taken off it. The clock is the
-         one fact up here that changes while you are looking. -->
-    <p class="hd-when" id="scHdDate"></p>
-
-    <!-- ── the day's span ──
-         The waking window drawn rather than written. It replaces the
-         3px black rule the hero used to hang off: that rule was the
-         loudest object above the fold and it carried nothing, and this
-         is the same line doing the same job while also saying where in
-         the day you are.
-
-         It is a role="img" with a written label rather than aria-hidden
-         — the first and last block are the only facts on this screen
-         that nothing else repeats, so hiding it would lose them. -->
-    <div class="span" id="scSpan" role="img">
-      <div class="sp-line">
-        <span class="sp-t" id="scSpanA"></span>
-        <span class="sp-track"><i class="sp-fill" id="scSpanFill"></i><i class="sp-dot" id="scSpanDot"></i></span>
-        <span class="sp-t" id="scSpanB"></span>
-      </div>
-      <div class="sp-ends">
-        <span id="scSpanAn"></span>
-        <span id="scSpanBn"></span>
-      </div>
-    </div>
-
+    <h1 class="title" id="scTitle">Daily Process</h1>
   </header>
-
-  <!-- ── the tally ──
-       Five things a day, the same five for everyone. It replaces the
-       week for the same reason the ring does: it is a different answer
-       to "how is today going", and two answers to one question on one
-       screen is how the running row came to be painted like everything
-       round it. Empty until scPaintTally fills it. -->
-  <!-- ── THREE STOPS, AND THE CONTROL IS THE HEADING ──
-       Showing up is the five, Workouts is what you actually trained,
-       and Pattern is the two of them read back. They are the same
-       subject at three grains and none is a summary of another, so
-       they are three stops rather than three panels down one page —
-       the friends board's own answer to the same shape.
-
-       Pattern is the only one of the three that ASKS for something:
-       nothing else on this record says whether a day was any good, and
-       without that there is nothing for the rest of it to line up
-       against. It asks on its own screen, once, and nowhere else.
-
-       The hero's own "Showing up" label went with it: a word naming a
-       section, sitting directly under the button that takes you to
-       that section, is the same word twice. -->
   <section class="tally" id="scTally" hidden>
     <nav class="fr-seg" id="scTyStops" aria-label="Today">
       <button class="fr-stop on" id="scTyUp" data-tystop="up"
@@ -195,15 +143,26 @@
        scrollable width; spacers fixed that and left the gap to account
        for. A transform has none of those — it is a number, the same
        number in every engine, and any card can be put dead centre. -->
-  <div class="wk-win" id="scDeckWin">
-    <ol class="rail" id="scRail"></ol>
-  </div>
-
-  <p class="empty" id="scEmpty" hidden>
-    Nothing here yet. Press the microphone and say something like
-    <em>“Train every day 6:30 to 7:30”</em>.
-  </p>
-
+  <!-- ── ONE DAY, AND THE WEEK IS A STRIP ──
+       Seven cards side by side was the app's own answer for a year,
+       and it is what still made this read as the old app with a new
+       coat on. A day is picked from the strip and drawn in full: one
+       list, the sessions as its headings, nothing peeking at the
+       edges and nothing to swipe. The back of the day is still a
+       back — the flip is on the panel now rather than on a card. -->
+  <section class="week" id="scWeek">
+    <div id="scWkViews"></div>
+    <div class="strip" id="scDayStrip" role="group" aria-label="The week"></div>
+    <div class="wk-flip" id="scFlip">
+      <div class="wk-front">
+        <div class="day-card" id="scDayCard"></div>
+      </div>
+    </div>
+    <p class="empty" id="scEmpty" hidden>
+      Nothing here yet. Press the microphone and say something like
+      <em>&#8220;Train every day 6:30 to 7:30&#8221;</em>.
+    </p>
+  </section>
 </main>
 
 <!-- ── the bar ──
@@ -270,6 +229,6 @@
 
 <div class="toast" id="scToast" role="status" aria-live="polite" hidden></div>
 
-<script src="app.js?v=35beae9a"></script>
+<script src="app.js?v=062070b4"></script>
 </body>
 </html>

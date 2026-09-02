@@ -974,161 +974,62 @@
     return 'block';
   }
 
+  /* ── ONE DAY, DRAWN IN FULL ──
+     The deck is gone: seven cards on a track, a window that had to be
+     measured against the painted floor of the bar, a transform that
+     centred the open one, page dots, and a face over every shut card.
+     All of it existed to put seven days on a phone at once, and all of
+     it is what made this screen read as the old app underneath a new
+     coat. The week is a strip of seven chips and the day you press is
+     drawn as one list. */
   function scRender() {
     var today = new Date().getDay();
     painted = new Date().toDateString();
-
     $('scTitle').textContent = state.title;
+    var d = scOpenDay();
+    $('scWeek').classList.toggle('is-today', d === today);
+    $('scWeek').dataset.d = d;
     scDate();
-    scDaySpan();
+    scHeadTurn();
 
-    var rail = $('scRail');
-    rail.textContent = '';
+    /* ── the week is a strip ──
+       Monday first, for the reason the deck had: a rail that began on
+       today moves every morning, so the week has no shape to remember
+       and Thursday sits somewhere different each time you look. */
+    var strip = $('scDayStrip');
+    strip.textContent = '';
+    ORDER.forEach(function (n) {
+      var b = scEl('button', 'st-d' + (n === d ? ' is-on' : ''));
+      b.type = 'button';
+      b.dataset.d = n;
+      var when = new Date(scObjDay(n) + 'T12:00:00');
+      b.appendChild(scEl('b', null, ABBR[n]));
+      b.appendChild(scEl('i', null, String(when.getDate())));
+      b.setAttribute('aria-label', FULL[n] + (n === today ? ', today' : ''));
+      b.setAttribute('aria-current', n === today ? 'date' : 'false');
+      b.setAttribute('aria-pressed', n === d ? 'true' : 'false');
+      b.addEventListener('click', function () { scDeckGo(n); });
+      strip.appendChild(b);
+    });
 
-    /* ── every day, always ──
-       The rail used to skip a day with nothing on it, because a column
-       of empty cards was six rows of furniture. A DECK cannot skip:
-       the seven cards are the week's spine, and a Tuesday that vanishes
-       because you cleared it leaves six cards and no way to put
-       anything back on the day that went. An empty card says "nothing
-       yet" and is one tap from fixing that.
+    var views = $('scWkViews');
+    views.textContent = '';
+    views.appendChild(scViews(wkView, function (v) {
+      wkView = v;
+      try { localStorage.setItem(WKV_KEY, v); } catch (e) {}
+      scRender();
+    }));
 
-       Monday first, and not today first. A week whose leftmost card
-       moves every morning has no shape to remember — you scroll to
-       today, and where today sits IS information. */
+    var rows = scByDay(d);
     $('scEmpty').hidden = state.items.length > 0;
-
-    var open = scOpenDay();
-
-    ORDER.forEach(function (d) {
-      var rows = scByDay(d);
-      var isOpen = d === open;
-      var li = scEl('li', 'day' + (d === today ? ' is-today' : '')
-        + (isOpen ? ' is-open' : ''));
-      li.dataset.d = d;
-      /* The two faces of the card turn together, so they sit inside one
-         box that is transformed rather than being transformed apart. */
-      var flip = scEl('div', 'wk-flip');
-      var front = scEl('div', 'wk-front');
-
-      var head = scEl('div', 'wk-h');
-      var dn = scEl('button', 'day-name', isOpen ? FULL[d] : ABBR[d]);
-      /* On the open card the name adds a block, which is what it has
-         always done; on a shut one it means what the rest of that card
-         means. One word with two answers depending on a state you
-         cannot see would be worse than either. */
-      dn.setAttribute('aria-label', isOpen
-        ? 'Add a block on ' + FULL[d] : 'Open ' + FULL[d]);
-      dn.addEventListener('click', function () {
-        if (d === scOpenDay()) scEditSheet(null, d); else scDeckGo(d);
-      });
-      head.appendChild(dn);
-      /* ── the turn ──
-         Only on the open card: a 76px sliver has nothing to show on its
-         back, and a control that appears on seven cards to be useful on
-         one is six pieces of furniture. */
-
-      /* Committed hours, opposite the name. It is the one figure a card
-         can carry for nothing — the rows are already here to add up —
-         and it is what makes a card comparable to the card beside it. */
-      /* scObjDay, never scDateOfDow: this is a per-DATE fact about the
-         card you are looking at, and the backfill resolver answers
-         "today" for every card more than two days behind and for every
-         one still ahead. That is the objectives' own bug and it would
-         put Friday's day off on today's card. */
-      var cd = scObjDay(d);
-      var mins = rows.reduce(function (a, it) {
-        return a + (scOff(cd, it.id) ? 0 : it.e - it.s);
-      }, 0);
-      if (mins) {
-        head.appendChild(scEl('span', 'wk-hrs',
-          (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs'));
-      }
-      /* ── LAST, so it lands in the corner the back puts it in ──
-         It sat between the day and the hours, which put the control
-         that turns the card in a different place on each face: you
-         pressed one spot to go and another to come back. Same corner
-         both ways, and the turn is one place rather than two. */
-      /* ── ON EVERY CARD, and it was on ONE ──
-         It was built `if (isOpen)`, and the deck opens a card by
-         toggling a class rather than by re-rendering — so the control
-         existed only on whichever day happened to be open when the
-         rail was last built. Press any other day and there was no way
-         to reach its objectives at all, which is not a card you can
-         turn over, it is a card whose back you can only see on the day
-         the page loaded.
-
-         Built for all seven and put away by CSS on the shut ones, the
-         same way `.wk-face` is put away on the open one: a swipe moves
-         a class and the browser does the rest, which is the deck's
-         whole design. */
-      {
-        var turn = scEl('button', 'wk-turn');
-        turn.setAttribute('aria-label', 'Objectives for ' + FULL[d]);
-        turn.innerHTML = OBJ_MARK;
-        /* The foil goes on the FRONT's control only. The back already
-           wears the card's own rim, and a second one 30px inside it is
-           two lights on one object. A real element with a child rather
-           than a pseudo, for the same reason the card's is: a mask
-           applies to an element AND its content, so the turning square
-           has to be masked BY the ring rather than be it. */
-        var tf = scEl('i', 'tn-foil');
-        tf.setAttribute('aria-hidden', 'true');
-        tf.appendChild(scEl('i'));
-        turn.insertBefore(tf, turn.firstChild);
-        turn.addEventListener('click', function () { scFlip(d, true); });
-        head.appendChild(turn);
-      }
-      front.appendChild(head);
-
-      /* The shut cards get bars: duration as length, the session breaks
-         as gaps, no words. Built for every card whether or not it is
-         open, so a swipe moves one class instead of running a render. */
-      var mini = scEl('div', 'wk-mini');
-      scSessions(rows).forEach(function (g, gi) {
-        if (gi) mini.appendChild(document.createElement('hr'));
-        g.rows.forEach(function (it) {
-          var b = scEl('i', blockLog[scDay(scDateOfDow(d))]
-            && blockLog[scDay(scDateOfDow(d))][it.id] ? 'is-done' : null);
-          /* Floored at 34%: below about a third a bar stops reading as
-             a bar and reads as a dot, and a fifteen-minute Down drew
-             one. */
-          b.style.width = Math.max(34, Math.min(100, (it.e - it.s) / 5)) + '%';
-          mini.appendChild(b);
-        });
-      });
-      front.appendChild(mini);
-
-      /* ── you OPEN a card by pressing it ──
-         It used to open by being nearest the middle of the scroller
-         after a swipe, and that was geometry standing in for an
-         intention: a scroller stops at 0, so the first card could never
-         reach the middle and Monday was unopenable. It was then
-         reachable only through a special case for the ends, and Tuesday
-         only after the deck reflowed and you swiped a second time. A
-         press says which day you meant, and none of that arithmetic has
-         to be right.
-
-         A REAL BUTTON sized to the card, not a click handler on the
-         <li>: it is focusable, it has a name, and a keyboard reaches
-         every day of the week. It is a SIBLING of the rows rather than
-         their ancestor, because a button inside a button is invalid and
-         collapses to one press while looking exactly right. */
-
-
-      var card = scEl('div', 'day-card');
-
-      if (!rows.length) {
-        var free = scEl('button', 'row is-free');
-        free.appendChild(scEl('span', 'n', 'Nothing yet'));
-        free.addEventListener('click', function () { scEditSheet(null, d); });
-        card.appendChild(free);
-      }
-
-      /* The session headings are interleaved with the rows rather than
-         wrapping them: a row's own grid is what aligns the glyph, the
-         time and the name, and nesting each session in a box of its own
-         would give three separate grids that agree only by luck. */
+    var card = $('scDayCard');
+    card.textContent = '';
+    if (!rows.length) {
+      var free = scEl('button', 'row is-free');
+      free.appendChild(scEl('span', 'n', 'Nothing yet'));
+      free.addEventListener('click', function () { scEditSheet(null, d); });
+      card.appendChild(free);
+    }
       var head3 = {};
       scSessions(rows).forEach(function (g) { head3[g.rows[0].id] = g; });
 
@@ -1389,128 +1290,28 @@
          you can rate. Gating the only ask in the app on finishing
          everything would make the record impossible to keep on exactly
          the days worth recording. */
-      var rd = scDowDate(d);
-      if (rd === scDay() && scDayDone(rd, d)) {
-        card.appendChild(scRateRow(rd, 'How was today?', function () {
-          scRender();
-          scPaintTally();
-        }));
-      }
-
-      /* The fade says there is more under the fold, and it comes off at
-         the end of the travel. Read off the box rather than off a count
-         of rows: what overflows depends on the card's measured height,
-         the type scale and how many session headings got drawn, and a
-         row count knows none of that. */
-      card.addEventListener('scroll', function () { scCardFade(card); });
-
-      if (rows.length) front.appendChild(scViews(wkView, function (v) {
-        wkView = v;
-        try { localStorage.setItem(WKV_KEY, v); } catch (e) {}
+    var rd = scDowDate(d);
+    if (rd === scDay() && scDayDone(rd, d)) {
+      card.appendChild(scRateRow(rd, 'How was today?', function () {
         scRender();
+        scPaintTally();
       }));
-      front.appendChild(card);
-      flip.appendChild(front);
-      /* Built for every card, not only the open one, for the same
-         reason the rows are: opening a day moves a class and nothing
-         re-renders, so whatever the new card needs has to be there
-         already. */
-      flip.appendChild(scObjBack(d));
-      li.appendChild(flip);
-      /* OUTSIDE the flip, so it is not turned away with the front: a
-         shut card is pressed to be opened whichever way its faces
-         happen to be pointing. */
-      var face = scEl('button', 'wk-face');
-      face.setAttribute('aria-label', 'Open ' + FULL[d]);
-      face.addEventListener('click', function () { scDeckGo(d); });
-      li.appendChild(face);
-      rail.appendChild(li);
-    });
-
-    /* Seven dots. With two cards on screen and five off it, nothing
-       else on the page says how many there are or where you stand. */
-    var dots = scEl('div', 'wk-dots');
-    dots.setAttribute('aria-hidden', 'true');
-    ORDER.forEach(function (d) {
-      dots.appendChild(scEl('i', d === open ? 'on' : null));
-    });
-    /* Replaced, not appended. scRender runs on every edit and on the
-       half-minute tick that crosses midnight, and an insertBefore with
-       no removal leaves a new row of dots under the last one every
-       time — silent, and only visible after a few edits. */
-    var was = document.querySelector('.wk-dots');
-    if (was) was.parentNode.removeChild(was);
-    /* After the WINDOW. Inside it they would be clipped along with the
-       track, and they are an indicator of the deck rather than part of
-       it. */
-    var win = $('scDeckWin');
-    win.parentNode.insertBefore(dots, win.nextSibling);
-
-    scDeckFit(rail, dots);
-    scDeckJump();
-    [].forEach.call(rail.querySelectorAll('.day-card'), scCardFade);
-
+    }
+    if (!card.dataset.wired) {
+      card.dataset.wired = '1';
+      card.addEventListener('scroll', function () { scCardFade(card); });
+    }
+    /* The back is rebuilt with the front — an objective is per DATE,
+       so the day you press decides which list this is. */
+    var flip = $('scFlip');
+    var was = flip.querySelector('.wk-back');
+    if (was) flip.removeChild(was);
+    flip.appendChild(scObjBack(d));
+    scCardFade(card);
     scLive();
   }
 
-  /* ── the deck's height is measured, never set ──
-     The gap between the top of the rail and the top of the bar, less
-     what the dots take. Written as a constant it would be the same
-     number in a place that cannot see the hero reflow, the notch
-     change, or the type scale move — and it would be wrong on the first
-     phone that did any of those. */
-  /* ── the open card is centred by MOVING THE TRACK ──
-     Not by scrolling. A scroller clamps at 0, so the first card could
-     never reach the middle, and the three fixes for that each behaved
-     differently in Safari — the last of them silently, because a
-     shorthand it could not parse simply vanished. A transform is one
-     number: half the window minus the middle of the card, measured
-     inside the track. It cannot clamp and there is nothing for an
-     engine to leave out.
 
-     `offsetLeft` is safe here where it was not before: the rail is the
-     card's offsetParent, so it is a position INSIDE the track, which is
-     exactly the space the transform moves. */
-  function scDeckCentre() {
-    var win = $('scDeckWin'), rail = $('scRail');
-    var mine = rail.querySelector('.day.is-open');
-    if (!mine || !win.clientWidth) return;
-
-    /* ── WORKED OUT, not read off the page ──
-       Reading `offsetLeft` and `offsetWidth` here is wrong and it was
-       wrong quietly: the card's width is transitioned from 76px to
-       268px, so a read taken the instant the class moves still
-       describes the layout BEFORE it, and the deck centred each card
-       where the previous one had been. Measured at 96px out on every
-       day of the week, with the applied transform -551 where -455 was
-       right — a constant error, which is what an off-by-one layout
-       looks like when every card is the same size.
-
-       The three widths are tokens, so this is arithmetic on numbers the
-       stylesheet owns: index of the open card, shut cards and gaps
-       before it, then half an open card. Nothing to be stale. */
-    var cs = getComputedStyle(rail);
-    var shut = parseFloat(cs.getPropertyValue('--wk-shut'));
-    var open = parseFloat(cs.getPropertyValue('--wk-open'));
-    var gap = parseFloat(cs.getPropertyValue('--wk-gap'));
-    if (!(shut > 0 && open > 0)) return;
-    var i = [].indexOf.call(rail.children, mine);
-    var x = win.clientWidth / 2 - (i * (shut + gap) + open / 2);
-    rail.style.transform = 'translateX(' + Math.round(x) + 'px)';
-  }
-
-  /* Arriving at the screen is instant — a week that appears already
-     mid-animation looks like it was left running while you were
-     somewhere else. Only a press animates. */
-  function scDeckJump() {
-    var rail = $('scRail');
-    rail.style.transition = 'none';
-    scDeckCentre();
-    /* Read back to force the style to land before the transition is
-       restored, or the browser coalesces both and animates anyway. */
-    void rail.offsetWidth;
-    rail.style.transition = '';
-  }
 
   /* Open a day and bring it to the middle. The classes move first and
      the centring runs after, because opening takes a card from 76px to
@@ -1518,133 +1319,21 @@
   function scDeckGo(d) {
     if (d === scOpenDay()) return;
     openDay = d;
-    scDeckOpen();
-    scDeckCentre();
+    /* A day found face-down is the app having kept the wrong half of a
+       decision, and that is truer still of the day BEFORE the one you
+       just pressed. */
+    scFlip(d, false, true);
+    scRender();
   }
 
-  function scDeckOpen() {
-    var open = scOpenDay();
-    var rail = $('scRail');
-    [].forEach.call(rail.children, function (li) {
-      var d = +li.dataset.d;
-      var mine = d === open;
-      li.classList.toggle('is-open', mine);
-      var nm = li.querySelector('.day-name');
-      if (nm) {
-        nm.textContent = mine ? FULL[d] : ABBR[d];
-        nm.setAttribute('aria-label',
-          (mine ? 'Add a block on ' : 'Open ') + FULL[d]);
-      }
-      /* The face is put away by CSS on the open card rather than
-         removed, so all this has to do is keep the NAME honest: a stale
-         "Open Friday" on the card that is already open tells a screen
-         reader the wrong thing about the one card it is on. */
-      var fc = li.querySelector('.wk-face');
-      if (fc) fc.setAttribute('aria-label', 'Open ' + FULL[d]);
-    });
-    var dots = document.querySelector('.wk-dots');
-    if (dots) {
-      [].forEach.call(dots.children, function (i, n) {
-        i.classList.toggle('on', ORDER[n] === open);
-      });
-    }
-  }
 
-  /* ── ASKED AFTER THE HEIGHT IS SETTLED ──
-     scDeckFit is what gives a card its height, so this can only run
-     once that has: called before it, every card reports the whole
-     page's worth of room and nothing ever overflows. Four pixels of
-     slack, because a scroller at its end is routinely a fraction of a
-     pixel short of its own scrollHeight. */
   function scCardFade(card) {
     if (!card) return;
     card.classList.toggle('has-more',
       card.scrollHeight - card.clientHeight - card.scrollTop > 4);
   }
 
-  /* ── AND IT HAS TO RUN AGAIN WHEN THE VIEWPORT MOVES ──
-     The height is measured, and until now it was measured ONCE per
-     render — which is right on a phone's home screen, where the
-     viewport is a constant, and wrong in every browser, where it is
-     not. Safari collapses its URL bar as you scroll and hands the page
-     back 50-odd pixels; rotating does the same on any device, and so
-     does a keyboard closing. The deck kept whatever height it was
-     given when the chrome was still showing, so the card sat short of
-     the bar with visible room under it and no way to claim it.
 
-     `visualViewport` is the one that fires for the URL bar collapsing
-     — `window.resize` does not, reliably, on iOS — so both are heard
-     and the work is idempotent either way. Coalesced into one frame
-     because a resize arrives as a burst and scDeckFit reads layout:
-     doing it per event is a forced reflow per event, which is the
-     orrery's own lesson about reading and writing in the same pass.
-
-     Only when the deck is the view that is up. scDeckFit writes a
-     height onto #scDeckWin, and doing that while the tally or the
-     friends board is showing measures a rail that is not on screen. */
-  var fitPend = 0;
-  function scDeckRefit() {
-    if (fitPend) return;
-    fitPend = requestAnimationFrame(function () {
-      fitPend = 0;
-      var rail = $('scRail');
-      var dots = document.querySelector('.wk-dots');
-      if (!rail || rail.hidden || !rail.getBoundingClientRect().height) return;
-      scDeckFit(rail, dots);
-      scDeckJump();
-    });
-  }
-  window.addEventListener('resize', scDeckRefit);
-  window.addEventListener('orientationchange', scDeckRefit);
-  if (window.visualViewport) {
-    window.visualViewport.addEventListener('resize', scDeckRefit);
-  }
-
-  function scDeckFit(rail, dots) {
-    var win = $('scDeckWin');
-    var bar = document.querySelector('.bar');
-    var top = win.getBoundingClientRect().top;
-    /* ── THE FLOOR IS WHAT IS PAINTED, NOT THE BAR'S BOX ──
-       `.bar` is `background: none` — it is a transparent frame holding
-       two drawn things, the tab pill and the add button, and its own
-       padding puts both of them 7px below the box it reports. Measured
-       at 390x844: the bar's box top is 759 and the pill's is 766, so
-       treating the box as the floor threw away seven pixels of card
-       for a surface that draws nothing.
-
-       The comment this replaces said the opposite — that the pill
-       reaches ABOVE the reported box — which is what the arithmetic
-       had been built around. It is false and was worth measuring
-       rather than believing: the pill sits INSIDE the box, on both
-       axes, at every viewport tried.
-
-       Read from the children rather than by subtracting the padding,
-       so a change to either one moves this on its own. */
-    var floor = window.innerHeight;
-    if (bar) {
-      floor = bar.getBoundingClientRect().top;
-      var tops = [].map.call(bar.children, function (kid) {
-        return kid.getBoundingClientRect().top;
-      }).filter(function (t) { return t > 0; });
-      if (tops.length) floor = Math.min.apply(null, tops);
-    }
-    /* The dots' own margin is not in its height, so it is read rather
-       than assumed — a number that happens to work at this type scale
-       stops working when the scale moves. The 12 below it is the only
-       constant here and it is the clearance between the dots and the
-       pill: at 8 the two read as one control, and there is nothing to
-       be won past it because the pill is the thing being cleared. */
-    var give = 24;
-    if (dots) {
-      var ds = getComputedStyle(dots);
-      give = dots.getBoundingClientRect().height
-        + parseFloat(ds.marginTop || 0) + parseFloat(ds.marginBottom || 0) + 12;
-    }
-    /* On the WINDOW, because that is the box with a fixed size; the
-       track inside it is as tall as the window and as wide as it needs
-       to be. */
-    win.style.height = Math.max(260, floor - top - give) + 'px';
-  }
 
   /* ── morning, afternoon, evening ──
      Noon and five o'clock, which is where the words already sit in
@@ -2038,10 +1727,43 @@
      for today and a card found face-down tomorrow morning would be the
      app remembering the wrong half of a decision. */
   function scFlip(d, on, quiet) {
-    var li = $('scRail').querySelector('.day[data-d="' + d + '"]');
-    if (!li) return;
-    li.classList.toggle('is-flipped', !!on);
+    var f = $('scFlip');
+    if (!f) return;
+    f.classList.toggle('is-flipped', !!on);
+    scHeadTurn();
     if (!quiet && navigator.vibrate) { try { navigator.vibrate(8); } catch (e) {} }
+  }
+  /* ── THE TURN CONTROL IS IN THE HEAD ──
+     There is one panel now rather than seven cards, so the control
+     that turns it belongs to the screen rather than to a card — and
+     it is the same control both ways round, which is what the two
+     faces' corners used to have to agree about by hand. */
+  function scHeadTurn() {
+    var b = $('scHdTurn');
+    if (!b) return;
+    var on = $('scFlip').classList.contains('is-flipped');
+    b.hidden = view !== 'list';
+    b.classList.toggle('is-back', on);
+    b.setAttribute('aria-expanded', on ? 'true' : 'false');
+    b.setAttribute('aria-label', on
+      ? 'Back to the schedule'
+      : 'Objectives for ' + FULL[scOpenDay()]);
+    if (!b.dataset.wired) {
+      b.dataset.wired = '1';
+      var foil = scEl('i', 'tn-foil');
+      foil.setAttribute('aria-hidden', 'true');
+      foil.appendChild(scEl('i'));
+      b.appendChild(foil);
+      var g = document.createElement('span');
+      g.className = 'tn-g';
+      b.appendChild(g);
+      b.addEventListener('click', function () {
+        scFlip(scOpenDay(), !$('scFlip').classList.contains('is-flipped'));
+      });
+    }
+    b.querySelector('.tn-g').innerHTML = on
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h10"/></svg>'
+      : OBJ_MARK;
   }
 
   /* ── which day it is, and what time ──
@@ -2062,63 +1784,49 @@
     if (n % 100 >= 11 && n % 100 <= 13) return 'th';
     return ['th', 'st', 'nd', 'rd'][n % 10] || 'th';
   }
+  var HEAD_ICON = {
+    today: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4"/>'
+      + '<path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4'
+      + 'M18.4 5.6L17 7M7 17l-1.4 1.4"/></svg>',
+    week: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="5" width="17"'
+      + ' height="15" rx="2.5"/><path d="M3.5 10h17M8 3.5v3M16 3.5v3"/></svg>',
+    tally: '<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="7"'
+      + ' height="7"/><rect x="13" y="4" width="7" height="7"/><rect x="4" y="13"'
+      + ' width="7" height="7"/><rect x="13" y="13" width="7" height="7"/></svg>',
+    friends: '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.4"/>'
+      + '<path d="M3 19c0-3.2 2.7-5 6-5s6 1.8 6 5"/>'
+      + '<path d="M16.5 6.4a3.4 3.4 0 010 6.5M21 19c0-2.7-1.8-4.4-4.2-4.8"/></svg>'
+  };
+  /* ── THE HEAD SAYS WHICH SCREEN, WHICH DAY, AND WHAT IS ON IT ──
+     A glyph tile, the name at 30px, and one line: the date, how many
+     blocks, and the clock. The clock runs on the LIVE pass, which is
+     why the whole line is written here rather than once at render. */
   function scDate() {
-    var d = new Date(), n = d.getDate();
-    $('scHdDate').textContent = FULL[d.getDay()] + ' ' + n + scOrd(n)
-      + ' \u00b7 ' + scT(scNowMin()) + scMerIf(scNowMin());
+    var t = new Date(), now = scT(scNowMin()) + scMerIf(scNowMin());
+    var ic = $('scHdIc'), day = $('scHdDay'), sub = $('scHdDate');
+    if (view !== 'list') {
+      day.textContent = view === 'tally' ? 'Today' : 'Friends';
+      sub.textContent = FULL[t.getDay()] + ' ' + t.getDate() + ' '
+        + MON[t.getMonth()] + ' \u00b7 ' + now;
+      ic.innerHTML = HEAD_ICON[view === 'tally' ? 'tally' : 'friends'];
+      return;
+    }
+    var d = scOpenDay(), cd = scObjDay(d);
+    var when = new Date(cd + 'T12:00:00');
+    /* HOURS, not a count of blocks. It is what the day card's own head
+       carried, and it is the figure a day off changes: a block marked
+       off for one date is not one of the day's hours, which a count of
+       rows could never say. */
+    var mins = scByDay(d).reduce(function (a2, it) {
+      return a2 + (scOff(cd, it.id) ? 0 : it.e - it.s);
+    }, 0);
+    day.textContent = FULL[d];
+    sub.textContent = when.getDate() + ' ' + MON[when.getMonth()]
+      + (mins ? ' \u00b7 ' + (mins / 60).toFixed(mins % 60 ? 1 : 0) + ' hrs' : '')
+      + ' \u00b7 ' + now;
+    ic.innerHTML = HEAD_ICON[d === t.getDay() ? 'today' : 'week'];
   }
 
-  /* ── the day's span ──
-     First block to last block, with a dot where you are in it. The
-     figures are 24-hour (scHHMM) rather than the app's usual 12-hour:
-     this is an AXIS, and the meridiem on a scale is four glyphs saying
-     what the dot's position already says.
-
-     NOT named scSpan — that is taken, by the duration formatter, and a
-     silent replacement is the failure this project has already had
-     three times.
-
-     The dot is CLAMPED to the ends rather than the track hidden
-     outside them: before the first block and after the last one the
-     honest picture is a dot parked on the end, and a span that
-     disappears at 23:00 is a screen that goes blank at exactly the
-     hour you are most likely to be checking it. */
-  function scDaySpan() {
-    var wrap = $('scSpan'), mine = scByDay(new Date().getDay());
-    if (!mine.length) { wrap.hidden = true; return; }
-    var a = mine[0].s, b = mine[0].e, i;
-    for (i = 1; i < mine.length; i++) {
-      if (mine[i].s < a) a = mine[i].s;
-      if (mine[i].e > b) b = mine[i].e;
-    }
-    /* A day with one instant on it would divide by zero and put the
-       dot at NaN%, which renders as the track's left edge and looks
-       deliberate. */
-    var span = Math.max(1, b - a);
-    var at = Math.min(b, Math.max(a, scNowMin()));
-    var pc = (at - a) / span * 100;
-
-    var first = mine[0], last = mine[0];
-    for (i = 1; i < mine.length; i++) {
-      if (mine[i].s < first.s) first = mine[i];
-      if (mine[i].e > last.e) last = mine[i];
-    }
-
-    wrap.hidden = false;
-    /* The meridiem is printed here on a 12-hour phone and nowhere on a
-       24-hour one. An axis in 24-hour figures says what the dot's
-       position says and needs no letters; "5:45" and "11:00" with no
-       letters is two times that could be either half of the day, which
-       is worse than the noise. */
-    $('scSpanA').textContent = scT(a) + scMerIf(a);
-    $('scSpanB').textContent = scT(b) + scMerIf(b);
-    $('scSpanAn').textContent = first.n;
-    $('scSpanBn').textContent = last.n;
-    $('scSpanFill').style.width = pc + '%';
-    $('scSpanDot').style.left = pc + '%';
-    wrap.setAttribute('aria-label', 'Today runs ' + scRangeLong(a, b)
-      + ', from ' + first.n + ' to ' + last.n + '.');
-  }
 
   /* The live pass touches classes and one line of text, never the DOM's
      shape — it runs every half minute, and rebuilding the card that
@@ -2144,7 +1852,7 @@
     if (view === 'friends') { scPaintFriends(); return; }
 
     var today = new Date().getDay(), now = scNowMin();
-    var rows = document.querySelectorAll('.day.is-today .row');
+    var rows = document.querySelectorAll('.week.is-today .row');
     var live = null;
     for (var i = 0; i < rows.length; i++) {
       var el = rows[i], s = +el.dataset.s, e = +el.dataset.e;
@@ -2174,7 +1882,6 @@
        below, and the dot already says where in the day that is. A head
        that repeats the card is a head you stop reading. */
     scDate();
-    scDaySpan();
   }
 
 
@@ -4771,43 +4478,18 @@
 
     $('scTally').hidden = !tal;
     $('scFriends').hidden = !fr;
-    $('scRail').hidden = tal || fr;
-    $('scDeckWin').hidden = tal || fr;
-    /* The dots are a SIBLING of the rail, not a child — the rail is the
-       scroller, and a page indicator that scrolls sideways with the
-       cards it indicates is not an indicator. So it has to be hidden
-       with it: left alone it sat on the friends board and the tally
-       under a week that was not on screen. */
-    var wkd = document.querySelector('.wk-dots');
-    if (wkd) wkd.hidden = tal || fr;
-    /* The label lives INSIDE the span now, so hiding the span takes it
-       with it. The tally has a hero of its own, and leaving the week's
-       above it says the same thing twice — the louder of the two being
-       the one that is not the point of the screen. */
-    $('scSpan').hidden = tal || fr || !scByDay(new Date().getDay()).length;
+    /* ONE SECTION PER VIEW, and `[hidden]` has to be said out loud
+       once a thing takes a display — .week is a flex column, and an
+       author display outranks the browser's own [hidden] rule. That
+       has cost this app the rail, the dots, the toast and the intro,
+       each in turn, so the check measures the BOX rather than the
+       attribute. */
+    $('scWeek').hidden = tal || fr;
     $('scEmpty').hidden = tal || fr || state.items.length > 0;
-
-    /* Coming back to the week: re-measure, because the window's own
-       rect was zero for as long as it was hidden, and re-centre, because
-       its transform went with it.
-
-       AFTER the head is put back, never before. scDeckFit reads the
-       window's own `top`, and the hero above it was still hidden when
-       this ran first — so the deck was measured against a head three
-       registers shorter than the one it would be under a frame later,
-       and came out that much too tall. It cost the dots, which went
-       under the bar and then off the bottom of the screen: the deck
-       itself is a window with cards clipped inside it, so nothing about
-       it looked wrong, and the only visible symptom was the page
-       indicator being missing on every return to the week.
-
-       It survived because the error was the height of the hero alone
-       and the dots had that much room to give. The span put another
-       35px on the head and spent it. */
-    if (!(tal || fr)) {
-      scDeckFit($('scRail'), wkd);
-      scDeckJump();
-    }
+    /* The head is the day's on the week and the screen's elsewhere,
+       and the turn control belongs to the week alone. */
+    scDate();
+    scHeadTurn();
 
     /* The tab you are on, lit. The old single button had to draw the
        NEXT view rather than the current one — a control that shows its
