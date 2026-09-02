@@ -423,8 +423,14 @@ const SAID = [
       /* Every sampled pixel, not just the lightest one: which extreme
          is the worst case flips with the polarity of the text, and
          both polarities are on this screen at once. */
-      for (let dx = 4; dx < b.w - 4; dx += 3) {
-        const p = at((b.x + dx) * dpr, (b.y + b.h - 3) * dpr);
+      /* INSIDE the row's own fill, not at its edge. A row is a card
+         with a 14px radius and the running one carries a 1.5px accent
+         ring; a sample 4px in and 3px up lands on the ring where it
+         curves round the corner, and the check then reports the mark
+         as the ground the words are on — 3.28:1 against a colour no
+         text is ever drawn over. Measured where the text is. */
+      for (let dx = 16; dx < b.w - 16; dx += 3) {
+        const p = at((b.x + dx) * dpr, (b.y + b.h - 7) * dpr);
         for (const ink of b.inks) {
           const seen = ink.map((v, i) => v * b.op + p[i] * (1 - b.op));
           const r = ratio(seen, p);
@@ -1311,20 +1317,6 @@ const SAID = [
   ok('the turn control is in the head, drawn once, and named for the day',
     turns.drawn && /Objectives for [A-Z]/.test(turns.lab), turns);
 
-  /* ── AND IT STOPS ONCE YOU ARE ON THE FACE IT OPENS ──
-     Six of these used to turn behind shut cards; there is one, and
-     the case that is left is the flip. A conic gradient turning in
-     its own masked layer costs a compositor pass a frame, and once
-     the objectives are facing you the control is no longer saying
-     where you could go — it is the way back. */
-  await page.evaluate(() => document.getElementById('scHdTurn').click());
-  await page.waitForTimeout(700);
-  ok('...and it stops turning once the face it opens is up',
-    await page.$eval('#scHdTurn .tn-foil > i',
-      (i) => getComputedStyle(i).animationPlayState === 'paused'));
-  await page.evaluate(() => document.getElementById('scHdTurn').click());
-  await page.waitForTimeout(700);
-
   /* Reachable on a day that is not today, which is the whole point of
      the change: open another card and its control has to be the one
      that is drawn, named for ITS day. */
@@ -1345,103 +1337,32 @@ const SAID = [
       (t) => /Thursday/.test(t.getAttribute('aria-label'))));
   await openDow(2);
 
-  /* ── the pill wears what it opens ──
-     Six affordances were rendered over the real card and what settled
-     it is that none of the others said anything about the BACK. So
-     the claim is not "it looks like a button" — it is that the pill
-     carries the objectives face's own two marks, a sheen mixed from
-     the palette and a rim that travels, and that the rim only turns
-     where somebody can see it.
-
-     The GROUND is read as a composited pixel, never off the cascade:
-     it is four layers of color-mix over --paper, and a theme that
-     resolved none of them would still report a background string. */
+  /* ── THE CONTROL IS A TILE OF THE APP'S OWN MATERIAL ──
+     It wore the objectives face's sheen with a foil rim that
+     travelled, on the argument that the thing you press should look
+     like the thing it turns to. That argument went with the face:
+     the back draws nothing now, so a sheen chip with a moving light
+     in it was the one ornamented object left in the app. It is the
+     head's own glyph tile, on the other side of the line — measured
+     as the ground it actually paints and against the tile beside it,
+     because "the same material" is the whole claim. */
   const pill = await page.evaluate(() => {
-    const t = document.querySelector('#scHdTurn');
-    const f = t.querySelector('.tn-foil > i');
-    const cs = getComputedStyle(t), fs = getComputedStyle(f);
-    const mask = getComputedStyle(t.querySelector('.tn-foil'));
-    const r = f.getBoundingClientRect();
-    return {
-      /* A ring is a mask with the middle taken out, and the composite
-         is the whole mechanism: without `exclude` the turning square
-         floods the pill and buries the glyph. */
-      xor: (mask.maskComposite || mask.webkitMaskComposite || '')
-        .split(',').map((v) => v.trim()).filter((v) => v !== 'exclude').length === 0,
-      /* SQUARE, sized off the pill's height. A non-square leaves the
-         ends unlit for part of every turn, which reads as a fault. */
-      square: Math.abs(r.width - r.height) < 1 && r.height > t.getBoundingClientRect().height * 2,
-      turning: fs.animationName === 'tnFoil' && fs.animationPlayState === 'running',
-      sheen: (cs.backgroundImage.match(/gradient/g) || []).length,
-      /* The BACK's control must not have one: that face already wears
-         the card's own rim, and a second light 30px inside it is two
-         lights on one object. */
-      onBack: !!document.querySelector('.wk-back .tn-foil'),
-    };
+    const t = document.getElementById('scHdTurn');
+    const ic = document.querySelector('.h-ic');
+    const cs = getComputedStyle(t), is = getComputedStyle(ic);
+    const r = t.getBoundingClientRect();
+    return { bg: cs.backgroundColor, mine: is.backgroundColor,
+             shadow: cs.boxShadow, square: Math.abs(r.width - r.height) < 1 && r.width >= 34,
+             /* Nothing on this screen turns, blooms or sheens any
+                more: the last conic gradient in the app went with the
+                face it was advertising. */
+             sheen: (cs.backgroundImage.match(/gradient/g) || []).length,
+             foils: document.querySelectorAll('.tn-foil, .ob-foil').length };
   });
-  ok('the pill carries the objectives face’s sheen and its rim',
-    pill.sheen >= 3 && pill.xor && pill.square, pill);
-
-  /* ── and the BACK's control is not a second one ──
-     The pill went on `.wk-turn` and reached both faces, so the way
-     back to the schedule came up wearing a sheen chip on a sheen card
-     — the same treatment twice, thirty pixels apart, on a face that
-     already carries the card's own rim. Measured as the ground it
-     actually paints, never as a class. */
-  ok('...and the way back is a plain glyph, not a second pill',
-    await page.$eval('.wk-back .wk-turn', (t) => {
-      const cs = getComputedStyle(t);
-      return !/gradient/.test(cs.backgroundImage) && !t.querySelector('.tn-foil');
-    }));
-  ok('...the rim turns, and only on the face you can see',
-    pill.turning && !pill.onBack, pill);
-
-  /* The glyph went from --dim on flat paper to --dim on four layers of
-     wash. Measured on composited pixels rather than computed — this
-     repo has shipped one thing that passed the arithmetic and read
-     2.92:1 on screen — and to 3:1, because a glyph is a graphic. */
-  {
-    const b = await page.$eval('#scHdTurn',
-      (e) => { const r = e.getBoundingClientRect();
-               return { x: r.x, y: r.y, width: r.width, height: r.height }; });
-    const png = PNG.sync.read(await page.screenshot({ clip: b }));
-    const seen = new Map(), px = [];
-    for (let i = 0; i < png.data.length; i += 4) {
-      const p = [png.data[i], png.data[i + 1], png.data[i + 2]];
-      px.push(p);
-      const k = (p[0] >> 2) + ',' + (p[1] >> 2) + ',' + (p[2] >> 2);
-      const e = seen.get(k);
-      if (e) e.n++; else seen.set(k, { n: 1, p });
-    }
-    let ground = null;
-    seen.forEach((e) => { if (!ground || e.n > ground.n) ground = e; });
-    let ink = ground.p, far = -1;
-    px.forEach((p) => { const d = Math.abs(lum(p) - lum(ground.p));
-                        if (d > far) { far = d; ink = p; } });
-    const r = +ratio(ink, ground.p).toFixed(2);
-    ok(`the glyph still clears 3:1 on the sheen (${r}:1)`, r >= 3, { r, ground: ground.p });
-  }
-
-  await page.click('#scHdTurn');
-  await page.waitForTimeout(700);
-  ok('pressing it turns the day over', await page.$eval('#scFlip',
-    (d) => d.classList.contains('is-flipped')));
-
-  /* ── and the pill's rim stops when its face turns away ──
-     Written first as "paused on every card that is NOT open", which
-     found nothing and failed for it: the control is built for the
-     open card alone, so the shut cards have no rim to pause. The case
-     that does exist is this one — the front is still in the document
-     with the schedule turned away from you, and a conic gradient
-     turning behind it costs a compositor pass a frame to draw what
-     nobody can see. Same rule the card's own rim keeps, one level in.
-
-     A check that finds nothing must not pass, which is why the count
-     is asserted beside the state. */
-  ok('...and the pill’s rim stops once its face is turned away',
-    await page.$$eval('#scHdTurn .tn-foil > i',
-      (i) => i.length === 1
-        && getComputedStyle(i[0]).animationPlayState === 'paused'));
+  ok('the turn control is the head\u2019s own tile, the same material as the glyph',
+    pill.bg === pill.mine && /inset/.test(pill.shadow) && pill.square, pill);
+  ok('...and nothing in the app is sheened or foiled any more',
+    pill.sheen === 0 && pill.foils === 0, pill);
 
   /* ── and the pill is not DRAWN behind the back either ──
      backface-visibility held for everything on the front except this:
@@ -1466,6 +1387,10 @@ const SAID = [
   ok('...and the control is outside the panel that turns',
     await page.$eval('#scHdTurn', (t) => !t.closest('#scFlip'))
     && await page.$$eval('.wk-front .wk-turn', (t) => t.length) === 0);
+  await page.click('#scHdTurn');
+  await page.waitForTimeout(700);
+  ok('pressing it turns the day over', await page.$eval('#scFlip',
+    (d) => d.classList.contains('is-flipped')));
   /* MEASURED, not the class. backface-visibility is what makes this a
      card with a back rather than two panels that swap, and without it
      the schedule reads through the objectives mirror-imaged. */
@@ -1612,8 +1537,11 @@ const SAID = [
   /* SMALL, and a marker rather than a picture: the sentence is the
      thing you read, and a glyph that competes with the text it labels
      has stopped labelling it. */
+  /* The glyph is the ROW's glyph now — the same 20px mark the
+     schedule's rows carry, since an objective is one of the same
+     cards — and the sentence still has the width. */
   ok('...small beside it, not competing with it',
-    icSize.w <= 22 && icSize.t > icSize.w * 4, icSize);
+    icSize.w <= 22 && icSize.t > icSize.w * 3, icSize);
   ok('the first is the main one, and it is the only one marked',
     obs.filter((o) => o.frog).length === 1 && obs[0].frog, obs);
   /* ── EVERY glyph takes the accent ──
@@ -1667,11 +1595,10 @@ const SAID = [
     (await page.$$eval('.ob-n', (n) => n.length)) === 0);
 
   /* ── the face names itself, in the accent ──
-     Every other heading in this app is white and this one is not. The
-     face it names is the only surface here that is not flat — a sheen
-     mixed from the accent — and a grey heading over it reads as a
-     caption for something else rather than as the name of the thing
-     you turned the card to find. */
+     Every other heading in this app is a grey label and this one is
+     not: it is the only heading you have to turn something over to
+     reach, and the accent is what says the list under it is the one
+     you chose rather than the one you scheduled. */
   ok('the list is headed, in the accent the marks under it wear',
     (await page.$eval('.ob-head b', (e) => e.textContent))
       === 'Main objectives' && obMarks.head === obMarks.red
@@ -1710,11 +1637,17 @@ const SAID = [
     const t = document.querySelector('.ob.is-done .ob-tick');
     return { stroke: t && getComputedStyle(t).stroke,
       shown: t && +getComputedStyle(t).opacity,
+      box: getComputedStyle(document.querySelector('.ob.is-done .ob-box'))
+        .backgroundColor,
       accent: rgb('--red'), ink: rgb('--ink') };
   });
-  ok('...and the tick it draws is the accent, like every other tick',
-    obTick.shown === 1 && obTick.stroke === obTick.accent
-    && obTick.stroke !== obTick.ink, obTick);
+  /* THE MARK IS THE CIRCLE, and the tick is the ink on it — which is
+     what every other check in this app is now. The accent is still
+     what says the thing happened; it has moved from the stroke to the
+     ground under it. */
+  ok('...and the mark it draws is the accent, like every other tick',
+    obTick.shown === 1 && obTick.box === obTick.accent
+    && obTick.stroke !== obTick.accent, obTick);
   const objStore = await page.evaluate(() => {
     const o = JSON.parse(localStorage.getItem('sched.obj.v1') || '{}');
     const d = new Date();
@@ -1727,21 +1660,20 @@ const SAID = [
     && objStore.mine.length === 2 && objStore.mine[0].done === true,
     JSON.stringify(objStore));
 
-  /* ── the rare card ──
-     A sheen mixed from the palette and never a literal: thirteen themes
-     move --red and --ink together, so a gradient written in hex would
-     be somebody else's card on twelve of them. */
-  const sheen = await page.$eval('.wk-back',
-    (e) => getComputedStyle(e).backgroundImage);
-  ok('the back is a gradient rather than a flat fill',
-    (sheen.match(/gradient/g) || []).length >= 2, sheen.slice(0, 80));
-  ok('...mixed from the palette, with no literal colour in it',
-    !/#[0-9a-f]{3,8}/i.test(sheen), sheen.slice(0, 160));
+  /* ── THE RARE CARD WAS THE LAST THING THAT DID NOT MATCH ──
+     The face was a sheen of the accent inside a card with a foil rim,
+     and three assertions held that gradient to being mixed from the
+     palette rather than written in hex. The whole app became cards on
+     a ground, and a panel behind a list of cards is the
+     frame-inside-a-frame this project keeps taking back out — so the
+     back is the same page as the front showing a different list, and
+     the turn is the whole of what says which. What survives is with
+     the tile above: nothing in this app sheens any more.
 
-  /* And it stays a SHEEN. Everything on this face is drawn at full
-     strength, so the wash must not become a ground the words then have
-     to fight. Measured on composited pixels, and polarity-agnostic —
-     seven of the thirteen palettes are dark. */
+     WHAT SURVIVES IS THE MEASUREMENT: an objective still has to be
+     readable on whatever it is drawn on, which is now a card on the
+     page rather than words on a wash. Measured on composited pixels,
+     and polarity-agnostic. */
   const obInk = await (async () => {
     const box = await page.$eval('.ob:not(.is-done) .ob-t', (e) => {
       const b = e.getBoundingClientRect();
@@ -1766,67 +1698,19 @@ const SAID = [
     const hi = ls[Math.floor(ls.length * 0.95)];
     return Math.round(((Math.max(lo, hi) + 0.05) / (Math.min(lo, hi) + 0.05)) * 100) / 100;
   })();
-  ok('an objective on the rare card still clears 4.5:1', obInk >= 4.5, obInk);
+  ok('an objective on its card still clears 4.5:1', obInk >= 4.5, obInk);
 
-  /* ── the foil edge ──
-     A light that keeps going round the rim. The ring is a mask on the
-     outer box and the thing that turns is masked BY it — rotating the
-     ring itself would swing a rounded rectangle round on its corner. */
-  const foil = await page.evaluate(() => {
-    const f = document.querySelector('.ob-foil');
-    const i = f && f.firstElementChild;
-    if (!i) return null;
-    const fs = getComputedStyle(f), is = getComputedStyle(i);
-    return { mask: (fs.maskComposite || fs.webkitMaskComposite || ''),
-      pad: fs.paddingTop, dur: parseFloat(is.animationDuration),
-      count: is.animationIterationCount, play: is.animationPlayState,
-      bg: is.backgroundImage.slice(0, 40),
-      w: Math.round(i.getBoundingClientRect().width),
-      h: Math.round(i.getBoundingClientRect().height) };
-  });
-  ok('the rim is a masked ring with something turning inside it',
-    foil && /exclude|xor/.test(foil.mask) && parseFloat(foil.pad) > 0
-    && /conic/.test(foil.bg), foil);
-  ok('...and it LOOPS rather than running once',
-    foil.dur > 0 && foil.count === 'infinite', foil);
-  /* SQUARE, and sized off the card's height. A 200%-by-200% box is not
-     square, and at 45 degrees a non-square leaves the ring's corners
-     unlit for part of every turn — a gap crossing a corner reads as a
-     fault rather than as a highlight. */
-  ok('...turning a square, so no corner of the rim ever goes unlit',
-    Math.abs(foil.w - foil.h) <= 2, foil);
-
-  /* ── PAUSED unless the face is towards you ──
-     Both faces of all seven cards are in the document at all times.
-     Left running, that is seven rotating conic gradients, each in its
-     own masked layer, costing a compositor pass a frame to draw
-     something nobody can see. */
-  ok('it runs on the card you are looking at', foil.play === 'running', foil.play);
-  /* One panel, so the case that exists is the front: turn back to the
-     schedule and the objectives face is the one nobody can see. */
-  await page.evaluate(() => document.getElementById('scHdTurn').click());
-  await page.waitForTimeout(700);
-  const asleep = await page.$$eval('.ob-foil > i',
-    (n) => n.map((x) => getComputedStyle(x).animationPlayState));
-  ok('...and is paused once that face is turned away',
-    asleep.length === 1 && asleep.every((p) => p === 'paused'), asleep);
-  await page.evaluate(() => document.getElementById('scHdTurn').click());
-  await page.waitForTimeout(700);
-
-  /* Still, not gone: the rim is the thing that was asked for, and what
-     the setting turns off is the travelling. */
-  await page.emulateMedia({ reducedMotion: 'reduce' });
-  await page.waitForTimeout(140);
-  const foilStill = await page.$eval('.ob-foil > i', (i) => ({
-    name: getComputedStyle(i).animationName,
-    bg: /conic/.test(getComputedStyle(i).backgroundImage) }));
-  ok('asked to sit still it stops travelling, and the rim stays',
-    foilStill.name === 'none' && foilStill.bg, foilStill);
-  await page.emulateMedia({ reducedMotion: null });
-  await page.waitForTimeout(140);
-
+  /* ── THE FOIL WENT WITH THE CARD ──
+     The face was a sheen inside a card with a light travelling round
+     its rim — a masked ring with a conic gradient turning in it, and
+     five assertions holding the ring, the loop, the square and the
+     pause. What the objectives are now is the page, a heading and a
+     list of the same cards every other screen is made of, so there is
+     no rim to turn and nothing here to hold. The one thing worth
+     keeping from it is stated with the tile above: nothing in this
+     app sheens or foils any more. */
   /* ── turning back ── */
-  await page.click('.wk-back .wk-turn');
+  await page.click('#scHdTurn');
   await page.waitForTimeout(700);
   ok('and it turns back to the schedule',
     await page.$eval('.week', (d) => !d.classList.contains('is-flipped')));
@@ -3684,8 +3568,11 @@ const SAID = [
      inside the page. What casts is the row, the tally row and the
      toast; the objectives face keeps a surface because it is one
      sheet rather than a list of objects. */
-  ok('every row is a card that casts, and the toast, and the face you turn to',
-    shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1 && shade.back >= 1, shade);
+  /* Neither face casts: they draw nothing, and what casts on this
+     screen is every row on them. */
+  ok('every row is a card that casts, and the tally\u2019s rows, and the toast',
+    shade.toast >= 1 && shade.row >= 1 && shade.tyRow >= 1
+    && shade.face === 0 && shade.back === 0, shade);
   ok('...and the scroller, the poster and the press targets inside a card cast nothing',
     shade.others.length === 0, shade);
 
@@ -3854,9 +3741,12 @@ const SAID = [
      that moved any of them would be the thirteen palettes back under
      one control. Held on every token the old sets were allowed to
      write. */
+  /* --g1 moved with the gradient: the ground is flat and neutral, so
+     the wash of the accent behind everything went, and the accent
+     appears where it means something and nowhere else. */
   const FIXED = ['--paper', '--ink', '--dim', '--spent', '--hair',
-                 '--tick-off', '--bad', '--g0', '--g2'];
-  const MOVES = ['--red', '--g1', '--on-red'];
+                 '--tick-off', '--bad', '--g0', '--g1', '--g2'];
+  const MOVES = ['--red', '--on-red'];
   /* Spaces stripped, because a custom property comes back as the
      AUTHOR'S text: the stylesheet writes `rgba(120, 124, 132, .14)`
      and the solver writes the same colour without the spaces, and a
@@ -3885,7 +3775,7 @@ const SAID = [
   };
   await spin(264);
   const after = await readTokens();
-  ok('a press on the ring moves the accent, its wash and the ink on it',
+  ok('a press on the ring moves the accent and the ink on it',
     MOVES.every((k) => before[k] !== after[k]) && /^#[0-9a-f]{6}$/.test(after['--red']),
     { before, after });
   ok('...and moves nothing else at all — the ground is the app\u2019s, not a theme\u2019s',
@@ -4051,9 +3941,9 @@ const SAID = [
   await page.evaluate(() => localStorage.setItem('sched.accent.v1', 'plum'));
   await page.reload({ waitUntil: 'networkidle' });
   await page.waitForTimeout(240);
-  /* 284 on the dark face solves to #8f87ff — the violet Craft ships
+  /* 284 on the flat near-black solves to #897eff — the one it ships
      with, where lime used to be. */
-  const SHIPS_RED = '#8f87ff';
+  const SHIPS_RED = '#897eff';
   ok('a stored accent that is not an angle falls back to the one it ships with',
     await page.evaluate(() =>
       getComputedStyle(document.documentElement).getPropertyValue('--red').trim())
@@ -4080,7 +3970,7 @@ const SAID = [
     return root;
   });
   ok('clearing it falls back to the page the stylesheet itself carries',
-    ships['--red'] === SHIPS_RED && ships['--paper'] === '#17142b'
+    ships['--red'] === SHIPS_RED && ships['--paper'] === '#0c0c0e'
     && ships['--ink'] === '#ffffff', ships);
   /* NOTHING HAS RUN scPaint AT THIS POINT — the key is clear, so every
      token above came from the stylesheet. Turning the wheel to 124 and
@@ -7684,7 +7574,7 @@ const SAID = [
     await spage.waitForTimeout(850);
     seen.onBack = await spin();
     await spage.evaluate(() =>
-      document.querySelector('.wk-back .wk-turn').click());
+      document.getElementById('scHdTurn').click());
     await spage.waitForTimeout(170);
     seen.returning = await spin();
     await spage.waitForTimeout(850);
@@ -7854,8 +7744,8 @@ const SAID = [
     });
     const auto = await face();
     ok('with nothing stored the app follows the device, and this one is light',
-      auto.mode === 'light' && auto.key === null && auto.paper === '#fbf9ff'
-      && auto.ink === '#2b2540' && auto.scheme === 'light', auto);
+      auto.mode === 'light' && auto.key === null && auto.paper === '#f7f7f9'
+      && auto.ink === '#1a1a1f' && auto.scheme === 'light', auto);
 
     /* The wheel solves against the light ground here, so the accent
        is a DIFFERENT colour from the dark face's at the same angle. */
@@ -7867,7 +7757,7 @@ const SAID = [
       return (Math.max(x, y) + .05) / (Math.min(x, y) + .05); };
     const hexL = (h) => h.replace('#', '').match(/\w\w/g).map((x) => parseInt(x, 16));
     ok('...and the accent is solved for THIS ground, not the dark one',
-      auto.red !== '#8f87ff' && ratioL(hexL(auto.red), hexL(auto.paper)) >= 6,
+      auto.red !== '#897eff' && ratioL(hexL(auto.red), hexL(auto.paper)) >= 6,
       { red: auto.red, ratio: ratioL(hexL(auto.red), hexL(auto.paper)).toFixed(2) });
 
     const worst = [];
@@ -7916,13 +7806,13 @@ const SAID = [
     await lpage.waitForTimeout(300);
     const forced = await face();
     ok('a stored dark beats a light device',
-      forced.mode === 'dark' && forced.paper === '#17142b' && forced.scheme === 'dark', forced);
+      forced.mode === 'dark' && forced.paper === '#0c0c0e' && forced.scheme === 'dark', forced);
     await lpage.evaluate(() => localStorage.setItem('sched.mode.v1', 'sepia'));
     await lpage.reload({ waitUntil: 'networkidle' });
     await lpage.waitForTimeout(300);
     const junk = await face();
     ok('and a stored mode this build does not have falls back to the device',
-      junk.mode === 'light' && junk.paper === '#fbf9ff', junk);
+      junk.mode === 'light' && junk.paper === '#f7f7f9', junk);
 
     /* THE STYLESHEET'S LIGHT COPY IS THE SCRIPT'S, token for token.
        app.css carries both faces for the first paint and app.js carries

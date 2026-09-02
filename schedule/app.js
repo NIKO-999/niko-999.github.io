@@ -1543,58 +1543,31 @@
   function scObjBack(d) {
     var day = scObjDay(d);
     var back = scEl('div', 'wk-back');
-
-    /* ── the foil edge ──
-       A light that travels round the rim. It is a real element rather
-       than a pseudo because it needs a CHILD: the ring is a mask on the
-       outer box, and the thing that turns has to be masked BY it —
-       rotating the mask itself would swing a rectangular ring round on
-       its corner. Two boxes, one turning inside the other's shape. */
-    var foil = scEl('i', 'ob-foil');
-    foil.setAttribute('aria-hidden', 'true');
-    foil.appendChild(scEl('i'));
-    back.appendChild(foil);
-
-    var head = scEl('div', 'wk-h');
-    /* NOT `.day-name`. The front already owns that class, and a second
-       one per card made every query for the week's day names return two
-       — the deck read as "Tuesday, Tuesday" and today counted twice
-       against the rule that says what the accent is spent on. It is
-       also plain ink here: the frog's rank is this face's one live
-       thing, and a red heading over it would be two. */
-    var t = scEl('button', 'ob-day', FULL[d]);
-    t.setAttribute('aria-label', 'Back to ' + FULL[d] + '\u2019s schedule');
-    t.addEventListener('click', function () { scFlip(d, false); });
-    head.appendChild(t);
-    var turn = scEl('button', 'wk-turn');
-    turn.setAttribute('aria-label', 'Back to the schedule');
-    turn.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
-      + '<path d="M4 7h16M4 12h16M4 17h10"/></svg>';
-    turn.addEventListener('click', function () { scFlip(d, false); });
-    head.appendChild(turn);
-    back.appendChild(head);
-
+    /* ── THE FACE IS HEADED, and it has no head of its own ──
+       It carried the day name and a second turn control, both of
+       which the page's own head now says: the day is up there at
+       30px and the one control turns the panel both ways. What is
+       left is the heading every other list in this app wears — small
+       caps and a count — so the back reads as one of them rather
+       than as a screen of its own. */
     var all = scObjFor(day);
-    /* ALWAYS, and it was drawn only over a list that existed. The
-       argument for that was sound — a heading over nothing names
-       something that is not there — and it was wrong about which
-       nothing this is: an empty card is not a card with no heading, it
-       is a card with no objectives YET, and the heading is what says
-       so. Without it the face opens on a plus and a sentence floating
-       in the middle of a gradient, anchored to nothing. */
-    var oh = scEl('div', 'ob-head');
-    oh.appendChild(scEl('b', null, 'Main objectives'));
-    oh.appendChild(scEl('i'));
+    var oh = scEl('div', 'grp-h ob-head');
+    oh.appendChild(scEl('b', 'pill', 'Main objectives'));
+    if (all.length) oh.appendChild(scEl('span', 'c', String(all.length)));
     back.appendChild(oh);
     var list = scEl('ol', 'ob-list');
     all.forEach(function (o, i) {
       var li = scEl('li');
       var b = scEl('button', 'ob' + (o.done ? ' is-done' : '')
         + (i === 0 ? ' is-frog' : ''));
-      /* SMALL, and it is a marker rather than a picture: the sentence
-         beside it is what you read, and a 30px glyph next to fifteen
-         words made the drawing the loudest thing on a face whose whole
-         job is the words. */
+      /* The circle every row in this app is ticked by, drawn rather
+         than pressed: the whole row is the button here, and a button
+         inside a button is invalid and collapses to one press. */
+      var box = scEl('i', 'ob-box');
+      box.setAttribute('aria-hidden', 'true');
+      box.innerHTML = '<svg class="ob-tick" viewBox="0 0 24 24">'
+        + '<path d="M4.5 12.8l5.2 5.2L19.5 6"/></svg>';
+      b.appendChild(box);
       var kind = scIconFor(o.n);
       var ic = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
       ic.setAttribute('class', 'ob-ic');
@@ -1603,20 +1576,7 @@
       ic.setAttribute('data-icon', kind);
       ic.innerHTML = BLOCK_ICON[kind];
       b.appendChild(ic);
-
       b.appendChild(scEl('span', 'ob-t', o.n));
-
-      /* The tick is a mark that APPEARS, the same as a finished block
-         on the front: an untouched row's gutter holds one thing. */
-      var tk = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-      tk.setAttribute('class', 'ob-tick');
-      tk.setAttribute('viewBox', '0 0 24 24');
-      tk.setAttribute('aria-hidden', 'true');
-      tk.innerHTML = '<path d="M4.5 12.8l5.2 5.2L19.5 6"/>';
-      b.appendChild(tk);
-
-      /* Everything the drawing says, said. Without this a screen reader
-         meets a list of buttons called "1" and "2". */
       b.setAttribute('aria-label', (i + 1) + '. ' + o.n
         + (i === 0 ? ', the main one' : '') + '. '
         + (o.done ? 'Done' : 'Not done') + '. Tap to mark.');
@@ -1630,18 +1590,15 @@
       list.appendChild(li);
     });
     back.appendChild(list);
-
     if (all.length < OBJ_MAX) {
       var add = scEl('button', 'ob-add');
       add.setAttribute('aria-label', 'Add an objective for ' + FULL[d]);
       add.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true">'
         + '<path d="M12 5v14M5 12h14"/></svg>';
+      add.appendChild(scEl('span', null, all.length ? 'Add another' : 'Add one'));
       add.addEventListener('click', function () { scObjSheet(d, day); });
       back.appendChild(add);
     }
-    /* The one line of prose on this face, and only when there is
-       nothing else on it: a blank card with a plus on it says what to
-       press and not what the thing is for. */
     if (!all.length) {
       back.appendChild(scEl('p', 'ob-empty',
         'What today is for. Two or three, hardest first.'));
@@ -1750,10 +1707,6 @@
       : 'Objectives for ' + FULL[scOpenDay()]);
     if (!b.dataset.wired) {
       b.dataset.wired = '1';
-      var foil = scEl('i', 'tn-foil');
-      foil.setAttribute('aria-hidden', 'true');
-      foil.appendChild(scEl('i'));
-      b.appendChild(foil);
       var g = document.createElement('span');
       g.className = 'tn-g';
       b.appendChild(g);
@@ -1954,7 +1907,7 @@
      friend's colour coming out wrong weeks later. It is the file's
      oldest bug and tests/names.js could not see it, because the whole
      app is inside an IIFE and that check read column zero. */
-  var GROUND = [23, 20, 43];
+  var GROUND = [12, 12, 14];
   /* The most chroma sRGB holds at this lightness and hue. Bisection
      rather than the analytic boundary: the boundary is six plane
      intersections and this is four lines that cannot be got wrong. */
@@ -1988,7 +1941,7 @@
      its fullest sits far above the white it has to read on. Same
      search, opposite direction, one cache per ground — a blue solved
      for black is a pale sky on white, and it had to not be shared. */
-  var LIGHT_GROUND = [251, 249, 255];
+  var LIGHT_GROUND = [247, 247, 249];
   var scHueCacheL = {};
   function scAccentRGB(h) {
     h = ((Math.round(h) % 360) + 360) % 360;
@@ -2030,28 +1983,24 @@
      [data-mode="light"] — and tests/schedule.js holds each pair in
      step, because the day one of them drifts is the day the page
      flashes the wrong colour for a frame on every open. */
-  var DARK_SET = { '--paper': '#17142B', '--ink': '#ffffff',
+  var DARK_SET = { '--paper': '#0C0C0E', '--ink': '#ffffff',
     '--dim': '#b4b4ba', '--spent': '#8c8c94',
-    '--hair': 'rgba(255,255,255,.10)', '--tick-off': '#46464F', '--bad': '#ff7a7a',
-    '--g0': '#17142B', '--g2': 'rgba(120,124,132,.14)', '--g3': 'transparent',
-    '--ground': 'linear-gradient(165deg, #1C1832 0%, #2A1B30 50%, #131B2C 100%)',
-    '--card': 'rgba(255,255,255,.07)', '--card-edge': 'rgba(255,255,255,.14)',
-    '--card-shadow': '0 12px 28px -18px rgba(0,0,0,.8)',
-    '--deck': 'rgba(255,255,255,.05)', '--deck-open': 'rgba(255,255,255,.08)',
-    '--deck-edge': 'rgba(255,255,255,.12)',
+    '--hair': 'rgba(255,255,255,.10)', '--tick-off': '#3A3A42', '--bad': '#ff7a7a',
+    '--g0': '#0C0C0E', '--g2': 'transparent', '--g3': 'transparent',
+    '--ground': '#0C0C0E',
+    '--card': 'rgba(255,255,255,.06)', '--card-edge': 'rgba(255,255,255,.10)',
+    '--card-shadow': '0 12px 28px -18px rgba(0,0,0,.9)',
     '--s-m-bg': '#F2B950', '--s-m-fg': '#2A1A00',
     '--s-a-bg': '#5FA8FF', '--s-a-fg': '#061C3A',
     '--s-e-bg': '#B98BFF', '--s-e-fg': '#23084A',
     '--done-bg': 'rgba(255,255,255,.10)' };
-  var LIGHT_SET = { '--paper': '#FBF9FF', '--ink': '#2B2540',
-    '--dim': '#625C78', '--spent': '#7A7490',
-    '--hair': 'rgba(60,40,100,.10)', '--tick-off': '#E3E2EA', '--bad': '#C7382F',
-    '--g0': '#FBF9FF', '--g2': 'transparent', '--g3': 'transparent',
-    '--ground': 'linear-gradient(160deg, #F6F1FF 0%, #FFF4EE 55%, #EEF6FF 100%)',
-    '--card': 'rgba(255,255,255,.82)', '--card-edge': '#ffffff',
-    '--card-shadow': '0 10px 26px -18px rgba(60,40,120,.45)',
-    '--deck': 'rgba(255,255,255,.55)', '--deck-open': 'rgba(255,255,255,.85)',
-    '--deck-edge': '#ffffff',
+  var LIGHT_SET = { '--paper': '#F7F7F9', '--ink': '#1A1A1F',
+    '--dim': '#5C5C66', '--spent': '#797984',
+    '--hair': 'rgba(0,0,0,.10)', '--tick-off': '#E2E2E7', '--bad': '#C7382F',
+    '--g0': '#F7F7F9', '--g2': 'transparent', '--g3': 'transparent',
+    '--ground': '#F7F7F9',
+    '--card': 'rgba(255,255,255,.92)', '--card-edge': '#ffffff',
+    '--card-shadow': '0 10px 26px -16px rgba(15,15,25,.40)',
     '--s-m-bg': '#FFE3B3', '--s-m-fg': '#6A3E00',
     '--s-a-bg': '#CFE6FF', '--s-a-fg': '#0F3E7A',
     '--s-e-bg': '#E6D6FF', '--s-e-fg': '#4A2A8A',
@@ -2064,7 +2013,9 @@
     t['--red'] = scHex(v);
     /* The wash IS the accent, at a fifth, on the dark face. The light
        face has its own sky and takes none. */
-    t['--g1'] = light ? 'transparent' : 'rgba(' + v.join(',') + ',.20)';
+    /* NO WASH ON EITHER FACE. The ground is flat and neutral, so the
+       accent appears where it means something and nowhere else. */
+    t['--g1'] = 'transparent';
     /* Ink ON the accent. Dark face: the floor puts every accent at a
        luminance of at least .26, so a near-black clears 6:1 on all of
        them. Light face: the accent was lowered until it clears 6:1 on
@@ -2164,7 +2115,6 @@
                 '--tick-off', '--on-red', '--bad',
                 '--g0', '--g1', '--g2', '--g3',
                 '--ground', '--card', '--card-edge', '--card-shadow',
-                '--deck', '--deck-open', '--deck-edge',
                 '--s-m-bg', '--s-m-fg', '--s-a-bg', '--s-a-fg', '--s-e-bg', '--s-e-fg',
                 '--done-bg'];
 
@@ -2649,7 +2599,7 @@
           else if (hist[j].off) continue;
           else break;
         }
-        if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-now' : ''), run + ' days'));
+        if (run >= 2) props.appendChild(scEl('span', 'pill' + (run >= 7 ? ' is-run' : ''), run + ' days'));
       }
       body.appendChild(props);
       c.setAttribute('aria-label', it.n + ', ' + (on ? 'logged' : 'not yet')
@@ -6459,7 +6409,7 @@
         bar.style.width = (Math.abs(r.lift) / most * 50).toFixed(2) + '%';
         mid.appendChild(bar);
       }
-      li.appendChild(scEl('span', 'pat-n pill' + (r.lift >= .5 ? ' is-now' : ''),
+      li.appendChild(scEl('span', 'pat-n pill' + (r.lift >= .5 ? ' is-up' : ''),
         (nil ? '' : r.lift < 0 ? '−' : '+') + fig));
       /* Spoken as one sentence with its sample in it. The bar says
          nothing a screen reader can use and the bare figure says less

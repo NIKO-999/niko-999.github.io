@@ -4257,3 +4257,95 @@ read the record instead, which is where the week lives. The ones that
 are genuinely about another day press its chip and read what is drawn:
 `rowsOf`, the per-date objectives, the finished-block time, what you
 trained, and the rating row walking all seven.
+
+## Black, grey, white, and one accent
+
+Craft's grounds were a pale gradient by day and an indigo-to-plum sky
+at night, over a violet near-black page. Both are flat and neutral
+now: `#0C0C0E` and `#F7F7F9`, with `--g1` gone from both faces. Every
+surface is white at a low alpha, so **the greys ARE the ground seen
+through the cards** rather than a second palette, and the one coloured
+thing on a screen is whatever the wheel is set to. A gradient is a
+colour nobody chose sitting behind everything that was.
+
+`GROUND` and `LIGHT_GROUND` moved with them, so the accent floor is
+solved against the page that ships: 284 is `#897eff` on the black and
+`#5c43d2` on the paper.
+
+**The session pills and the workout hues stay**, and that is the same
+rule rather than an exception: a colour that says WHICH has to be the
+same at every angle of the wheel. Nothing else is coloured at all.
+
+## A fact is type, not a tag
+
+Every figure on every screen was a grey chip: two on a schedule row,
+four on a workout tile, one on every item of Showing up. A screen of
+little boxes, each drawn as loudly as the last, none of them saying
+anything the words alone would not — **a chip that means nothing in
+particular is a chip that has stopped meaning anything at all.**
+
+A CHIP IS FOR SOMETHING CATEGORICAL: which session a block is in,
+which group a workout belongs to, and the one row running now. Those
+keep a fill, fully round. Every figure — a time, a length, an average,
+a share, how long ago — is quiet tabular type with a middle dot
+between, which is how a sentence separates two facts.
+
+**The dot rides the second item** as a `::before` rather than being an
+element of its own: a separator is punctuation, not a thing to lay
+out. **And only where the line cannot wrap** — a wrapped line begins
+with the separator, which reads as a bullet nobody asked for. The rows
+and the tally's items get dots; the workout tile, whose four figures
+wrap by design, gets a wider gap instead. A finished block draws no
+time and a hidden element is still a sibling, so the length came up
+wearing a leading dot with nothing in front of it.
+
+**A run of days is the accent as a COLOUR, not as a ground**, and so
+is a strong lift on Pattern: those are figures about you rather than
+states of the screen. The single filled chip in the app is Now.
+
+**The group heading is a heading, not a chip.** Small caps and a
+count, the same label wherever a list is headed.
+
+## The objectives face is the same page
+
+It was the one surface in this app that was not flat: a sheen of the
+accent inside a card with a foil rim travelling round it, headed in
+small caps with a hairline running off the heading, over rows that
+were bare lines with a glyph and a tick floating on the wash. Every
+other screen became cards on a ground, and **a panel behind a list of
+cards is the frame-inside-a-frame this project keeps taking back
+out.**
+
+The back draws nothing now. The two faces are the same page showing
+different lists and the turn is the whole of what says which. An
+objective is one of the same cards every other screen is made of: a
+circle check, the row's own 20px glyph, the sentence. The check is
+drawn rather than pressed — the whole row is the button, and a button
+inside a button is invalid.
+
+**The heading keeps the accent**, and that is not the exception it was:
+it is the one heading you have to turn something over to reach, and
+the colour is what says the list under it is the one you CHOSE rather
+than the one you scheduled. `.grp-h.ob-head .pill`, not `.ob-head b` —
+the group label's own rule is later in the file, so anything less
+specific loses to it and the accent quietly becomes grey. That is the
+fifth time in this file.
+
+**The mark moved from the stroke to the ground.** The tick was drawn
+in the accent on nothing; it is `--on-red` on an accent circle now,
+which is what every other check in the app is.
+
+**And the turn control went with the face it advertised.** It wore the
+sheen and a foil rim on the argument that the thing you press should
+look like the thing it turns to. With the face flat that argument is
+gone, and a sheen chip with a moving light in it was the last
+ornamented object in the app. It is the head's own glyph tile, on the
+other side of the line. **There is no conic gradient anywhere in
+`schedule/` any more** — asserted, because that is the kind of thing
+that comes back one element at a time.
+
+**A contrast scan has to sample the row, not the ring.** The check
+that reads every row's ink against its own ground sampled 4px in and
+3px up — which on a 14px radius with a 1.5px accent ring lands on the
+ring where it curves round the corner, and reported 3.28:1 against a
+colour no text is ever drawn over. It measures where the text is.

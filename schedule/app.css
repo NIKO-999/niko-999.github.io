@@ -95,7 +95,7 @@
      step on the tokens. */
   color-scheme: dark;
 
-  --paper: #17142B;
+  --paper: #0C0C0E;
   --ink:   #ffffff;
 
   /* ── the greys are measured, not chosen ──
@@ -161,8 +161,8 @@
      has none of that cost, and putting one on an element the ring
      repaints inside would give it all of it. */
   --g0: var(--paper);
-  --g1: rgba(200, 250, 66, .20);
-  --g2: rgba(120, 124, 132, .14);
+  --g1: transparent;
+  --g2: transparent;
   /* A third wash. Two corners is a tint; three is a gradient you can
      see across the whole frame. It was the light palettes' own third
      stop and nothing sets it now — kept, and kept transparent, because
@@ -181,7 +181,7 @@
      separated from the panel behind it by .009 of luminance, which is
      a day you cannot see you missed — and losing the misses is the one
      thing a record of showing up must never do. */
-  --tick-off: #46464F;
+  --tick-off: #3A3A42;
 
   /* What sits ON the accent — the add button's plus, the go button's
      label. White is right on a red at 4.7:1 and wrong on every bright
@@ -223,13 +223,17 @@
      light set is on [data-mode="light"] below, and scAccent writes
      whichever is live inline — the same three-copies arrangement the
      accent already had. */
-  --ground: linear-gradient(165deg, #1C1832 0%, #2A1B30 50%, #131B2C 100%);
-  --card:   rgba(255,255,255,.07);
-  --card-edge: rgba(255,255,255,.14);
-  --card-shadow: 0 12px 28px -18px rgba(0,0,0,.8);
-  --deck:   rgba(255,255,255,.05);
-  --deck-open: rgba(255,255,255,.08);
-  --deck-edge: rgba(255,255,255,.12);
+/* ── BLACK, GREY, WHITE, AND ONE ACCENT ──
+     The ground was an indigo-to-plum sky over a violet near-black. It
+     is flat and neutral now: every surface on this face is white at a
+     low alpha, so the greys ARE the ground seen through the cards
+     rather than a second palette, and the one coloured thing on the
+     screen is whatever the wheel is set to. A gradient is a colour
+     nobody chose sitting behind everything that was. */
+  --ground: #0C0C0E;
+  --card:   rgba(255,255,255,.06);
+  --card-edge: rgba(255,255,255,.10);
+  --card-shadow: 0 12px 28px -18px rgba(0,0,0,.9);
   --s-m-bg: #F2B950; --s-m-fg: #2A1A00;
   --s-a-bg: #5FA8FF; --s-a-fg: #061C3A;
   --s-e-bg: #B98BFF; --s-e-fg: #23084A;
@@ -271,21 +275,20 @@
    same set, and tests/schedule.js holds the two copies in step. */
 :root[data-mode="light"] {
   color-scheme: light;
-  --paper: #FBF9FF;
-  --ink:   #2B2540;
-  --dim:   #625C78;
-  --spent: #7A7490;
-  --hair:  rgba(60,40,100,.10);
-  --tick-off: #E3E2EA;
+  --paper: #F7F7F9;
+  --ink:   #1A1A1F;
+  --dim:   #5C5C66;
+  --spent: #797984;
+  --hair:  rgba(0,0,0,.10);
+  --tick-off: #E2E2E7;
   --bad:   #C7382F;
-  --g0: #FBF9FF; --g1: transparent; --g2: transparent; --g3: transparent;
-  --ground: linear-gradient(160deg, #F6F1FF 0%, #FFF4EE 55%, #EEF6FF 100%);
-  --card:   rgba(255,255,255,.82);
+  --g0: #F7F7F9; --g1: transparent; --g2: transparent; --g3: transparent;
+  /* Flat here too, and neutral: the day face is paper rather than a
+     pale sky, so the same rule holds either way round. */
+  --ground: #F7F7F9;
+  --card:   rgba(255,255,255,.92);
   --card-edge: #ffffff;
-  --card-shadow: 0 10px 26px -18px rgba(60,40,120,.45);
-  --deck:   rgba(255,255,255,.55);
-  --deck-open: rgba(255,255,255,.85);
-  --deck-edge: #ffffff;
+  --card-shadow: 0 10px 26px -16px rgba(15,15,25,.40);
   --s-m-bg: #FFE3B3; --s-m-fg: #6A3E00;
   --s-a-bg: #CFE6FF; --s-a-fg: #0F3E7A;
   --s-e-bg: #E6D6FF; --s-e-fg: #4A2A8A;
@@ -1054,53 +1057,15 @@ body {
   -webkit-backface-visibility: hidden;
   overflow: hidden;
 }
-.wk-back {
-  /* The back IS one sheet — the objectives are a page you turned to
-     rather than a list of objects — so it keeps the panel the front
-     gave up, and the sheen below paints over it. */
-  transform: rotateY(180deg);
-  border-radius: var(--wk-r);
-  padding: 15px 14px;
-  border: 1px solid var(--deck-edge);
-  box-shadow: inset 0 1px 0 var(--deck-edge), var(--card-shadow);
-}
-
-/* ── A TURNED FACE IS NOT DRAWN, and backface-visibility alone is not
-   enough to do that ──
-   The running row's sweep is an infinite animation on `transform`, so
-   it is promoted to its own compositor layer — and a composited
-   descendant of a backface-hidden ancestor is not reliably culled with
-   it. On iOS the whole running row came through the objectives face
-   MIRRORED: "Read" backwards, its time backwards, over the card you
-   were reading. Chromium does not reproduce it, which is why this is a
-   rule about the FACE rather than a fix aimed at the sweep — the pill
-   leaked the same way for the same reason, and the next animated thing
-   added to the front would too.
-
-   HIDDEN HALFWAY THROUGH THE TURN, not at the start of it: the front
-   is the thing rotating away and you are still looking at it for the
-   first half. `visibility` transitions as a discrete property, so a
-   delay of half the flip is all this takes. Coming back it is
-   immediate, because by then the front is what you are turning to. */
-/* ── AND VISIBILITY ALONE WAS NOT ENOUGH EITHER ──
-   It came back: the running row still bled through the objectives face
-   on iOS with this rule in place. `visibility` is a PAINT-time
-   property, and the whole shape of this bug is a layer the compositor
-   keeps and paints without consulting the paint tree — which is why
-   hiding the ancestor missed it twice.
-
-   `opacity` is the lever that reaches the layer itself: a composited
-   layer at zero is not drawn by the compositor, whatever it thinks the
-   paint tree says. It also transitions, so it carries the same
-   half-a-turn delay rather than needing a second mechanism.
-
-   AND THE ANIMATION STOPS, stated as a property of the SUBTREE rather
-   than aimed at the sweep — a rule naming the thing that leaked is a
-   rule the next animated thing on this face walks straight past, which
-   is how this got shipped twice. `!important` because an inline
-   `animation` shorthand beats any selector however specific, and this
-   app writes one on the tally's halo. An animation that is not running
-   is not promoted, which is the root of it. */
+/* ── AND THE BACK DRAWS NOTHING EITHER ──
+   It was the one surface in this app that was not flat: a sheen of
+   the accent inside a card with a travelling foil rim. Everything
+   around it became cards on a ground, and a panel behind a list of
+   cards is the frame-inside-a-frame this project keeps taking back
+   out — the objectives just were not the last place it was still
+   standing. The two faces are the same page now, showing different
+   lists, and the turn is the whole of what says which. */
+.wk-back { transform: rotateY(180deg); }
 .wk-front { visibility: visible; opacity: 1; transition: visibility 0s, opacity 0s; }
 .wk-flip.is-flipped .wk-front {
   visibility: hidden;
@@ -1190,18 +1155,6 @@ body {
    everything on this face is drawn in --ink at full strength, so the
    wash has to stay a sheen rather than become a ground that the glyphs
    then have to fight. */
-.wk-back {
-  background:
-    radial-gradient(128% 82% at 12% -8%,
-      color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
-    radial-gradient(120% 88% at 92% 106%,
-      color-mix(in srgb, var(--ink) 13%, transparent), transparent 58%),
-    linear-gradient(148deg,
-      color-mix(in srgb, var(--red) 7%, transparent) 0%,
-      transparent 42%,
-      color-mix(in srgb, var(--ink) 7%, transparent) 100%),
-    var(--paper);
-}
 
 /* ── the foil edge, and it LOOPS ──
    The card's rim catches a light that keeps going round it. A card
@@ -1229,56 +1182,10 @@ body {
 /* The card's own border gets out of the way where the foil runs, or
    the rim is two rings a pixel apart. */
 
-.ob-foil {
-  position: absolute;
-  inset: 0;
-  border-radius: 18px;
-  padding: 1.7px;
-  pointer-events: none;
-  overflow: hidden;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-}
-.ob-foil > i {
-  position: absolute;
-  left: 50%;
-  top: 50%;
-  height: 210%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  background: conic-gradient(from 0deg,
-    transparent 0deg,
-    color-mix(in srgb, var(--red) 92%, transparent) 26deg,
-    color-mix(in srgb, var(--paper) 70%, transparent) 40deg,
-    color-mix(in srgb, var(--ink) 55%, transparent) 62deg,
-    transparent 104deg,
-    transparent 180deg,
-    color-mix(in srgb, var(--red) 92%, transparent) 206deg,
-    color-mix(in srgb, var(--paper) 70%, transparent) 220deg,
-    color-mix(in srgb, var(--ink) 55%, transparent) 242deg,
-    transparent 284deg,
-    transparent 360deg);
-  animation: obFoil 6s linear infinite;
-  /* ── PAUSED UNLESS THE FACE IS TOWARDS YOU ──
-     Both faces are in the document at all times, so without this the
-     rim turns for all seven days of the week behind a schedule nobody
-     can see through — seven rotating conic gradients, each in its own
-     masked layer, costing a compositor pass a frame to draw nothing. */
-  animation-play-state: paused;
-}
-.wk-flip.is-flipped .ob-foil > i { animation-play-state: running; }
-@keyframes obFoil {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg); }
 }
 /* Still, not gone. The rim is the thing that was asked for; what the
    setting turns off is the travelling, so it holds at the phase where
    both lights are on the long edges. */
-@media (prefers-reduced-motion: reduce) {
-  .ob-foil > i { animation: none; transform: translate(-50%, -50%) rotate(28deg); }
-}
 
 /* The back's own title. Sized like the front's so the two faces are
    plainly the same card, and in ink rather than the accent — the frog's
@@ -1349,9 +1256,8 @@ body {
    across and 3px down, which the corner check caught. */
 .wk-turn {
   flex: none;
-  width: auto; height: 26px;
-  margin: -2px -3px -2px 0;
-  padding: 0 9px;
+  width: 38px; height: 38px;
+  padding: 0;
   border: 0;
   background: none;
   cursor: pointer;
@@ -1359,7 +1265,7 @@ body {
   place-items: center;
 }
 .wk-turn svg {
-  width: 15px; height: 15px;
+  width: 19px; height: 19px;
   /* ── THE COLOUR IS SAID, NOT INHERITED ──
      The target's centre is the one filled part of this mark and it is
      `currentColor`. Nothing here set a colour, and the `*` reset does
@@ -1372,36 +1278,32 @@ body {
      Set beside the stroke rather than as a literal, so the fill and
      the strokes are the same colour by construction wherever this
      mark is drawn. */
-  color: var(--dim);
-  fill: none; stroke: var(--dim); stroke-width: 1.9;
+  color: var(--ink);
+  fill: none; stroke: var(--ink); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
 
-/* ── THE PILL IS THE FRONT'S ALONE ──
-   It went on `.wk-turn` and reached both faces, so the way BACK to the
-   schedule came up wearing a sheen chip on a sheen card: the same
-   treatment twice, thirty pixels apart, on a face that already carries
-   the card's own rim. The pill's whole job is to advertise the back
-   from the front — on the back there is nothing left to advertise. */
+/* ── THE TURN CONTROL IS A TILE ──
+   It wore the objectives face's own sheen with a foil rim that
+   travelled, on the argument that the thing you press should look
+   like the thing it turns to. That argument went with the face: the
+   back draws nothing now, so a sheen chip with a moving light in it
+   was the one ornamented object left in the app and it matched
+   nothing. It is the head's own glyph tile, mirrored on the other
+   side of the line. */
+#scHdTurn {
+  position: relative;
+  border-radius: 12px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
+}
+
+
 /* ── THE TURN CONTROL WEARS WHAT IT OPENS ──
    In the head now rather than in a card's corner, and the surface is
    the reason it can be: the objectives face's own sheen, mixed from
    the palette exactly as the back's is, with a rim that travels. The
    thing you press looks like the thing it turns to. */
-#scHdTurn {
-  position: relative;
-  border-radius: 13px;
-  background:
-    radial-gradient(128% 82% at 12% -8%,
-      color-mix(in srgb, var(--red) 17%, transparent), transparent 62%),
-    radial-gradient(120% 88% at 92% 106%,
-      color-mix(in srgb, var(--ink) 13%, transparent), transparent 58%),
-    linear-gradient(148deg,
-      color-mix(in srgb, var(--red) 7%, transparent) 0%,
-      transparent 42%,
-      color-mix(in srgb, var(--ink) 7%, transparent) 100%),
-    var(--paper);
-}
 .wk-front .wk-turn svg { position: relative; z-index: 1; }
 .wk-turn:active svg { stroke: var(--red); }
 .wk-turn:focus-visible { outline: 2px solid var(--red); outline-offset: 1px; }
@@ -1413,61 +1315,15 @@ body {
    which reads as a fault rather than as a highlight. Sized off the
    pill's HEIGHT, which is the smaller dimension, so 340% clears the
    diagonal of a box three times as wide as it is tall. */
-.tn-foil {
-  position: absolute;
-  inset: 0;
-  border-radius: 13px;
-  padding: 1.4px;
-  pointer-events: none;
-  overflow: hidden;
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-  mask-composite: exclude;
-}
-.tn-foil > i {
-  position: absolute;
-  left: 50%; top: 50%;
-  height: 340%;
-  aspect-ratio: 1;
-  transform: translate(-50%, -50%);
-  background: conic-gradient(from 0deg,
-    transparent 0deg,
-    color-mix(in srgb, var(--red) 92%, transparent) 26deg,
-    color-mix(in srgb, var(--paper) 70%, transparent) 40deg,
-    color-mix(in srgb, var(--ink) 55%, transparent) 62deg,
-    transparent 104deg,
-    transparent 180deg,
-    color-mix(in srgb, var(--red) 92%, transparent) 206deg,
-    color-mix(in srgb, var(--paper) 70%, transparent) 220deg,
-    color-mix(in srgb, var(--ink) 55%, transparent) 242deg,
-    transparent 284deg,
-    transparent 360deg);
-  animation: tnFoil 5s linear infinite;
-  /* ── PAUSED UNLESS YOU CAN SEE IT ──
-     Seven cards are in the document at all times and each has this
-     control on its front face. Left running that is seven conic
-     gradients in seven masked layers, six of them behind a shut card
-     76px wide and one of them behind a schedule turned away from you,
-     costing a compositor pass a frame to draw nothing. The card's own
-     rim already keeps this rule; this is the same rule one level in. */
-  animation-play-state: paused;
-}
 /* IT TURNS WHILE THE SCHEDULE IS FACING YOU and stops once you are
    on the face it opens: a conic gradient turning in its own masked
    layer costs a compositor pass a frame to draw what is no longer
    telling you anything. */
-#scFlip:not(.is-flipped) ~ #scHdTurn .tn-foil > i,
-.hd-top #scHdTurn:not(.is-back) .tn-foil > i { animation-play-state: running; }
-@keyframes tnFoil {
-  from { transform: translate(-50%, -50%) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(360deg); }
 }
 /* Still, not gone — the rim is the thing that was asked for, and a
    pill that loses its edge under reduced motion loses the half that
    says it is a control. */
 @media (prefers-reduced-motion: reduce) {
-  .wk-flip:not(.is-flipped) .tn-foil > i { animation-play-state: paused; }
 }
 
 /* ── MAIN OBJECTIVES ──
@@ -1480,49 +1336,16 @@ body {
    Drawn only over a list that exists. A heading on an empty card names
    something that is not there, and the empty state already says what
    the face is for. */
-.ob-head {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex: none;
-  padding: 10px 2px 2px;
-}
-.ob-head b {
-  font-size: 9.5px;
-  font-weight: 700;
-  letter-spacing: .17em;
-  text-transform: uppercase;
-  /* ── THE ONE TITLE THAT KEEPS THE ACCENT ──
-     Every other heading in this app is white; this one is not, and it
-     is not an exception smuggled in. The face it names is the only
-     surface here that is not flat — a sheen mixed from the accent —
-     and a grey heading over it reads as a caption for something else
-     rather than as the name of the thing you turned the card to find.
-     It is the same treatment the sessions get on the front, in --red
-     rather than --spent. */
-  color: var(--red);
-  white-space: nowrap;
-}
-.ob-head i {
-  flex: 1;
-  height: 1px;
-  background: color-mix(in srgb, var(--red) 26%, transparent);
-}
-
-/* ── an objective ──
-   A rank, a glyph and a figure. No name is drawn: what you want at a
-   glance is WHICH thing and HOW MUCH, and a line of prose here would
-   be the schedule again with the times taken off. The name is on the
-   element for a screen reader, which is the rule the tally cards
-   already set — the glyph may be the name on screen and must never be
-   the only place the name exists. */
-/* `0 1 auto`, not `1 1 auto`. Grown to fill, the list pushed the add
-   button to the floor of the card and left a hand's width of nothing
-   between the last objective and it — which reads as the card being
-   half empty rather than as a list you can still add to. It takes the
-   height of what is in it and the empty space falls below, where empty
-   space belongs. */
-.ob-list { list-style: none; margin: 6px 0 0; padding: 0;
+/* The heading every list in this app wears, in the accent: it is the
+   one heading you have to turn something over to reach, and the
+   colour is what says the list under it is the one you chose rather
+   than the one you scheduled. */
+.ob-head { flex: none; padding: 4px 2px 8px; }
+/* .grp-h.ob-head, not .ob-head: the heading shares the group label's
+   own rule and that rule is later in this file, so anything less
+   specific loses to it and the accent quietly becomes grey. */
+.grp-h.ob-head .pill { color: var(--red); }
+.ob-list { list-style: none; margin: 0; padding: 0;
   flex: 0 1 auto; min-height: 0; overflow-y: auto; scrollbar-width: none; }
 .ob-list::-webkit-scrollbar { display: none; }
 /* ── QUIET, and the quiet is the design ──
@@ -1535,16 +1358,24 @@ body {
    The rows have NO borders. A hairline between each is a table, and a
    table is a thing you scan for a value rather than a list of things
    you have decided. The spacing separates them. */
+/* ── AN OBJECTIVE IS A CARD, like every other row in the app ──
+   It was a bare line with a glyph and a tick floating on a sheen,
+   which is the one place a list here was not made of objects. The
+   check is where a thumb expects it and the card is the material the
+   schedule's rows are. */
 .ob {
   display: grid;
-  grid-template-columns: 15px 1fr 14px;
-  align-items: start;
-  gap: 9px;
+  grid-template-columns: 22px 20px minmax(0, 1fr);
+  align-items: center;
+  gap: 10px;
   width: 100%;
   min-height: 44px;
-  padding: 10px 2px;
+  margin-bottom: 8px;
+  padding: 10px 12px;
   border: 0;
-  background: none;
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: inset 0 1px 0 var(--card-edge), var(--card-shadow);
   color: inherit;
   font: inherit;
   text-align: left;
@@ -1564,10 +1395,16 @@ body {
    of weight on its words. That signal is quieter than it was, and it
    is the honest cost of the change rather than something papered
    over. */
+.ob-box {
+  width: 22px; height: 22px;
+  display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1.5px solid var(--spent);
+}
+.ob.is-done .ob-box { background: var(--red); border-color: var(--red); }
 .ob-ic {
-  width: 15px; height: 15px;
-  margin-top: 2px;
-  fill: none; stroke: var(--red); stroke-width: 2;
+  width: 20px; height: 20px;
+  fill: none; stroke: var(--red); stroke-width: 1.9;
   stroke-linecap: round; stroke-linejoin: round;
 }
 /* ── the main one ──
@@ -1582,10 +1419,10 @@ body {
    were the ones that did not matter, and the list is the thing that
    matters. Every objective you have not done is full strength now,
    and the frog keeps the weight. */
-.ob.is-frog .ob-ic { stroke-width: 2.5; }
+.ob.is-frog .ob-ic { stroke-width: 2.4; }
 .ob.is-frog .ob-t { font-weight: 700; }
 .ob-t {
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 500;
   line-height: 1.42;
   color: var(--ink);
@@ -1598,9 +1435,8 @@ body {
    beside it is already the accent on this same sheen and was measured
    at 3:1 on composited pixels, so the ground is answered for. */
 .ob-tick {
-  width: 14px; height: 14px;
-  margin-top: 2px;
-  fill: none; stroke: var(--red); stroke-width: 3;
+  width: 12px; height: 12px;
+  fill: none; stroke: var(--on-red); stroke-width: 2.6;
   stroke-linecap: round; stroke-linejoin: round;
   opacity: 0;
 }
@@ -1623,28 +1459,31 @@ body {
    holds everything else to; only the drawing is small. */
 .ob-add {
   flex: none;
-  margin: 2px 0 0;
   width: 100%;
   min-height: 44px;
   border: 0;
+  border-radius: 14px;
   background: none;
+  color: var(--dim);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
   cursor: pointer;
-  display: grid;
-  grid-template-columns: 15px 1fr;
+  display: flex;
   align-items: center;
-  gap: 9px;
-  padding: 0 2px;
+  gap: 10px;
+  padding: 0 12px;
 }
 .ob-add svg {
-  width: 15px; height: 15px;
-  fill: none; stroke: var(--spent); stroke-width: 2;
+  width: 18px; height: 18px; flex: none;
+  fill: none; stroke: currentColor; stroke-width: 2;
   stroke-linecap: round; stroke-linejoin: round;
 }
 .ob-add:active svg { stroke: var(--red); }
 .ob-add:focus-visible { outline: 2px solid var(--red); outline-offset: -2px; }
 
 .ob-empty {
-  font-size: 12px;
+  font-size: 13px;
   line-height: 1.45;
   color: var(--spent);
   margin: 2px 2px 0;
@@ -1805,8 +1644,8 @@ body {
   font-weight: 600;
   letter-spacing: 0;
   text-transform: none;
-  padding: 3px 9px;
-  border-radius: 5px;
+  padding: 3px 10px;
+  border-radius: 999px;
 }
 .wk-sh b.m { background: var(--s-m-bg); color: var(--s-m-fg); }
 .wk-sh b.a { background: var(--s-a-bg); color: var(--s-a-fg); }
@@ -2093,35 +1932,86 @@ body {
    same neutral chip the session heading's colour version is. */
 .row .props {
   grid-column: 2; grid-row: 2;
-  display: flex; align-items: center; gap: 4px; flex-wrap: wrap;
+  display: flex; align-items: center; gap: 6px;
   justify-self: start;
   min-width: 0;
 }
 /* A status with nothing to say draws nothing — an empty pill is a
    grey dash on every row that is neither running nor done. */
 .row .st:empty { display: none; }
+/* ── A FACT IS TYPE, NOT A TAG ──
+   Every figure on every screen was a grey chip: two on a schedule
+   row, four on a workout tile, one on every item of Showing up. A
+   screen of little boxes, each drawn as loudly as the last, none of
+   them saying anything the words alone would not — and a chip that
+   means nothing in particular is a chip that has stopped meaning
+   anything at all.
+
+   A CHIP IS FOR SOMETHING CATEGORICAL: which session a block is in,
+   which group a workout belongs to, and the one row that is running
+   now. Those keep a fill. Every figure — a time, a length, an
+   average, a share, how long ago — is quiet tabular type with a
+   middle dot between, which is how a sentence separates two facts. */
 .row .t, .row .dur, .row .st, .pill {
-  font-size: 11px;
+  font-size: 11.5px;
   font-weight: 500;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: var(--done-bg);
   color: var(--dim);
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
   line-height: 1.4;
 }
+/* The dot rides the second item rather than sitting between them as
+   an element of its own: a separator is punctuation, not a thing to
+   lay out.
+
+   ONLY WHERE THE LINE CANNOT WRAP. A wrapped line begins with the
+   separator, which reads as a bullet nobody asked for — so the rows,
+   whose properties are two short figures, get dots, and the workout
+   tile, whose four wrap by design, gets a wider gap instead. */
+.ty-card .props { flex-wrap: nowrap; }
+.row .props > * + *::before,
+.ty-card .props > * + *::before {
+  content: '\00b7';
+  margin-right: 6px;
+  /* --spent, not --tick-off: the neutral is a surface colour and a
+     dot drawn in it is a dot nobody can see. */
+  color: var(--spent);
+}
+.props > * + .is-now::before,
+.props > * + .is-run::before { content: none; }
+/* A FINISHED BLOCK DRAWS NO TIME, and a hidden element is still a
+   sibling — so the length came up wearing a leading dot with nothing
+   in front of it. */
+.row.is-past .t + .dur::before { content: none; }
+.wo-p .props { gap: 4px 12px; }
 /* The accent, never a fifth colour: what is happening is the one
    claim the accent makes on this app, and the ring round the row is
    already saying it. A green here would be a second word for it. */
-.row .st.is-now, .pill.is-now { background: var(--red); color: var(--on-red); font-weight: 600; }
-.props { display: flex; align-items: center; gap: 4px; flex-wrap: wrap; min-width: 0; }
+/* THE ONE FILLED CHIP IN THE APP is the thing happening now — the
+   accent's single claim, in the single treatment that carries it. */
+.row .st.is-now, .pill.is-now {
+  padding: 2px 9px;
+  border-radius: 999px;
+  background: var(--red);
+  color: var(--on-red);
+  font-weight: 600;
+}
+/* A run of days is the accent as a COLOUR, not as a ground: it is a
+   figure about you rather than a state of the screen. */
+.pill.is-run { color: var(--red); font-weight: 600; }
+.props { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; min-width: 0; }
 /* ── the group heading ──
    A session pill and a count, the week card's own heading reused on
    every list in the app: it is what makes them one family. */
-.grp-h { display: flex; align-items: center; gap: 8px; padding: 14px 2px 8px; font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
-.grp-h .pill { font-weight: 600; padding: 3px 9px; }
-.row .st.is-done { background: var(--done-bg); color: var(--dim); }
+.grp-h { display: flex; align-items: center; gap: 8px; padding: 14px 2px 8px; font-size: 11px; color: var(--spent); font-variant-numeric: tabular-nums; }
+/* A HEADING, not a chip: it names the list under it, which is what
+   small caps are for. The app's own .label treatment, so a section
+   heading reads the same wherever one is. */
+.grp-h .pill {
+  font-size: 9.5px; font-weight: 700; letter-spacing: .17em;
+  text-transform: uppercase; color: var(--dim);
+}
+
 
 /* Finished blocks go grey — and only as far as --spent, which still
    clears 4.7:1. Hierarchy the rest of the way is weight, because
@@ -3751,7 +3641,11 @@ body {
 .wo-tx { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; padding: 12px 12px 6px; min-width: 0; }
 .wo-w { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; letter-spacing: -.01em; line-height: 1.15; min-width: 0; }
 .wo-w i { flex: none; width: 12px; height: 12px; border-radius: 4px; background: var(--wo-c); }
-.wo-gp { background: color-mix(in srgb, var(--wo-c) 14%, transparent); color: var(--wo-c); font-weight: 600; }
+.wo-gp {
+  padding: 2px 9px; border-radius: 999px;
+  background: color-mix(in srgb, var(--wo-c) 16%, transparent);
+  color: var(--wo-c); font-weight: 600;
+}
 .wo-p .props { padding: 0 12px; }
 .wo-p .wo-cal { margin: 12px 12px 4px; }
 .wo-cal {
@@ -3950,6 +3844,10 @@ body {
 .pat-bar.is-up { left: 50%; }
 .pat-bar.is-dn { right: 50%; }
 .pat-n { justify-self: end; }
+/* The strongest lifts take the accent as a colour. A filled chip here
+   would be a second thing shouting beside a bar already saying the
+   same size. */
+.pat-n.is-up { color: var(--red); font-weight: 700; }
 .pat-none {
   margin-top: 22px;
   font-size: 13px;
